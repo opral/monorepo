@@ -59,7 +59,15 @@ export let setLocale = (newLocale, options) => {
 				continue;
 			}
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}; path=/; max-age=${optionsWithDefaults.cookieMaxAge}`;
+			let cookie = `${cookieName}=${newLocale}; path=/`;
+			if (options !== undefined) {
+				if (options.cookieMaxAge !== undefined) {
+					cookie += `; max-age=${options.cookieMaxAge}`;
+				} else {
+					cookie += `; max-age=${optionsWithDefaults.cookieMaxAge}`;
+				}
+			}
+			document.cookie = cookie;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
