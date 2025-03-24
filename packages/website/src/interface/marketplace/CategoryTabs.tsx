@@ -2,7 +2,6 @@ import { For } from "solid-js";
 import { currentPageContext } from "#src/renderer/state.js";
 import Link from "#src/renderer/Link.jsx";
 import * as m from "#src/paraglide/messages.js";
-import { setSearchInput } from "../components/SearchBar.jsx";
 
 const CategoryTabs = () => {
 	const getCategories = () => {
@@ -15,14 +14,10 @@ const CategoryTabs = () => {
 				name: m.marketplace_header_plugins_title(),
 				href: "/c/plugins",
 			},
-			// {
-			// 	name: m.marketplace_header_lintRules_title(),
-			// 	href: "/c/lint-rules",
-			// },
-			// {
-			// 	name: m.marketplace_header_guides_title(),
-			// 	href: "/c/guides",
-			// },
+			{
+				name: m.marketplace_header_lintRules_title(),
+				href: "https://github.com/opral/lix-sdk/issues/239",
+			},
 		];
 	};
 	return (
@@ -42,7 +37,6 @@ const CategoryTabs = () => {
 					>
 						<Link
 							href={link.href}
-							onClick={() => setSearchInput("")}
 							target={link.href.includes("github.com") ? "_blank" : "_default"}
 						>
 							<div
