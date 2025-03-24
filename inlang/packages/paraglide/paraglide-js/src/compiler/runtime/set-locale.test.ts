@@ -1,6 +1,6 @@
-import { test, expect, vi } from "vitest";
-import { createParaglide } from "../create-paraglide.js";
 import { newProject } from "@inlang/sdk";
+import { expect, test, vi } from "vitest";
+import { createParaglide } from "../create-paraglide.js";
 
 test("sets the cookie to a different locale", async () => {
 	// @ts-expect-error - global variable definition
@@ -29,7 +29,9 @@ test("sets the cookie to a different locale", async () => {
 	runtime.setLocale("de");
 
 	// set the locale
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de; path=/");
+	expect(globalThis.document.cookie).toBe(
+		"PARAGLIDE_LOCALE=de; path=/; max-age=34560000"
+	);
 	// reloads the site if window is available
 	expect(globalThis.window.location.reload).toBeCalled();
 });
@@ -89,7 +91,9 @@ test("sets the cookie when it's an empty string", async () => {
 
 	runtime.setLocale("en");
 
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en; path=/");
+	expect(globalThis.document.cookie).toBe(
+		"PARAGLIDE_LOCALE=en; path=/; max-age=34560000"
+	);
 });
 
 test("when strategy precedes URL, it should set the locale and re-direct to the URL", async () => {
@@ -127,7 +131,9 @@ test("when strategy precedes URL, it should set the locale and re-direct to the 
 
 	runtime.setLocale("en");
 
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en; path=/");
+	expect(globalThis.document.cookie).toBe(
+		"PARAGLIDE_LOCALE=en; path=/; max-age=34560000"
+	);
 	expect(globalThis.window.location.href).toBe(
 		"https://example.com/en/some-path"
 	);
@@ -162,13 +168,17 @@ test("should not reload when setting locale to current locale", async () => {
 	runtime.setLocale("en");
 
 	// Cookie should remain unchanged
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=en; path=/");
+	expect(globalThis.document.cookie).toBe(
+		"PARAGLIDE_LOCALE=en; path=/; max-age=34560000"
+	);
 	// Should not trigger a reload
 	expect(globalThis.window.location.reload).not.toBeCalled();
 
 	// Setting to a different locale should still work
 	runtime.setLocale("de");
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de; path=/");
+	expect(globalThis.document.cookie).toBe(
+		"PARAGLIDE_LOCALE=de; path=/; max-age=34560000"
+	);
 	expect(globalThis.window.location.reload).toBeCalled();
 });
 
@@ -253,5 +263,7 @@ test("should set locale in all configured storage mechanisms regardless of which
 		"PARAGLIDE_LOCALE",
 		"fr"
 	);
-	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=fr; path=/");
+	expect(globalThis.document.cookie).toBe(
+		"PARAGLIDE_LOCALE=fr; path=/; max-age=34560000"
+	);
 });
