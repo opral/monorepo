@@ -226,9 +226,13 @@ const Editor: React.FC = () => {
 								height: "40px",
 								boxSizing: "border-box",
 								borderRadius: "0",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								paddingRight: "12px"
 							}}
 						>
-							+ Version
+							<span>+ Version</span>
 						</button>
 					) : (
 						<button
@@ -238,6 +242,10 @@ const Editor: React.FC = () => {
 								height: "40px",
 								boxSizing: "border-box",
 								borderRadius: "0",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								paddingRight: "12px"
 							}}
 						>
 							<svg
@@ -246,7 +254,7 @@ const Editor: React.FC = () => {
 								viewBox="0 0 16 16"
 								xmlns="http://www.w3.org/2000/svg"
 								fill="#000000"
-								style={{ marginRight: "6px" }}
+								style={{ marginRight: "6px", flexShrink: 0 }}
 							>
 								<path
 									fillRule="evenodd"
