@@ -51,7 +51,7 @@ const ProposalItem = (props: {
 }) => {
 	const [comment, setComment] = useState("");
 	const [discussion] = useQuery(() =>
-		selectDiscussion(props.proposal.change_set_id),
+		selectDiscussion({ changeSetId: props.proposal.change_set_id }),
 	);
 
 	const handleAddComment = async () => {

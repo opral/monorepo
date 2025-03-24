@@ -169,7 +169,7 @@ const Editor: React.FC = () => {
 			});
 
 			// Create a change proposal using the empty change sets
-			const proposal = await createChangeProposal({
+			await createChangeProposal({
 				lix,
 				source_change_set: sourceChangeSet,
 				target_change_set: targetChangeSet,
