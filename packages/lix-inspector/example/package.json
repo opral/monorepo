@@ -1,0 +1,26 @@
+{
+  "name": "lix-inspector-react-example",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@lix-js/sdk": "workspace:*",
+    "@lix-js/plugin-json": "workspace:*",
+    "@lix-js/inspector": "workspace:*",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "typescript": "^5.0.2",
+    "vite": "^5.0.0"
+  }
+}
