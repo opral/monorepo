@@ -710,7 +710,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:119](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:131](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -742,14 +742,17 @@ overwriteSetLocale((newLocale) => {
 
 > **setLocale**(`newLocale`, `options`?): `void`
 
-Defined in: [runtime/set-locale.js:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Set the locale.
 
 Set locale reloads the site by default on the client. Reloading
 can be disabled by passing `reload: false` as an option. If
-reloading is disbaled, you need to ensure that the UI is updated
+reloading is disabled, you need to ensure that the UI is updated
 to reflect the new locale.
+
+cookieMaxAge Indicates the number of seconds until the cookie
+expires.
 
 ### Parameters
 
@@ -758,6 +761,10 @@ to reflect the new locale.
 `any`
 
 #### options?
+
+##### cookieMaxAge?
+
+`number`
 
 ##### reload?
 
@@ -774,7 +781,7 @@ setLocale('en');
 ```
 
 ```ts
-setLocale('en', { reload: false });
+setLocale('en', { reload: false, cookieMaxAge: 60*60*24*7 });
 ```
 
 ***

@@ -1,3 +1,5 @@
+import { getLocale } from "./get-locale.js";
+import { localizeUrl } from "./localize-url.js";
 import {
 	cookieName,
 	isServer,
@@ -8,28 +10,30 @@ import {
 	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
-import { localizeUrl } from "./localize-url.js";
-import { getLocale } from "./get-locale.js";
 
 /**
  * Set the locale.
  *
  * Set locale reloads the site by default on the client. Reloading
  * can be disabled by passing \`reload: false\` as an option. If
- * reloading is disbaled, you need to ensure that the UI is updated
+ * reloading is disabled, you need to ensure that the UI is updated
  * to reflect the new locale.
+ *
+ * cookieMaxAge Indicates the number of seconds until the cookie
+ * expires.
  *
  * @example
  *   setLocale('en');
  *
  * @example
- *   setLocale('en', { reload: false });
+ *   setLocale('en', { reload: false, cookieMaxAge: 60*60*24*7 });
  *
- * @type {(newLocale: Locale, options?: { reload?: boolean }) => void}
+ * @type {(newLocale: Locale, options?: { reload?: boolean, cookieMaxAge?: number }) => void}
  */
 export let setLocale = (newLocale, options) => {
 	const optionsWithDefaults = {
 		reload: true,
+		cookieMaxAge: 60 * 60 * 24 * 400, // 400 days is the max age limit by chrome: https://developer.chrome.com/blog/cookie-max-age-expires/
 		...options,
 	};
 	// locale is already set
@@ -55,7 +59,15 @@ export let setLocale = (newLocale, options) => {
 				continue;
 			}
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}; path=/`;
+			let cookie = `${cookieName}=${newLocale}; path=/`;
+			if (options !== undefined) {
+				if (options.cookieMaxAge !== undefined) {
+					cookie += `; max-age=${options.cookieMaxAge}`;
+				} else {
+					cookie += `; max-age=${optionsWithDefaults.cookieMaxAge}`;
+				}
+			}
+			document.cookie = cookie;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
