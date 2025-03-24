@@ -3,33 +3,25 @@ import LixDebugPanel from "./components/LixDebugPanel";
 import Sidebar from "./components/Sidebar";
 import AccountSelector from "./components/AccountSelector";
 import { lix } from "./state";
+import React from "react";
+import ReactDOM from "react-dom/client";
 
 function App() {
 	return (
-		<div className="app-container">
-			<div
-				style={{
-					display: "flex",
-					justifyContent: "space-between",
-					alignItems: "center",
-					marginBottom: "20px",
-				}}
-			>
-				<h1>ProseMirror Lix Plugin Demo</h1>
-				<AccountSelector />
-			</div>
-
-			{/* Split layout: Editor, Version, and Checkpoints */}
-			<div className="main-layout">
-				{/* Left side: Editor */}
-				<div className="editor-container">
-					<Editor />
+		<div className="flex flex-col mx-5 bg-base-100 text-base-content">
+			{/* main ui */}
+			<div className="flex flex-col border border-base-300 rounded my-5">
+				<div className="flex justify-between items-center mt-5 mb-5 mx-5">
+					<h1>ProseMirror Lix Plugin Demo</h1>
+					<AccountSelector />
 				</div>
 
-				{/* Right side: Sidebar with Checkpoints and Proposals */}
-				<div className="right-panel">
-					{/* Sidebar containing Checkpoints and Proposals tabs */}
-					<div className="checkpoints-panel">
+				<div className="grid grid-cols-12 w-full border-t border-base-300 gap-0">
+					<div className="col-span-8 border-r border-base-300">
+						<Editor />
+					</div>
+
+					<div className="col-span-4">
 						<Sidebar />
 					</div>
 				</div>
@@ -41,4 +33,8 @@ function App() {
 	);
 }
 
-export default App;
+ReactDOM.createRoot(document.getElementById("root")!).render(
+	<React.StrictMode>
+		<App />
+	</React.StrictMode>,
+);

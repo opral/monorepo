@@ -15,7 +15,7 @@ import {
 	selectVersions,
 } from "../queries";
 import { useQuery } from "../hooks/useQuery";
-import { lix } from "../state";
+import { initialDoc, lix } from "../state";
 import {
 	changeIsLeafInVersion,
 	createChangeProposal,
@@ -51,7 +51,7 @@ const Editor: React.FC = () => {
 
 		// Create the editor state
 		const state = EditorState.create({
-			doc: schema.nodeFromJSON(docInLix ?? { type: "doc", content: [] }),
+			doc: schema.nodeFromJSON(docInLix ?? initialDoc),
 			plugins,
 		});
 
@@ -194,16 +194,23 @@ const Editor: React.FC = () => {
 	}, [versions?.length]);
 
 	return (
-		<div className="editor-container">
+		<div>
 			{/* Tab selector for versions with fixed button on right */}
-			<div className="mode-tabs" style={{ boxSizing: 'border-box', height: '40px', borderRadius: '0' }}>
+			<div
+				className="mode-tabs"
+				style={{ boxSizing: "border-box", height: "40px", borderRadius: "0" }}
+			>
 				<div className="mode-tabs-scroll-container" ref={scrollContainerRef}>
 					{versions?.map((version) => (
 						<button
 							key={version.id}
 							className={`mode-tab ${version.id === currentVersion?.id ? "active" : ""}`}
 							onClick={() => handleVersionChange(version.id)}
-							style={{ height: '40px', boxSizing: 'border-box', borderRadius: '0' }}
+							style={{
+								height: "40px",
+								boxSizing: "border-box",
+								borderRadius: "0",
+							}}
 						>
 							{version.name}
 						</button>
@@ -212,11 +219,27 @@ const Editor: React.FC = () => {
 
 				<div className="mode-tab-fixed">
 					{isMainVersion ? (
-						<button className="mode-tab" onClick={handleCreateVersion} style={{ height: '40px', boxSizing: 'border-box', borderRadius: '0' }}>
+						<button
+							className="mode-tab"
+							onClick={handleCreateVersion}
+							style={{
+								height: "40px",
+								boxSizing: "border-box",
+								borderRadius: "0",
+							}}
+						>
 							+ Version
 						</button>
 					) : (
-						<button className="mode-tab" onClick={handleProposeChanges} style={{ height: '40px', boxSizing: 'border-box', borderRadius: '0' }}>
+						<button
+							className="mode-tab"
+							onClick={handleProposeChanges}
+							style={{
+								height: "40px",
+								boxSizing: "border-box",
+								borderRadius: "0",
+							}}
+						>
 							<svg
 								width="16"
 								height="16"
@@ -239,7 +262,7 @@ const Editor: React.FC = () => {
 
 			<div className="editor-wrapper" onClick={handleClick}>
 				{/* The actual editor will be mounted here */}
-				<div ref={editorRef} className="editor" />
+				<div ref={editorRef} />
 			</div>
 		</div>
 	);

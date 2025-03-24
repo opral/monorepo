@@ -135,7 +135,7 @@
 	"marketplace_grid_title_guides": "All Guides",
 	"marketplace_header_apps_button_text": "Build an App",
 	"marketplace_header_apps_description": "Find the inlang app that fits your use case.",
-	"marketplace_header_apps_title": "inlang Apps",
+	"marketplace_header_apps_title": "Apps",
 	"marketplace_header_astro_description": "Recommended internationalization tooling for your Astro site.",
 	"marketplace_header_astro_title": "Astro - i18n Tooling",
 	"marketplace_header_build_on_inlang_button": "SDK Documentation",
@@ -157,7 +157,7 @@
 	"marketplace_header_lintRule_toast_title": "What are Lint Rules?",
 	"marketplace_header_lintRules_button_text": "Custom Lint Rule",
 	"marketplace_header_lintRules_description": "Validate content in an inlang project.",
-	"marketplace_header_lintRules_title": "Lint Rules",
+	"marketplace_header_lintRules_title": "Validation Rules",
 	"marketplace_header_lix_button": "Read more",
 	"marketplace_header_lix_button_text": "Visit lix",
 	"marketplace_header_lix_description": "The lix change control system is a system that allows you to run git in as a backend for\n\t\t\t\t\t\tyour application. It is available for the web.",
@@ -199,5 +199,7 @@
 	"newsletter_unsubscribed_description": "We're sad to see you go. If you have any feedback, please let us know on our",
 	"newsletter_unsubscribed_title": "You're unsubscribed",
 	"home_lix_button_text": "Read more about Lix",
-	"home_credibility_tag_text": "Used by {count} devs, designers and translators"
+	"home_credibility_tag_text": "Used by {count} devs, designers and translators",
+	"deprecated_item_title": "Deprecated Item",
+	"deprecated_item_default_message": "This item has been deprecated and is no longer actively maintained. It remains accessible for existing users but may be removed in the future."
 }

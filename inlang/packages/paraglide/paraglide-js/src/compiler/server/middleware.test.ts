@@ -527,3 +527,29 @@ test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'
 	// Middleware should be called since no redirect for API requests
 	expect(apiMiddlewareResolveWasCalled).toBe(true);
 });
+
+// https://github.com/opral/inlang-paraglide-js/issues/477
+test("does not catch errors thrown by downstream resolve call", async () => {
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en"],
+			},
+		}),
+		compilerOptions: {
+			strategy: ["url"],
+		},
+	});
+
+	await expect(() =>
+		runtime.paraglideMiddleware(
+			new Request(new URL("https://example.com/page"), {
+				headers: { "Sec-Fetch-Dest": "document" },
+			}),
+			() => {
+				throw new Error("Downstream error");
+			}
+		)
+	).rejects.toThrow();
+});

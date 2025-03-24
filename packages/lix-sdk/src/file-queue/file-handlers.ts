@@ -5,7 +5,6 @@ import { sql } from "kysely";
 import { createChange } from "../change/create-change.js";
 import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
 
-
 async function glob(args: {
 	lix: Pick<Lix, "db">;
 	glob: string;

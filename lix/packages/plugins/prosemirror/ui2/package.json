@@ -1,0 +1,29 @@
+{
+	"name": "prosemirror-ui-v2",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@lix-js/plugin-prosemirror": "workspace:*",
+		"@lix-js/sdk": "workspace:*",
+		"clsx": "^2.0.0",
+		"lucide-react": "^0.483.0",
+		"react": "^19",
+		"react-dom": "^19"
+	},
+	"devDependencies": {
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"typescript": "^5",
+		"vite": "^6",
+		"@vitejs/plugin-react": "^4.0.3",
+		"@tailwindcss/vite": "^4.0.15",
+		"tailwindcss": "^4.0.15"
+	}
+}

@@ -13,6 +13,9 @@
 		"@lix-js/plugin-prosemirror": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
 		"@tailwindcss/vite": "^4.0.15",
+		"clsx": "^2.1.1",
+		"daisyui": "^5.0.9",
+		"lucide-react": "^0.483.0",
 		"prosemirror-commands": "^1.5.2",
 		"prosemirror-history": "^1.4.1",
 		"prosemirror-keymap": "^1.2.2",
@@ -36,6 +39,6 @@
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"eslint-plugin-react-refresh": "^0.4.3",
 		"typescript": "^5.0.2",
-		"vite": "^4.4.5"
+		"vite": "^6"
 	}
 }

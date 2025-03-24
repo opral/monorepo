@@ -31,6 +31,7 @@ export function useQuery<T>(
 			setError(null);
 		} catch (err) {
 			if (!mountedRef.current) return;
+			console.error(err);
 			setError(err instanceof Error ? err : new Error(String(err)));
 		} finally {
 			if (mountedRef.current) setLoading(false);

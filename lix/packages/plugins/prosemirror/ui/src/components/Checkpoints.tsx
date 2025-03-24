@@ -1,231 +1,64 @@
-import React, { useState } from "react";
-import { Change, applyChanges } from "@lix-js/sdk";
-import { createCheckpoint } from "../utilities/createCheckpoint";
-import { toUserTime } from "../utilities/timeUtils";
-import { lix } from "../state";
 import { useQuery } from "../hooks/useQuery";
-import { selectChanges, selectCheckpoints } from "../queries";
-
-// Extend the Change type to include an optional metadata property
-interface ExtendedChange extends Change {
-	content: any;
-	metadata?: string | Record<string, any>;
-}
-
-// Get a summary preview from a change or checkpoint
-function getContentPreview(change: ExtendedChange) {
-	if (!change.content) return "Content deleted";
-
-	if (typeof change.content === "object") {
-		// For text nodes, show the text content
-		if (change.content.text) {
-			return (
-				change.content.text.substring(0, 60) +
-				(change.content.text.length > 60 ? "..." : "")
-			);
-		}
-
-		// For paragraph nodes, extract content from their children
-		if (change.content.content && Array.isArray(change.content.content)) {
-			const textNodes = change.content.content
-				.filter((node: any) => node.type === "text" && node.text)
-				.map((node: any) => node.text);
-
-			if (textNodes.length > 0) {
-				const combinedText = textNodes.join(" ");
-				return (
-					combinedText.substring(0, 60) +
-					(combinedText.length > 60 ? "..." : "")
-				);
-			}
-		}
-
-		// For other node types
-		return `${change.content.type || "Unknown"} node`;
-	}
-
-	return "Unknown content";
-};
-
-// Get a summary preview from a checkpoint
-function getCheckpointPreview(changes: ExtendedChange[]) {
-	if (changes.length === 0) return "No changes";
-
-	const previews = changes.map(getContentPreview);
-	return previews.join(", ");
-};
+import { selectCheckpoints, selectCurrentChangeSet } from "../queries";
+import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
+import { createCheckpointV2 } from "../utilities/createCheckpoint";
+import { useRef } from "react";
+import { useKeyValue } from "../hooks/useKeyValue";
 
 const Checkpoints: React.FC = () => {
-	const [changes] = useQuery(selectChanges);
 	const [stateCheckpoints] = useQuery(selectCheckpoints);
+	const [currentChangeSet] = useQuery(selectCurrentChangeSet);
+	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
+		"checkpoints.expandedChangeSetId",
+	);
+	const changeSetRef = useRef<ChangeSetHandle>(null);
 
-	// State for selected checkpoint and message input
-	const [selectedCheckpointId, setSelectedCheckpointId] = useState<
-		string | null
-	>(null);
-	const [isCreatingCheckpoint, setIsCreatingCheckpoint] = useState(false);
-	const [checkpointMessage, setCheckpointMessage] = useState("");
-
-	// Handler for creating a checkpoint
 	const handleCreateCheckpoint = async () => {
-		if (isCreatingCheckpoint || !changes || changes.length === 0) return;
+		// Get the comment text from the ChangeSet component
+		const commentText = changeSetRef.current?.getCommentText() || "";
 
-		try {
-			setIsCreatingCheckpoint(true);
+		// Create the checkpoint and add the comment if it exists
+		await createCheckpointV2(commentText);
 
-			// Create the checkpoint with optional message
-			await createCheckpoint(lix, checkpointMessage);
+		// Close any expanded change set
+		setExpandedChangeSetId(null);
 
-			// Reset the message input
-			setCheckpointMessage("");
-		} catch (error) {
-			console.error("Failed to create checkpoint:", error);
-		} finally {
-			setIsCreatingCheckpoint(false);
-		}
+		// Clear the comment text field after creating the checkpoint
+		changeSetRef.current?.clearCommentText();
 	};
 
 	return (
 		<>
 			<div
-				style={{
-					padding: "5px 0",
-					display: "flex",
-					flexDirection: "column",
-				}}
-			>
-				<div
-					style={{
-						paddingLeft: "20px",
-						paddingRight: "20px",
-						width: "100%",
-						boxSizing: "border-box",
-					}}
-				>
-					<input
-						id="checkpoint-message-input"
-						type="text"
-						value={checkpointMessage}
-						onChange={(e) => setCheckpointMessage(e.target.value)}
-						placeholder="Add a message"
-						style={{
-							width: "100%",
-							padding: "4px 8px",
-							marginBottom: "5px",
-							border: "1px solid #ddd",
-							borderRadius: "4px",
-							boxSizing: "border-box",
-							height: "28px",
-							fontSize: "13px",
-						}}
-						onKeyDown={(e) => {
-							if (e.key === "Enter") handleCreateCheckpoint();
-						}}
-					/>
-
-					<button
-						style={{
-							padding: "4px 8px",
-							background: "#f9f9f9",
-							border: "1px solid #ddd",
-							borderRadius: "4px",
-							cursor:
-								isCreatingCheckpoint || !changes || changes.length === 0
-									? "not-allowed"
-									: "pointer",
-							opacity:
-								isCreatingCheckpoint || !changes || changes.length === 0
-									? 0.6
-									: 1,
-							width: "100%",
-							marginBottom: "5px",
-							boxSizing: "border-box",
-							height: "28px",
-							fontSize: "13px",
-						}}
-						onClick={handleCreateCheckpoint}
-						disabled={isCreatingCheckpoint || !changes || changes.length === 0}
-					>
-						{isCreatingCheckpoint ? "Creating..." : "Create"}
-					</button>
-				</div>
-			</div>
-
-			<div
 				className="checkpoints-list"
 				style={{ maxHeight: "400px", overflow: "auto" }}
 			>
-				{(stateCheckpoints?.length ?? 0 > 0) ? (
-					stateCheckpoints?.map((checkpoint) => {
-						const isSelected = checkpoint.id === selectedCheckpointId;
-
-						return (
-							<div
-								key={checkpoint.id}
-								style={{
-									padding: "10px",
-									borderBottom: "1px solid #eee",
-									background: isSelected ? "#f5f5f5" : "white",
-									cursor: "pointer",
-								}}
-								onClick={async () => {
-									try {
-										setSelectedCheckpointId(checkpoint.id);
-
-										// Apply the changes from this checkpoint
-										await applyChanges({
-											lix,
-											changes: checkpoint.changes,
-										});
-
-										console.log(
-											`Applied changes from checkpoint: ${checkpoint.id}`,
-										);
-										
-										// The Lix plugin will automatically detect the changes through polling
-									} catch (error) {
-										console.error("Error applying checkpoint changes:", error);
-									}
-								}}
-							>
-								{checkpoint.message ? (
-									<div
-										style={{
-											fontWeight: "bold",
-											marginBottom: "5px",
-											fontSize: "1em",
-										}}
-									>
-										{checkpoint.message}
-									</div>
-								) : (
-									<div style={{ marginBottom: "5px", fontSize: "0.95em" }}>
-										{getCheckpointPreview(checkpoint.changes)}
-									</div>
-								)}
-								<div
-									style={{
-										fontSize: "0.8em",
-										color: "#666",
-										marginBottom: "3px",
-									}}
-								>
-									{toUserTime(checkpoint.created_at)}
+				{/* Current changes (to be checkpointed) */}
+				{currentChangeSet && currentChangeSet.change_count > 0 && (
+					<div className="border-b border-base-300">
+						<ChangeSet
+							ref={changeSetRef}
+							key="current-changes"
+							changeSet={currentChangeSet}
+							isCurrentChangeSet={true}
+							footer={
+								<div className="flex justify-end mt-2">
+									<button className="btn" onClick={handleCreateCheckpoint}>
+										Create Checkpoint
+									</button>
 								</div>
-								<div style={{ fontSize: "0.8em", color: "#666" }}>
-									{checkpoint.changes.length} changes
-								</div>
-							</div>
-						);
-					})
-				) : (
-					<div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-						<p>
-							No checkpoints available. Create your first checkpoint to save a
-							version of your document.
-						</p>
+							}
+						/>
 					</div>
 				)}
+
+				{stateCheckpoints?.map((checkpoint) => {
+					return (
+						<div key={checkpoint.id}>
+							<ChangeSet key={checkpoint.id} changeSet={checkpoint} />
+						</div>
+					);
+				})}
 			</div>
 		</>
 	);

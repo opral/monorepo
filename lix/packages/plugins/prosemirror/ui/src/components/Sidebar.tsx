@@ -1,56 +1,29 @@
 import React, { useState } from "react";
 import Checkpoints from "./Checkpoints";
 import Proposals from "./Proposals";
+import clsx from "clsx";
 
 const Sidebar: React.FC = () => {
 	const [activeTab, setActiveTab] = useState("checkpoints");
 
 	return (
-		<div
-			className="checkpoints-container"
-			style={{ border: "none", borderRadius: "0", margin: 0, padding: 0 }}
-		>
-			<div
-				className="checkpoints-header"
-				style={{
-					display: "flex",
-					borderBottom: "1px solid #e5e7eb",
-					height: "40px", // Match the height of the version bar in the Editor
-					margin: 0,
-					padding: 0,
-				}}
-			>
-				<button
-					style={{
-						flex: 1,
-						padding: "0",
-						border: "none",
-						outline: "none",
-						background: "none",
-						cursor: "pointer",
-						fontWeight: activeTab === "checkpoints" ? "bold" : "normal",
-						fontSize: "14px",
-					}}
+		<div>
+			<div className="tabs tabs-border flex justify-around border-b border-base-300 h-10">
+				<a
+					className={clsx(
+						"tab tab-lg",
+						activeTab === "checkpoints" && "tab-active",
+					)}
 					onClick={() => setActiveTab("checkpoints")}
 				>
 					Checkpoints
-				</button>
-				<div style={{ width: "1px", height: "14px", background: "#e5e7eb" }}></div>
-				<button
-					style={{
-						flex: 1,
-						padding: "0",
-						border: "none",
-						outline: "none",
-						background: "none",
-						cursor: "pointer",
-						fontWeight: activeTab === "proposals" ? "bold" : "normal",
-						fontSize: "14px",
-					}}
+				</a>
+				<a
+					className={clsx("tab", activeTab === "proposals" && "tab-active")}
 					onClick={() => setActiveTab("proposals")}
 				>
 					Proposals
-				</button>
+				</a>
 			</div>
 
 			{activeTab === "checkpoints" && <Checkpoints />}

@@ -54,9 +54,11 @@ const DiffView: React.FC<DiffViewProps> = ({
 				}
 
 				// Extract the ProseMirror documents from each version
-				const mainDocData = JSON.parse(new TextDecoder().decode(mainDoc.data));
+				const mainDocData = JSON.parse(
+					new TextDecoder().decode((mainDoc as any).data),
+				);
 				const proposalDocData = JSON.parse(
-					new TextDecoder().decode(proposalDoc.data),
+					new TextDecoder().decode((proposalDoc as any).data),
 				);
 
 				// Create a diff between the two documents

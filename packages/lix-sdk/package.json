@@ -1,8 +1,9 @@
 {
 	"name": "@lix-js/sdk",
 	"type": "module",
-	"version": "0.4.3",
+	"version": "0.4.4",
 	"license": "Apache-2.0",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js"
 	},
@@ -25,7 +26,7 @@
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
 	"sideEffects": false,
 	"engines": {
-		"node": ">=21"
+		"node": ">=18"
 	},
 	"dependencies": {
 		"@lix-js/server-api-schema": "workspace:*",

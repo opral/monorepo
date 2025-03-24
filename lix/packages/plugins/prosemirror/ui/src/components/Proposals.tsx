@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "../hooks/useQuery";
-import {
-	selectOpenChangeProposals,
-	selectDiscussionOfProposal,
-} from "../queries";
+import { selectOpenChangeProposals, selectDiscussion } from "../queries";
 import { createComment, createDiscussion } from "@lix-js/sdk";
 import { lix } from "../state";
 
@@ -54,7 +51,7 @@ const ProposalItem = (props: {
 }) => {
 	const [comment, setComment] = useState("");
 	const [discussion] = useQuery(() =>
-		selectDiscussionOfProposal(props.proposal),
+		selectDiscussion(props.proposal.change_set_id),
 	);
 
 	const handleAddComment = async () => {
