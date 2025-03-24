@@ -45,6 +45,8 @@ export default function ProposalForm() {
 						<ChangeSet
 							isCurrentChangeSet={false}
 							alwaysExpand={true}
+							showRestore={false}
+							showUndo={false}
 							changeSet={proposedChangeSet}
 							footer={
 								<div className="flex justify-between items-center p-4">

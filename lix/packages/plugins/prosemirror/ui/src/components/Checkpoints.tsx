@@ -41,6 +41,7 @@ const Checkpoints: React.FC = () => {
 							key="current-changes"
 							changeSet={currentChangeSet}
 							isCurrentChangeSet={true}
+							showRestore={false}
 							footer={
 								<div className="flex justify-end mt-2">
 									<button className="btn" onClick={handleCreateCheckpoint}>

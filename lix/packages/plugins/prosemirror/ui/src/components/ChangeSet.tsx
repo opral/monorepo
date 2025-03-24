@@ -20,12 +20,21 @@ interface ChangeSetProps {
 	changeSet: ChangeSetType & { change_count: number; created_at?: string };
 	isCurrentChangeSet?: boolean;
 	alwaysExpand?: boolean;
+	showRestore?: boolean;
+	showUndo?: boolean;
 	footer?: React.ReactNode;
 }
 
 export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 	(
-		{ changeSet, isCurrentChangeSet = false, alwaysExpand = false, footer },
+		{
+			changeSet,
+			isCurrentChangeSet = false,
+			alwaysExpand = false,
+			showRestore = true,
+			showUndo = true,
+			footer,
+		},
 		ref,
 	) => {
 		// Use shared key-value storage for expansion state
@@ -133,17 +142,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 								</span>
 							</div>
 							<div className="flex items-center gap-1">
-								<div className="tooltip" data-tip="Undo">
-									<button
-										className="btn btn-sm btn-ghost"
-										onClick={() => undoChangeSet(changeSet.id)}
-										title="Undo this change set"
-									>
-										<EraserIcon size={16} />
-									</button>
-								</div>
-
-								{!isCurrentChangeSet && (
+								{showRestore && (
 									<div className="tooltip" data-tip="Restore">
 										<button
 											className="btn btn-sm btn-ghost"
@@ -151,6 +150,18 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 											title="Restore to this change set"
 										>
 											<History size={16} />
+										</button>
+									</div>
+								)}
+
+								{showUndo && (
+									<div className="tooltip" data-tip="Undo">
+										<button
+											className="btn btn-sm btn-ghost"
+											onClick={() => undoChangeSet(changeSet.id)}
+											title="Undo this change set"
+										>
+											<EraserIcon size={16} />
 										</button>
 									</div>
 								)}
