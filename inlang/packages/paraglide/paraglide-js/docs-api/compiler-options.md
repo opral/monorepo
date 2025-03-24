@@ -2,7 +2,7 @@
 
 > **CompilerOptions**: `object`
 
-Defined in: [compiler-options.ts:17](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:18](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
 
@@ -44,6 +44,18 @@ Whether to clean the output directory before writing the new files.
 
 ```ts
 true
+```
+
+#### cookieMaxAge?
+
+> `optional` **cookieMaxAge**: `number`
+
+The max-age in seconds of the cookie until it expires.
+
+##### Default
+
+```ts
+60 * 60 * 24 * 400
 ```
 
 #### cookieName?
@@ -311,6 +323,10 @@ Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/
 #### cleanOutdir
 
 > `readonly` **cleanOutdir**: `true` = `true`
+
+#### cookieMaxAge
+
+> `readonly` **cookieMaxAge**: `number`
 
 #### cookieName
 
