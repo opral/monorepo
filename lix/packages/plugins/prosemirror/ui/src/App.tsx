@@ -1,20 +1,13 @@
 import Editor from "./components/Editor";
 import LixDebugPanel from "./components/LixDebugPanel";
-import Sidebar, { SidebarTab } from "./components/Sidebar";
+import Sidebar from "./components/Sidebar";
 import AccountSelector from "./components/AccountSelector";
+import VersionToolbar from "./components/VersionToolbar";
 import { lix } from "./state";
-import React, { useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 
 function App() {
-	const [activeSidebarTab, setActiveSidebarTab] = useState<SidebarTab>("checkpoints");
-
-	// Handler for when the user clicks the Propose button
-	const handleProposeChanges = () => {
-		// Switch the sidebar to the proposal creation form
-		setActiveSidebarTab("create-proposal");
-	};
-
 	return (
 		<div className="flex flex-col mx-5 bg-base-100 text-base-content">
 			{/* main ui */}
@@ -26,11 +19,12 @@ function App() {
 
 				<div className="grid grid-cols-12 w-full border-t border-base-300 gap-0">
 					<div className="col-span-8 border-r border-base-300">
+						<VersionToolbar />
 						<Editor />
 					</div>
 
 					<div className="col-span-4">
-						<Sidebar initialTab={activeSidebarTab} />
+						<Sidebar />
 					</div>
 				</div>
 			</div>
