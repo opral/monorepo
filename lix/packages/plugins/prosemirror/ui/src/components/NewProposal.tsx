@@ -5,8 +5,7 @@ import {
 	selectMainVersion,
 	selectCurrentVersion,
 } from "../queries";
-import { DiscussionHandle } from "./Discussion";
-import { ChangeSet } from "./ChangeSet";
+import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
 import { lix } from "../state";
 import { deepCopyChangeSet } from "../utilities/deepCopy";
 import { useKeyValue } from "../hooks/useKeyValue";
@@ -25,23 +24,48 @@ export default function NewProposal() {
 	const [, setActiveTab] = useKeyValue("activeTab");
 
 	// Create a ref for the discussion component to access its methods
-	const discussionRef = useRef<DiscussionHandle>(null);
+	const changeSetRef = useRef<ChangeSetHandle>(null);
 
 	const handleSubmit = async () => {
 		const currentVersion = await selectCurrentVersion();
+		const commentText = changeSetRef.current?.getCommentText() || "";
+
+		// Create the proposal
 		await deepCopyChangeSet(proposedChangeSet!.id, mainVersion!);
 		await lix.db
 			.insertInto("change_proposal")
 			.values({
 				change_set_id: proposedChangeSet!.id,
 			})
-			.returningAll()
 			.execute();
 
+		// If there's a comment, create a discussion and add the comment
+		if (commentText) {
+			const discussionId = crypto.randomUUID();
+			await lix.db
+				.insertInto("discussion")
+				.values({
+					id: discussionId,
+					change_set_id: proposedChangeSet!.id,
+				})
+				.execute();
+
+			await lix.db
+				.insertInto("comment")
+				.values({
+					id: crypto.randomUUID(),
+					content: commentText,
+					discussion_id: discussionId,
+				})
+				.execute();
+		}
+
+		// Clean up the temporary version
 		await lix.db
 			.deleteFrom("version")
 			.where("version.id", "=", currentVersion!.id)
 			.execute();
+
 		setExpandedChangeSetId(proposedChangeSet!.id);
 		setActiveTab("proposals");
 	};
@@ -74,6 +98,7 @@ export default function NewProposal() {
 				<div className="flex-1 overflow-auto">
 					{proposedChangeSet && (
 						<ChangeSet
+							ref={changeSetRef}
 							isCurrentChangeSet={false}
 							alwaysExpand={true}
 							showRestore={false}
@@ -89,7 +114,6 @@ export default function NewProposal() {
 									</button>
 								</div>
 							}
-							ref={discussionRef}
 						/>
 					)}
 				</div>

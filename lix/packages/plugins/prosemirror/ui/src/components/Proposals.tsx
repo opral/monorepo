@@ -3,6 +3,8 @@ import { selectOpenChangeProposals } from "../queries";
 import { FileText } from "lucide-react";
 import { ChangeSet } from "./ChangeSet";
 import { lix } from "../state";
+import { mergeChangeSet } from "../utilities/mergeChangeSet";
+import { useKeyValue } from "../hooks/useKeyValue";
 
 /**
  * ProposalList component
@@ -11,13 +13,17 @@ import { lix } from "../state";
 export default function Proposals() {
 	// Get all open proposals
 	const [proposals] = useQuery(selectOpenChangeProposals);
+	const [_, setActiveTab] = useKeyValue("activeTab");
 
-	const handleAccept = (id: string) => {
-		console.log("Accepting proposal:", id);
+	const handleAccept = async (id: string) => {
+		await mergeChangeSet(id);
+		await lix.db.deleteFrom("change_proposal").where("id", "=", id).execute();
+		setActiveTab("checkpoints");
 	};
 
-	const handleReject = (id: string) => {
-		lix.db.deleteFrom("change_proposal").where("id", "=", id).execute();
+	const handleReject = async (id: string) => {
+		await lix.db.deleteFrom("change_proposal").where("id", "=", id).execute();
+		setActiveTab("checkpoints");
 	};
 
 	return (
@@ -45,7 +51,7 @@ export default function Proposals() {
 										</button>
 										<button
 											className="btn btn-sm btn-primary"
-											onClick={() => handleAccept(proposal.id)}
+											onClick={() => handleAccept(proposal.change_set_id)}
 										>
 											Accept
 										</button>
