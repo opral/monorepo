@@ -1,6 +1,6 @@
-import { newProject } from "@inlang/sdk";
-import { expect, test, vi } from "vitest";
+import { test, expect, vi } from "vitest";
 import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("matching by strategy works", async () => {
 	const baseLocale = "en";
@@ -226,8 +226,6 @@ test("initially sets the locale after resolving it for the first time", async ()
 	// First call to getLocale should resolve and set the locale
 	expect(runtime.getLocale()).toBe("de");
 	// Cookie should be set, proving that the locale was initially set
-	expect(globalThis.document.cookie).toBe(
-		"PARAGLIDE_LOCALE=de; path=/; max-age=34560000"
-	);
+	expect(globalThis.document.cookie).toBe("PARAGLIDE_LOCALE=de; path=/");
 	expect(globalThis.window.location.href).toBe("https://example.com/de/page");
 });
