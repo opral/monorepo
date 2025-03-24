@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 2/9 (22%)
+- 🟢 Perfect roundtrip (input = output): 3/9 (33%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 2/9 (22%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 5/9 (56%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 4/9 (44%)
 
-**Overall Status**: ❌ 5 failing tests
+**Overall Status**: ❌ 4 failing tests
 
 ---
 
@@ -344,23 +344,14 @@ Regular paragraph after a blockquote.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - character inline - not detef</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - character inline - not detef</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
-<td>
-
-Text with > character that is not a blockquote.
-
-Paragraph with a line break and then a blockquote:
-> This blockquote comes after a line break in a paragraph.
-
-</td>
 <td>
 
 Text with > character that is not a blockquote.
@@ -372,14 +363,6 @@ Paragraph with a line break and then a blockquote:
 </td>
 </tr>
 <tr>
-<td>
-
-<pre><code>Text with &gt; character that is not a blockquote.
-
-Paragraph with a line break and then a blockquote:
-&gt; This blockquote comes after a line break in a paragraph.</code></pre>
-
-</td>
 <td>
 
 <pre><code>Text with &gt; character that is not a blockquote.

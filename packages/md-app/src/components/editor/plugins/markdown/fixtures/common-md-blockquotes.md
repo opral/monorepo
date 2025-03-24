@@ -68,4 +68,5 @@ Regular paragraph after a blockquote.
 Text with > character that is not a blockquote.
 
 Paragraph with a line break and then a blockquote:
+
 > This blockquote comes after a line break in a paragraph.

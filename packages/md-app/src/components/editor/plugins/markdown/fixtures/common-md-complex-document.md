@@ -22,6 +22,13 @@ created with two trailing spaces.
 This one has a line break\
 created with a backslash.
 
+This one has a line break<br>created with a break tag.
+
+This one has a line break<br>
+created with a break tag.
+
+And another one to check if it worked
+
 ## tc - headings
 <!-- reason for differing expectation:
 we currently expect a line break after each paragraph -->

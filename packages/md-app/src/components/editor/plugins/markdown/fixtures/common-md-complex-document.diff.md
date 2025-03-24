@@ -3,10 +3,10 @@
 ## Test Summary
 
 - 🟢 Perfect roundtrip (input = output): 2/21 (10%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 3/21 (14%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 16/21 (76%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 5/21 (24%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 14/21 (67%)
 
-**Overall Status**: ❌ 16 failing tests
+**Overall Status**: ❌ 14 failing tests
 
 ---
 
@@ -35,13 +35,14 @@ This document demonstrates a wide variety of Markdown syntax elements and how th
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - text formatting</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - text formatting</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -49,6 +50,15 @@ This document demonstrates a wide variety of Markdown syntax elements and how th
 Plain text paragraphs are the most basic element. This paragraph demonstrates *italic text*, **bold text**, and ***bold italic text***.
 
 You can also use _underscores_ for __emphasis__ and ___both___ if you prefer.
+
+Other formatting options include ~~strikethrough~~ and `inline code`.
+
+</td>
+<td>
+
+Plain text paragraphs are the most basic element. This paragraph demonstrates _italic text_, **bold text**, and ***bold italic text***.
+
+You can also use _underscores_ for **emphasis** and ***both*** if you prefer.
 
 Other formatting options include ~~strikethrough~~ and `inline code`.
 
@@ -82,6 +92,15 @@ You can also use _underscores_ for **emphasis** and ***both*** if you prefer.
 Other formatting options include ~~strikethrough~~ and `inline code`.</code></pre>
 
 </td>
+<td>
+
+<pre><code>Plain text paragraphs are the most basic element. This paragraph demonstrates _italic text_, **bold text**, and ***bold italic text***.
+
+You can also use _underscores_ for **emphasis** and ***both*** if you prefer.
+
+Other formatting options include ~~strikethrough~~ and `inline code`.</code></pre>
+
+</td>
 </tr>
 </table>
 
@@ -92,8 +111,9 @@ Other formatting options include ~~strikethrough~~ and `inline code`.</code></pr
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -106,6 +126,26 @@ created with two trailing spaces.
 This one has a line break\
 created with a backslash.
 
+This one has a line break<br>created with a break tag.
+
+This one has a line break<br>
+created with a break tag.
+
+And another one to check if it worked
+
+</td>
+<td>
+
+Paragraphs are separated by blank lines.
+
+This paragraph has a line break<br>created with two trailing spaces.
+
+This one has a line break<br>created with a backslash.
+
+This one has a line break<br>created with a break tag.
+
+And another one to check if it worked
+
 </td>
 <td>
 
@@ -114,6 +154,12 @@ Paragraphs are separated by blank lines.
 This paragraph has a line breakcreated with two trailing spaces.
 
 This one has a line breakcreated with a backslash.
+
+This one has a line break<br>created with a break tag.
+
+This one has a line break<br><br>created with a break tag.
+
+And another one to check if it worked
 
 </td>
 </tr>
@@ -126,7 +172,27 @@ This paragraph has a line break
 created with two trailing spaces.
 
 This one has a line break\
-created with a backslash.</code></pre>
+created with a backslash.
+
+This one has a line break&lt;br&gt;created with a break tag.
+
+This one has a line break&lt;br&gt;
+created with a break tag.
+
+And another one to check if it worked</code></pre>
+
+</td>
+<td>
+
+<pre><code>Paragraphs are separated by blank lines.
+
+This paragraph has a line break&lt;br&gt;created with two trailing spaces.
+
+This one has a line break&lt;br&gt;created with a backslash.
+
+This one has a line break&lt;br&gt;created with a break tag.
+
+And another one to check if it worked</code></pre>
 
 </td>
 <td>
@@ -135,7 +201,13 @@ created with a backslash.</code></pre>
 
 This paragraph has a line breakcreated with two trailing spaces.
 
-This one has a line breakcreated with a backslash.</code></pre>
+This one has a line breakcreated with a backslash.
+
+This one has a line break&lt;br&gt;created with a break tag.
+
+This one has a line break&lt;br&gt;&lt;br&gt;created with a break tag.
+
+And another one to check if it worked</code></pre>
 
 </td>
 </tr>
@@ -963,13 +1035,14 @@ function example() {
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - horizontal rules</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - horizontal rules</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -985,6 +1058,23 @@ Between horizontal rules.
 Between horizontal rules.
 
 ___
+
+Below horizontal rule.
+
+</td>
+<td>
+
+Above horizontal rule.
+
+---
+
+Between horizontal rules.
+
+---
+
+Between horizontal rules.
+
+---
 
 Below horizontal rule.
 
@@ -1021,6 +1111,23 @@ Between horizontal rules.
 Between horizontal rules.
 
 ___
+
+Below horizontal rule.</code></pre>
+
+</td>
+<td>
+
+<pre><code>Above horizontal rule.
+
+---
+
+Between horizontal rules.
+
+---
+
+Between horizontal rules.
+
+---
 
 Below horizontal rule.</code></pre>
 

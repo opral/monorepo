@@ -6,9 +6,9 @@ This document demonstrates a wide variety of Markdown syntax elements and how th
 
 ## tc - text formatting
 
-Plain text paragraphs are the most basic element. This paragraph demonstrates *italic text*, **bold text**, and ***bold italic text***.
+Plain text paragraphs are the most basic element. This paragraph demonstrates _italic text_, **bold text**, and ***bold italic text***.
 
-You can also use _underscores_ for __emphasis__ and ___both___ if you prefer.
+You can also use _underscores_ for **emphasis** and ***both*** if you prefer.
 
 Other formatting options include ~~strikethrough~~ and `inline code`.
 
@@ -16,11 +16,13 @@ Other formatting options include ~~strikethrough~~ and `inline code`.
 
 Paragraphs are separated by blank lines.
 
-This paragraph has a line break  
-created with two trailing spaces.
+This paragraph has a line break<br>created with two trailing spaces.
 
-This one has a line break\
-created with a backslash.
+This one has a line break<br>created with a backslash.
+
+This one has a line break<br>created with a break tag.
+
+And another one to check if it worked
 
 ## tc - headings
 <!-- reason for differing expectation:
@@ -159,11 +161,11 @@ Above horizontal rule.
 
 Between horizontal rules.
 
-***
+---
 
 Between horizontal rules.
 
-___
+---
 
 Below horizontal rule.
 
