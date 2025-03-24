@@ -1,8 +1,15 @@
 import { useRef } from "react";
 import { useQuery } from "../hooks/useQuery";
-import { selectProposedChangeSet } from "../queries";
+import {
+	selectProposedChangeSet,
+	selectMainVersion,
+	selectCurrentVersion,
+} from "../queries";
 import { DiscussionHandle } from "./Discussion";
 import { ChangeSet } from "./ChangeSet";
+import { lix } from "../state";
+import { deepCopyChangeSet } from "../utilities/deepCopy";
+import { useKeyValue } from "../hooks/useKeyValue";
 
 /**
  * ProposalForm component
@@ -11,9 +18,33 @@ import { ChangeSet } from "./ChangeSet";
 export default function NewProposal() {
 	// Load necessary data
 	const [proposedChangeSet] = useQuery(selectProposedChangeSet);
+	const [mainVersion] = useQuery(selectMainVersion);
+	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
+		"expandedChangeSetId",
+	);
+	const [, setActiveTab] = useKeyValue("activeTab");
 
 	// Create a ref for the discussion component to access its methods
 	const discussionRef = useRef<DiscussionHandle>(null);
+
+	const handleSubmit = async () => {
+		const currentVersion = await selectCurrentVersion();
+		await deepCopyChangeSet(proposedChangeSet!.id, mainVersion!);
+		await lix.db
+			.insertInto("change_proposal")
+			.values({
+				change_set_id: proposedChangeSet!.id,
+			})
+			.returningAll()
+			.execute();
+
+		await lix.db
+			.deleteFrom("version")
+			.where("version.id", "=", currentVersion!.id)
+			.execute();
+		setExpandedChangeSetId(proposedChangeSet!.id);
+		setActiveTab("proposals");
+	};
 
 	return (
 		<div className="proposal-form h-full flex flex-col">
@@ -49,16 +80,13 @@ export default function NewProposal() {
 							showUndo={false}
 							changeSet={proposedChangeSet}
 							footer={
-								<div className="flex justify-between items-center p-4">
-									<button className="btn btn-outline" onClick={() => {}}>
-										Cancel
+								<div className="flex justify-end gap-2">
+									<button
+										className="btn btn-sm btn-primary"
+										onClick={handleSubmit}
+									>
+										Submit
 									</button>
-
-									<div className="flex items-center gap-2">
-										<button className="btn btn-primary" onClick={() => {}}>
-											Submit Proposal
-										</button>
-									</div>
 								</div>
 							}
 							ref={discussionRef}

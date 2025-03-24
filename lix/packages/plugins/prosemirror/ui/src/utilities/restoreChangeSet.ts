@@ -78,7 +78,7 @@ export async function restoreChangeSet(
 		// Reset the expanded change set
 		await lix.db
 			.updateTable("key_value")
-			.where("key", "=", "checkpoints.expandedChangeSetId")
+			.where("key", "=", "expandedChangeSetId")
 			.set({ value: JSON.stringify(null) })
 			.execute();
 

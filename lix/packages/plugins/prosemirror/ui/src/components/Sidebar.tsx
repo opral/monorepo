@@ -1,10 +1,11 @@
-import { useState } from "react";
 import Checkpoints from "./Checkpoints";
 import Proposals from "./Proposals";
 import clsx from "clsx";
 import { useQuery } from "../hooks/useQuery";
 import { selectCurrentVersion, selectMainVersion } from "../queries";
 import NewProposal from "./NewProposal";
+import { useKeyValue } from "../hooks/useKeyValue";
+import { useEffect } from "react";
 
 export default function Sidebar() {
 	const [currentVersion] = useQuery(selectCurrentVersion);
@@ -22,9 +23,13 @@ export default function Sidebar() {
 }
 
 function MainVersionSidebar() {
-	const [activeTab, setActiveTab] = useState<"checkpoints" | "proposals">(
-		"checkpoints",
-	);
+	const [activeTab, setActiveTab] = useKeyValue("activeTab");
+
+	useEffect(() => {
+		if (!activeTab) {
+			setActiveTab("checkpoints");
+		}
+	}, [activeTab]);
 
 	return (
 		<div className="flex flex-col h-full">
@@ -56,4 +61,3 @@ function MainVersionSidebar() {
 		</div>
 	);
 }
-

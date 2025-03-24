@@ -9,7 +9,7 @@ const Checkpoints: React.FC = () => {
 	const [stateCheckpoints] = useQuery(selectCheckpoints);
 	const [currentChangeSet] = useQuery(selectCurrentChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
-		"checkpoints.expandedChangeSetId",
+		"expandedChangeSetId",
 	);
 	const changeSetRef = useRef<ChangeSetHandle>(null);
 

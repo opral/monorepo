@@ -1,6 +1,7 @@
 import { useQuery } from "../hooks/useQuery";
 import { selectOpenChangeProposals } from "../queries";
 import { FileText } from "lucide-react";
+import { ChangeSet } from "./ChangeSet";
 
 /**
  * ProposalList component
@@ -19,12 +20,38 @@ export default function Proposals() {
 	};
 
 	return (
-		<div className="proposal-list flex flex-col h-full p-4">
+		<div className="proposal-list flex flex-col h-full">
 			{/* Proposal list or empty state */}
 			<div className="overflow-y-auto flex-1">
 				{(proposals?.length ?? 0) > 0 ? (
 					<div className="space-y-2">
-						{proposals?.map((proposal) => <p>todo</p>)}
+						{proposals?.map((proposal) => (
+							<ChangeSet
+								key={proposal.id}
+								changeSet={{
+									id: proposal.change_set_id,
+									change_count: proposal.change_count,
+								}}
+								showRestore={false}
+								showUndo={false}
+								footer={
+									<div className="flex justify-end gap-2">
+										<button
+											className="btn btn-sm btn-outline"
+											onClick={() => handleReject(proposal.id)}
+										>
+											Reject
+										</button>
+										<button
+											className="btn btn-sm btn-primary"
+											onClick={() => handleAccept(proposal.id)}
+										>
+											Accept
+										</button>
+									</div>
+								}
+							/>
+						))}
 					</div>
 				) : (
 					<EmptyState />
@@ -36,12 +63,10 @@ export default function Proposals() {
 
 function EmptyState() {
 	return (
-		<div className="flex flex-col items-center justify-center h-full text-center p-6 text-base-content/70">
-			<FileText size={48} className="mb-4" />
-			<p className="mb-2">No open change proposals.</p>
-			<p className="text-sm mb-4">
-				Create a new version and propose your changes.
-			</p>
+		<div className="flex flex-col items-center justify-center h-full text-base-content-secondary">
+			<FileText size={32} className="mb-2" />
+			<p>No proposals yet</p>
+			<p className="text-sm">Create a new version to propose changes</p>
 		</div>
 	);
 }

@@ -90,6 +90,16 @@ export async function selectOpenChangeProposals() {
 		.innerJoin("account", "account.id", "change_author.account_id")
 		.selectAll("change_proposal")
 		.select("account.name as account_name")
+		.innerJoin("change_set", "change_set.id", "change_proposal.change_set_id")
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_set_id",
+			"change_set.id",
+		)
+		.select((eb) => [
+			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		])
+		.groupBy("change_proposal.id")
 		.execute();
 }
 

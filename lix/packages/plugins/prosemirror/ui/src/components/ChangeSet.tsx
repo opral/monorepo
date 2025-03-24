@@ -40,7 +40,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		// Use shared key-value storage for expansion state
 		const [expandedChangeSetId, setExpandedChangeSetId] = useKeyValue<
 			string | null
-		>("checkpoints.expandedChangeSetId");
+		>("expandedChangeSetId");
 
 		const [activeAccount] = useQuery(selectActiveAccount);
 
