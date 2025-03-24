@@ -8,6 +8,8 @@ import { selectDiscussion } from "../queries";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { restoreChangeSet } from "../utilities/restoreChangeSet";
 import { undoChangeSet } from "../utilities/undoChangeSet";
+import { selectActiveAccount } from "../queries";
+import { getInitials } from "../utilities/nameUtils";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -15,20 +17,26 @@ export interface ChangeSetHandle {
 }
 
 interface ChangeSetProps {
-	changeSet: ChangeSetType & { change_count: number; created_at: string };
+	changeSet: ChangeSetType & { change_count: number; created_at?: string };
 	isCurrentChangeSet?: boolean;
+	alwaysExpand?: boolean;
 	footer?: React.ReactNode;
 }
 
 export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
-	({ changeSet, isCurrentChangeSet = false, footer }, ref) => {
+	(
+		{ changeSet, isCurrentChangeSet = false, alwaysExpand = false, footer },
+		ref,
+	) => {
 		// Use shared key-value storage for expansion state
 		const [expandedChangeSetId, setExpandedChangeSetId] = useKeyValue<
 			string | null
 		>("checkpoints.expandedChangeSetId");
 
+		const [activeAccount] = useQuery(selectActiveAccount);
+
 		// Determine if this change set is the expanded one
-		const isExpanded = expandedChangeSetId === changeSet.id;
+		const isExpanded = alwaysExpand || expandedChangeSetId === changeSet.id;
 
 		// Auto-expand current change set only when component first mounts
 		useEffect(() => {
@@ -75,14 +83,22 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		return (
 			<div className="bg-base-100">
 				<div
-					className={`flex items-center p-2 cursor-pointer hover:bg-base-200`}
+					className={
+						alwaysExpand
+							? "flex items-center p-2"
+							: "flex items-center p-2 cursor-pointer hover:bg-base-200"
+					}
 					onClick={handleToggleExpand}
 				>
 					<div
 						className={`w-8 h-8 flex items-center justify-center mr-2 rounded-full ${isCurrentChangeSet ? "bg-blue-100" : "bg-base-300"}`}
 					>
 						{/* Icon: clock for current changes, user avatar for others */}
-						{isCurrentChangeSet ? <Clock size={16} /> : <span>U</span>}
+						{isCurrentChangeSet ? (
+							<Clock size={16} />
+						) : (
+							<span>{getInitials(activeAccount?.name || "")}</span>
+						)}
 					</div>
 					<div className="flex-1">
 						<div className="text-sm truncate">
@@ -90,7 +106,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 								? "Current Change Set"
 								: truncatedComment
 									? truncatedComment
-									: "Untitled change set"}
+									: "No description yet"}
 						</div>
 						{!isCurrentChangeSet && (
 							<div className="text-xs text-base-content-secondary">

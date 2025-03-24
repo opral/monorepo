@@ -1,8 +1,10 @@
 import { lix } from "./state";
 import {
 	changeHasLabel,
+	changeIsLeaf,
 	changeIsLeafInVersion,
 	ChangeSet,
+	changeSetElementInSymmetricDifference,
 	createChangeSet,
 	jsonArrayFrom,
 } from "@lix-js/sdk";
@@ -262,4 +264,136 @@ export async function selectCurrentChangeSet(): Promise<
 		console.error(e);
 		throw e;
 	}
+}
+
+/**
+ * Selects the current change proposal (if not in main version) for the sidebar
+ *
+ * TODO need easier API in lix
+ */
+export async function selectProposedChangeSet(): Promise<
+	(ChangeSet & { change_count: number }) | null
+> {
+	const mainVersion = await selectMainVersion();
+	const currentVersion = await selectCurrentVersion();
+
+	if (currentVersion.id === mainVersion.id) {
+		return null;
+	}
+
+	const sourceChangeSet = await lix.db
+		.insertInto("change_set")
+		.values({ id: `source-${currentVersion.id}` })
+		.onConflict((oc) => oc.doUpdateSet({ id: `source-${currentVersion.id}` }))
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// always have the proposed change set available
+	const proposedChangeSet = await lix.db
+		.insertInto("change_set")
+		.values({
+			id: `proposed-${currentVersion.id}`,
+		})
+		.onConflict((oc) => oc.doUpdateSet({ id: `proposed-${currentVersion.id}` }))
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const targetChangeSet = await lix.db
+		.insertInto("change_set")
+		.values({
+			id: `target-${currentVersion.id}`,
+		})
+		.onConflict((oc) => oc.doUpdateSet({ id: `target-${currentVersion.id}` }))
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// using the current change set as the source
+	const sourceChanges = await lix.db
+		.selectFrom("change")
+		.innerJoin("file", "change.file_id", "file.id")
+		.where("file.path", "=", "/prosemirror.json")
+		.where(changeIsLeafInVersion(currentVersion))
+		.select(["change.id"])
+		.execute();
+
+	// getting all changes of main to use as target
+	// todo need to target the current change set of main instead
+	// todo but that requires the change_set_graph to be implemented
+	// of re-creating the change set all the time
+	const targetChanges = await lix.db
+		.selectFrom("change")
+		.innerJoin("file", "change.file_id", "file.id")
+		.where("file.path", "=", "/prosemirror.json")
+		.where(changeIsLeafInVersion(mainVersion))
+		.select(["change.id"])
+		.execute();
+
+	// add all source changes
+	await lix.db
+		.insertInto("change_set_element")
+		.values(
+			sourceChanges.map((c) => ({
+				change_set_id: sourceChangeSet.id,
+				change_id: c.id,
+			})),
+		)
+		.onConflict((oc) => oc.doNothing())
+		.execute();
+
+	// add all target changes
+	await lix.db
+		.insertInto("change_set_element")
+		.values(
+			targetChanges.map((c) => ({
+				change_set_id: targetChangeSet.id,
+				change_id: c.id,
+			})),
+		)
+		.onConflict((oc) => oc.doNothing())
+		.execute();
+
+	const proposedChanges = await lix.db
+		.selectFrom("change_set_element")
+		.innerJoin("change", "change_set_element.change_id", "change.id")
+		.where(
+			changeSetElementInSymmetricDifference(sourceChangeSet!, targetChangeSet),
+		)
+		// The symmetric difference alone is not enough
+		// which change came before and after?
+		// if the source has leafs that are new,
+		.where(changeIsLeaf())
+		.distinct()
+		.select(["change_id as id"])
+		.execute();
+
+	// always keep the proposal up to date. this demo
+	// is purposefully simple by encouraging short lived
+	// proposals that dont run out of sync with the main
+	// version
+	await lix.db
+		.insertInto("change_set_element")
+		.values(
+			proposedChanges.map((c) => ({
+				change_set_id: proposedChangeSet.id,
+				change_id: c.id,
+			})),
+		)
+		.onConflict((oc) => oc.doNothing())
+		.execute();
+
+	await lix.db
+		.insertInto("change_proposal")
+		.values({
+			id: `propsal-${currentVersion.id}`,
+			source_change_set_id: sourceChangeSet!.id,
+			target_change_set_id: targetChangeSet.id,
+			change_set_id: proposedChangeSet.id,
+		})
+		.onConflict((oc) => oc.doNothing())
+		.execute();
+
+	return {
+		...proposedChangeSet,
+		change_count: proposedChanges.length,
+	};
 }
