@@ -9,15 +9,12 @@ import { useQuery } from "../hooks/useQuery";
 import { selectDiscussion, countChangesInChangeSet } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { Eye, Check, X, ChevronRight } from "lucide-react";
-import { toRelativeTime } from "../utilities/timeUtils";
 import { Discussion, DiscussionHandle } from "./Discussion";
 import type { ChangeProposal } from "@lix-js/sdk";
 
 // Common interfaces
 export interface ProposalData extends ChangeProposal {
 	account_name?: string;
-	change_set_id: string;
-	created_at?: string;
 	change_count?: number;
 	from_version?: string;
 	to_version?: string;
@@ -136,9 +133,7 @@ const ProposalItem = forwardRef<ProposalItemHandle, ProposalItemProps>(
 		const subtitle =
 			proposal.from_version && proposal.to_version
 				? `${proposal.from_version} → ${proposal.to_version}`
-				: proposal.created_at
-					? toRelativeTime(proposal.created_at)
-					: "";
+				: "";
 
 		// Display change count, prioritizing the actual count from the database
 		const changeCount = actualChangeCount ?? proposal.change_count ?? 0;

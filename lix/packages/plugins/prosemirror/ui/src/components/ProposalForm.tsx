@@ -162,7 +162,6 @@ const ProposalForm: React.FC<ProposalFormProps> = ({
 		change_set_id: currentChangeSet?.id || `temp-${Date.now()}`,
 		change_count: currentChangeSet?.change_count || 0,
 		account_name: activeAccount?.name,
-		created_at: new Date().toISOString(),
 		from_version: currentVersion?.name,
 		to_version: mainVersion?.name,
 	};
