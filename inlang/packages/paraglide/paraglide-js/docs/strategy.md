@@ -127,10 +127,11 @@ compile({
 	strategy: ["url", "cookie"],
 	urlPatterns: [
 		{
-			pattern: "https://example.com/:path(.*)?",
+			pattern: "/:path(.*)?",
 			localized: [
-				["en", "https://example.com/:path(.*)?"],
-				["de", "https://example.com/de/:path(.*)?"],
+				["de", "/de/:path(.*)?"],
+                                // ✅ make sure to match the least specific path last 
+				["en", "/:path(.*)?"],
 			],
 		},
 	],
