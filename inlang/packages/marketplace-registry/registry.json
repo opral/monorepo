@@ -22,6 +22,7 @@
 		"4cxm3eqi": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/inlang-v1/inlang/source-code/message-lint-rules/missingTranslation/marketplace-manifest.json",
 		"teldgniy": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/inlang-v1/inlang/source-code/message-lint-rules/validJsIdentifier/marketplace-manifest.json",
 		"gkerinvo": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/inlang-v1/inlang/source-code/message-lint-rules/snakeCaseId/marketplace-manifest.json",
-		"ewkole66": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/inlang-v1/inlang/source-code/message-lint-rules/camelCaseId/marketplace-manifest.json"
+		"ewkole66": "https://raw.githubusercontent.com/opral/monorepo/refs/heads/inlang-v1/inlang/source-code/message-lint-rules/camelCaseId/marketplace-manifest.json",
+		"x12czijs": "https://raw.githubusercontent.com/ooopus/inlang-message-format/refs/heads/main/marketplace-manifest.json"
 	}
 }
