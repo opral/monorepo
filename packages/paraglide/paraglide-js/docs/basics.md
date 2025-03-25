@@ -114,17 +114,11 @@ console.log(getLocale()); // "de"
 
 The `localizeHref` function can be used to generate URLs with the current locale:
 
-```js
-import { localizeHref } from "./paraglide/runtime.js";
-
-console.log(localizeHref("/blog")); // "/blog"
-console.log(localizeHref("/blog", { locale: "de" })); // "/de/blog"
-```
-
 ```tsx
 <a href={localizeHref("/blog")}>Blog</a>
-<a href={localizeHref("/blog", { locale: "de" })}>Blog (de)</a>
 ```
+
+Important: If you route to a different locale, ensure a reload happens afterwards. See https://inlang.com/m/gerre34r/library-inlang-paraglideJs/errors#switching-locales-via-links-doesnt-work
 
 ## Choosing your strategy
 
