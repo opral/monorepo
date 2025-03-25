@@ -8,6 +8,8 @@ import { Separator } from '@/components/plate-ui/separator';
 import IntermediateCheckpointComponent from '@/components/IntermediateCheckpointComponent';
 import CheckpointComponent from '@/components/CheckpointComponent';
 import Banner from '@/components/Banner';
+import FileSwitcher from '@/components/FileSwitcher';
+import FileName from '@/components/FileName';
 
 export default function Page() {
 	const [activeFile] = useAtom(activeFileAtom)
@@ -21,8 +23,13 @@ export default function Page() {
 				<div className="flex items-center">
 					<img src="/lix.svg" alt="lix logo" className="h-6 w-6" />
 					<div className="text-slate-600 text-xl font-medium ml-0.5 mt-[1px]">md</div>
+					<div className="ml-4">
+						<FileSwitcher />
+					</div>
 				</div>
-				<div className="flex-1" />
+				<div className="flex-1 flex justify-center items-center">
+					<FileName />
+				</div>
 				<LixMenuDropdown />
 			</div>
 			<div className='flex-1 flex overflow-hidden'>
