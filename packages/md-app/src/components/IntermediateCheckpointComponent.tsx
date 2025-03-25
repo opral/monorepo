@@ -12,18 +12,25 @@ import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown } from "lucide-react";
 
-export const IntermediateCheckpointComponent = () => {
+interface IntermediateCheckpointComponentProps {
+  filteredChanges?: UiDiffComponentProps["diffs"];
+}
+
+export const IntermediateCheckpointComponent = ({ filteredChanges }: IntermediateCheckpointComponentProps) => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
   const [intermediateChanges] = useAtom(intermediateChangesAtom);
   const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
+  
+  // Use filtered changes if provided, otherwise use all intermediate changes
+  const changesData = filteredChanges || intermediateChanges;
 
   // Don't render anything if there's no change data
-  if (intermediateChanges.length === 0) {
+  if (changesData.length === 0) {
     return null;
   }
 
   // Group changes by plugin_key
-  const groupedChanges = intermediateChanges.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
+  const groupedChanges = changesData.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
     const key = change.plugin_key;
     if (!acc[key]) {
       acc[key] = [];

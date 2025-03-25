@@ -10,11 +10,21 @@ import CheckpointComponent from '@/components/CheckpointComponent';
 import Banner from '@/components/Banner';
 import FileSwitcher from '@/components/FileSwitcher';
 import FileName from '@/components/FileName';
+import { useMemo } from 'react';
+import { isEqual } from "lodash-es";
 
 export default function Page() {
 	const [activeFile] = useAtom(activeFileAtom)
 	const [intermediateChanges] = useAtom(intermediateChangesAtom);
 	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
+
+	// Filter out changes where before and after content are identical (ghost changes)
+	const filteredChanges = useMemo(() => {
+		return intermediateChanges.filter(change => {
+			// Only show changes where the content has actually changed
+			return !isEqual(change.snapshot_content_before, change.snapshot_content_after);
+		});
+	}, [intermediateChanges]);
 
 	return (
 		<>
@@ -46,15 +56,15 @@ export default function Page() {
 				<Separator orientation="vertical" />
 				<div className="h-full w-[600px] flex flex-col relative">
 					<div className="px-[10px] pt-[10px] overflow-y-auto">
-						{intermediateChanges.length > 0 && (
-							<IntermediateCheckpointComponent />
+						{filteredChanges.length > 0 && (
+							<IntermediateCheckpointComponent filteredChanges={filteredChanges} />
 						)}
 						{checkpointChangeSets.map((checkpointChangeSet, i) => {
 							return (
 								<CheckpointComponent
 									key={checkpointChangeSet.id}
 									checkpointChangeSet={checkpointChangeSet}
-									showTopLine={i !== 0 || intermediateChanges.length > 0}
+									showTopLine={i !== 0 || filteredChanges.length > 0}
 									showBottomLine={i !== checkpointChangeSets.length - 1}
 								/>
 							);
