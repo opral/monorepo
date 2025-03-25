@@ -69,9 +69,9 @@ Alternative Heading level 2
 ## tc - heading without blank line after
 
 # Heading followed by paragraph
-This is a paragraph right after a heading with no blank line in between.
+This is a paragraph right after a heading with no blank line in between. (we expect it to get an extra break)
 
 ## tc - heading with trailing whitespace
 
 # Heading with trailing whitespace   
-Next line content.
+Next line content. (we expect it to get an extra break)

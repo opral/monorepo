@@ -51,6 +51,7 @@ import { CreateCopyMarkdownPlugin } from "./copy-markdown-plugin";
 import {
 	SanitizedBlockHtmlPlugin,
 	SanitizedInlineHtmlPlugin,
+	SanitizedBlockPlugin,
 } from "./sanitized-html";
 
 export const viewPlugins = [
@@ -116,6 +117,7 @@ export const editorPlugins = [
 	FrontMatterPlugin,
 	SanitizedInlineHtmlPlugin,
 	SanitizedBlockHtmlPlugin,
+	SanitizedBlockPlugin,
 
 	// Copy & paste
 	CreateCopyMarkdownPlugin,

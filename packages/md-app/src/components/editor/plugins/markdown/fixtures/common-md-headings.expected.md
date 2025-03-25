@@ -2,10 +2,10 @@
 
 <!--
 TEST REASONING:
-Notice how alternative heading syntax (using === or ---) has been converted to # syntax.
+Notice how alternative heading syntax (using === or ---) is converted to # syntax.
 This is an acceptable transformation as it maintains the heading level while
 standardizing on a single heading syntax. Also notice that emphasis markers in headings
-have been normalized to use underscores for italics, consistent with the rest of the document.
+are normalized to use underscores for italics, consistent with the rest of the document.
 -->
 
 ## tc - heading level 1
@@ -54,7 +54,7 @@ have been normalized to use underscores for italics, consistent with the rest of
 
 ## tc - heading with code
 
-#### Heading with `code`
+# Heading with `code`
 
 ## tc - heading with link
 
@@ -67,9 +67,11 @@ have been normalized to use underscores for italics, consistent with the rest of
 ## tc - heading without blank line after
 
 # Heading followed by paragraph
-This is a paragraph right after a heading with no blank line in between.
+
+This is a paragraph right after a heading with no blank line in between. (we expect it to get an extra break)
 
 ## tc - heading with trailing whitespace
 
 # Heading with trailing whitespace
-Next line content.
+
+Next line content. (we expect it to get an extra break)

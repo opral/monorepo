@@ -547,7 +547,7 @@ _Italic text with * escaped asterisk_
 </td>
 <td>
 
-_Bold text with *_ _escaped asterisks_*
+<br>**Bold text with \** escaped asterisks*<br>*
 
 </td>
 </tr>
@@ -559,7 +559,7 @@ _Bold text with *_ _escaped asterisks_*
 </td>
 <td>
 
-<pre><code>_Bold text with *_ _escaped asterisks_*</code></pre>
+<pre><code>&lt;br&gt;**Bold text with \** escaped asterisks*&lt;br&gt;*</code></pre>
 
 </td>
 </tr>

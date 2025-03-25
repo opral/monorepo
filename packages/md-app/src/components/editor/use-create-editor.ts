@@ -105,7 +105,8 @@ import {
 } from "./plugins/frontmatter-plugin";
 import {
 	SanitizedBlockHtmlPlugin,
-	SanitizedHtmlElementLeaf,
+	SanitizedBlockPlugin,
+	SanitizedElementLeaf,
 	SanitizedInlineHtmlPlugin,
 } from "./plugins/sanitized-html";
 
@@ -159,8 +160,9 @@ export const editorConfig = {
 			[UnderlinePlugin.key]: withProps(PlateLeaf, { as: "u" }),
 			[VideoPlugin.key]: MediaVideoElement,
 			[FrontMatterPlugin.key]: FrontMatterElement,
-			[SanitizedBlockHtmlPlugin.key]: SanitizedHtmlElementLeaf,
-			[SanitizedInlineHtmlPlugin.key]: SanitizedHtmlElementLeaf,
+			[SanitizedBlockHtmlPlugin.key]: SanitizedElementLeaf,
+			[SanitizedInlineHtmlPlugin.key]: SanitizedElementLeaf,
+			[SanitizedBlockPlugin.key]: SanitizedElementLeaf,
 		}),
 	},
 	plugins: [

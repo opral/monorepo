@@ -4,11 +4,25 @@
 
 This document demonstrates a wide variety of Markdown syntax elements and how they interact with each other. It's designed to test the roundtrip conversion capabilities of Markdown processors.
 
-## tc - text formatting
+## tc - text formatting - italic
 
-Plain text paragraphs are the most basic element. This paragraph demonstrates _italic text_, **bold text**, and ***bold italic text***.
+This paragraph demonstrates _italic text_ inline also wiht _underscore_
 
-You can also use _underscores_ for **emphasis** and ***both*** if you prefer.
+## tc - text formatting - bold/emphasis
+
+This paragraph demonstrates **bold/emphasis text** inline
+
+This paragraph demonstrates **bold/emphasis text** inline
+
+## tc - text formatting - bold AND italic with asterix *
+
+This paragraph demonstrates ***italic AND bold text*** inline
+
+## tc - text formatting - bold AND italic with underscore _
+
+This paragraph demonstrates ___italic AND bold text___ inline
+
+## tc - text formatting - strikethrough and inline code
 
 Other formatting options include ~~strikethrough~~ and `inline code`.
 

@@ -12,9 +12,13 @@ import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
+import {
+	sanatizeUnknownNodeStructures,
+	sanatizeUnknownNodeStructuresInTree,
+} from "./sanitizeUnsupported";
 
 const sanitizeHtml = function () {
-	return (tree: any) => {
+	return (tree: any, file: any) => {
 		visit(tree, (node, index, parent) => {
 			// don't sanitize <br> tags: remark never concats them and conversion to \n happens on ui layer
 			if (node.type === "html" && node.value !== "<br>") {
@@ -42,9 +46,12 @@ export const deserializeMd = (
 	Object.assign(textRules, options.textRules);
 
 	let mdProcessor: any = unified()
+		// @ts-expect-error - type issues
 		.use(remarkParse)
 		.use(remarkFrontmatter, ["yaml", "toml"])
+		// @ts-expect-error - type issues
 		.use(remarkGfm)
+		.use(sanatizeUnknownNodeStructuresInTree)
 		.use(sanitizeHtml);
 	// .use(remarkRehype, { allowDangerousHtml: true, passThrough: ['']  })
 	// .use(rehypeRaw);

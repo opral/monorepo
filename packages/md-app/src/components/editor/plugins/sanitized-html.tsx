@@ -2,7 +2,7 @@ import { createPlatePlugin } from "@udecode/plate-core/react";
 import { PlateLeaf, PlateLeafProps } from "@udecode/plate/react";
 import { textAlign } from "html2canvas/dist/types/css/property-descriptors/text-align";
 
-export const SanitizedHtmlElementLeaf = ({
+export const SanitizedElementLeaf = ({
 	className,
 	element,
 	...props
@@ -47,7 +47,7 @@ export const SanitizedHtmlElementLeaf = ({
 export const SanitizedInlineHtmlPlugin = createPlatePlugin({
 	key: "sanitized_inline_html",
 	node: {
-		component: SanitizedHtmlElementLeaf,
+		component: SanitizedElementLeaf,
 		isElement: true,
 		// set to true to not return early here: https://github.com/udecode/plate/blob/72e7ec523daebe9c6cf276bb020a99ce52b1ff01/packages/markdown/src/lib/serializer/serializeMdNode.ts#L218
 		isVoid: true,
@@ -58,7 +58,19 @@ export const SanitizedInlineHtmlPlugin = createPlatePlugin({
 export const SanitizedBlockHtmlPlugin = createPlatePlugin({
 	key: "sanitized_block_html",
 	node: {
-		component: SanitizedHtmlElementLeaf,
+		component: SanitizedElementLeaf,
+		isElement: true,
+		// set to true to not return early here: https://github.com/udecode/plate/blob/72e7ec523daebe9c6cf276bb020a99ce52b1ff01/packages/markdown/src/lib/serializer/serializeMdNode.ts#L218
+		isVoid: true,
+		isInline: false,
+	},
+});
+
+
+export const SanitizedBlockPlugin = createPlatePlugin({
+	key: "sanitized_block",
+	node: {
+		component: SanitizedElementLeaf,
 		isElement: true,
 		// set to true to not return early here: https://github.com/udecode/plate/blob/72e7ec523daebe9c6cf276bb020a99ce52b1ff01/packages/markdown/src/lib/serializer/serializeMdNode.ts#L218
 		isVoid: true,

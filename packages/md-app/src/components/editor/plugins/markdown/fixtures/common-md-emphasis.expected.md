@@ -1,4 +1,5 @@
 # Emphasis and Strong
+
 <!-- 
 TEST REASONING:
 Emphasis formatting standardization is visible here. The serializer has normalized

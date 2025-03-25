@@ -62,23 +62,37 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 [Basic link](https://example.com)
 
-[Link with title](https://example.com)
+<br>[Link with title](https://example.com "Example Website")<br>
 
-[Link with formatting **bold**](https://example.com)
+<br>[Link with formatting **bold**](https://example.com)<br>
 
-[Link with formatting _italic_](https://example.com)
+<br>[Link with formatting *italic*](https://example.com)<br>
 
-[Link with formatting `code`](https://example.com)
+<br>[Link with formatting `code`](https://example.com)<br>
 
 [https://example.com](https://example.com) (Automatic link)
 
 [email@example.com](mailto:email@example.com) (Email link)
 
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
 Paragraph with a [link](https://example.com) in the middle.
 
-Paragraph with _formatted link_ in italics.
+Paragraph with <br>*[formatted link](https://example.com)*<br> in italics.
 
-Paragraph with **formatted link** in bold.
+Paragraph with <br>**[formatted link](https://example.com)**<br> in bold.
+
+[ref]: https://example.com "Reference Example"
+
+[different-ref]: https://example.com/different "Different Reference"
+
+[shorthand reference]: https://example.com
 
 </td>
 </tr>
@@ -126,23 +140,37 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 [Basic link](https://example.com)
 
-[Link with title](https://example.com)
+&lt;br&gt;[Link with title](https://example.com &quot;Example Website&quot;)&lt;br&gt;
 
-[Link with formatting **bold**](https://example.com)
+&lt;br&gt;[Link with formatting **bold**](https://example.com)&lt;br&gt;
 
-[Link with formatting _italic_](https://example.com)
+&lt;br&gt;[Link with formatting *italic*](https://example.com)&lt;br&gt;
 
-[Link with formatting `code`](https://example.com)
+&lt;br&gt;[Link with formatting `code`](https://example.com)&lt;br&gt;
 
 [https://example.com](https://example.com) (Automatic link)
 
 [email@example.com](mailto:email@example.com) (Email link)
 
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
 Paragraph with a [link](https://example.com) in the middle.
 
-Paragraph with _formatted link_ in italics.
+Paragraph with &lt;br&gt;*[formatted link](https://example.com)*&lt;br&gt; in italics.
 
-Paragraph with **formatted link** in bold.</code></pre>
+Paragraph with &lt;br&gt;**[formatted link](https://example.com)**&lt;br&gt; in bold.
+
+[ref]: https://example.com &quot;Reference Example&quot;
+
+[different-ref]: https://example.com/different &quot;Different Reference&quot;
+
+[shorthand reference]: https://example.com</code></pre>
 
 </td>
 </tr>

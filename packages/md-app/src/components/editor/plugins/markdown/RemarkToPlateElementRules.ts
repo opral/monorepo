@@ -6,7 +6,7 @@ import { MdastNode, remarkDefaultElementRules, RemarkElementRules, RemarkPluginO
  */
 export const remarkToPlateElementRules: RemarkElementRules = {
 	...remarkDefaultElementRules,
-	
+
 	// @ts-expect-error -- yaml type not defined here
 	yaml: {
 		transform: (node: MdastNode, options: RemarkPluginOptions) => {
@@ -27,7 +27,7 @@ export const remarkToPlateElementRules: RemarkElementRules = {
 				type: options.editor.getType({ key: "sanitized_block_html" }),
 				value: node.value,
 			};
-            console.log("sanitized_block_html.transform");
+			console.log("sanitized_block_html.transform");
 			return transformed;
 		},
 	},
@@ -39,7 +39,19 @@ export const remarkToPlateElementRules: RemarkElementRules = {
 				type: options.editor.getType({ key: "sanitized_inline_html" }),
 				value: node.value,
 			};
-            console.log("sanitized_inline_html.transform");
+			console.log("sanitized_inline_html.transform");
+			return transformed;
+		},
+	},
+	sanitized_block: {
+		transform: (node: MdastNode, options: RemarkPluginOptions) => {
+			const transformed = {
+				// caption: [{ text: node.alt } as TText],
+				children: [{ text: "" } as TText],
+				type: options.editor.getType({ key: "sanitized_block" }),
+				value: (node as any).value,
+			};
+			console.log("sanitized_block.transform");
 			return transformed;
 		},
 	},
