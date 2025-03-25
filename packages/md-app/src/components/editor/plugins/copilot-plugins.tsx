@@ -42,7 +42,7 @@ export const copilotPlugins = [
           });
         },
       },
-      debounceDelay: 500,
+      debounceDelay: 250,
       renderGhostText: GhostText,
       getPrompt: ({ editor }) => {
         const contextEntry = editor.api.block({ highest: true });
