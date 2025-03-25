@@ -130,7 +130,7 @@ const LixHandlingDropdown = () => {
           <Ellipsis />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="py-1">
         <DropdownMenuItem onClick={handleImport}>
           <Upload />
           Import File
