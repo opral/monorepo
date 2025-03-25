@@ -10,6 +10,7 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+		cookieMaxAge: NonNullable<CompilerOptions["cookieMaxAge"]>;
 		urlPatterns?: CompilerOptions["urlPatterns"];
 		experimentalMiddlewareLocaleSplitting: CompilerOptions["experimentalMiddlewareLocaleSplitting"];
 		isServer: CompilerOptions["isServer"];
@@ -61,6 +62,7 @@ ${injectCode("./variables.js")
 		`export const strategy = ${JSON.stringify(args.compilerOptions.strategy, null, 2)};`
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
+	.replace(`60 * 60 * 24 * 400`, `${args.compilerOptions.cookieMaxAge}`)
 	.replace(
 		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
@@ -108,7 +110,7 @@ ${injectCode("./variables.js")
 
 globalThis.__paraglide = {}
 
-${injectCode("./get-locale.js")} 
+${injectCode("./get-locale.js")}
 
 ${injectCode("./set-locale.js")}
 

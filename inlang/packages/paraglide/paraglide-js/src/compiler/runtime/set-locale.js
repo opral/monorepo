@@ -1,4 +1,7 @@
+import { getLocale } from "./get-locale.js";
+import { localizeUrl } from "./localize-url.js";
 import {
+	cookieMaxAge,
 	cookieName,
 	isServer,
 	localStorageKey,
@@ -8,15 +11,13 @@ import {
 	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
-import { localizeUrl } from "./localize-url.js";
-import { getLocale } from "./get-locale.js";
 
 /**
  * Set the locale.
  *
  * Set locale reloads the site by default on the client. Reloading
  * can be disabled by passing \`reload: false\` as an option. If
- * reloading is disbaled, you need to ensure that the UI is updated
+ * reloading is disabled, you need to ensure that the UI is updated
  * to reflect the new locale.
  *
  * @example
@@ -55,7 +56,7 @@ export let setLocale = (newLocale, options) => {
 				continue;
 			}
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}; path=/`;
+			document.cookie = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}`;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
