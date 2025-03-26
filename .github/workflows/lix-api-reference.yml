@@ -57,9 +57,6 @@ jobs:
             echo "---" >> api-docs/README.md
             echo "" >> api-docs/README.md
           done
-          
-          # Remove all other markdown files
-          find api-docs -name "*.md" -not -name "README.md" -delete
         working-directory: packages/lix-sdk
 
       - name: Commit and push changes
