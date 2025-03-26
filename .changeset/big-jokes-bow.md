@@ -1,5 +1,5 @@
 ---
-"@lix-js/sdk": minor
+"@lix-js/sdk": patch
 "@lix-js/host": patch
 ---
 
