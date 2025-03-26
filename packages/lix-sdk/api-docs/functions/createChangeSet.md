@@ -8,7 +8,7 @@
 
 > **createChangeSet**(`args`): `Promise`\<\{ `id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:24](https://github.com/opral/monorepo/blob/53ab73e26c8882477681775708373fdf29620a50/packages/lix-sdk/src/change-set/create-change-set.ts#L24)
+Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:24](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/change-set/create-change-set.ts#L24)
 
 Creates a change set with the given changes, optionally within an open transaction.
 
@@ -42,9 +42,9 @@ Creates a change set with the given changes, optionally within an open transacti
 ```ts
   // Create a change set with labels
   const labels = await lix.db.selectFrom("label").selectAll().execute();
-  const changeSet = await createChangeSet({ 
-    lix, 
-    changes: [], 
-    labels 
+  const changeSet = await createChangeSet({
+    lix,
+    changes: [],
+    labels
   });
   ```

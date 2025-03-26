@@ -8,7 +8,7 @@
 
 > **UiDiffComponentProps** = `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:125](https://github.com/opral/monorepo/blob/53ab73e26c8882477681775708373fdf29620a50/packages/lix-sdk/src/plugin/lix-plugin.ts#L125)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:125](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/plugin/lix-plugin.ts#L125)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:125](https://github.com/o
 
 > **diffs**: `Pick`\<[`Change`](Change.md), `"entity_id"` \| `"plugin_key"` \| `"schema_key"`\> & `object`[]
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:126](https://github.com/opral/monorepo/blob/53ab73e26c8882477681775708373fdf29620a50/packages/lix-sdk/src/plugin/lix-plugin.ts#L126)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:126](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/plugin/lix-plugin.ts#L126)

@@ -8,7 +8,7 @@
 
 > **createDiscussion**(`args`): `Promise`\<`object` & `object`\>
 
-Defined in: [packages/lix-sdk/src/discussion/create-discussion.ts:15](https://github.com/opral/monorepo/blob/53ab73e26c8882477681775708373fdf29620a50/packages/lix-sdk/src/discussion/create-discussion.ts#L15)
+Defined in: [packages/lix-sdk/src/discussion/create-discussion.ts:15](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/discussion/create-discussion.ts#L15)
 
 Creates a new discussion with the first comment.
 

@@ -8,7 +8,7 @@
 
 > **DetectedChange**\<`Schema`\> = `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:97](https://github.com/opral/monorepo/blob/53ab73e26c8882477681775708373fdf29620a50/packages/lix-sdk/src/plugin/lix-plugin.ts#L97)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:97](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/plugin/lix-plugin.ts#L97)
 
 A detected change that lix ingests in to the database.
 
@@ -48,7 +48,7 @@ Type narrowing with a change schema:
 
 > **entity\_id**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:98](https://github.com/opral/monorepo/blob/53ab73e26c8882477681775708373fdf29620a50/packages/lix-sdk/src/plugin/lix-plugin.ts#L98)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:98](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/plugin/lix-plugin.ts#L98)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:98](https://github.com/op
 
 > **schema**: `Omit`\<[`ExperimentalChangeSchema`](ExperimentalChangeSchema.md), `"schema"`\>
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:99](https://github.com/opral/monorepo/blob/53ab73e26c8882477681775708373fdf29620a50/packages/lix-sdk/src/plugin/lix-plugin.ts#L99)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:99](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/plugin/lix-plugin.ts#L99)
 
 ***
 
@@ -64,6 +64,6 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:99](https://github.com/op
 
 > `optional` **snapshot**: [`ExperimentalInferType`](ExperimentalInferType.md)\<`Schema`\>
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:104](https://github.com/opral/monorepo/blob/53ab73e26c8882477681775708373fdf29620a50/packages/lix-sdk/src/plugin/lix-plugin.ts#L104)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:104](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/plugin/lix-plugin.ts#L104)
 
 The change is considered a deletion if `snapshot` is `undefined`.
