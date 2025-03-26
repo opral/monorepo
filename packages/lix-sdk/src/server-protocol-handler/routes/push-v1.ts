@@ -9,7 +9,8 @@ import { CompiledQuery } from "kysely";
 type RequestBody =
 	LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"];
 
-type ResponseBody = LixServerProtocol.paths["/lsp/push-v1"]["post"]["responses"];
+type ResponseBody =
+	LixServerProtocol.paths["/lsp/push-v1"]["post"]["responses"];
 
 export const route: LixServerProtocolHandlerRoute = async (context) => {
 	const body = (await context.request.json()) as RequestBody;

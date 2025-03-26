@@ -5,7 +5,8 @@ import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 type RequestBody =
 	LixServerProtocol.paths["/lsp/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
 
-type ResponseBody = LixServerProtocol.paths["/lsp/pull-v1"]["post"]["responses"];
+type ResponseBody =
+	LixServerProtocol.paths["/lsp/pull-v1"]["post"]["responses"];
 
 export const route: LixServerProtocolHandlerRoute = async (context) => {
 	const body = (await context.request.json()) as RequestBody;

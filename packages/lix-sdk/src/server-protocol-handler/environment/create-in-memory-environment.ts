@@ -115,4 +115,5 @@ export const createLspInMemoryEnvironment = (): LspEnvironment => {
 };
 
 // For backward compatibility
-export const createLsaInMemoryEnvironment: typeof createLspInMemoryEnvironment = createLspInMemoryEnvironment;
+export const createLsaInMemoryEnvironment: typeof createLspInMemoryEnvironment =
+	createLspInMemoryEnvironment;
