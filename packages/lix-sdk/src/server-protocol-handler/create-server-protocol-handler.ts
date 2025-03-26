@@ -2,18 +2,18 @@ import { route as newRouteV1 } from "./routes/new-v1.js";
 import { route as pushRouteV1 } from "./routes/push-v1.js";
 import { route as pullRouteV1 } from "./routes/pull-v1.js";
 import { route as getRouteV1 } from "./routes/get-v1.js";
-import type { LsaEnvironment } from "./environment/environment.js";
+import type { LspEnvironment } from "./environment/environment.js";
 
-export type LixServerApiHandler = (request: Request) => Promise<Response>;
-
-export type LixServerApiHandlerContext = {
+export type LixServerProtocolHandler = (request: Request) => Promise<Response>;
+// Keep old name for backward compatibility
+export type LixServerProtocolHandlerContext = {
 	request: Request;
-	environment: LsaEnvironment;
+	environment: LspEnvironment;
 	params?: Record<string, string | undefined>;
 };
 
-export type LixServerApiHandlerRoute = (
-	context: LixServerApiHandlerContext
+export type LixServerProtocolHandlerRoute = (
+	context: LixServerProtocolHandlerContext
 ) => Promise<Response>;
 
 /**
@@ -30,10 +30,10 @@ export type LixServerApiHandlerRoute = (
  *   // objects will need to be mapped.
  *   const app = new Hono();
  *
- *   const lsaHandler = createServerApiHandler({ storage });
+ *   const lspHandler = createServerProtocolHandler({ storage });
  *
  *   app.use('/lsp/*', async (req) => {
- *      await lsaHandler(req);
+ *      await lspHandler(req);
  *   });
  *   ```
  *
@@ -41,35 +41,35 @@ export type LixServerApiHandlerRoute = (
  *   Testing the handler.
  *
  *   ```ts
- *   const lsaHandler = createServerApiHandler({ storage });
+ *   const lspHandler = createServerProtocolHandler({ storage });
  *   const request = new Request('/lsp/new', {
  *     method: 'POST',
  *     body: new Blob(['...']),
  *   });
  *
- *   const response = await lsaHandler(request);
+ *   const response = await lspHandler(request);
  *
  *   expect(response).to(...);
  *   ```
  */
-export async function createServerApiHandler(args: {
-	environment: LsaEnvironment;
-}): Promise<LixServerApiHandler> {
+export async function createServerProtocolHandler(args: {
+	environment: LspEnvironment;
+}): Promise<LixServerProtocolHandler> {
 	const context = { environment: args.environment };
 
 	return async (request) => {
 		try {
 			const path = new URL(request.url).pathname;
-			if (path === "/lsa/get-v1") {
+			if (path === "/lsp/get-v1") {
 				return await getRouteV1({ ...context, request });
 			}
-			if (path === "/lsa/new-v1") {
+			if (path === "/lsp/new-v1") {
 				return await newRouteV1({ ...context, request });
 			}
-			if (path === "/lsa/push-v1") {
+			if (path === "/lsp/push-v1") {
 				return await pushRouteV1({ ...context, request });
 			}
-			if (path === "/lsa/pull-v1") {
+			if (path === "/lsp/pull-v1") {
 				return await pullRouteV1({ ...context, request });
 			}
 
@@ -82,3 +82,7 @@ export async function createServerApiHandler(args: {
 		}
 	};
 }
+
+// Keep old name for backward compatibility
+export const createServerApiHandler: typeof createServerProtocolHandler =
+	createServerProtocolHandler;

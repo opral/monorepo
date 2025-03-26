@@ -55,7 +55,7 @@ export async function initSyncProcess(args: {
 		} catch (e) {
 			// likely that lix didn't exist on the server
 			const response = await fetch(
-				new Request(url.value + "/lsa/new-v1", {
+				new Request(`${url.value}/lsp/new-v1`, {
 					method: "POST",
 					body: await toBlob({ lix: args.lix }),
 				})

@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { createServerApiHandler } from "../create-server-api-handler.js";
+import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
+import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
 test("it should fetch the lix file from the server", async () => {
@@ -20,20 +20,20 @@ test("it should fetch the lix file from the server", async () => {
 		.values({ key: "mock_key", value: "hello world" })
 		.execute();
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
 	// Store the lix file
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix }),
 		})
 	);
 
 	// Fetch the lix file
-	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/get-v1", {
+	const response = await lspHandler(
+		new Request("http://localhost:3000/lsp/get-v1", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -64,12 +64,12 @@ test("it should fetch the lix file from the server", async () => {
 });
 
 test("it should return 404 if the lix file does not exist", async () => {
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 
-	const lsaHandler = await createServerApiHandler({ environment });
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/get-v1", {
+	const response = await lspHandler(
+		new Request("http://localhost:3000/lsp/get-v1", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -85,11 +85,11 @@ test("it should return 404 if the lix file does not exist", async () => {
 });
 
 test("it should return 400 for a request without lix_id", async () => {
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/get-v1", {
+	const response = await lspHandler(
+		new Request("http://localhost:3000/lsp/get-v1", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -105,8 +105,8 @@ test("it should return 400 for a request without lix_id", async () => {
 });
 
 test("lix_sync is set to true", async () => {
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
@@ -114,8 +114,8 @@ test("lix_sync is set to true", async () => {
 	});
 
 	// Store the lix file
-	const response0 = await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	const response0 = await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix }),
 		})
@@ -123,8 +123,8 @@ test("lix_sync is set to true", async () => {
 
 	const id = (await response0.json()).id;
 
-	const response1 = await lsaHandler(
-		new Request("http://localhost:3000/lsa/get-v1", {
+	const response1 = await lspHandler(
+		new Request("http://localhost:3000/lsp/get-v1", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

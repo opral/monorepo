@@ -3,9 +3,9 @@ import {
 	createInMemoryDatabase,
 	importDatabase,
 } from "sqlite-wasm-kysely";
-import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
+import type { LixServerProtocolHandlerRoute } from "../create-server-protocol-handler.js";
 
-export const route: LixServerApiHandlerRoute = async (context) => {
+export const route: LixServerProtocolHandlerRoute = async (context) => {
 	const { lix_id } = await context.request.json();
 
 	if (!lix_id) {

@@ -3,14 +3,14 @@ import { closeLix } from "../../lix/close-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import type { Lix } from "../../lix/open-lix.js";
 import { toBlob } from "../../lix/to-blob.js";
-import type { LsaEnvironment } from "./environment.js";
+import type { LspEnvironment } from "./environment.js";
 
 /**
  * Create an in-memory storage.
  *
  * Great for testing or quick prototyping.
  */
-export const createLsaInMemoryEnvironment = (): LsaEnvironment => {
+export const createLspInMemoryEnvironment = (): LspEnvironment => {
 	const store = new Map<string, Blob>();
 
 	/**
@@ -113,3 +113,7 @@ export const createLsaInMemoryEnvironment = (): LsaEnvironment => {
 		},
 	};
 };
+
+// For backward compatibility
+export const createLsaInMemoryEnvironment: typeof createLspInMemoryEnvironment =
+	createLspInMemoryEnvironment;

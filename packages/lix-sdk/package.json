@@ -29,7 +29,7 @@
 		"node": ">=18"
 	},
 	"dependencies": {
-		"@lix-js/server-api-schema": "workspace:*",
+		"@lix-js/server-protocol-schema": "workspace:*",
 		"dedent": "1.5.1",
 		"human-id": "^4.1.1",
 		"js-sha256": "^0.11.0",

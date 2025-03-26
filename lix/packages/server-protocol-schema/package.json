@@ -3,7 +3,7 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"name": "@lix-js/server-api-schema",
+	"name": "@lix-js/server-protocol-schema",
 	"type": "module",
 	"version": "0.1.1",
 	"license": "Apache-2.0",

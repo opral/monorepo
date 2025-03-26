@@ -756,7 +756,7 @@ Set the locale.
 
 Set locale reloads the site by default on the client. Reloading
 can be disabled by passing `reload: false` as an option. If
-reloading is disbaled, you need to ensure that the UI is updated
+reloading is disabled, you need to ensure that the UI is updated
 to reflect the new locale.
 
 ### Parameters

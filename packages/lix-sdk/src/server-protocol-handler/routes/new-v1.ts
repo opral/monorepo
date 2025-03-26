@@ -1,8 +1,8 @@
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
+import type { LixServerProtocolHandlerRoute } from "../create-server-protocol-handler.js";
 
-export const route: LixServerApiHandlerRoute = async (context) => {
+export const route: LixServerProtocolHandlerRoute = async (context) => {
 	const blob = await context.request.blob();
 
 	let lix: Lix;

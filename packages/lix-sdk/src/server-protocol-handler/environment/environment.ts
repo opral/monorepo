@@ -3,7 +3,7 @@ import type { Lix } from "../../lix/open-lix.js";
 /**
  * Key value storage interface.
  */
-export type LsaEnvironment = {
+export type LspEnvironment = {
 	get(key: string): Promise<Blob | undefined>;
 	set(key: string, value: Blob): Promise<void>;
 	has(key: string): Promise<boolean>;
@@ -41,3 +41,6 @@ export type LsaEnvironment = {
 	 */
 	closeLix(args: { id: string; connectionId: string }): Promise<void>;
 };
+
+// For backward compatibility
+export type LsaEnvironment = LspEnvironment;

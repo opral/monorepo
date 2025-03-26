@@ -3,21 +3,21 @@ import type { Lix } from "../lix/open-lix.js";
 
 /**
  * Creates a change set with the given changes, optionally within an open transaction.
- * 
+ *
  * @example
  *   ```ts
  *   const changes = await lix.db.selectFrom("change").selectAll().execute();
  *   const changeSet = await createChangeSet({ db: lix.db, changes });
  *   ```
- * 
+ *
  * @example
  *   ```ts
  *   // Create a change set with labels
  *   const labels = await lix.db.selectFrom("label").selectAll().execute();
- *   const changeSet = await createChangeSet({ 
- *     lix, 
- *     changes: [], 
- *     labels 
+ *   const changeSet = await createChangeSet({
+ *     lix,
+ *     changes: [],
+ *     labels
  *   });
  *   ```
  */
@@ -50,7 +50,7 @@ export async function createChangeSet(args: {
 			await trx
 				.insertInto("change_set_label")
 				.values(
-					args.labels.map(label => ({
+					args.labels.map((label) => ({
 						label_id: label.id,
 						change_set_id: changeSet.id,
 					}))

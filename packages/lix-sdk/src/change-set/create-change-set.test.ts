@@ -85,7 +85,7 @@ test("creating a change set with labels should associate the labels with the cha
 	const changeSet = await createChangeSet({
 		lix: lix,
 		changes: [],
-		labels: [checkpointLabel, testLabel]
+		labels: [checkpointLabel, testLabel],
 	});
 
 	// Verify the change set was created
@@ -101,7 +101,7 @@ test("creating a change set with labels should associate the labels with the cha
 
 	// Verify both labels are associated with the change set
 	expect(changeSetLabels).toHaveLength(2);
-	expect(changeSetLabels.map(label => label.name)).toEqual(
+	expect(changeSetLabels.map((label) => label.name)).toEqual(
 		expect.arrayContaining(["test-label", "checkpoint"])
 	);
 });

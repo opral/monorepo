@@ -1,14 +1,14 @@
 import { test, expect, vi } from "vitest";
-import * as LixServerApi from "@lix-js/server-api-schema";
+import type * as LixServerProtocol from "@lix-js/server-protocol-schema";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import { createServerApiHandler } from "../create-server-api-handler.js";
+import { createServerApiHandler } from "../create-server-protocol-handler.js";
 import type { Change } from "../../database/schema.js";
 import { mockChange } from "../../change/mock-change.js";
 import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 import { createVersion } from "../../version/create-version.js";
 import { switchVersion } from "../../version/switch-version.js";
 import { pullFromServer } from "../../sync/pull-from-server.js";
-import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
+import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
 test("it should push data successfully", async () => {
@@ -19,7 +19,7 @@ test("it should push data successfully", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 	await environment.setLix({ id, blob: await toBlob({ lix }) });
 
 	const lsaHandler = await createServerApiHandler({ environment });
@@ -27,7 +27,7 @@ test("it should push data successfully", async () => {
 	const mockChange0 = mockChange({ id: "change0" });
 
 	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/push-v1", {
+		new Request("http://localhost:3000/lsp/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
@@ -50,7 +50,7 @@ test("it should push data successfully", async () => {
 					],
 					change: [mockChange0] satisfies Change[],
 				},
-			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -73,18 +73,18 @@ test("it should push data successfully", async () => {
 });
 
 test("it should return 404 if the Lix file is not found", async () => {
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 
 	const lsaHandler = await createServerApiHandler({ environment });
 
 	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/push-v1", {
+		new Request("http://localhost:3000/lsp/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "nonexistent-id",
 				vector_clock: [],
 				data: {},
-			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -95,7 +95,7 @@ test("it should return 404 if the Lix file is not found", async () => {
 });
 
 test("it should return 500 for an invalid Lix file", async () => {
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 
 	await environment.setLix({
 		id: `invalid-lix`,
@@ -105,13 +105,13 @@ test("it should return 500 for an invalid Lix file", async () => {
 	const lsa = await createServerApiHandler({ environment });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/push-v1", {
+		new Request("http://localhost:3000/lsp/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: "invalid-lix",
 				vector_clock: [],
 				data: {},
-			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -129,14 +129,14 @@ test("it should return 400 for a failed insert operation", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 
 	environment.setLix({ id, blob: await toBlob({ lix }) });
 
 	const lsa = await createServerApiHandler({ environment });
 
 	const response = await lsa(
-		new Request("http://localhost:3000/lsa/push-v1", {
+		new Request("http://localhost:3000/lsp/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: id,
@@ -144,7 +144,7 @@ test("it should return 400 for a failed insert operation", async () => {
 				data: {
 					nonexistent_table: [{ key: "test", value: "test value" }],
 				},
-			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -179,7 +179,7 @@ test.skip("it should detect conflicts", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 
 	const lsaHandler = await createServerApiHandler({ environment });
 
@@ -208,13 +208,13 @@ test.skip("it should detect conflicts", async () => {
 	});
 
 	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/push-v1", {
+		new Request("http://localhost:3000/lsp/push-v1", {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: lixId.value,
 				vector_clock: state,
 				data: tableRowsToPush,
-			} satisfies LixServerApi.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},

@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
-  title: Lix Server Api
+  title: Lix Server Protocol
   version: 1.0.0
 paths:
-  /lsa/new-v1:
+  /lsp/new-v1:
     post:
       summary: Stores the lix on the server.
       description: >
@@ -53,7 +53,7 @@ paths:
                     description: Error message.
                     example: "Lix file already exists."
 
-  /lsa/get-v1:
+  /lsp/get-v1:
     post:
       summary: Get the lix from the server.
       requestBody:
@@ -88,7 +88,7 @@ paths:
                     description: Error message.
                     example: "Lix file not found."
 
-  /lsa/push-v1:
+  /lsp/push-v1:
     post:
       summary: Push data to the server.
       requestBody:
@@ -187,7 +187,7 @@ paths:
                     description: A human-readable error message.
                     example: "An internal server error occurred."
 
-  /lsa/pull-v1:
+  /lsp/pull-v1:
     post:
       summary: Pull all data for all tables from the server.
       requestBody:

@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { createServerApiHandler } from "../create-server-api-handler.js";
+import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import { createLsaInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
+import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
 test("it should store the lix file", async () => {
@@ -16,12 +16,12 @@ test("it should store the lix file", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 
-	const lsaHandler = await createServerApiHandler({ environment });
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	const response = await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: initLix }),
 		})
@@ -62,12 +62,12 @@ test.skip("it should return 400 for an invalid lix file", async () => {
 
 	console.error = () => {};
 
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 
-	const lsaHandler = await createServerApiHandler({ environment });
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	const response = await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: invalidLixFile,
 		})
@@ -79,21 +79,21 @@ test.skip("it should return 400 for an invalid lix file", async () => {
 test("it should return 409 if the lix file already exists", async () => {
 	const lixFile = await newLixFile();
 
-	const environment = createLsaInMemoryEnvironment();
+	const environment = createLspInMemoryEnvironment();
 
-	const lsaHandler = await createServerApiHandler({ environment });
+	const lspHandler = await createServerProtocolHandler({ environment });
 
 	// First request to store the lix file
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: lixFile,
 		})
 	);
 
 	// Second request to store the same lix file
-	const response = await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	const response = await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: lixFile,
 		})
