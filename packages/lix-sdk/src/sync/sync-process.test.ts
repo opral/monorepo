@@ -1,9 +1,9 @@
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import {
-	createLsaInMemoryEnvironment,
-	createServerApiHandler,
-} from "../server-api-handler/index.js";
+	createLspInMemoryEnvironment,
+	createServerProtocolHandler,
+} from "../server-protocol-handler/index.js";
 import { createVersion } from "../version/create-version.js";
 import { switchVersion } from "../version/switch-version.js";
 import type { Version } from "../database/schema.js";
@@ -11,10 +11,10 @@ import { executeSync } from "../database/execute-sync.js";
 import { toBlob } from "../lix/to-blob.js";
 
 test("versions should be synced", async () => {
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	const lix0 = await openLixInMemory({
 		keyValues: [{ key: "lix_server_url", value: "http://mock.com" }],
@@ -30,8 +30,8 @@ test("versions should be synced", async () => {
 		.executeTakeFirstOrThrow();
 
 	// initialize lix on the server
-	await lsaHandler(
-		new Request("http://mock.com/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://mock.com/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: lix0 }),
 		})
@@ -126,10 +126,10 @@ test("versions should be synced", async () => {
 });
 
 test("switching synced versions should work", async () => {
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 	// @ts-expect-error - eases debugging
 	global.executeSync = executeSync;
 
@@ -148,8 +148,8 @@ test("switching synced versions should work", async () => {
 	const server = await environment.openLix({ id: lixId.value });
 
 	// initialize lix on the server
-	await lsaHandler(
-		new Request("http://mock.com/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://mock.com/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: lix0 }),
 		})
@@ -243,9 +243,9 @@ test("switching synced versions should work", async () => {
 });
 
 test("doesnt sync if lix_sync is not true", async () => {
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	const lix = await openLixInMemory({});
 
@@ -256,8 +256,8 @@ test("doesnt sync if lix_sync is not true", async () => {
 		.executeTakeFirstOrThrow();
 
 	// initialize lix on the server
-	await lsaHandler(
-		new Request("http://mock.com/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://mock.com/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix }),
 		})

@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import * as LixServerApi from "@lix-js/server-api-schema";
+import * as LixServerProtocol from "@lix-js/server-protocol";
 import { mergeTheirState, type VectorClock } from "./merge-state.js";
 import { applyChanges } from "../change/apply-changes.js";
 import type { Change } from "../database/schema.js";
@@ -21,12 +21,12 @@ export async function pullFromServer(args: {
 
 	// 2. query the state from the server using the clients vector clock
 	const response = await fetch(
-		new Request(`${args.serverUrl}/lsa/pull-v1`, {
+		new Request(`${args.serverUrl}/lsp/pull-v1`, {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: args.id,
 				vector_clock: sessionStatesClient,
-			} satisfies LixServerApi.paths["/lsa/pull-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/pull-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -49,11 +49,11 @@ export async function pullFromServer(args: {
 	// 3. Client receives the data (added/changed rows + vector clock) from the server
 	//   - client could have moved forward in the meantime!
 	const data = (
-		body as LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"]
+		body as LixServerProtocol.paths["/lsp/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"]
 	).data;
 
 	const sessionStateServer = (
-		body as LixServerApi.paths["/lsa/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"]
+		body as LixServerProtocol.paths["/lsp/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"]
 	).vector_clock;
 
 	const changes = (data["change"] ?? []) as Change[];

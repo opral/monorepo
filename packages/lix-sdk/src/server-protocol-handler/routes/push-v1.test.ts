@@ -1,7 +1,7 @@
 import { test, expect, vi } from "vitest";
-import * as LixServerApi from "@lix-js/server-protocol";
+import * as LixServerProtocol from "@lix-js/server-protocol";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import { createServerApiHandler } from "../create-server-api-handler.js";
+import { createServerApiHandler } from "../create-server-protocol-handler.js";
 import type { Change } from "../../database/schema.js";
 import { mockChange } from "../../change/mock-change.js";
 import { getDiffingRows } from "../../sync/get-diffing-rows.js";
@@ -50,7 +50,7 @@ test("it should push data successfully", async () => {
 					],
 					change: [mockChange0] satisfies Change[],
 				},
-			} satisfies LixServerApi.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -84,7 +84,7 @@ test("it should return 404 if the Lix file is not found", async () => {
 				lix_id: "nonexistent-id",
 				vector_clock: [],
 				data: {},
-			} satisfies LixServerApi.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -111,7 +111,7 @@ test("it should return 500 for an invalid Lix file", async () => {
 				lix_id: "invalid-lix",
 				vector_clock: [],
 				data: {},
-			} satisfies LixServerApi.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -144,7 +144,7 @@ test("it should return 400 for a failed insert operation", async () => {
 				data: {
 					nonexistent_table: [{ key: "test", value: "test value" }],
 				},
-			} satisfies LixServerApi.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -214,7 +214,7 @@ test.skip("it should detect conflicts", async () => {
 				lix_id: lixId.value,
 				vector_clock: state,
 				data: tableRowsToPush,
-			} satisfies LixServerApi.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},

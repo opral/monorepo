@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { createServerProtocolHandler } from "../../server-protocol-handler/create-server-protocol-handler.js";
+import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import { createLspInMemoryEnvironment } from "../../server-protocol-handler/environment/create-in-memory-environment.js";
+import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
 test("it should fetch the lix file from the server", async () => {

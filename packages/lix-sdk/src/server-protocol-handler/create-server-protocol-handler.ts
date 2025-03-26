@@ -4,17 +4,23 @@ import { route as pullRouteV1 } from "./routes/pull-v1.js";
 import { route as getRouteV1 } from "./routes/get-v1.js";
 import type { LspEnvironment } from "./environment/environment.js";
 
-export type LixServerApiHandler = (request: Request) => Promise<Response>;
+export type LixServerProtocolHandler = (request: Request) => Promise<Response>;
+// Keep old name for backward compatibility
+export type LixServerApiHandler = LixServerProtocolHandler;
 
-export type LixServerApiHandlerContext = {
+export type LixServerProtocolHandlerContext = {
 	request: Request;
 	environment: LspEnvironment;
 	params?: Record<string, string | undefined>;
 };
+// Keep old name for backward compatibility
+export type LixServerApiHandlerContext = LixServerProtocolHandlerContext;
 
-export type LixServerApiHandlerRoute = (
-	context: LixServerApiHandlerContext
+export type LixServerProtocolHandlerRoute = (
+	context: LixServerProtocolHandlerContext
 ) => Promise<Response>;
+// Keep old name for backward compatibility
+export type LixServerApiHandlerRoute = LixServerProtocolHandlerRoute;
 
 /**
  * The handler for the lix server protocol.
@@ -30,7 +36,7 @@ export type LixServerApiHandlerRoute = (
  *   // objects will need to be mapped.
  *   const app = new Hono();
  *
- *   const lspHandler = createServerApiHandler({ storage });
+ *   const lspHandler = createServerProtocolHandler({ storage });
  *
  *   app.use('/lsp/*', async (req) => {
  *      await lspHandler(req);
@@ -41,7 +47,7 @@ export type LixServerApiHandlerRoute = (
  *   Testing the handler.
  *
  *   ```ts
- *   const lspHandler = createServerApiHandler({ storage });
+ *   const lspHandler = createServerProtocolHandler({ storage });
  *   const request = new Request('/lsp/new', {
  *     method: 'POST',
  *     body: new Blob(['...']),
@@ -52,9 +58,9 @@ export type LixServerApiHandlerRoute = (
  *   expect(response).to(...);
  *   ```
  */
-export async function createServerApiHandler(args: {
+export async function createServerProtocolHandler(args: {
 	environment: LspEnvironment;
-}): Promise<LixServerApiHandler> {
+}): Promise<LixServerProtocolHandler> {
 	const context = { environment: args.environment };
 
 	return async (request) => {
@@ -82,3 +88,6 @@ export async function createServerApiHandler(args: {
 		}
 	};
 }
+
+// Keep old name for backward compatibility
+export const createServerApiHandler: typeof createServerProtocolHandler = createServerProtocolHandler;

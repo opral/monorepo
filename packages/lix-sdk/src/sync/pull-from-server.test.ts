@@ -1,9 +1,9 @@
 import { expect, test, vi } from "vitest";
-import { createServerApiHandler } from "../server-api-handler/create-server-api-handler.js";
+import { createServerProtocolHandler } from "../server-protocol-handler/create-server-protocol-handler.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
-import { createLsaInMemoryEnvironment } from "../server-api-handler/environment/create-in-memory-environment.js";
+import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
 
 test("pull rows of multiple tables from server successfully and applies them", async () => {
@@ -19,10 +19,10 @@ test("pull rows of multiple tables from server successfully and applies them", a
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	await lixOnServer.db
 		.insertInto("account")
@@ -38,8 +38,8 @@ test("pull rows of multiple tables from server successfully and applies them", a
 		.execute();
 
 	// initialize the lix on the server with the mock data
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: lixOnServer }),
 			headers: {
@@ -85,10 +85,10 @@ test("it handles snapshot.content being json binary", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	const mockSnapshot = mockJsonSnapshot({
 		location: "Berlin",
@@ -103,8 +103,8 @@ test("it handles snapshot.content being json binary", async () => {
 		.execute();
 
 	// initialize the lix on the server with the mock data
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: lixOnServer }),
 			headers: {
@@ -150,14 +150,14 @@ test("rows changed on the client more recently should not be updated", async () 
 		blob: await toBlob({ lix: lixOnServer }),
 	});
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	// initialize the lix on the server with the mock data
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: lixOnServer }),
 			headers: {
@@ -195,10 +195,10 @@ test("rows changed on the client more recently should not be updated", async () 
 // the change table now models "change control". no more last edit wins needed
 test.skip("rows changed on the server more recently should be updated on the client", async () => {
 	// setup mock server
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	// create a lix and clone it for the client - so they share the same lix id
 	const remoteLix = await openLixInMemory({});
@@ -243,8 +243,8 @@ test.skip("rows changed on the server more recently should be updated on the cli
 		.execute();
 
 	// initialize the lix on the server with the mock data
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: remoteLix }),
 			headers: {
@@ -302,14 +302,14 @@ test.skip("rows changed on the server more recently should be updated on the cli
 // 		.selectAll()
 // 		.executeTakeFirstOrThrow();
 
-// 	const environment = createLsaInMemoryEnvironment();
-// 	const lsaHandler = await createServerApiHandler({ environment });
+// 	const environment = createLspInMemoryEnvironment();
+// 	const lspHandler = await createServerProtocolHandler({ environment });
 
-// 	global.fetch = vi.fn((request) => lsaHandler(request));
+// 	global.fetch = vi.fn((request) => lspHandler(request));
 
 // 	// initialize the lix on the server
-// 	await lsaHandler(
-// 		new Request("http://localhost:3000/lsa/new", {
+// 	await lspHandler(
+// 		new Request("http://localhost:3000/lsp/new", {
 // 			method: "POST",
 // 			body: await lix.toBlob(),
 // 		})
@@ -354,10 +354,10 @@ test("non-conflicting changes from the server should for the same version should
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	const lixOnServer = await openLixInMemory({ blob: await toBlob({ lix }) });
 
@@ -389,8 +389,8 @@ test("non-conflicting changes from the server should for the same version should
 		])
 	);
 
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: lixOnServer }),
 			headers: {

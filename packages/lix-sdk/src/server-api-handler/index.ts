@@ -1,5 +1,2 @@
-export {
-	createServerApiHandler,
-	type LixServerApiHandlerContext,
-} from "./create-server-api-handler.js";
-export { createLsaInMemoryEnvironment } from "./environment/create-in-memory-environment.js";
+// Re-export from server-protocol-handler for backward compatibility
+export * from "../server-protocol-handler/index.js";

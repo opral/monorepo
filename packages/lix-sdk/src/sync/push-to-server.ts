@@ -1,4 +1,4 @@
-import type * as LixServerProtocol from "../../../lix-server-api-schema/dist/schema.js";
+import type * as LixServerProtocol from "@lix-js/server-protocol";
 import type { Lix } from "../lix/open-lix.js";
 import type { VectorClock } from "./merge-state.js";
 import { getDiffingRows } from "./get-diffing-rows.js";
@@ -28,13 +28,13 @@ export async function pushToServer(args: {
 	}
 
 	const response = await fetch(
-		new Request(`${args.serverUrl}/lsa/push-v1`, {
+		new Request(`${args.serverUrl}/lsp/push-v1`, {
 			method: "POST",
 			body: JSON.stringify({
 				lix_id: args.id,
 				vector_clock: state,
 				data: tableRowsToPush,
-			} satisfies LixServerProtocol.paths["/lsa/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
+			} satisfies LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"]),
 			headers: {
 				"Content-Type": "application/json",
 			},

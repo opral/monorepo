@@ -1,5 +1,5 @@
-import type * as LixServerApi from "@lix-js/server-protocol";
-import type { LixServerApiHandlerRoute } from "../create-server-api-handler.js";
+import type * as LixServerProtocol from "@lix-js/server-protocol";
+import type { LixServerProtocolHandlerRoute } from "../create-server-protocol-handler.js";
 import { mergeTheirState } from "../../sync/merge-state.js";
 import type { Change } from "../../database/schema.js";
 // import { detectChangeConflicts } from "../../change-conflict/detect-change-conflicts.js";
@@ -7,11 +7,11 @@ import type { Change } from "../../database/schema.js";
 import { CompiledQuery } from "kysely";
 
 type RequestBody =
-	LixServerApi.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"];
+	LixServerProtocol.paths["/lsp/push-v1"]["post"]["requestBody"]["content"]["application/json"];
 
-type ResponseBody = LixServerApi.paths["/lsp/push-v1"]["post"]["responses"];
+type ResponseBody = LixServerProtocol.paths["/lsp/push-v1"]["post"]["responses"];
 
-export const route: LixServerApiHandlerRoute = async (context) => {
+export const route: LixServerProtocolHandlerRoute = async (context) => {
 	const body = (await context.request.json()) as RequestBody;
 	const exists = await context.environment.hasLix({ id: body.lix_id });
 

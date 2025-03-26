@@ -63,8 +63,8 @@ export const lixAtom = atom(async (get) => {
 				const response = await fetch(
 					new Request(
 						import.meta.env.PROD
-							? "https://lix.host/lsa/get-v1"
-							: "http://localhost:3000/lsa/get-v1",
+							? "https://lix.host/lsp/get-v1"
+							: "http://localhost:3000/lsp/get-v1",
 						{
 							method: "POST",
 							headers: {

@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest";
-import { createServerApiHandler } from "../server-api-handler/create-server-api-handler.js";
+import { createServerProtocolHandler } from "../server-protocol-handler/create-server-protocol-handler.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pushToServer } from "./push-to-server.js";
 import type { LixFile } from "../database/schema.js";
@@ -8,7 +8,7 @@ import { newLixFile } from "../lix/new-lix.js";
 import type { NewKeyValue } from "../key-value/database-schema.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { pullFromServer } from "./pull-from-server.js";
-import { createLsaInMemoryEnvironment } from "../server-api-handler/environment/create-in-memory-environment.js";
+import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
 
 test("push rows of multiple tables to server successfully", async () => {
@@ -22,14 +22,14 @@ test("push rows of multiple tables to server successfully", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	// initialize the lix on the server
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix }),
 		})
@@ -103,14 +103,14 @@ test("push-pull-push with two clients", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	// Initialize the lix on the server
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix: client1 }),
 		})
@@ -286,14 +286,14 @@ test("it should handle snapshots.content json binaries", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	// initialize the lix on the server
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new-v1", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
 			body: await toBlob({ lix }),
 		})
@@ -340,14 +340,14 @@ test.todo("it should handle binary values", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const environment = createLsaInMemoryEnvironment();
-	const lsaHandler = await createServerApiHandler({ environment });
+	const environment = createLspInMemoryEnvironment();
+	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lsaHandler(request));
+	global.fetch = vi.fn((request) => lspHandler(request));
 
 	// initialize the lix on the server
-	await lsaHandler(
-		new Request("http://localhost:3000/lsa/new", {
+	await lspHandler(
+		new Request("http://localhost:3000/lsp/new", {
 			method: "POST",
 			body: await toBlob({ lix }),
 		})

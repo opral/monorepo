@@ -1,14 +1,14 @@
 import { test, expect } from "vitest";
-import * as LixServerApi from "@lix-js/server-protocol";
+import * as LixServerProtocol from "@lix-js/server-protocol";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
-import { createServerApiHandler } from "../create-server-api-handler.js";
+import { createServerApiHandler } from "../create-server-protocol-handler.js";
 import { mockJsonSnapshot } from "../../snapshot/mock-json-snapshot.js";
 import { mockChange } from "../../change/mock-change.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
 type RequestBody =
-	LixServerApi.paths["/lsp/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
+	LixServerProtocol.paths["/lsp/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
 
 test("it should pull rows successfully", async () => {
 	const lix = await openLixInMemory({});
@@ -48,7 +48,7 @@ test("it should pull rows successfully", async () => {
 
 	expect(response.status).toBe(200);
 	const responseJson =
-		(await response.json()) as LixServerApi.paths["/lsp/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
+		(await response.json()) as LixServerProtocol.paths["/lsp/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	expect(responseJson.data).toBeDefined();
 
@@ -99,7 +99,7 @@ test("it should specifically be able to handle snapshots which use json binary a
 
 	expect(response.status).toBe(200);
 	const responseJson =
-		(await response.json()) as LixServerApi.paths["/lsp/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
+		(await response.json()) as LixServerProtocol.paths["/lsp/pull-v1"]["post"]["responses"]["200"]["content"]["application/json"];
 
 	expect(responseJson.data).toBeDefined();
 
