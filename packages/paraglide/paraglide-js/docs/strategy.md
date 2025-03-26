@@ -7,9 +7,9 @@ imports:
 
 Paraglide JS comes with various strategies to determine the locale out of the box. 
 
-The strategy is defined with the `strategy` option. The order of the strategies in the array defines the priority. The first strategy that returns a locale will be used.
+The strategy is defined with the `strategy` option. The priority is determined by the order of the strategies in the array. The first strategy that returns a locale will be used.
 
-In the example below, the locale is first determined by the `cookie` strategy. If no cookie is found, the `baseLocale` is used.
+In the example below, the `cookie` strategy first determines the locale. If no cookie is found, the `baseLocale` is used.
 
 ```diff
 compile({
@@ -37,7 +37,7 @@ compile({
 
 Returns the `baseLocale` defined in the settings. 
 
-Useful as fallback if no other strategy returned a locale. If a cookie has not been set yet, for example. 
+It is useful as a fallback strategy if no other strategy returns a locale, for example, if a cookie has not been set yet. 
 
 ```diff
 compile({
@@ -51,7 +51,7 @@ compile({
 
 Uses a global variable to determine the locale. 
 
-This strategy is only useful in testing environments, or to get started quickly. Setting a global variable can lead to cross request issues in server-side environments and the locale is not persisted between page reloads in client-side environments.
+This strategy is only useful in testing environments or to get started quickly. Setting a global variable can lead to cross-request issues in server-side environments, and the locale is not persisted between page reloads in client-side environments.
 
 ```diff
 compile({
@@ -78,7 +78,7 @@ compile({
 
 The strategy attempts to match locale in order of user preference:
 
-1. First tries exact matches (e.g., "en-US" if supported)
+1. First try exact matches (e.g., "en-US" if supported)
 2. Falls back to base language codes (e.g., "en")
 
 For example:
@@ -112,10 +112,6 @@ compile({
 The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
 
 <doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
-
-<doc-callout type="info">On the server, the URL strategy will only trigger for requests with the `Sec-Fetch-Dest: "document"` header. This helps distinguish between document requests (browser page loads) and API requests, preventing incorrect locale extractions and unwanted redirects for API calls.</doc-callout>
-
-<doc-callout type="warning">Make sure that a strategy like `cookie` is used as well to resolve a locale in server-side API requests that are not a `Sec-Fetch-Dest: "document"` request.</doc-callout> 
 
 #### Locale prefixing
 

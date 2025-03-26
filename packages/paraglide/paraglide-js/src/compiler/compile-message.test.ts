@@ -82,7 +82,7 @@ test("compiles a message with variants", async () => {
 
 	const { some_message } = await import(
 		"data:text/javascript;base64," +
-			btoa("export const some_message =" + compiled.code)
+			btoa("export const some_message = " + compiled.code)
 	);
 
 	expect(some_message({ fistInput: 1, secondInput: 2 })).toBe(

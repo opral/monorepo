@@ -1,11 +1,12 @@
 {
 	"name": "@inlang/editor-component",
 	"type": "module",
-	"version": "4.0.2",
+	"version": "4.0.4",
 	"publishConfig": {
 		"access": "public"
 	},
 	"description": "",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js",
 		"./bundled": "./dist/bundled/index.js"

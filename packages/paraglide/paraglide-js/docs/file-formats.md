@@ -26,7 +26,7 @@ graph LR;
 All plugins can be found on https://inlang.com/c/plugins. Here are some popular plugins:
 
 - [Inlang Message Format](https://inlang.com/m/reootnfj/plugin-inlang-messageFormat)
-- [JSON](https://inlang.com/m/7zjzqj7n/plugin-inlang-json)
+- [JSON](https://inlang.com/m/ig84ng0o/plugin-inlang-json)
 - [i18next](https://inlang.com/m/3i8bor92/plugin-inlang-i18next)
 
 ## Installing a plugin

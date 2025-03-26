@@ -5,6 +5,7 @@ import MarketplaceLayout from "#src/interface/marketplace/MarketplaceLayout.jsx"
 import Card from "#src/interface/components/Card.jsx";
 import InlangDoclayout from "#src/interface/components/doc-layout-solid/doc-layout.jsx";
 import { GetHelp } from "#src/interface/components/GetHelp.jsx";
+import { DeprecationBanner } from "#src/interface/marketplace/DeprecationBanner.jsx";
 
 /**
  * The page props are undefined if an error occurred during parsing of the markdown.
@@ -106,6 +107,7 @@ export default function Page(props: PageProps) {
 							manifest={props.manifest}
 							currentRoute={props.pagePath}
 						>
+							<DeprecationBanner manifest={props.manifest} />
 							{/* eslint-disable-next-line solid/no-innerhtml */}
 							<article class="w-full my-12" innerHTML={props.markdown} />
 						</InlangDoclayout>
