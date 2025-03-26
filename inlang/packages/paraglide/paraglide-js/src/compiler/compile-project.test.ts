@@ -1,5 +1,5 @@
 import { expect, test, describe, vi, beforeEach } from "vitest";
-import { AsyncLocalStorage } from "async_hooks";
+import { AsyncLocalStorage } from "node:async_hooks";
 import {
 	createProject as typescriptProject,
 	ts,
@@ -911,7 +911,7 @@ async function bundleCode(output: Record<string, string>, file: string) {
 		'import "@inlang/paraglide-js/urlpattern-polyfill";',
 		"/** @type {any} */const URLPattern = {};"
 	).replace(
-		'const { AsyncLocalStorage } = await import("async_hooks");',
+		'const { AsyncLocalStorage } = await import("node:async_hooks");',
 		"const AsyncLocalStorage = class {};"
 	);
 
