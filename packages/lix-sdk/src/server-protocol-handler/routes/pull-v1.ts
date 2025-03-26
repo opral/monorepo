@@ -1,4 +1,4 @@
-import type * as LixServerProtocol from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "@lix-js/server-protocol-schema";
 import type { LixServerProtocolHandlerRoute } from "../create-server-protocol-handler.js";
 import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 

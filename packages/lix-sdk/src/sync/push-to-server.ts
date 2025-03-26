@@ -1,4 +1,4 @@
-import type * as LixServerProtocol from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "@lix-js/server-protocol-schema";
 import type { Lix } from "../lix/open-lix.js";
 import type { VectorClock } from "./merge-state.js";
 import { getDiffingRows } from "./get-diffing-rows.js";

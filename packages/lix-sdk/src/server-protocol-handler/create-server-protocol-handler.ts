@@ -6,21 +6,15 @@ import type { LspEnvironment } from "./environment/environment.js";
 
 export type LixServerProtocolHandler = (request: Request) => Promise<Response>;
 // Keep old name for backward compatibility
-export type LixServerApiHandler = LixServerProtocolHandler;
-
 export type LixServerProtocolHandlerContext = {
 	request: Request;
 	environment: LspEnvironment;
 	params?: Record<string, string | undefined>;
 };
-// Keep old name for backward compatibility
-export type LixServerApiHandlerContext = LixServerProtocolHandlerContext;
 
 export type LixServerProtocolHandlerRoute = (
 	context: LixServerProtocolHandlerContext
 ) => Promise<Response>;
-// Keep old name for backward compatibility
-export type LixServerApiHandlerRoute = LixServerProtocolHandlerRoute;
 
 /**
  * The handler for the lix server protocol.

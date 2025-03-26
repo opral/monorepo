@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import * as LixServerProtocol from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "@lix-js/server-protocol-schema";
 import { mergeTheirState, type VectorClock } from "./merge-state.js";
 import { applyChanges } from "../change/apply-changes.js";
 import type { Change } from "../database/schema.js";

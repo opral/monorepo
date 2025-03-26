@@ -1857,6 +1857,8 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@20.5.9)(typescript@5.7.2))(terser@5.36.0)
 
+  inlang/packages/website/dist/server: {}
+
   inlang/packages/website/tailwind-color-plugin:
     dependencies:
       '@ctrl/tinycolor':
@@ -1881,6 +1883,21 @@ importers:
       vitest:
         specifier: 0.34.3
         version: 0.34.3(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.1)(playwright@1.50.1)(safaridriver@0.1.2)(terser@5.36.0)(webdriverio@9.2.1)
+
+  lix/packages/server-protocol-schema:
+    devDependencies:
+      '@opral/tsconfig':
+        specifier: workspace:*
+        version: link:../../../packages/tsconfig
+      openapi-typescript:
+        specifier: ^7.4.3
+        version: 7.4.3(typescript@5.8.2)
+      prettier:
+        specifier: ^3.3.3
+        version: 3.5.1
+      typescript:
+        specifier: ^5.5.4
+        version: 5.8.2
 
   packages/csv-app:
     dependencies:
@@ -2258,9 +2275,9 @@ importers:
 
   packages/lix-sdk:
     dependencies:
-      '@lix-js/server-protocol':
+      '@lix-js/server-protocol-schema':
         specifier: workspace:*
-        version: link:../lix-server-protocol
+        version: link:../../lix/packages/server-protocol-schema
       dedent:
         specifier: 1.5.1
         version: 1.5.1(babel-plugin-macros@3.1.0)
@@ -2332,21 +2349,6 @@ importers:
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
-
-  packages/lix-server-protocol:
-    devDependencies:
-      '@opral/tsconfig':
-        specifier: workspace:*
-        version: link:../tsconfig
-      openapi-typescript:
-        specifier: ^7.4.3
-        version: 7.4.3(typescript@5.8.2)
-      prettier:
-        specifier: ^3.3.3
-        version: 3.5.1
-      typescript:
-        specifier: ^5.5.4
-        version: 5.8.2
 
   packages/lix-website:
     dependencies:

@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import * as LixServerProtocol from "@lix-js/server-protocol";
+import type * as LixServerProtocol from "@lix-js/server-protocol-schema";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createServerApiHandler } from "../create-server-protocol-handler.js";
 import { mockJsonSnapshot } from "../../snapshot/mock-json-snapshot.js";
