@@ -2,28 +2,18 @@ import { LixBadge } from "#src/interface/components/Card.jsx";
 import Link from "#src/renderer/Link.jsx";
 import { registry } from "@inlang/marketplace-registry";
 import { For, Match, Show, Switch } from "solid-js";
-import ParaglideHeader from "../cards/paraglide.jsx";
 
 const AppHeader = () => {
-	const getProducts = () => [
+	const featured = [
 		"app.inlang.finkLocalizationEditor",
 		"app.inlang.ideExtension",
 		"app.parrot.figmaPlugin",
-	];
-	const getDevProducts = () => [
-		"library.inlang.paraglideJs",
-		"app.inlang.ninjaI18nAction",
-		"app.inlang.ideExtension",
-		"library.inlang.paraglideJsAdapterNextJs",
-		"library.inlang.paraglideJsAdapterSvelteKit",
-		"library.inlang.paraglideJsAdapterAstro",
-		"library.inlang.paraglideJsAdapterSolidStart",
 	];
 
 	return (
 		<>
 			<div class="flex flex-row w-full justify-between pb-8 flex-wrap gap-y-4">
-				<For each={getProducts()}>
+				<For each={featured}>
 					{(product) => {
 						const manifest = registry.find(
 							(manifest) => manifest.id === product
@@ -45,8 +35,14 @@ const AppHeader = () => {
 							<Link
 								href={
 									manifest.id.split(".")[0] === "guide"
-										? `/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
-										: `/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
+										? `/g/${manifest.uniqueID}/${manifest.id.replaceAll(
+												".",
+												"-"
+										  )}`
+										: `/m/${manifest.uniqueID}/${manifest.id.replaceAll(
+												".",
+												"-"
+										  )}`
 								}
 								class="group sm:w-[calc((100%_-_16px)_/_2)] lg:w-[calc((100%_-_32px)_/_3)] bg-background border border-surface-200 rounded-xl overflow-hidden hover:border-surface-300 transition-all cursor-pointer"
 							>
@@ -78,78 +74,6 @@ const AppHeader = () => {
 									</Switch>
 								</div>
 
-								<div class="p-5 flex flex-col gap-5">
-									<div class="flex gap-5 items-center">
-										<img
-											class="h-10 w-10 object-cover rounded"
-											src={manifest.icon}
-											alt={displayName()}
-										/>
-										<div class="flex-1">
-											<div class="w-full font-bold text-surface-900 tracking-tight">
-												{displayName()}
-											</div>
-										</div>
-									</div>
-									<div class="text-surface-500 text-md font-regular line-clamp-2">
-										{description()}
-									</div>
-									<div class="flex flex-row-reverse justify-between items-center h-[30px]">
-										<div class="w-5 text-primary group transition-colors relative z-60">
-											<LixBadge />
-										</div>
-										<Show
-											when={
-												// @ts-ignore (Show components are not typed)
-												manifest.pricing
-											}
-										>
-											<div class="h-[30px] px-4 rounded-full bg-surface-200 flex items-center text-surface-500 font-semibold text-[13px]">
-												{
-													// @ts-ignore
-													manifest.pricing.toUpperCase()
-												}
-											</div>
-										</Show>
-									</div>
-								</div>
-							</Link>
-						);
-					}}
-				</For>
-			</div>
-			<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900 pt-4">
-				Apps for Developer
-			</h2>
-			<ParaglideHeader />
-			<div class="flex flex-row w-full justify-between pb-12 flex-wrap gap-y-4">
-				<For each={getDevProducts()}>
-					{(product) => {
-						const manifest = registry.find(
-							(manifest) => manifest.id === product
-						);
-						if (!manifest) {
-							return undefined;
-						}
-						const displayName = () =>
-							typeof manifest.displayName === "object"
-								? manifest.displayName.en
-								: manifest.displayName;
-
-						const description = () =>
-							typeof manifest.description === "object"
-								? manifest.description.en
-								: manifest.description;
-
-						return (
-							<Link
-								href={
-									manifest.id.split(".")[0] === "guide"
-										? `/g/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
-										: `/m/${manifest.uniqueID}/${manifest.id.replaceAll(".", "-")}`
-								}
-								class="group sm:w-[calc((100%_-_16px)_/_2)] lg:w-[calc((100%_-_32px)_/_3)] bg-background border border-surface-200 rounded-xl overflow-hidden hover:border-surface-300 transition-all cursor-pointer"
-							>
 								<div class="p-5 flex flex-col gap-5">
 									<div class="flex gap-5 items-center">
 										<img

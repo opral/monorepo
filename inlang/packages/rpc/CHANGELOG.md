@@ -1,5 +1,23 @@
 # @inlang/rpc
 
+## 0.3.46
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+
+## 0.3.45
+
+### Patch Changes
+
+- d88401e: - fix machine translation of empty patterns and empty text elements https://github.com/opral/inlang-cli/issues/30
+
+## 0.3.44
+
+### Patch Changes
+
+- @inlang/sdk@2.4.3
+
 ## 0.3.43
 
 ### Patch Changes

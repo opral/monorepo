@@ -62,103 +62,86 @@ import * as runtime from "./runtime.js";
  * ```
  */
 export async function paraglideMiddleware(request, resolve) {
-	try {
-		if (!runtime.disableAsyncLocalStorage && !runtime.serverAsyncLocalStorage) {
-			const { AsyncLocalStorage } = await import("async_hooks");
-			runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
-		} else if (!runtime.serverAsyncLocalStorage) {
-			runtime.overwriteServerAsyncLocalStorage(createMockAsyncLocalStorage());
-		}
-
-		const locale = runtime.extractLocaleFromRequest(request);
-		const origin = new URL(request.url).origin;
-
-		// if the client makes a request to a URL that doesn't match
-		// the localizedUrl, redirect the client to the localized URL
-		if (
-			request.headers.get("Sec-Fetch-Dest") === "document" &&
-			runtime.strategy.includes("url")
-		) {
-			const localizedUrl = runtime.localizeUrl(request.url, { locale });
-			if (normalizeURL(localizedUrl.href) !== normalizeURL(request.url)) {
-				return Response.redirect(localizedUrl, 307);
-			}
-		}
-
-		// If the strategy includes "url", we need to de-localize the URL
-		// before passing it to the server middleware.
-		//
-		// The middleware is responsible for mapping a localized URL to the
-		// de-localized URL e.g. `/en/about` to `/about`. Otherwise,
-		// the server can't render the correct page.
-		const newRequest = runtime.strategy.includes("url")
-			? new Request(runtime.deLocalizeUrl(request.url), request)
-			: // need to create a new request object because some metaframeworks (nextjs!) throw otherwise
-				// https://github.com/opral/inlang-paraglide-js/issues/411
-				new Request(request);
-
-		// the message functions that have been called in this request
-		/** @type {Set<string>} */
-		const messageCalls = new Set();
-
-		const response = await runtime.serverAsyncLocalStorage?.run(
-			{ locale, origin, messageCalls },
-			() => resolve({ locale, request: newRequest })
-		);
-
-		// Only modify HTML responses
-		if (
-			runtime.experimentalMiddlewareLocaleSplitting &&
-			response.headers.get("Content-Type")?.includes("html")
-		) {
-			const body = await response.text();
-
-			const messages = [];
-
-			// using .values() to avoid polyfilling in older projects. else the following error is thrown
-			// Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
-			for (const messageCall of Array.from(messageCalls)) {
-				const [id, locale] =
-					/** @type {[string, import("./runtime.js").Locale]} */ (
-						messageCall.split(":")
-					);
-				messages.push(`${id}: ${compiledBundles[id]?.[locale]}`);
-			}
-
-			const script = `<script>globalThis.__paraglide_ssr = { ${messages.join(",")} }</script>`;
-
-			// Insert the script before the closing head tag
-			const newBody = body.replace("</head>", `${script}</head>`);
-
-			// Create a new response with the modified body
-			// Clone all headers except Content-Length which will be set automatically
-			const newHeaders = new Headers(response.headers);
-			newHeaders.delete("Content-Length"); // Let the browser calculate the correct length
-
-			return new Response(newBody, {
-				status: response.status,
-				statusText: response.statusText,
-				headers: newHeaders,
-			});
-		}
-
-		return response;
-	} catch (error) {
-		// Log the error with stack trace to help with debugging
-		console.error("[Paraglide Middleware Error]", error);
-
-		// Return a helpful error response
-		// Use text/plain to ensure the error is readable in the browser
-		return new Response(
-			`Paraglide middleware error: ${/** @type {any} */ (error)?.message}\n`,
-			{
-				status: 500,
-				headers: {
-					"Content-Type": "text/plain; charset=utf-8",
-				},
-			}
-		);
+	if (!runtime.disableAsyncLocalStorage && !runtime.serverAsyncLocalStorage) {
+		const { AsyncLocalStorage } = await import("async_hooks");
+		runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
+	} else if (!runtime.serverAsyncLocalStorage) {
+		runtime.overwriteServerAsyncLocalStorage(createMockAsyncLocalStorage());
 	}
+
+	const locale = runtime.extractLocaleFromRequest(request);
+	const origin = new URL(request.url).origin;
+
+	// if the client makes a request to a URL that doesn't match
+	// the localizedUrl, redirect the client to the localized URL
+	if (
+		request.headers.get("Sec-Fetch-Dest") === "document" &&
+		runtime.strategy.includes("url")
+	) {
+		const localizedUrl = runtime.localizeUrl(request.url, { locale });
+		if (normalizeURL(localizedUrl.href) !== normalizeURL(request.url)) {
+			return Response.redirect(localizedUrl, 307);
+		}
+	}
+
+	// If the strategy includes "url", we need to de-localize the URL
+	// before passing it to the server middleware.
+	//
+	// The middleware is responsible for mapping a localized URL to the
+	// de-localized URL e.g. `/en/about` to `/about`. Otherwise,
+	// the server can't render the correct page.
+	const newRequest = runtime.strategy.includes("url")
+		? new Request(runtime.deLocalizeUrl(request.url), request)
+		: // need to create a new request object because some metaframeworks (nextjs!) throw otherwise
+			// https://github.com/opral/inlang-paraglide-js/issues/411
+			new Request(request);
+
+	// the message functions that have been called in this request
+	/** @type {Set<string>} */
+	const messageCalls = new Set();
+
+	const response = await runtime.serverAsyncLocalStorage?.run(
+		{ locale, origin, messageCalls },
+		() => resolve({ locale, request: newRequest })
+	);
+
+	// Only modify HTML responses
+	if (
+		runtime.experimentalMiddlewareLocaleSplitting &&
+		response.headers.get("Content-Type")?.includes("html")
+	) {
+		const body = await response.text();
+
+		const messages = [];
+
+		// using .values() to avoid polyfilling in older projects. else the following error is thrown
+		// Type 'Set<string>' can only be iterated through when using the '--downlevelIteration' flag or with a '--target' of 'es2015' or higher.
+		for (const messageCall of Array.from(messageCalls)) {
+			const [id, locale] =
+				/** @type {[string, import("./runtime.js").Locale]} */ (
+					messageCall.split(":")
+				);
+			messages.push(`${id}: ${compiledBundles[id]?.[locale]}`);
+		}
+
+		const script = `<script>globalThis.__paraglide_ssr = { ${messages.join(",")} }</script>`;
+
+		// Insert the script before the closing head tag
+		const newBody = body.replace("</head>", `${script}</head>`);
+
+		// Create a new response with the modified body
+		// Clone all headers except Content-Length which will be set automatically
+		const newHeaders = new Headers(response.headers);
+		newHeaders.delete("Content-Length"); // Let the browser calculate the correct length
+
+		return new Response(newBody, {
+			status: response.status,
+			statusText: response.statusText,
+			headers: newHeaders,
+		});
+	}
+
+	return response;
 }
 
 /**

@@ -319,3 +319,9 @@ sl-dialog.video-dialog::part(body) {
 html {
   scroll-padding-top: 28rem; 
 }
+
+.DocSearch-Modal {
+	/* sticky header */
+	margin-top: 8rem !important; /* Adjust to height of your sticky header */
+	z-index: 9999 !important;
+}

@@ -1,5 +1,19 @@
 # @lix-js/sdk
 
+## 0.4.4
+
+### Patch Changes
+
+- 85478f8: chore: reduce the minmum node version to v18 to unblock adoption https://github.com/opral/lix-sdk/issues/277
+
+## 0.4.3
+
+### Patch Changes
+
+- 8ce6666: Fix glob pattern behavior in file queue by removing prepending slash and add proper null checks for `plugin.detectChangesGlob`.
+
+  Also update the error message explanation for file paths to correctly state why paths need to start with a root slash.
+
 ## 0.4.2
 
 ### Patch Changes

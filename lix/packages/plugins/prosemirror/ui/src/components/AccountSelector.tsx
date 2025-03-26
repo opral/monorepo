@@ -2,15 +2,8 @@ import React, { useState } from "react";
 import { lix } from "../state";
 import { createAccount, switchAccount, Account } from "@lix-js/sdk";
 import { useQuery } from "../hooks/useQuery";
-
-// Helper function to get initials from a name
-const getInitials = (name: string): string => {
-	return name
-		.split(" ")
-		.map((part) => part[0])
-		.join("")
-		.toUpperCase();
-};
+import { getInitials } from "../utilities/nameUtils";
+import { ChevronDown } from "lucide-react";
 
 const AccountSelector: React.FC = () => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -63,129 +56,50 @@ const AccountSelector: React.FC = () => {
 
 	// Avatar component with wireframe style
 	const Avatar = ({ name }: { name: string }) => (
-		<div
-			style={{
-				width: "24px",
-				height: "24px",
-				borderRadius: "50%",
-				backgroundColor: "#e0e0e0",
-				border: "1px solid #ccc",
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-				fontSize: "10px",
-				fontWeight: "bold",
-				color: "#666",
-				marginRight: "8px",
-				flexShrink: 0,
-			}}
-		>
+		<div className="w-6 h-6 rounded-full bg-base-300 border border-base-300 flex items-center justify-center text-xs font-bold text-base-content mr-2 flex-shrink-0">
 			{getInitials(name)}
 		</div>
 	);
 
 	// Loading state or display account
 	return (
-		<div
-			className="account-selector"
-			style={{ position: "relative", display: "inline-block" }}
-		>
+		<div className="relative inline-block">
 			<button
 				onClick={() => setIsOpen(!isOpen)}
-				style={{
-					padding: "8px 12px",
-					border: "1px solid #ccc",
-					borderRadius: "4px",
-					background: "#f9f9f9",
-					cursor: "pointer",
-					display: "flex",
-					alignItems: "center",
-					minWidth: "120px",
-					justifyContent: "space-between",
-				}}
+				className="btn btn-outline justify-between normal-case"
 			>
-				<div style={{ display: "flex", alignItems: "center" }}>
+				<div className="flex items-center">
 					{activeAccount ? (
 						<>
 							<Avatar name={activeAccount.name} />
-							<span
-								style={{
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									whiteSpace: "nowrap",
-									maxWidth: "120px",
-								}}
-							>
+							<span className="overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px]">
 								{activeAccount.name}
 							</span>
 						</>
 					) : (
 						<>
-							<div
-								style={{
-									width: "24px",
-									height: "24px",
-									backgroundColor: "#e0e0e0",
-									border: "1px solid #ccc",
-									borderRadius: "50%",
-									marginRight: "8px",
-									display: "flex",
-									alignItems: "center",
-									justifyContent: "center",
-									fontSize: "10px",
-									fontWeight: "bold",
-									flexShrink: 0,
-								}}
-							></div>
+							<div className="w-6 h-6 bg-base-300 border border-base-300 rounded-full mr-2 flex items-center justify-center text-xs font-bold flex-shrink-0"></div>
 							<span>Loading...</span>
 						</>
 					)}
 				</div>
-				<span>▼</span>
+				<ChevronDown size={16} className="ml-2" />
 			</button>
 
 			{isOpen && (
-				<div
-					style={{
-						position: "absolute",
-						top: "100%",
-						right: "0", // Right-aligned instead of left
-						minWidth: "100%",
-						width: "auto",
-						maxWidth: "200px",
-						background: "white",
-						border: "1px solid #ccc",
-						borderRadius: "0 0 4px 4px",
-						boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-						zIndex: 10,
-						maxHeight: "300px",
-						overflowY: "auto",
-					}}
-				>
+				<div className="absolute top-full right-0 min-w-full w-auto max-w-[200px] bg-white border border-base-300 rounded-b-md shadow-md z-10 max-h-[300px] overflow-y-auto">
 					{allAccounts?.map((account) => (
 						<div
 							key={account.id}
 							onClick={() => handleAccountSelect(account)}
-							style={{
-								padding: "8px 12px",
-								cursor: "pointer",
-								borderBottom: "1px solid #eee",
-								backgroundColor:
-									activeAccount && account.id === activeAccount.id
-										? "#f5f5f5"
-										: "white",
-								display: "flex",
-								alignItems: "center",
-							}}
+							className={`p-3 cursor-pointer border-b border-base-200 flex items-center ${
+								activeAccount && account.id === activeAccount.id
+									? "bg-base-200"
+									: "bg-white"
+							}`}
 						>
 							<Avatar name={account.name} />
-							<span
-								style={{
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									whiteSpace: "nowrap",
-								}}
-							>
+							<span className="overflow-hidden text-ellipsis whitespace-nowrap">
 								{account.name}
 							</span>
 						</div>
@@ -193,127 +107,42 @@ const AccountSelector: React.FC = () => {
 					{/* Create new account option */}
 					<div
 						onClick={handleCreateAccountClick}
-						style={{
-							padding: "8px 12px",
-							cursor: "pointer",
-							borderTop: "1px solid #eee",
-							backgroundColor: "#f9f9f9",
-							display: "flex",
-							alignItems: "center",
-						}}
+						className="p-3 cursor-pointer border-t border-base-200 bg-base-100 flex items-center"
 					>
-						<div
-							style={{
-								width: "24px",
-								height: "24px",
-								borderRadius: "50%",
-								backgroundColor: "#e0e0e0",
-								border: "1px solid #ccc",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
-								fontSize: "10px",
-								fontWeight: "bold",
-								marginRight: "8px",
-								flexShrink: 0,
-							}}
-						>
+						<div className="w-6 h-6 bg-base-200 border border-base-300 rounded-full mr-2 flex items-center justify-center text-xs font-bold">
 							+
 						</div>
-						<span
-							style={{
-								overflow: "hidden",
-								textOverflow: "ellipsis",
-								whiteSpace: "nowrap",
-							}}
-						>
-							Create new account
-						</span>
+						<span>Create new account</span>
 					</div>
 				</div>
 			)}
 
-			{/* Create Account Dialog */}
+			{/* Create account dialog */}
 			{showCreateDialog && (
-				<div
-					style={{
-						position: "fixed",
-						top: 0,
-						left: 0,
-						right: 0,
-						bottom: 0,
-						backgroundColor: "rgba(0, 0, 0, 0.5)",
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "center",
-						zIndex: 100,
-					}}
-				>
-					<div
-						style={{
-							backgroundColor: "white",
-							padding: "20px",
-							width: "280px",
-							boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-							borderRadius:
-								"4px" /* Small border radius to match other UI elements */,
-						}}
-					>
-						<h3 style={{ margin: "0 0 16px", fontSize: "18px" }}>
-							Create New Account
-						</h3>
-						<input
-							type="text"
-							placeholder="Enter account name"
-							value={newAccountName}
-							onChange={(e) => setNewAccountName(e.target.value)}
-							style={{
-								width: "100%",
-								padding: "8px 12px",
-								border: "1px solid #ccc",
-								borderRadius: "4px",
-								marginBottom: "16px",
-								fontSize: "14px",
-								boxSizing:
-									"border-box" /* This ensures padding is included in width */,
-							}}
-							autoFocus
-						/>
-						<div
-							style={{
-								display: "flex",
-								justifyContent: "flex-end",
-								gap: "8px",
-							}}
-						>
+				<div className="modal modal-open">
+					<div className="modal-box bg-base-100">
+						<h3 className="font-medium text-lg mb-4">Create New Account</h3>
+						<div className="mb-4">
+							<label className="block text-sm font-medium mb-1">
+								Account Name
+							</label>
+							<input
+								type="text"
+								value={newAccountName}
+								onChange={(e) => setNewAccountName(e.target.value)}
+								className="input input-bordered w-full"
+								placeholder="Enter account name"
+								autoFocus
+							/>
+						</div>
+						<div className="modal-action">
 							<button
-								onClick={() => {
-									setShowCreateDialog(false);
-									setNewAccountName("");
-								}}
-								style={{
-									padding: "8px 12px",
-									border: "1px solid #ccc",
-									borderRadius: "4px",
-									background: "#f9f9f9",
-									cursor: "pointer",
-								}}
+								onClick={() => setShowCreateDialog(false)}
+								className="btn btn-ghost"
 							>
 								Cancel
 							</button>
-							<button
-								onClick={handleCreateAccount}
-								disabled={!newAccountName.trim()}
-								style={{
-									padding: "8px 12px",
-									border: "1px solid #ccc",
-									borderRadius: "4px",
-									background: "#f5f5f5",
-									color: "#333",
-									cursor: !newAccountName.trim() ? "not-allowed" : "pointer",
-									opacity: !newAccountName.trim() ? 0.7 : 1,
-								}}
-							>
+							<button onClick={handleCreateAccount} className="btn">
 								Create
 							</button>
 						</div>

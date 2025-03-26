@@ -654,6 +654,104 @@ test("it handles mixed nested simple and complex messages", async () => {
 	);
 });
 
+/**
+ * This test reproduces https://github.com/opral/inlang-paraglide-js/issues/479
+ * generate incorrect JSDoc with duplicate parameter names.
+ * 
+ * Example:
+ * @param {{ days: NonNullable<unknown>, days: NonNullable<unknown> }} inputs
+ * 
+ * This is a TS error because the property "days" is duplicated in the type.
+ */
+test("it correctly handles messages with duplicate placeholders", async () => {
+	// Test with messages having the same placeholder multiple times as in issue #479
+	const imported = await importFiles({
+		settings: {} as any,
+		files: [
+			{
+				locale: "en-us",
+				content: new TextEncoder().encode(
+					JSON.stringify({
+						"date_last_days": "Last {days} days",
+					})
+				),
+			},
+			{
+				locale: "de-de",
+				content: new TextEncoder().encode(
+					JSON.stringify({
+						"date_last_days": "Letzte {days} Tage",
+					})
+				),
+			}
+		],
+	});
+
+	// Verify the message structure
+	expect(imported.bundles).toHaveLength(1);
+	expect(imported.messages).toHaveLength(2); // One for each locale
+	expect(imported.variants).toHaveLength(2);
+
+	// Check that the bundle has the right declaration
+	expect(imported.bundles[0]?.id).toBe("date_last_days");
+	expect(imported.bundles[0]?.declarations).toHaveLength(1);
+	expect(imported.bundles[0]?.declarations?.[0]).toMatchObject({ type: "input-variable", name: "days" });
+
+	// Verify the export works correctly
+	const exported = await runExportFiles(imported);
+	const enExport = JSON.parse(new TextDecoder().decode(
+		exported.find(e => e.locale === "en-us")?.content || new Uint8Array()
+	));
+	const deExport = JSON.parse(new TextDecoder().decode(
+		exported.find(e => e.locale === "de-de")?.content || new Uint8Array()
+	));
+
+	expect(enExport).toMatchObject({
+		"date_last_days": "Last {days} days"
+	});
+	expect(deExport).toMatchObject({
+		"date_last_days": "Letzte {days} Tage"
+	});
+});
+
+/**
+ * Test for a more complex case with the same placeholder used multiple times in a single string
+ */
+test("it correctly handles messages with the same placeholder used multiple times in a string", async () => {
+	const imported = await runImportFiles({
+		"repeat_value": "The value {value} appears twice: {value}",
+	});
+
+	// Verify the message structure
+	expect(imported.bundles).toHaveLength(1);
+	expect(imported.messages).toHaveLength(1);
+	expect(imported.variants).toHaveLength(1);
+
+	// Check that the bundle only has a single declaration for "value"
+	expect(imported.bundles[0]?.declarations).toHaveLength(1);
+	expect(imported.bundles[0]?.declarations?.[0]).toMatchObject({ type: "input-variable", name: "value" });
+
+	// Check pattern has two references to the same variable
+	expect(imported.variants[0]?.pattern).toEqual([
+		{ type: "text", value: "The value " },
+		{ type: "expression", arg: { type: "variable-reference", name: "value" } },
+		{ type: "text", value: " appears twice: " },
+		{ type: "expression", arg: { type: "variable-reference", name: "value" } },
+	]);
+
+	// Ensure there are exactly two expressions using the "value" variable reference
+	const valueReferences = imported.variants[0]?.pattern?.filter(
+		item => item.type === "expression" && item.arg.type === "variable-reference" && item.arg.name === "value"
+	);
+	expect(valueReferences).toHaveLength(2);
+
+	// Verify the export works correctly
+	const exported = await runExportFilesParsed(imported);
+	expect(exported).toMatchObject({
+		"repeat_value": "The value {value} appears twice: {value}"
+	});
+});
+
 // convenience wrapper for less testing code
 function runImportFiles(json: Record<string, any>) {
 	return importFiles({

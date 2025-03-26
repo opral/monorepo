@@ -147,6 +147,12 @@ const faq = [
     answer:
       "There are apps with versioning, but in many cases, they only save versions of the entire project at specific points in time. Lix tracks and understands the context of every change in a file, giving you more context and allowing you to set automations. Furthermore, Lix provides a generalized system that allows all files and apps to work together.",
   },
+  {
+    question:
+      "What is the difference between restore a Version and revert a change?",
+    answer:
+      "Restoring a version replaces the current document with an older snapshot, erasing all subsequent changes, while reverting a change precisely undoes a specific modification while preserving all later work. Essentially, restore is an all-or-nothing replacement, and revert is a targeted undo.",
+  },
 ];
 
 export default function Index() {
@@ -156,13 +162,30 @@ export default function Index() {
       <main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-20">
         <div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
           <div className="max-w-md">
+            <div className="flex gap-2 mb-2 justify-center md:justify-start">
+              <a
+                href="https://www.npmjs.com/package/@lix-js/sdk"
+                target="_blank"
+              >
+                <img
+                  src="https://img.shields.io/npm/dw/%40lix-js%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads"
+                  alt="npm downloads"
+                />
+              </a>
+              <a href="https://discord.gg/xjQA897RyK" target="_blank">
+                <img
+                  src="https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white"
+                  alt="discord"
+                />
+              </a>
+            </div>
             <div>
               <h1 className="text-5xl leading-[1.2] font-semibold">
-                The worlds first change control system
+                A change control system & SDK
               </h1>
             </div>
             <p className="mt-8 mb-6">
-              The lix change control system allows storing, tracking, querying,
+              The lix SDK for change control allows storing, tracking, querying,
               and reviewing changes in different file formats, e.g. .xlsx,
               .sqlite, or .inlang.
             </p>
@@ -196,6 +219,27 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col items-center">
+          <h2 className="text-center">Built apps with the lix SDK</h2>
+          <p className="max-w-2xl text-center mt-4 mb-8">
+            The lix SDK can be intergated into exsiting apps, or used as backend
+            for new apps.{" "}
+            <a
+              href="https://github.com/opral/lix-sdk"
+              className="text-cyan-600"
+            >
+              Visit the documentation for more information.
+            </a>
+          </p>
+          <a href="https://github.com/opral/lix-sdk">
+            <img
+              src="/images/code-example.png"
+              alt="Simlified sketch of the lix file manager"
+              className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
+            />
+          </a>
+        </div>
+
+        <div className="flex flex-col items-center">
           <h2 className="text-center">Everything revolves around changes</h2>
           <p className="max-w-2xl text-center mt-4 mb-8">
             A system, that can track changes across any file format is one
@@ -224,27 +268,6 @@ export default function Index() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <h2 className="text-center">Built apps with the lix SDK</h2>
-          <p className="max-w-2xl text-center mt-4 mb-8">
-            The lix SDK can be intergated into exsiting apps, or used as backend
-            for new apps.{" "}
-            <a
-              href="https://github.com/opral/lix-sdk"
-              className="text-cyan-600"
-            >
-              Visit the documentation for more information.
-            </a>
-          </p>
-          <a href="https://github.com/opral/lix-sdk">
-            <img
-              src="/images/code-example.png"
-              alt="Simlified sketch of the lix file manager"
-              className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
-            />
-          </a>
         </div>
 
         <div className="flex flex-col items-center">

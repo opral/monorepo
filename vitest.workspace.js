@@ -4,5 +4,6 @@ export default [
   "inlang/packages/paraglide/*",
   "inlang/packages/sdk",
   "lix/packages/plugins/*",
+  "inlang/packages/rpc",
   "packages/*",
 ];

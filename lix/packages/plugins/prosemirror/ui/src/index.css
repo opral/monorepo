@@ -1,404 +1,598 @@
-/* Base styles */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background-color: #f5f8fa;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: #333;
-  line-height: 1.5;
-  overflow-y: auto;
-  min-height: 100vh;
-  min-width: 320px;
-  display: flex;
-  background-color: #f5f8fa;
-}
-
-#root {
-  width: 100%;
-  display: flex;
-}
-
 .ProseMirror {
-  flex: 1;
-  overflow-y: auto;
-  padding: 8px;
-  margin: 0;
-  outline: none;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  white-space: break-spaces;
-  -webkit-font-variant-ligatures: none;
-  font-variant-ligatures: none;
-  font-feature-settings: "liga" 0;
-  background-color: #fff;
+	flex: 1;
+	overflow-y: auto;
+	padding: 8px;
+	margin: 0;
+	outline: none;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+	white-space: break-spaces;
+	-webkit-font-variant-ligatures: none;
+	font-variant-ligatures: none;
+	font-feature-settings: "liga" 0;
+	background-color: #fff;
 }
 
 /* Make sure it's visible when it has focus */
 .ProseMirror-focused {
-  border-color: #4a90e2;
+	border-color: #4a90e2;
 }
 
 /* Makes the cursor visible */
 .ProseMirror-cursor {
-  border-left: 1px solid black;
-  border-right: none;
-  width: 0;
-  display: block !important;
+	border-left: 1px solid black;
+	border-right: none;
+	width: 0;
+	display: block !important;
 }
 
 .editor-wrapper {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid #ccc;
-  cursor: text !important;
-  background-color: #fff;
-  min-height: 300px;
-  padding: 0;
-  margin: 0;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border: 1px solid #ccc;
+	cursor: text !important;
+	background-color: #fff;
+	min-height: 300px;
+	padding: 0;
+	margin: 0;
 }
 
 .editor-container {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-right: 1px solid #ccc;
-  padding: 0;
-  margin: 0;
+	flex: 2;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border-right: 1px solid #ccc;
+	padding: 0;
+	margin: 0;
+	background-color: #fff;
 }
 
 .editor {
-  flex: 1;
-  display: flex;
-  background-color: #fff;
-  padding: 0;
-  margin: 0;
+	flex: 1;
+	display: flex;
+	background-color: #fff;
+	padding: 0;
+	margin: 0;
 }
 
 .app-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: 100vh;
-  padding: 10px;
-  box-sizing: border-box;
-  background-color: #f5f8fa;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	min-height: 100vh;
+	padding: 10px;
+	box-sizing: border-box;
+	background-color: #f5f8fa;
+}
+
+.main-layout {
+	display: flex;
+	height: 80vh;
+	margin-bottom: 20px;
+	border: 1px solid #ddd;
 }
 
 h1 {
-  margin: 0 0 10px 0;
-  font-size: 20px;
+	margin: 0 0 10px 0;
+	font-size: 20px;
 }
 
 .editor-checkpoints-container {
-  display: flex;
-  border: 1px solid #ccc;
-  overflow: hidden;
-  min-height: 500px;
-  max-height: 70vh;
-  flex: 0 1 auto;
-  margin-bottom: 10px;
+	display: none;
 }
 
 .editor-changes-container {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  width: 100%;
-  height: 50vh; /* Set to 50% of viewport height */
+	display: flex;
+	flex-direction: row;
+	gap: 20px;
+	width: 100%;
+	height: 50vh; /* Set to 50% of viewport height */
 }
 
 .editor-section {
-  flex: 1;
-  min-width: 0; /* Prevents flex items from overflowing */
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+	flex: 1;
+	min-width: 0; /* Prevents flex items from overflowing */
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 .changes-section {
-  width: 300px;
-  min-width: 300px;
-  height: 100%;
-  overflow: hidden; /* Prevents scrollbar on the container itself */
-  display: flex;
-  flex-direction: column;
+	width: 300px;
+	min-width: 300px;
+	height: 100%;
+	overflow: hidden; /* Prevents scrollbar on the container itself */
+	display: flex;
+	flex-direction: column;
 }
 
 .changes-container {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 15px;
-  background-color: #f9f9f9;
-  height: 100%;
-  overflow-y: auto; /* Makes the changes content scrollable */
-  margin: 0;
-  box-sizing: border-box;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 15px;
+	background-color: #f9f9f9;
+	height: 100%;
+	overflow-y: auto; /* Makes the changes content scrollable */
+	margin: 0;
+	box-sizing: border-box;
 }
 
 .toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
+	display: flex;
+	gap: 10px;
+	margin-bottom: 10px;
+	flex-wrap: wrap;
 }
 
 button {
-  background-color: #f5f5f5;
-  color: #333;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 5px 10px;
-  cursor: pointer;
+	background-color: #f5f5f5;
+	color: #333;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 5px 10px;
+	cursor: pointer;
 }
 
 button:hover {
-  background-color: #e5e5e5;
+	opacity: 0.8;
 }
 
 .debug-section {
-  margin-top: 30px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
+	margin-top: 30px;
+	border-top: 1px solid #eee;
+	padding-top: 20px;
 }
 
 .debug-content {
-  display: flex;
-  gap: 20px;
-  margin-top: 15px;
+	display: flex;
+	gap: 20px;
+	margin-top: 15px;
 }
 
 .debug-panel {
-  border: 1px solid #ccc;
-  overflow: hidden;
-  max-height: none;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
-  padding: 0;
-  flex: 0 1 auto;
+	border: 1px solid #ccc;
+	overflow: hidden;
+	max-height: none;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 10px;
+	padding: 0;
+	flex: 0 1 auto;
 }
 
 .debug-panel h4 {
-  margin: 0;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ccc;
-  margin-top: 0;
-  margin-bottom: 0;
+	margin: 0;
+	padding: 10px;
+	background-color: #f5f5f5;
+	border-bottom: 1px solid #ccc;
+	margin-top: 0;
+	margin-bottom: 0;
 }
 
 .change-graph {
-  overflow-y: auto;
-  flex: 1;
-  padding: 10px;
-  max-height: 300px;
+	overflow-y: auto;
+	flex: 1;
+	padding: 10px;
+	max-height: 300px;
 }
 
 .change-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 15px;
+	border-bottom: 1px solid #eee;
+	padding-bottom: 10px;
 }
 
 .change-content-wrapper {
-  width: 100%;
+	width: 100%;
 }
 
 .change-timestamp {
-  font-size: 0.8em;
-  margin-bottom: 5px;
+	font-size: 0.8em;
+	margin-bottom: 5px;
 }
 
 .change-item-container {
-  margin-bottom: 5px;
+	margin-bottom: 5px;
 }
 
 .change-item {
-  border-radius: 4px;
-  padding: 8px;
-  background-color: #f9f9f9;
-  border-left: 3px solid #ccc;
+	border-radius: 4px;
+	padding: 8px;
+	background-color: #f9f9f9;
+	border-left: 3px solid #ccc;
 }
 
 /* Styling for the change item itself */
 .change-item {
-  border-left: 3px solid #4a90e2;
+	border-left: 3px solid #4a90e2;
 }
 
 .change-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-  font-size: 0.9em;
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 5px;
+	font-size: 0.9em;
 }
 
 .change-type {
-  font-weight: bold;
+	font-weight: bold;
 }
 
 .change-node-type {
-  color: #666;
+	color: #666;
 }
 
 .change-content {
-  font-size: 0.9em;
+	font-size: 0.9em;
 }
 
 .change-preview {
-  word-break: break-word;
+	word-break: break-word;
 }
 
 .empty-graph {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100px;
 }
 
 .empty-message {
-  color: #999;
-  font-style: italic;
+	color: #999;
+	font-style: italic;
 }
 
 .checkpoints-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 250px;
-  max-width: 350px;
-  background-color: #fafafa;
-  overflow: hidden;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 250px;
+	max-width: 350px;
+	background-color: #fafafa;
+	overflow: hidden;
 }
 
 .checkpoints-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-  background-color: #f5f5f5;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #e5e7eb;
+	background-color: #f5f5f5;
+	height: 40px;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
 
 .checkpoints-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
+	margin: 0;
+	font-size: 16px;
+	font-weight: 500;
 }
 
 .create-checkpoint-button {
-  background-color: #f5f5f5;
-  color: #333;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 14px;
-  cursor: pointer;
+	background-color: #f5f5f5;
+	color: #333;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 6px 12px;
+	font-size: 14px;
+	cursor: pointer;
 }
 
 .create-checkpoint-button:hover {
-  background-color: #e5e5e5;
+	opacity: 0.8;
 }
 
 .checkpoints-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0;
+	flex: 1;
+	overflow-y: auto;
+	padding: 0;
 }
 
 .checkpoint-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
-  cursor: pointer;
+	padding: 12px 16px;
+	border-bottom: 1px solid #e0e0e0;
+	cursor: pointer;
 }
 
 .checkpoint-item:hover {
-  background-color: #f5f5f5;
+	opacity: 0.8;
 }
 
 .checkpoint-item.selected {
-  background-color: #f5f5f5;
-  border-left: 2px solid #ccc;
+	background-color: #f5f5f5;
+	border-left: 2px solid #ccc;
 }
 
 .checkpoint-timestamp {
-  font-size: 13px;
-  margin-bottom: 4px;
-  color: #666;
+	font-size: 13px;
+	margin-bottom: 4px;
+	color: #666;
 }
 
 .checkpoint-preview {
-  font-size: 14px;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	font-size: 14px;
+	color: #333;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .empty-checkpoints {
-  padding: 16px;
-  text-align: center;
-  color: #666;
-  font-style: italic;
+	padding: 16px;
+	text-align: center;
+	color: #666;
+	font-style: italic;
 }
 
 .changes-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
 }
 
 .filter-controls {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
+	display: flex;
+	align-items: center;
+	margin-bottom: 15px;
 }
 
 .filter-checkbox {
-  display: flex;
-  align-items: center;
-  font-size: 0.9em;
-  cursor: pointer;
+	display: flex;
+	align-items: center;
+	font-size: 0.9em;
+	cursor: pointer;
 }
 
 .filter-checkbox input {
-  margin-right: 5px;
+	margin-right: 5px;
 }
 
 .checkpoint-dot {
-  background-color: #4a90e2;
-  border: 1px solid #2a6fc9;
+	background-color: #4a90e2;
+	border: 1px solid #2a6fc9;
 }
 
 .checkpoint-badge {
-  font-size: 0.8em;
-  background-color: #4a90e2;
-  color: white;
-  padding: 2px 5px;
-  border-radius: 3px;
-  margin-left: 8px;
+	font-size: 0.8em;
+	background-color: #4a90e2;
+	color: white;
+	padding: 2px 5px;
+	border-radius: 3px;
+	margin-left: 8px;
 }
 
 .checkpoint-item {
-  border-left: 3px solid #4a90e2;
+	border-left: 3px solid #4a90e2;
 }
 
 pre {
-  margin: 0;
-  overflow-x: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  max-height: 300px;
-  overflow-y: auto;
+	margin: 0;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	max-height: 300px;
+	overflow-y: auto;
 }
 
 /* No media queries needed - using consistent light theme */
+
+/* Mode tabs styling */
+.mode-tabs {
+	display: flex;
+	align-items: center;
+	border-bottom: 1px solid #e5e7eb;
+	position: relative;
+	height: 40px;
+	background-color: #fff;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	justify-content: space-between;
+}
+
+.mode-tab {
+	padding: 8px 16px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	white-space: nowrap;
+	font-size: 14px;
+	height: 40px;
+	box-sizing: border-box;
+	border-radius: 0;
+}
+
+.mode-tab:hover {
+	background-color: #f9f9f9;
+	border-radius: 0;
+}
+
+.mode-tab:focus {
+	outline: none;
+}
+
+.mode-tab.active {
+	border-bottom: 2px solid #000;
+	font-weight: 500;
+	border-radius: 0;
+}
+
+.mode-tabs-scroll-container {
+	display: flex;
+	flex: 1;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
+	-webkit-overflow-scrolling: touch;
+}
+
+.mode-tab-fixed {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+}
+
+/* Mode indicator */
+.mode-indicator {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 5px 10px;
+	background-color: #f5f5f5;
+	border-top: 1px solid #ddd;
+	font-size: 12px;
+	color: #666;
+	text-align: left;
+}
+
+.version-info {
+	font-weight: normal;
+	color: #888;
+	margin-left: 5px;
+}
+
+/* Version selector UI */
+.version-selector {
+	margin-left: auto;
+	position: relative;
+}
+
+.version-button {
+	background: none;
+	border: 1px solid #ddd;
+	padding: 4px 8px;
+	cursor: pointer;
+	font-size: 12px;
+	outline: none;
+	border-radius: 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.version-button:hover {
+	opacity: 0.8;
+}
+
+.version-icon {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	position: relative;
+}
+
+.version-icon:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 3px;
+	width: 1px;
+	height: 12px;
+	background-color: #000;
+}
+
+.version-icon:after {
+	content: "";
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 6px;
+	height: 1px;
+	background-color: #000;
+}
+
+.version-dropdown {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	width: 200px;
+	border: 1px solid #ddd;
+	background-color: white;
+	z-index: 10;
+}
+
+.version-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.version-item {
+	padding: 8px;
+	border-bottom: 1px solid #eee;
+	display: flex;
+	cursor: pointer;
+}
+
+.version-item:last-child {
+	border-bottom: none;
+}
+
+.version-item:hover {
+	opacity: 0.8;
+}
+
+.version-item.current {
+	font-weight: bold;
+}
+
+.version-number {
+	width: 50px;
+}
+
+.version-date {
+	flex: 1;
+	font-size: 12px;
+	color: #666;
+}
+
+.new-version {
+	border-top: 1px solid #ddd;
+	justify-content: center;
+}
+
+.create-version {
+	font-size: 12px;
+}
+
+/* Main layout */
+.right-panel {
+	width: 300px;
+	display: flex;
+	flex-direction: column;
+	border-left: 1px solid #ddd;
+	background-color: #fff;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}
+
+.checkpoints-panel {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}
+
+/* Hide the old container */
+.editor-checkpoints-container {
+	display: none;
+}
+
+/* Version panel styles kept for potential future use */
+.version-panel {
+	display: none;
+}

@@ -70,7 +70,7 @@ const paraglideHandle: Handle = ({ event, resolve }) =>
 		event.request = localizedRequest;
 		return resolve(event, {
 			transformPageChunk: ({ html }) => {
-				return html.replace('lang%', locale);
+				return html.replace('%lang%', locale);
 			}
 		});
 	});
@@ -79,6 +79,8 @@ export const handle: Handle = paraglideHandle;
 ```
 
 ### Add a reroute hook in `src/hooks.ts`
+
+IMPORTANT: The `reroute()` function must be exported from the `src/hooks.ts` file, not `src/hooks.server.ts`.
 
 ```typescript
 import type { Reroute } from '@sveltejs/kit';

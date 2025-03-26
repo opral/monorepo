@@ -50,10 +50,18 @@ export async function machineTranslateBundle(args: {
 						sourceVariant.matches
 					);
 
-					// Skip translation if matching variant already exists
-					if (existingVariant) {
+					// Skip translation if matching variant already exists and is not empty
+					// Empty means either an empty pattern array or a pattern with just an empty text element
+					if (existingVariant && !(
+						existingVariant.pattern.length === 0 || 
+						(existingVariant.pattern.length === 1 && 
+						 existingVariant.pattern[0]?.type === "text" && 
+						 (existingVariant.pattern[0] as Text).value === "")
+					)) {
 						continue;
 					}
+					
+					// We found an empty pattern, continue with translation
 				}
 
 				const response = await fetch(
@@ -79,12 +87,29 @@ export async function machineTranslateBundle(args: {
 				);
 
 				if (targetMessage) {
-					targetMessage.variants.push({
-						id: randomUUID(),
-						messageId: targetMessage.id,
-						matches: sourceVariant.matches,
-						pattern,
-					} satisfies Variant);
+					// Check if we need to update an existing variant or create a new one
+					const existingVariant = findMatchingVariant(
+						targetMessage.variants,
+						sourceVariant.matches
+					);
+					
+					if (existingVariant && (
+						existingVariant.pattern.length === 0 || 
+						(existingVariant.pattern.length === 1 && 
+						 existingVariant.pattern[0]?.type === "text" && 
+						 (existingVariant.pattern[0] as Text).value === "")
+					)) {
+						// Update the existing variant instead of creating a new one
+						existingVariant.pattern = pattern;
+					} else {
+						// Create a new variant
+						targetMessage.variants.push({
+							id: randomUUID(),
+							messageId: targetMessage.id,
+							matches: sourceVariant.matches,
+							pattern,
+						} satisfies Variant);
+					}
 				} else {
 					const newMessageId = randomUUID();
 					copy.messages.push({
@@ -121,18 +146,19 @@ function findMatchingVariant(
 ): Variant | undefined {
 	// If matches is empty, look for variants with empty matches
 	if (matches.length === 0) {
-		return variants.find((v) => v.matches.length === 0);
+		const result = variants.find((v) => v.matches.length === 0);
+		return result;
 	}
 
 	// Otherwise, look for variants where all matches are equivalent
-	return variants.find((variant) => {
+	const result = variants.find((variant) => {
 		// If lengths don't match, it's not the same
 		if (variant.matches.length !== matches.length) {
 			return false;
 		}
 
 		// Check if all matches are equivalent
-		return matches.every((sourceMatch) => {
+		const isMatch = matches.every((sourceMatch) => {
 			return variant.matches.some((targetMatch) => {
 				// Both matches must have the same key and type
 				if (
@@ -154,7 +180,11 @@ function findMatchingVariant(
 				return true;
 			});
 		});
+		
+		return isMatch;
 	});
+	
+	return result;
 }
 
 // MOCK_TRANSLATE: Mock the google translate api

@@ -61,6 +61,7 @@ export default async function onRenderHtml(
       <head>
 			<meta charset="UTF-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3"/>
 		<!-- theme-color means the background color of the iOS status bar -->
 			<meta name="theme-color" content="#000000" />
 		<!-- START import inter font -->
@@ -75,6 +76,17 @@ export default async function onRenderHtml(
 	  <!-- setting min-h/w-screen to allow child elements to span to the entire screen  -->
       <body class="website min-h-screen min-w-screen bg-background text-on-background" id="root">
 		    ${dangerouslySkipEscape(renderedPage!)}
+				<script src="https://cdn.jsdelivr.net/npm/@docsearch/js@3"></script>
+				<script type="text/javascript">
+				docsearch({
+				appId: "X5BTW6ZBA0",
+				apiKey: "cf9a270f5245cc74b48013b6e47d7197",
+				indexName: "inlang",
+				insights: true,
+				container: "#search-input",
+				debug: false 
+				});
+				</script>
       </body>
     </html>`;
 }
