@@ -88,6 +88,7 @@ const LixDebugPanel = () => {
 				<h3 className="text-xl font-bold">Debug Tools</h3>
 				<div className="flex gap-2.5">
 					<ProsemirrorDocImport />
+					<ProsemirrorDocExport />
 					<button onClick={handleDownloadLixDb} className="btn btn-sm">
 						Download Lix Blob
 					</button>
@@ -214,6 +215,46 @@ const ProsemirrorDocImport = () => {
 				<div className="text-error mt-2 text-sm">{importError}</div>
 			)}
 		</div>
+	);
+};
+
+// Component for exporting ProseMirror document
+const ProsemirrorDocExport = () => {
+	const [currentDoc] = useQuery(selectProsemirrorDocument);
+
+	const handleExportDocument = () => {
+		try {
+			// Create a blob with the document content
+			const docContent = JSON.stringify(currentDoc, null, 2);
+			const blob = new Blob([docContent], { type: "application/json" });
+
+			// Create a download link
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `prosemirror-doc-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`;
+			document.body.appendChild(a);
+			a.click();
+
+			// Clean up
+			setTimeout(() => {
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			}, 0);
+		} catch (error) {
+			console.error("Error exporting document:", error);
+			alert("Error exporting document: " + (error as Error).message);
+		}
+	};
+
+	return (
+		<button
+			onClick={handleExportDocument}
+			className="btn btn-sm btn-outline"
+			disabled={!currentDoc}
+		>
+			Export ProseMirror Doc
+		</button>
 	);
 };
 
