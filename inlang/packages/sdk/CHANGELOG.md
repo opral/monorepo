@@ -1,5 +1,15 @@
 # @inlang/sdk
 
+## 2.4.5
+
+### Patch Changes
+
+- 083ff1f: fix: `loadProjectFromDirectory()` should return errors from `loadProject()`
+- Updated dependencies [275d87e]
+- Updated dependencies [dc92f56]
+- Updated dependencies [c1ed545]
+  - @lix-js/sdk@0.4.5
+
 ## 2.4.4
 
 ### Patch Changes

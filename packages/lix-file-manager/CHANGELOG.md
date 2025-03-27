@@ -1,5 +1,15 @@
 # lix-file-manager
 
+## 0.2.10
+
+### Patch Changes
+
+- Updated dependencies [275d87e]
+- Updated dependencies [dc92f56]
+- Updated dependencies [c1ed545]
+  - @lix-js/sdk@0.4.5
+  - @lix-js/plugin-csv@0.1.7
+
 ## 0.2.9
 
 ### Patch Changes
