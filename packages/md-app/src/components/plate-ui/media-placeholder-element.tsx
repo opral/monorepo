@@ -27,6 +27,7 @@ import { useFilePicker } from 'use-file-picker';
 import { useLixUpload } from '@/hooks/use-lix-upload';
 
 import { Spinner } from './spinner';
+import { ImageReplaceDialog } from './image-replace-dialog';
 
 const CONTENT: Record<
   string,
@@ -67,8 +68,17 @@ export const MediaPlaceholderElement = withHOC(
 
       const { api } = useEditorPlugin(PlaceholderPlugin);
 
-      const { isUploading, progress, uploadedFile, uploadFile, uploadingFile } =
-        useLixUpload();
+      const {
+        isUploading,
+        progress,
+        uploadedFile,
+        uploadFile,
+        uploadingFile,
+        duplicateDialogOpen,
+        duplicateInfo,
+        handleReplaceImage,
+        handleKeepImage
+      } = useLixUpload();
 
       const loading = isUploading && uploadingFile;
 
@@ -99,6 +109,22 @@ export const MediaPlaceholderElement = withHOC(
         [api.placeholder, element.id, uploadFile]
       );
 
+      // Handle replace decision from dialog
+      const onReplaceImage = useCallback(async () => {
+        const replacedFile = await handleReplaceImage();
+        if (replacedFile) {
+          // No need to do anything since uploadedFile will be set
+          // and the useEffect below will handle the node replacement
+        }
+      }, [handleReplaceImage]);
+
+      // Handle keep decision from dialog
+      const onKeepImage = useCallback(() => {
+        handleKeepImage();
+        // Clear the placeholder since we're keeping the original image
+        api.placeholder.removeUploadingFile(element.id as string);
+      }, [handleKeepImage, api.placeholder, element.id]);
+
       useEffect(() => {
         if (!uploadedFile) return;
 
@@ -124,7 +150,6 @@ export const MediaPlaceholderElement = withHOC(
         });
 
         api.placeholder.removeUploadingFile(element.id as string);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [uploadedFile, element.id]);
 
       // React dev mode will call useEffect twice
@@ -143,11 +168,20 @@ export const MediaPlaceholderElement = withHOC(
 
         replaceCurrentPlaceholder(currentFiles);
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [isReplaced]);
 
       return (
         <PlateElement ref={ref} className={cn(className, 'my-1')} {...props}>
+          {/* Image Replace Dialog */}
+          {duplicateDialogOpen && duplicateInfo && (
+            <ImageReplaceDialog
+              open={duplicateDialogOpen}
+              fileName={duplicateInfo.fileName}
+              onReplace={onReplaceImage}
+              onKeep={onKeepImage}
+            />
+          )}
+
           {(!loading || !isImage) && (
             <div
               className={cn(

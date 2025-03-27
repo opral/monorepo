@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { getFileFromLix } from '@/helper/upload-to-lix';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { getFileFromLix, IMAGE_REPLACED_EVENT } from '@/helper/upload-to-lix';
 import { Spinner } from './spinner';
 import { useAtom } from 'jotai';
 import { lixAtom } from '@/state';
@@ -16,13 +16,89 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [lix] = useAtom(lixAtom)
+  const [lix] = useAtom(lixAtom);
+  // Keep track of the last timestamp to force reload when src is the same
+  const timestampRef = useRef<number>(Date.now());
+  // Store the fileId for this image to respond to replacement events
+  const fileIdRef = useRef<string | null>(null);
+  
+  // Extract fileId from a Lix URL
+  const extractFileId = (url: string): string | null => {
+    try {
+      const parsedUrl = new URL(url);
+      return parsedUrl.searchParams.get('f');
+    } catch (error) {
+      console.error('Error parsing URL:', error);
+      return null;
+    }
+  };
+
+  // Encapsulate the image loading logic to make it reusable
+  const loadImage = useCallback(async (imageUrl: string) => {
+    if (!imageUrl || !imageUrl.startsWith('https://lix.host')) {
+      return;
+    }
+    
+    setLoading(true);
+    setError(false);
+    
+    try {
+      // Extract file ID from URL
+      const fileId = extractFileId(imageUrl);
+      fileIdRef.current = fileId; // Store for event listener reference
+
+      if (!fileId) {
+        console.error('No file ID found in URL:', imageUrl);
+        setError(true);
+        setObjectUrl(null);
+        return;
+      }
+
+      const blob = await getFileFromLix(fileId, lix);
+
+      if (!blob) {
+        console.error('File not found for ID:', fileId);
+        setError(true);
+        setObjectUrl(null);
+        return;
+      }
+
+      // For base64 display in markdown with cache busting
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        // Add timestamp to prevent caching issues when an image is replaced
+        setObjectUrl(`${base64data}#t=${timestampRef.current}`);
+      };
+      reader.readAsDataURL(blob);
+    } catch (err) {
+      console.error('Error loading image from Lix:', err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [lix]);
+
+  // Handle image replaced events
+  const handleImageReplaced = useCallback((event: Event) => {
+    const customEvent = event as CustomEvent<{fileId: string, timestamp: number}>;
+    
+    // If this is our fileId, reload the image
+    if (customEvent.detail.fileId === fileIdRef.current) {
+      console.log(`Image ${fileIdRef.current} was replaced, reloading...`);
+      timestampRef.current = customEvent.detail.timestamp;
+      loadImage(src);
+    }
+  }, [src, loadImage]);
 
   useEffect(() => {
     // Reset state when src changes
     setLoading(false);
     setError(false);
     setObjectUrl(null);
+    
+    // Generate new timestamp for cache busting
+    timestampRef.current = Date.now();
 
     // Handle empty or missing src
     if (!src) {
@@ -36,60 +112,21 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
       return;
     }
 
-    const loadImage = async () => {
-      setLoading(true);
-      setError(false);
-      try {
-        // Extract file ID from URL
-        try {
-          // Parse URL and extract parameters
-          const url = new URL(src);
-          const fileId = url.searchParams.get('f');
+    // Load the image initially
+    loadImage(src);
 
-          if (!fileId) {
-            console.error('No file ID found in URL:', src);
-            setError(true);
-            setObjectUrl(null);
-            return;
-          }
+    // Add event listener for image replacements
+    window.addEventListener(IMAGE_REPLACED_EVENT, handleImageReplaced);
 
-          const blob = await getFileFromLix(fileId, lix);
-
-          if (!blob) {
-            console.error('File not found for ID:', fileId);
-            setError(true);
-            setObjectUrl(null);
-            return;
-          }
-
-          // For base64 display in markdown
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64data = reader.result as string;
-            setObjectUrl(base64data);
-          };
-          reader.readAsDataURL(blob);
-        } catch (innerErr) {
-          console.error('Error parsing URL or loading file:', innerErr);
-          setError(true);
-        }
-      } catch (err) {
-        console.error('Error loading image from Lix:', err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadImage();
-
-    // Cleanup function to revoke object URL if needed
+    // Cleanup function to revoke object URL and remove event listener
     return () => {
+      window.removeEventListener(IMAGE_REPLACED_EVENT, handleImageReplaced);
+      
       if (objectUrl && objectUrl !== src && objectUrl.startsWith('blob:')) {
         URL.revokeObjectURL(objectUrl);
       }
     };
-  }, [src]);
+  }, [src, lix, loadImage, handleImageReplaced]);
 
   if (loading) {
     return (
