@@ -115,10 +115,10 @@ test("should handle case sensitivity in message IDs correctly", () => {
 	const fallbackMap: Record<string, string | undefined> = {};
 
 	const output = generateOutput(bundles, settings, fallbackMap);
-	
+
 	// Check that the output exists
 	expect(output).toHaveProperty("messages/en.js");
-	
+
 	// The exported constants should not conflict
 	const content = output["messages/en.js"];
 	expect(content).toContain("export const sad_penguin_bundle");
