@@ -10,6 +10,25 @@ import { useEffect, useRef, useState } from "react";
 import { selectProsemirrorDocument } from "../queries";
 import { useQuery } from "../hooks/useQuery";
 import { initialDoc, lix } from "../state";
+import { registerCustomNodeViews } from "../prosemirror/custom-node-views";
+
+// Custom styles for the ProseMirror editor
+const editorStyles = `
+  .ProseMirror {
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  .ProseMirror p {
+    font-size: 0.875rem; /* text-sm */
+    margin-bottom: 0.5rem;
+  }
+  
+  .ProseMirror h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+`;
 
 const Editor: React.FC = () => {
 	const [docInLix] = useQuery(selectProsemirrorDocument);
@@ -33,7 +52,7 @@ const Editor: React.FC = () => {
 			],
 		});
 
-		// Create the editor view
+		// Create the editor view with custom node views
 		const editorView = new EditorView(editorRef.current, {
 			state,
 			editable: () => true,
@@ -41,6 +60,11 @@ const Editor: React.FC = () => {
 				const newState = editorView.state.apply(transaction);
 				editorView.updateState(newState);
 			},
+		});
+
+		// Register custom node views after editorView is created
+		editorView.setProps({
+			nodeViews: registerCustomNodeViews(editorView),
 		});
 
 		// Set the view
@@ -67,9 +91,10 @@ const Editor: React.FC = () => {
 
 	return (
 		<div className="flex flex-col h-full">
-			<div className="editor-wrapper" onClick={handleClick}>
+			<style>{editorStyles}</style>
+			<div className="editor-wrapper p-4" onClick={handleClick}>
 				{/* The actual editor will be mounted here */}
-				<div ref={editorRef} />
+				<div ref={editorRef} className="prose max-w-none text-sm" />
 			</div>
 		</div>
 	);

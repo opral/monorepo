@@ -95,21 +95,23 @@ const LixDebugPanel = () => {
 				</div>
 			</div>
 
-			<div className="flex gap-5 mt-4">
+			<div className="grid grid-cols-2 gap-5 mt-4">
 				{/* Current Document AST */}
-				<div className="flex-1 flex flex-col">
+				<div>
 					<h4 className="text-lg font-medium mb-2">Current Document AST</h4>
-					<pre className="border border-base-300 rounded flex-1">
-						{JSON.stringify(currentDoc, null, 2)}
-					</pre>
+					<div className="border border-base-300 rounded overflow-auto">
+						<pre className="p-4 whitespace-pre">
+							{JSON.stringify(currentDoc, null, 2)}
+						</pre>
+					</div>
 				</div>
 
 				{/* All Changes */}
-				<div className="flex-1 flex flex-col">
+				<div>
 					<h4 className="text-lg font-medium mb-2">
 						All Changes {changes.length > 0 ? `(${changes.length})` : ""}
 					</h4>
-					<div className="rounded flex-1 overflow-auto">
+					<div className="border border-base-300 rounded overflow-auto">
 						{changes.length > 0 ? (
 							changes.map((change) => (
 								<div

@@ -373,15 +373,6 @@ button:hover {
 	border-left: 3px solid #4a90e2;
 }
 
-pre {
-	margin: 0;
-	overflow-x: auto;
-	white-space: pre-wrap;
-	word-wrap: break-word;
-	max-height: 300px;
-	overflow-y: auto;
-}
-
 /* No media queries needed - using consistent light theme */
 
 /* Mode tabs styling */
