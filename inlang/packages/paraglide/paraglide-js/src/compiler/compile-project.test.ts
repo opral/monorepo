@@ -970,6 +970,27 @@ const mockBundles: BundleNested[] = [
 			},
 		],
 	}),
+	createBundleNested({
+		id: "Sad_penguin_bundle",
+		messages: [
+			{
+				locale: "en",
+				variants: [
+					{ pattern: [{ type: "text", value: "Capital Sad penguin" }] },
+				],
+			},
+			{
+				locale: "de",
+				variants: [
+					{
+						pattern: [
+							{ type: "text", value: "Grossgeschriebenes Sad penguin" },
+						],
+					},
+				],
+			},
+		],
+	}),
 	{
 		id: "depressed_dog",
 		declarations: [
