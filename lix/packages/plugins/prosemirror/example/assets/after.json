@@ -1,0 +1,193 @@
+{
+    "type": "doc",
+    "content": [
+    {
+        "type": "title",
+        "attrs": {
+            "dragHandlesDisabled": true,
+            "level": 1
+        },
+        "content": [
+            {
+                "type": "text",
+                "text": "Example for Lix"
+            }
+        ]
+    },
+    {
+        "type": "description",
+        "attrs": {
+            "dragHandlesDisabled": true
+        },
+        "content": [
+            {
+                "type": "paragraph"
+            }
+        ]
+    },
+    {
+        "type": "inputs",
+        "attrs": {
+            "dragHandlesDisabled": true,
+            "id": "INPUTS",
+            "mode": "inputs"
+        },
+        "content": [
+            {
+                "type": "input",
+                "attrs": {
+                    "dragHandlesDisabled": true,
+                    "label": "my_input",
+                    "id": "input_dw1PasbG1elleF3w",
+                    "description": "",
+                    "type": "longtext",
+                    "strictType": {
+                        "typeId": "wtString",
+                        "constraints": [],
+                        "metadata": {
+                            "attributes": []
+                        }
+                    },
+                    "variableType": null,
+                    "fromTrigger": false
+                }
+            }
+        ]
+    },
+    {
+        "type": "horizontalRule"
+    },
+    {
+        "type": "paragraph",
+        "content": [
+            {
+                "type": "text",
+                "text": "Here's a "
+            },
+            {
+                "type": "text",
+                "marks": [
+                    {
+                        "type": "italic"
+                    }
+                ],
+                "text": "simple"
+            },
+            {
+                "type": "text",
+                "text": " prompt "
+            },
+            {
+                "type": "mention",
+                "attrs": {
+                    "referenceId": "input_dw1PasbG1elleF3w",
+                    "path": "input_dw1PasbG1elleF3w",
+                    "lastType": "longtext",
+                    "lastStrictType": {
+                        "typeId": "wtString",
+                        "constraints": [],
+                        "metadata": {
+                            "attributes": []
+                        }
+                    },
+                    "lastLabel": "my_input"
+                }
+            },
+            {
+                "type": "text",
+                "text": "."
+            }
+        ]
+    },
+    {
+        "type": "bulletList",
+        "content": [
+            {
+                "type": "listItem",
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "A"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "listItem",
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "B: "
+                            },
+                            {
+                                "type": "generation",
+                                "attrs": {
+                                    "id": "gen_U0i3eChqJFG5ZWwS",
+                                    "label": "generation",
+                                    "state": "editing",
+                                    "temperature": 0.5,
+                                    "effort": "medium",
+                                    "includeReasoning": false,
+                                    "model": "claude-3.7-sonnet",
+                                    "type": "full",
+                                    "stopBefore": "[\"\",\"\",\"\",\"\"]",
+                                    "responseModel": "{}"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "tool",
+        "attrs": {
+            "id": "tool_lin2fKNgFg4YcGzb",
+            "toolId": "elevenLabs",
+            "includeOutput": "false",
+            "parameters": "{\"voice\":{\"type\":\"literal\",\"value\":\"George (UK male)\"},\"text\":{\"type\":\"variable\",\"value\":\"gen_U0i3eChqJFG5ZWwS\"}}",
+            "label": "Say it",
+            "outputs": "[]",
+            "state": null
+        }
+    },
+    {
+        "type": "paragraph",
+        "content": [
+            {
+                "type": "mention",
+                "attrs": {
+                    "referenceId": "tool_lin2fKNgFg4YcGzb",
+                    "path": "tool_lin2fKNgFg4YcGzb.output",
+                    "lastType": "audio",
+                    "lastStrictType": {
+                        "typeId": "wtFile",
+                        "constraints": [],
+                        "metadata": {
+                            "fileType": "audio"
+                        }
+                    },
+                    "lastLabel": "output"
+                }
+            }
+        ]
+    },
+    {
+        "type": "paragraph",
+        "content": [
+            {
+                "type": "text",
+                "text": "New part of the prompt!"
+            }
+        ]
+    }
+]
+}
