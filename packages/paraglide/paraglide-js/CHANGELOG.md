@@ -1,5 +1,14 @@
 # @inlang/paraglide-js
 
+## 2.0.6
+
+### Patch Changes
+
+- 3fa27c0: fix: duplicate (case sensitive) message keys leading to compile error when using `output-structure: locale-modules`. closes https://github.com/opral/inlang-paraglide-js/issues/487
+- 02c2d34: improve: compiler should log warnings when plugins can not be imported
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+
 ## 2.0.5
 
 ### Patch Changes
