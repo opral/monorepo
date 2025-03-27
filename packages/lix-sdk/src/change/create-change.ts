@@ -1,6 +1,6 @@
-import { sql } from "kysely";
 import type { Account } from "../account/database-schema.js";
 import { executeSync } from "../database/execute-sync.js";
+import { jsonb } from "../database/json.js";
 import type { Change, Snapshot, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
@@ -47,18 +47,15 @@ export async function createChange(
 		query: args.lix.db
 			.insertInto("snapshot")
 			.values({
-				content: args.snapshotContent ?? null,
+				content: args.snapshotContent ? jsonb(args.snapshotContent) : null,
 			})
 			.onConflict((oc) =>
 				oc.doUpdateSet((eb) => ({
 					content: eb.ref("excluded.content"),
 				}))
 			)
-			.returningAll()
-			.returning(sql`json(content)`.as("content")),
+			.returningAll(),
 	})[0] as Snapshot;
-
-	snapshot.content = JSON.parse(snapshot.content as unknown as string);
 
 	const change = executeSync({
 		lix: args.lix,

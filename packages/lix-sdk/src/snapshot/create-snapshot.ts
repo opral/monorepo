@@ -1,5 +1,6 @@
 import type { Snapshot } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import { jsonb } from "../database/json.js";
 
 /**
  * Creates a snapshot and inserts it or retrieves the existing snapshot from the database.
@@ -20,7 +21,7 @@ export async function createSnapshot(args: {
 		const snapshot = await trx
 			.insertInto("snapshot")
 			.values({
-				content: args.content ?? null,
+				content: args.content ? jsonb(args.content) : null,
 			})
 			.onConflict((oc) =>
 				oc.doUpdateSet((eb) => ({

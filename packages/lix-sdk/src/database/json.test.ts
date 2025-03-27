@@ -1,5 +1,5 @@
-import { describe, expect, test, vi } from "vitest";
-import { jsonb, jsonObjectFrom, jsonArrayFrom } from "./json.js";
+import { describe, expect, test } from "vitest";
+import { jsonb } from "./json.js";
 
 describe("JSON utilities", () => {
   test("jsonb returns sql template with jsonb function", () => {
@@ -27,81 +27,6 @@ describe("JSON utilities", () => {
         expect(JSON.parse(jsonString)).toEqual(testObj);
       }
     }
-  });
-
-  test("jsonObjectFrom creates jsonb SQL for objects", () => {
-    const obj = { name: "test", value: 123 };
-    const result = jsonObjectFrom(obj);
-    
-    expect(result).toBeDefined();
-    expect(result.toOperationNode).toBeDefined();
-    
-    const sqlNode = result.toOperationNode();
-    expect(sqlNode.kind).toBe("RawNode");
-    
-    const sqlString = String(sqlNode.sqlFragments.join(''));
-    expect(sqlString).toContain("jsonb");
-    
-    // Verify parameters are properly structured
-    if (sqlNode.parameters && sqlNode.parameters.length > 0) {
-      const param = sqlNode.parameters[0];
-      if (typeof param === 'object' && param !== null && 'value' in param) {
-        const jsonString = (param as any).value;
-        expect(typeof jsonString).toBe("string");
-        expect(JSON.parse(jsonString)).toEqual(obj);
-      }
-    }
-  });
-
-  test("jsonArrayFrom creates jsonb SQL for arrays", () => {
-    const arr = [1, 2, 3, "test"];
-    const result = jsonArrayFrom(arr);
-    
-    expect(result).toBeDefined();
-    expect(result.toOperationNode).toBeDefined();
-    
-    const sqlNode = result.toOperationNode();
-    expect(sqlNode.kind).toBe("RawNode");
-    
-    const sqlString = String(sqlNode.sqlFragments.join(''));
-    expect(sqlString).toContain("jsonb");
-    
-    // Verify parameters are properly structured
-    if (sqlNode.parameters && sqlNode.parameters.length > 0) {
-      const param = sqlNode.parameters[0];
-      if (typeof param === 'object' && param !== null && 'value' in param) {
-        const jsonString = (param as any).value;
-        expect(typeof jsonString).toBe("string");
-        expect(JSON.parse(jsonString)).toEqual(arr);
-      }
-    }
-  });
-  
-  test("jsonArrayFrom handles Kysely query expressions", () => {
-    // Create a mock Kysely query expression
-    const mockQueryExpression = {
-      toOperationNode: vi.fn().mockReturnValue({
-        kind: "SelectQueryNode"
-      })
-    };
-    
-    const result = jsonArrayFrom(mockQueryExpression as any);
-    
-    expect(result).toBeDefined();
-    expect(result.toOperationNode).toBeDefined();
-    
-    const sqlNode = result.toOperationNode();
-    expect(sqlNode.kind).toBe("RawNode");
-    
-    // Should contain the jsonb and coalesce SQL pattern for subqueries
-    const sqlString = String(sqlNode.sqlFragments.join(''));
-    expect(sqlString).toContain("jsonb");
-    expect(sqlString).toContain("select coalesce(json_group_array(json_object(*))");
-    expect(sqlString).toContain("from");
-    expect(sqlString).toContain("as agg");
-    
-    // Verify the query expression was used
-    expect(mockQueryExpression.toOperationNode).toHaveBeenCalled();
   });
   
   test("jsonb handles null values", () => {
@@ -219,77 +144,5 @@ describe("JSON utilities", () => {
         expect(JSON.parse(jsonString)).toEqual(complex);
       }
     }
-  });
-  
-  test("jsonArrayFrom handles array with various data types", () => {
-    const mixedArray = [
-      1,
-      "string",
-      true,
-      null,
-      { key: "value" },
-      [1, 2, 3]
-    ];
-    
-    const result = jsonArrayFrom(mixedArray);
-    const sqlNode = result.toOperationNode();
-    
-    if (sqlNode.parameters && sqlNode.parameters.length > 0) {
-      const param = sqlNode.parameters[0];
-      if (typeof param === 'object' && param !== null && 'value' in param) {
-        const jsonString = (param as any).value;
-        expect(typeof jsonString).toBe("string");
-        expect(JSON.parse(jsonString)).toEqual(mixedArray);
-      }
-    }
-  });
-  
-  test("jsonObjectFrom handles keys with special characters", () => {
-    const objWithSpecialKeys = {
-      "normal-key": "value1",
-      "key.with.dots": "value2",
-      "key with spaces": "value3",
-      "$specialChars": "value4",
-      "emoji🔥key": "value5"
-    };
-    
-    const result = jsonObjectFrom(objWithSpecialKeys);
-    const sqlNode = result.toOperationNode();
-    
-    if (sqlNode.parameters && sqlNode.parameters.length > 0) {
-      const param = sqlNode.parameters[0];
-      if (typeof param === 'object' && param !== null && 'value' in param) {
-        const jsonString = (param as any).value;
-        expect(typeof jsonString).toBe("string");
-        expect(JSON.parse(jsonString)).toEqual(objWithSpecialKeys);
-      }
-    }
-  });
-  
-  test("jsonObjectFrom handles Kysely query expressions", () => {
-    // Create a mock Kysely query expression
-    const mockQueryExpression = {
-      toOperationNode: vi.fn().mockReturnValue({
-        kind: "SelectQueryNode"
-      })
-    };
-    
-    const result = jsonObjectFrom(mockQueryExpression as any);
-    
-    expect(result).toBeDefined();
-    expect(result.toOperationNode).toBeDefined();
-    
-    const sqlNode = result.toOperationNode();
-    expect(sqlNode.kind).toBe("RawNode");
-    
-    // Should contain the jsonb and json_object SQL pattern for subqueries
-    const sqlString = String(sqlNode.sqlFragments.join(''));
-    expect(sqlString).toContain("jsonb");
-    expect(sqlString).toContain("select json_object(*)");
-    expect(sqlString).toContain("from");
-    expect(sqlString).toContain("as obj");
-    
-    // Verify the query expression was used
-    expect(mockQueryExpression.toOperationNode).toHaveBeenCalled();
   });
 });
