@@ -22,7 +22,12 @@ export function lixProsemirror(options: LixPluginOptions) {
 		(...values: any[]) => {
 			const data = new TextDecoder().decode(values[1]);
 			const json = JSON.parse(data);
-			updateEditorFromExternalDoc(json);
+			const metadata = values[2] ? JSON.parse(values[2]) : null;
+
+			// Only update the editor if this is not an internal change
+			if (!metadata || !metadata.prosemirror_editor_update) {
+				updateEditorFromExternalDoc(json);
+			}
 			return null;
 		},
 		{
@@ -36,7 +41,7 @@ export function lixProsemirror(options: LixPluginOptions) {
     AFTER UPDATE ON file
     WHEN NEW.path = '/prosemirror.json'
     BEGIN
-      SELECT handle_lix_prosemirror_update(NEW.data);
+      SELECT handle_lix_prosemirror_update(NEW.data, json(NEW.metadata));
     END;
     `);
 
@@ -67,10 +72,16 @@ export function lixProsemirror(options: LixPluginOptions) {
 				.values({
 					path: "/prosemirror.json",
 					data: fileData,
+					metadata: {
+						prosemirror_editor_update: true,
+					},
 				})
 				.onConflict((oc) =>
 					oc.doUpdateSet({
 						data: fileData,
+						metadata: {
+							prosemirror_editor_update: true,
+						},
 					}),
 				)
 				.execute()
@@ -199,10 +210,9 @@ export function updateEditorWithExternalDoc(
 ) {
 	if (!view) return;
 
-	// Create a transaction with the external doc in the metadata
-	const tr = view.state.tr;
-	tr.setMeta(lixPluginKey, { externalDoc });
-
-	// Dispatch the transaction
-	view.dispatch(tr);
+	view.dispatch(
+		view.state.tr.setMeta(lixPluginKey, {
+			externalDoc,
+		}),
+	);
 }
