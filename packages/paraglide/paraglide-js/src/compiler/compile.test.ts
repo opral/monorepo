@@ -9,6 +9,7 @@ import { compile } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
 import type { Runtime } from "./runtime/type.js";
 import { defaultCompilerOptions } from "./compiler-options.js";
+import consola from "consola";
 
 test("loads a project and compiles it", async () => {
 	const project = await loadProjectInMemory({
@@ -337,4 +338,70 @@ test("default compiler options should include cookied, variable and baseLocale t
 		"globalVariable",
 		"baseLocale",
 	]);
+});
+
+test("emits warnings for modules that couldn't be imported locally", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+				modules: ["./non-existent-paraglide-plugin.js"],
+			},
+		}),
+	});
+
+	const mock = vi.fn();
+
+	consola.mockTypes(() => mock);
+
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	// save project to directory to test loading
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		fs: fs,
+	});
+
+	expect(mock).toHaveBeenCalled();
+});
+
+test("emits warnings for modules that couldn't be imported via http", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+				modules: ["https://example.com/non-existent-paraglide-plugin.js"],
+			},
+		}),
+	});
+
+	const mock = vi.fn();
+
+	consola.mockTypes(() => mock);
+
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	// save project to directory to test loading
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		fs: fs,
+	});
+
+	expect(mock).toHaveBeenCalled();
 });
