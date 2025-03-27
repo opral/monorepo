@@ -215,6 +215,7 @@ test("foreign key constraints are deferred to make the order of applying changes
 	const snapshots = [
 		mockJsonSnapshot({
 			id: "change-set-1",
+			discussion_id: null,
 		} satisfies ChangeSet),
 		mockJsonSnapshot({
 			change_id: "change0",

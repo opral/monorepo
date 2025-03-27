@@ -151,6 +151,7 @@ export type NewChangeSet = Insertable<ChangeSetTable>;
 export type ChangeSetUpdate = Updateable<ChangeSetTable>;
 type ChangeSetTable = {
 	id: Generated<string>;
+	discussion_id: string | null;
 };
 
 export type ChangeSetElement = Selectable<ChangeSetElementTable>;
@@ -168,7 +169,6 @@ export type NewDiscussion = Insertable<DiscussionTable>;
 export type DiscussionUpdate = Updateable<DiscussionTable>;
 type DiscussionTable = {
 	id: Generated<string>;
-	change_set_id: string;
 };
 
 export type Comment = Selectable<CommentTable>;

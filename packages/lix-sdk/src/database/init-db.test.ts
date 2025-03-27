@@ -247,17 +247,9 @@ test("discussion.id are nano_id(12)", async () => {
 	});
 	const db = initDb({ sqlite });
 
-	const changeSet = await db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
 	const discussion = await db
 		.insertInto("discussion")
-		.values({
-			change_set_id: changeSet.id,
-		})
+		.values({})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
@@ -271,17 +263,9 @@ test("comment.id are nano_id(14)", async () => {
 	});
 	const db = initDb({ sqlite });
 
-	const changeSet = await db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
 	const discussion = await db
 		.insertInto("discussion")
-		.values({
-			change_set_id: changeSet.id,
-		})
+		.values({})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
@@ -332,34 +316,43 @@ test("label.id is nano_id(8)", async () => {
 	expect(label.id.length).toBe(8);
 });
 
-test("creating multiple discussions for one change set should be possible", async () => {
+test("change sets can optionally have an associated discussion", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
 	const db = initDb({ sqlite });
 
-	const changeSet = await db
-		.insertInto("change_set")
-		.defaultValues()
+	// Create discussions
+	const discussion1 = await db
+		.insertInto("discussion")
+		.values({ id: "discussion-1" })
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	await db
+	const discussion2 = await db
 		.insertInto("discussion")
-		.values([
-			{ id: "discussion-1", change_set_id: changeSet.id },
-			{ id: "discussion-2", change_set_id: changeSet.id },
-		])
+		.values({ id: "discussion-2" })
 		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Create change sets pointing to different discussions
+	await db
+		.insertInto("change_set")
+		.values([
+			{ id: "change-set-1", discussion_id: discussion1.id },
+			{ id: "change-set-2", discussion_id: discussion2.id },
+		])
 		.execute();
 
-	const discussions = await db
-		.selectFrom("discussion")
+	// Verify the relationships
+	const changeSets = await db
+		.selectFrom("change_set")
 		.selectAll()
-		.where("change_set_id", "=", changeSet.id)
 		.execute();
 
-	expect(discussions).toHaveLength(2);
+	expect(changeSets).toHaveLength(2);
+	expect(changeSets.find(cs => cs.id === "change-set-1")?.discussion_id).toBe("discussion-1");
+	expect(changeSets.find(cs => cs.id === "change-set-2")?.discussion_id).toBe("discussion-2");
 });
 
 test("the checkpoint label should be created if it doesn't exist", async () => {
