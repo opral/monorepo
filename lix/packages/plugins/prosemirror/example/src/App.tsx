@@ -3,7 +3,6 @@ import LixDebugPanel from "./components/LixDebugPanel";
 import Sidebar from "./components/Sidebar";
 import AccountSelector from "./components/AccountSelector";
 import VersionToolbar from "./components/VersionToolbar";
-import { lix } from "./state";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
@@ -30,7 +29,8 @@ function App() {
 			</div>
 
 			{/* Debug tools at the bottom */}
-			<LixDebugPanel lix={lix} />
+			<hr className="mt-10 text-base-300" />
+			<LixDebugPanel />
 		</div>
 	);
 }
