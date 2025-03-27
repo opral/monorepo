@@ -24,7 +24,7 @@ import {
 import { AudioLines, FileUp, Film, ImageIcon } from 'lucide-react';
 import { useFilePicker } from 'use-file-picker';
 
-import { useUploadFile } from '@/lib/uploadthing';
+import { useLixUpload } from '@/hooks/use-lix-upload';
 
 import { Spinner } from './spinner';
 
@@ -68,7 +68,7 @@ export const MediaPlaceholderElement = withHOC(
       const { api } = useEditorPlugin(PlaceholderPlugin);
 
       const { isUploading, progress, uploadedFile, uploadFile, uploadingFile } =
-        useUploadFile();
+        useLixUpload();
 
       const loading = isUploading && uploadingFile;
 
