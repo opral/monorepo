@@ -99,12 +99,15 @@ function createMergedNode(
 
 	// For nodes with IDs, we need to do a deep comparison of their content
 	// to determine if they've been modified
-	if (beforeNode?.attrs?.id && afterNode?.attrs?.id && 
-		beforeNode.attrs.id === afterNode.attrs.id) {
+	if (
+		beforeNode?.attrs?.id &&
+		afterNode?.attrs?.id &&
+		beforeNode.attrs.id === afterNode.attrs.id
+	) {
 		// Check if the content has changed
 		const hasContentChanged = contentHasChanged(beforeNode, afterNode);
 		const diffState = hasContentChanged ? "updated" : "unmodified";
-		
+
 		return convertToDiffNode(
 			afterNode,
 			diffState,
@@ -134,20 +137,23 @@ function createMergedNode(
  */
 function contentHasChanged(beforeNode: any, afterNode: any): boolean {
 	if (!beforeNode || !afterNode) return true;
-	
+
 	// Different types means content has changed
 	if (beforeNode.type !== afterNode.type) return true;
-	
+
 	// For text nodes, compare text content
 	if (beforeNode.text !== afterNode.text) return true;
-	
+
 	// If one has content and the other doesn't, content has changed
-	if ((!beforeNode.content && afterNode.content) || 
-		(beforeNode.content && !afterNode.content)) return true;
-	
+	if (
+		(!beforeNode.content && afterNode.content) ||
+		(beforeNode.content && !afterNode.content)
+	)
+		return true;
+
 	// If content arrays have different lengths, content has changed
 	if (beforeNode.content?.length !== afterNode.content?.length) return true;
-	
+
 	// Compare each child recursively
 	if (beforeNode.content && afterNode.content) {
 		for (let i = 0; i < beforeNode.content.length; i++) {
@@ -156,7 +162,7 @@ function contentHasChanged(beforeNode: any, afterNode: any): boolean {
 			}
 		}
 	}
-	
+
 	return false;
 }
 
@@ -182,10 +188,14 @@ function convertToDiffNode(
 	// Add text content if this is a text node
 	if (node.text) {
 		result.text = node.text;
-		
+
 		// Special handling for text nodes - compare text content directly
-		if (diffState !== "created" && diffState !== "deleted" && 
-			beforeNode && beforeNode.text !== node.text) {
+		if (
+			diffState !== "created" &&
+			diffState !== "deleted" &&
+			beforeNode &&
+			beforeNode.text !== node.text
+		) {
 			// Ensure attrs exists before accessing it
 			result.attrs = result.attrs || {};
 			result.attrs.diff = "updated";
@@ -203,25 +213,29 @@ function convertToDiffNode(
 		// For each child in the current node
 		node.content.forEach((childNode: any, index: number) => {
 			const childId = childNode.attrs?.id;
-			
+
 			// For text nodes or nodes without IDs, we need to compare by position
 			if (!childId) {
 				// Find corresponding child in the before node by index
 				const beforeChild = beforeNode?.content?.[index];
-				
+
 				// Determine diff state based on content comparison and parent state
 				let childDiffState = diffState;
-				
+
 				// For created or deleted parent nodes, children inherit the state
 				if (diffState === "created" || diffState === "deleted") {
 					childDiffState = diffState;
-				} 
+				}
 				// Otherwise, determine state based on content comparison
-				else if (beforeChild && childNode.type === "text" && beforeChild.text !== childNode.text) {
+				else if (
+					beforeChild &&
+					childNode.type === "text" &&
+					beforeChild.text !== childNode.text
+				) {
 					childDiffState = "updated";
 					hasUpdatedChildren = true;
 				}
-				
+
 				const childDiffNode = convertToDiffNode(
 					childNode,
 					childDiffState,
@@ -229,15 +243,18 @@ function convertToDiffNode(
 					afterNodesById,
 					beforeChild,
 				);
-				
+
 				// Only count as updated if we're not already created or deleted
-				if (diffState !== "created" && diffState !== "deleted" &&
-					(childDiffNode.attrs?.diff === "updated" || 
-					childDiffNode.attrs?.diff === "created" || 
-					childDiffNode.attrs?.diff === "deleted")) {
+				if (
+					diffState !== "created" &&
+					diffState !== "deleted" &&
+					(childDiffNode.attrs?.diff === "updated" ||
+						childDiffNode.attrs?.diff === "created" ||
+						childDiffNode.attrs?.diff === "deleted")
+				) {
 					hasUpdatedChildren = true;
 				}
-				
+
 				result.content!.push(childDiffNode);
 				return;
 			}
@@ -256,15 +273,18 @@ function convertToDiffNode(
 				beforeNodesById,
 				afterNodesById,
 			);
-			
+
 			// Only count as updated if we're not already created or deleted
-			if (diffState !== "created" && diffState !== "deleted" &&
-				(mergedChild.attrs?.diff === "updated" || 
-				mergedChild.attrs?.diff === "created" || 
-				mergedChild.attrs?.diff === "deleted")) {
+			if (
+				diffState !== "created" &&
+				diffState !== "deleted" &&
+				(mergedChild.attrs?.diff === "updated" ||
+					mergedChild.attrs?.diff === "created" ||
+					mergedChild.attrs?.diff === "deleted")
+			) {
 				hasUpdatedChildren = true;
 			}
-			
+
 			result.content!.push(mergedChild);
 		});
 
@@ -290,11 +310,15 @@ function convertToDiffNode(
 				});
 			}
 		}
-		
+
 		// If any children were updated, created, or deleted, mark this node as updated
 		// But only if it's not already marked as created or deleted
-		if (hasUpdatedChildren && result.attrs && 
-			diffState !== "created" && diffState !== "deleted") {
+		if (
+			hasUpdatedChildren &&
+			result.attrs &&
+			diffState !== "created" &&
+			diffState !== "deleted"
+		) {
 			result.attrs.diff = "updated";
 		}
 	}

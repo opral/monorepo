@@ -80,16 +80,16 @@ it("detects changes when inserting a prosemirror document", async () => {
 	// So we'll check that at least one of them has the modified content
 	const p1Changes = changes.filter((c) => c.entity_id === "p1");
 	expect(p1Changes.length).toBeGreaterThanOrEqual(1);
-	
+
 	// At least one p1 change should have the modified content
-	const hasModifiedP1 = p1Changes.some(change => {
+	const hasModifiedP1 = p1Changes.some((change) => {
 		if (change?.content) {
 			const content = change.content as any;
 			return content.content?.[0]?.text === "Modified paragraph";
 		}
 		return false;
 	});
-	
+
 	expect(hasModifiedP1).toBe(true);
 
 	// Check for new paragraph p2

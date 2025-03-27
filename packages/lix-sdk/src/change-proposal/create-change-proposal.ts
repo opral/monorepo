@@ -7,7 +7,7 @@ import { changeSetElementInSymmetricDifference } from "../change-set/change-set-
 /**
  * Creates a change proposal that represents the symmetric difference
  * between the source and target change sets.
- * 
+ *
  * The symmetric difference contains changes that are in either the source
  * or target change set, but not in both.
  */
@@ -20,14 +20,21 @@ export async function createChangeProposal(args: {
 		// Get the changes that are in the symmetric difference between the two change sets
 		const symmetricDifferenceChanges = await trx
 			.selectFrom("change_set_element")
-			.where(changeSetElementInSymmetricDifference(args.source_change_set, args.target_change_set))
+			.where(
+				changeSetElementInSymmetricDifference(
+					args.source_change_set,
+					args.target_change_set
+				)
+			)
 			.select(["change_id"])
 			.execute();
 
 		// Create a new change set with the symmetric difference changes
 		const newChangeSet = await createChangeSet({
 			lix: { db: trx },
-			changes: symmetricDifferenceChanges.map(change => ({ id: change.change_id })),
+			changes: symmetricDifferenceChanges.map((change) => ({
+				id: change.change_id,
+			})),
 		});
 
 		// Create the change proposal

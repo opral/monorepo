@@ -143,16 +143,12 @@ test("should handle complex documents with multiple changes", () => {
 			{
 				type: "paragraph",
 				attrs: { id: "p1" },
-				content: [
-					{ type: "text", text: "First paragraph" },
-				],
+				content: [{ type: "text", text: "First paragraph" }],
 			},
 			{
 				type: "paragraph",
 				attrs: { id: "p2" },
-				content: [
-					{ type: "text", text: "Second paragraph" },
-				],
+				content: [{ type: "text", text: "Second paragraph" }],
 			},
 		],
 	};
@@ -170,9 +166,7 @@ test("should handle complex documents with multiple changes", () => {
 			{
 				type: "paragraph",
 				attrs: { id: "p2" },
-				content: [
-					{ type: "text", text: "Second paragraph" },
-				],
+				content: [{ type: "text", text: "Second paragraph" }],
 			},
 			{
 				type: "paragraph",
@@ -251,16 +245,16 @@ test("should detect text changes with spaces and commas", () => {
 			{
 				type: "paragraph",
 				attrs: {
-					id: "a02fc822-98c0-4845-a0e6-6cc0d00e27bb"
+					id: "a02fc822-98c0-4845-a0e6-6cc0d00e27bb",
 				},
 				content: [
 					{
 						type: "text",
-						text: "hello  world"
-					}
-				]
-			}
-		]
+						text: "hello  world",
+					},
+				],
+			},
+		],
 	};
 
 	// Proposal document (after)
@@ -270,16 +264,16 @@ test("should detect text changes with spaces and commas", () => {
 			{
 				type: "paragraph",
 				attrs: {
-					id: "a02fc822-98c0-4845-a0e6-6cc0d00e27bb"
+					id: "a02fc822-98c0-4845-a0e6-6cc0d00e27bb",
 				},
 				content: [
 					{
 						type: "text",
-						text: "hello  world, yes"
-					}
-				]
-			}
-		]
+						text: "hello  world, yes",
+					},
+				],
+			},
+		],
 	};
 
 	// Create the diff
@@ -289,7 +283,10 @@ test("should detect text changes with spaces and commas", () => {
 	expect(result.attrs?.diff).toBe("updated");
 
 	// The paragraph should be marked as updated
-	const paragraph = findNodeById(result, "a02fc822-98c0-4845-a0e6-6cc0d00e27bb");
+	const paragraph = findNodeById(
+		result,
+		"a02fc822-98c0-4845-a0e6-6cc0d00e27bb",
+	);
 	expect(paragraph).toBeDefined();
 	expect(paragraph?.attrs?.diff).toBe("updated");
 
@@ -323,7 +320,10 @@ function findNodeById(root: DiffNode, id: string): DiffNode | undefined {
 /**
  * Helper function to find a text node inside a paragraph with a specific ID
  */
-function findTextInParagraph(root: DiffNode, paragraphId: string): DiffNode | undefined {
+function findTextInParagraph(
+	root: DiffNode,
+	paragraphId: string,
+): DiffNode | undefined {
 	const paragraph = findNodeById(root, paragraphId);
 	if (paragraph?.content?.[0]?.type === "text") {
 		return paragraph.content[0];

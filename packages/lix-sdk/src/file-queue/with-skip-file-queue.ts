@@ -2,10 +2,10 @@ import type { Lix } from "../lix/open-lix.js";
 
 /**
  * Wraps a database operation in a transaction and skips file queue entries.
- * 
- * Use this function if you want to perform a database operation that should 
+ *
+ * Use this function if you want to perform a database operation that should
  * not trigger the file queue to detect changes in the operation you are about to perform.
- * 
+ *
  * @example
  *   await withSkipFileQueue(lix.db, async (trx) => {
  *     await trx
