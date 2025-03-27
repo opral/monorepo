@@ -8,8 +8,8 @@ test("should return the symmetric difference between two change sets", async () 
 	const lix = await openLixInMemory({});
 
 	// Insert test data
-	const changeSetA: ChangeSet = { id: "changeSetA" };
-	const changeSetB: ChangeSet = { id: "changeSetB" };
+	const changeSetA: ChangeSet = { id: "changeSetA", discussion_id: null };
+	const changeSetB: ChangeSet = { id: "changeSetB", discussion_id: null };
 
 	await lix.db
 		.insertInto("change_set")
@@ -68,8 +68,8 @@ test("should return an empty array if there are no differences", async () => {
 	const lix = await openLixInMemory({});
 
 	// Insert test data
-	const changeSetA: ChangeSet = { id: "changeSetA" };
-	const changeSetB: ChangeSet = { id: "changeSetB" };
+	const changeSetA: ChangeSet = { id: "changeSetA", discussion_id: null };
+	const changeSetB: ChangeSet = { id: "changeSetB", discussion_id: null };
 
 	await lix.db
 		.insertInto("change_set")
@@ -109,8 +109,8 @@ test("should handle empty change sets", async () => {
 	const lix = await openLixInMemory({});
 
 	// Insert test data
-	const changeSetA: ChangeSet = { id: "changeSetA" };
-	const changeSetB: ChangeSet = { id: "changeSetB" };
+	const changeSetA: ChangeSet = { id: "changeSetA", discussion_id: null };
+	const changeSetB: ChangeSet = { id: "changeSetB", discussion_id: null };
 
 	await lix.db
 		.insertInto("change_set")
