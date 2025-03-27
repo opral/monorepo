@@ -3,7 +3,7 @@ import type { Lix } from "../lix/open-lix.js";
 
 /**
  * Creates a change set with the given changes, optionally within an open transaction.
- *
+ * 
  * @example
  *   ```ts
  *   const changes = await lix.db.selectFrom("change").selectAll().execute();

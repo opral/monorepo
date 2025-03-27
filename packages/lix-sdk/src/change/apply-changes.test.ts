@@ -266,3 +266,103 @@ test("applies an insert change for a file if the file does not exist", async () 
 	expect(changes1).toEqual(changes2);
 	expect(file1).toEqual(file2);
 });
+
+test("it applies changes with skipFileQueue=false and detects changes", async () => {
+	// Create a plugin that will modify the file content when changes are detected
+	const mockPlugin: LixPlugin = {
+		key: "plugin1",
+		detectChangesGlob: "*.txt",
+		detectChanges: async () => {
+			// When detecting changes, create a new change with different content
+			return [
+				{
+					entity_id: "detected_change",
+					snapshot: {
+						text: "detected-change-content",
+					},
+					schema: {
+						type: "json",
+						key: "txt",
+					},
+				},
+			];
+		},
+		applyChanges: async ({ changes }) => {
+			// When applying changes, use the snapshot content
+			const changeId = changes[0]?.id || "unknown";
+			return {
+				fileData: new TextEncoder().encode(`applied-change-${changeId}`),
+			};
+		},
+	};
+
+	const lix = await openLixInMemory({
+		providePlugins: [mockPlugin],
+	});
+
+	// Create a test file
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			id: "file1",
+			data: new TextEncoder().encode("initial-data"),
+			path: "/test.txt",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Create a change to apply
+	const changes = await lix.db
+		.insertInto("change")
+		.values([
+			{
+				id: "changeA",
+				file_id: file.id,
+				plugin_key: mockPlugin.key,
+				snapshot_id: "no-content",
+				entity_id: "value1",
+				schema_key: "mock",
+			},
+		])
+		.returningAll()
+		.execute();
+
+	// Apply changes with skipFileQueue=false
+	await applyChanges({
+		lix,
+		changes,
+		skipFileQueue: false,
+	});
+
+	// Wait for the file queue to settle
+	await fileQueueSettled({ lix });
+
+	// Check if new changes were detected and created (since skipFileQueue=false)
+	const detectedChanges = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "detected_change")
+		.selectAll()
+		.execute();
+
+	// Should have detected changes
+	expect(detectedChanges.length).toBeGreaterThan(0);
+
+	// Apply changes with skipFileQueue=true (default)
+	await applyChanges({
+		lix,
+		changes,
+	});
+
+	// Wait for the file queue to settle
+	await fileQueueSettled({ lix });
+
+	// Check if new changes were detected (should be none since skipFileQueue=true)
+	const detectedChangesAfter = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "detected_change")
+		.selectAll()
+		.execute();
+
+	// Should not have detected any new changes
+	expect(detectedChangesAfter.length).toBe(detectedChanges.length);
+});

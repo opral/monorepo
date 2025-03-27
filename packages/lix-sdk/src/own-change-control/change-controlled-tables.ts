@@ -1,6 +1,7 @@
 export const changeControlledTableIds = {
 	account: ["id"],
 	comment: ["id"],
+	change_proposal: ["id"],
 	change_set: ["id"],
 	change_author: ["change_id", "account_id"],
 	change_set_element: ["change_set_id", "change_id"],
