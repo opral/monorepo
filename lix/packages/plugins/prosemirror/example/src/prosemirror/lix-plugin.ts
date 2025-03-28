@@ -1,13 +1,14 @@
 import { Plugin, PluginKey, Transaction } from "prosemirror-state";
-import { lix } from "../state";
 import { schema } from "./schema";
 import { EditorView } from "prosemirror-view";
+import { Lix } from "@lix-js/sdk";
 
 // Create a plugin key for the Lix plugin
 export const lixPluginKey = new PluginKey("lix-plugin");
 
 interface LixPluginOptions {
-	lix: typeof lix;
+	lix: Lix;
+	fileId: string;
 	debounceTime?: number;
 }
 
@@ -39,7 +40,7 @@ export function lixProsemirror(options: LixPluginOptions) {
 	lix.sqlite.exec(`
     CREATE TRIGGER IF NOT EXISTS lix_prosemirror_update
     AFTER UPDATE ON file
-    WHEN NEW.path = '/prosemirror.json'
+    WHEN NEW.id = '${options.fileId}'
     BEGIN
       SELECT handle_lix_prosemirror_update(NEW.data, json(NEW.metadata));
     END;
@@ -68,25 +69,16 @@ export function lixProsemirror(options: LixPluginOptions) {
 			const fileData = new TextEncoder().encode(JSON.stringify(docJSON));
 
 			lix.db
-				.insertInto("file")
-				.values({
-					path: "/prosemirror.json",
+				.updateTable("file")
+				.set({
 					data: fileData,
 					metadata: {
 						prosemirror_editor_update: true,
 					},
 				})
-				.onConflict((oc) =>
-					oc.doUpdateSet({
-						data: fileData,
-						metadata: {
-							prosemirror_editor_update: true,
-						},
-					}),
-				)
+				.where("id", "=", options.fileId)
 				.execute()
 				.then(() => {
-					console.log("Document saved to Lix");
 					saveInProgress = false;
 				})
 				.catch((error) => {
@@ -117,9 +109,7 @@ export function lixProsemirror(options: LixPluginOptions) {
 			const tr = view.state.tr;
 
 			// Create a new document from JSON
-			const newDoc = schema.nodeFromJSON(
-				externalDoc ?? { type: "doc", content: [] },
-			);
+			const newDoc = schema.nodeFromJSON(externalDoc);
 
 			// Replace the current document
 			tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
@@ -199,20 +189,4 @@ export function lixProsemirror(options: LixPluginOptions) {
 			};
 		},
 	});
-}
-
-/**
- * Updates the editor with an external document
- */
-export function updateEditorWithExternalDoc(
-	view: EditorView,
-	externalDoc: any,
-) {
-	if (!view) return;
-
-	view.dispatch(
-		view.state.tr.setMeta(lixPluginKey, {
-			externalDoc,
-		}),
-	);
 }

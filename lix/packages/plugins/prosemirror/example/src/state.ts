@@ -1,9 +1,18 @@
 import { openLixInMemory } from "@lix-js/sdk";
 import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
-import before from "../assets/before.json?raw";
+import initialDoc from "../assets/before.json?raw";
 
-export let lix = await openLixInMemory({
+export const lix = await openLixInMemory({
 	providePlugins: [prosemirrorPlugin],
 });
 
-export const initialDoc = JSON.parse(before);
+// Insert the initial document if it doesn't exist
+export const prosemirrorFile = await lix.db
+	.insertInto("file")
+	.values({
+		path: "/prosemirror.json",
+		data: new TextEncoder().encode(initialDoc),
+	})
+	.onConflict((oc) => oc.doNothing())
+	.returningAll()
+	.executeTakeFirstOrThrow();

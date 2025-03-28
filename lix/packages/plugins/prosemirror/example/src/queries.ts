@@ -1,4 +1,4 @@
-import { lix } from "./state";
+import { prosemirrorFile, lix } from "./state";
 import {
 	changeHasLabel,
 	changeIsLeaf,
@@ -15,7 +15,7 @@ import {
 export async function selectProsemirrorDocument() {
 	const file = await lix.db
 		.selectFrom("file")
-		.where("path", "=", "/prosemirror.json")
+		.where("id", "=", prosemirrorFile.id)
 		.selectAll()
 		.executeTakeFirst();
 
@@ -35,15 +35,18 @@ export async function selectProsemirrorDocument() {
  * Selects all changes related to the prosemirror document
  */
 export async function selectChanges() {
-	return lix.db
+	const result = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.innerJoin("file", "change.file_id", "file.id")
-		.where("file.path", "=", "/prosemirror.json")
+		.where("file.id", "=", prosemirrorFile.id)
 		.selectAll("change")
 		.select("snapshot.content")
 		.orderBy("change.created_at", "desc")
 		.execute();
+
+	// console.log({ result });
+	return result;
 }
 
 export async function selectCheckpoints(): Promise<
@@ -228,7 +231,7 @@ export async function selectCurrentChangeSet(): Promise<
 			.selectFrom("change")
 			.where(changeIsLeafInVersion(currentVersion))
 			.innerJoin("file", "change.file_id", "file.id")
-			.where("file.path", "=", "/prosemirror.json")
+			.where("file.id", "=", prosemirrorFile.id)
 			.where((eb) => eb.not(changeHasLabel("checkpoint")))
 			.where((eb) => eb.not(changeHasLabel(labelName)))
 			.selectAll("change")
@@ -321,7 +324,7 @@ export async function selectProposedChangeSet(): Promise<
 	const sourceChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("file", "change.file_id", "file.id")
-		.where("file.path", "=", "/prosemirror.json")
+		.where("file.id", "=", prosemirrorFile.id)
 		.where(changeIsLeafInVersion(currentVersion))
 		.select(["change.id"])
 		.execute();
@@ -333,7 +336,7 @@ export async function selectProposedChangeSet(): Promise<
 	const targetChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("file", "change.file_id", "file.id")
-		.where("file.path", "=", "/prosemirror.json")
+		.where("file.id", "=", prosemirrorFile.id)
 		.where(changeIsLeafInVersion(mainVersion))
 		.select(["change.id"])
 		.execute();

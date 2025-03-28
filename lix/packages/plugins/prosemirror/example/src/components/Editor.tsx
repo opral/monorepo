@@ -7,9 +7,7 @@ import { idPlugin } from "../prosemirror/id-plugin";
 import { schema } from "../prosemirror/schema";
 import { lixProsemirror } from "../prosemirror/lix-plugin";
 import { useEffect, useRef, useState } from "react";
-import { selectProsemirrorDocument } from "../queries";
-import { useQuery } from "../hooks/useQuery";
-import { initialDoc, lix } from "../state";
+import { prosemirrorFile, lix } from "../state";
 import { registerCustomNodeViews } from "../prosemirror/custom-node-views";
 
 // Custom styles for the ProseMirror editor
@@ -31,32 +29,40 @@ const editorStyles = `
 `;
 
 const Editor: React.FC = () => {
-	const [docInLix] = useQuery(selectProsemirrorDocument);
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
 
-	// Initialize editor
+	// Initialize editor using useEffect for proper lifecycle management
 	useEffect(() => {
-		if (!editorRef.current) return;
+		// Ensure the ref is attached
+		if (!editorRef.current) {
+			return;
+		}
 
-		// Create the initial state
+		// Create the initial state with an EMPTY document
+		// The lixProsemirror plugin will load the actual document
 		const state = EditorState.create({
-			doc: schema.nodeFromJSON(docInLix || initialDoc),
+			doc: schema.nodeFromJSON(
+				JSON.parse(new TextDecoder().decode(prosemirrorFile.data)),
+			),
+			schema,
 			plugins: [
 				history(),
 				keymap(baseKeymap),
 				idPlugin,
 				lixProsemirror({
 					lix,
+					fileId: prosemirrorFile.id,
 				}),
 			],
 		});
 
-		// Create the editor view with custom node views
+		// Create the editor view
 		const editorView = new EditorView(editorRef.current, {
 			state,
 			editable: () => true,
 			dispatchTransaction: (transaction) => {
+				// Get the latest state and apply the transaction
 				const newState = editorView.state.apply(transaction);
 				editorView.updateState(newState);
 			},
@@ -67,7 +73,7 @@ const Editor: React.FC = () => {
 			nodeViews: registerCustomNodeViews(editorView),
 		});
 
-		// Set the view
+		// Set the view in state
 		setView(editorView);
 
 		// Focus the editor
@@ -75,12 +81,12 @@ const Editor: React.FC = () => {
 			editorView.focus();
 		}, 100);
 
-		// Clean up the editor on unmount
+		// Clean up the editor on component unmount
 		return () => {
 			editorView.destroy();
 			setView(null);
 		};
-	}, []);
+	}, []); // Empty dependency array ensures this runs only once on mount
 
 	// Handle clicks to focus the editor
 	const handleClick = () => {
