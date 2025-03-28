@@ -10,7 +10,7 @@ import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { debounce } from "lodash-es";
 import { useAtom } from "jotai";
-import { lixAtom } from "@/state";
+import { editorRefAtom, lixAtom } from "@/state";
 import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
@@ -20,8 +20,14 @@ export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 	const [loadedMd] = useAtom(loadedMdAtom);
+	const [, setEditorRef] = useAtom(editorRefAtom);
 
 	const editor = useCreateEditor();
+	
+	// Store the editor reference in the global atom
+	useEffect(() => {
+		setEditorRef(editor);
+	}, [editor, setEditorRef]);
 
 	useEffect(() => {
 		if (loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()) {

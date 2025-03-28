@@ -201,6 +201,11 @@ export const lixAtom = atom(async (get) => {
  */
 export const withPollingAtom = atom(Date.now());
 
+/**
+ * Global editor reference atom to access the editor outside Plate components
+ */
+export const editorRefAtom = atom<any>(null);
+
 export const currentVersionAtom = atom<Promise<Version | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
