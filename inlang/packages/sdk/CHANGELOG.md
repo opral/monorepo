@@ -1,5 +1,11 @@
 # @inlang/sdk
 
+## 2.4.6
+
+### Patch Changes
+
+- 49a7880: improve: forward telemetry settings to lix
+
 ## 2.4.5
 
 ### Patch Changes
