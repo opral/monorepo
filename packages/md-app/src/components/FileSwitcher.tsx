@@ -1,9 +1,9 @@
 import { useAtom } from "jotai";
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { activeFileAtom } from "@/state-active-file";
 import { filesAtom, lixAtom, withPollingAtom } from "@/state";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
+import { updateUrlParams } from "@/helper/updateUrlParams";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,14 +41,16 @@ export default function FileSwitcher() {
   const [files] = useAtom(filesAtom);
   const [lix] = useAtom(lixAtom);
   const [, setPolling] = useAtom(withPollingAtom);
-  const navigate = useNavigate();
 
   const switchToFile = useCallback(
     async (fileId: string) => {
-      navigate(`?f=${fileId}`);
-      setPolling(Date.now()); // Trigger polling to refresh state
+      // Update URL without causing a navigation
+      updateUrlParams({ f: fileId });
+
+      // Trigger polling to refresh state without full page reload
+      setPolling(Date.now());
     },
-    [navigate, setPolling]
+    [setPolling]
   );
 
   const createNewFile = useCallback(async () => {
@@ -71,13 +73,15 @@ export default function FileSwitcher() {
       // Save the changes to OPFS
       await saveLixToOpfs({ lix });
 
-      // Navigate to the new file
-      navigate(`?f=${newFile.id}`);
-      setPolling(Date.now()); // Refresh state
+      // Update URL without full navigation
+      updateUrlParams({ f: newFile.id });
+
+      // Refresh state
+      setPolling(Date.now()); 
     } catch (error) {
       console.error("Failed to create new file:", error);
     }
-  }, [lix, navigate, setPolling]);
+  }, [lix, setPolling]);
 
   if (!activeFile) return null;
 

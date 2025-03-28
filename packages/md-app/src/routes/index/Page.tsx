@@ -12,8 +12,10 @@ import FileSwitcher from '@/components/FileSwitcher';
 import FileName from '@/components/FileName';
 import { useMemo } from 'react';
 import { isEqual } from "lodash-es";
+import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
 
 export default function Page() {
+	useUrlChangeListener();
 	const [activeFile] = useAtom(activeFileAtom)
 	const [intermediateChanges] = useAtom(intermediateChangesAtom);
 	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
@@ -24,7 +26,7 @@ export default function Page() {
 			// Only show changes where the content has actually changed
 			return !isEqual(change.snapshot_content_before, change.snapshot_content_after);
 		});
-	}, [intermediateChanges]);
+	}, [intermediateChanges, activeFile]);
 
 	return (
 		<>

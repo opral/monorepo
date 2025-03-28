@@ -14,7 +14,6 @@ import { lixAtom } from "@/state";
 import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
-import { BlockSelectionPlugin } from "@udecode/plate-selection/react";
 import { TElement } from "@udecode/plate";
 
 export function PlateEditor() {
@@ -24,17 +23,21 @@ export function PlateEditor() {
 
 	const editor = useCreateEditor();
 
-	// Set the initial value of the editor
+	// Update editor content when active file or loaded markdown changes
 	useEffect(() => {
-		if (
-			loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()
-		) {
-			const nodes = editor
-				.getApi(ExtendedMarkdownPlugin)
-				.markdown.deserialize(loadedMd);
-			editor.tf.setValue(nodes);
+		if (loadedMd) {
+			const currentEditorContent = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
+
+			// Only update if content has changed
+			if (loadedMd !== currentEditorContent) {
+				console.log('Updating editor content with new file');
+				const nodes = editor
+					.getApi(ExtendedMarkdownPlugin)
+					.markdown.deserialize(loadedMd);
+				editor.tf.setValue(nodes);
+			}
 		}
-	}, []);
+	}, [loadedMd, activeFile?.id]);
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -42,6 +45,11 @@ export function PlateEditor() {
 				// if (!editor.api.isFocused()) {
 				// 	editor.getApi(BlockSelectionPlugin).blockSelection.selectAll();
 				// } else {
+
+				// Only attempt to select all if we have editor content
+				if (!editor.children || editor.children.length === 0) {
+					return;
+				}
 
 				// recursive function to get the length of the last text node
 				function getLastTextOffset(node: TElement): number {
@@ -56,22 +64,25 @@ export function PlateEditor() {
 					return lastChild.text ? lastChild.text.length : 0;
 				}
 
-				editor.tf.select(
-					{
-						anchor: { path: [0, 0], offset: 0 },
-						focus: {
-							path: [
-								editor.children.length - 1,
-								editor.children[editor.children.length - 1].children.length - 1,
-							],
-							offset:
-								getLastTextOffset(editor.children[editor.children.length - 1]),
+				try {
+					editor.tf.select(
+						{
+							anchor: { path: [0, 0], offset: 0 },
+							focus: {
+								path: [
+									editor.children.length - 1,
+									editor.children[editor.children.length - 1].children.length - 1,
+								],
+								offset:
+									getLastTextOffset(editor.children[editor.children.length - 1]),
+							},
 						},
-					},
-					{ focus: true }
-				);
-				// }
-				event.preventDefault();
+						{ focus: true }
+					);
+					event.preventDefault();
+				} catch (err) {
+					console.error("Error selecting all text:", err);
+				}
 			}
 		};
 
@@ -79,7 +90,7 @@ export function PlateEditor() {
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [editor]);
+	}, [editor, loadedMd]); // Include loadedMd to re-attach event listener when content changes
 
 	// useCallback because react shouldn't recreate the function on every render
 	// debounce because keystroke changes are not important for the lix 1.0 preview
@@ -87,40 +98,41 @@ export function PlateEditor() {
 	// delete changes/disregard keystroke changes on merge
 	const handleUpdateMdData = useCallback(
 		debounce(async (newData) => {
-			const serializedMd = newData.editor.api.markdown.serialize();
+			// Only save if we have an active file
+			if (!activeFile) return;
+
+			const serializedMd = newData.editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
 
 			await lix.db
 				.updateTable("file")
 				.set("data", new TextEncoder().encode(serializedMd))
-				.where("id", "=", activeFile!.id)
+				.where("id", "=", activeFile.id)
 				.returningAll()
 				.execute();
 
 			// needed because lix is not writing to OPFS yet
 			await saveLixToOpfs({ lix });
 			console.log("saved to lix db");
-			console.log(serializedMd);
 		}, 500),
-		[]
+		[lix, activeFile?.id] // Include activeFile.id in dependencies
 	);
+
+	// Memoize the value change handler to avoid unnecessary re-renders
+	const handleValueChange = useCallback((newValue: any) => {
+		if (!activeFile) return; // Don't save if no active file
+
+		const newContent = newValue.editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
+
+		if (loadedMd !== newContent) {
+			handleUpdateMdData(newValue);
+		}
+	}, [loadedMd, handleUpdateMdData, activeFile]);
 
 	return (
 		<DndProvider backend={HTML5Backend}>
 			<Plate
 				editor={editor}
-				onValueChange={(newValue) => {
-					if (
-						loadedMd !==
-						newValue.editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()
-					) {
-						handleUpdateMdData(newValue);
-						// console.log(
-						// 	newValue.editor.api.markdown.serialize()
-						// );
-					} else {
-						console.log("no change");
-					}
-				}}
+				onValueChange={handleValueChange}
 			>
 				<EditorContainer>
 					<Editor />
