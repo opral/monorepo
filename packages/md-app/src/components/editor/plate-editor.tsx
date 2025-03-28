@@ -23,21 +23,14 @@ export function PlateEditor() {
 
 	const editor = useCreateEditor();
 
-	// Update editor content when active file or loaded markdown changes
 	useEffect(() => {
-		if (loadedMd) {
-			const currentEditorContent = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
-
-			// Only update if content has changed
-			if (loadedMd !== currentEditorContent) {
-				console.log('Updating editor content with new file');
-				const nodes = editor
-					.getApi(ExtendedMarkdownPlugin)
-					.markdown.deserialize(loadedMd);
-				editor.tf.setValue(nodes);
-			}
+		if (loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()) {
+			const nodes = editor
+				.getApi(ExtendedMarkdownPlugin)
+				.markdown.deserialize(loadedMd);
+			editor.tf.setValue(nodes);
 		}
-	}, [loadedMd, activeFile?.id]);
+	}, [activeFile?.id]);
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
