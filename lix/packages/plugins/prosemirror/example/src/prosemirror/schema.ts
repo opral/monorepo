@@ -14,7 +14,8 @@ export const schema = new Schema({
       group: "block",
       attrs: { 
         dragHandlesDisabled: { default: true },
-        level: { default: 1 }
+        level: { default: 1 },
+        id: { default: null } 
       },
       toDOM() { return ["h1", 0] }
     },
@@ -22,7 +23,8 @@ export const schema = new Schema({
       content: "paragraph*",
       group: "block",
       attrs: { 
-        dragHandlesDisabled: { default: true }
+        dragHandlesDisabled: { default: true },
+        id: { default: null } 
       },
       toDOM() { return ["div", { class: "description" }, 0] }
     },
@@ -52,20 +54,32 @@ export const schema = new Schema({
     },
     horizontalRule: {
       group: "block",
+      attrs: { 
+        id: { default: null } 
+      },
       toDOM() { return ["hr"] }
     },
     paragraph: { 
       content: "(text | inline)*", 
       group: "block",
+      attrs: { 
+        id: { default: null } 
+      },
       toDOM() { return ["p", 0] }
     },
     bulletList: {
       content: "listItem+",
       group: "block",
+      attrs: { 
+        id: { default: null } 
+      },
       toDOM() { return ["ul", 0] }
     },
     listItem: {
       content: "paragraph+",
+      attrs: { 
+        id: { default: null } 
+      },
       toDOM() { return ["li", 0] }
     },
     mention: {
@@ -76,7 +90,8 @@ export const schema = new Schema({
         path: { default: "" },
         lastType: { default: "" },
         lastStrictType: { default: null },
-        lastLabel: { default: "" }
+        lastLabel: { default: "" },
+        id: { default: null } 
       },
       toDOM() { return ["span", { class: "mention" }, 0] }
     },

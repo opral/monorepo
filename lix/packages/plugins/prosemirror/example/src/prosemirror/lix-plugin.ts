@@ -67,7 +67,6 @@ export function lixProsemirror(options: LixPluginOptions) {
 
 			saveInProgress = true;
 			const fileData = new TextEncoder().encode(JSON.stringify(docJSON));
-
 			lix.db
 				.updateTable("file")
 				.set({
