@@ -5,7 +5,8 @@
         "type": "title",
         "attrs": {
             "dragHandlesDisabled": true,
-            "level": 1
+            "level": 1,
+            "id": "f052363a-269f-4d68-93e1-dae96bc04c2a"
         },
         "content": [
             {
@@ -17,11 +18,15 @@
     {
         "type": "description",
         "attrs": {
-            "dragHandlesDisabled": true
+            "dragHandlesDisabled": true,
+            "id": "af78574b-e0c7-48e6-9b31-7b9634d1dd1a"
         },
         "content": [
             {
-                "type": "paragraph"
+                "type": "paragraph",
+                "attrs": {
+                    "id": "c50f2420-428f-4cd8-a841-d9292ef33976"
+                }
             }
         ]
     },
@@ -55,10 +60,16 @@
         ]
     },
     {
-        "type": "horizontalRule"
+        "type": "horizontalRule",
+        "attrs": {
+            "id": "e56f0bba-12ff-409a-9496-b7294371d962"
+        }
     },
     {
         "type": "paragraph",
+        "attrs": {
+            "id": "9f9babb9-b95b-487a-8618-e44ef0390819"
+        },
         "content": [
             {
                 "type": "text",
@@ -90,7 +101,8 @@
                             "attributes": []
                         }
                     },
-                    "lastLabel": "my_input"
+                    "lastLabel": "my_input",
+                    "id": "a28983e9-9b72-4322-a809-11bae41027be"
                 }
             },
             {
@@ -101,12 +113,21 @@
     },
     {
         "type": "bulletList",
+        "attrs": {
+            "id": "8c4e1a2d-3b5f-47c9-9d0e-1f2a3b4c5d6e"
+        },
         "content": [
             {
                 "type": "listItem",
+                "attrs": {
+                    "id": "7a6b5c4d-3e2f-1a0b-9c8d-7e6f5a4b3c2d"
+                },
                 "content": [
                     {
                         "type": "paragraph",
+                        "attrs": {
+                            "id": "1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a"
+                        },
                         "content": [
                             {
                                 "type": "text",
@@ -118,9 +139,15 @@
             },
             {
                 "type": "listItem",
+                "attrs": {
+                    "id": "5f6e7d8c-9b0a-1c2d-3e4f-5a6b7c8d9e0f"
+                },
                 "content": [
                     {
                         "type": "paragraph",
+                        "attrs": {
+                            "id": "0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                        },
                         "content": [
                             {
                                 "type": "text",
@@ -161,6 +188,9 @@
     },
     {
         "type": "paragraph",
+        "attrs": {
+            "id": "a831a0de-b143-45e8-aded-c2e3a7607b05"
+        },
         "content": [
             {
                 "type": "mention",
@@ -175,13 +205,17 @@
                             "fileType": "audio"
                         }
                     },
-                    "lastLabel": "output"
+                    "lastLabel": "output",
+                    "id": "9280e387-1faa-4dab-a3b3-4135da84f7c9"
                 }
             }
         ]
     },
     {
         "type": "paragraph",
+        "attrs": {
+            "id": "6d7e8f9a-0b1c-2d3e-4f5a-6b7c8d9e0f1a"
+        },
         "content": [
             {
                 "type": "text",
