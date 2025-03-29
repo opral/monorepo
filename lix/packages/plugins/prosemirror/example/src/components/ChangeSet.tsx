@@ -133,9 +133,22 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 					<div className="bg-base-100">
 						{/* Action buttons bar with change count */}
 						<div className="flex items-center justify-between p-2 bg-base-200 border-b border-base-300">
-							<div className="text-sm flex items-center gap-2">
-								<span className="hidden lg:inline">
-									{changeSet?.change_count || 0}{" "}
+							<div className="text-sm items-center gap-2 hidden md:flex">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									className="lucide ml-2"
+								>
+									<path
+										fill="currentColor"
+										d="M12 22q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2q.425 0 .713.288T13 3v7.275q.45.275.725.713T14 12q0 .825-.587 1.413T12 14t-1.412-.587T10 12q0-.575.275-1.025t.725-.7v-2.15q-1.3.35-2.15 1.413T8 12q0 1.65 1.175 2.825T12 16t2.825-1.175T16 12q0-.65-.187-1.2T15.3 9.75q-.25-.35-.225-.775t.3-.7q.3-.3.713-.3t.662.35q.575.775.913 1.7T18 12q0 2.5-1.75 4.25T12 18t-4.25-1.75T6 12q0-2.25 1.425-3.912T11 6.075V4.05q-2.975.375-4.988 2.625T4 12q0 3.35 2.325 5.675T12 20t5.675-2.325T20 12q0-1.45-.475-2.738t-1.35-2.337q-.275-.325-.275-.75t.3-.725t.713-.287t.687.337q1.125 1.325 1.763 2.975T22 12q0 2.075-.788 3.9t-2.137 3.175t-3.175 2.138T12 22"
+									/>
+								</svg>
+
+								<span className="inline">{changeSet?.change_count || 0}</span>
+								<span className="hidden xl:inline">
 									{changeSet?.change_count === 1
 										? "relevant change"
 										: "relevant changes"}
