@@ -110,7 +110,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 						)}
 					</div>
 					<div className="flex-1">
-						<div className="text-sm truncate">
+						<div className="text-sm break-words">
 							{isCurrentChangeSet
 								? "Current Change Set"
 								: truncatedComment
