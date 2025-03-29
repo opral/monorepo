@@ -143,10 +143,10 @@ export class InputNodeView implements NodeView {
 		this.dom = document.createElement("div");
 		this.dom.className = "badge gap-1 p-3 border border-base-300 rounded";
 
-		// Create the input label prefix
+		// Create the input label prefix with a grayscale image icon using SVG
 		const labelPrefix = document.createElement("span");
 		labelPrefix.className = "text-xs";
-		labelPrefix.textContent = "inp";
+		labelPrefix.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
 		this.dom.appendChild(labelPrefix);
 
 		// Create the input label text
@@ -188,8 +188,32 @@ export class MentionNodeView implements NodeView {
 
 	constructor(node: Node) {
 		this.dom = document.createElement("span");
-		this.dom.className = "border border-base-300 px-1 rounded";
-		this.dom.textContent = `@${node.attrs.lastLabel || ""}`;
+		this.dom.className = "mention";
+		
+		// Create a container for the mention text and icon
+		const container = document.createElement("span");
+		container.className = "mention-content";
+		
+		// Add the mention text
+		const mentionText = document.createElement("span");
+		mentionText.textContent = `@${node.attrs.lastLabel || ""}`;
+		container.appendChild(mentionText);
+		
+		// Add audio wave icon if lastType is audio
+		if (node.attrs.lastType === "audio") {
+			const audioIcon = document.createElement("span");
+			audioIcon.className = "audio-icon ml-1";
+			audioIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M4 10v4"></path>
+				<path d="M8 8v8"></path>
+				<path d="M12 4v16"></path>
+				<path d="M16 8v8"></path>
+				<path d="M20 10v4"></path>
+			</svg>`;
+			container.appendChild(audioIcon);
+		}
+		
+		this.dom.appendChild(container);
 	}
 }
 
@@ -198,27 +222,125 @@ export class GenerationNodeView implements NodeView {
 	dom: HTMLElement;
 
 	constructor(node: Node) {
-		this.dom = document.createElement("div");
-		this.dom.className = "flex items-center gap-2 my-2";
-
-		const badge = document.createElement("div");
-		badge.className = "badge badge-sm gap-1";
+		// Create an inline span instead of a div
+		this.dom = document.createElement("span");
+		this.dom.className = "inline-flex items-center gap-1";
 
 		const icon = document.createElement("span");
 		icon.className = "text-xs";
 		icon.textContent = "✨";
-		badge.appendChild(icon);
+		this.dom.appendChild(icon);
 
 		const label = document.createElement("span");
 		label.textContent = "generation";
-		badge.appendChild(label);
-
-		this.dom.appendChild(badge);
+		this.dom.appendChild(label);
 
 		const model = document.createElement("span");
-		model.className = "text-xs";
+		model.className = "text-xs ml-1";
 		model.textContent = node.attrs.model || "";
 		this.dom.appendChild(model);
+	}
+}
+
+// Custom node view for tool nodes
+export class ToolNodeView implements NodeView {
+	dom: HTMLElement;
+
+	constructor(node: Node) {
+		// Create the main container
+		this.dom = document.createElement("div");
+		this.dom.className = "tool-container border rounded-md p-2 my-2 bg-gray-50";
+
+		// Create the header with tool label and icon
+		const header = document.createElement("div");
+		header.className = "flex items-center justify-between mb-2";
+		
+		// Left side with icon and label
+		const labelContainer = document.createElement("div");
+		labelContainer.className = "flex items-center gap-2";
+		
+		// Tool icon - use speaker icon for ElevenLabs tools
+		const icon = document.createElement("span");
+		icon.className = "text-indigo-500";
+		
+		if (node.attrs.toolId === "elevenLabs") {
+			// Speaker icon for ElevenLabs
+			icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>`;
+		} else {
+			// Default info icon for other tools
+			icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h.01"></path><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path></svg>`;
+		}
+		
+		labelContainer.appendChild(icon);
+		
+		// Tool label
+		const label = document.createElement("span");
+		label.className = "font-medium";
+		label.textContent = node.attrs.label || "Tool";
+		labelContainer.appendChild(label);
+		
+		header.appendChild(labelContainer);
+		
+		// Settings icon on the right
+		const settingsIcon = document.createElement("span");
+		settingsIcon.className = "text-gray-400";
+		settingsIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`;
+		header.appendChild(settingsIcon);
+		
+		this.dom.appendChild(header);
+		
+		// Create the content section
+		const content = document.createElement("div");
+		content.className = "tool-content";
+		
+		try {
+			// Parse parameters
+			const parameters = JSON.parse(node.attrs.parameters || "{}");
+			
+			// Create parameters display
+			if (parameters) {
+				// Create a row for each parameter
+				Object.entries(parameters).forEach(([key, value]: [string, any]) => {
+					const paramRow = document.createElement("div");
+					paramRow.className = "flex items-center justify-between py-1 border-t border-gray-200";
+					
+					// Parameter key
+					const keyElem = document.createElement("span");
+					keyElem.className = "text-gray-500 text-sm";
+					keyElem.textContent = `${key}:`;
+					paramRow.appendChild(keyElem);
+					
+					// Parameter value
+					const valueElem = document.createElement("span");
+					valueElem.className = "text-sm";
+					
+					// Handle different value types
+					if (value && typeof value === 'object' && value.type && value.value) {
+						if (value.type === 'variable') {
+							valueElem.textContent = `@${value.value}`;
+							valueElem.className += " text-gray-400";
+						} else {
+							valueElem.textContent = value.value;
+						}
+					} else {
+						valueElem.textContent = String(value);
+					}
+					
+					paramRow.appendChild(valueElem);
+					content.appendChild(paramRow);
+				});
+			}
+		} catch (e) {
+			console.error("Error parsing tool parameters:", e);
+			
+			// Fallback display
+			const errorText = document.createElement("div");
+			errorText.className = "text-red-500 text-sm";
+			errorText.textContent = "Error parsing tool parameters";
+			content.appendChild(errorText);
+		}
+		
+		this.dom.appendChild(content);
 	}
 }
 
@@ -233,5 +355,6 @@ export function registerCustomNodeViews(_editorView: EditorView) {
 			new InputNodeView(node, view, getPos),
 		mention: (node: Node) => new MentionNodeView(node),
 		generation: (node: Node) => new GenerationNodeView(node),
+		tool: (node: Node) => new ToolNodeView(node),
 	};
 }

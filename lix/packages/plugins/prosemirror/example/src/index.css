@@ -26,6 +26,74 @@
 	display: block !important;
 }
 
+/* Bullet list styling */
+.ProseMirror ul {
+	padding-left: 30px;
+	margin: 0.5em 0;
+	list-style-type: disc;
+}
+
+.ProseMirror li {
+	position: relative;
+	margin-bottom: 0.2em;
+}
+
+.ProseMirror li p {
+	margin: 0;
+}
+
+/* Generation node styling */
+.ProseMirror .inline-flex {
+	display: inline-flex;
+	vertical-align: middle;
+	white-space: nowrap;
+	background-color: #f8f9fa;
+	border: 1px solid #e9ecef;
+	border-radius: 4px;
+	padding: 1px 4px;
+	margin: 0 2px;
+}
+
+/* Mention node styling */
+.ProseMirror .mention {
+	background-color: #e0f7f5;
+	border: 1px solid #c2ece8;
+	border-radius: 4px;
+	padding: 1px 4px;
+	margin: 0 2px;
+	color: #0d9488;
+	font-weight: 500;
+}
+
+.ProseMirror .mention .mention-content {
+	display: inline-flex;
+	align-items: center;
+}
+
+.ProseMirror .mention .audio-icon {
+	display: inline-flex;
+	align-items: center;
+	vertical-align: middle;
+}
+
+/* Tool node styling */
+.ProseMirror .tool-container {
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	background-color: #f9fafb;
+	margin: 1rem 0;
+	padding: 0.75rem;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ProseMirror .tool-content {
+	margin-top: 0.5rem;
+}
+
+.ProseMirror .tool-content .border-t {
+	border-top: 1px solid #e5e7eb;
+}
+
 .editor-wrapper {
 	flex: 1;
 	display: flex;
