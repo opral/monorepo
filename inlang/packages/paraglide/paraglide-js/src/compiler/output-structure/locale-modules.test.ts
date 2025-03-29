@@ -117,6 +117,7 @@ test("should handle case sensitivity in message IDs correctly", () => {
 	const output = generateOutput(bundles, settings, fallbackMap);
 
 	// Check that the output exists
+	expect(output).toHaveProperty("messages/_index.js");
 	expect(output).toHaveProperty("messages/en.js");
 
 	// The exported constants should not conflict
