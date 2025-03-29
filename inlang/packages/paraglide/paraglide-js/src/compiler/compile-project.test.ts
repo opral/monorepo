@@ -354,6 +354,8 @@ describe.each([
 			test("should return the correct message for the current locale", async () => {
 				const { m, runtime } = await importCode(code);
 
+				console.log(m);
+
 				runtime.setLocale("en");
 
 				expect(m.sad_penguin_bundle()).toBe("A simple message.");
@@ -480,7 +482,6 @@ describe.each([
 					`export * as m from "./paraglide/messages.js"
 					export * as runtime from "./paraglide/runtime.js"`
 				);
-
 				const { m, runtime } = await importCode(code);
 
 				runtime.setLocale("de");
@@ -793,10 +794,6 @@ describe.each([
 		});
 
 		test("case sensitivity handling for bundle IDs", async () => {
-			// skip local modules for now because the option might get removed in the future
-			if (compilerOptions.outputStructure === "locale-modules") {
-				return;
-			}
 			const project = await loadProjectInMemory({
 				blob: await newProject({
 					settings: { locales: ["en"], baseLocale: "en" },

@@ -62,7 +62,7 @@ export const blue_moon_bottle = (inputs, options = {}) => {
 	const locale = options.locale ?? getLocale()
 	trackMessageCall("blue_moon_bottle", locale)
 	if (locale === "en") return en.blue_moon_bottle(inputs)
-	if (locale === "en-US") return en_us.blue_moon_bottle(inputs)
+	if (locale === "en-US") return en_us2.blue_moon_bottle(inputs)
 	return "blue_moon_bottle"
 };"`
 	);
