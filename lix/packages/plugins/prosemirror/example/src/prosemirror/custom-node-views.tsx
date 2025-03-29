@@ -19,13 +19,7 @@ export class DescriptionNodeView implements NodeView {
 		this.dom = document.createElement("div");
 		this.dom.className = "my-4";
 
-		// Create the header
-		const header = document.createElement("h2");
-		header.className = "text-sm font-medium mb-2";
-		header.textContent = "DESCRIPTION";
-		this.dom.appendChild(header);
-
-		// Create the content container
+		// Create the content container (no header)
 		this.contentDOM = document.createElement("div");
 		this.contentDOM.className = "description";
 		this.dom.appendChild(this.contentDOM);
