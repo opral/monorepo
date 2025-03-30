@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import type { TestCase } from "../src/test-cases.js";
 import { renderUniversalDiff } from "../src/render-universal-diff.js";
-import Editor from "@monaco-editor/react";
 import { TabbedContentViewer } from "./tabbed-content-viewer.js";
 
 /**
@@ -24,27 +23,38 @@ export function TestCaseCard(props: { testCase: TestCase }) {
   return (
     <div>
       <h3 className="text-lg font-semibold mb-2">{props.testCase.name}</h3>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="flex-1 min-w-0">
+          <TabbedContentViewer
+            title="Before"
+            htmlContent={beforeHtml}
+            onContentChange={setBeforeHtml}
+            editable={true}
+            showTitle={true}
+            defaultTab="code"
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <TabbedContentViewer
+            title="After"
+            htmlContent={afterHtml}
+            onContentChange={setAfterHtml}
+            editable={true}
+            showTitle={true}
+            defaultTab="code"
+          />
+        </div>
+      </div>
 
-      {/* Instantiate TabbedContentViewer for each section */}
-      <TabbedContentViewer
-        title="Before"
-        htmlContent={beforeHtml}
-        onContentChange={setBeforeHtml}
-        editable={true}
-        showTitle={true}
-      />
-      <TabbedContentViewer
-        title="After"
-        htmlContent={afterHtml}
-        onContentChange={setAfterHtml}
-        editable={true}
-        showTitle={true}
-      />
-      <TabbedContentViewer
-        title="Rendered Diff"
-        htmlContent={diff}
-        showTitle={true}
-      />
+      <div className="mt-4">
+        <TabbedContentViewer
+          title="Rendered Diff"
+          htmlContent={diff}
+          showTitle={true}
+          defaultTab="rendered"
+        />
+      </div>
     </div>
   );
 }
