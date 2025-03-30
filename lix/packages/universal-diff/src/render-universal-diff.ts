@@ -3,8 +3,8 @@ import { diffWords } from "diff";
 export function renderUniversalDiff(args: {
   beforeHtml: string;
   afterHtml: string;
-}): string {
-  return renderUniversalDiffElement(args).outerHTML;
+}): HTMLElement {
+  return renderUniversalDiffElement(args);
 }
 
 /**
@@ -102,8 +102,34 @@ export function renderUniversalDiffElement(args: {
   // Elements remaining in afterElementsMap were added
   afterElementsMap.forEach((addedEl) => {
     if (addedEl instanceof HTMLElement) {
-      // Mark the entire added element
-      addedEl.style.outline = "2px solid lightblue"; // Example indication
+      // Only highlight the text content of new elements, not the container itself
+      // Remove any existing outline or border
+      addedEl.style.outline = "none";
+      addedEl.style.border = "none";
+      // Also remove any inline style attribute that might contain border/outline
+      const style = addedEl.getAttribute("style") || "";
+      if (style.includes("outline") || style.includes("border")) {
+        const newStyle = style
+          .replace(/outline:[^;]+;?/g, "")
+          .replace(/border:[^;]+;?/g, "");
+        addedEl.setAttribute("style", newStyle);
+      }
+      
+      // Create a wrapper span for the text content
+      const textContent = addedEl.textContent || "";
+
+      // Clear the element's content
+      while (addedEl.firstChild) {
+        addedEl.removeChild(addedEl.firstChild);
+      }
+
+      // Create a new span with green background for the text
+      const span = document.createElement("span");
+      span.style.backgroundColor = "lightgreen";
+      span.textContent = textContent;
+
+      // Add the highlighted text back to the element
+      addedEl.appendChild(span);
     }
   });
 

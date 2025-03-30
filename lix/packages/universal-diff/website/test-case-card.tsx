@@ -12,10 +12,13 @@ export function TestCaseCard(props: { testCase: TestCase }) {
   const [afterHtml, setAfterHtml] = useState(props.testCase.afterHtml);
 
   // Generate diff based on current state
-  const diff = renderUniversalDiff({
+  const diffElement = renderUniversalDiff({
     beforeHtml,
     afterHtml,
   });
+
+  // Convert the HTMLElement to a string for display
+  const diff = diffElement.outerHTML;
 
   return (
     <div className="border border-gray-300 p-4 mb-4 rounded-md shadow-md">
