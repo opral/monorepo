@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { renderUniversalDiff } from "../src/render-universal-diff.js";
 import Editor from "@monaco-editor/react";
+import { TabbedContentViewer } from "./tabbed-content-viewer.js";
+import dedent from "dedent";
 
 /**
  * A playground component that allows users to paste in "before" and "after" HTML
@@ -8,27 +10,53 @@ import Editor from "@monaco-editor/react";
  */
 export function DiffPlayground() {
   // Default examples to help users get started
-  const defaultBeforeHtml = `<div>
-  <p data-lix-entity-id="p1">This is a paragraph</p>
-  <p data-lix-entity-id="p2">This will be modified</p>
-</div>`;
+  const defaultBeforeHtml = dedent`
+  <p data-lix-entity-id="p1">
+    Paste your before HTML here
+  </p>
+`;
 
-  const defaultAfterHtml = `<div>
-  <p data-lix-entity-id="p1">This is a paragraph</p>
-  <p data-lix-entity-id="p2">This has been modified</p>
-  <p data-lix-entity-id="p3">This is a new paragraph</p>
-</div>`;
+  const defaultAfterHtml = dedent`
+  <p data-lix-entity-id="p1">
+    Paste your after HTML here to see a diff
+  </p>
+`;
 
-  const defaultCss = `/* Add CSS to style your HTML content */
+  const defaultCss = dedent`
+  /* Add CSS to style your HTML content */
+  /* Use the CSS that you are using in your app to get a 1:1 representation of the diff */
+`;
 
-  use the css that you are using in your app to get a 1:1 representation of the diff
+  // Load from localStorage or use defaults
+  const loadInitialState = () => {
+    // Try localStorage for the user's last session
+    try {
+      const savedState = localStorage.getItem("diffPlaygroundState");
+      if (savedState) {
+        return JSON.parse(savedState);
+      }
+    } catch (e) {
+      console.error("Error loading from localStorage:", e);
+    }
 
-*/`;
+    // Fall back to defaults
+    return {
+      beforeHtml: defaultBeforeHtml,
+      afterHtml: defaultAfterHtml,
+      customCss: defaultCss,
+    };
+  };
 
   // State for the HTML and CSS content
-  const [beforeHtml, setBeforeHtml] = useState(defaultBeforeHtml);
-  const [afterHtml, setAfterHtml] = useState(defaultAfterHtml);
-  const [customCss, setCustomCss] = useState(defaultCss);
+  const [beforeHtml, setBeforeHtml] = useState(
+    () => loadInitialState().beforeHtml,
+  );
+  const [afterHtml, setAfterHtml] = useState(
+    () => loadInitialState().afterHtml,
+  );
+  const [customCss, setCustomCss] = useState(
+    () => loadInitialState().customCss,
+  );
   const [styleId] = useState(
     `diff-style-${Math.random().toString(36).substring(2, 9)}`,
   );
@@ -65,14 +93,47 @@ export function DiffPlayground() {
     };
   }, [customCss, styleId]);
 
+  // Save to localStorage whenever state changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "diffPlaygroundState",
+        JSON.stringify({
+          beforeHtml,
+          afterHtml,
+          customCss,
+        }),
+      );
+    } catch (e) {
+      console.error("Error saving state:", e);
+    }
+  }, [beforeHtml, afterHtml, customCss]);
+
+  // Reset to default state
+  const resetToDefault = () => {
+    if (confirm("Are you sure you want to reset to default examples?")) {
+      setBeforeHtml(defaultBeforeHtml);
+      setAfterHtml(defaultAfterHtml);
+      setCustomCss(defaultCss);
+    }
+  };
+
   return (
     <div className="mb-8">
       <h2 className="text-xl font-bold mb-4">Playground</h2>
-      <p className="mb-4 text-gray-600">
-        Paste your HTML in the "Before" and "After" editors to see how the diff
-        would look. Make sure to include <code>data-lix-entity-id</code>{" "}
-        attributes for elements you want to track.
-      </p>
+      <div className="flex justify-between items-center mb-4">
+        <p className="text-gray-600">
+          Paste your HTML in the "Before" and "After" editors to see how the
+          diff would look. Make sure to include <code>data-lix-entity-id</code>{" "}
+          attributes for elements you want to track.
+        </p>
+        <button
+          onClick={resetToDefault}
+          className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
+        >
+          Reset
+        </button>
+      </div>
 
       <div className="mb-4">
         <div className="flex justify-between items-center">
@@ -99,6 +160,7 @@ export function DiffPlayground() {
                 formatOnType: true,
                 wordWrap: "on",
                 lineNumbers: "on",
+                padding: { top: 2, bottom: 2 },
               }}
               theme="vs-light"
             />
@@ -112,118 +174,36 @@ export function DiffPlayground() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <h3 className="text-lg font-semibold mb-2">Before HTML</h3>
+        <div className="flex-1 min-w-0">
           <TabbedContentViewer
-            title="Before HTML"
+            title="Before"
             htmlContent={beforeHtml}
             onContentChange={setBeforeHtml}
             editable={true}
+            showTitle={true}
             defaultTab="code"
           />
         </div>
-
-        <div>
-          <h3 className="text-lg font-semibold mb-2">After HTML</h3>
+        <div className="flex-1 min-w-0">
           <TabbedContentViewer
-            title="After HTML"
+            title="After"
             htmlContent={afterHtml}
             onContentChange={setAfterHtml}
             editable={true}
+            showTitle={true}
             defaultTab="code"
           />
         </div>
       </div>
 
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Diff Result</h3>
+      <div className="mt-8">
         <TabbedContentViewer
-          title="Rendered Diff"
+          title="Diff Result"
           htmlContent={diff}
-          editable={false}
+          showTitle={true}
+          defaultTab="rendered"
         />
       </div>
     </div>
-  );
-}
-
-// Helper component for tabbed content view
-function TabbedContentViewer(props: {
-  title: string;
-  htmlContent: string;
-  onContentChange?: (newContent: string) => void;
-  editable?: boolean;
-  defaultTab?: "rendered" | "code";
-}) {
-  const [activeTab, setActiveTab] = useState<"rendered" | "code">(
-    props.defaultTab || "rendered",
-  );
-
-  return (
-    <div className="relative border border-gray-200 rounded p-3 mt-4">
-      <div className="absolute top-1 right-1 flex space-x-1 bg-gray-100 rounded border border-gray-300 p-0.5">
-        <button
-          className={`px-2 py-0.5 text-xs rounded ${activeTab === "rendered" ? "bg-white shadow-sm font-medium text-gray-800" : "text-gray-500 hover:bg-gray-200"}`}
-          onClick={() => setActiveTab("rendered")}
-        >
-          Rendered
-        </button>
-        <button
-          className={`px-2 py-0.5 text-xs rounded ${activeTab === "code" ? "bg-white shadow-sm font-medium text-gray-800" : "text-gray-500 hover:bg-gray-200"}`}
-          onClick={() => setActiveTab("code")}
-        >
-          Code
-        </button>
-      </div>
-
-      <h4 className="text-md font-medium mb-2 mt-1">{props.title}:</h4>
-      {activeTab === "rendered" ? (
-        <div
-          className="min-h-[60px] bg-white mt-2"
-          dangerouslySetInnerHTML={{
-            __html: props.htmlContent,
-          }}
-        ></div>
-      ) : (
-        <CodeBlock
-          htmlContent={props.htmlContent}
-          onContentChange={props.onContentChange}
-          editable={props.editable}
-        />
-      )}
-    </div>
-  );
-}
-
-// Helper component for syntax highlighted code block
-function CodeBlock({
-  htmlContent,
-  onContentChange,
-  editable = false,
-}: {
-  htmlContent: string;
-  onContentChange?: (newContent: string) => void;
-  editable?: boolean;
-}) {
-  return (
-    <Editor
-      height="150px"
-      defaultLanguage="html"
-      value={htmlContent}
-      onChange={(value) => {
-        if (editable && onContentChange && value !== undefined) {
-          onContentChange(value);
-        }
-      }}
-      options={{
-        readOnly: !editable,
-        minimap: { enabled: false },
-        scrollBeyondLastLine: false,
-        automaticLayout: true,
-        wordWrap: "on",
-        lineNumbers: "on",
-      }}
-      theme="vs-light"
-    />
   );
 }
