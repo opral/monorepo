@@ -1,16 +1,24 @@
 /**
+ * A collection of test cases for the renderUniversalDiff function.
+ * Each test case includes a name, the HTML before the change, and the HTML after the change.
+ */
+
+/**
+ * Defines the structure of a single test case.
+ */
+export type TestCase = {
+  name: string;
+  beforeHtml: string;
+  afterHtml: string;
+  expectedHtml: string;
+};
+
+/**
  * Defines a collection of test cases for the `renderUniversalDiff` function.
- *
- * Each object contains:
- * - `name`: A descriptive name for the test case.
- * - `beforeHtml`: The initial HTML string.
- * - `afterHtml`: The modified HTML string.
- * - `expectedHtml`: The expected HTML string output after diffing, including highlighting spans.
- *
  * This array serves as a single source of truth for both unit tests (`*.test.ts`)
  * and potentially visual regression tests or viewers.
  */
-export const testCases = [
+export const testCases: TestCase[] = [
   {
     name: "should highlight added text within a paragraph",
     beforeHtml: `<p data-lix-entity-id="ksu4">Hello</p>`,
@@ -45,4 +53,4 @@ export const testCases = [
     expectedHtml: `<span data-lix-entity-id="complex"><span style="background-color: lightcoral; text-decoration: line-through;">Old</span><span style="background-color: lightgreen;">New</span> text <span style="background-color: lightcoral; text-decoration: line-through;">here</span><span style="background-color: lightgreen;">there</span></span>`,
   },
   // Add more test cases here as needed
-] as const; // Add 'as const' for better type inference with isolatedDeclarations
+];

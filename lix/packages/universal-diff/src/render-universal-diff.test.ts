@@ -8,7 +8,7 @@ test.each(testCases)(
     // Destructure the test case object, include name for potential debugging
     const resultElement = renderUniversalDiff({ beforeHtml, afterHtml });
     expect(resultElement, `Test failed: ${name}`).toBeInstanceOf(HTMLElement);
-    expect(resultElement.outerHTML, `Test failed: ${name}`).toBe(expectedHtml);
+    expect(resultElement, `Test failed: ${name}`).toBe(expectedHtml);
   },
 );
 

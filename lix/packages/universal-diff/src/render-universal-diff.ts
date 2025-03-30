@@ -1,23 +1,28 @@
 import { diffWords } from "diff";
 
+export function renderUniversalDiff(args: {
+  beforeHtml: string;
+  afterHtml: string;
+}): string {
+  return renderUniversalDiffElement(args).outerHTML;
+}
+
 /**
  * Compares two HTML strings (`beforeHtml` and `afterHtml`) and generates an HTMLElement
  * that visually represents the differences.
  *
+ * Use this if you want to bypass parsing and DOM creation by
+ * directly working with the DOM elements instead of the HTML string
+ * output of `renderUniversalDiff()`.
+ *
  * @example
- *   renderUniversalDiff({
+ *   renderUniversalDiffElement({
  *     beforeHtml: `<p data-lix-entity-id="abc">Test</p>`,
  *     afterHtml: `<p data-lix-entity-id="abc">Test World</p>`,
  *   });
  *
- * @param args - An object containing the before and after HTML strings.
- * @param args.beforeHtml - The HTML string representing the state before changes.
- * @param args.afterHtml - The HTML string representing the state after changes.
- * @returns An HTMLElement representing the `afterHtml` structure, with differences highlighted.
- *          If the original `afterHtml` contained a single root element, that element is returned directly.
- *          Otherwise, a container div wrapping the elements is returned.
  */
-export function renderUniversalDiff(args: {
+export function renderUniversalDiffElement(args: {
   beforeHtml: string;
   afterHtml: string;
 }): HTMLElement {
