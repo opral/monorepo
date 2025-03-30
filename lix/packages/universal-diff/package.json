@@ -1,0 +1,30 @@
+{
+  "name": "@lix-js/universal-diff",
+  "version": "0.0.1",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc --noEmit && vitest run",
+    "test:watch": "vitest",
+    "format": "prettier . --write"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@opral/tsconfig": "workspace:*",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.3",
+    "vitest": "^2.1.8"
+  }
+}
