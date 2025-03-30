@@ -120,7 +120,6 @@ export function DiffPlayground() {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl font-bold mb-4">Playground</h2>
       <div className="flex justify-between items-center mb-4">
         <p className="text-gray-600">
           Paste your HTML in the "Before" and "After" editors to see how the
