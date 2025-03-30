@@ -21,7 +21,7 @@ export function TestCaseCard(props: { testCase: TestCase }) {
   const diff = diffElement.outerHTML;
 
   return (
-    <div className="border border-gray-300 p-4 mb-4 rounded-md shadow-md">
+    <div>
       <h3 className="text-lg font-semibold mb-2">{props.testCase.name}</h3>
 
       {/* Instantiate TabbedContentViewer for each section */}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { testCases } from "../src/test-cases.js";
 import { TestCaseCard } from "./test-case-card";
+import { DiffPlayground } from "./diff-playground";
 import "./index.css"; // Import index.css
 
 function App() {
@@ -17,9 +18,10 @@ function App() {
 
   return (
     <div className="max-w-4xl mx-auto my-5 font-sans px-4">
-      <h1 className="text-2xl font-bold mb-4">
-        Lix Universal Diff - Test Cases
-      </h1>
+      {/* Add the DiffPlayground component above the test cases */}
+      <DiffPlayground />
+      
+      <h2 className="text-xl font-bold mb-4 mt-8">Test Cases</h2>
       <input
         type="search"
         placeholder="Filter by name..."
@@ -29,7 +31,10 @@ function App() {
       />
       <div className="test-cases">
         {filteredCases.map((tc) => (
-          <TestCaseCard key={tc.name} testCase={tc} />
+          <React.Fragment key={tc.name}>
+            <TestCaseCard testCase={tc} />
+            <hr className="my-6 border-gray-200" />
+          </React.Fragment>
         ))}
       </div>
     </div>
