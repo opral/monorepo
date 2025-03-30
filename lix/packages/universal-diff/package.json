@@ -20,7 +20,10 @@
     "test:watch": "vitest",
     "format": "prettier . --write"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/diff": "^5.0.2",
+    "diff": "^5.1.0"
+  },
   "devDependencies": {
     "@opral/tsconfig": "workspace:*",
     "prettier": "^3.3.2",
