@@ -299,35 +299,121 @@ export class ToolNodeView implements NodeView {
 			
 			// Create parameters display
 			if (parameters) {
-				// Create a row for each parameter
+				// Create a container for the parameters
+				const paramsContainer = document.createElement("div");
+				paramsContainer.className = "flex justify-between border-t border-gray-200 py-2";
+				
+				// Create left column for "text" parameter
+				const leftColumn = document.createElement("div");
+				leftColumn.className = "flex items-center gap-2"; // Changed to flex-row with gap
+				
+				// Create right column for "voice" parameter
+				const rightColumn = document.createElement("div");
+				rightColumn.className = "flex items-center gap-2"; // Changed to flex-row with gap
+				
+				// Add column headers
+				const leftHeader = document.createElement("span");
+				leftHeader.className = "text-gray-500 text-sm font-medium";
+				leftHeader.textContent = "Text:";
+				leftColumn.appendChild(leftHeader);
+				
+				const rightHeader = document.createElement("span");
+				rightHeader.className = "text-gray-500 text-sm font-medium";
+				rightHeader.textContent = "Voice:";
+				rightColumn.appendChild(rightHeader);
+				
+				// Add parameter values
 				Object.entries(parameters).forEach(([key, value]: [string, any]) => {
-					const paramRow = document.createElement("div");
-					paramRow.className = "flex items-center justify-between py-1 border-t border-gray-200";
-					
-					// Parameter key
-					const keyElem = document.createElement("span");
-					keyElem.className = "text-gray-500 text-sm";
-					keyElem.textContent = `${key}:`;
-					paramRow.appendChild(keyElem);
-					
-					// Parameter value
-					const valueElem = document.createElement("span");
-					valueElem.className = "text-sm";
-					
-					// Handle different value types
-					if (value && typeof value === 'object' && value.type && value.value) {
-						if (value.type === 'variable') {
-							valueElem.textContent = `@${value.value}`;
-							valueElem.className += " text-gray-400";
+					if (key.toLowerCase() === "text") {
+						// Add text value to left column
+						const textValue = document.createElement("span");
+						textValue.className = "text-sm"; // Removed mt-1
+						
+						// Handle different value types
+						if (value && typeof value === 'object' && value.type && value.value) {
+							if (value.type === 'variable') {
+								// Check if it's a generation variable (starts with "gen_")
+								if (typeof value.value === 'string' && value.value.startsWith('gen_')) {
+									textValue.textContent = "@generation";
+								} else {
+									textValue.textContent = `@${value.value}`;
+								}
+								textValue.className += " text-gray-400";
+							} else {
+								textValue.textContent = value.value;
+							}
 						} else {
-							valueElem.textContent = value.value;
+							textValue.textContent = String(value);
 						}
-					} else {
-						valueElem.textContent = String(value);
+						
+						leftColumn.appendChild(textValue);
+					} else if (key.toLowerCase() === "voice") {
+						// Add voice value to right column
+						const voiceValue = document.createElement("span");
+						voiceValue.className = "text-sm"; // Removed mt-1
+						
+						// Handle different value types
+						if (value && typeof value === 'object' && value.type && value.value) {
+							if (value.type === 'variable') {
+								// Check if it's a generation variable (starts with "gen_")
+								if (typeof value.value === 'string' && value.value.startsWith('gen_')) {
+									voiceValue.textContent = "@generation";
+								} else {
+									voiceValue.textContent = `@${value.value}`;
+								}
+								voiceValue.className += " text-gray-400";
+							} else {
+								voiceValue.textContent = value.value;
+							}
+						} else {
+							voiceValue.textContent = String(value);
+						}
+						
+						rightColumn.appendChild(voiceValue);
 					}
-					
-					paramRow.appendChild(valueElem);
-					content.appendChild(paramRow);
+				});
+				
+				// Add columns to container
+				paramsContainer.appendChild(leftColumn);
+				paramsContainer.appendChild(rightColumn);
+				content.appendChild(paramsContainer);
+				
+				// Add any other parameters that aren't text or voice
+				Object.entries(parameters).forEach(([key, value]: [string, any]) => {
+					if (key.toLowerCase() !== "text" && key.toLowerCase() !== "voice") {
+						const paramRow = document.createElement("div");
+						paramRow.className = "flex items-center justify-between py-1 border-t border-gray-200";
+						
+						// Parameter key
+						const keyElem = document.createElement("span");
+						keyElem.className = "text-gray-500 text-sm";
+						keyElem.textContent = `${key}:`;
+						paramRow.appendChild(keyElem);
+						
+						// Parameter value
+						const valueElem = document.createElement("span");
+						valueElem.className = "text-sm";
+						
+						// Handle different value types
+						if (value && typeof value === 'object' && value.type && value.value) {
+							if (value.type === 'variable') {
+								// Check if it's a generation variable (starts with "gen_")
+								if (typeof value.value === 'string' && value.value.startsWith('gen_')) {
+									valueElem.textContent = "@generation";
+								} else {
+									valueElem.textContent = `@${value.value}`;
+								}
+								valueElem.className += " text-gray-400";
+							} else {
+								valueElem.textContent = value.value;
+							}
+						} else {
+							valueElem.textContent = String(value);
+						}
+						
+						paramRow.appendChild(valueElem);
+						content.appendChild(paramRow);
+					}
 				});
 			}
 		} catch (e) {
