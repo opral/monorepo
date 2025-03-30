@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "dev": "vite",
     "test": "tsc --noEmit && vitest run",
     "test:watch": "vitest",
     "format": "prettier . --write"

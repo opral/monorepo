@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Diff Visual Tester</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .test-case {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 3px;
+            white-space: pre-wrap; /* Wrap long lines */
+            word-wrap: break-word; /* Break words if necessary */
+        }
+        .label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        .diff-output {
+            border: 1px dashed #aaa;
+            padding: 10px;
+            margin-top: 5px;
+            background-color: #fdfdfd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Universal Diff Visual Test Cases</h1>
+    <div id="test-case-container"></div>
+    <script type="module" src="/website/main.ts"></script>
+</body>
+</html>
