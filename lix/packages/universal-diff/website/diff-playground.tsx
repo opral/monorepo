@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { renderUniversalDiff } from "../src/render-universal-diff.js";
 import Editor from "@monaco-editor/react";
 
@@ -19,73 +19,122 @@ export function DiffPlayground() {
   <p data-lix-entity-id="p3">This is a new paragraph</p>
 </div>`;
 
-  // State for the HTML content
+  const defaultCss = `/* Add CSS to style your HTML content */
+
+  use the css that you are using in your app to get a 1:1 representation of the diff
+
+*/`;
+
+  // State for the HTML and CSS content
   const [beforeHtml, setBeforeHtml] = useState(defaultBeforeHtml);
   const [afterHtml, setAfterHtml] = useState(defaultAfterHtml);
-  
+  const [customCss, setCustomCss] = useState(defaultCss);
+  const [styleId] = useState(
+    `diff-style-${Math.random().toString(36).substring(2, 9)}`,
+  );
+  const [cssCollapsed, setCssCollapsed] = useState(true);
+
   // Generate diff based on current state
   const diffElement = renderUniversalDiff({
     beforeHtml,
     afterHtml,
   });
-  
+
   // Convert the HTMLElement to a string for display
   const diff = diffElement.outerHTML;
+
+  // Apply custom CSS to the diff view
+  useEffect(() => {
+    // Create or update the style element
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+
+    if (!styleElement) {
+      styleElement = document.createElement("style");
+      styleElement.id = styleId;
+      document.head.appendChild(styleElement);
+    }
+
+    styleElement.textContent = customCss;
+
+    // Cleanup on unmount
+    return () => {
+      const element = document.getElementById(styleId);
+      if (element) {
+        document.head.removeChild(element);
+      }
+    };
+  }, [customCss, styleId]);
 
   return (
     <div className="mb-8">
       <h2 className="text-xl font-bold mb-4">Playground</h2>
       <p className="mb-4 text-gray-600">
-        Paste your HTML in the "Before" and "After" editors to see how the diff would look.
-        Make sure to include <code>data-lix-entity-id</code> attributes for elements you want to track.
+        Paste your HTML in the "Before" and "After" editors to see how the diff
+        would look. Make sure to include <code>data-lix-entity-id</code>{" "}
+        attributes for elements you want to track.
       </p>
-      
+
+      <div className="mb-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold mb-2">CSS</h3>
+          <button
+            onClick={() => setCssCollapsed(!cssCollapsed)}
+            className="text-sm px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded border border-gray-300"
+          >
+            {cssCollapsed ? "Expand" : "Collapse"}
+          </button>
+        </div>
+        {!cssCollapsed && (
+          <div className="border border-gray-300 rounded">
+            <Editor
+              height="150px"
+              defaultLanguage="css"
+              value={customCss}
+              onChange={(value) => value !== undefined && setCustomCss(value)}
+              options={{
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                formatOnPaste: true,
+                formatOnType: true,
+                wordWrap: "on",
+                lineNumbers: "on",
+              }}
+              theme="vs-light"
+            />
+          </div>
+        )}
+        {cssCollapsed && (
+          <div className="text-sm text-gray-500 italic border border-gray-200 bg-gray-50 p-2 rounded">
+            CSS editor is collapsed. Click "Expand" to edit.
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <h3 className="text-lg font-semibold mb-2">Before HTML</h3>
-          <div className="border border-gray-300 rounded">
-          <Editor
-            height="200px"
-            defaultLanguage="html"
-            value={beforeHtml}
-            onChange={(value) => value !== undefined && setBeforeHtml(value)}
-            options={{
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              automaticLayout: true,
-              formatOnPaste: true,
-              formatOnType: true,
-              wordWrap: "on",
-              lineNumbers: "on",
-            }}
-            theme="vs-light"
+          <TabbedContentViewer
+            title="Before HTML"
+            htmlContent={beforeHtml}
+            onContentChange={setBeforeHtml}
+            editable={true}
+            defaultTab="code"
           />
-          </div>
         </div>
-        
+
         <div>
           <h3 className="text-lg font-semibold mb-2">After HTML</h3>
-          <div className="border border-gray-300 rounded">
-          <Editor
-            height="200px"
-            defaultLanguage="html"
-            value={afterHtml}
-            onChange={(value) => value !== undefined && setAfterHtml(value)}
-            options={{
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              automaticLayout: true,
-              formatOnPaste: true,
-              formatOnType: true,
-              wordWrap: "on",
-              lineNumbers: "on",
-            }}
-            theme="vs-light"
+          <TabbedContentViewer
+            title="After HTML"
+            htmlContent={afterHtml}
+            onContentChange={setAfterHtml}
+            editable={true}
+            defaultTab="code"
           />
-          </div>
         </div>
       </div>
-      
+
       <div>
         <h3 className="text-lg font-semibold mb-2">Diff Result</h3>
         <TabbedContentViewer
@@ -104,8 +153,11 @@ function TabbedContentViewer(props: {
   htmlContent: string;
   onContentChange?: (newContent: string) => void;
   editable?: boolean;
+  defaultTab?: "rendered" | "code";
 }) {
-  const [activeTab, setActiveTab] = useState<"rendered" | "code">("rendered");
+  const [activeTab, setActiveTab] = useState<"rendered" | "code">(
+    props.defaultTab || "rendered",
+  );
 
   return (
     <div className="relative border border-gray-200 rounded p-3 mt-4">
