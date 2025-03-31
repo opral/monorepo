@@ -1,15 +1,15 @@
 import { css, html, LitElement } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { UiDiffComponentProps } from "@lix-js/sdk";
-import { diffLines } from "diff";
+import { diffLines, diffWords, diffChars } from "diff";
 import type { Change } from "diff";
 
 export class DiffComponent extends LitElement {
 	static override styles = css`
 		:host {
-			--color-added-bg: #e6ffed;
+			--color-added-bg: rgba(46, 160, 67, 0.15);
 			--color-added-text: #22863a;
-			--color-deleted-bg: #ffeef0;
+			--color-deleted-bg: rgba(248, 81, 73, 0.15);
 			--color-deleted-text: #b31d28;
 			--color-border: #e1e4e8;
 			--color-line-bg: #f6f8fa;
@@ -54,7 +54,7 @@ export class DiffComponent extends LitElement {
 			align-items: start;
 			padding: 4px 8px;
 			white-space: pre-wrap;
-			word-break: break-all;
+			word-break: break-word;
 			width: 100%;
 			min-height: inherit;
 		}
@@ -68,14 +68,27 @@ export class DiffComponent extends LitElement {
 			border-right: 1px solid var(--color-border);
 		}
 
-		.added {
-			background-color: var(--color-added-bg);
-			color: var(--color-added-text);
+		.line-wrapper {
+			display: flow;
+			white-space: inherit;
 		}
 
-		.deleted {
+		/* Character-level highlighting */
+		.char-added {
+			background-color: var(--color-added-bg);
+			color: var(--color-added-text);
+			border-radius: 2px;
+			padding: 0 1px;
+			display: inline;
+			white-space: pre-wrap;
+		}
+
+		.char-deleted {
 			background-color: var(--color-deleted-bg);
 			color: var(--color-deleted-text);
+			border-radius: 2px;
+			padding: 0 1px;
+			display: inline;
 		}
 
 		.empty {
@@ -119,6 +132,11 @@ export class DiffComponent extends LitElement {
 			margin-right: 4px;
 			vertical-align: middle;
 		}
+
+		/* Ensure proper word wrapping */
+		span {
+			white-space: pre-line;
+		}
 	`;
 
 	@property({ type: Array })
@@ -140,6 +158,202 @@ export class DiffComponent extends LitElement {
 		e.stopPropagation();
 	}
 
+	// Helper functions for character-level diffs
+	// Check if words might be related by similarity
+	findMatchingWord(word1: string, word2: string): boolean {
+		if (!word1 || !word2) return false;
+
+		// Simple similarity check - if words share a common substring
+		// This helps identify similar words that might have just changed slightly
+		const minLength = Math.min(word1.length, word2.length);
+		const threshold = Math.max(1, Math.floor(minLength * 0.7)); // 70% match threshold
+
+		for (let i = 0; i <= word1.length - threshold; i++) {
+			const substr = word1.substring(i, i + threshold);
+			if (word2.includes(substr)) return true;
+		}
+		return false;
+	}
+
+	// Find nearby added and removed parts to see if they might be related
+	findRelatedParts(diffs: Change[]): Map<number, number> {
+		const relatedParts = new Map<number, number>();
+
+		for (let i = 0; i < diffs.length; i++) {
+			const currentPart = diffs[i];
+			if (currentPart && currentPart.removed) {
+				// Find the next added part to potentially match with this removed part
+				for (let j = i + 1; j < Math.min(i + 3, diffs.length); j++) {
+					const nextPart = diffs[j];
+					if (
+						nextPart &&
+						nextPart.added &&
+						this.findMatchingWord(currentPart.value || "", nextPart.value || "")
+					) {
+						relatedParts.set(i, j);
+						relatedParts.set(j, i);
+						break;
+					}
+				}
+			}
+		}
+
+		return relatedParts;
+	}
+
+	// Helper method for rendering character-level diffs with preserved whitespace
+	renderDetailedDiff(text1: string, text2: string) {
+		// If either string is empty, handle specially
+		if (!text1) {
+			return {
+				before: html``,
+				after: html`<span class="char-added">${text2}</span>`,
+				hasChanges: true,
+				hasAddedContent: true,
+				hasRemovedContent: false,
+			};
+		}
+		if (!text2) {
+			return {
+				before: html`<span class="char-deleted">${text1}</span>`,
+				after: html``,
+				hasChanges: true,
+				hasAddedContent: false,
+				hasRemovedContent: true,
+			};
+		}
+
+		// Normalize trailing newlines to prevent false positives
+		// This helps with the issue where a paragraph is marked as changed
+		// just because a newline after it was removed
+		const normalizedText1 = text1.replace(/\n+$/, "");
+		const normalizedText2 = text2.replace(/\n+$/, "");
+
+		// If texts are identical after normalization, no highlighting needed
+		if (normalizedText1 === normalizedText2) {
+			return {
+				before: html`<span>${text1}</span>`,
+				after: html`<span>${text2}</span>`,
+				hasChanges: false,
+				hasAddedContent: false,
+				hasRemovedContent: false,
+			};
+		}
+
+		// First, use word-level diffing to identify words
+		const wordDiffs = diffWords(normalizedText1, normalizedText2, {
+			ignoreCase: false,
+		});
+
+		// Find potential related parts for character-level diffs
+		const relatedParts = this.findRelatedParts(wordDiffs);
+
+		// Render each diff part with appropriate styling
+		const beforeParts: unknown[] = [];
+		const afterParts: unknown[] = [];
+		let hasRealChanges = false;
+		let hasAddedContent = false;
+		let hasRemovedContent = false;
+
+		for (let i = 0; i < wordDiffs.length; i++) {
+			const part = wordDiffs[i];
+
+			if (!part) continue;
+
+			if (part.added) {
+				// Check if this added part has a related removed part
+				if (relatedParts.has(i)) {
+					// Skip here - we'll handle this when processing the removed part
+					hasRealChanges = true;
+					hasAddedContent = true;
+				} else {
+					// Regular added content
+					afterParts.push(
+						html`<span class="char-added">${part.value || ""}</span>`,
+					);
+					hasRealChanges = true;
+					hasAddedContent = true;
+				}
+			} else if (part.removed) {
+				// Check if this removed part has a related added part
+				if (relatedParts.has(i)) {
+					const addedIndex = relatedParts.get(i);
+					const addedPart =
+						addedIndex !== undefined ? wordDiffs[addedIndex] : undefined;
+
+					if (addedPart) {
+						// Use character-level diffing for these related parts
+						const charDiffs = diffChars(
+							part.value || "",
+							addedPart.value || "",
+						);
+
+						// Ensure all changes are treated as significant
+						hasRemovedContent = true;
+						hasAddedContent = true;
+
+						// Process each diff part into HTML elements
+						const beforeElements: unknown[] = [];
+						const afterElements: unknown[] = [];
+
+						charDiffs.forEach((charPart) => {
+							if (!charPart) return;
+
+							if (charPart.added) {
+								afterElements.push(
+									html`<span class="char-added">${charPart.value || ""}</span>`,
+								);
+							} else if (charPart.removed) {
+								beforeElements.push(
+									html`<span class="char-deleted"
+										>${charPart.value || ""}</span
+									>`,
+								);
+							} else {
+								// Unchanged characters
+								beforeElements.push(html`${charPart.value || ""}`);
+								afterElements.push(html`${charPart.value || ""}`);
+							}
+						});
+
+						beforeParts.push(html`${beforeElements}`);
+						afterParts.push(html`${afterElements}`);
+
+						hasRealChanges = true;
+						hasRemovedContent = true;
+						hasAddedContent = true;
+					} else {
+						// Fallback if related part is not found
+						beforeParts.push(
+							html`<span class="char-deleted">${part.value || ""}</span>`,
+						);
+						hasRealChanges = true;
+						hasRemovedContent = true;
+					}
+				} else {
+					// Regular removed content
+					beforeParts.push(
+						html`<span class="char-deleted">${part.value || ""}</span>`,
+					);
+					hasRealChanges = true;
+					hasRemovedContent = true;
+				}
+			} else {
+				// Unchanged parts
+				beforeParts.push(html`<span>${part.value || ""}</span>`);
+				afterParts.push(html`<span>${part.value || ""}</span>`);
+			}
+		}
+
+		return {
+			before: html`${beforeParts}`,
+			after: html`${afterParts}`,
+			hasChanges: hasRealChanges,
+			hasAddedContent,
+			hasRemovedContent,
+		};
+	}
+
 	renderDiff(diff: UiDiffComponentProps["diffs"][0], diffId: string) {
 		const before =
 			diff.snapshot_content_before?.text ||
@@ -149,7 +363,13 @@ export class DiffComponent extends LitElement {
 			diff.snapshot_content_after?.text ||
 			JSON.stringify(diff.snapshot_content_after?.idPositions) ||
 			"";
-		const lineDiffs = diffLines(before, after);
+		// Configure line diff with options
+		const lineDiffs = diffLines(before, after, {
+			ignoreWhitespace: false, // Maintain visible whitespace changes
+			ignoreCase: false, // Case sensitive
+			newlineIsToken: false, // Treat newlines as part of the line
+			ignoreNewlineAtEof: true, // Ignore newlines at end of file
+		});
 
 		// Create aligned pairs with context and collapsible sections
 		const { sections, hasChanges } = this.processChangesWithContext(
@@ -217,33 +437,81 @@ export class DiffComponent extends LitElement {
 									Collapse ${section.count} unchanged
 									line${section.count !== 1 ? "s" : ""}
 								</div>
-								${section.rows.map(
-									(pair) => html`
-										<div class="row-pair">
-											<div class="diff-row ${pair.left.type}">
-												<span class="line">${pair.left.content}</span>
+								${section.rows.map((pair) => {
+									// For unchanged lines, render normally
+									if (!pair.left.type && !pair.right.type) {
+										return html`
+											<div class="row-pair">
+												<div class="diff-row">
+													<span class="line">${pair.left.content}</span>
+												</div>
+												<div class="diff-row">
+													<span class="line">${pair.right.content}</span>
+												</div>
 											</div>
-											<div class="diff-row ${pair.right.type}">
-												<span class="line">${pair.right.content}</span>
+										`;
+									}
+
+									// For changed lines, do detailed word diff
+									const detailedDiff = this.renderDetailedDiff(
+										pair.left.content,
+										pair.right.content,
+									);
+
+									return html`
+										<div class="row-pair">
+											<div class="diff-row">
+												<div class="line line-wrapper">
+													${detailedDiff.before}
+												</div>
+											</div>
+											<div class="diff-row">
+												<div class="line line-wrapper">
+													${detailedDiff.after}
+												</div>
 											</div>
 										</div>
-									`,
-								)}
+									`;
+								})}
 							`;
 						} else {
 							return html`
-								${section.rows.map(
-									(pair) => html`
-										<div class="row-pair">
-											<div class="diff-row ${pair.left.type}">
-												<span class="line">${pair.left.content}</span>
+								${section.rows.map((pair) => {
+									// For unchanged lines, render normally
+									if (!pair.left.type && !pair.right.type) {
+										return html`
+											<div class="row-pair">
+												<div class="diff-row">
+													<span class="line">${pair.left.content}</span>
+												</div>
+												<div class="diff-row">
+													<span class="line">${pair.right.content}</span>
+												</div>
 											</div>
-											<div class="diff-row ${pair.right.type}">
-												<span class="line">${pair.right.content}</span>
+										`;
+									}
+
+									// For changed lines, do detailed word diff
+									const detailedDiff = this.renderDetailedDiff(
+										pair.left.content,
+										pair.right.content,
+									);
+
+									return html`
+										<div class="row-pair">
+											<div class="diff-row">
+												<div class="line line-wrapper">
+													${detailedDiff.before}
+												</div>
+											</div>
+											<div class="diff-row">
+												<div class="line line-wrapper">
+													${detailedDiff.after}
+												</div>
 											</div>
 										</div>
-									`,
-								)}
+									`;
+								})}
 							`;
 						}
 					}
@@ -273,8 +541,9 @@ export class DiffComponent extends LitElement {
 		// First, create the full aligned changes
 		const alignedChanges = this.alignChanges(changes);
 
-		// Context lines to show before and after each change
-		const contextLines = 3;
+		// Set context lines: 2 above (showing "2 unchanged lines") and 1 below each change
+		const contextLinesBefore = 2;
+		const contextLinesAfter = 1;
 		const sections: Array<{
 			type: "visible" | "collapsible";
 			id: string;
@@ -284,7 +553,7 @@ export class DiffComponent extends LitElement {
 
 		// Determine which lines should be visible (changed or nearby context)
 		const isChangedLine = (pair: (typeof alignedChanges)[0]) =>
-			pair.left.type.includes("before") || pair.right.type.includes("after");
+			pair.left.type.includes("deleted") || pair.right.type.includes("added");
 
 		const visibleIndices = new Set<number>();
 
@@ -293,15 +562,15 @@ export class DiffComponent extends LitElement {
 			if (isChangedLine(pair)) {
 				visibleIndices.add(index);
 
-				// Add context lines before
-				for (let i = Math.max(0, index - contextLines); i < index; i++) {
+				// Add context lines before (more above)
+				for (let i = Math.max(0, index - contextLinesBefore); i < index; i++) {
 					visibleIndices.add(i);
 				}
 
-				// Add context lines after
+				// Add context lines after (fewer below)
 				for (
 					let i = index + 1;
-					i <= Math.min(alignedChanges.length - 1, index + contextLines);
+					i <= Math.min(alignedChanges.length - 1, index + contextLinesAfter);
 					i++
 				) {
 					visibleIndices.add(i);
