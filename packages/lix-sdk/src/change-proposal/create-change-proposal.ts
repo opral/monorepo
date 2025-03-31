@@ -20,8 +20,13 @@ export async function createChangeProposal(args: {
 		// Get the changes that are in the symmetric difference between the two change sets
 		const symmetricDifferenceChanges = await trx
 			.selectFrom("change_set_element")
-			.where(changeSetElementInSymmetricDifference(args.source_change_set, args.target_change_set))
-			.select(["change_id"])
+			.where(
+				changeSetElementInSymmetricDifference(
+					args.source_change_set,
+					args.target_change_set
+				)
+			)
+			.select(["change_id as id", "entity_id", "schema_key", "file_id"])
 			.execute();
 
 		if (symmetricDifferenceChanges.length === 0) {
@@ -33,7 +38,7 @@ export async function createChangeProposal(args: {
 		// Create a new change set with the symmetric difference changes
 		const newChangeSet = await createChangeSet({
 			lix: { db: trx },
-			changes: symmetricDifferenceChanges.map((change) => ({ id: change.change_id })),
+			changes: symmetricDifferenceChanges,
 		});
 
 		// Create the change proposal

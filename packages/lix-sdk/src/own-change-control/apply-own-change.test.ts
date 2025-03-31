@@ -219,6 +219,9 @@ test("foreign key constraints are deferred to make the order of applying changes
 		mockJsonSnapshot({
 			change_id: "change0",
 			change_set_id: "change-set-1",
+			entity_id: "change-set-1,change0",
+			schema_key: "lix_change_set_element_table",
+			file_id: "null",
 		} satisfies ChangeSetElement),
 	] as const;
 
@@ -254,15 +257,16 @@ test("foreign key constraints are deferred to make the order of applying changes
 		.values(snapshots.map((s) => ({ content: s.content })))
 		.execute();
 
-	// insert change that the change set element references
+	// insert the change that the change set element references
 	await lix.db
 		.insertInto("change")
 		.values({
 			id: "change0",
 			plugin_key: "mock",
 			file_id: "null",
-			entity_id: "mock",
-			schema_key: "mock",
+			// These must match the FK reference in the change_set_element
+			entity_id: "change-set-1,change0",
+			schema_key: "lix_change_set_element_table",
 			snapshot_id: "no-content",
 		})
 		.execute();
@@ -280,6 +284,9 @@ test("foreign key constraints are obeyed", async () => {
 			// both change 0 and the change set are missing
 			change_id: "change0",
 			change_set_id: "change-set-1",
+			entity_id: "change-set-1,change0",
+			schema_key: "lix_change_set_element_table",
+			file_id: "null",
 		} satisfies ChangeSetElement),
 	] as const;
 
@@ -313,13 +320,16 @@ test("foreign key constraints are obeyed", async () => {
 			id: "change0",
 			plugin_key: "mock",
 			file_id: "null",
-			entity_id: "mock",
-			schema_key: "mock",
+			// Use the values from the element snapshot that references this change
+			entity_id: "change-set-1,change0",
+			schema_key: "lix_change_set_element_table",
 			snapshot_id: "no-content",
 		})
 		.execute();
 
-	expect(applyOwnChanges({ lix, changes: mockChanges })).rejects.toThrow();
+	await expect(
+		applyOwnChanges({ lix, changes: mockChanges })
+	).rejects.toThrow();
 });
 
 // https://github.com/opral/lix-sdk/issues/185

@@ -24,7 +24,7 @@ import type { ChangeSet } from "./database-schema.js";
  */
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
-	changes: Pick<Change, "id">[];
+	changes: Pick<Change, "id" | "entity_id" | "schema_key" | "file_id">[];
 	labels?: Pick<Label, "id">[];
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -35,13 +35,19 @@ export async function createChangeSet(args: {
 			.executeTakeFirstOrThrow();
 
 		if (args.changes.length > 0) {
+			// Insert elements linking change set to changes
 			await trx
 				.insertInto("change_set_element")
 				.values(
-					args.changes.map((change) => ({
-						change_id: change.id,
-						change_set_id: changeSet.id,
-					}))
+					args.changes.map((change) => {
+						return {
+							change_set_id: changeSet.id,
+							change_id: change.id,
+							entity_id: change.entity_id,
+							schema_key: change.schema_key,
+							file_id: change.file_id,
+						};
+					})
 				)
 				.execute();
 		}

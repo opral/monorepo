@@ -14,9 +14,20 @@ export function applyChangeSetDatabaseSchema(
     change_set_id TEXT NOT NULL,
     change_id TEXT NOT NULL,
 
+    -- entity changes must be unique per change set
+    -- otherwise, a change (not set) graph is required
+    -- https://github.com/opral/lix-sdk/issues/290
+
+    entity_id TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
+    file_id TEXT NOT NULL,
+    UNIQUE (change_set_id, entity_id, schema_key, file_id),
+
     PRIMARY KEY(change_set_id, change_id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),    
-    FOREIGN KEY(change_id) REFERENCES change(id)
+    FOREIGN KEY(change_id) REFERENCES change(id),
+    FOREIGN KEY (change_id, entity_id, schema_key, file_id) REFERENCES change(id, entity_id, schema_key, file_id) ON DELETE CASCADE
+
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_label (
@@ -44,6 +55,9 @@ export type ChangeSetElementUpdate = Updateable<ChangeSetElementTable>;
 export type ChangeSetElementTable = {
 	change_set_id: string;
 	change_id: string;
+  entity_id: string;
+  schema_key: string;
+  file_id: string;
 };
 
 export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
