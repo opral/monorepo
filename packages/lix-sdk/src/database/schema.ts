@@ -7,7 +7,10 @@ import type { KeyValueTable } from "../key-value/database-schema.js";
 import type { MutationLogTable } from "./mutation-log/database-schema.js";
 import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
 import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
-import type { VersionV2Table } from "../version-v2/database-schema.js";
+import type {
+	ActiveVersionTable,
+	VersionV2Table,
+} from "../version-v2/database-schema.js";
 import type {
 	ChangeSetElementTable,
 	ChangeSetLabelTable,
@@ -62,6 +65,7 @@ export type LixDatabaseSchema = {
 	change_conflict_resolution: ChangeConflictResolutionTable;
 
 	mutation_log: MutationLogTable;
+	active_version: ActiveVersionTable;
 };
 
 export type FileQueueEntry = Selectable<FileQueueTable>;
@@ -184,7 +188,6 @@ type LabelTable = {
 	id: Generated<string>;
 	name: string;
 };
-
 
 // ------ versiones ------
 

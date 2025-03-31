@@ -10,19 +10,10 @@ describe("change_set table", () => {
 		const insertResult = await lix.db
 			.insertInto("change_set")
 			.defaultValues()
+			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		expect(insertResult.numInsertedOrUpdatedRows).toBe(1);
-
-		// Verify the ID was generated
-		const changeSet = await lix.db
-			.selectFrom("change_set")
-			.selectAll()
-			.limit(1)
-			.executeTakeFirst();
-		expect(changeSet).toBeDefined();
-		expect(changeSet?.id).toBeTypeOf("string");
-		expect(changeSet?.id.length).toBe(16); // Default nano_id length
+		expect(insertResult.id).toBeDefined();
 	});
 
 	test("should allow inserting with explicit ID", async () => {

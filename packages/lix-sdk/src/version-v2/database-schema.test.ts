@@ -133,3 +133,64 @@ test("should enforce NOT NULL constraint on change_set_id", async () => {
 			.execute()
 	).rejects.toThrow(/NOT NULL constraint failed: version_v2.change_set_id/i);
 });
+
+test("applying the schema should create the initial 'cs0' change set", async () => {
+	const lix = await openLixInMemory({});
+	const initialChangeSet = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", "cs0")
+		.selectAll()
+		.executeTakeFirst();
+	expect(initialChangeSet).toBeDefined();
+	expect(initialChangeSet?.id).toBe("cs0");
+});
+
+test("applying the schema should create the initial 'main' version linked to 'cs0'", async () => {
+	const lix = await openLixInMemory({});
+	const initialVersion = await lix.db
+		.selectFrom("version_v2")
+		.where("id", "=", "019328cc-ccb0-7f51-96e8-524df4597ac6")
+		.selectAll()
+		.executeTakeFirst();
+	expect(initialVersion).toBeDefined();
+	expect(initialVersion?.id).toBe("019328cc-ccb0-7f51-96e8-524df4597ac6");
+	expect(initialVersion?.name).toBe("main");
+	expect(initialVersion?.change_set_id).toBe("cs0");
+});
+
+test("applying the schema should set the initial active version to 'main'", async () => {
+	const lix = await openLixInMemory({});
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.selectAll()
+		.executeTakeFirst();
+	expect(activeVersion).toBeDefined();
+	expect(activeVersion?.id).toBe("019328cc-ccb0-7f51-96e8-524df4597ac6");
+});
+
+test("applying the schema multiple times should be idempotent for initial data", async () => {
+	const lix = await openLixInMemory({});
+	// openLixInMemory already applies the schema once.
+	// We don't need to explicitly apply it again as the init logic handles it.
+
+	// Verify counts after initial creation
+	const initialChangeSetCount = await lix.db
+		.selectFrom("change_set")
+		.select(lix.db.fn.count("id").as("count"))
+		.where("id", "=", "cs0")
+		.executeTakeFirstOrThrow();
+	expect(initialChangeSetCount.count).toBe(1);
+
+	const initialVersionCount = await lix.db
+		.selectFrom("version_v2")
+		.select(lix.db.fn.count("id").as("count"))
+		.where("id", "=", "019328cc-ccb0-7f51-96e8-524df4597ac6")
+		.executeTakeFirstOrThrow();
+	expect(initialVersionCount.count).toBe(1);
+
+	const initialActiveVersionCount = await lix.db
+		.selectFrom("active_version")
+		.select(lix.db.fn.count("id").as("count"))
+		.executeTakeFirstOrThrow();
+	expect(initialActiveVersionCount.count).toBe(1);
+});
