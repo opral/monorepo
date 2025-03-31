@@ -19,23 +19,16 @@ export function generateOutput(
 
 	for (const compiledBundle of compiledBundles) {
 		const bundleId = compiledBundle.bundle.node.id;
-		const safeBundleId = toSafeModuleId(compiledBundle.bundle.node.id);
+		const safeModuleId = toSafeModuleId(compiledBundle.bundle.node.id);
 		const inputs =
 			compiledBundle.bundle.node.declarations?.filter(
 				(decl) => decl.type === "input-variable"
 			) ?? [];
 
 		// bundle file
-		let filename = `messages/${safeBundleId}.js`;
+		const filename = `messages/${safeModuleId}.js`;
 
-		let counter = 0;
-		while (output[filename]) {
-			// bundle file already exists, need to append to it
-			counter += 1;
-			filename = `messages/${safeBundleId}${counter}.js`;
-		}
-
-		moduleFilenames.add(`${safeBundleId}${counter ? counter : ""}.js`);
+		moduleFilenames.add(`${safeModuleId}.js`);
 
 		// create fresh bundle file
 		output[filename] = compiledBundle.bundle.code;
@@ -53,7 +46,7 @@ export function generateOutput(
 				needsFallback.push(locale);
 			} else {
 				messages.push(
-					`const ${safeLocale}_${safeBundleId} = ${compiledMessage.code}`
+					`const ${safeLocale}_${safeModuleId} = ${compiledMessage.code}`
 				);
 			}
 		}
@@ -68,12 +61,12 @@ export function generateOutput(
 				const safeFallbackLocale = toSafeModuleId(fallbackLocale);
 				// take the fallback locale
 				messages.push(
-					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeBundleId} = ${safeFallbackLocale}_${safeBundleId};`
+					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = ${safeFallbackLocale}_${safeModuleId};`
 				);
 			} else {
 				// fallback to just the bundle id
 				messages.push(
-					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeBundleId} = () => '${escapeForSingleQuoteString(
+					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = () => '${escapeForSingleQuoteString(
 						bundleId
 					)}'`
 				);
