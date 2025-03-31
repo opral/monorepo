@@ -50,24 +50,19 @@ describe("change_set_element table", () => {
 			.executeTakeFirstOrThrow();
 
 		// Now insert the element
-		await expect(
-			lix.db
-				.insertInto("change_set_element")
-				.values({
-					change_set_id: "cs1",
-					change_id: change.id,
-					entity_id: change.entity_id,
-					schema_key: change.schema_key,
-					file_id: change.file_id,
-				})
-				.execute()
-		).resolves.toBeDefined();
-
-		// Verify insertion
 		const element = await lix.db
-			.selectFrom("change_set_element")
-			.selectAll()
-			.executeTakeFirst();
+			.insertInto("change_set_element")
+			.values({
+				change_set_id: "cs1",
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow();	
+		
+
 		expect(element).toEqual({
 			change_set_id: "cs1",
 			change_id: change.id,

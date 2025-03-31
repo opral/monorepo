@@ -110,6 +110,63 @@ export async function createChange(
 		}
 	}
 
+	// ---------> START: Update active change set <---------
+
+	const activeVersion = executeSync({
+		lix: args.lix,
+		query: args.lix.db
+			.selectFrom("active_version")
+			.innerJoin("version_v2", "active_version.id", "version_v2.id")
+			.select("change_set_id"),
+	})[0] as { change_set_id: string };
+
+	// Add the new change to the change set element table
+
+	// we need to simulate a skip own change control here
+	// to avoid an infinite loop. at the time of writing this code,
+	// it was to be determine if the change graph is going to be
+	// removed or not. if the change graph is removed, the version
+	// change set somehow needs to track how its beeing updated (immutable change sets?)
+	// executeSync({
+	// 	lix: args.lix,
+	// 	query: args.lix.db
+	// 		.insertInto("key_value")
+	// 		.values({
+	// 			key: "lix_skip_own_change_control",
+	// 			value: "true",
+	// 			skip_change_control: true,
+	// 		})
+	// 		.onConflict((oc) => oc.doUpdateSet({ value: "true" })),
+	// });
+
+	executeSync({
+		lix: args.lix,
+		query: args.lix.db
+			.insertInto("change_set_element")
+			.values({
+				change_set_id: activeVersion.change_set_id,
+				change_id: change.id,
+				entity_id: change.entity_id,
+				file_id: change.file_id,
+				schema_key: change.schema_key,
+			})
+			// If the entity change already exists, update the existing change
+			.onConflict((oc) =>
+				oc.doUpdateSet({
+					change_id: change.id,
+				})
+			),
+	});
+
+	// executeSync({
+	// 	lix: args.lix,
+	// 	query: args.lix.db
+	// 		.deleteFrom("key_value")
+	// 		.where("key", "=", "lix_skip_own_change_control"),
+	// });
+
+	// ---------> END: Update active change set <---------
+
 	// update the version with the new change
 	if (optionsWithDefaults.updateVersionChanges) {
 		updateChangesInVersion({
