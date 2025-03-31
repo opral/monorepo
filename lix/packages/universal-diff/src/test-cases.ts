@@ -96,5 +96,4 @@ export const testCases: TestCase[] = [
       </span>
     `,
   },
-  // Add more test cases here as needed
 ];
