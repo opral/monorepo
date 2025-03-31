@@ -3,6 +3,7 @@ import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
 import { applyMutationLogDatabaseSchema } from "./mutation-log/database-schema.js";
 import { applyChangeProposalDatabaseSchema } from "../change-proposal/database-schema.js";
+import { applyChangeSetEdgeDatabaseSchema } from "../change-set-edge/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -266,8 +267,9 @@ export function applySchema(args: {
   END;
   `;
 
-	applyMutationLogDatabaseSchema(args.sqlite);
 	applyChangeProposalDatabaseSchema(args.sqlite);
+	applyMutationLogDatabaseSchema(args.sqlite);
+	applyChangeSetEdgeDatabaseSchema(args.sqlite);
 
 	return args.sqlite;
 }

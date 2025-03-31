@@ -6,6 +6,7 @@ import type {
 import type { KeyValueTable } from "../key-value/database-schema.js";
 import type { MutationLogTable } from "./mutation-log/database-schema.js";
 import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
+import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -29,6 +30,7 @@ export type LixDatabaseSchema = {
 	change_set: ChangeSetTable;
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
+	change_set_edge: ChangeSetEdgeTable;
 
 	// key value
 	key_value: KeyValueTable;
