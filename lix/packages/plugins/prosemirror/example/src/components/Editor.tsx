@@ -9,6 +9,8 @@ import { lixProsemirror } from "../prosemirror/lix-plugin";
 import { useEffect, useRef, useState } from "react";
 import { prosemirrorFile, lix } from "../state";
 import { registerCustomNodeViews } from "../prosemirror/custom-node-views";
+import { useKeyValue } from "../hooks/useKeyValue";
+import { DiffView } from "./DiffView";
 
 // Custom styles for the ProseMirror editor
 const editorStyles = `
@@ -31,6 +33,7 @@ const editorStyles = `
 const Editor: React.FC = () => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
+	const [diffView] = useKeyValue<[string, string] | null>("diffView");
 
 	// Initialize editor using useEffect for proper lifecycle management
 	useEffect(() => {
@@ -100,7 +103,11 @@ const Editor: React.FC = () => {
 			<style>{editorStyles}</style>
 			<div className="editor-wrapper p-4" onClick={handleClick}>
 				{/* The actual editor will be mounted here */}
-				<div ref={editorRef} className="prose max-w-none text-sm" />
+				{diffView ? (
+					<DiffView />
+				) : (
+					<div ref={editorRef} className="prose max-w-none text-sm" />
+				)}
 			</div>
 		</div>
 	);

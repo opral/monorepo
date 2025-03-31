@@ -53,10 +53,20 @@ const Checkpoints: React.FC = () => {
 					</div>
 				)}
 
-				{stateCheckpoints?.map((checkpoint) => {
+				{stateCheckpoints?.map((checkpoint, index) => {
+					// Get the previous checkpoint ID (if available)
+					const previousCheckpointId =
+						index > 0 ? stateCheckpoints[index - 1].id : undefined;
+
+					console.log({ previousCheckpointId });
+
 					return (
 						<div key={checkpoint.id}>
-							<ChangeSet key={checkpoint.id} changeSet={checkpoint} />
+							<ChangeSet
+								key={checkpoint.id}
+								previousChangeSetId={previousCheckpointId}
+								changeSet={checkpoint}
+							/>
 						</div>
 					);
 				})}

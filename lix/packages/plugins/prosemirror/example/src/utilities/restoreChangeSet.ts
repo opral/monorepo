@@ -73,14 +73,14 @@ export async function restoreChangeSet(
 		await fileQueueSettled({ lix });
 
 		// Create a checkpoint with a "Restore" comment
-		await createCheckpointV2("Restore changes");
+		// await createCheckpointV2("Restore changes");
 
-		// Reset the expanded change set
-		await lix.db
-			.updateTable("key_value")
-			.where("key", "=", "expandedChangeSetId")
-			.set({ value: JSON.stringify(null) })
-			.execute();
+		// // Reset the expanded change set
+		// await lix.db
+		// 	.updateTable("key_value")
+		// 	.where("key", "=", "expandedChangeSetId")
+		// 	.set({ value: JSON.stringify(null) })
+		// 	.execute();
 
 		console.log(`Document restored to version: ${changeSetId}`);
 	} catch (error) {

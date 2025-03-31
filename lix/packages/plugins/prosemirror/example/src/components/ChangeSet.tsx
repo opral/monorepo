@@ -19,6 +19,7 @@ export interface ChangeSetHandle {
 interface ChangeSetProps {
 	changeSet: ChangeSetType & { change_count: number; created_at?: string };
 	isCurrentChangeSet?: boolean;
+	previousChangeSetId?: string;
 	alwaysExpand?: boolean;
 	showRestore?: boolean;
 	showUndo?: boolean;
@@ -30,6 +31,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		{
 			changeSet,
 			isCurrentChangeSet = false,
+			previousChangeSetId,
 			alwaysExpand = false,
 			showRestore = true,
 			showUndo = true,
@@ -41,6 +43,10 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		const [expandedChangeSetId, setExpandedChangeSetId] = useKeyValue<
 			string | null
 		>("expandedChangeSetId");
+
+		const [diffView, setDiffView] = useKeyValue<
+			[string | undefined, string] | null
+		>("diffView");
 
 		const [activeAccount] = useQuery(selectActiveAccount);
 
@@ -182,8 +188,15 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 								<button
 									className="btn btn-sm btn-ghost gap-1"
 									onClick={() => {
-										// Implement view diff functionality
-										console.log("View diff");
+										if (diffView) {
+											setDiffView(null);
+										} else {
+											console.log({
+												previousChangeSetId,
+												changeSetId: changeSet.id,
+											});
+											setDiffView([previousChangeSetId, changeSet.id]);
+										}
 									}}
 									title="View diff"
 								>

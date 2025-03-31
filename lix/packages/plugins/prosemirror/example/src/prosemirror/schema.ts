@@ -1,4 +1,32 @@
-import { Schema } from "prosemirror-model";
+import { Node, Schema, DOMOutputSpec } from "prosemirror-model";
+
+// Helper function to add data-lix-entity-id attribute
+function addLixEntityId(node: Node, spec: DOMOutputSpec): DOMOutputSpec {
+  if (node.attrs.id && Array.isArray(spec) && spec.length > 0) {
+    const tag = spec[0];
+    let attrs: { [key: string]: any } = {};
+    let content = spec.slice(2); // Default content starts from index 2
+
+    if (spec.length > 1) {
+        const maybeAttrs = spec[1];
+        if (typeof maybeAttrs === 'object' && maybeAttrs !== null && !Array.isArray(maybeAttrs)) {
+            // It's an attribute object
+            attrs = { ...maybeAttrs };
+        } else {
+            // It's not an attribute object, must be the content hole (or part of content)
+            attrs = {}; // Start with empty attributes
+            content = spec.slice(1); // Correct content starts from index 1
+        }
+    }
+
+    attrs['data-lix-entity-id'] = node.attrs.id;
+
+    // Reconstruct the spec: tag, attributes object, then the rest of the content
+    return [tag, attrs, ...content];
+  }
+  // Return original spec if no id or spec is not an array we can modify
+  return spec;
+}
 
 // Define schema that matches both before.json and after.json structures
 export const schema = new Schema({
@@ -17,7 +45,7 @@ export const schema = new Schema({
         level: { default: 1 },
         id: { default: null } 
       },
-      toDOM() { return ["h1", 0] }
+      toDOM(node) { return addLixEntityId(node, ["h1", 0]); }
     },
     description: {
       content: "paragraph*",
@@ -26,7 +54,7 @@ export const schema = new Schema({
         dragHandlesDisabled: { default: true },
         id: { default: null } 
       },
-      toDOM() { return ["div", { class: "description" }, 0] }
+      toDOM(node) { return addLixEntityId(node, ["div", { class: "description" }, 0]); }
     },
     inputs: {
       content: "input*", 
@@ -36,7 +64,7 @@ export const schema = new Schema({
         id: { default: "INPUTS" },
         mode: { default: "inputs" }
       },
-      toDOM() { return ["div", { class: "inputs" }, 0] }
+      toDOM(node) { return addLixEntityId(node, ["div", { class: "inputs" }, 0]); }
     },
     input: {
       group: "block",
@@ -50,14 +78,14 @@ export const schema = new Schema({
         variableType: { default: null },
         fromTrigger: { default: false }
       },
-      toDOM() { return ["div", { class: "input" }, 0] }
+      toDOM(node) { return addLixEntityId(node, ["div", { class: "input" }, 0]); }
     },
     horizontalRule: {
       group: "block",
       attrs: { 
         id: { default: null } 
       },
-      toDOM() { return ["hr"] }
+      toDOM(node) { return addLixEntityId(node, ["hr"]); }
     },
     paragraph: { 
       content: "(text | inline)*", 
@@ -65,7 +93,7 @@ export const schema = new Schema({
       attrs: { 
         id: { default: null } 
       },
-      toDOM() { return ["p", 0] }
+      toDOM(node) { return addLixEntityId(node, ["p", 0]); }
     },
     bulletList: {
       content: "listItem+",
@@ -73,14 +101,14 @@ export const schema = new Schema({
       attrs: { 
         id: { default: null } 
       },
-      toDOM() { return ["ul", 0] }
+      toDOM(node) { return addLixEntityId(node, ["ul", 0]); }
     },
     listItem: {
       content: "paragraph+",
       attrs: { 
         id: { default: null } 
       },
-      toDOM() { return ["li", 0] }
+      toDOM(node) { return addLixEntityId(node, ["li", 0]); }
     },
     mention: {
       group: "inline",
@@ -93,7 +121,7 @@ export const schema = new Schema({
         lastLabel: { default: "" },
         id: { default: null } 
       },
-      toDOM() { return ["span", { class: "mention" }, 0] }
+      toDOM(node) { return addLixEntityId(node, ["span", { class: "mention" }, 0]); }
     },
     generation: {
       group: "inline",
@@ -110,7 +138,7 @@ export const schema = new Schema({
         stopBefore: { default: "[\"\",\"\",\"\",\"\"]" },
         responseModel: { default: "{}" }
       },
-      toDOM() { return ["span", { class: "generation" }, 0] }
+      toDOM(node) { return addLixEntityId(node, ["span", { class: "generation" }, 0]); }
     },
     tool: {
       group: "block",
@@ -123,7 +151,7 @@ export const schema = new Schema({
         outputs: { default: "[]" },
         state: { default: null }
       },
-      toDOM() { return ["div", { class: "tool" }, 0] }
+      toDOM(node) { return addLixEntityId(node, ["div", { class: "tool" }, 0]); }
     },
     text: { 
       group: "inline" 
