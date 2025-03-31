@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { changeSetElementInSymmetricDifference } from "./change-set-element-in-symmetric-difference.js";
-import type { ChangeSet, ChangeSetElement } from "../database/schema.js";
+import type { ChangeSet, ChangeSetElement } from "./database-schema.js";
 import { mockChange } from "../change/mock-change.js";
 
 test("should return the symmetric difference between two change sets", async () => {

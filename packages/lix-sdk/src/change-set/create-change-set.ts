@@ -1,5 +1,6 @@
-import type { Change, ChangeSet, Label } from "../database/schema.js";
+import type { Change, Label } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { ChangeSet } from "./database-schema.js";
 
 /**
  * Creates a change set with the given changes, optionally within an open transaction.

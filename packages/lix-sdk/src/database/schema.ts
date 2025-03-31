@@ -8,6 +8,11 @@ import type { MutationLogTable } from "./mutation-log/database-schema.js";
 import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
 import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
 import type { VersionV2Table } from "../version-v2/database-schema.js";
+import type {
+	ChangeSetElementTable,
+	ChangeSetLabelTable,
+	ChangeSetTable,
+} from "../change-set/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -150,23 +155,6 @@ type SnapshotTable = {
 	content: Record<string, any> | null;
 };
 
-// ------ change sets ------
-
-export type ChangeSet = Selectable<ChangeSetTable>;
-export type NewChangeSet = Insertable<ChangeSetTable>;
-export type ChangeSetUpdate = Updateable<ChangeSetTable>;
-type ChangeSetTable = {
-	id: Generated<string>;
-};
-
-export type ChangeSetElement = Selectable<ChangeSetElementTable>;
-export type NewChangeSetElement = Insertable<ChangeSetElementTable>;
-export type ChangeSetElementUpdate = Updateable<ChangeSetElementTable>;
-type ChangeSetElementTable = {
-	change_set_id: string;
-	change_id: string;
-};
-
 // ------ discussions ------
 
 export type Discussion = Selectable<DiscussionTable>;
@@ -197,13 +185,6 @@ type LabelTable = {
 	name: string;
 };
 
-export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
-export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;
-export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
-type ChangeSetLabelTable = {
-	change_set_id: string;
-	label_id: string;
-};
 
 // ------ versiones ------
 

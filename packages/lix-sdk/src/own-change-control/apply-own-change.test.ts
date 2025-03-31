@@ -1,10 +1,10 @@
-import { test, expect } from "vitest";
+import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import type { Change } from "../database/schema.js";
 import type {
-	Change,
 	ChangeSet,
 	ChangeSetElement,
-} from "../database/schema.js";
+} from "../change-set/database-schema.js";
 import { applyOwnChanges } from "./apply-own-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { type NewKeyValue } from "../key-value/database-schema.js";
