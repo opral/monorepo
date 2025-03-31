@@ -7,10 +7,10 @@ import type { Change } from "diff";
 export class DiffComponent extends LitElement {
 	static override styles = css`
 		:host {
-			--color-after-bg: #e6ffed;
-			--color-after-text: #22863a;
-			--color-before-bg: #ffeef0;
-			--color-before-text: #b31d28;
+			--color-added-bg: #e6ffed;
+			--color-added-text: #22863a;
+			--color-deleted-bg: #ffeef0;
+			--color-deleted-text: #b31d28;
 			--color-border: #e1e4e8;
 			--color-line-bg: #f6f8fa;
 			--color-text: #24292e;
@@ -68,14 +68,14 @@ export class DiffComponent extends LitElement {
 			border-right: 1px solid var(--color-border);
 		}
 
-		.after {
-			background-color: var(--color-after-bg);
-			color: var(--color-after-text);
+		.added {
+			background-color: var(--color-added-bg);
+			color: var(--color-added-text);
 		}
 
-		.before {
-			background-color: var(--color-before-bg);
-			color: var(--color-before-text);
+		.deleted {
+			background-color: var(--color-deleted-bg);
+			color: var(--color-deleted-text);
 		}
 
 		.empty {
@@ -123,7 +123,7 @@ export class DiffComponent extends LitElement {
 
 	@property({ type: Array })
 	diffs: UiDiffComponentProps["diffs"] = [];
-	
+
 	@state()
 	expandedBlocks: Set<string> = new Set();
 
@@ -134,7 +134,7 @@ export class DiffComponent extends LitElement {
 			</div>
 		`;
 	}
-	
+
 	// Stop event propagation to prevent parent components from collapsing
 	_handleContainerClick(e: Event) {
 		e.stopPropagation();
@@ -152,13 +152,18 @@ export class DiffComponent extends LitElement {
 		const lineDiffs = diffLines(before, after);
 
 		// Create aligned pairs with context and collapsible sections
-		const { sections, hasChanges } = this.processChangesWithContext(lineDiffs, diffId);
+		const { sections, hasChanges } = this.processChangesWithContext(
+			lineDiffs,
+			diffId,
+		);
 
 		// If there are no changes, we can just show a simple message
 		if (!hasChanges) {
 			return html`
 				<div class="diff-section" @click=${this._handleContainerClick}>
-					<div style="grid-column: 1 / span 2; padding: 8px; text-align: center; color: #586069;">
+					<div
+						style="grid-column: 1 / span 2; padding: 8px; text-align: center; color: #586069;"
+					>
 						No changes found in this diff
 					</div>
 				</div>
@@ -169,24 +174,48 @@ export class DiffComponent extends LitElement {
 		return html`
 			<div class="diff-section" @click=${this._handleContainerClick}>
 				${sections.map((section) => {
-					if (section.type === 'collapsible' && !this.expandedBlocks.has(section.id)) {
+					if (
+						section.type === "collapsible" &&
+						!this.expandedBlocks.has(section.id)
+					) {
 						return html`
-							<div class="collapsed-block" @click=${(e: Event) => this.toggleBlock(section.id, e)}>
-								<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-									<path d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z"></path>
+							<div
+								class="collapsed-block"
+								@click=${(e: Event) => this.toggleBlock(section.id, e)}
+							>
+								<svg
+									width="14"
+									height="14"
+									viewBox="0 0 16 16"
+									fill="currentColor"
+								>
+									<path
+										d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z"
+									></path>
 								</svg>
-								${section.count} unchanged line${section.count !== 1 ? 's' : ''}
+								${section.count} unchanged line${section.count !== 1 ? "s" : ""}
 							</div>
 						`;
 					} else {
 						// For visible sections or expanded collapsible sections
-						if (section.type === 'collapsible') {
+						if (section.type === "collapsible") {
 							return html`
-								<div class="collapsed-block" @click=${(e: Event) => this.toggleBlock(section.id, e)}>
-									<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
-										<path d="M4 8a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 4 8Z"></path>
+								<div
+									class="collapsed-block"
+									@click=${(e: Event) => this.toggleBlock(section.id, e)}
+								>
+									<svg
+										width="14"
+										height="14"
+										viewBox="0 0 16 16"
+										fill="currentColor"
+									>
+										<path
+											d="M4 8a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 4 8Z"
+										></path>
 									</svg>
-									Collapse ${section.count} unchanged line${section.count !== 1 ? 's' : ''}
+									Collapse ${section.count} unchanged
+									line${section.count !== 1 ? "s" : ""}
 								</div>
 								${section.rows.map(
 									(pair) => html`
@@ -198,7 +227,7 @@ export class DiffComponent extends LitElement {
 												<span class="line">${pair.right.content}</span>
 											</div>
 										</div>
-									`
+									`,
 								)}
 							`;
 						} else {
@@ -213,7 +242,7 @@ export class DiffComponent extends LitElement {
 												<span class="line">${pair.right.content}</span>
 											</div>
 										</div>
-									`
+									`,
 								)}
 							`;
 						}
@@ -226,7 +255,7 @@ export class DiffComponent extends LitElement {
 	toggleBlock(blockId: string, e: Event) {
 		// Prevent the event from bubbling up to parent components
 		e.stopPropagation();
-		
+
 		if (this.expandedBlocks.has(blockId)) {
 			this.expandedBlocks.delete(blockId);
 		} else {
@@ -243,44 +272,48 @@ export class DiffComponent extends LitElement {
 	processChangesWithContext(changes: Change[], diffId: string) {
 		// First, create the full aligned changes
 		const alignedChanges = this.alignChanges(changes);
-		
+
 		// Context lines to show before and after each change
 		const contextLines = 3;
 		const sections: Array<{
-			type: 'visible' | 'collapsible';
-			id: string; 
+			type: "visible" | "collapsible";
+			id: string;
 			rows: typeof alignedChanges;
 			count: number;
 		}> = [];
-		
+
 		// Determine which lines should be visible (changed or nearby context)
-		const isChangedLine = (pair: typeof alignedChanges[0]) => 
-			pair.left.type.includes('before') || pair.right.type.includes('after');
-		
+		const isChangedLine = (pair: (typeof alignedChanges)[0]) =>
+			pair.left.type.includes("before") || pair.right.type.includes("after");
+
 		const visibleIndices = new Set<number>();
-		
+
 		// First identify all changed lines
 		alignedChanges.forEach((pair, index) => {
 			if (isChangedLine(pair)) {
 				visibleIndices.add(index);
-				
+
 				// Add context lines before
 				for (let i = Math.max(0, index - contextLines); i < index; i++) {
 					visibleIndices.add(i);
 				}
-				
+
 				// Add context lines after
-				for (let i = index + 1; i <= Math.min(alignedChanges.length - 1, index + contextLines); i++) {
+				for (
+					let i = index + 1;
+					i <= Math.min(alignedChanges.length - 1, index + contextLines);
+					i++
+				) {
 					visibleIndices.add(i);
 				}
 			}
 		});
-		
+
 		// Now create sections based on visibility
-		let currentSection: typeof sections[0] | null = null;
+		let currentSection: (typeof sections)[0] | null = null;
 		let sectionCount = 0;
 		let hasChanges = false;
-		
+
 		// Helper to push the current section if it exists
 		const pushCurrentSection = () => {
 			if (currentSection && currentSection.rows.length > 0) {
@@ -288,62 +321,62 @@ export class DiffComponent extends LitElement {
 				sections.push(currentSection);
 			}
 		};
-		
+
 		alignedChanges.forEach((pair, index) => {
 			const isVisible = visibleIndices.has(index);
 			const isChanged = isChangedLine(pair);
-			
+
 			if (isChanged) {
 				hasChanges = true;
 			}
-			
+
 			// If this line should be visible
 			if (isVisible) {
 				// If we were in a collapsible section, end it
-				if (currentSection && currentSection.type === 'collapsible') {
+				if (currentSection && currentSection.type === "collapsible") {
 					pushCurrentSection();
 					currentSection = null;
 				}
-				
+
 				// If we're not already in a visible section, start one
-				if (!currentSection || currentSection.type !== 'visible') {
+				if (!currentSection || currentSection.type !== "visible") {
 					pushCurrentSection();
 					currentSection = {
-						type: 'visible',
+						type: "visible",
 						id: `${diffId}-visible-${sectionCount++}`,
 						rows: [],
-						count: 0
+						count: 0,
 					};
 				}
 			} else {
 				// This line should be collapsible
 				// If we were in a visible section, end it
-				if (currentSection && currentSection.type === 'visible') {
+				if (currentSection && currentSection.type === "visible") {
 					pushCurrentSection();
 					currentSection = null;
 				}
-				
+
 				// If we're not already in a collapsible section, start one
-				if (!currentSection || currentSection.type !== 'collapsible') {
+				if (!currentSection || currentSection.type !== "collapsible") {
 					pushCurrentSection();
 					currentSection = {
-						type: 'collapsible',
+						type: "collapsible",
 						id: `${diffId}-collapsible-${sectionCount++}`,
 						rows: [],
-						count: 0
+						count: 0,
 					};
 				}
 			}
-			
+
 			// Add the current pair to the current section
 			if (currentSection) {
 				currentSection.rows.push(pair);
 			}
 		});
-		
+
 		// Push the last section if it exists
 		pushCurrentSection();
-		
+
 		return { sections, hasChanges };
 	}
 
@@ -428,12 +461,12 @@ export class DiffComponent extends LitElement {
 								j < processRemovedLines.length
 									? processRemovedLines[j] || ""
 									: "",
-							type: j < processRemovedLines.length ? "before" : "empty before",
+							type: j < processRemovedLines.length ? "deleted" : "empty",
 						},
 						right: {
 							content:
 								j < processAddedLines.length ? processAddedLines[j] || "" : "",
-							type: j < processAddedLines.length ? "after" : "empty after",
+							type: j < processAddedLines.length ? "added" : "empty",
 						},
 					});
 				}
@@ -450,8 +483,8 @@ export class DiffComponent extends LitElement {
 
 				processLines.forEach((line) => {
 					alignedChanges.push({
-						left: { content: line, type: "before" },
-						right: { content: "", type: "empty after" },
+						left: { content: line, type: "deleted" },
+						right: { content: "", type: "empty" },
 					});
 				});
 
@@ -466,8 +499,8 @@ export class DiffComponent extends LitElement {
 
 				processLines.forEach((line) => {
 					alignedChanges.push({
-						left: { content: "", type: "empty before" },
-						right: { content: line, type: "after" },
+						left: { content: "", type: "empty" },
+						right: { content: line, type: "added" },
 					});
 				});
 
