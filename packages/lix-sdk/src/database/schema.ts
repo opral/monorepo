@@ -7,6 +7,7 @@ import type { KeyValueTable } from "../key-value/database-schema.js";
 import type { MutationLogTable } from "./mutation-log/database-schema.js";
 import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
 import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
+import type { VersionV2Table } from "../version-v2/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -47,6 +48,9 @@ export type LixDatabaseSchema = {
 	version: VersionTable;
 	version_change: VersionChangeTable;
 	version_change_conflict: VersionChangeConflictTable;
+
+	// version v2
+	version_v2: VersionV2Table;
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;

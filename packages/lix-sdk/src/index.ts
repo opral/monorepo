@@ -16,3 +16,4 @@ export * from "./query-filter/index.js";
 export * from "./server-protocol-handler/index.js";
 export * from "./snapshot/index.js";
 export * from "./version/index.js";
+export * from "./version-v2/index.js";
