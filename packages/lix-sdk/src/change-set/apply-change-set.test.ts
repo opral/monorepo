@@ -386,3 +386,153 @@ test("should not lead to new changes if called with withSkipOwnChangeControl", a
 	expect(afterKeyValue?.value).toBe("initial-value");
 	expect(changesAfter).toEqual(changesBefore);
 });
+
+test("mode: recursive applies changes from target and all ancestors while direct only applies the target", async () => {
+	// Create a mock plugin that concatenates change IDs to track which changes were applied
+	const mockPlugin: LixPlugin = {
+		key: "recursive-test-plugin",
+		applyChanges: async ({ changes, file }) => {
+			// Sort changes by creation time to ensure consistent order
+			const sortedChanges = [...changes].sort(
+				(a, b) =>
+					new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+			);
+
+			// Concatenate change IDs to the file data
+			const currentData = file.data ? new TextDecoder().decode(file.data) : "";
+			const changeIds = sortedChanges.map((c) => c.id).join(",");
+
+			return {
+				fileData: new TextEncoder().encode(
+					`${currentData}${currentData ? "," : ""}${changeIds}`
+				),
+			};
+		},
+	};
+
+	const lix = await openLixInMemory({
+		providePlugins: [mockPlugin],
+	});
+
+	// Create a test file
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			id: "recursive-test-file",
+			data: new TextEncoder().encode(""),
+			path: "/recursive-test-path",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Create a snapshot for our changes
+	const snapshot = await createSnapshot({
+		lix,
+		content: { value: "test-content" },
+	});
+
+	// Create three changes with timestamps in order
+	const baseDate = new Date("2023-01-01T00:00:00Z");
+
+	// Change 1 (oldest)
+	const change1 = await lix.db
+		.insertInto("change")
+		.values({
+			id: "change1",
+			file_id: file.id,
+			plugin_key: mockPlugin.key,
+			snapshot_id: snapshot.id,
+			entity_id: "entity1",
+			schema_key: "testSchema",
+			created_at: new Date(baseDate.getTime()).toISOString(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Change 2 (middle)
+	const change2 = await lix.db
+		.insertInto("change")
+		.values({
+			id: "change2",
+			file_id: file.id,
+			plugin_key: mockPlugin.key,
+			snapshot_id: snapshot.id,
+			entity_id: "entity1",
+			schema_key: "testSchema",
+			created_at: new Date(baseDate.getTime() + 1000).toISOString(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Change 3 (newest)
+	const change3 = await lix.db
+		.insertInto("change")
+		.values({
+			id: "change3",
+			file_id: file.id,
+			plugin_key: mockPlugin.key,
+			snapshot_id: snapshot.id,
+			entity_id: "entity1",
+			schema_key: "testSchema",
+			created_at: new Date(baseDate.getTime() + 2000).toISOString(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Create three change sets, each with one change
+	const changeSet1 = await createChangeSet({ lix, changes: [change1] });
+	const changeSet2 = await createChangeSet({ lix, changes: [change2] });
+	const changeSet3 = await createChangeSet({ lix, changes: [change3] });
+
+	// Create parent-child relationships between change sets
+	// changeSet1 <- changeSet2 <- changeSet3
+	await lix.db
+		.insertInto("change_set_edge")
+		.values([
+			{ parent_id: changeSet1.id, child_id: changeSet2.id },
+			{ parent_id: changeSet2.id, child_id: changeSet3.id },
+		])
+		.execute();
+
+	// Test 1: Direct mode should only apply the target change set
+	await applyChangeSet({
+		lix,
+		changeSet: changeSet3,
+		mode: { type: "direct" },
+	});
+
+	// Verify only change3 was applied in direct mode
+	let updatedFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(new TextDecoder().decode(updatedFile.data)).toBe("change3");
+
+	// Reset the file data
+	await lix.db
+		.updateTable("file")
+		.set({ data: new TextEncoder().encode("") })
+		.where("id", "=", file.id)
+		.execute();
+
+	// Test 2: Recursive mode should apply the target change set and all ancestors
+	await applyChangeSet({
+		lix,
+		changeSet: changeSet3,
+		mode: { type: "recursive" },
+	});
+
+	// Verify all changes were applied in recursive mode
+	updatedFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// The mock plugin should have applied all three changes in order
+	expect(new TextDecoder().decode(updatedFile.data)).toBe(
+		"change1,change2,change3"
+	);
+});
