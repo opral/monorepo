@@ -1,5 +1,39 @@
 # @inlang/paraglide-js
 
+## 2.0.8
+
+### Patch Changes
+
+- 5258af0: fix: compiling message bundles with case sensitive ids for the locale module output https://github.com/opral/inlang-paraglide-js/issues/490
+
+  Case sensitive ids led to duplicate exports in the locale module output. This has been fixed by adjusting the `toSafeModuleId()` used by the compiler internally to append a number of uppercase characters to de-duplicate the ids.
+
+  ```diff
+  toSafeModuleId("helloworld")
+   "helloworld"
+
+  toSafeModuleId("helloWorld")
+  - "helloworld"
+  + "helloworld1"
+  ```
+
+## 2.0.7
+
+### Patch Changes
+
+- 48931f5: make `output-structure: locale-modules` the default for dev builds https://github.com/opral/inlang-paraglide-js/issues/486
+- Updated dependencies [49a7880]
+  - @inlang/sdk@2.4.6
+
+## 2.0.6
+
+### Patch Changes
+
+- 3fa27c0: fix: duplicate (case sensitive) message keys leading to compile error when using `output-structure: locale-modules`. closes https://github.com/opral/inlang-paraglide-js/issues/487
+- 02c2d34: improve: compiler should log warnings when plugins can not be imported
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+
 ## 2.0.5
 
 ### Patch Changes
