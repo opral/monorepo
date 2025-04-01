@@ -21,11 +21,24 @@ import type { ChangeSet } from "./database-schema.js";
  *     labels
  *   });
  *   ```
+ * 
+ * @example
+ *   ```ts
+ *   // Create a change set with parent change sets
+ *   const parentChangeSet = await createChangeSet({ lix, changes: [] });
+ *   const childChangeSet = await createChangeSet({
+ *     lix,
+ *     changes: [],
+ *     parents: [parentChangeSet]
+ *   });
+ *   ```
  */
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
 	changes: Pick<Change, "id" | "entity_id" | "schema_key" | "file_id">[];
 	labels?: Pick<Label, "id">[];
+	/** Parent change sets that this change set will be a child of */
+	parents?: Pick<ChangeSet, "id">[];
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const changeSet = await trx
@@ -60,6 +73,19 @@ export async function createChangeSet(args: {
 					args.labels.map((label) => ({
 						label_id: label.id,
 						change_set_id: changeSet.id,
+					}))
+				)
+				.execute();
+		}
+
+		// Add parent-child relationships if parents are provided
+		if (args.parents && args.parents.length > 0) {
+			await trx
+				.insertInto("change_set_edge")
+				.values(
+					args.parents.map((parent) => ({
+						parent_id: parent.id,
+						child_id: changeSet.id,
 					}))
 				)
 				.execute();
