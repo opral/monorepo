@@ -2,8 +2,8 @@ import type { Lix } from "../lix/index.js";
 import { applyOwnChanges } from "../own-change-control/apply-own-change.js";
 import type { ChangeSet } from "./database-schema.js";
 import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
-import { changeSetElementIsLeaf } from "../query-filter/change-set-element-is-leaf.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
+import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 /**
  * Applies a change set to the lix.
  */
@@ -20,33 +20,30 @@ export async function applyChangeSet(args: {
 	const mode = args.mode ?? { type: "recursive" };
 
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// Select changes associated with leaf change sets in the ancestry of the specified change set
+		// Select changes associated with the specified change set
 		let query = trx
 			.selectFrom("change")
 			.innerJoin(
 				"change_set_element",
 				"change_set_element.change_id",
 				"change.id"
-			)
-			.where(changeSetElementIsLeaf());
+			);
 
 		if (mode.type === "direct") {
+			// In direct mode, we only want changes directly in this change set
 			query = query.where(
 				"change_set_element.change_set_id",
 				"=",
 				args.changeSet.id
 			);
 		} else {
-			query = query.where(changeSetElementInAncestryOf(args.changeSet));
+			// In recursive mode, we want leaf changes in the ancestry
+			query = query
+				.where(changeSetElementInAncestryOf(args.changeSet))
+				.where(changeSetElementIsLeafOf(args.changeSet));
 		}
 
 		const changesResult = await query.selectAll().execute();
-
-		console.log("mode", mode);
-		console.log(
-			"changesResult",
-			changesResult.map((c) => c.id)
-		);
 
 		// Group changes by file_id for processing
 		const changesGroupedByFile = Object.groupBy(
@@ -99,8 +96,8 @@ export async function applyChangeSet(args: {
 				}
 				const { fileData } = await plugin.applyChanges({
 					lix: { ...args.lix, db: trx },
-					file,
 					changes,
+					file,
 				});
 
 				await trx

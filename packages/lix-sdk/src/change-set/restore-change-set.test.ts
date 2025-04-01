@@ -21,9 +21,11 @@ test("it restores the state to a specific change set", async () => {
 						.executeTakeFirstOrThrow();
 				})
 			);
+
 			const sorted = withSnapshots.sort((a, b) =>
 				a.entity_id.localeCompare(b.entity_id)
 			);
+
 			const lines = sorted.map((s) => s.content?.text ?? "").join("\n");
 			return {
 				fileData: new TextEncoder().encode(lines),
@@ -131,7 +133,10 @@ test("it restores the state to a specific change set", async () => {
 		parents: [cs1],
 	});
 
-	await applyChangeSet({ lix, changeSet: cs0 });
+	await applyChangeSet({
+		lix,
+		changeSet: cs0,
+	});
 
 	const fileCs0Before = await lix.db
 		.selectFrom("file")
@@ -176,14 +181,14 @@ test("it restores the state to a specific change set", async () => {
 
 	expect(finalVersion.change_set_id).toBe(cs0.id);
 
-	// 2. Check file content reflects cs0 state
+	// 2. Check if data is updated
 	const finalFile = await lix.db
 		.selectFrom("file")
 		.where("id", "=", file.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const str = new TextDecoder().decode(finalFile.data);
-
-	expect(str).toBe(fileCs0BeforeTxt);
+	expect(new TextDecoder().decode(finalFile.data)).toBe(
+		"Line 0\nLine 1\nLine 2"
+	);
 });
