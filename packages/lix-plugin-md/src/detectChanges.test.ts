@@ -46,30 +46,27 @@ New paragraph.`);
 		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
 
-	expect(detectedChanges).toStrictEqual(
-		[
-			{
+	expect(detectedChanges).toStrictEqual([
+		{
 			schema: MarkdownBlockSchemaV1,
-			  entity_id: "xyz789",
-			  snapshot: {
+			entity_id: "xyz789",
+			snapshot: {
 				text: "New paragraph.",
 				type: "paragraph",
-			  },
 			},
-			{
-			  schema: MarkdownBlockPositionSchemaV1,
-			  entity_id: "block_positions",
-			  snapshot: {
+		},
+		{
+			schema: MarkdownBlockPositionSchemaV1,
+			entity_id: "block_positions",
+			snapshot: {
 				idPositions: {
-				  abc123: 0,
-				  def456: 1,
-				  xyz789: 2,
+					abc123: 0,
+					def456: 1,
+					xyz789: 2,
 				},
-			  },
 			},
-		  ]
-		
-	);
+		},
+	]);
 });
 
 test("it should detect an updated block", async () => {
@@ -129,18 +126,17 @@ Some text.`);
 			snapshot: undefined,
 		},
 		{
-		  schema: MarkdownBlockPositionSchemaV1,
-		  entity_id: "block_positions",
-		  snapshot: {
-			idPositions: {
-			  abc123: 0,
-			  def456: 1,
+			schema: MarkdownBlockPositionSchemaV1,
+			entity_id: "block_positions",
+			snapshot: {
+				idPositions: {
+					abc123: 0,
+					def456: 1,
+				},
 			},
-		  },
 		},
 	]);
 });
-
 
 test("it should detect an empty block", async () => {
 	const lix = await openLixInMemory({});
@@ -183,15 +179,16 @@ test
 			},
 		},
 		{
-		  schema: MarkdownBlockPositionSchemaV1,
-		  entity_id: "block_positions",
-		  snapshot: {
-			idPositions: {
-			  abc123: 0,
-			  def456: 1,
-			  bcd: 2, cde: 3
+			schema: MarkdownBlockPositionSchemaV1,
+			entity_id: "block_positions",
+			snapshot: {
+				idPositions: {
+					abc123: 0,
+					def456: 1,
+					bcd: 2,
+					cde: 3,
+				},
 			},
-		  },
 		},
 	]);
 });

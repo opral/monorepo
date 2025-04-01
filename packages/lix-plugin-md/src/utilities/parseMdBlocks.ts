@@ -58,4 +58,3 @@ export function parseMdBlocks(data: Uint8Array) {
 
 	return blocks;
 }
-
