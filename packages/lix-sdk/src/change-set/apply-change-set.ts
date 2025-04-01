@@ -1,15 +1,9 @@
 import type { Lix } from "../lix/index.js";
 import { applyOwnChanges } from "../own-change-control/apply-own-change.js";
 import type { ChangeSet } from "./database-schema.js";
-import { changeIsLeafOfChangeSet } from "../query-filter/change-is-leaf-of-change-set.js";
-
-/**
- * The modes for applying change sets.
- *
- * Is an object for future extensibility like
- * `{ type: "recursive", depth: number }`.
- */
-type ApplyChangeSetMode = { type: "direct" } | { type: "recursive", depth?: number };
+import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import { changeIsLeafV2 } from "../query-filter/change-is-leaf-v2.js";
+import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
 
 /**
  * Applies a change set to the lix.
@@ -18,11 +12,11 @@ export async function applyChangeSet(args: {
 	lix: Lix;
 	changeSet: Pick<ChangeSet, "id">;
 	/**
-	 * The mode for applying the change set.
+	 * The {@link GraphTraversalMode} for applying the change set.
 	 *
 	 * @default "recursive"
 	 */
-	mode?: ApplyChangeSetMode;
+	mode?: GraphTraversalMode;
 }): Promise<void> {
 	const mode = args.mode ?? { type: "recursive" };
 
@@ -35,11 +29,8 @@ export async function applyChangeSet(args: {
 				"change_set_element.change_id",
 				"change.id"
 			)
-			.where(
-				changeIsLeafOfChangeSet(args.changeSet, {
-					depth: mode.type === "direct" ? 0 : mode.depth,
-				})
-			)
+			.where(changeSetIsAncestorOf(args.changeSet, mode))
+			.where(changeIsLeafV2())
 			.selectAll("change")
 			.execute();
 
