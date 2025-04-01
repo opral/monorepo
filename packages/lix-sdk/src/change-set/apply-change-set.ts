@@ -1,8 +1,7 @@
 import type { Lix } from "../lix/index.js";
 import { applyOwnChanges } from "../own-change-control/apply-own-change.js";
 import type { ChangeSet } from "./database-schema.js";
-import type { LixDatabaseSchema } from "../database/schema.js";
-import { sql, type ExpressionWrapper, type SqlBool } from "kysely";
+import { changeIsLeafOfChangeSet } from "../query-filter/change-is-leaf-of-change-set.js";
 
 /**
  * The modes for applying change sets.
@@ -10,80 +9,7 @@ import { sql, type ExpressionWrapper, type SqlBool } from "kysely";
  * Is an object for future extensibility like
  * `{ type: "recursive", depth: number }`.
  */
-type ApplyChangeSetMode = { type: "direct" } | { type: "recursive" };
-
-/**
- * Filter to select changes that are associated with a specified change set.
- * In 'direct' mode, it only selects changes directly associated with the specified change set.
- * In 'recursive' mode, it selects leaf changes from the entire ancestry of the specified change set,
- * where a "leaf" change is the latest change for a given entity within the ancestry graph.
- *
- * @example
- *   ```ts
- *   await lix.db.selectFrom("change")
- *      .innerJoin("change_set_element", "change_set_element.change_id", "change.id")
- *      .where(changeIsLeafOfChangeSet(someChangeSet, { type: "recursive" }))
- *      .selectAll()
- *      .execute();
- *   ```
- */
-export function changeIsLeafOfChangeSet(
-	changeSet: Pick<ChangeSet, "id">,
-	options?: { depth?: number } // depth === 0 is 'direct'
-): ExpressionWrapper<LixDatabaseSchema, "change", SqlBool> {
-	const maxDepth = options?.depth;
-	return sql`
-    EXISTS (
-      WITH RECURSIVE change_set_ancestors(ancestor_id, depth) AS (
-        -- Start with the specified change set
-        SELECT id AS ancestor_id, 0 AS depth
-        FROM change_set
-        WHERE id = ${changeSet.id}
-
-        UNION ALL
-
-        -- Traverse parents, but limit depth if specified
-        SELECT 
-          change_set_edge.parent_id, 
-          change_set_ancestors.depth + 1
-        FROM change_set_edge
-        INNER JOIN change_set_ancestors 
-          ON change_set_edge.child_id = change_set_ancestors.ancestor_id
-        ${maxDepth !== undefined ? sql`WHERE change_set_ancestors.depth < ${maxDepth}` : sql``}
-      ),
-      ancestor_changes AS (
-        SELECT 
-          c.id, 
-          c.entity_id, 
-          c.file_id,
-          c.created_at
-        FROM change c
-        INNER JOIN change_set_element cse ON c.id = cse.change_id
-        WHERE cse.change_set_id IN (
-          SELECT ancestor_id FROM change_set_ancestors
-        )
-      ),
-      latest_changes AS (
-        SELECT id
-        FROM (
-          SELECT 
-            id,
-            entity_id,
-            file_id,
-            ROW_NUMBER() OVER (
-              PARTITION BY entity_id, file_id 
-              ORDER BY created_at DESC
-            ) AS rn
-          FROM ancestor_changes
-        ) ranked
-        WHERE rn = 1
-      )
-      SELECT 1
-      FROM latest_changes
-      WHERE latest_changes.id = change.id
-    )
-  ` as unknown as ExpressionWrapper<LixDatabaseSchema, "change", SqlBool>;
-}
+type ApplyChangeSetMode = { type: "direct" } | { type: "recursive", depth?: number };
 
 /**
  * Applies a change set to the lix.
@@ -111,7 +37,7 @@ export async function applyChangeSet(args: {
 			)
 			.where(
 				changeIsLeafOfChangeSet(args.changeSet, {
-					depth: mode.type === "direct" ? 0 : undefined,
+					depth: mode.type === "direct" ? 0 : mode.depth,
 				})
 			)
 			.selectAll("change")
