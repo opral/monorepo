@@ -1,7 +1,6 @@
 import type { Lix } from "../lix/index.js";
 import { applyOwnChanges } from "../own-change-control/apply-own-change.js";
 import type { ChangeSet } from "./database-schema.js";
-import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { changeIsLeafV2 } from "../query-filter/change-is-leaf-v2.js";
 import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
 
@@ -29,8 +28,7 @@ export async function applyChangeSet(args: {
 				"change_set_element.change_id",
 				"change.id"
 			)
-			.where(changeSetIsAncestorOf(args.changeSet, mode))
-			.where(changeIsLeafV2())
+			.where(changeIsLeafV2(args.changeSet.id, { mode }))
 			.selectAll("change")
 			.execute();
 

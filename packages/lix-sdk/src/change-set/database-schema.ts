@@ -24,10 +24,8 @@ export function applyChangeSetDatabaseSchema(
     UNIQUE (change_set_id, entity_id, schema_key, file_id),
 
     PRIMARY KEY(change_set_id, change_id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id),    
-    FOREIGN KEY(change_id) REFERENCES change(id),
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id) ON DELETE CASCADE,    
     FOREIGN KEY (change_id, entity_id, schema_key, file_id) REFERENCES change(id, entity_id, schema_key, file_id) ON DELETE CASCADE
-
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_label (

@@ -1,6 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { mockChange } from "../change/mock-change.js";
+import { createChangeSet } from "./create-change-set.js";
 
 describe("change_set table", () => {
 	test("should allow inserting change sets with auto-generated IDs", async () => {
@@ -30,6 +31,49 @@ describe("change_set table", () => {
 			.selectAll()
 			.executeTakeFirst();
 		expect(changeSet?.id).toBe(explicitId);
+	});
+
+	test("deleting a change set should delete its elements (useful for interim change sets used in a transaction)", async () => {
+		const lix = await openLixInMemory({});
+
+		const changes = await lix.db
+			.insertInto("change")
+			.values([
+				mockChange({ id: "c1", entity_id: "e1" }),
+				mockChange({ id: "c2", entity_id: "e2" }),
+			])
+			.returningAll()
+			.execute();
+
+		// Create a change set with labels
+		const changeSet = await createChangeSet({
+			lix,
+			changes,
+		});
+
+		// Delete the change set
+		await lix.db
+			.deleteFrom("change_set")
+			.where("id", "=", changeSet.id)
+			.execute();
+
+		// Verify the change set was deleted
+		const deletedChangeSet = await lix.db
+			.selectFrom("change_set")
+			.where("id", "=", changeSet.id)
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(deletedChangeSet).toBeUndefined();
+
+		// Verify the change set elements were deleted
+		const deletedChangeSetElements = await lix.db
+			.selectFrom("change_set_element")
+			.where("change_set_id", "=", changeSet.id)
+			.selectAll()
+			.execute();
+
+		expect(deletedChangeSetElements).toHaveLength(0);
 	});
 });
 

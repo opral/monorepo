@@ -89,7 +89,7 @@ test("selects only the latest change in an ancestry chain", async () => {
 				eb("change_set_element.change_set_id", "=", changeSet2.id),
 			])
 		)
-		.where(changeIsLeafV2())
+		.where(changeIsLeafV2(changeSet2.id))
 		.selectAll("change")
 		.execute();
 
@@ -97,3 +97,5 @@ test("selects only the latest change in an ancestry chain", async () => {
 	expect(leafChanges).toHaveLength(1);
 	expect(leafChanges[0]?.id).toBe(change2.id);
 });
+
+
