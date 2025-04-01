@@ -138,11 +138,11 @@ test("applying the schema should create the initial 'cs0' change set", async () 
 	const lix = await openLixInMemory({});
 	const initialChangeSet = await lix.db
 		.selectFrom("change_set")
-		.where("id", "=", "cs0")
+		.where("id", "=", "initialchangeset")
 		.selectAll()
 		.executeTakeFirst();
 	expect(initialChangeSet).toBeDefined();
-	expect(initialChangeSet?.id).toBe("cs0");
+	expect(initialChangeSet?.id).toBe("initialchangeset");
 });
 
 test("applying the schema should create the initial 'main' version linked to 'cs0'", async () => {
@@ -155,7 +155,7 @@ test("applying the schema should create the initial 'main' version linked to 'cs
 	expect(initialVersion).toBeDefined();
 	expect(initialVersion?.id).toBe("019328cc-ccb0-7f51-96e8-524df4597ac6");
 	expect(initialVersion?.name).toBe("main");
-	expect(initialVersion?.change_set_id).toBe("cs0");
+	expect(initialVersion?.change_set_id).toBe("initialchangeset");
 });
 
 test("applying the schema should set the initial active version to 'main'", async () => {
@@ -177,7 +177,7 @@ test("applying the schema multiple times should be idempotent for initial data",
 	const initialChangeSetCount = await lix.db
 		.selectFrom("change_set")
 		.select(lix.db.fn.count("id").as("count"))
-		.where("id", "=", "cs0")
+		.where("id", "=", "initialchangeset")
 		.executeTakeFirstOrThrow();
 	expect(initialChangeSetCount.count).toBe(1);
 

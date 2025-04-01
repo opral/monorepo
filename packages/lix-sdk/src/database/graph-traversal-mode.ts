@@ -68,7 +68,7 @@ export type GraphTraversalModeRecursive = {
 	type: "recursive";
 	/**
 	 * Optional maximum depth to traverse.
-	 * - `depth = 1` includes direct parents/children only.
+	 * - `depth = 0` includes direct parents/children only.
 	 * - `undefined` includes full ancestry/descendants.
 	 */
 	depth?: number;

@@ -24,13 +24,13 @@ export function applyVersionV2DatabaseSchema(
   -- Insert the default change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id)
-  SELECT 'cs0'
-  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = 'cs0');
+  SELECT 'initialchangeset'
+  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = 'initialchangeset');
 
   -- Insert the default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO version_v2 (id, name, change_set_id)
-  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main', 'cs0'
+  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main', 'initialchangeset'
   WHERE NOT EXISTS (SELECT 1 FROM version_v2);
 
   -- Set the default current version to 'main' if both tables are empty

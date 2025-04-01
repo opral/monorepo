@@ -1,9 +1,9 @@
 import type { Lix } from "../lix/index.js";
 import { applyOwnChanges } from "../own-change-control/apply-own-change.js";
 import type { ChangeSet } from "./database-schema.js";
-import { changeIsLeafV2 } from "../query-filter/change-is-leaf-v2.js";
 import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
-
+import { changeSetElementIsLeaf } from "../query-filter/change-set-element-is-leaf.js";
+import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 /**
  * Applies a change set to the lix.
  */
@@ -21,16 +21,32 @@ export async function applyChangeSet(args: {
 
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Select changes associated with leaf change sets in the ancestry of the specified change set
-		const changesResult = await trx
+		let query = trx
 			.selectFrom("change")
 			.innerJoin(
 				"change_set_element",
 				"change_set_element.change_id",
 				"change.id"
 			)
-			.where(changeIsLeafV2(args.changeSet.id, { mode }))
-			.selectAll("change")
-			.execute();
+			.where(changeSetElementIsLeaf());
+
+		if (mode.type === "direct") {
+			query = query.where(
+				"change_set_element.change_set_id",
+				"=",
+				args.changeSet.id
+			);
+		} else {
+			query = query.where(changeSetElementInAncestryOf(args.changeSet));
+		}
+
+		const changesResult = await query.selectAll().execute();
+
+		console.log("mode", mode);
+		console.log(
+			"changesResult",
+			changesResult.map((c) => c.id)
+		);
 
 		// Group changes by file_id for processing
 		const changesGroupedByFile = Object.groupBy(

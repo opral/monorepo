@@ -35,19 +35,24 @@ import type { ChangeSet } from "./database-schema.js";
  */
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
-	changes: Pick<Change, "id" | "entity_id" | "schema_key" | "file_id">[];
+	id?: string;
+	changes?: Pick<Change, "id" | "entity_id" | "schema_key" | "file_id">[];
 	labels?: Pick<Label, "id">[];
 	/** Parent change sets that this change set will be a child of */
 	parents?: Pick<ChangeSet, "id">[];
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const changeSet = await trx
-			.insertInto("change_set")
-			.defaultValues()
-			.returningAll()
-			.executeTakeFirstOrThrow();
+		let query = trx.insertInto("change_set");
 
-		if (args.changes.length > 0) {
+		if (args.id) {
+			query = query.values({ id: args.id });
+		} else {
+			query = query.defaultValues();
+		}
+
+		const changeSet = await query.returningAll().executeTakeFirstOrThrow();
+
+		if (args.changes && args.changes.length > 0) {
 			// Insert elements linking change set to changes
 			await trx
 				.insertInto("change_set_element")

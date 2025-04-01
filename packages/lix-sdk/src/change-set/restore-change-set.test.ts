@@ -2,7 +2,6 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { restoreChangeSet } from "./restore-change-set.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { createSnapshot } from "../snapshot/create-snapshot.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
 
@@ -53,16 +52,18 @@ test("it restores the state to a specific change set", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	// Create snapshots for the changes
-	const snapshot0 = await createSnapshot({ lix, content: { text: "Line 0" } });
-	const snapshot1 = await createSnapshot({ lix, content: { text: "Line 1" } });
-	const snapshot2 = await createSnapshot({ lix, content: { text: "Line 2" } });
-	const snapshot3 = await createSnapshot({
-		lix,
-		content: { text: "Line 2 Modified" },
-	});
+	const snapshots = await lix.db
+		.insertInto("snapshot")
+		.values([
+			{ content: { text: "Line 0" } },
+			{ content: { text: "Line 1" } },
+			{ content: { text: "Line 2" } },
+			{ content: { text: "Line 2 Modified" } },
+			{ content: { text: "Line 3" } },
+		])
+		.returningAll()
+		.execute();
 
-	// Create three changes (c0, c1, c2)
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
@@ -72,7 +73,7 @@ test("it restores the state to a specific change set", async () => {
 				plugin_key: mockPlugin.key,
 				entity_id: "l0",
 				schema_key: "line",
-				snapshot_id: snapshot0.id,
+				snapshot_id: snapshots[0]!.id,
 			},
 			{
 				id: "c1",
@@ -80,7 +81,7 @@ test("it restores the state to a specific change set", async () => {
 				plugin_key: mockPlugin.key,
 				entity_id: "l1",
 				schema_key: "line",
-				snapshot_id: snapshot1.id,
+				snapshot_id: snapshots[1]!.id,
 			},
 			{
 				id: "c2",
@@ -88,7 +89,7 @@ test("it restores the state to a specific change set", async () => {
 				plugin_key: mockPlugin.key,
 				entity_id: "l2",
 				schema_key: "line",
-				snapshot_id: snapshot2.id,
+				snapshot_id: snapshots[2]!.id,
 			},
 			{
 				id: "c3",
@@ -96,45 +97,72 @@ test("it restores the state to a specific change set", async () => {
 				plugin_key: mockPlugin.key,
 				entity_id: "l2",
 				schema_key: "line",
-				snapshot_id: snapshot3.id,
+				snapshot_id: snapshots[3]!.id,
+			},
+			{
+				id: "c4",
+				file_id: file.id,
+				plugin_key: mockPlugin.key,
+				entity_id: "l3",
+				schema_key: "line",
+				snapshot_id: snapshots[4]!.id,
 			},
 		])
 		.returningAll()
 		.execute();
 
-	// Create change set 1 with changes c0, c1, c2
 	const cs0 = await createChangeSet({
 		lix,
+		id: "cs0",
 		changes: [changes[0]!, changes[1]!, changes[2]!],
 	});
 
-	// Create change set 2 with change c3
 	const cs1 = await createChangeSet({
 		lix,
+		id: "cs1",
 		changes: [changes[3]!],
 		parents: [cs0],
 	});
 
-	await applyChangeSet({
+	const cs2 = await createChangeSet({
 		lix,
-		changeSet: cs1,
+		id: "cs2",
+		changes: [changes[4]!],
+		parents: [cs1],
 	});
 
-	// Verify initial state
-	const initialFile = await lix.db
+	await applyChangeSet({ lix, changeSet: cs0 });
+
+	const fileCs0Before = await lix.db
 		.selectFrom("file")
 		.where("id", "=", file.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(new TextDecoder().decode(initialFile.data)).toBe(
-		"Line 0\nLine 1\nLine 2 Modified"
+	const fileCs0BeforeTxt = new TextDecoder().decode(fileCs0Before.data);
+
+	expect(fileCs0BeforeTxt).toBe("Line 0\nLine 1\nLine 2");
+
+	await applyChangeSet({
+		lix,
+		changeSet: cs2,
+	});
+
+	// Verify initial state
+	const fileCs2 = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(new TextDecoder().decode(fileCs2.data)).toBe(
+		"Line 0\nLine 1\nLine 2 Modified\nLine 3"
 	);
 
 	// Action: Restore to cs0
 	await restoreChangeSet({
 		lix,
-		changeSet: { id: cs0.id },
+		changeSet: cs0,
 		version: activeVersion,
 	});
 
@@ -155,7 +183,7 @@ test("it restores the state to a specific change set", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(new TextDecoder().decode(finalFile.data)).toBe(
-		"Line 0\nLine 1\nLine 2"
-	);
+	const str = new TextDecoder().decode(finalFile.data);
+
+	expect(str).toBe(fileCs0BeforeTxt);
 });

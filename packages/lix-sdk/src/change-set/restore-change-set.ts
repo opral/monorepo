@@ -1,9 +1,10 @@
 import type { Lix } from "../lix/index.js";
 import type { ChangeSet } from "./database-schema.js";
-import { changeIsLeafV2 } from "../query-filter/change-is-leaf-v2.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import type { Version } from "../database/schema.js";
+import { changeSetElementIsLeaf } from "../query-filter/change-set-element-is-leaf.js";
+import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 
 export async function restoreChangeSet(args: {
 	lix: Lix;
@@ -17,6 +18,7 @@ export async function restoreChangeSet(args: {
 				.selectFrom("active_version")
 				.select(["id"])
 				.executeTakeFirstOrThrow());
+
 		const changesToRestore = await trx
 			.selectFrom("change")
 			.innerJoin(
@@ -24,9 +26,15 @@ export async function restoreChangeSet(args: {
 				"change_set_element.change_id",
 				"change.id"
 			)
-			.where(changeIsLeafV2(args.changeSet.id, { mode: { type: "direct" } }))
+			.where(changeSetElementInAncestryOf(args.changeSet))
+			.where(changeSetElementIsLeaf())
 			.selectAll()
 			.execute();
+
+		console.log(
+			"Creating interimChangeSet with changes:",
+			changesToRestore.map((c) => c.id)
+		);
 
 		const interimChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
@@ -36,7 +44,6 @@ export async function restoreChangeSet(args: {
 		await applyChangeSet({
 			lix: { ...args.lix, db: trx },
 			changeSet: interimChangeSet,
-			mode: { type: "direct" },
 		});
 
 		await trx
