@@ -144,10 +144,19 @@ export function applySchema(args: {
     FOREIGN KEY(resolved_change_id) REFERENCES change(id)
   ) STRICT;
 
+  -- discussions (must be created before change_set that references it)
+
+  CREATE TABLE IF NOT EXISTS discussion (
+    id TEXT PRIMARY KEY DEFAULT (nano_id(12))
+  ) STRICT;
+
   -- change sets
 
   CREATE TABLE IF NOT EXISTS change_set (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(16))
+    id TEXT PRIMARY KEY DEFAULT (nano_id(16)),
+    discussion_id TEXT,
+    
+    FOREIGN KEY(discussion_id) REFERENCES discussion(id)
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_element (
@@ -165,15 +174,6 @@ export function applySchema(args: {
     change_set_id TEXT NOT NULL,
     PRIMARY KEY(label_id, change_set_id),
     FOREIGN KEY(label_id) REFERENCES label(id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
-  ) STRICT;
-
-  -- discussions 
-
-  CREATE TABLE IF NOT EXISTS discussion (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(12)),
-    change_set_id TEXT NOT NULL,
-
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
