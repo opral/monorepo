@@ -388,7 +388,132 @@ test("should not lead to new changes if called with withSkipOwnChangeControl", a
 	expect(changesAfter).toEqual(changesBefore);
 });
 
-test("mode: recursive applies changes from target and all ancestors while direct only applies the target", async () => {
+test("mode: direct only applies changes from the target change set", async () => {
+	// Create a mock plugin that simulates a document with multiple rows
+	// Each change will modify a specific row identified by entity_id
+	const mockPlugin: LixPlugin = {
+		key: "direct-test-plugin",
+		applyChanges: async ({ changes }) => {
+			// Apply the changes and create a simple representation of the file
+			// Each line shows which entity was modified by which change
+			const appliedChanges = changes.map(
+				(change) => `row:${change.entity_id}=${change.id}`
+			);
+
+			return {
+				fileData: new TextEncoder().encode(appliedChanges.join("\n")),
+			};
+		},
+	};
+
+	const lix = await openLixInMemory({
+		providePlugins: [mockPlugin],
+	});
+
+	// Create a test file
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			id: "direct-test-file",
+			data: new TextEncoder().encode(""),
+			path: "/direct-test-path",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Create a snapshot for our changes
+	const snapshot = await createSnapshot({
+		lix,
+		content: { value: "test-content" },
+	});
+
+	// Create three changes with timestamps in order
+	const baseDate = new Date("2023-01-01T00:00:00Z");
+
+	// Change 1 (oldest) - modifies row1
+	const change1 = await lix.db
+		.insertInto("change")
+		.values({
+			id: "direct-change1",
+			file_id: file.id,
+			plugin_key: mockPlugin.key,
+			snapshot_id: snapshot.id,
+			entity_id: "row1", // First row
+			schema_key: "testSchema",
+			created_at: new Date(baseDate.getTime()).toISOString(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Change 2 (middle) - also modifies row1, should supersede change1
+	const change2 = await lix.db
+		.insertInto("change")
+		.values({
+			id: "direct-change2",
+			file_id: file.id,
+			plugin_key: mockPlugin.key,
+			snapshot_id: snapshot.id,
+			entity_id: "row1", // Same row as change1
+			schema_key: "testSchema",
+			created_at: new Date(baseDate.getTime() + 1000).toISOString(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Change 3 (newest) - modifies row2
+	const change3 = await lix.db
+		.insertInto("change")
+		.values({
+			id: "direct-change3",
+			file_id: file.id,
+			plugin_key: mockPlugin.key,
+			snapshot_id: snapshot.id,
+			entity_id: "row2", // Different row
+			schema_key: "testSchema",
+			created_at: new Date(baseDate.getTime() + 2000).toISOString(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Create change sets with parent-child relationships:
+	// changeSet1 (oldest) <- changeSet2 (middle) <- changeSet3 (newest/leaf)
+	const changeSet1 = await createChangeSet({
+		lix,
+		changes: [change1],
+	});
+
+	const changeSet2 = await createChangeSet({
+		lix,
+		changes: [change2],
+		parents: [changeSet1],
+	});
+
+	const changeSet3 = await createChangeSet({
+		lix,
+		changes: [change3],
+		parents: [changeSet2],
+	});
+
+	// Direct mode should only apply changes from the target change set
+	await applyChangeSet({
+		lix,
+		changeSet: changeSet3,
+		mode: { type: "direct" },
+	});
+
+	// Verify only change3 (row2) was applied in direct mode
+	const updatedFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(new TextDecoder().decode(updatedFile.data)).toBe(
+		"row:row2=direct-change3"
+	);
+});
+
+test("mode: recursive applies changes from target and all ancestors", async () => {
 	// Create a mock plugin that simulates a document with multiple rows
 	// Each change will modify a specific row identified by entity_id
 	const mockPlugin: LixPlugin = {
@@ -434,7 +559,7 @@ test("mode: recursive applies changes from target and all ancestors while direct
 	const change1 = await lix.db
 		.insertInto("change")
 		.values({
-			id: "change1",
+			id: "recursive-change1",
 			file_id: file.id,
 			plugin_key: mockPlugin.key,
 			snapshot_id: snapshot.id,
@@ -449,7 +574,7 @@ test("mode: recursive applies changes from target and all ancestors while direct
 	const change2 = await lix.db
 		.insertInto("change")
 		.values({
-			id: "change2",
+			id: "recursive-change2",
 			file_id: file.id,
 			plugin_key: mockPlugin.key,
 			snapshot_id: snapshot.id,
@@ -464,7 +589,7 @@ test("mode: recursive applies changes from target and all ancestors while direct
 	const change3 = await lix.db
 		.insertInto("change")
 		.values({
-			id: "change3",
+			id: "recursive-change3",
 			file_id: file.id,
 			plugin_key: mockPlugin.key,
 			snapshot_id: snapshot.id,
@@ -494,30 +619,7 @@ test("mode: recursive applies changes from target and all ancestors while direct
 		parents: [changeSet2],
 	});
 
-	// Test 1: Direct mode should only apply changes from the target change set
-	await applyChangeSet({
-		lix,
-		changeSet: changeSet3,
-		mode: { type: "direct" },
-	});
-
-	// Verify only change3 (row2) was applied in direct mode
-	let updatedFile = await lix.db
-		.selectFrom("file")
-		.where("id", "=", file.id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	expect(new TextDecoder().decode(updatedFile.data)).toBe("row:row2=change3");
-
-	// Reset the file data
-	await lix.db
-		.updateTable("file")
-		.set({ data: new TextEncoder().encode("") })
-		.where("id", "=", file.id)
-		.execute();
-
-	// Test 2: Recursive mode should apply leaf changes from the target and all ancestors
+	// Recursive mode should apply leaf changes from the target and all ancestors
 	await applyChangeSet({
 		lix,
 		changeSet: changeSet3,
@@ -525,7 +627,7 @@ test("mode: recursive applies changes from target and all ancestors while direct
 	});
 
 	// Verify all leaf changes were applied in recursive mode
-	updatedFile = await lix.db
+	const updatedFile = await lix.db
 		.selectFrom("file")
 		.where("id", "=", file.id)
 		.selectAll()
@@ -539,10 +641,12 @@ test("mode: recursive applies changes from target and all ancestors while direct
 		.decode(updatedFile.data)
 		.split("\n")
 		.sort();
-	expect(resultRows).toEqual(["row:row1=change2", "row:row2=change3"].sort());
+	expect(resultRows).toEqual(
+		["row:row1=recursive-change2", "row:row2=recursive-change3"].sort()
+	);
 });
 
-test("updates the version's change set pointer and maintains parent relationship", async () => {
+test("updates the version's change set id and maintains parent relationship", async () => {
 	// Create a simple mock plugin
 	const mockPlugin: LixPlugin = {
 		key: "test",
@@ -614,7 +718,7 @@ test("updates the version's change set pointer and maintains parent relationship
 	// Verify the parent relationship was created
 	const edges = await lix.db
 		.selectFrom("change_set_edge")
-		.where("child_id", "=", newChangeSet.id)
+		.where("child_id", "=", updatedVersion.change_set_id)
 		.selectAll("change_set_edge")
 		.execute();
 
