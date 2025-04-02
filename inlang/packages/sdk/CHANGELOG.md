@@ -1,5 +1,13 @@
 # @inlang/sdk
 
+## 2.4.7
+
+### Patch Changes
+
+- bd2c366: improve: sample telemetry event to reduce number of events
+- Updated dependencies [f634538]
+  - @lix-js/sdk@0.4.6
+
 ## 2.4.6
 
 ### Patch Changes
