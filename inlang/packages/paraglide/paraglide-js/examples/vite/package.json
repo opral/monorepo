@@ -5,9 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
-		"clean": "rm -rf ./dist ./node_modules ./src/paraglide",
-		"test": "tsc --noEmit"
+		"build": "vite build && tsc --noEmit",
+		"clean": "rm -rf ./dist ./node_modules ./src/paraglide"
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "workspace:*",
