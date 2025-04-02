@@ -678,7 +678,7 @@ export function WorkspaceSidebar() {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleExportFile(file.id)}>
                       <Download className="h-4 w-4 mr-2" />
-                      <span>Export as Markdown</span>
+                      <span>Export File</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
