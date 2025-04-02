@@ -289,3 +289,39 @@ export const isSyncingAtom = atom(async (get) => {
 		return false;
 	}
 });
+
+export const availableWorkspacesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const root = await getOriginPrivateDirectory();
+	const workspaces = [];
+
+	for await (const entry of (root as any).values()) {
+		if (entry.kind === "file" && entry.name.endsWith(".lix")) {
+			const wsId = entry.name.replace(/\.lix$/, "");
+			try {
+				const buffer = await entry
+					.getFile()
+					.then((f: { arrayBuffer(): Promise<ArrayBuffer> }) =>
+						f.arrayBuffer()
+					);
+				const lix = await openLixInMemory({ blob: new Blob([buffer]) });
+				const name = await lix.db
+					.selectFrom("key_value")
+					.where("key", "=", "workspace_name")
+					.select("value")
+					.executeTakeFirst()
+					.then((row) => row?.value || `Workspace ${wsId.substring(0, 6)}`);
+
+				workspaces.push({ id: wsId, name });
+			} catch (error) {
+				console.error(`Failed to load workspace ${wsId}:`, error);
+				workspaces.push({
+					id: wsId,
+					name: `Workspace ${wsId.substring(0, 6)}`,
+				});
+			}
+		}
+	}
+
+	return workspaces;
+});
