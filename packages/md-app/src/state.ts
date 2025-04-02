@@ -9,7 +9,7 @@ import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
-import { generateHumanId } from "./helpers/generateHumanId";
+import { generateHumanId } from "./helper/generateHumanId";
 import {
 	lixMdDemoFile,
 	setupMdDemo,

@@ -23,7 +23,7 @@ import { activeFileAtom } from "@/state-active-file"
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
 import { createNewLixFileInOpfs } from "@/helper/new-lix"
 import { updateUrlParams } from "@/helper/updateUrlParams"
-import { generateHumanId } from "@/helpers/generateHumanId"
+import { generateHumanId } from "@/helper/generateHumanId"
 import { openLixInMemory, toBlob } from "@lix-js/sdk"
 
 import {

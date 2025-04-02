@@ -4,7 +4,7 @@ import { activeFileAtom } from "@/state-active-file";
 import { filesAtom, lixAtom, withPollingAtom } from "@/state";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { updateUrlParams } from "@/helper/updateUrlParams";
-import { generateHumanId } from "@/helpers/generateHumanId";
+import { generateHumanId } from "@/helper/generateHumanId";
 import {
   DropdownMenu,
   DropdownMenuContent,
