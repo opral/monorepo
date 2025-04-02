@@ -1,5 +1,11 @@
 # @inlang/paraglide-js
 
+## 2.0.10
+
+### Patch Changes
+
+- d16e853: fix: [2.0.8] Adds extra \*/ in generated .js files https://github.com/opral/inlang-paraglide-js/issues/493
+
 ## 2.0.9
 
 ### Patch Changes
