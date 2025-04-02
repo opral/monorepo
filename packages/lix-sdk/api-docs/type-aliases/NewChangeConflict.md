@@ -8,4 +8,4 @@
 
 > **NewChangeConflict** = `Insertable`\<`ChangeConflictTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:246](https://github.com/opral/monorepo/blob/c1910f74abb6a0c11c72843e559a3503d21f8bdb/packages/lix-sdk/src/database/schema.ts#L246)
+Defined in: [packages/lix-sdk/src/database/schema.ts:246](https://github.com/opral/monorepo/blob/9e4a0ed87313931bc006fc9fc84146a53943e93c/packages/lix-sdk/src/database/schema.ts#L246)
