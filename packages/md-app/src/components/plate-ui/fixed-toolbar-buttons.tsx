@@ -62,7 +62,8 @@ import { TableDropdownMenu } from './table-dropdown-menu';
 import { ToggleToolbarButton } from './toggle-toolbar-button';
 import { ToolbarGroup } from './toolbar';
 import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
-import { CopyToClipboard } from '../editor/CopyToClipboard';
+import { CopyToClipboard } from '../CopyToClipboard';
+import { ImportMarkdown } from '../ImportMarkdown';
 
 export function FixedToolbarButtons() {
   const readOnly = useEditorReadOnly();
@@ -86,9 +87,10 @@ export function FixedToolbarButtons() {
             <ExportToolbarButton>
               <ArrowUpToLineIcon />
             </ExportToolbarButton>
-
             <ImportToolbarButton />
           </ToolbarGroup> */}
+
+
 
           <ToolbarGroup>
             <InsertDropdownMenu />
@@ -184,6 +186,7 @@ export function FixedToolbarButtons() {
       </ToolbarGroup> */}
 
       <ToolbarGroup>
+        <ImportMarkdown />
         <CopyToClipboard />
         {/* <ModeDropdownMenu /> */}
       </ToolbarGroup>
