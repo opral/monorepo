@@ -9,8 +9,6 @@ import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
-import { generateHumanId } from "./helper/generateHumanId";
-import { ensureWorkspaceName } from "./helper/renameWorkspace";
 import {
 	lixMdDemoFile,
 	setupMdDemo,
@@ -292,6 +290,21 @@ export const isSyncingAtom = atom(async (get) => {
 	}
 });
 
+export const currentWorkspaceNameAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	if (!lix) return "Untitled Workspace";
+
+	const name = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "workspace_name")
+		.select("value")
+		.executeTakeFirst()
+		.then((row) => row?.value);
+
+	return name || "Untitled Workspace";
+});
+
 export const availableWorkspacesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const root = await getOriginPrivateDirectory();
@@ -307,23 +320,19 @@ export const availableWorkspacesAtom = atom(async (get) => {
 						f.arrayBuffer()
 					);
 				const lix = await openLixInMemory({ blob: new Blob([buffer]) });
-				const nameRecord = await lix.db
+				const name = await lix.db
 					.selectFrom("key_value")
 					.where("key", "=", "workspace_name")
 					.select("value")
-					.executeTakeFirst();
+					.executeTakeFirst()
+					.then((row) => row?.value || "Untitled");
 
-				if (nameRecord?.value) {
-					workspaces.push({ id: wsId, name: nameRecord.value });
-				} else {
-					const name = await ensureWorkspaceName({ lix });
-					workspaces.push({ id: wsId, name });
-				}
+				workspaces.push({ id: wsId, name });
 			} catch (error) {
 				console.error(`Failed to load workspace:`, error);
 				workspaces.push({
 					id: wsId,
-					name: generateHumanId(),
+					name: "Untitled",
 				});
 			}
 		}

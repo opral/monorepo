@@ -1,5 +1,4 @@
 import { Lix } from "@lix-js/sdk";
-import { generateHumanId } from "./generateHumanId";
 import { saveLixToOpfs } from "./saveLixToOpfs";
 
 // Helper function to ensure a workspace has a name
@@ -15,10 +14,10 @@ export async function ensureWorkspaceName({ lix }: { lix: Lix }): Promise<string
 		return nameRecord.value;
 	}
 
-	// Generate and save a new name if none exists
-	const newName = generateHumanId();
-	await saveWorkspaceName({ lix, newName });
-	return newName;
+	// Use "Untitled" as default name
+	const defaultName = "Untitled";
+	await saveWorkspaceName({ lix, newName: defaultName });
+	return defaultName;
 }
 
 // Helper function to save a workspace name

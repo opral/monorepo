@@ -23,7 +23,6 @@ import { activeFileAtom } from "@/state-active-file"
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
 import { createNewLixFileInOpfs } from "@/helper/new-lix"
 import { updateUrlParams } from "@/helper/updateUrlParams"
-import { generateHumanId } from "@/helper/generateHumanId"
 import { saveWorkspaceName } from "@/helper/renameWorkspace"
 import { openLixInMemory, toBlob } from "@lix-js/sdk"
 
@@ -57,6 +56,7 @@ import {
 } from "@/components/plate-ui/dialog"
 import InfoCard from "../InfoCard"
 import { Separator } from "../plate-ui/separator"
+import { generateHumanId } from "@/helper/generateHumanId"
 
 
 export function WorkspaceSidebar() {
@@ -68,7 +68,7 @@ export function WorkspaceSidebar() {
   const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] = React.useState(false)
   const [inlineEditingFile, setInlineEditingFile] = React.useState<{ id: string, name: string } | null>(null)
   const [isRenamingWorkspace, setIsRenamingWorkspace] = React.useState(false)
-  const [workspaceName, setWorkspaceName] = React.useState('Untitled Workspace')
+  const [workspaceName, setWorkspaceName] = React.useState('Untitled')
   const [previousWorkspaceName, setPreviousWorkspaceName] = React.useState('')
   const [availableWorkspaces] = useAtom(availableWorkspacesAtom)
   const inlineInputRef = React.useRef<HTMLInputElement>(null)
@@ -207,7 +207,7 @@ export function WorkspaceSidebar() {
       if (file && lix) {
         try {
           const fileContent = await file.text()
-          const fileName = file.name.replace(/\.md$/, '') || generateHumanId()
+          const fileName = file.name.replace(/\.md$/, '')
 
           const importedFile = await lix.db
             .insertInto("file")
@@ -358,14 +358,27 @@ export function WorkspaceSidebar() {
   const handleResetAllOpfs = React.useCallback(async () => {
     try {
       const root = await navigator.storage.getDirectory();
+
+      // First collect all entries to avoid modification during iteration
+      const entriesToRemove = [];
       // @ts-expect-error - TS doesn't know about values() yet
       for await (const entry of root.values()) {
-        if (entry.kind === "file") {
-          await root.removeEntry(entry.name);
+        if (entry.kind === "file" || entry.kind === "directory") {
+          entriesToRemove.push(entry.name);
         }
       }
+
+      // Then remove all collected entries
+      for (const name of entriesToRemove) {
+        try {
+          await root.removeEntry(name, { recursive: true });
+        } catch (err) {
+          console.error(`Failed to remove ${name}:`, err);
+        }
+      }
+
       navigate("/");
-      // trigger "polling" reset all atoms
+      // trigger "polling" to reset all atoms
       setPolling(Date.now());
     } catch (error) {
       console.error("Error resetting OPFS:", error);
@@ -417,28 +430,9 @@ export function WorkspaceSidebar() {
           if (nameRecord) {
             setWorkspaceName(nameRecord.value);
           } else {
-            // Use a human-readable ID as fallback name
-            setWorkspaceName(generateHumanId());
+            // Use "Untitled" as fallback name
+            setWorkspaceName("Untitled");
           }
-
-          // Load available workspaces
-          const root = await navigator.storage.getDirectory();
-          const workspaces = [];
-
-          // @ts-expect-error - TS doesn't know about values() yet
-          for await (const entry of root.values()) {
-            if (entry.kind === "file" && entry.name.endsWith(".lix")) {
-              const wsId = entry.name.replace(/\.lix$/, '');
-              workspaces.push({
-                id: wsId,
-                name: wsId === lixId.value ?
-                  nameRecord?.value || generateHumanId() :
-                  generateHumanId()
-              });
-            }
-          }
-
-          // setAvailableWorkspaces(workspaces);
         } catch (error) {
           console.error("Failed to load workspace data:", error);
         }
