@@ -27,7 +27,7 @@
 		"express": "^4.18.2"
 	},
 	"license": "Apache-2.0",
-	"version": "0.3.48",
+	"version": "0.3.49",
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
 		"@types/body-parser": "1.19.2",
