@@ -2,44 +2,72 @@ import type { Lix } from "../lix/index.js";
 import type { ChangeSet } from "./database-schema.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
-import type { Version } from "../database/schema.js";
+import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
+import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
+import type { VersionV2 } from "../version-v2/database-schema.js";
 
 export async function restoreChangeSet(args: {
 	lix: Lix;
 	changeSet: Pick<ChangeSet, "id">;
-	version?: Pick<Version, "id">;
+	version?: Pick<VersionV2, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const version =
-			args.version ??
-			(await trx
-				.selectFrom("active_version")
-				.select(["id"])
-				.executeTakeFirstOrThrow());
+		const version = args.version
+			? await trx
+					.selectFrom("version_v2")
+					.where("id", "=", args.version.id)
+					.select(["id", "change_set_id"])
+					.executeTakeFirstOrThrow()
+			: await trx
+					.selectFrom("active_version")
+					.innerJoin("version_v2", "version_v2.id", "active_version.id")
+					.select(["id", "change_set_id"])
+					.executeTakeFirstOrThrow();
 
-		// Get all changes directly contained in the target change set
-		// This is the state we want to restore to
-		const changesToRestore = await trx
+		const leafChangesToRestore = await trx
 			.selectFrom("change")
 			.innerJoin(
 				"change_set_element",
 				"change_set_element.change_id",
 				"change.id"
 			)
-			.where("change_set_element.change_set_id", "=", args.changeSet.id)
+			.where(changeSetElementInAncestryOf(args.changeSet))
+			.where(changeSetElementIsLeafOf(args.changeSet))
 			.selectAll("change")
 			.execute();
 
+		const leafEntitiesToDelete = await trx
+			.selectFrom("change")
+			.innerJoin(
+				"change_set_element",
+				"change_set_element.change_id",
+				"change.id"
+			)
+			.where(changeSetElementInAncestryOf({ id: version.change_set_id }))
+			.where(changeSetElementIsLeafOf({ id: version.change_set_id }))
+			.selectAll("change")
+			.execute();
+
+		console.log(
+			"changesToRestore",
+			leafChangesToRestore.map((c) => c.id)
+		);
+
+		console.log(
+			"changesToDelete",
+			leafEntitiesToDelete.map((c) => c.id)
+		);
+
 		// Create a temporary change set with these changes
-		const interimChangeSet = await createChangeSet({
+		const interimRestoreChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			changes: changesToRestore,
+			changes: [...leafChangesToRestore],
 		});
 
 		// Apply the temporary change set to update the file state
 		await applyChangeSet({
 			lix: { ...args.lix, db: trx },
-			changeSet: interimChangeSet,
+			changeSet: interimRestoreChangeSet,
 		});
 
 		// Update the version to point to the target change set
@@ -50,10 +78,10 @@ export async function restoreChangeSet(args: {
 			.execute();
 
 		// Clean up the temporary change set
-		await trx
-			.deleteFrom("change_set")
-			.where("id", "=", interimChangeSet.id)
-			.execute();
+		// await trx
+		// 	.deleteFrom("change_set")
+		// 	.where("id", "=", interimRestoreChangeSet.id)
+		// 	.execute();
 	};
 
 	if (args.lix.db.isTransaction) {

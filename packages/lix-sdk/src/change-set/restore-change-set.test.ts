@@ -6,29 +6,53 @@ import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
 
 test("it restores the state to a specific change set", async () => {
-	// Create a mock plugin that handles text file lines
+	// Create a mock plugin that handles JSON data (entity_id -> snapshot content)
 	const mockPlugin: LixPlugin = {
 		key: "mock_plugin",
-		applyChanges: async ({ lix, changes }) => {
+		applyChanges: async ({ lix, file, changes }) => {
+			// Get the current state from the file data
+			let currentJsonState: Record<string, any> = {};
+			// Check if file.data exists and is not empty before parsing
+			// Note: applyChanges is called *after* the file record is updated by restoreChangeSet,
+			// so file.data should already reflect the restored state.
+			// We expect the content to be an object like { text: "..." }
+			if (file.data && file.data.length > 0) {
+				try {
+					currentJsonState = JSON.parse(new TextDecoder().decode(file.data));
+				} catch (error) {
+					// Handle potential parsing errors if the initial file data isn't valid JSON
+					console.error("Failed to parse existing file data:", error);
+					// Depending on the desired behavior, you might want to throw or start fresh
+					currentJsonState = {};
+				}
+			}
+
 			const withSnapshots = await Promise.all(
 				changes.map(async (change) => {
 					return await lix.db
-						.selectFrom("snapshot")
-						.innerJoin("change", "change.snapshot_id", "snapshot.id")
+						.selectFrom("change")
+						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 						.where("change.id", "=", change.id)
-						.selectAll("change")
-						.select("snapshot.content as content")
+						.select(["change.id", "change.entity_id", "snapshot.content"])
 						.executeTakeFirstOrThrow();
 				})
 			);
 
-			const sorted = withSnapshots.sort((a, b) =>
-				a.entity_id.localeCompare(b.entity_id)
-			);
+			// Build a JSON object mapping entity_id to snapshot content
+			for (const change of withSnapshots) {
+				if (change.content === null) {
+					// If the content is null, remove the entity from the state
+					delete currentJsonState[change.entity_id];
+				} else {
+					// Update the current state with the new change content
+					// Need to decode the BLOB content from the snapshot
+					// The plugin should handle deserializing the object stored in the BLOB
+					currentJsonState[change.entity_id] = change.content;
+				}
+			}
 
-			const lines = sorted.map((s) => s.content?.text ?? "").join("\n");
 			return {
-				fileData: new TextEncoder().encode(lines),
+				fileData: new TextEncoder().encode(JSON.stringify(currentJsonState)),
 			};
 		},
 	};
@@ -40,7 +64,8 @@ test("it restores the state to a specific change set", async () => {
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.select(["id"])
+		.innerJoin("version_v2", "version_v2.id", "active_version.id")
+		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
 	// Create a file
@@ -54,16 +79,18 @@ test("it restores the state to a specific change set", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
+	// Insert snapshots with { text: "..." } content
 	const snapshots = await lix.db
 		.insertInto("snapshot")
 		.values([
-			{ content: { text: "Line 0" } },
-			{ content: { text: "Line 1" } },
-			{ content: { text: "Line 2" } },
-			{ content: { text: "Line 2 Modified" } },
-			{ content: { text: "Line 3" } },
+			{ content: { text: "Value 0" } },
+			{ content: { text: "Value 1" } },
+			{ content: { text: "Value 2" } },
+			{ content: { text: "Value 2 Modified" } }, // For c3
+			{ content: { text: "Value 3" } }, // For c4
+			{ content: { text: "Value 4" } }, // For c5
 		])
-		.returningAll()
+		.returning("id")
 		.execute();
 
 	const changes = await lix.db
@@ -74,7 +101,7 @@ test("it restores the state to a specific change set", async () => {
 				file_id: file.id,
 				plugin_key: mockPlugin.key,
 				entity_id: "l0",
-				schema_key: "line",
+				schema_key: "test_schema",
 				snapshot_id: snapshots[0]!.id,
 			},
 			{
@@ -82,7 +109,7 @@ test("it restores the state to a specific change set", async () => {
 				file_id: file.id,
 				plugin_key: mockPlugin.key,
 				entity_id: "l1",
-				schema_key: "line",
+				schema_key: "test_schema",
 				snapshot_id: snapshots[1]!.id,
 			},
 			{
@@ -90,7 +117,7 @@ test("it restores the state to a specific change set", async () => {
 				file_id: file.id,
 				plugin_key: mockPlugin.key,
 				entity_id: "l2",
-				schema_key: "line",
+				schema_key: "test_schema",
 				snapshot_id: snapshots[2]!.id,
 			},
 			{
@@ -98,7 +125,7 @@ test("it restores the state to a specific change set", async () => {
 				file_id: file.id,
 				plugin_key: mockPlugin.key,
 				entity_id: "l2",
-				schema_key: "line",
+				schema_key: "test_schema",
 				snapshot_id: snapshots[3]!.id,
 			},
 			{
@@ -106,8 +133,16 @@ test("it restores the state to a specific change set", async () => {
 				file_id: file.id,
 				plugin_key: mockPlugin.key,
 				entity_id: "l3",
-				schema_key: "line",
+				schema_key: "test_schema",
 				snapshot_id: snapshots[4]!.id,
+			},
+			{
+				id: "c5", // Add another change/entity for complexity
+				entity_id: "l4",
+				file_id: "file1",
+				schema_key: "test_schema",
+				plugin_key: "mock_plugin",
+				snapshot_id: snapshots[5]!.id,
 			},
 		])
 		.returningAll()
@@ -129,7 +164,7 @@ test("it restores the state to a specific change set", async () => {
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
-		changes: [changes[4]!],
+		changes: [changes[4]!, changes[5]!],
 		parents: [cs1],
 	});
 
@@ -144,9 +179,18 @@ test("it restores the state to a specific change set", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const fileCs0BeforeTxt = new TextDecoder().decode(fileCs0Before.data);
+	// The file data should now be a JSON string representing the state at cs0
+	const expectedJsonStateCs0 = {
+		l0: { text: "Value 0" },
+		l1: { text: "Value 1" },
+		l2: { text: "Value 2" },
+	};
 
-	expect(fileCs0BeforeTxt).toBe("Line 0\nLine 1\nLine 2");
+	const actualJsonStateCs0 = JSON.parse(
+		new TextDecoder().decode(fileCs0Before.data)
+	);
+
+	expect(actualJsonStateCs0).toEqual(expectedJsonStateCs0);
 
 	await applyChangeSet({
 		lix,
@@ -154,15 +198,26 @@ test("it restores the state to a specific change set", async () => {
 	});
 
 	// Verify initial state
-	const fileCs2 = await lix.db
+	const fileAfterRestoreCs2 = await lix.db
 		.selectFrom("file")
 		.where("id", "=", file.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(new TextDecoder().decode(fileCs2.data)).toBe(
-		"Line 0\nLine 1\nLine 2 Modified\nLine 3"
+	// The file data should now be a JSON string representing the state at cs2
+	const expectedJsonStateCs2 = {
+		l0: { text: "Value 0" },
+		l1: { text: "Value 1" },
+		l2: { text: "Value 2 Modified" }, // c3 replaced c2
+		l3: { text: "Value 3" }, // c4 added
+		l4: { text: "Value 4" }, // c5 added
+	};
+
+	const actualJsonStateCs2 = JSON.parse(
+		new TextDecoder().decode(fileAfterRestoreCs2.data)
 	);
+
+	expect(actualJsonStateCs2).toEqual(expectedJsonStateCs2);
 
 	// Action: Restore to cs0
 	await restoreChangeSet({
@@ -188,7 +243,8 @@ test("it restores the state to a specific change set", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(new TextDecoder().decode(finalFile.data)).toBe(
-		"Line 0\nLine 1\nLine 2"
-	);
+	// The file data should now be a JSON string representing the state at cs0
+	const actualJsonState = JSON.parse(new TextDecoder().decode(finalFile.data));
+
+	expect(actualJsonState).toEqual(expectedJsonStateCs0);
 });

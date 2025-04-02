@@ -8,6 +8,7 @@ import { createSnapshot } from "../snapshot/create-snapshot.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { fileQueueSettled } from "../file-queue/index.js";
 import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
+import { mockChange } from "../change/mock-change.js";
 
 test("it applies own entity changes", async () => {
 	const lix = await openLixInMemory({});
@@ -539,4 +540,85 @@ test("mode: recursive applies changes from target and all ancestors while direct
 		.split("\n")
 		.sort();
 	expect(resultRows).toEqual(["row:row1=change2", "row:row2=change3"].sort());
+});
+
+test("updates the version's change set pointer and maintains parent relationship", async () => {
+	// Create a simple mock plugin
+	const mockPlugin: LixPlugin = {
+		key: "test",
+		applyChanges: async () => {
+			// Simple implementation that just returns a new Uint8Array
+			return { fileData: new Uint8Array() };
+		},
+	};
+
+	// Create a test Lix instance with the mock plugin
+	const lix = await openLixInMemory({
+		providePlugins: [mockPlugin],
+	});
+
+	// Get the active version and its initial change set
+	const initialVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "version_v2.id", "active_version.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	const initialChangeSetId = initialVersion.change_set_id;
+
+	// Create a file for testing
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			id: "test-file",
+			data: new Uint8Array(),
+			path: "/test.json", // Add leading slash to path
+			metadata: null,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Create a change
+	const changes = await lix.db
+		.insertInto("change")
+		.values([
+			mockChange({ id: "c1", file_id: file.id, plugin_key: mockPlugin.key }),
+			mockChange({ id: "c2", file_id: file.id, plugin_key: mockPlugin.key }),
+		])
+		.returningAll()
+		.execute();
+
+	// Create a new change set
+	const newChangeSet = await createChangeSet({
+		lix,
+		changes: [changes[0]!],
+		// specifically not providing parents
+		parents: [],
+	});
+
+	// Apply the change set
+	await applyChangeSet({
+		lix,
+		changeSet: newChangeSet,
+	});
+
+	// Verify the version now points to the new change set
+	const updatedVersion = await lix.db
+		.selectFrom("version_v2")
+		.where("id", "=", initialVersion.id)
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	expect(updatedVersion.change_set_id).toBe(newChangeSet.id);
+
+	// Verify the parent relationship was created
+	const edges = await lix.db
+		.selectFrom("change_set_edge")
+		.where("child_id", "=", newChangeSet.id)
+		.selectAll("change_set_edge")
+		.execute();
+
+	expect(edges).toHaveLength(1);
+	expect(edges[0]?.parent_id).toBe(initialChangeSetId);
+	expect(edges[0]?.child_id).toBe(newChangeSet.id);
 });

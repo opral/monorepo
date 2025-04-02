@@ -4,12 +4,14 @@ import type { ChangeSet } from "./database-schema.js";
 import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
+import type { VersionV2 } from "../version-v2/database-schema.js";
 /**
  * Applies a change set to the lix.
  */
 export async function applyChangeSet(args: {
 	lix: Lix;
 	changeSet: Pick<ChangeSet, "id">;
+	version?: Pick<VersionV2, "id" | "change_set_id">;
 	/**
 	 * The {@link GraphTraversalMode} for applying the change set.
 	 *
@@ -20,6 +22,36 @@ export async function applyChangeSet(args: {
 	const mode = args.mode ?? { type: "recursive" };
 
 	const executeInTransaction = async (trx: Lix["db"]) => {
+		const version =
+			args.version ??
+			(await trx
+				.selectFrom("active_version")
+				.innerJoin("version_v2", "version_v2.id", "active_version.id")
+				.selectAll("version_v2")
+				.executeTakeFirstOrThrow());
+
+		//* NOTE: the creationd and handling of parent relationships
+		//* depends on the appliance of the change set to the version.
+		//*
+		//* if the version already has changes c1:e1 and the proposed
+		//* change set has changes c1:e1 and c2:e2, the diff is c2:e2.
+		//* only storing the diff as new change set can be a future optimzation.
+		// update the version to point to the new change set
+		await trx
+			.updateTable("version_v2")
+			.set({ change_set_id: args.changeSet.id })
+			.where("id", "=", version.id)
+			.execute();
+
+		// add a parent relationship
+		await trx
+			.insertInto("change_set_edge")
+			.values({
+				parent_id: version.change_set_id,
+				child_id: args.changeSet.id,
+			})
+			.execute();
+
 		// Select changes associated with the specified change set
 		let query = trx
 			.selectFrom("change")
