@@ -588,7 +588,7 @@ export function WorkspaceSidebar() {
               variant="ghost"
               size="icon"
               title="Import Markdown Document"
-              className="flex justify-between items-center mb-2 mr-1"
+              className="flex justify-between items-center mr-1"
               onClick={handleImportFile}
             >
               <Upload className="h-4 w-4" />
@@ -597,7 +597,7 @@ export function WorkspaceSidebar() {
               variant="ghost"
               size="icon"
               title="New File"
-              className="flex justify-between items-center mb-2"
+              className="flex justify-between items-center"
               onClick={createNewFile}
             >
               <Plus className="h-4 w-4" />
