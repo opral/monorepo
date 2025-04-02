@@ -56,6 +56,7 @@ test("it should capture as expected", async () => {
 	await maybeCaptureLoadedProject({
 		id,
 		settings,
+		forceCapture: true,
 		plugins,
 		lix: project.lix,
 		appId: "test",
