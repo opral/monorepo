@@ -23,6 +23,7 @@ import { activeFileAtom } from "@/state-active-file"
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
 import { createNewLixFileInOpfs } from "@/helper/new-lix"
 import { updateUrlParams } from "@/helper/updateUrlParams"
+import { generateHumanId } from "@/helpers/generateHumanId"
 import { openLixInMemory, toBlob } from "@lix-js/sdk"
 
 import {
@@ -56,27 +57,6 @@ import {
 import InfoCard from "../InfoCard"
 import { Separator } from "../plate-ui/separator"
 
-// Function to generate a human-readable ID for file names
-const generateHumanId = (): string => {
-  const adjectives = [
-    "happy", "clever", "brave", "bright", "calm", "eager", "gentle", "kind",
-    "lively", "neat", "proud", "smart", "swift", "witty", "blue", "green",
-    "red", "purple", "orange", "yellow", "teal", "pink", "silver", "golden"
-  ];
-
-  const nouns = [
-    "apple", "bear", "cat", "dog", "eagle", "fox", "goat", "horse", "iguana",
-    "jaguar", "koala", "lion", "mouse", "newt", "owl", "panda", "rabbit",
-    "snake", "tiger", "unicorn", "whale", "zebra", "star", "moon", "sun",
-    "cloud", "river", "mountain", "forest", "ocean"
-  ];
-
-  const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-  const randomNumber = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-
-  return `${randomAdjective}-${randomNoun}-${randomNumber}`;
-};
 
 export function WorkspaceSidebar() {
   const [lix] = useAtom(lixAtom)

@@ -9,6 +9,7 @@ import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
+import { generateHumanId } from "./helpers/generateHumanId";
 import {
 	lixMdDemoFile,
 	setupMdDemo,
@@ -310,14 +311,14 @@ export const availableWorkspacesAtom = atom(async (get) => {
 					.where("key", "=", "workspace_name")
 					.select("value")
 					.executeTakeFirst()
-					.then((row) => row?.value || `Workspace ${wsId.substring(0, 6)}`);
+					.then((row) => row?.value || generateHumanId());
 
 				workspaces.push({ id: wsId, name });
 			} catch (error) {
-				console.error(`Failed to load workspace ${wsId}:`, error);
+				console.error(`Failed to load workspace:`, error);
 				workspaces.push({
 					id: wsId,
-					name: `Workspace ${wsId.substring(0, 6)}`,
+					name: generateHumanId(),
 				});
 			}
 		}
