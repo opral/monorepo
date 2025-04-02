@@ -10,6 +10,7 @@ import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
 import { generateHumanId } from "./helper/generateHumanId";
+import { ensureWorkspaceName } from "./helper/renameWorkspace";
 import {
 	lixMdDemoFile,
 	setupMdDemo,
@@ -306,14 +307,18 @@ export const availableWorkspacesAtom = atom(async (get) => {
 						f.arrayBuffer()
 					);
 				const lix = await openLixInMemory({ blob: new Blob([buffer]) });
-				const name = await lix.db
+				const nameRecord = await lix.db
 					.selectFrom("key_value")
 					.where("key", "=", "workspace_name")
 					.select("value")
-					.executeTakeFirst()
-					.then((row) => row?.value || generateHumanId());
+					.executeTakeFirst();
 
-				workspaces.push({ id: wsId, name });
+				if (nameRecord?.value) {
+					workspaces.push({ id: wsId, name: nameRecord.value });
+				} else {
+					const name = await ensureWorkspaceName({ lix });
+					workspaces.push({ id: wsId, name });
+				}
 			} catch (error) {
 				console.error(`Failed to load workspace:`, error);
 				workspaces.push({

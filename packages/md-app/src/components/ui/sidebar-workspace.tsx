@@ -24,6 +24,7 @@ import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
 import { createNewLixFileInOpfs } from "@/helper/new-lix"
 import { updateUrlParams } from "@/helper/updateUrlParams"
 import { generateHumanId } from "@/helper/generateHumanId"
+import { saveWorkspaceName } from "@/helper/renameWorkspace"
 import { openLixInMemory, toBlob } from "@lix-js/sdk"
 
 import {
@@ -127,23 +128,18 @@ export function WorkspaceSidebar() {
     }
   }, [lix, inlineEditingFile, setPolling])
 
-  const saveWorkspaceName = React.useCallback(async () => {
+  const handleSaveWorkspaceName = React.useCallback(async () => {
     if (!lix || !workspaceName.trim()) {
       return
     }
 
     try {
-      // Store the workspace name in the database
-      await lix.db
-        .insertInto("key_value")
-        .values({
-          key: "workspace_name",
-          value: workspaceName.trim()
-        })
-        .onConflict((oc) => oc.doUpdateSet({ value: workspaceName.trim() }))
-        .execute()
-
-      await saveLixToOpfs({ lix })
+      // Use the imported saveWorkspaceName helper function
+      await saveWorkspaceName({ 
+        lix, 
+        newName: workspaceName 
+      })
+      
       setPolling(Date.now())
       setIsRenamingWorkspace(false)
     } catch (error) {
@@ -475,10 +471,10 @@ export function WorkspaceSidebar() {
                 value={workspaceName}
                 onChange={(e) => setWorkspaceName(e.target.value)}
                 onFocus={(e) => e.target.select()}
-                onBlur={saveWorkspaceName}
+                onBlur={handleSaveWorkspaceName}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    saveWorkspaceName();
+                    handleSaveWorkspaceName();
                   } else if (e.key === 'Escape') {
                     cancelRenameWorkspace();
                   }
