@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { activeFileAtom } from "@/state-active-file";
 import { lixAtom, withPollingAtom } from "@/state";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
-import { PencilIcon } from "lucide-react";
 
 export default function FileName() {
   const [activeFile] = useAtom(activeFileAtom);
@@ -92,7 +91,7 @@ export default function FileName() {
   if (!activeFile) return null;
 
   return (
-    <div className="flex items-center gap-1 cursor-pointer group">
+    <div className="flex items-center cursor-pointer">
       {/* Hidden span to measure text width */}
       <span 
         ref={hiddenSpanRef} 
@@ -103,7 +102,7 @@ export default function FileName() {
       </span>
 
       {isEditing ? (
-        <div className="flex items-center border-b border-slate-300 focus-within:border-slate-500">
+        <div className="flex items-center h-8 px-1.5 border-b border-slate-300 focus-within:border-slate-500 -my-0.5">
           <input
             ref={inputRef}
             type="text"
@@ -111,20 +110,16 @@ export default function FileName() {
             onChange={(e) => setFileName(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="bg-transparent outline-none pt-0.5 px-1 font-medium text-slate-700 min-w-[80px] text-right transition-all"
+            className="bg-transparent outline-none font-medium text-slate-700 min-w-[80px] transition-all h-full"
             placeholder="Filename"
           />
-          <span className="font-medium text-slate-500 mr-1">.md</span>
         </div>
       ) : (
         <div
-          className="flex items-center gap-1 hover:bg-slate-100 py-0.5 px-1.5 rounded transition-colors"
+            className="flex items-center h-8 px-1.5 hover:bg-slate-100 rounded transition-colors cursor-pointer -my-0.5"
           onClick={() => setIsEditing(true)}
         >
-          <h1 className="font-medium text-slate-700">
-            {fileName}<span className="text-slate-500">.md</span>
-          </h1>
-          <PencilIcon className="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <h1 className="font-medium text-slate-700">{fileName}</h1>
         </div>
       )}
     </div>

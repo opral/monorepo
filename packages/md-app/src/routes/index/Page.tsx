@@ -58,11 +58,9 @@ export default function Page() {
 					<WorkspaceSidebar />
 				</Sidebar>
 				<SidebarInset className="flex flex-col overflow-hidden">
-					<div className="w-full bg-slate-50 border-b-[1px] border-border p-2 flex justify-between items-center">
+					<div className="w-full bg-slate-50 border-b-[1px] border-border p-2 flex items-center">
 						<div className="flex items-center">
 							<SidebarTrigger className="mr-2" />
-						</div>
-						<div className="flex-1 flex justify-center items-center">
 							<FileName />
 						</div>
 					</div>
