@@ -21,8 +21,8 @@ import {
   ListPlus,
   PenLine,
   SmileIcon,
-  Wand,
   X,
+  Zap,
 } from 'lucide-react';
 
 import { CommandGroup, CommandItem } from './command';
@@ -109,7 +109,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
     },
   },
   improveWriting: {
-    icon: <Wand />,
+    icon: <Zap />,
     label: 'Improve writing',
     value: 'improveWriting',
     onSelect: ({ editor }) => {

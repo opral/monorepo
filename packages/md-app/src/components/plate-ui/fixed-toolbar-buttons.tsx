@@ -31,7 +31,7 @@ import {
   PaintBucketIcon,
   StrikethroughIcon,
   UnderlineIcon,
-  WandSparklesIcon,
+  ZapIcon,
 } from 'lucide-react';
 
 import { MoreDropdownMenu } from '@/components/plate-ui/more-dropdown-menu';
@@ -79,7 +79,7 @@ export function FixedToolbarButtons() {
 
           <ToolbarGroup>
             <AIToolbarButton tooltip="AI commands (⌘+J)">
-              <WandSparklesIcon />
+              <ZapIcon />
             </AIToolbarButton>
           </ToolbarGroup>
 

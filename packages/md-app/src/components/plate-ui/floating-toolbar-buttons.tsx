@@ -16,7 +16,7 @@ import {
   ItalicIcon,
   StrikethroughIcon,
   UnderlineIcon,
-  WandSparklesIcon,
+  ZapIcon,
 } from 'lucide-react';
 
 import { AIToolbarButton } from './ai-toolbar-button';
@@ -38,7 +38,7 @@ export function FloatingToolbarButtons() {
         <>
           <ToolbarGroup>
             <AIToolbarButton tooltip="AI commands (⌘+J)">
-              <WandSparklesIcon />
+              <ZapIcon />
               Ask AI
             </AIToolbarButton>
           </ToolbarGroup>
