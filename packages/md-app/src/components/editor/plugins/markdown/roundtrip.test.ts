@@ -528,7 +528,7 @@ describe("roundtrip", () => {
 
 			const serializedMarkdown = editor
 				.getApi(ExtendedMarkdownPlugin)
-				.markdown.serialize(deserializedNodes);
+				.markdown.serialize({ value: deserializedNodes });
 
 			// Always create a diff file regardless of pass/fail status
 			createDiffFile(

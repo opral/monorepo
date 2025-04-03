@@ -1,9 +1,9 @@
 
-import { Descendant } from "@udecode/plate";
-import { MarkdownPlugin } from "../markdown-plate-fork";
+// import { Descendant } from "@udecode/plate";
+import { MarkdownPlugin } from "../markdown-plate-fork-new";
 
-import { deserializeMd } from "./deserializeMd";
-import { remarkToPlateElementRules } from "./RemarkToPlateElementRules";
+// import { deserializeMd } from "./deserializeMd";
+// import { remarkToPlateElementRules } from "./RemarkToPlateElementRules";
 
 // export function remarkPlugin(
 // 	this: Processor<undefined, undefined, undefined, MdastNode>,
@@ -19,7 +19,56 @@ import { remarkToPlateElementRules } from "./RemarkToPlateElementRules";
 // 	(this as any).compiler = compiler;
 // }
 
-export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
+
+  import { SuggestionPlugin } from '@udecode/plate-suggestion/react';
+  import remarkGfm from 'remark-gfm';
+  import remarkMdx from 'remark-mdx';
+  export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
+	options: {
+	  disallowedNodes: [SuggestionPlugin.key],
+	  remarkPlugins: [remarkGfm],
+	  nodes: {
+		sanitized_block_html: {
+			// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
+			serialize: (children, node) => {
+				return  {
+					type: "html",
+					value: node.value 
+				}
+			},
+		},
+		sanitized_inline_html: {
+			// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
+			serialize: (children, node) => {
+				return  {
+					type: "html",
+					value: node.value 
+				}
+			},
+		},
+		sanitized_block: {
+			// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
+			serialize: (children, node) => {
+				return  {
+					type: "html",
+					value: node.value 
+				}
+			},
+		},
+		frontmatter: {
+			// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
+			serialize: (children, node) => {
+				return  {
+					type: "html",
+					value: node.value 
+				}
+			},
+		},
+	  }
+	},
+  });
+
+/*export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 	const originalSerializeMd = editor.getApi(MarkdownPlugin).markdown.serialize;
 	return {
 		deserialize: (data: any) => {
@@ -102,5 +151,6 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 		},
 	};
 }).configure({
-	options: { indentList: true, elementRules: remarkToPlateElementRules },
+	// options: { indentList: true, elementRules: remarkToPlateElementRules },
 });
+*/

@@ -53,35 +53,7 @@ Paragraph with **![formatted inline image](https://example.com/image.jpg)** in b
 </td>
 <td>
 
-# Images
 
-![Basic image](https://example.com/image.jpg)
-
-![Image with alt text](https://example.com/image.jpg "Example Image")
-
-![Image with *formatted* alt text](https://example.com/image.jpg)
-
-<br>[![Image with link](https://example.com/image.jpg)](https://example.com)<br>
-
-![Reference image][image-ref]
-
-![Another reference image][image-ref]
-
-![Reference image with different text][different-image-ref]
-
-Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
-
-Paragraph with <br>*![formatted inline image](https://example.com/image.jpg)*<br> in italics.
-
-Paragraph with <br>**![formatted inline image](https://example.com/image.jpg)**<br> in bold.
-
-![Image with empty source]()
-
-![](https://example.com/image.jpg)
-
-[image-ref]: https://example.com/ref-image.jpg "Reference Example Image"
-
-[different-image-ref]: https://example.com/different-image.jpg "Different Reference Image"
 
 </td>
 </tr>
@@ -120,35 +92,7 @@ Paragraph with **![formatted inline image](https://example.com/image.jpg)** in b
 </td>
 <td>
 
-<pre><code># Images
-
-![Basic image](https://example.com/image.jpg)
-
-![Image with alt text](https://example.com/image.jpg &quot;Example Image&quot;)
-
-![Image with *formatted* alt text](https://example.com/image.jpg)
-
-&lt;br&gt;[![Image with link](https://example.com/image.jpg)](https://example.com)&lt;br&gt;
-
-![Reference image][image-ref]
-
-![Another reference image][image-ref]
-
-![Reference image with different text][different-image-ref]
-
-Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
-
-Paragraph with &lt;br&gt;*![formatted inline image](https://example.com/image.jpg)*&lt;br&gt; in italics.
-
-Paragraph with &lt;br&gt;**![formatted inline image](https://example.com/image.jpg)**&lt;br&gt; in bold.
-
-![Image with empty source]()
-
-![](https://example.com/image.jpg)
-
-[image-ref]: https://example.com/ref-image.jpg &quot;Reference Example Image&quot;
-
-[different-image-ref]: https://example.com/different-image.jpg &quot;Different Reference Image&quot;</code></pre>
+<pre><code></code></pre>
 
 </td>
 </tr>

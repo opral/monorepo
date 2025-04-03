@@ -1,6 +1,5 @@
 import { SlateEditor } from "@udecode/plate-core";
 import {
-	DeserializeMdOptions,
 	MarkdownPlugin,
 	RemarkElementRules,
 	remarkPlugin,
@@ -13,7 +12,6 @@ import remarkParse from "remark-parse";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import {
-	sanatizeUnknownNodeStructures,
 	sanatizeUnknownNodeStructuresInTree,
 } from "./sanitizeUnsupported";
 
@@ -85,7 +83,7 @@ export const deserializeMd = (
 	//   });
 	// }
 
-	const parsedTree = mdProcessor.parse(data);
+	// const _parsedTree = mdProcessor.parse(data);
 
 	// console.log(parsedTree);
 	const result = mdProcessor.processSync(data).result;
