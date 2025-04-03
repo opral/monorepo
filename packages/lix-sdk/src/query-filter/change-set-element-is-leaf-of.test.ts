@@ -191,7 +191,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	// This should return c0, c1, c3, c4 (c3 replaces c2 since it's the same entity)
 	const leafChangesCs2 = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf(cs2))
+		.where(changeSetElementInAncestryOf([cs2]))
 		.where(changeSetElementIsLeafOf([cs2]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
@@ -213,7 +213,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	// This should return all changes in the ancestry: c0, c1, c2, c3, c4
 	const allChangesCs2 = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf(cs2))
+		.where(changeSetElementInAncestryOf([cs2]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
 		.execute();
@@ -252,7 +252,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	// To restore cs1, we need c0, c1 from cs0 and c3 from cs1
 	const restoreChangesCs1Recursive = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf(cs1))
+		.where(changeSetElementInAncestryOf([cs1]))
 		// No leaf filter here
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
@@ -275,7 +275,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	// This correctly includes c3 instead of c2, but for restore we'd need to handle this differently
 	const leafChangesCs1 = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf(cs1))
+		.where(changeSetElementInAncestryOf([cs1]))
 		.where(changeSetElementIsLeafOf([cs1]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
@@ -297,7 +297,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	// This incorrectly filters out c2 because c3 is the leaf for entity l2
 	const restoreChangesCs0WithLeafAtPoint = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf(cs0))
+		.where(changeSetElementInAncestryOf([cs0]))
 		.where(changeSetElementIsLeafOf([cs0]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
