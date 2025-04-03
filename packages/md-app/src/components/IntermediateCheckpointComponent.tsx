@@ -115,7 +115,7 @@ const CreateCheckpointInput = () => {
         onClick={handleCreateCheckpoint}
         size={"lg"}
       >
-        {description === "" ? "Create checkpoint without description" : "Create checkpoint"}
+        Create checkpoint
       </Button>
     </div>
   );

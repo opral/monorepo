@@ -40,7 +40,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/multisidebar"
 import { Button } from "@/components/plate-ui/button"
 import {
   DropdownMenu,
@@ -714,12 +714,9 @@ export function LixSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter className="p-2">
         <InfoCard />
       </SidebarFooter>
-
-
 
       {/* Delete File Confirmation Dialog */}
       <Dialog open={!!fileToDelete} onOpenChange={(open) => !open && setFileToDelete(null)}>
@@ -749,7 +746,7 @@ export function LixSidebar() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Current Workspace Confirmation Dialog */}
+      {/* Delete Current Lix Confirmation Dialog */}
       <Dialog open={showDeleteProjectsDialog} onOpenChange={setShowDeleteProjectsDialog}>
         <DialogContent>
           <DialogHeader>
