@@ -17,7 +17,7 @@ import {
 	SidebarInset,
 	useSidebar
 } from "@/components/ui/sidebar";
-import { WorkspaceSidebar } from "@/components/ui/sidebar-workspace";
+import { LixSidebar } from "@/components/ui/sidebar-lix";
 import { Button } from '@/components/plate-ui/button';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
@@ -55,7 +55,7 @@ export default function Page() {
 		<SidebarProvider>
 			<div className="w-full h-full flex">
 				<Sidebar side="left" variant="sidebar" collapsible="offcanvas">
-					<WorkspaceSidebar />
+					<LixSidebar />
 				</Sidebar>
 				<SidebarInset className="flex flex-col overflow-hidden">
 					<div className="w-full bg-slate-50 border-b-[1px] border-border p-2 flex items-center">

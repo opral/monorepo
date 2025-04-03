@@ -1,12 +1,12 @@
 import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "./saveLixToOpfs";
 
-// Helper function to ensure a workspace has a name
-export async function ensureWorkspaceName({ lix }: { lix: Lix }): Promise<string> {
-	// Try to get existing workspace name
+// Helper function to ensure a lix has a name
+export async function ensureLixName({ lix }: { lix: Lix }): Promise<string> {
+	// Try to get existing lix name
 	const nameRecord = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "workspace_name")
+		.where("key", "=", "lix_name")
 		.select("value")
 		.executeTakeFirst();
 
@@ -16,12 +16,12 @@ export async function ensureWorkspaceName({ lix }: { lix: Lix }): Promise<string
 
 	// Use "Untitled" as default name
 	const defaultName = "Untitled";
-	await saveWorkspaceName({ lix, newName: defaultName });
+	await saveLixName({ lix, newName: defaultName });
 	return defaultName;
 }
 
-// Helper function to save a workspace name
-export async function saveWorkspaceName({
+// Helper function to save a lix name
+export async function saveLixName({
 	lix,
 	newName,
 }: {
@@ -31,7 +31,7 @@ export async function saveWorkspaceName({
 	await lix.db
 		.insertInto("key_value")
 		.values({
-			key: "workspace_name",
+			key: "lix_name",
 			value: newName.trim(),
 		})
 		.onConflict((oc) => oc.doUpdateSet({ value: newName.trim() }))

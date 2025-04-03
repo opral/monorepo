@@ -290,25 +290,25 @@ export const isSyncingAtom = atom(async (get) => {
 	}
 });
 
-export const currentWorkspaceNameAtom = atom(async (get) => {
+export const currentLixNameAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
-	if (!lix) return "Untitled Workspace";
+	if (!lix) return "Untitled";
 
 	const name = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "workspace_name")
+		.where("key", "=", "lix_name")
 		.select("value")
 		.executeTakeFirst()
 		.then((row) => row?.value);
 
-	return name || "Untitled Workspace";
+	return name || "Untitled";
 });
 
-export const availableWorkspacesAtom = atom(async (get) => {
+export const availableLixesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const root = await getOriginPrivateDirectory();
-	const workspaces = [];
+	const lixes = [];
 
 	for await (const entry of (root as any).values()) {
 		if (entry.kind === "file" && entry.name.endsWith(".lix")) {
@@ -322,15 +322,15 @@ export const availableWorkspacesAtom = atom(async (get) => {
 				const lix = await openLixInMemory({ blob: new Blob([buffer]) });
 				const name = await lix.db
 					.selectFrom("key_value")
-					.where("key", "=", "workspace_name")
+					.where("key", "=", "lix_name")
 					.select("value")
 					.executeTakeFirst()
 					.then((row) => row?.value || "Untitled");
 
-				workspaces.push({ id: wsId, name });
+				lixes.push({ id: wsId, name });
 			} catch (error) {
-				console.error(`Failed to load workspace:`, error);
-				workspaces.push({
+				console.error(`Failed to load lix:`, error);
+				lixes.push({
 					id: wsId,
 					name: "Untitled",
 				});
@@ -338,5 +338,5 @@ export const availableWorkspacesAtom = atom(async (get) => {
 		}
 	}
 
-	return workspaces;
+	return lixes;
 });
