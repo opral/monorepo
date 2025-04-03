@@ -1,8 +1,11 @@
 import * as React from "react"
 import {
   Download, MoreVertical,
-  PenSquare, Trash2, Upload, FileText,
-  Plus, ArrowLeft, Folder, FolderOpen
+  PenSquare, Trash2, FileText,
+  Plus, ArrowLeft, Folder, FolderOpen,
+  FileUp,
+  FilePlus,
+  FolderPlus
 } from "lucide-react"
 import { useAtom } from "jotai"
 import posthog from "posthog-js"
@@ -516,7 +519,7 @@ export function LixSidebar() {
                   <SelectSeparator />
                   <SelectItem value="new">
                     <div className="flex items-center w-full">
-                      <Plus className="h-4 w-4 mr-2 shrink-0" />
+                        <FolderPlus className="h-4 w-4 mr-2 shrink-0" />
                       <span>New Lix</span>
                     </div>
                   </SelectItem>
@@ -533,7 +536,7 @@ export function LixSidebar() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-60 py-1">
             <DropdownMenuItem onClick={handleCreateNewLix}>
-              <Plus className="h-4 w-4 mr-2" />
+              <FolderPlus className="h-4 w-4 mr-2" />
               <span>New Lix</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleOpenLixFile}>
@@ -591,7 +594,7 @@ export function LixSidebar() {
               className="flex justify-between items-center mr-1"
               onClick={handleImportFile}
             >
-              <Upload className="h-4 w-4" />
+              <FileUp className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
@@ -600,7 +603,7 @@ export function LixSidebar() {
               className="flex justify-between items-center"
               onClick={createNewFile}
             >
-              <Plus className="h-4 w-4" />
+              <FilePlus className="h-4 w-4" />
             </Button>
           </SidebarGroupLabel>
 

@@ -1,4 +1,4 @@
-import { FileUp } from "lucide-react";
+import { Import } from "lucide-react";
 import { useEditorRef } from "@udecode/plate/react";
 import { useFilePicker } from 'use-file-picker';
 import { ExtendedMarkdownPlugin } from "./editor/plugins/markdown/markdown-plugin";
@@ -26,7 +26,7 @@ export const ImportMarkdown = () => {
       className="hover:bg-muted hover:text-muted-foreground"
       onClick={openFilePicker}
     >
-      <FileUp className="size-4" />
+      <Import className="size-4" />
     </ToolbarButton>
   );
 };
