@@ -3,6 +3,7 @@ import { localizeUrl } from "./localize-url.js";
 import {
 	cookieMaxAge,
 	cookieName,
+	cookieDomain,
 	isServer,
 	localStorageKey,
 	strategy,
@@ -55,8 +56,11 @@ export let setLocale = (newLocale, options) => {
 			if (isServer || typeof document === "undefined") {
 				continue;
 			}
+
+			const domain = cookieDomain || window.location.hostname;
+
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}`;
+			document.cookie = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}; domain=${domain}`;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
