@@ -21,7 +21,7 @@ export async function restoreChangeSet(args: {
 					.executeTakeFirstOrThrow()
 			: await trx
 					.selectFrom("active_version")
-					.innerJoin("version_v2", "version_v2.id", "active_version.id")
+					.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
 					.select(["id", "change_set_id"])
 					.executeTakeFirstOrThrow();
 

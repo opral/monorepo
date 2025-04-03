@@ -16,9 +16,9 @@ export function applyVersionV2DatabaseSchema(
   -- only one version can be active at a time
   -- hence, the table has only one row
   CREATE TABLE IF NOT EXISTS active_version (
-    id TEXT NOT NULL PRIMARY KEY,
+    version_id TEXT NOT NULL PRIMARY KEY,
 
-    FOREIGN KEY(id) REFERENCES version_v2(id)
+    FOREIGN KEY(version_id) REFERENCES version_v2(id)
   ) STRICT;
 
   -- Insert the default change set if missing
@@ -35,7 +35,7 @@ export function applyVersionV2DatabaseSchema(
 
   -- Set the default current version to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
-  INSERT INTO active_version (id)
+  INSERT INTO active_version (version_id)
   SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6'
   WHERE NOT EXISTS (SELECT 1 FROM active_version);
 `;
@@ -56,5 +56,5 @@ export type ActiveVersion = Selectable<ActiveVersionTable>;
 export type NewActiveVersion = Insertable<ActiveVersionTable>;
 export type ActiveVersionUpdate = Updateable<ActiveVersionTable>;
 export type ActiveVersionTable = {
-	id: Generated<string>;
+	version_id: Generated<string>;
 };

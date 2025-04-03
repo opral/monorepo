@@ -664,7 +664,7 @@ test("updates the version's change set id and maintains parent relationship", as
 	// Get the active version and its initial change set
 	const initialVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "version_v2.id", "active_version.id")
+		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
 		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
