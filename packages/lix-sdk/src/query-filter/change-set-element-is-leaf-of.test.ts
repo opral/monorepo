@@ -65,20 +65,15 @@ test("returns only leaf change_set_elements per entity", async () => {
 
 	// Only c2 should be the leaf (latest definition in the ancestry)
 	const leafChanges = await lix.db
-		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change_set_element.change_id",
-			"change.id"
-		)
+		.selectFrom("change_set_element")
 		.where("change_set_element.change_set_id", "in", [cs0.id, cs1.id, cs2.id])
 		.where(changeSetElementIsLeafOf(cs2))
-		.select(["change.id", "change.entity_id"])
+		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.execute();
 
 	expect(leafChanges).toEqual([
-		{ id: "c0", entity_id: "e0" },
-		{ id: "c2", entity_id: "e1" },
+		{ change_id: "c0", entity_id: "e0" },
+		{ change_id: "c2", entity_id: "e1" },
 	]);
 });
 
@@ -195,24 +190,19 @@ test("correctly identifies leaves at different points in history", async () => {
 	// Test 1: Using changeSetElementIsLeaf with ancestry of cs2
 	// This should return c0, c1, c3, c4 (c3 replaces c2 since it's the same entity)
 	const leafChangesCs2 = await lix.db
-		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change_set_element.change_id",
-			"change.id"
-		)
+		.selectFrom("change_set_element")
 		.where(changeSetElementInAncestryOf(cs2))
 		.where(changeSetElementIsLeafOf(cs2))
-		.select(["change.id", "change.entity_id"])
-		.orderBy("change.id")
+		.select(["change_set_element.change_id", "change_set_element.entity_id"])
+		.orderBy("change_set_element.change_id")
 		.execute();
 
 	// console.log(
 	// 	"Leaf changes in ancestry of cs2:",
-	// 	leafChangesCs2.map((c) => `${c.id} (${c.entity_id})`)
+	// 	leafChangesCs2.map((c) => `${c.change_id} (${c.entity_id})`)
 	// );
 
-	expect(leafChangesCs2.map((c) => c.id).sort()).toEqual([
+	expect(leafChangesCs2.map((c) => c.change_id).sort()).toEqual([
 		"c0",
 		"c1",
 		"c3",
@@ -222,23 +212,18 @@ test("correctly identifies leaves at different points in history", async () => {
 	// Test 2: Using only changeSetElementInAncestryOf without leaf filter for cs2
 	// This should return all changes in the ancestry: c0, c1, c2, c3, c4
 	const allChangesCs2 = await lix.db
-		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change_set_element.change_id",
-			"change.id"
-		)
+		.selectFrom("change_set_element")
 		.where(changeSetElementInAncestryOf(cs2))
-		.select(["change.id", "change.entity_id"])
-		.orderBy("change.id")
+		.select(["change_set_element.change_id", "change_set_element.entity_id"])
+		.orderBy("change_set_element.change_id")
 		.execute();
 
 	// console.log(
 	// 	"All changes in ancestry of cs2:",
-	// 	allChangesCs2.map((c) => `${c.id} (${c.entity_id})`)
+	// 	allChangesCs2.map((c) => `${c.change_id} (${c.entity_id})`)
 	// );
 
-	expect(allChangesCs2.map((c) => c.id).sort()).toEqual([
+	expect(allChangesCs2.map((c) => c.change_id).sort()).toEqual([
 		"c0",
 		"c1",
 		"c2",
@@ -249,47 +234,37 @@ test("correctly identifies leaves at different points in history", async () => {
 	// Test 3: Simulating the restore scenario for cs1
 	// This is why recursive mode is important - we need changes from cs0 too
 	const directChangesCs1 = await lix.db
-		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change_set_element.change_id",
-			"change.id"
-		)
+		.selectFrom("change_set_element")
 		.where("change_set_element.change_set_id", "=", cs1.id)
-		.select(["change.id", "change.entity_id"])
-		.orderBy("change.id")
+		.select(["change_set_element.change_id", "change_set_element.entity_id"])
+		.orderBy("change_set_element.change_id")
 		.execute();
 
 	// console.log(
 	// 	"Direct changes in cs1:",
-	// 	directChangesCs1.map((c) => `${c.id} (${c.entity_id})`)
+	// 	directChangesCs1.map((c) => `${c.change_id} (${c.entity_id})`)
 	// );
 
 	// This only has c3, but to restore cs1 we also need c0 and c1 from cs0
-	expect(directChangesCs1.map((c) => c.id).sort()).toEqual(["c3"]);
+	expect(directChangesCs1.map((c) => c.change_id).sort()).toEqual(["c3"]);
 
 	// Test 4: Demonstrating why we need recursive mode but without the leaf filter
 	// To restore cs1, we need c0, c1 from cs0 and c3 from cs1
 	const restoreChangesCs1Recursive = await lix.db
-		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change_set_element.change_id",
-			"change.id"
-		)
+		.selectFrom("change_set_element")
 		.where(changeSetElementInAncestryOf(cs1))
 		// No leaf filter here
-		.select(["change.id", "change.entity_id"])
-		.orderBy("change.id")
+		.select(["change_set_element.change_id", "change_set_element.entity_id"])
+		.orderBy("change_set_element.change_id")
 		.execute();
 
 	// console.log(
 	// 	"All changes in ancestry of cs1 (needed for restore):",
-	// 	restoreChangesCs1Recursive.map((c) => `${c.id} (${c.entity_id})`)
+	// 	restoreChangesCs1Recursive.map((c) => `${c.change_id} (${c.entity_id})`)
 	// );
 
 	// This includes c2, which would be replaced by c3
-	expect(restoreChangesCs1Recursive.map((c) => c.id).sort()).toEqual([
+	expect(restoreChangesCs1Recursive.map((c) => c.change_id).sort()).toEqual([
 		"c0",
 		"c1",
 		"c2",
@@ -299,50 +274,42 @@ test("correctly identifies leaves at different points in history", async () => {
 	// Test 5: Demonstrating the issue - when using ancestry + leaf filter
 	// This correctly includes c3 instead of c2, but for restore we'd need to handle this differently
 	const leafChangesCs1 = await lix.db
-		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change_set_element.change_id",
-			"change.id"
-		)
+		.selectFrom("change_set_element")
 		.where(changeSetElementInAncestryOf(cs1))
 		.where(changeSetElementIsLeafOf(cs1))
-		.select(["change.id", "change.entity_id"])
-		.orderBy("change.id")
+		.select(["change_set_element.change_id", "change_set_element.entity_id"])
+		.orderBy("change_set_element.change_id")
 		.execute();
 
 	// console.log(
 	// 	"Leaf changes in ancestry of cs1:",
-	// 	leafChangesCs1.map((c) => `${c.id} (${c.entity_id})`)
+	// 	leafChangesCs1.map((c) => `${c.change_id} (${c.entity_id})`)
 	// );
 
-	expect(leafChangesCs1.map((c) => c.id).sort()).toEqual(["c0", "c1", "c3"]);
+	expect(leafChangesCs1.map((c) => c.change_id).sort()).toEqual([
+		"c0",
+		"c1",
+		"c3",
+	]);
 
 	// Test 6: Demonstrating the issue with cs0 restoration
 	// When restoring to cs0 but using ancestry + regular leaf filter
 	// This incorrectly filters out c2 because c3 is the leaf for entity l2
 	const restoreChangesCs0WithLeafAtPoint = await lix.db
-		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change_set_element.change_id",
-			"change.id"
-		)
+		.selectFrom("change_set_element")
 		.where(changeSetElementInAncestryOf(cs0))
 		.where(changeSetElementIsLeafOf(cs0))
-		.select(["change.id", "change.entity_id"])
-		.orderBy("change.id")
+		.select(["change_set_element.change_id", "change_set_element.entity_id"])
+		.orderBy("change_set_element.change_id")
 		.execute();
 
 	// console.log(
 	// 	"Restore changes for cs0 with leaf-at-point filter:",
-	// 	restoreChangesCs0WithLeafAtPoint.map((c) => `${c.id} (${c.entity_id})`)
+	// 	restoreChangesCs0WithLeafAtPoint.map((c) => `${c.change_id} (${c.entity_id})`)
 	// );
 
 	// This should PASS because c2 is included - it's the leaf at the point of cs0
-	expect(restoreChangesCs0WithLeafAtPoint.map((c) => c.id).sort()).toEqual([
-		"c0",
-		"c1",
-		"c2",
-	]);
+	expect(
+		restoreChangesCs0WithLeafAtPoint.map((c) => c.change_id).sort()
+	).toEqual(["c0", "c1", "c2"]);
 });
