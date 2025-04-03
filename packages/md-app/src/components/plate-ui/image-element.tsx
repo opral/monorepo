@@ -4,11 +4,12 @@ import React from 'react';
 
 import { cn, withRef } from '@udecode/cn';
 import { useDraggable } from '@udecode/plate-dnd';
-import { Image, ImagePlugin, useMediaState } from '@udecode/plate-media/react';
+import { ImagePlugin, useMediaState } from '@udecode/plate-media/react';
 import { ResizableProvider, useResizableValue } from '@udecode/plate-resizable';
 import { PlateElement, withHOC } from '@udecode/plate/react';
 
 import { Caption, CaptionTextarea } from './caption';
+import { LixImage } from './lix-image';
 import { MediaPopover } from './media-popover';
 import {
   mediaResizeHandleVariants,
@@ -47,17 +48,19 @@ export const ImageElement = withHOC(
                   className={mediaResizeHandleVariants({ direction: 'left' })}
                   options={{ direction: 'left' }}
                 />
-                <Image
-                  ref={handleRef}
-                  className={cn(
-                    'block w-full max-w-full cursor-pointer object-cover px-0',
-                    'rounded-sm',
-                    focused && selected && 'ring-2 ring-ring ring-offset-2',
-                    isDragging && 'opacity-50'
-                  )}
-                  alt=""
-                  {...nodeProps}
-                />
+                <div ref={handleRef}>
+                  <LixImage
+                    className={cn(
+                      'block w-full max-w-full cursor-pointer object-cover px-0',
+                      'rounded-sm',
+                      focused && selected && 'ring-2 ring-ring ring-offset-2',
+                      isDragging && 'opacity-50'
+                    )}
+                    alt={props.element.alt as string || ''}
+                    src={props.element.url as string || ''}
+                    {...nodeProps}
+                  />
+                </div>
                 <ResizeHandle
                   className={mediaResizeHandleVariants({
                     direction: 'right',

@@ -21,8 +21,8 @@ import {
   ListPlus,
   PenLine,
   SmileIcon,
-  Wand,
   X,
+  Zap,
 } from 'lucide-react';
 
 import { CommandGroup, CommandItem } from './command';
@@ -81,7 +81,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
     value: 'emojify',
     onSelect: ({ editor }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit({
-        prompt: 'Emojify',
+        prompt: 'Emojify the text, keep the formatting including list and code blocks, whitespace and line breaks. Avoid wrapping text in emojis.',
       });
     },
   },
@@ -109,7 +109,7 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
     },
   },
   improveWriting: {
-    icon: <Wand />,
+    icon: <Zap />,
     label: 'Improve writing',
     value: 'improveWriting',
     onSelect: ({ editor }) => {

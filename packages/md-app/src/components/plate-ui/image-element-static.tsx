@@ -6,6 +6,7 @@ import type { TImageElement } from '@udecode/plate-media';
 
 import { cn } from '@udecode/cn';
 import { NodeApi, SlateElement } from '@udecode/plate';
+import { LixImage } from './lix-image';
 
 export function ImageElementStatic({
   children,
@@ -34,13 +35,13 @@ export function ImageElementStatic({
           className="relative max-w-full min-w-[92px]"
           style={{ textAlign: align }}
         >
-          <img
+          <LixImage
             className={cn(
               'w-full max-w-full cursor-default object-cover px-0',
               'rounded-sm'
             )}
             alt=""
-            src={url}
+            src={url || ''}
             {...nodeProps}
           />
           {caption && (

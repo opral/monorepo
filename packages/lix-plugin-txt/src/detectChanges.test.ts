@@ -1,6 +1,5 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
-import { TextSchemaV1 } from "./schemas/text.js";
 import { openLixInMemory } from "@lix-js/sdk";
 
 const encode = (text: string) => new TextEncoder().encode(text);
@@ -56,7 +55,7 @@ LINE 3`);
 					additionalProperties: false,
 				},
 			},
-			entity_id: "x.md|content-snapshot",
+			entity_id: "random",
 			snapshot: {
 				text: `LINE 1
 LINE 2
@@ -100,7 +99,7 @@ LINE 2`);
 					additionalProperties: false,
 				},
 			},
-			entity_id: "x.md|content-snapshot",
+			entity_id: "random",
 			snapshot: {
 				text: `LINE 1
 LINE 2`,
@@ -142,7 +141,7 @@ LINE 3 - updated`);
 					additionalProperties: false,
 				},
 			},
-			entity_id: "x.md|content-snapshot",
+			entity_id: "random",
 			snapshot: {
 				text: `LINE 1
 LINE 2

@@ -8,6 +8,7 @@ import {
 import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+import { updateUrlParams } from "./helper/updateUrlParams.ts";
 import {
 	lixMdDemoFile,
 	setupMdDemo,
@@ -171,20 +172,23 @@ export const lixAtom = atom(async (get) => {
 	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
 	if (!file) file = await setupMdDemo(lix);
 	if (!get(fileIdSearchParamsAtom)) {
-		// Set the file ID as searchParams
-		const url = new URL(window.location.href);
-		url.searchParams.set("f", file.id);
-		window.history.replaceState({}, "", url.toString());
+		// Set the file ID as searchParams without page reload
+		updateUrlParams({ f: file.id });
 	}
 
 	await saveLixToOpfs({ lix });
 
-	// mismatch in id, load correct url
+	// mismatch in id, update URL without full reload if possible
 	if (lixId.value !== lixIdSearchParam) {
-		const url = new URL(window.location.href);
-		url.searchParams.set("l", lixId.value);
-		// need to use window.location because react router complains otherwise
-		window.location.href = url.toString();
+		// Try to update URL without full navigation
+		const updateSuccessful = updateUrlParams({ l: lixId.value });
+
+		// If update failed, fall back to full navigation
+		if (!updateSuccessful) {
+			const url = new URL(window.location.href);
+			url.searchParams.set("l", lixId.value);
+			window.location.href = url.toString();
+		}
 	}
 
 	return lix;
@@ -196,6 +200,11 @@ export const lixAtom = atom(async (get) => {
  * Search where the atom is set (likely in the layout/root component).
  */
 export const withPollingAtom = atom(Date.now());
+
+/**
+ * Global editor reference atom to access the editor outside Plate components
+ */
+export const editorRefAtom = atom<any>(null);
 
 export const currentVersionAtom = atom<Promise<Version | null>>(async (get) => {
 	get(withPollingAtom);
@@ -279,4 +288,55 @@ export const isSyncingAtom = atom(async (get) => {
 	} else {
 		return false;
 	}
+});
+
+export const currentWorkspaceNameAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	if (!lix) return "Untitled Workspace";
+
+	const name = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "workspace_name")
+		.select("value")
+		.executeTakeFirst()
+		.then((row) => row?.value);
+
+	return name || "Untitled Workspace";
+});
+
+export const availableWorkspacesAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const root = await getOriginPrivateDirectory();
+	const workspaces = [];
+
+	for await (const entry of (root as any).values()) {
+		if (entry.kind === "file" && entry.name.endsWith(".lix")) {
+			const wsId = entry.name.replace(/\.lix$/, "");
+			try {
+				const buffer = await entry
+					.getFile()
+					.then((f: { arrayBuffer(): Promise<ArrayBuffer> }) =>
+						f.arrayBuffer()
+					);
+				const lix = await openLixInMemory({ blob: new Blob([buffer]) });
+				const name = await lix.db
+					.selectFrom("key_value")
+					.where("key", "=", "workspace_name")
+					.select("value")
+					.executeTakeFirst()
+					.then((row) => row?.value || "Untitled");
+
+				workspaces.push({ id: wsId, name });
+			} catch (error) {
+				console.error(`Failed to load workspace:`, error);
+				workspaces.push({
+					id: wsId,
+					name: "Untitled",
+				});
+			}
+		}
+	}
+
+	return workspaces;
 });

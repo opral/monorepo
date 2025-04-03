@@ -39,9 +39,13 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 
 	return {
 		fileData: new TextEncoder().encode(
-			parsedBlocks.map((block) => {
-				return block.content === '<br>' ? "<!-- id: " + block.id + " -->" + block.content
-			: "<!-- id: " + block.id + " -->\n" + block.content} ).join("\n\n"),
+			parsedBlocks
+				.map((block) => {
+					return block.content === "<br>"
+						? "<!-- id: " + block.id + " -->" + block.content
+						: "<!-- id: " + block.id + " -->\n" + block.content;
+				})
+				.join("\n\n"),
 		),
 	};
 };

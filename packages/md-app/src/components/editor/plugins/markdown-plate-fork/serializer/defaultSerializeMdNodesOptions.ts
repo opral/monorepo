@@ -25,7 +25,7 @@ export const defaultSerializeMdNodesOptions: SerializeMdOptions['nodes'] = {
   code_block: {
     type: 'code_block',
     serialize: (children, node) =>
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+       
       `\n\`\`\`${node.lang || ''}\n${children}\`\`\`\n`,
   },
   code_line: {

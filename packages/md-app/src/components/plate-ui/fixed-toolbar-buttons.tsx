@@ -31,7 +31,7 @@ import {
   PaintBucketIcon,
   StrikethroughIcon,
   UnderlineIcon,
-  WandSparklesIcon,
+  ZapIcon,
 } from 'lucide-react';
 
 import { MoreDropdownMenu } from '@/components/plate-ui/more-dropdown-menu';
@@ -62,7 +62,8 @@ import { TableDropdownMenu } from './table-dropdown-menu';
 import { ToggleToolbarButton } from './toggle-toolbar-button';
 import { ToolbarGroup } from './toolbar';
 import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
-import { CopyToClipboard } from '../editor/CopyToClipboard';
+import { CopyToClipboard } from '../CopyToClipboard';
+import { ImportMarkdown } from '../ImportMarkdown';
 
 export function FixedToolbarButtons() {
   const readOnly = useEditorReadOnly();
@@ -78,17 +79,18 @@ export function FixedToolbarButtons() {
 
           <ToolbarGroup>
             <AIToolbarButton tooltip="AI commands (⌘+J)">
-              <WandSparklesIcon />
+              <ZapIcon />
             </AIToolbarButton>
           </ToolbarGroup>
 
-          <ToolbarGroup>
+          {/* <ToolbarGroup>
             <ExportToolbarButton>
               <ArrowUpToLineIcon />
             </ExportToolbarButton>
-
             <ImportToolbarButton />
-          </ToolbarGroup>
+          </ToolbarGroup> */}
+
+
 
           <ToolbarGroup>
             <InsertDropdownMenu />
@@ -153,10 +155,10 @@ export function FixedToolbarButtons() {
             <LinkToolbarButton />
             <TableDropdownMenu />
             <EmojiDropdownMenu />
+            <MediaToolbarButton nodeType={ImagePlugin.key} />
           </ToolbarGroup>
 
           {/* <ToolbarGroup>
-            <MediaToolbarButton nodeType={ImagePlugin.key} />
             <MediaToolbarButton nodeType={VideoPlugin.key} />
             <MediaToolbarButton nodeType={AudioPlugin.key} />
             <MediaToolbarButton nodeType={FilePlugin.key} />
@@ -184,8 +186,9 @@ export function FixedToolbarButtons() {
       </ToolbarGroup> */}
 
       <ToolbarGroup>
+        <ImportMarkdown />
         <CopyToClipboard />
-        <ModeDropdownMenu />
+        {/* <ModeDropdownMenu /> */}
       </ToolbarGroup>
     </div>
   );
