@@ -64,7 +64,7 @@ test("it restores the state to a specific change set", async () => {
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "version_v2.id", "active_version.id")
+		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
 		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 

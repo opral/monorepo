@@ -26,7 +26,7 @@ export async function applyChangeSet(args: {
 			args.version ??
 			(await trx
 				.selectFrom("active_version")
-				.innerJoin("version_v2", "version_v2.id", "active_version.id")
+				.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
 				.selectAll("version_v2")
 				.executeTakeFirstOrThrow());
 

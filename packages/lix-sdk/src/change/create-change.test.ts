@@ -301,7 +301,7 @@ test("should add the change to the active version's change set", async () => {
 	// Get the initial change set ID (should be 'cs0')
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.id", "version_v2.id")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
 		.select("change_set_id")
 		.executeTakeFirstOrThrow();
 	const activeChangeSetId = activeVersion.change_set_id;

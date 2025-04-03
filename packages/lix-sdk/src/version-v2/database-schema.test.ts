@@ -165,7 +165,9 @@ test("applying the schema should set the initial active version to 'main'", asyn
 		.selectAll()
 		.executeTakeFirst();
 	expect(activeVersion).toBeDefined();
-	expect(activeVersion?.id).toBe("019328cc-ccb0-7f51-96e8-524df4597ac6");
+	expect(activeVersion?.version_id).toBe(
+		"019328cc-ccb0-7f51-96e8-524df4597ac6"
+	);
 });
 
 test("applying the schema multiple times should be idempotent for initial data", async () => {
@@ -190,7 +192,7 @@ test("applying the schema multiple times should be idempotent for initial data",
 
 	const initialActiveVersionCount = await lix.db
 		.selectFrom("active_version")
-		.select(lix.db.fn.count("id").as("count"))
+		.select(lix.db.fn.count("version_id").as("count"))
 		.executeTakeFirstOrThrow();
 	expect(initialActiveVersionCount.count).toBe(1);
 });
