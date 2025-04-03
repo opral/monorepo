@@ -8,20 +8,21 @@ import { mockChange } from "../change/mock-change.js";
 test("should only return change sets with the given label", async () => {
 	const lix = await openLixInMemory({});
 
-	await lix.db
+	const changes0 = await lix.db
 		.insertInto("change")
 		.values([mockChange({ id: "change1" }), mockChange({ id: "change2" })])
+		.returningAll()
 		.execute();
 
 	// Create two change sets
 	const changeSet1 = await createChangeSet({
 		lix,
-		changes: [{ id: "change1" }],
+		changes: [changes0[0]!],
 	});
 
 	const changeSet2 = await createChangeSet({
 		lix,
-		changes: [{ id: "change2" }],
+		changes: [changes0[1]!],
 	});
 
 	// Insert a label

@@ -8,4 +8,4 @@
 
 > **VersionChangeUpdate** = `Updateable`\<`VersionChangeTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:210](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/database/schema.ts#L210)
+Defined in: [packages/lix-sdk/src/database/schema.ts:210](https://github.com/opral/monorepo/blob/e56b872498d48e57574f781e8cd2e240c1f6f0b2/packages/lix-sdk/src/database/schema.ts#L210)

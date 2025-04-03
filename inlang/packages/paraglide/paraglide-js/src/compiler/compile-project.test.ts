@@ -354,6 +354,8 @@ describe.each([
 			test("should return the correct message for the current locale", async () => {
 				const { m, runtime } = await importCode(code);
 
+				console.log(m);
+
 				runtime.setLocale("en");
 
 				expect(m.sad_penguin_bundle()).toBe("A simple message.");
@@ -480,7 +482,6 @@ describe.each([
 					`export * as m from "./paraglide/messages.js"
 					export * as runtime from "./paraglide/runtime.js"`
 				);
-
 				const { m, runtime } = await importCode(code);
 
 				runtime.setLocale("de");
@@ -755,13 +756,44 @@ describe.each([
 				runtime.setLocale("en-US");
 				expect(m.missing_in_en_US()).toBe("Fallback message.");
 			});
+
+			test("arbitrary module identifiers", async () => {
+				const project = await loadProjectInMemory({
+					blob: await newProject({
+						settings: { locales: ["en"], baseLocale: "en" },
+					}),
+				});
+
+				await insertBundleNested(
+					project.db,
+					createBundleNested({
+						id: "happy🍌",
+						messages: [
+							{
+								locale: "en",
+								variants: [{ pattern: [{ type: "text", value: "Hello" }] }],
+							},
+						],
+					})
+				);
+
+				const output = await compileProject({
+					project,
+					compilerOptions,
+				});
+
+				const code = await bundleCode(
+					output,
+					`export * as m from "./paraglide/messages.js"
+					export * as runtime from "./paraglide/runtime.js"`
+				);
+				const { m } = await importCode(code);
+
+				expect(m["happy🍌"]()).toBe("Hello");
+			});
 		});
 
 		test("case sensitivity handling for bundle IDs", async () => {
-			// skip local modules for now because the option might get removed in the future
-			if (compilerOptions.outputStructure === "locale-modules") {
-				return;
-			}
 			const project = await loadProjectInMemory({
 				blob: await newProject({
 					settings: { locales: ["en"], baseLocale: "en" },
@@ -966,6 +998,27 @@ const mockBundles: BundleNested[] = [
 				locale: "de",
 				variants: [
 					{ pattern: [{ type: "text", value: "Eine einfache Nachricht." }] },
+				],
+			},
+		],
+	}),
+	createBundleNested({
+		id: "Sad_penguin_bundle",
+		messages: [
+			{
+				locale: "en",
+				variants: [
+					{ pattern: [{ type: "text", value: "Capital Sad penguin" }] },
+				],
+			},
+			{
+				locale: "de",
+				variants: [
+					{
+						pattern: [
+							{ type: "text", value: "Grossgeschriebenes Sad penguin" },
+						],
+					},
 				],
 			},
 		],

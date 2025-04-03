@@ -8,7 +8,7 @@
 
 > **changeSetElementInSymmetricDifference**(`a`, `b`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts:19](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts#L19)
+Defined in: [packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts:19](https://github.com/opral/monorepo/blob/e56b872498d48e57574f781e8cd2e240c1f6f0b2/packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts#L19)
 
 Returns the symmetric difference between two change sets.
 

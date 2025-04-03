@@ -1,6 +1,7 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
+import { PluginImportError } from "../plugin/errors.js";
 import { validate } from "uuid";
 
 test("it should persist changes of bundles, messages, and variants to lix ", async () => {
@@ -173,4 +174,41 @@ test("closing a project should not lead to a throw", async () => {
 
 	// capture async throws
 	await new Promise((resolve) => setTimeout(resolve, 250));
+});
+
+test("project.errors.get() returns errors for modules that couldn't be imported via http", async () => {
+	// Mock global fetch to simulate a network error
+	global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+				modules: ["https://example.com/non-existent-paraglide-plugin.js"],
+			},
+		}),
+	});
+
+	// Get the errors from project
+	const errors = await project.errors.get();
+
+	// Verify there's at least one error
+	expect(errors.length).toBeGreaterThan(0);
+
+	// Find the error related to the HTTP import
+	const httpImportError = errors.find(
+		(error) =>
+			error instanceof PluginImportError &&
+			error.plugin === "https://example.com/non-existent-paraglide-plugin.js"
+	);
+
+	// Verify the error exists and contains appropriate information
+	expect(httpImportError).toBeDefined();
+	expect(httpImportError?.message).toContain(
+		"non-existent-paraglide-plugin.js"
+	);
+	expect(httpImportError?.message).toContain("Couldn't import");
+
+	await project.close();
 });

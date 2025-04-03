@@ -6,6 +6,16 @@ import type {
 import type { KeyValueTable } from "../key-value/database-schema.js";
 import type { MutationLogTable } from "./mutation-log/database-schema.js";
 import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
+import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
+import type {
+	ActiveVersionTable,
+	VersionV2Table,
+} from "../version-v2/database-schema.js";
+import type {
+	ChangeSetElementTable,
+	ChangeSetLabelTable,
+	ChangeSetTable,
+} from "../change-set/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -29,6 +39,7 @@ export type LixDatabaseSchema = {
 	change_set: ChangeSetTable;
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
+	change_set_edge: ChangeSetEdgeTable;
 
 	// key value
 	key_value: KeyValueTable;
@@ -46,11 +57,15 @@ export type LixDatabaseSchema = {
 	version_change: VersionChangeTable;
 	version_change_conflict: VersionChangeConflictTable;
 
+	// version v2
+	version_v2: VersionV2Table;
+
 	// change conflicts
 	change_conflict: ChangeConflictTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
 
 	mutation_log: MutationLogTable;
+	active_version: ActiveVersionTable;
 };
 
 export type FileQueueEntry = Selectable<FileQueueTable>;
@@ -144,23 +159,6 @@ type SnapshotTable = {
 	content: Record<string, any> | null;
 };
 
-// ------ change sets ------
-
-export type ChangeSet = Selectable<ChangeSetTable>;
-export type NewChangeSet = Insertable<ChangeSetTable>;
-export type ChangeSetUpdate = Updateable<ChangeSetTable>;
-type ChangeSetTable = {
-	id: Generated<string>;
-};
-
-export type ChangeSetElement = Selectable<ChangeSetElementTable>;
-export type NewChangeSetElement = Insertable<ChangeSetElementTable>;
-export type ChangeSetElementUpdate = Updateable<ChangeSetElementTable>;
-type ChangeSetElementTable = {
-	change_set_id: string;
-	change_id: string;
-};
-
 // ------ discussions ------
 
 export type Discussion = Selectable<DiscussionTable>;
@@ -189,14 +187,6 @@ export type LabelUpdate = Updateable<LabelTable>;
 type LabelTable = {
 	id: Generated<string>;
 	name: string;
-};
-
-export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
-export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;
-export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
-type ChangeSetLabelTable = {
-	change_set_id: string;
-	label_id: string;
 };
 
 // ------ versiones ------

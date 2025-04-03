@@ -8,7 +8,7 @@
 
 > **resolveChangeConflictBySelecting**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts:10](https://github.com/opral/monorepo/blob/b171e3e71d4461028abf991c33609fbcfb064d33/packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts#L10)
+Defined in: [packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts:10](https://github.com/opral/monorepo/blob/e56b872498d48e57574f781e8cd2e240c1f6f0b2/packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts#L10)
 
 Resolves a conflict by selecting one of the two
 changes in the conflict.

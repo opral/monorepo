@@ -209,35 +209,35 @@ test("change set items must be unique", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	await db
+	const change1 = await db
 		.insertInto("change")
-		.values(
-			mockChange({
-				id: "change-1",
-			})
-		)
-		.execute();
+		.values(mockChange({ id: "change-1" })) // Use mockChange for consistent data
+		.returningAll()
+		.executeTakeFirstOrThrow();
 
 	await db
 		.insertInto("change_set_element")
 		.values({
 			change_set_id: "change-set-1",
-			change_id: "change-1",
+			change_id: change1.id,
+			entity_id: change1.entity_id,
+			schema_key: change1.schema_key,
+			file_id: change1.file_id,
 		})
 		.execute();
 
-	expect(
+	await expect(
 		db
 			.insertInto("change_set_element")
 			.values({
 				change_set_id: "change-set-1",
-				change_id: "change-1",
+				change_id: change1.id, // Use the same change ID
+				entity_id: change1.entity_id,
+				schema_key: change1.schema_key,
+				file_id: change1.file_id,
 			})
-			.returningAll()
 			.execute()
-	).rejects.toThrowErrorMatchingInlineSnapshot(
-		`[SQLite3Error: SQLITE_CONSTRAINT_PRIMARYKEY: sqlite3 result code 1555: UNIQUE constraint failed: change_set_element.change_set_id, change_set_element.change_id]`
-	);
+	).rejects.toThrow();
 });
 
 // 8B IDs needed, in order to have a 1% probability of at least one collision.

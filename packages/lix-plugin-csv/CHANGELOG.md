@@ -1,5 +1,14 @@
 # @lix-js/plugin-csv
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [275d87e]
+- Updated dependencies [dc92f56]
+- Updated dependencies [c1ed545]
+  - @lix-js/sdk@0.4.5
+
 ## 0.1.6
 
 ### Patch Changes

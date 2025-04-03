@@ -223,6 +223,10 @@ The `outputStructure` defines how modules are structured in the output.
 - `message-modules` - Each module is a message. This is the default.
 - `locale-modules` - Each module is a locale.
 
+It is recommended to use `locale-modules` for development and `message-modules` for production.
+Bundlers speed up the dev mode by bypassing bundling which can lead to many http requests
+during the dev mode with `message-modules`. See https://github.com/opral/inlang-paraglide-js/issues/486.
+
 **`message-modules`**
 
 Messages have their own module which eases tree-shaking for bundlers.

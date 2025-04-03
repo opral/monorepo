@@ -3,6 +3,9 @@ import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
 import { applyMutationLogDatabaseSchema } from "./mutation-log/database-schema.js";
 import { applyChangeProposalDatabaseSchema } from "../change-proposal/database-schema.js";
+import { applyChangeSetEdgeDatabaseSchema } from "../change-set-edge/database-schema.js";
+import { applyVersionV2DatabaseSchema } from "../version-v2/database-schema.js";
+import { applyChangeSetDatabaseSchema } from "../change-set/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -118,7 +121,11 @@ export function applySchema(args: {
   -- Create the default 'no-content' snapshot
   -- to avoid foreign key constraint violations in tests
   INSERT OR IGNORE INTO snapshot (content) VALUES (NULL);
+  `;
 
+	applyChangeSetDatabaseSchema(args.sqlite);
+	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+	args.sqlite.exec`
   -- conflicts
 
   CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
@@ -142,30 +149,6 @@ export function applySchema(args: {
     PRIMARY KEY(change_conflict_id, resolved_change_id),
     FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
     FOREIGN KEY(resolved_change_id) REFERENCES change(id)
-  ) STRICT;
-
-  -- change sets
-
-  CREATE TABLE IF NOT EXISTS change_set (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(16))
-  ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS change_set_element (
-    
-    change_set_id TEXT NOT NULL,
-    change_id TEXT NOT NULL,
-
-    PRIMARY KEY(change_set_id, change_id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id),    
-    FOREIGN KEY(change_id) REFERENCES change(id)
-  ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS change_set_label (
-    label_id TEXT NOT NULL,
-    change_set_id TEXT NOT NULL,
-    PRIMARY KEY(label_id, change_set_id),
-    FOREIGN KEY(label_id) REFERENCES label(id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
   -- discussions 
@@ -266,8 +249,10 @@ export function applySchema(args: {
   END;
   `;
 
-	applyMutationLogDatabaseSchema(args.sqlite);
 	applyChangeProposalDatabaseSchema(args.sqlite);
+	applyMutationLogDatabaseSchema(args.sqlite);
+	applyChangeSetEdgeDatabaseSchema(args.sqlite);
+	applyVersionV2DatabaseSchema(args.sqlite);
 
 	return args.sqlite;
 }
