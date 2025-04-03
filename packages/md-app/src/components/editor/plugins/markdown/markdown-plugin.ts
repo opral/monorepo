@@ -90,7 +90,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 				? serializenResult.slice(0, -4) + "\n"
 				: serializenResult;
 
-			console.log("serializenResult", serializenResult);
+			// console.log("serializenResult", serializenResult);
 
 			return serializenResult;
 		},
