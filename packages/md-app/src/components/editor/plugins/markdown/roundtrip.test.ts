@@ -1,19 +1,19 @@
 import fs from "fs";
 import path from "path";
 import { afterAll, describe, expect, test } from "vitest";
-import { ExtendedMarkdownPlugin } from "../markdown-plugin.js";
+import { ExtendedMarkdownPlugin } from "./markdown-plugin.js";
 
 import {
 	SanitizedBlockHtmlPlugin,
 	SanitizedBlockPlugin,
 	SanitizedElementLeaf,
 	SanitizedInlineHtmlPlugin,
-} from "../../sanitized-html.js";
-import { FrontMatterPlugin } from "../../frontmatter-plugin.js";
+} from "../sanitized-html.js";
+import { FrontMatterPlugin } from "../frontmatter-plugin.js";
 import { createPlateEditor } from "@udecode/plate/react";
 
 // Read all *.md files in the current folder
-const fixturesDir = __dirname;
+const fixturesDir = __dirname + "/fixtures";
 const fixturesFiles = fs
 	.readdirSync(fixturesDir)
 	.filter((file) => file.endsWith(".md"));
