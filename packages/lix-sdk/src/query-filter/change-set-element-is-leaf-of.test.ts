@@ -67,7 +67,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 	const leafChanges = await lix.db
 		.selectFrom("change_set_element")
 		.where("change_set_element.change_set_id", "in", [cs0.id, cs1.id, cs2.id])
-		.where(changeSetElementIsLeafOf(cs2))
+		.where(changeSetElementIsLeafOf([cs2]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.execute();
 
@@ -192,7 +192,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	const leafChangesCs2 = await lix.db
 		.selectFrom("change_set_element")
 		.where(changeSetElementInAncestryOf(cs2))
-		.where(changeSetElementIsLeafOf(cs2))
+		.where(changeSetElementIsLeafOf([cs2]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
 		.execute();
@@ -276,7 +276,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	const leafChangesCs1 = await lix.db
 		.selectFrom("change_set_element")
 		.where(changeSetElementInAncestryOf(cs1))
-		.where(changeSetElementIsLeafOf(cs1))
+		.where(changeSetElementIsLeafOf([cs1]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
 		.execute();
@@ -298,7 +298,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	const restoreChangesCs0WithLeafAtPoint = await lix.db
 		.selectFrom("change_set_element")
 		.where(changeSetElementInAncestryOf(cs0))
-		.where(changeSetElementIsLeafOf(cs0))
+		.where(changeSetElementIsLeafOf([cs0]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
 		.execute();
@@ -312,4 +312,151 @@ test("correctly identifies leaves at different points in history", async () => {
 	expect(
 		restoreChangesCs0WithLeafAtPoint.map((c) => c.change_id).sort()
 	).toEqual(["c0", "c1", "c2"]);
+});
+
+test("returns combined leaves from multiple target change sets", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create changes
+	const changes = await lix.db
+		.insertInto("change")
+		.values([
+			{
+				id: "c0",
+				entity_id: "entity3",
+				file_id: "file3",
+				schema_key: "schema3",
+				plugin_key: "mock_plugin",
+				snapshot_id: "no-content",
+			},
+			{
+				id: "c1",
+				entity_id: "entity1",
+				file_id: "file1",
+				schema_key: "schema1",
+				plugin_key: "mock_plugin",
+				snapshot_id: "no-content",
+			},
+			{
+				id: "c2",
+				entity_id: "entity2",
+				file_id: "file2",
+				schema_key: "schema2",
+				plugin_key: "mock_plugin",
+				snapshot_id: "no-content",
+			},
+			{
+				// Same entity as c2
+				id: "c3",
+				entity_id: "entity2",
+				file_id: "file2",
+				plugin_key: "mock_plugin",
+				snapshot_id: "no-content",
+				schema_key: "schema2",
+			},
+			{
+				id: "c4",
+				entity_id: "entity4",
+				file_id: "file4",
+				schema_key: "schema4",
+				plugin_key: "mock_plugin",
+				snapshot_id: "no-content",
+			},
+			{
+				id: "c5",
+				entity_id: "entity5",
+				file_id: "file5",
+				schema_key: "schema5",
+				plugin_key: "mock_plugin",
+				snapshot_id: "no-content",
+			},
+		])
+		.returningAll()
+		.execute();
+
+	// Create change sets with the new history:
+	// cs0 <- cs1 <- cs2
+	//    \
+	//     <- cs3 <- cs4
+	const cs0 = await createChangeSet({
+		lix,
+		id: "cs0",
+		changes: [changes[0]!], // c0 (entity3)
+	});
+
+	const cs1 = await createChangeSet({
+		lix,
+		id: "cs1",
+		changes: [changes[1]!], // c1 (entity1)
+		parents: [cs0],
+	});
+
+	const cs2 = await createChangeSet({
+		lix,
+		id: "cs2",
+		changes: [changes[2]!], // c2 (entity2)
+		parents: [cs1],
+	});
+
+	const cs3 = await createChangeSet({
+		lix,
+		id: "cs3",
+		changes: [changes[3]!], // c3 (entity2)
+		parents: [cs0],
+	});
+
+	const cs4 = await createChangeSet({
+		lix,
+		id: "cs4",
+		changes: [changes[4]!, changes[5]!], // c4 (entity4), c5 (entity5)
+		parents: [cs3],
+	});
+
+	// Test 1: Leaves in cs2 (Ancestry: cs0 -> cs1 -> cs2)
+	const leavesCs2 = await lix.db
+		.selectFrom("change_set_element")
+		.where(changeSetElementIsLeafOf([cs2]))
+		.selectAll()
+		.execute();
+	// Expected leaves: c0, c1, c2
+	expect(leavesCs2.map((c) => c.change_id).sort()).toEqual(["c0", "c1", "c2"]);
+
+	// Test 2: Leaves in cs4 branch (Ancestry: cs0 -> cs3 -> cs4)
+	const leavesCs4 = await lix.db
+		.selectFrom("change_set_element")
+		.where(changeSetElementIsLeafOf([cs4]))
+		.selectAll()
+		.execute();
+	// Expected leaves: c0, c3, c4, c5
+	expect(leavesCs4.map((c) => c.change_id).sort()).toEqual([
+		"c0",
+		"c3",
+		"c4",
+		"c5",
+	]);
+
+	// Test 3: Combined leaves from both cs2 and cs4 branches
+	const combinedLeaves = await lix.db
+		.selectFrom("change_set_element")
+		.where(changeSetElementIsLeafOf([cs2, cs4])) // Target heads are cs2 and cs4
+		.selectAll()
+		.execute();
+
+	// Expected combined leaves:
+	// - c0 (entity3): leaf in both ancestries
+	// - c1 (entity1): leaf in cs2 ancestry
+	// - c2 (entity2): leaf in cs2 ancestry (diverged from c3)
+	// - c3 (entity2): leaf in cs4 ancestry (diverged from c2)
+	// - c4 (entity4): leaf in cs4 ancestry
+	// - c5 (entity5): leaf in cs4 ancestry
+	// Both c2 and c3 are leaves for entity2 due to divergence
+	expect(combinedLeaves.map((c) => c.change_id).sort()).toEqual([
+		"c0",
+		"c1",
+		"c2",
+		"c3",
+		"c4",
+		"c5",
+	]);
+	expect(combinedLeaves).toHaveLength(6);
 });
