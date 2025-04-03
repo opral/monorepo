@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test } from "vitest";
 import { ExtendedMarkdownPlugin } from "../markdown-plugin.js";
 
 import {
