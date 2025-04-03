@@ -168,7 +168,7 @@ export async function selectMainVersion() {
 }
 
 export async function selectDiscussion(args: { changeSetId: ChangeSet["id"] }) {
-	const result = await lix.db
+	return await lix.db
 		.selectFrom("discussion")
 		.where("change_set_id", "=", args.changeSetId)
 		.select((eb) => [
@@ -185,13 +185,6 @@ export async function selectDiscussion(args: { changeSetId: ChangeSet["id"] }) {
 		])
 		.selectAll("discussion")
 		.executeTakeFirst();
-
-	if (result) {
-		// the automatic json parser doesn't work for some reason
-		result.comments = JSON.parse(result.comments as unknown as string);
-	}
-
-	return result;
 }
 
 /**
@@ -202,6 +195,7 @@ export async function selectCurrentChangeSet(): Promise<
 	(ChangeSet & { change_count: number; created_at: string }) | null
 > {
 	try {
+		console.log("current change set");
 		const currentVersion = await selectCurrentVersion();
 
 		const labelName = `current:${currentVersion.id}`;
@@ -250,6 +244,9 @@ export async function selectCurrentChangeSet(): Promise<
 				.insertInto("change_set_element")
 				.values(
 					looseChanges.map((c) => ({
+						entity_id: c.entity_id,
+						file_id: c.file_id,
+						schema_key: c.schema_key,
 						change_set_id: currentChangeSet.id,
 						change_id: c.id,
 					})),
@@ -326,7 +323,12 @@ export async function selectProposedChangeSet(): Promise<
 		.innerJoin("file", "change.file_id", "file.id")
 		.where("file.id", "=", prosemirrorFile.id)
 		.where(changeIsLeafInVersion(currentVersion))
-		.select(["change.id"])
+		.select([
+			"change.id",
+			"change.entity_id",
+			"change.file_id",
+			"change.schema_key",
+		])
 		.execute();
 
 	// getting all changes of main to use as target
@@ -338,7 +340,12 @@ export async function selectProposedChangeSet(): Promise<
 		.innerJoin("file", "change.file_id", "file.id")
 		.where("file.id", "=", prosemirrorFile.id)
 		.where(changeIsLeafInVersion(mainVersion))
-		.select(["change.id"])
+		.select([
+			"change.id",
+			"change.entity_id",
+			"change.file_id",
+			"change.schema_key",
+		])
 		.execute();
 
 	// add all source changes
@@ -348,6 +355,9 @@ export async function selectProposedChangeSet(): Promise<
 			sourceChanges.map((c) => ({
 				change_set_id: sourceChangeSet.id,
 				change_id: c.id,
+				entity_id: c.entity_id,
+				file_id: c.file_id,
+				schema_key: c.schema_key,
 			})),
 		)
 		.onConflict((oc) => oc.doNothing())
@@ -360,6 +370,9 @@ export async function selectProposedChangeSet(): Promise<
 			targetChanges.map((c) => ({
 				change_set_id: targetChangeSet.id,
 				change_id: c.id,
+				entity_id: c.entity_id,
+				file_id: c.file_id,
+				schema_key: c.schema_key,
 			})),
 		)
 		.onConflict((oc) => oc.doNothing())
@@ -376,7 +389,12 @@ export async function selectProposedChangeSet(): Promise<
 		// if the source has leafs that are new,
 		.where(changeIsLeaf())
 		.distinct()
-		.select(["change_id as id"])
+		.select([
+			"change_id as id",
+			"change.entity_id",
+			"change.file_id",
+			"change.schema_key",
+		])
 		.execute();
 
 	if (proposedChanges.length > 0) {
@@ -390,6 +408,9 @@ export async function selectProposedChangeSet(): Promise<
 				proposedChanges.map((c) => ({
 					change_set_id: proposedChangeSet.id,
 					change_id: c.id,
+					entity_id: c.entity_id,
+					file_id: c.file_id,
+					schema_key: c.schema_key,
 				})),
 			)
 			.onConflict((oc) => oc.doNothing())
@@ -401,3 +422,5 @@ export async function selectProposedChangeSet(): Promise<
 		change_count: proposedChanges.length,
 	};
 }
+
+

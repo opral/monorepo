@@ -12,7 +12,13 @@ export const prosemirrorFile = await lix.db
 	.insertInto("file")
 	.values({
 		path: "/prosemirror.json",
-		data: new TextEncoder().encode(initialDoc),
+		data: new TextEncoder().encode(
+			JSON.stringify({
+				type: "doc",
+				content: [],
+			}),
+		),
+		// data: new TextEncoder().encode(initialDoc),
 	})
 	.onConflict((oc) => oc.doNothing())
 	.returningAll()
