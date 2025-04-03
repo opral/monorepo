@@ -33,8 +33,8 @@ export async function restoreChangeSet(args: {
 				"change_set_element.change_id",
 				"change.id"
 			)
-			.where(changeSetElementInAncestryOf(args.changeSet))
-			.where(changeSetElementIsLeafOf(args.changeSet))
+			.where(changeSetElementInAncestryOf([args.changeSet]))
+			.where(changeSetElementIsLeafOf([args.changeSet]))
 			.selectAll("change")
 			.distinct()
 			.execute();
@@ -50,8 +50,8 @@ export async function restoreChangeSet(args: {
 				"change.id"
 			)
 			// Condition A: The change must be a leaf in the *current* version's state
-			.where(changeSetElementInAncestryOf({ id: version.change_set_id }))
-			.where(changeSetElementIsLeafOf({ id: version.change_set_id }))
+			.where(changeSetElementInAncestryOf([{ id: version.change_set_id }]))
+			.where(changeSetElementIsLeafOf([{ id: version.change_set_id }]))
 			// Condition B: The change must NOT be a leaf in the *target* state
 			.where(({ not, exists, selectFrom }) =>
 				not(
@@ -63,8 +63,8 @@ export async function restoreChangeSet(args: {
 								"target_leaf_check.id"
 							)
 							.whereRef("target_leaf_check.id", "=", "change.id")
-							.where(changeSetElementInAncestryOf(args.changeSet))
-							.where(changeSetElementIsLeafOf(args.changeSet))
+							.where(changeSetElementInAncestryOf([args.changeSet]))
+							.where(changeSetElementIsLeafOf([args.changeSet]))
 							.select("target_leaf_check.id")
 					)
 				)
@@ -86,8 +86,8 @@ export async function restoreChangeSet(args: {
 								"change.entity_id"
 							)
 							// Check if any change for this entity is a leaf AT THE TARGET change set
-							.where(changeSetElementInAncestryOf(args.changeSet)) // Use target change set
-							.where(changeSetElementIsLeafOf(args.changeSet)) // Use target change set
+							.where(changeSetElementInAncestryOf([args.changeSet])) // Use target change set
+							.where(changeSetElementIsLeafOf([args.changeSet])) // Use target change set
 							.select("restored_entity_check.id") // Select something small
 					)
 				)

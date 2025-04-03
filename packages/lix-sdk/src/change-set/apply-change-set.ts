@@ -71,8 +71,8 @@ export async function applyChangeSet(args: {
 		} else {
 			// In recursive mode, we want leaf changes in the ancestry
 			query = query
-				.where(changeSetElementInAncestryOf(args.changeSet))
-				.where(changeSetElementIsLeafOf(args.changeSet));
+				.where(changeSetElementInAncestryOf([args.changeSet]))
+				.where(changeSetElementIsLeafOf([args.changeSet]));
 		}
 
 		const changesResult = await query.selectAll().execute();
