@@ -8,9 +8,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 import type { ChangeSet } from "../change-set/database-schema.js";
 
 /**
- * Filters `change_set_element` rows that represent the last known definition
- * of a given entity (by `entity_id`, `file_id`, `schema_key`) relative to the combined history
- * of one or more target change sets.
+ * Filters the leaves of the given change set(s).
  *
  * An element is considered a **leaf** if no other element in the combined ancestry
  * of the target change sets redefines the same entity at a later point in the graph.

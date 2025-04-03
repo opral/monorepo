@@ -141,8 +141,8 @@ test("correctly identifies leaves at different points in history", async () => {
 		.execute();
 
 	// Create a more complex change set graph:
-	// cs0 (base) -> cs1 (modifies l2) -> cs2 (adds l3)
-	//           \-> cs3 (alternative version)
+	// cs0 (base) <- cs1 (modifies l2) <- cs2 (adds l3)
+	//           \<- cs3 (alternative version)
 
 	// Base change set with initial content
 	const cs0 = await createChangeSet({
@@ -370,6 +370,15 @@ test("returns combined leaves from multiple target change sets", async () => {
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
 			},
+			{
+				// Index 6 - New change for entity3
+				id: "c6",
+				entity_id: "entity3", // Same entity as c0
+				file_id: "file3",
+				schema_key: "schema3",
+				plugin_key: "mock_plugin",
+				snapshot_id: "no-content",
+			},
 		])
 		.returningAll()
 		.execute();
@@ -394,7 +403,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
-		changes: [changes[2]!], // c2 (entity2)
+		changes: [changes[2]!, changes[6]!], // c2 (entity2), c6 (entity3 v2) - supersedes c0
 		parents: [cs1],
 	});
 
@@ -418,8 +427,8 @@ test("returns combined leaves from multiple target change sets", async () => {
 		.where(changeSetElementIsLeafOf([cs2]))
 		.selectAll()
 		.execute();
-	// Expected leaves: c0, c1, c2
-	expect(leavesCs2.map((c) => c.change_id).sort()).toEqual(["c0", "c1", "c2"]);
+	// Expected leaves: c1, c2, c6 (c0 is superseded by c6)
+	expect(leavesCs2.map((c) => c.change_id).sort()).toEqual(["c1", "c2", "c6"]);
 
 	// Test 2: Leaves in cs4 branch (Ancestry: cs0 -> cs3 -> cs4)
 	const leavesCs4 = await lix.db
@@ -443,20 +452,20 @@ test("returns combined leaves from multiple target change sets", async () => {
 		.execute();
 
 	// Expected combined leaves:
-	// - c0 (entity3): leaf in both ancestries
+	// c0 is NOT included as it's superseded by c6 in the cs2 branch
 	// - c1 (entity1): leaf in cs2 ancestry
-	// - c2 (entity2): leaf in cs2 ancestry (diverged from c3)
-	// - c3 (entity2): leaf in cs4 ancestry (diverged from c2)
+	// - c2 (entity2): leaf in cs2 ancestry (diverged from c3, BOTH LEAVES)
+	// - c3 (entity2): leaf in cs4 ancestry (diverged from c2, BOTH LEAVES)
 	// - c4 (entity4): leaf in cs4 ancestry
 	// - c5 (entity5): leaf in cs4 ancestry
-	// Both c2 and c3 are leaves for entity2 due to divergence
+	// - c6 (entity3): leaf in cs2 ancestry, supersedes c0
 	expect(combinedLeaves.map((c) => c.change_id).sort()).toEqual([
-		"c0",
 		"c1",
 		"c2",
 		"c3",
 		"c4",
 		"c5",
+		"c6", // <-- Supersedes c0
 	]);
 	expect(combinedLeaves).toHaveLength(6);
 });
