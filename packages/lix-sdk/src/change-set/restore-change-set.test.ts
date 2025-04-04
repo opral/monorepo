@@ -227,14 +227,20 @@ test("it restores the state to a specific change set", async () => {
 	});
 
 	// Verify final state
-	// 1. Check if version points to cs1
+	// 1. Check that versions change set parent is cs2
 	const finalVersion = await lix.db
 		.selectFrom("version_v2")
 		.where("id", "=", activeVersion.id)
 		.select(["change_set_id"])
 		.executeTakeFirstOrThrow();
 
-	expect(finalVersion.change_set_id).toBe(cs0.id);
+	const parentCs = await lix.db
+		.selectFrom("change_set_edge")
+		.where("child_id", "=", finalVersion.change_set_id)
+		.select(["parent_id"])
+		.executeTakeFirstOrThrow();
+
+	expect(parentCs.parent_id).toBe(cs2.id);
 
 	// 2. Check if data is updated
 	const finalFile = await lix.db
