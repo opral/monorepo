@@ -7,7 +7,15 @@ import { changeSetElementInAncestryOf } from "../query-filter/change-set-element
 import type { VersionV2 } from "../version-v2/database-schema.js";
 import type { Change } from "../database/schema.js";
 
-export async function restoreChangeSet(args: {
+/**
+ * Restores the state to the specified change set. 
+ * 
+ * This function is experimental and may have unexpected behavior.
+ * Please provide feedback. Modeling what a user expects as 
+ * "restore" with good defaults is tricky. 
+ * 
+ */
+export async function experimentalRestoreChangeSet(args: {
 	lix: Lix;
 	changeSet: Pick<ChangeSet, "id">;
 	version?: Pick<VersionV2, "id">;
@@ -93,10 +101,8 @@ export async function restoreChangeSet(args: {
 				)
 			)
 			// don't delete history which would screw up the state
-			.where("change.schema_key", "not in", [
-				"lix_change_set_table",
-				"lix_change_set_edge",
-			])
+			// this might not be desired. hence, the function is experimental
+			.where("change.plugin_key", "!=", "lix_own_change_control")
 			.selectAll("change")
 			.distinct()
 			.execute();
