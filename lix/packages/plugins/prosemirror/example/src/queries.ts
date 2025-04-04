@@ -6,8 +6,9 @@ import {
 	ChangeSet,
 	changeSetElementInSymmetricDifference,
 	changeSetHasLabel,
-	createChangeSet,
 	jsonArrayFrom,
+	changeSetIsDescendantOf,
+	changeSetElementIsLeafOf,
 } from "@lix-js/sdk";
 
 /**
@@ -59,7 +60,7 @@ export async function selectCheckpoints(): Promise<
 	// Then select checkpoints that are ancestors of the current version's change set
 	const result = await lix.db
 		.selectFrom("change_set")
-		.where(changeSetHasLabel("checkpoint"))
+		.where(changeSetHasLabel({ name: "checkpoint" }))
 		.where(changeSetIsAncestorOf({ id: activeVersion.change_set_id }))
 		.innerJoin(
 			"change_set_element",
@@ -104,30 +105,6 @@ export async function selectOpenChangeProposals() {
 		])
 		.groupBy("change_proposal.id")
 		.execute();
-}
-
-/**
- * Count changes in a change set
- */
-export async function countChangesInChangeSet(
-	changeSetId: string,
-): Promise<number> {
-	try {
-		const result = await lix.db
-			.selectFrom("change_set_element")
-			.innerJoin("change", "change_set_element.change_id", "change.id")
-			.where("change_set_element.change_set_id", "=", changeSetId)
-			.groupBy(["change.entity_id", "change.schema_key", "change.file_id"])
-			.select((eb) => [
-				eb.fn.count<number>("change_set_element.change_id").as("count"),
-			])
-			.executeTakeFirst();
-
-		return result?.count || 0;
-	} catch (error) {
-		console.error("Error counting changes:", error);
-		return 0;
-	}
 }
 
 /**
@@ -196,95 +173,54 @@ export async function selectWorkingChangeSet(): Promise<
 > {
 	try {
 		const activeVersion = await selectActiveVersion();
-
-		console.log("select working change set");
-
-		// First find the latest checkpoint in the current version's change set graph
-		const latestCheckpoint = await lix.db
-			.selectFrom("change_set")
-			.where(changeSetHasLabel("checkpoint"))
-			.where(changeSetIsAncestorOf({ id: activeVersion.change_set_id }))
-			.selectAll()
-			.executeTakeFirst();
-
-		// Get all changes that are descendants of the latest checkpoint
-		// or all changes if there is no checkpoint
-		const newChanges = await lix.db
-			.selectFrom("change")
-			.innerJoin("file", "change.file_id", "file.id")
-			.where("file.id", "=", prosemirrorFile.id)
-			.selectAll("change")
-			.execute();
-
-		if (newChanges.length === 0) {
+		if (!activeVersion) {
+			console.warn("No active version found.");
 			return null;
 		}
 
-		const labelName = `current:${activeVersion.id}`;
-
-		const label = await lix.db
-			.insertInto("label")
-			.values({
-				name: labelName,
-			})
-			.onConflict((oc) => oc.doUpdateSet({ name: labelName }))
-			.returningAll()
-			.executeTakeFirstOrThrow();
-
-		let currentChangeSet = await lix.db
+		// Find the latest checkpoint in the current version's change set graph
+		const latestCheckpoint = await lix.db
 			.selectFrom("change_set")
-			.innerJoin(
-				"change_set_label",
-				"change_set.id",
-				"change_set_label.change_set_id",
-			)
-			.innerJoin("label", "change_set_label.label_id", "label.id")
-			.where("label.name", "=", labelName)
-			.selectAll("change_set")
+			.where(changeSetHasLabel({ name: "checkpoint" }))
+			.where(changeSetIsAncestorOf({ id: activeVersion.change_set_id }))
+			.select("id")
 			.executeTakeFirst();
 
-		if (!currentChangeSet) {
-			currentChangeSet = await createChangeSet({
-				lix,
-				changes: newChanges,
-				labels: [label],
-			});
-		}
+		const changes = !latestCheckpoint
+			? { change_count: 0 }
+			: await lix.db
+					.selectFrom("change_set_element")
+					.innerJoin(
+						"change_set",
+						"change_set_element.change_set_id",
+						"change_set.id",
+					)
+					.innerJoin("change", "change_set_element.change_id", "change.id")
+					.where("change.file_id", "=", prosemirrorFile.id)
+					.where(changeSetIsDescendantOf(latestCheckpoint))
+					.where("change_set.id", "!=", latestCheckpoint.id)
+					.where(
+						changeSetElementIsLeafOf([{ id: activeVersion.change_set_id }]),
+					)
+					.select((eb) =>
+						eb.fn
+							.count<number>("change_set_element.change_id")
+							.as("change_count"),
+					)
+					.executeTakeFirstOrThrow();
 
-		if (newChanges.length > 0) {
-			await lix.db
-				.insertInto("change_set_element")
-				.values(
-					newChanges.map((c) => ({
-						entity_id: c.entity_id,
-						file_id: c.file_id,
-						schema_key: c.schema_key,
-						change_set_id: currentChangeSet.id,
-						change_id: c.id,
-					})),
-				)
-				.onConflict((oc) => oc.doNothing())
-				.execute();
-		}
-
-		const changes = await lix.db
-			.selectFrom("change_set_element")
-			.innerJoin("change", "change_set_element.change_id", "change.id")
-			.where("change_set_element.change_set_id", "=", currentChangeSet.id)
-			.groupBy(["change.entity_id", "change.schema_key", "change.file_id"])
-			.selectAll("change")
-			.execute();
-
+		// Construct a synthetic ChangeSet object
+		// Using activeVersion.change_set_id as the representative ID for this state
 		return {
-			...currentChangeSet,
-			change_count: changes.length,
-			created_at: changes.toSorted((a, b) =>
-				b.created_at.localeCompare(a.created_at),
-			)[0]?.created_at,
+			id: `working-${activeVersion.id}`,
+			created_at: "2025-04-04T10:19:05.000Z",
+			change_count: changes.change_count,
 		};
 	} catch (e) {
-		console.error(e);
-		throw e;
+		console.error("Error selecting working change set:", e);
+		// Depending on desired behavior, re-throw or return null
+		return null; // Keep UI stable in case of error
+		// throw e;
 	}
 }
 

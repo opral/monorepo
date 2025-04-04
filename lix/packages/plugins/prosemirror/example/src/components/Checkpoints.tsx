@@ -58,8 +58,6 @@ const Checkpoints: React.FC = () => {
 					const previousCheckpointId =
 						index > 0 ? stateCheckpoints[index - 1].id : undefined;
 
-					console.log({ previousCheckpointId });
-
 					return (
 						<div key={checkpoint.id}>
 							<ChangeSet
