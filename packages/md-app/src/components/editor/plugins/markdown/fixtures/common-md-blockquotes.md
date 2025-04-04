@@ -29,7 +29,7 @@ in the source Markdown.
 
 ## tc - blockquote - with link
 
-> This blockquote contains a link.
+> This blockquote contains a [link](https://example.com).
 
 ## tc - blockquote - nested
 

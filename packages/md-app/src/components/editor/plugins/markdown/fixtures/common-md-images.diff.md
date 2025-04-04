@@ -55,33 +55,35 @@ Paragraph with **![formatted inline image](https://example.com/image.jpg)** in b
 
 # Images
 
-![Basic image](https://example.com/image.jpg)
+![Basic image](https://example.com/image.jpg "Basic image")
 
-![Image with alt text](https://example.com/image.jpg "Example Image")
+![Image with alt text](https://example.com/image.jpg "Image with alt text")
 
-![Image with *formatted* alt text](https://example.com/image.jpg)
+![Image with formatted alt text](https://example.com/image.jpg "Image with formatted alt text")
 
-[![Image with link](https://example.com/image.jpg)](https://example.com)
+[![Image with link](https://example.com/image.jpg "Image with link")](https://example.com)
 
-![Reference image][image-ref]
+Paragraph with an&#x20;
 
-![Another reference image][image-ref]
+![inline image](https://example.com/image.jpg "inline image")
 
-![Reference image with different text][different-image-ref]
+&#x20;in the middle.
 
-Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
+Paragraph with&#x20;
 
-Paragraph with *![formatted inline image](https://example.com/image.jpg)* in italics.
+![formatted inline image](https://example.com/image.jpg "formatted inline image")
 
-Paragraph with **![formatted inline image](https://example.com/image.jpg)** in bold.
+&#x20;in italics.
 
-![Image with empty source]()
+Paragraph with&#x20;
+
+![formatted inline image](https://example.com/image.jpg "formatted inline image")
+
+&#x20;in bold.
+
+![Image with empty source](<> "Image with empty source")
 
 ![](https://example.com/image.jpg)
-
-[image-ref]: https://example.com/ref-image.jpg "Reference Example Image"
-
-[different-image-ref]: https://example.com/different-image.jpg "Different Reference Image"
 
 
 </td>
@@ -123,33 +125,35 @@ Paragraph with **![formatted inline image](https://example.com/image.jpg)** in b
 
 <pre><code># Images
 
-![Basic image](https://example.com/image.jpg)
+![Basic image](https://example.com/image.jpg &quot;Basic image&quot;)
 
-![Image with alt text](https://example.com/image.jpg &quot;Example Image&quot;)
+![Image with alt text](https://example.com/image.jpg &quot;Image with alt text&quot;)
 
-![Image with *formatted* alt text](https://example.com/image.jpg)
+![Image with formatted alt text](https://example.com/image.jpg &quot;Image with formatted alt text&quot;)
 
-[![Image with link](https://example.com/image.jpg)](https://example.com)
+[![Image with link](https://example.com/image.jpg &quot;Image with link&quot;)](https://example.com)
 
-![Reference image][image-ref]
+Paragraph with an&amp;#x20;
 
-![Another reference image][image-ref]
+![inline image](https://example.com/image.jpg &quot;inline image&quot;)
 
-![Reference image with different text][different-image-ref]
+&amp;#x20;in the middle.
 
-Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
+Paragraph with&amp;#x20;
 
-Paragraph with *![formatted inline image](https://example.com/image.jpg)* in italics.
+![formatted inline image](https://example.com/image.jpg &quot;formatted inline image&quot;)
 
-Paragraph with **![formatted inline image](https://example.com/image.jpg)** in bold.
+&amp;#x20;in italics.
 
-![Image with empty source]()
+Paragraph with&amp;#x20;
+
+![formatted inline image](https://example.com/image.jpg &quot;formatted inline image&quot;)
+
+&amp;#x20;in bold.
+
+![Image with empty source](&lt;&gt; &quot;Image with empty source&quot;)
 
 ![](https://example.com/image.jpg)
-
-[image-ref]: https://example.com/ref-image.jpg &quot;Reference Example Image&quot;
-
-[different-image-ref]: https://example.com/different-image.jpg &quot;Different Reference Image&quot;
 </code></pre>
 
 </td>

@@ -470,7 +470,7 @@ Literal characters: & < > " '
 </td>
 <td>
 
-**Bold text with \** escaped asterisks*\*
+*Bold text with \* escaped asterisks*\*
 
 </td>
 </tr>
@@ -482,7 +482,7 @@ Literal characters: & < > " '
 </td>
 <td>
 
-<pre><code>**Bold text with \** escaped asterisks*\*</code></pre>
+<pre><code>*Bold text with \* escaped asterisks*\*</code></pre>
 
 </td>
 </tr>

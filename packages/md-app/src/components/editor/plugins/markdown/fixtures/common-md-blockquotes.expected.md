@@ -43,7 +43,9 @@ between perfect fidelity and practical serialization.
 >
 > This is the second paragraph in the blockquote.
 >
-> This is the third paragraph in the blockquote.
+> This is the third paragraph in **the** blockquote. 
+> 
+> This is the fourth paragraph in the blockquote. 
 
 ## tc - blockquote - containing markdown
 

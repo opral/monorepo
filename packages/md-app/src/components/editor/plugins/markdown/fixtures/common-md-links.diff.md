@@ -62,7 +62,7 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 [Basic link](https://example.com)
 
-[Link with title](https://example.com "Example Website")
+[Link with title](https://example.com)
 
 [Link with formatting **bold**](https://example.com)
 
@@ -74,25 +74,11 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 <email@example.com> (Email link)
 
-[Reference link][ref]
-
-[Another reference link][ref]
-
-[Reference link with different text][different-ref]
-
-[Shorthand reference]
-
 Paragraph with a [link](https://example.com) in the middle.
 
-Paragraph with *[formatted link](https://example.com)* in italics.
+Paragraph with [*formatted link*](https://example.com) in italics.
 
-Paragraph with **[formatted link](https://example.com)** in bold.
-
-[ref]: https://example.com "Reference Example"
-
-[different-ref]: https://example.com/different "Different Reference"
-
-[shorthand reference]: https://example.com
+Paragraph with [**formatted link**](https://example.com) in bold.
 
 
 </td>
@@ -141,7 +127,7 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 [Basic link](https://example.com)
 
-[Link with title](https://example.com &quot;Example Website&quot;)
+[Link with title](https://example.com)
 
 [Link with formatting **bold**](https://example.com)
 
@@ -153,25 +139,11 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 &lt;email@example.com&gt; (Email link)
 
-[Reference link][ref]
-
-[Another reference link][ref]
-
-[Reference link with different text][different-ref]
-
-[Shorthand reference]
-
 Paragraph with a [link](https://example.com) in the middle.
 
-Paragraph with *[formatted link](https://example.com)* in italics.
+Paragraph with [*formatted link*](https://example.com) in italics.
 
-Paragraph with **[formatted link](https://example.com)** in bold.
-
-[ref]: https://example.com &quot;Reference Example&quot;
-
-[different-ref]: https://example.com/different &quot;Different Reference&quot;
-
-[shorthand reference]: https://example.com
+Paragraph with [**formatted link**](https://example.com) in bold.
 </code></pre>
 
 </td>
