@@ -254,6 +254,3 @@ test("it restores the state to a specific change set", async () => {
 
 	expect(actualJsonState).toEqual(expectedJsonStateCs0);
 });
-
-test("restoring a change set that has the same state should do nothing", async () => {});
-
