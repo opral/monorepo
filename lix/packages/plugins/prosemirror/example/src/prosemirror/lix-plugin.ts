@@ -38,7 +38,7 @@ export function lixProsemirror(options: LixPluginOptions) {
 	);
 
 	lix.sqlite.exec(`
-    CREATE TRIGGER IF NOT EXISTS lix_prosemirror_update
+    CREATE TEMP TRIGGER IF NOT EXISTS lix_prosemirror_update
     AFTER UPDATE ON file
     WHEN NEW.id = '${options.fileId}'
     BEGIN
