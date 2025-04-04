@@ -1,4 +1,4 @@
-"use client";
+// From https://github.com/DevanceJ/echo/blob/main/components/ui/multisidebar.tsx
 
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
