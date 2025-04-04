@@ -29,9 +29,9 @@ function PageContent() {
 	};
 
 	return (
-		<div className="flex items-stretch w-full h-full">
+		<div className="flex items-stretch w-full h-screen">
 			{/* Left sidebar - directly controlled with CSS */}
-			<div className={`h-screen overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-r flex flex-col ${leftSidebar.open ? 'w-[14rem]' : 'w-0'}`}>
+			<div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-r flex flex-col ${leftSidebar.open ? 'w-[14rem]' : 'w-0'}`}>
 				<LixSidebar />
 			</div>
 
@@ -73,7 +73,7 @@ function PageContent() {
 			</div>
 
 			{/* Right sidebar */}
-			<div className={`h-screen overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[18rem]' : 'w-0'}`}>
+			<div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[18rem]' : 'w-0'}`}>
 				<ChangeControlSidebar />
 			</div>
 		</div>
