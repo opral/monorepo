@@ -1,5 +1,19 @@
 # @inlang/paraglide-js
 
+## 2.0.11
+
+### Patch Changes
+
+- de0439f: Add domain property to cookie options.
+
+  ```diff
+  paraglideVitePlugin({
+    project: './project.inlang',
+    outdir: "./src/paraglide",
+  + cookieDomain: 'example.com'
+  }),
+  ```
+
 ## 2.0.10
 
 ### Patch Changes
