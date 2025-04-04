@@ -1,10 +1,10 @@
 import { applyChanges, ChangeSet, fileQueueSettled } from "@lix-js/sdk";
 import { createCheckpointV2 } from "./createCheckpoint";
-import { selectCurrentChangeSet } from "../queries";
+import { selectWorkingChangeSet } from "../queries";
 import { lix } from "../state";
 
 export async function mergeChangeSet(changeSetId: ChangeSet["id"]) {
-	const currentSet = await selectCurrentChangeSet();
+	const currentSet = await selectWorkingChangeSet();
 
 	if ((currentSet?.change_count ?? 0) > 0) {
 		await createCheckpointV2("Changes before accepting");

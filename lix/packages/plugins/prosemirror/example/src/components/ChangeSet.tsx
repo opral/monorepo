@@ -2,14 +2,14 @@ import { useRef, forwardRef, useImperativeHandle, useEffect } from "react";
 import { Discussion, DiscussionHandle } from "./Discussion";
 import { toRelativeTime } from "../utilities/timeUtils";
 import { EraserIcon, Eye, History, Clock, ChevronRight } from "lucide-react";
-import type { ChangeSet as ChangeSetType } from "@lix-js/sdk";
+import { restoreChangeSet, type ChangeSet as ChangeSetType } from "@lix-js/sdk";
 import { useQuery } from "../hooks/useQuery";
 import { selectDiscussion } from "../queries";
 import { useKeyValue } from "../hooks/useKeyValue";
-import { restoreChangeSet } from "../utilities/restoreChangeSet";
 import { undoChangeSet } from "../utilities/undoChangeSet";
 import { selectActiveAccount } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
+import { lix } from "../state";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -165,7 +165,14 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 									<div className="tooltip" data-tip="Restore">
 										<button
 											className="btn btn-sm btn-ghost"
-											onClick={() => restoreChangeSet(changeSet.id)}
+											onClick={async () => {
+												try {
+													console.log("hello");
+													await restoreChangeSet({ lix, changeSet });
+												} catch (error) {
+													console.error(error);
+												}
+											}}
 											title="Restore to this change set"
 										>
 											<History size={16} />

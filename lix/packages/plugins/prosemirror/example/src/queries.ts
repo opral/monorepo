@@ -1,10 +1,11 @@
 import { prosemirrorFile, lix } from "./state";
 import {
-	changeHasLabel,
 	changeIsLeaf,
 	changeIsLeafInVersion,
+	changeSetIsAncestorOf,
 	ChangeSet,
 	changeSetElementInSymmetricDifference,
+	changeSetHasLabel,
 	createChangeSet,
 	jsonArrayFrom,
 } from "@lix-js/sdk";
@@ -52,22 +53,21 @@ export async function selectChanges() {
 export async function selectCheckpoints(): Promise<
 	Array<ChangeSet & { change_count: number; created_at: string }>
 > {
+	// First get the current version's change set
+	const activeVersion = await selectActiveVersion();
+
+	// Then select checkpoints that are ancestors of the current version's change set
 	const result = await lix.db
 		.selectFrom("change_set")
-		.innerJoin(
-			"change_set_label",
-			"change_set.id",
-			"change_set_label.change_set_id",
-		)
-		.innerJoin("label", "change_set_label.label_id", "label.id")
+		.where(changeSetHasLabel("checkpoint"))
+		.where(changeSetIsAncestorOf({ id: activeVersion.change_set_id }))
 		.innerJoin(
 			"change_set_element",
 			"change_set.id",
 			"change_set_element.change_set_id",
 		)
-		.innerJoin("change", "change_set.id", "change.entity_id")
+		.innerJoin("change", "change_set_element.change_id", "change.id")
 		.where("change.schema_key", "=", "lix_change_set_table")
-		.where("label.name", "=", "checkpoint")
 		.selectAll("change_set")
 		.select("change.created_at")
 		.select((eb) => [
@@ -140,11 +140,11 @@ export async function selectVersions() {
 /**
  * Selects the current version
  */
-export async function selectCurrentVersion() {
+export async function selectActiveVersion() {
 	return lix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "current_version.id", "version.id")
-		.selectAll()
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 }
 
@@ -191,14 +191,36 @@ export async function selectDiscussion(args: { changeSetId: ChangeSet["id"] }) {
  * Special change set which describes the current changes
  * that are not yet checkpointed.
  */
-export async function selectCurrentChangeSet(): Promise<
+export async function selectWorkingChangeSet(): Promise<
 	(ChangeSet & { change_count: number; created_at: string }) | null
 > {
 	try {
-		console.log("current change set");
-		const currentVersion = await selectCurrentVersion();
+		const activeVersion = await selectActiveVersion();
 
-		const labelName = `current:${currentVersion.id}`;
+		console.log("select working change set");
+
+		// First find the latest checkpoint in the current version's change set graph
+		const latestCheckpoint = await lix.db
+			.selectFrom("change_set")
+			.where(changeSetHasLabel("checkpoint"))
+			.where(changeSetIsAncestorOf({ id: activeVersion.change_set_id }))
+			.selectAll()
+			.executeTakeFirst();
+
+		// Get all changes that are descendants of the latest checkpoint
+		// or all changes if there is no checkpoint
+		const newChanges = await lix.db
+			.selectFrom("change")
+			.innerJoin("file", "change.file_id", "file.id")
+			.where("file.id", "=", prosemirrorFile.id)
+			.selectAll("change")
+			.execute();
+
+		if (newChanges.length === 0) {
+			return null;
+		}
+
+		const labelName = `current:${activeVersion.id}`;
 
 		const label = await lix.db
 			.insertInto("label")
@@ -221,29 +243,19 @@ export async function selectCurrentChangeSet(): Promise<
 			.selectAll("change_set")
 			.executeTakeFirst();
 
-		let looseChanges = await lix.db
-			.selectFrom("change")
-			.where(changeIsLeafInVersion(currentVersion))
-			.innerJoin("file", "change.file_id", "file.id")
-			.where("file.id", "=", prosemirrorFile.id)
-			.where((eb) => eb.not(changeHasLabel("checkpoint")))
-			.where((eb) => eb.not(changeHasLabel(labelName)))
-			.selectAll("change")
-			.execute();
-
 		if (!currentChangeSet) {
 			currentChangeSet = await createChangeSet({
 				lix,
-				changes: looseChanges,
+				changes: newChanges,
 				labels: [label],
 			});
 		}
 
-		if (looseChanges.length > 0) {
+		if (newChanges.length > 0) {
 			await lix.db
 				.insertInto("change_set_element")
 				.values(
-					looseChanges.map((c) => ({
+					newChanges.map((c) => ({
 						entity_id: c.entity_id,
 						file_id: c.file_id,
 						schema_key: c.schema_key,
@@ -285,7 +297,7 @@ export async function selectProposedChangeSet(): Promise<
 	(ChangeSet & { change_count: number }) | null
 > {
 	const mainVersion = await selectMainVersion();
-	const currentVersion = await selectCurrentVersion();
+	const currentVersion = await selectActiveVersion();
 
 	if (currentVersion.id === mainVersion.id) {
 		return null;
@@ -422,5 +434,3 @@ export async function selectProposedChangeSet(): Promise<
 		change_count: proposedChanges.length,
 	};
 }
-
-

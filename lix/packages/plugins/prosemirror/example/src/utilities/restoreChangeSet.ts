@@ -1,7 +1,7 @@
 import { lix } from "../state";
 import type { ChangeSet } from "@lix-js/sdk";
 import { applyChanges, changeInVersion, fileQueueSettled } from "@lix-js/sdk";
-import { selectCurrentVersion } from "../queries";
+import { selectActiveVersion } from "../queries";
 
 /**
  * Restores the document to the state it was in at the given change set
@@ -13,7 +13,7 @@ export async function restoreChangeSet(
 ): Promise<void> {
 	try {
 		// Get the current version
-		const currentVersion = await selectCurrentVersion();
+		const currentVersion = await selectActiveVersion();
 		if (!currentVersion) {
 			throw new Error("No current version found");
 		}

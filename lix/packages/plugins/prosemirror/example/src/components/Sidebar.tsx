@@ -2,13 +2,13 @@ import Checkpoints from "./Checkpoints";
 import Proposals from "./Proposals";
 import clsx from "clsx";
 import { useQuery } from "../hooks/useQuery";
-import { selectCurrentVersion, selectMainVersion } from "../queries";
+import { selectActiveVersion, selectMainVersion } from "../queries";
 import NewProposal from "./NewProposal";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { useEffect } from "react";
 
 export default function Sidebar() {
-	const [currentVersion] = useQuery(selectCurrentVersion);
+	const [currentVersion] = useQuery(selectActiveVersion);
 	const [mainVersion] = useQuery(selectMainVersion);
 
 	const isMainVersion = currentVersion?.id === mainVersion?.id;

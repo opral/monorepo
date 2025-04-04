@@ -1,5 +1,5 @@
 import { useQuery } from "../hooks/useQuery";
-import { selectCheckpoints, selectCurrentChangeSet } from "../queries";
+import { selectCheckpoints, selectWorkingChangeSet } from "../queries";
 import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
 import { createCheckpointV2 } from "../utilities/createCheckpoint";
 import { useRef } from "react";
@@ -7,7 +7,7 @@ import { useKeyValue } from "../hooks/useKeyValue";
 
 const Checkpoints: React.FC = () => {
 	const [stateCheckpoints] = useQuery(selectCheckpoints);
-	const [currentChangeSet] = useQuery(selectCurrentChangeSet);
+	const [currentChangeSet] = useQuery(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
 	);
