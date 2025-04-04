@@ -41,7 +41,7 @@ test("should only return change sets with the given label", async () => {
 	// Query change sets with the label
 	const changeSets = await lix.db
 		.selectFrom("change_set")
-		.where(changeSetHasLabel("mocked"))
+		.where(changeSetHasLabel({ name: "mocked" }))
 		.selectAll()
 		.execute();
 
