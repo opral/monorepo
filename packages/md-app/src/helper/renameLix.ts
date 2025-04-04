@@ -1,19 +1,9 @@
-import { Lix } from "@lix-js/sdk";
+import { Lix, openLixInMemory } from "@lix-js/sdk";
 import { saveLixToOpfs } from "./saveLixToOpfs";
+import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
 // Helper function to ensure a lix has a name
 export async function ensureLixName({ lix }: { lix: Lix }): Promise<string> {
-	// Try to get existing lix name
-	const nameRecord = await lix.db
-		.selectFrom("key_value")
-		.where("key", "=", "lix_name")
-		.select("value")
-		.executeTakeFirst();
-
-	if (nameRecord?.value) {
-		return nameRecord.value;
-	}
-
 	// Use "Untitled" as default name
 	const defaultName = "Untitled";
 	await saveLixName({ lix, newName: defaultName });
@@ -28,14 +18,31 @@ export async function saveLixName({
 	lix: Lix;
 	newName: string;
 }): Promise<void> {
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_name",
-			value: newName.trim(),
-		})
-		.onConflict((oc) => oc.doUpdateSet({ value: newName.trim() }))
-		.execute();
+	// Get the current lix_id to identify the file (we still need this for routing)
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_id")
+		.select("value")
+		.executeTakeFirstOrThrow();
 
-	await saveLixToOpfs({ lix });
+	// Clean name
+	const trimmedName = newName.trim();
+	if (!trimmedName) {
+		console.warn("Empty name provided, using 'Untitled' instead");
+		newName = "Untitled";
+	}
+
+	try {
+		// The saveLixToOpfs function now handles finding existing files and cleanup
+		await saveLixToOpfs({ lix, customFileName: trimmedName });
+		
+		// Update the URL to include the lix ID for routing
+		const url = new URL(window.location.href);
+		url.searchParams.set("l", lixId.value);
+		window.history.replaceState({}, "", url.toString());
+		
+		console.log(`Successfully renamed lix to: ${trimmedName}`);
+	} catch (error) {
+		console.error("Error during file renaming:", error);
+	}
 }

@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { availableLixesAtom, filesAtom, lixAtom, withPollingAtom } from "@/state"
+import { availableLixesAtom, currentLixNameAtom, filesAtom, lixAtom, withPollingAtom } from "@/state"
 import { activeFileAtom } from "@/state-active-file"
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
 import { createNewLixFileInOpfs } from "@/helper/newLix"
@@ -71,6 +71,7 @@ export function LixSidebar() {
   const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] = React.useState(false)
   const [inlineEditingFile, setInlineEditingFile] = React.useState<{ id: string, name: string } | null>(null)
   const [isRenamingLix, setIsRenamingLix] = React.useState(false)
+  const [currentLixName] = useAtom(currentLixNameAtom)
   const [lixName, setLixName] = React.useState('Untitled')
   const [previousLixName, setPreviousLixName] = React.useState('')
   const [availableLixes] = useAtom(availableLixesAtom)
@@ -137,14 +138,29 @@ export function LixSidebar() {
     }
 
     try {
-      // Use the imported saveLixName helper function
+      console.log(`Renaming lix to: ${lixName}`)
+      
+      // Use the imported saveLixName helper function which handles the file renaming
+      // This will also update the URL
       await saveLixName({
         lix,
         newName: lixName
       })
 
+      // Refresh everything to update the UI with the new file name
       setPolling(Date.now())
       setIsRenamingLix(false)
+      
+      // The currentLixId should still be the lix_id, not the new name
+      // The saveLixName function will handle updating the URL params correctly
+      const lixId = await lix.db
+        .selectFrom("key_value")
+        .where("key", "=", "lix_id")
+        .select("value")
+        .executeTakeFirstOrThrow();
+        
+      // Keep the ID the same, just update the display name
+      setCurrentLixId(lixId.value);
     } catch (error) {
       console.error("Failed to save lix name:", error)
       setIsRenamingLix(false)
@@ -274,23 +290,25 @@ export function LixSidebar() {
     if (!lix) return
 
     try {
-      const lixId = await lix.db
+      // Use the current display name (from file name) or fall back to the ID
+      const displayName = currentLixName || await lix.db
         .selectFrom("key_value")
         .where("key", "=", "lix_id")
         .select("value")
         .executeTakeFirstOrThrow()
+        .then(result => result.value)
 
       const blob = await toBlob({ lix })
       const a = document.createElement("a")
       a.href = URL.createObjectURL(blob)
-      a.download = `${lixId.value}.lix`
+      a.download = `${displayName}.lix`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
     } catch (error) {
       console.error("Failed to export Lix file:", error)
     }
-  }, [lix])
+  }, [lix, currentLixName])
 
   const handleExportFile = React.useCallback(async (fileId: string) => {
     if (!lix) return
@@ -388,14 +406,18 @@ export function LixSidebar() {
     }
   }, [navigate, setPolling])
 
-  // Filter only markdown files (assuming they end with .md)
-  // Load lix name and available lixes
   // Track current lix ID
   const [currentLixId, setCurrentLixId] = React.useState<string>('')
 
   const startRenamingLix = React.useCallback(() => {
-    setPreviousLixName(lixName)
-    setIsRenamingLix(true)
+    // Use the current display name from our atom
+    const displayName = currentLixName || lixName;
+    setLixName(displayName);
+    
+    // Set the current name as previous name for potential cancel
+    setPreviousLixName(displayName);
+    setIsRenamingLix(true);
+    
     // Focus on the input field with a slight delay to ensure the DOM has updated
     setTimeout(() => {
       if (lixInputRef.current) {
@@ -403,7 +425,7 @@ export function LixSidebar() {
         lixInputRef.current.select() // Select all text for easy replacement
       }
     }, 50)
-  }, [lixName])
+  }, [currentLixName, lixName])
 
   const cancelRenameLix = React.useCallback(() => {
     setLixName(previousLixName)
@@ -422,19 +444,10 @@ export function LixSidebar() {
 
           // Store current lix ID for the select component
           setCurrentLixId(lixId.value);
-
-          // Check if there's a lix name stored
-          const nameRecord = await lix.db
-            .selectFrom("key_value")
-            .where("key", "=", "workspace_name")
-            .select("value")
-            .executeTakeFirst();
-
-          if (nameRecord) {
-            setLixName(nameRecord.value);
-          } else {
-            // Use "Untitled" as fallback name
-            setLixName("Untitled");
+          
+          // Use the name from our currentLixNameAtom
+          if (currentLixName) {
+            setLixName(currentLixName);
           }
         } catch (error) {
           console.error("Failed to load lix data:", error);
@@ -443,7 +456,7 @@ export function LixSidebar() {
 
       loadLixData();
     }
-  }, [lix]);
+  }, [lix, currentLixName]);
 
   const mdFiles = files.filter(file => file.path.endsWith('.md'))
 
@@ -498,7 +511,7 @@ export function LixSidebar() {
               >
                 <SelectValue placeholder="Select Workspace">
                   <div className="flex items-center justify-between w-full">
-                    <span className="truncate mr-1">{lixName}</span>
+                    <span className="truncate mr-1">{currentLixName || lixName}</span>
                   </div>
                 </SelectValue>
               </SelectTrigger>

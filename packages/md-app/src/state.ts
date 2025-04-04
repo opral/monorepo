@@ -56,10 +56,19 @@ export const lixAtom = atom(async (get) => {
 	if (lixIdSearchParam) {
 		// try reading the lix file from OPFS
 		try {
-			const fileHandle = await rootHandle.getFileHandle(
-				`${lixIdSearchParam}.lix`
-			);
-			const file = await fileHandle.getFile();
+			// Import the helper function dynamically to avoid circular dependencies
+			const { findLixFileInOpfs } = await import("./helper/findLixInOpfs");
+			
+			// Find the Lix file with the specified ID
+			const lixFile = await findLixFileInOpfs(lixIdSearchParam, [txtPlugin]);
+			
+			if (!lixFile) {
+				throw new Error("Lix file not found with ID: " + lixIdSearchParam);
+			}
+			
+			console.log(`Found lix with ID ${lixIdSearchParam} in file: ${lixFile.fullName}`);
+			
+			const file = await lixFile.handle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} catch {
 			// Try server if lix doesn't exist in OPFS
@@ -294,49 +303,58 @@ export const currentLixNameAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return "Untitled";
-
-	const name = await lix.db
+	
+	// Get the current Lix ID for finding its file
+	const lixId = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "lix_name")
+		.where("key", "=", "lix_id")
 		.select("value")
-		.executeTakeFirst()
-		.then((row) => row?.value);
-
-	return name || "Untitled";
+		.executeTakeFirstOrThrow();
+	
+	// Find the actual filename in OPFS using our helper function
+	try {
+		// Import the helper function dynamically to avoid circular dependencies
+		const { findLixFileInOpfs } = await import("./helper/findLixInOpfs");
+		
+		// Find the Lix file with the specified ID
+		const lixFile = await findLixFileInOpfs(lixId.value);
+		
+		// If found, return its name, otherwise fall back to the ID
+		return lixFile ? lixFile.name : lixId.value || "Untitled";
+	} catch (error) {
+		console.error("Error getting current Lix name:", error);
+		return lixId.value || "Untitled";
+	}
 });
 
 export const availableLixesAtom = atom(async (get) => {
 	get(withPollingAtom);
-	const root = await getOriginPrivateDirectory();
-	const lixes = [];
-
-	for await (const entry of (root as any).values()) {
-		if (entry.kind === "file" && entry.name.endsWith(".lix")) {
-			const wsId = entry.name.replace(/\.lix$/, "");
-			try {
-				const buffer = await entry
-					.getFile()
-					.then((f: { arrayBuffer(): Promise<ArrayBuffer> }) =>
-						f.arrayBuffer()
-					);
-				const lix = await openLixInMemory({ blob: new Blob([buffer]) });
-				const name = await lix.db
-					.selectFrom("key_value")
-					.where("key", "=", "lix_name")
-					.select("value")
-					.executeTakeFirst()
-					.then((row) => row?.value || "Untitled");
-
-				lixes.push({ id: wsId, name });
-			} catch (error) {
-				console.error(`Failed to load lix:`, error);
-				lixes.push({
-					id: wsId,
-					name: "Untitled",
+	
+	try {
+		// Import the helper function dynamically to avoid circular dependencies
+		const { findLixFilesInOpfs } = await import("./helper/findLixInOpfs");
+		
+		// Get all Lix files in OPFS
+		const lixFiles = await findLixFilesInOpfs();
+		
+		// Convert to the format expected by consumers of this atom
+		// We'll use a map to ensure no duplicate IDs
+		const lixMap = new Map();
+		
+		for (const file of lixFiles) {
+			// If we've already seen this ID, skip it (shouldn't happen with our cleanup, but just in case)
+			if (!lixMap.has(file.id)) {
+				lixMap.set(file.id, {
+					id: file.id,
+					name: file.name
 				});
 			}
 		}
+		
+		// Convert the map values to an array
+		return Array.from(lixMap.values());
+	} catch (error) {
+		console.error("Failed to load available lixes:", error);
+		return [];
 	}
-
-	return lixes;
 });
