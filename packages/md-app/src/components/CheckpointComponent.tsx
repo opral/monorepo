@@ -71,42 +71,50 @@ export const CheckpointComponent = (props: {
     >
       <ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
       <div className="flex-1">
-        <div className="h-12 flex items-center w-full">
-          <p className="flex-1 truncate text-ellipsis overflow-hidden">
-            {props.checkpointChangeSet.author_name}:{" "}
-            <span className="text-slate-500">
+        <div className="flex flex-col w-full mt-1.5">
+          <div className="h-8 flex items-center justify-between w-full">
+            <div className="flex items-center gap-2 min-w-0 flex-shrink-1">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Avatar className="w-6 h-6 flex-shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                      <AvatarImage src="#" alt="#" />
+                      <AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7] text-xs">
+                        {props.checkpointChangeSet.author_name
+                          ? props.checkpointChangeSet.author_name
+                            .substring(0, 2)
+                            .toUpperCase()
+                          : "XX"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </TooltipTrigger>
+                  <TooltipContent>{props.checkpointChangeSet.author_name}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <span className="font-medium text-sm truncate">
+                {props.checkpointChangeSet.author_name}
+              </span>
+            </div>
+
+            <div className="flex items-center flex-shrink-0">
+              <span className="text-xs text-slate-500 mr-1">
+                {timeAgo(props.checkpointChangeSet.checkpoint_created_at!)}
+              </span>
+              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <ChevronDown
+                  className={clsx(
+                    isExpanded ? "rotate-180" : "rotate-0",
+                    "transition h-4 w-4"
+                  )}
+                />
+              </Button>
+            </div>
+          </div>
+
+          <div className="pb-2">
+            <p className="text-sm text-slate-500 truncate text-ellipsis overflow-hidden pr-2">
               {props.checkpointChangeSet.first_comment_content || "Create checkpoint"}
-            </span>
-          </p>
-          <div className="flex gap-3 items-center">
-            <span className="text-sm font-medium text-slate-500 block pr-2">
-              {timeAgo(props.checkpointChangeSet.checkpoint_created_at!)}
-            </span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Avatar className="w-8 h-8 cursor-pointer hover:opacity-90 transition-opacity">
-                    <AvatarImage src="#" alt="#" />
-                    <AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7]">
-                      {props.checkpointChangeSet.author_name
-                        ? props.checkpointChangeSet.author_name
-                          .substring(0, 2)
-                          .toUpperCase()
-                        : "XX"}
-                    </AvatarFallback>
-                  </Avatar>
-                </TooltipTrigger>
-                <TooltipContent>{props.checkpointChangeSet.author_name}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <Button variant="ghost" size="icon">
-              <ChevronDown
-                className={clsx(
-                  isExpanded ? "rotate-180" : "rotate-0",
-                  "transition"
-                )}
-              />
-            </Button>
+            </p>
           </div>
         </div>
         {isExpanded && (
@@ -117,6 +125,7 @@ export const CheckpointComponent = (props: {
                 <ChangeDiffComponent
                   key={pluginKey}
                   diffs={groupedChanges[pluginKey]}
+                  contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
                 // debug={true}
                 />
               ))}
