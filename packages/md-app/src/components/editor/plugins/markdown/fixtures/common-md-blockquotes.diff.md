@@ -2,31 +2,25 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/9 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/9 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 9/9 (100%)
+- 🟢 Perfect roundtrip (input = output): 6/9 (67%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/9 (11%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 2/9 (22%)
 
-**Overall Status**: ❌ 9 failing tests
+**Overall Status**: ❌ 2 failing tests
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - simple blockquote.</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - simple blockquote.</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 > This is a simple blockquote.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -36,18 +30,13 @@
 <pre><code>&gt; This is a simple blockquote.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - multi line blockquote.</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - multi line blockquote.</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -59,6 +48,13 @@
 <td>
 
 > This blockquote
+spans multiple lines
+in the source Markdown.
+
+</td>
+<td>
+
+> This blockquote
 > spans multiple lines
 > in the source Markdown.
 
@@ -66,17 +62,19 @@
 <td>
 
 > This blockquote
-spans multiple lines
-in the source Markdown.
-
-</td>
-<td>
-
-
+> spans multiple lines
+> in the source Markdown.
 
 </td>
 </tr>
 <tr>
+<td>
+
+<pre><code>&gt; This blockquote
+spans multiple lines
+in the source Markdown.</code></pre>
+
+</td>
 <td>
 
 <pre><code>&gt; This blockquote
@@ -87,13 +85,8 @@ in the source Markdown.
 <td>
 
 <pre><code>&gt; This blockquote
-spans multiple lines
-in the source Markdown.</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
+&gt; spans multiple lines
+&gt; in the source Markdown.</code></pre>
 
 </td>
 </tr>
@@ -106,16 +99,10 @@ in the source Markdown.</code></pre>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 50%">Input</th>
+<th style="width: 50%">Actual Output</th>
 </tr>
 <tr>
-<td>
-
-> This blockquote contains **formatted** text with *emphasis* and `code`.
-
-</td>
 <td>
 
 > This blockquote contains **formatted** text with _emphasis_ and `code`.
@@ -123,16 +110,23 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-
+> This blockquote contains 
+>
+> **formatted**
+>
+>  text with 
+>
+> *emphasis*
+>
+>  and 
+>
+> `code`
+>
+> .
 
 </td>
 </tr>
 <tr>
-<td>
-
-<pre><code>&gt; This blockquote contains **formatted** text with *emphasis* and `code`.</code></pre>
-
-</td>
 <td>
 
 <pre><code>&gt; This blockquote contains **formatted** text with _emphasis_ and `code`.</code></pre>
@@ -140,7 +134,19 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; This blockquote contains 
+&gt;
+&gt; **formatted**
+&gt;
+&gt;  text with 
+&gt;
+&gt; *emphasis*
+&gt;
+&gt;  and 
+&gt;
+&gt; `code`
+&gt;
+&gt; .</code></pre>
 
 </td>
 </tr>
@@ -148,35 +154,24 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - with link</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - with link</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
-> This blockquote contains a [link](https://example.com).
-
-</td>
-<td>
-
-
+> This blockquote contains a link.
 
 </td>
 </tr>
 <tr>
 <td>
 
-<pre><code>&gt; This blockquote contains a [link](https://example.com).</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
+<pre><code>&gt; This blockquote contains a link.</code></pre>
 
 </td>
 </tr>
@@ -184,13 +179,12 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - nested</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - nested</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -200,11 +194,6 @@ in the source Markdown.</code></pre>
 > > > This is a deeply nested blockquote.
 
 </td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
@@ -212,11 +201,6 @@ in the source Markdown.</code></pre>
 <pre><code>&gt; Nested blockquotes:
 &gt; &gt; This is a nested blockquote.
 &gt; &gt; &gt; This is a deeply nested blockquote.</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -229,10 +213,19 @@ in the source Markdown.</code></pre>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
+<td>
+
+> Blockquote with multiple paragraphs:  
+> This is the second paragraph in the blockquote.  
+> This is the third paragraph in **the** blockquote.  
+> This is the fourth paragraph in the blockquote.
+
+</td>
 <td>
 
 > Blockquote with multiple paragraphs:
@@ -244,11 +237,23 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-
+> Blockquote with multiple paragraphs:This is the second paragraph in the blockquote.This is the third paragraph in 
+>
+> **the**
+>
+>  blockquote.This is the fourth paragraph in the blockquote.
 
 </td>
 </tr>
 <tr>
+<td>
+
+<pre><code>&gt; Blockquote with multiple paragraphs:  
+&gt; This is the second paragraph in the blockquote.  
+&gt; This is the third paragraph in **the** blockquote.  
+&gt; This is the fourth paragraph in the blockquote.</code></pre>
+
+</td>
 <td>
 
 <pre><code>&gt; Blockquote with multiple paragraphs:
@@ -260,7 +265,11 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; Blockquote with multiple paragraphs:This is the second paragraph in the blockquote.This is the third paragraph in 
+&gt;
+&gt; **the**
+&gt;
+&gt;  blockquote.This is the fourth paragraph in the blockquote.</code></pre>
 
 </td>
 </tr>
@@ -268,13 +277,12 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - containing markdown</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - containing markdown</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -289,11 +297,6 @@ in the source Markdown.</code></pre>
 > ```
 > Code block in blockquote
 > ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -312,23 +315,17 @@ in the source Markdown.</code></pre>
 &gt; ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - followed by text</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - followed by text</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -336,11 +333,6 @@ in the source Markdown.</code></pre>
 > Blockquote followed by text.
 
 Regular paragraph after a blockquote.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -352,23 +344,17 @@ Regular paragraph after a blockquote.
 Regular paragraph after a blockquote.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - character inline - not detef</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - character inline - not detef</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -380,11 +366,6 @@ Paragraph with a line break and then a blockquote:
 > This blockquote comes after a line break in a paragraph.
 
 </td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
@@ -394,11 +375,6 @@ Paragraph with a line break and then a blockquote:
 Paragraph with a line break and then a blockquote:
 
 &gt; This blockquote comes after a line break in a paragraph.</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>

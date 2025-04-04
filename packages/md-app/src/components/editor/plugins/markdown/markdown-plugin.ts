@@ -23,50 +23,82 @@ import { MarkdownPlugin } from "../markdown-plate-fork-new";
   import { SuggestionPlugin } from '@udecode/plate-suggestion/react';
   import remarkGfm from 'remark-gfm';
   import remarkMdx from 'remark-mdx';
-  export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
+import { sanatizeUnknownNodeStructuresInTree } from "./sanitizeUnsupported";
+import { visit } from "unist-util-visit";
+
+const sanitizeHtml = function () {
+	return (tree: any, file: any) => {
+		visit(tree, (node, index, parent) => {
+			// don't sanitize <br> tags: remark never concats them and conversion to \n happens on ui layer
+			if (node.type === "html" && node.value !== "<br>") {
+				if (parent.type === "root") {
+					node.type = "sanitized_block_html";
+				} else {
+					node.type = "sanitized_inline_html";
+				}
+			}
+		});
+	};
+};
+
+export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 	options: {
-	  disallowedNodes: [SuggestionPlugin.key],
-	  remarkPlugins: [remarkGfm],
-	  nodes: {
-		sanitized_block_html: {
-			// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
-			serialize: (children, node) => {
-				return  {
-					type: "html",
-					value: node.value 
-				}
+		disallowedNodes: [SuggestionPlugin.key],
+		remarkPlugins: [
+			// remarkGfm,
+			sanatizeUnknownNodeStructuresInTree,
+			sanitizeHtml,
+		],
+		nodes: {
+			sanitized_block_html: {
+				serialize: (node) => {
+					return {
+						type: "html",
+						value: node.value,
+					};
+				},
+				deserialize(mdastNode) {
+					return mdastNode;
+				},
+			},
+			sanitized_inline_html: {
+				serialize: (node) => {
+					return {
+						type: "html",
+						value: node.value,
+					};
+				},
+				deserialize(mdastNode) {
+					return mdastNode;
+				},
+			},
+			sanitized_block: {
+				// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
+				serialize: (node, options) => {
+					return {
+						type: "html",
+						value: node.value,
+					};
+				},
+				deserialize(mdastNode, deco, options) {
+					return mdastNode;
+				},
+			},
+			frontmatter: {
+				// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
+				serialize: (node, options) => {
+					return {
+						type: "html",
+						value: node.value,
+					};
+				},
+				deserialize(mdastNode, deco, options) {
+					return mdastNode;
+				},
 			},
 		},
-		sanitized_inline_html: {
-			// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
-			serialize: (children, node) => {
-				return  {
-					type: "html",
-					value: node.value 
-				}
-			},
-		},
-		sanitized_block: {
-			// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
-			serialize: (children, node) => {
-				return  {
-					type: "html",
-					value: node.value 
-				}
-			},
-		},
-		frontmatter: {
-			// @ts-expect-error --frontmatter not part of MdNodeTypes - TODO check custom type
-			serialize: (children, node) => {
-				return  {
-					type: "html",
-					value: node.value 
-				}
-			},
-		},
-	  }
 	},
-  });
+});
 
 /*export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 	const originalSerializeMd = editor.getApi(MarkdownPlugin).markdown.serialize;

@@ -2,22 +2,20 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/8 (0%)
+- 🟢 Perfect roundtrip (input = output): 5/8 (63%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 0/8 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 8/8 (100%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 3/8 (38%)
 
-**Overall Status**: ❌ 8 failing tests
+**Overall Status**: ❌ 3 failing tests
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - basic table</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - basic table</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -26,19 +24,6 @@
 | -------- | -------- | -------- |
 | Cell 1   | Cell 2   | Cell 3   |
 | Cell 4   | Cell 5   | Cell 6   |
-
-</td>
-<td>
-
-| Header 1| Header 2| Header 3 |
-| --- | --- | --- |
-| Cell 1| Cell 2| Cell 3 |
-| Cell 4| Cell 5| Cell 6 |
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -51,32 +36,17 @@
 | Cell 4   | Cell 5   | Cell 6   |</code></pre>
 
 </td>
-<td>
-
-<pre><code>| Header 1| Header 2| Header 3 |
-| --- | --- | --- |
-| Cell 1| Cell 2| Cell 3 |
-| Cell 4| Cell 5| Cell 6 |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with alignment</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with alignment</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -85,19 +55,6 @@
 | :----------- | :------------: | ------------: |
 | Left         |     Center     |         Right |
 | Left         |     Center     |         Right |
-
-</td>
-<td>
-
-| Left-aligned | Center-aligned | Right-aligned |
-| :----------- | :------------: | ------------: |
-| Left | Center | Right |
-| Left | Center | Right |
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -110,32 +67,17 @@
 | Left         |     Center     |         Right |</code></pre>
 
 </td>
-<td>
-
-<pre><code>| Left-aligned | Center-aligned | Right-aligned |
-| :----------- | :------------: | ------------: |
-| Left | Center | Right |
-| Left | Center | Right |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with formatting</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with formatting</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -144,19 +86,6 @@
 | --------------- | --------------- | ------------------------ |
 | **Bold Cell**   | *Italic Cell*   | ~~Strikethrough Cell~~   |
 | `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |
-
-</td>
-<td>
-
-| **Bold Header** | _Italic Header_ | ~~Strikethrough Header~~ |
-| --------------- | --------------- | ------------------------ |
-| **Bold Cell** | _Italic Cell_ | ~~Strikethrough Cell~~ |
-| `Code Cell` | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -169,32 +98,17 @@
 | `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |</code></pre>
 
 </td>
-<td>
-
-<pre><code>| **Bold Header** | _Italic Header_ | ~~Strikethrough Header~~ |
-| --------------- | --------------- | ------------------------ |
-| **Bold Cell** | _Italic Cell_ | ~~Strikethrough Cell~~ |
-| `Code Cell` | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with empty cells</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with empty cells</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -204,20 +118,6 @@
 | Content  |          | Content  |
 |          | Content  |          |
 | Content  | Content  | Content  |
-
-</td>
-<td>
-
-| Header 1 | Header 2 | Header 3 |
-| -------- | -------- | -------- |
-| Content |  | Content |
-|  | Content |  |
-| Content | Content | Content |
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -231,33 +131,17 @@
 | Content  | Content  | Content  |</code></pre>
 
 </td>
-<td>
-
-<pre><code>| Header 1 | Header 2 | Header 3 |
-| -------- | -------- | -------- |
-| Content |  | Content |
-|  | Content |  |
-| Content | Content | Content |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with varying column width</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with varying column width</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -268,19 +152,6 @@
 | 2     | More Data     | More long content in this cell                       |
 
 </td>
-<td>
-
-| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
-| ----- | ------------- | --------------------------------------------------- |
-| 1 | Data | Long content that extends across multiple characters |
-| 2 | More Data | More long content in this cell |
-
-</td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
@@ -289,19 +160,6 @@
 | ----- | ------------- | --------------------------------------------------- |
 | 1     | Data          | Long content that extends across multiple characters |
 | 2     | More Data     | More long content in this cell                       |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
-| ----- | ------------- | --------------------------------------------------- |
-| 1 | Data | Long content that extends across multiple characters |
-| 2 | More Data | More long content in this cell |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -328,7 +186,10 @@
 </td>
 <td>
 
-
+| Header 1 | Header 2 |
+| -------- | -------- |
+| Line 1<br />Line 2 | Line 1<br />Line 2 |
+| Single Line | Single Line |
 
 </td>
 </tr>
@@ -343,7 +204,10 @@
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>| Header 1 | Header 2 |
+| -------- | -------- |
+| Line 1&lt;br /&gt;Line 2 | Line 1&lt;br /&gt;Line 2 |
+| Single Line | Single Line |</code></pre>
 
 </td>
 </tr>
@@ -377,7 +241,9 @@
 </td>
 <td>
 
-
+| Column with | pipe | Regular column |
+| ------------------ | -------------- |
+| Data with | pipe  | Regular data   |
 
 </td>
 </tr>
@@ -398,7 +264,9 @@
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>| Column with | pipe | Regular column |
+| ------------------ | -------------- |
+| Data with | pipe  | Regular data   |</code></pre>
 
 </td>
 </tr>
@@ -434,7 +302,10 @@ Cell 3   | Cell 4
 </td>
 <td>
 
-
+Header 1 | Header 2
+\-------- | --------
+Cell 1   | Cell 2
+Cell 3   | Cell 4
 
 </td>
 </tr>
@@ -457,7 +328,10 @@ Cell 3   | Cell 4</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>Header 1 | Header 2
+\-------- | --------
+Cell 1   | Cell 2
+Cell 3   | Cell 4</code></pre>
 
 </td>
 </tr>

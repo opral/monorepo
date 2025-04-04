@@ -20,8 +20,8 @@ between perfect fidelity and practical serialization.
 ## tc - multi line blockquote.
 
 > This blockquote
-spans multiple lines
-in the source Markdown.
+> spans multiple lines
+> in the source Markdown.
 
 ## tc - blockquote - inline formatting
 

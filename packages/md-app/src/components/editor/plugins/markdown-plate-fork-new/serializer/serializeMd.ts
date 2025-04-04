@@ -5,7 +5,7 @@ import { type Plugin, unified } from 'unified';
 
 import type { AllowNodeConfig, NodesConfig } from '../MarkdownPlugin';
 import type { MdRoot } from '../mdast';
-import type { TNodes } from '../nodesRule';
+import type { TNodes } from "../node-rules";
 
 import { convertNodesSerialize } from './convertNodesSerialize';
 import { getMergedOptionsSerialize } from './utils/getMergedOptions';
@@ -47,13 +47,12 @@ export const serializeMd = (
         },
       },
     });
+  const mdast = slateToMdast({
+		children: value!,
+		options: mergedOptions,
+	});
 
-  return toRemarkProcessor.stringify(
-    slateToMdast({
-      children: value!,
-      options: mergedOptions,
-    })
-  );
+  return toRemarkProcessor.stringify(mdast);
 };
 
 const slateToMdast = ({
