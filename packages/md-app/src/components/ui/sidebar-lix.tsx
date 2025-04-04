@@ -7,6 +7,7 @@ import {
   FilePlus,
   FolderPlus
 } from "lucide-react"
+import { setupAriaHiddenFixes } from "@/helper/fixAriaHidden"
 import { useAtom } from "jotai"
 import posthog from "posthog-js"
 import { useNavigate } from "react-router-dom"
@@ -78,6 +79,15 @@ export function LixSidebar() {
   const inlineInputRef = React.useRef<HTMLInputElement>(null)
   const lixInputRef = React.useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+  
+  // Set up automatic aria-hidden fixes for the entire app
+  React.useEffect(() => {
+    // This function will automatically fix aria-hidden issues when inputs get focus
+    const cleanupAriaFixes = setupAriaHiddenFixes();
+    
+    // Clean up when component unmounts
+    return cleanupAriaFixes;
+  }, []);
 
   const switchToFile = React.useCallback(
     async (fileId: string) => {
@@ -499,7 +509,8 @@ export function LixSidebar() {
         </Button>
 
         {isRenamingLix ? (
-          <div className="h-7 flex-1 flex items-center border-b border-input max-w-[calc(100%-4rem)]">
+          <div className="h-7 flex-1 flex items-center border-b border-input max-w-[calc(100%-4rem)]" id="rename-lix-container">
+            {/* Instead of using portals which are complex, we'll use the inert attribute on parent containers */}
             <input
               ref={lixInputRef}
               type="text"
@@ -515,6 +526,11 @@ export function LixSidebar() {
                 }
               }}
               className="bg-transparent outline-none h-7 pl-2 pr-0 text-sm font-semibold w-full mt-[1px]"
+              // Add data attribute to help with debugging accessibility
+              data-lix-rename-input
+              // Ensure the input has a label for accessibility
+              aria-label="Rename Lix"
+              tabIndex={0}
             />
           </div>
         ) : (
@@ -650,7 +666,10 @@ export function LixSidebar() {
               <SidebarMenuItem key={file.id}>
                 {inlineEditingFile?.id === file.id ? (
                   // Rename state - match the exact height and padding of the SidebarMenuButton
-                  <div className="flex items-center w-full h-8 p-2 rounded-md">
+                  <div 
+                    className="flex items-center w-full h-8 p-2 rounded-md" 
+                    id={`rename-file-container-${file.id}`}
+                  >
                     <FileText className={`h-4 w-4 mr-2 shrink-0 ${file.id === activeFile?.id ? 'text-primary' : ''}`} />
                     <div className="flex items-center border-b border-input min-w-0">
                       <input
@@ -670,6 +689,9 @@ export function LixSidebar() {
                           }
                         }}
                         className="bg-transparent outline-none text-sm min-w-0 mt-[1px]"
+                        data-file-rename-input
+                        aria-label={`Rename file ${inlineEditingFile.name}`}
+                        tabIndex={0}
                       />
                       <span className="text-muted-foreground text-sm whitespace-nowrap">.md</span>
                     </div>
