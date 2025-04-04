@@ -70,23 +70,23 @@ Paragraph before horizontal rule.
 
 Paragraph between horizontal rules.
 
-***
+---
 
 Paragraph between horizontal rules.
 
-___
+---
 
 Paragraph between horizontal rules.
 
-- - -
+---
 
 Paragraph between horizontal rules.
 
-* * *
+---
 
 Paragraph between horizontal rules.
 
-_ _ _
+---
 
 Paragraph after horizontal rule.
 
@@ -154,23 +154,23 @@ Paragraph before horizontal rule.
 
 Paragraph between horizontal rules.
 
-***
+---
 
 Paragraph between horizontal rules.
 
-___
+---
 
 Paragraph between horizontal rules.
 
-- - -
+---
 
 Paragraph between horizontal rules.
 
-* * *
+---
 
 Paragraph between horizontal rules.
 
-_ _ _
+---
 
 Paragraph after horizontal rule.
 

@@ -36,12 +36,10 @@ test
 <td>
 
 # Table
-
-| Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
-| Row 1    | Data 1   | Data 2   |
-| Row 2    | Data 3   | Data 4   |
-
+| Column 1| Column 2| Column 3 |
+| --- | --- | --- |
+| Row 1| Data 1| Data 2 |
+| Row 2| Data 3| Data 4 |
 test
 
 </td>
@@ -64,12 +62,10 @@ test</code></pre>
 <td>
 
 <pre><code># Table
-
-| Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
-| Row 1    | Data 1   | Data 2   |
-| Row 2    | Data 3   | Data 4   |
-
+| Column 1| Column 2| Column 3 |
+| --- | --- | --- |
+| Row 1| Data 1| Data 2 |
+| Row 2| Data 3| Data 4 |
 test</code></pre>
 
 </td>

@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 5/9 (56%)
+- 🟢 Perfect roundtrip (input = output): 3/9 (33%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 2/9 (22%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 2/9 (22%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 4/9 (44%)
 
-**Overall Status**: ❌ 2 failing tests
+**Overall Status**: ❌ 4 failing tests
 
 ---
 
@@ -177,12 +177,13 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - blockquote - nested</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - blockquote - nested</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 50%">Input</th>
+<th style="width: 50%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -192,6 +193,11 @@ in the source Markdown.</code></pre>
 > > > This is a deeply nested blockquote.
 
 </td>
+<td>
+
+> Nested blockquotes:This is a nested blockquote.This is a deeply nested blockquote.
+
+</td>
 </tr>
 <tr>
 <td>
@@ -199,6 +205,11 @@ in the source Markdown.</code></pre>
 <pre><code>&gt; Nested blockquotes:
 &gt; &gt; This is a nested blockquote.
 &gt; &gt; &gt; This is a deeply nested blockquote.</code></pre>
+
+</td>
+<td>
+
+<pre><code>&gt; Nested blockquotes:This is a nested blockquote.This is a deeply nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -250,12 +261,13 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - blockquote - containing markdown</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - blockquote - containing markdown</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 50%">Input</th>
+<th style="width: 50%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -272,6 +284,11 @@ in the source Markdown.</code></pre>
 > ```
 
 </td>
+<td>
+
+> Blockquote with other elements:tc - Heading in a blockquoteList item in blockquoteAnother list item
+
+</td>
 </tr>
 <tr>
 <td>
@@ -286,6 +303,11 @@ in the source Markdown.</code></pre>
 &gt; ```
 &gt; Code block in blockquote
 &gt; ```</code></pre>
+
+</td>
+<td>
+
+<pre><code>&gt; Blockquote with other elements:tc - Heading in a blockquoteList item in blockquoteAnother list item</code></pre>
 
 </td>
 </tr>

@@ -51,7 +51,7 @@ export const deserializeMd = (
 		.use(remarkFrontmatter, ["yaml", "toml"])
 		// @ts-expect-error - type issues
 		.use(remarkGfm)
-		.use(sanatizeUnknownNodeStructuresInTree)
+		// .use(sanatizeUnknownNodeStructuresInTree)
 		.use(sanitizeHtml);
 	// .use(remarkRehype, { allowDangerousHtml: true, passThrough: ['']  })
 	// .use(rehypeRaw);

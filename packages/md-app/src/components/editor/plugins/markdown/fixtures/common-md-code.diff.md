@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 10/13 (77%)
+- 🟢 Perfect roundtrip (input = output): 9/13 (69%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 1/13 (8%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 2/13 (15%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 3/13 (23%)
 
-**Overall Status**: ❌ 2 failing tests
+**Overall Status**: ❌ 3 failing tests
 
 ---
 
@@ -339,12 +339,13 @@ function test() {
 
 </details>
 
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - code block with nested backticks</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - code block with nested backticks</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 50%">Input</th>
+<th style="width: 50%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -359,6 +360,18 @@ nested code
 ````
 
 </td>
+<td>
+
+this codeblock contains another
+
+```
+This code block contains triple backticks
+```
+nested code
+```
+```
+
+</td>
 </tr>
 <tr>
 <td>
@@ -371,6 +384,18 @@ This code block contains triple backticks
 nested code
 ```
 ````</code></pre>
+
+</td>
+<td>
+
+<pre><code>this codeblock contains another
+
+```
+This code block contains triple backticks
+```
+nested code
+```
+```</code></pre>
 
 </td>
 </tr>

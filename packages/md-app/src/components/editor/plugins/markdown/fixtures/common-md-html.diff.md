@@ -150,7 +150,6 @@ Text with <br> line break.
 <td>
 
 # HTML in Markdown
-
 <!--
 TEST REASONING:
 HTML embedded in Markdown must be preserved exactly as written.
@@ -159,6 +158,7 @@ any changes could break functionality. The test verifies the serializer's
 ability to maintain 100% fidelity with HTML content. Unlike other Markdown
 elements, no normalization should occur with HTML.
 -->
+
 
 ## Inline HTML
 
@@ -173,7 +173,6 @@ This paragraph has <span style="color: red;">styled text</span> using HTML.
 This paragraph has a line break using HTML.<br>This is on a new line.
 
 ## Block HTML
-
 <div style="background-color: #f0f0f0; padding: 10px;">
   <h3>HTML Block</h3>
   <p>This is a paragraph inside an HTML block.</p>
@@ -183,8 +182,8 @@ This paragraph has a line break using HTML.<br>This is on a new line.
   </ul>
 </div>
 
-## HTML Tables
 
+## HTML Tables
 <table>
   <thead>
     <tr>
@@ -204,67 +203,65 @@ This paragraph has a line break using HTML.<br>This is on a new line.
   </tbody>
 </table>
 
-## HTML and Markdown Mixed
 
+## HTML and Markdown Mixed
 <div>
 
-### Markdown Heading Inside HTML
 
+### Markdown Heading Inside HTML
 - List item 1
 - List item 2
-
 </div>
 
-## HTML Comments
 
+## HTML Comments
 <!-- This is an HTML comment that shouldn't be visible in the rendered output -->
+
 
 Text before comment <!-- Inline comment --> text after comment.
 
 ## Void HTML Elements
-
 <hr>
 
-Text with <br> line break.
 
+Text with <br> line break.
 <img src="https://example.com/image.jpg" alt="Example Image">
+
 
 ## HTML with Attributes
 
 <a href="https://example.com" title="Example Website" target="_blank" rel="noopener noreferrer">Link with attributes</a>
-
 <div id="unique-id" class="custom-class" data-custom="value">
   Div with multiple attributes
 </div>
 
-## IFrames and Embeds
 
+## IFrames and Embeds
 <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-## HTML Forms
 
+## HTML Forms
 <form action="/submit" method="post">
   <label for="name">Name:</label>
   <input type="text" id="name" name="name"><br>
 
-<label for="email">Email:</label>
-  <input type="email" id="email" name="email"><br>
 
+<label for="email">Email:</label><br><input type="email" id="email" name="email"><br>
   <input type="submit" value="Submit">
 </form>
 
-## Scripts (might be stripped by some parsers)
 
+## Scripts (might be stripped by some parsers)
 <script>
   function sayHello() {
     alert('Hello, world!');
   }
 </script>
 
+
 <button onclick="sayHello()">Click me</button>
 
 ## HTML with CSS
-
 <style>
   .custom-text {
     color: blue;
@@ -408,7 +405,6 @@ Text with &lt;br&gt; line break.
 <td>
 
 <pre><code># HTML in Markdown
-
 &lt;!--
 TEST REASONING:
 HTML embedded in Markdown must be preserved exactly as written.
@@ -417,6 +413,7 @@ any changes could break functionality. The test verifies the serializer&#039;s
 ability to maintain 100% fidelity with HTML content. Unlike other Markdown
 elements, no normalization should occur with HTML.
 --&gt;
+
 
 ## Inline HTML
 
@@ -431,7 +428,6 @@ This paragraph has &lt;span style=&quot;color: red;&quot;&gt;styled text&lt;/spa
 This paragraph has a line break using HTML.&lt;br&gt;This is on a new line.
 
 ## Block HTML
-
 &lt;div style=&quot;background-color: #f0f0f0; padding: 10px;&quot;&gt;
   &lt;h3&gt;HTML Block&lt;/h3&gt;
   &lt;p&gt;This is a paragraph inside an HTML block.&lt;/p&gt;
@@ -441,8 +437,8 @@ This paragraph has a line break using HTML.&lt;br&gt;This is on a new line.
   &lt;/ul&gt;
 &lt;/div&gt;
 
-## HTML Tables
 
+## HTML Tables
 &lt;table&gt;
   &lt;thead&gt;
     &lt;tr&gt;
@@ -462,67 +458,65 @@ This paragraph has a line break using HTML.&lt;br&gt;This is on a new line.
   &lt;/tbody&gt;
 &lt;/table&gt;
 
-## HTML and Markdown Mixed
 
+## HTML and Markdown Mixed
 &lt;div&gt;
 
-### Markdown Heading Inside HTML
 
+### Markdown Heading Inside HTML
 - List item 1
 - List item 2
-
 &lt;/div&gt;
 
-## HTML Comments
 
+## HTML Comments
 &lt;!-- This is an HTML comment that shouldn&#039;t be visible in the rendered output --&gt;
+
 
 Text before comment &lt;!-- Inline comment --&gt; text after comment.
 
 ## Void HTML Elements
-
 &lt;hr&gt;
 
-Text with &lt;br&gt; line break.
 
+Text with &lt;br&gt; line break.
 &lt;img src=&quot;https://example.com/image.jpg&quot; alt=&quot;Example Image&quot;&gt;
+
 
 ## HTML with Attributes
 
 &lt;a href=&quot;https://example.com&quot; title=&quot;Example Website&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Link with attributes&lt;/a&gt;
-
 &lt;div id=&quot;unique-id&quot; class=&quot;custom-class&quot; data-custom=&quot;value&quot;&gt;
   Div with multiple attributes
 &lt;/div&gt;
 
-## IFrames and Embeds
 
+## IFrames and Embeds
 &lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/dQw4w9WgXcQ&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen&gt;&lt;/iframe&gt;
 
-## HTML Forms
 
+## HTML Forms
 &lt;form action=&quot;/submit&quot; method=&quot;post&quot;&gt;
   &lt;label for=&quot;name&quot;&gt;Name:&lt;/label&gt;
   &lt;input type=&quot;text&quot; id=&quot;name&quot; name=&quot;name&quot;&gt;&lt;br&gt;
 
-&lt;label for=&quot;email&quot;&gt;Email:&lt;/label&gt;
-  &lt;input type=&quot;email&quot; id=&quot;email&quot; name=&quot;email&quot;&gt;&lt;br&gt;
 
+&lt;label for=&quot;email&quot;&gt;Email:&lt;/label&gt;&lt;br&gt;&lt;input type=&quot;email&quot; id=&quot;email&quot; name=&quot;email&quot;&gt;&lt;br&gt;
   &lt;input type=&quot;submit&quot; value=&quot;Submit&quot;&gt;
 &lt;/form&gt;
 
-## Scripts (might be stripped by some parsers)
 
+## Scripts (might be stripped by some parsers)
 &lt;script&gt;
   function sayHello() {
     alert(&#039;Hello, world!&#039;);
   }
 &lt;/script&gt;
 
+
 &lt;button onclick=&quot;sayHello()&quot;&gt;Click me&lt;/button&gt;
 
 ## HTML with CSS
-
 &lt;style&gt;
   .custom-text {
     color: blue;

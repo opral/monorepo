@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 9/16 (56%)
+- 🟢 Perfect roundtrip (input = output): 10/16 (63%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 6/16 (38%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/16 (6%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/16 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (10 perfect, 6 acceptable)
 
 ---
 
@@ -330,13 +330,12 @@ Alternative Heading level 2
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading with strikethrough</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading with strikethrough</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -344,23 +343,11 @@ Alternative Heading level 2
 ### Heading with ~~strikethrough~~
 
 </td>
-<td>
-
-### Heading with 
-~~strikethrough~~
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>### Heading with ~~strikethrough~~</code></pre>
-
-</td>
-<td>
-
-<pre><code>### Heading with 
-~~strikethrough~~</code></pre>
 
 </td>
 </tr>

@@ -57,31 +57,25 @@ Paragraph with **![formatted inline image](https://example.com/image.jpg)** in b
 
 ![Basic image](https://example.com/image.jpg)
 
-![Image with alt text](https://example.com/image.jpg "Example Image")
+![Image with alt text](https://example.com/image.jpg)
 
-![Image with *formatted* alt text](https://example.com/image.jpg)
+![Image with formatted alt text](https://example.com/image.jpg)
 
-<br>[![Image with link](https://example.com/image.jpg)](https://example.com)<br>
+[<br>![Image with link](https://example.com/image.jpg)<br>](https://example.com)
 
-![Reference image][image-ref]
+Paragraph with an 
 
-![Another reference image][image-ref]
+![inline image](https://example.com/image.jpg)
 
-![Reference image with different text][different-image-ref]
+ in the middle.
 
-Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
+Paragraph with __ in italics.
 
-Paragraph with <br>*![formatted inline image](https://example.com/image.jpg)*<br> in italics.
-
-Paragraph with <br>**![formatted inline image](https://example.com/image.jpg)**<br> in bold.
+Paragraph with **** in bold.
 
 ![Image with empty source]()
 
 ![](https://example.com/image.jpg)
-
-[image-ref]: https://example.com/ref-image.jpg "Reference Example Image"
-
-[different-image-ref]: https://example.com/different-image.jpg "Different Reference Image"
 
 </td>
 </tr>
@@ -124,31 +118,25 @@ Paragraph with **![formatted inline image](https://example.com/image.jpg)** in b
 
 ![Basic image](https://example.com/image.jpg)
 
-![Image with alt text](https://example.com/image.jpg &quot;Example Image&quot;)
+![Image with alt text](https://example.com/image.jpg)
 
-![Image with *formatted* alt text](https://example.com/image.jpg)
+![Image with formatted alt text](https://example.com/image.jpg)
 
-&lt;br&gt;[![Image with link](https://example.com/image.jpg)](https://example.com)&lt;br&gt;
+[&lt;br&gt;![Image with link](https://example.com/image.jpg)&lt;br&gt;](https://example.com)
 
-![Reference image][image-ref]
+Paragraph with an 
 
-![Another reference image][image-ref]
+![inline image](https://example.com/image.jpg)
 
-![Reference image with different text][different-image-ref]
+ in the middle.
 
-Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
+Paragraph with __ in italics.
 
-Paragraph with &lt;br&gt;*![formatted inline image](https://example.com/image.jpg)*&lt;br&gt; in italics.
-
-Paragraph with &lt;br&gt;**![formatted inline image](https://example.com/image.jpg)**&lt;br&gt; in bold.
+Paragraph with **** in bold.
 
 ![Image with empty source]()
 
-![](https://example.com/image.jpg)
-
-[image-ref]: https://example.com/ref-image.jpg &quot;Reference Example Image&quot;
-
-[different-image-ref]: https://example.com/different-image.jpg &quot;Different Reference Image&quot;</code></pre>
+![](https://example.com/image.jpg)</code></pre>
 
 </td>
 </tr>
