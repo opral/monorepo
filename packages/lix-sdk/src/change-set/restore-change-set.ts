@@ -92,11 +92,16 @@ export async function restoreChangeSet(args: {
 					)
 				)
 			)
+			// don't delete history which would screw up the state
+			.where("change.schema_key", "not in", [
+				"lix_change_set_table",
+				"lix_change_set_edge",
+			])
 			.selectAll("change")
 			.distinct()
 			.execute();
 
-		const interimDeleteChanges = await trx
+		const deleteChanges = await trx
 			.insertInto("change")
 			.values(
 				leafEntitiesToDelete.map((c) => ({
@@ -114,7 +119,7 @@ export async function restoreChangeSet(args: {
 		// Combine the changes needed for the interim set
 		const combinedChangesForInterimSet = [
 			...leafChangesToRestore,
-			...interimDeleteChanges,
+			...deleteChanges,
 		];
 
 		//* OPTIMIZE IN THE FUTURE TO PERFORM THIS IN A SINGLE QUERY *
@@ -129,31 +134,17 @@ export async function restoreChangeSet(args: {
 		}
 		const finalChangesForInterimSet = Array.from(uniqueChangesMap.values());
 
-		// Create a temporary change set with these unique changes
-		const interimRestoreChangeSet = await createChangeSet({
+		const restoreChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			// Pass the filtered list to createChangeSet
 			changes: finalChangesForInterimSet,
+			// apply changes creates the edge
+			// parents: [{ id: version.change_set_id }],
 		});
 
-		// Apply the temporary change set to update the file state
 		await applyChangeSet({
 			lix: { ...args.lix, db: trx },
-			changeSet: interimRestoreChangeSet,
+			changeSet: restoreChangeSet,
 		});
-
-		// Update the version to point to the target change set
-		await trx
-			.updateTable("version_v2")
-			.set({ change_set_id: args.changeSet.id })
-			.where("id", "=", version.id)
-			.execute();
-
-		// Clean up the temporary change set
-		// await trx
-		// 	.deleteFrom("change_set")
-		// 	.where("id", "=", interimRestoreChangeSet.id)
-		// 	.execute();
 	};
 
 	if (args.lix.db.isTransaction) {
