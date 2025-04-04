@@ -47,7 +47,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 		remarkPlugins: [
 			// remarkGfm,
 			// sanatizeUnknownNodeStructuresInTree,
-			// sanitizeHtml,
+			sanitizeHtml,
 		],
 		nodes: {
 			sanitized_block_html: {

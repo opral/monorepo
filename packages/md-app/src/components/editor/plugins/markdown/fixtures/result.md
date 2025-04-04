@@ -4,15 +4,15 @@
 
 - Total test files: 17
 - Total test cases: 130
-- Generated on: 2025-04-04T10:49:59.898Z
+- Generated on: 2025-04-04T10:51:56.002Z
 
-### Overall Status: ❌ 106 Failing Tests
+### Overall Status: ❌ 55 Failing Tests
 
 ### Test Results Breakdown
 
-- 🟢 Perfect roundtrip: 23/130 (18%)
-- 🟡 Acceptable transformation: 1/130 (1%)
-- 🔴 Failing tests: 106/130 (82%)
+- 🟢 Perfect roundtrip: 64/130 (49%)
+- 🟡 Acceptable transformation: 11/130 (8%)
+- 🔴 Failing tests: 55/130 (42%)
 
 ### Known Issues in the Markdown Parser
 
@@ -29,31 +29,25 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/9 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/9 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 9/9 (100%)
+- 🟢 Perfect roundtrip (input = output): 3/9 (33%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/9 (11%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 5/9 (56%)
 
-**Overall Status**: ❌ 9 failing tests
+**Overall Status**: ❌ 5 failing tests
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - simple blockquote.</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - simple blockquote.</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 > This is a simple blockquote.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -63,18 +57,13 @@
 <pre><code>&gt; This is a simple blockquote.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - multi line blockquote.</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - multi line blockquote.</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -99,7 +88,9 @@ in the source Markdown.
 </td>
 <td>
 
-
+> This blockquote
+> spans multiple lines
+> in the source Markdown.
 
 </td>
 </tr>
@@ -120,7 +111,9 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; This blockquote
+&gt; spans multiple lines
+&gt; in the source Markdown.</code></pre>
 
 </td>
 </tr>
@@ -144,7 +137,19 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-
+> This blockquote contains 
+>
+> **formatted**
+>
+>  text with 
+>
+> *emphasis*
+>
+>  and 
+>
+> `code`
+>
+> .
 
 </td>
 </tr>
@@ -156,7 +161,19 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; This blockquote contains 
+&gt;
+&gt; **formatted**
+&gt;
+&gt;  text with 
+&gt;
+&gt; *emphasis*
+&gt;
+&gt;  and 
+&gt;
+&gt; `code`
+&gt;
+&gt; .</code></pre>
 
 </td>
 </tr>
@@ -180,7 +197,11 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-
+> This blockquote contains a 
+>
+> [link](https://example.com)
+>
+> .
 
 </td>
 </tr>
@@ -192,7 +213,11 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; This blockquote contains a 
+&gt;
+&gt; [link](https://example.com)
+&gt;
+&gt; .</code></pre>
 
 </td>
 </tr>
@@ -218,7 +243,11 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-
+> Nested blockquotes:
+>
+> This is a nested blockquote.
+>
+> This is a deeply nested blockquote.
 
 </td>
 </tr>
@@ -232,7 +261,11 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; Nested blockquotes:
+&gt;
+&gt; This is a nested blockquote.
+&gt;
+&gt; This is a deeply nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -271,7 +304,11 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-
+> Blockquote with multiple paragraphs:This is the second paragraph in the blockquote.This is the third paragraph in 
+>
+> **the**
+>
+>  blockquote.This is the fourth paragraph in the blockquote.
 
 </td>
 </tr>
@@ -297,7 +334,11 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; Blockquote with multiple paragraphs:This is the second paragraph in the blockquote.This is the third paragraph in 
+&gt;
+&gt; **the**
+&gt;
+&gt;  blockquote.This is the fourth paragraph in the blockquote.</code></pre>
 
 </td>
 </tr>
@@ -330,7 +371,7 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-
+> Blockquote with other elements:tc - Heading in a blockquote
 
 </td>
 </tr>
@@ -351,7 +392,7 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; Blockquote with other elements:tc - Heading in a blockquote</code></pre>
 
 </td>
 </tr>
@@ -359,13 +400,12 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - followed by text</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - followed by text</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -373,11 +413,6 @@ in the source Markdown.</code></pre>
 > Blockquote followed by text.
 
 Regular paragraph after a blockquote.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -389,23 +424,17 @@ Regular paragraph after a blockquote.
 Regular paragraph after a blockquote.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - character inline - not detef</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - character inline - not detef</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -415,11 +444,6 @@ Text with > character that is not a blockquote.
 Paragraph with a line break and then a blockquote:
 
 > This blockquote comes after a line break in a paragraph.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -433,11 +457,6 @@ Paragraph with a line break and then a blockquote:
 &gt; This blockquote comes after a line break in a paragraph.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
@@ -449,31 +468,25 @@ Paragraph with a line break and then a blockquote:
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/13 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/13 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 13/13 (100%)
+- 🟢 Perfect roundtrip (input = output): 12/13 (92%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/13 (8%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/13 (0%)
 
-**Overall Status**: ❌ 13 failing tests
+**Overall Status**: ✅ All tests passing (12 perfect, 1 acceptable)
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - inline code</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - inline code</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 This is a paragraph with `inline code` inside.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -483,33 +496,22 @@ This is a paragraph with `inline code` inside.
 <pre><code>This is a paragraph with `inline code` inside.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - inline code with formatting characters</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - inline code with formatting characters</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 Here's some more `inline code with **formatting**` which should be preserved literally.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -519,23 +521,17 @@ Here's some more `inline code with **formatting**` which should be preserved lit
 <pre><code>Here&#039;s some more `inline code with **formatting**` which should be preserved literally.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - simple code block</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - simple code block</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -547,11 +543,6 @@ function test() {
   return true;
 }
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -567,23 +558,17 @@ function test() {
 ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - javascript code block</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - javascript code block</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -595,11 +580,6 @@ function greet(name) {
   return true;
 }
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -615,23 +595,17 @@ function greet(name) {
 ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - python code block</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - python code block</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -642,11 +616,6 @@ def greet(name):
     print(f"Hello, {name}!")
     return True
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -661,23 +630,17 @@ def greet(name):
 ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - css code block</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - css code block</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -689,11 +652,6 @@ def greet(name):
   flex-direction: column;
 }
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -709,34 +667,23 @@ def greet(name):
 ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - empty code block</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - empty code block</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ```
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -747,34 +694,23 @@ def greet(name):
 ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - empty code block with language</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - empty code block with language</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ```javascript
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -785,18 +721,13 @@ def greet(name):
 ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - indented code block</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - indented code block</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -827,7 +758,13 @@ function test() {
 </td>
 <td>
 
-
+```
+This is an indented code block
+It uses 4 spaces for indentation
+function test() {
+  return true;
+}
+```
 
 </td>
 </tr>
@@ -854,7 +791,13 @@ function test() {
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>```
+This is an indented code block
+It uses 4 spaces for indentation
+function test() {
+  return true;
+}
+```</code></pre>
 
 </td>
 </tr>
@@ -862,13 +805,12 @@ function test() {
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - code block with nested backticks</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - code block with nested backticks</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -881,11 +823,6 @@ This code block contains triple backticks
 nested code
 ```
 ````
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -902,23 +839,17 @@ nested code
 ````</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - code block with special characters</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - code block with special characters</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -927,11 +858,6 @@ nested code
 Special characters: & < > " '
 HTML entities: &amp; &lt; &gt; &quot; &apos;
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -944,23 +870,17 @@ HTML entities: &amp;amp; &amp;lt; &amp;gt; &amp;quot; &amp;apos;
 ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - code block with line break</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - code block with line break</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -972,11 +892,6 @@ Line 3
 
 Line 5 (after empty line)
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -992,23 +907,17 @@ Line 5 (after empty line)
 ```</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - code block with multiple empty lines</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - code block with multiple empty lines</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1022,11 +931,6 @@ Line 5 (after two empty lines)
 
 Line 7 (after one empty lines)
 ```
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -1042,11 +946,6 @@ Line 5 (after two empty lines)
 
 Line 7 (after one empty lines)
 ```</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -1060,21 +959,20 @@ Line 7 (after one empty lines)
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/25 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/25 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 25/25 (100%)
+- 🟢 Perfect roundtrip (input = output): 5/25 (20%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/25 (4%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 19/25 (76%)
 
-**Overall Status**: ❌ 25 failing tests
+**Overall Status**: ❌ 19 failing tests
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - introduction</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - introduction</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1082,21 +980,11 @@ Line 7 (after one empty lines)
 This document demonstrates a wide variety of Markdown syntax elements and how they interact with each other. It's designed to test the roundtrip conversion capabilities of Markdown processors.
 
 </td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>This document demonstrates a wide variety of Markdown syntax elements and how they interact with each other. It&#039;s designed to test the roundtrip conversion capabilities of Markdown processors.</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -1126,7 +1014,7 @@ This paragraph demonstrates _italic text_ inline also wiht _underscore_
 </td>
 <td>
 
-
+This paragraph demonstrates *italic text* inline also wiht *underscore*
 
 </td>
 </tr>
@@ -1143,7 +1031,7 @@ This paragraph demonstrates _italic text_ inline also wiht _underscore_
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>This paragraph demonstrates *italic text* inline also wiht *underscore*</code></pre>
 
 </td>
 </tr>
@@ -1151,8 +1039,8 @@ This paragraph demonstrates _italic text_ inline also wiht _underscore_
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - text formatting - bold/emphasis</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - text formatting - bold/emphasis</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -1177,7 +1065,9 @@ This paragraph demonstrates **bold/emphasis text** inline
 </td>
 <td>
 
+This paragraph demonstrates **bold/emphasis text** inline
 
+This paragraph demonstrates **bold/emphasis text** inline
 
 </td>
 </tr>
@@ -1198,7 +1088,9 @@ This paragraph demonstrates **bold/emphasis text** inline</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>This paragraph demonstrates **bold/emphasis text** inline
+
+This paragraph demonstrates **bold/emphasis text** inline</code></pre>
 
 </td>
 </tr>
@@ -1278,13 +1170,12 @@ This paragraph demonstrates ___italic AND bold text___ inline
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - text formatting - strikethrough and inline code</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - text formatting - strikethrough and inline code</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1292,21 +1183,11 @@ This paragraph demonstrates ___italic AND bold text___ inline
 Other formatting options include ~~strikethrough~~ and `inline code`.
 
 </td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>Other formatting options include ~~strikethrough~~ and `inline code`.</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -1357,7 +1238,18 @@ And another one to check if it worked
 </td>
 <td>
 
+Paragraphs are separated by blank lines.
 
+This paragraph has a line breakcreated with two trailing spaces.
+
+This one has a line breakcreated with a backslash.
+
+This one has a line break<br />created with a break tag.
+
+This one has a line break<br />
+created with a break tag.
+
+And another one to check if it worked
 
 </td>
 </tr>
@@ -1395,7 +1287,18 @@ And another one to check if it worked</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>Paragraphs are separated by blank lines.
+
+This paragraph has a line breakcreated with two trailing spaces.
+
+This one has a line breakcreated with a backslash.
+
+This one has a line break&lt;br /&gt;created with a break tag.
+
+This one has a line break&lt;br /&gt;
+created with a break tag.
+
+And another one to check if it worked</code></pre>
 
 </td>
 </tr>
@@ -1457,7 +1360,24 @@ we currently expect a line break after each paragraph -->
 </td>
 <td>
 
+<!-- reason for differing expectation:
+we currently expect a line break after each paragraph -->
 
+# Level 1 Heading
+
+## Level 2 Heading
+
+### Level 3 Heading
+
+#### Level 4 Heading
+
+##### Level 5 Heading
+
+###### Level 6 Heading
+
+# Alternative Level 1 Heading
+
+## Alternative Level 2 Heading
 
 </td>
 </tr>
@@ -1506,7 +1426,24 @@ we currently expect a line break after each paragraph --&gt;
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&lt;!-- reason for differing expectation:
+we currently expect a line break after each paragraph --&gt;
+
+# Level 1 Heading
+
+## Level 2 Heading
+
+### Level 3 Heading
+
+#### Level 4 Heading
+
+##### Level 5 Heading
+
+###### Level 6 Heading
+
+# Alternative Level 1 Heading
+
+## Alternative Level 2 Heading</code></pre>
 
 </td>
 </tr>
@@ -1540,7 +1477,13 @@ we currently expect a line break after each paragraph --&gt;
 </td>
 <td>
 
+[Basic link](https://example.com)
 
+[Link with title](https://example.com)
+
+<https://example.com> (Automatic link)
+
+<email@example.com> (Email link)
 
 </td>
 </tr>
@@ -1562,7 +1505,13 @@ we currently expect a line break after each paragraph --&gt;
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>[Basic link](https://example.com)
+
+[Link with title](https://example.com)
+
+&lt;https://example.com&gt; (Automatic link)
+
+&lt;email@example.com&gt; (Email link)</code></pre>
 
 </td>
 </tr>
@@ -1592,7 +1541,9 @@ we currently expect a line break after each paragraph --&gt;
 </td>
 <td>
 
+![Image example](https://example.com/image.jpg "Image example")
 
+[![Image with link](https://example.com/image.jpg "Image with link")](https://example.com)
 
 </td>
 </tr>
@@ -1610,7 +1561,9 @@ we currently expect a line break after each paragraph --&gt;
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>![Image example](https://example.com/image.jpg &quot;Image example&quot;)
+
+[![Image with link](https://example.com/image.jpg &quot;Image with link&quot;)](https://example.com)</code></pre>
 
 </td>
 </tr>
@@ -1659,7 +1612,22 @@ the identation may differ 1 meaning is the same -->
 </td>
 <td>
 
+<!-- reason for differing expectation:
+the identation may differ 1 meaning is the same -->
 
+### Unordered Lists
+
+* Item 1
+
+* Item 2
+
+  * Nested item 2.1
+
+  * Nested item 2.2
+
+    * Deeply nested item
+
+* Item 3
 
 </td>
 </tr>
@@ -1695,7 +1663,22 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&lt;!-- reason for differing expectation:
+the identation may differ 1 meaning is the same --&gt;
+
+### Unordered Lists
+
+* Item 1
+
+* Item 2
+
+  * Nested item 2.1
+
+  * Nested item 2.2
+
+    * Deeply nested item
+
+* Item 3</code></pre>
 
 </td>
 </tr>
@@ -1736,7 +1719,17 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
+### Ordered Lists
 
+1. First item
+
+2. Second item
+
+   1. Nested first
+
+   2. Nested second
+
+3. Third item
 
 </td>
 </tr>
@@ -1764,7 +1757,17 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>### Ordered Lists
+
+1. First item
+
+2. Second item
+
+   1. Nested first
+
+   2. Nested second
+
+3. Third item</code></pre>
 
 </td>
 </tr>
@@ -1805,7 +1808,17 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
+### Mixed Lists
 
+1. First ordered item
+
+   * Unordered sub-item
+
+   * Another unordered sub-item
+
+     1. Ordered sub-sub-item
+
+2. Second ordered item
 
 </td>
 </tr>
@@ -1833,7 +1846,17 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>### Mixed Lists
+
+1. First ordered item
+
+   * Unordered sub-item
+
+   * Another unordered sub-item
+
+     1. Ordered sub-sub-item
+
+2. Second ordered item</code></pre>
 
 </td>
 </tr>
@@ -1861,7 +1884,13 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
+### Task Lists
 
+* \[x] Completed task
+
+* \[ ] Incomplete task
+
+* \[x] Another completed task
 
 </td>
 </tr>
@@ -1877,7 +1906,13 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>### Task Lists
+
+* \[x] Completed task
+
+* \[ ] Incomplete task
+
+* \[x] Another completed task</code></pre>
 
 </td>
 </tr>
@@ -1907,7 +1942,19 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
+> Simple blockquote
 
+> Blockquote with 
+>
+> **formatting**
+>
+>  and a 
+>
+> [link](https://example.com)
+>
+> .Multiple paragraphs in a blockquote.
+>
+> Nested blockquote.
 
 </td>
 </tr>
@@ -1925,7 +1972,19 @@ the identation may differ 1 meaning is the same --&gt;
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; Simple blockquote
+
+&gt; Blockquote with 
+&gt;
+&gt; **formatting**
+&gt;
+&gt;  and a 
+&gt;
+&gt; [link](https://example.com)
+&gt;
+&gt; .Multiple paragraphs in a blockquote.
+&gt;
+&gt; Nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -1969,7 +2028,29 @@ function example() {
 </td>
 <td>
 
+Indented code block:
 
+```
+function example() {
+  return "Hello, world!";
+}
+```
+
+Fenced code block without language:
+
+```
+function example() {
+  return "Hello, world!";
+}
+```
+
+Fenced code block with language:
+
+```javascript
+function example() {
+  return "Hello, world!";
+}
+```
 
 </td>
 </tr>
@@ -2001,7 +2082,29 @@ function example() {
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>Indented code block:
+
+```
+function example() {
+  return &quot;Hello, world!&quot;;
+}
+```
+
+Fenced code block without language:
+
+```
+function example() {
+  return &quot;Hello, world!&quot;;
+}
+```
+
+Fenced code block with language:
+
+```javascript
+function example() {
+  return &quot;Hello, world!&quot;;
+}
+```</code></pre>
 
 </td>
 </tr>
@@ -2033,7 +2136,19 @@ function example() {
 </td>
 <td>
 
+| Header 1 | Header 2 | Header 3 |
+| -------- | :------: | -------: |
+| Left     | Center   | Right    |
+| Cell     | Cell     | Cell     |
 
+| Formatted | Table     | Header   |
+| --------- | --------- | -------- |
+| *Italic*  | **Bold**  | `Code`   |
+| [Link](https://example.com) |&#x20;
+
+![Image](https://example.com/image.jpg "Image")
+
+&#x20;| > Quote |
 
 </td>
 </tr>
@@ -2053,7 +2168,19 @@ function example() {
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>| Header 1 | Header 2 | Header 3 |
+| -------- | :------: | -------: |
+| Left     | Center   | Right    |
+| Cell     | Cell     | Cell     |
+
+| Formatted | Table     | Header   |
+| --------- | --------- | -------- |
+| *Italic*  | **Bold**  | `Code`   |
+| [Link](https://example.com) |&amp;#x20;
+
+![Image](https://example.com/image.jpg &quot;Image&quot;)
+
+&amp;#x20;| &gt; Quote |</code></pre>
 
 </td>
 </tr>
@@ -2107,7 +2234,19 @@ Below horizontal rule.
 </td>
 <td>
 
+Above horizontal rule.
 
+***
+
+Between horizontal rules.
+
+***
+
+Between horizontal rules.
+
+***
+
+Below horizontal rule.
 
 </td>
 </tr>
@@ -2148,7 +2287,19 @@ Below horizontal rule.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>Above horizontal rule.
+
+***
+
+Between horizontal rules.
+
+***
+
+Between horizontal rules.
+
+***
+
+Below horizontal rule.</code></pre>
 
 </td>
 </tr>
@@ -2156,13 +2307,12 @@ Below horizontal rule.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - html</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - html</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -2171,11 +2321,6 @@ Below horizontal rule.</code></pre>
   Some HTML content 
   <span>with nested elements</span>
 </div>
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -2188,23 +2333,17 @@ Below horizontal rule.</code></pre>
 &lt;/div&gt;</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - escaping characters</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - escaping characters</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -2216,11 +2355,6 @@ Below horizontal rule.</code></pre>
 \# This is not a heading
 
 </td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
@@ -2230,11 +2364,6 @@ Below horizontal rule.</code></pre>
 \`This is not code\`
 
 \# This is not a heading</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -2273,7 +2402,11 @@ Below horizontal rule.</code></pre>
 </td>
 <td>
 
+> Heading in a blockquote
 
+1. **Bold list item** with *italic text*
+
+   * Nested list with `code` and [link](https://example.com)
 
 </td>
 </tr>
@@ -2300,7 +2433,11 @@ Below horizontal rule.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>&gt; Heading in a blockquote
+
+1. **Bold list item** with *italic text*
+
+   * Nested list with `code` and [link](https://example.com)</code></pre>
 
 </td>
 </tr>
@@ -2326,7 +2463,9 @@ Literal characters: & < > " '
 </td>
 <td>
 
+HTML entities: & < > " '
 
+Literal characters: & < > " '
 
 </td>
 </tr>
@@ -2340,7 +2479,9 @@ Literal characters: &amp; &lt; &gt; &quot; &#039;</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>HTML entities: &amp; &lt; &gt; &quot; &#039;
+
+Literal characters: &amp; &lt; &gt; &quot; &#039;</code></pre>
 
 </td>
 </tr>
@@ -2370,7 +2511,13 @@ Another paragraph with a different footnote.[^2]
 </td>
 <td>
 
+Text with a footnote.\[^1]
 
+Another paragraph with a different footnote.\[^2]
+
+\[^1]: This is the first footnote.
+\[^2]: This is the second footnote with multiple lines.
+Indented to be part of the footnote.
 
 </td>
 </tr>
@@ -2388,7 +2535,13 @@ Another paragraph with a different footnote.[^2]
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>Text with a footnote.\[^1]
+
+Another paragraph with a different footnote.\[^2]
+
+\[^1]: This is the first footnote.
+\[^2]: This is the second footnote with multiple lines.
+Indented to be part of the footnote.</code></pre>
 
 </td>
 </tr>
@@ -2396,13 +2549,12 @@ Another paragraph with a different footnote.[^2]
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - definition lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - definition lists</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -2415,11 +2567,6 @@ Term 2
 : Definition 2b
 
 </td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
@@ -2430,11 +2577,6 @@ Term 2
 Term 2
 : Definition 2a
 : Definition 2b</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -2465,7 +2607,11 @@ This is the final paragraph.
 </td>
 <td>
 
+This paragraph is followed by empty paragraphs.
 
+This paragraph has multiple line breaks between it and the next paragraph.
+
+This is the final paragraph.
 
 </td>
 </tr>
@@ -2484,7 +2630,11 @@ This is the final paragraph.</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>This paragraph is followed by empty paragraphs.
+
+This paragraph has multiple line breaks between it and the next paragraph.
+
+This is the final paragraph.</code></pre>
 
 </td>
 </tr>
@@ -2498,22 +2648,20 @@ This is the final paragraph.</code></pre>
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/11 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/11 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 11/11 (100%)
+- 🟢 Perfect roundtrip (input = output): 5/11 (45%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 2/11 (18%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 4/11 (36%)
 
-**Overall Status**: ❌ 11 failing tests
+**Overall Status**: ❌ 4 failing tests
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - italic with asterisks</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - italic with asterisks</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -2521,31 +2669,11 @@ This is the final paragraph.</code></pre>
 *Italic text* using single asterisks.
 
 </td>
-<td>
-
-_Italic text_ using single asterisks.
-
-</td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>*Italic text* using single asterisks.</code></pre>
-
-</td>
-<td>
-
-<pre><code>_Italic text_ using single asterisks.</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -2569,7 +2697,7 @@ _Italic text_ using single underscores.
 </td>
 <td>
 
-
+*Italic text* using single underscores.
 
 </td>
 </tr>
@@ -2581,7 +2709,7 @@ _Italic text_ using single underscores.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>*Italic text* using single underscores.</code></pre>
 
 </td>
 </tr>
@@ -2589,23 +2717,17 @@ _Italic text_ using single underscores.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - bold with asterisks</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - bold with asterisks</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 **Bold text** using double asterisks.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -2615,18 +2737,13 @@ _Italic text_ using single underscores.
 <pre><code>**Bold text** using double asterisks.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - bold with underscores</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - bold with underscores</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -2647,7 +2764,7 @@ __Bold text__ using double underscores.
 </td>
 <td>
 
-
+**Bold text** using double underscores.
 
 </td>
 </tr>
@@ -2664,7 +2781,7 @@ __Bold text__ using double underscores.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>**Bold text** using double underscores.</code></pre>
 
 </td>
 </tr>
@@ -2672,23 +2789,17 @@ __Bold text__ using double underscores.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - bold-italic with asterisks</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - bold-italic with asterisks</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ***Bold and italic*** using triple asterisks.
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -2698,18 +2809,13 @@ __Bold text__ using double underscores.
 <pre><code>***Bold and italic*** using triple asterisks.</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - bold-italic with underscores</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - bold-italic with underscores</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -2730,7 +2836,7 @@ ___Bold and italic___ using triple underscores.
 </td>
 <td>
 
-
+***Bold and italic*** using triple underscores.
 
 </td>
 </tr>
@@ -2747,7 +2853,7 @@ ___Bold and italic___ using triple underscores.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>***Bold and italic*** using triple underscores.</code></pre>
 
 </td>
 </tr>
@@ -2778,7 +2884,8 @@ ___Bold and italic___ using triple underscores.
 </td>
 <td>
 
-
+**Bold text with** ***italic*** **inside**.
+**Bold text with *italic*** **inside**.
 
 </td>
 </tr>
@@ -2796,7 +2903,8 @@ ___Bold and italic___ using triple underscores.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>**Bold text with** ***italic*** **inside**.
+**Bold text with *italic*** **inside**.</code></pre>
 
 </td>
 </tr>
@@ -2804,14 +2912,12 @@ ___Bold and italic___ using triple underscores.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - italic with bold inside</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - italic with bold inside</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -2819,31 +2925,11 @@ ___Bold and italic___ using triple underscores.
 *Italic text with **bold** inside*.
 
 </td>
-<td>
-
-_Italic text with **bold** inside_.
-
-</td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>*Italic text with **bold** inside*.</code></pre>
-
-</td>
-<td>
-
-<pre><code>_Italic text with **bold** inside_.</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -2867,7 +2953,7 @@ _Italic text with **bold** inside_.
 </td>
 <td>
 
-
+\~~Strikethrough text~~ using double tildes.
 
 </td>
 </tr>
@@ -2879,7 +2965,7 @@ _Italic text with **bold** inside_.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>\~~Strikethrough text~~ using double tildes.</code></pre>
 
 </td>
 </tr>
@@ -2887,14 +2973,12 @@ _Italic text with **bold** inside_.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - mixed styles in paragraph</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - mixed styles in paragraph</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -2902,31 +2986,11 @@ _Italic text with **bold** inside_.
 Mixed **bold** and *italic* and ~~strikethrough~~ in one paragraph.
 
 </td>
-<td>
-
-Mixed **bold** and _italic_ and ~~strikethrough~~ in one paragraph.
-
-</td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>Mixed **bold** and *italic* and ~~strikethrough~~ in one paragraph.</code></pre>
-
-</td>
-<td>
-
-<pre><code>Mixed **bold** and _italic_ and ~~strikethrough~~ in one paragraph.</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -2956,7 +3020,7 @@ Text with **multiple _styles_** applied.
 </td>
 <td>
 
-
+Text with **multiple styles** applied.
 
 </td>
 </tr>
@@ -2973,7 +3037,7 @@ Text with **multiple _styles_** applied.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>Text with **multiple styles** applied.</code></pre>
 
 </td>
 </tr>
@@ -2988,15 +3052,15 @@ Text with **multiple _styles_** applied.
 ## Test Summary
 
 - 🟢 Perfect roundtrip (input = output): 0/1 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/1 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/1 (100%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/1 (100%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/1 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (0 perfect, 1 acceptable)
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">Document</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">Document</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -3050,12 +3114,22 @@ Last line
 </td>
 <td>
 
-# Empty paragraphs test<!-- 
+# Empty paragraphs test
+
+<!-- 
 TEST REASONING:
 Empty paragraphs are crucial for document structure and should be preserved.
 However, the serializer may normalize multiple consecutive newlines to a single blank line.
 This test verifies how the serializer handles empty paragraphs during the roundtrip process.
-\-->Line with contentAnother line with contentMultiple empty lines between contentLast line
+-->
+
+Line with content
+
+Another line with content
+
+Multiple empty lines between content
+
+Last line
 
 
 </td>
@@ -3106,12 +3180,22 @@ Last line</code></pre>
 </td>
 <td>
 
-<pre><code># Empty paragraphs test&lt;!-- 
+<pre><code># Empty paragraphs test
+
+&lt;!-- 
 TEST REASONING:
 Empty paragraphs are crucial for document structure and should be preserved.
 However, the serializer may normalize multiple consecutive newlines to a single blank line.
 This test verifies how the serializer handles empty paragraphs during the roundtrip process.
-\--&gt;Line with contentAnother line with contentMultiple empty lines between contentLast line
+--&gt;
+
+Line with content
+
+Another line with content
+
+Multiple empty lines between content
+
+Last line
 </code></pre>
 
 </td>
@@ -3812,31 +3896,25 @@ And a \`escaped backtick\`
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/16 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/16 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 16/16 (100%)
+- 🟢 Perfect roundtrip (input = output): 12/16 (75%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 4/16 (25%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/16 (0%)
 
-**Overall Status**: ❌ 16 failing tests
+**Overall Status**: ✅ All tests passing (12 perfect, 4 acceptable)
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading level 1</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading level 1</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 # Heading level 1
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -3846,33 +3924,22 @@ And a \`escaped backtick\`
 <pre><code># Heading level 1</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading level 2</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading level 2</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ## Heading level 2
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -3882,33 +3949,22 @@ And a \`escaped backtick\`
 <pre><code>## Heading level 2</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading level 3</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading level 3</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ### Heading level 3
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -3918,33 +3974,22 @@ And a \`escaped backtick\`
 <pre><code>### Heading level 3</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading level 4</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading level 4</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 #### Heading level 4
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -3954,33 +3999,22 @@ And a \`escaped backtick\`
 <pre><code>#### Heading level 4</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading level 5</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading level 5</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ##### Heading level 5
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -3990,33 +4024,22 @@ And a \`escaped backtick\`
 <pre><code>##### Heading level 5</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading level 6</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading level 6</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ###### Heading level 6
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -4026,18 +4049,13 @@ And a \`escaped backtick\`
 <pre><code>###### Heading level 6</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - alternative heading level 1</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - alternative heading level 1</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -4059,7 +4077,7 @@ Alternative Heading level 1
 </td>
 <td>
 
-
+# Alternative Heading level 1
 
 </td>
 </tr>
@@ -4077,7 +4095,7 @@ Alternative Heading level 1
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code># Alternative Heading level 1</code></pre>
 
 </td>
 </tr>
@@ -4085,8 +4103,8 @@ Alternative Heading level 1
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - alternative heading level 2</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - alternative heading level 2</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -4108,7 +4126,7 @@ Alternative Heading level 2
 </td>
 <td>
 
-
+## Alternative Heading level 2
 
 </td>
 </tr>
@@ -4126,7 +4144,7 @@ Alternative Heading level 2
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>## Alternative Heading level 2</code></pre>
 
 </td>
 </tr>
@@ -4134,29 +4152,17 @@ Alternative Heading level 2
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading with emphasis</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading with emphasis</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 # Heading with *emphasis*
-
-</td>
-<td>
-
-# Heading with _emphasis_
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -4166,38 +4172,22 @@ Alternative Heading level 2
 <pre><code># Heading with *emphasis*</code></pre>
 
 </td>
-<td>
-
-<pre><code># Heading with _emphasis_</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading with strong</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading with strong</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ## Heading with **strong**
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -4207,33 +4197,22 @@ Alternative Heading level 2
 <pre><code>## Heading with **strong**</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading with strikethrough</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading with strikethrough</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ### Heading with ~~strikethrough~~
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -4243,39 +4222,22 @@ Alternative Heading level 2
 <pre><code>### Heading with ~~strikethrough~~</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading with code</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading with code</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 #### Heading with `code`
-
-</td>
-<td>
-
-# Heading with `code`
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -4285,38 +4247,22 @@ Alternative Heading level 2
 <pre><code>#### Heading with `code`</code></pre>
 
 </td>
-<td>
-
-<pre><code># Heading with `code`</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading with link</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading with link</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ##### Heading with [link](https://example.com)
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -4326,39 +4272,22 @@ Alternative Heading level 2
 <pre><code>##### Heading with [link](https://example.com)</code></pre>
 
 </td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading with mixed formatting</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - heading with mixed formatting</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
 
 ###### Heading with mixed **bold** and *italic*
-
-</td>
-<td>
-
-###### Heading with mixed **bold** and _italic_
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -4368,23 +4297,13 @@ Alternative Heading level 2
 <pre><code>###### Heading with mixed **bold** and *italic*</code></pre>
 
 </td>
-<td>
-
-<pre><code>###### Heading with mixed **bold** and _italic_</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading without blank line after</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - heading without blank line after</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -4408,7 +4327,9 @@ This is a paragraph right after a heading with no blank line in between. (we exp
 </td>
 <td>
 
+# Heading followed by paragraph
 
+This is a paragraph right after a heading with no blank line in between. (we expect it to get an extra break)
 
 </td>
 </tr>
@@ -4428,7 +4349,9 @@ This is a paragraph right after a heading with no blank line in between. (we exp
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code># Heading followed by paragraph
+
+This is a paragraph right after a heading with no blank line in between. (we expect it to get an extra break)</code></pre>
 
 </td>
 </tr>
@@ -4436,8 +4359,8 @@ This is a paragraph right after a heading with no blank line in between. (we exp
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - heading with trailing whitespace</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - heading with trailing whitespace</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -4461,7 +4384,9 @@ Next line content. (we expect it to get an extra break)
 </td>
 <td>
 
+# Heading with trailing whitespace
 
+Next line content. (we expect it to get an extra break)
 
 </td>
 </tr>
@@ -4481,7 +4406,9 @@ Next line content. (we expect it to get an extra break)</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code># Heading with trailing whitespace
+
+Next line content. (we expect it to get an extra break)</code></pre>
 
 </td>
 </tr>
@@ -4838,59 +4765,130 @@ Text with <br> line break.
 </td>
 <td>
 
-# HTML in Markdown<!--
+# HTML in Markdown
+
+<!--
 TEST REASONING:
 HTML embedded in Markdown must be preserved exactly as written.
 HTML tags, attributes, and indentation are all semantically significant and 
 any changes could break functionality. The test verifies the serializer's
 ability to maintain 100% fidelity with HTML content. Unlike other Markdown
 elements, no normalization should occur with HTML.
-\-->## Inline HTMLThis paragraph contains \<em>inline HTML\</em> elements.This paragraph contains \<strong>bold text\</strong> using HTML.This paragraph has a \<a href="https://example.com">link\</a> using HTML.This paragraph has \<span style="color: red;">styled text\</span> using HTML.This paragraph has a line break using HTML.
-This is on a new line.## Block HTML<div style="background-color: #f0f0f0; padding: 10px;">
-  \<h3>HTML Block</h3>
-  \<p>This is a paragraph inside an HTML block.</p>
-  \<ul>
-    \<li>List item 1</li>
-    \<li>List item 2</li>
-  \</ul>
-\</div>## HTML Tables<table>
-  \<thead>
-    \<tr>
-      \<th>Column 1</th>
-      \<th>Column 2</th>
-    \</tr>
-  \</thead>
-  \<tbody>
-    \<tr>
-      \<td>Cell 1</td>
-      \<td>Cell 2</td>
-    \</tr>
-    \<tr>
-      \<td>Cell 3</td>
-      \<td>Cell 4</td>
-    \</tr>
-  \</tbody>
-\</table>## HTML and Markdown Mixed<div>### Markdown Heading Inside HTML- List item 1
+-->
 
-- List item 2</div>## HTML Comments<!-- This is an HTML comment that shouldn't be visible in the rendered output -->Text before comment \<!-- Inline comment --> text after comment.## Void HTML Elements<hr>Text with&#x20;
-&#x20;line break.<img src="https://example.com/image.jpg" alt="Example Image">## HTML with Attributes\<a href="https://example.com" title="Example Website" target="\_blank" rel="noopener noreferrer">Link with attributes\</a><div id="unique-id" class="custom-class" data-custom="value">
+## Inline HTML
+
+This paragraph contains <em>inline HTML</em> elements.
+
+This paragraph contains <strong>bold text</strong> using HTML.
+
+This paragraph has a <a href="https://example.com">link</a> using HTML.
+
+This paragraph has <span style="color: red;">styled text</span> using HTML.
+
+This paragraph has a line break using HTML.<br />This is on a new line.
+
+## Block HTML
+
+<div style="background-color: #f0f0f0; padding: 10px;">
+  <h3>HTML Block</h3>
+  <p>This is a paragraph inside an HTML block.</p>
+  <ul>
+    <li>List item 1</li>
+    <li>List item 2</li>
+  </ul>
+</div>
+
+## HTML Tables
+
+<table>
+  <thead>
+    <tr>
+      <th>Column 1</th>
+      <th>Column 2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Cell 1</td>
+      <td>Cell 2</td>
+    </tr>
+    <tr>
+      <td>Cell 3</td>
+      <td>Cell 4</td>
+    </tr>
+  </tbody>
+</table>
+
+## HTML and Markdown Mixed
+
+<div>
+
+### Markdown Heading Inside HTML
+
+* List item 1
+
+* List item 2
+
+</div>
+
+## HTML Comments
+
+<!-- This is an HTML comment that shouldn't be visible in the rendered output -->
+
+Text before comment <!-- Inline comment --> text after comment.
+
+## Void HTML Elements
+
+<hr>
+
+Text with <br /> line break.
+
+<img src="https://example.com/image.jpg" alt="Example Image">
+
+## HTML with Attributes
+
+<a href="https://example.com" title="Example Website" target="_blank" rel="noopener noreferrer">Link with attributes</a>
+
+<div id="unique-id" class="custom-class" data-custom="value">
   Div with multiple attributes
-\</div>## IFrames and Embeds<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>## HTML Forms<form action="/submit" method="post">
-  \<label for="name">Name:</label>
-  \<input type="text" id="name" name="name">
-\<label for="email">Email:\</label>
-\<input type="email" id="email" name="email">
-  \<input type="submit" value="Submit">
-\</form>## Scripts (might be stripped by some parsers)<script>
+</div>
+
+## IFrames and Embeds
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## HTML Forms
+
+<form action="/submit" method="post">
+  <label for="name">Name:</label>
+  <input type="text" id="name" name="name"><br />
+
+<label for="email">Email:</label> <input type="email" id="email" name="email"><br />
+
+  <input type="submit" value="Submit">
+</form>
+
+## Scripts (might be stripped by some parsers)
+
+<script>
   function sayHello() {
     alert('Hello, world!');
   }
-\</script>\<button onclick="sayHello()">Click me\</button>## HTML with CSS<style>
+</script>
+
+<button onclick="sayHello()">Click me</button>
+
+## HTML with CSS
+
+<style>
   .custom-text {
     color: blue;
     font-weight: bold;
   }
-\</style><p class="custom-text">This text might be styled if CSS is allowed.</p>
+</style>
+
+<p class="custom-text">This text might be styled if CSS is allowed.</p>
 
 
 </td>
@@ -5026,59 +5024,130 @@ Text with &lt;br&gt; line break.
 </td>
 <td>
 
-<pre><code># HTML in Markdown&lt;!--
+<pre><code># HTML in Markdown
+
+&lt;!--
 TEST REASONING:
 HTML embedded in Markdown must be preserved exactly as written.
 HTML tags, attributes, and indentation are all semantically significant and 
 any changes could break functionality. The test verifies the serializer&#039;s
 ability to maintain 100% fidelity with HTML content. Unlike other Markdown
 elements, no normalization should occur with HTML.
-\--&gt;## Inline HTMLThis paragraph contains \&lt;em&gt;inline HTML\&lt;/em&gt; elements.This paragraph contains \&lt;strong&gt;bold text\&lt;/strong&gt; using HTML.This paragraph has a \&lt;a href=&quot;https://example.com&quot;&gt;link\&lt;/a&gt; using HTML.This paragraph has \&lt;span style=&quot;color: red;&quot;&gt;styled text\&lt;/span&gt; using HTML.This paragraph has a line break using HTML.
-This is on a new line.## Block HTML&lt;div style=&quot;background-color: #f0f0f0; padding: 10px;&quot;&gt;
-  \&lt;h3&gt;HTML Block&lt;/h3&gt;
-  \&lt;p&gt;This is a paragraph inside an HTML block.&lt;/p&gt;
-  \&lt;ul&gt;
-    \&lt;li&gt;List item 1&lt;/li&gt;
-    \&lt;li&gt;List item 2&lt;/li&gt;
-  \&lt;/ul&gt;
-\&lt;/div&gt;## HTML Tables&lt;table&gt;
-  \&lt;thead&gt;
-    \&lt;tr&gt;
-      \&lt;th&gt;Column 1&lt;/th&gt;
-      \&lt;th&gt;Column 2&lt;/th&gt;
-    \&lt;/tr&gt;
-  \&lt;/thead&gt;
-  \&lt;tbody&gt;
-    \&lt;tr&gt;
-      \&lt;td&gt;Cell 1&lt;/td&gt;
-      \&lt;td&gt;Cell 2&lt;/td&gt;
-    \&lt;/tr&gt;
-    \&lt;tr&gt;
-      \&lt;td&gt;Cell 3&lt;/td&gt;
-      \&lt;td&gt;Cell 4&lt;/td&gt;
-    \&lt;/tr&gt;
-  \&lt;/tbody&gt;
-\&lt;/table&gt;## HTML and Markdown Mixed&lt;div&gt;### Markdown Heading Inside HTML- List item 1
+--&gt;
 
-- List item 2&lt;/div&gt;## HTML Comments&lt;!-- This is an HTML comment that shouldn&#039;t be visible in the rendered output --&gt;Text before comment \&lt;!-- Inline comment --&gt; text after comment.## Void HTML Elements&lt;hr&gt;Text with&amp;#x20;
-&amp;#x20;line break.&lt;img src=&quot;https://example.com/image.jpg&quot; alt=&quot;Example Image&quot;&gt;## HTML with Attributes\&lt;a href=&quot;https://example.com&quot; title=&quot;Example Website&quot; target=&quot;\_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Link with attributes\&lt;/a&gt;&lt;div id=&quot;unique-id&quot; class=&quot;custom-class&quot; data-custom=&quot;value&quot;&gt;
+## Inline HTML
+
+This paragraph contains &lt;em&gt;inline HTML&lt;/em&gt; elements.
+
+This paragraph contains &lt;strong&gt;bold text&lt;/strong&gt; using HTML.
+
+This paragraph has a &lt;a href=&quot;https://example.com&quot;&gt;link&lt;/a&gt; using HTML.
+
+This paragraph has &lt;span style=&quot;color: red;&quot;&gt;styled text&lt;/span&gt; using HTML.
+
+This paragraph has a line break using HTML.&lt;br /&gt;This is on a new line.
+
+## Block HTML
+
+&lt;div style=&quot;background-color: #f0f0f0; padding: 10px;&quot;&gt;
+  &lt;h3&gt;HTML Block&lt;/h3&gt;
+  &lt;p&gt;This is a paragraph inside an HTML block.&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;List item 1&lt;/li&gt;
+    &lt;li&gt;List item 2&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/div&gt;
+
+## HTML Tables
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Column 1&lt;/th&gt;
+      &lt;th&gt;Column 2&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Cell 1&lt;/td&gt;
+      &lt;td&gt;Cell 2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Cell 3&lt;/td&gt;
+      &lt;td&gt;Cell 4&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+## HTML and Markdown Mixed
+
+&lt;div&gt;
+
+### Markdown Heading Inside HTML
+
+* List item 1
+
+* List item 2
+
+&lt;/div&gt;
+
+## HTML Comments
+
+&lt;!-- This is an HTML comment that shouldn&#039;t be visible in the rendered output --&gt;
+
+Text before comment &lt;!-- Inline comment --&gt; text after comment.
+
+## Void HTML Elements
+
+&lt;hr&gt;
+
+Text with &lt;br /&gt; line break.
+
+&lt;img src=&quot;https://example.com/image.jpg&quot; alt=&quot;Example Image&quot;&gt;
+
+## HTML with Attributes
+
+&lt;a href=&quot;https://example.com&quot; title=&quot;Example Website&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot;&gt;Link with attributes&lt;/a&gt;
+
+&lt;div id=&quot;unique-id&quot; class=&quot;custom-class&quot; data-custom=&quot;value&quot;&gt;
   Div with multiple attributes
-\&lt;/div&gt;## IFrames and Embeds&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/dQw4w9WgXcQ&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen&gt;&lt;/iframe&gt;## HTML Forms&lt;form action=&quot;/submit&quot; method=&quot;post&quot;&gt;
-  \&lt;label for=&quot;name&quot;&gt;Name:&lt;/label&gt;
-  \&lt;input type=&quot;text&quot; id=&quot;name&quot; name=&quot;name&quot;&gt;
-\&lt;label for=&quot;email&quot;&gt;Email:\&lt;/label&gt;
-\&lt;input type=&quot;email&quot; id=&quot;email&quot; name=&quot;email&quot;&gt;
-  \&lt;input type=&quot;submit&quot; value=&quot;Submit&quot;&gt;
-\&lt;/form&gt;## Scripts (might be stripped by some parsers)&lt;script&gt;
+&lt;/div&gt;
+
+## IFrames and Embeds
+
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https://www.youtube.com/embed/dQw4w9WgXcQ&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture&quot; allowfullscreen&gt;&lt;/iframe&gt;
+
+## HTML Forms
+
+&lt;form action=&quot;/submit&quot; method=&quot;post&quot;&gt;
+  &lt;label for=&quot;name&quot;&gt;Name:&lt;/label&gt;
+  &lt;input type=&quot;text&quot; id=&quot;name&quot; name=&quot;name&quot;&gt;&lt;br /&gt;
+
+&lt;label for=&quot;email&quot;&gt;Email:&lt;/label&gt; &lt;input type=&quot;email&quot; id=&quot;email&quot; name=&quot;email&quot;&gt;&lt;br /&gt;
+
+  &lt;input type=&quot;submit&quot; value=&quot;Submit&quot;&gt;
+&lt;/form&gt;
+
+## Scripts (might be stripped by some parsers)
+
+&lt;script&gt;
   function sayHello() {
     alert(&#039;Hello, world!&#039;);
   }
-\&lt;/script&gt;\&lt;button onclick=&quot;sayHello()&quot;&gt;Click me\&lt;/button&gt;## HTML with CSS&lt;style&gt;
+&lt;/script&gt;
+
+&lt;button onclick=&quot;sayHello()&quot;&gt;Click me&lt;/button&gt;
+
+## HTML with CSS
+
+&lt;style&gt;
   .custom-text {
     color: blue;
     font-weight: bold;
   }
-\&lt;/style&gt;&lt;p class=&quot;custom-text&quot;&gt;This text might be styled if CSS is allowed.&lt;/p&gt;
+&lt;/style&gt;
+
+&lt;p class=&quot;custom-text&quot;&gt;This text might be styled if CSS is allowed.&lt;/p&gt;
 </code></pre>
 
 </td>
@@ -5441,7 +5510,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+* Item 1
 
+* Item 2
+
+* Item 3
 
 </td>
 </tr>
@@ -5455,7 +5528,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>* Item 1
+
+* Item 2
+
+* Item 3</code></pre>
 
 </td>
 </tr>
@@ -5489,7 +5566,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+* Alternative item 1
 
+* Alternative item 2
+
+* Alternative item 3
 
 </td>
 </tr>
@@ -5510,7 +5591,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>* Alternative item 1
+
+* Alternative item 2
+
+* Alternative item 3</code></pre>
 
 </td>
 </tr>
@@ -5544,7 +5629,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+* Another alternative item 1
 
+* Another alternative item 2
+
+* Another alternative item 3
 
 </td>
 </tr>
@@ -5565,7 +5654,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>* Another alternative item 1
+
+* Another alternative item 2
+
+* Another alternative item 3</code></pre>
 
 </td>
 </tr>
@@ -5597,7 +5690,23 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+* Item 1
 
+  * Nested item 1.1
+
+  * Nested item 1.2
+
+    * Deeply nested item 1.2.1
+
+    * Deeply nested item 1.2.2
+
+  * Nested item 1.3
+
+* Item 2
+
+  * Nested item 2.1
+
+  * Nested item 2.2
 
 </td>
 </tr>
@@ -5617,7 +5726,23 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>* Item 1
+
+  * Nested item 1.1
+
+  * Nested item 1.2
+
+    * Deeply nested item 1.2.1
+
+    * Deeply nested item 1.2.2
+
+  * Nested item 1.3
+
+* Item 2
+
+  * Nested item 2.1
+
+  * Nested item 2.2</code></pre>
 
 </td>
 </tr>
@@ -5643,7 +5768,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+1. First item
 
+2. Second item
+
+3. Third item
 
 </td>
 </tr>
@@ -5657,7 +5786,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>1. First item
+
+2. Second item
+
+3. Third item</code></pre>
 
 </td>
 </tr>
@@ -5689,7 +5822,23 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+1. First item
 
+   1. Nested item 1.1
+
+   2. Nested item 1.2
+
+      1. Deeply nested item 1.2.1
+
+      2. Deeply nested item 1.2.2
+
+   3. Nested item 1.3
+
+2. Second item
+
+   1. Nested item 2.1
+
+   2. Nested item 2.2
 
 </td>
 </tr>
@@ -5709,7 +5858,23 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>1. First item
+
+   1. Nested item 1.1
+
+   2. Nested item 1.2
+
+      1. Deeply nested item 1.2.1
+
+      2. Deeply nested item 1.2.2
+
+   3. Nested item 1.3
+
+2. Second item
+
+   1. Nested item 2.1
+
+   2. Nested item 2.2</code></pre>
 
 </td>
 </tr>
@@ -5740,7 +5905,21 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+1. Ordered item 1
 
+2. Ordered item 2
+
+   * Unordered nested item 2.1
+
+   * Unordered nested item 2.2
+
+     1. Ordered deeply nested item 2.2.1
+
+     2. Ordered deeply nested item 2.2.2
+
+   * Unordered nested item 2.3
+
+3. Ordered item 3
 
 </td>
 </tr>
@@ -5759,7 +5938,21 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>1. Ordered item 1
+
+2. Ordered item 2
+
+   * Unordered nested item 2.1
+
+   * Unordered nested item 2.2
+
+     1. Ordered deeply nested item 2.2.1
+
+     2. Ordered deeply nested item 2.2.2
+
+   * Unordered nested item 2.3
+
+3. Ordered item 3</code></pre>
 
 </td>
 </tr>
@@ -5799,7 +5992,17 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+* **Bold item**
 
+* *Italic item*
+
+* \~~Strikethrough item~~
+
+* Item with `code`
+
+* Item with [link](https://example.com)
+
+* Item with *nested **formatting***
 
 </td>
 </tr>
@@ -5826,7 +6029,17 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>* **Bold item**
+
+* *Italic item*
+
+* \~~Strikethrough item~~
+
+* Item with `code`
+
+* Item with [link](https://example.com)
+
+* Item with *nested **formatting***</code></pre>
 
 </td>
 </tr>
@@ -5872,7 +6085,15 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+* First item
 
+  Paragraph within the first list item.
+
+  Another paragraph within the first list item.
+
+* Second item
+
+  Paragraph within the second list item.
 
 </td>
 </tr>
@@ -5905,7 +6126,15 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>* First item
+
+  Paragraph within the first list item.
+
+  Another paragraph within the first list item.
+
+* Second item
+
+  Paragraph within the second list item.</code></pre>
 
 </td>
 </tr>
@@ -5932,7 +6161,13 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
+* \[x] Completed task
 
+* \[ ] Incomplete task
+
+* \[x] Another completed task
+
+* \[ ] Another incomplete task
 
 </td>
 </tr>
@@ -5947,7 +6182,13 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>* \[x] Completed task
+
+* \[ ] Incomplete task
+
+* \[x] Another completed task
+
+* \[ ] Another incomplete task</code></pre>
 
 </td>
 </tr>
@@ -6042,8 +6283,7 @@ This paragraph ends with two spaceswhich creates a line break.
 
 This paragraph ends with a backslashwhich also creates a line break.
 
-This paragraph has a&#x20;
-&#x20;HTML tag
+This paragraph has a <br /> HTML tag
 which creates a line break.
 
 Paragraph with *emphasized* and **strong** text.
@@ -6062,7 +6302,7 @@ Here's a paragraph with a very long line that will need to wrap in most text edi
 
 * List item with a line breakcontinuing on the next line.
 
-For HTML processing, paragraph with \<span style="color: red;">HTML\</span> inside it.
+For HTML processing, paragraph with <span style="color: red;">HTML</span> inside it.
 
 Some markdown processors support paragraph attributes:
 
@@ -6141,8 +6381,7 @@ This paragraph ends with two spaceswhich creates a line break.
 
 This paragraph ends with a backslashwhich also creates a line break.
 
-This paragraph has a&amp;#x20;
-&amp;#x20;HTML tag
+This paragraph has a &lt;br /&gt; HTML tag
 which creates a line break.
 
 Paragraph with *emphasized* and **strong** text.
@@ -6161,7 +6400,7 @@ Here&#039;s a paragraph with a very long line that will need to wrap in most tex
 
 * List item with a line breakcontinuing on the next line.
 
-For HTML processing, paragraph with \&lt;span style=&quot;color: red;&quot;&gt;HTML\&lt;/span&gt; inside it.
+For HTML processing, paragraph with &lt;span style=&quot;color: red;&quot;&gt;HTML&lt;/span&gt; inside it.
 
 Some markdown processors support paragraph attributes:
 
@@ -6185,22 +6424,20 @@ A paragraph with a footnote reference\[^1].
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/8 (0%)
+- 🟢 Perfect roundtrip (input = output): 4/8 (50%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 0/8 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 8/8 (100%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 4/8 (50%)
 
-**Overall Status**: ❌ 8 failing tests
+**Overall Status**: ❌ 4 failing tests
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - basic table</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - basic table</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -6209,19 +6446,6 @@ A paragraph with a footnote reference\[^1].
 | -------- | -------- | -------- |
 | Cell 1   | Cell 2   | Cell 3   |
 | Cell 4   | Cell 5   | Cell 6   |
-
-</td>
-<td>
-
-| Header 1| Header 2| Header 3 |
-| --- | --- | --- |
-| Cell 1| Cell 2| Cell 3 |
-| Cell 4| Cell 5| Cell 6 |
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -6234,32 +6458,17 @@ A paragraph with a footnote reference\[^1].
 | Cell 4   | Cell 5   | Cell 6   |</code></pre>
 
 </td>
-<td>
-
-<pre><code>| Header 1| Header 2| Header 3 |
-| --- | --- | --- |
-| Cell 1| Cell 2| Cell 3 |
-| Cell 4| Cell 5| Cell 6 |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with alignment</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with alignment</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -6268,19 +6477,6 @@ A paragraph with a footnote reference\[^1].
 | :----------- | :------------: | ------------: |
 | Left         |     Center     |         Right |
 | Left         |     Center     |         Right |
-
-</td>
-<td>
-
-| Left-aligned | Center-aligned | Right-aligned |
-| :----------- | :------------: | ------------: |
-| Left | Center | Right |
-| Left | Center | Right |
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -6291,19 +6487,6 @@ A paragraph with a footnote reference\[^1].
 | :----------- | :------------: | ------------: |
 | Left         |     Center     |         Right |
 | Left         |     Center     |         Right |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Left-aligned | Center-aligned | Right-aligned |
-| :----------- | :------------: | ------------: |
-| Left | Center | Right |
-| Left | Center | Right |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -6339,7 +6522,14 @@ A paragraph with a footnote reference\[^1].
 </td>
 <td>
 
+| **Bold Header** | *Italic Header* | ~~Strikethrough Header~~ |
+| --------------- | --------------- | ------------------------ |
+| **Bold Cell**   | *Italic Cell*   | ~~Strikethrough Cell~~   |
+| `Code Cell`     | [Link](https://example.com) |&#x20;
 
+![Image](https://example.com/image.jpg "Image")
+
+&#x20;|
 
 </td>
 </tr>
@@ -6362,7 +6552,14 @@ A paragraph with a footnote reference\[^1].
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>| **Bold Header** | *Italic Header* | ~~Strikethrough Header~~ |
+| --------------- | --------------- | ------------------------ |
+| **Bold Cell**   | *Italic Cell*   | ~~Strikethrough Cell~~   |
+| `Code Cell`     | [Link](https://example.com) |&amp;#x20;
+
+![Image](https://example.com/image.jpg &quot;Image&quot;)
+
+&amp;#x20;|</code></pre>
 
 </td>
 </tr>
@@ -6370,14 +6567,12 @@ A paragraph with a footnote reference\[^1].
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with empty cells</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with empty cells</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -6387,20 +6582,6 @@ A paragraph with a footnote reference\[^1].
 | Content  |          | Content  |
 |          | Content  |          |
 | Content  | Content  | Content  |
-
-</td>
-<td>
-
-| Header 1 | Header 2 | Header 3 |
-| -------- | -------- | -------- |
-| Content |  | Content |
-|  | Content |  |
-| Content | Content | Content |
-
-</td>
-<td>
-
-
 
 </td>
 </tr>
@@ -6414,33 +6595,17 @@ A paragraph with a footnote reference\[^1].
 | Content  | Content  | Content  |</code></pre>
 
 </td>
-<td>
-
-<pre><code>| Header 1 | Header 2 | Header 3 |
-| -------- | -------- | -------- |
-| Content |  | Content |
-|  | Content |  |
-| Content | Content | Content |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with varying column width</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with varying column width</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -6451,19 +6616,6 @@ A paragraph with a footnote reference\[^1].
 | 2     | More Data     | More long content in this cell                       |
 
 </td>
-<td>
-
-| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
-| ----- | ------------- | --------------------------------------------------- |
-| 1 | Data | Long content that extends across multiple characters |
-| 2 | More Data | More long content in this cell |
-
-</td>
-<td>
-
-
-
-</td>
 </tr>
 <tr>
 <td>
@@ -6472,19 +6624,6 @@ A paragraph with a footnote reference\[^1].
 | ----- | ------------- | --------------------------------------------------- |
 | 1     | Data          | Long content that extends across multiple characters |
 | 2     | More Data     | More long content in this cell                       |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
-| ----- | ------------- | --------------------------------------------------- |
-| 1 | Data | Long content that extends across multiple characters |
-| 2 | More Data | More long content in this cell |</code></pre>
-
-</td>
-<td>
-
-<pre><code></code></pre>
 
 </td>
 </tr>
@@ -6511,7 +6650,10 @@ A paragraph with a footnote reference\[^1].
 </td>
 <td>
 
-
+| Header 1 | Header 2 |
+| -------- | -------- |
+| Line 1<br />Line 2 | Line 1<br />Line 2 |
+| Single Line | Single Line |
 
 </td>
 </tr>
@@ -6526,7 +6668,10 @@ A paragraph with a footnote reference\[^1].
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>| Header 1 | Header 2 |
+| -------- | -------- |
+| Line 1&lt;br /&gt;Line 2 | Line 1&lt;br /&gt;Line 2 |
+| Single Line | Single Line |</code></pre>
 
 </td>
 </tr>
@@ -6560,7 +6705,9 @@ A paragraph with a footnote reference\[^1].
 </td>
 <td>
 
-
+| Column with | pipe | Regular column |
+| ------------------ | -------------- |
+| Data with | pipe  | Regular data   |
 
 </td>
 </tr>
@@ -6581,7 +6728,9 @@ A paragraph with a footnote reference\[^1].
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>| Column with | pipe | Regular column |
+| ------------------ | -------------- |
+| Data with | pipe  | Regular data   |</code></pre>
 
 </td>
 </tr>
@@ -6617,7 +6766,10 @@ Cell 3   | Cell 4
 </td>
 <td>
 
-
+Header 1 | Header 2
+\-------- | --------
+Cell 1   | Cell 2
+Cell 3   | Cell 4
 
 </td>
 </tr>
@@ -6640,7 +6792,10 @@ Cell 3   | Cell 4</code></pre>
 </td>
 <td>
 
-<pre><code></code></pre>
+<pre><code>Header 1 | Header 2
+\-------- | --------
+Cell 1   | Cell 2
+Cell 3   | Cell 4</code></pre>
 
 </td>
 </tr>
@@ -6799,21 +6954,47 @@ test
 </td>
 <td>
 
-# Markdown with inline htmlInline html node \<img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works *perfectly fine*Inline html node \<img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works *perfectly fine*# markdown with block html element# hello<h1> hello </h1><p align="center">
-  \<img src="https://avatars.githubusercontent.com/u/91317568?s=64&v=4" alt="opral icon">
-  \<p align="center">
-    \<a href='https://twitter.com/opralHQ' target="_blank">𝕏 Twitter</a>
+# Markdown with inline html
+
+Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works *perfectly fine*
+
+Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works *perfectly fine*
+
+# markdown with block html element
+
+# hello
+
+<h1> hello </h1>
+
+<p align="center">
+  <img src="https://avatars.githubusercontent.com/u/91317568?s=64&v=4" alt="opral icon">
+  <p align="center">
+    <a href='https://twitter.com/opralHQ' target="_blank">𝕏 Twitter</a>
     ·
-    \<a href='https://discord.gg/gdMPPWy57R' target="_blank">💬 Discord</a>
-  \</p>
-\</p>test# inline html in list- 📦 **Import/Export**: Import and export messages in different file formats.
+    <a href='https://discord.gg/gdMPPWy57R' target="_blank">💬 Discord</a>
+  </p>
+</p>
 
-- \<img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.# random<details>
-\<summary>yo</summary>- asdasdsad
+test
 
-- asdasdasdasd
+# inline html in list
 
-- asdasdsad</details>
+* 📦 **Import/Export**: Import and export messages in different file formats.
+
+* <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
+
+# random
+
+<details>
+<summary>yo</summary>
+
+* asdasdsad
+
+* asdasdasdasd
+
+* asdasdsad
+
+</details>
 
 
 </td>
@@ -6863,21 +7044,47 @@ test
 </td>
 <td>
 
-<pre><code># Markdown with inline htmlInline html node \&lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works *perfectly fine*Inline html node \&lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works *perfectly fine*# markdown with block html element# hello&lt;h1&gt; hello &lt;/h1&gt;&lt;p align=&quot;center&quot;&gt;
-  \&lt;img src=&quot;https://avatars.githubusercontent.com/u/91317568?s=64&amp;v=4&quot; alt=&quot;opral icon&quot;&gt;
-  \&lt;p align=&quot;center&quot;&gt;
-    \&lt;a href=&#039;https://twitter.com/opralHQ&#039; target=&quot;_blank&quot;&gt;𝕏 Twitter&lt;/a&gt;
+<pre><code># Markdown with inline html
+
+Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works *perfectly fine*
+
+Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works *perfectly fine*
+
+# markdown with block html element
+
+# hello
+
+&lt;h1&gt; hello &lt;/h1&gt;
+
+&lt;p align=&quot;center&quot;&gt;
+  &lt;img src=&quot;https://avatars.githubusercontent.com/u/91317568?s=64&amp;v=4&quot; alt=&quot;opral icon&quot;&gt;
+  &lt;p align=&quot;center&quot;&gt;
+    &lt;a href=&#039;https://twitter.com/opralHQ&#039; target=&quot;_blank&quot;&gt;𝕏 Twitter&lt;/a&gt;
     ·
-    \&lt;a href=&#039;https://discord.gg/gdMPPWy57R&#039; target=&quot;_blank&quot;&gt;💬 Discord&lt;/a&gt;
-  \&lt;/p&gt;
-\&lt;/p&gt;test# inline html in list- 📦 **Import/Export**: Import and export messages in different file formats.
+    &lt;a href=&#039;https://discord.gg/gdMPPWy57R&#039; target=&quot;_blank&quot;&gt;💬 Discord&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/p&gt;
 
-- \&lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.# random&lt;details&gt;
-\&lt;summary&gt;yo&lt;/summary&gt;- asdasdsad
+test
 
-- asdasdasdasd
+# inline html in list
 
-- asdasdsad&lt;/details&gt;
+* 📦 **Import/Export**: Import and export messages in different file formats.
+
+* &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
+
+# random
+
+&lt;details&gt;
+&lt;summary&gt;yo&lt;/summary&gt;
+
+* asdasdsad
+
+* asdasdasdasd
+
+* asdasdsad
+
+&lt;/details&gt;
 </code></pre>
 
 </td>

@@ -83,8 +83,7 @@ This paragraph ends with two spaceswhich creates a line break.
 
 This paragraph ends with a backslashwhich also creates a line break.
 
-This paragraph has a&#x20;
-&#x20;HTML tag
+This paragraph has a <br /> HTML tag
 which creates a line break.
 
 Paragraph with *emphasized* and **strong** text.
@@ -103,7 +102,7 @@ Here's a paragraph with a very long line that will need to wrap in most text edi
 
 * List item with a line breakcontinuing on the next line.
 
-For HTML processing, paragraph with \<span style="color: red;">HTML\</span> inside it.
+For HTML processing, paragraph with <span style="color: red;">HTML</span> inside it.
 
 Some markdown processors support paragraph attributes:
 
@@ -182,8 +181,7 @@ This paragraph ends with two spaceswhich creates a line break.
 
 This paragraph ends with a backslashwhich also creates a line break.
 
-This paragraph has a&amp;#x20;
-&amp;#x20;HTML tag
+This paragraph has a &lt;br /&gt; HTML tag
 which creates a line break.
 
 Paragraph with *emphasized* and **strong** text.
@@ -202,7 +200,7 @@ Here&#039;s a paragraph with a very long line that will need to wrap in most tex
 
 * List item with a line breakcontinuing on the next line.
 
-For HTML processing, paragraph with \&lt;span style=&quot;color: red;&quot;&gt;HTML\&lt;/span&gt; inside it.
+For HTML processing, paragraph with &lt;span style=&quot;color: red;&quot;&gt;HTML&lt;/span&gt; inside it.
 
 Some markdown processors support paragraph attributes:
 
