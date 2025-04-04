@@ -117,6 +117,24 @@ export function LixSidebar() {
     }
 
     try {
+      // Find the file to check its current name
+      const currentFile = files.find(f => f.id === inlineEditingFile.id);
+      if (!currentFile) {
+        console.error("File not found for inline renaming");
+        setInlineEditingFile(null);
+        return;
+      }
+      
+      // Extract current filename without path and extension
+      const currentFileName = currentFile.path.split('/').pop()?.replace(/\.md$/, '');
+      
+      // Skip if the name hasn't changed
+      if (currentFileName === inlineEditingFile.name.trim()) {
+        console.log("File name hasn't changed, skipping rename operation");
+        setInlineEditingFile(null);
+        return;
+      }
+      
       await lix.db
         .updateTable("file")
         .set({ path: `/${inlineEditingFile.name}.md` })
@@ -130,7 +148,7 @@ export function LixSidebar() {
       console.error("Failed to rename file:", error)
       setInlineEditingFile(null)
     }
-  }, [lix, inlineEditingFile, setPolling])
+  }, [lix, inlineEditingFile, files, setPolling])
 
   const handleSaveLixName = React.useCallback(async () => {
     if (!lix || !lixName.trim()) {
@@ -138,6 +156,13 @@ export function LixSidebar() {
     }
 
     try {
+      // Check if the name has actually changed from the current one
+      if (lixName.trim() === currentLixName) {
+        console.log("Name hasn't changed, skipping rename operation");
+        setIsRenamingLix(false);
+        return;
+      }
+      
       console.log(`Renaming lix to: ${lixName}`)
       
       // Use the imported saveLixName helper function which handles the file renaming
@@ -165,7 +190,7 @@ export function LixSidebar() {
       console.error("Failed to save lix name:", error)
       setIsRenamingLix(false)
     }
-  }, [lix, lixName, setPolling])
+  }, [lix, lixName, currentLixName, setPolling])
 
   const switchToLix = React.useCallback((lixId: string) => {
     navigate(`?l=${lixId}`)
