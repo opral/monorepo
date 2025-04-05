@@ -4,6 +4,7 @@ import { createUndoChangeSet } from "./create-undo-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import { createCheckpoint } from "./create-checkpoint.js";
 
 test("it creates an undo change set that reverses the operations of the original change set", async () => {
 	// Create a Lix instance with the mockJsonPlugin
@@ -245,4 +246,66 @@ test("it correctly undoes delete operations by restoring previous state", async 
 	expect(stateAfterUndo).toEqual({
 		e1: "Initial Value",
 	});
+});
+
+test("undoes lix own change control changes except for graph related ones", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "mock_test",
+			value: "hello world",
+		})
+		.execute();
+
+	// checkpoint contains the key value update
+	const checkpoint = await createCheckpoint({
+		lix,
+	});
+
+	const undoChangeSet = await createUndoChangeSet({
+		lix,
+		changeSet: checkpoint,
+	});
+
+	const edgesBefore = await lix.db
+		.selectFrom("change_set_edge")
+		.selectAll()
+		.execute();
+	const changeSetsBefore = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
+	await applyChangeSet({
+		lix,
+		changeSet: undoChangeSet,
+	});
+
+	const edgesAfter = await lix.db
+		.selectFrom("change_set_edge")
+		.selectAll()
+		.execute();
+	const changeSetsAfter = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
+	expect(changeSetsAfter).toEqual(changeSetsBefore);
+	expect(edgesAfter).toEqual([
+		...edgesBefore,
+		{
+			parent_id: checkpoint.id,
+			child_id: undoChangeSet.id,
+		},
+	]);
+
+	const keyValues = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "mock_test")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(keyValues).toBeUndefined();
 });

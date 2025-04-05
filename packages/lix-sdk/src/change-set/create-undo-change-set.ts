@@ -49,8 +49,12 @@ export async function createUndoChangeSet(args: {
 		}> = [];
 
 		for (const change of targetChanges) {
-			if (change.plugin_key === "lix_own_change_control") {
-				// Skip own change control changes to avoid meta-operations
+			if (
+				change.plugin_key === "lix_own_change_control" &&
+				(change.schema_key === "lix_change_set_table" ||
+					change.schema_key === "lix_change_set_edge_table")
+			) {
+				// Skip own change control changes that interfere with history
 				continue;
 			}
 
