@@ -60,3 +60,33 @@ test("respects the optional depth limit", async () => {
 
 	expect(results.map((r) => r.id).sort()).toEqual([cs1.id].sort());
 });
+
+test("inclusive true selects the current change set as well", async () => {
+	const lix = await openLixInMemory({});
+
+	// cs0 <- cs1 <- cs2
+	const cs0 = await createChangeSet({ lix, id: "cs0", changes: [] });
+	const cs1 = await createChangeSet({
+		lix,
+		id: "cs1",
+		parents: [cs0],
+		changes: [],
+	});
+	const cs2 = await createChangeSet({
+		lix,
+		id: "cs2",
+		parents: [cs1],
+		changes: [],
+	});
+
+	// Should select cs0, cs1, cs2
+	const results = await lix.db
+		.selectFrom("change_set")
+		.where(changeSetIsAncestorOf(cs2, { inclusive: true }))
+		.select("id")
+		.execute();
+
+	expect(results.map((r) => r.id).sort()).toEqual(
+		[cs0.id, cs1.id, cs2.id].sort()
+	);
+})

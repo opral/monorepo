@@ -8,18 +8,26 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 import type { ChangeSet } from "../change-set/database-schema.js";
 
 /**
- * Filters change sets that are descendants (or the same) as the given change set.
+ * Filters change sets that are descendants of the given change set.
  *
- * Traverses the `change_set_edge` graph recursively, starting from the provided change set,
- * and returns all change sets that are reachable via child edges.
+ * By default, this is **exclusive**, meaning it returns only change sets strictly
+ * *after* the provided change set in the graph.
  *
- * This filter can be useful for finding all changes that happened *after* a specific point.
+ * Traverses the `change_set_edge` graph recursively, starting from the provided change set
+ * (or its children if exclusive), and returns all change sets reachable via child edges.
+ *
+ * This filter is useful for finding changes made *after* a specific point in time (e.g., a checkpoint).
  *
  * ⚠️ This filter only defines the traversal scope — it does not filter changes directly.
  *
- * ---
+ * --- Options --- 
+ * - `inclusive`: If `true`, includes the starting `changeSet` in the results. Defaults to `false`.
+ * - `depth`: Limits the traversal depth. `depth: 1` selects only immediate children (if exclusive) 
+ *   or the starting node and its immediate children (if inclusive).
  *
- * @example
+ * --- Examples --- 
+ *
+ * @example Selecting strict descendants (default)
  * ```ts
  * db.selectFrom("change_set")
  *   .where(changeSetIsDescendantOf({ id: "cs1" }))
@@ -37,11 +45,12 @@ import type { ChangeSet } from "../change-set/database-schema.js";
  */
 export function changeSetIsDescendantOf(
 	changeSet: Pick<ChangeSet, "id">,
-	options?: { depth?: number }
+	options?: { depth?: number; inclusive?: boolean }
 ): (
 	eb: ExpressionBuilder<LixDatabaseSchema, "change_set">
 ) => ExpressionWrapper<LixDatabaseSchema, "change_set", SqlBool> {
 	const depthLimit = options?.depth;
+	const inclusive = options?.inclusive ?? false;
 
 	return () =>
 		sql<SqlBool>`
@@ -51,11 +60,11 @@ export function changeSetIsDescendantOf(
 					UNION ALL
 					SELECT change_set_edge.child_id, dp.depth + 1
 					FROM change_set_edge
-					JOIN dp ON change_set_edge.parent_id = dp.id -- Join on parent_id to find children
+					JOIN dp ON change_set_edge.parent_id = dp.id
 					${depthLimit !== undefined ? sql`WHERE dp.depth < ${sql.lit(depthLimit)}` : sql``}
 				)
-				-- Select only IDs with depth > 0 to exclude the starting node itself
-				SELECT id FROM dp WHERE depth > 0
+				-- Select based on the inclusive flag
+				SELECT id FROM dp ${inclusive ? sql`` : sql`WHERE depth > 0`}
 			)
 		` as any;
 }
