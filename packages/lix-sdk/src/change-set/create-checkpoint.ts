@@ -49,8 +49,7 @@ export async function createCheckpoint(args: {
 			.selectFrom("change_set")
 			.where(changeSetHasLabel(checkpointLabel))
 			.where(changeSetIsAncestorOf({ id: version.change_set_id }))
-			// potential todo: handle multiple checkpoints as parents
-			.select(["id"])
+			.select("id")
 			.executeTakeFirst();
 
 		const leafChanges = await trx
@@ -60,10 +59,28 @@ export async function createCheckpoint(args: {
 				"change_set.id",
 				"change_set_element.change_set_id"
 			)
-			// get the changes between the last checkpoint and the versions change set
-			.where(changeSetIsAncestorOf({ id: version.change_set_id }))
+			// get the changes between the last checkpoint and the current state
+			.where((eb) =>
+				eb.or([
+					changeSetIsAncestorOf({ id: version.change_set_id })(eb),
+					eb("change_set.id", "=", version.change_set_id),
+				])
+			)
 			.$if(parentCheckpoint !== undefined, (eb) =>
-				eb.where(changeSetIsDescendantOf(parentCheckpoint!))
+				eb
+					// get the descendants of the last checkpoint
+					.where(changeSetIsDescendantOf(parentCheckpoint!))
+					// exclude changes that were already in the last checkpoint
+					.where("change_id", "not in", (subquery) =>
+						subquery
+							.selectFrom("change_set_element")
+							.where(
+								"change_set_element.change_set_id",
+								"=",
+								parentCheckpoint!.id
+							)
+							.select(["change_id"])
+					)
 			)
 			.where(changeSetElementIsLeafOf([{ id: version.change_set_id }]))
 			.select(["change_id as id", "entity_id", "schema_key", "file_id"])
