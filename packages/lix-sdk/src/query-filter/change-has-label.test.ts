@@ -6,7 +6,7 @@ import { createChangeSet } from "../change-set/create-change-set.js";
 test("should only return changes with the given label", async () => {
 	const lix = await openLixInMemory({});
 
-	await lix.db
+	const changes0 = await lix.db
 		.insertInto("change")
 		.values([
 			{
@@ -26,9 +26,10 @@ test("should only return changes with the given label", async () => {
 				schema_key: "mock",
 			},
 		])
+		.returningAll()
 		.execute();
 
-	const set = await createChangeSet({ lix, changes: [{ id: "change1" }] });
+	const set = await createChangeSet({ lix, changes: [changes0[0]!] });
 
 	const label = await lix.db
 		.insertInto("label")

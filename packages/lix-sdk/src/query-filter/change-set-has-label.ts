@@ -7,7 +7,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  * @example
  *   ```ts
  *   await lix.db.selectFrom("change_set")
- *      .where(changeSetHasLabel("checkpoint"))
+ *      .where(changeSetHasLabel({ name: "checkpoint" }))
  *      .selectAll()
  *      .execute();
  *   ```
@@ -17,12 +17,25 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *
  *   ```ts
  *   await lix.db.selectFrom("change_set")
- * 		.where((eb) => eb.not(changeSetHasLabel("checkpoint")))
+ * 		.where((eb) => eb.not(changeSetHasLabel({ name: "checkpoint" })))
+ * 		.selectAll()
+ * 		.execute();
+ *   ```
+ * 
+ * @example
+ *   Id lookup also works:
+ *
+ *   ```ts
+ *   await lix.db.selectFrom("change_set")
+ * 		.where(changeSetHasLabel({ id: "39j9afj2" }))
  * 		.selectAll()
  * 		.execute();
  *   ```
  */
-export function changeSetHasLabel(name: string) {
+export function changeSetHasLabel(
+	// lookup can happen via both id or name
+	label: { id: string; name?: string } | { name: string; id?: string }
+) {
 	return (
 		eb: ExpressionBuilder<LixDatabaseSchema, "change_set">
 	): ExpressionWrapper<LixDatabaseSchema, "change_set", SqlBool> =>
@@ -31,6 +44,7 @@ export function changeSetHasLabel(name: string) {
 				.selectFrom("change_set_label")
 				.innerJoin("label", "label.id", "change_set_label.label_id")
 				.select("change_set_label.change_set_id")
-				.where("label.name", "=", name)
+				.$if("name" in label, (eb) => eb.where("label.name", "=", label.name!))
+				.$if("id" in label, (eb) => eb.where("label.id", "=", label.id!))
 		);
 }

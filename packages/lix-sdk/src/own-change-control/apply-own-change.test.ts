@@ -1,13 +1,14 @@
-import { test, expect } from "vitest";
+import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import type { Change } from "../database/schema.js";
 import type {
-	Change,
 	ChangeSet,
 	ChangeSetElement,
-} from "../database/schema.js";
+} from "../change-set/database-schema.js";
 import { applyOwnChanges } from "./apply-own-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { type NewKeyValue } from "../key-value/database-schema.js";
+import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
 
 test("it should apply insert changes correctly", async () => {
 	const lix = await openLixInMemory({});
@@ -209,6 +210,7 @@ test("file.data is not changed by applyOwnEntityChanges", async () => {
 	});
 });
 
+// need to determine if change set elements are change controlled or not
 test("foreign key constraints are deferred to make the order of applying changes irrelevant", async () => {
 	const lix = await openLixInMemory({});
 
@@ -219,6 +221,9 @@ test("foreign key constraints are deferred to make the order of applying changes
 		mockJsonSnapshot({
 			change_id: "change0",
 			change_set_id: "change-set-1",
+			entity_id: "change-set-1,change0",
+			schema_key: "lix_change_set_element_table",
+			file_id: "null",
 		} satisfies ChangeSetElement),
 	] as const;
 
@@ -254,15 +259,16 @@ test("foreign key constraints are deferred to make the order of applying changes
 		.values(snapshots.map((s) => ({ content: s.content })))
 		.execute();
 
-	// insert change that the change set element references
+	// insert the change that the change set element references
 	await lix.db
 		.insertInto("change")
 		.values({
 			id: "change0",
 			plugin_key: "mock",
 			file_id: "null",
-			entity_id: "mock",
-			schema_key: "mock",
+			// These must match the FK reference in the change_set_element
+			entity_id: "change-set-1,change0",
+			schema_key: "lix_change_set_element_table",
 			snapshot_id: "no-content",
 		})
 		.execute();
@@ -280,6 +286,9 @@ test("foreign key constraints are obeyed", async () => {
 			// both change 0 and the change set are missing
 			change_id: "change0",
 			change_set_id: "change-set-1",
+			entity_id: "change-set-1,change0",
+			schema_key: "lix_change_set_element_table",
+			file_id: "lix_own_change_control",
 		} satisfies ChangeSetElement),
 	] as const;
 
@@ -312,18 +321,21 @@ test("foreign key constraints are obeyed", async () => {
 		.values({
 			id: "change0",
 			plugin_key: "mock",
-			file_id: "null",
-			entity_id: "mock",
-			schema_key: "mock",
+			file_id: "lix_own_change_control",
+			// Use the values from the element snapshot that references this change
+			entity_id: "change-set-1,change0",
+			schema_key: "lix_change_set_element_table",
 			snapshot_id: "no-content",
 		})
 		.execute();
 
-	expect(applyOwnChanges({ lix, changes: mockChanges })).rejects.toThrow();
+	await expect(
+		applyOwnChanges({ lix, changes: mockChanges })
+	).rejects.toThrow();
 });
 
 // https://github.com/opral/lix-sdk/issues/185
-test("applying own entity changes doesn't lead to the creation of new changes", async () => {
+test("applying own entity changes doesn't lead to the creation of new changes when used with skipOwnChangeControl", async () => {
 	const lix = await openLixInMemory({});
 
 	const snapshot = mockJsonSnapshot({
@@ -340,19 +352,21 @@ test("applying own entity changes doesn't lead to the creation of new changes", 
 
 	const changesBefore = await lix.db.selectFrom("change").selectAll().execute();
 
-	await applyOwnChanges({
-		lix,
-		changes: [
-			{
-				id: "change0",
-				entity_id: "mock-key",
-				file_id: "null",
-				plugin_key: "lix_own_change_control",
-				schema_key: "lix_key_value_table",
-				snapshot_id: snapshot.id,
-				created_at: "2021-01-01T00:00:00Z",
-			},
-		],
+	await withSkipOwnChangeControl(lix.db, async (trx) => {
+		await applyOwnChanges({
+			lix: { ...lix, db: trx },
+			changes: [
+				{
+					id: "change0",
+					entity_id: "mock-key",
+					file_id: "null",
+					plugin_key: "lix_own_change_control",
+					schema_key: "lix_key_value_table",
+					snapshot_id: snapshot.id,
+					created_at: "2021-01-01T00:00:00Z",
+				},
+			],
+		});
 	});
 
 	const changesAfter = await lix.db.selectFrom("change").selectAll().execute();

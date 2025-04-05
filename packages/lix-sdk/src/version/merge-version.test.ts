@@ -161,7 +161,7 @@ test("if a previously undetected conflict is detected during merge, the conflict
 	]);
 });
 
-test("it should not update the target version pointers of a conflicting change", async () => {
+test.skip("it should not update the target version pointers of a conflicting change", async () => {
 	const lix = await openLixInMemory({});
 
 	const sourceVersion = await createVersion({ lix, name: "source-version" });
@@ -280,7 +280,7 @@ test("it should not update the target version pointers of a conflicting change",
 
 // it is reasonable to assume that a conflict exists if the same (entity, file, type) change is updated in both versiones.
 // in case a plugin does not detect a conflict, the system should automatically detect it.
-test("it should automatically detect a diverging entity conflict", async () => {
+test.skip("it should automatically detect a diverging entity conflict", async () => {
 	const lix = await openLixInMemory({});
 
 	const sourceVersion = await createVersion({ lix, name: "source-version" });

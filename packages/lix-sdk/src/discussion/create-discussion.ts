@@ -1,4 +1,5 @@
-import type { ChangeSet, Comment, Discussion } from "../database/schema.js";
+import type { ChangeSet } from "../change-set/database-schema.js";
+import type { Comment, Discussion } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**

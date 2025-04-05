@@ -1,4 +1,4 @@
-import type { ChangeSet } from "../database/schema.js";
+import type { ChangeSet } from "../change-set/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { ChangeProposal } from "./database-schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
@@ -26,15 +26,19 @@ export async function createChangeProposal(args: {
 					args.target_change_set
 				)
 			)
-			.select(["change_id"])
+			.select(["change_id as id", "entity_id", "schema_key", "file_id"])
 			.execute();
+
+		if (symmetricDifferenceChanges.length === 0) {
+			throw new Error(
+				"No changes in symmetric difference between source and target change sets."
+			);
+		}
 
 		// Create a new change set with the symmetric difference changes
 		const newChangeSet = await createChangeSet({
 			lix: { db: trx },
-			changes: symmetricDifferenceChanges.map((change) => ({
-				id: change.change_id,
-			})),
+			changes: symmetricDifferenceChanges,
 		});
 
 		// Create the change proposal

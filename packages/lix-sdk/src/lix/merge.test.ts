@@ -259,8 +259,8 @@ test("diffing should not be invoked to prevent the generation of duplicate chang
 		{
 			id: "1",
 			schema_key: "mock",
-			snapshot_id: commonSnapshots[0]!.id,
 			entity_id: "value1",
+			snapshot_id: commonSnapshots[0]!.id,
 			file_id: "mock-file",
 			plugin_key: "mock-plugin",
 		},
@@ -814,6 +814,9 @@ test.skip("it should copy change sets and merge memberships", async () => {
 		.values({
 			change_set_id: changeSet1.id,
 			change_id: mockChanges[1]!.id,
+			entity_id: mockChanges[1]!.entity_id,
+			schema_key: mockChanges[1]!.schema_key,
+			file_id: mockChanges[1]!.file_id,
 		})
 		.execute();
 

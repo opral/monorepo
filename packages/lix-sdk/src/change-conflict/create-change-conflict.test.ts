@@ -68,7 +68,8 @@ test("conflicts should be de-duplicated based on the change_conflict.key and ver
 	expect(conflictsAfter2Creation[0]?.key).toBe("mock-conflict");
 });
 
-test("if a conflict contains the same changes for a given key and version, no new conflict should be created", async () => {
+// commented out because of https://github.com/opral/lix-sdk/issues/285#issuecomment-2755409022
+test.skip("if a conflict contains the same changes for a given key and version, no new conflict should be created", async () => {
 	const lix = await openLixInMemory({});
 
 	const version0 = await createVersion({ lix, name: "version0" });

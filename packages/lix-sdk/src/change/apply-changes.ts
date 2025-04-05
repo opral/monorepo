@@ -54,8 +54,6 @@ export async function applyChanges(args: {
 
 		const plugins = await args.lix.plugin.getAll();
 
-		// TODO make detection of which plugin to use easier
-		// https://linear.app/opral/issue/LIXDK-104/add-detectedchangeschema
 		for (const [fileId, changes] of [
 			// applying lix own changes first
 			["lix_own_change_control", lixOwnChanges] as [string, Change[]],
