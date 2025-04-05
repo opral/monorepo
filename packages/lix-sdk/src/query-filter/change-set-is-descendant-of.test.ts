@@ -85,7 +85,6 @@ test("can be combined with ancestor filter to select sets between two points", a
 	});
 
 	// Select change sets that are descendants of cs1 AND ancestors of cs3
-	// Expected result: cs2, cs3
 	const results = await lix.db
 		.selectFrom("change_set")
 		.where(changeSetIsDescendantOf(cs1))
