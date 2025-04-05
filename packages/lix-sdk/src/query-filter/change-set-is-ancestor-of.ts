@@ -64,7 +64,8 @@ export function changeSetIsAncestorOf(
 					JOIN ap ON change_set_edge.child_id = ap.id
 					${depthLimit !== undefined ? sql`WHERE ap.depth < ${sql.lit(depthLimit)}` : sql``}
 				)
-				SELECT id FROM ap
+				-- Select only IDs with depth > 0 to exclude the starting node itself
+				SELECT id FROM ap WHERE depth > 0
 			)
 		` as any;
 }

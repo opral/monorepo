@@ -54,7 +54,8 @@ export function changeSetIsDescendantOf(
 					JOIN dp ON change_set_edge.parent_id = dp.id -- Join on parent_id to find children
 					${depthLimit !== undefined ? sql`WHERE dp.depth < ${sql.lit(depthLimit)}` : sql``}
 				)
-				SELECT id FROM dp
+				-- Select only IDs with depth > 0 to exclude the starting node itself
+				SELECT id FROM dp WHERE depth > 0
 			)
 		` as any;
 }
