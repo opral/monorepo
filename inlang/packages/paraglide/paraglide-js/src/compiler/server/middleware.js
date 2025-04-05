@@ -63,7 +63,7 @@ import * as runtime from "./runtime.js";
  */
 export async function paraglideMiddleware(request, resolve) {
 	if (!runtime.disableAsyncLocalStorage && !runtime.serverAsyncLocalStorage) {
-		const { AsyncLocalStorage } = await import("async_hooks");
+		const { AsyncLocalStorage } = await import("node:async_hooks");
 		runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
 	} else if (!runtime.serverAsyncLocalStorage) {
 		runtime.overwriteServerAsyncLocalStorage(createMockAsyncLocalStorage());
