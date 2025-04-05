@@ -50,6 +50,7 @@ export async function applyChangeSet(args: {
 				parent_id: version.change_set_id,
 				child_id: args.changeSet.id,
 			})
+			.onConflict((oc) => oc.doNothing())
 			.execute();
 
 		// Select changes associated with the specified change set
