@@ -6,6 +6,7 @@ import { applyChangeProposalDatabaseSchema } from "../change-proposal/database-s
 import { applyChangeSetEdgeDatabaseSchema } from "../change-set-edge/database-schema.js";
 import { applyVersionV2DatabaseSchema } from "../version-v2/database-schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set/database-schema.js";
+import { applyFileQueueDatabaseSchema } from "../file-queue/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -33,52 +34,6 @@ export function applySchema(args: {
 
     CHECK (is_valid_file_path(path))
   ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS file_queue (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    file_id TEXT NOT NULL,
-    data_before BLOB,
-    data_after BLOB,
-    path_before TEXT,
-    path_after TEXT,
-    metadata_before BLOB,
-    metadata_after BLOB
-  ) STRICT;
-
-  CREATE TRIGGER IF NOT EXISTS file_insert BEFORE INSERT ON file
-  BEGIN
-    INSERT INTO file_queue(
-      file_id, path_after, data_after, metadata_after
-    )
-    VALUES (
-      NEW.id, NEW.path, NEW.data, NEW.metadata
-    );
-    SELECT triggerFileQueue();
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS file_update BEFORE UPDATE ON file
-  BEGIN
-    INSERT INTO file_queue(
-      file_id, 
-      path_before, data_before, metadata_before, 
-      path_after, data_after, metadata_after
-    )
-
-    VALUES (
-      NEW.id, 
-      OLD.path, OLD.data, OLD.metadata,
-      NEW.path, NEW.data, NEW.metadata
-    );
-
-    SELECT triggerFileQueue();
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
-  BEGIN
-    INSERT INTO file_queue(file_id)
-    VALUES (OLD.id);
-    SELECT triggerFileQueue();
-  END;
 
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
@@ -249,6 +204,7 @@ export function applySchema(args: {
   END;
   `;
 
+	applyFileQueueDatabaseSchema(args.sqlite);
 	applyChangeProposalDatabaseSchema(args.sqlite);
 	applyMutationLogDatabaseSchema(args.sqlite);
 	applyChangeSetEdgeDatabaseSchema(args.sqlite);
