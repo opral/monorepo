@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, DependencyList } from "react";
 import { useLix } from "./use-lix.ts";
 import type { Lix } from "@lix-js/sdk";
 
@@ -6,11 +6,13 @@ import type { Lix } from "@lix-js/sdk";
  * Polls a query function and updates the state with the result.
  *
  * @param queryFn - The function to poll
+ * @param deps - Optional dependencies that will trigger a re-fetch when changed
  * @param interval - The interval in milliseconds
  * @returns A tuple of [data, loading, error, fetch]
  */
 export function useQuery<T>(
   queryFn: (lix: Lix) => Promise<T>,
+  deps: DependencyList = [],
   interval = 250
 ): [T | null, boolean, Error | null, () => void] {
   const lix = useLix();
@@ -22,6 +24,9 @@ export function useQuery<T>(
   const mountedRef = useRef(true);
 
   const fetch = async () => {
+    if (!mountedRef.current) return;
+    setLoading(true);
+
     try {
       const result = await queryFn(lix);
       const serialized = JSON.stringify(result);
@@ -49,7 +54,7 @@ export function useQuery<T>(
       mountedRef.current = false;
       clearInterval(id);
     };
-  }, [interval]);
+  }, [interval, ...(Array.isArray(deps) ? deps : [])]);
 
   return [data, loading, error, fetch];
 }
