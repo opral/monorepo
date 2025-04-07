@@ -1,7 +1,7 @@
 import { type RouteObject } from "react-router";
 import Index from "./routes/index.tsx";
-import About from "./routes/about/index.tsx";
 import Graph from "./routes/graph/index.tsx";
+import DataExplorer from "./routes/data-explorer/index.tsx";
 
 export const routes: RouteObject[] = [
   {
@@ -9,11 +9,11 @@ export const routes: RouteObject[] = [
     element: <Index />,
   },
   {
-    path: "/about",
-    element: <About />,
-  },
-  {
     path: "/graph",
     element: <Graph />,
+  },
+  {
+    path: "/data-explorer",
+    element: <DataExplorer />,
   },
 ];
