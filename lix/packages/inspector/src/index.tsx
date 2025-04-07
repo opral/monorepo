@@ -1,7 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { App } from "./App.tsx";
 import type { Lix } from "@lix-js/sdk";
+import {
+  createBrowserRouter,
+  createMemoryRouter,
+  RouterProvider,
+} from "react-router";
+import { routes } from "./routes/routes.tsx";
+import styles from "./styles.css?inline";
 
 export interface LixInspector {
   /**
@@ -19,8 +25,15 @@ let reactRoot: ReactDOM.Root | null = null;
 
 export async function createLixInspector(args: {
   lix: Lix;
+  routerType?: "memory" | "browser";
 }): Promise<LixInspector> {
-  console.log(args.lix);
+  const routerType = args.routerType ?? "memory";
+
+  const router =
+    routerType === "memory"
+      ? createMemoryRouter(routes)
+      : createBrowserRouter(routes);
+
   return {
     render: (node: HTMLElement) => {
       // 1. Ensure Shadow DOM exists directly on the host node
@@ -42,7 +55,8 @@ export async function createLixInspector(args: {
       // 3. Render the App component
       reactRoot.render(
         <React.StrictMode>
-          <App />
+          <style>{styles}</style>
+          <RouterProvider router={router} />
         </React.StrictMode>
       );
     },

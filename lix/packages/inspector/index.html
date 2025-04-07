@@ -19,7 +19,7 @@
       };
 
       // Create and render the inspector
-      const inspector = await createLixInspector({ lix: mockLix });
+      const inspector = await createLixInspector({ lix: mockLix, routerType: "browser" });
       inspector.render(document.getElementById("lix-inspector"));
     </script>
     <div id="lix-inspector"></div>
