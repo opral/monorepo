@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
-import { 
-  LixUploadedFile, 
-  uploadFileToLix,
-  checkDuplicateImage,
-  replaceImageInLix,
-  getFileFromLix
-} from "@/helper/upload-to-lix";
+import {
+	LixUploadedFile,
+	uploadFileToLix,
+	checkDuplicateImage,
+	replaceImageInLix,
+	getFileFromLix,
+} from "@/helper/uploadToLix";
 import { toast } from "sonner";
 import { lixAtom } from "@/state";
 import { useAtom } from "jotai";

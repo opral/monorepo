@@ -1,6 +1,5 @@
-import { Lix, openLixInMemory } from "@lix-js/sdk";
+import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "./saveLixToOpfs";
-import { getOriginPrivateDirectory } from "native-file-system-adapter";
 
 // Helper function to ensure a lix has a name
 export async function ensureLixName({ lix }: { lix: Lix }): Promise<string> {
@@ -35,12 +34,12 @@ export async function saveLixName({
 	try {
 		// The saveLixToOpfs function now handles finding existing files and cleanup
 		await saveLixToOpfs({ lix, customFileName: trimmedName });
-		
+
 		// Update the URL to include the lix ID for routing
 		const url = new URL(window.location.href);
 		url.searchParams.set("l", lixId.value);
 		window.history.replaceState({}, "", url.toString());
-		
+
 		console.log(`Successfully renamed lix to: ${trimmedName}`);
 	} catch (error) {
 		console.error("Error during file renaming:", error);
