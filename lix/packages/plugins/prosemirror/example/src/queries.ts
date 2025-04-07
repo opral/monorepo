@@ -52,7 +52,7 @@ export async function selectChanges() {
 }
 
 export async function selectCheckpoints(): Promise<
-	Array<ChangeSet & { change_count: number; created_at: string }>
+	Array<ChangeSet & { change_count: number }>
 > {
 	// First get the current version's change set
 	const activeVersion = await selectActiveVersion();
@@ -67,20 +67,15 @@ export async function selectCheckpoints(): Promise<
 			"change_set.id",
 			"change_set_element.change_set_id",
 		)
-		.innerJoin("change", "change_set_element.change_id", "change.id")
-		.where("change.schema_key", "=", "lix_change_set_table")
 		.selectAll("change_set")
-		.select("change.created_at")
+		.groupBy("change_set.id")
 		.select((eb) => [
 			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 		])
-		// group by is needed to not make sql aggregate the change_count into one row
-		.groupBy("change_set.id")
-		.orderBy("change.created_at", "desc")
 		.execute();
 
 	// need to filter out the count
-	return result.filter((checkpoint) => checkpoint.id !== null);
+	return result;
 }
 
 /**

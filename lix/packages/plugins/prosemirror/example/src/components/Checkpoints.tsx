@@ -1,9 +1,10 @@
 import { useQuery } from "../hooks/useQuery";
 import { selectCheckpoints, selectWorkingChangeSet } from "../queries";
 import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
-import { createCheckpointV2 } from "../utilities/createCheckpoint";
 import { useRef } from "react";
 import { useKeyValue } from "../hooks/useKeyValue";
+import { createCheckpoint } from "@lix-js/sdk";
+import { lix } from "../state";
 
 const Checkpoints: React.FC = () => {
 	const [stateCheckpoints] = useQuery(selectCheckpoints);
@@ -18,7 +19,7 @@ const Checkpoints: React.FC = () => {
 		const commentText = changeSetRef.current?.getCommentText() || "";
 
 		// Create the checkpoint and add the comment if it exists
-		await createCheckpointV2(commentText);
+		await createCheckpoint({ lix });
 
 		// Close any expanded change set
 		setExpandedChangeSetId(null);

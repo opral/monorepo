@@ -2,11 +2,15 @@ import { useRef, forwardRef, useImperativeHandle, useEffect } from "react";
 import { Discussion, DiscussionHandle } from "./Discussion";
 import { toRelativeTime } from "../utilities/timeUtils";
 import { EraserIcon, Eye, History, Clock, ChevronRight } from "lucide-react";
-import { restoreChangeSet, type ChangeSet as ChangeSetType } from "@lix-js/sdk";
+import {
+	applyChangeSet,
+	createUndoChangeSet,
+	experimentalRestoreChangeSet,
+	type ChangeSet as ChangeSetType,
+} from "@lix-js/sdk";
 import { useQuery } from "../hooks/useQuery";
 import { selectDiscussion } from "../queries";
 import { useKeyValue } from "../hooks/useKeyValue";
-import { undoChangeSet } from "../utilities/undoChangeSet";
 import { selectActiveAccount } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { lix } from "../state";
@@ -166,12 +170,10 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 										<button
 											className="btn btn-sm btn-ghost"
 											onClick={async () => {
-												try {
-													console.log("hello");
-													await restoreChangeSet({ lix, changeSet });
-												} catch (error) {
-													console.error(error);
-												}
+												await experimentalRestoreChangeSet({
+													lix,
+													changeSet,
+												});
 											}}
 											title="Restore to this change set"
 										>
@@ -184,7 +186,16 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 									<div className="tooltip" data-tip="Undo">
 										<button
 											className="btn btn-sm btn-ghost"
-											onClick={() => undoChangeSet(changeSet.id)}
+											onClick={async () => {
+												const undoChangeSet = await createUndoChangeSet({
+													lix,
+													changeSet: { id: changeSet.id },
+												});
+												await applyChangeSet({
+													lix,
+													changeSet: undoChangeSet,
+												});
+											}}
 											title="Undo this change set"
 										>
 											<EraserIcon size={16} />

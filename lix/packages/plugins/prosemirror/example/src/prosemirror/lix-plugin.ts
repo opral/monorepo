@@ -1,7 +1,7 @@
 import { Plugin, PluginKey, Transaction } from "prosemirror-state";
 import { schema } from "./schema";
 import { EditorView } from "prosemirror-view";
-import { Lix } from "@lix-js/sdk";
+import { executeSync, Lix } from "@lix-js/sdk";
 
 // Create a plugin key for the Lix plugin
 export const lixPluginKey = new PluginKey("lix-plugin");
@@ -23,12 +23,27 @@ export function lixProsemirror(options: LixPluginOptions) {
 		(...values: any[]) => {
 			const data = new TextDecoder().decode(values[1]);
 			const json = JSON.parse(data);
-			const metadata = values[2] ? JSON.parse(values[2]) : null;
 
-			// Only update the editor if this is not an internal change
-			if (!metadata || !metadata.prosemirror_editor_update) {
+			const isInternalUpdate = executeSync({
+				lix,
+				query: lix.db
+					.selectFrom("key_value")
+					.where("key", "=", "prosemirror_is_editor_update")
+					.select("value"),
+			})[0];
+
+			// Only update the editor if this is an external change
+			if (!isInternalUpdate) {
 				updateEditorFromExternalDoc(json);
 			}
+
+			// clean up the update flag
+			executeSync({
+				lix,
+				query: lix.db
+					.deleteFrom("key_value")
+					.where("key", "=", "prosemirror_is_editor_update"),
+			});
 			return null;
 		},
 		{
@@ -61,20 +76,24 @@ export function lixProsemirror(options: LixPluginOptions) {
 		}
 
 		// Set a new timeout for debouncing
-		saveTimeout = setTimeout(() => {
+		saveTimeout = setTimeout(async () => {
 			// If a save is already in progress, don't start another one
 			if (saveInProgress) return;
 
 			saveInProgress = true;
 			const fileData = new TextEncoder().encode(JSON.stringify(docJSON));
-			lix.db
-				.updateTable("file")
-				.set({
-					data: fileData,
-					metadata: {
-						prosemirror_editor_update: true,
-					},
+			await lix.db
+				.insertInto("key_value")
+				.values({
+					key: "prosemirror_is_editor_update",
+					value: "true",
+					skip_change_control: true,
 				})
+				.onConflict((oc) => oc.doUpdateSet({ value: "true" }))
+				.execute();
+			await lix.db
+				.updateTable("file")
+				.set({ data: fileData })
 				.where("id", "=", options.fileId)
 				.execute()
 				.then(() => {

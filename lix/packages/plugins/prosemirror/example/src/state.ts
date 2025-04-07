@@ -1,13 +1,11 @@
-import { openLixInMemory } from "@lix-js/sdk";
+import { createCheckpoint, openLixInMemory } from "@lix-js/sdk";
 import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
-// import initialDoc from "../assets/before.json?raw";
-import { createCheckpointV2 } from "./utilities/createCheckpoint";
 
 export const lix = await openLixInMemory({
 	providePlugins: [prosemirrorPlugin],
 });
 
-await createCheckpointV2("initial checkpoint");
+await createCheckpoint({ lix });
 
 // Insert the initial document if it doesn't exist
 export const prosemirrorFile = await lix.db
@@ -24,4 +22,3 @@ export const prosemirrorFile = await lix.db
 	.onConflict((oc) => oc.doNothing())
 	.returningAll()
 	.executeTakeFirstOrThrow();
-
