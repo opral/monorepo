@@ -3,9 +3,7 @@ import {
   Download, MoreVertical,
   PenSquare, Trash2, FileText,
   Plus, ArrowLeft, Folder, FolderOpen,
-  FileUp,
-  FilePlus,
-  FolderPlus
+  Upload, FolderPlus
 } from "lucide-react"
 import { setupAriaHiddenFixes } from "@/helper/fixAriaHidden"
 import { useAtom } from "jotai"
@@ -648,7 +646,7 @@ export function LixSidebar() {
               className="flex justify-between items-center mr-1"
               onClick={handleImportFile}
             >
-              <FileUp className="h-4 w-4" />
+              <Upload className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
@@ -657,7 +655,7 @@ export function LixSidebar() {
               className="flex justify-between items-center"
               onClick={createNewFile}
             >
-              <FilePlus className="h-4 w-4" />
+              <Plus className="h-4 w-4" />
             </Button>
           </SidebarGroupLabel>
 
