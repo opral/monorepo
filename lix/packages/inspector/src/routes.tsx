@@ -1,7 +1,7 @@
 import { type RouteObject } from "react-router";
-import Index from "./index.tsx";
-import About from "./about/index.tsx";
-import Graph from "./graph/index.tsx";
+import Index from "./routes/index.tsx";
+import About from "./routes/about/index.tsx";
+import Graph from "./routes/graph/index.tsx";
 
 export const routes: RouteObject[] = [
   {

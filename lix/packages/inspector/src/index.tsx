@@ -6,7 +6,7 @@ import {
   createMemoryRouter,
   RouterProvider,
 } from "react-router";
-import { routes } from "./routes/routes.tsx";
+import { routes } from "./routes.tsx";
 import styles from "./styles.css?inline";
 import { LixProvider } from "./hooks/use-lix.ts";
 
