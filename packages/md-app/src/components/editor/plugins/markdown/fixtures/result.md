@@ -4,15 +4,15 @@
 
 - Total test files: 18
 - Total test cases: 143
-- Generated on: 2025-04-07T15:52:58.303Z
+- Generated on: 2025-04-07T15:57:54.982Z
 
-### Overall Status: ❌ 49 Failing Tests
+### Overall Status: ❌ 50 Failing Tests
 
 ### Test Results Breakdown
 
-- 🟢 Perfect roundtrip: 71/143 (50%)
+- 🟢 Perfect roundtrip: 70/143 (49%)
 - 🟡 Acceptable transformation: 23/143 (16%)
-- 🔴 Failing tests: 49/143 (34%)
+- 🔴 Failing tests: 50/143 (35%)
 
 ### Known Issues in the Markdown Parser
 
@@ -3176,11 +3176,11 @@ Last line
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 18/24 (75%)
+- 🟢 Perfect roundtrip (input = output): 17/24 (71%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 0/24 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 6/24 (25%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 7/24 (29%)
 
-**Overall Status**: ❌ 6 failing tests
+**Overall Status**: ❌ 7 failing tests
 
 ---
 
@@ -3261,7 +3261,7 @@ Last line
 </td>
 <td>
 
-\[This is not a link]\(<https://example.com>)
+\[This is not a link]\([https://example.com](https://example.com))
 
 </td>
 </tr>
@@ -3273,7 +3273,7 @@ Last line
 </td>
 <td>
 
-<pre><code>\[This is not a link]\(&lt;https://example.com&gt;)</code></pre>
+<pre><code>\[This is not a link]\([https://example.com](https://example.com))</code></pre>
 
 </td>
 </tr>
@@ -3483,7 +3483,7 @@ HTML entities: &amp; &lt; &gt; &quot; &apos;
 </td>
 <td>
 
-HTML entities: & < > " '
+HTML entities: & \< > " '
 
 </td>
 </tr>
@@ -3495,7 +3495,7 @@ HTML entities: & < > " '
 </td>
 <td>
 
-<pre><code>HTML entities: &amp; &lt; &gt; &quot; &#039;</code></pre>
+<pre><code>HTML entities: &amp; \&lt; &gt; &quot; &#039;</code></pre>
 
 </td>
 </tr>
@@ -3503,12 +3503,13 @@ HTML entities: & < > " '
 
 </details>
 
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - literal special characters</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - literal special characters</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 50%">Input</th>
+<th style="width: 50%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -3516,11 +3517,21 @@ HTML entities: & < > " '
 Literal characters: & < > " '
 
 </td>
+<td>
+
+Literal characters: & \< > " '
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>Literal characters: &amp; &lt; &gt; &quot; &#039;</code></pre>
+
+</td>
+<td>
+
+<pre><code>Literal characters: &amp; \&lt; &gt; &quot; &#039;</code></pre>
 
 </td>
 </tr>
