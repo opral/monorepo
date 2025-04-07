@@ -122,6 +122,12 @@ export const defaultNodes: TNodes = {
 				text: "\n",
 			};
 		},
+		serialize: () => {
+			return {
+				type: "html",
+				value: "<br />",
+			} as any; // TODO fix type
+		},
 	},
 	bold: {
 		deserialize: (mdastNode, deco, options) => {
@@ -503,7 +509,7 @@ export const defaultNodes: TNodes = {
 				}
 			};
 
-			children.forEach((child) => {
+			children.forEach((child, index, children) => {
 				const { type } = child as { type?: string };
 
 				if (type && splitBlockTypes.has(type)) {
@@ -545,7 +551,18 @@ export const defaultNodes: TNodes = {
 						}
 					});
 				} else {
-					inlineNodes.push(child);
+					// TODO remove the last br of the paragraph if the previos element is not a br
+
+					if (
+						child.text === "\n" &&
+						children.length > 1 &&
+						index === children.length - 1 
+					) {
+						// no - op
+						console.log("test");
+					} else {
+						inlineNodes.push(child);
+					}
 				}
 			});
 
@@ -554,9 +571,28 @@ export const defaultNodes: TNodes = {
 			return elements.length === 1 ? elements[0] : elements;
 		},
 		serialize: (node, options) => {
+			let cleanedChildren = node.children;
+
+			if (
+				node.children.length > 0 &&
+				cleanedChildren[cleanedChildren.length - 1].text === "\n"
+			) {
+				// if the last child of the paragraph is a line breake add an additional one
+				cleanedChildren.push({ text: "\n" });
+			}
+
+			cleanedChildren = cleanedChildren.map((child) => {
+				if (child.text === "\n") {
+					return {
+						type: "break",
+					} as any;
+				}
+				return child;
+			});
+
 			return {
 				children: convertNodesSerialize(
-					node.children,
+					cleanedChildren,
 					options
 				) as MdParagraph["children"],
 				type: "paragraph",
