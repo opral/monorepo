@@ -11,6 +11,7 @@ import type { ChangeSet } from "./database-schema.js";
 
 export async function createCheckpoint(args: {
 	lix: Lix;
+	id?: string;
 	/**
 	 * The comment to add to the checkpoint.
 	 *
@@ -49,8 +50,7 @@ export async function createCheckpoint(args: {
 			.selectFrom("change_set")
 			.where(changeSetHasLabel(checkpointLabel))
 			.where(changeSetIsAncestorOf({ id: version.change_set_id }))
-			// potential todo: handle multiple checkpoints as parents
-			.select(["id"])
+			.select("id")
 			.executeTakeFirst();
 
 		const leafChanges = await trx
@@ -60,17 +60,44 @@ export async function createCheckpoint(args: {
 				"change_set.id",
 				"change_set_element.change_set_id"
 			)
-			// get the changes between the last checkpoint and the versions change set
-			.where(changeSetIsAncestorOf({ id: version.change_set_id }))
+			.innerJoin("change", "change.id", "change_set_element.change_id")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			// get the changes between the last checkpoint and the current state
+			.where(
+				changeSetIsAncestorOf(
+					{ id: version.change_set_id },
+					{ inclusive: true }
+				)
+			)
 			.$if(parentCheckpoint !== undefined, (eb) =>
-				eb.where(changeSetIsDescendantOf(parentCheckpoint!))
+				eb
+					// get the descendants of the last checkpoint
+					.where(changeSetIsDescendantOf(parentCheckpoint!))
+					// exclude changes that were already in the last checkpoint
+					.where("change_id", "not in", (subquery) =>
+						subquery
+							.selectFrom("change_set_element")
+							.where(
+								"change_set_element.change_set_id",
+								"=",
+								parentCheckpoint!.id
+							)
+							.select(["change_id"])
+					)
 			)
 			.where(changeSetElementIsLeafOf([{ id: version.change_set_id }]))
-			.select(["change_id as id", "entity_id", "schema_key", "file_id"])
+			.select([
+				"change_set_element.change_id as id",
+				"change_set_element.entity_id",
+				"change_set_element.schema_key",
+				"change_set_element.file_id",
+			])
+			.select("snapshot.content")
 			.execute();
 
 		const newChangeSet = await createChangeSet({
 			lix: { db: trx },
+			id: args.id,
 			changes: leafChanges,
 			labels: [checkpointLabel],
 			parents: parentCheckpoint

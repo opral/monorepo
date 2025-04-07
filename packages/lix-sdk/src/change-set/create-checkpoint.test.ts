@@ -3,6 +3,9 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { createChangeSet } from "./create-change-set.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
+import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
+import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 
 test("creates a checkpoint that has an edge to the version's change set", async () => {
 	// Create a Lix instance with the mockJsonPlugin
@@ -154,4 +157,152 @@ test("creates a checkpoint with edges to both the version's change set AND the p
 		.executeTakeFirstOrThrow();
 
 	expect(updatedVersion.change_set_id).toBe(secondCheckpoint.id);
+});
+
+test("only contains the leaf change diff (not all) to the compared to the previous checkpoint", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file1",
+			data: new TextEncoder().encode(`{ "name": "Max", "age": 25 }`),
+			path: "/test.json",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await fileQueueSettled({ lix });
+
+	// should contain the file insert and name max change
+	const checkpoint1 = await createCheckpoint({ lix });
+
+	await lix.db
+		.updateTable("file")
+		.set({ data: new TextEncoder().encode(`{ "name": "Julia", "age": 25 }`) })
+		.execute();
+
+	await fileQueueSettled({ lix });
+
+	const checkpoint2 = await createCheckpoint({ lix });
+
+	const changesCheckpoint1 = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_element.change_set_id", "=", checkpoint1.id)
+		.where("change_set_element.schema_key", "=", "mock_json_property")
+		.orderBy("change_set_element.entity_id asc")
+		.select([
+			"change_set_element.entity_id",
+			"change_set_element.schema_key",
+			"change_set_element.file_id",
+		])
+		.execute();
+
+	const changesCheckpoint2 = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_element.change_set_id", "=", checkpoint2.id)
+		.where("change_set_element.schema_key", "=", "mock_json_property")
+		.select([
+			"change_set_element.entity_id",
+			"change_set_element.schema_key",
+			"change_set_element.file_id",
+		])
+		.orderBy("change_set_element.entity_id asc")
+		.execute();
+
+	// both age and name have been modified before creating the checkpoint
+	expect(changesCheckpoint1).toEqual([
+		{
+			file_id: "file1",
+			schema_key: "mock_json_property",
+			entity_id: "age",
+		},
+		{
+			file_id: "file1",
+			schema_key: "mock_json_property",
+			entity_id: "name",
+		},
+	]);
+
+	// only name has been modified before creating checkpoint 2
+	expect(changesCheckpoint2).toEqual([
+		{
+			file_id: "file1",
+			schema_key: "mock_json_property",
+			entity_id: "name",
+		},
+	]);
+});
+
+test("handles own change control changes", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "mock_test",
+			value: "hello world",
+		})
+		.execute();
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("change.schema_key", "=", "lix_key_value_table")
+		.select(["id"])
+		.execute();
+
+	expect(changes).toHaveLength(1);
+
+	// checkpoint contains the key value update
+	const checkpoint = await createCheckpoint({
+		lix,
+	});
+
+	const checkpointElements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", checkpoint.id)
+		.where("schema_key", "=", "lix_key_value_table")
+		.selectAll()
+		.execute();
+
+	expect(checkpointElements).toHaveLength(1);
+});
+
+test("creating multiple subsequent checkpoints leads to connected edges", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "mock_test",
+			value: "hello world",
+		})
+		.execute();
+
+	const checkpoint0 = await createCheckpoint({
+		id: "checkpoint0",
+		lix,
+	});
+
+	await lix.db
+		.updateTable("key_value")
+		.set({ value: "hello world 2" })
+		.where("key", "=", "mock_test")
+		.execute();
+
+	const checkpoint1 = await createCheckpoint({
+		id: "checkpoint1",
+		lix,
+	});
+
+	const parentCheckpoint = await lix.db
+		.selectFrom("change_set")
+		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
+		.select("id")
+		.executeTakeFirstOrThrow();
+
+	expect(parentCheckpoint.id).toBe(checkpoint0.id);
 });

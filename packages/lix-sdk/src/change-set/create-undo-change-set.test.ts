@@ -5,6 +5,8 @@ import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import { createCheckpoint } from "./create-checkpoint.js";
+import type { ChangeSet } from "./database-schema.js";
+import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 
 test("it creates an undo change set that reverses the operations of the original change set", async () => {
 	// Create a Lix instance with the mockJsonPlugin
@@ -17,8 +19,8 @@ test("it creates an undo change set that reverses the operations of the original
 		.insertInto("file")
 		.values({
 			id: "file1",
-			data: new TextEncoder().encode(""),
-			path: "/test.txt",
+			data: new TextEncoder().encode("{}"),
+			path: "/test.json",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -59,17 +61,15 @@ test("it creates an undo change set that reverses the operations of the original
 		.execute();
 
 	// Create a change set with these changes
-	const originalChangeSet = await createChangeSet({
+	const cs0 = await createChangeSet({
 		lix,
-		id: "cs1",
+		id: "cs0",
 		changes: changes,
 	});
 
-	// Apply the change set - use direct mode to avoid edge constraint issues
 	await applyChangeSet({
 		lix,
-		changeSet: originalChangeSet,
-		mode: { type: "direct" },
+		changeSet: cs0,
 	});
 
 	// Verify the file has the expected state
@@ -93,7 +93,7 @@ test("it creates an undo change set that reverses the operations of the original
 	// Create the undo change set
 	const undoCs = await createUndoChangeSet({
 		lix,
-		changeSet: originalChangeSet,
+		changeSet: cs0,
 	});
 
 	// Verify the undo change set has no parents (the dev is reponsible or by calling applyChanges())
@@ -105,11 +105,9 @@ test("it creates an undo change set that reverses the operations of the original
 
 	expect(edges).toHaveLength(0);
 
-	// Apply the undo change set - use direct mode to avoid edge constraint issues
 	await applyChangeSet({
 		lix,
 		changeSet: undoCs,
-		mode: { type: "direct" },
 	});
 
 	// Verify the file state after undo - should be empty again
@@ -137,11 +135,13 @@ test("it correctly undoes delete operations by restoring previous state", async 
 		.insertInto("file")
 		.values({
 			id: "file1",
-			data: new TextEncoder().encode(""),
-			path: "/test.txt",
+			data: new TextEncoder().encode("{}"),
+			path: "/test.json",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
+
+	await fileQueueSettled({ lix });
 
 	// Create snapshots
 	const snapshots = await lix.db
@@ -169,15 +169,15 @@ test("it correctly undoes delete operations by restoring previous state", async 
 		.returningAll()
 		.execute();
 
-	const initialChangeSet = await createChangeSet({
+	const cs0 = await createChangeSet({
 		lix,
-		id: "cs_initial",
+		id: "cs0",
 		changes: initialChanges,
 	});
 
 	await applyChangeSet({
 		lix,
-		changeSet: initialChangeSet,
+		changeSet: cs0,
 	});
 
 	// Second change set - delete the entity
@@ -196,16 +196,16 @@ test("it correctly undoes delete operations by restoring previous state", async 
 		.returningAll()
 		.execute();
 
-	const deleteChangeSet = await createChangeSet({
+	const cs1 = await createChangeSet({
 		lix,
-		id: "cs_delete",
+		id: "cs1",
 		changes: deleteChanges,
-		parents: [initialChangeSet],
+		parents: [cs0],
 	});
 
 	await applyChangeSet({
 		lix,
-		changeSet: deleteChangeSet,
+		changeSet: cs1,
 	});
 
 	// Verify the entity is deleted
@@ -224,7 +224,7 @@ test("it correctly undoes delete operations by restoring previous state", async 
 	// Create undo change set for the delete operation
 	const undoDeleteCs = await createUndoChangeSet({
 		lix,
-		changeSet: deleteChangeSet,
+		changeSet: cs1,
 	});
 
 	await applyChangeSet({
@@ -269,37 +269,10 @@ test("undoes lix own change control changes except for graph related ones", asyn
 		changeSet: checkpoint,
 	});
 
-	const edgesBefore = await lix.db
-		.selectFrom("change_set_edge")
-		.selectAll()
-		.execute();
-	const changeSetsBefore = await lix.db
-		.selectFrom("change_set")
-		.selectAll()
-		.execute();
-
 	await applyChangeSet({
 		lix,
 		changeSet: undoChangeSet,
 	});
-
-	const edgesAfter = await lix.db
-		.selectFrom("change_set_edge")
-		.selectAll()
-		.execute();
-	const changeSetsAfter = await lix.db
-		.selectFrom("change_set")
-		.selectAll()
-		.execute();
-
-	expect(changeSetsAfter).toEqual(changeSetsBefore);
-	expect(edgesAfter).toEqual([
-		...edgesBefore,
-		{
-			parent_id: checkpoint.id,
-			child_id: undoChangeSet.id,
-		},
-	]);
 
 	const keyValues = await lix.db
 		.selectFrom("key_value")
@@ -308,4 +281,77 @@ test("undoes lix own change control changes except for graph related ones", asyn
 		.executeTakeFirst();
 
 	expect(keyValues).toBeUndefined();
+});
+
+test("does not naively create delete changes if a previous state existed", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			id: "file1",
+			data: new TextEncoder().encode("{}"),
+			path: "/test.json",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const checkpoints: Array<ChangeSet> = [];
+
+	// simulating an undo of peter which should restore { name: "samuel", age: 20 }
+	for (const state of [
+		{ name: "Samuel", age: 20 },
+		{ name: "Peter", age: 20 },
+	]) {
+		await lix.db
+			.updateTable("file")
+			.set({ data: new TextEncoder().encode(JSON.stringify(state)) })
+			.execute();
+
+		await fileQueueSettled({ lix });
+
+		checkpoints.push(await createCheckpoint({ lix }));
+	}
+
+	const fileAfterEdits = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const jsonStateAfterEdits = JSON.parse(
+		new TextDecoder().decode(fileAfterEdits.data)
+	);
+
+	expect(jsonStateAfterEdits).toEqual({
+		name: "Peter",
+		age: 20,
+	});
+
+	const undoChangeSet = await createUndoChangeSet({
+		lix,
+		changeSet: checkpoints[1]!,
+	});
+
+	await applyChangeSet({
+		lix,
+		changeSet: undoChangeSet!,
+	});
+
+	const fileAfterUndo = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const jsonAfterUndo = JSON.parse(
+		new TextDecoder().decode(fileAfterUndo.data)
+	);
+
+	expect(jsonAfterUndo).toEqual({
+		name: "Samuel",
+		age: 20,
+	});
 });

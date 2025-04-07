@@ -16,6 +16,7 @@ import type {
 	ChangeSetLabelTable,
 	ChangeSetTable,
 } from "../change-set/database-schema.js";
+import type { FileQueueTable } from "../file-queue/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -66,20 +67,6 @@ export type LixDatabaseSchema = {
 
 	mutation_log: MutationLogTable;
 	active_version: ActiveVersionTable;
-};
-
-export type FileQueueEntry = Selectable<FileQueueTable>;
-export type NewFileQueueEntry = Insertable<FileQueueTable>;
-export type FileQueueEntryUpdate = Updateable<FileQueueTable>;
-type FileQueueTable = {
-	id: Generated<number>;
-	file_id: string;
-	path_before: string | null;
-	path_after: string | null;
-	data_before: Uint8Array | null;
-	data_after: Uint8Array | null;
-	metadata_before: Record<string, any> | null;
-	metadata_after: Record<string, any> | null;
 };
 
 // named lix file to avoid conflict with built-in file type

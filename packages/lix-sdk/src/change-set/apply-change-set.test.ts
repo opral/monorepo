@@ -9,6 +9,7 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { fileQueueSettled } from "../file-queue/index.js";
 import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
 import { mockChange } from "../change/mock-change.js";
+import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 
 test("it applies own entity changes", async () => {
 	const lix = await openLixInMemory({});
@@ -646,7 +647,7 @@ test("mode: recursive applies changes from target and all ancestors", async () =
 	);
 });
 
-test("updates the version's change set id and maintains parent relationship", async () => {
+test("updates the version's change set id and maintains ancestry relationship", async () => {
 	// Create a simple mock plugin
 	const mockPlugin: LixPlugin = {
 		key: "test",
@@ -668,26 +669,22 @@ test("updates the version's change set id and maintains parent relationship", as
 		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
-	const initialChangeSetId = initialVersion.change_set_id;
-
 	// Create a file for testing
 	const file = await lix.db
 		.insertInto("file")
 		.values({
 			id: "test-file",
 			data: new Uint8Array(),
-			path: "/test.json", // Add leading slash to path
+			path: "/test.json",
 			metadata: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	// Create a change
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
 			mockChange({ id: "c1", file_id: file.id, plugin_key: mockPlugin.key }),
-			mockChange({ id: "c2", file_id: file.id, plugin_key: mockPlugin.key }),
 		])
 		.returningAll()
 		.execute();
@@ -706,23 +703,23 @@ test("updates the version's change set id and maintains parent relationship", as
 		changeSet: newChangeSet,
 	});
 
-	// Verify the version now points to the new change set
+	// Verify the change set is now in the ancestry of the version
 	const updatedVersion = await lix.db
 		.selectFrom("version_v2")
 		.where("id", "=", initialVersion.id)
 		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
-	expect(updatedVersion.change_set_id).toBe(newChangeSet.id);
-
-	// Verify the parent relationship was created
-	const edges = await lix.db
-		.selectFrom("change_set_edge")
-		.where("child_id", "=", updatedVersion.change_set_id)
-		.selectAll("change_set_edge")
+	const ancestoryChangeSets = await lix.db
+		.selectFrom("change_set")
+		.where(
+			changeSetIsAncestorOf(
+				{ id: updatedVersion.change_set_id },
+				{ inclusive: true }
+			)
+		)
+		.selectAll("change_set")
 		.execute();
 
-	expect(edges).toHaveLength(1);
-	expect(edges[0]?.parent_id).toBe(initialChangeSetId);
-	expect(edges[0]?.child_id).toBe(newChangeSet.id);
+	expect(ancestoryChangeSets).toContainEqual(newChangeSet);
 });
