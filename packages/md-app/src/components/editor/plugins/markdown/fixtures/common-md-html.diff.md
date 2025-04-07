@@ -211,7 +211,6 @@ This paragraph has a line break using HTML.<br />This is on a new line.
 ### Markdown Heading Inside HTML
 
 *   List item 1
-
 *   List item 2
 
 </div>
@@ -470,7 +469,6 @@ This paragraph has a line break using HTML.&lt;br /&gt;This is on a new line.
 ### Markdown Heading Inside HTML
 
 *   List item 1
-
 *   List item 2
 
 &lt;/div&gt;

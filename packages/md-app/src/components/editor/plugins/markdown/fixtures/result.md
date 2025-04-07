@@ -2,17 +2,17 @@
 
 ## Summary
 
-- Total test files: 17
-- Total test cases: 130
-- Generated on: 2025-04-07T08:20:42.462Z
+- Total test files: 18
+- Total test cases: 143
+- Generated on: 2025-04-07T15:52:58.303Z
 
 ### Overall Status: ❌ 49 Failing Tests
 
 ### Test Results Breakdown
 
-- 🟢 Perfect roundtrip: 64/130 (49%)
-- 🟡 Acceptable transformation: 17/130 (13%)
-- 🔴 Failing tests: 49/130 (38%)
+- 🟢 Perfect roundtrip: 71/143 (50%)
+- 🟡 Acceptable transformation: 23/143 (16%)
+- 🔴 Failing tests: 49/143 (34%)
 
 ### Known Issues in the Markdown Parser
 
@@ -1608,15 +1608,10 @@ the identation may differ 1 meaning is the same -->
 ### Unordered Lists
 
 *   Item 1
-
 *   Item 2
-
     *   Nested item 2.1
-
     *   Nested item 2.2
-
         *   Deeply nested item
-
 *   Item 3
 
 </td>
@@ -1659,15 +1654,10 @@ the identation may differ 1 meaning is the same --&gt;
 ### Unordered Lists
 
 *   Item 1
-
 *   Item 2
-
     *   Nested item 2.1
-
     *   Nested item 2.2
-
         *   Deeply nested item
-
 *   Item 3</code></pre>
 
 </td>
@@ -1712,13 +1702,9 @@ the identation may differ 1 meaning is the same --&gt;
 ### Ordered Lists
 
 1.  First item
-
 2.  Second item
-
     1.  Nested first
-
     2.  Nested second
-
 3.  Third item
 
 </td>
@@ -1750,13 +1736,9 @@ the identation may differ 1 meaning is the same --&gt;
 <pre><code>### Ordered Lists
 
 1.  First item
-
 2.  Second item
-
     1.  Nested first
-
     2.  Nested second
-
 3.  Third item</code></pre>
 
 </td>
@@ -1801,13 +1783,9 @@ the identation may differ 1 meaning is the same --&gt;
 ### Mixed Lists
 
 1.  First ordered item
-
     *   Unordered sub-item
-
     *   Another unordered sub-item
-
         1.  Ordered sub-sub-item
-
 2.  Second ordered item
 
 </td>
@@ -1839,13 +1817,9 @@ the identation may differ 1 meaning is the same --&gt;
 <pre><code>### Mixed Lists
 
 1.  First ordered item
-
     *   Unordered sub-item
-
     *   Another unordered sub-item
-
         1.  Ordered sub-sub-item
-
 2.  Second ordered item</code></pre>
 
 </td>
@@ -1877,9 +1851,7 @@ the identation may differ 1 meaning is the same --&gt;
 ### Task Lists
 
 *   Completed task
-
 *   Incomplete task
-
 *   Another completed task
 
 </td>
@@ -1899,9 +1871,7 @@ the identation may differ 1 meaning is the same --&gt;
 <pre><code>### Task Lists
 
 *   Completed task
-
 *   Incomplete task
-
 *   Another completed task</code></pre>
 
 </td>
@@ -2422,7 +2392,6 @@ Below horizontal rule.</code></pre>
 > Heading in a blockquote
 
 1.  **Bold list item** with *italic text*
-
     *   Nested list with `code` and [link](https://example.com)
 
 </td>
@@ -2453,7 +2422,6 @@ Below horizontal rule.</code></pre>
 <pre><code>&gt; Heading in a blockquote
 
 1.  **Bold list item** with *italic text*
-
     *   Nested list with `code` and [link](https://example.com)</code></pre>
 
 </td>
@@ -4825,7 +4793,6 @@ This paragraph has a line break using HTML.<br />This is on a new line.
 ### Markdown Heading Inside HTML
 
 *   List item 1
-
 *   List item 2
 
 </div>
@@ -5084,7 +5051,6 @@ This paragraph has a line break using HTML.&lt;br /&gt;This is on a new line.
 ### Markdown Heading Inside HTML
 
 *   List item 1
-
 *   List item 2
 
 &lt;/div&gt;
@@ -5322,6 +5288,511 @@ Paragraph with&amp;#x20;
 
 ---
 
+# Test File: common-md-line-breaks
+
+## Test Summary
+
+- 🟢 Perfect roundtrip (input = output): 7/13 (54%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 6/13 (46%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/13 (0%)
+
+**Overall Status**: ✅ All tests passing (7 perfect, 6 acceptable)
+
+---
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line breaks</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
+Paragraphs are separated by blank lines.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>Paragraphs are separated by blank lines.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - 2 spaces + break</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
+<td>
+
+This paragraph has a line break  
+created with two trailing spaces.
+
+</td>
+<td>
+
+This paragraph has a line break<br />created with two trailing spaces.
+
+</td>
+<td>
+
+This paragraph has a line break<br />created with two trailing spaces.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This paragraph has a line break  
+created with two trailing spaces.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This paragraph has a line break&lt;br /&gt;created with two trailing spaces.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This paragraph has a line break&lt;br /&gt;created with two trailing spaces.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - backslash + break</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
+<td>
+
+This one has a line break\
+created with a backslash.
+
+</td>
+<td>
+
+This one has a line break<br />created with a backslash.
+
+</td>
+<td>
+
+This one has a line break<br />created with a backslash.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a line break\
+created with a backslash.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;created with a backslash.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;created with a backslash.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - non mdx br tag</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
+<td>
+
+This one has a line break<br>created with a html break tag.
+
+</td>
+<td>
+
+This one has a line break<br />created with a html break tag.
+
+</td>
+<td>
+
+This one has a line break<br />created with a html break tag.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a line break&lt;br&gt;created with a html break tag.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;created with a html break tag.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;created with a html break tag.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - br tag</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
+This one has a line break<br />created with a xhtml break tag.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;created with a xhtml break tag.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - br + linebreak</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
+This one has a line break<br />
+created with a break tag and a new line.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;
+created with a break tag and a new line.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - 2x linebreak</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
+This one has a two line breaks
+
+created with a break tag and two new lines.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a two line breaks
+
+created with a break tag and two new lines.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - br + 2x linebreak</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
+<td>
+
+This one has a break tag at the end of a paragraph which should be gone<br />
+
+created with a two new lines.
+
+</td>
+<td>
+
+This one has a break tag at the end of a paragraph which should be gone
+
+created with a two new lines.
+
+</td>
+<td>
+
+This one has a break tag at the end of a paragraph which should be gone
+
+created with a two new lines.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a break tag at the end of a paragraph which should be gone&lt;br /&gt;
+
+created with a two new lines.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a break tag at the end of a paragraph which should be gone
+
+created with a two new lines.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a break tag at the end of a paragraph which should be gone
+
+created with a two new lines.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - br, br + 2x linebreak</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
+This one has a line break<br /><br />
+
+created with a break tag and two new lines.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;&lt;br /&gt;
+
+created with a break tag and two new lines.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - br, br, br + 2x linebreak</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
+This one has a line break<br /><br /><br />
+
+created with a break tag and two new lines.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+
+created with a break tag and two new lines.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - br + 2 spaces + linebreak</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
+<td>
+
+This one has a line break<br />  
+created with a break tag followed by a space and new lines.
+
+</td>
+<td>
+
+This one has a line break<br /><br />created with a break tag followed by a space and new lines.
+
+</td>
+<td>
+
+This one has a line break<br /><br />created with a break tag followed by a space and new lines.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;  
+created with a break tag followed by a space and new lines.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;&lt;br /&gt;created with a break tag followed by a space and new lines.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;&lt;br /&gt;created with a break tag followed by a space and new lines.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - br + backslash + linebreak</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
+<td>
+
+This one has a line break<br />\
+created with a break tag followed by a space and new lines.
+
+</td>
+<td>
+
+This one has a line break<br /><br />created with a break tag followed by a space and new lines.
+
+</td>
+<td>
+
+This one has a line break<br /><br />created with a break tag followed by a space and new lines.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;\
+created with a break tag followed by a space and new lines.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;&lt;br /&gt;created with a break tag followed by a space and new lines.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This one has a line break&lt;br /&gt;&lt;br /&gt;created with a break tag followed by a space and new lines.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - simple paragraph</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
+And another one to check if it worked
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>And another one to check if it worked</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+---
+
 # Test File: common-md-links
 
 ## Test Summary
@@ -5509,9 +5980,7 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 *   Item 1
-
 *   Item 2
-
 *   Item 3
 
 </td>
@@ -5527,9 +5996,7 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>*   Item 1
-
 *   Item 2
-
 *   Item 3</code></pre>
 
 </td>
@@ -5565,9 +6032,7 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 *   Alternative item 1
-
 *   Alternative item 2
-
 *   Alternative item 3
 
 </td>
@@ -5590,9 +6055,7 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>*   Alternative item 1
-
 *   Alternative item 2
-
 *   Alternative item 3</code></pre>
 
 </td>
@@ -5628,9 +6091,7 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 *   Another alternative item 1
-
 *   Another alternative item 2
-
 *   Another alternative item 3
 
 </td>
@@ -5653,9 +6114,7 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>*   Another alternative item 1
-
 *   Another alternative item 2
-
 *   Another alternative item 3</code></pre>
 
 </td>
@@ -5689,21 +6148,13 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 *   Item 1
-
     *   Nested item 1.1
-
     *   Nested item 1.2
-
         *   Deeply nested item 1.2.1
-
         *   Deeply nested item 1.2.2
-
     *   Nested item 1.3
-
 *   Item 2
-
     *   Nested item 2.1
-
     *   Nested item 2.2
 
 </td>
@@ -5725,21 +6176,13 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>*   Item 1
-
     *   Nested item 1.1
-
     *   Nested item 1.2
-
         *   Deeply nested item 1.2.1
-
         *   Deeply nested item 1.2.2
-
     *   Nested item 1.3
-
 *   Item 2
-
     *   Nested item 2.1
-
     *   Nested item 2.2</code></pre>
 
 </td>
@@ -5767,9 +6210,7 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 1.  First item
-
 2.  Second item
-
 3.  Third item
 
 </td>
@@ -5785,9 +6226,7 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>1.  First item
-
 2.  Second item
-
 3.  Third item</code></pre>
 
 </td>
@@ -5821,21 +6260,13 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 1.  First item
-
     1.  Nested item 1.1
-
     2.  Nested item 1.2
-
         1.  Deeply nested item 1.2.1
-
         2.  Deeply nested item 1.2.2
-
     3.  Nested item 1.3
-
 2.  Second item
-
     1.  Nested item 2.1
-
     2.  Nested item 2.2
 
 </td>
@@ -5857,21 +6288,13 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>1.  First item
-
     1.  Nested item 1.1
-
     2.  Nested item 1.2
-
         1.  Deeply nested item 1.2.1
-
         2.  Deeply nested item 1.2.2
-
     3.  Nested item 1.3
-
 2.  Second item
-
     1.  Nested item 2.1
-
     2.  Nested item 2.2</code></pre>
 
 </td>
@@ -5904,19 +6327,12 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 1.  Ordered item 1
-
 2.  Ordered item 2
-
     *   Unordered nested item 2.1
-
     *   Unordered nested item 2.2
-
         1.  Ordered deeply nested item 2.2.1
-
         2.  Ordered deeply nested item 2.2.2
-
     *   Unordered nested item 2.3
-
 3.  Ordered item 3
 
 </td>
@@ -5937,19 +6353,12 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>1.  Ordered item 1
-
 2.  Ordered item 2
-
     *   Unordered nested item 2.1
-
     *   Unordered nested item 2.2
-
         1.  Ordered deeply nested item 2.2.1
-
         2.  Ordered deeply nested item 2.2.2
-
     *   Unordered nested item 2.3
-
 3.  Ordered item 3</code></pre>
 
 </td>
@@ -5991,15 +6400,10 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 *   **Bold item**
-
 *   *Italic item*
-
 *   ~~Strikethrough item~~
-
 *   Item with `code`
-
 *   Item with [link](https://example.com)
-
 *   Item with *nested **formatting***
 
 </td>
@@ -6028,15 +6432,10 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>*   **Bold item**
-
 *   *Italic item*
-
 *   ~~Strikethrough item~~
-
 *   Item with `code`
-
 *   Item with [link](https://example.com)
-
 *   Item with *nested **formatting***</code></pre>
 
 </td>
@@ -6088,7 +6487,6 @@ Paragraph with [**formatted link**](https://example.com) in bold.
     Paragraph within the first list item.
 
     Another paragraph within the first list item.
-
 *   Second item
 
     Paragraph within the second list item.
@@ -6129,7 +6527,6 @@ Paragraph with [**formatted link**](https://example.com) in bold.
     Paragraph within the first list item.
 
     Another paragraph within the first list item.
-
 *   Second item
 
     Paragraph within the second list item.</code></pre>
@@ -6160,11 +6557,8 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 *   Completed task
-
 *   Incomplete task
-
 *   Another completed task
-
 *   Another incomplete task
 
 </td>
@@ -6181,11 +6575,8 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 <td>
 
 <pre><code>*   Completed task
-
 *   Incomplete task
-
 *   Another completed task
-
 *   Another incomplete task</code></pre>
 
 </td>
@@ -7040,7 +7431,6 @@ test
 # inline html in list
 
 *   📦 **Import/Export**: Import and export messages in different file formats.
-
 *   <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
@@ -7049,9 +7439,7 @@ test
 <summary>yo</summary>
 
 *   asdasdsad
-
 *   asdasdasdasd
-
 *   asdasdsad
 
 </details>
@@ -7130,7 +7518,6 @@ test
 # inline html in list
 
 *   📦 **Import/Export**: Import and export messages in different file formats.
-
 *   &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
@@ -7139,9 +7526,7 @@ test
 &lt;summary&gt;yo&lt;/summary&gt;
 
 *   asdasdsad
-
 *   asdasdasdasd
-
 *   asdasdsad
 
 &lt;/details&gt;

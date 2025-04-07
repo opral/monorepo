@@ -687,15 +687,10 @@ the identation may differ 1 meaning is the same -->
 ### Unordered Lists
 
 *   Item 1
-
 *   Item 2
-
     *   Nested item 2.1
-
     *   Nested item 2.2
-
         *   Deeply nested item
-
 *   Item 3
 
 </td>
@@ -738,15 +733,10 @@ the identation may differ 1 meaning is the same --&gt;
 ### Unordered Lists
 
 *   Item 1
-
 *   Item 2
-
     *   Nested item 2.1
-
     *   Nested item 2.2
-
         *   Deeply nested item
-
 *   Item 3</code></pre>
 
 </td>
@@ -791,13 +781,9 @@ the identation may differ 1 meaning is the same --&gt;
 ### Ordered Lists
 
 1.  First item
-
 2.  Second item
-
     1.  Nested first
-
     2.  Nested second
-
 3.  Third item
 
 </td>
@@ -829,13 +815,9 @@ the identation may differ 1 meaning is the same --&gt;
 <pre><code>### Ordered Lists
 
 1.  First item
-
 2.  Second item
-
     1.  Nested first
-
     2.  Nested second
-
 3.  Third item</code></pre>
 
 </td>
@@ -880,13 +862,9 @@ the identation may differ 1 meaning is the same --&gt;
 ### Mixed Lists
 
 1.  First ordered item
-
     *   Unordered sub-item
-
     *   Another unordered sub-item
-
         1.  Ordered sub-sub-item
-
 2.  Second ordered item
 
 </td>
@@ -918,13 +896,9 @@ the identation may differ 1 meaning is the same --&gt;
 <pre><code>### Mixed Lists
 
 1.  First ordered item
-
     *   Unordered sub-item
-
     *   Another unordered sub-item
-
         1.  Ordered sub-sub-item
-
 2.  Second ordered item</code></pre>
 
 </td>
@@ -956,9 +930,7 @@ the identation may differ 1 meaning is the same --&gt;
 ### Task Lists
 
 *   Completed task
-
 *   Incomplete task
-
 *   Another completed task
 
 </td>
@@ -978,9 +950,7 @@ the identation may differ 1 meaning is the same --&gt;
 <pre><code>### Task Lists
 
 *   Completed task
-
 *   Incomplete task
-
 *   Another completed task</code></pre>
 
 </td>
@@ -1501,7 +1471,6 @@ Below horizontal rule.</code></pre>
 > Heading in a blockquote
 
 1.  **Bold list item** with *italic text*
-
     *   Nested list with `code` and [link](https://example.com)
 
 </td>
@@ -1532,7 +1501,6 @@ Below horizontal rule.</code></pre>
 <pre><code>&gt; Heading in a blockquote
 
 1.  **Bold list item** with *italic text*
-
     *   Nested list with `code` and [link](https://example.com)</code></pre>
 
 </td>
