@@ -17,11 +17,14 @@
     "@lix-js/sdk": "^0"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.4",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.1",
     "@tanstack/react-table": "^8.21.2",
+    "@types/dagre": "^0.7.52",
+    "@xyflow/react": "^12.3.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.483.0",
