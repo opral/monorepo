@@ -6,6 +6,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { plugins } from "./vite.config";
 import dts from "vite-plugin-dts";
+import path from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -24,6 +25,11 @@ export default defineConfig({
       formats: ["es"],
       fileName: "index",
       cssFileName: "styles",
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
   },
 });
