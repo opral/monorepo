@@ -3,6 +3,7 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { Context } from "@/context";
 
 function Select({
   ...props
@@ -54,8 +55,10 @@ function SelectContent({
   position = "popper",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const { rootContainer } = React.useContext(Context);
+
   return (
-    <SelectPrimitive.Portal>
+    <SelectPrimitive.Portal container={rootContainer}>
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
@@ -80,7 +83,7 @@ function SelectContent({
         <SelectScrollDownButton />
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
-  )
+  );
 }
 
 function SelectLabel({

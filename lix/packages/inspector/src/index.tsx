@@ -8,7 +8,10 @@ import {
 } from "react-router";
 import { routes } from "./routes.tsx";
 import styles from "./styles.css?inline";
-import { LixProvider } from "./hooks/use-lix.ts";
+import { Provider } from "./context";
+
+// Unique ID for the shadow DOM root node
+export const LIX_INSPECTOR_SHADOW_ROOT_ID = "lix-inspector-shadow-root";
 
 export interface LixInspector {
   /**
@@ -45,20 +48,28 @@ export async function createLixInspector(args: {
         localShadowRoot = node.shadowRoot;
       }
 
+      // Add an ID to the shadow root's first child for easy access
+      const rootContainer = document.createElement("div");
+      rootContainer.id = LIX_INSPECTOR_SHADOW_ROOT_ID;
+
+      // Clear any existing content in the shadow root
+      localShadowRoot.innerHTML = "";
+      localShadowRoot.appendChild(rootContainer);
+
       // Create or update the React root directly inside the shadow root
       // Simplify: Always unmount if root exists, then create new root.
       if (reactRoot) {
         reactRoot.unmount();
       }
-      // Pass the shadowRoot itself as the container
-      reactRoot = ReactDOM.createRoot(localShadowRoot);
+      // Pass the rootContainer as the container
+      reactRoot = ReactDOM.createRoot(rootContainer);
 
       reactRoot.render(
         <React.StrictMode>
           <style>{styles}</style>
-          <LixProvider lixInstance={args.lix}>
+          <Provider lix={args.lix} rootContainer={rootContainer}>
             <RouterProvider router={router} />
-          </LixProvider>
+          </Provider>
         </React.StrictMode>
       );
     },
