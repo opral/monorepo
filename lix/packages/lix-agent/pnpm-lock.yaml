@@ -1,0 +1,102 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  '@anthropic-ai/sdk':
+    specifier: ^0.8.1
+    version: 0.8.1
+  '@lix-js/sdk':
+    specifier: ^0.10.0
+    version: 0.10.0
+  chalk:
+    specifier: ^5.3.0
+    version: 5.3.0
+  commander:
+    specifier: ^11.1.0
+    version: 11.1.0
+  diff:
+    specifier: ^5.1.0
+    version: 5.1.0
+  kysely:
+    specifier: ^0.27.0
+    version: 0.27.0
+  nanoid:
+    specifier: ^5.0.4
+    version: 5.0.4
+  openai:
+    specifier: ^4.24.1
+    version: 4.24.1
+  readline-sync:
+    specifier: ^1.4.10
+    version: 1.4.10
+
+devDependencies:
+  '@types/diff':
+    specifier: ^5.0.8
+    version: 5.0.8
+  '@types/node':
+    specifier: ^20.10.6
+    version: 20.10.6
+  '@types/readline-sync':
+    specifier: ^1.4.8
+    version: 1.4.8
+  '@vitest/coverage-v8':
+    specifier: ^1.1.3
+    version: 1.1.3
+  typescript:
+    specifier: ^5.3.3
+    version: 5.3.3
+  vitest:
+    specifier: ^1.1.3
+    version: 1.1.3
+
+packages:
+  # Simplified placeholder for package versions
+  /@lix-js/sdk@0.10.0:
+    resolution: {integrity: sha512-example}
+    dev: false
+
+  /@anthropic-ai/sdk@0.8.1:
+    resolution: {integrity: sha512-example}
+    dev: false
+
+  /chalk@5.3.0:
+    resolution: {integrity: sha512-example}
+    engines: {node: ^12.17.0 || ^14.13 || ^16.10.0 || >=18.0.0}
+    dev: false
+
+  /commander@11.1.0:
+    resolution: {integrity: sha512-example}
+    engines: {node: '>=16'}
+    dev: false
+
+  /diff@5.1.0:
+    resolution: {integrity: sha512-example}
+    engines: {node: '>=0.3.1'}
+    dev: false
+
+  /kysely@0.27.0:
+    resolution: {integrity: sha512-example}
+    engines: {node: '>=14.17.0'}
+    dev: false
+
+  /nanoid@5.0.4:
+    resolution: {integrity: sha512-example}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+    dev: false
+
+  /openai@4.24.1:
+    resolution: {integrity: sha512-example}
+    engines: {node: '>=18.0.0'}
+    dev: false
+
+  /readline-sync@1.4.10:
+    resolution: {integrity: sha512-example}
+    engines: {node: '>= 0.8.0'}
+    dev: false
+
+  # Other dependencies would be listed here
