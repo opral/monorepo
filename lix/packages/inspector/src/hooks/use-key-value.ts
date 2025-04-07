@@ -6,7 +6,6 @@ import { useLix } from "./use-lix.ts";
 interface InspectorKeyValueSchema {
   "inspector.graphView.zoomLevel": number;
   "inspector.tableView.columnVisibility": Record<string, boolean>;
-  "inspector.userPreferences.theme": "light" | "dark";
 }
 
 // Extract the valid *known* keys from the schema
@@ -29,19 +28,20 @@ type ValidKeyValue = keyof InspectorKeyValueSchema;
  * @param key - The unique key to store the value under. Can be any string.
  * @returns A tuple of [value, setValue] with types inferred if the key is known.
  */
-// 1. Allow any string key, K extends string
 export function useKeyValue<K extends string>(key: K) {
   const lix = useLix();
-  // 2. Conditional type: If K is a known key, use its schema type, else use any
   type T = K extends ValidKeyValue ? InspectorKeyValueSchema[K] : any;
 
   // Type T is passed to selectKeyValue
   const [value, , , refetch] = useQuery(() => selectKeyValue<T>(lix, key), 75);
 
   // setValue expects the inferred type T
-  const setValue = async (newValue: T) => {
+  const setValue = async (
+    newValue: T,
+    options?: { skipChangeControl?: boolean }
+  ) => {
     // Pass inferred type T to upsertKeyValue
-    await upsertKeyValue<T>(lix, key, newValue);
+    await upsertKeyValue<T>(lix, key, newValue, options);
     refetch();
   };
 
@@ -52,7 +52,6 @@ export function useKeyValue<K extends string>(key: K) {
 /**
  * Retrieves the value associated with a key from the Lix database.
  */
-// 3. Remove ValidKeyValue constraint from key parameter
 async function selectKeyValue<T>(lix: Lix, key: string): Promise<T | null> {
   const result = await lix.db
     .selectFrom("key_value")
@@ -67,14 +66,21 @@ async function selectKeyValue<T>(lix: Lix, key: string): Promise<T | null> {
 /**
  * Upserts a key-value pair into the Lix database.
  */
-// 3. Remove ValidKeyValue constraint from key parameter
-//    Keep generic T for value to match setValue's expectation
-async function upsertKeyValue<T>(lix: Lix, key: string, value: T) {
+async function upsertKeyValue<T>(
+  lix: Lix,
+  key: string,
+  value: T,
+  options?: { skipChangeControl?: boolean }
+) {
   const jsonValue = JSON.stringify(value);
 
   await lix.db
     .insertInto("key_value")
-    .values({ key, value: jsonValue })
+    .values({
+      key,
+      value: jsonValue,
+      skip_change_control: options?.skipChangeControl,
+    })
     .onConflict((oc) => oc.doUpdateSet({ value: jsonValue }))
     .execute();
 
