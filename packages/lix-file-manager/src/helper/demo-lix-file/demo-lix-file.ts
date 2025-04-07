@@ -1,5 +1,4 @@
 import {
-	changeHasLabel,
 	createAccount,
 	createChangeSet,
 	createComment,
@@ -12,12 +11,12 @@ import {
 	switchAccount,
 	toBlob,
 } from "@lix-js/sdk";
-import { plugin as csvPlugin } from "@lix-js/plugin-csv";
+import { supportedFileTypes } from "@/state.ts";
 
 export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
-		providePlugins: [csvPlugin],
+		providePlugins: supportedFileTypes.map((type) => type.plugin),
 	});
 
 	const id = await lix.db

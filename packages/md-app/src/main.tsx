@@ -14,8 +14,8 @@ const router = createBrowserRouter(
 	})),
 	{
 		// in case the app is running one lix origin
-		basename: window.location.pathname.startsWith("/app/md")
-			? "/app/md"
+		basename: window.location.pathname.startsWith("/app/flashtype")
+			? "/app/flashtype"
 			: undefined,
 	}
 );

@@ -6,6 +6,8 @@ import {
 	fileIdSearchParamsAtom,
 	filesAtom,
 	lixAtom,
+	lixIdSearchParamsAtom,
+	supportedFileTypes,
 } from "@/state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
@@ -36,8 +38,10 @@ import { posthog } from "posthog-js";
 import CheckpointComponent from "@/components/CheckpointComponent.tsx";
 import IntermediateCheckpointComponent from "@/components/IntermediateCheckpointComponent.tsx";
 
-const isCsvFile = (path: string) => {
-	return path.toLowerCase().endsWith(".csv");
+const isSupportedFile = (path: string) => {
+	return supportedFileTypes.some(
+		(supportedFileType) => supportedFileType.extension === getFileExtension(path)
+	);
 };
 
 const getFileExtension = (path: string) => {
@@ -70,6 +74,7 @@ export default function Page() {
 	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
+	const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom);
 	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
 	const [searchParams] = useSearchParams();
 
@@ -257,8 +262,8 @@ export default function Page() {
 								type="file"
 								name={file.path.replace("/", "")}
 								appLink={
-									file.path.endsWith(".csv")
-										? `/app/csv/editor?f=${file.id}`
+									isSupportedFile(file.path)
+										? `/app${supportedFileTypes.find((fileType) => fileType.extension === getFileExtension(file.path))?.route}?l=${lixIdSearchParams}&f=${file.id}`
 										: ""
 								}
 							/>
@@ -358,7 +363,7 @@ export default function Page() {
 							activeFile?.path.replace("/", "")
 								? `/ ${activeFile?.path.replace("/", "")}`
 								: "Graph"
-							}
+						}
 					>
 						{fileIdSearchParams && (
 							<Button
@@ -368,14 +373,20 @@ export default function Page() {
 							>
 								<CustomLink
 									to={
-										activeFile?.path && isCsvFile(activeFile.path)
-											? `/app/csv/editor?f=${fileIdSearchParams}`
+										activeFile?.path && isSupportedFile(activeFile.path)
+											? ("/app"
+												+ supportedFileTypes.find(supportedFileType =>
+													supportedFileType.extension === getFileExtension(activeFile.path))?.route)
+											+ `?l=${lixIdSearchParams}&f=${fileIdSearchParams}`
 											: "https://github.com/opral/monorepo/tree/main/lix"
 									}
-									target={isCsvFile(activeFile?.path || "") ? "_self" : "_blank"}
+									target={isSupportedFile(activeFile?.path || "") ? "_self" : "_blank"}
 								>
-									{activeFile?.path && isCsvFile(activeFile.path)
-										? "Open in CSV app"
+									{activeFile?.path && isSupportedFile(activeFile.path)
+										? `Open in ${supportedFileTypes.find(
+											supportedFileType =>
+												supportedFileType.extension === getFileExtension(activeFile.path)
+										)?.appName}`
 										: "Build a Lix App"}
 								</CustomLink>
 								{/* indicator for user to click on the button */}
@@ -389,7 +400,7 @@ export default function Page() {
 						{/* Fade effect at the top */}
 						<div className="absolute top-0 left-0 w-full h-[20px] bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
 						<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
-							{activeFile?.path && !isCsvFile(activeFile.path) ? (
+							{activeFile?.path && !isSupportedFile(activeFile.path) ? (
 								<NoPluginMessage extension={getFileExtension(activeFile.path)} />
 							) : (
 								<>
