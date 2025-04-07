@@ -65,23 +65,17 @@ export function validateXml(content: string): boolean {
   try {
     // Check for matching opening/closing tags
     const openTags: string[] = [];
-    const tagRegex = /<\/?([^\s>]+)(\s[^>]*)?>|<!--|-->/g;
+    const tagRegex = /<\/?([^\s>]+)(\s[^>]*)?>|<!--.*?-->/g;
     let match;
-    let inComment = false;
     
-    while ((match = tagRegex.exec(content)) !== null) {
+    // First extract and remove comments, since they can contain tag-like content
+    const contentWithoutComments = content.replace(/<!--[\s\S]*?-->/g, '');
+    
+    while ((match = tagRegex.exec(contentWithoutComments)) !== null) {
       const tag = match[0];
       
-      // Handle comments
-      if (tag === '<!--') {
-        inComment = true;
-        continue;
-      }
-      if (tag === '-->' && inComment) {
-        inComment = false;
-        continue;
-      }
-      if (inComment) continue;
+      // Skip comment tags since we already removed them
+      if (tag.startsWith('<!--')) continue;
       
       // Handle self-closing tags
       if (tag.match(/\/>/)) continue;
@@ -103,7 +97,7 @@ export function validateXml(content: string): boolean {
     }
     
     // All tags should be closed
-    return openTags.length === 0 && !inComment;
+    return openTags.length === 0;
   } catch (e) {
     return false;
   }

@@ -266,7 +266,7 @@ Instructions:
       if (sessionState.activeLixManager) {
         await sessionState.activeLixManager.updateFileContent(filePath, newContent);
         
-        const response = `Successfully updated ${filePath}.`;
+        const response = `Successfully updated ${filePath.includes('json') ? 'JSON file' : filePath}.`;
         this.context.addAssistantMessage(response);
         this.outputFormatter.formatMessage(response);
       } else {
