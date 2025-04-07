@@ -1,6 +1,6 @@
 import React from "react";
 import { useLix } from "@/hooks/use-lix.ts";
-import { toBlob } from "@lix-js/sdk";
+import { openLixInMemory, toBlob } from "@lix-js/sdk";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,10 +9,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, FileIcon } from "lucide-react";
+import { useContext } from "react";
+import { Context } from "../context";
 
 export default function Layout() {
   const lix = useLix();
+  const { setLix } = useContext(Context);
   const [exportStatus, setExportStatus] = React.useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,6 +49,23 @@ export default function Layout() {
         `Export failed: ${error instanceof Error ? error.message : String(error)}`
       );
     }
+  };
+
+  const openLixBlob = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".lix";
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const buffer = await file.arrayBuffer();
+      const newLix = await openLixInMemory({ blob: new Blob([buffer]) });
+      setLix(newLix);
+    };
+
+    input.click();
   };
 
   // Navigation items
@@ -92,9 +112,13 @@ export default function Layout() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={openLixBlob}>
+                  <FileIcon className="mr-2 h-4 w-4" />
+                  Open lix
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={exportLixAsBlob}>
                   <DownloadIcon className="mr-2 h-4 w-4" />
-                  Export lix blob
+                  Export lix
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

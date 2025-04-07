@@ -55,13 +55,16 @@ export default function Route() {
     }
   }, [lix]);
 
-  // Memoize the results to prevent unnecessary re-renders in ChangeSetGraph
+  // Memoize results to prevent unnecessary re-renders of ChangeSetGraph
   const memoizedChangeSets = useMemo(
-    () => changeSetsResult,
+    () => changeSetsResult || [],
     [changeSetsResult]
   );
-  const memoizedEdges = useMemo(() => edgesResult, [edgesResult]);
-  const memoizedVersions = useMemo(() => versionsResult, [versionsResult]);
+  const memoizedEdges = useMemo(() => edgesResult || [], [edgesResult]);
+  const memoizedVersions = useMemo(
+    () => versionsResult || [],
+    [versionsResult]
+  );
 
   return (
     <div className="container mx-auto p-4">
