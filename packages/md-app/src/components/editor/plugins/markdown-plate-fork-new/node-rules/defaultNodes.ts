@@ -414,6 +414,7 @@ export const defaultNodes: TNodes = {
 						currentItem = {
 							children: [],
 							type: "listItem",
+							spread: false,
 						};
 
 						for (const liChild of child.children) {
@@ -427,6 +428,7 @@ export const defaultNodes: TNodes = {
 									children: serializeListItems(liChild.children),
 									ordered: liChild.type === "ol",
 									type: "list",
+									spread: false,
 								});
 							}
 						}
@@ -443,6 +445,7 @@ export const defaultNodes: TNodes = {
 			return {
 				children: serializeListItems(node.children),
 				ordered: isOrdered,
+				spread: false,
 				type: "list",
 			};
 		},
