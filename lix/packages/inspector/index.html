@@ -8,18 +8,14 @@
   <body>
     <script type="module" async>
       import { createLixInspector } from "/src/index.tsx";
+      import { openLixInMemory } from "@lix-js/sdk";
 
       // Placeholder Lix object for testing the inspector rendering
       // Replace with actual Lix SDK instance when integrating
-      const mockLix = {
-        /* mock methods/properties as needed by inspector */
-        repo: {
-          // Mock repo methods if App.tsx uses them immediately
-        },
-      };
+      const lix = await openLixInMemory({})
 
       // Create and render the inspector
-      const inspector = await createLixInspector({ lix: mockLix, routerType: "browser" });
+      const inspector = await createLixInspector({ lix, routerType: "browser" });
       inspector.render(document.getElementById("lix-inspector"));
     </script>
     <div id="lix-inspector"></div>
