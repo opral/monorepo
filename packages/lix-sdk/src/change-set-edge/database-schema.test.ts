@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
 
 test("should enforce primary key constraint (parent_id, child_id)", async () => {
 	const lix = await openLixInMemory({});
@@ -29,20 +30,22 @@ test("should enforce primary key constraint (parent_id, child_id)", async () => 
 test("should allow different edges with same parent or child", async () => {
 	const lix = await openLixInMemory({});
 	// Pre-populate change_set table for FK tests
-	await lix.db
-		.insertInto("change_set")
-		.values([{ id: "cs1" }, { id: "cs2" }, { id: "cs3" }])
-		.execute();
+	await withSkipOwnChangeControl(lix.db, async (trx) => {
+		await trx
+			.insertInto("change_set")
+			.values([{ id: "cs1" }, { id: "cs2" }, { id: "cs3" }])
+			.execute();
 
-	// Insert initial edges
-	await lix.db
-		.insertInto("change_set_edge")
-		.values([
-			{ parent_id: "cs1", child_id: "cs2" },
-			{ parent_id: "cs1", child_id: "cs3" }, // Same parent, different child
-			{ parent_id: "cs2", child_id: "cs3" }, // Different parent, same child
-		])
-		.execute();
+		// Insert initial edges
+		await trx
+			.insertInto("change_set_edge")
+			.values([
+				{ parent_id: "cs1", child_id: "cs2" },
+				{ parent_id: "cs1", child_id: "cs3" }, // Same parent, different child
+				{ parent_id: "cs2", child_id: "cs3" }, // Different parent, same child
+			])
+			.execute();
+	});
 
 	const edges = await lix.db
 		.selectFrom("change_set_edge")

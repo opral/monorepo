@@ -11,6 +11,7 @@ import type { ChangeSet } from "./database-schema.js";
 
 export async function createCheckpoint(args: {
 	lix: Lix;
+	id?: string;
 	/**
 	 * The comment to add to the checkpoint.
 	 *
@@ -59,12 +60,14 @@ export async function createCheckpoint(args: {
 				"change_set.id",
 				"change_set_element.change_set_id"
 			)
+			.innerJoin("change", "change.id", "change_set_element.change_id")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 			// get the changes between the last checkpoint and the current state
-			.where((eb) =>
-				eb.or([
-					changeSetIsAncestorOf({ id: version.change_set_id })(eb),
-					eb("change_set.id", "=", version.change_set_id),
-				])
+			.where(
+				changeSetIsAncestorOf(
+					{ id: version.change_set_id },
+					{ inclusive: true }
+				)
 			)
 			.$if(parentCheckpoint !== undefined, (eb) =>
 				eb
@@ -83,11 +86,18 @@ export async function createCheckpoint(args: {
 					)
 			)
 			.where(changeSetElementIsLeafOf([{ id: version.change_set_id }]))
-			.select(["change_id as id", "entity_id", "schema_key", "file_id"])
+			.select([
+				"change_set_element.change_id as id",
+				"change_set_element.entity_id",
+				"change_set_element.schema_key",
+				"change_set_element.file_id",
+			])
+			.select("snapshot.content")
 			.execute();
 
 		const newChangeSet = await createChangeSet({
 			lix: { db: trx },
+			id: args.id,
 			changes: leafChanges,
 			labels: [checkpointLabel],
 			parents: parentCheckpoint

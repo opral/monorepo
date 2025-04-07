@@ -268,7 +268,7 @@ test("option to create a change without updating the version changes", async () 
 		name: "author",
 	});
 
-	const change = await createChange(
+	const change = createChange(
 		{
 			lix,
 			version: version0,
@@ -295,7 +295,9 @@ test("option to create a change without updating the version changes", async () 
 	).toBeUndefined();
 });
 
-test("should add the change to the active version's change set", async () => {
+// decided against it as creating multiple changes in one transaction
+// should by applied to the same change set. todo: remove this test
+test.skip("should add the change to the active version's change set", async () => {
 	const lix = await openLixInMemory({});
 
 	// Get the initial change set ID (should be 'cs0')
@@ -311,7 +313,7 @@ test("should add the change to the active version's change set", async () => {
 	const schemaKey = "mySchema";
 
 	// Create the first change
-	const change1 = await createChange({
+	const change1 = createChange({
 		lix,
 		fileId,
 		entityId,

@@ -8,9 +8,10 @@ export const changeControlledTableIds = {
 	change_set_label: ["label_id", "change_set_id"],
 	discussion: ["id"],
 	file: ["id"],
+	label: ["id"],
 	key_value: ["key"],
 	version: ["id"],
-	version_change: ["version_id", "change_id"],
+	// version_change: ["version_id", "change_id"],
 } as const;
 
 //
