@@ -1,3 +1,5 @@
+// must be imported before React and React DOM
+import { scan } from "react-scan";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import type { Lix } from "@lix-js/sdk";
@@ -10,6 +12,11 @@ import { routes } from "./routes.tsx";
 import styles from "./styles.css?inline";
 import { Provider } from "./context";
 
+if (import.meta.env.DEV) {
+  scan({
+    enabled: true,
+  });
+}
 
 export interface LixInspector {
   /**

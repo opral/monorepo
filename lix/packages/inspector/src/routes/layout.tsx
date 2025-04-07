@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
+import { DownloadIcon } from "lucide-react";
 
 export default function Layout() {
   const lix = useLix();
@@ -50,8 +51,8 @@ export default function Layout() {
   // Navigation items
   const navItems = [
     { path: "/", label: "Home" },
-    { path: "/graph", label: "Graph" },
     { path: "/data-explorer", label: "Data Explorer" },
+    { path: "/graph", label: "Graph" },
   ];
 
   return (
@@ -92,7 +93,8 @@ export default function Layout() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={exportLixAsBlob}>
-                  Export as Lix File
+                  <DownloadIcon className="mr-2 h-4 w-4" />
+                  Export lix blob
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -100,7 +102,7 @@ export default function Layout() {
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto py-6 px-4">
+      <main className="flex-1 container mx-auto px-4">
         <Outlet />
       </main>
     </div>
