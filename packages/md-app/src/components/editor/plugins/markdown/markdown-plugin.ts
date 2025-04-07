@@ -45,7 +45,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 	options: {
 		disallowedNodes: [SuggestionPlugin.key],
 		remarkPlugins: [
-			// remarkGfm,
+			remarkGfm,
 			// sanatizeUnknownNodeStructuresInTree,
 			sanitizeHtml,
 		],

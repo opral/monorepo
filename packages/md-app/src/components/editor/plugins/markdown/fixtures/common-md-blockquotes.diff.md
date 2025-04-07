@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 3/9 (33%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/9 (11%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 5/9 (56%)
+- 🟢 Perfect roundtrip (input = output): 4/9 (44%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 3/9 (33%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 2/9 (22%)
 
-**Overall Status**: ❌ 5 failing tests
+**Overall Status**: ❌ 2 failing tests
 
 ---
 
@@ -94,13 +94,14 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - inline formatting</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - blockquote - inline formatting</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -110,19 +111,12 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-> This blockquote contains 
->
-> **formatted**
->
->  text with 
->
-> *emphasis*
->
->  and 
->
-> `code`
->
-> .
+> This blockquote contains **formatted** text with *emphasis* and `code`.
+
+</td>
+<td>
+
+> This blockquote contains **formatted** text with *emphasis* and `code`.
 
 </td>
 </tr>
@@ -134,19 +128,12 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code>&gt; This blockquote contains 
-&gt;
-&gt; **formatted**
-&gt;
-&gt;  text with 
-&gt;
-&gt; *emphasis*
-&gt;
-&gt;  and 
-&gt;
-&gt; `code`
-&gt;
-&gt; .</code></pre>
+<pre><code>&gt; This blockquote contains **formatted** text with *emphasis* and `code`.</code></pre>
+
+</td>
+<td>
+
+<pre><code>&gt; This blockquote contains **formatted** text with *emphasis* and `code`.</code></pre>
 
 </td>
 </tr>
@@ -154,13 +141,12 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - with link</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - with link</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -168,29 +154,11 @@ in the source Markdown.</code></pre>
 > This blockquote contains a [link](https://example.com).
 
 </td>
-<td>
-
-> This blockquote contains a 
->
-> [link](https://example.com)
->
-> .
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>&gt; This blockquote contains a [link](https://example.com).</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; This blockquote contains a 
-&gt;
-&gt; [link](https://example.com)
-&gt;
-&gt; .</code></pre>
 
 </td>
 </tr>
@@ -216,11 +184,7 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-> Nested blockquotes:
->
-> This is a nested blockquote.
->
-> This is a deeply nested blockquote.
+> Nested blockquotes:This is a nested blockquote.This is a deeply nested blockquote.
 
 </td>
 </tr>
@@ -234,11 +198,7 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code>&gt; Nested blockquotes:
-&gt;
-&gt; This is a nested blockquote.
-&gt;
-&gt; This is a deeply nested blockquote.</code></pre>
+<pre><code>&gt; Nested blockquotes:This is a nested blockquote.This is a deeply nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -246,8 +206,8 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - multiple paragraphs</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - blockquote - multiple paragraphs</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -270,18 +230,20 @@ in the source Markdown.</code></pre>
 >
 > This is the second paragraph in the blockquote.
 >
-> This is the third paragraph in **the** blockquote. 
-> 
+> This is the third paragraph in **the** blockquote.
+>
 > This is the fourth paragraph in the blockquote.
 
 </td>
 <td>
 
-> Blockquote with multiple paragraphs:This is the second paragraph in the blockquote.This is the third paragraph in 
+> Blockquote with multiple paragraphs:
 >
-> **the**
+> This is the second paragraph in the blockquote.
 >
->  blockquote.This is the fourth paragraph in the blockquote.
+> This is the third paragraph in **the** blockquote.
+>
+> This is the fourth paragraph in the blockquote.
 
 </td>
 </tr>
@@ -300,18 +262,20 @@ in the source Markdown.</code></pre>
 &gt;
 &gt; This is the second paragraph in the blockquote.
 &gt;
-&gt; This is the third paragraph in **the** blockquote. 
-&gt; 
+&gt; This is the third paragraph in **the** blockquote.
+&gt;
 &gt; This is the fourth paragraph in the blockquote.</code></pre>
 
 </td>
 <td>
 
-<pre><code>&gt; Blockquote with multiple paragraphs:This is the second paragraph in the blockquote.This is the third paragraph in 
+<pre><code>&gt; Blockquote with multiple paragraphs:
 &gt;
-&gt; **the**
+&gt; This is the second paragraph in the blockquote.
 &gt;
-&gt;  blockquote.This is the fourth paragraph in the blockquote.</code></pre>
+&gt; This is the third paragraph in **the** blockquote.
+&gt;
+&gt; This is the fourth paragraph in the blockquote.</code></pre>
 
 </td>
 </tr>

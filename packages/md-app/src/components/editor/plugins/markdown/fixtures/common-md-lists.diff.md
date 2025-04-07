@@ -28,11 +28,11 @@
 </td>
 <td>
 
-* Item 1
+*   Item 1
 
-* Item 2
+*   Item 2
 
-* Item 3
+*   Item 3
 
 </td>
 </tr>
@@ -46,11 +46,11 @@
 </td>
 <td>
 
-<pre><code>* Item 1
+<pre><code>*   Item 1
 
-* Item 2
+*   Item 2
 
-* Item 3</code></pre>
+*   Item 3</code></pre>
 
 </td>
 </tr>
@@ -84,11 +84,11 @@
 </td>
 <td>
 
-* Alternative item 1
+*   Alternative item 1
 
-* Alternative item 2
+*   Alternative item 2
 
-* Alternative item 3
+*   Alternative item 3
 
 </td>
 </tr>
@@ -109,11 +109,11 @@
 </td>
 <td>
 
-<pre><code>* Alternative item 1
+<pre><code>*   Alternative item 1
 
-* Alternative item 2
+*   Alternative item 2
 
-* Alternative item 3</code></pre>
+*   Alternative item 3</code></pre>
 
 </td>
 </tr>
@@ -147,11 +147,11 @@
 </td>
 <td>
 
-* Another alternative item 1
+*   Another alternative item 1
 
-* Another alternative item 2
+*   Another alternative item 2
 
-* Another alternative item 3
+*   Another alternative item 3
 
 </td>
 </tr>
@@ -172,11 +172,11 @@
 </td>
 <td>
 
-<pre><code>* Another alternative item 1
+<pre><code>*   Another alternative item 1
 
-* Another alternative item 2
+*   Another alternative item 2
 
-* Another alternative item 3</code></pre>
+*   Another alternative item 3</code></pre>
 
 </td>
 </tr>
@@ -208,23 +208,23 @@
 </td>
 <td>
 
-* Item 1
+*   Item 1
 
-  * Nested item 1.1
+    *   Nested item 1.1
 
-  * Nested item 1.2
+    *   Nested item 1.2
 
-    * Deeply nested item 1.2.1
+        *   Deeply nested item 1.2.1
 
-    * Deeply nested item 1.2.2
+        *   Deeply nested item 1.2.2
 
-  * Nested item 1.3
+    *   Nested item 1.3
 
-* Item 2
+*   Item 2
 
-  * Nested item 2.1
+    *   Nested item 2.1
 
-  * Nested item 2.2
+    *   Nested item 2.2
 
 </td>
 </tr>
@@ -244,23 +244,23 @@
 </td>
 <td>
 
-<pre><code>* Item 1
+<pre><code>*   Item 1
 
-  * Nested item 1.1
+    *   Nested item 1.1
 
-  * Nested item 1.2
+    *   Nested item 1.2
 
-    * Deeply nested item 1.2.1
+        *   Deeply nested item 1.2.1
 
-    * Deeply nested item 1.2.2
+        *   Deeply nested item 1.2.2
 
-  * Nested item 1.3
+    *   Nested item 1.3
 
-* Item 2
+*   Item 2
 
-  * Nested item 2.1
+    *   Nested item 2.1
 
-  * Nested item 2.2</code></pre>
+    *   Nested item 2.2</code></pre>
 
 </td>
 </tr>
@@ -286,11 +286,11 @@
 </td>
 <td>
 
-1. First item
+1.  First item
 
-2. Second item
+2.  Second item
 
-3. Third item
+3.  Third item
 
 </td>
 </tr>
@@ -304,11 +304,11 @@
 </td>
 <td>
 
-<pre><code>1. First item
+<pre><code>1.  First item
 
-2. Second item
+2.  Second item
 
-3. Third item</code></pre>
+3.  Third item</code></pre>
 
 </td>
 </tr>
@@ -340,23 +340,23 @@
 </td>
 <td>
 
-1. First item
+1.  First item
 
-   1. Nested item 1.1
+    1.  Nested item 1.1
 
-   2. Nested item 1.2
+    2.  Nested item 1.2
 
-      1. Deeply nested item 1.2.1
+        1.  Deeply nested item 1.2.1
 
-      2. Deeply nested item 1.2.2
+        2.  Deeply nested item 1.2.2
 
-   3. Nested item 1.3
+    3.  Nested item 1.3
 
-2. Second item
+2.  Second item
 
-   1. Nested item 2.1
+    1.  Nested item 2.1
 
-   2. Nested item 2.2
+    2.  Nested item 2.2
 
 </td>
 </tr>
@@ -376,23 +376,23 @@
 </td>
 <td>
 
-<pre><code>1. First item
+<pre><code>1.  First item
 
-   1. Nested item 1.1
+    1.  Nested item 1.1
 
-   2. Nested item 1.2
+    2.  Nested item 1.2
 
-      1. Deeply nested item 1.2.1
+        1.  Deeply nested item 1.2.1
 
-      2. Deeply nested item 1.2.2
+        2.  Deeply nested item 1.2.2
 
-   3. Nested item 1.3
+    3.  Nested item 1.3
 
-2. Second item
+2.  Second item
 
-   1. Nested item 2.1
+    1.  Nested item 2.1
 
-   2. Nested item 2.2</code></pre>
+    2.  Nested item 2.2</code></pre>
 
 </td>
 </tr>
@@ -423,21 +423,21 @@
 </td>
 <td>
 
-1. Ordered item 1
+1.  Ordered item 1
 
-2. Ordered item 2
+2.  Ordered item 2
 
-   * Unordered nested item 2.1
+    *   Unordered nested item 2.1
 
-   * Unordered nested item 2.2
+    *   Unordered nested item 2.2
 
-     1. Ordered deeply nested item 2.2.1
+        1.  Ordered deeply nested item 2.2.1
 
-     2. Ordered deeply nested item 2.2.2
+        2.  Ordered deeply nested item 2.2.2
 
-   * Unordered nested item 2.3
+    *   Unordered nested item 2.3
 
-3. Ordered item 3
+3.  Ordered item 3
 
 </td>
 </tr>
@@ -456,21 +456,21 @@
 </td>
 <td>
 
-<pre><code>1. Ordered item 1
+<pre><code>1.  Ordered item 1
 
-2. Ordered item 2
+2.  Ordered item 2
 
-   * Unordered nested item 2.1
+    *   Unordered nested item 2.1
 
-   * Unordered nested item 2.2
+    *   Unordered nested item 2.2
 
-     1. Ordered deeply nested item 2.2.1
+        1.  Ordered deeply nested item 2.2.1
 
-     2. Ordered deeply nested item 2.2.2
+        2.  Ordered deeply nested item 2.2.2
 
-   * Unordered nested item 2.3
+    *   Unordered nested item 2.3
 
-3. Ordered item 3</code></pre>
+3.  Ordered item 3</code></pre>
 
 </td>
 </tr>
@@ -510,17 +510,17 @@
 </td>
 <td>
 
-* **Bold item**
+*   **Bold item**
 
-* *Italic item*
+*   *Italic item*
 
-* \~~Strikethrough item~~
+*   ~~Strikethrough item~~
 
-* Item with `code`
+*   Item with `code`
 
-* Item with [link](https://example.com)
+*   Item with [link](https://example.com)
 
-* Item with *nested **formatting***
+*   Item with *nested **formatting***
 
 </td>
 </tr>
@@ -547,17 +547,17 @@
 </td>
 <td>
 
-<pre><code>* **Bold item**
+<pre><code>*   **Bold item**
 
-* *Italic item*
+*   *Italic item*
 
-* \~~Strikethrough item~~
+*   ~~Strikethrough item~~
 
-* Item with `code`
+*   Item with `code`
 
-* Item with [link](https://example.com)
+*   Item with [link](https://example.com)
 
-* Item with *nested **formatting***</code></pre>
+*   Item with *nested **formatting***</code></pre>
 
 </td>
 </tr>
@@ -603,15 +603,15 @@
 </td>
 <td>
 
-* First item
+*   First item
 
-  Paragraph within the first list item.
+    Paragraph within the first list item.
 
-  Another paragraph within the first list item.
+    Another paragraph within the first list item.
 
-* Second item
+*   Second item
 
-  Paragraph within the second list item.
+    Paragraph within the second list item.
 
 </td>
 </tr>
@@ -644,15 +644,15 @@
 </td>
 <td>
 
-<pre><code>* First item
+<pre><code>*   First item
 
-  Paragraph within the first list item.
+    Paragraph within the first list item.
 
-  Another paragraph within the first list item.
+    Another paragraph within the first list item.
 
-* Second item
+*   Second item
 
-  Paragraph within the second list item.</code></pre>
+    Paragraph within the second list item.</code></pre>
 
 </td>
 </tr>
@@ -679,13 +679,13 @@
 </td>
 <td>
 
-* \[x] Completed task
+*   Completed task
 
-* \[ ] Incomplete task
+*   Incomplete task
 
-* \[x] Another completed task
+*   Another completed task
 
-* \[ ] Another incomplete task
+*   Another incomplete task
 
 </td>
 </tr>
@@ -700,13 +700,13 @@
 </td>
 <td>
 
-<pre><code>* \[x] Completed task
+<pre><code>*   Completed task
 
-* \[ ] Incomplete task
+*   Incomplete task
 
-* \[x] Another completed task
+*   Another completed task
 
-* \[ ] Another incomplete task</code></pre>
+*   Another incomplete task</code></pre>
 
 </td>
 </tr>

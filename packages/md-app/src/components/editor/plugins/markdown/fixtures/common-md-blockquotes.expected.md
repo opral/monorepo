@@ -25,7 +25,7 @@ between perfect fidelity and practical serialization.
 
 ## tc - blockquote - inline formatting
 
-> This blockquote contains **formatted** text with _emphasis_ and `code`.
+> This blockquote contains **formatted** text with *emphasis* and `code`.
 
 ## tc - blockquote - with link
 
@@ -43,9 +43,9 @@ between perfect fidelity and practical serialization.
 >
 > This is the second paragraph in the blockquote.
 >
-> This is the third paragraph in **the** blockquote. 
-> 
-> This is the fourth paragraph in the blockquote. 
+> This is the third paragraph in **the** blockquote.
+>
+> This is the fourth paragraph in the blockquote.
 
 ## tc - blockquote - containing markdown
 

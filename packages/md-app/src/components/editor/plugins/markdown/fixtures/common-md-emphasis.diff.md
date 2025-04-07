@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 5/11 (45%)
+- 🟢 Perfect roundtrip (input = output): 6/11 (55%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 2/11 (18%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 4/11 (36%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 3/11 (27%)
 
-**Overall Status**: ❌ 4 failing tests
+**Overall Status**: ❌ 3 failing tests
 
 ---
 
@@ -291,13 +291,12 @@ ___Bold and italic___ using triple underscores.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - strikethrough</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - strikethrough</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -305,21 +304,11 @@ ___Bold and italic___ using triple underscores.
 ~~Strikethrough text~~ using double tildes.
 
 </td>
-<td>
-
-\~~Strikethrough text~~ using double tildes.
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>~~Strikethrough text~~ using double tildes.</code></pre>
-
-</td>
-<td>
-
-<pre><code>\~~Strikethrough text~~ using double tildes.</code></pre>
 
 </td>
 </tr>

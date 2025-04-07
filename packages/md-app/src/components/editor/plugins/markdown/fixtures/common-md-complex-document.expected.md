@@ -6,7 +6,7 @@ This document demonstrates a wide variety of Markdown syntax elements and how th
 
 ## tc - text formatting - italic
 
-This paragraph demonstrates _italic text_ inline also wiht _underscore_
+This paragraph demonstrates *italic text* inline also wiht *underscore*
 
 ## tc - text formatting - bold/emphasis
 
@@ -14,13 +14,13 @@ This paragraph demonstrates **bold/emphasis text** inline
 
 This paragraph demonstrates **bold/emphasis text** inline
 
-## tc - text formatting - bold AND italic with asterix *
+## tc - text formatting - bold AND italic with asterix \*
 
 This paragraph demonstrates ***italic AND bold text*** inline
 
-## tc - text formatting - bold AND italic with underscore _
+## tc - text formatting - bold AND italic with underscore \_
 
-This paragraph demonstrates ___italic AND bold text___ inline
+This paragraph demonstrates ***italic AND bold text*** inline
 
 ## tc - text formatting - strikethrough and inline code
 
@@ -135,9 +135,11 @@ the identation may differ 1 meaning is the same -->
 
 Indented code block:
 
-    function example() {
-      return "Hello, world!";
-    }
+```
+function example() {
+  return "Hello, world!";
+}
+```
 
 Fenced code block without language:
 

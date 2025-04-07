@@ -87,7 +87,7 @@
 </td>
 <td>
 
-\[This is not a link]\(https://example.com)
+\[This is not a link]\(<https://example.com>)
 
 </td>
 </tr>
@@ -99,7 +99,7 @@
 </td>
 <td>
 
-<pre><code>\[This is not a link]\(https://example.com)</code></pre>
+<pre><code>\[This is not a link]\(&lt;https://example.com&gt;)</code></pre>
 
 </td>
 </tr>

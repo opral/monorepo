@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 4/8 (50%)
+- 🟢 Perfect roundtrip (input = output): 2/8 (25%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 0/8 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 4/8 (50%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 6/8 (75%)
 
-**Overall Status**: ❌ 4 failing tests
+**Overall Status**: ❌ 6 failing tests
 
 ---
 
@@ -41,12 +41,14 @@
 
 </details>
 
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - table with alignment</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - table with alignment</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -57,6 +59,22 @@
 | Left         |     Center     |         Right |
 
 </td>
+<td>
+
+| Left-aligned | Center-aligned | Right-aligned |
+| :----------- | :------------: | ------------: |
+| Left | Center | Right |
+| Left | Center | Right |
+
+</td>
+<td>
+
+| Left-aligned | Center-aligned | Right-aligned |
+| ------------ | -------------- | ------------- |
+| Left         | Center         | Right         |
+| Left         | Center         | Right         |
+
+</td>
 </tr>
 <tr>
 <td>
@@ -65,6 +83,22 @@
 | :----------- | :------------: | ------------: |
 | Left         |     Center     |         Right |
 | Left         |     Center     |         Right |</code></pre>
+
+</td>
+<td>
+
+<pre><code>| Left-aligned | Center-aligned | Right-aligned |
+| :----------- | :------------: | ------------: |
+| Left | Center | Right |
+| Left | Center | Right |</code></pre>
+
+</td>
+<td>
+
+<pre><code>| Left-aligned | Center-aligned | Right-aligned |
+| ------------ | -------------- | ------------- |
+| Left         | Center         | Right         |
+| Left         | Center         | Right         |</code></pre>
 
 </td>
 </tr>
@@ -100,14 +134,10 @@
 </td>
 <td>
 
-| **Bold Header** | *Italic Header* | ~~Strikethrough Header~~ |
-| --------------- | --------------- | ------------------------ |
-| **Bold Cell**   | *Italic Cell*   | ~~Strikethrough Cell~~   |
-| `Code Cell`     | [Link](https://example.com) |&#x20;
-
-![Image](https://example.com/image.jpg "Image")
-
-&#x20;|
+| **Bold Header** | *Italic Header*             | ~~Strikethrough Header~~                        |
+| --------------- | --------------------------- | ----------------------------------------------- |
+| **Bold Cell**   | *Italic Cell*               | ~~Strikethrough Cell~~                          |
+| `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg "Image") |
 
 </td>
 </tr>
@@ -130,14 +160,10 @@
 </td>
 <td>
 
-<pre><code>| **Bold Header** | *Italic Header* | ~~Strikethrough Header~~ |
-| --------------- | --------------- | ------------------------ |
-| **Bold Cell**   | *Italic Cell*   | ~~Strikethrough Cell~~   |
-| `Code Cell`     | [Link](https://example.com) |&amp;#x20;
-
-![Image](https://example.com/image.jpg &quot;Image&quot;)
-
-&amp;#x20;|</code></pre>
+<pre><code>| **Bold Header** | *Italic Header*             | ~~Strikethrough Header~~                        |
+| --------------- | --------------------------- | ----------------------------------------------- |
+| **Bold Cell**   | *Italic Cell*               | ~~Strikethrough Cell~~                          |
+| `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg &quot;Image&quot;) |</code></pre>
 
 </td>
 </tr>
@@ -178,12 +204,14 @@
 
 </details>
 
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - table with varying column width</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - table with varying column width</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -194,12 +222,44 @@
 | 2     | More Data     | More long content in this cell                       |
 
 </td>
+<td>
+
+| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
+| ----- | ------------- | --------------------------------------------------- |
+| 1 | Data | Long content that extends across multiple characters |
+| 2 | More Data | More long content in this cell |
+
+</td>
+<td>
+
+| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
+| ----- | ------------- | ---------------------------------------------------- |
+| 1     | Data          | Long content that extends across multiple characters |
+| 2     | More Data     | More long content in this cell                       |
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
 | ----- | ------------- | --------------------------------------------------- |
+| 1     | Data          | Long content that extends across multiple characters |
+| 2     | More Data     | More long content in this cell                       |</code></pre>
+
+</td>
+<td>
+
+<pre><code>| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
+| ----- | ------------- | --------------------------------------------------- |
+| 1 | Data | Long content that extends across multiple characters |
+| 2 | More Data | More long content in this cell |</code></pre>
+
+</td>
+<td>
+
+<pre><code>| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
+| ----- | ------------- | ---------------------------------------------------- |
 | 1     | Data          | Long content that extends across multiple characters |
 | 2     | More Data     | More long content in this cell                       |</code></pre>
 
@@ -228,10 +288,10 @@
 </td>
 <td>
 
-| Header 1 | Header 2 |
-| -------- | -------- |
+| Header 1           | Header 2           |
+| ------------------ | ------------------ |
 | Line 1<br />Line 2 | Line 1<br />Line 2 |
-| Single Line | Single Line |
+| Single Line        | Single Line        |
 
 </td>
 </tr>
@@ -246,10 +306,10 @@
 </td>
 <td>
 
-<pre><code>| Header 1 | Header 2 |
-| -------- | -------- |
+<pre><code>| Header 1           | Header 2           |
+| ------------------ | ------------------ |
 | Line 1&lt;br /&gt;Line 2 | Line 1&lt;br /&gt;Line 2 |
-| Single Line | Single Line |</code></pre>
+| Single Line        | Single Line        |</code></pre>
 
 </td>
 </tr>
@@ -283,9 +343,9 @@
 </td>
 <td>
 
-| Column with | pipe | Regular column |
-| ------------------ | -------------- |
-| Data with | pipe  | Regular data   |
+| Column with \| pipe | Regular column |
+| ------------------- | -------------- |
+| Data with \| pipe   | Regular data   |
 
 </td>
 </tr>
@@ -306,9 +366,9 @@
 </td>
 <td>
 
-<pre><code>| Column with | pipe | Regular column |
-| ------------------ | -------------- |
-| Data with | pipe  | Regular data   |</code></pre>
+<pre><code>| Column with \| pipe | Regular column |
+| ------------------- | -------------- |
+| Data with \| pipe   | Regular data   |</code></pre>
 
 </td>
 </tr>
@@ -344,10 +404,10 @@ Cell 3   | Cell 4
 </td>
 <td>
 
-Header 1 | Header 2
-\-------- | --------
-Cell 1   | Cell 2
-Cell 3   | Cell 4
+| Header 1 | Header 2 |
+| -------- | -------- |
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |
 
 </td>
 </tr>
@@ -370,10 +430,10 @@ Cell 3   | Cell 4</code></pre>
 </td>
 <td>
 
-<pre><code>Header 1 | Header 2
-\-------- | --------
-Cell 1   | Cell 2
-Cell 3   | Cell 4</code></pre>
+<pre><code>| Header 1 | Header 2 |
+| -------- | -------- |
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |</code></pre>
 
 </td>
 </tr>

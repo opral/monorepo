@@ -88,20 +88,20 @@ test
 
 # inline html in list
 
-* 📦 **Import/Export**: Import and export messages in different file formats.
+*   📦 **Import/Export**: Import and export messages in different file formats.
 
-* <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
+*   <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
 
 <details>
 <summary>yo</summary>
 
-* asdasdsad
+*   asdasdsad
 
-* asdasdasdasd
+*   asdasdasdasd
 
-* asdasdsad
+*   asdasdsad
 
 </details>
 
@@ -178,20 +178,20 @@ test
 
 # inline html in list
 
-* 📦 **Import/Export**: Import and export messages in different file formats.
+*   📦 **Import/Export**: Import and export messages in different file formats.
 
-* &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
+*   &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
 
 &lt;details&gt;
 &lt;summary&gt;yo&lt;/summary&gt;
 
-* asdasdsad
+*   asdasdsad
 
-* asdasdasdasd
+*   asdasdasdasd
 
-* asdasdsad
+*   asdasdsad
 
 &lt;/details&gt;
 </code></pre>

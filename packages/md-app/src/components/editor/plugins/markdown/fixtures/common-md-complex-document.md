@@ -18,7 +18,7 @@ This paragraph demonstrates __bold/emphasis text__ inline
 
 This paragraph demonstrates ***italic AND bold text*** inline
 
-## tc - text formatting - bold AND italic with underscore _
+## tc - text formatting - bold AND italic with underscore \_
 
 This paragraph demonstrates ___italic AND bold text___ inline
 
