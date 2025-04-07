@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lix Inspector</title>
+    <link href="/src/styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <script type="module" async>
+      import { createLixInspector } from "/src/index.tsx";
+
+      // Placeholder Lix object for testing the inspector rendering
+      // Replace with actual Lix SDK instance when integrating
+      const mockLix = {
+        /* mock methods/properties as needed by inspector */
+        repo: {
+          // Mock repo methods if App.tsx uses them immediately
+        },
+      };
+
+      // Create and render the inspector
+      const inspector = await createLixInspector({ lix: mockLix });
+      inspector.render(document.getElementById("lix-inspector"));
+    </script>
+    <div id="lix-inspector"></div>
+  </body>
+</html>
