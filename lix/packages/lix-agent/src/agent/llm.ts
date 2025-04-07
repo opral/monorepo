@@ -131,34 +131,50 @@ export class AnthropicAdapter implements LLMAdapter {
   
   async generate(messages: ChatMessage[], options?: LLMOptions): Promise<LLMResponse> {
     try {
-      // Convert our unified message format to Anthropic's format
-      const anthropicMessages = messages
-        .filter(msg => msg.role !== 'system')
-        .map(msg => ({
-          role: msg.role as "user" | "assistant",
-          content: msg.content
-        })) as AnthropicMessage[];
+      // For Anthropic API v0.39.0, we need to format messages differently
+      // Extract the system message if present
+      const systemPrompt = messages.find(msg => msg.role === 'system')?.content || '';
       
-      // Add system prompt as a special parameter if present
-      const systemPrompt = messages.find(msg => msg.role === 'system')?.content;
+      // Format user/assistant messages into a prompt string
+      let prompt = '';
       
-      // Create the message with proper typing for Anthropic SDK
-      const response = await this.client.messages.create({
+      // If there's a system prompt, include it at the beginning
+      if (systemPrompt) {
+        prompt = `\n\nHuman: ${systemPrompt}\n\n`;
+      }
+      
+      for (const msg of messages.filter(m => m.role !== 'system')) {
+        if (msg.role === 'user') {
+          prompt += `\n\nHuman: ${msg.content}`;
+        } else if (msg.role === 'assistant') {
+          prompt += `\n\nAssistant: ${msg.content}`;
+        }
+      }
+      
+      // Add the final Assistant: prefix to prompt the model to respond
+      prompt += '\n\nAssistant: ';
+      
+      // Use the completions API for older SDK versions
+      // Need to cast because the SDK type definitions may not match the actual API
+      const params: any = {
         model: this.modelName,
-        messages: anthropicMessages,
-        system: systemPrompt,
-        temperature: options?.temperature ?? 0.7,
-        max_tokens: options?.maxTokens ?? 1000,
-      });
+        prompt: prompt,
+      };
       
-      // The response format from Claude API has content as an array
-      // with objects that have a type and text property
-      const responseContent = response.content[0].type === 'text' 
-        ? response.content[0].text 
-        : JSON.stringify(response.content[0]);
-        
+      if (options?.temperature !== undefined) {
+        params.temperature = options.temperature;
+      }
+      
+      if (options?.maxTokens !== undefined) {
+        params.max_tokens = options.maxTokens;
+      } else {
+        params.max_tokens = 1000;
+      }
+      
+      const response = await this.client.completions.create(params);
+      
       return {
-        message: responseContent,
+        message: response.completion,
         raw: response
       };
     } catch (error) {
