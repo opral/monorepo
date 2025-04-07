@@ -12,10 +12,13 @@
 
       // Placeholder Lix object for testing the inspector rendering
       // Replace with actual Lix SDK instance when integrating
-      const lix = await openLixInMemory({})
+      const lix = await openLixInMemory({});
 
       // Create and render the inspector
-      const inspector = await createLixInspector({ lix, routerType: "browser" });
+      const inspector = await createLixInspector({
+        lix,
+        routerType: "browser",
+      });
       inspector.render(document.getElementById("lix-inspector"));
     </script>
     <div id="lix-inspector"></div>

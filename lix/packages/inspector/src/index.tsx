@@ -10,8 +10,6 @@ import { routes } from "./routes.tsx";
 import styles from "./styles.css?inline";
 import { Provider } from "./context";
 
-// Unique ID for the shadow DOM root node
-export const LIX_INSPECTOR_SHADOW_ROOT_ID = "lix-inspector-shadow-root";
 
 export interface LixInspector {
   /**
@@ -40,21 +38,20 @@ export async function createLixInspector(args: {
 
   return {
     render: (node: HTMLElement) => {
-      // Ensure Shadow DOM exists directly on the host node
-      let localShadowRoot: ShadowRoot;
-      if (!node.shadowRoot) {
-        localShadowRoot = node.attachShadow({ mode: "open" });
-      } else {
-        localShadowRoot = node.shadowRoot;
-      }
+      const rootNode = document.createElement("div");
+      node.appendChild(rootNode);
+      // COULDN'T GET SHADOW DOM TO WORK PROPERLY WITH SHADCN STYLES
+      // NEEDS A REVIST IN THE FUTURE
+      // if (!node.shadowRoot) {
+      //   localShadowRoot = node.attachShadow({ mode: "open" });
+      // } else {
+      //   localShadowRoot = node.shadowRoot;
+      // }
 
-      // Add an ID to the shadow root's first child for easy access
-      const rootContainer = document.createElement("div");
-      rootContainer.id = LIX_INSPECTOR_SHADOW_ROOT_ID;
-
-      // Clear any existing content in the shadow root
-      localShadowRoot.innerHTML = "";
-      localShadowRoot.appendChild(rootContainer);
+      // https://github.com/tailwindlabs/tailwindcss/discussions/1935#discussioncomment-12135380
+      // const sheet = new CSSStyleSheet();
+      // sheet.replaceSync(styles.replaceAll(":root", ":host"));
+      // localShadowRoot.adoptedStyleSheets = [sheet];
 
       // Create or update the React root directly inside the shadow root
       // Simplify: Always unmount if root exists, then create new root.
@@ -62,12 +59,12 @@ export async function createLixInspector(args: {
         reactRoot.unmount();
       }
       // Pass the rootContainer as the container
-      reactRoot = ReactDOM.createRoot(rootContainer);
+      reactRoot = ReactDOM.createRoot(rootNode);
 
       reactRoot.render(
         <React.StrictMode>
           <style>{styles}</style>
-          <Provider lix={args.lix} rootContainer={rootContainer}>
+          <Provider lix={args.lix} rootContainer={rootNode}>
             <RouterProvider router={router} />
           </Provider>
         </React.StrictMode>
