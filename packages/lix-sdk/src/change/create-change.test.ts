@@ -22,11 +22,11 @@ test("should create a change with the correct values", async () => {
 		lix,
 		authors: [author],
 		entityId: "entity1",
-		version: version0,
 		fileId: "file1",
 		pluginKey: "plugin1",
 		schemaKey: "schema1",
 		snapshotContent: { text: "snapshot-content" },
+		version: version0,
 	});
 
 	const changes = await lix.db
@@ -268,7 +268,7 @@ test("option to create a change without updating the version changes", async () 
 		name: "author",
 	});
 
-	const change = await createChange(
+	const change = createChange(
 		{
 			lix,
 			version: version0,
@@ -293,4 +293,86 @@ test("option to create a change without updating the version changes", async () 
 	expect(
 		versionChanges.find((vc) => vc.change_id === change.id)
 	).toBeUndefined();
+});
+
+// decided against it as creating multiple changes in one transaction
+// should by applied to the same change set. todo: remove this test
+test.skip("should add the change to the active version's change set", async () => {
+	const lix = await openLixInMemory({});
+
+	// Get the initial change set ID (should be 'cs0')
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.select("change_set_id")
+		.executeTakeFirstOrThrow();
+	const activeChangeSetId = activeVersion.change_set_id;
+
+	const fileId = "test.txt";
+	const entityId = "entity1";
+	const schemaKey = "mySchema";
+
+	// Create the first change
+	const change1 = createChange({
+		lix,
+		fileId,
+		entityId,
+		pluginKey: "testPlugin",
+		schemaKey,
+		snapshotContent: { key: "value1" },
+		authors: [{ id: "user1" }], // Dummy author
+		version: { id: "main" }, // Dummy version
+	});
+
+	// Verify the change was added to the active change set
+	const element1 = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", activeChangeSetId)
+		.where("entity_id", "=", entityId)
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", schemaKey)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(element1.change_id).toBe(change1.id);
+	expect(element1.entity_id).toBe(entityId);
+	expect(element1.file_id).toBe(fileId);
+	expect(element1.schema_key).toBe(schemaKey);
+
+	// Create a second change for the same entity/file/schema
+	const change2 = await createChange({
+		lix,
+		fileId,
+		entityId,
+		pluginKey: "testPlugin",
+		schemaKey,
+		snapshotContent: { key: "value2" },
+		authors: [{ id: "user1" }], // Dummy author
+		version: { id: "main" }, // Dummy version
+	});
+
+	// Verify the change_set_element was updated (ON CONFLICT)
+	const element2 = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", activeChangeSetId)
+		.where("entity_id", "=", entityId)
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", schemaKey)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Check that the change_id now points to the second change
+	expect(element2.change_id).toBe(change2.id);
+
+	// Verify there's still only one entry for this combination in the active change set
+	const count = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", activeChangeSetId)
+		.where("entity_id", "=", entityId)
+		.where("file_id", "=", fileId)
+		.where("schema_key", "=", schemaKey)
+		.select(lix.db.fn.count("change_id").as("c"))
+		.executeTakeFirstOrThrow();
+
+	expect(count.c).toBe(1);
 });

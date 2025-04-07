@@ -4,13 +4,14 @@ export const changeControlledTableIds = {
 	change_proposal: ["id"],
 	change_set: ["id"],
 	change_author: ["change_id", "account_id"],
-	change_set_element: ["change_set_id", "change_id"],
+	// change_set_element: ["change_set_id", "change_id"],
 	change_set_label: ["label_id", "change_set_id"],
 	discussion: ["id"],
 	file: ["id"],
+	label: ["id"],
 	key_value: ["key"],
 	version: ["id"],
-	version_change: ["version_id", "change_id"],
+	// version_change: ["version_id", "change_id"],
 } as const;
 
 //

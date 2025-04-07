@@ -12,7 +12,7 @@ import { updateChangesInVersion } from "../version/update-changes-in-version.js"
  * Use this function to directly create a change from a lix app
  * with bypassing of file-based change detection.
  */
-export async function createChange(
+export function createChange(
 	args: {
 		lix: Pick<Lix, "db" | "sqlite">;
 		authors: Array<Pick<Account, "id">>;
@@ -31,7 +31,7 @@ export async function createChange(
 		 */
 		updateVersionChanges?: boolean;
 	}
-): Promise<Change> {
+): Change {
 	const optionsWithDefaults = {
 		updateVersionChanges: true,
 		...options,
@@ -109,6 +109,15 @@ export async function createChange(
 			console.log(e);
 		}
 	}
+
+	// executeSync({
+	// 	lix: args.lix,
+	// 	query: args.lix.db
+	// 		.deleteFrom("key_value")
+	// 		.where("key", "=", "lix_skip_own_change_control"),
+	// });
+
+	// ---------> END: Update active change set <---------
 
 	// update the version with the new change
 	if (optionsWithDefaults.updateVersionChanges) {
