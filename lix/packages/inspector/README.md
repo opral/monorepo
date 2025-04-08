@@ -2,14 +2,12 @@
 
 Dev tool to analyze and debug Lix'es. 
 
-## Features
+## User experience
 
-- View the database schema
-- View the database content
-- View the database history
-- View the database changes
-- View the database snapshots
-
+- Shadow DOM (does not interfere with your apps CSS) 
+- Floating windows (does not interfere with your apps DOM)
+- Keyboard shortcuts (⌘⇧o to toggle inspector)
+  
 ## Usage
 
 ```ts
