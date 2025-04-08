@@ -31,25 +31,19 @@ export const setupMdDemo = async (lix: Lix) => {
 		.insertInto("file")
 		.values({
 			path: "/demo.md",
-			data: new TextEncoder().encode(`# The AI Markdown Editor
+			data: new TextEncoder().encode(`# Flashtype.ai ⚡️
 
-## [Sign up](https://forms.gle/mpXxyiXsQ6yhuGS58) for the waitlist
+### Autocomplete your document
 
----
+Try the **AI commands** or use \`Cmd+J\` to open the AI menu.
 
-## Features
+### Learns your writing style ([Upvote #45](https://github.com/opral/flashtype.ai/issues/45))
 
-### Lix change control
+### Work with AI Cowriters ([Upvote #46](https://github.com/opral/flashtype.ai/issues/46))
 
-- 🔄 Change tracking: See who changed what
-- 📌 Versioning: The possibility to create divergent states (branches in Git)
-- 🔀 Change Proposals: (WIP [#242](https://github.com/opral/lix-sdk/issues/242)) Everyone can contribute, you accept or reject changes
-- 🤝 Collaboration: Asynchronous (Git-like) or real-time collaboration (Google Docs-like)
-- ✅ Validation Rules: (WIP [#239](https://github.com/opral/lix-sdk/issues/239)) Define and enforce validation rules for your document
+### Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))
 
-### Autocompletes your document with AI
-
-Try the **AI commands** or use \`Cmd+J\` to open the AI menu.`),
+`),
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
