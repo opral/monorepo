@@ -30,7 +30,7 @@ export const setupMdDemo = async (lix: Lix) => {
 	const file = await lix.db
 		.insertInto("file")
 		.values({
-			path: "/demo.md",
+			path: "/welcome.md",
 			data: new TextEncoder().encode(`# Flashtype.ai ⚡️
 
 ### Autocomplete your document
