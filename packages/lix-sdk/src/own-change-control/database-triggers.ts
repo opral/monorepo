@@ -181,10 +181,10 @@ function handleLixOwnEntityChange(
 			pluginKey: "lix_own_change_control",
 			schemaKey: `lix_${tableName}_table`,
 			snapshotContent,
-		},
-		{
-			updateVersionChanges: tableName === "version_change" ? false : true,
 		}
+		// {
+		// 	updateVersionChanges: tableName === "version_change" ? false : true,
+		// }
 	);
 
 	const activeVersion = executeSync({
