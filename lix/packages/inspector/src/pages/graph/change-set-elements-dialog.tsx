@@ -125,7 +125,7 @@ function ChangeComponent(props: { change: Change & { content: any } }) {
             <strong>Entity ID:</strong> {props.change.entity_id}
           </div>
           <div>
-            <strong>Content:</strong>
+            <strong>Snapshot:</strong>
             <pre className="bg-base-200 p-2 rounded mt-1 overflow-auto text-sm w-full whitespace-pre-wrap break-all">
               {formattedContent}
             </pre>
