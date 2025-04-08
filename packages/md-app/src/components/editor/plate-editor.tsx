@@ -52,20 +52,12 @@ export function PlateEditor() {
 
 			editor.tf.setValue([emptyPromptElement]);
 		} else {
-			// Remove empty document prompt element if document is not empty
-			// First check if there are any empty document prompt elements
-			const hasEmptyPrompt = editor.children.some(
-				(node) => node.type === EMPTY_DOCUMENT_PROMPT_KEY
-			);
-
-			if (hasEmptyPrompt) {
-				// If we have prompt elements but document is not empty,
-				// deserialize the markdown and replace the editor content
-				const nodes = editor
-					.getApi(ExtendedMarkdownPlugin)
-					.markdown.deserialize(loadedMd);
-				editor.tf.setValue(nodes);
-			}
+			// For non-empty documents, do not automatically remove the empty prompt element
+			// Instead, ensure it exists and is properly placed after the first heading
+			const nodes = editor
+				.getApi(ExtendedMarkdownPlugin)
+				.markdown.deserialize(loadedMd);
+			editor.tf.setValue(nodes);
 		}
 	}, [editor, loadedMd]);
 

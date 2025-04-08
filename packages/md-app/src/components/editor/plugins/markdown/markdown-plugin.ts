@@ -1,9 +1,9 @@
-
 import { Descendant } from "@udecode/plate";
 import { MarkdownPlugin } from "../markdown-plate-fork";
 
 import { deserializeMd } from "./deserializeMd";
 import { remarkToPlateElementRules } from "./RemarkToPlateElementRules";
+import { EMPTY_DOCUMENT_PROMPT_KEY } from "../../plugins/empty-document-prompt-plugin";
 
 // export function remarkPlugin(
 // 	this: Processor<undefined, undefined, undefined, MdastNode>,
@@ -34,7 +34,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 			// 	processor: (tree: any) => {
 			// 		return (
 			// 			tree
-
+			
 			// 				// add frontmatter to allow headers containing yaml and toml
 			// 				.use(remarkFrontmatter, ["yaml", "toml"])
 			// 				.use(remarkGfm)
@@ -46,6 +46,27 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 			// 	},
 			// });
 			console.log({ deserializedResult });
+			
+			// Insert the empty document prompt element after the first heading
+			// if we have at least one node
+			if (deserializedResult.length > 0) {
+				// Find the first heading element
+				const firstHeadingIndex = deserializedResult.findIndex(
+					(node) => node.type && node.type.startsWith('h')
+				);
+
+				// If we found a heading, insert the prompt after it
+				if (firstHeadingIndex !== -1) {
+					const emptyPromptElement = {
+						type: EMPTY_DOCUMENT_PROMPT_KEY,
+						children: [{ text: '' }],
+					};
+					
+					// Insert after the first heading
+					deserializedResult.splice(firstHeadingIndex + 1, 0, emptyPromptElement);
+				}
+			}
+			
 			return deserializedResult;
 		},
 		serialize: (value: Descendant[]) => {
@@ -83,6 +104,10 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.extendApi(({ editor }) => {
 						// TODO remove this after we have update to the last version (> 43.x.x of plate) - which includes this logic
 						serialize: (children) => `${children}\n`,
 					},
+					// Don't serialize the empty-document-prompt element to markdown
+					[EMPTY_DOCUMENT_PROMPT_KEY]: {
+						serialize: () => "",
+					}
 				},
 			});
 			// XXX removes the extra <br> added by plate at the end of a paragraph
