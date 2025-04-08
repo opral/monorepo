@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLix } from "./hooks/use-lix.ts";
 import { openLixInMemory, toBlob } from "@lix-js/sdk";
 import { useContext } from "react";
 import { Context } from "./context";
-import { DownloadIcon, FileIcon } from "lucide-react";
+import { DownloadIcon, FileIcon, PauseIcon, PlayIcon } from "lucide-react";
 import DataExplorer from "./pages/data-explorer/index";
 import Graph from "./pages/graph/index";
 import { FloatingWindow } from "./components/floating-window";
@@ -42,6 +42,8 @@ export default function App() {
   const [activeContent, setActiveContent] = useState<Pages | null>(null);
   const [pinnedWindows, setPinnedWindows] = useState<Pages[]>([]);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [isFrozen, setIsFrozen] = useState(false);
+  const transactionRef = useRef<any>(null);
   const [windowStates, setWindowStates] = useState<Record<Pages, WindowState>>(
     {} as Record<Pages, WindowState>
   );
@@ -206,11 +208,67 @@ export default function App() {
     }
   };
 
+  // Handle freezing and unfreezing of Lix database
+  const toggleFreezeState = async () => {
+    try {
+      if (!isFrozen) {
+        // Create a long-running transaction that will block writes
+        // We'll keep this transaction open until the user unfreezes
+        const transaction = lix.db.transaction();
+
+        // Start a transaction but don't commit or rollback
+        // This keeps the transaction open, blocking writes but allowing reads
+        transactionRef.current = { transaction, active: true };
+
+        // Execute a simple query to start the transaction
+        // but we won't resolve the promise, keeping the transaction open
+        transaction
+          .execute(async (trx) => {
+            // Store the transaction executor in the ref
+            transactionRef.current.executor = trx;
+
+            // This promise won't resolve until we manually resolve it when unfreezing
+            return new Promise((resolve) => {
+              transactionRef.current.resolve = resolve;
+            });
+          })
+          .catch((error) => {
+            console.error("Transaction error:", error);
+            // If there's an error with the transaction, make sure we unfreeze
+            setIsFrozen(false);
+            transactionRef.current = null;
+          });
+
+        setIsFrozen(true);
+      } else {
+        // Unfreeze by resolving the transaction promise
+        if (transactionRef.current && transactionRef.current.active) {
+          // Resolve the promise to complete the transaction
+          if (transactionRef.current.resolve) {
+            transactionRef.current.resolve();
+          }
+          transactionRef.current.active = false;
+        }
+        transactionRef.current = null;
+        setIsFrozen(false);
+      }
+    } catch (error) {
+      console.error("Error toggling freeze state:", error);
+      // If there's an error, ensure we're in an unfrozen state
+      setIsFrozen(false);
+      transactionRef.current = null;
+    }
+  };
+
   return (
     <div className="flex flex-col w-full" data-theme="light">
-      <header className="bg-background border-b border-base-200">
+      <header
+        className={`bg-background border-b ${
+          isFrozen ? "bg-blue-50 border-blue-100" : "border-base-200"
+        }`}
+      >
         <div className="container mx-auto py-1 px-2 flex items-center">
-          <span className="text-sm font-medium mr-4">Lix Inspector</span>
+          <span className={`text-sm font-medium mr-4`}>Lix Inspector</span>
 
           <div className="join">
             {[
@@ -229,7 +287,31 @@ export default function App() {
             ))}
           </div>
 
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            {/* Freeze/Unfreeze Button with Tooltip */}
+            <div className="tooltip tooltip-bottom">
+              <div className="tooltip-content">
+                <div className="font-bold text-xs">
+                  {isFrozen ? "Resume Lix" : "Pause Lix"}
+                </div>
+                <div className="text-xs mt-1">
+                  {isFrozen
+                    ? "Resume write operations"
+                    : "Block writes, allow reads"}
+                </div>
+              </div>
+              <button
+                className="btn btn-xs btn-ghost"
+                onClick={toggleFreezeState}
+              >
+                {isFrozen ? (
+                  <PlayIcon className="h-4 w-4" />
+                ) : (
+                  <PauseIcon className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-xs">
                 Actions
