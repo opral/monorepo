@@ -96,33 +96,42 @@ export function FloatingWindow({
   // Initialize position and size only once
   useEffect(() => {
     if (!hasInitialized) {
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+      // Use initialPosition and initialSize if provided
+      if (initialPosition.x !== 0 || initialPosition.y !== 0) {
+        // We have a saved position, use it
+        setPosition(initialPosition);
+        setSize(initialSize);
+      } else {
+        // No saved position, calculate a responsive default
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
-      // Calculate responsive initial size
-      const responsiveWidth = Math.min(
-        initialSize.width,
-        Math.max(300, viewportWidth * 0.8)
-      );
-      const responsiveHeight = Math.min(
-        initialSize.height,
-        Math.max(200, viewportHeight * 0.7)
-      );
+        // Calculate responsive initial size
+        const responsiveWidth = Math.min(
+          initialSize.width,
+          Math.max(300, viewportWidth * 0.8)
+        );
+        const responsiveHeight = Math.min(
+          initialSize.height,
+          Math.max(200, viewportHeight * 0.7)
+        );
 
-      // Set responsive size
-      setSize({
-        width: responsiveWidth,
-        height: responsiveHeight,
-      });
+        // Set responsive size
+        setSize({
+          width: responsiveWidth,
+          height: responsiveHeight,
+        });
 
-      // Calculate initial position to center the window
-      const newX = Math.max(0, (viewportWidth - responsiveWidth) / 2);
-      const newY = Math.max(navbarHeight + 20, (viewportHeight - responsiveHeight) / 3);
+        // Calculate initial position to center the window
+        const newX = Math.max(0, (viewportWidth - responsiveWidth) / 2);
+        const newY = Math.max(navbarHeight + 20, (viewportHeight - responsiveHeight) / 3);
 
-      setPosition({ x: newX, y: newY });
+        setPosition({ x: newX, y: newY });
+      }
+      
       setHasInitialized(true);
     }
-  }, [initialSize, hasInitialized, navbarHeight]);
+  }, [initialPosition, initialSize, hasInitialized, navbarHeight]);
 
   useEffect(() => {
     setIsExpanded(initialIsExpanded);
