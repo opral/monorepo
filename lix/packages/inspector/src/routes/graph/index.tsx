@@ -65,12 +65,6 @@ export default function Route() {
     }
   }, [lix]);
 
-  console.log({
-    versions,
-    changeSets,
-    changeSetEdges,
-  });
-
   return (
     <div className="container mx-auto p-4">
       <ChangeSetGraph
