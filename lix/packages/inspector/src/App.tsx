@@ -3,7 +3,7 @@ import { useLix } from "./hooks/use-lix.ts";
 import { openLixInMemory, toBlob } from "@lix-js/sdk";
 import { useContext } from "react";
 import { Context } from "./context";
-import { DownloadIcon, FileIcon, PauseIcon, PlayIcon } from "lucide-react";
+import { DownloadIcon, FileIcon, PauseIcon, PlayIcon, MoreVertical } from "lucide-react";
 import DataExplorer from "./pages/data-explorer/index";
 import Graph from "./pages/graph/index";
 import { FloatingWindow } from "./components/floating-window";
@@ -313,8 +313,8 @@ export default function App() {
             </div>
 
             <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-xs">
-                Actions
+              <div tabIndex={0} role="button" className="btn btn-xs btn-ghost">
+                <MoreVertical className="h-4 w-4" />
               </div>
               <ul
                 tabIndex={0}
