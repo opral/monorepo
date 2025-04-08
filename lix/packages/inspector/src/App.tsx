@@ -15,10 +15,12 @@ const CONTENT_CONFIG = {
   "data-explorer": {
     title: "Data Explorer",
     initialPosition: { x: 100, y: 100 },
+    initialSize: { width: 800, height: 600 },
   },
   graph: {
     title: "Graph",
     initialPosition: { x: 150, y: 150 },
+    initialSize: { width: 900, height: 700 },
   },
 };
 
@@ -26,6 +28,7 @@ export default function App() {
   const lix = useLix();
   const { setLix, rootContainer } = useContext(Context);
   const [activeContent, setActiveContent] = useState<Pages | null>(null);
+  const [pinnedWindows, setPinnedWindows] = useState<Pages[]>([]);
 
   // Update body padding when the inspector height changes
   useEffect(() => {
@@ -93,8 +96,40 @@ export default function App() {
 
   const handleNavItemClick = (id: string) => {
     if (id === "data-explorer" || id === "graph") {
-      setActiveContent(id as Pages);
-      return;
+      const pageId = id as Pages;
+      
+      // If the window is already pinned, just make it active
+      if (pinnedWindows.includes(pageId)) {
+        setActiveContent(pageId);
+        return;
+      }
+      
+      // Otherwise, set it as the active content
+      setActiveContent(pageId);
+    }
+  };
+
+  const handlePinChange = (pageId: Pages, isPinned: boolean) => {
+    if (isPinned) {
+      // Add to pinned windows if not already there
+      if (!pinnedWindows.includes(pageId)) {
+        setPinnedWindows([...pinnedWindows, pageId]);
+      }
+    } else {
+      // Remove from pinned windows
+      setPinnedWindows(pinnedWindows.filter(id => id !== pageId));
+    }
+  };
+
+  const handleCloseWindow = (pageId: Pages) => {
+    // Remove from pinned windows if it's pinned
+    if (pinnedWindows.includes(pageId)) {
+      setPinnedWindows(pinnedWindows.filter(id => id !== pageId));
+    }
+    
+    // If this is the active window, clear active content
+    if (activeContent === pageId) {
+      setActiveContent(null);
     }
   };
 
@@ -102,6 +137,12 @@ export default function App() {
     { id: "graph", label: "Graph" },
     { id: "data-explorer", label: "Data Explorer" },
   ];
+
+  // Determine which windows should be displayed
+  const visibleWindows = Array.from(new Set([
+    ...(activeContent ? [activeContent] : []),
+    ...pinnedWindows
+  ])) as Pages[];
 
   return (
     <div className="flex flex-col w-full" data-theme="light">
@@ -150,37 +191,49 @@ export default function App() {
         </div>
       </header>
 
-      <FloatingPage
-        activeContent={activeContent}
-        onClose={() => setActiveContent(null)}
-        children={{
-          "data-explorer": <DataExplorer />,
-          graph: <Graph />,
-        }}
-      />
+      {/* Render all visible windows */}
+      {visibleWindows.map(pageId => (
+        <FloatingPage
+          key={pageId}
+          pageId={pageId}
+          isActive={pageId === activeContent}
+          onClose={() => handleCloseWindow(pageId)}
+          onPinChange={(isPinned) => handlePinChange(pageId, isPinned)}
+          isPinned={pinnedWindows.includes(pageId)}
+          children={{
+            "data-explorer": <DataExplorer />,
+            graph: <Graph />,
+          }}
+        />
+      ))}
     </div>
   );
 }
 
 function FloatingPage(props: {
-  activeContent: Pages | null;
+  pageId: Pages;
+  isActive: boolean;
+  isPinned: boolean;
   onClose: () => void;
+  onPinChange: (isPinned: boolean) => void;
   children: {
     [key in Pages]: ReactNode;
   };
 }) {
-  if (!props.activeContent) return null;
-
-  const config = CONTENT_CONFIG[props.activeContent];
+  const { pageId, isPinned, onClose, onPinChange, children } = props;
+  const config = CONTENT_CONFIG[pageId];
 
   return (
     <FloatingWindow
       title={config.title}
       isOpen={true}
-      onClose={props.onClose}
+      onClose={onClose}
       initialPosition={config.initialPosition}
+      initialSize={config.initialSize}
+      isPinned={isPinned}
+      onPinChange={onPinChange}
     >
-      {props.children[props.activeContent]}
+      {children[pageId]}
     </FloatingWindow>
   );
 }
