@@ -39,12 +39,17 @@ export default function Graph() {
                 "change_set.id"
               )
               .innerJoin("label", "label.id", "change_set_label.label_id")
-              .where("change_set.id", "=", eb.ref("change_set.id"))
+              .where(
+                "change_set_label.change_set_id",
+                "=",
+                eb.ref("change_set.id")
+              )
               .groupBy("label.id")
               .select(["label.name"])
           ).as("labels"),
         ])
         .execute();
+      console.log("result", result);
       return result;
     } catch (error) {
       console.error("Error fetching change sets:", error);
