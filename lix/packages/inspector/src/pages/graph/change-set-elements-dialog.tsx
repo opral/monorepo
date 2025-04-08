@@ -17,7 +17,7 @@ export function ChangeSetElementsWindow(props: ChangeSetElementsWindowProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const [changes] = useQuery(async () => {
-    return await lix.db
+    const reuslt = await lix.db
       .selectFrom("change")
       .innerJoin(
         "change_set_element",
@@ -29,6 +29,10 @@ export function ChangeSetElementsWindow(props: ChangeSetElementsWindowProps) {
       .selectAll("change")
       .select("snapshot.content")
       .execute();
+
+    console.log("Changes:", reuslt);
+
+    return reuslt;
   });
 
   const handleClose = () => {
@@ -50,7 +54,7 @@ export function ChangeSetElementsWindow(props: ChangeSetElementsWindowProps) {
       {isOpen && (
         <FloatingWindowPortal
           rootContainer={rootContainer}
-          title={`Changes for ${props.changeSetId.substring(0, 8)}`}
+          title={`Change set ${props.changeSetId}`}
           onClose={handleClose}
         >
           <div className="grid gap-4 p-4 max-w-full overflow-hidden">
@@ -112,7 +116,8 @@ function ChangeComponent(props: { change: Change & { content: any } }) {
       <div className="card-body p-4 overflow-hidden">
         <div className="grid gap-2">
           <div>
-            <strong>ID:</strong> <span className="font-mono">{props.change.id.substring(0, 8)}</span>
+            <strong>ID:</strong>{" "}
+            <span className="font-mono">{props.change.id}</span>
           </div>
           <div>
             <strong>File ID:</strong> {props.change.file_id}

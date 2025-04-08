@@ -134,7 +134,7 @@ const VersionNode = ({ id, entity }: { id: string; entity: any }) => {
 };
 
 // Generic Node Component that delegates to specialized components
-const GenericLixNodeComponent = ({ id, data }: NodeProps<LixNodeData>) => {
+const GenericLixNodeComponent = ({ id, data }: NodeProps) => {
   const { tableName, entity } = data as LixNodeData;
 
   // Render the appropriate node type based on tableName
