@@ -17,7 +17,7 @@ export function ChangeSetElementsWindow(props: ChangeSetElementsWindowProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const [changes] = useQuery(async () => {
-    const reuslt = await lix.db
+    return await lix.db
       .selectFrom("change")
       .innerJoin(
         "change_set_element",
@@ -29,10 +29,6 @@ export function ChangeSetElementsWindow(props: ChangeSetElementsWindowProps) {
       .selectAll("change")
       .select("snapshot.content")
       .execute();
-
-    console.log("Changes:", reuslt);
-
-    return reuslt;
   });
 
   const handleClose = () => {
