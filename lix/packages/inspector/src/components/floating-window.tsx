@@ -10,10 +10,10 @@ interface FloatingWindowProps {
   initialSize?: { width: number; height: number };
   isPinned?: boolean;
   onPinChange?: (isPinned: boolean) => void;
-  isFullSize?: boolean;
+  isExpanded?: boolean;
   onPositionChange?: (position: { x: number; y: number }) => void;
   onSizeChange?: (size: { width: number; height: number }) => void;
-  onFullSizeChange?: (isFullSize: boolean) => void;
+  onExpandedChange?: (isExpanded: boolean) => void;
 }
 
 type ResizeDirection = "" | "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
@@ -24,17 +24,16 @@ const SNAP_THRESHOLD = EDGE_PADDING + 8; // Trigger slightly before the padding 
 const CORNER_THRESHOLD = SNAP_THRESHOLD * 5; // Reduced corner detection area (was 8x)
 const EDGE_THRESHOLD = SNAP_THRESHOLD; // Regular edge threshold
 const SIDE_EDGE_THRESHOLD = SNAP_THRESHOLD * 3; // Extended threshold for left/right edges
+const EXPANDED_MARGIN = EDGE_PADDING * 2; // Margin for expanded mode
 
 const SNAP_ZONES = {
   left: { x: 0, width: 0.5, height: 1, y: 0 },
   right: { x: 0.5, width: 0.5, height: 1, y: 0 },
-  top: { x: 0, width: 1, height: 0.5, y: 0 },
   bottom: { x: 0, width: 1, height: 0.5, y: 0.5 },
   topLeft: { x: 0, width: 0.5, height: 0.5, y: 0 },
   topRight: { x: 0.5, width: 0.5, height: 0.5, y: 0 },
   bottomLeft: { x: 0, width: 0.5, height: 0.5, y: 0.5 },
   bottomRight: { x: 0.5, width: 0.5, height: 0.5, y: 0.5 },
-  maximize: { x: 0, width: 1, height: 1, y: 0 },
 };
 
 export function FloatingWindow({
@@ -46,17 +45,17 @@ export function FloatingWindow({
   initialSize = { width: 600, height: 400 },
   isPinned = false,
   onPinChange,
-  isFullSize: initialIsFullSize = false,
+  isExpanded: initialIsExpanded = false,
   onPositionChange,
   onSizeChange,
-  onFullSizeChange,
+  onExpandedChange,
 }: FloatingWindowProps) {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<ResizeDirection>("");
-  const [isFullSize, setIsFullSize] = useState(initialIsFullSize);
+  const [isExpanded, setIsExpanded] = useState(initialIsExpanded);
   const [previousPosition, setPreviousPosition] = useState(initialPosition);
   const [previousSize, setPreviousSize] = useState(initialSize);
   const [pinned, setPinned] = useState(isPinned);
@@ -72,6 +71,7 @@ export function FloatingWindow({
     height: number;
   }>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [navbarHeight, setNavbarHeight] = useState(0);
 
   // Use refs for values that don't need to trigger re-renders
   const positionRef = useRef(position);
@@ -108,8 +108,8 @@ export function FloatingWindow({
   }, [initialSize, isDragging, isResizing]);
 
   useEffect(() => {
-    setIsFullSize(initialIsFullSize);
-  }, [initialIsFullSize]);
+    setIsExpanded(initialIsExpanded);
+  }, [initialIsExpanded]);
 
   // Get the Lix Inspector header height
   useEffect(() => {
@@ -124,39 +124,45 @@ export function FloatingWindow({
     }
   }, []);
 
+  // Get the Lix Inspector navbar height
+  useEffect(() => {
+    const navbarEl = document.getElementById("lix-inspector-navbar");
+    if (navbarEl) {
+      setNavbarHeight(navbarEl.offsetHeight);
+    }
+  }, []);
+
   // Handle dragging - optimized with useCallback
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (isFullSize) return; // Prevent dragging in full-size mode
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only start dragging from the header (excluding buttons)
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === "BUTTON" ||
+      target.closest("button") ||
+      target.tagName === "svg" ||
+      target.tagName === "path"
+    ) {
+      return;
+    }
 
-      // Only start dragging from the header (excluding buttons)
-      const target = e.target as HTMLElement;
-      const isHeader =
-        target.classList.contains("window-header") ||
-        (target.parentElement &&
-          target.parentElement.classList.contains("window-header") &&
-          !target.classList.contains("btn") &&
-          !target.parentElement.classList.contains("btn"));
+    e.preventDefault();
+    setIsDragging(true);
 
-      if (isHeader) {
-        setIsDragging(true);
-        // Store offset in ref to avoid re-renders
-        dragOffsetRef.current = {
-          x: e.clientX - positionRef.current.x,
-          y: e.clientY - positionRef.current.y,
-        };
-
-        // Prevent text selection during drag
-        e.preventDefault();
-      }
-    },
-    [isFullSize]
-  );
+    // Calculate offset from cursor to window corner
+    const windowRect = windowRef.current?.getBoundingClientRect();
+    if (windowRect) {
+      dragOffsetRef.current = {
+        x: e.clientX - windowRect.left,
+        y: e.clientY - windowRect.top,
+      };
+      e.preventDefault();
+    }
+  }, []);
 
   // Handle resize start
   const handleResizeStart = useCallback(
     (e: React.MouseEvent, direction: ResizeDirection) => {
-      if (isFullSize) return; // Prevent resizing in full-size mode
+      if (isExpanded) return; // Prevent resizing in expanded mode
 
       e.preventDefault();
       e.stopPropagation();
@@ -178,7 +184,7 @@ export function FloatingWindow({
         y: e.clientY - positionRef.current.y,
       };
     },
-    [isFullSize]
+    [isExpanded]
   );
 
   // Check if window should snap to a zone based on cursor position
@@ -208,32 +214,20 @@ export function FloatingWindow({
         !isNearTopRight &&
         !isNearBottomRight &&
         cursorX > viewportWidth - SIDE_EDGE_THRESHOLD;
-      const isNearTop =
-        !isNearTopLeft &&
-        !isNearTopRight &&
-        cursorY < EDGE_THRESHOLD + headerHeight;
       const isNearBottom =
         !isNearBottomLeft &&
         !isNearBottomRight &&
         cursorY > viewportHeight - EDGE_THRESHOLD;
 
-      // Calculate center positions
-      const isNearCenterX =
-        Math.abs(cursorX - viewportWidth / 2) < EDGE_THRESHOLD;
-      const isNearCenterY =
-        Math.abs(cursorY - viewportHeight / 2) < EDGE_THRESHOLD;
-
       // Only check for snapping if cursor is near an edge or corner
       if (
         !isNearLeft &&
         !isNearRight &&
-        !isNearTop &&
         !isNearBottom &&
         !isNearTopLeft &&
         !isNearTopRight &&
         !isNearBottomLeft &&
-        !isNearBottomRight &&
-        !(isNearCenterX && isNearCenterY)
+        !isNearBottomRight
       ) {
         return null;
       }
@@ -299,15 +293,6 @@ export function FloatingWindow({
           width: viewportWidth * SNAP_ZONES.right.width - EDGE_PADDING * 1.5,
           height: viewportHeight - EDGE_PADDING * 2,
         };
-      } else if (isNearTop) {
-        // Top edge
-        return {
-          zone: "top",
-          x: EDGE_PADDING,
-          y: EDGE_PADDING + headerHeight,
-          width: viewportWidth - EDGE_PADDING * 2,
-          height: viewportHeight * SNAP_ZONES.top.height - EDGE_PADDING * 1.5,
-        };
       } else if (isNearBottom) {
         // Bottom edge
         return {
@@ -317,15 +302,6 @@ export function FloatingWindow({
           width: viewportWidth - EDGE_PADDING * 2,
           height:
             viewportHeight * SNAP_ZONES.bottom.height - EDGE_PADDING * 1.5,
-        };
-      } else if (isNearCenterX && isNearCenterY) {
-        // Center (full screen)
-        return {
-          zone: "maximize",
-          x: EDGE_PADDING,
-          y: EDGE_PADDING + headerHeight,
-          width: viewportWidth - EDGE_PADDING * 2,
-          height: viewportHeight - EDGE_PADDING * 2 - headerHeight,
         };
       }
 
@@ -472,54 +448,53 @@ export function FloatingWindow({
     }
   }, [isSnapping, snapPreview, preSnapSize, onPositionChange, onSizeChange]);
 
-  // Toggle full-size mode
-  const toggleFullSize = useCallback(() => {
-    const newIsFullSize = !isFullSize;
+  // Toggle expanded mode
+  const toggleExpanded = useCallback(() => {
+    if (isExpanded) {
+      // Restore previous size and position
+      setPosition(previousPosition);
+      setSize(previousSize);
+    } else {
+      // Save current size and position
+      setPreviousPosition(position);
+      setPreviousSize(size);
 
-    if (!isFullSize) {
-      // Save current position and size before going full-screen
-      setPreviousPosition(positionRef.current);
-      setPreviousSize(sizeRef.current);
-
-      // Set full-screen size and position
+      // Set expanded size and position
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      const newPosition = { x: 0, y: 0 };
-      const newSize = { width: viewportWidth, height: viewportHeight };
+      const newPosition = {
+        x: EXPANDED_MARGIN,
+        y: navbarHeight + EXPANDED_MARGIN,
+      };
+      const newSize = {
+        width: viewportWidth - EXPANDED_MARGIN * 2,
+        height: viewportHeight - navbarHeight - EXPANDED_MARGIN * 2,
+      };
 
       setPosition(newPosition);
       setSize(newSize);
-      positionRef.current = newPosition;
-      sizeRef.current = newSize;
-
-      // Notify parent of changes
-      if (onPositionChange) onPositionChange(newPosition);
-      if (onSizeChange) onSizeChange(newSize);
-    } else {
-      // Restore previous position and size
-      setPosition(previousPosition);
-      setSize(previousSize);
-      positionRef.current = previousPosition;
-      sizeRef.current = previousSize;
-
-      // Notify parent of changes
-      if (onPositionChange) onPositionChange(previousPosition);
-      if (onSizeChange) onSizeChange(previousSize);
     }
 
-    setIsFullSize(newIsFullSize);
+    // Toggle expanded state
+    setIsExpanded(!isExpanded);
 
-    // Notify parent of full-size change
-    if (onFullSizeChange) {
-      onFullSizeChange(newIsFullSize);
+    // Notify parent component
+    if (onExpandedChange) {
+      onExpandedChange(!isExpanded);
     }
   }, [
-    isFullSize,
+    isExpanded,
     previousPosition,
     previousSize,
-    onPositionChange,
-    onSizeChange,
-    onFullSizeChange,
+    position,
+    size,
+    setPosition,
+    setSize,
+    setPreviousPosition,
+    setPreviousSize,
+    setIsExpanded,
+    onExpandedChange,
+    navbarHeight,
   ]);
 
   // Toggle pin state
@@ -584,7 +559,7 @@ export function FloatingWindow({
 
   // Render resize handles
   const renderResizeHandles = () => {
-    if (isFullSize) return null;
+    if (isExpanded) return null;
 
     const handles: ResizeDirection[] = [
       "n",
@@ -656,12 +631,18 @@ export function FloatingWindow({
         className={`floating-window bg-base-100 shadow-lg border border-base-300 rounded-md ${isDragging ? "dragging" : ""} ${isResizing ? "resizing" : ""} ${pinned ? "pinned" : ""}`}
         style={{
           position: "fixed",
-          top: isFullSize ? "0" : `${position.y}px`,
-          left: isFullSize ? "0" : `${position.x}px`,
-          width: isFullSize ? "100%" : `${size.width}px`,
-          height: isFullSize ? "100vh" : `${size.height}px`,
-          maxWidth: isFullSize ? "none" : "calc(100vw - 40px)",
-          maxHeight: isFullSize ? "none" : "calc(100vh - 40px)",
+          top: isExpanded
+            ? `${navbarHeight + EXPANDED_MARGIN}px`
+            : `${position.y}px`,
+          left: isExpanded ? `${EXPANDED_MARGIN}px` : `${position.x}px`,
+          width: isExpanded
+            ? `calc(100vw - ${EXPANDED_MARGIN * 2}px)`
+            : `${size.width}px`,
+          height: isExpanded
+            ? `calc(100vh - ${navbarHeight + EXPANDED_MARGIN * 2}px)`
+            : `${size.height}px`,
+          maxWidth: isExpanded ? "none" : "calc(100vw - 40px)",
+          maxHeight: isExpanded ? "none" : "calc(100vh - 40px)",
           zIndex: 1000,
           display: "flex",
           flexDirection: "column",
@@ -675,6 +656,7 @@ export function FloatingWindow({
         <div
           className="window-header flex justify-between items-center p-2 bg-base-200 cursor-move"
           onMouseDown={handleMouseDown}
+          onDoubleClick={toggleExpanded}
         >
           <div className="font-medium">{title}</div>
           <div className="flex items-center gap-1">
@@ -687,10 +669,10 @@ export function FloatingWindow({
             </button>
             <button
               className="btn btn-ghost btn-sm p-1 h-6 min-h-0"
-              onClick={toggleFullSize}
-              title={isFullSize ? "Restore size" : "Full size"}
+              onClick={toggleExpanded}
+              title={isExpanded ? "Restore size" : "Expanded"}
             >
-              {isFullSize ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </button>
             <button
               className="btn btn-ghost btn-sm p-1 h-6 min-h-0"
@@ -701,7 +683,10 @@ export function FloatingWindow({
             </button>
           </div>
         </div>
-        <div className="window-content p-4 overflow-auto flex-1">
+        <div
+          className="window-content p-4 overflow-auto flex-1"
+          style={{ height: "calc(100% - 40px)" }}
+        >
           {children}
         </div>
         {renderResizeHandles()}

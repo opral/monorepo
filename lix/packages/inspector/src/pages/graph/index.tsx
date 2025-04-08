@@ -66,7 +66,7 @@ export default function Graph() {
   }, [lix]);
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="h-full w-full" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <ChangeSetGraph
         changeSets={changeSets ?? []}
         changeSetEdges={changeSetEdges ?? []}

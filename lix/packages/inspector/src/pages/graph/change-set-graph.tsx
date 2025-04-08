@@ -2,14 +2,13 @@ import {
   ReactFlow,
   type Node,
   type Edge,
-  MiniMap,
   MarkerType,
   Controls,
   Background,
   ConnectionLineType,
 } from "@xyflow/react";
 import dagre from "@dagrejs/dagre";
-import { useMemo, useCallback, useRef } from "react";
+import { useMemo, useCallback, useRef, useEffect } from "react";
 import { type LixNodeData, lixNodeTypes } from "./nodes"; // Updated path
 import type { ChangeSet, ChangeSetEdge, VersionV2 } from "@lix-js/sdk";
 
@@ -25,6 +24,7 @@ export function ChangeSetGraph({
   versions,
 }: ChangeSetGraphProps) {
   const reactFlowInstanceRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Calculate layout using useMemo to prevent infinite loops
   const { nodes, edges } = useMemo(() => {
@@ -120,6 +120,18 @@ export function ChangeSetGraph({
     return { nodes, edges: allEdges };
   }, [changeSets, changeSetEdges, versions]);
 
+  // Refit view when container size changes or nodes change
+  useEffect(() => {
+    if (reactFlowInstanceRef.current) {
+      setTimeout(() => {
+        reactFlowInstanceRef.current?.fitView({
+          padding: 0.2,
+          includeHiddenNodes: false,
+        });
+      }, 100);
+    }
+  }, [nodes]);
+
   // Function to focus on a specific node
   const focusNode = useCallback(
     (nodeId: string) => {
@@ -144,7 +156,7 @@ export function ChangeSetGraph({
   );
 
   return (
-    <div className="flex flex-col h-screen w-full">
+    <div className="flex flex-col h-full w-full" style={{ height: "100%" }}>
       {/* Version Menu Bar */}
       <div className="p-2 border-b flex flex-wrap gap-2 items-center">
         <span className="font-bold mr-2">Versions:</span>
@@ -163,7 +175,15 @@ export function ChangeSetGraph({
       </div>
 
       {/* Graph Container */}
-      <div className="flex-1 border">
+      <div
+        ref={containerRef}
+        className="flex-1"
+        style={{
+          height: "calc(100% - 42px)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -178,10 +198,26 @@ export function ChangeSetGraph({
           connectionLineType={ConnectionLineType.SmoothStep}
           onInit={(instance) => {
             reactFlowInstanceRef.current = instance;
+            // Initial fit view
+            setTimeout(() => {
+              instance.fitView({
+                padding: 0.2,
+                includeHiddenNodes: false,
+              });
+            }, 100);
+          }}
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
           }}
         >
           <Controls />
-          <MiniMap />
+          {/* <MiniMap /> */}
           <Background variant="dots" gap={12} size={1} />
         </ReactFlow>
       </div>
