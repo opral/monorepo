@@ -10,7 +10,7 @@ import {
 } from "@xyflow/react";
 import dagre from "@dagrejs/dagre";
 import "@xyflow/react/dist/style.css";
-import { useMemo } from "react";
+import { useMemo, useCallback, useRef } from "react";
 import { type LixNodeData, lixNodeTypes } from "./nodes"; // Updated path
 import type { ChangeSet, ChangeSetEdge, VersionV2 } from "@lix-js/sdk";
 
@@ -25,6 +25,8 @@ export function ChangeSetGraph({
   changeSetEdges,
   versions,
 }: ChangeSetGraphProps) {
+  const reactFlowInstanceRef = useRef(null);
+
   // Calculate layout using useMemo to prevent infinite loops
   const { nodes, edges } = useMemo(() => {
     const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
@@ -119,23 +121,92 @@ export function ChangeSetGraph({
     return { nodes, edges: allEdges };
   }, [changeSets, changeSetEdges, versions]);
 
+  // Function to focus on a specific node
+  const focusNode = useCallback(
+    (nodeId: string) => {
+      const instance = reactFlowInstanceRef.current;
+      if (!instance) return;
+
+      // Find the node
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) return;
+
+      // Center the view on the node with some zoom
+      instance.setViewport(
+        {
+          x: -node.position.x + window.innerWidth / 2 - 85,
+          y: -node.position.y + window.innerHeight / 2 - 30,
+          zoom: 1.5,
+        },
+        { duration: 800 }
+      );
+    },
+    [nodes]
+  );
+
   return (
-    <div style={{ height: "800px", width: "100%", border: "1px solid #eee" }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={lixNodeTypes}
-        fitView
-        defaultEdgeOptions={{
-          type: "smoothstep",
-          style: { strokeWidth: 1.5 },
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "800px",
+        width: "100%",
+      }}
+    >
+      {/* Version Menu Bar */}
+      <div
+        style={{
+          padding: "8px",
+          borderBottom: "1px solid #eee",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "8px",
+          alignItems: "center",
         }}
-        connectionLineType={ConnectionLineType.SmoothStep}
       >
-        <Controls />
-        <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
-      </ReactFlow>
+        <span style={{ fontWeight: "bold", marginRight: "8px" }}>
+          Versions:
+        </span>
+        {versions.map((version) => (
+          <button
+            key={version.id}
+            onClick={() => focusNode(version.id)}
+            style={{
+              padding: "4px 8px",
+              border: "1px solid #ccc",
+              borderRadius: "0",
+              background: "white",
+              fontSize: "12px",
+              cursor: "pointer",
+            }}
+            title={`Jump to ${version.name || version.id}`}
+          >
+            {version.name || version.id.substring(0, 8)}
+          </button>
+        ))}
+      </div>
+
+      {/* Graph Container */}
+      <div style={{ flex: 1, border: "1px solid #eee" }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={lixNodeTypes}
+          fitView
+          defaultEdgeOptions={{
+            type: "smoothstep",
+            style: { strokeWidth: 1.5 },
+          }}
+          connectionLineType={ConnectionLineType.SmoothStep}
+          onInit={(instance) => {
+            reactFlowInstanceRef.current = instance;
+          }}
+        >
+          <Controls />
+          <MiniMap />
+          <Background variant="dots" gap={12} size={1} />
+        </ReactFlow>
+      </div>
     </div>
   );
 }
