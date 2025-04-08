@@ -33,15 +33,13 @@ export const setupMdDemo = async (lix: Lix) => {
 			path: "/welcome.md",
 			data: new TextEncoder().encode(`# Flashtype.ai ⚡️
 
-### Autocomplete your document
+### 🤖 Autocomplete your document
 
-Try the **AI commands** or use \`Cmd+J\` to open the AI menu.
+### 📚 Learns your writing style ([Upvote #45](https://github.com/opral/flashtype.ai/issues/45))
 
-### Learns your writing style ([Upvote #45](https://github.com/opral/flashtype.ai/issues/45))
+### 📝 Work with AI Cowriters ([Upvote #46](https://github.com/opral/flashtype.ai/issues/46))
 
-### Work with AI Cowriters ([Upvote #46](https://github.com/opral/flashtype.ai/issues/46))
-
-### Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))
+### 🤝 Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))
 
 `),
 		})
