@@ -18,11 +18,12 @@ export class SQLOrchestrator {
   
   /**
    * Generate and execute an SQL query based on a natural language question
+   * This orchestrator handles both SELECT, UPDATE, INSERT, and DELETE queries
    */
   async generateAndExecuteQuery(
     question: string, 
-    schema: string, 
-    executeQuery: (query: string) => Promise<any>
+    executeQuery: (query: string) => Promise<any>,
+    schemaInstructions?: string
   ): Promise<SQLQueryResult> {
     let attempts = 0;
     let lastError: string | undefined;
@@ -30,17 +31,8 @@ export class SQLOrchestrator {
     
     while (attempts <= this.maxRetries) {
       try {
-        // Generate SQL based on the question and schema
-        generatedSQL = await this.generateSQL(question, schema, lastError);
-        
-        // Validate query is SELECT only for safety
-        if (!this.isSelectQuery(generatedSQL)) {
-          return {
-            success: false,
-            error: 'For safety, only SELECT queries are allowed in query mode.',
-            sql: generatedSQL
-          };
-        }
+        // Generate SQL based on the question
+        generatedSQL = await this.generateSQL(question, lastError, schemaInstructions);
         
         // Execute the query
         const result = await executeQuery(generatedSQL);
@@ -79,28 +71,28 @@ export class SQLOrchestrator {
    */
   private async generateSQL(
     question: string, 
-    schema: string, 
-    previousError?: string
+    previousError?: string,
+    schemaInstructions?: string
   ): Promise<string> {
     // Build the prompt
     const messages: ChatMessage[] = [
       {
         role: 'system',
-        content: `You are an AI assistant that converts natural language questions into SQLite SQL queries.
+        content: `You are an AI assistant that converts natural language questions into SQL queries for the Lix database.
         
-Database Schema:
-${schema}
+${schemaInstructions || 'You will need to determine the database schema from the user query context.'}
 
 Instructions:
 1. Only generate SQL queries, with no explanation or commentary.
-2. Only use SELECT queries to ensure data safety.
-3. Use proper SQL syntax compatible with SQLite.
-4. Use quotes for string literals and table/column names that are keywords.
-5. Limit results to 100 rows by default for large queries.`
+2. Use proper SQL syntax compatible with SQLite.
+3. Use quotes for string literals and table/column names that are keywords.
+4. Limit results to 100 rows by default for large queries.
+5. You can use SELECT, INSERT, UPDATE, and DELETE operations.
+6. Be careful with UPDATE and DELETE operations - always use a WHERE clause.`
       },
       {
         role: 'user',
-        content: `Generate an SQL query for the following question: ${question}`
+        content: `Generate an SQL query for the following request: ${question}`
       }
     ];
     
@@ -142,17 +134,6 @@ Instructions:
       .replace(/```$/gm, '')
       .replace(/^sql$/im, '')
       .trim();
-  }
-  
-  /**
-   * Check if a query is a SELECT query for safety
-   */
-  private isSelectQuery(query: string): boolean {
-    // Normalize the query for checking
-    const normalizedQuery = query.trim().toUpperCase();
-    
-    // Check if it starts with SELECT
-    return normalizedQuery.startsWith('SELECT');
   }
   
   /**
