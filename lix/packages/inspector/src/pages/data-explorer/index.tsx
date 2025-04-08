@@ -2,13 +2,6 @@ import { useEffect, useState } from "react";
 import { useLix } from "../../hooks/use-lix";
 import { useQuery } from "../../hooks/use-query";
 import { type ColumnDef } from "@tanstack/react-table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { DataTable } from "./data-table";
 import { type ColumnFiltersState } from "@tanstack/react-table";
 
@@ -25,152 +18,134 @@ export default function DataExplorer() {
   const [tableColumns, setTableColumns] = useState<ColumnDef<any>[]>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const [tablesResult, tablesLoading, tablesError] = useQuery<
-    string[][]
-  >(() => {
+  const [tablesResult] = useQuery<string[][]>(() => {
     if (!lix) return [];
-    const result = lix.sqlite.exec(
-      "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",
-      { returnValue: "resultRows" }
-    );
-    return result as any;
+    try {
+      // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
+      const result = lix.sqlite.exec(
+        "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",
+        { returnValue: "resultRows" }
+      );
+      return result as any;
+    } catch (error) {
+      console.error("Error querying tables:", error);
+      return [];
+    }
   }, []);
 
+  // Process table results
   useEffect(() => {
     if (tablesResult && tablesResult.length > 0) {
-      const tableNames = tablesResult.map((row) => ({ name: row[0] })) as any;
-      setTables(tableNames);
-      if (tableNames.length > 0 && !selectedTable) {
-        setSelectedTable(tableNames[0].name);
+      const tableInfos = tablesResult.map((row) => ({
+        name: row[0],
+      }));
+      setTables(tableInfos);
+
+      // Auto-select first table if none selected
+      if (tableInfos.length > 0 && !selectedTable) {
+        setSelectedTable(tableInfos[0]!.name);
       }
     }
   }, [tablesResult, selectedTable]);
 
-  const [schemaResult, schemaLoading, schemaError] = useQuery<
-    any[][]
-  >(async () => {
-    if (!selectedTable || !lix) return [];
-    const result = lix.sqlite.exec(`PRAGMA table_info(${selectedTable});`, {
-      // @ts-expect-error - returnValue is not assignable to saveSql
-      returnValue: "resultRows",
-      rowId: "cid",
-    });
-    return result;
-  }, [selectedTable, lix]);
-
-  useEffect(() => {
-    if (schemaResult && schemaResult.length > 0) {
-      const newColumns = schemaResult.map((colData: any[]) => ({
-        accessorKey: colData[1],
-        header: colData[1],
-        cell: ({ row }) => {
-          const value = row.getValue(colData[1]);
-          return String(value ?? "NULL");
-        },
-      }));
-      setTableColumns(newColumns);
-    } else {
-      setTableColumns([]);
-    }
-  }, [schemaResult]);
-
-  const [tableDataResult, , tableDataError] = useQuery<any[]>(async () => {
-    if (!selectedTable || !lix || !tableColumns.length) return [];
-
+  // Fetch table data when a table is selected
+  const [tableDataResult] = useQuery<any[]>(() => {
+    if (!lix || !selectedTable) return [];
     try {
-      let query = lix.db.selectFrom(selectedTable).limit(100).selectAll();
-
-      columnFilters.forEach((filter) => {
-        const { id, value } = filter;
-        if (value) {
-          query = query.where(id as any, "like", `%${value}%`);
+      // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
+      const result = lix.sqlite.exec(
+        `SELECT * FROM "${selectedTable}" LIMIT 100;`,
+        {
+          returnValue: "resultRows",
         }
-      });
-
-      const result = await query.execute();
-      return result;
+      );
+      return result as any;
     } catch (error) {
       console.error(`Error querying table ${selectedTable}:`, error);
       return [];
     }
-  }, [selectedTable, lix, columnFilters, tableColumns]);
+  }, [selectedTable]);
 
+  // Get column names for the selected table
+  const [columnNamesResult] = useQuery<any[]>(() => {
+    if (!lix || !selectedTable) return [];
+    try {
+      // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
+      const result = lix.sqlite.exec(`PRAGMA table_info("${selectedTable}");`, {
+        returnValue: "resultRows",
+      });
+      return result as any;
+    } catch (error) {
+      console.error(`Error getting schema for ${selectedTable}:`, error);
+      return [];
+    }
+  }, [selectedTable]);
+
+  // Process column data
   useEffect(() => {
-    setTableData(tableDataResult || []);
+    if (columnNamesResult && columnNamesResult.length > 0) {
+      const columns: ColumnDef<any>[] = columnNamesResult.map((col, index) => ({
+        id: col[1], // column name
+        accessorKey: String(index),
+        header: col[1],
+        cell: (info) => info.getValue(),
+      }));
+      setTableColumns(columns);
+    } else {
+      setTableColumns([]);
+    }
+  }, [columnNamesResult]);
+
+  // Process table data
+  useEffect(() => {
+    if (tableDataResult && tableDataResult.length > 0) {
+      const data = tableDataResult.map((row) => {
+        const rowData: Record<string, any> = {};
+        row.forEach((cell: any, cellIndex: number) => {
+          rowData[String(cellIndex)] = cell;
+        });
+        return rowData;
+      });
+      setTableData(data);
+    } else {
+      setTableData([]);
+    }
   }, [tableDataResult]);
 
-  const handleTableSelect = (tableName: string) => {
-    setSelectedTable(tableName);
+  const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedTable(e.target.value);
     setColumnFilters([]);
     setTableData([]);
     setTableColumns([]);
   };
 
-  if (!lix) {
-    return <div>Loading Lix instance...</div>;
-  }
-
   return (
-    <div className="container mx-auto space-y-4 p-4">
-      {/* Removed h1 header */}
-
-      {/* Table Selector - Keep loading/error for initial table list fetch */}
-      {tablesLoading ? (
-        <p>Loading tables...</p>
-      ) : tablesError ? (
-        <p className="text-red-500">
-          Error loading tables: {tablesError.message}
-        </p>
-      ) : (
-        <div className="flex items-center space-x-4">
-          <label htmlFor="table-select" className="font-medium">
-            Select Table:
-          </label>
-          <Select value={selectedTable} onValueChange={handleTableSelect}>
-            <SelectTrigger id="table-select" className="w-[200px]">
-              <SelectValue placeholder="Select a table" />
-            </SelectTrigger>
-            <SelectContent>
-              {tables.map((table) => (
-                <SelectItem key={table.name} value={table.name}>
-                  {table.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+    <div className="container mx-auto p-4">
+      <div className="mb-4 flex items-center gap-2">
+        <label className="font-medium whitespace-nowrap">Select table:</label>
+        <select
+          className="select select-bordered w-full"
+          value={selectedTable}
+          onChange={handleTableChange}
+        >
+          <option value="" disabled>
+            Select a table
+          </option>
+          {tables.map((table) => (
+            <option key={table.name} value={table.name}>
+              {table.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {selectedTable && (
-        <div>
-          {tableColumns.length > 0 ? (
-            <DataTable
-              table={{
-                name: selectedTable,
-                columns: tableColumns,
-                data: tableData,
-              }}
-              columnFilters={columnFilters}
-              onColumnFiltersChange={setColumnFilters as any}
-            />
-          ) : schemaLoading ? (
-            <p>Loading schema...</p>
-          ) : (
-            <p>
-              No columns found for this table, or schema could not be loaded.
-            </p>
-          )}
-          {schemaError && (
-            <p className="text-red-500">
-              Error loading schema: {schemaError.message}
-            </p>
-          )}
-          {tableDataError && (
-            <p className="text-red-500">
-              Error loading table data: {tableDataError.message}
-            </p>
-          )}
-        </div>
+        <DataTable
+          data={tableData}
+          columns={tableColumns}
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+        />
       )}
     </div>
   );
