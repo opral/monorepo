@@ -17,9 +17,7 @@
     "clean": "rm -rf dist",
     "prebuild": "pnpm run clean",
     "prepublish": "pnpm run build",
-    "lix": "scripts/run.sh",
-    "setup": "scripts/setup.sh",
-    "install-global": "scripts/install.sh",
+    "lix": "node bin/run.js",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

@@ -7,6 +7,7 @@ import readline from 'readline-sync';
 import chalk from 'chalk';
 import { validateContent } from '../validate.js';
 import * as diff from 'diff';
+import { Lix } from '@lix-js/sdk';
 
 export interface AgentOptions {
   llmAdapter: LLMAdapter;
@@ -14,10 +15,146 @@ export interface AgentOptions {
   debug?: boolean;
 }
 
+/**
+ * JavaScript Code Executor for safely running LIX API code
+ */
+class JSCodeExecutor {
+  private llmAdapter: LLMAdapter;
+  
+  constructor(llmAdapter: LLMAdapter) {
+    this.llmAdapter = llmAdapter;
+  }
+  
+  /**
+   * Generate and execute JavaScript code based on a natural language request
+   */
+  async generateAndExecuteCode(
+    request: string,
+    lixObj: Lix,
+    previousError?: string
+  ): Promise<{ success: boolean; result?: any; error?: string; code?: string }> {
+    try {
+      // Generate the code
+      const code = await this.generateCode(request, previousError);
+      
+      // Execute the code with the LIX object
+      const result = await this.executeCode(code, lixObj);
+      
+      return {
+        success: true,
+        result,
+        code
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        code: ''
+      };
+    }
+  }
+  
+  /**
+   * Generate JavaScript code using the LLM
+   */
+  private async generateCode(request: string, previousError?: string): Promise<string> {
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `You are an AI assistant that generates JavaScript code to interact with a Lix object.
+        
+The Lix object (from @lix-js/sdk) has the following key properties:
+- db: A Kysely database instance for SQL operations
+- metadata: Information about the Lix file
+- changes: Change tracking functionality
+
+Instructions:
+1. Generate JavaScript code that accomplishes the user's request using the Lix API.
+2. Return only the executable code, with no explanation or commentary.
+3. The code will be executed with the Lix object available as 'lix'.
+4. Your code should return a result that can be shown to the user.
+5. Keep your code concise and focused on the task.
+6. Handle errors appropriately.
+7. Use async/await for asynchronous operations.`
+      },
+      {
+        role: 'user',
+        content: `Generate JavaScript code for the following request: ${request}`
+      }
+    ];
+    
+    // If there was an error in a previous attempt, add it for refinement
+    if (previousError) {
+      messages.push({
+        role: 'assistant',
+        content: '```javascript\n// Code goes here\n```' // Placeholder
+      });
+      
+      messages.push({
+        role: 'user',
+        content: `The code failed with error: "${previousError}". Please fix it and try again.`
+      });
+    }
+    
+    // Generate the code with lower temperature for more deterministic results
+    const response = await this.llmAdapter.generate(messages, { temperature: 0.2 });
+    
+    // Extract just the code
+    return this.extractCodeFromResponse(response.message);
+  }
+  
+  /**
+   * Extract JavaScript code from the LLM response
+   */
+  private extractCodeFromResponse(responseText: string): string {
+    // Look for JavaScript code blocks
+    const codeBlockRegex = /```(?:javascript|js)?\s*([\s\S]*?)\s*```/i;
+    const match = responseText.match(codeBlockRegex);
+    
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+    
+    // No code block, use the entire response
+    return responseText.trim()
+      .replace(/^```/gm, '')
+      .replace(/```$/gm, '')
+      .trim();
+  }
+  
+  /**
+   * Execute the generated JavaScript code
+   */
+  private async executeCode(code: string, lixObj: Lix): Promise<any> {
+    try {
+      // Create a safe execution context with the Lix object
+      const executionContext = {
+        lix: lixObj,
+        console: { log: () => {} }, // Suppress console.log
+      };
+      
+      // Create a function from the code
+      // This approach is safer than using eval directly
+      const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+      const codeFunction = new AsyncFunction('context', `
+        with (context) {
+          ${code}
+        }
+      `);
+      
+      // Execute the function and return the result
+      return await codeFunction(executionContext);
+    } catch (error) {
+      throw new Error(`Code execution failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+}
+
 export class Agent {
   private context: ConversationContext;
   llmAdapter: LLMAdapter; // Made public for testing and direct access
   private sqlOrchestrator: SQLOrchestrator;
+  private jsExecutor: JSCodeExecutor;
   private outputFormatter: OutputFormatter;
   private debug: boolean;
   
@@ -25,6 +162,7 @@ export class Agent {
     this.llmAdapter = options.llmAdapter;
     this.context = new ConversationContext(this.llmAdapter);
     this.sqlOrchestrator = new SQLOrchestrator(this.llmAdapter);
+    this.jsExecutor = new JSCodeExecutor(this.llmAdapter);
     this.outputFormatter = options.outputFormatter;
     this.debug = options.debug || false;
     
@@ -41,19 +179,29 @@ export class Agent {
       this.context.addUserMessage(input);
       
       // Update file context if we have a Lix file open
-      if (sessionState.activeLixManager) {
+      if (sessionState.activeLixManager?.isOpen()) {
         await this.updateFileContext(sessionState);
       }
       
-      // Determine if this is a query or a change request
-      const isChangeRequest = await this.isChangeRequest(input);
-      
-      if (isChangeRequest && sessionState.activeLixManager) {
-        // Handle a change request
-        await this.handleChangeRequest(input, sessionState);
+      // Handle the input based on whether we have an active Lix file
+      if (sessionState.activeLixManager?.isOpen()) {
+        // We have a Lix file open, so we can directly work with it
+        const lix = sessionState.activeLixManager.getLixObject();
+        if (lix) {
+          // First, try with direct JavaScript code execution
+          await this.handleLixRequest(input, lix);
+        } else {
+          // Handle with general response
+          await this.generateGeneralResponse(input);
+        }
       } else {
-        // Handle a query or general question
-        await this.handleQuery(input, sessionState);
+        // No Lix file is open, provide guidance
+        const response = await this.generateGeneralResponse(
+          input,
+          "I don't have a Lix file open, so I can't access any file or change data. You can use /open or /new commands to work with a Lix file."
+        );
+        this.context.addAssistantMessage(response);
+        this.outputFormatter.formatMessage(response);
       }
     } catch (error) {
       this.outputFormatter.formatError(
@@ -485,6 +633,126 @@ Please provide the fixed content.`
   /**
    * Update file context in the conversation
    */
+  /**
+   * Handle a request using the Lix object directly
+   */
+  private async handleLixRequest(input: string, lix: Lix): Promise<void> {
+    try {
+      // First attempt: Try direct JavaScript code execution
+      const codeResult = await this.jsExecutor.generateAndExecuteCode(input, lix);
+      
+      if (codeResult.success && codeResult.result !== undefined) {
+        // Code execution succeeded
+        if (this.debug) {
+          console.log(chalk.gray('Generated code:'), codeResult.code);
+        }
+        
+        // Format the result
+        const response = await this.formatExecutionResult(input, codeResult);
+        this.context.addAssistantMessage(response);
+        this.outputFormatter.formatMessage(response);
+        return;
+      }
+      
+      // Second attempt: Try SQL query if JS execution failed
+      // Get database schema dynamically
+      let dbSchema = '';
+      try {
+        // Query the database schema
+        const tables = await lix.db.introspection.getTables();
+        dbSchema = `Database Schema:\n`;
+        
+        for (const table of tables) {
+          dbSchema += `Table: ${table.name}\n`;
+          const columns = await lix.db.introspection.getTableColumns(table.name);
+          
+          for (const column of columns) {
+            dbSchema += `- ${column.name} (${column.dataType})\n`;
+          }
+          dbSchema += '\n';
+        }
+      } catch (error) {
+        dbSchema = 'Could not retrieve database schema. ';
+      }
+      
+      // Try with SQL execution
+      const sqlExecuteQuery = async (query: string) => {
+        return await lix.db.executeQuery(query);
+      };
+      
+      const sqlResult = await this.sqlOrchestrator.generateAndExecuteQuery(
+        input,
+        sqlExecuteQuery,
+        dbSchema
+      );
+      
+      if (sqlResult.success) {
+        // SQL execution succeeded
+        if (this.debug) {
+          console.log(chalk.gray('Generated SQL:'), sqlResult.sql);
+        }
+        
+        // Format the results
+        const response = await this.sqlOrchestrator.formatQueryResults(
+          input,
+          sqlResult.data,
+          sqlResult.sql!
+        );
+        
+        this.context.addAssistantMessage(response);
+        this.outputFormatter.formatMessage(response);
+        return;
+      }
+      
+      // Both JavaScript and SQL approaches failed, use general response
+      const fallbackContext = `I tried to execute your request but encountered technical issues:
+      ${codeResult.error ? `- JavaScript execution: ${codeResult.error}` : ''}
+      ${sqlResult.error ? `- SQL execution: ${sqlResult.error}` : ''}
+      
+      Let me try to help you in a different way.`;
+      
+      const response = await this.generateGeneralResponse(input, fallbackContext);
+      this.context.addAssistantMessage(response);
+      this.outputFormatter.formatMessage(response);
+    } catch (error) {
+      const errorMsg = `Failed to process your request: ${error instanceof Error ? error.message : String(error)}`;
+      this.context.addAssistantMessage(errorMsg);
+      this.outputFormatter.formatError(errorMsg);
+    }
+  }
+  
+  /**
+   * Format the result of code execution into a natural language response
+   */
+  private async formatExecutionResult(
+    input: string,
+    executionResult: { success: boolean; result?: any; code?: string }
+  ): Promise<string> {
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `You are an AI assistant that explains the results of JavaScript code execution.
+        
+Given the user's original request and the result of executing JavaScript code,
+provide a clear, concise explanation of what was accomplished.
+Focus on the information the user wanted, not the technical details of the code.`
+      },
+      {
+        role: 'user',
+        content: `
+User request: ${input}
+
+Execution result: 
+${JSON.stringify(executionResult.result, null, 2)}
+
+Please explain these results in a clear, natural way that directly answers the original request.`
+      }
+    ];
+    
+    const response = await this.llmAdapter.generate(messages);
+    return response.message;
+  }
+  
   private async updateFileContext(sessionState: SessionState): Promise<void> {
     if (!sessionState.activeLixManager) {
       this.context.setFileContext('');
@@ -492,16 +760,26 @@ Please provide the fixed content.`
     }
     
     const filePath = sessionState.activeLixManager.getCurrentFilePath();
-    const trackedFiles = await sessionState.activeLixManager.getTrackedFilePaths();
+    
+    // Get schema dynamically from the DB if possible
+    let schemaInfo = '';
+    const lix = sessionState.activeLixManager.getLixObject();
+    
+    if (lix) {
+      try {
+        const tables = await lix.db.introspection.getTables();
+        schemaInfo = 'Database Schema:\n';
+        
+        for (const table of tables) {
+          schemaInfo += `Table: ${table.name}\n`;
+        }
+      } catch (error) {
+        schemaInfo = 'Could not retrieve database schema. ';
+      }
+    }
     
     let fileContext = `Current Lix file: ${filePath || 'in-memory'}\n`;
-    
-    if (trackedFiles.length > 0) {
-      fileContext += 'Tracked files:\n';
-      fileContext += trackedFiles.map((file: string) => `- ${file}`).join('\n');
-    } else {
-      fileContext += 'No files currently tracked.';
-    }
+    fileContext += schemaInfo;
     
     this.context.setFileContext(fileContext);
   }
@@ -513,13 +791,22 @@ Please provide the fixed content.`
     return `You are an AI assistant for the Lix change control system.
     
 Your capabilities:
-- Answer questions about changes tracked in Lix files
-- Help users understand the Lix database and its schema
-- Generate and execute SQL queries to retrieve information
-- Help modify files and create changes in Lix
+- Answer questions about data stored in Lix files
+- Dynamically explore and understand the Lix database schema
+- Execute SQL queries directly to retrieve and manipulate data
+- Execute JavaScript code using the Lix SDK to perform operations
+- Help users work with the full Lix API through natural language requests
 
-When users ask about changes or files, try to interpret their request in the context of the current Lix file.
-When users want to make changes to files, help them modify the content and apply the changes to Lix.
+When users ask about data or changes, you'll interpret their request and:
+1. Generate and execute JavaScript code against the Lix API
+2. Generate and execute SQL queries against the Lix database
+3. Provide natural language explanations of the results
+
+You can handle any request related to Lix files, including:
+- Exploring file contents and change history
+- Querying structured data (CSV, JSON)
+- Modifying data and tracking changes
+- Advanced operations like filtering, aggregation, and transformation
 
 Always be clear, concise, and helpful in your responses.`;
   }
