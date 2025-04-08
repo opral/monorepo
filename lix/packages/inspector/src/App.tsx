@@ -1,18 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 import { useLix } from "@/hooks/use-lix.ts";
 import { openLixInMemory, toBlob } from "@lix-js/sdk";
 import { useContext } from "react";
 import { Context } from "./context";
 import { DownloadIcon, FileIcon } from "lucide-react";
+import DataExplorer from "./pages/data-explorer/index";
+import Graph from "./pages/graph/index";
 import { FloatingWindow } from "./components/floating-window";
-import DataExplorer from "./routes/data-explorer/index";
-import { FloatingGraph } from "./components/floating-graph";
+
+// Floating content types and component
+export type Pages = "data-explorer" | "graph";
+
+const CONTENT_CONFIG = {
+  "data-explorer": {
+    title: "Data Explorer",
+    initialPosition: { x: 100, y: 100 },
+  },
+  graph: {
+    title: "Graph",
+    initialPosition: { x: 150, y: 150 },
+  },
+};
 
 export default function App() {
   const lix = useLix();
   const { setLix, rootContainer } = useContext(Context);
-  const [isDataExplorerOpen, setIsDataExplorerOpen] = useState(false);
-  const [isGraphOpen, setIsGraphOpen] = useState(false);
+  const [activeContent, setActiveContent] = useState<Pages | null>(null);
 
   // Update body padding when the inspector height changes
   useEffect(() => {
@@ -78,20 +91,13 @@ export default function App() {
     input.click();
   };
 
-  // Handle navigation item clicks
   const handleNavItemClick = (id: string) => {
-    if (id === "data-explorer") {
-      setIsDataExplorerOpen(true);
-      return;
-    }
-
-    if (id === "graph") {
-      setIsGraphOpen(true);
+    if (id === "data-explorer" || id === "graph") {
+      setActiveContent(id as Pages);
       return;
     }
   };
 
-  // Navigation items
   const navItems = [
     { id: "graph", label: "Graph" },
     { id: "data-explorer", label: "Data Explorer" },
@@ -101,17 +107,14 @@ export default function App() {
     <div className="flex flex-col w-full" data-theme="light">
       <header className="bg-background border-b border-base-200">
         <div className="container mx-auto py-1 px-2 flex items-center">
-          <span className="text-sm font-medium mr-4">Lix</span>
+          <span className="text-sm font-medium mr-4">Lix Inspector</span>
 
           <div className="join">
             {navItems.map((item) => (
               <button
                 key={item.id}
                 className={`join-item btn btn-xs ${
-                  (item.id === "graph" && isGraphOpen) ||
-                  (item.id === "data-explorer" && isDataExplorerOpen)
-                    ? "btn-active"
-                    : "btn-ghost"
+                  activeContent === item.id ? "btn-active" : "btn-ghost"
                 }`}
                 onClick={() => handleNavItemClick(item.id)}
               >
@@ -147,21 +150,37 @@ export default function App() {
         </div>
       </header>
 
-      {/* Floating Data Explorer Window */}
-      <FloatingWindow
-        title="Data Explorer"
-        isOpen={isDataExplorerOpen}
-        onClose={() => setIsDataExplorerOpen(false)}
-        initialPosition={{ x: 100, y: 100 }}
-      >
-        <DataExplorer />
-      </FloatingWindow>
-
-      {/* Floating Graph Window */}
-      <FloatingGraph
-        isOpen={isGraphOpen}
-        onClose={() => setIsGraphOpen(false)}
+      <FloatingPage
+        activeContent={activeContent}
+        onClose={() => setActiveContent(null)}
+        children={{
+          "data-explorer": <DataExplorer />,
+          graph: <Graph />,
+        }}
       />
     </div>
+  );
+}
+
+function FloatingPage(props: {
+  activeContent: Pages | null;
+  onClose: () => void;
+  children: {
+    [key in Pages]: ReactNode;
+  };
+}) {
+  if (!props.activeContent) return null;
+
+  const config = CONTENT_CONFIG[props.activeContent];
+
+  return (
+    <FloatingWindow
+      title={config.title}
+      isOpen={true}
+      onClose={props.onClose}
+      initialPosition={config.initialPosition}
+    >
+      {props.children[props.activeContent]}
+    </FloatingWindow>
   );
 }
