@@ -6,138 +6,136 @@ import {
   MarkerType,
   Controls,
   Background,
+  ConnectionLineType,
 } from "@xyflow/react";
 import dagre from "@dagrejs/dagre";
 import "@xyflow/react/dist/style.css";
 import { useMemo } from "react";
 import { type LixNodeData, lixNodeTypes } from "./nodes"; // Updated path
+import type { ChangeSet, ChangeSetEdge, VersionV2 } from "@lix-js/sdk";
 
 interface ChangeSetGraphProps {
-  changeSets: any[];
-  edges: any[];
-  versions: any[];
+  changeSets: ChangeSet[];
+  changeSetEdges: ChangeSetEdge[];
+  versions: VersionV2[];
 }
 
 export function ChangeSetGraph({
   changeSets,
-  edges,
+  changeSetEdges,
   versions,
 }: ChangeSetGraphProps) {
   // Calculate layout using useMemo to prevent infinite loops
-  const { nodes, edges: layoutEdges } = useMemo(() => {
-    const dagreGraph = new dagre.graphlib.Graph();
-    dagreGraph.setDefaultEdgeLabel(() => ({})); // Setup default edge label function
-    // Increase vertical separation (ranksep), decrease horizontal (nodesep)
-    dagreGraph.setGraph({ rankdir: "TB", nodesep: 10, ranksep: 100 });
+  const { nodes, edges } = useMemo(() => {
+    const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+    g.setGraph({
+      rankdir: "TB",
+      nodesep: 150, // Increased node separation
+      ranksep: 100, // Add rank separation
+      ranker: "network-simplex",
+      marginx: 50,
+      marginy: 50,
+    });
 
-    // Create maps for efficient lookups
-    const changeSetMap = new Map(changeSets.map((cs) => [cs.id, cs]));
-    const versionMap = new Map(versions.map((v) => [v.id, v]));
-
-    // Fixed node dimensions (can be dynamic later)
     const changeSetNodeWidth = 170;
     const changeSetNodeHeight = 60;
     const versionNodeWidth = 150;
     const versionNodeHeight = 40;
 
-    // Add nodes to Dagre
-    changeSets.forEach((cs) => {
-      dagreGraph.setNode(cs.id, {
+    // Add nodes to the graph
+    for (const cs of changeSets) {
+      g.setNode(cs.id, {
+        label: "change_set",
         width: changeSetNodeWidth,
         height: changeSetNodeHeight,
       });
-    });
-    versions.forEach((v) => {
-      dagreGraph.setNode(v.id, {
+    }
+
+    for (const v of versions) {
+      g.setNode(v.id, {
+        label: "version_v2",
         width: versionNodeWidth,
         height: versionNodeHeight,
       });
-    });
+    }
 
-    // Run Dagre layout
-    dagre.layout(dagreGraph);
+    // Add edges to the graph for layout calculation
+    for (const cse of changeSetEdges) {
+      g.setEdge(cse.parent_id, cse.child_id);
+    }
+
+    for (const v of versions) {
+      g.setEdge(v.change_set_id, v.id);
+    }
+
+    // Calculate the layout
+    dagre.layout(g);
 
     // Map Dagre nodes to React Flow nodes
-    const finalNodes: Node<LixNodeData>[] = dagreGraph.nodes().map((nodeId) => {
-      // Use maps for type checking and entity lookup
-      const isVersionNode = versionMap.has(nodeId);
-      const originalEntity = isVersionNode
-        ? versionMap.get(nodeId)
-        : changeSetMap.get(nodeId);
-
-      if (!originalEntity) {
-        console.warn(`Could not find original entity for node ID: ${nodeId}`);
-        // Return a placeholder or handle error appropriately
-        const node = dagreGraph.node(nodeId); // Get node for position even if entity missing
-        return {
-          id: nodeId,
-          type: "lixNode",
-          // Position adjustments might be needed based on node anchor point
-          position: {
-            x: node?.x - (node?.width ?? changeSetNodeWidth) / 2,
-            y: node?.y - (node?.height ?? changeSetNodeHeight) / 2,
-          }, // Center position, fallback dimensions
-          data: {
-            tableName: "error",
-            entity: { id: nodeId, error: "Original entity not found" },
-          },
-        } as Node<LixNodeData>; // Type assertion needed here
-      }
-
-      const node = dagreGraph.node(nodeId); // Get node for position
+    const nodes: Node<LixNodeData>[] = g.nodes().map((nodeId) => {
+      const node = g.node(nodeId); // Get node for position
+      const label = node.label;
       return {
         id: nodeId,
         type: "lixNode",
         position: { x: node.x - node.width / 2, y: node.y - node.height / 2 },
         data: {
-          tableName: isVersionNode ? "version_v2" : "change_set",
-          entity: originalEntity,
+          tableName: label,
+          entity:
+            versions.find((v) => v.id === nodeId) ??
+            changeSets.find((cs) => cs.id === nodeId),
         },
         style: {
           border: "1px solid #ccc",
-          // Add other styles if needed
         },
-      } as Node<LixNodeData>; // Type assertion needed here
+      } as Node<LixNodeData>;
     });
 
-    // Build edges directly from input data
-    const finalEdges: Edge[] = [];
+    // Create edges with proper routing
+    const allEdges: Edge[] = [];
 
-    // Add edges based on the ChangeSetEdge data (before -> after)
-    edges.forEach((e) => {
-      finalEdges.push({
-        id: `e_${e.before_change_set_id}-${e.after_change_set_id}`, // Use original IDs in edge ID
-        source: e.before_change_set_id, // Use original ID
-        target: e.after_change_set_id, // Use original ID
-        type: "smoothstep",
-        markerEnd: { type: MarkerType.ArrowClosed },
+    for (const cse of changeSetEdges) {
+      allEdges.push({
+        id: `e_${cse.parent_id}-${cse.child_id}`,
+        source: cse.parent_id,
+        target: cse.child_id,
+        markerStart: { type: MarkerType.Arrow },
+        type: "smoothstep", // Use smoothstep for curved edges
+        animated: false,
       });
-    });
+    }
 
-    // Add edges from versions to their change sets
-    versions.forEach((v) => {
-      if (v.change_set_id) {
-        finalEdges.push({
-          id: `ve_${v.id}_${v.change_set_id}`, // Use original IDs in edge ID
-          source: v.id,
-          target: v.change_set_id,
-          style: { stroke: "#cccccc", strokeDasharray: "5 5" },
-          animated: false,
-          markerEnd: { type: MarkerType.ArrowClosed, color: "#cccccc" },
-        });
-      }
-    });
+    for (const v of versions) {
+      allEdges.push({
+        id: `ve_${v.id}_${v.change_set_id}`,
+        source: v.change_set_id,
+        target: v.id,
+        markerStart: { type: MarkerType.Arrow },
+        type: "smoothstep", // Use smoothstep for curved edges
+        animated: false,
+      });
+    }
 
-    return { nodes: finalNodes, edges: finalEdges };
-  }, [changeSets, edges, versions]);
+    return { nodes, edges: allEdges };
+  }, [changeSets, changeSetEdges, versions]);
 
   return (
     <div style={{ height: "800px", width: "100%", border: "1px solid #eee" }}>
-      <ReactFlow nodes={nodes} edges={layoutEdges} nodeTypes={lixNodeTypes}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={lixNodeTypes}
+        fitView
+        defaultEdgeOptions={{
+          type: "smoothstep",
+          style: { strokeWidth: 1.5 },
+        }}
+        connectionLineType={ConnectionLineType.SmoothStep}
+      >
         <Controls />
         <MiniMap />
         <Background variant="dots" gap={12} size={1} />
       </ReactFlow>
     </div>
   );
-};
+}

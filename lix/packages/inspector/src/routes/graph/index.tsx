@@ -1,48 +1,16 @@
 import { useLix } from "../../hooks/use-lix";
-import type { ChangeSet, ChangeSetEdge, VersionV2 } from "@lix-js/sdk";
-import { ChangeSetGraph } from "./change-set-graph";
+import {
+  type ChangeSet,
+  type ChangeSetEdge,
+  type VersionV2,
+} from "@lix-js/sdk";
 import { useQuery } from "../../hooks/use-query";
-import { useMemo } from "react";
+import { ChangeSetGraph } from "./change-set-graph";
 
 export default function Route() {
   const lix = useLix();
 
-  // Fetch change sets
-  const [changeSetsResult /* changeSetsLoading */, , changeSetsError] =
-    useQuery<ChangeSet[]>(async () => {
-      if (!lix) return [];
-      try {
-        const result = await lix.db
-          .selectFrom("change_set")
-          .selectAll()
-          .execute();
-        return result;
-      } catch (error) {
-        console.error("Error fetching change sets:", error);
-        return [];
-      }
-    }, [lix]);
-
-  // Fetch change set edges
-  const [edgesResult /* edgesLoading */, , edgesError] = useQuery<
-    ChangeSetEdge[]
-  >(async () => {
-    if (!lix) return [];
-    try {
-      const result = await lix.db
-        .selectFrom("change_set_edge")
-        .selectAll()
-        .execute();
-      return result;
-    } catch (error) {
-      console.error("Error fetching change set edges:", error);
-      return [];
-    }
-  }, [lix]);
-
-  // Fetch version_v2 data
-  const [versionsResult, , versionsError] = useQuery<VersionV2[]>(async () => {
-    if (!lix) return [];
+  const [versions] = useQuery<VersionV2[]>(async () => {
     try {
       const result = await lix.db
         .selectFrom("version_v2")
@@ -55,49 +23,45 @@ export default function Route() {
     }
   }, [lix]);
 
-  // Memoize results to prevent unnecessary re-renders of ChangeSetGraph
-  const memoizedChangeSets = useMemo(
-    () => changeSetsResult || [],
-    [changeSetsResult]
-  );
-  const memoizedEdges = useMemo(() => edgesResult || [], [edgesResult]);
-  const memoizedVersions = useMemo(
-    () => versionsResult || [],
-    [versionsResult]
-  );
+  const [changeSets] = useQuery<ChangeSet[]>(async () => {
+    try {
+      const result = await lix.db
+        .selectFrom("change_set")
+        .selectAll()
+        .execute();
+      return result;
+    } catch (error) {
+      console.error("Error fetching change sets:", error);
+      return [];
+    }
+  }, [lix]);
+
+  const [changeSetEdges] = useQuery<ChangeSetEdge[]>(async () => {
+    try {
+      const result = await lix.db
+        .selectFrom("change_set_edge")
+        .selectAll()
+        .execute();
+      return result;
+    } catch (error) {
+      console.error("Error fetching change set edges:", error);
+      return [];
+    }
+  }, [lix]);
+
+  console.log({
+    versions,
+    changeSets,
+    changeSetEdges,
+  });
 
   return (
     <div className="container mx-auto p-4">
-      {/* Removed h1 header */}
-      {/* Simplified loading/error handling based on Lix being local-first */}
-      {!lix ? (
-        <div>Loading Lix instance...</div>
-      ) : changeSetsError ? (
-        <div className="text-red-500">
-          Error loading change sets: {changeSetsError.message}
-        </div>
-      ) : edgesError ? (
-        <div className="text-red-500">
-          Error loading change set edges: {edgesError.message}
-        </div>
-      ) : versionsError ? (
-        <div className="text-red-500">
-          Error loading versions: {versionsError.message}
-        </div>
-      ) : memoizedChangeSets && memoizedEdges && memoizedVersions ? (
-        <ChangeSetGraph
-          changeSets={memoizedChangeSets}
-          edges={memoizedEdges}
-          versions={memoizedVersions}
-        />
-      ) : // Show loading only if data hasn't arrived yet (results are undefined)
-      changeSetsResult === undefined ||
-        edgesResult === undefined ||
-        versionsResult === undefined ? (
-        <div>Loading graph data...</div>
-      ) : (
-        <div>No data available to render the graph.</div>
-      )}
+      <ChangeSetGraph
+        changeSets={changeSets ?? []}
+        changeSetEdges={changeSetEdges ?? []}
+        versions={versions ?? []}
+      />
     </div>
   );
 }
