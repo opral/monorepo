@@ -3,7 +3,14 @@ import { useLix } from "./hooks/use-lix.ts";
 import { openLixInMemory, toBlob } from "@lix-js/sdk";
 import { useContext } from "react";
 import { Context } from "./context";
-import { DownloadIcon, FileIcon, PauseIcon, PlayIcon, MoreVertical } from "lucide-react";
+import {
+  DownloadIcon,
+  FileIcon,
+  PauseIcon,
+  PlayIcon,
+  MoreVertical,
+  EyeOff,
+} from "lucide-react";
 import DataExplorer from "./pages/data-explorer/index";
 import Graph from "./pages/graph/index";
 import { FloatingWindow } from "./components/floating-window";
@@ -43,6 +50,7 @@ export default function App() {
   const [pinnedWindows, setPinnedWindows] = useState<Pages[]>([]);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isFrozen, setIsFrozen] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
   const transactionRef = useRef<any>(null);
   const [windowStates, setWindowStates] = useState<Record<Pages, WindowState>>(
     {} as Record<Pages, WindowState>
@@ -51,6 +59,17 @@ export default function App() {
   // Update body padding when the inspector height changes
   useEffect(() => {
     const updateBodyPadding = () => {
+      if (isHidden) {
+        // Remove padding when hidden
+        const styleEl = document.getElementById(
+          "lix-inspector-style"
+        ) as HTMLStyleElement;
+        if (styleEl) {
+          styleEl.textContent = `body { padding-top: 0; }`;
+        }
+        return;
+      }
+
       const height = `${rootContainer.offsetHeight}px`;
       const styleEl = document.getElementById(
         "lix-inspector-style"
@@ -76,7 +95,22 @@ export default function App() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [rootContainer]);
+  }, [rootContainer, isHidden]);
+
+  // Add keyboard shortcut listener for showing the inspector when hidden
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Command+Shift+O to toggle inspector
+      if (event.metaKey && event.shiftKey && event.key.toLowerCase() === "o") {
+        setIsHidden((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   // Initialize window states on first render
   useEffect(() => {
@@ -262,105 +296,121 @@ export default function App() {
 
   return (
     <div className="flex flex-col w-full" data-theme="light">
-      <header
-        className={`bg-background border-b ${
-          isFrozen ? "bg-blue-50 border-blue-100" : "border-base-200"
-        }`}
-      >
-        <div className="container mx-auto py-1 px-2 flex items-center">
-          <span className={`text-sm font-medium mr-4`}>Lix Inspector</span>
+      {!isHidden && (
+        <header
+          className={`bg-background border-b ${
+            isFrozen ? "bg-blue-50 border-blue-100" : "border-base-200"
+          }`}
+        >
+          <div className="container mx-auto py-1 px-2 flex items-center">
+            <span className={`text-sm font-medium mr-4`}>Lix Inspector</span>
 
-          <div className="join">
-            {[
-              { id: "graph", label: "Graph" },
-              { id: "data-explorer", label: "Data Explorer" },
-            ].map((item) => (
-              <button
-                key={item.id}
-                className={`join-item btn btn-xs ${
-                  activeContent === item.id ? "btn-active" : "btn-ghost"
-                }`}
-                onClick={() => handleNavItemClick(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            {/* Freeze/Unfreeze Button with Tooltip */}
-            <div className="tooltip tooltip-bottom">
-              <div className="tooltip-content">
-                <div className="font-bold text-xs">
-                  {isFrozen ? "Resume Lix" : "Pause Lix"}
-                </div>
-                <div className="text-xs mt-1">
-                  {isFrozen
-                    ? "Resume write operations"
-                    : "Block writes, allow reads"}
-                </div>
-              </div>
-              <button
-                className="btn btn-xs btn-ghost"
-                onClick={toggleFreezeState}
-              >
-                {isFrozen ? (
-                  <PlayIcon className="h-4 w-4" />
-                ) : (
-                  <PauseIcon className="h-4 w-4" />
-                )}
-              </button>
+            <div className="join">
+              {[
+                { id: "graph", label: "Graph" },
+                { id: "data-explorer", label: "Data Explorer" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  className={`join-item btn btn-xs ${
+                    activeContent === item.id ? "btn-active" : "btn-ghost"
+                  }`}
+                  onClick={() => handleNavItemClick(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
 
-            <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-xs btn-ghost">
-                <MoreVertical className="h-4 w-4" />
+            <div className="ml-auto flex items-center gap-2">
+              {/* Freeze/Unfreeze Button with Tooltip */}
+              <div className="tooltip tooltip-bottom">
+                <div className="tooltip-content">
+                  <div className="font-bold text-xs">
+                    {isFrozen ? "Resume Lix" : "Pause Lix"}
+                  </div>
+                  <div className="text-xs mt-1">
+                    {isFrozen
+                      ? "Resume write operations"
+                      : "Block writes, allow reads"}
+                  </div>
+                </div>
+                <button
+                  className="btn btn-xs btn-ghost"
+                  onClick={toggleFreezeState}
+                >
+                  {isFrozen ? (
+                    <PlayIcon className="h-4 w-4" />
+                  ) : (
+                    <PauseIcon className="h-4 w-4" />
+                  )}
+                </button>
               </div>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-              >
-                <li>
-                  <a onClick={openLixBlob}>
-                    <FileIcon className="mr-2 h-4 w-4" />
-                    Open lix
-                  </a>
-                </li>
-                <li>
-                  <a onClick={exportLixAsBlob}>
-                    <DownloadIcon className="mr-2 h-4 w-4" />
-                    Export lix
-                  </a>
-                </li>
-              </ul>
+
+              <div className="dropdown dropdown-end">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-xs btn-ghost"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu bg-base-100 rounded-box z-1 p-2 shadow-sm w-56"
+                >
+                  <li>
+                    <a onClick={openLixBlob}>
+                      <FileIcon className="mr-2 h-4 w-4" />
+                      Open lix
+                    </a>
+                  </li>
+                  <li>
+                    <a onClick={exportLixAsBlob}>
+                      <DownloadIcon className="mr-2 h-4 w-4" />
+                      Export lix
+                    </a>
+                  </li>
+                  <li>
+                    <a onClick={() => setIsHidden(true)}>
+                      <div className="flex items-center gap-4">
+                        <EyeOff className="h-4 w-4" />
+                        Hide Inspector
+                        <kbd className="kbd kbd-sm">⌘⇧o</kbd>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Render all visible windows */}
-      {visibleWindows.map((pageId) => (
-        <FloatingWindow
-          key={pageId}
-          title={WINDOW_CONFIG[pageId].title}
-          isOpen={true}
-          onClose={() => handleCloseWindow(pageId)}
-          initialPosition={windowStates[pageId].position}
-          initialSize={windowStates[pageId].size}
-          isExpanded={windowStates[pageId].isExpanded}
-          isPinned={pinnedWindows.includes(pageId)}
-          onPinChange={(isPinned) => handlePinChange(pageId, isPinned)}
-          onPositionChange={(position) =>
-            handleWindowStateChange(pageId, { position })
-          }
-          onSizeChange={(size) => handleWindowStateChange(pageId, { size })}
-          onExpandedChange={(isExpanded) =>
-            handleWindowStateChange(pageId, { isExpanded })
-          }
-        >
-          {pageId === "data-explorer" ? <DataExplorer /> : <Graph />}
-        </FloatingWindow>
-      ))}
+      {!isHidden &&
+        visibleWindows.map((pageId) => (
+          <FloatingWindow
+            key={pageId}
+            title={WINDOW_CONFIG[pageId].title}
+            isOpen={true}
+            onClose={() => handleCloseWindow(pageId)}
+            initialPosition={windowStates[pageId].position}
+            initialSize={windowStates[pageId].size}
+            isExpanded={windowStates[pageId].isExpanded}
+            isPinned={pinnedWindows.includes(pageId)}
+            onPinChange={(isPinned) => handlePinChange(pageId, isPinned)}
+            onPositionChange={(position) =>
+              handleWindowStateChange(pageId, { position })
+            }
+            onSizeChange={(size) => handleWindowStateChange(pageId, { size })}
+            onExpandedChange={(isExpanded) =>
+              handleWindowStateChange(pageId, { isExpanded })
+            }
+          >
+            {pageId === "data-explorer" ? <DataExplorer /> : <Graph />}
+          </FloatingWindow>
+        ))}
     </div>
   );
 }
