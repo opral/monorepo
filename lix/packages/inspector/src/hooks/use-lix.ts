@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import type { Lix } from "@lix-js/sdk";
-import { Context } from "@/context";
+import { Context } from "../context";
 
 // Custom hook remains the same
 export const useLix = (): Lix => {

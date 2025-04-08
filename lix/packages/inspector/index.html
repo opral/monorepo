@@ -26,19 +26,9 @@
       import { initLixInspector } from "/src/index.tsx";
       import { openLixInMemory } from "@lix-js/sdk";
 
-      // Placeholder Lix object for testing the inspector rendering
-      // Replace with actual Lix SDK instance when integrating
       const lix = await openLixInMemory({});
 
-      // Create and render the inspector
-      const inspector = await initLixInspector({
-        lix,
-        routerType: "browser",
-      });
-      
-      // Render the inspector (the node parameter is no longer used directly,
-      // but we still need to call the render method)
-      inspector.render(document.body);
+      initLixInspector({ lix });
     </script>
   </body>
 </html>

@@ -4,7 +4,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
       "react": ["./node_modules/react"]
     },
     "target": "ES2022",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLix } from "@/hooks/use-lix.ts";
+import { useLix } from "./hooks/use-lix.ts";
 import { openLixInMemory, toBlob } from "@lix-js/sdk";
 import { useContext } from "react";
 import { Context } from "./context";

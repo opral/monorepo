@@ -4,7 +4,7 @@ import type { Change } from "@lix-js/sdk";
 import { FloatingWindow } from "../../components/floating-window";
 import { createPortal } from "react-dom";
 import { Context } from "../../context";
-import { useQuery } from "@/hooks/use-query";
+import { useQuery } from "../../hooks/use-query";
 
 interface ChangeSetElementsWindowProps {
   changeSetId: string;
