@@ -135,7 +135,6 @@ export function applySchema(args: {
   ) STRICT;
 
   INSERT OR IGNORE INTO label (name) VALUES ('checkpoint');
-  INSERT OR IGNORE INTO label (name) VALUES ('grouped');
 
   -- versions
 
