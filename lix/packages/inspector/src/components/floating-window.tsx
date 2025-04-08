@@ -96,11 +96,33 @@ export function FloatingWindow({
   // Initialize position and size only once
   useEffect(() => {
     if (!hasInitialized) {
-      setPosition(initialPosition);
-      setSize(initialSize);
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Calculate responsive initial size
+      const responsiveWidth = Math.min(
+        initialSize.width,
+        Math.max(300, viewportWidth * 0.8)
+      );
+      const responsiveHeight = Math.min(
+        initialSize.height,
+        Math.max(200, viewportHeight * 0.7)
+      );
+
+      // Set responsive size
+      setSize({
+        width: responsiveWidth,
+        height: responsiveHeight,
+      });
+
+      // Calculate initial position to center the window
+      const newX = Math.max(0, (viewportWidth - responsiveWidth) / 2);
+      const newY = Math.max(navbarHeight + 20, (viewportHeight - responsiveHeight) / 3);
+
+      setPosition({ x: newX, y: newY });
       setHasInitialized(true);
     }
-  }, [initialPosition, initialSize, hasInitialized]);
+  }, [initialSize, hasInitialized, navbarHeight]);
 
   useEffect(() => {
     setIsExpanded(initialIsExpanded);
@@ -440,6 +462,55 @@ export function FloatingWindow({
     onPositionChange,
     onSizeChange,
   ]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (isExpanded) return; // Don't adjust if expanded
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Ensure window isn't larger than viewport
+      let newWidth = size.width;
+      let newHeight = size.height;
+      let newX = position.x;
+      let newY = position.y;
+      let needsUpdate = false;
+
+      // Adjust width if needed
+      if (newWidth > viewportWidth - 40) {
+        newWidth = viewportWidth - 40;
+        needsUpdate = true;
+      }
+
+      // Adjust height if needed
+      if (newHeight > viewportHeight - navbarHeight - 40) {
+        newHeight = viewportHeight - navbarHeight - 40;
+        needsUpdate = true;
+      }
+
+      // Adjust position if window is off-screen
+      if (newX + newWidth > viewportWidth - 20) {
+        newX = Math.max(20, viewportWidth - newWidth - 20);
+        needsUpdate = true;
+      }
+
+      if (newY + newHeight > viewportHeight - 20) {
+        newY = Math.max(navbarHeight + 20, viewportHeight - newHeight - 20);
+        needsUpdate = true;
+      }
+
+      // Update if needed
+      if (needsUpdate) {
+        setSize({ width: newWidth, height: newHeight });
+        setPosition({ x: newX, y: newY });
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isExpanded, size, position, navbarHeight]);
 
   // Toggle expanded state
   const toggleExpanded = useCallback(() => {
