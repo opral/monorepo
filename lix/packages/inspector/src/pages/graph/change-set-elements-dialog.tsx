@@ -1,11 +1,7 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "../../components/ui/dialog";
 import { useLix } from "../../hooks/use-lix";
 import { useQuery } from "../../hooks/use-query";
 import type { Change } from "@lix-js/sdk";
+import { useState } from "react";
 
 interface ChangeSetElementsDialogProps {
   changeSetId: string;
@@ -14,6 +10,7 @@ interface ChangeSetElementsDialogProps {
 
 export function ChangeSetElementsDialog(props: ChangeSetElementsDialogProps) {
   const lix = useLix();
+  const [isOpen, setIsOpen] = useState(false);
 
   const [changes] = useQuery(async () => {
     const result = await lix.db
@@ -32,24 +29,34 @@ export function ChangeSetElementsDialog(props: ChangeSetElementsDialogProps) {
   }, [props.changeSetId, lix]);
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <button
-          className="mt-2 w-full py-1 px-2 text-xs bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-colors"
-          style={{ borderRadius: 0 }}
-        >
-          View Changes ({changes?.length || 0})
-        </button>
-      </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-        <h2 className="text-lg font-semibold mb-2">
-          Changes for {props.changeSetId.substring(0, 8)}
-        </h2>
-        <div className="grid gap-4 py-4">
-          {changes?.map((change) => <Change key={change.id} change={change} />)}
+    <>
+      <button
+        className="mt-2 w-full py-1 px-2 text-xs bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-colors"
+        onClick={() => setIsOpen(true)}
+      >
+        View Changes ({changes?.length || 0})
+      </button>
+
+      {/* DaisyUI Modal */}
+      <dialog className={`modal ${isOpen ? "modal-open" : ""}`}>
+        <div className="modal-box max-w-3xl max-h-[80vh] overflow-y-auto">
+          <h3 className="font-bold text-lg mb-2">
+            Changes for {props.changeSetId.substring(0, 8)}
+          </h3>
+          <div className="grid gap-4 py-4">
+            {changes?.map((change) => <Change key={change.id} change={change} />)}
+          </div>
+          <div className="modal-action">
+            <button className="btn" onClick={() => setIsOpen(false)}>
+              Close
+            </button>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={() => setIsOpen(false)}>close</button>
+        </form>
+      </dialog>
+    </>
   );
 }
 
@@ -58,7 +65,7 @@ function Change(props: { change: Change & { content: any } }) {
   const formattedContent = JSON.stringify(props.change.content, null, 2);
 
   return (
-    <div className="border border-gray-200 p-3" style={{ borderRadius: 0 }}>
+    <div className="border border-gray-200 p-3">
       <div className="font-medium border-b pb-2 mb-2">
         Change {props.change.id.substring(0, 8)}
       </div>
@@ -84,7 +91,7 @@ function Change(props: { change: Change & { content: any } }) {
         <div className="font-medium text-gray-500 mb-1">Snapshot</div>
         <div
           className="bg-gray-50 p-2 font-mono text-xs overflow-auto"
-          style={{ whiteSpace: "pre-wrap", borderRadius: 0 }}
+          style={{ whiteSpace: "pre-wrap" }}
         >
           {formattedContent}
         </div>

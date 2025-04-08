@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import type { Lix } from "@lix-js/sdk";
 // @ts-ignore - styles.css is not a module
 import styles from "./styles.css?inline";
+import reactflowStyles from "@xyflow/react/dist/style.css?inline";
 import { Provider } from "./context";
 import App from "./App.tsx";
 
@@ -20,7 +21,9 @@ export interface LixInspector {
 // Store the active React root instance to allow for unmounting before re-rendering
 let reactRoot: ReactDOM.Root | null = null;
 
-export async function initLixInspector(args: { lix: Lix }): Promise<LixInspector> {
+export async function initLixInspector(args: {
+  lix: Lix;
+}): Promise<LixInspector> {
   return {
     render: (_node: HTMLElement) => {
       // Create a fixed position overlay container for the inspector
@@ -38,6 +41,9 @@ export async function initLixInspector(args: { lix: Lix }): Promise<LixInspector
       const shadowSheet = new CSSStyleSheet();
       shadowSheet.replaceSync(styles.replace(/:root/gu, ":host"));
 
+      const reactflowSheet = new CSSStyleSheet();
+      reactflowSheet.replaceSync(reactflowStyles);
+
       const propertyPolyfill = new CSSStyleSheet();
       for (const rule of shadowSheet.cssRules) {
         if (rule instanceof CSSPropertyRule) {
@@ -48,6 +54,7 @@ export async function initLixInspector(args: { lix: Lix }): Promise<LixInspector
       document.adoptedStyleSheets.push(propertyPolyfill);
 
       container.shadowRoot?.adoptedStyleSheets.push(shadowSheet);
+      container.shadowRoot?.adoptedStyleSheets.push(reactflowSheet);
 
       // Add the overlay container to the document body instead of the provided node
       document.body.appendChild(container);

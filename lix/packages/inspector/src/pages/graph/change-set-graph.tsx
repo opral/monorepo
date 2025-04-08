@@ -9,7 +9,6 @@ import {
   ConnectionLineType,
 } from "@xyflow/react";
 import dagre from "@dagrejs/dagre";
-import "@xyflow/react/dist/style.css";
 import { useMemo, useCallback, useRef } from "react";
 import { type LixNodeData, lixNodeTypes } from "./nodes"; // Updated path
 import type { ChangeSet, ChangeSetEdge, VersionV2 } from "@lix-js/sdk";
@@ -145,54 +144,33 @@ export function ChangeSetGraph({
   );
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "800px",
-        width: "100%",
-      }}
-    >
+    <div className="flex flex-col h-screen w-full">
       {/* Version Menu Bar */}
-      <div
-        style={{
-          padding: "8px",
-          borderBottom: "1px solid #eee",
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "8px",
-          alignItems: "center",
-        }}
-      >
-        <span style={{ fontWeight: "bold", marginRight: "8px" }}>
-          Versions:
-        </span>
-        {versions.map((version) => (
-          <button
-            key={version.id}
-            onClick={() => focusNode(version.id)}
-            style={{
-              padding: "4px 8px",
-              border: "1px solid #ccc",
-              borderRadius: "0",
-              background: "white",
-              fontSize: "12px",
-              cursor: "pointer",
-            }}
-            title={`Jump to ${version.name || version.id}`}
-          >
-            {version.name || version.id.substring(0, 8)}
-          </button>
-        ))}
+      <div className="p-2 border-b flex flex-wrap gap-2 items-center">
+        <span className="font-bold mr-2">Versions:</span>
+        <div className="join">
+          {versions.map((version) => (
+            <button
+              key={version.id}
+              onClick={() => focusNode(version.id)}
+              className="join-item btn btn-xs"
+              title={`Jump to ${version.name || version.id}`}
+            >
+              {version.name || version.id.substring(0, 8)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Graph Container */}
-      <div style={{ flex: 1, border: "1px solid #eee" }}>
+      <div className="flex-1 border">
         <ReactFlow
           nodes={nodes}
           edges={edges}
           nodeTypes={lixNodeTypes}
           fitView
+          minZoom={0.1}
+          maxZoom={2}
           defaultEdgeOptions={{
             type: "smoothstep",
             style: { strokeWidth: 1.5 },
