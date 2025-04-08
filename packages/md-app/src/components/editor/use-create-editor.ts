@@ -1,6 +1,5 @@
 import { withProps } from "@udecode/cn";
 import {
-	CreatePlateEditorOptions,
 	ParagraphPlugin,
 	PlateLeaf,
 	usePlateEditor,
@@ -108,6 +107,8 @@ import {
 	SanitizedHtmlElementLeaf,
 	SanitizedInlineHtmlPlugin,
 } from "./plugins/sanitized-html";
+import { EmptyDocumentPromptPlugin } from "./plugins/empty-document-prompt-plugin";
+import { EmptyDocumentPromptElement } from "./empty-document-prompt-element";
 
 export const useCreateEditor = () => {
 	return usePlateEditor({
@@ -162,6 +163,7 @@ export const useCreateEditor = () => {
 				[FrontMatterPlugin.key]: FrontMatterElement,
 				[SanitizedBlockHtmlPlugin.key]: SanitizedHtmlElementLeaf,
 				[SanitizedInlineHtmlPlugin.key]: SanitizedHtmlElementLeaf,
+				[EmptyDocumentPromptPlugin.key]: EmptyDocumentPromptElement,
 			}),
 		},
 		plugins: [
@@ -169,22 +171,7 @@ export const useCreateEditor = () => {
 			...editorPlugins,
 			FixedToolbarPlugin,
 			FloatingToolbarPlugin,
+			EmptyDocumentPromptPlugin,
 		],
-		// value: [
-		// 	{
-		// 		children: [{ text: "Playground" }],
-		// 		type: "h1",
-		// 	},
-		// 	{
-		// 		children: [
-		// 			{ text: "A rich-text editor with AI capabilities. Try the " },
-		// 			{ bold: true, text: "AI commands" },
-		// 			{ text: " or use " },
-		// 			{ kbd: true, text: "Cmd+J" },
-		// 			{ text: " to open the AI menu." },
-		// 		],
-		// 		type: ParagraphPlugin.key,
-		// 	},
-		// ],
 	});
 };

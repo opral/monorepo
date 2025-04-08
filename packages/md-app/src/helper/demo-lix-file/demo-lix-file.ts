@@ -39,9 +39,7 @@ export const setupMdDemo = async (lix: Lix) => {
 
 ### 📝 Work with AI Cowriters ([Upvote #46](https://github.com/opral/flashtype.ai/issues/46))
 
-### 🤝 Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))
-
-`),
+### 🤝 Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))`),
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

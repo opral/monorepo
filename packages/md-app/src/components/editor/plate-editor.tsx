@@ -15,6 +15,7 @@ import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
+import { EMPTY_DOCUMENT_PROMPT_KEY } from "./plugins/empty-document-prompt-plugin";
 
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
@@ -23,7 +24,7 @@ export function PlateEditor() {
 	const [, setEditorRef] = useAtom(editorRefAtom);
 
 	const editor = useCreateEditor();
-	
+
 	// Store the editor reference in the global atom
 	useEffect(() => {
 		setEditorRef(editor);
@@ -37,6 +38,36 @@ export function PlateEditor() {
 			editor.tf.setValue(nodes);
 		}
 	}, [activeFile?.id]);
+
+	useEffect(() => {
+		// Check if document is empty or just whitespace
+		const isEmpty = !loadedMd || loadedMd.trim() === '';
+
+		if (isEmpty) {
+			// Insert our empty document prompt element if document is empty
+			const emptyPromptElement = {
+				type: EMPTY_DOCUMENT_PROMPT_KEY,
+				children: [{ text: '' }],
+			};
+
+			editor.tf.setValue([emptyPromptElement]);
+		} else {
+			// Remove empty document prompt element if document is not empty
+			// First check if there are any empty document prompt elements
+			const hasEmptyPrompt = editor.children.some(
+				(node) => node.type === EMPTY_DOCUMENT_PROMPT_KEY
+			);
+
+			if (hasEmptyPrompt) {
+				// If we have prompt elements but document is not empty,
+				// deserialize the markdown and replace the editor content
+				const nodes = editor
+					.getApi(ExtendedMarkdownPlugin)
+					.markdown.deserialize(loadedMd);
+				editor.tf.setValue(nodes);
+			}
+		}
+	}, [editor, loadedMd]);
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {

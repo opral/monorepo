@@ -14,6 +14,7 @@ import {
 	setupMdDemo,
 } from "./helper/demo-lix-file/demo-lix-file.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
+import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -58,16 +59,18 @@ export const lixAtom = atom(async (get) => {
 		try {
 			// Import the helper function dynamically to avoid circular dependencies
 			const { findLixFileInOpfs } = await import("./helper/findLixInOpfs");
-			
+
 			// Find the Lix file with the specified ID
 			const lixFile = await findLixFileInOpfs(lixIdSearchParam, [txtPlugin]);
-			
+
 			if (!lixFile) {
 				throw new Error("Lix file not found with ID: " + lixIdSearchParam);
 			}
-			
-			console.log(`Found lix with ID ${lixIdSearchParam} in file: ${lixFile.fullName}`);
-			
+
+			console.log(
+				`Found lix with ID ${lixIdSearchParam} in file: ${lixFile.fullName}`
+			);
+
 			const file = await lixFile.handle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} catch {
@@ -303,22 +306,19 @@ export const currentLixNameAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return "Untitled";
-	
+
 	// Get the current Lix ID for finding its file
 	const lixId = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
 		.select("value")
 		.executeTakeFirstOrThrow();
-	
+
 	// Find the actual filename in OPFS using our helper function
 	try {
-		// Import the helper function dynamically to avoid circular dependencies
-		const { findLixFileInOpfs } = await import("./helper/findLixInOpfs");
-		
 		// Find the Lix file with the specified ID
 		const lixFile = await findLixFileInOpfs(lixId.value);
-		
+
 		// If found, return its name, otherwise fall back to the ID
 		return lixFile ? lixFile.name : lixId.value || "Untitled";
 	} catch (error) {

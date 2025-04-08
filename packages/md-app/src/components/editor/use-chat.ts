@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { useChat as useBaseChat } from "ai/react";
 
-export const useChat = () => {
+export const useChat = (options?: Parameters<typeof useBaseChat>[0]) => {
 	// const { keys, model } = useSettings();
 
 	return useBaseChat({
@@ -22,7 +22,9 @@ export const useChat = () => {
 				// Mock the API response. Remove it when you implement the route /api/ai/command
 				await new Promise((resolve) => setTimeout(resolve, 400));
 
-				const stream = fakeStreamText();
+				const stream = fakeStreamText({
+					streamProtocol: "text",
+				});
 
 				return new Response(stream, {
 					headers: {
@@ -34,6 +36,7 @@ export const useChat = () => {
 
 			return res;
 		},
+		...options,
 	});
 };
 
