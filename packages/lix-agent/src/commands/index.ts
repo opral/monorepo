@@ -23,7 +23,6 @@ async function handleHelpCommand(state: SessionState): Promise<void> {
     console.log(`${chalk.green('/files')}               - List tracked files in the current .lix`);
     console.log(`${chalk.green('/add')} <path> <content>- Add a new file to track`);
     console.log(`${chalk.green('/backup')}              - Create a backup of the current .lix file`);
-    console.log(`${chalk.green('/saveDiff')} <path>     - Save the last diff to a patch file`);
     console.log(`${chalk.green('/exit')} or ${chalk.green('/quit')}    - Exit the CLI`);
     console.log(`${chalk.green('/help')}                - Show this help message`);
     console.log('');
@@ -40,7 +39,6 @@ async function handleHelpCommand(state: SessionState): Promise<void> {
         { name: '/files', args: '', description: 'List tracked files in the current .lix' },
         { name: '/add', args: '<path> <content>', description: 'Add a new file to track' },
         { name: '/backup', args: '', description: 'Create a backup of the current .lix file' },
-        { name: '/saveDiff', args: '<path>', description: 'Save the last diff to a patch file' }, 
         { name: '/exit', args: '', description: 'Exit the CLI' },
         { name: '/quit', args: '', description: 'Exit the CLI' },
         { name: '/help', args: '', description: 'Show this help message' }
@@ -311,20 +309,37 @@ async function handleFilesCommand(state: SessionState): Promise<void> {
     return;
   }
   
+  const lix = state.activeLixManager.getLixObject();
+  
+  if (!lix) {
+    if (outputMode === 'human') {
+      console.log(chalk.yellow('No Lix object available.'));
+    } else {
+      console.log(JSON.stringify({ error: 'No Lix object available' }));
+    }
+    return;
+  }
+  
   try {
-    const trackedFiles = await state.activeLixManager.getTrackedFilePaths();
+    // Use direct SQL query to get files
+    const files = await lix.db
+      .selectFrom('file')
+      .select(['path'])
+      .execute();
+    
+    const filePaths = files.map(file => file.path);
     
     if (outputMode === 'human') {
-      if (trackedFiles.length === 0) {
+      if (filePaths.length === 0) {
         console.log(chalk.yellow('No files currently tracked in this Lix file.'));
       } else {
         console.log(chalk.cyan('Tracked files:'));
-        trackedFiles.forEach((file, index) => {
+        filePaths.forEach((file, index) => {
           console.log(`${index + 1}. ${file}`);
         });
       }
     } else {
-      console.log(JSON.stringify({ files: trackedFiles }));
+      console.log(JSON.stringify({ files: filePaths }));
     }
   } catch (error) {
     if (outputMode === 'human') {
@@ -348,6 +363,17 @@ async function handleAddCommand(state: SessionState, args: string[]): Promise<vo
     return;
   }
   
+  const lix = state.activeLixManager.getLixObject();
+  
+  if (!lix) {
+    if (outputMode === 'human') {
+      console.log(chalk.yellow('No Lix object available.'));
+    } else {
+      console.log(JSON.stringify({ error: 'No Lix object available' }));
+    }
+    return;
+  }
+  
   if (args.length < 2) {
     if (outputMode === 'human') {
       console.log(chalk.yellow('Usage: /add <path> <content>'));
@@ -361,7 +387,16 @@ async function handleAddCommand(state: SessionState, args: string[]): Promise<vo
   const content = args.slice(1).join(' ');
   
   try {
-    await state.activeLixManager.addFile(filePath, content);
+    // Use direct SQL query to add the file
+    const contentBuffer = Buffer.from(content, 'utf8');
+    
+    await lix.db
+      .insertInto('file')
+      .values({ 
+        path: filePath, 
+        data: contentBuffer 
+      })
+      .execute();
     
     if (outputMode === 'human') {
       console.log(chalk.green(`Added file: ${filePath}`));
@@ -390,21 +425,31 @@ async function handleBackupCommand(state: SessionState): Promise<void> {
     return;
   }
   
-  try {
-    const backupPath = await state.activeLixManager.createBackup();
-    
-    if (backupPath) {
-      if (outputMode === 'human') {
-        console.log(chalk.green(`Created backup at: ${backupPath}`));
-      } else {
-        console.log(JSON.stringify({ success: true, backupPath }));
-      }
+  // Get the current file path
+  const filePath = state.activeLixManager.getCurrentFilePath();
+  if (!filePath) {
+    if (outputMode === 'human') {
+      console.log(chalk.yellow('Cannot create backup for an unsaved Lix file. Use /save first.'));
     } else {
-      if (outputMode === 'human') {
-        console.log(chalk.yellow('Could not create backup. File may not be saved to disk yet.'));
-      } else {
-        console.log(JSON.stringify({ success: false, reason: 'File not saved to disk' }));
-      }
+      console.log(JSON.stringify({ error: 'Cannot create backup for an unsaved Lix file' }));
+    }
+    return;
+  }
+  
+  try {
+    // Create backup filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:T\-Z\.]/g, '');
+    const dir = path.dirname(filePath);
+    const base = path.basename(filePath);
+    const backupPath = path.join(dir, `.${base}.backup.${timestamp}`);
+    
+    // Save to the backup location
+    await state.activeLixManager.saveFile(backupPath);
+    
+    if (outputMode === 'human') {
+      console.log(chalk.green(`Created backup at: ${backupPath}`));
+    } else {
+      console.log(JSON.stringify({ success: true, backupPath }));
     }
   } catch (error) {
     if (outputMode === 'human') {
@@ -483,5 +528,4 @@ export const commandHandlers: Record<string, CommandHandler> = {
   files: handleFilesCommand,
   add: handleAddCommand,
   backup: handleBackupCommand,
-  saveDiff: handleSaveDiffCommand
 };
