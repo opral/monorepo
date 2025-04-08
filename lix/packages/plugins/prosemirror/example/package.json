@@ -11,6 +11,7 @@
 	"dependencies": {
 		"@lix-js/plugin-prosemirror": "workspace:*",
 		"@lix-js/universal-diff": "workspace:*",
+		"@lix-js/inspector": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
 		"@tailwindcss/vite": "^4.0.15",
 		"clsx": "^2.1.1",

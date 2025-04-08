@@ -1,5 +1,6 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
+import { TagIcon } from "lucide-react";
 import { ChangeSetElementsWindow } from "./change-set-elements-dialog";
 
 // Define a generic data structure for our Lix nodes
@@ -47,14 +48,14 @@ const ChangeSetNode = ({ id, entity }: { id: string; entity: any }) => {
 
         {/* Display labels if they exist */}
         {entity.labels && entity.labels.length > 0 && (
-          <div className="mt-2 pt-1 border-t">
+          <div className="mt-2">
+            <h4 className="text-sm font-medium mb-1">
+              <TagIcon className="inline-block h-3 w-3 mr-1" />
+              Labels:
+            </h4>
             <div className="flex flex-wrap gap-1">
               {entity.labels.map((label: { name: string }, index: number) => (
-                <span
-                  key={index}
-                  className="badge badge-sm badge-outline"
-                  title={label.name}
-                >
+                <span key={index} className="badge badge-sm" title={label.name}>
                   {label.name}
                 </span>
               ))}
