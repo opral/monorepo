@@ -1,2 +1,11 @@
 @import "tailwindcss";
-@plugin "daisyui";
+
+@plugin "daisyui" {
+  themes: wireframe;
+}
+@plugin "daisyui/theme" {
+  name: "wireframe";
+  default: true;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+}

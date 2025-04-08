@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLix } from "@/hooks/use-lix.ts";
 import { openLixInMemory, toBlob } from "@lix-js/sdk";
-
-import { Button } from "@/components/ui/button";
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
-import { ChevronDown, ChevronUp, DownloadIcon, FileIcon } from "lucide-react";
+import { DownloadIcon, FileIcon } from "lucide-react";
 import { useContext } from "react";
 import { Context } from "../context";
 
@@ -13,14 +11,13 @@ export default function Layout() {
   const { setLix, rootContainer } = useContext(Context);
   const location = useLocation();
   const navigate = useNavigate();
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Update body padding when the inspector height changes
   useEffect(() => {
     if (!rootContainer) return;
 
     const updateBodyPadding = () => {
-      const height = isCollapsed ? "40px" : `${rootContainer.offsetHeight}px`;
+      const height = `${rootContainer.offsetHeight}px`;
       const styleEl = document.getElementById(
         "lix-inspector-style"
       ) as HTMLStyleElement;
@@ -39,7 +36,7 @@ export default function Layout() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [rootContainer, isCollapsed]);
+  }, [rootContainer]);
 
   // Export Lix as blob
   const exportLixAsBlob = async () => {
@@ -90,45 +87,31 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col w-full" data-theme="light">
-      <header className="border-b bg-background">
+      <header className="bg-background">
         <div className="container mx-auto py-2 px-4 flex justify-between items-center">
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="mr-2"
-            >
-              {isCollapsed ? (
-                <ChevronDown size={16} />
-              ) : (
-                <ChevronUp size={16} />
-              )}
-            </Button>
             <span className="font-medium">Lix Inspector</span>
           </div>
 
-          {!isCollapsed && (
-            <nav className="flex space-x-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`px-4 py-2 rounded-md ${
-                    location.pathname === item.path
-                      ? "bg-gray-200 font-medium"
-                      : "hover:bg-gray-100"
-                  }`}
-                  onClick={() => navigate(item.path)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          )}
+          <nav className="flex space-x-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`px-4 py-2 rounded-md ${
+                  location.pathname === item.path
+                    ? "bg-gray-200 font-medium"
+                    : "hover:bg-gray-100"
+                }`}
+                onClick={() => navigate(item.path)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
           <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-sm m-1">
+            <div tabIndex={0} role="button" className="btn m-1">
               Actions
             </div>
             <ul
@@ -152,11 +135,9 @@ export default function Layout() {
         </div>
       </header>
 
-      {!isCollapsed && (
-        <main className="flex-1 container mx-auto px-4 py-4">
-          <Outlet />
-        </main>
-      )}
+      <main className="flex-1 container mx-auto px-4 py-4">
+        <Outlet />
+      </main>
     </div>
   );
 }
