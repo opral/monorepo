@@ -1,16 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import type { Lix } from "@lix-js/sdk";
-import {
-  createBrowserRouter,
-  createMemoryRouter,
-  RouterProvider,
-  // RouterProvider,
-} from "react-router";
-import { routes } from "./routes.tsx";
 // @ts-ignore - styles.css is not a module
 import styles from "./styles.css?inline";
 import { Provider } from "./context";
+import App from "./App.tsx";
 
 export interface LixInspector {
   /**
@@ -26,17 +20,7 @@ export interface LixInspector {
 // Store the active React root instance to allow for unmounting before re-rendering
 let reactRoot: ReactDOM.Root | null = null;
 
-export async function initLixInspector(args: {
-  lix: Lix;
-  routerType?: "memory" | "browser";
-}): Promise<LixInspector> {
-  const routerType = args.routerType ?? "memory";
-
-  const router =
-    routerType === "memory"
-      ? createMemoryRouter(routes)
-      : createBrowserRouter(routes);
-
+export async function initLixInspector(args: { lix: Lix }): Promise<LixInspector> {
   return {
     render: (_node: HTMLElement) => {
       // Create a fixed position overlay container for the inspector
@@ -84,7 +68,7 @@ export async function initLixInspector(args: {
       reactRoot.render(
         <React.StrictMode>
           <Provider lix={args.lix} rootContainer={container}>
-            <RouterProvider router={router} />
+            <App />
           </Provider>
         </React.StrictMode>
       );

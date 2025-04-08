@@ -16,7 +16,7 @@ interface TableInfo {
   name: string;
 }
 
-export function Route() {
+export default function DataExplorer() {
   const lix = useLix();
 
   const [selectedTable, setSelectedTable] = useState<string>("");
@@ -175,5 +175,3 @@ export function Route() {
     </div>
   );
 }
-
-export default Route;

@@ -8,7 +8,7 @@ import {
 import { useQuery } from "../../hooks/use-query";
 import { ChangeSetGraph } from "./change-set-graph";
 
-export default function Route() {
+export default function Graph() {
   const lix = useLix();
 
   const [versions] = useQuery<VersionV2[]>(async () => {
