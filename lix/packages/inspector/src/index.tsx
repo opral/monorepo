@@ -19,13 +19,13 @@ export interface LixInspector {
    *   const inspector = await createLixInspector({ lix });
    *   inspector.render(document.getElementById("root")!);
    */
-  render: (node: HTMLElement) => void;
+  render: (_node: HTMLElement) => void;
 }
 
 // Store the active React root instance to allow for unmounting before re-rendering
 let reactRoot: ReactDOM.Root | null = null;
 
-export async function createLixInspector(args: {
+export async function initLixInspector(args: {
   lix: Lix;
   routerType?: "memory" | "browser";
 }): Promise<LixInspector> {
@@ -37,34 +37,36 @@ export async function createLixInspector(args: {
       : createBrowserRouter(routes);
 
   return {
-    render: (node: HTMLElement) => {
-      const rootNode = document.createElement("div");
-      node.appendChild(rootNode);
-      // COULDN'T GET SHADOW DOM TO WORK PROPERLY WITH SHADCN STYLES
-      // NEEDS A REVIST IN THE FUTURE
-      // if (!node.shadowRoot) {
-      //   localShadowRoot = node.attachShadow({ mode: "open" });
-      // } else {
-      //   localShadowRoot = node.shadowRoot;
-      // }
-
-      // https://github.com/tailwindlabs/tailwindcss/discussions/1935#discussioncomment-12135380
-      // const sheet = new CSSStyleSheet();
-      // sheet.replaceSync(styles.replaceAll(":root", ":host"));
-      // localShadowRoot.adoptedStyleSheets = [sheet];
-
-      // Create or update the React root directly inside the shadow root
+    render: (_node: HTMLElement) => {
+      // Create a fixed position overlay container for the inspector
+      const overlayContainer = document.createElement("div");
+      overlayContainer.id = "lix-inspector-overlay";
+      overlayContainer.style.position = "fixed";
+      overlayContainer.style.top = "0";
+      overlayContainer.style.left = "0";
+      overlayContainer.style.width = "100%";
+      overlayContainer.style.zIndex = "9999";
+      
+      // Add the overlay container to the document body instead of the provided node
+      document.body.appendChild(overlayContainer);
+      
+      // Create a style element to add padding to the body to prevent content from being hidden under the topbar
+      const styleElement = document.createElement("style");
+      styleElement.id = "lix-inspector-style";
+      document.head.appendChild(styleElement);
+      
       // Simplify: Always unmount if root exists, then create new root.
       if (reactRoot) {
         reactRoot.unmount();
       }
-      // Pass the rootContainer as the container
-      reactRoot = ReactDOM.createRoot(rootNode);
+      
+      // Create new root in the overlay container
+      reactRoot = ReactDOM.createRoot(overlayContainer);
 
       reactRoot.render(
         <React.StrictMode>
           <style>{styles}</style>
-          <Provider lix={args.lix} rootContainer={rootNode}>
+          <Provider lix={args.lix} rootContainer={overlayContainer}>
             <RouterProvider router={router} />
           </Provider>
         </React.StrictMode>
