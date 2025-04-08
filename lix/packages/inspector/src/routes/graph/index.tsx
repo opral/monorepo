@@ -1,5 +1,6 @@
 import { useLix } from "../../hooks/use-lix";
 import {
+  jsonArrayFrom,
   type ChangeSet,
   type ChangeSetEdge,
   type VersionV2,
@@ -27,7 +28,22 @@ export default function Route() {
     try {
       const result = await lix.db
         .selectFrom("change_set")
-        .selectAll()
+        .select((eb) => [
+          "id",
+          jsonArrayFrom(
+            eb
+              .selectFrom("change_set_label")
+              .innerJoin(
+                "change_set_edge",
+                "change_set_edge.child_id",
+                "change_set.id"
+              )
+              .innerJoin("label", "label.id", "change_set_label.label_id")
+              .where("change_set.id", "=", eb.ref("change_set.id"))
+              .groupBy("label.id")
+              .select(["label.name"])
+          ).as("labels"),
+        ])
         .execute();
       return result;
     } catch (error) {
