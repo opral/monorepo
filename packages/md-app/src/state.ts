@@ -10,13 +10,11 @@ import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
 import {
-	lixMdWelcomeFile,
-	setupWelcomeFile,
+	lixMdDemoFile,
+	setupMdDemo,
 } from "./helper/demo-lix-file/demo-lix-file.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
-import { ExtendedMarkdownPlugin } from "./components/editor/plugins/markdown/markdown-plugin";
-import { EMPTY_DOCUMENT_PROMPT_KEY } from "./components/editor/plugins/empty-document-prompt-plugin";
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -120,7 +118,7 @@ export const lixAtom = atom(async (get) => {
 			const file = await fileHandle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} else {
-			const demoLix = await lixMdWelcomeFile();
+			const demoLix = await lixMdDemoFile();
 			lixBlob = demoLix.blob;
 		}
 	}
@@ -184,7 +182,7 @@ export const lixAtom = atom(async (get) => {
 
 	// Check if there is a file in lix
 	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
-	if (!file) file = await setupWelcomeFile(lix);
+	if (!file) file = await setupMdDemo(lix);
 	if (!get(fileIdSearchParamsAtom)) {
 		// Set the file ID as searchParams without page reload
 		updateUrlParams({ f: file.id });
