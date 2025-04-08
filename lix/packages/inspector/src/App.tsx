@@ -11,24 +11,33 @@ import { FloatingWindow } from "./components/floating-window";
 // Floating content types and component
 export type Pages = "data-explorer" | "graph";
 
-const CONTENT_CONFIG = {
+const WINDOW_CONFIG = {
   "data-explorer": {
     title: "Data Explorer",
-    initialPosition: { x: 100, y: 100 },
     initialSize: { width: 800, height: 600 },
   },
   graph: {
     title: "Graph",
-    initialPosition: { x: 150, y: 150 },
     initialSize: { width: 900, height: 700 },
   },
 };
+
+// Window position and size state interface
+interface WindowState {
+  position: { x: number; y: number };
+  size: { width: number; height: number };
+  isFullSize: boolean;
+}
 
 export default function App() {
   const lix = useLix();
   const { setLix, rootContainer } = useContext(Context);
   const [activeContent, setActiveContent] = useState<Pages | null>(null);
   const [pinnedWindows, setPinnedWindows] = useState<Pages[]>([]);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const [windowStates, setWindowStates] = useState<Record<Pages, WindowState>>(
+    {}
+  );
 
   // Update body padding when the inspector height changes
   useEffect(() => {
@@ -39,6 +48,12 @@ export default function App() {
       ) as HTMLStyleElement;
       if (styleEl) {
         styleEl.textContent = `body { padding-top: ${height}; }`;
+
+        // Extract header height for window positioning
+        const match = styleEl.textContent?.match(/padding-top:\s*(\d+)px/);
+        if (match && match[1]) {
+          setHeaderHeight(parseInt(match[1], 10));
+        }
       }
     };
 
@@ -53,6 +68,36 @@ export default function App() {
       resizeObserver.disconnect();
     };
   }, [rootContainer]);
+
+  // Initialize window states with centered positions
+  useEffect(() => {
+    if (headerHeight > 0) {
+      const viewportWidth = window.innerWidth;
+
+      // Initialize window states with centered positions
+      const initialStates: Record<Pages, WindowState> = {} as Record<
+        Pages,
+        WindowState
+      >;
+
+      Object.entries(WINDOW_CONFIG).forEach(([pageId, config]) => {
+        const typedPageId = pageId as Pages;
+        const centerX = Math.max(
+          0,
+          (viewportWidth - config.initialSize.width) / 2
+        );
+        const topY = headerHeight + 20; // Position just below the header with some padding
+
+        initialStates[typedPageId] = {
+          position: { x: centerX, y: topY },
+          size: config.initialSize,
+          isFullSize: false,
+        };
+      });
+
+      setWindowStates(initialStates);
+    }
+  }, [headerHeight]);
 
   // Export Lix as blob
   const exportLixAsBlob = async () => {
@@ -97,13 +142,13 @@ export default function App() {
   const handleNavItemClick = (id: string) => {
     if (id === "data-explorer" || id === "graph") {
       const pageId = id as Pages;
-      
+
       // If the window is already pinned, just make it active
       if (pinnedWindows.includes(pageId)) {
         setActiveContent(pageId);
         return;
       }
-      
+
       // Otherwise, set it as the active content
       setActiveContent(pageId);
     }
@@ -117,20 +162,34 @@ export default function App() {
       }
     } else {
       // Remove from pinned windows
-      setPinnedWindows(pinnedWindows.filter(id => id !== pageId));
+      setPinnedWindows(pinnedWindows.filter((id) => id !== pageId));
     }
   };
 
   const handleCloseWindow = (pageId: Pages) => {
     // Remove from pinned windows if it's pinned
     if (pinnedWindows.includes(pageId)) {
-      setPinnedWindows(pinnedWindows.filter(id => id !== pageId));
+      setPinnedWindows(pinnedWindows.filter((id) => id !== pageId));
     }
-    
+
     // If this is the active window, clear active content
     if (activeContent === pageId) {
       setActiveContent(null);
     }
+  };
+
+  // Handle window state changes (position, size, fullscreen)
+  const handleWindowStateChange = (
+    pageId: Pages,
+    newState: Partial<WindowState>
+  ) => {
+    setWindowStates((prev) => ({
+      ...prev,
+      [pageId]: {
+        ...prev[pageId],
+        ...newState,
+      },
+    }));
   };
 
   const navItems = [
@@ -139,10 +198,9 @@ export default function App() {
   ];
 
   // Determine which windows should be displayed
-  const visibleWindows = Array.from(new Set([
-    ...(activeContent ? [activeContent] : []),
-    ...pinnedWindows
-  ])) as Pages[];
+  const visibleWindows = Array.from(
+    new Set([...(activeContent ? [activeContent] : []), ...pinnedWindows])
+  ) as Pages[];
 
   return (
     <div className="flex flex-col w-full" data-theme="light">
@@ -192,7 +250,7 @@ export default function App() {
       </header>
 
       {/* Render all visible windows */}
-      {visibleWindows.map(pageId => (
+      {visibleWindows.map((pageId) => (
         <FloatingPage
           key={pageId}
           pageId={pageId}
@@ -200,6 +258,10 @@ export default function App() {
           onClose={() => handleCloseWindow(pageId)}
           onPinChange={(isPinned) => handlePinChange(pageId, isPinned)}
           isPinned={pinnedWindows.includes(pageId)}
+          windowState={windowStates[pageId]}
+          onWindowStateChange={(newState) =>
+            handleWindowStateChange(pageId, newState)
+          }
           children={{
             "data-explorer": <DataExplorer />,
             graph: <Graph />,
@@ -216,22 +278,39 @@ function FloatingPage(props: {
   isPinned: boolean;
   onClose: () => void;
   onPinChange: (isPinned: boolean) => void;
+  windowState?: WindowState;
+  onWindowStateChange: (newState: Partial<WindowState>) => void;
   children: {
     [key in Pages]: ReactNode;
   };
 }) {
-  const { pageId, isPinned, onClose, onPinChange, children } = props;
-  const config = CONTENT_CONFIG[pageId];
+  const {
+    pageId,
+    isPinned,
+    onClose,
+    onPinChange,
+    children,
+    windowState,
+    onWindowStateChange,
+  } = props;
+  const config = WINDOW_CONFIG[pageId];
+
+  // If window state isn't initialized yet, don't render
+  if (!windowState) return null;
 
   return (
     <FloatingWindow
       title={config.title}
       isOpen={true}
       onClose={onClose}
-      initialPosition={config.initialPosition}
-      initialSize={config.initialSize}
+      initialPosition={windowState.position}
+      initialSize={windowState.size}
+      isFullSize={windowState.isFullSize}
       isPinned={isPinned}
       onPinChange={onPinChange}
+      onPositionChange={(position) => onWindowStateChange({ position })}
+      onSizeChange={(size) => onWindowStateChange({ size })}
+      onFullSizeChange={(isFullSize) => onWindowStateChange({ isFullSize })}
     >
       {children[pageId]}
     </FloatingWindow>

@@ -2,17 +2,40 @@ import { ReactNode, useEffect, useRef, useState, useCallback } from "react";
 import { X, Maximize2, Minimize2, Pin } from "lucide-react";
 
 interface FloatingWindowProps {
+  children: ReactNode;
   title: string;
   isOpen: boolean;
   onClose: () => void;
-  children: ReactNode;
   initialPosition?: { x: number; y: number };
   initialSize?: { width: number; height: number };
   isPinned?: boolean;
   onPinChange?: (isPinned: boolean) => void;
+  isFullSize?: boolean;
+  onPositionChange?: (position: { x: number; y: number }) => void;
+  onSizeChange?: (size: { width: number; height: number }) => void;
+  onFullSizeChange?: (isFullSize: boolean) => void;
 }
 
 type ResizeDirection = "" | "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
+
+// Snap zones configuration
+const EDGE_PADDING = 16; // p-4 equivalent (16px)
+const SNAP_THRESHOLD = EDGE_PADDING + 8; // Trigger slightly before the padding edge
+const CORNER_THRESHOLD = SNAP_THRESHOLD * 5; // Reduced corner detection area (was 8x)
+const EDGE_THRESHOLD = SNAP_THRESHOLD; // Regular edge threshold
+const SIDE_EDGE_THRESHOLD = SNAP_THRESHOLD * 3; // Extended threshold for left/right edges
+
+const SNAP_ZONES = {
+  left: { x: 0, width: 0.5, height: 1, y: 0 },
+  right: { x: 0.5, width: 0.5, height: 1, y: 0 },
+  top: { x: 0, width: 1, height: 0.5, y: 0 },
+  bottom: { x: 0, width: 1, height: 0.5, y: 0.5 },
+  topLeft: { x: 0, width: 0.5, height: 0.5, y: 0 },
+  topRight: { x: 0.5, width: 0.5, height: 0.5, y: 0 },
+  bottomLeft: { x: 0, width: 0.5, height: 0.5, y: 0.5 },
+  bottomRight: { x: 0.5, width: 0.5, height: 0.5, y: 0.5 },
+  maximize: { x: 0, width: 1, height: 1, y: 0 },
+};
 
 export function FloatingWindow({
   title,
@@ -20,28 +43,44 @@ export function FloatingWindow({
   onClose,
   children,
   initialPosition = { x: 100, y: 100 },
-  initialSize = { width: 800, height: 600 },
+  initialSize = { width: 600, height: 400 },
   isPinned = false,
   onPinChange,
+  isFullSize: initialIsFullSize = false,
+  onPositionChange,
+  onSizeChange,
+  onFullSizeChange,
 }: FloatingWindowProps) {
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<ResizeDirection>("");
-  const [isFullSize, setIsFullSize] = useState(false);
+  const [isFullSize, setIsFullSize] = useState(initialIsFullSize);
   const [previousPosition, setPreviousPosition] = useState(initialPosition);
   const [previousSize, setPreviousSize] = useState(initialSize);
   const [pinned, setPinned] = useState(isPinned);
+  const [isSnapping, setIsSnapping] = useState(false);
+  const [snapPreview, setSnapPreview] = useState<null | {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>(null);
+  const [preSnapSize, setPreSnapSize] = useState<null | {
+    width: number;
+    height: number;
+  }>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   // Use refs for values that don't need to trigger re-renders
   const positionRef = useRef(position);
   const sizeRef = useRef(size);
+  const windowRef = useRef<HTMLDivElement>(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const resizeStartRef = useRef({ x: 0, y: 0, width: 0, height: 0 });
-  const windowRef = useRef<HTMLDivElement>(null);
 
-  // Update the refs when position or size changes
+  // Update position and size refs when state changes
   useEffect(() => {
     positionRef.current = position;
   }, [position]);
@@ -50,10 +89,40 @@ export function FloatingWindow({
     sizeRef.current = size;
   }, [size]);
 
-  // Update pinned state when prop changes
+  // Sync with external pinned state
   useEffect(() => {
     setPinned(isPinned);
   }, [isPinned]);
+
+  // Update position and size when props change (for saved state)
+  useEffect(() => {
+    if (!isDragging && !isResizing) {
+      setPosition(initialPosition);
+    }
+  }, [initialPosition, isDragging, isResizing]);
+
+  useEffect(() => {
+    if (!isDragging && !isResizing) {
+      setSize(initialSize);
+    }
+  }, [initialSize, isDragging, isResizing]);
+
+  useEffect(() => {
+    setIsFullSize(initialIsFullSize);
+  }, [initialIsFullSize]);
+
+  // Get the Lix Inspector header height
+  useEffect(() => {
+    const styleEl = document.getElementById(
+      "lix-inspector-style"
+    ) as HTMLStyleElement;
+    if (styleEl) {
+      const match = styleEl.textContent?.match(/padding-top:\s*(\d+)px/);
+      if (match && match[1]) {
+        setHeaderHeight(parseInt(match[1], 10));
+      }
+    }
+  }, []);
 
   // Handle dragging - optimized with useCallback
   const handleMouseDown = useCallback(
@@ -112,6 +181,160 @@ export function FloatingWindow({
     [isFullSize]
   );
 
+  // Check if window should snap to a zone based on cursor position
+  const checkSnapping = useCallback(
+    (cursorX: number, cursorY: number) => {
+      // Get viewport dimensions
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Check proximity to corners with a larger threshold
+      const isNearTopLeft =
+        cursorX < CORNER_THRESHOLD && cursorY < CORNER_THRESHOLD + headerHeight;
+      const isNearTopRight =
+        cursorX > viewportWidth - CORNER_THRESHOLD &&
+        cursorY < CORNER_THRESHOLD + headerHeight;
+      const isNearBottomLeft =
+        cursorX < CORNER_THRESHOLD &&
+        cursorY > viewportHeight - CORNER_THRESHOLD;
+      const isNearBottomRight =
+        cursorX > viewportWidth - CORNER_THRESHOLD &&
+        cursorY > viewportHeight - CORNER_THRESHOLD;
+
+      // Check proximity of cursor to screen edges - only if not in a corner zone
+      const isNearLeft =
+        !isNearTopLeft && !isNearBottomLeft && cursorX < SIDE_EDGE_THRESHOLD;
+      const isNearRight =
+        !isNearTopRight &&
+        !isNearBottomRight &&
+        cursorX > viewportWidth - SIDE_EDGE_THRESHOLD;
+      const isNearTop =
+        !isNearTopLeft &&
+        !isNearTopRight &&
+        cursorY < EDGE_THRESHOLD + headerHeight;
+      const isNearBottom =
+        !isNearBottomLeft &&
+        !isNearBottomRight &&
+        cursorY > viewportHeight - EDGE_THRESHOLD;
+
+      // Calculate center positions
+      const isNearCenterX =
+        Math.abs(cursorX - viewportWidth / 2) < EDGE_THRESHOLD;
+      const isNearCenterY =
+        Math.abs(cursorY - viewportHeight / 2) < EDGE_THRESHOLD;
+
+      // Only check for snapping if cursor is near an edge or corner
+      if (
+        !isNearLeft &&
+        !isNearRight &&
+        !isNearTop &&
+        !isNearBottom &&
+        !isNearTopLeft &&
+        !isNearTopRight &&
+        !isNearBottomLeft &&
+        !isNearBottomRight &&
+        !(isNearCenterX && isNearCenterY)
+      ) {
+        return null;
+      }
+
+      // Determine snap zone based on cursor proximity - prioritize corners
+      if (isNearTopLeft) {
+        // Top-left corner
+        return {
+          zone: "topLeft",
+          x: EDGE_PADDING,
+          y: EDGE_PADDING + headerHeight,
+          width: viewportWidth * SNAP_ZONES.topLeft.width - EDGE_PADDING * 1.5,
+          height:
+            viewportHeight * SNAP_ZONES.topLeft.height - EDGE_PADDING * 1.5,
+        };
+      } else if (isNearTopRight) {
+        // Top-right corner
+        return {
+          zone: "topRight",
+          x: viewportWidth * SNAP_ZONES.topRight.x + EDGE_PADDING * 0.5,
+          y: EDGE_PADDING + headerHeight,
+          width: viewportWidth * SNAP_ZONES.topRight.width - EDGE_PADDING * 1.5,
+          height:
+            viewportHeight * SNAP_ZONES.topRight.height - EDGE_PADDING * 1.5,
+        };
+      } else if (isNearBottomLeft) {
+        // Bottom-left corner
+        return {
+          zone: "bottomLeft",
+          x: EDGE_PADDING,
+          y: viewportHeight * SNAP_ZONES.bottomLeft.y + EDGE_PADDING * 0.5,
+          width:
+            viewportWidth * SNAP_ZONES.bottomLeft.width - EDGE_PADDING * 1.5,
+          height:
+            viewportHeight * SNAP_ZONES.bottomLeft.height - EDGE_PADDING * 1.5,
+        };
+      } else if (isNearBottomRight) {
+        // Bottom-right corner
+        return {
+          zone: "bottomRight",
+          x: viewportWidth * SNAP_ZONES.bottomRight.x + EDGE_PADDING * 0.5,
+          y: viewportHeight * SNAP_ZONES.bottomRight.y + EDGE_PADDING * 0.5,
+          width:
+            viewportWidth * SNAP_ZONES.bottomRight.width - EDGE_PADDING * 1.5,
+          height:
+            viewportHeight * SNAP_ZONES.bottomRight.height - EDGE_PADDING * 1.5,
+        };
+      } else if (isNearLeft) {
+        // Left edge
+        return {
+          zone: "left",
+          x: EDGE_PADDING,
+          y: EDGE_PADDING + headerHeight,
+          width: viewportWidth * SNAP_ZONES.left.width - EDGE_PADDING * 1.5,
+          height: viewportHeight - EDGE_PADDING * 2,
+        };
+      } else if (isNearRight) {
+        // Right edge
+        return {
+          zone: "right",
+          x: viewportWidth * SNAP_ZONES.right.x + EDGE_PADDING * 0.5,
+          y: EDGE_PADDING + headerHeight,
+          width: viewportWidth * SNAP_ZONES.right.width - EDGE_PADDING * 1.5,
+          height: viewportHeight - EDGE_PADDING * 2,
+        };
+      } else if (isNearTop) {
+        // Top edge
+        return {
+          zone: "top",
+          x: EDGE_PADDING,
+          y: EDGE_PADDING + headerHeight,
+          width: viewportWidth - EDGE_PADDING * 2,
+          height: viewportHeight * SNAP_ZONES.top.height - EDGE_PADDING * 1.5,
+        };
+      } else if (isNearBottom) {
+        // Bottom edge
+        return {
+          zone: "bottom",
+          x: EDGE_PADDING,
+          y: viewportHeight * SNAP_ZONES.bottom.y + EDGE_PADDING * 0.5,
+          width: viewportWidth - EDGE_PADDING * 2,
+          height:
+            viewportHeight * SNAP_ZONES.bottom.height - EDGE_PADDING * 1.5,
+        };
+      } else if (isNearCenterX && isNearCenterY) {
+        // Center (full screen)
+        return {
+          zone: "maximize",
+          x: EDGE_PADDING,
+          y: EDGE_PADDING + headerHeight,
+          width: viewportWidth - EDGE_PADDING * 2,
+          height: viewportHeight - EDGE_PADDING * 2 - headerHeight,
+        };
+      }
+
+      // No snap zone detected
+      return null;
+    },
+    [headerHeight]
+  );
+
   // Handle mouse move for both dragging and resizing
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -128,7 +351,33 @@ export function FloatingWindow({
           // Update ref immediately for next move event
           positionRef.current = newPosition;
 
-          // Update state (triggers render)
+          // Check for snap zones based on cursor position
+          const snapResult = checkSnapping(e.clientX, e.clientY);
+
+          if (snapResult) {
+            // If we're not already snapping, save the current size
+            if (!isSnapping) {
+              setPreSnapSize({
+                width: sizeRef.current.width,
+                height: sizeRef.current.height,
+              });
+            }
+
+            setIsSnapping(true);
+            setSnapPreview(snapResult);
+          } else {
+            // If we were snapping but now we're not, restore the pre-snap size if available
+            if (isSnapping && preSnapSize) {
+              // Immediately update the size ref to avoid race conditions
+              sizeRef.current = { ...preSnapSize };
+              setSize({ ...preSnapSize });
+            }
+
+            setIsSnapping(false);
+            setSnapPreview(null);
+          }
+
+          // Always update position to follow cursor
           setPosition(newPosition);
         }
 
@@ -173,27 +422,105 @@ export function FloatingWindow({
         }
       });
     },
-    [isDragging, isResizing, resizeDirection]
+    [isDragging, isResizing, resizeDirection, checkSnapping]
   );
 
   // Handle mouse up for both dragging and resizing
   const handleMouseUp = useCallback(() => {
+    // If we were snapping, apply the snap
+    if (isSnapping && snapPreview) {
+      setPosition({ x: snapPreview.x, y: snapPreview.y });
+      setSize({ width: snapPreview.width, height: snapPreview.height });
+
+      // Update refs to match
+      positionRef.current = { x: snapPreview.x, y: snapPreview.y };
+      sizeRef.current = {
+        width: snapPreview.width,
+        height: snapPreview.height,
+      };
+
+      // Notify parent of snapped position and size
+      if (onPositionChange) {
+        onPositionChange({ x: snapPreview.x, y: snapPreview.y });
+      }
+
+      if (onSizeChange) {
+        onSizeChange({ width: snapPreview.width, height: snapPreview.height });
+      }
+    } else if (!isSnapping && preSnapSize) {
+      // If we're not snapping anymore but have a pre-snap size, clear it
+      setPreSnapSize(null);
+    }
+
     setIsDragging(false);
     setIsResizing(false);
-  }, []);
+    setIsSnapping(false);
+    setSnapPreview(null);
+    setResizeDirection("");
 
+    // If not snapping, notify parent of current position and size
+    if (!isSnapping) {
+      // Notify parent of position change
+      if (onPositionChange) {
+        onPositionChange(positionRef.current);
+      }
+
+      // Notify parent of size change
+      if (onSizeChange) {
+        onSizeChange(sizeRef.current);
+      }
+    }
+  }, [isSnapping, snapPreview, preSnapSize, onPositionChange, onSizeChange]);
+
+  // Toggle full-size mode
   const toggleFullSize = useCallback(() => {
-    if (isFullSize) {
-      // Return to previous position and size
+    const newIsFullSize = !isFullSize;
+
+    if (!isFullSize) {
+      // Save current position and size before going full-screen
+      setPreviousPosition(positionRef.current);
+      setPreviousSize(sizeRef.current);
+
+      // Set full-screen size and position
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const newPosition = { x: 0, y: 0 };
+      const newSize = { width: viewportWidth, height: viewportHeight };
+
+      setPosition(newPosition);
+      setSize(newSize);
+      positionRef.current = newPosition;
+      sizeRef.current = newSize;
+
+      // Notify parent of changes
+      if (onPositionChange) onPositionChange(newPosition);
+      if (onSizeChange) onSizeChange(newSize);
+    } else {
+      // Restore previous position and size
       setPosition(previousPosition);
       setSize(previousSize);
-    } else {
-      // Save current position and size before going full-size
-      setPreviousPosition(position);
-      setPreviousSize(size);
+      positionRef.current = previousPosition;
+      sizeRef.current = previousSize;
+
+      // Notify parent of changes
+      if (onPositionChange) onPositionChange(previousPosition);
+      if (onSizeChange) onSizeChange(previousSize);
     }
-    setIsFullSize(!isFullSize);
-  }, [isFullSize, position, previousPosition, size, previousSize]);
+
+    setIsFullSize(newIsFullSize);
+
+    // Notify parent of full-size change
+    if (onFullSizeChange) {
+      onFullSizeChange(newIsFullSize);
+    }
+  }, [
+    isFullSize,
+    previousPosition,
+    previousSize,
+    onPositionChange,
+    onSizeChange,
+    onFullSizeChange,
+  ]);
 
   // Toggle pin state
   const togglePin = useCallback(() => {
@@ -206,7 +533,7 @@ export function FloatingWindow({
     }
   }, [pinned, onPinChange]);
 
-  // Add and remove event listeners with cleanup
+  // Add/remove event listeners for dragging and resizing
   useEffect(() => {
     if (isDragging || isResizing) {
       window.addEventListener("mousemove", handleMouseMove);
@@ -255,7 +582,7 @@ export function FloatingWindow({
     };
   }, [isDragging, isResizing, resizeDirection, handleMouseMove, handleMouseUp]);
 
-  // Create resize handles
+  // Render resize handles
   const renderResizeHandles = () => {
     if (isFullSize) return null;
 
@@ -304,60 +631,81 @@ export function FloatingWindow({
     ));
   };
 
+  // Don't render if window is not open
   if (!isOpen) return null;
 
   return (
-    <div
-      ref={windowRef}
-      className={`floating-window bg-base-100 shadow-lg border border-base-300 rounded-md ${isDragging ? "dragging" : ""} ${isResizing ? "resizing" : ""} ${pinned ? "pinned" : ""}`}
-      style={{
-        position: "fixed",
-        top: isFullSize ? "0" : `${position.y}px`,
-        left: isFullSize ? "0" : `${position.x}px`,
-        width: isFullSize ? "100%" : `${size.width}px`,
-        height: isFullSize ? "100vh" : `${size.height}px`,
-        maxWidth: isFullSize ? "none" : "calc(100vw - 40px)",
-        maxHeight: isFullSize ? "none" : "calc(100vh - 40px)",
-        zIndex: 1000,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        transition: isDragging || isResizing ? "none" : "all 0.2s ease-in-out",
-        willChange:
-          isDragging || isResizing ? "transform, width, height" : "auto",
-      }}
-    >
+    <>
+      {/* Snap preview overlay */}
+      {isSnapping && snapPreview && (
+        <div
+          className="snap-preview bg-primary bg-opacity-20 border-2 border-primary border-dashed rounded-md pointer-events-none"
+          style={{
+            position: "fixed",
+            top: `${snapPreview.y}px`,
+            left: `${snapPreview.x}px`,
+            width: `${snapPreview.width}px`,
+            height: `${snapPreview.height}px`,
+            zIndex: 999,
+          }}
+        />
+      )}
+
       <div
-        className="window-header flex justify-between items-center p-2 bg-base-200 cursor-move"
-        onMouseDown={handleMouseDown}
+        ref={windowRef}
+        className={`floating-window bg-base-100 shadow-lg border border-base-300 rounded-md ${isDragging ? "dragging" : ""} ${isResizing ? "resizing" : ""} ${pinned ? "pinned" : ""}`}
+        style={{
+          position: "fixed",
+          top: isFullSize ? "0" : `${position.y}px`,
+          left: isFullSize ? "0" : `${position.x}px`,
+          width: isFullSize ? "100%" : `${size.width}px`,
+          height: isFullSize ? "100vh" : `${size.height}px`,
+          maxWidth: isFullSize ? "none" : "calc(100vw - 40px)",
+          maxHeight: isFullSize ? "none" : "calc(100vh - 40px)",
+          zIndex: 1000,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          transition:
+            isDragging || isResizing ? "none" : "all 0.2s ease-in-out",
+          willChange:
+            isDragging || isResizing ? "transform, width, height" : "auto",
+        }}
       >
-        <div className="font-medium">{title}</div>
-        <div className="flex items-center gap-1">
-          <button
-            className={`btn ${pinned ? "btn-primary" : "btn-ghost"} btn-sm p-1 h-6 min-h-0`}
-            onClick={togglePin}
-            title={pinned ? "Unpin window" : "Pin window"}
-          >
-            <Pin size={16} strokeWidth={pinned ? 2.5 : 2} />
-          </button>
-          <button
-            className="btn btn-ghost btn-sm p-1 h-6 min-h-0"
-            onClick={toggleFullSize}
-            title={isFullSize ? "Restore size" : "Full size"}
-          >
-            {isFullSize ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          </button>
-          <button
-            className="btn btn-ghost btn-sm p-1 h-6 min-h-0"
-            onClick={onClose}
-            title="Close"
-          >
-            <X size={16} />
-          </button>
+        <div
+          className="window-header flex justify-between items-center p-2 bg-base-200 cursor-move"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="font-medium">{title}</div>
+          <div className="flex items-center gap-1">
+            <button
+              className={`btn ${pinned ? "btn-primary" : "btn-ghost"} btn-sm p-1 h-6 min-h-0`}
+              onClick={togglePin}
+              title={pinned ? "Unpin window" : "Pin window"}
+            >
+              <Pin size={16} strokeWidth={pinned ? 2.5 : 2} />
+            </button>
+            <button
+              className="btn btn-ghost btn-sm p-1 h-6 min-h-0"
+              onClick={toggleFullSize}
+              title={isFullSize ? "Restore size" : "Full size"}
+            >
+              {isFullSize ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
+            <button
+              className="btn btn-ghost btn-sm p-1 h-6 min-h-0"
+              onClick={onClose}
+              title="Close"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
+        <div className="window-content p-4 overflow-auto flex-1">
+          {children}
+        </div>
+        {renderResizeHandles()}
       </div>
-      <div className="window-content p-4 overflow-auto flex-1">{children}</div>
-      {renderResizeHandles()}
-    </div>
+    </>
   );
 }
