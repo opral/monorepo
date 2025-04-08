@@ -16,15 +16,6 @@ interface TableInfo {
   name: string;
 }
 
-interface ColumnInfo {
-  cid: number;
-  name: string;
-  type: string;
-  notnull: number;
-  dflt_value: any;
-  pk: number;
-}
-
 export function Route() {
   const lix = useLix();
 
@@ -83,9 +74,7 @@ export function Route() {
     }
   }, [schemaResult]);
 
-  const [tableDataResult, tableDataLoading, tableDataError] = useQuery<
-    any[]
-  >(async () => {
+  const [tableDataResult, , tableDataError] = useQuery<any[]>(async () => {
     if (!selectedTable || !lix || !tableColumns.length) return [];
 
     try {
