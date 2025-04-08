@@ -56,8 +56,6 @@ export function FloatingWindow({
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState<ResizeDirection>("");
   const [isExpanded, setIsExpanded] = useState(initialIsExpanded);
-  const [previousPosition, setPreviousPosition] = useState(initialPosition);
-  const [previousSize, setPreviousSize] = useState(initialSize);
   const [pinned, setPinned] = useState(isPinned);
   const [isSnapping, setIsSnapping] = useState(false);
   const [snapPreview, setSnapPreview] = useState<null | {
@@ -72,6 +70,7 @@ export function FloatingWindow({
   }>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Use refs for values that don't need to trigger re-renders
   const positionRef = useRef(position);
@@ -94,18 +93,14 @@ export function FloatingWindow({
     setPinned(isPinned);
   }, [isPinned]);
 
-  // Update position and size when props change (for saved state)
+  // Initialize position and size only once
   useEffect(() => {
-    if (!isDragging && !isResizing) {
+    if (!hasInitialized) {
       setPosition(initialPosition);
-    }
-  }, [initialPosition, isDragging, isResizing]);
-
-  useEffect(() => {
-    if (!isDragging && !isResizing) {
       setSize(initialSize);
+      setHasInitialized(true);
     }
-  }, [initialSize, isDragging, isResizing]);
+  }, [initialPosition, initialSize, hasInitialized]);
 
   useEffect(() => {
     setIsExpanded(initialIsExpanded);
@@ -117,47 +112,42 @@ export function FloatingWindow({
       "lix-inspector-style"
     ) as HTMLStyleElement;
     if (styleEl) {
-      const match = styleEl.textContent?.match(/padding-top:\s*(\d+)px/);
-      if (match && match[1]) {
-        setHeaderHeight(parseInt(match[1], 10));
+      const headerHeightMatch = styleEl.innerHTML.match(
+        /--header-height:\s*(\d+)px/
+      );
+      if (headerHeightMatch && headerHeightMatch[1]) {
+        setHeaderHeight(parseInt(headerHeightMatch[1], 10));
       }
     }
-  }, []);
 
-  // Get the Lix Inspector navbar height
-  useEffect(() => {
-    const navbarEl = document.getElementById("lix-inspector-navbar");
-    if (navbarEl) {
-      setNavbarHeight(navbarEl.offsetHeight);
+    // Get navbar height
+    const navbar = document.querySelector(".navbar") as HTMLElement;
+    if (navbar) {
+      setNavbarHeight(navbar.offsetHeight);
+    } else {
+      setNavbarHeight(headerHeight || 42); // Fallback
     }
-  }, []);
+  }, [headerHeight]);
 
-  // Handle dragging - optimized with useCallback
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    // Only start dragging from the header (excluding buttons)
-    const target = e.target as HTMLElement;
-    if (
-      target.tagName === "BUTTON" ||
-      target.closest("button") ||
-      target.tagName === "svg" ||
-      target.tagName === "path"
-    ) {
-      return;
-    }
+  // Handle window dragging
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (isExpanded || e.button !== 0) return; // Only handle left mouse button
 
-    e.preventDefault();
-    setIsDragging(true);
+      setIsDragging(true);
 
-    // Calculate offset from cursor to window corner
-    const windowRect = windowRef.current?.getBoundingClientRect();
-    if (windowRect) {
-      dragOffsetRef.current = {
-        x: e.clientX - windowRect.left,
-        y: e.clientY - windowRect.top,
-      };
-      e.preventDefault();
-    }
-  }, []);
+      // Calculate offset from cursor to window corner
+      const windowRect = windowRef.current?.getBoundingClientRect();
+      if (windowRect) {
+        dragOffsetRef.current = {
+          x: e.clientX - windowRect.left,
+          y: e.clientY - windowRect.top,
+        };
+        e.preventDefault();
+      }
+    },
+    [isExpanded]
+  );
 
   // Handle resize start
   const handleResizeStart = useCallback(
@@ -258,7 +248,10 @@ export function FloatingWindow({
         return {
           zone: "bottomLeft",
           x: EDGE_PADDING,
-          y: viewportHeight * SNAP_ZONES.bottomLeft.y + EDGE_PADDING * 0.5,
+          y:
+            viewportHeight * SNAP_ZONES.bottomLeft.y +
+            headerHeight +
+            EDGE_PADDING * 0.5,
           width:
             viewportWidth * SNAP_ZONES.bottomLeft.width - EDGE_PADDING * 1.5,
           height:
@@ -269,7 +262,10 @@ export function FloatingWindow({
         return {
           zone: "bottomRight",
           x: viewportWidth * SNAP_ZONES.bottomRight.x + EDGE_PADDING * 0.5,
-          y: viewportHeight * SNAP_ZONES.bottomRight.y + EDGE_PADDING * 0.5,
+          y:
+            viewportHeight * SNAP_ZONES.bottomRight.y +
+            headerHeight +
+            EDGE_PADDING * 0.5,
           width:
             viewportWidth * SNAP_ZONES.bottomRight.width - EDGE_PADDING * 1.5,
           height:
@@ -282,7 +278,7 @@ export function FloatingWindow({
           x: EDGE_PADDING,
           y: EDGE_PADDING + headerHeight,
           width: viewportWidth * SNAP_ZONES.left.width - EDGE_PADDING * 1.5,
-          height: viewportHeight - EDGE_PADDING * 2,
+          height: viewportHeight - EDGE_PADDING * 2 - headerHeight,
         };
       } else if (isNearRight) {
         // Right edge
@@ -291,271 +287,183 @@ export function FloatingWindow({
           x: viewportWidth * SNAP_ZONES.right.x + EDGE_PADDING * 0.5,
           y: EDGE_PADDING + headerHeight,
           width: viewportWidth * SNAP_ZONES.right.width - EDGE_PADDING * 1.5,
-          height: viewportHeight - EDGE_PADDING * 2,
+          height: viewportHeight - EDGE_PADDING * 2 - headerHeight,
         };
       } else if (isNearBottom) {
         // Bottom edge
         return {
           zone: "bottom",
           x: EDGE_PADDING,
-          y: viewportHeight * SNAP_ZONES.bottom.y + EDGE_PADDING * 0.5,
+          y:
+            viewportHeight * SNAP_ZONES.bottom.y +
+            headerHeight +
+            EDGE_PADDING * 0.5,
           width: viewportWidth - EDGE_PADDING * 2,
           height:
             viewportHeight * SNAP_ZONES.bottom.height - EDGE_PADDING * 1.5,
         };
       }
 
-      // No snap zone detected
       return null;
     },
     [headerHeight]
   );
 
-  // Handle mouse move for both dragging and resizing
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
+  // Handle mouse move for dragging and resizing
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging && !isResizing) return;
 
-      // Use requestAnimationFrame for smoother updates
-      requestAnimationFrame(() => {
-        if (isDragging) {
-          const newPosition = {
-            x: e.clientX - dragOffsetRef.current.x,
-            y: e.clientY - dragOffsetRef.current.y,
-          };
+      // Prevent text selection during drag/resize
+      e.preventDefault();
 
-          // Update ref immediately for next move event
-          positionRef.current = newPosition;
+      if (isDragging) {
+        // Calculate new position
+        const newX = e.clientX - dragOffsetRef.current.x;
+        const newY = e.clientY - dragOffsetRef.current.y;
 
-          // Check for snap zones based on cursor position
-          const snapResult = checkSnapping(e.clientX, e.clientY);
+        // Always update position to follow cursor, even when snapping
+        setPosition({ x: newX, y: newY });
 
-          if (snapResult) {
-            // If we're not already snapping, save the current size
-            if (!isSnapping) {
-              setPreSnapSize({
-                width: sizeRef.current.width,
-                height: sizeRef.current.height,
-              });
-            }
+        // Check if we should snap to a zone
+        const snapInfo = checkSnapping(e.clientX, e.clientY);
 
-            setIsSnapping(true);
-            setSnapPreview(snapResult);
-          } else {
-            // If we were snapping but now we're not, restore the pre-snap size if available
-            if (isSnapping && preSnapSize) {
-              // Immediately update the size ref to avoid race conditions
-              sizeRef.current = { ...preSnapSize };
-              setSize({ ...preSnapSize });
-            }
+        if (snapInfo) {
+          // Show snap preview
+          setIsSnapping(true);
+          setSnapPreview({
+            x: snapInfo.x,
+            y: snapInfo.y,
+            width: snapInfo.width,
+            height: snapInfo.height,
+          });
 
-            setIsSnapping(false);
-            setSnapPreview(null);
+          // Store pre-snap size if not already stored
+          if (!preSnapSize) {
+            setPreSnapSize({
+              width: sizeRef.current.width,
+              height: sizeRef.current.height,
+            });
           }
+        } else {
+          // Clear snap preview
+          setIsSnapping(false);
+          setSnapPreview(null);
+          setPreSnapSize(null);
+        }
+      } else if (isResizing) {
+        // Calculate position and size changes based on resize direction
+        const deltaX = e.clientX - resizeStartRef.current.x;
+        const deltaY = e.clientY - resizeStartRef.current.y;
 
-          // Always update position to follow cursor
-          setPosition(newPosition);
+        let newWidth = resizeStartRef.current.width;
+        let newHeight = resizeStartRef.current.height;
+        let newX = positionRef.current.x;
+        let newY = positionRef.current.y;
+
+        // Handle width changes
+        if (resizeDirection.includes("e")) {
+          newWidth = Math.max(200, resizeStartRef.current.width + deltaX);
+        } else if (resizeDirection.includes("w")) {
+          const widthChange = Math.min(
+            deltaX,
+            resizeStartRef.current.width - 200
+          );
+          newWidth = Math.max(200, resizeStartRef.current.width - widthChange);
+          newX = resizeStartRef.current.x + widthChange;
         }
 
-        if (isResizing) {
-          const deltaX = e.clientX - resizeStartRef.current.x;
-          const deltaY = e.clientY - resizeStartRef.current.y;
-
-          let newWidth = resizeStartRef.current.width;
-          let newHeight = resizeStartRef.current.height;
-          let newX = positionRef.current.x;
-          let newY = positionRef.current.y;
-
-          // Handle different resize directions
-          if (resizeDirection.includes("e")) {
-            newWidth = Math.max(300, resizeStartRef.current.width + deltaX);
-          }
-          if (resizeDirection.includes("w")) {
-            const widthChange =
-              resizeStartRef.current.width -
-              Math.max(300, resizeStartRef.current.width - deltaX);
-            newWidth = resizeStartRef.current.width - widthChange;
-            newX = resizeStartRef.current.x + widthChange;
-          }
-          if (resizeDirection.includes("s")) {
-            newHeight = Math.max(200, resizeStartRef.current.height + deltaY);
-          }
-          if (resizeDirection.includes("n")) {
-            const heightChange =
-              resizeStartRef.current.height -
-              Math.max(200, resizeStartRef.current.height - deltaY);
-            newHeight = resizeStartRef.current.height - heightChange;
-            newY = resizeStartRef.current.y + heightChange;
-          }
-
-          // Update refs for next move event
-          sizeRef.current = { width: newWidth, height: newHeight };
-          positionRef.current = { x: newX, y: newY };
-
-          // Update state (triggers render)
-          setSize({ width: newWidth, height: newHeight });
-          setPosition({ x: newX, y: newY });
+        // Handle height changes
+        if (resizeDirection.includes("s")) {
+          newHeight = Math.max(100, resizeStartRef.current.height + deltaY);
+        } else if (resizeDirection.includes("n")) {
+          const heightChange = Math.min(
+            deltaY,
+            resizeStartRef.current.height - 100
+          );
+          newHeight = Math.max(
+            100,
+            resizeStartRef.current.height - heightChange
+          );
+          newY = resizeStartRef.current.y + heightChange;
         }
-      });
-    },
-    [isDragging, isResizing, resizeDirection, checkSnapping]
-  );
 
-  // Handle mouse up for both dragging and resizing
-  const handleMouseUp = useCallback(() => {
-    // If we were snapping, apply the snap
-    if (isSnapping && snapPreview) {
-      setPosition({ x: snapPreview.x, y: snapPreview.y });
-      setSize({ width: snapPreview.width, height: snapPreview.height });
-
-      // Update refs to match
-      positionRef.current = { x: snapPreview.x, y: snapPreview.y };
-      sizeRef.current = {
-        width: snapPreview.width,
-        height: snapPreview.height,
-      };
-
-      // Notify parent of snapped position and size
-      if (onPositionChange) {
-        onPositionChange({ x: snapPreview.x, y: snapPreview.y });
+        // Update position and size
+        setPosition({ x: newX, y: newY });
+        setSize({ width: newWidth, height: newHeight });
       }
+    };
 
-      if (onSizeChange) {
-        onSizeChange({ width: snapPreview.width, height: snapPreview.height });
+    const handleMouseUp = () => {
+      if (isDragging || isResizing) {
+        if (isSnapping && snapPreview) {
+          // Apply snap
+          setPosition({ x: snapPreview.x, y: snapPreview.y });
+          setSize({ width: snapPreview.width, height: snapPreview.height });
+        }
+
+        // Clear states
+        setIsDragging(false);
+        setIsResizing(false);
+        setResizeDirection("");
+        setIsSnapping(false);
+        setSnapPreview(null);
+        setPreSnapSize(null);
+
+        // Notify parent components of changes
+        if (isDragging && onPositionChange) {
+          onPositionChange(positionRef.current);
+        }
+        if (isResizing && onSizeChange) {
+          onSizeChange(sizeRef.current);
+        }
       }
-    } else if (!isSnapping && preSnapSize) {
-      // If we're not snapping anymore but have a pre-snap size, clear it
-      setPreSnapSize(null);
-    }
+    };
 
-    setIsDragging(false);
-    setIsResizing(false);
-    setIsSnapping(false);
-    setSnapPreview(null);
-    setResizeDirection("");
+    // Add event listeners
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
-    // If not snapping, notify parent of current position and size
-    if (!isSnapping) {
-      // Notify parent of position change
-      if (onPositionChange) {
-        onPositionChange(positionRef.current);
-      }
+    return () => {
+      // Clean up
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [
+    isDragging,
+    isResizing,
+    resizeDirection,
+    isSnapping,
+    snapPreview,
+    preSnapSize,
+    checkSnapping,
+    onPositionChange,
+    onSizeChange,
+  ]);
 
-      // Notify parent of size change
-      if (onSizeChange) {
-        onSizeChange(sizeRef.current);
-      }
-    }
-  }, [isSnapping, snapPreview, preSnapSize, onPositionChange, onSizeChange]);
-
-  // Toggle expanded mode
+  // Toggle expanded state
   const toggleExpanded = useCallback(() => {
     if (isExpanded) {
-      // Restore previous size and position
-      setPosition(previousPosition);
-      setSize(previousSize);
+      setIsExpanded(false);
+      if (onExpandedChange) {
+        onExpandedChange(false);
+      }
     } else {
-      // Save current size and position
-      setPreviousPosition(position);
-      setPreviousSize(size);
-
-      // Set expanded size and position
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const newPosition = {
-        x: EXPANDED_MARGIN,
-        y: navbarHeight + EXPANDED_MARGIN,
-      };
-      const newSize = {
-        width: viewportWidth - EXPANDED_MARGIN * 2,
-        height: viewportHeight - navbarHeight - EXPANDED_MARGIN * 2,
-      };
-
-      setPosition(newPosition);
-      setSize(newSize);
+      setIsExpanded(true);
+      if (onExpandedChange) {
+        onExpandedChange(true);
+      }
     }
-
-    // Toggle expanded state
-    setIsExpanded(!isExpanded);
-
-    // Notify parent component
-    if (onExpandedChange) {
-      onExpandedChange(!isExpanded);
-    }
-  }, [
-    isExpanded,
-    previousPosition,
-    previousSize,
-    position,
-    size,
-    setPosition,
-    setSize,
-    setPreviousPosition,
-    setPreviousSize,
-    setIsExpanded,
-    onExpandedChange,
-    navbarHeight,
-  ]);
+  }, [isExpanded, position, size, onExpandedChange]);
 
   // Toggle pin state
   const togglePin = useCallback(() => {
-    const newPinnedState = !pinned;
-    setPinned(newPinnedState);
-
-    // Notify parent component if callback is provided
+    const newPinned = !pinned;
+    setPinned(newPinned);
     if (onPinChange) {
-      onPinChange(newPinnedState);
+      onPinChange(newPinned);
     }
   }, [pinned, onPinChange]);
-
-  // Add/remove event listeners for dragging and resizing
-  useEffect(() => {
-    if (isDragging || isResizing) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-
-      // Add cursor styles to document during drag/resize
-      if (isDragging) {
-        document.body.style.cursor = "move";
-      } else if (isResizing) {
-        // Set appropriate cursor based on resize direction
-        switch (resizeDirection) {
-          case "n":
-          case "s":
-            document.body.style.cursor = "ns-resize";
-            break;
-          case "e":
-          case "w":
-            document.body.style.cursor = "ew-resize";
-            break;
-          case "ne":
-          case "sw":
-            document.body.style.cursor = "nesw-resize";
-            break;
-          case "nw":
-          case "se":
-            document.body.style.cursor = "nwse-resize";
-            break;
-        }
-      }
-
-      document.body.style.userSelect = "none";
-    } else {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-
-      // Reset cursor styles
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    }
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-  }, [isDragging, isResizing, resizeDirection, handleMouseMove, handleMouseUp]);
 
   // Render resize handles
   const renderResizeHandles = () => {
@@ -609,7 +517,8 @@ export function FloatingWindow({
   // Don't render if window is not open
   if (!isOpen) return null;
 
-  return (
+  // Create the window content
+  const windowContent = (
     <>
       {/* Snap preview overlay */}
       {isSnapping && snapPreview && (
@@ -632,14 +541,14 @@ export function FloatingWindow({
         style={{
           position: "fixed",
           top: isExpanded
-            ? `${navbarHeight + EXPANDED_MARGIN}px`
+            ? `${navbarHeight + 8}px`
             : `${position.y}px`,
           left: isExpanded ? `${EXPANDED_MARGIN}px` : `${position.x}px`,
           width: isExpanded
             ? `calc(100vw - ${EXPANDED_MARGIN * 2}px)`
             : `${size.width}px`,
           height: isExpanded
-            ? `calc(100vh - ${navbarHeight + EXPANDED_MARGIN * 2}px)`
+            ? `calc(100vh - ${navbarHeight + 24}px)`
             : `${size.height}px`,
           maxWidth: isExpanded ? "none" : "calc(100vw - 40px)",
           maxHeight: isExpanded ? "none" : "calc(100vh - 40px)",
@@ -693,4 +602,7 @@ export function FloatingWindow({
       </div>
     </>
   );
+
+  // For now, just return the window content directly
+  return windowContent;
 }

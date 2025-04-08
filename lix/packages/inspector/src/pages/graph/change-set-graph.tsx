@@ -31,11 +31,11 @@ export function ChangeSetGraph({
     const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
     g.setGraph({
       rankdir: "TB",
-      nodesep: 150, // Increased node separation
-      ranksep: 100, // Add rank separation
+      nodesep: 250, // Increased node separation (horizontal spacing)
+      ranksep: 200, // Increased rank separation (vertical spacing)
       ranker: "network-simplex",
-      marginx: 50,
-      marginy: 50,
+      marginx: 80,
+      marginy: 80,
     });
 
     const changeSetNodeWidth = 170;
@@ -53,10 +53,14 @@ export function ChangeSetGraph({
     }
 
     for (const v of versions) {
-      g.setNode(v.id, {
+      // Use a consistent prefix for version nodes to avoid ID conflicts
+      const versionNodeId = `version_${v.id}`;
+      g.setNode(versionNodeId, {
         label: "version_v2",
         width: versionNodeWidth,
         height: versionNodeHeight,
+        // Store metadata as a custom property
+        customData: { originalId: v.id }
       });
     }
 
@@ -66,7 +70,8 @@ export function ChangeSetGraph({
     }
 
     for (const v of versions) {
-      g.setEdge(v.change_set_id, v.id);
+      const versionNodeId = `version_${v.id}`;
+      g.setEdge(v.change_set_id, versionNodeId);
     }
 
     // Calculate the layout
@@ -75,16 +80,32 @@ export function ChangeSetGraph({
     // Map Dagre nodes to React Flow nodes
     const nodes: Node<LixNodeData>[] = g.nodes().map((nodeId) => {
       const node = g.node(nodeId); // Get node for position
-      const label = node.label;
+      const label = node.label || "";
+      
+      // Find the entity based on the node ID
+      let entity;
+      let originalId;
+      
+      if (nodeId.startsWith('version_')) {
+        // For version nodes, find by the original ID
+        // Access custom data safely with type assertion
+        const nodeAny = node as any;
+        originalId = nodeAny.customData?.originalId;
+        entity = versions.find((v) => v.id === originalId);
+      } else {
+        // For change set nodes, find directly
+        entity = changeSets.find((cs) => cs.id === nodeId);
+      }
+
+      // Create the node with proper typing
       return {
         id: nodeId,
         type: "lixNode",
         position: { x: node.x - node.width / 2, y: node.y - node.height / 2 },
         data: {
           tableName: label,
-          entity:
-            versions.find((v) => v.id === nodeId) ??
-            changeSets.find((cs) => cs.id === nodeId),
+          entity: entity,
+          originalId: originalId
         },
         style: {
           border: "1px solid #ccc",
@@ -107,10 +128,11 @@ export function ChangeSetGraph({
     }
 
     for (const v of versions) {
+      const versionNodeId = `version_${v.id}`;
       allEdges.push({
         id: `ve_${v.id}_${v.change_set_id}`,
         source: v.change_set_id,
-        target: v.id,
+        target: versionNodeId,
         markerStart: { type: MarkerType.Arrow },
         type: "smoothstep", // Use smoothstep for curved edges
         animated: false,
@@ -119,6 +141,50 @@ export function ChangeSetGraph({
 
     return { nodes, edges: allEdges };
   }, [changeSets, changeSetEdges, versions]);
+
+  // Function to focus on a specific node
+  const focusNode = useCallback(
+    (nodeId: string) => {
+      const instance = reactFlowInstanceRef.current;
+      if (!instance) return;
+
+      console.log("Focusing on node:", nodeId);
+      
+      // Find the node
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) {
+        console.warn(`Node with ID ${nodeId} not found in graph`);
+        return;
+      }
+
+      console.log("Found node:", node);
+      console.log("Node position:", node.position);
+
+      // Use fitView to focus on a specific node
+      setTimeout(() => {
+        instance.fitView({
+          padding: 0.5,
+          includeHiddenNodes: false,
+          nodes: [node],
+          duration: 800,
+        });
+        
+        // Add a visual highlight to the focused node
+        const updatedNodes = nodes.map(n => ({
+          ...n,
+          style: {
+            ...n.style,
+            boxShadow: n.id === nodeId ? '0 0 15px 5px rgba(66, 153, 225, 0.6)' : undefined,
+            zIndex: n.id === nodeId ? 1000 : undefined,
+          }
+        }));
+        
+        // Update nodes with highlight
+        instance.setNodes(updatedNodes);
+      }, 50);
+    },
+    [nodes]
+  );
 
   // Refit view when container size changes or nodes change
   useEffect(() => {
@@ -132,29 +198,6 @@ export function ChangeSetGraph({
     }
   }, [nodes]);
 
-  // Function to focus on a specific node
-  const focusNode = useCallback(
-    (nodeId: string) => {
-      const instance = reactFlowInstanceRef.current;
-      if (!instance) return;
-
-      // Find the node
-      const node = nodes.find((n) => n.id === nodeId);
-      if (!node) return;
-
-      // Center the view on the node with some zoom
-      instance.setViewport(
-        {
-          x: -node.position.x + window.innerWidth / 2 - 85,
-          y: -node.position.y + window.innerHeight / 2 - 30,
-          zoom: 1.5,
-        },
-        { duration: 800 }
-      );
-    },
-    [nodes]
-  );
-
   return (
     <div className="flex flex-col h-full w-full" style={{ height: "100%" }}>
       {/* Version Menu Bar */}
@@ -164,7 +207,11 @@ export function ChangeSetGraph({
           {versions.map((version) => (
             <button
               key={version.id}
-              onClick={() => focusNode(version.id)}
+              onClick={() => {
+                console.log("Version button clicked:", version);
+                // Directly focus on the version node
+                focusNode(`version_${version.id}`);
+              }}
               className="join-item btn btn-xs"
               title={`Jump to ${version.name || version.id}`}
             >

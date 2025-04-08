@@ -74,7 +74,7 @@ export async function initLixInspector(args: {
 
       reactRoot.render(
         <React.StrictMode>
-          <Provider lix={args.lix} rootContainer={container}>
+          <Provider lix={args.lix} rootContainer={container!}>
             <App />
           </Provider>
         </React.StrictMode>

@@ -1,14 +1,12 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
-import { ChangeSetElementsDialog } from "./change-set-elements-dialog";
+import { ChangeSetElementsWindow } from "./change-set-elements-dialog";
 
 // Define a generic data structure for our Lix nodes
 export interface LixNodeData {
   tableName: string; // e.g., 'change_set', 'version_v2'
   entity: any;
-  id: string;
-  position: { x: number; y: number };
-  data: any;
+  originalId?: string; // Added for version nodes to store original ID
   [key: string]: any;
 }
 
@@ -23,9 +21,14 @@ const ChangeSetNode = ({ id, entity }: { id: string; entity: any }) => {
         <div className="space-y-1">
           {Object.entries(entity).map(([key, value]) => {
             // Skip rendering labels array in the regular properties list
-            if (key === "labels" || value === null || value === undefined || value === "")
+            if (
+              key === "labels" ||
+              value === null ||
+              value === undefined ||
+              value === ""
+            )
               return null;
-            
+
             const displayValue =
               typeof value === "string"
                 ? value.substring(0, 20) + (value.length > 20 ? "..." : "")
@@ -41,7 +44,7 @@ const ChangeSetNode = ({ id, entity }: { id: string; entity: any }) => {
             );
           })}
         </div>
-        
+
         {/* Display labels if they exist */}
         {entity.labels && entity.labels.length > 0 && (
           <div className="mt-2 pt-1 border-t">
@@ -58,9 +61,9 @@ const ChangeSetNode = ({ id, entity }: { id: string; entity: any }) => {
             </div>
           </div>
         )}
-        
-        <ChangeSetElementsDialog changeSetId={entity.id} onClose={() => {}} />
-        
+
+        <ChangeSetElementsWindow changeSetId={entity.id} onClose={() => {}} />
+
         {/* Handles for connections */}
         <Handle
           type="target"
