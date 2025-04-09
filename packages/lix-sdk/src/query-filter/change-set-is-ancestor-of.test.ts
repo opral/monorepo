@@ -61,7 +61,7 @@ test("respects the optional depth limit", async () => {
 	expect(results.map((r) => r.id).sort()).toEqual([cs1.id].sort());
 });
 
-test("inclusive true selects the current change set as well", async () => {
+test("includeSelf true selects the current change set as well", async () => {
 	const lix = await openLixInMemory({});
 
 	// cs0 <- cs1 <- cs2
@@ -82,7 +82,7 @@ test("inclusive true selects the current change set as well", async () => {
 	// Should select cs0, cs1, cs2
 	const results = await lix.db
 		.selectFrom("change_set")
-		.where(changeSetIsAncestorOf(cs2, { inclusive: true }))
+		.where(changeSetIsAncestorOf(cs2, { includeSelf: true }))
 		.select("id")
 		.execute();
 

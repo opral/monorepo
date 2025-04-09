@@ -715,7 +715,7 @@ test("updates the version's change set id and maintains ancestry relationship", 
 		.where(
 			changeSetIsAncestorOf(
 				{ id: updatedVersion.change_set_id },
-				{ inclusive: true }
+				{ includeSelf: true }
 			)
 		)
 		.selectAll("change_set")

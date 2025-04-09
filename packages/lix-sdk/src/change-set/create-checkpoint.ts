@@ -66,7 +66,7 @@ export async function createCheckpoint(args: {
 			.where(
 				changeSetIsAncestorOf(
 					{ id: version.change_set_id },
-					{ inclusive: true }
+					{ includeSelf: true }
 				)
 			)
 			.$if(parentCheckpoint !== undefined, (eb) =>

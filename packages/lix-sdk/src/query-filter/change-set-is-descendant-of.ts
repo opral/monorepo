@@ -21,9 +21,9 @@ import type { ChangeSet } from "../change-set/database-schema.js";
  * ⚠️ This filter only defines the traversal scope — it does not filter changes directly.
  *
  * --- Options --- 
- * - `inclusive`: If `true`, includes the starting `changeSet` in the results. Defaults to `false`.
+ * - `includeSelf`: If `true`, includes the starting `changeSet` in the results. Defaults to `false`.
  * - `depth`: Limits the traversal depth. `depth: 1` selects only immediate children (if exclusive) 
- *   or the starting node and its immediate children (if inclusive).
+ *   or the starting node and its immediate children (if includeSelf is true).
  *
  * --- Examples --- 
  *
@@ -45,12 +45,12 @@ import type { ChangeSet } from "../change-set/database-schema.js";
  */
 export function changeSetIsDescendantOf(
 	changeSet: Pick<ChangeSet, "id">,
-	options?: { depth?: number; inclusive?: boolean }
+	options?: { depth?: number; includeSelf?: boolean }
 ): (
 	eb: ExpressionBuilder<LixDatabaseSchema, "change_set">
 ) => ExpressionWrapper<LixDatabaseSchema, "change_set", SqlBool> {
 	const depthLimit = options?.depth;
-	const inclusive = options?.inclusive ?? false;
+	const includeSelf = options?.includeSelf ?? false;
 
 	return () =>
 		sql<SqlBool>`
@@ -63,8 +63,8 @@ export function changeSetIsDescendantOf(
 					JOIN dp ON change_set_edge.parent_id = dp.id
 					${depthLimit !== undefined ? sql`WHERE dp.depth < ${sql.lit(depthLimit)}` : sql``}
 				)
-				-- Select based on the inclusive flag
-				SELECT id FROM dp ${inclusive ? sql`` : sql`WHERE depth > 0`}
+				-- Select based on the includeSelf flag
+				SELECT id FROM dp ${includeSelf ? sql`` : sql`WHERE depth > 0`}
 			)
 		` as any;
 }
