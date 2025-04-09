@@ -68,6 +68,45 @@ The Lix object (from @lix-js/sdk) has the following key properties:
 - db: A Kysely database instance for SQL operations
 - metadata: Information about the Lix file
 
+DYNAMIC DATABASE EXPLORATION:
+Instead of relying on hardcoded database schema, dynamically explore the database structure:
+
+1. For database schema exploration:
+\`\`\`javascript
+// Dynamically discover available tables
+const tables = await lix.db
+  .introspection
+  .getTables()
+  .execute();
+
+// For a specific table, explore its columns
+const columns = await lix.db
+  .introspection
+  .getColumns('table_name')
+  .execute();
+\`\`\`
+
+2. For file format discovery:
+\`\`\`javascript
+// Get the file extension to determine format
+const extension = filePath.split('.').pop().toLowerCase();
+
+// Dynamically import the appropriate plugin
+let plugin;
+try {
+  if (extension === 'json') {
+    plugin = (await import('@lix-js/plugin-json')).plugin;
+  } else if (extension === 'csv') {
+    plugin = (await import('@lix-js/plugin-csv')).plugin;
+  } else {
+    // Handle other formats or try to find a plugin dynamically
+    plugin = await findPluginForExtension(extension);
+  }
+} catch (error) {
+  console.warn('Plugin import failed:', error);
+}
+\`\`\`
+
 IMPORTANT - FILE HANDLING PRINCIPLES:
 1. All file operations must use the plugin system
 2. Never implement file format-specific logic directly
@@ -517,12 +556,43 @@ export class Agent {
   }
   
   /**
+   * Determine if input is a task (operation) or a general question
+   */
+  private isTaskRequest(input: string): boolean {
+    // Task-related keywords and patterns
+    const taskPatterns = [
+      // Data manipulation verbs
+      /\b(create|add|insert|update|modify|change|edit|delete|remove)\b/i,
+      // Show/list commands
+      /\b(show|display|list|get) (all|the|files|content|data)\b/i,
+      // SQL-like requests
+      /\bselect\b.*\bfrom\b/i,
+      /\bwhere\b.*\b(=|equals|is|contains)\b/i,
+      // File operations
+      /\bfile[s]?\b.*(content|open|save|read|write)/i,
+      // Explicit commands
+      /\bexecute\b|\brun\b|\bperform\b/i
+    ];
+    
+    // Check if input matches any task pattern
+    return taskPatterns.some(pattern => pattern.test(input));
+  }
+
+  /**
    * Process a natural language input from the user
    */
   async processInput(input: string, sessionState: SessionState): Promise<void> {
     try {
       // Add user message to conversation history
       this.context.addUserMessage(input);
+      
+      // Determine if this is a task or a question
+      const isTask = this.isTaskRequest(input);
+      
+      // Start loading animation
+      const loader = this.outputFormatter.startLoading(
+        isTask ? "Executing task" : "Thinking"
+      );
       
       // Update file context if we have a Lix file open
       if (sessionState.activeLixManager?.isOpen()) {
@@ -534,10 +604,19 @@ export class Agent {
         // We have a Lix file open, so we can directly work with it
         const lix = sessionState.activeLixManager.getLixObject();
         if (lix) {
-          // First, try with direct JavaScript code execution
-          await this.handleLixRequest(input, lix);
+          // Stop the loader when done
+          loader.stop();
+          
+          if (isTask) {
+            // Process as a task - generate and execute code/SQL
+            await this.handleLixTask(input, lix);
+          } else {
+            // Process as a general question about the project
+            await this.handleLixQuestion(input, lix);
+          }
         } else {
           // Handle with general response
+          loader.stop();
           await this.generateGeneralResponse(input);
         }
       } else {
@@ -546,10 +625,17 @@ export class Agent {
           input,
           "I don't have a Lix file open, so I can't access any file or change data. You can use /open or /new commands to work with a Lix file."
         );
+        
+        // Stop the loader when done
+        loader.stop();
+        
         this.context.addAssistantMessage(response);
         this.outputFormatter.formatMessage(response);
       }
     } catch (error) {
+      // Stop any running loader
+      this.outputFormatter.startLoading().stop();
+      
       this.outputFormatter.formatError(
         `Error processing your request: ${error instanceof Error ? error.message : String(error)}`
       );
@@ -561,9 +647,9 @@ export class Agent {
   }
   
   /**
-   * Handle a request using the Lix object directly
+   * Handle task-oriented requests that require execution
    */
-  private async handleLixRequest(input: string, lix: Lix): Promise<void> {
+  private async handleLixTask(input: string, lix: Lix): Promise<void> {
     try {
       // First attempt: Try direct JavaScript code execution
       const codeResult = await this.jsExecutor.generateAndExecuteCode(input, lix);
@@ -577,7 +663,7 @@ export class Agent {
         // Format the result
         const response = await this.formatExecutionResult(input, codeResult);
         this.context.addAssistantMessage(response);
-        this.outputFormatter.formatMessage(response);
+        this.outputFormatter.formatMessage(response, 'task');
         return;
       }
       
@@ -615,7 +701,7 @@ export class Agent {
         );
         
         this.context.addAssistantMessage(response);
-        this.outputFormatter.formatMessage(response);
+        this.outputFormatter.formatMessage(response, 'task');
         return;
       }
       
@@ -628,11 +714,42 @@ export class Agent {
       
       const response = await this.generateGeneralResponse(input, fallbackContext);
       this.context.addAssistantMessage(response);
-      this.outputFormatter.formatMessage(response);
+      this.outputFormatter.formatMessage(response, 'answer');
     } catch (error) {
       const errorMsg = `Failed to process your request: ${error instanceof Error ? error.message : String(error)}`;
       this.context.addAssistantMessage(errorMsg);
       this.outputFormatter.formatError(errorMsg);
+    }
+  }
+  
+  /**
+   * Handle general questions that don't require execution
+   */
+  private async handleLixQuestion(input: string, lix: Lix): Promise<void> {
+    try {
+      // For general questions, we don't need to execute code/SQL
+      const response = await this.generateGeneralResponse(input);
+      this.context.addAssistantMessage(response);
+      this.outputFormatter.formatMessage(response, 'answer');
+    } catch (error) {
+      const errorMsg = `Failed to answer your question: ${error instanceof Error ? error.message : String(error)}`;
+      this.context.addAssistantMessage(errorMsg);
+      this.outputFormatter.formatError(errorMsg);
+    }
+  }
+  
+  /**
+   * Handle a request using the Lix object directly
+   * Delegates to either task or question handler based on request type
+   */
+  private async handleLixRequest(input: string, lix: Lix): Promise<void> {
+    // Determine if this is a task or a question
+    const isTask = this.isTaskRequest(input);
+    
+    if (isTask) {
+      await this.handleLixTask(input, lix);
+    } else {
+      await this.handleLixQuestion(input, lix);
     }
   }
   

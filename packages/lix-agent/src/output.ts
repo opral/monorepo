@@ -36,15 +36,125 @@ export class OutputFormatter {
   
   /**
    * Format a response message from the agent
+   * With improved formatting, hierarchy and color
    */
-  formatMessage(message: string): void {
+  formatMessage(message: string, type: 'task' | 'answer' = 'answer'): void {
     if (this.mode === 'human') {
-      console.log(message);
+      if (type === 'task') {
+        // Format task results with subtle blue and structure
+        console.log(chalk.blue('Task Result:'));
+        
+        // Split response into sections if it has specific patterns
+        if (message.includes('success') || message.includes('Success')) {
+          console.log(chalk.green('✓ ') + chalk.bold('Success'));
+          
+          // Extract and format details
+          const details = message.replace(/success:?\s*true/i, '').trim();
+          if (details) {
+            console.log(chalk.blue('Details:'));
+            
+            // Format as list if it appears to have list items
+            if (details.includes('\n-') || details.includes('\n•')) {
+              console.log(details);
+            } else {
+              // Display as clean indented output
+              console.log('  ' + details.split('\n').join('\n  '));
+            }
+          }
+        } else {
+          // Format nicely with indentation for other task outputs
+          console.log(chalk.cyan('▶ ') + message.split('\n').join('\n  '));
+        }
+      } else {
+        // Information/answer type response
+        const lines = message.split('\n');
+        
+        // Check if the message has a clear structure
+        if (lines.some(line => line.startsWith('#') || line.startsWith('-') || 
+            /^\d+\./.test(line) || line.includes(':') && !line.includes(' http'))) {
+          // Already structured, preserve formatting but add subtle highlights
+          let inCodeBlock = false;
+          lines.forEach(line => {
+            // Handle code blocks
+            if (line.startsWith('```')) {
+              inCodeBlock = !inCodeBlock;
+              console.log(chalk.gray(line));
+              return;
+            }
+            
+            if (inCodeBlock) {
+              console.log(chalk.gray(line));
+              return;
+            }
+            
+            // Headers
+            if (line.startsWith('# ')) {
+              console.log(chalk.cyan.bold(line));
+            } 
+            // Subheaders
+            else if (line.startsWith('## ')) {
+              console.log(chalk.cyan(line));
+            }
+            // List items
+            else if (line.startsWith('- ') || /^\d+\./.test(line)) {
+              console.log(chalk.yellow('•') + ' ' + line.substring(line.indexOf(' ') + 1));
+            }
+            // Key-value pairs
+            else if (line.includes(':') && !line.includes(' http')) {
+              const [key, ...valueParts] = line.split(':');
+              const value = valueParts.join(':');
+              console.log(chalk.blue(key + ':') + value);
+            }
+            // Regular lines
+            else {
+              console.log(line);
+            }
+          });
+        } else {
+          // Simple text response
+          console.log(message);
+        }
+      }
     } else {
-      console.log(JSON.stringify({ message }));
+      console.log(JSON.stringify({ 
+        message,
+        type 
+      }));
     }
   }
   
+  /**
+   * Show a loading animation with elapsed time counter
+   */
+  startLoading(message: string = 'Thinking'): { stop: () => void } {
+    if (this.mode !== 'human') {
+      return { stop: () => {} };
+    }
+
+    const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+    let i = 0;
+    const startTime = Date.now();
+    let timeElapsed = 0;
+
+    process.stdout.write('\r');
+    
+    const timer = setInterval(() => {
+      timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+      const frame = frames[i = ++i % frames.length];
+      
+      // Clear the line and write the new frame
+      process.stdout.write(`\r${chalk.cyan(frame)} ${message}... ${chalk.gray(`${timeElapsed}s`)}     `);
+    }, 80);
+
+    return {
+      stop: () => {
+        clearInterval(timer);
+        // Clear the line when done
+        process.stdout.write('\r' + ' '.repeat(50) + '\r');
+      }
+    };
+  }
+
   /**
    * Format a streaming message chunk (for future implementation)
    */
