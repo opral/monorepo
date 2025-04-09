@@ -11,7 +11,10 @@ import App from "./App.tsx";
 // Store the active React root instance to allow for unmounting before re-rendering
 let reactRoot: ReactDOM.Root | null = null;
 
-export async function initLixInspector(args: { lix: Lix }): Promise<void> {
+export async function initLixInspector(args: {
+  lix: Lix;
+  hideWelcomeMessage?: boolean;
+}): Promise<void> {
   // Create a fixed position overlay container for the inspector
   const container = document.createElement("div");
   container.id = "lix-inspector";
@@ -64,5 +67,22 @@ export async function initLixInspector(args: { lix: Lix }): Promise<void> {
         <App />
       </Provider>
     </React.StrictMode>
+  );
+
+  if (!args.hideWelcomeMessage) {
+    logWelcomeMessage();
+  }
+}
+
+function logWelcomeMessage() {
+  console.log(
+    "%c    %cInspector initialized",
+    `
+      line-height: 1.5;
+      background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjYiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNiAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgaWQ9Ikdyb3VwIDE2MiI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik0xNC43NjE4IDUuNzQ4NDJMMTYuOTIwOCA5Ljg1OTg0TDIyLjM2NzUgMC4zNTgzOThIMjUuNzEzM0wxOS4wNzIzIDExLjYyODRMMjIuNTcxMiAxNy41MDg1SDE5LjI0MDdMMTYuOTIwOCAxMy40NDNMMTQuNjM5MyAxNy41MDg1SDExLjI3MDVMMTQuNzYxOCAxMS42Mjg0TDExLjM5MyA1Ljc0ODQySDE0Ljc2MThaIiBmaWxsPSIjMDhCNUQ2Ii8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTYuMTYyMTEgMTcuNTA4MVY1Ljc0ODA1SDkuNDIzNjhWMTcuNTA4MUg2LjE2MjExWiIgZmlsbD0iIzA4QjVENiIvPgo8cGF0aCBpZD0iVmVjdG9yXzMiIGQ9Ik0zLjUyMTEyIDAuMzkzNTU1VjE3LjY0MTZIMC4yODcxMDlWMC4zOTM1NTVIMy41MjExMloiIGZpbGw9IiMwOEI1RDYiLz4KPHBhdGggaWQ9IlJlY3RhbmdsZSAzOTEiIGQ9Ik02LjIxNTgyIDAuMzkzNTU1SDE0LjgzOTlWMy4wODg1Nkg2LjIxNTgyVjAuMzkzNTU1WiIgZmlsbD0iIzA4QjVENiIvPgo8L2c+Cjwvc3ZnPgo=")
+                  no-repeat center left / 20px;
+    `,
+    "font-weight: bold; font-size: 12px;",
+    "\n\nYou can toggle the inspector with `Ctrl` + `Shift` + `O`."
   );
 }
