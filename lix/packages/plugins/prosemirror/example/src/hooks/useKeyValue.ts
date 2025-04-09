@@ -67,7 +67,13 @@ async function upsertKeyValue(key: string, value: any) {
 	// Update existing key
 	await lix.db
 		.insertInto("key_value")
-		.values({ key, value: jsonValue })
+		.values({
+			key,
+			value: jsonValue,
+			// skip change control as this is only UI state that
+			// should be persisted but not controlled
+			skip_change_control: true,
+		})
 		.onConflict((oc) => oc.doUpdateSet({ value: jsonValue }))
 		.execute();
 
