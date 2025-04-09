@@ -9,10 +9,7 @@ import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
-import {
-	lixMdDemoFile,
-	setupMdDemo,
-} from "./helper/demo-lix-file/demo-lix-file.ts";
+import { lixMdWelcomeFile, setupMdWelcome } from "./helper/welcomeLixFile.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 
@@ -118,7 +115,7 @@ export const lixAtom = atom(async (get) => {
 			const file = await fileHandle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} else {
-			const demoLix = await lixMdDemoFile();
+			const demoLix = await lixMdWelcomeFile();
 			lixBlob = demoLix.blob;
 		}
 	}
@@ -182,7 +179,7 @@ export const lixAtom = atom(async (get) => {
 
 	// Check if there is a file in lix
 	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
-	if (!file) file = await setupMdDemo(lix);
+	if (!file) file = await setupMdWelcome(lix);
 	if (!get(fileIdSearchParamsAtom)) {
 		// Set the file ID as searchParams without page reload
 		updateUrlParams({ f: file.id });
@@ -329,28 +326,28 @@ export const currentLixNameAtom = atom(async (get) => {
 
 export const availableLixesAtom = atom(async (get) => {
 	get(withPollingAtom);
-	
+
 	try {
 		// Import the helper function dynamically to avoid circular dependencies
 		const { findLixFilesInOpfs } = await import("./helper/findLixInOpfs");
-		
+
 		// Get all Lix files in OPFS
 		const lixFiles = await findLixFilesInOpfs();
-		
+
 		// Convert to the format expected by consumers of this atom
 		// We'll use a map to ensure no duplicate IDs
 		const lixMap = new Map();
-		
+
 		for (const file of lixFiles) {
 			// If we've already seen this ID, skip it (shouldn't happen with our cleanup, but just in case)
 			if (!lixMap.has(file.id)) {
 				lixMap.set(file.id, {
 					id: file.id,
-					name: file.name
+					name: file.name,
 				});
 			}
 		}
-		
+
 		// Convert the map values to an array
 		return Array.from(lixMap.values());
 	} catch (error) {

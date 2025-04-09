@@ -7,7 +7,7 @@ import {
 } from "@lix-js/sdk";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 
-export async function lixMdDemoFile(): Promise<{ blob: Blob; id: string }> {
+export async function lixMdWelcomeFile(): Promise<{ blob: Blob; id: string }> {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 		providePlugins: [txtPlugin],
@@ -19,19 +19,13 @@ export async function lixMdDemoFile(): Promise<{ blob: Blob; id: string }> {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-	await setupMdDemo(lix);
+	await setupMdWelcome(lix);
 	await fileQueueSettled({ lix });
 
 	return { blob: await toBlob({ lix }), id: id.value };
 }
 
-export const setupMdDemo = async (lix: Lix) => {
-	// Load a demo md file and save it to OPFS
-	const file = await lix.db
-		.insertInto("file")
-		.values({
-			path: "/welcome.md",
-			data: new TextEncoder().encode(`# Flashtype.ai ⚡️
+export const welcomeMd = `# Flashtype.ai ⚡️
 
 ### 🤖 Autocomplete your document
 
@@ -39,7 +33,15 @@ export const setupMdDemo = async (lix: Lix) => {
 
 ### 📝 Work with AI Cowriters ([Upvote #46](https://github.com/opral/flashtype.ai/issues/46))
 
-### 🤝 Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))`),
+### 🤝 Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))`;
+
+export const setupMdWelcome = async (lix: Lix) => {
+	// Load a demo md file and save it to OPFS
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			path: "/welcome.md",
+			data: new TextEncoder().encode(welcomeMd),
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

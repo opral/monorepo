@@ -16,6 +16,7 @@ import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { EMPTY_DOCUMENT_PROMPT_KEY } from "./plugins/empty-document-prompt-plugin";
+import { welcomeMd } from "@/helper/welcomeLixFile";
 
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
@@ -24,6 +25,33 @@ export function PlateEditor() {
 	const [, setEditorRef] = useAtom(editorRefAtom);
 
 	const editor = useCreateEditor();
+
+	const insertEmptyPromptElement = () => {
+		// Remove any existing empty prompt elements first
+		const filteredNodes = [...editor.children].filter(
+			(node: TElement) => node.type !== EMPTY_DOCUMENT_PROMPT_KEY
+		);
+
+		const emptyPromptElement = {
+			type: EMPTY_DOCUMENT_PROMPT_KEY,
+			children: [{ text: "" }],
+		};
+
+		// Find the first heading level 1
+		const headingIndex = filteredNodes.findIndex(
+			(node: TElement) => node.type === "h1"
+		);
+
+		// If a heading level 1 exists, insert after it
+		if (headingIndex !== -1) {
+			filteredNodes.splice(headingIndex + 1, 0, emptyPromptElement);
+		} else {
+			// Otherwise insert at the beginning of the document
+			filteredNodes.unshift(emptyPromptElement);
+		}
+
+		editor.tf.setValue(filteredNodes);
+	};
 
 	// Store the editor reference in the global atom
 	useEffect(() => {
@@ -42,15 +70,17 @@ export function PlateEditor() {
 	useEffect(() => {
 		// Check if document is empty or just whitespace
 		const isEmpty = !loadedMd || loadedMd.trim() === '';
+		
+		// Check if this is the welcome document or closely resembles it
+		// We use includes() to allow for small edits while maintaining the prompt
+		const isWelcomeOrSimilar = loadedMd && (
+			loadedMd === welcomeMd || 
+			loadedMd.includes("Flashtype.ai ⚡️") ||
+			loadedMd.includes("🤖 Autocomplete your document")
+		);
 
-		if (isEmpty) {
-			// Insert our empty document prompt element if document is empty
-			const emptyPromptElement = {
-				type: EMPTY_DOCUMENT_PROMPT_KEY,
-				children: [{ text: '' }],
-			};
-
-			editor.tf.setValue([emptyPromptElement]);
+		if (isEmpty || isWelcomeOrSimilar) {
+			insertEmptyPromptElement();
 		} else {
 			// Remove empty document prompt element if document is not empty
 			// First check if there are any empty document prompt elements
