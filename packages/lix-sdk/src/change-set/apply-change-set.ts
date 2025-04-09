@@ -91,7 +91,7 @@ export async function applyChangeSet(args: {
 		// to be applied first.
 		const lixOwnChanges = changesGroupedByFile["lix_own_change_control"] ?? [];
 
-		await applyOwnChanges({
+		const { deletedFileIds } = await applyOwnChanges({
 			lix: { ...args.lix, db: trx },
 			changes: lixOwnChanges,
 		});
@@ -100,18 +100,22 @@ export async function applyChangeSet(args: {
 
 		// Iterate over files and apply plugin changes
 		for (const [file_id, changes] of Object.entries(changesGroupedByFile)) {
+			// lix own change control deleted the file
+			// no plugin needs to apply changes
+			if (file_id === "lix_own_change_control" || deletedFileIds.has(file_id)) {
+				continue;
+			}
+			// the file must exist at this point.
 			const file = await trx
 				.selectFrom("file")
 				.where("id", "=", file_id)
 				.selectAll()
-				.executeTakeFirst();
+				.executeTakeFirstOrThrow();
 
-			// lix own change control deleted the file
-			// no plugin needs to apply changes
-			if (file === undefined) {
-				continue;
-			} else if (file.data.byteLength === 0) {
-				// @ts-expect-error - the plugin will handle undefined file.data
+			if (file.data.byteLength === 0) {
+				// @ts-expect-error - own change control created this file
+				// it's the plugins job now to apply changes. deleting file.data
+				// to pass an undefined file.data to the plugin
 				delete file.data;
 			}
 

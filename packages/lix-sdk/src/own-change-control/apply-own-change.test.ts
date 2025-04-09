@@ -1,10 +1,7 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Change } from "../database/schema.js";
-import type {
-	ChangeSet,
-	ChangeSetLabel,
-} from "../change-set/database-schema.js";
+import type { ChangeSetLabel } from "../change-set/database-schema.js";
 import { applyOwnChanges } from "./apply-own-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { type NewKeyValue } from "../key-value/database-schema.js";
@@ -268,9 +265,11 @@ test("foreign key constraints are deferred to make the order of applying changes
 		})
 		.execute();
 
-	await expect(
-		applyOwnChanges({ lix, changes: mockChanges })
-	).resolves.toBeUndefined();
+	const applied = await applyOwnChanges({
+		lix,
+		changes: mockChanges,
+	});
+	expect(applied).toBeDefined();
 });
 
 test("foreign key constraints are obeyed", async () => {

@@ -18,8 +18,9 @@ import {
 export async function applyOwnChanges(args: {
 	lix: Pick<Lix, "db">;
 	changes: Change[];
-}): Promise<void> {
+}): Promise<{ deletedFileIds: Set<string> }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
+		const deletedFileIds: Set<string> = new Set();
 		// defer foreign keys to avoid constraint violations
 		// until the end of the transaction. otherwise, we would
 		// need to apply the changes in the correct order.
@@ -63,6 +64,9 @@ export async function applyOwnChanges(args: {
 
 				// deletion
 				if (snapshot.content === null) {
+					if (tableName === "file") {
+						deletedFileIds.add(change.entity_id);
+					}
 					query = trx.deleteFrom(tableName);
 					for (const [key, value] of primaryKeys) {
 						query = query.where(key as any, "=", value);
@@ -73,15 +77,17 @@ export async function applyOwnChanges(args: {
 					// take the current file data if the table is `file`
 					// (can be optimized later to adjust the query instead)
 					if (tableName === "file") {
-						const data = await trx
+						const file = await trx
 							.selectFrom("file")
 							.where("id", "=", change.entity_id)
 							.select("data")
 							.executeTakeFirst();
 
 						snapshot.content.data =
-							data?.data ??
+							file?.data ??
 							// empty uint8array will trigger applyChanges() to pass an empty file to the plugin
+							// the plugin is responsible for applying changes to the file
+							// we need to pass an empty uint8array to make the insert on the file table work
 							new Uint8Array();
 					}
 
@@ -94,6 +100,7 @@ export async function applyOwnChanges(args: {
 				await query.execute();
 			})
 		);
+		return { deletedFileIds };
 	};
 
 	if (args.lix.db.isTransaction) {
