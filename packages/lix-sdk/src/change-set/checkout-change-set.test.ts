@@ -115,13 +115,16 @@ test("it checks out a specific change set", async () => {
 		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
-	expect(activeVersionAfter.change_set_id).toBe(cs0!.id);
+	// switching the active version is not needed for a checkout
+	expect(activeVersionAfter.change_set_id).not.toBe(cs0!.id);
 
 	// Now checkout cs1 to test intermediate state
-	await checkoutChangeSet({
+	const cs1Checkout = await checkoutChangeSet({
 		lix,
 		changeSet: cs1!,
 	});
+
+	expect(cs1Checkout.change_set_id).toBe(cs1!.id);
 
 	// Verify intermediate state
 	const intermediateFile = await lix.db
@@ -139,10 +142,12 @@ test("it checks out a specific change set", async () => {
 	expect(intermediateState).toEqual(expectedIntermediateState);
 
 	// Now checkout cs2 again to return to the latest state
-	await checkoutChangeSet({
+	const cs2Checkout = await checkoutChangeSet({
 		lix,
 		changeSet: cs2!,
 	});
+
+	expect(cs2Checkout.change_set_id).toBe(cs2!.id);
 
 	// Verify we're back to the original state
 	const finalFile = await lix.db
