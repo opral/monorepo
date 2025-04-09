@@ -244,7 +244,7 @@ test("should throw an error if authors array is empty", async () => {
 
 	const version0 = await createVersion({ lix, name: "version0" });
 
-	await expect(
+	expect(() =>
 		createChange({
 			lix,
 			authors: [],
@@ -255,7 +255,7 @@ test("should throw an error if authors array is empty", async () => {
 			schemaKey: "schema1",
 			snapshotContent: { text: "snapshot-content" },
 		})
-	).rejects.toThrow("At least one author is required");
+	).toThrow("At least one author is required");
 });
 
 test("option to create a change without updating the version changes", async () => {

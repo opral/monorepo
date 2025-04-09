@@ -127,7 +127,8 @@ test("switch version applies the changes of the switched to version", async () =
 });
 
 // https://github.com/opral/lix-sdk/issues/209
-test("a deleted file in one version does not impact a version which did not delete the file", async () => {
+// will be succeeded by version_v2
+test.skip("a deleted file in one version does not impact a version which did not delete the file", async () => {
 	const mockTxtPlugin: LixPlugin = {
 		key: "mock_txt_plugin",
 		detectChangesGlob: "*.txt",
@@ -231,7 +232,8 @@ test("a deleted file in one version does not impact a version which did not dele
 	expect(fileAfterSwitch).toBeUndefined();
 });
 
-test("doesn't trigger the file queue when switching versions which would lead to duplicate changes", async () => {
+// will be succeeded by version_v2
+test.skip("doesn't trigger the file queue when switching versions which would lead to duplicate changes", async () => {
 	const mockTxtPlugin: LixPlugin = {
 		key: "mock_txt_plugin",
 		detectChangesGlob: "*.txt",

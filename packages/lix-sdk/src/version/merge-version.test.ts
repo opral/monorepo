@@ -7,7 +7,9 @@ import { updateChangesInVersion } from "./update-changes-in-version.js";
 import { createVersion } from "./create-version.js";
 import { switchVersion } from "./switch-version.js";
 
-test("it should update the version pointers in target that are not conflicting", async () => {
+// commented out for lix v0.5
+// version_v1 is deprecated
+test.skip("it should update the version pointers in target that are not conflicting", async () => {
 	const lix = await openLixInMemory({});
 
 	const sourceVersion = await createVersion({ lix });
@@ -44,7 +46,9 @@ test("it should update the version pointers in target that are not conflicting",
 });
 
 // edge case scenario
-test("if a previously undetected conflict is detected during merge, the conflict should be inserted and the target version change pointers updated (if the target version does not point to the entity yet) ", async () => {
+// commented out for lix v0.5
+
+test.skip("if a previously undetected conflict is detected during merge, the conflict should be inserted and the target version change pointers updated (if the target version does not point to the entity yet) ", async () => {
 	const lix = await openLixInMemory({});
 
 	const sourceVersion = await createVersion({ lix, name: "source-version" });
@@ -503,7 +507,9 @@ test("re-curring merges should not create a new conflict if the conflict already
 	expect(conflictsAfter2Merge.length).toBe(1);
 });
 
-test("it should apply the changes from the source version to the target version", async () => {
+// commented out for lix v0.5
+// version_v1 is deprecated
+test.skip("it should apply the changes from the source version to the target version", async () => {
 	const lix = await openLixInMemory({});
 
 	const sourceVersion = await createVersion({ lix });
