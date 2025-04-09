@@ -28,6 +28,8 @@ export default defineConfig({
       fileName: "index",
       cssFileName: "styles",
     },
+    rollupOptions: {
+      external: ["@lix-js/sdk"],
+    },
   },
-  
 });
