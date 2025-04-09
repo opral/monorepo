@@ -14,6 +14,7 @@ import { machineTranslateMessageCommand } from "./commands/machineTranslate.js"
 import { openSettingsViewCommand } from "./commands/openSettingsView.js"
 import { toggleInlineAnnotationsCommand } from "./commands/toggleInlineAnnotation.js"
 import { openEditorViewCommand } from "./commands/openEditorView.js"
+import { reloadProjectCommand } from "./commands/reloadProject.js"
 
 export const CONFIGURATION = {
 	EVENTS: {
@@ -41,6 +42,7 @@ export const CONFIGURATION = {
 		COPY_ERROR: copyErrorCommand,
 		MACHINE_TRANSLATE_MESSAGE: machineTranslateMessageCommand,
 		TOGGLE_INLINE_ANNOTATIONS: toggleInlineAnnotationsCommand,
+		RELOAD_PROJECT: reloadProjectCommand,
 	},
 	FILES: {
 		// TODO: remove this hardcoded assumption for multi project support

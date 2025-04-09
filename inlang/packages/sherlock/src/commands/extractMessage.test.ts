@@ -242,7 +242,7 @@ describe("extractMessageCommand", () => {
 		// @ts-expect-error
 		await extractMessageCommand.callback(mockTextEditor)
 		expect(msg).toHaveBeenCalledWith(
-			"Please select a text to extract in your text editor.",
+			"Please select a text in your text editor to extract a message.",
 			"warn",
 			"notification"
 		)
