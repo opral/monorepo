@@ -28,8 +28,8 @@ import type { ChangeSet } from "./database-schema.js";
  */
 export async function beforeAfterOfFile(args: {
 	lix: Lix;
-	changeSetBefore: Pick<ChangeSet, "id">;
-	changeSetAfter: Pick<ChangeSet, "id">;
+	changeSetBefore?: Pick<ChangeSet, "id">;
+	changeSetAfter?: Pick<ChangeSet, "id">;
 	file: Pick<LixFile, "id">;
 }): Promise<{ before?: LixFile; after?: LixFile }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
@@ -45,40 +45,48 @@ export async function beforeAfterOfFile(args: {
 
 				await trx.deleteFrom("file").where("id", "=", args.file.id).execute();
 
-				const leafChangesOfFileBefore = await trx
-					.selectFrom("change")
-					.innerJoin(
-						"change_set_element",
-						"change.id",
-						"change_set_element.change_id"
-					)
-					.where("change.file_id", "=", args.file.id)
-					.where(changeSetElementIsLeafOf([args.changeSetBefore]))
-					.selectAll("change")
-					.execute();
+				const leafChangesOfFileBefore = args.changeSetBefore
+					? await trx
+							.selectFrom("change")
+							.innerJoin(
+								"change_set_element",
+								"change.id",
+								"change_set_element.change_id"
+							)
+							.where("change.file_id", "=", args.file.id)
+							.where(changeSetElementIsLeafOf([args.changeSetBefore]))
+							.selectAll("change")
+							.execute()
+					: [];
 
-				const leafChangesOfFileAfter = await trx
-					.selectFrom("change")
-					.innerJoin(
-						"change_set_element",
-						"change.id",
-						"change_set_element.change_id"
-					)
-					.where("change.file_id", "=", args.file.id)
-					.where(changeSetElementIsLeafOf([args.changeSetAfter]))
-					.selectAll("change")
-					.execute();
+				const leafChangesOfFileAfter = args.changeSetAfter
+					? await trx
+							.selectFrom("change")
+							.innerJoin(
+								"change_set_element",
+								"change.id",
+								"change_set_element.change_id"
+							)
+							.where("change.file_id", "=", args.file.id)
+							.where(changeSetElementIsLeafOf([args.changeSetAfter]))
+							.selectAll("change")
+							.execute()
+					: [];
 
 				const beforeCs = await createChangeSet({
 					lix: { ...args.lix, db: trx },
 					changes: leafChangesOfFileBefore,
-					parents: [{ id: args.changeSetBefore.id }],
+					parents: args.changeSetBefore
+						? [{ id: args.changeSetBefore.id }]
+						: undefined,
 				});
 
 				const afterCs = await createChangeSet({
 					lix: { ...args.lix, db: trx },
 					changes: leafChangesOfFileAfter,
-					parents: [{ id: args.changeSetAfter.id }],
+					parents: args.changeSetAfter
+						? [{ id: args.changeSetAfter.id }]
+						: undefined,
 				});
 
 				const interimVersion = await createVersionV2({
