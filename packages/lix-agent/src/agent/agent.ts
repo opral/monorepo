@@ -754,20 +754,86 @@ export class Agent {
   }
   
   /**
-   * Get database schema as a string description
+   * Get database schema with a minimal approach to avoid TypeScript errors
    */
   private async getDatabaseSchema(lix: Lix): Promise<string> {
     try {
-      // For our POC, let's create a simple schema description
+      let schema = "Database Schema:\n";
+      
+      // Skip trying to query sqlite_master directly due to TypeScript issues
+      // Instead, check for known common tables
+      const commonTables = ['file', 'change', 'change_edge', 'version', 'version_change'];
+      
+      for (const tableName of commonTables) {
+        try {
+          // Try to query this table with a count query
+          // Need to use 'as any' to bypass TypeScript's strict typing
+          const countResult = await lix.db
+            .selectFrom(tableName as any)
+            .select(sql<number>`count(*)`.as('count'))
+            .executeTakeFirst();
+          
+          // Table exists if we get here
+          schema += `\n- ${tableName} table:\n`;
+          
+          if (countResult && typeof countResult.count !== 'undefined') {
+            schema += `  • ${countResult.count} rows\n`;
+          }
+          
+          // For the file table, add column information
+          if (tableName === 'file') {
+            schema += `  • id: INTEGER PRIMARY KEY\n`;
+            schema += `  • path: TEXT - File path\n`;
+            schema += `  • data: BLOB - File content\n`;
+          }
+        } catch (e) {
+          // Table doesn't exist or can't be queried
+        }
+      }
+      
+      // Try to get a sample file to check for additional properties
+      try {
+        const fileResult = await lix.db
+          .selectFrom('file' as any)
+          .selectAll()
+          .limit(1)
+          .execute();
+        
+        if (fileResult && fileResult.length > 0) {
+          const file = fileResult[0];
+          const columns = Object.keys(file);
+          
+          if (columns.length > 0 && !schema.includes('Additional file properties')) {
+            schema += `\n- Additional file properties:\n`;
+            for (const column of columns) {
+              if (!['id', 'path', 'data'].includes(column)) {
+                schema += `  • ${column}\n`;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // Skip if we can't get file details
+      }
+      
+      // Add usage hints to schema
+      schema += `
+Important notes:
+- File paths always start with a slash (/)
+- File content is stored in the data column as BLOB
+- Use TextDecoder to convert Uint8Array data to string
+`;
+      
+      return schema;
+    } catch (error) {
+      // If everything fails, return minimal information
+      console.error('Error getting schema:', error);
       return `
 Database Schema:
-- file (id: INTEGER PRIMARY KEY, path: TEXT, data: BLOB)
-- The path column contains file names and always starts with a slash (/)
-- The data column contains the file content as a BLOB
+- file table: contains files with id, path, and data columns
+- File paths start with a slash (/)
+- File content is stored as binary data
 `;
-    } catch (error) {
-      console.error('Error getting schema:', error);
-      return 'Database schema could not be retrieved.';
     }
   }
   
@@ -817,8 +883,8 @@ Please explain these results in a clear, natural way that directly answers the o
     
     if (lix) {
       try {
-        schemaInfo = 'Database Schema:\n';
-        schemaInfo += '- file (id, path, data): Stores file information\n';
+        // Get the full database schema using introspection
+        schemaInfo = await this.getDatabaseSchema(lix);
         
         // Try to get file count
         const files = await lix.db
@@ -827,7 +893,7 @@ Please explain these results in a clear, natural way that directly answers the o
           .execute();
           
         const fileCount = files[0]?.count || 0;
-        schemaInfo += `- ${fileCount} files currently stored in database\n`;
+        schemaInfo += `\n- ${fileCount} files currently stored in database\n`;
         
         // Get plugins information
         const pluginsInfo = await sessionState.activeLixManager.getPluginsInfo();
@@ -841,12 +907,21 @@ Please explain these results in a clear, natural way that directly answers the o
           }
         }
       } catch (error) {
+        console.error('Error updating file context:', error);
         schemaInfo = 'Could not retrieve database schema information. ';
       }
     }
     
     let fileContext = `Current Lix file: ${filePath || 'in-memory'}\n`;
     fileContext += schemaInfo;
+    
+    // Add usage hints to help the model use the schema correctly
+    fileContext += `\nUsage hints:
+- To query files, use: SELECT * FROM file WHERE path LIKE '%pattern%'
+- File paths always start with a slash (/)
+- File content is stored in the data column as BLOB and needs conversion to string
+- Use TextDecoder for Uint8Array or toString() for Buffer
+`;
     
     this.context.setFileContext(fileContext);
   }
