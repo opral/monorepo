@@ -19,7 +19,7 @@ This paragraph has a <a href="https://example.com">link</a> using HTML.
 
 This paragraph has <span style="color: red;">styled text</span> using HTML.
 
-This paragraph has a line break using HTML.<br>This is on a new line.
+This paragraph has a line break using HTML.<br />This is on a new line.
 
 ## Block HTML
 
@@ -56,11 +56,11 @@ This paragraph has a line break using HTML.<br>This is on a new line.
 ## HTML and Markdown Mixed
 
 <div>
-  
+
 ### Markdown Heading Inside HTML
 
-- List item 1
-- List item 2
+*   List item 1
+*   List item 2
 
 </div>
 
@@ -89,8 +89,6 @@ Text with <br /> line break.
 ## IFrames and Embeds
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-
 
 ## HTML with CSS
 

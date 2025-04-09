@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 4/9 (44%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 3/9 (33%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 2/9 (22%)
+- 🟢 Perfect roundtrip (input = output): 5/12 (42%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 4/12 (33%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 3/12 (25%)
 
-**Overall Status**: ❌ 2 failing tests
+**Overall Status**: ❌ 3 failing tests
 
 ---
 
@@ -184,7 +184,9 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-> Nested blockquotes:This is a nested blockquote.This is a deeply nested blockquote.
+> Nested blockquotes:\
+> \
+> This is a nested blockquote.This is a deeply nested blockquote.
 
 </td>
 </tr>
@@ -198,7 +200,9 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code>&gt; Nested blockquotes:This is a nested blockquote.This is a deeply nested blockquote.</code></pre>
+<pre><code>&gt; Nested blockquotes:\
+&gt; \
+&gt; This is a nested blockquote.This is a deeply nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -207,7 +211,36 @@ in the source Markdown.</code></pre>
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - blockquote - multiple paragraphs</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - multiple spread over multiple rows</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
+> This block qoute is just spread over multiple rows
+> one very long paragraph
+> written in 3 rows
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>&gt; This block qoute is just spread over multiple rows
+&gt; one very long paragraph
+&gt; written in 3 rows</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - blockquote - multiple lines - two leading spaces one break</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -218,12 +251,128 @@ in the source Markdown.</code></pre>
 <tr>
 <td>
 
-> Blockquote with multiple paragraphs:  
-> This is the second paragraph in the blockquote.  
-> This is the third paragraph in **the** blockquote.  
-> This is the fourth paragraph in the blockquote.
+> Blockquote with multiple lines:  
+> This is the second line in the blockquote.  
+> This is the third line in **the** blockquote.  
+> This is the fourth line in the blockquote.
 
 </td>
+<td>
+
+> Blockquote with multiple lines:\
+> This is the second line in the blockquote.\
+> This is the third line in **the** blockquote.\
+> This is the fourth line in the blockquote.
+
+</td>
+<td>
+
+> Blockquote with multiple lines:\
+> This is the second line in the blockquote.\
+> This is the third line in **the** blockquote.\
+> This is the fourth line in the blockquote.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>&gt; Blockquote with multiple lines:  
+&gt; This is the second line in the blockquote.  
+&gt; This is the third line in **the** blockquote.  
+&gt; This is the fourth line in the blockquote.</code></pre>
+
+</td>
+<td>
+
+<pre><code>&gt; Blockquote with multiple lines:\
+&gt; This is the second line in the blockquote.\
+&gt; This is the third line in **the** blockquote.\
+&gt; This is the fourth line in the blockquote.</code></pre>
+
+</td>
+<td>
+
+<pre><code>&gt; Blockquote with multiple lines:\
+&gt; This is the second line in the blockquote.\
+&gt; This is the third line in **the** blockquote.\
+&gt; This is the fourth line in the blockquote.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - blockquote - multiple lines - using the break tag</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
+<td>
+
+> Blockquote with multiple lines:<br>
+> This is the second line in the blockquote.<br>This is the third line in **the** blockquote.  
+> This is the fourth line in the blockquote.
+
+</td>
+<td>
+
+> Blockquote with multiple lines:\
+> This is the second line in the blockquote.\
+> This is the third line in **the** blockquote.\
+> This is the fourth line in the blockquote.
+
+</td>
+<td>
+
+> Blockquote with multiple lines:<br />This is the second line in the blockquote.<br />This is the third line in **the** blockquote.\
+> This is the fourth line in the blockquote.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>&gt; Blockquote with multiple lines:&lt;br&gt;
+&gt; This is the second line in the blockquote.&lt;br&gt;This is the third line in **the** blockquote.  
+&gt; This is the fourth line in the blockquote.</code></pre>
+
+</td>
+<td>
+
+<pre><code>&gt; Blockquote with multiple lines:\
+&gt; This is the second line in the blockquote.\
+&gt; This is the third line in **the** blockquote.\
+&gt; This is the fourth line in the blockquote.</code></pre>
+
+</td>
+<td>
+
+<pre><code>&gt; Blockquote with multiple lines:&lt;br /&gt;This is the second line in the blockquote.&lt;br /&gt;This is the third line in **the** blockquote.\
+&gt; This is the fourth line in the blockquote.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - blockquote - multiple paragraphs - two line breaks</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
 <td>
 
 > Blockquote with multiple paragraphs:
@@ -237,12 +386,23 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-> Blockquote with multiple paragraphs:
->
-> This is the second paragraph in the blockquote.
->
-> This is the third paragraph in **the** blockquote.
->
+> Blockquote with multiple paragraphs:\
+> \
+> This is the second paragraph in the blockquote.\
+> \
+> This is the third paragraph in **the** blockquote.\
+> \
+> This is the fourth paragraph in the blockquote.
+
+</td>
+<td>
+
+> Blockquote with multiple paragraphs:\
+> \
+> This is the second paragraph in the blockquote.\
+> \
+> This is the third paragraph in **the** blockquote.\
+> \
 > This is the fourth paragraph in the blockquote.
 
 </td>
@@ -250,14 +410,6 @@ in the source Markdown.</code></pre>
 <tr>
 <td>
 
-<pre><code>&gt; Blockquote with multiple paragraphs:  
-&gt; This is the second paragraph in the blockquote.  
-&gt; This is the third paragraph in **the** blockquote.  
-&gt; This is the fourth paragraph in the blockquote.</code></pre>
-
-</td>
-<td>
-
 <pre><code>&gt; Blockquote with multiple paragraphs:
 &gt;
 &gt; This is the second paragraph in the blockquote.
@@ -269,12 +421,23 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code>&gt; Blockquote with multiple paragraphs:
-&gt;
-&gt; This is the second paragraph in the blockquote.
-&gt;
-&gt; This is the third paragraph in **the** blockquote.
-&gt;
+<pre><code>&gt; Blockquote with multiple paragraphs:\
+&gt; \
+&gt; This is the second paragraph in the blockquote.\
+&gt; \
+&gt; This is the third paragraph in **the** blockquote.\
+&gt; \
+&gt; This is the fourth paragraph in the blockquote.</code></pre>
+
+</td>
+<td>
+
+<pre><code>&gt; Blockquote with multiple paragraphs:\
+&gt; \
+&gt; This is the second paragraph in the blockquote.\
+&gt; \
+&gt; This is the third paragraph in **the** blockquote.\
+&gt; \
 &gt; This is the fourth paragraph in the blockquote.</code></pre>
 
 </td>
@@ -308,7 +471,9 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-> Blockquote with other elements:tc - Heading in a blockquote
+> Blockquote with other elements:\
+> \
+> tc - Heading in a blockquote
 
 </td>
 </tr>
@@ -329,7 +494,9 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code>&gt; Blockquote with other elements:tc - Heading in a blockquote</code></pre>
+<pre><code>&gt; Blockquote with other elements:\
+&gt; \
+&gt; tc - Heading in a blockquote</code></pre>
 
 </td>
 </tr>

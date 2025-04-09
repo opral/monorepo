@@ -27,9 +27,9 @@ This paragraph demonstrates ***italic AND bold text*** inline
 Other formatting options include ~~strikethrough~~ and `inline code`.
 
 ## tc - headings
+
 <!-- reason for differing expectation:
 we currently expect a line break after each paragraph -->
-
 
 # Level 1 Heading
 
@@ -72,34 +72,38 @@ we currently expect a line break after each paragraph -->
 [![Image with link](https://example.com/image.jpg "Click me")](https://example.com)
 
 ## tc - unordered lists
+
 <!-- reason for differing expectation:
 the identation may differ 1 meaning is the same -->
 
 ### Unordered Lists
-- Item 1
-- Item 2
-   - Nested item 2.1
-   - Nested item 2.2
-      - Deeply nested item
-- Item 3
+
+*   Item 1
+*   Item 2
+    *   Nested item 2.1
+    *   Nested item 2.2
+        *   Deeply nested item
+*   Item 3
 
 ## tc - ordered lists
 
 ### Ordered Lists
-1. First item
-2. Second item
-    1. Nested first
-    2. Nested second
-3. Third item
+
+1.  First item
+2.  Second item
+    1.  Nested first
+    2.  Nested second
+3.  Third item
 
 ## tc - mixed lists
 
 ### Mixed Lists
-1. First ordered item
-   - Unordered sub-item
-   - Another unordered sub-item
-       1. Ordered sub-sub-item
-2. Second ordered item
+
+1.  First ordered item
+    *   Unordered sub-item
+    *   Another unordered sub-item
+        1.  Ordered sub-sub-item
+2.  Second ordered item
 
 ## tc - task lists
 
@@ -161,15 +165,15 @@ function example() {
 
 Above horizontal rule.
 
----
+***
 
 Between horizontal rules.
 
----
+***
 
 Between horizontal rules.
 
----
+***
 
 Below horizontal rule.
 
@@ -207,11 +211,15 @@ Below horizontal rule.
      Code block in a list
      ```
 
-## tc - special characters
+## tc - special characters - only escape if needed
 
-HTML entities: &amp; &lt; &gt; &quot; &apos;
+HTML entities: & < > " '
 
 Literal characters: & < > " '
+
+Should get escaped with `\<` \<!-- this is not a comment ->
+
+Is escaped get escaped  \<!-- this is not a comment ->
 
 ## tc - footnotes
 
@@ -232,13 +240,10 @@ Term 2
 : Definition 2a
 : Definition 2b
 
-## tc - line breaks and empty paragraphs
+## tc - line breaks and empty paragraphs should get collapsed
 
 This paragraph is followed by empty paragraphs.
 
-
 This paragraph has multiple line breaks between it and the next paragraph.
-
-
 
 This is the final paragraph.

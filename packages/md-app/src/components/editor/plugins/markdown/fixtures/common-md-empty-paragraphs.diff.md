@@ -62,6 +62,7 @@ Multiple empty lines between content
 
 Last line
 
+
 </td>
 <td>
 
@@ -126,7 +127,8 @@ Another line with content
 
 Multiple empty lines between content
 
-Last line</code></pre>
+Last line
+</code></pre>
 
 </td>
 <td>

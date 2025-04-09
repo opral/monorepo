@@ -79,10 +79,10 @@ This is a paragraph with
 multiple lines but
 no line breaks in the rendered output.
 
-This paragraph ends with two spaces
+This paragraph ends with two spaces\
 which creates a line break.
 
-This paragraph ends with a backslash
+This paragraph ends with a backslash\
 which also creates a line break.
 
 This paragraph has a <br /> HTML tag
@@ -96,7 +96,9 @@ Paragraph with *nested **formatting*** and **nested *formatting***.
 
 Here's a paragraph with a very long line that will need to wrap in most text editors and viewers. It just keeps going to demonstrate how lines can be automatically wrapped and how that shouldn't affect the rendered output. Markdown treats consecutive lines of text as a single paragraph.
 
-> Blockquote paragraph.Another paragraph in the same blockquote.
+> Blockquote paragraph.\
+> \
+> Another paragraph in the same blockquote.
 
 1.  List item paragraph.
 
@@ -178,10 +180,10 @@ This is a paragraph with
 multiple lines but
 no line breaks in the rendered output.
 
-This paragraph ends with two spaces
+This paragraph ends with two spaces\
 which creates a line break.
 
-This paragraph ends with a backslash
+This paragraph ends with a backslash\
 which also creates a line break.
 
 This paragraph has a &lt;br /&gt; HTML tag
@@ -195,7 +197,9 @@ Paragraph with *nested **formatting*** and **nested *formatting***.
 
 Here&#039;s a paragraph with a very long line that will need to wrap in most text editors and viewers. It just keeps going to demonstrate how lines can be automatically wrapped and how that shouldn&#039;t affect the rendered output. Markdown treats consecutive lines of text as a single paragraph.
 
-&gt; Blockquote paragraph.Another paragraph in the same blockquote.
+&gt; Blockquote paragraph.\
+&gt; \
+&gt; Another paragraph in the same blockquote.
 
 1.  List item paragraph.
 

@@ -32,10 +32,13 @@ __Bold text__ using double underscores.
 
 ___Bold and italic___ using triple underscores.
 
-## tc - mixed formatting inline
+## tc - mixed formatting inline - nested
 
-**Bold text with** ***italic*** **inside**.
 **Bold text with *italic* inside**.
+
+## tc - mixed formatting inline - not nested
+
+**Bold text with** ***italic*** **not nested**.
 
 ## tc - italic with bold inside
 
@@ -48,7 +51,3 @@ ___Bold and italic___ using triple underscores.
 ## tc - mixed styles in paragraph
 
 Mixed **bold** and *italic* and ~~strikethrough~~ in one paragraph.
-
-## tc - nested styles
-
-Text with **multiple __styles__** applied.

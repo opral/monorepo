@@ -6,11 +6,11 @@
 
 ## tc - escaped bold markers
 
-\**This text is not in bold**
+\*\*This text is not in bold\*\*
 
 ## tc - escaped link syntax
 
-\[This is not a link](https://example.com)
+\[This is not a link]\(<https://example.com>)
 
 ## tc - escaped code backticks
 
@@ -34,7 +34,7 @@
 
 ## tc - escaped backslash - that doesnt need to be escaped
 
-\\ This shows a backslash
+\ This shows a backslash
 
 ## tc - literal backslash
 
@@ -42,7 +42,7 @@
 
 ## tc - html entities - get converted to special characters
 
-HTML entities: &amp; &lt; &gt; &quot; &apos;
+HTML entities: & < > " '
 
 ## tc - literal special characters
 
@@ -66,7 +66,7 @@ Literal characters: & < > " '
 
 ## tc - escaped asterisks in bold
 
-**Bold text with \** escaped asterisks**
+*Bold text with \* escaped asterisks*\*
 
 ## tc - escaped bracket in link
 
@@ -81,7 +81,7 @@ And a \`escaped backtick\`
 
 ## tc - escaped marker in blockquote should get removed if not needed
 
-> Blockquote with \> escaped angle bracket
+> Blockquote with > escaped angle bracket
 
 ## tc - multiple backslash escapes
 

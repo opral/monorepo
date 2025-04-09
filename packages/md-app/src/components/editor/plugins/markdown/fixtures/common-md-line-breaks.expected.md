@@ -6,11 +6,13 @@ Paragraphs are separated by blank lines.
 
 ## tc - paragraphs and line break - 2 spaces + break
 
-This paragraph has a line break<br />created with two trailing spaces.
+This paragraph has a line break\
+created with two trailing spaces.
 
 ## tc - paragraphs and line break - backslash + break
 
-This one has a line break<br />created with a backslash.
+This one has a line break\
+created with a backslash.
 
 ## tc - paragraphs and line break - non mdx br tag
 
@@ -32,7 +34,7 @@ created with a break tag and two new lines.
 
 ## tc - paragraphs and line break - br + 2x linebreak
 
-This one has a break tag at the end of a paragraph which should be gone
+This one has a break tag at the end of a paragraph which should be gone<br />
 
 created with a two new lines.
 
@@ -50,11 +52,13 @@ created with a break tag and two new lines.
 
 ## tc - paragraphs and line break - br + 2 spaces + linebreak
 
-This one has a line break<br /><br />created with a break tag followed by a space and new lines.
+This one has a line break<br />\
+created with a break tag followed by a space and new lines.
 
 ## tc - paragraphs and line break - br + backslash + linebreak
 
-This one has a line break<br /><br />created with a break tag followed by a space and new lines.
+This one has a line break<br />\
+created with a break tag followed by a space and new lines.
 
 ## tc - paragraphs and line break - simple paragraph
 

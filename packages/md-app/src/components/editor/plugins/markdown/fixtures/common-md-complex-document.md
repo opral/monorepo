@@ -204,11 +204,15 @@ Below horizontal rule.
      Code block in a list
      ```
 
-## tc - special characters
+## tc - special characters - only escape if needed
 
 HTML entities: &amp; &lt; &gt; &quot; &apos;
 
 Literal characters: & < > " '
+
+Should get escaped with `\<` &lt;!-- this is not a comment -&gt;
+
+Is escaped get escaped  \<!-- this is not a comment -&gt;
 
 ## tc - footnotes
 
@@ -229,7 +233,7 @@ Term 2
 : Definition 2a
 : Definition 2b
 
-## tc - line breaks and empty paragraphs
+## tc - line breaks and empty paragraphs should get collapsed
 
 This paragraph is followed by empty paragraphs.
 

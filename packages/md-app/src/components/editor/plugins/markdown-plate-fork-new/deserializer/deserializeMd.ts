@@ -34,34 +34,36 @@ export const deserializeMd = (
   // if using remarkMdx, we need to replace <br> with <br /> since <br /> is not supported in mdx.
   data = data.replaceAll('<br>', '<br />');
 
-  const mergedOptions = getMergedOptionsDeserialize(editor, options);
+	const mergedOptions = getMergedOptionsDeserialize(editor, options);
 
-  const toSlateProcessor = unified()
-    .use(remarkParse)
-    .use(mergedOptions.remarkPlugins ?? [])
-    .use(remarkToSlate, mergedOptions);
+	const toSlateProcessor = unified()
+		.use(remarkParse)
+		.use(mergedOptions.remarkPlugins ?? [])
+		.use(remarkToSlate, mergedOptions);
 
-  if (options?.memoize) {
-    return parseMarkdownBlocks(data, options.parser).flatMap((token) => {
-      if (token.type === 'space') {
-        return {
-          ...editor.api.create.block(),
-          _memo: token.raw,
-        };
-      }
+	if (options?.memoize) {
+		return parseMarkdownBlocks(data, options.parser).flatMap((token) => {
+			if (token.type === "space") {
+				return {
+					...editor.api.create.block(),
+					_memo: token.raw,
+				};
+			}
 
-      return toSlateProcessor
-        .processSync(token.raw)
-        .result.map((result: any) => {
-          return {
-            _memo: token.raw,
-            ...result,
-          };
-        });
-    });
-  }
+			return toSlateProcessor
+				.processSync(token.raw)
+				.result.map((result: any) => {
+					return {
+						_memo: token.raw,
+						...result,
+					};
+				});
+		});
+	}
 
-  return toSlateProcessor.processSync(data).result;
+	const parsedResult = toSlateProcessor.processSync(data).result;
+
+	return parsedResult;
 };
 
 declare module 'unified' {

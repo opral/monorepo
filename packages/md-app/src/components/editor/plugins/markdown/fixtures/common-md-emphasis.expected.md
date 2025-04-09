@@ -10,11 +10,11 @@ and standardizing on one syntax improves consistency throughout the document.
 
 ## tc - italic with asterisks
 
-_Italic text_ using single asterisks.
+*Italic text* using single asterisks.
 
 ## tc - italic with underscores
 
-_Italic text_ using single underscores.
+*Italic text* using single underscores.
 
 ## tc - bold with asterisks
 
@@ -32,13 +32,17 @@ _Italic text_ using single underscores.
 
 ***Bold and italic*** using triple underscores.
 
-## tc - mixed formatting inline
+## tc - mixed formatting inline - nested
 
-**Bold text with _italic_ inside**.
+**Bold text with *italic* inside**.
+
+## tc - mixed formatting inline - not nested
+
+**Bold text with** ***italic*** **not nested**.
 
 ## tc - italic with bold inside
 
-_Italic text with **bold** inside_.
+*Italic text with **bold** inside*.
 
 ## tc - strikethrough
 
@@ -46,8 +50,4 @@ _Italic text with **bold** inside_.
 
 ## tc - mixed styles in paragraph
 
-Mixed **bold** and _italic_ and ~~strikethrough~~ in one paragraph.
-
-## tc - nested styles
-
-Text with **multiple _styles_** applied.
+Mixed **bold** and *italic* and ~~strikethrough~~ in one paragraph.

@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 5/25 (20%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 5/25 (20%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 15/25 (60%)
+- 🟢 Perfect roundtrip (input = output): 5/24 (21%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 12/24 (50%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 7/24 (29%)
 
-**Overall Status**: ❌ 15 failing tests
+**Overall Status**: ❌ 7 failing tests
 
 ---
 
@@ -260,123 +260,8 @@ Other formatting options include ~~strikethrough~~ and `inline code`.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - paragraphs and line breaks</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
-
-<table>
-<tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
-</tr>
-<tr>
-<td>
-
-Paragraphs are separated by blank lines.
-
-This paragraph has a line break  
-created with two trailing spaces.
-
-This one has a line break\
-created with a backslash.
-
-This one has a line break<br>created with a break tag.
-
-This one has a line break<br>
-created with a break tag.
-
-And another one to check if it worked
-
-</td>
-<td>
-
-Paragraphs are separated by blank lines.
-
-This paragraph has a line break<br>created with two trailing spaces.
-
-This one has a line break<br>created with a backslash.
-
-This one has a line break<br>created with a break tag.
-
-And another one to check if it worked
-
-</td>
-<td>
-
-Paragraphs are separated by blank lines.
-
-This paragraph has a line break
-created with two trailing spaces.
-
-This one has a line break
-created with a backslash.
-
-This one has a line break<br />created with a break tag.
-
-This one has a line break<br />
-created with a break tag.
-
-And another one to check if it worked
-
-</td>
-</tr>
-<tr>
-<td>
-
-<pre><code>Paragraphs are separated by blank lines.
-
-This paragraph has a line break  
-created with two trailing spaces.
-
-This one has a line break\
-created with a backslash.
-
-This one has a line break&lt;br&gt;created with a break tag.
-
-This one has a line break&lt;br&gt;
-created with a break tag.
-
-And another one to check if it worked</code></pre>
-
-</td>
-<td>
-
-<pre><code>Paragraphs are separated by blank lines.
-
-This paragraph has a line break&lt;br&gt;created with two trailing spaces.
-
-This one has a line break&lt;br&gt;created with a backslash.
-
-This one has a line break&lt;br&gt;created with a break tag.
-
-And another one to check if it worked</code></pre>
-
-</td>
-<td>
-
-<pre><code>Paragraphs are separated by blank lines.
-
-This paragraph has a line break
-created with two trailing spaces.
-
-This one has a line break
-created with a backslash.
-
-This one has a line break&lt;br /&gt;created with a break tag.
-
-This one has a line break&lt;br /&gt;
-created with a break tag.
-
-And another one to check if it worked</code></pre>
-
-</td>
-</tr>
-</table>
-
-</details>
-
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - headings</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - headings</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -408,7 +293,6 @@ Alternative Level 2 Heading
 
 <!-- reason for differing expectation:
 we currently expect a line break after each paragraph -->
-
 
 # Level 1 Heading
 
@@ -474,7 +358,6 @@ Alternative Level 2 Heading
 
 <pre><code>&lt;!-- reason for differing expectation:
 we currently expect a line break after each paragraph --&gt;
-
 
 # Level 1 Heading
 
@@ -640,8 +523,8 @@ we currently expect a line break after each paragraph --&gt;
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - unordered lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - unordered lists</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -671,12 +554,13 @@ the identation may differ 1 meaning is the same -->
 the identation may differ 1 meaning is the same -->
 
 ### Unordered Lists
-- Item 1
-- Item 2
-   - Nested item 2.1
-   - Nested item 2.2
-      - Deeply nested item
-- Item 3
+
+*   Item 1
+*   Item 2
+    *   Nested item 2.1
+    *   Nested item 2.2
+        *   Deeply nested item
+*   Item 3
 
 </td>
 <td>
@@ -717,12 +601,13 @@ the identation may differ 1 meaning is the same --&gt;
 the identation may differ 1 meaning is the same --&gt;
 
 ### Unordered Lists
-- Item 1
-- Item 2
-   - Nested item 2.1
-   - Nested item 2.2
-      - Deeply nested item
-- Item 3</code></pre>
+
+*   Item 1
+*   Item 2
+    *   Nested item 2.1
+    *   Nested item 2.2
+        *   Deeply nested item
+*   Item 3</code></pre>
 
 </td>
 <td>
@@ -745,8 +630,8 @@ the identation may differ 1 meaning is the same --&gt;
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - ordered lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - ordered lists</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -769,11 +654,12 @@ the identation may differ 1 meaning is the same --&gt;
 <td>
 
 ### Ordered Lists
-1. First item
-2. Second item
-    1. Nested first
-    2. Nested second
-3. Third item
+
+1.  First item
+2.  Second item
+    1.  Nested first
+    2.  Nested second
+3.  Third item
 
 </td>
 <td>
@@ -803,11 +689,12 @@ the identation may differ 1 meaning is the same --&gt;
 <td>
 
 <pre><code>### Ordered Lists
-1. First item
-2. Second item
-    1. Nested first
-    2. Nested second
-3. Third item</code></pre>
+
+1.  First item
+2.  Second item
+    1.  Nested first
+    2.  Nested second
+3.  Third item</code></pre>
 
 </td>
 <td>
@@ -826,8 +713,8 @@ the identation may differ 1 meaning is the same --&gt;
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - mixed lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - mixed lists</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -850,11 +737,12 @@ the identation may differ 1 meaning is the same --&gt;
 <td>
 
 ### Mixed Lists
-1. First ordered item
-   - Unordered sub-item
-   - Another unordered sub-item
-       1. Ordered sub-sub-item
-2. Second ordered item
+
+1.  First ordered item
+    *   Unordered sub-item
+    *   Another unordered sub-item
+        1.  Ordered sub-sub-item
+2.  Second ordered item
 
 </td>
 <td>
@@ -884,11 +772,12 @@ the identation may differ 1 meaning is the same --&gt;
 <td>
 
 <pre><code>### Mixed Lists
-1. First ordered item
-   - Unordered sub-item
-   - Another unordered sub-item
-       1. Ordered sub-sub-item
-2. Second ordered item</code></pre>
+
+1.  First ordered item
+    *   Unordered sub-item
+    *   Another unordered sub-item
+        1.  Ordered sub-sub-item
+2.  Second ordered item</code></pre>
 
 </td>
 <td>
@@ -983,7 +872,11 @@ the identation may differ 1 meaning is the same --&gt;
 
 > Simple blockquote
 
-> Blockquote with **formatting** and a [link](https://example.com).Multiple paragraphs in a blockquote.Nested blockquote.
+> Blockquote with **formatting** and a [link](https://example.com).\
+> \
+> Multiple paragraphs in a blockquote.\
+> \
+> Nested blockquote.
 
 </td>
 </tr>
@@ -1003,7 +896,11 @@ the identation may differ 1 meaning is the same --&gt;
 
 <pre><code>&gt; Simple blockquote
 
-&gt; Blockquote with **formatting** and a [link](https://example.com).Multiple paragraphs in a blockquote.Nested blockquote.</code></pre>
+&gt; Blockquote with **formatting** and a [link](https://example.com).\
+&gt; \
+&gt; Multiple paragraphs in a blockquote.\
+&gt; \
+&gt; Nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -1254,8 +1151,8 @@ function example() {
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - horizontal rules</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - horizontal rules</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -1285,15 +1182,15 @@ Below horizontal rule.
 
 Above horizontal rule.
 
----
+***
 
 Between horizontal rules.
 
----
+***
 
 Between horizontal rules.
 
----
+***
 
 Below horizontal rule.
 
@@ -1338,15 +1235,15 @@ Below horizontal rule.</code></pre>
 
 <pre><code>Above horizontal rule.
 
----
+***
 
 Between horizontal rules.
 
----
+***
 
 Between horizontal rules.
 
----
+***
 
 Below horizontal rule.</code></pre>
 
@@ -1509,13 +1406,14 @@ Below horizontal rule.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - special characters</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - special characters - only escape if needed</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -1524,12 +1422,31 @@ HTML entities: &amp; &lt; &gt; &quot; &apos;
 
 Literal characters: & < > " '
 
+Should get escaped with `\<` &lt;!-- this is not a comment -&gt;
+
+Is escaped get escaped  \<!-- this is not a comment -&gt;
+
 </td>
 <td>
 
 HTML entities: & < > " '
 
 Literal characters: & < > " '
+
+Should get escaped with `\<` \<!-- this is not a comment ->
+
+Is escaped get escaped  \<!-- this is not a comment ->
+
+</td>
+<td>
+
+HTML entities: & < > " '
+
+Literal characters: & < > " '
+
+Should get escaped with `\<` \<!-- this is not a comment ->
+
+Is escaped get escaped  \<!-- this is not a comment ->
 
 </td>
 </tr>
@@ -1538,14 +1455,33 @@ Literal characters: & < > " '
 
 <pre><code>HTML entities: &amp;amp; &amp;lt; &amp;gt; &amp;quot; &amp;apos;
 
-Literal characters: &amp; &lt; &gt; &quot; &#039;</code></pre>
+Literal characters: &amp; &lt; &gt; &quot; &#039;
+
+Should get escaped with `\&lt;` &amp;lt;!-- this is not a comment -&amp;gt;
+
+Is escaped get escaped  \&lt;!-- this is not a comment -&amp;gt;</code></pre>
 
 </td>
 <td>
 
 <pre><code>HTML entities: &amp; &lt; &gt; &quot; &#039;
 
-Literal characters: &amp; &lt; &gt; &quot; &#039;</code></pre>
+Literal characters: &amp; &lt; &gt; &quot; &#039;
+
+Should get escaped with `\&lt;` \&lt;!-- this is not a comment -&gt;
+
+Is escaped get escaped  \&lt;!-- this is not a comment -&gt;</code></pre>
+
+</td>
+<td>
+
+<pre><code>HTML entities: &amp; &lt; &gt; &quot; &#039;
+
+Literal characters: &amp; &lt; &gt; &quot; &#039;
+
+Should get escaped with `\&lt;` \&lt;!-- this is not a comment -&gt;
+
+Is escaped get escaped  \&lt;!-- this is not a comment -&gt;</code></pre>
 
 </td>
 </tr>
@@ -1640,13 +1576,14 @@ Term 2
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - line breaks and empty paragraphs</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - line breaks and empty paragraphs should get collapsed</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -1657,6 +1594,15 @@ This paragraph is followed by empty paragraphs.
 This paragraph has multiple line breaks between it and the next paragraph.
 
 
+
+This is the final paragraph.
+
+</td>
+<td>
+
+This paragraph is followed by empty paragraphs.
+
+This paragraph has multiple line breaks between it and the next paragraph.
 
 This is the final paragraph.
 
@@ -1680,6 +1626,15 @@ This is the final paragraph.
 This paragraph has multiple line breaks between it and the next paragraph.
 
 
+
+This is the final paragraph.</code></pre>
+
+</td>
+<td>
+
+<pre><code>This paragraph is followed by empty paragraphs.
+
+This paragraph has multiple line breaks between it and the next paragraph.
 
 This is the final paragraph.</code></pre>
 

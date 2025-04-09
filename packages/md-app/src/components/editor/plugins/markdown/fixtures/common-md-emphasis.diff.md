@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 6/11 (55%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 2/11 (18%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 3/11 (27%)
+- 🟢 Perfect roundtrip (input = output): 7/11 (64%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 3/11 (27%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 1/11 (9%)
 
-**Overall Status**: ❌ 3 failing tests
+**Overall Status**: ❌ 1 failing tests
 
 ---
 
@@ -35,13 +35,14 @@
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - italic with underscores</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - italic with underscores</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -54,11 +55,21 @@ _Italic text_ using single underscores.
 *Italic text* using single underscores.
 
 </td>
+<td>
+
+*Italic text* using single underscores.
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>_Italic text_ using single underscores.</code></pre>
+
+</td>
+<td>
+
+<pre><code>*Italic text* using single underscores.</code></pre>
 
 </td>
 <td>
@@ -216,29 +227,21 @@ ___Bold and italic___ using triple underscores.
 </details>
 
 <details open>
-<summary><span style="color:red; font-weight:bold;">tc - mixed formatting inline</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<summary><span style="color:red; font-weight:bold;">tc - mixed formatting inline - nested</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 50%">Input</th>
+<th style="width: 50%">Actual Output</th>
 </tr>
 <tr>
 <td>
 
-**Bold text with** ***italic*** **inside**.
 **Bold text with *italic* inside**.
 
 </td>
 <td>
 
-**Bold text with _italic_ inside**.
-
-</td>
-<td>
-
-**Bold text with** ***italic*** **inside**.
 **Bold text with *italic*** **inside**.
 
 </td>
@@ -246,19 +249,37 @@ ___Bold and italic___ using triple underscores.
 <tr>
 <td>
 
-<pre><code>**Bold text with** ***italic*** **inside**.
-**Bold text with *italic* inside**.</code></pre>
+<pre><code>**Bold text with *italic* inside**.</code></pre>
 
 </td>
 <td>
 
-<pre><code>**Bold text with _italic_ inside**.</code></pre>
+<pre><code>**Bold text with *italic*** **inside**.</code></pre>
 
 </td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - mixed formatting inline - not nested</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
 <td>
 
-<pre><code>**Bold text with** ***italic*** **inside**.
-**Bold text with *italic*** **inside**.</code></pre>
+**Bold text with** ***italic*** **not nested**.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>**Bold text with** ***italic*** **not nested**.</code></pre>
 
 </td>
 </tr>
@@ -334,53 +355,6 @@ Mixed **bold** and *italic* and ~~strikethrough~~ in one paragraph.
 <td>
 
 <pre><code>Mixed **bold** and *italic* and ~~strikethrough~~ in one paragraph.</code></pre>
-
-</td>
-</tr>
-</table>
-
-</details>
-
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - nested styles</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
-
-<table>
-<tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
-</tr>
-<tr>
-<td>
-
-Text with **multiple __styles__** applied.
-
-</td>
-<td>
-
-Text with **multiple _styles_** applied.
-
-</td>
-<td>
-
-Text with **multiple styles** applied.
-
-</td>
-</tr>
-<tr>
-<td>
-
-<pre><code>Text with **multiple __styles__** applied.</code></pre>
-
-</td>
-<td>
-
-<pre><code>Text with **multiple _styles_** applied.</code></pre>
-
-</td>
-<td>
-
-<pre><code>Text with **multiple styles** applied.</code></pre>
 
 </td>
 </tr>

@@ -1,23 +1,23 @@
-import type { TText } from '@udecode/plate';
+import type { Descendant, TText } from "@udecode/plate";
 
 import type {
-  TIndentListElement,
-  TStandardListElement,
-} from '../internal/types';
+	TIndentListElement,
+	TStandardListElement,
+} from "../internal/types";
 import type {
-  MdBlockquote,
-  MdHeading,
-  MdImage,
-  MdLink,
-  MdList,
-  MdMdxJsxTextElement,
-  MdParagraph,
-  MdRootContent,
-  MdTable,
-  MdTableCell,
-  MdTableRow,
-} from '../mdast';
-import type { TNodes } from './types';
+	MdBlockquote,
+	MdHeading,
+	MdImage,
+	MdLink,
+	MdList,
+	MdMdxJsxTextElement,
+	MdParagraph,
+	MdRootContent,
+	MdTable,
+	MdTableCell,
+	MdTableRow,
+} from "../mdast";
+import type { TNodes } from "./types";
 
 import {
 	buildSlateNode,
@@ -51,8 +51,18 @@ export const defaultNodes: TNodes = {
 		deserialize: (mdastNode, deco, options) => {
 			const children =
 				mdastNode.children.length > 0
-					? mdastNode.children.flatMap((paragraph) => {
+					? mdastNode.children.flatMap((paragraph, index, children) => {
 							if (paragraph.type === "paragraph") {
+								if (children.length > 1 && children.length - 1 !== index) {
+									// add a line break between the paragraphs
+									const paragraphChildren = convertChildrenDeserialize(
+										paragraph.children,
+										deco,
+										options
+									);
+									paragraphChildren.push({ text: "\n" }, { text: "\n" });
+									return paragraphChildren;
+								}
 								return convertChildrenDeserialize(
 									paragraph.children,
 									deco,
@@ -83,35 +93,30 @@ export const defaultNodes: TNodes = {
 		},
 		serialize: (node, options) => {
 			// create a paragraph for each \n node
-			const paragraphs = [
-				{
-					children: [] as any[],
-					type: "paragraph",
-				},
-			];
+			const nodes = [] as any;
 
 			for (const child of node.children) {
 				if (child.text === "\n") {
-					paragraphs.push({
-						children: [],
-						type: "paragraph",
+					nodes.push({
+						type: "break",
 					});
 				} else {
-					paragraphs.at(-1)!.children.push(child);
+					nodes.push(child);
 				}
 			}
 
-			// convert each node of each paragraph
-			// convert each node of each paragraph
-			for (const paragraph of paragraphs) {
-				paragraph.children = convertNodesSerialize(
-					paragraph.children,
-					options
-				) as MdBlockquote["children"];
-			}
+			const paragraphChildren = convertNodesSerialize(
+				nodes,
+				options
+			) as MdParagraph["children"];
 
 			return {
-				children: paragraphs,
+				children: [
+					{
+						children: paragraphChildren,
+						type: "paragraph",
+					},
+				],
 				type: "blockquote",
 			};
 		},
@@ -124,9 +129,8 @@ export const defaultNodes: TNodes = {
 		},
 		serialize: () => {
 			return {
-				type: "html",
-				value: "<br />",
-			} as any; // TODO fix type
+				type: "break",
+			};
 		},
 	},
 	bold: {
@@ -556,7 +560,7 @@ export const defaultNodes: TNodes = {
 					if (
 						child.text === "\n" &&
 						children.length > 1 &&
-						index === children.length - 1 
+						index === children.length - 1
 					) {
 						// no - op
 						console.log("test");
@@ -665,7 +669,7 @@ export const defaultNodes: TNodes = {
 		deserialize: (mdastNode, deco) => {
 			return {
 				...deco,
-				text: mdastNode.value,
+				text: mdastNode.value.replace(/^\n/, ""),
 			};
 		},
 	},

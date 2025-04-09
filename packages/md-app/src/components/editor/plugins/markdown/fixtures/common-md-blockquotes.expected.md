@@ -1,18 +1,5 @@
 # Blockquotes
 
-<!--
-TEST REASONING:
-The serialized blockquotes show significant restructuring:
-1. Continuation markers (> at beginning of each line) are removed in multi-line blockquotes
-2. Nested blockquotes are flattened with their content combined
-3. Multiple paragraphs within blockquotes are similarly flattened
-4. Complex content like headings and lists are preserved but without internal formatting
-
-While these transformations alter the visual structure, the content remains
-in blockquotes, preserving the essential semantic meaning. This is a compromise
-between perfect fidelity and practical serialization.
--->
-
 ## tc - simple blockquote.
 
 > This is a simple blockquote.
@@ -37,14 +24,34 @@ between perfect fidelity and practical serialization.
 > > This is a nested blockquote.
 > > > This is a deeply nested blockquote.
 
-## tc - blockquote - multiple paragraphs
+## tc - blockquote - multiple spread over multiple rows
 
-> Blockquote with multiple paragraphs:
->
-> This is the second paragraph in the blockquote.
->
-> This is the third paragraph in **the** blockquote.
->
+> This block qoute is just spread over multiple rows
+> one very long paragraph
+> written in 3 rows
+
+## tc - blockquote - multiple lines - two leading spaces one break
+
+> Blockquote with multiple lines:\
+> This is the second line in the blockquote.\
+> This is the third line in **the** blockquote.\
+> This is the fourth line in the blockquote.
+
+## tc - blockquote - multiple lines - using the break tag
+
+> Blockquote with multiple lines:\
+> This is the second line in the blockquote.\
+> This is the third line in **the** blockquote.\
+> This is the fourth line in the blockquote.
+
+## tc - blockquote - multiple paragraphs - two line breaks
+
+> Blockquote with multiple paragraphs:\
+> \
+> This is the second paragraph in the blockquote.\
+> \
+> This is the third paragraph in **the** blockquote.\
+> \
 > This is the fourth paragraph in the blockquote.
 
 ## tc - blockquote - containing markdown

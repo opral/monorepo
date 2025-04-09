@@ -42,7 +42,7 @@ are normalized to use underscores for italics, consistent with the rest of the d
 
 ## tc - heading with emphasis
 
-# Heading with _emphasis_
+# Heading with *emphasis*
 
 ## tc - heading with strong
 
@@ -54,7 +54,7 @@ are normalized to use underscores for italics, consistent with the rest of the d
 
 ## tc - heading with code
 
-# Heading with `code`
+#### Heading with `code`
 
 ## tc - heading with link
 
@@ -62,7 +62,7 @@ are normalized to use underscores for italics, consistent with the rest of the d
 
 ## tc - heading with mixed formatting
 
-###### Heading with mixed **bold** and _italic_
+###### Heading with mixed **bold** and *italic*
 
 ## tc - heading without blank line after
 
