@@ -44,14 +44,16 @@ export async function applyChangeSet(args: {
 			.execute();
 
 		// add a parent relationship
-		await trx
-			.insertInto("change_set_edge")
-			.values({
-				parent_id: version.change_set_id,
-				child_id: args.changeSet.id,
-			})
-			.onConflict((oc) => oc.doNothing())
-			.execute();
+		if (version.change_set_id !== args.changeSet.id) {
+			await trx
+				.insertInto("change_set_edge")
+				.values({
+					parent_id: version.change_set_id,
+					child_id: args.changeSet.id,
+				})
+				.onConflict((oc) => oc.doNothing())
+				.execute();
+		}
 
 		// Select changes associated with the specified change set
 		let query = trx
