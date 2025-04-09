@@ -1,0 +1,78 @@
+import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
+import type { Lix } from "../lix/index.js";
+import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
+import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
+import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
+import { createVersionV2 } from "../version-v2/create-version.js";
+import { applyChangeSet } from "./apply-change-set.js";
+import { createChangeSet } from "./create-change-set.js";
+import type { ChangeSet } from "./database-schema.js";
+/**
+ * Checks out a specific change set.
+ *
+ * Unlike restoreChangeSet, this function does not modify the history graph or create new change sets.
+ * It simply applies the state of the target change set to the current Lix instance.
+ *
+ * This is useful for diffing between states, e.g., comparing state A to state B.
+ */
+export async function checkoutChangeSet(args: {
+	lix: Lix;
+	changeSet: Pick<ChangeSet, "id">;
+}): Promise<void> {
+	const executeInTransaction = async (trx: Lix["db"]) => {
+		const leafElements = await trx
+			.selectFrom("change_set_element")
+			.innerJoin("change", "change.id", "change_set_element.change_id")
+			.where(changeSetElementIsLeafOf([args.changeSet]))
+			.where(changeSetElementInAncestryOf([args.changeSet]))
+			.selectAll("change")
+			.execute();
+
+		const interimCheckoutChangeSet = await createChangeSet({
+			lix: { ...args.lix, db: trx },
+			changes: leafElements,
+		});
+
+		const temporaryVersion = await createVersionV2({
+			lix: { ...args.lix, db: trx },
+			changeSet: args.changeSet,
+			name: `Change set: ${args.changeSet.id}`,
+		});
+
+		await trx
+			.updateTable("active_version")
+			.set({ version_id: temporaryVersion.id })
+			.execute();
+
+		// TODO #3558 we should have one "withSkipChangeControl" that handles both
+		// it requires deeper knowledge to know that both are needed to "fully"
+		// skip change control
+		await withSkipFileQueue(trx, async (trx) => {
+			await withSkipOwnChangeControl(trx, async (trx) => {
+				// TODO heursitic to wipe out all files. Better to use `createRestoreChangeSet()`
+				// under the hood for checkout.
+				await trx.deleteFrom("file").execute();
+
+				await applyChangeSet({
+					lix: { ...args.lix, db: trx },
+					changeSet: interimCheckoutChangeSet,
+					version: temporaryVersion,
+				});
+
+				await trx
+					.updateTable("version_v2")
+					.set({
+						change_set_id: args.changeSet.id,
+					})
+					.where("version_v2.id", "=", temporaryVersion.id)
+					.execute();
+			});
+		});
+	};
+
+	if (args.lix.db.isTransaction) {
+		return executeInTransaction(args.lix.db);
+	} else {
+		return args.lix.db.transaction().execute(executeInTransaction);
+	}
+}
