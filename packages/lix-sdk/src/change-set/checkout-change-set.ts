@@ -10,11 +10,10 @@ import { createChangeSet } from "./create-change-set.js";
 import type { ChangeSet } from "./database-schema.js";
 /**
  * Checks out a specific change set.
+ * 
+ * Useful for diffing between states, e.g., comparing state A to state B.
  *
- * Unlike restoreChangeSet, this function does not modify the history graph or create new change sets.
- * It simply applies the state of the target change set to the current Lix instance.
- *
- * This is useful for diffing between states, e.g., comparing state A to state B.
+ * INFO: THIS IS AN INTERIM API UNTIL https://github.com/opral/lix-sdk/issues/252 lands. 
  */
 export async function checkoutChangeSet(args: {
 	lix: Lix;

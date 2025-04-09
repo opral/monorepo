@@ -7,3 +7,4 @@ export { applyChangeSet } from "./apply-change-set.js";
 export { createUndoChangeSet } from "./create-undo-change-set.js";
 export { createCheckpoint } from "./create-checkpoint.js";
 export { checkoutChangeSet } from "./checkout-change-set.js";
+export { beforeAfterOfFile } from "./before-after-of-file.js";
