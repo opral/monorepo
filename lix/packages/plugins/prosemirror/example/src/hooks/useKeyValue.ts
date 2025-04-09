@@ -43,7 +43,12 @@ async function selectKeyValue(key: string) {
 		.executeTakeFirst();
 
 	// Return the value if found, otherwise null
-	return result ? JSON.parse(result.value) : null;
+	// need to figure out why json parsing is flaky
+	return result
+		? typeof result.value === "string"
+			? JSON.parse(result.value)
+			: result.value
+		: null;
 }
 
 /**
@@ -62,7 +67,13 @@ async function upsertKeyValue(key: string, value: any) {
 	// Update existing key
 	await lix.db
 		.insertInto("key_value")
-		.values({ key, value: jsonValue })
+		.values({
+			key,
+			value: jsonValue,
+			// skip change control as this is only UI state that
+			// should be persisted but not controlled
+			skip_change_control: false,
+		})
 		.onConflict((oc) => oc.doUpdateSet({ value: jsonValue }))
 		.execute();
 

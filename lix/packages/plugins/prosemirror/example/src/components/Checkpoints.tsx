@@ -1,13 +1,14 @@
 import { useQuery } from "../hooks/useQuery";
-import { selectCheckpoints, selectCurrentChangeSet } from "../queries";
+import { selectCheckpoints, selectWorkingChangeSet } from "../queries";
 import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
-import { createCheckpointV2 } from "../utilities/createCheckpoint";
 import { useRef } from "react";
 import { useKeyValue } from "../hooks/useKeyValue";
+import { createCheckpoint } from "@lix-js/sdk";
+import { lix } from "../state";
 
 const Checkpoints: React.FC = () => {
-	const [stateCheckpoints] = useQuery(selectCheckpoints);
-	const [currentChangeSet] = useQuery(selectCurrentChangeSet);
+	const [checkpoints] = useQuery(selectCheckpoints);
+	const [currentChangeSet] = useQuery(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
 	);
@@ -15,10 +16,10 @@ const Checkpoints: React.FC = () => {
 
 	const handleCreateCheckpoint = async () => {
 		// Get the comment text from the ChangeSet component
-		const commentText = changeSetRef.current?.getCommentText() || "";
+		// const commentText = changeSetRef.current?.getCommentText() || "";
 
 		// Create the checkpoint and add the comment if it exists
-		await createCheckpointV2(commentText);
+		await createCheckpoint({ lix });
 
 		// Close any expanded change set
 		setExpandedChangeSetId(null);
@@ -41,6 +42,7 @@ const Checkpoints: React.FC = () => {
 							key="current-changes"
 							changeSet={currentChangeSet}
 							isCurrentChangeSet={true}
+							// previousChangeSetId={checkpoints?.[0]?.id ?? undefined}
 							showRestore={false}
 							footer={
 								<div className="flex justify-end mt-2">
@@ -53,10 +55,17 @@ const Checkpoints: React.FC = () => {
 					</div>
 				)}
 
-				{stateCheckpoints?.map((checkpoint) => {
+				{checkpoints?.map((checkpoint, index) => {
+					// Get the previous checkpoint ID (if available)
+					const previousCheckpointId = checkpoints[index + 1]?.id ?? undefined;
+
 					return (
 						<div key={checkpoint.id}>
-							<ChangeSet key={checkpoint.id} changeSet={checkpoint} />
+							<ChangeSet
+								key={checkpoint.id}
+								previousChangeSetId={previousCheckpointId}
+								changeSet={checkpoint}
+							/>
 						</div>
 					);
 				})}

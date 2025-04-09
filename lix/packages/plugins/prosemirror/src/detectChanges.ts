@@ -61,13 +61,30 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 				schema: ProsemirrorNodeSchema,
 				snapshot: afterNode,
 			});
-		} else if (!areNodesEqual(beforeNode, afterNode)) {
-			// Node has been modified
-			detectedChanges.push({
-				entity_id: id,
-				schema: ProsemirrorNodeSchema,
-				snapshot: afterNode,
-			});
+		} else {
+			// Check if the node itself has changed (ignoring child content)
+			const nodeItselfChanged = !areNodesEqual(beforeNode, afterNode, true);
+
+			// Check if this node's content has changed
+			const contentChanged = !areContentArraysEqual(
+				beforeNode.content,
+				afterNode.content,
+			);
+
+			// For leaf nodes (nodes with no children with IDs), we want to detect content changes
+			// For parent nodes (nodes with children that have IDs), we only want to detect changes to the node itself
+
+			// Determine if this is a leaf node in terms of ID hierarchy
+			const isLeafNode = !hasChildrenWithIds(afterNode);
+
+			if (nodeItselfChanged || (isLeafNode && contentChanged)) {
+				// Node has been modified
+				detectedChanges.push({
+					entity_id: id,
+					schema: ProsemirrorNodeSchema,
+					snapshot: afterNode,
+				});
+			}
 		}
 	}
 
@@ -112,18 +129,20 @@ function collectNodesWithId(
 
 /**
  * Checks if two nodes are equal by comparing their structure and content
+ * @param ignoreChildContent When true, only compares node attributes and type, ignoring content changes
  */
 function areNodesEqual(
 	node1: ProsemirrorNode,
 	node2: ProsemirrorNode,
+	ignoreChildContent = false,
 ): boolean {
 	// If types differ, they're not equal
 	if (node1.type !== node2.type) {
 		return false;
 	}
 
-	// Compare text content
-	if (node1.text !== node2.text) {
+	// Compare text content (only if not ignoring content)
+	if (!ignoreChildContent && node1.text !== node2.text) {
 		return false;
 	}
 
@@ -132,9 +151,14 @@ function areNodesEqual(
 		return false;
 	}
 
-	// Compare marks
-	if (!areMarksEqual(node1.marks, node2.marks)) {
+	// Compare marks (only if not ignoring content)
+	if (!ignoreChildContent && !areMarksEqual(node1.marks, node2.marks)) {
 		return false;
+	}
+
+	// If we're ignoring child content, we consider the nodes equal at this point
+	if (ignoreChildContent) {
+		return true;
 	}
 
 	// Deep compare content arrays (with special handling for text nodes)
@@ -266,4 +290,26 @@ function areContentArraysEqual(
 	}
 
 	return true;
+}
+
+/**
+ * Checks if a node has any children with IDs
+ */
+function hasChildrenWithIds(node: ProsemirrorNode): boolean {
+	if (!node.content || !Array.isArray(node.content)) {
+		return false;
+	}
+
+	for (const child of node.content) {
+		if ((child.attrs && child.attrs.id) || child._id) {
+			return true;
+		}
+
+		// Recursively check children
+		if (hasChildrenWithIds(child)) {
+			return true;
+		}
+	}
+
+	return false;
 }

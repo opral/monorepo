@@ -1,76 +1,74 @@
-import React, { JSX, useEffect, useState } from "react";
-import { createDocDiff, type DiffNode } from "@lix-js/plugin-prosemirror";
-import { lix } from "../state";
-import { switchVersion } from "@lix-js/sdk";
+import { useEffect, useState } from "react";
+import { lix, prosemirrorFile } from "../state";
+import { beforeAfterOfFile } from "@lix-js/sdk";
+import { Node, DOMSerializer } from "prosemirror-model";
+import { schema } from "../prosemirror/schema";
+import { renderUniversalDiffElement } from "@lix-js/universal-diff";
+import { useKeyValue } from "../hooks/useKeyValue";
 
-interface DiffViewProps {
-	mainVersionId: string;
-	proposalVersionId: string;
-}
-
-const DiffView: React.FC<DiffViewProps> = ({
-	mainVersionId,
-	proposalVersionId,
-}) => {
-	const [diffDoc, setDiffDoc] = useState<DiffNode | null>(null);
+export function DiffView() {
+	const [diffView] = useKeyValue<{
+		beforeCsId?: string;
+		afterCsId?: string;
+	} | null>("diffView");
+	const [diffHtml, setDiffHtml] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		const fetchDocuments = async () => {
 			try {
-				setLoading(true);
-
-				// Get the main and proposal documents
-				// workaround for https://github.com/opral/lix-sdk/issues/252
-				let mainDoc: { data: Uint8Array } | null = null;
-				let proposalDoc: { data: Uint8Array } | null = null;
-
-				await lix.db.transaction().execute(async (trx) => {
-					await switchVersion({
-						lix: { ...lix, db: trx },
-						to: { id: mainVersionId },
-					});
-					mainDoc = await trx
-						.selectFrom("file")
-						.where("path", "=", "/prosemirror.json")
-						.select("data")
-						.executeTakeFirstOrThrow();
-
-					await switchVersion({
-						lix: { ...lix, db: trx },
-						to: { id: proposalVersionId },
-					});
-
-					proposalDoc = await trx
-						.selectFrom("file")
-						.where("path", "=", "/prosemirror.json")
-						.select("data")
-						.executeTakeFirstOrThrow();
-				});
-
-				if (!mainDoc || !proposalDoc) {
-					throw new Error("Failed to fetch one or both documents");
+				if (!diffView) {
+					return;
 				}
 
-				// Extract the ProseMirror documents from each version
-				const mainDocData = JSON.parse(
-					new TextDecoder().decode((mainDoc as any).data),
-				);
-				const proposalDocData = JSON.parse(
-					new TextDecoder().decode((proposalDoc as any).data),
-				);
+				setLoading(true);
+				setError(null);
+				setDiffHtml(null);
 
-				// Create a diff between the two documents
-				const diff = createDocDiff(mainDocData, proposalDocData);
+				const { beforeCsId, afterCsId } = diffView;
 
-				console.log({ diff, mainDocData, proposalDocData });
+				const { before, after } = await beforeAfterOfFile({
+					lix,
+					changeSetBefore: beforeCsId ? { id: beforeCsId } : undefined,
+					changeSetAfter: afterCsId ? { id: afterCsId } : undefined,
+					file: { id: prosemirrorFile.id },
+				});
 
-				setDiffDoc(diff);
+				let beforeHtml: string | undefined;
+				let afterHtml: string | undefined;
+
+				for (const doc of [before, after]) {
+					if (doc) {
+						const docData = JSON.parse(new TextDecoder().decode(doc.data));
+						const node = Node.fromJSON(schema, docData);
+						const serializer = DOMSerializer.fromSchema(schema);
+						const htmlFragment = serializer.serializeFragment(node.content);
+						const tempDiv = document.createElement("div");
+						tempDiv.appendChild(htmlFragment);
+						const html = tempDiv.innerHTML;
+						if (doc === before) {
+							beforeHtml = html;
+						} else {
+							afterHtml = html;
+						}
+					}
+				}
+
+				const diffHtml = renderUniversalDiffElement({
+					beforeHtml: beforeHtml ?? "",
+					afterHtml: afterHtml ?? "",
+				});
+
+				console.log("Before HTML:", beforeHtml);
+				console.log("After HTML:", afterHtml);
+				console.log("Diff HTML:", diffHtml);
+
+				setDiffHtml(diffHtml.outerHTML);
 			} catch (err) {
-				console.error("Error loading diff documents:", err);
+				console.error("Error loading or processing diff documents:", err);
 				setError(
-					`Failed to load documents: ${err instanceof Error ? err.message : "Unknown error"}`,
+					`Failed to load/process documents: ${err instanceof Error ? err.message : "Unknown error"}`,
 				);
 			} finally {
 				setLoading(false);
@@ -78,82 +76,7 @@ const DiffView: React.FC<DiffViewProps> = ({
 		};
 
 		fetchDocuments();
-	}, [mainVersionId, proposalVersionId]);
-
-	// Render nodes from the diffDoc
-	const renderNode = (node: DiffNode) => {
-		// Base classes for styling
-		let className = `diff-node diff-${node.attrs?.diff || "normal"}`;
-
-		switch (node.type) {
-			case "doc":
-				return (
-					<div className={`${className} diff-doc`}>
-						{node.content?.map((child, index) => (
-							<React.Fragment key={index}>{renderNode(child)}</React.Fragment>
-						))}
-					</div>
-				);
-
-			case "paragraph":
-				return (
-					<p className={className}>
-						{node.content?.map((child, index) => (
-							<React.Fragment key={index}>{renderNode(child)}</React.Fragment>
-						))}
-					</p>
-				);
-
-			case "heading":
-				const level = node.attrs?.level || 1;
-				const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
-				return (
-					<HeadingTag className={className}>
-						{node.content?.map((child, index) => (
-							<React.Fragment key={index}>{renderNode(child)}</React.Fragment>
-						))}
-					</HeadingTag>
-				);
-
-			case "text":
-				// For created (added) text, show with green
-				if (node.attrs?.diff === "created") {
-					return (
-						<span className={`${className} diff-created-text`}>
-							{node.text}
-						</span>
-					);
-				}
-				// For deleted text, show with red and strikethrough
-				else if (node.attrs?.diff === "deleted") {
-					return (
-						<span className={`${className} diff-deleted-text`}>
-							{node.text}
-						</span>
-					);
-				}
-				// For updated text, use inline diffing
-				else if (node.attrs?.diff === "updated") {
-					// In a real implementation, we would use a text diffing algorithm here
-					// to highlight only the specific parts that changed, but for now
-					// we just highlight the entire text
-					return (
-						<span className={`${className} diff-updated-text`}>
-							{node.text}
-						</span>
-					);
-				}
-				// For unmodified text, show normally
-				else {
-					return <span className={className}>{node.text}</span>;
-				}
-
-			default:
-				return (
-					<div className={className}>Unsupported node type: {node.type}</div>
-				);
-		}
-	};
+	}, [diffView]);
 
 	if (loading) {
 		return <div className="diff-loading">Loading diff view...</div>;
@@ -163,34 +86,13 @@ const DiffView: React.FC<DiffViewProps> = ({
 		return <div className="diff-error">Error: {error}</div>;
 	}
 
-	if (!diffDoc) {
+	if (!diffHtml) {
 		return (
 			<div className="diff-empty">
-				No differences found or documents couldn't be compared.
+				No differences generated or documents couldn't be compared.
 			</div>
 		);
 	}
 
-	return (
-		<div className="diff-container">
-			<div className="diff-legend">
-				<div className="diff-legend-item">
-					<span className="diff-legend-color diff-created-text"></span> Added
-					content
-				</div>
-				<div className="diff-legend-item">
-					<span className="diff-legend-color diff-deleted-text"></span> Deleted
-					content
-				</div>
-				<div className="diff-legend-item">
-					<span className="diff-legend-color diff-updated-text"></span> Updated
-					content
-				</div>
-			</div>
-
-			<div className="diff-content">{renderNode(diffDoc)}</div>
-		</div>
-	);
-};
-
-export default DiffView;
+	return <div dangerouslySetInnerHTML={{ __html: diffHtml }} />;
+}

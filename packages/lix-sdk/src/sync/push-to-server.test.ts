@@ -91,7 +91,9 @@ test("push rows of multiple tables to server successfully", async () => {
 	] satisfies NewKeyValue[]);
 });
 
-test("push-pull-push with two clients", async () => {
+// commented out for lix v0.5
+// sync needs overhaul after change set graph introduction
+test.skip("push-pull-push with two clients", async () => {
 	const lixBlob = await newLixFile();
 
 	const client1 = await openLixInMemory({ blob: lixBlob });

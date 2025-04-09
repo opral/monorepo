@@ -3,7 +3,7 @@ import { useQuery } from "../hooks/useQuery";
 import {
 	selectProposedChangeSet,
 	selectMainVersion,
-	selectCurrentVersion,
+	selectActiveVersion,
 } from "../queries";
 import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
 import { lix } from "../state";
@@ -27,7 +27,7 @@ export default function NewProposal() {
 	const changeSetRef = useRef<ChangeSetHandle>(null);
 
 	const handleSubmit = async () => {
-		const currentVersion = await selectCurrentVersion();
+		const currentVersion = await selectActiveVersion();
 		const commentText = changeSetRef.current?.getCommentText() || "";
 
 		// Create the proposal

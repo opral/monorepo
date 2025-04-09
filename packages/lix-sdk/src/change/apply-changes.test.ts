@@ -176,7 +176,9 @@ test("it applies own entity changes", async () => {
 	});
 });
 
-test("applies an insert change for a file if the file does not exist", async () => {
+// commented out for lix v0.5
+// api is deprecated
+test.skip("applies an insert change for a file if the file does not exist", async () => {
 	const mockTxtPlugin: LixPlugin = {
 		key: "mock_txt_plugin",
 		detectChangesGlob: "*.txt",

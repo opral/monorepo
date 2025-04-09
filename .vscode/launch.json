@@ -2,11 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "prosemirror-plugin-ui:3000",
+      "name": "prosemirror-plugin-example:3000",
       "port": 3000,
       "request": "launch",
       "type": "chrome",
-      "webRoot": "${workspaceFolder}/lix/packages/plugins/prosemirror/ui",
+      "webRoot": "${workspaceFolder}/lix/packages/plugins/prosemirror/example",
       "url": "http://localhost:3000"
     },
     {

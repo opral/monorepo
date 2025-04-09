@@ -1184,3 +1184,94 @@ test("it should detect changes in links", async () => {
 		expect(linkNode.marks[0].attrs.title).toEqual("New title");
 	}
 });
+
+test("it should NOT report changes for parent nodes when only children change", async () => {
+	const lix = await openLixInMemory({});
+
+	const before = new TextEncoder().encode(
+		JSON.stringify({
+			type: "doc",
+			content: [
+				{
+					type: "description",
+					attrs: {
+						dragHandlesDisabled: true,
+						id: "fc82493d-d5d6-4a36-9c25-2a8eb1c25de9",
+					},
+					content: [
+						{
+							type: "paragraph",
+							attrs: {
+								id: "854220ed-a3ec-4c27-86b2-8a27d46e3e34",
+							},
+							content: [
+								{
+									type: "text",
+									text: "hello world",
+								},
+							],
+						},
+					],
+				},
+			],
+		}),
+	);
+
+	const after = new TextEncoder().encode(
+		JSON.stringify({
+			type: "doc",
+			content: [
+				{
+					type: "description",
+					attrs: {
+						dragHandlesDisabled: true,
+						id: "fc82493d-d5d6-4a36-9c25-2a8eb1c25de9",
+					},
+					content: [
+						{
+							type: "paragraph",
+							attrs: {
+								id: "854220ed-a3ec-4c27-86b2-8a27d46e3e34",
+							},
+							content: [
+								{
+									type: "text",
+									text: "hello world, how are you?", // Text changed here
+								},
+							],
+						},
+					],
+				},
+			],
+		}),
+	);
+
+	const detectedChanges = await detectChanges?.({
+		lix,
+		before: {
+			id: "random",
+			path: "prosemirror.json",
+			data: before,
+			metadata: null,
+		},
+		after: {
+			id: "random",
+			path: "prosemirror.json",
+			data: after,
+			metadata: null,
+		},
+	});
+
+	// We expect only the paragraph to be reported as changed, not the description
+	expect(detectedChanges).toHaveLength(1);
+	const change = detectedChanges[0]!;
+
+	// The paragraph should be reported as changed
+	expect(change.entity_id).toEqual("854220ed-a3ec-4c27-86b2-8a27d46e3e34");
+
+	// The description should NOT be reported as changed
+	const descriptionChange = detectedChanges.find(
+		(c) => c.entity_id === "fc82493d-d5d6-4a36-9c25-2a8eb1c25de9",
+	);
+	expect(descriptionChange).toBeUndefined();
+});

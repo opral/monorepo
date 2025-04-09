@@ -3,6 +3,10 @@ import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
 import { applyMutationLogDatabaseSchema } from "./mutation-log/database-schema.js";
 import { applyChangeProposalDatabaseSchema } from "../change-proposal/database-schema.js";
+import { applyChangeSetEdgeDatabaseSchema } from "../change-set-edge/database-schema.js";
+import { applyVersionV2DatabaseSchema } from "../version-v2/database-schema.js";
+import { applyChangeSetDatabaseSchema } from "../change-set/database-schema.js";
+import { applyFileQueueDatabaseSchema } from "../file-queue/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -30,52 +34,6 @@ export function applySchema(args: {
 
     CHECK (is_valid_file_path(path))
   ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS file_queue (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    file_id TEXT NOT NULL,
-    data_before BLOB,
-    data_after BLOB,
-    path_before TEXT,
-    path_after TEXT,
-    metadata_before BLOB,
-    metadata_after BLOB
-  ) STRICT;
-
-  CREATE TRIGGER IF NOT EXISTS file_insert BEFORE INSERT ON file
-  BEGIN
-    INSERT INTO file_queue(
-      file_id, path_after, data_after, metadata_after
-    )
-    VALUES (
-      NEW.id, NEW.path, NEW.data, NEW.metadata
-    );
-    SELECT triggerFileQueue();
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS file_update BEFORE UPDATE ON file
-  BEGIN
-    INSERT INTO file_queue(
-      file_id, 
-      path_before, data_before, metadata_before, 
-      path_after, data_after, metadata_after
-    )
-
-    VALUES (
-      NEW.id, 
-      OLD.path, OLD.data, OLD.metadata,
-      NEW.path, NEW.data, NEW.metadata
-    );
-
-    SELECT triggerFileQueue();
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
-  BEGIN
-    INSERT INTO file_queue(file_id)
-    VALUES (OLD.id);
-    SELECT triggerFileQueue();
-  END;
 
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
@@ -118,7 +76,11 @@ export function applySchema(args: {
   -- Create the default 'no-content' snapshot
   -- to avoid foreign key constraint violations in tests
   INSERT OR IGNORE INTO snapshot (content) VALUES (NULL);
+  `;
 
+	applyChangeSetDatabaseSchema(args.sqlite);
+	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+	args.sqlite.exec`
   -- conflicts
 
   CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
@@ -142,30 +104,6 @@ export function applySchema(args: {
     PRIMARY KEY(change_conflict_id, resolved_change_id),
     FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
     FOREIGN KEY(resolved_change_id) REFERENCES change(id)
-  ) STRICT;
-
-  -- change sets
-
-  CREATE TABLE IF NOT EXISTS change_set (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(16))
-  ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS change_set_element (
-    
-    change_set_id TEXT NOT NULL,
-    change_id TEXT NOT NULL,
-
-    PRIMARY KEY(change_set_id, change_id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id),    
-    FOREIGN KEY(change_id) REFERENCES change(id)
-  ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS change_set_label (
-    label_id TEXT NOT NULL,
-    change_set_id TEXT NOT NULL,
-    PRIMARY KEY(label_id, change_set_id),
-    FOREIGN KEY(label_id) REFERENCES label(id),
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
   -- discussions 
@@ -197,7 +135,6 @@ export function applySchema(args: {
   ) STRICT;
 
   INSERT OR IGNORE INTO label (name) VALUES ('checkpoint');
-  INSERT OR IGNORE INTO label (name) VALUES ('grouped');
 
   -- versions
 
@@ -266,8 +203,11 @@ export function applySchema(args: {
   END;
   `;
 
-	applyMutationLogDatabaseSchema(args.sqlite);
+	applyFileQueueDatabaseSchema(args.sqlite);
 	applyChangeProposalDatabaseSchema(args.sqlite);
+	applyMutationLogDatabaseSchema(args.sqlite);
+	applyChangeSetEdgeDatabaseSchema(args.sqlite);
+	applyVersionV2DatabaseSchema(args.sqlite);
 
 	return args.sqlite;
 }

@@ -1,13 +1,14 @@
 import { Plugin, PluginKey, Transaction } from "prosemirror-state";
-import { lix } from "../state";
 import { schema } from "./schema";
 import { EditorView } from "prosemirror-view";
+import { executeSync, Lix } from "@lix-js/sdk";
 
 // Create a plugin key for the Lix plugin
 export const lixPluginKey = new PluginKey("lix-plugin");
 
 interface LixPluginOptions {
-	lix: typeof lix;
+	lix: Lix;
+	fileId: string;
 	debounceTime?: number;
 }
 
@@ -22,7 +23,27 @@ export function lixProsemirror(options: LixPluginOptions) {
 		(...values: any[]) => {
 			const data = new TextDecoder().decode(values[1]);
 			const json = JSON.parse(data);
-			updateEditorFromExternalDoc(json);
+
+			const isInternalUpdate = executeSync({
+				lix,
+				query: lix.db
+					.selectFrom("key_value")
+					.where("key", "=", "prosemirror_is_editor_update")
+					.select("value"),
+			})[0];
+
+			// Only update the editor if this is an external change
+			if (!isInternalUpdate) {
+				updateEditorFromExternalDoc(json);
+			}
+
+			// clean up the update flag
+			executeSync({
+				lix,
+				query: lix.db
+					.deleteFrom("key_value")
+					.where("key", "=", "prosemirror_is_editor_update"),
+			});
 			return null;
 		},
 		{
@@ -32,11 +53,11 @@ export function lixProsemirror(options: LixPluginOptions) {
 	);
 
 	lix.sqlite.exec(`
-    CREATE TRIGGER IF NOT EXISTS lix_prosemirror_update
+    CREATE TEMP TRIGGER IF NOT EXISTS lix_prosemirror_update
     AFTER UPDATE ON file
-    WHEN NEW.path = '/prosemirror.json'
+    WHEN NEW.id = '${options.fileId}'
     BEGIN
-      SELECT handle_lix_prosemirror_update(NEW.data);
+      SELECT handle_lix_prosemirror_update(NEW.data, json(NEW.metadata));
     END;
     `);
 
@@ -55,27 +76,27 @@ export function lixProsemirror(options: LixPluginOptions) {
 		}
 
 		// Set a new timeout for debouncing
-		saveTimeout = setTimeout(() => {
+		saveTimeout = setTimeout(async () => {
 			// If a save is already in progress, don't start another one
 			if (saveInProgress) return;
 
 			saveInProgress = true;
 			const fileData = new TextEncoder().encode(JSON.stringify(docJSON));
-
-			lix.db
-				.insertInto("file")
+			await lix.db
+				.insertInto("key_value")
 				.values({
-					path: "/prosemirror.json",
-					data: fileData,
+					key: "prosemirror_is_editor_update",
+					value: "true",
+					skip_change_control: true,
 				})
-				.onConflict((oc) =>
-					oc.doUpdateSet({
-						data: fileData,
-					}),
-				)
+				.onConflict((oc) => oc.doUpdateSet({ value: "true" }))
+				.execute();
+			await lix.db
+				.updateTable("file")
+				.set({ data: fileData })
+				.where("id", "=", options.fileId)
 				.execute()
 				.then(() => {
-					console.log("Document saved to Lix");
 					saveInProgress = false;
 				})
 				.catch((error) => {
@@ -106,9 +127,7 @@ export function lixProsemirror(options: LixPluginOptions) {
 			const tr = view.state.tr;
 
 			// Create a new document from JSON
-			const newDoc = schema.nodeFromJSON(
-				externalDoc ?? { type: "doc", content: [] },
-			);
+			const newDoc = schema.nodeFromJSON(externalDoc);
 
 			// Replace the current document
 			tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
@@ -188,21 +207,4 @@ export function lixProsemirror(options: LixPluginOptions) {
 			};
 		},
 	});
-}
-
-/**
- * Updates the editor with an external document
- */
-export function updateEditorWithExternalDoc(
-	view: EditorView,
-	externalDoc: any,
-) {
-	if (!view) return;
-
-	// Create a transaction with the external doc in the metadata
-	const tr = view.state.tr;
-	tr.setMeta(lixPluginKey, { externalDoc });
-
-	// Dispatch the transaction
-	view.dispatch(tr);
 }

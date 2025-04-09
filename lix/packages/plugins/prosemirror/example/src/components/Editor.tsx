@@ -7,28 +7,58 @@ import { idPlugin } from "../prosemirror/id-plugin";
 import { schema } from "../prosemirror/schema";
 import { lixProsemirror } from "../prosemirror/lix-plugin";
 import { useEffect, useRef, useState } from "react";
-import { selectProsemirrorDocument } from "../queries";
-import { useQuery } from "../hooks/useQuery";
-import { initialDoc, lix } from "../state";
+import { prosemirrorFile, lix } from "../state";
+import { registerCustomNodeViews } from "../prosemirror/custom-node-views";
+import { useKeyValue } from "../hooks/useKeyValue";
+import { DiffView } from "./DiffView";
+
+// Custom styles for the ProseMirror editor
+const editorStyles = `
+  .ProseMirror {
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  .ProseMirror p {
+    font-size: 0.875rem; /* text-sm */
+    margin-bottom: 0.5rem;
+  }
+  
+  .ProseMirror h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+`;
 
 const Editor: React.FC = () => {
-	const [docInLix] = useQuery(selectProsemirrorDocument);
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
+	const [diffView] = useKeyValue<{
+		beforeCsId?: string;
+		afterCsId?: string;
+	} | null>("diffView");
 
-	// Initialize editor
+	// Initialize editor using useEffect for proper lifecycle management
 	useEffect(() => {
-		if (!editorRef.current) return;
+		// Ensure the ref is attached
+		if (!editorRef.current) {
+			return;
+		}
 
-		// Create the initial state
+		// Create the initial state with an EMPTY document
+		// The lixProsemirror plugin will load the actual document
 		const state = EditorState.create({
-			doc: schema.nodeFromJSON(docInLix || initialDoc),
+			doc: schema.nodeFromJSON(
+				JSON.parse(new TextDecoder().decode(prosemirrorFile.data)),
+			),
+			schema,
 			plugins: [
 				history(),
 				keymap(baseKeymap),
 				idPlugin,
 				lixProsemirror({
 					lix,
+					fileId: prosemirrorFile.id,
 				}),
 			],
 		});
@@ -38,12 +68,18 @@ const Editor: React.FC = () => {
 			state,
 			editable: () => true,
 			dispatchTransaction: (transaction) => {
+				// Get the latest state and apply the transaction
 				const newState = editorView.state.apply(transaction);
 				editorView.updateState(newState);
 			},
 		});
 
-		// Set the view
+		// Register custom node views after editorView is created
+		editorView.setProps({
+			nodeViews: registerCustomNodeViews(editorView),
+		});
+
+		// Set the view in state
 		setView(editorView);
 
 		// Focus the editor
@@ -51,12 +87,12 @@ const Editor: React.FC = () => {
 			editorView.focus();
 		}, 100);
 
-		// Clean up the editor on unmount
+		// Clean up the editor on component unmount
 		return () => {
 			editorView.destroy();
 			setView(null);
 		};
-	}, []);
+	}, []); // Empty dependency array ensures this runs only once on mount
 
 	// Handle clicks to focus the editor
 	const handleClick = () => {
@@ -67,9 +103,22 @@ const Editor: React.FC = () => {
 
 	return (
 		<div className="flex flex-col h-full">
-			<div className="editor-wrapper" onClick={handleClick}>
-				{/* The actual editor will be mounted here */}
-				<div ref={editorRef} />
+			<style>{editorStyles}</style>
+			<div className="editor-wrapper p-4 relative" onClick={handleClick}>
+				{/* The editor is always mounted but hidden when diff view is active */}
+				<div
+					ref={editorRef}
+					className="prose max-w-none text-sm"
+					style={{ display: diffView ? "none" : "block" }}
+				/>
+
+				{/* Diff view with the same structure the p-2 is needed to match the editor */}
+				<div
+					className="prose max-w-none text-sm p-2"
+					style={{ display: diffView ? "block" : "none" }}
+				>
+					{diffView && <DiffView />}
+				</div>
 			</div>
 		</div>
 	);

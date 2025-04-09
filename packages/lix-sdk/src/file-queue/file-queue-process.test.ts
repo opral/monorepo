@@ -2,8 +2,10 @@ import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
-import type { FileQueueEntry, LixFile } from "../database/schema.js";
+import type { LixFile } from "../database/schema.js";
 import { fileQueueSettled } from "./file-queue-settled.js";
+import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import type { FileQueueEntry } from "./database-schema.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
@@ -453,4 +455,55 @@ test("should handle file deletions correctly", async () => {
 		.execute();
 
 	expect(internalFilesAfter).toEqual([]);
+});
+
+test("handles file upserts without reporting duplicates", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// creating a file insert and upsert
+	await lix.db
+		.insertInto("file")
+		.values(
+			Array.from({ length: 2 }, (_, i) => ({
+				id: "mock_file",
+				data: new TextEncoder().encode(
+					JSON.stringify({
+						name: `Max${i}`,
+					})
+				),
+				path: `/test.json`,
+			}))
+		)
+		.onConflict((oc) =>
+			oc.doUpdateSet((eb) => ({
+				data: eb.ref("excluded.data"),
+			}))
+		)
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await fileQueueSettled({ lix });
+
+	// should have detected 2 changes
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("file_id", "=", "mock_file")
+		.select("snapshot.content")
+		.execute();
+
+	expect(changes).toEqual([
+		{
+			content: {
+				value: "Max0",
+			},
+		},
+		{
+			content: {
+				value: "Max1",
+			},
+		},
+	]);
 });

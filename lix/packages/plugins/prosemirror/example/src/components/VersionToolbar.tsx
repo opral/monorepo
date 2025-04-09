@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import {
-	selectCurrentVersion,
+	selectActiveVersion,
 	selectMainVersion,
 	selectVersions,
 	selectActiveAccount,
@@ -10,7 +10,7 @@ import { createVersion, switchVersion } from "@lix-js/sdk";
 import { lix } from "../state";
 
 const VersionToolbar: React.FC = () => {
-	const [currentVersion] = useQuery(selectCurrentVersion);
+	const [currentVersion] = useQuery(selectActiveVersion);
 	const [mainVersion] = useQuery(selectMainVersion);
 	const [activeAccount] = useQuery(selectActiveAccount);
 	const [versions] = useQuery(selectVersions);

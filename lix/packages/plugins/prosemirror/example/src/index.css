@@ -1,3 +1,4 @@
+/* ProseMirror core styles */
 .ProseMirror {
 	flex: 1;
 	overflow-y: auto;
@@ -26,6 +27,75 @@
 	display: block !important;
 }
 
+/* Bullet list styling */
+.ProseMirror ul {
+	padding-left: 30px;
+	margin: 0.5em 0;
+	list-style-type: disc;
+}
+
+.ProseMirror li {
+	position: relative;
+	margin-bottom: 0.2em;
+}
+
+.ProseMirror li p {
+	margin: 0;
+}
+
+/* Generation node styling */
+.ProseMirror .inline-flex {
+	display: inline-flex;
+	vertical-align: middle;
+	white-space: nowrap;
+	background-color: #f8f9fa;
+	border: 1px solid #e9ecef;
+	border-radius: 4px;
+	padding: 1px 4px;
+	margin: 0 2px;
+}
+
+/* Mention node styling */
+.ProseMirror .mention {
+	background-color: #e0f7f5;
+	border: 1px solid #c2ece8;
+	border-radius: 4px;
+	padding: 1px 4px;
+	margin: 0 2px;
+	color: #0d9488;
+	font-weight: 500;
+}
+
+.ProseMirror .mention .mention-content {
+	display: inline-flex;
+	align-items: center;
+}
+
+.ProseMirror .mention .audio-icon {
+	display: inline-flex;
+	align-items: center;
+	vertical-align: middle;
+}
+
+/* Tool node styling */
+.ProseMirror .tool-container {
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	background-color: #f9fafb;
+	margin: 1rem 0;
+	padding: 0.75rem;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ProseMirror .tool-content {
+	margin-top: 0.5rem;
+}
+
+.ProseMirror .tool-content .border-t {
+	border-top: 1px solid #e5e7eb;
+}
+
+/* Editor layout */
 .editor-wrapper {
 	flex: 1;
 	display: flex;
@@ -58,6 +128,7 @@
 	margin: 0;
 }
 
+/* App layout */
 .app-container {
 	display: flex;
 	flex-direction: column;
@@ -75,56 +146,10 @@
 	border: 1px solid #ddd;
 }
 
+/* Basic elements */
 h1 {
 	margin: 0 0 10px 0;
 	font-size: 20px;
-}
-
-.editor-checkpoints-container {
-	display: none;
-}
-
-.editor-changes-container {
-	display: flex;
-	flex-direction: row;
-	gap: 20px;
-	width: 100%;
-	height: 50vh; /* Set to 50% of viewport height */
-}
-
-.editor-section {
-	flex: 1;
-	min-width: 0; /* Prevents flex items from overflowing */
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-}
-
-.changes-section {
-	width: 300px;
-	min-width: 300px;
-	height: 100%;
-	overflow: hidden; /* Prevents scrollbar on the container itself */
-	display: flex;
-	flex-direction: column;
-}
-
-.changes-container {
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	padding: 15px;
-	background-color: #f9f9f9;
-	height: 100%;
-	overflow-y: auto; /* Makes the changes content scrollable */
-	margin: 0;
-	box-sizing: border-box;
-}
-
-.toolbar {
-	display: flex;
-	gap: 10px;
-	margin-bottom: 10px;
-	flex-wrap: wrap;
 }
 
 button {
@@ -140,251 +165,7 @@ button:hover {
 	opacity: 0.8;
 }
 
-.debug-section {
-	margin-top: 30px;
-	border-top: 1px solid #eee;
-	padding-top: 20px;
-}
-
-.debug-content {
-	display: flex;
-	gap: 20px;
-	margin-top: 15px;
-}
-
-.debug-panel {
-	border: 1px solid #ccc;
-	overflow: hidden;
-	max-height: none;
-	display: flex;
-	flex-direction: column;
-	margin-bottom: 10px;
-	padding: 0;
-	flex: 0 1 auto;
-}
-
-.debug-panel h4 {
-	margin: 0;
-	padding: 10px;
-	background-color: #f5f5f5;
-	border-bottom: 1px solid #ccc;
-	margin-top: 0;
-	margin-bottom: 0;
-}
-
-.change-graph {
-	overflow-y: auto;
-	flex: 1;
-	padding: 10px;
-	max-height: 300px;
-}
-
-.change-group {
-	display: flex;
-	flex-direction: column;
-	margin-bottom: 15px;
-	border-bottom: 1px solid #eee;
-	padding-bottom: 10px;
-}
-
-.change-content-wrapper {
-	width: 100%;
-}
-
-.change-timestamp {
-	font-size: 0.8em;
-	margin-bottom: 5px;
-}
-
-.change-item-container {
-	margin-bottom: 5px;
-}
-
-.change-item {
-	border-radius: 4px;
-	padding: 8px;
-	background-color: #f9f9f9;
-	border-left: 3px solid #ccc;
-}
-
-/* Styling for the change item itself */
-.change-item {
-	border-left: 3px solid #4a90e2;
-}
-
-.change-header {
-	display: flex;
-	justify-content: space-between;
-	margin-bottom: 5px;
-	font-size: 0.9em;
-}
-
-.change-type {
-	font-weight: bold;
-}
-
-.change-node-type {
-	color: #666;
-}
-
-.change-content {
-	font-size: 0.9em;
-}
-
-.change-preview {
-	word-break: break-word;
-}
-
-.empty-graph {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100px;
-}
-
-.empty-message {
-	color: #999;
-	font-style: italic;
-}
-
-.checkpoints-container {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	min-width: 250px;
-	max-width: 350px;
-	background-color: #fafafa;
-	overflow: hidden;
-}
-
-.checkpoints-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	border-bottom: 1px solid #e5e7eb;
-	background-color: #f5f5f5;
-	height: 40px;
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
-
-.checkpoints-header h3 {
-	margin: 0;
-	font-size: 16px;
-	font-weight: 500;
-}
-
-.create-checkpoint-button {
-	background-color: #f5f5f5;
-	color: #333;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	padding: 6px 12px;
-	font-size: 14px;
-	cursor: pointer;
-}
-
-.create-checkpoint-button:hover {
-	opacity: 0.8;
-}
-
-.checkpoints-list {
-	flex: 1;
-	overflow-y: auto;
-	padding: 0;
-}
-
-.checkpoint-item {
-	padding: 12px 16px;
-	border-bottom: 1px solid #e0e0e0;
-	cursor: pointer;
-}
-
-.checkpoint-item:hover {
-	opacity: 0.8;
-}
-
-.checkpoint-item.selected {
-	background-color: #f5f5f5;
-	border-left: 2px solid #ccc;
-}
-
-.checkpoint-timestamp {
-	font-size: 13px;
-	margin-bottom: 4px;
-	color: #666;
-}
-
-.checkpoint-preview {
-	font-size: 14px;
-	color: #333;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-.empty-checkpoints {
-	padding: 16px;
-	text-align: center;
-	color: #666;
-	font-style: italic;
-}
-
-.changes-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 10px;
-}
-
-.filter-controls {
-	display: flex;
-	align-items: center;
-	margin-bottom: 15px;
-}
-
-.filter-checkbox {
-	display: flex;
-	align-items: center;
-	font-size: 0.9em;
-	cursor: pointer;
-}
-
-.filter-checkbox input {
-	margin-right: 5px;
-}
-
-.checkpoint-dot {
-	background-color: #4a90e2;
-	border: 1px solid #2a6fc9;
-}
-
-.checkpoint-badge {
-	font-size: 0.8em;
-	background-color: #4a90e2;
-	color: white;
-	padding: 2px 5px;
-	border-radius: 3px;
-	margin-left: 8px;
-}
-
-.checkpoint-item {
-	border-left: 3px solid #4a90e2;
-}
-
-pre {
-	margin: 0;
-	overflow-x: auto;
-	white-space: pre-wrap;
-	word-wrap: break-word;
-	max-height: 300px;
-	overflow-y: auto;
-}
-
-/* No media queries needed - using consistent light theme */
-
-/* Mode tabs styling */
+/* Mode tabs styling for version toolbar */
 .mode-tabs {
 	display: flex;
 	align-items: center;
@@ -440,26 +221,6 @@ pre {
 	margin-left: auto;
 }
 
-/* Mode indicator */
-.mode-indicator {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	padding: 5px 10px;
-	background-color: #f5f5f5;
-	border-top: 1px solid #ddd;
-	font-size: 12px;
-	color: #666;
-	text-align: left;
-}
-
-.version-info {
-	font-weight: normal;
-	color: #888;
-	margin-left: 5px;
-}
-
 /* Version selector UI */
 .version-selector {
 	margin-left: auto;
@@ -477,10 +238,6 @@ pre {
 	display: flex;
 	align-items: center;
 	gap: 4px;
-}
-
-.version-button:hover {
-	opacity: 0.8;
 }
 
 .version-icon {
@@ -508,91 +265,4 @@ pre {
 	width: 6px;
 	height: 1px;
 	background-color: #000;
-}
-
-.version-dropdown {
-	position: absolute;
-	top: 100%;
-	right: 0;
-	width: 200px;
-	border: 1px solid #ddd;
-	background-color: white;
-	z-index: 10;
-}
-
-.version-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	max-height: 200px;
-	overflow-y: auto;
-}
-
-.version-item {
-	padding: 8px;
-	border-bottom: 1px solid #eee;
-	display: flex;
-	cursor: pointer;
-}
-
-.version-item:last-child {
-	border-bottom: none;
-}
-
-.version-item:hover {
-	opacity: 0.8;
-}
-
-.version-item.current {
-	font-weight: bold;
-}
-
-.version-number {
-	width: 50px;
-}
-
-.version-date {
-	flex: 1;
-	font-size: 12px;
-	color: #666;
-}
-
-.new-version {
-	border-top: 1px solid #ddd;
-	justify-content: center;
-}
-
-.create-version {
-	font-size: 12px;
-}
-
-/* Main layout */
-.right-panel {
-	width: 300px;
-	display: flex;
-	flex-direction: column;
-	border-left: 1px solid #ddd;
-	background-color: #fff;
-	overflow: hidden;
-	margin: 0;
-	padding: 0;
-}
-
-.checkpoints-panel {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	margin: 0;
-	padding: 0;
-}
-
-/* Hide the old container */
-.editor-checkpoints-container {
-	display: none;
-}
-
-/* Version panel styles kept for potential future use */
-.version-panel {
-	display: none;
 }

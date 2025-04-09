@@ -171,7 +171,7 @@ function handleLixOwnEntityChange(
 
 	const entityId = entityIdForRow(tableName, ...values);
 
-	createChange(
+	const insertedChange = createChange(
 		{
 			lix,
 			authors: authors,
@@ -181,9 +181,70 @@ function handleLixOwnEntityChange(
 			pluginKey: "lix_own_change_control",
 			schemaKey: `lix_${tableName}_table`,
 			snapshotContent,
-		},
-		{
-			updateVersionChanges: tableName === "version_change" ? false : true,
 		}
+		// {
+		// 	updateVersionChanges: tableName === "version_change" ? false : true,
+		// }
 	);
+
+	const activeVersion = executeSync({
+		lix,
+		query: db
+			.selectFrom("active_version")
+			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+			.select(["version_v2.id", "version_v2.change_set_id"]),
+	})[0];
+
+	// skip change control for the following mutation that update the versions leaf
+	executeSync({
+		lix,
+		query: db
+			.insertInto("key_value")
+			.values({
+				key: "lix_skip_own_change_control",
+				value: "true",
+				skip_change_control: true,
+			})
+			.onConflict((oc) => oc.doUpdateSet({ value: "true" })),
+	});
+
+	const changeSet = executeSync({
+		lix,
+		query: db.insertInto("change_set").defaultValues().returningAll(),
+	})[0];
+
+	executeSync({
+		lix,
+		query: db.insertInto("change_set_element").values({
+			change_set_id: changeSet.id,
+			change_id: insertedChange.id,
+			entity_id: insertedChange.entity_id,
+			file_id: insertedChange.file_id,
+			schema_key: insertedChange.schema_key,
+		}),
+	});
+
+	executeSync({
+		lix,
+		query: db.insertInto("change_set_edge").values({
+			parent_id: activeVersion.change_set_id,
+			child_id: changeSet.id,
+		}),
+	});
+
+	executeSync({
+		lix,
+		query: db
+			.updateTable("version_v2")
+			.set({ change_set_id: changeSet.id })
+			.where("id", "=", activeVersion.id),
+	});
+
+	// remove the skip change control flag
+	executeSync({
+		lix,
+		query: db
+			.deleteFrom("key_value")
+			.where("key", "=", "lix_skip_own_change_control"),
+	});
 }
