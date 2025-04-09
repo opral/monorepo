@@ -1,9 +1,5 @@
 import fs from "node:fs";
-import type { Runtime } from "./type.js";
-import {
-	defaultCompilerOptions,
-	type CompilerOptions,
-} from "../compiler-options.js";
+import type { CompilerOptions } from "../compiler-options.js";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -14,7 +10,15 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+		cookieMaxAge: NonNullable<CompilerOptions["cookieMaxAge"]>;
+		cookieDomain: CompilerOptions["cookieDomain"];
 		urlPatterns?: CompilerOptions["urlPatterns"];
+		experimentalMiddlewareLocaleSplitting: CompilerOptions["experimentalMiddlewareLocaleSplitting"];
+		isServer: CompilerOptions["isServer"];
+		localStorageKey: CompilerOptions["localStorageKey"];
+		disableAsyncLocalStorage: NonNullable<
+			CompilerOptions["disableAsyncLocalStorage"]
+		>;
 	};
 }): string {
 	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
@@ -25,15 +29,22 @@ export function createRuntimeFile(args: {
 	if (args.compilerOptions.urlPatterns === undefined) {
 		defaultUrlPatternUsed = true;
 		urlPatterns.push({
-			pattern: `:protocol://:domain(.*)::port?/:locale(${args.locales.filter((l) => l !== args.baseLocale).join("|")})?/:path(.*)?`,
-			deLocalizedNamedGroups: { locale: null },
-			localizedNamedGroups: {
-				...Object.fromEntries(
-					args.locales.map((locale) => [locale, { locale }])
-				),
-				en: { locale: null },
-			},
+			pattern: `:protocol://:domain(.*)::port?/:path(.*)?`,
+			localized: [],
 		});
+		for (const locale of args.locales) {
+			if (locale === args.baseLocale) {
+				continue;
+			}
+			urlPatterns[0]?.localized.push([
+				locale,
+				`:protocol://:domain(.*)::port?/${locale}/:path(.*)?`,
+			]);
+		}
+		urlPatterns[0]?.localized.push([
+			args.baseLocale,
+			`:protocol://:domain(.*)::port?/:path(.*)?`,
+		]);
 	}
 	const code = `
 ${defaultUrlPatternUsed ? "/** @type {any} */\nconst URLPattern = {}" : `import "@inlang/paraglide-js/urlpattern-polyfill";`}
@@ -52,6 +63,8 @@ ${injectCode("./variables.js")
 		`export const strategy = ${JSON.stringify(args.compilerOptions.strategy, null, 2)};`
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
+	.replace(`60 * 60 * 24 * 400`, `${args.compilerOptions.cookieMaxAge}`)
+	.replace(`<cookie-domain>`, `${args.compilerOptions.cookieDomain}`)
 	.replace(
 		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
@@ -73,11 +86,33 @@ ${injectCode("./variables.js")
 		`export const urlPatterns = ${JSON.stringify(urlPatterns, null, 2)};`
 	)
 	.replace(
+		`export const disableAsyncLocalStorage = false;`,
+		`export const disableAsyncLocalStorage = ${args.compilerOptions.disableAsyncLocalStorage};`
+	)
+	.replace(
 		`export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;`,
 		`const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = ${defaultUrlPatternUsed};`
+	)
+	.replace(
+		`export const experimentalMiddlewareLocaleSplitting = false;`,
+		`export const experimentalMiddlewareLocaleSplitting = ${args.compilerOptions.experimentalMiddlewareLocaleSplitting};`
+	)
+	.replace(
+		`export const isServer = typeof window === "undefined";`,
+		`export const isServer = ${args.compilerOptions.isServer};`
+	)
+	.replace(
+		`export const localStorageKey = "PARAGLIDE_LOCALE";`,
+		`export const localStorageKey = "${args.compilerOptions.localStorageKey}";`
+	)
+	.replace(
+		`export const TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED = false;`,
+		`const TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("localStorage")};`
 	)}
 
-${injectCode("./get-locale.js")} 
+globalThis.__paraglide = {}
+
+${injectCode("./get-locale.js")}
 
 ${injectCode("./set-locale.js")}
 
@@ -97,7 +132,9 @@ ${injectCode("./localize-url.js")}
 
 ${injectCode("./localize-href.js")}
 
-${injectCode("./server-middleware.js")}
+${injectCode("./track-message-call.js")}
+
+${injectCode("./generate-static-localized-urls.js")}
 
 // ------ TYPES ------
 
@@ -129,37 +166,4 @@ function injectCode(path: string): string {
 	// Regex to match single-line and multi-line imports
 	const importRegex = /import\s+[\s\S]*?from\s+['"][^'"]+['"]\s*;?/g;
 	return code.replace(importRegex, "").trim();
-}
-
-/**
- * Returns the runtime module as an object for testing purposes.
- *
- * @example
- *   const runtime = await createRuntime({
- *      baseLocale: "en",
- *      locales: ["en", "de"],
- *   })
- */
-export async function createRuntimeForTesting(args: {
-	baseLocale: string;
-	locales: string[];
-	compilerOptions?: Omit<CompilerOptions, "outdir" | "project" | "fs">;
-}): Promise<Runtime> {
-	const file = createRuntimeFile({
-		baseLocale: args.baseLocale,
-		locales: args.locales,
-		compilerOptions: {
-			...defaultCompilerOptions,
-			...args.compilerOptions,
-		},
-	})
-		// remove the polyfill import statement to avoid module resolution logic in testing
-		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
-
-	await import("urlpattern-polyfill");
-
-	return await import(
-		"data:text/javascript;base64," +
-			Buffer.from(file, "utf-8").toString("base64")
-	);
 }

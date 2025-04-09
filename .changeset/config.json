@@ -5,9 +5,9 @@
   "access": "restricted",
   "baseBranch": "main",
   "ignore": [
-    "@inlang/cli",
+    "@inlang/cli-example",
     "@inlang/fink",
-    "@inlang/paraglide-js",
+    "@inlang/paraglide-js-benchmark",
     "@inlang/paraglide-js-example-cli",
     "@inlang/paraglide-js-example-vite",
     "@inlang/paraglide-js-example-react",

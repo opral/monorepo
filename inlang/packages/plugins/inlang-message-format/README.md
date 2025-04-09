@@ -77,6 +77,10 @@ You can organize your messages in a nested structure for better organization of 
 
 ### Simple Messages
 
+<doc-callout type="info">
+	Nesting is supported from v4 of the plugin and requires apps to use the inlang SDK v2 higher. 
+</doc-callout>
+
 Simple messages are string values, either directly at the root level or nested within objects:
 
 ```json

@@ -1,17 +1,24 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("uses the locale from getLocale() if no locale is provided", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
 					pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
-					deLocalizedNamedGroups: { locale: null },
-					localizedNamedGroups: { de: { locale: "de" }, en: { locale: "en" } },
+					localized: [
+						["de", "http://:domain(.*)/de/:path(.*)?"],
+						["en", "http://:domain(.*)/:path(.*)?"],
+					],
 				},
 			],
 		},
@@ -24,16 +31,22 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 });
 
 test("returns an absolute href if the provided href is absolute", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
 					pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
-					deLocalizedNamedGroups: { locale: null },
-					localizedNamedGroups: { de: { locale: "de" }, en: { locale: "en" } },
+					localized: [
+						["de", "http://:domain(.*)/de/:path(.*)?"],
+						["en", "http://:domain(.*)/:path(.*)?"],
+					],
 				},
 			],
 		},
@@ -49,19 +62,22 @@ test("returns an absolute href if the provided href is absolute", async () => {
 
 // useful if domain based localization is used for example
 test("returns an absolute href if the provided href is relative but the origin of the localized href differs", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable", "baseLocale"],
 			urlPatterns: [
 				{
-					pattern: "http://:domain(.*)/:path(.*)?",
-					deLocalizedNamedGroups: { domain: "example.com" },
-					localizedNamedGroups: {
-						de: { domain: "de.example.com" },
-						en: { domain: "example.com" },
-					},
+					pattern: "http://example.com/:path(.*)?",
+					localized: [
+						["de", "http://de.example.com/:path(.*)?"],
+						["en", "http://example.com/:path(.*)?"],
+					],
 				},
 			],
 		},
@@ -69,6 +85,7 @@ test("returns an absolute href if the provided href is relative but the origin o
 
 	// simulating routing from current en page to de page
 	runtime.overwriteGetLocale(() => "en");
+	runtime.overwriteGetUrlOrigin(() => "http://example.com");
 
 	expect(runtime.localizeHref("/hello", { locale: "de" })).toBe(
 		"http://de.example.com/hello"
@@ -92,19 +109,22 @@ test("returns an absolute href if the provided href is relative but the origin o
 test("adding a base path", async () => {
 	const base = "shop";
 
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 			urlPatterns: [
 				{
-					pattern: `:protocol://:domain(.*)::port?/:base(${base})?/:locale(en|de)?/:path(.*)?`,
-					deLocalizedNamedGroups: { base, locale: null },
-					localizedNamedGroups: {
-						en: { base, locale: "en" },
-						de: { base, locale: "de" },
-					},
+					pattern: `/{${base}/}?:path(.*)?`,
+					localized: [
+						["de", `/{${base}/}?de/:path(.*)?`],
+						["en", `/{${base}/}?:path(.*)?`],
+					],
 				},
 			],
 		},
@@ -113,20 +133,25 @@ test("adding a base path", async () => {
 	// simulating the current locale to be en
 	runtime.overwriteGetLocale(() => "en");
 
-	expect(runtime.localizeHref("/about")).toBe("/shop/en/about");
+	expect(runtime.localizeHref("/about")).toBe("/shop/about");
 	expect(runtime.deLocalizeHref("/about")).toBe("/shop/about");
 
-	// simulating current locale to be fde
+	// simulating current locale to be de
 	runtime.overwriteGetLocale(() => "de");
 	expect(runtime.localizeHref("/about")).toBe("/shop/de/about");
 	expect(runtime.deLocalizeHref("/de/about")).toBe("/shop/about");
 });
 
 test("default url patterns to improve out of the box experience", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
+			isServer: "false",
 			strategy: ["url"],
 			urlPatterns: undefined,
 		},
@@ -137,13 +162,12 @@ test("default url patterns to improve out of the box experience", async () => {
 
 	expect(runtime.urlPatterns).toStrictEqual([
 		{
-			pattern: ":protocol://:domain(.*)::port?/:locale(de|fr)?/:path(.*)?",
-			deLocalizedNamedGroups: { locale: null },
-			localizedNamedGroups: {
-				en: { locale: null },
-				de: { locale: "de" },
-				fr: { locale: "fr" },
-			},
+			pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
+			localized: [
+				["de", ":protocol://:domain(.*)::port?/de/:path(.*)?"],
+				["fr", ":protocol://:domain(.*)::port?/fr/:path(.*)?"],
+				["en", ":protocol://:domain(.*)::port?/:path(.*)?"],
+			],
 		},
 	]);
 

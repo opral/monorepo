@@ -3,12 +3,10 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
-# Astro SSR Example
+<img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/examples/astro/assets/banner.png" alt="i18n library for astro" width="10000000px" />
 
 This example demonstrates how to use Paraglide JS with Astro in SSR mode. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/astro).
 
-
-<doc-callout type="info">You can integrate Paraglide JS yourself to achieve SSG. PR with an example is welcome.</doc-callout>
 
 | Feature      | Supported |
 | ------------ | --------- |
@@ -18,12 +16,14 @@ This example demonstrates how to use Paraglide JS with Astro in SSR mode. The so
 | URLPattern   | ✅        |
 | Any Strategy | ✅        |
 
+<doc-callout type="info">You can integrate Paraglide JS yourself to achieve SSG. PR with an example is welcome.</doc-callout>
+
 ## Setup
 
 ### 1. If you have not initialized Paraglide JS yet, run:
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### 2. Add the vite plugin to the `astro.config.mjs` file and set `output` to `server`:
@@ -51,10 +51,10 @@ export default defineConfig({
 ### 3. Create or add the paraglide js server middleware to the `src/middleware.ts` file:
 
 ```diff
-import { serverMiddleware } from "./paralide/runtime.js";
+import { paraglideMiddleware } from "./paraglide/server.js";
 
 export const onRequest = defineMiddleware((context, next) => {
-+	return serverMiddleware(context.request, () => next());
++	return paraglideMiddleware(context.request, () => next());
 });
 ```
 
@@ -72,9 +72,13 @@ You can disable async local storage in serverless environments by using the `dis
 
 
 ```diff
-import { serverMiddleware } from "./paralide/runtime.js";
-
-export const onRequest = defineMiddleware((context, next) => {
-+	return serverMiddleware(context.request, () => next(), { disableAsyncLocalStorage: true });
-});
+	vite: {
+		plugins: [
+			paraglideVitePlugin({
+				project: "./project.inlang",
+				outdir: "./src/paraglide",
++				disableAsyncLocalStorage: true,
+			}),
+		],
+	},
 ```

@@ -19,10 +19,6 @@
 		"Overview": {
 			"/": "./README.md",
 			"/supported-i18n-libraries": "./docs/supported-i18n-libraries.md"
-		},
-		"Guides": {
-			"Usage": "/g/6ddyhpoi/guide-nilsjacobsen-contributeTranslationsWithFink",
-			"What is inlang?": "/g/7777asdy/guide-nilsjacobsen-ecosystemCompatible"
 		}
 	},
 	"keywords": [

@@ -5,14 +5,6 @@ import { sql } from "kysely";
 import { createChange } from "../change/create-change.js";
 import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
 
-// start a new normalize path function that has the absolute minimum implementation.
-function normalizePath(path: string) {
-	if (!path.startsWith("/")) {
-		return "/" + path;
-	}
-	return path;
-}
-
 async function glob(args: {
 	lix: Pick<Lix, "db">;
 	glob: string;
@@ -47,12 +39,13 @@ export async function handleFileInsert(args: {
 	}
 
 	for (const plugin of plugins) {
-		// glob expressions are expressed relative without leading / but path has leading /
+		// glob expressions and paths should be properly normalized
 		if (
+			!plugin.detectChangesGlob ||
 			!(await glob({
 				lix: args.lix,
-				path: normalizePath(path),
-				glob: "/" + plugin.detectChangesGlob,
+				path,
+				glob: plugin.detectChangesGlob,
 			}))
 		) {
 			break;
@@ -140,12 +133,13 @@ export async function handleFileUpdate(args: {
 	}
 
 	for (const plugin of plugins) {
-		// glob expressions are expressed relative without leading / but path has leading /
+		// glob expressions and paths should be properly normalized
 		if (
+			!plugin.detectChangesGlob ||
 			!(await glob({
 				lix: args.lix,
-				path: normalizePath(path),
-				glob: "/" + plugin.detectChangesGlob,
+				path,
+				glob: plugin.detectChangesGlob,
 			}))
 		) {
 			break;

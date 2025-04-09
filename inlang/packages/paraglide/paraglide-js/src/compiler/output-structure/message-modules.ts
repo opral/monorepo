@@ -1,101 +1,97 @@
 import type { ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
-import { createRuntimeFile } from "../runtime/create-runtime.js";
-import { createRegistry } from "../registry.js";
 import { escapeForSingleQuoteString } from "../../services/codegen/escape.js";
-import type { CompilerOptions } from "../compiler-options.js";
 import { toSafeModuleId } from "../safe-module-id.js";
+import { inputsType } from "../jsdoc-types.js";
 
-export function generateMessageModules(
+export function messageReferenceExpression(locale: string, bundleId: string) {
+	return `${toSafeModuleId(locale)}_${toSafeModuleId(bundleId)}`;
+}
+
+export function generateOutput(
 	compiledBundles: CompiledBundleWithMessages[],
 	settings: Pick<ProjectSettings, "locales" | "baseLocale">,
-	fallbackMap: Record<string, string | undefined>,
-	compilerOptions: {
-		strategy: NonNullable<CompilerOptions["strategy"]>;
-		cookieName: NonNullable<CompilerOptions["cookieName"]>;
-	}
+	fallbackMap: Record<string, string | undefined>
 ): Record<string, string> {
-	const output: Record<string, string> = {
-		["runtime.js"]: createRuntimeFile({
-			baseLocale: settings.baseLocale,
-			locales: settings.locales,
-			compilerOptions,
-		}),
-		["registry.js"]: createRegistry(),
-	};
+	const output: Record<string, string> = {};
 
-	// all messages index file
-	output["messages/_index.js"] = [
-		...compiledBundles.map(
-			({ bundle }) =>
-				`export * from './${toSafeModuleId(bundle.node.id)}/index.js'`
-		),
-	].join("\n");
-
-	output["messages.js"] = [
-		"export * from './messages/_index.js'",
-		"// enabling auto-import by exposing all messages as m",
-		"export * as m from './messages/_index.js'",
-	].join("\n");
+	const moduleFilenames = new Set<string>();
 
 	for (const compiledBundle of compiledBundles) {
-		const bundleFileId = toSafeModuleId(compiledBundle.bundle.node.id);
+		const bundleId = compiledBundle.bundle.node.id;
+		const safeModuleId = toSafeModuleId(compiledBundle.bundle.node.id);
+		const inputs =
+			compiledBundle.bundle.node.declarations?.filter(
+				(decl) => decl.type === "input-variable"
+			) ?? [];
+
 		// bundle file
-		const indexFilename = `messages/${bundleFileId}/index.js`;
-		if (output[indexFilename]) {
-			// bundle file already exists, need to append to it
-			output[indexFilename] += `\n${compiledBundle.bundle.code}`;
-		} else {
-			// create fresh bundle file
-			const code = [
-				settings.locales
-					.map(
-						(locale) =>
-							`import * as ${toSafeModuleId(locale)} from "./${locale}.js"`
-					)
-					.join("\n"),
-				`import { getLocale } from '../../runtime.js'`,
-				"",
-				compiledBundle.bundle.code,
-			].join("\n");
-			output[indexFilename] = code;
+		const filename = `messages/${safeModuleId}.js`;
+
+		moduleFilenames.add(`${safeModuleId}.js`);
+
+		// create fresh bundle file
+		output[filename] = compiledBundle.bundle.code;
+
+		const needsFallback: string[] = [];
+
+		const messages = [];
+
+		// messages
+		for (const locale of settings.locales) {
+			const safeLocale = toSafeModuleId(locale);
+			const compiledMessage = compiledBundle.messages[locale];
+
+			if (!compiledMessage) {
+				needsFallback.push(locale);
+			} else {
+				messages.push(
+					`const ${safeLocale}_${safeModuleId} = ${compiledMessage.code}`
+				);
+			}
 		}
 
-		// message files
-		for (const locale of settings.locales) {
-			let file = "";
-
-			const compiledMessage = compiledBundle.messages[locale];
-			const id = toSafeModuleId(compiledBundle.bundle.node.id);
-			if (!compiledMessage) {
-				// add fallback
-				const fallbackLocale = fallbackMap[locale];
-				if (fallbackLocale) {
-					// take the fallback locale
-					file += `\nexport { ${id} } from "./${fallbackLocale}.js"`;
-				} else {
-					// fallback to just the bundle id
-					file += `\n/** @type {(inputs?: Record<string, never>) => string} */\nexport const ${id} = () => '${escapeForSingleQuoteString(
-						compiledBundle.bundle.node.id
-					)}'`;
-				}
+		// add the fallbacks (needs to be done after the messages to avoid referencing
+		// the message before they are defined)
+		for (const locale of needsFallback) {
+			// add fallback
+			const safeLocale = toSafeModuleId(locale);
+			const fallbackLocale = fallbackMap[locale];
+			if (fallbackLocale) {
+				const safeFallbackLocale = toSafeModuleId(fallbackLocale);
+				// take the fallback locale
+				messages.push(
+					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = ${safeFallbackLocale}_${safeModuleId};`
+				);
 			} else {
-				file += `\n${compiledMessage.code}`;
+				// fallback to just the bundle id
+				messages.push(
+					`/** @type {(inputs: ${inputsType(inputs)}) => string} */\nconst ${safeLocale}_${safeModuleId} = () => '${escapeForSingleQuoteString(
+						bundleId
+					)}'`
+				);
 			}
+		}
 
-			if (output[`messages/${bundleFileId}/${locale}.js`]) {
-				// message file already exists, need to append to it
-				output[`messages/${bundleFileId}/${locale}.js`] += file;
-			} else {
-				// Add the registry import to the message file
-				// if registry is used
-				if (file.includes("registry.")) {
-					file = `import * as registry from '../../registry.js'\n` + file;
-				}
+		output[filename] = messages.join("\n\n") + "\n\n" + output[filename];
 
-				output[`messages/${bundleFileId}/${locale}.js`] = file;
-			}
+		// add the imports
+		output[filename] =
+			`import { getLocale, trackMessageCall, experimentalMiddlewareLocaleSplitting, isServer } from '../runtime.js';\n\n` +
+			output[filename];
+
+		// Add the registry import to the message file
+		// if registry is used
+		if (output[filename]?.includes("registry.")) {
+			output[filename] =
+				`import * as registry from '../registry.js'\n` + output[filename];
 		}
 	}
+
+	// all messages index file
+	output["messages/_index.js"] = Array.from(moduleFilenames)
+		.map((filename) => `export * from './${filename}'`)
+		.join("\n");
+
 	return output;
 }

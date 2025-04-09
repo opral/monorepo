@@ -1,0 +1,30 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"blue_horse_shoe": "Hello {username}! Welcome to {placename}.",
+	"simple": "This is a simple message.",
+	"nesting": {
+		"level1": {
+			"level2": {
+				"level3": "This is a nested message."
+			}
+		}
+	},
+	"jojo_mountain_day": [
+		{
+			"declarations": [
+				"input platform",
+				"input userGender",
+				"input username"
+			],
+			"selectors": [
+				"platform",
+				"userGender"
+			],
+			"match": {
+				"platform=android, userGender=male": "{username} has to download the app on his phone from the Google Play Store.",
+				"platform=ios, userGender=female": "{username} has to download the app on her iPhone from the App Store.",
+				"platform=*, userGender=*": "The person has to download the app."
+			}
+		}
+	]
+}

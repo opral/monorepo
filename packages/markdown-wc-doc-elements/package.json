@@ -1,36 +1,37 @@
 {
-	"name": "@opral/markdown-wc-doc-elements",
-	"type": "module",
-	"version": "0.3.2",
-	"publishConfig": {
-		"access": "public"
-	},
-	"files": [
-		"./src",
-		"./dist",
-		"README.md"
-	],
-	"exports": {
-		".": "./dist/library/index.js",
-		"./dist/*": "./dist/*.js"
-	},
-	"scripts": {
-		"dev": "rolldown -c --watch",
-		"build": "rolldown -c && tsc --build",
-		"test": "tsc --noEmit && vitest run --passWithNoTests",
-		"format": "prettier ./src --write",
-		"clean": "rm -rf ./dist ./node_modules"
-	},
-	"dependencies": {
-		"iconify-icon": "1.0.8",
-		"lit": "3.2.1"
-	},
-	"devDependencies": {
-		"@opral/markdown-wc": "workspace:*",
-		"@opral/tsconfig": "workspace:*",
-		"rolldown": "1.0.0-beta.1",
-		"typescript": "5.3.2",
-		"vitest": "2.1.8"
-	},
-	"license": "MIT"
+  "name": "@opral/markdown-wc-doc-elements",
+  "type": "module",
+  "version": "0.3.2",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "./src",
+    "./dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./dist/library/index.js",
+    "./dist/*": "./dist/*.js"
+  },
+  "scripts": {
+    "dev": "rolldown -c --watch",
+    "build": "rolldown -c && tsc --build",
+    "test": "tsc --noEmit && vitest run --passWithNoTests",
+    "format": "prettier ./src --write",
+    "clean": "rm -rf ./dist ./node_modules"
+  },
+  "dependencies": {
+    "iconify-icon": "1.0.8",
+    "lit": "3.2.1"
+  },
+  "devDependencies": {
+    "@opral/markdown-wc": "workspace:*",
+    "@opral/tsconfig": "workspace:*",
+    "rolldown": "1.0.0-beta.1",
+    "typescript": "5.3.2",
+    "vitest": "2.1.8"
+  },
+  "license": "MIT",
+  "types": "./dist/library/index.d.ts"
 }

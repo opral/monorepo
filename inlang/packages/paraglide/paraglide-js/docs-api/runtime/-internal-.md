@@ -1,3 +1,57 @@
+## Locale
+
+> **Locale**: `any`
+
+Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/ambient.d.ts)
+
+***
+
+## ParaglideAsyncLocalStorage
+
+> **ParaglideAsyncLocalStorage**\<\>: `object`
+
+Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+### Type Parameters
+
+### Type declaration
+
+#### run()
+
+> **run**: (`store`, `cb`) => `any`
+
+##### Parameters
+
+###### store
+
+###### locale?
+
+[`Locale`](-internal-.md#locale)
+
+###### messageCalls?
+
+`Set`\<`string`\>
+
+###### origin?
+
+`string`
+
+###### cb
+
+`any`
+
+##### Returns
+
+`any`
+
+#### getStore()
+
+##### Returns
+
+`undefined` \| \{ `locale`: [`Locale`](-internal-.md#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
+
+***
+
 ## baseLocale
 
 > `const` **baseLocale**: `"en"` = `"en"`
@@ -16,11 +70,43 @@ if (locale === baseLocale) {
 
 ***
 
+## cookieMaxAge
+
+> `const` **cookieMaxAge**: `number`
+
+Defined in: [runtime/variables.js:25](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
 ## cookieName
 
 > `const` **cookieName**: `string` = `"<cookie-name>"`
 
 Defined in: [runtime/variables.js:22](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
+## disableAsyncLocalStorage
+
+> `const` **disableAsyncLocalStorage**: `false` = `false`
+
+Defined in: [runtime/variables.js:67](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
+## experimentalMiddlewareLocaleSplitting
+
+> `const` **experimentalMiddlewareLocaleSplitting**: `false` = `false`
+
+Defined in: [runtime/variables.js:69](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
+## isServer
+
+> `const` **isServer**: `boolean`
+
+Defined in: [runtime/variables.js:71](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -42,11 +128,24 @@ if (locales.includes(userSelectedLocale) === false) {
 
 ***
 
+## serverAsyncLocalStorage
+
+> **serverAsyncLocalStorage**: `undefined` \| [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage) = `undefined`
+
+Defined in: [runtime/variables.js:65](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+Server side async local storage that is set by `serverMiddleware()`.
+
+The variable is used to retrieve the locale and origin in a server-side
+rendering context without effecting other requests.
+
+***
+
 ## strategy
 
-> `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"` \| `"preferredLanguage"`)[]
+> `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"` \| `"preferredLanguage"` \| `"localStorage"`)[]
 
-Defined in: [runtime/variables.js:27](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -54,19 +153,15 @@ Defined in: [runtime/variables.js:27](https://github.com/opral/monorepo/tree/mai
 
 > `const` **urlPatterns**: `object`[] = `[]`
 
-Defined in: [runtime/variables.js:34](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:43](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 The used URL patterns.
 
 ### Type declaration
 
-#### deLocalizedNamedGroups
+#### localized
 
-> **deLocalizedNamedGroups**: `Record`\<`string`, `null` \| `string`\>
-
-#### localizedNamedGroups
-
-> **localizedNamedGroups**: `Record`\<`string`, `Record`\<`string`, `null` \| `string`\>\>
+> **localized**: \[`any`, `string`\][]
 
 #### pattern
 
@@ -167,7 +262,7 @@ deLocalizeUrl - For low-level URL de-localization in server contexts
 
 > **deLocalizeUrl**(`url`): `URL`
 
-Defined in: [runtime/localize-url.js:163](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:184](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
 Low-level URL de-localization function, primarily used in server contexts.
 
@@ -239,7 +334,7 @@ The `document` object is not available in server-side rendering, so this functio
 
 > **extractLocaleFromRequest**(`request`): `any`
 
-Defined in: [runtime/extract-locale-from-request.js:27](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
+Defined in: [runtime/extract-locale-from-request.js:28](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
 
 Extracts a locale from a request.
 
@@ -247,7 +342,8 @@ Use the function on the server to extract the locale
 from a request.
 
 The function goes through the strategies in the order
-they are defined.
+they are defined. If a strategy returns an invalid locale,
+it will fall back to the next strategy.
 
 ### Parameters
 
@@ -271,7 +367,7 @@ const locale = extractLocaleFromRequest(request);
 
 > **extractLocaleFromUrl**(`url`): `any`
 
-Defined in: [runtime/extract-locale-from-url.js:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
+Defined in: [runtime/extract-locale-from-url.js:15](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
 
 Extracts the locale from a given URL using native URLPattern.
 
@@ -291,11 +387,52 @@ The extracted locale, or undefined if no locale is found.
 
 ***
 
+## generateStaticLocalizedUrls()
+
+> **generateStaticLocalizedUrls**(`urls`): `URL`[]
+
+Defined in: [runtime/generate-static-localized-urls.js:31](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/generate-static-localized-urls.js)
+
+Generates a list of localized URLs for all provided URLs.
+
+This is useful for SSG (Static Site Generation) and sitemap generation.
+NextJS and other frameworks use this function for SSG.
+
+### Parameters
+
+#### urls
+
+(`string` \| `URL`)[]
+
+List of URLs to generate localized versions for. Can be absolute URLs or paths.
+
+### Returns
+
+`URL`[]
+
+List of localized URLs as URL objects
+
+### Example
+
+```typescript
+const urls = generateStaticLocalizedUrls([
+  "https://example.com/about",
+  "https://example.com/blog",
+]);
+urls[0].href // => "https://example.com/about"
+urls[1].href // => "https://example.com/blog"
+urls[2].href // => "https://example.com/de/about"
+urls[3].href // => "https://example.com/de/blog"
+...
+```
+
+***
+
 ## getLocale()
 
 > **getLocale**(): `any`
 
-Defined in: [runtime/get-locale.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:44](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Get the current locale.
 
@@ -319,7 +456,7 @@ if (getLocale() === 'de') {
 
 > **getUrlOrigin**(): `string`
 
-Defined in: [runtime/get-url-origin.js:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
+Defined in: [runtime/get-url-origin.js:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-url-origin.js)
 
 The origin of the current URL.
 
@@ -500,7 +637,7 @@ localizeUrl(url, { locale: "de" });
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:126](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:147](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
@@ -552,11 +689,36 @@ define how the URL origin is resolved.
 
 ***
 
+## overwriteServerAsyncLocalStorage()
+
+> **overwriteServerAsyncLocalStorage**(`value`): `void`
+
+Defined in: [runtime/variables.js:83](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+Sets the server side async local storage.
+
+The function is needed because the `runtime.js` file
+must define the `serverAsyncLocalStorage` variable to
+avoid a circular import between `runtime.js` and
+`server.js` files.
+
+### Parameters
+
+#### value
+
+`undefined` | [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage)
+
+### Returns
+
+`void`
+
+***
+
 ## overwriteSetLocale()
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:85](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:128](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -584,114 +746,18 @@ overwriteSetLocale((newLocale) => {
 
 ***
 
-## serverMiddleware()
-
-> **serverMiddleware**\<`T`\>(`request`, `resolve`, `options`?): `Promise`\<`any`\>
-
-Defined in: [runtime/server-middleware.js:85](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/server-middleware.js)
-
-Server middleware that handles locale-based routing and request processing.
-
-This middleware performs several key functions:
-
-1. Determines the locale for the incoming request using configured strategies
-2. Handles URL localization and redirects
-3. Maintains locale state using AsyncLocalStorage to prevent request interference
-
-When URL strategy is used:
-
-- If URL doesn't match the determined locale, redirects to localized URL
-- De-localizes URLs before passing to server (e.g., `/fr/about` → `/about`)
-
-### Type Parameters
-
-• **T**
-
-The return type of the resolve function
-
-### Parameters
-
-#### request
-
-`Request`
-
-The incoming request object
-
-#### resolve
-
-(`args`) => `T` \| `Promise`\<`T`\>
-
-Function to handle the request
-
-#### options?
-
-Optional configuration for the middleware
-
-##### disableAsyncLocalStorage?
-
-`boolean`
-
-If true, disables AsyncLocalStorage usage.
-                                                          ⚠️ WARNING: This should ONLY be used in serverless environments
-                                                          like Cloudflare Workers. Disabling AsyncLocalStorage in traditional
-                                                          server environments risks cross-request pollution where state from
-                                                          one request could leak into another concurrent request.
-
-### Returns
-
-`Promise`\<`any`\>
-
-Returns either:
-- A `Response` object (302 redirect) if URL localization is needed
-- The result of the resolve function if no redirect is required
-
-### Examples
-
-```typescript
-// Basic usage in metaframeworks like NextJS, SvelteKit, Astro, Nuxt, etc.
-export const handle = async ({ event, resolve }) => {
-  return serverMiddleware(event.request, ({ request, locale }) => {
-    // let the framework further resolve the request
-    return resolve(request);
-  });
-};
-```
-
-```typescript
-// Usage in a framework like Express JS or Hono
-app.use(async (req, res, next) => {
-  const result = await serverMiddleware(req, ({ request, locale }) => {
-    // If a redirect happens this won't be called
-    return next(request);
-  });
-});
-```
-
-```typescript
-// Usage in serverless environments like Cloudflare Workers
-// ⚠️ WARNING: This should ONLY be used in serverless environments like Cloudflare Workers.
-// Disabling AsyncLocalStorage in traditional server environments risks cross-request pollution where state from
-// one request could leak into another concurrent request.
-export default {
-  fetch: async (request) => {
-    return serverMiddleware(
-      request,
-      ({ request, locale }) => handleRequest(request, locale),
-      { disableAsyncLocalStorage: true }
-    );
-  }
-};
-```
-
-***
-
 ## setLocale()
 
-> **setLocale**(`newLocale`): `void`
+> **setLocale**(`newLocale`, `options`?): `void`
 
-Defined in: [runtime/set-locale.js:18](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Set the locale.
+
+Set locale reloads the site by default on the client. Reloading
+can be disabled by passing `reload: false` as an option. If
+reloading is disabled, you need to ensure that the UI is updated
+to reflect the new locale.
 
 ### Parameters
 
@@ -699,12 +765,44 @@ Set the locale.
 
 `any`
 
+#### options?
+
+##### reload?
+
+`boolean`
+
 ### Returns
 
 `void`
 
-### Example
+### Examples
 
 ```ts
 setLocale('en');
 ```
+
+```ts
+setLocale('en', { reload: false });
+```
+
+***
+
+## trackMessageCall()
+
+> **trackMessageCall**(`safeModuleId`, `locale`): `void`
+
+Defined in: [runtime/track-message-call.js:7](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/track-message-call.js)
+
+### Parameters
+
+#### safeModuleId
+
+`string`
+
+#### locale
+
+`any`
+
+### Returns
+
+`void`

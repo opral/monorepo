@@ -17,7 +17,8 @@ import { isLocale } from "./is-locale.js";
  * from a request.
  *
  * The function goes through the strategies in the order
- * they are defined.
+ * they are defined. If a strategy returns an invalid locale,
+ * it will fall back to the next strategy.
  *
  * @example
  *   const locale = extractLocaleFromRequest(request);
@@ -49,15 +50,19 @@ export const extractLocaleFromRequest = (request) => {
 			locale = _locale;
 		} else if (strat === "baseLocale") {
 			return baseLocale;
-		} else {
-			throw new Error(`Unsupported strategy: ${strat}`);
+		} else if (strat === "localStorage") {
+			continue;
 		}
 		if (locale !== undefined) {
-			return assertIsLocale(locale);
+			if (!isLocale(locale)) {
+				locale = undefined;
+			} else {
+				return assertIsLocale(locale);
+			}
 		}
 	}
 	throw new Error(
-		"No locale found. There is an error in your strategy. Try adding 'baseLocale' as the very last strategy."
+		"No locale found. There is an error in your strategy. Try adding 'baseLocale' as the very last strategy. Read more here https://inlang.com/m/gerre34r/library-inlang-paraglideJs/errors#no-locale-found"
 	);
 };
 

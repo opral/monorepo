@@ -12,8 +12,18 @@ export async function maybeCaptureLoadedProject(args: {
 	plugins: Readonly<Array<{ key: string }>>;
 	appId?: string;
 	db: Kysely<InlangDatabaseSchema>;
+	forceCapture?: boolean;
 }) {
 	if (args.settings.telemetry === "off") {
+		return;
+	}
+
+	// --- SAMPLING ---
+	// randomly sample 10% of projects
+	// to reduce the number of telemetry events.
+	//
+	// 10% is chosen out of a gut feeling
+	if (args.forceCapture !== true && Math.random() > 0.1) {
 		return;
 	}
 

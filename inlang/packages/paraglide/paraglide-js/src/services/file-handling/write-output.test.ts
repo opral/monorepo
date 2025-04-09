@@ -1,12 +1,12 @@
 import memfs from "memfs";
 import type fs from "node:fs/promises";
-import { it, expect, vi, beforeEach } from "vitest";
+import { test, expect, vi, beforeEach } from "vitest";
 
 beforeEach(() => {
 	vi.resetModules();
 });
 
-it("should write the output to a non-existing directory", async () => {
+test("should write the output to a non-existing directory", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -20,7 +20,7 @@ it("should write the output to a non-existing directory", async () => {
 	);
 });
 
-it.skip("should clear & overwrite output that's already there", async () => {
+test("should clear & overwrite output that's already there", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({
 		"/output/test.txt": "old",
@@ -30,6 +30,7 @@ it.skip("should clear & overwrite output that's already there", async () => {
 	await writeOutput({
 		directory: "/output",
 		output: { "test.txt": "new" },
+		cleanDirectory: true,
 		fs,
 	});
 
@@ -41,7 +42,7 @@ it.skip("should clear & overwrite output that's already there", async () => {
 	).rejects.toBeDefined();
 });
 
-it("should create any missing directories", async () => {
+test("should create any missing directories", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -61,7 +62,7 @@ it("should create any missing directories", async () => {
 	).toBe("en");
 });
 
-it("should only write once if the output hasn't changed", async () => {
+test("should only write once if the output hasn't changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -86,7 +87,7 @@ it("should only write once if the output hasn't changed", async () => {
 	expect(fs.writeFile).toHaveBeenCalledTimes(1);
 });
 
-it("should write again if the output has changed", async () => {
+test("should write again if the output has changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -110,7 +111,7 @@ it("should write again if the output has changed", async () => {
 	expect(fs.writeFile).toHaveBeenCalledTimes(2);
 });
 
-it("should write files if output has partially changed", async () => {
+test("should write files if output has partially changed", async () => {
 	const { writeOutput } = await import("./write-output.js");
 	const fs = mockFs({});
 
@@ -131,6 +132,92 @@ it("should write files if output has partially changed", async () => {
 	});
 	expect(fs.writeFile).toHaveBeenCalledWith("/output/file2.txt", "test2");
 	expect(fs.writeFile).toHaveBeenCalledTimes(3);
+});
+
+test("should delete files that have been removed from the output", async () => {
+	const { writeOutput } = await import("./write-output.js");
+	const fs = mockFs({});
+
+	// First write with three files
+	const hashes = await writeOutput({
+		directory: "/output",
+		output: {
+			"file1.txt": "content1",
+			"file2.txt": "content2",
+			"subdir/file3.txt": "content3",
+		},
+		fs,
+	});
+
+	// Verify all files were written
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe(
+		"content1"
+	);
+	expect(await fs.readFile("/output/file2.txt", { encoding: "utf-8" })).toBe(
+		"content2"
+	);
+	expect(
+		await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })
+	).toBe("content3");
+
+	// Second write with file2.txt removed
+	await writeOutput({
+		directory: "/output",
+		output: {
+			"file1.txt": "content1",
+			"subdir/file3.txt": "content3updated",
+		},
+		fs,
+		previousOutputHashes: hashes,
+	});
+
+	// Verify file1.txt still exists
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe(
+		"content1"
+	);
+	// Verify file2.txt has been deleted
+	await expect(
+		async () => await fs.readFile("/output/file2.txt", { encoding: "utf-8" })
+	).rejects.toBeDefined();
+	// Verify file3.txt was updated
+	expect(
+		await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })
+	).toBe("content3updated");
+
+	// Get the new hashes
+	const newHashes = await writeOutput({
+		directory: "/output",
+		output: {
+			"file1.txt": "content1",
+			"subdir/file3.txt": "content3updated",
+		},
+		fs,
+		previousOutputHashes: hashes,
+	});
+
+	// Third write with subdir/file3.txt removed
+	await writeOutput({
+		directory: "/output",
+		output: {
+			"file1.txt": "content1",
+		},
+		fs,
+		previousOutputHashes: newHashes,
+	});
+
+	// Verify file1.txt still exists
+	expect(await fs.readFile("/output/file1.txt", { encoding: "utf-8" })).toBe(
+		"content1"
+	);
+	// Verify subdir/file3.txt has been deleted
+	await expect(
+		async () =>
+			await fs.readFile("/output/subdir/file3.txt", { encoding: "utf-8" })
+	).rejects.toBeDefined();
+	// Verify the subdir directory has also been removed
+	await expect(
+		async () => await fs.readdir("/output/subdir")
+	).rejects.toBeDefined();
 });
 
 const mockFs = (files: memfs.DirectoryJSON) => {

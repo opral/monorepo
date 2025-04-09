@@ -1,0 +1,364 @@
+{
+  "scenarios": [
+    {
+      "locales": 5,
+      "usedMessages": 100,
+      "namespaceSize": 200,
+      "namespaceSizeFactor": 2,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 17.9
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 47.1
+        },
+        {
+          "library": "i18next (default)",
+          "size": 205
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 167.5
+        }
+      ]
+    },
+    {
+      "locales": 5,
+      "usedMessages": 100,
+      "namespaceSize": 500,
+      "namespaceSizeFactor": 5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 17.9
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 47.1
+        },
+        {
+          "library": "i18next (default)",
+          "size": 283.3
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 183.1
+        }
+      ]
+    },
+    {
+      "locales": 5,
+      "usedMessages": 100,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 10,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 17.9
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 47.1
+        },
+        {
+          "library": "i18next (default)",
+          "size": 414.1
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 209.3
+        }
+      ]
+    },
+    {
+      "locales": 5,
+      "usedMessages": 200,
+      "namespaceSize": 500,
+      "namespaceSizeFactor": 2.5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 27.2
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 85.8
+        },
+        {
+          "library": "i18next (default)",
+          "size": 288.3
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 186.8
+        }
+      ]
+    },
+    {
+      "locales": 5,
+      "usedMessages": 200,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 27.2
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 85.8
+        },
+        {
+          "library": "i18next (default)",
+          "size": 419
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 213
+        }
+      ]
+    },
+    {
+      "locales": 10,
+      "usedMessages": 100,
+      "namespaceSize": 200,
+      "namespaceSizeFactor": 2,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 17.9
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 76.2
+        },
+        {
+          "library": "i18next (default)",
+          "size": 259
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 167.5
+        }
+      ]
+    },
+    {
+      "locales": 10,
+      "usedMessages": 100,
+      "namespaceSize": 500,
+      "namespaceSizeFactor": 5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 17.9
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 76.2
+        },
+        {
+          "library": "i18next (default)",
+          "size": 415.7
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 183.2
+        }
+      ]
+    },
+    {
+      "locales": 10,
+      "usedMessages": 100,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 10,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 17.9
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 76.2
+        },
+        {
+          "library": "i18next (default)",
+          "size": 677.2
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 209.3
+        }
+      ]
+    },
+    {
+      "locales": 10,
+      "usedMessages": 200,
+      "namespaceSize": 500,
+      "namespaceSizeFactor": 2.5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 27.3
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 144
+        },
+        {
+          "library": "i18next (default)",
+          "size": 422.2
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 186.8
+        }
+      ]
+    },
+    {
+      "locales": 10,
+      "usedMessages": 200,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 27.3
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 144
+        },
+        {
+          "library": "i18next (default)",
+          "size": 683.7
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 213
+        }
+      ]
+    },
+    {
+      "locales": 20,
+      "usedMessages": 100,
+      "namespaceSize": 200,
+      "namespaceSizeFactor": 2,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 18
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 134.5
+        },
+        {
+          "library": "i18next (default)",
+          "size": 367.1
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 167.5
+        }
+      ]
+    },
+    {
+      "locales": 20,
+      "usedMessages": 100,
+      "namespaceSize": 500,
+      "namespaceSizeFactor": 5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 18
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 134.5
+        },
+        {
+          "library": "i18next (default)",
+          "size": 680.6
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 183.2
+        }
+      ]
+    },
+    {
+      "locales": 20,
+      "usedMessages": 100,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 10,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 18
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 134.5
+        },
+        {
+          "library": "i18next (default)",
+          "size": 1203.5
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 209.4
+        }
+      ]
+    },
+    {
+      "locales": 20,
+      "usedMessages": 200,
+      "namespaceSize": 500,
+      "namespaceSizeFactor": 2.5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 27.4
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 261.8
+        },
+        {
+          "library": "i18next (default)",
+          "size": 690.2
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 186.9
+        }
+      ]
+    },
+    {
+      "locales": 20,
+      "usedMessages": 200,
+      "namespaceSize": 1000,
+      "namespaceSizeFactor": 5,
+      "results": [
+        {
+          "library": "paraglide (experimental-middleware-locale-splitting)",
+          "size": 27.4
+        },
+        {
+          "library": "paraglide (default)",
+          "size": 261.8
+        },
+        {
+          "library": "i18next (default)",
+          "size": 1213.1
+        },
+        {
+          "library": "i18next (http-backend)",
+          "size": 213
+        }
+      ]
+    }
+  ]
+}

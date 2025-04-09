@@ -1,8 +1,7 @@
 import { test, expect } from "vitest";
-import { generateMessageModules } from "./message-modules.js";
+import { generateOutput } from "./message-modules.js";
 import type { Bundle, Message, ProjectSettings } from "@inlang/sdk";
 import type { CompiledBundleWithMessages } from "../compile-bundle.js";
-import { defaultCompilerOptions } from "../compiler-options.js";
 
 test("should emit per locale message files", () => {
 	const resources: CompiledBundleWithMessages[] = [
@@ -36,18 +35,11 @@ test("should emit per locale message files", () => {
 		de: "en",
 	};
 
-	const output = generateMessageModules(
-		resources,
-		settings,
-		fallbackMap,
-		defaultCompilerOptions
-	);
+	const output = generateOutput(resources, settings, fallbackMap);
 
 	expect(output).not.toHaveProperty("messages/en.js");
 	expect(output).not.toHaveProperty("messages/de.js");
-	expect(output).toHaveProperty("messages/happy_elephant/en.js");
-	expect(output).toHaveProperty("messages/happy_elephant/de.js");
-	expect(output).toHaveProperty("messages/happy_elephant/index.js");
+	expect(output).toHaveProperty("messages/happy_elephant.js");
 });
 
 test("handles case senstivity by creating directories and files only in lowercase", () => {
@@ -85,32 +77,10 @@ test("handles case senstivity by creating directories and files only in lowercas
 		locales: ["en"],
 		baseLocale: "en",
 	};
-	const output = generateMessageModules(
-		resources,
-		settings,
-		{},
-		defaultCompilerOptions
-	);
+	const output = generateOutput(resources, settings, {});
 
 	// expecting only lowercase directories and files
-	expect(output).toHaveProperty("messages/happyelephant/en.js");
-	expect(output).toHaveProperty("messages/happyelephant/index.js");
-	expect(output).not.toHaveProperty("messages/HappyElephant/en.js");
-	expect(output).not.toHaveProperty("messages/HappyElephant/index.js");
-
-	// expecting both bundles to be merged into the "happyelephant" module
-	expect(output["messages/happyelephant/index.js"]).includes(
-		`export const happyelephant = () => en.happyelephant`
-	);
-	expect(output["messages/happyelephant/index.js"]).includes(
-		`export const HappyElephant = () => en.HappyElephant`
-	);
-
-	// expecting both messages to be in their respective files
-	expect(output["messages/happyelephant/en.js"]).includes(
-		`export const HappyElephant = () => "HappyElephant0"`
-	);
-	expect(output["messages/happyelephant/en.js"]).includes(
-		`export const HappyElephant = () => "HappyElephant0"`
-	);
+	expect(output).toHaveProperty("messages/happyelephant.js");
+	expect(output).toHaveProperty("messages/happyelephant2.js");
+	expect(output).not.toHaveProperty("messages/HappyElephant.js");
 });

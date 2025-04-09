@@ -18,18 +18,18 @@
 	"pages": {
 		"": {
 			"/": "./docs/introduction.md",
-			"/limitations": "./docs/limitations.md",
-			"/scaling": "./docs/scaling.md",
-			"/migrating-to-v2": "./docs/migrating-to-v2.md",
+			"/comparison": "./docs/comparison.md",
+			"/benchmark": "./benchmark/README.md",
 			"/changelog": "./CHANGELOG.md"
 		},
 		"Getting Started": {
 			"/vanilla-js-ts": "./docs/getting-started/vanilla-js-ts.md",
+			"/vite": "./examples/vite/README.md",
 			"/sveltekit": "./examples/sveltekit/README.md",
 			"/astro": "./examples/astro/README.md",
 			"/react-router": "./examples/react-router/README.md",
 			"/next-js": "./docs/getting-started/next-js.md",
-			"/vite": "./examples/vite/README.md"
+			"/other-frameworks": "./docs/getting-started/other-frameworks.md"
 		},
 		"Usage": {
 			"/basics": "./docs/basics.md",
@@ -41,16 +41,17 @@
 			"/compiling-messages": "./docs/compiling-messages.md",
 			"/incremental-migration": "./examples/incremental-migration/README.md"
 		},
-		"Ecosystem": {
-			"Sherlock VSCode extension": "/m/r7kp499g/app-inlang-ideExtension",
-			"CLI for automation": "/m/2qj2w8pu/app-inlang-cli",
-			"Fink web editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
-		},
 		"Reference": {
 			"/architecture": "./docs/architecture.md",
 			"/compiler-options": "./docs-api/compiler-options.md",
 			"/runtime": "./docs-api/runtime/-internal-.md",
+			"/server": "./docs-api/server/-internal-.md",
 			"/errors": "./docs/errors.md"
+		},
+		"Ecosystem": {
+			"Sherlock VSCode extension": "/m/r7kp499g/app-inlang-ideExtension",
+			"CLI for automation": "/m/2qj2w8pu/app-inlang-cli",
+			"Fink web editor": "/m/tdozzpar/app-inlang-finkLocalizationEditor"
 		}
 	},
 	"keywords": [
@@ -77,7 +78,7 @@
 		"react router",
 		"inlang"
 	],
-	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/2qj2w8pu"],
 	"pricing": "free",
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",

@@ -1,6 +1,5 @@
 import { assertIsLocale } from "./assert-is-locale.js";
 import { isLocale } from "./is-locale.js";
-import { aggregateGroups } from "./localize-url.js";
 import {
 	baseLocale,
 	TREE_SHAKE_DEFAULT_URL_PATTERN_USED,
@@ -17,45 +16,23 @@ export function extractLocaleFromUrl(url) {
 	if (TREE_SHAKE_DEFAULT_URL_PATTERN_USED) {
 		return defaultUrlPatternExtractLocale(url);
 	}
+
+	const urlObj = typeof url === "string" ? new URL(url) : url;
+
+	// Iterate over URL patterns
 	for (const element of urlPatterns) {
-		const pattern = new URLPattern(element.pattern);
-		const match = pattern.exec(url);
-		if (match) {
-			const groups = aggregateGroups(match);
+		for (const [locale, localizedPattern] of element.localized) {
+			const match = new URLPattern(localizedPattern, urlObj.href).exec(
+				urlObj.href
+			);
 
-			for (const [locale, overrideParams] of Object.entries(
-				element.localizedNamedGroups
-			)) {
-				let allMatch = true;
+			if (!match) {
+				continue;
+			}
 
-				for (const [key, val] of Object.entries(overrideParams)) {
-					const matchedValue = groups[key];
-
-					// Handle nullable parameters
-					if (val === null) {
-						if (matchedValue != null) {
-							allMatch = false;
-							break;
-						}
-					}
-					// Handle wildcard arrays
-					else if (Array.isArray(val)) {
-						const matchedArray = matchedValue?.split("/") ?? [];
-						if (JSON.stringify(matchedArray) !== JSON.stringify(val)) {
-							allMatch = false;
-							break;
-						}
-					}
-					// Handle regular parameters
-					else if (matchedValue !== val) {
-						allMatch = false;
-						break;
-					}
-				}
-
-				if (allMatch) {
-					return assertIsLocale(locale);
-				}
+			// Check if the locale is valid
+			if (assertIsLocale(locale)) {
+				return locale;
 			}
 		}
 	}

@@ -1,9 +1,12 @@
 {
 	"name": "@lix-js/plugin-json",
 	"type": "module",
-	"private": true,
-	"version": "0.1.2",
+	"publishConfig": {
+		"access": "public"
+	},
+	"version": "0.1.7",
 	"license": "Apache-2.0",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js"
 	},

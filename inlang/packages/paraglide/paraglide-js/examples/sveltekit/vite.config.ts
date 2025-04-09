@@ -4,14 +4,14 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 
 export default defineConfig({
 	build: {
-		minify: true
+		minify: false
 	},
 	plugins: [
 		sveltekit(),
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide',
-			strategy: ['url']
+			strategy: ['url', 'cookie', 'baseLocale']
 		})
 	]
 });

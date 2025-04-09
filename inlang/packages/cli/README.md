@@ -79,7 +79,7 @@ If one of the commands can't be found, you probably use an outdated CLI version.
 | --------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **CLI Version** | `npx @inlang/cli@latest [command]`            | Get the latest version of the inlang CLI.                                                                                                                           |
 | **Validate**    | `npx @inlang/cli validate [options]`          | Validate if the project is working correctly.                                                                                                                       |
-| **Machine**     | `npx @inlang/cli machine translate [options]` | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--sourceLanguageTag <source>` and `--targetLanguageTags <targets...>`           |
+| **Machine**     | `npx @inlang/cli machine translate [options]` | Automate translation processes. Options include `-f, --force`, `--project <path>`, `--locale <source>` and `--targetLocales <targets...>`           |
 | **Plugin**      | `npx @inlang/cli plugin [command]`            | Interact with Inlang plugins, including initialization and building. `build [options]` build an inlang module. Options include `--type`, `--entry`, and `--outdir`. |
 
 ---
@@ -99,8 +99,8 @@ If one of the commands can't be found, you probably use an outdated CLI version.
 CLI for inlang.
 
 Options:
-  -V, --version         output the version number
-  -h, --help            display help for command
+  -V, --version         Output the version number
+  -h, --help            Display help for command
 
 Commands:
   project [command]  Commands for managing your inlang project
@@ -108,7 +108,7 @@ Commands:
   machine [command]  Commands for automating translations.
   open [command]     Commands for open parts of the inlang ecosystem.
   module [command]   Commands for build inlang modules.
-  help [command]     display help for command
+  help [command]     Display help for command
 ```
 
 The following commands are available with the inlang CLI:
@@ -133,8 +133,8 @@ The translate command has the following options:
 
 - `-f, --force`: If this option is set, the command will not prompt confirmation. This is useful for CI/CD build pipelines. **We advise you to only use `machine translate` in build pipelines to avoid out-of-context/wrong translations.**
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-- `--sourceLanguageTag <source>`: Specifies the source [language tag](https://inlang.com/m/8y8sxj09/library-inlang-languageTag).
-- `--targetLanguageTags <targets...>`: Specifies the target language tags as comma seperated list (e.g. sk,zh,pt-BR).
+- `--locale <source>`: Specifies the base locale.
+- `--targetLocales <targets...>`: Specifies the target locales as comma seperated list (e.g. sk,zh,pt-BR).
 
 The translations are performed using machine translation services. The translated messages are added to the respective language resources. Finally, the updated resources are written back to the file system.
 
@@ -153,18 +153,6 @@ The validate command has the following options:
 - `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
 
 This will launch an interactive prompt that will guide you through the process of migrating the inlang configuration file.
-
-**Options**
-
-The translate command has the following options:
-
-- `--no-fail`: If this option is set, the command will not fail if there are any linting errors.
-- `--project <path>`: Specifies the path to the project root. The default project root is the current working directory.
-- `--languageTags <tags>`: Specifies the [language tags](https://inlang.com/m/8y8sxj09/library-inlang-languageTag) to lint. Defaults to all. Should be a comma-separated list of language tags specified in the inlang project, e.g. `en,de,fr`.
-
-`lint` will read through all resources and find potential errors and warnings in the translation strings, for example, with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/packages/message-lint-rules), it searches for **missing messages**, **missing references** and **identical patterns/duplicates**.
-
-However, it's totally up to you how you configure your lints. _You can build your own plugin with your customized set of lints_ with the [@inlang/plugin-standard-lint-rules](https://github.com/opral/monorepo/tree/main/inlang/packages/message-lint-rules) as a starter template.
 
 ## `plugin`
 

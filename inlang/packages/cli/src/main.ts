@@ -6,6 +6,7 @@ import { initErrorMonitoring } from "./services/error-monitoring/implementation.
 import { validate } from "./commands/validate/index.js";
 import { capture } from "./telemetry/capture.js";
 import { lastUsedProject } from "./utilities/getInlangProject.js";
+import { lint } from "./commands/lint/index.js";
 
 // --------------- INIT ---------------
 
@@ -26,12 +27,13 @@ export const cli = new Command()
   .addCommand(validate)
   .addCommand(machine)
   .addCommand(plugin)
+  .addCommand(lint)
   // Hooks
   .hook("postAction", async (command) => {
     // name enables better grouping in the telemetry dashboard
     const name = command.args.filter(
       // shouldn't start with a flag and the previous arg shouldn't be a flag
-      (arg, i) => !arg.startsWith("-") && !command.args[i - 1]?.startsWith("-"),
+      (arg, i) => !arg.startsWith("-") && !command.args[i - 1]?.startsWith("-")
     );
 
     await capture({

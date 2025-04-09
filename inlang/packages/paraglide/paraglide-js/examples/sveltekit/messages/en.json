@@ -1,5 +1,6 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"welcome": "Welcome to the SvelteKit Paraglide adapter example.",
-	"about": "This is the /other page that only exists to illustrate routing with `localizeHref()`"
+	"welcome": "Welcome to the SvelteKit Paraglide JS example.",
+	"about": "This is the /other page that only exists to illustrate routing with `localizeHref()`",
+	"unused": "This is an unused message to verify tree-shaking."
 }

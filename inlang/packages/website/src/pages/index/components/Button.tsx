@@ -36,6 +36,7 @@ interface ButtonProps {
 	children: JSXElement;
 	type: buttonType;
 	href?: string;
+	target?: string;
 	chevron?: boolean;
 	function?: () => void;
 }

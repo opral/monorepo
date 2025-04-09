@@ -7,6 +7,8 @@ imports:
 
 This is an example of how to use Paraglide with Next JS with SSG. The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/next-js-ssg).
 
+<doc-callout type="tip">NextJS is tech-debt plagued. If you start your app or website from scratch, we highly recommend using a vite-based framework. [Read](https://github.com/opral/inlang-paraglide-js/issues/245#issuecomment-2608727658) this comment. </doc-callout>
+
 ## Features
 
 | Feature      | Supported |
@@ -26,7 +28,7 @@ This is an example of how to use Paraglide with Next JS with SSG. The source cod
 ### Install paraglide js
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### Add the webpack plugin to the `next.config.js` file:
@@ -45,18 +47,14 @@ export default {
 +			paraglideWebpackPlugin({
 +				outdir: "./src/paraglide",
 +				project: "./project.inlang",
-+       strategy: ["url"],
++       strategy: ["url", "cookie", "baseLocale"],
 +				urlPatterns: [
 +					{
-+						pattern:
-+							":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
-+						deLocalizedNamedGroups: {
-+							locale: "en",
-+						},
-+						localizedNamedGroups: {
-+							de: { locale: "de" },
-+							en: { locale: "en" },
-+						},
++						pattern: 'https://:domain(.*)/:path*',
++						localized: [
++							['de', 'https://:domain(.*)/de/:path*'],
++							['en', 'https://:domain(.*)/:path*'],
++						],
 +					},
 +				],
 +			})

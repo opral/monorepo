@@ -59,6 +59,13 @@ export async function translateCommandAction(args: { project: InlangProject }) {
       .selectAll()
       .execute();
 
+    if (bundles.length === 0) {
+      log.warn(
+        "No message bundles found to translate. Check your project setup with `inlang validate`"
+      );
+      return;
+    }
+
     bar?.start(bundles.length, 0);
 
     const promises: Promise<

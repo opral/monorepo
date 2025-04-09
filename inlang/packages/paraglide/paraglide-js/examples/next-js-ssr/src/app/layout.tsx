@@ -13,7 +13,8 @@ import { headers } from "next/headers";
 
 const ssrLocale = cache(() => ({
 	locale: baseLocale,
-	origin: "http://fallback.com",
+	// needs to be localhost https://github.com/opral/inlang-paraglide-js/issues/407
+	origin: "http://localhost",
 }));
 
 // overwrite the getLocale function to use the locale from the request

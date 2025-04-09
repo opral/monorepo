@@ -3,22 +3,15 @@ imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
-# SvelteKit example
-
 <img src="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/examples/sveltekit/sveltekit-banner.png" alt="i18n library for SvelteKit" width="10000000px" />
 
-This example shows how to use Paraglide with SvelteKit. 
-The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/sveltekit).
-
-<doc-callout type="info">
-  You can build your own Paraglide JS implementation to achieve SSG. A PR with docs is welcome.
-</doc-callout>
+This example shows how to use Paraglide with SvelteKit.The source code can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/sveltekit).
 
 | Feature      | Supported |
 | ------------ | --------- |
 | CSR          | ✅        |
 | SSR          | ✅        |
-| SSG          | ❌        |
+| SSG          | ✅        |
 | URLPattern   | ✅        |
 | Any Strategy | ✅        |
 
@@ -27,10 +20,14 @@ The source code can be found [here](https://github.com/opral/monorepo/tree/main/
 ### Install paraglide js
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### Add the `paraglideVitePlugin()` to `vite.config.js`.
+
+<doc-callout type="info">
+	You can define strategy however you need. 
+</doc-callout>
 
 ```diff
 import { sveltekit } from '@sveltejs/kit/vite';
@@ -43,7 +40,7 @@ export default defineConfig({
 +		paraglideVitePlugin({
 +			project: './project.inlang',
 +			outdir: './src/lib/paraglide',
-+			strategy: ['url']
++			strategy: ['url', 'cookie', 'baseLocale'],
 +		})
 	]
 });
@@ -61,23 +58,29 @@ See https://svelte.dev/docs/kit/accessibility#The-lang-attribute for more inform
 </html>
 ```
 
-### Add the serverMiddleware to `src/hooks.server.ts`
+### Add the `paraglideMiddleware()` to `src/hooks.server.ts`
 
 ```typescript
 import type { Handle } from '@sveltejs/kit';
-import { serverMiddleware } from '$lib/paraglide/runtime';
+import { paraglideMiddleware } from '$lib/paraglide/server';
 
-export const handle: Handle = ({ event, resolve }) => {
-	return serverMiddleware(event.request, ({ request, locale }) =>
-		resolve(
-			{ ...event, request },
-			{ transformPageChunk: ({ html }) => html.replace('%lang%', locale)}
-		)
-	);
-};
+// creating a handle to use the paraglide middleware
+const paraglideHandle: Handle = ({ event, resolve }) =>
+	paraglideMiddleware(event.request, ({ request: localizedRequest, locale }) => {
+		event.request = localizedRequest;
+		return resolve(event, {
+			transformPageChunk: ({ html }) => {
+				return html.replace('%lang%', locale);
+			}
+		});
+	});
+
+export const handle: Handle = paraglideHandle;
 ```
 
-### Add a reroute hook in `src/hook.ts`
+### Add a reroute hook in `src/hooks.ts`
+
+IMPORTANT: The `reroute()` function must be exported from the `src/hooks.ts` file, not `src/hooks.server.ts`.
 
 ```typescript
 import type { Reroute } from '@sveltejs/kit';
@@ -88,29 +91,68 @@ export const reroute: Reroute = (request) => {
 };
 ```
 
-### Done :)
-
 ## Usage
 
 See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for more information on how to use Paraglide's messages, parameters, and locale management.
 
-## Additional guidance
+## Static site generation (SSG)
 
-### Disabling AsyncLocalStorage in serverless environments	
+Enable [pre-renderering](https://svelte.dev/docs/kit/page-options#prerender) by adding the following line to `routes/+layout.ts`:
 
-<doc-callout type="info">
-If you're deploying to SvelteKit's Edge adapter like Vercel Edge or Cloudflare Pages, you can disable AsyncLocalStorage to avoid issues with Node.js dependencies not available in those environments:
-
-```typescript
-export const handle: Handle = ({ event, resolve }) => {
-	return serverMiddleware(
-		event.request, 
-		({ request }) => resolve({ ...event, request }),
-		{ disableAsyncLocalStorage: true }
-	);
-};
+```diff
+// routes/+layout.ts
++export const prerender = true;
 ```
 
-⚠️ Only use this option in serverless environments where each request gets its own isolated runtime context. Using it in multi-request server environments could lead to data leakage between concurrent requests.
+Then add "invisble" anchor tags in `routes/+layout.svelte` to generate all pages during build time. SvelteKit crawls the anchor tags during the build and is, thereby, able to generate all pages statically.
+
+```diff
+<script>
+	import { page } from '$app/state';
++	import { locales, localizeHref } from '$lib/paraglide/runtime';
+</script>
+
+<slot></slot>
+
++<div style="display:none">
++	{#each locales as locale}
++		<a href={localizeHref(page.url.pathname, { locale })}>{locale}</a>
++	{/each}
++</div>
+```
+
+## Troubleshooting
+
+### Disabling AsyncLocalStorage in serverless environments
+
+If you're deploying to SvelteKit's Edge adapter like Vercel Edge or Cloudflare Pages, you can disable AsyncLocalStorage to avoid issues with Node.js dependencies not available in those environments:
+
+<doc-callout type="warning">
+	⚠️ Only use this option in serverless environments where each request gets its own isolated runtime context. Using it in multi-request server environments could lead to data leakage between concurrent requests.
 </doc-callout>
 
+```diff
+export default defineConfig({
+	plugins: [
+		sveltekit(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
++			disableAsyncLocalStorage: true
+		})
+	]
+});
+```
+
+### No locale OR different locale when calling messages outside of .server.ts files
+
+If you call messages on the server outside of load functions or hooks, you might run into issues with the locale not being set correctly. This can happen if you call messages outside of a request context.
+
+```typescript
+// hello.ts
+import { m } from './paraglide/messages.js';
+
+// 💥 there is no url in this context to retrieve
+//    the locale from.
+console.log(m.hello());
+```

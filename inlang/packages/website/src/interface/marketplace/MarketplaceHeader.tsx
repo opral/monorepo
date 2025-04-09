@@ -1,9 +1,4 @@
-import SearchBar, {
-	setSearchInput,
-} from "#src/interface/components/SearchBar.jsx";
-import CategoryTabs from "./CategoryTabs.jsx";
 import { For, Show } from "solid-js";
-import { currentPageContext } from "#src/renderer/state.js";
 import IconGithub from "~icons/cib/github";
 import IconDiscord from "~icons/cib/discord";
 import { IconX } from "../components/Icon.jsx";
@@ -12,6 +7,7 @@ import * as m from "#src/paraglide/messages.js";
 import { LanguagePicker } from "#src/pages/index/LanguagePicker.jsx";
 import { Banner } from "../components/Banner.jsx";
 import { languageTag } from "#src/paraglide/runtime.js";
+import CategoryTabs from "./CategoryTabs.jsx";
 
 const MarketplaceHeader = (props: { withBorder: boolean }) => {
 	const socialMediaLinks = [
@@ -55,7 +51,6 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 				>
 					<Link
 						href={"/"}
-						onClick={() => setSearchInput("")}
 						class="flex items-center w-fit pointer-events-auto py-4 transition-opacity hover:opacity-75"
 					>
 						<img
@@ -72,7 +67,7 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 						</span>
 					</Link>
 					<div class="static top-0 lg:absolute lg:top-4 lg:left-1/2 lg:-translate-x-1/2 flex-1 sm:max-w-sm md:w-80 mx-0">
-						<SearchBar />
+						<div id="search-input"></div>
 					</div>
 					<div class="flex gap-8 items-center">
 						<a
@@ -84,7 +79,8 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 						</a>
 						<a
 							class="hidden text-surface-700 hover:text-primary pointer-events-auto md:flex justify-center items-center h-10 relative gap-2 rounded-md flex-grow-0 flex-shrink-0 text-sm font-medium text-left cursor-pointer transition-all duration-200"
-							href="/documentation"
+							target="_blank"
+							href="https://github.com/opral/inlang-sdk"
 						>
 							{m.marketplace_header_build_on_inlang_button()}
 						</a>
@@ -108,11 +104,7 @@ const MarketplaceHeader = (props: { withBorder: boolean }) => {
 						<LanguagePicker />
 					</div>
 				</div>
-				<Show
-					when={!currentPageContext.urlParsed.pathname.includes("/install")}
-				>
-					<CategoryTabs />
-				</Show>
+				<CategoryTabs></CategoryTabs>
 			</header>
 		</>
 	);

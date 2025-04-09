@@ -20,6 +20,10 @@ The Paraglide runtime API.
 
 > **baseLocale**: [`baseLocale`](-internal-.md#baselocale)
 
+#### cookieMaxAge
+
+> **cookieMaxAge**: [`cookieMaxAge`](-internal-.md#cookiemaxage)
+
 #### cookieName
 
 > **cookieName**: [`cookieName`](-internal-.md#cookiename)
@@ -31,6 +35,14 @@ The Paraglide runtime API.
 #### deLocalizeUrl
 
 > **deLocalizeUrl**: [`deLocalizeUrl`](-internal-.md#delocalizeurl)
+
+#### disableAsyncLocalStorage
+
+> **disableAsyncLocalStorage**: [`disableAsyncLocalStorage`](-internal-.md#disableasynclocalstorage)
+
+#### experimentalMiddlewareLocaleSplitting
+
+> **experimentalMiddlewareLocaleSplitting**: [`experimentalMiddlewareLocaleSplitting`](-internal-.md#experimentalmiddlewarelocalesplitting)
 
 #### extractLocaleFromCookie
 
@@ -44,6 +56,10 @@ The Paraglide runtime API.
 
 > **extractLocaleFromUrl**: [`extractLocaleFromUrl`](-internal-.md#extractlocalefromurl)
 
+#### generateStaticLocalizedUrls
+
+> **generateStaticLocalizedUrls**: [`generateStaticLocalizedUrls`](-internal-.md#generatestaticlocalizedurls)
+
 #### getLocale
 
 > **getLocale**: [`getLocale`](-internal-.md#getlocale)
@@ -55,6 +71,10 @@ The Paraglide runtime API.
 #### isLocale
 
 > **isLocale**: [`isLocale`](-internal-.md#islocale)
+
+#### isServer
+
+> **isServer**: [`isServer`](-internal-.md#isserver)
 
 #### locales
 
@@ -76,13 +96,17 @@ The Paraglide runtime API.
 
 > **overwriteGetUrlOrigin**: [`overwriteGetUrlOrigin`](-internal-.md#overwritegeturlorigin)
 
+#### overwriteServerAsyncLocalStorage
+
+> **overwriteServerAsyncLocalStorage**: [`overwriteServerAsyncLocalStorage`](-internal-.md#overwriteserverasynclocalstorage)
+
 #### overwriteSetLocale
 
 > **overwriteSetLocale**: [`overwriteSetLocale`](-internal-.md#overwritesetlocale)
 
-#### serverMiddleware
+#### serverAsyncLocalStorage
 
-> **serverMiddleware**: [`serverMiddleware`](-internal-.md#servermiddleware)
+> **serverAsyncLocalStorage**: [`serverAsyncLocalStorage`](-internal-.md#serverasynclocalstorage)
 
 #### setLocale
 
@@ -91,6 +115,10 @@ The Paraglide runtime API.
 #### strategy
 
 > **strategy**: [`strategy`](-internal-.md#strategy)
+
+#### trackMessageCall
+
+> **trackMessageCall**: [`trackMessageCall`](-internal-.md#trackmessagecall)
 
 #### urlPatterns
 

@@ -1,5 +1,5 @@
 import { PluginSettings } from "./settings.js";
-import { ideExtensionConfig } from "./ideExtension/config.js";
+import { config } from "./ideExtension/config.js";
 import type { InlangPlugin } from "@inlang/sdk";
 
 const key = "plugin.inlang.mFunctionMatcher";
@@ -13,5 +13,7 @@ export const plugin: InlangPlugin<{
 	description:
 		"A plugin for the inlang SDK that uses a JSON file per language tag to store translations.",
 	key,
-	addCustomApi: () => ideExtensionConfig(),
+	meta: {
+		"app.inlang.ideExtension": config,
+	},
 };

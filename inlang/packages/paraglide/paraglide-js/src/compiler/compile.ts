@@ -11,6 +11,7 @@ import {
 	defaultCompilerOptions,
 	type CompilerOptions,
 } from "./compiler-options.js";
+import { Logger } from "../services/logger/index.js";
 
 // This is a workaround to prevent multiple compilations from running at the same time.
 // https://github.com/opral/inlang-paraglide-js/issues/320#issuecomment-2596951222
@@ -21,6 +22,8 @@ let compilationInProgress: Promise<{
 export type CompilationResult = {
 	outputHashes: Record<string, string> | undefined;
 };
+
+const logger = new Logger();
 
 /**
  * Loads, compiles, and writes the output to disk.
@@ -74,6 +77,7 @@ export async function compile(
 			const outputHashes = await writeOutput({
 				directory: absoluteOutdir,
 				output,
+				cleanDirectory: withDefaultOptions.cleanOutdir,
 				fs: fs.promises,
 				previousOutputHashes: options.previousCompilation?.outputHashes,
 			});
@@ -87,15 +91,19 @@ export async function compile(
 				saveLocalAccount({ fs, account: activeAccount });
 			}
 
+			const warningsAndErrors = await project.errors.get();
+
+			for (const warningOrError of warningsAndErrors) {
+				logger.warn(warningOrError);
+			}
+
 			await project.close();
 
 			return { outputHashes };
 		} catch (e) {
-			console.error(e);
-			return { outputHashes: undefined };
-		} finally {
-			// release the lock
+			// release the lock in case of an error
 			compilationInProgress = null;
+			throw e;
 		}
 	})();
 

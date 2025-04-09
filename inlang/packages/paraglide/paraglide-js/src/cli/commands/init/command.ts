@@ -1,5 +1,4 @@
 import { Command } from "commander";
-import consola from "consola";
 import * as nodePath from "node:path";
 import { Logger } from "../../../services/logger/index.js";
 import { findPackageJson } from "../../../services/environment/package.js";
@@ -15,6 +14,7 @@ import { ENV_VARIABLES } from "../../../services/env-variables/index.js";
 import { detectBundler } from "../../steps/detect-bundler.js";
 import { addVitePlugin } from "../../steps/add-vite-plugin.js";
 import { compile } from "../../../compiler/compile.js";
+import { maybeAddMachineTranslation } from "../../steps/maybe-add-machine-translation.js";
 
 export const initCommand = new Command()
 	.name("init")
@@ -46,35 +46,26 @@ export const initCommand = new Command()
 
 		const ctx7 = await maybeUpdateTsConfig(ctx6);
 		const ctx8 = await maybeAddSherlock(ctx7);
+		const ctx9 = await maybeAddMachineTranslation(ctx8);
 
 		try {
 			await compile({
-				project: ctx8.projectPath,
-				outdir: ctx8.outdir,
+				project: ctx9.projectPath,
+				outdir: ctx9.outdir,
 			});
-			ctx.logger.success("Run paraglide compiler");
+			ctx.logger.success("Ran the paraglide compiler");
 		} catch {
 			ctx.logger.warn(
 				"Failed to compile project automatically. You will need to run the compiler manually"
 			);
 		}
 
-		const absoluteSettingsPath = nodePath.resolve(
-			ctx8.projectPath,
-			"settings.json"
-		);
-		const relativeSettingsFilePath = absoluteSettingsPath.replace(
-			process.cwd(),
-			"."
-		);
-
 		const successMessage = [
 			`inlang Paraglide-JS has been set up sucessfully.`,
 			"\n",
 			`1. Run your install command (npm i, yarn install, etc)`,
 			`2. Run the build script (npm run build, or similar.)`,
-			`3. Define the locales in ${relativeSettingsFilePath}`,
-			"\n",
+			`3. Visit https://inlang.com/m/gerre34r/library-inlang-paraglideJs/basics to get started.`,
 			"\n",
 			`For questions and feedback, visit`,
 			`https://github.com/opral/inlang-paraglide-js/issues`,
@@ -83,7 +74,7 @@ export const initCommand = new Command()
 		process.exit(0);
 	});
 
-export const addParaglideJsToDevDependencies: CliStep<
+const addParaglideJsToDevDependencies: CliStep<
 	{
 		fs: typeof import("node:fs/promises");
 		logger: Logger;
@@ -103,7 +94,7 @@ export const addParaglideJsToDevDependencies: CliStep<
 	return ctx1;
 };
 
-export const enforcePackageJsonExists: CliStep<
+const enforcePackageJsonExists: CliStep<
 	{ logger: Logger; fs: typeof import("node:fs/promises") },
 	{ packageJsonPath: string }
 > = async (ctx) => {
@@ -117,7 +108,7 @@ export const enforcePackageJsonExists: CliStep<
 	return { ...ctx, packageJsonPath };
 };
 
-export const addCompileStepToPackageJSON: CliStep<
+const addCompileStepToPackageJSON: CliStep<
 	{
 		fs: typeof import("node:fs/promises");
 		logger: Logger;
@@ -130,54 +121,28 @@ export const addCompileStepToPackageJSON: CliStep<
 	const projectPath = "./" + nodePath.relative(process.cwd(), ctx.projectPath);
 	const outdir = "./" + nodePath.relative(process.cwd(), ctx.outdir);
 
-	let shouldExit = false;
-
 	ctx = await updatePackageJson({
 		scripts: async (scripts) => {
-			// add the compile command to the postinstall script
-			// this isn't super important, so we won't interrupt the user if it fails
-			if (!scripts.postinstall?.includes("paraglide-js compile")) {
-				scripts.postinstall =
-					`paraglide-js compile --project ${projectPath} --outdir ${outdir}` +
-					(scripts.postinstall ? " && " + scripts.postinstall : "");
-			}
-
 			if (scripts.build === undefined) {
 				scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${outdir}`;
 			} else if (scripts.build.includes("paraglide-js compile") === false) {
 				scripts.build = `paraglide-js compile --project ${projectPath} --outdir ${outdir} && ${scripts.build}`;
 			} else {
-				ctx.logger
-					.warn(`The "build" script in the \`package.json\` already contains a "paraglide-js compile" command.
-				
-				Please add the following command to your build script manually:
-				
-				\`paraglide-js compile --project ${ctx.projectPath}`);
-				const response = await consola.prompt(
-					"Have you added the compile command to your build script?",
-					{
-						type: "confirm",
-						initial: false,
-					}
-				);
-				if (response === false) {
-					ctx.logger.log(
-						"Please add the paraglide-js compile to your build script and try again."
-					);
-					shouldExit = true;
-					throw new Error("Skip write");
-				} else {
-					throw new Error("Skip write");
-				}
+				return scripts;
 			}
 
 			ctx.logger.success(
-				"Successfully added the compile command to the build step in package.json."
+				"Added the compile command to the build step in package.json."
+			);
+			ctx.logger.info(
+				`If you use a bundler like Vite, Rolldown, or Webpack, you can use a bundler plugin instead and remove the compile command from the build script.`
+			);
+			ctx.logger.info(
+				`Visit https://inlang.com/m/gerre34r/library-inlang-paraglideJs/compiling-messages for more information.`
 			);
 			return scripts;
 		},
 	})(ctx);
 
-	if (shouldExit) process.exit(1);
 	return ctx;
 };

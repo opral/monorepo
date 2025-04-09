@@ -23,7 +23,9 @@ export async function validateCommandAction(args: { project: string }) {
     }
 
     log.success("The project is valid!");
+    process.exit(0);
   } catch (error) {
     log.error(error);
+    process.exit(1);
   }
 }

@@ -1,5 +1,82 @@
 # @inlang/cli
 
+## 3.0.10
+
+### Patch Changes
+
+- Updated dependencies [bd2c366]
+  - @inlang/sdk@2.4.7
+
+## 3.0.9
+
+### Patch Changes
+
+- Updated dependencies [49a7880]
+  - @inlang/sdk@2.4.6
+
+## 3.0.8
+
+### Patch Changes
+
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+
+## 3.0.7
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+
+## 3.0.6
+
+### Patch Changes
+
+- c1adffe: Fix typo and inconsistent casing in CLI help output
+
+## 3.0.5
+
+### Patch Changes
+
+- @inlang/sdk@2.4.3
+
+## 3.0.4
+
+### Patch Changes
+
+- @inlang/sdk@2.4.2
+
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [5a991cd]
+  - @inlang/sdk@2.4.1
+
+## 3.0.2
+
+Fix @inlang/rpc is a bundled dependency that is not published on npm
+
+## 3.0.0
+
+### Major Changes
+
+- 4b710df: Upgrade to the inlang SDK v2.
+
+  BREAKING:
+
+  - The `inlang lint` command has been removed. Please upvote https://github.com/opral/lix-sdk/issues/239 to re-introduce linting in a future release.
+
+  ```diff
+  - inlang lint
+  ```
+
+  - Machine translate now takes `locales` instead of `languageTags` as argument
+
+  ```diff
+  - inlang machine-translate --languageTags en,de
+  + inlang machine-translate --locales en,de
+  ```
+
 ## 2.18.1
 
 ### Patch Changes

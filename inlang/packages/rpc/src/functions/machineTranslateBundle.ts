@@ -7,7 +7,6 @@ import {
 } from "@inlang/sdk";
 import { randomUUID } from "node:crypto";
 import type { Result } from "../types.js";
-import { ENV_VARIABLES } from "../services/env-variables/index.js";
 
 export async function machineTranslateBundle(args: {
 	bundle: BundleNested;
@@ -15,7 +14,7 @@ export async function machineTranslateBundle(args: {
 	targetLocales: string[];
 }): Promise<Result<NewBundleNested, string>> {
 	try {
-		if (!ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY) {
+		if (!process.env.GOOGLE_TRANSLATE_API_KEY) {
 			return { error: "GOOGLE_TRANSLATE_API_KEY is not set" };
 		}
 
@@ -38,6 +37,33 @@ export async function machineTranslateBundle(args: {
 					continue;
 				}
 
+				// Find target message for this locale if it exists
+				const targetMessage = copy.messages.find(
+					(m) => m.locale === targetLocale
+				);
+
+				// If target message exists, check if this variant already exists
+				if (targetMessage) {
+					// Check if a matching variant already exists
+					const existingVariant = findMatchingVariant(
+						targetMessage.variants,
+						sourceVariant.matches
+					);
+
+					// Skip translation if matching variant already exists and is not empty
+					// Empty means either an empty pattern array or a pattern with just an empty text element
+					if (existingVariant && !(
+						existingVariant.pattern.length === 0 || 
+						(existingVariant.pattern.length === 1 && 
+						 existingVariant.pattern[0]?.type === "text" && 
+						 (existingVariant.pattern[0] as Text).value === "")
+					)) {
+						continue;
+					}
+					
+					// We found an empty pattern, continue with translation
+				}
+
 				const response = await fetch(
 					"https://translation.googleapis.com/language/translate/v2?" +
 						new URLSearchParams({
@@ -45,7 +71,7 @@ export async function machineTranslateBundle(args: {
 							target: targetLocale,
 							source: args.sourceLocale,
 							format: "html",
-							key: ENV_VARIABLES.GOOGLE_TRANSLATE_API_KEY,
+							key: process.env.GOOGLE_TRANSLATE_API_KEY,
 						}),
 					{ method: "POST" }
 				);
@@ -59,17 +85,31 @@ export async function machineTranslateBundle(args: {
 				const pattern = deserializePattern(
 					json.data.translations[0].translatedText
 				);
-				const targetMessage = copy.messages.find(
-					(m) => m.locale === targetLocale
-				);
 
 				if (targetMessage) {
-					targetMessage.variants.push({
-						id: randomUUID(),
-						messageId: targetMessage.id,
-						matches: sourceVariant.matches,
-						pattern,
-					} satisfies Variant);
+					// Check if we need to update an existing variant or create a new one
+					const existingVariant = findMatchingVariant(
+						targetMessage.variants,
+						sourceVariant.matches
+					);
+					
+					if (existingVariant && (
+						existingVariant.pattern.length === 0 || 
+						(existingVariant.pattern.length === 1 && 
+						 existingVariant.pattern[0]?.type === "text" && 
+						 (existingVariant.pattern[0] as Text).value === "")
+					)) {
+						// Update the existing variant instead of creating a new one
+						existingVariant.pattern = pattern;
+					} else {
+						// Create a new variant
+						targetMessage.variants.push({
+							id: randomUUID(),
+							messageId: targetMessage.id,
+							matches: sourceVariant.matches,
+							pattern,
+						} satisfies Variant);
+					}
 				} else {
 					const newMessageId = randomUUID();
 					copy.messages.push({
@@ -92,6 +132,59 @@ export async function machineTranslateBundle(args: {
 	} catch (error) {
 		return { error: error?.toString() ?? "unknown error" };
 	}
+}
+
+/**
+ * Determines if a variant with matching "matches" property already exists
+ * @param variants Array of variants to search through
+ * @param matches The matches to look for
+ * @returns The matching variant or undefined if no match found
+ */
+function findMatchingVariant(
+	variants: Variant[],
+	matches: Variant["matches"]
+): Variant | undefined {
+	// If matches is empty, look for variants with empty matches
+	if (matches.length === 0) {
+		const result = variants.find((v) => v.matches.length === 0);
+		return result;
+	}
+
+	// Otherwise, look for variants where all matches are equivalent
+	const result = variants.find((variant) => {
+		// If lengths don't match, it's not the same
+		if (variant.matches.length !== matches.length) {
+			return false;
+		}
+
+		// Check if all matches are equivalent
+		const isMatch = matches.every((sourceMatch) => {
+			return variant.matches.some((targetMatch) => {
+				// Both matches must have the same key and type
+				if (
+					targetMatch.key !== sourceMatch.key ||
+					targetMatch.type !== sourceMatch.type
+				) {
+					return false;
+				}
+
+				// For literal matches, also check the value
+				if (
+					sourceMatch.type === "literal-match" &&
+					targetMatch.type === "literal-match"
+				) {
+					return sourceMatch.value === targetMatch.value;
+				}
+
+				// For catchall matches, just matching key and type is sufficient
+				return true;
+			});
+		});
+		
+		return isMatch;
+	});
+	
+	return result;
 }
 
 // MOCK_TRANSLATE: Mock the google translate api

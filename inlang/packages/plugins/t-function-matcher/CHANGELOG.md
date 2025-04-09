@@ -1,5 +1,63 @@
 # @inlang/plugin-t-function-matcher
 
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [bd2c366]
+  - @inlang/sdk@2.4.7
+
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [49a7880]
+  - @inlang/sdk@2.4.6
+
+## 2.0.7
+
+### Patch Changes
+
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+
+## 2.0.6
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+
+## 2.0.5
+
+### Patch Changes
+
+- @inlang/sdk@2.4.3
+
+## 2.0.4
+
+### Patch Changes
+
+- @inlang/sdk@2.4.2
+
+## 2.0.3
+
+### Patch Changes
+
+- 73cc245: fix: key name of sherlock extension
+
+## 2.0.2
+
+### Patch Changes
+
+- 856f1ef: fix export of meta config for sherlock
+
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [5a991cd]
+  - @inlang/sdk@2.4.1
+
 ## 2.0.0
 
 ### Major Changes

@@ -151,7 +151,11 @@ export async function loadProjectFromDirectory(
 		...project,
 		errors: {
 			get: async () => {
-				return [...localImport.errors, ...importedResourceFileErrors];
+				return [
+					...filterLocalPluginImportErrors(await project.errors.get()),
+					...localImport.errors,
+					...importedResourceFileErrors,
+				];
 			},
 			// subscribe: (
 			// 	callback: Parameters<InlangProject["errors"]["subscribe"]>[0]
@@ -216,6 +220,24 @@ function arrayBuffersEqual(a: ArrayBuffer, b: ArrayBuffer) {
 	}
 
 	return true;
+}
+
+/**
+ * Filters out errors that are related to local plugins because
+ * `loadProjectFromDirectory()` can import local plugins.
+ */
+function filterLocalPluginImportErrors(
+	errors: readonly Error[]
+): readonly Error[] {
+	return errors.filter((error) => {
+		if (
+			error instanceof PluginImportError &&
+			error.plugin.startsWith("http") === false
+		) {
+			return false;
+		}
+		return true;
+	});
 }
 
 /**
@@ -705,21 +727,33 @@ export function withAbsolutePaths(
  * Joins a path from a project path.
  *
  * @example
- *   joinPathFromProject("/project.inlang", "./local-plugins/mock-plugin.js") -> "/local-plugins/mock-plugin.js"
+ *   absolutePathFromProject("/project.inlang", "./local-plugins/mock-plugin.js") -> "/local-plugins/mock-plugin.js"
  *
- *   joinPathFromProject("/website/project.inlang", "./mock-plugin.js") -> "/website/mock-plugin.js"
+ *   absolutePathFromProject("/website/project.inlang", "./mock-plugin.js") -> "/website/mock-plugin.js"
  */
-export function absolutePathFromProject(projectPath: string, path: string) {
-	// need to remove the project path from the module path for legacy reasons
-	// "/project.inlang/local-plugins/mock-plugin.js" -> "/local-plugins/mock-plugin.js"
-	const pathWithoutProject = projectPath
-		.split(nodePath.sep)
-		.slice(0, -1)
-		.join(nodePath.sep);
+export function absolutePathFromProject(
+	projectPath: string,
+	filePath: string
+): string {
+	// Normalize paths for consistency across platforms
+	const normalizedProjectPath = nodePath
+		.normalize(projectPath)
+		.replace(/\\/g, "/");
+	const normalizedFilePath = nodePath.normalize(filePath).replace(/\\/g, "/");
 
-	const resolvedPath = nodePath.resolve(pathWithoutProject, path);
+	// Remove the last part of the project path (file name) to get the project root
+	const projectRoot = nodePath.dirname(normalizedProjectPath);
 
-	return resolvedPath;
+	// If filePath is already absolute, return it directly
+	if (nodePath.isAbsolute(normalizedFilePath)) {
+		return normalizedFilePath;
+	}
+
+	// Compute absolute resolved path
+	const resolvedPath = nodePath.resolve(projectRoot, normalizedFilePath);
+
+	// Ensure final path always uses forward slashes
+	return resolvedPath.replace(/\\/g, "/");
 }
 
 export class ResourceFileImportError extends Error {

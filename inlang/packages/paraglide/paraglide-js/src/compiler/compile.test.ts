@@ -9,6 +9,7 @@ import { compile } from "./compile.js";
 import { getAccountFilePath } from "../services/account/index.js";
 import type { Runtime } from "./runtime/type.js";
 import { defaultCompilerOptions } from "./compiler-options.js";
+import consola from "consola";
 
 test("loads a project and compiles it", async () => {
 	const project = await loadProjectInMemory({
@@ -38,7 +39,9 @@ test("loads a project and compiles it", async () => {
 	const files = await fs.promises.readdir("/output");
 
 	//runtime.js and messages.js are always compiled with the default options
-	expect(files).toEqual(expect.arrayContaining(["runtime.js", "messages.js"]));
+	expect(files).toEqual(
+		expect.arrayContaining(["runtime.js", "server.js", "messages.js"])
+	);
 });
 
 test("loads a local account from app data if exists", async () => {
@@ -104,7 +107,7 @@ test("saves the local account to app data if not exists", async () => {
 	expect(account).toHaveProperty("name");
 });
 
-test.skip("cleans the output directory", async () => {
+test("cleans the output directory", async () => {
 	const fs = memfs().fs as unknown as typeof import("node:fs");
 
 	const project = await loadProjectInMemory({
@@ -133,6 +136,38 @@ test.skip("cleans the output directory", async () => {
 
 	expect(outputDir).not.toContain("y.js");
 	expect(outputSubDir).toBe(false);
+});
+
+test("doesn't clean the output directory if option is set to false", async () => {
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	const project = await loadProjectInMemory({
+		blob: await newProject({}),
+	});
+
+	// save project to directory to test loading
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await fs.promises.mkdir("/output/subdir", { recursive: true });
+	await fs.promises.writeFile("/output/subdir/x.js", "console.log('hello')");
+	await fs.promises.writeFile("/output/y.js", "console.log('hello')");
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		cleanOutdir: false,
+		fs: fs,
+	});
+
+	const outputDir = await fs.promises.readdir("/output");
+	const outputSubDir = fs.existsSync("/output/subdir");
+
+	expect(outputDir).toContain("y.js");
+	expect(outputSubDir).toBe(true);
 });
 
 test("multiple compile calls do not interfere with each other", async () => {
@@ -235,7 +270,12 @@ test("emits additional files", async () => {
 	const adapterDir = await fs.promises.readdir("/output/adapter");
 
 	expect(outputDir).toEqual(
-		expect.arrayContaining(["runtime.js", "messages.js", "adapter.js"])
+		expect.arrayContaining([
+			"runtime.js",
+			"server.js",
+			"messages.js",
+			"adapter.js",
+		])
 	);
 
 	expect(adapterDir).toEqual(["component.svelte"]);
@@ -298,4 +338,70 @@ test("default compiler options should include cookied, variable and baseLocale t
 		"globalVariable",
 		"baseLocale",
 	]);
+});
+
+test("emits warnings for modules that couldn't be imported locally", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+				modules: ["./non-existent-paraglide-plugin.js"],
+			},
+		}),
+	});
+
+	const mock = vi.fn();
+
+	consola.mockTypes(() => mock);
+
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	// save project to directory to test loading
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		fs: fs,
+	});
+
+	expect(mock).toHaveBeenCalled();
+});
+
+test("emits warnings for modules that couldn't be imported via http", async () => {
+	const project = await loadProjectInMemory({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+				modules: ["https://example.com/non-existent-paraglide-plugin.js"],
+			},
+		}),
+	});
+
+	const mock = vi.fn();
+
+	consola.mockTypes(() => mock);
+
+	const fs = memfs().fs as unknown as typeof import("node:fs");
+
+	// save project to directory to test loading
+	await saveProjectToDirectory({
+		project,
+		path: "/project.inlang",
+		fs: fs.promises,
+	});
+
+	await compile({
+		project: "/project.inlang",
+		outdir: "/output",
+		fs: fs,
+	});
+
+	expect(mock).toHaveBeenCalled();
 });

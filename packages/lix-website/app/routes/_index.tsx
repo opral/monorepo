@@ -1,86 +1,86 @@
-import type { MetaFunction } from "@remix-run/node"
-import Header, { socialLinks } from "../components/header"
-import Check from "~/components/ui/check"
-import IconArrowExternal from "~/components/icons/arrow-external"
-import Details from "~/components/ui/details"
-import IconLogoTabelle from "~/components/icons/logo-tabelle"
-import IconLogoPapier from "~/components/icons/logo-papier"
-import IconLogoInlang from "~/components/icons/logo-inlang"
-import Banner from "~/components/ui/banner"
-import Footer from "~/components/footer"
+import type { MetaFunction } from "@remix-run/node";
+import Header, { socialLinks } from "../components/header";
+import Check from "app/components/ui/check";
+import IconArrowExternal from "app/components/icons/arrow-external";
+import Details from "app/components/ui/details";
+import IconLogoTabelle from "app/components/icons/logo-tabelle";
+import IconLogoPapier from "app/components/icons/logo-papier";
+import IconLogoInlang from "app/components/icons/logo-inlang";
+import Footer from "app/components/footer";
 
 export const meta: MetaFunction = () => {
-	const ogImage = [
-		{
-			property: "og:url",
-			content: "https://lix.opral.com",
-		},
-		{
-			property: "og:type",
-			content: "website",
-		},
-		{
-			property: "og:title",
-			content: "Lix - Change Control System",
-		},
-		{
-			property: "og:description",
-			content:
-				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-		},
-		{
-			property: "og:image",
-			content: "https://lix.opral.com/images/og-image-lix.png",
-		},
-		{
-			property: "og:image:type",
-			content: "image/png",
-		},
-		{
-			property: "og:image:width",
-			content: "1200",
-		},
-		{
-			property: "og:image:height",
-			content: "630",
-		},
-		{
-			name: "twitter:card",
-			content: "Change graph of the lix change control system",
-		},
-		{
-			property: "twitter:url",
-			content: "https://lix.opral.com",
-		},
-		{
-			name: "twitter:title",
-			content: "Lix - Change Control System",
-		},
-		{
-			name: "twitter:description",
-			content:
-				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-		},
-		{
-			name: "twitter:image:src",
-			content: "https://lix.opral.com/images/og-image-lix.png",
-		},
-	]
+  const ogImage = [
+    {
+      property: "og:url",
+      content: "https://lix.opral.com",
+    },
+    {
+      property: "og:type",
+      content: "website",
+    },
+    {
+      property: "og:title",
+      content: "Lix - Change Control System",
+    },
+    {
+      property: "og:description",
+      content:
+        "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
+    },
+    {
+      property: "og:image",
+      content: "https://lix.opral.com/images/og-image-lix.png",
+    },
+    {
+      property: "og:image:type",
+      content: "image/png",
+    },
+    {
+      property: "og:image:width",
+      content: "1200",
+    },
+    {
+      property: "og:image:height",
+      content: "630",
+    },
+    {
+      name: "twitter:card",
+      content: "Change graph of the lix change control system",
+    },
+    {
+      property: "twitter:url",
+      content: "https://lix.opral.com",
+    },
+    {
+      name: "twitter:title",
+      content: "Lix - Change Control System",
+    },
+    {
+      name: "twitter:description",
+      content:
+        "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
+    },
+    {
+      name: "twitter:image:src",
+      content: "https://lix.opral.com/images/og-image-lix.png",
+    },
+  ];
 
-	return [
-		{ title: "Lix - Change Control System" },
-		{
-			name: "description",
-			content:
-				"The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-		},
-		{
-			name: "keywords",
-			content: "change control, file-based apps, collaboration, automation, change graph",
-		},
-		...ogImage,
-	]
-}
+  return [
+    { title: "Lix - Change Control System" },
+    {
+      name: "description",
+      content:
+        "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
+    },
+    {
+      name: "keywords",
+      content:
+        "change control, file-based apps, collaboration, automation, change graph",
+    },
+    ...ogImage,
+  ];
+};
 
 const coreFeatures = [
   {
@@ -117,8 +117,8 @@ const enabledByChangeControl = [
 
 const appsBuiltOnTopOfLix = [
   {
-    title: "Table-App",
-    link: "https://csv-n2qj.onrender.com/",
+    title: "CSV App",
+    link: "https://lix.opral.com/app/csv",
     icon: <IconLogoTabelle />,
     description: "Get change control in your CSV file editor.",
   },
@@ -138,9 +138,9 @@ const appsBuiltOnTopOfLix = [
 
 const faq = [
   {
-    question: "How is it different from my current file-sharing solution?",
+    question: "Is lix replacing git?",
     answer:
-      "Your current file-sharing solution may show which of your colleagues made the last change to a file, but you don't know what changed, what the previous version was and what the context of the changes was.",
+      "No. Lix is designed for everything but software engineering. This is reflected by being browser-based, and being able to track changes in any file format, not just text files.",
   },
   {
     question: "How does it compare to versioning I know from other apps?",
@@ -148,27 +148,44 @@ const faq = [
       "There are apps with versioning, but in many cases, they only save versions of the entire project at specific points in time. Lix tracks and understands the context of every change in a file, giving you more context and allowing you to set automations. Furthermore, Lix provides a generalized system that allows all files and apps to work together.",
   },
   {
-    question: "Is lix replacing git?",
+    question:
+      "What is the difference between restore a Version and revert a change?",
     answer:
-      "No. Lix is designed to change control non-text files and build apps, not version source code.",
+      "Restoring a version replaces the current document with an older snapshot, erasing all subsequent changes, while reverting a change precisely undoes a specific modification while preserving all later work. Essentially, restore is an all-or-nothing replacement, and revert is a targeted undo.",
   },
 ];
 
 export default function Index() {
   return (
     <>
-      <Banner />
       <Header />
-      <main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-24">
+      <main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-20">
         <div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
           <div className="max-w-md">
+            <div className="flex gap-2 mb-2 justify-center md:justify-start">
+              <a
+                href="https://www.npmjs.com/package/@lix-js/sdk"
+                target="_blank"
+              >
+                <img
+                  src="https://img.shields.io/npm/dw/%40lix-js%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads"
+                  alt="npm downloads"
+                />
+              </a>
+              <a href="https://discord.gg/xjQA897RyK" target="_blank">
+                <img
+                  src="https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white"
+                  alt="discord"
+                />
+              </a>
+            </div>
             <div>
               <h1 className="text-5xl leading-[1.2] font-semibold">
-                The worlds first change control system
+                A change control system & SDK
               </h1>
             </div>
             <p className="mt-8 mb-6">
-              The lix change control system allows storing, tracking, querying,
+              The lix SDK for change control allows storing, tracking, querying,
               and reviewing changes in different file formats, e.g. .xlsx,
               .sqlite, or .inlang.
             </p>
@@ -177,14 +194,14 @@ export default function Index() {
                 href="/app/fm"
                 className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
               >
-                Open File Manager
+                Try the demo
               </a>
               <a
-                href="https://github.com/opral/monorepo/tree/lix-integration/packages/lix-sdk"
+                href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk"
                 target="_blank"
                 className="w-full sm:w-fit px-4 py-2 text-slate-500 bg-white hover:bg-slate-100 rounded-md font-medium flex justify-center items-center gap-2 border border-slate-300 hover:border-slate-400 transition-all"
               >
-                Explore the lix SDK
+                SDK documentation
               </a>
             </div>
           </div>
@@ -202,10 +219,32 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col items-center">
-          <h2 className="text-center">Enabled by change control</h2>
-          <p className="max-w-md text-center mt-2 mb-8">
-            The possibility to track and query changes is the foundation for
-            many features.
+          <h2 className="text-center">Built apps with the lix SDK</h2>
+          <p className="max-w-2xl text-center mt-4 mb-8">
+            The lix SDK can be intergated into exsiting apps, or used as backend
+            for new apps.{" "}
+            <a
+              href="https://github.com/opral/lix-sdk"
+              className="text-cyan-600"
+            >
+              Visit the documentation for more information.
+            </a>
+          </p>
+          <a href="https://github.com/opral/lix-sdk">
+            <img
+              src="/images/code-example.png"
+              alt="Simlified sketch of the lix file manager"
+              className="mb-2 sm:-mb-10 w-[724x] md:h-[300px] mt-4 mx-auto"
+            />
+          </a>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <h2 className="text-center">Everything revolves around changes</h2>
+          <p className="max-w-2xl text-center mt-4 mb-8">
+            A system, that can track changes across any file format is one
+            single system that enables collaboration, automation, and
+            traceability for every digital work we create.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
             {enabledByChangeControl.map((feature, index) => (
@@ -232,11 +271,10 @@ export default function Index() {
         </div>
 
         <div className="flex flex-col items-center">
-          <h2 className="text-center">How to experience the system?</h2>
-          <p className="max-w-md text-center mt-2 mb-8">
-            Change control can be accessed in file-based applications that are
-            already built on Lix or the Lix File Manager, which can track
-            changes of conventional files.
+          <h2 className="text-center">Try the demo</h2>
+          <p className="max-w-lg text-center mt-4 mb-8">
+            The file manager app is a demo of the lix change control system.
+            Import files, make changes, and see the change control in action.
           </p>
           <div className="card relative w-full group cursor-pointer">
             <a href="/file-manager">
@@ -258,52 +296,13 @@ export default function Index() {
               </div>
             </a>
           </div>
-
-          <div className="w-full my-12 md:my-16 relative flex items-center">
-            <div className="absolute w-fit left-0 right-0 mx-auto bg-white font-semibold text-slate-500 px-6">
-              Apps that built on top of Lix
-            </div>
-            <div className="w-full border-b border-slate-200"></div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-            {appsBuiltOnTopOfLix.map((app, index) => (
-              <a
-                key={index}
-                href={app.link}
-                className="relative card font-semibold gap-4 w-full group"
-              >
-                <div className="absolute top-[14px] md:top-6 right-[14px] md:right-6 flex justify-center items-center w-10 h-10 rounded-full bg-white text-slate-500 transition-all ring-1 ring-slate-200 group-hover:text-cyan-500  group-hover:ring-cyan-500">
-                  <div className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                    <IconArrowExternal />
-                  </div>
-                </div>
-                <div>{app.icon}</div>
-                <div className="mt-4">{app.title}</div>
-                <p className="font-normal mt-1">{app.description}</p>
-              </a>
-            ))}
-          </div>
-
-          <div className="card relative w-full mt-4">
-            <div className="flex justify-between items-end sm:items-center gap-2">
-              <div>
-                <span className="font-semibold">SDK to build Apps on Lix</span>
-                <p className="pt-1">
-                  Build your own apps with the Lix SDK to access change control
-                  features.
-                </p>
-              </div>
-              <p className="w-fit whitespace-nowrap bg-white ring-1 ring-slate-200 px-4 py-2 rounded-full">
-                Coming soon
-              </p>
-            </div>
-          </div>
         </div>
+
+        <hr />
 
         <div className="grid md:grid-cols-3 gap-8 md:gap-4">
           <div className="col-span-2 md:col-span-1">
-            <h2>Open questions?</h2>
+            <h2>FAQ</h2>
             <div className="mt-4 flex gap-2">
               {socialLinks
                 .map((socialLink, index) => (

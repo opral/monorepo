@@ -7,9 +7,9 @@ imports:
 
 Paraglide JS comes with various strategies to determine the locale out of the box. 
 
-The strategy is defined with the `strategy` option. The order of the strategies in the array defines the priority. The first strategy that returns a locale will be used.
+The strategy is defined with the `strategy` option. The priority is determined by the order of the strategies in the array. The first strategy that returns a locale will be used.
 
-In the example below, the locale is first determined by the `cookie` strategy. If no cookie is found, the `baseLocale` is used.
+In the example below, the `cookie` strategy first determines the locale. If no cookie is found, the `baseLocale` is used.
 
 ```diff
 compile({
@@ -37,7 +37,7 @@ compile({
 
 Returns the `baseLocale` defined in the settings. 
 
-Useful as fallback if no other strategy returned a locale. If a cookie has not been set yet, for example. 
+It is useful as a fallback strategy if no other strategy returns a locale, for example, if a cookie has not been set yet. 
 
 ```diff
 compile({
@@ -51,7 +51,7 @@ compile({
 
 Uses a global variable to determine the locale. 
 
-This strategy is only useful in testing environments, or to get started quickly. Setting a global variable can lead to cross request issues in server-side environments and the locale is not persisted between page reloads in client-side environments.
+This strategy is only useful in testing environments or to get started quickly. Setting a global variable can lead to cross-request issues in server-side environments, and the locale is not persisted between page reloads in client-side environments.
 
 ```diff
 compile({
@@ -60,157 +60,6 @@ compile({
 +	strategy: ["globalVariable"]
 })
 ```
-
-### url
-
-Determine the locale from the URL (pathname, domain, etc).
-
-```diff
-compile({
-	project: "./project.inlang",
-	outdir: "./src/paraglide",
-+	strategy: ["url"]
-})
-```
-
-The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
-
-For example, the pattern `https://:domain(.*)/:locale(de|en)?/:path*` matches URLs like `https://example.com/de/about` and `https://example.com/about`. The named groups `domain`, `locale`, and `path` are used to extract and replace parts of the URL.
-
-<doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
-
-
-#### Pathname-based url localization example
-
-```
-https://example.com/about 
-https://example.com/de/about
-```
-
-```js
-compile({
-	project: "./project.inlang",
-	outdir: "./src/paraglide",
-	strategy: ["url"],
-	urlPatterns: [
-		{
-			pattern: ":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
-			// the original URL is https://example.com/about. 
-			// hence, the locale is null
-			deLocalizedNamedGroups: { locale: null },
-			localizedNamedGroups: {
-				// the en locale should have no locale in the URL
-				// hence, the locale is null
-				en: { locale: null },
-				// the de locale should have the locale in the URL
-				de: { locale: "de" },
-			},
-		},
-	],
-});
-```
-
-#### Translated pathname-based url localization example
-
-For translated pathnames where you want to localize both the structure and the path segments of the URL, you can use named pattern groups to match and replace specific segments of the URL. This is useful for implementing language-specific routes like `/about` in English and `/ueber-uns` in German.
-
-```
-https://example.com/about
-https://example.com/ueber-uns
-```
-
-Basic example with translated path segment:
-
-```js
-compile({
-	project: "./project.inlang",
-	outdir: "./src/paraglide",
-	strategy: ["url"],
-	urlPatterns: [
-		{
-			pattern: ":protocol://:domain(.*)::port?/:about/:path*",
-			deLocalizedNamedGroups: { 
-				about: "about" 
-			},
-			localizedNamedGroups: {
-				en: { 
-					about: "about" 
-				},
-				de: { 
-					about: "ueber-uns" 
-				},
-			},
-		},
-	],
-});
-```
-
-#### Domain-based url localization example
-
-```
-https://example.com/about
-https://de.example.com/about
-```
-
-```js
-compile({
-	project: "./project.inlang",
-	outdir: "./src/paraglide",
-	strategy: ["url"],
-	urlPatterns: [
-		// defining the pattern during development which 
-		// uses path suffixes like /en
-		{
-			pattern: ':protocol://localhost::port?/:locale(de|en)?/:path(.*)?',
-				deLocalizedNamedGroups: { locale: null },
-				localizedNamedGroups: {
-					en: { locale: 'en' },
-					de: { locale: 'de' }
-				},
-		},
-		// production pattern which uses subdomains like de.example.com
-		{
-			pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
-			deLocalizedNamedGroups: { domain: "example.com" },
-			localizedNamedGroups: {
-				en: { domain: "example.com" },
-				de: { domain: "de.example.com" },
-			},
-		},
-	],
-});
-```
-
-#### Adding a base path
-
-You can add a base path to your URL patterns to support localized URLs with a common base path. 
-
-For example, with the base path set to "shop":
-
-- `runtime.localizeHref("/about")` will return `/shop/en/about`
-- `runtime.deLocalizeHref("/about")` will return `/shop/about`
-
-
-```js
-const base = "shop";
-
-compile({
-	project: "./project.inlang",
-	outdir: "./src/paraglide",
-	strategy: ["url"],
-	urlPatterns: [
-		{
-			pattern: ":protocol://:domain(.*)::port?/:base?/:locale(en|de)?/:path(.*)?",
-			deLocalizedNamedGroups: { base },
-			localizedNamedGroups: {
-				en: { base, locale: "en" },
-				de: { base, locale: "de" },
-			},
-		},
-	],
-});
-```
-
 
 ### preferredLanguage
 
@@ -229,22 +78,395 @@ compile({
 
 The strategy attempts to match locale in order of user preference:
 
-1. First tries exact matches (e.g., "en-US" if supported)
+1. First try exact matches (e.g., "en-US" if supported)
 2. Falls back to base language codes (e.g., "en")
 
 For example:
 - If user prefers `fr-FR,fr;q=0.9,en;q=0.7` and your app supports `["en", "fr"]`, it will use `fr`
 - If user prefers `en-US` and your app only supports `["en", "de"]`, it will use `en`
 
+### localStorage
+
+Determine the locale from the user's local storage.
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["localStorage"]
+})
+```
+
+### url
+
+Determine the locale from the URL (pathname, domain, etc).
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["url", "cookie"]
+})
+```
+
+The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
+
+<doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
+
+#### Locale prefixing
+
+```
+https://example.com/about 
+https://example.com/de/about
+```
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url", "cookie"],
+	urlPatterns: [
+		{
+			pattern: "/:path(.*)?",
+			localized: [
+				["de", "/de/:path(.*)?"],
+                                // ✅ make sure to match the least specific path last 
+				["en", "/:path(.*)?"],
+			],
+		},
+	],
+});
+```
+
+#### Translated pathnames
+
+For pathnames where you want to localize the structure and path segments of the URL, you can use different patterns for each locale. This approach enables language-specific routes like `/about` in English and `/ueber-uns` in German.
+
+```
+https://example.com/about
+https://example.com/ueber-uns
+```
+
+Here's a simple example with translated path segments:
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url", "cookie"],
+	urlPatterns: [
+		// Specific translated routes
+		{
+			pattern: "/about",
+			localized: [
+				["en", "/about"],
+				["de", "/ueber-uns"],
+			],
+		},
+		{
+			pattern: "/products/:id",
+			localized: [
+				["en", "/products/:id"],
+				["de", "/produkte/:id"],
+			],
+		},
+		// Wildcard pattern for untranslated routes
+		// This allows you to incrementally translate routes as needed
+		{
+			pattern: "/:path(.*)?",
+			localized: [
+				["en", "/:path(.*)?"],
+				["de", "/:path(.*)?"],
+			],
+		},
+	],
+});
+```
+
+
+#### Domain-based localization
+
+```
+https://example.com/about
+https://de.example.com/about
+```
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url", "cookie"],
+	urlPatterns: [
+		// Include the localhost domain as otherwise the pattern will
+		// always match and the path won't be localized
+		{
+			pattern: 'http://localhost::port?/:path(.*)?',
+			localized: [
+				["en", 'http://localhost::port?/en/:path(.*)?'],
+				["de", 'http://localhost::port?/de/:path(.*)?']
+			],
+		},
+		// production pattern which uses subdomains like de.example.com
+		{
+			pattern: "https://example.com/:path(.*)?",
+			localized: [
+				["en", "https://example.com/:path(.*)?"],
+				["de", "https://de.example.com/:path(.*)?"],
+			],
+		},
+	],
+});
+```
+
+#### Adding a base path
+
+You can add a base path to your URL patterns to support localized URLs with a common base path. 
+
+For example, with the base path set to "shop":
+
+- `runtime.localizeHref("/about")` will return `/shop/en/about`
+- `runtime.deLocalizeHref("/about")` will return `/shop/about`
+
+When using a base path, it's important to make it optional using the `{basepath/}?` syntax with curly braces and the `?` modifier. This ensures that paths without the base path will still be properly matched and have the base path added during localization.
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url", "cookie"],
+	urlPatterns: [
+		{
+			pattern: "/{shop/}?:path(.*)?",
+			localized: [
+				["en", "/{shop/}?en/:path(.*)?"],
+				["de", "/{shop/}?de/:path(.*)?"],
+			],
+		},
+	],
+});
+```
+
+This configuration enables:
+
+| Original URL | Localized URL (EN) | Localized URL (DE) | Notes |
+|-------------------|-------------------|-------------------|-------|
+| `/about` | `/shop/en/about` | `/shop/de/about` | Path without base path gets base path added |
+| `/shop/about` | `/shop/en/about` | `/shop/de/about` | Path with base path gets properly localized |
+
+The curly braces `{}` with the `?` modifier ensure that the group is treated as optional, allowing both URLs with and without the base path to be matched and properly localized.
+
+#### Making URL patterns unavailable in specific locales
+
+You can configure certain URL patterns to be unavailable in specific locales by redirecting them to a 404 page or any other designated error page. 
+
+This is useful when some content or features should only be accessible in certain languages.
+
+```
+https://example.com/specific-path       // Available in English
+https://example.com/de/404              // Redirected to 404 in German
+```
+
+To implement this, map the pattern to your 404 page URL for the locales where the content should be unavailable:
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url", "cookie"],
+	urlPatterns: [
+		// 404 page definition.
+		// 
+		// 💡 make sure to define the 404 pattern
+		// before a catch all pattern
+		{
+			pattern: "/404",
+			localized: [
+				["en", "/404"],
+				["de", "/de/404"],
+				// defining paths for locales that should not
+				// be caught by the catch all pattern 
+				// 
+				// this will be matched first and the catch all
+				// pattern will not be triggered and a redirect
+				// from /de/unavailable to /de/404 will be triggered
+				["de", "/de/unavailable"]
+			],
+		},
+		// Path that's only available in English
+		{
+			pattern: "/specific-path",
+			localized: [
+				["en", "/specific-path"],     // Normal path in English
+				["de", "/de/404"],            // Redirects to 404 in German
+			],
+		},
+		// Catch-all pattern for other routes
+		{
+			pattern: "/:path(.*)?",
+			localized: [
+				["en", "/:path(.*)?"],
+				["de", "/de/:path(.*)?"],
+			],
+		},
+	],
+});
+```
+
+When a user tries to access `/specific-path` in German, they will be redirected to `/de/404` instead. This approach allows you to:
+
+- Make certain content available only in specific languages
+- Create locale-specific restrictions for particular routes
+- Implement gradual rollouts of features by language
+- Handle legacy URLs that might only exist in certain locales
+
+Note that other paths will still work normally through the catch-all pattern, so only the specifically configured paths will be unavailable.
+
+#### Troubleshooting URL patterns
+
+When working with URL patterns, there are a few important considerations to keep in mind:
+
+##### Excluding paths is not supported
+
+[URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API#regex_matchers_limitations) does not support negative lookahead regex patterns. 
+
+The decision to not support negative lookaheads is likely related to ReDoS (Regular Expression Denial of Service) attacks. Read [this blog post](https://blakeembrey.com/posts/2024-09-web-redos/) or the [CVE on GitHub](https://github.com/pillarjs/path-to-regexp/security/advisories/GHSA-9wv6-86v2-598j).
+
+##### Pattern order matters
+
+URL patterns are evaluated in the order they appear in the `urlPatterns` array. The first pattern that matches a URL will be used. This means that more specific patterns should come before more general patterns.
+
+```js
+urlPatterns: [
+  // ❌ INCORRECT ORDER: The wildcard pattern will match everything, 
+  // so the specific pattern will never be reached
+  {
+    pattern: "https://example.com/:path(.*)?", // This will match ANY path
+    localized: [
+      ["en", "https://example.com/:path(.*)?"],
+      ["de", "https://example.com/de/:path(.*)?"],
+    ],
+  },
+  {
+    pattern: "https://example.com/blog/:id", // This will never be reached
+    localized: [
+      ["en", "https://example.com/blog/:id"],
+      ["de", "https://example.com/de/blog/:id"],
+    ],
+  },
+]
+
+// ✅ CORRECT ORDER: Specific patterns first, then more general patterns
+urlPatterns: [
+  {
+    pattern: "https://example.com/blog/:id", // Specific pattern first
+    localized: [
+      ["en", "https://example.com/blog/:id"],
+      ["de", "https://example.com/de/blog/:id"],
+    ],
+  },
+  {
+    pattern: "https://example.com/:path(.*)?", // General pattern last
+    localized: [
+      ["en", "https://example.com/:path(.*)?"],
+      ["de", "https://example.com/de/:path(.*)?"],
+    ],
+  },
+]
+```
+
+##### Localized pattern order matters too
+
+Within each pattern's `localized` array, the order of locale patterns also matters. When localizing a URL, the first matching pattern for the target locale will be used. Similarly, when delocalizing a URL, patterns are checked in order.
+
+This is especially important for path-based localization where one locale has a prefix (like `/de/`) and another doesn't. In these cases, put the more specific pattern (with prefix) first.
+
+```js
+// ❌ INCORRECT ORDER: The first pattern is too general
+{
+  pattern: "https://example.com/:path(.*)?",
+  localized: [
+    ["en", "https://example.com/:path(.*)?"], // This will match ANY path
+    ["en", "https://example.com/en/blog/:id"], // This specific pattern will never be reached
+  ],
+}
+
+// ✅ CORRECT ORDER: Specific patterns first, then more general patterns
+{
+  pattern: "https://example.com/:path(.*)?",
+  localized: [
+    ["en", "https://example.com/en/blog/:id"], // Specific pattern first
+    ["en", "https://example.com/:path(.*)?"], // General pattern last
+  ],
+}
+
+// ❌ INCORRECT ORDER FOR DELOCALIZATION: Generic pattern first will cause problems
+{
+  pattern: "/:path(.*)?",
+  localized: [
+    ["en", "/:path(.*)?"],      // Generic pattern will match everything including "/de/about"
+    ["de", "/de/:path(.*)?"],   // Pattern with prefix won't be reached for delocalization
+  ],
+}
+
+// ✅ CORRECT ORDER: More specific patterns with prefixes should come first
+{
+  pattern: "/:path(.*)?",
+  localized: [
+    ["de", "/de/:path(.*)?"],   // Specific pattern with prefix first
+    ["en", "/:path(.*)?"],      // Generic pattern last
+  ],
+}
+```
+
+##### Example: Multi-tenant application with specific routes
+
+For a multi-tenant application with specific routes, proper pattern ordering is crucial:
+
+```js
+compile({
+  project: "./project.inlang",
+  outdir: "./src/paraglide",
+  strategy: ["url", "cookie"],
+  urlPatterns: [
+    // Specific product routes first
+    {
+      pattern: "https://:tenant.example.com/products/:id",
+      localized: [
+        ["en", "https://:tenant.example.com/products/:id"],
+        ["de", "https://:tenant.example.com/produkte/:id"],
+        ["fr", "https://:tenant.example.com/produits/:id"],
+      ],
+    },
+    // Specific category routes next
+    {
+      pattern: "https://:tenant.example.com/categories/:name",
+      localized: [
+        ["en", "https://:tenant.example.com/categories/:name"],
+        ["de", "https://:tenant.example.com/kategorien/:name"],
+        ["fr", "https://:tenant.example.com/categories/:name"],
+      ],
+    },
+    // General wildcard pattern last
+    {
+      pattern: "https://:tenant.example.com/:path(.*)?",
+      localized: [
+        ["en", "https://:tenant.example.com/:path(.*)?"],
+        ["de", "https://:tenant.example.com/de/:path(.*)?"],
+        ["fr", "https://:tenant.example.com/fr/:path(.*)?"],
+      ],
+    },
+  ],
+});
+```
+
+With this configuration:
+1. Product URLs like `https://acme.example.com/products/123` will use the specific product pattern
+2. Category URLs like `https://acme.example.com/categories/electronics` will use the specific category pattern
+3. All other URLs will fall back to the general pattern
+
 ## Write your own strategy
 
 Write your own cookie, http header, or i18n routing based locale strategy to integrate Paraglide into any framework or app.
-
-### Basics
-
-Every time a message is rendered, Paraglide calls the `getLocale()` function under the hood to determine which locale to apply. By default, this will be the `baseLocale` defined in your settings. Calling `setLocale(locale)` anywhere in your code will update the locale stored by the runtime. Any calls to `getLocale()` after that (eg: when a new message is rendered) will return the newly set locale.
-
-This behaviour is far too simple for most apps. Instead of starting with the default `baseLocale`, you will probably want to determine the locale based on cookies, a http header or a routing strategy. Likewise, if the locale is changed by the user, you might want to update some cookies, change the route, or trigger a rerender of the app.
 
 Only two APIs are needed to define this behaviour and adapt Paraglide JS to your requirements: 
 
@@ -295,65 +517,3 @@ export function onRequest(request, next) {
   // in that context 
   return localeStorage.run(locale, async () => await next());
 }
-```
-
-Or, for a SvelteKit specific example, in your `hooks.server.ts`:
-
-```js
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { sequence } from '@sveltejs/kit/hooks';
-import { overwriteGetLocale, baseLocale } from './paraglide/runtime.js';
-
-overwriteGetLocale(() => {
-  //any calls to getLocale() in the async local storage context will return the stored locale
-  return localeStorage.getStore() ?? baseLocale;
-});
-
-async function localeHandler({event, resolve}) {
-  const locale = detectLocale(request);
-  // set the async locale storage for the current request
-  // to the detected locale and let the request continue
-  // in that context
-  return locale.run(locale, async() => await resolve(event));
-}
-
-async function mainHandler({event, resolve}) {
-  //...your main server side request handler logic
-  return await resolve(event);
-}
-
-export const handle = sequence(
-  localeHandler, //goes first to set the locale context for the rest of the request
-  mainHandler
-);
-
-```
-
-#### Server-side rendering
-
-1. Detect the locale from the request. 
-2. Make sure that `overwriteGetLocale()` is cross-request safe on the server. 
-
-Pseudocode logic on the server: 
-
-```ts
-import { overwriteGetLocale, overwriteSetLocale, setLocale, baseLocale } from "./paraglide/runtime.js";
-import { AsyncLocalStorage } from "node:async_hooks";
-
-const localeStorage = new AsyncLocalStorage();
-
-// ✅ DO THIS
-// ✅ when `getLocale()` is called inside a route handler
-// ✅ this function will return the language for the current request
-overwriteGetLocale(() => {
-  return localeStorage.getValue() ?? baseLocale;
-});
-
-export function onRequest(request, next) {
-  const locale = detectLocale(request);
-	// set the async locale storage for the current request
-	// to the detected locale and let the request continue
-	// in the async context 
-  return localeStorage(locale, async () => await next());
-}
-```

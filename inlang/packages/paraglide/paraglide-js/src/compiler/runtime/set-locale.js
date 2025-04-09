@@ -1,22 +1,49 @@
+import { getLocale } from "./get-locale.js";
+import { localizeUrl } from "./localize-url.js";
 import {
+	cookieMaxAge,
 	cookieName,
+	cookieDomain,
+	isServer,
+	localStorageKey,
 	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
-import { localizeUrl } from "./localize-url.js";
 
 /**
  * Set the locale.
  *
+ * Set locale reloads the site by default on the client. Reloading
+ * can be disabled by passing \`reload: false\` as an option. If
+ * reloading is disabled, you need to ensure that the UI is updated
+ * to reflect the new locale.
+ *
  * @example
  *   setLocale('en');
  *
- * @type {(newLocale: Locale) => void}
+ * @example
+ *   setLocale('en', { reload: false });
+ *
+ * @type {(newLocale: Locale, options?: { reload?: boolean }) => void}
  */
-export let setLocale = (newLocale) => {
-	let localeHasBeenSet = false;
+export let setLocale = (newLocale, options) => {
+	const optionsWithDefaults = {
+		reload: true,
+		...options,
+	};
+	// locale is already set
+	// https://github.com/opral/inlang-paraglide-js/issues/430
+	let currentLocale;
+	try {
+		currentLocale = getLocale();
+	} catch {
+		// do nothing, no locale has been set yet.
+	}
+	/** @type {string | undefined} */
+	let newLocation = undefined;
 	for (const strat of strategy) {
 		if (
 			TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED &&
@@ -25,14 +52,19 @@ export let setLocale = (newLocale) => {
 			// a default for a custom strategy to get started quickly
 			// is likely overwritten by `defineSetLocale()`
 			_locale = newLocale;
-			localeHasBeenSet = true;
 		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
-			if (typeof document === "undefined") {
+			if (
+				isServer ||
+				typeof document === "undefined" ||
+				typeof window === "undefined"
+			) {
 				continue;
 			}
+
+			const domain = cookieDomain || window.location.hostname;
+
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}; path=/`;
-			localeHasBeenSet = true;
+			document.cookie = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}; domain=${domain}`;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
@@ -49,20 +81,31 @@ export let setLocale = (newLocale) => {
 			// if the behavior is not desired, the implementation
 			// can be overwritten by `defineSetLocale()` to avoid
 			// a full page reload.
-			window.location.href = localizeUrl(window.location.href, {
+			newLocation = localizeUrl(window.location.href, {
 				locale: newLocale,
 			}).href;
-			// just in case return. the browser reloads the page by setting href
-			return;
+		} else if (
+			TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
+			strat === "localStorage" &&
+			typeof window !== "undefined"
+		) {
+			// set the localStorage
+			localStorage.setItem(localStorageKey, newLocale);
 		}
 	}
-	if (localeHasBeenSet === false) {
-		throw new Error(
-			"No strategy was able to set the locale. This can happen if you use browser-based strategies like `cookie` in a server-side rendering environment. Overwrite setLocale() on the server to avoid this error."
-		);
-	} else if (typeof window !== "undefined" && window.location) {
-		// reload the page to reflect the new locale
-		window.location.reload();
+	if (
+		!isServer &&
+		optionsWithDefaults.reload &&
+		window.location &&
+		newLocale !== currentLocale
+	) {
+		if (newLocation) {
+			// reload the page by navigating to the new url
+			window.location.href = newLocation;
+		} else {
+			// reload the page to reflect the new locale
+			window.location.reload();
+		}
 	}
 
 	return;

@@ -10,20 +10,36 @@ const PLUGIN_NAME = "unplugin-paraglide-js";
 
 const logger = new Logger();
 
+/**
+ * Default isServer which differs per bundler.
+ */
+let isServer: string | undefined;
+
 let previousCompilation: CompilationResult | undefined;
 
 export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 	name: PLUGIN_NAME,
 	enforce: "pre",
 	async buildStart() {
-		logger.info("Compiling inlang project...");
+		const isProduction = process.env.NODE_ENV === "production";
+		// default to locale-modules for development to speed up the dev server
+		// https://github.com/opral/inlang-paraglide-js/issues/486
+		const outputStructure =
+			args.outputStructure ??
+			(isProduction ? "message-modules" : "locale-modules");
 		try {
 			previousCompilation = await compile({
 				fs: wrappedFs,
 				previousCompilation,
+				outputStructure,
+				// webpack invokes the `buildStart` api in watch mode,
+				// to avoid cleaning the output directory in watch mode,
+				// we only clean the output directory if there was no previous compilation
+				cleanOutdir: previousCompilation === undefined,
+				isServer,
 				...args,
 			});
-			logger.success("Compilation complete");
+			logger.success(`Compilation complete (${outputStructure})`);
 		} catch (error) {
 			logger.error("Failed to compile project:", (error as Error).message);
 			logger.info("Please check your translation files for syntax errors.");
@@ -40,6 +56,14 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			return;
 		}
 
+		const isProduction = process.env.NODE_ENV === "production";
+
+		// default to locale-modules for development to speed up the dev server
+		// https://github.com/opral/inlang-paraglide-js/issues/486
+		const outputStructure =
+			args.outputStructure ??
+			(isProduction ? "message-modules" : "locale-modules");
+
 		const previouslyReadFiles = new Set(readFiles);
 
 		try {
@@ -53,10 +77,13 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			previousCompilation = await compile({
 				fs: wrappedFs,
 				previousCompilation,
+				outputStructure,
+				cleanOutdir: false,
+				isServer,
 				...args,
 			});
 
-			logger.success("Compilation complete");
+			logger.success(`Re-compilation complete (${outputStructure})`);
 
 			// Add any new files to watch
 			for (const filePath of Array.from(readFiles)) {
@@ -69,6 +96,13 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 			logger.warn("Failed to re-compile project:", (e as Error).message);
 		}
 	},
+	vite: {
+		config: {
+			handler: () => {
+				isServer = "import.meta.env?.SSR ?? typeof window === 'undefined'";
+			},
+		},
+	},
 	webpack(compiler) {
 		compiler.options.resolve = {
 			...compiler.options.resolve,
@@ -80,13 +114,24 @@ export const unpluginFactory: UnpluginFactory<CompilerOptions> = (args) => ({
 		};
 
 		compiler.hooks.beforeRun.tapPromise(PLUGIN_NAME, async () => {
+			const isProduction = process.env.NODE_ENV === "production";
+			// default to locale-modules for development to speed up the dev server
+			// https://github.com/opral/inlang-paraglide-js/issues/486
+			const outputStructure =
+				args.outputStructure ??
+				(isProduction ? "message-modules" : "locale-modules");
 			try {
 				previousCompilation = await compile({
 					fs: wrappedFs,
 					previousCompilation,
+					outputStructure,
+					// clean dir needs to be false. otherwise webpack get's into a race condition
+					// of deleting the output directory and writing files at the same time for
+					// multi environment builds
+					cleanOutdir: false,
 					...args,
 				});
-				logger.success("Compilation complete");
+				logger.success(`Compilation complete (${outputStructure})`);
 			} catch (error) {
 				logger.warn("Failed to compile project:", (error as Error).message);
 				logger.warn("Please check your translation files for syntax errors.");

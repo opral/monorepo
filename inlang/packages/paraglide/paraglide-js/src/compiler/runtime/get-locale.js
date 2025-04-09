@@ -3,13 +3,18 @@ import { isLocale } from "./is-locale.js";
 import {
 	baseLocale,
 	strategy,
+	serverAsyncLocalStorage,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
 	TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
+	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
+	localStorageKey,
+	isServer,
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
+import { setLocale } from "./set-locale.js";
 
 /**
  * This is a fallback to get started with a custom
@@ -21,6 +26,8 @@ import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
  * @type {Locale|undefined}
  */
 let _locale;
+
+let localeInitiallySet = false;
 
 /**
  * Get the current locale.
@@ -40,8 +47,8 @@ export let getLocale = () => {
 
 	// if running in a server-side rendering context
 	// retrieve the locale from the async local storage
-	if (serverMiddlewareAsyncStorage) {
-		const locale = serverMiddlewareAsyncStorage?.getStore()?.locale;
+	if (serverAsyncLocalStorage) {
+		const locale = serverAsyncLocalStorage?.getStore()?.locale;
 		if (locale) {
 			return locale;
 		}
@@ -55,6 +62,7 @@ export let getLocale = () => {
 		} else if (
 			TREE_SHAKE_URL_STRATEGY_USED &&
 			strat === "url" &&
+			!isServer &&
 			typeof window !== "undefined"
 		) {
 			locale = extractLocaleFromUrl(window.location.href);
@@ -67,13 +75,26 @@ export let getLocale = () => {
 		} else if (
 			TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED &&
 			strat === "preferredLanguage" &&
-			typeof window !== "undefined"
+			!isServer
 		) {
 			locale = negotiatePreferredLanguageFromNavigator();
+		} else if (
+			TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
+			strat === "localStorage" &&
+			!isServer
+		) {
+			locale = localStorage.getItem(localStorageKey) ?? undefined;
 		}
 		// check if match, else continue loop
 		if (locale !== undefined) {
-			return assertIsLocale(locale);
+			const asserted = assertIsLocale(locale);
+			if (!localeInitiallySet) {
+				_locale = asserted;
+				// https://github.com/opral/inlang-paraglide-js/issues/455
+				localeInitiallySet = true;
+				setLocale(asserted, { reload: false });
+			}
+			return asserted;
 		}
 	}
 

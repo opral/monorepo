@@ -1,5 +1,57 @@
 # @inlang/plugin-i18next
 
+## 6.0.8
+
+### Patch Changes
+
+- Updated dependencies [bd2c366]
+  - @inlang/sdk@2.4.7
+
+## 6.0.7
+
+### Patch Changes
+
+- Updated dependencies [49a7880]
+  - @inlang/sdk@2.4.6
+
+## 6.0.6
+
+### Patch Changes
+
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+
+## 6.0.5
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+
+## 6.0.4
+
+### Patch Changes
+
+- @inlang/sdk@2.4.3
+
+## 6.0.3
+
+### Patch Changes
+
+- @inlang/sdk@2.4.2
+
+## 6.0.2
+
+### Patch Changes
+
+- 73cc245: fix: key name of sherlock extension
+
+## 6.0.1
+
+### Patch Changes
+
+- Updated dependencies [5a991cd]
+  - @inlang/sdk@2.4.1
+
 ## 6.0.0
 
 ### Major Changes

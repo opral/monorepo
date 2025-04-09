@@ -4,7 +4,6 @@ import { CONFIGURATION } from "../../configuration.js"
 import { capture } from "../../services/telemetry/index.js"
 import { setState, state } from "../state.js"
 import * as Sherlock from "@inlang/recommend-sherlock"
-import { transpileToCjs } from "../import/transpileToCjs.js"
 import * as fs from "node:fs"
 import type { FileSystem } from "../fs/createFileSystemMapper.js"
 import path from "node:path"
@@ -45,14 +44,25 @@ export function createProjectViewNodes(args: {
 		}
 
 		const projectPath = typeof project.projectPath === "string" ? project.projectPath : ""
-		const projectName = projectPath.split("/").slice(-1).join("/").replace(".inlang", "")
-		const relativePath =
-			"./" + path.normalize(projectPath.replace(args.workspaceFolder.uri.fsPath, "./"))
+
+		// Ensure forward slashes are used across platforms
+		const normalizedProjectPath = projectPath.split(path.sep).join("/")
+
+		// Extract project name safely
+		const projectName = normalizedProjectPath.split("/").slice(-1).join("/").replace(".inlang", "")
+
+		// Compute relative path
+		const relativePath = path
+			.relative(args.workspaceFolder.uri.fsPath, projectPath) // Get relative path
+			.split(path.sep) // Normalize separators
+			.join("/") // Ensure forward slashes for cross-platform compatibility
+
+		const finalRelativePath = `./${relativePath}`
 
 		return {
 			label: projectName,
 			path: project.projectPath,
-			relativePath: relativePath,
+			relativePath: finalRelativePath,
 			isSelected: project.projectPath === state().selectedProjectPath,
 			collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
 			context: args.context,
@@ -96,6 +106,7 @@ export async function handleTreeSelection(args: {
 	}))
 
 	const newSelectedProject = projectViewNodes.find((node) => node.isSelected)?.path as string
+	console.log(newSelectedProject)
 
 	try {
 		const localAccount = getLocalAccount({ fs })
@@ -105,7 +116,6 @@ export async function handleTreeSelection(args: {
 			fs,
 			account: localAccount,
 			appId: CONFIGURATION.STRINGS.APP_ID,
-			preprocessPluginBeforeImport: transpileToCjs,
 		})
 
 		setState({

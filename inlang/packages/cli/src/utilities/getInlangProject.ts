@@ -1,8 +1,5 @@
 import fs from "node:fs";
-import {
-  loadProjectFromDirectoryInMemory,
-  type InlangProject,
-} from "@inlang/sdk";
+import { loadProjectFromDirectory, type InlangProject } from "@inlang/sdk";
 import { resolve } from "node:path";
 
 /**
@@ -20,7 +17,7 @@ export async function getInlangProject(args: {
     const baseDirectory = process.cwd();
     const projectPath = resolve(baseDirectory, args.projectPath);
 
-    const project = await loadProjectFromDirectoryInMemory({
+    const project = await loadProjectFromDirectory({
       path: projectPath,
       fs: fs,
       appId: "app",

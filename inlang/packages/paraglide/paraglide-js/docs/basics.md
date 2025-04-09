@@ -1,14 +1,27 @@
 ---
-imports: 
+imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
 # Basics
 
-## Adding and editing Messages
+## Adding and removing locales
+
+To add a new locale, add it to the `locales` array in `<project0name>.inlang/settings.json` file.
+
+```diff
+// project.inlang/settings.json
+
+{
+  "baseLocale": "en",
++ "locales": ["en", "de"]
+}
+```
+
+## Adding and editing messages
 
 <doc-callout type="info">
-  This section assumes you use the inlang message format plugin that is setup by default in Paraglide JS. [Other file formats can be used as well.](./file-formats.md)
+  This section assumes you use the inlang message format plugin that is setup by default in Paraglide JS. 
 </doc-callout>
 
 Messages are stored in `messages/{locale}.json` as key-value pairs. You can add parameters with curly braces.
@@ -32,7 +45,7 @@ import { m } from "./paraglide/messages.js";
 console.log(m.hello_world()); // "Hello World!"
 ```
 
-## Using parameters 
+## Using parameters
 
 For messages with parameters, simply pass an object with the parameter values:
 
@@ -72,6 +85,21 @@ import { setLocale } from "./paraglide/runtime.js";
 setLocale("de");
 ```
 
+### Disabling reloading
+
+By default, `setLocale()` triggers a full page reload. This is a deliberate design decision that:
+
+- Enables a small, efficient runtime without complex state management
+- Makes Paraglide work in any framework without requiring framework-specific adapters
+- Follows the pattern used by major websites like YouTube, as language switching is an infrequent action that doesn't justify the complexity of a no-reload approach
+
+If you need to change the locale without a page reload, you can pass `{ reload: false }` as the second parameter, but then you'll need to handle UI updates yourself.
+
+```js
+// Change locale without reloading the page
+setLocale("de", { reload: false });
+```
+
 ## Getting the current locale
 
 To get the current locale, use the `getLocale` function:
@@ -86,23 +114,35 @@ console.log(getLocale()); // "de"
 
 The `localizeHref` function can be used to generate URLs with the current locale:
 
-```js
-import { localizeHref } from "./paraglide/runtime.js";
-
-console.log(localizeHref("/blog")); // "/blog"
-console.log(localizeHref("/blog", { locale: "de" })); // "/de/blog"
-```
-
 ```tsx
 <a href={localizeHref("/blog")}>Blog</a>
-<a href={localizeHref("/blog", { locale: "de" })}>Blog (de)</a>
 ```
+
+Important: If you route to a different locale, ensure a reload happens afterwards. See https://inlang.com/m/gerre34r/library-inlang-paraglideJs/errors#switching-locales-via-links-doesnt-work
 
 ## Choosing your strategy
 
-You likely want to use one of the strategies provided by Inlang. Visit the [strategy documentation](./strategy.md) to learn more.
+You likely want to use one of the built-in strategies. Visit the [strategy documentation](./strategy.md) to learn more.
 
-## Advanced usage 
+## Dynamically calling messages
+
+You can dynamically call messages by specifying what messages you expect beforehand. Specifying the messages beforehand preserves tree-shaking.
+
+```ts
+import { m } from "./paraglide/messages.js";
+
+const messages = {
+	greeting: m.greeting,
+	goodbye: m.goodbye,
+};
+
+let messageKey = "greeting";
+
+console.log(messages[messageKey]());
+// "Hello World!"
+```
+
+## Advanced usage
 
 - [Choosing your strategy](/m/gerre34r/library-inlang-paraglideJs/strategy)
 - [Server-side rendering](/m/gerre34r/library-inlang-paraglideJs/server-side-rendering)

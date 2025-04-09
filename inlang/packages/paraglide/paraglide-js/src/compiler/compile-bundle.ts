@@ -20,6 +20,7 @@ export type CompiledBundleWithMessages = {
 export const compileBundle = (args: {
 	bundle: BundleNested;
 	fallbackMap: Record<string, string | undefined>;
+	messageReferenceExpression: (locale: string, bundleId: string) => string;
 }): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
 
@@ -42,6 +43,7 @@ export const compileBundle = (args: {
 		bundle: compileBundleFunction({
 			bundle: args.bundle,
 			availableLocales: Object.keys(args.fallbackMap),
+			messageReferenceExpression: args.messageReferenceExpression,
 		}),
 		messages: compiledMessages,
 	};
@@ -56,6 +58,10 @@ const compileBundleFunction = (args: {
 	 * The language tags which are available
 	 */
 	availableLocales: string[];
+	/**
+	 * The message reference expression
+	 */
+	messageReferenceExpression: (locale: string, bundleId: string) => string;
 }): Compiled<Bundle> => {
 	const inputs = args.bundle.declarations.filter(
 		(decl) => decl.type === "input-variable"
@@ -77,11 +83,15 @@ const compileBundleFunction = (args: {
 */
 /* @__NO_SIDE_EFFECTS__ */
 ${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "" : " = {}"}, options = {}) => {
+	if (experimentalMiddlewareLocaleSplitting && isServer === false) {
+		return /** @type {any} */ (globalThis).__paraglide_ssr.${safeBundleId}(inputs) 
+	}
 	const locale = options.locale ?? getLocale()
+	trackMessageCall("${safeBundleId}", locale)
 	${args.availableLocales
 		.map(
 			(locale, index) =>
-				`${index > 0 ? "	" : ""}if (locale === "${locale}") return ${toSafeModuleId(locale)}.${safeBundleId}(inputs)`
+				`${index > 0 ? "	" : ""}if (locale === "${locale}") return ${args.messageReferenceExpression(locale, args.bundle.id)}(inputs)`
 		)
 		.join("\n")}
 	return "${args.bundle.id}"

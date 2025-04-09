@@ -1,23 +1,29 @@
 ---
 imports:
   - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-video.js
+  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-callout.js
 ---
 
-# Server Side Rendering
+# Server Side Rendering (SSR) / Static Site Generation (SSG)
 
-Paraglide JS provides first-class support for server-side rendering (SSR) through its `serverMiddleware()` and async context management.
+Paraglide JS provides first-class support for server-side rendering (SSR) and static site generation (SSG) through the `paraglideMiddleware()`.  
 
-## Using `serverMiddleware()`
+<doc-callout type="tip">
+  If you just want to use Paraglide JS on the server, in CLI apps, etc, without SSR/SSG, refer to the vanilla JS/TS docs.
+</doc-callout>
 
-The `serverMiddleware()` handles request-scoped locale management automatically:
+## Using `paraglideMiddleware()`
+
+The `paraglideMiddleware()` handles request-scoped locale management automatically:
 
 ```ts
-import { serverMiddleware } from './paraglide/runtime.js';
+import { paraglideMiddleware } from './paraglide/server.js';
 
-// In your request handler:
-const response = await serverMiddleware(request, async ({ request, locale }) => {
-  // Your request handling logic here
-  return new Response(`Current locale: ${locale}`);
+app.get("*", async (request) => {
+  return paraglideMiddleware(request, async ({ request, locale }) => {
+    // Your request handling logic here
+    return Response(html(request));
+  });
 });
 ```
 
@@ -29,9 +35,9 @@ Key features:
 
 ### Automatic re-directs
 
-The `serverMiddleware()` automatically re-directs requests to the appropriate localized URL.
+The `paraglideMiddleware()` automatically re-directs requests to the appropriate localized URL.
 
-For example, assume that the cookie strategy preceeds the url strategy. If a request from a client is made where the client's locale cookie is set to `de`, the `serverMiddleware()` will re-direct the request from `https://example.com/page` to `https://example.com/de/seite`. 
+For example, assume that the cookie strategy preceeds the url strategy. If a request from a client is made where the client's locale cookie is set to `de`, the `paraglideMiddleware()` will re-direct the request from `https://example.com/page` to `https://example.com/de/seite`. 
 
 ```diff
 await compile({
@@ -57,24 +63,18 @@ await compile({
 
 ### Disabling Async Local Storage
 
-You can use `disableAsyncLocalStorage: true` to disable the use of Node.js' AsyncLocalStorage. Paraglide JS uses Node.js' AsyncLocalStorage to maintain request context isolation. This is crucial for:
+You can use `disableAsyncLocalStorage: true` to disable the use of Node.js' AsyncLocalStorage. **This is only safe** in environments that do not share request context between concurrent requests. 
 
-- Preventing locale information from leaking between concurrent requests
-- Ensuring consistent URL origin resolution
-- Maintaining a clean separation of request-specific state
-
-<doc-callout type="warning">
-Disabling AsyncLocalStorage is **only safe** in these environments:
+**Examples of safe environments:**
 
 - Cloudflare Workers  
 - Vercel Edge Functions
 - AWS Lambda (single-request mode)
 - Other isolated runtime contexts
-</doc-callout>
 
 ```ts
-// Only disable in serverless environments
-serverMiddleware(request, handler, { 
+paraglideVitePlugin({
+  // ...
   disableAsyncLocalStorage: true // ⚠️ Use with caution
 })
 ```
@@ -96,47 +96,12 @@ await Promise.all([
 ```
 
 3. Monitor for these warning signs:
+
    - Random locale switches during load testing
    - Incorrect URL origins in logs
    - Session data appearing in wrong requests
 
-## Manual Middleware Setup 
-
-For frameworks without middleware support, use AsyncLocalStorage directly:
-
-```ts
-import { AsyncLocalStorage } from 'async_hooks';
-import { 
-  overwriteGetLocale,
-  overwriteGetUrlOrigin
-} from './paraglide/runtime.js';
-
-const asyncStorage = new AsyncLocalStorage<{
-  locale: string;
-  origin: string;
-}>();
-
-// Set up once:
-overwriteGetLocale(() => {
-  return asyncStorage.getStore()?.locale ?? 'en';
-});
-
-overwriteGetUrlOrigin(() => {
-  return asyncStorage.getStore()?.origin ?? 'https://default.com';
-});
-
-// Pseudo middleware example:
-app.use((req, res, next) => {
-  const locale = extractLocaleFromRequest(req);
-  const origin = req.headers.host || 'https://default.com';
-  
-  asyncStorage.run({ locale, origin }, () => {
-    next();
-  });
-});
-```
-
-## Serverless Environments
+### Serverless Environments
 
 For edge functions and serverless platforms, you can use per-request overrides because each request is isolated:
 
@@ -168,15 +133,85 @@ export function middleware(request) {
 }
 ```
 
-Key advantages:
+## Server Side Rendering (SSR)
 
-- No async storage needed (requests are isolated)
-- Minimal overhead per request
-- Works with cold-start environments
+Setting up the `paraglideMiddleware()` automatically enables server-side rendering (SSR) for your application.
 
-## Best Practices
+## Static Site Generation (SSG)
 
-- Use `serverMiddleware` for full-stack frameworks with SSR support
-- Manual overrides work best for API routes/edge functions
-- Combine with [Routing Strategies](/docs/strategy) for complete i18n solution
-- Always test locale propagation in production-like environments
+Your framework of choice (e.g. Next.js, SvelteKit, etc.) needs to know the localized URLs of your pages to generate them during build time. 
+
+```diff
+https://example.com/about
++https://example.com/de/about
++https://example.com/fr/about
+```
+
+Several possibilities exist to communicate these URLs to your framework:
+
+### Site crawling (invisible anchor tags)
+
+Some static site generators crawl your site during build time by following anchor tags to discover all pages. You can leverage this behavior to ensure all localized URLs of your pages are generated:
+
+1. Add invisible anchor tags in the root layout of your application for each locale
+2. Ensure the `paraglideMiddleware()` is called
+
+_You can adapt the example beneath to any other framework_
+
+```tsx
+import { locales, localizeHref } from "./paraglide/runtime.js";
+
+// in the root layout
+function Layout({ children }) {
+  return (
+    <div>{children}</div>
+    // add invisible anchor tags for the currently visible page in each locale
+    <div style="display: none">
+      {locales.map((locale) => (
+        <a href={localizeHref(`/about`, { locale })}></a>
+      ))}
+    </div>
+  )
+}
+```
+
+The rendered HTML of the page will include the invisible anchor tags, ensuring they are generated during build time. The framwork will crawl the HTML and follow the anchor tags to discover all pages.
+
+```diff
+<div>
+  <p>My Cool Website
+</div>
++<div style="display: none">
++  <a href="/de/about"></a>
++  <a href="/fr/about"></a>
++</div>
+```
+
+### Programmatic Discovery
+
+If invisible anchor tags are not an option, some frameworks provide APIs to discover the localized URLs during build time. Figure out which API your framework provides and adapt the example above accordingly. 
+
+- **Next.js** has [generateStaticParams()](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) API to discover all localized URLs.
+- **Astro** has [getStaticPaths()](https://docs.astro.build/en/reference/routing-reference/#getstaticpaths)
+
+## Troubleshooting
+
+### `getLocale()` returns a different locale than expected
+
+This can happen if `getLocale()` is called outside of the scope of `paraglideMiddleware()`. 
+
+The `paraglideMiddleware()` ensures that the locale is set correctly for each request. If you call `getLocale()` outside of the scope of `paraglideMiddleware()`, you will get the locale of the server which is not the expected locale.
+
+```ts
+app.get("*", async (request) => {
+  // ❌ don't call `getLocale()` outside of `paraglideMiddleware`
+  const locale = getLocale()
+  
+  return paraglideMiddleware(request, async ({ request, locale }) => {
+    // ✅ call `getLocale()` inside of `paraglideMiddleware`
+    const locale = getLocale()
+    
+    // Your request handling logic here
+    return Response(html(request));
+  });
+});

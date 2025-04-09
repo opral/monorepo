@@ -2,7 +2,7 @@
   "extends": "@opral/tsconfig/default",
   "include": ["src/**/**.ts"],
   "compilerOptions": {
-    "target": "ES2021",
+    "target": "ES2022",
     "outDir": "dist",
     "resolveJsonModule": true,
     "types": ["node"]

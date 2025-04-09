@@ -102,6 +102,8 @@ services:
         - packages/md-app/**
     envVars:
       - fromGroup: production
+      - key: NODE_VERSION
+        value: 22.12.0
 
   - name: inlang-website
     type: web

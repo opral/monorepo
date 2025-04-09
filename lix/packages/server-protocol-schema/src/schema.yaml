@@ -1,0 +1,290 @@
+openapi: 3.0.3
+info:
+  title: Lix Server Protocol
+  version: 1.0.0
+paths:
+  /lsp/new-v1:
+    post:
+      summary: Stores the lix on the server.
+      description: >
+        Use sync if you want to push or pull data from the server.
+      requestBody:
+        description: The lix binary.
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              format: binary
+
+      responses:
+        "201":
+          description: Lix file created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the created lix.
+                    example: "123e4567-e89b-12d3-a456-426614174000"
+
+        "400":
+          description: Invalid Lix file.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Invalid Lix file."
+
+        "409":
+          description: Lix file already exists.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Lix file already exists."
+
+  /lsp/get-v1:
+    post:
+      summary: Get the lix from the server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lix_id
+              properties:
+                lix_id:
+                  type: string
+                  description: The ID of the lix to get.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Lix file fetched successfully.
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+        "404":
+          description: Lix file not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message.
+                    example: "Lix file not found."
+
+  /lsp/push-v1:
+    post:
+      summary: Push data to the server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lix_id
+                - vector_clock
+                - data
+              properties:
+                lix_id:
+                  type: string
+                  description: The ID of the lix to push to.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                vector_clock:
+                  type: array
+                  items:
+                    type: object
+                    description: The vector clock of the client.
+                    required:
+                      - session
+                      - time
+                    properties:
+                      session:
+                        type: string
+                        description: The session ID of the client.
+                        example: "123e4567-e"
+                      time:
+                        type: integer
+                        description: The time of the client.
+                        example: 123456789
+                    example:
+                      123e4567-e89b-12d3-a456-426614174000: 1
+                data:
+                  type: object
+                  description: The data to push.
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      example: >
+                        {
+                          "id": 1,
+                          "name": "Alice"
+                        }
+                  example: >
+                    {
+                      "table_name": [
+                      {
+                        "id": 1,
+                        "name": "Alice"
+                      }
+                      ]
+                    }
+
+      responses:
+        "201":
+          description: Rows pushed successfully.
+
+        "400":
+          description: Invalid row data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: A machine-readable error code.
+                    example: "INVALID_ROW_DATA"
+                  message:
+                    type: string
+                    description: A human-readable error message.
+                    example: "The provided row data is invalid."
+
+        "404":
+          description: Lix not found.
+
+        "500":
+          description: Server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: Error message.
+                    example: "INTERNAL_SERVER_ERROR"
+                  message:
+                    type: string
+                    description: A human-readable error message.
+                    example: "An internal server error occurred."
+
+  /lsp/pull-v1:
+    post:
+      summary: Pull all data for all tables from the server.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lix_id
+                - vector_clock
+              properties:
+                lix_id:
+                  type: string
+                  description: The ID of the lix to pull from.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                vector_clock:
+                  type: array
+                  items:
+                    type: object
+                    description: The vector clock of the client.
+                    required:
+                      - session
+                      - time
+                    properties:
+                      session:
+                        type: string
+                        description: The session ID of the client.
+                        example: "123e4567-e"
+                      time:
+                        type: integer
+                        description: The time of the client.
+                        example: 123456789
+      responses:
+        "200":
+          description: Data fetched successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - vector_clock
+                  - data
+                properties:
+                  vector_clock:
+                    type: array
+                    items:
+                      type: object
+                      description: The vector clock of the server.
+                      required:
+                        - session
+                        - time
+                      properties:
+                        session:
+                          type: string
+                          description: The session ID of the server.
+                          example: "123e4567-e"
+                        time:
+                          type: integer
+                          description: The time of the server.
+                      example:
+                        session: 123e4567-e89b-12d3-a456-426614174000
+                        time: 1
+                  data:
+                    type: object
+                    description: The data to push.
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: object
+                        additionalProperties: true
+                        example: >
+                          {
+                            "id": 1,
+                            "name": "Alice"
+                          }
+                    required:
+                      - vector_clock
+                    example: >
+                      {
+                        "table_name": [
+                        {
+                          "id": 1,
+                          "name": "Alice"
+                        }
+                        ]
+                      }
+        "404":
+          description: Lix file not found.
+        "500":
+          description: Failed to open the Lix file.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  message:
+                    type: string

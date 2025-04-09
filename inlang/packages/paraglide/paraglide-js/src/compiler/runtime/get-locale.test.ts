@@ -1,12 +1,17 @@
-import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { newProject } from "@inlang/sdk";
+import { expect, test, vi } from "vitest";
+import { createParaglide } from "../create-paraglide.js";
 
 test("matching by strategy works", async () => {
 	const baseLocale = "en";
 
-	const runtime = await createRuntimeForTesting({
-		baseLocale,
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale,
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -22,9 +27,13 @@ test("matching by strategy works", async () => {
 });
 
 test("throws if variable is used without baseLocale as fallback strategy", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["globalVariable"],
 		},
@@ -38,19 +47,23 @@ test("throws if variable is used without baseLocale as fallback strategy", async
 });
 
 test("retrieves the locale for a url pattern", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
+			isServer: "false",
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",
-					deLocalizedNamedGroups: { tld: "com" },
-					localizedNamedGroups: {
-						en: { tld: "com" },
-						de: { tld: "de" },
-					},
+					localized: [
+						["en", "https://example.com/:path*"],
+						["de", "https://example.de/:path*"],
+					],
 				},
 			],
 		},
@@ -66,19 +79,22 @@ test("retrieves the locale for a url pattern", async () => {
 });
 
 test("url pattern strategy doesn't throw during SSR", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "baseLocale"],
 			urlPatterns: [
 				{
 					pattern: "https://example.:tld/:path*",
-					deLocalizedNamedGroups: { tld: "com" },
-					localizedNamedGroups: {
-						en: { tld: "com" },
-						de: { tld: "de" },
-					},
+					localized: [
+						["en", "https://example.com/:path*"],
+						["de", "https://example.de/:path*"],
+					],
 				},
 			],
 		},
@@ -90,9 +106,13 @@ test("url pattern strategy doesn't throw during SSR", async () => {
 test("doesn't throw for an old cookie locale", async () => {
 	const baseLocale = "en";
 
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -110,16 +130,18 @@ test("doesn't throw for an old cookie locale", async () => {
 test("returns the preferred locale from navigator.languages", async () => {
 	const originalNavigator = globalThis.navigator;
 
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
 		compilerOptions: {
+			isServer: "false",
 			strategy: ["preferredLanguage"],
 		},
 	});
-
-	// @ts-expect-error - simulating browser based api
-	globalThis.window = {};
 
 	// Mock navigator.languages
 	Object.defineProperty(globalThis, "navigator", {
@@ -136,4 +158,77 @@ test("returns the preferred locale from navigator.languages", async () => {
 		value: originalNavigator,
 		configurable: true,
 	});
+});
+
+test("returns the locale from local storage", async () => {
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
+		compilerOptions: {
+			strategy: ["localStorage"],
+			localStorageKey: "PARAGLIDE_LOCALE",
+			isServer: "false",
+		},
+	});
+
+	// @ts-expect-error - global variable definition
+	globalThis.localStorage = {
+		setItem: vi.fn(),
+		getItem: vi.fn(() => "de"),
+	};
+
+	expect(runtime.getLocale()).toBe("de");
+});
+
+test("initially sets the locale after resolving it for the first time", async () => {
+	// Create runtime with multiple strategies
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
+		compilerOptions: {
+			strategy: ["url", "cookie"],
+			isServer: "false",
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path*",
+					localized: [
+						["en", "https://example.com/en/:path*"],
+						["de", "https://example.com/de/:path*"],
+						["fr", "https://example.com/fr/:path*"],
+					],
+				},
+			],
+		},
+	});
+
+	// Setup global objects for URL strategy
+	globalThis.window = {
+		// @ts-expect-error - global variable definition
+		location: {
+			hostname: "example.com",
+			href: "https://example.com/de/page",
+		},
+	};
+
+	// Create a spy on the internal _locale variable to verify it was set
+	// We can do this by checking if setLocale works without explicitly setting it first
+	// @ts-expect-error - global variable definition
+	globalThis.document = { cookie: "" };
+
+	// First call to getLocale should resolve and set the locale
+	expect(runtime.getLocale()).toBe("de");
+	// Cookie should be set, proving that the locale was initially set
+	expect(globalThis.document.cookie).toBe(
+		"PARAGLIDE_LOCALE=de; path=/; max-age=34560000; domain=example.com"
+	);
+	expect(globalThis.window.location.href).toBe("https://example.com/de/page");
 });
