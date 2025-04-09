@@ -1,7 +1,41 @@
-import chalk from 'chalk';
+// Use optional imports for Node-only modules
 import * as diff from 'diff';
-import fs from 'fs/promises';
-import path from 'path';
+import { isNode, getSafeConsole } from './environment.js';
+
+// Import chalk only in Node environment
+let chalk: any;
+if (isNode()) {
+  try {
+    // Dynamic import to avoid loading in browser
+    const chalkModule = await import('chalk');
+    chalk = chalkModule.default;
+  } catch (e) {
+    // Fallback if chalk is not available
+    chalk = {
+      cyan: (text: string) => text,
+      red: (text: string) => text,
+      green: (text: string) => text,
+      gray: (text: string) => text,
+      yellow: (text: string) => text,
+      blue: (text: string) => text,
+      bold: (text: string) => text
+    };
+  }
+} else {
+  // Browser fallback
+  chalk = {
+    cyan: (text: string) => text,
+    red: (text: string) => text,
+    green: (text: string) => text,
+    gray: (text: string) => text,
+    yellow: (text: string) => text,
+    blue: (text: string) => text,
+    bold: (text: string) => text
+  };
+}
+
+// Get a safe console for the current environment
+const console = getSafeConsole();
 
 export type OutputMode = 'human' | 'json';
 
@@ -287,9 +321,19 @@ export class OutputFormatter {
   
   /**
    * Save content to a file
+   * Only available in Node.js environment
    */
   async saveToFile(content: string, filePath: string): Promise<void> {
+    if (!isNode()) {
+      console.error('File saving is not available in browser environment');
+      return;
+    }
+
     try {
+      // Dynamic imports for Node-only modules
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
       // Ensure the directory exists
       await fs.mkdir(path.dirname(filePath), { recursive: true });
       
@@ -317,9 +361,19 @@ export class OutputFormatter {
   
   /**
    * Save diff to a patch file
+   * Only available in Node.js environment
    */
   async saveDiffToPatchFile(original: string, modified: string, filePath: string): Promise<void> {
+    if (!isNode()) {
+      console.error('File saving is not available in browser environment');
+      return;
+    }
+
     try {
+      // Dynamic imports for Node-only modules
+      const fs = await import('fs/promises');
+      const path = await import('path');
+
       // Generate unified diff
       const diffText = diff.createPatch(
         path.basename(filePath),

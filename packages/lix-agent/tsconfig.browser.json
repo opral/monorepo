@@ -1,0 +1,29 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist/browser",
+    "declaration": true,
+    "lib": ["es2020", "dom"],
+    "types": []
+  },
+  "include": [
+    "src/browser.ts",
+    "src/environment.ts",
+    "src/agent/**/*.ts",
+    "src/output.ts",
+    "src/index.ts"
+  ],
+  "exclude": [
+    "src/main.ts",
+    "src/repl.ts",
+    "src/commands/**/*.ts",
+    "src/lix/lixManager.ts",
+    "src/lix/pluginLoader.ts",
+    "node_modules",
+    "dist",
+    "**/*.test.ts"
+  ]
+}

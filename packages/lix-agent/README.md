@@ -1,14 +1,16 @@
-# Lix Agent CLI
+# Lix Agent
 
-An interactive CLI agent for the Lix change control system.
+An interactive natural language interface for the Lix change control system. Available as both a CLI and a browser-compatible JavaScript library.
 
 ## Overview
 
-Lix Agent is a REPL (read-evaluate-print loop) CLI that allows users to interact with Lix change control files using natural language. The agent leverages large language models (LLMs) to understand user instructions, answer questions about data, and help make modifications to tracked files.
+Lix Agent provides a natural language interface to interact with Lix change control files. It leverages large language models (LLMs) to understand user instructions, answer questions about data, and help make modifications to tracked files.
 
 ## Features
 
+- **Dual-Environment Support:** Use as a CLI in Node.js or as a JavaScript library in browsers
 - **Interactive REPL Interface:** Run the CLI in a terminal as a persistent session for natural language interaction
+- **Browser API:** Simple JavaScript API for web applications with `createLixAgent({ lix, apiKey })`
 - **Pluggable LLM Support:** Use different LLM providers (OpenAI GPT, Anthropic Claude, etc.)
 - **Dynamic SQL Generation:** Generate and execute SQL queries from natural language questions
 - **JavaScript Code Generation:** Generate and execute JavaScript against the Lix API
@@ -31,6 +33,8 @@ pnpm build
 ```
 
 ## Usage
+
+### CLI Usage
 
 Start the CLI:
 
@@ -56,6 +60,47 @@ With options:
 ```bash
 node bin/run.js --model openai:gpt-4 --file my-project.lix
 ```
+
+### Browser Usage
+
+Import and use the agent in a browser environment:
+
+```javascript
+import { openLixInMemory } from '@lix-js/sdk';
+import { createLixAgent } from '@lix-js/agent';
+
+// Initialize Lix
+const lix = await openLixInMemory({ /* options */ });
+
+// Create the agent
+const agent = createLixAgent({
+  lix,
+  apiKey: 'your-api-key-here', // OpenAI or Anthropic API key
+  provider: 'openai', // or 'anthropic'
+  model: 'gpt-4', // or 'claude-3-haiku-20240307'
+  
+  // Optional callback to receive messages
+  onMessage: (message, type) => {
+    console.log(`[${type}]`, message);
+    // Update UI based on message type (task, answer, error)
+  }
+});
+
+// Send prompts to the agent
+await agent.prompt("Show me all CSV files in the database");
+```
+
+A complete browser demo is available in the `/examples` directory. Run with:
+
+```bash
+# Navigate to the examples directory
+cd examples
+
+# Serve the demo using a local web server (requires http-server)
+npx http-server
+```
+
+Then open `http://localhost:8080/browser-demo.html` in your browser.
 
 ## Environment Variables
 

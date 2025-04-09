@@ -2,13 +2,25 @@
   "name": "@lix-js/agent",
   "version": "0.1.0",
   "description": "Interactive CLI agent for Lix change control system",
-  "main": "dist/main.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "browser": "dist/browser.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "lix-agent": "bin/run.js"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "browser": "./dist/browser.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run build:browser",
+    "build:browser": "tsc -p tsconfig.browser.json",
     "start": "node dist/main.js",
     "dev": "tsc -w",
     "test": "vitest",

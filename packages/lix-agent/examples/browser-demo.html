@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lix Agent Browser Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    h1 {
+      color: #0066cc;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input[type="text"], 
+    input[type="password"],
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .radio-group {
+      margin-bottom: 15px;
+    }
+
+    .radio-option {
+      margin-right: 15px;
+      display: inline-block;
+    }
+
+    button {
+      background-color: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      display: inline-block;
+    }
+
+    button:hover {
+      background-color: #0055aa;
+    }
+
+    #error-container {
+      background-color: #fee;
+      color: #d00;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .loading {
+      display: none;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    .loading::after {
+      content: "●●●";
+      animation: loading 1s infinite;
+      display: inline-block;
+    }
+
+    @keyframes loading {
+      0% { content: "●○○"; }
+      33% { content: "●●○"; }
+      66% { content: "●●●"; }
+    }
+
+    #chat-interface {
+      display: none;
+    }
+
+    #output {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .message .timestamp {
+      font-size: 12px;
+      color: #999;
+      position: absolute;
+      top: 5px;
+      right: 8px;
+    }
+
+    .message .content {
+      margin-top: 5px;
+      word-wrap: break-word;
+    }
+
+    .message.user {
+      background-color: #e6f2ff;
+      margin-left: 40px;
+    }
+
+    .message.answer {
+      background-color: #f0f0f0;
+      margin-right: 40px;
+    }
+
+    .message.task {
+      background-color: #e6ffe6;
+      margin-right: 40px;
+    }
+
+    .message.error {
+      background-color: #fee;
+      margin-right: 40px;
+    }
+
+    code {
+      background-color: #eee;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lix Agent Browser Demo</h1>
+
+  <!-- Initialization Section -->
+  <section id="initialization">
+    <h2>Initialize Lix Agent</h2>
+    <p>Configure the agent with your LLM provider and API key.</p>
+
+    <div id="error-container">
+      <strong>Error:</strong> <span id="error-message"></span>
+    </div>
+
+    <form id="init-form">
+      <div>
+        <label for="api-key">API Key:</label>
+        <input type="password" id="api-key" placeholder="Enter your OpenAI or Anthropic API key" required />
+      </div>
+
+      <div class="radio-group">
+        <label>LLM Provider:</label>
+        <div class="radio-option">
+          <input type="radio" id="openai" name="provider" value="openai" checked />
+          <label for="openai">OpenAI (GPT-4)</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="anthropic" name="provider" value="anthropic" />
+          <label for="anthropic">Anthropic (Claude)</label>
+        </div>
+      </div>
+
+      <button type="submit">Initialize Agent <span id="init-loading" class="loading"></span></button>
+    </form>
+  </section>
+
+  <!-- Chat Interface Section -->
+  <section id="chat-interface">
+    <h2>Chat with Lix Agent</h2>
+    
+    <div id="output">
+      <div class="message answer">
+        <div class="timestamp">System</div>
+        <div class="content">Lix Agent initialized successfully. You can now ask questions about your Lix file or give instructions.</div>
+      </div>
+    </div>
+
+    <form id="prompt-form">
+      <textarea id="prompt-input" rows="3" placeholder="Ask a question or give an instruction..." required></textarea>
+      <button type="submit">Send <span id="chat-loading" class="loading"></span></button>
+    </form>
+  </section>
+
+  <!-- Include the browser demo script -->
+  <script type="module" src="./browser-usage.js"></script>
+</body>
+</html>
