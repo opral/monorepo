@@ -73,11 +73,30 @@ export function EmptyDocumentPromptElement({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      if (e.shiftKey) {
+        // Allow line break with Shift+Enter
+        return;
+      }
+      // Prevent default to avoid form submission
+      e.preventDefault();
+
+      // Submit if not already generating
+      if (!isGenerating && prompt.trim() && !chat.isLoading) {
+        handleGenerateDocument();
+      }
+    }
+  };
+
   return (
     <div {...attributes} contentEditable={false}>
       <form
         className="my-8 flex flex-col items-end justify-center w-full p-1 gap-2 border border-muted rounded-md focus-within:ring-1"
-        onSubmit={handleGenerateDocument}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleGenerateDocument();
+        }}
       >
         <textarea
           ref={textareaRef}
@@ -87,10 +106,10 @@ export function EmptyDocumentPromptElement({
           placeholder="What do you want to write?"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <Button
           type="submit"
-          onClick={handleGenerateDocument}
           disabled={isGenerating || !prompt.trim() || chat.isLoading}
         >
           {isGenerating ?
