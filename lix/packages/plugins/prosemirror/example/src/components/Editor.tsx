@@ -104,13 +104,21 @@ const Editor: React.FC = () => {
 	return (
 		<div className="flex flex-col h-full">
 			<style>{editorStyles}</style>
-			<div className="editor-wrapper p-4" onClick={handleClick}>
-				{/* The actual editor will be mounted here */}
-				{diffView ? (
-					<DiffView />
-				) : (
-					<div ref={editorRef} className="prose max-w-none text-sm" />
-				)}
+			<div className="editor-wrapper p-4 relative" onClick={handleClick}>
+				{/* The editor is always mounted but hidden when diff view is active */}
+				<div
+					ref={editorRef}
+					className="prose max-w-none text-sm"
+					style={{ display: diffView ? "none" : "block" }}
+				/>
+
+				{/* Diff view with the same structure the p-2 is needed to match the editor */}
+				<div
+					className="prose max-w-none text-sm p-2"
+					style={{ display: diffView ? "block" : "none" }}
+				>
+					{diffView && <DiffView />}
+				</div>
 			</div>
 		</div>
 	);

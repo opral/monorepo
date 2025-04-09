@@ -204,25 +204,23 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 									</div>
 								)}
 
-								{previousChangeSetId && (
-									<button
-										className="btn btn-sm btn-ghost gap-1"
-										onClick={() => {
-											if (diffView) {
-												setDiffView(null);
-											} else {
-												setDiffView({
-													beforeCsId: previousChangeSetId,
-													afterCsId: changeSet.id,
-												});
-											}
-										}}
-										title="View diff"
-									>
-										<Eye size={16} />
-										View diff
-									</button>
-								)}
+								<button
+									className="btn btn-sm btn-ghost gap-1"
+									onClick={() => {
+										if (diffView) {
+											setDiffView(null);
+										} else {
+											setDiffView({
+												beforeCsId: previousChangeSetId,
+												afterCsId: changeSet.id,
+											});
+										}
+									}}
+									title="View diff"
+								>
+									<Eye size={16} />
+									View diff
+								</button>
 							</div>
 						</div>
 
