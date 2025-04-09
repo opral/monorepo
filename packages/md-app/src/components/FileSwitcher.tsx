@@ -37,7 +37,6 @@ export default function FileSwitcher() {
     if (!lix) return;
 
     const fileName = generateHumanId();
-    const newFileContent = `Start writing here...`;
 
     try {
       // Create a new file in the database
@@ -45,7 +44,7 @@ export default function FileSwitcher() {
         .insertInto("file")
         .values({
           path: `/${fileName}.md`,
-          data: new TextEncoder().encode(newFileContent),
+          data: new TextEncoder().encode(``),
         })
         .returning("id")
         .executeTakeFirstOrThrow();

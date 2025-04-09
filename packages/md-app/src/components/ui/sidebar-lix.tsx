@@ -99,13 +99,12 @@ export function LixSidebar() {
 
     try {
       const fileName = generateHumanId()
-      const newFileContent = `Start writing here...`
 
       const newFile = await lix.db
         .insertInto("file")
         .values({
           path: `/${fileName}.md`,
-          data: new TextEncoder().encode(newFileContent),
+          data: new TextEncoder().encode(``),
         })
         .returning("id")
         .executeTakeFirstOrThrow()
