@@ -28,8 +28,7 @@ export async function startRepl(options: ReplOptions): Promise<void> {
   const llmAdapter = createLLMAdapter(options.modelSpec);
   const lixManager = new LixManager();
   
-  // Set up backup
-  lixManager.enableAutoBackup();
+  // Initialize the Lix manager
   
   // Handle LixManager events
   lixManager.on('error', (error) => {

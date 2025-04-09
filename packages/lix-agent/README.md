@@ -12,6 +12,7 @@ Lix Agent is a REPL (read-evaluate-print loop) CLI that allows users to interact
 - **Pluggable LLM Support:** Use different LLM providers (OpenAI GPT, Anthropic Claude, etc.)
 - **Dynamic SQL Generation:** Generate and execute SQL queries from natural language questions
 - **JavaScript Code Generation:** Generate and execute JavaScript against the Lix API
+- **Plugin Support:** Automatically loads and uses specialized plugins for different file types (.csv, .json, etc.)
 - **Generalized Agent Architecture:** Agent can operate directly on the Lix object without hard-coded functionality
 - **Support for In-Memory and On-Disk Files:** Work with temporary or persistent .lix files
 - **Multiple Output Modes:** Human-readable or JSON format for programmatic use
@@ -78,6 +79,7 @@ Once in the REPL, you can use these commands:
 - `/close` - Close the current Lix file
 - `/mode <human|json>` - Switch output mode
 - `/model <n>` - Switch LLM model
+- `/plugins` - List available and active plugins
 - `/help` - Show help
 - `/exit` or `/quit` - Exit the CLI
 
@@ -89,11 +91,22 @@ For any other input, the agent will interpret it as a natural language query or 
 # Open a Lix file
 /open project.lix
 
+# Check available plugins
+/plugins
+
 # Ask about data
 What entries exist in the salaries table?
 
 # Make a change
 Update salaries for employees in the engineering department by 10%
+
+# Work with CSV files
+Find all employees in the marketing department from the employees.csv file
+Add a new employee named John Smith to employees.csv
+
+# Work with JSON files
+Update the theme setting in config.json to dark mode
+Add a new endpoint to the API configuration in api-settings.json
 
 # Get the schema
 What tables and columns exist in this Lix file?
@@ -101,6 +114,21 @@ What tables and columns exist in this Lix file?
 # Save the file
 /save
 ```
+
+## Plugins
+
+The agent automatically loads and uses specialized plugins for different file types:
+
+- **CSV Plugin** (`@lix-js/plugin-csv`): Handles CSV files with features for parsing, modifying, and tracking changes to tabular data.
+- **JSON Plugin** (`@lix-js/plugin-json`): Provides specialized handling for JSON files, including parsing, structure modification, and change tracking.
+
+The plugin system is designed to be extensible, with each plugin implementing the `LixPlugin` interface that includes:
+- `key`: A unique identifier for the plugin
+- `detectChangesGlob`: A glob pattern for which files the plugin handles
+- `detectChanges`: A function to detect changes between file versions
+- `applyChanges`: A function to apply changes to files
+
+Plugins are automatically loaded based on file extensions when working with files.
 
 ## Development
 

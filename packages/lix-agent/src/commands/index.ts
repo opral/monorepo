@@ -3,6 +3,7 @@ import { SessionState } from '../repl.js';
 import { LixManager } from '../lix/lixManager.js';
 import { createLLMAdapter } from '../agent/llm.js';
 import path from 'path';
+import { sql } from 'kysely';
 
 // Type for command handlers
 type CommandHandler = (state: SessionState, args: string[]) => Promise<void>;
@@ -23,6 +24,7 @@ async function handleHelpCommand(state: SessionState): Promise<void> {
     console.log(`${chalk.green('/files')}               - List tracked files in the current .lix`);
     console.log(`${chalk.green('/add')} <path> <content>- Add a new file to track`);
     console.log(`${chalk.green('/backup')}              - Create a backup of the current .lix file`);
+    console.log(`${chalk.green('/plugins')}             - List available and active plugins`);
     console.log(`${chalk.green('/exit')} or ${chalk.green('/quit')}    - Exit the CLI`);
     console.log(`${chalk.green('/help')}                - Show this help message`);
     console.log('');
@@ -39,6 +41,7 @@ async function handleHelpCommand(state: SessionState): Promise<void> {
         { name: '/files', args: '', description: 'List tracked files in the current .lix' },
         { name: '/add', args: '<path> <content>', description: 'Add a new file to track' },
         { name: '/backup', args: '', description: 'Create a backup of the current .lix file' },
+        { name: '/plugins', args: '', description: 'List available and active plugins' },
         { name: '/exit', args: '', description: 'Exit the CLI' },
         { name: '/quit', args: '', description: 'Exit the CLI' },
         { name: '/help', args: '', description: 'Show this help message' }
@@ -387,19 +390,23 @@ async function handleAddCommand(state: SessionState, args: string[]): Promise<vo
   const content = args.slice(1).join(' ');
   
   try {
-    // Use direct SQL query to add the file
+    // Insert the file using the query builder
+    // Ensure path starts with a slash
+    const fixedPath = filePath.startsWith('/') ? filePath : `/${filePath}`;
+    
+    // Create buffer from content
     const contentBuffer = Buffer.from(content, 'utf8');
     
     await lix.db
       .insertInto('file')
       .values({ 
-        path: filePath, 
+        path: fixedPath, 
         data: contentBuffer 
       })
       .execute();
     
     if (outputMode === 'human') {
-      console.log(chalk.green(`Added file: ${filePath}`));
+      console.log(chalk.green(`Added file: ${fixedPath}`));
     } else {
       console.log(JSON.stringify({ success: true, file: filePath }));
     }
@@ -460,58 +467,39 @@ async function handleBackupCommand(state: SessionState): Promise<void> {
   }
 }
 
-// Save Diff command
-async function handleSaveDiffCommand(state: SessionState, args: string[]): Promise<void> {
+
+// Plugins command
+async function handlePluginsCommand(state: SessionState): Promise<void> {
   const outputMode = state.outputMode;
   
-  if (args.length < 1) {
+  if (!state.activeLixManager) {
     if (outputMode === 'human') {
-      console.log(chalk.yellow('Usage: /saveDiff <path>'));
+      console.log(chalk.yellow('No Lix file is currently open. Use /new or /open first.'));
     } else {
-      console.log(JSON.stringify({ error: 'Missing path argument for /saveDiff command' }));
+      console.log(JSON.stringify({ error: 'No Lix file is currently open' }));
     }
     return;
   }
   
-  const filePath = args[0];
-  
-  // This command would require us to track the last diff shown
-  // As a placeholder implementation, we'll just create an example diff
   try {
-    const original = `{
-  "name": "example",
-  "version": "1.0.0",
-  "description": "Example for diff"
-}`;
-    
-    const modified = `{
-  "name": "example",
-  "version": "2.0.0",
-  "description": "Example for diff",
-  "updated": true
-}`;
-    
-    // Get the output formatter from the agent
-    const outputFormatter = state.agent['outputFormatter'];
-    
-    // Save the diff
-    await outputFormatter.saveDiffToPatchFile(original, modified, filePath);
+    const pluginsInfo = await state.activeLixManager.getPluginsInfo();
     
     if (outputMode === 'human') {
-      console.log(chalk.green(`Example diff saved to: ${filePath}`));
-      console.log(chalk.yellow('Note: This is an example diff. In a full implementation, this would save your last actual diff.'));
+      console.log(chalk.cyan(`Available plugins (${pluginsInfo.count}):`));
+      
+      pluginsInfo.available.forEach((plugin: { key: string, supports: string, active?: boolean }) => {
+        const status = plugin.active ? chalk.green('✓ ACTIVE') : chalk.gray('inactive');
+        console.log(`- ${plugin.key} ${status}`);
+        console.log(`  Supports: ${plugin.supports}`);
+      });
     } else {
-      console.log(JSON.stringify({ 
-        success: true, 
-        file: filePath,
-        note: 'This is an example diff. In a full implementation, this would save your last actual diff.' 
-      }));
+      console.log(JSON.stringify(pluginsInfo));
     }
   } catch (error) {
     if (outputMode === 'human') {
-      console.error(chalk.red(`Failed to save diff: ${error instanceof Error ? error.message : String(error)}`));
+      console.error(chalk.red(`Failed to get plugins info: ${error instanceof Error ? error.message : String(error)}`));
     } else {
-      console.error(JSON.stringify({ error: `Failed to save diff: ${error instanceof Error ? error.message : String(error)}` }));
+      console.error(JSON.stringify({ error: `Failed to get plugins info: ${error instanceof Error ? error.message : String(error)}` }));
     }
   }
 }
@@ -528,4 +516,5 @@ export const commandHandlers: Record<string, CommandHandler> = {
   files: handleFilesCommand,
   add: handleAddCommand,
   backup: handleBackupCommand,
+  plugins: handlePluginsCommand,
 };

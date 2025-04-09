@@ -2,6 +2,7 @@ import { openLixInMemory, newLixFile, toBlob, Lix } from '@lix-js/sdk';
 import path from 'path';
 import fs from 'fs/promises';
 import { EventEmitter } from 'events';
+import { PluginLoader } from './pluginLoader.js';
 
 // Define events for the LixManager
 export declare interface LixManager {
@@ -14,9 +15,11 @@ export declare interface LixManager {
 export class LixManager extends EventEmitter {
   private lix: Lix | null = null;
   private filePath: string | null = null;
+  private pluginLoader: PluginLoader;
   
   constructor() {
     super();
+    this.pluginLoader = new PluginLoader();
   }
   
   /**
@@ -51,8 +54,12 @@ export class LixManager extends EventEmitter {
       // If blob is a Promise<Blob>, make sure to resolve it
       const resolvedBlob = blob instanceof Promise ? await blob : blob;
       
+      // Load default plugins
+      const plugins = await this.pluginLoader.getAllPlugins();
+      
       this.lix = await openLixInMemory({ 
-        blob: resolvedBlob
+        blob: resolvedBlob,
+        providePlugins: plugins
       });
       
       this.filePath = null;
@@ -77,9 +84,13 @@ export class LixManager extends EventEmitter {
       // Create a Blob from the buffer
       const blob = new Blob([fileBuffer]);
       
-      // Open the Lix file
+      // Determine which plugins to load based on file extension and content
+      const plugins = await this.determinePluginsForFile(filePath, fileBuffer);
+      
+      // Open the Lix file with the appropriate plugins
       this.lix = await openLixInMemory({ 
-        blob
+        blob,
+        providePlugins: plugins
       });
       
       this.filePath = filePath;
@@ -88,6 +99,33 @@ export class LixManager extends EventEmitter {
       const err = new Error(`Failed to open Lix file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
       this.emit('error', err);
       throw err;
+    }
+  }
+  
+  /**
+   * Determine which plugins to load based on file content and path
+   */
+  private async determinePluginsForFile(filePath: string, fileBuffer: Buffer): Promise<any[]> {
+    const extension = path.extname(filePath).toLowerCase();
+    
+    try {
+      // First, try to get plugins based on file extension
+      if (extension) {
+        const extensionPlugin = await this.pluginLoader.getPluginForExtension(extension);
+        if (extensionPlugin) {
+          return [extensionPlugin];
+        }
+      }
+      
+      // If we don't have a plugin for this extension, 
+      // it's better to load all available plugins as a fallback
+      
+      // If we get here, load all plugins as a fallback
+      return await this.pluginLoader.getAllPlugins();
+    } catch (error) {
+      console.warn(`Error determining plugins for ${filePath}:`, error);
+      // Fall back to loading all plugins in case of error
+      return await this.pluginLoader.getAllPlugins();
     }
   }
   
@@ -137,5 +175,53 @@ export class LixManager extends EventEmitter {
     this.lix = null;
     this.filePath = null;
     this.emit('fileClosed');
+  }
+  
+  /**
+   * Get information about loaded plugins
+   */
+  async getPluginsInfo(): Promise<{
+    available: Array<{
+      key: string;
+      supports: string;
+      active?: boolean;
+    }>;
+    count: number;
+  }> {
+    // Get all available plugins
+    const availablePlugins = await this.pluginLoader.getAllPlugins();
+    
+    // Information about all available plugins
+    const pluginsInfo = availablePlugins.map(plugin => ({
+      key: plugin.key,
+      supports: plugin.detectChangesGlob || 'unknown',
+      active: false // Default to inactive
+    }));
+    
+    // If a Lix file is open, check what plugins are active
+    if (this.lix) {
+      try {
+        // In the actual LIX API, we would need to access active plugins somehow
+        // For now, let's assume all plugins are active if they're available
+        // and the Lix file is open
+        pluginsInfo.forEach(plugin => {
+          plugin.active = true;
+        });
+      } catch (error) {
+        console.warn('Could not determine active plugins:', error);
+      }
+    }
+    
+    return {
+      available: pluginsInfo,
+      count: pluginsInfo.length
+    };
+  }
+  
+  /**
+   * Get plugins for a file extension
+   */
+  async getPluginsForExtension(extension: string): Promise<any[]> {
+    return [await this.pluginLoader.getPluginForExtension(extension)].filter(Boolean);
   }
 }

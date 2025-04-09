@@ -8,6 +8,7 @@ import chalk from 'chalk';
 import { validateContent } from '../validate.js';
 import * as diff from 'diff';
 import { Lix } from '@lix-js/sdk';
+import { sql } from 'kysely';
 
 export interface AgentOptions {
   llmAdapter: LLMAdapter;
@@ -66,16 +67,93 @@ class JSCodeExecutor {
 The Lix object (from @lix-js/sdk) has the following key properties:
 - db: A Kysely database instance for SQL operations
 - metadata: Information about the Lix file
-- changes: Change tracking functionality
 
-Instructions:
-1. Generate JavaScript code that accomplishes the user's request using the Lix API.
-2. Return only the executable code, with no explanation or commentary.
-3. The code will be executed with the Lix object available as 'lix'.
-4. Your code should return a result that can be shown to the user.
-5. Keep your code concise and focused on the task.
-6. Handle errors appropriately.
-7. Use async/await for asynchronous operations.`
+IMPORTANT - FILE HANDLING PRINCIPLES:
+1. All file operations must use the plugin system
+2. Never implement file format-specific logic directly
+3. Each plugin has a standard interface with detectChanges and applyChanges methods
+4. Create proper before/after states for all modifications
+
+For working with files, follow this pattern:
+
+\`\`\`javascript
+async function workWithFile() {
+  try {
+    // 1. Get the file (or determine the file path from the request)
+    const filePath = '/path/to/file.ext'; // Normalize path to start with '/'
+    const fileResult = await lix.db
+      .selectFrom('file')
+      .select(['id', 'path', 'data'])
+      .where('path', '=', filePath)
+      .execute();
+    
+    if (!fileResult || fileResult.length === 0) {
+      return { error: \`File not found: \${filePath}\` };
+    }
+    
+    const fileData = fileResult[0];
+    
+    // 2. Determine extension and load the appropriate plugin dynamically
+    const extension = fileData.path.split('.').pop().toLowerCase();
+    
+    // Get plugin registry from the lix pluginLoader
+    const pluginLoader = lix.pluginLoader || { // Fallback if pluginLoader not available
+      async loadPlugin(ext) {
+        try {
+          if (ext === 'json') return (await import('@lix-js/plugin-json')).plugin;
+          if (ext === 'csv') return (await import('@lix-js/plugin-csv')).plugin;
+          return null;
+        } catch (e) {
+          return null;
+        }
+      }
+    };
+    
+    // Load the plugin
+    const plugin = await pluginLoader.loadPlugin(extension);
+    if (!plugin) {
+      // For read-only operations on unsupported formats, we can still return the content
+      if (isReadOnlyOperation) {
+        // Convert binary data to string for viewing
+        let content = fileData.data;
+        if (Buffer.isBuffer(content)) {
+          content = content.toString('utf8');
+        } else if (content instanceof Uint8Array) {
+          content = new TextDecoder().decode(content);
+        } else if (typeof content !== 'string') {
+          content = String(content);
+        }
+        
+        return {
+          success: true,
+          fileName: fileData.path,
+          content: content
+        };
+      }
+      
+      return { error: \`No plugin available for file type: \${extension}\` };
+    }
+    
+    // 3. For modifications, create before/after states and apply changes
+    // For read operations, just return the content
+    
+    // 4. Use the standard plugin interface
+    // const changes = await plugin.detectChanges({...});
+    // const result = await plugin.applyChanges({...});
+    
+    // 5. Return appropriate results
+    return { success: true, message: 'Operation completed successfully' };
+  } catch (e) {
+    return { 
+      error: 'Operation failed',
+      details: e.message
+    };
+  }
+}
+\`\`\`
+
+Generate concise JavaScript code that accomplishes the user's request while following these principles.
+The code will be executed with the Lix object available as 'lix'. Handle errors appropriately.`
       },
       {
         role: 'user',
@@ -130,7 +208,22 @@ Instructions:
       // Create a safe execution context with the Lix object
       const executionContext = {
         lix: lixObj,
-        console: { log: () => {} }, // Suppress console.log
+        // Provide real console methods but wrapped to catch any errors
+        console: { 
+          log: (...args: any[]) => {
+            try { console.log(...args); } catch (e) {}
+          },
+          error: (...args: any[]) => {
+            try { console.error(...args); } catch (e) {}
+          },
+          warn: (...args: any[]) => {
+            try { console.warn(...args); } catch (e) {}
+          },
+          info: (...args: any[]) => {
+            try { console.info(...args); } catch (e) {}
+          }
+        },
+        Buffer: Buffer,
       };
       
       // Create a function from the code
@@ -150,11 +243,263 @@ Instructions:
   }
 }
 
+/**
+ * Improved SQL Execution Helper
+ */
+class SQLExecutionHelper {
+  private debug: boolean;
+  
+  constructor(debug: boolean = false) {
+    this.debug = debug;
+  }
+  
+  /**
+   * Execute a SQL query against the Lix database
+   */
+  async executeQuery(lix: Lix, query: string): Promise<any> {
+    if (this.debug) {
+      console.log(`Executing query: ${query}`);
+    }
+    
+    try {
+      // For simplicity in this POC, determine basic query type and handle accordingly
+      const queryType = this.getQueryType(query);
+      
+      if (queryType === 'SELECT') {
+        return await this.executeSelect(lix, query);
+      } else if (queryType === 'INSERT') {
+        return await this.executeInsert(lix, query);
+      } else if (queryType === 'UPDATE') {
+        return await this.executeUpdate(lix, query);
+      } else if (queryType === 'DELETE') {
+        return await this.executeDelete(lix, query);
+      } else {
+        return {
+          success: false,
+          error: `Unsupported query type in POC: ${queryType}`
+        };
+      }
+    } catch (error) {
+      console.error('Error executing query:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  }
+  
+  /**
+   * Get the basic type of SQL query (SELECT, INSERT, etc.)
+   */
+  private getQueryType(query: string): string {
+    const upperQuery = query.trim().toUpperCase();
+    if (upperQuery.startsWith('SELECT')) return 'SELECT';
+    if (upperQuery.startsWith('INSERT')) return 'INSERT';
+    if (upperQuery.startsWith('UPDATE')) return 'UPDATE';
+    if (upperQuery.startsWith('DELETE')) return 'DELETE';
+    return 'UNKNOWN';
+  }
+  
+  /**
+   * Execute a SELECT query
+   */
+  private async executeSelect(lix: Lix, query: string): Promise<any> {
+    // For POC, we'll implement a simple version that extracts table name
+    // and handles only basic queries against the file table
+    try {
+      // Extract table name from query - simple regex approach
+      const tableMatch = query.match(/from\s+(\w+)/i);
+      if (!tableMatch || !tableMatch[1]) {
+        return { error: 'Could not determine table name from query' };
+      }
+      
+      const tableName = tableMatch[1].toLowerCase();
+      
+      if (tableName === 'file') {
+        // Get records from file table
+        const files = await lix.db
+          .selectFrom('file')
+          .select(['id', 'path', 'data'])
+          .execute();
+          
+        // Process files to handle binary data
+        return files.map(file => {
+          // Handle binary data conversion
+          let content: any = file.data;
+          if (Buffer.isBuffer(content)) {
+            try {
+              content = content.toString('utf8');
+            } catch (e) {
+              // Keep as is if can't convert
+              content = '[Binary data]';
+            }
+          } else if (content instanceof Uint8Array) {
+            try {
+              content = Array.from(content)
+                .map(byte => String.fromCharCode(byte))
+                .join('');
+            } catch (e) {
+              // Keep as is if can't convert
+              content = '[Binary data]';
+            }
+          }
+          
+          return {
+            id: file.id,
+            path: file.path,
+            data: content
+          };
+        });
+      } else {
+        // For POC, we'll return empty results for other tables
+        return [];
+      }
+    } catch (error) {
+      console.error('SELECT query error:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Execute an INSERT query
+   */
+  private async executeInsert(lix: Lix, query: string): Promise<any> {
+    // For POC, we'll only implement basic INSERT into file table
+    try {
+      // Check if query is inserting into file table
+      const tableMatch = query.match(/insert\s+into\s+(\w+)/i);
+      if (!tableMatch || tableMatch[1].toLowerCase() !== 'file') {
+        return { error: 'Only INSERT INTO file is implemented in POC' };
+      }
+      
+      // Try to extract path and data values - this is simplified!
+      // In a real parser, this would be much more robust
+      const pathMatch = query.match(/path\s*=\s*['"](.*?)['"]/i);
+      const dataMatch = query.match(/data\s*=\s*['"](.*?)['"]/i);
+      
+      if (!pathMatch || !dataMatch) {
+        return { error: 'Could not extract path or data from INSERT query' };
+      }
+      
+      const path = pathMatch[1];
+      const data = dataMatch[1];
+      
+      // Ensure path starts with / as this is a requirement
+      const fixedPath = path.startsWith('/') ? path : `/${path}`;
+      
+      // Convert data to Buffer for BLOB column
+      const dataBuffer = Buffer.from(data, 'utf8');
+      
+      // Insert the file
+      await lix.db
+        .insertInto('file')
+        .values({
+          path: fixedPath,
+          data: dataBuffer
+        })
+        .execute();
+        
+      return { success: true, message: `Inserted file at ${fixedPath}` };
+    } catch (error) {
+      console.error('INSERT query error:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Execute an UPDATE query
+   */
+  private async executeUpdate(lix: Lix, query: string): Promise<any> {
+    // For POC, we'll only implement basic UPDATE for file table
+    try {
+      // Check if query is updating file table
+      const tableMatch = query.match(/update\s+(\w+)/i);
+      if (!tableMatch || tableMatch[1].toLowerCase() !== 'file') {
+        return { error: 'Only UPDATE file is implemented in POC' };
+      }
+      
+      // Very basic extraction of SET and WHERE clauses
+      const setMatch = query.match(/set\s+(.*?)\s+where/i);
+      const whereMatch = query.match(/where\s+(.*?)(\s+|$)/i);
+      
+      if (!setMatch || !whereMatch) {
+        return { error: 'Could not extract SET or WHERE clauses from UPDATE query' };
+      }
+      
+      // Extract the path to update and the new data value
+      const pathMatch = whereMatch[1].match(/path\s*=\s*['"](.*?)['"]/i);
+      const dataMatch = setMatch[1].match(/data\s*=\s*['"](.*?)['"]/i);
+      
+      if (!pathMatch || !dataMatch) {
+        return { error: 'Could not extract path or data from UPDATE query' };
+      }
+      
+      const path = pathMatch[1];
+      const data = dataMatch[1];
+      
+      // Convert data to Buffer for BLOB column
+      const dataBuffer = Buffer.from(data, 'utf8');
+      
+      // Update the file
+      await lix.db
+        .updateTable('file')
+        .set({ data: dataBuffer })
+        .where('path', '=', path)
+        .execute();
+        
+      return { success: true, message: `Updated file at ${path}` };
+    } catch (error) {
+      console.error('UPDATE query error:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Execute a DELETE query
+   */
+  private async executeDelete(lix: Lix, query: string): Promise<any> {
+    // For POC, we'll only implement basic DELETE from file table
+    try {
+      // Check if query is deleting from file table
+      const tableMatch = query.match(/delete\s+from\s+(\w+)/i);
+      if (!tableMatch || tableMatch[1].toLowerCase() !== 'file') {
+        return { error: 'Only DELETE FROM file is implemented in POC' };
+      }
+      
+      // Extract WHERE condition
+      const whereMatch = query.match(/where\s+(.*?)(\s+|$)/i);
+      if (!whereMatch) {
+        return { error: 'DELETE requires a WHERE clause for safety' };
+      }
+      
+      // Extract the path to delete
+      const pathMatch = whereMatch[1].match(/path\s*=\s*['"](.*?)['"]/i);
+      if (!pathMatch) {
+        return { error: 'Could not extract path from DELETE query' };
+      }
+      
+      const path = pathMatch[1];
+      
+      // Delete the file
+      await lix.db
+        .deleteFrom('file')
+        .where('path', '=', path)
+        .execute();
+        
+      return { success: true, message: `Deleted file at ${path}` };
+    } catch (error) {
+      console.error('DELETE query error:', error);
+      throw error;
+    }
+  }
+}
+
 export class Agent {
   private context: ConversationContext;
   llmAdapter: LLMAdapter; // Made public for testing and direct access
   private sqlOrchestrator: SQLOrchestrator;
   private jsExecutor: JSCodeExecutor;
+  private sqlExecutor: SQLExecutionHelper;
   private outputFormatter: OutputFormatter;
   private debug: boolean;
   
@@ -163,6 +508,7 @@ export class Agent {
     this.context = new ConversationContext(this.llmAdapter);
     this.sqlOrchestrator = new SQLOrchestrator(this.llmAdapter);
     this.jsExecutor = new JSCodeExecutor(this.llmAdapter);
+    this.sqlExecutor = new SQLExecutionHelper(options.debug || false);
     this.outputFormatter = options.outputFormatter;
     this.debug = options.debug || false;
     
@@ -215,425 +561,6 @@ export class Agent {
   }
   
   /**
-   * Determine if the user input is requesting a change
-   */
-  private async isChangeRequest(input: string): Promise<boolean> {
-    // First, use a simple heuristic for obvious cases
-    const changeVerbs = [
-      'change', 'update', 'modify', 'set', 'add', 'create', 'insert', 
-      'delete', 'remove', 'rename', 'edit'
-    ];
-    
-    // Check if any of the change verbs appear in the input
-    for (const verb of changeVerbs) {
-      // Word boundaries to prevent partial matches
-      const regex = new RegExp(`\\b${verb}\\b`, 'i');
-      if (regex.test(input)) {
-        return true;
-      }
-    }
-    
-    // For more complex or ambiguous requests, use the LLM to classify
-    const messages: ChatMessage[] = [
-      {
-        role: 'system',
-        content: `You are an AI assistant that determines whether a user request is asking for a change to a file or just querying information.
-        
-Instructions:
-1. Analyze the user's request to determine their intent.
-2. If the request is asking to modify, update, create, delete, or otherwise change any file, respond with exactly "CHANGE".
-3. If the request is just asking for information, explanation, or retrieving data without changes, respond with exactly "QUERY".
-4. Only respond with one of these two words: "CHANGE" or "QUERY", with no explanation or additional text.`
-      },
-      {
-        role: 'user',
-        content: `Classify this request: "${input}"`
-      }
-    ];
-    
-    const response = await this.llmAdapter.generate(messages, { temperature: 0.2 });
-    const classification = response.message.trim().toUpperCase();
-    
-    return classification === "CHANGE";
-  }
-  
-  /**
-   * Handle a query request (retrieve information)
-   */
-  private async handleQuery(input: string, sessionState: SessionState): Promise<void> {
-    // If we have an active Lix file, try to answer with SQL
-    if (sessionState.activeLixManager) {
-      const schema = sessionState.activeLixManager.getDatabaseSchema();
-      
-      // Use the SQL orchestrator to generate and run a query
-      const queryResult = await this.sqlOrchestrator.generateAndExecuteQuery(
-        input,
-        schema,
-        async (query) => {
-          if (this.debug) {
-            console.log(chalk.gray('Generated SQL query:'), query);
-          }
-          return sessionState.activeLixManager!.executeQuery(query);
-        }
-      );
-      
-      if (queryResult.success) {
-        // Format the results with the LLM to create a natural language response
-        const response = await this.sqlOrchestrator.formatQueryResults(
-          input, 
-          queryResult.data, 
-          queryResult.sql!
-        );
-        
-        // Add to conversation history and output to user
-        this.context.addAssistantMessage(response);
-        this.outputFormatter.formatMessage(response);
-      } else {
-        // SQL generation/execution failed, fall back to general response
-        const response = await this.generateGeneralResponse(
-          input, 
-          `I tried to retrieve that information from the database but encountered an error: ${queryResult.error}. Let me try to answer your question more generally.`
-        );
-        
-        this.context.addAssistantMessage(response);
-        this.outputFormatter.formatMessage(response);
-      }
-    } else {
-      // No Lix file open, generate a general response
-      const response = await this.generateGeneralResponse(
-        input,
-        "I don't have a Lix file open, so I can't access any file or change data. You can use /open or /new commands to work with a Lix file."
-      );
-      
-      this.context.addAssistantMessage(response);
-      this.outputFormatter.formatMessage(response);
-    }
-  }
-  
-  /**
-   * Handle a change request (modify content)
-   */
-  private async handleChangeRequest(input: string, sessionState: SessionState): Promise<void> {
-    if (!sessionState.activeLixManager) {
-      const response = "You need to open a Lix file first using /open or /new before making changes.";
-      this.context.addAssistantMessage(response);
-      this.outputFormatter.formatMessage(response);
-      return;
-    }
-    
-    // 1. Get the current state of the file
-    const filePaths = await sessionState.activeLixManager.getTrackedFilePaths();
-    
-    if (filePaths.length === 0) {
-      const response = "There are no files tracked in this Lix file yet. You'll need to add a file first.";
-      this.context.addAssistantMessage(response);
-      this.outputFormatter.formatMessage(response);
-      return;
-    }
-    
-    // 2. Use LLM to determine which file to modify
-    const targetFilePath = await this.determineTargetFile(input, filePaths);
-    
-    // 3. Get current content of the target file
-    const currentContent = await sessionState.activeLixManager.getFileContent(targetFilePath);
-    
-    if (!currentContent) {
-      const response = `Cannot get content for file: ${targetFilePath}`;
-      this.context.addAssistantMessage(response);
-      this.outputFormatter.formatMessage(response);
-      return;
-    }
-    
-    // 4. Generate the modified content
-    const modifiedContent = await this.generateModifiedContent(
-      input,
-      targetFilePath,
-      currentContent
-    );
-    
-    // 5. Validate the changes
-    const isValid = validateContent(targetFilePath, modifiedContent);
-    
-    if (!isValid) {
-      // If validation fails, try to salvage the changes with LLM assistance
-      this.outputFormatter.formatMessage("The proposed changes have validation issues. Attempting to fix...");
-      
-      const fixedContent = await this.fixInvalidContent(targetFilePath, modifiedContent, currentContent);
-      
-      // Check if the fix worked
-      if (!validateContent(targetFilePath, fixedContent)) {
-        const response = "I couldn't generate valid changes. Please try with a more specific instruction.";
-        this.context.addAssistantMessage(response);
-        this.outputFormatter.formatMessage(response);
-        return;
-      }
-      
-      // Continue with the fixed content
-      this.outputFormatter.formatMessage("Validation issues fixed.");
-      this.showPendingChanges(currentContent, fixedContent, targetFilePath, sessionState);
-    } else {
-      // Continue with the valid content
-      this.showPendingChanges(currentContent, modifiedContent, targetFilePath, sessionState);
-    }
-  }
-
-  /**
-   * Show pending changes and ask for confirmation
-   */
-  private async showPendingChanges(
-    currentContent: string,
-    newContent: string,
-    filePath: string,
-    sessionState: SessionState
-  ): Promise<void> {
-    // Calculate diff to highlight changes
-    const changes = diff.diffLines(currentContent, newContent);
-    
-    // Summarize the changes for better user understanding
-    const changeSummary = await this.summarizeChanges(filePath, changes);
-    
-    // Display summary and diff
-    this.outputFormatter.formatMessage(`Proposed changes to ${filePath}:`);
-    this.outputFormatter.formatMessage(changeSummary);
-    this.outputFormatter.formatDiff(currentContent, newContent);
-    
-    // Skip confirmation if auto-confirm is enabled
-    if (!sessionState.autoConfirm) {
-      const confirm = readline.question(chalk.yellow('Apply this change? [y/N]: '));
-      
-      if (!confirm.match(/^y(es)?$/i)) {
-        const response = "Change not applied.";
-        this.context.addAssistantMessage(response);
-        this.outputFormatter.formatMessage(response);
-        return;
-      }
-    }
-    
-    // 7. Apply the changes
-    try {
-      if (sessionState.activeLixManager) {
-        await sessionState.activeLixManager.updateFileContent(filePath, newContent);
-        
-        const response = `Successfully updated ${filePath.includes('json') ? 'JSON file' : filePath}.`;
-        this.context.addAssistantMessage(response);
-        this.outputFormatter.formatMessage(response);
-      } else {
-        throw new Error("No active Lix manager");
-      }
-    } catch (error) {
-      const errorMsg = `Failed to apply changes: ${error instanceof Error ? error.message : String(error)}`;
-      this.context.addAssistantMessage(errorMsg);
-      this.outputFormatter.formatError(errorMsg);
-    }
-  }
-  
-  /**
-   * Use the LLM to create a brief summary of the changes
-   */
-  private async summarizeChanges(filePath: string, changes: diff.Change[]): Promise<string> {
-    // Prepare a description of the changes for the LLM
-    let changesDescription = "";
-    
-    for (const part of changes) {
-      if (part.added) {
-        changesDescription += `ADDED: ${part.value.substring(0, 100)}${part.value.length > 100 ? '...' : ''}\n`;
-      } else if (part.removed) {
-        changesDescription += `REMOVED: ${part.value.substring(0, 100)}${part.value.length > 100 ? '...' : ''}\n`;
-      }
-    }
-    
-    const messages: ChatMessage[] = [
-      {
-        role: 'system',
-        content: `You are an AI assistant that summarizes file changes.
-        
-Instructions:
-1. Given the description of additions and removals in a file, provide a brief, clear summary of what changed.
-2. Focus on the purpose or effect of the changes, not just the literal differences.
-3. Keep your summary concise (1-3 sentences).
-4. Be specific but avoid technical jargon unless necessary.`
-      },
-      {
-        role: 'user',
-        content: `Summarize these changes to ${filePath}:\n\n${changesDescription}`
-      }
-    ];
-    
-    const response = await this.llmAdapter.generate(messages, { temperature: 0.3 });
-    return response.message;
-  }
-  
-  /**
-   * Determine which file to target for a change
-   */
-  private async determineTargetFile(input: string, filePaths: string[]): Promise<string> {
-    // If there's only one file, use that
-    if (filePaths.length === 1) {
-      return filePaths[0];
-    }
-    
-    // Otherwise, ask the LLM which file the user is likely referring to
-    const messages: ChatMessage[] = [
-      {
-        role: 'system',
-        content: `You are an AI assistant that helps determine which file a user's request is referring to.
-        
-Available files:
-${filePaths.join('\n')}
-
-Instructions:
-1. Analyze the user's request and determine which file they're most likely referring to.
-2. Output ONLY the file path, with no explanation or commentary.
-3. If no specific file can be determined, choose the most likely file based on the request.`
-      },
-      {
-        role: 'user',
-        content: `Based on this request, which file should be modified? Request: "${input}"`
-      }
-    ];
-    
-    const response = await this.llmAdapter.generate(messages, { temperature: 0.2 });
-    
-    // Clean up the response to ensure we get just a file path
-    const filePath = response.message.trim();
-    
-    // Verify the file path is one of the available paths
-    if (filePaths.includes(filePath)) {
-      return filePath;
-    }
-    
-    // If not found, default to the first file
-    return filePaths[0];
-  }
-  
-  /**
-   * Generate modified content based on user instruction
-   */
-  private async generateModifiedContent(
-    instruction: string,
-    filePath: string,
-    currentContent: string
-  ): Promise<string> {
-    const fileType = filePath.split('.').pop()?.toLowerCase() || '';
-    
-    const messages: ChatMessage[] = [
-      {
-        role: 'system',
-        content: `You are an AI assistant that helps modify file content based on user instructions.
-        
-Instructions:
-1. You will be provided with the current content of a ${fileType} file and a user's request to modify it.
-2. Generate the complete new version of the file with the requested changes applied.
-3. Output ONLY the modified file content, with no explanation or commentary.
-4. Preserve the original format and structure as much as possible.
-5. Make minimal changes - only modify what's necessary to fulfill the user's request.
-6. For ${fileType} files, ensure your output is valid and properly formatted.`
-      },
-      {
-        role: 'user',
-        content: `I need to modify the file "${filePath}" according to this instruction: "${instruction}"
-        
-Current file content:
-
-\`\`\`${fileType}
-${currentContent}
-\`\`\`
-
-Please provide the complete updated file content.`
-      }
-    ];
-    
-    const response = await this.llmAdapter.generate(messages, { temperature: 0.3 });
-    
-    // Clean up to extract just the file content
-    return this.extractContentFromResponse(response.message);
-  }
-  
-  /**
-   * If content validation fails, try to fix it
-   */
-  private async fixInvalidContent(
-    filePath: string,
-    invalidContent: string,
-    originalContent: string
-  ): Promise<string> {
-    const fileType = filePath.split('.').pop()?.toLowerCase() || '';
-    
-    const messages: ChatMessage[] = [
-      {
-        role: 'system',
-        content: `You are an AI assistant that fixes invalid file content.
-        
-Instructions:
-1. You will be provided with invalid ${fileType} content that needs fixing.
-2. Fix any syntax or formatting errors in the content.
-3. Output ONLY the fixed content, with no explanation or commentary.
-4. Ensure your output is valid ${fileType} format.
-5. Make minimal changes - only fix what's broken.`
-      },
-      {
-        role: 'user',
-        content: `The following ${fileType} content is invalid and needs to be fixed.
-        
-Original valid content:
-\`\`\`${fileType}
-${originalContent}
-\`\`\`
-
-Invalid content that needs fixing:
-\`\`\`${fileType}
-${invalidContent}
-\`\`\`
-
-Please provide the fixed content.`
-      }
-    ];
-    
-    const response = await this.llmAdapter.generate(messages, { temperature: 0.3 });
-    
-    // Clean up to extract just the file content
-    return this.extractContentFromResponse(response.message);
-  }
-  
-  /**
-   * Extract content from the LLM's response
-   */
-  private extractContentFromResponse(responseText: string): string {
-    // Look for content in code blocks
-    const contentBlockRegex = /```(?:\w*)?\s*([\s\S]*?)\s*```/;
-    const match = responseText.match(contentBlockRegex);
-    
-    if (match && match[1]) {
-      return match[1];
-    }
-    
-    // No code block, use the entire response
-    return responseText.trim();
-  }
-  
-  /**
-   * Generate a general response when SQL is not available or fails
-   */
-  private async generateGeneralResponse(input: string, context?: string): Promise<string> {
-    const messages = this.context.getMessages().slice(); // Clone current context
-    
-    // If additional context was provided, add it
-    if (context) {
-      messages.push({
-        role: 'system',
-        content: context
-      });
-    }
-    
-    // Generate response
-    const response = await this.llmAdapter.generate(messages);
-    return response.message;
-  }
-  
-  /**
-   * Update file context in the conversation
-   */
-  /**
    * Handle a request using the Lix object directly
    */
   private async handleLixRequest(input: string, lix: Lix): Promise<void> {
@@ -655,34 +582,22 @@ Please provide the fixed content.`
       }
       
       // Second attempt: Try SQL query if JS execution failed
-      // Get database schema dynamically
-      let dbSchema = '';
-      try {
-        // Query the database schema
-        const tables = await lix.db.introspection.getTables();
-        dbSchema = `Database Schema:\n`;
-        
-        for (const table of tables) {
-          dbSchema += `Table: ${table.name}\n`;
-          const columns = await lix.db.introspection.getTableColumns(table.name);
-          
-          for (const column of columns) {
-            dbSchema += `- ${column.name} (${column.dataType})\n`;
-          }
-          dbSchema += '\n';
-        }
-      } catch (error) {
-        dbSchema = 'Could not retrieve database schema. ';
-      }
+      // Get database schema
+      const dbSchema = await this.getDatabaseSchema(lix);
       
-      // Try with SQL execution
-      const sqlExecuteQuery = async (query: string) => {
-        return await lix.db.executeQuery(query);
+      // Configure the SQL execution function
+      const executeQuery = async (query: string) => {
+        if (this.debug) {
+          console.log(chalk.gray('Generated SQL query:'), query);
+        }
+        
+        return await this.sqlExecutor.executeQuery(lix, query);
       };
       
+      // Use the SQL orchestrator to generate and execute a query
       const sqlResult = await this.sqlOrchestrator.generateAndExecuteQuery(
         input,
-        sqlExecuteQuery,
+        executeQuery,
         dbSchema
       );
       
@@ -718,6 +633,24 @@ Please provide the fixed content.`
       const errorMsg = `Failed to process your request: ${error instanceof Error ? error.message : String(error)}`;
       this.context.addAssistantMessage(errorMsg);
       this.outputFormatter.formatError(errorMsg);
+    }
+  }
+  
+  /**
+   * Get database schema as a string description
+   */
+  private async getDatabaseSchema(lix: Lix): Promise<string> {
+    try {
+      // For our POC, let's create a simple schema description
+      return `
+Database Schema:
+- file (id: INTEGER PRIMARY KEY, path: TEXT, data: BLOB)
+- The path column contains file names and always starts with a slash (/)
+- The data column contains the file content as a BLOB
+`;
+    } catch (error) {
+      console.error('Error getting schema:', error);
+      return 'Database schema could not be retrieved.';
     }
   }
   
@@ -767,14 +700,31 @@ Please explain these results in a clear, natural way that directly answers the o
     
     if (lix) {
       try {
-        const tables = await lix.db.introspection.getTables();
         schemaInfo = 'Database Schema:\n';
+        schemaInfo += '- file (id, path, data): Stores file information\n';
         
-        for (const table of tables) {
-          schemaInfo += `Table: ${table.name}\n`;
+        // Try to get file count
+        const files = await lix.db
+          .selectFrom('file')
+          .select(sql`count(*)`.as('count'))
+          .execute();
+          
+        const fileCount = files[0]?.count || 0;
+        schemaInfo += `- ${fileCount} files currently stored in database\n`;
+        
+        // Get plugins information
+        const pluginsInfo = await sessionState.activeLixManager.getPluginsInfo();
+        if (pluginsInfo && pluginsInfo.available && pluginsInfo.available.length > 0) {
+          schemaInfo += '\nActive Plugins:\n';
+          
+          for (const plugin of pluginsInfo.available) {
+            if (plugin.active) {
+              schemaInfo += `- ${plugin.key} (supports: ${plugin.supports})\n`;
+            }
+          }
         }
       } catch (error) {
-        schemaInfo = 'Could not retrieve database schema. ';
+        schemaInfo = 'Could not retrieve database schema information. ';
       }
     }
     
@@ -782,6 +732,25 @@ Please explain these results in a clear, natural way that directly answers the o
     fileContext += schemaInfo;
     
     this.context.setFileContext(fileContext);
+  }
+  
+  /**
+   * Generate a general response when other approaches fail
+   */
+  private async generateGeneralResponse(input: string, context?: string): Promise<string> {
+    const messages = this.context.getMessages().slice(); // Clone current context
+    
+    // If additional context was provided, add it
+    if (context) {
+      messages.push({
+        role: 'system',
+        content: context
+      });
+    }
+    
+    // Generate response
+    const response = await this.llmAdapter.generate(messages);
+    return response.message;
   }
   
   /**
@@ -793,20 +762,34 @@ Please explain these results in a clear, natural way that directly answers the o
 Your capabilities:
 - Answer questions about data stored in Lix files
 - Dynamically explore and understand the Lix database schema
-- Execute SQL queries directly to retrieve and manipulate data
+- Execute SQL queries directly to retrieve data
 - Execute JavaScript code using the Lix SDK to perform operations
 - Help users work with the full Lix API through natural language requests
+- Use specialized plugins for different file types 
 
 When users ask about data or changes, you'll interpret their request and:
 1. Generate and execute JavaScript code against the Lix API
 2. Generate and execute SQL queries against the Lix database
-3. Provide natural language explanations of the results
+3. Utilize appropriate plugins based on file types
+4. Provide natural language explanations of the results
+
+IMPORTANT: Always follow the plugin-based architecture when working with files:
+1. Determine the file type/extension
+2. Import the appropriate plugin dynamically
+3. Create proper before/after states with any required metadata
+4. Use the plugin's standard interface (detectChanges/applyChanges)
+5. Never implement format-specific logic directly
+
+For binary data conversion:
+- TextDecoder: new TextDecoder().decode(data)
+- For Buffer: data.toString('utf8')
 
 You can handle any request related to Lix files, including:
 - Exploring file contents and change history
-- Querying structured data (CSV, JSON)
+- Querying structured data
 - Modifying data and tracking changes
 - Advanced operations like filtering, aggregation, and transformation
+- Working with specialized file formats using the appropriate plugins
 
 Always be clear, concise, and helpful in your responses.`;
   }
