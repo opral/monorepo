@@ -33,7 +33,10 @@ const editorStyles = `
 const Editor: React.FC = () => {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
-	const [diffView] = useKeyValue<[string, string] | null>("diffView");
+	const [diffView] = useKeyValue<{
+		beforeCsId?: string;
+		afterCsId?: string;
+	} | null>("diffView");
 
 	// Initialize editor using useEffect for proper lifecycle management
 	useEffect(() => {

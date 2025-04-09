@@ -43,7 +43,12 @@ async function selectKeyValue(key: string) {
 		.executeTakeFirst();
 
 	// Return the value if found, otherwise null
-	return result ? JSON.parse(result.value) : null;
+	// need to figure out why json parsing is flaky
+	return result
+		? typeof result.value === "string"
+			? JSON.parse(result.value)
+			: result.value
+		: null;
 }
 
 /**

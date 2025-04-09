@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { lix } from "../state";
-import { createVersion, switchVersion } from "@lix-js/sdk";
+import { lix, prosemirrorFile } from "../state";
+import { beforeAfterOfFile } from "@lix-js/sdk";
 import { Node, DOMSerializer } from "prosemirror-model";
 import { schema } from "../prosemirror/schema";
 import { renderUniversalDiffElement } from "@lix-js/universal-diff";
 import { useKeyValue } from "../hooks/useKeyValue";
-import { restoreChangeSet } from "../utilities/restoreChangeSet";
 
 export function DiffView() {
-	const [diffView] = useKeyValue<[string | undefined, string] | null>(
-		"diffView",
-	);
-	const [diffDoc, setDiffDoc] = useState<string | null>(null);
+	const [diffView] = useKeyValue<{
+		beforeCsId?: string;
+		afterCsId?: string;
+	} | null>("diffView");
+	const [diffHtml, setDiffHtml] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -24,106 +24,47 @@ export function DiffView() {
 
 				setLoading(true);
 				setError(null);
-				setDiffDoc(null);
+				setDiffHtml(null);
 
-				let beforeDoc: { data: Uint8Array } | null = null;
-				let afterDoc: { data: Uint8Array } | null = null;
+				const { beforeCsId, afterCsId } = diffView;
 
-				await lix.db.transaction().execute(async (trx) => {
-					const currVersion = await trx
-						.selectFrom("current_version")
-						.selectAll()
-						.executeTakeFirstOrThrow();
-
-					const interimVersion = await createVersion({
-						lix: { ...lix, db: trx },
-					});
-
-					await switchVersion({
-						lix: { ...lix, db: trx },
-						to: interimVersion,
-					});
-
-					if (diffDoc?.[0]) {
-						await restoreChangeSet(diffDoc[0]);
-
-						beforeDoc = await trx
-							.selectFrom("file")
-							.where("path", "=", "/prosemirror.json")
-							.select("data")
-							.executeTakeFirstOrThrow();
-					} else {
-						beforeDoc = {
-							data: new TextEncoder().encode(
-								`{ "type": "doc", "content": [] }`,
-							),
-						};
-					}
-
-					if (diffDoc?.[1]) {
-						await restoreChangeSet(diffDoc[1]);
-
-						afterDoc = await trx
-							.selectFrom("file")
-							.where("path", "=", "/prosemirror.json")
-							.select("data")
-							.executeTakeFirstOrThrow();
-					} else {
-						afterDoc = {
-							data: new TextEncoder().encode(
-								`{ "type": "doc", "content": [] }`,
-							),
-						};
-					}
-
-					await switchVersion({
-						lix: { ...lix, db: trx },
-						to: currVersion,
-					});
+				const { before, after } = await beforeAfterOfFile({
+					lix,
+					changeSetBefore: beforeCsId ? { id: beforeCsId } : undefined,
+					changeSetAfter: afterCsId ? { id: afterCsId } : undefined,
+					file: { id: prosemirrorFile.id },
 				});
 
-				if (!beforeDoc || !afterDoc) {
-					throw new Error("Failed to fetch one or both documents");
+				let beforeHtml: string | undefined;
+				let afterHtml: string | undefined;
+
+				for (const doc of [before, after]) {
+					if (doc) {
+						const docData = JSON.parse(new TextDecoder().decode(doc.data));
+						const node = Node.fromJSON(schema, docData);
+						const serializer = DOMSerializer.fromSchema(schema);
+						const htmlFragment = serializer.serializeFragment(node.content);
+						const tempDiv = document.createElement("div");
+						tempDiv.appendChild(htmlFragment);
+						const html = tempDiv.innerHTML;
+						if (doc === before) {
+							beforeHtml = html;
+						} else {
+							afterHtml = html;
+						}
+					}
 				}
 
-				const beforeDocData = JSON.parse(
-					new TextDecoder().decode((beforeDoc as any).data),
-				);
-				const afterDocData = JSON.parse(
-					new TextDecoder().decode((afterDoc as any).data),
-				);
-
-				const beforeNode = Node.fromJSON(schema, beforeDocData);
-				const afterNode = Node.fromJSON(schema, afterDocData);
-
-				const serializer = DOMSerializer.fromSchema(schema);
-
-				const beforeHtmlFragment = serializer.serializeFragment(
-					beforeNode.content,
-				);
-				const afterHtmlFragment = serializer.serializeFragment(
-					afterNode.content,
-				);
-
-				const tempDiv = document.createElement("div");
-
-				tempDiv.appendChild(beforeHtmlFragment);
-				const beforeHtml = tempDiv.innerHTML;
-
-				tempDiv.innerHTML = "";
-				tempDiv.appendChild(afterHtmlFragment);
-				const afterHtml = tempDiv.innerHTML;
-
 				const diffHtml = renderUniversalDiffElement({
-					beforeHtml: beforeHtml,
-					afterHtml: afterHtml,
+					beforeHtml: beforeHtml ?? "",
+					afterHtml: afterHtml ?? "",
 				});
 
 				console.log("Before HTML:", beforeHtml);
 				console.log("After HTML:", afterHtml);
 				console.log("Diff HTML:", diffHtml);
 
-				setDiffDoc(diffHtml.outerHTML);
+				setDiffHtml(diffHtml.outerHTML);
 			} catch (err) {
 				console.error("Error loading or processing diff documents:", err);
 				setError(
@@ -145,7 +86,7 @@ export function DiffView() {
 		return <div className="diff-error">Error: {error}</div>;
 	}
 
-	if (!diffDoc) {
+	if (!diffHtml) {
 		return (
 			<div className="diff-empty">
 				No differences generated or documents couldn't be compared.
@@ -153,5 +94,5 @@ export function DiffView() {
 		);
 	}
 
-	return <div dangerouslySetInnerHTML={{ __html: diffDoc }} />;
+	return <div dangerouslySetInnerHTML={{ __html: diffHtml }} />;
 }
