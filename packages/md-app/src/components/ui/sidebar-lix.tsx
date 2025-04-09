@@ -60,7 +60,6 @@ import InfoCard from "../InfoCard"
 import { Separator } from "../plate-ui/separator"
 import { generateHumanId } from "@/helper/generateHumanId"
 
-
 export function LixSidebar() {
   const [lix] = useAtom(lixAtom)
   const [files] = useAtom(filesAtom)
@@ -77,12 +76,12 @@ export function LixSidebar() {
   const inlineInputRef = React.useRef<HTMLInputElement>(null)
   const lixInputRef = React.useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
-  
+
   // Set up automatic aria-hidden fixes for the entire app
   React.useEffect(() => {
     // This function will automatically fix aria-hidden issues when inputs get focus
     const cleanupAriaFixes = setupAriaHiddenFixes();
-    
+
     // Clean up when component unmounts
     return cleanupAriaFixes;
   }, []);
@@ -132,17 +131,17 @@ export function LixSidebar() {
         setInlineEditingFile(null);
         return;
       }
-      
+
       // Extract current filename without path and extension
       const currentFileName = currentFile.path.split('/').pop()?.replace(/\.md$/, '');
-      
+
       // Skip if the name hasn't changed
       if (currentFileName === inlineEditingFile.name.trim()) {
         console.log("File name hasn't changed, skipping rename operation");
         setInlineEditingFile(null);
         return;
       }
-      
+
       await lix.db
         .updateTable("file")
         .set({ path: `/${inlineEditingFile.name}.md` })
@@ -170,9 +169,9 @@ export function LixSidebar() {
         setIsRenamingLix(false);
         return;
       }
-      
+
       console.log(`Renaming lix to: ${lixName}`)
-      
+
       // Use the imported saveLixName helper function which handles the file renaming
       // This will also update the URL
       await saveLixName({
@@ -183,7 +182,7 @@ export function LixSidebar() {
       // Refresh everything to update the UI with the new file name
       setPolling(Date.now())
       setIsRenamingLix(false)
-      
+
       // The currentLixId should still be the lix_id, not the new name
       // The saveLixName function will handle updating the URL params correctly
       const lixId = await lix.db
@@ -191,7 +190,7 @@ export function LixSidebar() {
         .where("key", "=", "lix_id")
         .select("value")
         .executeTakeFirstOrThrow();
-        
+
       // Keep the ID the same, just update the display name
       setCurrentLixId(lixId.value);
     } catch (error) {
@@ -304,7 +303,8 @@ export function LixSidebar() {
             .select("value")
             .executeTakeFirstOrThrow()
 
-          const opfsFile = await opfsRoot.getFileHandle(`${lixId.value}.lix`, {
+          const fileName = file.name.replace(/\.lix$/, '')
+          const opfsFile = await opfsRoot.getFileHandle(`${fileName}.lix`, {
             create: true,
           })
           const writable = await opfsFile.createWritable()
@@ -372,22 +372,17 @@ export function LixSidebar() {
     if (!lix) return;
 
     try {
-      // Get the current lix ID
-      const lixId = await lix.db
-        .selectFrom("key_value")
-        .where("key", "=", "lix_id")
-        .select("value")
-        .executeTakeFirstOrThrow();
 
-      // Delete just this lix file from OPFS
       const root = await navigator.storage.getDirectory();
-      await root.removeEntry(`${lixId.value}.lix`);
+
+      // The file is saved with the current name displayed in the UI (with .lix extension)
+      await root.removeEntry(`${currentLixName}.lix`);
 
       // Find another lix to navigate to
       const availableLixFiles = [];
       // @ts-expect-error - TS doesn't know about values() yet
       for await (const entry of root.values()) {
-        if (entry.kind === "file" && entry.name.endsWith(".lix") && entry.name !== `${lixId.value}.lix`) {
+        if (entry.kind === "file" && entry.name.endsWith(".lix") && entry.name !== `${currentLixName}.lix`) {
           availableLixFiles.push(entry.name);
         }
       }
@@ -446,11 +441,11 @@ export function LixSidebar() {
     // Use the current display name from our atom
     const displayName = currentLixName || lixName;
     setLixName(displayName);
-    
+
     // Set the current name as previous name for potential cancel
     setPreviousLixName(displayName);
     setIsRenamingLix(true);
-    
+
     // Focus on the input field with a slight delay to ensure the DOM has updated
     setTimeout(() => {
       if (lixInputRef.current) {
@@ -477,7 +472,7 @@ export function LixSidebar() {
 
           // Store current lix ID for the select component
           setCurrentLixId(lixId.value);
-          
+
           // Use the name from our currentLixNameAtom
           if (currentLixName) {
             setLixName(currentLixName);
@@ -664,8 +659,8 @@ export function LixSidebar() {
               <SidebarMenuItem key={file.id}>
                 {inlineEditingFile?.id === file.id ? (
                   // Rename state - match the exact height and padding of the SidebarMenuButton
-                  <div 
-                    className="flex items-center w-full h-8 p-2 rounded-md" 
+                  <div
+                    className="flex items-center w-full h-8 p-2 rounded-md"
                     id={`rename-file-container-${file.id}`}
                   >
                     <FileText className={`h-4 w-4 mr-2 shrink-0 ${file.id === activeFile?.id ? 'text-primary' : ''}`} />
