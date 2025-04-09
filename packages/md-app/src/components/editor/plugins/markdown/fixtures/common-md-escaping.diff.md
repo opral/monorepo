@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 18/24 (75%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 6/24 (25%)
+- 🟢 Perfect roundtrip (input = output): 19/24 (79%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 5/24 (21%)
 - 🔴 Failing test (output ≠ input, output ≠ expected): 0/24 (0%)
 
-**Overall Status**: ✅ All tests passing (18 perfect, 6 acceptable)
+**Overall Status**: ✅ All tests passing (19 perfect, 5 acceptable)
 
 ---
 
@@ -499,13 +499,11 @@ Literal characters: & < > " '
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - escaped asterisks in bold</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - escaped asterisks in bold</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -513,31 +511,11 @@ Literal characters: & < > " '
 **Bold text with \** escaped asterisks**
 
 </td>
-<td>
-
-*Bold text with \* escaped asterisks*\*
-
-</td>
-<td>
-
-*Bold text with \* escaped asterisks*\*
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>**Bold text with \** escaped asterisks**</code></pre>
-
-</td>
-<td>
-
-<pre><code>*Bold text with \* escaped asterisks*\*</code></pre>
-
-</td>
-<td>
-
-<pre><code>*Bold text with \* escaped asterisks*\*</code></pre>
 
 </td>
 </tr>

@@ -228,6 +228,7 @@ Text with a footnote.[^1]
 Another paragraph with a different footnote.[^2]
 
 [^1]: This is the first footnote.
+
 [^2]: This is the second footnote with multiple lines.
     Indented to be part of the footnote.
 

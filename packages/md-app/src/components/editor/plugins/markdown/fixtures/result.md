@@ -4,15 +4,15 @@
 
 - Total test files: 18
 - Total test cases: 145
-- Generated on: 2025-04-09T09:42:06.240Z
+- Generated on: 2025-04-09T11:19:24.733Z
 
-### Overall Status: ❌ 21 Failing Tests
+### Overall Status: ❌ 5 Failing Tests
 
 ### Test Results Breakdown
 
-- 🟢 Perfect roundtrip: 76/145 (52%)
-- 🟡 Acceptable transformation: 48/145 (33%)
-- 🔴 Failing tests: 21/145 (14%)
+- 🟢 Perfect roundtrip: 93/145 (64%)
+- 🟡 Acceptable transformation: 47/145 (32%)
+- 🔴 Failing tests: 5/145 (3%)
 
 ### Known Issues in the Markdown Parser
 
@@ -29,11 +29,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 5/12 (42%)
+- 🟢 Perfect roundtrip (input = output): 7/12 (58%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 4/12 (33%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 3/12 (25%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 1/12 (8%)
 
-**Overall Status**: ❌ 3 failing tests
+**Overall Status**: ❌ 1 failing tests
 
 ---
 
@@ -193,13 +193,12 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - nested</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - nested</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -209,13 +208,6 @@ in the source Markdown.</code></pre>
 > > > This is a deeply nested blockquote.
 
 </td>
-<td>
-
-> Nested blockquotes:\
-> \
-> This is a nested blockquote.This is a deeply nested blockquote.
-
-</td>
 </tr>
 <tr>
 <td>
@@ -223,13 +215,6 @@ in the source Markdown.</code></pre>
 <pre><code>&gt; Nested blockquotes:
 &gt; &gt; This is a nested blockquote.
 &gt; &gt; &gt; This is a deeply nested blockquote.</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; Nested blockquotes:\
-&gt; \
-&gt; This is a nested blockquote.This is a deeply nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -358,7 +343,8 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-> Blockquote with multiple lines:<br />This is the second line in the blockquote.<br />This is the third line in **the** blockquote.\
+> Blockquote with multiple lines:<br />
+> This is the second line in the blockquote.<br />This is the third line in **the** blockquote.  
 > This is the fourth line in the blockquote.
 
 </td>
@@ -381,7 +367,8 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code>&gt; Blockquote with multiple lines:&lt;br /&gt;This is the second line in the blockquote.&lt;br /&gt;This is the third line in **the** blockquote.\
+<pre><code>&gt; Blockquote with multiple lines:&lt;br /&gt;
+&gt; This is the second line in the blockquote.&lt;br /&gt;This is the third line in **the** blockquote.  
 &gt; This is the fourth line in the blockquote.</code></pre>
 
 </td>
@@ -473,13 +460,12 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - containing markdown</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - containing markdown</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -496,13 +482,6 @@ in the source Markdown.</code></pre>
 > ```
 
 </td>
-<td>
-
-> Blockquote with other elements:\
-> \
-> tc - Heading in a blockquote
-
-</td>
 </tr>
 <tr>
 <td>
@@ -517,13 +496,6 @@ in the source Markdown.</code></pre>
 &gt; ```
 &gt; Code block in blockquote
 &gt; ```</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; Blockquote with other elements:\
-&gt; \
-&gt; tc - Heading in a blockquote</code></pre>
 
 </td>
 </tr>
@@ -1090,11 +1062,11 @@ Line 7 (after one empty lines)
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 5/24 (21%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 12/24 (50%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 7/24 (29%)
+- 🟢 Perfect roundtrip (input = output): 11/24 (46%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 13/24 (54%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/24 (0%)
 
-**Overall Status**: ❌ 7 failing tests
+**Overall Status**: ✅ All tests passing (11 perfect, 13 acceptable)
 
 ---
 
@@ -1491,13 +1463,12 @@ we currently expect a line break after each paragraph --&gt;
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - links</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - links</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1513,17 +1484,6 @@ we currently expect a line break after each paragraph --&gt;
 [Reference link][ref]
 
 [ref]: https://example.com "Reference Example"
-
-</td>
-<td>
-
-[Basic link](https://example.com)
-
-[Link with title](https://example.com)
-
-<https://example.com> (Automatic link)
-
-<email@example.com> (Email link)
 
 </td>
 </tr>
@@ -1543,29 +1503,17 @@ we currently expect a line break after each paragraph --&gt;
 [ref]: https://example.com &quot;Reference Example&quot;</code></pre>
 
 </td>
-<td>
-
-<pre><code>[Basic link](https://example.com)
-
-[Link with title](https://example.com)
-
-&lt;https://example.com&gt; (Automatic link)
-
-&lt;email@example.com&gt; (Email link)</code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - images</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - images</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1579,13 +1527,6 @@ we currently expect a line break after each paragraph --&gt;
 [![Image with link](https://example.com/image.jpg "Click me")](https://example.com)
 
 </td>
-<td>
-
-![Image example](https://example.com/image.jpg "Image example")
-
-[![Image with link](https://example.com/image.jpg "Image with link")](https://example.com)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -1597,13 +1538,6 @@ we currently expect a line break after each paragraph --&gt;
 [img-ref]: https://example.com/ref-image.jpg &quot;Reference Image&quot;
 
 [![Image with link](https://example.com/image.jpg &quot;Click me&quot;)](https://example.com)</code></pre>
-
-</td>
-<td>
-
-<pre><code>![Image example](https://example.com/image.jpg &quot;Image example&quot;)
-
-[![Image with link](https://example.com/image.jpg &quot;Image with link&quot;)](https://example.com)</code></pre>
 
 </td>
 </tr>
@@ -1884,13 +1818,12 @@ the identation may differ 1 meaning is the same --&gt;
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - task lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - task lists</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1900,15 +1833,6 @@ the identation may differ 1 meaning is the same --&gt;
 - [x] Completed task
 - [ ] Incomplete task
 - [x] Another completed task
-
-</td>
-<td>
-
-### Task Lists
-
-*   Completed task
-*   Incomplete task
-*   Another completed task
 
 </td>
 </tr>
@@ -1922,27 +1846,17 @@ the identation may differ 1 meaning is the same --&gt;
 - [x] Another completed task</code></pre>
 
 </td>
-<td>
-
-<pre><code>### Task Lists
-
-*   Completed task
-*   Incomplete task
-*   Another completed task</code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquotes</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquotes</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1956,17 +1870,6 @@ the identation may differ 1 meaning is the same --&gt;
 > > Nested blockquote.
 
 </td>
-<td>
-
-> Simple blockquote
-
-> Blockquote with **formatting** and a [link](https://example.com).\
-> \
-> Multiple paragraphs in a blockquote.\
-> \
-> Nested blockquote.
-
-</td>
 </tr>
 <tr>
 <td>
@@ -1978,17 +1881,6 @@ the identation may differ 1 meaning is the same --&gt;
 &gt; Multiple paragraphs in a blockquote.
 &gt;
 &gt; &gt; Nested blockquote.</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; Simple blockquote
-
-&gt; Blockquote with **formatting** and a [link](https://example.com).\
-&gt; \
-&gt; Multiple paragraphs in a blockquote.\
-&gt; \
-&gt; Nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -2171,13 +2063,12 @@ function example() {
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - tables</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - tables</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -2193,19 +2084,6 @@ function example() {
 | [Link](https://example.com) | ![Image](https://example.com/image.jpg) | > Quote |
 
 </td>
-<td>
-
-| Header 1 | Header 2 | Header 3 |
-| -------- | -------- | -------- |
-| Left     | Center   | Right    |
-| Cell     | Cell     | Cell     |
-
-| Formatted                   | Table                                           | Header  |
-| --------------------------- | ----------------------------------------------- | ------- |
-| *Italic*                    | **Bold**                                        | `Code`  |
-| [Link](https://example.com) | ![Image](https://example.com/image.jpg "Image") | > Quote |
-
-</td>
 </tr>
 <tr>
 <td>
@@ -2219,19 +2097,6 @@ function example() {
 | --------- | --------- | -------- |
 | *Italic*  | **Bold**  | `Code`   |
 | [Link](https://example.com) | ![Image](https://example.com/image.jpg) | &gt; Quote |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Header 1 | Header 2 | Header 3 |
-| -------- | -------- | -------- |
-| Left     | Center   | Right    |
-| Cell     | Cell     | Cell     |
-
-| Formatted                   | Table                                           | Header  |
-| --------------------------- | ----------------------------------------------- | ------- |
-| *Italic*                    | **Bold**                                        | `Code`  |
-| [Link](https://example.com) | ![Image](https://example.com/image.jpg &quot;Image&quot;) | &gt; Quote |</code></pre>
 
 </td>
 </tr>
@@ -2422,13 +2287,12 @@ Below horizontal rule.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - combined elements</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - combined elements</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -2451,14 +2315,6 @@ Below horizontal rule.</code></pre>
      ```
 
 </td>
-<td>
-
-> Heading in a blockquote
-
-1.  **Bold list item** with *italic text*
-    *   Nested list with `code` and [link](https://example.com)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -2479,14 +2335,6 @@ Below horizontal rule.</code></pre>
      ```
      Code block in a list
      ```</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; Heading in a blockquote
-
-1.  **Bold list item** with *italic text*
-    *   Nested list with `code` and [link](https://example.com)</code></pre>
 
 </td>
 </tr>
@@ -2577,13 +2425,14 @@ Is escaped get escaped  \&lt;!-- this is not a comment -&gt;</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - footnotes</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - footnotes</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -2599,9 +2448,26 @@ Another paragraph with a different footnote.[^2]
 </td>
 <td>
 
-Text with a footnote.
+Text with a footnote.[^1]
 
-Another paragraph with a different footnote.
+Another paragraph with a different footnote.[^2]
+
+[^1]: This is the first footnote.
+
+[^2]: This is the second footnote with multiple lines.
+    Indented to be part of the footnote.
+
+</td>
+<td>
+
+Text with a footnote.[^1]
+
+Another paragraph with a different footnote.[^2]
+
+[^1]: This is the first footnote.
+
+[^2]: This is the second footnote with multiple lines.
+    Indented to be part of the footnote.
 
 </td>
 </tr>
@@ -2619,9 +2485,26 @@ Another paragraph with a different footnote.[^2]
 </td>
 <td>
 
-<pre><code>Text with a footnote.
+<pre><code>Text with a footnote.[^1]
 
-Another paragraph with a different footnote.</code></pre>
+Another paragraph with a different footnote.[^2]
+
+[^1]: This is the first footnote.
+
+[^2]: This is the second footnote with multiple lines.
+    Indented to be part of the footnote.</code></pre>
+
+</td>
+<td>
+
+<pre><code>Text with a footnote.[^1]
+
+Another paragraph with a different footnote.[^2]
+
+[^1]: This is the first footnote.
+
+[^2]: This is the second footnote with multiple lines.
+    Indented to be part of the footnote.</code></pre>
 
 </td>
 </tr>
@@ -3274,11 +3157,11 @@ Last line
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 18/24 (75%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 6/24 (25%)
+- 🟢 Perfect roundtrip (input = output): 19/24 (79%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 5/24 (21%)
 - 🔴 Failing test (output ≠ input, output ≠ expected): 0/24 (0%)
 
-**Overall Status**: ✅ All tests passing (18 perfect, 6 acceptable)
+**Overall Status**: ✅ All tests passing (19 perfect, 5 acceptable)
 
 ---
 
@@ -3771,13 +3654,11 @@ Literal characters: & < > " '
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - escaped asterisks in bold</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - escaped asterisks in bold</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -3785,31 +3666,11 @@ Literal characters: & < > " '
 **Bold text with \** escaped asterisks**
 
 </td>
-<td>
-
-*Bold text with \* escaped asterisks*\*
-
-</td>
-<td>
-
-*Bold text with \* escaped asterisks*\*
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>**Bold text with \** escaped asterisks**</code></pre>
-
-</td>
-<td>
-
-<pre><code>*Bold text with \* escaped asterisks*\*</code></pre>
-
-</td>
-<td>
-
-<pre><code>*Bold text with \* escaped asterisks*\*</code></pre>
 
 </td>
 </tr>
@@ -5467,20 +5328,21 @@ Text with &lt;br /&gt; line break.
 ## Test Summary
 
 - 🟢 Perfect roundtrip (input = output): 0/1 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/1 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/1 (100%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/1 (100%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/1 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (0 perfect, 1 acceptable)
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">Document</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">Document</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -5519,35 +5381,67 @@ Paragraph with **![formatted inline image](https://example.com/image.jpg)** in b
 
 # Images
 
-![Basic image](https://example.com/image.jpg "Basic image")
+![Basic image](https://example.com/image.jpg)
 
-![Image with alt text](https://example.com/image.jpg "Image with alt text")
+![Image with alt text](https://example.com/image.jpg "Example Image")
 
-![Image with formatted alt text](https://example.com/image.jpg "Image with formatted alt text")
+![Image with *formatted* alt text](https://example.com/image.jpg)
 
-[![Image with link](https://example.com/image.jpg "Image with link")](https://example.com)
+[![Image with link](https://example.com/image.jpg)](https://example.com)
 
-Paragraph with an&#x20;
+![Reference image][image-ref]
 
-![inline image](https://example.com/image.jpg "inline image")
+![Another reference image][image-ref]
 
-&#x20;in the middle.
+![Reference image with different text][different-image-ref]
 
-Paragraph with&#x20;
+Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
 
-![formatted inline image](https://example.com/image.jpg "formatted inline image")
+Paragraph with *![formatted inline image](https://example.com/image.jpg)* in italics.
 
-&#x20;in italics.
+Paragraph with **![formatted inline image](https://example.com/image.jpg)** in bold.
 
-Paragraph with&#x20;
-
-![formatted inline image](https://example.com/image.jpg "formatted inline image")
-
-&#x20;in bold.
-
-![Image with empty source](<> "Image with empty source")
+![Image with empty source]()
 
 ![](https://example.com/image.jpg)
+
+[image-ref]: https://example.com/ref-image.jpg "Reference Example Image"
+
+[different-image-ref]: https://example.com/different-image.jpg "Different Reference Image"
+
+
+</td>
+<td>
+
+# Images
+
+![Basic image](https://example.com/image.jpg)
+
+![Image with alt text](https://example.com/image.jpg "Example Image")
+
+![Image with *formatted* alt text](https://example.com/image.jpg)
+
+[![Image with link](https://example.com/image.jpg)](https://example.com)
+
+![Reference image][image-ref]
+
+![Another reference image][image-ref]
+
+![Reference image with different text][different-image-ref]
+
+Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
+
+Paragraph with *![formatted inline image](https://example.com/image.jpg)* in italics.
+
+Paragraph with **![formatted inline image](https://example.com/image.jpg)** in bold.
+
+![Image with empty source]()
+
+![](https://example.com/image.jpg)
+
+[image-ref]: https://example.com/ref-image.jpg "Reference Example Image"
+
+[different-image-ref]: https://example.com/different-image.jpg "Different Reference Image"
 
 
 </td>
@@ -5589,35 +5483,67 @@ Paragraph with **![formatted inline image](https://example.com/image.jpg)** in b
 
 <pre><code># Images
 
-![Basic image](https://example.com/image.jpg &quot;Basic image&quot;)
+![Basic image](https://example.com/image.jpg)
 
-![Image with alt text](https://example.com/image.jpg &quot;Image with alt text&quot;)
+![Image with alt text](https://example.com/image.jpg &quot;Example Image&quot;)
 
-![Image with formatted alt text](https://example.com/image.jpg &quot;Image with formatted alt text&quot;)
+![Image with *formatted* alt text](https://example.com/image.jpg)
 
-[![Image with link](https://example.com/image.jpg &quot;Image with link&quot;)](https://example.com)
+[![Image with link](https://example.com/image.jpg)](https://example.com)
 
-Paragraph with an&amp;#x20;
+![Reference image][image-ref]
 
-![inline image](https://example.com/image.jpg &quot;inline image&quot;)
+![Another reference image][image-ref]
 
-&amp;#x20;in the middle.
+![Reference image with different text][different-image-ref]
 
-Paragraph with&amp;#x20;
+Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
 
-![formatted inline image](https://example.com/image.jpg &quot;formatted inline image&quot;)
+Paragraph with *![formatted inline image](https://example.com/image.jpg)* in italics.
 
-&amp;#x20;in italics.
+Paragraph with **![formatted inline image](https://example.com/image.jpg)** in bold.
 
-Paragraph with&amp;#x20;
-
-![formatted inline image](https://example.com/image.jpg &quot;formatted inline image&quot;)
-
-&amp;#x20;in bold.
-
-![Image with empty source](&lt;&gt; &quot;Image with empty source&quot;)
+![Image with empty source]()
 
 ![](https://example.com/image.jpg)
+
+[image-ref]: https://example.com/ref-image.jpg &quot;Reference Example Image&quot;
+
+[different-image-ref]: https://example.com/different-image.jpg &quot;Different Reference Image&quot;
+</code></pre>
+
+</td>
+<td>
+
+<pre><code># Images
+
+![Basic image](https://example.com/image.jpg)
+
+![Image with alt text](https://example.com/image.jpg &quot;Example Image&quot;)
+
+![Image with *formatted* alt text](https://example.com/image.jpg)
+
+[![Image with link](https://example.com/image.jpg)](https://example.com)
+
+![Reference image][image-ref]
+
+![Another reference image][image-ref]
+
+![Reference image with different text][different-image-ref]
+
+Paragraph with an ![inline image](https://example.com/image.jpg) in the middle.
+
+Paragraph with *![formatted inline image](https://example.com/image.jpg)* in italics.
+
+Paragraph with **![formatted inline image](https://example.com/image.jpg)** in bold.
+
+![Image with empty source]()
+
+![](https://example.com/image.jpg)
+
+[image-ref]: https://example.com/ref-image.jpg &quot;Reference Example Image&quot;
+
+[different-image-ref]: https://example.com/different-image.jpg &quot;Different Reference Image&quot;
 </code></pre>
 
 </td>
@@ -5632,11 +5558,11 @@ Paragraph with&amp;#x20;
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 9/13 (69%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 4/13 (31%)
+- 🟢 Perfect roundtrip (input = output): 11/13 (85%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 2/13 (15%)
 - 🔴 Failing test (output ≠ input, output ≠ expected): 0/13 (0%)
 
-**Overall Status**: ✅ All tests passing (9 perfect, 4 acceptable)
+**Overall Status**: ✅ All tests passing (11 perfect, 2 acceptable)
 
 ---
 
@@ -5818,13 +5744,11 @@ This one has a line break<br />created with a xhtml break tag.
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - br + linebreak</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - br + linebreak</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -5833,32 +5757,12 @@ This one has a line break<br />
 created with a break tag and a new line.
 
 </td>
-<td>
-
-This one has a line break<br />created with a break tag and a new line.
-
-</td>
-<td>
-
-This one has a line break<br />created with a break tag and a new line.
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>This one has a line break&lt;br /&gt;
 created with a break tag and a new line.</code></pre>
-
-</td>
-<td>
-
-<pre><code>This one has a line break&lt;br /&gt;created with a break tag and a new line.</code></pre>
-
-</td>
-<td>
-
-<pre><code>This one has a line break&lt;br /&gt;created with a break tag and a new line.</code></pre>
 
 </td>
 </tr>
@@ -5983,13 +5887,11 @@ created with a break tag and two new lines.</code></pre>
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - br + 2 spaces + linebreak</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - br + 2 spaces + linebreak</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -5998,35 +5900,11 @@ This one has a line break<br />
 created with a break tag followed by a space and new lines.
 
 </td>
-<td>
-
-This one has a line break<br />\
-created with a break tag followed by a space and new lines.
-
-</td>
-<td>
-
-This one has a line break<br />\
-created with a break tag followed by a space and new lines.
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>This one has a line break&lt;br /&gt;  
-created with a break tag followed by a space and new lines.</code></pre>
-
-</td>
-<td>
-
-<pre><code>This one has a line break&lt;br /&gt;\
-created with a break tag followed by a space and new lines.</code></pre>
-
-</td>
-<td>
-
-<pre><code>This one has a line break&lt;br /&gt;\
 created with a break tag followed by a space and new lines.</code></pre>
 
 </td>
@@ -6094,20 +5972,21 @@ And another one to check if it worked
 ## Test Summary
 
 - 🟢 Perfect roundtrip (input = output): 0/1 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/1 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/1 (100%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/1 (100%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/1 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (0 perfect, 1 acceptable)
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">Document</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">Document</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -6142,6 +6021,8 @@ Paragraph with *[formatted link](https://example.com)* in italics.
 
 Paragraph with **[formatted link](https://example.com)** in bold.
 
+Paragraph with **[formatted link](https://example.com) beyond** in bold.
+
 [ref]: https://example.com "Reference Example"
 [different-ref]: https://example.com/different "Different Reference"
 [shorthand reference]: https://example.com
@@ -6153,7 +6034,7 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 [Basic link](https://example.com)
 
-[Link with title](https://example.com)
+[Link with title](https://example.com "Example Website")
 
 [Link with formatting **bold**](https://example.com)
 
@@ -6165,11 +6046,69 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 <email@example.com> (Email link)
 
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
 Paragraph with a [link](https://example.com) in the middle.
 
 Paragraph with [*formatted link*](https://example.com) in italics.
 
 Paragraph with [**formatted link**](https://example.com) in bold.
+
+Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
+
+[ref]: https://example.com "Reference Example"
+
+[different-ref]: https://example.com/different "Different Reference"
+
+[shorthand reference]: https://example.com
+
+
+</td>
+<td>
+
+# Links
+
+[Basic link](https://example.com)
+
+[Link with title](https://example.com "Example Website")
+
+[Link with formatting **bold**](https://example.com)
+
+[Link with formatting *italic*](https://example.com)
+
+[Link with formatting `code`](https://example.com)
+
+<https://example.com> (Automatic link)
+
+<email@example.com> (Email link)
+
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
+Paragraph with a [link](https://example.com) in the middle.
+
+Paragraph with [*formatted link*](https://example.com) in italics.
+
+Paragraph with [**formatted link**](https://example.com) in bold.
+
+Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
+
+[ref]: https://example.com "Reference Example"
+
+[different-ref]: https://example.com/different "Different Reference"
+
+[shorthand reference]: https://example.com
 
 
 </td>
@@ -6207,6 +6146,8 @@ Paragraph with *[formatted link](https://example.com)* in italics.
 
 Paragraph with **[formatted link](https://example.com)** in bold.
 
+Paragraph with **[formatted link](https://example.com) beyond** in bold.
+
 [ref]: https://example.com &quot;Reference Example&quot;
 [different-ref]: https://example.com/different &quot;Different Reference&quot;
 [shorthand reference]: https://example.com</code></pre>
@@ -6218,7 +6159,7 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 [Basic link](https://example.com)
 
-[Link with title](https://example.com)
+[Link with title](https://example.com &quot;Example Website&quot;)
 
 [Link with formatting **bold**](https://example.com)
 
@@ -6230,11 +6171,69 @@ Paragraph with **[formatted link](https://example.com)** in bold.
 
 &lt;email@example.com&gt; (Email link)
 
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
 Paragraph with a [link](https://example.com) in the middle.
 
 Paragraph with [*formatted link*](https://example.com) in italics.
 
 Paragraph with [**formatted link**](https://example.com) in bold.
+
+Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
+
+[ref]: https://example.com &quot;Reference Example&quot;
+
+[different-ref]: https://example.com/different &quot;Different Reference&quot;
+
+[shorthand reference]: https://example.com
+</code></pre>
+
+</td>
+<td>
+
+<pre><code># Links
+
+[Basic link](https://example.com)
+
+[Link with title](https://example.com &quot;Example Website&quot;)
+
+[Link with formatting **bold**](https://example.com)
+
+[Link with formatting *italic*](https://example.com)
+
+[Link with formatting `code`](https://example.com)
+
+&lt;https://example.com&gt; (Automatic link)
+
+&lt;email@example.com&gt; (Email link)
+
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
+Paragraph with a [link](https://example.com) in the middle.
+
+Paragraph with [*formatted link*](https://example.com) in italics.
+
+Paragraph with [**formatted link**](https://example.com) in bold.
+
+Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
+
+[ref]: https://example.com &quot;Reference Example&quot;
+
+[different-ref]: https://example.com/different &quot;Different Reference&quot;
+
+[shorthand reference]: https://example.com
 </code></pre>
 
 </td>
@@ -6249,11 +6248,11 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/10 (0%)
+- 🟢 Perfect roundtrip (input = output): 1/10 (10%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 9/10 (90%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/10 (10%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/10 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (1 perfect, 9 acceptable)
 
 ---
 
@@ -6940,13 +6939,12 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - task lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - task lists</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -6957,14 +6955,6 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 - [ ] Another incomplete task
 
 </td>
-<td>
-
-*   Completed task
-*   Incomplete task
-*   Another completed task
-*   Another incomplete task
-
-</td>
 </tr>
 <tr>
 <td>
@@ -6973,14 +6963,6 @@ Paragraph with [**formatted link**](https://example.com) in bold.
 - [ ] Incomplete task
 - [x] Another completed task
 - [ ] Another incomplete task</code></pre>
-
-</td>
-<td>
-
-<pre><code>*   Completed task
-*   Incomplete task
-*   Another completed task
-*   Another incomplete task</code></pre>
 
 </td>
 </tr>
@@ -7106,7 +7088,9 @@ Some markdown processors support paragraph attributes:
 {: .class-name #para-id}
 Paragraph with attributes (might not work in all processors).
 
-A paragraph with a footnote reference.
+A paragraph with a footnote reference[^1].
+
+[^1]: This is the footnote content.
 
 
 </td>
@@ -7207,7 +7191,9 @@ Some markdown processors support paragraph attributes:
 {: .class-name #para-id}
 Paragraph with attributes (might not work in all processors).
 
-A paragraph with a footnote reference.
+A paragraph with a footnote reference[^1].
+
+[^1]: This is the footnote content.
 </code></pre>
 
 </td>
@@ -7222,11 +7208,11 @@ A paragraph with a footnote reference.
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 2/8 (25%)
+- 🟢 Perfect roundtrip (input = output): 7/8 (88%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 0/8 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 6/8 (75%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 1/8 (13%)
 
-**Overall Status**: ❌ 6 failing tests
+**Overall Status**: ❌ 1 failing tests
 
 ---
 
@@ -7261,14 +7247,12 @@ A paragraph with a footnote reference.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with alignment</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with alignment</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -7277,22 +7261,6 @@ A paragraph with a footnote reference.
 | :----------- | :------------: | ------------: |
 | Left         |     Center     |         Right |
 | Left         |     Center     |         Right |
-
-</td>
-<td>
-
-| Left-aligned | Center-aligned | Right-aligned |
-| :----------- | :------------: | ------------: |
-| Left | Center | Right |
-| Left | Center | Right |
-
-</td>
-<td>
-
-| Left-aligned | Center-aligned | Right-aligned |
-| ------------ | -------------- | ------------- |
-| Left         | Center         | Right         |
-| Left         | Center         | Right         |
 
 </td>
 </tr>
@@ -7305,35 +7273,17 @@ A paragraph with a footnote reference.
 | Left         |     Center     |         Right |</code></pre>
 
 </td>
-<td>
-
-<pre><code>| Left-aligned | Center-aligned | Right-aligned |
-| :----------- | :------------: | ------------: |
-| Left | Center | Right |
-| Left | Center | Right |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Left-aligned | Center-aligned | Right-aligned |
-| ------------ | -------------- | ------------- |
-| Left         | Center         | Right         |
-| Left         | Center         | Right         |</code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with formatting</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with formatting</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -7344,22 +7294,6 @@ A paragraph with a footnote reference.
 | `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |
 
 </td>
-<td>
-
-| **Bold Header** | _Italic Header_ | ~~Strikethrough Header~~ |
-| --------------- | --------------- | ------------------------ |
-| **Bold Cell** | _Italic Cell_ | ~~Strikethrough Cell~~ |
-| `Code Cell` | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |
-
-</td>
-<td>
-
-| **Bold Header** | *Italic Header*             | ~~Strikethrough Header~~                        |
-| --------------- | --------------------------- | ----------------------------------------------- |
-| **Bold Cell**   | *Italic Cell*               | ~~Strikethrough Cell~~                          |
-| `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg "Image") |
-
-</td>
 </tr>
 <tr>
 <td>
@@ -7368,22 +7302,6 @@ A paragraph with a footnote reference.
 | --------------- | --------------- | ------------------------ |
 | **Bold Cell**   | *Italic Cell*   | ~~Strikethrough Cell~~   |
 | `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| **Bold Header** | _Italic Header_ | ~~Strikethrough Header~~ |
-| --------------- | --------------- | ------------------------ |
-| **Bold Cell** | _Italic Cell_ | ~~Strikethrough Cell~~ |
-| `Code Cell` | [Link](https://example.com) | ![Image](https://example.com/image.jpg) |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| **Bold Header** | *Italic Header*             | ~~Strikethrough Header~~                        |
-| --------------- | --------------------------- | ----------------------------------------------- |
-| **Bold Cell**   | *Italic Cell*               | ~~Strikethrough Cell~~                          |
-| `Code Cell`     | [Link](https://example.com) | ![Image](https://example.com/image.jpg &quot;Image&quot;) |</code></pre>
 
 </td>
 </tr>
@@ -7424,14 +7342,12 @@ A paragraph with a footnote reference.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with varying column width</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with varying column width</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -7442,44 +7358,12 @@ A paragraph with a footnote reference.
 | 2     | More Data     | More long content in this cell                       |
 
 </td>
-<td>
-
-| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
-| ----- | ------------- | --------------------------------------------------- |
-| 1 | Data | Long content that extends across multiple characters |
-| 2 | More Data | More long content in this cell |
-
-</td>
-<td>
-
-| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
-| ----- | ------------- | ---------------------------------------------------- |
-| 1     | Data          | Long content that extends across multiple characters |
-| 2     | More Data     | More long content in this cell                       |
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
 | ----- | ------------- | --------------------------------------------------- |
-| 1     | Data          | Long content that extends across multiple characters |
-| 2     | More Data     | More long content in this cell                       |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
-| ----- | ------------- | --------------------------------------------------- |
-| 1 | Data | Long content that extends across multiple characters |
-| 2 | More Data | More long content in this cell |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Short | Medium Column | Very Long Column Header That Takes Up A Lot Of Space |
-| ----- | ------------- | ---------------------------------------------------- |
 | 1     | Data          | Long content that extends across multiple characters |
 | 2     | More Data     | More long content in this cell                       |</code></pre>
 
@@ -7508,10 +7392,10 @@ A paragraph with a footnote reference.
 </td>
 <td>
 
-| Header 1           | Header 2           |
-| ------------------ | ------------------ |
+| Header 1 | Header 2 |
+| -------- | -------- |
 | Line 1<br />Line 2 | Line 1<br />Line 2 |
-| Single Line        | Single Line        |
+| Single Line | Single Line |
 
 </td>
 </tr>
@@ -7526,10 +7410,10 @@ A paragraph with a footnote reference.
 </td>
 <td>
 
-<pre><code>| Header 1           | Header 2           |
-| ------------------ | ------------------ |
+<pre><code>| Header 1 | Header 2 |
+| -------- | -------- |
 | Line 1&lt;br /&gt;Line 2 | Line 1&lt;br /&gt;Line 2 |
-| Single Line        | Single Line        |</code></pre>
+| Single Line | Single Line |</code></pre>
 
 </td>
 </tr>
@@ -7537,14 +7421,12 @@ A paragraph with a footnote reference.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - table with escaped pipe characters</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - table with escaped pipe characters</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -7552,20 +7434,6 @@ A paragraph with a footnote reference.
 | Column with \| pipe | Regular column |
 | ------------------ | -------------- |
 | Data with \| pipe  | Regular data   |
-
-</td>
-<td>
-
-| Column with \| pipe | Regular column |
-| ------------------ | -------------- |
-| Data with \| pipe | Regular data |
-
-</td>
-<td>
-
-| Column with \| pipe | Regular column |
-| ------------------- | -------------- |
-| Data with \| pipe   | Regular data   |
 
 </td>
 </tr>
@@ -7577,33 +7445,17 @@ A paragraph with a footnote reference.
 | Data with \| pipe  | Regular data   |</code></pre>
 
 </td>
-<td>
-
-<pre><code>| Column with \| pipe | Regular column |
-| ------------------ | -------------- |
-| Data with \| pipe | Regular data |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Column with \| pipe | Regular column |
-| ------------------- | -------------- |
-| Data with \| pipe   | Regular data   |</code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - simplified table syntax</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - simplified table syntax</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -7614,22 +7466,6 @@ Cell 1   | Cell 2
 Cell 3   | Cell 4
 
 </td>
-<td>
-
-| Header 1 | Header 2 |
-| -------- | -------- |
-| Cell 1 | Cell 2 |
-| Cell 3 | Cell 4 |
-
-</td>
-<td>
-
-| Header 1 | Header 2 |
-| -------- | -------- |
-| Cell 1   | Cell 2   |
-| Cell 3   | Cell 4   |
-
-</td>
 </tr>
 <tr>
 <td>
@@ -7638,22 +7474,6 @@ Cell 3   | Cell 4
 -------- | --------
 Cell 1   | Cell 2
 Cell 3   | Cell 4</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Header 1 | Header 2 |
-| -------- | -------- |
-| Cell 1 | Cell 2 |
-| Cell 3 | Cell 4 |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Header 1 | Header 2 |
-| -------- | -------- |
-| Cell 1   | Cell 2   |
-| Cell 3   | Cell 4   |</code></pre>
 
 </td>
 </tr>
@@ -7719,15 +7539,15 @@ Cell 3   | Cell 4</code></pre>
 ## Test Summary
 
 - 🟢 Perfect roundtrip (input = output): 0/1 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/1 (100%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 0/1 (0%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/1 (0%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 1/1 (100%)
 
-**Overall Status**: ✅ All tests passing (0 perfect, 1 acceptable)
+**Overall Status**: ❌ 1 failing tests
 
 ---
 
-<details >
-<summary><span style="color:#cc7700; font-weight:bold;">Document</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">Document</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
@@ -7825,9 +7645,9 @@ test
 
 # Markdown with inline html
 
-Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works *perfectly fine*
+Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works _perfectly fine_
 
-Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works *perfectly fine*
+Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works _perfectly fine_
 
 # markdown with block html element
 
@@ -7848,8 +7668,8 @@ test
 
 # inline html in list
 
-*   📦 **Import/Export**: Import and export messages in different file formats.
-*   <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
+- 📦 **Import/Export**: Import and export messages in different file formats.
+- <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
 
@@ -7955,9 +7775,9 @@ test
 
 <pre><code># Markdown with inline html
 
-Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works *perfectly fine*
+Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works _perfectly fine_
 
-Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works *perfectly fine*
+Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works _perfectly fine_
 
 # markdown with block html element
 
@@ -7978,8 +7798,8 @@ test
 
 # inline html in list
 
-*   📦 **Import/Export**: Import and export messages in different file formats.
-*   &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
+- 📦 **Import/Export**: Import and export messages in different file formats.
+- &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
 

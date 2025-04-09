@@ -114,7 +114,9 @@ Some markdown processors support paragraph attributes:
 {: .class-name #para-id}
 Paragraph with attributes (might not work in all processors).
 
-A paragraph with a footnote reference.
+A paragraph with a footnote reference[^1].
+
+[^1]: This is the footnote content.
 
 
 </td>
@@ -215,7 +217,9 @@ Some markdown processors support paragraph attributes:
 {: .class-name #para-id}
 Paragraph with attributes (might not work in all processors).
 
-A paragraph with a footnote reference.
+A paragraph with a footnote reference[^1].
+
+[^1]: This is the footnote content.
 </code></pre>
 
 </td>

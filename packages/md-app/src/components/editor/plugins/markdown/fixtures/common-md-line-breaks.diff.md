@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 9/13 (69%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 4/13 (31%)
+- 🟢 Perfect roundtrip (input = output): 11/13 (85%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 2/13 (15%)
 - 🔴 Failing test (output ≠ input, output ≠ expected): 0/13 (0%)
 
-**Overall Status**: ✅ All tests passing (9 perfect, 4 acceptable)
+**Overall Status**: ✅ All tests passing (11 perfect, 2 acceptable)
 
 ---
 
@@ -188,13 +188,11 @@ This one has a line break<br />created with a xhtml break tag.
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - br + linebreak</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - br + linebreak</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -203,32 +201,12 @@ This one has a line break<br />
 created with a break tag and a new line.
 
 </td>
-<td>
-
-This one has a line break<br />created with a break tag and a new line.
-
-</td>
-<td>
-
-This one has a line break<br />created with a break tag and a new line.
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>This one has a line break&lt;br /&gt;
 created with a break tag and a new line.</code></pre>
-
-</td>
-<td>
-
-<pre><code>This one has a line break&lt;br /&gt;created with a break tag and a new line.</code></pre>
-
-</td>
-<td>
-
-<pre><code>This one has a line break&lt;br /&gt;created with a break tag and a new line.</code></pre>
 
 </td>
 </tr>
@@ -353,13 +331,11 @@ created with a break tag and two new lines.</code></pre>
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - paragraphs and line break - br + 2 spaces + linebreak</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - paragraphs and line break - br + 2 spaces + linebreak</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -368,35 +344,11 @@ This one has a line break<br />
 created with a break tag followed by a space and new lines.
 
 </td>
-<td>
-
-This one has a line break<br />\
-created with a break tag followed by a space and new lines.
-
-</td>
-<td>
-
-This one has a line break<br />\
-created with a break tag followed by a space and new lines.
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>This one has a line break&lt;br /&gt;  
-created with a break tag followed by a space and new lines.</code></pre>
-
-</td>
-<td>
-
-<pre><code>This one has a line break&lt;br /&gt;\
-created with a break tag followed by a space and new lines.</code></pre>
-
-</td>
-<td>
-
-<pre><code>This one has a line break&lt;br /&gt;\
 created with a break tag followed by a space and new lines.</code></pre>
 
 </td>

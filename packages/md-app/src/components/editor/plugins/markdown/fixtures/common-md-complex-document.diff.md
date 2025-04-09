@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 5/24 (21%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 12/24 (50%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 7/24 (29%)
+- 🟢 Perfect roundtrip (input = output): 11/24 (46%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 13/24 (54%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/24 (0%)
 
-**Overall Status**: ❌ 7 failing tests
+**Overall Status**: ✅ All tests passing (11 perfect, 13 acceptable)
 
 ---
 
@@ -403,13 +403,12 @@ we currently expect a line break after each paragraph --&gt;
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - links</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - links</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -425,17 +424,6 @@ we currently expect a line break after each paragraph --&gt;
 [Reference link][ref]
 
 [ref]: https://example.com "Reference Example"
-
-</td>
-<td>
-
-[Basic link](https://example.com)
-
-[Link with title](https://example.com)
-
-<https://example.com> (Automatic link)
-
-<email@example.com> (Email link)
 
 </td>
 </tr>
@@ -455,29 +443,17 @@ we currently expect a line break after each paragraph --&gt;
 [ref]: https://example.com &quot;Reference Example&quot;</code></pre>
 
 </td>
-<td>
-
-<pre><code>[Basic link](https://example.com)
-
-[Link with title](https://example.com)
-
-&lt;https://example.com&gt; (Automatic link)
-
-&lt;email@example.com&gt; (Email link)</code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - images</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - images</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -491,13 +467,6 @@ we currently expect a line break after each paragraph --&gt;
 [![Image with link](https://example.com/image.jpg "Click me")](https://example.com)
 
 </td>
-<td>
-
-![Image example](https://example.com/image.jpg "Image example")
-
-[![Image with link](https://example.com/image.jpg "Image with link")](https://example.com)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -509,13 +478,6 @@ we currently expect a line break after each paragraph --&gt;
 [img-ref]: https://example.com/ref-image.jpg &quot;Reference Image&quot;
 
 [![Image with link](https://example.com/image.jpg &quot;Click me&quot;)](https://example.com)</code></pre>
-
-</td>
-<td>
-
-<pre><code>![Image example](https://example.com/image.jpg &quot;Image example&quot;)
-
-[![Image with link](https://example.com/image.jpg &quot;Image with link&quot;)](https://example.com)</code></pre>
 
 </td>
 </tr>
@@ -796,13 +758,12 @@ the identation may differ 1 meaning is the same --&gt;
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - task lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - task lists</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -812,15 +773,6 @@ the identation may differ 1 meaning is the same --&gt;
 - [x] Completed task
 - [ ] Incomplete task
 - [x] Another completed task
-
-</td>
-<td>
-
-### Task Lists
-
-*   Completed task
-*   Incomplete task
-*   Another completed task
 
 </td>
 </tr>
@@ -834,27 +786,17 @@ the identation may differ 1 meaning is the same --&gt;
 - [x] Another completed task</code></pre>
 
 </td>
-<td>
-
-<pre><code>### Task Lists
-
-*   Completed task
-*   Incomplete task
-*   Another completed task</code></pre>
-
-</td>
 </tr>
 </table>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquotes</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - blockquotes</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -868,17 +810,6 @@ the identation may differ 1 meaning is the same --&gt;
 > > Nested blockquote.
 
 </td>
-<td>
-
-> Simple blockquote
-
-> Blockquote with **formatting** and a [link](https://example.com).\
-> \
-> Multiple paragraphs in a blockquote.\
-> \
-> Nested blockquote.
-
-</td>
 </tr>
 <tr>
 <td>
@@ -890,17 +821,6 @@ the identation may differ 1 meaning is the same --&gt;
 &gt; Multiple paragraphs in a blockquote.
 &gt;
 &gt; &gt; Nested blockquote.</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; Simple blockquote
-
-&gt; Blockquote with **formatting** and a [link](https://example.com).\
-&gt; \
-&gt; Multiple paragraphs in a blockquote.\
-&gt; \
-&gt; Nested blockquote.</code></pre>
 
 </td>
 </tr>
@@ -1083,13 +1003,12 @@ function example() {
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - tables</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - tables</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1105,19 +1024,6 @@ function example() {
 | [Link](https://example.com) | ![Image](https://example.com/image.jpg) | > Quote |
 
 </td>
-<td>
-
-| Header 1 | Header 2 | Header 3 |
-| -------- | -------- | -------- |
-| Left     | Center   | Right    |
-| Cell     | Cell     | Cell     |
-
-| Formatted                   | Table                                           | Header  |
-| --------------------------- | ----------------------------------------------- | ------- |
-| *Italic*                    | **Bold**                                        | `Code`  |
-| [Link](https://example.com) | ![Image](https://example.com/image.jpg "Image") | > Quote |
-
-</td>
 </tr>
 <tr>
 <td>
@@ -1131,19 +1037,6 @@ function example() {
 | --------- | --------- | -------- |
 | *Italic*  | **Bold**  | `Code`   |
 | [Link](https://example.com) | ![Image](https://example.com/image.jpg) | &gt; Quote |</code></pre>
-
-</td>
-<td>
-
-<pre><code>| Header 1 | Header 2 | Header 3 |
-| -------- | -------- | -------- |
-| Left     | Center   | Right    |
-| Cell     | Cell     | Cell     |
-
-| Formatted                   | Table                                           | Header  |
-| --------------------------- | ----------------------------------------------- | ------- |
-| *Italic*                    | **Bold**                                        | `Code`  |
-| [Link](https://example.com) | ![Image](https://example.com/image.jpg &quot;Image&quot;) | &gt; Quote |</code></pre>
 
 </td>
 </tr>
@@ -1334,13 +1227,12 @@ Below horizontal rule.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - combined elements</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - combined elements</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -1363,14 +1255,6 @@ Below horizontal rule.</code></pre>
      ```
 
 </td>
-<td>
-
-> Heading in a blockquote
-
-1.  **Bold list item** with *italic text*
-    *   Nested list with `code` and [link](https://example.com)
-
-</td>
 </tr>
 <tr>
 <td>
@@ -1391,14 +1275,6 @@ Below horizontal rule.</code></pre>
      ```
      Code block in a list
      ```</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; Heading in a blockquote
-
-1.  **Bold list item** with *italic text*
-    *   Nested list with `code` and [link](https://example.com)</code></pre>
 
 </td>
 </tr>
@@ -1489,13 +1365,14 @@ Is escaped get escaped  \&lt;!-- this is not a comment -&gt;</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - footnotes</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - footnotes</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -1511,9 +1388,26 @@ Another paragraph with a different footnote.[^2]
 </td>
 <td>
 
-Text with a footnote.
+Text with a footnote.[^1]
 
-Another paragraph with a different footnote.
+Another paragraph with a different footnote.[^2]
+
+[^1]: This is the first footnote.
+
+[^2]: This is the second footnote with multiple lines.
+    Indented to be part of the footnote.
+
+</td>
+<td>
+
+Text with a footnote.[^1]
+
+Another paragraph with a different footnote.[^2]
+
+[^1]: This is the first footnote.
+
+[^2]: This is the second footnote with multiple lines.
+    Indented to be part of the footnote.
 
 </td>
 </tr>
@@ -1531,9 +1425,26 @@ Another paragraph with a different footnote.[^2]
 </td>
 <td>
 
-<pre><code>Text with a footnote.
+<pre><code>Text with a footnote.[^1]
 
-Another paragraph with a different footnote.</code></pre>
+Another paragraph with a different footnote.[^2]
+
+[^1]: This is the first footnote.
+
+[^2]: This is the second footnote with multiple lines.
+    Indented to be part of the footnote.</code></pre>
+
+</td>
+<td>
+
+<pre><code>Text with a footnote.[^1]
+
+Another paragraph with a different footnote.[^2]
+
+[^1]: This is the first footnote.
+
+[^2]: This is the second footnote with multiple lines.
+    Indented to be part of the footnote.</code></pre>
 
 </td>
 </tr>

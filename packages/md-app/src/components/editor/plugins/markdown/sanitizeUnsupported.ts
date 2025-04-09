@@ -13,10 +13,41 @@ const rules = {
 	},
 	// nested formatting not supported yet
 	// TODO check if whitelist works with changes comming from plate
-	strong: { allowedChildren: ["text"], exactChildren: 1 },
-	inlineCode: { allowedChildren: ["text"], exactChildren: 1 },
-	emphasis: { allowedChildren: ["text"], exactChildren: 1 },
-
+	strong: {
+		allowedChildren: [
+			"break",
+			"text",
+			"inlineCode",
+			"emphasis",
+			"delete",
+			"link",
+		],
+	},
+	inlineCode: {
+		allowedChildren: ["break", "text", "strong", "emphasis", "delete", "link"],
+	},
+	emphasis: {
+		allowedChildren: [
+			"break",
+			"text",
+			"strong",
+			"inlineCode",
+			"delete",
+			"link",
+		],
+	},
+	delete: {
+		allowedChildren: [
+			"break",
+			"text",
+			"strong",
+			"inlineCode",
+			"emphasis",
+			"link",
+		],
+	},
+	break: { allowedChildren: [], exactChildren: 0 },
+	thematicBreak: { allowedChildren: [], exactChildren: 0 },
 	link: {
 		// nested formatting not supported also for links atm
 		// TODO check if whitelist works with changes comming from plate
@@ -33,7 +64,7 @@ const rules = {
 			// only allow meta to be defined as null
 			meta: [null],
 		},
-		// to detect code blocks and remove them from the whitelist - check the original markdown
+		// to detect code blocks and remove them from the allowlist - check the original markdown
 		validateFn: (node: any, file: any) => {
 			const first4Characters = file.value.substring(
 				node.position.start.offset,
@@ -46,8 +77,34 @@ const rules = {
 			return;
 		},
 	},
+	list: {
+		allowedChildren: [
+			// TODO add html break
+			"listItem",
+		],
+		exactChildren: null,
+		allowedAttributes: {
+			spread: null,
+			ordered: [true, false],
+			start: null,
+		},
+	},
+	listItem: {
+		allowedChildren: [
+			// TODO add html break
+			"paragraph",
+			"list",
+		],
+
+		allowedAttributes: {
+			checked: [null],
+			spread: null,
+		},
+	},
 	paragraph: {
 		allowedChildren: [
+			// TODO add html break
+			"break",
 			"text",
 			"strong",
 			"inlineCode",
@@ -87,28 +144,13 @@ function toSanitizedNode(node: TreeNode, file: any, reason: string) {
 	node.reason = reason;
 }
 
-export function sanatizeUnknownNodeStructuresInTree() {
-	return (rootNode: any, file: any) => {
-		for (const node of rootNode.children) {
-			sanatizeUnknownNodeStructures(node, file);
-		}
-
-		console.log("sanatizeUnknownNodeStructuresInTree result:");
-		console.log(JSON.parse(JSON.stringify(rootNode)));
-	};
-}
-
-export function sanatizeUnknownNodeStructures(node: TreeNode, file: any) {
+function sanatizeUnknownNodeStructures(node: TreeNode, file: any): boolean {
 	// @ts-expect-error -- TODO check custom type
 	const rule = rules[node.type];
 
 	if (!rule) {
-		toSanitizedNode(
-			node,
-			file,
-			"node type not supported: " + node.type + " in " + node.type
-		);
-		return; // we don't have to visit the children if the parent is sanitized
+		toSanitizedNode(node, file, "node type not supported: " + node.type);
+		return true; // we don't have to visit the children if the parent is sanitized
 	}
 
 	// Validate attributes
@@ -132,7 +174,7 @@ export function sanatizeUnknownNodeStructures(node: TreeNode, file: any) {
 					file,
 					"attribute not supported: " + attr + " in " + node.type
 				);
-				return;
+				return true;
 			}
 		}
 	}
@@ -148,6 +190,8 @@ export function sanatizeUnknownNodeStructures(node: TreeNode, file: any) {
 			node.invalid = true;
 		}
 
+		let oneChildInvalid = false;
+
 		for (const child of node.children) {
 			if (!rule.allowedChildren.includes(child.type)) {
 				toSanitizedNode(
@@ -155,10 +199,16 @@ export function sanatizeUnknownNodeStructures(node: TreeNode, file: any) {
 					file,
 					"child type not supported: " + child.type + " in " + node.type
 				);
-				return;
+				return true;
 			}
 
-			sanatizeUnknownNodeStructures(child, file);
+			oneChildInvalid =
+				sanatizeUnknownNodeStructures(child, file) || oneChildInvalid;
+		}
+
+		if (oneChildInvalid) {
+			toSanitizedNode(node, file, "child type not supported in " + node.type);
+			return true;
 		}
 	}
 
@@ -166,9 +216,20 @@ export function sanatizeUnknownNodeStructures(node: TreeNode, file: any) {
 		const reason = rule.validateFn(node, file);
 		if (reason !== undefined) {
 			toSanitizedNode(node, file, reason);
-			return;
+			return false;
 		}
 	}
 
-	return;
+	return false;
+}
+
+export function sanatizeUnknownNodeStructuresInTree() {
+	return (rootNode: any, file: any) => {
+		for (const node of rootNode.children) {
+			sanatizeUnknownNodeStructures(node, file);
+		}
+
+		console.log("sanatizeUnknownNodeStructuresInTree result:");
+		console.log(JSON.parse(JSON.stringify(rootNode)));
+	};
 }

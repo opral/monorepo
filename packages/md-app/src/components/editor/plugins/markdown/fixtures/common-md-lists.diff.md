@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 0/10 (0%)
+- 🟢 Perfect roundtrip (input = output): 1/10 (10%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 9/10 (90%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/10 (10%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/10 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (1 perfect, 9 acceptable)
 
 ---
 
@@ -693,13 +693,12 @@
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - task lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - task lists</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -710,14 +709,6 @@
 - [ ] Another incomplete task
 
 </td>
-<td>
-
-*   Completed task
-*   Incomplete task
-*   Another completed task
-*   Another incomplete task
-
-</td>
 </tr>
 <tr>
 <td>
@@ -726,14 +717,6 @@
 - [ ] Incomplete task
 - [x] Another completed task
 - [ ] Another incomplete task</code></pre>
-
-</td>
-<td>
-
-<pre><code>*   Completed task
-*   Incomplete task
-*   Another completed task
-*   Another incomplete task</code></pre>
 
 </td>
 </tr>
