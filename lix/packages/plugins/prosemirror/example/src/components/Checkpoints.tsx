@@ -7,7 +7,7 @@ import { createCheckpoint } from "@lix-js/sdk";
 import { lix } from "../state";
 
 const Checkpoints: React.FC = () => {
-	const [stateCheckpoints] = useQuery(selectCheckpoints);
+	const [checkpoints] = useQuery(selectCheckpoints);
 	const [currentChangeSet] = useQuery(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
@@ -16,7 +16,7 @@ const Checkpoints: React.FC = () => {
 
 	const handleCreateCheckpoint = async () => {
 		// Get the comment text from the ChangeSet component
-		const commentText = changeSetRef.current?.getCommentText() || "";
+		// const commentText = changeSetRef.current?.getCommentText() || "";
 
 		// Create the checkpoint and add the comment if it exists
 		await createCheckpoint({ lix });
@@ -42,6 +42,7 @@ const Checkpoints: React.FC = () => {
 							key="current-changes"
 							changeSet={currentChangeSet}
 							isCurrentChangeSet={true}
+							// previousChangeSetId={checkpoints?.[0]?.id ?? undefined}
 							showRestore={false}
 							footer={
 								<div className="flex justify-end mt-2">
@@ -54,10 +55,9 @@ const Checkpoints: React.FC = () => {
 					</div>
 				)}
 
-				{stateCheckpoints?.map((checkpoint, index) => {
+				{checkpoints?.map((checkpoint, index) => {
 					// Get the previous checkpoint ID (if available)
-					const previousCheckpointId =
-						index > 0 ? stateCheckpoints[index - 1].id : undefined;
+					const previousCheckpointId = checkpoints[index + 1]?.id ?? undefined;
 
 					return (
 						<div key={checkpoint.id}>

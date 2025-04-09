@@ -48,9 +48,10 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			string | null
 		>("expandedChangeSetId");
 
-		const [diffView, setDiffView] = useKeyValue<
-			[string | undefined, string] | null
-		>("diffView");
+		const [diffView, setDiffView] = useKeyValue<{
+			beforeCsId?: string;
+			afterCsId?: string;
+		} | null>("diffView");
 
 		const [activeAccount] = useQuery(selectActiveAccount);
 
@@ -203,24 +204,25 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 									</div>
 								)}
 
-								<button
-									className="btn btn-sm btn-ghost gap-1"
-									onClick={() => {
-										if (diffView) {
-											setDiffView(null);
-										} else {
-											console.log({
-												previousChangeSetId,
-												changeSetId: changeSet.id,
-											});
-											setDiffView([previousChangeSetId, changeSet.id]);
-										}
-									}}
-									title="View diff"
-								>
-									<Eye size={16} />
-									View diff
-								</button>
+								{previousChangeSetId && (
+									<button
+										className="btn btn-sm btn-ghost gap-1"
+										onClick={() => {
+											if (diffView) {
+												setDiffView(null);
+											} else {
+												setDiffView({
+													beforeCsId: previousChangeSetId,
+													afterCsId: changeSet.id,
+												});
+											}
+										}}
+										title="View diff"
+									>
+										<Eye size={16} />
+										View diff
+									</button>
+								)}
 							</div>
 						</div>
 
