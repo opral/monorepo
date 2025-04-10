@@ -130,7 +130,7 @@ export const CheckpointComponent = (props: {
                 />
               ))}
             </div>
-            {props.checkpointChangeSet.discussion_id ? (
+            {/* {props.checkpointChangeSet.discussion_id ? (
               <DiscussionPreview
                 key={props.checkpointChangeSet.discussion_id}
                 discussionId={props.checkpointChangeSet.discussion_id}
@@ -139,7 +139,7 @@ export const CheckpointComponent = (props: {
               <CreateCheckpointDiscussion
                 changeSetId={props.checkpointChangeSet}
               />
-            }
+            } */}
           </div>
         )}
       </div>
