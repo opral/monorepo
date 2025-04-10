@@ -10,23 +10,19 @@ import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { debounce } from "lodash-es";
 import { useAtom } from "jotai";
-import { editorRefAtom, lixAtom, switchActiveAccount } from "@/state";
+import { editorRefAtom, lixAtom } from "@/state";
 import { activeFileAtom, checkpointChangeSetsAtom, intermediateChangeIdsAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { EMPTY_DOCUMENT_PROMPT_KEY } from "./plugins/empty-document-prompt-plugin";
 import { welcomeMd } from "@/helper/welcomeLixFile";
-import { createCheckpoint } from "@/helper/createCheckpoint";
-import { createDiscussion } from "@lix-js/sdk";
 
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 	const [loadedMd] = useAtom(loadedMdAtom);
 	const [, setEditorRef] = useAtom(editorRefAtom);
-	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
-	const [intermediateChangeIds] = useAtom(intermediateChangeIdsAtom);
 
 	const editor = useCreateEditor();
 
@@ -57,50 +53,6 @@ export function PlateEditor() {
 		editor.tf.setValue(filteredNodes);
 	};
 
-	const createInitialCheckpoint = async () => {
-		if (checkpointChangeSets.length > 0) return;
-		// Get the current active account to restore it later
-		const currentActiveAccount = await lix.db
-			.selectFrom("active_account")
-			.selectAll()
-			.executeTakeFirst();
-
-		// Create and switch to a Flashtype account before creating the checkpoint
-		const existingAccounts = await lix.db.selectFrom("account").selectAll().execute();
-		const flashtypeAccount = existingAccounts.find(account => account.name === "Flashtype");
-
-		let accountToUse;
-		// Create a Flashtype account if it doesn't exist
-		if (!flashtypeAccount) {
-			accountToUse = await lix.db
-				.insertInto("account")
-				.values({
-					name: "Flashtype",
-				})
-				.returningAll()
-				.executeTakeFirstOrThrow();
-		} else {
-			accountToUse = flashtypeAccount;
-		}
-
-		// Switch to the Flashtype account using the existing helper function
-		await switchActiveAccount(lix, accountToUse);
-
-		// Now create the checkpoint with the Flashtype account
-		const changeSet = await createCheckpoint(lix, intermediateChangeIds);
-		await createDiscussion({
-			lix,
-			changeSet,
-			firstComment: { content: "Setup welcome file" },
-		});
-
-		// Switch back to the original account if it existed
-		if (currentActiveAccount) {
-			await switchActiveAccount(lix, currentActiveAccount);
-		}
-
-		await saveLixToOpfs({ lix });
-	};
 
 	// Store the editor reference in the global atom
 	useEffect(() => {
@@ -234,11 +186,6 @@ export function PlateEditor() {
 
 		if (loadedMd !== newContent) {
 			handleUpdateMdData(newValue);
-		}
-
-		// Create initial checkpoint for welcome file
-		if (activeFile.path === "/welcome.md" && loadedMd === welcomeMd && intermediateChangeIds.length > 0) {
-			createInitialCheckpoint();
 		}
 
 	}, [loadedMd, handleUpdateMdData, activeFile]);
