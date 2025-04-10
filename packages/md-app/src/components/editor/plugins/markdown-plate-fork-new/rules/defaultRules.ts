@@ -1,33 +1,37 @@
-import type { Descendant, TText } from "@udecode/plate";
+import type { TText } from '@udecode/plate';
+
+import isBoolean from 'lodash/fp/isBoolean.js';
 
 import type {
-	TIndentListElement,
-	TStandardListElement,
-} from "../internal/types";
+  TIndentListElement,
+  TMentionElement,
+  TStandardListElement,
+} from '../internal/types';
 import type {
-	MdBlockquote,
-	MdHeading,
-	MdImage,
-	MdLink,
-	MdList,
-	MdMdxJsxTextElement,
-	MdParagraph,
-	MdRootContent,
-	MdTable,
-	MdTableCell,
-	MdTableRow,
-} from "../mdast";
-import type { TNodes } from "./types";
+  MdHeading,
+  MdImage,
+  MdLink,
+  MdList,
+  MdMdxJsxFlowElement,
+  MdMdxJsxTextElement,
+  MdParagraph,
+  MdRootContent,
+  MdTable,
+  MdTableCell,
+  MdTableRow,
+} from '../mdast';
+import type { MentionNode } from '../plugins/remarkMention';
+import type { TRules } from './types';
 
 import {
-	buildSlateNode,
-	convertChildrenDeserialize,
-	convertTextsDeserialize,
-} from "../deserializer";
-import { convertNodesSerialize } from "../serializer";
-import { getPlateNodeType } from "../utils";
+  buildSlateNode,
+  convertChildrenDeserialize,
+  convertTextsDeserialize,
+} from '../deserializer';
+import { convertNodesSerialize } from '../serializer';
+import { getPlateNodeType } from '../utils';
 
-export const defaultNodes: TNodes = {
+export const defaultRules: TRules = {
 	a: {
 		deserialize: (mdastNode, deco, options) => {
 			return {
@@ -121,6 +125,12 @@ export const defaultNodes: TNodes = {
 			};
 		},
 	},
+	bold: {
+		mark: true,
+		deserialize: (mdastNode, deco, options) => {
+			return convertTextsDeserialize(mdastNode, deco, options);
+		},
+	},
 	break: {
 		deserialize: (mdastNode, deco) => {
 			return {
@@ -133,12 +143,8 @@ export const defaultNodes: TNodes = {
 			};
 		},
 	},
-	bold: {
-		deserialize: (mdastNode, deco, options) => {
-			return convertTextsDeserialize(mdastNode, deco, options);
-		},
-	},
 	code: {
+		mark: true,
 		deserialize: (mdastNode, deco, options) => {
 			return {
 				...deco,
@@ -175,6 +181,17 @@ export const defaultNodes: TNodes = {
 				value: date ?? "",
 			};
 		},
+	},
+	del: {
+		mark: true,
+		deserialize: (mdastNode, deco, options) => {
+			return convertChildrenDeserialize(
+				mdastNode.children,
+				{ strikethrough: true, ...deco },
+				options
+			) as any;
+		},
+		// no serialize because it's mdx <del /> only
 	},
 	equation: {
 		deserialize: (mdastNode, deco, options) => {
@@ -224,6 +241,30 @@ export const defaultNodes: TNodes = {
 				) as MdHeading["children"],
 				depth: depthMap[node.type as keyof typeof depthMap] as any,
 				type: "heading",
+			};
+		},
+	},
+	highlight: {
+		mark: true,
+		deserialize: (mdastNode, deco, options) => {
+			return convertChildrenDeserialize(
+				mdastNode.children,
+				{ highlight: true, ...deco },
+				options
+			) as any;
+		},
+		serialize(slateNode, options): MdMdxJsxTextElement {
+			return {
+				attributes: [
+					{
+						name: "style",
+						type: "mdxJsxAttribute",
+						value: "background-color: yellow;",
+					},
+				],
+				children: [{ type: "text", value: slateNode.text }],
+				name: "highlight",
+				type: "mdxJsxTextElement",
 			};
 		},
 	},
@@ -337,10 +378,14 @@ export const defaultNodes: TNodes = {
 			const parseListItems = (listNode: MdList, indent = 1, startIndex = 1) => {
 				const items: any[] = [];
 				const isOrdered = !!listNode.ordered;
-				const listStyleType = isOrdered ? "decimal" : "disc";
+				let listStyleType = isOrdered ? "decimal" : "disc";
 
 				listNode.children?.forEach((listItem, index) => {
 					if (listItem.type !== "listItem") return;
+
+					const isTodoList = isBoolean(listItem.checked);
+
+					if (isTodoList) listStyleType = "todo";
 
 					// Handle the main content of the list item
 					const [paragraph, ...subLists] = listItem.children || [];
@@ -363,6 +408,9 @@ export const defaultNodes: TNodes = {
 
 						// Only add listStyleType and listStart for appropriate cases
 						itemContent.listStyleType = listStyleType;
+						if (isTodoList) {
+							itemContent.checked = listItem.checked!;
+						}
 						if (isOrdered) {
 							itemContent.listStart = startIndex + index;
 						}
@@ -423,8 +471,8 @@ export const defaultNodes: TNodes = {
 						}
 						currentItem = {
 							children: [],
-							type: "listItem",
 							spread: false,
+							type: "listItem",
 						};
 
 						for (const liChild of child.children) {
@@ -437,8 +485,8 @@ export const defaultNodes: TNodes = {
 								currentItem.children.push({
 									children: serializeListItems(liChild.children),
 									ordered: liChild.type === "ol",
-									type: "list",
 									spread: false,
+									type: "list",
 								});
 							}
 						}
@@ -486,12 +534,15 @@ export const defaultNodes: TNodes = {
 		},
 	},
 	mention: {
-		serialize: ({ value }) => {
-			return {
-				type: "text",
-				value,
-			};
-		},
+		deserialize: (node: MentionNode): TMentionElement => ({
+			children: [{ text: "" }],
+			type: "mention",
+			value: node.username,
+		}),
+		serialize: (node: TMentionElement) => ({
+			type: "text",
+			value: `@${node.value.replaceAll(" ", "_")}`,
+		}),
 	},
 	p: {
 		deserialize: (node, deco, options) => {
@@ -513,7 +564,7 @@ export const defaultNodes: TNodes = {
 				}
 			};
 
-			children.forEach((child, index, children) => {
+			children.forEach((child) => {
 				const { type } = child as { type?: string };
 
 				if (type && splitBlockTypes.has(type)) {
@@ -555,18 +606,7 @@ export const defaultNodes: TNodes = {
 						}
 					});
 				} else {
-					// TODO remove the last br of the paragraph if the previos element is not a br
-
-					if (
-						child.text === "\n" &&
-						children.length > 1 &&
-						index === children.length - 1
-					) {
-						// no - op
-						console.log("test");
-					} else {
-						inlineNodes.push(child);
-					}
+					inlineNodes.push(child);
 				}
 			});
 
@@ -575,28 +615,9 @@ export const defaultNodes: TNodes = {
 			return elements.length === 1 ? elements[0] : elements;
 		},
 		serialize: (node, options) => {
-			let cleanedChildren = node.children;
-
-			if (
-				node.children.length > 0 &&
-				cleanedChildren[cleanedChildren.length - 1].text === "\n"
-			) {
-				// if the last child of the paragraph is a line breake add an additional one
-				cleanedChildren.push({ text: "\n" });
-			}
-
-			cleanedChildren = cleanedChildren.map((child) => {
-				if (child.text === "\n") {
-					return {
-						type: "break",
-					} as any;
-				}
-				return child;
-			});
-
 			return {
 				children: convertNodesSerialize(
-					cleanedChildren,
+					node.children,
 					options
 				) as MdParagraph["children"],
 				type: "paragraph",
@@ -604,6 +625,7 @@ export const defaultNodes: TNodes = {
 		},
 	},
 	strikethrough: {
+		mark: true,
 		deserialize: (mdastNode, deco, options) => {
 			return convertTextsDeserialize(mdastNode, deco, options);
 		},
@@ -684,6 +706,22 @@ export const defaultNodes: TNodes = {
 			};
 		},
 	},
+	toc: {
+		deserialize: (mdastNode, deco, options) => {
+			return {
+				children: convertChildrenDeserialize(mdastNode.children, deco, options),
+				type: "toc",
+			};
+		},
+		serialize: (node, options): MdMdxJsxFlowElement => {
+			return {
+				attributes: [],
+				children: convertNodesSerialize(node.children, options) as any,
+				name: "toc",
+				type: "mdxJsxFlowElement",
+			};
+		},
+	},
 	tr: {
 		serialize: (node, options) => {
 			return {
@@ -696,6 +734,7 @@ export const defaultNodes: TNodes = {
 		},
 	},
 	underline: {
+		mark: true,
 		deserialize: (mdastNode, deco, options) => {
 			return convertChildrenDeserialize(
 				mdastNode.children,
@@ -703,6 +742,7 @@ export const defaultNodes: TNodes = {
 				options
 			) as any;
 		},
+
 		serialize(slateNode, options): MdMdxJsxTextElement {
 			return {
 				attributes: [],

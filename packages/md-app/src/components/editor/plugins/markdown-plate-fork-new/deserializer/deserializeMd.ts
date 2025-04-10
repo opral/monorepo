@@ -6,39 +6,41 @@ import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 
 import type { AllowNodeConfig, NodesConfig } from '../MarkdownPlugin';
-import type { TNodes } from '../node-rules';
+import type { TRules } from "../rules";
 
-import { mdastToSlate } from './mdastToSlate';
-import { type ParseMarkdownBlocksOptions, parseMarkdownBlocks } from './utils';
-import { getMergedOptionsDeserialize } from './utils/getMergedOptions';
+import { remarkMention } from "../plugins/remarkMention";
+import { mdastToSlate } from "./mdastToSlate";
+import { type ParseMarkdownBlocksOptions, parseMarkdownBlocks } from "./utils";
+import { getMergedOptionsDeserialize } from "./utils/getMergedOptionsDeserialize";
 
 // TODO: fixes tests
 
 export type DeserializeMdOptions = {
-  allowedNodes?: NodesConfig;
-  allowNode?: AllowNodeConfig;
-  disallowedNodes?: NodesConfig;
-  editor?: SlateEditor;
-  memoize?: boolean;
-  nodes?: TNodes | null;
-  parser?: ParseMarkdownBlocksOptions;
-  remarkPlugins?: Plugin[];
-  splitLineBreaks?: boolean;
+	allowedNodes?: NodesConfig;
+	allowNode?: AllowNodeConfig;
+	disallowedNodes?: NodesConfig;
+	editor?: SlateEditor;
+	memoize?: boolean;
+	parser?: ParseMarkdownBlocksOptions;
+	remarkPlugins?: Plugin[];
+	rules?: TRules | null;
+	splitLineBreaks?: boolean;
 };
 
 export const deserializeMd = (
-  editor: SlateEditor,
-  data: string,
-  options?: Omit<DeserializeMdOptions, 'editor'>
+	editor: SlateEditor,
+	data: string,
+	options?: Omit<DeserializeMdOptions, "editor">
 ): any => {
-  // if using remarkMdx, we need to replace <br> with <br /> since <br /> is not supported in mdx.
-  data = data.replaceAll('<br>', '<br />');
+	// if using remarkMdx, we need to replace <br> with <br /> since <br /> is not supported in mdx.
+	data = data.replaceAll("<br>", "<br />");
 
 	const mergedOptions = getMergedOptionsDeserialize(editor, options);
 
 	const toSlateProcessor = unified()
 		.use(remarkParse)
 		.use(mergedOptions.remarkPlugins ?? [])
+		.use(remarkMention)
 		.use(remarkToSlate, mergedOptions);
 
 	if (options?.memoize) {
@@ -61,9 +63,7 @@ export const deserializeMd = (
 		});
 	}
 
-	const parsedResult = toSlateProcessor.processSync(data).result;
-
-	return parsedResult;
+	return toSlateProcessor.processSync(data).result;
 };
 
 declare module 'unified' {
