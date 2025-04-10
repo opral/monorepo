@@ -94,6 +94,7 @@
 		"lowlight": "^3.3.0",
 		"lucide-react": "^0.477.0",
 		"marked": "^15.0.7",
+		"mdast-util-mdx": "^3.0.0",
 		"native-file-system-adapter": "^3.0.1",
 		"pdf-lib": "^1.17.1",
 		"posthog-js": "^1.227.0",
