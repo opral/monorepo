@@ -110,8 +110,7 @@ export function LixSidebar() {
         .executeTakeFirstOrThrow()
 
       await saveLixToOpfs({ lix })
-      updateUrlParams({ f: newFile.id })
-      setPolling(Date.now())
+      switchToFile(newFile.id)
     } catch (error) {
       console.error("Failed to create new file:", error)
     }
