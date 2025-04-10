@@ -92,7 +92,7 @@ export function EmptyDocumentPromptElement({
   return (
     <div {...attributes} contentEditable={false}>
       <form
-        className="my-8 flex flex-col items-end justify-center w-full p-1 gap-2 border border-muted rounded-md focus-within:ring-1"
+        className="my-8 flex flex-col items-end justify-center w-full p-1 gap-2 border border-border rounded-md focus-within:ring-1"
         onSubmit={(e) => {
           e.preventDefault();
           handleGenerateDocument();
