@@ -9,7 +9,7 @@ import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
-import { lixMdWelcomeFile, setupMdWelcome } from "./helper/welcomeLixFile.ts";
+import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 
@@ -115,8 +115,8 @@ export const lixAtom = atom(async (get) => {
 			const file = await fileHandle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} else {
-			const demoLix = await lixMdWelcomeFile();
-			lixBlob = demoLix.blob;
+			const welcomeLix = await setupWelcomeFile();
+			lixBlob = welcomeLix.blob;
 		}
 	}
 
@@ -179,8 +179,11 @@ export const lixAtom = atom(async (get) => {
 
 	// Check if there is a file in lix
 	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
-	if (!file) file = await setupMdWelcome(lix);
-	if (!get(fileIdSearchParamsAtom)) {
+	if (!file) {
+		await setupWelcomeFile(lix);
+		file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
+	}
+	if (file && !get(fileIdSearchParamsAtom)) {
 		// Set the file ID as searchParams without page reload
 		updateUrlParams({ f: file.id });
 	}
