@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAtom } from 'jotai';
 import { PlateElementProps } from '@udecode/plate/react';
 import { activeFileAtom } from '@/state-active-file';
@@ -7,6 +7,10 @@ import { useChat } from './use-chat';
 import { toast } from 'sonner';
 import { Button } from '../plate-ui/button';
 import { Loader2, Zap } from 'lucide-react';
+import { lixAtom, withPollingAtom } from '@/state';
+import { saveLixToOpfs } from '@/helper/saveLixToOpfs';
+import { generateHumanId } from '@/helper/generateHumanId';
+import { updateUrlParams } from '@/helper/updateUrlParams';
 
 export function EmptyDocumentPromptElement({
   attributes,
@@ -15,6 +19,8 @@ export function EmptyDocumentPromptElement({
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeFile] = useAtom(activeFileAtom);
+  const [lix] = useAtom(lixAtom);
+  const [, setPolling] = useAtom(withPollingAtom)
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chat = useChat({
     streamProtocol: "text",
@@ -50,7 +56,47 @@ export function EmptyDocumentPromptElement({
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   };
-  
+
+  const createNewFile = useCallback(async (content?: string) => {
+    if (!lix) return
+
+    try {
+      // Use prompt-based name if generating content, otherwise use random ID
+      const fileBaseName = content
+        ? prompt
+          .trim()
+          .toLowerCase()
+          .split(/\s+/)
+          .reduce((acc: string[], word: string) => {
+            if ((acc.join('-') + (acc.length ? '-' : '') + word).length <= 30) {
+              acc.push(word);
+            }
+            return acc;
+          }, [])
+          .join('-')
+        : generateHumanId();
+
+      const newFile = await lix.db
+        .insertInto("file")
+        .values({
+          path: `/${fileBaseName}.md`,
+          data: new TextEncoder().encode(``),
+        })
+        .returning("id")
+        .executeTakeFirstOrThrow()
+
+      await saveLixToOpfs({ lix })
+      updateUrlParams({ f: newFile.id })
+      setPolling(Date.now())
+
+      // Return the new file ID for later use
+      return newFile.id;
+    } catch (error) {
+      console.error("Failed to create new file:", error)
+      return null;
+    }
+  }, [lix, setPolling, prompt])
+
   // Initialize height and reset on changes
   useEffect(() => {
     adjustHeight();
@@ -62,6 +108,18 @@ export function EmptyDocumentPromptElement({
     setIsGenerating(true);
 
     try {
+      // If we're in welcome.md, create a new file first
+      if (activeFile.path === '/welcome.md') {
+        const newFileId = await createNewFile(prompt);
+        if (newFileId) {
+          // Wait a moment for navigation to complete
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } else {
+          // If file creation failed, stay in current file
+          toast.error("Failed to create new file. Generating in current file instead.");
+        }
+      }
+
       await chat.append({
         role: 'user',
         content: `Generate a complete, well-structured markdown document about: ${prompt}. Include appropriate headings starting with level 1 heading (#), paragraphs, and relevant formatting like lists or emphasis where appropriate.`,
