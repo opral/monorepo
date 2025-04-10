@@ -1,35 +1,43 @@
 import type { TText } from '@udecode/plate';
 
-import isBoolean from 'lodash/fp/isBoolean.js';
-
 import type {
-  TIndentListElement,
-  TMentionElement,
-  TStandardListElement,
-} from '../internal/types';
+	TIndentListElement,
+	TMentionElement,
+	TStandardListElement,
+} from "../internal/types";
 import type {
-  MdHeading,
-  MdImage,
-  MdLink,
-  MdList,
-  MdMdxJsxFlowElement,
-  MdMdxJsxTextElement,
-  MdParagraph,
-  MdRootContent,
-  MdTable,
-  MdTableCell,
-  MdTableRow,
-} from '../mdast';
-import type { MentionNode } from '../plugins/remarkMention';
-import type { TRules } from './types';
+	MdHeading,
+	MdImage,
+	MdLink,
+	MdList,
+	MdMdxJsxFlowElement,
+	MdMdxJsxTextElement,
+	MdParagraph,
+	MdRootContent,
+	MdTable,
+	MdTableCell,
+	MdTableRow,
+} from "../mdast";
+import type { MentionNode } from "../plugins/remarkMention";
+import type { TRules } from "./types";
 
 import {
-  buildSlateNode,
-  convertChildrenDeserialize,
-  convertTextsDeserialize,
-} from '../deserializer';
-import { convertNodesSerialize } from '../serializer';
-import { getPlateNodeType } from '../utils';
+	buildSlateNode,
+	convertChildrenDeserialize,
+	convertTextsDeserialize,
+} from "../deserializer";
+import { convertNodesSerialize } from "../serializer";
+import { getPlateNodeType } from "../utils";
+
+function isBoolean(value: any) {
+	return (
+		value === true ||
+		value === false ||
+		(!!value &&
+			typeof value == "object" &&
+			Object.prototype.toString.call(value) == "[object Boolean]")
+	);
+}
 
 export const defaultRules: TRules = {
 	a: {
@@ -564,7 +572,7 @@ export const defaultRules: TRules = {
 				}
 			};
 
-			children.forEach((child) => {
+			children.forEach((child, index, children) => {
 				const { type } = child as { type?: string };
 
 				if (type && splitBlockTypes.has(type)) {
@@ -606,7 +614,18 @@ export const defaultRules: TRules = {
 						}
 					});
 				} else {
-					inlineNodes.push(child);
+					// TODO remove the last br of the paragraph if the previos element is not a br
+
+					if (
+						child.text === "\n" &&
+						children.length > 1 &&
+						index === children.length - 1
+					) {
+						// no - op
+						console.log("test");
+					} else {
+						inlineNodes.push(child);
+					}
 				}
 			});
 
@@ -615,9 +634,28 @@ export const defaultRules: TRules = {
 			return elements.length === 1 ? elements[0] : elements;
 		},
 		serialize: (node, options) => {
+			let cleanedChildren = node.children;
+
+			if (
+				node.children.length > 0 &&
+				cleanedChildren[cleanedChildren.length - 1].text === "\n"
+			) {
+				// if the last child of the paragraph is a line breake add an additional one
+				cleanedChildren.push({ text: "\n" });
+			}
+
+			cleanedChildren = cleanedChildren.map((child) => {
+				if (child.text === "\n") {
+					return {
+						type: "break",
+					} as any;
+				}
+				return child;
+			});
+
 			return {
 				children: convertNodesSerialize(
-					node.children,
+					cleanedChildren,
 					options
 				) as MdParagraph["children"],
 				type: "paragraph",
@@ -742,7 +780,6 @@ export const defaultRules: TRules = {
 				options
 			) as any;
 		},
-
 		serialize(slateNode, options): MdMdxJsxTextElement {
 			return {
 				attributes: [],
