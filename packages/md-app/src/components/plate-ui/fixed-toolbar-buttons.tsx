@@ -187,7 +187,6 @@ export function FixedToolbarButtons() {
       </ToolbarGroup> */}
 
       <ToolbarGroup>
-        <ImportMarkdown />
         <CopyToClipboard />
         {/* <ModeDropdownMenu /> */}
       </ToolbarGroup>
