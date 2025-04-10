@@ -10,21 +10,20 @@ import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { switchActiveAccount } from "@/state";
 import { createCheckpoint } from "./createCheckpoint";
 
-export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
-	if (!lix) {
-		lix = await openLixInMemory({
-			blob: await newLixFile(),
-			providePlugins: [txtPlugin],
-		});
-	}
-
+/**
+ * Executes a function as the Flashtype account and then restores the original account
+ */
+export async function withFlashtypeAccount<T>(
+	lix: Lix,
+	fn: (lix: Lix) => Promise<T>
+): Promise<T> {
 	// Get the current active account to restore it later
 	const currentActiveAccount = await lix.db
 		.selectFrom("active_account")
 		.selectAll()
 		.executeTakeFirst();
 
-	// Create and switch to a Flashtype account before creating the checkpoint
+	// Create and switch to a Flashtype account
 	const existingAccounts = await lix.db
 		.selectFrom("account")
 		.selectAll()
@@ -50,14 +49,30 @@ export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
 	// Switch to the Flashtype account using the existing helper function
 	await switchActiveAccount(lix, accountToUse);
 
-	await setupMdWelcome(lix);
-	await fileQueueSettled({ lix });
-	await createInitialCheckpoint(lix);
+	// Execute the provided function
+	const result = await fn(lix);
 
 	// Switch back to the user account if it existed
 	if (currentActiveAccount) {
 		await switchActiveAccount(lix, currentActiveAccount);
 	}
+
+	return result;
+}
+
+export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
+	if (!lix) {
+		lix = await openLixInMemory({
+			blob: await newLixFile(),
+			providePlugins: [txtPlugin],
+		});
+	}
+
+	await withFlashtypeAccount(lix, async (lixWithFlashtype) => {
+		await setupMdWelcome(lixWithFlashtype);
+		await fileQueueSettled({ lix: lixWithFlashtype });
+		await createInitialCheckpoint(lixWithFlashtype);
+	});
 
 	return { blob: await toBlob({ lix }) };
 }
