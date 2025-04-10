@@ -142,6 +142,7 @@ function toSanitizedNode(node: TreeNode, file: any, reason: string) {
 	node.type = "sanitized_block";
 	node.value = rawValue;
 	node.reason = reason;
+	node.children = [];
 }
 
 function sanatizeUnknownNodeStructures(node: TreeNode, file: any): boolean {
