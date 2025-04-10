@@ -50,7 +50,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 			sanatizeUnknownNodeStructuresInTree,
 			// sanitizeHtml,
 		],
-		nodes: {
+		rules: {
 			sanitized_block_html: {
 				serialize: (node) => {
 					return {

@@ -97,7 +97,7 @@ const rules = {
 		],
 
 		allowedAttributes: {
-			checked: [null],
+			checked: null,
 			spread: null,
 		},
 	},
@@ -142,6 +142,7 @@ function toSanitizedNode(node: TreeNode, file: any, reason: string) {
 	node.type = "sanitized_block";
 	node.value = rawValue;
 	node.reason = reason;
+	node._children = node.children;
 	node.children = [];
 }
 
@@ -229,7 +230,7 @@ export function sanatizeUnknownNodeStructuresInTree() {
 		for (const node of rootNode.children) {
 			sanatizeUnknownNodeStructures(node, file);
 		}
-
+		debugger;
 		console.log("sanatizeUnknownNodeStructuresInTree result:");
 		console.log(JSON.parse(JSON.stringify(rootNode)));
 	};
