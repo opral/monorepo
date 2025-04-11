@@ -2806,8 +2806,8 @@ importers:
         specifier: ^46.0.4
         version: 46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0))
       '@udecode/plate-ai':
-        specifier: ^46.0.4
-        version: 46.0.4(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^47.0.5
+        version: 47.0.5(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@udecode/plate-alignment':
         specifier: ^44.0.0
         version: 44.0.0(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -2893,8 +2893,8 @@ importers:
         specifier: ^44.0.4
         version: 44.0.4(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@udecode/plate-markdown':
-        specifier: ^46.0.3
-        version: 46.0.3(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^47.0.5
+        version: 47.0.5(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@udecode/plate-math':
         specifier: ^44.0.0
         version: 44.0.0(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -5331,10 +5331,12 @@ packages:
   '@faker-js/faker@9.5.0':
     resolution: {integrity: sha512-3qbjLv+fzuuCg3umxc9/7YjrEXNaKwHgmig949nfyaTx8eL4FAsvFbu+1JcFUj1YAXofhaDn6JdEUBTYuk0Ssw==}
     engines: {node: '>=18.0.0', npm: '>=9.0.0'}
+    deprecated: Please update to a newer version
 
   '@faker-js/faker@9.5.1':
     resolution: {integrity: sha512-0fzMEDxkExR2cn731kpDaCCnBGBUOIXEi2S1N5l8Hltp6aPf4soTMJ+g4k8r2sI5oB+rpwIW8Uy/6jkwGpnWPg==}
     engines: {node: '>=18.0.0', npm: '>=9.0.0'}
+    deprecated: Please update to a newer version
 
   '@fal-works/esbuild-plugin-global-externals@2.1.2':
     resolution: {integrity: sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==}
@@ -9532,8 +9534,8 @@ packages:
       react-dom: '>=18.0.0'
       tailwind-merge: '>=2.2.0'
 
-  '@udecode/plate-ai@46.0.4':
-    resolution: {integrity: sha512-bgMn25jRSsgpATCMl/jV4OLQ7TSnG64qdqp6+oaixiKoRzFnLIPX2kUj93zA9JWP139v1n3M7iHida7gaH3j1w==}
+  '@udecode/plate-ai@47.0.5':
+    resolution: {integrity: sha512-fiBW/p4op4GVM6XzsJg30HWTT2f0uFei9UbhDwGZhwW2Vh3RYqUDmHfNbDpPdskylwsPcC1xnKH2LrqyhJGkCQ==}
     peerDependencies:
       '@udecode/plate': '>=46.0.4'
       react: '>=18.0.0'
@@ -9751,10 +9753,10 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  '@udecode/plate-markdown@46.0.3':
-    resolution: {integrity: sha512-+MyGDOO2UhiIxOZAstCs7jUUImEhvONhTehUauF4p1ta9WX8nlkJctmIk05hRCFMkpcjNtzSLBJ1dhOuko4oJw==}
+  '@udecode/plate-markdown@47.0.5':
+    resolution: {integrity: sha512-4braKMu4MJn4uolUt8ff9vHFIeHrjdwXLDjlpSJnQ1j/nacrsJvcg3rY2p8SedHe1mHGd6Y4xLpSVXi3OM3agQ==}
     peerDependencies:
-      '@udecode/plate': '>=46.0.2'
+      '@udecode/plate': '>=46.0.10'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
@@ -15191,6 +15193,9 @@ packages:
 
   mdast-util-gfm@3.0.0:
     resolution: {integrity: sha512-dgQEX5Amaq+DuUqf26jJqSK9qgixgd6rYDHAv4aTBuA92cTknZlKpPfa86Z/s8Dj8xsAQpFfBmPUHWJBWqS4Bw==}
+
+  mdast-util-math@3.0.0:
+    resolution: {integrity: sha512-Tl9GBNeG/AhJnQM221bJR2HPvLOSnLE/T9cJI9tlc6zwQk2nPk/4f0cHkOdEixQPC/j8UtKDdITswvLAy1OZ1w==}
 
   mdast-util-mdx-expression@1.3.2:
     resolution: {integrity: sha512-xIPmR5ReJDu/DHH1OoIT1HkuybIfRGYRywC+gJtI7qHjCJp/M9jrmBEJW22O8lskDWm562BX2W8TiAwRTb0rKA==}
@@ -29012,10 +29017,10 @@ snapshots:
     transitivePeerDependencies:
       - '@types/react'
 
-  '@udecode/plate-ai@46.0.4(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@udecode/plate-ai@47.0.5(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@udecode/plate': 46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0))
-      '@udecode/plate-markdown': 46.0.3(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@udecode/plate-markdown': 47.0.5(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@udecode/plate-selection': 46.0.4(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       lodash: 4.17.21
       react: 19.0.0
@@ -29259,16 +29264,19 @@ snapshots:
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
 
-  '@udecode/plate-markdown@46.0.3(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@udecode/plate-markdown@47.0.5(@udecode/plate@46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0)))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@udecode/plate': 46.0.4(@types/react@19.0.10)(immer@10.1.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(scheduler@0.25.0)(slate-dom@0.112.2(slate@0.112.0))(slate@0.112.0)(use-sync-external-store@1.4.0(react@19.0.0))
       lodash: 4.17.21
       marked: 15.0.7
+      mdast-util-math: 3.0.0
+      mdast-util-mdx: 3.0.0
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
-      remark-gfm: 4.0.0
       remark-parse: 11.0.0
+      remark-stringify: 11.0.0
       unified: 11.0.5
+      zeed-dom: 0.15.1
     transitivePeerDependencies:
       - supports-color
 
@@ -29954,7 +29962,7 @@ snapshots:
       std-env: 3.8.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.1.3(@types/node@22.13.9)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.6.3))(terser@5.36.0)
+      vitest: 2.1.3(@types/node@22.13.9)(@vitest/browser@2.1.3)(jsdom@25.0.1)(lightningcss@1.29.1)(msw@2.7.0(@types/node@22.13.9)(typescript@5.7.2))(terser@5.36.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -36919,6 +36927,18 @@ snapshots:
       mdast-util-gfm-table: 2.0.0
       mdast-util-gfm-task-list-item: 2.0.0
       mdast-util-to-markdown: 2.1.2
+    transitivePeerDependencies:
+      - supports-color
+
+  mdast-util-math@3.0.0:
+    dependencies:
+      '@types/hast': 3.0.4
+      '@types/mdast': 4.0.4
+      devlop: 1.1.0
+      longest-streak: 3.1.0
+      mdast-util-from-markdown: 2.0.2
+      mdast-util-to-markdown: 2.1.2
+      unist-util-remove-position: 5.0.0
     transitivePeerDependencies:
       - supports-color
 

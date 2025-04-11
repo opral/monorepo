@@ -1,16 +1,18 @@
 
-// import { Descendant } from "@udecode/plate";
+
+import { SuggestionPlugin } from "@udecode/plate-suggestion/react";
+import remarkGfm from "remark-gfm";
+import { sanatizeUnknownNodeStructuresInTree } from "./sanitizeUnsupported";
 import {
 	convertChildrenDeserialize,
 	convertNodesSerialize,
 	getPlateNodeType,
 	MarkdownPlugin,
 	MdParagraph,
-} from "../markdown-plate-fork-new";
+} from "@udecode/plate-markdown";
 
-import { SuggestionPlugin } from "@udecode/plate-suggestion/react";
-import remarkGfm from "remark-gfm";
-import { sanatizeUnknownNodeStructuresInTree } from "./sanitizeUnsupported";
+
+
 
 export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 	options: {

@@ -37,7 +37,7 @@
 		"@udecode/cmdk": "^0.2.0",
 		"@udecode/cn": "^44.0.1",
 		"@udecode/plate": "^46.0.4",
-		"@udecode/plate-ai": "^46.0.4",
+		"@udecode/plate-ai": "^47.0.5",
 		"@udecode/plate-alignment": "^44.0.0",
 		"@udecode/plate-autoformat": "^44.0.0",
 		"@udecode/plate-basic-marks": "^46.0.5",
@@ -66,7 +66,7 @@
 		"@udecode/plate-layout": "^44.0.0",
 		"@udecode/plate-line-height": "^44.0.0",
 		"@udecode/plate-link": "^44.0.4",
-		"@udecode/plate-markdown": "^46.0.3",
+		"@udecode/plate-markdown": "^47.0.5",
 		"@udecode/plate-math": "^44.0.0",
 		"@udecode/plate-media": "^44.0.6",
 		"@udecode/plate-mention": "^44.0.0",
@@ -128,8 +128,8 @@
 		"unist-util-visit": "5.0.0",
 		"uploadthing": "7.2.0",
 		"use-file-picker": "^2.1.2",
-		"zod": "^3.24.2",
-		"zeed-dom": "0.15.1"
+		"zeed-dom": "0.15.1",
+		"zod": "^3.24.2"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.21.0",
