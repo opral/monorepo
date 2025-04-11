@@ -9,8 +9,10 @@ export function applyVersionV2DatabaseSchema(
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     name TEXT UNIQUE DEFAULT (human_id()),
     change_set_id TEXT NOT NULL,
+    working_change_set_id TEXT NOT NULL,
 
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
+    FOREIGN KEY(working_change_set_id) REFERENCES change_set(id)
   ) STRICT;
 
   -- only one version can be active at a time
@@ -27,10 +29,16 @@ export function applyVersionV2DatabaseSchema(
   SELECT 'initialchangeset'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = 'initialchangeset');
 
+  -- Insert the default working change set if missing
+  -- (this is a workaround for not having a separate creation and migration schema's)
+  INSERT INTO change_set (id)
+  SELECT 'initial_working_changeset'
+  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = 'initial_working_changeset');
+
   -- Insert the default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO version_v2 (id, name, change_set_id)
-  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main', 'initialchangeset'
+  INSERT INTO version_v2 (id, name, change_set_id, working_change_set_id)
+  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main', 'initialchangeset', 'initial_working_changeset'
   WHERE NOT EXISTS (SELECT 1 FROM version_v2);
 
   -- Set the default current version to 'main' if both tables are empty
@@ -50,6 +58,7 @@ export type VersionV2Table = {
 	id: Generated<string>;
 	name: string | null;
 	change_set_id: string;
+	working_change_set_id: string;
 };
 
 export type ActiveVersion = Selectable<ActiveVersionTable>;

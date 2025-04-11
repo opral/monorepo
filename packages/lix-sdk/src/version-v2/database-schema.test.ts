@@ -13,7 +13,12 @@ test("should allow inserting a valid version", async () => {
 	await expect(
 		lix.db
 			.insertInto("version_v2")
-			.values({ id: "v1", name: "version one", change_set_id: "cs1" })
+			.values({
+				id: "v1",
+				name: "version one",
+				change_set_id: "cs1",
+				working_change_set_id: "cs1",
+			})
 			.execute()
 	).resolves.toBeDefined();
 
@@ -27,6 +32,7 @@ test("should allow inserting a valid version", async () => {
 		id: "v1",
 		name: "version one",
 		change_set_id: "cs1",
+		working_change_set_id: "cs1",
 	});
 });
 
@@ -41,7 +47,7 @@ test("should use default id and name if not provided", async () => {
 	// Insert a version providing only change_set_id
 	await lix.db
 		.insertInto("version_v2")
-		.values({ change_set_id: "cs1" })
+		.values({ change_set_id: "cs1", working_change_set_id: "cs1" })
 		.execute();
 
 	// Verify the inserted data (id and name should be defaulted)
@@ -69,14 +75,24 @@ test("should enforce primary key constraint (id)", async () => {
 	// Insert initial version
 	await lix.db
 		.insertInto("version_v2")
-		.values({ id: "v1", name: "version one", change_set_id: "cs1" })
+		.values({
+			id: "v1",
+			name: "version one",
+			change_set_id: "cs1",
+			working_change_set_id: "cs1",
+		})
 		.execute();
 
 	// Attempt to insert the same version id again
 	await expect(
 		lix.db
 			.insertInto("version_v2")
-			.values({ id: "v1", name: "version two", change_set_id: "cs1" }) // Same id
+			.values({
+				id: "v1",
+				name: "version two",
+				change_set_id: "cs1",
+				working_change_set_id: "cs1",
+			}) // Same id
 			.execute()
 	).rejects.toThrow(/UNIQUE constraint failed: version_v2.id/i);
 });
@@ -92,14 +108,24 @@ test("should enforce unique constraint (name)", async () => {
 	// Insert initial version
 	await lix.db
 		.insertInto("version_v2")
-		.values({ id: "v1", name: "unique_name", change_set_id: "cs1" })
+		.values({
+			id: "v1",
+			name: "unique_name",
+			change_set_id: "cs1",
+			working_change_set_id: "cs1",
+		})
 		.execute();
 
 	// Attempt to insert another version with the same name
 	await expect(
 		lix.db
 			.insertInto("version_v2")
-			.values({ id: "v2", name: "unique_name", change_set_id: "cs1" }) // Same name
+			.values({
+				id: "v2",
+				name: "unique_name",
+				change_set_id: "cs1",
+				working_change_set_id: "cs1",
+			}) // Same name
 			.execute()
 	).rejects.toThrow(/UNIQUE constraint failed: version_v2.name/i);
 });
@@ -111,7 +137,12 @@ test("should enforce foreign key constraint on change_set_id", async () => {
 	await expect(
 		lix.db
 			.insertInto("version_v2")
-			.values({ id: "v1", name: "v1_name", change_set_id: "cs_nonexistent" })
+			.values({
+				id: "v1",
+				name: "v1_name",
+				change_set_id: "cs_nonexistent",
+				working_change_set_id: "cs_nonexistent",
+			})
 			.execute()
 	).rejects.toThrow(/FOREIGN KEY constraint failed/i);
 });

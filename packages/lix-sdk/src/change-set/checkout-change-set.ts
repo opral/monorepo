@@ -35,7 +35,7 @@ export async function checkoutChangeSet(args: {
 
 		const checkoutVersion = await createVersionV2({
 			lix: { ...args.lix, db: trx },
-			changeSet: args.changeSet,
+			from: args.changeSet,
 			name: null,
 		});
 

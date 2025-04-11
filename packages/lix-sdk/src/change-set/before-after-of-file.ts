@@ -91,7 +91,7 @@ export async function beforeAfterOfFile(args: {
 
 				const interimVersion = await createVersionV2({
 					lix: { ...args.lix, db: trx },
-					changeSet: beforeCs,
+					from: beforeCs,
 					name: null,
 				});
 
