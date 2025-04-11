@@ -20,7 +20,7 @@ import {
 } from '@udecode/plate-code-block';
 import { BaseHeadingPlugin, HEADING_KEYS } from '@udecode/plate-heading';
 import { BaseHorizontalRulePlugin } from '@udecode/plate-horizontal-rule';
-import { BaseIndentPlugin } from '@udecode/plate-indent';
+// import { BaseIndentPlugin } from '@udecode/plate-indent';
 import { BaseIndentListPlugin } from '@udecode/plate-indent-list';
 import { BaseLinkPlugin } from '@udecode/plate-link';
 
@@ -75,11 +75,11 @@ const plugins = [
   BaseHorizontalRulePlugin,
   BaseLinkPlugin,
   BaseParagraphPlugin,
-  BaseIndentPlugin.extend({
-    inject: {
-      targetPlugins: [BaseParagraphPlugin.key],
-    },
-  }),
+  // BaseIndentPlugin.extend({
+  //   inject: {
+  //     targetPlugins: [BaseParagraphPlugin.key],
+  //   },
+  // }),
   BaseIndentListPlugin.extend({
     inject: {
       targetPlugins: [BaseParagraphPlugin.key],
