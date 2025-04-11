@@ -5,6 +5,7 @@ import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import type { VersionV2 } from "../version-v2/database-schema.js";
+import type { LixFile } from "../database/schema.js";
 /**
  * Applies a change set to the lix.
  */
@@ -91,7 +92,7 @@ export async function applyChangeSet(args: {
 		// to be applied first.
 		const lixOwnChanges = changesGroupedByFile["lix_own_change_control"] ?? [];
 
-		const { deletedFileIds } = await applyOwnChanges({
+		const ownChangeControl = await applyOwnChanges({
 			lix: { ...args.lix, db: trx },
 			changes: lixOwnChanges,
 		});
@@ -102,21 +103,24 @@ export async function applyChangeSet(args: {
 		for (const [file_id, changes] of Object.entries(changesGroupedByFile)) {
 			// lix own change control deleted the file
 			// no plugin needs to apply changes
-			if (file_id === "lix_own_change_control" || deletedFileIds.has(file_id)) {
+			if (
+				file_id === "lix_own_change_control" ||
+				ownChangeControl.deletedFileIds.has(file_id)
+			) {
 				continue;
 			}
-			// the file must exist at this point.
-			const file = await trx
-				.selectFrom("file")
-				.where("id", "=", file_id)
-				.selectAll()
-				.executeTakeFirstOrThrow();
 
-			if (file.data.byteLength === 0) {
-				// @ts-expect-error - own change control created this file
-				// it's the plugins job now to apply changes. deleting file.data
-				// to pass an undefined file.data to the plugin
-				delete file.data;
+			let file: Omit<LixFile, "data"> & { data?: Uint8Array };
+
+			if (ownChangeControl.insertedFiles.has(file_id)) {
+				file = ownChangeControl.insertedFiles.get(file_id)!;
+			} else {
+				// the file must exist given that it is not inserted nor deleted
+				file = await trx
+					.selectFrom("file")
+					.where("id", "=", file_id)
+					.selectAll()
+					.executeTakeFirstOrThrow();
 			}
 
 			const groupByPlugin = Object.groupBy(changes ?? [], (c) => c.plugin_key);
@@ -139,10 +143,15 @@ export async function applyChangeSet(args: {
 					file,
 				});
 
+				const resultingFile = {
+					...file,
+					data: fileData,
+				};
+
 				await trx
-					.updateTable("file")
-					.set({ data: fileData })
-					.where("id", "=", file_id)
+					.insertInto("file")
+					.values(resultingFile)
+					.onConflict((oc) => oc.doUpdateSet(resultingFile))
 					.execute();
 			}
 		}
