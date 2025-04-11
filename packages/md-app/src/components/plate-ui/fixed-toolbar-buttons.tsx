@@ -153,7 +153,7 @@ export function FixedToolbarButtons() {
 
           <ToolbarGroup>
             <LinkToolbarButton />
-            <TableDropdownMenu />
+            {/* <TableDropdownMenu /> */}
             <EmojiDropdownMenu />
             <MediaToolbarButton nodeType={ImagePlugin.key} />
             <ImportMarkdown />
