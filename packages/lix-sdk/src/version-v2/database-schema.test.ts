@@ -72,6 +72,16 @@ test("should enforce primary key constraint (id)", async () => {
 		.values([{ id: "cs1" }])
 		.execute();
 
+	await lix.db
+		.insertInto("change_set")
+		.values([{ id: "wcs1" }])
+		.execute();
+
+	await lix.db
+		.insertInto("change_set")
+		.values([{ id: "wcs2" }])
+		.execute();
+
 	// Insert initial version
 	await lix.db
 		.insertInto("version_v2")
@@ -79,7 +89,7 @@ test("should enforce primary key constraint (id)", async () => {
 			id: "v1",
 			name: "version one",
 			change_set_id: "cs1",
-			working_change_set_id: "cs1",
+			working_change_set_id: "wcs1",
 		})
 		.execute();
 
@@ -91,7 +101,7 @@ test("should enforce primary key constraint (id)", async () => {
 				id: "v1",
 				name: "version two",
 				change_set_id: "cs1",
-				working_change_set_id: "cs1",
+				working_change_set_id: "wcs2",
 			}) // Same id
 			.execute()
 	).rejects.toThrow(/UNIQUE constraint failed: version_v2.id/i);
@@ -105,6 +115,16 @@ test("should enforce unique constraint (name)", async () => {
 		.values([{ id: "cs1" }])
 		.execute();
 
+	await lix.db
+		.insertInto("change_set")
+		.values([{ id: "wcs1" }])
+		.execute();
+
+	await lix.db
+		.insertInto("change_set")
+		.values([{ id: "wcs2" }])
+		.execute();
+
 	// Insert initial version
 	await lix.db
 		.insertInto("version_v2")
@@ -112,7 +132,7 @@ test("should enforce unique constraint (name)", async () => {
 			id: "v1",
 			name: "unique_name",
 			change_set_id: "cs1",
-			working_change_set_id: "cs1",
+			working_change_set_id: "wcs1",
 		})
 		.execute();
 
@@ -124,7 +144,7 @@ test("should enforce unique constraint (name)", async () => {
 				id: "v2",
 				name: "unique_name",
 				change_set_id: "cs1",
-				working_change_set_id: "cs1",
+				working_change_set_id: "wcs2",
 			}) // Same name
 			.execute()
 	).rejects.toThrow(/UNIQUE constraint failed: version_v2.name/i);
@@ -226,4 +246,69 @@ test("applying the schema multiple times should be idempotent for initial data",
 		.select(lix.db.fn.count("version_id").as("count"))
 		.executeTakeFirstOrThrow();
 	expect(initialActiveVersionCount.count).toBe(1);
+});
+
+test("should enforce UNIQUE constraint on working_change_set_id", async () => {
+	const lix = await openLixInMemory({});
+
+	// Insert necessary change sets to satisfy foreign keys
+	const cs1 = await lix.db
+		.insertInto("change_set")
+		.values({ id: "cs1" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+	const cs2 = await lix.db
+		.insertInto("change_set")
+		.values({ id: "cs2" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+	const workingCs1 = await lix.db
+		.insertInto("change_set")
+		.values({ id: "workingCs1" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+	const workingCs2 = await lix.db
+		.insertInto("change_set")
+		.values({ id: "workingCs2" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	// Insert first version referencing workingCs1
+	await lix.db
+		.insertInto("version_v2")
+		.values({
+			id: "v1",
+			name: "version one",
+			change_set_id: cs1.id,
+			working_change_set_id: workingCs1.id,
+		})
+		.execute();
+
+	// Attempt to insert another version referencing the SAME workingCs1 -> should fail
+	await expect(
+		lix.db
+			.insertInto("version_v2")
+			.values({
+				id: "v2",
+				name: "version two",
+				change_set_id: cs2.id, // Different historical point is fine
+				working_change_set_id: workingCs1.id, // <<< Same working_change_set_id
+			})
+			.execute()
+	).rejects.toThrow(
+		/UNIQUE constraint failed: version_v2.working_change_set_id/i
+	);
+
+	// Inserting another version with a DIFFERENT working_change_set_id should succeed
+	await expect(
+		lix.db
+			.insertInto("version_v2")
+			.values({
+				id: "v3",
+				name: "version three",
+				change_set_id: cs1.id, // Can branch from same historical point
+				working_change_set_id: workingCs2.id, // <<< Different working_change_set_id
+			})
+			.execute()
+	).resolves.toBeDefined();
 });

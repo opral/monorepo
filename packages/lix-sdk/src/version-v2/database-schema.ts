@@ -9,7 +9,7 @@ export function applyVersionV2DatabaseSchema(
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     name TEXT UNIQUE DEFAULT (human_id()),
     change_set_id TEXT NOT NULL,
-    working_change_set_id TEXT NOT NULL,
+    working_change_set_id TEXT NOT NULL UNIQUE,
 
     FOREIGN KEY(change_set_id) REFERENCES change_set(id),
     FOREIGN KEY(working_change_set_id) REFERENCES change_set(id)
