@@ -21,7 +21,7 @@ import type { ChangeSet } from "./database-schema.js";
  *     labels
  *   });
  *   ```
- * 
+ *
  * @example
  *   ```ts
  *   // Create a change set with parent change sets
@@ -36,6 +36,17 @@ import type { ChangeSet } from "./database-schema.js";
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
 	id?: string;
+	/**
+	 * If true, all elements of the change set will be immutable after creation.
+	 *
+	 * Immutable change set elements is required to create change set edges (the graph).
+	 *
+	 * WARNING: The SQL schema defaults to false to allow crating change sets
+	 * and inserting elements. For ease of use, the `createChangeSet()` utility
+	 * defaults to true because in the majority of cases change set elements should be immutable.
+	 *
+	 * @default true
+	 */
 	immutableElements?: boolean;
 	changes?: Pick<Change, "id" | "entity_id" | "schema_key" | "file_id">[];
 	labels?: Pick<Label, "id">[];
@@ -43,18 +54,15 @@ export async function createChangeSet(args: {
 	parents?: Pick<ChangeSet, "id">[];
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		let query = trx.insertInto("change_set");
-
-		if (args.id || args.immutableElements) {
-			query = query.values({
+		const changeSet = await trx
+			.insertInto("change_set")
+			.values({
 				id: args.id,
-				immutable_elements: args.immutableElements,
-			});
-		} else {
-			query = query.defaultValues();
-		}
-
-		const changeSet = await query.returningAll().executeTakeFirstOrThrow();
+				// needs to be false when creating the change set to insert elements
+				immutable_elements: false,
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
 		if (args.changes && args.changes.length > 0) {
 			// Insert elements linking change set to changes
@@ -87,6 +95,13 @@ export async function createChangeSet(args: {
 				.execute();
 		}
 
+		const updatedCs = await trx
+			.updateTable("change_set")
+			.set({ immutable_elements: args.immutableElements ?? true })
+			.where("id", "=", changeSet.id)
+			.returningAll()
+			.executeTakeFirstOrThrow();
+
 		// Add parent-child relationships if parents are provided
 		if (args.parents && args.parents.length > 0) {
 			await trx
@@ -101,7 +116,7 @@ export async function createChangeSet(args: {
 				.execute();
 		}
 
-		return changeSet;
+		return updatedCs;
 	};
 
 	if (args.lix.db.isTransaction) {

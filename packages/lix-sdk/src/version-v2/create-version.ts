@@ -12,7 +12,7 @@ import type { VersionV2 } from "./database-schema.js";
  *   const version = await createVersionV2({ lix, from: otherVersion.change_set_id });
  */
 export async function createVersionV2(args: {
-	lix: Pick<Lix, "db">;
+	lix: Lix;
 	id?: VersionV2["id"];
 	from: Pick<ChangeSet, "id">;
 	name?: VersionV2["name"];

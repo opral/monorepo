@@ -10,6 +10,8 @@ import { fileQueueSettled } from "../file-queue/index.js";
 import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
 import { mockChange } from "../change/mock-change.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 
 test("it applies own entity changes", async () => {
 	const lix = await openLixInMemory({});
@@ -223,62 +225,39 @@ test("throws an error if plugin does not support applying changes", async () => 
 	);
 });
 
-test("applies an insert change from a change set if the file does not exist", async () => {
-	// Plugin that creates/updates .txt files based on snapshot content
-	const mockTxtPlugin: LixPlugin = {
-		key: "mock_txt_plugin",
-		detectChangesGlob: "*.txt",
-		detectChanges: async ({ after }) => {
-			return [
-				{
-					entity_id: "txt_file",
-					snapshot: after
-						? { text: new TextDecoder().decode(after.data) }
-						: null,
-					schema: { type: "json", key: "txt" },
-				},
-			];
-		},
-		applyChanges: async ({ lix, changes }) => {
-			// applyChanges uses the latest change's snapshot
-			const latestChange = changes
-				.sort((a, b) => a.created_at.localeCompare(b.created_at))
-				.at(-1);
-			if (!latestChange) return { fileData: new Uint8Array() };
-
-			const snapshot = await lix.db
-				.selectFrom("snapshot")
-				.where("id", "=", latestChange.snapshot_id)
-				.selectAll()
-				.executeTakeFirstOrThrow();
-
-			return {
-				fileData: new TextEncoder().encode(snapshot.content!.text),
-			};
-		},
-	};
-
-	// --- Setup lix 1 with the file and generate the initial change/changeSet ---
+test("applies an insert change from a change set even if the file does not exist", async () => {
 	const lix1 = await openLixInMemory({
-		providePlugins: [mockTxtPlugin],
+		providePlugins: [mockJsonPlugin],
 	});
 
 	// Insert the initial file
 	await lix1.db
 		.insertInto("file")
 		.values({
-			path: "/test.txt",
-			data: new TextEncoder().encode("hello initial"),
+			path: "/test.json",
+			data: new TextEncoder().encode(JSON.stringify({ value: "hello world" })),
 		})
 		.executeTakeFirstOrThrow();
 
 	// Wait for detectChanges to run and create the change
 	await fileQueueSettled({ lix: lix1 });
 
+	const activeVersionLix1 = await lix1.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
 	// Get the created change and its snapshot
-	const changesInLix1 = await lix1.db
+	const leafChangesInLix1 = await lix1.db
 		.selectFrom("change")
-		.selectAll()
+		.innerJoin(
+			"change_set_element",
+			"change.id",
+			"change_set_element.change_id"
+		)
+		.where(changeSetElementIsLeafOf([{ id: activeVersionLix1.change_set_id }]))
+		.selectAll("change")
 		.execute();
 
 	const snapshotsInLix1 = await lix1.db
@@ -289,12 +268,12 @@ test("applies an insert change from a change set if the file does not exist", as
 	// Create a change set in lix1
 	const changeSetInLix1 = await createChangeSet({
 		lix: lix1,
-		changes: changesInLix1,
+		changes: leafChangesInLix1,
 	});
 
 	// --- Setup lix 2 (empty) and apply the change set from lix1 ---
 	const lix2 = await openLixInMemory({
-		providePlugins: [mockTxtPlugin],
+		providePlugins: [mockJsonPlugin],
 	});
 
 	// Manually insert required records into lix2 for applyChangeSet to work
@@ -308,16 +287,23 @@ test("applies an insert change from a change set if the file does not exist", as
 	// 2. Change
 	// the changes need to exist too to avoid foreign key constraint errors
 	// (applyChanges assumes that changes are existent in the lix)
-	await lix2.db.insertInto("change").values(changesInLix1).execute();
+	await lix2.db.insertInto("change").values(leafChangesInLix1).execute();
 
 	// 3. ChangeSet
-	await lix2.db.insertInto("change_set").values(changeSetInLix1).execute();
+	await lix2.db
+		.insertInto("change_set")
+		.values({
+			id: changeSetInLix1.id,
+			// needs to be false because we are inserting elements below
+			immutable_elements: false,
+		})
+		.execute();
 
 	// 4. ChangeSetElement
 	await lix2.db
 		.insertInto("change_set_element")
 		.values(
-			changesInLix1.map((c) => ({
+			leafChangesInLix1.map((c) => ({
 				change_id: c.id,
 				change_set_id: changeSetInLix1.id,
 				// Copy required fields from the change itself
@@ -328,6 +314,14 @@ test("applies an insert change from a change set if the file does not exist", as
 		)
 		.execute();
 
+	await lix2.db
+		.updateTable("change_set")
+		.set({
+			immutable_elements: true,
+		})
+		.where("id", "=", changeSetInLix1.id)
+		.execute();
+
 	// Apply the changeSet in lix2
 	await applyChangeSet({ lix: lix2, changeSet: changeSetInLix1 });
 
@@ -335,12 +329,14 @@ test("applies an insert change from a change set if the file does not exist", as
 	// Check if the file was created in lix2
 	const fileInLix2 = await lix2.db
 		.selectFrom("file")
-		.where("path", "=", "/test.txt")
+		.where("path", "=", "/test.json")
 		.selectAll()
 		.executeTakeFirst();
 
 	expect(fileInLix2).toBeDefined();
-	expect(new TextDecoder().decode(fileInLix2!.data)).toBe("hello initial");
+	expect(new TextDecoder().decode(fileInLix2!.data)).toBe(
+		JSON.stringify({ value: "hello world" })
+	);
 });
 
 test("should not lead to new changes if called with withSkipOwnChangeControl", async () => {

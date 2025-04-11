@@ -7,7 +7,10 @@ export function applyChangeSetDatabaseSchema(
 	const sql = `
   CREATE TABLE IF NOT EXISTS change_set (
     id TEXT PRIMARY KEY DEFAULT (nano_id(16)),
-    -- Determines if elements belonging to this change set can be modified
+    
+    -- needs to default to 0 to allow inserting elements 
+    -- after creating the change set. SQLite does not 
+    -- support statement or on commit triggers (yet).
     immutable_elements INTEGER NOT NULL DEFAULT 0
   ) STRICT;
 

@@ -96,7 +96,7 @@ export async function createCheckpoint(args: {
 			.execute();
 
 		const newChangeSet = await createChangeSet({
-			lix: { db: trx },
+			lix: { ...args.lix, db: trx },
 			id: args.id,
 			changes: leafChanges,
 			labels: [checkpointLabel],

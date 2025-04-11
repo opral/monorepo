@@ -12,7 +12,7 @@ import { changeSetElementInSymmetricDifference } from "../change-set/change-set-
  * or target change set, but not in both.
  */
 export async function createChangeProposal(args: {
-	lix: Pick<Lix, "db">;
+	lix: Lix;
 	source_change_set: Pick<ChangeSet, "id">;
 	target_change_set: Pick<ChangeSet, "id">;
 }): Promise<ChangeProposal> {
@@ -37,7 +37,7 @@ export async function createChangeProposal(args: {
 
 		// Create a new change set with the symmetric difference changes
 		const newChangeSet = await createChangeSet({
-			lix: { db: trx },
+			lix: { ...args.lix, db: trx },
 			changes: symmetricDifferenceChanges,
 		});
 

@@ -26,7 +26,6 @@ test("skipping works", async () => {
 	expect(keyValues.find((kv) => kv.key === "foo")).toBeDefined();
 	expect(keyValues.find((kv) => kv.key === "foo2")).toBeDefined();
 
-	console.log(changes);
 	expect(changes).toHaveLength(0);
 });
 

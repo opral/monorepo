@@ -34,7 +34,7 @@ test("duplicate keys lead to an error", async () => {
 		.returningAll()
 		.execute();
 
-	expect(
+	await expect(
 		lix.db
 			.insertInto("key_value")
 			.values({

@@ -25,14 +25,14 @@ export function applyVersionV2DatabaseSchema(
 
   -- Insert the default change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id)
-  SELECT 'initialchangeset'
+  INSERT INTO change_set (id, immutable_elements)
+  SELECT 'initialchangeset', 1
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = 'initialchangeset');
 
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id)
-  SELECT 'initial_working_changeset'
+  INSERT INTO change_set (id, immutable_elements)
+  SELECT 'initial_working_changeset', 0
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = 'initial_working_changeset');
 
   -- Insert the default version if missing

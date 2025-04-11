@@ -210,7 +210,10 @@ function handleLixOwnEntityChange(
 
 	const changeSet = executeSync({
 		lix,
-		query: db.insertInto("change_set").defaultValues().returningAll(),
+		query: db
+			.insertInto("change_set")
+			.values({ immutable_elements: false })
+			.returningAll(),
 	})[0];
 
 	executeSync({
@@ -222,6 +225,14 @@ function handleLixOwnEntityChange(
 			file_id: insertedChange.file_id,
 			schema_key: insertedChange.schema_key,
 		}),
+	});
+
+	executeSync({
+		lix,
+		query: db
+			.updateTable("change_set")
+			.set({ immutable_elements: true })
+			.where("id", "=", changeSet.id),
 	});
 
 	executeSync({

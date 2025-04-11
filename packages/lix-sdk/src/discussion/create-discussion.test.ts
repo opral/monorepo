@@ -22,9 +22,9 @@ test("should be able to start a discussion on changes", async () => {
 
 	await lix.db.transaction().execute(async (trx) => {
 		await createDiscussion({
-			lix: { db: trx },
+			lix: { ...lix, db: trx },
 			firstComment: { content: "Hello, world!" },
-			changeSet: await createChangeSet({ lix: { db: trx }, changes }),
+			changeSet: await createChangeSet({ lix: { ...lix, db: trx }, changes }),
 		});
 	});
 

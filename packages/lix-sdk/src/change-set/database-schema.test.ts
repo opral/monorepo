@@ -353,7 +353,12 @@ describe("change_set_label table", () => {
 describe("change_set immutable flag and triggers", () => {
 	test("change_set should default immutable to FALSE (0)", async () => {
 		const lix = await openLixInMemory({});
-		const cs = await createChangeSet({ lix });
+		const cs = await lix.db
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
+			.executeTakeFirstOrThrow();
+
 		const fetchedCs = await lix.db
 			.selectFrom("change_set")
 			.where("id", "=", cs.id)
@@ -364,7 +369,12 @@ describe("change_set immutable flag and triggers", () => {
 
 	test("change_set immutable can be set to TRUE (1)", async () => {
 		const lix = await openLixInMemory({});
-		const cs = await createChangeSet({ lix });
+		const cs = await lix.db
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
+			.executeTakeFirstOrThrow();
+
 		await lix.db
 			.updateTable("change_set")
 			.set({ immutable_elements: true })
@@ -381,9 +391,19 @@ describe("change_set immutable flag and triggers", () => {
 	test("triggers should prevent modification of change_set_element if change_set is immutable (1)", async () => {
 		const lix = await openLixInMemory({});
 
-		const immutableCs = await createChangeSet({ lix, immutableElements: true });
+		const immutableCs = await lix.db
+			.insertInto("change_set")
+			.values({
+				immutable_elements: true,
+			})
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
-		const mutableCs = await createChangeSet({ lix });
+		const mutableCs = await lix.db
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
 		const changes = await lix.db
 			.insertInto("change")
@@ -422,7 +442,11 @@ describe("change_set immutable flag and triggers", () => {
 
 		// --- Test UPDATE Trigger ---
 		// Setup: Insert into a set, then make it immutable
-		const csToMakeImmutable = await createChangeSet({ lix });
+		const csToMakeImmutable = await lix.db
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
 		await lix.db
 			.insertInto("change_set_element")
