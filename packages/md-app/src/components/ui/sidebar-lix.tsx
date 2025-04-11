@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { availableLixesAtom, currentLixNameAtom, filesAtom, lixAtom, withPollingAtom } from "@/state"
+import { availableLixesAtom, currentLixNameAtom, fileIdSearchParamsAtom, filesAtom, lixAtom, lixIdSearchParamsAtom, withPollingAtom } from "@/state"
 import { activeFileAtom } from "@/state-active-file"
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
 import { createNewLixFileInOpfs } from "@/helper/newLix"
@@ -65,16 +65,20 @@ export function LixSidebar() {
   const [files] = useAtom(filesAtom)
   const [activeFile] = useAtom(activeFileAtom)
   const [, setPolling] = useAtom(withPollingAtom)
+  const [currentLixName] = useAtom(currentLixNameAtom)
+  const [availableLixes] = useAtom(availableLixesAtom)
+  const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom)
+  const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom)
+
   const [fileToDelete, setFileToDelete] = React.useState<string | null>(null)
   const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] = React.useState(false)
   const [inlineEditingFile, setInlineEditingFile] = React.useState<{ id: string, name: string } | null>(null)
   const [isRenamingLix, setIsRenamingLix] = React.useState(false)
-  const [currentLixName] = useAtom(currentLixNameAtom)
   const [lixName, setLixName] = React.useState('Untitled')
   const [previousLixName, setPreviousLixName] = React.useState('')
-  const [availableLixes] = useAtom(availableLixesAtom)
   const inlineInputRef = React.useRef<HTMLInputElement>(null)
   const lixInputRef = React.useRef<HTMLInputElement>(null)
+
   const navigate = useNavigate()
 
   // Set up automatic aria-hidden fixes for the entire app
@@ -489,15 +493,16 @@ export function LixSidebar() {
   return (
     <>
       <SidebarHeader className="flex flex-row justify-between items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0 mr-1"
-          title="To lix file manager"
-          onClick={() => window.location.href = 'https://lix.host/app/fm'}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+        <a href={`https://lix.host/app/fm?l=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 mr-1"
+            title="To lix file manager"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </a>
 
         {isRenamingLix ? (
           <div className="h-7 flex-1 flex items-center border-b border-input max-w-[calc(100%-4rem)]" id="rename-lix-container">
@@ -564,7 +569,7 @@ export function LixSidebar() {
                   <SelectSeparator />
                   <SelectItem value="new">
                     <div className="flex items-center w-full">
-                        <FolderPlus className="h-4 w-4 mr-2 shrink-0" />
+                      <FolderPlus className="h-4 w-4 mr-2 shrink-0" />
                       <span>New Lix</span>
                     </div>
                   </SelectItem>
