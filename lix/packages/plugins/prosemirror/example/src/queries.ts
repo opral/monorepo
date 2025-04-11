@@ -58,11 +58,18 @@ export async function selectCheckpoints(): Promise<
 	const activeVersion = await selectActiveVersion();
 
 	// Then select checkpoints that are ancestors of the current version's change set
-	const result = await lix.db
+	return await lix.db
 		.selectFrom("change_set")
 		.where(changeSetHasLabel({ name: "checkpoint" }))
-		.where(changeSetIsAncestorOf({ id: activeVersion.change_set_id }))
-		.innerJoin(
+		.where(
+			changeSetIsAncestorOf(
+				{ id: activeVersion.change_set_id },
+				// in case the checkpoint is the active version's change set
+				{ includeSelf: true },
+			),
+		)
+		// left join in case the change set has no elements
+		.leftJoin(
 			"change_set_element",
 			"change_set.id",
 			"change_set_element.change_set_id",
@@ -72,10 +79,16 @@ export async function selectCheckpoints(): Promise<
 		.select((eb) => [
 			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 		])
+		.select((eb) =>
+			eb
+				.selectFrom("change")
+				.where("change.schema_key", "=", "lix_change_set_table")
+				.whereRef("change.entity_id", "=", "change_set.id")
+				.select("change.created_at")
+				.as("created_at"),
+		)
+		.orderBy("created_at", "desc")
 		.execute();
-
-	// need to filter out the count
-	return result;
 }
 
 /**
