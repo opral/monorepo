@@ -8,14 +8,14 @@ import {
   CodePlugin,
   ItalicPlugin,
   StrikethroughPlugin,
-  UnderlinePlugin,
+  // UnderlinePlugin,
 } from '@udecode/plate-basic-marks/react';
 import {
   BoldIcon,
   Code2Icon,
   ItalicIcon,
   StrikethroughIcon,
-  UnderlineIcon,
+  // UnderlineIcon,
   ZapIcon,
 } from 'lucide-react';
 
@@ -57,12 +57,12 @@ export function FloatingToolbarButtons() {
               <ItalicIcon />
             </MarkToolbarButton>
 
-            <MarkToolbarButton
+            {/* <MarkToolbarButton
               nodeType={UnderlinePlugin.key}
               tooltip="Underline (⌘+U)"
             >
               <UnderlineIcon />
-            </MarkToolbarButton>
+            </MarkToolbarButton> */}
 
             <MarkToolbarButton
               nodeType={StrikethroughPlugin.key}

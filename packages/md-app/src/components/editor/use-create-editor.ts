@@ -12,7 +12,7 @@ import {
 	StrikethroughPlugin,
 	SubscriptPlugin,
 	SuperscriptPlugin,
-	UnderlinePlugin,
+	// UnderlinePlugin,
 } from "@udecode/plate-basic-marks/react";
 import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
 import {
@@ -158,7 +158,7 @@ export const editorConfig = {
 			[TableRowPlugin.key]: TableRowElement,
 			[TocPlugin.key]: TocElement,
 			[TogglePlugin.key]: ToggleElement,
-			[UnderlinePlugin.key]: withProps(PlateLeaf, { as: "u" }),
+			// [UnderlinePlugin.key]: withProps(PlateLeaf, { as: "u" }),
 			[VideoPlugin.key]: MediaVideoElement,
 			[FrontMatterPlugin.key]: FrontMatterElement,
 			[SanitizedBlockHtmlPlugin.key]: SanitizedElementLeaf,

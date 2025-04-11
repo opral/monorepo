@@ -19,7 +19,7 @@ import {
   BaseStrikethroughPlugin,
   BaseSubscriptPlugin,
   BaseSuperscriptPlugin,
-  BaseUnderlinePlugin,
+  // BaseUnderlinePlugin,
 } from '@udecode/plate-basic-marks';
 import { BaseBlockquotePlugin } from '@udecode/plate-block-quote';
 import {
@@ -220,7 +220,7 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
       [BaseTableRowPlugin.key]: TableRowElementStatic,
       [BaseTocPlugin.key]: TocElementStatic,
       [BaseTogglePlugin.key]: ToggleElementStatic,
-      [BaseUnderlinePlugin.key]: withProps(SlateLeaf, { as: 'u' }),
+      // [BaseUnderlinePlugin.key]: withProps(SlateLeaf, { as: 'u' }),
       [BaseVideoPlugin.key]: MediaVideoElementStatic,
       [HEADING_KEYS.h1]: withProps(HeadingElementStatic, { variant: 'h1' }),
       [HEADING_KEYS.h2]: withProps(HeadingElementStatic, { variant: 'h2' }),
@@ -246,7 +246,7 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
         BaseStrikethroughPlugin,
         BaseSubscriptPlugin,
         BaseSuperscriptPlugin,
-        BaseUnderlinePlugin,
+        // BaseUnderlinePlugin,
         BaseBlockquotePlugin,
         BaseDatePlugin,
         BaseEquationPlugin,
