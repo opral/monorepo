@@ -159,6 +159,7 @@ export async function handleFileUpdate(args: {
 			console.error(error);
 			throw error;
 		}
+
 		for (const change of await plugin.detectChanges({
 			lix: args.lix,
 			before: args.fileQueueEntry.data_before
@@ -296,7 +297,12 @@ async function updateChangesInActiveVersion(args: {
 
 		const newChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			changes: args.changes,
+			elements: args.changes.map((change) => ({
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})),
 			parents: [{ id: activeVersion.change_set_id }],
 		});
 		await trx

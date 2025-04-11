@@ -29,7 +29,18 @@ test("should only return changes with the given label", async () => {
 		.returningAll()
 		.execute();
 
-	const set = await createChangeSet({ lix, changes: [changes0[0]!] });
+	const set = await createChangeSet({
+		lix,
+		elements: [
+			{
+				change_id: changes0[0]!.id,
+				entity_id: changes0[0]!.entity_id,
+				schema_key: changes0[0]!.schema_key,
+				file_id: changes0[0]!.file_id,
+			},
+		],
+		labels: [],
+	});
 
 	const label = await lix.db
 		.insertInto("label")

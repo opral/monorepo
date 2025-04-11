@@ -75,7 +75,12 @@ export async function beforeAfterOfFile(args: {
 
 				const beforeCs = await createChangeSet({
 					lix: { ...args.lix, db: trx },
-					changes: leafChangesOfFileBefore,
+					elements: leafChangesOfFileBefore.map((change) => ({
+						change_id: change.id,
+						entity_id: change.entity_id,
+						schema_key: change.schema_key,
+						file_id: change.file_id,
+					})),
 					parents: args.changeSetBefore
 						? [{ id: args.changeSetBefore.id }]
 						: undefined,
@@ -83,7 +88,12 @@ export async function beforeAfterOfFile(args: {
 
 				const afterCs = await createChangeSet({
 					lix: { ...args.lix, db: trx },
-					changes: leafChangesOfFileAfter,
+					elements: leafChangesOfFileAfter.map((change) => ({
+						change_id: change.id,
+						entity_id: change.entity_id,
+						schema_key: change.schema_key,
+						file_id: change.file_id,
+					})),
 					parents: args.changeSetAfter
 						? [{ id: args.changeSetAfter.id }]
 						: undefined,

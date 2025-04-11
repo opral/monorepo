@@ -15,14 +15,24 @@ test("should only return change sets with the given label", async () => {
 		.execute();
 
 	// Create two change sets
-	const changeSet1 = await createChangeSet({
+	const cs0 = await createChangeSet({
 		lix,
-		changes: [changes0[0]!],
+		elements: [changes0[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
-	const changeSet2 = await createChangeSet({
+	const cs1 = await createChangeSet({
 		lix,
-		changes: [changes0[1]!],
+		elements: [changes0[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	// Insert a label
@@ -35,7 +45,7 @@ test("should only return change sets with the given label", async () => {
 	// Assign the label to one of the change sets
 	await lix.db
 		.insertInto("change_set_label")
-		.values({ change_set_id: changeSet1.id, label_id: label.id })
+		.values({ change_set_id: cs0.id, label_id: label.id })
 		.execute();
 
 	// Query change sets with the label
@@ -47,5 +57,5 @@ test("should only return change sets with the given label", async () => {
 
 	// Assertions
 	expect(changeSets).toHaveLength(1);
-	expect(changeSets[0]?.id).toBe(changeSet1.id);
+	expect(changeSets[0]?.id).toBe(cs0.id);
 });

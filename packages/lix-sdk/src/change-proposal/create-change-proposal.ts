@@ -38,7 +38,12 @@ export async function createChangeProposal(args: {
 		// Create a new change set with the symmetric difference changes
 		const newChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			changes: symmetricDifferenceChanges,
+			elements: symmetricDifferenceChanges.map((change) => ({
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})),
 		});
 
 		// Create the change proposal

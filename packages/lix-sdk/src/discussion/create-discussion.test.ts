@@ -21,10 +21,22 @@ test("should be able to start a discussion on changes", async () => {
 		.execute();
 
 	await lix.db.transaction().execute(async (trx) => {
+		const changeSet = await createChangeSet({
+			lix: { ...lix, db: trx },
+			elements: [
+				{
+					change_id: changes[0]!.id,
+					entity_id: changes[0]!.entity_id,
+					schema_key: changes[0]!.schema_key,
+					file_id: changes[0]!.file_id,
+				},
+			],
+		});
+
 		await createDiscussion({
 			lix: { ...lix, db: trx },
 			firstComment: { content: "Hello, world!" },
-			changeSet: await createChangeSet({ lix: { ...lix, db: trx }, changes }),
+			changeSet,
 		});
 	});
 

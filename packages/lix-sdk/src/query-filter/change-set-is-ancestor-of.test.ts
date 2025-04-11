@@ -7,18 +7,22 @@ test("selects all ancestors of the current change set", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create a linear chain of change sets: cs0 <- cs1 <- cs2
-	const cs0 = await createChangeSet({ lix, id: "cs0", changes: [] });
+	const cs0 = await createChangeSet({
+		lix,
+		id: "cs0",
+		elements: [],
+	});
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
+		elements: [],
 		parents: [cs0],
-		changes: [],
 	});
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
+		elements: [],
 		parents: [cs1],
-		changes: [],
 	});
 
 	// Should select cs0, cs1 as ancestors of cs2
@@ -37,18 +41,22 @@ test("respects the optional depth limit", async () => {
 	const lix = await openLixInMemory({});
 
 	// cs0 <- cs1 <- cs2
-	const cs0 = await createChangeSet({ lix, id: "cs0", changes: [] });
+	const cs0 = await createChangeSet({
+		lix,
+		id: "cs0",
+		elements: [],
+	});
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
+		elements: [],
 		parents: [cs0],
-		changes: [],
 	});
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
+		elements: [],
 		parents: [cs1],
-		changes: [],
 	});
 
 	// With depth: 1, we expect cs1 only
@@ -65,18 +73,22 @@ test("includeSelf true selects the current change set as well", async () => {
 	const lix = await openLixInMemory({});
 
 	// cs0 <- cs1 <- cs2
-	const cs0 = await createChangeSet({ lix, id: "cs0", changes: [] });
+	const cs0 = await createChangeSet({
+		lix,
+		id: "cs0",
+		elements: [],
+	});
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
+		elements: [],
 		parents: [cs0],
-		changes: [],
 	});
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
+		elements: [],
 		parents: [cs1],
-		changes: [],
 	});
 
 	// Should select cs0, cs1, cs2

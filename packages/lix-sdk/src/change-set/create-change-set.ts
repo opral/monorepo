@@ -1,14 +1,14 @@
-import type { Change, Label } from "../database/schema.js";
+import type { Label } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { ChangeSet } from "./database-schema.js";
+import type { ChangeSet, ChangeSetElementTable } from "./database-schema.js";
 
 /**
- * Creates a change set with the given changes, optionally within an open transaction.
+ * Creates a change set with the given elements, optionally within an open transaction.
  *
  * @example
  *   ```ts
- *   const changes = await lix.db.selectFrom("change").selectAll().execute();
- *   const changeSet = await createChangeSet({ db: lix.db, changes });
+ *   const elements = await lix.db.selectFrom("change_set_element").selectAll().execute();
+ *   const changeSet = await createChangeSet({ db: lix.db, elements });
  *   ```
  *
  * @example
@@ -17,7 +17,7 @@ import type { ChangeSet } from "./database-schema.js";
  *   const labels = await lix.db.selectFrom("label").selectAll().execute();
  *   const changeSet = await createChangeSet({
  *     lix,
- *     changes: [],
+ *     elements: [],
  *     labels
  *   });
  *   ```
@@ -25,10 +25,10 @@ import type { ChangeSet } from "./database-schema.js";
  * @example
  *   ```ts
  *   // Create a change set with parent change sets
- *   const parentChangeSet = await createChangeSet({ lix, changes: [] });
+ *   const parentChangeSet = await createChangeSet({ lix, elements: [] });
  *   const childChangeSet = await createChangeSet({
  *     lix,
- *     changes: [],
+ *     elements: [],
  *     parents: [parentChangeSet]
  *   });
  *   ```
@@ -48,7 +48,7 @@ export async function createChangeSet(args: {
 	 * @default true
 	 */
 	immutableElements?: boolean;
-	changes?: Pick<Change, "id" | "entity_id" | "schema_key" | "file_id">[];
+	elements?: Pick<ChangeSetElementTable, "change_id" | "entity_id" | "schema_key" | "file_id">[];
 	labels?: Pick<Label, "id">[];
 	/** Parent change sets that this change set will be a child of */
 	parents?: Pick<ChangeSet, "id">[];
@@ -64,20 +64,15 @@ export async function createChangeSet(args: {
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
-		if (args.changes && args.changes.length > 0) {
+		if (args.elements && args.elements.length > 0) {
 			// Insert elements linking change set to changes
 			await trx
 				.insertInto("change_set_element")
 				.values(
-					args.changes.map((change) => {
-						return {
-							change_set_id: changeSet.id,
-							change_id: change.id,
-							entity_id: change.entity_id,
-							schema_key: change.schema_key,
-							file_id: change.file_id,
-						};
-					})
+					args.elements.map((element) => ({
+						change_set_id: changeSet.id,
+						...element,
+					}))
 				)
 				.execute();
 		}

@@ -52,7 +52,14 @@ test("it applies own entity changes", async () => {
 
 	const changeSet0 = await createChangeSet({
 		lix,
-		changes: [change0],
+		elements: [
+			{
+				change_id: change0.id,
+				entity_id: change0.entity_id,
+				schema_key: change0.schema_key,
+				file_id: change0.file_id,
+			},
+		],
 	});
 
 	await applyChangeSet({
@@ -120,7 +127,17 @@ test("it applies the changes associated with the change set", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Create a change set containing the change
-	const changeSet = await createChangeSet({ lix, changes: [change] });
+	const changeSet = await createChangeSet({
+		lix,
+		elements: [
+			{
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			},
+		],
+	});
 
 	// Apply the change set
 	await applyChangeSet({ lix, changeSet });
@@ -174,7 +191,17 @@ test("throws an error if plugin does not exist", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Create a change set
-	const changeSet = await createChangeSet({ lix, changes: [change] });
+	const changeSet = await createChangeSet({
+		lix,
+		elements: [
+			{
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			},
+		],
+	});
 
 	// Apply change set and verify error for missing plugin
 	await expect(applyChangeSet({ lix, changeSet })).rejects.toThrow(
@@ -217,7 +244,17 @@ test("throws an error if plugin does not support applying changes", async () => 
 		.executeTakeFirstOrThrow();
 
 	// Create a change set
-	const changeSet = await createChangeSet({ lix, changes: [change] });
+	const changeSet = await createChangeSet({
+		lix,
+		elements: [
+			{
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			},
+		],
+	});
 
 	// Apply change set and verify error for unsupported applyChanges
 	await expect(applyChangeSet({ lix, changeSet })).rejects.toThrow(
@@ -268,7 +305,12 @@ test("applies an insert change from a change set even if the file does not exist
 	// Create a change set in lix1
 	const changeSetInLix1 = await createChangeSet({
 		lix: lix1,
-		changes: leafChangesInLix1,
+		elements: leafChangesInLix1.map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	// --- Setup lix 2 (empty) and apply the change set from lix1 ---
@@ -354,7 +396,15 @@ test("should not lead to new changes if called with withSkipOwnChangeControl", a
 		.selectAll()
 		.execute();
 
-	const changeSet = await createChangeSet({ lix, changes: changesBefore });
+	const changeSet = await createChangeSet({
+		lix,
+		elements: changesBefore.map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
+	});
 
 	// Delete the key-value record to test applying
 	await withSkipOwnChangeControl(lix.db, async (trx) => {
@@ -476,18 +526,39 @@ test("mode: direct only applies changes from the target change set", async () =>
 	// changeSet1 (oldest) <- changeSet2 (middle) <- changeSet3 (newest/leaf)
 	const changeSet1 = await createChangeSet({
 		lix,
-		changes: [change1],
+		elements: [
+			{
+				change_id: change1.id,
+				entity_id: change1.entity_id,
+				schema_key: change1.schema_key,
+				file_id: change1.file_id,
+			},
+		],
 	});
 
 	const changeSet2 = await createChangeSet({
 		lix,
-		changes: [change2],
+		elements: [
+			{
+				change_id: change2.id,
+				entity_id: change2.entity_id,
+				schema_key: change2.schema_key,
+				file_id: change2.file_id,
+			},
+		],
 		parents: [changeSet1],
 	});
 
 	const changeSet3 = await createChangeSet({
 		lix,
-		changes: [change3],
+		elements: [
+			{
+				change_id: change3.id,
+				entity_id: change3.entity_id,
+				schema_key: change3.schema_key,
+				file_id: change3.file_id,
+			},
+		],
 		parents: [changeSet2],
 	});
 
@@ -601,18 +672,39 @@ test("mode: recursive applies changes from target and all ancestors", async () =
 	// changeSet1 (oldest) <- changeSet2 (middle) <- changeSet3 (newest/leaf)
 	const changeSet1 = await createChangeSet({
 		lix,
-		changes: [change1],
+		elements: [
+			{
+				change_id: change1.id,
+				entity_id: change1.entity_id,
+				schema_key: change1.schema_key,
+				file_id: change1.file_id,
+			},
+		],
 	});
 
 	const changeSet2 = await createChangeSet({
 		lix,
-		changes: [change2],
+		elements: [
+			{
+				change_id: change2.id,
+				entity_id: change2.entity_id,
+				schema_key: change2.schema_key,
+				file_id: change2.file_id,
+			},
+		],
 		parents: [changeSet1],
 	});
 
 	const changeSet3 = await createChangeSet({
 		lix,
-		changes: [change3],
+		elements: [
+			{
+				change_id: change3.id,
+				entity_id: change3.entity_id,
+				schema_key: change3.schema_key,
+				file_id: change3.file_id,
+			},
+		],
 		parents: [changeSet2],
 	});
 
@@ -688,7 +780,12 @@ test("updates the version's change set id and maintains ancestry relationship", 
 	// Create a new change set
 	const newChangeSet = await createChangeSet({
 		lix,
-		changes: [changes[0]!],
+		elements: changes.map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		// specifically not providing parents
 		parents: [],
 	});

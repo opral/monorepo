@@ -80,13 +80,13 @@ export async function mergeChangeSets(args: {
 		// Create the new merge change set record
 		const newChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			parents: [args.source, args.target],
-			changes: mergedElements.map((ce) => ({
-				id: ce.change_id,
+			elements: mergedElements.map((ce) => ({
+				change_id: ce.change_id,
 				entity_id: ce.entity_id,
 				schema_key: ce.schema_key,
 				file_id: ce.file_id,
 			})),
+			parents: [args.source, args.target],
 		});
 
 		return newChangeSet;

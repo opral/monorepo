@@ -28,7 +28,12 @@ test("creating a change set should succeed", async () => {
 
 	const changeSet = await createChangeSet({
 		lix: lix,
-		changes: mockChanges,
+		elements: mockChanges.map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	const changeSetMembers = await lix.db
@@ -42,13 +47,13 @@ test("creating a change set should succeed", async () => {
 	);
 });
 
-test("creating a change set with empty changes array should succeed", async () => {
+test("creating a change set with empty elements array should succeed", async () => {
 	const lix = await openLixInMemory({});
 
-	// Create a change set with an empty changes array
+	// Create a change set with an empty elements array
 	const changeSet = await createChangeSet({
 		lix: lix,
-		changes: [],
+		elements: [],
 	});
 
 	// Verify the change set was created
@@ -84,7 +89,7 @@ test("creating a change set with labels should associate the labels with the cha
 	// Create a change set with labels
 	const changeSet = await createChangeSet({
 		lix: lix,
-		changes: [],
+		elements: [],
 		labels: [checkpointLabel, testLabel],
 	});
 
@@ -112,18 +117,18 @@ test("creating a change set with parents should establish parent-child relations
 	// Create two parent change sets
 	const parentChangeSet1 = await createChangeSet({
 		lix,
-		changes: [],
+		elements: [],
 	});
 
 	const parentChangeSet2 = await createChangeSet({
 		lix,
-		changes: [],
+		elements: [],
 	});
 
 	// Create a child change set with two parents
 	const childChangeSet = await createChangeSet({
 		lix,
-		changes: [],
+		elements: [],
 		parents: [parentChangeSet1, parentChangeSet2],
 	});
 

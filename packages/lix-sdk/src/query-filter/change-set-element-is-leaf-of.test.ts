@@ -49,17 +49,38 @@ test("returns only leaf change_set_elements per entity", async () => {
 		.returningAll()
 		.execute();
 
-	const cs0 = await createChangeSet({ lix, id: "cs0", changes: [changes[0]!] });
+	const cs0 = await createChangeSet({
+		lix,
+		id: "cs0",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
+	});
+
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
-		changes: [changes[1]!],
+		elements: [changes[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
+
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
-		changes: [changes[2]!],
+		elements: [changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
 	});
 
@@ -148,14 +169,24 @@ test("correctly identifies leaves at different points in history", async () => {
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		changes: [changes[0]!, changes[1]!, changes[2]!],
+		elements: [changes[0]!, changes[1]!, changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	// First modification - updates line 2
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
-		changes: [changes[3]!], // This replaces c2 with c3 (same entity)
+		elements: [changes[3]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
 
@@ -163,7 +194,12 @@ test("correctly identifies leaves at different points in history", async () => {
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
-		changes: [changes[4]!],
+		elements: [changes[4]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
 	});
 
@@ -171,7 +207,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	const cs3 = await createChangeSet({
 		lix,
 		id: "cs3",
-		changes: [],
+		elements: [],
 		parents: [cs0],
 	});
 
@@ -390,34 +426,59 @@ test("returns combined leaves from multiple target change sets", async () => {
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		changes: [changes[0]!], // c0 (entity3)
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
-		changes: [changes[1]!], // c1 (entity1)
+		elements: [changes[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
 
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
-		changes: [changes[2]!, changes[6]!], // c2 (entity2), c6 (entity3 v2) - supersedes c0
+		elements: [changes[2]!, changes[6]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
 	});
 
 	const cs3 = await createChangeSet({
 		lix,
 		id: "cs3",
-		changes: [changes[3]!], // c3 (entity2)
+		elements: [changes[3]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
 
 	const cs4 = await createChangeSet({
 		lix,
 		id: "cs4",
-		changes: [changes[4]!, changes[5]!], // c4 (entity4), c5 (entity5)
+		elements: [changes[4]!, changes[5]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs3],
 	});
 

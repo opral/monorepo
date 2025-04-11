@@ -124,7 +124,12 @@ export async function createUndoChangeSet(args: {
 		// Create the change set linking to these changes
 		const undoChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			changes,
+			elements: changes.map((change) => ({
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})),
 		});
 
 		return undoChangeSet;

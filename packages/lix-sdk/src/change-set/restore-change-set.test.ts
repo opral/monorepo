@@ -151,20 +151,35 @@ test.todo("it restores the state to a specific change set", async () => {
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		changes: [changes[0]!, changes[1]!, changes[2]!],
+		elements: [changes[0]!, changes[1]!, changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
-		changes: [changes[3]!],
+		elements: [changes[3]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
 
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
-		changes: [changes[4]!, changes[5]!],
+		elements: [changes[4]!, changes[5]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
 	});
 

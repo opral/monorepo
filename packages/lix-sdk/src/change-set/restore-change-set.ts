@@ -142,9 +142,12 @@ export async function experimentalRestoreChangeSet(args: {
 
 		const restoreChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			changes: finalChangesForInterimSet,
-			// apply changes creates the edge
-			// parents: [{ id: version.change_set_id }],
+			elements: finalChangesForInterimSet.map(change => ({
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})),
 		});
 
 		await applyChangeSet({

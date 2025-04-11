@@ -53,18 +53,34 @@ test("selects only the leaf changes in recursive mode", async () => {
 
 	const cs0 = await createChangeSet({
 		lix,
-		parents: [],
-		changes: [changes[0]!],
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
+
 	const cs1 = await createChangeSet({
 		lix,
+		elements: [changes[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
-		changes: [changes[1]!],
 	});
+
 	const cs2 = await createChangeSet({
 		lix,
+		elements: [changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
-		changes: [changes[2]!],
 	});
 
 	// should only return change2 (the leaf change)
@@ -131,18 +147,33 @@ test("leaf changes with different entity ids", async () => {
 	// Create change sets in a chain: cs0 -> cs1 -> cs2
 	const cs0 = await createChangeSet({
 		lix,
-		changes: [changes[0]!], // Line 0
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	const cs1 = await createChangeSet({
 		lix,
-		changes: [changes[1]!], // Line 1
+		elements: [changes[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
 
 	const cs2 = await createChangeSet({
 		lix,
-		changes: [changes[2]!], // Line 2
+		elements: [changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
 	});
 
@@ -203,13 +234,23 @@ test("ignores leaf changes of child change sets if the change sets are filtered"
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		changes: [changes[0]!],
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	await createChangeSet({
 		lix,
 		id: "cs1",
-		changes: [changes[1]!],
+		elements: [changes[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
 

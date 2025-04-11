@@ -11,18 +11,12 @@ import type { ChangeSet } from "./database-schema.js";
 
 export async function createCheckpoint(args: {
 	lix: Lix;
+	/**
+	 * Optional ID for the checkpoint change set
+	 */
 	id?: string;
 	/**
-	 * The comment to add to the checkpoint.
-	 *
-	 * Use this as "checkpoint message". Modeling the
-	 * message as first comment enables re-using the discussion
-	 * components.
-	 */
-	// firstComment?: Pick<Comment, "content">;
-	/**
-	 * The version for which the checkpoint should be created.
-	 *
+	 * Optional version to create checkpoint from.
 	 * @default The active version
 	 */
 	version?: Pick<VersionV2, "id">;
@@ -95,10 +89,15 @@ export async function createCheckpoint(args: {
 			.select("snapshot.content")
 			.execute();
 
-		const newChangeSet = await createChangeSet({
+		const checkpointChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
 			id: args.id,
-			changes: leafChanges,
+			elements: leafChanges.map((change) => ({
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})),
 			labels: [checkpointLabel],
 			parents: parentCheckpoint
 				? [parentCheckpoint, { id: version.change_set_id }]
@@ -108,7 +107,7 @@ export async function createCheckpoint(args: {
 		await trx
 			.updateTable("version_v2")
 			.set({
-				change_set_id: newChangeSet.id,
+				change_set_id: checkpointChangeSet.id,
 			})
 			.where("id", "=", version.id)
 			.execute();
@@ -121,7 +120,7 @@ export async function createCheckpoint(args: {
 		// 		firstComment: args.firstComment,
 		// 	});
 		// }
-		return newChangeSet;
+		return checkpointChangeSet;
 	};
 
 	if (args.lix.db.isTransaction) {

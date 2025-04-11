@@ -48,7 +48,14 @@ describe("change_set table", () => {
 		// Create a change set with labels
 		const changeSet = await createChangeSet({
 			lix,
-			changes,
+			elements: [
+				{
+					change_id: changes[0]!.id,
+					entity_id: changes[0]!.entity_id,
+					schema_key: changes[0]!.schema_key,
+					file_id: changes[0]!.file_id,
+				},
+			],
 		});
 
 		// Delete the change set

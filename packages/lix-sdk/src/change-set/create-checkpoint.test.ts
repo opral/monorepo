@@ -114,7 +114,14 @@ test("creates a checkpoint with edges to both the version's change set AND the p
 	// Create a change set with the change
 	const changeSet = await createChangeSet({
 		lix,
-		changes: [change],
+		elements: [
+			{
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			},
+		],
 		parents: [{ id: firstCheckpoint.id }],
 	});
 
