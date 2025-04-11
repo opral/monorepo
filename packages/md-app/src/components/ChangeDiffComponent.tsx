@@ -7,6 +7,7 @@ import clsx from "clsx";
 export const ChangeDiffComponent = (props: {
 	diffs: UiDiffComponentProps["diffs"];
 	className?: string;
+	contentClassName?: string; // Add new prop for styling the actual diff content
 	debug?: boolean;
 }) => {
 	const [lix] = useAtom(lixAtom);
@@ -43,10 +44,12 @@ export const ChangeDiffComponent = (props: {
 
 	return (
 		<div className={clsx("w-full overflow-x-auto pb-4", props.className)}>
-			<CustomElementName
-				// @ts-expect-error - Custom element props
-				diffs={props.diffs}
-			/>
+			<div className={props.contentClassName}>
+				<CustomElementName
+					// @ts-expect-error - Custom element props
+					diffs={props.diffs}
+				/>
+			</div>
 			{props.debug && (
 				<pre className="text-xs text-gray-500 whitespace-pre-wrap break-all">
 					{JSON.stringify(props.diffs, null, 2)}

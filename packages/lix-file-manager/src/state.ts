@@ -7,9 +7,26 @@ import {
 } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
+import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demo-lix-file.ts";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+
+// plugin, file and app configuration (add supported apps to list in lix-website-server)
+export const supportedFileTypes = [
+	{
+		plugin: csvPlugin,
+		extension: ".csv",
+		route: "/csv/editor",
+		appName: "CSV app",
+	},
+	{
+		plugin: txtPlugin,
+		extension: ".md",
+		route: "/flashtype",
+		appName: "Flashtype",
+	},
+];
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -78,7 +95,7 @@ export const lixAtom = atom(async (get) => {
 					const blob = await response.blob();
 					const lix = await openLixInMemory({
 						blob,
-						providePlugins: [csvPlugin],
+						providePlugins: supportedFileTypes.map((type) => type.plugin),
 					});
 					await saveLixToOpfs({ lix });
 					return lix;
@@ -116,13 +133,13 @@ export const lixAtom = atom(async (get) => {
 		if (storedActiveAccount) {
 			lix = await openLixInMemory({
 				blob: lixBlob!,
-				providePlugins: [csvPlugin],
+				providePlugins: supportedFileTypes.map((type) => type.plugin),
 				account: JSON.parse(storedActiveAccount),
 			});
 		} else {
 			lix = await openLixInMemory({
 				blob: lixBlob!,
-				providePlugins: [csvPlugin],
+				providePlugins: supportedFileTypes.map((type) => type.plugin),
 			});
 		}
 	} catch {
@@ -143,7 +160,6 @@ export const lixAtom = atom(async (get) => {
 		.where("key", "=", "lix_id")
 		.select("value")
 		.executeTakeFirstOrThrow();
-
 
 	if (storedActiveAccount) {
 		const activeAccount = JSON.parse(storedActiveAccount);

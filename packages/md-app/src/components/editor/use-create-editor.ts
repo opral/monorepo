@@ -1,6 +1,5 @@
 import { withProps } from "@udecode/cn";
 import {
-	CreatePlateEditorOptions,
 	ParagraphPlugin,
 	PlateLeaf,
 	usePlateEditor,
@@ -109,6 +108,8 @@ import {
 	SanitizedElementLeaf,
 	SanitizedInlineHtmlPlugin,
 } from "./plugins/sanitized-html";
+import { EmptyDocumentPromptPlugin } from "./plugins/empty-document-prompt-plugin";
+import { EmptyDocumentPromptElement } from "./empty-document-prompt-element";
 
 export const editorConfig = {
 	override: {
@@ -163,6 +164,7 @@ export const editorConfig = {
 			[SanitizedBlockHtmlPlugin.key]: SanitizedElementLeaf,
 			[SanitizedInlineHtmlPlugin.key]: SanitizedElementLeaf,
 			[SanitizedBlockPlugin.key]: SanitizedElementLeaf,
+			[EmptyDocumentPromptPlugin.key]: EmptyDocumentPromptElement,
 		}),
 	},
 	plugins: [
@@ -170,6 +172,7 @@ export const editorConfig = {
 		...editorPlugins,
 		FixedToolbarPlugin,
 		FloatingToolbarPlugin,
+		EmptyDocumentPromptPlugin,
 	],
 	// value: [
 	// 	{

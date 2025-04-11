@@ -20,7 +20,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
   const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
   const [intermediateChanges] = useAtom(intermediateChangesAtom);
   const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
-  
+
   // Use filtered changes if provided, otherwise use all intermediate changes
   const changesData = filteredChanges || intermediateChanges;
 
@@ -52,7 +52,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
       <ChangeDot top={false} bottom={checkpointChangeSets.length > 0} highlighted />
       <div className="flex-1 z-10">
         <div className="h-12 flex items-center w-full gap-2">
-          <p className="flex-1 truncate text-ellipsis overflow-hidden">
+          <p className="flex-1 truncate text-ellipsis overflow-hidden text-sm">
             Intermediate changes{" "}
           </p>
           <div className="flex gap-3 items-center">
@@ -74,6 +74,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
                 <ChangeDiffComponent
                   key={pluginKey}
                   diffs={groupedChanges[pluginKey]}
+                  contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
                 // debug={true}
                 />
               ))}
@@ -107,15 +108,12 @@ const CreateCheckpointInput = () => {
   return (
     <div className="flex flex-col w-full gap-2 px-1 items-end">
       <Input
-        className="flex-grow pl-2"
+        className="flex-grow pl-2 bg-background text-sm placeholder:text-sm"
         placeholder="Describe the changes"
         onInput={(event: any) => setDescription(event.target?.value)}
       ></Input>
-      <Button
-        onClick={handleCreateCheckpoint}
-        size={"lg"}
-      >
-        {description === "" ? "Create checkpoint without description" : "Create checkpoint"}
+      <Button onClick={handleCreateCheckpoint}>
+        Create checkpoint
       </Button>
     </div>
   );

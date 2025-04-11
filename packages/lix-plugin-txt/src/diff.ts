@@ -34,6 +34,10 @@ export class DiffComponent extends LitElement {
 			--color-border: #e1e4e8;
 			--color-line-bg: #f6f8fa;
 			--color-text: #24292e;
+
+			/* Enhanced colors for inline view */
+			--color-added-bg-inline: rgba(46, 160, 67, 0.2);
+			--color-deleted-bg-inline: rgba(248, 81, 73, 0.2);
 		}
 
 		.diff-container {
@@ -43,6 +47,8 @@ export class DiffComponent extends LitElement {
 			border-radius: 6px;
 			overflow: hidden;
 			font-family: "Courier New", monospace;
+			container-type: inline-size;
+			container-name: diff;
 		}
 
 		.diff-section {
@@ -66,7 +72,6 @@ export class DiffComponent extends LitElement {
 		.diff-row {
 			display: flex;
 			width: 100%;
-			min-height: 30px;
 		}
 
 		.line {
@@ -122,7 +127,6 @@ export class DiffComponent extends LitElement {
 
 		.row-pair > div:nth-child(1),
 		.row-pair > div:nth-child(2) {
-			min-height: 30px;
 			position: relative;
 		}
 
@@ -134,7 +138,6 @@ export class DiffComponent extends LitElement {
 
 		.collapsed-block {
 			background-color: var(--color-line-bg);
-			text-align: center;
 			cursor: pointer;
 			padding: 6px;
 			grid-column: 1 / span 2;
@@ -153,9 +156,65 @@ export class DiffComponent extends LitElement {
 			vertical-align: middle;
 		}
 
-		/* Ensure proper word wrapping */
-		span {
-			white-space: pre-line;
+		/* Container query for smaller container widths */
+		@container diff (max-width: 600px) {
+			.diff-section {
+				display: flex;
+				flex-direction: column;
+			}
+
+			.row-pair {
+				display: block;
+				margin-bottom: 8px;
+				padding-bottom: 4px;
+			}
+
+			/* Hide duplicate content in inline mode */
+			.row-pair > div.diff-row:nth-child(2) {
+				display: none;
+			}
+
+			/* Adjust collapsed block for mobile */
+			.collapsed-block {
+				grid-column: unset;
+				width: 100%;
+				display: flex;
+				align-items: center;
+				padding-left: 0.5rem;
+			}
+
+			.collapsed-text {
+				margin-left: 4px;
+				white-space: normal;
+				word-break: break-word;
+				hyphens: auto;
+				display: inline-block;
+				width: 100%;
+				max-width: calc(100% - 30px);
+			}
+
+			/* Expand line-wrapper to full width */
+			.line-wrapper {
+				width: 100%;
+			}
+
+			/* Enhanced highlighting for inline view */
+			.char-added {
+				background-color: var(--color-added-bg-inline);
+				border-radius: 3px;
+				padding: 0 2px;
+				margin: 0 1px;
+			}
+
+			.char-deleted {
+				background-color: var(--color-deleted-bg-inline);
+				border-radius: 3px;
+				padding: 0 2px;
+				margin: 0 1px;
+				text-decoration: line-through;
+				text-decoration-color: var(--color-deleted-text);
+				opacity: 0.85;
+			}
 		}
 	`;
 
@@ -438,7 +497,10 @@ export class DiffComponent extends LitElement {
 						d="M8 2a.75.75 0 0 1 .75.75v4.5h4.5a.75.75 0 0 1 0 1.5h-4.5v4.5a.75.75 0 0 1-1.5 0v-4.5h-4.5a.75.75 0 0 1 0-1.5h4.5v-4.5A.75.75 0 0 1 8 2Z"
 					></path>
 				</svg>
-				${section.count} unchanged line${section.count !== 1 ? "s" : ""}
+				<span class="collapsed-text"
+					>${section.count}
+					unchanged${section.count > 1 ? " lines" : " line"}</span
+				>
 			</div>
 		`;
 	}
@@ -454,8 +516,10 @@ export class DiffComponent extends LitElement {
 						d="M4 8a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 4 8Z"
 					></path>
 				</svg>
-				Collapse ${section.count} unchanged
-				line${section.count !== 1 ? "s" : ""}
+				<span class="collapsed-text"
+					>Collapse
+					${section.count}${section.count > 1 ? " lines" : " line"}</span
+				>
 			</div>
 			${section.rows.map((pair) => this.renderDiffRow(pair))}
 		`;
@@ -470,32 +534,78 @@ export class DiffComponent extends LitElement {
 		if (!pair.left.type && !pair.right.type) {
 			return html`
 				<div class="row-pair">
-					<div class="diff-row">
+					<div class="diff-row unchanged">
 						<span class="line">${pair.left.content}</span>
 					</div>
-					<div class="diff-row">
+					<div class="diff-row unchanged">
 						<span class="line">${pair.right.content}</span>
 					</div>
 				</div>
 			`;
 		}
 
-		// For changed lines, do detailed word diff
-		const detailedDiff = this.renderDetailedDiff(
+		// For mobile view, we'll combine both sides for the char-level diff
+		// This creates a unified view with inline highlighting
+		const detailedDiff = this.renderInlineDiff(
 			pair.left.content,
 			pair.right.content,
 		);
 
 		return html`
 			<div class="row-pair">
-				<div class="diff-row">
-					<div class="line line-wrapper">${detailedDiff.before}</div>
+				<div class="diff-row ${pair.left.type || ""}">
+					<div class="line line-wrapper">${detailedDiff}</div>
 				</div>
-				<div class="diff-row">
-					<div class="line line-wrapper">${detailedDiff.after}</div>
+				<div class="diff-row ${pair.right.type || ""}">
+					<div class="line line-wrapper">${detailedDiff}</div>
 				</div>
 			</div>
 		`;
+	}
+
+	renderInlineDiff(text1: string, text2: string) {
+		// Handle empty strings
+		if (!text1) {
+			return text2 ? html`<span class="char-added">${text2}</span>` : html``;
+		}
+
+		if (!text2) {
+			return text1 ? html`<span class="char-deleted">${text1}</span>` : html``;
+		}
+
+		// Normalize trailing newlines to prevent false positives
+		const normalizedText1 = text1.replace(/\n+$/, "");
+		const normalizedText2 = text2.replace(/\n+$/, "");
+
+		// If texts are identical after normalization, no highlighting needed
+		if (normalizedText1 === normalizedText2) {
+			return html`<span>${text1}</span>`;
+		}
+
+		// Character-level diffing
+		const charDiffs = diffChars(normalizedText1, normalizedText2);
+
+		// Process and render the character differences
+		const combinedElements: unknown[] = [];
+
+		charDiffs.forEach((part) => {
+			if (!part) return;
+
+			if (part.added && part.value) {
+				combinedElements.push(
+					html`<span class="char-added">${part.value}</span>`,
+				);
+			} else if (part.removed && part.value) {
+				combinedElements.push(
+					html`<span class="char-deleted">${part.value}</span>`,
+				);
+			} else {
+				// Unchanged parts
+				combinedElements.push(html`<span>${part.value || ""}</span>`);
+			}
+		});
+
+		return html`${combinedElements}`;
 	}
 
 	toggleBlock(blockId: string, e: Event) {

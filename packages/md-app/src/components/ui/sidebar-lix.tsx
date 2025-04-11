@@ -1,9 +1,11 @@
 import * as React from "react"
 import {
   Download, MoreVertical,
-  PenSquare, Trash2, Upload, FileText,
-  Plus, ArrowLeft, Folder, FolderOpen
+  PenSquare, Trash2, FileText,
+  Plus, ArrowLeft, Folder, FolderOpen,
+  Upload, FolderPlus
 } from "lucide-react"
+import { setupAriaHiddenFixes } from "@/helper/fixAriaHidden"
 import { useAtom } from "jotai"
 import posthog from "posthog-js"
 import { useNavigate } from "react-router-dom"
@@ -18,12 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { availableWorkspacesAtom, filesAtom, lixAtom, withPollingAtom } from "@/state"
+import { availableLixesAtom, currentLixNameAtom, fileIdSearchParamsAtom, filesAtom, lixAtom, lixIdSearchParamsAtom, withPollingAtom } from "@/state"
 import { activeFileAtom } from "@/state-active-file"
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
-import { createNewLixFileInOpfs } from "@/helper/new-lix"
+import { createNewLixFileInOpfs } from "@/helper/newLix"
 import { updateUrlParams } from "@/helper/updateUrlParams"
-import { saveWorkspaceName } from "@/helper/renameWorkspace"
+import { saveLixName } from "@/helper/renameLix"
 import { openLixInMemory, toBlob } from "@lix-js/sdk"
 
 import {
@@ -37,7 +39,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/multisidebar"
 import { Button } from "@/components/plate-ui/button"
 import {
   DropdownMenu,
@@ -58,22 +60,35 @@ import InfoCard from "../InfoCard"
 import { Separator } from "../plate-ui/separator"
 import { generateHumanId } from "@/helper/generateHumanId"
 
-
-export function WorkspaceSidebar() {
+export function LixSidebar() {
   const [lix] = useAtom(lixAtom)
   const [files] = useAtom(filesAtom)
   const [activeFile] = useAtom(activeFileAtom)
   const [, setPolling] = useAtom(withPollingAtom)
+  const [currentLixName] = useAtom(currentLixNameAtom)
+  const [availableLixes] = useAtom(availableLixesAtom)
+  const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom)
+  const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom)
+
   const [fileToDelete, setFileToDelete] = React.useState<string | null>(null)
   const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] = React.useState(false)
   const [inlineEditingFile, setInlineEditingFile] = React.useState<{ id: string, name: string } | null>(null)
-  const [isRenamingWorkspace, setIsRenamingWorkspace] = React.useState(false)
-  const [workspaceName, setWorkspaceName] = React.useState('Untitled')
-  const [previousWorkspaceName, setPreviousWorkspaceName] = React.useState('')
-  const [availableWorkspaces] = useAtom(availableWorkspacesAtom)
+  const [isRenamingLix, setIsRenamingLix] = React.useState(false)
+  const [lixName, setLixName] = React.useState('Untitled')
+  const [previousLixName, setPreviousLixName] = React.useState('')
   const inlineInputRef = React.useRef<HTMLInputElement>(null)
-  const workspaceInputRef = React.useRef<HTMLInputElement>(null)
+  const lixInputRef = React.useRef<HTMLInputElement>(null)
+
   const navigate = useNavigate()
+
+  // Set up automatic aria-hidden fixes for the entire app
+  React.useEffect(() => {
+    // This function will automatically fix aria-hidden issues when inputs get focus
+    const cleanupAriaFixes = setupAriaHiddenFixes();
+
+    // Clean up when component unmounts
+    return cleanupAriaFixes;
+  }, []);
 
   const switchToFile = React.useCallback(
     async (fileId: string) => {
@@ -88,20 +103,18 @@ export function WorkspaceSidebar() {
 
     try {
       const fileName = generateHumanId()
-      const newFileContent = `Start writing here...`
 
       const newFile = await lix.db
         .insertInto("file")
         .values({
           path: `/${fileName}.md`,
-          data: new TextEncoder().encode(newFileContent),
+          data: new TextEncoder().encode(``),
         })
         .returning("id")
         .executeTakeFirstOrThrow()
 
       await saveLixToOpfs({ lix })
-      updateUrlParams({ f: newFile.id })
-      setPolling(Date.now())
+      switchToFile(newFile.id)
     } catch (error) {
       console.error("Failed to create new file:", error)
     }
@@ -113,6 +126,24 @@ export function WorkspaceSidebar() {
     }
 
     try {
+      // Find the file to check its current name
+      const currentFile = files.find(f => f.id === inlineEditingFile.id);
+      if (!currentFile) {
+        console.error("File not found for inline renaming");
+        setInlineEditingFile(null);
+        return;
+      }
+
+      // Extract current filename without path and extension
+      const currentFileName = currentFile.path.split('/').pop()?.replace(/\.md$/, '');
+
+      // Skip if the name hasn't changed
+      if (currentFileName === inlineEditingFile.name.trim()) {
+        console.log("File name hasn't changed, skipping rename operation");
+        setInlineEditingFile(null);
+        return;
+      }
+
       await lix.db
         .updateTable("file")
         .set({ path: `/${inlineEditingFile.name}.md` })
@@ -126,30 +157,52 @@ export function WorkspaceSidebar() {
       console.error("Failed to rename file:", error)
       setInlineEditingFile(null)
     }
-  }, [lix, inlineEditingFile, setPolling])
+  }, [lix, inlineEditingFile, files, setPolling])
 
-  const handleSaveWorkspaceName = React.useCallback(async () => {
-    if (!lix || !workspaceName.trim()) {
+  const handleSaveLixName = React.useCallback(async () => {
+    if (!lix || !lixName.trim()) {
       return
     }
 
     try {
-      // Use the imported saveWorkspaceName helper function
-      await saveWorkspaceName({ 
-        lix, 
-        newName: workspaceName 
-      })
-      
-      setPolling(Date.now())
-      setIsRenamingWorkspace(false)
-    } catch (error) {
-      console.error("Failed to save workspace name:", error)
-      setIsRenamingWorkspace(false)
-    }
-  }, [lix, workspaceName, setPolling])
+      // Check if the name has actually changed from the current one
+      if (lixName.trim() === currentLixName) {
+        console.log("Name hasn't changed, skipping rename operation");
+        setIsRenamingLix(false);
+        return;
+      }
 
-  const switchToWorkspace = React.useCallback((workspaceId: string) => {
-    navigate(`?l=${workspaceId}`)
+      console.log(`Renaming lix to: ${lixName}`)
+
+      // Use the imported saveLixName helper function which handles the file renaming
+      // This will also update the URL
+      await saveLixName({
+        lix,
+        newName: lixName
+      })
+
+      // Refresh everything to update the UI with the new file name
+      setPolling(Date.now())
+      setIsRenamingLix(false)
+
+      // The currentLixId should still be the lix_id, not the new name
+      // The saveLixName function will handle updating the URL params correctly
+      const lixId = await lix.db
+        .selectFrom("key_value")
+        .where("key", "=", "lix_id")
+        .select("value")
+        .executeTakeFirstOrThrow();
+
+      // Keep the ID the same, just update the display name
+      setCurrentLixId(lixId.value);
+    } catch (error) {
+      console.error("Failed to save lix name:", error)
+      setIsRenamingLix(false)
+    }
+  }, [lix, lixName, currentLixName, setPolling])
+
+  const switchToLix = React.useCallback((lixId: string) => {
+    navigate(`?l=${lixId}`)
   }, [navigate])
 
   const deleteFile = React.useCallback(async (fileId: string) => {
@@ -183,18 +236,18 @@ export function WorkspaceSidebar() {
     }
   }, [lix, files, activeFile, setPolling, createNewFile])
 
-  const handleCreateNewWorkspace = React.useCallback(async () => {
+  const handleCreateNewLix = React.useCallback(async () => {
     try {
       // Create a new lix file
       const { id } = await createNewLixFileInOpfs()
 
-      // Navigate to the new workspace
+      // Navigate to the new lix
       navigate(`?l=${id}`)
 
       // Set polling to refresh the UI
       setPolling(Date.now())
     } catch (error) {
-      console.error("Failed to create new workspace:", error)
+      console.error("Failed to create new lix:", error)
     }
   }, [navigate])
 
@@ -252,7 +305,8 @@ export function WorkspaceSidebar() {
             .select("value")
             .executeTakeFirstOrThrow()
 
-          const opfsFile = await opfsRoot.getFileHandle(`${lixId.value}.lix`, {
+          const fileName = file.name.replace(/\.lix$/, '')
+          const opfsFile = await opfsRoot.getFileHandle(`${fileName}.lix`, {
             create: true,
           })
           const writable = await opfsFile.createWritable()
@@ -271,23 +325,25 @@ export function WorkspaceSidebar() {
     if (!lix) return
 
     try {
-      const lixId = await lix.db
+      // Use the current display name (from file name) or fall back to the ID
+      const displayName = currentLixName || await lix.db
         .selectFrom("key_value")
         .where("key", "=", "lix_id")
         .select("value")
         .executeTakeFirstOrThrow()
+        .then(result => result.value)
 
       const blob = await toBlob({ lix })
       const a = document.createElement("a")
       a.href = URL.createObjectURL(blob)
-      a.download = `${lixId.value}.lix`
+      a.download = `${displayName}.lix`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
     } catch (error) {
       console.error("Failed to export Lix file:", error)
     }
-  }, [lix])
+  }, [lix, currentLixName])
 
   const handleExportFile = React.useCallback(async (fileId: string) => {
     if (!lix) return
@@ -314,36 +370,31 @@ export function WorkspaceSidebar() {
     }
   }, [lix])
 
-  const handleDeleteCurrentWorkspace = React.useCallback(async () => {
+  const handleDeleteCurrentLix = React.useCallback(async () => {
     if (!lix) return;
-    
+
     try {
-      // Get the current project ID
-      const lixId = await lix.db
-        .selectFrom("key_value")
-        .where("key", "=", "lix_id")
-        .select("value")
-        .executeTakeFirstOrThrow();
-      
-      // Delete just this project file from OPFS
+
       const root = await navigator.storage.getDirectory();
-      await root.removeEntry(`${lixId.value}.lix`);
-      
-      // Find another project to navigate to
+
+      // The file is saved with the current name displayed in the UI (with .lix extension)
+      await root.removeEntry(`${currentLixName}.lix`);
+
+      // Find another lix to navigate to
       const availableLixFiles = [];
       // @ts-expect-error - TS doesn't know about values() yet
       for await (const entry of root.values()) {
-        if (entry.kind === "file" && entry.name.endsWith(".lix") && entry.name !== `${lixId.value}.lix`) {
+        if (entry.kind === "file" && entry.name.endsWith(".lix") && entry.name !== `${currentLixName}.lix`) {
           availableLixFiles.push(entry.name);
         }
       }
-      
+
       if (availableLixFiles.length > 0) {
-        // Navigate to another project
-        const nextProjectId = availableLixFiles[0].replace(/\.lix$/, '');
-        navigate(`?l=${nextProjectId}`);
+        // Navigate to another lix
+        const nextLixId = availableLixFiles[0].replace(/\.lix$/, '');
+        navigate(`?l=${nextLixId}`);
       } else {
-        // No projects left, create a new one by navigating to root
+        // No lixes left, create a new one by navigating to root
         navigate("/");
       }
 
@@ -351,10 +402,10 @@ export function WorkspaceSidebar() {
       setPolling(Date.now());
       setShowDeleteProjectsDialog(false);
     } catch (error) {
-      console.error("Error deleting current project:", error);
+      console.error("Error deleting current lix:", error);
     }
   }, [lix, navigate, setPolling])
-  
+
   const handleResetAllOpfs = React.useCallback(async () => {
     try {
       const root = await navigator.storage.getDirectory();
@@ -385,31 +436,35 @@ export function WorkspaceSidebar() {
     }
   }, [navigate, setPolling])
 
-  // Filter only markdown files (assuming they end with .md)
-  // Load workspace name and available workspaces
-  // Track current workspace ID
-  const [currentWorkspaceId, setCurrentWorkspaceId] = React.useState<string>('')
+  // Track current lix ID
+  const [currentLixId, setCurrentLixId] = React.useState<string>('')
 
-  const startRenamingWorkspace = React.useCallback(() => {
-    setPreviousWorkspaceName(workspaceName)
-    setIsRenamingWorkspace(true)
+  const startRenamingLix = React.useCallback(() => {
+    // Use the current display name from our atom
+    const displayName = currentLixName || lixName;
+    setLixName(displayName);
+
+    // Set the current name as previous name for potential cancel
+    setPreviousLixName(displayName);
+    setIsRenamingLix(true);
+
     // Focus on the input field with a slight delay to ensure the DOM has updated
     setTimeout(() => {
-      if (workspaceInputRef.current) {
-        workspaceInputRef.current.focus()
-        workspaceInputRef.current.select() // Select all text for easy replacement
+      if (lixInputRef.current) {
+        lixInputRef.current.focus()
+        lixInputRef.current.select() // Select all text for easy replacement
       }
     }, 50)
-  }, [workspaceName])
+  }, [currentLixName, lixName])
 
-  const cancelRenameWorkspace = React.useCallback(() => {
-    setWorkspaceName(previousWorkspaceName)
-    setIsRenamingWorkspace(false)
-  }, [previousWorkspaceName])
+  const cancelRenameLix = React.useCallback(() => {
+    setLixName(previousLixName)
+    setIsRenamingLix(false)
+  }, [previousLixName])
 
   React.useEffect(() => {
     if (lix) {
-      const loadWorkspaceData = async () => {
+      const loadLixData = async () => {
         try {
           const lixId = await lix.db
             .selectFrom("key_value")
@@ -417,107 +472,105 @@ export function WorkspaceSidebar() {
             .select("value")
             .executeTakeFirstOrThrow();
 
-          // Store current workspace ID for the select component
-          setCurrentWorkspaceId(lixId.value);
+          // Store current lix ID for the select component
+          setCurrentLixId(lixId.value);
 
-          // Check if there's a workspace name stored
-          const nameRecord = await lix.db
-            .selectFrom("key_value")
-            .where("key", "=", "workspace_name")
-            .select("value")
-            .executeTakeFirst();
-
-          if (nameRecord) {
-            setWorkspaceName(nameRecord.value);
-          } else {
-            // Use "Untitled" as fallback name
-            setWorkspaceName("Untitled");
+          // Use the name from our currentLixNameAtom
+          if (currentLixName) {
+            setLixName(currentLixName);
           }
         } catch (error) {
-          console.error("Failed to load workspace data:", error);
+          console.error("Failed to load lix data:", error);
         }
       };
 
-      loadWorkspaceData();
+      loadLixData();
     }
-  }, [lix]);
+  }, [lix, currentLixName]);
 
   const mdFiles = files.filter(file => file.path.endsWith('.md'))
 
   return (
     <>
       <SidebarHeader className="flex flex-row justify-between items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0 mr-1"
-          title="To lix file manager"
-          onClick={() => window.location.href = 'https://lix.host/app/fm'}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+        <a href={`https://lix.host/app/fm?l=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 mr-1"
+            title="To lix file manager"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </a>
 
-        {isRenamingWorkspace ? (
-          <div className="h-7 flex-1 flex items-center border-b border-input max-w-[calc(100%-4rem)]">
+        {isRenamingLix ? (
+          <div className="h-7 flex-1 flex items-center border-b border-input max-w-[calc(100%-4rem)]" id="rename-lix-container">
+            {/* Instead of using portals which are complex, we'll use the inert attribute on parent containers */}
             <input
-              ref={workspaceInputRef}
+              ref={lixInputRef}
               type="text"
-                value={workspaceName}
-                onChange={(e) => setWorkspaceName(e.target.value)}
-                onFocus={(e) => e.target.select()}
-                onBlur={handleSaveWorkspaceName}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSaveWorkspaceName();
-                  } else if (e.key === 'Escape') {
-                    cancelRenameWorkspace();
-                  }
-                }}
+              value={lixName}
+              onChange={(e) => setLixName(e.target.value)}
+              onFocus={(e) => e.target.select()}
+              onBlur={handleSaveLixName}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSaveLixName();
+                } else if (e.key === 'Escape') {
+                  cancelRenameLix();
+                }
+              }}
               className="bg-transparent outline-none h-7 pl-2 pr-0 text-sm font-semibold w-full mt-[1px]"
-              />
-            </div>
-          ) : (
-            <div className="flex-1 min-w-0 mx-1 -my-0.5 max-w-[calc(100%-4rem)]">
-              {/* Workspace selector using Select component */}
-              <Select
-                onValueChange={(value) => {
-                  if (value === "new") {
-                    handleCreateNewWorkspace();
-                  } else {
-                    switchToWorkspace(value);
-                  }
-                }}
-                value={currentWorkspaceId}
-              >
-                <SelectTrigger
-                  size="sm"
+              // Add data attribute to help with debugging accessibility
+              data-lix-rename-input
+              // Ensure the input has a label for accessibility
+              aria-label="Rename Lix"
+              tabIndex={0}
+            />
+          </div>
+        ) : (
+          <div className="flex-1 min-w-0 mx-1 -my-0.5 max-w-[calc(100%-4rem)]">
+            {/* Workspace selector using Select component */}
+            <Select
+              onValueChange={(value) => {
+                if (value === "new") {
+                  handleCreateNewLix();
+                } else {
+                  switchToLix(value);
+                }
+              }}
+              value={currentLixId}
+            >
+              <SelectTrigger
+                size="sm"
                 className="max-w-full border-0 shadow-none bg-transparent font-semibold text-sm px-1 hover:bg-muted rounded justify-between"
               >
                 <SelectValue placeholder="Select Workspace">
                   <div className="flex items-center justify-between w-full">
-                    <span className="truncate mr-1">{workspaceName}</span>
+                    <span className="truncate mr-1">{currentLixName || lixName}</span>
                   </div>
                 </SelectValue>
               </SelectTrigger>
               <SelectContent align="center" className="w-60 -ml-0.5">
                 <SelectGroup>
-                  <SelectLabel className="font-medium">Workspaces</SelectLabel>
-                  {availableWorkspaces.map((workspace: { id: string, name: string }) => (
+                  <SelectLabel className="font-medium">Lixes</SelectLabel>
+                  {availableLixes.map((lix: { id: string, name: string }) => (
                     <SelectItem
-                      key={workspace.id}
-                      value={workspace.id}
+                      key={lix.id}
+                      value={lix.id}
                     >
                       <div className="flex items-center w-full">
                         <Folder className="h-4 w-4 mr-2 shrink-0" />
-                        <span className="truncate flex-1">{workspace.name}</span>
+                        <span className="truncate flex-1">{lix.name}</span>
                       </div>
                     </SelectItem>
                   ))}
                   <SelectSeparator />
                   <SelectItem value="new">
                     <div className="flex items-center w-full">
-                      <Plus className="h-4 w-4 mr-2 shrink-0" />
-                      <span>New Workspace</span>
+                      <FolderPlus className="h-4 w-4 mr-2 shrink-0" />
+                      <span>New Lix</span>
                     </div>
                   </SelectItem>
                 </SelectGroup>
@@ -532,32 +585,32 @@ export function WorkspaceSidebar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-60 py-1">
-            <DropdownMenuItem onClick={handleCreateNewWorkspace}>
-              <Plus className="h-4 w-4 mr-2" />
-              <span>New Workspace</span>
+            <DropdownMenuItem onClick={handleCreateNewLix}>
+              <FolderPlus className="h-4 w-4 mr-2" />
+              <span>New Lix</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleOpenLixFile}>
               <FolderOpen className="h-4 w-4 mr-2" />
-              <span>Open Workspace</span>
+              <span>Open Lix</span>
             </DropdownMenuItem>
             <Separator className="my-1" />
             <DropdownMenuItem onClick={handleExportLixFile}>
               <Download className="h-4 w-4 mr-2" />
-              <span>Download Workspace</span>
+              <span>Download Lix</span>
             </DropdownMenuItem>
             <Separator className="my-1" />
-            <DropdownMenuItem onClick={startRenamingWorkspace}>
+            <DropdownMenuItem onClick={startRenamingLix}>
               <PenSquare className="h-4 w-4 mr-2" />
-              <span>Rename Workspace</span>
+              <span>Rename Lix</span>
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onClick={() => setShowDeleteProjectsDialog(true)}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              <span>Delete Workspace</span>
+              <span>Delete Lix</span>
             </DropdownMenuItem>
-            
+
             {/* Development-only option */}
             {import.meta.env.DEV && (
               <>
@@ -609,7 +662,10 @@ export function WorkspaceSidebar() {
               <SidebarMenuItem key={file.id}>
                 {inlineEditingFile?.id === file.id ? (
                   // Rename state - match the exact height and padding of the SidebarMenuButton
-                  <div className="flex items-center w-full h-8 p-2 rounded-md">
+                  <div
+                    className="flex items-center w-full h-8 p-2 rounded-md"
+                    id={`rename-file-container-${file.id}`}
+                  >
                     <FileText className={`h-4 w-4 mr-2 shrink-0 ${file.id === activeFile?.id ? 'text-primary' : ''}`} />
                     <div className="flex items-center border-b border-input min-w-0">
                       <input
@@ -629,30 +685,33 @@ export function WorkspaceSidebar() {
                           }
                         }}
                         className="bg-transparent outline-none text-sm min-w-0 mt-[1px]"
+                        data-file-rename-input
+                        aria-label={`Rename file ${inlineEditingFile.name}`}
+                        tabIndex={0}
                       />
                       <span className="text-muted-foreground text-sm whitespace-nowrap">.md</span>
                     </div>
                   </div>
                 ) : (
-                    <SidebarMenuButton
-                      isActive={file.id === activeFile?.id}
-                      onClick={() => switchToFile(file.id)}
-                      onDoubleClick={() => {
-                        const fileName = file.path.split('/').pop()?.replace(/\.md$/, '') || ''
-                        setInlineEditingFile({ id: file.id, name: fileName })
-                        // Focus and select the input text
-                        setTimeout(() => {
-                          if (inlineInputRef.current) {
-                            inlineInputRef.current.focus()
-                            inlineInputRef.current.select()
-                          }
-                        }, 50)
-                      }}
-                      className={`w-full justify-start ${file.id === activeFile?.id ? 'font-medium' : ''}`}
-                    >
-                      <FileText className={`h-4 w-4 ${file.id === activeFile?.id ? 'text-primary' : ''}`} />
-                      <span>{file.path.split('/').pop()}</span>
-                    </SidebarMenuButton>
+                  <SidebarMenuButton
+                    isActive={file.id === activeFile?.id}
+                    onClick={() => switchToFile(file.id)}
+                    onDoubleClick={() => {
+                      const fileName = file.path.split('/').pop()?.replace(/\.md$/, '') || ''
+                      setInlineEditingFile({ id: file.id, name: fileName })
+                      // Focus and select the input text
+                      setTimeout(() => {
+                        if (inlineInputRef.current) {
+                          inlineInputRef.current.focus()
+                          inlineInputRef.current.select()
+                        }
+                      }, 50)
+                    }}
+                    className={`w-full justify-start ${file.id === activeFile?.id ? 'font-medium' : ''}`}
+                  >
+                    <FileText className={`h-4 w-4 ${file.id === activeFile?.id ? 'text-primary' : ''}`} />
+                    <span>{file.path.split('/').pop()}</span>
+                  </SidebarMenuButton>
                 )}
 
                 <DropdownMenu>
@@ -711,12 +770,9 @@ export function WorkspaceSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-
       <SidebarFooter className="p-2">
         <InfoCard />
       </SidebarFooter>
-
-
 
       {/* Delete File Confirmation Dialog */}
       <Dialog open={!!fileToDelete} onOpenChange={(open) => !open && setFileToDelete(null)}>
@@ -746,13 +802,13 @@ export function WorkspaceSidebar() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Current Workspace Confirmation Dialog */}
+      {/* Delete Current Lix Confirmation Dialog */}
       <Dialog open={showDeleteProjectsDialog} onOpenChange={setShowDeleteProjectsDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Current Workspace</DialogTitle>
+            <DialogTitle>Delete Current Lix</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the current workspace? This will remove all files in this workspace and cannot be undone.
+              Are you sure you want to delete the current lix? This will remove all files in this lix and cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4">
@@ -761,9 +817,9 @@ export function WorkspaceSidebar() {
             </DialogClose>
             <Button
               variant="destructive"
-              onClick={handleDeleteCurrentWorkspace}
+              onClick={handleDeleteCurrentLix}
             >
-              Delete Workspace
+              Delete Lix
             </Button>
           </DialogFooter>
         </DialogContent>

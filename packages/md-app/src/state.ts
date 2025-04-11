@@ -9,11 +9,9 @@ import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
-import {
-	lixMdDemoFile,
-	setupMdDemo,
-} from "./helper/demo-lix-file/demo-lix-file.ts";
+import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
+import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -56,10 +54,21 @@ export const lixAtom = atom(async (get) => {
 	if (lixIdSearchParam) {
 		// try reading the lix file from OPFS
 		try {
-			const fileHandle = await rootHandle.getFileHandle(
-				`${lixIdSearchParam}.lix`
+			// Import the helper function dynamically to avoid circular dependencies
+			const { findLixFileInOpfs } = await import("./helper/findLixInOpfs");
+
+			// Find the Lix file with the specified ID
+			const lixFile = await findLixFileInOpfs(lixIdSearchParam, [txtPlugin]);
+
+			if (!lixFile) {
+				throw new Error("Lix file not found with ID: " + lixIdSearchParam);
+			}
+
+			console.log(
+				`Found lix with ID ${lixIdSearchParam} in file: ${lixFile.fullName}`
 			);
-			const file = await fileHandle.getFile();
+
+			const file = await lixFile.handle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} catch {
 			// Try server if lix doesn't exist in OPFS
@@ -106,8 +115,8 @@ export const lixAtom = atom(async (get) => {
 			const file = await fileHandle.getFile();
 			lixBlob = new Blob([await file.arrayBuffer()]);
 		} else {
-			const demoLix = await lixMdDemoFile();
-			lixBlob = demoLix.blob;
+			const welcomeLix = await setupWelcomeFile();
+			lixBlob = welcomeLix.blob;
 		}
 	}
 
@@ -170,8 +179,11 @@ export const lixAtom = atom(async (get) => {
 
 	// Check if there is a file in lix
 	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
-	if (!file) file = await setupMdDemo(lix);
-	if (!get(fileIdSearchParamsAtom)) {
+	if (!file) {
+		await setupWelcomeFile(lix);
+		file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
+	}
+	if (file && !get(fileIdSearchParamsAtom)) {
 		// Set the file ID as searchParams without page reload
 		updateUrlParams({ f: file.id });
 	}
@@ -290,53 +302,59 @@ export const isSyncingAtom = atom(async (get) => {
 	}
 });
 
-export const currentWorkspaceNameAtom = atom(async (get) => {
+export const currentLixNameAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
-	if (!lix) return "Untitled Workspace";
+	if (!lix) return "Untitled";
 
-	const name = await lix.db
+	// Get the current Lix ID for finding its file
+	const lixId = await lix.db
 		.selectFrom("key_value")
-		.where("key", "=", "workspace_name")
+		.where("key", "=", "lix_id")
 		.select("value")
-		.executeTakeFirst()
-		.then((row) => row?.value);
+		.executeTakeFirstOrThrow();
 
-	return name || "Untitled Workspace";
+	// Find the actual filename in OPFS using our helper function
+	try {
+		// Find the Lix file with the specified ID
+		const lixFile = await findLixFileInOpfs(lixId.value);
+
+		// If found, return its name, otherwise fall back to the ID
+		return lixFile ? lixFile.name : lixId.value || "Untitled";
+	} catch (error) {
+		console.error("Error getting current Lix name:", error);
+		return lixId.value || "Untitled";
+	}
 });
 
-export const availableWorkspacesAtom = atom(async (get) => {
+export const availableLixesAtom = atom(async (get) => {
 	get(withPollingAtom);
-	const root = await getOriginPrivateDirectory();
-	const workspaces = [];
 
-	for await (const entry of (root as any).values()) {
-		if (entry.kind === "file" && entry.name.endsWith(".lix")) {
-			const wsId = entry.name.replace(/\.lix$/, "");
-			try {
-				const buffer = await entry
-					.getFile()
-					.then((f: { arrayBuffer(): Promise<ArrayBuffer> }) =>
-						f.arrayBuffer()
-					);
-				const lix = await openLixInMemory({ blob: new Blob([buffer]) });
-				const name = await lix.db
-					.selectFrom("key_value")
-					.where("key", "=", "workspace_name")
-					.select("value")
-					.executeTakeFirst()
-					.then((row) => row?.value || "Untitled");
+	try {
+		// Import the helper function dynamically to avoid circular dependencies
+		const { findLixFilesInOpfs } = await import("./helper/findLixInOpfs");
 
-				workspaces.push({ id: wsId, name });
-			} catch (error) {
-				console.error(`Failed to load workspace:`, error);
-				workspaces.push({
-					id: wsId,
-					name: "Untitled",
+		// Get all Lix files in OPFS
+		const lixFiles = await findLixFilesInOpfs();
+
+		// Convert to the format expected by consumers of this atom
+		// We'll use a map to ensure no duplicate IDs
+		const lixMap = new Map();
+
+		for (const file of lixFiles) {
+			// If we've already seen this ID, skip it (shouldn't happen with our cleanup, but just in case)
+			if (!lixMap.has(file.id)) {
+				lixMap.set(file.id, {
+					id: file.id,
+					name: file.name,
 				});
 			}
 		}
-	}
 
-	return workspaces;
+		// Convert the map values to an array
+		return Array.from(lixMap.values());
+	} catch (error) {
+		console.error("Failed to load available lixes:", error);
+		return [];
+	}
 });

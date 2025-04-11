@@ -156,6 +156,7 @@ export function FixedToolbarButtons() {
             <TableDropdownMenu />
             <EmojiDropdownMenu />
             <MediaToolbarButton nodeType={ImagePlugin.key} />
+            <ImportMarkdown />
           </ToolbarGroup>
 
           {/* <ToolbarGroup>
@@ -186,7 +187,6 @@ export function FixedToolbarButtons() {
       </ToolbarGroup> */}
 
       <ToolbarGroup>
-        <ImportMarkdown />
         <CopyToClipboard />
         {/* <ModeDropdownMenu /> */}
       </ToolbarGroup>

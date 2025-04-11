@@ -1,102 +1,103 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-// import { SettingsProvider } from '@/components/editor/settings';
-import { activeFileAtom, checkpointChangeSetsAtom, intermediateChangesAtom } from '@/state-active-file';
+import { activeFileAtom } from '@/state-active-file';
 import { useAtom } from 'jotai/react';
-import { Separator } from '@/components/plate-ui/separator';
-import IntermediateCheckpointComponent from '@/components/IntermediateCheckpointComponent';
-import CheckpointComponent from '@/components/CheckpointComponent';
 import FileName from '@/components/FileName';
-import { useMemo } from 'react';
-import { isEqual } from "lodash-es";
 import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
 import {
-	SidebarProvider,
-	Sidebar,
-	SidebarTrigger,
-	SidebarInset,
-	useSidebar
-} from "@/components/ui/sidebar";
-import { WorkspaceSidebar } from "@/components/ui/sidebar-workspace";
+	MultiSidebarProvider,
+	useMultiSidebar
+} from "@/components/ui/multisidebar";
+import { LixSidebar } from "@/components/ui/sidebar-lix";
+import { useState } from "react";
 import { Button } from '@/components/plate-ui/button';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import ChangeControlSidebar from '@/components/ui/sidebar-change-control';
 
-const SidebarToggleButton = () => {
-	const { open, setOpen } = useSidebar();
+// Wrapper component that has access to the MultiSidebar context
+function PageContent() {
+	const [activeFile] = useAtom(activeFileAtom);
+	const { leftSidebar, rightSidebar } = useMultiSidebar();
+
+	// Control sidebar visibility using the context
+	const toggleLeftSidebar = () => {
+		leftSidebar.setOpen(!leftSidebar.open);
+	};
+
+	const toggleRightSidebar = () => {
+		rightSidebar.setOpen(!rightSidebar.open);
+	};
 
 	return (
-		<Button
-			variant="ghost"
-			size="icon"
-			className="fixed z-50 left-4 bottom-4 shadow-md bg-background border border-border"
-			onClick={() => setOpen(!open)}
-			title={open ? "Hide sidebar" : "Show sidebar"}
-		>
-			{open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
-		</Button>
+		<div className="flex items-stretch w-full h-screen">
+			{/* Left sidebar - directly controlled with CSS */}
+			<div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-r flex flex-col ${leftSidebar.open ? 'w-[16rem]' : 'w-0'}`}>
+				<LixSidebar />
+			</div>
+
+			{/* Center content */}
+			<div className="flex-1 flex flex-col overflow-hidden bg-background">
+				<div className="bg-slate-50 border-b-[1px] border-border p-2 flex items-center justify-between">
+					<div className="flex items-center">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="mr-2 size-7"
+							onClick={toggleLeftSidebar}
+						>
+							{leftSidebar.open ? <PanelLeftClose /> : <PanelLeftOpen />}
+							<span className="sr-only">Toggle Project Sidebar</span>
+						</Button>
+						<FileName />
+					</div>
+					<div className="flex items-center">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="size-7"
+							onClick={toggleRightSidebar}
+						>
+							{rightSidebar.open ? <PanelRightClose /> : <PanelRightOpen />}
+							<span className="sr-only">Toggle Change Control Sidebar</span>
+						</Button>
+					</div>
+				</div>
+				{activeFile ?
+					<div className="h-full flex-1 overflow-hidden" data-registry="plate">
+						<PlateEditor />
+						<Toaster />
+					</div>
+					: <div className="h-full flex-1 flex justify-center items-center">
+						No file selected
+					</div>}
+			</div>
+
+			{/* Right sidebar */}
+			<div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[20rem]' : 'w-0'}`}>
+				<ChangeControlSidebar />
+			</div>
+		</div>
 	);
-};
+}
 
 export default function Page() {
 	useUrlChangeListener();
-	const [activeFile] = useAtom(activeFileAtom)
-	const [intermediateChanges] = useAtom(intermediateChangesAtom);
-	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
-
-	// Filter out changes where before and after content are identical (ghost changes)
-	const filteredChanges = useMemo(() => {
-		return intermediateChanges.filter(change => {
-			// Only show changes where the content has actually changed
-			return !isEqual(change.snapshot_content_before, change.snapshot_content_after);
-		});
-	}, [intermediateChanges, activeFile]);
+	const [leftOpen, setLeftOpen] = useState(true);
+	const [rightOpen, setRightOpen] = useState(true);
 
 	return (
-		<SidebarProvider>
-			<div className="w-full h-full flex">
-				<Sidebar side="left" variant="sidebar" collapsible="offcanvas">
-					<WorkspaceSidebar />
-				</Sidebar>
-				<SidebarInset className="flex flex-col overflow-hidden">
-					<div className="w-full bg-slate-50 border-b-[1px] border-border p-2 flex items-center">
-						<div className="flex items-center">
-							<SidebarTrigger className="mr-2" />
-							<FileName />
-						</div>
-					</div>
-					<div className='flex-1 flex overflow-hidden'>
-						{activeFile ?
-							<div className="h-full flex-1 max-w-[calc(100%-600px)]" data-registry="plate">
-								<PlateEditor />
-								<Toaster />
-							</div>
-							: <div className="h-full flex-1 max-w-[calc(100%-600px)] flex justify-center items-center">
-								No file selected
-							</div>}
-						<Separator orientation="vertical" />
-						<div className="h-full w-[600px] flex flex-col relative">
-							<div className="px-[10px] pt-[10px] overflow-y-auto">
-								{filteredChanges.length > 0 && (
-									<IntermediateCheckpointComponent filteredChanges={filteredChanges} />
-								)}
-								{checkpointChangeSets.map((checkpointChangeSet, i) => {
-									return (
-										<CheckpointComponent
-											key={checkpointChangeSet.id}
-											checkpointChangeSet={checkpointChangeSet}
-											showTopLine={i !== 0 || filteredChanges.length > 0}
-											showBottomLine={i !== checkpointChangeSets.length - 1}
-										/>
-									);
-								})}
-							</div>
-						</div>
-					</div>
-				</SidebarInset>
-
-				{/* Floating toggle button - shows on both mobile and desktop */}
-				{/* <SidebarToggleButton /> */}
-			</div>
-		</SidebarProvider>
+		<div className="w-full h-full">
+			{/* MultiSidebarProvider properly configured */}
+			<MultiSidebarProvider
+				defaultLeftOpen={leftOpen}
+				defaultRightOpen={rightOpen}
+				leftOpen={leftOpen}
+				rightOpen={rightOpen}
+				onLeftOpenChange={setLeftOpen}
+				onRightOpenChange={setRightOpen}
+			>
+				<PageContent />
+			</MultiSidebarProvider>
+		</div>
 	);
 }

@@ -162,7 +162,7 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
         </ContextMenuGroup>
 
         <ContextMenuGroup>
-          <ContextMenuItem
+          {/* <ContextMenuItem
             onClick={() =>
               editor
                 .getTransforms(BlockSelectionPlugin)
@@ -179,8 +179,8 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
             }
           >
             Outdent
-          </ContextMenuItem>
-          <ContextMenuSub>
+          </ContextMenuItem> */}
+          {/* <ContextMenuSub>
             <ContextMenuSubTrigger>Align</ContextMenuSubTrigger>
             <ContextMenuSubContent className="w-48">
               <ContextMenuItem onClick={() => handleAlign('left')}>
@@ -193,7 +193,7 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
                 Right
               </ContextMenuItem>
             </ContextMenuSubContent>
-          </ContextMenuSub>
+          </ContextMenuSub> */}
         </ContextMenuGroup>
       </ContextMenuContent>
     </ContextMenu>

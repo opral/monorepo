@@ -24,7 +24,7 @@ app.use(express.json());
 const allowedOrigins = ["https://lix.opral.com", "https://lix-md.onrender.com"];
 
 if (process.env.NODE_ENV !== "production") {
-  allowedOrigins.push("http://localhost:3009");
+  allowedOrigins.push("http://localhost:3005", "http://localhost:3009");
 }
 
 interface CorsOptions {
@@ -146,6 +146,10 @@ const lixApps = [
   {
     route: "csv",
     module: "csv-app",
+  },
+  {
+    route: "flashtype",
+    module: "md-app",
   },
 ];
 

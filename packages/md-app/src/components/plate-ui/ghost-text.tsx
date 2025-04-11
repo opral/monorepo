@@ -27,7 +27,14 @@ export function GhostTextContent() {
       className="pointer-events-none text-muted-foreground/70 max-sm:hidden"
       contentEditable={false}
     >
-      {suggestionText && suggestionText}
+      {suggestionText && (
+        <>
+          {suggestionText}
+          <span className="text-xs text-muted-foreground/30 ring ring-muted-foreground/30 px-0.5 ml-1 rounded-xs -translate-y-[1px] inline-block">
+            tab
+          </span>
+        </>
+      )}
     </span>
   );
 }

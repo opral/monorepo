@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { getFileFromLix, IMAGE_REPLACED_EVENT } from '@/helper/upload-to-lix';
+import { getFileFromLix, IMAGE_REPLACED_EVENT } from '@/helper/uploadToLix';
 import { Spinner } from './spinner';
 import { useAtom } from 'jotai';
 import { lixAtom } from '@/state';
