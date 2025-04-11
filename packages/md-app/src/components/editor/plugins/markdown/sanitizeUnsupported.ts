@@ -1,3 +1,5 @@
+import { image } from "html2canvas/dist/types/css/types/image";
+
 type TreeNode = {
 	type: string;
 	children?: TreeNode[];
@@ -101,6 +103,7 @@ const rules = {
 			spread: null,
 		},
 	},
+	image: {},
 	paragraph: {
 		allowedChildren: [
 			// TODO add html break
@@ -112,6 +115,7 @@ const rules = {
 			"delete",
 			"link",
 			"html",
+			"image",
 		],
 		exactChildren: null,
 		allowedAttributes: [],
@@ -145,6 +149,8 @@ function toSanitizedNode(node: TreeNode, file: any, reason: string) {
 	node.reason = reason;
 	node._children = node.children;
 	node.children = [];
+
+	console.warn("Node sanitized", node);
 }
 
 function sanatizeUnknownNodeStructures(node: TreeNode, file: any): boolean {
