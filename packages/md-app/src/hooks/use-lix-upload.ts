@@ -138,7 +138,7 @@ export function useLixUpload() {
 					name: duplicateInfo.fileName,
 					size: fileBlob.size,
 					type: fileBlob.type,
-					url: `${serverUrl}?l=${lixId}&f=${duplicateInfo.fileId}`
+					url: `${serverUrl}?lix=${lixId}&f=${duplicateInfo.fileId}`,
 				};
 				
 				// Set as the uploaded file so the editor can use it

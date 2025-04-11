@@ -127,7 +127,7 @@ export default function Page() {
 				const writable = await opfsFile.createWritable();
 				await writable.write(fileContent);
 				await writable.close();
-				navigate("?l=" + lixId.value);
+				navigate("?lix=" + lixId.value);
 			}
 		};
 		input.click();
@@ -190,8 +190,8 @@ export default function Page() {
 		// Only trigger if clicking the background container itself
 		if (e.target === e.currentTarget) {
 			const newParams = new URLSearchParams(searchParams);
-			const openLix = newParams.get("l");
-			navigate(`/?l=${openLix}`);
+			const openLix = newParams.get("lix");
+			navigate(`/?lix=${openLix}`);
 		}
 	};
 
@@ -263,7 +263,7 @@ export default function Page() {
 								name={file.path.replace("/", "")}
 								appLink={
 									isSupportedFile(file.path)
-										? `/app${supportedFileTypes.find((fileType) => fileType.extension === getFileExtension(file.path))?.route}?l=${lixIdSearchParams}&f=${file.id}`
+										? `/app${supportedFileTypes.find((fileType) => fileType.extension === getFileExtension(file.path))?.route}?lix=${lixIdSearchParams}&f=${file.id}`
 										: ""
 								}
 							/>
@@ -377,7 +377,7 @@ export default function Page() {
 											? ("/app"
 												+ supportedFileTypes.find(supportedFileType =>
 													supportedFileType.extension === getFileExtension(activeFile.path))?.route)
-											+ `?l=${lixIdSearchParams}&f=${fileIdSearchParams}`
+											+ `?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`
 											: "https://github.com/opral/monorepo/tree/main/lix"
 									}
 									target={isSupportedFile(activeFile?.path || "") ? "_self" : "_blank"}

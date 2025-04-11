@@ -34,8 +34,8 @@ export async function uploadFileToLix(
 
 	// Store the file in the database
 	try {
-		console.log('Inserting file with ID:', fileId);
-		
+		console.log("Inserting file with ID:", fileId);
+
 		// Always insert the file
 		await lix.db
 			.insertInto("file")
@@ -49,15 +49,15 @@ export async function uploadFileToLix(
 				},
 			})
 			.execute();
-			
-		console.log('File inserted successfully');
+
+		console.log("File inserted successfully");
 	} catch (error) {
 		console.error("Error inserting into file table:", error);
 		throw error;
 	}
 
 	// Create a URL that can be used to retrieve the file
-	// Format: https://lix.host?l={lixId}&f={fileId}
+	// Format: https://lix.host?lix={lixId}&f={fileId}
 	const serverUrl = "https://lix.host";
 
 	// Get the lix ID from key_value table
@@ -68,10 +68,10 @@ export async function uploadFileToLix(
 		.executeTakeFirst();
 
 	const lixId = lixIdRecord?.value;
-	const fileUrl = `${serverUrl}?l=${lixId}&f=${fileId}`;
-	
+	const fileUrl = `${serverUrl}?lix=${lixId}&f=${fileId}`;
+
 	// Log for debugging
-	console.log('Created file URL:', fileUrl);
+	console.log("Created file URL:", fileUrl);
 
 	return {
 		id: fileId,
@@ -141,7 +141,7 @@ export async function replaceImageInLix(
 
 		// Create a URL that can be used to retrieve the file
 		const serverUrl = "https://lix.host";
-		
+
 		// Get the lix ID for the URL
 		const lixIdRecord = await lix.db
 			.selectFrom("key_value")
@@ -150,14 +150,14 @@ export async function replaceImageInLix(
 			.executeTakeFirst();
 
 		const lixId = lixIdRecord?.value;
-		const fileUrl = `${serverUrl}?l=${lixId}&f=${existingId}`;
-		
+		const fileUrl = `${serverUrl}?lix=${lixId}&f=${existingId}`;
+
 		// Dispatch event to notify any image components showing this file
 		// that they should refresh (avoids caching issues)
 		dispatchImageReplacedEvent(existingId);
-		
+
 		// Log for debugging
-		console.log('Updated existing image with ID:', existingId);
+		console.log("Updated existing image with ID:", existingId);
 
 		return {
 			id: existingId,

@@ -49,7 +49,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 									// route to lix fm in production,
 									// else csv app root
 									(import.meta.env.PROD ? "/app/fm" : "/") +
-									`?l=${searchParams.get("l")}`
+									`?lix=${searchParams.get("lix")}`
 								}
 								className="flex justify-center items-center text-zinc-500 w-9 h-9 hover:bg-zinc-100 hover:text-zinc-950 rounded-lg cursor-pointer"
 							>

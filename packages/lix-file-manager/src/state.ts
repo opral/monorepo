@@ -37,7 +37,7 @@ export const fileIdSearchParamsAtom = atom((get) => {
 export const lixIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("l") || undefined;
+	return searchParams.get("lix") || undefined;
 });
 
 export const discussionSearchParamsAtom = atom(async (get) => {
@@ -188,7 +188,7 @@ export const lixAtom = atom(async (get) => {
 	// mismatch in id, load correct url
 	if (lixId.value !== lixIdSearchParam) {
 		const url = new URL(window.location.href);
-		url.searchParams.set("l", lixId.value);
+		url.searchParams.set("lix", lixId.value);
 		// need to use window.location because react router complains otherwise
 		window.location.href = url.toString();
 	}
