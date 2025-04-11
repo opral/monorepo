@@ -1,4 +1,5 @@
 import {
+	changeHasLabel,
 	createAccount,
 	createChangeSet,
 	createComment,
