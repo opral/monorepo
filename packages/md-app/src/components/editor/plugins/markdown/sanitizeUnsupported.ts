@@ -111,6 +111,7 @@ const rules = {
 			"emphasis",
 			"delete",
 			"link",
+			"html",
 		],
 		exactChildren: null,
 		allowedAttributes: [],
@@ -230,8 +231,5 @@ export function sanatizeUnknownNodeStructuresInTree() {
 		for (const node of rootNode.children) {
 			sanatizeUnknownNodeStructures(node, file);
 		}
-		debugger;
-		console.log("sanatizeUnknownNodeStructuresInTree result:");
-		console.log(JSON.parse(JSON.stringify(rootNode)));
 	};
 }
