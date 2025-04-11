@@ -6,7 +6,9 @@ export function applyChangeSetDatabaseSchema(
 ): SqliteWasmDatabase {
 	const sql = `
   CREATE TABLE IF NOT EXISTS change_set (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(16))
+    id TEXT PRIMARY KEY DEFAULT (nano_id(16)),
+    -- Determines if elements belonging to this change set can be modified
+    immutable_elements INTEGER NOT NULL DEFAULT 0
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change_set_element (
@@ -28,6 +30,33 @@ export function applyChangeSetDatabaseSchema(
     FOREIGN KEY (change_id, entity_id, schema_key, file_id) REFERENCES change(id, entity_id, schema_key, file_id) ON DELETE CASCADE
   ) STRICT;
 
+  -- Trigger to prevent INSERTING elements into an immutable change set
+  CREATE TRIGGER IF NOT EXISTS prevent_immutable_element_insert
+  BEFORE INSERT ON change_set_element
+  FOR EACH ROW
+  WHEN (SELECT immutable_elements FROM change_set WHERE id = NEW.change_set_id) = 1
+  BEGIN
+    SELECT RAISE(ABORT, 'Attempted to insert elements into a change set with immutable elements');
+  END;
+
+  -- Trigger to prevent UPDATING elements in an immutable change set
+  CREATE TRIGGER IF NOT EXISTS prevent_immutable_element_update
+  BEFORE UPDATE ON change_set_element
+  FOR EACH ROW
+  WHEN (SELECT immutable_elements FROM change_set WHERE id = OLD.change_set_id) = 1
+  BEGIN
+    SELECT RAISE(ABORT, 'Attempted to update elements of a change set with immutable elements');
+  END;
+
+  -- Trigger to prevent DELETING elements from an immutable change set
+  CREATE TRIGGER IF NOT EXISTS prevent_immutable_element_delete
+  BEFORE DELETE ON change_set_element
+  FOR EACH ROW
+  WHEN (SELECT immutable_elements FROM change_set WHERE id = OLD.change_set_id) = 1
+  BEGIN
+    SELECT RAISE(ABORT, 'Attempted to delete elements from a change set with immutable elements');
+  END;
+
   CREATE TABLE IF NOT EXISTS change_set_label (
     label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
@@ -35,7 +64,7 @@ export function applyChangeSetDatabaseSchema(
     FOREIGN KEY(label_id) REFERENCES label(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
-`;  
+`;
 
 	return sqlite.exec(sql);
 }
@@ -45,6 +74,11 @@ export type NewChangeSet = Insertable<ChangeSetTable>;
 export type ChangeSetUpdate = Updateable<ChangeSetTable>;
 export type ChangeSetTable = {
 	id: Generated<string>;
+	/**
+	 * Carefull (!) when querying the database. The return value will be `0` or `1`.
+	 * SQLite does not have a boolean select type https://www.sqlite.org/datatype3.html.
+	 */
+	immutable_elements: Generated<boolean>;
 };
 
 export type ChangeSetElement = Selectable<ChangeSetElementTable>;

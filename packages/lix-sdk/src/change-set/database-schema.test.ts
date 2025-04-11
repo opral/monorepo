@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest";
+import { test, expect, describe } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { mockChange } from "../change/mock-change.js";
 import { createChangeSet } from "./create-change-set.js";
@@ -104,8 +104,7 @@ describe("change_set_element table", () => {
 				file_id: change.file_id,
 			})
 			.returningAll()
-			.executeTakeFirstOrThrow();	
-		
+			.executeTakeFirstOrThrow();
 
 		expect(element).toEqual({
 			change_set_id: "cs1",
@@ -254,9 +253,9 @@ describe("change_set_element table", () => {
 			lix.db
 				.insertInto("change_set_element")
 				.values({
-					change_set_id: "cs1", // Same change set
-					change_id: change2.id, // Different change
-					entity_id: change2.entity_id, // Same entity combo
+					change_set_id: "cs1",
+					change_id: change2.id,
+					entity_id: change2.entity_id,
 					schema_key: change2.schema_key,
 					file_id: change2.file_id,
 				})
@@ -348,5 +347,141 @@ describe("change_set_label table", () => {
 				.values({ change_set_id: "cs1", label_id: "l_nonexistent" })
 				.execute()
 		).rejects.toThrow(/FOREIGN KEY constraint failed/i);
+	});
+});
+
+describe("change_set immutable flag and triggers", () => {
+	test("change_set should default immutable to FALSE (0)", async () => {
+		const lix = await openLixInMemory({});
+		const cs = await createChangeSet({ lix });
+		const fetchedCs = await lix.db
+			.selectFrom("change_set")
+			.where("id", "=", cs.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+		expect(fetchedCs.immutable_elements).toBe(0);
+	});
+
+	test("change_set immutable can be set to TRUE (1)", async () => {
+		const lix = await openLixInMemory({});
+		const cs = await createChangeSet({ lix });
+		await lix.db
+			.updateTable("change_set")
+			.set({ immutable_elements: true })
+			.where("id", "=", cs.id)
+			.execute();
+		const fetchedCs = await lix.db
+			.selectFrom("change_set")
+			.where("id", "=", cs.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+		expect(fetchedCs.immutable_elements).toBe(1);
+	});
+
+	test("triggers should prevent modification of change_set_element if change_set is immutable (1)", async () => {
+		const lix = await openLixInMemory({});
+
+		const immutableCs = await createChangeSet({ lix, immutableElements: true });
+
+		const mutableCs = await createChangeSet({ lix });
+
+		const changes = await lix.db
+			.insertInto("change")
+			.values([mockChange({ id: "c1" }), mockChange({ id: "c2" })])
+			.returningAll()
+			.execute();
+
+		await lix.db
+			.insertInto("change_set_element")
+			.values([
+				{
+					change_id: changes[0]!.id,
+					change_set_id: mutableCs.id,
+					entity_id: changes[0]!.entity_id,
+					schema_key: changes[0]!.schema_key,
+					file_id: changes[0]!.file_id,
+				},
+			])
+			.execute();
+
+		// --- Test INSERT Trigger ---
+		await expect(
+			lix.db
+				.insertInto("change_set_element")
+				.values({
+					change_id: changes[0]!.id,
+					change_set_id: immutableCs.id,
+					entity_id: changes[0]!.entity_id,
+					schema_key: changes[0]!.schema_key,
+					file_id: changes[0]!.file_id,
+				})
+				.execute()
+		).rejects.toThrow(
+			/Attempted to insert elements into a change set with immutable elements/i
+		);
+
+		// --- Test UPDATE Trigger ---
+		// Setup: Insert into a set, then make it immutable
+		const csToMakeImmutable = await createChangeSet({ lix });
+
+		await lix.db
+			.insertInto("change_set_element")
+			.values({
+				change_id: changes[0]!.id,
+				change_set_id: csToMakeImmutable.id,
+				entity_id: changes[0]!.entity_id,
+				schema_key: changes[0]!.schema_key,
+				file_id: changes[0]!.file_id,
+			})
+			.execute();
+
+		await lix.db
+			.updateTable("change_set")
+			.set({ immutable_elements: true })
+			.where("id", "=", csToMakeImmutable.id)
+			.execute();
+
+		// Test: Attempt update on now-immutable set
+		await expect(
+			lix.db
+				.updateTable("change_set_element")
+				.set({ change_id: changes[1]!.id })
+				.where("change_set_id", "=", csToMakeImmutable.id)
+				.where("change_id", "=", changes[0]!.id)
+				.executeTakeFirst()
+		).rejects.toThrow(
+			/Attempted to update elements of a change set with immutable elements/i
+		);
+
+		// Update should work on the still-mutable set
+		const updateResult = await lix.db
+			.updateTable("change_set_element")
+			.set({ change_id: changes[1]!.id })
+			.where("change_set_id", "=", mutableCs.id)
+			.where("change_id", "=", changes[0]!.id)
+			.returningAll()
+			.executeTakeFirstOrThrow();
+		expect(updateResult).toBeDefined();
+		expect(updateResult.change_id).toBe(changes[1]!.id);
+
+		// --- Test DELETE Trigger ---
+		// Test: Attempt delete on the now-immutable set
+		await expect(
+			lix.db
+				.deleteFrom("change_set_element")
+				.where("change_set_id", "=", csToMakeImmutable.id)
+				.executeTakeFirst()
+		).rejects.toThrow(
+			/Attempted to delete elements from a change set with immutable elements/i
+		);
+
+		// Delete should work on the (now updated) mutable set
+		const deleteResult = await lix.db
+			.deleteFrom("change_set_element")
+			.where("change_set_id", "=", mutableCs.id)
+			.where("change_id", "=", changes[1]!.id) // Element was updated
+			.returningAll()
+			.executeTakeFirstOrThrow();
+		expect(deleteResult).toBeDefined();
 	});
 });

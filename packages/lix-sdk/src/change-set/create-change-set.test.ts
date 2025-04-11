@@ -144,3 +144,20 @@ test("creating a change set with parents should establish parent-child relations
 		childChangeSet.id,
 	]);
 });
+
+test("specifiying immutable elements", async () => {
+	const lix = await openLixInMemory({});
+
+	const changeSet = await createChangeSet({
+		lix,
+		immutableElements: true,
+	});
+
+	const fetchedCs = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", changeSet.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(fetchedCs.immutable_elements).toBe(1);
+});

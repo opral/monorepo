@@ -36,6 +36,7 @@ import type { ChangeSet } from "./database-schema.js";
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
 	id?: string;
+	immutableElements?: boolean;
 	changes?: Pick<Change, "id" | "entity_id" | "schema_key" | "file_id">[];
 	labels?: Pick<Label, "id">[];
 	/** Parent change sets that this change set will be a child of */
@@ -44,8 +45,11 @@ export async function createChangeSet(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		let query = trx.insertInto("change_set");
 
-		if (args.id) {
-			query = query.values({ id: args.id });
+		if (args.id || args.immutableElements) {
+			query = query.values({
+				id: args.id,
+				immutable_elements: args.immutableElements,
+			});
 		} else {
 			query = query.defaultValues();
 		}
