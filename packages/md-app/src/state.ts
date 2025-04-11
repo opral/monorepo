@@ -193,7 +193,7 @@ export const lixAtom = atom(async (get) => {
 	// mismatch in id, update URL without full reload if possible
 	if (lixId.value !== lixIdSearchParam) {
 		// Try to update URL without full navigation
-		const updateSuccessful = updateUrlParams({ l: lixId.value });
+		const updateSuccessful = updateUrlParams({ lix: lixId.value });
 
 		// If update failed, fall back to full navigation
 		if (!updateSuccessful) {
