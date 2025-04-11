@@ -101,11 +101,11 @@ const groups: Group[] = [
         label: 'Heading 3',
         value: HEADING_KEYS.h3,
       },
-      {
-        icon: <TableIcon />,
-        label: 'Table',
-        value: TablePlugin.key,
-      },
+      // {
+      //   icon: <TableIcon />,
+      //   label: 'Table',
+      //   value: TablePlugin.key,
+      // },
       {
         icon: <FileCodeIcon />,
         label: 'Code',
