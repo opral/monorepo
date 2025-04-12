@@ -2,6 +2,9 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createAccount } from "../account/create-account.js";
 import { createChange } from "../change/create-change.js";
+import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import fs from "node:fs/promises";
+import { toBlob } from "../lix/to-blob.js";
 
 test("it works for inserts, updates and deletions", async () => {
 	const lix = await openLixInMemory({});
@@ -55,14 +58,8 @@ test("it works for compound entity ids like change_author", async () => {
 
 	const account1 = await createAccount({ lix, name: "account1" });
 
-	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
 	await createChange({
 		lix,
-		version: currentVersion,
 		authors: [account1],
 		pluginKey: "mock-plugin",
 		schemaKey: "mock",
@@ -258,7 +255,78 @@ test("updating file.data does not trigger own change control", async () => {
 	expect(changes.length).toBe(2);
 });
 
+// SQlite does not have a BEFORE COMMIT trigger which could be used to group transactions into one change set
+// the test is a nice to have but not required to make change control work.
+test.todo("it should group transactions into one change set", async () => {
+	const lix = await openLixInMemory({});
 
-test.todo("it should group transactions into one change set", async () => {});
+	const activeVersionBefore = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.select(["version_v2.id", "version_v2.change_set_id"])
+		.executeTakeFirstOrThrow();
 
-	
+	const changeSetsBefore = await lix.db
+		.selectFrom("change_set")
+		.where(
+			changeSetIsAncestorOf(
+				{ id: activeVersionBefore.change_set_id },
+				{ includeSelf: true }
+			)
+		)
+		.selectAll()
+		.execute();
+
+	// freshly created lix should only have one change set in the ancestry
+	expect(changeSetsBefore.length).toBe(1);
+
+	await lix.db.transaction().execute(async (trx) => {
+		await trx
+			.insertInto("key_value")
+			.values({ key: "key0", value: "value0" })
+			.execute();
+
+		await trx
+			.insertInto("key_value")
+			.values({ key: "key1", value: "value1" })
+			.execute();
+	});
+
+	await fs.writeFile(
+		"./repro_after.lix",
+		Buffer.from(await(await toBlob({ lix })).arrayBuffer())
+	);
+
+	const activeVersionAfter = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.select(["version_v2.id", "version_v2.change_set_id"])
+		.executeTakeFirstOrThrow();
+
+	const changeSetsAfter = await lix.db
+		.selectFrom("change_set")
+		.where(
+			changeSetIsAncestorOf(
+				{ id: activeVersionAfter.change_set_id },
+				{ includeSelf: true }
+			)
+		)
+		.selectAll()
+		.execute();
+
+	// initial change set and the one created by the transaction
+	expect(changeSetsAfter.length).toBe(2);
+
+	const elements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", activeVersionAfter.change_set_id)
+		.selectAll()
+		.execute();
+
+	// mock plugin properties and own change control changes should be in the same set
+	expect(elements.map((e) => e.schema_key)).toContain([
+		"mock_json_property",
+		"lix_file_table",
+		"lix_change_author_table",
+	]);
+});

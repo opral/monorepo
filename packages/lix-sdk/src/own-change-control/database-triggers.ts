@@ -1,5 +1,9 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixDatabaseSchema, Snapshot } from "../database/schema.js";
+import type {
+	Change,
+	LixDatabaseSchema,
+	Snapshot,
+} from "../database/schema.js";
 import type { Kysely } from "kysely";
 import {
 	changeControlledTableIds,
@@ -124,14 +128,6 @@ function handleLixOwnEntityChange(
 		return;
 	}
 
-	const currentVersion = executeSync({
-		lix,
-		query: db
-			.selectFrom("current_version")
-			.innerJoin("version", "current_version.id", "version.id")
-			.selectAll("version"),
-	})[0];
-
 	const authors = executeSync({
 		lix,
 		query: db.selectFrom("active_account").selectAll(),
@@ -171,21 +167,15 @@ function handleLixOwnEntityChange(
 
 	const entityId = entityIdForRow(tableName, ...values);
 
-	const insertedChange = createChange(
-		{
-			lix,
-			authors: authors,
-			version: currentVersion,
-			entityId,
-			fileId: "lix_own_change_control",
-			pluginKey: "lix_own_change_control",
-			schemaKey: `lix_${tableName}_table`,
-			snapshotContent,
-		}
-		// {
-		// 	updateVersionChanges: tableName === "version_change" ? false : true,
-		// }
-	);
+	const insertedChange = createChange({
+		lix,
+		authors: authors,
+		entityId,
+		fileId: "lix_own_change_control",
+		pluginKey: "lix_own_change_control",
+		schemaKey: `lix_${tableName}_table`,
+		snapshotContent,
+	}) as unknown as Change;
 
 	const activeVersion = executeSync({
 		lix,
