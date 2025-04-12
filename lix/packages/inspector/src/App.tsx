@@ -335,6 +335,10 @@ export default function App() {
         <header
           className={`bg-background border-b ${
             isFrozen ? "bg-blue-50 border-blue-100" : "border-base-200"
+          } transition-opacity duration-200 ${
+            activeContent || pinnedWindows.length > 0
+              ? "opacity-100"
+              : "opacity-70 hover:opacity-100"
           }`}
         >
           <div className="container mx-auto py-1 px-2 flex items-center">
