@@ -8,7 +8,6 @@ import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
 import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
 import { createSession } from "./mutation-log/lix-session.js";
-import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 
@@ -16,7 +15,6 @@ export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
 }): Kysely<LixDatabaseSchema> {
 	initFunctions({ sqlite: args.sqlite });
-	applySchema({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({
 		dialect: createDialect({
 			database: args.sqlite,
@@ -34,8 +32,7 @@ export function initDb(args: {
 		],
 	});
 
-	// need to apply it here because db object needs to be available
-	applyOwnChangeControlTriggers(args.sqlite, db);
+	applySchema({ sqlite: args.sqlite, db: db });
 	return db;
 }
 

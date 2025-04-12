@@ -7,12 +7,16 @@ import { applyChangeSetEdgeDatabaseSchema } from "../change-set-edge/database-sc
 import { applyVersionV2DatabaseSchema } from "../version-v2/database-schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set/database-schema.js";
 import { applyFileQueueDatabaseSchema } from "../file-queue/database-schema.js";
+import type { Kysely } from "kysely";
+import type { LixDatabaseSchema } from "./schema.js";
+import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
 
 /**
  * Applies the database schema to the given sqlite database.
  */
 export function applySchema(args: {
 	sqlite: SqliteWasmDatabase;
+	db: Kysely<LixDatabaseSchema>;
 }): SqliteWasmDatabase {
 	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
@@ -207,7 +211,8 @@ export function applySchema(args: {
 	applyChangeProposalDatabaseSchema(args.sqlite);
 	applyMutationLogDatabaseSchema(args.sqlite);
 	applyChangeSetEdgeDatabaseSchema(args.sqlite);
-	applyVersionV2DatabaseSchema(args.sqlite);
+	applyVersionV2DatabaseSchema(args.sqlite, args.db);
+	applyOwnChangeControlTriggers(args.sqlite, args.db);
 
 	return args.sqlite;
 }
