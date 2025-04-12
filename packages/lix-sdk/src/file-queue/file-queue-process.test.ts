@@ -6,6 +6,8 @@ import type { LixFile } from "../database/schema.js";
 import { fileQueueSettled } from "./file-queue-settled.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { FileQueueEntry } from "./database-schema.js";
+import { changeSetIsDescendantOf } from "../query-filter/change-set-is-descendant-of.js";
+import type { ChangeSetEdge } from "../change-set-edge/database-schema.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
@@ -41,10 +43,10 @@ test("should use queue and settled correctly", async () => {
 		providePlugins: [mockPlugin],
 	});
 
-	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "current_version.id", "version.id")
-		.selectAll()
+	const activeVersionBefore = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
 	const enc = new TextEncoder();
@@ -118,20 +120,6 @@ test("should use queue and settled correctly", async () => {
 		.where("id", "=", "test")
 		.execute();
 
-	// const beforeQueueTick = await lix.db
-	// 	.selectFrom("file_queue")
-	// 	.selectAll()
-	// 	.execute();
-
-	// expect(beforeQueueTick.length).toBe(1);
-
-	// const afterQueueTick = await lix.db
-	// 	.selectFrom("file_queue")
-	// 	.selectAll()
-	// 	.execute();
-
-	// expect(afterQueueTick.length).toBe(0);
-
 	// update2 is equal to update1
 	const dataUpdate2 = dataUpdate1;
 
@@ -190,15 +178,24 @@ test("should use queue and settled correctly", async () => {
 		.execute();
 
 	const updatedEdges = await lix.db
-		.selectFrom("change_edge")
-		.selectAll()
+		.selectFrom("change_set")
+		.where(
+			changeSetIsDescendantOf(
+				{ id: activeVersionBefore.change_set_id },
+				{ includeSelf: true }
+			)
+		)
+		.innerJoin("change_set_edge", "change_set.id", "change_set_edge.parent_id")
+		.selectAll("change_set_edge")
 		.execute();
 
-	const versionChanges = await lix.db
-		.selectFrom("version_change")
-		.where("version_id", "=", currentVersion.id)
-		.selectAll()
-		.execute();
+	expect(updatedEdges).toEqual(
+		expect.arrayContaining([
+			expect.objectContaining({
+				parent_id: activeVersionBefore.change_set_id,
+			}) satisfies ChangeSetEdge,
+		])
+	);
 
 	expect(updatedChanges).toEqual(
 		expect.arrayContaining([
@@ -231,31 +228,6 @@ test("should use queue and settled correctly", async () => {
 					text: "second text update",
 				},
 				account_id: expect.stringMatching(/./),
-			}),
-		])
-	);
-
-	expect(updatedEdges).toEqual(
-		expect.arrayContaining([
-			// 0 is the parent of 1
-			// 1 is the parent of 2
-			expect.objectContaining({
-				parent_id: updatedChanges[0]?.id,
-				child_id: updatedChanges[1]?.id,
-			}),
-			expect.objectContaining({
-				parent_id: updatedChanges[1]?.id,
-				child_id: updatedChanges[2]?.id,
-			}),
-		])
-	);
-
-	// the version change pointers points to the last change
-	expect(versionChanges).toEqual(
-		expect.arrayContaining([
-			expect.objectContaining({
-				version_id: currentVersion.id,
-				change_id: updatedChanges[2]?.id,
 			}),
 		])
 	);
