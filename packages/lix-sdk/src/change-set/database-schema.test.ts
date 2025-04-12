@@ -395,6 +395,83 @@ describe("change_set immutable flag and triggers", () => {
 		expect(fetchedCs.immutable_elements).toBe(1);
 	});
 
+test("inserting, updating, and deleting elements from a change set with immutable elements FALSE should work", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create a mutable change set
+	const [mutableCs] = await lix.db
+		.insertInto("change_set")
+		.values({
+			immutable_elements: false,
+		})
+		.returning("id")
+		.execute();
+
+	await lix.db
+		.insertInto("change")
+		.values([
+			{
+				id: "change1",
+				entity_id: "entity1",
+				schema_key: "key1",
+				file_id: "file1",
+				plugin_key: "test",
+				snapshot_id: "no-content",
+			},
+			{
+				id: "change2",
+				entity_id: "entity1",
+				schema_key: "key1",
+				file_id: "file1",
+				plugin_key: "test",
+				snapshot_id: "no-content",
+			},
+		])
+		.execute();
+
+	// Insert an element
+	await expect(
+		lix.db
+			.insertInto("change_set_element")
+			.values({
+				change_set_id: mutableCs!.id,
+				change_id: "change1",
+				entity_id: "entity1",
+				schema_key: "key1",
+				file_id: "file1",
+			})
+			.execute()
+	).resolves.toBeDefined();
+
+	// Update the element
+	await expect(
+		lix.db
+			.updateTable("change_set_element")
+			.set({ change_id: "change2" })
+			.where("change_set_id", "=", mutableCs!.id)
+			.where("entity_id", "=", "entity1")
+			.execute()
+	).resolves.toBeDefined();
+
+	// Delete the element
+	await expect(
+		lix.db
+			.deleteFrom("change_set_element")
+			.where("change_set_id", "=", mutableCs!.id)
+			.where("entity_id", "=", "entity1")
+			.execute()
+	).resolves.toBeDefined();
+
+	// Verify the element was deleted
+	const elements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", mutableCs!.id)
+		.selectAll()
+		.execute();
+
+	expect(elements).toHaveLength(0);
+});
+
 	test("triggers should prevent modification of change_set_element if change_set is immutable (1)", async () => {
 		const lix = await openLixInMemory({});
 
