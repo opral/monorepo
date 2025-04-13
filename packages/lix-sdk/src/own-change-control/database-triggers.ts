@@ -1,23 +1,27 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { Kysely } from "kysely";
 import type {
 	Change,
 	LixDatabaseSchema,
 	Snapshot,
 } from "../database/schema.js";
-import type { Kysely } from "kysely";
 import {
 	changeControlledTableIds,
 	entityIdForRow,
 	type PragmaTableInfo,
 } from "./change-controlled-tables.js";
-import { createChange } from "../change/create-change.js";
 import { executeSync } from "../database/execute-sync.js";
+import { createChange } from "../change/create-change.js";
+
+export const LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID =
+	"pending-own-change-control";
 
 export function applyOwnChangeControlTriggers(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixDatabaseSchema>
 ): void {
 	const tableInfos: Record<string, PragmaTableInfo> = {};
+	let isFlushing = false;
 
 	for (const table of Object.keys(changeControlledTableIds)) {
 		tableInfos[table] = sqlite.exec({
@@ -57,10 +61,10 @@ export function applyOwnChangeControlTriggers(
       BEGIN
         SELECT handle_lix_own_change_control('${table}', 'insert', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
       END;
-      
+
       CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_update
       AFTER UPDATE ON ${table}
-			${
+      ${
 				// ignore update trigger if the change controlled properties
 				// did not change (a plugin likely called apply changes on the file.data)
 				table === "file"
@@ -81,10 +85,94 @@ export function applyOwnChangeControlTriggers(
       BEGIN
         SELECT handle_lix_own_change_control('${table}', 'delete', ${tableInfo.map((c) => "OLD." + c.name).join(", ")});
       END;
-      `;
+    `;
 
 		sqlite.exec(sql);
 	}
+
+	// Add trigger to move system changes before version change_set_id update
+	//
+	// Coming up with this took a long time AKA this has been evaluated against other options.
+	// Other options included:
+	//
+	// Have a "flush" mechanism
+	//    - needs manual invocation from devs (really bad)
+	//    - automatic flush using sqlite's `commit` hook runs out of transaction (bad)
+	sqlite.exec(`
+    CREATE TEMP TRIGGER IF NOT EXISTS flush_system_changes_before_version_update
+    BEFORE UPDATE OF change_set_id ON version_v2
+    BEGIN
+      -- bypass lix own change control
+      INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
+      VALUES ('lix_skip_own_change_control', 'true', true);
+
+      -- ensure new change_set exists and is mutable
+			UPDATE change_set SET immutable_elements = false WHERE id = NEW.change_set_id;
+
+
+      -- move pending elements
+      INSERT INTO change_set_element (change_set_id, change_id, entity_id, file_id, schema_key)
+      SELECT NEW.change_set_id, change_id, entity_id, file_id, schema_key
+      FROM change_set_element
+      WHERE change_set_id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}';
+
+      -- mark new change_set as immutable
+      UPDATE change_set
+      SET immutable_elements = true
+      WHERE id = NEW.change_set_id;
+
+      -- delete pending elements and pending change_set
+      DELETE FROM change_set_element WHERE change_set_id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}';
+      DELETE FROM change_set WHERE id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}';
+
+      -- remove skip flag
+      DELETE FROM key_value WHERE key = 'lix_skip_own_change_control';
+    END;
+  `);
+
+	// fallback flush on commit if system changes were never finalized
+	sqlite.sqlite3.capi.sqlite3_commit_hook(
+		sqlite,
+		() => {
+			if (isFlushing) return 0;
+			queueMicrotask(() => {
+				isFlushing = true;
+				try {
+					const pending = sqlite.exec(
+						`SELECT 1 FROM change_set_element WHERE change_set_id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}' LIMIT 1`,
+						{
+							returnValue: "resultRows",
+						}
+					);
+					if (pending.length === 0) return;
+
+					sqlite.exec(`
+          INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
+          VALUES ('lix_skip_own_change_control', 'true', true);
+
+          INSERT INTO change_set (immutable_elements)
+          VALUES (true);
+
+          INSERT INTO change_set_edge (parent_id, child_id)
+          SELECT change_set_id, (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
+          FROM version_v2
+          WHERE id = (SELECT version_id FROM active_version)
+          AND change_set_id IN (
+            SELECT id FROM change_set WHERE immutable_elements = true
+          );
+
+          UPDATE version_v2
+          SET change_set_id = (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
+          WHERE id = (SELECT version_id FROM active_version);
+        `);
+				} finally {
+					isFlushing = false;
+				}
+			});
+			return 0;
+		},
+		0
+	);
 }
 
 function handleLixOwnEntityChange(
@@ -115,18 +203,7 @@ function handleLixOwnEntityChange(
 		return;
 	}
 
-	// need to break the loop if own changes are detected
-	const change = executeSync({
-		lix,
-		query: db
-			.selectFrom("change")
-			.where("id", "=", values[0])
-			.select("plugin_key"),
-	})[0];
-
-	if (change?.plugin_key === "lix_own_change_control") {
-		return;
-	}
+	const entityId = entityIdForRow(tableName, ...values);
 
 	const authors = executeSync({
 		lix,
@@ -134,7 +211,6 @@ function handleLixOwnEntityChange(
 	});
 
 	if (authors.length === 0) {
-		console.error(tableName, change);
 		throw new Error("At least one author is required");
 	}
 
@@ -165,11 +241,20 @@ function handleLixOwnEntityChange(
 		delete snapshotContent.data;
 	}
 
-	const entityId = entityIdForRow(tableName, ...values);
+	// avoid a loop of own changes
+	// entails that we manually need to create all necessary changes
+	executeSync({
+		lix,
+		query: db.insertInto("key_value").values({
+			key: "lix_skip_own_change_control",
+			value: "true",
+			skip_change_control: true,
+		}),
+	});
 
 	const insertedChange = createChange({
 		lix,
-		authors: authors,
+		authors,
 		entityId,
 		fileId: "lix_own_change_control",
 		pluginKey: "lix_own_change_control",
@@ -177,68 +262,56 @@ function handleLixOwnEntityChange(
 		snapshotContent,
 	}) as unknown as Change;
 
-	const activeVersion = executeSync({
-		lix,
-		query: db
-			.selectFrom("active_version")
-			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-			.select(["version_v2.id", "version_v2.change_set_id"]),
-	})[0];
+	const insertedChangeAuthors = authors.map(
+		(author) =>
+			createChange({
+				lix,
+				authors: [],
+				entityId: entityIdForRow("change_author", [
+					insertedChange.id,
+					author.id,
+				]),
+				fileId: "lix_own_change_control",
+				pluginKey: "lix_own_change_control",
+				schemaKey: "lix_change_author_table",
+				snapshotContent: author,
+			}) as unknown as Change
+	);
 
-	// skip change control for the following mutation that update the versions leaf
 	executeSync({
-		lix,
-		query: db
-			.insertInto("key_value")
-			.values({
-				key: "lix_skip_own_change_control",
-				value: "true",
-				skip_change_control: true,
-			})
-			.onConflict((oc) => oc.doUpdateSet({ value: "true" })),
-	});
-
-	const changeSet = executeSync({
 		lix,
 		query: db
 			.insertInto("change_set")
-			.values({ immutable_elements: false })
-			.returningAll(),
-	})[0];
-
-	executeSync({
-		lix,
-		query: db.insertInto("change_set_element").values({
-			change_set_id: changeSet.id,
-			change_id: insertedChange.id,
-			entity_id: insertedChange.entity_id,
-			file_id: insertedChange.file_id,
-			schema_key: insertedChange.schema_key,
-		}),
+			.values({
+				id: LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID,
+				immutable_elements: false,
+			})
+			.onConflict((oc) => oc.doNothing()),
 	});
 
 	executeSync({
 		lix,
 		query: db
-			.updateTable("change_set")
-			.set({ immutable_elements: true })
-			.where("id", "=", changeSet.id),
-	});
-
-	executeSync({
-		lix,
-		query: db.insertInto("change_set_edge").values({
-			parent_id: activeVersion.change_set_id,
-			child_id: changeSet.id,
-		}),
-	});
-
-	executeSync({
-		lix,
-		query: db
-			.updateTable("version_v2")
-			.set({ change_set_id: changeSet.id })
-			.where("id", "=", activeVersion.id),
+			.insertInto("change_set_element")
+			.values([
+				{
+					change_set_id: LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID,
+					change_id: insertedChange.id,
+					entity_id: insertedChange.entity_id,
+					file_id: insertedChange.file_id,
+					schema_key: insertedChange.schema_key,
+				},
+				{
+					change_set_id: LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID,
+					change_id: insertedChangeAuthors[0]!.id,
+					schema_key: insertedChangeAuthors[0]!.schema_key,
+					entity_id: insertedChangeAuthors[0]!.entity_id,
+					file_id: insertedChangeAuthors[0]!.file_id,
+				},
+			])
+			.onConflict((oc) =>
+				oc.doUpdateSet((eb) => ({ change_id: eb.ref("excluded.change_id") }))
+			),
 	});
 
 	// remove the skip change control flag

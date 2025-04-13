@@ -143,20 +143,3 @@ test("should create the change authors", async () => {
 		{ change_id: change.id, account_id: account2.id },
 	]);
 });
-
-test("should throw an error if authors array is empty", async () => {
-	const lix = await openLixInMemory({});
-
-	expect(() =>
-		createChange({
-			lix,
-			authors: [],
-			entityId: "entity1",
-			fileId: "file1",
-			pluginKey: "plugin1",
-			schemaKey: "schema1",
-			snapshotContent: { text: "snapshot-content" },
-		})
-	).toThrow("At least one author is required");
-});
-

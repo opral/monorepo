@@ -71,6 +71,9 @@ test("it works for compound entity ids like change_author", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.where("schema_key", "=", "lix_change_author_table")
+		// haha this is meta. the account creation is also change controlled
+		// by the active account. hence, we need to filter the account creation
+		.where("entity_id", "like", `%,${account1.id}`)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
 		.execute();
@@ -257,7 +260,7 @@ test("updating file.data does not trigger own change control", async () => {
 
 // SQlite does not have a BEFORE COMMIT trigger which could be used to group transactions into one change set
 // the test is a nice to have but not required to make change control work.
-test.todo("it should group transactions into one change set", async () => {
+test("it should group transactions into one change set", async () => {
 	const lix = await openLixInMemory({});
 
 	const activeVersionBefore = await lix.db
@@ -320,13 +323,17 @@ test.todo("it should group transactions into one change set", async () => {
 	const elements = await lix.db
 		.selectFrom("change_set_element")
 		.where("change_set_id", "=", activeVersionAfter.change_set_id)
+		.orderBy("change_id")
 		.selectAll()
 		.execute();
 
 	// mock plugin properties and own change control changes should be in the same set
-	expect(elements.map((e) => e.schema_key)).toContain([
-		"mock_json_property",
-		"lix_file_table",
-		"lix_change_author_table",
+	expect(
+		elements.map((e) => ({ entity_id: e.entity_id, schema_key: e.schema_key }))
+	).toEqual([
+		{ entity_id: "key0", schema_key: "lix_key_value_table" },
+		{ entity_id: expect.any(String), schema_key: "lix_change_author_table" },
+		{ entity_id: "key1", schema_key: "lix_key_value_table" },
+		{ entity_id: expect.any(String), schema_key: "lix_change_author_table" },
 	]);
 });

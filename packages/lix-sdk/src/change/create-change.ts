@@ -1,4 +1,3 @@
-import { sql } from "kysely";
 import type { Account } from "../account/database-schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { Change, Snapshot } from "../database/schema.js";
@@ -19,10 +18,6 @@ export function createChange(args: {
 	schemaKey: Change["schema_key"];
 	snapshotContent: Snapshot["content"];
 }): Promise<Change> {
-	if (args.authors.length === 0) {
-		throw new Error("At least one author is required");
-	}
-
 	const snapshot = executeSync({
 		lix: args.lix,
 		query: args.lix.db
@@ -35,11 +30,8 @@ export function createChange(args: {
 					content: eb.ref("excluded.content"),
 				}))
 			)
-			.returningAll()
-			.returning(sql`json(content)`.as("content")),
+			.returning("id"),
 	})[0] as Snapshot;
-
-	snapshot.content = JSON.parse(snapshot.content as unknown as string);
 
 	const change = executeSync({
 		lix: args.lix,
@@ -56,17 +48,13 @@ export function createChange(args: {
 	})[0] as Change;
 
 	for (const author of args.authors) {
-		try {
-			executeSync({
-				lix: args.lix,
-				query: args.lix.db.insertInto("change_author").values({
-					change_id: change.id,
-					account_id: author.id,
-				}),
-			});
-		} catch (e) {
-			console.log(e);
-		}
+		executeSync({
+			lix: args.lix,
+			query: args.lix.db.insertInto("change_author").values({
+				change_id: change.id,
+				account_id: author.id,
+			}),
+		});
 	}
 
 	// @ts-expect-error - async type to make ts believe its async
@@ -74,9 +62,3 @@ export function createChange(args: {
 	// once we figure out how to make triggers async.
 	return change;
 }
-// if (args.lix.db.isTransaction) {
-// 	return executeInTransaction(args.lix.db);
-// } else {
-// 	return args.lix.db.transaction().execute(executeInTransaction);
-// }
-// }
