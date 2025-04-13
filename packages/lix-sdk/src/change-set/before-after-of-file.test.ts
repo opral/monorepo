@@ -139,7 +139,7 @@ test("gives the before and after state without altering the current state", asyn
 	expect(currentFile.path).toBe(originalFile.path);
 });
 
-test("returns an empty file object for before state when it doesn't exist", async () => {
+test("returns before: undefined when the file has no before state", async () => {
 	// Create a Lix instance with the mock JSON plugin
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
@@ -182,7 +182,7 @@ test("returns an empty file object for before state when it doesn't exist", asyn
 	expect(afterState).toEqual({ key: "value" });
 });
 
-test("returns undefined for after state when file is deleted", async () => {
+test("returns after: undefined when the file has no after state", async () => {
 	// Create a Lix instance with the mock JSON plugin
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
