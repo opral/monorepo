@@ -5,6 +5,7 @@ import { createChange } from "../change/create-change.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import fs from "node:fs/promises";
 import { toBlob } from "../lix/to-blob.js";
+import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
 
 test("it works for inserts, updates and deletions", async () => {
 	const lix = await openLixInMemory({});
@@ -402,3 +403,31 @@ test("should not trigger change control when modifying the skip key", async () =
 	expect(changesAfterDelete).toEqual(changesBefore);
 	expect(elementsAfterDelete).toEqual(elementsBefore);
 });
+
+test("works in combination with skipOwnChangeControl", async () => {
+	const lix = await openLixInMemory({});
+
+	await withSkipOwnChangeControl(lix.db, async (trx) => {
+		await trx
+			.insertInto("key_value")
+			.values({ key: "key1", value: "value1" })
+			.execute();
+
+		const skip = await trx
+			.selectFrom("key_value")
+			.where("key", "=", "lix_skip_own_change_control")
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(skip?.value).toBe("true");
+	});
+
+	const skip = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_skip_own_change_control")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(skip).toBeUndefined();
+});
+

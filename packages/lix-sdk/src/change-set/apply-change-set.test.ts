@@ -393,7 +393,9 @@ test("should not lead to new changes if called with withSkipOwnChangeControl", a
 		.selectFrom("change")
 		.where("change.entity_id", "=", "test-key")
 		.where("change.schema_key", "=", "lix_key_value_table")
-		.selectAll()
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll("change")
+		.select("snapshot.content")
 		.execute();
 
 	const changeSet = await createChangeSet({
@@ -428,7 +430,9 @@ test("should not lead to new changes if called with withSkipOwnChangeControl", a
 		.selectFrom("change")
 		.where("change.entity_id", "=", "test-key")
 		.where("change.schema_key", "=", "lix_key_value_table")
-		.selectAll()
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll("change")
+		.select("snapshot.content")
 		.execute();
 
 	expect(afterKeyValue?.value).toBe("initial-value");

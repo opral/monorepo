@@ -364,3 +364,39 @@ test("applying own entity changes doesn't lead to the creation of new changes wh
 
 	expect(changesBefore).toEqual(changesAfter);
 });
+
+
+test("does not double report changes", async () => {
+	const lix = await openLixInMemory({});
+
+	// insert a key-value record
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "key1", value: "value1" })
+		.execute();
+
+	const changesBefore = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "key1")
+		.where("schema_key", "=", "lix_key_value_table")
+		.selectAll()
+		.execute();
+
+	expect(changesBefore).toHaveLength(1);
+
+	// apply own changes
+	await applyOwnChanges({
+		lix,
+		changes: changesBefore,
+	});
+
+	// verify no new changes were created
+	const changesAfter = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "key1")
+		.where("schema_key", "=", "lix_key_value_table")
+		.selectAll()
+		.execute();
+
+	expect(changesAfter).toHaveLength(1);
+});
