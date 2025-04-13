@@ -3,7 +3,7 @@ export const changeControlledTableIds = {
 	comment: ["id"],
 	change_proposal: ["id"],
 	change_set: ["id"],
-	change_author: ["change_id", "account_id"],
+	// change_author: ["change_id", "account_id"],
 	// change_set_element: ["change_set_id", "change_id"],
 	change_set_label: ["label_id", "change_set_id"],
 	discussion: ["id"],
@@ -66,10 +66,7 @@ export function entityIdForRow(
 	// has compound primary key that are joined with a comma.
 	else {
 		for (const column of changeControlledTableIds[tableName]!) {
-			const index = changeControlledTableIds[tableName]!.indexOf(
-				// @ts-expect-error - no clue why
-				column
-			);
+			const index = changeControlledTableIds[tableName]!.indexOf(column);
 			if (entityId === "") {
 				entityId = values[index];
 			} else {

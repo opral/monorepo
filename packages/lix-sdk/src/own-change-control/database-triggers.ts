@@ -2,7 +2,6 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Kysely } from "kysely";
 import type {
 	Change,
-	ChangeAuthor,
 	LixDatabaseSchema,
 	Snapshot,
 } from "../database/schema.js";
@@ -57,37 +56,52 @@ export function applyOwnChangeControlTriggers(
 	for (const table of Object.keys(changeControlledTableIds)) {
 		const tableInfo = tableInfos[table]!;
 
-		const sql = `
-      CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_insert
-      AFTER INSERT ON ${table}
-      BEGIN
-        SELECT handle_lix_own_change_control('${table}', 'insert', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
-      END;
-
-      CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_update
-      AFTER UPDATE ON ${table}
-      ${
-				// ignore update trigger if the change controlled properties
-				// did not change (a plugin likely called apply changes on the file.data)
-				table === "file"
+		// Define WHEN clauses specifically for the key_value table
+		const insertWhenClause =
+			table === "key_value"
+				? // Skip if the inserted row IS the skip key
+					`WHEN NEW.key != 'lix_skip_own_change_control'`
+				: "";
+		const updateWhenClause =
+			table === "key_value"
+				? // Skip if the updated row IS the skip key
+					`WHEN NEW.key != 'lix_skip_own_change_control'`
+				: table === "file"
 					? `
-			WHEN (
-				OLD.id IS NOT NEW.id OR
-				OLD.path IS NOT NEW.path OR
-				OLD.metadata IS NOT NEW.metadata
-			)`
-					: ""
-			}
-      BEGIN
-        SELECT handle_lix_own_change_control('${table}', 'update', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
-      END;
+					WHEN (
+						OLD.id IS NOT NEW.id OR
+						OLD.path IS NOT NEW.path OR
+						OLD.metadata IS NOT NEW.metadata
+					)`
+					: ""; // Keep existing file clause
+		const deleteWhenClause =
+			table === "key_value"
+				? // Skip if the deleted row IS the skip key
+					`WHEN OLD.key != 'lix_skip_own_change_control'`
+				: "";
 
-      CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_delete
-      AFTER DELETE ON ${table}
-      BEGIN
-        SELECT handle_lix_own_change_control('${table}', 'delete', ${tableInfo.map((c) => "OLD." + c.name).join(", ")});
-      END;
-    `;
+		const sql = `
+					CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_insert
+					AFTER INSERT ON ${table}
+					${insertWhenClause}
+					BEGIN
+						SELECT handle_lix_own_change_control('${table}', 'insert', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
+					END;
+		
+					CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_update
+					AFTER UPDATE ON ${table}
+					${updateWhenClause}
+					BEGIN
+						SELECT handle_lix_own_change_control('${table}', 'update', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
+					END;
+		
+					CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_delete
+					AFTER DELETE ON ${table}
+					${deleteWhenClause}
+					BEGIN
+						SELECT handle_lix_own_change_control('${table}', 'delete', ${tableInfo.map((c) => "OLD." + c.name).join(", ")});
+					END;
+				`;
 
 		sqlite.exec(sql);
 	}
@@ -188,6 +202,8 @@ function handleLixOwnEntityChange(
 	const lix = { db, sqlite };
 
 	// key values that have skip_change_control set to true should not be change controlled
+	// { tableName: "key_value", skipChangeControl: true }
+	// This handles the explicit case where a key *itself* has skip_change_control set
 	if (tableName === "key_value" && values[2]) {
 		return;
 	}
@@ -264,25 +280,6 @@ function handleLixOwnEntityChange(
 		snapshotContent,
 	}) as unknown as Change;
 
-	const insertedChangeAuthors = authors.map(
-		(author) =>
-			createChange({
-				lix,
-				authors,
-				entityId: entityIdForRow("change_author", [
-					insertedChange.id,
-					author.id,
-				]),
-				fileId: "lix_own_change_control",
-				pluginKey: "lix_own_change_control",
-				schemaKey: "lix_change_author_table",
-				snapshotContent: {
-					change_id: insertedChange.id,
-					account_id: author.id,
-				} satisfies ChangeAuthor,
-			}) as unknown as Change
-	);
-
 	executeSync({
 		lix,
 		query: db
@@ -306,20 +303,12 @@ function handleLixOwnEntityChange(
 					file_id: insertedChange.file_id,
 					schema_key: insertedChange.schema_key,
 				},
-				{
-					change_set_id: LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID,
-					change_id: insertedChangeAuthors[0]!.id,
-					schema_key: insertedChangeAuthors[0]!.schema_key,
-					entity_id: insertedChangeAuthors[0]!.entity_id,
-					file_id: insertedChangeAuthors[0]!.file_id,
-				},
 			])
 			.onConflict((oc) =>
 				oc.doUpdateSet((eb) => ({ change_id: eb.ref("excluded.change_id") }))
 			),
 	});
 
-	// remove the skip change control flag
 	executeSync({
 		lix,
 		query: db
