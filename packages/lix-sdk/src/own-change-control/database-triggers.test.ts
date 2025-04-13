@@ -3,8 +3,6 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createAccount } from "../account/create-account.js";
 import { createChange } from "../change/create-change.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
-import fs from "node:fs/promises";
-import { toBlob } from "../lix/to-blob.js";
 import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
 
 test("it works for inserts, updates and deletions", async () => {
@@ -232,9 +230,11 @@ test("updating file.data does not trigger own change control", async () => {
 
 	changes = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("schema_key", "=", "lix_file_table")
 		.where("entity_id", "=", file.id)
-		.selectAll()
+		.selectAll("change")
+		.select("snapshot.content")
 		.execute();
 
 	expect(changes.length).toBe(1);
@@ -295,11 +295,6 @@ test("it should group transactions into one change set", async () => {
 			.values({ key: "key1", value: "value1" })
 			.execute();
 	});
-
-	await fs.writeFile(
-		"./repro_after.lix",
-		Buffer.from(await(await toBlob({ lix })).arrayBuffer())
-	);
 
 	const activeVersionAfter = await lix.db
 		.selectFrom("active_version")

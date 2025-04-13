@@ -13,7 +13,6 @@ import {
 import { executeSync } from "../database/execute-sync.js";
 import { createChange } from "../change/create-change.js";
 import type { Account } from "../account/database-schema.js";
-import type { KeyValue } from "../key-value/database-schema.js";
 
 export const LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID =
 	"pending-own-change-control";
@@ -57,54 +56,69 @@ export function applyOwnChangeControlTriggers(
 	for (const table of Object.keys(changeControlledTableIds)) {
 		const tableInfo = tableInfos[table]!;
 
-		// Define WHEN clauses specifically for the key_value table
-		const insertWhenClause =
-			table === "key_value"
-				? // Skip if the inserted row IS the skip key
-					`WHEN NEW.key != 'lix_skip_own_change_control'`
-				: "";
-		const updateWhenClause =
-			table === "key_value"
-				? // Skip if the updated row IS the skip key
-					`WHEN NEW.key != 'lix_skip_own_change_control'`
-				: table === "file"
-					? `
-					WHEN (
-						OLD.id IS NOT NEW.id OR
-						OLD.path IS NOT NEW.path OR
-						OLD.metadata IS NOT NEW.metadata
-					)`
-					: ""; // Keep existing file clause
-		const deleteWhenClause =
-			table === "key_value"
-				? // Skip if the deleted row IS the skip key
-					`WHEN OLD.key != 'lix_skip_own_change_control'`
-				: "";
+		// Define the common WHEN clause to check for global skip flags.
+		// Trigger should run ONLY if none of the skip conditions are met.
+		const commonSkipCheck = `NOT (
+			EXISTS (SELECT 1 FROM key_value WHERE key IN (
+				'lix_skip_own_change_control',
+				'lix_flushing_own_changes',
+				'lix_skip_handle_own_change_trigger',
+				'lix_updating_working_change_set'
+			))
+		)`;
 
-		const sql = `
+		// Base WHEN clauses, starting with the common check
+		let insertWhenClause = `WHEN ${commonSkipCheck}`;
+		let updateWhenClause = `WHEN ${commonSkipCheck}`;
+		// deleteWhenClause is not modified after this, so use const
+		const deleteWhenClause = `WHEN ${commonSkipCheck}`;
+
+		// Add table-specific WHEN clauses
+		if (table === "key_value") {
+			// For key_value, also check the skip_change_control column of the row itself
+			insertWhenClause += ` AND NEW.skip_change_control IS NOT TRUE`;
+			updateWhenClause += ` AND NEW.skip_change_control IS NOT TRUE`;
+			// Delete trigger doesn't need this specific check as the row is gone,
+			// but we might still want to record the deletion unless a global flag is set.
+		}
+
+		if (table === "file") {
+			// For file, check its own skip flag
+			// For file updates, ONLY trigger if columns *other than* 'data' have changed.
+			updateWhenClause += ` AND (
+			  OLD.id IS NOT NEW.id OR
+				OLD.path IS NOT NEW.path OR 
+				OLD.metadata IS NOT NEW.metadata
+			)`;
+			// Delete trigger doesn't need column checks.
+		}
+
+		try {
+			sqlite.exec(`
 					CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_insert
 					AFTER INSERT ON ${table}
 					${insertWhenClause}
 					BEGIN
 						SELECT handle_lix_own_change_control('${table}', 'insert', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
 					END;
-		
+
 					CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_update
 					AFTER UPDATE ON ${table}
 					${updateWhenClause}
 					BEGIN
 						SELECT handle_lix_own_change_control('${table}', 'update', ${tableInfo.map((c) => "NEW." + c.name).join(", ")});
 					END;
-		
+
 					CREATE TEMP TRIGGER IF NOT EXISTS ${table}_change_control_delete
 					AFTER DELETE ON ${table}
 					${deleteWhenClause}
 					BEGIN
 						SELECT handle_lix_own_change_control('${table}', 'delete', ${tableInfo.map((c) => "OLD." + c.name).join(", ")});
 					END;
-				`;
-
-		sqlite.exec(sql);
+			`);
+		} catch {
+			// ignore errors during trigger setup
+		}
 	}
 
 	// Add trigger to move system changes before version change_set_id update
@@ -206,25 +220,11 @@ function handleLixOwnChange(
 	// key values that have skip_change_control set to true should not be change controlled
 	// { tableName: "key_value", skipChangeControl: true }
 	// This handles the explicit case where a key *itself* has skip_change_control set
+	//
+	// for unknown reasons this double check is needed because
+	// setting `lix_skip_handle_own_change_trigger` bypasses the when
+	// clause of the trigger
 	if (tableName === "key_value" && values[2]) {
-		return;
-	}
-
-	const [skip] = executeSync({
-		lix,
-		query: db
-			.selectFrom("key_value")
-			.where((eb) =>
-				eb.or([
-					eb("key", "=", "lix_skip_own_change_control"),
-					eb("key", "=", "lix_flushing_own_changes"),
-					eb("key", "=", "lix_skip_handle_own_change_trigger"),
-				])
-			)
-			.select("value"),
-	}) as [KeyValue | undefined];
-
-	if (skip?.value) {
 		return;
 	}
 
@@ -318,6 +318,8 @@ function handleLixOwnChange(
 
 	executeSync({
 		lix,
-		query: db.deleteFrom("key_value").where("key", "=", "lix_skip_handle_own_change_trigger"),
+		query: db
+			.deleteFrom("key_value")
+			.where("key", "=", "lix_skip_handle_own_change_trigger"),
 	});
 }
