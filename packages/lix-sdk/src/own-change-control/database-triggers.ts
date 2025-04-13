@@ -13,6 +13,7 @@ import {
 import { executeSync } from "../database/execute-sync.js";
 import { createChange } from "../change/create-change.js";
 import type { Account } from "../account/database-schema.js";
+import type { KeyValue } from "../key-value/database-schema.js";
 
 export const LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID =
 	"pending-own-change-control";
@@ -42,7 +43,7 @@ export function applyOwnChangeControlTriggers(
 			operation: "insert" | "update" | "delete",
 			...value
 		) => {
-			return handleLixOwnEntityChange(
+			return handleLixOwnChange(
 				db,
 				sqlite,
 				tableName,
@@ -118,9 +119,8 @@ export function applyOwnChangeControlTriggers(
     CREATE TEMP TRIGGER IF NOT EXISTS flush_system_changes_before_version_update
     BEFORE UPDATE OF change_set_id ON version_v2
     BEGIN
-      -- bypass lix own change control
       INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
-      VALUES ('lix_skip_own_change_control', 'true', true);
+      VALUES ('lix_flushing_own_changes', 'true', true);
 
       -- ensure new change_set exists and is mutable
 			UPDATE change_set SET immutable_elements = false WHERE id = NEW.change_set_id;
@@ -141,8 +141,8 @@ export function applyOwnChangeControlTriggers(
       DELETE FROM change_set_element WHERE change_set_id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}';
       DELETE FROM change_set WHERE id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}';
 
-      -- remove skip flag
-      DELETE FROM key_value WHERE key = 'lix_skip_own_change_control';
+      -- delete the flushing flag
+      DELETE FROM key_value WHERE key = 'lix_flushing_own_changes';
     END;
   `);
 
@@ -164,7 +164,7 @@ export function applyOwnChangeControlTriggers(
 
 					sqlite.exec(`
           INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
-          VALUES ('lix_skip_own_change_control', 'true', true);
+          VALUES ('lix_flushing_own_changes', 'true', true);
 
           INSERT INTO change_set (immutable_elements)
           VALUES (true);
@@ -180,6 +180,8 @@ export function applyOwnChangeControlTriggers(
           UPDATE version_v2
           SET change_set_id = (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
           WHERE id = (SELECT version_id FROM active_version);
+
+          DELETE FROM key_value WHERE key = 'lix_flushing_own_changes';
         `);
 				} finally {
 					isFlushing = false;
@@ -191,7 +193,7 @@ export function applyOwnChangeControlTriggers(
 	);
 }
 
-function handleLixOwnEntityChange(
+function handleLixOwnChange(
 	db: Kysely<LixDatabaseSchema>,
 	sqlite: SqliteWasmDatabase,
 	tableName: keyof typeof changeControlledTableIds,
@@ -208,16 +210,21 @@ function handleLixOwnEntityChange(
 		return;
 	}
 
-	const shouldSkip =
-		executeSync({
-			lix,
-			query: db
-				.selectFrom("key_value")
-				.where("key", "=", "lix_skip_own_change_control")
-				.select("value"),
-		})[0]?.value === "true";
+	const [skip] = executeSync({
+		lix,
+		query: db
+			.selectFrom("key_value")
+			.where((eb) =>
+				eb.or([
+					eb("key", "=", "lix_skip_own_change_control"),
+					eb("key", "=", "lix_flushing_own_changes"),
+					eb("key", "=", "lix_skip_handle_own_change_trigger"),
+				])
+			)
+			.select("value"),
+	}) as [KeyValue | undefined];
 
-	if (shouldSkip) {
+	if (skip?.value) {
 		return;
 	}
 
@@ -264,7 +271,7 @@ function handleLixOwnEntityChange(
 	executeSync({
 		lix,
 		query: db.insertInto("key_value").values({
-			key: "lix_skip_own_change_control",
+			key: "lix_skip_handle_own_change_trigger",
 			value: "true",
 			skip_change_control: true,
 		}),
@@ -311,8 +318,6 @@ function handleLixOwnEntityChange(
 
 	executeSync({
 		lix,
-		query: db
-			.deleteFrom("key_value")
-			.where("key", "=", "lix_skip_own_change_control"),
+		query: db.deleteFrom("key_value").where("key", "=", "lix_skip_handle_own_change_trigger"),
 	});
 }

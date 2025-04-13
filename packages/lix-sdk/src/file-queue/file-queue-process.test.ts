@@ -6,8 +6,6 @@ import type { LixFile } from "../database/schema.js";
 import { fileQueueSettled } from "./file-queue-settled.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { FileQueueEntry } from "./database-schema.js";
-import { changeSetIsDescendantOf } from "../query-filter/change-set-is-descendant-of.js";
-import type { ChangeSetEdge } from "../change-set-edge/database-schema.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
@@ -42,12 +40,6 @@ test("should use queue and settled correctly", async () => {
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
-
-	const activeVersionBefore = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
-		.executeTakeFirstOrThrow();
 
 	const enc = new TextEncoder();
 	const dataInitial = enc.encode("insert text");
@@ -177,26 +169,6 @@ test("should use queue and settled correctly", async () => {
 		.select("snapshot.content")
 		.execute();
 
-	const updatedEdges = await lix.db
-		.selectFrom("change_set")
-		.where(
-			changeSetIsDescendantOf(
-				{ id: activeVersionBefore.change_set_id },
-				{ includeSelf: true }
-			)
-		)
-		.innerJoin("change_set_edge", "change_set.id", "change_set_edge.parent_id")
-		.selectAll("change_set_edge")
-		.execute();
-
-	expect(updatedEdges).toEqual(
-		expect.arrayContaining([
-			expect.objectContaining({
-				parent_id: activeVersionBefore.change_set_id,
-			}) satisfies ChangeSetEdge,
-		])
-	);
-
 	expect(updatedChanges).toEqual(
 		expect.arrayContaining([
 			expect.objectContaining({
@@ -231,6 +203,22 @@ test("should use queue and settled correctly", async () => {
 			}),
 		])
 	);
+
+	// Find all change sets whose IDs do not appear as a parent_id in any edge
+	const leafChangeSets = await lix.db
+		.selectFrom("change_set")
+		.where("change_set.id", "not in", (eb) =>
+			eb
+				.selectFrom("change_set_edge")
+				.select("change_set_edge.parent_id")
+				.distinct()
+		)
+		.selectAll("change_set")
+		.execute();
+
+	// There should only be one leaf change set at the end
+	// plus the working change set
+	expect(leafChangeSets).toHaveLength(2);
 });
 
 test.todo("changes should contain the author", async () => {

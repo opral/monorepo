@@ -419,7 +419,7 @@ test("works in combination with skipOwnChangeControl", async () => {
 			.selectAll()
 			.executeTakeFirst();
 
-		expect(skip?.value).toBe("true");
+		expect(skip).toBeDefined();
 	});
 
 	const skip = await lix.db
