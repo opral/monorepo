@@ -2,6 +2,7 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Kysely } from "kysely";
 import type {
 	Change,
+	ChangeAuthor,
 	LixDatabaseSchema,
 	Snapshot,
 } from "../database/schema.js";
@@ -12,6 +13,7 @@ import {
 } from "./change-controlled-tables.js";
 import { executeSync } from "../database/execute-sync.js";
 import { createChange } from "../change/create-change.js";
+import type { Account } from "../account/database-schema.js";
 
 export const LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID =
 	"pending-own-change-control";
@@ -208,7 +210,7 @@ function handleLixOwnEntityChange(
 	const authors = executeSync({
 		lix,
 		query: db.selectFrom("active_account").selectAll(),
-	});
+	}) as Account[];
 
 	if (authors.length === 0) {
 		throw new Error("At least one author is required");
@@ -266,7 +268,7 @@ function handleLixOwnEntityChange(
 		(author) =>
 			createChange({
 				lix,
-				authors: [],
+				authors,
 				entityId: entityIdForRow("change_author", [
 					insertedChange.id,
 					author.id,
@@ -274,7 +276,10 @@ function handleLixOwnEntityChange(
 				fileId: "lix_own_change_control",
 				pluginKey: "lix_own_change_control",
 				schemaKey: "lix_change_author_table",
-				snapshotContent: author,
+				snapshotContent: {
+					change_id: insertedChange.id,
+					account_id: author.id,
+				} satisfies ChangeAuthor,
 			}) as unknown as Change
 	);
 
