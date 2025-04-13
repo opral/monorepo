@@ -47,14 +47,16 @@ export function createChange(args: {
 			.returningAll(),
 	})[0] as Change;
 
-	for (const author of args.authors) {
-		executeSync({
-			lix: args.lix,
-			query: args.lix.db.insertInto("change_author").values({
-				change_id: change.id,
-				account_id: author.id,
-			}),
-		});
+	if (args.authors.length > 0) {
+		for (const author of args.authors) {
+			executeSync({
+				lix: args.lix,
+				query: args.lix.db.insertInto("change_author").values({
+					change_id: change.id,
+					account_id: author.id,
+				}),
+			});
+		}
 	}
 
 	// @ts-expect-error - async type to make ts believe its async
