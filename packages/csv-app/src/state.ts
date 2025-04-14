@@ -16,7 +16,7 @@ export const withPollingAtom = atom(Date.now());
 export const lixIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("l") || undefined;
+	return searchParams.get("lix") || undefined;
 });
 
 export const fileIdSearchParamsAtom = atom((get) => {
@@ -83,8 +83,8 @@ export const lixAtom = atom(async (get) => {
 		} else {
 			lixBlob = await lixCsvDemoFile();
 		}
-	}	
-	
+	}
+
 	let lix: Lix;
 
 	try {
@@ -139,7 +139,7 @@ export const lixAtom = atom(async (get) => {
 
 	if (lixId.value !== lixIdSearchParam) {
 		const url = new URL(window.location.href);
-		url.searchParams.set("l", lixId.value);
+		url.searchParams.set("lix", lixId.value);
 		window.location.href = url.toString();
 	}
 

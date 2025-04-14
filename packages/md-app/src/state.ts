@@ -22,7 +22,7 @@ export const fileIdSearchParamsAtom = atom((get) => {
 export const lixIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("l") || undefined;
+	return searchParams.get("lix") || undefined;
 });
 
 export const discussionSearchParamsAtom = atom(async (get) => {
@@ -193,12 +193,12 @@ export const lixAtom = atom(async (get) => {
 	// mismatch in id, update URL without full reload if possible
 	if (lixId.value !== lixIdSearchParam) {
 		// Try to update URL without full navigation
-		const updateSuccessful = updateUrlParams({ l: lixId.value });
+		const updateSuccessful = updateUrlParams({ lix: lixId.value });
 
 		// If update failed, fall back to full navigation
 		if (!updateSuccessful) {
 			const url = new URL(window.location.href);
-			url.searchParams.set("l", lixId.value);
+			url.searchParams.set("lix", lixId.value);
 			window.location.href = url.toString();
 		}
 	}

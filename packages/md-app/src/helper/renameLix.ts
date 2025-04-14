@@ -37,7 +37,7 @@ export async function saveLixName({
 
 		// Update the URL to include the lix ID for routing
 		const url = new URL(window.location.href);
-		url.searchParams.set("l", lixId.value);
+		url.searchParams.set("lix", lixId.value);
 		window.history.replaceState({}, "", url.toString());
 
 		console.log(`Successfully renamed lix to: ${trimmedName}`);

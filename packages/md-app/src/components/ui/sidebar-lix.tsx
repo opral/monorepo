@@ -202,7 +202,7 @@ export function LixSidebar() {
   }, [lix, lixName, currentLixName, setPolling])
 
   const switchToLix = React.useCallback((lixId: string) => {
-    navigate(`?l=${lixId}`)
+    navigate(`?lix=${lixId}`)
   }, [navigate])
 
   const deleteFile = React.useCallback(async (fileId: string) => {
@@ -242,7 +242,7 @@ export function LixSidebar() {
       const { id } = await createNewLixFileInOpfs()
 
       // Navigate to the new lix
-      navigate(`?l=${id}`)
+      navigate(`?lix=${id}`)
 
       // Set polling to refresh the UI
       setPolling(Date.now())
@@ -312,7 +312,7 @@ export function LixSidebar() {
           const writable = await opfsFile.createWritable()
           await writable.write(fileContent)
           await writable.close()
-          navigate("?l=" + lixId.value)
+          navigate("?lix=" + lixId.value)
         } catch (error) {
           console.error("Failed to open Lix file:", error)
         }
@@ -392,7 +392,7 @@ export function LixSidebar() {
       if (availableLixFiles.length > 0) {
         // Navigate to another lix
         const nextLixId = availableLixFiles[0].replace(/\.lix$/, '');
-        navigate(`?l=${nextLixId}`);
+        navigate(`?lix=${nextLixId}`);
       } else {
         // No lixes left, create a new one by navigating to root
         navigate("/");
@@ -493,7 +493,7 @@ export function LixSidebar() {
   return (
     <>
       <SidebarHeader className="flex flex-row justify-between items-center gap-1">
-        <a href={`https://lix.host/app/fm?l=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
+        <a href={`https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
           <Button
             variant="ghost"
             size="icon"
