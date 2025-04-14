@@ -8,16 +8,17 @@ export interface LixNodeData {
   tableName: string; // e.g., 'change_set', 'version_v2'
   entity: any;
   originalId?: string; // Added for version nodes to store original ID
+  title?: string; // Custom title for the node
   [key: string]: any;
 }
 
 // Change Set Node Component
-const ChangeSetNode = ({ id, entity }: { id: string; entity: any }) => {
+const ChangeSetNode = ({ id, entity, title }: { id: string; entity: any; title?: string }) => {
   return (
     <div className="card card-compact bg-base-100 shadow-sm min-w-[200px] text-sm">
       <div className="card-body p-4">
         <h3 className="card-title text-sm capitalize border-b mb-2">
-          change set
+          {title || "change set"}
         </h3>
         <div className="space-y-1">
           {Object.entries(entity).map(([key, value]) => {
@@ -136,11 +137,11 @@ const VersionNode = ({ id, entity }: { id: string; entity: any }) => {
 
 // Generic Node Component that delegates to specialized components
 const GenericLixNodeComponent = ({ id, data }: NodeProps) => {
-  const { tableName, entity } = data as LixNodeData;
+  const { tableName, entity, title } = data as LixNodeData;
 
   // Render the appropriate node type based on tableName
   if (tableName === "change_set") {
-    return <ChangeSetNode id={id} entity={entity} />;
+    return <ChangeSetNode id={id} entity={entity} title={title} />;
   } else if (tableName === "version_v2") {
     return <VersionNode id={id} entity={entity} />;
   }
@@ -150,7 +151,7 @@ const GenericLixNodeComponent = ({ id, data }: NodeProps) => {
     <div className="card card-compact bg-base-100 shadow-sm min-w-[180px] text-sm">
       <div className="card-body p-4">
         <h3 className="card-title text-sm capitalize border-b mb-2">
-          {tableName.replace("_", " ")}
+          {title || tableName.replace("_", " ")}
         </h3>
         <div className="space-y-1">
           {Object.entries(entity).map(([key, value]) => {
