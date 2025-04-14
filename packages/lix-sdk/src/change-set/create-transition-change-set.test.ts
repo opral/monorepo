@@ -1,6 +1,5 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { experimentalRestoreChangeSet } from "./restore-change-set.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
@@ -235,11 +234,11 @@ test.todo("it restores the state to a specific change set", async () => {
 	expect(actualJsonStateCs2).toEqual(expectedJsonStateCs2);
 
 	// Action: Restore to cs0
-	await experimentalRestoreChangeSet({
-		lix,
-		changeSet: cs0,
-		version: activeVersion,
-	});
+	// await experimentalCreateRestoreChangeSet({
+	// 	lix,
+	// 	changeSet: cs0,
+	// 	version: activeVersion,
+	// });
 
 	// Verify final state
 	// 1. Check that versions change set parent is cs2

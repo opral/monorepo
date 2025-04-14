@@ -74,16 +74,7 @@ export async function switchVersion(args: {
 				}
 				// need to remove the entity when switching the version
 				else {
-					if (
-						change.plugin_key === "lix_own_change_control" &&
-						(change.schema_key === "lix_account_table" ||
-							change.schema_key === "lix_version_table")
-					) {
-						// deleting accounts and versions when switching is
-						// not desired. a version should be able to jump to a
-						// different version and the accounts are not affected
-						continue;
-					}
+					thi
 					// the entity does not exist in the switched to version
 					toBeAppliedChanges.set(
 						`${change.file_id},${change.entity_id},${change.schema_key}`,

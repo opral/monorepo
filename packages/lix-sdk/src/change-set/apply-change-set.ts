@@ -17,6 +17,12 @@ export async function applyChangeSet(args: {
 	changeSet: Pick<ChangeSet, "id">;
 	version?: Pick<VersionV2, "id" | "change_set_id">;
 	/**
+	 * Whether to update the version to point to the new change set.
+	 *
+	 * @default true
+	 */
+	updateVersion?: boolean;
+	/**
 	 * The {@link GraphTraversalMode} for applying the change set.
 	 *
 	 * @default "recursive"
@@ -47,22 +53,24 @@ export async function applyChangeSet(args: {
 				//* change set has changes c1:e1 and c2:e2, the diff is c2:e2.
 				//* only storing the diff as new change set can be a future optimzation.
 				// update the version to point to the new change set
-				await trx
-					.updateTable("version_v2")
-					.set({ change_set_id: args.changeSet.id })
-					.where("id", "=", version.id)
-					.execute();
-
-				// add a parent relationship
-				if (version.change_set_id !== args.changeSet.id) {
+				if (args.updateVersion ?? true) {
 					await trx
-						.insertInto("change_set_edge")
-						.values({
-							parent_id: version.change_set_id,
-							child_id: args.changeSet.id,
-						})
-						.onConflict((oc) => oc.doNothing())
+						.updateTable("version_v2")
+						.set({ change_set_id: args.changeSet.id })
+						.where("id", "=", version.id)
 						.execute();
+
+					// add a parent relationship
+					if (version.change_set_id !== args.changeSet.id) {
+						await trx
+							.insertInto("change_set_edge")
+							.values({
+								parent_id: version.change_set_id,
+								child_id: args.changeSet.id,
+							})
+							.onConflict((oc) => oc.doNothing())
+							.execute();
+					}
 				}
 
 				// Select changes associated with the specified change set
