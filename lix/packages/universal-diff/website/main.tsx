@@ -15,7 +15,7 @@ function App() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto my-5 font-sans px-4">
+    <div className="max-w-7xl mx-auto my-5 px-5 font-sans">
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
 
       {activePage === "playground" ? <DiffPlayground /> : <TestCases />}
