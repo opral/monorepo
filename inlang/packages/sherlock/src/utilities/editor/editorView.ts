@@ -13,9 +13,6 @@ import { deleteBundleNested } from "./helper/deleteBundleNested.js"
 import { handleUpdateBundle } from "./helper/handleBundleUpdate.js"
 import { createMessage } from "./helper/createMessage.js"
 import { saveProject } from "../../main.js"
-import { createFileSystemMapper } from "../fs/createFileSystemMapper.js"
-import path from "path"
-import fs from "node:fs/promises"
 
 // Same interface as before
 export interface UpdateBundleMessage {
@@ -147,6 +144,29 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 					})
 
 					updateView()
+					return
+				case "translate-bundle":
+					// Handle the translated bundle
+					try {
+						// Update the bundle in the database
+						await handleUpdateBundle({
+							db: state().project?.db,
+							message: {
+								command: "translate-bundle",
+								change: message.translatedBundle,
+							},
+						})
+						updateView()
+					} catch (error) {
+						console.error("Failed to update translated bundle", error)
+						vscode.window.showErrorMessage(`Failed to update translations: ${String(error)}`)
+					}
+					return
+				case "show-info-message":
+					msg(message.message, "info", "statusBar", vscode.StatusBarAlignment.Right, 3000)
+					return
+				case "show-error-message":
+					msg(message.message, "error", "statusBar", vscode.StatusBarAlignment.Right, 3000)
 					return
 
 				default:
