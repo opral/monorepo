@@ -12,7 +12,7 @@ test("should create a version linked to the provided change_set_id", async () =>
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const newVersion = await createVersionV2({ lix, from: changeSet });
+	const newVersion = await createVersionV2({ lix, changeSet: changeSet });
 
 	expect(newVersion.change_set_id).toBe(changeSet.id);
 	expect(newVersion.id).toBeDefined();
@@ -31,7 +31,7 @@ test("should create a version with the specified name", async () => {
 
 	const newVersion = await createVersionV2({
 		lix,
-		from: changeSet,
+		changeSet: changeSet,
 		name: versionName,
 	});
 
@@ -50,7 +50,7 @@ test("should create a version with the specified id", async () => {
 
 	const newVersion = await createVersionV2({
 		lix,
-		from: changeSet,
+		changeSet: changeSet,
 		id: "hello world",
 	});
 
@@ -72,7 +72,7 @@ test("should work within an existing transaction", async () => {
 	const newVersion = await lix.db.transaction().execute(async (trx) => {
 		return createVersionV2({
 			lix: { ...lix, db: trx }, // Pass the transaction object
-			from: { id: changeSet.id },
+			changeSet: { id: changeSet.id },
 			name: versionName,
 		});
 	});
@@ -97,7 +97,7 @@ test("should fail if the 'from' change_set_id does not exist", async () => {
 	};
 
 	await expect(
-		createVersionV2({ lix, from: nonExistentChangeSet })
+		createVersionV2({ lix, changeSet: nonExistentChangeSet })
 		// Check for foreign key constraint error
 		// The specific error message might vary based on the db driver
 	).rejects.toThrow(/FOREIGN KEY constraint failed/i);
