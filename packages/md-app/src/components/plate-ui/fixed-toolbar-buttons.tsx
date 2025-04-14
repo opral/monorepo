@@ -8,7 +8,7 @@ import {
   CodePlugin,
   ItalicPlugin,
   StrikethroughPlugin,
-  UnderlinePlugin,
+  // UnderlinePlugin,
 } from '@udecode/plate-basic-marks/react';
 import {
   FontBackgroundColorPlugin,
@@ -30,7 +30,7 @@ import {
   ItalicIcon,
   PaintBucketIcon,
   StrikethroughIcon,
-  UnderlineIcon,
+  // UnderlineIcon,
   ZapIcon,
 } from 'lucide-react';
 
@@ -110,12 +110,12 @@ export function FixedToolbarButtons() {
               <ItalicIcon />
             </MarkToolbarButton>
 
-            <MarkToolbarButton
+            {/* <MarkToolbarButton
               nodeType={UnderlinePlugin.key}
               tooltip="Underline (⌘+U)"
             >
               <UnderlineIcon />
-            </MarkToolbarButton>
+            </MarkToolbarButton> */}
 
             <MarkToolbarButton
               nodeType={StrikethroughPlugin.key}
@@ -153,7 +153,7 @@ export function FixedToolbarButtons() {
 
           <ToolbarGroup>
             <LinkToolbarButton />
-            <TableDropdownMenu />
+            {/* <TableDropdownMenu /> */}
             <EmojiDropdownMenu />
             <MediaToolbarButton nodeType={ImagePlugin.key} />
             <ImportMarkdown />

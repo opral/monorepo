@@ -10,7 +10,7 @@ import {
   BaseCodePlugin,
   BaseItalicPlugin,
   BaseStrikethroughPlugin,
-  BaseUnderlinePlugin,
+  // BaseUnderlinePlugin,
 } from '@udecode/plate-basic-marks';
 import { BaseBlockquotePlugin } from '@udecode/plate-block-quote';
 import {
@@ -20,7 +20,7 @@ import {
 } from '@udecode/plate-code-block';
 import { BaseHeadingPlugin, HEADING_KEYS } from '@udecode/plate-heading';
 import { BaseHorizontalRulePlugin } from '@udecode/plate-horizontal-rule';
-import { BaseIndentPlugin } from '@udecode/plate-indent';
+// import { BaseIndentPlugin } from '@udecode/plate-indent';
 import { BaseIndentListPlugin } from '@udecode/plate-indent-list';
 import { BaseLinkPlugin } from '@udecode/plate-link';
 
@@ -55,7 +55,7 @@ const components = {
   [BaseLinkPlugin.key]: LinkElementStatic,
   [BaseParagraphPlugin.key]: ParagraphElementStatic,
   [BaseStrikethroughPlugin.key]: withProps(SlateLeaf, { as: 's' }),
-  [BaseUnderlinePlugin.key]: withProps(SlateLeaf, { as: 'u' }),
+  // [BaseUnderlinePlugin.key]: withProps(SlateLeaf, { as: 'u' }),
   [HEADING_KEYS.h1]: withProps(HeadingElementStatic, { variant: 'h1' }),
   [HEADING_KEYS.h2]: withProps(HeadingElementStatic, { variant: 'h2' }),
   [HEADING_KEYS.h3]: withProps(HeadingElementStatic, { variant: 'h3' }),
@@ -70,16 +70,16 @@ const plugins = [
   BaseCodeSyntaxPlugin,
   BaseItalicPlugin,
   BaseStrikethroughPlugin,
-  BaseUnderlinePlugin,
+  // BaseUnderlinePlugin,
   BaseHeadingPlugin,
   BaseHorizontalRulePlugin,
   BaseLinkPlugin,
   BaseParagraphPlugin,
-  BaseIndentPlugin.extend({
-    inject: {
-      targetPlugins: [BaseParagraphPlugin.key],
-    },
-  }),
+  // BaseIndentPlugin.extend({
+  //   inject: {
+  //     targetPlugins: [BaseParagraphPlugin.key],
+  //   },
+  // }),
   BaseIndentListPlugin.extend({
     inject: {
       targetPlugins: [BaseParagraphPlugin.key],

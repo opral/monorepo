@@ -10,7 +10,7 @@ import {
   BoldPlugin,
   ItalicPlugin,
   StrikethroughPlugin,
-  UnderlinePlugin,
+  // UnderlinePlugin,
 } from '@udecode/plate-basic-marks/react';
 import { getCommentKey, getDraftCommentKey } from '@udecode/plate-comments';
 import { CommentsPlugin, useCommentId } from '@udecode/plate-comments/react';
@@ -70,7 +70,7 @@ export const useCommentEditor = (
           [MentionInputPlugin.key]: MentionInputElement,
           [MentionPlugin.key]: MentionElement,
           [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: 's' }),
-          [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
+          // [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
           // [SlashInputPlugin.key]: SlashInputElement,
         },
       },
