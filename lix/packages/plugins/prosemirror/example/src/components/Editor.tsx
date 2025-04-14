@@ -2,7 +2,8 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { history } from "prosemirror-history";
 import { keymap } from "prosemirror-keymap";
-import { baseKeymap } from "prosemirror-commands";
+import { baseKeymap, toggleMark, chainCommands } from "prosemirror-commands";
+import { wrapInList, splitListItem, liftListItem, sinkListItem } from "prosemirror-schema-list";
 import { idPlugin } from "../prosemirror/id-plugin";
 import { schema } from "../prosemirror/schema";
 import { lixProsemirror } from "../prosemirror/lix-plugin";
@@ -11,6 +12,7 @@ import { prosemirrorFile, lix } from "../state";
 import { registerCustomNodeViews } from "../prosemirror/custom-node-views";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { DiffView } from "./DiffView";
+import Toolbar from './Toolbar';
 
 // Custom styles for the ProseMirror editor
 const editorStyles = `
@@ -54,7 +56,18 @@ const Editor: React.FC = () => {
 			schema,
 			plugins: [
 				history(),
-				keymap(baseKeymap),
+				keymap({
+					...baseKeymap,
+					// Add bold/italic/list keybindings
+					"Mod-b": toggleMark(schema.marks.strong),
+					"Mod-B": toggleMark(schema.marks.strong), // Handle Shift
+					"Mod-i": toggleMark(schema.marks.em),
+					"Mod-I": toggleMark(schema.marks.em), // Handle Shift
+					"Shift-Ctrl-8": wrapInList(schema.nodes.bulletList), // Common shortcut for bullet list
+					"Enter": chainCommands(splitListItem(schema.nodes.listItem), baseKeymap.Enter), // Chain list split with default Enter
+					"Tab": sinkListItem(schema.nodes.listItem), // Indent list item
+					"Shift-Tab": liftListItem(schema.nodes.listItem), // Outdent list item
+				}),
 				idPlugin,
 				lixProsemirror({
 					lix,
@@ -104,6 +117,7 @@ const Editor: React.FC = () => {
 	return (
 		<div className="flex flex-col h-full">
 			<style>{editorStyles}</style>
+            <Toolbar view={view} />
 			<div className="editor-wrapper p-4 relative" onClick={handleClick}>
 				{/* The editor is always mounted but hidden when diff view is active */}
 				<div
