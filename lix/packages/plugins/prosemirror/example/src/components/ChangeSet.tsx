@@ -22,7 +22,7 @@ export interface ChangeSetHandle {
 
 interface ChangeSetProps {
 	changeSet: ChangeSetType & { change_count: number; created_at?: string };
-	isCurrentChangeSet?: boolean;
+	isWorkingChangeSet?: boolean;
 	previousChangeSetId?: string;
 	alwaysExpand?: boolean;
 	showRestore?: boolean;
@@ -34,7 +34,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 	(
 		{
 			changeSet,
-			isCurrentChangeSet = false,
+			isWorkingChangeSet = false,
 			previousChangeSetId,
 			alwaysExpand = false,
 			showRestore = true,
@@ -61,13 +61,13 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		// Auto-expand current change set only when component first mounts
 		useEffect(() => {
 			// Only auto-expand if this is the current change set and no change set is currently expanded
-			if (isCurrentChangeSet && expandedChangeSetId === null) {
+			if (isWorkingChangeSet && expandedChangeSetId === null) {
 				setExpandedChangeSetId(changeSet.id);
 			}
 		}, [
 			// Only run this effect once when the component mounts
 			// eslint-disable-next-line react-hooks/exhaustive-deps
-			isCurrentChangeSet,
+			isWorkingChangeSet,
 			changeSet,
 		]);
 
@@ -81,7 +81,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 		// Truncate comment content if it's longer than 50 characters
 		const truncatedComment =
-			firstComment?.content && !isCurrentChangeSet
+			firstComment?.content && !isWorkingChangeSet
 				? firstComment.content.length > 50
 					? `${firstComment.content.substring(0, 50)}...`
 					: firstComment.content
@@ -111,10 +111,10 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 					onClick={handleToggleExpand}
 				>
 					<div
-						className={`w-8 h-8 flex items-center justify-center mr-2 rounded-full ${isCurrentChangeSet ? "bg-blue-100" : "bg-base-300"}`}
+						className={`w-8 h-8 flex items-center justify-center mr-2 rounded-full ${isWorkingChangeSet ? "bg-blue-100" : "bg-base-300"}`}
 					>
 						{/* Icon: clock for current changes, user avatar for others */}
-						{isCurrentChangeSet ? (
+						{isWorkingChangeSet ? (
 							<Clock size={16} />
 						) : (
 							<span>{getInitials(activeAccount?.name || "")}</span>
@@ -122,13 +122,13 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 					</div>
 					<div className="flex-1">
 						<div className="text-sm break-words">
-							{isCurrentChangeSet
-								? "Current Change Set"
+							{isWorkingChangeSet
+								? "Working Change Set"
 								: truncatedComment
 									? truncatedComment
 									: "No description yet"}
 						</div>
-						{!isCurrentChangeSet && (
+						{!isWorkingChangeSet && (
 							<div className="text-xs text-base-content-secondary">
 								{changeSet?.created_at && toRelativeTime(changeSet.created_at)}
 							</div>

@@ -7,8 +7,6 @@ import {
 	changeSetElementInSymmetricDifference,
 	changeSetHasLabel,
 	jsonArrayFrom,
-	changeSetIsDescendantOf,
-	changeSetElementIsLeafOf,
 } from "@lix-js/sdk";
 
 /**
@@ -74,6 +72,7 @@ export async function selectCheckpoints(): Promise<
 			"change_set.id",
 			"change_set_element.change_set_id",
 		)
+		.where("file_id", "=", prosemirrorFile.id)
 		.selectAll("change_set")
 		.groupBy("change_set.id")
 		.select((eb) => [
@@ -177,56 +176,29 @@ export async function selectDiscussion(args: { changeSetId: ChangeSet["id"] }) {
  * that are not yet checkpointed.
  */
 export async function selectWorkingChangeSet(): Promise<
-	(ChangeSet & { change_count: number; created_at: string }) | null
+	(ChangeSet & { change_count: number }) | null
 > {
 	try {
 		const activeVersion = await selectActiveVersion();
-		if (!activeVersion) {
-			console.warn("No active version found.");
-			return null;
-		}
 
-		// Find the latest checkpoint in the current version's change set graph
-		const latestCheckpoint = await lix.db
+		return await lix.db
 			.selectFrom("change_set")
-			.where(changeSetHasLabel({ name: "checkpoint" }))
-			.where(changeSetIsAncestorOf({ id: activeVersion.change_set_id }))
-			.select("id")
-			.executeTakeFirst();
-
-		const changes = !latestCheckpoint
-			? { change_count: 0 }
-			: await lix.db
-					.selectFrom("change_set_element")
-					.innerJoin(
-						"change_set",
-						"change_set_element.change_set_id",
-						"change_set.id",
-					)
-					.innerJoin("change", "change_set_element.change_id", "change.id")
-					.where("change.file_id", "=", prosemirrorFile.id)
-					.where(changeSetIsDescendantOf(latestCheckpoint))
-					.where("change_set.id", "!=", latestCheckpoint.id)
-					.where(
-						changeSetElementIsLeafOf([{ id: activeVersion.change_set_id }]),
-					)
-					.select((eb) =>
-						eb.fn
-							.count<number>("change_set_element.change_id")
-							.as("change_count"),
-					)
-					.executeTakeFirstOrThrow();
-
-		// Construct a synthetic ChangeSet object
-		// Using activeVersion.change_set_id as the representative ID for this state
-		return {
-			id: `working-${activeVersion.id}`,
-			created_at: "2025-04-04T10:19:05.000Z",
-			change_count: changes.change_count,
-		};
+			.where("id", "=", activeVersion.working_change_set_id)
+			// left join in case the change set has no elements
+			.leftJoin(
+				"change_set_element",
+				"change_set.id",
+				"change_set_element.change_set_id",
+			)
+			.where("file_id", "=", prosemirrorFile.id)
+			.selectAll("change_set")
+			.groupBy("change_set.id")
+			.select((eb) => [
+				eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+			])
+			.executeTakeFirstOrThrow();
 	} catch (e) {
 		console.error("Error selecting working change set:", e);
-		// Depending on desired behavior, re-throw or return null
 		return null; // Keep UI stable in case of error
 		// throw e;
 	}

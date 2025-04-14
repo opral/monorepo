@@ -41,7 +41,7 @@ const Checkpoints: React.FC = () => {
 							ref={changeSetRef}
 							key="current-changes"
 							changeSet={currentChangeSet}
-							isCurrentChangeSet={true}
+							isWorkingChangeSet={true}
 							// previousChangeSetId={checkpoints?.[0]?.id ?? undefined}
 							showRestore={false}
 							footer={
