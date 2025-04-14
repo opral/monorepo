@@ -1,8 +1,13 @@
-import { it, expect } from "vitest";
-import { openLixInMemory, fileQueueSettled } from "@lix-js/sdk";
+import { expect, test } from "vitest";
+import {
+	openLixInMemory,
+	fileQueueSettled,
+	beforeAfterOfFile,
+} from "@lix-js/sdk";
 import { plugin } from "./index.js";
+import fs from "node:fs/promises";
 
-it("detects changes when inserting a prosemirror document", async () => {
+test("detects changes when inserting a prosemirror document", async () => {
 	// Initialize Lix with the ProseMirror plugin
 	const lix = await openLixInMemory({
 		providePlugins: [plugin],
@@ -99,4 +104,51 @@ it("detects changes when inserting a prosemirror document", async () => {
 		const content = p2Change.content as any;
 		expect(content.content?.[0]?.text).toBe("New paragraph");
 	}
+});
+
+test("beforeAfterOfFile() reconstructs the same file", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [plugin],
+	});
+
+	const example = await fs.readFile(
+		new URL(`../example/assets/before.json`, import.meta.url).pathname,
+	);
+
+	const exampleParsed = JSON.parse(new TextDecoder().decode(example));
+
+	const versionBefore = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			id: "mock-file-id",
+			path: "/prosemirror.json",
+			data: example,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await fileQueueSettled({ lix });
+
+	const versionAfter = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	const { after } = await beforeAfterOfFile({
+		lix,
+		file,
+		changeSetBefore: { id: versionBefore.change_set_id },
+		changeSetAfter: { id: versionAfter.change_set_id },
+	});
+
+	const afterParsed = JSON.parse(new TextDecoder().decode(after?.data));
+
+	expect(afterParsed).toEqual(exampleParsed);
 });
