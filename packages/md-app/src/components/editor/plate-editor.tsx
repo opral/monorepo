@@ -11,7 +11,7 @@ import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { debounce } from "lodash-es";
 import { useAtom } from "jotai";
 import { editorRefAtom, lixAtom } from "@/state";
-import { activeFileAtom, checkpointChangeSetsAtom, intermediateChangeIdsAtom, loadedMdAtom } from "@/state-active-file";
+import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
@@ -27,6 +27,8 @@ export function PlateEditor() {
 	const editor = useCreateEditor();
 
 	const insertEmptyPromptElement = () => {
+		if (!editor) return;
+
 		// Remove any existing empty prompt elements first
 		const filteredNodes = [...editor.children].filter(
 			(node: TElement) => node.type !== EMPTY_DOCUMENT_PROMPT_KEY
@@ -60,7 +62,7 @@ export function PlateEditor() {
 	}, [editor, setEditorRef]);
 
 	useEffect(() => {
-		if (loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()) {
+		if (editor && loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()) {
 			const nodes = editor
 				.getApi(ExtendedMarkdownPlugin)
 				.markdown.deserialize(loadedMd);
@@ -69,6 +71,8 @@ export function PlateEditor() {
 	}, [activeFile?.id]);
 
 	useEffect(() => {
+		if (!editor) return;
+
 		// Check if document is empty or just whitespace
 		const isEmpty = !loadedMd || loadedMd.trim() === '';
 
@@ -108,7 +112,7 @@ export function PlateEditor() {
 				// } else {
 
 				// Only attempt to select all if we have editor content
-				if (!editor.children || editor.children.length === 0) {
+				if (!editor || !editor.children || editor.children.length === 0) {
 					return;
 				}
 
