@@ -10,8 +10,8 @@ import {
 	CodePlugin,
 	ItalicPlugin,
 	StrikethroughPlugin,
-	SubscriptPlugin,
-	SuperscriptPlugin,
+	// SubscriptPlugin,
+	// SuperscriptPlugin,
 	// UnderlinePlugin,
 } from "@udecode/plate-basic-marks/react";
 import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
