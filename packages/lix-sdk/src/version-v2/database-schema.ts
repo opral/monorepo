@@ -5,7 +5,6 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
-import { changeSetIsDescendantOf } from "../query-filter/change-set-is-descendant-of.js";
 
 export function applyVersionV2DatabaseSchema(
 	sqlite: SqliteWasmDatabase,
@@ -30,6 +29,11 @@ export function applyVersionV2DatabaseSchema(
 			}),
 	});
 
+	// initial ids (lack of having a separate creation and migration schema)
+	const mainVersionId = "019328cc-ccb0-7f51-96e8-524df4597ac6";
+	const workingChangeSetId = "h2h09ha92jfaw2";
+	const initialChangeSetId = "2j9jm90ajc9j90";
+
 	const sql = `
   CREATE TABLE IF NOT EXISTS version_v2 (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
@@ -52,25 +56,25 @@ export function applyVersionV2DatabaseSchema(
   -- Insert the default change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id, immutable_elements)
-  SELECT 'initialchangeset', 1
-  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = 'initialchangeset');
+  SELECT '${initialChangeSetId}', 1
+  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${initialChangeSetId}');
 
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id, immutable_elements)
-  SELECT 'initial_working_changeset', 0
-  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = 'initial_working_changeset');
+  SELECT '${workingChangeSetId}', 0
+  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${workingChangeSetId}');
 
   -- Insert the default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO version_v2 (id, name, change_set_id, working_change_set_id)
-  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main', 'initialchangeset', 'initial_working_changeset'
+  SELECT '${mainVersionId}', 'main', '${initialChangeSetId}', '${workingChangeSetId}'
   WHERE NOT EXISTS (SELECT 1 FROM version_v2);
 
   -- Set the default current version to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
   INSERT INTO active_version (version_id)
-  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6'
+  SELECT '${mainVersionId}'
   WHERE NOT EXISTS (SELECT 1 FROM active_version);
 
   CREATE TRIGGER IF NOT EXISTS update_working_change_set 
@@ -108,55 +112,56 @@ function handleUpdateWorkingChangeSet(args: {
 			query: args.db
 				.selectFrom("change")
 				.where("id", "=", element.change_id)
-				.select("snapshot_id"),
-		}) as [{ snapshot_id: string }];
+				.select(["snapshot_id", "id"]),
+		}) as [{ snapshot_id: string; id: string }];
 
+		// checking if the entity has been inserted since the last checkpoint.
+		//
+		// if yes, the entity is removed from the working change set to signal
+		// the user "nothing changed since your last checkpoint"
+		//
+		// if not, the delete change for the entity is explicitly added to the
+		// working change set to signal the user "you just deleted something"
 		if (change.snapshot_id === "no-content") {
-			// checking if the entity has been inserted since the last checkpoint.
-			//
-			// if yes, the entity is removed from the working change set to signal
-			// the user "nothing changed since your last checkpoint"
-			//
-			// if not, the delete change for the entity is explicitly added to the
-			// working change set to signal the user "you just deleted something"
-			const [existing] = executeSync({
+			const [lastCheckpoint] = executeSync({
 				lix: { sqlite: args.sqlite },
 				query: args.db
-					// get the last checkpoint
-					.with("last_checkpoint", (eb) =>
-						eb
-							.selectFrom("change_set")
-							.where(changeSetIsAncestorOf({ id: args.change_set_id }))
-							.where(changeSetHasLabel({ name: "checkpoint" }))
-							.limit(1)
-							.select("change_set.id")
-					)
-					// get all changesets since the last checkpoint
-					.with("change_sets_since_last_checkpoint", (eb) =>
-						eb
-							.selectFrom("change_set")
-							.innerJoin(
-								"last_checkpoint",
-								"last_checkpoint.id",
-								"change_set.id"
-							)
-							.where(changeSetIsDescendantOf({ id: "last_checkpoint.id" }))
-							.select("change_set.id")
-					)
-					// get all changes since the last checkpoint
-					.selectFrom("change_set_element")
-					.innerJoin("change", "change.id", "change_set_element.change_id")
-					.where("change_set_id", "in", (eb) =>
-						eb
-							.selectFrom("change_sets_since_last_checkpoint")
-							.select("change_sets_since_last_checkpoint.id")
-					)
-					.where("change.entity_id", "=", element.entity_id)
-					.where("change.file_id", "=", element.file_id)
-					.where("change.schema_key", "=", element.schema_key)
+					.selectFrom("change_set")
+					.where(changeSetIsAncestorOf({ id: args.change_set_id }))
+					.where(changeSetHasLabel({ name: "checkpoint" }))
+					// note: assumes that sqlite traverses the tree in depth-first order
+					// this might not be true in all cases (todo for the future)
 					.limit(1)
-					.select(["change.snapshot_id"]),
-			}) as [{ snapshot_id: string } | undefined];
+					.select("change_set.id"),
+			}) as [{ id: string } | undefined];
+
+			const [existing] = lastCheckpoint
+				? (executeSync({
+						lix: { sqlite: args.sqlite },
+						query: args.db
+							.selectFrom("change_set_element")
+							.innerJoin("change", "change.id", "change_set_element.change_id")
+							.innerJoin(
+								"change_set",
+								"change_set.id",
+								"change_set_element.change_set_id"
+							)
+							.where(
+								changeSetIsAncestorOf(
+									{ id: lastCheckpoint!.id },
+									{ includeSelf: true }
+								)
+							)
+							.where("change.entity_id", "=", element.entity_id)
+							.where("change.file_id", "=", element.file_id)
+							.where("change.schema_key", "=", element.schema_key)
+							.where("change.snapshot_id", "!=", "no-content")
+							// note: assumes that sqlite traverses the tree in depth-first order
+							// this might not be true in all cases (todo for the future)
+							.limit(1)
+							.select(["change.snapshot_id", "change.id"]),
+					}) as [{ snapshot_id: string }])
+				: [];
 			// if the entity was inserted after the last checkpoint but removed again,
 			// delete the entity from the working change set
 			if (!existing) {
@@ -173,24 +178,25 @@ function handleUpdateWorkingChangeSet(args: {
 							args.working_change_set_id
 						),
 				});
+				return true;
 			}
-		} else {
-			executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.insertInto("change_set_element")
-					.values({
-						...element,
-						change_set_id: args.working_change_set_id,
-					})
-					// if the entity already exists, update the change_id
-					.onConflict((oc) =>
-						oc.doUpdateSet((eb) => ({
-							change_id: eb.ref("excluded.change_id"),
-						}))
-					),
-			});
 		}
+
+		executeSync({
+			lix: { sqlite: args.sqlite },
+			query: args.db
+				.insertInto("change_set_element")
+				.values({
+					...element,
+					change_set_id: args.working_change_set_id,
+				})
+				// if the entity already exists, update the change_id
+				.onConflict((oc) =>
+					oc.doUpdateSet((eb) => ({
+						change_id: eb.ref("excluded.change_id"),
+					}))
+				),
+		});
 	}
 
 	return true;

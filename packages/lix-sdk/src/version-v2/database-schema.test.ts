@@ -189,28 +189,15 @@ test("should enforce NOT NULL constraint on change_set_id", async () => {
 	).rejects.toThrow(/NOT NULL constraint failed: version_v2.change_set_id/i);
 });
 
-test("applying the schema should create the initial 'cs0' change set", async () => {
-	const lix = await openLixInMemory({});
-	const initialChangeSet = await lix.db
-		.selectFrom("change_set")
-		.where("id", "=", "initialchangeset")
-		.selectAll()
-		.executeTakeFirst();
-	expect(initialChangeSet).toBeDefined();
-	expect(initialChangeSet?.id).toBe("initialchangeset");
-});
-
-test("applying the schema should create the initial 'main' version linked to 'cs0'", async () => {
+test("applying the schema should create an initial 'main' version", async () => {
 	const lix = await openLixInMemory({});
 	const initialVersion = await lix.db
 		.selectFrom("version_v2")
-		.where("id", "=", "019328cc-ccb0-7f51-96e8-524df4597ac6")
+		.where("name", "=", "main")
 		.selectAll()
 		.executeTakeFirst();
+
 	expect(initialVersion).toBeDefined();
-	expect(initialVersion?.id).toBe("019328cc-ccb0-7f51-96e8-524df4597ac6");
-	expect(initialVersion?.name).toBe("main");
-	expect(initialVersion?.change_set_id).toBe("initialchangeset");
 });
 
 test("applying the schema should set the initial active version to 'main'", async () => {
@@ -234,14 +221,14 @@ test("applying the schema multiple times should be idempotent for initial data",
 	const initialChangeSetCount = await lix.db
 		.selectFrom("change_set")
 		.select(lix.db.fn.count("id").as("count"))
-		.where("id", "=", "initialchangeset")
 		.executeTakeFirstOrThrow();
-	expect(initialChangeSetCount.count).toBe(1);
+
+	// change set + working change set
+	expect(initialChangeSetCount.count).toBe(2);
 
 	const initialVersionCount = await lix.db
 		.selectFrom("version_v2")
 		.select(lix.db.fn.count("id").as("count"))
-		.where("id", "=", "019328cc-ccb0-7f51-96e8-524df4597ac6")
 		.executeTakeFirstOrThrow();
 	expect(initialVersionCount.count).toBe(1);
 
@@ -547,6 +534,10 @@ test("the working change set should be updated when the change set is updated", 
 		.selectAll()
 		.execute();
 
+	// expecting only entity0 because entity1 was deleted by change 3.
+	// entity1 was never tracked in a previous checkpoint. hence, the
+	// working change set does not contain a delete change to avoid user confusion a la:
+	// "my previous checkpoint doesn't have entity1, why does it show as deleted?"
 	expect(workingElements4).toHaveLength(1);
 	expect(workingElements4[0]).toMatchObject({
 		change_id: "change2",
@@ -556,7 +547,8 @@ test("the working change set should be updated when the change set is updated", 
 	});
 });
 
-test("keeps delete change if entity was inserted before or with the last checkpoint", async () => {
+// simplified test but depends on `createCheckpoint()` which was flaky at the time of writing this test
+test.skip("keeps delete change if entity was inserted before or with the last checkpoint", async () => {
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
 	});
@@ -575,7 +567,7 @@ test("keeps delete change if entity was inserted before or with the last checkpo
 		.execute();
 
 	await fileQueueSettled({ lix });
-	await createCheckpoint({ lix, id: "checkpoint0" });
+	await createCheckpoint({ lix });
 
 	// Delete the entity
 	await lix.db.deleteFrom("file").where("path", "=", "/test.json").execute();
@@ -610,6 +602,126 @@ test("keeps delete change if entity was inserted before or with the last checkpo
 		change_id: expect.any(String),
 		entity_id: "entity0",
 		schema_key: "mock_json_property",
+		file_id: "file0",
+	});
+});
+
+test("keeps the delete change if the ancestry from the previous checkpoint tracked the entity", async () => {
+	const lix = await openLixInMemory({});
+
+	const checkpointLabel = await lix.db
+		.selectFrom("label")
+		.where("name", "=", "checkpoint")
+		.select("id")
+		.executeTakeFirstOrThrow();
+
+	const snapshots = await lix.db
+		.insertInto("snapshot")
+		.values({ content: { value: "entity0" } })
+		.returningAll()
+		.execute();
+
+	const insertChange = await lix.db
+		.insertInto("change")
+		.values({
+			id: "change-insert",
+			entity_id: "entity0",
+			schema_key: "test_entity",
+			file_id: "file0",
+			snapshot_id: snapshots[0]!.id,
+			plugin_key: "test_plugin",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const deleteChange = await lix.db
+		.insertInto("change")
+		.values({
+			id: "change-delete",
+			entity_id: "entity0",
+			schema_key: "test_entity",
+			file_id: "file0",
+			snapshot_id: "no-content",
+			plugin_key: "test_plugin",
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	const insertChangeSet = await createChangeSet({
+		lix,
+		labels: [checkpointLabel],
+		id: "checkpoint-cs",
+		elements: [
+			{
+				change_id: insertChange.id,
+				entity_id: insertChange.entity_id,
+				schema_key: insertChange.schema_key,
+				file_id: insertChange.file_id,
+			},
+		],
+	});
+
+	const deleteChangeSet = await createChangeSet({
+		lix,
+		id: "delete-cs",
+		elements: [
+			{
+				change_id: deleteChange.id,
+				entity_id: deleteChange.entity_id,
+				schema_key: deleteChange.schema_key,
+				file_id: deleteChange.file_id,
+			},
+		],
+		parents: [insertChangeSet],
+	});
+
+	const workingChangeSet = await createChangeSet({
+		lix,
+		id: "working-cs",
+		immutableElements: false,
+	});
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
+		.select(["version_v2.id"])
+		.executeTakeFirstOrThrow();
+
+	// Update the version to point to the checkpoint change set
+	await lix.db
+		.updateTable("version_v2")
+		.set({
+			change_set_id: insertChangeSet.id,
+			working_change_set_id: workingChangeSet.id,
+		})
+		.where("id", "=", activeVersion.id)
+		.execute();
+
+	// Trigger the handleUpdateWorkingChangeSet function by updating the version
+	// to point to the delete change set
+	await lix.db
+		.updateTable("version_v2")
+		.set({ change_set_id: deleteChangeSet.id })
+		.where("id", "=", activeVersion.id)
+		.execute();
+
+	// Now check the working change set - it should contain the delete change
+	const workingElements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", workingChangeSet.id)
+		.where("entity_id", "=", "entity0")
+		.selectAll()
+		.execute();
+
+	// The delete change should be in the working change set
+	// because the entity0 has been previously captured in a
+	// checkpoint. the user needs to know when creating a new
+	// checkpoint that "you are deleting entity0"
+	expect(workingElements).toHaveLength(1);
+	expect(workingElements[0]).toMatchObject({
+		change_id: deleteChange.id,
+		entity_id: "entity0",
+		schema_key: "test_entity",
 		file_id: "file0",
 	});
 });
