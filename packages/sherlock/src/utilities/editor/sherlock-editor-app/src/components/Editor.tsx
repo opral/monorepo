@@ -103,6 +103,8 @@ const Editor: React.FC<{
 				{settings.locales.map((locale) => {
 					const message = bundle.messages.find((message) => message.locale === locale)
 					if (message) {
+						// Find source message for translation (from base locale)
+						const sourceMessage = bundle.messages.find((m) => m.locale === settings.baseLocale)
 						return (
 							<ReactInlangMessage
 								key={message.id}
@@ -124,36 +126,19 @@ const Editor: React.FC<{
 													slot="variant-action"
 													onClick={async () => {
 														try {
-															// Show loading state
+															// Instead of using RPC, send message to VS Code extension
+															// to handle the translation directly
 															vscode.postMessage({
-																command: "show-info-message",
-																message: "Translating...",
-															})
-
-															// Call translation service
-															const result = await rpc.machineTranslateBundle({
+																command: "machine-translate-bundle",
 																bundle: bundle,
 																sourceLocale: settings.baseLocale,
-																targetLocales: [message.locale],
+																targetLocale: message.locale,
+																messageId: message.id,
+																variantId: sourceMessage?.variants[0]?.id || null,
 															})
 
-															if (result.error) {
-																vscode.postMessage({
-																	command: "show-error-message",
-																	message: `Translation failed: ${result.error}`,
-																})
-															} else {
-																// Update the bundle with translated content
-																vscode.postMessage({
-																	command: "translate-bundle",
-																	translatedBundle: result.data,
-																})
-
-																vscode.postMessage({
-																	command: "show-info-message",
-																	message: "Translation complete",
-																})
-															}
+															// The response will come back via a message from the extension host
+															// which will be handled by the main message listener
 														} catch (error) {
 															vscode.postMessage({
 																command: "show-error-message",
