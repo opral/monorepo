@@ -60,6 +60,15 @@ export function applyChangeSetDatabaseSchema(
     SELECT RAISE(ABORT, 'Attempted to delete elements from a change set with immutable elements');
   END;
 
+  -- Trigger to prevent changing the immutable flag once set
+  -- CREATE TRIGGER IF NOT EXISTS prevent_immutable_flag_change
+  -- BEFORE UPDATE OF immutable_elements ON change_set
+  -- FOR EACH ROW
+  -- WHEN OLD.immutable_elements = 1 AND NEW.immutable_elements = 0
+  -- BEGIN
+  --     SELECT RAISE(ABORT, 'Cannot set immutable_elements to false once it was set to true');
+  -- END;
+
   CREATE TABLE IF NOT EXISTS change_set_label (
     label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,

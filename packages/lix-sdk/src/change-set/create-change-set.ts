@@ -98,15 +98,21 @@ export async function createChangeSet(args: {
 			.executeTakeFirstOrThrow();
 
 		// Add parent-child relationships if parents are provided
-		if (args.parents && args.parents.length > 0) {
+		for (const parent of args.parents ?? []) {
+			// there is a bug somewhere which sometimes flips
+			// an immutable to mutable change set before creating the edge
+			// ideally the root cause is fixed but operating under a tight deadline
+			await trx
+				.updateTable("change_set")
+				.set({ immutable_elements: true })
+				.where("id", "=", parent.id)
+				.execute();
 			await trx
 				.insertInto("change_set_edge")
-				.values(
-					args.parents.map((parent) => ({
-						parent_id: parent.id,
-						child_id: changeSet.id,
-					}))
-				)
+				.values({
+					parent_id: parent.id,
+					child_id: changeSet.id,
+				})
 				.onConflict((oc) => oc.doNothing())
 				.execute();
 		}
