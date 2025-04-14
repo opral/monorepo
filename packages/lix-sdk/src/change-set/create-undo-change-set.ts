@@ -3,7 +3,7 @@ import type { ChangeSet } from "./database-schema.js";
 import { createChangeSet } from "./create-change-set.js";
 import { changeSetIsDescendantOf } from "../query-filter/change-set-is-descendant-of.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
-import type { Change, NewChange } from "../database/schema.js";
+import type { Change, Label, NewChange } from "../database/schema.js";
 
 /**
  * Creates a "reverse" change set that undoes the changes made by the specified change set.
@@ -26,6 +26,7 @@ import type { Change, NewChange } from "../database/schema.js";
 export async function createUndoChangeSet(args: {
 	lix: Lix;
 	changeSet: Pick<ChangeSet, "id">;
+	labels?: Pick<Label, "id">[];
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Get all changes in the target change set
@@ -117,6 +118,7 @@ export async function createUndoChangeSet(args: {
 		// Create the change set linking to these changes
 		const undoChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
+			labels: args.labels,
 			elements: [...ancestorChanges, ...undoChanges].map((change) => ({
 				change_id: change.id,
 				entity_id: change.entity_id,
