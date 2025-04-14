@@ -6,11 +6,14 @@ export const defaultCompilerOptions = {
 	includeEslintDisableComment: true,
 	emitPrettierIgnore: true,
 	cleanOutdir: true,
+	disableAsyncLocalStorage: false,
 	experimentalMiddlewareLocaleSplitting: false,
 	localStorageKey: "PARAGLIDE_LOCALE",
 	isServer: "typeof window === 'undefined'",
 	strategy: ["cookie", "globalVariable", "baseLocale"],
 	cookieName: "PARAGLIDE_LOCALE",
+	cookieMaxAge: 60 * 60 * 24 * 400,
+	cookieDomain: "",
 } as const satisfies Partial<CompilerOptions>;
 
 export type CompilerOptions = {
@@ -48,10 +51,10 @@ export type CompilerOptions = {
 	 * fallback to the base locale.
 	 *
 	 * The default ensures that the browser takes a cookie approach,
-	 * server-side takes the variable (because cookie is unavailable),
+	 * server-side takes the globalVariable (because cookie is unavailable),
 	 * whereas both fallback to the base locale if not available.
 	 *
-	 * @default ["url", "cookie", "variable", "baseLocale"]
+	 * @default ["cookie", "globalVariable", "baseLocale"]
 	 */
 	strategy?: Runtime["strategy"];
 	/**
@@ -95,6 +98,20 @@ export type CompilerOptions = {
 	 * @default 'PARAGLIDE_LOCALE'
 	 */
 	cookieName?: string;
+	/**
+	 * The max-age in seconds of the cookie until it expires.
+	 *
+	 * @default 60 * 60 * 24 * 400
+	 */
+	cookieMaxAge?: number;
+	/**
+	 * The host to which the cookie will be sent.
+	 * If null, this defaults to the host portion of the current document location and the cookie is not available on subdomains.
+	 * Otherwise, subdomains are always included.
+	 *
+	 * @default window.location.hostname
+	 */
+	cookieDomain?: string;
 	/**
 	 * The `additionalFiles` option is an array of paths to additional files that should be copied to the output directory.
 	 *
@@ -146,6 +163,17 @@ export type CompilerOptions = {
 	 */
 	includeEslintDisableComment?: boolean;
 	/**
+	 * Replaces AsyncLocalStorage with a synchronous implementation.
+	 *
+	 * ⚠️ WARNING: This should ONLY be used in serverless environments
+	 * like Cloudflare Workers.
+	 *
+	 * Disabling AsyncLocalStorage in traditional server environments
+	 * risks cross-request pollution where state from one request could
+	 * leak into another concurrent request.
+	 */
+	disableAsyncLocalStorage?: boolean;
+	/**
 	 * If `emitGitIgnore` is set to `true` a `.gitignore` file will be emitted in the output directory. Defaults to `true`.
 	 *
 	 * ```diff
@@ -164,6 +192,10 @@ export type CompilerOptions = {
 	 *
 	 * - `message-modules` - Each module is a message. This is the default.
 	 * - `locale-modules` - Each module is a locale.
+	 *
+	 * It is recommended to use `locale-modules` for development and `message-modules` for production.
+	 * Bundlers speed up the dev mode by bypassing bundling which can lead to many http requests
+	 * during the dev mode with `message-modules`. See https://github.com/opral/inlang-paraglide-js/issues/486.
 	 *
 	 * **`message-modules`**
 	 *

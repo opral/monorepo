@@ -1,5 +1,50 @@
 # @inlang/cli
 
+## 3.0.10
+
+### Patch Changes
+
+- Updated dependencies [bd2c366]
+  - @inlang/sdk@2.4.7
+
+## 3.0.9
+
+### Patch Changes
+
+- Updated dependencies [49a7880]
+  - @inlang/sdk@2.4.6
+
+## 3.0.8
+
+### Patch Changes
+
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+
+## 3.0.7
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+
+## 3.0.6
+
+### Patch Changes
+
+- c1adffe: Fix typo and inconsistent casing in CLI help output
+
+## 3.0.5
+
+### Patch Changes
+
+- @inlang/sdk@2.4.3
+
+## 3.0.4
+
+### Patch Changes
+
+- @inlang/sdk@2.4.2
+
 ## 3.0.3
 
 ### Patch Changes

@@ -1,5 +1,50 @@
 # @inlang/sdk
 
+## 2.4.7
+
+### Patch Changes
+
+- bd2c366: improve: sample telemetry event to reduce number of events
+- Updated dependencies [f634538]
+  - @lix-js/sdk@0.4.6
+
+## 2.4.6
+
+### Patch Changes
+
+- 49a7880: improve: forward telemetry settings to lix
+
+## 2.4.5
+
+### Patch Changes
+
+- 083ff1f: fix: `loadProjectFromDirectory()` should return errors from `loadProject()`
+- Updated dependencies [275d87e]
+- Updated dependencies [dc92f56]
+- Updated dependencies [c1ed545]
+  - @lix-js/sdk@0.4.5
+
+## 2.4.4
+
+### Patch Changes
+
+- Updated dependencies [85478f8]
+  - @lix-js/sdk@0.4.4
+
+## 2.4.3
+
+### Patch Changes
+
+- Updated dependencies [8ce6666]
+  - @lix-js/sdk@0.4.3
+
+## 2.4.2
+
+### Patch Changes
+
+- Updated dependencies [59f6c92]
+  - @lix-js/sdk@0.4.2
+
 ## 2.4.1
 
 ### Patch Changes

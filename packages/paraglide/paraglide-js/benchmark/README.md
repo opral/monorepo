@@ -1,56 +1,28 @@
+---
+imports: 
+  - https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-visualization.js
+---
+
 # Benchmark
 
-The internationalization (i18n) library you choose can significantly impact your application's bundle size and overall performance.
+This benchmark compares the transfer size of different i18n libraries and their implementations. 
 
-This benchmark provides data-driven insights comparing Paraglide-JS with i18next, one of the most popular i18n solutions.
+The goal is to understand how the size of the library changes with different configurations, such as the number of locales, messages per page, and namespace size.
 
-## Results
+If you are looking for a feature comparison, check out the [comparison table](/m/gerre34r/library-inlang-paraglideJs/comparison).
 
-TL;DR
+💡 **Tip**: Paraglide JS has not reached its final optimizations yet. Tickets like [#88 per locale builds](https://github.com/opral/inlang-paraglide-js/issues/88) or [#354 pruning server side rendered messages](https://github.com/opral/inlang-paraglide-js/issues/354) are yet to be implemented. Pull requests are welcome!
 
-- Paraglide JS is significantly smaller than i18next in all scenarios with less than 15 locales.
-- Above approx 15 locales, i18next has a lower bundle size with the `http-backend`. 
-- The [experimental per-locale splitting](https://github.com/opral/inlang-paraglide-js/issues/425) is consitently the smallest in all scenarios.
 
-`Locales: 5`  
-`Messages: 200`  
-`Namespace Size: 500`
+<benchmark-visualization src="https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/benchmark/benchmark-results.json"></benchmark-visualization>
 
-| Library                                              | Total Transfer Size |
-| ---------------------------------------------------- | ------------------- |
-| paraglide (experimental-middleware-locale-splitting) | 31.5 KB             |
-| paraglide (default)                                  | 90.1 KB             |
-| i18next (default)                                    | 694.3 KB            |
-| i18next (http-backend)                               | 191.0 KB            |
-
-`Locales: 10`  
-`Messages: 200`  
-`Namespace Size: 500`
-
-| Library                                              | Total Transfer Size |
-| ---------------------------------------------------- | ------------------- |
-| paraglide (experimental-middleware-locale-splitting) | 31.6 KB             |
-| paraglide (default)                                  | 148.3 KB            |
-| i18next (default)                                    | 694.3 KB            |
-| i18next (http-backend)                               | 191.0 KB            |
-
-`Locales: 20`  
-`Messages: 200`  
-`Namespace Size: 500`
-
-| Library                                              | Total Transfer Size |
-| ---------------------------------------------------- | ------------------- |
-| paraglide (experimental-middleware-locale-splitting) | 31.7 KB             |
-| paraglide (default)                                  | 266.1 KB            |
-| i18next (default)                                    | 694.3 KB            |
-| i18next (http-backend)                               | 191.1 KB            |
 
 ### What is Being Tested
 
 The benchmark creates a static website for each configuration (library variant, number of locales, messages per page, and namespace size). Each website is loaded in a headless browser, and the total transfer size is measured.
 
 - **Number of Locales**: How does an i18n library scale with the number of locales?
-- **Number of Message per page**: How does an i18n library scale with the number of messages that are used on a given page?
+- **Number of used Messages**: How does an i18n library scale with the number of messages that are used on a given page?
 - **Library Implementation Variants**: Testing different implementation approaches:
   - **Paraglide**:
     - `default`: Standard implementation

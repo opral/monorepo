@@ -73,8 +73,8 @@ You can use `disableAsyncLocalStorage: true` to disable the use of Node.js' Asyn
 - Other isolated runtime contexts
 
 ```ts
-// Only disable in serverless environments
-paraglideMiddleware(request, handler, { 
+paraglideVitePlugin({
+  // ...
   disableAsyncLocalStorage: true // ⚠️ Use with caution
 })
 ```

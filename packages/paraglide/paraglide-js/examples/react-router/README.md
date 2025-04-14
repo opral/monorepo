@@ -12,7 +12,7 @@ This example shows how to use Paraglide with React Router v7. The source code ca
 1. Init Paraglide JS
 
 ```bash
-npx @inlang/paraglide-js@beta init 
+npx @inlang/paraglide-js@latest init 
 ```
 
 2. Add the vite plugin to your `vite.config.ts`:

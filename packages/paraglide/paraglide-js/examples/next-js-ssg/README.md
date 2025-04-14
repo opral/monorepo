@@ -28,7 +28,7 @@ This is an example of how to use Paraglide with Next JS with SSG. The source cod
 ### Install paraglide js
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### Add the webpack plugin to the `next.config.js` file:
@@ -50,15 +50,11 @@ export default {
 +       strategy: ["url", "cookie", "baseLocale"],
 +				urlPatterns: [
 +					{
-+						pattern:
-+							":protocol://:domain(.*)::port?/:locale(de|en)?/:path(.*)?",
-+						deLocalizedNamedGroups: {
-+							locale: "en",
-+						},
-+						localizedNamedGroups: {
-+							de: { locale: "de" },
-+							en: { locale: "en" },
-+						},
++						pattern: 'https://:domain(.*)/:path*',
++						localized: [
++							['de', 'https://:domain(.*)/de/:path*'],
++							['en', 'https://:domain(.*)/:path*'],
++						],
 +					},
 +				],
 +			})

@@ -10,7 +10,7 @@ Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/mai
 
 > **ParaglideAsyncLocalStorage**\<\>: `object`
 
-Defined in: [runtime/variables.js:48](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ### Type Parameters
 
@@ -70,6 +70,14 @@ if (locale === baseLocale) {
 
 ***
 
+## cookieMaxAge
+
+> `const` **cookieMaxAge**: `number`
+
+Defined in: [runtime/variables.js:25](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
 ## cookieName
 
 > `const` **cookieName**: `string` = `"<cookie-name>"`
@@ -78,11 +86,19 @@ Defined in: [runtime/variables.js:22](https://github.com/opral/monorepo/tree/mai
 
 ***
 
+## disableAsyncLocalStorage
+
+> `const` **disableAsyncLocalStorage**: `false` = `false`
+
+Defined in: [runtime/variables.js:67](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+
+***
+
 ## experimentalMiddlewareLocaleSplitting
 
 > `const` **experimentalMiddlewareLocaleSplitting**: `false` = `false`
 
-Defined in: [runtime/variables.js:61](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:69](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -90,7 +106,7 @@ Defined in: [runtime/variables.js:61](https://github.com/opral/monorepo/tree/mai
 
 > `const` **isServer**: `boolean`
 
-Defined in: [runtime/variables.js:63](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:71](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -116,7 +132,7 @@ if (locales.includes(userSelectedLocale) === false) {
 
 > **serverAsyncLocalStorage**: `undefined` \| [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage) = `undefined`
 
-Defined in: [runtime/variables.js:59](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:65](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Server side async local storage that is set by `serverMiddleware()`.
 
@@ -129,7 +145,7 @@ rendering context without effecting other requests.
 
 > `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"` \| `"preferredLanguage"` \| `"localStorage"`)[]
 
-Defined in: [runtime/variables.js:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -137,7 +153,7 @@ Defined in: [runtime/variables.js:30](https://github.com/opral/monorepo/tree/mai
 
 > `const` **urlPatterns**: `object`[] = `[]`
 
-Defined in: [runtime/variables.js:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:43](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 The used URL patterns.
 
@@ -246,7 +262,7 @@ deLocalizeUrl - For low-level URL de-localization in server contexts
 
 > **deLocalizeUrl**(`url`): `URL`
 
-Defined in: [runtime/localize-url.js:186](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
+Defined in: [runtime/localize-url.js:184](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
 Low-level URL de-localization function, primarily used in server contexts.
 
@@ -621,7 +637,7 @@ localizeUrl(url, { locale: "de" });
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:142](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:147](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
@@ -677,7 +693,7 @@ define how the URL origin is resolved.
 
 > **overwriteServerAsyncLocalStorage**(`value`): `void`
 
-Defined in: [runtime/variables.js:75](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:83](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Sets the server side async local storage.
 
@@ -702,7 +718,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:119](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:128](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -734,13 +750,13 @@ overwriteSetLocale((newLocale) => {
 
 > **setLocale**(`newLocale`, `options`?): `void`
 
-Defined in: [runtime/set-locale.js:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Set the locale.
 
 Set locale reloads the site by default on the client. Reloading
 can be disabled by passing `reload: false` as an option. If
-reloading is disbaled, you need to ensure that the UI is updated
+reloading is disabled, you need to ensure that the UI is updated
 to reflect the new locale.
 
 ### Parameters

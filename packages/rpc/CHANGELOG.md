@@ -1,5 +1,58 @@
 # @inlang/rpc
 
+## 0.3.49
+
+### Patch Changes
+
+- Updated dependencies [bd2c366]
+  - @inlang/sdk@2.4.7
+
+## 0.3.48
+
+### Patch Changes
+
+- Updated dependencies [49a7880]
+  - @inlang/sdk@2.4.6
+
+## 0.3.47
+
+### Patch Changes
+
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+
+## 0.3.46
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+
+## 0.3.45
+
+### Patch Changes
+
+- d88401e: - fix machine translation of empty patterns and empty text elements https://github.com/opral/inlang-cli/issues/30
+
+## 0.3.44
+
+### Patch Changes
+
+- @inlang/sdk@2.4.3
+
+## 0.3.43
+
+### Patch Changes
+
+- @inlang/sdk@2.4.2
+
+## 0.3.42
+
+### Patch Changes
+
+- 4b4d07e: fix cors
+- 8b20480: fix: env variable for google translate was not referenced correctly
+- f173871: fix: only machine translate variants that don't exist
+
 ## 0.3.41
 
 ### Patch Changes

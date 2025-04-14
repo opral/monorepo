@@ -1,5 +1,78 @@
 # inlang-vs-code-extension
 
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [bd2c366]
+  - @inlang/sdk@2.4.7
+  - @inlang/rpc@0.3.49
+  - @inlang/editor-component@4.0.7
+  - @inlang/settings-component@5.0.0
+
+## 2.0.12
+
+### Patch Changes
+
+- Updated dependencies [49a7880]
+  - @inlang/sdk@2.4.6
+  - @inlang/rpc@0.3.48
+  - @inlang/editor-component@4.0.6
+  - @inlang/settings-component@5.0.0
+
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+  - @inlang/rpc@0.3.47
+  - @inlang/editor-component@4.0.5
+  - @inlang/settings-component@5.0.0
+
+## 2.0.10
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+- @inlang/rpc@0.3.46
+- @inlang/editor-component@4.0.4
+- @inlang/settings-component@5.0.0
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [d88401e]
+  - @inlang/rpc@0.3.45
+
+## 2.0.8
+
+### Patch Changes
+
+- @inlang/sdk@2.4.3
+- @inlang/rpc@0.3.44
+- @inlang/editor-component@4.0.3
+- @inlang/settings-component@5.0.0
+
+## 2.0.7
+
+### Patch Changes
+
+- @inlang/sdk@2.4.2
+- @inlang/rpc@0.3.43
+- @inlang/editor-component@4.0.2
+- @inlang/settings-component@5.0.0
+
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [4b4d07e]
+- Updated dependencies [8b20480]
+- Updated dependencies [f173871]
+  - @inlang/rpc@0.3.42
+
 ## 2.0.5
 
 ### Patch Changes

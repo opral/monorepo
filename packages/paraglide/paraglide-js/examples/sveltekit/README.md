@@ -20,7 +20,7 @@ This example shows how to use Paraglide with SvelteKit.The source code can be fo
 ### Install paraglide js
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### Add the `paraglideVitePlugin()` to `vite.config.js`.
@@ -66,9 +66,12 @@ import { paraglideMiddleware } from '$lib/paraglide/server';
 
 // creating a handle to use the paraglide middleware
 const paraglideHandle: Handle = ({ event, resolve }) =>
-	paraglideMiddleware(event.request, ({ locale }) => {
+	paraglideMiddleware(event.request, ({ request: localizedRequest, locale }) => {
+		event.request = localizedRequest;
 		return resolve(event, {
-			transformPageChunk: ({ html }) => html.replace('%lang%', locale)
+			transformPageChunk: ({ html }) => {
+				return html.replace('%lang%', locale);
+			}
 		});
 	});
 
@@ -76,6 +79,8 @@ export const handle: Handle = paraglideHandle;
 ```
 
 ### Add a reroute hook in `src/hooks.ts`
+
+IMPORTANT: The `reroute()` function must be exported from the `src/hooks.ts` file, not `src/hooks.server.ts`.
 
 ```typescript
 import type { Reroute } from '@sveltejs/kit';
@@ -126,24 +131,28 @@ If you're deploying to SvelteKit's Edge adapter like Vercel Edge or Cloudflare P
 	⚠️ Only use this option in serverless environments where each request gets its own isolated runtime context. Using it in multi-request server environments could lead to data leakage between concurrent requests.
 </doc-callout>
 
-```typescript
-export const handle: Handle = ({ event, resolve }) => {
-	return paraglideMiddleware(event.request, ({ request }) => resolve({ ...event, request }), {
-		disableAsyncLocalStorage: true
-	});
-};
+```diff
+export default defineConfig({
+	plugins: [
+		sveltekit(),
+		paraglideVitePlugin({
+			project: './project.inlang',
+			outdir: './src/lib/paraglide',
++			disableAsyncLocalStorage: true
+		})
+	]
+});
 ```
 
 ### No locale OR different locale when calling messages outside of .server.ts files
 
-If you call messages on the server outside of load functions or hooks, you might run into issues with the locale not being set correctly. This can happen if you call messages outside of a request context. 
+If you call messages on the server outside of load functions or hooks, you might run into issues with the locale not being set correctly. This can happen if you call messages outside of a request context.
 
 ```typescript
 // hello.ts
-import { m } from "./paraglide/messages.js";
+import { m } from './paraglide/messages.js';
 
 // 💥 there is no url in this context to retrieve
 //    the locale from.
 console.log(m.hello());
 ```
-

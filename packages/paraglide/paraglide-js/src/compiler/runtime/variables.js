@@ -21,6 +21,12 @@ export const locales = /** @type {const} */ (["en", "de"]);
 /** @type {string} */
 export const cookieName = "<cookie-name>";
 
+/** @type {number} */
+export const cookieMaxAge = 60 * 60 * 24 * 400;
+
+/** @type {string} */
+export const cookieDomain = "<cookie-domain>";
+
 /** @type {string} */
 export const localStorageKey = "PARAGLIDE_LOCALE";
 
@@ -57,6 +63,8 @@ export const urlPatterns = [];
  * @type {ParaglideAsyncLocalStorage | undefined}
  */
 export let serverAsyncLocalStorage = undefined;
+
+export const disableAsyncLocalStorage = false;
 
 export const experimentalMiddlewareLocaleSplitting = false;
 

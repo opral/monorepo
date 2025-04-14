@@ -76,15 +76,6 @@ export default function Page(props: {
 					coverCard: <AppHeader />,
 					sections: ["all"],
 				};
-			case "libraries":
-				return {
-					title: m.marketplace_header_libraries_title(),
-					description: m.marketplace_header_libraries_description(),
-					buttonLink: "/m/gerre34r/library-inlang-paraglideJs",
-					buttonText: m.marketplace_header_libraries_button_text(),
-					coverCard: <ParaglideHeader />,
-					sections: ["all"],
-				};
 			case "plugins":
 				return {
 					title: m.marketplace_header_plugins_title(),
@@ -93,29 +84,6 @@ export default function Page(props: {
 					buttonText: m.marketplace_header_plugins_button_text(),
 					coverCard: <PluginHeader />,
 					sections: ["all"],
-				};
-			case "lint-rules":
-				return {
-					title: m.marketplace_header_lintRules_title(),
-					description: m.marketplace_header_lintRules_description(),
-					buttonLink: "/documentation/lint-rule",
-					buttonText: m.marketplace_header_lintRules_button_text(),
-					coverCard: <LintRulesHeader />,
-					sections: ["all"],
-				};
-			case "guides":
-				return {
-					title: m.marketplace_header_guides_title(),
-					description: m.marketplace_header_guides_description(),
-					buttonLink: "/documentation/publish-guide",
-					buttonText: m.marketplace_header_guides_button_text(),
-					sections: [
-						"guides-developer",
-						"guides-translator",
-						"guides-change-control",
-						"guides-general",
-						"guides-i18n",
-					],
 				};
 			case "lix":
 				return {
@@ -190,10 +158,10 @@ export default function Page(props: {
 				currentPageContext.routeParams.category === "nextjs"
 					? getCategoryContent()?.title + " "
 					: (currentPageContext.routeParams.category?.toLowerCase() === "lix" ||
-						currentPageContext.routeParams.category?.toLowerCase() === "guides"
+					  currentPageContext.routeParams.category?.toLowerCase() === "guides"
 							? ""
 							: "Global" + " ") +
-						((currentPageContext.routeParams.category?.toLowerCase() === "lix"
+					  ((currentPageContext.routeParams.category?.toLowerCase() === "lix"
 							? currentPageContext.routeParams.category
 							: currentPageContext.routeParams.category
 									?.replaceAll("-", " ")
@@ -212,7 +180,7 @@ export default function Page(props: {
 						: `Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
 								"-",
 								" "
-							)} - inlang`
+						  )} - inlang`
 				}
 			/>
 			<Meta
@@ -236,11 +204,11 @@ export default function Page(props: {
 						? getCategoryContent()?.title + " "
 						: (currentPageContext.routeParams.category?.toLowerCase() ===
 								"lix" ||
-							currentPageContext.routeParams.category?.toLowerCase() ===
+						  currentPageContext.routeParams.category?.toLowerCase() ===
 								"guides"
 								? ""
 								: "Global" + " ") +
-							((currentPageContext.routeParams.category?.toLowerCase() === "lix"
+						  ((currentPageContext.routeParams.category?.toLowerCase() === "lix"
 								? currentPageContext.routeParams.category
 								: currentPageContext.routeParams.category
 										?.replaceAll("-", " ")
@@ -259,7 +227,7 @@ export default function Page(props: {
 						: `Find everything globalization (i18n) related to ${currentPageContext.routeParams.category?.replaceAll(
 								"-",
 								" "
-							)} - inlang`
+						  )} - inlang`
 				}
 			/>
 			<Meta name="twitter:site" content="@inlanghq" />
@@ -284,16 +252,6 @@ export default function Page(props: {
 					/>
 					<Show when={getCategoryContent()?.coverCard}>
 						{getCategoryContent()?.coverCard}
-						<Show
-							when={
-								currentPageContext.routeParams.category === "libraries" ||
-								currentPageContext.routeParams.category === "apps"
-							}
-						>
-							<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
-								{`All ${currentPageContext.routeParams.category}`}
-							</h2>
-						</Show>
 					</Show>
 				</Show>
 				<div class="pb-16 md:pb-20 min-h-screen relative">
@@ -340,7 +298,7 @@ export default function Page(props: {
 									}
 								>
 									<h2 class="pb-4 border-t-surface-200 text-xl font-medium tracking-tight text-surface-900">
-										inlang Apps
+										Apps
 									</h2>
 									<Gallery
 										items={props.items.filter(

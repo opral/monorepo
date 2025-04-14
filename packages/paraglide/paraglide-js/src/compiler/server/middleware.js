@@ -6,24 +6,19 @@ import * as runtime from "./runtime.js";
  * This middleware performs several key functions:
  *
  * 1. Determines the locale for the incoming request using configured strategies
- * 2. Handles URL localization and redirects
+ * 2. Handles URL localization and redirects (only for document requests)
  * 3. Maintains locale state using AsyncLocalStorage to prevent request interference
  *
  * When URL strategy is used:
  *
- * - If URL doesn't match the determined locale, redirects to localized URL
+ * - The locale is extracted from the URL for all request types
+ * - If URL doesn't match the determined locale, redirects to localized URL (only for document requests)
  * - De-localizes URLs before passing to server (e.g., `/fr/about` → `/about`)
  *
  * @template T - The return type of the resolve function
  *
  * @param {Request} request - The incoming request object
  * @param {(args: { request: Request, locale: import("./runtime.js").Locale }) => T | Promise<T>} resolve - Function to handle the request
- * @param {Object} [options] - Optional configuration for the middleware
- * @param {boolean} [options.disableAsyncLocalStorage=false] - If true, disables AsyncLocalStorage usage.
- *                                                           ⚠️ WARNING: This should ONLY be used in serverless environments
- *                                                           like Cloudflare Workers. Disabling AsyncLocalStorage in traditional
- *                                                           server environments risks cross-request pollution where state from
- *                                                           one request could leak into another concurrent request.
  *
  * @returns {Promise<Response>}
  *
@@ -66,10 +61,8 @@ import * as runtime from "./runtime.js";
  * };
  * ```
  */
-export async function paraglideMiddleware(request, resolve, options = {}) {
-	const { disableAsyncLocalStorage = false } = options;
-
-	if (!runtime.serverAsyncLocalStorage && !disableAsyncLocalStorage) {
+export async function paraglideMiddleware(request, resolve) {
+	if (!runtime.disableAsyncLocalStorage && !runtime.serverAsyncLocalStorage) {
 		const { AsyncLocalStorage } = await import("async_hooks");
 		runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
 	} else if (!runtime.serverAsyncLocalStorage) {
@@ -86,7 +79,7 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 		runtime.strategy.includes("url")
 	) {
 		const localizedUrl = runtime.localizeUrl(request.url, { locale });
-		if (localizedUrl.href !== request.url) {
+		if (normalizeURL(localizedUrl.href) !== normalizeURL(request.url)) {
 			return Response.redirect(localizedUrl, 307);
 		}
 	}
@@ -149,6 +142,19 @@ export async function paraglideMiddleware(request, resolve, options = {}) {
 	}
 
 	return response;
+}
+
+/**
+ * Normalize url for comparison.
+ * Strips trailing slash
+ * @param {string} url
+ * @returns {string} normalized url string
+ */
+function normalizeURL(url) {
+	const urlObj = new URL(url);
+	// // strip trailing slash from pathname
+	urlObj.pathname = urlObj.pathname.replace(/\/$/, "");
+	return urlObj.href;
 }
 
 /**

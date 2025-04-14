@@ -1,5 +1,41 @@
 # sherlock-editor-app
 
+## 0.0.13
+
+### Patch Changes
+
+- @inlang/editor-component@4.0.7
+
+## 0.0.12
+
+### Patch Changes
+
+- @inlang/editor-component@4.0.6
+
+## 0.0.11
+
+### Patch Changes
+
+- @inlang/editor-component@4.0.5
+
+## 0.0.10
+
+### Patch Changes
+
+- @inlang/editor-component@4.0.4
+
+## 0.0.9
+
+### Patch Changes
+
+- @inlang/editor-component@4.0.3
+
+## 0.0.8
+
+### Patch Changes
+
+- @inlang/editor-component@4.0.2
+
 ## 0.0.7
 
 ### Patch Changes

@@ -1,10 +1,15 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "../runtime/create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("sets the locale and origin", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable"],
 		},
@@ -42,9 +47,13 @@ test("sets the locale and origin", async () => {
 });
 
 test("delocalizes the url if the url strategy is used and returns the locale", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url"],
 		},
@@ -64,9 +73,13 @@ test("delocalizes the url if the url strategy is used and returns the locale", a
 });
 
 test("does not delocalize the url if the url strategy is not used", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["globalVariable", "baseLocale"],
 		},
@@ -86,9 +99,13 @@ test("does not delocalize the url if the url strategy is not used", async () => 
 });
 
 test("redirects to localized URL when non-URL strategy determines locale", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "url"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -126,9 +143,13 @@ test("redirects to localized URL when non-URL strategy determines locale", async
 });
 
 test("does not redirect if URL already matches determined locale", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "url"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -162,11 +183,16 @@ test("does not redirect if URL already matches determined locale", async () => {
 });
 
 test("works with disableAsyncLocalStorage option", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable"],
+			disableAsyncLocalStorage: true,
 		},
 	});
 
@@ -179,19 +205,15 @@ test("works with disableAsyncLocalStorage option", async () => {
 	});
 
 	// Process the request with AsyncLocalStorage disabled
-	const response = await runtime.paraglideMiddleware(
-		request,
-		(args) => {
-			// Verify we still get the correct locale
-			expect(args.locale).toBe("de");
-			expect(runtime.getLocale()).toBe("de");
-			// Verify URL is still properly delocalized
-			expect(args.request.url).toBe("https://example.com/page");
-			expect(runtime.getUrlOrigin()).toBe("https://example.com");
-			return new Response("hello");
-		},
-		{ disableAsyncLocalStorage: true }
-	);
+	const response = await runtime.paraglideMiddleware(request, (args) => {
+		// Verify we still get the correct locale
+		expect(args.locale).toBe("de");
+		expect(runtime.getLocale()).toBe("de");
+		// Verify URL is still properly delocalized
+		expect(args.request.url).toBe("https://example.com/page");
+		expect(runtime.getUrlOrigin()).toBe("https://example.com");
+		return new Response("hello");
+	});
 
 	// Verify the result contains the correct data
 	expect(await response.text()).toBe("hello");
@@ -201,9 +223,13 @@ test("works with disableAsyncLocalStorage option", async () => {
 });
 
 test("works with sequential parallel requests using disableAsyncLocalStorage", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "globalVariable"],
 		},
@@ -222,8 +248,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 				expect(runtime.getLocale()).toBe("en");
 				expect(runtime.getUrlOrigin()).toBe("https://example.com");
 				return new Response();
-			},
-			{ disableAsyncLocalStorage: true }
+			}
 		),
 
 		runtime.paraglideMiddleware(
@@ -234,8 +259,7 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 				expect(runtime.getLocale()).toBe("de");
 				expect(runtime.getUrlOrigin()).toBe("https://peter.com");
 				return new Response();
-			},
-			{ disableAsyncLocalStorage: true }
+			}
 		),
 	]);
 
@@ -245,9 +269,13 @@ test("works with sequential parallel requests using disableAsyncLocalStorage", a
 
 // https://github.com/opral/inlang-paraglide-js/issues/442
 test("falls back to next strategy when cookie contains invalid locale", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "url", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -295,14 +323,108 @@ test("falls back to next strategy when cookie contains invalid locale", async ()
 	});
 });
 
+// can likely be removed once the default url pattern polyfill workaround is removed
+// because URLPattern seems to be handling this correctly
+test("prevents redirect loops by normalizing URLs with trailing slashes in different scenarios", async () => {
+	// Create two different runtimes to test different strategy configurations
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		compilerOptions: {
+			strategy: ["cookie", "url"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path(.*)?",
+					localized: [
+						["en", "https://example.com/en/:path(.*)?"],
+						["fr", "https://example.com/fr/:path(.*)?"],
+					],
+				},
+			],
+		},
+	});
+
+	// SCENARIO 1: Basic trailing slash normalization with cookie strategy
+
+	// Case 1A: Request URL has trailing slash, but localized URL might not
+	const requestWithTrailingSlash = new Request("https://example.com/fr/page/", {
+		headers: {
+			"Sec-Fetch-Dest": "document",
+			cookie: `PARAGLIDE_LOCALE=fr`,
+		},
+	});
+
+	let response = await runtime.paraglideMiddleware(
+		requestWithTrailingSlash,
+		() => {
+			return new Response("No redirect needed");
+		}
+	);
+
+	// Middleware should be called (no redirect) because normalized URLs match
+	expect(response.status).toBe(200);
+	expect(await response.text()).toBe("No redirect needed");
+
+	// Case 1B: Request URL has no trailing slash, but localized URL might
+	const requestWithoutTrailingSlash = new Request(
+		"https://example.com/fr/page",
+		{
+			headers: {
+				"Sec-Fetch-Dest": "document",
+				cookie: `PARAGLIDE_LOCALE=fr`,
+			},
+		}
+	);
+
+	response = await runtime.paraglideMiddleware(
+		requestWithoutTrailingSlash,
+		() => {
+			return new Response("No redirect needed");
+		}
+	);
+
+	expect(response.status).toBe(200);
+
+	// Case 1C: redirect wanted because cookie is set to fr but url is en
+	const requestDifferentPath = new Request(
+		"https://example.com/en/different-page",
+		{
+			headers: {
+				"Sec-Fetch-Dest": "document",
+				cookie: `PARAGLIDE_LOCALE=fr`,
+			},
+		}
+	);
+
+	response = await runtime.paraglideMiddleware(requestDifferentPath, () => {
+		// This shouldn't be called since we should redirect
+		throw new Error("Should not reach here");
+	});
+
+	// Should redirect to fr version
+	expect(response.status).toBe(307);
+	expect(response.headers.get("Location")).toBe(
+		"https://example.com/fr/different-page"
+	);
+});
+
 // not implemented because users should disable redirects by
 // making another strategy preceed the url strategy
 //
 // strategy: ["cookie", "url"]
 test.skip("doesn't redirect if disableUrlRedirect is true", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			cookieName: "PARAGLIDE_LOCALE",
 			strategy: ["cookie", "url"],
@@ -342,9 +464,13 @@ test.skip("doesn't redirect if disableUrlRedirect is true", async () => {
 });
 
 test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "url"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -400,4 +526,30 @@ test("only redirects if the request.headers.get('Sec-Fetch-Dest') === 'document'
 
 	// Middleware should be called since no redirect for API requests
 	expect(apiMiddlewareResolveWasCalled).toBe(true);
+});
+
+// https://github.com/opral/inlang-paraglide-js/issues/477
+test("does not catch errors thrown by downstream resolve call", async () => {
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en"],
+			},
+		}),
+		compilerOptions: {
+			strategy: ["url"],
+		},
+	});
+
+	await expect(() =>
+		runtime.paraglideMiddleware(
+			new Request(new URL("https://example.com/page"), {
+				headers: { "Sec-Fetch-Dest": "document" },
+			}),
+			() => {
+				throw new Error("Downstream error");
+			}
+		)
+	).rejects.toThrow();
 });

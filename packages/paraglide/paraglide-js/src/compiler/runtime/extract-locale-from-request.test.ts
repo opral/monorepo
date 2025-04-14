@@ -1,10 +1,15 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("returns the locale from the cookie", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -20,9 +25,13 @@ test("returns the locale from the cookie", async () => {
 });
 
 test("returns the locale from the pathname for document requests", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "baseLocale"],
 			urlPatterns: [
@@ -43,9 +52,13 @@ test("returns the locale from the pathname for document requests", async () => {
 });
 
 test("returns the baseLocale if no other strategy matches", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["baseLocale"],
 		},
@@ -56,9 +69,13 @@ test("returns the baseLocale if no other strategy matches", async () => {
 });
 
 test("throws an error if no locale is found", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie"],
 		},
@@ -70,9 +87,13 @@ test("throws an error if no locale is found", async () => {
 });
 
 test("returns the preferred locale from Accept-Language header", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["preferredLanguage", "baseLocale"],
 		},
@@ -108,9 +129,13 @@ test("returns the preferred locale from Accept-Language header", async () => {
 });
 
 test("should fall back to next strategy when cookie contains invalid locale", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["cookie", "baseLocale"],
 			cookieName: "PARAGLIDE_LOCALE",
@@ -129,9 +154,13 @@ test("should fall back to next strategy when cookie contains invalid locale", as
 });
 
 test("skips over localStorage strategy as it is not supported on the server", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["localStorage", "baseLocale"],
 		},
@@ -143,10 +172,14 @@ test("skips over localStorage strategy as it is not supported on the server", as
 	expect(runtime.extractLocaleFromRequest(request)).toBe("en");
 });
 
-test("does not resolve the locale from the url if request is not a document request", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "fr"],
+test("resolves the locale from the url for all request types", async () => {
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "baseLocale"],
 			urlPatterns: [
@@ -161,21 +194,69 @@ test("does not resolve the locale from the url if request is not a document requ
 		},
 	});
 
-	// Document request - should use URL strategy
+	// Non-document request should still use URL strategy
 	const request = new Request("https://example.com/fr/home", {
 		headers: {
 			"Sec-Fetch-Dest": "something",
 		},
 	});
 	const locale = runtime.extractLocaleFromRequest(request);
-	expect(locale).toBe("en");
+	expect(locale).toBe("fr");
+});
+
+test("cookie strategy precedes URL strategy for API requests with wildcards", async () => {
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		compilerOptions: {
+			strategy: ["cookie", "url", "baseLocale"],
+			cookieName: "PARAGLIDE_LOCALE",
+			urlPatterns: [
+				{
+					pattern: "https://example.com/:path(.*)",
+					localized: [
+						["fr", "https://example.com/fr/:path(.*)"],
+						["de", "https://example.com/de/:path(.*)"],
+						["en", "https://example.com/:path(.*)"],
+					],
+				},
+			],
+		},
+	});
+
+	// API request with cookie should use cookie locale
+	const apiRequestWithCookie = new Request("https://example.com/api/data", {
+		headers: {
+			"Sec-Fetch-Dest": "empty",
+			cookie: "PARAGLIDE_LOCALE=de",
+		},
+	});
+	const apiLocale = runtime.extractLocaleFromRequest(apiRequestWithCookie);
+	expect(apiLocale).toBe("de");
+
+	// API request without cookie should fall back to URL strategy
+	const apiRequestNoMatch = new Request("https://example.com/api/data", {
+		headers: {
+			"Sec-Fetch-Dest": "empty",
+		},
+	});
+	const fallbackLocale = runtime.extractLocaleFromRequest(apiRequestNoMatch);
+	expect(fallbackLocale).toBe("en");
 });
 
 // https://github.com/opral/inlang-paraglide-js/issues/436
 test("preferredLanguage precedence over url", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			strategy: ["url", "preferredLanguage"],
 			urlPatterns: [

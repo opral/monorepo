@@ -6,6 +6,18 @@ import { type UserConfig } from "vite";
  * If not specified, it defaults to the same value as messages.
  */
 export const builds: BuildConfig[] = [
+	// For m=100
+	...createBuildMatrix({
+		libraries: {
+			paraglide: ["default", "experimental-middleware-locale-splitting"],
+			i18next: ["default", "http-backend"],
+		},
+		locales: [5, 10, 20],
+		messages: [100],
+		percentDynamic: 20,
+		namespaceSizes: [100, 200, 500, 1000],
+	}),
+	// For m=200
 	...createBuildMatrix({
 		libraries: {
 			paraglide: ["default", "experimental-middleware-locale-splitting"],
@@ -14,7 +26,7 @@ export const builds: BuildConfig[] = [
 		locales: [5, 10, 20],
 		messages: [200],
 		percentDynamic: 20,
-		namespaceSizes: [500],
+		namespaceSizes: [200, 500, 1000],
 	}),
 ];
 
