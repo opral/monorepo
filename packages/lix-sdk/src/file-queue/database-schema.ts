@@ -17,6 +17,7 @@ export function applyFileQueueDatabaseSchema(
     ) STRICT;
   
     CREATE TRIGGER IF NOT EXISTS file_insert AFTER INSERT ON file
+    WHEN NOT EXISTS (SELECT 1 FROM key_value WHERE key = 'lix_skip_file_queue')
     BEGIN
       INSERT INTO file_queue(
         file_id, path_after, data_after, metadata_after
@@ -28,6 +29,7 @@ export function applyFileQueueDatabaseSchema(
     END;
   
     CREATE TRIGGER IF NOT EXISTS file_update AFTER UPDATE ON file
+    WHEN NOT EXISTS (SELECT 1 FROM key_value WHERE key = 'lix_skip_file_queue')
     BEGIN
       INSERT INTO file_queue(
         file_id, 
@@ -45,6 +47,7 @@ export function applyFileQueueDatabaseSchema(
     END;
   
     CREATE TRIGGER IF NOT EXISTS file_delete BEFORE DELETE ON file
+    WHEN NOT EXISTS (SELECT 1 FROM key_value WHERE key = 'lix_skip_file_queue')
     BEGIN
       INSERT INTO file_queue(file_id)
       VALUES (OLD.id);
