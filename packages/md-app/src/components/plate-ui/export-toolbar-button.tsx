@@ -11,14 +11,13 @@ import {
   serializeHtml,
   SlateLeaf,
 } from '@udecode/plate';
-import { BaseAlignPlugin } from '@udecode/plate-alignment';
 import {
   BaseBoldPlugin,
   BaseCodePlugin,
   BaseItalicPlugin,
   BaseStrikethroughPlugin,
-  BaseSubscriptPlugin,
-  BaseSuperscriptPlugin,
+  // BaseSubscriptPlugin,
+  // BaseSuperscriptPlugin,
   // BaseUnderlinePlugin,
 } from '@udecode/plate-basic-marks';
 import { BaseBlockquotePlugin } from '@udecode/plate-block-quote';
@@ -38,11 +37,11 @@ import {
   BaseHeadingPlugin,
   BaseTocPlugin,
   HEADING_KEYS,
-  HEADING_LEVELS,
+  // HEADING_LEVELS,
 } from '@udecode/plate-heading';
 import { BaseHighlightPlugin } from '@udecode/plate-highlight';
 import { BaseHorizontalRulePlugin } from '@udecode/plate-horizontal-rule';
-// import { BaseIndentPlugin } from '@udecode/plate-indent';
+import { BaseIndentPlugin } from '@udecode/plate-indent';
 import { BaseIndentListPlugin } from '@udecode/plate-indent-list';
 import { BaseKbdPlugin } from '@udecode/plate-kbd';
 import { BaseColumnItemPlugin, BaseColumnPlugin } from '@udecode/plate-layout';
@@ -212,8 +211,8 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
       [BaseMentionPlugin.key]: MentionElementStatic,
       [BaseParagraphPlugin.key]: ParagraphElementStatic,
       [BaseStrikethroughPlugin.key]: withProps(SlateLeaf, { as: 'del' }),
-      [BaseSubscriptPlugin.key]: withProps(SlateLeaf, { as: 'sub' }),
-      [BaseSuperscriptPlugin.key]: withProps(SlateLeaf, { as: 'sup' }),
+      // [BaseSubscriptPlugin.key]: withProps(SlateLeaf, { as: 'sub' }),
+      // [BaseSuperscriptPlugin.key]: withProps(SlateLeaf, { as: 'sup' }),
       [BaseTableCellHeaderPlugin.key]: TableCellHeaderStaticElement,
       [BaseTableCellPlugin.key]: TableCellElementStatic,
       [BaseTablePlugin.key]: TableElementStatic,
@@ -244,8 +243,8 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
         BaseCodePlugin,
         BaseItalicPlugin,
         BaseStrikethroughPlugin,
-        BaseSubscriptPlugin,
-        BaseSuperscriptPlugin,
+        // BaseSubscriptPlugin,
+        // BaseSuperscriptPlugin,
         // BaseUnderlinePlugin,
         BaseBlockquotePlugin,
         BaseDatePlugin,
@@ -256,23 +255,23 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
             lowlight,
           },
         }),
-        // BaseIndentPlugin.extend({
-        //   inject: {
-        //     targetPlugins: [
-        //       BaseParagraphPlugin.key,
-        //       BaseBlockquotePlugin.key,
-        //       BaseCodeBlockPlugin.key,
-        //     ],
-        //   },
-        // }),
+        BaseIndentPlugin.extend({
+          inject: {
+            targetPlugins: [
+              BaseParagraphPlugin.key,
+              // BaseBlockquotePlugin.key,
+              // BaseCodeBlockPlugin.key,
+            ],
+          },
+        }),
         BaseIndentListPlugin.extend({
           inject: {
             targetPlugins: [
               BaseParagraphPlugin.key,
-              ...HEADING_LEVELS,
-              BaseBlockquotePlugin.key,
-              BaseCodeBlockPlugin.key,
-              BaseTogglePlugin.key,
+              // ...HEADING_LEVELS,
+              // BaseBlockquotePlugin.key,
+              // BaseCodeBlockPlugin.key,
+              // BaseTogglePlugin.key,
             ],
           },
           options: {
@@ -299,16 +298,16 @@ export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
         BaseFontBackgroundColorPlugin,
         BaseFontSizePlugin,
         BaseKbdPlugin,
-        BaseAlignPlugin.extend({
-          inject: {
-            targetPlugins: [
-              BaseParagraphPlugin.key,
-              BaseMediaEmbedPlugin.key,
-              ...HEADING_LEVELS,
-              BaseImagePlugin.key,
-            ],
-          },
-        }),
+        // BaseAlignPlugin.extend({
+        //   inject: {
+        //     targetPlugins: [
+        //       BaseParagraphPlugin.key,
+        //       BaseMediaEmbedPlugin.key,
+        //       ...HEADING_LEVELS,
+        //       BaseImagePlugin.key,
+        //     ],
+        //   },
+        // }),
         BaseLineHeightPlugin,
         BaseHighlightPlugin,
         BaseFilePlugin,
