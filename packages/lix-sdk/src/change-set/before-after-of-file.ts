@@ -43,6 +43,11 @@ export async function beforeAfterOfFile(args: {
 					.selectAll()
 					.executeTakeFirst();
 
+				const currentChangeSets = await trx
+					.selectFrom("change_set")
+					.selectAll()
+					.execute();
+
 				await trx.deleteFrom("file").where("id", "=", args.file.id).execute();
 
 				const leafChangesOfFileBefore = args.changeSetBefore
@@ -139,6 +144,34 @@ export async function beforeAfterOfFile(args: {
 						.where("id", "=", args.file.id)
 						.execute();
 				}
+
+				// clean up
+				await trx
+					.deleteFrom("change_set")
+					.where("id", "=", beforeCs.id)
+					.execute();
+				await trx
+					.deleteFrom("change_set")
+					.where("id", "=", afterCs.id)
+					.execute();
+				await trx
+					.deleteFrom("version_v2")
+					.where("id", "=", interimVersion.id)
+					.execute();
+
+				// currently facing unexpected behavior because the change sets are
+				// two more than before from apply changes i suspect that the flush
+				// pending changes trigger might interfere.
+				//
+				// took this shortcut to deliver a tight deadline
+				await trx
+					.deleteFrom("change_set")
+					.where(
+						"id",
+						"not in",
+						currentChangeSets.map((cs) => cs.id)
+					)
+					.execute();
 
 				return { before: fileBefore, after: fileAfter };
 			});

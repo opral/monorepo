@@ -85,6 +85,22 @@ test("gives the before and after state without altering the current state", asyn
 	// Verify the original state matches the latest update
 	expect(originalState).toEqual(updates[2]);
 
+	const activeVersionBefore = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	const versionsBeforeDiffing = await lix.db
+		.selectFrom("version_v2")
+		.selectAll()
+		.execute();
+
+	const changeSetsBeforeDiffing = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
 	// Test case 1: Compare cs0 and cs1
 	const result1 = await beforeAfterOfFile({
 		lix,
@@ -137,6 +153,30 @@ test("gives the before and after state without altering the current state", asyn
 	// Verify file properties are preserved
 	expect(currentFile.id).toBe(originalFile.id);
 	expect(currentFile.path).toBe(originalFile.path);
+
+	const activeVersionAfter = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	expect(activeVersionAfter).toEqual(activeVersionBefore);
+
+	const versionsAfterDiffing = await lix.db
+		.selectFrom("version_v2")
+		.selectAll()
+		.execute();
+
+	// Verify that no new versions were created
+	expect(versionsAfterDiffing.length).toBe(versionsBeforeDiffing.length);
+
+	const changeSetsAfterDiffing = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
+	// Verify that no new change sets were created
+	expect(changeSetsAfterDiffing.length).toBe(changeSetsBeforeDiffing.length);
 });
 
 test("returns before: undefined when the file has no before state", async () => {
