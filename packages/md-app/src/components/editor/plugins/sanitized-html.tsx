@@ -38,7 +38,7 @@ export const SanitizedElementLeaf = ({
 	return (
 		<PlateLeaf asChild className={className} {...props} contentEditable={false}>
 			<code>
-				<pre>{element.value}</pre>
+				<pre className="whitespace-pre-wrap">{element.value}</pre>
 			</code>
 		</PlateLeaf>
 	);
