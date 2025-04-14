@@ -11,8 +11,8 @@ export function applyChangeSetEdgeDatabaseSchema(
 
       PRIMARY KEY (parent_id, child_id),
 
-      FOREIGN KEY(parent_id) REFERENCES change_set(id),
-      FOREIGN KEY(child_id) REFERENCES change_set(id),
+      FOREIGN KEY(parent_id) REFERENCES change_set(id) ON DELETE CASCADE,
+      FOREIGN KEY(child_id) REFERENCES change_set(id) ON DELETE CASCADE,
 
       -- Prevent self referencing edges
       CHECK (parent_id != child_id)

@@ -41,8 +41,8 @@ export function applyVersionV2DatabaseSchema(
     change_set_id TEXT NOT NULL,
     working_change_set_id TEXT NOT NULL UNIQUE,
 
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id),
-    FOREIGN KEY(working_change_set_id) REFERENCES change_set(id)
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id) ON DELETE CASCADE,
+    FOREIGN KEY(working_change_set_id) REFERENCES change_set(id) ON DELETE CASCADE
   ) STRICT;
 
   -- only one version can be active at a time
