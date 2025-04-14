@@ -42,7 +42,7 @@ const Checkpoints: React.FC = () => {
 							key="current-changes"
 							changeSet={currentChangeSet}
 							isWorkingChangeSet={true}
-							// previousChangeSetId={checkpoints?.[0]?.id ?? undefined}
+							previousChangeSetId={checkpoints?.[0]?.id ?? undefined}
 							showRestore={false}
 							footer={
 								<div className="flex justify-end mt-2">

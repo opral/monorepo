@@ -176,32 +176,26 @@ export async function selectDiscussion(args: { changeSetId: ChangeSet["id"] }) {
  * that are not yet checkpointed.
  */
 export async function selectWorkingChangeSet(): Promise<
-	(ChangeSet & { change_count: number }) | null
+	(ChangeSet & { change_count: number }) | undefined
 > {
-	try {
-		const activeVersion = await selectActiveVersion();
+	const activeVersion = await selectActiveVersion();
 
-		return await lix.db
-			.selectFrom("change_set")
-			.where("id", "=", activeVersion.working_change_set_id)
-			// left join in case the change set has no elements
-			.leftJoin(
-				"change_set_element",
-				"change_set.id",
-				"change_set_element.change_set_id",
-			)
-			.where("file_id", "=", prosemirrorFile.id)
-			.selectAll("change_set")
-			.groupBy("change_set.id")
-			.select((eb) => [
-				eb.fn.count<number>("change_set_element.change_id").as("change_count"),
-			])
-			.executeTakeFirstOrThrow();
-	} catch (e) {
-		console.error("Error selecting working change set:", e);
-		return null; // Keep UI stable in case of error
-		// throw e;
-	}
+	return await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", activeVersion.working_change_set_id)
+		// left join in case the change set has no elements
+		.leftJoin(
+			"change_set_element",
+			"change_set.id",
+			"change_set_element.change_set_id",
+		)
+		.where("file_id", "=", prosemirrorFile.id)
+		.selectAll("change_set")
+		.groupBy("change_set.id")
+		.select((eb) => [
+			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		])
+		.executeTakeFirst();
 }
 
 /**

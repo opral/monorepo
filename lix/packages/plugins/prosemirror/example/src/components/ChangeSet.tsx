@@ -107,17 +107,6 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			setExpandedChangeSetId(isExpanded ? null : changeSet.id);
 		};
 
-		// Calculate the target diff state for *this* change set
-		const targetDiffView = {
-			beforeCsId: previousChangeSetId,
-			afterCsId: changeSet.id,
-		};
-
-		// Determine if the global diffView state matches the target state for this change set
-		const isDiffViewActive =
-			diffView?.beforeCsId === targetDiffView.beforeCsId &&
-			diffView?.afterCsId === targetDiffView.afterCsId;
-
 		return (
 			<div className="bg-base-100">
 				<div
@@ -225,13 +214,19 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 								<button
 									className="btn btn-sm btn-ghost gap-1 flex items-center"
 									onClick={() => {
-										// Toggle logic: If active for this CS, set to null. Otherwise, set to this CS's target state.
-										setDiffView(isDiffViewActive ? null : targetDiffView);
+										if (diffView) {
+											setDiffView(null);
+										} else {
+											setDiffView({
+												beforeCsId: previousChangeSetId,
+												afterCsId: changeSet.id,
+											});
+										}
 									}}
-									title={isDiffViewActive ? "Hide Diff" : "View Diff"}
+									title={diffView ? "Hide Diff" : "View Diff"}
 								>
-									{isDiffViewActive ? <EyeOff size={16} /> : <Eye size={16} />}
-									{isDiffViewActive ? "Hide Diff" : "View Diff"}
+									{diffView ? <EyeOff size={16} /> : <Eye size={16} />}
+									{diffView ? "Hide Diff" : "View Diff"}
 								</button>
 							</div>
 						</div>
