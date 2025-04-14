@@ -9,7 +9,7 @@ This is an example of how to use Paraglide with Next JS with SSR. The source cod
 
 <doc-callout type="tip">NextJS is tech-debt plagued. If you start your app or website from scratch, we highly recommend using a vite-based framework. [Read](https://github.com/opral/inlang-paraglide-js/issues/245#issuecomment-2608727658) this comment. </doc-callout>
 
-<doc-callout type="warning">The setup has been reported as fragile for advances use-cases [#407](https://github.com/opral/inlang-paraglide-js/issues/407). Official NodeJS middleware support of NextJS could solve these problems.</doc-callout>
+<doc-callout type="warning">The setup has been reported as fragile for advances use-cases [#407](https://github.com/opral/inlang-paraglide-js/issues/407). Official NodeJS middleware support of NextJS could solve these problems. Use [next-intl](https://next-intl.dev/) if you need a more stable setup.</doc-callout>
 
 ## Features
 
@@ -28,7 +28,7 @@ This is an example of how to use Paraglide with Next JS with SSR. The source cod
 ### Install paraglide js
 
 ```bash
-npx @inlang/paraglide-js@beta init
+npx @inlang/paraglide-js@latest init
 ```
 
 ### Add the webpack plugin to the `next.config.js` file:

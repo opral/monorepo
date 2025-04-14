@@ -1,5 +1,88 @@
 # @lix-js/sdk
 
+## 0.4.6
+
+### Patch Changes
+
+- f634538: lower sampling in telemetry event to reduce amounts of events
+
+## 0.4.5
+
+### Patch Changes
+
+- 275d87e: improve: `createChangeSet()` now accepts labels to associate with the change set
+
+  Before:
+
+  ```ts
+  await createChangeSet({
+  	lix,
+  	changes: [],
+  	// ❌ no way to add labels
+  });
+  ```
+
+  After:
+
+  ```ts
+  // Get existing labels
+  const labels = await lix.db.selectFrom("label").selectAll().execute();
+
+  await createChangeSet({
+  	lix,
+  	changes: [],
+  	// ✅ associate labels with the change set
+  	labels,
+  });
+  ```
+
+- dc92f56: - Rename `lix-server-api` to `lix-server-protocol` for improved clarity and consistent naming. All functionality remains backward compatible. The following changes were made:
+  - Renamed server-api-handler directory to server-protocol-handler
+  - Renamed server endpoints from /lsa/ to /lsp/
+  - Updated imports in all affected files
+  - Added backward compatibility aliases to ensure existing code continues to work
+- c1ed545: improve: `createChangeSet()` now takes an empty list of changes without throwing
+
+  Before:
+
+  ```ts
+  await createChangeSet({
+  	lix,
+  	// 💥 throws FOREIGN KEY CONSTRAINT violation
+  	changes: [],
+  });
+  ```
+
+  After:
+
+  ```ts
+  await createChangeSet({
+  	lix,
+  	// ✅ does not throw
+  	changes: [],
+  });
+  ```
+
+## 0.4.4
+
+### Patch Changes
+
+- 85478f8: chore: reduce the minmum node version to v18 to unblock adoption https://github.com/opral/lix-sdk/issues/277
+
+## 0.4.3
+
+### Patch Changes
+
+- 8ce6666: Fix glob pattern behavior in file queue by removing prepending slash and add proper null checks for `plugin.detectChangesGlob`.
+
+  Also update the error message explanation for file paths to correctly state why paths need to start with a root slash.
+
+## 0.4.2
+
+### Patch Changes
+
+- 59f6c92: Add polyfill for crypto.getRandomValues to ensure nanoid works in environments without crypto support (like older versions of Node in Stackblitz). Fixes https://github.com/opral/lix-sdk/issues/258
+
 ## 0.4.1
 
 ### Patch Changes

@@ -14,7 +14,14 @@ export function toSafeModuleId(id: string): string {
 		return "_" + result;
 	}
 
-	return result;
+	let numUppercase = 0;
+	for (const char of id) {
+		if (char.match(/[A-Z]/)) {
+			numUppercase++;
+		}
+	}
+
+	return result + (numUppercase > 0 ? `${numUppercase}` : "");
 }
 
 export function isSafeModuleId(id: string): boolean {

@@ -8,6 +8,7 @@
   "files": [
     "tsconfig.default.json"
   ],
+  "types": "./dist/index.d.ts",
   "exports": {
     "./default": "./tsconfig.default.json"
   }

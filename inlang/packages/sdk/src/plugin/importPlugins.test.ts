@@ -49,6 +49,29 @@ test("if a fetch fails, a plugin import error is expected", async () => {
 	expect(result.errors[0]).toBeInstanceOf(PluginImportError);
 });
 
+test("if a network error occurs during fetch, a plugin import error is expected", async () => {
+	global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+	const lix = await openLixInMemory({ blob: await newLixFile() });
+
+	const result = await importPlugins({
+		lix,
+		settings: {
+			baseLocale: "en",
+			locales: ["en"],
+			modules: ["https://example.com/non-existent-paraglide-plugin.js"],
+		},
+	});
+
+	expect(global.fetch).toHaveBeenCalledTimes(1);
+	expect(result.plugins.length).toBe(0);
+	expect(result.errors.length).toBe(1);
+	expect(result.errors[0]).toBeInstanceOf(PluginImportError);
+	expect(result.errors[0]?.message).toContain(
+		"https://example.com/non-existent-paraglide-plugin.js"
+	);
+	expect(result.errors[0]?.message).toContain("Network error");
+});
+
 test("it should filter message lint rules for legacy reasons", async () => {
 	global.fetch = vi.fn().mockResolvedValue({
 		ok: true,

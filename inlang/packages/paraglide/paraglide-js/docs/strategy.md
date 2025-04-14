@@ -7,9 +7,9 @@ imports:
 
 Paraglide JS comes with various strategies to determine the locale out of the box. 
 
-The strategy is defined with the `strategy` option. The order of the strategies in the array defines the priority. The first strategy that returns a locale will be used.
+The strategy is defined with the `strategy` option. The priority is determined by the order of the strategies in the array. The first strategy that returns a locale will be used.
 
-In the example below, the locale is first determined by the `cookie` strategy. If no cookie is found, the `baseLocale` is used.
+In the example below, the `cookie` strategy first determines the locale. If no cookie is found, the `baseLocale` is used.
 
 ```diff
 compile({
@@ -37,7 +37,7 @@ compile({
 
 Returns the `baseLocale` defined in the settings. 
 
-Useful as fallback if no other strategy returned a locale. If a cookie has not been set yet, for example. 
+It is useful as a fallback strategy if no other strategy returns a locale, for example, if a cookie has not been set yet. 
 
 ```diff
 compile({
@@ -51,7 +51,7 @@ compile({
 
 Uses a global variable to determine the locale. 
 
-This strategy is only useful in testing environments, or to get started quickly. Setting a global variable can lead to cross request issues in server-side environments and the locale is not persisted between page reloads in client-side environments.
+This strategy is only useful in testing environments or to get started quickly. Setting a global variable can lead to cross-request issues in server-side environments, and the locale is not persisted between page reloads in client-side environments.
 
 ```diff
 compile({
@@ -78,7 +78,7 @@ compile({
 
 The strategy attempts to match locale in order of user preference:
 
-1. First tries exact matches (e.g., "en-US" if supported)
+1. First try exact matches (e.g., "en-US" if supported)
 2. Falls back to base language codes (e.g., "en")
 
 For example:
@@ -88,8 +88,6 @@ For example:
 ### localStorage
 
 Determine the locale from the user's local storage.
-
-<doc-callout type="warning">If you use this stragety in combination with url, make sure that a strategy like `cookie` is used as well to resolve the locale in a request. The server has no access to localStorage.</doc-callout> 
 
 ```diff
 compile({
@@ -107,15 +105,13 @@ Determine the locale from the URL (pathname, domain, etc).
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-+	strategy: ["url"]
++	strategy: ["url", "cookie"]
 })
 ```
 
 The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
 
 <doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
-
-<doc-callout type="info">On the server, the URL strategy will only trigger for requests with the `Sec-Fetch-Dest: "document"` header. This helps distinguish between document requests (browser page loads) and API requests, preventing unnecessary redirects for API calls.</doc-callout>
 
 #### Locale prefixing
 
@@ -128,13 +124,14 @@ https://example.com/de/about
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		{
-			pattern: "https://example.com/:path(.*)?",
+			pattern: "/:path(.*)?",
 			localized: [
-				["en", "https://example.com/:path(.*)?"],
-				["de", "https://example.com/de/:path(.*)?"],
+				["de", "/de/:path(.*)?"],
+                                // ✅ make sure to match the least specific path last 
+				["en", "/:path(.*)?"],
 			],
 		},
 	],
@@ -156,7 +153,7 @@ Here's a simple example with translated path segments:
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		// Specific translated routes
 		{
@@ -198,15 +195,15 @@ https://de.example.com/about
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		// Include the localhost domain as otherwise the pattern will
 		// always match and the path won't be localized
 		{
-			pattern: 'https://localhost:port?/:path(.*)?',
+			pattern: 'http://localhost::port?/:path(.*)?',
 			localized: [
-				["en", 'https://localhost:port?/en/:path(.*)?'],
-				["de", 'https://localhost:port?/de/:path(.*)?']
+				["en", 'http://localhost::port?/en/:path(.*)?'],
+				["de", 'http://localhost::port?/de/:path(.*)?']
 			],
 		},
 		// production pattern which uses subdomains like de.example.com
@@ -236,7 +233,7 @@ When using a base path, it's important to make it optional using the `{basepath/
 compile({
 	project: "./project.inlang",
 	outdir: "./src/paraglide",
-	strategy: ["url"],
+	strategy: ["url", "cookie"],
 	urlPatterns: [
 		{
 			pattern: "/{shop/}?:path(.*)?",
@@ -258,9 +255,81 @@ This configuration enables:
 
 The curly braces `{}` with the `?` modifier ensure that the group is treated as optional, allowing both URLs with and without the base path to be matched and properly localized.
 
+#### Making URL patterns unavailable in specific locales
+
+You can configure certain URL patterns to be unavailable in specific locales by redirecting them to a 404 page or any other designated error page. 
+
+This is useful when some content or features should only be accessible in certain languages.
+
+```
+https://example.com/specific-path       // Available in English
+https://example.com/de/404              // Redirected to 404 in German
+```
+
+To implement this, map the pattern to your 404 page URL for the locales where the content should be unavailable:
+
+```js
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+	strategy: ["url", "cookie"],
+	urlPatterns: [
+		// 404 page definition.
+		// 
+		// 💡 make sure to define the 404 pattern
+		// before a catch all pattern
+		{
+			pattern: "/404",
+			localized: [
+				["en", "/404"],
+				["de", "/de/404"],
+				// defining paths for locales that should not
+				// be caught by the catch all pattern 
+				// 
+				// this will be matched first and the catch all
+				// pattern will not be triggered and a redirect
+				// from /de/unavailable to /de/404 will be triggered
+				["de", "/de/unavailable"]
+			],
+		},
+		// Path that's only available in English
+		{
+			pattern: "/specific-path",
+			localized: [
+				["en", "/specific-path"],     // Normal path in English
+				["de", "/de/404"],            // Redirects to 404 in German
+			],
+		},
+		// Catch-all pattern for other routes
+		{
+			pattern: "/:path(.*)?",
+			localized: [
+				["en", "/:path(.*)?"],
+				["de", "/de/:path(.*)?"],
+			],
+		},
+	],
+});
+```
+
+When a user tries to access `/specific-path` in German, they will be redirected to `/de/404` instead. This approach allows you to:
+
+- Make certain content available only in specific languages
+- Create locale-specific restrictions for particular routes
+- Implement gradual rollouts of features by language
+- Handle legacy URLs that might only exist in certain locales
+
+Note that other paths will still work normally through the catch-all pattern, so only the specifically configured paths will be unavailable.
+
 #### Troubleshooting URL patterns
 
 When working with URL patterns, there are a few important considerations to keep in mind:
+
+##### Excluding paths is not supported
+
+[URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API#regex_matchers_limitations) does not support negative lookahead regex patterns. 
+
+The decision to not support negative lookaheads is likely related to ReDoS (Regular Expression Denial of Service) attacks. Read [this blog post](https://blakeembrey.com/posts/2024-09-web-redos/) or the [CVE on GitHub](https://github.com/pillarjs/path-to-regexp/security/advisories/GHSA-9wv6-86v2-598j).
 
 ##### Pattern order matters
 
@@ -309,6 +378,8 @@ urlPatterns: [
 
 Within each pattern's `localized` array, the order of locale patterns also matters. When localizing a URL, the first matching pattern for the target locale will be used. Similarly, when delocalizing a URL, patterns are checked in order.
 
+This is especially important for path-based localization where one locale has a prefix (like `/de/`) and another doesn't. In these cases, put the more specific pattern (with prefix) first.
+
 ```js
 // ❌ INCORRECT ORDER: The first pattern is too general
 {
@@ -327,6 +398,24 @@ Within each pattern's `localized` array, the order of locale patterns also matte
     ["en", "https://example.com/:path(.*)?"], // General pattern last
   ],
 }
+
+// ❌ INCORRECT ORDER FOR DELOCALIZATION: Generic pattern first will cause problems
+{
+  pattern: "/:path(.*)?",
+  localized: [
+    ["en", "/:path(.*)?"],      // Generic pattern will match everything including "/de/about"
+    ["de", "/de/:path(.*)?"],   // Pattern with prefix won't be reached for delocalization
+  ],
+}
+
+// ✅ CORRECT ORDER: More specific patterns with prefixes should come first
+{
+  pattern: "/:path(.*)?",
+  localized: [
+    ["de", "/de/:path(.*)?"],   // Specific pattern with prefix first
+    ["en", "/:path(.*)?"],      // Generic pattern last
+  ],
+}
 ```
 
 ##### Example: Multi-tenant application with specific routes
@@ -337,7 +426,7 @@ For a multi-tenant application with specific routes, proper pattern ordering is 
 compile({
   project: "./project.inlang",
   outdir: "./src/paraglide",
-  strategy: ["url"],
+  strategy: ["url", "cookie"],
   urlPatterns: [
     // Specific product routes first
     {

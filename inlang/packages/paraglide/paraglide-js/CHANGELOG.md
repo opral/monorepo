@@ -1,6 +1,417 @@
 # @inlang/paraglide-js
 
-**Paraglide JS 2.0 GA release notes are [here](https://github.com/opral/monorepo/blob/main/inlang/packages/paraglide/paraglide-js/v2-release-notes.md)**
+## 2.0.11
+
+### Patch Changes
+
+- de0439f: Add domain property to cookie options.
+
+  ```diff
+  paraglideVitePlugin({
+    project: './project.inlang',
+    outdir: "./src/paraglide",
+  + cookieDomain: 'example.com'
+  }),
+  ```
+
+## 2.0.10
+
+### Patch Changes
+
+- d16e853: fix: [2.0.8] Adds extra \*/ in generated .js files https://github.com/opral/inlang-paraglide-js/issues/493
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [bd2c366]
+  - @inlang/sdk@2.4.7
+
+## 2.0.8
+
+### Patch Changes
+
+- 5258af0: fix: compiling message bundles with case sensitive ids for the locale module output https://github.com/opral/inlang-paraglide-js/issues/490
+
+  Case sensitive ids led to duplicate exports in the locale module output. This has been fixed by adjusting the `toSafeModuleId()` used by the compiler internally to append a number of uppercase characters to de-duplicate the ids.
+
+  ```diff
+  toSafeModuleId("helloworld")
+   "helloworld"
+
+  toSafeModuleId("helloWorld")
+  - "helloworld"
+  + "helloworld1"
+  ```
+
+## 2.0.7
+
+### Patch Changes
+
+- 48931f5: make `output-structure: locale-modules` the default for dev builds https://github.com/opral/inlang-paraglide-js/issues/486
+- Updated dependencies [49a7880]
+  - @inlang/sdk@2.4.6
+
+## 2.0.6
+
+### Patch Changes
+
+- 3fa27c0: fix: duplicate (case sensitive) message keys leading to compile error when using `output-structure: locale-modules`. closes https://github.com/opral/inlang-paraglide-js/issues/487
+- 02c2d34: improve: compiler should log warnings when plugins can not be imported
+- Updated dependencies [083ff1f]
+  - @inlang/sdk@2.4.5
+
+## 2.0.5
+
+### Patch Changes
+
+- 698b9a9: add `cookieMaxAge` option to compiler and runtime
+
+  Closes https://github.com/opral/inlang-paraglide-js/issues/483
+
+  - Introduced `cookieMaxAge` option to `CompilerOptions`, allowing configuration of cookie expiration time.
+  - Adjusted tests to verify `max-age` in cookies.
+
+## 2.0.4
+
+### Patch Changes
+
+- @inlang/sdk@2.4.4
+
+## 2.0.3
+
+### Patch Changes
+
+- cf404e0: improve: handle duplicate inputs https://github.com/opral/inlang-paraglide-js/issues/479
+
+## 2.0.2
+
+### Patch Changes
+
+- a6c43ea: fix: error handling in paraglideMiddleware breaks SvelteKit features that rely on errors being thrown
+
+## 2.0.1
+
+### Patch Changes
+
+- b906c0c: fix: window undefined bug in webpack
+  - @inlang/sdk@2.4.3
+
+## Paraglide JS 2.0 🚀
+
+Paraglide JS 2.0 had three main goals which have all been achieved:
+
+1. Use the new inlang SDK v2 which supports variants [#201](https://github.com/opral/inlang-paraglide-js/issues/201).
+2. Unify the API across any framework [#217](https://github.com/opral/inlang-paraglide-js/issues/217).
+3. Support any i18n strategy (cookie, url, domain, session, etc).
+
+- 🌐 **Variants (pluralization) are now supported** [docs](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/variants)
+- 😍 **No more adapters or providers are needed** (!)
+- 🛣️ **Any strategy (url, cookie, local storage) is now supported** [docs](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy)
+
+In addition, Paraglide JS 2.0 comes with:
+
+- 🌟 **Nested message keys** are now supported (most requested feature!)
+- ✨ **Auto-imports** when writing `m.` (no more manual `import * as m`)
+- 🍌 **Arbitrary key names** including emojis via `m["🍌"]()`
+- 🔄 **Incremental migration** to Paraglide JS is now possible
+- 🏘️ **Multi-tenancy support** for domain-based routing
+- 🔧 **Exposing the compiler API** for advanced workflows
+- 🛣️ **Configurable routing strategies** (URL, cookie, domain, etc)
+- 🧪 **Experimental per-locale splitting** for decreasing bundle sizes
+- 🌐 **Framework-agnostic server middleware** for SSR (SvelteKit, Next.js, etc)
+
+### Highlights
+
+#### Interactive benchmark
+
+Check out the [benchmark](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/benchmark) to see how Paraglide JS compares to other libraries like i18next.
+
+[![Benchmark Visualization](https://cdn.jsdelivr.net/gh/opral/monorepo@main/inlang/packages/paraglide/paraglide-js/assets/interactive-benchmark.png)](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/benchmark)
+
+#### No more adapters are needed
+
+```diff
+- @inlang/paraglide-sveltekit
+- @inlang/paraglide-next
++ // No more adapters are needed
+```
+
+#### 🚀 Framework-Agnostic Server Middleware
+
+Docs are [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/server-side-rendering)
+
+- **New**: Universal `paraglideMiddleware()` works in any SSR framework
+- **Built-in**: Automatic locale redirects when user preference detected
+
+```ts
+// SvelteKit example - same pattern works for Next.js, Astro, etc.
+import { paraglideMiddleware } from "./paraglide/server.js";
+
+export const handle = ({ event, resolve }) => {
+	return paraglideMiddleware(event.request, () => resolve(event));
+};
+```
+
+#### 🛣️ Configurable Routing Strategies
+
+Read more about strategies on the [docs](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy).
+
+Literally anything is now possible. URL-based, domain-based, path-based, cookie-based, etc.
+
+```js
+paraglide({
+	strategy: [
+    "url",
+    "cookie",
+    "preferredLanguage",
+    "..."
+  ],
+}),
+```
+
+#### 🔧 Exposing the compiler API
+
+- **New**: Direct compiler access for advanced workflows
+- **Why**: Enable CI/CD pipelines and custom tooling
+- **Benefit**: Full control over compilation timing/caching
+
+```ts
+// New programmatic API
+import { compile } from "@inlang/paraglide-js";
+
+await compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
+});
+```
+
+#### 🍌 Arbitrary key names
+
+- **New**: Arbitrary key names including emojis via `m["🍌"]()
+- **Why**: Enable nesting of messages
+- **Benefit**: More expressive and fun translations
+
+```ts
+// Paraglide 1.0
+m.some_message(); // ✅ Works
+m.nested.message(); // 💥 Error
+
+// Paraglide 2.0
+m.some_message(); // ✅ Works
+m["nested.message"](); // ✅ Works
+
+// Even emojis are supported
+m["🍌"]();
+```
+
+#### 🔄 Incrementally migrating to Paraglide JS
+
+Paraglide JS 2.0 can load multiple [translation file formats](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/file-formats). As such, you can incrementally migrate to Paraglide JS with existing translation file formats.
+
+```js
+// In this example, Paraglide JS compiles i18next translation files
+// which enables using both i18next and Paraglide JS.
+
+import i18next from "i18next";
+import { m } from "./paraglide/messages.js";
+
+console.log(i18next.t("greeting", { name: "World" }));
+console.log(m.greeting({ name: "World" }));
+```
+
+#### 🏘️ Multi-tenancy support
+
+Paraglide JS 2.0 supports multi-tenant applications. Read more about it [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/multi-tenancy).
+
+```
+# Domain-based with sub-locale
+customer1.fr/about         → French (default)
+customer1.fr/en/about      → English version
+
+# Domain-based with root locale
+customer2.com/about        → English (default)
+customer2.com/fr/about     → French version
+
+# Path-based for any domain
+example.com/en/about       → English
+example.com/fr/about       → French
+app.example.com/en/about   → English
+app.example.com/fr/about   → French
+```
+
+### Migrating breaking changes
+
+If problems arise, please refer to the framework-specific getting started guide:
+
+- [SvelteKit](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/sveltekit)
+- [Next.js](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/next)
+- [Astro](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/astro)
+- [Vite](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/vite)
+- [React Router](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/react-router)
+
+#### `LanguageTag` got renamed to `locale`
+
+To align with industry standards, we renamed `LanguageTag` to `locale`.
+
+```diff
+-languageTag()
++getLocale()
+-setLanguageTag()
++setLocale()
+-availableLanguageTags
++locales
+```
+
+#### Remove adapters `@inlang/paraglide-*` from your dependencies
+
+````diff
+// package.json
+{
+  "dependencies": {
+-    "@inlang/paraglide-sveltekit": "^1.0.0",
+-    "@inlang/paraglide-next": "^1.0.0",
+-    "@inlang/paraglide-astro": "^1.0.0",
+-    "@inlang/paraglide-vite": "^1.0.0",
++    "@inlang/paraglide-js": "^2.0.0",
+  }
+}
+```
+
+### Replace adapter bundler plugins
+
+```diff
+// vite.config.js
+-import { paraglide } from "@inlang/paraglide-vite";
++import { paraglideVitePlugin } from "@inlang/paraglide-js";
+
+
+export default defineConfig({
+	plugins: [
+-		paraglide({
++		paraglideVitePlugin({
+			project: "./project.inlang",
+			outdir: "./src/paraglide",
+		}),
+	],
+});
+
+````
+
+#### Remove Paraglide Providers
+
+Paraglide JS 2.0 no longer requires providers.
+
+```diff
+// app.tsx, layout.svelte, etc.
+-import { ParaglideProvider } from "@inlang/paraglide-{framework}";
+
+function App() {
+  return (
+-    <ParaglideProvider>
+      <YourApp />
+-    </ParaglideProvider>
+  )
+}
+```
+
+#### Shorten key names longer than 255 characters
+
+Paraglide JS 2.0 build output now defaults to [message-modules](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/compiler-options#outputstructure) to improve tree-shaking. Some filesystem's limitations require key names to be shorter than 255 characters.
+
+Upvote [#423](https://github.com/opral/inlang-paraglide-js/issues/423) to remove this limitation.
+
+```diff
+- m.this_is_a_very_long_key_name_that_should_be_shortened()
++ m.shortened_key_name()
+```
+
+#### Changing the locale requires a reload
+
+Changing the locale works via `setLocale()` in any framework now.
+
+If you used an adapter in v1 like the SvelteKit one, this behavior is new. The new behaviour leads to a page reload. The reload is a deliberate design decision. Reloading the site eliminates the need for providers, adapters, and API differences between frameworks. Furthermore, optimizations like per-locale splitting is expected to be easier to implement.
+
+Read https://github.com/opral/inlang-paraglide-js/issues/438#issuecomment-2703733096 for more information.
+
+```diff
+-<a href="/de">Deutsch</a>
++<button onclick="setLocale('de')">Deutsch</button>
+```
+
+#### Lint rules were deprecated
+
+Remove lint rules from your project modules.
+
+We want to re-introduce lint rules in a better form in the future. Please upvote the [#239 lix validation rules](https://github.com/opral/lix-sdk/issues/239) proposal.
+
+```diff
+modules: [
+-  "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-missing-translation@latest/dist/index.js",
+-	 "https://cdn.jsdelivr.net/npm/@inlang/message-lint-rule-empty-pattern@latest/dist/index.js"
+   ...
+]
+
+```
+
+#### `localizeHref()` is now required
+
+Some Paraglide adapters used AST transforms to automatically transform `<a>` into localized links. That led to many bugs and edge cases. The AST transforms were removed for v2.
+
+```diff
+-<a href="/page"></a>
++<a href={localizeHref("/page")}
+```
+
+## 2.0.0-beta.31 (released as 2.0.0)
+
+- feat: New API: `createParaglide()`
+
+  The function allows a no build step or before build step access to Paraglide's compiled APIs.
+
+  ```typescript
+  const project = await fs.readFile("./project.inlang");
+
+  const paraglide = await createParaglideModule({
+  	project,
+  	compilerOptions: {
+  		strategy: ["url"],
+  	},
+  });
+
+  // Use runtime functions
+  paraglide.localizeUrl("https://example.com", { locale: "de" });
+
+  // Use server middleware
+  app.use(paraglide.paraglideMiddleware());
+  ```
+
+- fix: `getLocale` returns correct value on SvelteKit server [#461](https://github.com/opral/inlang-paraglide-js/issues/461)
+
+- fix: Prevent redirect loops by normalizing URLs with trailing slashes [#408](https://github.com/opral/inlang-paraglide-js/issues/408)
+
+- fix: Support for explicit port numbers in URL patterns
+
+- improve: Better error handling in server middleware
+
+## 2.0.0-beta.30
+
+- improve: if no url pattern matches, `localizeUrl()` and `deLocalizeUrl()` will return the input url unchanged instead of throwing an error [#452](https://github.com/opral/inlang-paraglide-js/issues/452#issuecomment-2715761308)
+
+- improve: make AsyncLocalStorage tree-shakable by moving `disableAsyncLocalStorage` into the compiler options [#424](https://github.com/opral/inlang-paraglide-js/issues/424#issuecomment-2711453627)
+
+```diff
+-  serverMiddleware(req, resolve, { disableAsyncLocalStorage: true })
++  serverMiddleware(req, resolve)
+
+paraglideVitePlugin({
+   // ...
++  disableAsyncLocalStorage: true
+})
+
+```
+
+- improve: allow fall through. enables partially localized patterns and thereby eases adoption.
 
 ## 2.0.0-beta.29
 
@@ -10,11 +421,11 @@
 
 ## 2.0.0-beta.28
 
-### BREAKING update to the URLPattern API  
+### BREAKING update to the URLPattern API
 
 https://github.com/opral/monorepo/pull/3485
 
-The `localizedNamedGroups` and `deLocalizedNamedGroups` API has been replaced with a tuple-based `localized` array to: 
+The `localizedNamedGroups` and `deLocalizedNamedGroups` API has been replaced with a tuple-based `localized` array to:
 
 - enable translated pathnames in any combination
 - make the API more intuitive
@@ -27,13 +438,13 @@ Before
 
 ```json
 {
-  "pattern": "https://:domain(.*)/:locale(de|fr)?/:path*",
-  "deLocalizedNamedGroups": { "locale": null },
-  "localizedNamedGroups": {
-    "en": { "locale": null },
-    "fr": { "locale": "fr" },
-    "de": { "locale": "de" }
-  }
+	"pattern": "https://:domain(.*)/:locale(de|fr)?/:path*",
+	"deLocalizedNamedGroups": { "locale": null },
+	"localizedNamedGroups": {
+		"en": { "locale": null },
+		"fr": { "locale": "fr" },
+		"de": { "locale": "de" }
+	}
 }
 ```
 
@@ -71,12 +482,11 @@ console.log(localizedUrls.map(url => url.pathnames))
 >> ...
 ```
 
-
 ## 2.0.0-beta.27
 
 - fix wrong matching in API requests [#427](https://github.com/opral/inlang-paraglide-js/issues/427)
 
-Paraglide JS is no longer extracting the locale from API requests for the `url` strategy because that can lead to unwanted re-directs. To get the right locale in API requests, at least add the `baseLocale` strategy to your options. 
+Paraglide JS is no longer extracting the locale from API requests for the `url` strategy because that can lead to unwanted re-directs. To get the right locale in API requests, at least add the `baseLocale` strategy to your options.
 
 ```diff
 -strategy: ["url"]
@@ -85,17 +495,15 @@ Paraglide JS is no longer extracting the locale from API requests for the `url` 
 
 - consolidated `message-modules` output into a single file [#434](https://github.com/opral/inlang-paraglide-js/issues/434) to severaly improve scalability
 
-
-
 - `experimentalMiddlewareLocaleSplitting` option https://github.com/opral/inlang-paraglide-js/issues/425#issuecomment-2692351073
 
-- fix [setLocale() triggers re-loads if the same locale is set](https://github.com/opral/inlang-paraglide-js/issues/430) 
+- fix [setLocale() triggers re-loads if the same locale is set](https://github.com/opral/inlang-paraglide-js/issues/430)
 
 - fix [serverMiddleware() throws when cookie contains invalid locale](https://github.com/opral/inlang-paraglide-js/issues/442)
 
 - add `localStorage` strategy [#431](https://github.com/opral/inlang-paraglide-js/issues/431)
 
-- fix url strategy with optional locale always resoles base locale  [#436](https://github.com/opral/inlang-paraglide-js/issues/436)
+- fix url strategy with optional locale always resoles base locale [#436](https://github.com/opral/inlang-paraglide-js/issues/436)
 
 ## 2.0.0-beta.26
 
@@ -103,9 +511,9 @@ Paraglide JS is no longer extracting the locale from API requests for the `url` 
 
 ## 2.0.0-beta.25
 
-- added optional localized groups 
+- added optional localized groups
 - keeps hashes, etc. in the URL when localizing https://github.com/opral/monorepo/pull/3452
-- fixes the multi-variant return 
+- fixes the multi-variant return
 
 ## 2.0.0-beta.24
 
@@ -115,7 +523,7 @@ Paraglide JS is no longer extracting the locale from API requests for the `url` 
 
 ## 2.0.0-beta.23
 
-Renames and splits the `serverMiddleware()` into a dedicated `server.js` file to avoid bundler issues. 
+Renames and splits the `serverMiddleware()` into a dedicated `server.js` file to avoid bundler issues.
 
 ```diff
 - import { serverMiddleware } from "./paraglide/runtime.js";
@@ -162,9 +570,9 @@ If you have code from an adapter, remove it and follow the examples in the docum
 
 ## 2.0.0-beta.18
 
-Added URLPatterns as a replacement for the beta 17 pathnames API. 
+Added URLPatterns as a replacement for the beta 17 pathnames API.
 
-The URLPattern API is extremly powerful. You can express base paths, translated pathnames, domain based localization, and even multi-tenancy. 
+The URLPattern API is extremly powerful. You can express base paths, translated pathnames, domain based localization, and even multi-tenancy.
 
 Read the docs [here](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/strategy#url) and make PRs to improve the documentation.
 

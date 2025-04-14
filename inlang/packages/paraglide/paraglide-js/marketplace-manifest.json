@@ -18,18 +18,17 @@
 	"pages": {
 		"": {
 			"/": "./docs/introduction.md",
-			"/limitations": "./docs/limitations.md",
+			"/comparison": "./docs/comparison.md",
 			"/benchmark": "./benchmark/README.md",
-			"/migrating-to-v2": "./docs/migrating-to-v2.md",
 			"/changelog": "./CHANGELOG.md"
 		},
 		"Getting Started": {
 			"/vanilla-js-ts": "./docs/getting-started/vanilla-js-ts.md",
+			"/vite": "./examples/vite/README.md",
 			"/sveltekit": "./examples/sveltekit/README.md",
 			"/astro": "./examples/astro/README.md",
 			"/react-router": "./examples/react-router/README.md",
 			"/next-js": "./docs/getting-started/next-js.md",
-			"/vite": "./examples/vite/README.md",
 			"/other-frameworks": "./docs/getting-started/other-frameworks.md"
 		},
 		"Usage": {
@@ -79,7 +78,7 @@
 		"react router",
 		"inlang"
 	],
-	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/teldgniy"],
+	"recommends": ["m/reootnfj", "m/632iow21", "m/r7kp499g", "m/2qj2w8pu"],
 	"pricing": "free",
 	"publisherName": "inlang",
 	"publisherIcon": "https://inlang.com/favicon/safari-pinned-tab.svg",

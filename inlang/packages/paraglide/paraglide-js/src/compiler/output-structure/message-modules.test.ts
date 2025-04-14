@@ -81,6 +81,6 @@ test("handles case senstivity by creating directories and files only in lowercas
 
 	// expecting only lowercase directories and files
 	expect(output).toHaveProperty("messages/happyelephant.js");
-	expect(output).toHaveProperty("messages/happyelephant1.js");
+	expect(output).toHaveProperty("messages/happyelephant2.js");
 	expect(output).not.toHaveProperty("messages/HappyElephant.js");
 });

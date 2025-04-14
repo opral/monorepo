@@ -1,10 +1,15 @@
 import { test, expect } from "vitest";
-import { createRuntimeForTesting } from "./create-runtime.js";
+import { createParaglide } from "../create-paraglide.js";
+import { newProject } from "@inlang/sdk";
 
 test("normal named groups", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -32,9 +37,13 @@ test("normal named groups", async () => {
 });
 
 test("handles relative named groups", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -62,9 +71,13 @@ test("handles relative named groups", async () => {
 });
 
 test("wildcards", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -88,9 +101,13 @@ test("wildcards", async () => {
 });
 
 test("optional parameters", async () => {
-	const runtime = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const runtime = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -109,9 +126,13 @@ test("optional parameters", async () => {
 });
 
 test("regex works", async () => {
-	const { extractLocaleFromUrl } = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const { extractLocaleFromUrl } = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 		compilerOptions: {
 			urlPatterns: [
 				{
@@ -133,9 +154,13 @@ test("regex works", async () => {
 });
 
 test("default url pattern", async () => {
-	const r = await createRuntimeForTesting({
-		baseLocale: "en",
-		locales: ["en", "de"],
+	const r = await createParaglide({
+		project: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "de"],
+			},
+		}),
 	});
 
 	expect(r.extractLocaleFromUrl("https://example.com/")).toBe("en");

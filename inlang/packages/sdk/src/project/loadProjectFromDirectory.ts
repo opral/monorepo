@@ -151,7 +151,11 @@ export async function loadProjectFromDirectory(
 		...project,
 		errors: {
 			get: async () => {
-				return [...localImport.errors, ...importedResourceFileErrors];
+				return [
+					...filterLocalPluginImportErrors(await project.errors.get()),
+					...localImport.errors,
+					...importedResourceFileErrors,
+				];
 			},
 			// subscribe: (
 			// 	callback: Parameters<InlangProject["errors"]["subscribe"]>[0]
@@ -216,6 +220,24 @@ function arrayBuffersEqual(a: ArrayBuffer, b: ArrayBuffer) {
 	}
 
 	return true;
+}
+
+/**
+ * Filters out errors that are related to local plugins because
+ * `loadProjectFromDirectory()` can import local plugins.
+ */
+function filterLocalPluginImportErrors(
+	errors: readonly Error[]
+): readonly Error[] {
+	return errors.filter((error) => {
+		if (
+			error instanceof PluginImportError &&
+			error.plugin.startsWith("http") === false
+		) {
+			return false;
+		}
+		return true;
+	});
 }
 
 /**

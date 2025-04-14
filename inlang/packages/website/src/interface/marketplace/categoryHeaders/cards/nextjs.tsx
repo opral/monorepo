@@ -175,9 +175,9 @@ const NextBody = () => {
 							Documentation
 						</div>
 					</Link>
-					<Link href="/g/wxcebbig/guide-lorissigrist-useParaglideJsWithNextjsAppRouter">
+					<Link href="/m/gerre34r/library-inlang-paraglideJs/next-js">
 						<div class="bg-background text-surface-700 border border-surface-300 w-fit h-10 px-6 rounded-full cursor-pointer text-sm ld:text-md flex items-center">
-							Quickstart Guide
+							Next.js Documentation
 						</div>
 					</Link>
 				</div>

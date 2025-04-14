@@ -1,5 +1,47 @@
 # @lix-js/host
 
+## 0.0.16
+
+### Patch Changes
+
+- Updated dependencies [f634538]
+  - @lix-js/sdk@0.4.6
+
+## 0.0.15
+
+### Patch Changes
+
+- dc92f56: - Rename `lix-server-api` to `lix-server-protocol` for improved clarity and consistent naming. All functionality remains backward compatible. The following changes were made:
+  - Renamed server-api-handler directory to server-protocol-handler
+  - Renamed server endpoints from /lsa/ to /lsp/
+  - Updated imports in all affected files
+  - Added backward compatibility aliases to ensure existing code continues to work
+- Updated dependencies [275d87e]
+- Updated dependencies [dc92f56]
+- Updated dependencies [c1ed545]
+  - @lix-js/sdk@0.4.5
+
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [85478f8]
+  - @lix-js/sdk@0.4.4
+
+## 0.0.13
+
+### Patch Changes
+
+- Updated dependencies [8ce6666]
+  - @lix-js/sdk@0.4.3
+
+## 0.0.12
+
+### Patch Changes
+
+- Updated dependencies [59f6c92]
+  - @lix-js/sdk@0.4.2
+
 ## 0.0.11
 
 ### Patch Changes

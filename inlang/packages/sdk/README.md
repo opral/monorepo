@@ -1,4 +1,7 @@
-# Inlang SDK
+# Inlang file format SDK
+
+[![NPM Downloads](https://img.shields.io/npm/dw/%40inlang%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads)](https://www.npmjs.com/package/@inlang/sdk) [![Discord](https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white)](https://discord.gg/ecsc6bFtZw)
+
 
 <p align="center">
   <img src="https://cdn.jsdelivr.net/gh/opral/monorepo/inlang/packages/sdk/assets/open-file.svg" alt="Inlang SDK opens .inlang files">
@@ -16,7 +19,7 @@
 
 The inlang SDK is the official specification and parser for `.inlang` files. 
 
-`.inlang` files are designed to become the open standard for i18n and enable interoperability between i18n solutions. Such solutions involve apps like [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor), libraries like [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), or plugins that extend inlang [plugins](https://inlang.com/c/plugins) that extend inlang projects.
+`.inlang` files are designed to become the open standard for i18n and enable interoperability between i18n solutions. Such solutions involve apps like [Fink](https://inlang.com/m/tdozzpar/app-inlang-finkLocalizationEditor), libraries like [Paraglide JS](https://inlang.com/m/gerre34r/library-inlang-paraglideJs), or plugins that extend inlang.
 
 ### Core Features
 

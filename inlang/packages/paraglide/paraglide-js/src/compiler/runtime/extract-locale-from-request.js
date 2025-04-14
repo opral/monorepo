@@ -36,13 +36,7 @@ export const extractLocaleFromRequest = (request) => {
 				?.split("; ")
 				.find((c) => c.startsWith(cookieName + "="))
 				?.split("=")[1];
-		} else if (
-			TREE_SHAKE_URL_STRATEGY_USED &&
-			strat === "url" &&
-			// only process url strategy if request is a document
-			// else it's api requests, etc.
-			request.headers.get("Sec-Fetch-Dest") === "document"
-		) {
+		} else if (TREE_SHAKE_URL_STRATEGY_USED && strat === "url") {
 			locale = extractLocaleFromUrl(request.url);
 		} else if (
 			TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED &&

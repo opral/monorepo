@@ -1,5 +1,6 @@
 packages:
   - 'inlang/packages/**/*'
+  - 'lix/packages/**/*'
   - "!**/*/dist"
   - 'packages/*'
   - 'packages/*/example'

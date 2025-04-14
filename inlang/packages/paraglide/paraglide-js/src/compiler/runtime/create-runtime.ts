@@ -1,11 +1,5 @@
 import fs from "node:fs";
-import type { Runtime } from "./type.js";
-import {
-	defaultCompilerOptions,
-	type CompilerOptions,
-} from "../compiler-options.js";
-import { createServerFile } from "../server/create-server-file.js";
-import type { ServerRuntime } from "../server/type.js";
+import type { CompilerOptions } from "../compiler-options.js";
 
 /**
  * Returns the code for the `runtime.js` module
@@ -16,10 +10,15 @@ export function createRuntimeFile(args: {
 	compilerOptions: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
+		cookieMaxAge: NonNullable<CompilerOptions["cookieMaxAge"]>;
+		cookieDomain: CompilerOptions["cookieDomain"];
 		urlPatterns?: CompilerOptions["urlPatterns"];
 		experimentalMiddlewareLocaleSplitting: CompilerOptions["experimentalMiddlewareLocaleSplitting"];
 		isServer: CompilerOptions["isServer"];
 		localStorageKey: CompilerOptions["localStorageKey"];
+		disableAsyncLocalStorage: NonNullable<
+			CompilerOptions["disableAsyncLocalStorage"]
+		>;
 	};
 }): string {
 	const urlPatterns = args.compilerOptions.urlPatterns ?? [];
@@ -64,6 +63,8 @@ ${injectCode("./variables.js")
 		`export const strategy = ${JSON.stringify(args.compilerOptions.strategy, null, 2)};`
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
+	.replace(`60 * 60 * 24 * 400`, `${args.compilerOptions.cookieMaxAge}`)
+	.replace(`<cookie-domain>`, `${args.compilerOptions.cookieDomain}`)
 	.replace(
 		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`
@@ -83,6 +84,10 @@ ${injectCode("./variables.js")
 	.replace(
 		`export const urlPatterns = [];`,
 		`export const urlPatterns = ${JSON.stringify(urlPatterns, null, 2)};`
+	)
+	.replace(
+		`export const disableAsyncLocalStorage = false;`,
+		`export const disableAsyncLocalStorage = ${args.compilerOptions.disableAsyncLocalStorage};`
 	)
 	.replace(
 		`export const TREE_SHAKE_DEFAULT_URL_PATTERN_USED = false;`,
@@ -107,7 +112,7 @@ ${injectCode("./variables.js")
 
 globalThis.__paraglide = {}
 
-${injectCode("./get-locale.js")} 
+${injectCode("./get-locale.js")}
 
 ${injectCode("./set-locale.js")}
 
@@ -161,50 +166,4 @@ function injectCode(path: string): string {
 	// Regex to match single-line and multi-line imports
 	const importRegex = /import\s+[\s\S]*?from\s+['"][^'"]+['"]\s*;?/g;
 	return code.replace(importRegex, "").trim();
-}
-
-/**
- * Returns the runtime module as an object for testing purposes.
- *
- * @example
- *   const runtime = await createRuntime({
- *      baseLocale: "en",
- *      locales: ["en", "de"],
- *   })
- */
-export async function createRuntimeForTesting(args: {
-	baseLocale: string;
-	locales: string[];
-	compilerOptions?: Omit<CompilerOptions, "outdir" | "project" | "fs">;
-}): Promise<Runtime & ServerRuntime> {
-	const clientSideRuntime = createRuntimeFile({
-		baseLocale: args.baseLocale,
-		locales: args.locales,
-		compilerOptions: {
-			...defaultCompilerOptions,
-			...args.compilerOptions,
-		},
-	})
-		// remove the polyfill import statement to avoid module resolution logic in testing
-		.replace(`import "@inlang/paraglide-js/urlpattern-polyfill";`, "");
-
-	// remove the server-side runtime import statement to avoid module resolution logic in testing
-	const serverSideRuntime = createServerFile({
-		compiledBundles: [],
-		compilerOptions: {
-			experimentalMiddlewareLocaleSplitting: false,
-		},
-	})
-		.replace(`import * as runtime from "./runtime.js";`, "")
-		// the runtime functions are bundles, hence remove the runtime namespace
-		.replaceAll("runtime.", "");
-
-	await import("urlpattern-polyfill");
-
-	return await import(
-		"data:text/javascript;base64," +
-			Buffer.from(clientSideRuntime + serverSideRuntime, "utf-8").toString(
-				"base64"
-			)
-	);
 }

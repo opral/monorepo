@@ -2,7 +2,7 @@
 
 > **CompilerOptions**: `object`
 
-Defined in: [compiler-options.ts:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
+Defined in: [compiler-options.ts:19](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 ### Type declaration
 
@@ -46,6 +46,32 @@ Whether to clean the output directory before writing the new files.
 true
 ```
 
+#### cookieDomain?
+
+> `optional` **cookieDomain**: `string`
+
+The host to which the cookie will be sent.
+If null, this defaults to the host portion of the current document location and the cookie is not available on subdomains.
+Otherwise, subdomains are always included.
+
+##### Default
+
+```ts
+window.location.hostname
+```
+
+#### cookieMaxAge?
+
+> `optional` **cookieMaxAge**: `number`
+
+The max-age in seconds of the cookie until it expires.
+
+##### Default
+
+```ts
+60 * 60 * 24 * 400
+```
+
 #### cookieName?
 
 > `optional` **cookieName**: `string`
@@ -57,6 +83,19 @@ The name of the cookie to use for the cookie strategy.
 ```ts
 'PARAGLIDE_LOCALE'
 ```
+
+#### disableAsyncLocalStorage?
+
+> `optional` **disableAsyncLocalStorage**: `boolean`
+
+Replaces AsyncLocalStorage with a synchronous implementation.
+
+⚠️ WARNING: This should ONLY be used in serverless environments
+like Cloudflare Workers.
+
+Disabling AsyncLocalStorage in traditional server environments
+risks cross-request pollution where state from one request could
+leak into another concurrent request.
 
 #### emitGitIgnore?
 
@@ -198,6 +237,10 @@ The `outputStructure` defines how modules are structured in the output.
 - `message-modules` - Each module is a message. This is the default.
 - `locale-modules` - Each module is a locale.
 
+It is recommended to use `locale-modules` for development and `message-modules` for production.
+Bundlers speed up the dev mode by bypassing bundling which can lead to many http requests
+during the dev mode with `message-modules`. See https://github.com/opral/inlang-paraglide-js/issues/486.
+
 **`message-modules`**
 
 Messages have their own module which eases tree-shaking for bundlers.
@@ -270,13 +313,13 @@ first tried to be detected in the url, then in a cookie, and finally
 fallback to the base locale.
 
 The default ensures that the browser takes a cookie approach,
-server-side takes the variable (because cookie is unavailable),
+server-side takes the globalVariable (because cookie is unavailable),
 whereas both fallback to the base locale if not available.
 
 ##### Default
 
 ```ts
-["url", "cookie", "variable", "baseLocale"]
+["cookie", "globalVariable", "baseLocale"]
 ```
 
 #### urlPatterns?
@@ -299,9 +342,21 @@ Defined in: [compiler-options.ts:3](https://github.com/opral/monorepo/tree/main/
 
 > `readonly` **cleanOutdir**: `true` = `true`
 
+#### cookieDomain
+
+> `readonly` **cookieDomain**: `""` = `""`
+
+#### cookieMaxAge
+
+> `readonly` **cookieMaxAge**: `number`
+
 #### cookieName
 
 > `readonly` **cookieName**: `"PARAGLIDE_LOCALE"` = `"PARAGLIDE_LOCALE"`
+
+#### disableAsyncLocalStorage
+
+> `readonly` **disableAsyncLocalStorage**: `false` = `false`
 
 #### emitGitIgnore
 
