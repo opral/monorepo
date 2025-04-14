@@ -160,6 +160,10 @@ export function applyOwnChangeControlTriggers(
   `);
 
 	// fallback flush on commit if system changes were never finalized
+	//
+	// - nasty hack because SQlite triggers do not allow mutations after finalization
+	// - queueMicrotask is needed to ensure the transaction is complete with the downside that the transaction is not atomic
+	// - if bugs arise, we have to find a different solution
 	sqlite.sqlite3.capi.sqlite3_commit_hook(
 		sqlite,
 		() => {

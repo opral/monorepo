@@ -81,6 +81,7 @@ export function applyVersionV2DatabaseSchema(
   AFTER UPDATE OF change_set_id ON version_v2
   FOR EACH ROW
   WHEN OLD.change_set_id != NEW.change_set_id
+  AND NOT EXISTS (SELECT 1 FROM key_value WHERE key = 'lix_skip_update_working_change_set')
   BEGIN
     SELECT handle_update_working_change_set(NEW.id, NEW.change_set_id, NEW.working_change_set_id);
   END;

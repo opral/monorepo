@@ -61,7 +61,9 @@ test("creates a checkpoint that has an edge to the version's change set", async 
 	expect(labels.map((l) => l.name)).toContain("checkpoint");
 });
 
-test("creates a checkpoint with edges to both the version's change set AND the previous checkpoint", async () => {
+// this is a potential future optimization of being able to disregard 
+// change sets between two checkpoints once every client (reasonably) synced
+test.skip("creates a checkpoint with edges to both the version's change set AND the previous checkpoint", async () => {
 	// Create a Lix instance with the mockJsonPlugin
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
@@ -289,9 +291,33 @@ test("creating multiple subsequent checkpoints leads to connected edges", async 
 		.execute();
 
 	const checkpoint0 = await createCheckpoint({
-		id: "checkpoint0",
 		lix,
 	});
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	expect(activeVersion.change_set_id).toBe(checkpoint0.id);
+
+	const elements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", checkpoint0.id)
+		.where("schema_key", "=", "lix_key_value_table")
+		.selectAll()
+		.execute();
+
+	expect(elements).toHaveLength(1);
+
+	const workingChangeSetElements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", activeVersion.working_change_set_id)
+		.selectAll()
+		.execute();
+
+	expect(workingChangeSetElements).toHaveLength(0);
 
 	await lix.db
 		.updateTable("key_value")
@@ -300,7 +326,6 @@ test("creating multiple subsequent checkpoints leads to connected edges", async 
 		.execute();
 
 	const checkpoint1 = await createCheckpoint({
-		id: "checkpoint1",
 		lix,
 	});
 

@@ -47,7 +47,7 @@ test("gives the before and after state without altering the current state", asyn
 
 	const checkpoints = [];
 
-	for (const [index, update] of updates.entries()) {
+	for (const update of updates) {
 		// Update file with the current state
 		await lix.db
 			.updateTable("file")
@@ -61,7 +61,7 @@ test("gives the before and after state without altering the current state", asyn
 		await fileQueueSettled({ lix });
 
 		// Create checkpoint for the current state
-		const checkpoint = await createCheckpoint({ id: `cs${index}`, lix });
+		const checkpoint = await createCheckpoint({ lix });
 		checkpoints.push(checkpoint);
 	}
 
@@ -147,7 +147,7 @@ test("returns before: undefined when the file has no before state", async () => 
 
 	// Create two checkpoints
 	// First checkpoint (cs0) - file doesn't exist yet
-	const cs0 = await createCheckpoint({ id: "cs0", lix });
+	const cs0 = await createCheckpoint({ lix });
 
 	// Create a file
 	const file = await lix.db
@@ -164,7 +164,7 @@ test("returns before: undefined when the file has no before state", async () => 
 	await fileQueueSettled({ lix });
 
 	// Second checkpoint (cs1) - file exists with content
-	const cs1 = await createCheckpoint({ id: "cs1", lix });
+	const cs1 = await createCheckpoint({ lix });
 
 	// Test the beforeAfterOfFile function
 	const result = await beforeAfterOfFile({
@@ -203,7 +203,7 @@ test("returns after: undefined when the file has no after state", async () => {
 	await fileQueueSettled({ lix });
 
 	// First checkpoint (cs0) - file exists
-	const cs0 = await createCheckpoint({ id: "cs0", lix });
+	const cs0 = await createCheckpoint({ lix });
 
 	// Delete the file
 	await lix.db.deleteFrom("file").where("id", "=", file.id).execute();
@@ -212,7 +212,7 @@ test("returns after: undefined when the file has no after state", async () => {
 	await fileQueueSettled({ lix });
 
 	// Second checkpoint (cs1) - file is deleted
-	const cs1 = await createCheckpoint({ id: "cs1", lix });
+	const cs1 = await createCheckpoint({ lix });
 
 	// Test the beforeAfterOfFile function
 	const result = await beforeAfterOfFile({
