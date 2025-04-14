@@ -185,6 +185,7 @@ function isTopLevelNode(node: ProsemirrorNode): boolean {
 		"bullet_list",
 		"ordered_list",
 		"horizontal_rule",
+		"horizontalRule",
 		"table",
 		"image",
 		"title",
@@ -233,27 +234,46 @@ function updateDocumentWithChanges(
 				continue;
 			}
 
-			// Replace with updated node (preserve content if needed)
-			const hadContent = node.content && Array.isArray(node.content);
+			// IMPORTANT: When updating a node, we need to preserve the child structure
+			// if the content hasn't changed
+			const originalHasContent =
+				node.content && Array.isArray(node.content) && node.content.length > 0;
+			const updatedHasContent =
+				updatedNode.content &&
+				Array.isArray(updatedNode.content) &&
+				updatedNode.content.length > 0;
+
+			// Make a deep copy of the updated node
 			doc.content[i] = JSON.parse(JSON.stringify(updatedNode));
 
-			// If the original node had content but the updated doesn't have its own content structure,
-			// we'll continue updating the node's children recursively
-			if (
-				hadContent &&
-				(!updatedNode.content || !Array.isArray(updatedNode.content))
-			) {
+			// If the original had content but the updated node doesn't specify content,
+			// then preserve the original content structure
+			if (originalHasContent && !updatedHasContent) {
 				const currentNode = doc.content[i];
 				if (currentNode && node.content) {
 					currentNode.content = JSON.parse(JSON.stringify(node.content));
 				}
 			}
+			// If both have content, process children recursively but preserve structure
+			else if (originalHasContent && updatedHasContent) {
+				// Continue updating the node's children recursively
+				// but preserve the existing structure
+				const currentNode = doc.content[i];
+				if (currentNode) {
+					updateDocumentWithChanges(currentNode, nodeMap, processedIds);
+				}
+			}
 		}
-
-		// Regardless of whether this node was updated, process its children
-		const currentNode = doc.content[i];
-		if (currentNode) {
-			updateDocumentWithChanges(currentNode, nodeMap, processedIds);
+		// For nodes without IDs or not in the nodeMap, just process their children
+		else {
+			// Process this node's children recursively
+			if (
+				node.content &&
+				Array.isArray(node.content) &&
+				node.content.length > 0
+			) {
+				updateDocumentWithChanges(node, nodeMap, processedIds);
+			}
 		}
 	}
 }
