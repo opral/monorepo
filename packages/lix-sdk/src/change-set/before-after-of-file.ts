@@ -32,6 +32,11 @@ export async function beforeAfterOfFile(args: {
 	changeSetAfter?: Pick<ChangeSet, "id">;
 	file: Pick<LixFile, "id">;
 }): Promise<{ before?: LixFile; after?: LixFile }> {
+	if (!args.changeSetBefore && !args.changeSetAfter) {
+		throw new Error(
+			"At least one change set is required. Both changeSetBefore and changeSetAfter are undefined."
+		);
+	}
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// TODO #3558 we should have one "withSkipChangeControl" that handles both
 		// it requires deeper knowledge to know that both are needed to "fully" skip change control
