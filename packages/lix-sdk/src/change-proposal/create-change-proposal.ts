@@ -13,8 +13,8 @@ import { changeSetElementInSymmetricDifference } from "../change-set/change-set-
  */
 export async function createChangeProposal(args: {
 	lix: Lix;
-	source_change_set: Pick<ChangeSet, "id">;
-	target_change_set: Pick<ChangeSet, "id">;
+	sourceChangeSet: Pick<ChangeSet, "id">;
+	targetChangeSet: Pick<ChangeSet, "id">;
 }): Promise<ChangeProposal> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Get the changes that are in the symmetric difference between the two change sets
@@ -22,8 +22,8 @@ export async function createChangeProposal(args: {
 			.selectFrom("change_set_element")
 			.where(
 				changeSetElementInSymmetricDifference(
-					args.source_change_set,
-					args.target_change_set
+					args.sourceChangeSet,
+					args.targetChangeSet
 				)
 			)
 			.select(["change_id as id", "entity_id", "schema_key", "file_id"])
@@ -51,8 +51,8 @@ export async function createChangeProposal(args: {
 			.insertInto("change_proposal")
 			.values({
 				change_set_id: newChangeSet.id,
-				source_change_set_id: args.source_change_set.id,
-				target_change_set_id: args.target_change_set.id,
+				source_change_set_id: args.sourceChangeSet.id,
+				target_change_set_id: args.targetChangeSet.id,
 			})
 			.returningAll()
 			.executeTakeFirstOrThrow();

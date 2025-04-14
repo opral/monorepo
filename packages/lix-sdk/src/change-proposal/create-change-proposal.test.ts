@@ -63,8 +63,8 @@ test("creating a change proposal should compute the symmetric difference", async
 	// Create a change proposal
 	const proposal = await createChangeProposal({
 		lix: lix,
-		source_change_set: sourceChangeSet,
-		target_change_set: targetChangeSet,
+		sourceChangeSet: sourceChangeSet,
+		targetChangeSet: targetChangeSet,
 	});
 
 	// Verify the change proposal was created with the correct data
