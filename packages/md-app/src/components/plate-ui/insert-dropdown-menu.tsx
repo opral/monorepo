@@ -141,11 +141,11 @@ const groups: Group[] = [
         label: 'Numbered list',
         value: ListStyleType.Decimal,
       },
-      // {
-      //   icon: <SquareIcon />,
-      //   label: 'To-do list',
-      //   value: INDENT_LIST_KEYS.todo,
-      // },
+      {
+        icon: <SquareIcon />,
+        label: 'To-do list',
+        value: INDENT_LIST_KEYS.todo,
+      },
       // {
       //   icon: <ChevronRightIcon />,
       //   label: 'Toggle list',

@@ -122,12 +122,12 @@ const groups: Group[] = [
         label: 'Numbered list',
         value: ListStyleType.Decimal,
       },
-      // {
-      //   icon: <Square />,
-      //   keywords: ['checklist', 'task', 'checkbox', '[]'],
-      //   label: 'To-do list',
-      //   value: INDENT_LIST_KEYS.todo,
-      // },
+      {
+        icon: <Square />,
+        keywords: ['checklist', 'task', 'checkbox', '[]'],
+        label: 'To-do list',
+        value: INDENT_LIST_KEYS.todo,
+      },
       // {
       //   icon: <ChevronRightIcon />,
       //   keywords: ['collapsible', 'expandable'],
@@ -140,11 +140,11 @@ const groups: Group[] = [
         label: 'Code Block',
         value: CodeBlockPlugin.key,
       },
-      {
-        icon: <Table />,
-        label: 'Table',
-        value: TablePlugin.key,
-      },
+      // {
+      //   icon: <Table />,
+      //   label: 'Table',
+      //   value: TablePlugin.key,
+      // },
       {
         icon: <Quote />,
         keywords: ['citation', 'blockquote', 'quote', '>'],

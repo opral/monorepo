@@ -147,7 +147,7 @@ export function FixedToolbarButtons() {
             {/* <AlignDropdownMenu /> */}
             <NumberedIndentListToolbarButton />
             <BulletedIndentListToolbarButton />
-            {/* <IndentTodoToolbarButton /> */}
+            <IndentTodoToolbarButton />
             {/* <ToggleToolbarButton /> */}
           </ToolbarGroup>
 
