@@ -1,7 +1,14 @@
 import { useRef, forwardRef, useImperativeHandle, useEffect } from "react";
 import { Discussion, DiscussionHandle } from "./Discussion";
 import { toRelativeTime } from "../utilities/timeUtils";
-import { EraserIcon, Eye, History, Clock, ChevronRight } from "lucide-react";
+import {
+	EraserIcon,
+	Eye,
+	EyeOff,
+	History,
+	Clock,
+	ChevronRight,
+} from "lucide-react";
 import {
 	applyChangeSet,
 	createUndoChangeSet,
@@ -99,6 +106,17 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			// Otherwise, expand this change set (which automatically collapses any other)
 			setExpandedChangeSetId(isExpanded ? null : changeSet.id);
 		};
+
+		// Calculate the target diff state for *this* change set
+		const targetDiffView = {
+			beforeCsId: previousChangeSetId,
+			afterCsId: changeSet.id,
+		};
+
+		// Determine if the global diffView state matches the target state for this change set
+		const isDiffViewActive =
+			diffView?.beforeCsId === targetDiffView.beforeCsId &&
+			diffView?.afterCsId === targetDiffView.afterCsId;
 
 		return (
 			<div className="bg-base-100">
@@ -205,21 +223,15 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 								)}
 
 								<button
-									className="btn btn-sm btn-ghost gap-1"
+									className="btn btn-sm btn-ghost gap-1 flex items-center"
 									onClick={() => {
-										if (diffView) {
-											setDiffView(null);
-										} else {
-											setDiffView({
-												beforeCsId: previousChangeSetId,
-												afterCsId: changeSet.id,
-											});
-										}
+										// Toggle logic: If active for this CS, set to null. Otherwise, set to this CS's target state.
+										setDiffView(isDiffViewActive ? null : targetDiffView);
 									}}
-									title="View diff"
+									title={isDiffViewActive ? "Hide Diff" : "View Diff"}
 								>
-									<Eye size={16} />
-									View diff
+									{isDiffViewActive ? <EyeOff size={16} /> : <Eye size={16} />}
+									{isDiffViewActive ? "Hide Diff" : "View Diff"}
 								</button>
 							</div>
 						</div>
