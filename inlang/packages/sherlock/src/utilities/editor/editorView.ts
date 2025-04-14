@@ -13,6 +13,7 @@ import { deleteBundleNested } from "./helper/deleteBundleNested.js"
 import { handleUpdateBundle } from "./helper/handleBundleUpdate.js"
 import { createMessage } from "./helper/createMessage.js"
 import { saveProject } from "../../main.js"
+import { rpc } from "@inlang/rpc"
 
 // Same interface as before
 export interface UpdateBundleMessage {
@@ -162,6 +163,67 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 						vscode.window.showErrorMessage(`Failed to update translations: ${String(error)}`)
 					}
 					return
+				case "machine-translate-bundle":
+					// Handle machine translation directly in extension host
+					try {
+						const sourceBundle = message.bundle
+						const sourceLocale = message.sourceLocale
+						const targetLocale = message.targetLocale
+
+						// Show info message
+						msg("Translating...", "info", "statusBar", vscode.StatusBarAlignment.Right, 3000)
+
+						// Use the RPC translation service
+						const result = await rpc.machineTranslateBundle({
+							bundle: sourceBundle,
+							sourceLocale,
+							targetLocales: [targetLocale],
+						})
+
+						if (result.error) {
+							throw new Error(result.error)
+						}
+
+						// Check if result.data is undefined
+						if (!result.data) {
+							throw new Error("Translation result is empty")
+						}
+
+						// We need to ensure the result.data has the expected structure
+						// Create a properly formatted bundle with required fields to match expected type
+						const typedBundle = {
+							...result.data,
+							id: result.data.id || sourceBundle.id, // Ensure id is never undefined
+							declarations: result.data.declarations || [], // Ensure declarations is always an array
+							// Add any other required fields that might be missing
+						}
+
+						// Update the bundle in the database with the properly typed data
+						await handleUpdateBundle({
+							db: state().project?.db,
+							message: {
+								command: "translate-bundle",
+								change: {
+									entityId: sourceBundle.id,
+									entity: "bundle",
+									newData: typedBundle,
+								},
+							},
+						})
+
+						updateView()
+						msg("Translation complete", "info", "statusBar", vscode.StatusBarAlignment.Right, 3000)
+					} catch (error) {
+						console.error("Failed to translate bundle", error)
+						msg(
+							`Translation error: ${String(error)}`,
+							"error",
+							"statusBar",
+							vscode.StatusBarAlignment.Right,
+							3000
+						)
+					}
+					return
 				case "show-info-message":
 					msg(message.message, "info", "statusBar", vscode.StatusBarAlignment.Right, 3000)
 					return
@@ -265,8 +327,8 @@ export function editorView(args: { context: vscode.ExtensionContext; initialBund
 			// Allow media from safe sources (if needed)
 			`media-src ${webview.cspSource} https://* data:;`,
 
-			// Allow connections to APIs, WebSockets, and data URIs
-			`connect-src https://* data: ${
+			// Allow connections to APIs, WebSockets, and data URIs - include http://localhost:3000 for RPC
+			`connect-src https://* http://localhost:3000 data: ${
 				isProd
 					? ``
 					: `ws://${localServerUrl} ws://0.0.0.0:${localPort} http://${localServerUrl} http://0.0.0.0:${localPort}`
