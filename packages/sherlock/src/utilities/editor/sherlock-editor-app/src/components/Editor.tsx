@@ -13,7 +13,6 @@ import {
 import { createComponent } from "@lit/react"
 import { SlDialog, SlDropdown, SlMenu, SlMenuItem } from "@shoelace-style/shoelace/dist/react"
 import { v4 as uuidv4 } from "uuid"
-import { rpc } from "@inlang/rpc"
 
 const ReactInlangBundle = createComponent({
 	tagName: "inlang-bundle",
