@@ -191,16 +191,6 @@ function handleUpdateWorkingChangeSet(args: {
 			}
 		}
 
-		const workingCs = executeSync({
-			lix: { sqlite: args.sqlite },
-			query: args.db
-				.selectFrom("change_set")
-				.where("id", "=", args.working_change_set_id)
-				.selectAll(),
-		});
-
-		console.log("handleUpdateWorkingChangeSet()", { workingCs });
-
 		executeSync({
 			lix: { sqlite: args.sqlite },
 			query: args.db

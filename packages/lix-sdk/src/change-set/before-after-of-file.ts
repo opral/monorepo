@@ -37,6 +37,32 @@ export async function beforeAfterOfFile(args: {
 		// it requires deeper knowledge to know that both are needed to "fully" skip change control
 		return await withSkipFileQueue(trx, async (trx) => {
 			return await withSkipOwnChangeControl(trx, async (trx) => {
+				// If the change sets are working change sets,
+				// we must avoid edges in the graph because
+				// working change sets are mutable, and not
+				// insertable into the graph.
+				const afterIsWorkingCs = args.changeSetAfter
+					? await trx
+							.selectFrom("version_v2")
+							.where(
+								"version_v2.working_change_set_id",
+								"=",
+								args.changeSetAfter.id
+							)
+							.selectAll()
+							.executeTakeFirst()
+					: undefined;
+
+				// need to disable the trigger to avoid
+				// duplicate working change set updates
+				await trx
+					.insertInto("key_value")
+					.values({
+						key: "lix_skip_update_working_change_set",
+						value: "true",
+						skip_change_control: true,
+					})
+					.execute();
 				const currentFile = await trx
 					.selectFrom("file")
 					.where("id", "=", args.file.id)
@@ -58,7 +84,15 @@ export async function beforeAfterOfFile(args: {
 								"change.id",
 								"change_set_element.change_id"
 							)
-							.where("change.file_id", "=", args.file.id)
+							.where((eb) =>
+								eb.or([
+									eb("change.file_id", "=", args.file.id),
+									eb.and([
+										eb("change.schema_key", "=", "lix_file_table"),
+										eb("change.entity_id", "=", args.file.id),
+									]),
+								])
+							)
 							.where(changeSetElementIsLeafOf([args.changeSetBefore]))
 							.selectAll("change")
 							.execute()
@@ -72,8 +106,25 @@ export async function beforeAfterOfFile(args: {
 								"change.id",
 								"change_set_element.change_id"
 							)
-							.where("change.file_id", "=", args.file.id)
-							.where(changeSetElementIsLeafOf([args.changeSetAfter]))
+							// need to get the insert changes for the file as well to apply the plugins changes
+							.where((eb) =>
+								eb.or([
+									eb("change.file_id", "=", args.file.id),
+									eb.and([
+										eb("change.schema_key", "=", "lix_file_table"),
+										eb("change.entity_id", "=", args.file.id),
+									]),
+								])
+							)
+							.where(
+								changeSetElementIsLeafOf([
+									afterIsWorkingCs
+										? // we need to take the versions change set, not working change set to
+											// get all leaf changes by traversing the graph
+											{ id: afterIsWorkingCs.change_set_id }
+										: { id: args.changeSetAfter.id },
+								])
+							)
 							.selectAll("change")
 							.execute()
 					: [];
@@ -86,9 +137,6 @@ export async function beforeAfterOfFile(args: {
 						schema_key: change.schema_key,
 						file_id: change.file_id,
 					})),
-					parents: args.changeSetBefore
-						? [{ id: args.changeSetBefore.id }]
-						: undefined,
 				});
 
 				const afterCs = await createChangeSet({
@@ -99,9 +147,6 @@ export async function beforeAfterOfFile(args: {
 						schema_key: change.schema_key,
 						file_id: change.file_id,
 					})),
-					parents: args.changeSetAfter
-						? [{ id: args.changeSetAfter.id }]
-						: undefined,
 				});
 
 				const interimVersion = await createVersionV2({
@@ -171,6 +216,11 @@ export async function beforeAfterOfFile(args: {
 						"not in",
 						currentChangeSets.map((cs) => cs.id)
 					)
+					.execute();
+
+				await trx
+					.deleteFrom("key_value")
+					.where("key", "=", "lix_skip_update_working_change_set")
 					.execute();
 
 				return { before: fileBefore, after: fileAfter };
