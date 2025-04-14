@@ -62,8 +62,7 @@ export function applyOwnChangeControlTriggers(
 			EXISTS (SELECT 1 FROM key_value WHERE key IN (
 				'lix_skip_own_change_control',
 				'lix_flushing_own_changes',
-				'lix_skip_handle_own_change_trigger',
-				'lix_updating_working_change_set'
+				'lix_skip_handle_own_change_trigger'
 			))
 		)`;
 

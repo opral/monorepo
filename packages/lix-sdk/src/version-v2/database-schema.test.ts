@@ -1,5 +1,9 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
+import { createCheckpoint } from "../change-set/create-checkpoint.js";
 
 test("should allow inserting a valid version", async () => {
 	const lix = await openLixInMemory({});
@@ -311,4 +315,301 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 			})
 			.execute()
 	).resolves.toBeDefined();
+});
+
+test("the working change set should be updated when the change set is updated", async () => {
+	const lix = await openLixInMemory({});
+
+	const snapshots = await lix.db
+		.insertInto("snapshot")
+		.values([
+			{ content: { value: "entity0" } },
+			{ content: { value: "entity1" } },
+			{ content: { value: "entity0-updated" } },
+		])
+		.returningAll()
+		.execute();
+
+	const changes = await lix.db
+		.insertInto("change")
+		.values([
+			{
+				id: "change0",
+				entity_id: "entity0",
+				schema_key: "key0",
+				file_id: "file0",
+				snapshot_id: snapshots[0]!.id,
+				plugin_key: "mock",
+			},
+			{
+				id: "change1",
+				entity_id: "entity1",
+				schema_key: "key1",
+				file_id: "file1",
+				snapshot_id: snapshots[1]!.id,
+				plugin_key: "mock",
+			},
+			// updates the entity0
+			{
+				id: "change2",
+				entity_id: "entity0",
+				schema_key: "key0",
+				file_id: "file0",
+				snapshot_id: snapshots[2]!.id,
+				plugin_key: "mock",
+			},
+			// deletes entity1
+			{
+				id: "change3",
+				entity_id: "entity1",
+				schema_key: "key1",
+				file_id: "file1",
+				snapshot_id: "no-content",
+				plugin_key: "mock",
+			},
+		])
+		.returningAll()
+		.execute();
+
+	// Create initial change sets
+	const [initialChangeSet] = await lix.db
+		.insertInto("change_set")
+		.values({
+			id: "cs0",
+			immutable_elements: true,
+		})
+		.returning("id")
+		.execute();
+
+	const [workingChangeSet] = await lix.db
+		.insertInto("change_set")
+		.values({
+			id: "working_cs",
+			immutable_elements: false,
+		})
+		.returning("id")
+		.execute();
+
+	// Create initial version pointing to these change sets
+	await lix.db
+		.insertInto("version_v2")
+		.values({
+			id: "v0",
+			name: "v0",
+			change_set_id: initialChangeSet!.id,
+			working_change_set_id: workingChangeSet!.id,
+		})
+		.execute();
+
+	const cs1 = await createChangeSet({
+		lix,
+		id: "cs1",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
+		parents: [initialChangeSet!],
+	});
+
+	// Update the version to point to the new change set
+	await lix.db
+		.updateTable("version_v2")
+		.set({ change_set_id: cs1!.id })
+		.where("id", "=", "v0")
+		.execute();
+
+	// Verify the working change set was updated with the new change
+	const workingElements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", workingChangeSet!.id)
+		.selectAll()
+		.execute();
+
+	expect(workingElements).toHaveLength(1);
+	expect(workingElements[0]).toMatchObject({
+		change_id: "change0",
+		entity_id: "entity0",
+		schema_key: "key0",
+		file_id: "file0",
+	});
+
+	// now use change1 which inserts entity1
+	const cs2 = await createChangeSet({
+		lix,
+		id: "cs2",
+		elements: [changes[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
+		parents: [cs1!],
+	});
+
+	// Update the version to point to the new change set
+	await lix.db
+		.updateTable("version_v2")
+		.set({ change_set_id: cs2!.id })
+		.where("id", "=", "v0")
+		.execute();
+
+	// Verify the working change set was updated with the new change
+	const workingElements2 = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", workingChangeSet!.id)
+		.orderBy("entity_id")
+		.selectAll()
+		.execute();
+
+	expect(workingElements2).toHaveLength(2);
+	expect(workingElements2[0]).toMatchObject({
+		change_id: "change0",
+		entity_id: "entity0",
+		schema_key: "key0",
+		file_id: "file0",
+	});
+	expect(workingElements2[1]).toMatchObject({
+		change_id: "change1",
+		entity_id: "entity1",
+		schema_key: "key1",
+		file_id: "file1",
+	});
+
+	// now use change2 which updates entity0
+	const cs3 = await createChangeSet({
+		lix,
+		id: "cs3",
+		elements: [changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
+		parents: [cs2!],
+	});
+
+	// Update the version to point to the new change set
+	await lix.db
+		.updateTable("version_v2")
+		.set({ change_set_id: cs3!.id })
+		.where("id", "=", "v0")
+		.execute();
+
+	// Verify the working change set was updated with the new change
+	const workingElements3 = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", workingChangeSet!.id)
+		.orderBy("entity_id")
+		.selectAll()
+		.execute();
+
+	expect(workingElements3).toHaveLength(2);
+	expect(workingElements3[0]).toMatchObject({
+		change_id: "change2",
+		entity_id: "entity0",
+		schema_key: "key0",
+		file_id: "file0",
+	});
+	expect(workingElements3[1]).toMatchObject({
+		change_id: "change1",
+		entity_id: "entity1",
+		schema_key: "key1",
+		file_id: "file1",
+	});
+
+	// now use change3 which deletes entity1
+	const cs4 = await createChangeSet({
+		lix,
+		id: "cs4",
+		elements: [changes[3]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
+		parents: [cs3!],
+	});
+
+	// Update the version to point to the new change set
+	await lix.db
+		.updateTable("version_v2")
+		.set({ change_set_id: cs4!.id })
+		.where("id", "=", "v0")
+		.execute();
+
+	// Verify the working change set was updated with the new change
+	const workingElements4 = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", workingChangeSet!.id)
+		.orderBy("entity_id")
+		.selectAll()
+		.execute();
+
+	expect(workingElements4).toHaveLength(1);
+	expect(workingElements4[0]).toMatchObject({
+		change_id: "change2",
+		entity_id: "entity0",
+		schema_key: "key0",
+		file_id: "file0",
+	});
+});
+
+test("keeps delete change if entity was inserted before or with the last checkpoint", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file0",
+			path: "/test.json",
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					entity0: "value0",
+				})
+			),
+		})
+		.execute();
+
+	await fileQueueSettled({ lix });
+	await createCheckpoint({ lix, id: "checkpoint0" });
+
+	// Delete the entity
+	await lix.db.deleteFrom("file").where("path", "=", "/test.json").execute();
+
+	await fileQueueSettled({ lix });
+
+	const workingChangeSet = await lix.db
+		.with("act_version", (eb) =>
+			eb
+				.selectFrom("active_version")
+				.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+				.selectAll("version_v2")
+		)
+		.selectFrom("change_set")
+		.innerJoin(
+			"act_version",
+			"change_set.id",
+			"act_version.working_change_set_id"
+		)
+		.selectAll("change_set")
+		.executeTakeFirstOrThrow();
+
+	const elements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", workingChangeSet.id)
+		.orderBy("entity_id")
+		.selectAll()
+		.execute();
+
+	expect(elements).toHaveLength(1);
+	expect(elements[0]).toMatchObject({
+		change_id: expect.any(String),
+		entity_id: "entity0",
+		schema_key: "mock_json_property",
+		file_id: "file0",
+	});
 });

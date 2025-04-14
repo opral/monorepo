@@ -20,6 +20,7 @@ export async function createVersionV2(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
 			lix: { ...args.lix, db: trx },
+			immutableElements: false,
 		});
 		const newVersion = await trx
 			.insertInto("version_v2")
