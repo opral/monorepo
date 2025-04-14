@@ -1,6 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { VersionV2 } from "../version-v2/database-schema.js";
-import { createChangeSet } from "./create-change-set.js";
 import type { ChangeSet } from "./database-schema.js";
 
 export async function createCheckpoint(args: {
@@ -12,6 +11,17 @@ export async function createCheckpoint(args: {
 	version?: Pick<VersionV2, "id">;
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
+		// need to disable the trigger to avoid
+		// duplicate working change set updates
+		await trx
+			.insertInto("key_value")
+			.values({
+				key: "lix_skip_update_working_change_set",
+				value: "true",
+				skip_change_control: true,
+			})
+			.execute();
+
 		const version = args.version
 			? await trx
 					.selectFrom("version_v2")
@@ -30,22 +40,6 @@ export async function createCheckpoint(args: {
 			.select("id")
 			.executeTakeFirstOrThrow();
 
-		// seal the working change set to insert it into the graph
-		const returnChangeSet = await trx
-			.updateTable("change_set")
-			.where("change_set.id", "=", version.working_change_set_id)
-			.set({ immutable_elements: true })
-			.returningAll()
-			.executeTakeFirstOrThrow();
-
-		await trx
-			.insertInto("change_set_edge")
-			.values({
-				parent_id: version.change_set_id,
-				child_id: version.working_change_set_id,
-			})
-			.execute();
-
 		await trx
 			.insertInto("change_set_label")
 			.values({
@@ -54,29 +48,41 @@ export async function createCheckpoint(args: {
 			})
 			.execute();
 
-		const newWorkingCs = await createChangeSet({
-			lix: { ...args.lix, db: trx },
-			immutableElements: false,
-		});
-
-		// need to disable the trigger to avoid
-		// duplicate working change set updates
-		await trx
-			.insertInto("key_value")
-			.values({
-				key: "lix_skip_update_working_change_set",
-				value: "true",
-				skip_change_control: true,
-			})
-			.execute();
+		const newWorkingCs = await trx
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
+			.executeTakeFirstOrThrow();
 
 		await trx
 			.updateTable("version_v2")
 			.set({
-				change_set_id: version.working_change_set_id,
 				working_change_set_id: newWorkingCs.id,
 			})
 			.where("id", "=", version.id)
+			.execute();
+
+		// seal the working change set to insert it into the graph
+		const formerWorkingCs = await trx
+			.updateTable("change_set")
+			.where("change_set.id", "=", version.working_change_set_id)
+			.set({ immutable_elements: true })
+			.returningAll()
+			.executeTakeFirstOrThrow();
+
+		await trx
+			.updateTable("version_v2")
+			.set({
+				change_set_id: formerWorkingCs.id,
+			})
+			.execute();
+
+		await trx
+			.insertInto("change_set_edge")
+			.values({
+				parent_id: version.change_set_id,
+				child_id: formerWorkingCs.id,
+			})
 			.execute();
 
 		await trx
@@ -84,7 +90,7 @@ export async function createCheckpoint(args: {
 			.where("key", "=", "lix_skip_update_working_change_set")
 			.execute();
 
-		return returnChangeSet;
+		return formerWorkingCs;
 	};
 
 	if (args.lix.db.isTransaction) {

@@ -593,35 +593,61 @@ describe("change_set immutable flag and triggers", () => {
 		expect(deleteResult).toBeDefined();
 	});
 
-	// maybe implement this. there is a bug somewhere which flips the immutable flag
-	// which is the reason why this test is commented out
-	test.todo(
-		"the immutable flag cannot be changed after the change set has been sealed",
-		async () => {
-			const lix = await openLixInMemory({});
-			const cs = await lix.db
-				.insertInto("change_set")
-				.defaultValues()
-				.returningAll()
-				.executeTakeFirstOrThrow();
+	test("a working change set can't be made immutable", async () => {
+		const lix = await openLixInMemory({});
 
-			// Seal the change set
-			await lix.db
+		// Get the active version and its working change set ID
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		const version = await lix.db
+			.selectFrom("version_v2")
+			.where("id", "=", activeVersion.version_id)
+			.select("working_change_set_id")
+			.executeTakeFirstOrThrow();
+
+		const workingChangeSetId = version.working_change_set_id;
+
+		// Attempt to update the *actual* working change set
+		await expect(
+			lix.db
 				.updateTable("change_set")
 				.set({ immutable_elements: true })
-				.where("id", "=", cs.id)
-				.execute();
+				.where("id", "=", workingChangeSetId) // Target the correct ID
+				.execute()
+		).rejects.toThrow(
+			/Cannot set immutable_elements to true for working change sets./i
+		);
+	});
 
-			// Attempt to change the immutable flag
-			await expect(() =>
-				lix.db
-					.updateTable("change_set")
-					.set({ immutable_elements: false })
-					.where("id", "=", cs.id)
-					.execute()
-			).rejects.toThrow(
-				/Cannot set immutable_elements to false once it was set to true/i
-			);
-		}
-	);
+	// maybe implement this. there is a bug somewhere which flips the immutable flag
+	// which is the reason why this test is commented out
+	test.skip("the immutable flag cannot be changed after the change set has been sealed", async () => {
+		const lix = await openLixInMemory({});
+		const cs = await lix.db
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
+			.executeTakeFirstOrThrow();
+
+		// Seal the change set
+		await lix.db
+			.updateTable("change_set")
+			.set({ immutable_elements: true })
+			.where("id", "=", cs.id)
+			.execute();
+
+		// Attempt to change the immutable flag
+		await expect(() =>
+			lix.db
+				.updateTable("change_set")
+				.set({ immutable_elements: false })
+				.where("id", "=", cs.id)
+				.execute()
+		).rejects.toThrow(
+			/Cannot set immutable_elements to false once it was set to true/i
+		);
+	});
 });

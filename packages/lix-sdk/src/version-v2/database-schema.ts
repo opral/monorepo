@@ -85,6 +85,14 @@ export function applyVersionV2DatabaseSchema(
   BEGIN
     SELECT handle_update_working_change_set(NEW.id, NEW.change_set_id, NEW.working_change_set_id);
   END;
+
+  CREATE TRIGGER IF NOT EXISTS prevent_immutable_working_change_set
+  BEFORE UPDATE OF immutable_elements ON change_set
+  FOR EACH ROW
+  WHEN NEW.immutable_elements = 1 AND OLD.immutable_elements = 0 AND EXISTS (SELECT 1 FROM version_v2 WHERE working_change_set_id = NEW.id)
+  BEGIN
+      SELECT RAISE(FAIL, 'Cannot set immutable_elements to true for working change sets.');
+  END;
 `;
 
 	return sqlite.exec(sql);
@@ -182,6 +190,16 @@ function handleUpdateWorkingChangeSet(args: {
 				return true;
 			}
 		}
+
+		const workingCs = executeSync({
+			lix: { sqlite: args.sqlite },
+			query: args.db
+				.selectFrom("change_set")
+				.where("id", "=", args.working_change_set_id)
+				.selectAll(),
+		});
+
+		console.log("handleUpdateWorkingChangeSet()", { workingCs });
 
 		executeSync({
 			lix: { sqlite: args.sqlite },

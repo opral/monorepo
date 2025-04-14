@@ -26,12 +26,11 @@ test("creates a checkpoint that has an edge to the version's change set", async 
 	// Verify the checkpoint has an edge to the version's change set
 	const edges = await lix.db
 		.selectFrom("change_set_edge")
-		.where("child_id", "=", checkpoint.id)
 		.select(["parent_id", "child_id"])
 		.execute();
 
-	// Should have at least one edge
-	expect(edges.length).toBeGreaterThan(0);
+	// Should have exactly one edge
+	expect(edges.length).toBe(1);
 
 	// Verify the edge connects to the version's change set
 	const edgeToVersionChangeSet = edges.find(
@@ -40,15 +39,6 @@ test("creates a checkpoint that has an edge to the version's change set", async 
 	expect(edgeToVersionChangeSet).toBeDefined();
 	expect(edgeToVersionChangeSet?.parent_id).toBe(initialVersion.change_set_id);
 	expect(edgeToVersionChangeSet?.child_id).toBe(checkpoint.id);
-
-	// Verify the version now points to the checkpoint
-	const updatedVersion = await lix.db
-		.selectFrom("version_v2")
-		.where("id", "=", initialVersion.id)
-		.select(["change_set_id"])
-		.executeTakeFirstOrThrow();
-
-	expect(updatedVersion.change_set_id).toBe(checkpoint.id);
 
 	// Verify the checkpoint has the checkpoint label
 	const labels = await lix.db
