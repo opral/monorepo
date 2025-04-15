@@ -1,5 +1,4 @@
-// TODO: Ensure 'diff' package is installed
-// import { diffWords } from "diff"; // Reverted: Inline diff broke layout
+// import { diffWords } from "diff";
 
 /**
  * Compares two HTML strings (`beforeHtml` and `afterHtml`) and generates an HTMLElement
@@ -11,12 +10,12 @@
  *
  * @example
  *   renderUniversalDiffElement({
- *     beforeHtml: `<p data-lix-entity-id="abc">Test</p>`,
- *     afterHtml: `<p data-lix-entity-id="abc">Test World</p>`,
+ *     beforeHtml: `<p data-diff-id="abc">Test</p>`,
+ *     afterHtml: `<p data-diff-id="abc">Test World</p>`,
  *   });
  *
  */
-export function renderUniversalDiffElement(args: {
+function renderUniversalDiffElement(args: {
   beforeHtml: string;
   afterHtml: string;
 }): HTMLElement {
@@ -33,8 +32,8 @@ export function renderUniversalDiffElement(args: {
   // --- Step 1: Map elements and identify changes ---
   const beforeElementsMap = new Map<string, Element>();
   const beforeElementOrder: { id: string; element: Element }[] = [];
-  beforeDoc.body.querySelectorAll("[data-lix-entity-id]").forEach((el) => {
-    const id = el.getAttribute("data-lix-entity-id");
+  beforeDoc.body.querySelectorAll("[data-diff-id]").forEach((el) => {
+    const id = el.getAttribute("data-diff-id");
     if (id) {
       beforeElementsMap.set(id, el);
       beforeElementOrder.push({ id, element: el });
@@ -43,11 +42,10 @@ export function renderUniversalDiffElement(args: {
 
   const afterElementsInResultMap = new Map<string, Element>();
   // Query within the result container which holds the 'after' structure clone
-  const afterElementsInResult = resultContainer.querySelectorAll(
-    "[data-lix-entity-id]",
-  );
+  const afterElementsInResult =
+    resultContainer.querySelectorAll("[data-diff-id]");
   afterElementsInResult.forEach((el) => {
-    const id = el.getAttribute("data-lix-entity-id");
+    const id = el.getAttribute("data-diff-id");
     if (id) {
       afterElementsInResultMap.set(id, el);
     }
@@ -76,12 +74,11 @@ export function renderUniversalDiffElement(args: {
     if (addedIds.has(id)) {
       // Handle Added Element
       if (afterEl instanceof HTMLElement) {
-        // Style with green text color
-        afterEl.style.color = "green";
-        afterEl.style.textDecoration = "none";
-        afterEl.style.outline = "none"; // Ensure no outline
-        afterEl.style.border = "none"; // Ensure no border
-        afterEl.style.backgroundColor = ""; // Ensure no background
+        if (afterEl.hasAttribute("class")) {
+          afterEl.className += " diff-after";
+        } else {
+          afterEl.className = "diff-after";
+        }
       }
     } else if (modifiedIds.has(id)) {
       // Handle Potentially Modified Element
@@ -89,14 +86,14 @@ export function renderUniversalDiffElement(args: {
 
       // Check if direct child structure changed
       const beforeChildIds = new Set(
-        Array.from(
-          beforeEl.querySelectorAll(":scope > [data-lix-entity-id]"),
-        ).map((el) => el.getAttribute("data-lix-entity-id")),
+        Array.from(beforeEl.querySelectorAll(":scope > [data-diff-id]")).map(
+          (el) => el.getAttribute("data-diff-id"),
+        ),
       );
       const afterChildIds = new Set(
-        Array.from(
-          afterEl.querySelectorAll(":scope > [data-lix-entity-id]"),
-        ).map((el) => el.getAttribute("data-lix-entity-id")),
+        Array.from(afterEl.querySelectorAll(":scope > [data-diff-id]")).map(
+          (el) => el.getAttribute("data-diff-id"),
+        ),
       );
       const areChildSetsEqual =
         beforeChildIds.size === afterChildIds.size &&
@@ -109,25 +106,24 @@ export function renderUniversalDiffElement(args: {
         // Child structure is the same, but text content differs.
         // Treat as Delete Old + Insert New
         if (afterEl instanceof HTMLElement) {
-          // 1. Style the 'after' element as inserted (green text)
-          afterEl.style.color = "green";
-          afterEl.style.textDecoration = "none";
-          afterEl.style.outline = "none";
-          afterEl.style.border = "none";
-          afterEl.style.backgroundColor = "";
+          // 1. Style the 'after' element as inserted
+          if (afterEl.hasAttribute("class")) {
+            afterEl.className += " diff-after";
+          } else {
+            afterEl.className = "diff-after";
+          }
 
           // 2. Clone the 'before' element
           const beforeClone = beforeEl.cloneNode(true) as HTMLElement;
 
-          // 3. Style the clone as deleted (red text)
-          beforeClone.style.color = "red";
-          beforeClone.style.textDecoration = "none";
-          beforeClone.style.outline = "none"; // Ensure no outline
-          beforeClone.style.border = "none"; // Ensure no border
-          beforeClone.style.backgroundColor = ""; // Ensure no background
+          // 3. Style the clone as deleted
+          if (beforeClone.hasAttribute("class")) {
+            beforeClone.className += " diff-before";
+          } else {
+            beforeClone.className = "diff-before";
+          }
 
           // 4. Disable interactions in the clone
-          beforeClone.setAttribute("contenteditable", "false");
           beforeClone
             .querySelectorAll("button, input, select, textarea, a[href]")
             .forEach((interactiveEl) => {
@@ -154,8 +150,7 @@ export function renderUniversalDiffElement(args: {
   for (const { id, element: beforeEl } of beforeElementOrder) {
     if (removedIds.has(id)) {
       // Check if parent was also removed. If so, skip (it'll be handled with the parent)
-      const parentId =
-        beforeEl.parentElement?.getAttribute("data-lix-entity-id");
+      const parentId = beforeEl.parentElement?.getAttribute("data-diff-id");
       if (parentId && removedIds.has(parentId)) {
         continue;
       }
@@ -164,7 +159,7 @@ export function renderUniversalDiffElement(args: {
       let parentInResult: Element | null = null;
       if (parentId) {
         parentInResult = resultContainer.querySelector(
-          `[data-lix-entity-id="${parentId}"]`,
+          `[data-diff-id="${parentId}"]`,
         );
       } else if (beforeEl.parentElement === beforeDoc.body) {
         parentInResult = resultContainer; // Element was direct child of body
@@ -177,7 +172,7 @@ export function renderUniversalDiffElement(args: {
         while (currentSibling) {
           if (currentSibling.nodeType === Node.ELEMENT_NODE) {
             const siblingId = (currentSibling as Element).getAttribute(
-              "data-lix-entity-id",
+              "data-diff-id",
             );
             // Check if this sibling exists in the 'after' state (i.e., wasn't removed)
             if (siblingId && afterElementsInResultMap.has(siblingId)) {
@@ -190,12 +185,12 @@ export function renderUniversalDiffElement(args: {
 
         // Clone the removed element, style it, and insert
         const clone = beforeEl.cloneNode(true) as HTMLElement;
-        // Style with red text
-        clone.style.color = "red";
-        clone.style.textDecoration = "none";
-        clone.style.outline = "none"; // Ensure no outline
-        clone.style.border = "none"; // Ensure no border
-        clone.style.backgroundColor = ""; // Ensure no background
+        // Style with class
+        if (clone.hasAttribute("class")) {
+          clone.className += " diff-before";
+        } else {
+          clone.className = "diff-before";
+        }
 
         // Ensure contenteditable is false on the clone to prevent interaction
         clone.setAttribute("contenteditable", "false");
@@ -237,4 +232,26 @@ export function renderUniversalDiffElement(args: {
   }
 
   return resultContainer;
+}
+
+/**
+ * Compares two HTML strings (`beforeHtml` and `afterHtml`) and generates an HTMLElement
+ * that visually represents the differences.
+ *
+ * Use this if you want to bypass parsing and DOM creation by
+ * directly working with the DOM elements instead of the HTML string
+ * output of `renderUniversalDiff()`.
+ *
+ * @example
+ *   renderUniversalDiffElement({
+ *     beforeHtml: `<p data-diff-id="abc">Test</p>`,
+ *     afterHtml: `<p data-diff-id="abc">Test World</p>`,
+ *   });
+ *
+ */
+export function renderUniversalDiff(args: {
+  beforeHtml: string;
+  afterHtml: string;
+}): string {
+  return renderUniversalDiffElement(args).outerHTML;
 }

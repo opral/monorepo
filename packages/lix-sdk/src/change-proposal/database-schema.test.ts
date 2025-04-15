@@ -22,7 +22,14 @@ test("change_proposal.id should default to uuid_v7", async () => {
 	// Create a change set to use in the proposal
 	const changeSet = await createChangeSet({
 		lix,
-		changes: [mockChange],
+		elements: [
+			{
+				change_id: mockChange.id,
+				entity_id: mockChange.entity_id,
+				schema_key: mockChange.schema_key,
+				file_id: mockChange.file_id,
+			},
+		],
 	});
 
 	// Now we can test the change proposal with valid foreign keys
@@ -57,7 +64,14 @@ test("change proposals are change controlled", async () => {
 	// Create a change set to use in the proposal
 	const changeSet = await createChangeSet({
 		lix,
-		changes: [mockChange],
+		elements: [
+			{
+				change_id: mockChange.id,
+				entity_id: mockChange.entity_id,
+				schema_key: mockChange.schema_key,
+				file_id: mockChange.file_id,
+			},
+		],
 	});
 
 	const result = await lix.db
@@ -98,7 +112,14 @@ test("source change set id is nullable", async () => {
 	// Create a change set to use in the proposal
 	const changeSet = await createChangeSet({
 		lix,
-		changes: [mockChange],
+		elements: [
+			{
+				change_id: mockChange.id,
+				entity_id: mockChange.entity_id,
+				schema_key: mockChange.schema_key,
+				file_id: mockChange.file_id,
+			},
+		],
 	});
 
 	const result = await lix.db
@@ -132,7 +153,14 @@ test("target change set id is not nullable", async () => {
 	// Create a change set to use in the proposal
 	const changeSet = await createChangeSet({
 		lix,
-		changes: [mockChange],
+		elements: [
+			{
+				change_id: mockChange.id,
+				entity_id: mockChange.entity_id,
+				schema_key: mockChange.schema_key,
+				file_id: mockChange.file_id,
+			},
+		],
 	});
 
 	const result = await lix.db

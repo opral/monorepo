@@ -144,7 +144,7 @@ export class InputNodeView implements NodeView {
 		this.dom.className = "badge gap-1 p-3 border border-base-300 rounded";
 		// Add the entity ID attribute
 		if (node.attrs.id) {
-			this.dom.setAttribute("data-lix-entity-id", node.attrs.id);
+			this.dom.setAttribute("data-diff-id", node.attrs.id);
 		}
 
 		// Create the input label prefix with a grayscale image icon using SVG
@@ -195,7 +195,7 @@ export class MentionNodeView implements NodeView {
 		this.dom.className = "mention";
 		// Add the entity ID attribute
 		if (node.attrs.id) {
-			this.dom.setAttribute("data-lix-entity-id", node.attrs.id);
+			this.dom.setAttribute("data-diff-id", node.attrs.id);
 		}
 
 		// Create a container for the mention text and icon
@@ -235,7 +235,7 @@ export class GenerationNodeView implements NodeView {
 		this.dom.className = "inline-flex items-center gap-1";
 		// Add the entity ID attribute
 		if (node.attrs.id) {
-			this.dom.setAttribute("data-lix-entity-id", node.attrs.id);
+			this.dom.setAttribute("data-diff-id", node.attrs.id);
 		}
 
 		const icon = document.createElement("span");
@@ -264,7 +264,7 @@ export class ToolNodeView implements NodeView {
 		this.dom.className = "tool-container border rounded-md p-2 my-2 bg-gray-50";
 		// Add the entity ID attribute
 		if (node.attrs.id) {
-			this.dom.setAttribute("data-lix-entity-id", node.attrs.id);
+			this.dom.setAttribute("data-diff-id", node.attrs.id);
 		}
 
 		// Create the header with tool label and icon

@@ -9,8 +9,6 @@ This package offers a simple way to generate and display diffs, showing users ex
 - ✅ Styling: Uses your existing CSS.
 - ✅ Works in any framework (React, Vue, Svelte, Angular, etc.)
 
-TODO insert screenshots
-
 ## How Does It Work? (The Rendered HTML Trick)
 
 The core idea is to diff the *rendered HTML output* instead of source data structures given that anything is rendered as HTML anyways. This bypasses the need for custom diff implementations. 
@@ -67,15 +65,15 @@ graph TD
 
 ## Usage
 
-1. Add `data-lix-entity-id` attributes to your rendered HTML elements.
+1. Add `data-diff-id` attributes to your rendered HTML elements.
 2. Use `renderUniversalDiff` to generate a diff HTML string.
 3. Display the diff HTML string in your app.
 
 ```typescript
 import { renderUniversalDiff } from '@lix/universal-diff';
 
-const beforeHtml = "<p data-lix-entity-id='p1'>Old text.</p>";
-const afterHtml = "<p data-lix-entity-id='p1'>New text!</p><p data-lix-entity-id='p2'>Added.</p>";
+const beforeHtml = "<p data-diff-id='p1'>Old text.</p>";
+const afterHtml = "<p data-diff-id='p1'>New text!</p><p data-diff-id='p2'>Added.</p>";
 
 const diffHtmlString = renderUniversalDiff({ beforeHtml, afterHtml });
 
@@ -84,7 +82,7 @@ document.getElementById('diff-container')!.innerHTML = diffHtmlString;
 
 ## ⚠️ Limitations
 
-**`data-lix-entity-id` Required:** Diff quality depends on stable `data-lix-entity-id` attributes being present in the rendered HTML.
+**`data-diff-id` Required:** Diff quality depends on stable `data-diff-id` attributes being present in the rendered HTML.
 
 ---
 
@@ -107,3 +105,51 @@ This package includes a Vite-based visual test website to help develop and debug
     ```
 
 </details>
+
+
+## Styling the Diff Output
+
+The diff renderer uses semantic CSS classes to style changes:
+
+- `.diff-before` — applied to elements representing removed or old content
+- `.diff-after` — applied to elements representing added or new content
+
+### Default Styles
+
+A default stylesheet is provided with the package:
+
+```js
+import '@lix/universal-diff/default.css';
+```
+
+Or, add it to your HTML:
+
+```html
+<link rel="stylesheet" href="/node_modules/@lix/universal-diff/default.css">
+```
+
+This file provides sensible defaults:
+
+```css
+.diff-before {
+  color: red;
+  text-decoration: none;
+  outline: none;
+}
+.diff-after {
+  color: green;
+  text-decoration: none;
+  outline: none;
+}
+```
+
+You can override these styles in your own CSS for custom themes or branding:
+
+```css
+.diff-before { color: #b00; background: #fee; }
+.diff-after { color: #080; background: #efe; }
+```
+
+### Merging with Existing Classes
+
+If your original elements have classes, the diff classes will be merged (e.g. `<p class="foo diff-after">`).

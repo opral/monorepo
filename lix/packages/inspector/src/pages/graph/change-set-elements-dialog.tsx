@@ -5,6 +5,7 @@ import { FloatingWindow } from "../../components/floating-window";
 import { createPortal } from "react-dom";
 import { Context } from "../../context";
 import { useQuery } from "../../hooks/use-query";
+import { Copy } from "lucide-react";
 
 interface ChangeSetElementsWindowProps {
   changeSetId: string;
@@ -107,9 +108,28 @@ function ChangeComponent(props: { change: Change & { content: any } }) {
   // Format the JSON content
   const formattedContent = JSON.stringify(props.change.content, null, 2);
 
+  const handleCopy = () => {
+    const changeText = `ID: ${props.change.id}
+File ID: ${props.change.file_id}
+Schema Key: ${props.change.schema_key}
+Entity ID: ${props.change.entity_id}
+Snapshot:
+${formattedContent}`;
+
+    navigator.clipboard.writeText(changeText);
+  };
+
   return (
     <div className="card bg-base-100 shadow-sm overflow-hidden w-full">
       <div className="card-body p-4 overflow-hidden">
+        <div className="flex justify-between items-start mb-2">
+          <div></div>
+          <div className="tooltip tooltip-bottom" data-tip="Copy">
+            <button onClick={handleCopy} className="btn btn-xs btn-ghost">
+              <Copy size={16} />
+            </button>
+          </div>
+        </div>
         <div className="grid gap-2">
           <div>
             <strong>ID:</strong>{" "}

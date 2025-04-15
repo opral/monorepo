@@ -41,6 +41,9 @@ export const createCheckpoint = async (
 				.values({
 					change_set_id: newChangeSet.id,
 					change_id: leafChange.id,
+					entity_id: leafChange.entity_id,
+					schema_key: leafChange.schema_key,
+					file_id: leafChange.file_id,
 				})
 				// the leaf change is contained in the set already
 				.onConflict((oc) => oc.doNothing())

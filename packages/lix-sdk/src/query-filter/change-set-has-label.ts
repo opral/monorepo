@@ -21,7 +21,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  * 		.selectAll()
  * 		.execute();
  *   ```
- * 
+ *
  * @example
  *   Id lookup also works:
  *

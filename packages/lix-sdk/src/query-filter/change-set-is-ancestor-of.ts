@@ -20,12 +20,12 @@ import type { ChangeSet } from "../change-set/database-schema.js";
  *
  * ⚠️ This filter only defines the traversal scope — it does not filter changes directly.
  *
- * --- Options --- 
+ * --- Options ---
  * - `includeSelf`: If `true`, includes the starting `changeSet` in the results. Defaults to `false`.
- * - `depth`: Limits the traversal depth. `depth: 1` selects only immediate parents (if exclusive) 
+ * - `depth`: Limits the traversal depth. `depth: 1` selects only immediate parents (if exclusive)
  *   or the starting node and its immediate parents (if inclusive).
  *
- * --- Examples --- 
+ * --- Examples ---
  *
  * @example Selecting strict ancestors (default)
  * ```ts
@@ -40,7 +40,7 @@ import type { ChangeSet } from "../change-set/database-schema.js";
  *   .where(changeSetIsAncestorOf({ id: "cs3" }, { includeSelf: true }))
  *   .selectAll()
  * ```
- * 
+ *
  * @example Combining with changeSetIsDescendantOf to select change sets between two points in time
  * ```ts
  * // Select all change sets between startPoint and endPoint (inclusive)

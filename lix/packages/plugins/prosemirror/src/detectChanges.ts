@@ -56,6 +56,15 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 
 		if (!beforeNode) {
 			// Node is new
+
+			// Check if the parent node is also new in this diff.
+			// If so, skip adding the child separately, as it's part of the parent's snapshot.
+			const parentNode = findParentNode(documentAfter, id);
+			const parentId = parentNode?.attrs?.id || parentNode?._id;
+			if (parentId && !beforeNodeMap.has(parentId)) {
+				continue; // Skip adding child node if parent is also new
+			}
+
 			detectedChanges.push({
 				entity_id: id,
 				schema: ProsemirrorNodeSchema,
@@ -105,7 +114,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 
 /**
  * Recursively collects all nodes with IDs into a map
- * IDs can be either in node._id (legacy) or node.attrs.id (preferred)
+ * IDs can be either in node.attrs.id (preferred) or node._id (legacy)
  */
 function collectNodesWithId(
 	node: ProsemirrorNode,
@@ -312,4 +321,29 @@ function hasChildrenWithIds(node: ProsemirrorNode): boolean {
 	}
 
 	return false;
+}
+
+/**
+ * Finds the parent node of a node with a specific ID within a Prosemirror document tree.
+ */
+function findParentNode(
+	currentNode: ProsemirrorNode,
+	targetId: string,
+	parent: ProsemirrorNode | null = null,
+): ProsemirrorNode | null {
+	const currentId = currentNode.attrs?.id || currentNode._id;
+	if (currentId === targetId) {
+		return parent;
+	}
+
+	if (currentNode.content && Array.isArray(currentNode.content)) {
+		for (const childNode of currentNode.content) {
+			const foundParent = findParentNode(childNode, targetId, currentNode);
+			if (foundParent) {
+				return foundParent;
+			}
+		}
+	}
+
+	return null;
 }

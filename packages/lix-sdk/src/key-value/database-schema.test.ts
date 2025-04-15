@@ -34,7 +34,7 @@ test("duplicate keys lead to an error", async () => {
 		.returningAll()
 		.execute();
 
-	expect(
+	await expect(
 		lix.db
 			.insertInto("key_value")
 			.values({
@@ -137,4 +137,16 @@ test("skip_change_control should default to false", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(updated.skip_change_control).toBeTruthy();
+});
+
+test("using numbers should work", async () => {
+	const lix = await openLixInMemory({});
+
+	const result = await lix.db
+		.insertInto("key_value")
+		.values({ key: "mock_key", value: "42" })
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result.value).toBe("42");
 });

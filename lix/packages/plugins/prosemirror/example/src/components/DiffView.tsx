@@ -3,7 +3,8 @@ import { lix, prosemirrorFile } from "../state";
 import { beforeAfterOfFile } from "@lix-js/sdk";
 import { Node, DOMSerializer } from "prosemirror-model";
 import { schema } from "../prosemirror/schema";
-import { renderUniversalDiffElement } from "@lix-js/universal-diff";
+import { renderUniversalDiff } from "@lix-js/universal-diff";
+import "@lix-js/universal-diff/default.css";
 import { useKeyValue } from "../hooks/useKeyValue";
 
 export function DiffView() {
@@ -55,7 +56,7 @@ export function DiffView() {
 					}
 				}
 
-				const diffHtml = renderUniversalDiffElement({
+				const diffHtml = renderUniversalDiff({
 					beforeHtml: beforeHtml ?? "",
 					afterHtml: afterHtml ?? "",
 				});
@@ -64,7 +65,7 @@ export function DiffView() {
 				console.log("After HTML:", afterHtml);
 				console.log("Diff HTML:", diffHtml);
 
-				setDiffHtml(diffHtml.outerHTML);
+				setDiffHtml(diffHtml);
 			} catch (err) {
 				console.error("Error loading or processing diff documents:", err);
 				setError(

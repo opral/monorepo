@@ -1,21 +1,98 @@
-# Lix Plugin `.csv` 
+# Lix Plugin Prosemirror
 
-This plugin adds support for `.csv` files in Lix.
+This package enables change control for [ProseMirror](https://prosemirror.net/) documents using the Lix SDK.
 
-## Limitations 
+## Installation
 
-CSV files have no ids. To detect changes, the CSV plugin assumes that a unique column exists in the CSV file. This column is used to uniquely identify each row in the CSV file. 
+```bash
+npm install @lix-js/sdk @lix-js/plugin-prosemirror 
+```
 
-- Every CSV file must have a header row.
-- The CSV file must have a unique column. 
-- Changing the unique column value in a row will lead to the detection of a deletion and new insertion.  
+## Getting Started
 
-### Valid Example
+### Initialize Lix with the Prosemirror Plugin
 
-| Email (unique column)     | Name           | Age |
-|---------------------------|----------------|-----|
-| hans@example.com          | Hans Müller    | 30  |
-| mull@example.com          | Hans Müller    | 83  |
-| lisa@example.com          | Lisa Schneider | 25  |
-| karl@example.com          | Karl Meier     | 28  |
+```ts
+import { openLixInMemory } from "@lix-js/sdk";
+import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
 
+export const lix = await openLixInMemory({
+  providePlugins: [prosemirrorPlugin],
+});
+```
+
+### Create and Insert a Prosemirror Document
+
+```ts
+export const prosemirrorFile = await lix.db
+  .insertInto("file")
+  .values({
+    path: "/prosemirror.json",
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        type: "doc",
+        content: [],
+      }),
+    ),
+  })
+  .execute();
+```
+
+### Add the `lixProsemirror` Plugin to Your Editor State
+
+When configuring your ProseMirror editor, add the `lixProsemirror` plugin to your editor state's plugins array:
+
+```ts
+import { lixProsemirror, idPlugin } from "@lix-js/plugin-prosemirror";
+import { EditorState } from "prosemirror-state";
+
+const state = EditorState.create({
+  doc: schema.nodeFromJSON(/* ... */),
+  schema,
+  plugins: [
+    // ...other plugins...
+    idPlugin(),
+    lixProsemirror({
+      lix, // your lix instance
+      fileId: prosemirrorFile.id, // the file id of your Prosemirror document
+    }),
+  ],
+});
+```
+
+### (Optional) Add the `idPlugin` if Your Nodes Lack Unique IDs
+
+If your ProseMirror document nodes do not have unique IDs, you should also add the `idPlugin`:
+
+```ts
+import { idPlugin } from "@lix-js/plugin-prosemirror";
+// ...other plugins...
+idPlugin(),
+```
+
+
+## How it works
+
+The lix prosemirror plugin tracks changes in the Prosemirror document with unique IDs. 
+
+If you don't have a id for your nodes yet, use the `idPlugin()` to add them:
+
+```diff
+{
+  "type": "doc",
+  "content": [
+    {
+      "attrs": {
++       "id": "unique-id-1"
+      },
+      "type": "paragraph",
+      "content": [
+        {
+          "type": "text",
+          "text": "Hello World"
+        }
+      ]
+    }
+  ]
+}
+```

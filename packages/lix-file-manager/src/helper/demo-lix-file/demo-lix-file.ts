@@ -244,7 +244,12 @@ async function createChangesWithCheckpoint(args: {
 
 	const changeSet = await createChangeSet({
 		lix: args.lix,
-		changes,
+		elements: changes.map((change) => ({
+			file_id: change.file_id,
+			schema_key: change.schema_key,
+			change_id: change.id,
+			entity_id: change.entity_id,
+		})),
 	});
 
 	const discussion = await createDiscussion({

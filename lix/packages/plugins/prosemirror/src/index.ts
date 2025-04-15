@@ -1,8 +1,9 @@
 import { type LixPlugin } from "@lix-js/sdk";
 import { applyChanges } from "./applyChanges.js";
 import { detectChanges } from "./detectChanges.js";
-export { createDocDiff } from "./diffing/create-doc-diff.js";
-export type { DiffNode, DiffState } from "./diffing/create-doc-diff.js";
+
+export { lixProsemirror } from "./prosemirror/lix-plugin.js";
+export { idPlugin } from "./prosemirror/id-plugin.js";
 
 export const plugin: LixPlugin = {
 	key: "plugin_prosemirror",
@@ -11,4 +12,3 @@ export const plugin: LixPlugin = {
 	applyChanges,
 };
 
-// Export the main functions for easier consumption by the UI

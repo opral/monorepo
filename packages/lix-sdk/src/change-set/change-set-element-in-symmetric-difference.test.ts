@@ -17,8 +17,8 @@ test("should return the symmetric difference between two change sets", async () 
 	const lix = await openLixInMemory({});
 
 	// Insert test data
-	const changeSetA: ChangeSet = { id: "changeSetA" };
-	const changeSetB: ChangeSet = { id: "changeSetB" };
+	const changeSetB: ChangeSet = { id: "changeSetB", immutable_elements: false };
+	const changeSetA: ChangeSet = { id: "changeSetA", immutable_elements: false };
 
 	await lix.db
 		.insertInto("change_set")
@@ -28,10 +28,30 @@ test("should return the symmetric difference between two change sets", async () 
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
-			mockChange({ id: "change1", entity_id: "e1", schema_key: "s1", file_id: "f1" }),
-			mockChange({ id: "change2", entity_id: "e2", schema_key: "s2", file_id: "f2" }),
-			mockChange({ id: "change3", entity_id: "e3", schema_key: "s3", file_id: "f3" }),
-			mockChange({ id: "change4", entity_id: "e4", schema_key: "s4", file_id: "f4" }),
+			mockChange({
+				id: "change1",
+				entity_id: "e1",
+				schema_key: "s1",
+				file_id: "f1",
+			}),
+			mockChange({
+				id: "change2",
+				entity_id: "e2",
+				schema_key: "s2",
+				file_id: "f2",
+			}),
+			mockChange({
+				id: "change3",
+				entity_id: "e3",
+				schema_key: "s3",
+				file_id: "f3",
+			}),
+			mockChange({
+				id: "change4",
+				entity_id: "e4",
+				schema_key: "s4",
+				file_id: "f4",
+			}),
 		])
 		.returningAll()
 		.execute();
@@ -40,13 +60,29 @@ test("should return the symmetric difference between two change sets", async () 
 
 	// Setup: Create change set elements
 	const changeElementsA: ChangeSetElement[] = [
-		{ change_set_id: "changeSetA", change_id: "change1", ...getEntityChangeFields(changeMap.get("change1")!) },
-		{ change_set_id: "changeSetA", change_id: "change2", ...getEntityChangeFields(changeMap.get("change2")!) },
+		{
+			change_set_id: "changeSetA",
+			change_id: "change1",
+			...getEntityChangeFields(changeMap.get("change1")!),
+		},
+		{
+			change_set_id: "changeSetA",
+			change_id: "change2",
+			...getEntityChangeFields(changeMap.get("change2")!),
+		},
 	];
 
 	const changeElementsB: ChangeSetElement[] = [
-		{ change_set_id: "changeSetB", change_id: "change2", ...getEntityChangeFields(changeMap.get("change2")!) },
-		{ change_set_id: "changeSetB", change_id: "change3", ...getEntityChangeFields(changeMap.get("change3")!) },
+		{
+			change_set_id: "changeSetB",
+			change_id: "change2",
+			...getEntityChangeFields(changeMap.get("change2")!),
+		},
+		{
+			change_set_id: "changeSetB",
+			change_id: "change3",
+			...getEntityChangeFields(changeMap.get("change3")!),
+		},
 	];
 
 	await lix.db
@@ -84,8 +120,8 @@ test("should return an empty array if there are no differences", async () => {
 	const lix = await openLixInMemory({});
 
 	// Insert test data
-	const changeSetA: ChangeSet = { id: "changeSetA" };
-	const changeSetB: ChangeSet = { id: "changeSetB" };
+	const changeSetA: ChangeSet = { id: "changeSetA", immutable_elements: false };
+	const changeSetB: ChangeSet = { id: "changeSetB", immutable_elements: false };
 
 	await lix.db
 		.insertInto("change_set")
@@ -95,10 +131,30 @@ test("should return an empty array if there are no differences", async () => {
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
-			mockChange({ id: "change1", entity_id: "e1", schema_key: "s1", file_id: "f1" }),
-			mockChange({ id: "change2", entity_id: "e2", schema_key: "s2", file_id: "f2" }),
-			mockChange({ id: "change3", entity_id: "e3", schema_key: "s3", file_id: "f3" }),
-			mockChange({ id: "change4", entity_id: "e4", schema_key: "s4", file_id: "f4" }),
+			mockChange({
+				id: "change1",
+				entity_id: "e1",
+				schema_key: "s1",
+				file_id: "f1",
+			}),
+			mockChange({
+				id: "change2",
+				entity_id: "e2",
+				schema_key: "s2",
+				file_id: "f2",
+			}),
+			mockChange({
+				id: "change3",
+				entity_id: "e3",
+				schema_key: "s3",
+				file_id: "f3",
+			}),
+			mockChange({
+				id: "change4",
+				entity_id: "e4",
+				schema_key: "s4",
+				file_id: "f4",
+			}),
 		])
 		.returningAll()
 		.execute();
@@ -106,13 +162,32 @@ test("should return an empty array if there are no differences", async () => {
 	const changeMap = new Map(changes.map((c) => [c.id, c]));
 
 	const sharedChangeElements: ChangeSetElement[] = [
-		{ change_set_id: "changeSetA", change_id: "change1", ...getEntityChangeFields(changeMap.get("change1")!) },
-		{ change_set_id: "changeSetA", change_id: "change2", ...getEntityChangeFields(changeMap.get("change2")!) },
-		{ change_set_id: "changeSetB", change_id: "change1", ...getEntityChangeFields(changeMap.get("change1")!) },
-		{ change_set_id: "changeSetB", change_id: "change2", ...getEntityChangeFields(changeMap.get("change2")!) },
+		{
+			change_set_id: "changeSetA",
+			change_id: "change1",
+			...getEntityChangeFields(changeMap.get("change1")!),
+		},
+		{
+			change_set_id: "changeSetA",
+			change_id: "change2",
+			...getEntityChangeFields(changeMap.get("change2")!),
+		},
+		{
+			change_set_id: "changeSetB",
+			change_id: "change1",
+			...getEntityChangeFields(changeMap.get("change1")!),
+		},
+		{
+			change_set_id: "changeSetB",
+			change_id: "change2",
+			...getEntityChangeFields(changeMap.get("change2")!),
+		},
 	];
 
-	await lix.db.insertInto("change_set_element").values(sharedChangeElements).execute();
+	await lix.db
+		.insertInto("change_set_element")
+		.values(sharedChangeElements)
+		.execute();
 
 	const result = await lix.db
 		.selectFrom("change_set_element")
@@ -127,8 +202,8 @@ test("should handle empty change sets", async () => {
 	const lix = await openLixInMemory({});
 
 	// Insert test data
-	const changeSetA: ChangeSet = { id: "changeSetA" };
-	const changeSetB: ChangeSet = { id: "changeSetB" };
+	const changeSetA: ChangeSet = { id: "changeSetA", immutable_elements: false };
+	const changeSetB: ChangeSet = { id: "changeSetB", immutable_elements: false };
 
 	await lix.db
 		.insertInto("change_set")
@@ -149,8 +224,8 @@ test("should handle disjoint change sets", async () => {
 	const lix = await openLixInMemory({});
 
 	// Insert test data
-	const changeSetA: ChangeSet = { id: "changeSetA" };
-	const changeSetB: ChangeSet = { id: "changeSetB" };
+	const changeSetA: ChangeSet = { id: "changeSetA", immutable_elements: false };
+	const changeSetB: ChangeSet = { id: "changeSetB", immutable_elements: false };
 
 	await lix.db
 		.insertInto("change_set")
@@ -160,10 +235,30 @@ test("should handle disjoint change sets", async () => {
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
-			mockChange({ id: "change1", entity_id: "e1", schema_key: "s1", file_id: "f1" }),
-			mockChange({ id: "change2", entity_id: "e2", schema_key: "s2", file_id: "f2" }),
-			mockChange({ id: "change3", entity_id: "e3", schema_key: "s3", file_id: "f3" }),
-			mockChange({ id: "change4", entity_id: "e4", schema_key: "s4", file_id: "f4" }),
+			mockChange({
+				id: "change1",
+				entity_id: "e1",
+				schema_key: "s1",
+				file_id: "f1",
+			}),
+			mockChange({
+				id: "change2",
+				entity_id: "e2",
+				schema_key: "s2",
+				file_id: "f2",
+			}),
+			mockChange({
+				id: "change3",
+				entity_id: "e3",
+				schema_key: "s3",
+				file_id: "f3",
+			}),
+			mockChange({
+				id: "change4",
+				entity_id: "e4",
+				schema_key: "s4",
+				file_id: "f4",
+			}),
 		])
 		.returningAll()
 		.execute();
@@ -171,12 +266,28 @@ test("should handle disjoint change sets", async () => {
 	const changeMap = new Map(changes.map((c) => [c.id, c]));
 
 	const disjointChangeElementsA: ChangeSetElement[] = [
-		{ change_set_id: "changeSetA", change_id: "change1", ...getEntityChangeFields(changeMap.get("change1")!) },
-		{ change_set_id: "changeSetA", change_id: "change2", ...getEntityChangeFields(changeMap.get("change2")!) },
+		{
+			change_set_id: "changeSetA",
+			change_id: "change1",
+			...getEntityChangeFields(changeMap.get("change1")!),
+		},
+		{
+			change_set_id: "changeSetA",
+			change_id: "change2",
+			...getEntityChangeFields(changeMap.get("change2")!),
+		},
 	];
 	const disjointChangeElementsB: ChangeSetElement[] = [
-		{ change_set_id: "changeSetB", change_id: "change3", ...getEntityChangeFields(changeMap.get("change3")!) },
-		{ change_set_id: "changeSetB", change_id: "change4", ...getEntityChangeFields(changeMap.get("change4")!) },
+		{
+			change_set_id: "changeSetB",
+			change_id: "change3",
+			...getEntityChangeFields(changeMap.get("change3")!),
+		},
+		{
+			change_set_id: "changeSetB",
+			change_id: "change4",
+			...getEntityChangeFields(changeMap.get("change4")!),
+		},
 	];
 
 	await lix.db
@@ -187,7 +298,7 @@ test("should handle disjoint change sets", async () => {
 	// Expected result: Symmetric difference includes all elements as sets are disjoint
 	const expectedResult: ChangeSetElement[] = [
 		...disjointChangeElementsA,
-		...disjointChangeElementsB
+		...disjointChangeElementsB,
 	];
 
 	const result = await lix.db

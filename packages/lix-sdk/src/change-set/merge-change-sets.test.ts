@@ -39,18 +39,33 @@ test("it should merge non-conflicting changes", async () => {
 
 	const cs0 = await createChangeSet({
 		lix,
-		changes: [changes[0]!],
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	const cs1 = await createChangeSet({
 		lix,
-		changes: [changes[1]!],
+		elements: [changes[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	// simulating graph relation
 	const cs2 = await createChangeSet({
 		lix,
-		changes: [changes[2]!],
+		elements: [changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
 	});
 
@@ -67,14 +82,8 @@ test("it should merge non-conflicting changes", async () => {
 		.execute();
 
 	expect(mergedElements).toHaveLength(3);
-	expect(mergedElements).toEqual(
-		changes.map((c) => ({
-			change_set_id: merged.id,
-			change_id: c.id,
-			entity_id: c.entity_id,
-			schema_key: c.schema_key,
-			file_id: c.file_id,
-		}))
+	expect(mergedElements.map((e) => e.change_id).sort()).toEqual(
+		[changes[0]!.id, changes[1]!.id, changes[2]!.id].sort()
 	);
 });
 
@@ -127,23 +136,35 @@ test("should handle conflicting elements with source winning (until conflicts ar
 	// 1. Base change set with initial content
 	const cs_base = await createChangeSet({
 		lix,
-		id: "cs_base",
-		changes: [changes[0]!], // base content for e1
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	// 2. Target branch - modifies e1
 	const cs_target = await createChangeSet({
 		lix,
-		id: "cs_target",
-		changes: [changes[1]!], // target modification for e1
+		elements: [changes[1]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs_base],
 	});
 
 	// 3. Source branch - modifies e1 differently
 	const cs_source = await createChangeSet({
 		lix,
-		id: "cs_source",
-		changes: [changes[2]!], // source modification for e1
+		elements: [changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs_base],
 	});
 

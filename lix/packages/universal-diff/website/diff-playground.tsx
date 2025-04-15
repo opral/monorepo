@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { TabbedContentViewer } from "./tabbed-content-viewer.js";
 import dedent from "dedent";
-import { renderUniversalDiffElement } from "../src/render-universal-diff.js";
+import { renderUniversalDiff } from "../src/render-universal-diff.js";
 
 /**
  * A playground component that allows users to paste in "before" and "after" HTML
@@ -11,13 +11,13 @@ import { renderUniversalDiffElement } from "../src/render-universal-diff.js";
 export function DiffPlayground() {
   // Default examples to help users get started
   const defaultBeforeHtml = dedent`
-  <p data-lix-entity-id="p1">
+  <p data-diff-id="p1">
     Paste your before HTML here
   </p>
 `;
 
   const defaultAfterHtml = dedent`
-  <p data-lix-entity-id="p1">
+  <p data-diff-id="p1">
     Paste your after HTML here to see a diff
   </p>
 `;
@@ -63,13 +63,10 @@ export function DiffPlayground() {
   const [cssCollapsed, setCssCollapsed] = useState(true);
 
   // Generate diff based on current state
-  const diffElement = renderUniversalDiffElement({
+  const diff = renderUniversalDiff({
     beforeHtml,
     afterHtml,
   });
-
-  // Convert the HTMLElement to a string for display
-  const diff = diffElement.outerHTML;
 
   // Apply custom CSS to the diff view
   useEffect(() => {
@@ -123,7 +120,7 @@ export function DiffPlayground() {
       <div className="flex justify-between items-center mb-4">
         <p className="text-gray-600">
           Paste your HTML in the "Before" and "After" editors to see how the
-          diff would look. Make sure to include <code>data-lix-entity-id</code>{" "}
+          diff would look. Make sure to include <code>data-diff-id</code>{" "}
           attributes for elements you want to track.
         </p>
         <button

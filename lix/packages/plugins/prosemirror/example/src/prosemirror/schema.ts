@@ -1,7 +1,7 @@
 import { Node, Schema, DOMOutputSpec } from "prosemirror-model";
 
-// Helper function to add data-lix-entity-id attribute
-function addLixEntityId(node: Node, spec: DOMOutputSpec): DOMOutputSpec {
+// Helper function to add data-diff-id attribute
+function addDiffId(node: Node, spec: DOMOutputSpec): DOMOutputSpec {
   if (node.attrs.id && Array.isArray(spec) && spec.length > 0) {
     const tag = spec[0];
     let attrs: { [key: string]: any } = {};
@@ -19,7 +19,7 @@ function addLixEntityId(node: Node, spec: DOMOutputSpec): DOMOutputSpec {
         }
     }
 
-    attrs['data-lix-entity-id'] = node.attrs.id;
+    attrs["data-diff-id"] = node.attrs.id;
 
     // Reconstruct the spec: tag, attributes object, then the rest of the content
     return [tag, attrs, ...content];
@@ -47,7 +47,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["h1", 0]);
+				return addDiffId(node, ["h1", 0]);
 			},
 		},
 		description: {
@@ -58,7 +58,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["div", { class: "description" }, 0]);
+				return addDiffId(node, ["div", { class: "description" }, 0]);
 			},
 		},
 		inputs: {
@@ -70,7 +70,7 @@ export const schema = new Schema({
 				mode: { default: "inputs" },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["div", { class: "inputs" }, 0]);
+				return addDiffId(node, ["div", { class: "inputs" }, 0]);
 			},
 		},
 		input: {
@@ -86,7 +86,7 @@ export const schema = new Schema({
 				fromTrigger: { default: false },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["div", { class: "input" }, 0]);
+				return addDiffId(node, ["div", { class: "input" }, 0]);
 			},
 		},
 		horizontalRule: {
@@ -95,7 +95,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["hr"]);
+				return addDiffId(node, ["hr"]);
 			},
 		},
 		paragraph: {
@@ -105,7 +105,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["p", 0]);
+				return addDiffId(node, ["p", 0]);
 			},
 		},
 		bulletList: {
@@ -115,7 +115,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["ul", 0]);
+				return addDiffId(node, ["ul", 0]);
 			},
 		},
 		listItem: {
@@ -124,7 +124,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["li", 0]);
+				return addDiffId(node, ["li", 0]);
 			},
 		},
 		mention: {
@@ -139,7 +139,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["span", { class: "mention" }, 0]);
+				return addDiffId(node, ["span", { class: "mention" }, 0]);
 			},
 		},
 		generation: {
@@ -158,7 +158,7 @@ export const schema = new Schema({
 				responseModel: { default: "{}" },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["span", { class: "generation" }, 0]);
+				return addDiffId(node, ["span", { class: "generation" }, 0]);
 			},
 		},
 		tool: {
@@ -173,7 +173,7 @@ export const schema = new Schema({
 				state: { default: null },
 			},
 			toDOM(node) {
-				return addLixEntityId(node, ["div", { class: "tool" }, 0]);
+				return addDiffId(node, ["div", { class: "tool" }, 0]);
 			},
 		},
 		text: {

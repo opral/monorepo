@@ -99,7 +99,7 @@ export default function NewProposal() {
 					{proposedChangeSet && (
 						<ChangeSet
 							ref={changeSetRef}
-							isCurrentChangeSet={false}
+							isWorkingChangeSet={false}
 							alwaysExpand={true}
 							showRestore={false}
 							showUndo={false}

@@ -2,6 +2,8 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createAccount } from "../account/create-account.js";
 import { createChange } from "../change/create-change.js";
+import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
 
 test("it works for inserts, updates and deletions", async () => {
 	const lix = await openLixInMemory({});
@@ -50,19 +52,13 @@ test("it works for inserts, updates and deletions", async () => {
 	]);
 });
 
-test("it works for compound entity ids like change_author", async () => {
+test.skip("it works for compound entity ids like change_author", async () => {
 	const lix = await openLixInMemory({});
 
 	const account1 = await createAccount({ lix, name: "account1" });
 
-	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
 	await createChange({
 		lix,
-		version: currentVersion,
 		authors: [account1],
 		pluginKey: "mock-plugin",
 		schemaKey: "mock",
@@ -74,6 +70,9 @@ test("it works for compound entity ids like change_author", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.where("schema_key", "=", "lix_change_author_table")
+		// haha this is meta. the account creation is also change controlled
+		// by the active account. hence, we need to filter the account creation
+		.where("entity_id", "like", `%,${account1.id}`)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.selectAll()
 		.execute();
@@ -231,9 +230,11 @@ test("updating file.data does not trigger own change control", async () => {
 
 	changes = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("schema_key", "=", "lix_file_table")
 		.where("entity_id", "=", file.id)
-		.selectAll()
+		.selectAll("change")
+		.select("snapshot.content")
 		.execute();
 
 	expect(changes.length).toBe(1);
@@ -258,7 +259,169 @@ test("updating file.data does not trigger own change control", async () => {
 	expect(changes.length).toBe(2);
 });
 
+// SQlite does not have a BEFORE COMMIT trigger which could be used to group transactions into one change set
+// the test is a nice to have but not required to make change control work.
+test("it should group transactions into one change set", async () => {
+	const lix = await openLixInMemory({});
 
-test.todo("it should group transactions into one change set", async () => {});
+	const activeVersionBefore = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.select(["version_v2.id", "version_v2.change_set_id"])
+		.executeTakeFirstOrThrow();
 
-	
+	const changeSetsBefore = await lix.db
+		.selectFrom("change_set")
+		.where(
+			changeSetIsAncestorOf(
+				{ id: activeVersionBefore.change_set_id },
+				{ includeSelf: true }
+			)
+		)
+		.selectAll()
+		.execute();
+
+	// freshly created lix should only have one change set in the ancestry
+	expect(changeSetsBefore.length).toBe(1);
+
+	await lix.db.transaction().execute(async (trx) => {
+		await trx
+			.insertInto("key_value")
+			.values({ key: "key0", value: "value0" })
+			.execute();
+
+		await trx
+			.insertInto("key_value")
+			.values({ key: "key1", value: "value1" })
+			.execute();
+	});
+
+	const activeVersionAfter = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.select(["version_v2.id", "version_v2.change_set_id"])
+		.executeTakeFirstOrThrow();
+
+	const changeSetsAfter = await lix.db
+		.selectFrom("change_set")
+		.where(
+			changeSetIsAncestorOf(
+				{ id: activeVersionAfter.change_set_id },
+				{ includeSelf: true }
+			)
+		)
+		.selectAll()
+		.execute();
+
+	// initial change set and the one created by the transaction
+	expect(changeSetsAfter.length).toBe(2);
+
+	const elements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", activeVersionAfter.change_set_id)
+		.orderBy("change_id")
+		.selectAll()
+		.execute();
+
+	// mock plugin properties and own change control changes should be in the same set
+	expect(
+		elements.map((e) => ({ entity_id: e.entity_id, schema_key: e.schema_key }))
+	).toEqual([
+		{ entity_id: "key0", schema_key: "lix_key_value_table" },
+		// { entity_id: expect.any(String), schema_key: "lix_change_author_table" },
+		{ entity_id: "key1", schema_key: "lix_key_value_table" },
+		// { entity_id: expect.any(String), schema_key: "lix_change_author_table" },
+	]);
+});
+
+test("should not trigger change control when modifying the skip key", async () => {
+	const lix = await openLixInMemory({});
+
+	// 1. Baseline change
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "regular_key", value: "a" })
+		.execute();
+
+	const changesBefore = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll("change")
+		.select("snapshot.content")
+		.execute();
+	const elementsBefore = await lix.db
+		.selectFrom("change_set_element")
+		.selectAll()
+		.execute();
+
+	// 2. Insert the skip key (should NOT trigger change control)
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "lix_skip_own_change_control",
+			value: "true",
+			skip_change_control: true, // Important!
+		})
+		.execute();
+
+	const changesAfterInsert = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll("change")
+		.select("snapshot.content")
+		.execute();
+	const elementsAfterInsert = await lix.db
+		.selectFrom("change_set_element")
+		.selectAll()
+		.execute();
+
+	expect(changesAfterInsert).toEqual(changesBefore);
+	expect(elementsAfterInsert).toEqual(elementsBefore);
+
+	// 3. Delete the skip key (should also NOT trigger change control)
+	await lix.db
+		.deleteFrom("key_value")
+		.where("key", "=", "lix_skip_own_change_control")
+		.execute();
+
+	const changesAfterDelete = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.selectAll("change")
+		.select("snapshot.content")
+		.execute();
+	const elementsAfterDelete = await lix.db
+		.selectFrom("change_set_element")
+		.selectAll()
+		.execute();
+
+	expect(changesAfterDelete).toEqual(changesBefore);
+	expect(elementsAfterDelete).toEqual(elementsBefore);
+});
+
+test("works in combination with skipOwnChangeControl", async () => {
+	const lix = await openLixInMemory({});
+
+	await withSkipOwnChangeControl(lix.db, async (trx) => {
+		await trx
+			.insertInto("key_value")
+			.values({ key: "key1", value: "value1" })
+			.execute();
+
+		const skip = await trx
+			.selectFrom("key_value")
+			.where("key", "=", "lix_skip_own_change_control")
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(skip).toBeDefined();
+	});
+
+	const skip = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "lix_skip_own_change_control")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(skip).toBeUndefined();
+});

@@ -5,6 +5,10 @@ import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import type { VersionV2 } from "../version-v2/database-schema.js";
+import type { LixFile } from "../database/schema.js";
+import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
+import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
+
 /**
  * Applies a change set to the lix.
  */
@@ -12,6 +16,12 @@ export async function applyChangeSet(args: {
 	lix: Lix;
 	changeSet: Pick<ChangeSet, "id">;
 	version?: Pick<VersionV2, "id" | "change_set_id">;
+	/**
+	 * Whether to update the version to point to the new change set.
+	 *
+	 * @default true
+	 */
+	updateVersion?: boolean;
 	/**
 	 * The {@link GraphTraversalMode} for applying the change set.
 	 *
@@ -22,130 +32,152 @@ export async function applyChangeSet(args: {
 	const mode = args.mode ?? { type: "recursive" };
 
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const version =
-			args.version ??
-			(await trx
-				.selectFrom("active_version")
-				.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
-				.selectAll("version_v2")
-				.executeTakeFirstOrThrow());
+		return withSkipFileQueue(trx, async (trx) => {
+			return withSkipOwnChangeControl(trx, async (trx) => {
+				const version =
+					args.version ??
+					(await trx
+						.selectFrom("active_version")
+						.innerJoin(
+							"version_v2",
+							"version_v2.id",
+							"active_version.version_id"
+						)
+						.selectAll("version_v2")
+						.executeTakeFirstOrThrow());
 
-		//* NOTE: the creationd and handling of parent relationships
-		//* depends on the appliance of the change set to the version.
-		//*
-		//* if the version already has changes c1:e1 and the proposed
-		//* change set has changes c1:e1 and c2:e2, the diff is c2:e2.
-		//* only storing the diff as new change set can be a future optimzation.
-		// update the version to point to the new change set
-		await trx
-			.updateTable("version_v2")
-			.set({ change_set_id: args.changeSet.id })
-			.where("id", "=", version.id)
-			.execute();
+				//* NOTE: the creationd and handling of parent relationships
+				//* depends on the appliance of the change set to the version.
+				//*
+				//* if the version already has changes c1:e1 and the proposed
+				//* change set has changes c1:e1 and c2:e2, the diff is c2:e2.
+				//* only storing the diff as new change set can be a future optimzation.
+				// update the version to point to the new change set
+				if (args.updateVersion ?? true) {
+					await trx
+						.updateTable("version_v2")
+						.set({ change_set_id: args.changeSet.id })
+						.where("id", "=", version.id)
+						.execute();
 
-		// add a parent relationship
-		if (version.change_set_id !== args.changeSet.id) {
-			await trx
-				.insertInto("change_set_edge")
-				.values({
-					parent_id: version.change_set_id,
-					child_id: args.changeSet.id,
-				})
-				.onConflict((oc) => oc.doNothing())
-				.execute();
-		}
-
-		// Select changes associated with the specified change set
-		let query = trx
-			.selectFrom("change")
-			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
-				"change.id"
-			);
-
-		if (mode.type === "direct") {
-			// In direct mode, we only want changes directly in this change set
-			query = query.where(
-				"change_set_element.change_set_id",
-				"=",
-				args.changeSet.id
-			);
-		} else {
-			// In recursive mode, we want leaf changes in the ancestry
-			query = query
-				.where(changeSetElementInAncestryOf([args.changeSet]))
-				.where(changeSetElementIsLeafOf([args.changeSet]));
-		}
-
-		const changesResult = await query.selectAll().execute();
-
-		// Group changes by file_id for processing
-		const changesGroupedByFile = Object.groupBy(
-			changesResult,
-			(c) => c.file_id
-		);
-
-		// Plugin changes depend on lix changes like the file
-		// data for example. Therefore, the lix changes need
-		// to be applied first.
-		const lixOwnChanges = changesGroupedByFile["lix_own_change_control"] ?? [];
-
-		const { deletedFileIds } = await applyOwnChanges({
-			lix: { ...args.lix, db: trx },
-			changes: lixOwnChanges,
-		});
-
-		const plugins = await args.lix.plugin.getAll();
-
-		// Iterate over files and apply plugin changes
-		for (const [file_id, changes] of Object.entries(changesGroupedByFile)) {
-			// lix own change control deleted the file
-			// no plugin needs to apply changes
-			if (file_id === "lix_own_change_control" || deletedFileIds.has(file_id)) {
-				continue;
-			}
-			// the file must exist at this point.
-			const file = await trx
-				.selectFrom("file")
-				.where("id", "=", file_id)
-				.selectAll()
-				.executeTakeFirstOrThrow();
-
-			if (file.data.byteLength === 0) {
-				// @ts-expect-error - own change control created this file
-				// it's the plugins job now to apply changes. deleting file.data
-				// to pass an undefined file.data to the plugin
-				delete file.data;
-			}
-
-			const groupByPlugin = Object.groupBy(changes ?? [], (c) => c.plugin_key);
-
-			for (const [pluginKey, changes] of Object.entries(groupByPlugin)) {
-				if (changes === undefined) {
-					continue;
+					// add a parent relationship
+					if (version.change_set_id !== args.changeSet.id) {
+						await trx
+							.insertInto("change_set_edge")
+							.values({
+								parent_id: version.change_set_id,
+								child_id: args.changeSet.id,
+							})
+							.onConflict((oc) => oc.doNothing())
+							.execute();
+					}
 				}
-				const plugin = plugins.find((plugin) => plugin.key === pluginKey);
-				if (!plugin) {
-					throw new Error(`Plugin with key ${pluginKey} not found`);
-				} else if (!plugin.applyChanges) {
-					throw new Error(
-						`Plugin with key ${pluginKey} does not support applying changes`
+
+				// Select changes associated with the specified change set
+				let query = trx
+					.selectFrom("change")
+					.innerJoin(
+						"change_set_element",
+						"change_set_element.change_id",
+						"change.id"
 					);
+
+				if (mode.type === "direct") {
+					// In direct mode, we only want changes directly in this change set
+					query = query.where(
+						"change_set_element.change_set_id",
+						"=",
+						args.changeSet.id
+					);
+				} else {
+					// In recursive mode, we want leaf changes in the ancestry
+					query = query
+						.where(changeSetElementInAncestryOf([args.changeSet]))
+						.where(changeSetElementIsLeafOf([args.changeSet]));
 				}
-				const { fileData } = await plugin.applyChanges({
+
+				const changesResult = await query.selectAll().execute();
+
+				// Group changes by file_id for processing
+				const changesGroupedByFile = Object.groupBy(
+					changesResult,
+					(c) => c.file_id
+				);
+
+				// Plugin changes depend on lix changes like the file
+				// data for example. Therefore, the lix changes need
+				// to be applied first.
+				const lixOwnChanges =
+					changesGroupedByFile["lix_own_change_control"] ?? [];
+
+				const ownChangeControl = await applyOwnChanges({
 					lix: { ...args.lix, db: trx },
-					changes,
-					file,
+					changes: lixOwnChanges,
 				});
 
-				await trx
-					.updateTable("file")
-					.set({ data: fileData })
-					.where("id", "=", file_id)
-					.execute();
-			}
-		}
+				const plugins = await args.lix.plugin.getAll();
+
+				// Iterate over files and apply plugin changes
+				for (const [file_id, changes] of Object.entries(changesGroupedByFile)) {
+					// lix own change control deleted the file
+					// no plugin needs to apply changes
+					if (
+						file_id === "lix_own_change_control" ||
+						ownChangeControl.deletedFileIds.has(file_id)
+					) {
+						continue;
+					}
+
+					let file: Omit<LixFile, "data"> & { data?: Uint8Array };
+
+					if (ownChangeControl.insertedFiles.has(file_id)) {
+						file = ownChangeControl.insertedFiles.get(file_id)!;
+					} else {
+						// the file must exist given that it is not inserted nor deleted
+						file = await trx
+							.selectFrom("file")
+							.where("id", "=", file_id)
+							.selectAll()
+							.executeTakeFirstOrThrow();
+					}
+
+					const groupByPlugin = Object.groupBy(
+						changes ?? [],
+						(c) => c.plugin_key
+					);
+
+					for (const [pluginKey, changes] of Object.entries(groupByPlugin)) {
+						if (changes === undefined) {
+							continue;
+						}
+						const plugin = plugins.find((plugin) => plugin.key === pluginKey);
+						if (!plugin) {
+							throw new Error(`Plugin with key ${pluginKey} not found`);
+						} else if (!plugin.applyChanges) {
+							throw new Error(
+								`Plugin with key ${pluginKey} does not support applying changes`
+							);
+						}
+						const { fileData } = await plugin.applyChanges({
+							lix: { ...args.lix, db: trx },
+							changes,
+							file,
+						});
+
+						const resultingFile = {
+							...file,
+							data: fileData,
+						};
+
+						await trx
+							.insertInto("file")
+							.values(resultingFile)
+							.onConflict((oc) => oc.doUpdateSet(resultingFile))
+							.execute();
+					}
+				}
+			});
+		});
 	};
 
 	if (args.lix.db.isTransaction) {

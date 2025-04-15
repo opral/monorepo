@@ -3,6 +3,7 @@ import type { ChangeSet } from "./database-schema.js";
 import { createChangeSet } from "./create-change-set.js";
 import { changeSetIsDescendantOf } from "../query-filter/change-set-is-descendant-of.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import type { Change, Label, NewChange } from "../database/schema.js";
 
 /**
  * Creates a "reverse" change set that undoes the changes made by the specified change set.
@@ -25,6 +26,7 @@ import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of
 export async function createUndoChangeSet(args: {
 	lix: Lix;
 	changeSet: Pick<ChangeSet, "id">;
+	labels?: Pick<Label, "id">[];
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Get all changes in the target change set
@@ -46,13 +48,11 @@ export async function createUndoChangeSet(args: {
 			.selectAll("change")
 			.execute();
 
-		const undoChanges: Array<{
-			entity_id: string;
-			file_id: string;
-			plugin_key: string;
-			schema_key: string;
-			snapshot_id: string;
-		}> = [];
+		// Define the shape of data we will insert. Exclude DB-generated columns.
+		// Assuming Change type includes all columns. Adjust if needed.
+
+		const newUndoChanges: Array<NewChange> = [];
+		const ancestorChanges: Array<Change> = [];
 
 		for (const change of targetChanges) {
 			const descendantChange = await trx
@@ -89,42 +89,42 @@ export async function createUndoChangeSet(args: {
 				.where("change_set_element.file_id", "=", change.file_id)
 				.where("change_set_element.schema_key", "=", change.schema_key)
 				.where("change.id", "!=", change.id)
-				.selectAll("change")
+				.selectAll("change") // Select all columns needed for ChangeInsertData
 				.executeTakeFirst();
 
 			if (ancestorChange === undefined) {
-				// the entity needs to be deleted, as it has been created by the target change set
-				undoChanges.push({
+				// Create a 'deletion' change object
+				newUndoChanges.push({
 					entity_id: change.entity_id,
 					file_id: change.file_id,
 					plugin_key: change.plugin_key,
 					schema_key: change.schema_key,
-					snapshot_id: "no-content",
+					snapshot_id: "no-content", // Mark as deletion/no content
 				});
 			} else {
-				undoChanges.push(ancestorChange);
+				ancestorChanges.push(ancestorChange);
 			}
 		}
 
-		// if (undoChanges.length === 0) {
-		// 	return;
-		// }
-
-		const changes = await trx
-			.insertInto("change")
-			.values(undoChanges)
-			// if the change is an ancestor change and already exists, do nothing
-			.onConflict((oc) =>
-				// need to update something to make the on conflict return the change
-				oc.doUpdateSet((eb) => ({ id: eb.ref("excluded.id") }))
-			)
-			.returningAll()
-			.execute();
+		const undoChanges =
+			newUndoChanges.length > 0
+				? await trx
+						.insertInto("change")
+						.values(newUndoChanges)
+						.returningAll()
+						.execute()
+				: [];
 
 		// Create the change set linking to these changes
 		const undoChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			changes,
+			labels: args.labels,
+			elements: [...ancestorChanges, ...undoChanges].map((change) => ({
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})),
 		});
 
 		return undoChangeSet;

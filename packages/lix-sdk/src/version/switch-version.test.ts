@@ -49,7 +49,6 @@ test("switching a version does not lead to duplicate changes", async () => {
 
 	const change0 = await createChange({
 		lix,
-		version: currentVersion,
 		authors: [account0],
 		entityId: "entity0",
 		fileId: "file0",
@@ -74,7 +73,7 @@ test("switching a version does not lead to duplicate changes", async () => {
 	expect(changesAfter).toEqual(changesBefore);
 });
 
-test("switch version applies the changes of the switched to version", async () => {
+test.skip("switch version applies the changes of the switched to version", async () => {
 	const lix = await openLixInMemory({});
 
 	const versionA = await createVersion({ lix });

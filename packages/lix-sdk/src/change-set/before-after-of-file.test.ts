@@ -47,7 +47,7 @@ test("gives the before and after state without altering the current state", asyn
 
 	const checkpoints = [];
 
-	for (const [index, update] of updates.entries()) {
+	for (const update of updates) {
 		// Update file with the current state
 		await lix.db
 			.updateTable("file")
@@ -61,7 +61,7 @@ test("gives the before and after state without altering the current state", asyn
 		await fileQueueSettled({ lix });
 
 		// Create checkpoint for the current state
-		const checkpoint = await createCheckpoint({ id: `cs${index}`, lix });
+		const checkpoint = await createCheckpoint({ lix });
 		checkpoints.push(checkpoint);
 	}
 
@@ -84,6 +84,22 @@ test("gives the before and after state without altering the current state", asyn
 
 	// Verify the original state matches the latest update
 	expect(originalState).toEqual(updates[2]);
+
+	const activeVersionBefore = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	const versionsBeforeDiffing = await lix.db
+		.selectFrom("version_v2")
+		.selectAll()
+		.execute();
+
+	const changeSetsBeforeDiffing = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
 
 	// Test case 1: Compare cs0 and cs1
 	const result1 = await beforeAfterOfFile({
@@ -137,9 +153,33 @@ test("gives the before and after state without altering the current state", asyn
 	// Verify file properties are preserved
 	expect(currentFile.id).toBe(originalFile.id);
 	expect(currentFile.path).toBe(originalFile.path);
+
+	const activeVersionAfter = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
+	expect(activeVersionAfter).toEqual(activeVersionBefore);
+
+	const versionsAfterDiffing = await lix.db
+		.selectFrom("version_v2")
+		.selectAll()
+		.execute();
+
+	// Verify that no new versions were created
+	expect(versionsAfterDiffing.length).toBe(versionsBeforeDiffing.length);
+
+	const changeSetsAfterDiffing = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
+	// Verify that no new change sets were created
+	expect(changeSetsAfterDiffing.length).toBe(changeSetsBeforeDiffing.length);
 });
 
-test("returns an empty file object for before state when it doesn't exist", async () => {
+test("returns before: undefined when the file has no before state", async () => {
 	// Create a Lix instance with the mock JSON plugin
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
@@ -147,7 +187,7 @@ test("returns an empty file object for before state when it doesn't exist", asyn
 
 	// Create two checkpoints
 	// First checkpoint (cs0) - file doesn't exist yet
-	const cs0 = await createCheckpoint({ id: "cs0", lix });
+	const cs0 = await createCheckpoint({ lix });
 
 	// Create a file
 	const file = await lix.db
@@ -164,7 +204,7 @@ test("returns an empty file object for before state when it doesn't exist", asyn
 	await fileQueueSettled({ lix });
 
 	// Second checkpoint (cs1) - file exists with content
-	const cs1 = await createCheckpoint({ id: "cs1", lix });
+	const cs1 = await createCheckpoint({ lix });
 
 	// Test the beforeAfterOfFile function
 	const result = await beforeAfterOfFile({
@@ -182,7 +222,7 @@ test("returns an empty file object for before state when it doesn't exist", asyn
 	expect(afterState).toEqual({ key: "value" });
 });
 
-test("returns undefined for after state when file is deleted", async () => {
+test("returns after: undefined when the file has no after state", async () => {
 	// Create a Lix instance with the mock JSON plugin
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
@@ -203,7 +243,7 @@ test("returns undefined for after state when file is deleted", async () => {
 	await fileQueueSettled({ lix });
 
 	// First checkpoint (cs0) - file exists
-	const cs0 = await createCheckpoint({ id: "cs0", lix });
+	const cs0 = await createCheckpoint({ lix });
 
 	// Delete the file
 	await lix.db.deleteFrom("file").where("id", "=", file.id).execute();
@@ -212,7 +252,7 @@ test("returns undefined for after state when file is deleted", async () => {
 	await fileQueueSettled({ lix });
 
 	// Second checkpoint (cs1) - file is deleted
-	const cs1 = await createCheckpoint({ id: "cs1", lix });
+	const cs1 = await createCheckpoint({ lix });
 
 	// Test the beforeAfterOfFile function
 	const result = await beforeAfterOfFile({

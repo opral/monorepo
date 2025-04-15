@@ -64,7 +64,12 @@ test("it creates an undo change set that reverses the operations of the original
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		changes: changes,
+		elements: changes.map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	await applyChangeSet({
@@ -172,7 +177,12 @@ test("it correctly undoes delete operations by restoring previous state", async 
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		changes: initialChanges,
+		elements: initialChanges.map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	await applyChangeSet({
@@ -199,7 +209,12 @@ test("it correctly undoes delete operations by restoring previous state", async 
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
-		changes: deleteChanges,
+		elements: deleteChanges.map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
 

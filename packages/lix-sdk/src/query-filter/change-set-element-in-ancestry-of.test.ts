@@ -29,20 +29,32 @@ test("returns all elements from a single change set and its ancestors", async ()
 	// cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({
 		lix,
-		id: "cs0",
-		changes: [changes[0]!],
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 	const cs1 = await createChangeSet({
 		lix,
-		id: "cs1",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
-		changes: [changes[0]!],
 	});
 	const cs2 = await createChangeSet({
 		lix,
-		id: "cs2",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
-		changes: [changes[0]!],
 	});
 
 	const elements = await lix.db
@@ -81,20 +93,32 @@ test("respects depth limit when provided for a single target", async () => {
 	// cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({
 		lix,
-		id: "cs0",
-		changes: [changes[0]!],
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 	const cs1 = await createChangeSet({
 		lix,
-		id: "cs1",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
-		changes: [changes[0]!],
 	});
 	const cs2 = await createChangeSet({
 		lix,
-		id: "cs2",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
-		changes: [changes[0]!],
 	});
 
 	const elements = await lix.db
@@ -133,30 +157,54 @@ test("returns combined elements from multiple divergent change set ancestries", 
 	// cs0 <- cs1 <- cs2
 	//    \
 	//     <- cs3 <- cs4
-	const cs0 = await createChangeSet({ lix, id: "cs0", changes: [changes[0]!] });
+	const cs0 = await createChangeSet({
+		lix,
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
+	});
 	const cs1 = await createChangeSet({
 		lix,
-		id: "cs1",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
-		changes: [changes[0]!],
 	});
 	const cs2 = await createChangeSet({
 		lix,
-		id: "cs2",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
-		changes: [changes[0]!],
 	}); // Branch 1 leaf
 	const cs3 = await createChangeSet({
 		lix,
-		id: "cs3",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
-		changes: [changes[0]!],
 	});
 	const cs4 = await createChangeSet({
 		lix,
-		id: "cs4",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs3],
-		changes: [changes[0]!],
 	}); // Branch 2 leaf
 
 	const elements = await lix.db
@@ -196,30 +244,54 @@ test("respects depth limit with multiple divergent targets", async () => {
 	// cs0 <- cs1 <- cs2
 	//    \
 	//     <- cs3 <- cs4
-	const cs0 = await createChangeSet({ lix, id: "cs0", changes: [changes[0]!] });
+	const cs0 = await createChangeSet({
+		lix,
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
+	});
 	const cs1 = await createChangeSet({
 		lix,
-		id: "cs1",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
-		changes: [changes[0]!],
 	});
 	const cs2 = await createChangeSet({
 		lix,
-		id: "cs2",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
-		changes: [changes[0]!],
 	}); // Branch 1 leaf
 	const cs3 = await createChangeSet({
 		lix,
-		id: "cs3",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
-		changes: [changes[0]!],
 	});
 	const cs4 = await createChangeSet({
 		lix,
-		id: "cs4",
+		elements: [changes[0]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs3],
-		changes: [changes[0]!],
 	}); // Branch 2 leaf
 
 	const elements = await lix.db

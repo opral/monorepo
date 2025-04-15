@@ -1,7 +1,7 @@
 import { Plugin, PluginKey, Transaction } from "prosemirror-state";
-import { schema } from "./schema";
 import { EditorView } from "prosemirror-view";
-import { executeSync, Lix } from "@lix-js/sdk";
+import { Schema } from "prosemirror-model";
+import { executeSync, type Lix } from "@lix-js/sdk";
 
 // Create a plugin key for the Lix plugin
 export const lixPluginKey = new PluginKey("lix-plugin");
@@ -9,6 +9,7 @@ export const lixPluginKey = new PluginKey("lix-plugin");
 interface LixPluginOptions {
 	lix: Lix;
 	fileId: string;
+	schema: Schema;
 	debounceTime?: number;
 }
 
@@ -127,7 +128,7 @@ export function lixProsemirror(options: LixPluginOptions) {
 			const tr = view.state.tr;
 
 			// Create a new document from JSON
-			const newDoc = schema.nodeFromJSON(externalDoc);
+			const newDoc = options.schema.nodeFromJSON(externalDoc);
 
 			// Replace the current document
 			tr.replaceWith(0, view.state.doc.content.size, newDoc.content);

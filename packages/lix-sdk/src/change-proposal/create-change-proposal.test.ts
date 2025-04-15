@@ -41,20 +41,30 @@ test("creating a change proposal should compute the symmetric difference", async
 	// Create source change set with changes 1 and 2
 	const sourceChangeSet = await createChangeSet({
 		lix: lix,
-		changes: [mockChanges[0]!, mockChanges[1]!],
+		elements: mockChanges.slice(0, 2).map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	// Create target change set with changes 2 and 3
 	const targetChangeSet = await createChangeSet({
 		lix: lix,
-		changes: [mockChanges[1]!, mockChanges[2]!],
+		elements: mockChanges.slice(1, 3).map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	// Create a change proposal
 	const proposal = await createChangeProposal({
 		lix: lix,
-		source_change_set: sourceChangeSet,
-		target_change_set: targetChangeSet,
+		sourceChangeSet: sourceChangeSet,
+		targetChangeSet: targetChangeSet,
 	});
 
 	// Verify the change proposal was created with the correct data

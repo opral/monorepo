@@ -25,16 +25,10 @@ export async function mergeChangeSets(args: {
 	target: Pick<ChangeSet, "id">;
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// Create the new merge change set record
-		const newChangeSet = await createChangeSet({
-			lix: { db: trx },
-			parents: [args.source, args.target],
-		});
-
 		// Create edges from source and target parents to the new merge change set
 
 		// --- Calculate the merged elements using "source wins" logic ---
-		const mergedElementsToInsert = await trx
+		const mergedElements = await trx
 			.with("SourceLeaves", (db) =>
 				db
 					.selectFrom("change_set_element")
@@ -83,22 +77,17 @@ export async function mergeChangeSets(args: {
 			) // End UNION
 			.execute();
 
-		// --- Insert the final calculated elements into the merge change set ---
-		if (mergedElementsToInsert.length > 0) {
-			await trx
-				.insertInto("change_set_element")
-				.values(
-					mergedElementsToInsert.map((ce) => ({
-						// Kysely correctly infers types from the CTEs union result
-						change_set_id: newChangeSet.id, // Assign to the new merge change set
-						change_id: ce.change_id,
-						entity_id: ce.entity_id,
-						schema_key: ce.schema_key,
-						file_id: ce.file_id,
-					}))
-				)
-				.execute();
-		}
+		// Create the new merge change set record
+		const newChangeSet = await createChangeSet({
+			lix: { ...args.lix, db: trx },
+			elements: mergedElements.map((ce) => ({
+				change_id: ce.change_id,
+				entity_id: ce.entity_id,
+				schema_key: ce.schema_key,
+				file_id: ce.file_id,
+			})),
+			parents: [args.source, args.target],
+		});
 
 		return newChangeSet;
 	};

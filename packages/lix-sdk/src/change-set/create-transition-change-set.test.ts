@@ -1,6 +1,5 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { experimentalRestoreChangeSet } from "./restore-change-set.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
@@ -151,20 +150,35 @@ test.todo("it restores the state to a specific change set", async () => {
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		changes: [changes[0]!, changes[1]!, changes[2]!],
+		elements: [changes[0]!, changes[1]!, changes[2]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
-		changes: [changes[3]!],
+		elements: [changes[3]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs0],
 	});
 
 	const cs2 = await createChangeSet({
 		lix,
 		id: "cs2",
-		changes: [changes[4]!, changes[5]!],
+		elements: [changes[4]!, changes[5]!].map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 		parents: [cs1],
 	});
 
@@ -220,11 +234,11 @@ test.todo("it restores the state to a specific change set", async () => {
 	expect(actualJsonStateCs2).toEqual(expectedJsonStateCs2);
 
 	// Action: Restore to cs0
-	await experimentalRestoreChangeSet({
-		lix,
-		changeSet: cs0,
-		version: activeVersion,
-	});
+	// await experimentalCreateRestoreChangeSet({
+	// 	lix,
+	// 	changeSet: cs0,
+	// 	version: activeVersion,
+	// });
 
 	// Verify final state
 	// 1. Check that versions change set parent is cs2

@@ -57,18 +57,33 @@ export default function Graph() {
     try {
       const result = await lix.db
         .selectFrom("change_set")
-
         .$if(selectedLabels.length > 0, (eb) =>
           eb
-            .innerJoin(
+            .leftJoin(
               "change_set_label",
               "change_set_label.change_set_id",
               "change_set.id"
             )
-            .where(
-              "change_set_label.label_id",
-              "in",
-              availableLabels?.map((l) => l.id) ?? []
+            .$if(true, (qb) =>
+              qb.where((eb) =>
+                eb.or([
+                  eb(
+                    "change_set_label.label_id",
+                    "in",
+                    availableLabels?.map((l) => l.id) ?? []
+                  ),
+                  eb.exists(
+                    eb
+                      .selectFrom("version_v2")
+                      .whereRef(
+                        "version_v2.working_change_set_id",
+                        "=",
+                        "change_set.id"
+                      )
+                      .select("version_v2.id")
+                  ),
+                ])
+              )
             )
         )
         .select((eb) => [
@@ -184,6 +199,14 @@ export default function Graph() {
       if ((changeSets || []).some((cs) => cs.id === v.change_set_id)) {
         g.setEdge(v.change_set_id, versionNodeId);
       }
+      // Add edge for working change set if it exists and is different from the main change set
+      if (
+        v.working_change_set_id &&
+        v.working_change_set_id !== v.change_set_id &&
+        (changeSets || []).some((cs) => cs.id === v.working_change_set_id)
+      ) {
+        g.setEdge(v.working_change_set_id, versionNodeId);
+      }
     }
 
     // Calculate the layout
@@ -218,6 +241,11 @@ export default function Graph() {
           tableName: label,
           entity: entity,
           originalId: originalId,
+          title: (versions || []).some(
+            (v) => v.working_change_set_id === nodeId
+          )
+            ? "working change set"
+            : "change set",
         },
         style: {
           border: "1px solid #ccc",
@@ -254,7 +282,22 @@ export default function Graph() {
           source: v.change_set_id,
           target: versionNodeId,
           markerStart: { type: MarkerType.Arrow },
-          type: "smoothstep", // Use smoothstep for curved edges
+          type: "smoothstep",
+          animated: false,
+        });
+      }
+      // Add edge for working change set if it exists and is different from the main change set
+      if (
+        v.working_change_set_id &&
+        v.working_change_set_id !== v.change_set_id &&
+        (changeSets || []).some((cs) => cs.id === v.working_change_set_id)
+      ) {
+        allEdges.push({
+          id: `ve_working_${v.id}_${v.working_change_set_id}`,
+          source: v.working_change_set_id,
+          target: versionNodeId,
+          markerStart: { type: MarkerType.Arrow },
+          type: "smoothstep",
           animated: false,
         });
       }

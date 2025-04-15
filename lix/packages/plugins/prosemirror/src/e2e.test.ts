@@ -1,8 +1,13 @@
-import { it, expect } from "vitest";
-import { openLixInMemory, fileQueueSettled } from "@lix-js/sdk";
+import { expect, test } from "vitest";
+import {
+	openLixInMemory,
+	fileQueueSettled,
+	// beforeAfterOfFile,
+} from "@lix-js/sdk";
 import { plugin } from "./index.js";
+// import fs from "node:fs/promises";
 
-it("detects changes when inserting a prosemirror document", async () => {
+test("detects changes when inserting a prosemirror document", async () => {
 	// Initialize Lix with the ProseMirror plugin
 	const lix = await openLixInMemory({
 		providePlugins: [plugin],
@@ -100,3 +105,55 @@ it("detects changes when inserting a prosemirror document", async () => {
 		expect(content.content?.[0]?.text).toBe("New paragraph");
 	}
 });
+
+// test.each(["../example/assets/before.json", "../example/assets/after.json"])(
+// 	"beforeAfterOfFile() reconstructs the same file %s",
+// 	async (filepath) => {
+// 		const lix = await openLixInMemory({
+// 			providePlugins: [plugin],
+// 		});
+
+// 		const exampleFile = await fs.readFile(
+// 			new URL(filepath, import.meta.url).pathname,
+// 		);
+
+// 		const exampleParsed = JSON.parse(new TextDecoder().decode(exampleFile));
+
+// 		const versionBefore = await lix.db
+// 			.selectFrom("active_version")
+// 			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+// 			.selectAll("version_v2")
+// 			.executeTakeFirstOrThrow();
+
+// 		const file = await lix.db
+// 			.insertInto("file")
+// 			.values({
+// 				id: "mock-file-id",
+// 				path: "/prosemirror.json",
+// 				data: exampleFile,
+// 			})
+// 			.returningAll()
+// 			.executeTakeFirstOrThrow();
+
+// 		await fileQueueSettled({ lix });
+
+// 		const versionAfter = await lix.db
+// 			.selectFrom("active_version")
+// 			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+// 			.selectAll("version_v2")
+// 			.executeTakeFirstOrThrow();
+
+// 		const { after } = await beforeAfterOfFile({
+// 			lix,
+// 			file,
+// 			changeSetBefore: { id: versionBefore.change_set_id },
+// 			changeSetAfter: { id: versionAfter.change_set_id },
+// 		});
+
+// 		const reconstructedParsed = JSON.parse(
+// 			new TextDecoder().decode(after?.data),
+// 		);
+
+// 		expect(reconstructedParsed).toEqual(exampleParsed);
+// 	},
+// );

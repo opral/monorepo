@@ -1,13 +1,20 @@
 import { test, expect } from "vitest";
-import { renderUniversalDiffElement } from "./render-universal-diff.js";
-import { testCases } from "./test-cases.js"; // Import the shared cases
+import { renderUniversalDiff } from "./render-universal-diff.js";
+import { testCases } from "./test-cases.js";
+
+function normalizeHtml(html: string): string {
+  return html
+    .replace(/>\s+</g, "><")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 
 test.each(testCases)(
-  "$name", // Use the name property for the test description
+  "$name",
   ({ name, beforeHtml, afterHtml, expectedHtml }) => {
-    // Destructure the test case object, include name for potential debugging
-    const resultElement = renderUniversalDiffElement({ beforeHtml, afterHtml });
-    expect(resultElement.outerHTML, `Test failed: ${name}`).toBe(expectedHtml);
+    const result = renderUniversalDiff({ beforeHtml, afterHtml });
+    expect(normalizeHtml(result), `Test failed: ${name}`).toBe(
+      normalizeHtml(expectedHtml),
+    );
   },
 );
-

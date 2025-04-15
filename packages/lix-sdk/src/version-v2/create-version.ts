@@ -1,3 +1,4 @@
+import { createChangeSet } from "../change-set/create-change-set.js";
 import type { ChangeSet } from "../change-set/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { VersionV2 } from "./database-schema.js";
@@ -11,18 +12,23 @@ import type { VersionV2 } from "./database-schema.js";
  *   const version = await createVersionV2({ lix, changeSet: otherVersion.change_set_id });
  */
 export async function createVersionV2(args: {
-	lix: Pick<Lix, "db">;
+	lix: Lix;
 	id?: VersionV2["id"];
 	changeSet: Pick<ChangeSet, "id">;
 	name?: VersionV2["name"];
 }): Promise<VersionV2> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
+		const workingCs = await createChangeSet({
+			lix: { ...args.lix, db: trx },
+			immutableElements: false,
+		});
 		const newVersion = await trx
 			.insertInto("version_v2")
 			.values({
 				id: args.id,
 				name: args.name,
 				change_set_id: args.changeSet.id,
+				working_change_set_id: workingCs.id,
 			})
 			.returningAll()
 			.executeTakeFirstOrThrow();
