@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
-import { beforeAfterOfFile } from "./before-after-of-file.js";
+import { getBeforeAfterOfFile } from "./get-before-after-of-file.js";
 
 test("gives the before and after state without altering the current state", async () => {
 	// Create a Lix instance with the mock JSON plugin
@@ -102,7 +102,7 @@ test("gives the before and after state without altering the current state", asyn
 		.execute();
 
 	// Test case 1: Compare cs0 and cs1
-	const result1 = await beforeAfterOfFile({
+	const result1 = await getBeforeAfterOfFile({
 		lix,
 		changeSetBefore: cs0!,
 		changeSetAfter: cs1!,
@@ -120,7 +120,7 @@ test("gives the before and after state without altering the current state", asyn
 	expect(afterState1).toEqual(updates[1]);
 
 	// Test case 3: Compare cs0 and cs2 (skipping cs1)
-	const result3 = await beforeAfterOfFile({
+	const result3 = await getBeforeAfterOfFile({
 		lix,
 		changeSetBefore: cs0!,
 		changeSetAfter: cs2!,
@@ -207,7 +207,7 @@ test("returns before: undefined when the file has no before state", async () => 
 	const cs1 = await createCheckpoint({ lix });
 
 	// Test the beforeAfterOfFile function
-	const result = await beforeAfterOfFile({
+	const result = await getBeforeAfterOfFile({
 		lix,
 		changeSetBefore: cs0!,
 		changeSetAfter: cs1!,
@@ -255,7 +255,7 @@ test("returns after: undefined when the file has no after state", async () => {
 	const cs1 = await createCheckpoint({ lix });
 
 	// Test the beforeAfterOfFile function
-	const result = await beforeAfterOfFile({
+	const result = await getBeforeAfterOfFile({
 		lix,
 		changeSetBefore: cs0!,
 		changeSetAfter: cs1!,

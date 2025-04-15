@@ -11,4 +11,3 @@ export const plugin: LixPlugin = {
 	detectChanges,
 	applyChanges,
 };
-

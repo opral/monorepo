@@ -5,6 +5,9 @@ import type { Version, VersionChange } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { versionChangeInSymmetricDifference } from "../query-filter/version-change-in-symmetric-difference.js";
 
+/**
+ * @deprecated Use `createMergeChangeSet()` instead.
+ */
 export async function mergeVersion(args: {
 	lix: Lix;
 	sourceVersion: Version;

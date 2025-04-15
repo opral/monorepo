@@ -6,6 +6,8 @@ import type { Lix } from "../lix/open-lix.js";
  *
  * If `from` is provided, the new version will be identical to the from version.
  *
+ * @deprecated Use `createVersionV2()` instead.
+ *
  * @example
  *   _Without from_
  *

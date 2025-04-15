@@ -55,7 +55,7 @@ test("should only return changes with the given label", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.where(changeHasLabel("mocked"))
+		.where(changeHasLabel({ name: "mocked" }))
 		.selectAll()
 		.execute();
 
