@@ -214,6 +214,7 @@ test("initially sets the locale after resolving it for the first time", async ()
 	globalThis.window = {
 		// @ts-expect-error - global variable definition
 		location: {
+			hostname: "example.com",
 			href: "https://example.com/de/page",
 		},
 	};
@@ -227,7 +228,7 @@ test("initially sets the locale after resolving it for the first time", async ()
 	expect(runtime.getLocale()).toBe("de");
 	// Cookie should be set, proving that the locale was initially set
 	expect(globalThis.document.cookie).toBe(
-		"PARAGLIDE_LOCALE=de; path=/; max-age=34560000"
+		"PARAGLIDE_LOCALE=de; path=/; max-age=34560000; domain=example.com"
 	);
 	expect(globalThis.window.location.href).toBe("https://example.com/de/page");
 });

@@ -11,6 +11,7 @@ export function createRuntimeFile(args: {
 		strategy: NonNullable<CompilerOptions["strategy"]>;
 		cookieName: NonNullable<CompilerOptions["cookieName"]>;
 		cookieMaxAge: NonNullable<CompilerOptions["cookieMaxAge"]>;
+		cookieDomain: CompilerOptions["cookieDomain"];
 		urlPatterns?: CompilerOptions["urlPatterns"];
 		experimentalMiddlewareLocaleSplitting: CompilerOptions["experimentalMiddlewareLocaleSplitting"];
 		isServer: CompilerOptions["isServer"];
@@ -63,6 +64,7 @@ ${injectCode("./variables.js")
 	)
 	.replace(`<cookie-name>`, `${args.compilerOptions.cookieName}`)
 	.replace(`60 * 60 * 24 * 400`, `${args.compilerOptions.cookieMaxAge}`)
+	.replace(`<cookie-domain>`, `${args.compilerOptions.cookieDomain}`)
 	.replace(
 		`export const TREE_SHAKE_COOKIE_STRATEGY_USED = false;`,
 		`const TREE_SHAKE_COOKIE_STRATEGY_USED = ${args.compilerOptions.strategy.includes("cookie")};`

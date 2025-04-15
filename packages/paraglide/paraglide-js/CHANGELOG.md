@@ -1,5 +1,32 @@
 # @inlang/paraglide-js
 
+## 2.0.11
+
+### Patch Changes
+
+- de0439f: Add domain property to cookie options.
+
+  ```diff
+  paraglideVitePlugin({
+    project: './project.inlang',
+    outdir: "./src/paraglide",
+  + cookieDomain: 'example.com'
+  }),
+  ```
+
+## 2.0.10
+
+### Patch Changes
+
+- d16e853: fix: [2.0.8] Adds extra \*/ in generated .js files https://github.com/opral/inlang-paraglide-js/issues/493
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [bd2c366]
+  - @inlang/sdk@2.4.7
+
 ## 2.0.8
 
 ### Patch Changes
