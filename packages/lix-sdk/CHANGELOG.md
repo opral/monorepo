@@ -1,5 +1,11 @@
 # @lix-js/sdk
 
+## 0.4.6
+
+### Patch Changes
+
+- f634538: lower sampling in telemetry event to reduce amounts of events
+
 ## 0.4.5
 
 ### Patch Changes

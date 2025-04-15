@@ -8,7 +8,7 @@
 
 > **changeSetHasLabel**(`name`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-set-has-label.ts:25](https://github.com/opral/monorepo/blob/e56b872498d48e57574f781e8cd2e240c1f6f0b2/packages/lix-sdk/src/query-filter/change-set-has-label.ts#L25)
+Defined in: [packages/lix-sdk/src/query-filter/change-set-has-label.ts:25](https://github.com/opral/monorepo/blob/9e4a0ed87313931bc006fc9fc84146a53943e93c/packages/lix-sdk/src/query-filter/change-set-has-label.ts#L25)
 
 Selects change sets that have a label with the given name.
 
@@ -20,7 +20,7 @@ Selects change sets that have a label with the given name.
 
 ## Returns
 
-`Function`
+> (`eb`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
 
 ### Parameters
 

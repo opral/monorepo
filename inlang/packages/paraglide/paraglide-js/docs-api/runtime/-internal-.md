@@ -10,7 +10,7 @@ Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/mai
 
 > **ParaglideAsyncLocalStorage**\<\>: `object`
 
-Defined in: [runtime/variables.js:51](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ### Type Parameters
 
@@ -90,7 +90,7 @@ Defined in: [runtime/variables.js:22](https://github.com/opral/monorepo/tree/mai
 
 > `const` **disableAsyncLocalStorage**: `false` = `false`
 
-Defined in: [runtime/variables.js:64](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:67](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -98,7 +98,7 @@ Defined in: [runtime/variables.js:64](https://github.com/opral/monorepo/tree/mai
 
 > `const` **experimentalMiddlewareLocaleSplitting**: `false` = `false`
 
-Defined in: [runtime/variables.js:66](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:69](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -106,7 +106,7 @@ Defined in: [runtime/variables.js:66](https://github.com/opral/monorepo/tree/mai
 
 > `const` **isServer**: `boolean`
 
-Defined in: [runtime/variables.js:68](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:71](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -132,7 +132,7 @@ if (locales.includes(userSelectedLocale) === false) {
 
 > **serverAsyncLocalStorage**: `undefined` \| [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage) = `undefined`
 
-Defined in: [runtime/variables.js:62](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:65](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Server side async local storage that is set by `serverMiddleware()`.
 
@@ -145,7 +145,7 @@ rendering context without effecting other requests.
 
 > `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"` \| `"preferredLanguage"` \| `"localStorage"`)[]
 
-Defined in: [runtime/variables.js:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 ***
 
@@ -153,7 +153,7 @@ Defined in: [runtime/variables.js:33](https://github.com/opral/monorepo/tree/mai
 
 > `const` **urlPatterns**: `object`[] = `[]`
 
-Defined in: [runtime/variables.js:40](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:43](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 The used URL patterns.
 
@@ -693,7 +693,7 @@ define how the URL origin is resolved.
 
 > **overwriteServerAsyncLocalStorage**(`value`): `void`
 
-Defined in: [runtime/variables.js:80](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
+Defined in: [runtime/variables.js:83](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
 Sets the server side async local storage.
 
@@ -718,7 +718,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:120](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:128](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -750,7 +750,7 @@ overwriteSetLocale((newLocale) => {
 
 > **setLocale**(`newLocale`, `options`?): `void`
 
-Defined in: [runtime/set-locale.js:31](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Set the locale.
 
