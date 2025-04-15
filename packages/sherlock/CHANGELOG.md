@@ -1,5 +1,14 @@
 # inlang-vs-code-extension
 
+## 2.0.14
+
+### Patch Changes
+
+- 0dbca1e: Sherlock v2 bugfixes & improvements
+- 1ae3e60: bugfixes & small improvements
+- Updated dependencies [0dbca1e]
+  - @inlang/editor-component@4.0.8
+
 ## 2.0.13
 
 ### Patch Changes
