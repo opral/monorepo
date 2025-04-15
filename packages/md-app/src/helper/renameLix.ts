@@ -1,14 +1,6 @@
 import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "./saveLixToOpfs";
 
-// Helper function to ensure a lix has a name
-export async function ensureLixName({ lix }: { lix: Lix }): Promise<string> {
-	// Use "Untitled" as default name
-	const defaultName = "Untitled";
-	await saveLixName({ lix, newName: defaultName });
-	return defaultName;
-}
-
 // Helper function to save a lix name
 export async function saveLixName({
 	lix,

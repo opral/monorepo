@@ -305,7 +305,6 @@ export const isSyncingAtom = atom(async (get) => {
 export const currentLixNameAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
-	if (!lix) return "Untitled";
 
 	// Get the current Lix ID for finding its file
 	const lixId = await lix.db
@@ -320,10 +319,10 @@ export const currentLixNameAtom = atom(async (get) => {
 		const lixFile = await findLixFileInOpfs(lixId.value);
 
 		// If found, return its name, otherwise fall back to the ID
-		return lixFile ? lixFile.name : lixId.value || "Untitled";
+		return lixFile ? lixFile.name : lixId.value;
 	} catch (error) {
 		console.error("Error getting current Lix name:", error);
-		return lixId.value || "Untitled";
+		return lixId.value;
 	}
 });
 

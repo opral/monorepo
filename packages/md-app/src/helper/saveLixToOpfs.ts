@@ -4,6 +4,34 @@ import { getDefaultStore } from "jotai";
 import { withPollingAtom } from "@/state";
 import { findLixFilesInOpfs, cleanupLixFilesInOpfs } from "./findLixInOpfs";
 
+/**
+ * Finds a unique "Untitled" name by adding sequential numbers like "Untitled (1)" when needed
+ */
+async function findUniqueUntitledName(): Promise<string> {
+	const rootHandle = await getOriginPrivateDirectory();
+	const existingNames = new Set<string>();
+	
+	// Collect all existing .lix file names
+	for await (const [name, handle] of rootHandle) {
+		if (handle.kind === "file" && name.endsWith(".lix")) {
+			existingNames.add(name.replace(/\.lix$/, ""));
+		}
+	}
+	
+	// If "Untitled" doesn't exist, use it
+	if (!existingNames.has("Untitled")) {
+		return "Untitled";
+	}
+	
+	// Otherwise find the first available "Untitled (n)"
+	let counter = 1;
+	while (existingNames.has(`Untitled (${counter})`)) {
+		counter++;
+	}
+	
+	return `Untitled (${counter})`;
+}
+
 export async function saveLixToOpfs(args: {
 	lix: Lix;
 	customFileName?: string;
@@ -21,13 +49,18 @@ export async function saveLixToOpfs(args: {
 	const existingFiles = await findLixFilesInOpfs(lixId.value);
 	
 	// Determine the filename to use
-	// If a custom filename is provided, use it
-	// Otherwise, use the first existing file's name, or "Untitled" as a fallback
-	const fileName = args.customFileName 
-		? `${args.customFileName}.lix` 
-		: existingFiles.length > 0 
-			? `${existingFiles[0].name}.lix` 
-			: "Untitled.lix";
+	let fileName: string;
+	if (args.customFileName) {
+		// If a custom filename is provided, use it
+		fileName = `${args.customFileName}.lix`;
+	} else if (existingFiles.length > 0) {
+		// If this Lix already has files, use the existing name
+		fileName = `${existingFiles[0].name}.lix`;
+	} else {
+		// For new Lix files, find a unique "Untitled" name
+		const uniqueName = await findUniqueUntitledName();
+		fileName = `${uniqueName}.lix`;
+	}
 			
 	const baseName = fileName.replace(/\.lix$/, "");
 

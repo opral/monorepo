@@ -74,7 +74,7 @@ export function LixSidebar() {
   const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] = React.useState(false)
   const [inlineEditingFile, setInlineEditingFile] = React.useState<{ id: string, name: string } | null>(null)
   const [isRenamingLix, setIsRenamingLix] = React.useState(false)
-  const [lixName, setLixName] = React.useState('Untitled')
+  const [lixName, setLixName] = React.useState(currentLixName)
   const [previousLixName, setPreviousLixName] = React.useState('')
   const inlineInputRef = React.useRef<HTMLInputElement>(null)
   const lixInputRef = React.useRef<HTMLInputElement>(null)
