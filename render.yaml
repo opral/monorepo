@@ -21,10 +21,6 @@ services:
     runtime: static
     branch: main
     staticPublishPath: ./packages/lix-website/dist
-    routes: 
-      - type: rewrite
-        source: /*
-        destination: /index.html
     envVars:
       - fromGroup: production
       - key: PORT

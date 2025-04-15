@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prepare-routes.js",
     "preview": "vite preview",
     "serve-static": "node serve-static.js",
     "serve": "npx serve dist -s",
