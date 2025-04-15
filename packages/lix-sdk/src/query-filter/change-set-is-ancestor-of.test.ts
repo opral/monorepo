@@ -32,9 +32,7 @@ test("selects all ancestors of the current change set", async () => {
 		.select("id")
 		.execute();
 
-	expect(results.map((r) => r.id).sort()).toEqual(
-		[cs0.id, cs1.id].sort()
-	);
+	expect(results.map((r) => r.id).sort()).toEqual([cs0.id, cs1.id].sort());
 });
 
 test("respects the optional depth limit", async () => {
@@ -101,4 +99,4 @@ test("includeSelf true selects the current change set as well", async () => {
 	expect(results.map((r) => r.id).sort()).toEqual(
 		[cs0.id, cs1.id, cs2.id].sort()
 	);
-})
+});

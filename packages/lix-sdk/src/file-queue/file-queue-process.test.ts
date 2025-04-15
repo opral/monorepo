@@ -483,14 +483,16 @@ test("file queue should not deadlock when handlers throw errors", async () => {
 		key: "success-plugin",
 		detectChangesGlob: "*.success.txt", // Only process success files
 		detectChanges: async () => {
-			return [{
-				schema: {
-					key: "text",
-					type: "json",
+			return [
+				{
+					schema: {
+						key: "text",
+						type: "json",
+					},
+					entity_id: "success-test",
+					snapshot: { text: "success" },
 				},
-				entity_id: "success-test",
-				snapshot: { text: "success" },
-			}];
+			];
 		},
 	};
 
@@ -500,31 +502,41 @@ test("file queue should not deadlock when handlers throw errors", async () => {
 	});
 
 	const enc = new TextEncoder();
-	
+
 	// Insert a file that will trigger the error
 	await lix.db
 		.insertInto("file")
-		.values({ id: "error-test", path: "/test.error.txt", data: enc.encode("error test") })
+		.values({
+			id: "error-test",
+			path: "/test.error.txt",
+			data: enc.encode("error test"),
+		})
 		.execute();
 
 	// Verify the queue entry was created
-	const queueBefore = await lix.db.selectFrom("file_queue").selectAll().execute();
+	const queueBefore = await lix.db
+		.selectFrom("file_queue")
+		.selectAll()
+		.execute();
 	expect(queueBefore.length).toBeGreaterThan(0);
 
 	// Wait for the queue to settle
 	await fileQueueSettled({ lix });
 
 	// The queue should be empty despite the error
-	const queueAfter = await lix.db.selectFrom("file_queue").selectAll().execute();
+	const queueAfter = await lix.db
+		.selectFrom("file_queue")
+		.selectAll()
+		.execute();
 	expect(queueAfter.length).toBe(0);
 
 	// Insert a file that should process successfully
 	await lix.db
 		.insertInto("file")
-		.values({ 
-			id: "success-test", 
-			path: "/test.success.txt", 
-			data: enc.encode("success test") 
+		.values({
+			id: "success-test",
+			path: "/test.success.txt",
+			data: enc.encode("success test"),
 		})
 		.execute();
 
@@ -532,7 +544,10 @@ test("file queue should not deadlock when handlers throw errors", async () => {
 	await fileQueueSettled({ lix });
 
 	// The queue should still be empty
-	const queueFinal = await lix.db.selectFrom("file_queue").selectAll().execute();
+	const queueFinal = await lix.db
+		.selectFrom("file_queue")
+		.selectAll()
+		.execute();
 	expect(queueFinal.length).toBe(0);
 
 	// Verify a change was created for the success file
@@ -541,7 +556,7 @@ test("file queue should not deadlock when handlers throw errors", async () => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("entity_id", "=", "success-test")
 		.select("snapshot.content")
-		.execute();	
+		.execute();
 
 	expect(changes.length).toBe(1);
 });

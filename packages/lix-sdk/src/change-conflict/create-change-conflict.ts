@@ -83,7 +83,9 @@ export async function createChangeConflict(args: {
 			.select(["id", "entity_id", "schema_key", "file_id"])
 			.execute();
 
-		const conflictingChangeMap = new Map(conflictingChanges.map((c) => [c.id, c]));
+		const conflictingChangeMap = new Map(
+			conflictingChanges.map((c) => [c.id, c])
+		);
 
 		await trx
 			.insertInto("change_set_element")

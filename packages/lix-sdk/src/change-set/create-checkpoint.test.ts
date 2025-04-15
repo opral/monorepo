@@ -51,7 +51,7 @@ test("creates a checkpoint that has an edge to the version's change set", async 
 	expect(labels.map((l) => l.name)).toContain("checkpoint");
 });
 
-// this is a potential future optimization of being able to disregard 
+// this is a potential future optimization of being able to disregard
 // change sets between two checkpoints once every client (reasonably) synced
 test.skip("creates a checkpoint with edges to both the version's change set AND the previous checkpoint", async () => {
 	// Create a Lix instance with the mockJsonPlugin

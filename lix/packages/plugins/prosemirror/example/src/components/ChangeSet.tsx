@@ -12,7 +12,6 @@ import {
 import {
 	applyChangeSet,
 	createUndoChangeSet,
-	experimentalRestoreChangeSet,
 	type ChangeSet as ChangeSetType,
 } from "@lix-js/sdk";
 import { useQuery } from "../hooks/useQuery";
@@ -173,22 +172,17 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 								</span>
 							</div>
 							<div className="flex items-center gap-1">
-								{showRestore && (
+								{/* {showRestore && (
 									<div className="tooltip" data-tip="Restore">
 										<button
 											className="btn btn-sm btn-ghost"
-											onClick={async () => {
-												await experimentalRestoreChangeSet({
-													lix,
-													changeSet,
-												});
-											}}
+											onClick={async () => {}}
 											title="Restore to this change set"
 										>
 											<History size={16} />
 										</button>
 									</div>
-								)}
+								)} */}
 
 								{showUndo && (
 									<div className="tooltip" data-tip="Undo">

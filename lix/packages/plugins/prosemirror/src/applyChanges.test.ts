@@ -421,7 +421,6 @@ test("it correctly applies changes to text with marks", async () => {
 	);
 });
 
-
 // Test handling of mixed content with headings, code blocks, and other elements
 test("it correctly applies changes to mixed content", async () => {
 	// Initial document with various elements

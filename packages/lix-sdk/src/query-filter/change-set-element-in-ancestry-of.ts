@@ -42,7 +42,7 @@ export function changeSetElementInAncestryOf(
 		sql<SqlBool>`
 			change_set_element.change_set_id IN (
 				WITH RECURSIVE ancestors(id, depth) AS (
-					SELECT id, 0 AS depth FROM change_set WHERE id IN (${sql.join(targetIds.map(id => sql.lit(id)))})
+					SELECT id, 0 AS depth FROM change_set WHERE id IN (${sql.join(targetIds.map((id) => sql.lit(id)))})
 					UNION ALL
 					SELECT change_set_edge.parent_id, ancestors.depth + 1
 					FROM change_set_edge

@@ -99,9 +99,9 @@ export type ChangeSetElementUpdate = Updateable<ChangeSetElementTable>;
 export type ChangeSetElementTable = {
 	change_set_id: string;
 	change_id: string;
-  entity_id: string;
-  schema_key: string;
-  file_id: string;
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
 };
 
 export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;

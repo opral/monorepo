@@ -20,12 +20,12 @@ import type { ChangeSet } from "../change-set/database-schema.js";
  *
  * ⚠️ This filter only defines the traversal scope — it does not filter changes directly.
  *
- * --- Options --- 
+ * --- Options ---
  * - `includeSelf`: If `true`, includes the starting `changeSet` in the results. Defaults to `false`.
- * - `depth`: Limits the traversal depth. `depth: 1` selects only immediate children (if exclusive) 
+ * - `depth`: Limits the traversal depth. `depth: 1` selects only immediate children (if exclusive)
  *   or the starting node and its immediate children (if includeSelf is true).
  *
- * --- Examples --- 
+ * --- Examples ---
  *
  * @example Selecting strict descendants (default)
  * ```ts

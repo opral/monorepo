@@ -50,7 +50,9 @@ export async function switchVersionV2(args: {
 					.values({ key: "lix_skip_update_working_change_set", value: "true" })
 					.execute();
 
-				console.log(`Switching from Version ID: ${activeVersion.id} to Target Version ID: ${targetVersion.id}`);
+				console.log(
+					`Switching from Version ID: ${activeVersion.id} to Target Version ID: ${targetVersion.id}`
+				);
 
 				const transitionChangeSet = await createTransitionChangeSet({
 					lix: { ...args.lix, db: trx },
@@ -66,15 +68,22 @@ export async function switchVersionV2(args: {
 				});
 
 				// Update the active version pointer MANUALLY
-				console.log(`Updating active_version.version_id to: ${targetVersion.id}`);
+				console.log(
+					`Updating active_version.version_id to: ${targetVersion.id}`
+				);
 				await trx
 					.updateTable("active_version")
 					.set({ version_id: targetVersion.id })
 					.executeTakeFirstOrThrow();
 
 				// Check for foreign key violations before committing
-				const fkErrorsAfterUpdate = await sql`PRAGMA foreign_key_check`.execute(trx);
-				if (Array.isArray(fkErrorsAfterUpdate.rows) && fkErrorsAfterUpdate.rows.length > 0) {
+				const fkErrorsAfterUpdate = await sql`PRAGMA foreign_key_check`.execute(
+					trx
+				);
+				if (
+					Array.isArray(fkErrorsAfterUpdate.rows) &&
+					fkErrorsAfterUpdate.rows.length > 0
+				) {
 					console.error(
 						"FOREIGN KEY VIOLATIONS DETECTED (after active_version update):",
 						fkErrorsAfterUpdate.rows

@@ -365,7 +365,6 @@ test("applying own entity changes doesn't lead to the creation of new changes wh
 	expect(changesBefore).toEqual(changesAfter);
 });
 
-
 test("does not double report changes", async () => {
 	const lix = await openLixInMemory({});
 
