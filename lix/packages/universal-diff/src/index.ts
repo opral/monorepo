@@ -1,1 +1,1 @@
-export { renderUniversalDiffElement } from "./render-universal-diff.js";
+export { renderUniversalDiff } from "./render-universal-diff.js";

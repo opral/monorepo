@@ -2,10 +2,10 @@ import { expect, test } from "vitest";
 import {
 	openLixInMemory,
 	fileQueueSettled,
-	beforeAfterOfFile,
+	// beforeAfterOfFile,
 } from "@lix-js/sdk";
 import { plugin } from "./index.js";
-import fs from "node:fs/promises";
+// import fs from "node:fs/promises";
 
 test("detects changes when inserting a prosemirror document", async () => {
 	// Initialize Lix with the ProseMirror plugin

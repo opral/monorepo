@@ -38,6 +38,7 @@ export default function Proposals() {
 								changeSet={{
 									id: proposal.change_set_id,
 									change_count: proposal.change_count,
+									immutable_elements: false,
 								}}
 								showRestore={false}
 								showUndo={false}

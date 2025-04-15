@@ -5,7 +5,7 @@ import {
 	EraserIcon,
 	Eye,
 	EyeOff,
-	History,
+	// History,
 	Clock,
 	ChevronRight,
 } from "lucide-react";
@@ -43,7 +43,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			isWorkingChangeSet = false,
 			previousChangeSetId,
 			alwaysExpand = false,
-			showRestore = true,
+			// showRestore = true,
 			showUndo = true,
 			footer,
 		},
