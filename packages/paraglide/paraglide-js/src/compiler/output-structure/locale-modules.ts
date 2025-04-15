@@ -47,7 +47,7 @@ export function generateOutput(
 					file += `\nexport { ${bundleModuleId} } from "./${fallbackLocale}.js"`;
 				} else {
 					// no fallback exists, render the bundleId
-					file += `\n/** @type {(inputs: ${inputsType(inputs)}) => string} */ */\nexport const ${bundleModuleId} = () => '${bundleId}'`;
+					file += `\n/** @type {(inputs: ${inputsType(inputs)}) => string} */\nexport const ${bundleModuleId} = () => '${bundleId}'`;
 				}
 				continue;
 			}

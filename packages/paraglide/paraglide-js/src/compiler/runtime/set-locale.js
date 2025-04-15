@@ -3,6 +3,7 @@ import { localizeUrl } from "./localize-url.js";
 import {
 	cookieMaxAge,
 	cookieName,
+	cookieDomain,
 	isServer,
 	localStorageKey,
 	strategy,
@@ -52,11 +53,18 @@ export let setLocale = (newLocale, options) => {
 			// is likely overwritten by `defineSetLocale()`
 			_locale = newLocale;
 		} else if (TREE_SHAKE_COOKIE_STRATEGY_USED && strat === "cookie") {
-			if (isServer || typeof document === "undefined") {
+			if (
+				isServer ||
+				typeof document === "undefined" ||
+				typeof window === "undefined"
+			) {
 				continue;
 			}
+
+			const domain = cookieDomain || window.location.hostname;
+
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}`;
+			document.cookie = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}; domain=${domain}`;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;

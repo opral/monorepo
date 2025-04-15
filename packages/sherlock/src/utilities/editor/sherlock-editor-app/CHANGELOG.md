@@ -1,5 +1,19 @@
 # sherlock-editor-app
 
+## 0.0.14
+
+### Patch Changes
+
+- 0dbca1e: Sherlock v2 bugfixes & improvements
+- Updated dependencies [0dbca1e]
+  - @inlang/editor-component@4.0.8
+
+## 0.0.13
+
+### Patch Changes
+
+- @inlang/editor-component@4.0.7
+
 ## 0.0.12
 
 ### Patch Changes
