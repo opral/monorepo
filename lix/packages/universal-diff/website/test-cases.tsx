@@ -59,7 +59,7 @@ function TestCaseCard(props: { testCase: TestCase }) {
             onContentChange={setBeforeHtml}
             editable={true}
             showTitle={true}
-            defaultTab="code"
+            defaultTab="rendered"
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -69,19 +69,17 @@ function TestCaseCard(props: { testCase: TestCase }) {
             onContentChange={setAfterHtml}
             editable={true}
             showTitle={true}
-            defaultTab="code"
+            defaultTab="rendered"
           />
         </div>
       </div>
 
-      <div className="mt-4">
-        <TabbedContentViewer
-          title="Rendered Diff"
-          htmlContent={diff}
-          showTitle={true}
-          defaultTab="rendered"
-        />
-      </div>
+      <TabbedContentViewer
+        title="Rendered Diff"
+        htmlContent={diff}
+        showTitle={true}
+        defaultTab="rendered"
+      />
     </div>
   );
 }
