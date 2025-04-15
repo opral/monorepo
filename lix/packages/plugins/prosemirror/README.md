@@ -2,6 +2,8 @@
 
 This package enables change control for [ProseMirror](https://prosemirror.net/) documents using the Lix SDK.
 
+An example can be found in the [example](./example) directory.
+
 ## Installation
 
 ```bash
