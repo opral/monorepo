@@ -217,12 +217,21 @@ export async function getRecommendationViewHtml(args: {
 		</html>`
 }
 
+let recommendationBannerProvider: vscode.Disposable | undefined
+
 export async function recommendationBannerView(args: {
 	context: vscode.ExtensionContext
 	workspaceFolder: vscode.WorkspaceFolder
 	fs: FileSystem
 }) {
-	return vscode.window.registerWebviewViewProvider(
+	// Check if the provider is already registered
+	if (recommendationBannerProvider) {
+		console.log("Disposing existing Webview View provider for 'recommendationBanner'")
+		recommendationBannerProvider.dispose()
+	}
+
+	// Register the Webview View provider
+	recommendationBannerProvider = vscode.window.registerWebviewViewProvider(
 		"recommendationBanner",
 		createRecommendationView({
 			fs: args.fs,

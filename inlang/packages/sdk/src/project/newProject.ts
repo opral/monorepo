@@ -25,7 +25,9 @@ export async function newProject(args?: {
 
 		const lix = await openLixInMemory({
 			blob: await newLixFile(),
-			keyValues: [{ key: "lix_telemetry", value: args?.settings?.telemetry ?? "on" }],
+			keyValues: [
+				{ key: "lix_telemetry", value: args?.settings?.telemetry ?? "on" },
+			],
 		});
 
 		const { value: lixId } = await lix.db

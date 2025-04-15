@@ -135,7 +135,7 @@ async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {
 			.executeTakeFirstOrThrow();
 
 		const fileExtensions = await usedFileExtensions(args.db);
-		if (Math.random() > 0.5) {
+		if (Math.random() > 0.1) {
 			await capture("LIX-SDK lix opened", {
 				accountId: activeAccount.id,
 				lixId: lixId.value,

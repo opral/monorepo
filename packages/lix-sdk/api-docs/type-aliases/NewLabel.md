@@ -8,4 +8,4 @@
 
 > **NewLabel** = `Insertable`\<`LabelTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:183](https://github.com/opral/monorepo/blob/e56b872498d48e57574f781e8cd2e240c1f6f0b2/packages/lix-sdk/src/database/schema.ts#L183)
+Defined in: [packages/lix-sdk/src/database/schema.ts:183](https://github.com/opral/monorepo/blob/9e4a0ed87313931bc006fc9fc84146a53943e93c/packages/lix-sdk/src/database/schema.ts#L183)
