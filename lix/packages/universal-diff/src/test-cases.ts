@@ -29,7 +29,10 @@ export const testCases: TestCase[] = [
       <p data-diff-id="ksu4">Hello World</p>
     `,
     expectedHtml: dedent`
-      <p data-diff-id="ksu4">Hello<span style="background-color: lightgreen;"> World</span></p>
+      <div>
+        <p data-diff-id="ksu4" style="color: red; text-decoration: none; outline: none;" contenteditable="false">Hello</p>
+        <p data-diff-id="ksu4" style="color: green; text-decoration: none; outline: none;">Hello World</p>
+      </div>
     `,
   },
   {
@@ -54,7 +57,10 @@ export const testCases: TestCase[] = [
       <p data-diff-id="rem">Remove </p>
     `,
     expectedHtml: dedent`
-      <p data-diff-id="rem">Remove <span style="background-color: lightcoral; text-decoration: line-through;">This</span></p>
+      <div>
+        <p data-diff-id="rem" style="color: red; text-decoration: none; outline: none;" contenteditable="false">Remove This</p>
+        <p data-diff-id="rem" style="color: green; text-decoration: none; outline: none;">Remove </p>
+      </div>
     `,
   },
   {
@@ -74,7 +80,7 @@ export const testCases: TestCase[] = [
     expectedHtml: dedent`
       <div>
         <p data-diff-id="p1">Para 1</p>
-        <p data-diff-id="p2">New Para</p>
+        <p data-diff-id="p2" style="color: green; text-decoration: none; outline: none;">New Para</p>
       </div>
     `,
   },
@@ -88,12 +94,10 @@ export const testCases: TestCase[] = [
       <span data-diff-id="complex">New text there</span>
     `,
     expectedHtml: dedent`
-      <span data-diff-id="complex">
-        <span style="background-color: lightcoral; text-decoration: line-through;">Old</span>
-        <span style="background-color: lightgreen;">New</span> text 
-        <span style="background-color: lightcoral; text-decoration: line-through;">here</span>
-        <span style="background-color: lightgreen;">there</span>
-      </span>
+      <div>
+        <span data-diff-id="complex" style="color: red; text-decoration: none; outline: none;" contenteditable="false">Old text here</span>
+        <span data-diff-id="complex" style="color: green; text-decoration: none; outline: none;">New text there</span>
+      </div>
     `,
   },
 ];
