@@ -420,4 +420,5 @@ export async function setupDirectMessageWatcher(args: {
 		console.error("Error setting up direct message watcher:", error)
 		handleError(error)
 	}
+
 }

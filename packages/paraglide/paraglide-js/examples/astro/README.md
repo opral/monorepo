@@ -51,7 +51,7 @@ export default defineConfig({
 ### 3. Create or add the paraglide js server middleware to the `src/middleware.ts` file:
 
 ```diff
-import { paraglideMiddleware } from "./paralide/server.js";
+import { paraglideMiddleware } from "./paraglide/server.js";
 
 export const onRequest = defineMiddleware((context, next) => {
 +	return paraglideMiddleware(context.request, () => next());
