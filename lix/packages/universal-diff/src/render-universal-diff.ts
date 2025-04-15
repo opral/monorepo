@@ -15,7 +15,7 @@
  *   });
  *
  */
-export function renderUniversalDiffElement(args: {
+function renderUniversalDiffElement(args: {
   beforeHtml: string;
   afterHtml: string;
 }): HTMLElement {
@@ -235,7 +235,19 @@ export function renderUniversalDiffElement(args: {
 }
 
 /**
- * Wrapper function for `renderUniversalDiffElement` that returns the outer HTML string.
+ * Compares two HTML strings (`beforeHtml` and `afterHtml`) and generates an HTMLElement
+ * that visually represents the differences.
+ *
+ * Use this if you want to bypass parsing and DOM creation by
+ * directly working with the DOM elements instead of the HTML string
+ * output of `renderUniversalDiff()`.
+ *
+ * @example
+ *   renderUniversalDiffElement({
+ *     beforeHtml: `<p data-diff-id="abc">Test</p>`,
+ *     afterHtml: `<p data-diff-id="abc">Test World</p>`,
+ *   });
+ *
  */
 export function renderUniversalDiff(args: {
   beforeHtml: string;

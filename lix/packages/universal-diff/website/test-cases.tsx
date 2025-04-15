@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { type TestCase, testCases } from "../src/test-cases.js";
-import { renderUniversalDiffElement } from "../src/render-universal-diff.js";
+import { renderUniversalDiff } from "../src/render-universal-diff.js";
 import { TabbedContentViewer } from "./tabbed-content-viewer.js";
 
 export function TestCases() {
@@ -42,13 +42,10 @@ function TestCaseCard(props: { testCase: TestCase }) {
   const [afterHtml, setAfterHtml] = useState(props.testCase.afterHtml);
 
   // Generate diff based on current state
-  const diffElement = renderUniversalDiffElement({
+  const diff = renderUniversalDiff({
     beforeHtml,
     afterHtml,
   });
-
-  // Convert the HTMLElement to a string for display
-  const diff = diffElement.outerHTML;
 
   return (
     <div>

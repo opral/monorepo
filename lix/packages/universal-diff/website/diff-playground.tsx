@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { TabbedContentViewer } from "./tabbed-content-viewer.js";
 import dedent from "dedent";
-import { renderUniversalDiffElement } from "../src/render-universal-diff.js";
+import { renderUniversalDiff } from "../src/render-universal-diff.js";
 
 /**
  * A playground component that allows users to paste in "before" and "after" HTML
@@ -63,13 +63,10 @@ export function DiffPlayground() {
   const [cssCollapsed, setCssCollapsed] = useState(true);
 
   // Generate diff based on current state
-  const diffElement = renderUniversalDiffElement({
+  const diff = renderUniversalDiff({
     beforeHtml,
     afterHtml,
   });
-
-  // Convert the HTMLElement to a string for display
-  const diff = diffElement.outerHTML;
 
   // Apply custom CSS to the diff view
   useEffect(() => {
