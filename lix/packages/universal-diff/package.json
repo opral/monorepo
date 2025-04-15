@@ -8,7 +8,8 @@
     "tag": "latest"
   },
   "exports": {
-    ".": "./dist/index.js"
+    ".": "./dist/index.js",
+    "./default.css": "./dist/default.css"
   },
   "files": [
     "dist",

@@ -74,12 +74,11 @@ export function renderUniversalDiffElement(args: {
     if (addedIds.has(id)) {
       // Handle Added Element
       if (afterEl instanceof HTMLElement) {
-        // Style with green text color
-        afterEl.style.color = "green";
-        afterEl.style.textDecoration = "none";
-        afterEl.style.outline = "none"; // Ensure no outline
-        afterEl.style.border = "none"; // Ensure no border
-        afterEl.style.backgroundColor = ""; // Ensure no background
+        if (afterEl.hasAttribute("class")) {
+          afterEl.className += " diff-after";
+        } else {
+          afterEl.className = "diff-after";
+        }
       }
     } else if (modifiedIds.has(id)) {
       // Handle Potentially Modified Element
@@ -107,25 +106,24 @@ export function renderUniversalDiffElement(args: {
         // Child structure is the same, but text content differs.
         // Treat as Delete Old + Insert New
         if (afterEl instanceof HTMLElement) {
-          // 1. Style the 'after' element as inserted (green text)
-          afterEl.style.color = "green";
-          afterEl.style.textDecoration = "none";
-          afterEl.style.outline = "none";
-          afterEl.style.border = "none";
-          afterEl.style.backgroundColor = "";
+          // 1. Style the 'after' element as inserted
+          if (afterEl.hasAttribute("class")) {
+            afterEl.className += " diff-after";
+          } else {
+            afterEl.className = "diff-after";
+          }
 
           // 2. Clone the 'before' element
           const beforeClone = beforeEl.cloneNode(true) as HTMLElement;
 
-          // 3. Style the clone as deleted (red text)
-          beforeClone.style.color = "red";
-          beforeClone.style.textDecoration = "none";
-          beforeClone.style.outline = "none"; // Ensure no outline
-          beforeClone.style.border = "none"; // Ensure no border
-          beforeClone.style.backgroundColor = ""; // Ensure no background
+          // 3. Style the clone as deleted
+          if (beforeClone.hasAttribute("class")) {
+            beforeClone.className += " diff-before";
+          } else {
+            beforeClone.className = "diff-before";
+          }
 
           // 4. Disable interactions in the clone
-          beforeClone.setAttribute("contenteditable", "false");
           beforeClone
             .querySelectorAll("button, input, select, textarea, a[href]")
             .forEach((interactiveEl) => {
@@ -187,12 +185,12 @@ export function renderUniversalDiffElement(args: {
 
         // Clone the removed element, style it, and insert
         const clone = beforeEl.cloneNode(true) as HTMLElement;
-        // Style with red text
-        clone.style.color = "red";
-        clone.style.textDecoration = "none";
-        clone.style.outline = "none"; // Ensure no outline
-        clone.style.border = "none"; // Ensure no border
-        clone.style.backgroundColor = ""; // Ensure no background
+        // Style with class
+        if (clone.hasAttribute("class")) {
+          clone.className += " diff-before";
+        } else {
+          clone.className = "diff-before";
+        }
 
         // Ensure contenteditable is false on the clone to prevent interaction
         clone.setAttribute("contenteditable", "false");

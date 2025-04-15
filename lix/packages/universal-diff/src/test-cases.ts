@@ -30,8 +30,8 @@ export const testCases: TestCase[] = [
     `,
     expectedHtml: dedent`
       <div>
-        <p data-diff-id="ksu4" style="color: red; text-decoration: none; outline: none;" contenteditable="false">Hello</p>
-        <p data-diff-id="ksu4" style="color: green; text-decoration: none; outline: none;">Hello World</p>
+        <p data-diff-id="ksu4" class="diff-before">Hello</p>
+        <p data-diff-id="ksu4" class="diff-after">Hello World</p>
       </div>
     `,
   },
@@ -58,8 +58,8 @@ export const testCases: TestCase[] = [
     `,
     expectedHtml: dedent`
       <div>
-        <p data-diff-id="rem" style="color: red; text-decoration: none; outline: none;" contenteditable="false">Remove This</p>
-        <p data-diff-id="rem" style="color: green; text-decoration: none; outline: none;">Remove </p>
+        <p data-diff-id="rem" class="diff-before">Remove This</p>
+        <p data-diff-id="rem" class="diff-after">Remove </p>
       </div>
     `,
   },
@@ -80,7 +80,7 @@ export const testCases: TestCase[] = [
     expectedHtml: dedent`
       <div>
         <p data-diff-id="p1">Para 1</p>
-        <p data-diff-id="p2" style="color: green; text-decoration: none; outline: none;">New Para</p>
+        <p data-diff-id="p2" class="diff-after">New Para</p>
       </div>
     `,
   },
@@ -95,8 +95,23 @@ export const testCases: TestCase[] = [
     `,
     expectedHtml: dedent`
       <div>
-        <span data-diff-id="complex" style="color: red; text-decoration: none; outline: none;" contenteditable="false">Old text here</span>
-        <span data-diff-id="complex" style="color: green; text-decoration: none; outline: none;">New text there</span>
+        <span data-diff-id="complex" class="diff-before">Old text here</span>
+        <span data-diff-id="complex" class="diff-after">New text there</span>
+      </div>
+    `,
+  },
+  {
+    name: "should merge diff classes with existing classes",
+    beforeHtml: dedent`
+      <p data-diff-id="merge" class="foo bar">Old</p>
+    `,
+    afterHtml: dedent`
+      <p data-diff-id="merge" class="foo bar">New</p>
+    `,
+    expectedHtml: dedent`
+      <div>
+        <p data-diff-id="merge" class="foo bar diff-before">Old</p>
+        <p data-diff-id="merge" class="foo bar diff-after">New</p>
       </div>
     `,
   },
