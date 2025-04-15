@@ -1,5 +1,11 @@
 # @inlang/message-bundle-component
 
+## 4.0.8
+
+### Patch Changes
+
+- 0dbca1e: Sherlock v2 bugfixes & improvements
+
 ## 4.0.7
 
 ### Patch Changes
