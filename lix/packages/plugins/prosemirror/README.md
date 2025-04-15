@@ -5,7 +5,7 @@ This package enables change control for [ProseMirror](https://prosemirror.net/) 
 ## Installation
 
 ```bash
-npm install @lix-js/plugin-prosemirror
+npm install @lix-js/sdk @lix-js/plugin-prosemirror 
 ```
 
 ## Getting Started

@@ -1967,14 +1967,13 @@ importers:
         version: 4.5.3(@types/node@22.10.6)(rollup@4.40.0)(typescript@5.8.2)(vite@6.0.11(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.0))
 
   lix/packages/plugins/prosemirror:
-    dependencies:
-      '@lix-js/sdk':
-        specifier: workspace:*
-        version: link:../../../../packages/lix-sdk
     devDependencies:
       '@eslint/js':
         specifier: ^9.12.0
         version: 9.19.0
+      '@lix-js/sdk':
+        specifier: workspace:*
+        version: link:../../../../packages/lix-sdk
       '@opral/tsconfig':
         specifier: workspace:*
         version: link:../../../../packages/tsconfig
@@ -1987,6 +1986,15 @@ importers:
       prettier:
         specifier: ^3.3.3
         version: 3.5.1
+      prosemirror-model:
+        specifier: ^1.19.3
+        version: 1.25.0
+      prosemirror-state:
+        specifier: ^1.4.3
+        version: 1.4.3
+      prosemirror-view:
+        specifier: ^1.31.7
+        version: 1.38.1
       rolldown:
         specifier: 1.0.0-beta.1
         version: 1.0.0-beta.1(@babel/runtime@7.25.7)

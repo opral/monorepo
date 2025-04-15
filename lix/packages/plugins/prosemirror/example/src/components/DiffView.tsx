@@ -4,6 +4,7 @@ import { beforeAfterOfFile } from "@lix-js/sdk";
 import { Node, DOMSerializer } from "prosemirror-model";
 import { schema } from "../prosemirror/schema";
 import { renderUniversalDiff } from "@lix-js/universal-diff";
+import "@lix-js/universal-diff/default.css";
 import { useKeyValue } from "../hooks/useKeyValue";
 
 export function DiffView() {

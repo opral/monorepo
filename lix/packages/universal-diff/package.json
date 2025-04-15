@@ -9,7 +9,7 @@
   },
   "exports": {
     ".": "./dist/index.js",
-    "./default.css": "./dist/default.css"
+    "./default.css": "./src/default.css"
   },
   "files": [
     "dist",
