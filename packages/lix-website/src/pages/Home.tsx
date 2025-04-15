@@ -1,86 +1,13 @@
-import type { MetaFunction } from "@remix-run/node";
+import { Helmet } from 'react-helmet-async';
 import Header, { socialLinks } from "../components/header";
-import Check from "app/components/ui/check";
-import IconArrowExternal from "app/components/icons/arrow-external";
-import Details from "app/components/ui/details";
-import IconLogoTabelle from "app/components/icons/logo-tabelle";
-import IconLogoPapier from "app/components/icons/logo-papier";
-import IconLogoInlang from "app/components/icons/logo-inlang";
-import Footer from "app/components/footer";
-
-export const meta: MetaFunction = () => {
-  const ogImage = [
-    {
-      property: "og:url",
-      content: "https://lix.opral.com",
-    },
-    {
-      property: "og:type",
-      content: "website",
-    },
-    {
-      property: "og:title",
-      content: "Lix - Change Control System",
-    },
-    {
-      property: "og:description",
-      content:
-        "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-    },
-    {
-      property: "og:image",
-      content: "https://lix.opral.com/images/og-image-lix.png",
-    },
-    {
-      property: "og:image:type",
-      content: "image/png",
-    },
-    {
-      property: "og:image:width",
-      content: "1200",
-    },
-    {
-      property: "og:image:height",
-      content: "630",
-    },
-    {
-      name: "twitter:card",
-      content: "Change graph of the lix change control system",
-    },
-    {
-      property: "twitter:url",
-      content: "https://lix.opral.com",
-    },
-    {
-      name: "twitter:title",
-      content: "Lix - Change Control System",
-    },
-    {
-      name: "twitter:description",
-      content:
-        "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-    },
-    {
-      name: "twitter:image:src",
-      content: "https://lix.opral.com/images/og-image-lix.png",
-    },
-  ];
-
-  return [
-    { title: "Lix - Change Control System" },
-    {
-      name: "description",
-      content:
-        "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-    },
-    {
-      name: "keywords",
-      content:
-        "change control, file-based apps, collaboration, automation, change graph",
-    },
-    ...ogImage,
-  ];
-};
+import Check from "../components/ui/check";
+import IconArrowExternal from "../components/icons/arrow-external";
+import Details from "../components/ui/details";
+import IconLogoTabelle from "../components/icons/logo-tabelle";
+import IconLogoPapier from "../components/icons/logo-papier";
+import IconLogoInlang from "../components/icons/logo-inlang";
+import Footer from "../components/footer";
+import { Link } from 'react-router-dom';
 
 const coreFeatures = [
   {
@@ -118,13 +45,13 @@ const enabledByChangeControl = [
 const appsBuiltOnTopOfLix = [
   {
     title: "CSV App",
-    link: "https://lix.opral.com/app/csv",
+    link: "https://lix.host/app/csv",
     icon: <IconLogoTabelle />,
     description: "Get change control in your CSV file editor.",
   },
   {
     title: "Text-Editor",
-    link: "https://opral.substack.com/p/collaborative-markdown-with-lix-change",
+    link: "https://lix.host/app/flashtype",
     icon: <IconLogoPapier />,
     description: "Take notes and collaborate with change control.",
   },
@@ -155,9 +82,30 @@ const faq = [
   },
 ];
 
-export default function Index() {
+export default function HomePage() {
   return (
     <>
+      <Helmet>
+        <title>Lix - Change Control System</title>
+        <meta name="description" content="The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang." />
+        <meta name="keywords" content="change control, file-based apps, collaboration, automation, change graph" />
+        
+        <meta property="og:url" content="https://lix.opral.com" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Lix - Change Control System" />
+        <meta property="og:description" content="The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang." />
+        <meta property="og:image" content="https://lix.opral.com/images/og-image-lix.png" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        
+        <meta name="twitter:card" content="Change graph of the lix change control system" />
+        <meta property="twitter:url" content="https://lix.opral.com" />
+        <meta name="twitter:title" content="Lix - Change Control System" />
+        <meta name="twitter:description" content="The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang." />
+        <meta name="twitter:image:src" content="https://lix.opral.com/images/og-image-lix.png" />
+      </Helmet>
+      
       <Header />
       <main className="w-full max-w-5xl px-4 mx-auto space-y-16 md:space-y-20">
         <div className="grid md:grid-cols-2 justify-center md:justify-start gap-16 md:gap-8 lg:gap-24 mt-12 mb-12">
@@ -191,7 +139,7 @@ export default function Index() {
             </p>
             <div className="flex flex-wrap-reverse items-center gap-2">
               <a
-                href="/app/fm"
+                href="https://lix.host/app/fm"
                 className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
               >
                 Try the demo
@@ -277,7 +225,7 @@ export default function Index() {
             Import files, make changes, and see the change control in action.
           </p>
           <div className="card relative w-full group cursor-pointer">
-            <a href="/file-manager">
+            <Link to="/file-manager">
               <img
                 src="/images/file-manager.svg"
                 alt="Simlified sketch of the lix file manager"
@@ -294,7 +242,7 @@ export default function Index() {
                   </div>
                 </div>
               </div>
-            </a>
+            </Link>
           </div>
         </div>
 

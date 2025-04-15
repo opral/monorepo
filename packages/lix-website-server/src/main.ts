@@ -168,17 +168,6 @@ for (const lixApp of lixApps) {
   });
 }
 
-// Serve static files from client
-app.use(express.static(`${node_modules}/lix-website/build/client`));
-
-// Serve the website server routes
-app.all(
-  "*",
-  // @ts-ignore
-  createRequestHandler({
-    build: require(`${node_modules}/lix-website/build/server`),
-  })
-);
 
 // Start the server
 const port = 3005;

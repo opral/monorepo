@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lix - Change Control System</title>
+    <meta
+      name="description"
+      content="The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang."
+    />
+    <meta
+      name="keywords"
+      content="change control, file-based apps, collaboration, automation, change graph"
+    />
+
+    <!-- Environment variables -->
+    <script type="module">
+      // Runtime environment variables
+      window.__ENV__ = window.__ENV__ || {};
+      // Make environment variables available to the client code
+      window.process = window.process || {};
+      window.process.env = window.process.env || {};
+      window.process.env.PUBLIC_LIX_POSTHOG_TOKEN = "%%PUBLIC_LIX_POSTHOG_TOKEN%%";
+      
+      // Handle base path for proper asset loading
+      document.addEventListener('DOMContentLoaded', function() {
+        // Fix any broken asset paths if needed
+        const fixRelativePaths = () => {
+          const baseUrl = document.baseURI.split('/').slice(0, -1).join('/') + '/';
+          document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            if (link.getAttribute('href').startsWith('/') && !link.getAttribute('href').startsWith('//')) {
+              link.setAttribute('href', baseUrl + link.getAttribute('href').substring(1));
+            }
+          });
+        };
+        fixRelativePaths();
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
