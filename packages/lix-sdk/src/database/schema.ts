@@ -17,6 +17,7 @@ import type {
 	ChangeSetTable,
 } from "../change-set/database-schema.js";
 import type { FileQueueTable } from "../file-queue/database-schema.js";
+import type { ThreadCommentTable, ThreadTable } from "../thread/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -54,6 +55,10 @@ export type LixDatabaseSchema = {
 	// discussion
 	discussion: DiscussionTable;
 	comment: CommentTable;
+
+	// thread
+	thread: ThreadTable;
+	thread_comment: ThreadCommentTable;
 
 	// version
 	/**

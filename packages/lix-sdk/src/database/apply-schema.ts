@@ -10,6 +10,7 @@ import { applyFileQueueDatabaseSchema } from "../file-queue/database-schema.js";
 import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
+import { applyThreadDatabaseSchema } from "../thread/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -20,6 +21,7 @@ export function applySchema(args: {
 }): SqliteWasmDatabase {
 	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
+	applyThreadDatabaseSchema(args.sqlite);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	args.sqlite.exec`
