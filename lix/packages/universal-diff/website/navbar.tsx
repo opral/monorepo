@@ -1,8 +1,8 @@
 import React from "react";
 
 interface NavbarProps {
-  activePage: "home" | "playground" | "testcases";
-  onNavigate: (page: "home" | "playground" | "testcases") => void;
+  activePage: "home" | "playground" | "testcases" | "showcase";
+  onNavigate: (page: "home" | "playground" | "testcases" | "showcase") => void;
 }
 
 export function Navbar({ activePage, onNavigate }: NavbarProps) {
@@ -23,6 +23,20 @@ export function Navbar({ activePage, onNavigate }: NavbarProps) {
         >
           Home
         </a>
+        {/* <a
+          href="#showcase"
+          className={`${
+            activePage === "showcase"
+              ? "font-medium"
+              : "font-normal hover:text-blue-500"
+          }`}
+          onClick={(e) => {
+            e.preventDefault();
+            onNavigate("showcase");
+          }}
+        >
+          Showcase
+        </a> */}
         <a
           href="#playground"
           className={`${

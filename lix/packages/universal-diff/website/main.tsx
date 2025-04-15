@@ -4,18 +4,25 @@ import { TestCases } from "./test-cases.js";
 import { DiffPlayground } from "./diff-playground.js";
 import { Navbar } from "./navbar.js";
 import { ReadmeHome } from "./readme-home.js";
+import { Showcase } from "./showcase/index.js";
 import "./index.css";
 
 function App() {
-  const [activePage] = useState<"home" | "playground" | "testcases">(
+  const [activePage] = useState<
+    "home" | "playground" | "testcases" | "showcase"
+  >(
     window.location.pathname === "/testcases"
       ? "testcases"
       : window.location.pathname === "/playground"
-      ? "playground"
-      : "home"
+        ? "playground"
+        : window.location.pathname === "/showcase"
+          ? "showcase"
+          : "home",
   );
 
-  const handleNavigate = (page: "home" | "playground" | "testcases") => {
+  const handleNavigate = (
+    page: "home" | "playground" | "testcases" | "showcase",
+  ) => {
     window.location.pathname = page === "home" ? "/" : `/${page}`;
   };
 
@@ -25,6 +32,7 @@ function App() {
       {activePage === "home" && <ReadmeHome />}
       {activePage === "playground" && <DiffPlayground />}
       {activePage === "testcases" && <TestCases />}
+      {activePage === "showcase" && <Showcase />}
     </div>
   );
 }
