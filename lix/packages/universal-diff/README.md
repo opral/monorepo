@@ -9,8 +9,6 @@ This package offers a simple way to generate and display diffs, showing users ex
 - ✅ Styling: Uses your existing CSS.
 - ✅ Works in any framework (React, Vue, Svelte, Angular, etc.)
 
-TODO insert screenshots
-
 ## How Does It Work? (The Rendered HTML Trick)
 
 The core idea is to diff the *rendered HTML output* instead of source data structures given that anything is rendered as HTML anyways. This bypasses the need for custom diff implementations. 

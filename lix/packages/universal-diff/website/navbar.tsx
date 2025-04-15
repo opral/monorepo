@@ -1,14 +1,28 @@
 import React from "react";
 
 interface NavbarProps {
-  activePage: "playground" | "testcases";
-  onNavigate: (page: "playground" | "testcases") => void;
+  activePage: "home" | "playground" | "testcases";
+  onNavigate: (page: "home" | "playground" | "testcases") => void;
 }
 
 export function Navbar({ activePage, onNavigate }: NavbarProps) {
   return (
     <nav className="mb-6">
       <div className="flex space-x-6 pb-3">
+        <a
+          href="#home"
+          className={`${
+            activePage === "home"
+              ? "font-medium"
+              : "font-normal hover:text-blue-500"
+          }`}
+          onClick={(e) => {
+            e.preventDefault();
+            onNavigate("home");
+          }}
+        >
+          Home
+        </a>
         <a
           href="#playground"
           className={`${
