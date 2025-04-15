@@ -1,5 +1,11 @@
 # inlang-vs-code-extension
 
+## 2.0.15
+
+### Patch Changes
+
+- 1e1cf37: fix sherlock updating
+
 ## 2.0.14
 
 ### Patch Changes
