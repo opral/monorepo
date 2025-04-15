@@ -1,5 +1,4 @@
-// TODO: Ensure 'diff' package is installed
-// import { diffWords } from "diff"; // Reverted: Inline diff broke layout
+// import { diffWords } from "diff";
 
 /**
  * Compares two HTML strings (`beforeHtml` and `afterHtml`) and generates an HTMLElement
@@ -11,8 +10,8 @@
  *
  * @example
  *   renderUniversalDiffElement({
- *     beforeHtml: `<p data-lix-entity-id="abc">Test</p>`,
- *     afterHtml: `<p data-lix-entity-id="abc">Test World</p>`,
+ *     beforeHtml: `<p data-diff-id="abc">Test</p>`,
+ *     afterHtml: `<p data-diff-id="abc">Test World</p>`,
  *   });
  *
  */
@@ -33,8 +32,8 @@ export function renderUniversalDiffElement(args: {
   // --- Step 1: Map elements and identify changes ---
   const beforeElementsMap = new Map<string, Element>();
   const beforeElementOrder: { id: string; element: Element }[] = [];
-  beforeDoc.body.querySelectorAll("[data-lix-entity-id]").forEach((el) => {
-    const id = el.getAttribute("data-lix-entity-id");
+  beforeDoc.body.querySelectorAll("[data-diff-id]").forEach((el) => {
+    const id = el.getAttribute("data-diff-id");
     if (id) {
       beforeElementsMap.set(id, el);
       beforeElementOrder.push({ id, element: el });
@@ -43,11 +42,10 @@ export function renderUniversalDiffElement(args: {
 
   const afterElementsInResultMap = new Map<string, Element>();
   // Query within the result container which holds the 'after' structure clone
-  const afterElementsInResult = resultContainer.querySelectorAll(
-    "[data-lix-entity-id]",
-  );
+  const afterElementsInResult =
+    resultContainer.querySelectorAll("[data-diff-id]");
   afterElementsInResult.forEach((el) => {
-    const id = el.getAttribute("data-lix-entity-id");
+    const id = el.getAttribute("data-diff-id");
     if (id) {
       afterElementsInResultMap.set(id, el);
     }
@@ -89,14 +87,14 @@ export function renderUniversalDiffElement(args: {
 
       // Check if direct child structure changed
       const beforeChildIds = new Set(
-        Array.from(
-          beforeEl.querySelectorAll(":scope > [data-lix-entity-id]"),
-        ).map((el) => el.getAttribute("data-lix-entity-id")),
+        Array.from(beforeEl.querySelectorAll(":scope > [data-diff-id]")).map(
+          (el) => el.getAttribute("data-diff-id"),
+        ),
       );
       const afterChildIds = new Set(
-        Array.from(
-          afterEl.querySelectorAll(":scope > [data-lix-entity-id]"),
-        ).map((el) => el.getAttribute("data-lix-entity-id")),
+        Array.from(afterEl.querySelectorAll(":scope > [data-diff-id]")).map(
+          (el) => el.getAttribute("data-diff-id"),
+        ),
       );
       const areChildSetsEqual =
         beforeChildIds.size === afterChildIds.size &&
@@ -154,8 +152,7 @@ export function renderUniversalDiffElement(args: {
   for (const { id, element: beforeEl } of beforeElementOrder) {
     if (removedIds.has(id)) {
       // Check if parent was also removed. If so, skip (it'll be handled with the parent)
-      const parentId =
-        beforeEl.parentElement?.getAttribute("data-lix-entity-id");
+      const parentId = beforeEl.parentElement?.getAttribute("data-diff-id");
       if (parentId && removedIds.has(parentId)) {
         continue;
       }
@@ -164,7 +161,7 @@ export function renderUniversalDiffElement(args: {
       let parentInResult: Element | null = null;
       if (parentId) {
         parentInResult = resultContainer.querySelector(
-          `[data-lix-entity-id="${parentId}"]`,
+          `[data-diff-id="${parentId}"]`,
         );
       } else if (beforeEl.parentElement === beforeDoc.body) {
         parentInResult = resultContainer; // Element was direct child of body
@@ -177,7 +174,7 @@ export function renderUniversalDiffElement(args: {
         while (currentSibling) {
           if (currentSibling.nodeType === Node.ELEMENT_NODE) {
             const siblingId = (currentSibling as Element).getAttribute(
-              "data-lix-entity-id",
+              "data-diff-id",
             );
             // Check if this sibling exists in the 'after' state (i.e., wasn't removed)
             if (siblingId && afterElementsInResultMap.has(siblingId)) {
@@ -237,4 +234,14 @@ export function renderUniversalDiffElement(args: {
   }
 
   return resultContainer;
+}
+
+/**
+ * Wrapper function for `renderUniversalDiffElement` that returns the outer HTML string.
+ */
+export function renderUniversalDiff(args: {
+  beforeHtml: string;
+  afterHtml: string;
+}): string {
+  return renderUniversalDiffElement(args).outerHTML;
 }

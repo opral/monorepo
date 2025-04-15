@@ -67,15 +67,15 @@ graph TD
 
 ## Usage
 
-1. Add `data-lix-entity-id` attributes to your rendered HTML elements.
+1. Add `data-diff-id` attributes to your rendered HTML elements.
 2. Use `renderUniversalDiff` to generate a diff HTML string.
 3. Display the diff HTML string in your app.
 
 ```typescript
 import { renderUniversalDiff } from '@lix/universal-diff';
 
-const beforeHtml = "<p data-lix-entity-id='p1'>Old text.</p>";
-const afterHtml = "<p data-lix-entity-id='p1'>New text!</p><p data-lix-entity-id='p2'>Added.</p>";
+const beforeHtml = "<p data-diff-id='p1'>Old text.</p>";
+const afterHtml = "<p data-diff-id='p1'>New text!</p><p data-diff-id='p2'>Added.</p>";
 
 const diffHtmlString = renderUniversalDiff({ beforeHtml, afterHtml });
 
@@ -84,7 +84,7 @@ document.getElementById('diff-container')!.innerHTML = diffHtmlString;
 
 ## ⚠️ Limitations
 
-**`data-lix-entity-id` Required:** Diff quality depends on stable `data-lix-entity-id` attributes being present in the rendered HTML.
+**`data-diff-id` Required:** Diff quality depends on stable `data-diff-id` attributes being present in the rendered HTML.
 
 ---
 

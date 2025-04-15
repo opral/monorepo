@@ -11,13 +11,13 @@ import { renderUniversalDiffElement } from "../src/render-universal-diff.js";
 export function DiffPlayground() {
   // Default examples to help users get started
   const defaultBeforeHtml = dedent`
-  <p data-lix-entity-id="p1">
+  <p data-diff-id="p1">
     Paste your before HTML here
   </p>
 `;
 
   const defaultAfterHtml = dedent`
-  <p data-lix-entity-id="p1">
+  <p data-diff-id="p1">
     Paste your after HTML here to see a diff
   </p>
 `;
@@ -123,7 +123,7 @@ export function DiffPlayground() {
       <div className="flex justify-between items-center mb-4">
         <p className="text-gray-600">
           Paste your HTML in the "Before" and "After" editors to see how the
-          diff would look. Make sure to include <code>data-lix-entity-id</code>{" "}
+          diff would look. Make sure to include <code>data-diff-id</code>{" "}
           attributes for elements you want to track.
         </p>
         <button
