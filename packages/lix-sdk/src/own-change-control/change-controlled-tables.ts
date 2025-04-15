@@ -1,19 +1,23 @@
 export const changeControlledTableIds = {
 	account: ["id"],
 	comment: ["id"],
+	change_proposal: ["id"],
 	change_set: ["id"],
-	change_author: ["change_id", "account_id"],
-	change_set_element: ["change_set_id", "change_id"],
+	// Change author should be change controlled but
+	// breaking the trigger loop turned out to be difficult.
+	//
+	// For the sake of getting lix v0.5 out, authors are not
+	// change controlled. A future update should address this.
+	// change_author: ["change_id", "account_id"],
 	change_set_label: ["label_id", "change_set_id"],
 	discussion: ["id"],
 	file: ["id"],
+	label: ["id"],
 	key_value: ["key"],
 	version: ["id"],
-	version_change: ["version_id", "change_id"],
+	// version_v2: ["id"],
+	// version_change: ["version_id", "change_id"],
 } as const;
-
-//
-// uo28ns,-3-9u2h
 
 /**
  * The result of a PRAGMA table_info call.
@@ -64,10 +68,7 @@ export function entityIdForRow(
 	// has compound primary key that are joined with a comma.
 	else {
 		for (const column of changeControlledTableIds[tableName]!) {
-			const index = changeControlledTableIds[tableName]!.indexOf(
-				// @ts-expect-error - no clue why
-				column
-			);
+			const index = changeControlledTableIds[tableName]!.indexOf(column);
 			if (entityId === "") {
 				entityId = values[index];
 			} else {

@@ -51,21 +51,30 @@ export async function initFileQueueProcess(args: {
 				.executeTakeFirst();
 
 			if (entry) {
-				if (entry.data_before && entry.data_after) {
-					await handleFileUpdate({
-						fileQueueEntry: entry,
-						lix: args.lix,
-					});
-				} else if (!entry.data_before && entry.data_after) {
-					await handleFileInsert({
-						fileQueueEntry: entry,
-						lix: args.lix,
-					});
-				} else {
-					await handleFileDelete({
-						fileQueueEntry: entry,
-						lix: args.lix,
-					});
+				try {
+					if (entry.data_before && entry.data_after) {
+						await handleFileUpdate({
+							fileQueueEntry: entry,
+							lix: args.lix,
+						});
+					} else if (!entry.data_before && entry.data_after) {
+						await handleFileInsert({
+							fileQueueEntry: entry,
+							lix: args.lix,
+						});
+					} else {
+						await handleFileDelete({
+							fileQueueEntry: entry,
+							lix: args.lix,
+						});
+					}
+				} catch (err) {
+					console.error("Error processing file queue entry:", err);
+					// Remove the entry to prevent deadlock even if processing fails
+					await args.lix.db
+						.deleteFrom("file_queue")
+						.where("id", "=", entry.id)
+						.execute();
 				}
 			}
 
@@ -85,7 +94,6 @@ export async function initFileQueueProcess(args: {
 				resolve!();
 				hasMoreEntriesSince = undefined;
 				pending = undefined;
-				// console.log("resolving");
 			} else {
 				// there are more entries to process
 				queueWorker(true);

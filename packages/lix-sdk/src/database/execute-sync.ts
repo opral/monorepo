@@ -20,28 +20,20 @@ export function executeSync(args: {
 
 	const columnNames: string[] = [];
 
-	try {
-		const result = args.lix.sqlite.exec({
-			sql: compiledQuery.sql,
-			bind: compiledQuery.parameters as any[],
-			returnValue: "resultRows",
-			columnNames,
+	const result = args.lix.sqlite.exec({
+		sql: compiledQuery.sql,
+		bind: compiledQuery.parameters as any[],
+		returnValue: "resultRows",
+		columnNames,
+	});
+
+	return result.map((row) => {
+		const obj: any = {};
+
+		columnNames.forEach((columnName, index) => {
+			obj[columnName] = row[index];
 		});
 
-		return result.map((row) => {
-			const obj: any = {};
-
-			columnNames.forEach((columnName, index) => {
-				obj[columnName] = row[index];
-			});
-
-			return obj;
-		});
-	} catch (e) {
-		console.error(
-			`Error in executeSync for query:\n\n${compiledQuery.sql}\n\n`,
-			e
-		);
-		return [];
-	}
+		return obj;
+	});
 }

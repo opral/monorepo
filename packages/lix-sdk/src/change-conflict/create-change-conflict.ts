@@ -75,16 +75,36 @@ export async function createChangeConflict(args: {
 			.returningAll()
 			.executeTakeFirstOrThrow();
 
+		// Insert elements linking the new conflict change set to the conflicting changes
+		// Fetch the change records to get entity_id, schema_key, file_id
+		const conflictingChanges = await trx
+			.selectFrom("change")
+			.where("id", "in", [...args.conflictingChangeIds])
+			.select(["id", "entity_id", "schema_key", "file_id"])
+			.execute();
+
+		const conflictingChangeMap = new Map(
+			conflictingChanges.map((c) => [c.id, c])
+		);
+
 		await trx
 			.insertInto("change_set_element")
 			.values(
-				Array.from(args.conflictingChangeIds).map((id) => ({
-					change_id: id,
-					change_set_id: newConflict.change_set_id,
-				}))
+				Array.from(args.conflictingChangeIds).map((id) => {
+					const change = conflictingChangeMap.get(id);
+					if (!change) {
+						// Should not happen if FK constraints work
+						throw new Error(`Conflicting change record not found: ${id}`);
+					}
+					return {
+						change_id: id,
+						change_set_id: newConflict.change_set_id,
+						entity_id: change.entity_id,
+						schema_key: change.schema_key,
+						file_id: change.file_id,
+					};
+				})
 			)
-			// Ignore if the conflict element already exists
-			.onConflict((oc) => oc.doNothing())
 			.execute();
 
 		await trx

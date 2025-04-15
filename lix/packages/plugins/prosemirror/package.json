@@ -1,0 +1,41 @@
+{
+	"name": "@lix-js/plugin-prosemirror",
+	"type": "module",
+	"publishConfig": {
+		"access": "public"
+	},
+	"version": "0.0.1",
+	"license": "MIT",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "tsc --build",
+		"test": "tsc --noEmit && vitest run",
+		"test:watch": "vitest",
+		"lint": "eslint src/**/* --fix",
+		"dev": "tsc --watch",
+		"format": "prettier ./src --write"
+	},
+	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
+	"sideEffects": false,
+	"peerDependencies": {
+		"@lix-js/sdk": "^0"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.12.0",
+		"@lix-js/sdk": "workspace:*",
+		"@opral/tsconfig": "workspace:*",
+		"@vitest/coverage-v8": "^2.0.5",
+		"eslint": "^9.12.0",
+		"prettier": "^3.3.3",
+		"prosemirror-state": "^1.4.3",
+		"prosemirror-model": "^1.19.3",
+		"prosemirror-view": "^1.31.7",
+		"rolldown": "1.0.0-beta.1",
+		"typescript": "^5.5.4",
+		"typescript-eslint": "^8.9.0",
+		"vitest": "^2.0.5"
+	},
+	"dependencies": {}
+}

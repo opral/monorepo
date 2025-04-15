@@ -24,7 +24,20 @@ import { applyOwnChanges } from "../own-change-control/apply-own-change.js";
 export async function applyChanges(args: {
 	lix: Pick<Lix, "db" | "plugin">;
 	changes: Change[];
+	/**
+	 * Whether to skip the file queue that detects changes.
+	 *
+	 * If the file queue is skipped, no changes will be detected
+	 * after applying the changes.
+	 *
+	 * https://github.com/opral/lix-sdk/issues/281
+	 *
+	 * @default true
+	 */
+	skipFileQueue?: boolean;
 }): Promise<void> {
+	args.skipFileQueue ??= true;
+
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const groupByFile = Object.groupBy(
 			args.changes,
@@ -41,8 +54,6 @@ export async function applyChanges(args: {
 
 		const plugins = await args.lix.plugin.getAll();
 
-		// TODO make detection of which plugin to use easier
-		// https://linear.app/opral/issue/LIXDK-104/add-detectedchangeschema
 		for (const [fileId, changes] of [
 			// applying lix own changes first
 			["lix_own_change_control", lixOwnChanges] as [string, Change[]],
@@ -95,13 +106,21 @@ export async function applyChanges(args: {
 					changes,
 				});
 
-				await withSkipFileQueue(trx, async (trx) => {
+				if (args.skipFileQueue) {
+					await withSkipFileQueue(trx, async (trx) => {
+						await trx
+							.updateTable("file")
+							.set({ data: fileData })
+							.where("id", "=", fileId)
+							.execute();
+					});
+				} else {
 					await trx
 						.updateTable("file")
 						.set({ data: fileData })
 						.where("id", "=", fileId)
 						.execute();
-				});
+				}
 			}
 		}
 	};

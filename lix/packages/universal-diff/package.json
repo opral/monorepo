@@ -1,0 +1,42 @@
+{
+  "name": "@lix-js/universal-diff",
+  "version": "0.0.1",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./default.css": "./src/default.css"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "vite",
+    "test": "tsc --noEmit && vitest run",
+    "test:watch": "vitest",
+    "format": "prettier . --write"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@opral/tsconfig": "workspace:*",
+    "@tailwindcss/vite": "^4.0.17",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "dedent": "1.5.1",
+    "prettier": "^3.5.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.0.17",
+    "typescript": "^5.5.3",
+    "vite": "^6.2.6",
+    "vitest": "^2.1.8"
+  }
+}

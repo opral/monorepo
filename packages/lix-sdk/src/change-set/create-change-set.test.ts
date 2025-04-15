@@ -28,7 +28,12 @@ test("creating a change set should succeed", async () => {
 
 	const changeSet = await createChangeSet({
 		lix: lix,
-		changes: mockChanges,
+		elements: mockChanges.map((change) => ({
+			change_id: change.id,
+			entity_id: change.entity_id,
+			schema_key: change.schema_key,
+			file_id: change.file_id,
+		})),
 	});
 
 	const changeSetMembers = await lix.db
@@ -42,13 +47,13 @@ test("creating a change set should succeed", async () => {
 	);
 });
 
-test("creating a change set with empty changes array should succeed", async () => {
+test("creating a change set with empty elements array should succeed", async () => {
 	const lix = await openLixInMemory({});
 
-	// Create a change set with an empty changes array
+	// Create a change set with an empty elements array
 	const changeSet = await createChangeSet({
 		lix: lix,
-		changes: [],
+		elements: [],
 	});
 
 	// Verify the change set was created
@@ -84,7 +89,7 @@ test("creating a change set with labels should associate the labels with the cha
 	// Create a change set with labels
 	const changeSet = await createChangeSet({
 		lix: lix,
-		changes: [],
+		elements: [],
 		labels: [checkpointLabel, testLabel],
 	});
 
@@ -104,4 +109,60 @@ test("creating a change set with labels should associate the labels with the cha
 	expect(changeSetLabels.map((label) => label.name)).toEqual(
 		expect.arrayContaining(["test-label", "checkpoint"])
 	);
+});
+
+test("creating a change set with parents should establish parent-child relationships", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create two parent change sets
+	const parentChangeSet1 = await createChangeSet({
+		lix,
+		elements: [],
+	});
+
+	const parentChangeSet2 = await createChangeSet({
+		lix,
+		elements: [],
+	});
+
+	// Create a child change set with two parents
+	const childChangeSet = await createChangeSet({
+		lix,
+		elements: [],
+		parents: [parentChangeSet1, parentChangeSet2],
+	});
+
+	// Get the parent-child relationships from the database
+	const edges = await lix.db
+		.selectFrom("change_set_edge")
+		.selectAll()
+		.where("child_id", "=", childChangeSet.id)
+		.execute();
+
+	// Verify both parent-child relationships were created
+	expect(edges).toHaveLength(2);
+	expect(edges.map((edge) => edge.parent_id)).toEqual(
+		expect.arrayContaining([parentChangeSet1.id, parentChangeSet2.id])
+	);
+	expect(edges.map((edge) => edge.child_id)).toEqual([
+		childChangeSet.id,
+		childChangeSet.id,
+	]);
+});
+
+test("specifiying immutable elements", async () => {
+	const lix = await openLixInMemory({});
+
+	const changeSet = await createChangeSet({
+		lix,
+		immutableElements: true,
+	});
+
+	const fetchedCs = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", changeSet.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(fetchedCs.immutable_elements).toBe(1);
 });

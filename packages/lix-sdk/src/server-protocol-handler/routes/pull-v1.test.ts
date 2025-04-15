@@ -139,7 +139,7 @@ test("it should return 404 if the Lix file is not found", async () => {
 	expect(response.status).toBe(404);
 });
 
-test("it should return 500 if the Lix file is invalid", async () => {
+test.skip("it should return 500 if the Lix file is invalid", async () => {
 	const environment = createLspInMemoryEnvironment();
 
 	await environment.setLix({

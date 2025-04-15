@@ -1,0 +1,227 @@
+{
+    "type": "doc",
+    "content": [
+    {
+        "type": "title",
+        "attrs": {
+            "dragHandlesDisabled": true,
+            "level": 1,
+            "id": "f052363a-269f-4d68-93e1-dae96bc04c2a"
+        },
+        "content": [
+            {
+                "type": "text",
+                "text": "Example for Lix"
+            }
+        ]
+    },
+    {
+        "type": "description",
+        "attrs": {
+            "dragHandlesDisabled": true,
+            "id": "af78574b-e0c7-48e6-9b31-7b9634d1dd1a"
+        },
+        "content": [
+            {
+                "type": "paragraph",
+                "attrs": {
+                    "id": "c50f2420-428f-4cd8-a841-d9292ef33976"
+                }
+            }
+        ]
+    },
+    {
+        "type": "inputs",
+        "attrs": {
+            "dragHandlesDisabled": true,
+            "id": "INPUTS",
+            "mode": "inputs"
+        },
+        "content": [
+            {
+                "type": "input",
+                "attrs": {
+                    "dragHandlesDisabled": true,
+                    "label": "my_input",
+                    "id": "input_dw1PasbG1elleF3w",
+                    "description": "",
+                    "type": "longtext",
+                    "strictType": {
+                        "typeId": "wtString",
+                        "constraints": [],
+                        "metadata": {
+                            "attributes": []
+                        }
+                    },
+                    "variableType": null,
+                    "fromTrigger": false
+                }
+            }
+        ]
+    },
+    {
+        "type": "horizontalRule",
+        "attrs": {
+            "id": "e56f0bba-12ff-409a-9496-b7294371d962"
+        }
+    },
+    {
+        "type": "paragraph",
+        "attrs": {
+            "id": "9f9babb9-b95b-487a-8618-e44ef0390819"
+        },
+        "content": [
+            {
+                "type": "text",
+                "text": "Here's a "
+            },
+            {
+                "type": "text",
+                "marks": [
+                    {
+                        "type": "italic"
+                    }
+                ],
+                "text": "simple"
+            },
+            {
+                "type": "text",
+                "text": " prompt "
+            },
+            {
+                "type": "mention",
+                "attrs": {
+                    "referenceId": "input_dw1PasbG1elleF3w",
+                    "path": "input_dw1PasbG1elleF3w",
+                    "lastType": "longtext",
+                    "lastStrictType": {
+                        "typeId": "wtString",
+                        "constraints": [],
+                        "metadata": {
+                            "attributes": []
+                        }
+                    },
+                    "lastLabel": "my_input",
+                    "id": "a28983e9-9b72-4322-a809-11bae41027be"
+                }
+            },
+            {
+                "type": "text",
+                "text": "."
+            }
+        ]
+    },
+    {
+        "type": "bulletList",
+        "attrs": {
+            "id": "8c4e1a2d-3b5f-47c9-9d0e-1f2a3b4c5d6e"
+        },
+        "content": [
+            {
+                "type": "listItem",
+                "attrs": {
+                    "id": "7a6b5c4d-3e2f-1a0b-9c8d-7e6f5a4b3c2d"
+                },
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "attrs": {
+                            "id": "1d2e3f4a-5b6c-7d8e-9f0a-1b2c3d4e5f6a"
+                        },
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "A"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "type": "listItem",
+                "attrs": {
+                    "id": "5f6e7d8c-9b0a-1c2d-3e4f-5a6b7c8d9e0f"
+                },
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "attrs": {
+                            "id": "0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d"
+                        },
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "B: "
+                            },
+                            {
+                                "type": "generation",
+                                "attrs": {
+                                    "id": "gen_U0i3eChqJFG5ZWwS",
+                                    "label": "generation",
+                                    "state": "editing",
+                                    "temperature": 0.5,
+                                    "effort": "medium",
+                                    "includeReasoning": false,
+                                    "model": "claude-3.7-sonnet",
+                                    "type": "full",
+                                    "stopBefore": "[\"\",\"\",\"\",\"\"]",
+                                    "responseModel": "{}"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "tool",
+        "attrs": {
+            "id": "tool_lin2fKNgFg4YcGzb",
+            "toolId": "elevenLabs",
+            "includeOutput": "false",
+            "parameters": "{\"voice\":{\"type\":\"literal\",\"value\":\"George (UK male)\"},\"text\":{\"type\":\"variable\",\"value\":\"gen_U0i3eChqJFG5ZWwS\"}}",
+            "label": "Say it",
+            "outputs": "[]",
+            "state": null
+        }
+    },
+    {
+        "type": "paragraph",
+        "attrs": {
+            "id": "a831a0de-b143-45e8-aded-c2e3a7607b05"
+        },
+        "content": [
+            {
+                "type": "mention",
+                "attrs": {
+                    "referenceId": "tool_lin2fKNgFg4YcGzb",
+                    "path": "tool_lin2fKNgFg4YcGzb.output",
+                    "lastType": "audio",
+                    "lastStrictType": {
+                        "typeId": "wtFile",
+                        "constraints": [],
+                        "metadata": {
+                            "fileType": "audio"
+                        }
+                    },
+                    "lastLabel": "output",
+                    "id": "9280e387-1faa-4dab-a3b3-4135da84f7c9"
+                }
+            }
+        ]
+    },
+    {
+        "type": "paragraph",
+        "attrs": {
+            "id": "6d7e8f9a-0b1c-2d3e-4f5a-6b7c8d9e0f1a"
+        },
+        "content": [
+            {
+                "type": "text",
+                "text": "New part of the prompt!"
+            }
+        ]
+    }
+]
+}

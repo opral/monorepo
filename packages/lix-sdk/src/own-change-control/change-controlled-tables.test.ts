@@ -21,7 +21,7 @@ test("roundtrip entity_id test for single primary key", () => {
 });
 
 test("roundtrip entity_id test for compound primary keys", () => {
-	const tableName: keyof LixDatabaseSchema = "change_author";
+	const tableName: keyof LixDatabaseSchema = "change_set_label";
 
 	const row = ["294u-2345", "0128-34928"];
 
@@ -30,8 +30,8 @@ test("roundtrip entity_id test for compound primary keys", () => {
 
 	expect(entityId).toBe("294u-2345,0128-34928");
 	expect(primaryKeys).toEqual([
-		["change_id", "294u-2345"],
-		["account_id", "0128-34928"],
+		["label_id", "294u-2345"],
+		["change_set_id", "0128-34928"],
 	]);
 });
 
