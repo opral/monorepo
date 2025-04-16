@@ -19,7 +19,7 @@ imports:
 
 Paraglide is a compiler-based i18n library that emits tree-shakable message functions. Small bundle sizes, no async waterfalls, full type-safety, and more. Check out the [comparison page](/m/gerre34r/library-inlang-paraglideJs/comparison). 
 
-If you use a bundler like Vite in your project, Paraglide JS is almost certainly the best fit. 
+If you use a bundler like [Vite](/m/gerre34r/library-inlang-paraglideJs/vite) in your project, Paraglide JS is almost certainly the best fit. 
 
 <doc-features>
   <doc-feature title="Tiny Runtime" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/bundlesize-feature.png"></doc-feature>
