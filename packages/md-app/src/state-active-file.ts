@@ -114,26 +114,6 @@ export const intermediateChangesAtom = atom<
 	return changesWithBeforeSnapshots;
 });
 
-export const intermediateChangeIdsAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	const activeFile = await get(activeFileAtom);
-	const currentVersion = await get(currentVersionAtom);
-	if (!currentVersion || !activeFile) return [];
-
-	const intermediateLeafChangeIds = await lix.db
-		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		// .where(changeIsLeafInVersion(currentVersion))
-		.where("change.plugin_key", "!=", "lix_own_change_control")
-		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
-		.where("change.file_id", "=", activeFile.id) // Always filter by active file
-		.select("change.id")
-		.execute();
-
-	return intermediateLeafChangeIds;
-});
-
 export const checkpointChangeSetsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/plate-ui/button";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, intermediateChangeIdsAtom, intermediateChangesAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, intermediateChangesAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "@/components/plate-ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
@@ -90,10 +90,9 @@ export default IntermediateCheckpointComponent;
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const [lix] = useAtom(lixAtom);
-  const [intermediateChangeIds] = useAtom(intermediateChangeIdsAtom);
 
   const handleCreateCheckpoint = async () => {
-    const changeSet = await createCheckpoint(lix, intermediateChangeIds);
+    const changeSet = await createCheckpoint({ lix });
     if (description !== "") {
       await createDiscussion({
         lix,
