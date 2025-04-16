@@ -70,7 +70,7 @@ export const intermediateChangesAtom = atom<
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where(changeIsLeafInVersion(currentVersion))
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
 		.where("change.file_id", "!=", "lix_own_change_control")
 		.where("change.file_id", "=", activeFile.id)
 		.select([
@@ -89,7 +89,7 @@ export const intermediateChangesAtom = atom<
 					.selectFrom("change")
 					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.where(changeInVersion(currentVersion))
-					.where(changeHasLabel("checkpoint"))
+					.where(changeHasLabel({ name: "checkpoint" }))
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
 					.where("change.file_id", "=", activeFile.id)
@@ -125,7 +125,7 @@ export const intermediateChangeIdsAtom = atom(async (get) => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where(changeIsLeafInVersion(currentVersion))
 		.where("change.plugin_key", "!=", "lix_own_change_control")
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
 		.where("change.file_id", "=", activeFile.id) // Always filter by active file
 		.select("change.id")
 		.execute();
@@ -158,7 +158,7 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 		// Join with the `comment` table, filtering for first-level comments
 		.leftJoin("comment", "comment.discussion_id", "discussion.id")
 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
-		.where(changeHasLabel("checkpoint"))
+		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change.file_id", "=", activeFile.id)
 		.groupBy("change_set.id")
 		.orderBy("change.created_at", "desc")
@@ -201,7 +201,7 @@ export const getChangeDiffs = async (
 		)
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where(changeInVersion(currentVersion))
-		.where(changeHasLabel("checkpoint"))
+		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change.file_id", "=", activeFile.id)
 		.select("change.id")
 		.select("change.created_at")
@@ -228,7 +228,7 @@ export const getChangeDiffs = async (
 					.where("ancestors.entity_id", "=", change.entity_id)
 					.where("ancestors.schema_key", "=", change.schema_key)
 					.where("ancestors.file_id", "=", activeFile.id)
-					.where(changeHasLabel("checkpoint"))
+					.where(changeHasLabel({ name: "checkpoint" }))
 					.where(changeInVersion(currentVersion))
 					.orderBy("ancestors.created_at", "desc")
 					.limit(1)
