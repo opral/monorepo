@@ -36,5 +36,5 @@ export type ThreadCommentTable = {
 	id: Generated<string>;
 	thread_id: string;
 	parent_id: string | null;
-	content: string;
+	content: Record<string, any>;
 };
