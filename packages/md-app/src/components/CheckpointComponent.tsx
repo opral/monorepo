@@ -27,7 +27,6 @@ export const CheckpointComponent = (props: {
   showBottomLine: boolean;
 }) => {
   const [lix] = useAtom(lixAtom);
-  const [currentVersion] = useAtom(currentVersionAtom);
   const [activeFile] = useAtom(activeFileAtom);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
@@ -43,7 +42,7 @@ export const CheckpointComponent = (props: {
       return;
     }
 
-    getChangeDiffs(lix, props.checkpointChangeSet.id, currentVersion!, activeFile).then((diffs) => {
+    getChangeDiffs(lix, props.checkpointChangeSet.id, activeFile).then((diffs) => {
       setDiffs(diffs);
       setIsExpanded(true);
     });
