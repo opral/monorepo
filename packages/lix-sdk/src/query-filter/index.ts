@@ -5,6 +5,7 @@ export { changeIsLeafOf } from "./change-is-leaf-of.js";
 export { changeIsLeafInVersion } from "./change-is-leaf-in-version.js";
 export { changeInVersion } from "./change-in-version.js";
 export { changeIsLowestCommonAncestorOf } from "./change-is-lowest-common-ancestor-of.js";
+export { changeSetElementInAncestryOf } from "./change-set-element-in-ancestry-of.js";
 export { changeSetHasLabel } from "./change-set-has-label.js";
 export { changeSetIsAncestorOf } from "./change-set-is-ancestor-of.js";
 export { changeSetIsDescendantOf } from "./change-set-is-descendant-of.js";
