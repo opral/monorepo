@@ -1,0 +1,29 @@
+{
+  "name": "@lix-js/ui-components",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "format": "prettier ./src --write",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "dependencies": {
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "8.6.12",
+    "@storybook/blocks": "8.6.12",
+    "@storybook/test": "8.6.12",
+    "@storybook/web-components": "8.6.12",
+    "@storybook/web-components-vite": "8.6.12",
+    "@open-wc/lit-helpers": "^0.7.0",
+    "prettier": "^3.5.3",
+    "storybook": "8.6.12",
+    "typescript": "~5.7.2",
+    "vite": "^6.3.0"
+  }
+}
