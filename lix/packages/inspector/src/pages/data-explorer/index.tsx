@@ -51,14 +51,20 @@ export default function DataExplorer() {
   // Fetch table data when a table is selected
   const [tableDataResult] = useQuery<any[]>(() => {
     if (!lix || !selectedTable) return [];
+
+    // Construct query based on selected table
+    let sqlQuery = `SELECT * FROM "${selectedTable}" LIMIT 100;`;
+    if (selectedTable === "snapshot") {
+      // Use json() function for the content column
+      // Corrected columns: id, content
+      sqlQuery = `SELECT id, json(content) as content FROM snapshot LIMIT 100;`;
+    }
+
     try {
       // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
-      const result = lix.sqlite.exec(
-        `SELECT * FROM "${selectedTable}" LIMIT 100;`,
-        {
-          returnValue: "resultRows",
-        }
-      );
+      const result = lix.sqlite.exec(sqlQuery, {
+        returnValue: "resultRows",
+      });
       return result as any;
     } catch (error) {
       console.error(`Error querying table ${selectedTable}:`, error);
@@ -83,18 +89,77 @@ export default function DataExplorer() {
 
   // Process column data
   useEffect(() => {
-    if (columnNamesResult && columnNamesResult.length > 0) {
-      const columns: ColumnDef<any>[] = columnNamesResult.map((col, index) => ({
-        id: col[1], // column name
-        accessorKey: String(index),
-        header: col[1],
-        cell: (info) => info.getValue(),
-      }));
+    if (selectedTable === "snapshot") {
+      // --- Special case for snapshot table ---
+      // Define columns manually based on the custom query structure
+      const columns: ColumnDef<any>[] = [
+        {
+          id: "id",
+          accessorKey: "0", // Corresponds to SELECT index 0
+          header: "id",
+          cell: (info: any) => info.getValue(),
+        },
+        {
+          id: "content",
+          accessorKey: "1", // Corresponds to SELECT index 1
+          header: "content",
+          cell: (info: any) => {
+            // JSON renderer
+            const value = info.getValue();
+            try {
+              // Step 1: Parse the value if it's a string containing JSON
+              const parsedValue =
+                typeof value === "string" ? JSON.parse(value) : value;
+              // Step 2: Stringify the potentially parsed object for pretty printing
+              const formattedJson = JSON.stringify(parsedValue, null, 2);
+              return (
+                <pre className="text-xs whitespace-pre-wrap break-all">
+                  {formattedJson}
+                </pre>
+              );
+            } catch (e) {
+              console.error(
+                "Failed to parse or stringify snapshot content:",
+                e,
+                "Original value:",
+                value
+              );
+              // Fallback: Display raw value or error message
+              return (
+                <span className="text-error text-xs">
+                  Error formatting JSON
+                </span>
+              );
+            }
+          },
+        },
+      ];
+      setTableColumns(columns);
+    } else if (columnNamesResult && columnNamesResult.length > 0) {
+      // --- Default case for other tables (using PRAGMA) ---
+      const columns: ColumnDef<any>[] = columnNamesResult.map((col, index) => {
+        const columnName = col[1]; // column name is at index 1
+
+        // Default cell renderer (could customize for other tables later if needed)
+        let cellRenderer = (info: any) => info.getValue();
+
+        // Example: Keep custom renderer logic structure if needed elsewhere
+        // if (selectedTable === 'some_other_table' && columnName === 'some_column') {
+        //   cellRenderer = (info: any) => { /* ... */ };
+        // }
+
+        return {
+          id: columnName,
+          accessorKey: String(index), // Use index from PRAGMA
+          header: columnName,
+          cell: cellRenderer,
+        };
+      });
       setTableColumns(columns);
     } else {
       setTableColumns([]);
     }
-  }, [columnNamesResult]);
+  }, [columnNamesResult, selectedTable]);
 
   // Process table data
   useEffect(() => {
