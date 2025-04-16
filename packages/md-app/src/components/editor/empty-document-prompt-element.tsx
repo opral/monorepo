@@ -11,6 +11,7 @@ import { lixAtom, withPollingAtom } from '@/state';
 import { saveLixToOpfs } from '@/helper/saveLixToOpfs';
 import { generateHumanId } from '@/helper/generateHumanId';
 import { updateUrlParams } from '@/helper/updateUrlParams';
+import { removeEmptyPromptElement, setPromptDismissed } from '@/helper/emptyPromptElementHelpers';
 
 export function EmptyDocumentPromptElement({
   attributes,
@@ -48,7 +49,7 @@ export function EmptyDocumentPromptElement({
     const nodes = editor.getApi(ExtendedMarkdownPlugin).markdown.deserialize(content);
     editor.tf.setValue(nodes);
   };
-  
+
   // Adjust textarea height when content changes
   const adjustHeight = () => {
     if (textareaRef.current) {
@@ -147,10 +148,25 @@ export function EmptyDocumentPromptElement({
     }
   };
 
+  // Function to remove the prompt element
+  const handleDismiss = async () => {
+    if (activeFile?.id) {
+      removeEmptyPromptElement(editor);
+      // Mark this file as having dismissed the prompt
+      if (lix) {
+        try {
+          setPromptDismissed(lix, activeFile.id);
+        } catch (error) {
+          console.error("Error saving prompt dismissed state:", error);
+        }
+      }
+    }
+  };
+
   return (
     <div {...attributes} contentEditable={false}>
       <form
-        className="my-8 flex flex-col items-end justify-center w-full p-1 gap-2 border border-border rounded-md focus-within:ring-1"
+        className="my-8 flex flex-col items-end justify-center w-full p-1 gap-2 border border-border rounded-md focus-within:ring-1 relative overflow-hidden"
         onSubmit={(e) => {
           e.preventDefault();
           handleGenerateDocument();
@@ -166,23 +182,34 @@ export function EmptyDocumentPromptElement({
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <Button
-          type="submit"
-          disabled={isGenerating || !prompt.trim() || chat.isLoading}
-        >
-          {isGenerating ?
-            (<>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Generating...
-            </>
-            ) :
-            (<>
-              <Zap className="h-4 w-4" />
-              Generate
-            </>
-            )
-          }
-        </Button>
+
+        <div className='flex gap-2 max-w-full'>
+          {!isGenerating && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleDismiss}
+              disabled={isGenerating}
+            >
+              Dismiss
+            </Button>)}
+          <Button
+            type="submit"
+            disabled={isGenerating || !prompt.trim() || chat.isLoading}
+          >
+            {isGenerating ?
+              (<>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating...
+              </>) :
+              (<>
+                <Zap className="h-4 w-4" />
+                Generate
+              </>
+              )
+            }
+          </Button>
+        </div>
       </form>
     </div>
   );

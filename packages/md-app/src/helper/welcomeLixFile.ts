@@ -97,7 +97,7 @@ export const welcomeMd = `# Flashtype.ai ⚡️
 
 ### 🤝 Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))
 
-![](${serverUrl}/images/Collaborate.png)`;
+![](${serverUrl}/images/Collaborate.png)\n\n`;
 
 export const setupMdWelcome = async (lix: Lix) => {
 	// Load a demo md file and save it to OPFS

@@ -114,7 +114,7 @@ export function LixSidebar() {
         .executeTakeFirstOrThrow()
 
       await saveLixToOpfs({ lix })
-      switchToFile(newFile.id)
+      await switchToFile(newFile.id)
     } catch (error) {
       console.error("Failed to create new file:", error)
     }

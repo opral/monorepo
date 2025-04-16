@@ -1,5 +1,5 @@
 // import { DOMEditor } from 'slate-dom';
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -15,8 +15,8 @@ import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
-import { EMPTY_DOCUMENT_PROMPT_KEY } from "./plugins/empty-document-prompt-plugin";
 import { welcomeMd } from "@/helper/welcomeLixFile";
+import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
 
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
@@ -25,40 +25,12 @@ export function PlateEditor() {
 	const [, setEditorRef] = useAtom(editorRefAtom);
 
 	const editor = useCreateEditor();
+	const [previousHasPromptElement, setPreviousHasPromptElement] = useState(false);
 
-	const insertEmptyPromptElement = () => {
-		if (!editor) return;
-
-		// Remove any existing empty prompt elements first
-		const filteredNodes = [...editor.children].filter(
-			(node: TElement) => node.type !== EMPTY_DOCUMENT_PROMPT_KEY
-		);
-
-		const emptyPromptElement = {
-			type: EMPTY_DOCUMENT_PROMPT_KEY,
-			children: [{ text: "" }],
-		};
-
-		// Find the first heading level 1
-		const headingIndex = filteredNodes.findIndex(
-			(node: TElement) => node.type === "h1"
-		);
-
-		// If a heading level 1 exists, insert after it
-		if (headingIndex !== -1) {
-			filteredNodes.splice(headingIndex + 1, 0, emptyPromptElement);
-		} else {
-			// Otherwise insert at the beginning of the document
-			filteredNodes.unshift(emptyPromptElement);
-		}
-
-		editor.tf.setValue(filteredNodes);
-	};
-
-
-	// Store the editor reference in the global atom
 	useEffect(() => {
-		setEditorRef(editor);
+		if (editor) {
+			setEditorRef(editor);
+		}
 	}, [editor, setEditorRef]);
 
 	useEffect(() => {
@@ -68,41 +40,35 @@ export function PlateEditor() {
 				.markdown.deserialize(loadedMd);
 			editor.tf.setValue(nodes);
 		}
+		setPreviousHasPromptElement(false);
 	}, [activeFile?.id]);
 
 	useEffect(() => {
-		if (!editor) return;
+		if (!editor || !lix || !activeFile?.id) return;
 
-		// Check if document is empty or just whitespace
-		const isEmpty = !loadedMd || loadedMd.trim() === '';
+		// The main function to check and potentially add a prompt
+		const checkAndAddPrompt = async () => {
+			try {
+				// If prompt has been dismissed, don't show it
+				if (await getPromptDismissed(lix, activeFile.id)) {
+					removeEmptyPromptElement(editor);
+					return;
+				}
 
-		// Check if this is the welcome document or closely resembles it
-		// We use includes() to allow for small edits while maintaining the prompt
-		const isWelcomeOrSimilar = loadedMd && (
-			loadedMd === welcomeMd ||
-			loadedMd.includes("Flashtype.ai ⚡️") ||
-			loadedMd.includes("🤖 Autocomplete your document")
-		);
+				const isWelcomeFile = loadedMd === welcomeMd;
+				const isEmptyFile = loadedMd === "";
 
-		if (isEmpty || isWelcomeOrSimilar) {
-			insertEmptyPromptElement();
-		} else {
-			// Remove empty document prompt element if document is not empty
-			// First check if there are any empty document prompt elements
-			const hasEmptyPrompt = editor.children.some(
-				(node) => node.type === EMPTY_DOCUMENT_PROMPT_KEY
-			);
-
-			if (hasEmptyPrompt) {
-				// If we have prompt elements but document is not empty,
-				// deserialize the markdown and replace the editor content
-				const nodes = editor
-					.getApi(ExtendedMarkdownPlugin)
-					.markdown.deserialize(loadedMd);
-				editor.tf.setValue(nodes);
+				if (isWelcomeFile || isEmptyFile) {
+					insertEmptyPromptElement(editor);
+					return;
+				}
+			} catch (error) {
+				console.error("Error checking prompt status:", error);
 			}
-		}
-	}, [editor, loadedMd]);
+		};
+
+		checkAndAddPrompt();
+	}, [editor, loadedMd, lix, activeFile]);
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -184,15 +150,23 @@ export function PlateEditor() {
 
 	// Memoize the value change handler to avoid unnecessary re-renders
 	const handleValueChange = useCallback((newValue: any) => {
-		if (!activeFile) return; // Don't save if no active file
+		if (!activeFile || !lix) return; // Don't save if no active file or lix
 
 		const newContent = newValue.editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
+		const hasPromptElement = hasEmptyPromptElement(newValue.editor);
+
+		// If there was a prompt but now it's gone, mark it as dismissed
+		if (previousHasPromptElement && !hasPromptElement && activeFile.id) {
+			setPromptDismissed(lix, activeFile.id);
+		}
+
+		setPreviousHasPromptElement(hasPromptElement);
 
 		if (loadedMd !== newContent) {
 			handleUpdateMdData(newValue);
 		}
 
-	}, [loadedMd, handleUpdateMdData, activeFile]);
+	}, [loadedMd, handleUpdateMdData, activeFile, lix, editor, previousHasPromptElement]);
 
 	return (
 		<DndProvider backend={HTML5Backend}>
