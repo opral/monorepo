@@ -68,8 +68,21 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 					return mdastNode;
 				},
 			},
+			html: {
+				deserialize: (mdastNode, deco, options) => {
+					if (mdastNode.value === "<p><br /></p>") {
+						const paragraphType = getPlateNodeType("paragraph");
+						return {
+							children: [{ text: "\n" } as TText],
+							type: paragraphType,
+						};
+					}
+					return {
+						text: (mdastNode.value || "").replaceAll("<br />", "\n"),
+					};
+				},
+			},
 
-			// remove this after the pr is merged and we updated to the latest version of plate markdown plugin
 			p: {
 				deserialize: (node, deco, options) => {
 					const isKeepLineBreak = options.splitLineBreaks;
@@ -136,18 +149,7 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 								}
 							});
 						} else {
-							// TODO remove the last br of the paragraph if the previos element is not a br
-
-							if (
-								child.text === "\n" &&
-								children.length > 1 &&
-								index === children.length - 1
-							) {
-								// no - op
-								console.log("test");
-							} else {
-								inlineNodes.push(child);
-							}
+							inlineNodes.push(child);
 						}
 					});
 
@@ -156,30 +158,89 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 					return elements.length === 1 ? elements[0] : elements;
 				},
 				serialize: (node, options) => {
-					let cleanedChildren = node.children;
+					let enrichedChildren = node.children;
 
-					if (
-						node.children.length > 0 &&
-						cleanedChildren[cleanedChildren.length - 1].text === "\n"
+					enrichedChildren = enrichedChildren.map(
+						(child, index, childNodes) => {
+							if (child.text === "\n") {
+								return {
+									type: "break",
+								} as any;
+							} else if (typeof child.text === "string") {
+								// mask soft breaks breaks
+								return {
+									...child,
+									text: child.text.replaceAll("\n", `\\n`),
+								};
+							}
+							return child;
+						}
+					);
+
+					const convertedNodes = convertNodesSerialize(
+						enrichedChildren,
+						options
+					) as MdParagraph["children"];
+
+					if (convertedNodes.length === 0) {
+						return {
+							type: "html",
+							value: "<br />",
+						} as any;
+					} else if (
+						convertedNodes.length === 1 &&
+						enrichedChildren.at(-1)!.type === "break"
 					) {
-						// if the last child of the paragraph is a line breake add an additional one
-						cleanedChildren.push({ text: "\n" });
+						return {
+							type: "html",
+							value: "<p><br /></p>",
+						} as any;
+					} else if (enrichedChildren.at(-1)!.type === "break") {
+						// if the last child of the paragraph is a line break add an additional one
+						convertedNodes.at(-1)!.type = "html";
+						// @ts-expect-error -- value is the right property here
+						convertedNodes.at(-1)!.value = "\n<br />";
+					} else if (
+						convertedNodes.at(-1)!.type === "text" &&
+						(convertedNodes.at(-1)!.value as string).endsWith(`\\n`)
+					) {
+						// if the last child of the paragraph is a text node that ends with a line break replace it with a br tag
+
+						(convertedNodes.at(-1) as any)!.value = (
+							convertedNodes.at(-1)!.value as string
+						).slice(0, -2);
+
+						convertedNodes.push({
+							type: "html",
+							value: "<br />",
+						});
 					}
 
-					cleanedChildren = cleanedChildren.map((child) => {
-						if (child.text === "\n") {
-							return {
-								type: "break",
-							} as any;
+					const lineBreaksExtracted = [];
+
+					convertedNodes.forEach((child, index) => {
+						if (child.type === "text") {
+							const textValue = (child as any).value as string;
+							textValue.split(`\\n`).forEach((part, partIndex, array) => {
+								lineBreaksExtracted.push({
+									...child,
+									value: part,
+								});
+								if (partIndex !== array.length - 1) {
+									lineBreaksExtracted.push({
+										type: "break",
+									});
+								}
+							});
+						} else {
+							lineBreaksExtracted.push(child);
 						}
-						return child;
 					});
 
+					// if the last child of the paragraph is a text node that ends with a line break replace it with a br tag
+
 					return {
-						children: convertNodesSerialize(
-							cleanedChildren,
-							options
-						) as MdParagraph["children"],
+						children: lineBreaksExtracted,
 						type: "paragraph",
 					};
 				},

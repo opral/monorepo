@@ -131,6 +131,18 @@ const rules = {
 		],
 		exactChildren: null,
 	},
+	html: {
+		validateFn: (node: any) => {
+			if (node.value === "<p><br /></p>") {
+				return;
+			}
+			if (node.value === "<br />") {
+				return;
+			}
+
+			return "html is not supported";
+		},
+	},
 	blockquote: {
 		// only allow paragraphs in blockquotes - nesting is also not supported in plate atm
 		allowedChildren: ["paragraph"],
@@ -234,6 +246,7 @@ function sanatizeUnknownNodeStructures(node: TreeNode, file: any): boolean {
 
 export function sanatizeUnknownNodeStructuresInTree() {
 	return (rootNode: any, file: any) => {
+		debugger;
 		for (const node of rootNode.children) {
 			sanatizeUnknownNodeStructures(node, file);
 		}
