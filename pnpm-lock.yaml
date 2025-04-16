@@ -2157,6 +2157,9 @@ importers:
         specifier: ^3.2.1
         version: 3.2.1
     devDependencies:
+      '@lix-js/sdk':
+        specifier: workspace:*
+        version: link:../../../packages/lix-sdk
       '@open-wc/lit-helpers':
         specifier: ^0.7.0
         version: 0.7.0(lit@3.2.1)

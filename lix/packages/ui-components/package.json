@@ -13,7 +13,11 @@
   "dependencies": {
     "lit": "^3.2.1"
   },
+  "peerDependencies": {
+    "@lix-js/sdk": "^0"
+  },
   "devDependencies": {
+    "@lix-js/sdk": "workspace:*",
     "@storybook/addon-essentials": "8.6.12",
     "@storybook/blocks": "8.6.12",
     "@storybook/test": "8.6.12",
