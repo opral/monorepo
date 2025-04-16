@@ -1,10 +1,14 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { Thread, ThreadComment } from "./database-schema.js";
+import type {
+	NewThreadComment,
+	Thread,
+	ThreadComment,
+} from "./database-schema.js";
 
 export async function createThread(args: {
 	lix: Lix;
 	id?: string;
-	comments?: Pick<ThreadComment, "content">[];
+	comments?: Pick<NewThreadComment, "content">[];
 }): Promise<Thread & { comments: ThreadComment[] }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const thread = await trx

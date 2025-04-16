@@ -13,7 +13,8 @@ export function applyThreadDatabaseSchema(
     id TEXT PRIMARY KEY DEFAULT (nano_id()),
     thread_id TEXT NOT NULL,
     parent_id TEXT,
-    content TEXT NOT NULL,
+
+    content BLOB NOT NULL, --JSONB
     FOREIGN KEY(thread_id) REFERENCES thread(id),
     FOREIGN KEY(parent_id) REFERENCES thread_comment(id)
   ) STRICT;

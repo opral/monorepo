@@ -6,9 +6,10 @@ test("creates a thread with sequential comments where only the first has null pa
 	const lix = await openLixInMemory({});
 
 	const comments = [
-		{ content: "First comment" },
-		{ content: "Second comment" },
-		{ content: "Third comment" },
+		// TODO use PortableTextBlock[]
+		{ content: { value: "First comment" } },
+		{ content: { value: "Second comment" } },
+		{ content: { value: "Third comment" } },
 	];
 
 	const threadWithComments = await createThread({ lix, comments });
