@@ -12,6 +12,7 @@ import { updateUrlParams } from "./helper/updateUrlParams.ts";
 import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
+import { initLixInspector } from "@lix-js/inspector";
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -201,6 +202,11 @@ export const lixAtom = atom(async (get) => {
 			url.searchParams.set("lix", lixId.value);
 			window.location.href = url.toString();
 		}
+	}
+
+	if (import.meta.env.DEV) {
+		// Initialize the Lix Inspector for debugging
+		await initLixInspector({ lix });
 	}
 
 	return lix;
