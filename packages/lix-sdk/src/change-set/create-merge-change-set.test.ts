@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { mergeChangeSets } from "./merge-change-sets.js";
+import { createMergeChangeSet } from "./create-merge-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 
 test("it should merge non-conflicting changes", async () => {
@@ -69,7 +69,7 @@ test("it should merge non-conflicting changes", async () => {
 		parents: [cs1],
 	});
 
-	const merged = await mergeChangeSets({
+	const merged = await createMergeChangeSet({
 		lix,
 		source: cs0,
 		target: cs2,
@@ -169,7 +169,7 @@ test("should handle conflicting elements with source winning (until conflicts ar
 	});
 
 	// 4. Merge source into target
-	const merged = await mergeChangeSets({
+	const merged = await createMergeChangeSet({
 		lix,
 		source: cs_source,
 		target: cs_target,

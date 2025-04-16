@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { lix, prosemirrorFile } from "../state";
-import { beforeAfterOfFile } from "@lix-js/sdk";
+import { getBeforeAfterOfFile } from "@lix-js/sdk";
 import { Node, DOMSerializer } from "prosemirror-model";
 import { schema } from "../prosemirror/schema";
 import { renderUniversalDiff } from "@lix-js/universal-diff";
@@ -29,7 +29,7 @@ export function DiffView() {
 
 				const { beforeCsId, afterCsId } = diffView;
 
-				const { before, after } = await beforeAfterOfFile({
+				const { before, after } = await getBeforeAfterOfFile({
 					lix,
 					changeSetBefore: beforeCsId ? { id: beforeCsId } : undefined,
 					changeSetAfter: afterCsId ? { id: afterCsId } : undefined,

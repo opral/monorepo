@@ -6,6 +6,8 @@ import { applyOwnChanges } from "../own-change-control/apply-own-change.js";
 /**
  * Applies the given changes to the lix.
  *
+ * @deprecated Use `applyChangeSet()` instead
+ *
  * Calls the `applyChanges` method of the corresponding plugin for each change.
  * **Carefull**, the changes are not validated before applying them. It is up to
  * the caller to ensure that the changes are valid. Usually, only the leaf changes

@@ -5,6 +5,8 @@ import type { SqlBool } from "kysely";
 /**
  * Filters if a change is in the given Version.
  *
+ * @deprecated Use `changeSetElementInAncestryOf` instead
+ *
  * @example
  *   ```ts
  *   const changes = await lix.db.selectFrom("change")

@@ -19,7 +19,7 @@ import type { ChangeSet } from "./database-schema.js";
  *
  * @returns A Promise resolving to the newly created ChangeSet representing the merged state.
  */
-export async function mergeChangeSets(args: {
+export async function createMergeChangeSet(args: {
 	lix: Lix;
 	source: Pick<ChangeSet, "id">;
 	target: Pick<ChangeSet, "id">;

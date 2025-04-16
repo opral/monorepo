@@ -26,7 +26,7 @@ import type { ChangeSet } from "./database-schema.js";
  *
  *   renderDiff(before, after);
  */
-export async function beforeAfterOfFile(args: {
+export async function getBeforeAfterOfFile(args: {
 	lix: Lix;
 	changeSetBefore?: Pick<ChangeSet, "id">;
 	changeSetAfter?: Pick<ChangeSet, "id">;

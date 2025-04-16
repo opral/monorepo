@@ -4,6 +4,8 @@ import type { Version, LixDatabaseSchema } from "../database/schema.js";
 /**
  * Returns the difference between two versions for the version_change table.
  *
+ * @deprecated Use `changeSetElementInAncestryOf` instead
+ *
  * The difference is the set of changes that exist in version `a` but not in version `b`.
  * Modeled after https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/difference
  *

@@ -194,7 +194,7 @@ const getChanges = async (
 			"change.id"
 		)
 		.where("change.schema_key", "=", CellSchemaV1.key)
-		.where(changeHasLabel("checkpoint"))
+		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
@@ -241,7 +241,7 @@ const getChanges = async (
 				.innerJoin("change_edge", "change_edge.parent_id", "change.id")
 				.where("change_edge.child_id", "=", change.id)
 				.where(changeInVersion(currentVersion))
-				.where(changeHasLabel("checkpoint"))
+				.where(changeHasLabel({ name: "checkpoint" }))
 				.selectAll("change")
 				.select("snapshot.content")
 				.executeTakeFirst();
@@ -273,7 +273,7 @@ const getIntermediateChanges = async (
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("change.file_id", "=", fileId)
 		.where(changeIsLeafInVersion(currentVersion))
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.selectAll("change")
 		.select("snapshot.content")
@@ -300,7 +300,7 @@ const getIntermediateChanges = async (
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where("change.entity_id", "=", change.entity_id)
-				.where(changeHasLabel("checkpoint"))
+				.where(changeHasLabel({ name: "checkpoint" }))
 				.where(changeInVersion(currentVersion))
 				// TODO fix the filter
 				// https://github.com/opral/lix-sdk/issues/151

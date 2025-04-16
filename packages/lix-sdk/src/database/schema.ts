@@ -33,6 +33,9 @@ export type LixDatabaseSchema = {
 
 	// change
 	change: ChangeTable;
+	/**
+	 * @deprecated Use `change_set_edge` instead
+	 */
 	change_edge: ChangeEdgeTable;
 	change_author: ChangeAuthorTable;
 
@@ -53,20 +56,35 @@ export type LixDatabaseSchema = {
 	comment: CommentTable;
 
 	// version
+	/**
+	 * @deprecated Use `active_version` instead
+	 */
 	current_version: CurrentVersionTable;
+	/**
+	 * @deprecated Use `version_v2` instead
+	 */
 	version: VersionTable;
+	/**
+	 * @deprecated Versions point to change sets directly in lix v0.5
+	 */
 	version_change: VersionChangeTable;
+	/**
+	 * @deprecated Conflicts will be modelled differently in lix v0.5 and above
+	 */
 	version_change_conflict: VersionChangeConflictTable;
 
 	// version v2
 	version_v2: VersionV2Table;
+	active_version: ActiveVersionTable;
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
 
+	/**
+	 * @deprecated Lix tracks its own changes.
+	 */
 	mutation_log: MutationLogTable;
-	active_version: ActiveVersionTable;
 };
 
 // named lix file to avoid conflict with built-in file type
@@ -176,7 +194,7 @@ type LabelTable = {
 	name: string;
 };
 
-// ------ versiones ------
+// ------ version ------
 
 export type Version = Selectable<VersionTable>;
 export type Newversion = Insertable<VersionTable>;
