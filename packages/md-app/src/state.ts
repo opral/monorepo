@@ -1,9 +1,9 @@
 import {
-	Version,
 	openLixInMemory,
 	Account,
 	switchAccount,
 	Lix,
+	VersionV2,
 } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -224,15 +224,15 @@ export const withPollingAtom = atom(Date.now());
  */
 export const editorRefAtom = atom<any>(null);
 
-export const currentVersionAtom = atom<Promise<Version | null>>(async (get) => {
+export const currentVersionAtom = atom<Promise<VersionV2 | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return null;
 
 	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "version.id", "current_version.id")
-		.selectAll("version")
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
 	return currentVersion;

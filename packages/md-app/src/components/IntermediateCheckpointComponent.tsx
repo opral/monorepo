@@ -5,8 +5,7 @@ import { checkpointChangeSetsAtom, intermediateChangeIdsAtom, intermediateChange
 import { useAtom } from "jotai/react";
 import { Input } from "@/components/plate-ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
-import { createCheckpoint } from "@/helper/createCheckpoint.ts";
+import { createDiscussion, UiDiffComponentProps, createCheckpoint } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";

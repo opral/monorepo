@@ -4,11 +4,11 @@ import {
 	newLixFile,
 	openLixInMemory,
 	toBlob,
+	createCheckpoint,
 	createDiscussion,
 } from "@lix-js/sdk";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { switchActiveAccount } from "@/state";
-import { createCheckpoint } from "./createCheckpoint";
 
 /**
  * Executes a function as the Flashtype account and then restores the original account
@@ -113,13 +113,7 @@ export const setupMdWelcome = async (lix: Lix) => {
 };
 
 const createInitialCheckpoint = async (lix: Lix) => {
-	const changeIds = await lix.db
-		.selectFrom("change")
-		.select("change.id")
-		.execute();
-
-	// Now create the checkpoint with the Flashtype account
-	const changeSet = await createCheckpoint(lix, changeIds);
+	const changeSet = await createCheckpoint({ lix });
 	await createDiscussion({
 		lix,
 		changeSet,
