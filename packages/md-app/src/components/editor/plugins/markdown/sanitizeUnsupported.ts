@@ -246,7 +246,7 @@ function sanatizeUnknownNodeStructures(node: TreeNode, file: any): boolean {
 
 export function sanatizeUnknownNodeStructuresInTree() {
 	return (rootNode: any, file: any) => {
-		debugger;
+		// debugger;
 		for (const node of rootNode.children) {
 			sanatizeUnknownNodeStructures(node, file);
 		}
