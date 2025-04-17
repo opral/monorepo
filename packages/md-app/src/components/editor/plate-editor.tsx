@@ -55,8 +55,9 @@ export function PlateEditor() {
 					return;
 				}
 
-				const isWelcomeFile = loadedMd === welcomeMd;
-				const isEmptyFile = loadedMd === "";
+				// is more or less the same as the welcome file
+				const isWelcomeFile = loadedMd === welcomeMd || activeFile.path === "/welcome.md";
+				const isEmptyFile = loadedMd === "" || loadedMd === "<br />\n";
 
 				if (isWelcomeFile || isEmptyFile) {
 					insertEmptyPromptElement(editor);
