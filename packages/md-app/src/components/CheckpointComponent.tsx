@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/plate-ui/avatar.tsx";
 import { Button } from "@/components/plate-ui/button.tsx";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/plate-ui/tooltip.tsx";
@@ -10,23 +10,22 @@ import { ChangeSet, createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
 import { useAtom } from "jotai/react";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { getChangeDiffs } from "@/state-active-file.ts";
+import { getChangeDiffs, getDiscussion } from "@/state-active-file.ts";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { ChevronDown } from "lucide-react";
 
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
     id: string;
-    discussion_id: string | null;
-    first_comment_content: string | null;
+    created_at: string;
     author_name: string;
-    checkpoint_created_at: string | null;
   }
   showTopLine: boolean;
   showBottomLine: boolean;
 }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
+  const [discussion, setDiscussion] = useState<any>(undefined);
 
   // Don't render anything if there's no change data
   if (!props.checkpointChangeSet || !props.checkpointChangeSet.id) {
@@ -41,8 +40,12 @@ export const CheckpointComponent = (props: {
 
     getChangeDiffs(props.checkpointChangeSet.id).then((diffs) => {
       setDiffs(diffs);
-      setIsExpanded(true);
     });
+    getDiscussion(props.checkpointChangeSet.id).then((discussion) => {
+      if (discussion) setDiscussion(discussion);
+    })
+
+    setIsExpanded(true);
   };
 
   // Group changes by plugin_key
@@ -94,7 +97,7 @@ export const CheckpointComponent = (props: {
 
             <div className="flex items-center flex-shrink-0">
               <span className="text-xs text-slate-500 mr-1">
-                {timeAgo(props.checkpointChangeSet.checkpoint_created_at!)}
+                {timeAgo(props.checkpointChangeSet.created_at!)}
               </span>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                 <ChevronDown
@@ -109,7 +112,7 @@ export const CheckpointComponent = (props: {
 
           <div className="pb-2">
             <p className="text-sm text-slate-500 truncate text-ellipsis overflow-hidden pr-2">
-              {props.checkpointChangeSet.first_comment_content || "Create checkpoint"}
+              {discussion?.comments[0]?.content || "Create checkpoint"}
             </p>
           </div>
         </div>

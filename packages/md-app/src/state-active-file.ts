@@ -179,6 +179,15 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 				.select("change.created_at")
 				.as("created_at")
 		)
+		.select((eb) =>
+			eb
+				.selectFrom("change_author")
+				.innerJoin("change", "change.id", "change_author.change_id")
+				.innerJoin("account", "account.id", "change_author.account_id")
+				.whereRef("change.entity_id", "=", "change_set.id")
+				.select("account.name")
+				.as("author_name")
+		)
 		.orderBy("created_at", "desc")
 		.execute();
 });
