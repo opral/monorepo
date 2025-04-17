@@ -82,8 +82,8 @@ function PageContent() {
 
 export default function Page() {
 	useUrlChangeListener();
-	const [leftOpen, setLeftOpen] = useState(true);
-	const [rightOpen, setRightOpen] = useState(true);
+	const [leftOpen, setLeftOpen] = useState(false);
+	const [rightOpen, setRightOpen] = useState(false);
 
 	return (
 		<div className="w-full h-full">
