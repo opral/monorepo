@@ -16,6 +16,7 @@ import {
 	changeSetHasLabel,
 	changeSetIsAncestorOf,
 	jsonArrayFrom,
+	Lix,
 	sql,
 	UiDiffComponentProps,
 } from "@lix-js/sdk";
@@ -199,13 +200,10 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 });
 
 export const getChangeDiffs = async (
+	lix: Lix,
+	activeFileId: string,
 	changeSetId: string
 ): Promise<UiDiffComponentProps["diffs"]> => {
-	const lix = await store.get(lixAtom);
-	const activeFile = await store.get(activeFileAtom);
-
-	if (!lix || !activeFile) return [];
-
 	const checkpointChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -228,7 +226,7 @@ export const getChangeDiffs = async (
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where(changeSetElementInAncestryOf([{ id: changeSetId }]))
 		.where(changeHasLabel({ name: "checkpoint" }))
-		.where("change.file_id", "=", activeFile.id)
+		.where("change.file_id", "=", activeFileId)
 		.select("change.id")
 		.select("change.created_at")
 		.select("change.plugin_key")
@@ -253,7 +251,7 @@ export const getChangeDiffs = async (
 					.where("ancestors.created_at", "<", change.created_at) // Ensure the ancestor is before the change
 					.where("ancestors.entity_id", "=", change.entity_id)
 					.where("ancestors.schema_key", "=", change.schema_key)
-					.where("ancestors.file_id", "=", activeFile.id)
+					.where("ancestors.file_id", "=", activeFileId)
 					.where(changeHasLabel({ name: "checkpoint" }))
 					// .where(changeInVersion(currentVersion))
 					.orderBy("ancestors.created_at", "desc")

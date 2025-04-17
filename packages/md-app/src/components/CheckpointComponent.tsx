@@ -52,7 +52,7 @@ export const CheckpointComponent = (props: {
       setIsExpanded(!isExpanded);
       return;
     }
-    getChangeDiffs(props.checkpointChangeSet.id).then((diffs) => {
+    getChangeDiffs(lix, activeFile!.id, props.checkpointChangeSet.id).then((diffs) => {
       setDiffs(diffs);
     });
     // TODO: diff needs to hanndle before and after file
