@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/plate-ui/button";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, intermediateChangesAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, getDiscussion, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "@/components/plate-ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { createDiscussion, UiDiffComponentProps, createCheckpoint } from "@lix-js/sdk";
+import { createDiscussion, UiDiffComponentProps, createCheckpoint, createComment, ChangeSet } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
@@ -92,15 +92,49 @@ const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const [lix] = useAtom(lixAtom);
 
+  const handleAddComment = async (changeSet: ChangeSet) => {
+    if (!description.trim()) return;
+
+    const discussion = await getDiscussion(changeSet?.id);
+    try {
+      if (!discussion) {
+        await createDiscussion({
+          lix,
+          changeSet,
+          firstComment: { content: description },
+        });
+      } else {
+        // Add to existing discussion
+        const lastComment = discussion.comments[discussion.comments.length - 1];
+        if (!lastComment) {
+          throw new Error("No existing comments found");
+        }
+
+        await createComment({
+          lix,
+          parentComment: lastComment,
+          content: description,
+        });
+      }
+
+      // Clear the input field
+      setDescription("");
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  };
+
   const handleCreateCheckpoint = async () => {
     const changeSet = await createCheckpoint({ lix });
-    if (description !== "") {
-      await createDiscussion({
-        lix,
-        changeSet,
-        firstComment: { content: description },
-      });
-      await saveLixToOpfs({ lix });
+    handleAddComment(changeSet);
+    await saveLixToOpfs({ lix });
+  };
+
+  // Handle key down in the comment textarea
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleCreateCheckpoint();
     }
   };
 
@@ -110,6 +144,9 @@ const CreateCheckpointInput = () => {
         className="flex-grow pl-2 bg-background text-sm placeholder:text-sm"
         placeholder="Describe the changes"
         onInput={(event: any) => setDescription(event.target?.value)}
+        onKeyDown={handleKeyDown}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
       ></Input>
       <Button onClick={handleCreateCheckpoint}>
         Create checkpoint
