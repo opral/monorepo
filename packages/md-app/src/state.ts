@@ -5,7 +5,7 @@ import {
 	Lix,
 	VersionV2,
 } from "@lix-js/sdk";
-import { atom } from "jotai";
+import { atom, createStore } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
@@ -13,6 +13,8 @@ import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 import { initLixInspector } from "@lix-js/inspector";
+
+export const store = createStore();
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -224,18 +226,18 @@ export const withPollingAtom = atom(Date.now());
  */
 export const editorRefAtom = atom<any>(null);
 
-export const currentVersionAtom = atom<Promise<VersionV2 | null>>(async (get) => {
+export const activeVersionAtom = atom<Promise<VersionV2 | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return null;
 
-	const currentVersion = await lix.db
+	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
 		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
-	return currentVersion;
+	return activeVersion;
 });
 
 export const existingVersionsAtom = atom(async (get) => {

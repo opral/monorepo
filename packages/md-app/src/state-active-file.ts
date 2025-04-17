@@ -7,14 +7,15 @@ import {
 	lixAtom,
 	fileIdSearchParamsAtom,
 	withPollingAtom,
-	currentVersionAtom,
-	discussionSearchParamsAtom,
+	activeVersionAtom,
+	store,
 } from "./state.ts";
 import {
 	changeHasLabel,
 	changeSetElementInAncestryOf,
+	changeSetHasLabel,
+	changeSetIsAncestorOf,
 	jsonArrayFrom,
-	Lix,
 	sql,
 	UiDiffComponentProps,
 } from "@lix-js/sdk";
@@ -53,6 +54,33 @@ export const loadedMdAtom = atom(async (get) => {
 	return data;
 });
 
+/**
+ * Special change set which describes the current changes
+ * that are not yet checkpointed.
+ */
+export const workingChangeSetAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	if (!lix || !activeFile) return null;
+
+	return await lix.db
+		.selectFrom("change_set")
+		// left join in case the change set has no elements
+		.leftJoin(
+			"change_set_element",
+			"change_set.id",
+			"change_set_element.change_set_id"
+		)
+		.where("file_id", "=", activeFile.id)
+		.selectAll("change_set")
+		.groupBy("change_set.id")
+		.select((eb) => [
+			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		])
+		.executeTakeFirst();
+});
+
 // The file manager app treats changes that are not in a change set as intermediate changes.
 export const intermediateChangesAtom = atom<
 	Promise<UiDiffComponentProps["diffs"]>
@@ -60,7 +88,7 @@ export const intermediateChangesAtom = atom<
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentVersion = await get(currentVersionAtom);
+	const currentVersion = await get(activeVersionAtom);
 	if (!currentVersion || !activeFile) return [];
 
 	const intermediateLeafChanges = await lix.db
@@ -118,47 +146,89 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	if (!activeFile) return [];
+	const activeVersion = await get(activeVersionAtom);
+	if (!activeFile || !activeVersion) return [];
 
-	const checkpointChangeSets = await lix.db
+	return await lix.db
 		.selectFrom("change_set")
-		.innerJoin(
+		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.where(
+			changeSetIsAncestorOf(
+				{ id: activeVersion.change_set_id },
+				// in case the checkpoint is the active version's change set
+				{ includeSelf: true }
+			)
+		)
+		// left join in case the change set has no elements
+		.leftJoin(
 			"change_set_element",
-			"change_set_element.change_set_id",
-			"change_set.id"
+			"change_set.id",
+			"change_set_element.change_set_id"
 		)
-		.leftJoin("change", "change.id", "change_set_element.change_id")
-		.innerJoin("change as own_change", (join) =>
-			join
-				.onRef("own_change.entity_id", "=", "change_set.id")
-				.on("own_change.schema_key", "=", "lix_change_set_table")
-		)
-		.innerJoin("change_author", "own_change.id", "change_author.change_id")
-		.innerJoin("account", "change_author.account_id", "account.id")
-		.leftJoin("discussion", "discussion.change_set_id", "change_set.id")
-		// Join with the `comment` table, filtering for first-level comments
-		.leftJoin("comment", "comment.discussion_id", "discussion.id")
-		.where("comment.parent_id", "is", null) // Filter to get only the first comment
-		.where(changeHasLabel({ name: "checkpoint" }))
-		.where("change.file_id", "=", activeFile.id)
+		.where("file_id", "=", activeFile.id)
+		.selectAll("change_set")
 		.groupBy("change_set.id")
-		.orderBy("change.created_at", "desc")
-		.select("change_set.id")
-		.select("discussion.id as discussion_id")
-		.select("comment.content as first_comment_content") // Get the first comment's content
-		.select("account.name as author_name")
-		.select("own_change.created_at as checkpoint_created_at") // Get the change set's creation time
+		.select((eb) => [
+			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		])
+		.select((eb) =>
+			eb
+				.selectFrom("change")
+				.where("change.schema_key", "=", "lix_change_set_table")
+				.whereRef("change.entity_id", "=", "change_set.id")
+				.select("change.created_at")
+				.as("created_at")
+		)
+		.orderBy("created_at", "desc")
 		.execute();
-
-	return checkpointChangeSets;
 });
 
+// export const checkpointChangeSetsAtom = atom(async (get) => {
+// 	get(withPollingAtom);
+// 	const lix = await get(lixAtom);
+// 	const activeFile = await get(activeFileAtom);
+// 	if (!activeFile) return [];
+
+// 	const checkpointChangeSets = await lix.db
+// 		.selectFrom("change_set")
+// 		.innerJoin(
+// 			"change_set_element",
+// 			"change_set_element.change_set_id",
+// 			"change_set.id"
+// 		)
+// 		.leftJoin("change", "change.id", "change_set_element.change_id")
+// 		.innerJoin("change as own_change", (join) =>
+// 			join
+// 				.onRef("own_change.entity_id", "=", "change_set.id")
+// 				.on("own_change.schema_key", "=", "lix_change_set_table")
+// 		)
+// 		.innerJoin("change_author", "own_change.id", "change_author.change_id")
+// 		.innerJoin("account", "change_author.account_id", "account.id")
+// 		.leftJoin("discussion", "discussion.change_set_id", "change_set.id")
+// 		// Join with the `comment` table, filtering for first-level comments
+// 		.leftJoin("comment", "comment.discussion_id", "discussion.id")
+// 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
+// 		.where(changeHasLabel({ name: "checkpoint" }))
+// 		.where("change.file_id", "=", activeFile.id)
+// 		.groupBy("change_set.id")
+// 		.orderBy("change.created_at", "desc")
+// 		.select("change_set.id")
+// 		.select("discussion.id as discussion_id")
+// 		.select("comment.content as first_comment_content") // Get the first comment's content
+// 		.select("account.name as author_name")
+// 		.select("own_change.created_at as checkpoint_created_at") // Get the change set's creation time
+// 		.execute();
+
+// 	return checkpointChangeSets;
+// });
+
 export const getChangeDiffs = async (
-	lix: Lix,
-	changeSetId: string,
-	activeFile: { id: string } | null
+	changeSetId: string
 ): Promise<UiDiffComponentProps["diffs"]> => {
-	if (!activeFile) return [];
+	const lix = await store.get(lixAtom);
+	const activeFile = await store.get(activeFileAtom);
+
+	if (!lix || !activeFile) return [];
 
 	const checkpointChanges = await lix.db
 		.selectFrom("change")
@@ -237,63 +307,25 @@ export const getChangeDiffs = async (
 	return changesWithBeforeSnapshot;
 };
 
-export const allEdgesAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	const activeFile = await get(activeFileAtom);
-	if (!activeFile) return [];
+export const getDiscussion = async (changeSetId: string) => {
+	const lix = await store.get(lixAtom);
+	if (!changeSetId || !lix) return null;
+
 	return await lix.db
-		.selectFrom("change_edge")
-		.innerJoin("change", "change.id", "change_edge.parent_id")
-		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_edge")
-		.execute();
-});
-
-export const selectedChangeIdsAtom = atom<string[]>([]);
-
-export const activeDiscussionAtom = atom(async (get) => {
-	const lix = await get(lixAtom);
-	const currentVersion = await get(currentVersionAtom);
-	const fileIdSearchParams = get(fileIdSearchParamsAtom);
-	if (!fileIdSearchParams || !currentVersion) return null;
-	const discussionSearchParams = await get(discussionSearchParamsAtom);
-	if (!discussionSearchParams) return null;
-
-	// Fetch the discussion and its comments in a single query
-	const discussionWithComments = await lix.db
 		.selectFrom("discussion")
-		.where("discussion.id", "=", discussionSearchParams)
+		.where("change_set_id", "=", changeSetId)
 		.select((eb) => [
-			"discussion.id",
 			jsonArrayFrom(
 				eb
 					.selectFrom("comment")
-					.innerJoin("change", (join) =>
-						join
-							.onRef("change.entity_id", "=", "comment.id")
-							.on("change.schema_key", "=", "lix_comment_table")
-					)
-					// .where(changeInVersion(currentVersion))
-					.leftJoin("change_author", "change_author.change_id", "change.id")
+					.select(["comment.content", "comment.id", "comment.discussion_id"])
+					.innerJoin("change", "change.entity_id", "comment.id")
+					.innerJoin("change_author", "change_author.change_id", "change.id")
 					.innerJoin("account", "account.id", "change_author.account_id")
-					.select([
-						"comment.id",
-						"comment.content",
-						"change.created_at",
-						"account.id as account_id",
-						"account.name as account_name",
-						// "comment.created_at",
-						// "account.id as account_id",
-						// "account.name as account_name",
-					])
+					.select(["change.created_at", "account.name as author_name"])
 					.whereRef("comment.discussion_id", "=", "discussion.id")
-					.orderBy("change.created_at", "asc")
 			).as("comments"),
 		])
-		.execute();
-
-	if (!discussionWithComments.length) return null;
-
-	return discussionWithComments[0];
-});
+		.selectAll("discussion")
+		.executeTakeFirst();
+};
