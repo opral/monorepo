@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/plate-ui/avatar.tsx";
 import { Button } from "@/components/plate-ui/button.tsx";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/plate-ui/tooltip.tsx";
@@ -29,6 +29,17 @@ export const CheckpointComponent = (props: {
   const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
   const [discussion, setDiscussion] = useState<any>(undefined);
 
+  useEffect(() => {
+    const fetchDiscussion = async () => {
+      if (props.checkpointChangeSet.id) {
+        const discussion = await getDiscussion(props.checkpointChangeSet.id);
+        if (discussion) setDiscussion(discussion);
+      }
+    };
+
+    fetchDiscussion();
+  }, []);
+
   // Don't render anything if there's no change data
   if (!props.checkpointChangeSet || !props.checkpointChangeSet.id) {
     return null;
@@ -39,13 +50,9 @@ export const CheckpointComponent = (props: {
       setIsExpanded(!isExpanded);
       return;
     }
-
     getChangeDiffs(props.checkpointChangeSet.id).then((diffs) => {
       setDiffs(diffs);
     });
-    getDiscussion(props.checkpointChangeSet.id).then((discussion) => {
-      if (discussion) setDiscussion(discussion);
-    })
 
     setIsExpanded(true);
   };
