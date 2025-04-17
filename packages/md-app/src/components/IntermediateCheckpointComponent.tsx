@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/plate-ui/button";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, getDiscussion, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, getDiscussion, intermediateChangesAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "@/components/plate-ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
@@ -126,7 +126,7 @@ const CreateCheckpointInput = () => {
 
   const handleCreateCheckpoint = async () => {
     const changeSet = await createCheckpoint({ lix });
-    handleAddComment(changeSet);
+    await handleAddComment(changeSet);
     await saveLixToOpfs({ lix });
   };
 
