@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/plate-ui/avatar.tsx";
 import { Button } from "@/components/plate-ui/button.tsx";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/plate-ui/tooltip.tsx";
@@ -17,8 +17,10 @@ import { ChevronDown } from "lucide-react";
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
     id: string;
-    created_at: string;
-    author_name: string;
+    immutable_elements: boolean;
+    change_count: number;
+    created_at: string | null;
+    author_name: string | null;
   }
   showTopLine: boolean;
   showBottomLine: boolean;
