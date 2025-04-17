@@ -107,3 +107,25 @@ test("portable text italic (em) passes", async () => {
 	const result = [...Value.Errors(PapierAstJsonSchema, examplePortableText)];
 	expect(result).toEqual([]);
 });
+
+test("account mention passes", async () => {
+	const examplePortableText = [
+		{
+			_type: "block",
+			_key: "4ee4134378b1",
+			style: "normal",
+			markDefs: [],
+			children: [
+				{
+					_type: "span",
+					_key: "e60571e00344",
+					text: "Hello world",
+					marks: ["accountMention"],
+				},
+			],
+		},
+	];
+
+	const result = [...Value.Errors(PapierAstJsonSchema, examplePortableText)];
+	expect(result).toEqual([]);
+});

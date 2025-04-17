@@ -1,8 +1,8 @@
 {
-	"name": "@opral/papier-ast",
+	"name": "@opral/papier-file-format",
 	"type": "module",
 	"version": "0.1.0",
-	"license": "Apache-2.0",
+	"license": "MIT",
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js"
@@ -15,9 +15,8 @@
 	"scripts": {
 		"dev": "tsc --watch",
 		"build": "tsc --build",
-		"test": "tsc --noEmit && vitest run --coverage",
+		"test": "tsc --noEmit && vitest run --coverage --passWithNoTests",
 		"test:watch": "vitest",
-		"lint": "eslint src/**/* --fix",
 		"format": "prettier ./src --write"
 	},
 	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
@@ -26,17 +25,13 @@
 		"node": ">=20"
 	},
 	"dependencies": {
-		"@sinclair/typebox": "^0.34.33"
+		"@opral/papier-ast": "workspace:*"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.12.0",
 		"@opral/tsconfig": "workspace:*",
-		"@portabletext/types": "^2.0.13",
 		"@vitest/coverage-v8": "3.1.1",
-		"eslint": "^9.12.0",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.4",
-		"typescript-eslint": "^8.9.0",
 		"vitest": "3.1.1"
 	}
 }

@@ -2,7 +2,7 @@ packages:
   - 'inlang/packages/**/*'
   - 'lix/packages/**/*'
   - "!**/*/dist"
-  - 'packages/*'
+  - 'packages/**/*'
   - 'packages/*/example'
   - 'packages/*/examples/*'
   
