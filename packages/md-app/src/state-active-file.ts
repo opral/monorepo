@@ -174,8 +174,14 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 		.select((eb) =>
 			eb
 				.selectFrom("change")
-				.where("change.schema_key", "=", "lix_change_set_table")
-				.whereRef("change.entity_id", "=", "change_set.id")
+				.where("change.schema_key", "=", "lix_change_set_label_table")
+				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.where(
+					// @ts-expect-error - this is a workaround for the type system
+					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					"=",
+					eb.ref("change_set.id")
+				)
 				.select("change.created_at")
 				.as("created_at")
 		)
