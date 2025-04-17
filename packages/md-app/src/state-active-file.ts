@@ -281,8 +281,7 @@ export const getChangeDiffs = async (
 	return changesWithBeforeSnapshot;
 };
 
-export const getDiscussion = async (changeSetId: string) => {
-	const lix = await store.get(lixAtom);
+export const getDiscussion = async (lix: Lix, changeSetId: string) => {
 	if (!changeSetId || !lix) return null;
 
 	return await lix.db

@@ -34,7 +34,7 @@ export const CheckpointComponent = (props: {
   useEffect(() => {
     const fetchDiscussion = async () => {
       if (props.checkpointChangeSet.id) {
-        const discussion = await getDiscussion(props.checkpointChangeSet.id);
+        const discussion = await getDiscussion(lix, props.checkpointChangeSet.id);
         if (discussion) setDiscussion(discussion);
       }
     };
