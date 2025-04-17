@@ -82,19 +82,38 @@ function PageContent() {
 
 export default function Page() {
 	useUrlChangeListener();
-	const [leftOpen, setLeftOpen] = useState(false);
-	const [rightOpen, setRightOpen] = useState(false);
+
+	// Initialize sidebar states from localStorage with defaults
+	const [leftOpen, setLeftOpen] = useState(() => {
+		const savedValue = localStorage.getItem('flashtype:sidebar:left');
+		return savedValue !== null ? savedValue === 'true' : false; // default to false if not set
+	});
+
+	const [rightOpen, setRightOpen] = useState(() => {
+		const savedValue = localStorage.getItem('flashtype:sidebar:right');
+		return savedValue !== null ? savedValue === 'true' : false; // default to false if not set
+	});
+
+	// Update localStorage when sidebar states change
+	const handleLeftSidebarChange = (open: boolean) => {
+		localStorage.setItem('flashtype:sidebar:left', String(open));
+		setLeftOpen(open);
+	};
+
+	const handleRightSidebarChange = (open: boolean) => {
+		localStorage.setItem('flashtype:sidebar:right', String(open));
+		setRightOpen(open);
+	};
 
 	return (
 		<div className="w-full h-full">
-			{/* MultiSidebarProvider properly configured */}
 			<MultiSidebarProvider
 				defaultLeftOpen={leftOpen}
 				defaultRightOpen={rightOpen}
 				leftOpen={leftOpen}
 				rightOpen={rightOpen}
-				onLeftOpenChange={setLeftOpen}
-				onRightOpenChange={setRightOpen}
+				onLeftOpenChange={handleLeftSidebarChange}
+				onRightOpenChange={handleRightSidebarChange}
 			>
 				<PageContent />
 			</MultiSidebarProvider>
