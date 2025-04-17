@@ -167,18 +167,18 @@ export const lixAtom = atom(async (get) => {
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
 	// : "http://localhost:3000";
-	const serverUrl = import.meta.env.PROD
-		? "https://lix.host"
-		: "http://localhost:3000";
+	// const serverUrl = import.meta.env.PROD
+	// 	? "https://lix.host"
+	// 	: "http://localhost:3000";
 
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_server_url",
-			value: serverUrl,
-		})
-		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
-		.execute();
+	// await lix.db
+	// 	.insertInto("key_value")
+	// 	.values({
+	// 		key: "lix_server_url",
+	// 		value: serverUrl,
+	// 	})
+	// 	.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
+	// 	.execute();
 
 	// Check if there is a file in lix
 	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
@@ -211,6 +211,20 @@ export const lixAtom = atom(async (get) => {
 		await initLixInspector({ lix });
 	}
 
+	// lix.sqlite.createFunction("handle_save_lix_to_opfs", () => {
+	// 	saveLixToOpfs({ lix });
+	// 	return 0;
+	// });
+
+	// lix.sqlite.exec(`
+	// 	CREATE TEMP TRIGGER IF NOT EXISTS handle_save_lix_to_opfs
+	// 	AFTER UPDATE ON version_v2
+	// 	WHEN OLD.change_set_id != NEW.change_set_id
+	// 	BEGIN
+	// 		SELECT handle_save_lix_to_opfs();
+	// 	END;
+	// 	`);
+
 	return lix;
 });
 
@@ -226,19 +240,21 @@ export const withPollingAtom = atom(Date.now());
  */
 export const editorRefAtom = atom<any>(null);
 
-export const activeVersionAtom = atom<Promise<VersionV2 | null>>(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	if (!lix) return null;
+export const activeVersionAtom = atom<Promise<VersionV2 | null>>(
+	async (get) => {
+		get(withPollingAtom);
+		const lix = await get(lixAtom);
+		if (!lix) return null;
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
-		.executeTakeFirstOrThrow();
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+			.selectAll("version_v2")
+			.executeTakeFirstOrThrow();
 
-	return activeVersion;
-});
+		return activeVersion;
+	}
+);
 
 export const existingVersionsAtom = atom(async (get) => {
 	get(withPollingAtom);
