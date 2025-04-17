@@ -6,12 +6,11 @@ import { Input } from "@/components/plate-ui/input.tsx";
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
-import { ChangeSet, createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
+import { ChangeSet, createDiscussion, getBeforeAfterOfFile, UiDiffComponentProps } from "@lix-js/sdk";
 import { useAtom } from "jotai/react";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { getChangeDiffs, getDiscussion } from "@/state-active-file.ts";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
+import { activeFileAtom, getChangeDiffs, getDiscussion } from "@/state-active-file.ts";
 import { ChevronDown } from "lucide-react";
 
 export const CheckpointComponent = (props: {
@@ -22,12 +21,15 @@ export const CheckpointComponent = (props: {
     created_at: string | null;
     author_name: string | null;
   }
+  previousChangeSetId: string | null;
   showTopLine: boolean;
   showBottomLine: boolean;
 }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
   const [discussion, setDiscussion] = useState<any>(undefined);
+  const [lix] = useAtom(lixAtom);
+  const [activeFile] = useAtom(activeFileAtom);
 
   useEffect(() => {
     const fetchDiscussion = async () => {
@@ -53,6 +55,15 @@ export const CheckpointComponent = (props: {
     getChangeDiffs(props.checkpointChangeSet.id).then((diffs) => {
       setDiffs(diffs);
     });
+    // TODO: diff needs to hanndle before and after file
+    // getBeforeAfterOfFile({
+    //   lix,
+    //   changeSetBefore: props.previousChangeSetId ? { id: props.previousChangeSetId } : undefined,
+    //   changeSetAfter: props.checkpointChangeSet.id ? { id: props.checkpointChangeSet.id } : undefined,
+    //   file: { id: activeFile!.id },
+    // }).then((diffs) => {
+    //   setDiffs([diffs]);
+    // });
 
     setIsExpanded(true);
   };
@@ -170,7 +181,6 @@ const CreateCheckpointDiscussion = (props: {
         changeSet: props.changeSetId,
         firstComment: { content: description },
       });
-      await saveLixToOpfs({ lix });
     }
   };
 
