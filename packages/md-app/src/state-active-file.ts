@@ -192,45 +192,6 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 		.execute();
 });
 
-// export const checkpointChangeSetsAtom = atom(async (get) => {
-// 	get(withPollingAtom);
-// 	const lix = await get(lixAtom);
-// 	const activeFile = await get(activeFileAtom);
-// 	if (!activeFile) return [];
-
-// 	const checkpointChangeSets = await lix.db
-// 		.selectFrom("change_set")
-// 		.innerJoin(
-// 			"change_set_element",
-// 			"change_set_element.change_set_id",
-// 			"change_set.id"
-// 		)
-// 		.leftJoin("change", "change.id", "change_set_element.change_id")
-// 		.innerJoin("change as own_change", (join) =>
-// 			join
-// 				.onRef("own_change.entity_id", "=", "change_set.id")
-// 				.on("own_change.schema_key", "=", "lix_change_set_table")
-// 		)
-// 		.innerJoin("change_author", "own_change.id", "change_author.change_id")
-// 		.innerJoin("account", "change_author.account_id", "account.id")
-// 		.leftJoin("discussion", "discussion.change_set_id", "change_set.id")
-// 		// Join with the `comment` table, filtering for first-level comments
-// 		.leftJoin("comment", "comment.discussion_id", "discussion.id")
-// 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
-// 		.where(changeHasLabel({ name: "checkpoint" }))
-// 		.where("change.file_id", "=", activeFile.id)
-// 		.groupBy("change_set.id")
-// 		.orderBy("change.created_at", "desc")
-// 		.select("change_set.id")
-// 		.select("discussion.id as discussion_id")
-// 		.select("comment.content as first_comment_content") // Get the first comment's content
-// 		.select("account.name as author_name")
-// 		.select("own_change.created_at as checkpoint_created_at") // Get the change set's creation time
-// 		.execute();
-
-// 	return checkpointChangeSets;
-// });
-
 export const getChangeDiffs = async (
 	changeSetId: string
 ): Promise<UiDiffComponentProps["diffs"]> => {
