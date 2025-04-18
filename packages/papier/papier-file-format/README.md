@@ -1,10 +1,5 @@
-# [PLACEHOLDER] Papier File Format
+# 📄 [PLACEHOLDER] Papier file format
 
-The file format built on top of the Papier AST.
+Spec and parser for the papier file format that is used by [Papier](https://github.com/opral/monorepo/packages/papier/papier-app).
 
-- stores assets (images, videos, components, etc.) referenced in the AST
-- uses lix for change control
-
-## Goal
-
-Watch this video https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312
+The file format uses the [Zettel AST](https://github.com/opral/monorepo/packages/zettel/zettel-ast) to represent the document content and lix for persistence of assets and change control.

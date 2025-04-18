@@ -1,5 +1,5 @@
 {
-	"name": "@opral/papier-editor",
+	"name": "@opral/zettel-ast",
 	"type": "module",
 	"version": "0.1.0",
 	"license": "MIT",
@@ -15,7 +15,7 @@
 	"scripts": {
 		"dev": "tsc --watch",
 		"build": "tsc --build",
-		"test": "tsc --noEmit && vitest run --coverage --passWithNoTests",
+		"test": "tsc --noEmit && vitest run --coverage",
 		"test:watch": "vitest",
 		"format": "prettier ./src --write"
 	},
@@ -25,10 +25,11 @@
 		"node": ">=20"
 	},
 	"dependencies": {
-		"@opral/papier-ast": "workspace:*"
+		"@sinclair/typebox": "^0.34.33"
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
+		"@portabletext/types": "^2.0.13",
 		"@vitest/coverage-v8": "3.1.1",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.4",

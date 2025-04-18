@@ -2848,36 +2848,11 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.3.2))(terser@5.36.0)
 
-  packages/papier/papier-ast:
+  packages/papier/papier-app:
     dependencies:
-      '@sinclair/typebox':
-        specifier: ^0.34.33
-        version: 0.34.33
-    devDependencies:
-      '@opral/tsconfig':
+      '@opral/zettel-ast':
         specifier: workspace:*
-        version: link:../../tsconfig
-      '@portabletext/types':
-        specifier: ^2.0.13
-        version: 2.0.13
-      '@vitest/coverage-v8':
-        specifier: 3.1.1
-        version: 3.1.1(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.10.6)(jsdom@25.0.1)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.8.2))(terser@5.36.0))
-      prettier:
-        specifier: ^3.3.3
-        version: 3.5.1
-      typescript:
-        specifier: ^5.5.4
-        version: 5.8.2
-      vitest:
-        specifier: 3.1.1
-        version: 3.1.1(@types/debug@4.1.12)(@types/node@22.10.6)(jsdom@25.0.1)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.8.2))(terser@5.36.0)
-
-  packages/papier/papier-editor:
-    dependencies:
-      '@opral/papier-ast':
-        specifier: workspace:*
-        version: link:../papier-ast
+        version: link:../../zettel/zettel-ast
     devDependencies:
       '@opral/tsconfig':
         specifier: workspace:*
@@ -2897,9 +2872,9 @@ importers:
 
   packages/papier/papier-file-format:
     dependencies:
-      '@opral/papier-ast':
+      '@opral/zettel-ast':
         specifier: workspace:*
-        version: link:../papier-ast
+        version: link:../../zettel/zettel-ast
     devDependencies:
       '@opral/tsconfig':
         specifier: workspace:*
@@ -2940,6 +2915,53 @@ importers:
         version: 2.1.8(@types/node@22.10.6)(@vitest/browser@2.1.8)(jsdom@25.0.1)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.6.3))(terser@5.36.0)
 
   packages/tsconfig: {}
+
+  packages/zettel/zettel-ast:
+    dependencies:
+      '@sinclair/typebox':
+        specifier: ^0.34.33
+        version: 0.34.33
+    devDependencies:
+      '@opral/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
+      '@portabletext/types':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@vitest/coverage-v8':
+        specifier: 3.1.1
+        version: 3.1.1(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.10.6)(jsdom@25.0.1)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.8.2))(terser@5.36.0))
+      prettier:
+        specifier: ^3.3.3
+        version: 3.5.1
+      typescript:
+        specifier: ^5.5.4
+        version: 5.8.2
+      vitest:
+        specifier: 3.1.1
+        version: 3.1.1(@types/debug@4.1.12)(@types/node@22.10.6)(jsdom@25.0.1)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.8.2))(terser@5.36.0)
+
+  packages/zettel/zettel-editor:
+    dependencies:
+      '@opral/zettel-ast':
+        specifier: workspace:*
+        version: link:../zettel-ast
+    devDependencies:
+      '@opral/tsconfig':
+        specifier: workspace:*
+        version: link:../../tsconfig
+      '@vitest/coverage-v8':
+        specifier: 3.1.1
+        version: 3.1.1(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.10.6)(jsdom@25.0.1)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.8.2))(terser@5.36.0))
+      prettier:
+        specifier: ^3.3.3
+        version: 3.5.1
+      typescript:
+        specifier: ^5.5.4
+        version: 5.8.2
+      vitest:
+        specifier: 3.1.1
+        version: 3.1.1(@types/debug@4.1.12)(@types/node@22.10.6)(jsdom@25.0.1)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.8.2))(terser@5.36.0)
 
 packages:
 

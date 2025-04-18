@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { Value } from "@sinclair/typebox/value";
-import { PapierAstJsonSchema } from "./schema.js";
+import { ZettelAstJsonSchema } from "./schema.js";
 
 test("portable text example with a link passes", async () => {
 	const examplePortableText = [
@@ -38,7 +38,7 @@ test("portable text example with a link passes", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(PapierAstJsonSchema, examplePortableText)];
+	const result = [...Value.Errors(ZettelAstJsonSchema, examplePortableText)];
 	expect(result).toEqual([]);
 });
 
@@ -60,7 +60,7 @@ test("portable text headers pass", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(PapierAstJsonSchema, examplePortableText)];
+	const result = [...Value.Errors(ZettelAstJsonSchema, examplePortableText)];
 	expect(result).toEqual([]);
 });
 
@@ -82,7 +82,7 @@ test("portable text bold (strong) passes", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(PapierAstJsonSchema, examplePortableText)];
+	const result = [...Value.Errors(ZettelAstJsonSchema, examplePortableText)];
 	expect(result).toEqual([]);
 });
 
@@ -104,7 +104,7 @@ test("portable text italic (em) passes", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(PapierAstJsonSchema, examplePortableText)];
+	const result = [...Value.Errors(ZettelAstJsonSchema, examplePortableText)];
 	expect(result).toEqual([]);
 });
 
@@ -126,6 +126,6 @@ test("account mention passes", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(PapierAstJsonSchema, examplePortableText)];
+	const result = [...Value.Errors(ZettelAstJsonSchema, examplePortableText)];
 	expect(result).toEqual([]);
 });

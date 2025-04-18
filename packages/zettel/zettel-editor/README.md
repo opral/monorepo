@@ -1,6 +1,6 @@
-# [PLACEHOLDER] Papier Editor
+# [PLACEHOLDER] Zettel AST Editor
 
-Unstyled editor for the Papier AST.
+Unstyled editor for the Zettel AST.
 
 ## Goal
 

@@ -1,5 +1,5 @@
 {
-	"name": "@opral/papier-file-format",
+	"name": "@opral/zettel-editor",
 	"type": "module",
 	"version": "0.1.0",
 	"license": "MIT",
