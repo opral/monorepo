@@ -9,9 +9,6 @@ const AccountMentionMarkDef = Type.Object({
 	id: Type.String({
 		description: "The ID of the account being mentioned",
 	}),
-	name: Type.String({
-		description: "The name of the account being mentioned",
-	}),
 });
 
 export type LinkMarkDef = Static<typeof LinkMarkDef>;
@@ -35,7 +32,8 @@ const Span = Type.Object({
 		description: "Unique key for this span within the block",
 	}),
 	marks: Type.Array(Type.String(), {
-		description: "Array of mark keys (_key) referencing items in the parent block's markDefs",
+		description:
+			"Array of decorators or annotation keys (_key) referencing items in the parent block's markDefs",
 	}),
 	text: Type.String({ description: "The text content of this span" }),
 });
@@ -54,7 +52,7 @@ const Block = Type.Object({
 		description: "Array of inline spans that make up the block content",
 	}),
 	markDefs: Type.Array(MarkDef, {
-		description: "Array of mark definitions (links, mentions) used by spans in this block",
+		description: "Array of annotations (links, mentions) used by spans in this block",
 	}),
 });
 

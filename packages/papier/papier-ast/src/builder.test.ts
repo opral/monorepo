@@ -1,19 +1,19 @@
 import { test, expect } from "vitest";
 import { block, span, accountMention, link } from "./builder.js";
-import type { Span, MarkDef } from "./schema.js";
 
 test("account mention and link", () => {
+	const accountMentionDef = accountMention({ id: "47237hh8h4h75" });
+	const linkDef = link({ href: "https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312" });
+
 	const ast = [
 		block({
 			style: "normal",
+			markDefs: [accountMentionDef, linkDef],
 			children: [
 				span({ text: "Hi " }),
-				accountMention({ id: "47237hh8h4h75", name: "Developer" }),
+				span({ text: "Developer", marks: [accountMentionDef._key] }),
 				span({ text: ", have you seen " }),
-				link({
-					label: "this",
-					href: "https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312",
-				}),
+				span({ text: "this", marks: [linkDef._key] }),
 				span({ text: "?" }),
 			],
 		}),
@@ -41,7 +41,7 @@ test("account mention and link", () => {
 			{ _type: "span", text: "?", _key: expect.any(String), marks: [] },
 		],
 		markDefs: [
-			{ _type: "accountMention", _key: mentionMarkDefKey, id: "47237hh8h4h75", name: "Developer" },
+			{ _type: "accountMention", _key: mentionMarkDefKey, id: "47237hh8h4h75" },
 			{
 				_type: "link",
 				_key: linkMarkDefKey,
@@ -49,28 +49,4 @@ test("account mention and link", () => {
 			},
 		],
 	});
-});
-
-test("creating two account mentions with the same ID results in different markDefs", () => {
-	const ast = [
-		block({
-			style: "normal",
-			children: [
-				span({ text: "Hi " }),
-				accountMention({ id: "47237hh8h4h75", name: "Samuel" }),
-				span({ text: ", have you seen this?" }),
-				accountMention({ id: "47237hh8h4h75", name: "Samuel" }),
-			],
-		}),
-	];
-
-	const blockNode = ast[0]!;
-	const mentionSpans = blockNode.children.slice(1, 3) as (Span & {
-		__markDef: MarkDef;
-	})[];
-	const markDefs = blockNode.markDefs;
-
-	// Each mention should have a different mark key and markDef object
-	expect(mentionSpans[0]!.marks[0]).not.toBe(mentionSpans[1]!.marks[0]);
-	expect(markDefs).toHaveLength(2);
 });
