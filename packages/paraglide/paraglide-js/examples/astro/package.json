@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "astro dev",
 		"start": "astro dev",
-		"build": "astro build",
+		"_COMMENT": "build command fails sometimes because of the send dependency in @astrojs/node",
+		"_build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro"
 	},
