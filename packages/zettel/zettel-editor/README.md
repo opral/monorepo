@@ -1,7 +1,30 @@
-# [PLACEHOLDER] Zettel AST Editor
+# Zettel editor
 
-Unstyled editor for the Zettel AST.
+The zettel editor is a headless (unstyled) web component that enables rich text editing of Zettel's.
 
-## Goal
+- out of the box rich text editing
+- works in any framework (React, Vue, Svelte, etc.)
+- extendable via custom zettel blocks
 
-Watch this video https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312
+## Installation
+
+```bash
+npm install @opral/zettel-editor
+```
+
+## Usage
+
+```tsx
+function Component(props: { zettel: Zettel }) {
+
+  return (
+    <zettel-editor 
+      zettel={props.zettel} 
+      onChange={(updatedZettel) => {
+        console.log(updatedZettel);
+        // persist the updated zettel somewhere
+      }}
+    />
+  );
+}
+```
