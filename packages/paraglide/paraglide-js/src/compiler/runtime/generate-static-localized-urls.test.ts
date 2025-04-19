@@ -5,17 +5,15 @@ import "@inlang/paraglide-js/urlpattern-polyfill";
 
 test("generates localized URLs using default URL pattern", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			// undefined creates the default pattern
-			urlPatterns: undefined,
-		},
+		strategy: ["url"],
+		// undefined creates the default pattern
+		urlPatterns: undefined,
 	});
 
 	const urls = runtime.generateStaticLocalizedUrls([
@@ -43,31 +41,29 @@ test("generates localized URLs using default URL pattern", async () => {
 
 test("generates localized URLs using custom URL patterns", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/store/item/:id",
-					localized: [
-						["en", "/store/item/:id"],
-						["de", "/laden/artikel/:id"],
-					],
-				},
-				{
-					pattern: "/blog/:slug",
-					localized: [
-						["en", "/blog/:slug"],
-						["de", "/blog/:slug"], // Same pattern for both locales
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/store/item/:id",
+				localized: [
+					["en", "/store/item/:id"],
+					["de", "/laden/artikel/:id"],
+				],
+			},
+			{
+				pattern: "/blog/:slug",
+				localized: [
+					["en", "/blog/:slug"],
+					["de", "/blog/:slug"], // Same pattern for both locales
+				],
+			},
+		],
 	});
 
 	const urls = runtime.generateStaticLocalizedUrls([
@@ -92,24 +88,22 @@ test("generates localized URLs using custom URL patterns", async () => {
 
 test("handles paths that don't match any pattern by including them", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "https://example.com/store/:path*",
-					localized: [
-						["en", "https://example.com/store/:path*"],
-						["de", "https://example.com/laden/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "https://example.com/store/:path*",
+				localized: [
+					["en", "https://example.com/store/:path*"],
+					["de", "https://example.com/laden/:path*"],
+				],
+			},
+		],
 	});
 
 	const urls = runtime.generateStaticLocalizedUrls([
@@ -133,24 +127,22 @@ test("handles paths that don't match any pattern by including them", async () =>
 
 test("handles URL objects as input", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/store/:path*",
-					localized: [
-						["en", "/store/:path*"],
-						["de", "/laden/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/store/:path*",
+				localized: [
+					["en", "/store/:path*"],
+					["de", "/laden/:path*"],
+				],
+			},
+		],
 	});
 
 	const urls = runtime.generateStaticLocalizedUrls([
@@ -176,17 +168,15 @@ test("handles URL objects as input", async () => {
 
 test("generates localized URLs from paths", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			// undefined creates the default pattern
-			urlPatterns: undefined,
-		},
+		strategy: ["url"],
+		// undefined creates the default pattern
+		urlPatterns: undefined,
 	});
 
 	const urls = runtime.generateStaticLocalizedUrls([
