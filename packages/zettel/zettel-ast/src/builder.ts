@@ -1,43 +1,49 @@
-import type { Block, Span, MarkDef, AccountMentionMarkDef, LinkMarkDef } from "./schema.js";
+import type {
+	ZettelTextBlock,
+	ZettelSpan,
+	MarkDef,
+	ZettelAccountMentionAnnotation,
+	ZettelLinkAnnotation,
+} from "./schema.js";
 import { nanoid } from "./utils/nano-id.js";
 
-export function span(args: { text: string; marks?: string[] }): Span {
+export function span(args: { text: string; marks?: ZettelSpan["marks"] }): ZettelSpan {
 	return {
-		_type: "span",
+		_type: "zettel.span",
 		_key: nanoid(),
 		text: args.text,
 		marks: args.marks ?? [],
 	};
 }
 
-export function accountMention(args: { id: string }): AccountMentionMarkDef {
+export function accountMention(args: { id: string }): ZettelAccountMentionAnnotation {
 	return {
-		_type: "accountMention",
+		_type: "zettel.accountMention",
 		_key: nanoid(),
 		id: args.id,
 	};
 }
 
-export function link(args: { href: string }): LinkMarkDef {
+export function link(args: { href: string }): ZettelLinkAnnotation {
 	return {
-		_type: "link",
+		_type: "zettel.link",
 		_key: nanoid(),
 		href: args.href,
 	};
 }
 
-export function block(args: {
-	children: Span[];
+export function textBlock(args: {
+	children: ZettelSpan[];
 	markDefs?: MarkDef[];
 	/**
 	 * The style of the block e.g. "normal", "h1", "h2", etc.
 	 *
 	 * @default "normal"
 	 */
-	style?: string;
-}): Block {
+	style?: ZettelTextBlock["style"];
+}): ZettelTextBlock {
 	return {
-		_type: "block",
+		_type: "zettel.textBlock",
 		_key: nanoid(),
 		style: args.style ?? "normal",
 		markDefs: args.markDefs ?? [],

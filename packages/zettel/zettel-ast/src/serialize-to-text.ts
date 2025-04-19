@@ -1,4 +1,4 @@
-import type { Span, Zettel } from "./schema.js";
+import type { ZettelTextBlock, Zettel } from "./schema.js";
 
 /**
  * Serializes the Zettel AST to text.
@@ -8,14 +8,20 @@ import type { Span, Zettel } from "./schema.js";
  *
  * Parsing from text is not possible given the lossy nature of the format.
  */
-export function serializeToText(value: Zettel): string {
-	return value
-		.filter((block) => block._type === "block" && Array.isArray(block.children))
-		.map((block) =>
-			block.children
-				.filter((child): child is Span => child._type === "span" && typeof child.text === "string")
-				.map((span) => span.text)
-				.join("")
-		)
-		.join("\n");
+export function serializeToText(ast: Zettel): string {
+	let lines: string[] = [];
+	for (const node of ast) {
+		if (node._type === "zettel.textBlock") {
+			let line = "";
+			for (const span of (node as ZettelTextBlock).children) {
+				if (span._type !== "zettel.span") {
+					throw new Error("Serialize to text only supports zettel.span nodes");
+				}
+				line += `${span.text}`;
+			}
+			lines.push(line);
+		}
+	}
+
+	return lines.join("\n");
 }

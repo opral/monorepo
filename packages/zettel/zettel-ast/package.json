@@ -25,11 +25,11 @@
 		"node": ">=20"
 	},
 	"dependencies": {
-		"@sinclair/typebox": "^0.34.33"
+		"@sinclair/typebox": "^0.34.33",
+		"json-schema-to-ts": "^3.1.1"
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
-		"@portabletext/types": "^2.0.13",
 		"@vitest/coverage-v8": "3.1.1",
 		"prettier": "^3.3.3",
 		"typescript": "^5.5.4",

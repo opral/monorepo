@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { accountMention, block, span, link } from "./builder.js";
+import { accountMention, textBlock, span, link } from "./builder.js";
 import { serializeToText } from "./serialize-to-text.js";
 
 test("serializes spans with no marks", () => {
 	const ast = [
-		block({
+		textBlock({
 			style: "normal",
 			children: [span({ text: "Hello world" })],
 		}),
@@ -17,7 +17,7 @@ test("serializes an account mention", () => {
 	const accountMentionDef = accountMention({ id: "47237hh8h4h75" });
 
 	const ast = [
-		block({
+		textBlock({
 			style: "normal",
 			markDefs: [accountMentionDef],
 			children: [

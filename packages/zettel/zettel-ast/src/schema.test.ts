@@ -1,35 +1,34 @@
 import { test, expect } from "vitest";
-import { Value } from "@sinclair/typebox/value";
-import { ZettelJsonSchema } from "./schema.js";
+import { validate } from "./validate.js";
 
 test("portable text example with a link passes", async () => {
 	const examplePortableText = [
 		{
-			_type: "block",
+			_type: "zettel.block",
 			_key: "4ee4134378b1",
 			style: "normal",
 			markDefs: [
 				{
-					_type: "link",
+					_type: "zettel.link",
 					_key: "6928e05a72cf",
 					href: "https://example.com",
 				},
 			],
 			children: [
 				{
-					_type: "span",
+					_type: "zettel.span",
 					_key: "e60571e00344",
 					text: "Hello world, ",
 					marks: [],
 				},
 				{
-					_type: "span",
+					_type: "zettel.span",
 					_key: "c68e8030ad79",
 					marks: ["6928e05a72cf"],
 					text: "how",
 				},
 				{
-					_type: "span",
+					_type: "zettel.span",
 					_key: "2d3de5b05adc",
 					marks: [],
 					text: " are you?",
@@ -38,20 +37,20 @@ test("portable text example with a link passes", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(ZettelJsonSchema, examplePortableText)];
-	expect(result).toEqual([]);
+	const result = validate(examplePortableText);
+	expect(result.errors).toBeUndefined();
 });
 
 test("portable text headers pass", async () => {
 	const examplePortableText = [
 		{
-			_type: "block",
+			_type: "zettel.block",
 			_key: "4ee4134378b1",
 			style: "h1",
 			markDefs: [],
 			children: [
 				{
-					_type: "span",
+					_type: "zettel.span",
 					_key: "e60571e00344",
 					text: "This is a header",
 					marks: [],
@@ -60,20 +59,20 @@ test("portable text headers pass", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(ZettelJsonSchema, examplePortableText)];
-	expect(result).toEqual([]);
+	const result = validate(examplePortableText);
+	expect(result.errors).toBeUndefined();
 });
 
 test("portable text bold (strong) passes", async () => {
 	const examplePortableText = [
 		{
-			_type: "block",
+			_type: "zettel.block",
 			_key: "4ee4134378b1",
 			style: "normal",
 			markDefs: [],
 			children: [
 				{
-					_type: "span",
+					_type: "zettel.span",
 					_key: "e60571e00344",
 					text: "Hello world",
 					marks: ["strong"],
@@ -82,20 +81,20 @@ test("portable text bold (strong) passes", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(ZettelJsonSchema, examplePortableText)];
-	expect(result).toEqual([]);
+	const result = validate(examplePortableText);
+	expect(result.errors).toBeUndefined();
 });
 
 test("portable text italic (em) passes", async () => {
 	const examplePortableText = [
 		{
-			_type: "block",
+			_type: "zettel.block",
 			_key: "4ee4134378b1",
 			style: "normal",
 			markDefs: [],
 			children: [
 				{
-					_type: "span",
+					_type: "zettel.span",
 					_key: "e60571e00344",
 					text: "Hello world",
 					marks: ["em"],
@@ -104,20 +103,20 @@ test("portable text italic (em) passes", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(ZettelJsonSchema, examplePortableText)];
-	expect(result).toEqual([]);
+	const result = validate(examplePortableText);
+	expect(result.errors).toBeUndefined();
 });
 
 test("account mention passes", async () => {
 	const examplePortableText = [
 		{
-			_type: "block",
+			_type: "zettel.block",
 			_key: "4ee4134378b1",
 			style: "normal",
 			markDefs: [],
 			children: [
 				{
-					_type: "span",
+					_type: "zettel.span",
 					_key: "e60571e00344",
 					text: "Hello world",
 					marks: ["accountMention"],
@@ -126,6 +125,6 @@ test("account mention passes", async () => {
 		},
 	];
 
-	const result = [...Value.Errors(ZettelJsonSchema, examplePortableText)];
-	expect(result).toEqual([]);
+	const result = validate(examplePortableText);
+	expect(result.errors).toBeUndefined();
 });
