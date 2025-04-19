@@ -8,7 +8,7 @@
 
 > **LixReadonly** = `Pick`\<[`Lix`](Lix.md), `"plugin"`\> & `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:118](https://github.com/opral/monorepo/blob/9e4a0ed87313931bc006fc9fc84146a53943e93c/packages/lix-sdk/src/plugin/lix-plugin.ts#L118)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:118](https://github.com/opral/monorepo/blob/c13f0c918d257762bc7c6d37d45e4c6bded6e939/packages/lix-sdk/src/plugin/lix-plugin.ts#L118)
 
 ## Type declaration
 

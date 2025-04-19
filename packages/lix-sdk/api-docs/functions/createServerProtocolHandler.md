@@ -8,7 +8,7 @@
 
 > **createServerProtocolHandler**(`args`): `Promise`\<`LixServerProtocolHandler`\>
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:55](https://github.com/opral/monorepo/blob/9e4a0ed87313931bc006fc9fc84146a53943e93c/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L55)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:55](https://github.com/opral/monorepo/blob/c13f0c918d257762bc7c6d37d45e4c6bded6e939/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L55)
 
 The handler for the lix server protocol.
 
