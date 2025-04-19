@@ -1,4 +1,4 @@
-import type { ZettelAst, Span, AccountMentionMarkDef } from "./schema.js";
+import type { Span, Zettel } from "./schema.js";
 
 /**
  * Serializes the Zettel AST to text.
@@ -8,7 +8,7 @@ import type { ZettelAst, Span, AccountMentionMarkDef } from "./schema.js";
  *
  * Parsing from text is not possible given the lossy nature of the format.
  */
-export function serializeToText(value: ZettelAst): string {
+export function serializeToText(value: Zettel): string {
 	return value
 		.filter((block) => block._type === "block" && Array.isArray(block.children))
 		.map((block) =>

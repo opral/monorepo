@@ -56,7 +56,7 @@ const Block = Type.Object({
 	}),
 });
 
-export type ZettelAst = Static<typeof ZettelAst>;
-const ZettelAst = Type.Array(Block);
+export type Zettel = Static<typeof Zettel>;
+const Zettel = Type.Array(Block);
 
-export const ZettelAstJsonSchema = Type.Array(Block);
+export const ZettelJsonSchema = Zettel;
