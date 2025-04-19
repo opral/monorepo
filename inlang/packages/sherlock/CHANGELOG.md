@@ -1,5 +1,15 @@
 # inlang-vs-code-extension
 
+## 2.0.16
+
+### Patch Changes
+
+- Updated dependencies [56acb22]
+  - @inlang/sdk@2.4.8
+  - @inlang/rpc@0.3.50
+  - @inlang/editor-component@4.0.9
+  - @inlang/settings-component@5.0.0
+
 ## 2.0.15
 
 ### Patch Changes

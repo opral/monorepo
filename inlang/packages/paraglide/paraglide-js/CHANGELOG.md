@@ -1,5 +1,13 @@
 # @inlang/paraglide-js
 
+## 2.0.12
+
+### Patch Changes
+
+- 31337ba: expose `createParaglide()`
+- Updated dependencies [56acb22]
+  - @inlang/sdk@2.4.8
+
 ## 2.0.11
 
 ### Patch Changes
