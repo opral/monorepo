@@ -4,7 +4,7 @@ import { newProject } from "@inlang/sdk";
 
 test("createParaglideModule should create a module with runtime and server functions", async () => {
 	const paraglide = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
@@ -25,16 +25,14 @@ test("createParaglideModule should create a module with runtime and server funct
 
 test("createParaglideModule should allow configuring compiler options", async () => {
 	const paraglide = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			cookieName: "custom-cookie",
-		},
+		strategy: ["url"],
+		cookieName: "custom-cookie",
 	});
 
 	// Check that compiler options are applied
@@ -44,15 +42,13 @@ test("createParaglideModule should allow configuring compiler options", async ()
 
 test("createParaglideModule should work with URL localization", async () => {
 	const paraglide = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-		},
+		strategy: ["url"],
 	});
 
 	// Test URL localization
@@ -68,7 +64,7 @@ test("createParaglideModule should work with URL localization", async () => {
 
 test("createParaglideModule should provide mock message functions that throw helpful errors", async () => {
 	const paraglide = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],

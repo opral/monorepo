@@ -12,16 +12,14 @@ test("sets the cookie to a different locale", async () => {
 	globalThis.window.location.reload = vi.fn();
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie"],
-			cookieName: "PARAGLIDE_LOCALE",
-		},
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
 	});
 
 	globalThis.document.cookie = "PARAGLIDE_LOCALE=en";
@@ -46,17 +44,15 @@ test("sets the cookie with explicit domain to a different locale navigating subd
 	globalThis.window.location.reload = vi.fn();
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie"],
-			cookieName: "PARAGLIDE_LOCALE",
-			cookieDomain: "example.com",
-		},
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
+		cookieDomain: "example.com",
 	});
 
 	globalThis.document.cookie = "PARAGLIDE_LOCALE=en";
@@ -81,17 +77,15 @@ test("sets the cookie with explicit domain to a different locale navigating doma
 	globalThis.window.location.reload = vi.fn();
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie"],
-			cookieName: "PARAGLIDE_LOCALE",
-			cookieDomain: "example.com",
-		},
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
+		cookieDomain: "example.com",
 	});
 
 	globalThis.document.cookie = "PARAGLIDE_LOCALE=en";
@@ -115,21 +109,19 @@ test("url pattern strategy sets the window location", async () => {
 	globalThis.window.location.reload = vi.fn();
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: { baseLocale: "en", locales: ["en", "de"] },
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "https://example.:tld/:path*",
-					localized: [
-						["en", "https://example.com/:path*"],
-						["de", "https://example.de/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "https://example.:tld/:path*",
+				localized: [
+					["en", "https://example.com/:path*"],
+					["de", "https://example.de/:path*"],
+				],
+			},
+		],
 	});
 
 	globalThis.window.location.href = "https://example.com/page";
@@ -144,16 +136,14 @@ test("url pattern strategy sets the window location", async () => {
 // `!document.cookie` was used which returned false for an empty string
 test("sets the cookie when it's an empty string", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie"],
-			cookieName: "PARAGLIDE_LOCALE",
-		},
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
 	});
 
 	/** @ts-expect-error - client side api */
@@ -168,26 +158,24 @@ test("sets the cookie when it's an empty string", async () => {
 
 test("when strategy precedes URL, it should set the locale and re-direct to the URL", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie", "url", "baseLocale"],
-			cookieName: "PARAGLIDE_LOCALE",
-			isServer: "false",
-			urlPatterns: [
-				{
-					pattern: "https://example.com/en/:path(.*)?",
-					localized: [
-						["en", "https://example.com/en/:path(.*)?"],
-						["fr", "https://example.com/fr/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["cookie", "url", "baseLocale"],
+		cookieName: "PARAGLIDE_LOCALE",
+		isServer: "false",
+		urlPatterns: [
+			{
+				pattern: "https://example.com/en/:path(.*)?",
+				localized: [
+					["en", "https://example.com/en/:path(.*)?"],
+					["fr", "https://example.com/fr/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	/** @ts-expect-error - client side api */
@@ -220,16 +208,14 @@ test("should not reload when setting locale to current locale", async () => {
 	globalThis.window.location.reload = vi.fn();
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie"],
-			cookieName: "PARAGLIDE_LOCALE",
-		},
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
 	});
 
 	globalThis.document.cookie = "PARAGLIDE_LOCALE=en; path=/";
@@ -263,15 +249,13 @@ test("sets the locale to localStorage", async () => {
 	globalThis.window = {};
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["localStorage"],
-		},
+		strategy: ["localStorage"],
 	});
 
 	runtime.setLocale("de");
@@ -302,26 +286,24 @@ test("should set locale in all configured storage mechanisms regardless of which
 
 	// Create runtime with multiple strategies
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url", "localStorage", "cookie", "baseLocale"],
-			cookieName: "PARAGLIDE_LOCALE",
-			urlPatterns: [
-				{
-					pattern: "https://example.com/:locale/:path*",
-					localized: [
-						["en", "https://example.com/en/:path*"],
-						["de", "https://example.com/de/:path*"],
-						["fr", "https://example.com/fr/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url", "localStorage", "cookie", "baseLocale"],
+		cookieName: "PARAGLIDE_LOCALE",
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:locale/:path*",
+				localized: [
+					["en", "https://example.com/en/:path*"],
+					["de", "https://example.com/de/:path*"],
+					["fr", "https://example.com/fr/:path*"],
+				],
+			},
+		],
 	});
 
 	// Call setLocale
