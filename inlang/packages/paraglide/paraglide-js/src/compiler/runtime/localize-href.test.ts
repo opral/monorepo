@@ -4,24 +4,22 @@ import { newProject } from "@inlang/sdk";
 
 test("uses the locale from getLocale() if no locale is provided", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url", "globalVariable", "baseLocale"],
-			urlPatterns: [
-				{
-					pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
-					localized: [
-						["de", "http://:domain(.*)/de/:path(.*)?"],
-						["en", "http://:domain(.*)/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url", "globalVariable", "baseLocale"],
+		urlPatterns: [
+			{
+				pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
+				localized: [
+					["de", "http://:domain(.*)/de/:path(.*)?"],
+					["en", "http://:domain(.*)/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	runtime.overwriteGetLocale(() => "de");
@@ -32,24 +30,22 @@ test("uses the locale from getLocale() if no locale is provided", async () => {
 
 test("returns an absolute href if the provided href is absolute", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url", "globalVariable", "baseLocale"],
-			urlPatterns: [
-				{
-					pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
-					localized: [
-						["de", "http://:domain(.*)/de/:path(.*)?"],
-						["en", "http://:domain(.*)/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url", "globalVariable", "baseLocale"],
+		urlPatterns: [
+			{
+				pattern: "http://:domain(.*)/:locale(de|en)?/:path(.*)?",
+				localized: [
+					["de", "http://:domain(.*)/de/:path(.*)?"],
+					["en", "http://:domain(.*)/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -63,24 +59,22 @@ test("returns an absolute href if the provided href is absolute", async () => {
 // useful if domain based localization is used for example
 test("returns an absolute href if the provided href is relative but the origin of the localized href differs", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url", "globalVariable", "baseLocale"],
-			urlPatterns: [
-				{
-					pattern: "http://example.com/:path(.*)?",
-					localized: [
-						["de", "http://de.example.com/:path(.*)?"],
-						["en", "http://example.com/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url", "globalVariable", "baseLocale"],
+		urlPatterns: [
+			{
+				pattern: "http://example.com/:path(.*)?",
+				localized: [
+					["de", "http://de.example.com/:path(.*)?"],
+					["en", "http://example.com/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	// simulating routing from current en page to de page
@@ -110,24 +104,22 @@ test("adding a base path", async () => {
 	const base = "shop";
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: `/{${base}/}?:path(.*)?`,
-					localized: [
-						["de", `/{${base}/}?de/:path(.*)?`],
-						["en", `/{${base}/}?:path(.*)?`],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: `/{${base}/}?:path(.*)?`,
+				localized: [
+					["de", `/{${base}/}?de/:path(.*)?`],
+					["en", `/{${base}/}?:path(.*)?`],
+				],
+			},
+		],
 	});
 
 	// simulating the current locale to be en
@@ -144,17 +136,15 @@ test("adding a base path", async () => {
 
 test("default url patterns to improve out of the box experience", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
 			},
 		}),
-		compilerOptions: {
-			isServer: "false",
-			strategy: ["url"],
-			urlPatterns: undefined,
-		},
+		isServer: "false",
+		strategy: ["url"],
+		urlPatterns: undefined,
 	});
 
 	// polyfilling window
