@@ -1,5 +1,12 @@
 # lix-website-server
 
+## 0.0.16
+
+### Patch Changes
+
+- csv-app@0.2.12
+- lix-file-manager@0.2.12
+
 ## 0.0.15
 
 ### Patch Changes
