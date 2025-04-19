@@ -171,6 +171,32 @@ export async function selectDiscussion(args: { changeSetId: ChangeSet["id"] }) {
 		.executeTakeFirst();
 }
 
+export async function selectThreads(args: { changeSetId: ChangeSet["id"] }) {
+	return await lix.db
+		.selectFrom("thread")
+		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
+		.where("change_set_thread.change_set_id", "=", args.changeSetId)
+		.select((eb) => [
+			jsonArrayFrom(
+				eb
+					.selectFrom("thread_comment")
+					.innerJoin("change", "change.entity_id", "thread_comment.id")
+					.innerJoin("change_author", "change_author.change_id", "change.id")
+					.innerJoin("account", "account.id", "change_author.account_id")
+					.select([
+						"thread_comment.id",
+						"thread_comment.content",
+						"thread_comment.thread_id",
+						"thread_comment.parent_id",
+					])
+					.select(["change.created_at", "account.name as author_name"])
+					.whereRef("thread_comment.thread_id", "=", "thread.id"),
+			).as("comments"),
+		])
+		.selectAll("thread")
+		.execute();
+}
+
 /**
  * Special change set which describes the current changes
  * that are not yet checkpointed.

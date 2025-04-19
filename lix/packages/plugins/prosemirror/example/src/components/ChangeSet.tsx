@@ -1,5 +1,4 @@
-import { useRef, forwardRef, useImperativeHandle, useEffect } from "react";
-import { Discussion, DiscussionHandle } from "./Discussion";
+import { forwardRef, useImperativeHandle, useEffect } from "react";
 import { toRelativeTime } from "../utilities/timeUtils";
 import {
 	EraserIcon,
@@ -11,15 +10,16 @@ import {
 } from "lucide-react";
 import {
 	applyChangeSet,
+	createThread,
 	createUndoChangeSet,
 	type ChangeSet as ChangeSetType,
 } from "@lix-js/sdk";
 import { useQuery } from "../hooks/useQuery";
-import { selectDiscussion } from "../queries";
 import { useKeyValue } from "../hooks/useKeyValue";
-import { selectActiveAccount } from "../queries";
+import { selectActiveAccount, selectThreads } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { lix } from "../state";
+import { Composer, Thread } from "./Thread";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -77,13 +77,12 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			changeSet,
 		]);
 
-		const [discussion] = useQuery(() =>
-			selectDiscussion({ changeSetId: changeSet.id }),
+		const [threads] = useQuery(() =>
+			selectThreads({ changeSetId: changeSet.id }),
 		);
-		const discussionRef = useRef<DiscussionHandle>(null);
 
 		// Get the first comment if it exists
-		const firstComment = discussion?.comments?.[0];
+		const firstComment = threads?.[0]?.comments?.[0];
 
 		// Truncate comment content if it's longer than 50 characters
 		const truncatedComment =
@@ -95,9 +94,25 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 		// Expose methods to parent components
 		useImperativeHandle(ref, () => ({
-			getCommentText: () => discussionRef.current?.getCommentText() || "",
-			clearCommentText: () => discussionRef.current?.clearCommentText(),
+			getCommentText: () => "",
+			clearCommentText: () => {},
 		}));
+
+		const onThreadComposerSubmit = async (args: { content: any }) => {
+			lix.db.transaction().execute(async (trx) => {
+				const thread = await createThread({
+					lix: { ...lix, db: trx },
+					comments: [{ content: args.content }],
+				});
+				await trx
+					.insertInto("change_set_thread")
+					.values({
+						change_set_id: changeSet.id,
+						thread_id: thread.id,
+					})
+					.execute();
+			});
+		};
 
 		// Toggle expansion state
 		const handleToggleExpand = () => {
@@ -128,11 +143,12 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 					</div>
 					<div className="flex-1">
 						<div className="text-sm break-words">
-							{isWorkingChangeSet
+							TODO portable text to html
+							{/* {isWorkingChangeSet
 								? "Working Change Set"
 								: truncatedComment
 									? truncatedComment
-									: "No description yet"}
+									: "No description yet"} */}
 						</div>
 						{!isWorkingChangeSet && (
 							<div className="text-xs text-base-content-secondary">
@@ -225,13 +241,21 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 							</div>
 						</div>
 
-						{/* Always render the Discussion component when expanded */}
+						{/* Render existing threads */}
 						<div className="p-2">
-							<Discussion
-								ref={discussionRef}
-								changeSetId={changeSet.id}
-								placeholderText="Write a comment..."
-							/>
+							{threads?.map((thread) => (
+								<Thread
+									key={thread.id}
+									lix={lix}
+									thread={thread}
+									comments={thread.comments}
+									onComposerSubmit={onThreadComposerSubmit}
+								/>
+							))}
+							{/* Conditionally render the Composer for *new* threads */}
+							{(!threads || threads.length === 0) && (
+								<Composer lix={lix} onComposerSubmit={onThreadComposerSubmit} />
+							)}
 						</div>
 
 						{/* Render footer if provided */}

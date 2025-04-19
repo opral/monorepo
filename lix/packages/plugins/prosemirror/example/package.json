@@ -9,10 +9,13 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@lix-js/plugin-prosemirror": "workspace:*",
-		"@lix-js/universal-diff": "workspace:*",
 		"@lix-js/inspector": "workspace:*",
+		"@lix-js/plugin-prosemirror": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
+		"@lix-js/universal-diff": "workspace:*",
+		"@portabletext/editor": "^1.47.7",
+		"@portabletext/react": "^3.2.1",
+		"@portabletext/types": "^2.0.13",
 		"@tailwindcss/vite": "^4.0.15",
 		"clsx": "^2.1.1",
 		"daisyui": "^5.0.9",
