@@ -25,8 +25,7 @@
 		"node": ">=20"
 	},
 	"dependencies": {
-		"@sinclair/typebox": "^0.34.33",
-		"json-schema-to-ts": "^3.1.1"
+		"@sinclair/typebox": "^0.34.33"
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
