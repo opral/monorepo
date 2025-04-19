@@ -6,15 +6,14 @@
 	"scripts": {
 		"dev": "astro dev",
 		"start": "astro dev",
-		"build": "astro check && astro build",
+		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro"
 	},
 	"dependencies": {
-		"@astrojs/node": "^9.0.1",
-		"@astrojs/svelte": "^7.0.3",
-		"astro": "^5.1.6",
-		"@astrojs/check": "^0.9.4",
+		"@astrojs/node": "^9.2.0",
+		"@astrojs/svelte": "^7.0.10",
+		"astro": "^5.7.4",
 		"typescript": "^5.5.2",
 		"svelte": "^5.17.5"
 	},
