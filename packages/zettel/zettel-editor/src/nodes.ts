@@ -30,7 +30,7 @@ export class ZettelSpanNode extends TextNode {
   constructor(text: string, zettelKey?: string, key?: NodeKey) {
     super(text, key);
     this.__zettelKey = zettelKey;
-    this.__type = "zettel-span"; // Ensure type is set
+    this.__type = "zettel-span";
   }
 
   exportJSON(): SerializedZettelSpanNode {
@@ -144,20 +144,19 @@ export interface SerializedZettelTextBlockNode extends SerializedParagraphNode {
 }
 
 export class ZettelTextBlockNode extends ParagraphNode {
-  __zettelKey: string | undefined;
+  __zettelKey: string;
 
   static getType(): string {
     return "zettel-text-block";
   }
 
   static clone(node: ZettelTextBlockNode): ZettelTextBlockNode {
-    return new ZettelTextBlockNode(node.__key);
+    return new ZettelTextBlockNode(node.__zettelKey, node.__key);
   }
 
-  constructor(key?: NodeKey) {
+  constructor(zettelKey?: string, key?: NodeKey) {
     super(key);
-    this.__zettelKey = generateKey();
-    this.__type = "zettel-text-block";
+    this.__zettelKey = zettelKey ?? generateKey();
   }
 
   exportJSON(): SerializedZettelTextBlockNode {
@@ -180,12 +179,10 @@ export class ZettelTextBlockNode extends ParagraphNode {
 
   createDOM() {
     const dom = document.createElement("div");
+    // block should take full width
     dom.style.width = "100%";
+    // block should have a minimum height
     dom.style.minHeight = "1rem";
-    dom.onclick = (e) => {
-      this.select();
-      e.stopPropagation();
-    };
     return dom;
   }
 }
@@ -203,8 +200,10 @@ export function $isZettelSpanNode(
   return node instanceof ZettelSpanNode;
 }
 
-export function $createZettelTextBlockNode(): ZettelTextBlockNode {
-  return new ZettelTextBlockNode();
+export function $createZettelTextBlockNode(
+  zettelKey?: string,
+): ZettelTextBlockNode {
+  return new ZettelTextBlockNode(zettelKey);
 }
 
 export function $isZettelTextBlockNode(

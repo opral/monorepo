@@ -7,7 +7,7 @@ import {
 } from "lexical";
 import { registerZettelLexicalPlugin } from "./plugins/zettel-lexical-plugin.js";
 import { importZettelAST } from "./plugins/conversion.js";
-import { Zettel, generateKey } from "@opral/zettel-ast";
+import { Zettel } from "@opral/zettel-ast";
 import { ZettelTextBlockNode, ZettelSpanNode } from "./nodes.js";
 
 export type EditorProps = {};
@@ -33,7 +33,20 @@ export class ZettelEditor extends HTMLElement {
       onError: (error: Error) => {
         console.error("Lexical Error:", error);
       },
-      nodes: [ZettelTextBlockNode, ZettelSpanNode],
+      nodes: [
+        ZettelTextBlockNode,
+        ZettelSpanNode,
+        {
+          replace: ParagraphNode,
+          with: () => new ZettelTextBlockNode(),
+          withKlass: ZettelTextBlockNode,
+        },
+        {
+          replace: TextNode,
+          with: () => new ZettelSpanNode(""),
+          withKlass: ZettelSpanNode,
+        },
+      ],
     };
 
     const editor: LexicalEditor = createEditor(initialConfig);

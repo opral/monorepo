@@ -90,12 +90,10 @@ export function registerEditorCommands(editor: LexicalEditor): () => void {
     // Enter key: insert new block
     editor.registerCommand<KeyboardEvent | null>(
       KEY_ENTER_COMMAND,
-      (event) => {
+      () => {
         console.log("[commands] KEY_ENTER_COMMAND");
         const root = $getRoot();
         const newBlock = $createZettelTextBlockNode();
-        const newSpan = $createZettelSpanNode("");
-        newBlock.append(newSpan);
         root.append(newBlock);
         newBlock.select();
         return true;
