@@ -17,6 +17,7 @@ import {
   CUT_COMMAND,
   DELETE_CHARACTER_COMMAND,
   DELETE_WORD_COMMAND,
+  INSERT_LINE_BREAK_COMMAND,
   LexicalEditor,
   PASTE_COMMAND,
   SELECT_ALL_COMMAND,
@@ -138,6 +139,20 @@ export function registerCommandHandlers(editor: LexicalEditor): () => void {
           return false;
         }
         selection.deleteWord(isBackward);
+        return true;
+      },
+      COMMAND_PRIORITY_EDITOR,
+    ),
+    // Insert Line Break
+    editor.registerCommand<boolean>(
+      INSERT_LINE_BREAK_COMMAND,
+      (_selectStart) => { 
+        // selectStart is unused in the plain text implementation we're mimicking
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) {
+          return false;
+        }
+        selection.insertLineBreak(); // Insert the line break
         return true;
       },
       COMMAND_PRIORITY_EDITOR,

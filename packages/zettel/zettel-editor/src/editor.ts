@@ -1,19 +1,17 @@
 import {
   LexicalEditor,
   createEditor,
-  $createRangeSelection,
-  $getRoot,
   $getSelection,
   $isRangeSelection,
-  $setSelection as $setLexicalSelection,
-  FORMAT_TEXT_COMMAND,
   COMMAND_PRIORITY_CRITICAL,
+  FORMAT_TEXT_COMMAND,
   TextNode,
   ParagraphNode,
   TextFormatType,
 } from "lexical";
 import { registerKeybindings } from "./keybindings.js";
 import { registerCommandHandlers } from "./commands.js";
+import { exportZettelAST } from "./conversion.js";
 
 export type EditorProps = {};
 
@@ -59,28 +57,25 @@ export class ZettelEditor extends HTMLElement {
       COMMAND_PRIORITY_CRITICAL,
     );
 
-    editor.update(() => {
-      const root = $getRoot();
-      if (root.isEmpty()) {
-        const paragraph = new ParagraphNode();
-        root.append(paragraph);
-        const selection = $createRangeSelection();
-        selection.anchor.set(paragraph.getKey(), 0, "element");
-        selection.focus.set(paragraph.getKey(), 0, "element");
-        $setLexicalSelection(selection);
-      }
-    });
-
     const unregisterUpdateListener = editor.registerUpdateListener(
       ({ editorState }) => {
         const editorStateJSON = editorState.toJSON();
+        const zettelAST = exportZettelAST(editorStateJSON);
+
         console.log(
-          "Lexical Editor State (JSON):",
-          JSON.stringify(editorStateJSON, null, 2),
+          "Zettel AST:",
+          JSON.stringify(zettelAST, null, 2),
         );
         this.dispatchEvent(
           new CustomEvent("lexical-state-updated", {
             detail: editorStateJSON,
+            bubbles: true,
+            composed: true,
+          }),
+        );
+        this.dispatchEvent(
+          new CustomEvent("zettel-ast-updated", {
+            detail: zettelAST,
             bubbles: true,
             composed: true,
           }),
@@ -92,9 +87,9 @@ export class ZettelEditor extends HTMLElement {
     const unregisterCommandHandlers = registerCommandHandlers(editor);
 
     this.unregisterListeners = () => {
-      unregisterUpdateListener();
       unregisterKeybindings();
       unregisterCommandHandlers();
+      unregisterUpdateListener();
     };
   }
 

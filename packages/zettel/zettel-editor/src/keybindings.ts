@@ -2,64 +2,75 @@
  * Handles mapping specific key presses to logical Lexical commands.
  */
 
-import { mergeRegister } from "@lexical/utils";
+import type { LexicalEditor } from "lexical";
 import {
   $getSelection,
   $isRangeSelection,
-  LexicalEditor,
-  COMMAND_PRIORITY_EDITOR,
   COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_EDITOR,
   FORMAT_TEXT_COMMAND,
   KEY_DOWN_COMMAND,
+  KEY_ENTER_COMMAND,
+  INSERT_LINE_BREAK_COMMAND,
 } from "lexical";
+import { mergeRegister } from "@lexical/utils";
 
 export function registerKeybindings(editor: LexicalEditor): () => void {
   const unregister = mergeRegister(
-    // Handle standard formatting commands (Cmd/Ctrl + B/I)
-    editor.registerCommand<KeyboardEvent>(
-      KEY_DOWN_COMMAND,
-      (event) => {
-        const { metaKey, ctrlKey, key } = event;
-        const isShortcut = metaKey || ctrlKey;
-
-        if (isShortcut && key.toLowerCase() === "b") {
-          event.preventDefault();
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
-          return true;
-        }
-        if (isShortcut && key.toLowerCase() === "i") {
-          event.preventDefault();
-          editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
-          return true;
-        }
-        // Let other handlers or default behavior process the event
-        return false;
-      },
-      COMMAND_PRIORITY_LOW,
-    ),
-
-    // Handle basic character input directly
+    // Handler for Cmd+B/I (Low Priority)
     editor.registerCommand<KeyboardEvent>(
       KEY_DOWN_COMMAND,
       (event) => {
         const { key, metaKey, ctrlKey, altKey } = event;
-        // Intercept single character keys without modifiers
+
+        // Handle standard formatting commands (Cmd/Ctrl + B/I)
+        if ((metaKey || ctrlKey) && !altKey) {
+          if (key.toLowerCase() === "b") {
+            event.preventDefault();
+            editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
+            return true;
+          }
+          if (key.toLowerCase() === "i") {
+            event.preventDefault();
+            editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
+            return true;
+          }
+        }
+
+        // Handle printable character input directly (restored)
         if (key.length === 1 && !metaKey && !ctrlKey && !altKey) {
-          event.preventDefault();
+          event.preventDefault(); // Prevent native handling since we're doing it
           editor.update(() => {
             const selection = $getSelection();
             if ($isRangeSelection(selection)) {
               selection.insertText(key);
             }
           });
-          return true; // Handled
+          return true; // Indicate we handled this event
         }
-        return false; // Not handled
+
+        // Let other key down events fall through (including printable chars for now)
+        return false;
+      },
+      COMMAND_PRIORITY_LOW,
+    ),
+
+    // Handler for Enter Key (Editor Priority)
+    editor.registerCommand<KeyboardEvent | null>(
+      KEY_ENTER_COMMAND,
+      (event) => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) {
+          return false;
+        }
+        if (event !== null) {
+          event.preventDefault();
+        }
+        // Dispatch INSERT_LINE_BREAK_COMMAND which should be handled in commands.ts
+        return editor.dispatchCommand(INSERT_LINE_BREAK_COMMAND, false);
       },
       COMMAND_PRIORITY_EDITOR,
     ),
-
-    // TODO: Add handlers for other keys if needed (e.g., Tab, Arrows with Shift)
   );
 
   return unregister;
