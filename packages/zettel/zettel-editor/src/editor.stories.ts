@@ -13,23 +13,12 @@ const meta: Meta<EditorProps> = {
   title: "Editor",
   tags: ["autodocs"],
   render: function Render(args) {
-    const handleLexicalStateUpdate = (e: CustomEvent) => {
-      const textarea = document.getElementById(
-        "lexical-state-display",
-      ) as HTMLTextAreaElement;
-      if (textarea) {
-        textarea.value = JSON.stringify(e.detail, null, 2);
-        textarea.style.height = "auto";
-        textarea.style.height = `${textarea.scrollHeight}px`;
-      }
-    };
-
     const handleZettelASTUpdate = (e: CustomEvent) => {
       const textarea = document.getElementById(
         "zettel-ast-display",
       ) as HTMLTextAreaElement;
       if (textarea) {
-        textarea.value = JSON.stringify(e.detail, null, 2);
+        textarea.value = JSON.stringify(e.detail.ast, null, 2);
         textarea.style.height = "auto";
         textarea.style.height = `${textarea.scrollHeight}px`;
       }
@@ -38,16 +27,9 @@ const meta: Meta<EditorProps> = {
     return html`
       <zettel-editor
         ${spreadProps(args)}
-        @lexical-state-updated=${handleLexicalStateUpdate}
-        @zettel-ast-updated=${handleZettelASTUpdate}
+        @zettel-update=${handleZettelASTUpdate}
         style="border: 1px solid #ccc; min-height: 100px; display: block;"
       ></zettel-editor>
-      <textarea
-        id="lexical-state-display"
-        readonly
-        style="width: 100%; margin-top: 10px; font-family: monospace; font-size: 12px; box-sizing: border-box; overflow: hidden; resize: none; min-height: 70px;"
-        placeholder="Lexical Editor State JSON will appear here..."
-      ></textarea>
       <textarea
         id="zettel-ast-display"
         readonly
@@ -67,9 +49,8 @@ const meta: Meta<EditorProps> = {
     ) as HTMLTextAreaElement;
 
     if (editor && outputArea) {
-      editor.addEventListener("zettel-ast-updated", (event) => {
-        // The detail now directly contains the Zettel AST
-        const zettelAST = (event as CustomEvent).detail;
+      editor.addEventListener("zettel-update", (event) => {
+        const zettelAST = (event as CustomEvent).detail.ast;
         outputArea.value = JSON.stringify(zettelAST, null, 2);
       });
     } else {

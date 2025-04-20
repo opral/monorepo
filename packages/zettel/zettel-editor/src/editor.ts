@@ -1,17 +1,6 @@
-import {
-  LexicalEditor,
-  createEditor,
-  $getSelection,
-  $isRangeSelection,
-  COMMAND_PRIORITY_CRITICAL,
-  FORMAT_TEXT_COMMAND,
-  TextNode,
-  ParagraphNode,
-  TextFormatType,
-} from "lexical";
-import { registerKeybindings } from "./keybindings.js";
-import { registerCommandHandlers } from "./commands.js";
-import { exportZettelAST } from "./conversion.js";
+import { LexicalEditor, createEditor, TextNode, ParagraphNode } from "lexical";
+import { ZettelBlock } from "./plugins/conversion.js";
+import { registerZettelLexicalPlugin } from "./plugins/zettel-lexical-plugin.js";
 
 export type EditorProps = {};
 
@@ -21,14 +10,6 @@ export class ZettelEditor extends HTMLElement {
 
   connectedCallback() {
     const initialConfig = {
-      namespace: "ZettelEditor",
-      theme: {
-        paragraph: "editor-paragraph",
-        text: {
-          bold: "editor-text-bold",
-          italic: "editor-text-italic",
-        },
-      },
       onError: (error: Error) => {
         console.error("Lexical Error:", error);
       },
@@ -45,51 +26,16 @@ export class ZettelEditor extends HTMLElement {
     editor.setRootElement(container as HTMLElement);
     this.editor = editor;
 
-    editor.registerCommand<TextFormatType>(
-      FORMAT_TEXT_COMMAND,
-      (formatType) => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          selection.formatText(formatType);
-        }
-        return true;
-      },
-      COMMAND_PRIORITY_CRITICAL,
-    );
-
-    const unregisterUpdateListener = editor.registerUpdateListener(
-      ({ editorState }) => {
-        const zettelAST = exportZettelAST(editorState);
-
-        console.log(
-          "Zettel AST:",
-          JSON.stringify(zettelAST, null, 2),
-        );
-        this.dispatchEvent(
-          new CustomEvent("lexical-state-updated", {
-            detail: editorState.toJSON(),
-            bubbles: true,
-            composed: true,
-          }),
-        );
-        this.dispatchEvent(
-          new CustomEvent("zettel-ast-updated", {
-            detail: zettelAST,
-            bubbles: true,
-            composed: true,
-          }),
-        );
-      },
-    );
-
-    const unregisterKeybindings = registerKeybindings(editor);
-    const unregisterCommandHandlers = registerCommandHandlers(editor);
-
-    this.unregisterListeners = () => {
-      unregisterKeybindings();
-      unregisterCommandHandlers();
-      unregisterUpdateListener();
+    const handleZettelUpdate = (ast: ZettelBlock[]) => {
+      this.dispatchEvent(
+        new CustomEvent("zettel-update", { detail: { ast: ast } }),
+      );
     };
+
+    this.unregisterListeners = registerZettelLexicalPlugin(
+      editor,
+      handleZettelUpdate,
+    );
   }
 
   disconnectedCallback() {
