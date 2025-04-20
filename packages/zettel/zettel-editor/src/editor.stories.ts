@@ -7,7 +7,7 @@ import "./editor.js";
 const meta: Meta<EditorProps> = {
   title: "Editor",
   tags: ["autodocs"],
-  render: (args) => html`<zettel-editor ${spreadProps(args)}></zettel-editor>`,
+  render: (args) => `<zettel-editor></zettel-editor>`,
   argTypes: {},
   args: { zettel: [] },
 };

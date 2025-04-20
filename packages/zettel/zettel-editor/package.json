@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
@@ -11,16 +14,22 @@
     "storybook": "storybook dev -p 6006"
   },
   "dependencies": {
+    "@lexical/clipboard": "^0.30.0",
+    "@lexical/history": "^0.30.0",
+    "@lexical/plain-text": "^0.30.0",
+    "@lexical/rich-text": "^0.30.0",
+    "@lexical/utils": "^0.30.0",
     "@opral/zettel-ast": "workspace:*",
+    "lexical": "^0.30.0",
     "lit": "^3.2.1"
   },
   "devDependencies": {
+    "@open-wc/lit-helpers": "^0.7.0",
     "@storybook/addon-essentials": "8.6.12",
     "@storybook/blocks": "8.6.12",
     "@storybook/test": "8.6.12",
     "@storybook/web-components": "8.6.12",
     "@storybook/web-components-vite": "8.6.12",
-    "@open-wc/lit-helpers": "^0.7.0",
     "prettier": "^3.5.3",
     "storybook": "8.6.12",
     "typescript": "~5.7.2",
