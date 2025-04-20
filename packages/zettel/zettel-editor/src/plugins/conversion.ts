@@ -1,111 +1,186 @@
 import {
+  $getRoot,
+  $getNodeByKey,
+  $isParagraphNode,
   EditorState,
-  LineBreakNode,
+  LexicalEditor,
+  LexicalNode,
+  NodeKey,
   ParagraphNode,
-  RootNode,
-  TextNode,
 } from "lexical";
-import { Zettel, ZettelTextBlock } from "@opral/zettel-ast";
-
-// Helper to check bitmask - Checks if a specific bit is set in the format number
-const hasFormat = (format: number, type: number): boolean =>
-  (format & type) !== 0;
+import {
+  generateKey,
+  type Zettel,
+  type ZettelSpan,
+  type ZettelTextBlock,
+} from "@opral/zettel-ast";
+import {
+  $createZettelTextBlockNode,
+  $createZettelSpanNode,
+  $isZettelSpanNode,
+  $isZettelTextBlockNode,
+  ZettelSpanNode,
+} from "../nodes.js";
 
 /**
- * Converts a Lexical TextNode's format bitmask into a Zettel marks array.
+ * Converts the live Lexical editor state to a Zettel AST.
+ * Traverses the node tree within an editorState.read() block.
+ * @param editorState The Lexical EditorState to convert.
+ * @param editor The LexicalEditor instance.
+ * @returns A Zettel AST array.
  */
-function convertFormatToMarks(format: number): string[] {
-  const marks: string[] = [];
-  // Check for specific format bits and add corresponding marks
-  if (hasFormat(format, 1)) {
-    // 1 corresponds to FORMAT_BOLD in Lexical constants
-    marks.push("bold");
+export function exportZettelAST(
+  editorState: EditorState,
+  editor: LexicalEditor,
+): Zettel {
+  let zettel: Zettel = [];
+  const pendingKeyUpdates = new Map<NodeKey, string>();
+
+  editorState.read(() => {
+    const root = $getRoot();
+    root.getChildren().forEach((node: LexicalNode) => {
+      if ($isParagraphNode(node)) {
+        const paragraphNode: ParagraphNode = node;
+        let blockKey: string = generateKey();
+        if ($isZettelTextBlockNode(paragraphNode)) {
+          blockKey = paragraphNode.__zettelKey ?? blockKey;
+        }
+        const zettelBlock: ZettelTextBlock = {
+          _type: "zettel.textBlock",
+          _key: blockKey,
+          style: "normal",
+          children: [],
+          markDefs: [],
+        };
+
+        const spans: ZettelSpan[] = [];
+        let currentGroup: ZettelSpanNode[] = [];
+
+        paragraphNode
+          .getChildren()
+          .forEach((childNode: LexicalNode, index: number) => {
+            if ($isZettelSpanNode(childNode)) {
+              const textNode = childNode;
+
+              if (
+                currentGroup.length > 0 &&
+                (textNode.getFormat() !== currentGroup[0].getFormat() ||
+                  textNode.__zettelKey !== currentGroup[0].__zettelKey)
+              ) {
+                const firstNode = currentGroup[0];
+                let groupZettelKey = firstNode.__zettelKey;
+                if (groupZettelKey === undefined) {
+                  groupZettelKey = generateKey();
+                  currentGroup.forEach((node) =>
+                    pendingKeyUpdates.set(node.__key, groupZettelKey!),
+                  );
+                }
+                spans.push({
+                  _type: "zettel.span",
+                  _key: groupZettelKey,
+                  text: currentGroup.map((n) => n.getTextContent()).join(""),
+                  marks: exportTextFormat(firstNode.getFormat()),
+                });
+                currentGroup = [];
+              }
+
+              currentGroup.push(textNode);
+
+              if (
+                index === paragraphNode.getChildren().length - 1 &&
+                currentGroup.length > 0
+              ) {
+                const firstNode = currentGroup[0];
+                let groupZettelKey = firstNode.__zettelKey;
+                if (groupZettelKey === undefined) {
+                  groupZettelKey = generateKey();
+                  currentGroup.forEach((node) =>
+                    pendingKeyUpdates.set(node.__key, groupZettelKey!),
+                  );
+                }
+                spans.push({
+                  _type: "zettel.span",
+                  _key: groupZettelKey,
+                  text: currentGroup.map((n) => n.getTextContent()).join(""),
+                  marks: exportTextFormat(firstNode.getFormat()),
+                });
+              }
+            }
+          });
+
+        zettelBlock.children = spans;
+
+        // Add the processed block to the Zettel array
+        zettel.push(zettelBlock);
+      } else {
+        console.warn("Unsupported top-level node type:", node.getType());
+      }
+    });
+  });
+
+  if (pendingKeyUpdates.size > 0) {
+    Promise.resolve().then(() => {
+      editor.update(
+        () => {
+          pendingKeyUpdates.forEach((zettelKey, nodeKey) => {
+            const node = $getNodeByKey<LexicalNode>(nodeKey);
+            if (node && $isZettelSpanNode(node)) {
+              node.getWritable().__zettelKey = zettelKey;
+            }
+          });
+        },
+        { tag: "zettel-key-update" },
+      );
+    });
   }
-  if (hasFormat(format, 2)) {
-    // 2 corresponds to FORMAT_ITALIC
-    marks.push("italic");
-  }
-  // Add checks for other formats if needed (underline, strikethrough, etc.)
-  // if (hasFormat(format, 8)) { marks.push('underline'); }
-  return marks;
+
+  return zettel;
 }
 
 /**
- * Converts a Lexical EditorState JSON object into a Zettel AST.
- * Currently handles simple structures: Root -> Paragraph -> Text.
+ * Converts a Zettel AST into Lexical nodes and updates the editor state.
+ * @param zettel The Zettel AST to import.
+ * @param editor The LexicalEditor instance.
  */
-export function exportZettelAST(editorState: EditorState): Zettel {
-  const zettelBlocks: ZettelTextBlock[] = [];
+export function importZettelAST(zettel: Zettel, editor: LexicalEditor): void {
+  editor.update(() => {
+    const root = $getRoot();
+    root.clear();
 
-  editorState.read(() => {
-    const root = editorState._nodeMap.get("root") as RootNode;
-    if (!root) return;
+    if (!zettel || zettel.length === 0) return;
 
-    // Iterate over top-level nodes (typically paragraphs)
-    for (const topLevelNode of root.getChildren()) {
-      if (topLevelNode instanceof ParagraphNode) {
-        let currentBlock: ZettelTextBlock | null = null; // Initialize block
+    zettel.forEach((block) => {
+      if (block._type === "zettel.textBlock") {
+        const paragraphNode = $createZettelTextBlockNode();
 
-        // Iterate over children of the paragraph (TextNode, LineBreakNode, etc.)
-        for (const childNode of topLevelNode.getChildren()) {
-          if (childNode instanceof TextNode) {
-            // If we don't have a current block, start one
-            if (!currentBlock) {
-              // Start a new block using the parent Paragraph's key
-              currentBlock = {
-                _type: "zettel.textBlock",
-                _key: topLevelNode.getKey(),
-                style: "normal",
-                children: [],
-                markDefs: [],
-              };
-            } else if (currentBlock._key !== topLevelNode.getKey()) {
-              // Safety check: If parent key changes, start new block (shouldn't happen mid-paragraph)
-              currentBlock = {
-                _type: "zettel.textBlock",
-                _key: topLevelNode.getKey(),
-                style: "normal",
-                children: [],
-                markDefs: [],
-              };
+        (block as ZettelTextBlock).children.forEach((span: ZettelSpan) => {
+          if (span._type === "zettel.span") {
+            const textNode = $createZettelSpanNode(span.text);
+
+            let format = 0;
+            if (span.marks?.includes("bold")) {
+              format |= 1;
             }
-            const textNode = childNode;
-            const marks = convertFormatToMarks(textNode.getFormat());
-            // Add span only if text is not empty
-            if (textNode.getTextContent().length > 0) {
-              currentBlock.children.push({
-                _type: "zettel.span",
-                _key: textNode.getKey(), // Use TextNode's key for span
-                text: textNode.getTextContent(),
-                marks,
-              });
+            if (span.marks?.includes("italic")) {
+              format |= 2;
             }
-          } else if (childNode instanceof LineBreakNode) {
-            // If we encounter a line break and have a current block with content, push it.
-            if (currentBlock && currentBlock.children.length > 0) {
-              zettelBlocks.push(currentBlock);
+
+            if (format > 0) {
+              textNode.setFormat(format);
             }
-            // Start a new block for content after the line break
-            // Use the parent Paragraph's key for the new block after line break
-            currentBlock = {
-              _type: "zettel.textBlock",
-              _key: topLevelNode.getKey(),
-              style: "normal",
-              children: [],
-              markDefs: [],
-            };
+            paragraphNode.append(textNode);
           }
-          // Handle other node types if necessary
-        }
+        });
 
-        // After processing all children, push the last block if it has content
-        if (currentBlock && currentBlock.children.length > 0) {
-          zettelBlocks.push(currentBlock);
-        }
+        root.append(paragraphNode);
       }
-      // Handle other top-level node types if necessary
-    }
+    });
   });
+}
 
-  return zettelBlocks;
+function exportTextFormat(format: number): ZettelSpan["marks"] {
+  const marks: ZettelSpan["marks"] = [];
+  if (format & 1) marks.push("strong");
+  if (format & 2) marks.push("emphasis");
+  return marks;
 }

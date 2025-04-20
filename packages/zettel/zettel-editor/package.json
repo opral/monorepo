@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@open-wc/lit-helpers": "^0.7.0",
+    "@storybook/addon-actions": "^8.6.12",
     "@storybook/addon-essentials": "8.6.12",
     "@storybook/blocks": "8.6.12",
     "@storybook/preview-api": "8.6.12",

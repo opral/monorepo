@@ -6,12 +6,19 @@ import type {
 import { type EditorProps } from "./editor.js";
 import { html } from "lit";
 import { spreadProps } from "@open-wc/lit-helpers";
+import { action } from "@storybook/addon-actions";
 import "./editor.js";
 import type { ZettelEditor } from "./editor.js";
+import { generateKey, Zettel } from "@opral/zettel-ast";
 
 const meta: Meta<EditorProps> = {
-  title: "Editor",
+  title: "Zettel/Editor",
+  component: 'zettel-editor',
   tags: ["autodocs"],
+  argTypes: {
+    zettel: { control: "object" }, // Allows editing Zettel JSON in controls
+    onZettelUpdate: { action: "zettel-update" }, // Log events to actions tab
+  },
   render: function Render(args) {
     const handleZettelASTUpdate = (e: CustomEvent) => {
       const textarea = document.getElementById(
@@ -38,12 +45,8 @@ const meta: Meta<EditorProps> = {
       ></textarea>
     `;
   },
-  argTypes: {},
-  args: {},
   play: async ({ canvasElement }) => {
-    const editor = canvasElement.querySelector(
-      "zettel-editor",
-    ) as ZettelEditor;
+    const editor = canvasElement.querySelector("zettel-editor") as ZettelEditor;
     const outputArea = canvasElement.querySelector(
       "#zettel-ast-display",
     ) as HTMLTextAreaElement;
@@ -52,6 +55,10 @@ const meta: Meta<EditorProps> = {
       editor.addEventListener("zettel-update", (event) => {
         const zettelAST = (event as CustomEvent).detail.ast;
         outputArea.value = JSON.stringify(zettelAST, null, 2);
+        action("zettel-update")((event as CustomEvent).detail);
+      });
+      editor.addEventListener("lexical-update", (event) => {
+        action("lexical-update")((event as CustomEvent).detail);
       });
     } else {
       console.error("Editor or output area not found");
@@ -59,8 +66,29 @@ const meta: Meta<EditorProps> = {
   },
 };
 
+const sampleZettel: Zettel = [
+  {
+    _type: "zettel.textBlock",
+    _key: generateKey(),
+    style: "normal",
+    children: [
+      {
+        _type: "zettel.span",
+        _key: generateKey(),
+        text: "Hello world",
+        marks: [],
+      },
+    ],
+    markDefs: [],
+  },
+];
+
 export default meta;
 
 type Story = StoryObj<EditorProps>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  args: {
+    zettel: sampleZettel, // Pass the sample Zettel AST
+  },
+};

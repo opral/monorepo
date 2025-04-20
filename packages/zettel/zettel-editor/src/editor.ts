@@ -1,19 +1,39 @@
-import { LexicalEditor, createEditor, TextNode, ParagraphNode } from "lexical";
+import {
+  LexicalEditor,
+  createEditor,
+  TextNode,
+  ParagraphNode,
+  SerializedEditorState,
+} from "lexical";
 import { registerZettelLexicalPlugin } from "./plugins/zettel-lexical-plugin.js";
-import { Zettel } from "@opral/zettel-ast";
+import { importZettelAST } from "./plugins/conversion.js";
+import { Zettel, generateKey } from "@opral/zettel-ast";
+import { ZettelTextBlockNode, ZettelSpanNode } from "./nodes.js";
 
 export type EditorProps = {};
 
 export class ZettelEditor extends HTMLElement {
   private editor: LexicalEditor | null = null;
   private unregisterListeners: (() => void) | null = null;
+  private _zettel: Zettel | null = null;
+
+  get zettel(): Zettel | null {
+    return this._zettel;
+  }
+
+  set zettel(value: Zettel | null) {
+    this._zettel = value;
+    if (this.editor && this._zettel) {
+      importZettelAST(this._zettel, this.editor);
+    }
+  }
 
   connectedCallback() {
     const initialConfig = {
       onError: (error: Error) => {
         console.error("Lexical Error:", error);
       },
-      nodes: [ParagraphNode, TextNode],
+      nodes: [ZettelTextBlockNode, ZettelSpanNode],
     };
 
     const editor: LexicalEditor = createEditor(initialConfig);
@@ -26,9 +46,15 @@ export class ZettelEditor extends HTMLElement {
     editor.setRootElement(container as HTMLElement);
     this.editor = editor;
 
-    const handleZettelUpdate = (ast: Zettel) => {
+    const handleZettelUpdate = (
+      zettelAst: Zettel,
+      lexicalState: SerializedEditorState,
+    ) => {
       this.dispatchEvent(
-        new CustomEvent("zettel-update", { detail: { ast: ast } }),
+        new CustomEvent("zettel-update", { detail: { ast: zettelAst } }),
+      );
+      this.dispatchEvent(
+        new CustomEvent("lexical-update", { detail: { state: lexicalState } }),
       );
     };
 
@@ -36,6 +62,10 @@ export class ZettelEditor extends HTMLElement {
       editor,
       handleZettelUpdate,
     );
+
+    if (this._zettel) {
+      importZettelAST(this._zettel, editor);
+    }
   }
 
   disconnectedCallback() {
