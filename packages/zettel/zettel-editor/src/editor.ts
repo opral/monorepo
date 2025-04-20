@@ -59,8 +59,7 @@ export class ZettelEditor extends HTMLElement {
 
     const unregisterUpdateListener = editor.registerUpdateListener(
       ({ editorState }) => {
-        const editorStateJSON = editorState.toJSON();
-        const zettelAST = exportZettelAST(editorStateJSON);
+        const zettelAST = exportZettelAST(editorState);
 
         console.log(
           "Zettel AST:",
@@ -68,7 +67,7 @@ export class ZettelEditor extends HTMLElement {
         );
         this.dispatchEvent(
           new CustomEvent("lexical-state-updated", {
-            detail: editorStateJSON,
+            detail: editorState.toJSON(),
             bubbles: true,
             composed: true,
           }),

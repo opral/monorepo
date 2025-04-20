@@ -1,10 +1,11 @@
 // src/conversion.ts
 
-import type {
+import {
   EditorState,
-  SerializedTextNode,
-  SerializedParagraphNode,
-  SerializedRootNode,
+  LineBreakNode,
+  ParagraphNode,
+  RootNode,
+  TextNode,
 } from "lexical";
 
 // Define the target Zettel AST structure types
@@ -45,45 +46,55 @@ function convertFormatToMarks(format: number): string[] {
  * Currently handles simple structures: Root -> Paragraph -> Text.
  */
 export function exportZettelAST(
-  editorStateJSON: ReturnType<EditorState["toJSON"]>,
+  editorState: EditorState,
 ): ZettelBlock[] {
   const zettelBlocks: ZettelBlock[] = [];
-  // Type cast the root to SerializedRootNode
-  const lexicalRoot = editorStateJSON.root as SerializedRootNode;
 
-  // Check if root and its children exist
-  if (!lexicalRoot?.children) {
-    return zettelBlocks;
-  }
+  editorState.read(() => {
+    const root = editorState._nodeMap.get("root") as RootNode;
+    if (!root) return;
 
-  // Iterate through the children of the Lexical RootNode
-  for (const topLevelNode of lexicalRoot.children) {
-    // Type guard to ensure it's a paragraph and has children
-    if (topLevelNode.type === "paragraph" && "children" in topLevelNode) {
-      const paragraphNode = topLevelNode as SerializedParagraphNode; // Cast after check
-      const zettelBlock: ZettelBlock = {
-        type: "block",
-        children: [],
-      };
+    // Iterate over top-level nodes (typically paragraphs)
+    for (const topLevelNode of root.getChildren()) {
+      if (topLevelNode instanceof ParagraphNode) {
+        let currentBlock: ZettelBlock | null = null; // Initialize block
 
-      // Iterate through the children of the ParagraphNode (expecting TextNodes)
-      for (const childNode of paragraphNode.children) {
-        // Check if it's a text node
-        if (childNode.type === "text") {
-          const textNode = childNode as SerializedTextNode; // Cast to SerializedTextNode
-          const zettelSpan: ZettelSpan = {
-            type: "span",
-            text: textNode.text,
-            marks: convertFormatToMarks(textNode.format ?? 0),
-          };
-          zettelBlock.children.push(zettelSpan);
+        // Iterate over children of the paragraph (TextNode, LineBreakNode, etc.)
+        for (const childNode of topLevelNode.getChildren()) {
+          if (childNode instanceof TextNode) {
+            // If we don't have a current block, start one
+            if (!currentBlock) {
+              currentBlock = { type: "block", children: [] };
+            }
+            const textNode = childNode;
+            const marks = convertFormatToMarks(textNode.getFormat());
+            // Add span only if text is not empty
+            if (textNode.getTextContent().length > 0) {
+              currentBlock.children.push({
+                type: "span",
+                text: textNode.getTextContent(),
+                marks,
+              });
+            }
+          } else if (childNode instanceof LineBreakNode) {
+            // If we encounter a line break and have a current block with content, push it.
+            if (currentBlock && currentBlock.children.length > 0) {
+              zettelBlocks.push(currentBlock);
+            }
+            // Start a new block for content after the line break
+            currentBlock = { type: "block", children: [] };
+          }
+          // Handle other node types if necessary
         }
-        // Add handling for other potential node types within a paragraph if needed
+
+        // After processing all children, push the last block if it has content
+        if (currentBlock && currentBlock.children.length > 0) {
+          zettelBlocks.push(currentBlock);
+        }
       }
-      zettelBlocks.push(zettelBlock);
+      // Handle other top-level node types if necessary
     }
-    // Add handling for other top-level node types (e.g., lists, headings) if needed
-  }
+  });
 
   return zettelBlocks;
 }
