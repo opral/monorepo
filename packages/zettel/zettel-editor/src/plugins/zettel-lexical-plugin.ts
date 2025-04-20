@@ -11,7 +11,8 @@ import { mergeRegister } from "@lexical/utils";
 
 import { registerKeybindings } from "./keybindings.js";
 import { registerCommandHandlers } from "./commands.js";
-import { exportZettelAST, ZettelBlock } from "./conversion.js";
+import { exportZettelAST } from "./conversion.js";
+import { Zettel } from "@opral/zettel-ast";
 
 /**
  * Registers the core functionality for the Zettel editor,
@@ -22,7 +23,7 @@ import { exportZettelAST, ZettelBlock } from "./conversion.js";
  */
 export function registerZettelLexicalPlugin(
   editor: LexicalEditor,
-  onZettelUpdate: (ast: ZettelBlock[]) => void,
+  onZettelUpdate: (ast: Zettel) => void,
 ): () => void {
   // Register standard keybindings and command handlers
   const unregisterKeybindings = registerKeybindings(editor);

@@ -1,6 +1,6 @@
 import { LexicalEditor, createEditor, TextNode, ParagraphNode } from "lexical";
-import { ZettelBlock } from "./plugins/conversion.js";
 import { registerZettelLexicalPlugin } from "./plugins/zettel-lexical-plugin.js";
+import { Zettel } from "@opral/zettel-ast";
 
 export type EditorProps = {};
 
@@ -26,7 +26,7 @@ export class ZettelEditor extends HTMLElement {
     editor.setRootElement(container as HTMLElement);
     this.editor = editor;
 
-    const handleZettelUpdate = (ast: ZettelBlock[]) => {
+    const handleZettelUpdate = (ast: Zettel) => {
       this.dispatchEvent(
         new CustomEvent("zettel-update", { detail: { ast: ast } }),
       );
