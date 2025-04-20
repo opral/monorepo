@@ -17,7 +17,7 @@ import {
   PASTE_COMMAND,
   SELECT_ALL_COMMAND,
 } from "lexical";
-import { $createZettelTextBlockNode, $createZettelSpanNode } from "../nodes.js";
+import { $createZettelTextBlockNode } from "../nodes.js";
 
 function onCopyForPlainText(
   event: ClipboardEvent,

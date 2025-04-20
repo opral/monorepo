@@ -12,7 +12,6 @@ import { mergeRegister } from "@lexical/utils";
 
 import { registerEditorCommands } from "./commands.js";
 import { exportZettelAST } from "./conversion.js";
-import { ZettelTextBlockNode, ZettelSpanNode, $createZettelTextBlockNode, $createZettelSpanNode } from "../nodes.js";
 import { Zettel } from "@opral/zettel-ast";
 
 /**

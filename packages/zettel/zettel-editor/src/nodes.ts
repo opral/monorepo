@@ -33,6 +33,20 @@ export class ZettelSpanNode extends TextNode {
     this.__type = "zettel-span";
   }
 
+  canMergeWith(node: LexicalNode): boolean {
+    // Merge if adjacent ZettelSpanNodes have same format, style, and mode
+    if (!(node instanceof ZettelSpanNode)) return false;
+    return (
+      this.getFormat() === node.getFormat() &&
+      this.getStyle() === node.getStyle() &&
+      this.getMode() === node.getMode()
+    );
+  }
+
+  isSimpleText(): boolean {
+    return true;
+  }
+
   exportJSON(): SerializedZettelSpanNode {
     return {
       ...super.exportJSON(), // Inherit base properties (text, format, style, etc.)

@@ -157,13 +157,7 @@ export function importZettelAST(zettel: Zettel, editor: LexicalEditor): void {
           if (span._type === "zettel.span") {
             const textNode = $createZettelSpanNode(span.text);
 
-            let format = 0;
-            if (span.marks?.includes("bold")) {
-              format |= 1;
-            }
-            if (span.marks?.includes("italic")) {
-              format |= 2;
-            }
+            let format = importTextFormat(span.marks);
 
             if (format > 0) {
               textNode.setFormat(format);
@@ -181,6 +175,13 @@ export function importZettelAST(zettel: Zettel, editor: LexicalEditor): void {
 function exportTextFormat(format: number): ZettelSpan["marks"] {
   const marks: ZettelSpan["marks"] = [];
   if (format & 1) marks.push("strong");
-  if (format & 2) marks.push("emphasis");
+  if (format & 2) marks.push("em");
   return marks;
+}
+
+function importTextFormat(marks: string[]): number {
+  let format = 0;
+  if (marks.includes("strong")) format |= 1;
+  if (marks.includes("em")) format |= 2;
+  return format;
 }
