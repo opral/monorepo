@@ -18,16 +18,21 @@ import {
   $getSelection,
   $isRangeSelection,
   $selectAll,
+  $createRangeSelection,
+  $setSelection,
   COMMAND_PRIORITY_EDITOR,
   CONTROLLED_TEXT_INSERTION_COMMAND,
   COPY_COMMAND,
   CUT_COMMAND, // Needed for cut helper
   DELETE_CHARACTER_COMMAND,
   DELETE_WORD_COMMAND, // Import command
-  INSERT_LINE_BREAK_COMMAND, // Import command
   PASTE_COMMAND,
   SELECT_ALL_COMMAND,
 } from "lexical";
+import { $getNearestNodeOfType } from "@lexical/utils";
+import { TextBlockNode } from "./nodes/TextBlockNode.js"; // Import node type
+import { ZettelSpanNode } from "./nodes/ZettelSpanNode.js"; // Import node type
+import { generateKey } from "@opral/zettel-ast"; // Import key generation
 
 // --- Helper Functions (Adapted from @lexical/plain-text) --- //
 
@@ -89,6 +94,44 @@ export function registerCommandHandlers(editor: LexicalEditor): () => void {
         if (typeof payload === "string") {
           const selection = $getSelection();
           if ($isRangeSelection(selection)) {
+            // Special case: Inserting text into an empty TextBlockNode
+            if (selection.isCollapsed()) {
+              const anchorNode = selection.anchor.getNode();
+              const parentBlock = $getNearestNodeOfType(
+                anchorNode,
+                TextBlockNode,
+              );
+              // Check if anchor is block OR if parent is block and empty
+              if (parentBlock && parentBlock.isEmpty()) {
+                // Create the new span node
+                // Generate a key for the new span
+                const spanKey = generateKey();
+                const newSpan = ZettelSpanNode.$createZettelSpanNode(
+                  payload,
+                  [],
+                  spanKey,
+                );
+                // Replace existing empty content OR append
+                parentBlock.append(newSpan);
+
+                // Set selection to the end of the newly inserted text
+                const rangeSelection = $createRangeSelection();
+                rangeSelection.anchor.set(
+                  newSpan.getKey(),
+                  payload.length,
+                  "text",
+                );
+                rangeSelection.focus.set(
+                  newSpan.getKey(),
+                  payload.length,
+                  "text",
+                );
+                $setSelection(rangeSelection);
+                return true; // Handled
+              }
+            }
+
+            // Default case: Let Lexical handle insertion
             selection.insertText(payload);
             return true; // Handled
           }
@@ -176,18 +219,22 @@ export function registerCommandHandlers(editor: LexicalEditor): () => void {
       },
       COMMAND_PRIORITY_EDITOR,
     ),
-    // Insert Line Break (Handles Enter Key)
-    editor.registerCommand<boolean>(
-      INSERT_LINE_BREAK_COMMAND,
-      (selectStart) => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) {
-          return false;
-        }
-        selection.insertLineBreak(selectStart);
-        return true; // Handled
-      },
-      COMMAND_PRIORITY_EDITOR,
-    ),
+    /*
+     // Insert Line Break (Handles Enter Key)
+     // REMOVED: This handler was preventing default block splitting.
+     // By removing it, Lexical will use TextBlockNode.insertNewAfter() correctly.
+     editor.registerCommand<boolean>(
+       INSERT_LINE_BREAK_COMMAND,
+       (selectStart) => {
+         const selection = $getSelection();
+         if (!$isRangeSelection(selection)) {
+           return false;
+         }
+         selection.insertLineBreak(selectStart);
+         return true; // Handled
+       },
+       COMMAND_PRIORITY_EDITOR,
+     ),
+     */
   );
 }
