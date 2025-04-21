@@ -169,3 +169,31 @@ test("allows custom blocks", () => {
 	const result = validate(doc);
 	expect(result.errors).toBeUndefined();
 });
+
+test("adding custom mark defs", () => {
+	const doc: ZettelDoc = [
+		{
+			_type: "zettel.textBlock",
+			_key: "uniqueKey",
+			markDefs: [
+				{
+					_type: "custom.markDef",
+					_key: "uniqueKey",
+					foo: {},
+				},
+			],
+			style: "normal",
+			children: [
+				{
+					_type: "zettel.span",
+					_key: "spanInvalid",
+					text: "Invalid mark test",
+					marks: ["custom.markDef"],
+				},
+			],
+		},
+	];
+
+	const result = validate(doc);
+	expect(result.errors).toBeUndefined();
+});

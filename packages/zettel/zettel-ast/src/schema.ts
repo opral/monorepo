@@ -1,11 +1,11 @@
 import { Type, type Static } from "@sinclair/typebox";
 
 /**
- * A [Portable Text](https://github.com/portabletext/portabletext) node.
+ * A Base Node (modeled after [Portable Text](https://github.com/portabletext/portabletext)).
  *
  * A node always has to have a `_type` and a `_key`.
  */
-export type BaseNode = Static<typeof BaseNode>;
+export type BaseNode = Static<typeof BaseNode> & { [property: string]: any };
 const BaseNode = Type.Object({
 	_type: Type.String(),
 	_key: Type.String({
@@ -93,7 +93,7 @@ const ZettelLinkMarkDef = Type.Object({
  *   ]
  *   ```
  */
-export type MarkDef = ZettelAccountMentionMarkDef | ZettelLinkMarkDef | BaseNode;
+export type MarkDef = Static<typeof MarkDef> & { [property: string]: any };
 const MarkDef = Type.Union([ZettelAccountMentionMarkDef, ZettelLinkMarkDef, BaseNode]);
 
 /**
@@ -154,7 +154,7 @@ const ZettelSpan = Type.Object({
  *   ]
  *   ```
  */
-export type ZettelTextBlock = Static<typeof ZettelTextBlock>;
+export type ZettelTextBlock = Static<typeof ZettelTextBlock>; 
 const ZettelTextBlock = Type.Object({
 	_type: Type.Literal("zettel.textBlock"),
 	_key: Type.String(),
@@ -185,7 +185,7 @@ const CustomBlock = Type.Intersect([
 	}),
 ]);
 
-export type ZettelDoc = Static<typeof ZettelDoc>;
+export type ZettelDoc = Array<ZettelTextBlock | BaseNode>;
 // A document is an array of either ZettelTextBlocks or CustomBlocks
 const ZettelDoc = Type.Array(Type.Union([ZettelTextBlock, CustomBlock]));
 

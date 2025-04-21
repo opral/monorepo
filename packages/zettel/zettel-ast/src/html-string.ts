@@ -7,7 +7,33 @@ import type {
 } from "./schema.js";
 import { createZettelSpan, createZettelTextBlock } from "./builder.js"; // Assuming builder generates keys
 
-export function toHtml(doc: ZettelDoc): string {
+/**
+ * Serializes a ZettelDoc into an HTML string.
+ *
+ * @param doc ZettelDoc to serialize
+ * @returns HTML string representation of the ZettelDoc
+ *
+ * @example
+ * const doc = [
+ *   {
+ *     _type: "zettel.textBlock",
+ *     _key: "abc123",
+ *     style: "zettel.normal",
+ *     markDefs: [],
+ *     children: [
+ *       {
+ *         _type: "zettel.span",
+ *         _key: "def456",
+ *         text: "Hello!",
+ *         marks: []
+ *       }
+ *     ]
+ *   }
+ * ];
+ * const html = toHtmlString(doc);
+ * // html => '<div data-zettel-doc="true"><p data-zettel-key="abc123">...'</div>'
+ */
+export function toHtmlString(doc: ZettelDoc): string {
 	const container = document.createElement("div"); // Temporary container
 	container.setAttribute("data-zettel-doc", "true"); // Set attribute value to 'true'
 
@@ -203,7 +229,7 @@ function parseUnknownHtml(container: HTMLElement): ZettelDoc {
 			// Add more tag-to-mark mappings as needed
 
 			let spans: ZettelSpan[] = [];
-			el.childNodes.forEach(child => {
+			el.childNodes.forEach((child) => {
 				spans = spans.concat(walkInline(child, nextMarks));
 			});
 			return spans;
@@ -228,7 +254,22 @@ function parseUnknownHtml(container: HTMLElement): ZettelDoc {
 	return resultingDoc;
 }
 
-export function fromHtml(html: string): ZettelDoc {
+/**
+ * Parses a ZettelDoc from an HTML string.
+ *
+ * If the HTML string contains a ZettelDoc root element (with data-zettel-doc="true"),
+ * it is parsed as a ZettelDoc. Otherwise, the function attempts to parse any recognizable
+ * Zettel structure from the HTML fragment.
+ *
+ * @param html HTML string to parse
+ * @returns ZettelDoc parsed from the HTML
+ *
+ * @example
+ * const html = '<div data-zettel-doc="true"><p data-zettel-key="abc123">Hello!</p></div>';
+ * const doc = fromHtmlString(html);
+ * // doc => [{ _type: "zettel.textBlock", ... }]
+ */
+export function fromHtmlString(html: string): ZettelDoc {
 	const container = document.createElement("div");
 	container.innerHTML = html;
 	const rootElement = container.firstElementChild;
