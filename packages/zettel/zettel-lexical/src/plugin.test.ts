@@ -5,13 +5,22 @@ import {
   $createZettelTextBlockNode,
   ZettelNodes,
 } from "./nodes.js";
-import { $getRoot, createEditor, KEY_ENTER_COMMAND } from "lexical";
+import {
+  $getRoot,
+  createEditor,
+  KEY_ENTER_COMMAND,
+  PASTE_COMMAND,
+} from "lexical";
 import { JSDOM } from "jsdom";
-import { ZettelDoc } from "@opral/zettel-ast";
+import { toHtml, ZettelDoc } from "@opral/zettel-ast";
 import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
 
 beforeEach(() => {
-  global.window = new JSDOM().window as unknown as Window & typeof globalThis;
+  const dom = new JSDOM();
+  globalThis.document = dom.window.document;
+  globalThis.HTMLElement = dom.window.HTMLElement;
+  globalThis.Node = dom.window.Node;
+  // globalThis.window = dom.window;
 });
 
 test("handles new zettel.textBlock's", () => {
@@ -95,6 +104,193 @@ test("return key creates a new block", async () => {
       _key: expect.any(String),
       style: "zettel.normal",
       children: [],
+      markDefs: [],
+    },
+  ]);
+});
+
+test("pastes plain text as new zettel.textBlock", async () => {
+  const editor = createEditor({
+    nodes: ZettelNodes,
+  });
+  registerZettelLexicalPlugin(editor);
+
+  // Simulate a plain text paste event
+  const clipboardData = {
+    types: ["text/plain"],
+    getData: (type: string) =>
+      type === "text/plain" ? "Hello clipboard!" : "",
+  };
+  const event = { clipboardData } as unknown as ClipboardEvent;
+
+  // Fire the paste command
+  editor.update(
+    () => {
+      editor.dispatchCommand(PASTE_COMMAND, event);
+    },
+    { discrete: true },
+  );
+
+  // Check that a new block was inserted with the text
+  const state = editor.getEditorState().toJSON();
+  const zettelDoc = fromLexicalState(state);
+  expect(zettelDoc).toEqual([
+    {
+      _type: "zettel.textBlock",
+      _key: expect.any(String),
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: "Hello clipboard!",
+          marks: [],
+        },
+      ],
+      markDefs: [],
+    },
+  ]);
+});
+
+test("pastes a zettel HTML document", async () => {
+  const editor = createEditor({
+    nodes: ZettelNodes,
+  });
+  registerZettelLexicalPlugin(editor);
+
+  // Create a ZettelDoc and serialize to HTML
+  const zettelDoc = [
+    {
+      _type: "zettel.textBlock",
+      _key: "block-0",
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: "span-0",
+          text: "HTML paste!",
+          marks: [],
+        },
+      ],
+      markDefs: [],
+    },
+  ];
+  // Use the same toHtml function as the plugin
+  const zettelHtml = toHtml(zettelDoc);
+
+  // Simulate a Zettel HTML paste event
+  const clipboardData = {
+    types: ["text/html"],
+    getData: (type: string) => (type === "text/html" ? zettelHtml : ""),
+  };
+  const event = { clipboardData } as unknown as ClipboardEvent;
+
+  // Fire the paste command
+  editor.update(
+    () => {
+      editor.dispatchCommand(PASTE_COMMAND, event);
+    },
+    { discrete: true },
+  );
+
+  // Check that the AST was restored
+  const state = editor.getEditorState().toJSON();
+  const restored = fromLexicalState(state);
+  expect(restored).toEqual([
+    {
+      _type: "zettel.textBlock",
+      _key: expect.any(String),
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: "HTML paste!",
+          marks: [],
+        },
+      ],
+      markDefs: [],
+    },
+  ]);
+});
+
+test("pastes a generic HTML document (not zettel) and parses as fallback", () => {
+  const editor = createEditor({
+    nodes: ZettelNodes,
+  });
+
+  registerZettelLexicalPlugin(editor);
+
+  // Simulate a generic HTML paste event (not zettel HTML)
+  const genericHtml = `<p>This is <strong>bold</strong> and <em>italic</em> text.</p><p>Second paragraph.</p>`;
+  const clipboardData = {
+    types: ["text/html"],
+    getData: (type: string) => (type === "text/html" ? genericHtml : ""),
+  };
+  const event = { clipboardData } as unknown as ClipboardEvent;
+
+  // Fire the paste command
+  editor.update(
+    () => {
+      editor.dispatchCommand(PASTE_COMMAND, event);
+    },
+    { discrete: true },
+  );
+
+  // Check that the AST was restored as fallback
+  const state = editor.getEditorState().toJSON();
+  const restored = fromLexicalState(state);
+  expect(restored).toEqual([
+    {
+      _type: "zettel.textBlock",
+      _key: expect.any(String),
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: "This is ",
+          marks: [],
+        },
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: "bold",
+          marks: ["zettel.strong"],
+        },
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: " and ",
+          marks: [],
+        },
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: "italic",
+          marks: ["zettel.em"],
+        },
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: " text.",
+          marks: [],
+        },
+      ],
+      markDefs: [],
+    },
+    {
+      _type: "zettel.textBlock",
+      _key: expect.any(String),
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: "Second paragraph.",
+          marks: [],
+        },
+      ],
       markDefs: [],
     },
   ]);

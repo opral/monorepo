@@ -1,8 +1,8 @@
 import { LexicalEditor, createEditor } from "lexical";
 import { registerZettelLexicalPlugin } from "../plugin.js";
-import { importZettelAST } from "../import-export.js";
 import { ZettelDoc } from "@opral/zettel-ast";
 import { ZettelNodes } from "../nodes.js";
+import { fromLexicalState, toLexicalState } from "../parse-serialize.js";
 
 export type EditorProps = {};
 
@@ -18,7 +18,8 @@ export class ZettelEditor extends HTMLElement {
   set zettel(value: ZettelDoc | null) {
     this._zettel = value;
     if (this.editor && this._zettel) {
-      importZettelAST(this._zettel, this.editor);
+      const lexicalState = toLexicalState(this._zettel);
+      this.editor.setEditorState(this.editor.parseEditorState(lexicalState));
     }
   }
 
@@ -32,27 +33,28 @@ export class ZettelEditor extends HTMLElement {
 
     const editor: LexicalEditor = createEditor(initialConfig);
 
+    editor.registerUpdateListener(() => {
+      const lexicalState = editor.getEditorState().toJSON();
+      const zettelDoc = fromLexicalState(lexicalState);
+      this.dispatchEvent(
+        new CustomEvent("zettel-update", { detail: { ast: zettelDoc } }),
+      );
+    });
+
     const container = document.createElement("div");
     container.id = "zettel-lexical-editor";
     container.setAttribute("contenteditable", "true");
     this.appendChild(container);
 
     editor.setRootElement(container as HTMLElement);
+
     this.editor = editor;
 
-    const onZettelDocUpdate = (doc: ZettelDoc) => {
-      this.dispatchEvent(
-        new CustomEvent("zettel-update", { detail: { ast: doc } }),
-      );
-    };
-
-    this.unregisterListeners = registerZettelLexicalPlugin(
-      editor,
-      onZettelDocUpdate,
-    );
+    this.unregisterListeners = registerZettelLexicalPlugin(editor);
 
     if (this._zettel) {
-      importZettelAST(this._zettel, editor);
+      const lexicalState = toLexicalState(this._zettel);
+      editor.setEditorState(editor.parseEditorState(lexicalState));
     }
   }
 

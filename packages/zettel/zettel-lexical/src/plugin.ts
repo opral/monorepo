@@ -18,7 +18,9 @@ import {
   TextFormatType,
 } from "lexical";
 import { mergeRegister } from "@lexical/utils";
-import { $createZettelTextBlockNode } from "./nodes.js";
+import { $createZettelTextBlockNode, $createZettelSpanNode } from "./nodes.js";
+import { toHtml, fromHtml, toPlainText } from "@opral/zettel-ast";
+import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
 
 /**
  * Registers the core functionality for the Zettel editor,
@@ -41,25 +43,6 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
         clipboardData?.setData("text/plain", selection.getTextContent());
       }
     });
-  }
-
-  function onPasteForPlainText(
-    event: ClipboardEvent,
-    editor: LexicalEditor,
-  ): void {
-    event.preventDefault();
-    editor.update(
-      () => {
-        const selection = $getSelection();
-        const text = event.clipboardData?.getData("text/plain");
-        if (text != null && selection) {
-          selection.insertText(text);
-        }
-      },
-      {
-        tag: "paste",
-      },
-    );
   }
 
   const unregisterCommandHandlers = mergeRegister(
@@ -108,6 +91,7 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
         return false;
       },
       COMMAND_PRIORITY_LOW,
+      // @prettier-ignore
     ),
 
     // Enter key: insert new block
@@ -161,36 +145,88 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
       COMMAND_PRIORITY_EDITOR,
     ),
 
-    // Copy
-    editor.registerCommand<ClipboardEvent>(
+    // Copy (Zettel HTML)
+    editor.registerCommand(
       COPY_COMMAND,
-      (event) => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) {
-          return false;
+      () => {
+        // 1. Get the current selection as Zettel AST
+        const state = editor.getEditorState();
+        // Use your existing function to convert Lexical state to Zettel AST
+        const zettelDoc = fromLexicalState(state.toJSON());
+        const html = toHtml(zettelDoc);
+        // 2. Set clipboard data
+        if (typeof window !== "undefined") {
+          const clipboard = (window.navigator as any).clipboard;
+          if (clipboard && clipboard.write) {
+            // Use Clipboard API if available
+            clipboard.write([
+              new window.ClipboardItem({
+                "text/plain": new Blob([toPlainText(zettelDoc)], {
+                  type: "text/plain",
+                }),
+                "text/html": new Blob([html], { type: "text/html" }),
+                "text/zettel": new Blob([JSON.stringify(zettelDoc)], {
+                  type: "text/zettel",
+                }),
+              }),
+            ]);
+            return true;
+          }
         }
-        if (event instanceof ClipboardEvent) {
-          onCopyForPlainText(event, editor);
-        }
-        return true;
+        return false;
       },
       COMMAND_PRIORITY_EDITOR,
     ),
-
-    // Paste
-    editor.registerCommand<ClipboardEvent>(
+    // Paste (Zettel: prefer text/zettel, fallback to html, fallback to plain text)
+    editor.registerCommand(
       PASTE_COMMAND,
-      (event) => {
-        const selection = $getSelection();
-        if (!$isRangeSelection(selection)) {
-          return false;
+      (event: ClipboardEvent | InputEvent | null) => {
+        if (!event) return false;
+        const clipboardData = (event as ClipboardEvent).clipboardData;
+        if (!clipboardData) return false;
+
+        // 1. Try text/zettel (raw AST)
+        if (Array.from(clipboardData.types).includes("text/zettel")) {
+          try {
+            const astJson = clipboardData.getData("text/zettel");
+            const zettelDoc = JSON.parse(astJson);
+            const lexicalState = toLexicalState(zettelDoc);
+            editor.setEditorState(editor.parseEditorState(lexicalState));
+            return true;
+          } catch (e) {
+            console.error(e);
+            // fall through to next format
+          }
         }
-        if (event instanceof ClipboardEvent) {
-          onPasteForPlainText(event, editor);
+        // 2. Try text/html (Zettel HTML)
+        if (Array.from(clipboardData.types).includes("text/html")) {
+          const html = clipboardData.getData("text/html");
+          try {
+            const zettelDoc = fromHtml(html);
+            const lexicalState = toLexicalState(zettelDoc);
+            editor.setEditorState(editor.parseEditorState(lexicalState));
+            return true;
+          } catch (e) {
+            console.error(e);
+            // fall through to next format
+          }
         }
-        return true;
+        // 3. Fallback: text/plain (insert as new block)
+        if (Array.from(clipboardData.types).includes("text/plain")) {
+          const text = clipboardData.getData("text/plain");
+          editor.update(() => {
+            const root = $getRoot();
+            const zettelTextBlock = $createZettelTextBlockNode();
+            const zettelSpan = $createZettelSpanNode(text);
+            zettelTextBlock.append(zettelSpan);
+            root.append(zettelTextBlock);
+          });
+          return true;
+        }
+        return false;
       },
       COMMAND_PRIORITY_EDITOR,
+      // @prettier-ignore
     ),
 
     // Cut (delegates to Copy + Delete)
