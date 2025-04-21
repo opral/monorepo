@@ -7,6 +7,8 @@ import {
 } from "./nodes.js";
 import {
   $getRoot,
+  $isParagraphNode,
+  $isTextNode,
   createEditor,
   KEY_ENTER_COMMAND,
   PASTE_COMMAND,
@@ -358,6 +360,80 @@ test("copies zettel as plain text, HTML, and zettel doc", () => {
         {
           _type: "zettel.span",
           _key: "span2",
+          text: "world",
+          marks: ["zettel.strong"],
+        },
+      ],
+      markDefs: [],
+    },
+  ]);
+});
+
+test.todo("copies only the selected text and marks", () => {
+  const editor = createEditor({ nodes: ZettelNodes });
+  registerZettelLexicalPlugin(editor);
+
+  // Set up initial Zettel AST in the editor
+  const zettelDoc = [
+    {
+      _type: "zettel.textBlock",
+      _key: "block1",
+      style: "zettel.normal",
+      children: [
+        { _type: "zettel.span", _key: "span1", text: "Hello ", marks: [] },
+        {
+          _type: "zettel.span",
+          _key: "span2",
+          text: "world",
+          marks: ["zettel.strong"],
+        },
+        { _type: "zettel.span", _key: "span3", text: "!", marks: [] },
+      ],
+      markDefs: [],
+    },
+  ];
+  const lexicalState = toLexicalState(zettelDoc);
+  editor.setEditorState(editor.parseEditorState(lexicalState));
+
+  // Select only "world"
+  editor.update(() => {
+    const root = $getRoot();
+    const first = root.getFirstChild();
+    if (first && $isParagraphNode(first)) {
+      const spanNodes = first.getChildren();
+      // Select the second span ("world")
+      if (spanNodes.length > 1 && $isTextNode(spanNodes[1])) {
+        spanNodes[1].select(0, spanNodes[1].getTextContentSize());
+      }
+    }
+  });
+
+  // Mock clipboard
+  let clipboardData: Record<string, string> = {};
+  const clipboardEvent = {
+    clipboardData: {
+      setData: (type: string, value: string) => {
+        clipboardData[type] = value;
+      },
+      getData: (type: string) => clipboardData[type],
+    },
+    preventDefault: () => {},
+  } as unknown as ClipboardEvent;
+
+  // Fire the copy command
+  editor.update(() => {
+    editor.dispatchCommand(COPY_COMMAND, clipboardEvent);
+  });
+
+  expect(JSON.parse(clipboardData["text/zettel"])).toEqual([
+    {
+      _type: "zettel.textBlock",
+      _key: expect.any(String),
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
           text: "world",
           marks: ["zettel.strong"],
         },
