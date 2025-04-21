@@ -122,11 +122,11 @@ const ZettelSpan = Type.Object({
 	_type: Type.Literal("zettel.span"),
 	_key: Type.String(),
 	marks: Type.Array(
-		Type.Union([
-			Type.Literal("zettel.strong"),
-			Type.Literal("zettel.em"),
-			Type.String({ description: "The key of a markDef or a custom mark" }),
-		])
+		Type.String({
+			description:
+				"A mark identifier: either 'zettel.strong', 'zettel.em', 'zettel.code', a key for a MarkDef, or a custom mark string (which cannot start with 'zettel.').",
+			pattern: "^(zettel\\.strong|zettel\\.em|zettel\\.code)$|^(?!zettel\\.).*$", // Escaped backslashes for JS string
+		})
 	),
 	text: Type.String({ description: "The text content of this span" }),
 	metadata: Metadata,
@@ -177,7 +177,16 @@ const ZettelTextBlock = Type.Object({
 	metadata: Metadata,
 });
 
+// Represents any block that is *not* a ZettelTextBlock but has the basic node requirements
+const CustomBlock = Type.Intersect([
+	BaseNode, // Must have _type and _key
+	Type.Object({
+		_type: Type.Not(Type.Literal("zettel.textBlock")), // _type cannot be zettel.textBlock
+	}),
+]);
+
 export type ZettelDoc = Static<typeof ZettelDoc>;
-const ZettelDoc = Type.Array(Type.Union([ZettelTextBlock, BaseNode]));
+// A document is an array of either ZettelTextBlocks or CustomBlocks
+const ZettelDoc = Type.Array(Type.Union([ZettelTextBlock, CustomBlock]));
 
 export const ZettelDocJsonSchema = ZettelDoc;

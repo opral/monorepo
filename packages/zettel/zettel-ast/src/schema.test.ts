@@ -2,10 +2,10 @@ import { test, expect } from "vitest";
 import { validate } from "./validate.js";
 import type { ZettelDoc } from "./schema.js";
 
-test("portable text example with a link passes", async () => {
+test("link passes", async () => {
 	const examplePortableText = [
 		{
-			_type: "zettel.block",
+			_type: "zettel.textBlock",
 			_key: "4ee4134378b1",
 			style: "normal",
 			markDefs: [
@@ -42,10 +42,10 @@ test("portable text example with a link passes", async () => {
 	expect(result.errors).toBeUndefined();
 });
 
-test("portable text headers pass", async () => {
+test("header h1 passes", async () => {
 	const examplePortableText = [
 		{
-			_type: "zettel.block",
+			_type: "zettel.textBlock",
 			_key: "4ee4134378b1",
 			style: "zettel.h1",
 			markDefs: [],
@@ -64,10 +64,10 @@ test("portable text headers pass", async () => {
 	expect(result.errors).toBeUndefined();
 });
 
-test("portable text bold (strong) passes", async () => {
+test("bold (strong) passes", async () => {
 	const examplePortableText = [
 		{
-			_type: "zettel.block",
+			_type: "zettel.textBlock",
 			_key: "4ee4134378b1",
 			style: "zettel.normal",
 			markDefs: [],
@@ -86,10 +86,10 @@ test("portable text bold (strong) passes", async () => {
 	expect(result.errors).toBeUndefined();
 });
 
-test("portable text italic (em) passes", async () => {
+test("italic (em) passes", async () => {
 	const examplePortableText = [
 		{
-			_type: "zettel.block",
+			_type: "zettel.textBlock",
 			_key: "4ee4134378b1",
 			style: "zettel.normal",
 			markDefs: [],
@@ -117,7 +117,7 @@ test("account mention passes", async () => {
 			markDefs: [
 				{
 					_type: "zettel.accountMention",
-					_key: "uniqueKey",
+					_key: "j93j2",
 					id: "47237hh8h4h75",
 				},
 			],
@@ -126,12 +126,46 @@ test("account mention passes", async () => {
 					_type: "zettel.span",
 					_key: "e60571e00344",
 					text: "Hello world",
-					marks: ["zettel.accountMention"],
+					marks: ["j93j2"],
 				},
 			],
 		},
 	];
 
 	const result = validate(examplePortableText);
+	expect(result.errors).toBeUndefined();
+});
+
+test("should reject unknown 'zettel.*' marks", () => {
+	const doc: ZettelDoc = [
+		{
+			_type: "zettel.textBlock",
+			_key: "uniqueKey",
+			markDefs: [],
+			style: "normal",
+			children: [
+				{
+					_type: "zettel.span",
+					_key: "spanInvalid",
+					text: "Invalid mark test",
+					marks: ["zettel.ananas"],
+				},
+			],
+		},
+	];
+
+	const result = validate(doc);
+	expect(result.errors).not.toBeUndefined();
+});
+
+test("allows custom blocks", () => {
+	const doc: ZettelDoc = [
+		{
+			_type: "custom.block",
+			_key: "uniqueKey",
+		},
+	];
+
+	const result = validate(doc);
 	expect(result.errors).toBeUndefined();
 });
