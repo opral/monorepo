@@ -7,34 +7,42 @@ import type {
 } from "./schema.js";
 import { nanoid } from "./utils/nano-id.js";
 
-export function span(args: { text: string; marks?: ZettelSpan["marks"] }): ZettelSpan {
+export function createZettelSpan(args: {
+	text: string;
+	marks?: ZettelSpan["marks"];
+	_key?: string;
+}): ZettelSpan {
 	return {
 		_type: "zettel.span",
-		_key: nanoid(),
+		_key: args._key ?? nanoid(),
 		text: args.text,
 		marks: args.marks ?? [],
 	};
 }
 
-export function accountMention(args: { id: string }): ZettelAccountMentionMarkDef {
+export function createZettelAcountMentionMarkDef(args: {
+	id: string;
+	_key?: string;
+}): ZettelAccountMentionMarkDef {
 	return {
 		_type: "zettel.accountMention",
-		_key: nanoid(),
+		_key: args._key ?? nanoid(),
 		id: args.id,
 	};
 }
 
-export function link(args: { href: string }): ZettelLinkMarkDef {
+export function createZettelLinkMarkDef(args: { href: string; _key?: string }): ZettelLinkMarkDef {
 	return {
 		_type: "zettel.link",
-		_key: nanoid(),
+		_key: args._key ?? nanoid(),
 		href: args.href,
 	};
 }
 
-export function textBlock(args: {
+export function createZettelTextBlock(args: {
 	children: ZettelSpan[];
 	markDefs?: MarkDef[];
+	_key?: string;
 	/**
 	 * The style of the block e.g. "normal", "h1", "h2", etc.
 	 *
@@ -44,7 +52,7 @@ export function textBlock(args: {
 }): ZettelTextBlock {
 	return {
 		_type: "zettel.textBlock",
-		_key: nanoid(),
+		_key: args._key ?? nanoid(),
 		style: args.style ?? "normal",
 		markDefs: args.markDefs ?? [],
 		children: args.children,

@@ -1,20 +1,27 @@
 import { test, expect } from "vitest";
-import { textBlock, span, accountMention, link } from "./builder.js";
+import {
+	createZettelTextBlock,
+	createZettelSpan,
+	createZettelAcountMentionMarkDef,
+	createZettelLinkMarkDef,
+} from "./builder.js";
 
 test("account mention and link", () => {
-	const accountMentionDef = accountMention({ id: "47237hh8h4h75" });
-	const linkDef = link({ href: "https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312" });
+	const accountMentionDef = createZettelAcountMentionMarkDef({ id: "47237hh8h4h75" });
+	const linkDef = createZettelLinkMarkDef({
+		href: "https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312",
+	});
 
 	const ast = [
-		textBlock({
+		createZettelTextBlock({
 			style: "normal",
 			markDefs: [accountMentionDef, linkDef],
 			children: [
-				span({ text: "Hi " }),
-				span({ text: "Developer", marks: [accountMentionDef._key] }),
-				span({ text: ", have you seen " }),
-				span({ text: "this", marks: [linkDef._key] }),
-				span({ text: "?" }),
+				createZettelSpan({ text: "Hi " }),
+				createZettelSpan({ text: "Developer", marks: [accountMentionDef._key] }),
+				createZettelSpan({ text: ", have you seen " }),
+				createZettelSpan({ text: "this", marks: [linkDef._key] }),
+				createZettelSpan({ text: "?" }),
 			],
 		}),
 	];
