@@ -148,13 +148,21 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
     // Copy (Zettel HTML)
     editor.registerCommand(
       COPY_COMMAND,
-      () => {
+      (event: ClipboardEvent | null) => {
         // 1. Get the current selection as Zettel AST
         const state = editor.getEditorState();
         // Use your existing function to convert Lexical state to Zettel AST
         const zettelDoc = fromLexicalState(state.toJSON());
         const html = toHtml(zettelDoc);
         // 2. Set clipboard data
+        if (event && "clipboardData" in event && event.clipboardData) {
+          // Use ClipboardEvent clipboardData API
+          event.clipboardData.setData("text/plain", toPlainText(zettelDoc));
+          event.clipboardData.setData("text/html", html);
+          event.clipboardData.setData("text/zettel", JSON.stringify(zettelDoc));
+          event.preventDefault();
+          return true;
+        }
         if (typeof window !== "undefined") {
           const clipboard = (window.navigator as any).clipboard;
           if (clipboard && clipboard.write) {

@@ -10,6 +10,7 @@ import {
   createEditor,
   KEY_ENTER_COMMAND,
   PASTE_COMMAND,
+  COPY_COMMAND,
 } from "lexical";
 import { JSDOM } from "jsdom";
 import { toHtml, ZettelDoc } from "@opral/zettel-ast";
@@ -20,7 +21,8 @@ beforeEach(() => {
   globalThis.document = dom.window.document;
   globalThis.HTMLElement = dom.window.HTMLElement;
   globalThis.Node = dom.window.Node;
-  // globalThis.window = dom.window;
+  // @ts-expect-error
+  globalThis.window = dom.window;
 });
 
 test("handles new zettel.textBlock's", () => {
@@ -289,6 +291,75 @@ test("pastes a generic HTML document (not zettel) and parses as fallback", () =>
           _key: expect.any(String),
           text: "Second paragraph.",
           marks: [],
+        },
+      ],
+      markDefs: [],
+    },
+  ]);
+});
+
+test("copies zettel as plain text, HTML, and zettel doc", () => {
+  const editor = createEditor({ nodes: ZettelNodes });
+  registerZettelLexicalPlugin(editor);
+
+  // Set up initial Zettel AST in the editor
+  const zettelDoc = [
+    {
+      _type: "zettel.textBlock",
+      _key: "block1",
+      style: "zettel.normal",
+      children: [
+        { _type: "zettel.span", _key: "span1", text: "Hello ", marks: [] },
+        {
+          _type: "zettel.span",
+          _key: "span2",
+          text: "world",
+          marks: ["zettel.strong"],
+        },
+      ],
+      markDefs: [],
+    },
+  ];
+  editor.setEditorState(editor.parseEditorState(toLexicalState(zettelDoc)));
+
+  // Mock clipboard
+  let clipboardData: Record<string, string> = {};
+  const clipboardEvent = {
+    clipboardData: {
+      setData: (type: string, value: string) => {
+        clipboardData[type] = value;
+      },
+      getData: (type: string) => clipboardData[type],
+    },
+    preventDefault: () => {},
+  } as unknown as ClipboardEvent;
+
+  // Fire the copy command
+  editor.update(
+    () => {
+      editor.dispatchCommand(COPY_COMMAND, clipboardEvent);
+    },
+    { discrete: true },
+  );
+
+  // Check clipboard contents
+  expect(clipboardData["text/plain"]).toBe("Hello world");
+  expect(clipboardData["text/html"]).toContain("data-zettel-doc");
+  expect(clipboardData["text/html"]).toContain("<strong>world</strong>");
+  expect(clipboardData["text/zettel"]).toBeDefined();
+  expect(() => JSON.parse(clipboardData["text/zettel"])).not.toThrow();
+  expect(JSON.parse(clipboardData["text/zettel"])).toEqual([
+    {
+      _type: "zettel.textBlock",
+      _key: "block1",
+      style: "zettel.normal",
+      children: [
+        { _type: "zettel.span", _key: "span1", text: "Hello ", marks: [] },
+        {
+          _type: "zettel.span",
+          _key: "span2",
+          text: "world",
+          marks: ["zettel.strong"],
         },
       ],
       markDefs: [],
