@@ -1,12 +1,18 @@
 import { test, expect } from "vitest";
-import { accountMention, textBlock, span, link } from "./builder.js";
+import {
+	createZettelAcountMentionMarkDef,
+	createZettelLinkMarkDef,
+	createZettelTextBlock,
+	createZettelSpan,
+} from "./builder.js";
 import { serializeToText } from "./serialize-to-text.js";
+import { ZettelDocJsonSchema } from "./schema.js";
 
 test("serializes spans with no marks", () => {
 	const ast = [
-		textBlock({
+		createZettelTextBlock({
 			style: "normal",
-			children: [span({ text: "Hello world" })],
+			children: [createZettelSpan({ text: "Hello world" })],
 		}),
 	];
 	const serialized = serializeToText(ast);
@@ -14,18 +20,21 @@ test("serializes spans with no marks", () => {
 });
 
 test("serializes an account mention", () => {
-	const accountMentionDef = accountMention({ id: "47237hh8h4h75" });
+	const accountMentionDef = createZettelAcountMentionMarkDef({ id: "47237hh8h4h75" });
 
 	const ast = [
-		textBlock({
+		createZettelTextBlock({
 			style: "normal",
 			markDefs: [accountMentionDef],
 			children: [
-				span({ text: "Hello " }),
-				span({ text: "Developer", marks: [accountMentionDef._key] }),
+				createZettelSpan({ text: "Hello " }),
+				createZettelSpan({ text: "Developer", marks: [accountMentionDef._key] }),
 			],
 		}),
 	];
+
+	console.log(JSON.stringify(ZettelDocJsonSchema, null, 2));
+
 	const serialized = serializeToText(ast);
 	expect(serialized).toBe("Hello Developer");
 });
