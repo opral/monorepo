@@ -7,7 +7,7 @@ import type {
 } from "./schema.js";
 import { createZettelSpan, createZettelTextBlock } from "./builder.js"; // Assuming builder generates keys
 
-export function serializeToHtml(doc: ZettelDoc): string {
+export function toHtml(doc: ZettelDoc): string {
 	const container = document.createElement("div"); // Temporary container
 	container.setAttribute("data-zettel-doc", "true"); // Set attribute value to 'true'
 
@@ -110,7 +110,7 @@ export function serializeToHtml(doc: ZettelDoc): string {
 	return container.outerHTML;
 }
 
-export function parseFromHtml(html: string): ZettelDoc {
+export function fromHtml(html: string): ZettelDoc {
 	const container = document.createElement("div");
 	container.innerHTML = html; // Parse the HTML string
 

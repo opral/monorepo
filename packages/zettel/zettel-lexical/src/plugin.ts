@@ -1,8 +1,7 @@
-import { mergeRegister } from "@lexical/utils";
 import {
-  $getRoot,
   $getSelection,
   $isRangeSelection,
+  $getRoot,
   $selectAll,
   COMMAND_PRIORITY_EDITOR,
   COMMAND_PRIORITY_LOW,
@@ -16,44 +15,68 @@ import {
   LexicalEditor,
   PASTE_COMMAND,
   SELECT_ALL_COMMAND,
+  TextFormatType,
 } from "lexical";
-import { $createZettelTextBlockNode } from "../nodes.js";
+import { mergeRegister } from "@lexical/utils";
+import { $createZettelTextBlockNode } from "./nodes.js";
 
-function onCopyForPlainText(
-  event: ClipboardEvent,
-  editor: LexicalEditor,
-): void {
-  event.preventDefault();
-  editor.update(() => {
-    const clipboardData = event.clipboardData;
-    const selection = $getSelection();
-    if (selection) {
-      clipboardData?.setData("text/plain", selection.getTextContent());
-    }
-  });
-}
-
-function onPasteForPlainText(
-  event: ClipboardEvent,
-  editor: LexicalEditor,
-): void {
-  event.preventDefault();
-  editor.update(
-    () => {
+/**
+ * Registers the core functionality for the Zettel editor,
+ * including keybindings, command handling, and Zettel AST conversion.
+ *
+ *
+ * @returns A cleanup function to unregister listeners.
+ */
+export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
+  // Register standard keybindings and command handlers
+  function onCopyForPlainText(
+    event: ClipboardEvent,
+    editor: LexicalEditor,
+  ): void {
+    event.preventDefault();
+    editor.update(() => {
+      const clipboardData = event.clipboardData;
       const selection = $getSelection();
-      const text = event.clipboardData?.getData("text/plain");
-      if (text != null && selection) {
-        selection.insertText(text);
+      if (selection) {
+        clipboardData?.setData("text/plain", selection.getTextContent());
       }
-    },
-    {
-      tag: "paste",
-    },
-  );
-}
+    });
+  }
 
-export function registerEditorCommands(editor: LexicalEditor): () => void {
-  return mergeRegister(
+  function onPasteForPlainText(
+    event: ClipboardEvent,
+    editor: LexicalEditor,
+  ): void {
+    event.preventDefault();
+    editor.update(
+      () => {
+        const selection = $getSelection();
+        const text = event.clipboardData?.getData("text/plain");
+        if (text != null && selection) {
+          selection.insertText(text);
+        }
+      },
+      {
+        tag: "paste",
+      },
+    );
+  }
+
+  const unregisterCommandHandlers = mergeRegister(
+    // Format text (bold, italic, etc)
+    editor.registerCommand<TextFormatType>(
+      FORMAT_TEXT_COMMAND,
+      (payload) => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if ($isRangeSelection(selection)) {
+            selection.formatText(payload);
+          }
+        });
+        return true;
+      },
+      COMMAND_PRIORITY_EDITOR,
+    ),
     // Keybindings: Cmd/Ctrl+B/I for formatting
     editor.registerCommand<KeyboardEvent>(
       KEY_DOWN_COMMAND,
@@ -91,7 +114,6 @@ export function registerEditorCommands(editor: LexicalEditor): () => void {
     editor.registerCommand<KeyboardEvent | null>(
       KEY_ENTER_COMMAND,
       () => {
-        console.log("[commands] KEY_ENTER_COMMAND");
         const root = $getRoot();
         const newBlock = $createZettelTextBlockNode();
         root.append(newBlock);
@@ -188,4 +210,7 @@ export function registerEditorCommands(editor: LexicalEditor): () => void {
       COMMAND_PRIORITY_EDITOR,
     ),
   );
+
+  // Return a function that unregisters all listeners
+  return unregisterCommandHandlers;
 }

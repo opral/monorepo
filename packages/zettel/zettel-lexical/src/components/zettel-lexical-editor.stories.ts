@@ -1,14 +1,10 @@
-import type {
-  Meta,
-  StoryObj,
-  WebComponentsRenderer,
-} from "@storybook/web-components";
-import { type EditorProps } from "./editor.js";
+import type { Meta, StoryObj } from "@storybook/web-components";
+import { type EditorProps } from "./zettel-lexical-editor.js";
 import { html } from "lit";
 import { spreadProps } from "@open-wc/lit-helpers";
 import { action } from "@storybook/addon-actions";
-import "./editor.js";
-import type { ZettelEditor } from "./editor.js";
+import "./zettel-lexical-editor.js";
+import type { ZettelEditor } from "./zettel-lexical-editor.js";
 import { generateKey, ZettelDoc } from "@opral/zettel-ast";
 
 const meta: Meta<EditorProps> = {
@@ -56,9 +52,6 @@ const meta: Meta<EditorProps> = {
         const zettelAST = (event as CustomEvent).detail.ast;
         outputArea.value = JSON.stringify(zettelAST, null, 2);
         action("zettel-update")((event as CustomEvent).detail);
-      });
-      editor.addEventListener("lexical-update", (event) => {
-        action("lexical-update")((event as CustomEvent).detail);
       });
     } else {
       console.error("Editor or output area not found");

@@ -9,6 +9,7 @@ import {
 } from "lexical";
 import { generateKey } from "@opral/zettel-ast";
 
+
 // #region ZettelSpanNode
 
 export interface SerializedZettelSpanNode extends SerializedTextNode {
@@ -225,3 +226,19 @@ export function $isZettelTextBlockNode(
 ): node is ZettelTextBlockNode {
   return node instanceof ZettelTextBlockNode;
 }
+
+
+export const ZettelNodes = [
+  ZettelTextBlockNode,
+  ZettelSpanNode,
+  {
+    replace: ParagraphNode,
+    with: () => new ZettelTextBlockNode(),
+    withKlass: ZettelTextBlockNode,
+  },
+  {
+    replace: TextNode,
+    with: () => new ZettelSpanNode(""),
+    withKlass: ZettelSpanNode,
+  },
+] as const;

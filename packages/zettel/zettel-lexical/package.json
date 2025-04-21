@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "build:storybook": "storybook build",
     "format": "prettier ./src --write",
     "storybook": "storybook dev -p 6006"
@@ -21,11 +23,11 @@
     "@lexical/selection": "^0.30.0",
     "@lexical/utils": "^0.30.0",
     "@opral/zettel-ast": "workspace:*",
-    "emoji-picker-element": "^1.26.3",
     "lexical": "^0.30.0",
     "lit": "^3.2.1"
   },
   "devDependencies": {
+    "@lexical/headless": "^0.30.0",
     "@open-wc/lit-helpers": "^0.7.0",
     "@storybook/addon-actions": "^8.6.12",
     "@storybook/addon-essentials": "8.6.12",
@@ -34,9 +36,12 @@
     "@storybook/test": "8.6.12",
     "@storybook/web-components": "8.6.12",
     "@storybook/web-components-vite": "8.6.12",
+    "@types/jsdom": "^21.1.7",
+    "jsdom": "^26.1.0",
     "prettier": "^3.5.3",
     "storybook": "8.6.12",
     "typescript": "~5.7.2",
-    "vite": "^6.3.0"
+    "vite": "^6.3.0",
+    "vitest": "^3.1.1"
   }
 }

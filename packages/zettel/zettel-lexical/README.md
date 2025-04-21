@@ -1,24 +1,23 @@
-# Zettel editor
+# Zettel Lexical
 
-The zettel editor is a headless (unstyled) web component that enables rich text editing of Zettel's.
-
-- out of the box rich text editing
-- works in any framework (React, Vue, Svelte, etc.)
-- extendable via custom zettel blocks
+Mappings for the Zettel AST to the Lexical editor state, as well as a headless editor component.
 
 ## Installation
 
 ```bash
-npm install @opral/zettel-editor
+npm install @opral/zettel-lexical
 ```
 
 ## Usage
 
 ```tsx
-function Component(props: { zettel: Zettel }) {
+import { ZettelDoc } from "@opral/zettel-ast";
+import { ZettelLexicalEditor } from "@opral/zettel-lexical";
+
+function Component(props: { zettel: ZettelDoc }) {
 
   return (
-    <zettel-editor 
+    <zettel-lexical-editor 
       zettel={props.zettel} 
       onChange={(updatedZettel) => {
         console.log(updatedZettel);

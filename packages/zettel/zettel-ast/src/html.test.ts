@@ -1,7 +1,7 @@
 import { test, expect, beforeEach } from "vitest";
 import { createZettelTextBlock, createZettelSpan, createZettelLinkMarkDef } from "./builder.js";
 import type { ZettelDoc } from "./schema.js";
-import { serializeToHtml, parseFromHtml } from "./html.js";
+import { toHtml, fromHtml } from "./html.js";
 import { JSDOM } from "jsdom";
 
 /**
@@ -34,7 +34,7 @@ beforeEach(() => {
 test("wraps a doc in a div for encapsulation", () => {
 	const doc: ZettelDoc = [];
 
-	const html = serializeToHtml(doc);
+	const html = toHtml(doc);
 
 	expect(html).toBe(
 		normalizeHtml(`
@@ -42,7 +42,7 @@ test("wraps a doc in a div for encapsulation", () => {
   `)
 	);
 
-	expect(parseFromHtml(html)).toEqual(doc);
+	expect(fromHtml(html)).toEqual(doc);
 });
 
 test("style: zettel.normal serializes to <p><span></span></p> with keys and parses back", async () => {
@@ -62,7 +62,7 @@ test("style: zettel.normal serializes to <p><span></span></p> with keys and pars
 		}),
 	];
 
-	const html = serializeToHtml(doc);
+	const html = toHtml(doc);
 
 	expect(html).toBe(
 		normalizeHtml(`
@@ -74,7 +74,7 @@ test("style: zettel.normal serializes to <p><span></span></p> with keys and pars
   `)
 	);
 
-	expect(parseFromHtml(html)).toEqual(doc);
+	expect(fromHtml(html)).toEqual(doc);
 });
 
 test("serializes and parses 'strong' mark", () => {
@@ -94,7 +94,7 @@ test("serializes and parses 'strong' mark", () => {
 		}),
 	];
 
-	const html = serializeToHtml(doc);
+	const html = toHtml(doc);
 
 	const marksAttrValue = stringifyJsonForHtmlAttribute(["zettel.strong"]);
 	const expectedHtml = normalizeHtml(`
@@ -107,7 +107,7 @@ test("serializes and parses 'strong' mark", () => {
 
 	expect(html).toBe(expectedHtml);
 
-	const parsedDoc = parseFromHtml(html);
+	const parsedDoc = fromHtml(html);
 	expect(parsedDoc).toEqual(doc);
 });
 
@@ -128,7 +128,7 @@ test("serializes and parses 'em' mark", () => {
 		}),
 	];
 
-	const html = serializeToHtml(doc);
+	const html = toHtml(doc);
 
 	const marksAttrValue = stringifyJsonForHtmlAttribute(["zettel.em"]);
 	const expectedHtml = normalizeHtml(`
@@ -141,7 +141,7 @@ test("serializes and parses 'em' mark", () => {
 
 	expect(html).toBe(expectedHtml);
 
-	const parsedDoc = parseFromHtml(html);
+	const parsedDoc = fromHtml(html);
 	expect(parsedDoc).toEqual(doc);
 });
 
@@ -162,7 +162,7 @@ test("serializes and parses nested 'strong' and 'em' marks", () => {
 		}),
 	];
 
-	const html = serializeToHtml(doc);
+	const html = toHtml(doc);
 
 	const marksAttrValue = stringifyJsonForHtmlAttribute(["zettel.strong", "zettel.em"]);
 	const expectedHtml = normalizeHtml(`
@@ -175,7 +175,7 @@ test("serializes and parses nested 'strong' and 'em' marks", () => {
 
 	expect(html).toBe(expectedHtml);
 
-	const parsedDoc = parseFromHtml(html);
+	const parsedDoc = fromHtml(html);
 	expect(parsedDoc).toEqual(doc);
 });
 
@@ -196,7 +196,7 @@ test("serializes and parses 'zettel.code' mark", () => {
 		}),
 	];
 
-	const html = serializeToHtml(doc);
+	const html = toHtml(doc);
 
 	const marksAttrValue = stringifyJsonForHtmlAttribute(["zettel.code"]);
 	const expectedHtml = normalizeHtml(`
@@ -209,7 +209,7 @@ test("serializes and parses 'zettel.code' mark", () => {
 
 	expect(html).toBe(expectedHtml);
 
-	const parsedDoc = parseFromHtml(html);
+	const parsedDoc = fromHtml(html);
 	expect(parsedDoc).toEqual(doc);
 });
 
@@ -236,7 +236,7 @@ test("serializes and parses 'zettel.link' mark", () => {
 		}),
 	];
 
-	const html = serializeToHtml(doc);
+	const html = toHtml(doc);
 
 	const markDefsAttrValue = stringifyJsonForHtmlAttribute([linkMarkDef]);
 	const marksAttrValue = stringifyJsonForHtmlAttribute([linkMarkDef._key]);
@@ -252,7 +252,7 @@ test("serializes and parses 'zettel.link' mark", () => {
 
 	expect(html).toBe(expectedHtml);
 
-	const parsedDoc = parseFromHtml(html);
+	const parsedDoc = fromHtml(html);
 	expect(parsedDoc).toEqual(doc);
 });
 
@@ -273,7 +273,7 @@ test("custom marks are serialized and parsed", () => {
 		}),
 	];
 
-	const html = serializeToHtml(doc);
+	const html = toHtml(doc);
 
 	const marksAttrValue = stringifyJsonForHtmlAttribute(["custom.mark"]);
 	const expectedHtml = normalizeHtml(`
@@ -286,6 +286,6 @@ test("custom marks are serialized and parsed", () => {
 
 	expect(html).toBe(expectedHtml);
 
-	const parsedDoc = parseFromHtml(html);
+	const parsedDoc = fromHtml(html);
 	expect(parsedDoc).toEqual(doc);
 });

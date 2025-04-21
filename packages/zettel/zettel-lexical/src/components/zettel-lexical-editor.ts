@@ -1,15 +1,8 @@
-import {
-  LexicalEditor,
-  createEditor,
-  TextNode,
-  ParagraphNode,
-  SerializedEditorState,
-} from "lexical";
-import { registerZettelLexicalPlugin } from "./plugins/zettel-lexical-plugin.js";
-import { importZettelAST } from "./plugins/conversion.js";
-import { registerEmojiPickerPlugin } from "./plugins/emoji-picker-plugin.js";
+import { LexicalEditor, createEditor } from "lexical";
+import { registerZettelLexicalPlugin } from "../plugin.js";
+import { importZettelAST } from "../import-export.js";
 import { ZettelDoc } from "@opral/zettel-ast";
-import { ZettelTextBlockNode, ZettelSpanNode } from "./nodes.js";
+import { ZettelNodes } from "../nodes.js";
 
 export type EditorProps = {};
 
@@ -34,26 +27,10 @@ export class ZettelEditor extends HTMLElement {
       onError: (error: Error) => {
         console.error("Lexical Error:", error);
       },
-      nodes: [
-        ZettelTextBlockNode,
-        ZettelSpanNode,
-        {
-          replace: ParagraphNode,
-          with: () => new ZettelTextBlockNode(),
-          withKlass: ZettelTextBlockNode,
-        },
-        {
-          replace: TextNode,
-          with: () => new ZettelSpanNode(""),
-          withKlass: ZettelSpanNode,
-        },
-      ],
+      nodes: ZettelNodes,
     };
 
     const editor: LexicalEditor = createEditor(initialConfig);
-
-    // Register Emoji Picker Plugin
-    registerEmojiPickerPlugin(editor);
 
     const container = document.createElement("div");
     container.id = "zettel-lexical-editor";
@@ -63,21 +40,15 @@ export class ZettelEditor extends HTMLElement {
     editor.setRootElement(container as HTMLElement);
     this.editor = editor;
 
-    const handleZettelUpdate = (
-      zettelAst: ZettelDoc,
-      lexicalState: SerializedEditorState,
-    ) => {
+    const onZettelDocUpdate = (doc: ZettelDoc) => {
       this.dispatchEvent(
-        new CustomEvent("zettel-update", { detail: { ast: zettelAst } }),
-      );
-      this.dispatchEvent(
-        new CustomEvent("lexical-update", { detail: { state: lexicalState } }),
+        new CustomEvent("zettel-update", { detail: { ast: doc } }),
       );
     };
 
     this.unregisterListeners = registerZettelLexicalPlugin(
       editor,
-      handleZettelUpdate,
+      onZettelDocUpdate,
     );
 
     if (this._zettel) {
