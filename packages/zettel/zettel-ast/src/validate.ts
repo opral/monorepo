@@ -1,7 +1,7 @@
 import { TypeCompiler } from "@sinclair/typebox/compiler";
-import { ZettelJsonSchema, type Zettel } from "./schema.js";
+import { ZettelDocJsonSchema, type ZettelDoc } from "./schema.js";
 
-const Z = TypeCompiler.Compile(ZettelJsonSchema);
+const Z = TypeCompiler.Compile(ZettelDocJsonSchema);
 
 /**
  * Validates a Zettel AST without throwing an error.
@@ -17,7 +17,7 @@ const Z = TypeCompiler.Compile(ZettelJsonSchema);
 export function validate(zettel: unknown):
 	| {
 			success: true;
-			data: Zettel;
+			data: ZettelDoc;
 			errors: undefined;
 	  }
 	| {
@@ -36,7 +36,7 @@ export function validate(zettel: unknown):
 	}
 	return {
 		success: true,
-		data: zettel as Zettel,
+		data: zettel as ZettelDoc,
 		errors: undefined,
 	};
 }

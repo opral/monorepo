@@ -12,7 +12,7 @@ import { mergeRegister } from "@lexical/utils";
 
 import { registerEditorCommands } from "./commands.js";
 import { exportZettelAST } from "./conversion.js";
-import { Zettel } from "@opral/zettel-ast";
+import { ZettelDoc } from "@opral/zettel-ast";
 
 /**
  * Registers the core functionality for the Zettel editor,
@@ -24,7 +24,7 @@ import { Zettel } from "@opral/zettel-ast";
 export function registerZettelLexicalPlugin(
   editor: LexicalEditor,
   onZettelUpdate: (
-    zettelAst: Zettel,
+    zettelDoc: ZettelDoc,
     lexicalState: SerializedEditorState,
   ) => void,
 ): () => void {
@@ -50,10 +50,10 @@ export function registerZettelLexicalPlugin(
   const unregisterUpdateListener = editor.registerUpdateListener(
     ({ editorState }) => {
       // Convert to Zettel AST
-      const zettelAST = exportZettelAST(editorState, editor);
+      const zettelDoc = exportZettelAST(editorState, editor);
       const lexicalState = editorState.toJSON();
       // Call the provided callback with the new AST and Lexical state
-      onZettelUpdate(zettelAST, lexicalState);
+      onZettelUpdate(zettelDoc, lexicalState);
     },
   );
 

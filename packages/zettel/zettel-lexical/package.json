@@ -1,5 +1,5 @@
 {
-  "name": "@opral/zettel-editor",
+  "name": "@opral/zettel-lexical",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -21,6 +21,7 @@
     "@lexical/selection": "^0.30.0",
     "@lexical/utils": "^0.30.0",
     "@opral/zettel-ast": "workspace:*",
+    "emoji-picker-element": "^1.26.3",
     "lexical": "^0.30.0",
     "lit": "^3.2.1"
   },

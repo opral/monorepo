@@ -5,8 +5,8 @@ import { Type, type Static } from "@sinclair/typebox";
  *
  * A node always has to have a `_type` and a `_key`.
  */
-export type PortableTextNode = Static<typeof PortableTextNode>;
-const PortableTextNode = Type.Object({
+export type BaseNode = Static<typeof BaseNode>;
+const BaseNode = Type.Object({
 	_type: Type.String(),
 	_key: Type.String({
 		description: "Unique key for this node within the document",
@@ -44,8 +44,8 @@ const Metadata = Type.Optional(Type.Record(Type.String(), Type.Unknown()));
  *   ]
  *   ```
  */
-export type ZettelAccountMentionAnnotation = Static<typeof ZettelAccountMentionAnnotation>;
-const ZettelAccountMentionAnnotation = Type.Object({
+export type ZettelAccountMentionMarkDef = Static<typeof ZettelAccountMentionMarkDef>;
+const ZettelAccountMentionMarkDef = Type.Object({
 	_key: Type.String({}),
 	_type: Type.Literal("zettel.accountMention"),
 	id: Type.String({
@@ -54,8 +54,8 @@ const ZettelAccountMentionAnnotation = Type.Object({
 	metadata: Metadata,
 });
 
-export type ZettelLinkAnnotation = Static<typeof ZettelLinkAnnotation>;
-const ZettelLinkAnnotation = Type.Object({
+export type ZettelLinkMarkDef = Static<typeof ZettelLinkMarkDef>;
+const ZettelLinkMarkDef = Type.Object({
 	_key: Type.String({}),
 	_type: Type.Literal("zettel.link"),
 	href: Type.String({
@@ -93,12 +93,8 @@ const ZettelLinkAnnotation = Type.Object({
  *   ]
  *   ```
  */
-export type MarkDef = ZettelAccountMentionAnnotation | ZettelLinkAnnotation | PortableTextNode;
-const MarkDef = Type.Union([
-	ZettelAccountMentionAnnotation,
-	ZettelLinkAnnotation,
-	PortableTextNode,
-]);
+export type MarkDef = ZettelAccountMentionMarkDef | ZettelLinkMarkDef | BaseNode;
+const MarkDef = Type.Union([ZettelAccountMentionMarkDef, ZettelLinkMarkDef, BaseNode]);
 
 /**
  * A span is an inline element in a Zettel document.
@@ -116,7 +112,7 @@ const MarkDef = Type.Union([
  *   {
  *     "_type": "zettel.span",
  *     "_key": "uniqueKey",
- *     "marks": ["strong", "93j9jas09j2"],
+ *     "marks": ["zettel.strong", "93j9jas09j2"],
  *     "text": "Hello world"
  *   }
  *   ```
@@ -127,9 +123,9 @@ const ZettelSpan = Type.Object({
 	_key: Type.String(),
 	marks: Type.Array(
 		Type.Union([
-			Type.Literal("strong"),
-			Type.Literal("italic"),
-			Type.String({ description: "The key of a markDef" }),
+			Type.Literal("zettel.strong"),
+			Type.Literal("zettel.em"),
+			Type.String({ description: "The key of a markDef or a custom mark" }),
 		])
 	),
 	text: Type.String({ description: "The text content of this span" }),
@@ -163,10 +159,14 @@ const ZettelTextBlock = Type.Object({
 	_type: Type.Literal("zettel.textBlock"),
 	_key: Type.String(),
 	style: Type.Union([
-		Type.Literal("normal"),
-		Type.Literal("h1"),
-		Type.Literal("h2"),
-		Type.Literal("h3"),
+		Type.Literal("zettel.normal"),
+		Type.Literal("zettel.h1"),
+		Type.Literal("zettel.h2"),
+		Type.Literal("zettel.h3"),
+		Type.String({
+			description:
+				"The key of a custom block. Renderers that don't support this block will render it as a zettel.normal block.",
+		}),
 	]),
 	children: Type.Array(ZettelSpan, {
 		description: "Array of inline spans that make up the block content",
@@ -177,7 +177,7 @@ const ZettelTextBlock = Type.Object({
 	metadata: Metadata,
 });
 
-export type Zettel = Static<typeof Zettel>;
-const Zettel = Type.Array(Type.Union([ZettelTextBlock, PortableTextNode]));
+export type ZettelDoc = Static<typeof ZettelDoc>;
+const ZettelDoc = Type.Array(Type.Union([ZettelTextBlock, BaseNode]));
 
-export const ZettelJsonSchema = Zettel;
+export const ZettelDocJsonSchema = ZettelDoc;

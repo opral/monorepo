@@ -29,6 +29,7 @@
 		"node": ">=18"
 	},
 	"dependencies": {
+		"@opral/zettel-ast": "workspace:*",
 		"@lix-js/server-protocol-schema": "workspace:*",
 		"dedent": "1.5.1",
 		"human-id": "^4.1.1",

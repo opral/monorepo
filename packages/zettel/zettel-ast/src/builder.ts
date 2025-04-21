@@ -2,8 +2,8 @@ import type {
 	ZettelTextBlock,
 	ZettelSpan,
 	MarkDef,
-	ZettelAccountMentionAnnotation,
-	ZettelLinkAnnotation,
+	ZettelAccountMentionMarkDef,
+	ZettelLinkMarkDef,
 } from "./schema.js";
 import { nanoid } from "./utils/nano-id.js";
 
@@ -16,7 +16,7 @@ export function span(args: { text: string; marks?: ZettelSpan["marks"] }): Zette
 	};
 }
 
-export function accountMention(args: { id: string }): ZettelAccountMentionAnnotation {
+export function accountMention(args: { id: string }): ZettelAccountMentionMarkDef {
 	return {
 		_type: "zettel.accountMention",
 		_key: nanoid(),
@@ -24,7 +24,7 @@ export function accountMention(args: { id: string }): ZettelAccountMentionAnnota
 	};
 }
 
-export function link(args: { href: string }): ZettelLinkAnnotation {
+export function link(args: { href: string }): ZettelLinkMarkDef {
 	return {
 		_type: "zettel.link",
 		_key: nanoid(),

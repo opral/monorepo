@@ -1,5 +1,6 @@
 import { test, expect } from "vitest";
 import { validate } from "./validate.js";
+import type { ZettelDoc } from "./schema.js";
 
 test("portable text example with a link passes", async () => {
 	const examplePortableText = [
@@ -46,7 +47,7 @@ test("portable text headers pass", async () => {
 		{
 			_type: "zettel.block",
 			_key: "4ee4134378b1",
-			style: "h1",
+			style: "zettel.h1",
 			markDefs: [],
 			children: [
 				{
@@ -68,7 +69,7 @@ test("portable text bold (strong) passes", async () => {
 		{
 			_type: "zettel.block",
 			_key: "4ee4134378b1",
-			style: "normal",
+			style: "zettel.normal",
 			markDefs: [],
 			children: [
 				{
@@ -90,7 +91,7 @@ test("portable text italic (em) passes", async () => {
 		{
 			_type: "zettel.block",
 			_key: "4ee4134378b1",
-			style: "normal",
+			style: "zettel.normal",
 			markDefs: [],
 			children: [
 				{
@@ -108,18 +109,24 @@ test("portable text italic (em) passes", async () => {
 });
 
 test("account mention passes", async () => {
-	const examplePortableText = [
+	const examplePortableText: ZettelDoc = [
 		{
-			_type: "zettel.block",
+			_type: "zettel.textBlock",
 			_key: "4ee4134378b1",
-			style: "normal",
-			markDefs: [],
+			style: "zettel.normal",
+			markDefs: [
+				{
+					_type: "zettel.accountMention",
+					_key: "uniqueKey",
+					id: "47237hh8h4h75",
+				},
+			],
 			children: [
 				{
 					_type: "zettel.span",
 					_key: "e60571e00344",
 					text: "Hello world",
-					marks: ["accountMention"],
+					marks: ["zettel.accountMention"],
 				},
 			],
 		},

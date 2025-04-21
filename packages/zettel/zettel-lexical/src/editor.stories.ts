@@ -9,11 +9,11 @@ import { spreadProps } from "@open-wc/lit-helpers";
 import { action } from "@storybook/addon-actions";
 import "./editor.js";
 import type { ZettelEditor } from "./editor.js";
-import { generateKey, Zettel } from "@opral/zettel-ast";
+import { generateKey, ZettelDoc } from "@opral/zettel-ast";
 
 const meta: Meta<EditorProps> = {
   title: "Zettel/Editor",
-  component: 'zettel-editor',
+  component: "zettel-editor",
   tags: ["autodocs"],
   argTypes: {
     zettel: { control: "object" }, // Allows editing Zettel JSON in controls
@@ -66,7 +66,7 @@ const meta: Meta<EditorProps> = {
   },
 };
 
-const sampleZettel: Zettel = [
+const sampleZettel: ZettelDoc = [
   {
     _type: "zettel.textBlock",
     _key: generateKey(),

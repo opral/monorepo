@@ -1,5 +1,6 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { ZettelDoc } from "@opral/zettel-ast";
 
 export function applyThreadDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -37,5 +38,5 @@ export type ThreadCommentTable = {
 	id: Generated<string>;
 	thread_id: string;
 	parent_id: string | null;
-	content: Record<string, any>;
+	content: ZettelDoc;
 };

@@ -1,203 +1,104 @@
-# Zettel AST
+# Zettel
 
-**Zettel** (German for "a piece of paper on which anything can be written") is a standard, portable AST for rich text that enables interoperability across different products.
+A **portable, extendable JSON‑based rich‑text format** that works everywhere — comments, issues, docs.
 
-## Use case
-
-Zettel is ideal for implementing rich text features such as mentions, links, bold, italic, lists, and more — in **comments**, **issue trackers**, **documents**, and any structured content system.
-
-## Why Zettel?
+> **Zettel** is the German word for “A scrap of paper that anything can be written on.”
 
 https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312
 
-### Problem
+---
 
-No standard, editor-independent rich text AST exists. Most products re-invent their own rich text data model, which:
+## Why another AST?
 
-- Leads to fragmentation across tools
-- Prevents rich copy-paste or shared components
-- Blocks collaboration and structured diffing
+No standard rich‑text AST exists. Everyone reinvents the wheel with no interop, no ecosystem, and no shared components.
 
-Existing approaches fall short:
-
-- [Markdown is unsuited for rich text](https://www.smashingmagazine.com/2022/02/thoughts-on-markdown/)
-- HTML is unsafe and platform-specific (`dangerouslySetInnerHTML`)
-- Editor-specific ASTs (e.g., ProseMirror, Slate) are tightly coupled to their editor runtime
-
-### Solution
-
-**Zettel** defines a simple, portable, and extensible AST — modeled after Portable Text — but with an opinionated, namespaced core vocabulary defined in the **Zettel Spec**.
-
-## Goals
-
-- Define a **standard vocabulary of nodes** for core rich text features
-- Ensure **extensibility** via namespaced custom types
-- Be **portable** and persistable as plain JSON
-- Remain **unopinionated** about rendering and storage
-
-## Out of scope
-
-- Persistence of referenced assets (e.g. images, files)
-- Rendering logic or styling of nodes
-
-## Architecture
-
-Zettel defines two core node types:
-
-- `zettel.block` — a top-level block (paragraph, heading, quote, etc.)
-- `zettel.span` — inline content within a block (text, inline marks)
-
-Each node includes a `metadata` field for structured extensibility. This prevents top-level property collisions and allows gradual spec evolution. If a majority of use cases store a property in the `metadata` field, it will eventually be added to the Zettel spec itself.
+| Pain today                                                                                     | Zettel fix                           |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------ |
+| [Markdown & HTML are unsuited](https://www.smashingmagazine.com/2022/02/thoughts-on-markdown/) | Explicit JSON nodes                  |
+| Every app invents a custom AST                                                                 | Single shared spec                   |
+| Editor‑tied ASTs (Slate, Lexical, …) are not portable                                          | Editor‑agnostic, storage‑first model |
 
 ---
 
-## 📊 Zettel Spec
+## Core design principles
 
-The **Zettel Spec** defines a required vocabulary of styles, marks, and markDefs that all Zettel-compliant tools must support. It ensures consistent behavior across tools while remaining extensible.
+**One‑sentence spec** → A Zettel document is an array of blocks. `zettel.textBlock` holds inline spans; spans reference `markDefs` for links, mentions, or custom marks; everything else lives in `metadata` or your own namespaced types.
 
----
-
-### Text Block (`zettel.textBlock`)
-
-| Style | Description |
-|-------|-------------|
-| `zettel.normal` | Paragraph text |
-| `zettel.h1`        | Heading level 1 |
-| `zettel.h2`        | Heading level 2 |
-
-#### Inline Marks (`zettel.textBlock.marks[]`)
-
-| Mark | Description |
-|------|-------------|
-| `zettel.strong` | Bold |
-| `zettel.italic`     | Italic |
-| `zettel.link`   | Link (via `markDefs`) |
-| `zettel.accountMention`| Mention (via `markDefs`) |
+- **Flat block array** → easy diff / CRDT / streaming.
+- **Namespaced types** → `zettel.*` is guaranteed; anything else is vendor land.
+- **Marks + markDefs** → bold / italic / link / mention without deep nesting.
+- **`metadata` escape‑hatch** → extend safely; successful fields can graduate into the spec.
 
 ---
 
-#### Mark Definitions (`zettel.textBlock.markDefs[]`)
+## Built‑in nodes (v‑1)
 
-#### `zettel.link`
+| `_type`                      | purpose                     | key fields                                 |
+| ---------------------------- | --------------------------- | ------------------------------------------ |
+| `zettel.textBlock`           | paragraphs, headings, lists | `style`, `children`, `listItem?`, `level?` |
+| `zettel.span`                | inline text                 | `text`, `marks?`                           |
+| `zettel.link` _(markDef)_    | hyperlink                   | `href`                                     |
+| `zettel.mention` _(markDef)_ | cross‑entity reference      | `referenceId`, `entityType`, `name`        |
 
-```json
-{
-  "_key": "<unique-key>",
-  "_type": "zettel.link",
-  "href": "https://example.com"
-}
-```
-
-#### `zettel.accountMention`
-
-```json
-{
-  "_key": "<unique-key>",
-  "_type": "zettel.accountMention",
-  "id": "user_123",
-  "metadata": {
-    "zettel.avatarUrl": "https://example.com/avatar.jpg",
-    "role": "editor"
-  }
-}
-```
+> **Fallback rule** If a viewer doesn’t recognise a custom mark or block, it’s ignored and raw text is shown — so custom mentions never break copy‑paste.
 
 ---
 
-### 🧰 Extensibility Guidelines
+### Minimal document
 
-Either define a custom type or use metadata.
-
-- Custom types **must not** use the `zettel.` prefix.
-- All non-standard properties **must** be placed in the `metadata` object when placed in a Zettel node.
+> Have you seen [this](https://example.com)?
 
 ```json
 [
-  {
-    // Use metadata in Zettel nodes
-    "_type": "zettel.textBlock",
-    "_key": "<unique-key>",
-    "metadata": {
-      "papier.viewMode": "edit",
-      "acme.tag": "important"
-    }
-  },
-  {
-    // Use custom types outside of Zettel nodes
-    "_type": "<namespace>.type",
-    "_key": "<unique-key>",
-    "foo": "bar"
-  }
-]
-```
-
-
----
-
-### 📄 Example AST
-
-```json
-[
-  {
-    "_key": "<unique-key>",
-    "_type": "zettel.textBlock",
-    "style": "zettel.h1",
-    "children": [
-      {
-        "_key": "<unique-key>",
-        "_type": "zettel.span",
-        "text": "Hello, ",
-        "marks": []
-      },
-      {
-        "_key": "<unique-key>",
-        "_type": "zettel.span",
-        "text": "World!",
-        "marks": ["zettel.strong"]
-      }
-    ],
-    "markDefs": [],
-    "metadata": {}
-  },
-  {
-    "_key": "<unique-key>",
-    "_type": "zettel.textBlock",
-    "style": "zettel.normal",
-    "children": [
-      {
-        "_key": "<unique-key>",
-        "_type": "zettel.span",
-        "text": "This is a paragraph with a ",
-        "marks": []
-      },
-      {
-        "_key": "<unique-key>",
-        "_type": "zettel.span",
-        "text": "mention",
-        "marks": ["<mention-key>"]
-      }
-    ],
-    "markDefs": [
-      {
-        "_key": "<mention-key>",
-        "_type": "zettel.accountMention",
-        "id": "user_123"
-      }
-    ],
-    "metadata": {}
-  }
+	{
+		"_type": "zettel.textBlock",
+		"style": "zettel.normal",
+		"children": [
+			{ "_type": "zettel.span", "text": "Hello world, have you seen ", "marks": [] },
+			{ "_type": "zettel.span", "text": "this", "marks": ["039jsj3"] },
+			{ "_type": "zettel.span", "text": "?", "marks": [] }
+		],
+		"markDefs": [{ "_key": "039jsj3", "_type": "zettel.link", "href": "https://example.com" }]
+	}
 ]
 ```
 
 ---
 
-### 💡 Inspiration
+## Extending Zettel
 
-Zettel is inspired by [Portable Text](https://portabletext.org/), which offers a flexible JSON representation of rich text.
+### 1 · Custom inline mark
 
-Zettel builds on that foundation by:
+```json
+{ "_key": "9j39ja", "_type": "acme.flag", "emoji": "🚩" }
+```
 
-- Defining a **shared vocabulary** for guaranteed interoperability  
-- Introducing **namespaced conventions** for core semantics  
-- Encouraging **extensibility** through clearly scoped custom types and `metadata` fields
+### 2 · Use it in a span
 
+```json
+{ "_type": "zettel.span", "text": "important", "marks": ["9j39ja"] }
+```
+
+| viewer            | output      |
+| ----------------- | ----------- |
+| acme‑aware editor | 🚩important |
+| Generic viewer    | important   |
+
+> **Note:** Custom marks such as `acme.flag` are ignored by generic viewers, but the underlying text is still rendered, ensuring the content remains readable even without specialized support.
+
+### 3 · Custom block
+
+```json
+{ "_type": "acme.codeBlock", "code": "console.log()", "language": "js" }
+```
+
+| viewer            | output        |
+| ----------------- | ------------- |
+| acme‑aware editor | console.log() |
+| Generic viewer    | <ignored>     |
+
+---
+
+### Inspiration
+
+Based on [Portable Text](https://portabletext.org/) — Zettel keeps its flat, JSON‑native shape and adds a shared vocabulary plus safe namespacing.

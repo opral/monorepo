@@ -7,7 +7,8 @@ import {
 } from "lexical";
 import { registerZettelLexicalPlugin } from "./plugins/zettel-lexical-plugin.js";
 import { importZettelAST } from "./plugins/conversion.js";
-import { Zettel } from "@opral/zettel-ast";
+import { registerEmojiPickerPlugin } from "./plugins/emoji-picker-plugin.js";
+import { ZettelDoc } from "@opral/zettel-ast";
 import { ZettelTextBlockNode, ZettelSpanNode } from "./nodes.js";
 
 export type EditorProps = {};
@@ -15,13 +16,13 @@ export type EditorProps = {};
 export class ZettelEditor extends HTMLElement {
   private editor: LexicalEditor | null = null;
   private unregisterListeners: (() => void) | null = null;
-  private _zettel: Zettel | null = null;
+  private _zettel: ZettelDoc | null = null;
 
-  get zettel(): Zettel | null {
+  get zettel(): ZettelDoc | null {
     return this._zettel;
   }
 
-  set zettel(value: Zettel | null) {
+  set zettel(value: ZettelDoc | null) {
     this._zettel = value;
     if (this.editor && this._zettel) {
       importZettelAST(this._zettel, this.editor);
@@ -51,6 +52,9 @@ export class ZettelEditor extends HTMLElement {
 
     const editor: LexicalEditor = createEditor(initialConfig);
 
+    // Register Emoji Picker Plugin
+    registerEmojiPickerPlugin(editor);
+
     const container = document.createElement("div");
     container.id = "zettel-lexical-editor";
     container.setAttribute("contenteditable", "true");
@@ -60,7 +64,7 @@ export class ZettelEditor extends HTMLElement {
     this.editor = editor;
 
     const handleZettelUpdate = (
-      zettelAst: Zettel,
+      zettelAst: ZettelDoc,
       lexicalState: SerializedEditorState,
     ) => {
       this.dispatchEvent(

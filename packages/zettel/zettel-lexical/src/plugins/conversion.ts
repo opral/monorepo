@@ -10,7 +10,7 @@ import {
 } from "lexical";
 import {
   generateKey,
-  type Zettel,
+  type ZettelDoc,
   type ZettelSpan,
   type ZettelTextBlock,
 } from "@opral/zettel-ast";
@@ -32,8 +32,8 @@ import {
 export function exportZettelAST(
   editorState: EditorState,
   editor: LexicalEditor,
-): Zettel {
-  let zettel: Zettel = [];
+): ZettelDoc {
+  let zettel: ZettelDoc = [];
   const pendingKeyUpdates = new Map<NodeKey, string>();
 
   editorState.read(() => {
@@ -142,7 +142,10 @@ export function exportZettelAST(
  * @param zettel The Zettel AST to import.
  * @param editor The LexicalEditor instance.
  */
-export function importZettelAST(zettel: Zettel, editor: LexicalEditor): void {
+export function importZettelAST(
+  zettel: ZettelDoc,
+  editor: LexicalEditor,
+): void {
   editor.update(() => {
     const root = $getRoot();
     root.clear();
