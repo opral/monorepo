@@ -289,3 +289,141 @@ test("custom marks are serialized and parsed", () => {
 	const parsedDoc = fromHtml(html);
 	expect(parsedDoc).toEqual(doc);
 });
+
+test("parses generic <p>Hello World</p> as zettel.textBlock", () => {
+	const html = `<p>Hello World</p>`;
+
+	expect(fromHtml(html)).toEqual([
+		{
+			_type: "zettel.textBlock",
+			_key: expect.any(String),
+			style: "zettel.normal",
+			markDefs: [],
+			children: [
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: "Hello World",
+					marks: [],
+				},
+			],
+		},
+	] satisfies ZettelDoc);
+});
+
+test("parses <em> in generic HTML as zettel.em mark", () => {
+	const html = `<p>This is <em>italic</em> text</p>`;
+	const parsedDoc = fromHtml(html);
+	// Should parse as a single zettel.textBlock with three spans: "This is ", "italic" (with em), " text"
+	expect(parsedDoc).toEqual([
+		{
+			_type: "zettel.textBlock",
+			_key: expect.any(String),
+			style: "zettel.normal",
+			markDefs: [],
+			children: [
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: "This is ",
+					marks: [],
+				},
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: "italic",
+					marks: ["zettel.em"],
+				},
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: " text",
+					marks: [],
+				},
+			],
+		},
+	] satisfies ZettelDoc);
+});
+
+test("parses <strong> in generic HTML as zettel.strong mark", () => {
+	const html = `<p>This is <strong>bold</strong> text</p>`;
+	const parsedDoc = fromHtml(html);
+	// Should parse as a single zettel.textBlock with three spans: "This is ", "bold" (with strong), " text"
+	expect(parsedDoc).toEqual([
+		{
+			_type: "zettel.textBlock",
+			_key: expect.any(String),
+			style: "zettel.normal",
+			markDefs: [],
+			children: [
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: "This is ",
+					marks: [],
+				},
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: "bold",
+					marks: ["zettel.strong"],
+				},
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: " text",
+					marks: [],
+				},
+			],
+		},
+	]);
+});
+
+test("parses multiple <p> as multiple zettel.textBlock", () => {
+	const html = `<p>First block</p><p>Second block</p><p>Third block</p>`;
+	const parsedDoc = fromHtml(html);
+	expect(parsedDoc).toEqual([
+		{
+			_type: "zettel.textBlock",
+			_key: expect.any(String),
+			style: "zettel.normal",
+			markDefs: [],
+			children: [
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: "First block",
+					marks: [],
+				},
+			],
+		},
+		{
+			_type: "zettel.textBlock",
+			_key: expect.any(String),
+			style: "zettel.normal",
+			markDefs: [],
+			children: [
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: "Second block",
+					marks: [],
+				},
+			],
+		},
+		{
+			_type: "zettel.textBlock",
+			_key: expect.any(String),
+			style: "zettel.normal",
+			markDefs: [],
+			children: [
+				{
+					_type: "zettel.span",
+					_key: expect.any(String),
+					text: "Third block",
+					marks: [],
+				},
+			],
+		},
+	]);
+});

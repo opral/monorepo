@@ -110,114 +110,130 @@ export function toHtml(doc: ZettelDoc): string {
 	return container.outerHTML;
 }
 
-export function fromHtml(html: string): ZettelDoc {
-	const container = document.createElement("div");
-	container.innerHTML = html; // Parse the HTML string
-
+function parseZettelHtml(rootElement: Element): ZettelDoc {
 	const resultingDoc: ZettelDoc = [];
+	for (const element of rootElement.children) {
+		if (element.tagName === "P") {
+			const pElement = element as HTMLParagraphElement;
+			const spans: ZettelSpan[] = [];
+			let parsedMarkDefs: MarkDef[] | undefined = undefined;
 
-	// Get the actual root element parsed from the string (should be the first child)
-	const rootElement = container.firstElementChild;
+			// Parse markDefs from the paragraph element
+			const markDefsAttr = pElement.getAttribute("data-zettel-mark-defs");
+			if (markDefsAttr) {
+				try {
+					parsedMarkDefs = JSON.parse(markDefsAttr);
+				} catch (e) {
+					console.error("Failed to parse markDefs attribute:", e);
+				}
+			}
 
-	// Check if we got the expected root element (a DIV)
-	if (rootElement && rootElement.tagName === "DIV") {
-		// Iterate over the children of the *parsed* root div
-		for (const element of rootElement.children) {
-			if (element.tagName === "P") {
-				const pElement = element as HTMLParagraphElement;
-				const spans: ZettelSpan[] = [];
-				let parsedMarkDefs: MarkDef[] | undefined = undefined;
-
-				// Parse markDefs from the paragraph element
-				const markDefsAttr = pElement.getAttribute("data-zettel-mark-defs");
-				if (markDefsAttr) {
+			for (const outerSpanElement of Array.from(pElement.children)) {
+				if (!(outerSpanElement instanceof HTMLElement) || outerSpanElement.tagName !== "SPAN") {
+					continue;
+				}
+				const keyAttr = outerSpanElement.getAttribute("data-zettel-key");
+				const key = keyAttr ?? undefined;
+				let allMarks: string[] = [];
+				const marksAttr = outerSpanElement.getAttribute("data-zettel-marks");
+				if (marksAttr) {
 					try {
-						parsedMarkDefs = JSON.parse(markDefsAttr);
-						// Optional: Add validation for the parsed markDefs structure here
+						allMarks = JSON.parse(marksAttr);
+						if (!Array.isArray(allMarks)) {
+							console.error("Parsed data-zettel-marks is not an array:", allMarks);
+							allMarks = [];
+						}
 					} catch (e) {
-						console.error("Failed to parse markDefs attribute:", e);
-						// Handle error, maybe default to undefined
+						console.error("Failed to parse data-zettel-marks attribute:", e);
 					}
 				}
-
-				// Use for...of loop for children of P (expecting outer SPANs)
-				for (const outerSpanElement of Array.from(pElement.children)) {
-					// Ensure it's an element and specifically a SPAN
-					if (!(outerSpanElement instanceof HTMLElement) || outerSpanElement.tagName !== "SPAN") {
-						continue; // Skip unexpected elements
+				let text = "";
+				let currentElement: Element = outerSpanElement;
+				while (true) {
+					const firstChild = currentElement.childNodes[0];
+					if (firstChild && firstChild.nodeType === Node.TEXT_NODE) {
+						text = firstChild.textContent || "";
+						break;
 					}
-
-					// 1. Get key from the outer SPAN
-					const keyAttr = outerSpanElement.getAttribute("data-zettel-key");
-					const key = keyAttr ?? undefined;
-
-					// 1. Parse ALL marks solely from the data-zettel-marks attribute
-					let allMarks: string[] = [];
-					const marksAttr = outerSpanElement.getAttribute("data-zettel-marks");
-					if (marksAttr) {
-						try {
-							allMarks = JSON.parse(marksAttr);
-							if (!Array.isArray(allMarks)) {
-								console.error("Parsed data-zettel-marks is not an array:", allMarks);
-								allMarks = []; // Reset to empty on invalid format
-							}
-						} catch (e) {
-							console.error("Failed to parse data-zettel-marks attribute:", e);
-							// Keep allMarks as empty array
-						}
+					if (firstChild && firstChild.nodeType === Node.ELEMENT_NODE) {
+						currentElement = firstChild as Element;
+					} else {
+						text = currentElement.textContent || "";
+						break;
 					}
-
-					// 2. Traverse inwards from the outer SPAN to find the final text node
-					// We IGNORE the tags for mark reconstruction now.
-					let text = "";
-					let currentElement: Element = outerSpanElement;
-
-					while (true) {
-						const firstChild = currentElement.childNodes[0];
-
-						// Base case: Found the text node
-						if (firstChild && firstChild.nodeType === Node.TEXT_NODE) {
-							text = firstChild.textContent || "";
-							break;
-						}
-
-						// Recursive step: Found an element node (mark tag)
-						if (firstChild && firstChild.nodeType === Node.ELEMENT_NODE) {
-							currentElement = firstChild as Element; // Move inwards
-						} else {
-							text = currentElement.textContent || ""; // Fallback
-							break;
-						}
-					}
-
-					// 3. Create the ZettelSpan
-					spans.push(
-						createZettelSpan({
-							_key: key,
-							text,
-							marks: allMarks.length > 0 ? allMarks : undefined,
-						})
-					);
 				}
-
-				// Add markDefs parsing here later if needed
-				const blockKeyAttr = pElement.getAttribute("data-zettel-key");
-				// Create a new block, preserving the key if found, assuming 'zettel.normal' style
-				// Note: MarkDefs are not handled yet
-				resultingDoc.push(
-					createZettelTextBlock({
-						_key: blockKeyAttr ?? undefined, // Pass key or undefined
-						style: "zettel.normal", // Assuming normal style for now
-						children: spans,
-						markDefs: parsedMarkDefs, // Assign the parsed markDefs
+				spans.push(
+					createZettelSpan({
+						_key: key,
+						text,
+						marks: allMarks.length > 0 ? allMarks : undefined,
 					})
 				);
 			}
-			// Handle other block-level elements (H1, H2, UL, etc.)
+			const blockKeyAttr = pElement.getAttribute("data-zettel-key");
+			resultingDoc.push(
+				createZettelTextBlock({
+					_key: blockKeyAttr ?? undefined,
+					style: "zettel.normal",
+					children: spans,
+					markDefs: parsedMarkDefs,
+				})
+			);
 		}
-	} else {
-		throw new Error("Input HTML did not contain expected root <div>");
+	}
+	return resultingDoc;
+}
+
+function parseUnknownHtml(container: HTMLElement): ZettelDoc {
+	const resultingDoc: ZettelDoc = [];
+	const blockElements = ["P", "DIV"];
+	const topLevel = Array.from(container.children);
+
+	function walkInline(node: Node, marks: string[] = []): ZettelSpan[] {
+		if (node.nodeType === Node.TEXT_NODE) {
+			const text = node.textContent ?? "";
+			if (text.length === 0) return [];
+			return [createZettelSpan({ text, marks: marks.length > 0 ? [...marks] : undefined })];
+		}
+		if (node.nodeType === Node.ELEMENT_NODE) {
+			const el = node as HTMLElement;
+			let nextMarks = [...marks];
+			if (el.tagName === "EM") nextMarks.push("zettel.em");
+			if (el.tagName === "STRONG") nextMarks.push("zettel.strong");
+			// Add more tag-to-mark mappings as needed
+
+			let spans: ZettelSpan[] = [];
+			el.childNodes.forEach(child => {
+				spans = spans.concat(walkInline(child, nextMarks));
+			});
+			return spans;
+		}
+		return [];
 	}
 
+	topLevel.forEach((el) => {
+		if (!(el instanceof HTMLElement)) return;
+		if (!blockElements.includes(el.tagName)) return;
+		let spans: ZettelSpan[] = [];
+		el.childNodes.forEach((node) => {
+			spans = spans.concat(walkInline(node));
+		});
+		resultingDoc.push(
+			createZettelTextBlock({
+				style: "zettel.normal",
+				children: spans,
+			})
+		);
+	});
 	return resultingDoc;
+}
+
+export function fromHtml(html: string): ZettelDoc {
+	const container = document.createElement("div");
+	container.innerHTML = html;
+	const rootElement = container.firstElementChild;
+	if (rootElement && rootElement.tagName === "DIV" && rootElement.hasAttribute("data-zettel-doc")) {
+		return parseZettelHtml(rootElement);
+	}
+	return parseUnknownHtml(container);
 }
