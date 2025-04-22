@@ -15,7 +15,9 @@ test("no root div fails", () => {
 	expect(result).toEqual({
 		success: false,
 		data: undefined,
-		errors: expect.arrayContaining([{ message: "Missing root div" }]),
+		errors: expect.arrayContaining([
+			{ message: "Missing root div with data-zettel-doc attribute" },
+		]),
 	});
 });
 
