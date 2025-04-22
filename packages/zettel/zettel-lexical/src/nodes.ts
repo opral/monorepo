@@ -252,7 +252,6 @@ export function $isZettelTextBlockNode(
   return node instanceof ZettelTextBlockNode;
 }
 
-
 export const ZettelNodes = [
   ZettelTextBlockNode,
   ZettelSpanNode,

@@ -30,29 +30,15 @@ import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
  * @returns A cleanup function to unregister listeners.
  */
 export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
+  const root = editor.getRootElement();
 
+  console.log(root);
 
-  const rootElement = editor.getRootElement();
+  root?.setAttribute("data-zettel-doc", "true");
 
-  if (rootElement) {
-    rootElement.setAttribute("data-zettel-doc", "true");
-  }
+  console.log(root);
 
   // Register standard keybindings and command handlers
-  function onCopyForPlainText(
-    event: ClipboardEvent,
-    editor: LexicalEditor,
-  ): void {
-    event.preventDefault();
-    editor.update(() => {
-      const clipboardData = event.clipboardData;
-      const selection = $getSelection();
-      if (selection) {
-        clipboardData?.setData("text/plain", selection.getTextContent());
-      }
-    });
-  }
-
   const unregisterCommandHandlers = mergeRegister(
     // Format text (bold, italic, etc)
     editor.registerCommand<TextFormatType>(
@@ -248,14 +234,12 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
     // Cut (delegates to Copy + Delete)
     editor.registerCommand<ClipboardEvent>(
       CUT_COMMAND,
-      (event) => {
+      () => {
         const selection = $getSelection();
         if (!$isRangeSelection(selection)) {
           return false;
         }
-        if (event instanceof ClipboardEvent) {
-          onCopyForPlainText(event, editor);
-        }
+
         editor.dispatchCommand(DELETE_CHARACTER_COMMAND, false);
         return true;
       },

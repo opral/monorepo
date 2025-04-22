@@ -552,6 +552,8 @@ test("renders valid zettel html", async () => {
   const editor = createEditor({ nodes: ZettelNodes });
 
   const element = document.createElement("div");
+  element.setAttribute("contenteditable", "");
+  element.setAttribute("data-zettel-doc", "true");
 
   registerZettelLexicalPlugin(editor);
 
@@ -567,14 +569,28 @@ test("renders valid zettel html", async () => {
           text: "Hello world",
           marks: ["zettel.strong", "zettel.em"],
         },
+        {
+          _type: "zettel.span",
+          _key: "span-1",
+          text: "look at this link",
+          marks: ["link-0"],
+        },
       ],
-      markDefs: [],
+      markDefs: [
+        {
+          _type: "zettel.link",
+          _key: "link-0",
+          href: "https://example.com",
+        },
+      ],
     },
   ];
 
   editor.setEditorState(editor.parseEditorState(toLexicalState(zettelDoc)));
 
   editor.setRootElement(element);
+
+  console.log(element.innerHTML);
 
   const result = validateHtmlString(element.outerHTML);
 
