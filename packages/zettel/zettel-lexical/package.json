@@ -22,7 +22,6 @@
     "lexical": "^0.30.0"
   },
   "devDependencies": {
-    "@open-wc/lit-helpers": "^0.7.0",
     "@types/jsdom": "^21.1.7",
     "jsdom": "^26.1.0",
     "prettier": "^3.5.3",

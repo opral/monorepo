@@ -111,14 +111,7 @@ test("return key creates a new block", async () => {
       _type: "zettel.textBlock",
       _key: expect.stringMatching(/^.+$/),
       style: "zettel.normal",
-      children: [
-        {
-          _type: "zettel.span",
-          _key: expect.stringMatching(/^.+$/),
-          text: "",
-          marks: [],
-        },
-      ],
+      children: [],
       markDefs: [],
     },
   ]);

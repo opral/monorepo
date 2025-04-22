@@ -53,6 +53,10 @@
         const textarea = document.getElementById("zettel-ast-display");
         textarea.value = JSON.stringify(zettelDoc, null, 2);
         autoResizeTextarea(textarea);
+        // Update Lexical state display
+        const lexicalTextarea = document.getElementById("lexical-state-display");
+        lexicalTextarea.value = JSON.stringify(lexicalState, null, 2);
+        autoResizeTextarea(lexicalTextarea);
       });
 
       function autoResizeTextarea(textarea) {
@@ -64,11 +68,25 @@
     <h1>Zettel Lexical Example</h1>
     <strong>Editor</strong>
     <div id="editor-container" contenteditable="true"></div>
-    <strong>AST</strong>
-    <textarea
-      id="zettel-ast-display"
-      readonly
-      placeholder="Zettel AST will appear here..."
-    ></textarea>
+    <div style="display: flex; gap: 16px; align-items: flex-start;">
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+        <strong>Document</strong>
+        <textarea
+          id="zettel-ast-display"
+          readonly
+          placeholder="Zettel AST will appear here..."
+          style="min-width: 0; overflow: hidden; resize: none;"
+        ></textarea>
+      </div>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+        <strong>Lexical State</strong>
+        <textarea
+          id="lexical-state-display"
+          readonly
+          placeholder="Lexical state will appear here..."
+          style="min-width: 0; overflow: hidden; resize: none;"
+        ></textarea>
+      </div>
+    </div>
   </body>
 </html>

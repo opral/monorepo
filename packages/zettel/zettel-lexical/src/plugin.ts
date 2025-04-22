@@ -91,7 +91,6 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
       () => {
         const root = $getRoot();
         const newBlock = $createZettelTextBlockNode();
-        const newSpan = $createZettelSpanNode("");
         root.append(newBlock);
         newBlock.select();
         return true;
