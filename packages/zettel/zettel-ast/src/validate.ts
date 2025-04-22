@@ -3,6 +3,20 @@ import { ZettelDocJsonSchema, type ZettelDoc } from "./schema.js";
 
 const Z = TypeCompiler.Compile(ZettelDocJsonSchema);
 
+export type SerializableError = { message: string };
+
+export type ValidationResult<T> =
+	| {
+			success: true;
+			data: T;
+			errors: undefined;
+	  }
+	| {
+			success: false;
+			data: undefined;
+			errors: SerializableError[];
+	  };
+
 /**
  * Validates a Zettel AST without throwing an error.
  *
@@ -14,24 +28,14 @@ const Z = TypeCompiler.Compile(ZettelDocJsonSchema);
  *     console.log(result.data);
  *   }
  */
-export function validate(zettel: unknown):
-	| {
-			success: true;
-			data: ZettelDoc;
-			errors: undefined;
-	  }
-	| {
-			success: false;
-			data: undefined;
-			errors: Error[];
-	  } {
+export function validate(zettel: unknown): ValidationResult<ZettelDoc> {
 	const result = Z.Check(zettel);
 	if (!result) {
 		const errors = [...Z.Errors(zettel)];
 		return {
 			success: false,
 			data: undefined,
-			errors: errors.map((error) => new Error(error.message)),
+			errors: errors.map((error) => ({ message: error.message })),
 		};
 	}
 	return {

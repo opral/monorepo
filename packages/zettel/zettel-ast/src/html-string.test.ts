@@ -3,23 +3,7 @@ import { createZettelTextBlock, createZettelSpan, createZettelLinkMarkDef } from
 import type { ZettelDoc } from "./schema.js";
 import { toHtmlString, fromHtmlString } from "./html-string.js";
 import { JSDOM } from "jsdom";
-
-/**
- * Normalizes HTML by removing extra whitespace and escaping double quotes within specific JSON attributes.
- */
-function normalizeHtml(html: string): string {
-	// Remove extra whitespace between tags and leading/trailing whitespace
-	return html.replace(/>\s+</g, "><").trim();
-}
-
-/**
- * Stringifies a value and escapes double quotes for safe embedding in an HTML attribute.
- * @param value The value to stringify.
- * @returns The stringified and escaped value.
- */
-function stringifyJsonForHtmlAttribute(value: any): string {
-	return JSON.stringify(value).replace(/"/g, "&quot;");
-}
+import { normalizeHtml, stringifyJson } from "./utils/normalize-html.js";
 
 /**
  * Simulate document for element creation
@@ -96,7 +80,7 @@ test("serializes and parses 'strong' mark", () => {
 
 	const html = toHtmlString(doc);
 
-	const marksAttrValue = stringifyJsonForHtmlAttribute(["zettel.strong"]);
+	const marksAttrValue = stringifyJson(["zettel.strong"]);
 	const expectedHtml = normalizeHtml(`
     <div data-zettel-doc="true">
       <p data-zettel-key="${blockKey}">
@@ -130,7 +114,7 @@ test("serializes and parses 'em' mark", () => {
 
 	const html = toHtmlString(doc);
 
-	const marksAttrValue = stringifyJsonForHtmlAttribute(["zettel.em"]);
+	const marksAttrValue = stringifyJson(["zettel.em"]);
 	const expectedHtml = normalizeHtml(`
     <div data-zettel-doc="true">
       <p data-zettel-key="${blockKey}">
@@ -164,7 +148,7 @@ test("serializes and parses nested 'strong' and 'em' marks", () => {
 
 	const html = toHtmlString(doc);
 
-	const marksAttrValue = stringifyJsonForHtmlAttribute(["zettel.strong", "zettel.em"]);
+	const marksAttrValue = stringifyJson(["zettel.strong", "zettel.em"]);
 	const expectedHtml = normalizeHtml(`
     <div data-zettel-doc="true">
       <p data-zettel-key="${blockKey}">
@@ -198,7 +182,7 @@ test("serializes and parses 'zettel.code' mark", () => {
 
 	const html = toHtmlString(doc);
 
-	const marksAttrValue = stringifyJsonForHtmlAttribute(["zettel.code"]);
+	const marksAttrValue = stringifyJson(["zettel.code"]);
 	const expectedHtml = normalizeHtml(`
     <div data-zettel-doc="true">
       <p data-zettel-key="${blockKey}">
@@ -238,8 +222,8 @@ test("serializes and parses 'zettel.link' mark", () => {
 
 	const html = toHtmlString(doc);
 
-	const markDefsAttrValue = stringifyJsonForHtmlAttribute([linkMarkDef]);
-	const marksAttrValue = stringifyJsonForHtmlAttribute([linkMarkDef._key]);
+	const markDefsAttrValue = stringifyJson([linkMarkDef]);
+	const marksAttrValue = stringifyJson([linkMarkDef._key]);
 	const expectedHtml = normalizeHtml(`
     <div data-zettel-doc="true">
       <p data-zettel-key="${blockKey}" data-zettel-mark-defs="${markDefsAttrValue}">
@@ -275,7 +259,7 @@ test("custom marks are serialized and parsed", () => {
 
 	const html = toHtmlString(doc);
 
-	const marksAttrValue = stringifyJsonForHtmlAttribute(["custom.mark"]);
+	const marksAttrValue = stringifyJson(["custom.mark"]);
 	const expectedHtml = normalizeHtml(`
     <div data-zettel-doc="true">
       <p data-zettel-key="${blockKey}">
