@@ -5,25 +5,34 @@ Mappings for the Zettel AST to the Lexical editor state, as well as a headless e
 ## Installation
 
 ```bash
-npm install @opral/zettel-lexical
+npm install @opral/zettel-ast @opral/zettel-lexical
 ```
 
-## Usage
+## Getting started
 
 ```tsx
 import { ZettelDoc } from "@opral/zettel-ast";
-import { ZettelLexicalEditor } from "@opral/zettel-lexical";
+import { ZettelNodes, registerZettelLexicalPlugin } from "@opral/zettel-lexical";
 
-function Component(props: { zettel: ZettelDoc }) {
 
-  return (
-    <zettel-lexical-editor 
-      zettel={props.zettel} 
-      onChange={(updatedZettel) => {
-        console.log(updatedZettel);
-        // persist the updated zettel somewhere
-      }}
-    />
-  );
-}
+// register the zettel nodes
+const editor = createEditor({
+  nodes: [...ZettelNodes],
+});
+// register the zettel plugin
+registerZettelLexicalPlugin(editor);
+```
+
+## Getting the AST
+
+```tsx
+const lexicalState = editor.getEditorState().toJSON();
+const zettelDoc = fromLexicalState(lexicalState);
+```
+
+## Setting the AST
+
+```tsx
+const lexicalState = toLexicalState(zettelDoc);
+editor.setEditorState(editor.parseEditorState(lexicalState));
 ```

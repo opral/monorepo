@@ -109,9 +109,16 @@ test("return key creates a new block", async () => {
     },
     {
       _type: "zettel.textBlock",
-      _key: expect.any(String),
+      _key: expect.stringMatching(/^.+$/),
       style: "zettel.normal",
-      children: [],
+      children: [
+        {
+          _type: "zettel.span",
+          _key: expect.stringMatching(/^.+$/),
+          text: "",
+          marks: [],
+        },
+      ],
       markDefs: [],
     },
   ]);
@@ -145,12 +152,12 @@ test("pastes plain text as new zettel.textBlock", async () => {
   expect(zettelDoc).toEqual([
     {
       _type: "zettel.textBlock",
-      _key: expect.any(String),
+      _key: expect.stringMatching(/^.+$/),
       style: "zettel.normal",
       children: [
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: "Hello clipboard!",
           marks: [],
         },
@@ -207,12 +214,12 @@ test("pastes a zettel HTML document", async () => {
   expect(restored).toEqual([
     {
       _type: "zettel.textBlock",
-      _key: expect.any(String),
+      _key: expect.stringMatching(/^.+$/),
       style: "zettel.normal",
       children: [
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: "HTML paste!",
           marks: [],
         },
@@ -251,36 +258,36 @@ test("pastes a generic HTML document (not zettel) and parses as fallback", () =>
   expect(restored).toEqual([
     {
       _type: "zettel.textBlock",
-      _key: expect.any(String),
+      _key: expect.stringMatching(/^.+$/),
       style: "zettel.normal",
       children: [
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: "This is ",
           marks: [],
         },
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: "bold",
           marks: ["zettel.strong"],
         },
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: " and ",
           marks: [],
         },
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: "italic",
           marks: ["zettel.em"],
         },
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: " text.",
           marks: [],
         },
@@ -289,12 +296,12 @@ test("pastes a generic HTML document (not zettel) and parses as fallback", () =>
     },
     {
       _type: "zettel.textBlock",
-      _key: expect.any(String),
+      _key: expect.stringMatching(/^.+$/),
       style: "zettel.normal",
       children: [
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: "Second paragraph.",
           marks: [],
         },
@@ -432,12 +439,12 @@ test.todo("copies only the selected text and marks", () => {
   expect(JSON.parse(clipboardData["text/zettel"])).toEqual([
     {
       _type: "zettel.textBlock",
-      _key: expect.any(String),
+      _key: expect.stringMatching(/^.+$/),
       style: "zettel.normal",
       children: [
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: "world",
           marks: ["zettel.strong"],
         },
@@ -511,7 +518,7 @@ test("toggling italic splits and merges spans and updates marks correctly", () =
         },
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: expect.stringMatching(/^.+$/),
           text: "world",
           marks: ["zettel.em"],
         },

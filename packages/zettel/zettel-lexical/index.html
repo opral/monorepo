@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Zettel Lexical Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem;
+        background: #fafbfc;
+      }
+      #editor-container {
+        border: 1px solid #ccc;
+        min-height: 100px;
+        padding: 1rem;
+        background: #fff;
+        margin-bottom: 1rem;
+      }
+      textarea {
+        width: 100%;
+        margin-top: 10px;
+        font-family: monospace;
+        font-size: 12px;
+        box-sizing: border-box;
+        overflow: hidden;
+        resize: none;
+        min-height: 70px;
+        /* Remove fixed height for auto-resize */
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import {
+        registerZettelLexicalPlugin,
+        fromLexicalState,
+        ZettelNodes,
+      } from "./src/index.js";
+      import { createEditor } from "lexical";
+
+      const container = document.getElementById("editor-container");
+      const editor = createEditor({
+        nodes: [...ZettelNodes],
+      });
+      registerZettelLexicalPlugin(editor);
+
+      editor.setRootElement(container);
+
+      editor.registerUpdateListener(() => {
+        const lexicalState = editor.getEditorState().toJSON();
+        const zettelDoc = fromLexicalState(lexicalState);
+        const textarea = document.getElementById("zettel-ast-display");
+        textarea.value = JSON.stringify(zettelDoc, null, 2);
+        autoResizeTextarea(textarea);
+      });
+
+      function autoResizeTextarea(textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = textarea.scrollHeight + "px";
+      }
+    </script>
+
+    <h1>Zettel Lexical Example</h1>
+    <strong>Editor</strong>
+    <div id="editor-container" contenteditable="true"></div>
+    <strong>AST</strong>
+    <textarea
+      id="zettel-ast-display"
+      readonly
+      placeholder="Zettel AST will appear here..."
+    ></textarea>
+  </body>
+</html>

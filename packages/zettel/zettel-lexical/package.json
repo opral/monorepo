@@ -7,7 +7,7 @@
     ".": "./dist/index.js"
   },
   "scripts": {
-    "dev": "tsc --watch",
+    "dev": "vite",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
