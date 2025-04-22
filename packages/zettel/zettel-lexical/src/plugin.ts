@@ -19,7 +19,7 @@ import {
 } from "lexical";
 import { mergeRegister } from "@lexical/utils";
 import { $createZettelTextBlockNode, $createZettelSpanNode } from "./nodes.js";
-import { toHtml, fromHtml, toPlainText } from "@opral/zettel-ast";
+import { toHtmlString, fromHtmlString, toPlainText } from "@opral/zettel-ast";
 import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
 
 /**
@@ -153,7 +153,7 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
         const state = editor.getEditorState();
         // Use your existing function to convert Lexical state to Zettel AST
         const zettelDoc = fromLexicalState(state.toJSON());
-        const html = toHtml(zettelDoc);
+        const html = toHtmlString(zettelDoc);
         // 2. Set clipboard data
         if (event && "clipboardData" in event && event.clipboardData) {
           // Use ClipboardEvent clipboardData API
@@ -210,7 +210,7 @@ export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
         if (Array.from(clipboardData.types).includes("text/html")) {
           const html = clipboardData.getData("text/html");
           try {
-            const zettelDoc = fromHtml(html);
+            const zettelDoc = fromHtmlString(html);
             const lexicalState = toLexicalState(zettelDoc);
             editor.setEditorState(editor.parseEditorState(lexicalState));
             return true;

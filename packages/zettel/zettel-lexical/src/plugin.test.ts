@@ -3,6 +3,7 @@ import { registerZettelLexicalPlugin } from "./plugin.js";
 import {
   $createZettelSpanNode,
   $createZettelTextBlockNode,
+  $isZettelSpanNode,
   ZettelNodes,
 } from "./nodes.js";
 import {
@@ -13,9 +14,10 @@ import {
   KEY_ENTER_COMMAND,
   PASTE_COMMAND,
   COPY_COMMAND,
+  FORMAT_TEXT_COMMAND,
 } from "lexical";
 import { JSDOM } from "jsdom";
-import { toHtml, ZettelDoc } from "@opral/zettel-ast";
+import { toHtmlString, validateHtmlString, ZettelDoc } from "@opral/zettel-ast";
 import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
 
 beforeEach(() => {
@@ -23,6 +25,7 @@ beforeEach(() => {
   globalThis.document = dom.window.document;
   globalThis.HTMLElement = dom.window.HTMLElement;
   globalThis.Node = dom.window.Node;
+  globalThis.MutationObserver = dom.window.MutationObserver;
   // @ts-expect-error
   globalThis.window = dom.window;
 });
@@ -180,7 +183,7 @@ test("pastes a zettel HTML document", async () => {
     },
   ];
   // Use the same toHtml function as the plugin
-  const zettelHtml = toHtml(zettelDoc);
+  const zettelHtml = toHtmlString(zettelDoc);
 
   // Simulate a Zettel HTML paste event
   const clipboardData = {
@@ -441,4 +444,107 @@ test.todo("copies only the selected text and marks", () => {
       markDefs: [],
     },
   ]);
+});
+
+test("toggling italic splits span and updates marks correctly", () => {
+  const editor = createEditor({ nodes: ZettelNodes });
+  registerZettelLexicalPlugin(editor);
+
+  // Insert a single span: "Hello world"
+  editor.update(
+    () => {
+      $getRoot().append(
+        $createZettelTextBlockNode("block-0").append(
+          $createZettelSpanNode("Hello world", "span-0"),
+        ),
+      );
+    },
+    { discrete: true },
+  );
+
+  // Select "world" and toggle italic
+  editor.update(
+    () => {
+      const root = $getRoot();
+      const block = root.getFirstChild();
+      if (block && $isParagraphNode(block)) {
+        const span = block.getFirstChild();
+        if (span && $isZettelSpanNode(span)) {
+          // "Hello ".length === 6
+          span.select(6, 11);
+        }
+      }
+    },
+    { discrete: true },
+  );
+
+  editor.update(
+    () => {
+      editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
+    },
+    { discrete: true },
+  );
+
+  // Get the resulting Zettel AST
+  const state = editor.getEditorState().toJSON();
+  const zettelDoc = fromLexicalState(state);
+
+  expect(zettelDoc).toEqual([
+    {
+      _type: "zettel.textBlock",
+      _key: "block-0",
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: "Hello ",
+          marks: [],
+        },
+        {
+          _type: "zettel.span",
+          _key: expect.any(String),
+          text: "world",
+          marks: ["zettel.em"],
+        },
+      ],
+      markDefs: [],
+    },
+  ]);
+});
+
+test.skip("renders valid zettel html", async () => {
+  const editor = createEditor({ nodes: ZettelNodes });
+
+  const element = document.createElement("div");
+
+  registerZettelLexicalPlugin(editor);
+
+  const zettelDoc: ZettelDoc = [
+    {
+      _type: "zettel.textBlock",
+      _key: "block-0",
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: "span-0",
+          text: "Hello world",
+          marks: ["zettel.strong", "zettel.em"],
+        },
+      ],
+      markDefs: [],
+    },
+  ];
+
+  editor.setEditorState(editor.parseEditorState(toLexicalState(zettelDoc)));
+
+  editor.setRootElement(element);
+
+  const result = validateHtmlString(element.innerHTML);
+
+  expect(result).toEqual({
+    success: true,
+    data: expect.anything(),
+  });
 });
