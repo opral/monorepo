@@ -55,16 +55,20 @@ export const loadedMdAtom = atom(async (get) => {
 });
 
 /**
- * Special change set which describes the current changes
- * that are not yet checkpointed.
+ * Get working change set for a specific file
+ * This is extracted to be reusable across the application
  */
-export const workingChangeSetAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	const activeFile = await get(activeFileAtom);
-	const activeVersion = await get(activeVersionAtom);
-	if (!lix || !activeFile || !activeVersion) return null;
+export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
+	// Get the active version with working change set id
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirst();
 
+	if (!activeVersion) return null;
+
+	// Get the working change set
 	return await lix.db
 		.selectFrom("change_set")
 		.where("id", "=", activeVersion.working_change_set_id)
@@ -74,13 +78,26 @@ export const workingChangeSetAtom = atom(async (get) => {
 			"change_set.id",
 			"change_set_element.change_set_id"
 		)
-		.where("file_id", "=", activeFile.id)
+		.where("file_id", "=", fileId)
 		.selectAll("change_set")
 		.groupBy("change_set.id")
 		.select((eb) => [
 			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 		])
 		.executeTakeFirst();
+};
+
+/**
+ * Special change set which describes the current changes
+ * that are not yet checkpointed.
+ */
+export const workingChangeSetAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	if (!lix || !activeFile) return null;
+
+	return await getWorkingChangeSet(lix, activeFile.id);
 });
 
 // The file manager app treats changes that are not in a change set as intermediate changes.
@@ -193,6 +210,7 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 				.innerJoin("change", "change.id", "change_author.change_id")
 				.innerJoin("account", "account.id", "change_author.account_id")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.where("change.schema_key", "=", "lix_change_set_label_table")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
 					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
