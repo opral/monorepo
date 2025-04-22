@@ -197,3 +197,16 @@ test("adding custom mark defs", () => {
 	const result = validate(doc);
 	expect(result.errors).toBeUndefined();
 });
+
+test("custom blocks may not define keys with `_` prefix to avoid conflicts", () => {
+	const doc: ZettelDoc = [
+		{
+			_type: "custom.block",
+			_key: "_uniqueKey",
+			_foo: {},
+		},
+	];
+
+	const result = validate(doc);
+	expect(result.errors).toBeDefined();
+});

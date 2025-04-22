@@ -183,6 +183,10 @@ const CustomBlock = Type.Intersect([
 	Type.Object({
 		_type: Type.Not(Type.Literal("zettel.textBlock")), // _type cannot be zettel.textBlock
 	}),
+	// Forbid _key starting with '_'
+	Type.Object({
+		_key: Type.String({ pattern: "^[^_].*" }),
+	}),
 ]);
 
 export type ZettelDoc = Array<ZettelTextBlock | BaseNode>;
