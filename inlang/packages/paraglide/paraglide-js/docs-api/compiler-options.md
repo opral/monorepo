@@ -51,7 +51,7 @@ true
 > `optional` **cookieDomain**: `string`
 
 The host to which the cookie will be sent.
-If null, this defaults to the host portion of the current document location and the cookie is not available on subdomains.
+If undefined, this defaults to the host portion of the current document location and the cookie is not available on subdomains.
 Otherwise, subdomains are always included.
 
 ##### Default
