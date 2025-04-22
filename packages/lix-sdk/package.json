@@ -6,7 +6,7 @@
 	"types": "./dist/index.d.ts",
 	"exports": {
 		".": "./dist/index.js",
-		"./zettel-ast": "./dist/zettel-ast.js"
+		"./zettel-ast": "./dist/zettel-ast/index.js"
 	},
 	"_filesComment": "Shipping src for better debugging experience",
 	"files": [
