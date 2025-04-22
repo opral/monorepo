@@ -37,7 +37,7 @@ export class ZettelSpanNode extends TextNode {
 
   constructor(text: string, zettelKey?: string, key?: NodeKey) {
     super(text, key);
-    this.__zettelKey = zettelKey;
+    this.__zettelKey = zettelKey ?? generateKey();
     this.__type = "zettel-span";
   }
 
