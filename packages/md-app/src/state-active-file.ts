@@ -192,7 +192,13 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 				.selectFrom("change_author")
 				.innerJoin("change", "change.id", "change_author.change_id")
 				.innerJoin("account", "account.id", "change_author.account_id")
-				.whereRef("change.entity_id", "=", "change_set.id")
+				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.where(
+					// @ts-expect-error - this is a workaround for the type system
+					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					"=",
+					eb.ref("change_set.id")
+				)
 				.select("account.name")
 				.as("author_name")
 		)
