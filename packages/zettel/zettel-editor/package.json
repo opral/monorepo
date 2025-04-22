@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "build:storybook": "storybook build",
     "format": "prettier ./src --write",
