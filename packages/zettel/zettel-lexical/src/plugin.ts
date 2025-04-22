@@ -30,6 +30,14 @@ import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
  * @returns A cleanup function to unregister listeners.
  */
 export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
+
+
+  const rootElement = editor.getRootElement();
+
+  if (rootElement) {
+    rootElement.setAttribute("data-zettel-doc", "true");
+  }
+
   // Register standard keybindings and command handlers
   function onCopyForPlainText(
     event: ClipboardEvent,

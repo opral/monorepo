@@ -548,7 +548,7 @@ test("toggling italic splits and merges spans and updates marks correctly", () =
   expect(zettelDoc2).toEqual(initialDoc);
 });
 
-test.skip("renders valid zettel html", async () => {
+test("renders valid zettel html", async () => {
   const editor = createEditor({ nodes: ZettelNodes });
 
   const element = document.createElement("div");
@@ -576,7 +576,7 @@ test.skip("renders valid zettel html", async () => {
 
   editor.setRootElement(element);
 
-  const result = validateHtmlString(element.innerHTML);
+  const result = validateHtmlString(element.outerHTML);
 
   expect(result).toEqual({
     success: true,

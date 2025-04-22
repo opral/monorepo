@@ -7,14 +7,21 @@ import {
   TextModeType,
   TextNode,
 } from "lexical";
-import { generateKey } from "@opral/zettel-ast";
-
+import {
+  createZettelSpan,
+  createZettelTextBlock,
+  generateKey,
+  singleNodeToHtmlElement,
+  ZettelSpan,
+  ZettelTextBlock,
+} from "@opral/zettel-ast";
 
 // #region ZettelSpanNode
 
 export interface SerializedZettelSpanNode extends SerializedTextNode {
   zettelKey?: string; // Optional because newly created nodes might not have one initially
   type: "zettel-span";
+  zettelNode: ZettelSpan;
 }
 
 export class ZettelSpanNode extends TextNode {
@@ -48,11 +55,28 @@ export class ZettelSpanNode extends TextNode {
     return true;
   }
 
+  createDOM() {
+    return singleNodeToHtmlElement(this.exportJSON().zettelNode);
+  }
+
   exportJSON(): SerializedZettelSpanNode {
     return {
       ...super.exportJSON(), // Inherit base properties (text, format, style, etc.)
       type: "zettel-span", // Explicitly set the type
       zettelKey: this.__zettelKey,
+      zettelNode: createZettelSpan({
+        _key: this.__zettelKey,
+        text: this.__text,
+        marks: (() => {
+          // Derive marks from Lexical's format bitmask
+          const marks: string[] = [];
+          const format = this.getFormat();
+          if (format & 1) marks.push("zettel.strong");
+          if (format & (1 << 1)) marks.push("zettel.em");
+          if (format & (1 << 4)) marks.push("zettel.code");
+          return marks;
+        })(),
+      }),
       version: 1,
     };
   }
@@ -155,6 +179,7 @@ export class ZettelSpanNode extends TextNode {
 
 export interface SerializedZettelTextBlockNode extends SerializedParagraphNode {
   zettelKey?: string;
+  zettelNode: ZettelTextBlock;
   type: "zettel-text-block";
 }
 
@@ -179,6 +204,11 @@ export class ZettelTextBlockNode extends ParagraphNode {
       ...super.exportJSON(),
       type: "zettel-text-block",
       zettelKey: this.__zettelKey,
+      zettelNode: createZettelTextBlock({
+        _key: this.__zettelKey,
+        children: [],
+        markDefs: [],
+      }),
       version: 1,
     };
   }
@@ -193,12 +223,7 @@ export class ZettelTextBlockNode extends ParagraphNode {
   }
 
   createDOM() {
-    const dom = document.createElement("div");
-    // block should take full width
-    dom.style.width = "100%";
-    // block should have a minimum height
-    dom.style.minHeight = "1rem";
-    return dom;
+    return singleNodeToHtmlElement(this.exportJSON().zettelNode);
   }
 }
 

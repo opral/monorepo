@@ -141,6 +141,7 @@ export function toLexicalState(doc: ZettelDoc): SerializedEditorState {
             style: "", // Default from SerializedTextNode
             mode: "normal", // Default from SerializedTextNode
             detail: 0, // Default from SerializedTextNode
+            zettelNode: zettelSpan,
           };
           lexicalSpans.push(lexicalSpan);
         }
@@ -155,6 +156,7 @@ export function toLexicalState(doc: ZettelDoc): SerializedEditorState {
         indent: 0, // Default from SerializedElementNode
         textFormat: 0, // Correct type: number
         textStyle: "", // Add missing required property
+        zettelNode: zettelBlock,
         // style: "", // Add if ZettelTextBlock has own style property in exportJSON
       };
       lexicalBlocks.push(lexicalBlock);
