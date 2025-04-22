@@ -5,7 +5,8 @@
 	"license": "Apache-2.0",
 	"types": "./dist/index.d.ts",
 	"exports": {
-		".": "./dist/index.js"
+		".": "./dist/index.js",
+		"./zettel-ast": "./dist/zettel-ast.js"
 	},
 	"_filesComment": "Shipping src for better debugging experience",
 	"files": [
