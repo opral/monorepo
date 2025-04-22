@@ -8,7 +8,6 @@ import {
 	fileIdSearchParamsAtom,
 	withPollingAtom,
 	activeVersionAtom,
-	store,
 } from "./state.ts";
 import {
 	changeHasLabel,
@@ -63,10 +62,12 @@ export const workingChangeSetAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	if (!lix || !activeFile) return null;
+	const activeVersion = await get(activeVersionAtom);
+	if (!lix || !activeFile || !activeVersion) return null;
 
 	return await lix.db
 		.selectFrom("change_set")
+		.where("id", "=", activeVersion.working_change_set_id)
 		// left join in case the change set has no elements
 		.leftJoin(
 			"change_set_element",

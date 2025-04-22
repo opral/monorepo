@@ -69,9 +69,9 @@ export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
 	}
 
 	await withFlashtypeAccount(lix, async (lixWithFlashtype) => {
-		await setupMdWelcome(lixWithFlashtype);
+		const file = await setupMdWelcome(lixWithFlashtype);
 		await fileQueueSettled({ lix: lixWithFlashtype });
-		await createInitialCheckpoint(lixWithFlashtype);
+		await createInitialCheckpoint(lixWithFlashtype, file.id);
 	});
 
 	return { blob: await toBlob({ lix }) };
@@ -97,7 +97,7 @@ export const welcomeMd = `# Flashtype.ai ⚡️
 
 ### 🤝 Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))
 
-![](${serverUrl}/images/Collaborate.png)`;
+![](${serverUrl}/images/Collaborate.png)\n\n`;
 
 export const setupMdWelcome = async (lix: Lix) => {
 	// Load a demo md file and save it to OPFS
@@ -112,11 +112,34 @@ export const setupMdWelcome = async (lix: Lix) => {
 	return file;
 };
 
-const createInitialCheckpoint = async (lix: Lix) => {
-	const changeSet = await createCheckpoint({ lix });
+const createInitialCheckpoint = async (lix: Lix, fileId: string) => {
+	// Get the working change set for the discussion
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirst();
+	const changeSet = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", activeVersion!.working_change_set_id)
+		// left join in case the change set has no elements
+		.leftJoin(
+			"change_set_element",
+			"change_set.id",
+			"change_set_element.change_set_id"
+		)
+		.where("file_id", "=", fileId)
+		.selectAll("change_set")
+		.groupBy("change_set.id")
+		.select((eb) => [
+			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		])
+		.executeTakeFirst();
+
 	await createDiscussion({
 		lix,
 		changeSet,
 		firstComment: { content: "Setup welcome file" },
 	});
+	await createCheckpoint({ lix });
 };

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/plate-ui/button";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, getDiscussion, intermediateChangesAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, getDiscussion, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "@/components/plate-ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
@@ -75,7 +75,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
                   // TODO: Rework changes query to what we need
                   diffs={[changesData[changesData.length - 1]]}
                   contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
-                  // debug={true}
+                // debug={true}
                 />
               ))}
             </div>
@@ -91,11 +91,12 @@ export default IntermediateCheckpointComponent;
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const [lix] = useAtom(lixAtom);
+  const [currentChangeSet] = useAtom(workingChangeSetAtom);
 
   const handleAddComment = async (changeSet: ChangeSet) => {
     if (!description.trim()) return;
 
-    const discussion = await getDiscussion(changeSet?.id);
+    const discussion = await getDiscussion(lix, changeSet?.id);
     try {
       if (!discussion) {
         await createDiscussion({
@@ -125,8 +126,8 @@ const CreateCheckpointInput = () => {
   };
 
   const handleCreateCheckpoint = async () => {
-    const changeSet = await createCheckpoint({ lix });
-    await handleAddComment(changeSet);
+    await handleAddComment(currentChangeSet!);
+    await createCheckpoint({ lix });
     await saveLixToOpfs({ lix });
   };
 
@@ -140,6 +141,7 @@ const CreateCheckpointInput = () => {
 
   return (
     <div className="flex flex-col w-full gap-2 px-1 items-end">
+      {/* {currentChangeSet?.id} */}
       <Input
         className="flex-grow pl-2 bg-background text-sm placeholder:text-sm"
         placeholder="Describe the changes"

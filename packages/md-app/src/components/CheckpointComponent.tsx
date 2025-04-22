@@ -6,7 +6,7 @@ import { Input } from "@/components/plate-ui/input.tsx";
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
-import { ChangeSet, createDiscussion, getBeforeAfterOfFile, UiDiffComponentProps } from "@lix-js/sdk";
+import { ChangeSet, createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
 import { useAtom } from "jotai/react";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
@@ -91,6 +91,7 @@ export const CheckpointComponent = (props: {
       <ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
       <div className="flex-1">
         <div className="flex flex-col w-full mt-1.5">
+          {/* {props.checkpointChangeSet.id} */}
           <div className="h-8 flex items-center justify-between w-full">
             <div className="flex items-center gap-2 min-w-0 flex-shrink-1">
               <TooltipProvider>
