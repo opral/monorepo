@@ -11,7 +11,7 @@ import {
 } from "./state.ts";
 import {
 	changeHasLabel,
-	changeSetElementInAncestryOf,
+	changeSetElementIsLeafOf,
 	changeSetHasLabel,
 	changeSetIsAncestorOf,
 	jsonArrayFrom,
@@ -227,8 +227,10 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 export const getChangeDiffs = async (
 	lix: Lix,
 	activeFileId: string,
-	changeSetId: string
+	changeSetId: string,
+	changeSetBeforeId?: string
 ): Promise<UiDiffComponentProps["diffs"]> => {
+	// Get leaf changes for this change set
 	const checkpointChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -237,52 +239,47 @@ export const getChangeDiffs = async (
 			"change_set_element.change_id",
 			"change.id"
 		)
-		.leftJoin("change_edge", "change_edge.child_id", "change.id")
-		.leftJoin(
-			"change as parent_change",
-			"parent_change.id",
-			"change_edge.parent_id"
-		)
-		.leftJoin(
-			"snapshot as parent_snapshot",
-			"parent_snapshot.id",
-			"parent_change.snapshot_id"
-		)
 		.where("change_set_element.change_set_id", "=", changeSetId)
-		.where(changeSetElementInAncestryOf([{ id: changeSetId }]))
+		.where(changeSetElementIsLeafOf([{ id: changeSetId }])) // Only get leaf changes
 		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change.file_id", "=", activeFileId)
-		.select("change.id")
-		.select("change.created_at")
-		.select("change.plugin_key")
-		.select("change.schema_key")
-		.select("change.entity_id")
-		.select("change.file_id")
+		.select([
+			"change.id",
+			"change.created_at",
+			"change.plugin_key",
+			"change.schema_key",
+			"change.entity_id",
+			"change.file_id",
+		])
 		.select(sql`json(snapshot.content)`.as("snapshot_content_after"))
 		.execute();
 
+	// Process each change to include before snapshots
 	const changesWithBeforeSnapshot: UiDiffComponentProps["diffs"] =
 		await Promise.all(
 			checkpointChanges.map(async (change) => {
-				const snapshotBefore = await lix.db
-					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.innerJoin("change_edge", "change_edge.parent_id", "change.id")
-					.innerJoin(
-						"change as ancestors",
-						"ancestors.id",
-						"change_edge.parent_id"
-					) // Ensure we traverse the hierarchy
-					.where("ancestors.created_at", "<", change.created_at) // Ensure the ancestor is before the change
-					.where("ancestors.entity_id", "=", change.entity_id)
-					.where("ancestors.schema_key", "=", change.schema_key)
-					.where("ancestors.file_id", "=", activeFileId)
-					.where(changeHasLabel({ name: "checkpoint" }))
-					// .where(changeInVersion(currentVersion))
-					.orderBy("ancestors.created_at", "desc")
-					.limit(1)
-					.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
-					.executeTakeFirst();
+				let snapshotBefore = null;
+
+				// If we have a previous change set, look for the same entity in it
+				if (changeSetBeforeId) {
+					snapshotBefore = await lix.db
+						.selectFrom("change")
+						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+						.innerJoin(
+							"change_set_element",
+							"change_set_element.change_id",
+							"change.id"
+						)
+						.where("change_set_element.change_set_id", "=", changeSetBeforeId)
+						.where("change.entity_id", "=", change.entity_id)
+						.where("change.schema_key", "=", change.schema_key)
+						.where("change.file_id", "=", activeFileId)
+						.where(changeHasLabel({ name: "checkpoint" }))
+						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+						.orderBy("change.created_at", "desc")
+						.limit(1)
+						.executeTakeFirst();
+				}
 
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { id, ...rest } = change;

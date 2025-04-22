@@ -9,7 +9,7 @@ import {
 } from "@lix-js/sdk";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { switchActiveAccount } from "@/state";
-import { getDiscussion, getWorkingChangeSet } from "../state-active-file";
+import { getWorkingChangeSet } from "../state-active-file";
 
 /**
  * Executes a function as the Flashtype account and then restores the original account
