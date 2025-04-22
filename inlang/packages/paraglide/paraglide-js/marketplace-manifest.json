@@ -44,8 +44,8 @@
 		"Reference": {
 			"/architecture": "./docs/architecture.md",
 			"/compiler-options": "./docs-api/compiler-options.md",
-			"/runtime": "./docs-api/runtime/-internal-.md",
-			"/server": "./docs-api/server/-internal-.md",
+			"/runtime": "./docs-api/runtime/type/-internal-.md",
+			"/server": "./docs-api/server/type/-internal-.md",
 			"/errors": "./docs/errors.md"
 		},
 		"Ecosystem": {

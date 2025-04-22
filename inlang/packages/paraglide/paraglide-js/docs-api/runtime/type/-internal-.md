@@ -1,6 +1,6 @@
 ## Locale
 
-> **Locale**: `any`
+> **Locale** = `any`
 
 Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/ambient.d.ts)
 
@@ -8,7 +8,7 @@ Defined in: [runtime/ambient.d.ts:10](https://github.com/opral/monorepo/tree/mai
 
 ## ParaglideAsyncLocalStorage
 
-> **ParaglideAsyncLocalStorage**\<\>: `object`
+> **ParaglideAsyncLocalStorage**\<\> = `object`
 
 Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
@@ -26,7 +26,7 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 ###### locale?
 
-[`Locale`](-internal-.md#locale)
+[`Locale`](#locale)
 
 ###### messageCalls?
 
@@ -46,9 +46,11 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 #### getStore()
 
+> **getStore**(): `undefined` \| \{ `locale`: [`Locale`](#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
+
 ##### Returns
 
-`undefined` \| \{ `locale`: [`Locale`](-internal-.md#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
+`undefined` \| \{ `locale`: [`Locale`](#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
 
 ***
 
@@ -130,7 +132,7 @@ if (locales.includes(userSelectedLocale) === false) {
 
 ## serverAsyncLocalStorage
 
-> **serverAsyncLocalStorage**: `undefined` \| [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage) = `undefined`
+> **serverAsyncLocalStorage**: `undefined` \| [`ParaglideAsyncLocalStorage`](#paraglideasynclocalstorage) = `undefined`
 
 Defined in: [runtime/variables.js:65](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
@@ -502,7 +504,7 @@ if (isLocale(params.locale)) {
 
 ## localizeHref()
 
-> **localizeHref**(`href`, `options`?): `string`
+> **localizeHref**(`href`, `options?`): `string`
 
 Defined in: [runtime/localize-href.js:43](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
 
@@ -567,7 +569,7 @@ which provides more precise control over URL handling.
 
 ## localizeUrl()
 
-> **localizeUrl**(`url`, `options`?): `URL`
+> **localizeUrl**(`url`, `options?`): `URL`
 
 Defined in: [runtime/localize-url.js:53](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-url.js)
 
@@ -706,7 +708,7 @@ avoid a circular import between `runtime.js` and
 
 #### value
 
-`undefined` | [`ParaglideAsyncLocalStorage`](-internal-.md#paraglideasynclocalstorage)
+`undefined` | [`ParaglideAsyncLocalStorage`](#paraglideasynclocalstorage)
 
 ### Returns
 
@@ -748,7 +750,7 @@ overwriteSetLocale((newLocale) => {
 
 ## setLocale()
 
-> **setLocale**(`newLocale`, `options`?): `void`
+> **setLocale**(`newLocale`, `options?`): `void`
 
 Defined in: [runtime/set-locale.js:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
