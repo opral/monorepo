@@ -446,21 +446,28 @@ test.todo("copies only the selected text and marks", () => {
   ]);
 });
 
-test("toggling italic splits span and updates marks correctly", () => {
+test("toggling italic splits and merges spans and updates marks correctly", () => {
   const editor = createEditor({ nodes: ZettelNodes });
   registerZettelLexicalPlugin(editor);
 
-  // Insert a single span: "Hello world"
-  editor.update(
-    () => {
-      $getRoot().append(
-        $createZettelTextBlockNode("block-0").append(
-          $createZettelSpanNode("Hello world", "span-0"),
-        ),
-      );
+  // Set the initial Zettel AST doc and state
+  const initialDoc = [
+    {
+      _type: "zettel.textBlock",
+      _key: "block-0",
+      style: "zettel.normal",
+      children: [
+        {
+          _type: "zettel.span",
+          _key: "span-0",
+          text: "Hello world",
+          marks: [],
+        },
+      ],
+      markDefs: [],
     },
-    { discrete: true },
-  );
+  ];
+  editor.setEditorState(editor.parseEditorState(toLexicalState(initialDoc)));
 
   // Select "world" and toggle italic
   editor.update(
@@ -485,7 +492,7 @@ test("toggling italic splits span and updates marks correctly", () => {
     { discrete: true },
   );
 
-  // Get the resulting Zettel AST
+  // Get the resulting Zettel AST after italic
   const state = editor.getEditorState().toJSON();
   const zettelDoc = fromLexicalState(state);
 
@@ -497,7 +504,7 @@ test("toggling italic splits span and updates marks correctly", () => {
       children: [
         {
           _type: "zettel.span",
-          _key: expect.any(String),
+          _key: "span-0",
           text: "Hello ",
           marks: [],
         },
@@ -511,6 +518,34 @@ test("toggling italic splits span and updates marks correctly", () => {
       markDefs: [],
     },
   ]);
+
+  // Now select "world" again and toggle italic OFF
+  editor.update(
+    () => {
+      const root = $getRoot();
+      const block = root.getFirstChild();
+      if (block && $isParagraphNode(block)) {
+        // After split, "world" should be the second child
+        const span = block.getChildAtIndex(1);
+        if (span && $isZettelSpanNode(span)) {
+          span.select(0, 5); // Select all of "world"
+        }
+      }
+    },
+    { discrete: true },
+  );
+  editor.update(
+    () => {
+      editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
+    },
+    { discrete: true },
+  );
+
+  // Get the resulting Zettel AST after toggling italic OFF
+  const state2 = editor.getEditorState().toJSON();
+  const zettelDoc2 = fromLexicalState(state2);
+
+  expect(zettelDoc2).toEqual(initialDoc);
 });
 
 test.skip("renders valid zettel html", async () => {
