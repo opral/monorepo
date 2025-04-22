@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
-import { type EditorProps } from "./zettel-lexical-editor.js";
+import { type EditorProps } from "./zettel-editor.js";
 import { html } from "lit";
 import { spreadProps } from "@open-wc/lit-helpers";
 import { action } from "@storybook/addon-actions";
-import "./zettel-lexical-editor.js";
-import type { ZettelEditor } from "./zettel-lexical-editor.js";
+import "./zettel-editor.js";
+import type { ZettelEditor } from "./zettel-editor.js";
 import { generateKey, ZettelDoc } from "@opral/zettel-ast";
 
 const meta: Meta<EditorProps> = {

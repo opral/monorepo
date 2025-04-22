@@ -1,6 +1,7 @@
 import { test, expect, beforeEach } from "vitest";
 import { validateHtmlString } from "./validate-html-string.js";
 import { JSDOM } from "jsdom";
+import { stringifyJson } from "./utils/normalize-html.js";
 
 beforeEach(() => {
 	const dom = new JSDOM();

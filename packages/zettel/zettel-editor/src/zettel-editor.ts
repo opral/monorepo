@@ -1,8 +1,10 @@
 import { LexicalEditor, createEditor } from "lexical";
-import { registerZettelLexicalPlugin } from "../plugin.js";
+import {
+  registerZettelLexicalPlugin,
+  ZettelNodes,
+} from "@opral/zettel-lexical";
 import { ZettelDoc } from "@opral/zettel-ast";
-import { ZettelNodes } from "../nodes.js";
-import { fromLexicalState, toLexicalState } from "../parse-serialize.js";
+import { fromLexicalState, toLexicalState } from "@opral/zettel-lexical";
 
 export type EditorProps = {};
 
