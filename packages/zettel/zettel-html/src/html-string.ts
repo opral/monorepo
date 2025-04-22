@@ -4,8 +4,8 @@ import type {
 	ZettelSpan,
 	MarkDef,
 	ZettelLinkMarkDef,
-} from "./schema.js";
-import { createZettelSpan, createZettelTextBlock } from "./builder.js"; // Assuming builder generates keys
+} from "@opral/zettel-ast";
+import { createZettelSpan, createZettelTextBlock } from "@opral/zettel-ast";
 
 /**
  * Serializes a ZettelDoc into an HTML string.

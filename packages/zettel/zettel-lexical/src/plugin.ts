@@ -19,8 +19,9 @@ import {
 } from "lexical";
 import { mergeRegister } from "@lexical/utils";
 import { $createZettelTextBlockNode, $createZettelSpanNode } from "./nodes.js";
-import { toHtmlString, fromHtmlString, toPlainText } from "@opral/zettel-ast";
+import { toPlainText } from "@opral/zettel-ast";
 import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
+import { fromHtmlString, toHtmlString } from "@opral/zettel-html";
 
 /**
  * Registers the core functionality for the Zettel editor,
@@ -32,11 +33,7 @@ import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
 export function registerZettelLexicalPlugin(editor: LexicalEditor): () => void {
   const root = editor.getRootElement();
 
-  console.log(root);
-
   root?.setAttribute("data-zettel-doc", "true");
-
-  console.log(root);
 
   // Register standard keybindings and command handlers
   const unregisterCommandHandlers = mergeRegister(

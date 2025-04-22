@@ -11,10 +11,10 @@ import {
   createZettelSpan,
   createZettelTextBlock,
   generateKey,
-  singleNodeToHtmlElement,
   ZettelSpan,
   ZettelTextBlock,
 } from "@opral/zettel-ast";
+import { singleNodeToHtmlElement } from "@opral/zettel-html";
 
 // #region ZettelSpanNode
 

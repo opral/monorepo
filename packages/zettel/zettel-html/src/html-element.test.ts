@@ -1,7 +1,7 @@
 import { test, expect, beforeEach } from "vitest";
-import { createZettelTextBlock, createZettelSpan, createZettelLinkMarkDef } from "./builder.js";
+import { createZettelTextBlock, createZettelSpan, createZettelLinkMarkDef } from "@opral/zettel-ast";
 import { singleNodeToHtmlElement } from "./html-element.js";
-import type { ZettelDoc, ZettelTextBlock, ZettelSpan } from "./schema.js";
+import type { ZettelDoc, ZettelTextBlock, ZettelSpan } from "@opral/zettel-ast";
 import { JSDOM } from "jsdom";
 import { normalizeHtml, stringifyJson } from "./utils/normalize-html.js";
 

@@ -1,4 +1,4 @@
-import type { ZettelTextBlock, ZettelSpan, ZettelDoc, MarkDef, BaseNode } from "./schema.js";
+import type { ZettelTextBlock, ZettelSpan, MarkDef, BaseNode } from "@opral/zettel-ast";
 
 interface ToHtmlElementOptions {
 	includeChildren?: boolean;

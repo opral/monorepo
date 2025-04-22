@@ -1,4 +1,4 @@
-import type { ValidationResult, SerializableError } from "./validate.js";
+import type { SerializableError, ValidationResult } from "@opral/zettel-ast";
 
 /**
  * Validates that the input HTML string is a valid Zettel HTML document.

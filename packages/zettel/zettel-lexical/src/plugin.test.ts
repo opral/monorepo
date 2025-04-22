@@ -17,8 +17,9 @@ import {
   FORMAT_TEXT_COMMAND,
 } from "lexical";
 import { JSDOM } from "jsdom";
-import { toHtmlString, validateHtmlString, ZettelDoc } from "@opral/zettel-ast";
+import { ZettelDoc } from "@opral/zettel-ast";
 import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
+import { toHtmlString, validateHtmlString } from "@opral/zettel-html";
 
 beforeEach(() => {
   const dom = new JSDOM();
@@ -589,8 +590,6 @@ test("renders valid zettel html", async () => {
   editor.setEditorState(editor.parseEditorState(toLexicalState(zettelDoc)));
 
   editor.setRootElement(element);
-
-  console.log(element.innerHTML);
 
   const result = validateHtmlString(element.outerHTML);
 
