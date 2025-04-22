@@ -25,15 +25,15 @@ test("roundtrip entity_id test for single primary key", () => {
 test("roundtrip entity_id test for compound primary keys", () => {
 	const tableName: keyof LixDatabaseSchema = "change_set_label";
 
-	const row = ["294u-2345", "0128-34928"];
+	const row = ["0128-34928", "294u-2345"];
 
 	const entityId = entityIdForRow(tableName, ...row);
 	const primaryKeys = primaryKeysForEntityId(tableName, entityId);
 
-	expect(entityId).toBe("294u-2345,0128-34928");
+	expect(entityId).toBe("0128-34928,294u-2345");
 	expect(primaryKeys).toEqual([
-		["label_id", "294u-2345"],
 		["change_set_id", "0128-34928"],
+		["label_id", "294u-2345"],
 	]);
 });
 

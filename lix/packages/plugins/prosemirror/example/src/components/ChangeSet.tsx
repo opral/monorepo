@@ -82,15 +82,15 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		);
 
 		// Get the first comment if it exists
-		const firstComment = threads?.[0]?.comments?.[0];
+		// const firstComment = threads?.[0]?.comments?.[0];
 
 		// Truncate comment content if it's longer than 50 characters
-		const truncatedComment =
-			firstComment?.content && !isWorkingChangeSet
-				? firstComment.content.length > 50
-					? `${firstComment.content.substring(0, 50)}...`
-					: firstComment.content
-				: null;
+		// const truncatedComment =
+		// 	firstComment?.content && !isWorkingChangeSet
+		// 		? firstComment.content.length > 50
+		// 			? `${firstComment.content.substring(0, 50)}...`
+		// 			: firstComment.content
+		// 		: null;
 
 		// Expose methods to parent components
 		useImperativeHandle(ref, () => ({

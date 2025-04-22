@@ -72,7 +72,7 @@ export function applyChangeSetDatabaseSchema(
   CREATE TABLE IF NOT EXISTS change_set_label (
     change_set_id TEXT NOT NULL,
     label_id TEXT NOT NULL,
-    PRIMARY KEY(label_id, change_set_id),
+    PRIMARY KEY(change_set_id, label_id),
     FOREIGN KEY(label_id) REFERENCES label(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
@@ -81,7 +81,7 @@ export function applyChangeSetDatabaseSchema(
     change_set_id TEXT NOT NULL,
     thread_id TEXT NOT NULL,
   
-    PRIMARY KEY(thread_id, change_set_id),
+    PRIMARY KEY(change_set_id, thread_id),
     FOREIGN KEY(thread_id) REFERENCES thread(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
