@@ -146,7 +146,7 @@ export const CheckpointComponent = (props: {
                   key={pluginKey}
                   diffs={groupedChanges[pluginKey]}
                   contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
-                  debug={true}
+                  // debug={true}
                 />
               ))}
             </div>

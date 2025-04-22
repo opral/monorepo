@@ -100,7 +100,7 @@ export const workingChangeSetAtom = atom(async (get) => {
 	return await getWorkingChangeSet(lix, activeFile.id);
 });
 
-// The file manager app treats changes that are not in a change set as intermediate changes.
+// The file manager app treats changes that are in the working change set as intermediate changes.
 export const intermediateChangesAtom = atom<
 	Promise<UiDiffComponentProps["diffs"]>
 >(async (get) => {
@@ -108,42 +108,72 @@ export const intermediateChangesAtom = atom<
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
 	const currentVersion = await get(activeVersionAtom);
+	const checkpointChanges = await get(checkpointChangeSetsAtom);
 	if (!currentVersion || !activeFile) return [];
 
-	const intermediateLeafChanges = await lix.db
+	// Get all changes in the working change set
+	const workingChangeSetId = currentVersion.working_change_set_id;
+
+	// Get changes that are in the working change set
+	const intermediateChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		// .where(changeIsLeafInVersion(currentVersion))
-		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
-		.where("change.file_id", "!=", "lix_own_change_control")
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_id",
+			"change.id"
+		)
+		.where("change_set_element.change_set_id", "=", workingChangeSetId)
 		.where("change.file_id", "=", activeFile.id)
+		.where("change.file_id", "!=", "lix_own_change_control")
 		.select([
+			"change.id",
 			"change.entity_id",
 			"change.file_id",
 			"change.plugin_key",
 			"change.schema_key",
+			"change.created_at",
 			sql`json(snapshot.content)`.as("snapshot_content_after"),
 		])
 		.execute();
 
+	const latestCheckpointChangeSetId = checkpointChanges?.[0]?.id;
+	// If there are no checkpoint changes, we can't get the before snapshot
+
 	const changesWithBeforeSnapshots: UiDiffComponentProps["diffs"] =
 		await Promise.all(
-			intermediateLeafChanges.map(async (change) => {
-				const snapshotBefore = await lix.db
-					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					// .where(changeInVersion(currentVersion))
-					.where(changeHasLabel({ name: "checkpoint" }))
-					.where("change.entity_id", "=", change.entity_id)
-					.where("change.schema_key", "=", change.schema_key)
-					.where("change.file_id", "=", activeFile.id)
-					.orderBy("change.created_at", "desc")
-					.limit(1)
-					.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
-					.executeTakeFirst();
+			intermediateChanges.map(async (change) => {
+				let snapshotBefore = null;
+
+				// First try to find the entity in the latest checkpoint change set
+				if (latestCheckpointChangeSetId) {
+					snapshotBefore = await lix.db
+						.selectFrom("change")
+						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+						.innerJoin(
+							"change_set_element",
+							"change_set_element.change_id",
+							"change.id"
+						)
+						.where(
+							"change_set_element.change_set_id",
+							"=",
+							latestCheckpointChangeSetId
+						)
+						.where("change.entity_id", "=", change.entity_id)
+						.where("change.schema_key", "=", change.schema_key)
+						.where("change.file_id", "=", activeFile.id)
+						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+						.orderBy("change.created_at", "desc")
+						.limit(1)
+						.executeTakeFirst();
+				}
+
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { id, ...rest } = change;
 
 				return {
-					...change,
+					...rest,
 					snapshot_content_after: change.snapshot_content_after
 						? typeof change.snapshot_content_after === "string"
 							? JSON.parse(change.snapshot_content_after)
