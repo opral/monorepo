@@ -253,7 +253,7 @@ export const activeAccountAtom = atom(async (get) => {
 
 	return await lix.db
 		.selectFrom("active_account")
-		.selectAll("active_account")
+		.selectAll()
 		// assuming only one account active at a time
 		.executeTakeFirstOrThrow();
 });
