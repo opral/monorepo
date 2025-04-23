@@ -2,7 +2,7 @@ import { test, expect, beforeEach } from "vitest";
 import {
 	createZettelTextBlock,
 	createZettelSpan,
-	createZettelLinkMarkDef,
+	createZettelLink,
 	type ZettelDoc,
 } from "@opral/zettel-ast";
 import { toHtmlString, fromHtmlString } from "./html-string.js";
@@ -205,7 +205,7 @@ test("serializes and parses 'zettel.link' mark", () => {
 	const spanKey = "spanLink1";
 	const blockKey = "blockLink1";
 
-	const linkMarkDef = createZettelLinkMarkDef({
+	const linkMarkDef = createZettelLink({
 		href: "https://example.com",
 	});
 

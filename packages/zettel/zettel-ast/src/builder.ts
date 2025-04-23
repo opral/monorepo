@@ -7,13 +7,16 @@ export function createZettelSpan(args: {
 	_key?: string;
 	metadata?: ZettelSpan["metadata"];
 }): ZettelSpan {
-	return {
+	const result: ZettelSpan = {
 		_type: "zettel.span",
 		_key: args._key ?? nanoid(),
 		text: args.text,
 		marks: args.marks ?? [],
-		metadata: args.metadata ?? {},
 	};
+	if (args.metadata) {
+		result.metadata = args.metadata;
+	}
+	return result;
 }
 
 export function createZettelLink(args: {
@@ -21,12 +24,15 @@ export function createZettelLink(args: {
 	_key?: string;
 	metadata?: ZettelLink["metadata"];
 }): ZettelLink {
-	return {
+	const result: ZettelLink = {
 		_type: "zettel.link",
 		_key: args._key ?? nanoid(),
 		href: args.href,
-		metadata: args.metadata ?? {},
 	};
+	if (args.metadata) {
+		result.metadata = args.metadata;
+	}
+	return result;
 }
 
 export function createZettelTextBlock(args: {
@@ -41,12 +47,15 @@ export function createZettelTextBlock(args: {
 	style?: ZettelTextBlock["style"];
 	metadata?: ZettelTextBlock["metadata"];
 }): ZettelTextBlock {
-	return {
+	const result: ZettelTextBlock = {
 		_type: "zettel.textBlock",
 		_key: args._key ?? nanoid(),
 		style: args.style ?? "normal",
 		markDefs: args.markDefs ?? [],
 		children: args.children,
-		metadata: args.metadata ?? {},
 	};
+	if (args.metadata) {
+		result.metadata = args.metadata;
+	}
+	return result;
 }

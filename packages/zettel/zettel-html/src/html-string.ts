@@ -3,7 +3,7 @@ import type {
 	ZettelTextBlock,
 	ZettelSpan,
 	MarkDef,
-	ZettelLinkMarkDef,
+	ZettelLink,
 } from "@opral/zettel-ast";
 import { createZettelSpan, createZettelTextBlock } from "@opral/zettel-ast";
 
@@ -92,7 +92,7 @@ export function toHtmlString(doc: ZettelDoc): string {
 							}
 							// Handle keyed marks (like link)
 							else if (markDef && markDef._type === "zettel.link") {
-								const linkDef = markDef as ZettelLinkMarkDef;
+								const linkDef = markDef as ZettelLink;
 								wrapperElement = document.createElement("a");
 								wrapperElement.setAttribute("href", linkDef.href);
 								wrapperElement.setAttribute("data-zettel-mark-key", mark); // Use the mark key

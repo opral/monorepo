@@ -1,5 +1,5 @@
 import { test, expect, beforeEach } from "vitest";
-import { createZettelTextBlock, createZettelSpan, createZettelLinkMarkDef } from "@opral/zettel-ast";
+import { createZettelTextBlock, createZettelSpan, createZettelLink } from "@opral/zettel-ast";
 import { singleNodeToHtmlElement } from "./html-element.js";
 import type { ZettelDoc, ZettelTextBlock, ZettelSpan } from "@opral/zettel-ast";
 import { JSDOM } from "jsdom";
@@ -115,7 +115,7 @@ test("creates a <span> with custom mark data attribute", () => {
 test("creates <a> for zettel.link mark with markDef", () => {
 	const spanKey = "spanLink1";
 	const blockKey = "blockLink1";
-	const linkMarkDef = createZettelLinkMarkDef({ _key: "linkDef1", href: "https://example.com" });
+	const linkMarkDef = createZettelLink({ _key: "linkDef1", href: "https://example.com" });
 	const span: ZettelSpan = createZettelSpan({
 		_key: spanKey,
 		text: "Link text",
