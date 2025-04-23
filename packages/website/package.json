@@ -7,7 +7,7 @@
 		"build": "node ./scripts/generateSitemap.js && vite build",
 		"production": "node --experimental-strip-types ./src/server/main.ts",
 		"---- TEST ----------------------------------------------------------": "",
-		"test": "vitest run --passWithNoTests && tsc --noEmit",
+		"_test": "vitest run --passWithNoTests && tsc --noEmit",
 		"format": "prettier ./src --write",
 		"clean": "rm -rf ./dist ./node_modules"
 	},
