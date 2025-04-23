@@ -70,10 +70,19 @@ export function applyChangeSetDatabaseSchema(
   -- END;
 
   CREATE TABLE IF NOT EXISTS change_set_label (
-    label_id TEXT NOT NULL,
     change_set_id TEXT NOT NULL,
-    PRIMARY KEY(label_id, change_set_id),
+    label_id TEXT NOT NULL,
+    PRIMARY KEY(change_set_id, label_id),
     FOREIGN KEY(label_id) REFERENCES label(id),
+    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
+  ) STRICT;
+
+  CREATE TABLE IF NOT EXISTS change_set_thread (
+    change_set_id TEXT NOT NULL,
+    thread_id TEXT NOT NULL,
+  
+    PRIMARY KEY(change_set_id, thread_id),
+    FOREIGN KEY(thread_id) REFERENCES thread(id),
     FOREIGN KEY(change_set_id) REFERENCES change_set(id)
   ) STRICT;
 `;
@@ -110,4 +119,12 @@ export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
 export type ChangeSetLabelTable = {
 	label_id: string;
 	change_set_id: string;
+};
+
+export type ChangeSetThread = Selectable<ChangeSetThreadTable>;
+export type NewChangeSetThread = Insertable<ChangeSetThreadTable>;
+export type ChangeSetThreadUpdate = Updateable<ChangeSetThreadTable>;
+export type ChangeSetThreadTable = {
+	change_set_id: string;
+	thread_id: string;
 };

@@ -100,7 +100,7 @@ function initFunctions(args: { sqlite: SqliteWasmDatabase }) {
 
 	args.sqlite.createFunction({
 		name: "nano_id",
-		arity: 1,
+		arity: -1,
 		// @ts-expect-error - not sure why this is not working
 		xFunc: (_ctx: number, length: number) => {
 			return nanoid(length);

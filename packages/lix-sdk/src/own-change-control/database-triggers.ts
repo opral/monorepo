@@ -267,6 +267,14 @@ function handleLixOwnChange(
 
 		// remove the data field which is change controlled by plugins, not lix itself
 		delete snapshotContent.data;
+	} else if (tableName === "thread_comment" && snapshotContent) {
+		// Convert thread_comment.content from SQLite JSONB to standard JSON string
+		const json = sqlite.exec("SELECT json(?)", {
+			bind: [snapshotContent.content],
+			returnValue: "resultRows",
+		})[0]![0];
+
+		snapshotContent["content"] = JSON.parse(json as string);
 	}
 
 	// avoid a loop of own changes

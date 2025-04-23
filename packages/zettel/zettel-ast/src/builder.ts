@@ -1,46 +1,61 @@
-import type { Block, Span, MarkDef, AccountMentionMarkDef, LinkMarkDef } from "./schema.js";
+import type { ZettelTextBlock, ZettelSpan, MarkDef, ZettelLink } from "./schema.js";
 import { nanoid } from "./utils/nano-id.js";
 
-export function span(args: { text: string; marks?: string[] }): Span {
-	return {
-		_type: "span",
-		_key: nanoid(),
+export function createZettelSpan(args: {
+	text: string;
+	marks?: ZettelSpan["marks"];
+	_key?: string;
+	metadata?: ZettelSpan["metadata"];
+}): ZettelSpan {
+	const result: ZettelSpan = {
+		_type: "zettel.span",
+		_key: args._key ?? nanoid(),
 		text: args.text,
 		marks: args.marks ?? [],
 	};
+	if (args.metadata) {
+		result.metadata = args.metadata;
+	}
+	return result;
 }
 
-export function accountMention(args: { id: string }): AccountMentionMarkDef {
-	return {
-		_type: "accountMention",
-		_key: nanoid(),
-		id: args.id,
-	};
-}
-
-export function link(args: { href: string }): LinkMarkDef {
-	return {
-		_type: "link",
-		_key: nanoid(),
+export function createZettelLink(args: {
+	href: string;
+	_key?: string;
+	metadata?: ZettelLink["metadata"];
+}): ZettelLink {
+	const result: ZettelLink = {
+		_type: "zettel.link",
+		_key: args._key ?? nanoid(),
 		href: args.href,
 	};
+	if (args.metadata) {
+		result.metadata = args.metadata;
+	}
+	return result;
 }
 
-export function block(args: {
-	children: Span[];
+export function createZettelTextBlock(args: {
+	children: ZettelSpan[];
 	markDefs?: MarkDef[];
+	_key?: string;
 	/**
 	 * The style of the block e.g. "normal", "h1", "h2", etc.
 	 *
 	 * @default "normal"
 	 */
-	style?: string;
-}): Block {
-	return {
-		_type: "block",
-		_key: nanoid(),
+	style?: ZettelTextBlock["style"];
+	metadata?: ZettelTextBlock["metadata"];
+}): ZettelTextBlock {
+	const result: ZettelTextBlock = {
+		_type: "zettel.textBlock",
+		_key: args._key ?? nanoid(),
 		style: args.style ?? "normal",
 		markDefs: args.markDefs ?? [],
 		children: args.children,
 	};
+	if (args.metadata) {
+		result.metadata = args.metadata;
+	}
+	return result;
 }

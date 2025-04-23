@@ -88,7 +88,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 	const leafChanges = await lix.db
 		.selectFrom("change_set_element")
 		.where("change_set_element.change_set_id", "in", [cs0.id, cs1.id, cs2.id])
-		.where(changeSetElementIsLeafOf([cs2]))
+		.where(changeSetElementIsLeafOf(cs2))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.execute();
 

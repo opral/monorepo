@@ -15,8 +15,13 @@ import type {
 	ChangeSetElementTable,
 	ChangeSetLabelTable,
 	ChangeSetTable,
+	ChangeSetThreadTable,
 } from "../change-set/database-schema.js";
 import type { FileQueueTable } from "../file-queue/database-schema.js";
+import type {
+	ThreadCommentTable,
+	ThreadTable,
+} from "../thread/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -44,6 +49,7 @@ export type LixDatabaseSchema = {
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
 	change_set_edge: ChangeSetEdgeTable;
+	change_set_thread: ChangeSetThreadTable;
 
 	// key value
 	key_value: KeyValueTable;
@@ -54,6 +60,10 @@ export type LixDatabaseSchema = {
 	// discussion
 	discussion: DiscussionTable;
 	comment: CommentTable;
+
+	// thread
+	thread: ThreadTable;
+	thread_comment: ThreadCommentTable;
 
 	// version
 	/**
