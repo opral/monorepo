@@ -1,23 +1,17 @@
 {
-  "include": ["src"],
-  "exclude": ["**/*.stories.ts"],
   "compilerOptions": {
-    "outDir": "./dist",
-    "sourceMap": true,
-    "declarationMap": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2022",
-    "experimentalDecorators": false,
-    "useDefineForClassFields": false,
-    "module": "Node16",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2023"],
+    "module": "ESNext",
     "skipLibCheck": true,
 
     /* Bundler mode */
-    "moduleResolution": "node16",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-
-    "declaration": true,
+    "noEmit": true,
 
     /* Linting */
     "strict": true,
@@ -25,5 +19,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
-  }
+  },
+  "include": ["vite.config.ts"]
 }

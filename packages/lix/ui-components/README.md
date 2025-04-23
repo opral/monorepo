@@ -1,1 +1,1 @@
-# Lix UI Components 
+# @lix-js/ui-components
