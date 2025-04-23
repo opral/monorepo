@@ -59,7 +59,7 @@ test("returns all elements from a single change set and its ancestors", async ()
 
 	const elements = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs2])) // Pass as array
+		.where(changeSetElementInAncestryOf(cs2))
 		.select("change_set_id")
 		.execute();
 
@@ -123,7 +123,7 @@ test("respects depth limit when provided for a single target", async () => {
 
 	const elements = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs2], { depth: 1 })) // Pass as array
+		.where(changeSetElementInAncestryOf(cs2, { depth: 1 }))
 		.select("change_set_id")
 		.execute();
 

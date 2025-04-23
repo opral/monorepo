@@ -8,6 +8,8 @@ import {
 } from "./change-controlled-tables.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { newLixFile } from "../lix/new-lix.js";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { createThread } from "../thread/create-thread.js";
 
 test("roundtrip entity_id test for single primary key", () => {
 	const tableName: keyof LixDatabaseSchema = "key_value";
@@ -23,15 +25,15 @@ test("roundtrip entity_id test for single primary key", () => {
 test("roundtrip entity_id test for compound primary keys", () => {
 	const tableName: keyof LixDatabaseSchema = "change_set_label";
 
-	const row = ["294u-2345", "0128-34928"];
+	const row = ["0128-34928", "294u-2345"];
 
 	const entityId = entityIdForRow(tableName, ...row);
 	const primaryKeys = primaryKeysForEntityId(tableName, entityId);
 
-	expect(entityId).toBe("294u-2345,0128-34928");
+	expect(entityId).toBe("0128-34928,294u-2345");
 	expect(primaryKeys).toEqual([
-		["label_id", "294u-2345"],
 		["change_set_id", "0128-34928"],
+		["label_id", "294u-2345"],
 	]);
 });
 
@@ -66,4 +68,32 @@ test("the primary key order matches the order the primary keys in the database s
 			changeControlledTableIds[table]
 		);
 	}
+});
+
+test("content of a thread comment is stored as json", async () => {
+	const lix = await openLixInMemory({});
+
+	const thread = await createThread({
+		lix,
+		comments: [
+			{
+				content: [{ _type: "mock", _key: "new_value" }],
+			},
+		],
+	});
+
+	const firstComment = thread.comments[0]!;
+
+	const change = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("entity_id", "=", firstComment.id)
+		.selectAll("change")
+		.select("snapshot.content")
+		.executeTakeFirst();
+
+	expect(firstComment.content).toEqual([{ _type: "mock", _key: "new_value" }]);
+	expect(change?.content?.content).toEqual([
+		{ _type: "mock", _key: "new_value" },
+	]);
 });
