@@ -1,10 +1,10 @@
 # Zettel
 
-A **portable, extendable JSON‑based rich‑text format** that works everywhere — comments, issues, docs.
+A **portable JSON‑based rich‑text AST** that good enough for 80% of use cases and extendsable for the rest.
 
 > **Zettel** is the German word for “A scrap of paper that anything can be written on.”
 
-https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312
+Zettel is based on [Portable Text](https://portabletext.org/) with the goal to define standard nodes that must be supported by all viewers. The need for an off-the-shelf AST arised in https://www.loom.com/share/8ae4a5f864bd42b49353c9fb55bcb312.
 
 ---
 
@@ -15,8 +15,9 @@ No standard rich‑text AST exists. Everyone reinvents the wheel with no interop
 | Pain today                                                                                     | Zettel fix                           |
 | ---------------------------------------------------------------------------------------------- | ------------------------------------ |
 | [Markdown & HTML are unsuited](https://www.smashingmagazine.com/2022/02/thoughts-on-markdown/) | Explicit JSON nodes                  |
-| Every app invents a custom AST                                                                 | Single shared spec                   |
+| Custom ASTs have no interop and ecosystem                                                      | Single shared spec                   |
 | Editor‑tied ASTs (Slate, Lexical, …) are not portable                                          | Editor‑agnostic, storage‑first model |
+| PortableText lacks a spec for standard nodes                                                   | `zettel.*` nodes                     |
 
 ---
 
@@ -96,9 +97,3 @@ No standard rich‑text AST exists. Everyone reinvents the wheel with no interop
 | ----------------- | ------------- |
 | acme‑aware editor | console.log() |
 | Generic viewer    | <ignored>     |
-
----
-
-### Inspiration
-
-Based on [Portable Text](https://portabletext.org/) — Zettel keeps its flat, JSON‑native shape and adds a shared vocabulary plus safe namespacing.
