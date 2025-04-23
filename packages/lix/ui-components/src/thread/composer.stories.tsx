@@ -3,7 +3,7 @@ import { ThreadComposer, ThreadComposerProps } from "./composer";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 const meta: Meta<ThreadComposerProps> = {
-  title: "Thread/Composer",
+  title: "Thread/Thread Composer",
   component: ThreadComposer,
   tags: ["autodocs"],
 };
