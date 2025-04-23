@@ -20,6 +20,7 @@ import { selectActiveAccount, selectThreads } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { lix } from "../state";
 import { Composer, Thread } from "./Thread";
+import { toPlainText } from "@lix-js/sdk/zettel-ast";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -82,15 +83,15 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		);
 
 		// Get the first comment if it exists
-		// const firstComment = threads?.[0]?.comments?.[0];
+		const firstComment = threads?.[0]?.comments?.[0];
 
 		// Truncate comment content if it's longer than 50 characters
-		// const truncatedComment =
-		// 	firstComment?.content && !isWorkingChangeSet
-		// 		? firstComment.content.length > 50
-		// 			? `${firstComment.content.substring(0, 50)}...`
-		// 			: firstComment.content
-		// 		: null;
+		const truncatedComment =
+			firstComment?.content && !isWorkingChangeSet
+				? firstComment.content.length > 50
+					? `${toPlainText(firstComment.content).substring(0, 50)}...`
+					: toPlainText(firstComment.content)
+				: null;
 
 		// Expose methods to parent components
 		useImperativeHandle(ref, () => ({
@@ -143,12 +144,11 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 					</div>
 					<div className="flex-1">
 						<div className="text-sm break-words">
-							TODO portable text to html
-							{/* {isWorkingChangeSet
+							{isWorkingChangeSet
 								? "Working Change Set"
 								: truncatedComment
 									? truncatedComment
-									: "No description yet"} */}
+									: "No description yet"}
 						</div>
 						{!isWorkingChangeSet && (
 							<div className="text-xs text-base-content-secondary">
