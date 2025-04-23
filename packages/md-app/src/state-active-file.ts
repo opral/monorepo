@@ -11,6 +11,7 @@ import {
 } from "./state.ts";
 import {
 	changeHasLabel,
+	ChangeSet,
 	changeSetElementIsLeafOf,
 	changeSetHasLabel,
 	changeSetIsAncestorOf,
@@ -258,7 +259,7 @@ export const getChangeDiffs = async (
 	lix: Lix,
 	activeFileId: string,
 	changeSetId: string,
-	changeSetBeforeId?: string
+	changeSetBeforeId?: string | null
 ): Promise<UiDiffComponentProps["diffs"]> => {
 	// Get leaf changes for this change set
 	const checkpointChanges = await lix.db
@@ -333,24 +334,30 @@ export const getChangeDiffs = async (
 	return changesWithBeforeSnapshot;
 };
 
-export const getDiscussion = async (lix: Lix, changeSetId: string) => {
+export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
 	if (!changeSetId || !lix) return null;
 
 	return await lix.db
-		.selectFrom("discussion")
-		.where("change_set_id", "=", changeSetId)
+		.selectFrom("thread")
+		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
+		.where("change_set_thread.change_set_id", "=", changeSetId)
 		.select((eb) => [
 			jsonArrayFrom(
 				eb
-					.selectFrom("comment")
-					.select(["comment.content", "comment.id", "comment.discussion_id"])
-					.innerJoin("change", "change.entity_id", "comment.id")
+					.selectFrom("thread_comment")
+					.innerJoin("change", "change.entity_id", "thread_comment.id")
 					.innerJoin("change_author", "change_author.change_id", "change.id")
 					.innerJoin("account", "account.id", "change_author.account_id")
+					.select([
+						"thread_comment.id",
+						"thread_comment.content",
+						"thread_comment.thread_id",
+						"thread_comment.parent_id",
+					])
 					.select(["change.created_at", "account.name as author_name"])
-					.whereRef("comment.discussion_id", "=", "discussion.id")
+					.whereRef("thread_comment.thread_id", "=", "thread.id")
 			).as("comments"),
 		])
-		.selectAll("discussion")
-		.executeTakeFirst();
+		.selectAll("thread")
+		.execute();
 };

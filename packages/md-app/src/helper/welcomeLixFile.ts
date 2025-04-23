@@ -5,11 +5,12 @@ import {
 	openLixInMemory,
 	toBlob,
 	createCheckpoint,
-	createDiscussion,
+	createThread,
 } from "@lix-js/sdk";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { switchActiveAccount } from "@/state";
 import { getWorkingChangeSet } from "../state-active-file";
+import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 /**
  * Executes a function as the Flashtype account and then restores the original account
@@ -113,15 +114,24 @@ export const setupMdWelcome = async (lix: Lix) => {
 	return file;
 };
 
+const initialComment = fromPlainText("Setup welcome file");
+
 const createInitialCheckpoint = async (lix: Lix, fileId: string) => {
-	// Get the working change set for the discussion using the utility function
 	const changeSet = await getWorkingChangeSet(lix, fileId);
 
 	if (changeSet) {
-		await createDiscussion({
-			lix,
-			changeSet,
-			firstComment: { content: "Setup welcome file" },
+		lix.db.transaction().execute(async (trx) => {
+			const thread = await createThread({
+				lix: { ...lix, db: trx },
+				comments: [{ content: initialComment }],
+			});
+			await trx
+				.insertInto("change_set_thread")
+				.values({
+					change_set_id: changeSet.id,
+					thread_id: thread.id,
+				})
+				.execute();
 		});
 	}
 	await createCheckpoint({ lix });

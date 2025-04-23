@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/plate-ui/button";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, getDiscussion, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "@/components/plate-ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { createDiscussion, UiDiffComponentProps, createCheckpoint, createComment, ChangeSet } from "@lix-js/sdk";
+import { UiDiffComponentProps, createCheckpoint, createThread } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown } from "lucide-react";
+import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 
 interface IntermediateCheckpointComponentProps {
   filteredChanges?: UiDiffComponentProps["diffs"];
@@ -93,40 +94,26 @@ const CreateCheckpointInput = () => {
   const [lix] = useAtom(lixAtom);
   const [currentChangeSet] = useAtom(workingChangeSetAtom);
 
-  const handleAddComment = async (changeSet: ChangeSet) => {
-    if (!description.trim()) return;
+  const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
+    if (!description) return;
 
-    const discussion = await getDiscussion(lix, changeSet?.id);
-    try {
-      if (!discussion) {
-        await createDiscussion({
-          lix,
-          changeSet,
-          firstComment: { content: description },
-        });
-      } else {
-        // Add to existing discussion
-        const lastComment = discussion.comments[discussion.comments.length - 1];
-        if (!lastComment) {
-          throw new Error("No existing comments found");
-        }
-
-        await createComment({
-          lix,
-          parentComment: lastComment,
-          content: description,
-        });
-      }
-
-      // Clear the input field
-      setDescription("");
-    } catch (error) {
-      console.error("Error adding comment:", error);
-    }
+    lix.db.transaction().execute(async (trx) => {
+      const thread = await createThread({
+        lix: { ...lix, db: trx },
+        comments: [{ content: args.content }],
+      });
+      await trx
+        .insertInto("change_set_thread")
+        .values({
+          change_set_id: currentChangeSet!.id,
+          thread_id: thread.id,
+        })
+        .execute();
+    });
   };
 
   const handleCreateCheckpoint = async () => {
-    await handleAddComment(currentChangeSet!);
+    await onThreadComposerSubmit({ content: fromPlainText(description!) });
     await createCheckpoint({ lix });
     await saveLixToOpfs({ lix });
   };
@@ -145,10 +132,9 @@ const CreateCheckpointInput = () => {
       <Input
         className="flex-grow pl-2 bg-background text-sm placeholder:text-sm"
         placeholder="Describe the changes"
-        onInput={(event: any) => setDescription(event.target?.value)}
+        onChange={(event) => setDescription(event.target.value)}
         onKeyDown={handleKeyDown}
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
       ></Input>
       <Button onClick={handleCreateCheckpoint}>
         Create checkpoint
