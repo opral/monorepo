@@ -116,9 +116,9 @@ test("account mention passes", async () => {
 			style: "zettel.normal",
 			markDefs: [
 				{
-					_type: "zettel.accountMention",
+					_type: "zettel.link",
 					_key: "j93j2",
-					id: "47237hh8h4h75",
+					href: "https://example.com",
 				},
 			],
 			children: [

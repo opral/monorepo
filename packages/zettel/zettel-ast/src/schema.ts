@@ -15,47 +15,8 @@ const BaseNode = Type.Object({
 
 const Metadata = Type.Optional(Type.Record(Type.String(), Type.Unknown()));
 
-/**
- * An account mention annotation.
- *
- * @example
- *   ```json
- *   [
- *     {
- *       "_type": "zettel.textBlock",
- *       "_key": "uniqueKey",
- *       "style": "normal",
- *       "children": [
- *         {
- *           "_type": "zettel.span",
- *           "_key": "uniqueKeySpanKey",
- *           "text": "Username",
- *           "marks": ["uniqueKeyMarkDefKey"]
- *         }
- *       ],
- *       "markDefs": [
- *         {
- *           "_type": "zettel.accountMention",
- *           "_key": "uniqueKeyMarkDefKey",
- *           "id": "47237hh8h4h75"
- *         }
- *       ]
- *     }
- *   ]
- *   ```
- */
-export type ZettelAccountMentionMarkDef = Static<typeof ZettelAccountMentionMarkDef>;
-const ZettelAccountMentionMarkDef = Type.Object({
-	_key: Type.String({}),
-	_type: Type.Literal("zettel.accountMention"),
-	id: Type.String({
-		description: "The ID of the account being mentioned",
-	}),
-	metadata: Metadata,
-});
-
-export type ZettelLinkMarkDef = Static<typeof ZettelLinkMarkDef>;
-const ZettelLinkMarkDef = Type.Object({
+export type ZettelLink = Static<typeof ZettelLink>;
+const ZettelLink = Type.Object({
 	_key: Type.String({}),
 	_type: Type.Literal("zettel.link"),
 	href: Type.String({
@@ -84,9 +45,9 @@ const ZettelLinkMarkDef = Type.Object({
  *       ],
  *       "markDefs": [
  *         {
- *           "_type": "zettel.accountMention",
+ *           "_type": "zettel.link",
  *           "_key": "uniqueKeyMarkDefKey",
- *           "id": "47237hh8h4h75"
+ *           "href": "https://example.com"
  *         }
  *       ]
  *     },
@@ -94,7 +55,7 @@ const ZettelLinkMarkDef = Type.Object({
  *   ```
  */
 export type MarkDef = Static<typeof MarkDef> & { [property: string]: any };
-const MarkDef = Type.Union([ZettelAccountMentionMarkDef, ZettelLinkMarkDef, BaseNode]);
+const MarkDef = Type.Union([ZettelLink, BaseNode]);
 
 /**
  * A span is an inline element in a Zettel document.

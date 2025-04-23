@@ -1,11 +1,7 @@
 import { test, expect } from "vitest";
-import {
-	createZettelAcountMentionMarkDef,
-	createZettelTextBlock,
-	createZettelSpan,
-} from "./builder.js";
+import { createZettelTextBlock, createZettelSpan } from "./builder.js";
 import { toPlainText, fromPlainText } from "./plain-text.js";
-import type { ZettelDoc } from "./schema.js";
+import type { BaseNode, ZettelDoc } from "./schema.js";
 
 test("serializes spans with no marks", () => {
 	const doc: ZettelDoc = [
@@ -19,7 +15,11 @@ test("serializes spans with no marks", () => {
 });
 
 test("serializes custom marks", () => {
-	const accountMentionDef = createZettelAcountMentionMarkDef({ id: "47237hh8h4h75" });
+	const accountMentionDef: BaseNode = {
+		_type: "custom.accountMention",
+		_key: "47237hh8h4h75",
+		id: "blabla",
+	};
 
 	const doc: ZettelDoc = [
 		createZettelTextBlock({
