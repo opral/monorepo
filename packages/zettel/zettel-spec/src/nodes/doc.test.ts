@@ -1,0 +1,99 @@
+import { test, expect } from "vitest";
+import type { ZettelDoc } from "./doc.js";
+import { validateDoc } from "./validate-doc.js";
+
+test("empty document passes", () => {
+	const doc: ZettelDoc = {
+		type: "zettel_doc",
+		content: [],
+	};
+	const result = validateDoc(doc);
+	expect(result.errors).toBeUndefined();
+});
+
+test("invalid document type fails", () => {
+	const doc: ZettelDoc = {
+		// @ts-expect-error - invalid document type
+		type: "doc",
+		content: [],
+	};
+	const result = validateDoc(doc);
+	expect(result.errors).toBeDefined();
+});
+
+test("paragraph passes", () => {
+	const doc: ZettelDoc = {
+		type: "zettel_doc",
+		content: [
+			{
+				type: "zettel_paragraph",
+				attrs: {
+					zettel_key: "uniqueKey",
+				},
+				content: [
+					{
+						type: "text",
+						text: "Hello world",
+					},
+				],
+			},
+		],
+	};
+	const result = validateDoc(doc);
+	expect(result.errors).toBeUndefined();
+});
+
+test("undefined attrs.zettel_key fails", () => {
+	const doc: ZettelDoc = {
+		type: "zettel_doc",
+		content: [
+			{
+				type: "zettel_paragraph",
+				// @ts-expect-error - missing required attribute
+				attrs: {},
+				content: [
+					{
+						type: "text",
+						text: "Hello world",
+					},
+				],
+			},
+		],
+	};
+	const result = validateDoc(doc);
+	expect(result.errors).toBeDefined();
+});
+
+test("attrs.zettel_key requires at least 6 characters to minimize collisions", () => {
+	const fails: ZettelDoc = {
+		type: "zettel_doc",
+		content: [
+			{
+				type: "zettel_paragraph",
+				attrs: {
+					zettel_key: "12345",
+				},
+			},
+		],
+	};
+	expect(validateDoc(fails).errors).toBeDefined();
+
+	const succeeds: ZettelDoc = {
+		type: "zettel_doc",
+		content: [
+			{
+				type: "zettel_paragraph",
+				attrs: {
+					zettel_key: "123456",
+				},
+			},
+			{
+				type: "custom_video_viewer",
+				attrs: {
+					zettel_key: "123456",
+				},
+			},
+		],
+	};
+	expect(validateDoc(succeeds).errors).toBeUndefined();
+});

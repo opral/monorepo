@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Zettel Spec - ProseMirror Basic Editor</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<!-- Basic ProseMirror styles -->
+		<link rel="stylesheet" href="https://prosemirror.net/css/editor.css" />
+		<style>
+			body {
+				font-family: system-ui, sans-serif;
+				margin: 2rem;
+				background: #fafbfc;
+			}
+			/* Style the editor */
+			.ProseMirror {
+				position: relative;
+				word-wrap: break-word;
+				white-space: pre-wrap;
+				white-space: break-spaces;
+				-webkit-font-variant-ligatures: none;
+				font-variant-ligatures: none;
+				font-feature-settings: "liga" 0; /* the above doesn't seem to work in Edge */
+				outline: none;
+				border: 1px solid #ccc;
+				padding: 1rem;
+				min-height: 150px;
+				background: #fff;
+			}
+
+			.ProseMirror p:first-child,
+			.ProseMirror h1:first-child,
+			.ProseMirror h2:first-child,
+			.ProseMirror h3:first-child,
+			.ProseMirror h4:first-child,
+			.ProseMirror h5:first-child,
+			.ProseMirror h6:first-child {
+				margin-top: 10px;
+			}
+
+			.ProseMirror-focused {
+				border-color: black;
+			}
+
+			/* Style the state display area */
+			#prosemirror-state-display {
+				width: 100%;
+				margin-top: 1rem;
+				font-family: monospace;
+				font-size: 12px;
+				box-sizing: border-box;
+				min-height: 100px;
+				background: #f0f0f0;
+				border: 1px solid #ccc;
+				padding: 0.5rem;
+				resize: vertical; /* Allow vertical resize */
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Zettel Spec - ProseMirror Editor</h1>
+		<div id="editor"></div>
+
+		<h2>ProseMirror Document State (JSON)</h2>
+		<textarea id="prosemirror-state-display" readonly></textarea>
+
+		<script type="module">
+			import { Schema } from "prosemirror-model";
+			import { EditorState } from "prosemirror-state";
+			import { EditorView } from "prosemirror-view";
+			import { ZettelSchema } from "./src/nodes/prosemirror.ts";
+			// For basic editing functionality (like typing, enter key)
+			import { keymap } from "prosemirror-keymap";
+			import { baseKeymap } from "prosemirror-commands";
+			import { history, undo, redo } from "prosemirror-history";
+
+			const plugins = [
+				history(),
+				keymap({ "Mod-z": undo, "Mod-y": redo, "Shift-Mod-z": redo }),
+				keymap(baseKeymap),
+			];
+
+			const state = EditorState.create({
+				schema: new ZettelSchema({}),
+				plugins,
+			});
+
+			const view = new EditorView(document.querySelector("#editor"), {
+				state,
+				attributes: {
+					class: "zettel-doc",
+				},
+				dispatchTransaction(transaction) {
+					console.log("Document size:", transaction.doc.content.size);
+					// Apply the transaction first to update the editor's internal state and view
+					const newState = view.state.apply(transaction);
+					view.updateState(newState);
+					// Now update the display with the new state's document
+					updateStateDisplay(view.state);
+				},
+			});
+
+			// Function to update the textarea content
+			const stateTextarea = document.getElementById("prosemirror-state-display");
+			function updateStateDisplay(state) {
+				stateTextarea.value = JSON.stringify(state.doc.toJSON(), null, 2);
+				// Auto-resize the textarea after updating its value
+				autoResizeTextarea(stateTextarea);
+			}
+
+			// Function to auto-resize textarea height
+			function autoResizeTextarea(textarea) {
+				textarea.style.height = "auto"; // Reset height
+				textarea.style.height = textarea.scrollHeight + "px"; // Set to content height
+			}
+
+			// Initial display update
+			updateStateDisplay(view.state);
+
+			// Make view accessible for debugging
+			window.view = view;
+		</script>
+	</body>
+</html>
