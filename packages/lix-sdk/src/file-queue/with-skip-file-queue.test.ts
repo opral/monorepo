@@ -74,7 +74,7 @@ test("skipping the file queue should be possible", async () => {
 	expect(changes1[0]?.content).toEqual({ text: "update0" });
 });
 
-test("skipping the file queue should be possible with multiple changes", async () => {
+test("skipping the file queue should be possible with multiple changes and supports nesting", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 		detectChangesGlob: "*",
@@ -123,17 +123,20 @@ test("skipping the file queue should be possible with multiple changes", async (
 				.where("id", "=", "test")
 				.execute();
 		}
-		for (const update of last50Updates) {
-			await withSkipFileQueue(trx, async (trx) => {
-				await trx
-					.updateTable("file")
-					.set({
-						data: new TextEncoder().encode(update),
-					})
-					.where("id", "=", "test")
-					.execute();
-			});
-		}
+		// Test nesting by using two levels of withSkipFileQueue
+		await withSkipFileQueue(trx, async (outerTrx) => {
+			for (const update of last50Updates) {
+				await withSkipFileQueue(outerTrx, async (innerTrx) => {
+					await innerTrx
+						.updateTable("file")
+						.set({
+							data: new TextEncoder().encode(update),
+						})
+						.where("id", "=", "test")
+						.execute();
+				});
+			}
+		});
 	});
 
 	await fileQueueSettled({ lix });

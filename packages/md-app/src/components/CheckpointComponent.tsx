@@ -1,36 +1,46 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/plate-ui/avatar.tsx";
 import { Button } from "@/components/plate-ui/button.tsx";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/plate-ui/tooltip.tsx";
-import { Input } from "@/components/plate-ui/input.tsx";
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
-import DiscussionPreview from "@/components/DiscussionPreview.tsx";
-import { ChangeSet, createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
+import { Thread, UiDiffComponentProps } from "@lix-js/sdk";
+import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { useAtom } from "jotai/react";
-import { currentVersionAtom, lixAtom } from "@/state.ts";
+import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { activeFileAtom, getChangeDiffs } from "@/state-active-file.ts";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
+import { activeFileAtom, getChangeDiffs, getThreads } from "@/state-active-file.ts";
 import { ChevronDown } from "lucide-react";
 
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
     id: string;
-    discussion_id: string | null;
-    first_comment_content: string | null;
-    author_name: string;
-    checkpoint_created_at: string | null;
+    immutable_elements: boolean;
+    change_count: number;
+    created_at: string | null;
+    author_name: string | null;
   }
+  previousChangeSetId: string | null;
   showTopLine: boolean;
   showBottomLine: boolean;
 }) => {
-  const [lix] = useAtom(lixAtom);
-  const [currentVersion] = useAtom(currentVersionAtom);
-  const [activeFile] = useAtom(activeFileAtom);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [lix] = useAtom(lixAtom);
+  const [activeFile] = useAtom(activeFileAtom);
+
+  useEffect(() => {
+    const fetchThreads = async () => {
+      if (props.checkpointChangeSet.id) {
+        const threads = await getThreads(lix, props.checkpointChangeSet.id);
+        if (threads) setThreads(threads);
+      }
+    };
+
+    fetchThreads();
+  }, []);
 
   // Don't render anything if there's no change data
   if (!props.checkpointChangeSet || !props.checkpointChangeSet.id) {
@@ -42,11 +52,20 @@ export const CheckpointComponent = (props: {
       setIsExpanded(!isExpanded);
       return;
     }
-
-    getChangeDiffs(lix, props.checkpointChangeSet.id, currentVersion!, activeFile).then((diffs) => {
+    getChangeDiffs(lix, activeFile!.id, props.checkpointChangeSet.id, props.previousChangeSetId).then((diffs) => {
       setDiffs(diffs);
-      setIsExpanded(true);
     });
+    // TODO: diff needs to hanndle before and after file
+    // getBeforeAfterOfFile({
+    //   lix,
+    //   changeSetBefore: props.previousChangeSetId ? { id: props.previousChangeSetId } : undefined,
+    //   changeSetAfter: props.checkpointChangeSet.id ? { id: props.checkpointChangeSet.id } : undefined,
+    //   file: { id: activeFile!.id },
+    // }).then((diffs) => {
+    //   setDiffs([diffs]);
+    // });
+
+    setIsExpanded(true);
   };
 
   // Group changes by plugin_key
@@ -58,6 +77,18 @@ export const CheckpointComponent = (props: {
     acc[key].push(change);
     return acc;
   }, {});
+
+  // Get the first comment if it exists
+  // @ts-expect-error - Typescript doesn't know that threads are created with initial comment
+  const firstComment = threads?.[0]?.comments?.[0];
+
+  // Truncate comment content if it's longer than 50 characters
+  const truncatedComment =
+    firstComment?.content
+      ? firstComment.content.length > 50
+        ? `${toPlainText(firstComment.content).substring(0, 50)}...`
+        : toPlainText(firstComment.content)
+      : null;
 
   return (
     <div
@@ -72,6 +103,7 @@ export const CheckpointComponent = (props: {
       <ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
       <div className="flex-1">
         <div className="flex flex-col w-full mt-1.5">
+          {/* {props.checkpointChangeSet.id} */}
           <div className="h-8 flex items-center justify-between w-full">
             <div className="flex items-center gap-2 min-w-0 flex-shrink-1">
               <TooltipProvider>
@@ -98,7 +130,7 @@ export const CheckpointComponent = (props: {
 
             <div className="flex items-center flex-shrink-0">
               <span className="text-xs text-slate-500 mr-1">
-                {timeAgo(props.checkpointChangeSet.checkpoint_created_at!)}
+                {timeAgo(props.checkpointChangeSet.created_at!)}
               </span>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
                 <ChevronDown
@@ -113,20 +145,20 @@ export const CheckpointComponent = (props: {
 
           <div className="pb-2">
             <p className="text-sm text-slate-500 truncate text-ellipsis overflow-hidden pr-2">
-              {props.checkpointChangeSet.first_comment_content || "Create checkpoint"}
+              {truncatedComment || "Create checkpoint"}
             </p>
           </div>
         </div>
         {isExpanded && (
           <div className="flex flex-col gap-2 pb-2">
-            {/* Option to introduce tabs - Discussion | Changes */}
+            {/* Option to introduce tabs - Threads | Changes */}
             <div className="flex flex-col justify-center items-start w-full gap-4 sm:gap-6 pt-2 pb-4 sm:pb-6 overflow-hidden">
               {Object.keys(groupedChanges).map((pluginKey) => (
                 <ChangeDiffComponent
                   key={pluginKey}
                   diffs={groupedChanges[pluginKey]}
                   contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
-                // debug={true}
+                  // debug={true}
                 />
               ))}
             </div>
@@ -149,39 +181,38 @@ export const CheckpointComponent = (props: {
 
 export default CheckpointComponent;
 
-const CreateCheckpointDiscussion = (props: {
-  changeSetId: Pick<ChangeSet, "id">,
-}) => {
-  const [description, setDescription] = useState("");
-  const [lix] = useAtom(lixAtom);
+// const CreateCheckpointDiscussion = (props: {
+//   changeSetId: Pick<ChangeSet, "id">,
+// }) => {
+//   const [description, setDescription] = useState("");
+//   const [lix] = useAtom(lixAtom);
 
-  const handleCreateCheckpoint = async () => {
-    if (description !== "") {
-      await createDiscussion({
-        lix,
-        changeSet: props.changeSetId,
-        firstComment: { content: description },
-      });
-      await saveLixToOpfs({ lix });
-    }
-  };
+//   const handleCreateCheckpoint = async () => {
+//     if (description !== "") {
+//       await createDiscussion({
+//         lix,
+//         changeSet: props.changeSetId,
+//         firstComment: { content: description },
+//       });
+//     }
+//   };
 
-  return (
-    <div className="flex w-full gap-2 px-1 items-center">
-      <Input
-        className="flex-grow pl-2"
-        placeholder="Write a comment"
-        onInput={(event: any) => {
-          event.preventDefault();
-          setDescription(event.target?.value)
-        }}
-      ></Input>
-      <Button
-        onClick={handleCreateCheckpoint}
-        size={"lg"}
-      >
-        Start discussion
-      </Button>
-    </div>
-  );
-};
+//   return (
+//     <div className="flex w-full gap-2 px-1 items-center">
+//       <Input
+//         className="flex-grow pl-2"
+//         placeholder="Write a comment"
+//         onInput={(event: any) => {
+//           event.preventDefault();
+//           setDescription(event.target?.value)
+//         }}
+//       ></Input>
+//       <Button
+//         onClick={handleCreateCheckpoint}
+//         size={"lg"}
+//       >
+//         Start discussion
+//       </Button>
+//     </div>
+//   );
+// };

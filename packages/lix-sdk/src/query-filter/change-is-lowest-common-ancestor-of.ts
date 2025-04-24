@@ -5,6 +5,8 @@ import type { SqlBool } from "kysely";
 /**
  * Filters changes that are the lowest common ancestor of the given changes.
  *
+ * @deprecated No new api exists yet for the change set graph. Write on discord if you need it
+ *
  * @example
  *   ```ts
  *   const lowestCommonAncestor = await lix.db.selectFrom("change")

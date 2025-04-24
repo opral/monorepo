@@ -1,6 +1,9 @@
 {
 	"include": ["src", "demo", "x"],
 	"compilerOptions": {
+		"paths": {
+			"react": ["./node_modules/@types/react"]
+		},
 		"composite": true,
 		"target": "ES2023",
 		"useDefineForClassFields": true,

@@ -4,6 +4,8 @@ import type { Version, LixDatabaseSchema } from "../database/schema.js";
 /**
  * Returns the symmetric difference between two versions for the version_change table.
  *
+ * @deprecated Use `changeSetElementInSymmetricDifferenceOf` instead
+ *
  * The symmetric difference is the set of changes
  * that exist in either one version but not both.
  * Modeled after https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/symmetricDifference

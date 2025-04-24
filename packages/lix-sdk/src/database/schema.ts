@@ -5,6 +5,23 @@ import type {
 } from "../account/database-schema.js";
 import type { KeyValueTable } from "../key-value/database-schema.js";
 import type { MutationLogTable } from "./mutation-log/database-schema.js";
+import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
+import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
+import type {
+	ActiveVersionTable,
+	VersionV2Table,
+} from "../version-v2/database-schema.js";
+import type {
+	ChangeSetElementTable,
+	ChangeSetLabelTable,
+	ChangeSetTable,
+	ChangeSetThreadTable,
+} from "../change-set/database-schema.js";
+import type { FileQueueTable } from "../file-queue/database-schema.js";
+import type {
+	ThreadCommentTable,
+	ThreadTable,
+} from "../thread/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -21,6 +38,9 @@ export type LixDatabaseSchema = {
 
 	// change
 	change: ChangeTable;
+	/**
+	 * @deprecated Use `change_set_edge` instead
+	 */
 	change_edge: ChangeEdgeTable;
 	change_author: ChangeAuthorTable;
 
@@ -28,39 +48,53 @@ export type LixDatabaseSchema = {
 	change_set: ChangeSetTable;
 	change_set_element: ChangeSetElementTable;
 	change_set_label: ChangeSetLabelTable;
+	change_set_edge: ChangeSetEdgeTable;
+	change_set_thread: ChangeSetThreadTable;
 
 	// key value
 	key_value: KeyValueTable;
+
+	// change proposal
+	change_proposal: ChangeProposalTable;
 
 	// discussion
 	discussion: DiscussionTable;
 	comment: CommentTable;
 
+	// thread
+	thread: ThreadTable;
+	thread_comment: ThreadCommentTable;
+
 	// version
+	/**
+	 * @deprecated Use `active_version` instead
+	 */
 	current_version: CurrentVersionTable;
+	/**
+	 * @deprecated Use `version_v2` instead
+	 */
 	version: VersionTable;
+	/**
+	 * @deprecated Versions point to change sets directly in lix v0.5
+	 */
 	version_change: VersionChangeTable;
+	/**
+	 * @deprecated Conflicts will be modelled differently in lix v0.5 and above
+	 */
 	version_change_conflict: VersionChangeConflictTable;
+
+	// version v2
+	version_v2: VersionV2Table;
+	active_version: ActiveVersionTable;
 
 	// change conflicts
 	change_conflict: ChangeConflictTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
 
+	/**
+	 * @deprecated Lix tracks its own changes.
+	 */
 	mutation_log: MutationLogTable;
-};
-
-export type FileQueueEntry = Selectable<FileQueueTable>;
-export type NewFileQueueEntry = Insertable<FileQueueTable>;
-export type FileQueueEntryUpdate = Updateable<FileQueueTable>;
-type FileQueueTable = {
-	id: Generated<number>;
-	file_id: string;
-	path_before: string | null;
-	path_after: string | null;
-	data_before: Uint8Array | null;
-	data_after: Uint8Array | null;
-	metadata_before: Record<string, any> | null;
-	metadata_after: Record<string, any> | null;
 };
 
 // named lix file to avoid conflict with built-in file type
@@ -140,23 +174,6 @@ type SnapshotTable = {
 	content: Record<string, any> | null;
 };
 
-// ------ change sets ------
-
-export type ChangeSet = Selectable<ChangeSetTable>;
-export type NewChangeSet = Insertable<ChangeSetTable>;
-export type ChangeSetUpdate = Updateable<ChangeSetTable>;
-type ChangeSetTable = {
-	id: Generated<string>;
-};
-
-export type ChangeSetElement = Selectable<ChangeSetElementTable>;
-export type NewChangeSetElement = Insertable<ChangeSetElementTable>;
-export type ChangeSetElementUpdate = Updateable<ChangeSetElementTable>;
-type ChangeSetElementTable = {
-	change_set_id: string;
-	change_id: string;
-};
-
 // ------ discussions ------
 
 export type Discussion = Selectable<DiscussionTable>;
@@ -187,15 +204,7 @@ type LabelTable = {
 	name: string;
 };
 
-export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
-export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;
-export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
-type ChangeSetLabelTable = {
-	change_set_id: string;
-	label_id: string;
-};
-
-// ------ versiones ------
+// ------ version ------
 
 export type Version = Selectable<VersionTable>;
 export type Newversion = Insertable<VersionTable>;

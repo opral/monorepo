@@ -153,7 +153,7 @@ export const intermediateChangesAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.where(changeIsLeafInVersion(currentBranch))
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
 		.selectAll("change")
 		.execute();
 });

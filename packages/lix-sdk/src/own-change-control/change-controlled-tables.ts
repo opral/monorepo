@@ -1,19 +1,26 @@
 export const changeControlledTableIds = {
 	account: ["id"],
 	comment: ["id"],
+	change_proposal: ["id"],
 	change_set: ["id"],
-	change_author: ["change_id", "account_id"],
-	change_set_element: ["change_set_id", "change_id"],
-	change_set_label: ["label_id", "change_set_id"],
+	// Change author should be change controlled but
+	// breaking the trigger loop turned out to be difficult.
+	//
+	// For the sake of getting lix v0.5 out, authors are not
+	// change controlled. A future update should address this.
+	// change_author: ["change_id", "account_id"],
+	thread: ["id"],
+	thread_comment: ["id"],
+	change_set_label: ["change_set_id", "label_id"],
+	change_set_thread: ["change_set_id", "thread_id"],
 	discussion: ["id"],
 	file: ["id"],
+	label: ["id"],
 	key_value: ["key"],
 	version: ["id"],
-	version_change: ["version_id", "change_id"],
+	// version_v2: ["id"],
+	// version_change: ["version_id", "change_id"],
 } as const;
-
-//
-// uo28ns,-3-9u2h
 
 /**
  * The result of a PRAGMA table_info call.
@@ -52,28 +59,30 @@ export function entityIdForRow(
 	...values: any[]
 ): string {
 	let entityId = "";
+	const primaryKeyColumns = changeControlledTableIds[tableName]!; // Get the specific array of PK columns
 
 	// only has one primary key
-	if (changeControlledTableIds[tableName]!.length === 1) {
-		const index = changeControlledTableIds[tableName]!.indexOf(
-			// @ts-expect-error - no clue why
-			changeControlledTableIds[tableName]![0]
-		);
-		entityId = values[index];
+	if (primaryKeyColumns.length === 1) {
+		// If there's only one key, its index is 0. Assume the corresponding value is also at index 0 in 'values'.
+		if (!values[0]) {
+			throw new Error(
+				`entityIdForRow: Missing value for single key in table '${tableName}'.`
+			);
+		}
+		entityId = values[0];
 	}
 	// has compound primary key that are joined with a comma.
 	else {
-		for (const column of changeControlledTableIds[tableName]!) {
-			const index = changeControlledTableIds[tableName]!.indexOf(
-				// @ts-expect-error - no clue why
-				column
-			);
-			if (entityId === "") {
-				entityId = values[index];
-			} else {
-				entityId = [entityId, values[index]].join(",");
+		const keyValues: string[] = [];
+		for (let i = 0; i < primaryKeyColumns.length; i++) {
+			if (!values[i]) {
+				throw new Error(
+					`entityIdForRow: Missing value for compound key part '${primaryKeyColumns[i]}' in table '${tableName}' at index ${i}.`
+				);
 			}
+			keyValues.push(values[i]);
 		}
+		entityId = keyValues.join(",");
 	}
 
 	return entityId;
