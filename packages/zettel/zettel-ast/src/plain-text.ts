@@ -10,14 +10,14 @@ import type { ZettelTextBlock, ZettelDoc } from "./schema.js";
  *
  * Parsing from text is not possible given the lossy nature of the format.
  */
-export function toPlainText(ast: ZettelDoc): string {
+export function toPlainText(doc: ZettelDoc): string {
 	let lines: string[] = [];
-	for (const node of ast) {
-		if (node._type === "zettel.textBlock") {
+	for (const node of doc.content) {
+		if (node.type === "zettel_text_block" && Array.isArray((node as any).children)) {
 			let line = "";
-			for (const span of (node as ZettelTextBlock).children) {
-				if (span._type !== "zettel.span") {
-					throw new Error("Serialize to text only supports zettel.span nodes");
+			for (const span of (node as any).children) {
+				if (span.type !== "zettel_span") {
+					throw new Error("Serialize to text only supports zettel_span nodes");
 				}
 				line += `${span.text}`;
 			}
@@ -30,24 +30,26 @@ export function toPlainText(ast: ZettelDoc): string {
 
 /**
  * Parses plain text into a ZettelDoc AST.
- * Each line becomes a zettel.textBlock; each block contains a single zettel.span with the text.
+ * Each line becomes a zettel_text_block; each block contains a single zettel_span with the text.
  */
 export function fromPlainText(text: string): ZettelDoc {
-	if (!text) return [];
-	return text.split(/\r?\n/).map((line) => {
-		return {
-			_type: "zettel.textBlock",
-			_key: generateKey(),
-			style: "zettel.normal",
-			markDefs: [],
-			children: [
-				{
-					_type: "zettel.span",
-					_key: generateKey(),
-					text: line,
-					marks: [],
-				},
-			],
-		};
-	});
+	if (!text) return { type: "zettel_doc", content: [] };
+	return {
+		type: "zettel_doc",
+		content: text.split(/\r?\n/).map((line) => {
+			return {
+				type: "zettel_text_block",
+				zettel_key: generateKey(),
+				style: "zettel_normal",
+				children: [
+					{
+						type: "zettel_span",
+						zettel_key: generateKey(),
+						text: line,
+						marks: [],
+					},
+				],
+			};
+		}),
+	};
 }
