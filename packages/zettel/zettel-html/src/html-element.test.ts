@@ -1,5 +1,5 @@
 import { test, expect, beforeEach } from "vitest";
-import { createZettelTextBlock, createZettelSpan, createZettelLink } from "@opral/zettel-ast";
+import { createZettelTextBlock, createZettelSpan, createZettelLinkMark } from "@opral/zettel-ast";
 import { singleNodeToHtmlElement } from "./html-element.js";
 import type { ZettelDoc, ZettelTextBlock, ZettelSpan } from "@opral/zettel-ast";
 import { JSDOM } from "jsdom";
@@ -16,9 +16,9 @@ test("creates a <p> element for zettel.textBlock with one span (with and without
 	const spanKey = "span1";
 	const blockKey = "block1";
 	const block: ZettelTextBlock = createZettelTextBlock({
-		_key: blockKey,
-		style: "zettel.normal",
-		children: [createZettelSpan({ _key: spanKey, text: "Hello world" })],
+		zettel_key: blockKey,
+		style: "zettel_normal",
+		children: [createZettelSpan({ zettel_key: spanKey, text: "Hello world" })],
 	});
 
 	// With children (default)
@@ -36,24 +36,24 @@ test("creates a <p> element for zettel.textBlock with one span (with and without
 	);
 });
 
-test("creates a <span> with <strong> for zettel.strong mark", () => {
+test("creates a <span> with <strong> for zettel.bold mark", () => {
 	const spanKey = "spanStrong1";
 	const blockKey = "blockStrong1";
 	const span: ZettelSpan = createZettelSpan({
-		_key: spanKey,
+		zettel_key: spanKey,
 		text: "Bold text",
-		marks: ["zettel.strong"],
+		marks: [{ type: "zettel_bold", zettel_key: "mark1" }],
 	});
 	const block: ZettelTextBlock = createZettelTextBlock({
-		_key: blockKey,
-		style: "zettel.normal",
+		zettel_key: blockKey,
+		style: "zettel_normal",
 		children: [span],
 	});
 	const elem = singleNodeToHtmlElement(block);
 	expect(normalizeHtml(elem.outerHTML)).toBe(
 		normalizeHtml(`
       <p data-zettel-key="${blockKey}">
-        <span data-zettel-key="${spanKey}" data-zettel-marks="${stringifyJson(["zettel.strong"])}">
+        <span data-zettel-key="${spanKey}">
           <strong>Bold text</strong>
         </span>
       </p>
@@ -61,17 +61,17 @@ test("creates a <span> with <strong> for zettel.strong mark", () => {
 	);
 });
 
-test("creates a <span> with <em> for zettel.em mark", () => {
+test("creates a <span> with <em> for zettel_italic mark", () => {
 	const spanKey = "spanEm1";
 	const blockKey = "blockEm1";
 	const span: ZettelSpan = createZettelSpan({
-		_key: spanKey,
+		zettel_key: spanKey,
 		text: "Italic text",
-		marks: ["zettel.em"],
+		marks: [{ type: "zettel_italic", zettel_key: "mark2" }],
 	});
 	const block: ZettelTextBlock = createZettelTextBlock({
-		_key: blockKey,
-		style: "zettel.normal",
+		zettel_key: blockKey,
+		style: "zettel_normal",
 		children: [span],
 	});
 	const elem = singleNodeToHtmlElement(block);
@@ -79,7 +79,7 @@ test("creates a <span> with <em> for zettel.em mark", () => {
 		normalizeHtml(
 			`
       <p data-zettel-key="${blockKey}">
-        <span data-zettel-key="${spanKey}" data-zettel-marks="${stringifyJson(["zettel.em"])}">
+        <span data-zettel-key="${spanKey}">
           <em>Italic text</em>
         </span>
       </p>
@@ -92,68 +92,44 @@ test("creates a <span> with custom mark data attribute", () => {
 	const spanKey = "spanCustom1";
 	const blockKey = "blockCustom1";
 	const span: ZettelSpan = createZettelSpan({
-		_key: spanKey,
+		zettel_key: spanKey,
 		text: "hello world",
-		marks: ["custom.mark"],
+		marks: [{ type: "custom_mark", zettel_key: "mark3" }],
 	});
 	const block: ZettelTextBlock = createZettelTextBlock({
-		_key: blockKey,
-		style: "zettel.normal",
+		zettel_key: blockKey,
+		style: "zettel_normal",
 		children: [span],
 	});
 	const elem = singleNodeToHtmlElement(block);
 	expect(normalizeHtml(elem.outerHTML)).toBe(
 		normalizeHtml(`
       <p data-zettel-key="${blockKey}">
-        <span data-zettel-key="${spanKey}" data-zettel-marks="${stringifyJson(["custom.mark"])}">
+        <span data-zettel-key="${spanKey}">
           hello world
         </span>
       </p>`)
 	);
 });
 
-test("creates <a> for zettel.link mark with markDef", () => {
-	const spanKey = "spanLink1";
-	const blockKey = "blockLink1";
-	const linkMarkDef = createZettelLink({ _key: "linkDef1", href: "https://example.com" });
-	const span: ZettelSpan = createZettelSpan({
-		_key: spanKey,
-		text: "Link text",
-		marks: ["linkDef1"],
-	});
-	const block: ZettelTextBlock = createZettelTextBlock({
-		_key: blockKey,
-		style: "zettel.normal",
-		markDefs: [linkMarkDef],
-		children: [span],
-	});
-	const elem = singleNodeToHtmlElement(block);
-	expect(normalizeHtml(elem.outerHTML)).toBe(
-		normalizeHtml(
-			`<p data-zettel-key="${blockKey}" data-zettel-mark-defs="${stringifyJson([linkMarkDef])}">
-        <span data-zettel-key="${spanKey}" data-zettel-marks="${stringifyJson(["linkDef1"])}">
-          <a href="https://example.com" data-zettel-mark-key="linkDef1">Link text</a>
-        </span>
-      </p>`
-		)
-	);
-});
-
 test("multiple blocks produce multiple elements", () => {
-	const doc: ZettelDoc = [
-		createZettelTextBlock({
-			_key: "b1",
-			style: "zettel.normal",
-			children: [createZettelSpan({ _key: "s1", text: "A" })],
-		}),
-		createZettelTextBlock({
-			_key: "b2",
-			style: "zettel.normal",
-			children: [createZettelSpan({ _key: "s2", text: "B" })],
-		}),
-	];
+	const doc: ZettelDoc = {
+		type: "zettel_doc",
+		content: [
+			createZettelTextBlock({
+				zettel_key: "b1",
+				style: "zettel_normal",
+				children: [createZettelSpan({ zettel_key: "s1", text: "A" })],
+			}),
+			createZettelTextBlock({
+				zettel_key: "b2",
+				style: "zettel_normal",
+				children: [createZettelSpan({ zettel_key: "s2", text: "B" })],
+			}),
+		],
+	};
 	// @ts-expect-error
-	const elems = doc.map(singleNodeToHtmlElement);
+	const elems = doc.content.map(singleNodeToHtmlElement);
 	expect(normalizeHtml(elems[0]?.outerHTML ?? "")).toBe(
 		normalizeHtml(`
       <p data-zettel-key="b1">

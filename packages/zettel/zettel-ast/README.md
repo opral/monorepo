@@ -1,6 +1,6 @@
 # Zettel
 
-A **portable JSON-based rich text AST** for universal interoperability.
+A **portable JSON-based rich text AST** to enable interoperability between apps, rich text editors, and storage formats.
 
 > **Zettel** is German for "a scrap of paper that anything can be written on."
 
