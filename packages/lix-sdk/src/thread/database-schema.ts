@@ -34,32 +34,32 @@ export function applyThreadDatabaseSchema(
     thread_id TEXT NOT NULL,
     parent_id TEXT,
 
-    content BLOB NOT NULL, --JSONB
+    body BLOB NOT NULL, --JSONB
     FOREIGN KEY(thread_id) REFERENCES thread(id),
     FOREIGN KEY(parent_id) REFERENCES thread_comment(id)
   ) STRICT;
 
   -- TEMP TRIGGER to validate ZettelDoc for inserts
-  CREATE TEMP TRIGGER IF NOT EXISTS validate_thread_comment_content_insert
+  CREATE TEMP TRIGGER IF NOT EXISTS validate_thread_comment_doc_insert
   BEFORE INSERT ON thread_comment
   FOR EACH ROW
   BEGIN
     SELECT
       CASE
-        WHEN validate_zettel_doc(json(NEW.content)) = 0
-        THEN RAISE(ABORT, 'Invalid ZettelDoc: content must be a valid ZettelDoc')
+        WHEN validate_zettel_doc(json(NEW.body)) = 0
+        THEN RAISE(ABORT, 'Invalid ZettelDoc: body must be a valid ZettelDoc')
       END;
   END;
 
   -- TEMP TRIGGER to validate ZettelDoc for upserts/updates
-  CREATE TEMP TRIGGER IF NOT EXISTS validate_thread_comment_content_update
-  BEFORE UPDATE OF content ON thread_comment
+  CREATE TEMP TRIGGER IF NOT EXISTS validate_thread_comment_doc_update
+  BEFORE UPDATE OF body ON thread_comment
   FOR EACH ROW
   BEGIN
     SELECT
       CASE
-        WHEN validate_zettel_doc(json(NEW.content)) = 0
-        THEN RAISE(ABORT, 'Invalid ZettelDoc: content must be a valid ZettelDoc')
+        WHEN validate_zettel_doc(json(NEW.body)) = 0
+        THEN RAISE(ABORT, 'Invalid ZettelDoc: body must be a valid ZettelDoc')
       END;
   END;
 `;
@@ -81,5 +81,5 @@ export type ThreadCommentTable = {
 	id: Generated<string>;
 	thread_id: string;
 	parent_id: string | null;
-	content: ZettelDoc;
+	body: ZettelDoc;
 };

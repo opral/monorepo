@@ -20,7 +20,7 @@ import { selectActiveAccount, selectThreads } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { lix } from "../state";
 import { Composer, Thread } from "./Thread";
-import { toPlainText } from "@lix-js/sdk/zettel-ast";
+import { toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -87,10 +87,10 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 		// Truncate comment content if it's longer than 50 characters
 		const truncatedComment =
-			firstComment?.content && !isWorkingChangeSet
-				? firstComment.content.length > 50
-					? `${toPlainText(firstComment.content).substring(0, 50)}...`
-					: toPlainText(firstComment.content)
+			firstComment?.body && !isWorkingChangeSet
+				? firstComment.body.content.length > 50
+					? `${toPlainText(firstComment.body).substring(0, 50)}...`
+					: toPlainText(firstComment.body)
 				: null;
 
 		// Expose methods to parent components
@@ -99,11 +99,11 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			clearCommentText: () => {},
 		}));
 
-		const onThreadComposerSubmit = async (args: { content: any }) => {
+		const onThreadComposerSubmit = async (args: { body: ZettelDoc }) => {
 			lix.db.transaction().execute(async (trx) => {
 				const thread = await createThread({
 					lix: { ...lix, db: trx },
-					comments: [{ content: args.content }],
+					comments: [{ body: args.body }],
 				});
 				await trx
 					.insertInto("change_set_thread")

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createZettelSpan, createZettelTextBlock } from "@opral/zettel-ast";
+import { fromPlainText } from "@opral/zettel-ast";
 
 test("thread.id should default to nano_id", async () => {
 	const lix = await openLixInMemory({});
@@ -30,15 +30,18 @@ test("an invalid thread comment content should throw an error", async () => {
 				.values({
 					thread_id: thread.id,
 					parent_id: null,
-					content: [
-						// @ts-expect-error - missing _key prop
-						{
-							_type: "zettel.textBlock",
-							style: "zettel.normal",
-							markDefs: [],
-							children: [{ _type: "zettel.span", text: "Hello world" }],
-						},
-					],
+					body: {
+						type: "zettel_doc",
+						content: [
+							// @ts-expect-error - missing _key prop
+							{
+								_type: "zettel.textBlock",
+								style: "zettel.normal",
+								markDefs: [],
+								children: [{ _type: "zettel.span", text: "Hello world" }],
+							},
+						],
+					},
 				})
 				.returningAll()
 				.executeTakeFirstOrThrow()
@@ -59,15 +62,7 @@ test("valid thread comment content should pass", async () => {
 		.values({
 			thread_id: thread.id,
 			parent_id: null,
-			content: [
-				createZettelTextBlock({
-					children: [
-						createZettelSpan({
-							text: "Hello world",
-						}),
-					],
-				}),
-			],
+			body: fromPlainText("Hello world"),
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

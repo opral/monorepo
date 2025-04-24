@@ -1,45 +1,15 @@
 import { expect, test } from "vitest";
 import { createThread } from "./create-thread.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createZettelSpan, createZettelTextBlock } from "@opral/zettel-ast";
+import { fromPlainText } from "@opral/zettel-ast";
 
 test("creates a thread with sequential comments where only the first has null parent_id", async () => {
 	const lix = await openLixInMemory({});
 
 	const comments = [
-		{
-			content: [
-				createZettelTextBlock({
-					children: [
-						createZettelSpan({
-							text: "First comment",
-						}),
-					],
-				}),
-			],
-		},
-		{
-			content: [
-				createZettelTextBlock({
-					children: [
-						createZettelSpan({
-							text: "Second comment",
-						}),
-					],
-				}),
-			],
-		},
-		{
-			content: [
-				createZettelTextBlock({
-					children: [
-						createZettelSpan({
-							text: "Third comment",
-						}),
-					],
-				}),
-			],
-		},
+		{ body: fromPlainText("First comment") },
+		{ body: fromPlainText("Second comment") },
+		{ body: fromPlainText("Third comment") },
 	];
 
 	const threadWithComments = await createThread({ lix, comments });

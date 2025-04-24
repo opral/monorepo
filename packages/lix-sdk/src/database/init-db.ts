@@ -27,6 +27,7 @@ export function initDb(args: {
 				file_queue: ["metadata_before", "metadata_after"],
 				snapshot: ["content"],
 				mutation_log: ["row_id"],
+				thread: ["body"],
 			}),
 			SerializeJsonBPlugin(),
 		],
