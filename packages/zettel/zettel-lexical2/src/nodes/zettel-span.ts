@@ -1,29 +1,48 @@
-import { TextNode, NodeKey } from "lexical";
+import { TextNode, SerializedTextNode, NodeKey } from "lexical";
 import type { ZettelSpan } from "../schema.js";
+import { generateKey } from "@opral/zettel-ast";
+
+export interface SerializedZettelSpanNode extends SerializedTextNode {
+  zettel: ZettelSpan;
+}
 
 export class ZettelSpanNode extends TextNode {
+  __zettel_key: ZettelSpan["_key"];
+
+  constructor(args: Partial<ZettelSpan>, lexicalKey?: NodeKey) {
+    super(args.text ?? "", lexicalKey);
+    this.__zettel_key = args._key ?? generateKey();
+  }
+
   static getType(): string {
     return "zettel_span";
   }
 
   static clone(node: ZettelSpanNode): ZettelSpanNode {
-    return new ZettelSpanNode(node.__text, node.__key);
+    return new ZettelSpanNode(
+      { _key: node.__zettel_key, text: node.__text },
+      node.__key,
+    );
   }
 
-  // constructor(args: { _key: ZettelSpan["_key"]; text: ZettelSpan["text"] }) {
-  //   super(args.text, args._key as NodeKey);
-  // }
+  static override importJSON(
+    serializedNode: SerializedZettelSpanNode,
+  ): TextNode {
+    return new ZettelSpanNode({
+      marks: serializedNode.zettel.marks,
+      metadata: serializedNode.zettel.metadata,
+      text: serializedNode.text,
+    });
+  }
 
-  // static importJSON(serialized: ZettelSpan): ZettelSpanNode {
-  //   return new ZettelSpanNode({ _key: serialized._key, text: serialized.text });
-  // }
-
-  // exportJSON(): ZettelSpan {
-  //   return {
-  //     _type: "zettel_span",
-  //     _key: this.getKey(),
-  //     text: this.getTextContent(),
-  //     marks: [],
-  //   };
-  // }
+  exportJSON(): SerializedZettelSpanNode {
+    return {
+      ...super.exportJSON(),
+      zettel: {
+        _key: this.__zettel_key,
+        _type: "zettel_span",
+        text: this.__text,
+      },
+    };
+  }
 }
