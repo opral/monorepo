@@ -9,15 +9,25 @@ import {
 	useMultiSidebar
 } from "@/components/ui/multisidebar";
 import { LixSidebar } from "@/components/ui/sidebar-lix";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from '@/components/plate-ui/button';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import ChangeControlSidebar from '@/components/ui/sidebar-change-control';
+import { activeAccountAtom } from '@/state';
+import posthog from 'posthog-js';
 
 // Wrapper component that has access to the MultiSidebar context
 function PageContent() {
 	const [activeFile] = useAtom(activeFileAtom);
+	const [activeAccount] = useAtom(activeAccountAtom);
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
+
+	useEffect(() => {
+		posthog.identify(activeAccount.id, {
+			LIX_USER_ID: activeAccount.id,
+			LIX_USER_NAME: activeAccount.name,
+		});
+	}, [])
 
 	// Control sidebar visibility using the context
 	const toggleLeftSidebar = () => {
