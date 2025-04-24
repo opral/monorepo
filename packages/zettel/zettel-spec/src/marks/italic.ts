@@ -2,7 +2,7 @@
  * Vendored from https://github.com/ueberdosis/tiptap/blob/main/packages/extension-italic/src/italic.ts
  */
 
-import { Mark, markInputRule, markPasteRule, mergeAttributes } from "@tiptap/core";
+import { Mark, mergeAttributes } from "@tiptap/core";
 
 declare module "@tiptap/core" {
 	interface Commands<ReturnType> {
@@ -69,25 +69,6 @@ export const ItalicMark = Mark.create({
 	addKeyboardShortcuts() {
 		return {
 			"Mod-i": () => this.editor.commands.toggleItalic(),
-			"Mod-I": () => this.editor.commands.toggleItalic(),
 		};
-	},
-
-	addInputRules() {
-		return [
-			markInputRule({
-				find: underscoreInputRegex,
-				type: this.type,
-			}),
-		];
-	},
-
-	addPasteRules() {
-		return [
-			markPasteRule({
-				find: underscoreInputRegex,
-				type: this.type,
-			}),
-		];
 	},
 });

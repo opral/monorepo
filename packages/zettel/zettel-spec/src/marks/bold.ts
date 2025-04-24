@@ -2,7 +2,7 @@
  * Vendored from https://github.com/ueberdosis/tiptap/blob/main/packages/extension-bold/src/bold.ts
  */
 
-import { Mark, markInputRule, mergeAttributes } from "@tiptap/core";
+import { Mark, mergeAttributes } from "@tiptap/core";
 
 declare module "@tiptap/core" {
 	interface Commands<ReturnType> {
@@ -36,7 +36,11 @@ export const BoldMark = Mark.create({
 	name: "zettel_bold",
 
 	parseHTML() {
-		return [{ tag: "strong" }];
+		return [
+			{
+				tag: "strong",
+			},
+		];
 	},
 
 	renderHTML({ HTMLAttributes }) {
@@ -64,14 +68,5 @@ export const BoldMark = Mark.create({
 		return {
 			"Mod-b": () => this.editor.commands.toggleBold(),
 		};
-	},
-
-	addInputRules() {
-		return [
-			markInputRule({
-				find: starInputRegex,
-				type: this.type,
-			}),
-		];
 	},
 });
