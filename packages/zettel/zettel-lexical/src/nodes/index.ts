@@ -17,4 +17,4 @@ export const ZettelNodes = [
     with: () => new ZettelSpanNode({}),
     withKlass: ZettelSpanNode,
   },
-] as const;
+];

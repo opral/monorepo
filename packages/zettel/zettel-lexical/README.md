@@ -1,6 +1,6 @@
 # Zettel Lexical
 
-Mappings for the Zettel AST to the Lexical editor state, as well as a headless editor component.
+Mappings for the Zettel AST to the Lexical editor state.
 
 ## Installation
 
