@@ -26,14 +26,7 @@
 	},
 	"dependencies": {
 		"@sinclair/typebox": "^0.34.33",
-		"@tiptap/core": "^2.11.7",
-		"@types/json-schema": "^7.0.15",
-		"prosemirror-commands": "^1.5.2",
-		"prosemirror-history": "^1.4.1",
-		"prosemirror-keymap": "^1.2.2",
-		"prosemirror-model": "^1.19.3",
-		"prosemirror-state": "^1.4.3",
-		"prosemirror-view": "^1.31.7"
+		"@tiptap/core": "^2.11.7"
 	},
 	"devDependencies": {
 		"@opral/tsconfig": "workspace:*",
