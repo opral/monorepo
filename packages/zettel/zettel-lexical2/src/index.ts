@@ -1,3 +1,3 @@
-export * from "./nodes.js";
+export * from "./old/nodes.js";
 export { registerZettelLexicalPlugin } from "./plugin.js";
-export { toLexicalState, fromLexicalState } from "./parse-serialize.js";
+export { toLexicalState, fromLexicalState } from "./old/parse-serialize.js";

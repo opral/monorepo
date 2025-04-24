@@ -13,7 +13,6 @@ test("link passes", async () => {
           _type: "zettel_span",
           _key: "e60571e00344",
           text: "Have you seen ",
-          marks: [],
         },
         {
           _type: "zettel_span",
@@ -30,7 +29,6 @@ test("link passes", async () => {
         {
           _type: "zettel_span",
           _key: "2d3de5b05adc",
-          marks: [],
           text: "?",
         },
       ],

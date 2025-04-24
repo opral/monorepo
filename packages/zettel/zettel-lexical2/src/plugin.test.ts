@@ -5,7 +5,7 @@ import {
   $createZettelTextBlockNode,
   $isZettelSpanNode,
   ZettelNodes,
-} from "./nodes.js";
+} from "./old/nodes.js";
 import {
   $getRoot,
   $isParagraphNode,
@@ -18,7 +18,7 @@ import {
 } from "lexical";
 import { JSDOM } from "jsdom";
 import { ZettelDoc } from "@opral/zettel-ast";
-import { fromLexicalState, toLexicalState } from "./parse-serialize.js";
+import { fromLexicalState, toLexicalState } from "./old/parse-serialize.js";
 import { toHtmlString, validateHtmlString } from "@opral/zettel-html";
 
 beforeEach(() => {
