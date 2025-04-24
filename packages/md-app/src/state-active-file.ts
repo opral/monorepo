@@ -108,12 +108,12 @@ export const intermediateChangesAtom = atom<
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentVersion = await get(activeVersionAtom);
+	const activeVersion = await get(activeVersionAtom);
 	const checkpointChanges = await get(checkpointChangeSetsAtom);
-	if (!currentVersion || !activeFile) return [];
+	if (!activeVersion || !activeFile) return [];
 
 	// Get all changes in the working change set
-	const workingChangeSetId = currentVersion.working_change_set_id;
+	const workingChangeSetId = activeVersion.working_change_set_id;
 
 	// Get changes that are in the working change set
 	const intermediateChanges = await lix.db
@@ -308,7 +308,6 @@ export const getChangeDiffs = async (
 						.where(changeHasLabel({ name: "checkpoint" }))
 						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
 						.orderBy("change.created_at", "desc")
-						.limit(1)
 						.executeTakeFirst();
 				}
 

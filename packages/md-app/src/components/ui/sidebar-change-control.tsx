@@ -36,15 +36,13 @@ const ChangeControlSidebar = () => {
         {checkpointChangeSets.map((checkpointChangeSet, index) => {
           const previousCheckpointId = checkpointChangeSets[index + 1]?.id ?? undefined;
           return (
-            <>
             <CheckpointComponent
               key={checkpointChangeSet.id}
               checkpointChangeSet={checkpointChangeSet}
               previousChangeSetId={previousCheckpointId}
               showTopLine={index !== 0 || filteredChanges.length > 0}
               showBottomLine={index !== checkpointChangeSets.length - 1}
-              />
-            </>
+            />
           );
         })}
       </div>
