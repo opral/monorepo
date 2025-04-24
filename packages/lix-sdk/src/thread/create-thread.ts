@@ -8,7 +8,7 @@ import type {
 export async function createThread(args: {
 	lix: Lix;
 	id?: string;
-	comments?: Pick<NewThreadComment, "content">[];
+	comments?: Pick<NewThreadComment, "body">[];
 }): Promise<Thread & { comments: ThreadComment[] }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const thread = await trx
@@ -26,7 +26,7 @@ export async function createThread(args: {
 					.insertInto("thread_comment")
 					.values({
 						thread_id: thread.id,
-						content: comment.content,
+						body: comment.body,
 						parent_id: index > 0 ? insertedComments[index - 1]!.id : null,
 					})
 					.returningAll()

@@ -270,11 +270,11 @@ function handleLixOwnChange(
 	} else if (tableName === "thread_comment" && snapshotContent) {
 		// Convert thread_comment.content from SQLite JSONB to standard JSON string
 		const json = sqlite.exec("SELECT json(?)", {
-			bind: [snapshotContent.content],
+			bind: [snapshotContent.body],
 			returnValue: "resultRows",
 		})[0]![0];
 
-		snapshotContent["content"] = JSON.parse(json as string);
+		snapshotContent["body"] = JSON.parse(json as string);
 	}
 
 	// avoid a loop of own changes
