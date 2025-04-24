@@ -66,9 +66,7 @@
 
 		<script type="module">
 			import { Editor } from "@tiptap/core";
-			import { ZettelDoc } from "./src/tiptap-nodes/doc.js";
-			import { ZettelParagraph } from "./src/tiptap-nodes/paragraph.js";
-			import { Text } from "./src/tiptap-nodes/text.js";
+			import { ZettelExtensions } from "./src/extensions.js";
 
 			const stateTextarea = document.getElementById("prosemirror-state-display");
 
@@ -83,13 +81,8 @@
 			}
 
 			const editor = new Editor({
-				element: document.querySelector('#editor'),
-				extensions: [
-					ZettelDoc,
-					ZettelParagraph,
-					Text,
-				],
-				content: '<div><p>Hello Zettel</p></div>',
+				element: document.querySelector("#editor"),
+				extensions: ZettelExtensions,
 				onUpdate: ({ editor }) => {
 					updateStateDisplay(editor.getJSON());
 				},
@@ -98,6 +91,5 @@
 			// Initial state display
 			updateStateDisplay(editor.getJSON());
 		</script>
-
 	</body>
 </html>

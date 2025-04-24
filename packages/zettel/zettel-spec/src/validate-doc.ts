@@ -1,5 +1,5 @@
 import { TypeCompiler } from "@sinclair/typebox/compiler";
-import { ZettelDocJsonSchema, type ZettelDoc } from "./doc.js";
+import { ZettelDocJsonSchema, type ZettelDoc } from "./nodes/doc.js";
 
 const Z = TypeCompiler.Compile(ZettelDocJsonSchema);
 

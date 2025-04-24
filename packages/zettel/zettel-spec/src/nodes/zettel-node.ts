@@ -1,11 +1,4 @@
 import { Type, type Static } from "@sinclair/typebox";
-import type { NodeSpec } from "prosemirror-model";
-import type { JSONSchema7 } from "json-schema";
-
-export type ZettelNodeSpec = NodeSpec & {
-	jsonSchema: JSONSchema7;
-	attrs: Record<string, any> & { zettel_key: Record<string, any> };
-};
 
 export type ZettelNode = Static<typeof ZettelNodeJsonSchema>;
 

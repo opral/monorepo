@@ -1,6 +1,40 @@
+// @vitest-environment jsdom
 import { test, expect } from "vitest";
 import type { ZettelDoc } from "./doc.js";
-import { validateDoc } from "./validate-doc.js";
+import { validateDoc } from "../validate-doc.js";
+import { generateHTML, generateJSON } from "@tiptap/core";
+import { ZettelExtensions } from "../extensions.js";
+import { normalizeHtml } from "../utils/normalize-html.js";
+
+test("roundtrip html", async () => {
+	const input: ZettelDoc = {
+		type: "zettel_doc",
+		content: [
+			{
+				type: "zettel_paragraph",
+				attrs: {
+					zettel_key: "123456",
+				},
+			},
+		],
+	};
+
+	const html = generateHTML(input, ZettelExtensions);
+
+	// given that the doc node is the top node,
+	// the content is expected to be the first paragraph
+	expect(normalizeHtml(html)).toBe(
+		normalizeHtml(`
+		<p data-zettel-key="123456"></p>
+	`)
+	);
+
+	const parsed = generateJSON(html, ZettelExtensions);
+	expect(parsed).toEqual(input);
+
+	const valid = validateDoc(parsed);
+	expect(valid.errors).toBeUndefined();
+});
 
 test("empty document passes", () => {
 	const doc: ZettelDoc = {
