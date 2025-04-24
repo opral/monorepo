@@ -3012,6 +3012,43 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(@types/debug@4.1.12)(@types/node@22.10.6)(happy-dom@17.4.4)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.1)
 
+  packages/zettel/zettel-lexical2:
+    dependencies:
+      '@lexical/utils':
+        specifier: ^0.30.0
+        version: 0.30.0
+      '@opral/zettel-ast':
+        specifier: workspace:*
+        version: link:../zettel-ast
+      '@opral/zettel-html':
+        specifier: workspace:*
+        version: link:../zettel-html
+      '@sinclair/typebox':
+        specifier: ^0.34.33
+        version: 0.34.33
+    devDependencies:
+      '@types/jsdom':
+        specifier: ^21.1.7
+        version: 21.1.7
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0
+      lexical:
+        specifier: ^0.30.0
+        version: 0.30.0
+      prettier:
+        specifier: ^3.5.3
+        version: 3.5.3
+      typescript:
+        specifier: ~5.7.2
+        version: 5.7.3
+      vite:
+        specifier: ^6.3.0
+        version: 6.3.2(@types/node@22.10.6)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.1)
+      vitest:
+        specifier: ^3.1.1
+        version: 3.1.1(@types/debug@4.1.12)(@types/node@22.10.6)(happy-dom@17.4.4)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.3))(terser@5.36.0)(tsx@4.19.2)(yaml@2.7.1)
+
   packages/zettel/zettel-spec:
     dependencies:
       '@sinclair/typebox':
@@ -26624,7 +26661,7 @@ snapshots:
       std-env: 3.8.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.1.3(@types/node@22.10.6)(@vitest/browser@2.1.3)(happy-dom@17.4.4)(jsdom@26.1.0)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.7.2))(terser@5.36.0)
+      vitest: 2.1.3(@types/node@22.10.6)(@vitest/browser@2.1.3)(happy-dom@17.4.4)(jsdom@26.1.0)(lightningcss@1.29.2)(msw@2.7.0(@types/node@22.10.6)(typescript@5.6.3))(terser@5.36.0)
     transitivePeerDependencies:
       - supports-color
 
