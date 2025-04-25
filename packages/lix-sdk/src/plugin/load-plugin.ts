@@ -1,4 +1,5 @@
-import type { LixDatabaseSchema, LixFile } from "../database/schema.js";
+import type { LixDatabaseSchema } from "../database/schema.js";
+import type { LixFile } from "../file/database-schema.js";
 import type { LixPlugin } from "./lix-plugin.js";
 import { Kysely, sql } from "kysely";
 

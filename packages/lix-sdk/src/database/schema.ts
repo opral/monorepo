@@ -20,6 +20,8 @@ import type {
 	ThreadCommentTable,
 	ThreadTable,
 } from "../thread/database-schema.js";
+import type { LixFileTable } from "../file/database-schema.js";
+import type { SnapshotTable } from "../snapshot/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -60,26 +62,6 @@ export type LixDatabaseSchema = {
 	active_version: ActiveVersionTable;
 };
 
-// named lix file to avoid conflict with built-in file type
-export type LixFile = Selectable<LixFileTable>;
-export type NewLixFile = Insertable<LixFileTable>;
-export type LixFileUpdate = Updateable<LixFileTable>;
-type LixFileTable = {
-	id: Generated<string>;
-	/**
-	 * The path of the file.
-	 *
-	 * The path is currently defined as a subset of RFC 3986.
-	 * Any path can be tested with the `isValidFilePath()` function.
-	 *
-	 * @example
-	 *   - `/path/to/file.txt`
-	 */
-	path: string;
-	data: Uint8Array;
-	metadata: Record<string, any> | null;
-};
-
 export type Change = Selectable<ChangeTable>;
 export type NewChange = Insertable<ChangeTable>;
 type ChangeTable = {
@@ -112,22 +94,6 @@ export type NewChangeAuthor = Insertable<ChangeAuthorTable>;
 type ChangeAuthorTable = {
 	change_id: string;
 	account_id: string;
-};
-
-export type Snapshot = Selectable<SnapshotTable>;
-export type NewSnapshot = Insertable<SnapshotTable>;
-type SnapshotTable = {
-	id: Generated<string>;
-	/**
-	 * The value of the change.
-	 *
-	 * Lix interprets an undefined value as delete operation.
-	 *
-	 * @example
-	 *   - For a csv cell change, the value would be the new cell value.
-	 *   - For an inlang message change, the value would be the new message.
-	 */
-	content: Record<string, any> | null;
 };
 
 // ----- tags -----

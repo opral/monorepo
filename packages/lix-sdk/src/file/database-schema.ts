@@ -1,5 +1,6 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { validateFilePath } from "./validate-file-path.js";
+import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 
 /**
  * Applies the file table schema to the given sqlite database.
@@ -28,3 +29,23 @@ export function applyFileDatabaseSchema(
 `);
 	return sqlite;
 }
+
+// named lix file to avoid conflict with built-in file type
+export type LixFile = Selectable<LixFileTable>;
+export type NewLixFile = Insertable<LixFileTable>;
+export type LixFileUpdate = Updateable<LixFileTable>;
+export type LixFileTable = {
+	id: Generated<string>;
+	/**
+	 * The path of the file.
+	 *
+	 * The path is currently defined as a subset of RFC 3986.
+	 * Any path can be tested with the `isValidFilePath()` function.
+	 *
+	 * @example
+	 *   - `/path/to/file.txt`
+	 */
+	path: string;
+	data: Uint8Array;
+	metadata: Record<string, any> | null;
+};

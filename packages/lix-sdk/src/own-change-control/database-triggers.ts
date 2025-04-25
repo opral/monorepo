@@ -1,10 +1,6 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Kysely } from "kysely";
-import type {
-	Change,
-	LixDatabaseSchema,
-	Snapshot,
-} from "../database/schema.js";
+import type { Change, LixDatabaseSchema } from "../database/schema.js";
 import {
 	changeControlledTableIds,
 	entityIdForRow,
@@ -13,6 +9,7 @@ import {
 import { executeSync } from "../database/execute-sync.js";
 import { createChange } from "../change/create-change.js";
 import type { Account } from "../account/database-schema.js";
+import type { Snapshot } from "../snapshot/database-schema.js";
 
 export const LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID =
 	"pending-own-change-control";

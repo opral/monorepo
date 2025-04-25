@@ -7,6 +7,7 @@ import { applyVersionV2DatabaseSchema } from "../version-v2/database-schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set/database-schema.js";
 import { applyFileQueueDatabaseSchema } from "../file-queue/database-schema.js";
 import { applyFileDatabaseSchema } from "../file/database-schema.js";
+import { applySnapshotDatabaseSchema } from "../snapshot/database-schema.js";
 import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
@@ -23,6 +24,7 @@ export function applySchema(args: {
 	applyKeyValueDatabaseSchema(args.sqlite);
 	applyThreadDatabaseSchema(args.sqlite);
 	applyFileDatabaseSchema(args.sqlite);
+	applySnapshotDatabaseSchema(args.sqlite);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	args.sqlite.exec`
@@ -51,23 +53,11 @@ export function applySchema(args: {
     FOREIGN KEY(change_id) REFERENCES change(id),
     FOREIGN KEY(account_id) REFERENCES account(id)
   ) strict;
-
-  CREATE TABLE IF NOT EXISTS snapshot (
-    id TEXT GENERATED ALWAYS AS (json_sha256(content)) STORED UNIQUE,
-    content BLOB
-  ) STRICT;
-
-  -- Create the default 'no-content' snapshot
-  -- to avoid foreign key constraint violations in tests
-  INSERT OR IGNORE INTO snapshot (content) VALUES (NULL);
   `;
 
 	applyChangeSetDatabaseSchema(args.sqlite);
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	args.sqlite.exec`
-  -- conflicts
-
-  CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
 
   -- labels
   

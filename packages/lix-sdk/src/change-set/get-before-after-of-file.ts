@@ -1,5 +1,5 @@
-import type { LixFile } from "../database/schema.js";
 import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
+import type { LixFile } from "../file/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";

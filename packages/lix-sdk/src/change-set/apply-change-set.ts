@@ -5,9 +5,9 @@ import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import type { VersionV2 } from "../version-v2/database-schema.js";
-import type { LixFile } from "../database/schema.js";
 import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
 import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
+import type { LixFile } from "../file/database-schema.js";
 
 /**
  * Applies a change set to the lix.

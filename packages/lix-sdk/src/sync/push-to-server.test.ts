@@ -2,7 +2,6 @@ import { expect, test, vi } from "vitest";
 import { createServerProtocolHandler } from "../server-protocol-handler/create-server-protocol-handler.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pushToServer } from "./push-to-server.js";
-import type { LixFile } from "../database/schema.js";
 import type { Account } from "../account/database-schema.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { NewKeyValue } from "../key-value/database-schema.js";
@@ -10,6 +9,7 @@ import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
+import type { LixFile } from "../file/database-schema.js";
 
 test.skip("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
