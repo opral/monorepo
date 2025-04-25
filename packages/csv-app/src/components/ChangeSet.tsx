@@ -2,8 +2,6 @@ import {
 	Version,
 	Change,
 	changeHasLabel,
-	changeInVersion,
-	changeIsLeafInVersion,
 	Lix,
 	Snapshot,
 	createThread,

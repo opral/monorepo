@@ -11,11 +11,7 @@ import {
 } from "./state.ts";
 import Papa from "papaparse";
 import {
-	changeConflictInVersion,
-	changeHasLabel,
-	changeInVersion,
 	ChangeSet,
-	changeSetElementInAncestryOf,
 	changeSetHasLabel,
 	changeSetIsAncestorOf,
 	jsonArrayFrom,
@@ -110,8 +106,14 @@ export const activeCellChangesAtom = atom(async (get) => {
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.where("change.entity_id", "=", cellEntityId)
 		.where("change.file_id", "=", activeFile.id)
-		// .where(changeInVersion(currentBranch))
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.leftJoin("version_change", "version_change.change_id", "change.id")
+		.where((eb) =>
+			eb.or([
+				eb("version_change.version_id", "=", currentVersion.id),
+				eb("version_change.change_id", "is", null),
+			])
+		)
 		// .innerJoin("change_set_item", "change_set_item.change_id", "change.id")
 		// .innerJoin("change_set", "change_set.id", "change_set_item.change_set_id")
 		// .innerJoin("discussion", "discussion.change_set_id", "change_set.id")
@@ -358,6 +360,13 @@ export const allChangesAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.leftJoin("version_change", "version_change.change_id", "change.id")
+		.where((eb) =>
+			eb.or([
+				eb("version_change.version_id", "=", currentVersion.id),
+				eb("version_change.change_id", "is", null),
+			])
+		)
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
@@ -375,7 +384,13 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		// .where(changeInVersion(currentBranch))
+		.leftJoin("version_change", "version_change.change_id", "change.id")
+		.where((eb) =>
+			eb.or([
+				eb("version_change.version_id", "=", currentVersion.id),
+				eb("version_change.change_id", "is", null),
+			])
+		)
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
@@ -408,7 +423,6 @@ export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
 		.selectAll("thread")
 		.execute();
 };
-
 
 export const allEdgesAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -472,7 +486,14 @@ export const changeConflictsAtom = atom(async (get) => {
 		.select((eb) =>
 			eb
 				.case()
-				.when(changeInVersion(currentVersion))
+				.when(
+					eb.exists(
+						eb
+							.selectFrom("version_change")
+							.whereRef("version_change.change_id", "=", "change.id")
+							.where("version_change.version_id", "=", currentVersion.id)
+					)
+				)
 				.then(1)
 				.else(0)
 				.end()

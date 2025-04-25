@@ -6,7 +6,6 @@ import clsx from "clsx";
 import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { currentVersionAtom, lixAtom } from "../../state.ts";
 import {
-	changeIsLeafInVersion,
 	changeSetElementIsLeafOf,
 	createChangeConflict,
 	detectChangeConflicts,
