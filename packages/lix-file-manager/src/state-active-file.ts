@@ -115,6 +115,13 @@ export const intermediateChangesAtom = atom<
 			"change_set_element.change_id",
 			"change.id"
 		)
+		.leftJoin("version_change", "version_change.change_id", "change.id")
+		.where((eb) =>
+			eb.or([
+				eb("version_change.version_id", "=", activeVersion.id),
+				eb("version_change.change_id", "is", null),
+			])
+		)
 		.where("change_set_element.change_set_id", "=", workingChangeSetId)
 		.where("change.file_id", "!=", "lix_own_change_control")
 		.select([
@@ -150,6 +157,13 @@ export const intermediateChangesAtom = atom<
 							"change_set_element",
 							"change_set_element.change_id",
 							"change.id"
+						)
+						.leftJoin("version_change", "version_change.change_id", "change.id")
+						.where((eb) =>
+							eb.or([
+								eb("version_change.version_id", "=", activeVersion.id),
+								eb("version_change.change_id", "is", null),
+							])
 						)
 						.where(
 							"change_set_element.change_set_id",
@@ -204,14 +218,6 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 	const query = lix.db
 		.selectFrom("change_set")
 		.where(changeSetHasLabel({ name: "checkpoint" }))
-		// .where(
-		// 	changeSetIsAncestorOf(
-		// 		{ id: activeVersion.change_set_id },
-		// 		// in case the checkpoint is the active version's change set
-		// 		{ includeSelf: true }
-		// 	)
-		// )
-		// left join in case the change set has no elements
 		.leftJoin(
 			"change_set_element",
 			"change_set.id",
@@ -267,7 +273,17 @@ export const getChangeDiffs = async (
 	changeSetBeforeId?: string | null,
 	activeFileId?: string | null
 ): Promise<UiDiffComponentProps["diffs"]> => {
-	// Get leaf changes for this change set
+	// Get active version to filter by current version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirst();
+
+	if (!activeVersion) {
+		return [];
+	}
+
 	let checkpointChangesQuery = lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -275,6 +291,13 @@ export const getChangeDiffs = async (
 			"change_set_element",
 			"change_set_element.change_id",
 			"change.id"
+		)
+		.leftJoin("version_change", "version_change.change_id", "change.id")
+		.where((eb) =>
+			eb.or([
+				eb("version_change.version_id", "=", activeVersion.id),
+				eb("version_change.change_id", "is", null),
+			])
 		)
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where(changeSetElementIsLeafOf([{ id: changeSetId }])) // Only get leaf changes
@@ -314,6 +337,13 @@ export const getChangeDiffs = async (
 							"change_set_element",
 							"change_set_element.change_id",
 							"change.id"
+						)
+						.leftJoin("version_change", "version_change.change_id", "change.id")
+						.where((eb) =>
+							eb.or([
+								eb("version_change.version_id", "=", activeVersion.id),
+								eb("version_change.change_id", "is", null),
+							])
 						)
 						.where("change_set_element.change_set_id", "=", changeSetBeforeId)
 						.where("change.entity_id", "=", change.entity_id)

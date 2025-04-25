@@ -1,5 +1,4 @@
 import {
-	Version,
 	Change,
 	changeHasLabel,
 	Lix,
@@ -7,6 +6,7 @@ import {
 	createThread,
 	createCheckpoint,
 	Thread,
+	VersionV2,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
@@ -227,7 +227,7 @@ const getChanges = async (
 	lix: Lix,
 	changeSetId: string,
 	fileId: string,
-	currentVersion: Version,
+	currentVersion: VersionV2,
 	previousChangeSetId?: string | undefined,
 ): Promise<
 	Record<
@@ -247,6 +247,13 @@ const getChanges = async (
 			"change_set_element",
 			"change_set_element.change_id",
 			"change.id"
+		)
+		.leftJoin("version_change", "version_change.change_id", "change.id")
+		.where((eb) =>
+			eb.or([
+				eb("version_change.version_id", "=", currentVersion.id),
+				eb("version_change.change_id", "is", null),
+			])
 		)
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.where(changeHasLabel({ name: "checkpoint" }))
@@ -305,6 +312,13 @@ const getChanges = async (
 						"change_set_element",
 						"change_set_element.change_id",
 						"change.id"
+					)
+					.leftJoin("version_change", "version_change.change_id", "change.id")
+					.where((eb) =>
+						eb.or([
+							eb("version_change.version_id", "=", currentVersion.id),
+							eb("version_change.change_id", "is", null),
+						])
 					)
 					.where("change_set_element.change_set_id", "=", previousChangeSetId)
 					.where("change.entity_id", "=", change.entity_id)
@@ -378,6 +392,13 @@ const getIntermediateChanges = async (
 		.executeTakeFirst()
 		.then(version => version?.working_change_set_id);
 
+	// Get the current version for filtering
+	const currentVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirstOrThrow();
+
 	const intermediateLeafChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -439,12 +460,15 @@ const getIntermediateChanges = async (
 			const parent = await lix.db
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.leftJoin("version_change", "version_change.change_id", "change.id")
+				.where((eb) =>
+					eb.or([
+						eb("version_change.version_id", "=", currentVersion.id),
+						eb("version_change.change_id", "is", null),
+					])
+				)
 				.where("change.entity_id", "=", change.entity_id)
 				.where(changeHasLabel({ name: "checkpoint" }))
-				// .where(changeInVersion(currentVersion))
-				// TODO fix the filter
-				// https://github.com/opral/lix-sdk/issues/151
-				// .where(changeIsLowestCommonAncestorOf([change]))
 				.where("change.schema_key", "=", CellSchemaV1.key)
 				.selectAll("change")
 				.select("snapshot.content")

@@ -11,7 +11,7 @@ import {
 	lixAtom,
 } from "@/state.ts";
 import IconArrow from "./icons/IconArrow.tsx";
-import { changeInVersion, createComment } from "@lix-js/sdk";
+import { createComment } from "@lix-js/sdk";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 
 const ChatInput = () => {
@@ -49,7 +49,11 @@ const ChatInput = () => {
 		// 				.onRef("change.entity_id", "=", "comment.id")
 		// 				.on("change.schema_key", "=", "lix_comment_table")
 		// 		)
-		// 		.where(changeInVersion(activeVersion!))
+		// 		.leftJoin("version_change", "version_change.change_id", "change.id")
+		// 		.where((eb) => eb.or([
+		// 			eb("version_change.version_id", "=", activeVersion!.id),
+		// 			eb("version_change.change_id", "is", null)
+		// 		]))
 		// 		.orderBy("created_at", "desc")
 		// 		.selectAll("comment")
 		// 		.executeTakeFirstOrThrow();
