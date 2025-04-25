@@ -4,41 +4,39 @@ import { newProject } from "@inlang/sdk";
 
 test("pathname based localization", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				// literal match
-				{
-					pattern: "/blog/about",
-					localized: [
-						["en", "/blog/about"],
-						["de", "/de/artikel/ueber-uns"],
-					],
-				},
-				// parameter
-				{
-					pattern: "/blog/:id",
-					localized: [
-						["en", "/blog/:id"],
-						["de", "/de/artikel/:id"],
-					],
-				},
-				// wildcard
-				{
-					pattern: "/:path(.*)",
-					localized: [
-						["de", "/de/:path(.*)"],
-						["en", "/:path(.*)"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			// literal match
+			{
+				pattern: "/blog/about",
+				localized: [
+					["en", "/blog/about"],
+					["de", "/de/artikel/ueber-uns"],
+				],
+			},
+			// parameter
+			{
+				pattern: "/blog/:id",
+				localized: [
+					["en", "/blog/:id"],
+					["de", "/de/artikel/:id"],
+				],
+			},
+			// wildcard
+			{
+				pattern: "/:path(.*)",
+				localized: [
+					["de", "/de/:path(.*)"],
+					["en", "/:path(.*)"],
+				],
+			},
+		],
 	});
 
 	// wildcard - en to de
@@ -82,33 +80,31 @@ test("pathname based localization", async () => {
 
 test("cross domain urls", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				// Development/deployment mapping
-				{
-					pattern: "https://localhost::port/:path*",
-					localized: [
-						["de", "https://localhost::port/de/:path*"],
-						["en", "https://localhost::port/:path*"],
-					],
-				},
-				// Domain based localization
-				{
-					pattern: "https://example.com/:path*",
-					localized: [
-						["en", "https://example.com/:path*"],
-						["de", "https://de.example.com/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			// Development/deployment mapping
+			{
+				pattern: "https://localhost::port/:path*",
+				localized: [
+					["de", "https://localhost::port/de/:path*"],
+					["en", "https://localhost::port/:path*"],
+				],
+			},
+			// Domain based localization
+			{
+				pattern: "https://example.com/:path*",
+				localized: [
+					["en", "https://example.com/:path*"],
+					["de", "https://de.example.com/:path*"],
+				],
+			},
+		],
 	});
 
 	// in development use localhost with different mapping
@@ -155,41 +151,39 @@ test("cross domain urls", async () => {
 
 test("multi tenancy", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				// 1) customer1.fr => root path locale is fr, other locales via sub-path e.g. /en/
-				{
-					pattern: "https://customer1.fr/:path*",
-					localized: [
-						["en", "https://customer1.fr/en/:path*"],
-						["fr", "https://customer1.fr/:path*"],
-					],
-				},
-				// 2) customer2.com => root path locale is en, other locales via sub-path e.g. /fr/
-				{
-					pattern: "https://customer2.com/:path*",
-					localized: [
-						["fr", "https://customer2.com/fr/:path*"],
-						["en", "https://customer2.com/:path*"],
-					],
-				},
-				// 3) Any other domain => path-based for en/fr
-				{
-					pattern: "https://:domain(.*)/:path*",
-					localized: [
-						["en", "https://:domain(.*)/en/:path*"],
-						["fr", "https://:domain(.*)/fr/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			// 1) customer1.fr => root path locale is fr, other locales via sub-path e.g. /en/
+			{
+				pattern: "https://customer1.fr/:path*",
+				localized: [
+					["en", "https://customer1.fr/en/:path*"],
+					["fr", "https://customer1.fr/:path*"],
+				],
+			},
+			// 2) customer2.com => root path locale is en, other locales via sub-path e.g. /fr/
+			{
+				pattern: "https://customer2.com/:path*",
+				localized: [
+					["fr", "https://customer2.com/fr/:path*"],
+					["en", "https://customer2.com/:path*"],
+				],
+			},
+			// 3) Any other domain => path-based for en/fr
+			{
+				pattern: "https://:domain(.*)/:path*",
+				localized: [
+					["en", "https://:domain(.*)/en/:path*"],
+					["fr", "https://:domain(.*)/fr/:path*"],
+				],
+			},
+		],
 	});
 	// customer 1 - localizing french to french
 	expect(
@@ -224,24 +218,22 @@ test("multi tenancy", async () => {
 
 test("providing a URL object as input", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "https://:domain(.*)/:path*",
-					localized: [
-						["en", "https://:domain(.*)/:path*"],
-						["de", "https://de.:domain(.*)/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "https://:domain(.*)/:path*",
+				localized: [
+					["en", "https://:domain(.*)/:path*"],
+					["de", "https://de.:domain(.*)/:path*"],
+				],
+			},
+		],
 	});
 
 	const url = new URL("https://example.com/about");
@@ -255,24 +247,22 @@ test("providing a URL object as input", async () => {
 
 test("localhost with portname", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
-					localized: [
-						["de", ":protocol://:domain(.*)::port?/de/:path(.*)?"],
-						["en", ":protocol://:domain(.*)::port?/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: ":protocol://:domain(.*)::port?/:path(.*)?",
+				localized: [
+					["de", ":protocol://:domain(.*)::port?/de/:path(.*)?"],
+					["en", ":protocol://:domain(.*)::port?/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	// http
@@ -306,24 +296,22 @@ test("localhost with portname", async () => {
 
 test("it keeps the query parameters", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "https://:domain(.*)/:path(.*)?",
-					localized: [
-						["de", "https://:domain(.*)/de/:path(.*)?"],
-						["en", "https://:domain(.*)/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "https://:domain(.*)/:path(.*)?",
+				localized: [
+					["de", "https://:domain(.*)/de/:path(.*)?"],
+					["en", "https://:domain(.*)/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -339,24 +327,22 @@ test("it keeps the query parameters", async () => {
 
 test("it keeps the url hash", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "https://:domain(.*)/:path(.*)?",
-					localized: [
-						["de", "https://:domain(.*)/de/:path(.*)?"],
-						["en", "https://:domain(.*)/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "https://:domain(.*)/:path(.*)?",
+				localized: [
+					["de", "https://:domain(.*)/de/:path(.*)?"],
+					["en", "https://:domain(.*)/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -375,24 +361,22 @@ test("it keeps the url hash", async () => {
 // This means any request, including https://example.com/about, will match.
 test("it keeps the url path", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "https://example.com",
-					localized: [
-						["de", "https://example.de"],
-						["en", "https://example.com"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "https://example.com",
+				localized: [
+					["de", "https://example.de"],
+					["en", "https://example.com"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -406,24 +390,22 @@ test("it keeps the url path", async () => {
 
 test("uses getLocale when no locale is provided", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "https://:domain(.*)/:path(.*)?",
-					localized: [
-						["de", "https://:domain(.*)/de/:path(.*)?"],
-						["en", "https://:domain(.*)/en/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "https://:domain(.*)/:path(.*)?",
+				localized: [
+					["de", "https://:domain(.*)/de/:path(.*)?"],
+					["en", "https://:domain(.*)/en/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	// Override getLocale to return German
@@ -460,13 +442,13 @@ test.each([
 	},
 ])("default url pattern", async (compilerOptions) => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions,
+		...compilerOptions,
 	});
 
 	runtime.overwriteGetLocale(() => "en");
@@ -505,24 +487,22 @@ test.each([
 
 test("auto fills the url base path", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/:path(.*)?",
-					localized: [
-						["de", "/de/:path(.*)?"],
-						["en", "/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/:path(.*)?",
+				localized: [
+					["de", "/de/:path(.*)?"],
+					["en", "/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -541,24 +521,22 @@ test("auto fills the url base path", async () => {
 // https://github.com/opral/inlang-paraglide-js/issues/454
 test("works with no trailing slash at the end", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/:path(.*)?",
-					localized: [
-						["en", "/en/:path(.*)?"],
-						["de", "/de/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/:path(.*)?",
+				localized: [
+					["en", "/en/:path(.*)?"],
+					["de", "/de/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	expect(runtime.deLocalizeUrl("https://example.com/en/").href).toBe(
@@ -573,24 +551,22 @@ test("works with no trailing slash at the end", async () => {
 // https://github.com/opral/inlang-paraglide-js/issues/452#issuecomment-2715761308
 test("falls through if no match is found", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/about",
-					localized: [
-						["de", "/ueber"],
-						["en", "/about"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/about",
+				localized: [
+					["de", "/ueber"],
+					["en", "/about"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -604,21 +580,19 @@ test("falls through if no match is found", async () => {
 
 test("defining no localized pattern leads to a fallthrough", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/specific-path",
-					localized: [["en", "/specific-path"]],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/specific-path",
+				localized: [["en", "/specific-path"]],
+			},
+		],
 	});
 
 	// doesn't localize because no localized pattern is defined
@@ -636,38 +610,36 @@ test("defining no localized pattern leads to a fallthrough", async () => {
 // https://github.com/opral/inlang-paraglide-js/issues/456
 test("routing to a 404 page", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/404",
-					localized: [
-						["en", "/404"],
-						["de", "/de/404"],
-					],
-				},
-				{
-					pattern: "specific-path",
-					localized: [
-						["en", "/specific-path"],
-						["de", "/de/404"],
-					],
-				},
-				{
-					pattern: "/:path(.*)?",
-					localized: [
-						["en", "/:path(.*)?"],
-						["de", "/de/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/404",
+				localized: [
+					["en", "/404"],
+					["de", "/de/404"],
+				],
+			},
+			{
+				pattern: "specific-path",
+				localized: [
+					["en", "/specific-path"],
+					["de", "/de/404"],
+				],
+			},
+			{
+				pattern: "/:path(.*)?",
+				localized: [
+					["en", "/:path(.*)?"],
+					["de", "/de/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -690,25 +662,23 @@ test("routing to a 404 page", async () => {
 // Test showing the importance of pattern order in the localized array
 test("pattern order in localized array - correct order (specific first)", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/:path(.*)?",
-					localized: [
-						// CORRECT ORDER: more specific pattern first
-						["de", "/de/:path(.*)?"], // More specific pattern with prefix
-						["en", "/:path(.*)?"], // Less specific pattern without prefix
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/:path(.*)?",
+				localized: [
+					// CORRECT ORDER: more specific pattern first
+					["de", "/de/:path(.*)?"], // More specific pattern with prefix
+					["en", "/:path(.*)?"], // Less specific pattern without prefix
+				],
+			},
+		],
 	});
 
 	// These should work correctly with the specific (de) pattern first
@@ -729,25 +699,23 @@ test("pattern order in localized array - correct order (specific first)", async 
 // Test showing the importance of pattern order in the localized array
 test("pattern order in localized array - incorrect order (generic first)", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					pattern: "/:path(.*)?",
-					localized: [
-						// INCORRECT ORDER: less specific pattern first
-						["en", "/:path(.*)?"], // Less specific pattern without prefix
-						["de", "/de/:path(.*)?"], // More specific pattern with prefix that may never match
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				pattern: "/:path(.*)?",
+				localized: [
+					// INCORRECT ORDER: less specific pattern first
+					["en", "/:path(.*)?"], // Less specific pattern without prefix
+					["de", "/de/:path(.*)?"], // More specific pattern with prefix that may never match
+				],
+			},
+		],
 	});
 
 	// English localization works as expected
@@ -771,25 +739,23 @@ test("pattern order in localized array - incorrect order (generic first)", async
 // Test for port number issue with specific port numbers in the URL pattern
 test("handles explicit port numbers in URL patterns correctly", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					// Using explicit port number - this causes issues with deLocalizeUrl
-					pattern: "http://localhost:5173/:path(.*)?",
-					localized: [
-						["de", "http://localhost:5173/de/:path(.*)?"],
-						["en", "http://localhost:5173/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				// Using explicit port number - this causes issues with deLocalizeUrl
+				pattern: "http://localhost:5173/:path(.*)?",
+				localized: [
+					["de", "http://localhost:5173/de/:path(.*)?"],
+					["en", "http://localhost:5173/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	// Localization should work correctly
@@ -811,25 +777,23 @@ test("handles explicit port numbers in URL patterns correctly", async () => {
 // Test for the correct approach using port as a pattern parameter
 test("correctly handles port numbers as pattern parameters", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			urlPatterns: [
-				{
-					// Using port as a proper pattern parameter with :: syntax
-					pattern: "http://localhost::port/:path(.*)?",
-					localized: [
-						["de", "http://localhost::port/de/:path(.*)?"],
-						["en", "http://localhost::port/:path(.*)?"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		urlPatterns: [
+			{
+				// Using port as a proper pattern parameter with :: syntax
+				pattern: "http://localhost::port/:path(.*)?",
+				localized: [
+					["de", "http://localhost::port/de/:path(.*)?"],
+					["en", "http://localhost::port/:path(.*)?"],
+				],
+			},
+		],
 	});
 
 	// Localization should work correctly

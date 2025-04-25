@@ -4,23 +4,21 @@ import { newProject } from "@inlang/sdk";
 
 test("normal named groups", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			urlPatterns: [
-				{
-					pattern: "https://example.com/bookstore/item/:id",
-					localized: [
-						["de", "https://example.com/buchladen/artikel/:id"],
-						["en", "https://example.com/bookstore/item/:id"],
-					],
-				},
-			],
-		},
+		urlPatterns: [
+			{
+				pattern: "https://example.com/bookstore/item/:id",
+				localized: [
+					["de", "https://example.com/buchladen/artikel/:id"],
+					["en", "https://example.com/bookstore/item/:id"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -38,23 +36,21 @@ test("normal named groups", async () => {
 
 test("handles relative named groups", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			urlPatterns: [
-				{
-					pattern: "/bookstore/item/:id",
-					localized: [
-						["de", "/buchladen/artikel/:id"],
-						["en", "/bookstore/item/:id"],
-					],
-				},
-			],
-		},
+		urlPatterns: [
+			{
+				pattern: "/bookstore/item/:id",
+				localized: [
+					["de", "/buchladen/artikel/:id"],
+					["en", "/bookstore/item/:id"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -72,23 +68,21 @@ test("handles relative named groups", async () => {
 
 test("wildcards", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			urlPatterns: [
-				{
-					pattern: "https://{:subdomain.}?:domain.:tld/:path*",
-					localized: [
-						["de", "https://de.:domain.:tld/startseite/ueber-uns"],
-						["en", "https://:domain.:tld/home/about-us"],
-					],
-				},
-			],
-		},
+		urlPatterns: [
+			{
+				pattern: "https://{:subdomain.}?:domain.:tld/:path*",
+				localized: [
+					["de", "https://de.:domain.:tld/startseite/ueber-uns"],
+					["en", "https://:domain.:tld/home/about-us"],
+				],
+			},
+		],
 	});
 
 	expect(
@@ -102,23 +96,21 @@ test("wildcards", async () => {
 
 test("optional parameters", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			urlPatterns: [
-				{
-					pattern: "https://example.com/:locale?",
-					localized: [
-						["de", "https://example.com/de"],
-						["en", "https://example.com/en"],
-					],
-				},
-			],
-		},
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:locale?",
+				localized: [
+					["de", "https://example.com/de"],
+					["en", "https://example.com/en"],
+				],
+			},
+		],
 	});
 
 	expect(runtime.extractLocaleFromUrl(`https://example.com/de`)).toBe("de");
@@ -127,23 +119,21 @@ test("optional parameters", async () => {
 
 test("regex works", async () => {
 	const { extractLocaleFromUrl } = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			urlPatterns: [
-				{
-					pattern: "https://example.com/:item(phone)",
-					localized: [
-						["en", "https://example.com/:item(phone)"],
-						["de", "https://example.com/de/:item(phone)"],
-					],
-				},
-			],
-		},
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:item(phone)",
+				localized: [
+					["en", "https://example.com/:item(phone)"],
+					["de", "https://example.com/de/:item(phone)"],
+				],
+			},
+		],
 	});
 
 	expect(extractLocaleFromUrl(`https://example.com/de/phone`)).toBe("de");
@@ -155,7 +145,7 @@ test("regex works", async () => {
 
 test("default url pattern", async () => {
 	const r = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
