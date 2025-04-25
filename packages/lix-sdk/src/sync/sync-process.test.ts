@@ -7,8 +7,6 @@ import {
 	createLspInMemoryEnvironment,
 	createServerProtocolHandler,
 } from "../server-protocol-handler/index.js";
-import { createVersion } from "../version/create-version.js";
-import type { Version } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { toBlob } from "../lix/to-blob.js";
 

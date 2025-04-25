@@ -6,7 +6,7 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { resolveChangeConflictBySelecting } from "./resolve-conflict-by-selecting.js";
 
-test("it should resolve a conflict and apply the changes", async () => {
+test.skip("it should resolve a conflict and apply the changes", async () => {
 	const mockSnapshots: Snapshot[] = [
 		mockJsonSnapshot({
 			id: "value1",

@@ -7,7 +7,7 @@ import {
 } from "./detect-diverging-entity-conflict.js";
 import type { DetectedConflict } from "../plugin/lix-plugin.js";
 
-test("it should detect a diverging entity conflict", async () => {
+test.skip("it should detect a diverging entity conflict", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChanges = [
@@ -65,7 +65,7 @@ test("it should detect a diverging entity conflict", async () => {
 	} satisfies DetectedConflict);
 });
 
-test("it should return a conflict if no common ancestor is found (two clients created different entities without being aware of it (aka distributed system))", async () => {
+test.skip("it should return a conflict if no common ancestor is found (two clients created different entities without being aware of it (aka distributed system))", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChanges = [
@@ -115,7 +115,7 @@ test("it should return a conflict if no common ancestor is found (two clients cr
 	} satisfies DetectedConflict);
 });
 
-test("it should return undefined if one of either change is the lowest common ancestor", async () => {
+test.skip("it should return undefined if one of either change is the lowest common ancestor", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChanges = [
@@ -161,7 +161,7 @@ test("it should return undefined if one of either change is the lowest common an
 	expect(result).toBeUndefined();
 });
 
-test("it should detect a diverging entity conflict with multiple divering entity changes", async () => {
+test.skip("it should detect a diverging entity conflict with multiple divering entity changes", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChanges = [

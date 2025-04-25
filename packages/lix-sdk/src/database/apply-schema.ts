@@ -145,15 +145,6 @@ export function applySchema(args: {
     UNIQUE (version_id, entity_id, schema_key, file_id)
   ) STRICT;
 
-  CREATE TABLE IF NOT EXISTS version_change_conflict (
-    version_id TEXT NOT NULL,
-    change_conflict_id TEXT NOT NULL,
-
-    PRIMARY KEY (version_id, change_conflict_id),
-    FOREIGN KEY (version_id) REFERENCES version(id),
-    FOREIGN KEY (change_conflict_id) REFERENCES change_conflict(id)
-  ) STRICT;
-
   -- Insert the default version if missing
   -- (this is a workaround for not having a separata creation and migration schema's)
 

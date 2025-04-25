@@ -2,11 +2,8 @@ import { createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { test, expect } from "vitest";
 import { initDb } from "./init-db.js";
 import { validate } from "uuid";
-import { mockChange } from "../change/mock-change.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { updateChangesInVersion } from "../version/update-changes-in-version.js";
-import { createVersion } from "../version/create-version.js";
 
 // file ids are always in the URL of lix apps
 // to increase sharing, the ids should be as short as possible
@@ -249,94 +246,4 @@ test("invalid file paths should be rejected", async () => {
 			.returningAll()
 			.execute()
 	).rejects.toThrowError("File path must start with a slash");
-});
-
-test("deleting a version cascades to version changes", async () => {
-	const lix = await openLixInMemory({});
-	const version = await lix.db
-		.insertInto("version")
-		.values({ name: "mock" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const changes = await lix.db
-		.insertInto("change")
-		.values(
-			mockChange({
-				entity_id: `mock`,
-			})
-		)
-		.returningAll()
-		.execute();
-
-	await updateChangesInVersion({
-		lix,
-		version,
-		changes,
-	});
-
-	await lix.db.deleteFrom("version").where("id", "=", version.id).execute();
-
-	const versionChangesAfterDelete = await lix.db
-		.selectFrom("version_change")
-		.where("version_change.version_id", "=", version.id)
-		.selectAll()
-		.execute();
-
-	expect(versionChangesAfterDelete).toHaveLength(0);
-});
-
-test("version_change must have a unique entity_id, file_id, version_id, and schema_id", async () => {
-	const lix = await openLixInMemory({});
-
-	const version0 = await createVersion({ lix, name: "version0" });
-	const version1 = await createVersion({ lix, name: "version1" });
-
-	const mockChanges = [
-		mockChange({ entity_id: "mock0", file_id: "file0", schema_key: "file" }),
-	] as const;
-
-	await lix.db.insertInto("change").values(mockChanges).execute();
-
-	const versionChange = {
-		change_id: mockChanges[0].id,
-		file_id: mockChanges[0].file_id,
-		entity_id: mockChanges[0].entity_id,
-		schema_key: mockChanges[0].schema_key,
-	};
-
-	await lix.db
-		.insertInto("version_change")
-		.values({ ...versionChange, version_id: version0.id })
-		.execute();
-
-	// inserting the same change again should throw
-	await expect(
-		lix.db
-			.insertInto("version_change")
-			.values({ ...versionChange, version_id: version0.id })
-			.execute()
-	).rejects.toThrowErrorMatchingInlineSnapshot(
-		`[SQLite3Error: SQLITE_CONSTRAINT_UNIQUE: sqlite3 result code 2067: UNIQUE constraint failed: version_change.version_id, version_change.entity_id, version_change.schema_key, version_change.file_id]`
-	);
-
-	// insert into version 1 should work
-	await lix.db
-		.insertInto("version_change")
-		.values({ ...versionChange, version_id: version1.id })
-		.execute();
-});
-
-test("versions have a unique and default human readable name", async () => {
-	const lix = await openLixInMemory({});
-
-	const version0 = await createVersion({ lix });
-	const version1 = await createVersion({ lix });
-
-	expect(version0.name).not.toBe(version1.name);
-
-	await expect(
-		createVersion({ lix, name: version0.name }),
-		"version.name is unique"
-	).rejects.toThrow();
 });

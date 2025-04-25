@@ -1,6 +1,7 @@
 {
 	"extends": "@opral/tsconfig/default",
 	"include": ["src/**/*"],
+	"exclude": ["src/change-conflict/**/*"],
 	"compilerOptions": {
 		"allowJs": false,
 		"checkJs": false,

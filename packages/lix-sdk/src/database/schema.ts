@@ -69,10 +69,6 @@ export type LixDatabaseSchema = {
 	 * @deprecated Versions point to change sets directly in lix v0.5
 	 */
 	version_change: VersionChangeTable;
-	/**
-	 * @deprecated Conflicts will be modelled differently in lix v0.5 and above
-	 */
-	version_change_conflict: VersionChangeConflictTable;
 
 	// version v2
 	version_v2: VersionV2Table;
