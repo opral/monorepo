@@ -63,8 +63,8 @@ test.todo("it restores the state to a specific change set", async () => {
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
-		.selectAll("version_v2")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	// Create a file
@@ -243,7 +243,7 @@ test.todo("it restores the state to a specific change set", async () => {
 	// Verify final state
 	// 1. Check that versions change set parent is cs2
 	const finalVersion = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.where("id", "=", activeVersion.id)
 		.select(["change_set_id"])
 		.executeTakeFirstOrThrow();

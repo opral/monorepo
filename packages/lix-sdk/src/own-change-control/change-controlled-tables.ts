@@ -15,7 +15,7 @@ export const changeControlledTableIds = {
 	file: ["id"],
 	label: ["id"],
 	key_value: ["key"],
-	// version_v2: ["id"],
+	// version: ["id"],
 	// version_change: ["version_id", "change_id"],
 } as const;
 

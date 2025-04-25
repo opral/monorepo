@@ -2,7 +2,7 @@ import type { Lix } from "../lix/open-lix.js";
 import { applyChangeSet } from "../change-set/apply-change-set.js";
 import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
 import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
-import type { VersionV2 } from "./database-schema.js";
+import type { Version } from "./database-schema.js";
 import { createTransitionChangeSet } from "../change-set/create-transition-change-set.js";
 import { sql } from "kysely";
 
@@ -26,21 +26,21 @@ import { sql } from "kysely";
  *   });
  *   ```
  */
-export async function switchVersionV2(args: {
+export async function switchVersion(args: {
 	lix: Lix;
-	to: Pick<VersionV2, "id">;
+	to: Pick<Version, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		return await withSkipOwnChangeControl(trx, async (trx) => {
 			return await withSkipFileQueue(trx, async (trx) => {
 				const activeVersion = await trx
 					.selectFrom("active_version")
-					.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-					.selectAll("version_v2")
+					.innerJoin("version", "active_version.version_id", "version.id")
+					.selectAll("version")
 					.executeTakeFirstOrThrow();
 
 				const targetVersion = await trx
-					.selectFrom("version_v2")
+					.selectFrom("version")
 					.where("id", "=", args.to.id)
 					.selectAll()
 					.executeTakeFirstOrThrow();

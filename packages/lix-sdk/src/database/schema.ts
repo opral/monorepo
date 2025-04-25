@@ -7,8 +7,8 @@ import type { KeyValueTable } from "../key-value/database-schema.js";
 import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
 import type {
 	ActiveVersionTable,
-	VersionV2Table,
-} from "../version-v2/database-schema.js";
+	VersionTable,
+} from "../version/database-schema.js";
 import type {
 	ChangeSetElementTable,
 	ChangeSetLabelTable,
@@ -57,8 +57,8 @@ export type LixDatabaseSchema = {
 	thread: ThreadTable;
 	thread_comment: ThreadCommentTable;
 
-	// version v2
-	version_v2: VersionV2Table;
+	// version
+	version: VersionTable;
 	active_version: ActiveVersionTable;
 };
 

@@ -59,4 +59,3 @@ test("the checkpoint label should be created if it doesn't exist", async () => {
 		name: "checkpoint",
 	});
 });
-

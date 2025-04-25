@@ -87,12 +87,12 @@ test("gives the before and after state without altering the current state", asyn
 
 	const activeVersionBefore = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	const versionsBeforeDiffing = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.selectAll()
 		.execute();
 
@@ -156,14 +156,14 @@ test("gives the before and after state without altering the current state", asyn
 
 	const activeVersionAfter = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	expect(activeVersionAfter).toEqual(activeVersionBefore);
 
 	const versionsAfterDiffing = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.selectAll()
 		.execute();
 

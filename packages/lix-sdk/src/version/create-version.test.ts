@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createVersionV2 } from "./create-version.js";
+import { createVersion } from "./create-version.js";
 import type { ChangeSet } from "../change-set/database-schema.js";
 
 test("should create a version linked to the provided change_set_id", async () => {
@@ -12,7 +12,7 @@ test("should create a version linked to the provided change_set_id", async () =>
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const newVersion = await createVersionV2({ lix, changeSet: changeSet });
+	const newVersion = await createVersion({ lix, changeSet: changeSet });
 
 	expect(newVersion.change_set_id).toBe(changeSet.id);
 	expect(newVersion.id).toBeDefined();
@@ -29,7 +29,7 @@ test("should create a version with the specified name", async () => {
 		.executeTakeFirstOrThrow();
 	const versionName = "My Test Version";
 
-	const newVersion = await createVersionV2({
+	const newVersion = await createVersion({
 		lix,
 		changeSet: changeSet,
 		name: versionName,
@@ -48,7 +48,7 @@ test("should create a version with the specified id", async () => {
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const newVersion = await createVersionV2({
+	const newVersion = await createVersion({
 		lix,
 		changeSet: changeSet,
 		id: "hello world",
@@ -70,7 +70,7 @@ test("should work within an existing transaction", async () => {
 	const versionName = "Transaction Test Version";
 
 	const newVersion = await lix.db.transaction().execute(async (trx) => {
-		return createVersionV2({
+		return createVersion({
 			lix: { ...lix, db: trx }, // Pass the transaction object
 			changeSet: { id: changeSet.id },
 			name: versionName,
@@ -83,7 +83,7 @@ test("should work within an existing transaction", async () => {
 
 	// Verify it's actually in the database outside the transaction
 	const dbVersion = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.selectAll()
 		.where("id", "=", newVersion.id)
 		.executeTakeFirstOrThrow();
@@ -97,7 +97,7 @@ test("should fail if the 'from' change_set_id does not exist", async () => {
 	};
 
 	await expect(
-		createVersionV2({ lix, changeSet: nonExistentChangeSet })
+		createVersion({ lix, changeSet: nonExistentChangeSet })
 		// Check for foreign key constraint error
 		// The specific error message might vary based on the db driver
 	).rejects.toThrow(/FOREIGN KEY constraint failed/i);

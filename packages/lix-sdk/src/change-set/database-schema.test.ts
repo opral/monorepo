@@ -615,7 +615,7 @@ describe("change_set immutable flag and triggers", () => {
 			.executeTakeFirstOrThrow();
 
 		const version = await lix.db
-			.selectFrom("version_v2")
+			.selectFrom("version")
 			.where("id", "=", activeVersion.version_id)
 			.select("working_change_set_id")
 			.executeTakeFirstOrThrow();

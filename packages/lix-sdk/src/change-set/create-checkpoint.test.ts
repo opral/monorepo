@@ -16,8 +16,8 @@ test("creates a checkpoint that has an edge to the version's change set", async 
 	// Get the initial version and its change set
 	const initialVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
-		.select(["version_v2.id as id", "version_v2.change_set_id"])
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.select(["version.id as id", "version.change_set_id"])
 		.executeTakeFirstOrThrow();
 
 	// Create a checkpoint
@@ -62,8 +62,8 @@ test.skip("creates a checkpoint with edges to both the version's change set AND 
 	// Get the initial version
 	const initialVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
-		.select(["version_v2.id as id", "version_v2.change_set_id"])
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.select(["version.id as id", "version.change_set_id"])
 		.executeTakeFirstOrThrow();
 
 	// Create first checkpoint
@@ -119,7 +119,7 @@ test.skip("creates a checkpoint with edges to both the version's change set AND 
 
 	// Update the version to point to the new change set
 	await lix.db
-		.updateTable("version_v2")
+		.updateTable("version")
 		.set({ change_set_id: changeSet.id })
 		.where("id", "=", initialVersion.id)
 		.execute();
@@ -150,7 +150,7 @@ test.skip("creates a checkpoint with edges to both the version's change set AND 
 
 	// Verify the version now points to the second checkpoint
 	const updatedVersion = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.where("id", "=", initialVersion.id)
 		.select(["change_set_id"])
 		.executeTakeFirstOrThrow();
@@ -286,8 +286,8 @@ test("creating multiple subsequent checkpoints leads to connected edges", async 
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
-		.selectAll("version_v2")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	expect(activeVersion.change_set_id).toBe(checkpoint0.id);

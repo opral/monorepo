@@ -6,8 +6,8 @@ import {
 	selectActiveAccount,
 } from "../queries";
 import { useQuery } from "../hooks/useQuery";
-import { createVersion, switchVersion } from "@lix-js/sdk";
 import { lix } from "../state";
+import { createVersion, switchVersion } from "@lix-js/sdk";
 
 const VersionToolbar: React.FC = () => {
 	const [currentVersion] = useQuery(selectActiveVersion);
@@ -44,7 +44,7 @@ const VersionToolbar: React.FC = () => {
 				const newVersion = await createVersion({
 					lix,
 					name: `${firstName}'s Version`,
-					from: { id: currentVersion!.id },
+					changeSet: { id: currentVersion!.id },
 				});
 				await switchVersion({ lix, to: { id: newVersion.id } });
 			}

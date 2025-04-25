@@ -1,7 +1,7 @@
 import { createChangeSet } from "../change-set/create-change-set.js";
 import type { ChangeSet } from "../change-set/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { VersionV2 } from "./database-schema.js";
+import type { Version } from "./database-schema.js";
 
 /**
  * Creates a new version.
@@ -9,21 +9,21 @@ import type { VersionV2 } from "./database-schema.js";
  * The changeSet can be any change set e.g. another version, a checkpoint, etc.
  *
  * @example
- *   const version = await createVersionV2({ lix, changeSet: otherVersion.change_set_id });
+ *   const version = await createVersion({ lix, changeSet: otherVersion.change_set_id });
  */
-export async function createVersionV2(args: {
+export async function createVersion(args: {
 	lix: Lix;
-	id?: VersionV2["id"];
+	id?: Version["id"];
 	changeSet: Pick<ChangeSet, "id">;
-	name?: VersionV2["name"];
-}): Promise<VersionV2> {
+	name?: Version["name"];
+}): Promise<Version> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
 			lix: { ...args.lix, db: trx },
 			immutableElements: false,
 		});
 		const newVersion = await trx
-			.insertInto("version_v2")
+			.insertInto("version")
 			.values({
 				id: args.id,
 				name: args.name,

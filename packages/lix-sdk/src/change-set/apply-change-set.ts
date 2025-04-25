@@ -4,7 +4,7 @@ import type { ChangeSet } from "./database-schema.js";
 import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
-import type { VersionV2 } from "../version-v2/database-schema.js";
+import type { Version } from "../version/database-schema.js";
 import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
 import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
 import type { LixFile } from "../file/database-schema.js";
@@ -15,7 +15,7 @@ import type { LixFile } from "../file/database-schema.js";
 export async function applyChangeSet(args: {
 	lix: Lix;
 	changeSet: Pick<ChangeSet, "id">;
-	version?: Pick<VersionV2, "id" | "change_set_id">;
+	version?: Pick<Version, "id" | "change_set_id">;
 	/**
 	 * Whether to update the version to point to the new change set.
 	 *
@@ -38,12 +38,8 @@ export async function applyChangeSet(args: {
 					args.version ??
 					(await trx
 						.selectFrom("active_version")
-						.innerJoin(
-							"version_v2",
-							"version_v2.id",
-							"active_version.version_id"
-						)
-						.selectAll("version_v2")
+						.innerJoin("version", "version.id", "active_version.version_id")
+						.selectAll("version")
 						.executeTakeFirstOrThrow());
 
 				//* NOTE: the creationd and handling of parent relationships
@@ -55,7 +51,7 @@ export async function applyChangeSet(args: {
 				// update the version to point to the new change set
 				if (args.updateVersion ?? true) {
 					await trx
-						.updateTable("version_v2")
+						.updateTable("version")
 						.set({ change_set_id: args.changeSet.id })
 						.where("id", "=", version.id)
 						.execute();

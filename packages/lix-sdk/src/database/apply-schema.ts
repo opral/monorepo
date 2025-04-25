@@ -1,9 +1,9 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { applyAccountDatabaseSchema } from "../account/database-schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/database-schema.js";
-import { applyChangeProposalDatabaseSchema } from "../change-proposal/database-schema.js";
+// import { applyChangeProposalDatabaseSchema } from "../change-proposal/database-schema.js";
 import { applyChangeSetEdgeDatabaseSchema } from "../change-set-edge/database-schema.js";
-import { applyVersionV2DatabaseSchema } from "../version-v2/database-schema.js";
+import { applyVersionV2DatabaseSchema } from "../version/database-schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set/database-schema.js";
 import { applyFileQueueDatabaseSchema } from "../file-queue/database-schema.js";
 import { applyFileDatabaseSchema } from "../file/database-schema.js";
@@ -84,7 +84,7 @@ export function applySchema(args: {
   `;
 
 	applyFileQueueDatabaseSchema(args.sqlite);
-	applyChangeProposalDatabaseSchema(args.sqlite);
+	// applyChangeProposalDatabaseSchema(args.sqlite);
 	applyChangeSetEdgeDatabaseSchema(args.sqlite);
 	applyVersionV2DatabaseSchema(args.sqlite, args.db);
 	applyOwnChangeControlTriggers(args.sqlite, args.db);

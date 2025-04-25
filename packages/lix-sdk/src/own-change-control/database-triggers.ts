@@ -127,7 +127,7 @@ export function applyOwnChangeControlTriggers(
 	//    - automatic flush using sqlite's `commit` hook runs out of transaction (bad)
 	sqlite.exec(`
     CREATE TEMP TRIGGER IF NOT EXISTS flush_system_changes_before_version_update
-    BEFORE UPDATE OF change_set_id ON version_v2
+    BEFORE UPDATE OF change_set_id ON version
     BEGIN
       INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
       VALUES ('lix_flushing_own_changes', 'true', true);
@@ -185,13 +185,13 @@ export function applyOwnChangeControlTriggers(
 
           INSERT INTO change_set_edge (parent_id, child_id)
           SELECT change_set_id, (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
-          FROM version_v2
+          FROM version
           WHERE id = (SELECT version_id FROM active_version)
           AND change_set_id IN (
             SELECT id FROM change_set WHERE immutable_elements = true
           );
 
-          UPDATE version_v2
+          UPDATE version
           SET change_set_id = (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
           WHERE id = (SELECT version_id FROM active_version);
 
