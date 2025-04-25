@@ -1,5 +1,13 @@
 # @inlang/sdk
 
+## 2.4.8
+
+### Patch Changes
+
+- 56acb22: fix: loading plugins from cache in directory mode https://github.com/opral/inlang-paraglide-js/issues/498
+- Updated dependencies [aa4d69e]
+  - @lix-js/sdk@0.4.7
+
 ## 2.4.7
 
 ### Patch Changes

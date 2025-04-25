@@ -1,5 +1,12 @@
 # @lix-js/plugin-json
 
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies [aa4d69e]
+  - @lix-js/sdk@0.4.7
+
 ## 0.1.7
 
 ### Patch Changes

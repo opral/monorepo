@@ -1,27 +1,13 @@
----
-imports:
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-feature.js
-  - https://cdn.jsdelivr.net/npm/@opral/markdown-wc-doc-elements/dist/doc-features.js
----
+# Paraglide JS Vite setup
 
-# Paraglide JS Vite example
+Paraglide JS provides a plugin for Vite. 
 
-This example shows how to use Paraglide with Vite. 
+If you use Vite in your project, Paraglide JS is almost certainly the best i18n library you can adopt. Check out the [comparison page](/m/gerre34r/library-inlang-paraglideJs/comparison):
 
-Any frontend framework that works with Vite is automatically supported. Paraglide JS does not require framework specific code. If you are looking for metaframework features, check out [Paraglide JS on the server](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/server-side-rendering).
-
-The source code for the vite example is [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/vite).
-
-<doc-features>
-  <doc-feature title="JavaScript" icon="devicon:javascript" color="#f0f0f0" text-color="#000"></doc-feature>
-  <doc-feature title="TypeScript" icon="devicon:typescript" color="#f0f0f0" text-color="#000"></doc-feature>
-  <doc-feature title="React" icon="devicon:react" color="#f0f0f0" text-color="#000"></doc-feature>
-  <doc-feature title="Vue" icon="devicon:vuejs" color="#e0e0e0" text-color="#111"></doc-feature>
-  <doc-feature title="Svelte" icon="devicon:svelte" color="#f0f0f0" text-color="#000"></doc-feature>
-  <doc-feature title="Solid" icon="devicon:solidjs" color="#f0f0f0" text-color="#000"></doc-feature>
-  <doc-feature title="Preact" icon="logos:preact" color="#f0f0f0" text-color="#000"></doc-feature>
-  <doc-feature title="Lit" icon="logos:lit" color="#f0f0f0" text-color="#000"></doc-feature>
-</doc-features>
+- Simple one plugin setup.
+- Automatic re-compilation with HMR.
+- Supports any framework (React, Vue, Svelte, Solid JS, Preact, Lit).
+- Supports any Vite-based metaframework (React Router, TanStack Start, SvelteKit, Nuxt, ...). 
 
 ## Getting started
 
@@ -48,3 +34,11 @@ export default defineConfig({
 ## Usage
 
 See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for more information on how to use Paraglide's messages, parameters, and locale management.
+
+## I18n routing
+
+Check out [Paraglide JS on the server](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/server-side-rendering) for i18n routing.
+
+## Example
+
+A full example can be found [here](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/examples/vite).
