@@ -4,7 +4,6 @@ import type {
 	ActiveAccountTable,
 } from "../account/database-schema.js";
 import type { KeyValueTable } from "../key-value/database-schema.js";
-import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
 import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
 import type {
 	ActiveVersionTable,
@@ -50,7 +49,7 @@ export type LixDatabaseSchema = {
 	key_value: KeyValueTable;
 
 	// change proposal
-	change_proposal: ChangeProposalTable;
+	// change_proposal: ChangeProposalTable;
 
 	// thread
 	thread: ThreadTable;
@@ -59,10 +58,6 @@ export type LixDatabaseSchema = {
 	// version v2
 	version_v2: VersionV2Table;
 	active_version: ActiveVersionTable;
-
-	// change conflicts
-	change_conflict: ChangeConflictTable;
-	change_conflict_resolution: ChangeConflictResolutionTable;
 };
 
 // named lix file to avoid conflict with built-in file type
@@ -112,13 +107,6 @@ type ChangeTable = {
 	created_at: Generated<string>;
 };
 
-export type ChangeEdge = Selectable<ChangeEdgeTable>;
-export type NewChangeEdge = Insertable<ChangeEdgeTable>;
-type ChangeEdgeTable = {
-	parent_id: string;
-	child_id: string;
-};
-
 export type ChangeAuthor = Selectable<ChangeAuthorTable>;
 export type NewChangeAuthor = Insertable<ChangeAuthorTable>;
 type ChangeAuthorTable = {
@@ -150,81 +138,4 @@ export type LabelUpdate = Updateable<LabelTable>;
 type LabelTable = {
 	id: Generated<string>;
 	name: string;
-};
-
-// ------ version ------
-
-export type Version = Selectable<VersionTable>;
-export type Newversion = Insertable<VersionTable>;
-export type VersionUpdate = Updateable<VersionTable>;
-type VersionTable = {
-	id: Generated<string>;
-	name: Generated<string>;
-};
-
-export type VersionChange = Selectable<VersionChangeTable>;
-export type NewVersionChange = Insertable<VersionChangeTable>;
-export type VersionChangeUpdate = Updateable<VersionChangeTable>;
-type VersionChangeTable = {
-	version_id: string;
-	change_id: string;
-	entity_id: string;
-	file_id: string;
-	schema_key: string;
-};
-
-export type VersionChangeConflict = Selectable<VersionChangeConflictTable>;
-export type NewversionChangeConflict = Insertable<VersionChangeConflictTable>;
-export type VersionChangeConflictUpdate =
-	Updateable<VersionChangeConflictTable>;
-type VersionChangeConflictTable = {
-	version_id: string;
-	change_conflict_id: string;
-};
-
-export type CurrentVersion = Selectable<CurrentVersionTable>;
-export type NewCurrentVersion = Insertable<CurrentVersionTable>;
-export type CurrentVersionUpdate = Updateable<CurrentVersionTable>;
-type CurrentVersionTable = {
-	id: string;
-};
-
-// export type versionTarget = Selectable<versionTargetTable>;
-// export type NewversionTarget = Insertable<versionTargetTable>;
-// export type versionTargetUpdate = Updateable<versionTargetTable>;
-// type versionTargetTable = {
-// 	source_version_id: string;
-// 	target_version_id: string;
-// };
-
-// -------- change conflicts --------
-
-export type ChangeConflict = Selectable<ChangeConflictTable>;
-export type NewChangeConflict = Insertable<ChangeConflictTable>;
-export type ChangeConflictUpdate = Updateable<ChangeConflictTable>;
-type ChangeConflictTable = {
-	id: Generated<string>;
-	/**
-	 * The key is used to identify the conflict.
-	 *
-	 * The key should be unique for the plugin and the conflict
-	 * to avoid duplicate conflict reports.
-	 *
-	 * @example
-	 *   - `csv-row-order-changed`
-	 *   - `inlang-message-bundle-foreign-key-violation`
-	 */
-	key: string;
-	change_set_id: string;
-};
-
-export type ChangeConflictResolution =
-	Selectable<ChangeConflictResolutionTable>;
-export type NewChangeConflictResolution =
-	Insertable<ChangeConflictResolutionTable>;
-export type ChangeConflictResolutionUpdate =
-	Updateable<ChangeConflictResolutionTable>;
-type ChangeConflictResolutionTable = {
-	change_conflict_id: string;
-	resolved_change_id: string;
 };

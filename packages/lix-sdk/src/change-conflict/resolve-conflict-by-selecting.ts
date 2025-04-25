@@ -3,7 +3,6 @@
 
 import type { Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { applyChanges } from "../change/apply-changes.js";
 
 /**
  * Resolves a conflict by selecting one of the two

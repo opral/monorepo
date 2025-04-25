@@ -79,27 +79,6 @@ export function applySchema(args: {
 
   CREATE INDEX IF NOT EXISTS idx_content_hash ON snapshot (id);
 
-  CREATE TABLE IF NOT EXISTS change_conflict (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    
-    key TEXT NOT NULL,
-    change_set_id TEXT NOT NULL,
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
-  ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS change_conflict_resolution (
-    change_conflict_id TEXT NOT NULL,
-    resolved_change_id TEXT NOT NULL,
-    
-    -- potential future columns
-    -- resolved_by <account_id>
-    -- resolved_at <timestamp>
-
-    PRIMARY KEY(change_conflict_id, resolved_change_id),
-    FOREIGN KEY(change_conflict_id) REFERENCES change_conflict(id),
-    FOREIGN KEY(resolved_change_id) REFERENCES change(id)
-  ) STRICT;
-
   -- labels
   
   CREATE TABLE IF NOT EXISTS label (
