@@ -207,21 +207,6 @@ test("the checkpoint label should be created if it doesn't exist", async () => {
 	});
 });
 
-test("a default main version should exist", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const version = await db
-		.selectFrom("version")
-		.selectAll()
-		.where("name", "=", "main")
-		.executeTakeFirst();
-
-	expect(version).toBeDefined();
-});
-
 test("invalid file paths should be rejected", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,

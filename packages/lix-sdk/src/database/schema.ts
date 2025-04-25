@@ -60,16 +60,6 @@ export type LixDatabaseSchema = {
 	thread: ThreadTable;
 	thread_comment: ThreadCommentTable;
 
-	// version
-	/**
-	 * @deprecated Use `version_v2` instead
-	 */
-	version: VersionTable;
-	/**
-	 * @deprecated Versions point to change sets directly in lix v0.5
-	 */
-	version_change: VersionChangeTable;
-
 	// version v2
 	version_v2: VersionV2Table;
 	active_version: ActiveVersionTable;

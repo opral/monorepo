@@ -122,36 +122,6 @@ export function applySchema(args: {
 
   INSERT OR IGNORE INTO label (name) VALUES ('checkpoint');
 
-  -- versions
-
-  CREATE TABLE IF NOT EXISTS version (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-
-    name TEXT NOT NULL UNIQUE DEFAULT (human_id())
-  ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS version_change (
-    version_id TEXT NOT NULL,
-    change_id TEXT NOT NULL,
-
-    entity_id TEXT NOT NULL,
-    schema_key TEXT NOT NULL,
-    file_id TEXT NOT NULL,
-
-    PRIMARY KEY (version_id, change_id),
-    FOREIGN KEY (version_id) REFERENCES version(id) ON DELETE CASCADE,
-    FOREIGN KEY (change_id, entity_id, schema_key, file_id) REFERENCES change(id, entity_id, schema_key, file_id) ON DELETE CASCADE,
-
-    UNIQUE (version_id, entity_id, schema_key, file_id)
-  ) STRICT;
-
-  -- Insert the default version if missing
-  -- (this is a workaround for not having a separata creation and migration schema's)
-
-  INSERT INTO version (id, name)
-  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main'
-  WHERE NOT EXISTS (SELECT 1 FROM version);
-
   CREATE TEMP TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_change_author
   BEFORE INSERT ON change_author
   FOR EACH ROW
