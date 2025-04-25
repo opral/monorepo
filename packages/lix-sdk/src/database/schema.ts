@@ -62,10 +62,6 @@ export type LixDatabaseSchema = {
 
 	// version
 	/**
-	 * @deprecated Use `active_version` instead
-	 */
-	current_version: CurrentVersionTable;
-	/**
 	 * @deprecated Use `version_v2` instead
 	 */
 	version: VersionTable;

@@ -154,27 +154,12 @@ export function applySchema(args: {
     FOREIGN KEY (change_conflict_id) REFERENCES change_conflict(id)
   ) STRICT;
 
-  -- only one version can be active at a time
-  -- hence, the table has only one row
-  CREATE TABLE IF NOT EXISTS current_version (
-    id TEXT NOT NULL PRIMARY KEY,
-
-    FOREIGN KEY(id) REFERENCES version(id)
-  ) STRICT;
-
   -- Insert the default version if missing
   -- (this is a workaround for not having a separata creation and migration schema's)
 
   INSERT INTO version (id, name)
   SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6', 'main'
   WHERE NOT EXISTS (SELECT 1 FROM version);
-
-  -- Set the default current version to 'main' if both tables are empty
-  -- (this is a workaround for not having a separata creation and migration schema's)
-  INSERT INTO current_version (id)
-  SELECT '019328cc-ccb0-7f51-96e8-524df4597ac6'
-  WHERE NOT EXISTS (SELECT 1 FROM current_version);
-
 
   CREATE TEMP TRIGGER IF NOT EXISTS insert_account_if_not_exists_on_change_author
   BEFORE INSERT ON change_author

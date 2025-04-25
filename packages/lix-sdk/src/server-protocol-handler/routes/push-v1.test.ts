@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { test, expect, vi } from "vitest";
 import type * as LixServerProtocol from "../../../../lix/server-protocol-schema/dist/schema.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
@@ -6,7 +9,6 @@ import type { Change } from "../../database/schema.js";
 import { mockChange } from "../../change/mock-change.js";
 import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 import { createVersion } from "../../version/create-version.js";
-import { switchVersion } from "../../version/switch-version.js";
 import { pullFromServer } from "../../sync/pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";

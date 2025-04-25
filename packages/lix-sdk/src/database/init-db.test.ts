@@ -225,30 +225,6 @@ test("a default main version should exist", async () => {
 	expect(version).toBeDefined();
 });
 
-test("re-opening the same database shouldn't lead to duplicate insertion of the current version", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const newversion = await db
-		.insertInto("version")
-		.values({ name: "mock" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	await db.updateTable("current_version").set({ id: newversion.id }).execute();
-
-	const db2 = initDb({ sqlite });
-
-	const currentversion = await db2
-		.selectFrom("current_version")
-		.selectAll()
-		.execute();
-
-	expect(currentversion).toHaveLength(1);
-});
-
 test("invalid file paths should be rejected", async () => {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,

@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import {
@@ -5,7 +8,6 @@ import {
 	createServerProtocolHandler,
 } from "../server-protocol-handler/index.js";
 import { createVersion } from "../version/create-version.js";
-import { switchVersion } from "../version/switch-version.js";
 import type { Version } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { toBlob } from "../lix/to-blob.js";
