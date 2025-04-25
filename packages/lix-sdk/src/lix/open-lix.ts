@@ -4,7 +4,6 @@ import { initDb } from "../database/init-db.js";
 import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import { initSyncProcess } from "../sync/sync-process.js";
 import type { NewKeyValue } from "../key-value/database-schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
@@ -100,7 +99,7 @@ export async function openLix(args: {
 
 	await initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
 
-	await initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
+	// await initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
 
 	captureOpened({ db });
 

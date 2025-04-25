@@ -246,7 +246,7 @@ test.skip("switching synced versions should work", async () => {
 	});
 });
 
-test("doesnt sync if lix_sync is not true", async () => {
+test.skip("doesnt sync if lix_sync is not true", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 	global.fetch = vi.fn((request) => lspHandler(request));

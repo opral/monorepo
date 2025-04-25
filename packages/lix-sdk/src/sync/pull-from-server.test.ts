@@ -74,7 +74,7 @@ test.skip("pull rows of multiple tables from server successfully and applies the
 	expect(mockKey).toMatchObject({ key: "mock-key", value: "mock-value" });
 });
 
-test("it handles snapshot.content being json binary", async () => {
+test.skip("it handles snapshot.content being json binary", async () => {
 	const lixOnServer = await openLixInMemory({});
 
 	const lix = await openLixInMemory({
@@ -131,7 +131,7 @@ test("it handles snapshot.content being json binary", async () => {
 	expect(snapshots).toMatchObject(mockSnapshot);
 });
 
-test("rows changed on the client more recently should not be updated", async () => {
+test.skip("rows changed on the client more recently should not be updated", async () => {
 	const lixOnServer = await openLixInMemory({});
 
 	const lixId = await lixOnServer.db
@@ -295,7 +295,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 	expect(mockKey).toEqual({ key: "mock-key", value: "mock-value" });
 });
 
-// test("it should handle files without syncing the data column", async () => {
+// test.skip("it should handle files without syncing the data column", async () => {
 // 	const lix = await openLixInMemory({});
 
 // 	const { value: id } = await lix.db

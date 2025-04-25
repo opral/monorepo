@@ -4,7 +4,6 @@ import type {
 	ActiveAccountTable,
 } from "../account/database-schema.js";
 import type { KeyValueTable } from "../key-value/database-schema.js";
-import type { MutationLogTable } from "./mutation-log/database-schema.js";
 import type { ChangeProposalTable } from "../change-proposal/database-schema.js";
 import type { ChangeSetEdgeTable } from "../change-set-edge/database-schema.js";
 import type {
@@ -86,11 +85,6 @@ export type LixDatabaseSchema = {
 	// change conflicts
 	change_conflict: ChangeConflictTable;
 	change_conflict_resolution: ChangeConflictResolutionTable;
-
-	/**
-	 * @deprecated Lix tracks its own changes.
-	 */
-	mutation_log: MutationLogTable;
 };
 
 // named lix file to avoid conflict with built-in file type

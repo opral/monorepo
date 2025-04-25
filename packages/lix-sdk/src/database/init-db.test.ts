@@ -4,7 +4,6 @@ import { initDb } from "./init-db.js";
 import { validate } from "uuid";
 import { mockChange } from "../change/mock-change.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
-import { sql } from "kysely";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 import { createVersion } from "../version/create-version.js";
@@ -175,7 +174,6 @@ test("files should be able to have metadata", async () => {
 	expect(updatedFile.metadata?.primary_key).toBe("something-else");
 });
 
-
 // 2M IDs needed, in order to have a 1% probability of at least one collision.
 // it is assumed that creating 2 million labels is ... unlikely
 test("label.id is nano_id(8)", async () => {
@@ -275,97 +273,6 @@ test("invalid file paths should be rejected", async () => {
 			.returningAll()
 			.execute()
 	).rejects.toThrowError("File path must start with a slash");
-});
-
-test("vector clock functions", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const vectorClockTick1 =
-		await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
-			db
-		);
-	const vectorClockTick2 =
-		await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
-			db
-		);
-
-	expect((vectorClockTick1.rows[0] as any)["session"]).toEqual(
-		(vectorClockTick2.rows[0] as any)["session"]
-	);
-	expect((vectorClockTick1.rows[0] as any)["time"]).toBeLessThan(
-		(vectorClockTick2.rows[0] as any)["time"]
-	);
-});
-
-test("mutation should only be recorded if sync row is not present", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	await db
-		.insertInto("change")
-		.values({
-			schema_key: "file",
-			entity_id: "value1",
-			file_id: "mock",
-			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-	const mutation = await db.selectFrom("mutation_log").selectAll().execute();
-
-	expect(mutation).toHaveLength(1);
-
-	await db
-		.insertInto("mutation_log")
-		.values({
-			session: "mock",
-			wall_clock: 0,
-			session_time: 0,
-			row_id: { ignored: "ignored" },
-			table_name: "mutation_log",
-			operation: "INSERT",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const mutationWithFlag = await db
-		.selectFrom("mutation_log")
-		.selectAll()
-		.execute();
-	expect(mutationWithFlag).toHaveLength(2);
-
-	await db
-		.insertInto("change")
-		.values({
-			schema_key: "file",
-			entity_id: "value1",
-			file_id: "mock",
-			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const mutationLogAfterIgnoredChange = await db
-		.selectFrom("mutation_log")
-		.selectAll()
-		.execute();
-	expect(mutationLogAfterIgnoredChange).toHaveLength(2);
-
-	// const vectorClockTick1 =
-	// 	await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
-	// 		db
-	// 	);
-	// const vectorClockTick2 =
-	// 	await sql`select lix_session() as session, lix_session_clock_tick() as time`.execute(
-	// 		db
-	// 	);
 });
 
 test("deleting a version cascades to version changes", async () => {

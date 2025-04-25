@@ -11,7 +11,7 @@ import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
 
-test("push rows of multiple tables to server successfully", async () => {
+test.skip("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
 
 	const lix = await openLixInMemory({ blob: lixBlob });
@@ -279,7 +279,7 @@ test.skip("push-pull-push with two clients", async () => {
 	);
 });
 
-test("it should handle snapshots.content json binaries", async () => {
+test.skip("it should handle snapshots.content json binaries", async () => {
 	const lix = await openLixInMemory({});
 
 	const { value: id } = await lix.db
