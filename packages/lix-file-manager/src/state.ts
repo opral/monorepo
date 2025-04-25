@@ -1,9 +1,9 @@
 import {
-	Version,
 	openLixInMemory,
 	Account,
 	switchAccount,
 	Lix,
+	VersionV2,
 } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
@@ -40,10 +40,10 @@ export const lixIdSearchParamsAtom = atom((get) => {
 	return searchParams.get("lix") || undefined;
 });
 
-export const discussionSearchParamsAtom = atom(async (get) => {
+export const threadSearchParamsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("d");
+	return searchParams.get("t");
 });
 
 export const availableLixFilesInOpfsAtom = atom(async (get) => {
@@ -203,18 +203,18 @@ export const lixAtom = atom(async (get) => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const currentVersionAtom = atom<Promise<Version | null>>(async (get) => {
+export const activeVersionAtom = atom<Promise<VersionV2 | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return null;
 
-	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "version.id", "current_version.id")
-		.selectAll("version")
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
 		.executeTakeFirstOrThrow();
 
-	return currentVersion;
+	return activeVersion;
 });
 
 export const existingVersionsAtom = atom(async (get) => {
@@ -222,7 +222,7 @@ export const existingVersionsAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	if (!lix) return [];
 
-	return await lix.db.selectFrom("version").selectAll().execute();
+	return await lix.db.selectFrom("version_v2").selectAll().execute();
 });
 
 export const filesAtom = atom(async (get) => {
@@ -238,7 +238,7 @@ export const activeAccountAtom = atom(async (get) => {
 
 	return await lix.db
 		.selectFrom("active_account")
-		.selectAll("active_account")
+		.selectAll()
 		// assuming only one account active at a time
 		.executeTakeFirstOrThrow();
 });

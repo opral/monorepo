@@ -18,7 +18,7 @@ const FilterSelect = () => {
   const [selectedChangeIds, setSelectedChangeIds] = useAtom(selectedChangeIdsAtom);
   const [lix] = useAtom(lixAtom);
   // TODO: replace with actual changes if this component is used again
-  const [changesCurrentVersion] = useState<{ id: string }[]>([]);
+  const [changesActiveVersion] = useState<{ id: string }[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const form = useForm({
     defaultValues: {
@@ -30,8 +30,8 @@ const FilterSelect = () => {
 
   const handleSelectAll = () => {
     // select or unset all changes
-    if (selectedChangeIds.length === 0 && changesCurrentVersion.length > 0) {
-      setSelectedChangeIds(changesCurrentVersion.map((change) => change.id));
+    if (selectedChangeIds.length === 0 && changesActiveVersion.length > 0) {
+      setSelectedChangeIds(changesActiveVersion.map((change) => change.id));
     } else {
       setSelectedChangeIds([]);
     }
@@ -84,8 +84,8 @@ const FilterSelect = () => {
       <div className="pl-3 pr-2 py-1.5 w-full h-12 flex items-center gap-3 text-slate-500">
         <Checkbox
           onClick={handleSelectAll}
-          checked={changesCurrentVersion.length === selectedChangeIds.length}
-          minus={selectedChangeIds.length > 0 && changesCurrentVersion.length !== selectedChangeIds.length}
+          checked={changesActiveVersion.length === selectedChangeIds.length}
+          minus={selectedChangeIds.length > 0 && changesActiveVersion.length !== selectedChangeIds.length}
         />
         {selectedChangeIds.length > 0 && (
           <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>

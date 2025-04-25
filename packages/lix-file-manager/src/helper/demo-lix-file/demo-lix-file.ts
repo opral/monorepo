@@ -1,18 +1,19 @@
 import {
 	changeHasLabel,
 	createAccount,
-	createChangeSet,
-	createComment,
-	createDiscussion,
+	createCheckpoint,
+	createThread,
 	fileQueueSettled,
-	Label,
 	Lix,
 	newLixFile,
 	openLixInMemory,
 	switchAccount,
+	Thread,
 	toBlob,
 } from "@lix-js/sdk";
 import { supportedFileTypes } from "@/state.ts";
+import { getThreads, getWorkingChangeSet } from "@/state-active-file.ts";
+import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
 	const lix = await openLixInMemory({
@@ -59,12 +60,6 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		"Henry Clark,DevOps Engineer,Engineering,95000",
 	];
 
-	const checkpointLabel = await lix.db
-		.selectFrom("label")
-		.where("name", "=", "checkpoint")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
 	await switchAccount({ lix, to: [anna] });
 
 	const file = await lix.db
@@ -85,7 +80,6 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		file,
 		rows,
 		timestamp: "2022-03-11 14:53:00.000",
-		checkpointLabel,
 		comment: "Initial salaries",
 	});
 
@@ -99,7 +93,6 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		file,
 		rows,
 		timestamp: "2022-04-14 19:53:00.000",
-		checkpointLabel,
 		comment: "Increased Charlie Davis salary",
 	});
 
@@ -113,37 +106,35 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		file,
 		rows,
 		timestamp: "2022-05-11 14:53:00.000",
-		checkpointLabel,
 		comment: "Promoted Alice Johnson to Senior Data Scientist",
 	});
 
 	// Peter hires a new employee
 	rows.push("Klaus Kleber,Intern,HR,40000");
 
-	const { discussion } = await createChangesWithCheckpoint({
+	const { threads } = await createChangesWithCheckpoint({
 		lix,
 		file,
 		rows,
 		timestamp: "2022-05-13 14:53:00.000",
-		checkpointLabel,
 		comment: "Hired Klaus Kleber",
 	});
 
 	// Anna thinks the salary is too low of Klaus Kleber
 	await switchAccount({ lix, to: [anna] });
 
-	const annasComment = await createComment({
+	await createComment({
 		lix,
-		parentComment: discussion.firstComment,
+		threadId: threads![0].id,
 		content: "I think the salary is too low. Adjust to 45000?",
 	});
 
 	// Otto agrees with Anna
 	await switchAccount({ lix, to: [otto] });
 
-	const ottosComment = await createComment({
+	await createComment({
 		lix,
-		parentComment: annasComment,
+		threadId: threads![0].id,
 		content: "I agree. Adjust to 45000.",
 	});
 
@@ -152,7 +143,7 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 
 	await createComment({
 		lix,
-		parentComment: ottosComment,
+		threadId: threads![0].id,
 		content: "Aye from me as well",
 	});
 
@@ -166,7 +157,6 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		file,
 		rows,
 		timestamp: "2022-05-14 11:42:00.000",
-		checkpointLabel,
 		comment: "Increased Klaus Kleber salary",
 	});
 
@@ -181,7 +171,6 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		file,
 		rows,
 		timestamp: "2023-01-01 10:45:00.000",
-		checkpointLabel,
 		comment: "Hired Klaus Kleber after intern period",
 	});
 
@@ -202,7 +191,6 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		file,
 		rows,
 		timestamp: "2023-02-01 10:45:00.000",
-		checkpointLabel,
 		comment: "Updated salary bands",
 	});
 }
@@ -212,7 +200,6 @@ async function createChangesWithCheckpoint(args: {
 	file: { id: string };
 	rows: string[];
 	timestamp: string;
-	checkpointLabel: Label;
 	comment: string;
 }) {
 	await args.lix.db
@@ -242,29 +229,41 @@ async function createChangesWithCheckpoint(args: {
 			.execute();
 	}
 
-	const changeSet = await createChangeSet({
-		lix: args.lix,
-		elements: changes.map((change) => ({
-			file_id: change.file_id,
-			schema_key: change.schema_key,
-			change_id: change.id,
-			entity_id: change.entity_id,
-		})),
-	});
+	const changeSet = await getWorkingChangeSet(args.lix, args.file.id);
 
-	const discussion = await createDiscussion({
-		changeSet,
-		lix: args.lix,
-		firstComment: { content: args.comment },
-	});
+	if (changeSet) {
+		args.lix.db.transaction().execute(async (trx) => {
+			const thread = await createThread({
+				lix: { ...args.lix, db: trx },
+				comments: [{ content: fromPlainText(args.comment) }],
+			});
+			await trx
+				.insertInto("change_set_thread")
+				.values({
+					change_set_id: changeSet.id,
+					thread_id: thread.id,
+				})
+				.execute();
+		});
+	}
 
+	const threads = await getThreads(args.lix, changeSet!.id);
+
+	await createCheckpoint({ lix: args.lix });
+
+	return { threads };
+}
+
+const createComment = async (args: {
+	lix: Lix;
+	threadId: Thread["id"];
+	content: string;
+}) => {
 	await args.lix.db
-		.insertInto("change_set_label")
+		.insertInto("thread_comment")
 		.values({
-			change_set_id: changeSet.id,
-			label_id: args.checkpointLabel.id,
+			content: fromPlainText(args.content),
+			thread_id: args.threadId,
 		})
 		.execute();
-
-	return { discussion };
-}
+};

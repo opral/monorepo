@@ -2,7 +2,7 @@ import IconUpload from "@/components/icons/IconUpload.tsx";
 import SectionHeader from "@/components/SectionHeader.tsx";
 import ListItems from "@/components/ListItems.tsx";
 import {
-	discussionSearchParamsAtom,
+	threadSearchParamsAtom,
 	fileIdSearchParamsAtom,
 	filesAtom,
 	lixAtom,
@@ -20,7 +20,7 @@ import {
 } from "@/state-active-file.ts";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ChatInput from "@/components/ChatInput.tsx";
-import ConnectedChanges from "@/components/ConnectedChanges.tsx";
+// import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
 import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
@@ -75,7 +75,7 @@ export default function Page() {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
 	const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom);
-	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
+	const [threadSearchParams] = useAtom(threadSearchParamsAtom);
 	const [searchParams] = useSearchParams();
 
 	//hooks
@@ -340,14 +340,14 @@ export default function Page() {
 			</div>
 			<Separator orientation="vertical" className="h-full" />
 
-			{fileIdSearchParams && discussionSearchParams && (
+			{fileIdSearchParams && threadSearchParams && (
 				<div className="flex-1 h-full pb-2">
 					<SectionHeader
 						backaction={() => navigate(`/?f=${fileIdSearchParams}`)}
 						title={`Discussion`}
 					/>
 					<div className="flex flex-col px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
-						<ConnectedChanges />
+						{/* <ConnectedChanges /> */}
 						<div className="flex-1 mt-6">
 							<DiscussionThread />
 						</div>
@@ -355,7 +355,7 @@ export default function Page() {
 					</div>
 				</div>
 			)}
-			{!discussionSearchParams && (
+			{!threadSearchParams && (
 				<div className="flex-1 h-full pb-2">
 					<SectionHeader
 						backaction={activeFile ? () => navigate("/") : undefined}
@@ -407,13 +407,15 @@ export default function Page() {
 									{intermediateChanges.length > 0 && (
 										<IntermediateCheckpointComponent />
 									)}
-									{checkpointChangeSets.map((checkpointChangeSet, i) => {
+										{checkpointChangeSets.map((checkpointChangeSet, index) => {
+											const previousCheckpointId = checkpointChangeSets[index + 1]?.id ?? undefined;
 										return (
 											<CheckpointComponent
 												key={checkpointChangeSet.id}
 												checkpointChangeSet={checkpointChangeSet}
-												showTopLine={i !== 0 || intermediateChanges.length > 0}
-												showBottomLine={i !== checkpointChangeSets.length - 1}
+												previousChangeSetId={previousCheckpointId}
+												showTopLine={index !== 0 || intermediateChanges.length > 0}
+												showBottomLine={index !== checkpointChangeSets.length - 1}
 											/>
 										);
 									})}

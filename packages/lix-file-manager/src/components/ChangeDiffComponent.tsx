@@ -7,8 +7,9 @@ import clsx from "clsx";
 export const ChangeDiffComponent = (props: {
 	diffs: UiDiffComponentProps["diffs"];
 	className?: string;
+	contentClassName?: string;
+	debug?: boolean;
 }) => {
-	console.log("ChangeDiffComponent", props);
 	const [lix] = useAtom(lixAtom);
 	const [isComponentLoaded, setIsComponentLoaded] = useState(false);
 
@@ -25,10 +26,10 @@ export const ChangeDiffComponent = (props: {
 				if (component) {
 					customElements.define(CustomElementName, component);
 					setIsComponentLoaded(true);
-					} else {
+				} else {
 					console.warn(`No diff UI component found for plugin key '${pluginKey}'`);
 					// Fallback logic
-					}
+				}
 			} else {
 				setIsComponentLoaded(true);
 			}
@@ -43,10 +44,17 @@ export const ChangeDiffComponent = (props: {
 
 	return (
 		<div className={clsx("w-full overflow-x-auto pb-4", props.className)}>
-			<CustomElementName
-				// @ts-expect-error - Custom element props
-				diffs={props.diffs}
-			/>
+			<div className={props.contentClassName}>
+				<CustomElementName
+					// @ts-expect-error - Custom element props
+					diffs={props.diffs}
+				/>
+			</div>
+			{props.debug && (
+				<pre className="text-xs text-gray-500 whitespace-pre-wrap break-all">
+					{JSON.stringify(props.diffs, null, 2)}
+				</pre>
+			)}
 		</div>
 	);
 };
