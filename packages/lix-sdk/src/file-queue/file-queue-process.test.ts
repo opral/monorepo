@@ -2,8 +2,10 @@ import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
-import type { FileQueueEntry, LixFile } from "../database/schema.js";
+import type { LixFile } from "../database/schema.js";
 import { fileQueueSettled } from "./file-queue-settled.js";
+import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import type { FileQueueEntry } from "./database-schema.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {
@@ -38,12 +40,6 @@ test("should use queue and settled correctly", async () => {
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
-
-	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "current_version.id", "version.id")
-		.selectAll()
-		.executeTakeFirstOrThrow();
 
 	const enc = new TextEncoder();
 	const dataInitial = enc.encode("insert text");
@@ -116,20 +112,6 @@ test("should use queue and settled correctly", async () => {
 		.where("id", "=", "test")
 		.execute();
 
-	// const beforeQueueTick = await lix.db
-	// 	.selectFrom("file_queue")
-	// 	.selectAll()
-	// 	.execute();
-
-	// expect(beforeQueueTick.length).toBe(1);
-
-	// const afterQueueTick = await lix.db
-	// 	.selectFrom("file_queue")
-	// 	.selectAll()
-	// 	.execute();
-
-	// expect(afterQueueTick.length).toBe(0);
-
 	// update2 is equal to update1
 	const dataUpdate2 = dataUpdate1;
 
@@ -187,17 +169,6 @@ test("should use queue and settled correctly", async () => {
 		.select("snapshot.content")
 		.execute();
 
-	const updatedEdges = await lix.db
-		.selectFrom("change_edge")
-		.selectAll()
-		.execute();
-
-	const versionChanges = await lix.db
-		.selectFrom("version_change")
-		.where("version_id", "=", currentVersion.id)
-		.selectAll()
-		.execute();
-
 	expect(updatedChanges).toEqual(
 		expect.arrayContaining([
 			expect.objectContaining({
@@ -233,30 +204,21 @@ test("should use queue and settled correctly", async () => {
 		])
 	);
 
-	expect(updatedEdges).toEqual(
-		expect.arrayContaining([
-			// 0 is the parent of 1
-			// 1 is the parent of 2
-			expect.objectContaining({
-				parent_id: updatedChanges[0]?.id,
-				child_id: updatedChanges[1]?.id,
-			}),
-			expect.objectContaining({
-				parent_id: updatedChanges[1]?.id,
-				child_id: updatedChanges[2]?.id,
-			}),
-		])
-	);
+	// Find all change sets whose IDs do not appear as a parent_id in any edge
+	const leafChangeSets = await lix.db
+		.selectFrom("change_set")
+		.where("change_set.id", "not in", (eb) =>
+			eb
+				.selectFrom("change_set_edge")
+				.select("change_set_edge.parent_id")
+				.distinct()
+		)
+		.selectAll("change_set")
+		.execute();
 
-	// the version change pointers points to the last change
-	expect(versionChanges).toEqual(
-		expect.arrayContaining([
-			expect.objectContaining({
-				version_id: currentVersion.id,
-				change_id: updatedChanges[2]?.id,
-			}),
-		])
-	);
+	// There should only be one leaf change set at the end
+	// plus the working change set
+	expect(leafChangeSets).toHaveLength(2);
 });
 
 test.todo("changes should contain the author", async () => {
@@ -453,4 +415,148 @@ test("should handle file deletions correctly", async () => {
 		.execute();
 
 	expect(internalFilesAfter).toEqual([]);
+});
+
+test("handles file upserts without reporting duplicates", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// creating a file insert and upsert
+	await lix.db
+		.insertInto("file")
+		.values(
+			Array.from({ length: 2 }, (_, i) => ({
+				id: "mock_file",
+				data: new TextEncoder().encode(
+					JSON.stringify({
+						name: `Max${i}`,
+					})
+				),
+				path: `/test.json`,
+			}))
+		)
+		.onConflict((oc) =>
+			oc.doUpdateSet((eb) => ({
+				data: eb.ref("excluded.data"),
+			}))
+		)
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	await fileQueueSettled({ lix });
+
+	// should have detected 2 changes
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("file_id", "=", "mock_file")
+		.select("snapshot.content")
+		.execute();
+
+	expect(changes).toEqual([
+		{
+			content: {
+				value: "Max0",
+			},
+		},
+		{
+			content: {
+				value: "Max1",
+			},
+		},
+	]);
+});
+
+// Test that the file queue doesn't get stuck in a deadlock when handlers throw errors
+test("file queue should not deadlock when handlers throw errors", async () => {
+	// Create plugins - one that will throw errors and one that works correctly
+	const errorPlugin: LixPlugin = {
+		key: "error-plugin",
+		detectChangesGlob: "*.error.txt", // Only process error files
+		detectChanges: async () => {
+			throw new Error("Simulated plugin error");
+		},
+	};
+
+	const successPlugin: LixPlugin = {
+		key: "success-plugin",
+		detectChangesGlob: "*.success.txt", // Only process success files
+		detectChanges: async () => {
+			return [
+				{
+					schema: {
+						key: "text",
+						type: "json",
+					},
+					entity_id: "success-test",
+					snapshot: { text: "success" },
+				},
+			];
+		},
+	};
+
+	const lix = await openLixInMemory({
+		blob: await newLixFile(),
+		providePlugins: [errorPlugin, successPlugin],
+	});
+
+	const enc = new TextEncoder();
+
+	// Insert a file that will trigger the error
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "error-test",
+			path: "/test.error.txt",
+			data: enc.encode("error test"),
+		})
+		.execute();
+
+	// Verify the queue entry was created
+	const queueBefore = await lix.db
+		.selectFrom("file_queue")
+		.selectAll()
+		.execute();
+	expect(queueBefore.length).toBeGreaterThan(0);
+
+	// Wait for the queue to settle
+	await fileQueueSettled({ lix });
+
+	// The queue should be empty despite the error
+	const queueAfter = await lix.db
+		.selectFrom("file_queue")
+		.selectAll()
+		.execute();
+	expect(queueAfter.length).toBe(0);
+
+	// Insert a file that should process successfully
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "success-test",
+			path: "/test.success.txt",
+			data: enc.encode("success test"),
+		})
+		.execute();
+
+	// Wait for the queue to settle again
+	await fileQueueSettled({ lix });
+
+	// The queue should still be empty
+	const queueFinal = await lix.db
+		.selectFrom("file_queue")
+		.selectAll()
+		.execute();
+	expect(queueFinal.length).toBe(0);
+
+	// Verify a change was created for the success file
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("entity_id", "=", "success-test")
+		.select("snapshot.content")
+		.execute();
+
+	expect(changes.length).toBe(1);
 });

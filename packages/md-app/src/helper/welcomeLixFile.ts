@@ -4,11 +4,13 @@ import {
 	newLixFile,
 	openLixInMemory,
 	toBlob,
-	createDiscussion,
+	createCheckpoint,
+	createThread,
 } from "@lix-js/sdk";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { switchActiveAccount } from "@/state";
-import { createCheckpoint } from "./createCheckpoint";
+import { getWorkingChangeSet } from "../state-active-file";
+import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 /**
  * Executes a function as the Flashtype account and then restores the original account
@@ -69,9 +71,9 @@ export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
 	}
 
 	await withFlashtypeAccount(lix, async (lixWithFlashtype) => {
-		await setupMdWelcome(lixWithFlashtype);
+		const file = await setupMdWelcome(lixWithFlashtype);
 		await fileQueueSettled({ lix: lixWithFlashtype });
-		await createInitialCheckpoint(lixWithFlashtype);
+		await createInitialCheckpoint(lixWithFlashtype, file.id);
 	});
 
 	return { blob: await toBlob({ lix }) };
@@ -130,17 +132,25 @@ export const setupMdWelcome = async (lix: Lix) => {
 	return file;
 };
 
-const createInitialCheckpoint = async (lix: Lix) => {
-	const changeIds = await lix.db
-		.selectFrom("change")
-		.select("change.id")
-		.execute();
+const initialComment = fromPlainText("Setup welcome file");
 
-	// Now create the checkpoint with the Flashtype account
-	const changeSet = await createCheckpoint(lix, changeIds);
-	await createDiscussion({
-		lix,
-		changeSet,
-		firstComment: { content: "Setup welcome file" },
-	});
+const createInitialCheckpoint = async (lix: Lix, fileId: string) => {
+	const changeSet = await getWorkingChangeSet(lix, fileId);
+
+	if (changeSet) {
+		lix.db.transaction().execute(async (trx) => {
+			const thread = await createThread({
+				lix: { ...lix, db: trx },
+				comments: [{ content: initialComment }],
+			});
+			await trx
+				.insertInto("change_set_thread")
+				.values({
+					change_set_id: changeSet.id,
+					thread_id: thread.id,
+				})
+				.execute();
+		});
+	}
+	await createCheckpoint({ lix });
 };

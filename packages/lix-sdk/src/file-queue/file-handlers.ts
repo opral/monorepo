@@ -1,9 +1,11 @@
-import type { FileQueueEntry } from "../database/schema.js";
+import type { Change } from "../database/schema.js";
 import type { DetectedChange } from "../plugin/lix-plugin.js";
 import type { Lix } from "../lix/open-lix.js";
 import { sql } from "kysely";
 import { createChange } from "../change/create-change.js";
-import { changeIsLeafInVersion } from "../query-filter/change-is-leaf-in-version.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import type { FileQueueEntry } from "./database-schema.js";
+import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 
 async function glob(args: {
 	lix: Pick<Lix, "db">;
@@ -87,18 +89,11 @@ export async function handleFileInsert(args: {
 			.selectAll()
 			.execute();
 
-		const currentVersion = await trx
-			.selectFrom("current_version")
-			.innerJoin("version", "current_version.id", "version.id")
-			.selectAll()
-			.executeTakeFirstOrThrow();
-
-		await Promise.all(
+		const insertedChanges = await Promise.all(
 			detectedChanges.map(async (detectedChange) => {
-				await createChange({
+				return createChange({
 					lix: { ...args.lix, db: trx },
 					authors: currentAuthors,
-					version: currentVersion,
 					entityId: detectedChange.entity_id,
 					fileId: args.fileQueueEntry.file_id,
 					pluginKey: detectedChange.pluginKey,
@@ -107,6 +102,11 @@ export async function handleFileInsert(args: {
 				});
 			})
 		);
+
+		await updateChangesInActiveVersion({
+			lix: { ...args.lix, db: trx },
+			changes: insertedChanges,
+		});
 
 		await trx
 			.deleteFrom("file_queue")
@@ -152,6 +152,7 @@ export async function handleFileUpdate(args: {
 			console.error(error);
 			throw error;
 		}
+
 		for (const change of await plugin.detectChanges({
 			lix: args.lix,
 			before: args.fileQueueEntry.data_before
@@ -182,18 +183,11 @@ export async function handleFileUpdate(args: {
 			.selectAll()
 			.execute();
 
-		const currentVersion = await trx
-			.selectFrom("current_version")
-			.innerJoin("version", "current_version.id", "version.id")
-			.selectAll()
-			.executeTakeFirstOrThrow();
-
-		await Promise.all(
+		const insertedChanges = await Promise.all(
 			detectedChanges.map(async (detectedChange) => {
-				await createChange({
+				return createChange({
 					lix: { ...args.lix, db: trx },
 					authors: currentAuthors,
-					version: currentVersion,
 					entityId: detectedChange.entity_id,
 					fileId: args.fileQueueEntry.file_id,
 					pluginKey: detectedChange.pluginKey,
@@ -202,6 +196,11 @@ export async function handleFileUpdate(args: {
 				});
 			})
 		);
+
+		await updateChangesInActiveVersion({
+			lix: { ...args.lix, db: trx },
+			changes: insertedChanges,
+		});
 
 		await trx
 			.deleteFrom("file_queue")
@@ -224,19 +223,22 @@ export async function handleFileDelete(args: {
 	fileQueueEntry: FileQueueEntry;
 }): Promise<void> {
 	await args.lix.db.transaction().execute(async (trx) => {
-		const currentVersion = await trx
-			.selectFrom("current_version")
-			.innerJoin("version", "current_version.id", "version.id")
-			.selectAll()
+		const activeVersion = await trx
+			.selectFrom("active_version")
+			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+			.selectAll("version_v2")
 			.executeTakeFirstOrThrow();
 
 		const toBeDeletedEntities = await trx
 			.selectFrom("change")
-			.where("file_id", "=", args.fileQueueEntry.file_id)
-			.where(changeIsLeafInVersion(currentVersion))
-			.select("entity_id")
-			.select("schema_key")
-			.select("plugin_key")
+			.innerJoin(
+				"change_set_element",
+				"change.id",
+				"change_set_element.change_id"
+			)
+			.where("change.file_id", "=", args.fileQueueEntry.file_id)
+			.where(changeSetElementIsLeafOf([{ id: activeVersion.change_set_id }]))
+			.selectAll()
 			.execute();
 
 		const currentAuthors = await trx
@@ -244,12 +246,11 @@ export async function handleFileDelete(args: {
 			.selectAll()
 			.execute();
 
-		await Promise.all(
+		const insertedChanges = await Promise.all(
 			toBeDeletedEntities.map(async (change) => {
-				await createChange({
+				return createChange({
 					lix: { ...args.lix, db: trx },
 					authors: currentAuthors,
-					version: currentVersion,
 					entityId: change.entity_id,
 					fileId: args.fileQueueEntry.file_id,
 					pluginKey: change.plugin_key,
@@ -259,9 +260,51 @@ export async function handleFileDelete(args: {
 			})
 		);
 
+		await updateChangesInActiveVersion({
+			lix: { ...args.lix, db: trx },
+			changes: insertedChanges,
+		});
+
 		await trx
 			.deleteFrom("file_queue")
 			.where("id", "=", args.fileQueueEntry.id)
 			.execute();
 	});
+}
+
+async function updateChangesInActiveVersion(args: {
+	lix: Pick<Lix, "db" | "sqlite">;
+	changes: Array<Change>;
+}) {
+	const executeInTransaction = async (trx: Lix["db"]) => {
+		const activeVersion = await trx
+			.selectFrom("active_version")
+			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+			.selectAll("version_v2")
+			.executeTakeFirstOrThrow();
+
+		const newChangeSet = await createChangeSet({
+			lix: { ...args.lix, db: trx },
+			elements: args.changes.map((change) => ({
+				change_id: change.id,
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+			})),
+			parents: [{ id: activeVersion.change_set_id }],
+		});
+		await trx
+			.updateTable("version_v2")
+			.set({
+				change_set_id: newChangeSet.id,
+			})
+			.where("id", "=", activeVersion.id)
+			.execute();
+	};
+
+	if (args.lix.db.isTransaction) {
+		return executeInTransaction(args.lix.db);
+	} else {
+		return args.lix.db.transaction().execute(executeInTransaction);
+	}
 }

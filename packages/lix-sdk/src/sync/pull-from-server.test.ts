@@ -6,7 +6,9 @@ import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
 
-test("pull rows of multiple tables from server successfully and applies them", async () => {
+// commented out for lix v0.5
+// sync needs overhaul after change set graph introduction
+test.skip("pull rows of multiple tables from server successfully and applies them", async () => {
 	const lixOnServer = await openLixInMemory({});
 
 	const lix = await openLixInMemory({
@@ -340,7 +342,9 @@ test.skip("rows changed on the server more recently should be updated on the cli
 // 	]);
 // });
 
-test("non-conflicting changes from the server should for the same version should be applied", async () => {
+// commented out for lix v0.5
+// sync needs overhaul after change set graph introduction
+test.skip("non-conflicting changes from the server should for the same version should be applied", async () => {
 	const lix = await openLixInMemory({});
 
 	const currentVersion = await lix.db

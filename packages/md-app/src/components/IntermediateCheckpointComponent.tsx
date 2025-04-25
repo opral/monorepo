@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/plate-ui/button";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, intermediateChangeIdsAtom, intermediateChangesAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "@/components/plate-ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
-import { createCheckpoint } from "@/helper/createCheckpoint.ts";
+import { UiDiffComponentProps, createCheckpoint, createThread } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown } from "lucide-react";
+import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 
 interface IntermediateCheckpointComponentProps {
   filteredChanges?: UiDiffComponentProps["diffs"];
@@ -73,7 +73,8 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
               {Object.keys(groupedChanges).map((pluginKey) => (
                 <ChangeDiffComponent
                   key={pluginKey}
-                  diffs={groupedChanges[pluginKey]}
+                  // TODO: Rework changes query to what we need
+                  diffs={[changesData[changesData.length - 1]]}
                   contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
                 // debug={true}
                 />
@@ -91,26 +92,49 @@ export default IntermediateCheckpointComponent;
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const [lix] = useAtom(lixAtom);
-  const [intermediateChangeIds] = useAtom(intermediateChangeIdsAtom);
+  const [currentChangeSet] = useAtom(workingChangeSetAtom);
+
+  const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
+    if (!description) return;
+
+    lix.db.transaction().execute(async (trx) => {
+      const thread = await createThread({
+        lix: { ...lix, db: trx },
+        comments: [{ content: args.content }],
+      });
+      await trx
+        .insertInto("change_set_thread")
+        .values({
+          change_set_id: currentChangeSet!.id,
+          thread_id: thread.id,
+        })
+        .execute();
+    });
+  };
 
   const handleCreateCheckpoint = async () => {
-    const changeSet = await createCheckpoint(lix, intermediateChangeIds);
-    if (description !== "") {
-      await createDiscussion({
-        lix,
-        changeSet,
-        firstComment: { content: description },
-      });
-      await saveLixToOpfs({ lix });
+    await onThreadComposerSubmit({ content: fromPlainText(description!) });
+    await createCheckpoint({ lix });
+    await saveLixToOpfs({ lix });
+  };
+
+  // Handle key down in the comment textarea
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleCreateCheckpoint();
     }
   };
 
   return (
     <div className="flex flex-col w-full gap-2 px-1 items-end">
+      {/* {currentChangeSet?.id} */}
       <Input
         className="flex-grow pl-2 bg-background text-sm placeholder:text-sm"
         placeholder="Describe the changes"
-        onInput={(event: any) => setDescription(event.target?.value)}
+        onChange={(event) => setDescription(event.target.value)}
+        onKeyDown={handleKeyDown}
+        value={description}
       ></Input>
       <Button onClick={handleCreateCheckpoint}>
         Create checkpoint

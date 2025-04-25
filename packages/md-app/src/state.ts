@@ -1,17 +1,20 @@
 import {
-	Version,
 	openLixInMemory,
 	Account,
 	switchAccount,
 	Lix,
+	VersionV2,
 } from "@lix-js/sdk";
-import { atom } from "jotai";
+import { atom, createStore } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
 import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
+import { initLixInspector } from "@lix-js/inspector";
+
+export const store = createStore();
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -25,10 +28,10 @@ export const lixIdSearchParamsAtom = atom((get) => {
 	return searchParams.get("lix") || undefined;
 });
 
-export const discussionSearchParamsAtom = atom(async (get) => {
+export const threadSearchParamsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("d");
+	return searchParams.get("t");
 });
 
 export const availableLixFilesInOpfsAtom = atom(async (get) => {
@@ -164,18 +167,18 @@ export const lixAtom = atom(async (get) => {
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
 	// : "http://localhost:3000";
-	const serverUrl = import.meta.env.PROD
-		? "https://lix.host"
-		: "http://localhost:3000";
+	// const serverUrl = import.meta.env.PROD
+	// 	? "https://lix.host"
+	// 	: "http://localhost:3000";
 
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_server_url",
-			value: serverUrl,
-		})
-		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
-		.execute();
+	// await lix.db
+	// 	.insertInto("key_value")
+	// 	.values({
+	// 		key: "lix_server_url",
+	// 		value: serverUrl,
+	// 	})
+	// 	.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
+	// 	.execute();
 
 	// Check if there is a file in lix
 	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
@@ -203,6 +206,25 @@ export const lixAtom = atom(async (get) => {
 		}
 	}
 
+	if (import.meta.env.DEV) {
+		// Initialize the Lix Inspector for debugging
+		await initLixInspector({ lix });
+	}
+
+	// lix.sqlite.createFunction("handle_save_lix_to_opfs", () => {
+	// 	saveLixToOpfs({ lix });
+	// 	return 0;
+	// });
+
+	// lix.sqlite.exec(`
+	// 	CREATE TEMP TRIGGER IF NOT EXISTS handle_save_lix_to_opfs
+	// 	AFTER UPDATE ON version_v2
+	// 	WHEN OLD.change_set_id != NEW.change_set_id
+	// 	BEGIN
+	// 		SELECT handle_save_lix_to_opfs();
+	// 	END;
+	// 	`);
+
 	return lix;
 });
 
@@ -218,19 +240,21 @@ export const withPollingAtom = atom(Date.now());
  */
 export const editorRefAtom = atom<any>(null);
 
-export const currentVersionAtom = atom<Promise<Version | null>>(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	if (!lix) return null;
+export const activeVersionAtom = atom<Promise<VersionV2 | null>>(
+	async (get) => {
+		get(withPollingAtom);
+		const lix = await get(lixAtom);
+		if (!lix) return null;
 
-	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "version.id", "current_version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+			.selectAll("version_v2")
+			.executeTakeFirstOrThrow();
 
-	return currentVersion;
-});
+		return activeVersion;
+	}
+);
 
 export const existingVersionsAtom = atom(async (get) => {
 	get(withPollingAtom);

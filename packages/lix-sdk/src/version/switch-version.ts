@@ -7,6 +7,8 @@ import { versionChangeInSymmetricDifference } from "../query-filter/version-chan
 /**
  * Switches the current Version to the given Version.
  *
+ * @deprecated Use `switchVersionV2()` instead
+ *
  * The Version must already exist before calling this function.
  *
  * @example

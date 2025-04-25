@@ -3,26 +3,19 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChange } from "./create-change.js";
 import type { Change } from "../database/schema.js";
 import { createAccount } from "../account/create-account.js";
-import { createVersion } from "../version/create-version.js";
-import { switchVersion } from "../version/switch-version.js";
 
 test("should create a change with the correct values", async () => {
 	const lix = await openLixInMemory({});
-
-	const version0 = await createVersion({ lix, name: "version0" });
 
 	const author = await createAccount({
 		lix,
 		name: "author",
 	});
 
-	await switchVersion({ lix, to: version0 });
-
 	const change = await createChange({
 		lix,
 		authors: [author],
 		entityId: "entity1",
-		version: version0,
 		fileId: "file1",
 		pluginKey: "plugin1",
 		schemaKey: "schema1",
@@ -46,10 +39,6 @@ test("should create a change with the correct values", async () => {
 test("should create a snapshot with the correct content", async () => {
 	const lix = await openLixInMemory({});
 
-	const version0 = await createVersion({ lix, name: "version0" });
-
-	await switchVersion({ lix, to: version0 });
-
 	const author = await createAccount({
 		lix,
 		name: "author",
@@ -58,7 +47,6 @@ test("should create a snapshot with the correct content", async () => {
 	const change = await createChange({
 		lix,
 		authors: [author],
-		version: version0,
 		entityId: "entity1",
 		fileId: "file1",
 		pluginKey: "plugin1",
@@ -79,10 +67,6 @@ test("should create a snapshot with the correct content", async () => {
 test("should create a change and a snapshot in a transaction", async () => {
 	const lix = await openLixInMemory({});
 
-	const version0 = await createVersion({ lix, name: "version0" });
-
-	await switchVersion({ lix, to: version0 });
-
 	const author = await createAccount({
 		lix,
 		name: "author",
@@ -94,7 +78,6 @@ test("should create a change and a snapshot in a transaction", async () => {
 		change = await createChange({
 			lix: { ...lix, db: trx },
 			authors: [author],
-			version: version0,
 			entityId: "entity1",
 			fileId: "file1",
 			pluginKey: "plugin1",
@@ -123,10 +106,6 @@ test("should create a change and a snapshot in a transaction", async () => {
 test("should create the change authors", async () => {
 	const lix = await openLixInMemory({});
 
-	const version0 = await createVersion({ lix, name: "version0" });
-
-	await switchVersion({ lix, to: version0 });
-
 	const account1 = await createAccount({
 		lix,
 		name: "account1",
@@ -144,7 +123,6 @@ test("should create the change authors", async () => {
 
 	const change = await createChange({
 		lix,
-		version: version0,
 		authors: [account1, account2],
 		entityId: "entity1",
 		fileId: "file1",
@@ -164,133 +142,4 @@ test("should create the change authors", async () => {
 		{ change_id: change.id, account_id: account1.id },
 		{ change_id: change.id, account_id: account2.id },
 	]);
-});
-
-test("should correctly identify parentChange and create change_edge", async () => {
-	const lix = await openLixInMemory({});
-
-	const version0 = await createVersion({ lix, name: "version0" });
-
-	const author = await createAccount({
-		lix,
-		name: "author",
-	});
-
-	const parentChange = await createChange({
-		lix,
-		version: version0,
-		authors: [author],
-		entityId: "entity1",
-		fileId: "file1",
-		pluginKey: "plugin1",
-		schemaKey: "schema1",
-		snapshotContent: { text: "parent-snapshot-content" },
-	});
-
-	const change = await createChange({
-		lix,
-		version: version0,
-		authors: [author],
-		entityId: "entity1",
-		fileId: "file1",
-		pluginKey: "plugin1",
-		schemaKey: "schema1",
-		snapshotContent: { text: "child-snapshot-content" },
-	});
-
-	const changeEdges = await lix.db
-		.selectFrom("change_edge")
-		.where("change_edge.child_id", "=", change.id)
-		.selectAll()
-		.execute();
-
-	expect(changeEdges.length).toBe(1);
-	expect(changeEdges[0]?.parent_id).toBe(parentChange.id);
-});
-
-test("should update versionChanges with the new change", async () => {
-	const lix = await openLixInMemory({});
-
-	const version0 = await createVersion({ lix, name: "version0" });
-
-	const author = await createAccount({
-		lix,
-		name: "author",
-	});
-
-	const change = await createChange({
-		lix,
-		version: version0,
-		authors: [author],
-		entityId: "entity1",
-		fileId: "file1",
-		pluginKey: "plugin1",
-		schemaKey: "schema1",
-		snapshotContent: { text: "snapshot-content" },
-	});
-
-	const versionChanges = await lix.db
-		.selectFrom("version_change")
-		.where("version_change.version_id", "=", version0.id)
-		.selectAll()
-		.execute();
-
-	expect(versionChanges.length).toBe(1);
-	expect(versionChanges[0]?.change_id).toBe(change.id);
-});
-
-test("should throw an error if authors array is empty", async () => {
-	const lix = await openLixInMemory({});
-
-	const version0 = await createVersion({ lix, name: "version0" });
-
-	await expect(
-		createChange({
-			lix,
-			authors: [],
-			version: version0,
-			entityId: "entity1",
-			fileId: "file1",
-			pluginKey: "plugin1",
-			schemaKey: "schema1",
-			snapshotContent: { text: "snapshot-content" },
-		})
-	).rejects.toThrow("At least one author is required");
-});
-
-test("option to create a change without updating the version changes", async () => {
-	const lix = await openLixInMemory({});
-
-	const version0 = await createVersion({ lix, name: "version0" });
-
-	const author = await createAccount({
-		lix,
-		name: "author",
-	});
-
-	const change = await createChange(
-		{
-			lix,
-			version: version0,
-			authors: [author],
-			entityId: "entity1",
-			fileId: "file1",
-			pluginKey: "plugin1",
-			schemaKey: "schema1",
-			snapshotContent: { text: "snapshot-content" },
-		},
-		{
-			updateVersionChanges: false,
-		}
-	);
-
-	const versionChanges = await lix.db
-		.selectFrom("version_change")
-		.where("version_change.version_id", "=", version0.id)
-		.selectAll()
-		.execute();
-
-	expect(
-		versionChanges.find((vc) => vc.change_id === change.id)
-	).toBeUndefined();
 });

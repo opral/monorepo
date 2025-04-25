@@ -33,13 +33,15 @@ const ChangeControlSidebar = () => {
       {/* Scrollable content area */}
       <div className="overflow-y-auto flex-1 px-2 pt-2">
         <IntermediateCheckpointComponent filteredChanges={filteredChanges} />
-        {checkpointChangeSets.map((checkpointChangeSet, i) => {
+        {checkpointChangeSets.map((checkpointChangeSet, index) => {
+          const previousCheckpointId = checkpointChangeSets[index + 1]?.id ?? undefined;
           return (
             <CheckpointComponent
               key={checkpointChangeSet.id}
               checkpointChangeSet={checkpointChangeSet}
-              showTopLine={i !== 0 || filteredChanges.length > 0}
-              showBottomLine={i !== checkpointChangeSets.length - 1}
+              previousChangeSetId={previousCheckpointId}
+              showTopLine={index !== 0 || filteredChanges.length > 0}
+              showBottomLine={index !== checkpointChangeSets.length - 1}
             />
           );
         })}

@@ -5,6 +5,8 @@ import type { Lix } from "../lix/open-lix.js";
 /**
  * Updates the changes that are part of a version.
  *
+ * @deprecated
+ *
  * This function will update the change_set_element table to point to the new changes.
  */
 export async function updateChangesInVersion(args: {

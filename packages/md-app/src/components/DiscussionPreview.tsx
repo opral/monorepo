@@ -39,7 +39,7 @@ const DiscussionPreview = ({ discussionId }: { discussionId: string }) => {
   };
 
   return (
-    <Link to={`?f=${fileId}&d=${discussionId}`}>
+    <Link to={`?f=${fileId}&t=${discussionId}`}>
       <div className="group/preview flex items-start gap-4 pl-3 pr-1.5 py-2 ring-1 ring-muted transition-all hover:ring-slate-500 rounded-sm bg-background">
         <MessagesSquare />
         <div className="flex-1">

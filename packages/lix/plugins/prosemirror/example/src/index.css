@@ -1,0 +1,268 @@
+/* ProseMirror core styles */
+.ProseMirror {
+	flex: 1;
+	overflow-y: auto;
+	padding: 8px;
+	margin: 0;
+	outline: none;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+	white-space: break-spaces;
+	-webkit-font-variant-ligatures: none;
+	font-variant-ligatures: none;
+	font-feature-settings: "liga" 0;
+	background-color: #fff;
+}
+
+/* Make sure it's visible when it has focus */
+.ProseMirror-focused {
+	border-color: #4a90e2;
+}
+
+/* Makes the cursor visible */
+.ProseMirror-cursor {
+	border-left: 1px solid black;
+	border-right: none;
+	width: 0;
+	display: block !important;
+}
+
+/* Bullet list styling */
+.ProseMirror ul {
+	padding-left: 30px;
+	margin: 0.5em 0;
+	list-style-type: disc;
+}
+
+.ProseMirror li {
+	position: relative;
+	margin-bottom: 0.2em;
+}
+
+.ProseMirror li p {
+	margin: 0;
+}
+
+/* Generation node styling */
+.ProseMirror .inline-flex {
+	display: inline-flex;
+	vertical-align: middle;
+	white-space: nowrap;
+	background-color: #f8f9fa;
+	border: 1px solid #e9ecef;
+	border-radius: 4px;
+	padding: 1px 4px;
+	margin: 0 2px;
+}
+
+/* Mention node styling */
+.ProseMirror .mention {
+	background-color: #e0f7f5;
+	border: 1px solid #c2ece8;
+	border-radius: 4px;
+	padding: 1px 4px;
+	margin: 0 2px;
+	color: #0d9488;
+	font-weight: 500;
+}
+
+.ProseMirror .mention .mention-content {
+	display: inline-flex;
+	align-items: center;
+}
+
+.ProseMirror .mention .audio-icon {
+	display: inline-flex;
+	align-items: center;
+	vertical-align: middle;
+}
+
+/* Tool node styling */
+.ProseMirror .tool-container {
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	background-color: #f9fafb;
+	margin: 1rem 0;
+	padding: 0.75rem;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.ProseMirror .tool-content {
+	margin-top: 0.5rem;
+}
+
+.ProseMirror .tool-content .border-t {
+	border-top: 1px solid #e5e7eb;
+}
+
+/* Editor layout */
+.editor-wrapper {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border: 1px solid #ccc;
+	cursor: text !important;
+	background-color: #fff;
+	min-height: 300px;
+	padding: 0;
+	margin: 0;
+}
+
+.editor-container {
+	flex: 2;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border-right: 1px solid #ccc;
+	padding: 0;
+	margin: 0;
+	background-color: #fff;
+}
+
+.editor {
+	flex: 1;
+	display: flex;
+	background-color: #fff;
+	padding: 0;
+	margin: 0;
+}
+
+/* App layout */
+.app-container {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	min-height: 100vh;
+	padding: 10px;
+	box-sizing: border-box;
+	background-color: #f5f8fa;
+}
+
+.main-layout {
+	display: flex;
+	height: 80vh;
+	margin-bottom: 20px;
+	border: 1px solid #ddd;
+}
+
+/* Basic elements */
+h1 {
+	margin: 0 0 10px 0;
+	font-size: 20px;
+}
+
+button {
+	background-color: #f5f5f5;
+	color: #333;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	padding: 5px 10px;
+	cursor: pointer;
+}
+
+button:hover {
+	opacity: 0.8;
+}
+
+/* Mode tabs styling for version toolbar */
+.mode-tabs {
+	display: flex;
+	align-items: center;
+	border-bottom: 1px solid #e5e7eb;
+	position: relative;
+	height: 40px;
+	background-color: #fff;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	justify-content: space-between;
+}
+
+.mode-tab {
+	padding: 8px 16px;
+	border: none;
+	background: none;
+	cursor: pointer;
+	white-space: nowrap;
+	font-size: 14px;
+	height: 40px;
+	box-sizing: border-box;
+	border-radius: 0;
+}
+
+.mode-tab:hover {
+	background-color: #f9f9f9;
+	border-radius: 0;
+}
+
+.mode-tab:focus {
+	outline: none;
+}
+
+.mode-tab.active {
+	border-bottom: 2px solid #000;
+	font-weight: 500;
+	border-radius: 0;
+}
+
+.mode-tabs-scroll-container {
+	display: flex;
+	flex: 1;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
+	-webkit-overflow-scrolling: touch;
+}
+
+.mode-tab-fixed {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+}
+
+/* Version selector UI */
+.version-selector {
+	margin-left: auto;
+	position: relative;
+}
+
+.version-button {
+	background: none;
+	border: 1px solid #ddd;
+	padding: 4px 8px;
+	cursor: pointer;
+	font-size: 12px;
+	outline: none;
+	border-radius: 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.version-icon {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	position: relative;
+}
+
+.version-icon:before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 3px;
+	width: 1px;
+	height: 12px;
+	background-color: #000;
+}
+
+.version-icon:after {
+	content: "";
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 6px;
+	height: 1px;
+	background-color: #000;
+}

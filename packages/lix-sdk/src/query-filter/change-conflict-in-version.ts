@@ -4,6 +4,8 @@ import type { Version, LixDatabaseSchema } from "../database/schema.js";
 /**
  * Filters if a conflict is in the given version.
  *
+ * @deprecated Conflicts will be re-modeled in a later version of lix.
+ *
  * @example
  *   ```ts
  *   const conflicts = await lix.db.selectFrom("change_conflict")

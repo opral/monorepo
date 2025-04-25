@@ -166,7 +166,7 @@ export const intermediateChangesAtom = atom<
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where(changeIsLeafInVersion(currentVersion))
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
 		.where("change.file_id", "!=", "lix_own_change_control")
 		.select([
 			"change.entity_id",
@@ -189,7 +189,7 @@ export const intermediateChangesAtom = atom<
 					.selectFrom("change")
 					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.where(changeInVersion(currentVersion))
-					.where(changeHasLabel("checkpoint"))
+					.where(changeHasLabel({ name: "checkpoint" }))
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
 					.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
@@ -222,7 +222,7 @@ export const intermediateChangeIdsAtom = atom(async (get) => {
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where(changeIsLeafInVersion(currentVersion))
 		.where("change.plugin_key", "!=", "lix_own_change_control")
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
 		.select("change.id");
 
 	if (activeFile) {
@@ -258,7 +258,7 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 		// Join with the `comment` table, filtering for first-level comments
 		.leftJoin("comment", "comment.discussion_id", "discussion.id")
 		.where("comment.parent_id", "is", null) // Filter to get only the first comment
-		.where(changeHasLabel("checkpoint"))
+		.where(changeHasLabel({ name: "checkpoint" }))
 		.groupBy("change_set.id")
 		.orderBy("change.created_at", "desc")
 		.select("change_set.id")
@@ -301,7 +301,7 @@ export const getChanges = async (
 		)
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where(changeInVersion(currentVersion))
-		.where(changeHasLabel("checkpoint"))
+		.where(changeHasLabel({ name: "checkpoint" }))
 		.select("change.id")
 		.select("change.plugin_key")
 		.select("change.schema_key")
@@ -322,7 +322,7 @@ export const getChanges = async (
 					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.innerJoin("change_edge", "change_edge.parent_id", "change.id")
 					.where("change_edge.child_id", "=", change.id)
-					.where(changeHasLabel("checkpoint"))
+					.where(changeHasLabel({ name: "checkpoint" }))
 					.where(changeInVersion(currentVersion))
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
