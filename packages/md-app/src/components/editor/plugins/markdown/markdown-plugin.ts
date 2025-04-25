@@ -24,6 +24,32 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 			// sanitizeHtml,
 		],
 		rules: {
+			// TODO remove code_block rule when the pr https://github.com/udecode/plate/pull/4245 is merged
+			code_block: {
+				deserialize: (mdastNode, deco, options) => {
+					return {
+						children: (mdastNode.value || "").split("\n").map((line) => ({
+							children: [{ text: line } as TText],
+							type: "code_line",
+						})),
+						lang: mdastNode.lang ?? undefined,
+						type: "code_block",
+					};
+				},
+				serialize: (node) => {
+					return {
+						lang: node.lang,
+						type: "code",
+						value: node.children
+							.map((child: any) =>
+								child?.children === undefined
+									? child.text
+									: child.children.map((c: any) => c.text).join("")
+							)
+							.join("\n"),
+					};
+				},
+			},
 			sanitized_block_html: {
 				serialize: (node) => {
 					return {
