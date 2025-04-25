@@ -3,7 +3,6 @@ import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
-import { validateFilePath } from "../file/validate-file-path.js";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
 import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
@@ -64,15 +63,6 @@ function initFunctions(args: { sqlite: SqliteWasmDatabase }) {
 			const parsed = JSON.parse(json as string);
 
 			return jsonSha256(parsed);
-		},
-		deterministic: true,
-	});
-
-	args.sqlite.createFunction({
-		name: "is_valid_file_path",
-		arity: 1,
-		xFunc: (_ctx: number, value) => {
-			return validateFilePath(value as string) as unknown as string;
 		},
 		deterministic: true,
 	});

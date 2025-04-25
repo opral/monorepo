@@ -3,29 +3,6 @@ import { test, expect } from "vitest";
 import { initDb } from "./init-db.js";
 import { validate } from "uuid";
 import { jsonSha256 } from "../snapshot/json-sha-256.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-
-// file ids are always in the URL of lix apps
-// to increase sharing, the ids should be as short as possible
-//
-// 129 million file creations will lead to a 1% chance of a collision
-//
-// if someone uses lix to handle 129 million files, we can
-// increase the length of the id :D
-test("file ids should default to nano_id(10)", async () => {
-	const lix = await openLixInMemory({});
-
-	const file = await lix.db
-		.insertInto("file")
-		.values({
-			path: "/mock.txt",
-			data: new Uint8Array(),
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	expect(file.id.length).toBe(10);
-});
 
 test("change ids should default to uuid", async () => {
 	const sqlite = await createInMemoryDatabase({
@@ -127,50 +104,6 @@ test("an empty snapshot should default to the special 'no-content' snapshot to s
 	expect(snapshot.id).toBe("no-content");
 });
 
-// https://github.com/opral/lix-sdk/issues/71
-test("files should be able to have metadata", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	sqlite.createFunction({
-		name: "triggerFileQueue",
-		arity: 0,
-		// @ts-expect-error - dynamic function
-		xFunc: () => {
-			// console.log('test')
-		},
-	});
-
-	const file = await db
-		.insertInto("file")
-		.values({
-			path: "/mock.csv",
-			data: new Uint8Array(),
-			metadata: {
-				primary_key: "email",
-			},
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	expect(file.metadata?.primary_key).toBe("email");
-
-	const updatedFile = await db
-		.updateTable("file")
-		.where("path", "=", "/mock.csv")
-		.set({
-			metadata: {
-				primary_key: "something-else",
-			},
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	expect(updatedFile.metadata?.primary_key).toBe("something-else");
-});
-
 // 2M IDs needed, in order to have a 1% probability of at least one collision.
 // it is assumed that creating 2 million labels is ... unlikely
 test("label.id is nano_id(8)", async () => {
@@ -207,28 +140,3 @@ test("the checkpoint label should be created if it doesn't exist", async () => {
 	});
 });
 
-test("invalid file paths should be rejected", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	// init the trigger function (usually defined by lix only)
-	sqlite.createFunction({
-		name: "triggerFileQueue",
-		arity: 0,
-		// @ts-expect-error - dynamic function
-		xFunc: () => {},
-	});
-
-	await expect(
-		db
-			.insertInto("file")
-			.values({
-				path: "invalid-path",
-				data: new Uint8Array(),
-			})
-			.returningAll()
-			.execute()
-	).rejects.toThrowError("File path must start with a slash");
-});

@@ -6,6 +6,7 @@ import { applyChangeSetEdgeDatabaseSchema } from "../change-set-edge/database-sc
 import { applyVersionV2DatabaseSchema } from "../version-v2/database-schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set/database-schema.js";
 import { applyFileQueueDatabaseSchema } from "../file-queue/database-schema.js";
+import { applyFileDatabaseSchema } from "../file/database-schema.js";
 import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
@@ -21,24 +22,13 @@ export function applySchema(args: {
 	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 	applyThreadDatabaseSchema(args.sqlite);
+	applyFileDatabaseSchema(args.sqlite);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	args.sqlite.exec`
 
   PRAGMA foreign_keys = ON;
   PRAGMA auto_vacuum = 2; -- incremental https://www.sqlite.org/pragma.html#pragma_auto_vacuum
- 
-  -- file
-
-  CREATE TABLE IF NOT EXISTS file (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(10)),
-    path TEXT NOT NULL UNIQUE,
-    data BLOB NOT NULL,
-    metadata BLOB,
-    
-
-    CHECK (is_valid_file_path(path))
-  ) STRICT;
 
   CREATE TABLE IF NOT EXISTS change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
