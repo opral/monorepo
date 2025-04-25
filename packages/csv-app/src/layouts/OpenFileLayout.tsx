@@ -15,7 +15,6 @@ import {
 import { useAtom } from "jotai";
 import {
 	activeFileAtom,
-	changeConflictsAtom,
 	parsedCsvAtom,
 	uniqueColumnAtom,
 } from "../state-active-file.ts";
@@ -33,7 +32,7 @@ import CustomLink from "../components/CustomLink.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
-	const [changeConflicts] = useAtom(changeConflictsAtom);
+	// const [changeConflicts] = useAtom(changeConflictsAtom);
 	const [currentVersion] = useAtom(currentVersionAtom);
 	const [searchParams] = useSearchParams();
 
@@ -111,7 +110,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 							// }
 							name="Changes"
 						/>
-						<NavItem
+						{/* <NavItem
 							to={`/conflicts?${searchParams.toString()}`}
 							counter={
 								Object.values(changeConflicts).length !== 0
@@ -119,7 +118,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 									: undefined
 							}
 							name="Conflicts"
-						/>
+						/> */}
 						<NavItem to={`/graph?${searchParams.toString()}`} name="Graph" />
 						{/* <NavItem to={`/proposal?f=${activeFile.id}`} name="Proposal" /> */}
 					</div>

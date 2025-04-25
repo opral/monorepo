@@ -7,6 +7,7 @@ import { SlButton } from "@shoelace-style/shoelace/dist/react";
 import { currentVersionAtom, lixAtom } from "../../state.ts";
 import {
 	changeIsLeafInVersion,
+	changeSetElementIsLeafOf,
 	createChangeConflict,
 	detectChangeConflicts,
 } from "@lix-js/sdk";
@@ -66,9 +67,12 @@ export default function Page() {
 																		changesIncurrentBranch.map(async (c) => {
 																			return await trx
 																				.selectFrom("change")
-																				.where(
-																					changeIsLeafInVersion(currentVersion)
+																				.innerJoin(
+																					"change_set_element",
+																					"change_set_element.change_id",
+																					"change.id"
 																				)
+																				.where(changeSetElementIsLeafOf([{ id: changesIncurrentBranch[0].change_set_id }]))
 																				.where(
 																					"change.entity_id",
 																					"=",

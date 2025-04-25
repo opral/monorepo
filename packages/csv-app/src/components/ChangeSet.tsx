@@ -6,7 +6,9 @@ import {
 	changeIsLeafInVersion,
 	Lix,
 	Snapshot,
-	createDiscussion,
+	createThread,
+	createCheckpoint,
+	Thread,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
@@ -14,18 +16,18 @@ import { currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
 import {
 	activeFileAtom,
-	intermediateChangesAtom,
+	getThreads,
+	workingChangeSetAtom,
 } from "../state-active-file.ts";
 import { SlButton, SlInput } from "@shoelace-style/shoelace/dist/react";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
-import { createCheckpoint } from "../helper/createCheckpoint.ts";
 import RowDiff from "./RowDiff.tsx";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
+import { fromPlainText, toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 
 export default function Component(props: {
 	id: string;
 	authorName: string | null;
-	firstComment: string | null;
 }) {
 	const [isOpen, setIsOpen] = useState(
 		props.id === "intermediate-changes" ? true : false
@@ -36,6 +38,7 @@ export default function Component(props: {
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
 	>({});
+	const [threads, setThreads] = useState<Thread[]>([]);
 
 	const [intermediateChanges, setIntermediateChanges] = useState<
 		Awaited<ReturnType<typeof getIntermediateChanges>>
@@ -50,7 +53,7 @@ export default function Component(props: {
 					setChanges
 				);
 			} else {
-				getIntermediateChanges(lix, activeFile!.id, currentVersion).then(
+				getIntermediateChanges(lix, activeFile!.id).then(
 					setIntermediateChanges
 				);
 			}
@@ -60,7 +63,7 @@ export default function Component(props: {
 						setChanges
 					);
 				} else {
-					getIntermediateChanges(lix, activeFile!.id, currentVersion).then(
+					getIntermediateChanges(lix, activeFile!.id).then(
 						setIntermediateChanges
 					);
 				}
@@ -68,6 +71,29 @@ export default function Component(props: {
 			return () => clearInterval(interval);
 		}
 	}, [lix, activeFile, props.id]);
+
+	useEffect(() => {
+		const fetchThreads = async () => {
+			if (props.id) {
+				const threads = await getThreads(lix, props.id);
+				if (threads) setThreads(threads);
+			}
+		};
+
+		fetchThreads();
+	}, []);
+
+	// Get the first comment if it exists
+	// @ts-expect-error - Typescript doesn't know that threads are created with initial comment
+	const firstComment = threads?.[0]?.comments?.[0];
+
+	// Truncate comment content if it's longer than 50 characters
+	const truncatedComment =
+		firstComment?.content
+			? firstComment.content.length > 50
+				? `${toPlainText(firstComment.content).substring(0, 50)}...`
+				: toPlainText(firstComment.content)
+			: null;
 
 	return (
 		<div
@@ -90,7 +116,7 @@ export default function Component(props: {
 								? "Intermediate changes"
 								: props.authorName}
 						</p>
-						<p className="text-sm! text-zinc-600">{props.firstComment}</p>
+						<p className="text-sm! text-zinc-600">{truncatedComment}</p>
 					</div>
 					<p className="text-sm! pr-5 flex items-center gap-4 flex-1]">
 						{/* {timeAgo(change.created_at)} */}
@@ -123,6 +149,7 @@ export default function Component(props: {
 						const uniqueColumnValue = rowId.split("|")[1];
 						return (
 							<RowDiff
+								key={`${props.id}-${rowId}`}
 								uniqueColumnValue={uniqueColumnValue}
 								changes={
 									props.id === "intermediate-changes"
@@ -141,19 +168,40 @@ export default function Component(props: {
 const CreateCheckpointBox = () => {
 	const [description, setDescription] = useState("");
 	const [lix] = useAtom(lixAtom);
-	const [intermediateChanges] = useAtom(intermediateChangesAtom);
+	const [workingChangeSet] = useAtom(workingChangeSetAtom);
+
+	const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
+		if (!description) return;
+
+		lix.db.transaction().execute(async (trx) => {
+			const thread = await createThread({
+				lix: { ...lix, db: trx },
+				comments: [{ content: args.content }],
+			});
+			await trx
+				.insertInto("change_set_thread")
+				.values({
+					change_set_id: workingChangeSet!.id,
+					thread_id: thread.id,
+				})
+				.execute();
+		});
+	};
 
 	const handleCreateCheckpoint = async () => {
-		const changeSet = await createCheckpoint(lix, intermediateChanges);
-		if (description !== "") {
-			await createDiscussion({
-				lix,
-				changeSet,
-				firstComment: { content: description },
-			});
-			await saveLixToOpfs({ lix });
+		await onThreadComposerSubmit({ content: fromPlainText(description!) });
+		await createCheckpoint({ lix });
+		await saveLixToOpfs({ lix });
+	};
+
+	// Handle key down in the comment textarea
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === "Enter" && !e.shiftKey) {
+			e.preventDefault();
+			handleCreateCheckpoint();
 		}
 	};
+
 
 	return (
 		<div className="flex gap-2">
@@ -161,6 +209,8 @@ const CreateCheckpointBox = () => {
 				className="w-full"
 				placeholder="Describe the changes"
 				onInput={(event: any) => setDescription(event.target?.value)}
+				onKeyDown={handleKeyDown}
+				value={description}
 			></SlInput>
 			<SlButton slot="footer" variant="primary" onClick={handleCreateCheckpoint}>
 				{description === "" ? "Create checkpoint without description" : "Create checkpoint"}
@@ -240,13 +290,22 @@ const getChanges = async (
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.innerJoin("change_edge", "change_edge.parent_id", "change.id")
 				.where("change_edge.child_id", "=", change.id)
-				.where(changeInVersion(currentVersion))
+				// .where(changeInVersion(currentVersion))
 				.where(changeHasLabel({ name: "checkpoint" }))
 				.selectAll("change")
 				.select("snapshot.content")
 				.executeTakeFirst();
 
-			change.parent = parent;
+			// Process parent content if it exists
+			if (parent && typeof parent.content === 'string') {
+				try {
+					parent.content = JSON.parse(parent.content);
+				} catch (e) {
+					// Keep as is if not valid JSON
+				}
+			}
+
+			change.parent = parent || { content: null };
 		}
 	}
 	return groupedByRow;
@@ -255,8 +314,7 @@ const getChanges = async (
 // duplicating because easier for now. clean up later
 const getIntermediateChanges = async (
 	lix: Lix,
-	fileId: string,
-	currentVersion: Version
+	fileId: string
 ): Promise<
 	Record<
 		string,
@@ -268,20 +326,49 @@ const getIntermediateChanges = async (
 		>
 	>
 > => {
+	// Get the working change set ID 
+	const workingChangeSetId = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
+		.selectAll("version_v2")
+		.executeTakeFirst()
+		.then(version => version?.working_change_set_id);
+
 	const intermediateLeafChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin("change_set_element", "change_set_element.change_id", "change.id")
+		.where(eb =>
+			workingChangeSetId
+				? eb("change_set_element.change_set_id", "=", workingChangeSetId)
+				: eb.exists(
+					eb.selectFrom("change_set_element")
+						.whereRef("change_set_element.change_id", "=", "change.id")
+						.where(eb => eb.not(changeHasLabel({ name: "checkpoint" })))
+				)
+		)
 		.where("change.file_id", "=", fileId)
-		.where(changeIsLeafInVersion(currentVersion))
-		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
 
-	const groupedByRow: any = {};
+	// Parse the content fields if they are JSON strings
+	const processedChanges = intermediateLeafChanges.map(change => {
+		// Ensure content field is properly parsed from JSON if needed
+		if (typeof change.content === 'string') {
+			try {
+				change.content = JSON.parse(change.content);
+			} catch (e) {
+				// Keep as is if not valid JSON
+			}
+		}
+		return change;
+	});
 
-	for (const change of intermediateLeafChanges) {
+	const groupedByRow: Record<string, Array<any>> = {};
+
+	for (const change of processedChanges) {
 		const parts = change.entity_id.split("|");
 		const rowEntityId = parts[0] + "|" + parts[1];
 
@@ -301,7 +388,7 @@ const getIntermediateChanges = async (
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where("change.entity_id", "=", change.entity_id)
 				.where(changeHasLabel({ name: "checkpoint" }))
-				.where(changeInVersion(currentVersion))
+				// .where(changeInVersion(currentVersion))
 				// TODO fix the filter
 				// https://github.com/opral/lix-sdk/issues/151
 				// .where(changeIsLowestCommonAncestorOf([change]))
@@ -310,7 +397,16 @@ const getIntermediateChanges = async (
 				.select("snapshot.content")
 				.executeTakeFirst();
 
-			change.parent = parent;
+			// Process parent content if it exists
+			if (parent && typeof parent.content === 'string') {
+				try {
+					parent.content = JSON.parse(parent.content);
+				} catch (e) {
+					// Keep as is if not valid JSON
+				}
+			}
+
+			change.parent = parent || { content: null };
 		}
 	}
 	return groupedByRow;

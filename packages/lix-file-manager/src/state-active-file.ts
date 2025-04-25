@@ -13,7 +13,6 @@ import {
 import {
 	changeHasLabel,
 	ChangeSet,
-	changeSetElementInAncestryOf,
 	changeSetElementIsLeafOf,
 	changeSetHasLabel,
 	jsonArrayFrom,
@@ -421,18 +420,6 @@ export const activeThreadAtom = atom(async (get) => {
 						join
 							.onRef("change.entity_id", "=", "thread_comment.id")
 							.on("change.schema_key", "=", "lix_comment_table")
-					)
-					.where((eb) =>
-						eb.exists(
-							eb
-								.selectFrom("change_set_element")
-								.where(changeSetElementInAncestryOf(activeVersion))
-								.whereRef(
-									"change_set_element.change_id",
-									"=",
-									"change.entity_id"
-								)
-						)
 					)
 					.leftJoin("change_author", "change_author.change_id", "change.id")
 					.innerJoin("account", "account.id", "change_author.account_id")
