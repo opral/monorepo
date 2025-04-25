@@ -82,6 +82,18 @@ describe("change_set table", () => {
 
 		expect(deletedChangeSetElements).toHaveLength(0);
 	});
+
+	test("change_set.id are uuid-v7", async () => {
+		const lix = await openLixInMemory({});
+
+		const changeSet = await lix.db
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
+			.executeTakeFirstOrThrow();
+
+		expect(changeSet.id.length).toBe(36);
+	});
 });
 
 describe("change_set_element table", () => {

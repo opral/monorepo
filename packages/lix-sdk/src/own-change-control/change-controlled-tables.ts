@@ -1,7 +1,6 @@
 export const changeControlledTableIds = {
 	account: ["id"],
-	comment: ["id"],
-	change_proposal: ["id"],
+	// change_proposal: ["id"],
 	change_set: ["id"],
 	// Change author should be change controlled but
 	// breaking the trigger loop turned out to be difficult.
@@ -13,7 +12,6 @@ export const changeControlledTableIds = {
 	thread_comment: ["id"],
 	change_set_label: ["change_set_id", "label_id"],
 	change_set_thread: ["change_set_id", "thread_id"],
-	discussion: ["id"],
 	file: ["id"],
 	label: ["id"],
 	key_value: ["key"],

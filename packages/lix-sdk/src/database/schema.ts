@@ -57,10 +57,6 @@ export type LixDatabaseSchema = {
 	// change proposal
 	change_proposal: ChangeProposalTable;
 
-	// discussion
-	discussion: DiscussionTable;
-	comment: CommentTable;
-
 	// thread
 	thread: ThreadTable;
 	thread_comment: ThreadCommentTable;
@@ -172,26 +168,6 @@ type SnapshotTable = {
 	 *   - For an inlang message change, the value would be the new message.
 	 */
 	content: Record<string, any> | null;
-};
-
-// ------ discussions ------
-
-export type Discussion = Selectable<DiscussionTable>;
-export type NewDiscussion = Insertable<DiscussionTable>;
-export type DiscussionUpdate = Updateable<DiscussionTable>;
-type DiscussionTable = {
-	id: Generated<string>;
-	change_set_id: string;
-};
-
-export type Comment = Selectable<CommentTable>;
-export type NewComment = Insertable<CommentTable>;
-export type CommentUpdate = Updateable<CommentTable>;
-type CommentTable = {
-	id: Generated<string>;
-	parent_id: string | null;
-	discussion_id: string;
-	content: string;
 };
 
 // ----- tags -----

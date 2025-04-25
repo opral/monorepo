@@ -240,79 +240,6 @@ test("change set items must be unique", async () => {
 	).rejects.toThrow();
 });
 
-// 8B IDs needed, in order to have a 1% probability of at least one collision.
-test("discussion.id are nano_id(12)", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const changeSet = await db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const discussion = await db
-		.insertInto("discussion")
-		.values({
-			change_set_id: changeSet.id,
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	expect(discussion.id.length).toBe(12);
-});
-
-// 499B IDs needed, in order to have a 1% probability of at least one collision.
-test("comment.id are nano_id(14)", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const changeSet = await db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const discussion = await db
-		.insertInto("discussion")
-		.values({
-			change_set_id: changeSet.id,
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const comment = await db
-		.insertInto("comment")
-		.values({
-			discussion_id: discussion.id,
-			content: "mock",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	expect(comment.id.length).toBe(14);
-});
-
-// 30T IDs needed, in order to have a 1% probability of at least one collision
-test("change_set.id are nano_id(16)", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const changeSet = await db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	expect(changeSet.id.length).toBe(16);
-});
-
 // 2M IDs needed, in order to have a 1% probability of at least one collision.
 // it is assumed that creating 2 million labels is ... unlikely
 test("label.id is nano_id(8)", async () => {
@@ -330,36 +257,6 @@ test("label.id is nano_id(8)", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(label.id.length).toBe(8);
-});
-
-test("creating multiple discussions for one change set should be possible", async () => {
-	const sqlite = await createInMemoryDatabase({
-		readOnly: false,
-	});
-	const db = initDb({ sqlite });
-
-	const changeSet = await db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	await db
-		.insertInto("discussion")
-		.values([
-			{ id: "discussion-1", change_set_id: changeSet.id },
-			{ id: "discussion-2", change_set_id: changeSet.id },
-		])
-		.returningAll()
-		.execute();
-
-	const discussions = await db
-		.selectFrom("discussion")
-		.selectAll()
-		.where("change_set_id", "=", changeSet.id)
-		.execute();
-
-	expect(discussions).toHaveLength(2);
 });
 
 test("the checkpoint label should be created if it doesn't exist", async () => {

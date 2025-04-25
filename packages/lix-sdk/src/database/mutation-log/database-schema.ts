@@ -27,10 +27,6 @@ export const tablesByDepencies: string[] = [
 	"change_set_element",
 	// Depends on: label, change_set
 	"change_set_label",
-	//Depends on: change_set
-	"discussion",
-	// Depends on: account, discussion, comment
-	"comment",
 	// Depends on: version, change
 	"version_change",
 	// Depends on: version, change_conflict

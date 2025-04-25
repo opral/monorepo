@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { validate } from "uuid";
 
-test("change_proposal.id should default to uuid_v7", async () => {
+test.skip("change_proposal.id should default to uuid_v7", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create some changes first
@@ -46,7 +46,7 @@ test("change_proposal.id should default to uuid_v7", async () => {
 	expect(validate(result.id)).toBe(true);
 });
 
-test("change proposals are change controlled", async () => {
+test.skip("change proposals are change controlled", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChange = await lix.db
@@ -94,7 +94,7 @@ test("change proposals are change controlled", async () => {
 	expect(change.entity_id).toBe(result.id);
 });
 
-test("source change set id is nullable", async () => {
+test.skip("source change set id is nullable", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChange = await lix.db

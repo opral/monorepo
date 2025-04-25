@@ -112,25 +112,6 @@ export function applySchema(args: {
     FOREIGN KEY(resolved_change_id) REFERENCES change(id)
   ) STRICT;
 
-  -- discussions 
-
-  CREATE TABLE IF NOT EXISTS discussion (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(12)),
-    change_set_id TEXT NOT NULL,
-
-    FOREIGN KEY(change_set_id) REFERENCES change_set(id)
-  ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS comment (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(14)),
-    parent_id TEXT,
-    discussion_id TEXT NULL,
-    content TEXT NOT NULL,
-    
-    FOREIGN KEY(discussion_id) REFERENCES discussion(id),
-    FOREIGN KEY(parent_id) REFERENCES comment(id)
-  ) STRICT;
-
   -- labels
   
   CREATE TABLE IF NOT EXISTS label (
