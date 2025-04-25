@@ -1,5 +1,5 @@
 import Checkpoints from "./Checkpoints";
-import Proposals from "./Proposals";
+// import Proposals from "./Proposals";
 import clsx from "clsx";
 import { useQuery } from "../hooks/useQuery";
 import { selectActiveVersion, selectMainVersion } from "../queries";
@@ -56,7 +56,7 @@ function MainVersionSidebar() {
 
 			<div className="flex-1 overflow-auto">
 				{activeTab === "checkpoints" && <Checkpoints />}
-				{activeTab === "proposals" && <Proposals />}
+				{/* {activeTab === "proposals" && <Proposals />} */}
 			</div>
 		</div>
 	);

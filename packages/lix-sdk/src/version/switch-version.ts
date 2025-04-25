@@ -1,13 +1,13 @@
-import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
-import { applyChanges } from "../change/apply-changes.js";
-import type { Change, Version } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { versionChangeInSymmetricDifference } from "../query-filter/version-change-in-symmetric-difference.js";
+import { applyChangeSet } from "../change-set/apply-change-set.js";
+import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
+import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
+import type { Version } from "./database-schema.js";
+import { createTransitionChangeSet } from "../change-set/create-transition-change-set.js";
+import { sql } from "kysely";
 
 /**
  * Switches the current Version to the given Version.
- *
- * @deprecated Use `switchVersionV2()` instead
  *
  * The Version must already exist before calling this function.
  *
@@ -27,79 +27,82 @@ import { versionChangeInSymmetricDifference } from "../query-filter/version-chan
  *   ```
  */
 export async function switchVersion(args: {
-	lix: Pick<Lix, "db" | "plugin">;
+	lix: Lix;
 	to: Pick<Version, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		await withSkipFileQueue(trx, async (trx) => {
-			const sourceVersion = await trx
-				.selectFrom("current_version")
-				.selectAll()
-				.executeTakeFirstOrThrow();
+		return await withSkipOwnChangeControl(trx, async (trx) => {
+			return await withSkipFileQueue(trx, async (trx) => {
+				const activeVersion = await trx
+					.selectFrom("active_version")
+					.innerJoin("version", "active_version.version_id", "version.id")
+					.selectAll("version")
+					.executeTakeFirstOrThrow();
 
-			await trx
-				.updateTable("current_version")
-				.set({ id: args.to.id })
-				.execute();
+				const targetVersion = await trx
+					.selectFrom("version")
+					.where("id", "=", args.to.id)
+					.selectAll()
+					.executeTakeFirstOrThrow();
 
-			// need symmetric difference to detect inserts and deletions
-			// that should occur when switching the version
-			const versionChangesSymmetricDifference = await trx
-				.selectFrom("version_change")
-				.innerJoin("change", "version_change.change_id", "change.id")
-				.where(versionChangeInSymmetricDifference(sourceVersion, args.to))
-				.selectAll("change")
-				.execute();
+				await trx
+					.insertInto("key_value")
+					.values({ key: "lix_skip_update_working_change_set", value: "true" })
+					.execute();
 
-			// because we use the symmetric difference, entity
-			// changes need to be de-duplicated. in the future,
-			// we could improve the symmetric difference query
-			const toBeAppliedChanges: Map<string, Change> = new Map();
+				console.log(
+					`Switching from Version ID: ${activeVersion.id} to Target Version ID: ${targetVersion.id}`
+				);
 
-			for (const change of versionChangesSymmetricDifference) {
-				const existingEntityChange = await trx
-					.selectFrom("version_change")
-					.innerJoin("change", "change.id", "version_change.change_id")
-					.where("version_id", "=", args.to.id)
-					.where("change.entity_id", "=", change.entity_id)
-					.where("change.file_id", "=", change.file_id)
-					.where("change.schema_key", "=", change.schema_key)
-					.selectAll("change")
-					.executeTakeFirst();
+				const transitionChangeSet = await createTransitionChangeSet({
+					lix: { ...args.lix, db: trx },
+					sourceChangeSet: { id: activeVersion.change_set_id },
+					targetChangeSet: { id: targetVersion.change_set_id },
+				});
 
-				if (existingEntityChange) {
-					toBeAppliedChanges.set(
-						`${change.file_id},${change.entity_id},${change.schema_key}`,
-						existingEntityChange
+				console.log(`Applying transition change set ${transitionChangeSet.id}`);
+				await applyChangeSet({
+					lix: { ...args.lix, db: trx },
+					changeSet: transitionChangeSet,
+					updateVersion: false,
+				});
+
+				// Update the active version pointer MANUALLY
+				console.log(
+					`Updating active_version.version_id to: ${targetVersion.id}`
+				);
+				await trx
+					.updateTable("active_version")
+					.set({ version_id: targetVersion.id })
+					.executeTakeFirstOrThrow();
+
+				// Check for foreign key violations before committing
+				const fkErrorsAfterUpdate = await sql`PRAGMA foreign_key_check`.execute(
+					trx
+				);
+				if (
+					Array.isArray(fkErrorsAfterUpdate.rows) &&
+					fkErrorsAfterUpdate.rows.length > 0
+				) {
+					console.error(
+						"FOREIGN KEY VIOLATIONS DETECTED (after active_version update):",
+						fkErrorsAfterUpdate.rows
 					);
-					continue;
+				} else {
+					console.log("No FK violations detected after active_version update.");
 				}
-				// need to remove the entity when switching the version
-				else {
-					if (
-						change.plugin_key === "lix_own_change_control" &&
-						(change.schema_key === "lix_account_table" ||
-							change.schema_key === "lix_version_table")
-					) {
-						// deleting accounts and versions when switching is
-						// not desired. a version should be able to jump to a
-						// different version and the accounts are not affected
-						continue;
-					}
-					// the entity does not exist in the switched to version
-					toBeAppliedChanges.set(
-						`${change.file_id},${change.entity_id},${change.schema_key}`,
-						{
-							...change,
-							snapshot_id: "no-content",
-						}
-					);
-				}
-			}
 
-			return await applyChanges({
-				lix: { ...args.lix, db: trx },
-				changes: toBeAppliedChanges.values().toArray(),
+				// Clean up the temporary skip flag
+				await trx
+					.deleteFrom("key_value")
+					.where("key", "=", "lix_skip_update_working_change_set")
+					.execute();
+
+				// Check for foreign key violations before committing
+				const fkErrors = await sql`PRAGMA foreign_key_check`.execute(trx);
+				if (Array.isArray(fkErrors.rows) && fkErrors.rows.length > 0) {
+					console.error("FOREIGN KEY VIOLATIONS DETECTED:", fkErrors.rows);
+				}
 			});
 		});
 	};

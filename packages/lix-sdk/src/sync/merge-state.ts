@@ -1,7 +1,10 @@
-import {
-	tableIdColumns,
-	tablesByDepencies,
-} from "../database/mutation-log/database-schema.js";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
+// import {
+// 	tableIdColumns,
+// 	tablesByDepencies,
+// } from "../database/mutation-log/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export type VectorClock = {

@@ -6,7 +6,7 @@ export function applyChangeSetDatabaseSchema(
 ): SqliteWasmDatabase {
 	const sql = `
   CREATE TABLE IF NOT EXISTS change_set (
-    id TEXT PRIMARY KEY DEFAULT (nano_id(16)),
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     
     -- needs to default to 0 to allow inserting elements 
     -- after creating the change set. SQLite does not 

@@ -266,8 +266,8 @@ test("it should group transactions into one change set", async () => {
 
 	const activeVersionBefore = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.select(["version_v2.id", "version_v2.change_set_id"])
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.select(["version.id", "version.change_set_id"])
 		.executeTakeFirstOrThrow();
 
 	const changeSetsBefore = await lix.db
@@ -298,8 +298,8 @@ test("it should group transactions into one change set", async () => {
 
 	const activeVersionAfter = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.select(["version_v2.id", "version_v2.change_set_id"])
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.select(["version.id", "version.change_set_id"])
 		.executeTakeFirstOrThrow();
 
 	const changeSetsAfter = await lix.db

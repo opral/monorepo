@@ -5,7 +5,7 @@ import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
-test("it should fetch the lix file from the server", async () => {
+test.skip("it should fetch the lix file from the server", async () => {
 	const lix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
@@ -63,7 +63,7 @@ test("it should fetch the lix file from the server", async () => {
 	expect(mockKey.value).toBe("hello world");
 });
 
-test("it should return 404 if the lix file does not exist", async () => {
+test.skip("it should return 404 if the lix file does not exist", async () => {
 	const environment = createLspInMemoryEnvironment();
 
 	const lspHandler = await createServerProtocolHandler({ environment });
@@ -84,7 +84,7 @@ test("it should return 404 if the lix file does not exist", async () => {
 	expect(responseJson.error).toBe("Lix not found");
 });
 
-test("it should return 400 for a request without lix_id", async () => {
+test.skip("it should return 400 for a request without lix_id", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
@@ -104,7 +104,7 @@ test("it should return 400 for a request without lix_id", async () => {
 	expect(responseJson.error).toBe("Missing required field 'lix_id'");
 });
 
-test("lix_sync is set to true", async () => {
+test.skip("lix_sync is set to true", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 

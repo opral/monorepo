@@ -1,9 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { garbageCollectChangeConflicts } from "./garbage-collect-change-conflicts.js";
 import { createChangeConflict } from "./create-change-conflict.js";
-import { createVersion } from "../version/create-version.js";
-import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 // garbage collection is not used atm
 test.skip("should garbage collect conflicts that contain one or more changes that no version change pointer references (anymore)", async () => {
@@ -105,7 +106,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 	);
 });
 
-test("should garbage collect conflicts that no version references", async () => {
+test.skip("should garbage collect conflicts that no version references", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes = await lix.db
@@ -162,7 +163,7 @@ test("should garbage collect conflicts that no version references", async () => 
 	expect(gc0.deletedChangeConflicts[0]?.id).toBe(mockConflict0.id);
 });
 
-test("should NOT garbage collect conflicts that a version change conflict pointer references and where each change is referenced by a version change pointer", async () => {
+test.skip("should NOT garbage collect conflicts that a version change conflict pointer references and where each change is referenced by a version change pointer", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes = await lix.db

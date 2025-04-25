@@ -1,10 +1,6 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Kysely } from "kysely";
-import type {
-	Change,
-	LixDatabaseSchema,
-	Snapshot,
-} from "../database/schema.js";
+import type { Change, LixDatabaseSchema } from "../database/schema.js";
 import {
 	changeControlledTableIds,
 	entityIdForRow,
@@ -13,6 +9,7 @@ import {
 import { executeSync } from "../database/execute-sync.js";
 import { createChange } from "../change/create-change.js";
 import type { Account } from "../account/database-schema.js";
+import type { Snapshot } from "../snapshot/database-schema.js";
 
 export const LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID =
 	"pending-own-change-control";
@@ -130,7 +127,7 @@ export function applyOwnChangeControlTriggers(
 	//    - automatic flush using sqlite's `commit` hook runs out of transaction (bad)
 	sqlite.exec(`
     CREATE TEMP TRIGGER IF NOT EXISTS flush_system_changes_before_version_update
-    BEFORE UPDATE OF change_set_id ON version_v2
+    BEFORE UPDATE OF change_set_id ON version
     BEGIN
       INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
       VALUES ('lix_flushing_own_changes', 'true', true);
@@ -188,13 +185,13 @@ export function applyOwnChangeControlTriggers(
 
           INSERT INTO change_set_edge (parent_id, child_id)
           SELECT change_set_id, (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
-          FROM version_v2
+          FROM version
           WHERE id = (SELECT version_id FROM active_version)
           AND change_set_id IN (
             SELECT id FROM change_set WHERE immutable_elements = true
           );
 
-          UPDATE version_v2
+          UPDATE version
           SET change_set_id = (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
           WHERE id = (SELECT version_id FROM active_version);
 

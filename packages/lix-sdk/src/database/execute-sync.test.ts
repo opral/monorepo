@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { executeSync } from "./execute-sync.js";
 import type { Lix } from "../lix/open-lix.js";
 import { mockChange } from "../change/mock-change.js";
-import type { LixFile } from "./schema.js";
+import type { LixFile } from "../file/database-schema.js";
 import { sql } from "kysely";
 
 test("executeSync yields the same result as async execute for an insert", async () => {

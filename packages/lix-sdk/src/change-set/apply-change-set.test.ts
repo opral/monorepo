@@ -281,8 +281,8 @@ test("applies an insert change from a change set even if the file does not exist
 
 	const activeVersionLix1 = await lix1.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	// Get the created change and its snapshot
@@ -757,8 +757,8 @@ test("updates the version's change set id and maintains ancestry relationship", 
 	// Get the active version and its initial change set
 	const initialVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
-		.selectAll("version_v2")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	// Create a file for testing
@@ -802,9 +802,9 @@ test("updates the version's change set id and maintains ancestry relationship", 
 
 	// Verify the change set is now in the ancestry of the version
 	const updatedVersion = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.where("id", "=", initialVersion.id)
-		.selectAll("version_v2")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	const ancestoryChangeSets = await lix.db

@@ -1,4 +1,4 @@
-import type { Snapshot } from "../database/schema.js";
+import type { Snapshot } from "./database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**

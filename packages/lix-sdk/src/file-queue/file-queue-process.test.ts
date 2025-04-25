@@ -2,10 +2,10 @@ import { expect, test, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
-import type { LixFile } from "../database/schema.js";
 import { fileQueueSettled } from "./file-queue-settled.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { FileQueueEntry } from "./database-schema.js";
+import type { LixFile } from "../file/database-schema.js";
 
 test("should use queue and settled correctly", async () => {
 	const mockPlugin: LixPlugin = {

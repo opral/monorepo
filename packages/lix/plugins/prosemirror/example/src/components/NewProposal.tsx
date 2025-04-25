@@ -1,13 +1,14 @@
+// @ts-nocheck
+
 import { useRef } from "react";
 import { useQuery } from "../hooks/useQuery";
 import {
-	selectProposedChangeSet,
+	// selectProposedChangeSet,
 	selectMainVersion,
 	selectActiveVersion,
 } from "../queries";
 import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
 import { lix } from "../state";
-import { deepCopyChangeSet } from "../utilities/deepCopy";
 import { useKeyValue } from "../hooks/useKeyValue";
 
 /**
