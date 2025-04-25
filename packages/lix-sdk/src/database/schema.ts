@@ -37,10 +37,6 @@ export type LixDatabaseSchema = {
 
 	// change
 	change: ChangeTable;
-	/**
-	 * @deprecated Use `change_set_edge` instead
-	 */
-	change_edge: ChangeEdgeTable;
 	change_author: ChangeAuthorTable;
 
 	// change set

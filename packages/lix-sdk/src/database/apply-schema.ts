@@ -62,17 +62,6 @@ export function applySchema(args: {
     FOREIGN KEY(account_id) REFERENCES account(id)
   ) strict;
 
-  CREATE TABLE IF NOT EXISTS change_edge (
-    parent_id TEXT NOT NULL,
-    child_id TEXT NOT NULL,
-    
-    PRIMARY KEY (parent_id, child_id),
-    FOREIGN KEY(parent_id) REFERENCES change(id),
-    FOREIGN KEY(child_id) REFERENCES change(id),
-    -- Prevent self referencing edges
-    CHECK (parent_id != child_id)
-  ) STRICT;
-
   CREATE TABLE IF NOT EXISTS snapshot (
     id TEXT GENERATED ALWAYS AS (json_sha256(content)) STORED UNIQUE,
     content BLOB

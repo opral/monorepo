@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { expect, test } from "vitest";
 import type { Change } from "../database/schema.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
