@@ -4,7 +4,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 /**
  * Selects changes that are not a parent of any other change.
  *
- * @deprecated Use `changeSetLementIsLeafOf` instead
+ * @deprecated Use `changeSetElementIsLeafOf` instead
  *
  * **Careful**: This filter is not specific to any version.
  * If you want to filter changes in a specific version, use `changeIsLeafInversion`.

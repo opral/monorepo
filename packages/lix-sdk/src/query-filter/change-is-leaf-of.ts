@@ -5,7 +5,7 @@ import type { Change } from "../database/schema.js";
 /**
  * Filter to select the last descendant of the specified change.
  *
- * @deprecated Use `changeSetLementIsLeafOf` instead
+ * @deprecated Use `changeSetElementIsLeafOf` instead
  *
  * @example
  *   Checking for the leaf of a change in all versiones.
