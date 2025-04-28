@@ -3,7 +3,7 @@ import {
 	Account,
 	switchAccount,
 	Lix,
-	VersionV2,
+	Version,
 } from "@lix-js/sdk";
 import { atom, createStore } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -240,21 +240,19 @@ export const withPollingAtom = atom(Date.now());
  */
 export const editorRefAtom = atom<any>(null);
 
-export const activeVersionAtom = atom<Promise<VersionV2 | null>>(
-	async (get) => {
-		get(withPollingAtom);
-		const lix = await get(lixAtom);
-		if (!lix) return null;
+export const activeVersionAtom = atom<Promise<Version | null>>(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	if (!lix) return null;
 
-		const activeVersion = await lix.db
-			.selectFrom("active_version")
-			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-			.selectAll("version_v2")
-			.executeTakeFirstOrThrow();
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
 
-		return activeVersion;
-	}
-);
+	return activeVersion;
+});
 
 export const existingVersionsAtom = atom(async (get) => {
 	get(withPollingAtom);

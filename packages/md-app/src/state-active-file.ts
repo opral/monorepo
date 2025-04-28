@@ -63,8 +63,8 @@ export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
 	// Get the active version with working change set id
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirst();
 
 	if (!activeVersion) return null;
