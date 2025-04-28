@@ -100,7 +100,7 @@ const CreateCheckpointInput = () => {
     lix.db.transaction().execute(async (trx) => {
       const thread = await createThread({
         lix: { ...lix, db: trx },
-        comments: [{ content: args.content }],
+        comments: [{ body: args.content }],
       });
       await trx
         .insertInto("change_set_thread")

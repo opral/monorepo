@@ -349,7 +349,7 @@ export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"thread_comment.id",
-						"thread_comment.content",
+						"thread_comment.body",
 						"thread_comment.thread_id",
 						"thread_comment.parent_id",
 					])

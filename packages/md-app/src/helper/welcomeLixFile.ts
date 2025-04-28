@@ -141,7 +141,7 @@ const createInitialCheckpoint = async (lix: Lix, fileId: string) => {
 		lix.db.transaction().execute(async (trx) => {
 			const thread = await createThread({
 				lix: { ...lix, db: trx },
-				comments: [{ content: initialComment }],
+				comments: [{ body: initialComment }],
 			});
 			await trx
 				.insertInto("change_set_thread")
