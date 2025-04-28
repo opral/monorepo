@@ -1032,3 +1032,49 @@ test("the lix id should be stable between loadings of the same project", async (
 	expect(lixId).toBe(lixId2);
 	expect(lixId).toBe(lixId3);
 });
+
+test("it imports plugins from cache if the network is not available", async () => {
+	const mockRepo = {
+		"/project.inlang/settings.json": JSON.stringify({
+			baseLocale: "en",
+			locales: ["en"],
+			modules: ["http://mock.com/plugin.js"],
+		} satisfies ProjectSettings),
+	};
+
+	const fs = Volume.fromJSON(mockRepo);
+
+	globalThis.fetch = vi.fn(() =>
+		Promise.resolve(
+			new Response(`
+		export default {
+			key: "mock-plugin"	
+		}`)
+		)
+	);
+
+	const project = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+	});
+
+	const plugins = await project.plugins.get();
+
+	expect(plugins.length).toBe(1);
+	expect(plugins[0]?.key).toBe("mock-plugin");
+
+	globalThis.fetch = vi.fn(() => Promise.reject(new Error("Network error")));
+
+	const cache = await fs.promises.readdir("/project.inlang/cache/plugins");
+	expect(cache.length).toBe(1);
+
+	const project2 = await loadProjectFromDirectory({
+		fs: fs as any,
+		path: "/project.inlang",
+	});
+
+	const plugins2 = await project2.plugins.get();
+
+	expect(plugins2.length).toBe(1);
+	expect(plugins2[0]?.key).toBe("mock-plugin");
+});

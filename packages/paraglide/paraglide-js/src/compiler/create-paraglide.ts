@@ -12,35 +12,43 @@ import { loadProjectInMemory } from "@inlang/sdk";
  * Creates an in-memory Paraglide module for use in tests and non-bundled environments.
  *
  * @example
- *	 const project = await fs.readFile("./project.inlang");
+ *	 const blob = await fs.readFile("./project.inlang");
  *   const paraglide = await createParaglide({
- *     project,
- *     compilerOptions, // optional
- *   })
- *
- * @example
- *   import { newProject } from "@inlang/sdk";
- *
- *   const paraglide = await createParaglide({
- *     project: await newProject({
- *       settings: {
- *         baseLocale: "en",
- *         locales: ["en", "de"],
- *       },
- *     }),
- *     compilerOptions, // optional
+ *     blob,
+ *     // other options
  *   })
  *
  *   // Access functions
  *   paraglide.localizeUrl("https://example.com", { locale: "de" })
  *   app.use(paraglide.paraglideMiddleware())
+ *
+ * You can load a project from a directory as well.
+ *
+ * @example
+ *   import { loadProjectFromDirectory } from "@inlang/sdk";
+ *
+ * 	 const project = await loadProjectFromDirectory("./project");
+ *
+ *   const paraglide = await createParaglide({
+ *     blob: await project.toBlob(),
+ *     // other options
+ *   })
+ *
+ *   // Access functions
+ *   paraglide.localizeUrl("https://example.com", { locale: "de" })
+ *   app.use(paraglide.paraglideMiddleware())
+ *
  */
-export async function createParaglide(args: {
-	project: Blob;
-	compilerOptions?: Omit<CompilerOptions, "outdir" | "project" | "fs">;
-}): Promise<Runtime & ServerRuntime & { m: Record<string, unknown> }> {
+export async function createParaglide(
+	args: {
+		/**
+		 * The inlang file.
+		 */
+		blob: Blob;
+	} & Omit<CompilerOptions, "outdir" | "project" | "fs">
+): Promise<Runtime & ServerRuntime & { m: Record<string, unknown> }> {
 	// Load the project from the blob
-	const project = await loadProjectInMemory({ blob: args.project });
+	const project = await loadProjectInMemory({ blob: args.blob });
 	const settings = await project.settings.get();
 
 	// Extract baseLocale and locales from the project
@@ -70,7 +78,7 @@ export async function createParaglide(args: {
 		locales,
 		compilerOptions: {
 			...defaultCompilerOptions,
-			...args.compilerOptions,
+			...args,
 		},
 	})
 		// remove the polyfill import statement to avoid module resolution issues
@@ -81,7 +89,7 @@ export async function createParaglide(args: {
 		compiledBundles: [],
 		compilerOptions: {
 			experimentalMiddlewareLocaleSplitting:
-				args.compilerOptions?.experimentalMiddlewareLocaleSplitting ??
+				args.experimentalMiddlewareLocaleSplitting ??
 				defaultCompilerOptions.experimentalMiddlewareLocaleSplitting,
 		},
 	})
