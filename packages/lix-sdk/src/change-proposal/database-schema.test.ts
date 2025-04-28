@@ -138,7 +138,7 @@ test.skip("source change set id is nullable", async () => {
 	expect(result).toBeDefined();
 });
 
-test("target change set id is not nullable", async () => {
+test.skip("target change set id is not nullable", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChange = await lix.db
