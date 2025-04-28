@@ -29,7 +29,7 @@ export const blockSelectionPlugins = [
 
       // Serialize only the selected block nodes to Markdown
       const markdown = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize({
-        nodes: selectedNodes,
+        value: selectedNodes as any,
       });
 
       window.navigator.clipboard.writeText(markdown);

@@ -15,7 +15,9 @@ export const CreateCopyMarkdownPlugin = createPlatePlugin({
 
 			const selectedNodes = NodeApi.fragment(editor, editor.selection);
 			
-			const markdown = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize(selectedNodes)
+			const markdown = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize({
+				value: selectedNodes
+		})
 
 			window.navigator.clipboard.writeText(markdown);
 			event.preventDefault();
