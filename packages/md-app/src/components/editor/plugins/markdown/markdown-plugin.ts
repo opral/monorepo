@@ -9,7 +9,7 @@ import {
 	getPlateNodeType,
 	MarkdownPlugin,
 	MdParagraph,
-} from "@udecode/plate-markdown";
+} from "../markdown-plate-fork";
 
 
 
