@@ -54,8 +54,8 @@ export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
 	// Get the active version with working change set id
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirst();
 
 	if (!activeVersion) return null;
@@ -115,13 +115,13 @@ export const intermediateChangesAtom = atom<
 			"change_set_element.change_id",
 			"change.id"
 		)
-		.leftJoin("version_change", "version_change.change_id", "change.id")
-		.where((eb) =>
-			eb.or([
-				eb("version_change.version_id", "=", activeVersion.id),
-				eb("version_change.change_id", "is", null),
-			])
-		)
+		// .leftJoin("version_change", "version_change.change_id", "change.id")
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("version_change.version_id", "=", activeVersion.id),
+		// 		eb("version_change.change_id", "is", null),
+		// 	])
+		// )
 		.where("change_set_element.change_set_id", "=", workingChangeSetId)
 		.where("change.file_id", "!=", "lix_own_change_control")
 		.select([
@@ -158,13 +158,13 @@ export const intermediateChangesAtom = atom<
 							"change_set_element.change_id",
 							"change.id"
 						)
-						.leftJoin("version_change", "version_change.change_id", "change.id")
-						.where((eb) =>
-							eb.or([
-								eb("version_change.version_id", "=", activeVersion.id),
-								eb("version_change.change_id", "is", null),
-							])
-						)
+						// .leftJoin("version_change", "version_change.change_id", "change.id")
+						// .where((eb) =>
+						// 	eb.or([
+						// 		eb("version_change.version_id", "=", activeVersion.id),
+						// 		eb("version_change.change_id", "is", null),
+						// 	])
+						// )
 						.where(
 							"change_set_element.change_set_id",
 							"=",
@@ -276,8 +276,8 @@ export const getChangeDiffs = async (
 	// Get active version to filter by current version
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirst();
 
 	if (!activeVersion) {
@@ -292,13 +292,13 @@ export const getChangeDiffs = async (
 			"change_set_element.change_id",
 			"change.id"
 		)
-		.leftJoin("version_change", "version_change.change_id", "change.id")
-		.where((eb) =>
-			eb.or([
-				eb("version_change.version_id", "=", activeVersion.id),
-				eb("version_change.change_id", "is", null),
-			])
-		)
+		// .leftJoin("version_change", "version_change.change_id", "change.id")
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("version_change.version_id", "=", activeVersion.id),
+		// 		eb("version_change.change_id", "is", null),
+		// 	])
+		// )
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where(changeSetElementIsLeafOf([{ id: changeSetId }])) // Only get leaf changes
 		.where(changeHasLabel({ name: "checkpoint" }))
@@ -338,13 +338,13 @@ export const getChangeDiffs = async (
 							"change_set_element.change_id",
 							"change.id"
 						)
-						.leftJoin("version_change", "version_change.change_id", "change.id")
-						.where((eb) =>
-							eb.or([
-								eb("version_change.version_id", "=", activeVersion.id),
-								eb("version_change.change_id", "is", null),
-							])
-						)
+						// .leftJoin("version_change", "version_change.change_id", "change.id")
+						// .where((eb) =>
+						// 	eb.or([
+						// 		eb("version_change.version_id", "=", activeVersion.id),
+						// 		eb("version_change.change_id", "is", null),
+						// 	])
+						// )
 						.where("change_set_element.change_set_id", "=", changeSetBeforeId)
 						.where("change.entity_id", "=", change.entity_id)
 						.where("change.schema_key", "=", change.schema_key)
@@ -402,7 +402,7 @@ export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"thread_comment.id",
-						"thread_comment.content",
+						"thread_comment.body",
 						"thread_comment.thread_id",
 						"thread_comment.parent_id",
 					])
@@ -455,7 +455,7 @@ export const activeThreadAtom = atom(async (get) => {
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"thread_comment.id",
-						"thread_comment.content",
+						"thread_comment.body",
 						"change.created_at",
 						"account.id as account_id",
 						"account.name as account_name",

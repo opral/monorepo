@@ -235,7 +235,7 @@ async function createChangesWithCheckpoint(args: {
 		args.lix.db.transaction().execute(async (trx) => {
 			const thread = await createThread({
 				lix: { ...args.lix, db: trx },
-				comments: [{ content: fromPlainText(args.comment) }],
+				comments: [{ body: fromPlainText(args.comment) }],
 			});
 			await trx
 				.insertInto("change_set_thread")
@@ -254,7 +254,7 @@ async function createChangesWithCheckpoint(args: {
 	return { threads };
 }
 
-const createComment = async (args: {
+export const createComment = async (args: {
 	lix: Lix;
 	threadId: Thread["id"];
 	content: string;
@@ -262,7 +262,7 @@ const createComment = async (args: {
 	await args.lix.db
 		.insertInto("thread_comment")
 		.values({
-			content: fromPlainText(args.content),
+			body: fromPlainText(args.content),
 			thread_id: args.threadId,
 		})
 		.execute();

@@ -3,7 +3,7 @@ import {
 	Account,
 	switchAccount,
 	Lix,
-	VersionV2,
+	Version,
 } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
@@ -203,15 +203,15 @@ export const lixAtom = atom(async (get) => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const activeVersionAtom = atom<Promise<VersionV2 | null>>(async (get) => {
+export const activeVersionAtom = atom<Promise<Version | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return null;
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	return activeVersion;
@@ -222,7 +222,7 @@ export const existingVersionsAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	if (!lix) return [];
 
-	return await lix.db.selectFrom("version_v2").selectAll().execute();
+	return await lix.db.selectFrom("version").selectAll().execute();
 });
 
 export const filesAtom = atom(async (get) => {
