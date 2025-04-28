@@ -15,6 +15,7 @@ import {
 	ChangeSet,
 	changeSetElementIsLeafOf,
 	changeSetHasLabel,
+	changeSetIsAncestorOf,
 	jsonArrayFrom,
 	Lix,
 	sql,
@@ -115,13 +116,7 @@ export const intermediateChangesAtom = atom<
 			"change_set_element.change_id",
 			"change.id"
 		)
-		// .leftJoin("version_change", "version_change.change_id", "change.id")
-		// .where((eb) =>
-		// 	eb.or([
-		// 		eb("version_change.version_id", "=", activeVersion.id),
-		// 		eb("version_change.change_id", "is", null),
-		// 	])
-		// )
+		.where(changeSetElementIsLeafOf([{ id: workingChangeSetId }])) // Only get leaf changes
 		.where("change_set_element.change_set_id", "=", workingChangeSetId)
 		.where("change.file_id", "!=", "lix_own_change_control")
 		.select([
@@ -158,13 +153,7 @@ export const intermediateChangesAtom = atom<
 							"change_set_element.change_id",
 							"change.id"
 						)
-						// .leftJoin("version_change", "version_change.change_id", "change.id")
-						// .where((eb) =>
-						// 	eb.or([
-						// 		eb("version_change.version_id", "=", activeVersion.id),
-						// 		eb("version_change.change_id", "is", null),
-						// 	])
-						// )
+						.where(changeSetElementIsLeafOf([{ id: workingChangeSetId }]))
 						.where(
 							"change_set_element.change_set_id",
 							"=",
@@ -215,9 +204,16 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 	const activeVersion = await get(activeVersionAtom);
 	if (!activeVersion) return [];
 
-	const query = lix.db
+	let query = lix.db
 		.selectFrom("change_set")
 		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.where(
+			changeSetIsAncestorOf(
+				{ id: activeVersion.change_set_id },
+				// in case the checkpoint is the active version's change set
+				{ includeSelf: true }
+			)
+		)
 		.leftJoin(
 			"change_set_element",
 			"change_set.id",
@@ -261,7 +257,7 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 		.orderBy("created_at", "desc");
 
 	if (activeFile) {
-		query.where("file_id", "=", activeFile.id);
+		query = query.where("file_id", "=", activeFile.id);
 	}
 
 	return await query.execute();
@@ -292,24 +288,10 @@ export const getChangeDiffs = async (
 			"change_set_element.change_id",
 			"change.id"
 		)
-		// .leftJoin("version_change", "version_change.change_id", "change.id")
-		// .where((eb) =>
-		// 	eb.or([
-		// 		eb("version_change.version_id", "=", activeVersion.id),
-		// 		eb("version_change.change_id", "is", null),
-		// 	])
-		// )
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where(changeSetElementIsLeafOf([{ id: changeSetId }])) // Only get leaf changes
 		.where(changeHasLabel({ name: "checkpoint" }))
-		.select([
-			"change.id",
-			"change.created_at",
-			"change.plugin_key",
-			"change.schema_key",
-			"change.entity_id",
-			"change.file_id",
-		])
+		.selectAll("change")
 		.select(sql`json(snapshot.content)`.as("snapshot_content_after"));
 
 	if (activeFileId) {
@@ -338,13 +320,7 @@ export const getChangeDiffs = async (
 							"change_set_element.change_id",
 							"change.id"
 						)
-						// .leftJoin("version_change", "version_change.change_id", "change.id")
-						// .where((eb) =>
-						// 	eb.or([
-						// 		eb("version_change.version_id", "=", activeVersion.id),
-						// 		eb("version_change.change_id", "is", null),
-						// 	])
-						// )
+						.where(changeSetElementIsLeafOf([{ id: changeSetId }]))
 						.where("change_set_element.change_set_id", "=", changeSetBeforeId)
 						.where("change.entity_id", "=", change.entity_id)
 						.where("change.schema_key", "=", change.schema_key)

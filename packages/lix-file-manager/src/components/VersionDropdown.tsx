@@ -21,7 +21,7 @@ import {
 	isSyncingAtom,
 	lixAtom,
 } from "../state.js";
-import { Version, VersionV2, createVersion, switchVersion } from "@lix-js/sdk";
+import { Version, createVersion, switchVersion } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.js";
 import { Check, Trash2, ChevronDown, Plus } from "lucide-react";
 import { MergeDialog } from "./MergeDialog.js";
@@ -32,16 +32,16 @@ export function VersionDropdown() {
 	const [existingVersions] = useAtom(existingVersionsAtom);
 	const [lix] = useAtom(lixAtom);
 	const [isSyncing] = useAtom(isSyncingAtom);
-	const [versionToDelete, setVersionToDelete] = useState<VersionV2 | null>(null);
+	const [versionToDelete, setVersionToDelete] = useState<Version | null>(null);
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const [deleteConfirmation, setDeleteConfirmation] = useState("");
 	const [isHovered, setIsHovered] = useState(false);
 	const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
 	const [selectedSourceVersion, setSelectedSourceVersion] =
-		useState<VersionV2 | null>(null);
+		useState<Version | null>(null);
 
 	const switchToVersion = useCallback(
-		async (version: VersionV2) => {
+		async (version: Version) => {
 			if (!lix) return;
 			await switchVersion({ lix, to: version });
 			await saveLixToOpfs({ lix });
@@ -54,7 +54,7 @@ export function VersionDropdown() {
 
 		const newVersion = await createVersion({
 			lix,
-			from: activeVersion,
+			changeSet: { id: activeVersion.change_set_id },
 		});
 
 		await switchToVersion(newVersion);
@@ -66,8 +66,8 @@ export function VersionDropdown() {
 		await lix.db.transaction().execute(async (trx) => {
 			// First delete version_change references
 			await trx
-				.deleteFrom("version_change")
-				.where("version_change.version_id", "=", version.id)
+				.deleteFrom("version")
+				.where("version.id", "=", version.id)
 				.execute();
 
 			// Then delete the version itself

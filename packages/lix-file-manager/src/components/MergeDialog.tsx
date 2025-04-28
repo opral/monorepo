@@ -6,7 +6,7 @@ import {
 	DialogTitle,
 	DialogFooter,
 } from "@/components/ui/dialog.js";
-import { VersionV2 } from "@lix-js/sdk";
+import { Version } from "@lix-js/sdk";
 import {
 	Select,
 	SelectContent,
@@ -20,10 +20,10 @@ import { createMergeChangeSet } from "@lix-js/sdk";
 interface MergeDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	versions: VersionV2[];
-	activeVersion: VersionV2;
+	versions: Version[];
+	activeVersion: Version;
 	lix: any;
-	initialSourceVersion: VersionV2 | null;
+	initialSourceVersion: Version | null;
 	onMergeComplete: () => void;
 }
 
