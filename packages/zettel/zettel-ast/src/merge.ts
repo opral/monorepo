@@ -4,5 +4,8 @@ import type { ZettelDoc } from "./schema.js";
 //
 // Great for copy & pasting potentially
 export function merge(args: { source: ZettelDoc; target: ZettelDoc }): ZettelDoc {
-	return [];
+	return {
+		type: "zettel_doc",
+		content: [],
+	};
 }

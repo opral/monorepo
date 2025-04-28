@@ -3,11 +3,8 @@ import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
-import { validateFilePath } from "../file/validate-file-path.js";
-import { jsonSha256 } from "../snapshot/json-sha-256.js";
 import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
 import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
-import { createSession } from "./mutation-log/lix-session.js";
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 
@@ -26,7 +23,7 @@ export function initDb(args: {
 				file: ["metadata"],
 				file_queue: ["metadata_before", "metadata_after"],
 				snapshot: ["content"],
-				mutation_log: ["row_id"],
+				thread: ["body"],
 			}),
 			SerializeJsonBPlugin(),
 		],
@@ -47,49 +44,6 @@ function initFunctions(args: { sqlite: SqliteWasmDatabase }) {
 		name: "uuid_v4",
 		arity: 0,
 		xFunc: () => uuid_v4(),
-	});
-
-	args.sqlite.createFunction({
-		name: "json_sha256",
-		arity: 1,
-		xFunc: (_ctx: number, value) => {
-			if (!value) {
-				return "no-content";
-			}
-
-			const json = args.sqlite.exec("SELECT json(?)", {
-				bind: [value],
-				returnValue: "resultRows",
-			})[0]![0];
-
-			const parsed = JSON.parse(json as string);
-
-			return jsonSha256(parsed);
-		},
-		deterministic: true,
-	});
-
-	args.sqlite.createFunction({
-		name: "is_valid_file_path",
-		arity: 1,
-		xFunc: (_ctx: number, value) => {
-			return validateFilePath(value as string) as unknown as string;
-		},
-		deterministic: true,
-	});
-
-	const lixSession = createSession();
-
-	args.sqlite.createFunction({
-		name: "lix_session",
-		arity: 0,
-		xFunc: () => lixSession.id(),
-	});
-
-	args.sqlite.createFunction({
-		name: "lix_session_clock_tick",
-		arity: 0,
-		xFunc: () => lixSession.sessionClockTick(),
 	});
 
 	args.sqlite.createFunction({

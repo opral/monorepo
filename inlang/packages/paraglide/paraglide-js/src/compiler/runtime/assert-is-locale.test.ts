@@ -4,7 +4,7 @@ import { newProject } from "@inlang/sdk";
 
 test("throws if the locale is not available", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
@@ -17,7 +17,7 @@ test("throws if the locale is not available", async () => {
 
 test("passes if the locale is available", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
@@ -29,7 +29,7 @@ test("passes if the locale is available", async () => {
 
 test("the return value is a Locale", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],

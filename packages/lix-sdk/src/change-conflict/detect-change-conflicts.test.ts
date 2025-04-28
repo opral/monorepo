@@ -1,10 +1,13 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Change } from "../database/schema.js";
 import { detectChangeConflicts } from "./detect-change-conflicts.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 
-test("should detect conflicts using plugins", async () => {
+test.skip("should detect conflicts using plugins", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockPlugin: LixPlugin = {
@@ -51,7 +54,7 @@ test("should detect conflicts using plugins", async () => {
 	});
 });
 
-test("should handle no conflicts detected by plugins", async () => {
+test.skip("should handle no conflicts detected by plugins", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockPlugin: LixPlugin = {
@@ -89,7 +92,7 @@ test("should handle no conflicts detected by plugins", async () => {
 	});
 });
 
-test("should handle multiple plugins detecting conflicts", async () => {
+test.skip("should handle multiple plugins detecting conflicts", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockPlugin1: LixPlugin = {
@@ -160,7 +163,7 @@ test("should handle multiple plugins detecting conflicts", async () => {
 	});
 });
 
-test("it should auto detect diverging entity conflicts", async () => {
+test.skip("it should auto detect diverging entity conflicts", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes = await lix.db

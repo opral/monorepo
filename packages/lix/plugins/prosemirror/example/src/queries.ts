@@ -1,10 +1,7 @@
 import { prosemirrorFile, lix } from "./state";
 import {
-	changeIsLeaf,
-	changeIsLeafInVersion,
 	changeSetIsAncestorOf,
 	ChangeSet,
-	changeSetElementInSymmetricDifference,
 	changeSetHasLabel,
 	jsonArrayFrom,
 } from "@lix-js/sdk";
@@ -93,26 +90,26 @@ export async function selectCheckpoints(): Promise<
 /**
  * Selects open change proposals from the database
  */
-export async function selectOpenChangeProposals() {
-	return lix.db
-		.selectFrom("change_proposal")
-		.innerJoin("change", "change.entity_id", "change_proposal.id")
-		.innerJoin("change_author", "change_author.change_id", "change.id")
-		.innerJoin("account", "account.id", "change_author.account_id")
-		.selectAll("change_proposal")
-		.select("account.name as account_name")
-		.innerJoin("change_set", "change_set.id", "change_proposal.change_set_id")
-		.innerJoin(
-			"change_set_element",
-			"change_set_element.change_set_id",
-			"change_set.id",
-		)
-		.select((eb) => [
-			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
-		])
-		.groupBy("change_proposal.id")
-		.execute();
-}
+// export async function selectOpenChangeProposals() {
+// 	return lix.db
+// 		.selectFrom("change_proposal")
+// 		.innerJoin("change", "change.entity_id", "change_proposal.id")
+// 		.innerJoin("change_author", "change_author.change_id", "change.id")
+// 		.innerJoin("account", "account.id", "change_author.account_id")
+// 		.selectAll("change_proposal")
+// 		.select("account.name as account_name")
+// 		.innerJoin("change_set", "change_set.id", "change_proposal.change_set_id")
+// 		.innerJoin(
+// 			"change_set_element",
+// 			"change_set_element.change_set_id",
+// 			"change_set.id",
+// 		)
+// 		.select((eb) => [
+// 			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+// 		])
+// 		.groupBy("change_proposal.id")
+// 		.execute();
+// }
 
 /**
  * Selects all versions
@@ -127,8 +124,8 @@ export async function selectVersions() {
 export async function selectActiveVersion() {
 	return lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 }
 
@@ -151,26 +148,6 @@ export async function selectMainVersion() {
 		.executeTakeFirstOrThrow();
 }
 
-export async function selectDiscussion(args: { changeSetId: ChangeSet["id"] }) {
-	return await lix.db
-		.selectFrom("discussion")
-		.where("change_set_id", "=", args.changeSetId)
-		.select((eb) => [
-			jsonArrayFrom(
-				eb
-					.selectFrom("comment")
-					.select(["comment.content", "comment.id", "comment.discussion_id"])
-					.innerJoin("change", "change.entity_id", "comment.id")
-					.innerJoin("change_author", "change_author.change_id", "change.id")
-					.innerJoin("account", "account.id", "change_author.account_id")
-					.select(["change.created_at", "account.name as author_name"])
-					.whereRef("comment.discussion_id", "=", "discussion.id"),
-			).as("comments"),
-		])
-		.selectAll("discussion")
-		.executeTakeFirst();
-}
-
 export async function selectThreads(args: { changeSetId: ChangeSet["id"] }) {
 	return await lix.db
 		.selectFrom("thread")
@@ -185,7 +162,7 @@ export async function selectThreads(args: { changeSetId: ChangeSet["id"] }) {
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"thread_comment.id",
-						"thread_comment.content",
+						"thread_comment.body",
 						"thread_comment.thread_id",
 						"thread_comment.parent_id",
 					])
@@ -222,151 +199,4 @@ export async function selectWorkingChangeSet(): Promise<
 			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 		])
 		.executeTakeFirst();
-}
-
-/**
- * Selects the current change proposal (if not in main version) for the sidebar
- *
- * TODO need easier API in lix
- */
-export async function selectProposedChangeSet(): Promise<
-	(ChangeSet & { change_count: number }) | null
-> {
-	const mainVersion = await selectMainVersion();
-	const currentVersion = await selectActiveVersion();
-
-	if (currentVersion.id === mainVersion.id) {
-		return null;
-	}
-
-	const sourceChangeSet = await lix.db
-		.insertInto("change_set")
-		.values({ id: `source-${currentVersion.id}` })
-		.onConflict((oc) => oc.doUpdateSet({ id: `source-${currentVersion.id}` }))
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	// always have the proposed change set available
-	const proposedChangeSet = await lix.db
-		.insertInto("change_set")
-		.values({
-			id: `proposed-${currentVersion.id}`,
-		})
-		.onConflict((oc) => oc.doUpdateSet({ id: `proposed-${currentVersion.id}` }))
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	const targetChangeSet = await lix.db
-		.insertInto("change_set")
-		.values({
-			id: `target-${currentVersion.id}`,
-		})
-		.onConflict((oc) => oc.doUpdateSet({ id: `target-${currentVersion.id}` }))
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	// using the current change set as the source
-	const sourceChanges = await lix.db
-		.selectFrom("change")
-		.innerJoin("file", "change.file_id", "file.id")
-		.where("file.id", "=", prosemirrorFile.id)
-		.where(changeIsLeafInVersion(currentVersion))
-		.select([
-			"change.id",
-			"change.entity_id",
-			"change.file_id",
-			"change.schema_key",
-		])
-		.execute();
-
-	// getting all changes of main to use as target
-	// todo need to target the current change set of main instead
-	// todo but that requires the change_set_graph to be implemented
-	// of re-creating the change set all the time
-	const targetChanges = await lix.db
-		.selectFrom("change")
-		.innerJoin("file", "change.file_id", "file.id")
-		.where("file.id", "=", prosemirrorFile.id)
-		.where(changeIsLeafInVersion(mainVersion))
-		.select([
-			"change.id",
-			"change.entity_id",
-			"change.file_id",
-			"change.schema_key",
-		])
-		.execute();
-
-	// add all source changes
-	await lix.db
-		.insertInto("change_set_element")
-		.values(
-			sourceChanges.map((c) => ({
-				change_set_id: sourceChangeSet.id,
-				change_id: c.id,
-				entity_id: c.entity_id,
-				file_id: c.file_id,
-				schema_key: c.schema_key,
-			})),
-		)
-		.onConflict((oc) => oc.doNothing())
-		.execute();
-
-	// add all target changes
-	await lix.db
-		.insertInto("change_set_element")
-		.values(
-			targetChanges.map((c) => ({
-				change_set_id: targetChangeSet.id,
-				change_id: c.id,
-				entity_id: c.entity_id,
-				file_id: c.file_id,
-				schema_key: c.schema_key,
-			})),
-		)
-		.onConflict((oc) => oc.doNothing())
-		.execute();
-
-	const proposedChanges = await lix.db
-		.selectFrom("change_set_element")
-		.innerJoin("change", "change_set_element.change_id", "change.id")
-		.where(
-			changeSetElementInSymmetricDifference(sourceChangeSet!, targetChangeSet),
-		)
-		// The symmetric difference alone is not enough
-		// which change came before and after?
-		// if the source has leafs that are new,
-		.where(changeIsLeaf())
-		.distinct()
-		.select([
-			"change_id as id",
-			"change.entity_id",
-			"change.file_id",
-			"change.schema_key",
-		])
-		.execute();
-
-	if (proposedChanges.length > 0) {
-		// always keep the proposal up to date. this demo
-		// is purposefully simple by encouraging short lived
-		// proposals that dont run out of sync with the main
-		// version
-		await lix.db
-			.insertInto("change_set_element")
-			.values(
-				proposedChanges.map((c) => ({
-					change_set_id: proposedChangeSet.id,
-					change_id: c.id,
-					entity_id: c.entity_id,
-					file_id: c.file_id,
-					schema_key: c.schema_key,
-				})),
-			)
-			.onConflict((oc) => oc.doNothing())
-			.execute();
-	}
-
-	return {
-		...proposedChangeSet,
-		change_count: proposedChanges.length,
-	};
 }

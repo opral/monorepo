@@ -6,16 +6,14 @@ test("matching by strategy works", async () => {
 	const baseLocale = "en";
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale,
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie", "baseLocale"],
-			cookieName: "PARAGLIDE_LOCALE",
-		},
+		strategy: ["cookie", "baseLocale"],
+		cookieName: "PARAGLIDE_LOCALE",
 	});
 
 	// @ts-expect-error - global variable definition
@@ -28,15 +26,13 @@ test("matching by strategy works", async () => {
 
 test("throws if variable is used without baseLocale as fallback strategy", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["globalVariable"],
-		},
+		strategy: ["globalVariable"],
 	});
 
 	expect(() => runtime.getLocale()).toThrow();
@@ -48,25 +44,23 @@ test("throws if variable is used without baseLocale as fallback strategy", async
 
 test("retrieves the locale for a url pattern", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url"],
-			isServer: "false",
-			urlPatterns: [
-				{
-					pattern: "https://example.:tld/:path*",
-					localized: [
-						["en", "https://example.com/:path*"],
-						["de", "https://example.de/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url"],
+		isServer: "false",
+		urlPatterns: [
+			{
+				pattern: "https://example.:tld/:path*",
+				localized: [
+					["en", "https://example.com/:path*"],
+					["de", "https://example.de/:path*"],
+				],
+			},
+		],
 	});
 
 	globalThis.window = { location: { href: "https://example.com/page" } } as any;
@@ -80,24 +74,22 @@ test("retrieves the locale for a url pattern", async () => {
 
 test("url pattern strategy doesn't throw during SSR", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url", "baseLocale"],
-			urlPatterns: [
-				{
-					pattern: "https://example.:tld/:path*",
-					localized: [
-						["en", "https://example.com/:path*"],
-						["de", "https://example.de/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url", "baseLocale"],
+		urlPatterns: [
+			{
+				pattern: "https://example.:tld/:path*",
+				localized: [
+					["en", "https://example.com/:path*"],
+					["de", "https://example.de/:path*"],
+				],
+			},
+		],
 	});
 
 	expect(() => runtime.getLocale()).not.toThrow();
@@ -107,16 +99,14 @@ test("doesn't throw for an old cookie locale", async () => {
 	const baseLocale = "en";
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie", "baseLocale"],
-			cookieName: "PARAGLIDE_LOCALE",
-		},
+		strategy: ["cookie", "baseLocale"],
+		cookieName: "PARAGLIDE_LOCALE",
 	});
 
 	// @ts-expect-error - global variable definition
@@ -131,16 +121,14 @@ test("returns the preferred locale from navigator.languages", async () => {
 	const originalNavigator = globalThis.navigator;
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "fr", "de"],
 			},
 		}),
-		compilerOptions: {
-			isServer: "false",
-			strategy: ["preferredLanguage"],
-		},
+		isServer: "false",
+		strategy: ["preferredLanguage"],
 	});
 
 	// Mock navigator.languages
@@ -162,17 +150,15 @@ test("returns the preferred locale from navigator.languages", async () => {
 
 test("returns the locale from local storage", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["localStorage"],
-			localStorageKey: "PARAGLIDE_LOCALE",
-			isServer: "false",
-		},
+		strategy: ["localStorage"],
+		localStorageKey: "PARAGLIDE_LOCALE",
+		isServer: "false",
 	});
 
 	// @ts-expect-error - global variable definition
@@ -187,27 +173,25 @@ test("returns the locale from local storage", async () => {
 test("initially sets the locale after resolving it for the first time", async () => {
 	// Create runtime with multiple strategies
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de", "fr"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["url", "cookie"],
-			isServer: "false",
-			cookieName: "PARAGLIDE_LOCALE",
-			urlPatterns: [
-				{
-					pattern: "https://example.com/:path*",
-					localized: [
-						["en", "https://example.com/en/:path*"],
-						["de", "https://example.com/de/:path*"],
-						["fr", "https://example.com/fr/:path*"],
-					],
-				},
-			],
-		},
+		strategy: ["url", "cookie"],
+		isServer: "false",
+		cookieName: "PARAGLIDE_LOCALE",
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:path*",
+				localized: [
+					["en", "https://example.com/en/:path*"],
+					["de", "https://example.com/de/:path*"],
+					["fr", "https://example.com/fr/:path*"],
+				],
+			},
+		],
 	});
 
 	// Setup global objects for URL strategy

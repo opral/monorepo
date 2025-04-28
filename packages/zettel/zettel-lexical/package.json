@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@lexical/utils": "^0.30.0",
+    "@sinclair/typebox": "^0.34.33",
     "@opral/zettel-ast": "workspace:*",
     "@opral/zettel-html": "workspace:*"
   },

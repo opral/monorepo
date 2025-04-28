@@ -3,13 +3,14 @@ import {
 	type DeleteQueryBuilder,
 	type DeleteResult,
 } from "kysely";
-import type { Change, LixDatabaseSchema, LixFile } from "../database/schema.js";
+import type { Change, LixDatabaseSchema } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import {
 	changeControlledTableIds,
 	primaryKeysForEntityId,
 } from "./change-controlled-tables.js";
 import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
+import type { LixFile } from "../file/database-schema.js";
 
 /**
  * Applies own changes to lix itself.

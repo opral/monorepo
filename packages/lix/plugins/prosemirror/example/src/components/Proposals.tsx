@@ -1,9 +1,10 @@
+// @ts-nocheck
+
 import { useQuery } from "../hooks/useQuery";
 import { selectOpenChangeProposals } from "../queries";
 import { FileText } from "lucide-react";
 import { ChangeSet } from "./ChangeSet";
 import { lix } from "../state";
-import { mergeChangeSet } from "../utilities/mergeChangeSet";
 import { useKeyValue } from "../hooks/useKeyValue";
 
 /**

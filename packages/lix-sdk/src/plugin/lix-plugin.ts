@@ -2,7 +2,8 @@ import type {
 	ExperimentalChangeSchema,
 	ExperimentalInferType,
 } from "../change-schema/types.js";
-import { type Change, type LixFile } from "../database/schema.js";
+import { type Change } from "../database/schema.js";
+import type { LixFile } from "../file/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 
 // named lixplugin to avoid conflict with built-in plugin type

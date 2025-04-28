@@ -77,7 +77,10 @@ test("content of a thread comment is stored as json", async () => {
 		lix,
 		comments: [
 			{
-				content: [{ _type: "mock", _key: "new_value" }],
+				body: {
+					type: "zettel_doc",
+					content: [{ type: "mock", zettel_key: "mock_key" }],
+				},
 			},
 		],
 	});
@@ -92,8 +95,11 @@ test("content of a thread comment is stored as json", async () => {
 		.select("snapshot.content")
 		.executeTakeFirst();
 
-	expect(firstComment.content).toEqual([{ _type: "mock", _key: "new_value" }]);
-	expect(change?.content?.content).toEqual([
-		{ _type: "mock", _key: "new_value" },
+	expect(firstComment.body.content).toEqual([
+		{ type: "mock", zettel_key: "mock_key" },
+	]);
+
+	expect(change?.content?.body?.content).toEqual([
+		{ type: "mock", zettel_key: "mock_key" },
 	]);
 });

@@ -5,7 +5,7 @@ import { ChangeSetElementsWindow } from "./change-set-elements-dialog";
 
 // Define a generic data structure for our Lix nodes
 export interface LixNodeData {
-  tableName: string; // e.g., 'change_set', 'version_v2'
+  tableName: string; // e.g., 'change_set', 'version'
   entity: any;
   originalId?: string; // Added for version nodes to store original ID
   title?: string; // Custom title for the node
@@ -13,7 +13,15 @@ export interface LixNodeData {
 }
 
 // Change Set Node Component
-const ChangeSetNode = ({ id, entity, title }: { id: string; entity: any; title?: string }) => {
+const ChangeSetNode = ({
+  id,
+  entity,
+  title,
+}: {
+  id: string;
+  entity: any;
+  title?: string;
+}) => {
   return (
     <div className="card card-compact bg-base-100 shadow-sm min-w-[200px] text-sm">
       <div className="card-body p-4">
@@ -91,14 +99,12 @@ const VersionNode = ({ id, entity }: { id: string; entity: any }) => {
   return (
     <div className="card card-compact bg-base-100 shadow-sm min-w-[180px] text-sm">
       <div className="card-body p-4">
-        <h3 className="card-title text-sm capitalize border-b mb-2">
-          version
-        </h3>
+        <h3 className="card-title text-sm capitalize border-b mb-2">version</h3>
         <div className="space-y-1">
           {Object.entries(entity).map(([key, value]) => {
             if (value === null || value === undefined || value === "")
               return null;
-            
+
             const displayValue =
               typeof value === "string"
                 ? value.substring(0, 20) + (value.length > 20 ? "..." : "")
@@ -114,7 +120,7 @@ const VersionNode = ({ id, entity }: { id: string; entity: any }) => {
             );
           })}
         </div>
-        
+
         {/* Handles for connections */}
         <Handle
           type="target"
@@ -142,7 +148,7 @@ const GenericLixNodeComponent = ({ id, data }: NodeProps) => {
   // Render the appropriate node type based on tableName
   if (tableName === "change_set") {
     return <ChangeSetNode id={id} entity={entity} title={title} />;
-  } else if (tableName === "version_v2") {
+  } else if (tableName === "version") {
     return <VersionNode id={id} entity={entity} />;
   }
 

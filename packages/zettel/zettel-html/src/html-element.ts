@@ -1,4 +1,4 @@
-import type { ZettelTextBlock, ZettelSpan, MarkDef, BaseNode } from "@opral/zettel-ast";
+import type { ZettelTextBlock, ZettelSpan } from "@opral/zettel-ast";
 
 interface ToHtmlElementOptions {
 	includeChildren?: boolean;
@@ -15,20 +15,17 @@ interface ToHtmlElementOptions {
  * @returns HTMLElement representing the node
  */
 export function singleNodeToHtmlElement(
-	node: ZettelTextBlock | ZettelSpan | BaseNode,
+	node: ZettelTextBlock | ZettelSpan,
 	options?: ToHtmlElementOptions,
-	markDefsFromParent?: MarkDef[]
+	markDefsFromParent?: any[]
 ): HTMLElement {
 	const { includeChildren = true } = options ?? {};
 
-	if (node._type === "zettel.textBlock") {
+	if (node.type === "zettel_text_block") {
 		const block = node as ZettelTextBlock;
 		const p = document.createElement("p");
-		p.setAttribute("data-zettel-key", block._key);
-		if (block.markDefs && block.markDefs.length > 0) {
-			// Use plain JSON.stringify, single quotes in HTML string
-			p.setAttribute("data-zettel-mark-defs", JSON.stringify(block.markDefs));
-		}
+		p.setAttribute("data-zettel-key", block.zettel_key);
+
 		if (includeChildren && block.children) {
 			for (const child of block.children) {
 				p.appendChild(singleNodeToHtmlElement(child, options, block.markDefs));
@@ -36,43 +33,35 @@ export function singleNodeToHtmlElement(
 		}
 		return p;
 	}
-	if (node._type === "zettel.span") {
+	if (node.type === "zettel_span") {
 		const span = document.createElement("span");
 		const zettelSpan = node as ZettelSpan;
-		// Only set data-zettel-key if present in the node
-		if (zettelSpan._key) {
-			span.setAttribute("data-zettel-key", zettelSpan._key);
+		if (zettelSpan.zettel_key) {
+			span.setAttribute("data-zettel-key", zettelSpan.zettel_key);
 		}
-		// Only set data-zettel-marks if marks are present
-		if (zettelSpan.marks && zettelSpan.marks.length > 0) {
-			span.setAttribute("data-zettel-marks", JSON.stringify(zettelSpan.marks));
-		}
+
 		if (includeChildren) {
 			let textNode: Node = document.createTextNode(zettelSpan.text);
 			if (zettelSpan.marks) {
 				for (const mark of zettelSpan.marks) {
-					if (mark === "zettel.strong") {
+					if (mark.type === "zettel_bold") {
 						const strong = document.createElement("strong");
 						strong.appendChild(textNode);
 						textNode = strong;
-					} else if (mark === "zettel.em") {
+					} else if (mark.type === "zettel_italic") {
 						const em = document.createElement("em");
 						em.appendChild(textNode);
 						textNode = em;
-					} else if (mark === "zettel.code") {
+					} else if (mark.type === "zettel_code") {
 						const code = document.createElement("code");
 						code.appendChild(textNode);
 						textNode = code;
-					} else if (markDefsFromParent) {
-						// Handle keyed marks (e.g. links)
-						const def = markDefsFromParent.find((d) => d._key === mark);
-						if (def && def._type === "zettel.link" && "href" in def) {
-							const a = document.createElement("a");
-							a.setAttribute("href", def.href);
-							a.setAttribute("data-zettel-mark-key", def._key);
-							a.appendChild(textNode);
-							textNode = a;
-						}
+					} else if (mark.type === "zettel_link" && typeof (mark as any).href === "string") {
+						// Only link marks have href
+						const a = document.createElement("a");
+						a.setAttribute("href", (mark as any).href);
+						a.appendChild(textNode);
+						textNode = a;
 					}
 				}
 			}

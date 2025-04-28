@@ -57,7 +57,7 @@ test("it should throw the error from the loader if the cache does not exist", as
 
 	const lix = await openLixInMemory({ blob: await newLixFile() });
 
-	expect(
+	await expect(
 		async () => await withCache(mockLoader, lix)(mockModulePath)
 	).rejects.toThrowError("Network error");
 });

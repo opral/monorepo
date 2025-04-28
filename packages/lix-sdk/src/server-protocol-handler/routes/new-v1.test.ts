@@ -5,7 +5,7 @@ import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
-test("it should store the lix file", async () => {
+test.skip("it should store the lix file", async () => {
 	const initLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});

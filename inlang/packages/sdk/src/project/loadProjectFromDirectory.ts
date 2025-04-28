@@ -1,6 +1,6 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { type Lix } from "@lix-js/sdk";
+import { closeLix, openLixInMemory, toBlob, type Lix } from "@lix-js/sdk";
 import fs from "node:fs";
 import nodePath from "node:path";
 import type {
@@ -58,6 +58,22 @@ export async function loadProjectFromDirectory(
 		...localImport.locallyImportedPlugins,
 	];
 
+	// Loading a new lix to sync the fs files to before
+	// opening the inlang project
+	// https://github.com/opral/inlang-paraglide-js/issues/498
+	const newLix = await newProject({
+		settings,
+	});
+
+	const tempLix = await openLixInMemory({ blob: newLix });
+
+	await syncLixFsFiles({
+		fs: args.fs,
+		path: args.path,
+		lix: tempLix,
+		syncInterval: undefined,
+	});
+
 	// TODO call tempProject.lix.settled() to wait for the new settings file, and remove reload of the proejct as soon as reactive settings has landed
 	// NOTE: we need to ensure two things:
 	// 1. settled needs to include the changes from the copyFiles call
@@ -69,10 +85,11 @@ export async function loadProjectFromDirectory(
 			? // reversing the id to have distinguishable lix ids from inlang ids
 				[{ key: "lix_id", value: inlangId }]
 			: undefined,
-		blob: await newProject({
-			settings,
-		}),
+		blob: await toBlob({ lix: tempLix }),
 	});
+
+	// Closing the temp lix
+	await closeLix({ lix: tempLix });
 
 	await syncLixFsFiles({
 		fs: args.fs,

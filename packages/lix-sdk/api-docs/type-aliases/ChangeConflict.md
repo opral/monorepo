@@ -8,4 +8,4 @@
 
 > **ChangeConflict** = `Selectable`\<`ChangeConflictTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:245](https://github.com/opral/monorepo/blob/9e4a0ed87313931bc006fc9fc84146a53943e93c/packages/lix-sdk/src/database/schema.ts#L245)
+Defined in: [packages/lix-sdk/src/database/schema.ts:245](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L245)

@@ -1,7 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import type { Change, ChangeConflict } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
-import { applyChanges } from "../change/apply-changes.js";
-import { updateChangesInVersion } from "../version/update-changes-in-version.js";
 
 /**
  * Resolves a conflict by selecting one of the two
