@@ -1,13 +1,11 @@
-import { test, expect } from "vitest";
+import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type {
-	Change,
-	ChangeSet,
-	ChangeSetElement,
-} from "../database/schema.js";
+import type { Change } from "../database/schema.js";
+import type { ChangeSetLabel } from "../change-set/database-schema.js";
 import { applyOwnChanges } from "./apply-own-change.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { type NewKeyValue } from "../key-value/database-schema.js";
+import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
 
 test("it should apply insert changes correctly", async () => {
 	const lix = await openLixInMemory({});
@@ -212,25 +210,25 @@ test("file.data is not changed by applyOwnEntityChanges", async () => {
 test("foreign key constraints are deferred to make the order of applying changes irrelevant", async () => {
 	const lix = await openLixInMemory({});
 
-	const snapshots = [
-		mockJsonSnapshot({
-			id: "change-set-1",
-		} satisfies ChangeSet),
-		mockJsonSnapshot({
-			change_id: "change0",
-			change_set_id: "change-set-1",
-		} satisfies ChangeSetElement),
-	] as const;
+	const snapshots = await lix.db
+		.insertInto("snapshot")
+		.values([
+			{ content: { id: "change-set-1" } },
+			{ content: { label_id: "test-label", change_set_id: "change-set-1" } },
+			{ content: { id: "test-label", name: "test-label" } },
+		])
+		.returningAll()
+		.execute();
 
 	const mockChanges: Change[] = [
 		// applying changes in reverse order
 		{
 			id: "change2",
-			entity_id: "change-set-1,change0",
-			schema_key: "lix_change_set_element_table",
+			entity_id: "test-label,change-set-1",
+			schema_key: "lix_change_set_label_table",
 			plugin_key: "lix_own_change_control",
-			file_id: "null",
-			snapshot_id: snapshots[1].id,
+			file_id: "lix_own_change_control",
+			snapshot_id: snapshots[1]!.id,
 			created_at: "2021-01-01T00:00:00.000Z",
 		},
 		{
@@ -238,38 +236,40 @@ test("foreign key constraints are deferred to make the order of applying changes
 			entity_id: "change-set-1",
 			schema_key: "lix_change_set_table",
 			plugin_key: "lix_own_change_control",
-			file_id: "null",
-			snapshot_id: snapshots[0].id,
+			file_id: "lix_own_change_control",
+			snapshot_id: snapshots[0]!.id,
+			created_at: "2021-01-01T00:00:00.000Z",
+		},
+		{
+			id: "change0",
+			entity_id: "test-label",
+			schema_key: "lix_label_table",
+			plugin_key: "lix_own_change_control",
+			file_id: "lix_own_change_control",
+			snapshot_id: snapshots[2]!.id,
 			created_at: "2021-01-01T00:00:00.000Z",
 		},
 	];
 
-	for (const snapshot of snapshots) {
-		// @ts-expect-error - 'cannot' insert into generated column error
-		delete snapshot.id;
-	}
-
-	await lix.db
-		.insertInto("snapshot")
-		.values(snapshots.map((s) => ({ content: s.content })))
-		.execute();
-
-	// insert change that the change set element references
+	// insert the change that the change set label references
 	await lix.db
 		.insertInto("change")
 		.values({
 			id: "change0",
 			plugin_key: "mock",
 			file_id: "null",
-			entity_id: "mock",
-			schema_key: "mock",
+			// These must match the FK reference in the change_set_label
+			entity_id: "test-label,change-set-1",
+			schema_key: "lix_change_set_label_table",
 			snapshot_id: "no-content",
 		})
 		.execute();
 
-	await expect(
-		applyOwnChanges({ lix, changes: mockChanges })
-	).resolves.toBeUndefined();
+	const applied = await applyOwnChanges({
+		lix,
+		changes: mockChanges,
+	});
+	expect(applied).toBeDefined();
 });
 
 test("foreign key constraints are obeyed", async () => {
@@ -278,17 +278,17 @@ test("foreign key constraints are obeyed", async () => {
 	const snapshots = [
 		mockJsonSnapshot({
 			// both change 0 and the change set are missing
-			change_id: "change0",
+			label_id: "test-label",
 			change_set_id: "change-set-1",
-		} satisfies ChangeSetElement),
+		} satisfies ChangeSetLabel),
 	] as const;
 
 	const mockChanges: Change[] = [
 		{
 			id: "change2",
 			// the change set for this change does not exist
-			entity_id: "change-set-1,change0",
-			schema_key: "lix_change_set_element_table",
+			entity_id: "change-set-1,test-label",
+			schema_key: "lix_change_set_label_table",
 			plugin_key: "lix_own_change_control",
 			file_id: "lix_own_change_control",
 			snapshot_id: snapshots[0].id,
@@ -306,24 +306,27 @@ test("foreign key constraints are obeyed", async () => {
 		.values(snapshots.map((s) => ({ content: s.content })))
 		.execute();
 
-	// insert change that the change set element references
+	// insert change that the change set label references
 	await lix.db
 		.insertInto("change")
 		.values({
 			id: "change0",
 			plugin_key: "mock",
-			file_id: "null",
-			entity_id: "mock",
-			schema_key: "mock",
+			file_id: "lix_own_change_control",
+			// Use the values from the element snapshot that references this change
+			entity_id: "change-set-1,test-label",
+			schema_key: "lix_change_set_label_table",
 			snapshot_id: "no-content",
 		})
 		.execute();
 
-	expect(applyOwnChanges({ lix, changes: mockChanges })).rejects.toThrow();
+	await expect(
+		applyOwnChanges({ lix, changes: mockChanges })
+	).rejects.toThrow();
 });
 
 // https://github.com/opral/lix-sdk/issues/185
-test("applying own entity changes doesn't lead to the creation of new changes", async () => {
+test("applying own entity changes doesn't lead to the creation of new changes when used with skipOwnChangeControl", async () => {
 	const lix = await openLixInMemory({});
 
 	const snapshot = mockJsonSnapshot({
@@ -340,22 +343,59 @@ test("applying own entity changes doesn't lead to the creation of new changes", 
 
 	const changesBefore = await lix.db.selectFrom("change").selectAll().execute();
 
-	await applyOwnChanges({
-		lix,
-		changes: [
-			{
-				id: "change0",
-				entity_id: "mock-key",
-				file_id: "null",
-				plugin_key: "lix_own_change_control",
-				schema_key: "lix_key_value_table",
-				snapshot_id: snapshot.id,
-				created_at: "2021-01-01T00:00:00Z",
-			},
-		],
+	await withSkipOwnChangeControl(lix.db, async (trx) => {
+		await applyOwnChanges({
+			lix: { ...lix, db: trx },
+			changes: [
+				{
+					id: "change0",
+					entity_id: "mock-key",
+					file_id: "null",
+					plugin_key: "lix_own_change_control",
+					schema_key: "lix_key_value_table",
+					snapshot_id: snapshot.id,
+					created_at: "2021-01-01T00:00:00Z",
+				},
+			],
+		});
 	});
 
 	const changesAfter = await lix.db.selectFrom("change").selectAll().execute();
 
 	expect(changesBefore).toEqual(changesAfter);
+});
+
+test("does not double report changes", async () => {
+	const lix = await openLixInMemory({});
+
+	// insert a key-value record
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "key1", value: "value1" })
+		.execute();
+
+	const changesBefore = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "key1")
+		.where("schema_key", "=", "lix_key_value_table")
+		.selectAll()
+		.execute();
+
+	expect(changesBefore).toHaveLength(1);
+
+	// apply own changes
+	await applyOwnChanges({
+		lix,
+		changes: changesBefore,
+	});
+
+	// verify no new changes were created
+	const changesAfter = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "key1")
+		.where("schema_key", "=", "lix_key_value_table")
+		.selectAll()
+		.execute();
+
+	expect(changesAfter).toHaveLength(1);
 });

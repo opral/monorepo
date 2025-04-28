@@ -2,8 +2,6 @@ import {
 	CompiledQuery,
 	type DeleteQueryBuilder,
 	type DeleteResult,
-	type InsertQueryBuilder,
-	type InsertResult,
 } from "kysely";
 import type { Change, LixDatabaseSchema } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -12,6 +10,7 @@ import {
 	primaryKeysForEntityId,
 } from "./change-controlled-tables.js";
 import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
+import type { LixFile } from "../file/database-schema.js";
 
 /**
  * Applies own changes to lix itself.
@@ -19,9 +18,15 @@ import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
 export async function applyOwnChanges(args: {
 	lix: Pick<Lix, "db">;
 	changes: Change[];
-}): Promise<void> {
+}): Promise<{
+	deletedFileIds: Set<string>;
+	insertedFiles: Map<string, Omit<LixFile, "data">>;
+}> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		await withSkipOwnChangeControl(trx, async (trx) => {
+		return withSkipOwnChangeControl(trx, async (trx) => {
+			const deletedFileIds: Set<string> = new Set();
+			const insertedFiles: Map<string, Omit<LixFile, "data">> = new Map();
+
 			// defer foreign keys to avoid constraint violations
 			// until the end of the transaction. otherwise, we would
 			// need to apply the changes in the correct order.
@@ -54,51 +59,57 @@ export async function applyOwnChanges(args: {
 						change.entity_id
 					);
 
-					let query:
-						| DeleteQueryBuilder<
-								LixDatabaseSchema,
-								keyof typeof changeControlledTableIds,
-								DeleteResult
-						  >
-						| InsertQueryBuilder<
-								LixDatabaseSchema,
-								keyof typeof changeControlledTableIds,
-								InsertResult
-						  >;
-
 					// deletion
 					if (snapshot.content === null) {
-						query = trx.deleteFrom(tableName);
+						if (tableName === "file") {
+							deletedFileIds.add(change.entity_id);
+						}
+						let query: DeleteQueryBuilder<
+							LixDatabaseSchema,
+							keyof typeof changeControlledTableIds,
+							DeleteResult
+						> = trx.deleteFrom(tableName);
 						for (const [key, value] of primaryKeys) {
 							query = query.where(key as any, "=", value);
 						}
+						return await query.execute();
 					}
 					// upsert
 					else {
 						// take the current file data if the table is `file`
 						// (can be optimized later to adjust the query instead)
 						if (tableName === "file") {
-							const data = await trx
+							const file = await trx
 								.selectFrom("file")
 								.where("id", "=", change.entity_id)
-								.select("data")
+								.select("id")
 								.executeTakeFirst();
 
-							snapshot.content.data =
-								data?.data ??
-								// empty uint8array will trigger applyChanges() to pass an empty file to the plugin
-								new Uint8Array();
+							// applyChangeSet() needs to handle the file insert together with
+							// the file.data from plugins
+							if (!file) {
+								return insertedFiles.set(
+									change.entity_id,
+									snapshot.content as Omit<LixFile, "data">
+								);
+							} else {
+								return trx
+									.updateTable("file")
+									.set(snapshot.content)
+									.where("id", "=", change.entity_id)
+									.execute();
+							}
 						}
 
-						query = trx
+						return await trx
 							.insertInto(tableName)
 							.values(snapshot.content)
-							.onConflict((oc) => oc.doUpdateSet(snapshot.content!));
+							.onConflict((oc) => oc.doUpdateSet(snapshot.content!))
+							.execute();
 					}
-
-					await query.execute();
 				})
 			);
+			return { deletedFileIds, insertedFiles };
 		});
 	};
 

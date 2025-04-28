@@ -7,7 +7,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  * @example
  *   ```ts
  *   await lix.db.selectFrom("change")
- *      .where(changeHasLabel("checkpoint"))
+ *      .where(changeHasLabel({ name: "checkpoint" }))
  *      .selectAll()
  *      .execute();
  *   ```
@@ -17,12 +17,15 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *
  *   ```ts
  *   await lix.db.selectFrom("change")
- * 		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+ * 		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint"})))
  * 		.selectAll()
  * 		.execute();
  *   ```
  */
-export function changeHasLabel(name: string) {
+export function changeHasLabel(
+	// lookup can happen via both id or name
+	label: { id: string; name?: string } | { name: string; id?: string }
+) {
 	return (
 		eb: ExpressionBuilder<LixDatabaseSchema, "change">
 	): ExpressionWrapper<LixDatabaseSchema, "change", SqlBool> =>
@@ -36,6 +39,7 @@ export function changeHasLabel(name: string) {
 				)
 				.innerJoin("label", "label.id", "change_set_label.label_id")
 				.select("change_set_element.change_id")
-				.where("label.name", "=", name)
+				.$if("name" in label, (eb) => eb.where("label.name", "=", label.name!))
+				.$if("id" in label, (eb) => eb.where("label.id", "=", label.id!))
 		);
 }

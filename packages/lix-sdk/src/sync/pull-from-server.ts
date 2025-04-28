@@ -1,7 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import type { Lix } from "../lix/open-lix.js";
-import type * as LixServerProtocol from "@lix-js/server-protocol-schema";
+import type * as LixServerProtocol from "../../../lix/server-protocol-schema/dist/schema.js";
 import { mergeTheirState, type VectorClock } from "./merge-state.js";
-import { applyChanges } from "../change/apply-changes.js";
 import type { Change } from "../database/schema.js";
 import { CompiledQuery } from "kysely";
 

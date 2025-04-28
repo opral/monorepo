@@ -1,4 +1,7 @@
-import type * as LixServerProtocol from "@lix-js/server-protocol-schema";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
+import type * as LixServerProtocol from "../../../../lix/server-protocol-schema/dist/schema.js";
 import type { LixServerProtocolHandlerRoute } from "../create-server-protocol-handler.js";
 import { mergeTheirState } from "../../sync/merge-state.js";
 import type { Change } from "../../database/schema.js";

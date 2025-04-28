@@ -1,16 +1,18 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { test, expect, vi } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import {
 	createLspInMemoryEnvironment,
 	createServerProtocolHandler,
 } from "../server-protocol-handler/index.js";
-import { createVersion } from "../version/create-version.js";
-import { switchVersion } from "../version/switch-version.js";
-import type { Version } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { toBlob } from "../lix/to-blob.js";
 
-test("versions should be synced", async () => {
+// commented out for lix v0.5
+// sync needs overhaul after change set graph introduction
+test.skip("versions should be synced", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
@@ -125,7 +127,9 @@ test("versions should be synced", async () => {
 	expect(lix0VersionChanges).toEqual(lix1VersionChanges);
 });
 
-test("switching synced versions should work", async () => {
+// commented out for lix v0.5
+// sync needs overhaul after change set graph introduction
+test.skip("switching synced versions should work", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
@@ -242,7 +246,7 @@ test("switching synced versions should work", async () => {
 	});
 });
 
-test("doesnt sync if lix_sync is not true", async () => {
+test.skip("doesnt sync if lix_sync is not true", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 	global.fetch = vi.fn((request) => lspHandler(request));

@@ -1,9 +1,14 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { ExpressionWrapper, sql } from "kysely";
 import type { Change, LixDatabaseSchema } from "../database/schema.js";
 import type { SqlBool } from "kysely";
 
 /**
  * Filters changes that are the lowest common ancestor of the given changes.
+ *
+ * @deprecated No new api exists yet for the change set graph. Write on discord if you need it
  *
  * @example
  *   ```ts

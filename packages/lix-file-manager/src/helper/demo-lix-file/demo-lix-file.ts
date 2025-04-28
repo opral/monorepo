@@ -229,7 +229,7 @@ async function createChangesWithCheckpoint(args: {
 		.selectFrom("change")
 		.selectAll()
 		// don't copy changes that are already tagged as a checkpoint
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
 		.where("file_id", "=", args.file.id)
 		.execute();
 
@@ -244,7 +244,12 @@ async function createChangesWithCheckpoint(args: {
 
 	const changeSet = await createChangeSet({
 		lix: args.lix,
-		changes,
+		elements: changes.map((change) => ({
+			file_id: change.file_id,
+			schema_key: change.schema_key,
+			change_id: change.id,
+			entity_id: change.entity_id,
+		})),
 	});
 
 	const discussion = await createDiscussion({

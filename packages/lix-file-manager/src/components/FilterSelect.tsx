@@ -41,9 +41,17 @@ const FilterSelect = () => {
     const resolve = await lix.db.transaction().execute(
       async (trx) => {
         const changeSet = await createChangeSet({
-          lix: { ...lix, db: trx },
-          changes: selectedChangeIds.map((id) => { return { id } }),
-        })
+					lix: { ...lix, db: trx },
+					// TODO: get actual changes
+					elements: selectedChangeIds.map((id) => {
+						return {
+							file_id: id,
+							entity_id: id,
+							schema_key: id,
+							change_id: id,
+						};
+					}),
+				});
 
         return await createDiscussion({
 					lix: { ...lix, db: trx },

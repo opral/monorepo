@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lix Inspector</title>
+    <style>
+      /* Add some content to demonstrate the overlay effect */
+      .content {
+        padding: 20px;
+        margin: 20px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Example content that will be pushed down by the inspector topbar -->
+    <div class="content">
+      <h1>Host Application Content</h1>
+      <p>This content will be pushed down below the Lix Inspector topbar.</p>
+      <p>The inspector is now rendered as a fixed position overlay at the top of the page.</p>
+    </div>
+    
+    <script type="module" async>
+      import { initLixInspector } from "/src/index.tsx";
+      import { openLixInMemory } from "@lix-js/sdk";
+
+      const lix = await openLixInMemory({});
+
+      initLixInspector({ lix });
+    </script>
+  </body>
+</html>
