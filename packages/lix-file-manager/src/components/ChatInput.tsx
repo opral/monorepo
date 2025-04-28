@@ -6,7 +6,6 @@ import { Button } from "./ui/button.tsx";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.tsx";
 import {
 	activeAccountAtom,
-	activeVersionAtom,
 	threadSearchParamsAtom,
 	lixAtom,
 } from "@/state.ts";
@@ -17,7 +16,6 @@ import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 const ChatInput = () => {
 	const [activeAccount] = useAtom(activeAccountAtom);
 	const [threadSearchParams] = useAtom(threadSearchParamsAtom);
-	const [activeVersion] = useAtom(activeVersionAtom);
 	const [lix] = useAtom(lixAtom);
 
 	const form = useForm({
