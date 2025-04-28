@@ -26,7 +26,6 @@ import {
 	Version,
 	createVersion,
 	switchVersion,
-	mergeVersion,
 } from "@lix-js/sdk";
 import CustomLink from "../components/CustomLink.tsx";
 
@@ -119,7 +118,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 							}
 							name="Conflicts"
 						/> */}
-						<NavItem to={`/graph?${searchParams.toString()}`} name="Graph" />
+						{/* <NavItem to={`/graph?${searchParams.toString()}`} name="Graph" /> */}
 						{/* <NavItem to={`/proposal?f=${activeFile.id}`} name="Proposal" /> */}
 					</div>
 				</div>
@@ -246,12 +245,12 @@ const VersionDropdown = () => {
 								<SlIconButton
 									name="sign-merge-right"
 									onClick={async () => {
-										await mergeVersion({
-											lix,
-											sourceVersion: version,
-											targetVersion: currentVersion,
-										});
-										await saveLixToOpfs({ lix });
+										// await mergeVersion({
+										// 	lix,
+										// 	sourceVersion: version,
+										// 	targetVersion: currentVersion,
+										// });
+										// await saveLixToOpfs({ lix });
 									}}
 								></SlIconButton>
 								<SlIconButton
@@ -274,7 +273,7 @@ const VersionDropdown = () => {
 					onClick={async () => {
 						const newversion = await createVersion({
 							lix,
-							from: currentVersion,
+							changeSet: { id: currentVersion.change_set_id },
 						});
 						await switchToversion(newversion);
 					}}

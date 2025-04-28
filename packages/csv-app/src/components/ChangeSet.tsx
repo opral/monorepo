@@ -6,7 +6,9 @@ import {
 	createThread,
 	createCheckpoint,
 	Thread,
-	VersionV2,
+	Version,
+	UiDiffComponentProps,
+	changeSetElementIsLeafOf,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
@@ -41,7 +43,7 @@ export default function Component(props: {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
-	>({});
+		>([]);
 	const [threads, setThreads] = useState<Thread[]>([]);
 
 	const [intermediateChanges, setIntermediateChanges] = useState<
@@ -93,10 +95,10 @@ export default function Component(props: {
 
 	// Truncate comment content if it's longer than 50 characters
 	const truncatedComment =
-		firstComment?.content
-			? firstComment.content.length > 50
-				? `${toPlainText(firstComment.content).substring(0, 50)}...`
-				: toPlainText(firstComment.content)
+		firstComment?.body
+			? firstComment.body.content.length > 50
+				? `${toPlainText(firstComment.body).substring(0, 50)}...`
+				: toPlainText(firstComment.body)
 			: null;
 
 	return (
@@ -180,7 +182,7 @@ const CreateCheckpointBox = () => {
 		lix.db.transaction().execute(async (trx) => {
 			const thread = await createThread({
 				lix: { ...lix, db: trx },
-				comments: [{ content: args.content }],
+				comments: [{ body: args.content }],
 			});
 			await trx
 				.insertInto("change_set_thread")
@@ -227,19 +229,9 @@ const getChanges = async (
 	lix: Lix,
 	changeSetId: string,
 	fileId: string,
-	currentVersion: VersionV2,
+	currentVersion: Version,
 	previousChangeSetId?: string | undefined,
-): Promise<
-	Record<
-		string,
-		Array<
-			Change & {
-				content: Snapshot["content"];
-				parent: Change & { content: Snapshot["content"] };
-			}
-		>
-	>
-> => {
+): Promise<UiDiffComponentProps["diffs"]> => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -247,14 +239,7 @@ const getChanges = async (
 			"change_set_element",
 			"change_set_element.change_id",
 			"change.id"
-		)
-		.leftJoin("version_change", "version_change.change_id", "change.id")
-		.where((eb) =>
-			eb.or([
-				eb("version_change.version_id", "=", currentVersion.id),
-				eb("version_change.change_id", "is", null),
-			])
-		)
+	)
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change_set_element.change_set_id", "=", changeSetId)
@@ -313,13 +298,7 @@ const getChanges = async (
 						"change_set_element.change_id",
 						"change.id"
 					)
-					.leftJoin("version_change", "version_change.change_id", "change.id")
-					.where((eb) =>
-						eb.or([
-							eb("version_change.version_id", "=", currentVersion.id),
-							eb("version_change.change_id", "is", null),
-						])
-					)
+					.where(changeSetElementIsLeafOf([{ id: changeSetId }]))
 					.where("change_set_element.change_set_id", "=", previousChangeSetId)
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
@@ -336,8 +315,8 @@ const getChanges = async (
 				parent = await lix.db
 					.selectFrom("change")
 					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.innerJoin("change_edge", "change_edge.parent_id", "change.id")
-					.where("change_edge.child_id", "=", change.id)
+					// .innerJoin("change_edge", "change_edge.parent_id", "change.id")
+					// .where("change_edge.child_id", "=", change.id)
 					.where(changeHasLabel({ name: "checkpoint" }))
 					.selectAll("change")
 					.select("snapshot.content")
@@ -387,16 +366,16 @@ const getIntermediateChanges = async (
 	// Get the working change set ID 
 	const workingChangeSetId = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirst()
 		.then(version => version?.working_change_set_id);
 
 	// Get the current version for filtering
 	const currentVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	const intermediateLeafChanges = await lix.db
@@ -460,13 +439,6 @@ const getIntermediateChanges = async (
 			const parent = await lix.db
 				.selectFrom("change")
 				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-				.leftJoin("version_change", "version_change.change_id", "change.id")
-				.where((eb) =>
-					eb.or([
-						eb("version_change.version_id", "=", currentVersion.id),
-						eb("version_change.change_id", "is", null),
-					])
-				)
 				.where("change.entity_id", "=", change.entity_id)
 				.where(changeHasLabel({ name: "checkpoint" }))
 				.where("change.schema_key", "=", CellSchemaV1.key)
