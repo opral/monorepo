@@ -414,19 +414,6 @@ export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
 		.execute();
 };
 
-export const allEdgesAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	const activeFile = await get(activeFileAtom);
-	if (!activeFile) return [];
-	return await lix.db
-		.selectFrom("change_edge")
-		.innerJoin("change", "change.id", "change_edge.parent_id")
-		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_edge")
-		.execute();
-});
-
 export const selectedChangeIdsAtom = atom<string[]>([]);
 
 export const activeThreadAtom = atom(async (get) => {
