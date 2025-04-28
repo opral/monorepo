@@ -32,15 +32,15 @@ export const routes: RouteObject[] = [
 			</RootLayout>
 		),
 	},
-	{
-		path: "/conflicts",
-		element: (
-			// @ts-expect-error - type mismatch?
-			<RootLayout>
-				<ConflictsPage />,
-			</RootLayout>
-		),
-	},
+	// {
+	// 	path: "/conflicts",
+	// 	element: (
+	// 		// @ts-expect-error - type mismatch?
+	// 		<RootLayout>
+	// 			<ConflictsPage />,
+	// 		</RootLayout>
+	// 	),
+	// },
 	{
 		path: "/graph",
 		element: (
