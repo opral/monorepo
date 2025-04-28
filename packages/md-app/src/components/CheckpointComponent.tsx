@@ -12,6 +12,7 @@ import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import { activeFileAtom, getChangeDiffs, getThreads } from "@/state-active-file.ts";
 import { ChevronDown } from "lucide-react";
+import DiscussionPreview from "./DiscussionPreview.tsx";
 
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
@@ -165,7 +166,7 @@ export const CheckpointComponent = (props: {
             {/* {props.checkpointChangeSet.discussion_id ? (
               <DiscussionPreview
                 key={props.checkpointChangeSet.discussion_id}
-                discussionId={props.checkpointChangeSet.discussion_id}
+                threadId={props.checkpointChangeSet.discussion_id}
               />
             ) :
               <CreateCheckpointDiscussion

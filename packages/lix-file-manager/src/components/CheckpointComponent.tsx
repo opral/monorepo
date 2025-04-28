@@ -84,10 +84,10 @@ export const CheckpointComponent = (props: {
 
   // Truncate comment content if it's longer than 50 characters
   const truncatedComment =
-    firstComment?.content
-      ? firstComment.content.length > 50
-        ? `${toPlainText(firstComment.content).substring(0, 50)}...`
-        : toPlainText(firstComment.content)
+    firstComment?.body
+      ? firstComment.body.content.length > 50
+        ? `${toPlainText(firstComment.body).substring(0, 50)}...`
+        : toPlainText(firstComment.body)
       : null;
 
   return (
