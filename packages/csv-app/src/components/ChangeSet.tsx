@@ -230,7 +230,7 @@ const getChanges = async (
 	changeSetId: string,
 	fileId: string,
 	currentVersion: Version,
-	previousChangeSetId?: string | undefined,
+	previousChangeSetId?: string | undefined | null,
 ): Promise<UiDiffComponentProps["diffs"]> => {
 	const changes = await lix.db
 		.selectFrom("change")
@@ -298,8 +298,7 @@ const getChanges = async (
 						"change_set_element.change_id",
 						"change.id"
 					)
-					.where(changeSetElementIsLeafOf([{ id: changeSetId }]))
-					.where("change_set_element.change_set_id", "=", previousChangeSetId)
+					.where(changeSetElementIsLeafOf([{ id: previousChangeSetId }]))
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
 					.where("change.file_id", "=", fileId)
@@ -307,19 +306,6 @@ const getChanges = async (
 					.selectAll("change")
 					.select("snapshot.content")
 					.orderBy("change.created_at", "desc")
-					.executeTakeFirst();
-			}
-
-			// If no parent was found with previousChangeSetId, try to find it using change_edge
-			if (!parent) {
-				parent = await lix.db
-					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					// .innerJoin("change_edge", "change_edge.parent_id", "change.id")
-					// .where("change_edge.child_id", "=", change.id)
-					.where(changeHasLabel({ name: "checkpoint" }))
-					.selectAll("change")
-					.select("snapshot.content")
 					.executeTakeFirst();
 			}
 
