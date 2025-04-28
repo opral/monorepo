@@ -6,6 +6,6 @@
 
 # Type Alias: ChangeSet
 
-> **ChangeSet** = `Selectable`\<`ChangeSetTable`\>
+> **ChangeSet** = `Selectable`\<[`ChangeSetTable`](ChangeSetTable.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:145](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L145)
+Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:93](https://github.com/opral/monorepo/blob/95d464500b14a3c0aabc535935d800ebcc86d1ad/packages/lix-sdk/src/change-set/database-schema.ts#L93)

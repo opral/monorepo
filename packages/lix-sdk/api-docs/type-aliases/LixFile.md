@@ -6,6 +6,6 @@
 
 # Type Alias: LixFile
 
-> **LixFile** = `Selectable`\<`LixFileTable`\>
+> **LixFile** = `Selectable`\<[`LixFileTable`](LixFileTable.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:67](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L67)
+Defined in: [packages/lix-sdk/src/file/database-schema.ts:34](https://github.com/opral/monorepo/blob/95d464500b14a3c0aabc535935d800ebcc86d1ad/packages/lix-sdk/src/file/database-schema.ts#L34)

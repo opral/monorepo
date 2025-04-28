@@ -6,44 +6,40 @@
 
 # Function: createVersion()
 
-> **createVersion**(`args`): `Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
+> **createVersion**(`args`): `Promise`\<\{ `change_set_id`: `string`; `id`: `string`; `name`: `null` \| `string`; `working_change_set_id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/version/create-version.ts:23](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/version/create-version.ts#L23)
+Defined in: [packages/lix-sdk/src/version/create-version.ts:14](https://github.com/opral/monorepo/blob/95d464500b14a3c0aabc535935d800ebcc86d1ad/packages/lix-sdk/src/version/create-version.ts#L14)
 
-Creates a new Version.
+Creates a new version.
 
-If `from` is provided, the new version will be identical to the from version.
+The changeSet can be any change set e.g. another version, a checkpoint, etc.
 
 ## Parameters
 
 ### args
 
-#### from?
+#### changeSet
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
+`Pick`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}, `"id"`\>
 
-#### lix
-
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
-
-#### name?
+#### id?
 
 `string`
 
+#### lix
+
+[`Lix`](../type-aliases/Lix.md)
+
+#### name?
+
+`null` \| `string`
+
 ## Returns
 
-`Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
+`Promise`\<\{ `change_set_id`: `string`; `id`: `string`; `name`: `null` \| `string`; `working_change_set_id`: `string`; \}\>
 
-## Examples
+## Example
 
-_Without from_
-
-  ```ts
-  const version = await createVersion({ lix });
-  ```
-
-_With from_
-
-  ```ts
-  const version = await createVersion({ lix, from: otherVersion });
-  ```
+```ts
+const version = await createVersion({ lix, changeSet: otherVersion.change_set_id });
+```

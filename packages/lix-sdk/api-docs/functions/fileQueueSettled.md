@@ -8,7 +8,7 @@
 
 > **fileQueueSettled**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/file-queue/file-queue-settled.ts:11](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/file-queue/file-queue-settled.ts#L11)
+Defined in: [packages/lix-sdk/src/file-queue/file-queue-settled.ts:11](https://github.com/opral/monorepo/blob/95d464500b14a3c0aabc535935d800ebcc86d1ad/packages/lix-sdk/src/file-queue/file-queue-settled.ts#L11)
 
 Waits until the file queue is settled.
 

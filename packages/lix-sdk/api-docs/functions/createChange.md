@@ -6,9 +6,9 @@
 
 # Function: createChange()
 
-> **createChange**(`args`, `options?`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
+> **createChange**(`args`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change/create-change.ts:15](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change/create-change.ts#L15)
+Defined in: [packages/lix-sdk/src/change/create-change.ts:13](https://github.com/opral/monorepo/blob/95d464500b14a3c0aabc535935d800ebcc86d1ad/packages/lix-sdk/src/change/create-change.ts#L13)
 
 Programatically create a change in the database.
 
@@ -46,20 +46,6 @@ with bypassing of file-based change detection.
 #### snapshotContent
 
 `null` \| `Record`\<`string`, `any`\>
-
-#### version
-
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
-
-### options?
-
-#### updateVersionChanges?
-
-`boolean`
-
-When true, the version changes will be updated.
-
-Defaults to true.
 
 ## Returns
 

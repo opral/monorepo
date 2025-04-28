@@ -6,6 +6,6 @@
 
 # Type Alias: Snapshot
 
-> **Snapshot** = `Selectable`\<`SnapshotTable`\>
+> **Snapshot** = `Selectable`\<[`SnapshotTable`](SnapshotTable.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:127](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L127)
+Defined in: [packages/lix-sdk/src/snapshot/database-schema.ts:43](https://github.com/opral/monorepo/blob/95d464500b14a3c0aabc535935d800ebcc86d1ad/packages/lix-sdk/src/snapshot/database-schema.ts#L43)

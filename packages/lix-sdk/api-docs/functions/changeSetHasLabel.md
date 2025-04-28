@@ -6,17 +6,17 @@
 
 # Function: changeSetHasLabel()
 
-> **changeSetHasLabel**(`name`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
+> **changeSetHasLabel**(`label`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-set-has-label.ts:25](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-set-has-label.ts#L25)
+Defined in: [packages/lix-sdk/src/query-filter/change-set-has-label.ts:35](https://github.com/opral/monorepo/blob/95d464500b14a3c0aabc535935d800ebcc86d1ad/packages/lix-sdk/src/query-filter/change-set-has-label.ts#L35)
 
 Selects change sets that have a label with the given name.
 
 ## Parameters
 
-### name
+### label
 
-`string`
+\{ `id`: `string`; `name?`: `string`; \} | \{ `id?`: `string`; `name`: `string`; \}
 
 ## Returns
 
@@ -36,7 +36,7 @@ Selects change sets that have a label with the given name.
 
 ```ts
   await lix.db.selectFrom("change_set")
-     .where(changeSetHasLabel("checkpoint"))
+     .where(changeSetHasLabel({ name: "checkpoint" }))
      .selectAll()
      .execute();
   ```
@@ -45,7 +45,16 @@ You can use eb.not() to negate the filter.
 
   ```ts
   await lix.db.selectFrom("change_set")
-		.where((eb) => eb.not(changeSetHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeSetHasLabel({ name: "checkpoint" })))
+		.selectAll()
+		.execute();
+  ```
+
+Id lookup also works:
+
+  ```ts
+  await lix.db.selectFrom("change_set")
+		.where(changeSetHasLabel({ id: "39j9afj2" }))
 		.selectAll()
 		.execute();
   ```
