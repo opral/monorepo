@@ -44,7 +44,7 @@ export default function Component(props: {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
-		>([]);
+		>({});
 	const [threads, setThreads] = useState<Thread[]>([]);
 
 	const [intermediateChanges, setIntermediateChanges] = useState<
@@ -60,7 +60,7 @@ export default function Component(props: {
 					setChanges
 				);
 			} else {
-				getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets[0].id).then(
+				getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets[0]?.id).then(
 					setIntermediateChanges
 				);
 			}
@@ -70,7 +70,7 @@ export default function Component(props: {
 						setChanges
 					);
 				} else {
-					getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets[0].id).then(
+					getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets[0]?.id).then(
 						setIntermediateChanges
 					);
 				}
