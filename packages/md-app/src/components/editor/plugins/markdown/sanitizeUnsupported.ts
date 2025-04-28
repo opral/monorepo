@@ -53,7 +53,14 @@ const rules = {
 	link: {
 		// nested formatting not supported also for links atm
 		// TODO check if whitelist works with changes comming from plate
-		allowedChildren: ["text"],
+		allowedChildren: [
+			"text",
+			"strong",
+			"inlineCode",
+			"emphasis",
+			"delete",
+			"link",
+		],
 		exactChildren: 1,
 		// TODO whitelist all urls, but only title attribute set to null for now (plate does not support tiltle for links)
 		allowedAttributes: { title: [null], url: null },
