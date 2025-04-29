@@ -25,11 +25,11 @@ let cachedLocale;
  */
 export function extractLocaleFromUrl(url) {
 	const urlString = typeof url === "string" ? url : url.href;
-	
+
 	if (cachedUrl === urlString) {
 		return cachedLocale;
 	}
-	
+
 	let result;
 	if (TREE_SHAKE_DEFAULT_URL_PATTERN_USED) {
 		result = defaultUrlPatternExtractLocale(url);
@@ -56,7 +56,7 @@ export function extractLocaleFromUrl(url) {
 			if (result) break;
 		}
 	}
-	
+
 	cachedUrl = urlString;
 	cachedLocale = result;
 	return result;
