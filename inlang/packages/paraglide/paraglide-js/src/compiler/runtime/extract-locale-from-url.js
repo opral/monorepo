@@ -9,8 +9,13 @@ import {
 /**
  * If extractLocaleFromUrl is called many times on the same page and the URL
  * hasn't changed, we don't need to recompute it every time which can get expensive.
+ * We might use a LRU cache if needed, but for now storing only the last result is enough.
+ * https://github.com/opral/monorepo/pull/3575#discussion_r2066731243
  */
-const urlToLocaleCache = new Map();
+/** @type {string|undefined} */
+let cachedUrl;
+/** @type {Locale|undefined} */
+let cachedLocale;
 
 /**
  * Extracts the locale from a given URL using native URLPattern.
@@ -21,13 +26,13 @@ const urlToLocaleCache = new Map();
 export function extractLocaleFromUrl(url) {
 	const urlString = typeof url === "string" ? url : url.href;
 	
-	if (urlToLocaleCache.has(urlString)) {
-		return urlToLocaleCache.get(urlString);
+	if (cachedUrl === urlString) {
+		return cachedLocale;
 	}
 	
 	let result;
 	if (TREE_SHAKE_DEFAULT_URL_PATTERN_USED) {
-		result = defaultUrlPqatternExtractLocale(url);
+		result = defaultUrlPatternExtractLocale(url);
 	} else {
 		const urlObj = typeof url === "string" ? new URL(url) : url;
 
@@ -52,7 +57,8 @@ export function extractLocaleFromUrl(url) {
 		}
 	}
 	
-	urlToLocaleCache.set(urlString, result);
+	cachedUrl = urlString;
+	cachedLocale = result;
 	return result;
 }
 
