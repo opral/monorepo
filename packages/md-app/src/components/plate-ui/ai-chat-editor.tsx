@@ -1,6 +1,6 @@
 
 
-import React, { memo } from 'react';
+import { memo } from 'react';
 
 import { withProps } from '@udecode/cn';
 import { BaseParagraphPlugin, SlateLeaf } from '@udecode/plate';

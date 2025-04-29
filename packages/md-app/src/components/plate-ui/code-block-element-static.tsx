@@ -1,4 +1,3 @@
-import React from 'react';
 
 import type { SlateElementProps } from '@udecode/plate';
 import type { TCodeBlockElement } from '@udecode/plate-code-block';

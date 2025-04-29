@@ -45,11 +45,12 @@ export async function findLixFilesInOpfs(
         // If no specific ID was requested, or if this file matches the requested ID
         if (!lixId || tempLixId?.value === lixId) {
           results.push({
-            handle,
-            name: name.replace(/\.lix$/, ""),
-            fullName: name,
-            id: tempLixId?.value || ""
-          });
+						// @ts-expect-error - FileSystemFileHandle is not a standard type
+						handle,
+						name: name.replace(/\.lix$/, ""),
+						fullName: name,
+						id: tempLixId?.value || "",
+					});
         }
       } catch (e) {
         console.error(`Error reading file ${name}:`, e);

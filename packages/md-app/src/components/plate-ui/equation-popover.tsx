@@ -1,6 +1,6 @@
 
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import TextareaAutosize, {
   type TextareaAutosizeProps,
 } from 'react-textarea-autosize';

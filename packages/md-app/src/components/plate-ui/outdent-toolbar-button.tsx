@@ -1,7 +1,5 @@
 
 
-import React from 'react';
-
 import { withRef } from '@udecode/cn';
 import { useOutdentButton } from '@udecode/plate-indent/react';
 import { Outdent } from 'lucide-react';

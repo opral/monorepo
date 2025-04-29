@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 
 import { AIChatPlugin, AIPlugin } from '@udecode/plate-ai/react';
 
