@@ -1,5 +1,4 @@
 import {
-	changeHasLabel,
 	createAccount,
 	createCheckpoint,
 	createThread,
@@ -80,7 +79,7 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		file,
 		rows,
 		timestamp: "2022-03-11 14:53:00.000",
-		comment: "Initial salaries",
+		comment: "0. Initial salaries",
 	});
 
 	// Otto increases the salary of Charlie Davis
@@ -211,23 +210,6 @@ async function createChangesWithCheckpoint(args: {
 		.execute();
 
 	await fileQueueSettled({ lix: args.lix });
-
-	const changes = await args.lix.db
-		.selectFrom("change")
-		.selectAll()
-		// don't copy changes that are already tagged as a checkpoint
-		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
-		.where("file_id", "=", args.file.id)
-		.execute();
-
-	// set the time
-	for (const change of changes) {
-		await args.lix.db
-			.updateTable("change")
-			.set({ created_at: args.timestamp })
-			.where("id", "=", change.id)
-			.execute();
-	}
 
 	const changeSet = await getWorkingChangeSet(args.lix, args.file.id);
 
