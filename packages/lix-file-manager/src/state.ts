@@ -11,6 +11,7 @@ import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demo-lix-file.ts";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+import { initLixInspector } from "@lix-js/inspector";
 
 // plugin, file and app configuration (add supported apps to list in lix-website-server)
 export const supportedFileTypes = [
@@ -170,18 +171,18 @@ export const lixAtom = atom(async (get) => {
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
 	// : "http://localhost:3000";
-	const serverUrl = import.meta.env.PROD
-		? "https://lix.host"
-		: "http://localhost:3000";
+	// const serverUrl = import.meta.env.PROD
+	// 	? "https://lix.host"
+	// 	: "http://localhost:3000";
 
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_server_url",
-			value: serverUrl,
-		})
-		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
-		.execute();
+	// await lix.db
+	// 	.insertInto("key_value")
+	// 	.values({
+	// 		key: "lix_server_url",
+	// 		value: serverUrl,
+	// 	})
+	// 	.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
+	// 	.execute();
 
 	await saveLixToOpfs({ lix });
 
@@ -191,6 +192,11 @@ export const lixAtom = atom(async (get) => {
 		url.searchParams.set("lix", lixId.value);
 		// need to use window.location because react router complains otherwise
 		window.location.href = url.toString();
+	}
+
+	if (import.meta.env.DEV) {
+		// Initialize the Lix Inspector for debugging
+		await initLixInspector({ lix });
 	}
 
 	return lix;
