@@ -1,5 +1,5 @@
 import { useLix } from "../../hooks/use-lix";
-import { jsonArrayFrom, type ChangeSetEdge, type VersionV2 } from "@lix-js/sdk";
+import { jsonArrayFrom, type ChangeSetEdge, type Version } from "@lix-js/sdk";
 import { useQuery } from "../../hooks/use-query";
 import {
   ReactFlow,
@@ -26,12 +26,9 @@ export default function Graph() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
 
-  const [versions] = useQuery<VersionV2[]>(async () => {
+  const [versions] = useQuery<Version[]>(async () => {
     try {
-      const result = await lix.db
-        .selectFrom("version_v2")
-        .selectAll()
-        .execute();
+      const result = await lix.db.selectFrom("version").selectAll().execute();
       return result;
     } catch (error) {
       console.error("Error fetching versions:", error);
@@ -74,13 +71,13 @@ export default function Graph() {
                   ),
                   eb.exists(
                     eb
-                      .selectFrom("version_v2")
+                      .selectFrom("version")
                       .whereRef(
-                        "version_v2.working_change_set_id",
+                        "version.working_change_set_id",
                         "=",
                         "change_set.id"
                       )
-                      .select("version_v2.id")
+                      .select("version.id")
                   ),
                 ])
               )
@@ -174,7 +171,7 @@ export default function Graph() {
       // Use a consistent prefix for version nodes to avoid ID conflicts
       const versionNodeId = `version_${v.id}`;
       g.setNode(versionNodeId, {
-        label: "version_v2",
+        label: "version",
         width: versionNodeWidth,
         height: versionNodeHeight,
         // Store metadata as a custom property

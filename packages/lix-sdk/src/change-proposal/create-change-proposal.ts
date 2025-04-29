@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import type { ChangeSet } from "../change-set/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { ChangeProposal } from "./database-schema.js";

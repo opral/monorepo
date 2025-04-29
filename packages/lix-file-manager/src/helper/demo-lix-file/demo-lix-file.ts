@@ -1,5 +1,4 @@
 import {
-	changeHasLabel,
 	createAccount,
 	createCheckpoint,
 	createThread,
@@ -80,7 +79,7 @@ async function demoSalariesCsv(lix: Lix): Promise<void> {
 		file,
 		rows,
 		timestamp: "2022-03-11 14:53:00.000",
-		comment: "Initial salaries",
+		comment: "0. Initial salaries",
 	});
 
 	// Otto increases the salary of Charlie Davis
@@ -212,30 +211,13 @@ async function createChangesWithCheckpoint(args: {
 
 	await fileQueueSettled({ lix: args.lix });
 
-	const changes = await args.lix.db
-		.selectFrom("change")
-		.selectAll()
-		// don't copy changes that are already tagged as a checkpoint
-		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
-		.where("file_id", "=", args.file.id)
-		.execute();
-
-	// set the time
-	for (const change of changes) {
-		await args.lix.db
-			.updateTable("change")
-			.set({ created_at: args.timestamp })
-			.where("id", "=", change.id)
-			.execute();
-	}
-
 	const changeSet = await getWorkingChangeSet(args.lix, args.file.id);
 
 	if (changeSet) {
 		args.lix.db.transaction().execute(async (trx) => {
 			const thread = await createThread({
 				lix: { ...args.lix, db: trx },
-				comments: [{ content: fromPlainText(args.comment) }],
+				comments: [{ body: fromPlainText(args.comment) }],
 			});
 			await trx
 				.insertInto("change_set_thread")
@@ -254,7 +236,7 @@ async function createChangesWithCheckpoint(args: {
 	return { threads };
 }
 
-const createComment = async (args: {
+export const createComment = async (args: {
 	lix: Lix;
 	threadId: Thread["id"];
 	content: string;
@@ -262,7 +244,7 @@ const createComment = async (args: {
 	await args.lix.db
 		.insertInto("thread_comment")
 		.values({
-			content: fromPlainText(args.content),
+			body: fromPlainText(args.content),
 			thread_id: args.threadId,
 		})
 		.execute();

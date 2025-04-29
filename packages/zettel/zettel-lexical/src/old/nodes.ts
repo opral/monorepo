@@ -1,3 +1,9 @@
+// @ts-nocheck
+
+/**
+ * THIS IS A PREVIOUS IMPLEMENTATION OF THE NODES FOR FUTURE REFERENCE.
+ */
+
 import {
   LexicalNode,
   NodeKey,

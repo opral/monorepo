@@ -3,7 +3,7 @@ import {
 	Account,
 	switchAccount,
 	Lix,
-	VersionV2,
+	Version,
 } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
@@ -11,6 +11,7 @@ import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demo-lix-file.ts";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+import { initLixInspector } from "@lix-js/inspector";
 
 // plugin, file and app configuration (add supported apps to list in lix-website-server)
 export const supportedFileTypes = [
@@ -170,18 +171,18 @@ export const lixAtom = atom(async (get) => {
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
 	// : "http://localhost:3000";
-	const serverUrl = import.meta.env.PROD
-		? "https://lix.host"
-		: "http://localhost:3000";
+	// const serverUrl = import.meta.env.PROD
+	// 	? "https://lix.host"
+	// 	: "http://localhost:3000";
 
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_server_url",
-			value: serverUrl,
-		})
-		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
-		.execute();
+	// await lix.db
+	// 	.insertInto("key_value")
+	// 	.values({
+	// 		key: "lix_server_url",
+	// 		value: serverUrl,
+	// 	})
+	// 	.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
+	// 	.execute();
 
 	await saveLixToOpfs({ lix });
 
@@ -191,6 +192,11 @@ export const lixAtom = atom(async (get) => {
 		url.searchParams.set("lix", lixId.value);
 		// need to use window.location because react router complains otherwise
 		window.location.href = url.toString();
+	}
+
+	if (import.meta.env.DEV) {
+		// Initialize the Lix Inspector for debugging
+		await initLixInspector({ lix });
 	}
 
 	return lix;
@@ -203,15 +209,15 @@ export const lixAtom = atom(async (get) => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const activeVersionAtom = atom<Promise<VersionV2 | null>>(async (get) => {
+export const activeVersionAtom = atom<Promise<Version | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return null;
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
 	return activeVersion;
@@ -222,7 +228,7 @@ export const existingVersionsAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	if (!lix) return [];
 
-	return await lix.db.selectFrom("version_v2").selectAll().execute();
+	return await lix.db.selectFrom("version").selectAll().execute();
 });
 
 export const filesAtom = atom(async (get) => {

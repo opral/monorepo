@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { VersionV2 } from "../version-v2/database-schema.js";
+import type { Version } from "../version/database-schema.js";
 import type { ChangeSet } from "./database-schema.js";
 
 export async function createCheckpoint(args: {
@@ -8,7 +8,7 @@ export async function createCheckpoint(args: {
 	 * Optional version to create checkpoint from.
 	 * @default The active version
 	 */
-	version?: Pick<VersionV2, "id">;
+	version?: Pick<Version, "id">;
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// need to disable the trigger to avoid
@@ -24,14 +24,14 @@ export async function createCheckpoint(args: {
 
 		const version = args.version
 			? await trx
-					.selectFrom("version_v2")
+					.selectFrom("version")
 					.where("id", "=", args.version.id)
-					.selectAll("version_v2")
+					.selectAll("version")
 					.executeTakeFirstOrThrow()
 			: await trx
 					.selectFrom("active_version")
-					.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
-					.selectAll("version_v2")
+					.innerJoin("version", "version.id", "active_version.version_id")
+					.selectAll("version")
 					.executeTakeFirstOrThrow();
 
 		const checkpointLabel = await trx
@@ -55,7 +55,7 @@ export async function createCheckpoint(args: {
 			.executeTakeFirstOrThrow();
 
 		await trx
-			.updateTable("version_v2")
+			.updateTable("version")
 			.set({
 				working_change_set_id: newWorkingCs.id,
 			})
@@ -71,7 +71,7 @@ export async function createCheckpoint(args: {
 			.executeTakeFirstOrThrow();
 
 		await trx
-			.updateTable("version_v2")
+			.updateTable("version")
 			.set({
 				change_set_id: formerWorkingCs.id,
 			})

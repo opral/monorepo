@@ -12,6 +12,7 @@ import {
 import Papa from "papaparse";
 import {
 	ChangeSet,
+	changeSetElementIsLeafOf,
 	changeSetHasLabel,
 	changeSetIsAncestorOf,
 	jsonArrayFrom,
@@ -103,17 +104,17 @@ export const activeCellChangesAtom = atom(async (get) => {
 	if (!cellEntityId || !activeFile) return [];
 	const changes = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.where("change.entity_id", "=", cellEntityId)
 		.where("change.file_id", "=", activeFile.id)
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("version_change", "version_change.change_id", "change.id")
-		.where((eb) =>
-			eb.or([
-				eb("version_change.version_id", "=", currentVersion.id),
-				eb("version_change.change_id", "is", null),
-			])
-		)
+		// .leftJoin("version_change", "version_change.change_id", "change.id")
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("version_change.version_id", "=", currentVersion.id),
+		// 		eb("version_change.change_id", "is", null),
+		// 	])
+		// )
 		// .innerJoin("change_set_item", "change_set_item.change_id", "change.id")
 		// .innerJoin("change_set", "change_set.id", "change_set_item.change_set_id")
 		// .innerJoin("discussion", "discussion.change_set_id", "change_set.id")
@@ -157,8 +158,8 @@ export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
 	// Get the active version with working change set id
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirst();
 
 	if (!activeVersion) return null;
@@ -360,13 +361,13 @@ export const allChangesAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("version_change", "version_change.change_id", "change.id")
-		.where((eb) =>
-			eb.or([
-				eb("version_change.version_id", "=", currentVersion.id),
-				eb("version_change.change_id", "is", null),
-			])
-		)
+		// .leftJoin("version_change", "version_change.change_id", "change.id")
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("version_change.version_id", "=", currentVersion.id),
+		// 		eb("version_change.change_id", "is", null),
+		// 	])
+		// )
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
@@ -384,13 +385,13 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("version_change", "version_change.change_id", "change.id")
-		.where((eb) =>
-			eb.or([
-				eb("version_change.version_id", "=", currentVersion.id),
-				eb("version_change.change_id", "is", null),
-			])
-		)
+		// .leftJoin("version_change", "version_change.change_id", "change.id")
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("version_change.version_id", "=", currentVersion.id),
+		// 		eb("version_change.change_id", "is", null),
+		// 	])
+		// )
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
@@ -412,7 +413,7 @@ export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"thread_comment.id",
-						"thread_comment.content",
+						"thread_comment.body",
 						"thread_comment.thread_id",
 						"thread_comment.parent_id",
 					])

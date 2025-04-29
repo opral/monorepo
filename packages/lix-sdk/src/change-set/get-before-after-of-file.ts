@@ -1,9 +1,9 @@
-import type { LixFile } from "../database/schema.js";
 import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
+import type { LixFile } from "../file/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
-import { createVersionV2 } from "../version-v2/create-version.js";
+import { createVersion } from "../version/create-version.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import type { ChangeSet } from "./database-schema.js";
@@ -48,9 +48,9 @@ export async function getBeforeAfterOfFile(args: {
 				// insertable into the graph.
 				const afterIsWorkingCs = args.changeSetAfter
 					? await trx
-							.selectFrom("version_v2")
+							.selectFrom("version")
 							.where(
-								"version_v2.working_change_set_id",
+								"version.working_change_set_id",
 								"=",
 								args.changeSetAfter.id
 							)
@@ -154,7 +154,7 @@ export async function getBeforeAfterOfFile(args: {
 					})),
 				});
 
-				const interimVersion = await createVersionV2({
+				const interimVersion = await createVersion({
 					lix: { ...args.lix, db: trx },
 					changeSet: beforeCs,
 					name: null,
@@ -205,7 +205,7 @@ export async function getBeforeAfterOfFile(args: {
 					.where("id", "=", afterCs.id)
 					.execute();
 				await trx
-					.deleteFrom("version_v2")
+					.deleteFrom("version")
 					.where("id", "=", interimVersion.id)
 					.execute();
 

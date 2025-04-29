@@ -1,7 +1,8 @@
 import type { Account } from "../account/database-schema.js";
 import { executeSync } from "../database/execute-sync.js";
-import type { Change, Snapshot } from "../database/schema.js";
+import type { Change } from "../database/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { Snapshot } from "../snapshot/database-schema.js";
 
 /**
  * Programatically create a change in the database.

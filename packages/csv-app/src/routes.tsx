@@ -41,13 +41,13 @@ export const routes: RouteObject[] = [
 	// 		</RootLayout>
 	// 	),
 	// },
-	{
-		path: "/graph",
-		element: (
-			// @ts-expect-error - type mismatch?
-			<RootLayout>
-				<GraphPage />,
-			</RootLayout>
-		),
-	},
+	// {
+	// 	path: "/graph",
+	// 	element: (
+	// 		// @ts-expect-error - type mismatch?
+	// 		<RootLayout>
+	// 			<GraphPage />,
+	// 		</RootLayout>
+	// 	),
+	// },
 ];

@@ -17,7 +17,9 @@ imports:
 
 # Why Paraglide?
 
-Paraglide is designed as a compiler which emits tree-shakable message functions. This means that only the messages you actually use are loaded without asynchronous waterfalls.
+Paraglide is a compiler-based i18n library that emits tree-shakable message functions. Small bundle sizes, no async waterfalls, full type-safety, and more. Check out the [comparison page](/m/gerre34r/library-inlang-paraglideJs/comparison). 
+
+If you use a bundler like [Vite](/m/gerre34r/library-inlang-paraglideJs/vite) in your project, Paraglide JS is almost certainly the best fit. 
 
 <doc-features>
   <doc-feature title="Tiny Runtime" image="https://cdn.jsdelivr.net/gh/opral/monorepo@latest/inlang/packages/paraglide/paraglide-js/assets/bundlesize-feature.png"></doc-feature>
@@ -29,10 +31,10 @@ Paraglide is designed as a compiler which emits tree-shakable message functions.
 ## People Love It
 
 <doc-comments>
-<doc-comment text="Paraglide js is by far the best option when it comes to internatinalization. Nothing better on the market." author="Ancient-Background17" icon="mdi:reddit" data-source="https://www.reddit.com/r/sveltejs/comments/1h7z5gv/comment/m0suyvf"></doc-comment>
+<doc-comment text="Paraglide js is by far the best option when it comes to internationalization. Nothing better on the market." author="Ancient-Background17" icon="mdi:reddit" data-source="https://www.reddit.com/r/sveltejs/comments/1h7z5gv/comment/m0suyvf"></doc-comment>
 <doc-comment text="Just tried Paraglide JS from @inlangHQ. This is how i18n should be done! Totally new level of DX for both implementation and managing translations! Superb support for SvelteKit as well ⭐" author="Patrik Engborg" icon="mdi:twitter" data-source="https://twitter.com/patrikengborg/status/1747260930873053674"></doc-comment>
 <doc-comment text="I was messing with various i18n frameworks and tools in combination with Astro, and must say that Paraglide was the smoothest experience. I have migrated my website from i18next and it was a breeze. SSG and SSR worked out of the box (which was the first one for me), and overall DX is great. Thanks for your work!" author="Dalibor Hon" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1096039983116202034/1220796380772307004"></doc-comment>
-<doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straight forward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
+<doc-comment text="Awesome library 🙂 Thanks so much! 1) The docs were simple and straightforward 2) Everything just worked.. no headaches" author="Dimitry" icon="mdi:discord" data-source="https://discord.com/channels/897438559458430986/1083724234142011392/1225658097016766574"></doc-comment>
 </doc-comments>
 
 ## Works in any framework
@@ -49,7 +51,7 @@ Paraglide is designed as a compiler which emits tree-shakable message functions.
 
 ## Ecosystem
 
-Paraglide JS is build on top of the [open inlang file format](https://github.com/opral/inlang-sdk). Any other inlang app like the Sherlock VSCode extension, the CLI to machine translate, or Fink to let translators manage translations works out of the box.
+Paraglide JS is built on top of the [open inlang file format](https://github.com/opral/inlang-sdk). Any other inlang app like the Sherlock VSCode extension, the CLI to machine translate, or Fink to let translators manage translations works out of the box.
 
 <doc-links>
   <doc-link title="Sherlock" description="VSCode extension" icon="twemoji:detective" href="https://inlang.com/m/r7kp499g/app-inlang-ideExtension"></doc-link>

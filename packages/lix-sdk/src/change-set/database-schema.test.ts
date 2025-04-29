@@ -82,6 +82,18 @@ describe("change_set table", () => {
 
 		expect(deletedChangeSetElements).toHaveLength(0);
 	});
+
+	test("change_set.id are uuid-v7", async () => {
+		const lix = await openLixInMemory({});
+
+		const changeSet = await lix.db
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
+			.executeTakeFirstOrThrow();
+
+		expect(changeSet.id.length).toBe(36);
+	});
 });
 
 describe("change_set_element table", () => {
@@ -603,7 +615,7 @@ describe("change_set immutable flag and triggers", () => {
 			.executeTakeFirstOrThrow();
 
 		const version = await lix.db
-			.selectFrom("version_v2")
+			.selectFrom("version")
 			.where("id", "=", activeVersion.version_id)
 			.select("working_change_set_id")
 			.executeTakeFirstOrThrow();

@@ -16,7 +16,7 @@ test("should allow inserting a valid version", async () => {
 	// Insert a version referencing a valid change set
 	await expect(
 		lix.db
-			.insertInto("version_v2")
+			.insertInto("version")
 			.values({
 				id: "v1",
 				name: "version one",
@@ -28,7 +28,7 @@ test("should allow inserting a valid version", async () => {
 
 	// Verify the inserted data
 	const version = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.selectAll()
 		.where("id", "=", "v1")
 		.executeTakeFirst();
@@ -50,13 +50,13 @@ test("should use default id and name if not provided", async () => {
 
 	// Insert a version providing only change_set_id
 	await lix.db
-		.insertInto("version_v2")
+		.insertInto("version")
 		.values({ change_set_id: "cs1", working_change_set_id: "cs1" })
 		.execute();
 
 	// Verify the inserted data (id and name should be defaulted)
 	const version = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.selectAll()
 		.where("change_set_id", "=", "cs1")
 		.executeTakeFirst();
@@ -88,7 +88,7 @@ test("should enforce primary key constraint (id)", async () => {
 
 	// Insert initial version
 	await lix.db
-		.insertInto("version_v2")
+		.insertInto("version")
 		.values({
 			id: "v1",
 			name: "version one",
@@ -100,7 +100,7 @@ test("should enforce primary key constraint (id)", async () => {
 	// Attempt to insert the same version id again
 	await expect(
 		lix.db
-			.insertInto("version_v2")
+			.insertInto("version")
 			.values({
 				id: "v1",
 				name: "version two",
@@ -108,7 +108,7 @@ test("should enforce primary key constraint (id)", async () => {
 				working_change_set_id: "wcs2",
 			}) // Same id
 			.execute()
-	).rejects.toThrow(/UNIQUE constraint failed: version_v2.id/i);
+	).rejects.toThrow(/UNIQUE constraint failed: version.id/i);
 });
 
 test("should enforce unique constraint (name)", async () => {
@@ -131,7 +131,7 @@ test("should enforce unique constraint (name)", async () => {
 
 	// Insert initial version
 	await lix.db
-		.insertInto("version_v2")
+		.insertInto("version")
 		.values({
 			id: "v1",
 			name: "unique_name",
@@ -143,7 +143,7 @@ test("should enforce unique constraint (name)", async () => {
 	// Attempt to insert another version with the same name
 	await expect(
 		lix.db
-			.insertInto("version_v2")
+			.insertInto("version")
 			.values({
 				id: "v2",
 				name: "unique_name",
@@ -151,7 +151,7 @@ test("should enforce unique constraint (name)", async () => {
 				working_change_set_id: "wcs2",
 			}) // Same name
 			.execute()
-	).rejects.toThrow(/UNIQUE constraint failed: version_v2.name/i);
+	).rejects.toThrow(/UNIQUE constraint failed: version.name/i);
 });
 
 test("should enforce foreign key constraint on change_set_id", async () => {
@@ -160,7 +160,7 @@ test("should enforce foreign key constraint on change_set_id", async () => {
 
 	await expect(
 		lix.db
-			.insertInto("version_v2")
+			.insertInto("version")
 			.values({
 				id: "v1",
 				name: "v1_name",
@@ -182,17 +182,17 @@ test("should enforce NOT NULL constraint on change_set_id", async () => {
 	// Kysely's types should prevent this, but testing the constraint directly
 	await expect(
 		lix.db
-			.insertInto("version_v2")
+			.insertInto("version")
 			// @ts-expect-error Testing invalid input
 			.values({ id: "v1", name: "v1_name", change_set_id: null })
 			.execute()
-	).rejects.toThrow(/NOT NULL constraint failed: version_v2.change_set_id/i);
+	).rejects.toThrow(/NOT NULL constraint failed: version.change_set_id/i);
 });
 
 test("applying the schema should create an initial 'main' version", async () => {
 	const lix = await openLixInMemory({});
 	const initialVersion = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.where("name", "=", "main")
 		.selectAll()
 		.executeTakeFirst();
@@ -227,7 +227,7 @@ test("applying the schema multiple times should be idempotent for initial data",
 	expect(initialChangeSetCount.count).toBe(2);
 
 	const initialVersionCount = await lix.db
-		.selectFrom("version_v2")
+		.selectFrom("version")
 		.select(lix.db.fn.count("id").as("count"))
 		.executeTakeFirstOrThrow();
 	expect(initialVersionCount.count).toBe(1);
@@ -266,7 +266,7 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 
 	// Insert first version referencing workingCs1
 	await lix.db
-		.insertInto("version_v2")
+		.insertInto("version")
 		.values({
 			id: "v1",
 			name: "version one",
@@ -278,7 +278,7 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 	// Attempt to insert another version referencing the SAME workingCs1 -> should fail
 	await expect(
 		lix.db
-			.insertInto("version_v2")
+			.insertInto("version")
 			.values({
 				id: "v2",
 				name: "version two",
@@ -286,14 +286,12 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 				working_change_set_id: workingCs1.id, // <<< Same working_change_set_id
 			})
 			.execute()
-	).rejects.toThrow(
-		/UNIQUE constraint failed: version_v2.working_change_set_id/i
-	);
+	).rejects.toThrow(/UNIQUE constraint failed: version.working_change_set_id/i);
 
 	// Inserting another version with a DIFFERENT working_change_set_id should succeed
 	await expect(
 		lix.db
-			.insertInto("version_v2")
+			.insertInto("version")
 			.values({
 				id: "v3",
 				name: "version three",
@@ -379,7 +377,7 @@ test("the working change set should be updated when the change set is updated", 
 
 	// Create initial version pointing to these change sets
 	await lix.db
-		.insertInto("version_v2")
+		.insertInto("version")
 		.values({
 			id: "v0",
 			name: "v0",
@@ -402,7 +400,7 @@ test("the working change set should be updated when the change set is updated", 
 
 	// Update the version to point to the new change set
 	await lix.db
-		.updateTable("version_v2")
+		.updateTable("version")
 		.set({ change_set_id: cs1!.id })
 		.where("id", "=", "v0")
 		.execute();
@@ -437,7 +435,7 @@ test("the working change set should be updated when the change set is updated", 
 
 	// Update the version to point to the new change set
 	await lix.db
-		.updateTable("version_v2")
+		.updateTable("version")
 		.set({ change_set_id: cs2!.id })
 		.where("id", "=", "v0")
 		.execute();
@@ -479,7 +477,7 @@ test("the working change set should be updated when the change set is updated", 
 
 	// Update the version to point to the new change set
 	await lix.db
-		.updateTable("version_v2")
+		.updateTable("version")
 		.set({ change_set_id: cs3!.id })
 		.where("id", "=", "v0")
 		.execute();
@@ -521,7 +519,7 @@ test("the working change set should be updated when the change set is updated", 
 
 	// Update the version to point to the new change set
 	await lix.db
-		.updateTable("version_v2")
+		.updateTable("version")
 		.set({ change_set_id: cs4!.id })
 		.where("id", "=", "v0")
 		.execute();
@@ -578,8 +576,8 @@ test.skip("keeps delete change if entity was inserted before or with the last ch
 		.with("act_version", (eb) =>
 			eb
 				.selectFrom("active_version")
-				.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-				.selectAll("version_v2")
+				.innerJoin("version", "active_version.version_id", "version.id")
+				.selectAll("version")
 		)
 		.selectFrom("change_set")
 		.innerJoin(
@@ -683,13 +681,13 @@ test("keeps the delete change if the ancestry from the previous checkpoint track
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "version_v2.id", "active_version.version_id")
-		.select(["version_v2.id"])
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.select(["version.id"])
 		.executeTakeFirstOrThrow();
 
 	// Update the version to point to the checkpoint change set
 	await lix.db
-		.updateTable("version_v2")
+		.updateTable("version")
 		.set({
 			change_set_id: insertChangeSet.id,
 			working_change_set_id: workingChangeSet.id,
@@ -700,7 +698,7 @@ test("keeps the delete change if the ancestry from the previous checkpoint track
 	// Trigger the handleUpdateWorkingChangeSet function by updating the version
 	// to point to the delete change set
 	await lix.db
-		.updateTable("version_v2")
+		.updateTable("version")
 		.set({ change_set_id: deleteChangeSet.id })
 		.where("id", "=", activeVersion.id)
 		.execute();

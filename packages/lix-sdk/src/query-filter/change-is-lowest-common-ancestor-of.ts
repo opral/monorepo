@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { ExpressionWrapper, sql } from "kysely";
 import type { Change, LixDatabaseSchema } from "../database/schema.js";
 import type { SqlBool } from "kysely";

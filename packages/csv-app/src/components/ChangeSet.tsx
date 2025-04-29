@@ -6,7 +6,8 @@ import {
 	createThread,
 	createCheckpoint,
 	Thread,
-	VersionV2,
+	Version,
+	changeSetElementIsLeafOf,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
@@ -14,6 +15,7 @@ import { currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
 import {
 	activeFileAtom,
+	checkpointChangeSetsAtom,
 	getThreads,
 	workingChangeSetAtom,
 } from "../state-active-file.ts";
@@ -29,6 +31,7 @@ export default function Component(props: {
 	authorName: string | null;
 }) {
 	const [workingChangeSet] = useAtom(workingChangeSetAtom);
+	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 	const isWorkingChangeSet = useCallback(
 		() => props.changeSetid === workingChangeSet?.id,
 		[props.changeSetid, workingChangeSet]
@@ -41,7 +44,7 @@ export default function Component(props: {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
-	>({});
+		>({});
 	const [threads, setThreads] = useState<Thread[]>([]);
 
 	const [intermediateChanges, setIntermediateChanges] = useState<
@@ -57,7 +60,7 @@ export default function Component(props: {
 					setChanges
 				);
 			} else {
-				getIntermediateChanges(lix, activeFile!.id).then(
+				getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets?.[0]?.id).then(
 					setIntermediateChanges
 				);
 			}
@@ -67,7 +70,7 @@ export default function Component(props: {
 						setChanges
 					);
 				} else {
-					getIntermediateChanges(lix, activeFile!.id).then(
+					getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets?.[0]?.id).then(
 						setIntermediateChanges
 					);
 				}
@@ -93,10 +96,10 @@ export default function Component(props: {
 
 	// Truncate comment content if it's longer than 50 characters
 	const truncatedComment =
-		firstComment?.content
-			? firstComment.content.length > 50
-				? `${toPlainText(firstComment.content).substring(0, 50)}...`
-				: toPlainText(firstComment.content)
+		firstComment?.body
+			? firstComment.body.content.length > 50
+				? `${toPlainText(firstComment.body).substring(0, 50)}...`
+				: toPlainText(firstComment.body)
 			: null;
 
 	return (
@@ -180,7 +183,7 @@ const CreateCheckpointBox = () => {
 		lix.db.transaction().execute(async (trx) => {
 			const thread = await createThread({
 				lix: { ...lix, db: trx },
-				comments: [{ content: args.content }],
+				comments: [{ body: args.content }],
 			});
 			await trx
 				.insertInto("change_set_thread")
@@ -227,8 +230,8 @@ const getChanges = async (
 	lix: Lix,
 	changeSetId: string,
 	fileId: string,
-	currentVersion: VersionV2,
-	previousChangeSetId?: string | undefined,
+	currentVersion: Version,
+	previousChangeSetId?: string | undefined | null,
 ): Promise<
 	Record<
 		string,
@@ -247,14 +250,7 @@ const getChanges = async (
 			"change_set_element",
 			"change_set_element.change_id",
 			"change.id"
-		)
-		.leftJoin("version_change", "version_change.change_id", "change.id")
-		.where((eb) =>
-			eb.or([
-				eb("version_change.version_id", "=", currentVersion.id),
-				eb("version_change.change_id", "is", null),
-			])
-		)
+	)
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change_set_element.change_set_id", "=", changeSetId)
@@ -269,6 +265,7 @@ const getChanges = async (
 			try {
 				change.content = JSON.parse(change.content);
 			} catch (e) {
+				console.log("Error parsing JSON:", e);
 				// Keep as is if not valid JSON
 			}
 		}
@@ -313,14 +310,7 @@ const getChanges = async (
 						"change_set_element.change_id",
 						"change.id"
 					)
-					.leftJoin("version_change", "version_change.change_id", "change.id")
-					.where((eb) =>
-						eb.or([
-							eb("version_change.version_id", "=", currentVersion.id),
-							eb("version_change.change_id", "is", null),
-						])
-					)
-					.where("change_set_element.change_set_id", "=", previousChangeSetId)
+					.where(changeSetElementIsLeafOf([{ id: previousChangeSetId }]))
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
 					.where("change.file_id", "=", fileId)
@@ -331,24 +321,12 @@ const getChanges = async (
 					.executeTakeFirst();
 			}
 
-			// If no parent was found with previousChangeSetId, try to find it using change_edge
-			if (!parent) {
-				parent = await lix.db
-					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.innerJoin("change_edge", "change_edge.parent_id", "change.id")
-					.where("change_edge.child_id", "=", change.id)
-					.where(changeHasLabel({ name: "checkpoint" }))
-					.selectAll("change")
-					.select("snapshot.content")
-					.executeTakeFirst();
-			}
-
 			// Process parent content if it exists
 			if (parent && typeof parent.content === 'string') {
 				try {
 					parent.content = JSON.parse(parent.content);
 				} catch (e) {
+					console.log("Error parsing parent JSON:", e);
 					// Keep as is if not valid JSON
 				}
 			}
@@ -372,7 +350,8 @@ const getChanges = async (
 // duplicating because easier for now. clean up later
 const getIntermediateChanges = async (
 	lix: Lix,
-	fileId: string
+	fileId: string,
+	latestCheckpointChangeSetId?: string | null,
 ): Promise<
 	Record<
 		string,
@@ -387,22 +366,16 @@ const getIntermediateChanges = async (
 	// Get the working change set ID 
 	const workingChangeSetId = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirst()
 		.then(version => version?.working_change_set_id);
-
-	// Get the current version for filtering
-	const currentVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
-		.executeTakeFirstOrThrow();
 
 	const intermediateLeafChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin("change_set_element", "change_set_element.change_id", "change.id")
+		.where(changeSetElementIsLeafOf([{ id: workingChangeSetId! }]))
 		.where(eb =>
 			workingChangeSetId
 				? eb("change_set_element.change_set_id", "=", workingChangeSetId)
@@ -425,6 +398,7 @@ const getIntermediateChanges = async (
 			try {
 				change.content = JSON.parse(change.content);
 			} catch (e) {
+				console.log("Error parsing JSON:", e);
 				// Keep as is if not valid JSON
 			}
 		}
@@ -457,43 +431,50 @@ const getIntermediateChanges = async (
 
 		for (const change of row) {
 			// defining a parent as the last checkpoint change
-			const parent = await lix.db
-				.selectFrom("change")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-				.leftJoin("version_change", "version_change.change_id", "change.id")
-				.where((eb) =>
-					eb.or([
-						eb("version_change.version_id", "=", currentVersion.id),
-						eb("version_change.change_id", "is", null),
-					])
-				)
-				.where("change.entity_id", "=", change.entity_id)
-				.where(changeHasLabel({ name: "checkpoint" }))
-				.where("change.schema_key", "=", CellSchemaV1.key)
-				.selectAll("change")
-				.select("snapshot.content")
-				.executeTakeFirst();
+			if (latestCheckpointChangeSetId) {
 
-			// Process parent content if it exists
-			if (parent && typeof parent.content === 'string') {
-				try {
-					parent.content = JSON.parse(parent.content);
-				} catch (e) {
-					// Keep as is if not valid JSON
+				const parent = await lix.db
+					.selectFrom("change")
+					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+					.innerJoin(
+						"change_set_element",
+						"change_set_element.change_id",
+						"change.id"
+					)
+					.where(
+						"change_set_element.change_set_id",
+						"=",
+						latestCheckpointChangeSetId
+					)
+					.where("change.entity_id", "=", change.entity_id)
+					.where("change.schema_key", "=", CellSchemaV1.key)
+					.where(changeHasLabel({ name: "checkpoint" }))
+					.selectAll("change")
+					.select("snapshot.content")
+					.executeTakeFirst();
+
+				// Process parent content if it exists
+				if (parent && typeof parent.content === 'string') {
+					try {
+						parent.content = JSON.parse(parent.content);
+					} catch (e) {
+						console.log("Error parsing JSON:", e);
+						// Keep as is if not valid JSON
+					}
 				}
-			}
 
-			// Provide a full parent object with all necessary properties
-			change.parent = parent || {
-				id: "",
-				entity_id: change.entity_id,
-				file_id: change.file_id,
-				plugin_key: change.plugin_key,
-				schema_key: change.schema_key,
-				snapshot_id: "",
-				created_at: "",
-				content: null
-			};
+				// Provide a full parent object with all necessary properties
+				change.parent = parent || {
+					id: "",
+					entity_id: change.entity_id,
+					file_id: change.file_id,
+					plugin_key: change.plugin_key,
+					schema_key: change.schema_key,
+					snapshot_id: "",
+					created_at: "",
+					content: null
+				};
+			}
 		}
 	}
 	return groupedByRow;

@@ -82,7 +82,3 @@ export async function createServerProtocolHandler(args: {
 		}
 	};
 }
-
-// Keep old name for backward compatibility
-export const createServerApiHandler: typeof createServerProtocolHandler =
-	createServerProtocolHandler;

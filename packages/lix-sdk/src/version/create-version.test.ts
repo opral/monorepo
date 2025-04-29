@@ -1,149 +1,104 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "./create-version.js";
-import { updateChangesInVersion } from "./update-changes-in-version.js";
-import { createChangeConflict } from "../change-conflict/create-change-conflict.js";
+import type { ChangeSet } from "../change-set/database-schema.js";
 
-test("it should copy the changes from the parent version", async () => {
+test("should create a version linked to the provided change_set_id", async () => {
 	const lix = await openLixInMemory({});
-
-	const version0 = await lix.db
-		.insertInto("version")
-		.values({ name: "version0" })
+	// Setup: Create a change_set to link to
+	const changeSet = await lix.db
+		.insertInto("change_set")
+		.defaultValues()
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const changes = await lix.db
-		.insertInto("change")
-		.values([
-			{
-				schema_key: "file",
-				entity_id: "value1",
-				file_id: "mock",
-				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
-			},
-			{
-				schema_key: "file",
-				entity_id: "value2",
-				file_id: "mock",
-				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
-			},
-		])
-		.returningAll()
-		.execute();
+	const newVersion = await createVersion({ lix, changeSet: changeSet });
 
-	await updateChangesInVersion({
-		lix,
-		version: version0,
-		changes,
-	});
-
-	const version1 = await createVersion({
-		lix,
-		from: version0,
-	});
-
-	const changesInversion0 = await lix.db
-		.selectFrom("change")
-		.innerJoin("version_change", "change.id", "version_change.change_id")
-		.selectAll("change")
-		.where("version_id", "=", version0.id)
-		.execute();
-
-	const changesInversion1 = await lix.db
-		.selectFrom("change")
-		.innerJoin("version_change", "change.id", "version_change.change_id")
-		.selectAll("change")
-		.where("version_id", "=", version1.id)
-		.execute();
-
-	// main and feature version should have the same changes
-	expect(changesInversion0).toStrictEqual(changesInversion1);
+	expect(newVersion.change_set_id).toBe(changeSet.id);
+	expect(newVersion.id).toBeDefined();
+	// Check if default name is assigned (assuming schema has a default or generated name)
+	expect(newVersion.name).toBeDefined();
 });
 
-// test("if a parent version is provided, a merge target should be created to activate conflict detection", async () => {
-// 	const lix = await openLixInMemory({});
-
-// 	const version0 = await createVersion({ lix, name: "version0" });
-// 	const version1 = await createVersion({ lix, parent: version0, name: "version1" });
-
-// 	const versionTarget = await lix.db
-// 		.selectFrom("version_target")
-// 		.selectAll()
-// 		.where("source_version_id", "=", version1.id)
-// 		.where("target_version_id", "=", version0.id)
-// 		.execute();
-
-// 	expect(versionTarget.length).toBe(1);
-// });
-
-test("it should copy change conflict pointers from the parent version", async () => {
+test("should create a version with the specified name", async () => {
 	const lix = await openLixInMemory({});
+	const changeSet = await lix.db
+		.insertInto("change_set")
+		.defaultValues()
+		.returningAll()
+		.executeTakeFirstOrThrow();
+	const versionName = "My Test Version";
 
-	const version0 = await lix.db
-		.insertInto("version")
-		.values({ name: "version0" })
+	const newVersion = await createVersion({
+		lix,
+		changeSet: changeSet,
+		name: versionName,
+	});
+
+	expect(newVersion.change_set_id).toBe(changeSet.id);
+	expect(newVersion.name).toBe(versionName);
+	expect(newVersion.id).toBeDefined();
+});
+
+test("should create a version with the specified id", async () => {
+	const lix = await openLixInMemory({});
+	const changeSet = await lix.db
+		.insertInto("change_set")
+		.defaultValues()
 		.returningAll()
 		.executeTakeFirstOrThrow();
 
-	const changes = await lix.db
-		.insertInto("change")
-		.values([
-			{
-				schema_key: "file",
-				entity_id: "value1",
-				file_id: "mock",
-				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
-			},
-			{
-				schema_key: "file",
-				entity_id: "value2",
-				file_id: "mock",
-				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
-			},
-		])
+	const newVersion = await createVersion({
+		lix,
+		changeSet: changeSet,
+		id: "hello world",
+	});
+
+	expect(newVersion.change_set_id).toBe(changeSet.id);
+	expect(newVersion.id).toBe("hello world");
+	// Check default name assignment
+	expect(newVersion.name).toBeDefined();
+});
+
+test("should work within an existing transaction", async () => {
+	const lix = await openLixInMemory({});
+	const changeSet = await lix.db
+		.insertInto("change_set")
+		.defaultValues()
 		.returningAll()
-		.execute();
+		.executeTakeFirstOrThrow();
+	const versionName = "Transaction Test Version";
 
-	await updateChangesInVersion({
-		lix,
-		version: version0,
-		changes,
+	const newVersion = await lix.db.transaction().execute(async (trx) => {
+		return createVersion({
+			lix: { ...lix, db: trx }, // Pass the transaction object
+			changeSet: { id: changeSet.id },
+			name: versionName,
+		});
 	});
 
-	await createChangeConflict({
-		lix,
-		version: version0,
-		key: "mock-key",
-		conflictingChangeIds: new Set([changes[0]!.id, changes[1]!.id]),
-	});
+	expect(newVersion.change_set_id).toBe(changeSet.id);
+	expect(newVersion.name).toBe(versionName);
+	expect(newVersion.id).toBeDefined();
 
-	const version0Conflicts = await lix.db
-		.selectFrom("version_change_conflict")
-		.where("version_id", "=", version0.id)
+	// Verify it's actually in the database outside the transaction
+	const dbVersion = await lix.db
+		.selectFrom("version")
 		.selectAll()
-		.execute();
+		.where("id", "=", newVersion.id)
+		.executeTakeFirstOrThrow();
+	expect(dbVersion.name).toBe(versionName);
+});
 
-	expect(version0Conflicts.length).toBe(1);
+test("should fail if the 'from' change_set_id does not exist", async () => {
+	const lix = await openLixInMemory({});
+	const nonExistentChangeSet: Pick<ChangeSet, "id"> = {
+		id: "hello world" as ChangeSet["id"], // ID that won't exist
+	};
 
-	const version1 = await createVersion({
-		lix,
-		from: version0,
-		name: "version1",
-	});
-
-	const version2Conflicts = await lix.db
-		.selectFrom("version_change_conflict")
-		.where("version_id", "=", version1.id)
-		.selectAll()
-		.execute();
-
-	expect(version2Conflicts.length).toBe(1);
-	expect(version2Conflicts[0]?.change_conflict_id).toBe(
-		version0Conflicts[0]?.change_conflict_id
-	);
+	await expect(
+		createVersion({ lix, changeSet: nonExistentChangeSet })
+		// Check for foreign key constraint error
+		// The specific error message might vary based on the db driver
+	).rejects.toThrow(/FOREIGN KEY constraint failed/i);
 });

@@ -7,7 +7,7 @@ test("returns undefined if document is not available", async () => {
 	globalThis.document = undefined;
 
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
@@ -20,16 +20,14 @@ test("returns undefined if document is not available", async () => {
 
 test("matches the locale of a cookie", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie"],
-			cookieName: "PARAGLIDE_LOCALE",
-		},
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
 	});
 
 	// @ts-expect-error - global variable definition
@@ -46,16 +44,14 @@ test("matches the locale of a cookie", async () => {
 // different locales
 test("returns undefined if the locale is not defined in the locales", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],
 			},
 		}),
-		compilerOptions: {
-			strategy: ["cookie"],
-			cookieName: "PARAGLIDE_LOCALE",
-		},
+		strategy: ["cookie"],
+		cookieName: "PARAGLIDE_LOCALE",
 	});
 
 	// @ts-expect-error - global variable definition

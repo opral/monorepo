@@ -1,5 +1,11 @@
 # @lix-js/sdk
 
+## 0.4.7
+
+### Patch Changes
+
+- aa4d69e: expose `closeLix()` api
+
 ## 0.4.6
 
 ### Patch Changes

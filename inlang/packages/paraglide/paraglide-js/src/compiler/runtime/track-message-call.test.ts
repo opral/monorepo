@@ -5,7 +5,7 @@ import { test, expect } from "vitest";
 
 test("tracks message calls", async () => {
 	const runtime = await createParaglide({
-		project: await newProject({
+		blob: await newProject({
 			settings: {
 				baseLocale: "en",
 				locales: ["en", "de"],

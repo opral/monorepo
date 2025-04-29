@@ -121,8 +121,8 @@ test("detects changes when inserting a prosemirror document", async () => {
 
 // 		const versionBefore = await lix.db
 // 			.selectFrom("active_version")
-// 			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-// 			.selectAll("version_v2")
+// 			.innerJoin("version", "active_version.version_id", "version.id")
+// 			.selectAll("version")
 // 			.executeTakeFirstOrThrow();
 
 // 		const file = await lix.db
@@ -139,8 +139,8 @@ test("detects changes when inserting a prosemirror document", async () => {
 
 // 		const versionAfter = await lix.db
 // 			.selectFrom("active_version")
-// 			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-// 			.selectAll("version_v2")
+// 			.innerJoin("version", "active_version.version_id", "version.id")
+// 			.selectAll("version")
 // 			.executeTakeFirstOrThrow();
 
 // 		const { after } = await beforeAfterOfFile({

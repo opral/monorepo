@@ -63,8 +63,8 @@ export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
 	// Get the active version with working change set id
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-		.selectAll("version_v2")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
 		.executeTakeFirst();
 
 	if (!activeVersion) return null;
@@ -349,7 +349,7 @@ export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
 					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"thread_comment.id",
-						"thread_comment.content",
+						"thread_comment.body",
 						"thread_comment.thread_id",
 						"thread_comment.parent_id",
 					])

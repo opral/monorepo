@@ -225,8 +225,8 @@ export async function handleFileDelete(args: {
 	await args.lix.db.transaction().execute(async (trx) => {
 		const activeVersion = await trx
 			.selectFrom("active_version")
-			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-			.selectAll("version_v2")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
 		const toBeDeletedEntities = await trx
@@ -279,8 +279,8 @@ async function updateChangesInActiveVersion(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const activeVersion = await trx
 			.selectFrom("active_version")
-			.innerJoin("version_v2", "active_version.version_id", "version_v2.id")
-			.selectAll("version_v2")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
 		const newChangeSet = await createChangeSet({
@@ -294,7 +294,7 @@ async function updateChangesInActiveVersion(args: {
 			parents: [{ id: activeVersion.change_set_id }],
 		});
 		await trx
-			.updateTable("version_v2")
+			.updateTable("version")
 			.set({
 				change_set_id: newChangeSet.id,
 			})

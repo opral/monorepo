@@ -32,11 +32,8 @@
   </head>
   <body>
     <script type="module">
-      import {
-        registerZettelLexicalPlugin,
-        fromLexicalState,
-        ZettelNodes,
-      } from "./src/index.js";
+      import { registerZettelLexicalPlugin } from "./src/index.js";
+      import { ZettelNodes } from "./src/nodes/index.js";
       import { createEditor } from "lexical";
 
       const container = document.getElementById("editor-container");
@@ -49,14 +46,9 @@
 
       editor.registerUpdateListener(() => {
         const lexicalState = editor.getEditorState().toJSON();
-        const zettelDoc = fromLexicalState(lexicalState);
         const textarea = document.getElementById("zettel-ast-display");
-        textarea.value = JSON.stringify(zettelDoc, null, 2);
+        textarea.value = JSON.stringify(lexicalState, null, 2);
         autoResizeTextarea(textarea);
-        // Update Lexical state display
-        const lexicalTextarea = document.getElementById("lexical-state-display");
-        lexicalTextarea.value = JSON.stringify(lexicalState, null, 2);
-        autoResizeTextarea(lexicalTextarea);
       });
 
       function autoResizeTextarea(textarea) {
@@ -74,16 +66,7 @@
         <textarea
           id="zettel-ast-display"
           readonly
-          placeholder="Zettel AST will appear here..."
-          style="min-width: 0; overflow: hidden; resize: none;"
-        ></textarea>
-      </div>
-      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
-        <strong>Lexical State</strong>
-        <textarea
-          id="lexical-state-display"
-          readonly
-          placeholder="Lexical state will appear here..."
+          placeholder="The lexical stat will appear here "
           style="min-width: 0; overflow: hidden; resize: none;"
         ></textarea>
       </div>

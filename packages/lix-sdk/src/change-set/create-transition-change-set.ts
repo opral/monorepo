@@ -123,7 +123,7 @@ export async function createTransitionChangeSet(args: {
 									const isInternalProtected =
 										c.plugin_key === "lix_own_change_control" &&
 										(c.schema_key === "lix_account_table" ||
-											c.schema_key === "lix_version_v2_table");
+											c.schema_key === "lix_version_table");
 									return !isInternalProtected;
 								})
 								.map((c) => ({

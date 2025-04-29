@@ -6,18 +6,16 @@ import { Button } from "./ui/button.tsx";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.tsx";
 import {
 	activeAccountAtom,
-	activeVersionAtom,
 	threadSearchParamsAtom,
 	lixAtom,
 } from "@/state.ts";
 import IconArrow from "./icons/IconArrow.tsx";
-import { createComment } from "@lix-js/sdk";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
+import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 const ChatInput = () => {
 	const [activeAccount] = useAtom(activeAccountAtom);
 	const [threadSearchParams] = useAtom(threadSearchParamsAtom);
-	const [activeVersion] = useAtom(activeVersionAtom);
 	const [lix] = useAtom(lixAtom);
 
 	const form = useForm({
@@ -40,30 +38,13 @@ const ChatInput = () => {
 	};
 
 	const handleAddComment = async () => {
-		// await lix.db.transaction().execute(async (trx) => {
-		// 	const parentComment = await trx
-		// 		.selectFrom("thread_comment")
-		// 		.where("thread_comment.thread_id", "=", threadSearchParams)
-		// 		.innerJoin("change", (join) =>
-		// 			join
-		// 				.onRef("change.entity_id", "=", "comment.id")
-		// 				.on("change.schema_key", "=", "lix_comment_table")
-		// 		)
-		// 		.leftJoin("version_change", "version_change.change_id", "change.id")
-		// 		.where((eb) => eb.or([
-		// 			eb("version_change.version_id", "=", activeVersion!.id),
-		// 			eb("version_change.change_id", "is", null)
-		// 		]))
-		// 		.orderBy("created_at", "desc")
-		// 		.selectAll("comment")
-		// 		.executeTakeFirstOrThrow();
-
-		// 	return await createComment({
-		// 		lix: { ...lix, db: trx },
-		// 		parentComment,
-		// 		content: commentValue,
-		// 	});
-		// });
+		await lix.db
+			.insertInto("thread_comment")
+			.values({
+				body: fromPlainText(commentValue),
+				thread_id: threadSearchParams!,
+			})
+			.execute();
 		await saveLixToOpfs({ lix });
 		form.reset();
 	};

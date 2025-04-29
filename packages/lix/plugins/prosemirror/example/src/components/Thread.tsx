@@ -8,14 +8,14 @@ export function Thread(props: {
 	lix: Lix;
 	thread: Thread;
 	comments: Array<ThreadComment & { author_name: string; created_at: string }>;
-	onComposerSubmit: (args: { content: ZettelDoc }) => void;
+	onComposerSubmit: (args: { body: ZettelDoc }) => void;
 }) {
 	// Handler for adding a new comment to THIS thread
-	const handleCommentSubmit = async (args: { content: ZettelDoc }) => {
+	const handleCommentSubmit = async (args: { body: ZettelDoc }) => {
 		await props.lix.db
 			.insertInto("thread_comment")
 			.values({
-				content: args.content,
+				body: args.body,
 				thread_id: props.thread.id,
 			})
 			.execute();
@@ -43,14 +43,14 @@ export function Thread(props: {
 export function Composer(props: {
 	lix: Lix;
 	threadId?: Thread["id"];
-	onComposerSubmit: (args: { content: ZettelDoc }) => void;
+	onComposerSubmit: (args: { body: ZettelDoc }) => void;
 }) {
 	const [value, setValue] = useState<string | undefined>(undefined);
 
 	const handleSubmitClick = () => {
 		// Use optional chaining for safe access and check text content
 		if (value !== "") {
-			props.onComposerSubmit({ content: fromPlainText(value!) });
+			props.onComposerSubmit({ body: fromPlainText(value!) });
 			setValue(undefined);
 		}
 	};
@@ -108,9 +108,7 @@ function ThreadComment(props: {
 							{toRelativeTime(props.comment.created_at)}
 						</span>
 					</div>
-					<div className="text-xs mt-1">
-						{toPlainText(props.comment.content)}
-					</div>
+					<div className="text-xs mt-1">{toPlainText(props.comment.body)}</div>
 				</div>
 			</div>
 		</div>

@@ -35,7 +35,7 @@ export function applyVersionV2DatabaseSchema(
 	const initialChangeSetId = "2j9jm90ajc9j90";
 
 	const sql = `
-  CREATE TABLE IF NOT EXISTS version_v2 (
+  CREATE TABLE IF NOT EXISTS version (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     name TEXT UNIQUE DEFAULT (human_id()),
     change_set_id TEXT NOT NULL,
@@ -50,7 +50,7 @@ export function applyVersionV2DatabaseSchema(
   CREATE TABLE IF NOT EXISTS active_version (
     version_id TEXT NOT NULL PRIMARY KEY,
 
-    FOREIGN KEY(version_id) REFERENCES version_v2(id)
+    FOREIGN KEY(version_id) REFERENCES version(id)
   ) STRICT;
 
   -- Insert the default change set if missing
@@ -67,9 +67,9 @@ export function applyVersionV2DatabaseSchema(
 
   -- Insert the default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO version_v2 (id, name, change_set_id, working_change_set_id)
+  INSERT INTO version (id, name, change_set_id, working_change_set_id)
   SELECT '${mainVersionId}', 'main', '${initialChangeSetId}', '${workingChangeSetId}'
-  WHERE NOT EXISTS (SELECT 1 FROM version_v2);
+  WHERE NOT EXISTS (SELECT 1 FROM version);
 
   -- Set the default current version to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
@@ -78,7 +78,7 @@ export function applyVersionV2DatabaseSchema(
   WHERE NOT EXISTS (SELECT 1 FROM active_version);
 
   CREATE TRIGGER IF NOT EXISTS update_working_change_set 
-  AFTER UPDATE OF change_set_id ON version_v2
+  AFTER UPDATE OF change_set_id ON version
   FOR EACH ROW
   WHEN OLD.change_set_id != NEW.change_set_id
   AND NOT EXISTS (SELECT 1 FROM key_value WHERE key = 'lix_skip_update_working_change_set')
@@ -89,7 +89,7 @@ export function applyVersionV2DatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS prevent_immutable_working_change_set
   BEFORE UPDATE OF immutable_elements ON change_set
   FOR EACH ROW
-  WHEN NEW.immutable_elements = 1 AND OLD.immutable_elements = 0 AND EXISTS (SELECT 1 FROM version_v2 WHERE working_change_set_id = NEW.id)
+  WHEN NEW.immutable_elements = 1 AND OLD.immutable_elements = 0 AND EXISTS (SELECT 1 FROM version WHERE working_change_set_id = NEW.id)
   BEGIN
       SELECT RAISE(FAIL, 'Cannot set immutable_elements to true for working change sets.');
   END;
@@ -211,10 +211,10 @@ function handleUpdateWorkingChangeSet(args: {
 	return true;
 }
 
-export type VersionV2 = Selectable<VersionV2Table>;
-export type NewVersionV2 = Insertable<VersionV2Table>;
-export type VersionV2Update = Updateable<VersionV2Table>;
-export type VersionV2Table = {
+export type Version = Selectable<VersionTable>;
+export type NewVersion = Insertable<VersionTable>;
+export type VersionUpdate = Updateable<VersionTable>;
+export type VersionTable = {
 	id: Generated<string>;
 	name: string | null;
 	change_set_id: string;
