@@ -9,7 +9,7 @@ const Layout = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Access the global process object that was set in index.html
-      const posthogToken = (window as any).process?.env?.PUBLIC_LIX_POSTHOG_TOKEN || '';
+      const posthogToken = (window).process?.env?.PUBLIC_LIX_POSTHOG_TOKEN || '';
 
       if (posthogToken) {
         posthog.init(posthogToken, {

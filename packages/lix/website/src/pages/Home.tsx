@@ -3,9 +3,9 @@ import Header, { socialLinks } from "../components/header";
 import Check from "../components/ui/check";
 import IconArrowExternal from "../components/icons/arrow-external";
 import Details from "../components/ui/details";
-import IconLogoTabelle from "../components/icons/logo-tabelle";
-import IconLogoPapier from "../components/icons/logo-papier";
-import IconLogoInlang from "../components/icons/logo-inlang";
+// import IconLogoTabelle from "../components/icons/logo-tabelle";
+// import IconLogoPapier from "../components/icons/logo-papier";
+// import IconLogoInlang from "../components/icons/logo-inlang";
 import Footer from "../components/footer";
 import { Link } from 'react-router-dom';
 
@@ -42,26 +42,26 @@ const enabledByChangeControl = [
   },
 ];
 
-const appsBuiltOnTopOfLix = [
-  {
-    title: "CSV App",
-    link: "https://lix.host/app/csv",
-    icon: <IconLogoTabelle />,
-    description: "Get change control in your CSV file editor.",
-  },
-  {
-    title: "Text-Editor",
-    link: "https://lix.host/app/flashtype",
-    icon: <IconLogoPapier />,
-    description: "Take notes and collaborate with change control.",
-  },
-  {
-    title: "Translation-App",
-    link: "https://fink2.onrender.com",
-    icon: <IconLogoInlang />,
-    description: "Collaborate on translations with change control.",
-  },
-];
+// const appsBuiltOnTopOfLix = [
+//   {
+//     title: "CSV App",
+//     link: "https://lix.host/app/csv",
+//     icon: <IconLogoTabelle />,
+//     description: "Get change control in your CSV file editor.",
+//   },
+//   {
+//     title: "Text-Editor",
+//     link: "https://lix.host/app/flashtype",
+//     icon: <IconLogoPapier />,
+//     description: "Take notes and collaborate with change control.",
+//   },
+//   {
+//     title: "Translation-App",
+//     link: "https://fink2.onrender.com",
+//     icon: <IconLogoInlang />,
+//     description: "Collaborate on translations with change control.",
+//   },
+// ];
 
 const faq = [
   {

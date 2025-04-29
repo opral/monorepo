@@ -11,8 +11,8 @@ function App() {
 
   useEffect(() => {
     // Try to get the token from window.__ENV__ if available (for static site)
-    const posthogToken = typeof window !== 'undefined' && (window as any).__ENV__?.PUBLIC_LIX_POSTHOG_TOKEN 
-      ? (window as any).__ENV__.PUBLIC_LIX_POSTHOG_TOKEN 
+    const posthogToken = typeof window !== 'undefined' && (window).__ENV__?.PUBLIC_LIX_POSTHOG_TOKEN
+      ? (window).__ENV__.PUBLIC_LIX_POSTHOG_TOKEN 
       : import.meta.env.VITE_PUBLIC_LIX_POSTHOG_TOKEN || '';
 
     if (posthogToken) {

@@ -27,7 +27,8 @@
     /* Paths */
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "react": ["./node_modules/@types/react"]
     }
   },
   "include": ["src", "src/types"]

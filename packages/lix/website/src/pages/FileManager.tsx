@@ -1,7 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import Footer from "../components/footer";
 import Header, { socialLinks } from "../components/header";
-import IconArrowExternal from "../components/icons/arrow-external";
 import IconBranch from "../components/icons/branch";
 import IconConversation from "../components/icons/conversation";
 import IconLix from "../components/icons/lix";

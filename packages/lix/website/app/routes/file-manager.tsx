@@ -1,13 +1,14 @@
 import { Helmet } from 'react-helmet-async';
 import Footer from "../components/footer";
 import Header, { socialLinks } from "../components/header";
-import IconArrowExternal from "../components/icons/arrow-external";
+// import IconArrowExternal from "../components/icons/arrow-external";
 import IconBranch from "../components/icons/branch";
 import IconConversation from "../components/icons/conversation";
 import IconLix from "../components/icons/lix";
 import IconSync from "../components/icons/sync";
 import Check from "../components/ui/check";
 import Details from "../components/ui/details";
+import React from 'react';
 
 const faq = [
   {
@@ -94,7 +95,7 @@ export default function FileManagerPage() {
         <title>Lix file manager</title>
         <meta name="description" content="The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang." />
         <meta name="keywords" content="change control, file-based apps, collaboration, automation, change graph" />
-        
+
         <meta property="og:url" content="https://lix.opral.com/file-manager" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Lix file manager" />
@@ -103,14 +104,14 @@ export default function FileManagerPage() {
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        
+
         <meta name="twitter:card" content="Lix file manager with build-in change control" />
         <meta property="twitter:url" content="https://lix.opral.com/" />
         <meta name="twitter:title" content="Lix file manager" />
         <meta name="twitter:description" content="Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents." />
         <meta name="twitter:image:src" content="https://lix.opral.com/images/og-image-lix.png" />
       </Helmet>
-      
+
       <div className="w-full bg-slate-50">
         <Header />
       </div>
