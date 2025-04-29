@@ -103,3 +103,4 @@ test("content of a thread comment is stored as json", async () => {
 		{ type: "mock", zettel_key: "mock_key" },
 	]);
 });
+

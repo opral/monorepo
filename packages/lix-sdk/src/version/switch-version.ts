@@ -60,12 +60,19 @@ export async function switchVersion(args: {
 					targetChangeSet: { id: targetVersion.change_set_id },
 				});
 
-				console.log(`Applying transition change set ${transitionChangeSet.id}`);
 				await applyChangeSet({
 					lix: { ...args.lix, db: trx },
 					changeSet: transitionChangeSet,
 					updateVersion: false,
 				});
+
+				let fkErrors = await sql`PRAGMA foreign_key_check`.execute(trx);
+				if (Array.isArray(fkErrors.rows) && fkErrors.rows.length > 0) {
+					console.error(
+						"FOREIGN KEY VIOLATIONS DETECTED (after apply change set update):",
+						fkErrors.rows
+					);
+				}
 
 				// Update the active version pointer MANUALLY
 				console.log(
@@ -76,20 +83,12 @@ export async function switchVersion(args: {
 					.set({ version_id: targetVersion.id })
 					.executeTakeFirstOrThrow();
 
-				// Check for foreign key violations before committing
-				const fkErrorsAfterUpdate = await sql`PRAGMA foreign_key_check`.execute(
-					trx
-				);
-				if (
-					Array.isArray(fkErrorsAfterUpdate.rows) &&
-					fkErrorsAfterUpdate.rows.length > 0
-				) {
+				fkErrors = await sql`PRAGMA foreign_key_check`.execute(trx);
+				if (Array.isArray(fkErrors.rows) && fkErrors.rows.length > 0) {
 					console.error(
 						"FOREIGN KEY VIOLATIONS DETECTED (after active_version update):",
-						fkErrorsAfterUpdate.rows
+						fkErrors.rows
 					);
-				} else {
-					console.log("No FK violations detected after active_version update.");
 				}
 
 				// Clean up the temporary skip flag
@@ -99,9 +98,12 @@ export async function switchVersion(args: {
 					.execute();
 
 				// Check for foreign key violations before committing
-				const fkErrors = await sql`PRAGMA foreign_key_check`.execute(trx);
+				fkErrors = await sql`PRAGMA foreign_key_check`.execute(trx);
 				if (Array.isArray(fkErrors.rows) && fkErrors.rows.length > 0) {
-					console.error("FOREIGN KEY VIOLATIONS DETECTED:", fkErrors.rows);
+					console.error(
+						"FOREIGN KEY VIOLATIONS DETECTED (after transaction complete):",
+						fkErrors.rows
+					);
 				}
 			});
 		});

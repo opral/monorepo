@@ -4,6 +4,7 @@ import { createVersion } from "./create-version.js";
 import { switchVersion } from "./switch-version.js";
 import { createChange } from "../change/create-change.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
+// import { initLixInspector } from "@lix-js/inspector";
 
 test("switching versiones should update the active_version", async () => {
 	const lix = await openLixInMemory({});
@@ -82,63 +83,64 @@ test.todo(
 	}
 );
 
-test.todo(
-	"switch version applies the changes of the switched to version",
-	async () => {
-		const lix = await openLixInMemory({});
+test("switch version applies the changes of the switched to version", async () => {
+	const lix = await openLixInMemory({});
 
-		const versionA = await createVersion({
-			lix,
-			changeSet: await createChangeSet({ lix }),
-		});
+	// await initLixInspector({
+	// 	lix,
+	// });
 
-		const versionB = await createVersion({
-			lix,
-			changeSet: await createChangeSet({ lix }),
-		});
+	const versionA = await createVersion({
+		lix,
+		changeSet: await createChangeSet({ lix }),
+	});
 
-		await switchVersion({ lix, to: versionA });
+	const versionB = await createVersion({
+		lix,
+		changeSet: await createChangeSet({ lix }),
+	});
 
-		// version A has value foo
-		await lix.db
-			.insertInto("key_value")
-			.values({ key: "foo", value: "bar" })
-			.execute();
+	await switchVersion({ lix, to: versionA });
 
-		let keyValues = await lix.db
-			.selectFrom("key_value")
-			.where("key", "=", "foo")
-			.selectAll()
-			.execute();
+	// version A has value foo
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "foo", value: "bar" })
+		.execute();
 
-		expect(keyValues).toMatchObject([{ key: "foo", value: "bar" }]);
+	let keyValues = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.execute();
 
-		await switchVersion({ lix, to: versionB });
+	expect(keyValues).toMatchObject([{ key: "foo", value: "bar" }]);
 
-		// version B should have no value foo
-		keyValues = await lix.db
-			.selectFrom("key_value")
-			.where("key", "=", "foo")
-			.selectAll()
-			.execute();
+	await switchVersion({ lix, to: versionB });
 
-		expect(keyValues).toHaveLength(0);
+	// version B should have no value foo
+	keyValues = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.execute();
 
-		// version B has value foo
-		await lix.db
-			.insertInto("key_value")
-			.values({ key: "foo", value: "baz" })
-			.execute();
+	expect(keyValues).toHaveLength(0);
 
-		await switchVersion({ lix, to: versionA });
+	// version B has value foo
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "foo", value: "baz" })
+		.execute();
 
-		keyValues = await lix.db
-			.selectFrom("key_value")
-			.where("key", "=", "foo")
-			.selectAll()
-			.execute();
+	await switchVersion({ lix, to: versionA });
 
-		// expecting to see the value from version A again
-		expect(keyValues).toMatchObject([{ key: "foo", value: "bar" }]);
-	}
-);
+	keyValues = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.execute();
+
+	// expecting to see the value from version A again
+	expect(keyValues).toMatchObject([{ key: "foo", value: "bar" }]);
+});
