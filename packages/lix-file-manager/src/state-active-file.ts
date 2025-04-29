@@ -320,8 +320,7 @@ export const getChangeDiffs = async (
 							"change_set_element.change_id",
 							"change.id"
 						)
-						.where(changeSetElementIsLeafOf([{ id: changeSetId }]))
-						.where("change_set_element.change_set_id", "=", changeSetBeforeId)
+						.where(changeSetElementIsLeafOf([{ id: changeSetBeforeId }]))
 						.where("change.entity_id", "=", change.entity_id)
 						.where("change.schema_key", "=", change.schema_key)
 						.where(changeHasLabel({ name: "checkpoint" }))
