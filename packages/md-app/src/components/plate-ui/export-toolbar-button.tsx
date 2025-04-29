@@ -125,7 +125,10 @@ import { ExtendedMarkdownPlugin } from '../editor/plugins/markdown/markdown-plug
 const siteUrl = 'https://platejs.org';
 const lowlight = createLowlight(all);
 
-export function ExportToolbarButton({ children, ...props }: DropdownMenuProps) {
+export function ExportToolbarButton({
+  // children,
+  ...props
+}: DropdownMenuProps) {
   const editor = useEditorRef();
   const openState = useOpenState();
 

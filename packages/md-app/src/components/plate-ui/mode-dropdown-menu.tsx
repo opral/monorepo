@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -10,7 +9,11 @@ import {
   usePlateState,
   usePluginOption,
 } from '@udecode/plate/react';
-import { Eye, Pen, PencilLineIcon } from 'lucide-react';
+import {
+  // Eye,
+  Pen,
+  PencilLineIcon
+} from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -24,7 +27,9 @@ import { ToolbarButton } from './toolbar';
 
 export function ModeDropdownMenu(props: DropdownMenuProps) {
   const editor = useEditorRef();
-  const [readOnly, setReadOnly] = usePlateState('readOnly');
+  const [readOnly,
+    // setReadOnly
+  ] = usePlateState('readOnly');
   const openState = useOpenState();
 
   const isSuggesting = usePluginOption(SuggestionPlugin, 'isSuggesting');

@@ -195,6 +195,7 @@ export function CommentCreateForm({
 
     const id = newDiscussion.id;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     commentsNodeEntry.forEach(([_, path]) => {
       editor.tf.setNodes(
         {

@@ -15,6 +15,7 @@ export const Toolbar = withCn(
   'relative flex items-center select-none'
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const a = cn('flex items-center');
 
 export const ToolbarToggleGroup = withCn(

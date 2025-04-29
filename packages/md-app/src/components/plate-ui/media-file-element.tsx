@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 
 import { cn, withRef } from '@udecode/cn';
 import { useMediaState } from '@udecode/plate-media/react';
@@ -13,6 +12,7 @@ import { Caption, CaptionTextarea } from './caption';
 export const MediaFileElement = withHOC(
   ResizableProvider,
   withRef<typeof PlateElement>(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ({ children, className, nodeProps, ...props }, ref) => {
       const readOnly = useReadOnly();
 

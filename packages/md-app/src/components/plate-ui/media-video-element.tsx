@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import ReactPlayer from 'react-player';
 
@@ -21,6 +20,7 @@ import {
 export const MediaVideoElement = withHOC(
   ResizableProvider,
   withRef<typeof PlateElement>(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ({ children, className, nodeProps, ...props }, ref) => {
       const {
         align = 'center',

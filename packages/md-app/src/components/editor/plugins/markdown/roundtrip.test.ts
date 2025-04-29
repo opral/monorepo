@@ -93,7 +93,6 @@ function createDiffFile(
 		const isPerfect = originalContent.trim() === actualContent.trim();
 		const isAcceptable =
 			!isPerfect && expectedContent.trim() === actualContent.trim();
-		const isFailing = !isPerfect && !isAcceptable;
 
 		// Set display styles based on status
 		let statusEmoji, inOutStatus, visualStatus, detailsOpen, titleStyle;
@@ -539,6 +538,7 @@ describe("roundtrip", () => {
 			);
 			testResults.push(fileName);
 
+			// eslint-disable-next-line no-useless-catch
 			try {
 				// The test should still fail if actual doesn't match expected
 				expect(serializedMarkdown).toBe(expectedMarkdown);

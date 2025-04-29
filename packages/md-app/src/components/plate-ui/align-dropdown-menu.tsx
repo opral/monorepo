@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -44,7 +43,10 @@ const items = [
   },
 ];
 
-export function AlignDropdownMenu({ children, ...props }: DropdownMenuProps) {
+export function AlignDropdownMenu({
+  // children,
+  ...props
+}: DropdownMenuProps) {
   const editor = useEditorRef();
   const value = useSelectionFragmentProp({
     defaultValue: 'start',

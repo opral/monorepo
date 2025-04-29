@@ -1,6 +1,5 @@
 import { NodeApi } from "@udecode/plate";
 import { createPlatePlugin } from "@udecode/plate-core/react";
-import { serializeMdNodes } from "@udecode/plate-markdown";
 import { ClipboardEvent } from "react";
 import { ExtendedMarkdownPlugin } from "./markdown/markdown-plugin";
 

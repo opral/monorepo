@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 import type { SlateEditor, SlateElementProps, TElement } from '@udecode/plate';
 
@@ -91,6 +91,7 @@ const getHeadingList = (editor?: SlateEditor) => {
     const title = NodeApi.string(node);
     const depth = headingDepth[type];
     const id = node.id as string;
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     title && headingList.push({ id, depth, path, title, type });
   });
 

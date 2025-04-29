@@ -62,6 +62,7 @@ const CONTENT: Record<
 export const MediaPlaceholderElement = withHOC(
   PlaceholderProvider,
   withRef<typeof PlateElement>(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ({ children, className, nodeProps, ...props }, ref) => {
       const editor = props.editor;
       const element = props.element as TPlaceholderElement;
@@ -97,7 +98,9 @@ export const MediaPlaceholderElement = withHOC(
 
           replaceCurrentPlaceholder(firstFile);
 
-          restFiles.length > 0 && (editor as any).tf.insert.media(restFiles);
+          if (restFiles.length > 0) {
+            (editor as any).tf.insert.media(restFiles);
+          }
         },
       });
 

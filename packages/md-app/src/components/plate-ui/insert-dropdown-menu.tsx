@@ -6,52 +6,52 @@ import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
-import { DatePlugin } from '@udecode/plate-date/react';
-import { ExcalidrawPlugin } from '@udecode/plate-excalidraw/react';
+// import { DatePlugin } from '@udecode/plate-date/react';
+// import { ExcalidrawPlugin } from '@udecode/plate-excalidraw/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
-import { TocPlugin } from '@udecode/plate-heading/react';
+// import { TocPlugin } from '@udecode/plate-heading/react';
 import { HorizontalRulePlugin } from '@udecode/plate-horizontal-rule/react';
 import { INDENT_LIST_KEYS, ListStyleType } from '@udecode/plate-indent-list';
-import { LinkPlugin } from '@udecode/plate-link/react';
-import {
-  EquationPlugin,
-  InlineEquationPlugin,
-} from '@udecode/plate-math/react';
-import { ImagePlugin, MediaEmbedPlugin } from '@udecode/plate-media/react';
-import { TablePlugin } from '@udecode/plate-table/react';
-import { TogglePlugin } from '@udecode/plate-toggle/react';
+// import { LinkPlugin } from '@udecode/plate-link/react';
+// import {
+//   EquationPlugin,
+//   InlineEquationPlugin,
+// } from '@udecode/plate-math/react';
+// import { ImagePlugin, MediaEmbedPlugin } from '@udecode/plate-media/react';
+// import { TablePlugin } from '@udecode/plate-table/react';
+// import { TogglePlugin } from '@udecode/plate-toggle/react';
 import {
   type PlateEditor,
   ParagraphPlugin,
   useEditorRef,
 } from '@udecode/plate/react';
 import {
-  CalendarIcon,
-  ChevronRightIcon,
-  Columns3Icon,
+  // CalendarIcon,
+  // ChevronRightIcon,
+  // Columns3Icon,
   FileCodeIcon,
-  FilmIcon,
+  // FilmIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
-  ImageIcon,
-  Link2Icon,
+  // ImageIcon,
+  // Link2Icon,
   ListIcon,
   ListOrderedIcon,
   MinusIcon,
-  PenToolIcon,
+  // PenToolIcon,
   PilcrowIcon,
   PlusIcon,
   QuoteIcon,
-  RadicalIcon,
+  // RadicalIcon,
   SquareIcon,
-  TableIcon,
-  TableOfContentsIcon,
+  // TableIcon,
+  // TableOfContentsIcon,
 } from 'lucide-react';
 
 import {
   insertBlock,
-  insertInlineElement,
+  // insertInlineElement,
 } from '@/components/editor/transforms';
 
 import {

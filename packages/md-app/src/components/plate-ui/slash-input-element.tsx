@@ -6,23 +6,23 @@ import { withRef } from '@udecode/cn';
 import { AIChatPlugin } from '@udecode/plate-ai/react';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
-import { DatePlugin } from '@udecode/plate-date/react';
+// import { DatePlugin } from '@udecode/plate-date/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
-import { TocPlugin } from '@udecode/plate-heading/react';
+// import { TocPlugin } from '@udecode/plate-heading/react';
 import { INDENT_LIST_KEYS, ListStyleType } from '@udecode/plate-indent-list';
-import {
-  EquationPlugin,
-  InlineEquationPlugin,
-} from '@udecode/plate-math/react';
-import { TablePlugin } from '@udecode/plate-table/react';
-import { TogglePlugin } from '@udecode/plate-toggle/react';
+// import {
+//   EquationPlugin,
+//   InlineEquationPlugin,
+// } from '@udecode/plate-math/react';
+// import { TablePlugin } from '@udecode/plate-table/react';
+// import { TogglePlugin } from '@udecode/plate-toggle/react';
 import { type PlateEditor, ParagraphPlugin } from '@udecode/plate/react';
 import { PlateElement } from '@udecode/plate/react';
 import {
-  CalendarIcon,
-  ChevronRightIcon,
+  // CalendarIcon,
+  // ChevronRightIcon,
   Code2,
-  Columns3Icon,
+  // Columns3Icon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -30,16 +30,16 @@ import {
   ListOrdered,
   PilcrowIcon,
   Quote,
-  RadicalIcon,
+  // RadicalIcon,
   SparklesIcon,
   Square,
-  Table,
-  TableOfContentsIcon,
+  // Table,
+  // TableOfContentsIcon,
 } from 'lucide-react';
 
 import {
   insertBlock,
-  insertInlineElement,
+  // insertInlineElement,
 } from '@/components/editor/transforms';
 
 import {

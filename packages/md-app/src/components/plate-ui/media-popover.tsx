@@ -49,7 +49,6 @@ export function MediaPopover({ children, plugin }: MediaPopoverProps) {
     if (!isOpen && isEditing) {
       FloatingMediaStore.set('isEditing', false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const element = useElement();

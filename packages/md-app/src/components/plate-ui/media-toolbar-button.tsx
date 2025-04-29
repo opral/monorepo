@@ -83,7 +83,7 @@ const MEDIA_CONFIG: Record<
 };
 
 export function MediaToolbarButton({
-  children,
+  // children,
   nodeType,
   ...props
 }: DropdownMenuProps & { nodeType: string }) {

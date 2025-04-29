@@ -23,7 +23,10 @@ import { ExtendedMarkdownPlugin } from '../editor/plugins/markdown/markdown-plug
 
 type ImportType = 'html' | 'markdown';
 
-export function ImportToolbarButton({ children, ...props }: DropdownMenuProps) {
+export function ImportToolbarButton({
+  // children,
+  ...props
+}: DropdownMenuProps) {
   const editor = useEditorRef();
   const openState = useOpenState();
 

@@ -1,10 +1,10 @@
 import { createPlatePlugin } from "@udecode/plate-core/react";
 import { PlateLeaf, PlateLeafProps } from "@udecode/plate/react";
-import { textAlign } from "html2canvas/dist/types/css/property-descriptors/text-align";
+// import { textAlign } from "html2canvas/dist/types/css/property-descriptors/text-align";
 
 export const SanitizedElementLeaf = ({
 	className,
-	element,
+	// element,
 	...props
 }: PlateLeafProps) => {
 	const singleElRegex =

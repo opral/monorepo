@@ -51,14 +51,14 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
     [editor]
   );
 
-  const handleAlign = useCallback(
-    (align: 'center' | 'left' | 'right') => {
-      editor
-        .getTransforms(BlockSelectionPlugin)
-        .blockSelection.setNodes({ align });
-    },
-    [editor]
-  );
+  // const handleAlign = useCallback(
+  //   (align: 'center' | 'left' | 'right') => {
+  //     editor
+  //       .getTransforms(BlockSelectionPlugin)
+  //       .blockSelection.setNodes({ align });
+  //   },
+  //   [editor]
+  // );
 
   if (isTouch) {
     return children;

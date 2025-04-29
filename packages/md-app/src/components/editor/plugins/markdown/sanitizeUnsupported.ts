@@ -1,4 +1,4 @@
-import { image } from "html2canvas/dist/types/css/types/image";
+// import { image } from "html2canvas/dist/types/css/types/image";
 
 type TreeNode = {
 	type: string;

@@ -12,7 +12,6 @@ import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import { activeFileAtom, getChangeDiffs, getThreads } from "@/state-active-file.ts";
 import { ChevronDown } from "lucide-react";
-import DiscussionPreview from "./DiscussionPreview.tsx";
 
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {

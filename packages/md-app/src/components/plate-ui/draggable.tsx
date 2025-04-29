@@ -112,7 +112,8 @@ export const Draggable = withRef<'div', PlateRenderElementProps>(
         className={cn(
           'relative',
           isDragging && 'opacity-50',
-          STRUCTURAL_TYPES.includes(element.type) ? 'group/structural' : 'group'
+          STRUCTURAL_TYPES.includes(element.type) ? 'group/structural' : 'group',
+          className
         )}
       >
         {!isInTable && (

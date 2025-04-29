@@ -1,13 +1,13 @@
 
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 
 import type * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 
 import { PopoverAnchor } from '@radix-ui/react-popover';
 import { cn, withRef } from '@udecode/cn';
 import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
-import { type TTableElement, setCellBackground } from '@udecode/plate-table';
+import { type TTableElement } from '@udecode/plate-table';
 import {
   TablePlugin,
   TableProvider,
@@ -32,25 +32,25 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
-  CombineIcon,
-  EraserIcon,
-  Grid2X2Icon,
-  PaintBucketIcon,
-  SquareSplitHorizontalIcon,
+  // CombineIcon,
+  // EraserIcon,
+  // Grid2X2Icon,
+  // PaintBucketIcon,
+  // SquareSplitHorizontalIcon,
   Trash2Icon,
   XIcon,
 } from 'lucide-react';
 
-import { DEFAULT_COLORS } from './color-constants';
-import { ColorDropdownMenuItems } from './color-dropdown-menu-items';
+// import { DEFAULT_COLORS } from './color-constants';
+// import { ColorDropdownMenuItems } from './color-dropdown-menu-items';
 import {
-  DropdownMenu,
+  // DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuTrigger,
+  // DropdownMenuItem,
+  // DropdownMenuPortal,
+  // DropdownMenuTrigger,
 } from './dropdown-menu';
 import { Popover, PopoverContent } from './popover';
 import {
@@ -330,54 +330,54 @@ export const TableBordersDropdownMenuContent = withRef<
   );
 });
 
-type ColorDropdownMenuProps = {
-  children: React.ReactNode;
-  tooltip: string;
-};
+// type ColorDropdownMenuProps = {
+//   children: React.ReactNode;
+//   tooltip: string;
+// };
 
-function ColorDropdownMenu({ children, tooltip }: ColorDropdownMenuProps) {
-  const [open, setOpen] = useState(false);
+// function ColorDropdownMenu({ children, tooltip }: ColorDropdownMenuProps) {
+//   const [open, setOpen] = useState(false);
 
-  const editor = useEditorRef();
-  const selectedCells = usePluginOption(TablePlugin, 'selectedCells');
+//   const editor = useEditorRef();
+//   const selectedCells = usePluginOption(TablePlugin, 'selectedCells');
 
-  const onUpdateColor = useCallback(
-    (color: string) => {
-      setOpen(false);
-      setCellBackground(editor, { color, selectedCells: selectedCells ?? [] });
-    },
-    [selectedCells, editor]
-  );
+//   const onUpdateColor = useCallback(
+//     (color: string) => {
+//       setOpen(false);
+//       setCellBackground(editor, { color, selectedCells: selectedCells ?? [] });
+//     },
+//     [selectedCells, editor]
+//   );
 
-  const onClearColor = useCallback(() => {
-    setOpen(false);
-    setCellBackground(editor, {
-      color: null,
-      selectedCells: selectedCells ?? [],
-    });
-  }, [selectedCells, editor]);
+//   const onClearColor = useCallback(() => {
+//     setOpen(false);
+//     setCellBackground(editor, {
+//       color: null,
+//       selectedCells: selectedCells ?? [],
+//     });
+//   }, [selectedCells, editor]);
 
-  return (
-    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton tooltip={tooltip}>{children}</ToolbarButton>
-      </DropdownMenuTrigger>
+//   return (
+//     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+//       <DropdownMenuTrigger asChild>
+//         <ToolbarButton tooltip={tooltip}>{children}</ToolbarButton>
+//       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start">
-        <DropdownMenuGroup label="Colors">
-          <ColorDropdownMenuItems
-            className="px-2"
-            colors={DEFAULT_COLORS}
-            updateColor={onUpdateColor}
-          />
-        </DropdownMenuGroup>
-        <DropdownMenuGroup>
-          <DropdownMenuItem className="p-2" onClick={onClearColor}>
-            <EraserIcon />
-            <span>Clear</span>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+//       <DropdownMenuContent align="start">
+//         <DropdownMenuGroup label="Colors">
+//           <ColorDropdownMenuItems
+//             className="px-2"
+//             colors={DEFAULT_COLORS}
+//             updateColor={onUpdateColor}
+//           />
+//         </DropdownMenuGroup>
+//         <DropdownMenuGroup>
+//           <DropdownMenuItem className="p-2" onClick={onClearColor}>
+//             <EraserIcon />
+//             <span>Clear</span>
+//           </DropdownMenuItem>
+//         </DropdownMenuGroup>
+//       </DropdownMenuContent>
+//     </DropdownMenu>
+//   );
+// }
