@@ -8,4 +8,4 @@
 
 > **Change** = `Selectable`\<`ChangeTable`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:65](https://github.com/opral/monorepo/blob/95d464500b14a3c0aabc535935d800ebcc86d1ad/packages/lix-sdk/src/database/schema.ts#L65)
+Defined in: [packages/lix-sdk/src/database/schema.ts:69](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/database/schema.ts#L69)
