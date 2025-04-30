@@ -22,7 +22,7 @@ export function initDb(args: {
 }): Kysely<LixDatabaseSchema> {
 	initFunctions({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({
-		log: ["error", "query"],
+		// log: ["error", "query"],
 		dialect: createDialect({
 			database: args.sqlite,
 		}),
