@@ -59,7 +59,11 @@ export type KeyValueTable = {
 	skip_change_control: Generated<boolean>;
 };
 
-type PredefinedKeys = "lix_id" | "lix_server_url" | "lix_sync";
+type PredefinedKeys =
+	| "lix_id"
+	| "lix_server_url"
+	| "lix_sync"
+	| "lix_log_levels";
 // The string & {} ensures TypeScript recognizes KeyValueKeys
 // as a superset of string, preventing conflicts when using other string values.
 type KeyType = string & {};

@@ -22,6 +22,7 @@ import type {
 } from "../thread/database-schema.js";
 import type { LixFileTable } from "../file/database-schema.js";
 import type { SnapshotTable } from "../snapshot/database-schema.js";
+import type { LogTable } from "../log/database-schema.js";
 
 export type LixDatabaseSchema = {
 	// account
@@ -60,6 +61,9 @@ export type LixDatabaseSchema = {
 	// version
 	version: VersionTable;
 	active_version: ActiveVersionTable;
+
+	// logging
+	log: LogTable;
 };
 
 export type Change = Selectable<ChangeTable>;
