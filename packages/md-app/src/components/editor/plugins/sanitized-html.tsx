@@ -4,7 +4,7 @@ import { PlateLeaf, PlateLeafProps } from "@udecode/plate/react";
 
 export const SanitizedElementLeaf = ({
 	className,
-	// element,
+	element,
 	...props
 }: PlateLeafProps) => {
 	const singleElRegex =
