@@ -1,5 +1,4 @@
 
-
 import {
   cn,
   createPrimitiveComponent,
@@ -42,7 +41,7 @@ export const CaptionTextarea = withCn(
   )
 );
 
-export const CaptionButton = createPrimitiveComponent(Button)({
+export const CaptionButton: any = createPrimitiveComponent(Button)({
   propsHook: useCaptionButton,
   stateHook: useCaptionButtonState,
 });

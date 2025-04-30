@@ -5,7 +5,7 @@ import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 import { BlockSelection } from '@/components/plate-ui/block-selection';
 import { ExtendedMarkdownPlugin } from "./markdown/markdown-plugin";
 
-export const blockSelectionPlugins = [
+export const blockSelectionPlugins: any = [
   BlockSelectionPlugin.configure(({ editor }) => ({
     options: {
       enableContextMenu: true,
@@ -45,7 +45,7 @@ export const blockSelectionPlugins = [
   })),
 ] as const;
 
-export const blockSelectionReadOnlyPlugin = BlockSelectionPlugin.configure({
+export const blockSelectionReadOnlyPlugin: any = BlockSelectionPlugin.configure({
   api: {},
   extendEditor: null,
   handlers: {},
