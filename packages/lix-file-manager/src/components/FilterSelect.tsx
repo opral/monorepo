@@ -5,7 +5,8 @@ import { Button } from "./ui/button.tsx";
 import { selectedChangeIdsAtom } from "@/state-active-file.ts";
 import { Checkbox } from "./ui/checkbox.tsx";
 import { lixAtom } from "@/state.ts";
-import { createChangeSet, createDiscussion } from "@lix-js/sdk";
+import { createThread } from "@lix-js/sdk";
+import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover.tsx";
 import { FormField, FormControl, FormItem, Form } from "./ui/form.tsx";
 import { FormProvider, useForm } from "react-hook-form";
@@ -40,23 +41,9 @@ const FilterSelect = () => {
   const handleAddDiscussion = async () => {
     const resolve = await lix.db.transaction().execute(
       async (trx) => {
-        const changeSet = await createChangeSet({
+        return await createThread({
 					lix: { ...lix, db: trx },
-					// TODO: get actual changes
-					elements: selectedChangeIds.map((id) => {
-						return {
-							file_id: id,
-							entity_id: id,
-							schema_key: id,
-							change_id: id,
-						};
-					}),
-				});
-
-        return await createDiscussion({
-					lix: { ...lix, db: trx },
-					changeSet,
-					firstComment: { content: discussionValue },
+          comments: [{ body: fromPlainText(discussionValue) }],
 				});
       }
     );

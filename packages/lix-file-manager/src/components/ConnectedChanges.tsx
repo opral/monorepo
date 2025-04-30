@@ -3,8 +3,12 @@ import IconChevron from "./icons/IconChevron.tsx";
 import { useAtom } from "jotai/react";
 import { Button } from "./ui/button.tsx";
 import { clsx } from "clsx";
-import { activeVersionAtom, threadSearchParamsAtom, lixAtom } from "@/state.ts";
-import { activeFileAtom, getChanges } from "@/state-active-file.ts";
+import {
+	// activeVersionAtom,
+	threadSearchParamsAtom,
+	lixAtom
+} from "@/state.ts";
+// import { activeFileAtom, getChangeDiffs } from "@/state-active-file.ts";
 import { UiDiffComponentProps } from "@lix-js/sdk";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
 
@@ -12,8 +16,8 @@ const ConnectedChanges = () => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
 	const [threadSearchParams] = useAtom(threadSearchParamsAtom);
 	const [lix] = useAtom(lixAtom);
-	const [activeVersion] = useAtom(activeVersionAtom);
-	const [activeFile] = useAtom(activeFileAtom);
+	// const [activeVersion] = useAtom(activeVersionAtom);
+	// const [activeFile] = useAtom(activeFileAtom);
 	const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
 
 	useEffect(() => {
@@ -33,13 +37,15 @@ const ConnectedChanges = () => {
 	const getThreadChanges = async () => {
 		const discussionChangeSet = await lix.db
 			.selectFrom("thread")
+			.innerJoin("change_set", "change_set.id", "thread.id")
 			.where("thread.id", "=", threadSearchParams)
-			.select("change_set_id")
+			.select(["change_set.id"])
 			.executeTakeFirstOrThrow();
 
 		if (!discussionChangeSet) return [];
 
-		const changes = await getChanges(lix, discussionChangeSet.change_set_id, activeVersion!, activeFile);
+		const changes = [] as UiDiffComponentProps["diffs"];
+		// await getChangeDiffs(lix, discussionChangeSet.id, activeVersion!, activeFile);
 		setDiffs(changes);
 		return changes;
 	};
