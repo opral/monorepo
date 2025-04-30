@@ -3,6 +3,7 @@ import { PlateLeaf, PlateLeafProps } from "@udecode/plate/react";
 
 export const FrontMatterElement = ({
 	className,
+	// @ts-expect-error -- the type seem to wrong
 	element,
 	...props
 }: PlateLeafProps) => {

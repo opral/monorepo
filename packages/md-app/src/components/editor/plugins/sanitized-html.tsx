@@ -4,12 +4,15 @@ import { PlateLeaf, PlateLeafProps } from "@udecode/plate/react";
 
 export const SanitizedElementLeaf = ({
 	className,
+	// @ts-expect-error -- the type seem to wrong
 	element,
 	...props
 }: PlateLeafProps) => {
+
 	const singleElRegex =
 		/<\s*\/?\s*([a-zA-Z0-9]+)((?:\s+[a-zA-Z-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*\/?\s*>/i;
 	const attributeRegex = /([a-zA-Z-]+)\s*=\s*(['"])(.*?)\2/g;
+
 
 	const singleElMatch = singleElRegex.exec(element.value);
 

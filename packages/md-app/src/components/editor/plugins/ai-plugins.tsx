@@ -92,9 +92,10 @@ export const PROMPT_TEMPLATES = {
   userSelecting,
 };
 
+
 export const aiPlugins = [
   cursorOverlayPlugin,
-  ExtendedMarkdownPlugin.configure({ options: { indentList: true } }),
+  ExtendedMarkdownPlugin.configure({}),
   AIPlugin,
   AIChatPlugin.configure({
     options: {

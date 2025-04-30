@@ -14,6 +14,7 @@ import { TText } from "@udecode/plate";
 
 export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 	options: {
+		
 		disallowedNodes: [SuggestionPlugin.key],
 		remarkPlugins: [
 			remarkGfm as any,
