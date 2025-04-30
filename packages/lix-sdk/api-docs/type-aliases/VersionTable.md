@@ -8,7 +8,7 @@
 
 > **VersionTable** = `object`
 
-Defined in: [packages/lix-sdk/src/version/database-schema.ts:217](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/version/database-schema.ts#L217)
+Defined in: [packages/lix-sdk/src/version/database-schema.ts:217](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/version/database-schema.ts#L217)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/version/database-schema.ts:217](https://github
 
 > **change\_set\_id**: `string`
 
-Defined in: [packages/lix-sdk/src/version/database-schema.ts:220](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/version/database-schema.ts#L220)
+Defined in: [packages/lix-sdk/src/version/database-schema.ts:220](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/version/database-schema.ts#L220)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/lix-sdk/src/version/database-schema.ts:220](https://github
 
 > **id**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/version/database-schema.ts:218](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/version/database-schema.ts#L218)
+Defined in: [packages/lix-sdk/src/version/database-schema.ts:218](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/version/database-schema.ts#L218)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/lix-sdk/src/version/database-schema.ts:218](https://github
 
 > **name**: `string` \| `null`
 
-Defined in: [packages/lix-sdk/src/version/database-schema.ts:219](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/version/database-schema.ts#L219)
+Defined in: [packages/lix-sdk/src/version/database-schema.ts:219](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/version/database-schema.ts#L219)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/lix-sdk/src/version/database-schema.ts:219](https://github
 
 > **working\_change\_set\_id**: `string`
 
-Defined in: [packages/lix-sdk/src/version/database-schema.ts:221](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/version/database-schema.ts#L221)
+Defined in: [packages/lix-sdk/src/version/database-schema.ts:221](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/version/database-schema.ts#L221)

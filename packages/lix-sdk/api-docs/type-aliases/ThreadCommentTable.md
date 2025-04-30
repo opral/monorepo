@@ -8,7 +8,7 @@
 
 > **ThreadCommentTable** = `object`
 
-Defined in: [packages/lix-sdk/src/thread/database-schema.ts:80](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/thread/database-schema.ts#L80)
+Defined in: [packages/lix-sdk/src/thread/database-schema.ts:80](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/thread/database-schema.ts#L80)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/thread/database-schema.ts:80](https://github.c
 
 > **body**: `ZettelDoc`
 
-Defined in: [packages/lix-sdk/src/thread/database-schema.ts:84](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/thread/database-schema.ts#L84)
+Defined in: [packages/lix-sdk/src/thread/database-schema.ts:84](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/thread/database-schema.ts#L84)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/lix-sdk/src/thread/database-schema.ts:84](https://github.c
 
 > **id**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/thread/database-schema.ts:81](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/thread/database-schema.ts#L81)
+Defined in: [packages/lix-sdk/src/thread/database-schema.ts:81](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/thread/database-schema.ts#L81)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/lix-sdk/src/thread/database-schema.ts:81](https://github.c
 
 > **parent\_id**: `string` \| `null`
 
-Defined in: [packages/lix-sdk/src/thread/database-schema.ts:83](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/thread/database-schema.ts#L83)
+Defined in: [packages/lix-sdk/src/thread/database-schema.ts:83](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/thread/database-schema.ts#L83)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/lix-sdk/src/thread/database-schema.ts:83](https://github.c
 
 > **thread\_id**: `string`
 
-Defined in: [packages/lix-sdk/src/thread/database-schema.ts:82](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/thread/database-schema.ts#L82)
+Defined in: [packages/lix-sdk/src/thread/database-schema.ts:82](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/thread/database-schema.ts#L82)

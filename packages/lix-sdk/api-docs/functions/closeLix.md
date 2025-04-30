@@ -8,7 +8,7 @@
 
 > **closeLix**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/lix/close-lix.ts:6](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/lix/close-lix.ts#L6)
+Defined in: [packages/lix-sdk/src/lix/close-lix.ts:6](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/lix/close-lix.ts#L6)
 
 Closes the lix.
 

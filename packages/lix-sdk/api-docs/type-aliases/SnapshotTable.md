@@ -8,7 +8,7 @@
 
 > **SnapshotTable** = `object`
 
-Defined in: [packages/lix-sdk/src/snapshot/database-schema.ts:45](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/snapshot/database-schema.ts#L45)
+Defined in: [packages/lix-sdk/src/snapshot/database-schema.ts:45](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/snapshot/database-schema.ts#L45)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/snapshot/database-schema.ts:45](https://github
 
 > **content**: `Record`\<`string`, `any`\> \| `null`
 
-Defined in: [packages/lix-sdk/src/snapshot/database-schema.ts:56](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/snapshot/database-schema.ts#L56)
+Defined in: [packages/lix-sdk/src/snapshot/database-schema.ts:56](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/snapshot/database-schema.ts#L56)
 
 The value of the change.
 
@@ -35,4 +35,4 @@ Lix interprets an undefined value as delete operation.
 
 > **id**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/snapshot/database-schema.ts:46](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/snapshot/database-schema.ts#L46)
+Defined in: [packages/lix-sdk/src/snapshot/database-schema.ts:46](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/snapshot/database-schema.ts#L46)

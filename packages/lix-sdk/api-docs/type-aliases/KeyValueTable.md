@@ -8,7 +8,7 @@
 
 > **KeyValueTable** = `object`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:30](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/key-value/database-schema.ts#L30)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:30](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/key-value/database-schema.ts#L30)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:30](https://githu
 
 > **key**: `KeyValueKeys`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:39](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/key-value/database-schema.ts#L39)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:39](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/key-value/database-schema.ts#L39)
 
 The key of the key-value pair.
 
@@ -34,7 +34,7 @@ Lix prefixes its keys with "lix-" to avoid conflicts with user-defined keys.
 
 > **skip\_change\_control**: `Generated`\<`boolean`\>
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:59](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/key-value/database-schema.ts#L59)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:59](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/key-value/database-schema.ts#L59)
 
 If `true`, the key-value pair is not tracked with own change control.
 
@@ -51,9 +51,9 @@ false
 
 ### value
 
-> **value**: `string`
+> **value**: `JSON`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:50](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/key-value/database-schema.ts#L50)
+Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:50](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/key-value/database-schema.ts#L50)
 
 The value of the key-value pair.
 
