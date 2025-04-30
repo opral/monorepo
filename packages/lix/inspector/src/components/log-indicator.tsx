@@ -5,7 +5,10 @@ export type LogIndicatorProps = {
   errorCount?: number;
   warningCount?: number;
   otherCount?: number;
-  onClick?: () => void;
+  /**
+   * Called when a log indicator is clicked. Receives the log level: 'error', 'warning', or 'other'.
+   */
+  onClick?: (level: "error" | "warning" | "other") => void;
 };
 
 /**
@@ -49,8 +52,13 @@ export function LogIndicator({
 
   return (
     <div
-      style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 8, cursor: onClick ? "pointer" : "default", height: 20 }}
-      onClick={onClick}
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        height: 20,
+      }}
       data-testid="log-indicator"
     >
       {icons.map((item) => (
@@ -73,6 +81,14 @@ export function LogIndicator({
             boxShadow: "none",
           }}
           aria-label={item.key + " logs"}
+          onClick={
+            item.count > 0 && onClick
+              ? (e) => {
+                  e.stopPropagation();
+                  onClick(item.key as "error" | "warning" | "other");
+                }
+              : undefined
+          }
         >
           {item.icon}
           {item.count > 0 && (

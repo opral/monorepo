@@ -394,8 +394,23 @@ export default function App() {
               <LogIndicator
                 errorCount={logCounts?.error ?? 0}
                 warningCount={logCounts?.warning ?? 0}
-                otherCount={(logCounts?.info ?? 0) + (logCounts?.debug ?? 0) + (logCounts?.unknown ?? 0)}
-                onClick={() => setActiveContent("data-explorer")}
+                otherCount={
+                  (logCounts?.info ?? 0) +
+                  (logCounts?.debug ?? 0) +
+                  (logCounts?.unknown ?? 0)
+                }
+                onClick={(level) => {
+                  setActiveContent("data-explorer");
+                  // Only set filter for error or warning; show all logs for 'other'
+                  if (level === "error" || level === "warning") {
+                    window.localStorage.setItem(
+                      "lix-inspector-log-filter",
+                      level
+                    );
+                  } else {
+                    window.localStorage.removeItem("lix-inspector-log-filter");
+                  }
+                }}
               />
               {/* Freeze/Unfreeze Button with Tooltip */}
               <div className="tooltip tooltip-bottom">
