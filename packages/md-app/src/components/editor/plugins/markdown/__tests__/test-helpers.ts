@@ -1,5 +1,5 @@
 import { PlateEditor, createPlateEditor } from "@udecode/plate/react";
-import { Descendant } from "@udecode/plate";
+import { Descendant, Value } from "@udecode/plate";
 import { ExtendedMarkdownPlugin } from "../markdown-plugin";
 
 /**
@@ -45,12 +45,9 @@ export function deserializeMarkdown(
 /**
  * Serializes editor value to markdown
  */
-export function serializeToMarkdown(
-	editor: PlateEditor,
-	value: Descendant[]
-): string {
+export function serializeToMarkdown(editor: PlateEditor, value: Value): string {
 	editor.children = value;
-	return editor.getApi(ExtendedMarkdownPlugin).markdown.serialize(value);
+	return editor.getApi(ExtendedMarkdownPlugin).markdown.serialize({ value });
 }
 
 /**

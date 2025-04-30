@@ -27,7 +27,9 @@ export async function findLixFilesInOpfs(
   for await (const [name, handle] of rootHandle) {
     if (handle.kind === "file" && name.endsWith(".lix")) {
       try {
-        const file = await handle.getFile();
+        // Type assertion for FileSystemFileHandle
+        const fileHandle = handle as unknown as FileSystemFileHandle;
+        const file = await fileHandle.getFile();
         const tempBlob = new Blob([await file.arrayBuffer()]);
         
         // Open the Lix to check its ID

@@ -16,7 +16,7 @@ export const blockSelectionPlugins = [
         );
       },
     },
-    onKeyDownSelecting: (event) => {
+    onKeyDownSelecting: (event: KeyboardEvent) => {
       // Detect Meta + C (Cmd + C on macOS, Ctrl + C elsewhere)
       const isCopyShortcut =
         (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "c";
