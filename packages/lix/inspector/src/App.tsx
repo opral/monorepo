@@ -14,6 +14,8 @@ import {
 import DataExplorer from "./pages/data-explorer/index";
 import Graph from "./pages/graph/index";
 import { FloatingWindow } from "./components/floating-window";
+import { LogIndicator } from "./components/log-indicator";
+import { useQuery } from "./hooks/use-query";
 
 // Define the types of content that can be displayed
 type Pages = "data-explorer" | "graph";
@@ -89,6 +91,33 @@ export default function App() {
   const transactionRef = useRef<any>(null);
   const [windowStates, setWindowStates] = useState<Record<Pages, WindowState>>(
     {} as Record<Pages, WindowState>
+  );
+
+  // Log counts for indicator using useQuery
+  const [logCounts] = useQuery(
+    async (lix) => {
+      if (!lix?.db)
+        return { error: 0, warning: 0, info: 0, debug: 0, unknown: 0 };
+      const levels = ["error", "warning", "info", "debug"];
+      const counts: any = {};
+      for (const level of levels) {
+        const res = await lix.db
+          .selectFrom("log")
+          .select(({ fn }) => fn.countAll().as("count"))
+          .where("level", "=", level)
+          .executeTakeFirst();
+        counts[level] = Number(res?.count ?? 0);
+      }
+      // Unknown levels: .where('level', 'not in', [...])
+      const unknownRes = await lix.db
+        .selectFrom("log")
+        .select(({ fn }) => fn.countAll().as("count"))
+        .where("level", "not in", levels)
+        .executeTakeFirst();
+      counts.unknown = Number(unknownRes?.count ?? 0);
+      return counts;
+    },
+    [lix]
   );
 
   // Update body padding when the inspector height changes
@@ -361,6 +390,13 @@ export default function App() {
             </div>
 
             <div className="ml-auto flex items-center gap-2">
+              {/* Log Indicator */}
+              <LogIndicator
+                errorCount={logCounts?.error ?? 0}
+                warningCount={logCounts?.warning ?? 0}
+                otherCount={(logCounts?.info ?? 0) + (logCounts?.debug ?? 0) + (logCounts?.unknown ?? 0)}
+                onClick={() => setActiveContent("data-explorer")}
+              />
               {/* Freeze/Unfreeze Button with Tooltip */}
               <div className="tooltip tooltip-bottom">
                 <div className="tooltip-content">
