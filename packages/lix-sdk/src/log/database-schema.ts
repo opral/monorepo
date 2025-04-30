@@ -11,8 +11,13 @@ export function applyLogDatabaseSchema(
 		level TEXT,
 		created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
 	) STRICT;
+
+	-- Garbage collect old logs (can be more sophisticated in the future)
+	DELETE FROM log WHERE created_at < datetime('now', '-1 day');
 `;
 }
+
+
 
 export type Log = Selectable<LogTable>;
 export type NewLog = Insertable<LogTable>;
