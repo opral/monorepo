@@ -1,25 +1,25 @@
 import { describe, it, expect } from "vitest";
 import { createTestEditor, serializeToMarkdown, normalizeMarkdown } from "./test-helpers";
-import { Descendant } from "@udecode/plate";
+import { Value } from "@udecode/plate";
 
 describe("Markdown Plugin Serialization Tests", () => {
   const editor = createTestEditor();
 
   it("should serialize headings", () => {
-    const editorValue: Descendant[] = [
-      {
-        type: "h1",
-        children: [{ text: "Heading 1" }],
-      },
-      {
-        type: "h2",
-        children: [{ text: "Heading 2" }],
-      },
-      {
-        type: "h3",
-        children: [{ text: "Heading 3" }],
-      },
-    ];
+    const editorValue: Value = [
+			{
+				type: "h1",
+				children: [{ text: "Heading 1" }],
+			},
+			{
+				type: "h2",
+				children: [{ text: "Heading 2" }],
+			},
+			{
+				type: "h3",
+				children: [{ text: "Heading 3" }],
+			},
+		];
 
     const result = serializeToMarkdown(editor, editorValue);
     const expected = "# Heading 1\n\n## Heading 2\n\n### Heading 3";
@@ -28,7 +28,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize paragraphs", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "p",
         children: [{ text: "This is paragraph 1." }],
@@ -46,7 +46,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize text formatting", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "p",
         children: [
@@ -68,7 +68,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize links", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "p",
         children: [
@@ -90,7 +90,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize blockquotes", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "blockquote",
         children: [{ text: "This is a blockquote." }],
@@ -104,7 +104,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize unordered lists", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "ul",
         children: [
@@ -137,7 +137,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize ordered lists", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "ol",
         children: [
@@ -170,7 +170,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize code blocks", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "code_block",
         lang: "javascript",
@@ -194,7 +194,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize inline code", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "p",
         children: [
@@ -212,7 +212,7 @@ describe("Markdown Plugin Serialization Tests", () => {
   });
 
   it("should serialize horizontal rules", () => {
-    const editorValue: Descendant[] = [
+    const editorValue: Value = [
       {
         type: "p",
         children: [{ text: "Text before rule" }],
