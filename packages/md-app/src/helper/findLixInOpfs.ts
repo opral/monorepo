@@ -17,51 +17,51 @@ export interface LixFileInfo {
  * @returns Promise resolving to an array of LixFileInfo objects
  */
 export async function findLixFilesInOpfs(
-  lixId?: string,
-  providePlugins: any[] = [txtPlugin]
+	lixId?: string,
+	providePlugins = [txtPlugin]
 ): Promise<LixFileInfo[]> {
-  const rootHandle = await getOriginPrivateDirectory();
-  const results: LixFileInfo[] = [];
-  
-  // Scan all .lix files in OPFS
-  for await (const [name, handle] of rootHandle) {
-    if (handle.kind === "file" && name.endsWith(".lix")) {
-      try {
-        // Type assertion for FileSystemFileHandle
-        const fileHandle = handle as unknown as FileSystemFileHandle;
-        const file = await fileHandle.getFile();
-        const tempBlob = new Blob([await file.arrayBuffer()]);
-        
-        // Open the Lix to check its ID
-        const tempLix = await openLixInMemory({ 
-          blob: tempBlob,
-          providePlugins
-        });
-        
-        const tempLixId = await tempLix.db
-          .selectFrom("key_value")
-          .where("key", "=", "lix_id")
-          .select("value")
-          .executeTakeFirst();
-        
-        // If no specific ID was requested, or if this file matches the requested ID
-        if (!lixId || tempLixId?.value === lixId) {
-          results.push({
+	const rootHandle = await getOriginPrivateDirectory();
+	const results: LixFileInfo[] = [];
+
+	// Scan all .lix files in OPFS
+	for await (const [name, handle] of rootHandle) {
+		if (handle.kind === "file" && name.endsWith(".lix")) {
+			try {
+				// Type assertion for FileSystemFileHandle
+				const fileHandle = handle as unknown as FileSystemFileHandle;
+				const file = await fileHandle.getFile();
+				const tempBlob = new Blob([await file.arrayBuffer()]);
+
+				// Open the Lix to check its ID
+				const tempLix = await openLixInMemory({
+					blob: tempBlob,
+					providePlugins,
+				});
+
+				const tempLixId = await tempLix.db
+					.selectFrom("key_value")
+					.where("key", "=", "lix_id")
+					.select("value")
+					.executeTakeFirst();
+
+				// If no specific ID was requested, or if this file matches the requested ID
+				if (!lixId || tempLixId?.value === lixId) {
+					results.push({
 						// @ts-expect-error - FileSystemFileHandle is not a standard type
 						handle,
 						name: name.replace(/\.lix$/, ""),
 						fullName: name,
 						id: tempLixId?.value || "",
 					});
-        }
-      } catch (e) {
-        console.error(`Error reading file ${name}:`, e);
-        // Skip if we can't read this file
-      }
-    }
-  }
-  
-  return results;
+				}
+			} catch (e) {
+				console.error(`Error reading file ${name}:`, e);
+				// Skip if we can't read this file
+			}
+		}
+	}
+
+	return results;
 }
 
 /**
@@ -72,11 +72,11 @@ export async function findLixFilesInOpfs(
  * @returns Promise resolving to a LixFileInfo object or undefined if not found
  */
 export async function findLixFileInOpfs(
-  lixId: string,
-  providePlugins: any[] = [txtPlugin]
+	lixId: string,
+	providePlugins = [txtPlugin]
 ): Promise<LixFileInfo | undefined> {
-  const files = await findLixFilesInOpfs(lixId, providePlugins);
-  return files.length > 0 ? files[0] : undefined;
+	const files = await findLixFilesInOpfs(lixId, providePlugins);
+	return files.length > 0 ? files[0] : undefined;
 }
 
 /**
