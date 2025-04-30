@@ -11,11 +11,11 @@ import {
 import dagre from "@dagrejs/dagre";
 import "@xyflow/react/dist/style.css";
 import { useMemo } from "react";
-import { Change, ChangeEdge, Snapshot } from "@lix-js/sdk";
+import { Change, ChangeSetEdge, Snapshot } from "@lix-js/sdk";
 
 export const ChangeGraph = (props: {
 	changes: Array<Change & { content: Snapshot["content"] }>;
-	edges: ChangeEdge[];
+	edges: ChangeSetEdge[];
 	highlightChanges: Array<Change>;
 }) => {
 	const dagreGraph = useMemo(
@@ -47,7 +47,7 @@ export const ChangeGraph = (props: {
 const layoutElements = (
 	dagreGraph: dagre.graphlib.Graph,
 	changes: Array<Change & { content: Snapshot["content"] }>,
-	edges: ChangeEdge[],
+	edges: ChangeSetEdge[],
 	highlightChanges: Array<Change>,
 	direction: "TB" | "LR" = "TB"
 ) => {

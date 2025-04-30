@@ -12,7 +12,7 @@ import {
 import Papa from "papaparse";
 import {
 	ChangeSet,
-	changeSetElementIsLeafOf,
+	// changeSetElementIsLeafOf,
 	changeSetHasLabel,
 	changeSetIsAncestorOf,
 	jsonArrayFrom,
@@ -100,7 +100,7 @@ export const activeCellChangesAtom = atom(async (get) => {
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
 	const cellEntityId = await get(activeCellEntityIdAtom);
-	const currentVersion = await get(currentVersionAtom);
+	// const currentVersion = await get(currentVersionAtom);
 	if (!cellEntityId || !activeFile) return [];
 	const changes = await lix.db
 		.selectFrom("change")
@@ -354,7 +354,7 @@ export const allChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentVersion = await get(currentVersionAtom);
+	// const currentVersion = await get(currentVersionAtom);
 
 	if (!activeFile) return [];
 	return await lix.db
@@ -377,7 +377,7 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentVersion = await get(currentVersionAtom);
+	// const currentVersion = await get(currentVersionAtom);
 
 	if (!activeFile) return [];
 
@@ -433,87 +433,88 @@ export const allEdgesAtom = atom(async (get) => {
 	if (!activeFile) return [];
 
 	return await lix.db
-		.selectFrom("change_edge")
-		.innerJoin("change", "change.id", "change_edge.parent_id")
+		.selectFrom("change_set_edge")
+		.innerJoin("change", "change.id", "change_set_edge.parent_id")
 		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_edge")
+		.selectAll("change_set_edge")
 		.execute();
 });
 
-export const changeConflictsAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	// const activeFile = await get(activeFileAtom);
-	const currentVersion = await get(currentVersionAtom);
+// Conflict resolution is not yet implemented
+// export const changeConflictsAtom = atom(async (get) => {
+// 	get(withPollingAtom);
+// 	const lix = await get(lixAtom);
+// 	// const activeFile = await get(activeFileAtom);
+// 	const currentVersion = await get(currentVersionAtom);
 
-	const changeConflictElements = await lix.db
-		.selectFrom("change_set_element")
-		.innerJoin(
-			"change_conflict",
-			"change_conflict.change_set_id",
-			"change_set_element.change_set_id"
-		)
-		.innerJoin("change", "change.id", "change_set_element.change_id")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("version_change", (join) =>
-			join
-				.onRef("version_change.change_id", "=", "change.id")
-				.on("version_change.version_id", "=", currentVersion.id)
-		)
-		// .where((eb) =>
-		// 	eb.or([
-		// 		eb("change.file_id", "=", activeFile.id),
-		// 		eb("change.file_id", "=", "null"),
-		// 	])
-		// )
-		// .where(changeConflictInVersion(currentVersion))
-		.selectAll("change_set_element")
-		.select([
-			"change_conflict.id as change_conflict_id",
-			"change_conflict.change_set_id as change_conflict_change_set_id",
-		])
-		.selectAll("change")
-		.select((eb) =>
-			eb
-				.case()
-				.when("version_change.change_id", "is not", null)
-				// using boolean still returns 0 or 1
-				// for typesafety, number is used
-				.then(1)
-				.else(0)
-				.end()
-				.as("is_current_version_change")
-		)
-		.select((eb) =>
-			eb
-				.case()
-				.when(
-					eb.exists(
-						eb
-							.selectFrom("version_change")
-							.whereRef("version_change.change_id", "=", "change.id")
-							.where("version_change.version_id", "=", currentVersion.id)
-					)
-				)
-				.then(1)
-				.else(0)
-				.end()
-				.as("is_in_current_version")
-		)
-		.select("snapshot.content")
-		.select("change_conflict.key as change_conflict_key")
-		.execute();
+// 	const changeConflictElements = await lix.db
+// 		.selectFrom("change_set_element")
+// 		.innerJoin(
+// 			"change_conflict",
+// 			"change_conflict.change_set_id",
+// 			"change_set_element.change_set_id"
+// 		)
+// 		.innerJoin("change", "change.id", "change_set_element.change_id")
+// 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+// 		.leftJoin("version_change", (join) =>
+// 			join
+// 				.onRef("version_change.change_id", "=", "change.id")
+// 				.on("version_change.version_id", "=", currentVersion.id)
+// 		)
+// 		// .where((eb) =>
+// 		// 	eb.or([
+// 		// 		eb("change.file_id", "=", activeFile.id),
+// 		// 		eb("change.file_id", "=", "null"),
+// 		// 	])
+// 		// )
+// 		// .where(changeConflictInVersion(currentVersion))
+// 		.selectAll("change_set_element")
+// 		.select([
+// 			"change_conflict.id as change_conflict_id",
+// 			"change_conflict.change_set_id as change_conflict_change_set_id",
+// 		])
+// 		.selectAll("change")
+// 		.select((eb) =>
+// 			eb
+// 				.case()
+// 				.when("version_change.change_id", "is not", null)
+// 				// using boolean still returns 0 or 1
+// 				// for typesafety, number is used
+// 				.then(1)
+// 				.else(0)
+// 				.end()
+// 				.as("is_current_version_change")
+// 		)
+// 		.select((eb) =>
+// 			eb
+// 				.case()
+// 				.when(
+// 					eb.exists(
+// 						eb
+// 							.selectFrom("version_change")
+// 							.whereRef("version_change.change_id", "=", "change.id")
+// 							.where("version_change.version_id", "=", currentVersion.id)
+// 					)
+// 				)
+// 				.then(1)
+// 				.else(0)
+// 				.end()
+// 				.as("is_in_current_version")
+// 		)
+// 		.select("snapshot.content")
+// 		.select("change_conflict.key as change_conflict_key")
+// 		.execute();
 
-	const groupedByConflictId: { [key: string]: typeof changeConflictElements } =
-		{};
+// 	const groupedByConflictId: { [key: string]: typeof changeConflictElements } =
+// 		{};
 
-	for (const element of changeConflictElements) {
-		const conflictId = element.change_conflict_id;
-		if (!groupedByConflictId[conflictId]) {
-			groupedByConflictId[conflictId] = [];
-		}
-		groupedByConflictId[conflictId].push(element);
-	}
+// 	for (const element of changeConflictElements) {
+// 		const conflictId = element.change_conflict_id;
+// 		if (!groupedByConflictId[conflictId]) {
+// 			groupedByConflictId[conflictId] = [];
+// 		}
+// 		groupedByConflictId[conflictId].push(element);
+// 	}
 
-	return groupedByConflictId;
-});
+// 	return groupedByConflictId;
+// });

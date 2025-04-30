@@ -44,7 +44,7 @@ export default function Component(props: {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
-		>({});
+	>({});
 	const [threads, setThreads] = useState<Thread[]>([]);
 
 	const [intermediateChanges, setIntermediateChanges] = useState<
@@ -230,6 +230,7 @@ const getChanges = async (
 	lix: Lix,
 	changeSetId: string,
 	fileId: string,
+	// @ts-expect-error - not used yet
 	currentVersion: Version,
 	previousChangeSetId?: string | undefined | null,
 ): Promise<
@@ -250,7 +251,7 @@ const getChanges = async (
 			"change_set_element",
 			"change_set_element.change_id",
 			"change.id"
-	)
+		)
 		.where("change.schema_key", "=", CellSchemaV1.key)
 		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change_set_element.change_set_id", "=", changeSetId)
