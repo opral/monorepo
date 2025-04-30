@@ -15,7 +15,6 @@ export const CodeBlockElement = withRef<typeof PlateElement>(
   ({ children, className, ...props }, ref) => {
     const { editor, element } = props;
 
-    const [renderView, setRenderView] = React.useState(false);
     return (
       <PlateElement
         ref={ref}
@@ -64,15 +63,6 @@ export const CodeBlockElement = withRef<typeof PlateElement>(
               className="size-6 gap-1 text-xs text-muted-foreground"
               value={() => NodeApi.string(element)}
             />
-            <Button
-              onClick={() => {
-                setRenderView(!renderView);
-              }}
-              
-            >
-              <span className="sr-only">{renderView ? "code" : "rendered"}</span>
-              {renderView ? "code" : "rendered"}
-            </Button>
           </div>
         </div>
       </PlateElement>

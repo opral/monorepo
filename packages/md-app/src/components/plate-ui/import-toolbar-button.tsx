@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -30,9 +29,6 @@ export function ImportToolbarButton({
   const editor = useEditorRef();
   const openState = useOpenState();
 
-  const [type, setType] = React.useState<ImportType>('html');
-  const accept = type === 'html' ? ['text/html'] : ['.md'];
-
   const getFileNodes = (text: string, type: ImportType) => {
     if (type === 'html') {
       const editorNode = getEditorDOMFromHtmlString(text);
@@ -43,18 +39,35 @@ export function ImportToolbarButton({
       return nodes;
     }
 
-    const nodes = editor.getApi(ExtendedMarkdownPlugin).markdown.deserialize(text);
+    if (type === 'markdown') {
+      return editor.getApi(ExtendedMarkdownPlugin).markdown.deserialize(text);
+    }
 
-    return nodes;
+    return [];
   };
 
-  const { openFilePicker } = useFilePicker({
-    accept,
+  const { openFilePicker: openMdFilePicker } = useFilePicker({
+    accept: [
+      '.md',
+      // '.mdx'
+    ],
     multiple: false,
     onFilesSelected: async ({ plainFiles }) => {
       const text = await plainFiles[0].text();
 
-      const nodes = getFileNodes(text, type);
+      const nodes = getFileNodes(text, 'markdown');
+
+      editor.tf.insertNodes(nodes);
+    },
+  });
+
+  const { openFilePicker: openHtmlFilePicker } = useFilePicker({
+    accept: ['text/html'],
+    multiple: false,
+    onFilesSelected: async ({ plainFiles }) => {
+      const text = await plainFiles[0].text();
+
+      const nodes = getFileNodes(text, 'html');
 
       editor.tf.insertNodes(nodes);
     },
@@ -72,8 +85,7 @@ export function ImportToolbarButton({
         <DropdownMenuGroup>
           <DropdownMenuItem
             onSelect={() => {
-              setType('html');
-              openFilePicker();
+              openHtmlFilePicker();
             }}
           >
             Import from HTML
@@ -81,8 +93,7 @@ export function ImportToolbarButton({
 
           <DropdownMenuItem
             onSelect={() => {
-              setType('markdown');
-              openFilePicker();
+              openMdFilePicker();
             }}
           >
             Import from Markdown

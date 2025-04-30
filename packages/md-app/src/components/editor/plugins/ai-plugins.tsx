@@ -1,9 +1,14 @@
 
 
 
-import { AIChatPlugin, AIPlugin } from '@udecode/plate-ai/react';
+import type { AIChatPluginConfig } from '@udecode/plate-ai/react';
 
+import { PathApi } from '@udecode/plate';
+import { streamInsertChunk, withAIBatch } from '@udecode/plate-ai';
+import { AIChatPlugin, AIPlugin, useChatChunk } from '@udecode/plate-ai/react';
+import { usePluginOption } from '@udecode/plate/react';
 
+import { AILoadingBar } from '@/components/plate-ui/ai-loading-bar';
 import { AIMenu } from '@/components/plate-ui/ai-menu';
 
 import { cursorOverlayPlugin } from './cursor-overlay-plugin';
@@ -27,7 +32,6 @@ const systemDefault = `\
 ${systemCommon}
 - <Block> is the current block of text the user is working on.
 - Ensure your output can seamlessly fit into the existing <Block> structure.
-- CRITICAL: Provide only a single block of text. DO NOT create multiple paragraphs or separate blocks.
 <Block>
 {block}
 </Block>
@@ -59,9 +63,7 @@ ${systemCommon}
 `;
 
 const userDefault = `<Reminder>
-CRITICAL: DO NOT use block formatting. You can only use inline formatting.
-CRITICAL: DO NOT start new lines or paragraphs.
-NEVER write <Block>.
+CRITICAL: NEVER write <Block>.
 </Reminder>
 {prompt}`;
 
@@ -111,6 +113,64 @@ export const aiPlugins = [
             : PROMPT_TEMPLATES.systemDefault;
       },
     },
-    render: { afterEditable: () => <AIMenu /> },
+    render: {
+      afterContainer: () => <AILoadingBar />,
+      afterEditable: () => <AIMenu />,
+    },
+  }).extend({
+    useHooks: ({ editor, getOption,
+      // setOption
+    }) => {
+      const mode = usePluginOption(
+        { key: 'aiChat' } as AIChatPluginConfig,
+        'mode'
+      );
+
+      useChatChunk({
+        onChunk: ({ chunk, isFirst, nodes,
+          // text
+        }) => {
+          if (isFirst && mode == 'insert') {
+            editor.tf.withoutSaving(() => {
+              editor.tf.insertNodes(
+                {
+                  children: [{ text: '' }],
+                  type: AIChatPlugin.key,
+                },
+                {
+                  at: PathApi.next(editor.selection!.focus.path.slice(0, 1)),
+                }
+              );
+            });
+            editor.setOption(AIChatPlugin, 'streaming', true);
+          }
+
+          if (mode === 'insert' && nodes.length > 0) {
+            withAIBatch(
+              editor,
+              () => {
+                if (!getOption('streaming')) return;
+                editor.tf.withScrolling(() => {
+                  streamInsertChunk(editor, chunk, {
+                    textProps: {
+                      ai: true,
+                    },
+                  });
+                });
+              },
+              { split: isFirst }
+            );
+          }
+        },
+        onFinish: (
+          // { content }
+        ) => {
+          editor.setOption(AIChatPlugin, 'streaming', false);
+          editor.setOption(AIChatPlugin, '_blockChunks', '');
+          editor.setOption(AIChatPlugin, '_blockPath', null);
+          editor.setOption(AIChatPlugin, 'experimental_lastTextId', null);
+        },
+      });
+    },
   }),
 ] as const;

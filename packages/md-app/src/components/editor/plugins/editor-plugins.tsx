@@ -1,12 +1,13 @@
 import emojiMartData from "@emoji-mart/data";
 import { CalloutPlugin } from "@udecode/plate-callout/react";
+import { CodeBlockPlugin } from "@udecode/plate-code-block/react";
 import { DatePlugin } from "@udecode/plate-date/react";
 import { DocxPlugin } from "@udecode/plate-docx";
 import { EmojiPlugin } from "@udecode/plate-emoji/react";
 import {
-	FontBackgroundColorPlugin,
-	FontColorPlugin,
-	FontSizePlugin,
+  FontBackgroundColorPlugin,
+  FontColorPlugin,
+  FontSizePlugin,
 } from "@udecode/plate-font/react";
 import { HighlightPlugin } from "@udecode/plate-highlight/react";
 import { HorizontalRulePlugin } from "@udecode/plate-horizontal-rule/react";
@@ -49,80 +50,88 @@ import { ExtendedMarkdownPlugin } from "./markdown/markdown-plugin";
 import { FrontMatterPlugin } from "./frontmatter-plugin";
 import { CreateCopyMarkdownPlugin } from "./copy-markdown-plugin";
 import {
-	SanitizedBlockHtmlPlugin,
-	SanitizedInlineHtmlPlugin,
-	SanitizedBlockPlugin,
+  SanitizedBlockHtmlPlugin,
+  SanitizedInlineHtmlPlugin,
+  SanitizedBlockPlugin,
 } from "./sanitized-html";
 
 export const viewPlugins = [
-	...basicNodesPlugins,
-	HorizontalRulePlugin,
-	linkPlugin,
-	DatePlugin,
-	mentionPlugin,
-	tablePlugin,
-	TogglePlugin,
-	tocPlugin,
-	...mediaPlugins,
-	...equationPlugins,
-	CalloutPlugin,
-	ColumnPlugin,
+  ...basicNodesPlugins,
+  HorizontalRulePlugin,
+  linkPlugin,
+  DatePlugin,
+  mentionPlugin,
+  tablePlugin,
+  TogglePlugin,
+  tocPlugin,
+  ...mediaPlugins,
+  ...equationPlugins,
+  CalloutPlugin,
+  ColumnPlugin,
 
-	// Marks
-	FontColorPlugin,
-	FontBackgroundColorPlugin,
-	FontSizePlugin,
-	HighlightPlugin,
-	KbdPlugin,
-	skipMarkPlugin,
+  // Marks
+  FontColorPlugin,
+  FontBackgroundColorPlugin,
+  FontSizePlugin,
+  HighlightPlugin,
+  KbdPlugin,
+  skipMarkPlugin,
 
-	// Block Style
-	alignPlugin,
-	...indentListPlugins,
-	lineHeightPlugin,
+  // Block Style
+  alignPlugin,
+  ...indentListPlugins,
+  lineHeightPlugin,
 
-	// Collaboration
-	commentsPlugin.configure({
-		render: { aboveNodes: BlockDiscussion as any },
-	}),
-	suggestionPlugin.configure({
-		render: { belowNodes: SuggestionBelowNodes as any },
-	}),
+  // Collaboration
+  commentsPlugin.configure({
+    render: { aboveNodes: BlockDiscussion as any },
+  }),
+  suggestionPlugin.configure({
+    render: { belowNodes: SuggestionBelowNodes as any },
+  }),
 ] as const;
 
 export const editorPlugins = [
-	// AI
-	...aiPlugins,
+  // AI
+  ...aiPlugins,
 
-	// Nodes
-	...viewPlugins,
+  // Nodes
+  ...viewPlugins,
 
-	// Functionality
-	SlashPlugin,
-	autoformatPlugin,
-	cursorOverlayPlugin,
-	...blockMenuPlugins,
-	...dndPlugins,
-	EmojiPlugin.configure({ options: { data: emojiMartData as any } }),
-	exitBreakPlugin,
-	resetBlockTypePlugin,
-	...deletePlugins,
-	softBreakPlugin,
-	TrailingBlockPlugin,
+  // Functionality
+  SlashPlugin.extend({
+    options: {
+      triggerQuery(editor) {
+        return !editor.api.some({
+          match: { type: editor.getType(CodeBlockPlugin) },
+        });
+      },
+    },
+  }),
+  autoformatPlugin,
+  cursorOverlayPlugin,
+  ...blockMenuPlugins,
+  ...dndPlugins,
+  EmojiPlugin.configure({ options: { data: emojiMartData as any } }),
+  exitBreakPlugin,
+  resetBlockTypePlugin,
+  ...deletePlugins,
+  softBreakPlugin,
+  TrailingBlockPlugin,
 
-	// Deserialization
-	DocxPlugin,
-	ExtendedMarkdownPlugin,
-	JuicePlugin,
-	FrontMatterPlugin,
-	SanitizedInlineHtmlPlugin,
-	SanitizedBlockHtmlPlugin,
-	SanitizedBlockPlugin,
+  // Deserialization
+  DocxPlugin,
+  ExtendedMarkdownPlugin,
+  JuicePlugin,
+  FrontMatterPlugin,
+  SanitizedInlineHtmlPlugin,
+  SanitizedBlockHtmlPlugin,
+  SanitizedBlockPlugin,
 
-	// Copy & paste
-	CreateCopyMarkdownPlugin,
+  // Copy & paste
+  CreateCopyMarkdownPlugin,
 
-	// UI
-	FixedToolbarPlugin,
-	FloatingToolbarPlugin,
+  // UI
+  FixedToolbarPlugin,
+  FloatingToolbarPlugin,
 ];
