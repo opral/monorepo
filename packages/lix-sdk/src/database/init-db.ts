@@ -8,7 +8,10 @@ import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js"
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 
-const jsonBColumns = {
+/**
+ * Columns that should be serialized and parsed as JSON Binary.
+ */
+const TablesWithJSONBColumns: Record<string, string[]> = {
 	file: ["metadata"],
 	file_queue: ["metadata_before", "metadata_after"],
 	snapshot: ["content"],
@@ -29,8 +32,8 @@ export function initDb(args: {
 		plugins: [
 			// fallback json parser in case column aliases are used
 			new ParseJSONResultsPlugin(),
-			ParseJsonBPluginV1(jsonBColumns),
-			SerializeJsonBPlugin(jsonBColumns),
+			ParseJsonBPluginV1(TablesWithJSONBColumns),
+			SerializeJsonBPlugin(TablesWithJSONBColumns),
 		],
 	});
 
