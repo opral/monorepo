@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import { createLog } from "../log/create-log.js";
+import { createLixOwnLog } from "../log/create-lix-own-log.js";
 
 /**
  * Wraps a database operation in a transaction and skips file queue entries.
@@ -62,7 +62,7 @@ export async function withSkipFileQueue<T>(
 				.execute();
 		}
 
-		await createLog({
+		await createLixOwnLog({
 			lix: { db: trx },
 			key: "lix.file_queue.skipped",
 			level: "debug",

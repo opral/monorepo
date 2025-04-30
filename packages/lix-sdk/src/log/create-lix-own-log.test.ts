@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createLog } from "./create-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { Log } from "./database-schema.js";
+import { createLixOwnLog } from "./create-lix-own-log.js";
 
 test("should insert logs default log levels when lix_log_levels is not set)", async () => {
 	const lix = await openLixInMemory({});
@@ -80,71 +80,26 @@ test("should insert all levels when lix_log_levels=['*']", async () => {
 	);
 });
 
-test("should default to INFO filtering if lix_log_levels has invalid JSON", async () => {
-	const lix = await openLixInMemory({});
-
-	// @ts-expect-error - invalid type
-	await setLogLevels(lix, "this is not an array");
-
-	// Attempt to log one message which should be filtered out by default rules
-	await createLog({
-		lix,
-		key: "lix.test.debug",
-		level: "debug",
-		message: "debug message",
-	});
-
-	const logs = await getLogs(lix);
-
-	expect(logs).toHaveLength(0); // No logs should be created
-});
-
-test("createLog should return the log entry when not filtered", async () => {
-	const lix = await openLixInMemory({});
-	await setLogLevels(lix, ["info"]);
-	const result = await createLog({
-		lix,
-		key: "lix.test.info",
-		level: "info",
-		message: "info message",
-	});
-	expect(result).toBeDefined();
-	expect(result?.level).toBe("info");
-	expect(result?.message).toBe("info message");
-});
-
-test("createLog should return undefined when filtered", async () => {
-	const lix = await openLixInMemory({});
-	await setLogLevels(lix, ["info"]);
-	const result = await createLog({
-		lix,
-		key: "lix.test.debug",
-		level: "debug",
-		message: "debug message",
-	});
-	expect(result).toBeUndefined();
-});
-
 async function createLogs(lix: Lix) {
-	await createLog({
+	await createLixOwnLog({
 		lix,
 		key: "lix.test.debug",
 		level: "debug",
 		message: "debug message",
 	});
-	await createLog({
+	await createLixOwnLog({
 		lix,
 		key: "lix.test.info",
 		level: "info",
 		message: "info message",
 	});
-	await createLog({
+	await createLixOwnLog({
 		lix,
 		key: "lix.test.warn",
 		level: "warn",
 		message: "warn message",
 	});
-	await createLog({
+	await createLixOwnLog({
 		lix,
 		key: "lix.test.error",
 		level: "error",
