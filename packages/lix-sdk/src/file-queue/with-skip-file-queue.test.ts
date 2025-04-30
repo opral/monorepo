@@ -159,3 +159,20 @@ test("skipping the file queue should be possible with multiple changes and suppo
 	// and only 50 changes + 1 insert change have been created
 	expect(changes).toHaveLength(51);
 });
+
+test("it logs when skipping the file queue", async () => {
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: JSON.stringify(["debug"]) }],
+	});
+
+	await withSkipFileQueue(lix.db, async () => {
+		// Do something
+	});
+
+	const logs = await lix.db.selectFrom("log").selectAll().execute();
+
+	expect(logs).toHaveLength(1);
+	expect(logs[0]?.key).toBe("lix.file_queue.skipped");
+	expect(logs[0]?.level).toBe("debug");
+	expect(logs[0]?.message).toBe("The file queue has been skipped.");
+});

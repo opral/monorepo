@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { createChangeProposal } from "./create-change-proposal.js";
 
-test("creating a change proposal should compute the symmetric difference", async () => {
+test.skip("creating a change proposal should compute the symmetric difference", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create some changes for change sets

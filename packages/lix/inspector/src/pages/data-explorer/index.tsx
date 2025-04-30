@@ -177,6 +177,21 @@ export default function DataExplorer() {
     }
   }, [tableDataResult]);
 
+  // Log table auto-filter integration
+  useEffect(() => {
+    // Only auto-apply if log table exists and the log table is not already selected
+    const logFilter = window.localStorage.getItem("lix-inspector-log-filter");
+    if (tables.some((t) => t.name === "log") && selectedTable !== "log") {
+      setSelectedTable("log");
+      if (logFilter) {
+        setColumnFilters([{ id: "level", value: logFilter }]);
+        window.localStorage.removeItem("lix-inspector-log-filter");
+      } else {
+        setColumnFilters([]); // Show all logs if no filter
+      }
+    }
+  }, [tables, selectedTable]);
+
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTable(e.target.value);
     setColumnFilters([]);

@@ -4,11 +4,11 @@
 
 [@lix-js/sdk](../README.md) / changeIsLowestCommonAncestorOf
 
-# Function: changeIsLowestCommonAncestorOf()
+# Function: ~~changeIsLowestCommonAncestorOf()~~
 
 > **changeIsLowestCommonAncestorOf**(`changes`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-is-lowest-common-ancestor-of.ts:16](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-is-lowest-common-ancestor-of.ts#L16)
+Defined in: [packages/lix-sdk/src/query-filter/change-is-lowest-common-ancestor-of.ts:21](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/query-filter/change-is-lowest-common-ancestor-of.ts#L21)
 
 Filters changes that are the lowest common ancestor of the given changes.
 
@@ -21,6 +21,10 @@ Filters changes that are the lowest common ancestor of the given changes.
 ## Returns
 
 `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
+
+## Deprecated
+
+No new api exists yet for the change set graph. Write on discord if you need it
 
 ## Example
 

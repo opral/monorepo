@@ -203,7 +203,7 @@ If the input is not a locale.
 
 > **deLocalizeHref**(`href`): `string`
 
-Defined in: [runtime/localize-href.js:104](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
+Defined in: [runtime/localize-href.js:105](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
 
 High-level URL de-localization function optimized for client-side UI usage.
 
@@ -369,7 +369,7 @@ const locale = extractLocaleFromRequest(request);
 
 > **extractLocaleFromUrl**(`url`): `any`
 
-Defined in: [runtime/extract-locale-from-url.js:15](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
+Defined in: [runtime/extract-locale-from-url.js:26](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-url.js)
 
 Extracts the locale from a given URL using native URLPattern.
 

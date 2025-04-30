@@ -6,19 +6,41 @@
 
 # Function: createChangeSet()
 
-> **createChangeSet**(`args`): `Promise`\<\{ `id`: `string`; \}\>
+> **createChangeSet**(`args`): `Promise`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:24](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change-set/create-change-set.ts#L24)
+Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:36](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/change-set/create-change-set.ts#L36)
 
-Creates a change set with the given changes, optionally within an open transaction.
+Creates a change set with the given elements, optionally within an open transaction.
 
 ## Parameters
 
 ### args
 
-#### changes
+#### elements?
 
-`Pick`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}, `"id"`\>[]
+`Pick`\<[`ChangeSetElementTable`](../type-aliases/ChangeSetElementTable.md), `"entity_id"` \| `"file_id"` \| `"schema_key"` \| `"change_id"`\>[]
+
+#### id?
+
+`string`
+
+#### immutableElements?
+
+`boolean`
+
+If true, all elements of the change set will be immutable after creation.
+
+Immutable change set elements is required to create change set edges (the graph).
+
+WARNING: The SQL schema defaults to false to allow crating change sets
+and inserting elements. For ease of use, the `createChangeSet()` utility
+defaults to true because in the majority of cases change set elements should be immutable.
+
+**Default**
+
+```ts
+true
+```
 
 #### labels?
 
@@ -28,15 +50,21 @@ Creates a change set with the given changes, optionally within an open transacti
 
 `Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
 
+#### parents?
+
+`Pick`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}, `"id"`\>[]
+
+Parent change sets that this change set will be a child of
+
 ## Returns
 
-`Promise`\<\{ `id`: `string`; \}\>
+`Promise`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}\>
 
 ## Examples
 
 ```ts
-  const changes = await lix.db.selectFrom("change").selectAll().execute();
-  const changeSet = await createChangeSet({ db: lix.db, changes });
+  const elements = await lix.db.selectFrom("change_set_element").selectAll().execute();
+  const changeSet = await createChangeSet({ db: lix.db, elements });
   ```
 
 ```ts
@@ -44,7 +72,17 @@ Creates a change set with the given changes, optionally within an open transacti
   const labels = await lix.db.selectFrom("label").selectAll().execute();
   const changeSet = await createChangeSet({
     lix,
-    changes: [],
+    elements: [],
     labels
+  });
+  ```
+
+```ts
+  // Create a change set with parent change sets
+  const parentChangeSet = await createChangeSet({ lix, elements: [] });
+  const childChangeSet = await createChangeSet({
+    lix,
+    elements: [],
+    parents: [parentChangeSet]
   });
   ```
