@@ -129,8 +129,8 @@ export function applyOwnChangeControlTriggers(
     CREATE TEMP TRIGGER IF NOT EXISTS flush_system_changes_before_version_update
     BEFORE UPDATE OF change_set_id ON version
     BEGIN
-      INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
-      VALUES ('lix_flushing_own_changes', 'true', true);
+    	INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
+      VALUES ('lix_flushing_own_changes', jsonb(json_quote('true')), true);
 
       -- ensure new change_set exists and is mutable
 			UPDATE change_set SET immutable_elements = false WHERE id = NEW.change_set_id;
@@ -178,7 +178,7 @@ export function applyOwnChangeControlTriggers(
 
 					sqlite.exec(`
           INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
-          VALUES ('lix_flushing_own_changes', 'true', true);
+          VALUES ('lix_flushing_own_changes', jsonb(json_quote('true')), true);
 
           INSERT INTO change_set (immutable_elements)
           VALUES (true);
@@ -272,6 +272,13 @@ function handleLixOwnChange(
 		})[0]![0];
 
 		snapshotContent["body"] = JSON.parse(json as string);
+	} else if (tableName === "key_value" && snapshotContent) {
+		const json = sqlite.exec("SELECT json(?)", {
+			bind: [snapshotContent.value],
+			returnValue: "resultRows",
+		})[0]![0];
+
+		snapshotContent["value"] = JSON.parse(json as string);
 	}
 
 	// avoid a loop of own changes

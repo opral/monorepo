@@ -1,4 +1,3 @@
-import React from "react";
 import { List, AlertTriangle, XCircle } from "lucide-react";
 
 export type LogIndicatorProps = {

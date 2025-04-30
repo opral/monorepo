@@ -8,24 +8,32 @@ import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js"
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 
+/**
+ * Columns that should be serialized and parsed as JSON Binary.
+ */
+const TablesWithJSONBColumns: Record<string, string[]> = {
+	file: ["metadata"],
+	file_queue: ["metadata_before", "metadata_after"],
+	snapshot: ["content"],
+	thread: ["body"],
+	key_value: ["value"],
+	thread_comment: ["body"],
+};
+
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
 }): Kysely<LixDatabaseSchema> {
 	initFunctions({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({
+		// log: ["error", "query"],
 		dialect: createDialect({
 			database: args.sqlite,
 		}),
 		plugins: [
+			// fallback json parser in case column aliases are used
 			new ParseJSONResultsPlugin(),
-			ParseJsonBPluginV1({
-				// jsonb columns
-				file: ["metadata"],
-				file_queue: ["metadata_before", "metadata_after"],
-				snapshot: ["content"],
-				thread: ["body"],
-			}),
-			SerializeJsonBPlugin(),
+			ParseJsonBPluginV1(TablesWithJSONBColumns),
+			SerializeJsonBPlugin(TablesWithJSONBColumns),
 		],
 	});
 

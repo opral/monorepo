@@ -49,7 +49,7 @@ test("handles joins", async () => {
 	expect(result).toEqual(result2);
 });
 
-test("does not transform the query or results (json parsing)", async () => {
+test("transforms the query or results (json parsing)", async () => {
 	const lix1 = await openLixInMemory({});
 	const lix2 = await openLixInMemory({});
 
@@ -68,7 +68,7 @@ test("does not transform the query or results (json parsing)", async () => {
 	const result1 = await insertQuery(lix1).execute();
 	const result2 = executeSync({ lix: lix2, query: insertQuery(lix2) });
 
-	expect(result1).not.toEqual(result2);
+	expect(result1).toEqual(result2);
 
 	const withManualJson = executeSync({
 		lix: lix2,
