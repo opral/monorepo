@@ -7,20 +7,20 @@ export function applyKeyValueDatabaseSchema(
 	return sqlite.exec`
 	CREATE TABLE IF NOT EXISTS key_value (
 		key TEXT PRIMARY KEY,
-		value TEXT NOT NULL,
+		value BLOB NOT NULL, --JSONB
 
 		-- Options
 		skip_change_control INT DEFAULT FALSE
 	) STRICT;
 
 	INSERT OR IGNORE INTO key_value (key, value)
-	VALUES ('lix_id', nano_id(18));
+	VALUES ('lix_id', jsonb(json_quote(nano_id(18))));
 
 	-- default value for lix sync to false
 	-- if not exist to remove conditional logic
 	-- if the key exists or not
 	INSERT OR IGNORE INTO key_value (key, value, skip_change_control)
-	VALUES ('lix_sync', 'false', 1);
+	VALUES ('lix_sync', jsonb(json_quote('false')), 1);
 `;
 }
 
@@ -47,7 +47,7 @@ export type KeyValueTable = {
 	 *   "{ "foo": "bar" }"
 	 *
 	 */
-	value: string;
+	value: JSON;
 	/**
 	 * If `true`, the key-value pair is not tracked with own change control.
 	 *
@@ -58,6 +58,8 @@ export type KeyValueTable = {
 	 */
 	skip_change_control: Generated<boolean>;
 };
+
+type JSON = any;
 
 type PredefinedKeys =
 	| "lix_id"

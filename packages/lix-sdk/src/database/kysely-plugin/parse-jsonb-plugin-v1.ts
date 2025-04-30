@@ -23,26 +23,21 @@ export function ParseJsonBPluginV1(
 
 			for (const row of args.result.rows) {
 				for (const col of jsonColumnNames) {
-					if (!row[col]) {
-						// result does not have a whitelisted json column
-						// ! this is a heursitic. ideally, we invest into
-						// ! building ParseJsonBPluginV2 that detects
-						// ! json columns from the query itself
-						// see https://github.com/opral/lix-sdk/issues/145
+					const raw = row[col];
+					// Only parse binary JSONB blobs
+					if (!(raw instanceof Uint8Array)) {
 						continue;
 					}
 					try {
-						// sqlite has it's own jsonb format
+						// sqlite has its own jsonb format
 						// hence, need to query sqlite to convert
-						// to json
 						const json = sqlite.exec("SELECT json(?)", {
-							bind: [row[col] as Uint8Array],
+							bind: [raw],
 							returnValue: "resultRows",
 						})[0]![0];
 
 						row[col] = JSON.parse(json as string);
 					} catch {
-						// it's not a json binary
 						continue;
 					}
 				}

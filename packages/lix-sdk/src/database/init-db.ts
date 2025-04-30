@@ -14,6 +14,7 @@ const jsonBColumns = {
 	snapshot: ["content"],
 	thread: ["body"],
 	key_value: ["value"],
+	thread_comment: ["body"],
 };
 
 export function initDb(args: {
@@ -21,7 +22,7 @@ export function initDb(args: {
 }): Kysely<LixDatabaseSchema> {
 	initFunctions({ sqlite: args.sqlite });
 	const db = new Kysely<LixDatabaseSchema>({
-		log: ["query"],
+		log: ["error", "query"],
 		dialect: createDialect({
 			database: args.sqlite,
 		}),

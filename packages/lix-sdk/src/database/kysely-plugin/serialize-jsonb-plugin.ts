@@ -125,13 +125,20 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		};
 	}
 
+	public override transformNode(node: any): any {
+		if (!node) {
+			return node;
+		}
+		return super.transformNode(node);
+	}
+
 	// Serialize JSONB values in updates for ColumnUpdateNodes
 	protected override transformColumnUpdate(
 		node: ColumnUpdateNode
 	): ColumnUpdateNode {
 		// @ts-expect-error - kysely type narrowing
 		const columnName = node.column.column.name;
-		if (this.isJsonbColumn(columnName) && node.value.kind === "ValueNode") {
+		if (this.isJsonbColumn(columnName)) {
 			return {
 				...node,
 				// @ts-expect-error - kysely type narrowing
@@ -139,6 +146,19 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 			} as ColumnUpdateNode;
 		}
 		return super.transformColumnUpdate(node);
+	}
+
+	// Support .set("col", value) syntax (SetOperationNode)
+	protected override transformSetOperation(node: any): any {
+		// node.column.column.name is the column name for SetOperationNode
+		const columnName = node.column?.column?.name;
+		if (columnName && this.isJsonbColumn(columnName)) {
+			return {
+				...node,
+				value: this.serializeValue(node.value),
+			};
+		}
+		return super.transformSetOperation(node);
 	}
 
 	protected override transformValues(node: ValuesNode): ValuesNode {
@@ -164,15 +184,13 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 			// Handle AST rows
 			if (row.kind === "ValueListNode") {
 				const newValuesList = row.values.map((valNode, idx) => {
-					if (valNode.kind === "ValueNode") {
-						const colNode = this.columns?.[idx];
-						if (
-							colNode?.kind === "ColumnNode" &&
-							this.isJsonbColumn(colNode.column.name)
-						) {
-							// @ts-expect-error - kysely type narrowing
-							return this.serializeValue(valNode);
-						}
+					const colNode = this.columns?.[idx];
+					if (
+						colNode?.kind === "ColumnNode" &&
+						this.isJsonbColumn(colNode.column.name)
+					) {
+						// Always serialize, regardless of valNode.kind
+						return this.serializeValue(valNode as ValueNode);
 					}
 					return valNode;
 				});
@@ -183,23 +201,21 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		return { ...node, values: newValues };
 	}
 
-	private serializeValue(node: ValueNode): ValueNode {
+	private serializeValue(node: ValueNode): any {
 		const val = node.value;
-		// If it's a JS object (excluding ArrayBuffer and typed arrays), stringify and encode for BLOB
-		if (
-			typeof val === "object" &&
-			val !== null &&
-			!(val instanceof ArrayBuffer) &&
-			!ArrayBuffer.isView(val)
-		) {
-			const str = JSON.stringify(val);
-			const encoded = new TextEncoder().encode(str);
-
-			return {
-				...node,
-				value: encoded,
-			};
+		// If it's an ArrayBuffer or typed array, leave unchanged
+		// if null -> database column should be null thus don't use jsonb()
+		if (val instanceof ArrayBuffer || ArrayBuffer.isView(val) || val === null) {
+			return node;
 		}
-		return node;
+
+		// JSON stringify the value (object, array, primitive, null)
+		const jsonText = JSON.stringify(val);
+		// Wrap in SQLite jsonb() for proper binary JSONB blob
+		return {
+			kind: "FunctionNode",
+			func: "jsonb",
+			arguments: [{ kind: "ValueNode", value: jsonText }],
+		};
 	}
 }

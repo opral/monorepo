@@ -17,7 +17,7 @@ test("it works for inserts, updates and deletions", async () => {
 	// update
 	await lix.db
 		.updateTable("key_value")
-		.set("value", "value2")
+		.set({ value: "value2" })
 		.where("key", "=", "key1")
 		.execute();
 

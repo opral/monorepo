@@ -1,6 +1,6 @@
-import { sql } from "kysely";
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { sql } from "kysely";
 
 test("string values are accepted", async () => {
 	const lix = await openLixInMemory({});
@@ -56,11 +56,11 @@ test("using json as value should work", async () => {
 		.values([
 			{
 				key: "foo",
-				value: JSON.stringify({
+				value: {
 					bar: "baz",
 					age: 42,
 					location: "Berlin",
-				}),
+				},
 			},
 		])
 		.returningAll()

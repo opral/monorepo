@@ -2,6 +2,7 @@ import { Kysely, sql, type Generated } from "kysely";
 import { expect, test } from "vitest";
 import { createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely";
 import { SerializeJsonBPlugin } from "./serialize-jsonb-plugin.js";
+import { ParseJsonBPluginV1 } from "./parse-jsonb-plugin-v1.js";
 
 test("inserts should work", async () => {
 	const db = await mockDatabase();
@@ -56,6 +57,44 @@ test("updates should work", async () => {
 	});
 });
 
+// JSONB serialization for updates is only supported when using the object form: .set({ col: value }).
+// The string-key form .set('col', value) will not be intercepted for JSONB serialization.
+//
+// (took to long to get this working, should work in the future if people ask for it though.)
+test.skip("works with kysely column syntax", async () => {
+	const db = await mockDatabase();
+
+	await db
+		.insertInto("mock_table")
+		.values({
+			id: 1,
+			metadata: "value1",
+			other: "other",
+			just_blob: new Uint8Array(),
+		})
+		.execute();
+
+	// update
+	await db
+		.updateTable("mock_table")
+		.set("metadata", "value2")
+		.where("id", "=", 1)
+		.execute();
+
+	const result = await db
+		.selectFrom("mock_table")
+		.where("id", "=", 1)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result).toEqual({
+		id: 1,
+		metadata: "value2",
+		other: "other",
+		just_blob: new Uint8Array(),
+	});
+});
+
 test("onConflict should work", async () => {
 	const db = await mockDatabase();
 
@@ -89,6 +128,24 @@ test("onConflict should work", async () => {
 		other: "value",
 		just_blob: new Uint8Array(),
 	});
+});
+
+test("null leads to a nulled column, not nulled json", async () => {
+	const db = await mockDatabase();
+
+	await db
+		.insertInto("mock_table")
+		.values({
+			metadata: null,
+			other: "value",
+			just_blob: new Uint8Array(),
+		})
+		.executeTakeFirstOrThrow();
+
+	const result =
+		await sql`SELECT jsonb(metadata) as metadata FROM mock_table;`.execute(db);
+
+	expect(result.rows).toEqual([{ metadata: null }]);
 });
 
 test("json number primitive works", async () => {
@@ -222,6 +279,9 @@ const mockDatabase = async () => {
 		}),
 		plugins: [
 			SerializeJsonBPlugin({
+				mock_table: ["metadata"],
+			}),
+			ParseJsonBPluginV1({
 				mock_table: ["metadata"],
 			}),
 		],

@@ -17,8 +17,6 @@ export function applyLogDatabaseSchema(
 `;
 }
 
-
-
 export type Log = Selectable<LogTable>;
 export type NewLog = Insertable<LogTable>;
 export type LogUpdate = Updateable<LogTable>;
