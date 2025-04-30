@@ -91,13 +91,124 @@ test("onConflict should work", async () => {
 	});
 });
 
+test("json number primitive works", async () => {
+	const db = await mockDatabase();
+
+	const result = await db
+		.insertInto("mock_table")
+		.values({
+			metadata: 42,
+			other: "value",
+			just_blob: new Uint8Array(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result).toEqual({
+		id: 1,
+		metadata: 42,
+		other: "value",
+		just_blob: new Uint8Array(),
+	});
+});
+
+test("json string primitive works", async () => {
+	const db = await mockDatabase();
+
+	const result = await db
+		.insertInto("mock_table")
+		.values({
+			metadata: "hello",
+			other: "value",
+			just_blob: new Uint8Array(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result).toEqual({
+		id: 1,
+		metadata: "hello",
+		other: "value",
+		just_blob: new Uint8Array(),
+	});
+});
+
+test("json boolean primitive works", async () => {
+	const db = await mockDatabase();
+
+	const result = await db
+		.insertInto("mock_table")
+		.values({
+			metadata: true,
+			other: "value",
+			just_blob: new Uint8Array(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result).toEqual({
+		id: 1,
+		metadata: true,
+		other: "value",
+		just_blob: new Uint8Array(),
+	});
+});
+
+test("json null primitive works", async () => {
+	const db = await mockDatabase();
+
+	const result = await db
+		.insertInto("mock_table")
+		.values({
+			metadata: null,
+			other: "value",
+			just_blob: new Uint8Array(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result).toEqual({
+		id: 1,
+		metadata: null,
+		other: "value",
+		just_blob: new Uint8Array(),
+	});
+});
+
+test("json array works", async () => {
+	const db = await mockDatabase();
+
+	const result = await db
+		.insertInto("mock_table")
+		.values({
+			metadata: [1, 2, "3"],
+			other: "value",
+			just_blob: new Uint8Array(),
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(result).toEqual({
+		id: 1,
+		metadata: [1, 2, "3"],
+		other: "value",
+		just_blob: new Uint8Array(),
+	});
+});
+
 const mockDatabase = async () => {
 	const database = await createInMemoryDatabase({ readOnly: false });
 
 	const db = new Kysely<{
 		mock_table: {
 			id: Generated<number>;
-			metadata: Record<string, any>;
+			metadata:
+				| Record<string, any>
+				| string
+				| number
+				| boolean
+				| null
+				| Array<any>;
 			other: string;
 			just_blob: Uint8Array;
 		};
@@ -109,7 +220,11 @@ const mockDatabase = async () => {
 		dialect: createDialect({
 			database,
 		}),
-		plugins: [SerializeJsonBPlugin()],
+		plugins: [
+			SerializeJsonBPlugin({
+				mock_table: ["metadata"],
+			}),
+		],
 	});
 
 	await sql`
