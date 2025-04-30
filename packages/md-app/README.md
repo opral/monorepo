@@ -23,7 +23,7 @@ npx npm-check-updates '/@udecode\/plate.*/' -u
 npm install
 ```
 
-**Note:** This will only update the dependencies that start with `@udecode/plate`. You may need to update other dependencies manually or by running `ncu -u` for all dependencies.
+**Note:** This will only update the dependencies that start with `@udecode/plate`. You may need to update other dependencies manually or by running `ncu -u` for all dependencies. Please be careful as this may lead to version mismatches.
 
 4. Update the ui components and plugins by running `npx shadcx@latest add plate/editor-ai` to reinstall the latest version of the editor template.
 5. Check the changes in source control to exclude any unwanted changes (e.g. files you modified before).
