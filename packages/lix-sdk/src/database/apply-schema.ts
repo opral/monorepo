@@ -12,6 +12,7 @@ import type { Kysely } from "kysely";
 import type { LixDatabaseSchema } from "./schema.js";
 import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
 import { applyThreadDatabaseSchema } from "../thread/database-schema.js";
+import { applyLogDatabaseSchema } from "../log/database-schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -88,6 +89,7 @@ export function applySchema(args: {
 	applyChangeSetEdgeDatabaseSchema(args.sqlite);
 	applyVersionV2DatabaseSchema(args.sqlite, args.db);
 	applyOwnChangeControlTriggers(args.sqlite, args.db);
+	applyLogDatabaseSchema(args.sqlite);
 
 	return args.sqlite;
 }

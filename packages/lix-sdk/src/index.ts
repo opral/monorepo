@@ -2,6 +2,7 @@ export * from "./account/index.js";
 export * from "./change/index.js";
 export * from "./change-set/index.js";
 export * from "./change-set-edge/index.js";
+export * from "./log/index.js";
 // export * from "./change-conflict/index.js";
 // export * from "./change-proposal/index.js";
 export * from "./file-queue/index.js";
