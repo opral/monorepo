@@ -1,23 +1,24 @@
 import type { ExpressionBuilder, ExpressionWrapper, SqlBool } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { ChangeSet } from "./database-schema.js";
+import type { ChangeSet } from "../change-set/database-schema.js";
 
 /**
  * Returns the symmetric difference between two change sets.
  *
  * The symmetric difference is the set of changes
  * that exist in either one version but not both.
+ *
  * Modeled after https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set/symmetricDifference
  *
  * @example
  *   ```ts
  *   await lix.db.selectFrom("change_set_element")
- *     .where(changeSetElementInSymmetricDifference(a: changeSetA, b: changeSetB))
+ *     .where(changeSetElementInSymmetricDifferenceOf(changeSetA, changeSetB))
  *     .selectAll()
  *     .execute();
  *   ```
  */
-export function changeSetElementInSymmetricDifference(
+export function changeSetElementInSymmetricDifferenceOf(
 	a: Pick<ChangeSet, "id">,
 	b: Pick<ChangeSet, "id">
 ) {

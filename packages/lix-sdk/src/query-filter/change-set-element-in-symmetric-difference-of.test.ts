@@ -1,7 +1,10 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { changeSetElementInSymmetricDifference } from "./change-set-element-in-symmetric-difference.js";
-import type { ChangeSet, ChangeSetElement } from "./database-schema.js";
+import { changeSetElementInSymmetricDifferenceOf } from "./change-set-element-in-symmetric-difference-of.js";
+import type {
+	ChangeSet,
+	ChangeSetElement,
+} from "../change-set/database-schema.js";
 import { mockChange } from "../change/mock-change.js";
 
 // Helper function to extract necessary fields from a Change object
@@ -92,7 +95,7 @@ test("should return the symmetric difference between two change sets", async () 
 
 	const result = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInSymmetricDifference(changeSetA, changeSetB))
+		.where(changeSetElementInSymmetricDifferenceOf(changeSetA, changeSetB))
 		.selectAll()
 		.execute();
 
@@ -191,7 +194,7 @@ test("should return an empty array if there are no differences", async () => {
 
 	const result = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInSymmetricDifference(changeSetA, changeSetB))
+		.where(changeSetElementInSymmetricDifferenceOf(changeSetA, changeSetB))
 		.selectAll()
 		.execute();
 
@@ -212,7 +215,7 @@ test("should handle empty change sets", async () => {
 
 	const result = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInSymmetricDifference(changeSetA, changeSetB))
+		.where(changeSetElementInSymmetricDifferenceOf(changeSetA, changeSetB))
 		.selectAll()
 		.execute();
 
@@ -303,7 +306,7 @@ test("should handle disjoint change sets", async () => {
 
 	const result = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInSymmetricDifference(changeSetA, changeSetB))
+		.where(changeSetElementInSymmetricDifferenceOf(changeSetA, changeSetB))
 		.selectAll()
 		.execute();
 
