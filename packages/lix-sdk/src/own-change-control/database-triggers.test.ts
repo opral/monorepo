@@ -4,6 +4,8 @@ import { createAccount } from "../account/create-account.js";
 import { createChange } from "../change/create-change.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
+import { createThread } from "../thread/create-thread.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("it works for inserts, updates and deletions", async () => {
 	const lix = await openLixInMemory({});
@@ -424,4 +426,88 @@ test("works in combination with skipOwnChangeControl", async () => {
 		.executeTakeFirst();
 
 	expect(skip).toBeUndefined();
+});
+
+test("content of a thread comment is stored as json", async () => {
+	const lix = await openLixInMemory({});
+
+	const thread = await createThread({
+		lix,
+		comments: [
+			{
+				body: {
+					type: "zettel_doc",
+					content: [{ type: "mock", zettel_key: "mock_key" }],
+				},
+			},
+		],
+	});
+
+	const firstComment = thread.comments[0]!;
+
+	const change = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("entity_id", "=", firstComment.id)
+		.selectAll("change")
+		.select("snapshot.content")
+		.executeTakeFirst();
+
+	expect(firstComment.body.content).toEqual([
+		{ type: "mock", zettel_key: "mock_key" },
+	]);
+
+	expect(change?.content?.body?.content).toEqual([
+		{ type: "mock", zettel_key: "mock_key" },
+	]);
+});
+
+test("updating the version's change_set_id or working change_set_id is not change controlled to avoid infinite loops", async () => {
+	const lix = await openLixInMemory({});
+
+	const version = await lix.db
+		.selectFrom("version")
+		.select("id")
+		.executeTakeFirstOrThrow();
+
+	expect(version.id).toBeDefined();
+
+	// testing that updating the version's change_set_id does not trigger a change
+	await lix.db
+		.updateTable("version")
+		.set({
+			change_set_id: (await createChangeSet({ lix })).id,
+		})
+		.returningAll()
+		.where("id", "=", version.id)
+		.executeTakeFirstOrThrow();
+
+	// testing working change set
+	await lix.db
+		.updateTable("version")
+		.set({ working_change_set_id: (await createChangeSet({ lix })).id })
+		.executeTakeFirstOrThrow();
+
+	// other columns should create a change
+	await lix.db
+		.updateTable("version")
+		.set({ name: "new name" })
+		.where("id", "=", version.id)
+		.executeTakeFirstOrThrow();
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_version_table")
+		.where("entity_id", "=", version.id)
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.select("snapshot.content")
+		.execute();
+
+	expect(changes).toMatchObject([
+		{
+			content: {
+				name: "new name",
+			},
+		},
+	]);
 });

@@ -1,7 +1,11 @@
 export const changeControlledTableIds = {
 	account: ["id"],
-	// change_proposal: ["id"],
-	change_set: ["id"],
+	active_version: ["version_id"],
+	// change_set: ["id"],
+	change_set_edge: ["parent_id", "child_id"],
+	// change_set_element: ["change_set_id", "change_id"],
+	change_set_label: ["change_set_id", "label_id"],
+	change_set_thread: ["change_set_id", "thread_id"],
 	// Change author should be change controlled but
 	// breaking the trigger loop turned out to be difficult.
 	//
@@ -10,13 +14,10 @@ export const changeControlledTableIds = {
 	// change_author: ["change_id", "account_id"],
 	thread: ["id"],
 	thread_comment: ["id"],
-	change_set_label: ["change_set_id", "label_id"],
-	change_set_thread: ["change_set_id", "thread_id"],
 	file: ["id"],
 	label: ["id"],
 	key_value: ["key"],
-	// version: ["id"],
-	// version_change: ["version_id", "change_id"],
+	version: ["id"],
 } as const;
 
 /**
