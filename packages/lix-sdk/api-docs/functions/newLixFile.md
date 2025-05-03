@@ -8,7 +8,7 @@
 
 > **newLixFile**(): `Promise`\<`Blob`\>
 
-Defined in: [packages/lix-sdk/src/lix/new-lix.ts:14](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/lix/new-lix.ts#L14)
+Defined in: [packages/lix-sdk/src/lix/new-lix.ts:14](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/lix/new-lix.ts#L14)
 
 Creates a new lix file.
 
