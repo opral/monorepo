@@ -5,13 +5,12 @@
       "id": "production",
       "name": "Production",
       "region": "eu-west-3",
-      "source": { "branch": "main", "pr": false, "trigger": "push" },
+      "source": { "branch": "main", "pr": false, "trigger": "manual" },
       "services": [
         {
           "id": "opral-website-7nvwjx",
           "name": "Opral Website",
           "buildType": "nixpacks",
-          "buildCommand": "",
           "watchPaths": ["packages/opral-website/**"],
           "type": "static",
           "ci": {
