@@ -11,6 +11,7 @@
           "id": "opral-website-7nvwjx",
           "name": "Opral Website",
           "buildType": "nixpacks",
+          "buildCommand": "",
           "watchPaths": ["packages/opral-website/**"],
           "type": "static",
           "ci": {
