@@ -8,7 +8,7 @@
 
 > **getBeforeAfterOfFile**(`args`): `Promise`\<\{ `after?`: \{ `data`: `Uint8Array`\<`ArrayBufferLike`\>; `id`: `string`; `metadata`: `null` \| `Record`\<`string`, `any`\>; `path`: `string`; \}; `before?`: \{ `data`: `Uint8Array`\<`ArrayBufferLike`\>; `id`: `string`; `metadata`: `null` \| `Record`\<`string`, `any`\>; `path`: `string`; \}; \}\>
 
-Defined in: [packages/lix-sdk/src/change-set/get-before-after-of-file.ts:29](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/change-set/get-before-after-of-file.ts#L29)
+Defined in: [packages/lix-sdk/src/change-set/get-before-after-of-file.ts:29](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/change-set/get-before-after-of-file.ts#L29)
 
 Interim utility function until https://github.com/opral/lix-sdk/issues/252 arrives.
 

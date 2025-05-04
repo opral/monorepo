@@ -8,7 +8,7 @@
 
 > **GraphTraversalModeRecursive** = `object`
 
-Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:67](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/database/graph-traversal-mode.ts#L67)
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:67](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/database/graph-traversal-mode.ts#L67)
 
 Recursive mode: Includes the specified node and all transitive parents (or children).
 
@@ -42,7 +42,7 @@ Included:
 
 > `optional` **depth**: `number`
 
-Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:74](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/database/graph-traversal-mode.ts#L74)
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:74](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/database/graph-traversal-mode.ts#L74)
 
 Optional maximum depth to traverse.
 - `depth = 0` includes direct parents/children only.
@@ -54,4 +54,4 @@ Optional maximum depth to traverse.
 
 > **type**: `"recursive"`
 
-Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:68](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/database/graph-traversal-mode.ts#L68)
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:68](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/database/graph-traversal-mode.ts#L68)

@@ -373,7 +373,7 @@ test.todo("it should handle binary values", async () => {
 	});
 
 	const lixFromServer = await openLixInMemory({
-		blob: await environment.get(`lix-file-${id}`),
+		blob: await environment.getLix({ id }),
 	});
 
 	const filesOnServer = await lixFromServer.db

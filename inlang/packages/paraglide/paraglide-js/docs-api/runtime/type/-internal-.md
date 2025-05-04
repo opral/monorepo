@@ -203,7 +203,7 @@ If the input is not a locale.
 
 > **deLocalizeHref**(`href`): `string`
 
-Defined in: [runtime/localize-href.js:105](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
+Defined in: [runtime/localize-href.js:107](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/localize-href.js)
 
 High-level URL de-localization function optimized for client-side UI usage.
 

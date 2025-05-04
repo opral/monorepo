@@ -8,7 +8,7 @@
 
 > **executeSync**(`args`): `any`[]
 
-Defined in: [packages/lix-sdk/src/database/execute-sync.ts:15](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/database/execute-sync.ts#L15)
+Defined in: [packages/lix-sdk/src/database/execute-sync.ts:15](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/database/execute-sync.ts#L15)
 
 Execute a query synchronously.
 

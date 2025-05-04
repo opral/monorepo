@@ -8,7 +8,7 @@
 
 > `const` **mockJsonPlugin**: [`LixPlugin`](../type-aliases/LixPlugin.md)
 
-Defined in: [packages/lix-sdk/src/plugin/mock-json-plugin.ts:16](https://github.com/opral/monorepo/blob/9bfa52db93cdc611a0e5ae280016f4a334c2a6ac/packages/lix-sdk/src/plugin/mock-json-plugin.ts#L16)
+Defined in: [packages/lix-sdk/src/plugin/mock-json-plugin.ts:16](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/plugin/mock-json-plugin.ts#L16)
 
 A mock plugin that handles JSON data.
 
