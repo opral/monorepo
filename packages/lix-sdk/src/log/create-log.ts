@@ -12,7 +12,7 @@ import type { Log } from "./database-schema.js";
  *
  * @example
  * // Directly log an info message
- * 
+ *
  * if (shouldLog) {
  *   await createLog({
  *     lix,
