@@ -194,10 +194,10 @@ export const lixAtom = atom(async (get) => {
 		window.location.href = url.toString();
 	}
 
-	if (import.meta.env.DEV) {
-		// Initialize the Lix Inspector for debugging
-		await initLixInspector({ lix });
-	}
+	await initLixInspector({
+		lix,
+		show: import.meta.env.DEV,
+	});
 
 	return lix;
 });

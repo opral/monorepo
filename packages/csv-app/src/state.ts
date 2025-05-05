@@ -10,6 +10,7 @@ import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+import { initLixInspector } from "@lix-js/inspector";
 
 export const withPollingAtom = atom(Date.now());
 
@@ -142,6 +143,11 @@ export const lixAtom = atom(async (get) => {
 		url.searchParams.set("lix", lixId.value);
 		window.location.href = url.toString();
 	}
+
+	await initLixInspector({
+		lix,
+		show: import.meta.env.DEV,
+	});
 
 	return lix;
 });

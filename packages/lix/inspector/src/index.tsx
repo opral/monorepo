@@ -14,6 +14,7 @@ let reactRoot: ReactDOM.Root | null = null;
 export async function initLixInspector(args: {
   lix: Lix;
   hideWelcomeMessage?: boolean;
+  show?: boolean;
 }): Promise<void> {
   // Create a fixed position overlay container for the inspector
   const container = document.createElement("div");
@@ -64,7 +65,7 @@ export async function initLixInspector(args: {
   reactRoot.render(
     <React.StrictMode>
       <Provider lix={args.lix} rootContainer={container!}>
-        <App />
+        <App show={args.show ?? true} />
       </Provider>
     </React.StrictMode>
   );

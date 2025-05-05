@@ -206,10 +206,12 @@ export const lixAtom = atom(async (get) => {
 		}
 	}
 
-	if (import.meta.env.DEV) {
-		// Initialize the Lix Inspector for debugging
-		await initLixInspector({ lix });
-	}
+	await initLixInspector({
+		lix,
+		show: import.meta.env.DEV,
+	});
+
+	console.log("DEV: ", import.meta.env.DEV);
 
 	// lix.sqlite.createFunction("handle_save_lix_to_opfs", () => {
 	// 	saveLixToOpfs({ lix });

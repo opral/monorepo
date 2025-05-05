@@ -80,14 +80,14 @@ interface WindowState {
   isExpanded: boolean;
 }
 
-export default function App() {
+export default function App(args: { show: boolean }) {
   const lix = useLix();
   const { setLix, rootContainer } = useContext(Context);
   const [activeContent, setActiveContent] = useState<Pages | null>(null);
   const [pinnedWindows, setPinnedWindows] = useState<Pages[]>([]);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isFrozen, setIsFrozen] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
+  const [isHidden, setIsHidden] = useState(args.show ? false : true);
   const transactionRef = useRef<any>(null);
   const [windowStates, setWindowStates] = useState<Record<Pages, WindowState>>(
     {} as Record<Pages, WindowState>
@@ -362,9 +362,8 @@ export default function App() {
     <div className="flex flex-col w-full" data-theme="light">
       {!isHidden && (
         <header
-          className={`bg-background border-b ${
-            isFrozen ? "bg-blue-50 border-blue-100" : "border-base-200"
-          }`}
+          className={`bg-background border-b ${isFrozen ? "bg-blue-50 border-blue-100" : "border-base-200"
+            }`}
         >
           <div className="container mx-auto py-1 px-2 flex items-center">
             <div className="flex items-center mr-4">
@@ -379,9 +378,8 @@ export default function App() {
               ].map((item) => (
                 <button
                   key={item.id}
-                  className={`join-item btn btn-xs ${
-                    activeContent === item.id ? "btn-active" : "btn-ghost"
-                  }`}
+                  className={`join-item btn btn-xs ${activeContent === item.id ? "btn-active" : "btn-ghost"
+                    }`}
                   onClick={() => handleNavItemClick(item.id)}
                 >
                   {item.label}
