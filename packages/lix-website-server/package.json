@@ -11,10 +11,12 @@
     "clean": "rm -rf ./dist ./node_modules"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^1.1.12",
+    "@ai-sdk/openai": "^1.3.21",
+    "@ai-sdk/provider": "^1.1.3",
+    "@ai-sdk/provider-utils": "^2.2.7",
     "@faker-js/faker": "^9.4.0",
     "@remix-run/express": "^2.15.1",
-    "ai": "^4.1.41",
+    "ai": "^4.3.13",
     "cors": "^2.8.5",
     "csv-app": "workspace:*",
     "dotenv": "^16.4.7",

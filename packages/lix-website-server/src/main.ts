@@ -1,11 +1,14 @@
 import express from "express";
-import { createRequestHandler } from "@remix-run/express";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import { dirname, join } from "path";
 import { createRequire } from "module";
+import { Readable } from "stream";
 import cors from "cors";
 import { createOpenAI, openai } from "@ai-sdk/openai";
+import { InvalidArgumentError } from "@ai-sdk/provider";
+import { delay as originalDelay } from "@ai-sdk/provider-utils";
+import type { TextStreamPart, ToolSet } from "ai";
 import { convertToCoreMessages, generateText, streamText } from "ai";
 import dotenv from "dotenv";
 
@@ -48,21 +51,143 @@ const corsOptions: CorsOptions = {
 
 app.use(cors(corsOptions));
 
+const CHUNKING_REGEXPS = {
+  line: /\n+/m,
+  list: /.{8}/m,
+  word: /\S+\s+/m,
+};
+
+/**
+ * Detects the first chunk in a buffer.
+ *
+ * @param buffer - The buffer to detect the first chunk in.
+ * @returns The first detected chunk, or `undefined` if no chunk was detected.
+ */
+type ChunkDetector = (buffer: string) => string | null | undefined;
+type Delayer = (buffer: string) => number;
+
+function smoothStream<TOOLS extends ToolSet>({
+  _internal: { delay = originalDelay } = {},
+  chunking = "word",
+  delayInMs = 10,
+}: {
+  _internal?: {
+    delay?: (delayInMs: number | null) => Promise<void>;
+  };
+  chunking?: ChunkDetector | RegExp | "line" | "word";
+  delayInMs?: Delayer | number | null;
+} = {}) {
+  let detectChunk: ChunkDetector;
+
+  if (typeof chunking === "function") {
+    detectChunk = chunking;
+  } else {
+    const chunkingRegex =
+      typeof chunking === "string" ? CHUNKING_REGEXPS[chunking] : chunking;
+    if (!chunkingRegex) {
+      throw new InvalidArgumentError({
+        argument: "chunking",
+        message: `Invalid chunking type`,
+      });
+    }
+
+    detectChunk = (buffer) => {
+      const match = chunkingRegex.exec(buffer);
+      if (!match) return null;
+      return buffer.slice(0, match.index) + match[0];
+    };
+  }
+
+  return () => {
+    let buffer = "";
+
+    return new TransformStream<TextStreamPart<TOOLS>, TextStreamPart<TOOLS>>({
+      async transform(chunk, controller) {
+        if (chunk.type !== "text-delta") {
+          if (buffer.length > 0) {
+            controller.enqueue({ type: "text-delta", textDelta: buffer });
+            buffer = "";
+          }
+          controller.enqueue(chunk);
+          return;
+        }
+
+        buffer += chunk.textDelta;
+
+        let match;
+        while ((match = detectChunk(buffer)) != null) {
+          controller.enqueue({ type: "text-delta", textDelta: match });
+          buffer = buffer.slice(match.length);
+          const ms =
+            typeof delayInMs === "number"
+              ? delayInMs
+              : (delayInMs?.(buffer) ?? 10);
+          await delay(ms);
+        }
+      },
+    });
+  };
+}
+
 // AI Command Streaming Endpoint
 // @ts-expect-error - overload type error
 app.post("/api/ai/command", async (req, res) => {
-  const { messages, model = "gpt-4", system } = req.body;
-  const apiKey = process.env.OPENAI_API_KEY;
+  const { apiKey: key, messages, model = "gpt-4o", system } = req.body;
+  const apiKey = key || process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return res.status(401).json({ error: "Missing OpenAI API key." });
   }
 
-  // Real AI response if API key is available
   const openai = createOpenAI({ apiKey });
+
+  let isInCodeBlock = false;
+  let isInTable = false;
+  let isInList = false;
+  let isInLink = false;
 
   try {
     const result = streamText({
+      experimental_transform: smoothStream({
+        chunking: (buffer) => {
+          if (/```[^\s]+/.test(buffer)) {
+            isInCodeBlock = true;
+          } else if (isInCodeBlock && buffer.includes("```")) {
+            isInCodeBlock = false;
+          }
+
+          if (buffer.includes("http") || buffer.includes("https")) {
+            isInLink = true;
+          } else if (buffer.includes("\n") && isInLink) {
+            isInLink = false;
+          }
+
+          if (buffer.includes("*") || buffer.includes("-")) {
+            isInList = true;
+          } else if (buffer.includes("\n") && isInList) {
+            isInList = false;
+          }
+
+          if (!isInTable && buffer.includes("|")) {
+            isInTable = true;
+          } else if (isInTable && buffer.includes("\n\n")) {
+            isInTable = false;
+          }
+
+          let match;
+          if (isInCodeBlock || isInTable || isInLink) {
+            match = CHUNKING_REGEXPS.line.exec(buffer);
+          } else if (isInList) {
+            match = CHUNKING_REGEXPS.list.exec(buffer);
+          } else {
+            match = CHUNKING_REGEXPS.word.exec(buffer);
+          }
+
+          if (!match) return null;
+          return buffer.slice(0, match.index) + match[0];
+        },
+        delayInMs: () => (isInCodeBlock || isInTable ? 100 : 30),
+      }),
       maxTokens: 2048,
       messages: convertToCoreMessages(messages),
       model: openai(model),
@@ -79,24 +204,41 @@ app.post("/api/ai/command", async (req, res) => {
 // AI Copilot Endpoint
 // @ts-expect-error - overload type error
 app.post("/api/ai/copilot", async (req, res) => {
-  try {
-    const { model = "gpt-4", prompt, system } = req.body;
-    const apiKey = process.env.OPENAI_API_KEY;
+  const { apiKey: key, model = "gpt-4o-mini", prompt, system } = req.body;
+  const apiKey = key || process.env.OPENAI_API_KEY;
 
-    if (!apiKey) {
-      return res.status(401).json({ error: "Missing OpenAI API key." });
+  if (!apiKey) {
+    return res.status(401).json({ error: "Missing OpenAI API key." });
+  }
+
+  const openai = createOpenAI({ apiKey });
+
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  // Abort the operation if client disconnects
+  req.on("close", () => {
+    if (res.writableEnded === false) {
+      controller.abort();
     }
+  });
 
+  try {
     const result = await generateText({
-      // abortSignal: req.signal,
+      abortSignal: signal,
       maxTokens: 50,
       model: openai(model),
       prompt,
       system,
       temperature: 0.7,
     });
+
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === "AbortError") {
+      return res.status(408).json(null);
+    }
+
     console.error("AI Copilot Error:", error);
     res.status(500).json({ error: "Failed to process AI request" });
   }
@@ -167,7 +309,6 @@ for (const lixApp of lixApps) {
     }
   });
 }
-
 
 // Start the server
 const port = 3005;
