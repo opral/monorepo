@@ -3,13 +3,16 @@ import { fileURLToPath } from "url";
 import fs from "fs";
 import { dirname, join } from "path";
 import { createRequire } from "module";
-import { Readable } from "stream";
 import cors from "cors";
-import { createOpenAI, openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { InvalidArgumentError } from "@ai-sdk/provider";
 import { delay as originalDelay } from "@ai-sdk/provider-utils";
 import type { TextStreamPart, ToolSet } from "ai";
 import { convertToCoreMessages, generateText, streamText } from "ai";
+import {
+  createServerProtocolHandler,
+  createLspInMemoryEnvironment,
+} from "@lix-js/sdk";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -213,19 +216,19 @@ app.post("/api/ai/copilot", async (req, res) => {
 
   const openai = createOpenAI({ apiKey });
 
-  const controller = new AbortController();
-  const { signal } = controller;
+  // const controller = new AbortController();
+  // const { signal } = controller;
 
   // Abort the operation if client disconnects
-  req.on("close", () => {
-    if (res.writableEnded === false) {
-      controller.abort();
-    }
-  });
+  // req.on("close", () => {
+  //   if (res.writableEnded === false) {
+  //     controller.abort();
+  //   }
+  // });
 
   try {
     const result = await generateText({
-      abortSignal: signal,
+      // abortSignal: req.signal,
       maxTokens: 50,
       model: openai(model),
       prompt,
@@ -309,6 +312,24 @@ for (const lixApp of lixApps) {
     }
   });
 }
+
+// LSP Handler
+const lspHandler = await createServerProtocolHandler({
+  environment: createLspInMemoryEnvironment(),
+});
+
+app.use("/lsp/*", async (req, res) => {
+  const fetchRequest = new Request(req.url, {
+    method: req.method,
+    headers: req.headers as any,
+    body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
+  });
+
+  const response = await lspHandler(fetchRequest);
+  res.status(response.status);
+  response.headers.forEach((value, key) => res.setHeader(key, value));
+  res.send(await response.text());
+});
 
 // Start the server
 const port = 3005;
