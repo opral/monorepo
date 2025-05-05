@@ -12,8 +12,8 @@ import { Caption, CaptionTextarea } from './caption';
 export const MediaFileElement = withHOC(
   ResizableProvider,
   withRef<typeof PlateElement>(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ({ children, className, nodeProps, ...props }, ref) => {
+
+    ({ children, className, ...props }, ref) => {
       const readOnly = useReadOnly();
 
       const { name, unsafeUrl } = useMediaState();

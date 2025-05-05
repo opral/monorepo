@@ -62,8 +62,7 @@ const CONTENT: Record<
 export const MediaPlaceholderElement = withHOC(
   PlaceholderProvider,
   withRef<typeof PlateElement>(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ({ children, className, nodeProps, ...props }, ref) => {
+    ({ children, className, ...props }, ref) => {
       const editor = props.editor;
       const element = props.element as TPlaceholderElement;
 
@@ -292,9 +291,8 @@ export function formatBytes(
 
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
-  return `${(bytes / Math.pow(1024, i)).toFixed(decimals)} ${
-    sizeType === 'accurate'
-      ? (accurateSizes[i] ?? 'Bytest')
-      : (sizes[i] ?? 'Bytes')
-  }`;
+  return `${(bytes / Math.pow(1024, i)).toFixed(decimals)} ${sizeType === 'accurate'
+    ? (accurateSizes[i] ?? 'Bytest')
+    : (sizes[i] ?? 'Bytes')
+    }`;
 }

@@ -1,6 +1,6 @@
 
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import { withRef } from '@udecode/cn';
 import { getMentionOnSelectItem } from '@udecode/plate-mention';

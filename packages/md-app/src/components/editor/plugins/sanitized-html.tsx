@@ -27,7 +27,11 @@ export const SanitizedElementLeaf = ({
 
 		// debugger;
 		return (
-			<PlateLeaf asChild className={className} {...props} contentEditable={false}>
+			<PlateLeaf className={className} {...props} attributes={{
+				...props.attributes,
+				contentEditable: false,
+				asChild: true,
+			}}>
 				<>
 					<span style={{ display: "inline-block", textAlign: "initial" }}>
 						<img
@@ -39,7 +43,11 @@ export const SanitizedElementLeaf = ({
 		);
 	}
 	return (
-		<PlateLeaf asChild className={className} {...props} contentEditable={false}>
+		<PlateLeaf className={className}  {...props} attributes={{
+			...props.attributes,
+			contentEditable: false,
+			asChild: true,
+		}}>
 			<code>
 				<pre className="whitespace-pre-wrap">{element.value}</pre>
 			</code>

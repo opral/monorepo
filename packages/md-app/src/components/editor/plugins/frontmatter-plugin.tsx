@@ -8,7 +8,10 @@ export const FrontMatterElement = ({
 	...props
 }: PlateLeafProps) => {
   return (
-		<PlateLeaf asChild className={className} {...props}>
+		<PlateLeaf className={className} {...props} attributes={{
+			...props.attributes,
+			asChild: true,
+		}}>
 			<code>{element.value}</code>
 		</PlateLeaf>
 	);

@@ -20,8 +20,7 @@ import {
 export const MediaVideoElement = withHOC(
   ResizableProvider,
   withRef<typeof PlateElement>(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ({ children, className, nodeProps, ...props }, ref) => {
+    ({ children, className, ...props }, ref) => {
       const {
         align = 'center',
         embed,
@@ -43,7 +42,7 @@ export const MediaVideoElement = withHOC(
       });
 
       return (
-        <PlateElement ref={ref} className={cn(className, 'py-2.5')} {...props}>
+        <PlateElement {...props} ref={ref} className={cn(className, 'py-2.5')}>
           <figure
             className="relative m-0 cursor-default"
             contentEditable={false}

@@ -10,7 +10,6 @@ import { LixImage } from './lix-image';
 export function ImageElementStatic({
   children,
   className,
-  nodeProps,
   ...props
 }: SlateElementProps) {
   const {
@@ -27,7 +26,6 @@ export function ImageElementStatic({
     <SlateElement
       className={cn(className, 'py-2.5')}
       {...props}
-      nodeProps={nodeProps}
     >
       <figure className="group relative m-0 inline-block" style={{ width }}>
         <div
@@ -39,9 +37,8 @@ export function ImageElementStatic({
               'w-full max-w-full cursor-default object-cover px-0',
               'rounded-sm'
             )}
-            alt=""
+            alt={props.attributes?.alt}
             src={url || ''}
-            {...nodeProps}
           />
           {caption && (
             <figcaption className="mx-auto mt-2 h-[24px] max-w-full">

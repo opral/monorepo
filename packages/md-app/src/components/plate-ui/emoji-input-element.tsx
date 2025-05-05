@@ -1,6 +1,6 @@
 
 
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { withRef } from '@udecode/cn';
 import { EmojiInlineIndexSearch, insertEmoji } from '@udecode/plate-emoji';

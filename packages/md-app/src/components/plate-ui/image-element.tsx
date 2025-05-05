@@ -11,7 +11,7 @@ import { LixImage } from './lix-image';
 import { MediaPopover } from './media-popover';
 
 export const ImageElement = withRef<typeof PlateElement>(
-  ({ children, className, nodeProps, ...props }, ref) => {
+  ({ children, className, ...props }, ref) => {
     const { align = 'center', focused, readOnly, selected } = useMediaState();
 
     const { isDragging, handleRef } = useDraggable({
@@ -36,7 +36,6 @@ export const ImageElement = withRef<typeof PlateElement>(
                 )}
                 alt={props.element.alt as string || ''}
                 src={props.element.url as string || ''}
-                {...nodeProps}
               />
             </div>
 

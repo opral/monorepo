@@ -211,8 +211,6 @@ export const lixAtom = atom(async (get) => {
 		show: import.meta.env.DEV,
 	});
 
-	console.log("DEV: ", import.meta.env.DEV);
-
 	// lix.sqlite.createFunction("handle_save_lix_to_opfs", () => {
 	// 	saveLixToOpfs({ lix });
 	// 	return 0;

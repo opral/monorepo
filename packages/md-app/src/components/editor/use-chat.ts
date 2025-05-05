@@ -1,12 +1,25 @@
-import { faker } from "@faker-js/faker";
+import { useRef } from "react";
+
 import { useChat as useBaseChat } from "@ai-sdk/react";
+import { faker } from "@faker-js/faker";
 
 // import { useSettings } from "@/components/editor/settings";
 
-export const useChat = (options?: Parameters<typeof useBaseChat>[0]) => {
+export const useChat = (
+	options?: Parameters<typeof useBaseChat>[0]
+): ReturnType<typeof useBaseChat> & { _abortFakeStream: () => void } => {
 	// const { keys, model } = useSettings();
 
-	return useBaseChat({
+	// remove when you implement the route /api/ai/command
+	const abortControllerRef = useRef<AbortController | null>(null);
+	const _abortFakeStream = () => {
+		if (abortControllerRef.current) {
+			abortControllerRef.current.abort();
+			abortControllerRef.current = null;
+		}
+	};
+
+	const chat = useBaseChat({
 		id: "editor",
 		api: import.meta.env.PROD
 			? "https://lix.opral.com/api/ai/command"
@@ -32,11 +45,13 @@ export const useChat = (options?: Parameters<typeof useBaseChat>[0]) => {
 					isMarkdown = false;
 				}
 
+				abortControllerRef.current = new AbortController();
 				await new Promise((resolve) => setTimeout(resolve, 400));
 
 				const stream = fakeStreamText({
 					streamProtocol: "text",
 					isMarkdown,
+					signal: abortControllerRef.current.signal,
 				});
 
 				return new Response(stream, {
@@ -51,16 +66,20 @@ export const useChat = (options?: Parameters<typeof useBaseChat>[0]) => {
 		},
 		...options,
 	});
+
+	return { ...chat, _abortFakeStream };
 };
 
 // Used for testing. Remove it after implementing useChat api.
 const fakeStreamText = ({
 	chunkCount = 10,
 	isMarkdown = false,
+	signal,
 	streamProtocol = "data",
 }: {
 	chunkCount?: number;
 	isMarkdown?: boolean;
+	signal?: AbortSignal;
 	streamProtocol?: "data" | "text";
 } = {}) => {
 	// Create 3 blocks with different lengths
@@ -85,6 +104,17 @@ const fakeStreamText = ({
 
 	return new ReadableStream({
 		async start(controller) {
+			if (signal?.aborted) {
+				controller.error(new Error("Aborted before start"));
+				return;
+			}
+
+			const abortHandler = () => {
+				controller.error(new Error("Stream aborted"));
+			};
+
+			signal?.addEventListener("abort", abortHandler);
+
 			for (let i = 0; i < blocks.length; i++) {
 				const block = blocks[i];
 

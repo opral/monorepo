@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 
 import { cn, withRef } from '@udecode/cn';
 import { PlateLeaf } from '@udecode/plate/react';
