@@ -8,7 +8,7 @@
 
 > **mockJsonSnapshot**(`content`): `object`
 
-Defined in: [packages/lix-sdk/src/snapshot/mock-json-snapshot.ts:9](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/snapshot/mock-json-snapshot.ts#L9)
+Defined in: [packages/lix-sdk/src/snapshot/mock-json-snapshot.ts:9](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/snapshot/mock-json-snapshot.ts#L9)
 
 Util function for tests that creates a snapshot that looks like one you got returned from the database after inserting
 

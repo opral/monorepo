@@ -159,7 +159,7 @@ function transformSelections(
 					kind: "AliasNode",
 					node: {
 						kind: "FunctionNode",
-						func: "json",
+						func: "jsonb",
 						arguments: [
 							{
 								kind: "ReferenceNode",

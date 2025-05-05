@@ -54,10 +54,13 @@ export default function DataExplorer() {
 
     // Construct query based on selected table
     let sqlQuery = `SELECT * FROM "${selectedTable}" LIMIT 100;`;
+
     if (selectedTable === "snapshot") {
       // Use json() function for the content column
       // Corrected columns: id, content
       sqlQuery = `SELECT id, json(content) as content FROM snapshot LIMIT 100;`;
+    } else if (selectedTable === "key_value") {
+      sqlQuery = `SELECT key, json(value) as value FROM key_value LIMIT 100;`;
     }
 
     try {
@@ -178,19 +181,19 @@ export default function DataExplorer() {
   }, [tableDataResult]);
 
   // Log table auto-filter integration
-  useEffect(() => {
-    // Only auto-apply if log table exists and the log table is not already selected
-    const logFilter = window.localStorage.getItem("lix-inspector-log-filter");
-    if (tables.some((t) => t.name === "log") && selectedTable !== "log") {
-      setSelectedTable("log");
-      if (logFilter) {
-        setColumnFilters([{ id: "level", value: logFilter }]);
-        window.localStorage.removeItem("lix-inspector-log-filter");
-      } else {
-        setColumnFilters([]); // Show all logs if no filter
-      }
-    }
-  }, [tables, selectedTable]);
+  // useEffect(() => {
+  //   // Only auto-apply if log table exists and the log table is not already selected
+  //   const logFilter = window.localStorage.getItem("lix-inspector-log-filter");
+  //   if (tables.some((t) => t.name === "log") && selectedTable !== "log") {
+  //     setSelectedTable("log");
+  //     if (logFilter) {
+  //       setColumnFilters([{ id: "level", value: logFilter }]);
+  //       window.localStorage.removeItem("lix-inspector-log-filter");
+  //     } else {
+  //       setColumnFilters([]); // Show all logs if no filter
+  //     }
+  //   }
+  // }, [tables, selectedTable]);
 
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedTable(e.target.value);

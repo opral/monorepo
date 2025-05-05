@@ -8,7 +8,7 @@
 
 > **ChangeSetTable** = `object`
 
-Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:96](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/change-set/database-schema.ts#L96)
+Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:96](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/change-set/database-schema.ts#L96)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:96](https://gith
 
 > **id**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:97](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/change-set/database-schema.ts#L97)
+Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:97](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/change-set/database-schema.ts#L97)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:97](https://gith
 
 > **immutable\_elements**: `Generated`\<`boolean`\>
 
-Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:102](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/change-set/database-schema.ts#L102)
+Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:102](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/change-set/database-schema.ts#L102)
 
 Carefull (!) when querying the database. The return value will be `0` or `1`.
 SQLite does not have a boolean select type https://www.sqlite.org/datatype3.html.

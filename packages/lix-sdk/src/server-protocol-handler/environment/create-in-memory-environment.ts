@@ -35,22 +35,6 @@ export const createLspInMemoryEnvironment = (): LspEnvironment => {
 	const openConnections = new Map<string, Set<string>>();
 
 	return {
-		async get(key: string): Promise<Blob | undefined> {
-			return store.get(key);
-		},
-
-		async set(key: string, value: Blob): Promise<void> {
-			store.set(key, value);
-		},
-
-		async delete(key: string): Promise<void> {
-			store.delete(key);
-		},
-
-		async has(key: string): Promise<boolean> {
-			return store.has(key);
-		},
-
 		async hasLix(args) {
 			return store.has(args.id);
 		},

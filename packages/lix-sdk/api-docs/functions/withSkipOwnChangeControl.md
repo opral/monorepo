@@ -8,7 +8,7 @@
 
 > **withSkipOwnChangeControl**\<`T`\>(`db`, `operation`): `Promise`\<`T`\>
 
-Defined in: [packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts:3](https://github.com/opral/monorepo/blob/319d0a05c320245f48086433fd248754def09ccc/packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts#L3)
+Defined in: [packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts:3](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts#L3)
 
 ## Type Parameters
 

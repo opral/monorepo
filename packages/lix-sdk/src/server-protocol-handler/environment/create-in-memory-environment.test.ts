@@ -93,7 +93,7 @@ test("it handles concurrent connections", async () => {
 			await trx
 				.updateTable("key_value")
 				.where("key", "=", "foo")
-				.set("value", "bar2")
+				.set({ value: "bar2" })
 				.execute();
 			// Introduce a delay to simulate processing time
 			// and keep the transaction open
@@ -106,7 +106,7 @@ test("it handles concurrent connections", async () => {
 			return trx
 				.updateTable("key_value")
 				.where("key", "=", "foo")
-				.set("value", "bar3")
+				.set({ value: "bar3" })
 				.execute();
 		}),
 	]);
