@@ -52,7 +52,9 @@ export function localizeHref(href, options) {
 	if (href.startsWith("/") && url.origin === localized.origin) {
 		// check for cross origin localization in which case an absolute URL must be returned.
 		if (locale !== currentLocale) {
-			const localizedCurrentLocale = localizeUrl(url, { locale: currentLocale });
+			const localizedCurrentLocale = localizeUrl(url, {
+				locale: currentLocale,
+			});
 			if (localizedCurrentLocale.origin !== localized.origin) {
 				return localized.href;
 			}
