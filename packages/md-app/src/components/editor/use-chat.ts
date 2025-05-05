@@ -22,7 +22,7 @@ export const useChat = (
 	const chat = useBaseChat({
 		id: "editor",
 		api: import.meta.env.PROD
-			? "https://lix.opral.com/api/ai/command"
+			? "https://lix.host/api/ai/command"
 			: "http://localhost:3005/api/ai/command",
 		streamProtocol: "text",
 		// body: {

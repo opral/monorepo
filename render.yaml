@@ -63,7 +63,7 @@ services:
     autoDeploy: true
     branch: main
     staticPublishPath: ./inlang/packages/fink2/dist
-    routes: 
+    routes:
       - type: rewrite
         source: /*
         destination: /index.html
@@ -108,9 +108,9 @@ services:
     region: frankfurt
     plan: standard
     branch: main
-    # corepack has some key matching issues. disable the checks for now. 
+    # corepack has some key matching issues. disable the checks for now.
     buildCommand: npm i pnpm@10 -g --force && pnpm install && pnpm run --filter @inlang/server... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production 
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production
     autoDeploy: true
     envVars:
       - key: PORT
@@ -121,9 +121,9 @@ services:
         - inlang/packages/website/**
         - inlang/packages/marketplace-registry/**
         - inlang/packages/**/marketplace-manifest.json
-        - '**/*.md'
+        - "**/*.md"
       ignoredPaths:
-        - '**/CHANGELOG.md'
+        - "**/CHANGELOG.md"
     domains:
       - inlang.com
 
@@ -263,7 +263,7 @@ services:
     branch: add-parrot-figma
     staticPublishPath: ./inlang/packages/parrot-figma/dist
     # buildCommand: pnpm install && pnpm run --filter csv-app... build
-    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build 
+    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build
     buildFilter:
       paths:
         - ./inlang/packages/parrot-figma/**

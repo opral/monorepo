@@ -80,7 +80,7 @@ export const lixAtom = atom(async (get) => {
 					new Request(
 						import.meta.env.PROD
 							? "https://lix.host/lsa/get-v1"
-							: "http://localhost:3000/lsa/get-v1",
+							: "http://localhost:3005/lsa/get-v1",
 						{
 							method: "POST",
 							headers: {
@@ -166,10 +166,10 @@ export const lixAtom = atom(async (get) => {
 	// TODO use env varibale
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
-	// : "http://localhost:3000";
+	// : "http://localhost:3005";
 	// const serverUrl = import.meta.env.PROD
 	// 	? "https://lix.host"
-	// 	: "http://localhost:3000";
+	// 	: "http://localhost:3005";
 
 	// await lix.db
 	// 	.insertInto("key_value")

@@ -80,7 +80,7 @@ export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
 }
 
 export const serverUrl = import.meta.env.PROD
-	? "https://lix-md.onrender.com"
+	? "https://lix.host/app/flashtype"
 	: "http://localhost:3009";
 
 export const welcomeMd = `# Flashtype.ai ⚡️

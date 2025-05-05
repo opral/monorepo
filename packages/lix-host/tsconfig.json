@@ -1,18 +1,12 @@
 {
-	"extends": "@opral/tsconfig/default",
-	"include": ["src/**/*"],
-	"compilerOptions": {
-		"allowJs": false,
-		"checkJs": false,
-		// isolated declarations lead to substantially faster build times
-		// which is overproportionally useful in a monorepo
-		// https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#isolated-declarations
-		"isolatedDeclarations": true,
-		"allowImportingTsExtensions": false,
-		"emitDeclarationOnly": false,
-		"module": "Node16",
-		"lib": ["ESNext", "DOM"],
-		"outDir": "./dist",
-		"rootDir": "./src"
-	}
+  "extends": "@opral/tsconfig/default",
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    // DOM because of fetch. TODO: extract fetch from this package and
+    // let fetch be provided by the environment.
+    "lib": ["ESNext", "DOM"],
+    "types": ["node"],
+    "outDir": "./dist",
+    "rootDir": "./src"
+  }
 }
