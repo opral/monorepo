@@ -6,6 +6,7 @@ import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of
 import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
 import { createThread } from "../thread/create-thread.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
+import { LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID } from "./database-triggers.js";
 
 test("it works for inserts, updates and deletions", async () => {
 	const lix = await openLixInMemory({});
@@ -200,6 +201,24 @@ test("file.data is not own change controlled as plugins handle the change contro
 
 	expect(change.content?.data).toBe(undefined);
 });
+
+test("the pending change set is immediately 'flushed' when a change is inserted", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "key0", value: "value0" })
+		.execute();
+
+	const changeSet = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(changeSet).toBeUndefined();
+});
+
 
 test("updating file.data does not trigger own change control", async () => {
 	const lix = await openLixInMemory({});
