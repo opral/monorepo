@@ -227,7 +227,6 @@ const menuStateItems: Record<
   cursorCommand: [
     {
       items: [
-        aiChatItems.generateMarkdownSample,
         aiChatItems.continueWrite,
         aiChatItems.summarize,
         aiChatItems.explain,
@@ -262,6 +261,11 @@ const menuStateItems: Record<
     },
   ],
 };
+
+if (import.meta.env.DEV) {
+  menuStateItems.cursorCommand[0].items.push(aiChatItems.generateMarkdownSample);
+}
+
 
 export const AIMenuItems = ({
   setValue,

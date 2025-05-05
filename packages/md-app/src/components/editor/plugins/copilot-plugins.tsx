@@ -7,8 +7,10 @@ import { CopilotPlugin } from '@udecode/plate-ai/react';
 import { serializeMd, stripMarkdown } from '@udecode/plate-markdown';
 
 import { GhostText } from '@/components/plate-ui/ghost-text';
+import { ExtendedMarkdownPlugin } from './markdown/markdown-plugin';
 
 export const copilotPlugins = [
+  ExtendedMarkdownPlugin,
   CopilotPlugin.configure(({ api }) => ({
     options: {
       completeOptions: {
@@ -50,7 +52,7 @@ export const copilotPlugins = [
         if (!contextEntry) return '';
 
         const prompt = serializeMd(editor, {
-          value:[contextEntry[0] as TElement]
+          value: [contextEntry[0] as TElement],
         });
 
         return `Continue the text up to the next punctuation mark:
