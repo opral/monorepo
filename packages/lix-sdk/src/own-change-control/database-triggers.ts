@@ -200,6 +200,14 @@ export function applyOwnChangeControlTriggers(
 					if (pending.length === 0) return 0;
 
 					sqlite.exec(`
+					INSERT INTO log (key, level, message)
+					VALUES (
+						'lix.own_change_control.begin_commit_hook',
+						'debug',
+						'current change_set_id=' || (SELECT change_set_id FROM version WHERE id = (SELECT version_id FROM active_version))
+					);
+
+
           INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
           VALUES ('lix_flushing_own_changes', jsonb(json_quote('true')), true);
 
@@ -222,9 +230,13 @@ export function applyOwnChangeControlTriggers(
 
 					INSERT INTO log (key, level, message)
 					VALUES (
-						'lix.own_change_control.flushed_changes_after_commit',
+						'lix.own_change_control.end_commit_hook',
 						'debug',
-						changes() || ' changes have been flushed to change_set_id ' || (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
+						'new change_set_id=' || (
+							SELECT change_set_id
+							FROM version
+							WHERE id = (SELECT version_id FROM active_version)
+						)
 					);
         `);
 					return 0;
