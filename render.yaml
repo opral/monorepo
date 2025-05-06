@@ -47,6 +47,8 @@ services:
       - fromGroup: production
       - key: PORT
         value: 3005
+      - key: NODE_VERSION
+        value: 22.11.0
     buildFilter:
       paths:
         - packages/lix-host/**
