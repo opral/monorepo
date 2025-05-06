@@ -40,7 +40,7 @@ services:
     plan: starter
     branch: main
     pullRequestPreviewsEnabled: false
-    buildCommand: corepack enable && pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
+    buildCommand: pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
     startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host production
     autoDeploy: true
     envVars:
