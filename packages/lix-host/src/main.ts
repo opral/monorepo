@@ -247,6 +247,10 @@ app.post("/api/ai/copilot", async (req, res) => {
   }
 });
 
+app.get(["", "/"], (req, res) => {
+  res.redirect("/app/fm");
+});
+
 // Middleware to forward browser fetch requests to the correct subpath
 app.use((req, res, next) => {
   // Skip for /file-manager
