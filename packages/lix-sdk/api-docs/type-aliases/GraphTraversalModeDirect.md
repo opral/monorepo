@@ -8,7 +8,7 @@
 
 > **GraphTraversalModeDirect** = `object`
 
-Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:37](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/database/graph-traversal-mode.ts#L37)
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:37](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/database/graph-traversal-mode.ts#L37)
 
 Direct mode: Only the specified node is included.
 
@@ -39,4 +39,4 @@ const mode: GraphTraversalMode = { type: "direct" };
 
 > **type**: `"direct"`
 
-Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:38](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/database/graph-traversal-mode.ts#L38)
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:38](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/database/graph-traversal-mode.ts#L38)

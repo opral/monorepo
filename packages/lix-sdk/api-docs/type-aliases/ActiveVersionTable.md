@@ -8,7 +8,7 @@
 
 > **ActiveVersionTable** = `object`
 
-Defined in: [packages/lix-sdk/src/version/database-schema.ts:227](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/version/database-schema.ts#L227)
+Defined in: [packages/lix-sdk/src/version/database-schema.ts:227](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/version/database-schema.ts#L227)
 
 ## Properties
 
@@ -16,4 +16,4 @@ Defined in: [packages/lix-sdk/src/version/database-schema.ts:227](https://github
 
 > **version\_id**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/version/database-schema.ts:228](https://github.com/opral/monorepo/blob/0c842a72d3025295846c020e08a97bf5148757a1/packages/lix-sdk/src/version/database-schema.ts#L228)
+Defined in: [packages/lix-sdk/src/version/database-schema.ts:228](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/version/database-schema.ts#L228)
