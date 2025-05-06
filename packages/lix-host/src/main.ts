@@ -27,7 +27,7 @@ const app = express();
 app.use(express.json());
 
 // CORS Configuration
-const allowedOrigins = ["https://lix.opral.com", "https://lix-md.onrender.com"];
+const allowedOrigins = ["https://lix.opral.com", "https://lix.host"];
 
 if (process.env.NODE_ENV !== "production") {
   allowedOrigins.push("http://localhost:3005", "http://localhost:3009");
