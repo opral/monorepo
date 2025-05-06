@@ -89,21 +89,6 @@ services:
     envVars:
       - fromGroup: production
 
-  - name: lix-md
-    type: web
-    runtime: static
-    autoDeploy: true
-    branch: md-app
-    staticPublishPath: ./packages/md-app/dist
-    buildCommand: pnpm install && pnpm run --filter md-app... build
-    buildFilter:
-      paths:
-        - packages/md-app/**
-    envVars:
-      - fromGroup: production
-      - key: NODE_VERSION
-        value: 22.12.0
-
   - name: inlang-website
     type: web
     runtime: node
@@ -262,7 +247,7 @@ services:
     runtime: static
     autoDeploy: true
     # TODO replace with main when we deploy parrot-figma in prod
-    branch: add-parrot-figma
+    branch: main
     staticPublishPath: ./inlang/packages/parrot-figma/dist
     # buildCommand: pnpm install && pnpm run --filter csv-app... build
     buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build
