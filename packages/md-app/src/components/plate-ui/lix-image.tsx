@@ -4,6 +4,7 @@ import { Spinner } from './spinner';
 import { useAtom } from 'jotai';
 import { lixAtom } from '@/state';
 import { cn } from '@udecode/cn';
+import { serverUrl } from '@/helper/welcomeLixFile';
 
 interface LixImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -21,7 +22,7 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
   const timestampRef = useRef<number>(Date.now());
   // Store the fileId for this image to respond to replacement events
   const fileIdRef = useRef<string | null>(null);
-  
+
   // Extract fileId from a Lix URL
   const extractFileId = (url: string): string | null => {
     try {
@@ -35,13 +36,13 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
 
   // Encapsulate the image loading logic to make it reusable
   const loadImage = useCallback(async (imageUrl: string) => {
-    if (!imageUrl || !imageUrl.startsWith('https://lix.host') || imageUrl.startsWith('https://lix.host/app/flashtype/images')) {
+    if (!imageUrl || !imageUrl.startsWith(serverUrl) || imageUrl.startsWith(`${serverUrl}/images/`)) {
       return;
     }
-    
+
     setLoading(true);
     setError(false);
-    
+
     try {
       // Extract file ID from URL
       const fileId = extractFileId(imageUrl);
@@ -81,8 +82,8 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
 
   // Handle image replaced events
   const handleImageReplaced = useCallback((event: Event) => {
-    const customEvent = event as CustomEvent<{fileId: string, timestamp: number}>;
-    
+    const customEvent = event as CustomEvent<{ fileId: string, timestamp: number }>;
+
     // If this is our fileId, reload the image
     if (customEvent.detail.fileId === fileIdRef.current) {
       console.log(`Image ${fileIdRef.current} was replaced, reloading...`);
@@ -96,7 +97,7 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
     setLoading(false);
     setError(false);
     setObjectUrl(null);
-    
+
     // Generate new timestamp for cache busting
     timestampRef.current = Date.now();
 
@@ -107,7 +108,7 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
     }
 
     // Only process if src is a https://lix.host URL
-    if (!src.startsWith('https://lix.host')) {
+    if (!src.startsWith(serverUrl) || src.startsWith(`${serverUrl}/images/`)) {
       setObjectUrl(src);
       return;
     }
@@ -121,7 +122,7 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
     // Cleanup function to revoke object URL and remove event listener
     return () => {
       window.removeEventListener(IMAGE_REPLACED_EVENT, handleImageReplaced);
-      
+
       if (objectUrl && objectUrl !== src && objectUrl.startsWith('blob:')) {
         URL.revokeObjectURL(objectUrl);
       }
