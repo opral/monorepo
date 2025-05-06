@@ -21,7 +21,7 @@ export async function applyChangeSet(args: {
 	 *
 	 * @default true
 	 */
-	updateVersion?: boolean;
+	updateVersionChangeSetId?: boolean;
 	/**
 	 * The {@link GraphTraversalMode} for applying the change set.
 	 *
@@ -41,33 +41,6 @@ export async function applyChangeSet(args: {
 						.innerJoin("version", "version.id", "active_version.version_id")
 						.selectAll("version")
 						.executeTakeFirstOrThrow());
-
-				//* NOTE: the creationd and handling of parent relationships
-				//* depends on the appliance of the change set to the version.
-				//*
-				//* if the version already has changes c1:e1 and the proposed
-				//* change set has changes c1:e1 and c2:e2, the diff is c2:e2.
-				//* only storing the diff as new change set can be a future optimzation.
-				// update the version to point to the new change set
-				if (args.updateVersion ?? true) {
-					await trx
-						.updateTable("version")
-						.set({ change_set_id: args.changeSet.id })
-						.where("id", "=", version.id)
-						.execute();
-
-					// add a parent relationship
-					if (version.change_set_id !== args.changeSet.id) {
-						await trx
-							.insertInto("change_set_edge")
-							.values({
-								parent_id: version.change_set_id,
-								child_id: args.changeSet.id,
-							})
-							.onConflict((oc) => oc.doNothing())
-							.execute();
-					}
-				}
 
 				// Select changes associated with the specified change set
 				let query = trx
@@ -169,6 +142,32 @@ export async function applyChangeSet(args: {
 							.insertInto("file")
 							.values(resultingFile)
 							.onConflict((oc) => oc.doUpdateSet(resultingFile))
+							.execute();
+					}
+				}
+				//* NOTE: the creationd and handling of parent relationships
+				//* depends on the appliance of the change set to the version.
+				//*
+				//* if the version already has changes c1:e1 and the proposed
+				//* change set has changes c1:e1 and c2:e2, the diff is c2:e2.
+				//* only storing the diff as new change set can be a future optimzation.
+				// update the version to point to the new change set
+				if (args.updateVersionChangeSetId ?? true) {
+					await trx
+						.updateTable("version")
+						.set({ change_set_id: args.changeSet.id })
+						.where("id", "=", version.id)
+						.execute();
+
+					// add a parent relationship
+					if (version.change_set_id !== args.changeSet.id) {
+						await trx
+							.insertInto("change_set_edge")
+							.values({
+								parent_id: version.change_set_id,
+								child_id: args.changeSet.id,
+							})
+							.onConflict((oc) => oc.doNothing())
 							.execute();
 					}
 				}
