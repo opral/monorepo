@@ -45,8 +45,8 @@ const ListItems = ({ id, type, name, appLink }: ListItemsProps) => {
 		e.stopPropagation();
 		await lix.db.deleteFrom("file").where("id", "=", id).execute();
 		await saveLixToOpfs({ lix });
-		const lixId = searchParams.get("l");
-		return navigate(`/?l=${lixId}`);
+		const lixId = searchParams.get("lix");
+		return navigate(`/?lix=${lixId}`);
 	};
 
 	const handleDownload = async () => {

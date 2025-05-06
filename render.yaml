@@ -16,26 +16,20 @@ services:
     domains:
       - opral.com
 
-  - name: lix-website-server
+  - name: lix-website
     type: web
-    runtime: node
-    region: frankfurt
-    plan: starter
+    runtime: static
     branch: main
-    pullRequestPreviewsEnabled: false
-    buildCommand: pnpm --filter lix-website-server... i && pnpm --filter lix-website-server... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter lix-website-server production
-    autoDeploy: true
+    staticPublishPath: ./packages/lix-website/dist
     envVars:
       - fromGroup: production
       - key: PORT
-        value: 3005
+        value: 3006
+    buildCommand: pnpm --filter lix-website... i && pnpm --filter lix-website... build
+    autoDeploy: true
     buildFilter:
       paths:
-        - packages/lix-website-server/**
         - packages/lix-website/**
-        - packages/lix-file-manager/**
-        - packages/csv-app/**
     domains:
       - lix.opral.com
 
@@ -47,16 +41,19 @@ services:
     branch: main
     pullRequestPreviewsEnabled: false
     buildCommand: corepack enable && pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host start
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host production
     autoDeploy: true
     envVars:
       - fromGroup: production
       - key: PORT
-        value: 3000
+        value: 3005
     buildFilter:
       paths:
         - packages/lix-host/**
         - packages/lix-sdk/**
+        - packages/lix-file-manager/**
+        - packages/csv-app/**
+        - packages/md-app/**
     domains:
       - lix.host
 
@@ -66,7 +63,7 @@ services:
     autoDeploy: true
     branch: main
     staticPublishPath: ./inlang/packages/fink2/dist
-    routes: 
+    routes:
       - type: rewrite
         source: /*
         destination: /index.html
@@ -111,9 +108,9 @@ services:
     region: frankfurt
     plan: standard
     branch: main
-    # corepack has some key matching issues. disable the checks for now. 
+    # corepack has some key matching issues. disable the checks for now.
     buildCommand: npm i pnpm@10 -g --force && pnpm install && pnpm run --filter @inlang/server... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production 
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production
     autoDeploy: true
     envVars:
       - key: PORT
@@ -124,9 +121,9 @@ services:
         - inlang/packages/website/**
         - inlang/packages/marketplace-registry/**
         - inlang/packages/**/marketplace-manifest.json
-        - '**/*.md'
+        - "**/*.md"
       ignoredPaths:
-        - '**/CHANGELOG.md'
+        - "**/CHANGELOG.md"
     domains:
       - inlang.com
 
@@ -266,7 +263,7 @@ services:
     branch: add-parrot-figma
     staticPublishPath: ./inlang/packages/parrot-figma/dist
     # buildCommand: pnpm install && pnpm run --filter csv-app... build
-    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build 
+    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build
     buildFilter:
       paths:
         - ./inlang/packages/parrot-figma/**

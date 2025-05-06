@@ -5,7 +5,8 @@ import { Button } from "./ui/button.tsx";
 import { selectedChangeIdsAtom } from "@/state-active-file.ts";
 import { Checkbox } from "./ui/checkbox.tsx";
 import { lixAtom } from "@/state.ts";
-import { createChangeSet, createDiscussion } from "@lix-js/sdk";
+import { createThread } from "@lix-js/sdk";
+import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover.tsx";
 import { FormField, FormControl, FormItem, Form } from "./ui/form.tsx";
 import { FormProvider, useForm } from "react-hook-form";
@@ -18,7 +19,7 @@ const FilterSelect = () => {
   const [selectedChangeIds, setSelectedChangeIds] = useAtom(selectedChangeIdsAtom);
   const [lix] = useAtom(lixAtom);
   // TODO: replace with actual changes if this component is used again
-  const [changesCurrentVersion] = useState<{ id: string }[]>([]);
+  const [changesActiveVersion] = useState<{ id: string }[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const form = useForm({
     defaultValues: {
@@ -30,8 +31,8 @@ const FilterSelect = () => {
 
   const handleSelectAll = () => {
     // select or unset all changes
-    if (selectedChangeIds.length === 0 && changesCurrentVersion.length > 0) {
-      setSelectedChangeIds(changesCurrentVersion.map((change) => change.id));
+    if (selectedChangeIds.length === 0 && changesActiveVersion.length > 0) {
+      setSelectedChangeIds(changesActiveVersion.map((change) => change.id));
     } else {
       setSelectedChangeIds([]);
     }
@@ -40,23 +41,9 @@ const FilterSelect = () => {
   const handleAddDiscussion = async () => {
     const resolve = await lix.db.transaction().execute(
       async (trx) => {
-        const changeSet = await createChangeSet({
+        return await createThread({
 					lix: { ...lix, db: trx },
-					// TODO: get actual changes
-					elements: selectedChangeIds.map((id) => {
-						return {
-							file_id: id,
-							entity_id: id,
-							schema_key: id,
-							change_id: id,
-						};
-					}),
-				});
-
-        return await createDiscussion({
-					lix: { ...lix, db: trx },
-					changeSet,
-					firstComment: { content: discussionValue },
+          comments: [{ body: fromPlainText(discussionValue) }],
 				});
       }
     );
@@ -84,8 +71,8 @@ const FilterSelect = () => {
       <div className="pl-3 pr-2 py-1.5 w-full h-12 flex items-center gap-3 text-slate-500">
         <Checkbox
           onClick={handleSelectAll}
-          checked={changesCurrentVersion.length === selectedChangeIds.length}
-          minus={selectedChangeIds.length > 0 && changesCurrentVersion.length !== selectedChangeIds.length}
+          checked={changesActiveVersion.length === selectedChangeIds.length}
+          minus={selectedChangeIds.length > 0 && changesActiveVersion.length !== selectedChangeIds.length}
         />
         {selectedChangeIds.length > 0 && (
           <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>

@@ -83,7 +83,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 			const writable = await opfsFile.createWritable();
 			await writable.write(fileContent);
 			await writable.close();
-			navigate("?l=" + lixId.value);
+			navigate("?lix=" + lixId.value);
 		}
 	};
 

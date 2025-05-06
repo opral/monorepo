@@ -1,40 +1,40 @@
 {
-	"name": "@lix-js/host",
-	"private": true,
-	"type": "module",
-	"version": "0.0.17",
-	"license": "Apache-2.0",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": "./dist/index.js"
-	},
-	"scripts": {
-		"dev": "node --watch --experimental-strip-types ./src/main.ts",
-		"build": "tsc --build",
-		"start": "tsx ./src/main.ts",
-		"test": "tsc --noEmit",
-		"test:watch": "vitest",
-		"format": "prettier ./src --write"
-	},
-	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
-	"sideEffects": false,
-	"engines": {
-		"node": ">=22.6"
-	},
-	"dependencies": {
-		"@hono/node-server": "^1.13.7",
-		"@lix-js/sdk": "workspace:*",
-		"hono": "^4.6.11"
-	},
-	"devDependencies": {
-		"@opral/tsconfig": "workspace:*",
-		"@eslint/js": "^9.12.0",
-		"@vitest/coverage-v8": "^2.0.5",
-		"eslint": "^9.12.0",
-		"prettier": "^3.3.3",
-		"tsx": "^4.19.2",
-		"typescript": "^5.5.4",
-		"typescript-eslint": "^8.9.0",
-		"vitest": "^2.0.5"
-	}
+  "name": "@lix-js/host",
+  "type": "module",
+  "private": true,
+  "version": "0.0.16",
+  "scripts": {
+    "dev": "tsx watch ./src/main.ts",
+    "production": "NODE_ENV=production tsx ./src/main.ts",
+    "test": "tsc --noEmit",
+    "format": "prettier ./src --write",
+    "clean": "rm -rf ./dist ./node_modules"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^1.3.21",
+    "@ai-sdk/provider": "^1.1.3",
+    "@ai-sdk/provider-utils": "^2.2.7",
+    "@faker-js/faker": "^9.4.0",
+    "@lix-js/sdk": "workspace:*",
+    "@remix-run/express": "^2.15.1",
+    "ai": "^4.3.13",
+    "cors": "^2.8.5",
+    "csv-app": "workspace:*",
+    "dotenv": "^16.4.7",
+    "http-proxy-middleware": "^3.0.3",
+    "lix-file-manager": "workspace:*",
+    "lix-website": "workspace:*",
+    "md-app": "workspace:*"
+  },
+  "devDependencies": {
+    "@opral/tsconfig": "workspace:*",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.1",
+    "express": "^4.21.1",
+    "prettier": "^3.4.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.2"
+  },
+  "license": "Apache-2.0"
 }

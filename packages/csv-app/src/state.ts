@@ -10,13 +10,14 @@ import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demoLixFile.ts";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+import { initLixInspector } from "@lix-js/inspector";
 
 export const withPollingAtom = atom(Date.now());
 
 export const lixIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("l") || undefined;
+	return searchParams.get("lix") || undefined;
 });
 
 export const fileIdSearchParamsAtom = atom((get) => {
@@ -44,7 +45,7 @@ export const lixAtom = atom(async (get) => {
 					new Request(
 						import.meta.env.PROD
 							? "https://lix-host/lsp/get-v1"
-							: "http://localhost:3000/lsp/get-v1",
+							: "http://localhost:3005/lsp/get-v1",
 						{
 							method: "POST",
 							headers: {
@@ -83,8 +84,8 @@ export const lixAtom = atom(async (get) => {
 		} else {
 			lixBlob = await lixCsvDemoFile();
 		}
-	}	
-	
+	}
+
 	let lix: Lix;
 
 	try {
@@ -121,10 +122,10 @@ export const lixAtom = atom(async (get) => {
 	// TODO use env varibale
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
-	// : "http://localhost:3000";
+	// : "http://localhost:3005";
 	const serverUrl = import.meta.env.PROD
 		? "https://lix.host"
-		: "http://localhost:3000";
+		: "http://localhost:3005";
 
 	await lix.db
 		.insertInto("key_value")
@@ -139,9 +140,14 @@ export const lixAtom = atom(async (get) => {
 
 	if (lixId.value !== lixIdSearchParam) {
 		const url = new URL(window.location.href);
-		url.searchParams.set("l", lixId.value);
+		url.searchParams.set("lix", lixId.value);
 		window.location.href = url.toString();
 	}
+
+	await initLixInspector({
+		lix,
+		show: import.meta.env.DEV,
+	});
 
 	return lix;
 });
@@ -153,8 +159,8 @@ export const currentVersionAtom = atom<
 	const lix = await get(lixAtom);
 
 	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "version.id", "current_version.id")
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
 		.selectAll("version")
 		.executeTakeFirstOrThrow();
 

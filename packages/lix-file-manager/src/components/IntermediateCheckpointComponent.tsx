@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button.tsx";
 import ChangeDot from "./ChangeDot.tsx";
 import IconChevron from "@/components/icons/IconChevron.tsx";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, intermediateChangeIdsAtom, intermediateChangesAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, workingChangeSetAtom, intermediateChangesAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "./ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
-import { createDiscussion, UiDiffComponentProps } from "@lix-js/sdk";
-import { createCheckpoint } from "@/helper/createCheckpoint.ts";
+import { createCheckpoint, createThread, UiDiffComponentProps } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
+import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 
 export const IntermediateCheckpointComponent = () => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
@@ -82,32 +82,52 @@ export default IntermediateCheckpointComponent;
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const [lix] = useAtom(lixAtom);
-  const [intermediateChangeIds] = useAtom(intermediateChangeIdsAtom);
+  const [currentChangeSet] = useAtom(workingChangeSetAtom);
+
+  const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
+    if (!description) return;
+
+    lix.db.transaction().execute(async (trx) => {
+      const thread = await createThread({
+        lix: { ...lix, db: trx },
+        comments: [{ body: args.content }],
+      });
+      await trx
+        .insertInto("change_set_thread")
+        .values({
+          change_set_id: currentChangeSet!.id,
+          thread_id: thread.id,
+        })
+        .execute();
+    });
+  };
 
   const handleCreateCheckpoint = async () => {
-    const changeSet = await createCheckpoint(lix, intermediateChangeIds);
-    if (description !== "") {
-      await createDiscussion({
-        lix,
-        changeSet,
-        firstComment: { content: description },
-      });
-      await saveLixToOpfs({ lix });
+    await onThreadComposerSubmit({ content: fromPlainText(description!) });
+    await createCheckpoint({ lix });
+    await saveLixToOpfs({ lix });
+  };
+
+  // Handle key down in the comment textarea
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleCreateCheckpoint();
     }
   };
 
   return (
-    <div className="flex w-full gap-2 px-1 items-center">
+    <div className="flex flex-col w-full gap-2 px-1 items-end">
+      {/* {currentChangeSet?.id} */}
       <Input
-        className="flex-grow pl-2"
+        className="flex-grow pl-2 bg-background text-sm placeholder:text-sm"
         placeholder="Describe the changes"
-        onInput={(event: any) => setDescription(event.target?.value)}
+        onChange={(event) => setDescription(event.target.value)}
+        onKeyDown={handleKeyDown}
+        value={description}
       ></Input>
-      <Button
-        onClick={handleCreateCheckpoint}
-        variant="default"
-      >
-        {description === "" ? "Create checkpoint without description" : "Create checkpoint"}
+      <Button onClick={handleCreateCheckpoint}>
+        Create checkpoint
       </Button>
     </div>
   );

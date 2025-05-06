@@ -2,10 +2,12 @@ import IconUpload from "@/components/icons/IconUpload.tsx";
 import SectionHeader from "@/components/SectionHeader.tsx";
 import ListItems from "@/components/ListItems.tsx";
 import {
-	discussionSearchParamsAtom,
+	threadSearchParamsAtom,
 	fileIdSearchParamsAtom,
 	filesAtom,
 	lixAtom,
+	lixIdSearchParamsAtom,
+	supportedFileTypes,
 } from "@/state.ts";
 import { useAtom } from "jotai";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
@@ -18,7 +20,7 @@ import {
 } from "@/state-active-file.ts";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ChatInput from "@/components/ChatInput.tsx";
-import ConnectedChanges from "@/components/ConnectedChanges.tsx";
+// import ConnectedChanges from "@/components/ConnectedChanges.tsx";
 import DiscussionThread from "@/components/DiscussionThread.tsx";
 import { VersionDropdown } from "@/components/VersionDropdown.tsx";
 import CustomLink from "@/components/CustomLink.tsx";
@@ -36,8 +38,10 @@ import { posthog } from "posthog-js";
 import CheckpointComponent from "@/components/CheckpointComponent.tsx";
 import IntermediateCheckpointComponent from "@/components/IntermediateCheckpointComponent.tsx";
 
-const isCsvFile = (path: string) => {
-	return path.toLowerCase().endsWith(".csv");
+const isSupportedFile = (path: string) => {
+	return supportedFileTypes.some(
+		(supportedFileType) => supportedFileType.extension === getFileExtension(path)
+	);
 };
 
 const getFileExtension = (path: string) => {
@@ -70,7 +74,8 @@ export default function Page() {
 	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
-	const [discussionSearchParams] = useAtom(discussionSearchParamsAtom);
+	const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom);
+	const [threadSearchParams] = useAtom(threadSearchParamsAtom);
 	const [searchParams] = useSearchParams();
 
 	//hooks
@@ -122,7 +127,7 @@ export default function Page() {
 				const writable = await opfsFile.createWritable();
 				await writable.write(fileContent);
 				await writable.close();
-				navigate("?l=" + lixId.value);
+				navigate("?lix=" + lixId.value);
 			}
 		};
 		input.click();
@@ -165,12 +170,28 @@ export default function Page() {
 		}
 	};
 
+	const handleExportLixFile = async (lix: Lix) => {
+		const lixId = await lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "lix_id")
+			.select("value")
+			.executeTakeFirstOrThrow();
+
+		const blob = await toBlob({ lix });
+		const a = document.createElement("a");
+		a.href = URL.createObjectURL(blob);
+		a.download = `${lixId.value}.lix`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	};
+
 	const handleBackgroundClick = async (e: React.MouseEvent) => {
 		// Only trigger if clicking the background container itself
 		if (e.target === e.currentTarget) {
 			const newParams = new URLSearchParams(searchParams);
-			const openLix = newParams.get("l");
-			navigate(`/?l=${openLix}`);
+			const openLix = newParams.get("lix");
+			navigate(`/?lix=${openLix}`);
 		}
 	};
 
@@ -241,8 +262,8 @@ export default function Page() {
 								type="file"
 								name={file.path.replace("/", "")}
 								appLink={
-									file.path.endsWith(".csv")
-										? `/app/csv/editor?f=${file.id}`
+									isSupportedFile(file.path)
+										? `/app${supportedFileTypes.find((fileType) => fileType.extension === getFileExtension(file.path))?.route}?lix=${lixIdSearchParams}&f=${file.id}`
 										: ""
 								}
 							/>
@@ -319,14 +340,14 @@ export default function Page() {
 			</div>
 			<Separator orientation="vertical" className="h-full" />
 
-			{fileIdSearchParams && discussionSearchParams && (
+			{fileIdSearchParams && threadSearchParams && (
 				<div className="flex-1 h-full pb-2">
 					<SectionHeader
 						backaction={() => navigate(`/?f=${fileIdSearchParams}`)}
 						title={`Discussion`}
 					/>
 					<div className="flex flex-col px-2.5 h-[calc(100%_-_60px)] overflow-y-auto flex-shrink-0">
-						<ConnectedChanges />
+						{/* <ConnectedChanges /> */}
 						<div className="flex-1 mt-6">
 							<DiscussionThread />
 						</div>
@@ -334,7 +355,7 @@ export default function Page() {
 					</div>
 				</div>
 			)}
-			{!discussionSearchParams && (
+			{!threadSearchParams && (
 				<div className="flex-1 h-full pb-2">
 					<SectionHeader
 						backaction={activeFile ? () => navigate("/") : undefined}
@@ -342,7 +363,7 @@ export default function Page() {
 							activeFile?.path.replace("/", "")
 								? `/ ${activeFile?.path.replace("/", "")}`
 								: "Graph"
-							}
+						}
 					>
 						{fileIdSearchParams && (
 							<Button
@@ -352,14 +373,20 @@ export default function Page() {
 							>
 								<CustomLink
 									to={
-										activeFile?.path && isCsvFile(activeFile.path)
-											? `/app/csv/editor?f=${fileIdSearchParams}`
+										activeFile?.path && isSupportedFile(activeFile.path)
+											? ("/app"
+												+ supportedFileTypes.find(supportedFileType =>
+													supportedFileType.extension === getFileExtension(activeFile.path))?.route)
+											+ `?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`
 											: "https://github.com/opral/monorepo/tree/main/lix"
 									}
-									target={isCsvFile(activeFile?.path || "") ? "_self" : "_blank"}
+									target={isSupportedFile(activeFile?.path || "") ? "_self" : "_blank"}
 								>
-									{activeFile?.path && isCsvFile(activeFile.path)
-										? "Open in CSV app"
+									{activeFile?.path && isSupportedFile(activeFile.path)
+										? `Open in ${supportedFileTypes.find(
+											supportedFileType =>
+												supportedFileType.extension === getFileExtension(activeFile.path)
+										)?.appName}`
 										: "Build a Lix App"}
 								</CustomLink>
 								{/* indicator for user to click on the button */}
@@ -373,20 +400,22 @@ export default function Page() {
 						{/* Fade effect at the top */}
 						<div className="absolute top-0 left-0 w-full h-[20px] bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
 						<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
-							{activeFile?.path && !isCsvFile(activeFile.path) ? (
+							{activeFile?.path && !isSupportedFile(activeFile.path) ? (
 								<NoPluginMessage extension={getFileExtension(activeFile.path)} />
 							) : (
 								<>
 									{intermediateChanges.length > 0 && (
 										<IntermediateCheckpointComponent />
 									)}
-									{checkpointChangeSets.map((checkpointChangeSet, i) => {
+										{checkpointChangeSets.map((checkpointChangeSet, index) => {
+											const previousCheckpointId = checkpointChangeSets[index + 1]?.id ?? undefined;
 										return (
 											<CheckpointComponent
 												key={checkpointChangeSet.id}
 												checkpointChangeSet={checkpointChangeSet}
-												showTopLine={i !== 0 || intermediateChanges.length > 0}
-												showBottomLine={i !== checkpointChangeSets.length - 1}
+												previousChangeSetId={previousCheckpointId}
+												showTopLine={index !== 0 || intermediateChanges.length > 0}
+												showBottomLine={index !== checkpointChangeSets.length - 1}
 											/>
 										);
 									})}
@@ -399,19 +428,3 @@ export default function Page() {
 		</div>
 	);
 }
-
-const handleExportLixFile = async (lix: Lix) => {
-	const lixId = await lix.db
-		.selectFrom("key_value")
-		.where("key", "=", "lix_id")
-		.select("value")
-		.executeTakeFirstOrThrow();
-
-	const blob = await toBlob({ lix });
-	const a = document.createElement("a");
-	a.href = URL.createObjectURL(blob);
-	a.download = `${lixId.value}.lix`;
-	document.body.appendChild(a);
-	a.click();
-	document.body.removeChild(a);
-};

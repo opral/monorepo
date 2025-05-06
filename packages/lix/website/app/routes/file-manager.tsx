@@ -1,98 +1,25 @@
-import { MetaFunction } from "@remix-run/node";
-import Footer from "app/components/footer";
-import Header, { socialLinks } from "app/components/header";
-import IconArrowExternal from "app/components/icons/arrow-external";
-import IconBranch from "app/components/icons/branch";
-import IconConversation from "app/components/icons/conversation";
-import IconLix from "app/components/icons/lix";
-import IconSync from "app/components/icons/sync";
-import Check from "app/components/ui/check";
-import Details from "app/components/ui/details";
-
-export const meta: MetaFunction = () => {
-  const ogImage = [
-    {
-      property: "og:url",
-      content: "https://lix.opral.com/file-manager",
-    },
-    {
-      property: "og:type",
-      content: "website",
-    },
-    {
-      property: "og:title",
-      content: "Lix file manager",
-    },
-    {
-      property: "og:description",
-      content:
-        "Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents.",
-    },
-    {
-      property: "og:image",
-      content: "https://lix.opral.com/images/og-image-lix.png",
-    },
-    {
-      property: "og:image:type",
-      content: "image/png",
-    },
-    {
-      property: "og:image:width",
-      content: "1200",
-    },
-    {
-      property: "og:image:height",
-      content: "630",
-    },
-    {
-      name: "twitter:card",
-      content: "Lix file manager with build-in change control",
-    },
-    {
-      property: "twitter:url",
-      content: "https://lix.opral.com/",
-    },
-    {
-      name: "twitter:title",
-      content: "Lix file manager",
-    },
-    {
-      name: "twitter:description",
-      content:
-        "Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents.",
-    },
-    {
-      name: "twitter:image:src",
-      content: "https://lix.opral.com/images/og-image-lix.png",
-    },
-  ];
-
-  return [
-    { title: "Lix file manager" },
-    {
-      name: "description",
-      content:
-        "The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang.",
-    },
-    {
-      name: "keywords",
-      content:
-        "change control, file-based apps, collaboration, automation, change graph",
-    },
-    ...ogImage,
-  ];
-};
+import { Helmet } from 'react-helmet-async';
+import Footer from "../components/footer";
+import Header, { socialLinks } from "../components/header";
+// import IconArrowExternal from "../components/icons/arrow-external";
+import IconBranch from "../components/icons/branch";
+import IconConversation from "../components/icons/conversation";
+import IconLix from "../components/icons/lix";
+import IconSync from "../components/icons/sync";
+import Check from "../components/ui/check";
+import Details from "../components/ui/details";
+import React from 'react';
 
 const faq = [
   {
     question: "When will this be available for general use?",
     answer:
-      "Lix is currently in the closed beta phase, where we're actively refining features based on user feedback. We’re excited to announce a launch event on December 16th. Sign up to join and be among the first to experience the release!",
+      "Lix is currently in the closed beta phase, where we're actively refining features based on user feedback. We're excited to announce a launch event on December 16th. Sign up to join and be among the first to experience the release!",
   },
   {
     question: "How does this integrate with my already existing software?",
     answer:
-      "Lix is file-based, meaning you can seamlessly use your preferred applications alongside Lix’s internal tools. For instance, you can edit a CSV file in Numbers or Excel, and once you're done, simply upload it back to the Lix file manager. Lix will automatically understand the changes you made.",
+      "Lix is file-based, meaning you can seamlessly use your preferred applications alongside Lix's internal tools. For instance, you can edit a CSV file in Numbers or Excel, and once you're done, simply upload it back to the Lix file manager. Lix will automatically understand the changes you made.",
   },
   {
     question: "Where does my data get stored?",
@@ -107,7 +34,7 @@ const faq = [
   {
     question: "Is Lix free or do I need to buy it?",
     answer:
-      "The private beta will be completely free to use. As we approach the official launch, we’re still finalizing future pricing plans.",
+      "The private beta will be completely free to use. As we approach the official launch, we're still finalizing future pricing plans.",
   },
   {
     question: "Does Lix also work with AI?",
@@ -161,9 +88,30 @@ const createFeatures = [
   },
 ];
 
-export default function FileManager() {
+export default function FileManagerPage() {
   return (
     <>
+      <Helmet>
+        <title>Lix file manager</title>
+        <meta name="description" content="The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang." />
+        <meta name="keywords" content="change control, file-based apps, collaboration, automation, change graph" />
+
+        <meta property="og:url" content="https://lix.opral.com/file-manager" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Lix file manager" />
+        <meta property="og:description" content="Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents." />
+        <meta property="og:image" content="https://lix.opral.com/images/og-image-lix.png" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+
+        <meta name="twitter:card" content="Lix file manager with build-in change control" />
+        <meta property="twitter:url" content="https://lix.opral.com/" />
+        <meta name="twitter:title" content="Lix file manager" />
+        <meta name="twitter:description" content="Lix file manager understands changes in your files, making it easy to see detailed updates, collaborate, comment, and automate tasks directly within your documents." />
+        <meta name="twitter:image:src" content="https://lix.opral.com/images/og-image-lix.png" />
+      </Helmet>
+
       <div className="w-full bg-slate-50">
         <Header />
       </div>
@@ -185,7 +133,7 @@ export default function FileManager() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center w-full gap-2">
               <a
-                href="/app/fm"
+                href="https://lix.host/app/fm"
                 className="w-full sm:w-fit px-4 py-2 text-white bg-cyan-600 hover:bg-cyan-700 rounded-md font-medium flex justify-center items-center gap-2 transition-all"
               >
                 Try it out

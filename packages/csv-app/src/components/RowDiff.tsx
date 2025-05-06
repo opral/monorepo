@@ -7,7 +7,6 @@ export default function RowDiff(props: {
 		parent: Change & { content: Snapshot["content"] };
 	})[];
 }) {
-	console.log(props.changes);
 	return (
 		<div className="bg-zinc-50 border border-zinc-200 rounded-md pt-2 px-3 pb-4">
 			<div className="flex flex-wrap md:flex-nowrap overflow-x-scroll gap-x-1 gap-y-2 md:gap-y-8">

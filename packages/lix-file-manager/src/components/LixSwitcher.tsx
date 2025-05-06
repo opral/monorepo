@@ -20,7 +20,7 @@ export function LixSwitcher() {
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
 				<Button variant="secondary" size="default" className="gap-2">
-					{searchParams.get("l")?.split("-").pop() || "Select Lix"}
+					{searchParams.get("lix")?.split("-").pop() || "Select Lix"}
 					<ChevronDown className="h-4 w-4" />
 				</Button>
 			</DropdownMenuTrigger>
@@ -30,13 +30,13 @@ export function LixSwitcher() {
 					return (
 						<DropdownMenuItem
 							key={path}
-							onClick={() => setSearchParams({ l: lixId })}
+							onClick={() => setSearchParams({ lix: lixId })}
 							className="flex items-center justify-between group"
 						>
 							<div className="flex items-center gap-2">
 								<span>{lixId}</span>
 							</div>
-							{lixId === searchParams.get("l") && (
+							{lixId === searchParams.get("lix") && (
 								<Check className="h-4 w-4 opacity-50" />
 							)}
 						</DropdownMenuItem>
@@ -46,7 +46,7 @@ export function LixSwitcher() {
 				<DropdownMenuItem
 					onClick={async () => {
 						const { id } = await createNewLixFileInOpfs();
-						setSearchParams({ l: id });
+						setSearchParams({ lix: id });
 					}}
 				>
 					<Plus className="h-4 w-4 mr-2" />
