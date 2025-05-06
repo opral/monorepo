@@ -35,7 +35,7 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
 
   // Encapsulate the image loading logic to make it reusable
   const loadImage = useCallback(async (imageUrl: string) => {
-    if (!imageUrl || !imageUrl.startsWith('https://lix.host')) {
+    if (!imageUrl || !imageUrl.startsWith('https://lix.host') || imageUrl.startsWith('https://lix.host/app/flashtype/images')) {
       return;
     }
     
