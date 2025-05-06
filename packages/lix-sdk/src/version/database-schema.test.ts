@@ -412,13 +412,17 @@ test("the working change set should be updated when the change set is updated", 
 		.selectAll()
 		.execute();
 
-	expect(workingElements).toHaveLength(1);
-	expect(workingElements[0]).toMatchObject({
-		change_id: "change0",
-		entity_id: "entity0",
-		schema_key: "key0",
-		file_id: "file0",
-	});
+	expect(workingElements).toEqual(
+		expect.arrayContaining([
+			{
+				change_set_id: workingChangeSet!.id,
+				change_id: "change0",
+				entity_id: "entity0",
+				schema_key: "key0",
+				file_id: "file0",
+			},
+		])
+	);
 
 	// now use change1 which inserts entity1
 	const cs2 = await createChangeSet({
@@ -448,19 +452,24 @@ test("the working change set should be updated when the change set is updated", 
 		.selectAll()
 		.execute();
 
-	expect(workingElements2).toHaveLength(2);
-	expect(workingElements2[0]).toMatchObject({
-		change_id: "change0",
-		entity_id: "entity0",
-		schema_key: "key0",
-		file_id: "file0",
-	});
-	expect(workingElements2[1]).toMatchObject({
-		change_id: "change1",
-		entity_id: "entity1",
-		schema_key: "key1",
-		file_id: "file1",
-	});
+	expect(workingElements2).toEqual(
+		expect.arrayContaining([
+			{
+				change_set_id: workingChangeSet!.id,
+				change_id: "change0",
+				entity_id: "entity0",
+				schema_key: "key0",
+				file_id: "file0",
+			},
+			{
+				change_set_id: workingChangeSet!.id,
+				change_id: "change1",
+				entity_id: "entity1",
+				schema_key: "key1",
+				file_id: "file1",
+			},
+		])
+	);
 
 	// now use change2 which updates entity0
 	const cs3 = await createChangeSet({
@@ -490,19 +499,24 @@ test("the working change set should be updated when the change set is updated", 
 		.selectAll()
 		.execute();
 
-	expect(workingElements3).toHaveLength(2);
-	expect(workingElements3[0]).toMatchObject({
-		change_id: "change2",
-		entity_id: "entity0",
-		schema_key: "key0",
-		file_id: "file0",
-	});
-	expect(workingElements3[1]).toMatchObject({
-		change_id: "change1",
-		entity_id: "entity1",
-		schema_key: "key1",
-		file_id: "file1",
-	});
+	expect(workingElements3).toEqual(
+		expect.arrayContaining([
+			{
+				change_set_id: workingChangeSet!.id,
+				change_id: "change2",
+				entity_id: "entity0",
+				schema_key: "key0",
+				file_id: "file0",
+			},
+			{
+				change_set_id: workingChangeSet!.id,
+				change_id: "change1",
+				entity_id: "entity1",
+				schema_key: "key1",
+				file_id: "file1",
+			},
+		])
+	);
 
 	// now use change3 which deletes entity1
 	const cs4 = await createChangeSet({
@@ -536,13 +550,17 @@ test("the working change set should be updated when the change set is updated", 
 	// entity1 was never tracked in a previous checkpoint. hence, the
 	// working change set does not contain a delete change to avoid user confusion a la:
 	// "my previous checkpoint doesn't have entity1, why does it show as deleted?"
-	expect(workingElements4).toHaveLength(1);
-	expect(workingElements4[0]).toMatchObject({
-		change_id: "change2",
-		entity_id: "entity0",
-		schema_key: "key0",
-		file_id: "file0",
-	});
+	expect(workingElements4).toEqual(
+		expect.arrayContaining([
+			{
+				change_set_id: workingChangeSet!.id,
+				change_id: "change2",
+				entity_id: "entity0",
+				schema_key: "key0",
+				file_id: "file0",
+			},
+		])
+	);
 });
 
 // simplified test but depends on `createCheckpoint()` which was flaky at the time of writing this test

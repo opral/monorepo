@@ -1,9 +1,9 @@
 export const changeControlledTableIds = {
 	account: ["id"],
 	active_version: ["version_id"],
-	// change_set: ["id"],
+	change_set: ["id"],
 	change_set_edge: ["parent_id", "child_id"],
-	// change_set_element: ["change_set_id", "change_id"],
+	change_set_element: ["change_set_id", "change_id"],
 	change_set_label: ["change_set_id", "label_id"],
 	change_set_thread: ["change_set_id", "thread_id"],
 	// Change author should be change controlled but
