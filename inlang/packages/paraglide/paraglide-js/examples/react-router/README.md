@@ -39,6 +39,7 @@ Run the app and start translating. See the [basics documentation](/m/gerre34r/li
 
 ## Server side rendering using middleware
 
+In your middleware file:
 ```ts
 import { paraglideMiddleware } from "~/paraglide/server";
 import type { Route } from "../+types/root";
@@ -55,6 +56,13 @@ const localeMiddleware: Route.unstable_MiddlewareFunction = async (
 export { localeMiddleware };
 
 ```
+
+In `root.tsx`:
+```ts
+export const unstable_middleware = [localeMiddleware];
+```
+
+Now you can use `getLocale` function anywhere in your project.
 
 ## Server side rendering without middleware
 
