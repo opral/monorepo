@@ -10,12 +10,13 @@ import {
 import { createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely";
 import type { SnapshotTable } from "../snapshot/database-schema.js";
 import { v7 } from "uuid";
+import { getOrMaterializeQuery } from "./get-or-materialize-query.js";
 
 export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
-	const db = new Kysely<DatabaseSchema>({
+	const db = new Kysely<InternalDatabaseSchema>({
 		dialect: createDialect({
 			database: sqlite,
 		}),
@@ -38,6 +39,17 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
 			return validateFilePath(value) as unknown as string;
 		},
 		deterministic: true,
+	});
+
+	sqlite.createFunction({
+		name: "get_or_materialize_query",
+		arity: -1,
+		// potentially writes to the database
+		deterministic: false,
+		// @ts-expect-error - sqlite-wasm-kysely types are not correct
+		xFunc: (_ctx: number, ...args: any[]) => {
+			return getOrMaterializeQuery(sqlite, db, args);
+		},
 	});
 
 	sqlite.exec(`
@@ -76,6 +88,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_materialized (
+		id TEXT,
     name TEXT PRIMARY KEY,
     change_set_id TEXT NOT NULL
   ) STRICT;
@@ -85,6 +98,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
       SELECT
           ch.entity_id AS name,
           json_extract(s.content, '$.change_set_id') AS change_set_id,
+					json_extract(s.content, '$.id') AS id,
           s.content IS NULL AS is_deleted,
           ROW_NUMBER() OVER (
               PARTITION BY ch.entity_id
@@ -98,6 +112,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
           ch.schema_key = 'lix_version_view_table'
   )
   SELECT
+			id,
       name,
       change_set_id
   FROM
@@ -112,7 +127,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
   INSTEAD OF INSERT ON version
   BEGIN
       INSERT INTO snapshot (content)
-      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id));
+      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id, 'id', uuid_v7()));
 
       INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
       VALUES (
@@ -128,7 +143,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
   INSTEAD OF UPDATE ON version
   BEGIN
       INSERT INTO snapshot (content)
-      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id));
+      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id, 'id', uuid_v7()));
 
       INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
       VALUES (
@@ -154,8 +169,13 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
   END;
 
 `);
-	return db;
+	return db as unknown as Kysely<DatabaseSchema>;
 }
+
+export type InternalDatabaseSchema = DatabaseSchema & {
+	file_materialized: FileMaterializedTable;
+	version_materialized: VersionMaterializedTable;
+};
 
 type DatabaseSchema = {
 	file: LixFileTable;
@@ -215,6 +235,23 @@ export type LixFileTable = {
 export type Version = Selectable<VersionView>;
 export type NewVersion = Insertable<VersionView>;
 export type VersionView = {
+	name: string;
+	change_set_id: string;
+};
+
+export type FileMaterialized = Selectable<FileMaterializedTable>;
+export type NewFileMaterialized = Insertable<FileMaterializedTable>;
+export type FileMaterializedTable = {
+	id: Generated<string>;
+	path: string;
+	data: Uint8Array;
+	version_id: string;
+	metadata: Record<string, any> | null;
+};
+
+export type VersionMaterialized = Selectable<VersionMaterializedTable>;
+export type NewVersionMaterialized = Insertable<VersionMaterializedTable>;
+export type VersionMaterializedTable = {
 	name: string;
 	change_set_id: string;
 };
