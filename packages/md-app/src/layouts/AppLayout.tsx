@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { posthog } from "posthog-js";
+import posthog from "posthog-js";
 export function App({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
