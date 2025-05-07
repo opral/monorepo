@@ -1,4 +1,6 @@
-import * as runtime from "./runtime.js"; /**
+import * as runtime from "./runtime.js";
+
+/**
  * Server middleware that handles locale-based routing and request processing.
  *
  * This middleware performs several key functions:
