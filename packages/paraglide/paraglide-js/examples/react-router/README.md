@@ -37,12 +37,28 @@ export default defineConfig({
 
 Run the app and start translating. See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for information on how to use Paraglide's messages, parameters, and locale management.
 
-## Server side rendering
+## Server side rendering using middleware
 
+```ts
+import { paraglideMiddleware } from "~/paraglide/server";
+import type { Route } from "../+types/root";
+
+const localeMiddleware: Route.unstable_MiddlewareFunction = async (
+  { request },
+  next,
+) => {
+  return await paraglideMiddleware(request, () => {
+    return next();
+  }, { onRedirect: (response) => throw response });
+};
+
+export { localeMiddleware };
+
+```
+
+## Server side rendering without middleware
 
 If you use React Router v7 with SSR you will need to add the following code:
-
-<doc-callout type="info">The setup will be even easier when React Router receives middlewares which is expected to arrive in early 2025 https://github.com/remix-run/react-router/issues/12695</doc-callout>
 
 In `root.tsx`:
 
