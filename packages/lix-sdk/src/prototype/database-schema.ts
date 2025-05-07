@@ -87,7 +87,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_materialized (
-		id TEXT PRIMARY KEY,
+		id TEXT NOT NULL,
     name TEXT,
     change_set_id TEXT NOT NULL
   ) STRICT;
@@ -246,6 +246,7 @@ export type FileMaterializedTable = {
 export type VersionMaterialized = Selectable<VersionMaterializedTable>;
 export type NewVersionMaterialized = Insertable<VersionMaterializedTable>;
 export type VersionMaterializedTable = {
+	id: Generated<string>;
 	name: string;
 	change_set_id: string;
 };

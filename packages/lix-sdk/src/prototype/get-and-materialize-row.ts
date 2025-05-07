@@ -79,7 +79,15 @@ export function getAndMaterializeRow(
 			}
 			insertData["change_set_id"] = computedResult["change_set_id"];
 			insertData["id"] = computedResult["id"];
-			// db.insertInto(table).values(insertData).execute();
+
+			// executeSync({
+			// 	lix: { sqlite },
+			// 	query: db.insertInto("version_materialized").values({
+			// 		change_set_id: computedResult["change_set_id"],
+			// 		name: "wtf",
+			// 		id: computedResult["id"],
+			// 	}),
+			// });
 		}
 	}
 
