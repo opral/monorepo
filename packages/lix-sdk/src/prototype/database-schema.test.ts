@@ -100,3 +100,32 @@ test("insert, update, delete on the version view", async () => {
 		null,
 	]);
 });
+
+test("querying by id", async () => {
+	const db = await initPrototypeDb();
+
+	await db
+		.insertInto("version")
+		.values([
+			{
+				id: "version0",
+				name: "version0",
+				change_set_id: "change_set_id_0",
+			},
+			{
+				id: "version1",
+				name: "version1",
+				change_set_id: "change_set_id_1",
+			},
+		])
+		.execute();
+
+	const versions = await db
+		.selectFrom("version")
+		.where("id", "=", "version0")
+		.select("id")
+		.execute();
+
+	expect(versions).toHaveLength(1);
+	expect(versions[0]?.id).toBe("version0");
+});

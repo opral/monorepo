@@ -127,7 +127,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
   INSTEAD OF INSERT ON version
   BEGIN
       INSERT INTO snapshot (content)
-      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id, 'id', uuid_v7()));
+      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id, 'id', COALESCE(NEW.id, uuid_v7())));
 
       INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
       VALUES (
@@ -143,7 +143,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
   INSTEAD OF UPDATE ON version
   BEGIN
       INSERT INTO snapshot (content)
-      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id, 'id', uuid_v7()));
+      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id, 'id', COALESCE(NEW.id, uuid_v7())));
 
       INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
       VALUES (
@@ -235,6 +235,7 @@ export type LixFileTable = {
 export type Version = Selectable<VersionView>;
 export type NewVersion = Insertable<VersionView>;
 export type VersionView = {
+	id: Generated<string>;
 	name: string;
 	change_set_id: string;
 };
