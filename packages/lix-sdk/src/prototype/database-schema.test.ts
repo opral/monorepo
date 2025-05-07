@@ -74,7 +74,7 @@ test("insert, update, delete on the version view", async () => {
 	const changes = await db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.where("schema_key", "=", "lix_version_view_table")
+		.where("schema_key", "=", "lix_version_table")
 		.orderBy("change.created_at", "asc")
 		.selectAll("change")
 		.select("snapshot.content")

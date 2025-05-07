@@ -10,7 +10,7 @@ import {
 import { createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely";
 import type { SnapshotTable } from "../snapshot/database-schema.js";
 import { v7 } from "uuid";
-import { getOrMaterializeQuery } from "./get-or-materialize-query.js";
+import { getAndMaterializeRow } from "./get-and-materialize-row.js";
 
 export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
 	const sqlite = await createInMemoryDatabase({
@@ -42,13 +42,12 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
 	});
 
 	sqlite.createFunction({
-		name: "get_or_materialize_query",
+		name: "get_and_materialize_row",
 		arity: -1,
 		// potentially writes to the database
 		deterministic: false,
-		// @ts-expect-error - sqlite-wasm-kysely types are not correct
 		xFunc: (_ctx: number, ...args: any[]) => {
-			return getOrMaterializeQuery(sqlite, db, args);
+			return getAndMaterializeRow(sqlite, db, ...args);
 		},
 	});
 
@@ -88,37 +87,31 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
   ) STRICT;
 
   CREATE TABLE IF NOT EXISTS version_materialized (
-		id TEXT,
-    name TEXT PRIMARY KEY,
+		id TEXT PRIMARY KEY,
+    name TEXT,
     change_set_id TEXT NOT NULL
   ) STRICT;
 
-  CREATE VIEW IF NOT EXISTS version AS
-  WITH RankedSnapshots AS (
-      SELECT
-          ch.entity_id AS name,
-          json_extract(s.content, '$.change_set_id') AS change_set_id,
-					json_extract(s.content, '$.id') AS id,
-          s.content IS NULL AS is_deleted,
-          ROW_NUMBER() OVER (
-              PARTITION BY ch.entity_id
-              ORDER BY ch.created_at DESC, ch.id DESC
-          ) as rn
-      FROM
-          Change AS ch
-      JOIN
-          Snapshot AS s ON ch.snapshot_id = s.id
-      WHERE
-          ch.schema_key = 'lix_version_view_table'
-  )
-  SELECT
-			id,
-      name,
-      change_set_id
-  FROM
-      RankedSnapshots
-  WHERE
-      rn = 1 AND is_deleted = 0;
+	CREATE VIEW IF NOT EXISTS version AS
+	SELECT
+		json_extract(vj, '$.id') AS id,
+		json_extract(vj, '$.name') AS name,
+		json_extract(vj, '$.change_set_id') AS change_set_id
+	FROM (
+		SELECT get_and_materialize_row('version_materialized', 'name', v.name) AS vj
+		FROM (
+			SELECT entity_id AS name
+			FROM change
+			WHERE schema_key = 'lix_version_table'
+				AND rowid IN (
+					SELECT MAX(rowid)
+					FROM change
+					WHERE schema_key = 'lix_version_table'
+					GROUP BY entity_id
+				)
+				AND snapshot_id != 'no-content'
+		) v
+	);
 
 	INSERT INTO snapshot (id, content)
 	VALUES ('no-content', NULL);
@@ -132,7 +125,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
       INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
       VALUES (
           NEW.name,
-          'lix_version_view_table',
+          'lix_version_table',
           (SELECT id FROM snapshot ORDER BY rowid DESC LIMIT 1),
           'lix_own_change_control',
           'lix_own_change_control'
@@ -148,7 +141,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
       INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
       VALUES (
           NEW.name, 
-          'lix_version_view_table',
+          'lix_version_table',
           (SELECT id FROM snapshot ORDER BY rowid DESC LIMIT 1),
           'lix_own_change_control',
           'lix_own_change_control'
@@ -161,7 +154,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
       INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
       VALUES (
           OLD.name, 
-          'lix_version_view_table',
+          'lix_version_table',
           'no-content',
           'lix_own_change_control',
           'lix_own_change_control'
