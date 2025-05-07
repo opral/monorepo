@@ -1,7 +1,14 @@
 import { sql, type Kysely } from "kysely";
-import type { InternalDatabaseSchema } from "./database-schema.js";
+import { type InternalDatabaseSchema } from "./database-schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import { FileViewJsonSchema } from "./file-schema.js";
+import { VersionViewJsonSchema } from "./version-schema.js";
+
+const schemaMap = {
+	version: { entityIdPropertyName: "id", value: VersionViewJsonSchema },
+	file: { entityIdPropertyName: "id", value: FileViewJsonSchema },
+} as const;
 
 export function getAndMaterializeRow(
 	sqlite: SqliteWasmDatabase,
@@ -12,8 +19,9 @@ export function getAndMaterializeRow(
 		throw new Error("Expected: table, key1, value1, [key2, value2, ...]");
 	}
 
-	const table = args[0] as string;
+	const tableName = args[0] as string;
 	const keyPairs = args.slice(1);
+	const schema = schemaMap[tableName as keyof typeof schemaMap];
 
 	// Build key-value object
 	const whereObj: Record<string, any> = {};
@@ -22,74 +30,107 @@ export function getAndMaterializeRow(
 	}
 
 	// 1. Try cache lookup
-	// @ts-expect-error - dynamic table name
-	let cacheQuery = db.selectFrom(table).selectAll();
+	// let cacheQuery = db.selectFrom(tableName).selectAll();
+	// for (const [key, value] of Object.entries(whereObj)) {
+	// 	cacheQuery = cacheQuery.where(key as any, "=", value);
+	// }
+	// const cacheResult = executeSync({
+	// 	lix: { sqlite },
+	// 	query: cacheQuery,
+	// });
+
+	// if (cacheResult.length > 0) {
+	// 	return cacheResult[0];
+	// }
+
+	// // 2. Cache miss: Compute the value (example for 'version_materialized')
+	let computedResult: any = null;
+
+	const selectExpressions = createSelectExpressionsForSchema(
+		schema.value,
+		schema.entityIdPropertyName
+	);
+
+	// RankedSnapshots logic
+	let rankedQuery = db
+		.with("ranked_snapshots", (db) =>
+			db
+				.selectFrom("change as ch")
+				.innerJoin("snapshot as s", "ch.snapshot_id", "s.id")
+				.select(selectExpressions)
+				.where("ch.schema_key", "=", `lix_${tableName}_table`)
+		)
+		.selectFrom("ranked_snapshots")
+		.where("rn", "=", 1)
+		.where("is_deleted", "=", 0)
+		.selectAll();
+
 	for (const [key, value] of Object.entries(whereObj)) {
-		cacheQuery = cacheQuery.where(key as any, "=", value);
+		rankedQuery = rankedQuery.where(key as any, "=", value);
 	}
-	const cacheResult = executeSync({
+
+	const rankedResult = executeSync({
 		lix: { sqlite },
-		query: cacheQuery,
+		query: rankedQuery,
 	});
 
-	if (cacheResult.length > 0) {
-		return cacheResult[0];
-	}
-
-	// 2. Cache miss: Compute the value (example for 'version_materialized')
-	let computedResult: any = null;
-	if (table === "version_materialized") {
-		// RankedSnapshots logic
-		let rankedQuery = db
-			.with("ranked_snapshots", (db) =>
-				db
-					.selectFrom("change as ch")
-					.innerJoin("snapshot as s", "ch.snapshot_id", "s.id")
-					.select([
-						"ch.entity_id as name",
-						sql`json_extract(s.content, '$.change_set_id')`.as("change_set_id"),
-						sql`json_extract(s.content, '$.id')`.as("id"),
-						sql`s.content IS NULL`.as("is_deleted"),
-						sql`ROW_NUMBER() OVER (PARTITION BY ch.entity_id ORDER BY ch.created_at DESC, ch.id DESC)`.as(
-							"rn"
-						),
-					])
-					.where("ch.schema_key", "=", "lix_version_table")
-			)
-			.selectFrom("ranked_snapshots")
-			.selectAll()
-			.where("rn", "=", 1)
-			.where("is_deleted", "=", 0);
-
-		for (const [key, value] of Object.entries(whereObj)) {
-			rankedQuery = rankedQuery.where(key as any, "=", value);
+	if (rankedResult.length > 0) {
+		computedResult = rankedResult[0];
+		// Insert into materialized table for caching
+		const insertData: Record<string, any> = {};
+		for (const key of Object.keys(whereObj)) {
+			insertData[key] = computedResult[key];
 		}
+		insertData["change_set_id"] = computedResult["change_set_id"];
+		insertData["id"] = computedResult["id"];
 
-		const rankedResult = executeSync({
-			lix: { sqlite },
-			query: rankedQuery,
-		});
-
-		if (rankedResult.length > 0) {
-			computedResult = rankedResult[0];
-			// Insert into materialized table for caching
-			const insertData: Record<string, any> = {};
-			for (const key of Object.keys(whereObj)) {
-				insertData[key] = computedResult[key];
-			}
-			insertData["change_set_id"] = computedResult["change_set_id"];
-			insertData["id"] = computedResult["id"];
-
-			// executeSync({
-			// 	lix: { sqlite },
-			// 	query: db.insertInto("version_materialized").values({
-			// 		change_set_id: computedResult["change_set_id"],
-			// 		name: "wtf",
-			// 		id: computedResult["id"],
-			// 	}),
-			// });
-		}
+		// executeSync({
+		// 	lix: { sqlite },
+		// 	query: db.insertInto("version_materialized").values({
+		// 		change_set_id: computedResult["change_set_id"],
+		// 		name: "wtf",
+		// 		id: computedResult["id"],
+		// 	}),
+		// });
 	}
 
 	return computedResult ? JSON.stringify(computedResult) : null;
+}
+
+/**
+ * Generate Kysely select expressions for each property in a JSON schema.
+ * @param schema - The JSON schema object with a `properties` field.
+ * @param entityIdPropertyName - The property name that should select from `ch.entity_id`.
+ * @returns Array of Kysely select expressions for use in .select([...])
+ */
+function createSelectExpressionsForSchema(
+	schema: Record<string, any>, // Using Record<string, any> as requested
+	entityIdPropertyName: string
+): any[] {
+	const selectExpressions: any[] = [];
+
+	// Add common fields first
+	selectExpressions.push(
+		sql`s.content IS NULL`.as("is_deleted"),
+		sql`ROW_NUMBER() OVER (PARTITION BY ch.entity_id ORDER BY ch.created_at DESC, ch.id DESC)`.as(
+			"rn"
+		)
+	);
+
+	// Iterate over properties defined in the schema
+	for (const propertyName in schema.properties) {
+		if (propertyName === entityIdPropertyName) {
+			// If the property name matches the alias for ch.entity_id, select ch.entity_id directly
+			selectExpressions.push(sql`ch.entity_id`.as(propertyName));
+		} else {
+			// Otherwise, assume the property is within snapshot.content (JSON)
+			selectExpressions.push(
+				sql`json_extract(s.content, ${sql.raw(`'$.${propertyName}'`)})`.as(
+					propertyName
+				)
+			);
+		}
+	}
+
+	return selectExpressions;
 }

@@ -5,12 +5,21 @@ import {
 	type Generated,
 	type Insertable,
 	type Selectable,
-	type Updateable,
 } from "kysely";
 import { createDialect, createInMemoryDatabase } from "sqlite-wasm-kysely";
 import type { SnapshotTable } from "../snapshot/database-schema.js";
 import { v7 } from "uuid";
 import { getAndMaterializeRow } from "./get-and-materialize-row.js";
+import {
+	applyFileSchema,
+	type FileMaterializedTable,
+	type LixFileTable,
+} from "./file-schema.js";
+import {
+	applyVersionSchema,
+	type VersionMaterializedTable,
+	type VersionView,
+} from "./version-schema.js";
 
 export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
 	const sqlite = await createInMemoryDatabase({
@@ -72,96 +81,12 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
     FOREIGN KEY(snapshot_id) REFERENCES snapshot(id)
   ) STRICT;
 
-
-  CREATE TABLE IF NOT EXISTS file_materialized (
-    id TEXT,
-    path TEXT NOT NULL,
-    data TEXT NOT NULL,
-    metadata TEXT,
-
-		change_set_id TEXT NOT NULL,
-
-		PRIMARY KEY (id, change_set_id),
-		UNIQUE (path, change_set_id),
-    CHECK (is_valid_file_path(path))
-  ) STRICT;
-
-  CREATE TABLE IF NOT EXISTS version_materialized (
-		id TEXT NOT NULL,
-    name TEXT,
-    change_set_id TEXT NOT NULL
-  ) STRICT;
-
-	CREATE VIEW IF NOT EXISTS version AS
-	SELECT
-		json_extract(vj, '$.id') AS id,
-		json_extract(vj, '$.name') AS name,
-		json_extract(vj, '$.change_set_id') AS change_set_id
-	FROM (
-		SELECT get_and_materialize_row('version_materialized', 'name', v.name) AS vj
-		FROM (
-			SELECT entity_id AS name
-			FROM change
-			WHERE schema_key = 'lix_version_table'
-				AND rowid IN (
-					SELECT MAX(rowid)
-					FROM change
-					WHERE schema_key = 'lix_version_table'
-					GROUP BY entity_id
-				)
-				AND snapshot_id != 'no-content'
-		) v
-	);
-
-	INSERT INTO snapshot (id, content)
+  INSERT INTO snapshot (id, content)
 	VALUES ('no-content', NULL);
 
-  CREATE TRIGGER version_insert
-  INSTEAD OF INSERT ON version
-  BEGIN
-      INSERT INTO snapshot (content)
-      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id, 'id', COALESCE(NEW.id, uuid_v7())));
-
-      INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
-      VALUES (
-          NEW.name,
-          'lix_version_table',
-          (SELECT id FROM snapshot ORDER BY rowid DESC LIMIT 1),
-          'lix_own_change_control',
-          'lix_own_change_control'
-      );
-  END;
-
-  CREATE TRIGGER version_update
-  INSTEAD OF UPDATE ON version
-  BEGIN
-      INSERT INTO snapshot (content)
-      VALUES (json_object('name', NEW.name, 'change_set_id', NEW.change_set_id, 'id', COALESCE(NEW.id, uuid_v7())));
-
-      INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
-      VALUES (
-          NEW.name, 
-          'lix_version_table',
-          (SELECT id FROM snapshot ORDER BY rowid DESC LIMIT 1),
-          'lix_own_change_control',
-          'lix_own_change_control'
-      );
-  END;
-
-  CREATE TRIGGER version_delete
-  INSTEAD OF DELETE ON version
-  BEGIN
-      INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
-      VALUES (
-          OLD.name, 
-          'lix_version_table',
-          'no-content',
-          'lix_own_change_control',
-          'lix_own_change_control'
-      );
-  END;
-
 `);
+	applyFileSchema(sqlite);
+	applyVersionSchema(sqlite);
 	return db as unknown as Kysely<DatabaseSchema>;
 }
 
@@ -204,49 +129,3 @@ type ChangeTable = {
 	created_at: Generated<string>;
 };
 
-// named lix file to avoid conflict with built-in file type
-export type LixFile = Selectable<LixFileTable>;
-export type NewLixFile = Insertable<LixFileTable>;
-export type LixFileUpdate = Updateable<LixFileTable>;
-export type LixFileTable = {
-	id: Generated<string>;
-	/**
-	 * The path of the file.
-	 *
-	 * The path is currently defined as a subset of RFC 3986.
-	 * Any path can be tested with the `isValidFilePath()` function.
-	 *
-	 * @example
-	 *   - `/path/to/file.txt`
-	 */
-	path: string;
-	data: Uint8Array;
-	version_id: string;
-	metadata: Record<string, any> | null;
-};
-
-export type Version = Selectable<VersionView>;
-export type NewVersion = Insertable<VersionView>;
-export type VersionView = {
-	id: Generated<string>;
-	name: string;
-	change_set_id: string;
-};
-
-export type FileMaterialized = Selectable<FileMaterializedTable>;
-export type NewFileMaterialized = Insertable<FileMaterializedTable>;
-export type FileMaterializedTable = {
-	id: Generated<string>;
-	path: string;
-	data: Uint8Array;
-	version_id: string;
-	metadata: Record<string, any> | null;
-};
-
-export type VersionMaterialized = Selectable<VersionMaterializedTable>;
-export type NewVersionMaterialized = Insertable<VersionMaterializedTable>;
-export type VersionMaterializedTable = {
-	id: Generated<string>;
-	name: string;
-	change_set_id: string;
-};

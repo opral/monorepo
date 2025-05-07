@@ -11,8 +11,8 @@ test("insert, update, delete on the version view", async () => {
 	await db
 		.insertInto("version")
 		.values([
-			{ name: "version0", change_set_id: "change_set_id_0" },
-			{ name: "version1", change_set_id: "change_set_id_1" },
+			{ id: "peter", name: "version0", change_set_id: "change_set_id_0" },
+			{ id: "paul", name: "version1", change_set_id: "change_set_id_1" },
 		])
 		.execute();
 
