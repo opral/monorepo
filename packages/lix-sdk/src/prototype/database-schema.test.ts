@@ -10,12 +10,15 @@ test("insert, update, delete on the version view", async () => {
 
 	await db
 		.insertInto("version")
-		.values({ name: "version0", change_set_id: "change_set_id_0" })
+		.values([
+			{ name: "version0", change_set_id: "change_set_id_0" },
+			{ name: "version1", change_set_id: "change_set_id_1" },
+		])
 		.execute();
 
 	const viewAfterInsert = await db
 		.selectFrom("version")
-		.where("name", "=", "version0")
+		.orderBy("name", "asc")
 		.selectAll()
 		.execute();
 
@@ -23,6 +26,10 @@ test("insert, update, delete on the version view", async () => {
 		{
 			name: "version0",
 			change_set_id: "change_set_id_0",
+		},
+		{
+			name: "version1",
+			change_set_id: "change_set_id_1",
 		},
 	]);
 
@@ -34,7 +41,7 @@ test("insert, update, delete on the version view", async () => {
 
 	const viewAfterUpdate = await db
 		.selectFrom("version")
-		.where("name", "=", "version0")
+		.orderBy("name", "asc")
 		.selectAll()
 		.execute();
 
@@ -43,11 +50,26 @@ test("insert, update, delete on the version view", async () => {
 			name: "version0",
 			change_set_id: "change_set_id_1",
 		},
+		{
+			name: "version1",
+			change_set_id: "change_set_id_1",
+		},
 	]);
 
 	await db.deleteFrom("version").where("name", "=", "version0").execute();
 
-	const viewAfterDelete = await db.selectFrom("version").selectAll().execute();
+	const viewAfterDelete = await db
+		.selectFrom("version")
+		.orderBy("name", "asc")
+		.selectAll()
+		.execute();
+
+	expect(viewAfterDelete).toMatchObject([
+		{
+			name: "version1",
+			change_set_id: "change_set_id_1",
+		},
+	]);
 
 	const changes = await db
 		.selectFrom("change")
@@ -58,17 +80,23 @@ test("insert, update, delete on the version view", async () => {
 		.select("snapshot.content")
 		.execute();
 
-	expect(viewAfterDelete).toHaveLength(0);
-
 	expect(changes.map((change) => change.content)).toMatchObject([
+		// version 0's insert
 		{
 			name: "version0",
 			change_set_id: "change_set_id_0",
 		},
+		// version 0's insert
 		{
+			name: "version1",
+			change_set_id: "change_set_id_1",
+		},
+		{
+			// version 0's update
 			name: "version0",
 			change_set_id: "change_set_id_1",
 		},
+		// version 0's delete
 		null,
 	]);
 });
