@@ -208,9 +208,9 @@ test("does not call onRedirect callback when there is no redirecting", async () 
 	});
 
 	// Request to URL in en with cookie specifying French
-	const request = new Request("https://example.com/en/some-path", {
+	const request = new Request("https://example.com/fr/some-path", {
 		headers: {
-			cookie: `PARAGLIDE_LOCALE=en`,
+			cookie: `PARAGLIDE_LOCALE=fr`,
 			"Sec-Fetch-Dest": "document",
 		},
 	});
