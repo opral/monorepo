@@ -111,8 +111,11 @@ console.log(getLocale()); // "de"
 ```
 
 ## Routing
+<doc-callout type="info">
+ Automatic `&lt;a&gt;` tag localization has been removed in v2.
+</doc-callout>
 
-The `localizeHref` function can be used to generate URLs with the current locale:
+You must now explicitly use localizeHref() for URL localization:
 
 ```tsx
 <a href={localizeHref("/blog")}>Blog</a>
