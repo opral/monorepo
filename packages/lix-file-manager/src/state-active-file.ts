@@ -153,7 +153,6 @@ export const intermediateChangesAtom = atom<
 							"change_set_element.change_id",
 							"change.id"
 						)
-						.where(changeSetElementIsLeafOf([{ id: workingChangeSetId }]))
 						.where(
 							"change_set_element.change_set_id",
 							"=",
@@ -173,6 +172,7 @@ export const intermediateChangesAtom = atom<
 						);
 					}
 					snapshotBefore = await snapshotBeforeQuery.executeTakeFirst();
+					console.log({ snapshotBefore });
 				}
 
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
