@@ -36,12 +36,6 @@ const Footer = () => {
 				name: m.footer_resources_documentation(),
 				href: "/documentation",
 			},
-			{
-				name: m.footer_resources_inlang_manage(),
-				href: import.meta.env.PROD
-					? "https://manage.inlang.com"
-					: "http://localhost:4004",
-			},
 		];
 	};
 
