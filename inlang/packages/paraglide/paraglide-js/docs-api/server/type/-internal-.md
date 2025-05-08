@@ -40,6 +40,13 @@ The incoming request object
 
 Function to handle the request
 
+#### callbacks
+
+{ `onRedirect`: (`response`: `Response`) => `void` }
+
+Callbacks to handle events from middleware
+- `onRedirect` calls when it's redirecting to a new url
+
 ### Returns
 
 `Promise`\<`Response`\>

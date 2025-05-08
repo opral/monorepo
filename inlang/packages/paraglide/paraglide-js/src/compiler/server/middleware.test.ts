@@ -134,6 +134,104 @@ test("redirects to localized URL when non-URL strategy determines locale", async
 	);
 });
 
+test("call onRedirect callback when redirecting to new url", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["cookie", "url"],
+		cookieName: "PARAGLIDE_LOCALE",
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:path(.*)?",
+				localized: [
+					["en", "https://example.com/en/:path(.*)?"],
+					["fr", "https://example.com/fr/:path(.*)?"],
+				],
+			},
+		],
+	});
+
+	// Request to URL in en with cookie specifying French
+	const request = new Request("https://example.com/en/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=fr`,
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	let response: any;
+
+	await runtime.paraglideMiddleware(
+		request,
+		() => {
+			// This shouldn't be called since we should redirect
+			throw new Error("Should not reach here");
+		},
+		{
+			onRedirect: (res: Response) => {
+				response = res;
+			},
+		}
+	);
+
+	expect(response instanceof Response).toBe(true);
+	// needs to be 307 status code https://github.com/opral/inlang-paraglide-js/issues/416
+	expect(response.status).toBe(307); // Redirect status code
+	expect(response.headers.get("Location")).toBe(
+		"https://example.com/fr/some-path"
+	);
+});
+
+test("does not call onRedirect callback when there is no redirecting", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["cookie", "url"],
+		cookieName: "PARAGLIDE_LOCALE",
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:path(.*)?",
+				localized: [
+					["en", "https://example.com/en/:path(.*)?"],
+					["fr", "https://example.com/fr/:path(.*)?"],
+				],
+			},
+		],
+	});
+
+	// Request to URL in en with cookie specifying French
+	const request = new Request("https://example.com/fr/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=fr`,
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	let response: any = null;
+
+	await runtime.paraglideMiddleware(
+		request,
+		() => {
+			return new Response("Hello World");
+		},
+		{
+			onRedirect: (res: Response) => {
+				response = res;
+			},
+		}
+	);
+
+	expect(response).toBe(null);
+});
+
 test("does not redirect if URL already matches determined locale", async () => {
 	const runtime = await createParaglide({
 		blob: await newProject({
