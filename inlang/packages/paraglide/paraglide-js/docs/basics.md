@@ -115,7 +115,7 @@ console.log(getLocale()); // "de"
  Automatic `&lt;a&gt;` tag localization has been removed in v2. See <a href="/m/gerre34r/library-inlang-paraglideJs/changelog#localizehref-is-now-required">this change</a>
 </doc-callout>
 
-You must now explicitly use localizeHref() for URL localization:
+You must explicitly use localizeHref() for URL localization:
 
 ```tsx
 <a href={localizeHref("/blog")}>Blog</a>
