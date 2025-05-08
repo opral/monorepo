@@ -172,7 +172,6 @@ export const intermediateChangesAtom = atom<
 						);
 					}
 					snapshotBefore = await snapshotBeforeQuery.executeTakeFirst();
-					console.log({ snapshotBefore });
 				}
 
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
