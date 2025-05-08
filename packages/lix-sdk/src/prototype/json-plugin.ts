@@ -27,11 +27,7 @@ type LixPluginV2 = {
 		 * has been deleted and should be restored at a later point.
 		 */
 		file: Omit<LixFile, "data"> & { data?: LixFile["data"] };
-		changes: Array<
-			Change & {
-				snapshot: { content: Record<string, any> | null };
-			}
-		>;
+		changes: Array<Change & { snapshot: Record<string, any> | null }>;
 	}) => { fileData: Uint8Array };
 };
 
@@ -128,14 +124,14 @@ export const mockJsonPluginV2: LixPluginV2 = {
 
 		// Build a JSON object mapping entity_id to snapshot content
 		for (const change of changes) {
-			if (change.snapshot.content === null) {
+			if (change.snapshot === null) {
 				// If the content is null, remove the entity from the state
 				delete flattened[change.entity_id];
 			} else {
 				// Update the current state with the new change content
 				// Need to decode the BLOB content from the snapshot
 				// The plugin should handle deserializing the object stored in the BLOB
-				flattened[change.entity_id] = change.snapshot.content;
+				flattened[change.entity_id] = change.snapshot.value;
 			}
 		}
 

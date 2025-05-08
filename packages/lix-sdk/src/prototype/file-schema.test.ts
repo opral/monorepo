@@ -30,18 +30,24 @@ test("insert, update, delete on the file view", async () => {
 		])
 		.execute();
 
-	const viewAfterInsert = await db.selectFrom("file").selectAll().execute();
+	let viewAfterInsert = await db.selectFrom("file").selectAll().execute();
+	viewAfterInsert = viewAfterInsert.map((row) => ({
+		...row,
+		data: JSON.parse(new TextDecoder().decode(row.data)),
+	}));
 
-	expect(viewAfterInsert).toMatchObject([
+	expect(viewAfterInsert).toEqual([
 		{
 			id: "file0",
 			path: "/path/to/file.txt",
 			version_id: "version0",
+			data: { value: "file0-value0" },
 		},
 		{
 			id: "file1",
 			path: "/path/to/file.txt",
 			version_id: "version1",
+			data: { value: "file1-value0" },
 		},
 	]);
 

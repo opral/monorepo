@@ -5,6 +5,39 @@ import type { InternalDatabaseSchema } from "./database-schema.js";
 import type { Kysely } from "kysely";
 import { executeSync } from "../database/execute-sync.js";
 
+export function materializeFileData(args: {
+	sqlite: SqliteWasmDatabase;
+	db: Kysely<InternalDatabaseSchema>;
+	file: {
+		id: string;
+		path: string;
+		version_id: string;
+	};
+}): Uint8Array {
+	let changes = executeSync({
+		lix: { sqlite: args.sqlite },
+		query: args.db
+			.selectFrom("change")
+			.where("plugin_key", "=", mockJsonPluginV2.key)
+			.where("file_id", "=", args.file.id)
+			.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+			.selectAll("change")
+			.select("snapshot.content as snapshot"),
+	});
+
+	changes = changes.map((change) => ({
+		...change,
+		snapshot: JSON.parse(change.snapshot),
+	}));
+
+	const file = mockJsonPluginV2.applyChanges({
+		file: args.file,
+		changes,
+	});
+
+	return file.fileData;
+}
+
 export function handleFileInsert(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<InternalDatabaseSchema>;

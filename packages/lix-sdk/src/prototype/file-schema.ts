@@ -6,7 +6,7 @@ import type {
 	Updateable,
 } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { handleFileInsert } from "./file-handlers.js";
+import { handleFileInsert, materializeFileData } from "./file-handlers.js";
 import type { InternalDatabaseSchema } from "./database-schema.js";
 
 export function applyFileSchema(
@@ -32,12 +32,29 @@ export function applyFileSchema(
 		deterministic: true,
 	});
 
+	sqlite.createFunction({
+		name: "materialize_file_data",
+		arity: 3,
+		deterministic: false,
+		xFunc: (_ctx: number, ...args: any[]) => {
+			return materializeFileData({
+				sqlite,
+				db,
+				file: {
+					id: args[0],
+					path: args[1],
+					version_id: args[2],
+				},
+			});
+		},
+	});
+
 	sqlite.exec(`
   CREATE VIEW IF NOT EXISTS file AS
 	SELECT
 		json_extract(vj, '$.id') AS id,
 		json_extract(vj, '$.path') AS path,
-		json_extract(vj, '$.data') AS data,
+		materialize_file_data(json_extract(vj, '$.id'), json_extract(vj, '$.path'), json_extract(vj, '$.version_id')) AS data,
 		json_extract(vj, '$.version_id') AS version_id
 	FROM (
 		SELECT get_and_materialize_row('file', 'id', v.id) AS vj
