@@ -112,7 +112,7 @@ console.log(getLocale()); // "de"
 
 ## Routing
 <doc-callout type="info">
- Automatic `&lt;a&gt;` tag localization has been removed in v2.
+ Automatic `&lt;a&gt;` tag localization has been removed in v2. See <a href="/m/gerre34r/library-inlang-paraglideJs/changelog#localizehref-is-now-required">this change</a>
 </doc-callout>
 
 You must now explicitly use localizeHref() for URL localization:
