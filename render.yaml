@@ -105,6 +105,7 @@ services:
       - fromGroup: production
     buildFilter:
       paths:
+        - inlang/packages/server/**
         - inlang/packages/website/**
         - inlang/packages/marketplace-registry/**
         - inlang/packages/**/marketplace-manifest.json
