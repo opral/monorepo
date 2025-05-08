@@ -1,7 +1,36 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type {
+	Generated,
+	Insertable,
+	Kysely,
+	Selectable,
+	Updateable,
+} from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import { handleFileInsert } from "./file-handlers.js";
+import type { InternalDatabaseSchema } from "./database-schema.js";
 
-export function applyFileSchema(sqlite: SqliteWasmDatabase): void {
+export function applyFileSchema(
+	sqlite: SqliteWasmDatabase,
+	db: Kysely<InternalDatabaseSchema>
+): void {
+	sqlite.createFunction({
+		name: "handle_file_insert",
+		arity: 3,
+		xFunc: (_ctx: number, ...args: any[]) => {
+			const result = handleFileInsert({
+				sqlite,
+				db,
+				file: {
+					id: args[0],
+					path: args[1],
+					version_id: args[2],
+				},
+			});
+			return result;
+		},
+		deterministic: true,
+	});
+
 	sqlite.exec(`
   CREATE VIEW IF NOT EXISTS file AS
 	SELECT
@@ -31,16 +60,10 @@ export function applyFileSchema(sqlite: SqliteWasmDatabase): void {
   CREATE TRIGGER file_insert
   INSTEAD OF INSERT ON file
   BEGIN
-      INSERT INTO snapshot (content)
-      VALUES (json_object('path', NEW.path, 'version_id', NEW.version_id, 'id', COALESCE(NEW.id, uuid_v7())));
-
-      INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
-      VALUES (
-          (SELECT json_extract(content, '$.id') FROM snapshot ORDER BY rowid DESC LIMIT 1),
-          'lix_file_table',
-          (SELECT id FROM snapshot ORDER BY rowid DESC LIMIT 1),
-          'lix_own_change_control',
-          'lix_own_change_control'
+      SELECT handle_file_insert(
+        NEW.id,
+        NEW.path,
+        NEW.version_id
       );
   END;
 
@@ -89,7 +112,6 @@ export const FileViewJsonSchema = {
 		id: { type: "string" },
 		path: { type: "string" },
 		version_id: { type: "string" },
-		metadata: { type: ["object", "null"] },
 	},
 	required: ["id", "path", "version_id"],
 } as const;
@@ -112,7 +134,6 @@ export type LixFileTable = {
 	path: string;
 	// data: Uint8Array;
 	version_id: string;
-	metadata: Record<string, any> | null;
 };
 
 export type FileMaterialized = Selectable<FileMaterializedTable>;
@@ -122,5 +143,4 @@ export type FileMaterializedTable = {
 	path: string;
 	// data: Uint8Array;
 	change_set_id: string;
-	metadata: Record<string, any> | null;
 };

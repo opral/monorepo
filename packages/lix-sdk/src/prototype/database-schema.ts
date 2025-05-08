@@ -85,7 +85,7 @@ export async function initPrototypeDb(): Promise<Kysely<DatabaseSchema>> {
 	VALUES ('no-content', NULL);
 
 `);
-	applyFileSchema(sqlite);
+	applyFileSchema(sqlite, db);
 	applyVersionSchema(sqlite);
 	return db as unknown as Kysely<DatabaseSchema>;
 }
