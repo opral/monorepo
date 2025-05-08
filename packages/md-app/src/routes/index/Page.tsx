@@ -23,11 +23,13 @@ function PageContent() {
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
 	useEffect(() => {
-		posthog.identify(activeAccount.id, {
-			LIX_USER_ID: activeAccount.id,
-			LIX_USER_NAME: activeAccount.name,
-		});
-	}, [])
+		if (activeAccount && activeAccount.id) {
+			posthog.identify(activeAccount.id, {
+				LIX_USER_ID: activeAccount.id,
+				LIX_USER_NAME: activeAccount.name,
+			});
+		}
+	}, [activeAccount])
 
 	// Control sidebar visibility using the context
 	const toggleLeftSidebar = () => {
