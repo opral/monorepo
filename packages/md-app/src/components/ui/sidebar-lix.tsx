@@ -492,7 +492,7 @@ export function LixSidebar() {
 
   return (
     <>
-      <SidebarHeader className="flex flex-row justify-between items-center gap-1">
+      <SidebarHeader className="flex flex-row justify-between items-center gap-1 h-11">
         <a href={`https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
           <Button
             variant="ghost"
