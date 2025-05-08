@@ -20,7 +20,7 @@ services:
     type: web
     runtime: static
     branch: main
-    staticPublishPath: ./packages/lix-website/dist
+    staticPublishPath: ./packages/lix/website/dist
     envVars:
       - fromGroup: production
       - key: PORT
