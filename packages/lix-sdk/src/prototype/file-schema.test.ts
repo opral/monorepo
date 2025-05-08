@@ -10,11 +10,21 @@ test("insert, update, delete on the file view", async () => {
 			{
 				id: "file0",
 				path: "/path/to/file.txt",
+				data: new TextEncoder().encode(
+					JSON.stringify({
+						value: "file0-value0",
+					})
+				),
 				version_id: "version0",
 			},
 			{
 				id: "file1",
 				path: "/path/to/file.txt",
+				data: new TextEncoder().encode(
+					JSON.stringify({
+						value: "file1-value0",
+					})
+				),
 				version_id: "version1",
 			},
 		])
@@ -70,7 +80,7 @@ test("insert, update, delete on the file view", async () => {
 	const viewAfterDelete = await db
 		.selectFrom("file")
 		.orderBy("id")
-		.selectAll()
+		.select(["id", "path", "version_id"])
 		.execute();
 
 	expect(viewAfterDelete).toEqual([
@@ -83,17 +93,54 @@ test("insert, update, delete on the file view", async () => {
 
 	const changes = await db
 		.selectFrom("change")
-		.select(["entity_id", "snapshot_id"])
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.select(["entity_id", "snapshot_id", "snapshot.content", "schema_key"])
 		.execute();
 
 	expect(changes).toEqual([
 		// insert
-		{ entity_id: "file0", snapshot_id: expect.any(String) },
+		{
+			schema_key: "lix_file_table",
+			entity_id: "file0",
+			snapshot_id: expect.any(String),
+			content: expect.any(Object),
+		},
+		{
+			schema_key: "mock_json_property",
+			entity_id: "value",
+			content: {
+				value: "file0-value0",
+			},
+			snapshot_id: expect.any(String),
+		},
 		// insert
-		{ entity_id: "file1", snapshot_id: expect.any(String) },
+		{
+			schema_key: "lix_file_table",
+			entity_id: "file1",
+			snapshot_id: expect.any(String),
+			content: expect.any(Object),
+		},
+		{
+			schema_key: "mock_json_property",
+			entity_id: "value",
+			content: {
+				value: "file1-value0",
+			},
+			snapshot_id: expect.any(String),
+		},
 		// update
-		{ entity_id: "file0", snapshot_id: expect.any(String) },
+		{
+			schema_key: "lix_file_table",
+			entity_id: "file0",
+			snapshot_id: expect.any(String),
+			content: expect.any(Object),
+		},
 		// delete
-		{ entity_id: "file0", snapshot_id: "no-content" },
+		{
+			schema_key: "lix_file_table",
+			entity_id: "file0",
+			snapshot_id: "no-content",
+			content: expect.any(Object),
+		},
 	]);
 });

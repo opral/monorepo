@@ -15,7 +15,7 @@ export function applyFileSchema(
 ): void {
 	sqlite.createFunction({
 		name: "handle_file_insert",
-		arity: 3,
+		arity: 4,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			const result = handleFileInsert({
 				sqlite,
@@ -23,7 +23,8 @@ export function applyFileSchema(
 				file: {
 					id: args[0],
 					path: args[1],
-					version_id: args[2],
+					data: args[2],
+					version_id: args[3],
 				},
 			});
 			return result;
@@ -36,6 +37,7 @@ export function applyFileSchema(
 	SELECT
 		json_extract(vj, '$.id') AS id,
 		json_extract(vj, '$.path') AS path,
+		json_extract(vj, '$.data') AS data,
 		json_extract(vj, '$.version_id') AS version_id
 	FROM (
 		SELECT get_and_materialize_row('file', 'id', v.id) AS vj
@@ -63,6 +65,7 @@ export function applyFileSchema(
       SELECT handle_file_insert(
         NEW.id,
         NEW.path,
+        NEW.data,
         NEW.version_id
       );
   END;
@@ -132,7 +135,7 @@ export type LixFileTable = {
 	 *   - `/path/to/file.txt`
 	 */
 	path: string;
-	// data: Uint8Array;
+	data: Uint8Array;
 	version_id: string;
 };
 
@@ -141,6 +144,6 @@ export type NewFileMaterialized = Insertable<FileMaterializedTable>;
 export type FileMaterializedTable = {
 	id: Generated<string>;
 	path: string;
-	// data: Uint8Array;
+	data: Uint8Array;
 	change_set_id: string;
 };

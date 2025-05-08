@@ -1,5 +1,5 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-// import { mockJsonPluginV2 } from "./json-plugin.js";
+import { mockJsonPluginV2 } from "./json-plugin.js";
 import type { LixFile } from "./file-schema.js";
 import type { InternalDatabaseSchema } from "./database-schema.js";
 import type { Kysely } from "kysely";
@@ -10,9 +10,9 @@ export function handleFileInsert(args: {
 	db: Kysely<InternalDatabaseSchema>;
 	file: LixFile;
 }): 0 | 1 {
-	// const detectedChanges = mockJsonPluginV2.detectChanges({
-	// 	after: { data: args.file.data },
-	// });
+	const detectedChanges = mockJsonPluginV2.detectChanges({
+		after: { data: args.file.data },
+	});
 
 	const [snapshot] = executeSync({
 		lix: { sqlite: args.sqlite },
@@ -40,30 +40,30 @@ export function handleFileInsert(args: {
 		}),
 	});
 
-	// // plugin detected changes
-	// for (const change of detectedChanges) {
-	// 	const [snapshot] = executeSync({
-	// 		lix: { sqlite: args.sqlite },
-	// 		query: args.db
-	// 			.insertInto("snapshot")
-	// 			.values({
-	// 				id: Math.random().toString(36).slice(2),
-	// 				content: change.snapshot,
-	// 			})
-	// 			.returning("id"),
-	// 	});
+	// plugin detected changes
+	for (const change of detectedChanges) {
+		const [snapshot] = executeSync({
+			lix: { sqlite: args.sqlite },
+			query: args.db
+				.insertInto("snapshot")
+				.values({
+					id: Math.random().toString(36).slice(2),
+					content: JSON.stringify(change.snapshot) as any,
+				})
+				.returning("id"),
+		});
 
-	// 	executeSync({
-	// 		lix: { sqlite: args.sqlite },
-	// 		query: args.db.insertInto("change").values({
-	// 			entity_id: change.entity_id,
-	// 			file_id: args.file.id,
-	// 			plugin_key: mockJsonPluginV2.key,
-	// 			schema_key: change.schema.key,
-	// 			snapshot_id: snapshot.id,
-	// 		}),
-	// 	});
-	// }
+		executeSync({
+			lix: { sqlite: args.sqlite },
+			query: args.db.insertInto("change").values({
+				entity_id: change.entity_id,
+				file_id: args.file.id,
+				plugin_key: mockJsonPluginV2.key,
+				schema_key: change.schema.key,
+				snapshot_id: snapshot.id,
+			}),
+		});
+	}
 
 	return 0;
 }
