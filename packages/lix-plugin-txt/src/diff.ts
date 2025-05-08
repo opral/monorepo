@@ -93,11 +93,6 @@ export class DiffComponent extends LitElement {
 			border-right: 1px solid var(--color-border);
 		}
 
-		.line-wrapper {
-			display: flow;
-			white-space: inherit;
-		}
-
 		/* Character-level highlighting */
 		.char-added {
 			background-color: var(--color-added-bg);
@@ -156,6 +151,17 @@ export class DiffComponent extends LitElement {
 			vertical-align: middle;
 		}
 
+		.content-for-mobile {
+			display: none;
+		}
+		.content-for-desktop {
+			display: inline; /* Allows internal spans like char-added to flow */
+		}
+		/* Hide entire row-pair */
+		.row-pair.mobile-row-pair-empty {
+			display: none;
+		}
+
 		/* Container query for smaller container widths */
 		@container diff (max-width: 600px) {
 			.diff-section {
@@ -165,11 +171,10 @@ export class DiffComponent extends LitElement {
 
 			.row-pair {
 				display: block;
-				margin-bottom: 8px;
-				padding-bottom: 4px;
+				padding-bottom: 2px;
 			}
 
-			/* Hide duplicate content in inline mode */
+			/* Hide right column in inline mode */
 			.row-pair > div.diff-row:nth-child(2) {
 				display: none;
 			}
@@ -193,9 +198,12 @@ export class DiffComponent extends LitElement {
 				max-width: calc(100% - 30px);
 			}
 
-			/* Expand line-wrapper to full width */
-			.line-wrapper {
-				width: 100%;
+			/* Show mobile content, hide desktop content */
+			.content-for-desktop {
+				display: none;
+			}
+			.content-for-mobile {
+				display: inline; /* Or block if it needs to take full width of .line */
 			}
 
 			/* Enhanced highlighting for inline view */
@@ -530,34 +538,57 @@ export class DiffComponent extends LitElement {
 	}
 
 	renderDiffRow(pair: AlignedChange) {
+		let isMobileRowPairEmpty = false;
+
 		// For unchanged lines, render normally
 		if (!pair.left.type && !pair.right.type) {
+			isMobileRowPairEmpty = !pair.left.content;
 			return html`
-				<div class="row-pair">
+				<div
+					class="row-pair ${isMobileRowPairEmpty
+						? "mobile-row-pair-empty"
+						: ""}"
+				>
 					<div class="diff-row unchanged">
-						<span class="line">${pair.left.content}</span>
+						<div class="line">${pair.left.content}</div>
 					</div>
 					<div class="diff-row unchanged">
-						<span class="line">${pair.right.content}</span>
+						<div class="line">${pair.right.content}</div>
 					</div>
 				</div>
 			`;
 		}
 
-		// For mobile view, we'll combine both sides for the char-level diff
-		// This creates a unified view with inline highlighting
-		const detailedDiff = this.renderInlineDiff(
+		// For changed lines:
+		// Get detailed diffs for side-by-side (desktop) view
+		const detailedResult = this.renderDetailedDiff(
+			pair.left.content,
+			pair.right.content,
+		);
+		// Get inline diff for single column (mobile) view
+		const inlineResult = this.renderInlineDiff(
 			pair.left.content,
 			pair.right.content,
 		);
 
+		// Determine if the mobile content would be empty
+		isMobileRowPairEmpty = !pair.left.content && !pair.right.content;
+
 		return html`
-			<div class="row-pair">
+			<div
+				class="row-pair ${isMobileRowPairEmpty ? "mobile-row-pair-empty" : ""}"
+			>
 				<div class="diff-row ${pair.left.type || ""}">
-					<div class="line line-wrapper">${detailedDiff}</div>
+					<div class="line">
+						<span class="content-for-desktop">${detailedResult.before}</span>
+						<span class="content-for-mobile">${inlineResult}</span>
+					</div>
 				</div>
 				<div class="diff-row ${pair.right.type || ""}">
-					<div class="line line-wrapper">${detailedDiff}</div>
+					<div class="line">
+						<span class="content-for-desktop">${detailedResult.after}</span>
+						<!-- Mobile view hides this entire .diff-row, so no specific mobile content needed here -->
+					</div>
 				</div>
 			</div>
 		`;
