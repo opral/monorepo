@@ -35,22 +35,22 @@ export function executeSync(args: {
 		});
 
 		// Parse JSONB binary blobs
-		for (const col of Object.keys(obj)) {
-			const raw = obj[col];
-			if (!(raw instanceof Uint8Array)) {
-				continue;
-			}
-			try {
-				// Convert SQLite JSONB blob to JSON string
-				const json = args.lix.sqlite.exec("SELECT json(?)", {
-					bind: [raw],
-					returnValue: "resultRows",
-				})[0]![0];
-				obj[col] = JSON.parse(json as string);
-			} catch {
-				continue;
-			}
-		}
+		// for (const col of Object.keys(obj)) {
+		// 	const raw = obj[col];
+		// 	if (!(raw instanceof Uint8Array)) {
+		// 		continue;
+		// 	}
+		// 	try {
+		// 		// Convert SQLite JSONB blob to JSON string
+		// 		const json = args.lix.sqlite.exec("SELECT json(?)", {
+		// 			bind: [raw],
+		// 			returnValue: "resultRows",
+		// 		})[0]![0];
+		// 		obj[col] = JSON.parse(json as string);
+		// 	} catch {
+		// 		continue;
+		// 	}
+		// }
 
 		return obj;
 	});

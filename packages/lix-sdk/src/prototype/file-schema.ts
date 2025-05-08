@@ -6,7 +6,11 @@ import type {
 	Updateable,
 } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { handleFileInsert, materializeFileData } from "./file-handlers.js";
+import {
+	handleFileInsert,
+	handleFileUpdate,
+	materializeFileData,
+} from "./file-handlers.js";
 import type { InternalDatabaseSchema } from "./database-schema.js";
 
 export function applyFileSchema(
@@ -18,6 +22,25 @@ export function applyFileSchema(
 		arity: 4,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			const result = handleFileInsert({
+				sqlite,
+				db,
+				file: {
+					id: args[0],
+					path: args[1],
+					data: args[2],
+					version_id: args[3],
+				},
+			});
+			return result;
+		},
+		deterministic: true,
+	});
+
+	sqlite.createFunction({
+		name: "handle_file_update",
+		arity: 4,
+		xFunc: (_ctx: number, ...args: any[]) => {
+			const result = handleFileUpdate({
 				sqlite,
 				db,
 				file: {
@@ -90,16 +113,11 @@ export function applyFileSchema(
   CREATE TRIGGER file_update
   INSTEAD OF UPDATE ON file
   BEGIN
-      INSERT INTO snapshot (content)
-      VALUES (json_object('path', NEW.path, 'version_id', NEW.version_id, 'id', COALESCE(NEW.id, OLD.id)));
-
-      INSERT INTO change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
-      VALUES (
-          OLD.id, 
-          'lix_file_table',
-          (SELECT id FROM snapshot ORDER BY rowid DESC LIMIT 1),
-          'lix_own_change_control',
-          'lix_own_change_control'
+      SELECT handle_file_update(
+        NEW.id,
+        NEW.path,
+        NEW.data,
+        NEW.version_id
       );
   END;
 
