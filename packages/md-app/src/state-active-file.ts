@@ -44,6 +44,11 @@ export const activeFileAtom = atom(async (get) => {
 		redirect("/");
 		return null;
 	}
+
+	if (!fileAtom.path.endsWith(".md")) {
+		redirect("/");
+		return null;
+	}
 	return fileAtom;
 });
 

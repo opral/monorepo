@@ -181,14 +181,29 @@ export const lixAtom = atom(async (get) => {
 	// 	.execute();
 
 	// Check if there is a file in lix
-	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
-	if (!file) {
+	const files = await lix.db.selectFrom("file").selectAll().execute();
+	const markdownFiles = files.filter((file) => file.path.endsWith(".md"));
+	if (markdownFiles.length === 0) {
 		await setupWelcomeFile(lix);
-		file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
+		const welcomeFile = await lix.db
+			.selectFrom("file")
+			.selectAll()
+			.executeTakeFirst();
+		markdownFiles.push(welcomeFile!);
 	}
-	if (file && !get(fileIdSearchParamsAtom)) {
+	if (markdownFiles.length > 0 && !get(fileIdSearchParamsAtom)) {
 		// Set the file ID as searchParams without page reload
-		updateUrlParams({ f: file.id });
+		updateUrlParams({ f: markdownFiles[0].id });
+	}
+
+	// Redirect to first markdown file if fileId param is not a markdown file
+	const fileIdParam = get(fileIdSearchParamsAtom);
+	if (fileIdParam) {
+		const file = files.find((f) => f.id === fileIdParam);
+		if ((!file || !file.path.endsWith(".md")) && markdownFiles.length > 0) {
+			// Set the file ID as searchParams without page reload
+			updateUrlParams({ f: markdownFiles[0].id });
+		}
 	}
 
 	await saveLixToOpfs({ lix });
