@@ -1,6 +1,6 @@
 ## paraglideMiddleware()
 
-> **paraglideMiddleware**\<`T`\>(`request`, `resolve`): `Promise`\<`Response`\>
+> **paraglideMiddleware**\<`T`\>(`request`, `resolve`, `callbacks?`): `Promise`\<`Response`\>
 
 Defined in: [server/middleware.js:64](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/server/middleware.js)
 
@@ -40,12 +40,13 @@ The incoming request object
 
 Function to handle the request
 
-#### callbacks
-
-{ `onRedirect`: (`response`: `Response`) => `void` }
+#### callbacks?
 
 Callbacks to handle events from middleware
-- `onRedirect` calls when it's redirecting to a new url
+
+##### onRedirect
+
+(`response`) => `void`
 
 ### Returns
 
