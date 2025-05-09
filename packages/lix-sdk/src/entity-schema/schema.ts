@@ -1,6 +1,6 @@
 import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 
-export const ChangeSchemaJsonSchema = {
+export const EntitySchemaJsonSchema = {
 	$schema: "http://json-schema.org/draft-07/schema#",
 	title: "Lix Change Schema",
 	description:
@@ -31,7 +31,7 @@ export const ChangeSchemaJsonSchema = {
 	],
 } as const;
 
-export type ChangeSchema = JSONSchema & {
+export type EntitySchema = JSONSchema & {
 	/**
 	 * The key of the schema.
 	 *
@@ -54,4 +54,4 @@ export type ChangeSchema = JSONSchema & {
 	"x-version": string;
 };
 
-export type FromChangeSchema<T extends ChangeSchema> = FromSchema<T>;
+export type FromEntitySchema<T extends EntitySchema> = FromSchema<T>;

@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { ChangeSchemaJsonSchema, type ChangeSchema } from "./schema.js";
+import { EntitySchemaJsonSchema, type EntitySchema } from "./schema.js";
 import { Ajv } from "ajv";
 
 const ajv = new Ajv();
@@ -14,9 +14,9 @@ test("valid schema", () => {
 		},
 		required: ["name"],
 		additionalProperties: false,
-	} as const satisfies ChangeSchema;
+	} as const satisfies EntitySchema;
 
-	const valid = ajv.validate(ChangeSchemaJsonSchema, schema);
+	const valid = ajv.validate(EntitySchemaJsonSchema, schema);
 
 	expect(valid).toBe(true);
 });
@@ -32,9 +32,9 @@ test("x-key is required", () => {
 		},
 		required: ["name"],
 		additionalProperties: false,
-	} as const satisfies ChangeSchema;
+	} as const satisfies EntitySchema;
 
-	const valid = ajv.validate(ChangeSchemaJsonSchema, schema);
+	const valid = ajv.validate(EntitySchemaJsonSchema, schema);
 
 	expect(valid).toBe(false);
 });
@@ -50,10 +50,9 @@ test("x-version is required", () => {
 		},
 		required: ["name"],
 		additionalProperties: false,
-	} as const satisfies ChangeSchema;
+	} as const satisfies EntitySchema;
 
-	const valid = ajv.validate(ChangeSchemaJsonSchema, schema);
+	const valid = ajv.validate(EntitySchemaJsonSchema, schema);
 
 	expect(valid).toBe(false);
 });
-
