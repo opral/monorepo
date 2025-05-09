@@ -10,6 +10,9 @@ import { executeSync } from "../database/execute-sync.js";
 import { createChange } from "../change/create-change.js";
 import type { Account } from "../account/database-schema.js";
 import type { Snapshot } from "../snapshot/database-schema.js";
+import type { NewChangeSetElement } from "../change-set/database-schema.js";
+import { v7 } from "uuid";
+import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 export const LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID =
 	"pending-own-change-control";
@@ -59,15 +62,15 @@ export function applyOwnChangeControlTriggers(
 			EXISTS (SELECT 1 FROM key_value WHERE key IN (
 				'lix_skip_own_change_control',
 				'lix_flushing_own_changes',
-				'lix_skip_handle_own_change_trigger'
+				'lix_skip_handle_own_change_trigger',
+				'lix_skip_update_working_change_set'
 			))
 		)`;
 
 		// Base WHEN clauses, starting with the common check
 		let insertWhenClause = `WHEN ${commonSkipCheck}`;
 		let updateWhenClause = `WHEN ${commonSkipCheck}`;
-		// deleteWhenClause is not modified after this, so use const
-		const deleteWhenClause = `WHEN ${commonSkipCheck}`;
+		let deleteWhenClause = `WHEN ${commonSkipCheck}`;
 
 		// Add table-specific WHEN clauses
 		if (table === "key_value") {
@@ -76,6 +79,18 @@ export function applyOwnChangeControlTriggers(
 			updateWhenClause += ` AND NEW.skip_change_control IS NOT TRUE`;
 			// Delete trigger doesn't need this specific check as the row is gone,
 			// but we might still want to record the deletion unless a global flag is set.
+		}
+
+		if (table === "change_set_element") {
+			insertWhenClause += ` AND NEW.change_set_id != '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}'`;
+			updateWhenClause += ` AND OLD.change_set_id != '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}' OR NEW.change_set_id != '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}'`;
+			deleteWhenClause += ` AND OLD.change_set_id != '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}'`;
+		}
+
+		if (table === "change_set") {
+			insertWhenClause += ` AND NEW.id != '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}'`;
+			updateWhenClause += ` AND OLD.id != '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}' OR NEW.id != '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}'`;
+			deleteWhenClause += ` AND OLD.id != '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}'`;
 		}
 
 		if (table === "file") {
@@ -87,6 +102,21 @@ export function applyOwnChangeControlTriggers(
 				OLD.metadata IS NOT NEW.metadata
 			)`;
 			// Delete trigger doesn't need column checks.
+		}
+
+		// only change control version if name or id changes
+		// the change_set_id and working change set id are handled by the version update trigger
+		if (table === "version") {
+			updateWhenClause += ` AND (
+			  OLD.id IS NOT NEW.id OR
+				OLD.name IS NOT NEW.name
+			)`;
+		}
+
+		if (table === "key_value") {
+			console.log("insertWhenClause", insertWhenClause);
+			console.log("updateWhenClause", updateWhenClause);
+			console.log("deleteWhenClause", deleteWhenClause);
 		}
 
 		try {
@@ -112,12 +142,19 @@ export function applyOwnChangeControlTriggers(
 						SELECT handle_lix_own_change_control('${table}', 'delete', ${tableInfo.map((c) => "OLD." + c.name).join(", ")});
 					END;
 			`);
-		} catch {
-			// ignore errors during trigger setup
+		} catch (e) {
+			createLixOwnLogSync({
+				lix: { sqlite, db },
+				message: "Failed to create trigger for table " + table + " " + e,
+				level: "error",
+				key: "lix.own_change_control.apply_triggers_failed",
+			});
 		}
 	}
 
-	// Add trigger to move system changes before version change_set_id update
+	// Add trigger to move own changes before version change_set_id update
+	//
+	// This trigger fires inside the same transaction as the version update
 	//
 	// Coming up with this took a long time AKA this has been evaluated against other options.
 	// Other options included:
@@ -126,7 +163,7 @@ export function applyOwnChangeControlTriggers(
 	//    - needs manual invocation from devs (really bad)
 	//    - automatic flush using sqlite's `commit` hook runs out of transaction (bad)
 	sqlite.exec(`
-    CREATE TEMP TRIGGER IF NOT EXISTS flush_system_changes_before_version_update
+    CREATE TEMP TRIGGER IF NOT EXISTS flush_own_changes_before_version_update
     BEFORE UPDATE OF change_set_id ON version
     BEGIN
     	INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
@@ -137,9 +174,8 @@ export function applyOwnChangeControlTriggers(
 
 
       -- move pending elements
-      INSERT INTO change_set_element (change_set_id, change_id, entity_id, file_id, schema_key)
-      SELECT NEW.change_set_id, change_id, entity_id, file_id, schema_key
-      FROM change_set_element
+      UPDATE change_set_element
+      SET change_set_id = NEW.change_set_id
       WHERE change_set_id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}';
 
       -- mark new change_set as immutable
@@ -153,16 +189,27 @@ export function applyOwnChangeControlTriggers(
 
       -- delete the flushing flag
       DELETE FROM key_value WHERE key = 'lix_flushing_own_changes';
+
+			INSERT INTO log (key, level, message)
+			VALUES (
+				'lix.own_change_control.flushed_changes_before_version_update',
+				'debug',
+				changes() || ' changes have been flushed to change_set_id ' || NEW.change_set_id
+			);
     END;
   `);
 
-	// fallback flush on commit if system changes were never finalized
+	// fallback flush on commit
 	//
-	// - nasty hack because SQlite triggers do not allow mutations after finalization
-	// - queueMicrotask is needed to ensure the transaction is complete with the downside that the transaction is not atomic
+	// If the version update trigger missed to flush the changes, we flush them here.
+	//
+	// - acts as safety net to avoid pending changes
+	// - it needs queueMicrotask because SQLite's commit hook does not allow mutations
+	//   (if the triggers fail, we lost the changes for the transaction. bad. but unavoidable rn.)
 	// - if bugs arise, we have to find a different solution
 	sqlite.sqlite3.capi.sqlite3_commit_hook(
 		sqlite,
+		// @ts-expect-error - queueMicrotask is not a number
 		() => {
 			if (isFlushing) return 0;
 			queueMicrotask(() => {
@@ -174,14 +221,22 @@ export function applyOwnChangeControlTriggers(
 							returnValue: "resultRows",
 						}
 					);
-					if (pending.length === 0) return;
+					if (pending.length === 0) return 0;
 
 					sqlite.exec(`
+					INSERT INTO log (key, level, message)
+					VALUES (
+						'lix.own_change_control.begin_commit_hook',
+						'debug',
+						'current change_set_id=' || (SELECT change_set_id FROM version WHERE id = (SELECT version_id FROM active_version))
+					);
+
+
           INSERT OR REPLACE INTO key_value (key, value, skip_change_control)
           VALUES ('lix_flushing_own_changes', jsonb(json_quote('true')), true);
 
-          INSERT INTO change_set (immutable_elements)
-          VALUES (true);
+          INSERT INTO change_set (immutable_elements, id)
+          VALUES (true, COALESCE((SELECT json(value) FROM key_value WHERE key='lix_next_change_set_id'), uuid_v7()));
 
           INSERT INTO change_set_edge (parent_id, child_id)
           SELECT change_set_id, (SELECT id FROM change_set ORDER BY rowid DESC LIMIT 1)
@@ -196,12 +251,46 @@ export function applyOwnChangeControlTriggers(
           WHERE id = (SELECT version_id FROM active_version);
 
           DELETE FROM key_value WHERE key = 'lix_flushing_own_changes';
+          DELETE FROM key_value WHERE key = 'lix_next_change_set_id';
+
+					-- delete pending elements and pending change_set
+      		DELETE FROM change_set_element WHERE change_set_id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}';
+      		DELETE FROM change_set WHERE id = '${LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID}';
+
+					INSERT INTO log (key, level, message)
+					VALUES (
+						'lix.own_change_control.end_commit_hook',
+						'debug',
+						'new change_set_id=' || (
+							SELECT change_set_id
+							FROM version
+							WHERE id = (SELECT version_id FROM active_version)
+						)
+					);
         `);
+					return 0;
+				} catch (e) {
+					createLixOwnLogSync({
+						lix: { sqlite, db },
+						message: [
+							"Failed to commit own changes. This is a crucial bug in lix. Please report it.",
+							"",
+							"Lix uses SQLite's commit hook as a workaround to track lix own changes such as comments.",
+							"Unfortunately, SQLite's commit hook does not allow mutations. As a result, tracking lix",
+							"own changes runs outside of the transaction. If this error was thrown, lix own changes",
+							"have not been captured and the transaction that created the changes IS NOT rolled back.",
+							"",
+							"Data loss is likely to occur. Please report this bug to the lix maintainers.",
+							e,
+						].join("\n"),
+						level: "error",
+						key: "lix.own_change_control.commit_hook_failed",
+					});
+					return 1;
 				} finally {
 					isFlushing = false;
 				}
 			});
-			return 0;
 		},
 		0
 	);
@@ -228,7 +317,46 @@ function handleLixOwnChange(
 		return;
 	}
 
+	const shouldSkip = executeSync({
+		lix,
+		query: db
+			.selectFrom("key_value")
+			.where("key", "=", "lix_skip_own_change_control")
+			.select("value"),
+	})[0];
+
+	if (shouldSkip?.value) {
+		console.log("Skipping own change control for", tableName);
+		return;
+	}
+
+	const [{ value: nextChangeSetId }] = executeSync({
+		lix,
+		query: db
+			.insertInto("key_value")
+			.values({
+				key: "lix_next_change_set_id",
+				value: v7(),
+				skip_change_control: true,
+			})
+			.returning("value")
+			.onConflict((oc) => oc.doUpdateSet({ skip_change_control: true })),
+	});
+
 	const entityId = entityIdForRow(tableName, ...values);
+
+	executeSync({
+		lix,
+		query: db.insertInto("log").values({
+			key: "lix.own_change_control.begin_handle_own_change",
+			level: "debug",
+			message: JSON.stringify({
+				table: tableName,
+				entityId,
+				operation,
+			}),
+		}),
+	});
 
 	const authors = executeSync({
 		lix,
@@ -250,6 +378,8 @@ function handleLixOwnChange(
 			snapshotContent[column.name] = values[index];
 		}
 	}
+
+	console.log("handleLixOwnChange", tableName, operation, snapshotContent);
 
 	if (tableName === "file" && snapshotContent) {
 		// sqlite has it's own jsonb format
@@ -313,6 +443,48 @@ function handleLixOwnChange(
 			.onConflict((oc) => oc.doNothing()),
 	});
 
+	const newChangeSetElement: NewChangeSetElement = {
+		change_set_id: LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID,
+		change_id: insertedChange.id,
+		entity_id: insertedChange.entity_id,
+		file_id: insertedChange.file_id,
+		schema_key: insertedChange.schema_key,
+	};
+
+	const changeForChangeSetElement = createChange({
+		lix,
+		authors,
+		entityId: entityIdForRow(
+			"change_set_element",
+			nextChangeSetId,
+			insertedChange.id
+		),
+		fileId: "lix_own_change_control",
+		pluginKey: "lix_own_change_control",
+		schemaKey: `lix_change_set_element_table`,
+		snapshotContent: newChangeSetElement,
+	}) as unknown as Change;
+
+	const newChangeSetElementChangeSetElement: NewChangeSetElement = {
+		change_set_id: LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID,
+		change_id: changeForChangeSetElement.id,
+		entity_id: changeForChangeSetElement.entity_id,
+		file_id: "lix_own_change_control",
+		schema_key: "lix_change_set_element_table",
+	};
+
+	executeSync({
+		lix,
+		query: db
+			.insertInto("change_set_element")
+			.values([newChangeSetElement, newChangeSetElementChangeSetElement])
+			.onConflict((oc) =>
+				oc.doUpdateSet((eb) => ({
+					change_id: eb.ref("excluded.change_id"),
+				}))
+			),
+	});
+
 	executeSync({
 		lix,
 		query: db
@@ -327,8 +499,24 @@ function handleLixOwnChange(
 				},
 			])
 			.onConflict((oc) =>
-				oc.doUpdateSet((eb) => ({ change_id: eb.ref("excluded.change_id") }))
+				oc.doUpdateSet((eb) => ({
+					change_id: eb.ref("excluded.change_id"),
+				}))
 			),
+	});
+
+	executeSync({
+		lix,
+		query: db.insertInto("log").values({
+			key: "lix.own_change_control.end_handle_own_change",
+			level: "debug",
+			message: JSON.stringify({
+				table: tableName,
+				entityId,
+				operation,
+				snapshotContent,
+			}),
+		}),
 	});
 
 	executeSync({

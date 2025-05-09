@@ -4,6 +4,10 @@ import { createAccount } from "../account/create-account.js";
 import { createChange } from "../change/create-change.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { withSkipOwnChangeControl } from "./with-skip-own-change-control.js";
+import { createThread } from "../thread/create-thread.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import { changeControlledTableIds } from "./change-controlled-tables.js";
+import { LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID } from "./database-triggers.js";
 
 test("it works for inserts, updates and deletions", async () => {
 	const lix = await openLixInMemory({});
@@ -105,6 +109,8 @@ test("if the trigger throws, the transaction is rolled back", async () => {
 		expect(e).toBeDefined();
 	}
 
+	await lix.db.selectFrom("log").selectAll().execute();
+
 	const account1AfterFailedDeleted = await lix.db
 		.selectFrom("account")
 		.where("id", "=", account1.id)
@@ -176,6 +182,23 @@ test("file.metadata is tracked as json string, not binary.", async () => {
 	});
 });
 
+test("the pending change set is immediately 'flushed' when a change is inserted", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "key0", value: "value0" })
+		.execute();
+
+	const changeSet = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(changeSet).toBeUndefined();
+});
+
 test("file.data is not own change controlled as plugins handle the change control of file data", async () => {
 	const lix = await openLixInMemory({});
 
@@ -197,6 +220,46 @@ test("file.data is not own change controlled as plugins handle the change contro
 		.executeTakeFirstOrThrow();
 
 	expect(change.content?.data).toBe(undefined);
+});
+
+test("it updates the active version's change set id", async () => {
+	const lix = await openLixInMemory({});
+
+	const versionBefore = await lix.db
+		.selectFrom("version")
+		.innerJoin("active_version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "key0", value: "value0" })
+		.execute();
+
+	const versionAfter = await lix.db
+		.selectFrom("version")
+		.innerJoin("active_version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	expect(versionAfter.change_set_id).not.toBe(versionBefore.change_set_id);
+});
+
+test("the pending change set is immediately 'flushed' when a change is inserted", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "key0", value: "value0" })
+		.execute();
+
+	const changeSet = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(changeSet).toBeUndefined();
 });
 
 test("updating file.data does not trigger own change control", async () => {
@@ -313,6 +376,13 @@ test("it should group transactions into one change set", async () => {
 		.selectAll()
 		.execute();
 
+	await lix.db.selectFrom("log").selectAll().execute();
+
+	const cleanChangeSetId = activeVersionAfter.change_set_id.replace(
+		/^"|"$/g,
+		""
+	);
+
 	// initial change set and the one created by the transaction
 	expect(changeSetsAfter.length).toBe(2);
 
@@ -323,19 +393,56 @@ test("it should group transactions into one change set", async () => {
 		.selectAll()
 		.execute();
 
-	// mock plugin properties and own change control changes should be in the same set
+	// Verify the elements recorded in the final change set.
+	// The order is determined by the 'change_id' (UUIDv7), which reflects the order of operations.
 	expect(
 		elements.map((e) => ({ entity_id: e.entity_id, schema_key: e.schema_key }))
 	).toEqual([
+		// The insertion of the first key-value pair.
 		{ entity_id: "key0", schema_key: "lix_key_value_table" },
-		// { entity_id: expect.any(String), schema_key: "lix_change_author_table" },
+		// The change_set_element linking the first key-value insertion to the final change set.
+		// The entity_id is a composite key: <change_set_id>,<change_id_of_key0_insert>
+		{
+			entity_id: expect.stringMatching(
+				new RegExp(`^${cleanChangeSetId},[0-9a-f-]+$`)
+			),
+			schema_key: "lix_change_set_element_table",
+		},
+		// The insertion of the second key-value pair.
 		{ entity_id: "key1", schema_key: "lix_key_value_table" },
-		// { entity_id: expect.any(String), schema_key: "lix_change_author_table" },
+		// The change_set_element linking the second key-value insertion to the final change set.
+		// The entity_id is a composite key: <change_set_id>,<change_id_of_key1_insert>
+		{
+			entity_id: expect.stringMatching(
+				new RegExp(`^${cleanChangeSetId},[0-9a-f-]+$`)
+			),
+			schema_key: "lix_change_set_element_table",
+		},
+		// The insertion of the final change_set row itself (triggered by the end_commit_hook).
+		{
+			entity_id: activeVersionAfter.change_set_id,
+			schema_key: "lix_change_set_table",
+		},
+		// The change_set_element linking the change_set insertion (#5) to itself.
+		// The entity_id is a composite key: <change_set_id>,<change_id_of_change_set_insert>
+		{
+			entity_id: expect.stringMatching(
+				new RegExp(`^${cleanChangeSetId},[0-9a-f-]+$`)
+			),
+			schema_key: "lix_change_set_element_table",
+		},
 	]);
 });
 
 test("should not trigger change control when modifying the skip key", async () => {
 	const lix = await openLixInMemory({});
+
+	// globalThis.getLogs = () => {
+	// 	return executeSync({
+	// 		lix,
+	// 		query: lix.db.selectFrom("log").selectAll(),
+	// 	});
+	// };
 
 	// 1. Baseline change
 	await lix.db
@@ -424,4 +531,122 @@ test("works in combination with skipOwnChangeControl", async () => {
 		.executeTakeFirst();
 
 	expect(skip).toBeUndefined();
+});
+
+test("content of a thread comment is stored as json", async () => {
+	const lix = await openLixInMemory({});
+
+	const thread = await createThread({
+		lix,
+		comments: [
+			{
+				body: {
+					type: "zettel_doc",
+					content: [{ type: "mock", zettel_key: "mock_key" }],
+				},
+			},
+		],
+	});
+
+	const firstComment = thread.comments[0]!;
+
+	const change = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("entity_id", "=", firstComment.id)
+		.selectAll("change")
+		.select("snapshot.content")
+		.executeTakeFirst();
+
+	expect(firstComment.body.content).toEqual([
+		{ type: "mock", zettel_key: "mock_key" },
+	]);
+
+	expect(change?.content?.body?.content).toEqual([
+		{ type: "mock", zettel_key: "mock_key" },
+	]);
+});
+
+// TODO remove.
+// not change controlling the versions' change set id or working change set id means it can't be synced and state not be restored.
+test("updating the version's change_set_id or working change_set_id is not change controlled to avoid infinite loops", async () => {
+	const lix = await openLixInMemory({});
+
+	const version = await lix.db
+		.selectFrom("version")
+		.select("id")
+		.executeTakeFirstOrThrow();
+
+	expect(version.id).toBeDefined();
+
+	// testing that updating the version's change_set_id does not trigger a change
+	await lix.db
+		.updateTable("version")
+		.set({
+			change_set_id: (await createChangeSet({ lix })).id,
+		})
+		.returningAll()
+		.where("id", "=", version.id)
+		.executeTakeFirstOrThrow();
+
+	// testing working change set
+	await lix.db
+		.updateTable("version")
+		.set({ working_change_set_id: (await createChangeSet({ lix })).id })
+		.executeTakeFirstOrThrow();
+
+	// other columns should create a change
+	await lix.db
+		.updateTable("version")
+		.set({ name: "new name" })
+		.where("id", "=", version.id)
+		.executeTakeFirstOrThrow();
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_version_table")
+		.where("entity_id", "=", version.id)
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.select("snapshot.content")
+		.execute();
+
+	expect(changes).toMatchObject([
+		{
+			content: {
+				name: "new name",
+			},
+		},
+	]);
+});
+
+// https://github.com/opral/lix-sdk/issues/304
+test("every table is change controlled with the exception of changes, snapshots, and the file_queue which are used to re-compute state", async () => {
+	const lix = await openLixInMemory({});
+
+	const dbTables = await lix.db
+		// @ts-expect-error - sqlite_master is not a table in the schema
+		.selectFrom("sqlite_master")
+		// @ts-expect-error - sqlite_master is not a table in the schema
+		.where("type", "=", "table")
+		.select("name")
+		.execute();
+
+	const ignoredTables = [
+		"change",
+		"snapshot",
+		"file_queue",
+		// TODO enable change control for logs (required for sync, sync is required for a lix inspector in local debugging)
+		"log",
+	];
+
+	const changeControlledTables = dbTables
+		.map((t) => t.name)
+		.filter((t) => t?.includes("sqlite") === false)
+		.filter((t) => !ignoredTables.includes(t as string));
+
+	const shouldBeChangeControlledTables = Object.keys(changeControlledTableIds);
+
+	expect(changeControlledTables.toSorted()).toEqual(
+		shouldBeChangeControlledTables.toSorted()
+	);
 });

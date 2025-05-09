@@ -39,16 +39,16 @@ export function applyChangeSetDatabaseSchema(
   FOR EACH ROW
   WHEN (SELECT immutable_elements FROM change_set WHERE id = NEW.change_set_id) = 1
   BEGIN
-    SELECT RAISE(ABORT, 'Attempted to insert elements into a change set with immutable elements');
+    SELECT RAISE(ABORT, 'Attempted to insert elements into immutable change set: ' || NEW.change_set_id);
   END;
 
   -- Trigger to prevent UPDATING elements in an immutable change set
   CREATE TRIGGER IF NOT EXISTS prevent_immutable_element_update
   BEFORE UPDATE ON change_set_element
   FOR EACH ROW
-  WHEN (SELECT immutable_elements FROM change_set WHERE id = OLD.change_set_id) = 1
+  WHEN (SELECT immutable_elements FROM change_set WHERE id = OLD.change_set_id) = 1 OR (NEW.change_set_id != OLD.change_set_id AND (SELECT immutable_elements FROM change_set WHERE id = NEW.change_set_id) = 1)
   BEGIN
-    SELECT RAISE(ABORT, 'Attempted to update elements of a change set with immutable elements');
+    SELECT RAISE(ABORT, 'Attempted to update elements of a change set with immutable elements with id: ' || OLD.change_set_id);
   END;
 
   -- Trigger to prevent DELETING elements from an immutable change set
@@ -57,7 +57,7 @@ export function applyChangeSetDatabaseSchema(
   FOR EACH ROW
   WHEN (SELECT immutable_elements FROM change_set WHERE id = OLD.change_set_id) = 1
   BEGIN
-    SELECT RAISE(ABORT, 'Attempted to delete elements from a change set with immutable elements');
+    SELECT RAISE(ABORT, 'Attempted to delete elements from a change set with immutable elements with id: ' || OLD.change_set_id);
   END;
 
   -- Trigger to prevent changing the immutable flag once set
