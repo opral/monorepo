@@ -144,7 +144,7 @@ export const CheckpointComponent = (props: {
           </div>
 
           <div className="pb-2">
-            <p className="text-sm text-slate-500 truncate text-ellipsis overflow-hidden pr-2">
+            <p className="text-sm text-slate-500 overflow-hidden pr-2 whitespace-normal">
               {truncatedComment || "Create checkpoint"}
             </p>
           </div>
