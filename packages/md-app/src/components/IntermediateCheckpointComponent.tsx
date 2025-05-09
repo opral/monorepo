@@ -45,7 +45,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
       className="flex group hover:bg-slate-50 rounded-md cursor-pointer flex-shrink-0 pr-2"
       onClick={(e) => {
         if ((e.target as HTMLElement).tagName !== "TEXTAREA" && (e.target as HTMLElement).tagName !== "BUTTON") {
-        // Prevent click event from propagating to the textarea and button
+          // Prevent click event from propagating to the textarea and button
           e.stopPropagation();
           setIsExpandedState(!isExpandedState);
         }
@@ -58,7 +58,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
             Intermediate changes{" "}
           </p>
           <div className="flex gap-3 items-center">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={() => setIsExpandedState(!isExpandedState)}>
               <ChevronDown
                 className={clsx(
                   isExpandedState ? "rotate-180" : "rotate-0",
@@ -173,10 +173,10 @@ const CreateCheckpointInput = () => {
 
     try {
       const changesSummary =
-        `Before:\n` +
+        `| Before:\n` +
         `${lastTextChange.snapshot_content_before?.["text"] || ``}` +
         '\n' +
-        'After:\n' +
+        '| After:\n' +
         `${lastTextChange.snapshot_content_after?.["text"] || ``}`;
 
       console.log("Changes summary:", changesSummary);
@@ -221,7 +221,7 @@ const CreateCheckpointInput = () => {
       <div className="relative w-full">
         <textarea
           ref={textareaRef}
-          className="flex-grow w-full min-h-[32px] rounded-md border border-input bg-background px-2 py-1 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none overflow-hidden pr-8"
+          className="flex-grow w-full min-h-[32px] rounded-md border border-input bg-background px-2 pt-[5px] pb-[7px] text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none overflow-hidden pr-8"
           placeholder={isGeneratingDescription ? "Generating description..." : "Describe the changes"}
           onChange={(event) => {
             setDescription(event.target.value);
@@ -244,7 +244,7 @@ const CreateCheckpointInput = () => {
       </div>
       <Button
         onClick={handleCreateCheckpoint}
-        className="w-full mt-2"
+        className="w-full"
         disabled={!description.trim() || isGeneratingDescription}
       >
         Create checkpoint
