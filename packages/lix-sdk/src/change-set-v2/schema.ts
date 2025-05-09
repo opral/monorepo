@@ -30,24 +30,10 @@ export function applyChangeSetDatabaseSchema(
   CREATE TRIGGER change_set_insert
   INSTEAD OF INSERT ON change_set
   BEGIN
-      INSERT INTO internal_snapshot (content)
-      VALUES (
-        jsonb(
-          json_object(
-            'id', COALESCE(NEW.id, nano_id()),
-            'metadata', NEW.metadata
-          )
-        )
-      );
-
-      INSERT INTO internal_change (entity_id, schema_key, snapshot_id, file_id, plugin_key)
-      VALUES (
-          (SELECT json_extract(content, '$.id') FROM internal_snapshot ORDER BY rowid DESC LIMIT 1),
-          'lix_change_set',
-          (SELECT id FROM internal_snapshot ORDER BY rowid DESC LIMIT 1),
-          'lix_own_change_control',
-          'lix_own_change_control'
-      );
+    SELECT handle_insert_on_view('change_set', 
+      'id', COALESCE(NEW.id, nano_id()), 
+      'metadata', NEW.metadata
+    );
   END;
 
   CREATE TRIGGER change_set_update

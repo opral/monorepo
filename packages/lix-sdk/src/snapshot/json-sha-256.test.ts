@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { jsonSha256 } from "./json-sha-256.js";
-import type { JSONType } from "../change/schema.js";
+import type { JSONType } from "./schema.js";
 
 test("sha256 returns the same hash for the same content irrespective of the property ordering", async () => {
 	const obj1: JSONType = {

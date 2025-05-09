@@ -1,5 +1,5 @@
 import { sha256 } from "js-sha256";
-import type { JSONType } from "../change/schema.js";
+import type { JSONType } from "./schema.js";
 
 /**
  * Creates a sha256 hash from a json object.

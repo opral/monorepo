@@ -1,11 +1,11 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { NewChange } from "./schema.js";
-import type { NewSnapshot } from "./schema.js";
-import { createSnapshot } from "./create-snapshot.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import type { Change } from "./schema.js";
 import { v7 } from "uuid";
+import type { NewSnapshot } from "../snapshot/schema.js";
+import { createSnapshot } from "../snapshot/create-snapshot.js";
 
 export function createChange(args: {
 	lix: Lix;

@@ -1,18 +1,10 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Selectable, Insertable, Generated, Updateable } from "kysely";
 
-export function applyInternalChangeDatabaseSchema(
+export function applyChangeDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): SqliteWasmDatabase {
 	return sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS internal_snapshot (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    content BLOB -- jsonb or binary file
-  ) STRICT;
-
-  INSERT INTO internal_snapshot (id, content)
-  VALUES ('no-content', NULL);
-
   CREATE TABLE IF NOT EXISTS internal_change (
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     entity_id TEXT NOT NULL,
@@ -28,38 +20,6 @@ export function applyInternalChangeDatabaseSchema(
 
   CREATE VIEW change AS
   SELECT * FROM internal_change;
-
-  CREATE VIEW snapshot AS
-  SELECT 
-    internal_snapshot.id as id, 
-    json(internal_snapshot.content) 
-  AS content FROM internal_snapshot;
-
-  -- Triggers for 'snapshot' view to make it updatable
-  CREATE TRIGGER IF NOT EXISTS snapshot_insert_trigger
-  INSTEAD OF INSERT ON snapshot
-  FOR EACH ROW
-  BEGIN
-    INSERT INTO internal_snapshot (id, content)
-    VALUES (NEW.id, NEW.content);
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS snapshot_update_trigger
-  INSTEAD OF UPDATE ON snapshot
-  FOR EACH ROW
-  BEGIN
-    UPDATE internal_snapshot
-    SET content = NEW.content
-    WHERE id = OLD.id;
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS snapshot_delete_trigger
-  INSTEAD OF DELETE ON snapshot
-  FOR EACH ROW
-  BEGIN
-    DELETE FROM internal_snapshot
-    WHERE id = OLD.id;
-  END;
 `);
 }
 
@@ -76,21 +36,6 @@ export type InternalChangeTable = {
 	created_at: Generated<string>;
 };
 
-// Types for the internal_snapshot TABLE
-export type InternalSnapshot = Selectable<InternalSnapshotTable>;
-export type NewInternalSnapshot = Insertable<InternalSnapshotTable>;
-export type InternalSnapshotTable = {
-	id: Generated<string>;
-	content: JSONType;
-};
-
-export type Snapshot = Selectable<SnapshotView>;
-export type NewSnapshot = Insertable<SnapshotView>;
-export type SnapshotView = {
-	id: Generated<string>;
-	content: JSONType;
-};
-
 export type Change = Selectable<ChangeView>;
 export type NewChange = Insertable<ChangeView>;
 export type ChangeUpdate = Updateable<ChangeView>;
@@ -103,11 +48,3 @@ export type ChangeView = {
 	snapshot_id: string;
 	created_at: Generated<string>;
 };
-
-export type JSONType =
-	| string
-	| number
-	| boolean
-	| null
-	| JSONType[]
-	| { [key: string]: JSONType };
