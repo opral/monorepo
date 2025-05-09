@@ -1,5 +1,60 @@
 # @inlang/sdk
 
+## 2.4.9
+
+### Patch Changes
+
+- 22089a2: Fix error when running the machine translate using `pathPattern` as an array
+
+  ***
+
+  When running command `{npx|pnpm} inlang machine translate ...` is throwing an error when the `pathPattern` value is Array like this:
+
+  ```json
+  {
+  	"$schema": "https://inlang.com/schema/project-settings",
+  	"baseLocale": "es",
+  	"locales": ["es", "en"],
+  	"modules": [
+  		"https://cdn.jsdelivr.net/npm/@inlang/plugin-message-format@4/dist/index.js",
+  		"https://cdn.jsdelivr.net/npm/@inlang/plugin-m-function-matcher@2/dist/index.js"
+  	],
+  	"plugin.inlang.messageFormat": {
+  		// In this example, "pathPattern" is array
+  		"pathPattern": [
+  			"./messages/{locale}/home.json",
+  			"./messages/{locale}/shopping-cart.json"
+  		]
+  	}
+  }
+  ```
+
+  ### Error message
+
+  ```bash
+  deriancordoba@DerianCordoba project % pnpm machine-translate
+
+  > project@0.0.1 machine-translate /Users/deriancordoba/Developer/project
+  > inlang machine translate --project project.inlang
+
+  ✔ Machine translate complete.
+
+   ERROR   pathPattern.replace is not a function
+
+    at saveProjectToDirectory (node_modules/.pnpm/@inlang+cli@3.0.11/node_modules/@inlang/cli/dist/main.js:56516:81)
+    at async _Command.<anonymous> (node_modules/.pnpm/@inlang+cli@3.0.11/node_modules/@inlang/cli/dist/main.js:56647:5)
+
+   ELIFECYCLE  Command failed with exit code 1.
+  ```
+
+- Updated dependencies [bb8b62f]
+- Updated dependencies [ff75cca]
+- Updated dependencies [2eb5c9d]
+- Updated dependencies [8bd8ced]
+- Updated dependencies [48e9f18]
+- Updated dependencies [5e8f3d9]
+  - @lix-js/sdk@0.5.0
+
 ## 2.4.8
 
 ### Patch Changes
