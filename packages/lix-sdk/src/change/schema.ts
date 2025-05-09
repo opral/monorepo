@@ -6,12 +6,15 @@ export function applyInternalChangeDatabaseSchema(
 ): SqliteWasmDatabase {
 	return sqlite.exec(`
   CREATE TABLE IF NOT EXISTS internal_snapshot (
-    id TEXT PRIMARY KEY,
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     content BLOB -- jsonb or binary file
   ) STRICT;
 
+  INSERT INTO internal_snapshot (id, content)
+  VALUES ('no-content', NULL);
+
   CREATE TABLE IF NOT EXISTS internal_change (
-    id TEXT PRIMARY KEY,
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     entity_id TEXT NOT NULL,
     schema_key TEXT NOT NULL,
     file_id TEXT NOT NULL,
@@ -27,7 +30,10 @@ export function applyInternalChangeDatabaseSchema(
   SELECT * FROM internal_change;
 
   CREATE VIEW snapshot AS
-  SELECT * FROM internal_snapshot;
+  SELECT 
+    internal_snapshot.id as id, 
+    json(internal_snapshot.content) 
+  AS content FROM internal_snapshot;
 
   -- Triggers for 'snapshot' view to make it updatable
   CREATE TRIGGER IF NOT EXISTS snapshot_insert_trigger

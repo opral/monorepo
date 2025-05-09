@@ -1,7 +1,7 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
+// import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import type { NewKeyValue } from "../key-value/database-schema.js";
@@ -97,7 +97,7 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 	};
 
-	await initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
+	// await initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
 
 	// await initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
 
