@@ -1,6 +1,6 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-import { activeFileAtom } from '@/state-active-file';
+import { activeFileAtom, intermediateChangesAtom } from '@/state-active-file';
 import { useAtom } from 'jotai/react';
 import FileName from '@/components/FileName';
 import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
@@ -20,6 +20,7 @@ import posthog from 'posthog-js';
 function PageContent() {
 	const [activeFile] = useAtom(activeFileAtom);
 	const [activeAccount] = useAtom(activeAccountAtom);
+	const [intermediateChanges] = useAtom(intermediateChangesAtom);
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
 	useEffect(() => {
@@ -66,9 +67,15 @@ function PageContent() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="size-7"
+							className="size-7 relative"
 							onClick={toggleRightSidebar}
 						>
+							{intermediateChanges.length > 0 && !rightSidebar.open && (
+								<>
+									<span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary animate-ping" />
+									<span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary" />
+								</>
+							)}
 							{rightSidebar.open ? <PanelRightClose /> : <PanelRightOpen />}
 							<span className="sr-only">Toggle Change Control Sidebar</span>
 						</Button>
