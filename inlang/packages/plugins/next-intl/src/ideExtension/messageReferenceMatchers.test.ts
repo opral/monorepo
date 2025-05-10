@@ -313,3 +313,35 @@ it("should add the defined namespace by useTranslations hook", async () => {
 	expect(matches).toHaveLength(1);
 	expect(matches[0]?.messageId).toBe("DirectoryPage.title");
 });
+
+
+it("should correctly reference messages with multiple useTranslations hooks", async () => {
+	const sourceCode = `
+		const tOne = useTranslations("namespaceOne");
+		const tTwo = useTranslations("namespaceTwo");
+		const tThree = useTranslations("namespaceThree");
+		const tNested = useTranslations("nestedNamespace.section");
+
+		// Simulate usage of these translation functions
+		const message1 = tOne("messageKey1");
+		const message2 = tTwo("messageKey2");
+		const message3 = tThree("messageKey3");
+		const message4 = tNested("messageKey4");
+
+		// Interleaved usage
+		const message5 = tOne("anotherKey1");
+		const message6 = tTwo("anotherKey2");
+	`;
+	const settings: PluginSettings = {
+		pathPattern: "./{language}.json",
+	};
+	const matches = parse(sourceCode, settings);
+
+	expect(matches).toHaveLength(6);
+	expect(matches[0]?.messageId).toBe("namespaceOne.messageKey1");
+	expect(matches[1]?.messageId).toBe("namespaceTwo.messageKey2");
+	expect(matches[2]?.messageId).toBe("namespaceThree.messageKey3");
+	expect(matches[3]?.messageId).toBe("nestedNamespace.section.messageKey4");
+	expect(matches[4]?.messageId).toBe("namespaceOne.anotherKey1");
+	expect(matches[5]?.messageId).toBe("namespaceTwo.anotherKey2");
+});
