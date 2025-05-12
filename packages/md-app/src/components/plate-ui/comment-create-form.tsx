@@ -18,10 +18,10 @@ import { DatePlugin } from '@udecode/plate-date/react';
 import { EmojiInputPlugin } from '@udecode/plate-emoji/react';
 import { LinkPlugin } from '@udecode/plate-link/react';
 import { InlineEquationPlugin } from '@udecode/plate-math/react';
-import {
-  MentionInputPlugin,
-  MentionPlugin,
-} from '@udecode/plate-mention/react';
+// import {
+//   MentionInputPlugin,
+//   MentionPlugin,
+// } from '@udecode/plate-mention/react';
 import { Plate, useEditorRef, usePluginOption } from '@udecode/plate/react';
 import { type CreatePlateEditorOptions, PlateLeaf } from '@udecode/plate/react';
 import { ArrowUpIcon } from 'lucide-react';
@@ -46,8 +46,8 @@ import { Editor, EditorContainer } from './editor';
 import { EmojiInputElement } from './emoji-input-element';
 import { InlineEquationElement } from './inline-equation-element';
 import { LinkElement } from './link-element';
-import { MentionElement } from './mention-element';
-import { MentionInputElement } from './mention-input-element';
+// import { MentionElement } from './mention-element';
+// import { MentionInputElement } from './mention-input-element';
 
 export const useCommentEditor = (
   options: Omit<CreatePlateEditorOptions, 'plugins'> = {},
@@ -64,8 +64,8 @@ export const useCommentEditor = (
         [InlineEquationPlugin.key]: InlineEquationElement,
         [ItalicPlugin.key]: withProps(PlateLeaf, { as: 'em' }),
         [LinkPlugin.key]: LinkElement,
-        [MentionInputPlugin.key]: MentionInputElement,
-        [MentionPlugin.key]: MentionElement,
+        // [MentionInputPlugin.key]: MentionInputElement,
+        // [MentionPlugin.key]: MentionElement,
         [StrikethroughPlugin.key]: withProps(PlateLeaf, { as: 's' }),
         // [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
         // [SlashInputPlugin.key]: SlashInputElement,

@@ -58,7 +58,7 @@ import {
   BaseMediaEmbedPlugin,
   BaseVideoPlugin,
 } from '@udecode/plate-media';
-import { BaseMentionPlugin } from '@udecode/plate-mention';
+// import { BaseMentionPlugin } from '@udecode/plate-mention';
 import {
   BaseTableCellHeaderPlugin,
   BaseTableCellPlugin,
@@ -96,7 +96,7 @@ import { LinkElementStatic } from '@/components/plate-ui/link-element-static';
 import { MediaAudioElementStatic } from '@/components/plate-ui/media-audio-element-static';
 import { MediaFileElementStatic } from '@/components/plate-ui/media-file-element-static';
 import { MediaVideoElementStatic } from '@/components/plate-ui/media-video-element-static';
-import { MentionElementStatic } from '@/components/plate-ui/mention-element-static';
+// import { MentionElementStatic } from '@/components/plate-ui/mention-element-static';
 import { ParagraphElementStatic } from '@/components/plate-ui/paragraph-element-static';
 import {
   TableCellElementStatic,
@@ -222,7 +222,7 @@ export function ExportToolbarButton({
       [BaseKbdPlugin.key]: KbdLeafStatic,
       [BaseLinkPlugin.key]: LinkElementStatic,
       // [BaseMediaEmbedPlugin.key]: MediaEmbedElementStatic,
-      [BaseMentionPlugin.key]: MentionElementStatic,
+      // [BaseMentionPlugin.key]: MentionElementStatic,
       [BaseParagraphPlugin.key]: ParagraphElementStatic,
       [BaseStrikethroughPlugin.key]: withProps(SlateLeaf, { as: 'del' }),
       // [BaseSubscriptPlugin.key]: withProps(SlateLeaf, { as: 'sub' }),
@@ -326,7 +326,7 @@ export function ExportToolbarButton({
         BaseHighlightPlugin,
         BaseFilePlugin,
         BaseImagePlugin,
-        BaseMentionPlugin,
+        // BaseMentionPlugin,
         BaseCommentsPlugin,
         BaseTogglePlugin,
       ],

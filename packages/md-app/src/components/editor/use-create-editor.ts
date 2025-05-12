@@ -39,10 +39,10 @@ import {
 	PlaceholderPlugin,
 	VideoPlugin,
 } from "@udecode/plate-media/react";
-import {
-	MentionInputPlugin,
-	MentionPlugin,
-} from "@udecode/plate-mention/react";
+// import {
+// 	MentionInputPlugin,
+// 	MentionPlugin,
+// } from "@udecode/plate-mention/react";
 import { SlashInputPlugin } from "@udecode/plate-slash-command/react";
 import { SuggestionPlugin } from "@udecode/plate-suggestion/react";
 import {
@@ -88,8 +88,8 @@ import { MediaEmbedElement } from "@/components/plate-ui/media-embed-element";
 import { MediaFileElement } from "@/components/plate-ui/media-file-element";
 import { MediaPlaceholderElement } from "@/components/plate-ui/media-placeholder-element";
 import { MediaVideoElement } from "@/components/plate-ui/media-video-element";
-import { MentionElement } from "@/components/plate-ui/mention-element";
-import { MentionInputElement } from "@/components/plate-ui/mention-input-element";
+// import { MentionElement } from "@/components/plate-ui/mention-element";
+// import { MentionInputElement } from "@/components/plate-ui/mention-input-element";
 import { ParagraphElement } from "@/components/plate-ui/paragraph-element";
 import { withPlaceholders } from "@/components/plate-ui/placeholder";
 import { SlashInputElement } from "@/components/plate-ui/slash-input-element";
@@ -144,7 +144,7 @@ export const viewComponents = {
 	[KbdPlugin.key]: KbdLeaf,
 	[LinkPlugin.key]: LinkElement,
 	[MediaEmbedPlugin.key]: MediaEmbedElement,
-	[MentionPlugin.key]: MentionElement,
+	// [MentionPlugin.key]: MentionElement,
 	[ParagraphPlugin.key]: ParagraphElement,
 	[PlaceholderPlugin.key]: MediaPlaceholderElement,
 	[StrikethroughPlugin.key]: withProps(PlateLeaf, { as: "s" }),
@@ -170,7 +170,7 @@ export const editorComponents = {
 	...viewComponents,
 	[AIPlugin.key]: AILeaf,
 	[EmojiInputPlugin.key]: EmojiInputElement,
-	[MentionInputPlugin.key]: MentionInputElement,
+	// [MentionInputPlugin.key]: MentionInputElement,
 	[SlashInputPlugin.key]: SlashInputElement,
 };
 

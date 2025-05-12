@@ -38,7 +38,7 @@ import { indentListPlugins } from "./indent-list-plugins";
 import { lineHeightPlugin } from "./line-height-plugin";
 import { linkPlugin } from "./link-plugin";
 import { mediaPlugins } from "./media-plugins";
-import { mentionPlugin } from "./mention-plugin";
+// import { mentionPlugin } from "./mention-plugin";
 import { resetBlockTypePlugin } from "./reset-block-type-plugin";
 import { skipMarkPlugin } from "./skip-mark-plugin";
 import { softBreakPlugin } from "./soft-break-plugin";
@@ -60,7 +60,7 @@ export const viewPlugins = [
   HorizontalRulePlugin,
   linkPlugin,
   DatePlugin,
-  mentionPlugin,
+  // mentionPlugin,
   tablePlugin,
   TogglePlugin,
   tocPlugin,
