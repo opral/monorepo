@@ -11,6 +11,7 @@ import {
   createNodesHOC,
   usePlaceholderState,
 } from '@udecode/plate/react';
+import { getModKey } from '@/helper/modKey';
 
 export const Placeholder = (props: PlaceholderProps) => {
   const { attributes, children, placeholder } = props;
@@ -41,7 +42,7 @@ export const withPlaceholders = (components: any) =>
     {
       key: ParagraphPlugin.key,
       hideOnBlur: true,
-      placeholder: 'Write, press CMD + J for AI, or / for commands',
+      placeholder: `Write, press ${getModKey()} + J for AI, or / for commands`,
       query: {
         maxLevel: 1,
       },

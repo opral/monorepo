@@ -137,7 +137,7 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
             }}
           >
             Duplicate
-            {/* <ContextMenuShortcut>⌘ + D</ContextMenuShortcut> */}
+            {/* <ContextMenuShortcut>getModKey() + D</ContextMenuShortcut> */}
           </ContextMenuItem>
           <ContextMenuSub>
             <ContextMenuSubTrigger>Turn into</ContextMenuSubTrigger>

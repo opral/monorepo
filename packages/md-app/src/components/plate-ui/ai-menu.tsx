@@ -95,11 +95,11 @@ export function AIMenu() {
   });
 
   useHotkeys(
-    'meta+j',
+    'mod+j',
     () => {
       api.aiChat.show();
     },
-    { enableOnContentEditable: true, enableOnFormTags: true }
+    { enableOnContentEditable: true, enableOnFormTags: true, preventDefault: true }
   );
 
   useHotkeys('esc', () => {

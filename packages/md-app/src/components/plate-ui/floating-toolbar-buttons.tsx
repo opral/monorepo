@@ -27,6 +27,7 @@ import { MarkToolbarButton } from './mark-toolbar-button';
 // import { SuggestionToolbarButton } from './suggestion-toolbar-button';
 import { ToolbarGroup } from './toolbar';
 import { TurnIntoDropdownMenu } from './turn-into-dropdown-menu';
+import { getModKey } from '@/helper/modKey';
 
 export function FloatingToolbarButtons() {
   const readOnly = useEditorReadOnly();
@@ -36,7 +37,7 @@ export function FloatingToolbarButtons() {
       {!readOnly && (
         <>
           <ToolbarGroup>
-            <AIToolbarButton tooltip="AI commands (⌘+J)">
+            <AIToolbarButton tooltip={`AI commands (${getModKey()}+J)`}>
               <ZapIcon />
               Ask AI
             </AIToolbarButton>
@@ -45,32 +46,32 @@ export function FloatingToolbarButtons() {
           <ToolbarGroup>
             <TurnIntoDropdownMenu />
 
-            <MarkToolbarButton nodeType={BoldPlugin.key} tooltip="Bold (⌘+B)">
+            <MarkToolbarButton nodeType={BoldPlugin.key} tooltip={`Bold (${getModKey()}+B)`}>
               <BoldIcon />
             </MarkToolbarButton>
 
             <MarkToolbarButton
               nodeType={ItalicPlugin.key}
-              tooltip="Italic (⌘+I)"
+              tooltip={`Italic (${getModKey()}+I)`}
             >
               <ItalicIcon />
             </MarkToolbarButton>
 
             {/* <MarkToolbarButton
               nodeType={UnderlinePlugin.key}
-              tooltip="Underline (⌘+U)"
+              tooltip={`Underline (${getModKey()}+U)`}
             >
               <UnderlineIcon />
             </MarkToolbarButton> */}
 
             <MarkToolbarButton
               nodeType={StrikethroughPlugin.key}
-              tooltip="Strikethrough (⌘+⇧+M)"
+              tooltip={`Strikethrough (${getModKey()}+⇧+M)`}
             >
               <StrikethroughIcon />
             </MarkToolbarButton>
 
-            <MarkToolbarButton nodeType={CodePlugin.key} tooltip="Code (⌘+E)">
+            <MarkToolbarButton nodeType={CodePlugin.key} tooltip={`Code (${getModKey()}+E)`}>
               <Code2Icon />
             </MarkToolbarButton>
 

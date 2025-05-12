@@ -34,7 +34,7 @@ export function SuggestionLeaf(props: PlateLeafProps) {
     {
       delete: 'del',
       insert: 'ins',
-      update: 'span',
+      // update: 'span',
     } as const
   )[diffOperation.type];
 
