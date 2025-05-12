@@ -174,7 +174,6 @@ export function EmptyDocumentPromptElement({
       >
         <textarea
           ref={textareaRef}
-          autoFocus
           id="prompt"
           className="w-full min-h-8 p-3 border-none focus:outline-none resize-none overflow-hidden"
           placeholder="What do you want to write?"
