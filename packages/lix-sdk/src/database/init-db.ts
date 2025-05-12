@@ -5,7 +5,7 @@ import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
-import { getAndCacheRow } from "./get-and-cache-row.js";
+import { handleSelectOnView } from "./handle-select-on-view.js";
 import { handleInsertOnView } from "./handle-insert-on-view.js";
 import { handleUpdateOnView } from "./handle-update-on-view.js";
 import { handleDeleteOnView } from "./handle-delete-on-view.js";
@@ -13,14 +13,14 @@ import { handleDeleteOnView } from "./handle-delete-on-view.js";
 /**
  * Columns that should be serialized and parsed as JSON Binary.
  */
-const TablesWithJSONBColumns: Record<string, string[]> = {
-	file: ["metadata"],
-	file_queue: ["metadata_before", "metadata_after"],
-	snapshot: ["content"],
-	thread: ["body"],
-	key_value: ["value"],
-	thread_comment: ["body"],
-};
+// const TablesWithJSONBColumns: Record<string, string[]> = {
+// 	file: ["metadata"],
+// 	file_queue: ["metadata_before", "metadata_after"],
+// 	snapshot: ["content"],
+// 	thread: ["body"],
+// 	key_value: ["value"],
+// 	thread_comment: ["body"],
+// };
 
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
@@ -108,12 +108,12 @@ function initFunctions(args: {
 	});
 
 	args.sqlite.createFunction({
-		name: "get_and_cache_row",
+		name: "handle_select_on_view",
 		arity: -1,
 		// potentially writes to the database for caching
 		deterministic: false,
 		xFunc: (_ctx: number, ...params: any[]) => {
-			return getAndCacheRow(args.sqlite, args.db, ...params);
+			return handleSelectOnView(args.sqlite, args.db, ...params);
 		},
 	});
 

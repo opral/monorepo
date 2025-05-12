@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { EntitySchema } from "../entity-schema/schema.js";
+import type { LixSchema } from "../schema/schema.js";
 
 export function applyChangeSetDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -11,7 +11,7 @@ export function applyChangeSetDatabaseSchema(
 		json_extract(vj, '$.id') AS id,
     json_extract(vj, '$.metadata') AS metadata
 	FROM (
-		SELECT get_and_cache_row('change_set', 'id', v.id) AS vj
+		SELECT handle_select_on_view('change_set', 'id', v.id) AS vj
 		FROM (
 			SELECT 
         entity_id AS id
@@ -52,14 +52,78 @@ export function applyChangeSetDatabaseSchema(
         'id', OLD.id
       );
   END;
+
+  -- change set element
+
+  CREATE VIEW IF NOT EXISTS change_set_element AS
+	SELECT
+		json_extract(vj, '$.change_set_id') AS change_set_id,
+    json_extract(vj, '$.change_id') AS change_id,
+    json_extract(vj, '$.entity_id') AS entity_id,
+    json_extract(vj, '$.schema_key') AS schema_key,
+    json_extract(vj, '$.file_id') AS file_id
+	FROM (
+		SELECT handle_select_on_view('change_set_element', 'change_set_id', v.change_set_id, 'change_id', v.change_id) AS vj
+		FROM (
+			SELECT 
+				substr(entity_id, 1, instr(entity_id, ',') - 1) AS change_set_id,
+				substr(entity_id, instr(entity_id, ',') + 1) AS change_id				  
+      FROM internal_change
+			WHERE schema_key = 'lix_change_set_element'
+				AND rowid IN (
+					SELECT MAX(rowid)
+					FROM internal_change
+					WHERE schema_key = 'lix_change_set_element'
+					GROUP BY entity_id
+				)
+				AND snapshot_id != 'no-content'
+		) v
+	);
+
+  CREATE TRIGGER change_set_element_insert
+  INSTEAD OF INSERT ON change_set_element
+  BEGIN
+    SELECT handle_insert_on_view('change_set_element', 
+      'change_set_id', NEW.change_set_id, 
+      'change_id', NEW.change_id,
+      'entity_id', NEW.entity_id,
+      'schema_key', NEW.schema_key,
+      'file_id', NEW.file_id
+    );
+  END;
+
+  CREATE TRIGGER change_set_element_update
+  INSTEAD OF UPDATE ON change_set_element
+  BEGIN
+      SELECT handle_update_on_view('change_set_element', 
+        'change_set_id', OLD.change_set_id,
+        'change_id', NEW.change_id,
+        'entity_id', NEW.entity_id,
+        'schema_key', NEW.schema_key,
+        'file_id', NEW.file_id
+      );
+  END;
+
+  CREATE TRIGGER change_set_element_delete
+  INSTEAD OF DELETE ON change_set_element
+  BEGIN
+      SELECT handle_delete_on_view('change_set_element', 
+        'change_set_id', OLD.change_set_id,
+        'change_id', OLD.change_id,
+        'entity_id', OLD.entity_id,
+        'schema_key', OLD.schema_key,
+        'file_id', OLD.file_id
+      );
+  END;
 `;
 
 	return sqlite.exec(sql);
 }
 
-export const ChangeSetSchema: EntitySchema = {
-	"x-key": "lix_change_set",
-	"x-version": "1.0",
+export const ChangeSetSchema: LixSchema = {
+	"x-lix-key": "lix_change_set",
+	"x-lix-version": "1.0",
+	"x-primary-key": ["id"],
 	type: "object",
 	properties: {
 		id: { type: "string" },
@@ -76,16 +140,46 @@ export type ChangeSetView = {
 	metadata: Record<string, any> | null;
 };
 
-// export type ChangeSetElement = Selectable<ChangeSetElementTable>;
-// export type NewChangeSetElement = Insertable<ChangeSetElementTable>;
-// export type ChangeSetElementUpdate = Updateable<ChangeSetElementTable>;
-// export type ChangeSetElementTable = {
-// 	change_set_id: string;
-// 	change_id: string;
-// 	entity_id: string;
-// 	schema_key: string;
-// 	file_id: string;
-// };
+export const ChangeSetElementSchema: LixSchema = {
+	"x-lix-key": "lix_change_set_element",
+	"x-lix-version": "1.0",
+	// TODO foreign key constraint
+	// "x-foreign-keys": {
+	//   "change_set_id": "lix_change_set.id",
+	//   "change_id": "lix_change.id",
+	//   "schema_key": "lix_schema.key",
+	//   "file_id": "lix_file.id",
+	// }
+	"x-primary-key": ["change_set_id", "change_id"],
+	"x-lix-unique": [["entity_id", "schema_key", "file_id"]],
+	type: "object",
+	properties: {
+		change_set_id: { type: "string" },
+		change_id: { type: "string" },
+		entity_id: { type: "string" },
+		schema_key: { type: "string" },
+		file_id: { type: "string" },
+	},
+	required: [
+		"change_set_id",
+		"change_id",
+		"entity_id",
+		"schema_key",
+		"file_id",
+	],
+	additionalProperties: false,
+};
+
+export type ChangeSetElement = Selectable<ChangeSetElementView>;
+export type NewChangeSetElement = Insertable<ChangeSetElementView>;
+export type ChangeSetElementUpdate = Updateable<ChangeSetElementView>;
+export type ChangeSetElementView = {
+	change_set_id: string;
+	change_id: string;
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
+};
 
 // export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
 // export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;

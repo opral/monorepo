@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { EntitySchema } from "../entity-schema/schema.js";
+import type { LixSchema } from "../schema/schema.js";
 
 export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	sqlite.exec(`
@@ -10,7 +10,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
     json_extract(vj, '$.name') AS name,
     json_extract(vj, '$.change_set_id') AS change_set_id
   FROM (
-    SELECT get_and_cache_row('version', 'id', v.id) AS vj
+    SELECT handle_select_on_view('version', 'id', v.id) AS vj
     FROM (
       SELECT entity_id AS id
       FROM internal_change
@@ -56,8 +56,9 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 }
 
 export const VersionSchema = {
-	"x-key": "lix_version",
-	"x-version": "1.0",
+	"x-lix-key": "lix_version",
+	"x-lix-version": "1.0",
+	"x-primary-key": ["id"],
 	type: "object",
 	properties: {
 		id: { type: "string" },
@@ -66,7 +67,7 @@ export const VersionSchema = {
 	},
 	required: ["id", "name", "change_set_id"],
 } as const;
-VersionSchema satisfies EntitySchema;
+VersionSchema satisfies LixSchema;
 
 export type Version = Selectable<VersionView>;
 export type NewVersion = Insertable<VersionView>;

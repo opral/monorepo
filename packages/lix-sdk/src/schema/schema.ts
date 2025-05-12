@@ -12,13 +12,22 @@ export const LixSchemaJsonSchema = {
 		{
 			type: "object",
 			properties: {
-				"x-key": {
+				"x-lix-unique": {
+					type: "array",
+					items: {
+						type: "array",
+						items: {
+							type: "string",
+						},
+					},
+				},
+				"x-lix-key": {
 					type: "string",
 					description:
 						"The key of the schema. The key is used to identify the schema. You must use a unique key for each schema.",
 					examples: ["csv_plugin_cell"],
 				},
-				"x-version": {
+				"x-lix-version": {
 					type: "string",
 					description:
 						"The version of the schema. Use the major version to signal breaking changes. Use the minor version to signal non-breaking changes.",
@@ -26,11 +35,19 @@ export const LixSchemaJsonSchema = {
 					examples: ["1.0"],
 				},
 			},
-			required: ["x-key", "x-version"],
+			required: ["x-lix-key", "x-lix-version"],
 		},
 	],
 } as const;
 
+/**
+ * LixSchema
+ *
+ * A superset of JSON Schema (draft-07) that includes Lix-specific metadata
+ * and supports custom extensions.
+ *
+ * Custom extensions may be added with any x-* prefix.
+ */
 export type LixSchema = JSONSchema & {
 	/**
 	 * The key of the schema.
@@ -41,7 +58,7 @@ export type LixSchema = JSONSchema & {
 	 * @example
 	 *   "csv_plugin_cell"
 	 */
-	"x-key": string;
+	"x-lix-key": string;
 	/**
 	 * The version of the schema.
 	 *
@@ -51,7 +68,30 @@ export type LixSchema = JSONSchema & {
 	 * @example
 	 *   "1.0"
 	 */
-	"x-version": string;
+	"x-lix-version": string;
+	"x-primary-key"?: string[] | readonly string[];
+	/**
+	 * Properties that must be unique per version.
+	 *
+	 * Not to be confused by `x-version` which is used for versioning the schema.
+	 *
+	 *
+	 * @example
+	 *   {
+	 *     "x-lix-unique": [
+	 *       // the id must be unique
+	 *       ["id"],
+	 *       // the name and age must be unique as well
+	 *       ["name", "age"],
+	 *     ],
+	 *     properties: {
+	 *       id: { type: "string" },
+	 *       name: { type: "string" },
+	 *       age: { type: "number" },
+	 *     },
+	 *   }
+	 */
+	"x-lix-unique"?: string[][] | readonly (readonly string[])[];
 };
 
 export type FromLixSchema<T extends LixSchema> = FromSchema<T>;

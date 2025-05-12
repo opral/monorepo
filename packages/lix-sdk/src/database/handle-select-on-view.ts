@@ -1,16 +1,10 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixInternalDatabaseSchema } from "./schema.js";
+import { LixSchemaMap, type LixInternalDatabaseSchema } from "./schema.js";
 import { sql, type Kysely } from "kysely";
 import { executeSync } from "./execute-sync.js";
-import { ChangeSetSchema } from "../change-set-v2/schema.js";
-import { VersionSchema } from "../version/schema.js";
+import type { LixSchema } from "../schema/schema.js";
 
-const schemaMap = {
-	change_set: { entityIdPropertyName: "id", value: ChangeSetSchema },
-	version: { entityIdPropertyName: "id", value: VersionSchema },
-} as const;
-
-export function getAndCacheRow(
+export function handleSelectOnView(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
 	...args: any[]
@@ -21,7 +15,7 @@ export function getAndCacheRow(
 
 	const name = args[0] as string;
 	const keyPairs = args.slice(1);
-	const schema = schemaMap[name as keyof typeof schemaMap];
+	const schema = LixSchemaMap[name as keyof typeof LixSchemaMap]!;
 
 	// Build key-value object
 	const whereObj: Record<string, any> = {};
@@ -46,10 +40,7 @@ export function getAndCacheRow(
 	// // 2. Cache miss: Compute the value (example for 'version_materialized')
 	let computedResult: any = null;
 
-	const selectExpressions = createSelectExpressionsForSchema(
-		schema.value,
-		schema.entityIdPropertyName
-	);
+	const selectExpressions = createSelectExpressionsForSchema(schema);
 
 	// RankedSnapshots logic
 	let rankedQuery = db
@@ -103,10 +94,7 @@ export function getAndCacheRow(
  * @param entityIdPropertyName - The property name that should select from `ch.entity_id`.
  * @returns Array of Kysely select expressions for use in .select([...])
  */
-function createSelectExpressionsForSchema(
-	schema: Record<string, any>, // Using Record<string, any> as requested
-	entityIdPropertyName: string
-): any[] {
+function createSelectExpressionsForSchema(schema: LixSchema): any[] {
 	const selectExpressions: any[] = [];
 
 	// Add common fields first
@@ -118,18 +106,13 @@ function createSelectExpressionsForSchema(
 	);
 
 	// Iterate over properties defined in the schema
-	for (const propertyName in schema.properties) {
-		if (propertyName === entityIdPropertyName) {
-			// If the property name matches the alias for ch.entity_id, select ch.entity_id directly
-			selectExpressions.push(sql`ch.entity_id`.as(propertyName));
-		} else {
-			// Otherwise, assume the property is within snapshot.content (JSON)
-			selectExpressions.push(
-				sql`json_extract(s.content, ${sql.raw(`'$.${propertyName}'`)})`.as(
-					propertyName
-				)
-			);
-		}
+	for (const propertyName in (schema as any).properties) {
+		// Otherwise, assume the property is within snapshot.content (JSON)
+		selectExpressions.push(
+			sql`json_extract(s.content, ${sql.raw(`'$.${propertyName}'`)})`.as(
+				propertyName
+			)
+		);
 	}
 
 	return selectExpressions;

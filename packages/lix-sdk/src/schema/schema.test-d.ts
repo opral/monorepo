@@ -4,8 +4,8 @@ import { test, assertType } from "vitest";
 
 test("a json change schema should be infer the properties", () => {
 	const jsonChangeSchema = {
-		"x-version": "1.0",
-		"x-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock",
 		type: "object",
 		properties: {
 			name: { type: "string" },

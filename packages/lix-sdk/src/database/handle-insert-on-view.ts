@@ -1,6 +1,6 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "./schema.js";
+import { LixSchemaMap, type LixInternalDatabaseSchema } from "./schema.js";
 import { executeSync } from "./execute-sync.js";
 
 export function handleInsertOnView(
@@ -13,6 +13,9 @@ export function handleInsertOnView(
 	for (let i = 0; i < data.length; i += 2) {
 		newRowData[data[i]] = data[i + 1];
 	}
+
+	const schema = LixSchemaMap[viewName]!;
+	const pk = schema["x-primary-key"]!.map((key) => newRowData[key]).join(",");
 
 	const [snapshot] = executeSync({
 		lix: { sqlite },
@@ -29,7 +32,7 @@ export function handleInsertOnView(
 		query: db
 			.insertInto("internal_change")
 			.values({
-				entity_id: newRowData.id,
+				entity_id: pk,
 				schema_key: "lix_" + viewName,
 				snapshot_id: snapshot.id,
 				file_id: "lix_own_change_control",

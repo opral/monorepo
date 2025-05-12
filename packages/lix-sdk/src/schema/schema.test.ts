@@ -7,8 +7,8 @@ const ajv = new Ajv();
 test("valid schema", () => {
 	const schema = {
 		type: "object",
-		"x-key": "mock",
-		"x-version": "1.0",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
 		properties: {
 			name: { type: "string" },
 		},
@@ -25,8 +25,8 @@ test("x-key is required", () => {
 	const schema = {
 		type: "object",
 		// @ts-expect-error - invalid
-		"x-key": undefined,
-		"x-version": "1.0",
+		"x-lix-key": undefined,
+		"x-lix-version": "1.0",
 		properties: {
 			name: { type: "string" },
 		},
@@ -43,8 +43,8 @@ test("x-version is required", () => {
 	const schema = {
 		type: "object",
 		// @ts-expect-error - invalid
-		"x-version": undefined,
-		"x-key": "mock",
+		"x-lix-version": undefined,
+		"x-lix-key": "mock",
 		properties: {
 			name: { type: "string" },
 		},
