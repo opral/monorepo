@@ -1,10 +1,12 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { ChangeView, InternalChangeTable } from "../change/schema.js";
 import {
+	ChangeSetEdgeSchema,
 	ChangeSetElementSchema,
 	ChangeSetSchema,
 	type ChangeSetElementView,
 	type ChangeSetView,
+	type ChangeSetEdgeView,
 } from "../change-set-v2/schema.js";
 import { VersionSchema, type VersionView } from "../version/schema.js";
 import type {
@@ -27,6 +29,7 @@ export const LixSchemaMap: Record<string, LixSchema> = {
 	version: VersionSchema,
 	change_set: ChangeSetSchema,
 	change_set_element: ChangeSetElementSchema,
+	change_set_edge: ChangeSetEdgeSchema,
 };
 
 export type LixDatabaseSchema = {
@@ -51,8 +54,8 @@ export type LixDatabaseSchema = {
 	// change set
 	change_set: ChangeSetView;
 	change_set_element: ChangeSetElementView;
+	change_set_edge: ChangeSetEdgeView;
 	// change_set_label: ChangeSetLabelTable;
-	// change_set_edge: ChangeSetEdgeTable;
 	// change_set_thread: ChangeSetThreadTable;
 
 	// // key value

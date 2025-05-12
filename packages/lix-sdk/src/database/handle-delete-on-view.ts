@@ -1,6 +1,6 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "./schema.js";
+import { LixSchemaMap, type LixInternalDatabaseSchema } from "./schema.js";
 import { executeSync } from "./execute-sync.js";
 
 export function handleDeleteOnView(
@@ -13,14 +13,16 @@ export function handleDeleteOnView(
 	for (let i = 0; i < data.length; i += 2) {
 		rowData[data[i]] = data[i + 1];
 	}
-	if (!rowData.id) throw new Error("Missing id for delete");
+
+	const schema = LixSchemaMap[viewName]!;
+	const pk = schema["x-lix-primary-key"]!.map((key) => rowData[key]).join(",");
 
 	executeSync({
 		lix: { sqlite },
 		query: db
 			.insertInto("internal_change")
 			.values({
-				entity_id: rowData.id,
+				entity_id: pk,
 				schema_key: "lix_" + viewName,
 				snapshot_id: "no-content",
 				file_id: "lix_own_change_control",

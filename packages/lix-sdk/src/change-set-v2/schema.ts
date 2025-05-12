@@ -115,6 +115,57 @@ export function applyChangeSetDatabaseSchema(
         'file_id', OLD.file_id
       );
   END;
+
+  -- change set edge
+
+  CREATE VIEW IF NOT EXISTS change_set_edge AS
+  SELECT
+    json_extract(vj, '$.parent_id') AS parent_id,
+    json_extract(vj, '$.child_id') AS child_id
+  FROM (
+    SELECT handle_select_on_view('change_set_edge', 'parent_id', v.parent_id, 'child_id', v.child_id) AS vj
+    FROM (
+      SELECT 
+        substr(entity_id, 1, instr(entity_id, ',') - 1) AS parent_id,
+        substr(entity_id, instr(entity_id, ',') + 1) AS child_id				
+      FROM internal_change
+      WHERE schema_key = 'lix_change_set_edge'
+        AND rowid IN (
+          SELECT MAX(rowid)
+          FROM internal_change
+          WHERE schema_key = 'lix_change_set_edge'
+          GROUP BY entity_id
+        )
+        AND snapshot_id != 'no-content'
+    ) v
+  );
+
+  CREATE TRIGGER change_set_edge_insert
+  INSTEAD OF INSERT ON change_set_edge
+  BEGIN
+    SELECT handle_insert_on_view('change_set_edge', 
+      'parent_id', NEW.parent_id, 
+      'child_id', NEW.child_id
+    );
+  END;
+
+  CREATE TRIGGER change_set_edge_update
+  INSTEAD OF UPDATE ON change_set_edge
+  BEGIN
+      SELECT handle_update_on_view('change_set_edge', 
+        'parent_id', OLD.parent_id,
+        'child_id', NEW.child_id
+      );
+  END;
+
+  CREATE TRIGGER change_set_edge_delete
+  INSTEAD OF DELETE ON change_set_edge
+  BEGIN
+      SELECT handle_delete_on_view('change_set_edge', 
+        'parent_id', OLD.parent_id,
+        'child_id', OLD.child_id
+      );
+  END;
 `;
 
 	return sqlite.exec(sql);
@@ -180,6 +231,28 @@ export type ChangeSetElementView = {
 	schema_key: string;
 	file_id: string;
 };
+
+export const ChangeSetEdgeSchema: LixSchema = {
+	"x-lix-key": "lix_change_set_edge",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["parent_id", "child_id"],
+	type: "object",
+	properties: {
+		parent_id: { type: "string" },
+		child_id: { type: "string" },
+	},
+	required: ["parent_id", "child_id"],
+	additionalProperties: false,
+};
+
+export type ChangeSetEdge = Selectable<ChangeSetEdgeView>;
+export type NewChangeSetEdge = Insertable<ChangeSetEdgeView>;
+export type ChangeSetEdgeUpdate = Updateable<ChangeSetEdgeView>;
+export type ChangeSetEdgeView = {
+	parent_id: string;
+	child_id: string;
+};
+
 
 // export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
 // export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;

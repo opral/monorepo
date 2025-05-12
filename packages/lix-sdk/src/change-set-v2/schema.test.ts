@@ -101,7 +101,7 @@ describe("change_set", () => {
 });
 
 describe("change_set_element", () => {
-	test("insert, update, delete on the change set element view", async () => {
+	test("insert, delete on the change set element view", async () => {
 		const lix = await openLixInMemory({});
 
 		const initial = await lix.db
@@ -139,5 +139,67 @@ describe("change_set_element", () => {
 				file_id: "f0",
 			},
 		]);
+
+		await lix.db
+			.deleteFrom("change_set_element")
+			.where("change_set_id", "=", "cs0")
+			.execute();
+
+		const viewAfterDelete = await lix.db
+			.selectFrom("change_set_element")
+			.orderBy("change_set_id", "asc")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterDelete).toEqual([]);
+	});
+});
+
+describe("change_set_edge", () => {
+	test("insert, delete on the change set edge view", async () => {
+		const lix = await openLixInMemory({});
+
+		const initial = await lix.db
+			.selectFrom("change_set_edge")
+			.selectAll()
+			.execute();
+
+		expect(initial).toEqual([]);
+
+		await lix.db
+			.insertInto("change_set_edge")
+			.values([
+				{
+					parent_id: "cs0",
+					child_id: "cs1",
+				},
+			])
+			.execute();
+
+		const viewAfterInsert = await lix.db
+			.selectFrom("change_set_edge")
+			.orderBy("parent_id", "asc")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterInsert).toEqual([
+			{
+				parent_id: "cs0",
+				child_id: "cs1",
+			},
+		]);
+
+		await lix.db
+			.deleteFrom("change_set_edge")
+			.where("parent_id", "=", "cs0")
+			.execute();
+
+		const viewAfterDelete = await lix.db
+			.selectFrom("change_set_edge")
+			.orderBy("parent_id", "asc")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterDelete).toEqual([]);
 	});
 });
