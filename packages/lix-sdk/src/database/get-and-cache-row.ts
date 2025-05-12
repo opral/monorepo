@@ -3,9 +3,11 @@ import type { LixInternalDatabaseSchema } from "./schema.js";
 import { sql, type Kysely } from "kysely";
 import { executeSync } from "./execute-sync.js";
 import { ChangeSetSchema } from "../change-set-v2/schema.js";
+import { VersionSchema } from "../version/schema.js";
 
 const schemaMap = {
 	change_set: { entityIdPropertyName: "id", value: ChangeSetSchema },
+	version: { entityIdPropertyName: "id", value: VersionSchema },
 } as const;
 
 export function getAndCacheRow(

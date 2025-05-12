@@ -3,12 +3,12 @@ import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { applySchema } from "./apply-schema.js";
-import { ParseJsonBPluginV1 } from "./kysely-plugin/parse-jsonb-plugin-v1.js";
-import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js";
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 import { getAndCacheRow } from "./get-and-cache-row.js";
 import { handleInsertOnView } from "./handle-insert-on-view.js";
+import { handleUpdateOnView } from "./handle-update-on-view.js";
+import { handleDeleteOnView } from "./handle-delete-on-view.js";
 
 /**
  * Columns that should be serialized and parsed as JSON Binary.
@@ -61,6 +61,32 @@ function initFunctions(args: {
 		arity: -1,
 		xFunc: (_ctx: number, ...params: any[]) => {
 			return handleInsertOnView(
+				args.sqlite,
+				args.db,
+				params[0],
+				...params.slice(1)
+			);
+		},
+	});
+
+	args.sqlite.createFunction({
+		name: "handle_update_on_view",
+		arity: -1,
+		xFunc: (_ctx: number, ...params: any[]) => {
+			return handleUpdateOnView(
+				args.sqlite,
+				args.db,
+				params[0],
+				...params.slice(1)
+			);
+		},
+	});
+
+	args.sqlite.createFunction({
+		name: "handle_delete_on_view",
+		arity: -1,
+		xFunc: (_ctx: number, ...params: any[]) => {
+			return handleDeleteOnView(
 				args.sqlite,
 				args.db,
 				params[0],
