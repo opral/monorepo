@@ -14,8 +14,10 @@ import type { LixDatabaseSchema } from "./schema.js";
 // import { applyThreadDatabaseSchema } from "../thread/database-schema.js";
 // import { applyLogDatabaseSchema } from "../log/database-schema.js";
 // import { applyKeyValueViewDatabaseSchema } from "../key-value-v2/database-schema.js";
-import { applyInternalChangeDatabaseSchema } from "../change/schema.js";
+import { applyChangeDatabaseSchema } from "../change/schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set-v2/schema.js";
+import { applyVersionDatabaseSchema } from "../version/schema.js";
+import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -24,13 +26,10 @@ export function applySchema(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixDatabaseSchema>;
 }): SqliteWasmDatabase {
-	// applyAccountDatabaseSchema(args.sqlite);
-	// applyKeyValueDatabaseSchema(args.sqlite);
-	// applyThreadDatabaseSchema(args.sqlite);
-	// applyFileDatabaseSchema(args.sqlite);
-	// applySnapshotDatabaseSchema(args.sqlite);
-	applyInternalChangeDatabaseSchema(args.sqlite);
+	applySnapshotDatabaseSchema(args.sqlite);
+	applyChangeDatabaseSchema(args.sqlite);
 	applyChangeSetDatabaseSchema(args.sqlite);
+	applyVersionDatabaseSchema(args.sqlite);
 
 	// // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	// args.sqlite.exec`

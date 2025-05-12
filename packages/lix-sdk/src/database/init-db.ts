@@ -8,6 +8,7 @@ import { SerializeJsonBPlugin } from "./kysely-plugin/serialize-jsonb-plugin.js"
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 import { getAndCacheRow } from "./get-and-cache-row.js";
+import { handleInsertOnView } from "./handle-insert-on-view.js";
 
 /**
  * Columns that should be serialized and parsed as JSON Binary.
@@ -53,6 +54,19 @@ function initFunctions(args: {
 		name: "uuid_v7",
 		arity: 0,
 		xFunc: () => uuid_v7(),
+	});
+
+	args.sqlite.createFunction({
+		name: "handle_insert_on_view",
+		arity: -1,
+		xFunc: (_ctx: number, ...params: any[]) => {
+			return handleInsertOnView(
+				args.sqlite,
+				args.db,
+				params[0],
+				...params.slice(1)
+			);
+		},
 	});
 
 	args.sqlite.createFunction({

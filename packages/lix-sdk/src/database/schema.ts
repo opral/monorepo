@@ -1,11 +1,16 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type { ChangeView, InternalChangeTable } from "../change/schema.js";
+import type { ChangeSetView } from "../change-set-v2/schema.js";
+import type { VersionView } from "../version/schema.js";
 import type {
-	ChangeView,
-	InternalChangeTable,
 	InternalSnapshotTable,
 	SnapshotView,
-} from "../change/schema.js";
-import type { ChangeSetView } from "../change-set-v2/schema.js";
+} from "../snapshot/schema.js";
+
+export const LixDatabaseSchemaJsonColumns = {
+	snapshot: ["content"],
+	change_set: ["metadata"],
+} as const;
 
 export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_change: InternalChangeTable;
@@ -51,6 +56,7 @@ export type LixDatabaseSchema = {
 	// thread_comment: ThreadCommentTable;
 
 	// // version
+	version: VersionView;
 	// version: VersionTable;
 	// active_version: ActiveVersionTable;
 
