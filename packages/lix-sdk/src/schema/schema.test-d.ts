@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { EntitySchema, FromEntitySchema } from "./schema.js";
+import type { LixSchema, FromLixSchema } from "./schema.js";
 import { test, assertType } from "vitest";
 
 test("a json change schema should be infer the properties", () => {
@@ -14,9 +14,9 @@ test("a json change schema should be infer the properties", () => {
 		},
 		required: ["name", "age", "location"],
 		additionalProperties: false,
-	} as const satisfies EntitySchema;
+	} as const satisfies LixSchema;
 
-	const snapshot: FromEntitySchema<typeof jsonChangeSchema> = {
+	const snapshot: FromLixSchema<typeof jsonChangeSchema> = {
 		name: "John",
 		age: 5,
 		location: {
