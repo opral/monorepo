@@ -144,7 +144,8 @@ This paragraph has a <a href="https://example.com">link</a> using HTML.
 
 This paragraph has <span style="color: red;">styled text</span> using HTML.
 
-This paragraph has a line break using HTML.<br />This is on a new line.
+This paragraph has a line break using HTML.\
+This is on a new line.
 
 ## Block HTML
 
@@ -184,8 +185,8 @@ This paragraph has a line break using HTML.<br />This is on a new line.
 
 ### Markdown Heading Inside HTML
 
-*   List item 1
-*   List item 2
+* List item 1
+* List item 2
 
 </div>
 
@@ -199,7 +200,8 @@ Text before comment <!-- Inline comment --> text after comment.
 
 <hr />
 
-Text with <br /> line break.
+Text with \
+&#x20;line break.
 
 <img src="https://example.com/image.jpg" alt="Example Image" />
 
@@ -244,7 +246,8 @@ This paragraph has a <a href="https://example.com">link</a> using HTML.
 
 This paragraph has <span style="color: red;">styled text</span> using HTML.
 
-This paragraph has a line break using HTML.<br />This is on a new line.
+This paragraph has a line break using HTML.\
+This is on a new line.
 
 ## Block HTML
 
@@ -284,8 +287,8 @@ This paragraph has a line break using HTML.<br />This is on a new line.
 
 ### Markdown Heading Inside HTML
 
-*   List item 1
-*   List item 2
+* List item 1
+* List item 2
 
 </div>
 
@@ -299,7 +302,8 @@ Text before comment <!-- Inline comment --> text after comment.
 
 <hr />
 
-Text with <br /> line break.
+Text with \
+&#x20;line break.
 
 <img src="https://example.com/image.jpg" alt="Example Image" />
 
@@ -447,7 +451,8 @@ This paragraph has a &lt;a href=&quot;https://example.com&quot;&gt;link&lt;/a&gt
 
 This paragraph has &lt;span style=&quot;color: red;&quot;&gt;styled text&lt;/span&gt; using HTML.
 
-This paragraph has a line break using HTML.&lt;br /&gt;This is on a new line.
+This paragraph has a line break using HTML.\
+This is on a new line.
 
 ## Block HTML
 
@@ -487,8 +492,8 @@ This paragraph has a line break using HTML.&lt;br /&gt;This is on a new line.
 
 ### Markdown Heading Inside HTML
 
-*   List item 1
-*   List item 2
+* List item 1
+* List item 2
 
 &lt;/div&gt;
 
@@ -502,7 +507,8 @@ Text before comment &lt;!-- Inline comment --&gt; text after comment.
 
 &lt;hr /&gt;
 
-Text with &lt;br /&gt; line break.
+Text with \
+&amp;#x20;line break.
 
 &lt;img src=&quot;https://example.com/image.jpg&quot; alt=&quot;Example Image&quot; /&gt;
 
@@ -547,7 +553,8 @@ This paragraph has a &lt;a href=&quot;https://example.com&quot;&gt;link&lt;/a&gt
 
 This paragraph has &lt;span style=&quot;color: red;&quot;&gt;styled text&lt;/span&gt; using HTML.
 
-This paragraph has a line break using HTML.&lt;br /&gt;This is on a new line.
+This paragraph has a line break using HTML.\
+This is on a new line.
 
 ## Block HTML
 
@@ -587,8 +594,8 @@ This paragraph has a line break using HTML.&lt;br /&gt;This is on a new line.
 
 ### Markdown Heading Inside HTML
 
-*   List item 1
-*   List item 2
+* List item 1
+* List item 2
 
 &lt;/div&gt;
 
@@ -602,7 +609,8 @@ Text before comment &lt;!-- Inline comment --&gt; text after comment.
 
 &lt;hr /&gt;
 
-Text with &lt;br /&gt; line break.
+Text with \
+&amp;#x20;line break.
 
 &lt;img src=&quot;https://example.com/image.jpg&quot; alt=&quot;Example Image&quot; /&gt;
 

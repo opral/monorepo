@@ -12,7 +12,7 @@
 
 ## tc - blockquote - inline formatting
 
-> This blockquote contains **formatted** text with *emphasis* and `code`.
+> This blockquote contains **formatted** text with _emphasis_ and `code`.
 
 ## tc - blockquote - with link
 

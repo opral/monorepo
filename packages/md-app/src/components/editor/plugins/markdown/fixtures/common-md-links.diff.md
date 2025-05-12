@@ -69,7 +69,7 @@ Paragraph with **[formatted link](https://example.com) beyond** in bold.
 
 [Link with formatting **bold**](https://example.com)
 
-[Link with formatting *italic*](https://example.com)
+[Link with formatting _italic_](https://example.com)
 
 [Link with formatting `code`](https://example.com)
 
@@ -87,7 +87,7 @@ Paragraph with **[formatted link](https://example.com) beyond** in bold.
 
 Paragraph with a [link](https://example.com) in the middle.
 
-Paragraph with [*formatted link*](https://example.com) in italics.
+Paragraph with [_formatted link_](https://example.com) in italics.
 
 Paragraph with [**formatted link**](https://example.com) in bold.
 
@@ -111,7 +111,7 @@ Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
 
 [Link with formatting **bold**](https://example.com)
 
-[Link with formatting *italic*](https://example.com)
+[Link with formatting _italic_](https://example.com)
 
 [Link with formatting `code`](https://example.com)
 
@@ -129,7 +129,7 @@ Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
 
 Paragraph with a [link](https://example.com) in the middle.
 
-Paragraph with [*formatted link*](https://example.com) in italics.
+Paragraph with [_formatted link_](https://example.com) in italics.
 
 Paragraph with [**formatted link**](https://example.com) in bold.
 
@@ -194,7 +194,7 @@ Paragraph with **[formatted link](https://example.com) beyond** in bold.
 
 [Link with formatting **bold**](https://example.com)
 
-[Link with formatting *italic*](https://example.com)
+[Link with formatting _italic_](https://example.com)
 
 [Link with formatting `code`](https://example.com)
 
@@ -212,7 +212,7 @@ Paragraph with **[formatted link](https://example.com) beyond** in bold.
 
 Paragraph with a [link](https://example.com) in the middle.
 
-Paragraph with [*formatted link*](https://example.com) in italics.
+Paragraph with [_formatted link_](https://example.com) in italics.
 
 Paragraph with [**formatted link**](https://example.com) in bold.
 
@@ -236,7 +236,7 @@ Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
 
 [Link with formatting **bold**](https://example.com)
 
-[Link with formatting *italic*](https://example.com)
+[Link with formatting _italic_](https://example.com)
 
 [Link with formatting `code`](https://example.com)
 
@@ -254,7 +254,7 @@ Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
 
 Paragraph with a [link](https://example.com) in the middle.
 
-Paragraph with [*formatted link*](https://example.com) in italics.
+Paragraph with [_formatted link_](https://example.com) in italics.
 
 Paragraph with [**formatted link**](https://example.com) in bold.
 

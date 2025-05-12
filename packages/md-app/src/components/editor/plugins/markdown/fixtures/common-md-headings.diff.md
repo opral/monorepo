@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 12/16 (75%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 4/16 (25%)
+- 🟢 Perfect roundtrip (input = output): 10/16 (63%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 6/16 (38%)
 - 🔴 Failing test (output ≠ input, output ≠ expected): 0/16 (0%)
 
-**Overall Status**: ✅ All tests passing (12 perfect, 4 acceptable)
+**Overall Status**: ✅ All tests passing (10 perfect, 6 acceptable)
 
 ---
 
@@ -259,11 +259,13 @@ Alternative Heading level 2
 </details>
 
 <details >
-<summary><span style="color:green; font-weight:bold;">tc - heading with emphasis</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:#cc7700; font-weight:bold;">tc - heading with emphasis</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -271,11 +273,31 @@ Alternative Heading level 2
 # Heading with *emphasis*
 
 </td>
+<td>
+
+# Heading with _emphasis_
+
+</td>
+<td>
+
+# Heading with _emphasis_
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code># Heading with *emphasis*</code></pre>
+
+</td>
+<td>
+
+<pre><code># Heading with _emphasis_</code></pre>
+
+</td>
+<td>
+
+<pre><code># Heading with _emphasis_</code></pre>
 
 </td>
 </tr>
@@ -384,11 +406,13 @@ Alternative Heading level 2
 </details>
 
 <details >
-<summary><span style="color:green; font-weight:bold;">tc - heading with mixed formatting</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:#cc7700; font-weight:bold;">tc - heading with mixed formatting</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -396,11 +420,31 @@ Alternative Heading level 2
 ###### Heading with mixed **bold** and *italic*
 
 </td>
+<td>
+
+###### Heading with mixed **bold** and _italic_
+
+</td>
+<td>
+
+###### Heading with mixed **bold** and _italic_
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>###### Heading with mixed **bold** and *italic*</code></pre>
+
+</td>
+<td>
+
+<pre><code>###### Heading with mixed **bold** and _italic_</code></pre>
+
+</td>
+<td>
+
+<pre><code>###### Heading with mixed **bold** and _italic_</code></pre>
 
 </td>
 </tr>

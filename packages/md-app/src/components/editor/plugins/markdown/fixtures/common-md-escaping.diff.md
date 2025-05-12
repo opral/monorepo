@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 19/24 (79%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 5/24 (21%)
+- 🟢 Perfect roundtrip (input = output): 18/24 (75%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 6/24 (25%)
 - 🔴 Failing test (output ≠ input, output ≠ expected): 0/24 (0%)
 
-**Overall Status**: ✅ All tests passing (19 perfect, 5 acceptable)
+**Overall Status**: ✅ All tests passing (18 perfect, 6 acceptable)
 
 ---
 
@@ -474,11 +474,13 @@ Literal characters: & < > " '
 </details>
 
 <details >
-<summary><span style="color:green; font-weight:bold;">tc - escaped asterisk in italic</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:#cc7700; font-weight:bold;">tc - escaped asterisk in italic</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -486,11 +488,31 @@ Literal characters: & < > " '
 *Italic text with \* escaped asterisk*
 
 </td>
+<td>
+
+_Italic text with \* escaped asterisk_
+
+</td>
+<td>
+
+_Italic text with \* escaped asterisk_
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>*Italic text with \* escaped asterisk*</code></pre>
+
+</td>
+<td>
+
+<pre><code>_Italic text with \* escaped asterisk_</code></pre>
+
+</td>
+<td>
+
+<pre><code>_Italic text with \* escaped asterisk_</code></pre>
 
 </td>
 </tr>
