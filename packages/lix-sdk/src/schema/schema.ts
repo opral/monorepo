@@ -21,6 +21,12 @@ export const LixSchemaJsonSchema = {
 						},
 					},
 				},
+				"x-primary-key": {
+					type: "array",
+					items: {
+						type: "string",
+					},
+				},
 				"x-lix-key": {
 					type: "string",
 					description:
@@ -69,7 +75,7 @@ export type LixSchema = JSONSchema & {
 	 *   "1.0"
 	 */
 	"x-lix-version": string;
-	"x-primary-key"?: string[] | readonly string[];
+	"x-lix-primary-key"?: string[] | readonly string[];
 	/**
 	 * Properties that must be unique per version.
 	 *

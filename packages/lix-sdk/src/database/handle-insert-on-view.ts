@@ -15,7 +15,9 @@ export function handleInsertOnView(
 	}
 
 	const schema = LixSchemaMap[viewName]!;
-	const pk = schema["x-primary-key"]!.map((key) => newRowData[key]).join(",");
+	const pk = schema["x-lix-primary-key"]!.map((key) => newRowData[key]).join(
+		","
+	);
 
 	const [snapshot] = executeSync({
 		lix: { sqlite },

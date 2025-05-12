@@ -58,7 +58,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 export const VersionSchema = {
 	"x-lix-key": "lix_version",
 	"x-lix-version": "1.0",
-	"x-primary-key": ["id"],
+	"x-lix-primary-key": ["id"],
 	type: "object",
 	properties: {
 		id: { type: "string" },

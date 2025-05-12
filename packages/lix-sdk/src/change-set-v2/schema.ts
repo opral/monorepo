@@ -123,7 +123,7 @@ export function applyChangeSetDatabaseSchema(
 export const ChangeSetSchema: LixSchema = {
 	"x-lix-key": "lix_change_set",
 	"x-lix-version": "1.0",
-	"x-primary-key": ["id"],
+	"x-lix-primary-key": ["id"],
 	type: "object",
 	properties: {
 		id: { type: "string" },
@@ -150,7 +150,7 @@ export const ChangeSetElementSchema: LixSchema = {
 	//   "schema_key": "lix_schema.key",
 	//   "file_id": "lix_file.id",
 	// }
-	"x-primary-key": ["change_set_id", "change_id"],
+	"x-lix-primary-key": ["change_set_id", "change_id"],
 	"x-lix-unique": [["entity_id", "schema_key", "file_id"]],
 	type: "object",
 	properties: {
