@@ -15,9 +15,16 @@ export function handleInsertOnView(
 	}
 
 	const schema = LixSchemaMap[viewName]!;
-	const pk = schema["x-lix-primary-key"]!.map((key) => newRowData[key]).join(
-		","
-	);
+	// using JSON.stringify to avoid coming up with a custom serialization
+	// and parsing logic for compound primary keys. using something as simple
+	// as join by comma can lead to issues downstream if the primary key
+	// contains a comma etc.
+	const pk =
+		schema["x-lix-primary-key"]!.length > 1
+			? JSON.stringify(
+					schema["x-lix-primary-key"]!.map((key) => newRowData[key])
+				)
+			: newRowData[schema["x-lix-primary-key"]![0]!];
 
 	const [snapshot] = executeSync({
 		lix: { sqlite },

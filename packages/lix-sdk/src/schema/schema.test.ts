@@ -32,5 +32,54 @@ test("inserting stored schema", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(result.value).toEqual(schema.value);
+	expect(result).toMatchObject({
+		key: "mock",
+		version: "1.0",
+		value: JSON.parse(schema.value),
+	});
+});
+
+test("throws if the stored schema version does not match the x-lix-version prop", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema: NewStoredSchema = {
+		version: "2.0",
+		value: JSON.stringify({
+			type: "object",
+			"x-lix-key": "mock",
+			"x-lix-version": "1.0",
+			properties: {
+				name: { type: "string" },
+			},
+			required: ["name"],
+			additionalProperties: false,
+		}),
+	};
+
+	await expect(
+		lix.db.insertInto("stored_schema").values(schema).execute()
+	).rejects.toThrow(/Inserted version does not match value\.x-lix-version/);
+});
+
+test("throws if the stored schema key does not match the x-lix-key prop", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema: NewStoredSchema = {
+		key: "mock",
+		version: "1.0",
+		value: JSON.stringify({
+			type: "object",
+			"x-lix-key": "mock2",
+			"x-lix-version": "1.0",
+			properties: {
+				name: { type: "string" },
+			},
+			required: ["name"],
+			additionalProperties: false,
+		}),
+	};
+
+	await expect(
+		lix.db.insertInto("stored_schema").values(schema).execute()
+	).rejects.toThrow(/Inserted key does not match value\.x-lix-key/);
 });
