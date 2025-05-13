@@ -1,7 +1,13 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { sql, type Kysely } from "kysely";
-import { LixSchemaMap, type LixInternalDatabaseSchema } from "./schema.js";
+import {
+	LixSchemaMap,
+	type LixDatabaseSchema,
+	type LixInternalDatabaseSchema,
+} from "./schema.js";
 import { executeSync } from "./execute-sync.js";
+import { validateSchema } from "../schema/validate-schema.js";
+import { buildRowDataFromSchema } from "./handle-update-on-view.js";
 
 export function handleInsertOnView(
 	sqlite: SqliteWasmDatabase,
@@ -9,25 +15,26 @@ export function handleInsertOnView(
 	viewName: string,
 	...data: Array<any>
 ): any {
-	const newRowData: Record<string, any> = {};
-	for (let i = 0; i < data.length; i += 2) {
-		newRowData[data[i]] = data[i + 1];
-	}
-
 	const schema = LixSchemaMap[viewName]!;
+	const rowData = buildRowDataFromSchema(schema, data);
+
 	// double colon is used as a separator for compound primary keys
 	// which is not appearing in the nano_id alphabet. thus, should be safe
 	// for the entity_id
-	const pk = schema["x-lix-primary-key"]!.map((key) => newRowData[key]).join(
-		"::"
-	);
+	const pk = schema["x-lix-primary-key"]!.map((key) => rowData[key]).join("::");
+
+	validateSchema({
+		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
+		schema,
+		data: rowData,
+	});
 
 	const [snapshot] = executeSync({
 		lix: { sqlite },
 		query: db
 			.insertInto("internal_snapshot")
 			.values({
-				content: sql`jsonb(${JSON.stringify(newRowData)})`,
+				content: sql`jsonb(${JSON.stringify(rowData)})`,
 			})
 			.returning("id"),
 	});
@@ -45,5 +52,5 @@ export function handleInsertOnView(
 			})
 			.returningAll(),
 	});
-	return JSON.stringify(newRowData);
+	return JSON.stringify(rowData);
 }

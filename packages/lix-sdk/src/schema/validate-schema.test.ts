@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { handleSchemaValidation } from "./handle-schema-validation.js";
+import { validateSchema } from "./validate-schema.js";
 import type { LixSchemaDefinition } from "./definition.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
@@ -19,7 +19,7 @@ test("throws if the schema is not a valid lix schema", async () => {
 
 	expect(() =>
 		// @ts-expect-error - x-key is missing
-		handleSchemaValidation(lix.sqlite, lix.db as any, schema, {})
+		validateSchema(lix.sqlite, lix.db as any, schema, {})
 	).toThrowError();
 });
 
@@ -44,7 +44,7 @@ test("valid lix schema with a valid snapshot passes", async () => {
 	};
 
 	expect(() =>
-		handleSchemaValidation(lix.sqlite, lix.db as any, schema, snapshot.content)
+		validateSchema({ lix, schema, data: snapshot.content })
 	).not.toThrowError();
 });
 
@@ -69,6 +69,6 @@ test("an invalid snapshot fails", async () => {
 	};
 
 	expect(() =>
-		handleSchemaValidation(lix.sqlite, lix.db as any, schema, snapshot.content)
+		validateSchema({ lix, schema, data: snapshot.content })
 	).toThrowError();
 });

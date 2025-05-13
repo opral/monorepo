@@ -177,7 +177,7 @@ export const ChangeSetSchema: LixSchemaDefinition = {
 	type: "object",
 	properties: {
 		id: { type: "string" },
-		metadata: { type: "object" },
+		metadata: { type: ["object", "null"] },
 	},
 	required: ["id"],
 	additionalProperties: false,
