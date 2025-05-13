@@ -15,8 +15,8 @@ export function applyStoredSchemaDatabaseSchema(
     SELECT handle_select_on_view('stored_schema', 'key', v.key, 'version', v.version) AS row
     FROM (
       SELECT
-        json_extract(entity_id, '$[0]') AS key,
-        json_extract(entity_id, '$[1]') AS version
+        substr(entity_id, 1, instr(entity_id, '::') - 1) AS key,
+        substr(entity_id, instr(entity_id, '::') + 2) AS version			
       FROM internal_change
       WHERE schema_key = 'lix_stored_schema'
         AND rowid IN (

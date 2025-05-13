@@ -15,16 +15,12 @@ export function handleInsertOnView(
 	}
 
 	const schema = LixSchemaMap[viewName]!;
-	// using JSON.stringify to avoid coming up with a custom serialization
-	// and parsing logic for compound primary keys. using something as simple
-	// as join by comma can lead to issues downstream if the primary key
-	// contains a comma etc.
-	const pk =
-		schema["x-lix-primary-key"]!.length > 1
-			? JSON.stringify(
-					schema["x-lix-primary-key"]!.map((key) => newRowData[key])
-				)
-			: newRowData[schema["x-lix-primary-key"]![0]!];
+	// double colon is used as a separator for compound primary keys
+	// which is not appearing in the nano_id alphabet. thus, should be safe
+	// for the entity_id
+	const pk = schema["x-lix-primary-key"]!.map((key) => newRowData[key]).join(
+		"::"
+	);
 
 	const [snapshot] = executeSync({
 		lix: { sqlite },

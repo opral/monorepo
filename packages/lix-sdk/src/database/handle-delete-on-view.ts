@@ -15,9 +15,7 @@ export function handleDeleteOnView(
 	}
 
 	const schema = LixSchemaMap[viewName]!;
-	const pk = JSON.stringify(
-		schema["x-lix-primary-key"]!.map((key) => rowData[key])
-	);
+	const pk = schema["x-lix-primary-key"]!.map((key) => rowData[key]).join("::");
 
 	executeSync({
 		lix: { sqlite },

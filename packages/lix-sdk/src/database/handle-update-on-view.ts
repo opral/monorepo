@@ -15,7 +15,7 @@ export function handleUpdateOnView(
 	}
 
 	const schema = LixSchemaMap[viewName]!;
-	const pk = schema["x-lix-primary-key"]!.map((key) => rowData[key]).join(",");
+	const pk = schema["x-lix-primary-key"]!.map((key) => rowData[key]).join("::");
 
 	// Insert new snapshot
 	const [snapshot] = executeSync({

@@ -118,7 +118,7 @@ describe("change_set_element", () => {
 					change_set_id: "cs0",
 					change_id: "c0",
 					entity_id: "e0",
-					schema_key: "lix_key_value_table",
+					schema_key: "mock_schema",
 					file_id: "f0",
 				},
 			])
@@ -135,7 +135,7 @@ describe("change_set_element", () => {
 				change_set_id: "cs0",
 				change_id: "c0",
 				entity_id: "e0",
-				schema_key: "lix_key_value_table",
+				schema_key: "mock_schema",
 				file_id: "f0",
 			},
 		]);

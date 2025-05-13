@@ -8,13 +8,12 @@ export function applyChangeSetDatabaseSchema(
 	const sql = `
   CREATE VIEW IF NOT EXISTS change_set AS
 	SELECT
-		json_extract(vj, '$.id') AS id,
-    json_extract(vj, '$.metadata') AS metadata
+		json_extract(row, '$.id') AS id,
+    json_extract(row, '$.metadata') AS metadata
 	FROM (
-		SELECT handle_select_on_view('change_set', 'id', v.id) AS vj
+		SELECT handle_select_on_view('change_set', 'id', v.id) AS row
 		FROM (
-			SELECT 
-        entity_id AS id
+			SELECT entity_id AS id
 			FROM internal_change
 			WHERE schema_key = 'lix_change_set'
 				AND rowid IN (
@@ -57,17 +56,17 @@ export function applyChangeSetDatabaseSchema(
 
   CREATE VIEW IF NOT EXISTS change_set_element AS
 	SELECT
-		json_extract(vj, '$.change_set_id') AS change_set_id,
-    json_extract(vj, '$.change_id') AS change_id,
-    json_extract(vj, '$.entity_id') AS entity_id,
-    json_extract(vj, '$.schema_key') AS schema_key,
-    json_extract(vj, '$.file_id') AS file_id
+		json_extract(row, '$.change_set_id') AS change_set_id,
+    json_extract(row, '$.change_id') AS change_id,
+    json_extract(row, '$.entity_id') AS entity_id,
+    json_extract(row, '$.schema_key') AS schema_key,
+    json_extract(row, '$.file_id') AS file_id
 	FROM (
-		SELECT handle_select_on_view('change_set_element', 'change_set_id', v.change_set_id, 'change_id', v.change_id) AS vj
+		SELECT handle_select_on_view('change_set_element', 'change_set_id', v.change_set_id, 'change_id', v.change_id) AS row
 		FROM (
 			SELECT 
-				substr(entity_id, 1, instr(entity_id, ',') - 1) AS change_set_id,
-				substr(entity_id, instr(entity_id, ',') + 1) AS change_id				  
+				substr(entity_id, 1, instr(entity_id, '::') - 1) AS change_set_id,
+				substr(entity_id, instr(entity_id, '::') + 2) AS change_id				  
       FROM internal_change
 			WHERE schema_key = 'lix_change_set_element'
 				AND rowid IN (
@@ -120,14 +119,14 @@ export function applyChangeSetDatabaseSchema(
 
   CREATE VIEW IF NOT EXISTS change_set_edge AS
   SELECT
-    json_extract(vj, '$.parent_id') AS parent_id,
-    json_extract(vj, '$.child_id') AS child_id
+    json_extract(row, '$.parent_id') AS parent_id,
+    json_extract(row, '$.child_id') AS child_id
   FROM (
-    SELECT handle_select_on_view('change_set_edge', 'parent_id', v.parent_id, 'child_id', v.child_id) AS vj
+    SELECT handle_select_on_view('change_set_edge', 'parent_id', v.parent_id, 'child_id', v.child_id) AS row
     FROM (
       SELECT 
-        substr(entity_id, 1, instr(entity_id, ',') - 1) AS parent_id,
-        substr(entity_id, instr(entity_id, ',') + 1) AS child_id				
+        substr(entity_id, 1, instr(entity_id, '::') - 1) AS parent_id,
+        substr(entity_id, instr(entity_id, '::') + 2) AS child_id				
       FROM internal_change
       WHERE schema_key = 'lix_change_set_edge'
         AND rowid IN (
@@ -252,7 +251,6 @@ export type ChangeSetEdgeView = {
 	parent_id: string;
 	child_id: string;
 };
-
 
 // export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
 // export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;

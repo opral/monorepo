@@ -6,11 +6,11 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	sqlite.exec(`
   CREATE VIEW IF NOT EXISTS version AS
   SELECT
-    json_extract(vj, '$.id') AS id,
-    json_extract(vj, '$.name') AS name,
-    json_extract(vj, '$.change_set_id') AS change_set_id
+    json_extract(row, '$.id') AS id,
+    json_extract(row, '$.name') AS name,
+    json_extract(row, '$.change_set_id') AS change_set_id
   FROM (
-    SELECT handle_select_on_view('version', 'id', v.id) AS vj
+    SELECT handle_select_on_view('version', 'id', v.id) AS row
     FROM (
       SELECT entity_id AS id
       FROM internal_change
