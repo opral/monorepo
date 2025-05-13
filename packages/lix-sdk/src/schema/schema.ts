@@ -52,21 +52,12 @@ export function applyStoredSchemaDatabaseSchema(
       );
   END;
 
-  CREATE TRIGGER IF NOT EXISTS stored_schema_update
-  INSTEAD OF UPDATE ON stored_schema
-  BEGIN
-      SELECT handle_update_on_view('stored_schema', 
-        'key', OLD.key,
-        'version', NEW.version,
-        'value', NEW.value
-      );
-  END;
-
   CREATE TRIGGER IF NOT EXISTS stored_schema_delete
   INSTEAD OF DELETE ON stored_schema
   BEGIN
       SELECT handle_delete_on_view('stored_schema', 
-        'key', OLD.key
+        'key', OLD.key,
+        'version', OLD.version
       );
   END;
 `);
