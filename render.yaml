@@ -231,3 +231,14 @@ services:
       - path: "/*"
         name: Access-Control-Allow-Headers
         value: Content-Type
+
+  - name: flashtype-redirect
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: packages/flashtype-redirect
+    buildFilter:
+      paths:
+        - packages/flashtype-redirect/**
+    domains:
+      - flashtype.ai
