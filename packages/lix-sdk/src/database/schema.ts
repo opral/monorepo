@@ -15,6 +15,7 @@ import type {
 } from "../snapshot/schema.js";
 import { StoredSchemaSchema, type StoredSchemaView } from "../schema/schema.js";
 import type { LixSchemaDefinition } from "../schema/definition.js";
+import { KeyValueSchema, type KeyValueView } from "../key-value-v2/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -32,6 +33,7 @@ export const LixSchemaMap: Record<string, LixSchemaDefinition> = {
 	change_set_element: ChangeSetElementSchema,
 	change_set_edge: ChangeSetEdgeSchema,
 	stored_schema: StoredSchemaSchema,
+	key_value: KeyValueSchema,
 };
 
 export type LixDatabaseSchema = {
@@ -63,8 +65,7 @@ export type LixDatabaseSchema = {
 	// change_set_thread: ChangeSetThreadTable;
 
 	// // key value
-	// key_value: KeyValueTable;
-	// key_value_v2: KeyValueV2Table;
+	key_value: KeyValueView;
 
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;

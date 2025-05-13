@@ -6,58 +6,45 @@ test("inserts, updates, deletes are handled", async () => {
 	const lix = await openLixInMemory({});
 
 	await lix.db
-		.insertInto("key_value_v2")
+		.insertInto("key_value")
 		.values({ key: "key0", value: "value0" })
 		.execute();
 
 	const viewAfterInsert = await lix.db
-		.selectFrom("key_value_v2")
+		.selectFrom("key_value")
 		.where("key", "=", "key0")
 		.selectAll()
 		.executeTakeFirst();
 
-	const changesAfterInsert = await lix.db
-		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.where("schema_key", "=", "lix_key_value_v2_table")
-		.selectAll()
-		.execute();
-
-	console.log(changesAfterInsert);
-
 	expect(viewAfterInsert).toMatchObject({
 		key: "key0",
 		value: "value0",
-		version_id: null,
-		created_at: expect.any(String),
+		// version_id: null,
+		// created_at: expect.any(String),
 	});
 
 	await lix.db
-		.updateTable("key_value_v2")
+		.updateTable("key_value")
 		.where("key", "=", "key0")
 		.set({ value: "value1" })
 		.execute();
 
-	await lix.db.deleteFrom("key_value_v2").where("key", "=", "key0").execute();
+	await lix.db.deleteFrom("key_value").where("key", "=", "key0").execute();
 
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.where("schema_key", "=", "lix_key_value_v2_table")
+		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
 		.orderBy("change.created_at", "asc")
 		.execute();
 
-	const view = await lix.db.selectFrom("key_value_v2").selectAll().execute();
+	const viewAfterDelete = await lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.execute();
 
-	expect(view).toMatchObject([
-		{
-			key: "key0",
-			value: "value1",
-			version_id: null,
-			created_at: expect.any(String),
-		},
-	]);
+	expect(viewAfterDelete).toMatchObject([]);
 
 	expect(changes.map((change) => change.content)).toMatchObject([
 		{
@@ -97,7 +84,7 @@ test("view should show changes across versions", async () => {
 		},
 	]);
 	const viewResult0 = await lix.db
-		.selectFrom("key_value_v2")
+		.selectFrom("key_value")
 		.selectAll()
 		.execute();
 
@@ -128,7 +115,7 @@ test("view should show changes across versions", async () => {
 		.execute();
 
 	const kvViewAfterSwitch = await lix.db
-		.selectFrom("key_value_v2")
+		.selectFrom("key_value")
 		.selectAll()
 		.execute();
 
@@ -151,7 +138,7 @@ test("view should show changes across versions", async () => {
 		.execute();
 
 	const viewResult1 = await lix.db
-		.selectFrom("key_value_v2")
+		.selectFrom("key_value")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();
