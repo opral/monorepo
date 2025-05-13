@@ -1,103 +1,82 @@
-import type { FromSchema, JSONSchema } from "json-schema-to-ts";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { LixSchemaDefinition } from "./definition.js";
+import type { Selectable, Insertable, Updateable, Generated } from "kysely";
 
-export const LixSchemaJsonSchema = {
-	$schema: "http://json-schema.org/draft-07/schema#",
-	title: "Lix Change Schema",
-	description:
-		"A JSON schema document that also includes custom x-key and x-version properties for identification and versioning.",
-	allOf: [
-		{
-			$ref: "http://json-schema.org/draft-07/schema#",
-		},
-		{
-			type: "object",
-			properties: {
-				"x-lix-unique": {
-					type: "array",
-					items: {
-						type: "array",
-						items: {
-							type: "string",
-						},
-					},
-				},
-				"x-primary-key": {
-					type: "array",
-					items: {
-						type: "string",
-					},
-				},
-				"x-lix-key": {
-					type: "string",
-					description:
-						"The key of the schema. The key is used to identify the schema. You must use a unique key for each schema.",
-					examples: ["csv_plugin_cell"],
-				},
-				"x-lix-version": {
-					type: "string",
-					description:
-						"The version of the schema. Use the major version to signal breaking changes. Use the minor version to signal non-breaking changes.",
-					pattern: "^\\d+\\.\\d+$",
-					examples: ["1.0"],
-				},
-			},
-			required: ["x-lix-key", "x-lix-version"],
-		},
-	],
+export function applyStoredSchemaDatabaseSchema(
+	sqlite: SqliteWasmDatabase
+): void {
+	sqlite.exec(`
+  CREATE VIEW IF NOT EXISTS stored_schema AS
+  SELECT
+    json_extract(vj, '$.x-lix-key') AS key,
+    json_extract(vj, '$.x-lix-version') AS version,
+    vj as value
+  FROM (
+    SELECT handle_select_on_view('stored_schema', 'key', v.key) AS vj
+    FROM (
+      SELECT entity_id AS key
+      FROM internal_change
+      WHERE schema_key = 'lix_stored_schema'
+        AND rowid IN (
+          SELECT MAX(rowid)
+          FROM internal_change
+          WHERE schema_key = 'lix_stored_schema'
+          GROUP BY entity_id
+        )
+        AND snapshot_id != 'no-content'
+    ) v
+  );
+
+  CREATE TRIGGER IF NOT EXISTS stored_schema_insert
+  INSTEAD OF INSERT ON stored_schema
+  BEGIN
+      SELECT handle_insert_on_view('stored_schema', 
+        'key', json_extract(NEW.value, '$.x-lix-key'),
+        'version', json_extract(NEW.value, '$.x-lix-version'),
+        'value', NEW.value
+      );
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS stored_schema_update
+  INSTEAD OF UPDATE ON stored_schema
+  BEGIN
+      SELECT handle_update_on_view('stored_schema', 
+        'key', OLD.key,
+        'version', NEW.version,
+        'value', NEW.value
+      );
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS stored_schema_delete
+  INSTEAD OF DELETE ON stored_schema
+  BEGIN
+      SELECT handle_delete_on_view('stored_schema', 
+        'key', OLD.key
+      );
+  END;
+`);
+}
+
+export const StoredSchemaSchema = {
+	"x-lix-key": "lix_stored_schema",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["x-lix-key", "x-lix-version"],
+	type: "object",
+	properties: {
+		"x-lix-key": { type: "string" },
+		"x-lix-version": { type: "string" },
+	},
+	// Allo props for the dynamic lix schema
+	additionalProperties: true,
 } as const;
 
-/**
- * LixSchema
- *
- * A superset of JSON Schema (draft-07) that includes Lix-specific metadata
- * and supports custom extensions.
- *
- * Custom extensions may be added with any x-* prefix.
- */
-export type LixSchema = JSONSchema & {
-	/**
-	 * The key of the schema.
-	 *
-	 * The key is used to identify the schema. You must use a
-	 * unique key for each schema.
-	 *
-	 * @example
-	 *   "csv_plugin_cell"
-	 */
-	"x-lix-key": string;
-	/**
-	 * The version of the schema.
-	 *
-	 * Use the major version to signal breaking changes.
-	 * Use the minor version to signal non-breaking changes.
-	 *
-	 * @example
-	 *   "1.0"
-	 */
-	"x-lix-version": string;
-	"x-lix-primary-key"?: string[] | readonly string[];
-	/**
-	 * Properties that must be unique per version.
-	 *
-	 * Not to be confused by `x-version` which is used for versioning the schema.
-	 *
-	 *
-	 * @example
-	 *   {
-	 *     "x-lix-unique": [
-	 *       // the id must be unique
-	 *       ["id"],
-	 *       // the name and age must be unique as well
-	 *       ["name", "age"],
-	 *     ],
-	 *     properties: {
-	 *       id: { type: "string" },
-	 *       name: { type: "string" },
-	 *       age: { type: "number" },
-	 *     },
-	 *   }
-	 */
-	"x-lix-unique"?: string[][] | readonly (readonly string[])[];
-};
+StoredSchemaSchema satisfies LixSchemaDefinition;
 
-export type FromLixSchema<T extends LixSchema> = FromSchema<T>;
+export type StoredSchema = Selectable<StoredSchemaView>;
+export type NewStoredSchema = Insertable<StoredSchemaView>;
+export type StoredSchemaUpdate = Updateable<StoredSchemaView>;
+export type StoredSchemaView = {
+	key: Generated<string>;
+	version: Generated<string>;
+	value: LixSchemaDefinition;
+};

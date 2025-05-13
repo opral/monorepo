@@ -1,58 +1,36 @@
 import { test, expect } from "vitest";
-import { LixSchemaJsonSchema, type LixSchema } from "./schema.js";
-import { Ajv } from "ajv";
+import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import type { NewStoredSchema } from "./schema.js";
 
-const ajv = new Ajv();
+test("inserting stored schema", async () => {
+	const lix = await openLixInMemory({});
 
-test("valid schema", () => {
-	const schema = {
-		type: "object",
-		"x-lix-key": "mock",
-		"x-lix-version": "1.0",
-		properties: {
-			name: { type: "string" },
-		},
-		required: ["name"],
-		additionalProperties: false,
-	} as const satisfies LixSchema;
+	const initial = await lix.db
+		.selectFrom("stored_schema")
+		.selectAll()
+		.execute();
 
-	const valid = ajv.validate(LixSchemaJsonSchema, schema);
+	expect(initial).toHaveLength(0);
 
-	expect(valid).toBe(true);
-});
+	const schema: NewStoredSchema = {
+		value: JSON.stringify({
+			type: "object",
+			"x-lix-key": "mock",
+			"x-lix-version": "1.0",
+			properties: {
+				name: { type: "string" },
+			},
+			required: ["name"],
+			additionalProperties: false,
+		}),
+	};
 
-test("x-key is required", () => {
-	const schema = {
-		type: "object",
-		// @ts-expect-error - invalid
-		"x-lix-key": undefined,
-		"x-lix-version": "1.0",
-		properties: {
-			name: { type: "string" },
-		},
-		required: ["name"],
-		additionalProperties: false,
-	} as const satisfies LixSchema;
+	await lix.db.insertInto("stored_schema").values(schema).execute();
 
-	const valid = ajv.validate(LixSchemaJsonSchema, schema);
+	const result = await lix.db
+		.selectFrom("stored_schema")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-	expect(valid).toBe(false);
-});
-
-test("x-version is required", () => {
-	const schema = {
-		type: "object",
-		// @ts-expect-error - invalid
-		"x-lix-version": undefined,
-		"x-lix-key": "mock",
-		properties: {
-			name: { type: "string" },
-		},
-		required: ["name"],
-		additionalProperties: false,
-	} as const satisfies LixSchema;
-
-	const valid = ajv.validate(LixSchemaJsonSchema, schema);
-
-	expect(valid).toBe(false);
+	expect(result.value).toEqual(schema.value);
 });

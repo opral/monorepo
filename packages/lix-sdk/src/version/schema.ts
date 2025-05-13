@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchema } from "../schema/schema.js";
+import type { LixSchemaDefinition } from "../schema/definition.js";
 
 export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	sqlite.exec(`
@@ -67,7 +67,7 @@ export const VersionSchema = {
 	},
 	required: ["id", "name", "change_set_id"],
 } as const;
-VersionSchema satisfies LixSchema;
+VersionSchema satisfies LixSchemaDefinition;
 
 export type Version = Selectable<VersionView>;
 export type NewVersion = Insertable<VersionView>;

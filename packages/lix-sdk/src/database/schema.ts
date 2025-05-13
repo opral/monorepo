@@ -13,7 +13,8 @@ import type {
 	InternalSnapshotTable,
 	SnapshotView,
 } from "../snapshot/schema.js";
-import type { LixSchema } from "../schema/schema.js";
+import { StoredSchemaSchema, type StoredSchemaView } from "../schema/schema.js";
+import type { LixSchemaDefinition } from "../schema/definition.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -25,11 +26,12 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_snapshot: InternalSnapshotTable;
 };
 
-export const LixSchemaMap: Record<string, LixSchema> = {
+export const LixSchemaMap: Record<string, LixSchemaDefinition> = {
 	version: VersionSchema,
 	change_set: ChangeSetSchema,
 	change_set_element: ChangeSetElementSchema,
 	change_set_edge: ChangeSetEdgeSchema,
+	stored_schema: StoredSchemaSchema,
 };
 
 export type LixDatabaseSchema = {
@@ -50,6 +52,8 @@ export type LixDatabaseSchema = {
 	// internal_snapshot: InternalSnapshotTable;
 	change: ChangeView;
 	snapshot: SnapshotView;
+
+	stored_schema: StoredSchemaView;
 
 	// change set
 	change_set: ChangeSetView;

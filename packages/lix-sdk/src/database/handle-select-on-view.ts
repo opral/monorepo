@@ -2,7 +2,7 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { LixSchemaMap, type LixInternalDatabaseSchema } from "./schema.js";
 import { sql, type Kysely } from "kysely";
 import { executeSync } from "./execute-sync.js";
-import type { LixSchema } from "../schema/schema.js";
+import type { LixSchemaDefinition } from "../schema/definition.js";
 
 export function handleSelectOnView(
 	sqlite: SqliteWasmDatabase,
@@ -94,7 +94,7 @@ export function handleSelectOnView(
  * @param entityIdPropertyName - The property name that should select from `ch.entity_id`.
  * @returns Array of Kysely select expressions for use in .select([...])
  */
-function createSelectExpressionsForSchema(schema: LixSchema): any[] {
+function createSelectExpressionsForSchema(schema: LixSchemaDefinition): any[] {
 	const selectExpressions: any[] = [];
 
 	// Add common fields first

@@ -18,6 +18,7 @@ import { applyChangeDatabaseSchema } from "../change/schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set-v2/schema.js";
 import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
+import { applyStoredSchemaDatabaseSchema } from "../schema/schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -30,6 +31,7 @@ export function applySchema(args: {
 	applyChangeDatabaseSchema(args.sqlite);
 	applyChangeSetDatabaseSchema(args.sqlite);
 	applyVersionDatabaseSchema(args.sqlite);
+	applyStoredSchemaDatabaseSchema(args.sqlite);
 
 	// // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	// args.sqlite.exec`

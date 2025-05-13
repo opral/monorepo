@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchema } from "../schema/schema.js";
+import type { LixSchemaDefinition } from "../schema/definition.js";
 
 export function applyChangeSetDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -171,7 +171,7 @@ export function applyChangeSetDatabaseSchema(
 	return sqlite.exec(sql);
 }
 
-export const ChangeSetSchema: LixSchema = {
+export const ChangeSetSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
@@ -191,7 +191,7 @@ export type ChangeSetView = {
 	metadata: Record<string, any> | null;
 };
 
-export const ChangeSetElementSchema: LixSchema = {
+export const ChangeSetElementSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set_element",
 	"x-lix-version": "1.0",
 	// TODO foreign key constraint
@@ -232,7 +232,7 @@ export type ChangeSetElementView = {
 	file_id: string;
 };
 
-export const ChangeSetEdgeSchema: LixSchema = {
+export const ChangeSetEdgeSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set_edge",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["parent_id", "child_id"],

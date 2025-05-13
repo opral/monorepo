@@ -1,5 +1,4 @@
 export {
-	LixSchemaJsonSchema as ChangeSchemaJsonSchema,
-	type LixSchema as ChangeSchema,
-	type FromLixSchema as FromChangeSchema,
-} from "./schema.js";
+	LixSchemaDefinition,
+	type FromLixSchemaDefinition,
+} from "./definition.js";
