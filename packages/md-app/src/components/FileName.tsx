@@ -119,7 +119,7 @@ export default function FileName() {
             className="flex items-center h-8 px-1.5 hover:bg-slate-100 rounded transition-colors cursor-pointer -my-0.5"
           onClick={() => setIsEditing(true)}
         >
-            <h1 className="font-medium text-slate-700">{fileName}</h1>
+            <span className="font-medium text-slate-700">{fileName}</span>
         </div>
       )}
     </div>
