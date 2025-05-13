@@ -1,42 +1,44 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { NewChange } from "./schema.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import type { Kysely } from "kysely";
+import { Kysely, sql } from "kysely";
 import type { Change } from "./schema.js";
-import { v7 } from "uuid";
 import type { NewSnapshot } from "../snapshot/schema.js";
-import { createSnapshot } from "../snapshot/create-snapshot.js";
+import { executeSync } from "../database/execute-sync.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 export function createChange(args: {
-	lix: Lix;
-	data: Omit<NewChange, "snapshot_id"> & { snapshot: NewSnapshot };
-}): Promise<Change> {
-	const executeInTransaction = async (trx: Lix["db"]) => {
-		const snapshot = await createSnapshot({
-			lix: { ...args.lix, db: trx },
-			data: args.data.snapshot,
-		});
+	lix: Pick<Lix, "db" | "sqlite">;
+	data: Omit<NewChange, "snapshot_id"> & { snapshot: Omit<NewSnapshot, "id"> };
+}): // fake async API to to use the function in instead of triggers while keeping the public
+// api async in anticipation that we will move to async once we figure out how to make
+// triggers async
+Promise<Change> {
+	const [snapshot] = !args.data.snapshot.content
+		? [{ id: "no-content" }]
+		: executeSync({
+				lix: args.lix,
+				query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+					.insertInto("internal_snapshot")
+					.values({
+						content: sql`jsonb(${JSON.stringify(args.data.snapshot)})`,
+					})
+					.returning("id"),
+			});
 
-		const change = await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
+	const [change] = executeSync({
+		lix: args.lix,
+		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.insertInto("internal_change")
 			.values({
-				id: v7(),
 				entity_id: args.data.entity_id,
-				plugin_key: args.data.plugin_key,
-				file_id: args.data.file_id,
 				schema_key: args.data.schema_key,
 				snapshot_id: snapshot.id,
+				file_id: args.data.file_id,
+				plugin_key: args.data.plugin_key,
+				id: args.data.id,
 			})
-			.returningAll()
-			.executeTakeFirstOrThrow();
+			.returningAll(),
+	});
 
-		return change;
-	};
-
-	// user provided an open transaction
-	if (args.lix.db.isTransaction) {
-		return executeInTransaction(args.lix.db);
-	} else {
-		return args.lix.db.transaction().execute(executeInTransaction);
-	}
+	return change;
 }
