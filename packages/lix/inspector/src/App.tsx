@@ -166,7 +166,10 @@ export default function App(args: { show: boolean }) {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Command+Shift+O to toggle inspector
       if (event.metaKey && event.shiftKey && event.key.toLowerCase() === "o") {
-        setIsHidden((prev) => !prev);
+        setIsHidden((prev) => {
+          localStorage.setItem('lix-inspector:show', String(prev));
+          return !prev
+        });
       }
     };
 

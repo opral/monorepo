@@ -223,7 +223,9 @@ export const lixAtom = atom(async (get) => {
 
 	await initLixInspector({
 		lix,
-		show: import.meta.env.DEV,
+		show: localStorage.getItem("lix-inspector:show")
+			? localStorage.getItem("lix-inspector:show") === "true"
+			: import.meta.env.DEV,
 	});
 
 	// lix.sqlite.createFunction("handle_save_lix_to_opfs", () => {
