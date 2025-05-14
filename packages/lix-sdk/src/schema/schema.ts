@@ -1,6 +1,7 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { LixSchemaDefinition } from "./definition.js";
 import type { Selectable, Insertable, Updateable, Generated } from "kysely";
+import { JSONTypeSchema } from "./json-type.js";
 
 export function applyStoredSchemaDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -8,57 +9,38 @@ export function applyStoredSchemaDatabaseSchema(
 	sqlite.exec(`
   CREATE VIEW IF NOT EXISTS stored_schema AS
   SELECT
-    json_extract(row, '$.key') AS key,
-    json_extract(row, '$.version') AS version,
-    json_extract(row, '$.value') AS value
-  FROM (
-    SELECT handle_select_on_view('stored_schema', 'key', v.key, 'version', v.version) AS row
-    FROM (
-      SELECT
-        substr(entity_id, 1, instr(entity_id, '::') - 1) AS key,
-        substr(entity_id, instr(entity_id, '::') + 2) AS version			
-      FROM internal_change
-      WHERE schema_key = 'lix_stored_schema'
-        AND rowid IN (
-          SELECT MAX(rowid)
-          FROM internal_change
-          WHERE schema_key = 'lix_stored_schema'
-          GROUP BY entity_id
-        )
-        AND snapshot_id != 'no-content'
-    ) v
-  );
+    json_extract(snapshot_content, '$.key') AS key,
+    json_extract(snapshot_content, '$.version') AS version,
+    json_extract(snapshot_content, '$.value') AS value
+  FROM state
+  WHERE schema_key = 'lix_stored_schema';
 
   CREATE TRIGGER IF NOT EXISTS stored_schema_insert
   INSTEAD OF INSERT ON stored_schema
   BEGIN
-      -- Check x-lix-key if present
-      SELECT CASE
-        WHEN NEW.key IS NOT NULL
-         AND NEW.key IS NOT json_extract(NEW.value, '$.x-lix-key')
-        THEN RAISE(FAIL, 'Inserted key does not match value.x-lix-key: key=' || NEW.key || ' x-lix-key=' || json_extract(NEW.value, '$.x-lix-key'))
-      END;
-      -- Check x-lix-version if present
-      SELECT CASE
-        WHEN NEW.version IS NOT NULL
-         AND NEW.version IS NOT json_extract(NEW.value, '$.x-lix-version')
-        THEN RAISE(FAIL, 'Inserted version does not match value.x-lix-version: version=' || NEW.version || ' x-lix-version=' || json_extract(NEW.value, '$.x-lix-version'))
-      END;
-      -- Proceed with insert
-      SELECT handle_insert_on_view('stored_schema', 
-        'key', json_extract(NEW.value, '$.x-lix-key'),
-        'version', json_extract(NEW.value, '$.x-lix-version'),
+    INSERT INTO state (
+      entity_id,
+      schema_key,
+      file_id,
+      plugin_key,
+      snapshot_content
+      ) VALUES (
+      NEW.key || '::' || NEW.version, 
+      'lix_stored_schema',
+      'lix',
+      'lix_own_entity',
+      json_object(
+        'key', NEW.key, 
+        'version', NEW.version, 
         'value', NEW.value
-      );
+      )
+    );
   END;
 
   CREATE TRIGGER IF NOT EXISTS stored_schema_delete
   INSTEAD OF DELETE ON stored_schema
   BEGIN
-      SELECT handle_delete_on_view('stored_schema', 
-        'key', OLD.key,
-        'version', OLD.version
-      );
+      DELETE FROM state WHERE entity_id = OLD.key || '::' || OLD.version AND schema_key = 'lix_stored_schema';
   END;
 `);
 }
@@ -71,7 +53,7 @@ export const StoredSchemaSchema = {
 	properties: {
 		key: { type: "string" },
 		version: { type: "string" },
-		value: { type: "object" },
+		value: JSONTypeSchema,
 	},
 	additionalProperties: false,
 } as const;

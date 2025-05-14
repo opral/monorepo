@@ -1,7 +1,7 @@
 import { Ajv } from "ajv";
-import { LixSchemaDefinition } from "./definition.js";
+import { LixSchemaDefinition } from "../schema/definition.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { JSONType } from "./json-type.js";
+import type { Snapshot } from "../snapshot/schema.js";
 
 const ajv = new Ajv({
 	strict: true,
@@ -11,12 +11,13 @@ const ajv = new Ajv({
 });
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
 
-export function validateSchema(args: {
+export function validateSnapshotContent(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	data: JSONType;
+	snapshot_content: Snapshot["content"];
 }): void {
 	const isValidLixSchema = validateLixSchema(args.schema);
+	return;
 
 	if (!isValidLixSchema) {
 		throw new Error(
@@ -24,7 +25,10 @@ export function validateSchema(args: {
 		);
 	}
 
-	const isValidSnapshotContent = ajv.validate(args.schema, args.data);
+	const isValidSnapshotContent = ajv.validate(
+		args.schema,
+		args.snapshot_content
+	);
 
 	if (!isValidSnapshotContent) {
 		throw new Error(

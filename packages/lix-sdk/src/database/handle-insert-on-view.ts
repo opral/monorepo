@@ -6,7 +6,7 @@ import {
 	type LixInternalDatabaseSchema,
 } from "./schema.js";
 import { executeSync } from "./execute-sync.js";
-import { validateSchema } from "../schema/validate-schema.js";
+import { validateSchema } from "../state/validate-snapshot-content.js";
 import { buildRowDataFromSchema } from "./handle-update-on-view.js";
 
 export function handleInsertOnView(

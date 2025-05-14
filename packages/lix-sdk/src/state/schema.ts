@@ -1,10 +1,28 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { JSONType } from "../schema/json-type.js";
+import { validateSnapshotContent } from "./validate-snapshot-content.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { Kysely } from "kysely";
 
 export function applyStateDatabaseSchema(
-	sqlite: SqliteWasmDatabase
+	sqlite: SqliteWasmDatabase,
+	db: Kysely<LixInternalDatabaseSchema>
 ): SqliteWasmDatabase {
+	sqlite.createFunction({
+		name: "validate_snapshot_content",
+		deterministic: true,
+		arity: 2,
+		// @ts-expect-error - type mismatch
+		xFunc: (_ctxPtr: number, ...args: any[]) => {
+			return validateSnapshotContent({
+				lix: { sqlite, db: db as any },
+				schema: args[0],
+				snapshot_content: JSON.parse(args[1]),
+			});
+		},
+	});
+
 	const sql = `
   CREATE VIEW IF NOT EXISTS state AS
   SELECT
@@ -27,6 +45,9 @@ export function applyStateDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
   BEGIN
+    -- validate the snapshot content
+    SELECT validate_snapshot_content(NEW.schema_key, NEW.snapshot_content);
+
     INSERT INTO internal_snapshot (content) VALUES (jsonb(NEW.snapshot_content));
 
     INSERT INTO internal_change (
@@ -43,6 +64,9 @@ export function applyStateDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS state_update
   INSTEAD OF UPDATE ON state
   BEGIN
+    -- validate the snapshot content
+    SELECT validate_snapshot_content(NEW.schema_key, NEW.snapshot_content);
+
     INSERT INTO internal_snapshot (content) VALUES (jsonb(NEW.snapshot_content));
 
     INSERT INTO internal_change (

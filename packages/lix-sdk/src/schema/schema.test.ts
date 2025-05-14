@@ -13,6 +13,8 @@ test("insert and delete a stored schema", async () => {
 	expect(initial).toHaveLength(0);
 
 	const schema: NewStoredSchema = {
+		key: "mock",
+		version: "1.0",
 		value: JSON.stringify({
 			type: "object",
 			"x-lix-key": "mock",
@@ -31,6 +33,14 @@ test("insert and delete a stored schema", async () => {
 		.selectFrom("stored_schema")
 		.selectAll()
 		.executeTakeFirstOrThrow();
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.selectAll()
+		.execute();
+
+	console.log(changes);
 
 	expect(afterInsert).toMatchObject({
 		key: "mock",

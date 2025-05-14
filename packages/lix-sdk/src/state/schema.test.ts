@@ -1,14 +1,32 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import type { LixSchemaDefinition } from "../schema/definition.js";
 
 test("select, insert, update, delete entity", async () => {
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "value",
+		"x-lix-version": "1",
+		type: "object",
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
 	const lix = await openLixInMemory({});
 
-	const initial = await lix.db.selectFrom("entity").selectAll().execute();
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	const initial = await lix.db.selectFrom("state").selectAll().execute();
+
 	expect(initial).toHaveLength(0);
 
 	await lix.db
-		.insertInto("entity")
+		.insertInto("state")
 		.values({
 			entity_id: "e0",
 			file_id: "f0",
@@ -21,7 +39,7 @@ test("select, insert, update, delete entity", async () => {
 		.execute();
 
 	const viewAfterInsert = await lix.db
-		.selectFrom("entity")
+		.selectFrom("state")
 		.selectAll()
 		.execute();
 
@@ -38,7 +56,7 @@ test("select, insert, update, delete entity", async () => {
 	]);
 
 	await lix.db
-		.updateTable("entity")
+		.updateTable("state")
 		.set({
 			snapshot_content: {
 				value: "hello world - updated",
@@ -50,7 +68,7 @@ test("select, insert, update, delete entity", async () => {
 		.execute();
 
 	const viewAfterUpdate = await lix.db
-		.selectFrom("entity")
+		.selectFrom("state")
 		.selectAll()
 		.execute();
 
@@ -66,10 +84,10 @@ test("select, insert, update, delete entity", async () => {
 		},
 	]);
 
-	await lix.db.deleteFrom("entity").where("entity_id", "=", "e0").execute();
+	await lix.db.deleteFrom("state").where("entity_id", "=", "e0").execute();
 
 	const viewAfterDelete = await lix.db
-		.selectFrom("entity")
+		.selectFrom("state")
 		.selectAll()
 		.execute();
 

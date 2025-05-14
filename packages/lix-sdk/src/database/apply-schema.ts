@@ -35,7 +35,7 @@ export function applySchema(args: {
 	applyVersionDatabaseSchema(args.sqlite);
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
-	applyStateDatabaseSchema(args.sqlite);
+	applyStateDatabaseSchema(args.sqlite, args.db);
 
 	// // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	// args.sqlite.exec`
