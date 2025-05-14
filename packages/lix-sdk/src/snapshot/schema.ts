@@ -1,5 +1,7 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Selectable, Insertable, Generated } from "kysely";
+import { type JSONType, JSONTypeSchema } from "../schema/json-type.js";
+import type { LixSchemaDefinition } from "../schema/definition.js";
 
 export function applySnapshotDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -38,6 +40,19 @@ export function applySnapshotDatabaseSchema(
 `);
 }
 
+export const SnapshotSchema = {
+	"x-lix-key": "lix_snapshot",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["id"],
+	type: "object",
+	properties: {
+		id: { type: "string" },
+		content: JSONTypeSchema,
+	},
+	required: ["id", "content"],
+} as const;
+SnapshotSchema satisfies LixSchemaDefinition;
+
 // Types for the internal_snapshot TABLE
 export type InternalSnapshot = Selectable<InternalSnapshotTable>;
 export type NewInternalSnapshot = Insertable<InternalSnapshotTable>;
@@ -52,11 +67,3 @@ export type SnapshotView = {
 	id: Generated<string>;
 	content: JSONType;
 };
-
-export type JSONType =
-	| string
-	| number
-	| boolean
-	| null
-	| JSONType[]
-	| { [key: string]: JSONType };

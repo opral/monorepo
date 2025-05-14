@@ -31,6 +31,13 @@ test("inserts, updates, deletes are handled", async () => {
 
 	await lix.db.deleteFrom("key_value").where("key", "=", "key0").execute();
 
+	const viewAfterDelete = await lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.execute();
+
+	expect(viewAfterDelete).toMatchObject([]);
+
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
@@ -38,13 +45,6 @@ test("inserts, updates, deletes are handled", async () => {
 		.selectAll()
 		.orderBy("change.created_at", "asc")
 		.execute();
-
-	const viewAfterDelete = await lix.db
-		.selectFrom("key_value")
-		.selectAll()
-		.execute();
-
-	expect(viewAfterDelete).toMatchObject([]);
 
 	expect(changes.map((change) => change.content)).toMatchObject([
 		{
@@ -57,6 +57,28 @@ test("inserts, updates, deletes are handled", async () => {
 		},
 		null,
 	]);
+});
+
+test("arbitrary json is allowed", async () => {
+	const lix = await openLixInMemory({});
+
+	const kvs = [
+		{ key: "key0", value: { foo: "bar" } },
+		{ key: "key1", value: ["foo", "bar"] },
+		{ key: "key2", value: "foo" },
+		{ key: "key3", value: 42 },
+		{ key: "key4", value: true },
+		{ key: "key5", value: null },
+	];
+
+	await lix.db.insertInto("key_value").values(kvs).execute();
+
+	const viewAfterInsert = await lix.db
+		.selectFrom("key_value")
+		.selectAll()
+		.execute();
+
+	expect(viewAfterInsert).toEqual(kvs);
 });
 
 test("view should show changes across versions", async () => {

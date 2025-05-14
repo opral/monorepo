@@ -1,8 +1,8 @@
 import { type Selectable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Insertable, Updateable } from "kysely";
-import type { JSONType } from "../snapshot/schema.js";
 import type { LixSchemaDefinition } from "../schema/definition.js";
+import { JSONTypeSchema, type JSONType } from "../schema/json-type.js";
 
 export function applyKeyValueDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -66,7 +66,7 @@ export const KeyValueSchema = {
 	type: "object",
 	properties: {
 		key: { type: "string" },
-		value: { type: "string" },
+		value: JSONTypeSchema,
 	},
 	required: ["key", "value"],
 } as const;

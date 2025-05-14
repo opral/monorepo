@@ -1,4 +1,4 @@
-import { Kysely, ParseJSONResultsPlugin } from "kysely";
+import { Kysely } from "kysely";
 import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
@@ -9,18 +9,27 @@ import { handleSelectOnView } from "./handle-select-on-view.js";
 import { handleInsertOnView } from "./handle-insert-on-view.js";
 import { handleUpdateOnView } from "./handle-update-on-view.js";
 import { handleDeleteOnView } from "./handle-delete-on-view.js";
+import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
+import { isJsonType } from "../schema/json-type.js";
+import { LixSchemaMap } from "./schema.js";
 
-/**
- * Columns that should be serialized and parsed as JSON Binary.
- */
-// const TablesWithJSONBColumns: Record<string, string[]> = {
-// 	file: ["metadata"],
-// 	file_queue: ["metadata_before", "metadata_after"],
-// 	snapshot: ["content"],
-// 	thread: ["body"],
-// 	key_value: ["value"],
-// 	thread_comment: ["body"],
-// };
+// dynamically computes the json columns for each view
+// via the json schemas.
+const ViewsWithJsonColumns = (() => {
+	const result: Record<string, string[]> = {};
+	for (const [viewName, schema] of Object.entries(LixSchemaMap)) {
+		// @ts-expect-error - false positive
+		if (!schema.properties) continue;
+		// @ts-expect-error - false positive
+		const jsonColumns = Object.entries(schema.properties)
+			.filter(([, def]) => isJsonType(def))
+			.map(([key]) => key);
+		if (jsonColumns.length) {
+			result[viewName] = jsonColumns;
+		}
+	}
+	return result;
+})();
 
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
@@ -32,9 +41,8 @@ export function initDb(args: {
 		}),
 		plugins: [
 			// fallback json parser in case column aliases are used
-			new ParseJSONResultsPlugin(),
-			// ParseJsonBPluginV1(TablesWithJSONBColumns),
-			// SerializeJsonBPlugin(TablesWithJSONBColumns),
+			// new ParseJSONResultsPlugin(),
+			JSONColumnPlugin(ViewsWithJsonColumns),
 		],
 	});
 	initFunctions({

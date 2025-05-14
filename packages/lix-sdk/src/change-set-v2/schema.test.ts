@@ -34,7 +34,7 @@ describe("change_set", () => {
 		await lix.db
 			.updateTable("change_set")
 			.where("id", "=", "cs0")
-			.set({ metadata: JSON.stringify({ foo: "bar" }) })
+			.set({ metadata: { foo: "bar" } })
 			.execute();
 
 		const viewAfterUpdate = await lix.db

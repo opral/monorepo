@@ -7,6 +7,7 @@ import {
 } from "./schema.js";
 import { executeSync } from "./execute-sync.js";
 import { validateSchema } from "../schema/validate-schema.js";
+import { isJsonType } from "../schema/json-type.js";
 
 export function handleUpdateOnView(
 	sqlite: SqliteWasmDatabase,
@@ -74,7 +75,7 @@ export function buildRowDataFromSchema(
 
 		const propertyDefinition = schema.properties?.[key];
 		if (propertyDefinition && typeof value === "string") {
-			if (propertyAllowsObject(propertyDefinition)) {
+			if (isJsonType(propertyDefinition)) {
 				try {
 					value = JSON.parse(value);
 				} catch {
@@ -88,14 +89,3 @@ export function buildRowDataFromSchema(
 	return rowData;
 }
 
-function propertyAllowsObject(def: any): boolean {
-	// Handles type: "object", type: ["object", ...], or anyOf: [{type:...}]
-	if (def.type) {
-		const types = Array.isArray(def.type) ? def.type : [def.type];
-		if (types.includes("object")) return true;
-	}
-	if (Array.isArray(def.anyOf)) {
-		if (def.anyOf.some((sub: any) => sub.type === "object")) return true;
-	}
-	return false;
-}

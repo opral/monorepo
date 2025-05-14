@@ -9,9 +9,10 @@ import {
 	type ChangeSetEdgeView,
 } from "../change-set-v2/schema.js";
 import { VersionSchema, type VersionView } from "../version/schema.js";
-import type {
-	InternalSnapshotTable,
-	SnapshotView,
+import {
+	SnapshotSchema,
+	type InternalSnapshotTable,
+	type SnapshotView,
 } from "../snapshot/schema.js";
 import { StoredSchemaSchema, type StoredSchemaView } from "../schema/schema.js";
 import type { LixSchemaDefinition } from "../schema/definition.js";
@@ -34,6 +35,7 @@ export const LixSchemaMap: Record<string, LixSchemaDefinition> = {
 	change_set_edge: ChangeSetEdgeSchema,
 	stored_schema: StoredSchemaSchema,
 	key_value: KeyValueSchema,
+	snapshot: SnapshotSchema,
 };
 
 export type LixDatabaseSchema = {
