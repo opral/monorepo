@@ -251,6 +251,9 @@ app.get(["", "/"], (req, res) => {
   res.redirect("/app/fm");
 });
 
+// Serve static files from the 'public' directory
+app.use(express.static(join(__dirname, "../public")));
+
 // Middleware to forward browser fetch requests to the correct subpath
 app.use((req, res, next) => {
   // Skip for /file-manager
@@ -316,20 +319,6 @@ for (const lixApp of lixApps) {
     }
   });
 }
-
-// Serve sitemap.xml
-app.get("/sitemap.xml", (req, res) => {
-  const sitemapPath = join(__dirname, "..", "sitemap.xml");
-  fs.readFile(sitemapPath, (err, data) => {
-    if (err) {
-      console.error("Error reading sitemap:", err);
-      res.status(404).send("Sitemap not found");
-      return;
-    }
-    res.header("Content-Type", "application/xml");
-    res.send(data);
-  });
-});
 
 // LSP Handler
 const lspHandler = await createServerProtocolHandler({
