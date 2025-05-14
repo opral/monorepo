@@ -12,6 +12,7 @@ export const useChat = (
 
 	// remove when you implement the route /api/ai/command
 	const abortControllerRef = useRef<AbortController | null>(null);
+
 	const _abortFakeStream = () => {
 		if (abortControllerRef.current) {
 			abortControllerRef.current.abort();
@@ -31,7 +32,15 @@ export const useChat = (
 		// model: model.value,
 		// },
 		fetch: async (input, init) => {
-			const res = await fetch(input, init);
+			// Only create a new AbortController if not already set
+			if (!abortControllerRef.current) {
+				abortControllerRef.current = new AbortController();
+			}
+
+			const res = await fetch(input, {
+				...init,
+				signal: abortControllerRef.current.signal,
+			});
 
 			if (!res.ok) {
 				// Mock the API response. Remove it when you implement the route /api/ai/command
@@ -66,7 +75,6 @@ export const useChat = (
 		},
 		...options,
 	});
-
 	return { ...chat, _abortFakeStream };
 };
 
@@ -102,6 +110,9 @@ const fakeStreamText = ({
 
 	const encoder = new TextEncoder();
 
+	// Keep track of whether the stream has been aborted
+	let isStreamAborted = false;
+
 	return new ReadableStream({
 		async start(controller) {
 			if (signal?.aborted) {
@@ -110,47 +121,64 @@ const fakeStreamText = ({
 			}
 
 			const abortHandler = () => {
+				isStreamAborted = true;
 				controller.error(new Error("Stream aborted"));
 			};
 
 			signal?.addEventListener("abort", abortHandler);
 
-			for (let i = 0; i < blocks.length; i++) {
-				const block = blocks[i];
+			try {
+				for (let i = 0; i < blocks.length; i++) {
+					if (isStreamAborted) break;
 
-				// Stream the block content
-				for (const chunk of block) {
-					await new Promise((resolve) => setTimeout(resolve, chunk.delay));
+					const block = blocks[i];
 
-					if (streamProtocol === "text") {
-						controller.enqueue(encoder.encode(chunk.texts));
-					} else {
-						controller.enqueue(
-							encoder.encode(`0:${JSON.stringify(chunk.texts)}\n`)
-						);
+					// Stream the block content
+					for (const chunk of block) {
+						if (isStreamAborted) break;
+						await new Promise((resolve) => setTimeout(resolve, chunk.delay));
+
+						if (streamProtocol === "text") {
+							controller.enqueue(encoder.encode(chunk.texts));
+						} else {
+							controller.enqueue(
+								encoder.encode(`0:${JSON.stringify(chunk.texts)}\n`)
+							);
+						}
+					}
+
+					// Add double newline after each block except the last one
+					if (i < blocks.length - 1) {
+						if (streamProtocol === "text") {
+							controller.enqueue(encoder.encode("\n\n"));
+						} else {
+							controller.enqueue(
+								encoder.encode(`0:${JSON.stringify("\n\n")}\n`)
+							);
+						}
 					}
 				}
 
-				// Add double newline after each block except the last one
-				if (i < blocks.length - 1) {
-					if (streamProtocol === "text") {
-						controller.enqueue(encoder.encode("\n\n"));
-					} else {
-						controller.enqueue(encoder.encode(`0:${JSON.stringify("\n\n")}\n`));
+				if (streamProtocol === "data") {
+					controller.enqueue(
+						`d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":${blocks.reduce(
+							(sum, block) => sum + block.length,
+							0
+						)}}}\n`
+					);
+				}
+
+				controller.close();
+			} catch (error) {
+				console.error("Error in stream processing:", error);
+				if (!isStreamAborted) {
+					try {
+						controller.error(error);
+					} catch (closeError) {
+						console.error("Error sending stream error:", closeError);
 					}
 				}
 			}
-
-			if (streamProtocol === "data") {
-				controller.enqueue(
-					`d:{"finishReason":"stop","usage":{"promptTokens":0,"completionTokens":${blocks.reduce(
-						(sum, block) => sum + block.length,
-						0
-					)}}}\n`
-				);
-			}
-
-			controller.close();
 		},
 	});
 };

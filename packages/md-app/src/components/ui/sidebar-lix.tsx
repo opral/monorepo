@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { availableLixesAtom, currentLixNameAtom, fileIdSearchParamsAtom, filesAtom, lixAtom, lixIdSearchParamsAtom, withPollingAtom } from "@/state"
+import { availableLixesAtom, currentLixNameAtom, documentGenerationAtom, fileIdSearchParamsAtom, filesAtom, lixAtom, lixIdSearchParamsAtom, withPollingAtom } from "@/state"
 import { activeFileAtom } from "@/state-active-file"
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
 import { createNewLixFileInOpfs } from "@/helper/newLix"
@@ -69,6 +69,7 @@ export function LixSidebar() {
   const [availableLixes] = useAtom(availableLixesAtom)
   const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom)
   const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom)
+  const [documentGeneration] = useAtom(documentGenerationAtom)
 
   const [fileToDelete, setFileToDelete] = React.useState<string | null>(null)
   const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] = React.useState(false)
@@ -643,6 +644,7 @@ export function LixSidebar() {
               title="Import Markdown Document"
               className="flex justify-between items-center mr-1"
               onClick={handleImportFile}
+              disabled={documentGeneration !== null && documentGeneration.isGenerating}
             >
               <Upload className="h-4 w-4" />
             </Button>
@@ -652,6 +654,7 @@ export function LixSidebar() {
               title="New File"
               className="flex justify-between items-center"
               onClick={createNewFile}
+              disabled={documentGeneration !== null && documentGeneration.isGenerating}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -707,6 +710,7 @@ export function LixSidebar() {
                         }
                       }, 50)
                     }}
+                      disabled={documentGeneration !== null && documentGeneration.isGenerating}
                     className={`w-full justify-start ${file.id === activeFile?.id ? 'font-medium' : ''}`}
                   >
                     <FileText className={`h-4 w-4 ${file.id === activeFile?.id ? 'text-primary' : ''}`} />

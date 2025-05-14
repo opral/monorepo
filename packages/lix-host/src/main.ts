@@ -149,8 +149,21 @@ app.post("/api/ai/command", async (req, res) => {
   let isInList = false;
   let isInLink = false;
 
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  // Abort the operation if the client disconnects
+  req.on("close", () => {
+    if (res.writableEnded) {
+      console.log("Client disconnected, aborting stream.");
+      controller.abort(); // Abort only when the client disconnects
+    }
+  });
+
   try {
     const result = streamText({
+      // Attach the abort signal
+      abortSignal: signal,
       experimental_transform: smoothStream({
         chunking: (buffer) => {
           if (/```[^\s]+/.test(buffer)) {
@@ -198,7 +211,11 @@ app.post("/api/ai/command", async (req, res) => {
     });
 
     result.pipeTextStreamToResponse(res);
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === "AbortError") {
+      console.log("Stream aborted by client.");
+      return res.status(499).end(); // Client closed request
+    }
     console.error("AI Command Error:", error);
     res.status(500).json({ error: "Failed to process AI request" });
   }

@@ -7,7 +7,7 @@ import { useChat } from './use-chat';
 import { toast } from 'sonner';
 import { Button } from '../plate-ui/button';
 import { Loader2, Zap } from 'lucide-react';
-import { lixAtom, withPollingAtom } from '@/state';
+import { documentGenerationAtom, lixAtom, withPollingAtom } from '@/state';
 import { saveLixToOpfs } from '@/helper/saveLixToOpfs';
 import { generateHumanId } from '@/helper/generateHumanId';
 import { updateUrlParams } from '@/helper/updateUrlParams';
@@ -21,7 +21,8 @@ export function EmptyDocumentPromptElement({
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeFile] = useAtom(activeFileAtom);
   const [lix] = useAtom(lixAtom);
-  const [, setPolling] = useAtom(withPollingAtom)
+  const [, setPolling] = useAtom(withPollingAtom);
+  const [, setDocumentGeneration] = useAtom(documentGenerationAtom);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chat = useChat({
     streamProtocol: "text",
@@ -30,18 +31,32 @@ export function EmptyDocumentPromptElement({
       const decoder = new TextDecoder();
       let result = "";
 
-      while (reader) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        result += decoder.decode(value);
-        applyMdContent(result); // apply progressively or buffer chunks
+      try {
+        while (reader) {
+          const { value, done } = await reader.read();
+          if (done) {
+            console.log("Stream completed - done flag detected");
+            // Explicitly reset states when done
+            setIsGenerating(false);
+            setDocumentGeneration(null);
+            break;
+          }
+          result += decoder.decode(value);
+          applyMdContent(result); // apply progressively or buffer chunks
+        }
+      } catch (error) {
+        console.error("Error in stream reading:", error);
+        // Reset states on error
+        setIsGenerating(false);
+        setDocumentGeneration(null);
       }
     },
     onFinish: () => {
-      if (isGenerating) {
-        setIsGenerating(false);
-        setPrompt('');
-      }
+      console.log("onFinish triggered in chat");
+      // Reset states when stream finishes
+      setIsGenerating(false);
+      setPrompt('');
+      setDocumentGeneration(null);
     }
   });
 
@@ -108,6 +123,12 @@ export function EmptyDocumentPromptElement({
     if (!activeFile || !prompt.trim()) return;
     setIsGenerating(true);
 
+    // Set the global document generation state
+    setDocumentGeneration({
+      isGenerating: true,
+      chat: chat
+    });
+
     try {
       // If we're in welcome.md, create a new file first
       if (activeFile.path === '/welcome.md') {
@@ -129,6 +150,7 @@ export function EmptyDocumentPromptElement({
       console.error('Error starting document generation:', error);
       toast.error("Failed to generate document. Please try again.");
       setIsGenerating(false);
+      setDocumentGeneration(null);
     }
   };
 
