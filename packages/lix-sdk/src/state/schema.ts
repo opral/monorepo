@@ -2,11 +2,11 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { JSONType } from "../schema/json-type.js";
 
-export function applyEntityViewDatabaseSchema(
+export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): SqliteWasmDatabase {
 	const sql = `
-  CREATE VIEW IF NOT EXISTS entity AS
+  CREATE VIEW IF NOT EXISTS state AS
   SELECT
     ic.entity_id,
     ic.schema_key,
@@ -24,8 +24,8 @@ export function applyEntityViewDatabaseSchema(
       AND ic2.file_id = ic.file_id
   );
 
-  CREATE TRIGGER IF NOT EXISTS entity_insert
-  INSTEAD OF INSERT ON entity
+  CREATE TRIGGER IF NOT EXISTS state_insert
+  INSTEAD OF INSERT ON state
   BEGIN
     INSERT INTO internal_snapshot (content) VALUES (jsonb(NEW.snapshot_content));
 
@@ -40,8 +40,8 @@ export function applyEntityViewDatabaseSchema(
     );
   END;
 
-  CREATE TRIGGER IF NOT EXISTS entity_update
-  INSTEAD OF UPDATE ON entity
+  CREATE TRIGGER IF NOT EXISTS state_update
+  INSTEAD OF UPDATE ON state
   BEGIN
     INSERT INTO internal_snapshot (content) VALUES (jsonb(NEW.snapshot_content));
 
@@ -56,8 +56,8 @@ export function applyEntityViewDatabaseSchema(
     );
   END;
 
-  CREATE TRIGGER IF NOT EXISTS entity_delete
-  INSTEAD OF DELETE ON entity
+  CREATE TRIGGER IF NOT EXISTS state_delete
+  INSTEAD OF DELETE ON state
   BEGIN
     INSERT INTO internal_change (
       entity_id, schema_key, file_id, plugin_key, snapshot_id
@@ -74,10 +74,10 @@ export function applyEntityViewDatabaseSchema(
 	return sqlite.exec(sql);
 }
 
-export type Entity = Selectable<EntityView>;
-export type NewEntity = Insertable<EntityView>;
-export type EntityUpdate = Updateable<EntityView>;
-export type EntityView = {
+export type State = Selectable<StateView>;
+export type NewState = Insertable<StateView>;
+export type StateUpdate = Updateable<StateView>;
+export type StateView = {
 	entity_id: Generated<string>;
 	schema_key: string;
 	file_id: string;

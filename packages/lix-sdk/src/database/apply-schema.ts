@@ -20,7 +20,7 @@ import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStoredSchemaDatabaseSchema } from "../schema/schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value-v2/schema.js";
-import { applyEntityViewDatabaseSchema } from "../entity-view/schema.js";
+import { applyStateDatabaseSchema } from "../state/schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -35,7 +35,7 @@ export function applySchema(args: {
 	applyVersionDatabaseSchema(args.sqlite);
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
-	applyEntityViewDatabaseSchema(args.sqlite);
+	applyStateDatabaseSchema(args.sqlite);
 
 	// // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	// args.sqlite.exec`

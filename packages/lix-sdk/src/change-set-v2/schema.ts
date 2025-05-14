@@ -8,162 +8,155 @@ export function applyChangeSetDatabaseSchema(
 	const sql = `
   CREATE VIEW IF NOT EXISTS change_set AS
 	SELECT
-		json_extract(row, '$.id') AS id,
-    json_extract(row, '$.metadata') AS metadata
-	FROM (
-		SELECT handle_select_on_view('change_set', 'id', v.id) AS row
-		FROM (
-			SELECT entity_id AS id
-			FROM internal_change
-			WHERE schema_key = 'lix_change_set'
-				AND rowid IN (
-					SELECT MAX(rowid)
-					FROM internal_change
-					WHERE schema_key = 'lix_change_set'
-					GROUP BY entity_id
-				)
-				AND snapshot_id != 'no-content'
-		) v
-	);
+		json_extract(snapshot_content, '$.id') AS id,
+    json_extract(snapshot_content, '$.metadata') AS metadata
+	FROM state
+	WHERE schema_key = 'lix_change_set';
 
   CREATE TRIGGER change_set_insert
   INSTEAD OF INSERT ON change_set
   BEGIN
-    SELECT handle_insert_on_view('change_set', 
-      'id', COALESCE(NEW.id, nano_id()), 
-      'metadata', NEW.metadata
+    INSERT INTO state (
+      entity_id,
+      schema_key,
+      file_id,
+      plugin_key,
+      snapshot_content
+    ) VALUES (
+      NEW.id,
+      'lix_change_set',
+      'lix',
+      'lix_own_entity',
+      json_object('id', NEW.id, 'metadata', NEW.metadata)
     );
   END;
 
   CREATE TRIGGER change_set_update
   INSTEAD OF UPDATE ON change_set
   BEGIN
-      SELECT handle_update_on_view('change_set', 
-        'id', OLD.id,
-        'metadata', NEW.metadata
-      );
+    UPDATE state
+    SET
+      entity_id = NEW.id,
+      schema_key = 'lix_change_set',
+      file_id = 'lix',
+      plugin_key = 'lix_own_entity',
+      snapshot_content = json_object('id', NEW.id, 'metadata', NEW.metadata)
+    WHERE
+      entity_id = OLD.id
+      AND schema_key = 'lix_change_set'
+      AND file_id = 'lix';
   END;
 
   CREATE TRIGGER change_set_delete
   INSTEAD OF DELETE ON change_set
   BEGIN
-      SELECT handle_delete_on_view('change_set', 
-        'id', OLD.id
-      );
+    DELETE FROM state
+    WHERE entity_id = OLD.id
+    AND schema_key = 'lix_change_set'
+    AND file_id = 'lix';
   END;
 
   -- change set element
 
   CREATE VIEW IF NOT EXISTS change_set_element AS
 	SELECT
-		json_extract(row, '$.change_set_id') AS change_set_id,
-    json_extract(row, '$.change_id') AS change_id,
-    json_extract(row, '$.entity_id') AS entity_id,
-    json_extract(row, '$.schema_key') AS schema_key,
-    json_extract(row, '$.file_id') AS file_id
-	FROM (
-		SELECT handle_select_on_view('change_set_element', 'change_set_id', v.change_set_id, 'change_id', v.change_id) AS row
-		FROM (
-			SELECT 
-				substr(entity_id, 1, instr(entity_id, '::') - 1) AS change_set_id,
-				substr(entity_id, instr(entity_id, '::') + 2) AS change_id				  
-      FROM internal_change
-			WHERE schema_key = 'lix_change_set_element'
-				AND rowid IN (
-					SELECT MAX(rowid)
-					FROM internal_change
-					WHERE schema_key = 'lix_change_set_element'
-					GROUP BY entity_id
-				)
-				AND snapshot_id != 'no-content'
-		) v
-	);
+		json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
+    json_extract(snapshot_content, '$.change_id') AS change_id,
+    json_extract(snapshot_content, '$.entity_id') AS entity_id,
+    json_extract(snapshot_content, '$.schema_key') AS schema_key,
+    json_extract(snapshot_content, '$.file_id') AS file_id
+	FROM state
+	WHERE schema_key = 'lix_change_set_element';
 
   CREATE TRIGGER change_set_element_insert
   INSTEAD OF INSERT ON change_set_element
   BEGIN
-    SELECT handle_insert_on_view('change_set_element', 
-      'change_set_id', NEW.change_set_id, 
-      'change_id', NEW.change_id,
-      'entity_id', NEW.entity_id,
-      'schema_key', NEW.schema_key,
-      'file_id', NEW.file_id
+    INSERT INTO state (
+      entity_id,
+      schema_key,
+      file_id,
+      plugin_key,
+      snapshot_content
+    ) VALUES (
+      NEW.change_set_id || '::' || NEW.change_id,
+      'lix_change_set_element',
+      'lix',
+      'lix_own_entity',
+      json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id)
     );
   END;
 
   CREATE TRIGGER change_set_element_update
   INSTEAD OF UPDATE ON change_set_element
   BEGIN
-      SELECT handle_update_on_view('change_set_element', 
-        'change_set_id', OLD.change_set_id,
-        'change_id', NEW.change_id,
-        'entity_id', NEW.entity_id,
-        'schema_key', NEW.schema_key,
-        'file_id', NEW.file_id
-      );
+    UPDATE state
+    SET
+      entity_id = NEW.entity_id,
+      schema_key = 'lix_change_set_element',
+      file_id = 'lix',
+      plugin_key = 'lix_own_entity',
+      snapshot_content = json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id)
+    WHERE
+      entity_id = OLD.change_set_id || '::' || OLD.change_id
+      AND schema_key = 'lix_change_set_element'
+      AND file_id = 'lix';
   END;
 
   CREATE TRIGGER change_set_element_delete
   INSTEAD OF DELETE ON change_set_element
   BEGIN
-      SELECT handle_delete_on_view('change_set_element', 
-        'change_set_id', OLD.change_set_id,
-        'change_id', OLD.change_id,
-        'entity_id', OLD.entity_id,
-        'schema_key', OLD.schema_key,
-        'file_id', OLD.file_id
-      );
+    DELETE FROM state
+    WHERE entity_id = OLD.change_set_id || '::' || OLD.change_id
+    AND schema_key = 'lix_change_set_element'
+    AND file_id = 'lix';
   END;
 
   -- change set edge
 
   CREATE VIEW IF NOT EXISTS change_set_edge AS
   SELECT
-    json_extract(row, '$.parent_id') AS parent_id,
-    json_extract(row, '$.child_id') AS child_id
-  FROM (
-    SELECT handle_select_on_view('change_set_edge', 'parent_id', v.parent_id, 'child_id', v.child_id) AS row
-    FROM (
-      SELECT 
-        substr(entity_id, 1, instr(entity_id, '::') - 1) AS parent_id,
-        substr(entity_id, instr(entity_id, '::') + 2) AS child_id				
-      FROM internal_change
-      WHERE schema_key = 'lix_change_set_edge'
-        AND rowid IN (
-          SELECT MAX(rowid)
-          FROM internal_change
-          WHERE schema_key = 'lix_change_set_edge'
-          GROUP BY entity_id
-        )
-        AND snapshot_id != 'no-content'
-    ) v
-  );
+    json_extract(snapshot_content, '$.parent_id') AS parent_id,
+    json_extract(snapshot_content, '$.child_id') AS child_id
+  FROM state
+  WHERE schema_key = 'lix_change_set_edge';
 
   CREATE TRIGGER change_set_edge_insert
   INSTEAD OF INSERT ON change_set_edge
   BEGIN
-    SELECT handle_insert_on_view('change_set_edge', 
-      'parent_id', NEW.parent_id, 
-      'child_id', NEW.child_id
-    );
+    INSERT INTO state (
+      entity_id, schema_key, file_id, plugin_key, snapshot_content
+    ) VALUES (
+      NEW.parent_id || '::' || NEW.child_id,
+      'lix_change_set_edge',
+      'lix',
+      'lix_own_entity',
+      json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id)
+    ); 
   END;
 
   CREATE TRIGGER change_set_edge_update
   INSTEAD OF UPDATE ON change_set_edge
   BEGIN
-      SELECT handle_update_on_view('change_set_edge', 
-        'parent_id', OLD.parent_id,
-        'child_id', NEW.child_id
-      );
+    UPDATE state
+    SET
+      entity_id = NEW.parent_id || '::' || NEW.child_id,
+      schema_key = 'lix_change_set_edge',
+      file_id = 'lix',
+      plugin_key = 'lix_own_entity',
+      snapshot_content = json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id)
+    WHERE
+      entity_id = OLD.parent_id || '::' || OLD.child_id
+      AND schema_key = 'lix_change_set_edge'
+      AND file_id = 'lix';
   END;
 
   CREATE TRIGGER change_set_edge_delete
   INSTEAD OF DELETE ON change_set_edge
   BEGIN
-      SELECT handle_delete_on_view('change_set_edge', 
-        'parent_id', OLD.parent_id,
-        'child_id', OLD.child_id
-      );
+    DELETE FROM state
+    WHERE entity_id = OLD.parent_id || '::' || OLD.child_id
+    AND schema_key = 'lix_change_set_edge'
+    AND file_id = 'lix';
   END;
 `;
 

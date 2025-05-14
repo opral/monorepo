@@ -1,7 +1,7 @@
-import type { JSONType } from "../snapshot/schema.js";
 import { Ajv } from "ajv";
 import { LixSchemaDefinition } from "./definition.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { JSONType } from "./json-type.js";
 
 const ajv = new Ajv({
 	strict: true,

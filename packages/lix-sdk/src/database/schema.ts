@@ -17,7 +17,7 @@ import {
 import { StoredSchemaSchema, type StoredSchemaView } from "../schema/schema.js";
 import type { LixSchemaDefinition } from "../schema/definition.js";
 import { KeyValueSchema, type KeyValueView } from "../key-value-v2/schema.js";
-import type { EntityView } from "../entity-view/schema.js";
+import type { StateView } from "../state/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -40,7 +40,7 @@ export const LixSchemaMap: Record<string, LixSchemaDefinition> = {
 };
 
 export type LixDatabaseSchema = {
-	entity: EntityView;
+	entity: StateView;
 	// account
 	// account: AccountTable;
 	// active_account: ActiveAccountTable;

@@ -16,7 +16,7 @@ import { LixSchemaMap } from "./schema.js";
 // dynamically computes the json columns for each view
 // via the json schemas.
 const ViewsWithJsonColumns = {
-	entity: ["snapshot_content"],
+	state: ["snapshot_content"],
 	...(() => {
 		const result: Record<string, string[]> = {};
 		for (const [viewName, schema] of Object.entries(LixSchemaMap)) {
@@ -53,7 +53,10 @@ export function initDb(args: {
 		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
 	});
 
-	applySchema({ sqlite: args.sqlite, db: db });
+	applySchema({
+		sqlite: args.sqlite,
+		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
+	});
 	return db;
 }
 

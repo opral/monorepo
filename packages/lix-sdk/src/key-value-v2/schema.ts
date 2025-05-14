@@ -10,51 +10,52 @@ export function applyKeyValueDatabaseSchema(
 	return sqlite.exec`
 	CREATE VIEW IF NOT EXISTS key_value AS
   SELECT
-    json_extract(row, '$.key') AS key,
-    json_extract(row, '$.value') AS value
-  FROM (
-    SELECT handle_select_on_view('key_value', 'key', v.key) AS row
-    FROM (
-      SELECT entity_id AS key
-      FROM internal_change
-      WHERE schema_key = 'lix_key_value'
-        AND rowid IN (
-          SELECT MAX(rowid)
-          FROM internal_change
-          WHERE schema_key = 'lix_key_value'
-          GROUP BY entity_id
-        )
-        AND snapshot_id != 'no-content'
-    ) v
-  );
+    json_extract(snapshot_content, '$.key') AS key,
+    json_extract(snapshot_content, '$.value') AS value
+  FROM state
+  WHERE schema_key = 'lix_key_value';
 
 	CREATE TRIGGER key_value_insert
 	INSTEAD OF INSERT ON key_value
 	BEGIN
-		SELECT handle_insert_on_view(
-		  'key_value', 
-			'key', NEW.key, 
-			'value', NEW.value
+		INSERT INTO state (
+			entity_id,
+			schema_key,
+			file_id,
+			plugin_key,
+			snapshot_content
+		) VALUES (
+			NEW.key,
+			'lix_key_value',
+			'lix',
+			'lix_own_entity',
+			json_object('key', NEW.key, 'value', NEW.value)
 		);
 	END;
 
 	CREATE TRIGGER key_value_update
 	INSTEAD OF UPDATE ON key_value
 	BEGIN
-		SELECT handle_update_on_view(
-		  'key_value', 
-			'key', NEW.key, 
-			'value', NEW.value
-		);
+		UPDATE state
+		SET
+			entity_id = NEW.key,
+			schema_key = 'lix_key_value',
+			file_id = 'lix',
+			plugin_key = 'lix_own_entity',
+			snapshot_content = json_object('key', NEW.key, 'value', NEW.value)
+		WHERE
+			state.entity_id = OLD.key
+			AND state.schema_key = 'lix_key_value'
+			AND state.file_id = 'lix';
 	END;
 
 	CREATE TRIGGER key_value_delete
 	INSTEAD OF DELETE ON key_value
 	BEGIN
-		SELECT handle_delete_on_view(
-		  'key_value', 
-			'key', OLD.key
-		);
+		DELETE FROM state
+		WHERE entity_id = OLD.key
+		AND schema_key = 'lix_key_value'
+		AND file_id = 'lix';
 	END;
 `;
 }
