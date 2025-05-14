@@ -74,12 +74,7 @@ export function buildRowDataFromSchema(
 
 		const propertyDefinition = schema.properties?.[key];
 		if (propertyDefinition && typeof value === "string") {
-			const expectedTypes = Array.isArray(propertyDefinition.type)
-				? propertyDefinition.type
-				: propertyDefinition.type
-					? [propertyDefinition.type]
-					: [];
-			if (expectedTypes.includes("object")) {
+			if (propertyAllowsObject(propertyDefinition)) {
 				try {
 					value = JSON.parse(value);
 				} catch {
@@ -91,4 +86,16 @@ export function buildRowDataFromSchema(
 		rowData[key] = value;
 	}
 	return rowData;
+}
+
+function propertyAllowsObject(def: any): boolean {
+	// Handles type: "object", type: ["object", ...], or anyOf: [{type:...}]
+	if (def.type) {
+		const types = Array.isArray(def.type) ? def.type : [def.type];
+		if (types.includes("object")) return true;
+	}
+	if (Array.isArray(def.anyOf)) {
+		if (def.anyOf.some((sub: any) => sub.type === "object")) return true;
+	}
+	return false;
 }
