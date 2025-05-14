@@ -9,7 +9,7 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 // import { applyFileDatabaseSchema } from "../file/database-schema.js";
 // import { applySnapshotDatabaseSchema } from "../snapshot/database-schema.js";
 import type { Kysely } from "kysely";
-import type { LixDatabaseSchema } from "./schema.js";
+import type { LixInternalDatabaseSchema } from "./schema.js";
 // import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
 // import { applyThreadDatabaseSchema } from "../thread/database-schema.js";
 // import { applyLogDatabaseSchema } from "../log/database-schema.js";
@@ -20,13 +20,14 @@ import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStoredSchemaDatabaseSchema } from "../schema/schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value-v2/schema.js";
+import { applyEntityViewDatabaseSchema } from "../entity-view/schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
  */
 export function applySchema(args: {
 	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixDatabaseSchema>;
+	db: Kysely<LixInternalDatabaseSchema>;
 }): SqliteWasmDatabase {
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);
@@ -34,6 +35,7 @@ export function applySchema(args: {
 	applyVersionDatabaseSchema(args.sqlite);
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
+	applyEntityViewDatabaseSchema(args.sqlite);
 
 	// // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	// args.sqlite.exec`

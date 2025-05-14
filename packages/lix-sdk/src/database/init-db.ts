@@ -15,21 +15,24 @@ import { LixSchemaMap } from "./schema.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
-const ViewsWithJsonColumns = (() => {
-	const result: Record<string, string[]> = {};
-	for (const [viewName, schema] of Object.entries(LixSchemaMap)) {
-		// @ts-expect-error - false positive
-		if (!schema.properties) continue;
-		// @ts-expect-error - false positive
-		const jsonColumns = Object.entries(schema.properties)
-			.filter(([, def]) => isJsonType(def))
-			.map(([key]) => key);
-		if (jsonColumns.length) {
-			result[viewName] = jsonColumns;
+const ViewsWithJsonColumns = {
+	entity: ["snapshot_content"],
+	...(() => {
+		const result: Record<string, string[]> = {};
+		for (const [viewName, schema] of Object.entries(LixSchemaMap)) {
+			// @ts-expect-error - false positive
+			if (!schema.properties) continue;
+			// @ts-expect-error - false positive
+			const jsonColumns = Object.entries(schema.properties)
+				.filter(([, def]) => isJsonType(def))
+				.map(([key]) => key);
+			if (jsonColumns.length) {
+				result[viewName] = jsonColumns;
+			}
 		}
-	}
-	return result;
-})();
+		return result;
+	})(),
+};
 
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
