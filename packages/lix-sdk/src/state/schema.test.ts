@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type { LixSchemaDefinition } from "../schema/definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("select, insert, update, delete entity", async () => {
 	const mockSchema: LixSchemaDefinition = {

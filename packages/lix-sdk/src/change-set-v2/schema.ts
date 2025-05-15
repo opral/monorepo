@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "../schema/definition.js";
+import type { LixSchemaDefinition } from "../stored-schema/definition.js";
 
 export function applyChangeSetDatabaseSchema(
 	sqlite: SqliteWasmDatabase

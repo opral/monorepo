@@ -18,7 +18,7 @@ import { applyChangeDatabaseSchema } from "../change/schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set-v2/schema.js";
 import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
-import { applyStoredSchemaDatabaseSchema } from "../schema/schema.js";
+import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value-v2/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
 
@@ -32,10 +32,10 @@ export function applySchema(args: {
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);
 	applyChangeSetDatabaseSchema(args.sqlite);
-	applyVersionDatabaseSchema(args.sqlite);
-	applyStoredSchemaDatabaseSchema(args.sqlite);
-	applyKeyValueDatabaseSchema(args.sqlite);
 	applyStateDatabaseSchema(args.sqlite, args.db);
+	applyStoredSchemaDatabaseSchema(args.sqlite);
+	applyVersionDatabaseSchema(args.sqlite);
+	applyKeyValueDatabaseSchema(args.sqlite);
 
 	// // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	// args.sqlite.exec`

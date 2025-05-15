@@ -18,8 +18,8 @@ import {
 	type InternalSnapshotTable,
 	type SnapshotView,
 } from "../snapshot/schema.js";
-import { StoredSchemaSchema, type StoredSchemaView } from "../schema/schema.js";
-import type { LixSchemaDefinition } from "../schema/definition.js";
+import { StoredSchemaSchema, type StoredSchemaView } from "../stored-schema/schema.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { KeyValueSchema, type KeyValueView } from "../key-value-v2/schema.js";
 import type { StateView } from "../state/schema.js";
 

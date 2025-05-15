@@ -1,7 +1,7 @@
 import { Ajv } from "ajv";
-import { LixSchemaDefinition } from "../schema/definition.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { Snapshot } from "../snapshot/schema.js";
+import { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 const ajv = new Ajv({
 	strict: true,

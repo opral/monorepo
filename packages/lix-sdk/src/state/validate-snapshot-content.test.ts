@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { validateSnapshotContent } from "./validate-snapshot-content.js";
-import type { LixSchemaDefinition } from "../schema/definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
 	const lix = await openLixInMemory({});
@@ -21,6 +21,18 @@ test("throws if the schema is not a valid lix schema", async () => {
 		// @ts-expect-error - x-key is missing
 		validateSnapshotContent({ lix, schema, data: {} })
 	).toThrowError();
+});
+
+test("inserts the version and active version schemas to enable validation", async () => {
+	const lix = await openLixInMemory({});
+
+	const result = await lix.db
+		.selectFrom("stored_schema")
+		// .where("key", "in", ["lix_version", "lix_active_version"])
+		.selectAll()
+		.execute();
+
+	console.log(result);
 });
 
 test("valid lix schema with a valid snapshot passes", async () => {

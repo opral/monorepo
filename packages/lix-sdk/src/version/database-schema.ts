@@ -30,7 +30,7 @@ export function applyVersionV2DatabaseSchema(
 	});
 
 	// initial ids (lack of having a separate creation and migration schema)
-	const mainVersionId = "019328cc-ccb0-7f51-96e8-524df4597ac6";
+	const mainVersionId = "BoIaHTW9ePX6pNc8";
 	const workingChangeSetId = "h2h09ha92jfaw2";
 	const initialChangeSetId = "2j9jm90ajc9j90";
 

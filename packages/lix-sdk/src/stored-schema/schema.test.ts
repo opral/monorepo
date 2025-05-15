@@ -5,13 +5,6 @@ import type { NewStoredSchema } from "./schema.js";
 test("insert and delete a stored schema", async () => {
 	const lix = await openLixInMemory({});
 
-	const initial = await lix.db
-		.selectFrom("stored_schema")
-		.selectAll()
-		.execute();
-
-	expect(initial).toHaveLength(0);
-
 	const schema: NewStoredSchema = {
 		value: {
 			type: "object",
@@ -30,7 +23,9 @@ test("insert and delete a stored schema", async () => {
 	const afterInsert = await lix.db
 		.selectFrom("stored_schema")
 		.selectAll()
-		.executeTakeFirstOrThrow();
+		.where("key", "=", "mock")
+		.where("version", "=", "1.0")
+		.executeTakeFirst();
 
 	expect(afterInsert).toMatchObject({
 		key: "mock",
@@ -43,6 +38,8 @@ test("insert and delete a stored schema", async () => {
 	const afterDelete = await lix.db
 		.selectFrom("stored_schema")
 		.selectAll()
+		.where("key", "=", "mock")
+		.where("version", "=", "1.0")
 		.execute();
 
 	expect(afterDelete).toHaveLength(0);
@@ -115,4 +112,54 @@ test("updating is not possible (schema is immutable, needs new version bumb)", a
 	await expect(
 		lix.db.updateTable("stored_schema").set({ version: "2.0" }).execute()
 	).rejects.toThrow(/cannot modify stored_schema because it is a view/);
+});
+
+test("default fills in key and version from the schema value", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema: NewStoredSchema = {
+		value: {
+			"x-lix-key": "mock",
+			"x-lix-version": "1.0",
+			type: "object",
+			properties: {
+				name: { type: "string" },
+			},
+			required: ["name"],
+			additionalProperties: false,
+		},
+	};
+
+	await lix.db.insertInto("stored_schema").values(schema).execute();
+
+	const result = await lix.db
+		.selectFrom("stored_schema")
+		.selectAll()
+		.where("key", "=", "mock")
+		.executeTakeFirstOrThrow();
+
+	expect(result.key).toBe("mock");
+	expect(result.version).toBe("1.0");
+});
+
+test("validates inserted schemas", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema: NewStoredSchema = {
+		value: {
+			type: "object",
+			"x-lix-key": "mock",
+			// @ts-expect-error - x-lix-version must be a string
+			"x-lix-version": 1,
+			properties: {
+				name: { type: "string" },
+			},
+			required: ["name"],
+			additionalProperties: false,
+		},
+	};
+
+	await expect(
+		lix.db.insertInto("stored_schema").values(schema).execute()
+	).rejects.toThrow(/data\/version must be string/);
 });

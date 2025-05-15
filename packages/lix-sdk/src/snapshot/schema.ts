@@ -1,7 +1,10 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Selectable, Insertable, Generated } from "kysely";
-import { type JSONType, JSONTypeSchema } from "../schema/json-type.js";
-import type { LixSchemaDefinition } from "../schema/definition.js";
+import {
+	type JSONType,
+	JSONTypeSchema,
+} from "../schema-definition/json-type.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 export function applySnapshotDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -47,7 +50,7 @@ export const SnapshotSchema = {
 	type: "object",
 	properties: {
 		id: { type: "string" },
-		content: JSONTypeSchema,
+		content: JSONTypeSchema as any,
 	},
 	required: ["id", "content"],
 } as const;

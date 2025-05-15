@@ -1,46 +1,96 @@
 import type { Generated, Insertable, Selectable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "../schema/definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
+	// initial ids (lack of having a separate creation and migration schema)
+	const mainVersionId = "BoIaHTW9ePX6pNc8";
+	const workingChangeSetId = "h2h09ha92jfaw2";
+	const initialChangeSetId = "2j9jm90ajc9j90";
+
+	// inserting the lix schemas to enable validation
+	sqlite.exec(
+		`
+		INSERT INTO stored_schema (value)
+		SELECT ?
+		WHERE NOT EXISTS (
+			SELECT 1
+			FROM stored_schema
+			WHERE key = '${VersionSchema["x-lix-key"]}'
+      AND version = '${VersionSchema["x-lix-version"]}'
+		);
+		`,
+		{ bind: [JSON.stringify(VersionSchema)] }
+	);
+
+	sqlite.exec(
+		`
+		INSERT INTO stored_schema (value)
+		SELECT ?
+		WHERE NOT EXISTS (
+			SELECT 1
+			FROM stored_schema
+			WHERE key = '${ActiveVersionSchema["x-lix-key"]}'
+      AND version = '${ActiveVersionSchema["x-lix-version"]}'
+		);
+		`,
+		{ bind: [JSON.stringify(ActiveVersionSchema)] }
+	);
+
 	sqlite.exec(`
   -- version
   CREATE VIEW IF NOT EXISTS version AS
   SELECT
     json_extract(snapshot_content, '$.id') AS id,
     json_extract(snapshot_content, '$.name') AS name,
-    json_extract(snapshot_content, '$.change_set_id') AS change_set_id
+    json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
+    json_extract(snapshot_content, '$.working_change_set_id') AS working_change_set_id
   FROM state
   WHERE schema_key = 'lix_version';
 
   CREATE TRIGGER version_insert
   INSTEAD OF INSERT ON version
   BEGIN
-    INSERT INTO state (
-      entity_id,
-      schema_key,
-      file_id,
-      plugin_key,
-      snapshot_content
-    ) VALUES (
-      NEW.id,
-      'lix_version',
-      'lix',
-      'lix_own_entity',
-      json_object('id', NEW.id, 'name', NEW.name, 'change_set_id', NEW.change_set_id)
-    );
+      INSERT INTO state (
+        entity_id,
+        schema_key,
+        file_id,
+        plugin_key,
+        snapshot_content
+      )
+      SELECT
+        id,
+        'lix_version',
+        'lix',
+        'lix_own_entity',
+        json_object(
+          'id', id,                
+          'name', name,            
+          'change_set_id', NEW.change_set_id,
+          'working_change_set_id', NEW.working_change_set_id
+        )
+      FROM (
+          SELECT
+              COALESCE(NEW.id, nano_id()) AS id,
+              COALESCE(NEW.name, human_id()) AS name
+      ) AS generated_values_subquery;
   END;
 
-  CREATE TRIGGER version_update
-  INSTEAD OF UPDATE ON version
-  BEGIN
+CREATE TRIGGER version_update
+INSTEAD OF UPDATE ON version
+BEGIN
     UPDATE state
     SET
       entity_id = NEW.id,
       schema_key = 'lix_version',
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('id', NEW.id, 'name', NEW.name, 'change_set_id', NEW.change_set_id)
+      snapshot_content = json_object(
+        'id', NEW.id,
+        'name', NEW.name,
+        'change_set_id', NEW.change_set_id,
+        'working_change_set_id', NEW.working_change_set_id
+      )
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_version'
@@ -99,6 +149,30 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
     WHERE entity_id = 'lix_active_version'
     AND schema_key = 'lix_active_version';
   END;
+
+  -- Insert the default change set if missing
+  -- (this is a workaround for not having a separate creation and migration schema's)
+  INSERT INTO change_set (id)
+  SELECT '${initialChangeSetId}'
+  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${initialChangeSetId}');
+
+  -- Insert the default working change set if missing
+  -- (this is a workaround for not having a separate creation and migration schema's)
+  INSERT INTO change_set (id)
+  SELECT '${workingChangeSetId}'
+  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${workingChangeSetId}');
+
+  -- Insert the default version if missing
+  -- (this is a workaround for not having a separate creation and migration schema's)
+  INSERT INTO version (id, name, change_set_id, working_change_set_id)
+  SELECT '${mainVersionId}', 'main', '${initialChangeSetId}', '${workingChangeSetId}'
+  WHERE NOT EXISTS (SELECT 1 FROM version);
+
+  -- Set the default current version to 'main' if both tables are empty
+  -- (this is a workaround for not having a separata creation and migration schema's)
+  INSERT INTO active_version (version_id)
+  SELECT '${mainVersionId}'
+  WHERE NOT EXISTS (SELECT 1 FROM active_version);
 `);
 }
 
@@ -111,8 +185,10 @@ export const VersionSchema = {
 		id: { type: "string" },
 		name: { type: "string" },
 		change_set_id: { type: "string" },
+		working_change_set_id: { type: "string" },
 	},
-	required: ["id", "name", "change_set_id"],
+	required: ["id", "name", "change_set_id", "working_change_set_id"],
+	additionalProperties: false,
 } as const;
 VersionSchema satisfies LixSchemaDefinition;
 
@@ -120,8 +196,9 @@ export type Version = Selectable<VersionView>;
 export type NewVersion = Insertable<VersionView>;
 export type VersionView = {
 	id: Generated<string>;
-	name: string;
+	name: Generated<string>;
 	change_set_id: string;
+	working_change_set_id: string;
 };
 
 export const ActiveVersionSchema = {
@@ -133,6 +210,7 @@ export const ActiveVersionSchema = {
 		version_id: { type: "string" },
 	},
 	required: ["version_id"],
+	additionalProperties: false,
 } as const;
 ActiveVersionSchema satisfies LixSchemaDefinition;
 

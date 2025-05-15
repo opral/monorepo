@@ -1,7 +1,7 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "./definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Selectable, Insertable, Updateable, Generated } from "kysely";
-import { JSONTypeSchema } from "./json-type.js";
+import { JSONTypeSchema } from "../schema-definition/json-type.js";
 
 export function applyStoredSchemaDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -17,6 +17,7 @@ export function applyStoredSchemaDatabaseSchema(
 
   CREATE TRIGGER IF NOT EXISTS stored_schema_insert
   INSTEAD OF INSERT ON stored_schema
+  FOR EACH ROW
   BEGIN 
     -- Check x-lix-key if present
     SELECT CASE
@@ -45,7 +46,7 @@ export function applyStoredSchemaDatabaseSchema(
       json_object(
         'key', json_extract(NEW.value, '$.x-lix-key'), 
         'version', json_extract(NEW.value, '$.x-lix-version'), 
-        'value', NEW.value
+        'value', json(NEW.value)
       )
     );
   END;
@@ -56,6 +57,21 @@ export function applyStoredSchemaDatabaseSchema(
       DELETE FROM state WHERE entity_id = OLD.key || '::' || OLD.version AND schema_key = 'lix_stored_schema';
   END;
 `);
+
+	// inserting the lix schema to enable validation
+	sqlite.exec(
+		`
+      INSERT INTO stored_schema (value)
+      SELECT ?
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM stored_schema
+        WHERE key = '${StoredSchemaSchema["x-lix-key"]}'
+        AND version = '${StoredSchemaSchema["x-lix-version"]}'
+      );
+      `,
+		{ bind: [JSON.stringify(StoredSchemaSchema)] }
+	);
 }
 
 export const StoredSchemaSchema = {
@@ -66,7 +82,7 @@ export const StoredSchemaSchema = {
 	properties: {
 		key: { type: "string" },
 		version: { type: "string" },
-		value: JSONTypeSchema,
+		value: JSONTypeSchema as any,
 	},
 	additionalProperties: false,
 } as const;

@@ -1,9 +1,9 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { JSONType } from "../schema/json-type.js";
 import { validateSnapshotContent } from "./validate-snapshot-content.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
+import type { JSONType } from "../schema-definition/json-type.js";
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
