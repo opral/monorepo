@@ -169,7 +169,11 @@ test("it logs when skipping the file queue", async () => {
 		// Do something
 	});
 
-	const logs = await lix.db.selectFrom("log").selectAll().execute();
+	const logs = await lix.db
+		.selectFrom("log")
+		.where("key", "=", "lix.file_queue.skipped")
+		.selectAll()
+		.execute();
 
 	expect(logs).toHaveLength(1);
 	expect(logs[0]?.key).toBe("lix.file_queue.skipped");

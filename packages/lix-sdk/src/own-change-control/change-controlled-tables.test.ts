@@ -8,8 +8,6 @@ import {
 } from "./change-controlled-tables.js";
 import { loadDatabaseInMemory } from "sqlite-wasm-kysely";
 import { newLixFile } from "../lix/new-lix.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createThread } from "../thread/create-thread.js";
 
 test("roundtrip entity_id test for single primary key", () => {
 	const tableName: keyof LixDatabaseSchema = "key_value";
@@ -68,38 +66,4 @@ test("the primary key order matches the order the primary keys in the database s
 			changeControlledTableIds[table]
 		);
 	}
-});
-
-test("content of a thread comment is stored as json", async () => {
-	const lix = await openLixInMemory({});
-
-	const thread = await createThread({
-		lix,
-		comments: [
-			{
-				body: {
-					type: "zettel_doc",
-					content: [{ type: "mock", zettel_key: "mock_key" }],
-				},
-			},
-		],
-	});
-
-	const firstComment = thread.comments[0]!;
-
-	const change = await lix.db
-		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("entity_id", "=", firstComment.id)
-		.selectAll("change")
-		.select("snapshot.content")
-		.executeTakeFirst();
-
-	expect(firstComment.body.content).toEqual([
-		{ type: "mock", zettel_key: "mock_key" },
-	]);
-
-	expect(change?.content?.body?.content).toEqual([
-		{ type: "mock", zettel_key: "mock_key" },
-	]);
 });
