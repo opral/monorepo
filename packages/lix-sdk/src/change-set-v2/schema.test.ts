@@ -98,6 +98,29 @@ describe("change_set", () => {
 			null,
 		]);
 	});
+
+	test("has a default id", async () => {
+		const lix = await openLixInMemory({});
+
+		const initial = await lix.db.selectFrom("change_set").selectAll().execute();
+
+		await lix.db.insertInto("change_set").defaultValues().execute();
+
+		const viewAfterInsert = await lix.db
+			.selectFrom("change_set")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterInsert.length).toBe(initial.length + 1);
+
+		expect(viewAfterInsert).toEqual([
+			...initial,
+			{
+				id: expect.any(String),
+				metadata: null,
+			},
+		]);
+	});
 });
 
 describe("change_set_element", () => {

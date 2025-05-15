@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "../stored-schema/definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 export function applyChangeSetDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -22,13 +22,18 @@ export function applyChangeSetDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_content
-    ) VALUES (
-      NEW.id,
+    )
+    SELECT
+      with_default_values.id,
       'lix_change_set',
       'lix',
       'lix_own_entity',
-      json_object('id', NEW.id, 'metadata', NEW.metadata)
-    );
+      json_object('id', with_default_values.id, 'metadata', with_default_values.metadata)
+    FROM (
+      SELECT
+        COALESCE(NEW.id, nano_id()) AS id,
+        NEW.metadata AS metadata
+    ) AS with_default_values;
   END;
 
   CREATE TRIGGER change_set_update
