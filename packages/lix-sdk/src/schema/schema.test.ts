@@ -13,9 +13,7 @@ test("insert and delete a stored schema", async () => {
 	expect(initial).toHaveLength(0);
 
 	const schema: NewStoredSchema = {
-		key: "mock",
-		version: "1.0",
-		value: JSON.stringify({
+		value: {
 			type: "object",
 			"x-lix-key": "mock",
 			"x-lix-version": "1.0",
@@ -24,7 +22,7 @@ test("insert and delete a stored schema", async () => {
 			},
 			required: ["name"],
 			additionalProperties: false,
-		}),
+		},
 	};
 
 	await lix.db.insertInto("stored_schema").values(schema).execute();
@@ -34,18 +32,10 @@ test("insert and delete a stored schema", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const changes = await lix.db
-		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.selectAll()
-		.execute();
-
-	console.log(changes);
-
 	expect(afterInsert).toMatchObject({
 		key: "mock",
 		version: "1.0",
-		value: JSON.parse(schema.value),
+		value: schema.value,
 	});
 
 	await lix.db.deleteFrom("stored_schema").where("key", "=", "mock").execute();
@@ -63,7 +53,8 @@ test("throws if the stored schema version does not match the x-lix-version prop"
 
 	const schema: NewStoredSchema = {
 		version: "2.0",
-		value: JSON.stringify({
+		key: "mock",
+		value: {
 			type: "object",
 			"x-lix-key": "mock",
 			"x-lix-version": "1.0",
@@ -72,7 +63,7 @@ test("throws if the stored schema version does not match the x-lix-version prop"
 			},
 			required: ["name"],
 			additionalProperties: false,
-		}),
+		},
 	};
 
 	await expect(
@@ -86,7 +77,7 @@ test("throws if the stored schema key does not match the x-lix-key prop", async 
 	const schema: NewStoredSchema = {
 		key: "mock",
 		version: "1.0",
-		value: JSON.stringify({
+		value: {
 			type: "object",
 			"x-lix-key": "mock2",
 			"x-lix-version": "1.0",
@@ -95,7 +86,7 @@ test("throws if the stored schema key does not match the x-lix-key prop", async 
 			},
 			required: ["name"],
 			additionalProperties: false,
-		}),
+		},
 	};
 
 	await expect(
@@ -107,9 +98,7 @@ test("updating is not possible (schema is immutable, needs new version bumb)", a
 	const lix = await openLixInMemory({});
 
 	const schema: NewStoredSchema = {
-		key: "mock",
-		version: "1.0",
-		value: JSON.stringify({
+		value: {
 			type: "object",
 			"x-lix-key": "mock",
 			"x-lix-version": "1.0",
@@ -118,7 +107,7 @@ test("updating is not possible (schema is immutable, needs new version bumb)", a
 			},
 			required: ["name"],
 			additionalProperties: false,
-		}),
+		},
 	};
 
 	await lix.db.insertInto("stored_schema").values(schema).execute();
