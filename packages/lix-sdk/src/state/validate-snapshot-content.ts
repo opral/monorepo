@@ -13,11 +13,14 @@ const validateLixSchema = ajv.compile(LixSchemaDefinition);
 
 export function validateSnapshotContent(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
-	schema: LixSchemaDefinition;
+	schema: LixSchemaDefinition | null;
 	snapshot_content: Snapshot["content"];
 }): void {
+	if (!args.schema) {
+		return;
+	}
+
 	const isValidLixSchema = validateLixSchema(args.schema);
-	return;
 
 	if (!isValidLixSchema) {
 		throw new Error(

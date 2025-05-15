@@ -17,7 +17,7 @@ export function applyStateDatabaseSchema(
 		xFunc: (_ctxPtr: number, ...args: any[]) => {
 			return validateSnapshotContent({
 				lix: { sqlite, db: db as any },
-				schema: args[0],
+				schema: JSON.parse(args[0]),
 				snapshot_content: JSON.parse(args[1]),
 			});
 		},
@@ -45,8 +45,11 @@ export function applyStateDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
   BEGIN
-    -- validate the snapshot content
-    SELECT validate_snapshot_content(NEW.schema_key, NEW.snapshot_content);
+    -- validate the snapshot content if a schema has been provided
+    SELECT validate_snapshot_content(
+      (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = NEW.schema_key),
+      NEW.snapshot_content
+    );
 
     INSERT INTO internal_snapshot (content) VALUES (jsonb(NEW.snapshot_content));
 
@@ -64,8 +67,11 @@ export function applyStateDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS state_update
   INSTEAD OF UPDATE ON state
   BEGIN
-    -- validate the snapshot content
-    SELECT validate_snapshot_content(NEW.schema_key, NEW.snapshot_content);
+    -- validate the snapshot content if a schema has been provided
+    SELECT validate_snapshot_content(
+      (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = NEW.schema_key),
+      NEW.snapshot_content
+    );
 
     INSERT INTO internal_snapshot (content) VALUES (jsonb(NEW.snapshot_content));
 
