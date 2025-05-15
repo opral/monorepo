@@ -257,14 +257,6 @@ export const withPollingAtom = atom(Date.now());
  */
 export const editorRefAtom = atom<any>(null);
 
-/**
- * Document generation state for the empty document prompt
- */
-export const documentGenerationAtom = atom<{
-	isGenerating: boolean;
-	chat: any;
-} | null>(null);
-
 export const activeVersionAtom = atom<Promise<Version | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);

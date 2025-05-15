@@ -10,23 +10,18 @@ import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { Editor, EditorContainer } from "@/components/plate-ui/editor";
 import { debounce } from "lodash-es";
 import { useAtom } from "jotai";
-import { documentGenerationAtom, editorRefAtom, lixAtom } from "@/state";
+import { editorRefAtom, lixAtom } from "@/state";
 import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { welcomeMd } from "@/helper/welcomeLixFile";
 import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
-import { cn } from "@udecode/cn";
-import { Button } from "../plate-ui/button";
-import { Pause } from "lucide-react";
-
 export function PlateEditor() {
 	const [lix] = useAtom(lixAtom);
 	const [activeFile] = useAtom(activeFileAtom);
 	const [loadedMd] = useAtom(loadedMdAtom);
 	const [, setEditorRef] = useAtom(editorRefAtom);
-	const [documentGeneration, setDocumentGeneration] = useAtom(documentGenerationAtom);
 
 	const editor = useCreateEditor();
 	const [previousHasPromptElement, setPreviousHasPromptElement] = useState(false);
@@ -173,55 +168,6 @@ export function PlateEditor() {
 
 	}, [loadedMd, handleUpdateMdData, activeFile, lix, editor, previousHasPromptElement]);
 
-	// Custom AI Loading Bar for document generation
-	const DocumentGenerationLoadingBar = () => {
-		if (!documentGeneration?.isGenerating) return null;
-
-		const chat = documentGeneration.chat;
-
-		return (
-			<div
-				className={cn(
-					'fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-md border border-border bg-muted px-3 py-1.5 text-sm text-muted-foreground shadow-md transition-all duration-300'
-				)}
-			>
-				<span className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
-				<span>{chat.status === 'submitted' ? 'Thinking...' : 'Writing...'}</span>
-				<Button
-					size="sm"
-					variant="ghost"
-					className="flex items-center gap-1 text-xs"
-					onClick={() => {
-						if (documentGeneration?.chat) {
-							documentGeneration.chat._abortFakeStream(); // Abort the stream explicitly
-							setDocumentGeneration(null);
-						}
-					}}
-				>
-					<Pause className="h-4 w-4" />
-					Stop
-					<kbd className="ml-1 rounded bg-border px-1 font-mono text-[10px] text-muted-foreground shadow-sm">
-						Esc
-					</kbd>
-				</Button>
-			</div>
-		);
-	};
-
-	// Add Esc key handler to stop generation
-	useEffect(() => {
-		const handleEscKey = (e: KeyboardEvent) => {
-			if (e.key === 'Escape' && documentGeneration?.isGenerating) {
-				documentGeneration.chat._abortFakeStream();
-				setDocumentGeneration(null);
-			}
-		};
-		document.addEventListener('keydown', handleEscKey);
-		return () => {
-			document.removeEventListener('keydown', handleEscKey);
-		};
-	}, [documentGeneration, setDocumentGeneration]);
-
 	return (
 		<DndProvider backend={HTML5Backend}>
 			<Plate
@@ -233,9 +179,6 @@ export function PlateEditor() {
 				</EditorContainer>
 				{/* <SettingsDialog /> */}
 			</Plate>
-
-			{/* Custom loading bar for document generation */}
-			<DocumentGenerationLoadingBar />
 		</DndProvider>
 	);
 }

@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { availableLixesAtom, currentLixNameAtom, documentGenerationAtom, fileIdSearchParamsAtom, filesAtom, lixAtom, lixIdSearchParamsAtom, withPollingAtom } from "@/state"
+import { availableLixesAtom, currentLixNameAtom, fileIdSearchParamsAtom, filesAtom, lixAtom, lixIdSearchParamsAtom, withPollingAtom } from "@/state"
 import { activeFileAtom } from "@/state-active-file"
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs"
 import { createNewLixFileInOpfs } from "@/helper/newLix"
@@ -59,6 +59,7 @@ import {
 import InfoCard from "../InfoCard"
 import { Separator } from "../plate-ui/separator"
 import { generateHumanId } from "@/helper/generateHumanId"
+import { useChat } from "../editor/use-chat"
 
 export function LixSidebar() {
   const [lix] = useAtom(lixAtom)
@@ -69,7 +70,6 @@ export function LixSidebar() {
   const [availableLixes] = useAtom(availableLixesAtom)
   const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom)
   const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom)
-  const [documentGeneration] = useAtom(documentGenerationAtom)
 
   const [fileToDelete, setFileToDelete] = React.useState<string | null>(null)
   const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] = React.useState(false)
@@ -81,6 +81,10 @@ export function LixSidebar() {
   const lixInputRef = React.useRef<HTMLInputElement>(null)
 
   const navigate = useNavigate()
+
+  const chat = useChat();
+  const { status } = chat;
+  const isLoading = status === 'streaming' || status === 'submitted';
 
   // Set up automatic aria-hidden fixes for the entire app
   React.useEffect(() => {
@@ -644,7 +648,7 @@ export function LixSidebar() {
               title="Import Markdown Document"
               className="flex justify-between items-center mr-1"
               onClick={handleImportFile}
-              disabled={documentGeneration !== null && documentGeneration.isGenerating}
+              disabled={isLoading}
             >
               <Upload className="h-4 w-4" />
             </Button>
@@ -654,7 +658,7 @@ export function LixSidebar() {
               title="New File"
               className="flex justify-between items-center"
               onClick={createNewFile}
-              disabled={documentGeneration !== null && documentGeneration.isGenerating}
+              disabled={isLoading}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -710,7 +714,7 @@ export function LixSidebar() {
                         }
                       }, 50)
                     }}
-                      disabled={documentGeneration !== null && documentGeneration.isGenerating}
+                    disabled={isLoading}
                     className={`w-full justify-start ${file.id === activeFile?.id ? 'font-medium' : ''}`}
                   >
                     <FileText className={`h-4 w-4 ${file.id === activeFile?.id ? 'text-primary' : ''}`} />
