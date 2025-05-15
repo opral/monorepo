@@ -72,7 +72,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
       plugin_key,
       snapshot_content
     ) VALUES (
-      NEW.version_id,
+      'lix_active_version',
       'lix_active_version',
       'lix',
       'lix_own_entity',
@@ -85,13 +85,9 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
   BEGIN
     UPDATE state
     SET
-      entity_id = NEW.version_id,
-      schema_key = 'lix_active_version',
-      file_id = 'lix',
-      plugin_key = 'lix_own_entity',
       snapshot_content = json_object('version_id', NEW.version_id)
     WHERE
-      entity_id = OLD.version_id
+      entity_id = 'lix_active_version'
       AND schema_key = 'lix_active_version'
       AND file_id = 'lix';
   END;
@@ -100,7 +96,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
   INSTEAD OF DELETE ON active_version
   BEGIN
     DELETE FROM state
-    WHERE entity_id = OLD.version_id
+    WHERE entity_id = 'lix_active_version'
     AND schema_key = 'lix_active_version';
   END;
 `);

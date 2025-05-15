@@ -8,7 +8,11 @@ import {
 	type ChangeSetView,
 	type ChangeSetEdgeView,
 } from "../change-set-v2/schema.js";
-import { VersionSchema, type VersionView } from "../version/schema.js";
+import {
+	VersionSchema,
+	type ActiveVersionView,
+	type VersionView,
+} from "../version/schema.js";
 import {
 	SnapshotSchema,
 	type InternalSnapshotTable,
@@ -80,8 +84,7 @@ export type LixDatabaseSchema = {
 
 	// // version
 	version: VersionView;
-	// version: VersionTable;
-	// active_version: ActiveVersionTable;
+	active_version: ActiveVersionView;
 
 	// // logging
 	// log: LogTable;
