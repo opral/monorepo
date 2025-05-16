@@ -47,10 +47,12 @@ export function AIMenu() {
   React.useEffect(() => {
     if (streaming) {
       const anchor = api.aiChat.node({ anchor: true });
-      setTimeout(() => {
-        const anchorDom = editor.api.toDOMNode(anchor![0])!;
-        setAnchorElement(anchorDom);
-      }, 0);
+      if (anchor) {
+        setTimeout(() => {
+          const anchorDom = editor.api.toDOMNode(anchor![0])!;
+          setAnchorElement(anchorDom);
+        }, 0);
+      }
     }
   }, [streaming]);
 
