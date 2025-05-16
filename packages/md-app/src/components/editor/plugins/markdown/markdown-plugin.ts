@@ -1,5 +1,3 @@
-
-
 import { SuggestionPlugin } from "@udecode/plate-suggestion/react";
 import remarkGfm from "remark-gfm";
 import { sanatizeUnknownNodeStructuresInTree } from "./sanitizeUnsupported";
@@ -14,7 +12,6 @@ import { TText } from "@udecode/plate";
 
 export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 	options: {
-		
 		disallowedNodes: [SuggestionPlugin.key],
 		remarkPlugins: [
 			remarkGfm as any,
@@ -196,10 +193,10 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 					) as MdParagraph["children"];
 
 					if (convertedNodes.length === 0) {
-						return {
-							type: "html",
-							value: "<br />",
-						} as any;
+						// return {
+						// 	type: "html",
+						// 	value: "<br /> test 1",
+						// } as any;
 					} else if (
 						convertedNodes.length === 1 &&
 						enrichedChildren.at(-1)!.type === "break"
