@@ -1,5 +1,97 @@
 # @lix-js/sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- ff75cca: refactor: `changeSetHasLabel()` now takes an object to perform a lookup by id or name.
+
+  ```diff
+  await lix.db.selectFrom("change_set")
+  - 	.where(changeSetHasLabel("checkpoint"))
+  + 	.where(changeSetHasLabel({ name: "checkpoint" }))
+   		.selectAll()
+   		.execute();
+  ```
+
+- 2eb5c9d: Refactor: The `key_value` table now uses JSON(B) as value instead of TEXT.
+
+  Using JSON as value increases the versatility of the table and allows for more complex values. Storing JSON was possible before via `JSON.stringify()` and a manual `JSON.parse()` in the application code but felt unnatural given that other tables support JSON natively.
+
+  Closes https://github.com/opral/lix-sdk/issues/283
+
+- 5e8f3d9: Introducing a universal logging system. Closes https://github.com/opral/lix-sdk/issues/266
+
+  - apps can now create logs
+  - lix will create logs for internal operations prefixed with `lix.`, e.g. `lix.file_queue.skipped`
+
+  ```ts
+  await createLog({
+  	lix,
+  	key: "app.init",
+  	level: "info",
+  	message: "Application started.",
+  });
+  ```
+
+  Logs can be queried via SQL
+
+  ```ts
+  const logs = await lix.db
+  	.selectFrom("log")
+  	.selectAll()
+  	.where("level", "=", "info")
+  	.where("key", "LIKE", "app.%")
+  	.execute();
+  ```
+
+### Patch Changes
+
+- bb8b62f: new testing utility `mockJsonPlugin`
+
+  - can be used intead of defining a mock plugin for each test
+  - do not rely on it for production code
+
+  ```ts
+  test("abc", async () => {
+  	const lix = await openLixInMemory({
+  		providePlugins: [mockJsonPlugin],
+  	});
+
+  	// ...
+  });
+  ```
+
+- 8bd8ced: fix: duplicate file queue entries when using an upsert. An `insertInto` with `onConflict` could lead to duplicate change detections.
+
+  ```typescript
+  // This operation now correctly generates only two changes:
+  // 1. An initial insert change.
+  // 2. An update change due to the conflict.
+  await lix.db
+  	.insertInto("file")
+  	.values([
+  		{ id: "file1", path: "/a.txt", data: data0 },
+  		{ id: "file1", path: "/a.txt", data: data1 }, // Causes conflict
+  	])
+  	.onConflict((oc) =>
+  		oc.doUpdateSet({ data: (eb) => eb.ref("excluded.data") })
+  	)
+  	.execute();
+  ```
+
+- 48e9f18: improve: `applyChanges()` gets a `skipFileQueue` options
+
+  https://github.com/opral/lix-sdk/issues/281
+
+  ```diff
+  applyChanges({
+    lix,
+    changes,
+  + skipFileQueue: false,
+  });
+  ```
+
 ## 0.4.7
 
 ### Patch Changes
