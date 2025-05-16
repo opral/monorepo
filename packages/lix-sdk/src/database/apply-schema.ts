@@ -9,7 +9,7 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 // import { applyFileDatabaseSchema } from "../file/database-schema.js";
 // import { applySnapshotDatabaseSchema } from "../snapshot/database-schema.js";
 import type { Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "./schema.js";
+import { LixSchemaMap, type LixInternalDatabaseSchema } from "./schema.js";
 // import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
 // import { applyThreadDatabaseSchema } from "../thread/database-schema.js";
 // import { applyLogDatabaseSchema } from "../log/database-schema.js";
@@ -36,6 +36,26 @@ export function applySchema(args: {
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyVersionDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
+
+	// insert the schemas into the stored_schema table
+	// to enable validation. must be done after the database
+	// schemas have been applied to ensure that the stored_schema
+	// table exists.
+	for (const schema of Object.values(LixSchemaMap)) {
+		args.sqlite.exec(
+			`
+			INSERT INTO stored_schema (value)
+			SELECT ?
+			WHERE NOT EXISTS (
+				SELECT 1
+				FROM stored_schema
+				WHERE key = '${schema["x-lix-key"]}'
+				AND version = '${schema["x-lix-version"]}'
+			);
+			`,
+			{ bind: [JSON.stringify(schema)] }
+		);
+	}
 
 	// // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 	// args.sqlite.exec`

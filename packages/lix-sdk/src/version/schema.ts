@@ -8,35 +8,6 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	const workingChangeSetId = "h2h09ha92jfaw2";
 	const initialChangeSetId = "2j9jm90ajc9j90";
 
-	// inserting the lix schemas to enable validation
-	sqlite.exec(
-		`
-		INSERT INTO stored_schema (value)
-		SELECT ?
-		WHERE NOT EXISTS (
-			SELECT 1
-			FROM stored_schema
-			WHERE key = '${VersionSchema["x-lix-key"]}'
-      AND version = '${VersionSchema["x-lix-version"]}'
-		);
-		`,
-		{ bind: [JSON.stringify(VersionSchema)] }
-	);
-
-	sqlite.exec(
-		`
-		INSERT INTO stored_schema (value)
-		SELECT ?
-		WHERE NOT EXISTS (
-			SELECT 1
-			FROM stored_schema
-			WHERE key = '${ActiveVersionSchema["x-lix-key"]}'
-      AND version = '${ActiveVersionSchema["x-lix-version"]}'
-		);
-		`,
-		{ bind: [JSON.stringify(ActiveVersionSchema)] }
-	);
-
 	sqlite.exec(`
   -- version
   CREATE VIEW IF NOT EXISTS version AS
@@ -73,7 +44,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
           SELECT
               COALESCE(NEW.id, nano_id()) AS id,
               COALESCE(NEW.name, human_id()) AS name
-      ) AS generated_values_subquery;
+      ) AS with_default_values;
   END;
 
 CREATE TRIGGER version_update

@@ -57,21 +57,6 @@ export function applyStoredSchemaDatabaseSchema(
       DELETE FROM state WHERE entity_id = OLD.key || '::' || OLD.version AND schema_key = 'lix_stored_schema';
   END;
 `);
-
-	// inserting the lix schema to enable validation
-	sqlite.exec(
-		`
-      INSERT INTO stored_schema (value)
-      SELECT ?
-      WHERE NOT EXISTS (
-        SELECT 1
-        FROM stored_schema
-        WHERE key = '${StoredSchemaSchema["x-lix-key"]}'
-        AND version = '${StoredSchemaSchema["x-lix-version"]}'
-      );
-      `,
-		{ bind: [JSON.stringify(StoredSchemaSchema)] }
-	);
 }
 
 export const StoredSchemaSchema = {
