@@ -5,7 +5,7 @@ import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 test("select, insert, update, delete entity", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
-		"x-lix-version": "1",
+		"x-lix-version": "1.0",
 		type: "object",
 		properties: {
 			value: {

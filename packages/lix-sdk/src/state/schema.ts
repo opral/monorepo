@@ -1,9 +1,10 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type { Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { validateSnapshotContent } from "./validate-snapshot-content.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import type { JSONType } from "../schema-definition/json-type.js";
+import { handleStateMutation } from "./handle-state-mutation.js";
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
@@ -20,6 +21,22 @@ export function applyStateDatabaseSchema(
 				schema: JSON.parse(args[0]),
 				snapshot_content: JSON.parse(args[1]),
 			});
+		},
+	});
+
+	sqlite.createFunction({
+		name: "handle_state_mutation",
+		arity: -1,
+		xFunc: (_ctxPtr: number, ...args: any[]) => {
+			return handleStateMutation(
+				sqlite,
+				db,
+				args[0], // entity_id
+				args[1], // schema_key
+				args[2], // file_id
+				args[3], // plugin_key
+				args[4] // snapshot_content
+			);
 		},
 	});
 
@@ -45,58 +62,46 @@ export function applyStateDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
   BEGIN
-    -- validate the snapshot content if a schema has been provided
     SELECT validate_snapshot_content(
       (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = NEW.schema_key),
       NEW.snapshot_content
     );
 
-    INSERT INTO internal_snapshot (content) VALUES (jsonb(NEW.snapshot_content));
-
-    INSERT INTO internal_change (
-      entity_id, schema_key, file_id, plugin_key, snapshot_id
-    ) VALUES (
+    SELECT handle_state_mutation(
       NEW.entity_id,
       NEW.schema_key,
       NEW.file_id,
       NEW.plugin_key,
-      (SELECT id FROM internal_snapshot ORDER BY rowid DESC LIMIT 1)
+      NEW.snapshot_content
     );
   END;
 
   CREATE TRIGGER IF NOT EXISTS state_update
   INSTEAD OF UPDATE ON state
   BEGIN
-    -- validate the snapshot content if a schema has been provided
     SELECT validate_snapshot_content(
       (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = NEW.schema_key),
       NEW.snapshot_content
     );
 
-    INSERT INTO internal_snapshot (content) VALUES (jsonb(NEW.snapshot_content));
-
-    INSERT INTO internal_change (
-      entity_id, schema_key, file_id, plugin_key, snapshot_id
-    ) VALUES (
+    SELECT handle_state_mutation(
       NEW.entity_id,
       NEW.schema_key,
       NEW.file_id,
       NEW.plugin_key,
-      (SELECT id FROM internal_snapshot ORDER BY rowid DESC LIMIT 1)
+      NEW.snapshot_content
     );
   END;
 
   CREATE TRIGGER IF NOT EXISTS state_delete
   INSTEAD OF DELETE ON state
   BEGIN
-    INSERT INTO internal_change (
-      entity_id, schema_key, file_id, plugin_key, snapshot_id
-    ) VALUES (
+    SELECT handle_state_mutation(
       OLD.entity_id,
       OLD.schema_key,
       OLD.file_id,
       OLD.plugin_key,
-      'no-content'
+      null
     );
   END;
 `;
@@ -104,11 +109,11 @@ export function applyStateDatabaseSchema(
 	return sqlite.exec(sql);
 }
 
-export type State = Selectable<StateView>;
-export type NewState = Insertable<StateView>;
-export type StateUpdate = Updateable<StateView>;
+export type StateRow = Selectable<StateView>;
+export type NewStateRow = Insertable<StateView>;
+export type StateRowUpdate = Updateable<StateView>;
 export type StateView = {
-	entity_id: Generated<string>;
+	entity_id: string;
 	schema_key: string;
 	file_id: string;
 	plugin_key: string;

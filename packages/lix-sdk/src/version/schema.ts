@@ -2,12 +2,12 @@ import type { Generated, Insertable, Selectable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
-export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
-	// initial ids (lack of having a separate creation and migration schema)
-	const mainVersionId = "BoIaHTW9ePX6pNc8";
-	const workingChangeSetId = "h2h09ha92jfaw2";
-	const initialChangeSetId = "2j9jm90ajc9j90";
+// initial ids (lack of having a separate creation and migration schema)
+export const INITIAL_VERSION_ID = "BoIaHTW9ePX6pNc8";
+export const INITIAL_WORKING_CHANGE_SET_ID = "h2h09ha92jfaw2";
+export const INITIAL_CHANGE_SET_ID = "2j9jm90ajc9j90";
 
+export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	sqlite.exec(`
   -- version
   CREATE VIEW IF NOT EXISTS version AS
@@ -124,25 +124,25 @@ BEGIN
   -- Insert the default change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id)
-  SELECT '${initialChangeSetId}'
-  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${initialChangeSetId}');
+  SELECT '${INITIAL_CHANGE_SET_ID}'
+  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_CHANGE_SET_ID}');
 
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id)
-  SELECT '${workingChangeSetId}'
-  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${workingChangeSetId}');
+  SELECT '${INITIAL_WORKING_CHANGE_SET_ID}'
+  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_WORKING_CHANGE_SET_ID}');
 
   -- Insert the default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO version (id, name, change_set_id, working_change_set_id)
-  SELECT '${mainVersionId}', 'main', '${initialChangeSetId}', '${workingChangeSetId}'
+  SELECT '${INITIAL_VERSION_ID}', 'main', '${INITIAL_CHANGE_SET_ID}', '${INITIAL_WORKING_CHANGE_SET_ID}'
   WHERE NOT EXISTS (SELECT 1 FROM version);
 
   -- Set the default current version to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
   INSERT INTO active_version (version_id)
-  SELECT '${mainVersionId}'
+  SELECT '${INITIAL_VERSION_ID}'
   WHERE NOT EXISTS (SELECT 1 FROM active_version);
 `);
 }

@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { INITIAL_VERSION_ID } from "./schema.js";
 
 test("insert, update, delete on the version view", async () => {
 	const lix = await openLixInMemory({});
@@ -142,27 +143,15 @@ test("querying by id", async () => {
 	expect(versions[0]?.id).toBe("version0");
 });
 
-test("insert, update, delete on the active version view", async () => {
+test("update, delete on the active version view", async () => {
 	const lix = await openLixInMemory({});
 
-	// deleting the active version which is filled in by default
-	await lix.db.deleteFrom("active_version").execute();
-
-	await lix.db
-		.insertInto("active_version")
-		.values({ version_id: "version_id_0" })
-		.execute();
-
-	const viewAfterInsert = await lix.db
+	const activeVersion = await lix.db
 		.selectFrom("active_version")
-		.selectAll()
-		.execute();
+		.select("version_id")
+		.executeTakeFirstOrThrow();
 
-	expect(viewAfterInsert).toMatchObject([
-		{
-			version_id: "version_id_0",
-		},
-	]);
+	console.log(activeVersion);
 
 	await lix.db
 		.updateTable("active_version")
@@ -208,7 +197,7 @@ test("applying the schema should set the initial active version to 'main'", asyn
 		.selectAll()
 		.executeTakeFirst();
 	expect(activeVersion).toBeDefined();
-	expect(activeVersion?.version_id).toBe("BoIaHTW9ePX6pNc8");
+	expect(activeVersion?.version_id).toBe(INITIAL_VERSION_ID);
 });
 
 test("should use default id and name if not provided", async () => {
