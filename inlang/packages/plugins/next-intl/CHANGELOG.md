@@ -1,5 +1,11 @@
 # @inlang/plugin-next-intl
 
+## 2.0.1
+
+### Patch Changes
+
+- a410265: Added support for multiple useTranslations function names
+
 ## 2.0.0
 
 ### Major Changes
