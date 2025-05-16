@@ -134,6 +134,10 @@ export const aiPlugins: readonly [PlatePlugin<PluginConfig<"cursorOverlay">>] = 
           // text
         }) => {
           if (isFirst && mode == 'insert') {
+            // Make sure the document is focused
+            if (editor.selection === null) {
+              editor.tf.focus();
+            }
             editor.tf.withoutSaving(() => {
               editor.tf.insertNodes(
                 {
