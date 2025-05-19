@@ -16,7 +16,7 @@ export default function FileName() {
   useEffect(() => {
     if (activeFile) {
       // Extract just the filename without path and extension
-      const fullName = activeFile.path.split('/').pop() || "";
+      const fullName = activeFile?.path?.split('/').pop() || "";
       const name = fullName.replace(/\.md$/, "");
       setFileName(name);
     }

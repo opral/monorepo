@@ -229,9 +229,6 @@ export function LixSidebar() {
         const remainingFiles = files.filter((f) => f.id !== fileId)
         if (remainingFiles.length > 0) {
           await switchToFile(remainingFiles[0].id)
-        } else {
-          // No files left, create a new one
-          await createNewFile()
         }
       }
 
@@ -433,8 +430,7 @@ export function LixSidebar() {
         }
       }
 
-      navigate("/");
-      // trigger "polling" to reset all atoms
+      updateUrlParams({ lix: "", f: "" });
       setPolling(Date.now());
     } catch (error) {
       console.error("Error resetting OPFS:", error);

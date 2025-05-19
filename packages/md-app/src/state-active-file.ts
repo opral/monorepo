@@ -20,36 +20,64 @@ import {
 	sql,
 	UiDiffComponentProps,
 } from "@lix-js/sdk";
-import { redirect } from "react-router-dom";
 // import { parseMdBlocks } from "@lix-js/plugin-md";
+import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
+import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+import { updateUrlParams } from "./helper/updateUrlParams.ts";
+
+const setFirstMarkdownFile = (() => {
+	let isExecuting = false;
+	return async (lix: Lix) => {
+		if (isExecuting) return;
+		isExecuting = true;
+		try {
+			if (!lix) return null;
+			const files =
+				(await lix.db.selectFrom("file").selectAll().execute()) ?? [];
+			const markdownFiles = files.filter(
+				(file) => file.path && file.path.endsWith(".md")
+			);
+
+			if (markdownFiles.length === 0) {
+				await setupWelcomeFile(lix);
+				await saveLixToOpfs({ lix });
+
+				const welcomeFile = await lix.db
+					.selectFrom("file")
+					.selectAll()
+					.executeTakeFirst();
+				markdownFiles.push(welcomeFile!);
+			}
+			if (markdownFiles.length > 0) {
+				updateUrlParams({ f: markdownFiles[0].id });
+			}
+			return markdownFiles[0];
+		} finally {
+			isExecuting = false;
+		}
+	};
+})();
 
 export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const fileId = get(fileIdSearchParamsAtom);
+	const lix = await get(lixAtom);
+	if (!lix) return null;
 
 	if (!fileId) {
-		redirect("/");
-		return null;
+		return await setFirstMarkdownFile(lix);
 	}
 
-	const lix = await get(lixAtom);
-
-	const fileAtom = await lix.db
+	const file = await lix.db
 		.selectFrom("file")
 		.selectAll()
 		.where("id", "=", fileId)
 		.executeTakeFirst();
 
-	if (!fileAtom) {
-		redirect("/");
-		return null;
+	if (!file || !file.path || !file.path.endsWith(".md")) {
+		return await setFirstMarkdownFile(lix);
 	}
-
-	if (!fileAtom.path.endsWith(".md")) {
-		redirect("/");
-		return null;
-	}
-	return fileAtom;
+	return file;
 });
 
 export const loadedMdAtom = atom(async (get) => {

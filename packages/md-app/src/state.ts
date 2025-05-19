@@ -180,32 +180,6 @@ export const lixAtom = atom(async (get) => {
 	// 	.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
 	// 	.execute();
 
-	// Check if there is a file in lix
-	const files = await lix.db.selectFrom("file").selectAll().execute();
-	const markdownFiles = files.filter((file) => file.path.endsWith(".md"));
-	if (markdownFiles.length === 0) {
-		await setupWelcomeFile(lix);
-		const welcomeFile = await lix.db
-			.selectFrom("file")
-			.selectAll()
-			.executeTakeFirst();
-		markdownFiles.push(welcomeFile!);
-	}
-	if (markdownFiles.length > 0 && !get(fileIdSearchParamsAtom)) {
-		// Set the file ID as searchParams without page reload
-		updateUrlParams({ f: markdownFiles[0].id });
-	}
-
-	// Redirect to first markdown file if fileId param is not a markdown file
-	const fileIdParam = get(fileIdSearchParamsAtom);
-	if (fileIdParam) {
-		const file = files.find((f) => f.id === fileIdParam);
-		if ((!file || !file.path.endsWith(".md")) && markdownFiles.length > 0) {
-			// Set the file ID as searchParams without page reload
-			updateUrlParams({ f: markdownFiles[0].id });
-		}
-	}
-
 	await saveLixToOpfs({ lix });
 
 	// mismatch in id, update URL without full reload if possible
