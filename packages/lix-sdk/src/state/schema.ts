@@ -65,22 +65,29 @@ export function applyStateDatabaseSchema(
     ),
 
     /* === Graph Traversal Logic === */
-    /* 1. Identify the root change_set_id for the 'main' version */
-    root_cs_of_main AS (
-      SELECT json_extract(snapshot_content, '$.change_set_id') AS version_change_set_id
-      FROM latest_change_with_snapshot
-      WHERE schema_key = 'lix_version'
-        AND json_extract(snapshot_content, '$.name') = 'main'
-      LIMIT 1
+    /* 
+      1. Identify the root change_set_id for the currently ACTIVE version. 
+         This involves two steps:
+         a) Find the 'lix_active_version' entity. Its snapshot_content.version_id points to the entity_id of the active 'lix_version'.
+         b) Get the 'lix_version' entity identified in (a) and extract its snapshot_content.change_set_id.
+    */
+    root_cs_of_active_version AS (
+      SELECT json_extract(actual_active_version.snapshot_content, '$.change_set_id') AS version_change_set_id
+      FROM latest_change_with_snapshot active_version_indicator -- This is the 'lix_active_version' record
+      JOIN latest_change_with_snapshot actual_active_version -- This is the actual 'lix_version' record that is active
+        ON json_extract(active_version_indicator.snapshot_content, '$.version_id') = actual_active_version.entity_id
+        AND actual_active_version.schema_key = 'lix_version' -- Ensure we are joining to a 'lix_version' entity
+      WHERE active_version_indicator.schema_key = 'lix_active_version'
+      LIMIT 1 -- Assuming there's only one 'lix_active_version' entity, or we take the latest one by rowid from latest_change_with_snapshot
     ),
 
-    /* 2. Recursively find all change_set_ids that are ancestors of the main version's root */
-    reachable_cs_from_main(id) AS (
-      SELECT version_change_set_id FROM root_cs_of_main
+    /* 2. Recursively find all change_set_ids that are ancestors of the active version's root */
+    reachable_cs_from_active_root(id) AS (
+      SELECT version_change_set_id FROM root_cs_of_active_version
       UNION
       SELECT json_extract(e.snapshot_content, '$.parent_id')
       FROM latest_change_with_snapshot e 
-      JOIN reachable_cs_from_main ac ON json_extract(e.snapshot_content, '$.child_id') = ac.id
+      JOIN reachable_cs_from_active_root ac ON json_extract(e.snapshot_content, '$.child_id') = ac.id
       WHERE e.schema_key = 'lix_change_set_edge'
     ),
 
@@ -88,16 +95,14 @@ export function applyStateDatabaseSchema(
     /* 3. Select all CSEs that belong to any of the reachable change sets */
     cse_in_reachable_cs AS (
       SELECT
-        -- Fields from the CSE's snapshot, describing the TARGET of the CSE:
         json_extract(ias.snapshot_content, '$.entity_id')    AS target_entity_id,
         json_extract(ias.snapshot_content, '$.file_id')      AS target_file_id,
         json_extract(ias.snapshot_content, '$.schema_key')   AS target_schema_key, 
         json_extract(ias.snapshot_content, '$.change_id')    AS target_change_id,
-        -- The change_set_id this CSE belongs to:
         json_extract(ias.snapshot_content, '$.change_set_id') AS cse_origin_change_set_id 
       FROM latest_change_with_snapshot ias
       WHERE ias.schema_key = 'lix_change_set_element'
-        AND json_extract(ias.snapshot_content, '$.change_set_id') IN (SELECT id FROM reachable_cs_from_main)
+        AND json_extract(ias.snapshot_content, '$.change_set_id') IN (SELECT id FROM reachable_cs_from_active_root)
     ),
 
     /* 4. Filter to 'leaf' CSEs and retrieve their target entity's full snapshot */
@@ -118,7 +123,7 @@ export function applyStateDatabaseSchema(
           FROM latest_change_with_snapshot edge
           JOIN descendants_of_current_cs d ON json_extract(edge.snapshot_content, '$.parent_id') = d.id
           WHERE edge.schema_key = 'lix_change_set_edge'
-            AND json_extract(edge.snapshot_content, '$.child_id') IN (SELECT id FROM reachable_cs_from_main) 
+            AND json_extract(edge.snapshot_content, '$.child_id') IN (SELECT id FROM reachable_cs_from_active_root) 
         )
         SELECT 1
         FROM cse_in_reachable_cs newer_r 

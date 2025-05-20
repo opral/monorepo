@@ -1,6 +1,8 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import { createVersion } from "../version/create-version.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("select, insert, update, delete entity", async () => {
 	const mockSchema: LixSchemaDefinition = {
@@ -195,4 +197,69 @@ test("validates the schema on update", async () => {
 			},
 		},
 	]);
+});
+
+test("switching versions", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "a",
+			change_set_id: "cs0",
+			working_change_set_id: "working_cs0",
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "b",
+			change_set_id: "cs1",
+			working_change_set_id: "working_cs1",
+		})
+		.execute();
+
+	await lix.db
+		.updateTable("active_version")
+		.set({
+			version_id: "b",
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "foo",
+			value: "bar",
+		})
+		.execute();
+
+	const viewAfterInsert = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.execute();
+
+	expect(viewAfterInsert).toMatchObject([
+		{
+			key: "foo",
+			value: "bar",
+		},
+	]);
+
+	await lix.db
+		.updateTable("active_version")
+		.set({
+			version_id: "a",
+		})
+		.execute();
+
+	const viewAfterSwitch = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.execute();
+
+	expect(viewAfterSwitch).toHaveLength(0);
 });
