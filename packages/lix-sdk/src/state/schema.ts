@@ -41,7 +41,7 @@ export function applyStateDatabaseSchema(
 	});
 
 	const sql = `
-  CREATE VIEW IF NOT EXISTS state AS
+  CREATE VIEW IF NOT EXISTS internal_all_state AS
   SELECT
     ic.entity_id,
     ic.schema_key,
@@ -58,6 +58,49 @@ export function applyStateDatabaseSchema(
       AND ic2.schema_key = ic.schema_key
       AND ic2.file_id = ic.file_id
   );
+
+
+  CREATE VIEW IF NOT EXISTS state AS
+  WITH main_version_change_set AS (
+    SELECT json_extract(snapshot_content, '$.change_set_id') AS version_change_set_id
+    FROM internal_all_state
+    WHERE schema_key = 'lix_version'
+      AND json_extract(snapshot_content, '$.name') = 'main'
+    LIMIT 1
+  ),
+  -- Recursively gather all change sets reachable from the main version's root change set
+  ancestor_cs(id) AS (
+    SELECT version_change_set_id FROM main_version_change_set
+    UNION
+    -- traverse from child back to parent
+    SELECT json_extract(e.snapshot_content, '$.parent_id')
+    FROM internal_all_state e
+    JOIN ancestor_cs ac ON json_extract(e.snapshot_content, '$.child_id') = ac.id
+    WHERE e.schema_key = 'lix_change_set_edge'
+    UNION
+    -- traverse forward from parent to child
+    SELECT json_extract(e.snapshot_content, '$.child_id')
+    FROM internal_all_state e
+    JOIN ancestor_cs ac ON json_extract(e.snapshot_content, '$.parent_id') = ac.id
+    WHERE e.schema_key = 'lix_change_set_edge'
+  ),
+  -- Collect all edge entity_ids touching those change sets for debugging
+  collected_edges AS (
+    SELECT json_group_array(e.entity_id) AS change_set_edges
+    FROM internal_all_state e
+    WHERE e.schema_key = 'lix_change_set_edge'
+      AND (
+        json_extract(e.snapshot_content, '$.parent_id') IN (SELECT id FROM ancestor_cs)
+        OR json_extract(e.snapshot_content, '$.child_id') IN (SELECT id FROM ancestor_cs)
+      )
+  )
+  SELECT
+    ias.*,
+    main_version_change_set.version_change_set_id,
+    collected_edges.change_set_edges
+  FROM internal_all_state ias
+  CROSS JOIN main_version_change_set
+  CROSS JOIN collected_edges;
 
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
@@ -118,4 +161,6 @@ export type StateView = {
 	file_id: string;
 	plugin_key: string;
 	snapshot_content: JSONType;
+	version_change_set_id?: string | null;
+	change_set_edges?: string | null;
 };

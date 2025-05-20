@@ -11,6 +11,16 @@ test("creates a new change set and updates the version's change set id for mutat
 		.where("name", "=", "main")
 		.executeTakeFirstOrThrow();
 
+	console.log("versionBeforeInsert", versionBeforeInsert);
+
+	const stateBeforeInsert = await lix.db
+		.selectFrom("state")
+		.selectAll()
+		.limit(1)
+		.execute();
+
+	console.log("stateBeforeInsert", stateBeforeInsert);
+
 	await lix.db
 		.insertInto("key_value")
 		.values({
@@ -24,6 +34,16 @@ test("creates a new change set and updates the version's change set id for mutat
 		.selectAll()
 		.where("name", "=", "main")
 		.executeTakeFirstOrThrow();
+
+	console.log("versionAfterInsert", versionAfterInsert);
+
+	const stateAfterInsert = await lix.db
+		.selectFrom("state")
+		.selectAll()
+		.limit(1)
+		.execute();
+
+	console.log("stateAfterInsert", stateAfterInsert);
 
 	expect(versionAfterInsert.change_set_id).not.toEqual(
 		versionBeforeInsert.change_set_id
