@@ -77,7 +77,46 @@ export function applyStateDatabaseSchema(
     FROM internal_all_state e
     JOIN ancestor_cs ac ON json_extract(e.snapshot_content, '$.child_id') = ac.id
     WHERE e.schema_key = 'lix_change_set_edge'
-
+  ),
+  -- Elements within ancestor change sets
+  relevant_elements AS (
+    SELECT
+      json_extract(ias.snapshot_content, '$.entity_id') AS entity_id,
+      json_extract(ias.snapshot_content, '$.file_id') AS file_id,
+      json_extract(ias.snapshot_content, '$.schema_key') AS schema_key,
+      json_extract(ias.snapshot_content, '$.change_id') AS change_id,
+      json_extract(ias.snapshot_content, '$.change_set_id') AS change_set_id
+    FROM internal_all_state ias
+    WHERE ias.schema_key = 'lix_change_set_element'
+      AND json_extract(ias.snapshot_content, '$.change_set_id') IN (SELECT id FROM ancestor_cs)
+  ),
+  -- Filter to leaf elements
+  leaf_elements AS (
+    SELECT r.change_id
+    FROM relevant_elements r
+    WHERE NOT EXISTS (
+      WITH RECURSIVE descendants_of_current_cs(id) AS (
+        SELECT r.change_set_id
+        UNION
+        SELECT json_extract(edge.snapshot_content, '$.child_id')
+        FROM internal_all_state edge
+        JOIN descendants_of_current_cs d ON json_extract(edge.snapshot_content, '$.parent_id') = d.id
+        WHERE edge.schema_key = 'lix_change_set_edge'
+          AND json_extract(edge.snapshot_content, '$.child_id') IN (SELECT id FROM ancestor_cs) -- Must be within overall ancestor scope
+      )
+      SELECT 1
+      FROM relevant_elements newer_r
+      WHERE newer_r.entity_id = r.entity_id
+        AND newer_r.file_id = r.file_id
+        AND newer_r.schema_key = r.schema_key
+        AND (newer_r.change_set_id != r.change_set_id OR newer_r.change_id != r.change_id) -- Different element
+        AND newer_r.change_set_id IN (SELECT id FROM descendants_of_current_cs WHERE id != r.change_set_id) -- Newer CS is strict descendant of current element's CS
+    )
+  ),
+  -- Aggregate leaf change_ids
+  aggregated_leaf_change_ids AS (
+    SELECT json_group_array(le.change_id) AS leaf_change_ids
+    FROM leaf_elements le
   ),
   -- Collect all edge entity_ids touching those change sets for debugging
   collected_edges AS (
@@ -100,12 +139,10 @@ export function applyStateDatabaseSchema(
   SELECT
     ias.*,
     main_version_change_set.version_change_set_id,
-    collected_edges.change_set_edges,
-    aggregated_change_ids.change_ids
+    aggregated_leaf_change_ids.leaf_change_ids
   FROM internal_all_state ias
   CROSS JOIN main_version_change_set
-  CROSS JOIN collected_edges
-  CROSS JOIN aggregated_change_ids;
+  CROSS JOIN aggregated_leaf_change_ids;
 
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
@@ -167,6 +204,5 @@ export type StateView = {
 	plugin_key: string;
 	snapshot_content: JSONType;
 	version_change_set_id?: string | null;
-	change_set_edges?: string | null;
-	change_ids?: string | null;
+	leaf_change_ids?: string | null;
 };

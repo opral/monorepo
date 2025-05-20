@@ -11,15 +11,15 @@ test("creates a new change set and updates the version's change set id for mutat
 		.where("name", "=", "main")
 		.executeTakeFirstOrThrow();
 
-	console.log("versionBeforeInsert", versionBeforeInsert);
 
 	const stateBeforeInsert = await lix.db
 		.selectFrom("state")
 		.selectAll()
-		.limit(1)
 		.execute();
 
-	console.log("stateBeforeInsert", stateBeforeInsert);
+	const leafChangeIdsBeforeInsert = JSON.parse(
+		(stateBeforeInsert[0].leaf_change_ids ?? "[]") as string
+	);
 
 	await lix.db
 		.insertInto("key_value")
@@ -35,15 +35,29 @@ test("creates a new change set and updates the version's change set id for mutat
 		.where("name", "=", "main")
 		.executeTakeFirstOrThrow();
 
-	console.log("versionAfterInsert", versionAfterInsert);
-
 	const stateAfterInsert = await lix.db
 		.selectFrom("state")
 		.selectAll()
 		.limit(1)
 		.execute();
 
-	console.log("stateAfterInsert", stateAfterInsert);
+	const leafChangeIdsAfterInsert = JSON.parse(
+		(stateAfterInsert[0].leaf_change_ids ?? "[]") as string
+	);
+
+	const diff = leafChangeIdsAfterInsert.filter(
+		(changeId) => !leafChangeIdsBeforeInsert.includes(changeId)
+	);
+
+	const leafChangesAfterInsert = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("change.id", "in", diff)
+		.selectAll("change")
+		.select("snapshot.content")
+		.execute();
+
+	console.log("DIFF insert", leafChangesAfterInsert);
 
 	expect(versionAfterInsert.change_set_id).not.toEqual(
 		versionBeforeInsert.change_set_id
@@ -56,6 +70,30 @@ test("creates a new change set and updates the version's change set id for mutat
 			value: "mock_value_updated",
 		})
 		.execute();
+
+	const stateAfterUpdate = await lix.db
+		.selectFrom("state")
+		.selectAll()
+		.limit(1)
+		.execute();
+
+	const leafChangeIdsAfterUpdate = JSON.parse(
+		(stateAfterUpdate[0].leaf_change_ids ?? "[]") as string
+	);
+
+	const diffUpdate = leafChangeIdsAfterUpdate.filter(
+		(changeId) => !leafChangeIdsAfterInsert.includes(changeId)
+	);
+
+	const leafChangesAfterUpdate = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("change.id", "in", diffUpdate)
+		.selectAll("change")
+		.select("snapshot.content")
+		.execute();
+
+	console.log("DIFF update", leafChangesAfterUpdate);
 
 	const versionAfterUpdate = await lix.db
 		.selectFrom("version")
