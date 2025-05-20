@@ -1,5 +1,13 @@
 # @inlang/plugin-i18next
 
+## 6.0.10
+
+### Patch Changes
+
+- 0aa07ec: Re-enables `variableReferencePattern` settings for the v6 `importFiles` and `exportFiles` APIs.
+
+  https://github.com/opral/inlang-paraglide-js/issues/513
+
 ## 6.0.9
 
 ### Patch Changes
