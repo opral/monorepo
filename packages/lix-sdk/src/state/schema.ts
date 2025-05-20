@@ -77,12 +77,7 @@ export function applyStateDatabaseSchema(
     FROM internal_all_state e
     JOIN ancestor_cs ac ON json_extract(e.snapshot_content, '$.child_id') = ac.id
     WHERE e.schema_key = 'lix_change_set_edge'
-    UNION
-    -- traverse forward from parent to child
-    SELECT json_extract(e.snapshot_content, '$.child_id')
-    FROM internal_all_state e
-    JOIN ancestor_cs ac ON json_extract(e.snapshot_content, '$.parent_id') = ac.id
-    WHERE e.schema_key = 'lix_change_set_edge'
+
   ),
   -- Collect all edge entity_ids touching those change sets for debugging
   collected_edges AS (
