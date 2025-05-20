@@ -78,7 +78,7 @@ export function PlateEditor() {
 				// } else {
 
 				// Only attempt to select all if we have editor content
-				if (!editor || !editor.children || editor.children.length === 0 || (event.target as HTMLElement).tagName !== "TEXTAREA") {
+				if (!editor || !editor.children || editor.children.length === 0 || (event.target as HTMLElement).tagName === "TEXTAREA") {
 					return;
 				}
 
