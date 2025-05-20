@@ -4,7 +4,7 @@ import type { TElement } from '@udecode/plate';
 
 import { faker } from '@faker-js/faker';
 import { CopilotPlugin } from '@udecode/plate-ai/react';
-import { serializeMd, stripMarkdown } from '@udecode/plate-markdown';
+import { stripMarkdown } from '@udecode/plate-markdown';
 
 import { GhostText } from '@/components/plate-ui/ghost-text';
 import { ExtendedMarkdownPlugin } from './markdown/markdown-plugin';
@@ -51,11 +51,17 @@ export const copilotPlugins = [
 
         if (!contextEntry) return '';
 
-        const prompt = serializeMd(editor, {
+        const document = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()
+
+        const prompt = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize({
           value: [contextEntry[0] as TElement],
         });
 
-        return `Continue the text up to the next punctuation mark:
+        return `
+Full document context:
+  ${document}
+END OF DOCUMENT
+Continue the text up to the next punctuation mark:
   """
   ${prompt}
   """`;
