@@ -93,14 +93,24 @@ export function applyStateDatabaseSchema(
         json_extract(e.snapshot_content, '$.parent_id') IN (SELECT id FROM ancestor_cs)
         OR json_extract(e.snapshot_content, '$.child_id') IN (SELECT id FROM ancestor_cs)
       )
+  ),
+  -- Aggregate all change_ids from elements in ancestor change sets
+  aggregated_change_ids AS (
+    SELECT json_group_array(json_extract(e.snapshot_content, '$.change_id')) AS change_ids
+    FROM internal_all_state e
+    WHERE e.schema_key = 'lix_change_set_element'
+      AND json_extract(e.snapshot_content, '$.change_set_id') IN (SELECT id FROM ancestor_cs)
   )
+      
   SELECT
     ias.*,
     main_version_change_set.version_change_set_id,
-    collected_edges.change_set_edges
+    collected_edges.change_set_edges,
+    aggregated_change_ids.change_ids
   FROM internal_all_state ias
   CROSS JOIN main_version_change_set
-  CROSS JOIN collected_edges;
+  CROSS JOIN collected_edges
+  CROSS JOIN aggregated_change_ids;
 
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
@@ -163,4 +173,5 @@ export type StateView = {
 	snapshot_content: JSONType;
 	version_change_set_id?: string | null;
 	change_set_edges?: string | null;
+	change_ids?: string | null;
 };
