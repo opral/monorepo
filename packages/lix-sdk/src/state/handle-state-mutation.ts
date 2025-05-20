@@ -204,7 +204,7 @@ export function handleStateMutation(
 			sqlite,
 			db,
 			data: {
-				entity_id: `${changeSetId}::${changeSetElementChange.id}`,
+				entity_id: changeSetElementChange.entity_id,
 				schema_key: "lix_change_set_element",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
@@ -213,7 +213,7 @@ export function handleStateMutation(
 					change_id: changeSetElementChange.id,
 					schema_key: "lix_change_set_element",
 					file_id: "lix",
-					entity_id: `${changeSetId}::${changeSetElementChange.id}`,
+					entity_id: changeSetElementChange.entity_id,
 				} satisfies ChangeSetElement),
 			},
 		});
@@ -225,6 +225,7 @@ export function handleStateMutation(
 function createChangeWithSnapshot(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
+	id?: string;
 	data: NewStateRow;
 }): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
 	const [snapshot] = args.data.snapshot_content
@@ -244,6 +245,7 @@ function createChangeWithSnapshot(args: {
 		query: args.db
 			.insertInto("internal_change")
 			.values({
+				id: args.id,
 				entity_id: args.data.entity_id,
 				schema_key: args.data.schema_key,
 				snapshot_id: snapshot.id,
