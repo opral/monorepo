@@ -1,8 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { createVersion } from "../version/create-version.js";
-import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("select, insert, update, delete entity", async () => {
 	const mockSchema: LixSchemaDefinition = {
@@ -262,4 +260,72 @@ test("switching versions", async () => {
 		.execute();
 
 	expect(viewAfterSwitch).toHaveLength(0);
+});
+
+test("state is separated by version", async () => {
+	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("state")
+		.values([
+			{
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					value: "hello world from version a",
+				},
+				version_id: "a",
+			},
+			{
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					value: "hello world from version b",
+				},
+				version_id: "b",
+			},
+		])
+		.execute();
+
+	const versionAAfterInsert = await lix.db
+		.selectFrom("state")
+		.where("version_id", "=", "a")
+		.selectAll()
+		.execute();
+
+	expect(versionAAfterInsert).toMatchObject([
+		{
+			entity_id: "e0",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "lix_own_entity",
+			snapshot_content: {
+				value: "hello world from version a",
+			},
+			version_id: "a",
+		},
+	]);
+
+	const versionBAfterInsert = await lix.db
+		.selectFrom("state")
+		.where("version_id", "=", "b")
+		.selectAll()
+		.execute();
+
+	expect(versionBAfterInsert).toMatchObject([
+		{
+			entity_id: "e0",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "lix_own_entity",
+			snapshot_content: {
+				value: "hello world from version b",
+			},
+			version_id: "b",
+		},
+	]);
 });
