@@ -112,37 +112,13 @@ export function applyStateDatabaseSchema(
         AND (newer_r.change_set_id != r.change_set_id OR newer_r.change_id != r.change_id) -- Different element
         AND newer_r.change_set_id IN (SELECT id FROM descendants_of_current_cs WHERE id != r.change_set_id) -- Newer CS is strict descendant of current element's CS
     )
-  ),
-  -- Aggregate leaf change_ids
-  aggregated_leaf_change_ids AS (
-    SELECT json_group_array(le.change_id) AS leaf_change_ids
-    FROM leaf_elements le
-  ),
-  -- Collect all edge entity_ids touching those change sets for debugging
-  collected_edges AS (
-    SELECT json_group_array(e.entity_id) AS change_set_edges
-    FROM internal_all_state e
-    WHERE e.schema_key = 'lix_change_set_edge'
-      AND (
-        json_extract(e.snapshot_content, '$.parent_id') IN (SELECT id FROM ancestor_cs)
-        OR json_extract(e.snapshot_content, '$.child_id') IN (SELECT id FROM ancestor_cs)
-      )
-  ),
-  -- Aggregate all change_ids from elements in ancestor change sets
-  aggregated_change_ids AS (
-    SELECT json_group_array(json_extract(e.snapshot_content, '$.change_id')) AS change_ids
-    FROM internal_all_state e
-    WHERE e.schema_key = 'lix_change_set_element'
-      AND json_extract(e.snapshot_content, '$.change_set_id') IN (SELECT id FROM ancestor_cs)
   )
       
   SELECT
     ias.*,
-    main_version_change_set.version_change_set_id,
-    aggregated_leaf_change_ids.leaf_change_ids
+    main_version_change_set.version_change_set_id
   FROM internal_all_state ias
-  CROSS JOIN main_version_change_set
-  CROSS JOIN aggregated_leaf_change_ids;
+  CROSS JOIN main_version_change_set;
 
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
