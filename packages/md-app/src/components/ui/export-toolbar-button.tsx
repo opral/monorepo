@@ -70,42 +70,42 @@ import { useEditorRef } from '@udecode/plate/react';
 import { all, createLowlight } from 'lowlight';
 import { ArrowDownToLineIcon } from 'lucide-react';
 
-import { BlockquoteElementStatic } from '@/components/plate-ui/blockquote-element-static';
-import { CodeBlockElementStatic } from '@/components/plate-ui/code-block-element-static';
-import { CodeLeafStatic } from '@/components/plate-ui/code-leaf-static';
-import { CodeLineElementStatic } from '@/components/plate-ui/code-line-element-static';
-import { CodeSyntaxLeafStatic } from '@/components/plate-ui/code-syntax-leaf-static';
-import { ColumnElementStatic } from '@/components/plate-ui/column-element-static';
-import { ColumnGroupElementStatic } from '@/components/plate-ui/column-group-element-static';
-import { CommentLeafStatic } from '@/components/plate-ui/comment-leaf-static';
-import { DateElementStatic } from '@/components/plate-ui/date-element-static';
-import { HeadingElementStatic } from '@/components/plate-ui/heading-element-static';
-import { HighlightLeafStatic } from '@/components/plate-ui/highlight-leaf-static';
-import { HrElementStatic } from '@/components/plate-ui/hr-element-static';
-import { ImageElementStatic } from '@/components/plate-ui/image-element-static';
+import { BlockquoteElementStatic } from '@/components/ui/blockquote-element-static';
+import { CodeBlockElementStatic } from '@/components/ui/code-block-element-static';
+import { CodeLeafStatic } from '@/components/ui/code-leaf-static';
+import { CodeLineElementStatic } from '@/components/ui/code-line-element-static';
+import { CodeSyntaxLeafStatic } from '@/components/ui/code-syntax-leaf-static';
+import { ColumnElementStatic } from '@/components/ui/column-element-static';
+import { ColumnGroupElementStatic } from '@/components/ui/column-group-element-static';
+import { CommentLeafStatic } from '@/components/ui/comment-leaf-static';
+import { DateElementStatic } from '@/components/ui/date-element-static';
+import { HeadingElementStatic } from '@/components/ui/heading-element-static';
+import { HighlightLeafStatic } from '@/components/ui/highlight-leaf-static';
+import { HrElementStatic } from '@/components/ui/hr-element-static';
+import { ImageElementStatic } from '@/components/ui/image-element-static';
 import {
   FireLiComponent,
   FireMarker,
-} from '@/components/plate-ui/indent-fire-marker';
+} from '@/components/ui/indent-fire-marker';
 import {
   TodoLiStatic,
   TodoMarkerStatic,
-} from '@/components/plate-ui/indent-todo-marker-static';
-import { KbdLeafStatic } from '@/components/plate-ui/kbd-leaf-static';
-import { LinkElementStatic } from '@/components/plate-ui/link-element-static';
-import { MediaAudioElementStatic } from '@/components/plate-ui/media-audio-element-static';
-import { MediaFileElementStatic } from '@/components/plate-ui/media-file-element-static';
-import { MediaVideoElementStatic } from '@/components/plate-ui/media-video-element-static';
-// import { MentionElementStatic } from '@/components/plate-ui/mention-element-static';
-import { ParagraphElementStatic } from '@/components/plate-ui/paragraph-element-static';
+} from '@/components/ui/indent-todo-marker-static';
+import { KbdLeafStatic } from '@/components/ui/kbd-leaf-static';
+import { LinkElementStatic } from '@/components/ui/link-element-static';
+import { MediaAudioElementStatic } from '@/components/ui/media-audio-element-static';
+import { MediaFileElementStatic } from '@/components/ui/media-file-element-static';
+import { MediaVideoElementStatic } from '@/components/ui/media-video-element-static';
+// import { MentionElementStatic } from '@/components/ui/mention-element-static';
+import { ParagraphElementStatic } from '@/components/ui/paragraph-element-static';
 import {
   TableCellElementStatic,
   TableCellHeaderStaticElement,
-} from '@/components/plate-ui/table-cell-element-static';
-import { TableElementStatic } from '@/components/plate-ui/table-element-static';
-import { TableRowElementStatic } from '@/components/plate-ui/table-row-element-static';
-import { TocElementStatic } from '@/components/plate-ui/toc-element-static';
-import { ToggleElementStatic } from '@/components/plate-ui/toggle-element-static';
+} from '@/components/ui/table-cell-element-static';
+import { TableElementStatic } from '@/components/ui/table-element-static';
+import { TableRowElementStatic } from '@/components/ui/table-row-element-static';
+import { TocElementStatic } from '@/components/ui/toc-element-static';
+import { ToggleElementStatic } from '@/components/ui/toggle-element-static';
 
 import {
   DropdownMenu,

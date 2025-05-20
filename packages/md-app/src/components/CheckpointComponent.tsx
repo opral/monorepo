@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/plate-ui/avatar.tsx";
-import { Button } from "@/components/plate-ui/button.tsx";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/plate-ui/tooltip.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";

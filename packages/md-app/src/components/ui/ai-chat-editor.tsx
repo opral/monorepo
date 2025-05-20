@@ -29,7 +29,7 @@ import { usePlateEditor } from '@udecode/plate/react';
 import {
   TodoLiStatic,
   TodoMarkerStatic,
-} from '@/components/plate-ui/indent-todo-marker-static';
+} from '@/components/ui/indent-todo-marker-static';
 
 import { BlockquoteElementStatic } from './blockquote-element-static';
 import { CodeBlockElementStatic } from './code-block-element-static';
@@ -97,7 +97,7 @@ const plugins = [
       },
     },
   }),
-  ExtendedMarkdownPlugin.configure({ }),
+  ExtendedMarkdownPlugin.configure({}),
 ];
 
 export const AIChatEditor = memo(({ content }: { content: string }) => {

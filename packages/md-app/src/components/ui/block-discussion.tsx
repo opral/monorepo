@@ -36,13 +36,13 @@ import {
   discussionPlugin,
 } from '@/components/editor/plugins/discussion-plugin';
 import { suggestionPlugin } from '@/components/editor/plugins/suggestion-plugin';
-import { Button } from '@/components/plate-ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/plate-ui/popover';
+} from '@/components/ui/popover';
 
 import {
   BlockSuggestionCard,

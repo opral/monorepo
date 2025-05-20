@@ -4,7 +4,7 @@ import { PlateElementProps } from '@udecode/plate/react';
 import { activeFileAtom } from '@/state-active-file';
 import { useChat } from './use-chat';
 import { toast } from 'sonner';
-import { Button } from '../plate-ui/button';
+import { Button } from '../ui/button';
 import { Loader2, Zap } from 'lucide-react';
 import { lixAtom, withPollingAtom } from '@/state';
 import { saveLixToOpfs } from '@/helper/saveLixToOpfs';

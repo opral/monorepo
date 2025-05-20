@@ -7,7 +7,7 @@ import { Plate } from "@udecode/plate/react";
 
 import { useCreateEditor } from "@/components/editor/use-create-editor";
 // import { SettingsDialog } from "@/components/editor/settings";
-import { Editor, EditorContainer } from "@/components/plate-ui/editor";
+import { Editor, EditorContainer } from "@/components/ui/editor";
 import { debounce } from "lodash-es";
 import { useAtom } from "jotai";
 import { editorRefAtom, lixAtom } from "@/state";

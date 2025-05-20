@@ -40,13 +40,13 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/multisidebar"
-import { Button } from "@/components/plate-ui/button"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/plate-ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogClose,
@@ -55,9 +55,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/plate-ui/dialog"
+} from "@/components/ui/dialog"
 import InfoCard from "../InfoCard"
-import { Separator } from "../plate-ui/separator"
+import { Separator } from "./separator"
 import { generateHumanId } from "@/helper/generateHumanId"
 import { useChat } from "../editor/use-chat"
 

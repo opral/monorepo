@@ -35,7 +35,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '@/components/plate-ui/avatar';
+} from '@/components/ui/avatar';
 
 import type { TComment } from './comment';
 
@@ -89,7 +89,7 @@ export function CommentCreateForm({
   autoFocus?: boolean;
   className?: string;
   discussionId?: string;
-    focusOnMount?: boolean;
+  focusOnMount?: boolean;
 }) {
   const discussions = usePluginOption(discussionPlugin, 'discussions');
 
