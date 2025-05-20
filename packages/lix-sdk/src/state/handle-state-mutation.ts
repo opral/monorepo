@@ -196,6 +196,8 @@ export function handleStateMutation(
 				} satisfies ChangeSetElement),
 			},
 		});
+		// TODO investigate if needed as part of a change set itself
+		// seems to make queries slower
 		// creating a change set element for the change set element change
 		// this is meta but allows us to reconstruct and mutate a change set
 		createChangeWithSnapshot({
