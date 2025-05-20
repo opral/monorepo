@@ -49,13 +49,82 @@ export function handleStateMutation(
 		return 0;
 	}
 
-	const [activeVersion] = executeSync({
+	// to avoid querying the own state view
+	// Step 1: Get the latest 'lix_active_version' entity's snapshot content
+	const [activeVersionRecord] = executeSync({
 		lix: { sqlite },
 		query: db
-			.selectFrom("active_version")
-			.innerJoin("version", "version.id", "active_version.version_id")
-			.selectAll(),
-	}) as [Version];
+			.selectFrom("internal_change")
+			.innerJoin(
+				"internal_snapshot",
+				"internal_change.snapshot_id",
+				"internal_snapshot.id"
+			)
+			.where("internal_change.schema_key", "=", "lix_active_version")
+			.where("internal_change.snapshot_id", "!=", "no-content")
+			.orderBy("internal_change.rowid", "desc")
+			.limit(1)
+			.select(sql`json(internal_snapshot.content)`.as("content")),
+	}) as [{ content: string } | undefined];
+
+	if (!activeVersionRecord) {
+		throw new Error(
+			"No active version found. Database may be in an inconsistent state."
+		);
+	}
+
+	const activeVersionSnapshot = JSON.parse(activeVersionRecord.content);
+	const activeVersionId = activeVersionSnapshot.version_id;
+
+	if (!activeVersionId || typeof activeVersionId !== "string") {
+		throw new Error(
+			"'version_id' not found or invalid in active_version snapshot."
+		);
+	}
+
+	// Step 2: Get the latest 'lix_version' entity's snapshot content using the activeVersionId
+	const [versionRecord] = executeSync({
+		lix: { sqlite },
+		query: db
+			.selectFrom("internal_change")
+			.innerJoin(
+				"internal_snapshot",
+				"internal_change.snapshot_id",
+				"internal_snapshot.id"
+			)
+			.where("internal_change.schema_key", "=", "lix_version")
+			.where("internal_change.entity_id", "=", activeVersionId)
+			.where("internal_change.snapshot_id", "!=", "no-content")
+			.orderBy("internal_change.rowid", "desc")
+			.limit(1)
+			.select(sql`json(internal_snapshot.content)`.as("content")),
+	}) as [{ content: string } | undefined];
+
+	if (!versionRecord) {
+		throw new Error(
+			`Version with id '${activeVersionId}' not found for active_version.`
+		);
+	}
+
+	const versionSnapshot = JSON.parse(versionRecord.content);
+
+	// Reconstruct the activeVersion object based on the Version type structure
+	const activeVersion: Version = {
+		id: versionSnapshot.id,
+		name: versionSnapshot.name,
+		change_set_id: versionSnapshot.change_set_id,
+		working_change_set_id: versionSnapshot.working_change_set_id,
+	};
+
+	if (
+		!activeVersion.id ||
+		!activeVersion.change_set_id ||
+		!activeVersion.working_change_set_id
+	) {
+		throw new Error(
+			"Failed to reconstruct a valid activeVersion object from internal tables."
+		);
+	}
 
 	const changeSetId = nanoid();
 
