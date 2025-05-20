@@ -105,6 +105,18 @@ test("creates a new change set and updates the version's change set id for mutat
 		versionAfterInsert.change_set_id
 	);
 
+	const elements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", versionAfterUpdate.change_set_id)
+		.innerJoin("change", "change.id", "change_set_element.change_id")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.select("change.schema_key")
+		.select("snapshot.content")
+		.orderBy("change.schema_key", "asc")
+		.execute();
+
+	console.log("elements", elements);
+
 	await lix.db.deleteFrom("key_value").where("key", "=", "mock_key").execute();
 
 	const versionAfterDelete = await lix.db

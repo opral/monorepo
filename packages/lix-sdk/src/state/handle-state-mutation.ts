@@ -179,7 +179,7 @@ export function handleStateMutation(
 		changeSetEdgeChange,
 		versionChange,
 	]) {
-		createChangeWithSnapshot({
+		const changeSetElementChange = createChangeWithSnapshot({
 			sqlite,
 			db,
 			data: {
@@ -190,6 +190,25 @@ export function handleStateMutation(
 				snapshot_content: JSON.stringify({
 					change_set_id: changeSetId,
 					change_id: change.id,
+					schema_key,
+					file_id,
+					entity_id,
+				} satisfies ChangeSetElement),
+			},
+		});
+		// creating a change set element for the change set element change
+		// this is meta but allows us to reconstruct and mutate a change set
+		createChangeWithSnapshot({
+			sqlite,
+			db,
+			data: {
+				entity_id: `${changeSetId}::${changeSetElementChange.id}`,
+				schema_key: "lix_change_set_element",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					change_set_id: changeSetId,
+					change_id: changeSetElementChange.id,
 					schema_key,
 					file_id,
 					entity_id,
