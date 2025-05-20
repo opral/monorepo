@@ -1,7 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { sql } from "kysely";
 
 test("select, insert, update, delete entity", async () => {
 	const mockSchema: LixSchemaDefinition = {
@@ -16,33 +15,6 @@ test("select, insert, update, delete entity", async () => {
 	};
 
 	const lix = await openLixInMemory({});
-
-	const baseView = await sql`SELECT * FROM internal_all_state`.execute(lix.db);
-	const rootChangeSet = await sql`
-		SELECT json_extract(snapshot_content, '$.change_set_id') AS id
-		FROM internal_all_state
-		WHERE schema_key = 'lix_version'
-		  AND entity_id = 'BoIaHTW9ePX6pNc8'`.execute(lix.db);
-	const graphTraversal = await sql`
-		WITH main_version_root_cs AS (
-  SELECT json_extract(snapshot_content, '$.change_set_id') AS id
-  FROM internal_all_state
-  WHERE schema_key = 'lix_version'
-    AND entity_id = 'BoIaHTW9ePX6pNc8'
-)
-SELECT * FROM main_version_root_cs;
-`.execute(lix.db);
-	const rootElements = await sql`
-	SELECT *
-FROM internal_all_state
-WHERE schema_key = 'lix_change_set_element'
-  AND json_extract(snapshot_content, '$.change_set_id') = '${rootChangeSet.rows[0]?.id}';
-`.execute(lix.db);
-
-	console.log("baseView", baseView);
-	console.log("rootChangeSet", rootChangeSet);
-	console.log("graphTraversal", graphTraversal);
-	console.log("rootElements", rootElements);
 
 	await lix.db
 		.insertInto("stored_schema")

@@ -200,23 +200,23 @@ export function handleStateMutation(
 		// seems to make queries slower
 		// creating a change set element for the change set element change
 		// this is meta but allows us to reconstruct and mutate a change set
-		createChangeWithSnapshot({
-			sqlite,
-			db,
-			data: {
-				entity_id: changeSetElementChange.entity_id,
-				schema_key: "lix_change_set_element",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					change_set_id: changeSetId,
-					change_id: changeSetElementChange.id,
-					schema_key: "lix_change_set_element",
-					file_id: "lix",
-					entity_id: changeSetElementChange.entity_id,
-				} satisfies ChangeSetElement),
-			},
-		});
+		// createChangeWithSnapshot({
+		// 	sqlite,
+		// 	db,
+		// 	data: {
+		// 		entity_id: changeSetElementChange.entity_id,
+		// 		schema_key: "lix_change_set_element",
+		// 		file_id: "lix",
+		// 		plugin_key: "lix_own_entity",
+		// 		snapshot_content: JSON.stringify({
+		// 			change_set_id: changeSetId,
+		// 			change_id: changeSetElementChange.id,
+		// 			schema_key: "lix_change_set_element",
+		// 			file_id: "lix",
+		// 			entity_id: changeSetElementChange.entity_id,
+		// 		} satisfies ChangeSetElement),
+		// 	},
+		// });
 	}
 
 	return 1;

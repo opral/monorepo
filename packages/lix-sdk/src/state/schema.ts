@@ -114,11 +114,16 @@ export function applyStateDatabaseSchema(
     )
   )
       
-  SELECT
-    ias.*,
-    main_version_change_set.version_change_set_id
-  FROM internal_all_state ias
-  CROSS JOIN main_version_change_set;
+  SELECT 
+    change.entity_id,
+    change.schema_key,
+    change.file_id,
+    change.plugin_key,
+    json(change_snapshot.content) AS snapshot_content
+  FROM leaf_elements
+  INNER JOIN internal_change change ON leaf_elements.change_id = change.id
+  INNER JOIN internal_snapshot change_snapshot ON change.snapshot_id = change_snapshot.id
+  WHERE change.snapshot_id != 'no-content';
 
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
