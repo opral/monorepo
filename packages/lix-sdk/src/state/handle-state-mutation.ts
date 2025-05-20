@@ -190,9 +190,9 @@ export function handleStateMutation(
 				snapshot_content: JSON.stringify({
 					change_set_id: changeSetId,
 					change_id: change.id,
-					schema_key,
-					file_id,
-					entity_id,
+					schema_key: change.schema_key,
+					file_id: change.file_id,
+					entity_id: change.entity_id,
 				} satisfies ChangeSetElement),
 			},
 		});
@@ -211,9 +211,9 @@ export function handleStateMutation(
 				snapshot_content: JSON.stringify({
 					change_set_id: changeSetId,
 					change_id: changeSetElementChange.id,
-					schema_key,
-					file_id,
-					entity_id,
+					schema_key: "lix_change_set_element",
+					file_id: "lix",
+					entity_id: `${changeSetId}::${changeSetElementChange.id}`,
 				} satisfies ChangeSetElement),
 			},
 		});
@@ -226,7 +226,7 @@ function createChangeWithSnapshot(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 	data: NewStateRow;
-}): Pick<Change, "id"> {
+}): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
 	const [snapshot] = args.data.snapshot_content
 		? executeSync({
 				lix: { sqlite: args.sqlite },
@@ -250,7 +250,7 @@ function createChangeWithSnapshot(args: {
 				file_id: args.data.file_id,
 				plugin_key: args.data.plugin_key,
 			})
-			.returning("id"),
+			.returning(["id", "schema_key", "file_id", "entity_id"]),
 	});
 
 	return change;

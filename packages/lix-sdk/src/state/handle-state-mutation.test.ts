@@ -11,7 +11,6 @@ test("creates a new change set and updates the version's change set id for mutat
 		.where("name", "=", "main")
 		.executeTakeFirstOrThrow();
 
-
 	const stateBeforeInsert = await lix.db
 		.selectFrom("state")
 		.selectAll()
