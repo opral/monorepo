@@ -1,10 +1,14 @@
 
 
-import { withRef } from '@udecode/cn';
+import type { TExcalidrawElement } from '@udecode/plate-excalidraw';
+import type { PlateElementProps } from '@udecode/plate/react';
+
 import { useExcalidrawElement } from '@udecode/plate-excalidraw/react';
 import { PlateElement } from '@udecode/plate/react';
 
-export const ExcalidrawElement = withRef<typeof PlateElement>((props, ref) => {
+export function ExcalidrawElement(
+  props: PlateElementProps<TExcalidrawElement>
+) {
   const { children, element } = props;
 
   const { Excalidraw, excalidrawProps } = useExcalidrawElement({
@@ -12,7 +16,7 @@ export const ExcalidrawElement = withRef<typeof PlateElement>((props, ref) => {
   });
 
   return (
-    <PlateElement ref={ref} {...props}>
+    <PlateElement {...props}>
       <div contentEditable={false}>
         <div className="mx-auto aspect-video h-[600px] w-[min(100%,600px)] overflow-hidden rounded-sm border">
           {Excalidraw && <Excalidraw {...(excalidrawProps as any)} />}
@@ -21,4 +25,4 @@ export const ExcalidrawElement = withRef<typeof PlateElement>((props, ref) => {
       {children}
     </PlateElement>
   );
-});
+}

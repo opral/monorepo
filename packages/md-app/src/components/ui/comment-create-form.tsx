@@ -1,8 +1,8 @@
 
 
-import React, { useEffect, useMemo } from 'react';
+import * as React from 'react';
 
-import { cn, withProps } from '@udecode/cn';
+import { withProps } from '@udecode/cn';
 import { type Value, nanoid, NodeApi } from '@udecode/plate';
 import { AIPlugin } from '@udecode/plate-ai/react';
 import {
@@ -26,21 +26,18 @@ import { Plate, useEditorRef, usePluginOption } from '@udecode/plate/react';
 import { type CreatePlateEditorOptions, PlateLeaf } from '@udecode/plate/react';
 import { ArrowUpIcon } from 'lucide-react';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   type TDiscussion,
   discussionPlugin,
 } from '@/components/editor/plugins/discussion-plugin';
 import { useCreateEditor } from '@/components/editor/use-create-editor';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar';
 
 import type { TComment } from './comment';
 
 import { AILeaf } from './ai-leaf';
-import { Button } from './button';
 import { DateElement } from './date-element';
 import { Editor, EditorContainer } from './editor';
 import { EmojiInputElement } from './emoji-input-element';
@@ -70,6 +67,7 @@ export const useCommentEditor = (
         // [UnderlinePlugin.key]: withProps(PlateLeaf, { as: 'u' }),
         // [SlashInputPlugin.key]: SlashInputElement,
       },
+      placeholders: false,
       plugins: [BasicMarksPlugin],
       value: [],
       ...options,
@@ -99,16 +97,14 @@ export function CommentCreateForm({
 
   const userInfo = usePluginOption(discussionPlugin, 'currentUser');
   const [commentValue, setCommentValue] = React.useState<Value | undefined>();
-  const commentContent = useMemo(
+  const commentContent = React.useMemo(
     () =>
-      commentValue
-        ? NodeApi.string({ children: commentValue as any, type: 'p' })
-        : '',
+      commentValue ? NodeApi.string({ children: commentValue, type: 'p' }) : '',
     [commentValue]
   );
   const commentEditor = useCommentEditor({}, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (commentEditor && focusOnMount) {
       commentEditor.tf.focus();
     }
@@ -121,7 +117,7 @@ export function CommentCreateForm({
 
     if (discussionId) {
       // Get existing discussion
-      const discussion = discussions.find((d: any) => d.id === discussionId);
+      const discussion = discussions.find((d) => d.id === discussionId);
       if (!discussion) {
         // Mock creating suggestion
         const newDiscussion: TDiscussion = {
@@ -166,7 +162,7 @@ export function CommentCreateForm({
 
       // Filter out old discussion and add updated one
       const updatedDiscussions = discussions
-        .filter((d: any) => d.id !== discussionId)
+        .filter((d) => d.id !== discussionId)
         .concat(updatedDiscussion);
 
       editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
@@ -211,8 +207,7 @@ export function CommentCreateForm({
 
     const id = newDiscussion.id;
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    commentsNodeEntry.forEach(([_, path]) => {
+    commentsNodeEntry.forEach(([, path]) => {
       editor.tf.setNodes(
         {
           [getCommentKey(id)]: true,
@@ -225,7 +220,7 @@ export function CommentCreateForm({
 
   return (
     <div className={cn('flex w-full', className)}>
-      <div className="mt-1 mr-1 shrink-0">
+      <div className="mt-2 mr-1 shrink-0">
         {/* Replace to your own backend or refer to potion */}
         <Avatar className="size-5">
           <AvatarImage alt={userInfo?.name} src={userInfo?.avatarUrl} />
@@ -258,7 +253,7 @@ export function CommentCreateForm({
             <Button
               size="icon"
               variant="ghost"
-              className="absolute right-0 bottom-0 ml-auto shrink-0"
+              className="absolute right-0.5 bottom-0.5 ml-auto shrink-0"
               disabled={commentContent.trim().length === 0}
               onClick={(e) => {
                 e.stopPropagation();

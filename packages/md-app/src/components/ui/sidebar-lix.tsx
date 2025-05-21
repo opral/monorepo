@@ -608,7 +608,7 @@ export function LixSidebar() {
               className="text-destructive focus:text-destructive"
               onClick={() => setShowDeleteProjectsDialog(true)}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-4 w-4 mr-2 text-current" />
               <span>Delete Lix</span>
             </DropdownMenuItem>
 
@@ -620,7 +620,7 @@ export function LixSidebar() {
                   className="text-amber-600 focus:text-amber-600mt-1 pt-1"
                   onClick={handleResetAllOpfs}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 mr-2 text-current" />
                   <span>Reset OPFS (Dev)</span>
                 </DropdownMenuItem>
               </>
@@ -629,11 +629,13 @@ export function LixSidebar() {
         </DropdownMenu>
       </SidebarHeader>
 
-      <SidebarSeparator />
+      <div className="w-full px-2">
+        <SidebarSeparator className="mx-0" />
+      </div>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="flex items-center">
+          <SidebarGroupLabel className="flex items-center pr-0">
             Files {mdFiles.length > 0 && (
               <span className="ml-1.5 text-xs text-muted-foreground">({mdFiles.length})</span>
             )}
@@ -642,25 +644,23 @@ export function LixSidebar() {
               variant="ghost"
               size="icon"
               title="Import Markdown Document"
-              className="flex justify-between items-center mr-1"
               onClick={handleImportFile}
               disabled={isLoading}
             >
-              <Upload className="h-4 w-4" />
+              <Upload className="size-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               title="New File"
-              className="flex justify-between items-center"
               onClick={createNewFile}
               disabled={isLoading}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="size-4" />
             </Button>
           </SidebarGroupLabel>
 
-          <SidebarMenu>
+          <SidebarMenu className="pt-1">
             {mdFiles.map((file) => (
               <SidebarMenuItem key={file.id}>
                 {inlineEditingFile?.id === file.id ? (
@@ -747,7 +747,7 @@ export function LixSidebar() {
                       className="text-destructive focus:text-destructive"
                       onClick={() => setFileToDelete(file.id)}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4 mr-2 text-current" />
                       <span>Delete</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

@@ -1,5 +1,6 @@
 
 
+import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -15,19 +16,16 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  useOpenState,
-} from './dropdown-menu';
+} from '@/components/ui/dropdown-menu';
+
 import { ToolbarButton } from './toolbar';
 import { ExtendedMarkdownPlugin } from '../editor/plugins/markdown/markdown-plugin';
 
 type ImportType = 'html' | 'markdown';
 
-export function ImportToolbarButton({
-  // children,
-  ...props
-}: DropdownMenuProps) {
+export function ImportToolbarButton(props: DropdownMenuProps) {
   const editor = useEditorRef();
-  const openState = useOpenState();
+  const [open, setOpen] = React.useState(false);
 
   const getFileNodes = (text: string, type: ImportType) => {
     if (type === 'html') {
@@ -74,9 +72,9 @@ export function ImportToolbarButton({
   });
 
   return (
-    <DropdownMenu modal={false} {...openState} {...props}>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={openState.open} tooltip="Import" isDropdown>
+        <ToolbarButton pressed={open} tooltip="Import" isDropdown>
           <ArrowUpToLineIcon className="size-4" />
         </ToolbarButton>
       </DropdownMenuTrigger>

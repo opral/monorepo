@@ -1,6 +1,6 @@
 
 
-import React, { useCallback, useState } from 'react';
+import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -9,6 +9,7 @@ import {
   AudioPlugin,
   FilePlugin,
   ImagePlugin,
+  PlaceholderPlugin,
   VideoPlugin,
 } from '@udecode/plate-media/react';
 import { useEditorRef } from '@udecode/plate/react';
@@ -31,16 +32,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from './alert-dialog';
+} from '@/components/ui/alert-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  useOpenState,
-} from './dropdown-menu';
-import { FloatingInput } from './input';
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+
 import {
   ToolbarSplitButton,
   ToolbarSplitButtonPrimary,
@@ -83,21 +84,20 @@ const MEDIA_CONFIG: Record<
 };
 
 export function MediaToolbarButton({
-  // children,
   nodeType,
   ...props
 }: DropdownMenuProps & { nodeType: string }) {
   const currentConfig = MEDIA_CONFIG[nodeType];
 
   const editor = useEditorRef();
-  const openState = useOpenState();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const { openFilePicker } = useFilePicker({
     accept: currentConfig.accept,
     multiple: true,
     onFilesSelected: ({ plainFiles: updatedFiles }) => {
-      (editor as any).tf.insert.media(updatedFiles);
+      editor.getTransforms(PlaceholderPlugin).insert.media(updatedFiles);
     },
   });
 
@@ -110,16 +110,21 @@ export function MediaToolbarButton({
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
-            openState.onOpenChange(true);
+            setOpen(true);
           }
         }}
-        pressed={openState.open}
+        pressed={open}
       >
-        <ToolbarSplitButtonPrimary tooltip={currentConfig.tooltip}>
+        <ToolbarSplitButtonPrimary>
           {currentConfig.icon}
         </ToolbarSplitButtonPrimary>
 
-        <DropdownMenu {...openState} modal={false} {...props}>
+        <DropdownMenu
+          open={open}
+          onOpenChange={setOpen}
+          modal={false}
+          {...props}
+        >
           <DropdownMenuTrigger asChild>
             <ToolbarSplitButtonSecondary />
           </DropdownMenuTrigger>
@@ -171,9 +176,9 @@ function MediaUrlDialogContent({
   setOpen: (value: boolean) => void;
 }) {
   const editor = useEditorRef();
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = React.useState('');
 
-  const embedMedia = useCallback(() => {
+  const embedMedia = React.useCallback(() => {
     if (!isUrl(url)) return toast.error('Invalid URL');
 
     setOpen(false);
@@ -192,7 +197,13 @@ function MediaUrlDialogContent({
       </AlertDialogHeader>
 
       <AlertDialogDescription className="group relative w-full">
-        <FloatingInput
+        <label
+          className="absolute top-1/2 block -translate-y-1/2 cursor-text px-1 text-sm text-muted-foreground/70 transition-all group-focus-within:pointer-events-none group-focus-within:top-0 group-focus-within:cursor-default group-focus-within:text-xs group-focus-within:font-medium group-focus-within:text-foreground has-[+input:not(:placeholder-shown)]:pointer-events-none has-[+input:not(:placeholder-shown)]:top-0 has-[+input:not(:placeholder-shown)]:cursor-default has-[+input:not(:placeholder-shown)]:text-xs has-[+input:not(:placeholder-shown)]:font-medium has-[+input:not(:placeholder-shown)]:text-foreground"
+          htmlFor="url"
+        >
+          <span className="inline-flex bg-background px-2">URL</span>
+        </label>
+        <Input
           id="url"
           className="w-full"
           value={url}
@@ -200,7 +211,6 @@ function MediaUrlDialogContent({
           onKeyDown={(e) => {
             if (e.key === 'Enter') embedMedia();
           }}
-          label="URL"
           placeholder=""
           type="url"
           autoFocus

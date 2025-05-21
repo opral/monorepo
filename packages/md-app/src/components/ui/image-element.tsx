@@ -1,17 +1,20 @@
 
 
+import type { TImageElement } from '@udecode/plate-media';
+import type { PlateElementProps } from '@udecode/plate/react';
 
-import { cn, withRef } from '@udecode/cn';
 import { useDraggable } from '@udecode/plate-dnd';
 import { ImagePlugin, useMediaState } from '@udecode/plate-media/react';
 import { PlateElement } from '@udecode/plate/react';
+
+import { cn } from '@/lib/utils';
 
 import { Caption, CaptionTextarea } from './caption';
 import { LixImage } from './lix-image';
 import { MediaPopover } from './media-popover';
 
-export const ImageElement = withRef<typeof PlateElement>(
-  ({ children, className, ...props }, ref) => {
+export const ImageElement =
+  function ImageElement(props: PlateElementProps<TImageElement>) {
     const { align = 'center', focused, readOnly, selected } = useMediaState();
 
     const { isDragging, handleRef } = useDraggable({
@@ -20,11 +23,7 @@ export const ImageElement = withRef<typeof PlateElement>(
 
     return (
       <MediaPopover plugin={ImagePlugin}>
-        <PlateElement
-          ref={ref}
-          className={cn(className, 'py-2.5')}
-          {...props}
-        >
+        <PlateElement {...props} className="py-2.5">
           <figure className="group relative m-0" contentEditable={false}>
             <div ref={handleRef} style={{ width: '100%' }}>
               <LixImage
@@ -34,11 +33,10 @@ export const ImageElement = withRef<typeof PlateElement>(
                   focused && selected && 'ring-2 ring-ring ring-offset-2',
                   isDragging && 'opacity-50'
                 )}
-                alt={props.element.alt as string || ''}
-                src={props.element.url as string || ''}
+                alt={(props.attributes as any).alt}
+                src={props.element.url || ''}
               />
             </div>
-
             <Caption align={align}>
               <CaptionTextarea
                 readOnly={readOnly}
@@ -50,9 +48,8 @@ export const ImageElement = withRef<typeof PlateElement>(
             </Caption>
           </figure>
 
-          {children}
+          {props.children}
         </PlateElement>
-      </MediaPopover>
+      </MediaPopover >
     );
   }
-);

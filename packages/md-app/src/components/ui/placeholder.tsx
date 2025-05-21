@@ -1,8 +1,7 @@
 
 
-import React from 'react';
+import * as React from 'react';
 
-import { cn } from '@udecode/cn';
 import { HEADING_KEYS } from '@udecode/plate-heading';
 import { ParagraphPlugin } from '@udecode/plate/react';
 import {
@@ -12,6 +11,7 @@ import {
   usePlaceholderState,
 } from '@udecode/plate/react';
 import { getModKey } from '@/helper/modKey';
+import { cn } from '@/lib/utils';
 
 export const Placeholder = (props: PlaceholderProps) => {
   const { attributes, children, placeholder } = props;

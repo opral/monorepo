@@ -1,5 +1,6 @@
 
 
+import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
@@ -10,6 +11,7 @@ import {
   serializeHtml,
   SlateLeaf,
 } from '@udecode/plate';
+// import { BaseAlignPlugin } from '@udecode/plate-alignment';
 import {
   BaseBoldPlugin,
   BaseCodePlugin,
@@ -70,6 +72,13 @@ import { useEditorRef } from '@udecode/plate/react';
 import { all, createLowlight } from 'lowlight';
 import { ArrowDownToLineIcon } from 'lucide-react';
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { BlockquoteElementStatic } from '@/components/ui/blockquote-element-static';
 import { CodeBlockElementStatic } from '@/components/ui/code-block-element-static';
 import { CodeLeafStatic } from '@/components/ui/code-leaf-static';
@@ -83,10 +92,7 @@ import { HeadingElementStatic } from '@/components/ui/heading-element-static';
 import { HighlightLeafStatic } from '@/components/ui/highlight-leaf-static';
 import { HrElementStatic } from '@/components/ui/hr-element-static';
 import { ImageElementStatic } from '@/components/ui/image-element-static';
-import {
-  FireLiComponent,
-  FireMarker,
-} from '@/components/ui/indent-fire-marker';
+import { FireLiComponent, FireMarker } from '@/components/ui/indent-fire-marker';
 import {
   TodoLiStatic,
   TodoMarkerStatic,
@@ -107,14 +113,6 @@ import { TableRowElementStatic } from '@/components/ui/table-row-element-static'
 import { TocElementStatic } from '@/components/ui/toc-element-static';
 import { ToggleElementStatic } from '@/components/ui/toggle-element-static';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  useOpenState,
-} from './dropdown-menu';
 import { EditorStatic } from './editor-static';
 import { EquationElementStatic } from './equation-element-static';
 import { InlineEquationElementStatic } from './inline-equation-element-static';
@@ -124,12 +122,9 @@ import { ExtendedMarkdownPlugin } from '../editor/plugins/markdown/markdown-plug
 const siteUrl = 'https://platejs.org';
 const lowlight = createLowlight(all);
 
-export function ExportToolbarButton({
-  // children,
-  ...props
-}: DropdownMenuProps) {
+export function ExportToolbarButton(props: DropdownMenuProps) {
   const editor = useEditorRef();
-  const openState = useOpenState();
+  const [open, setOpen] = React.useState(false);
 
   const getCanvas = async () => {
     const { default: html2canvas } = await import('html2canvas-pro');
@@ -380,9 +375,9 @@ export function ExportToolbarButton({
   };
 
   return (
-    <DropdownMenu modal={false} {...openState} {...props}>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={openState.open} tooltip="Export" isDropdown>
+        <ToolbarButton pressed={open} tooltip="Export" isDropdown>
           <ArrowDownToLineIcon className="size-4" />
         </ToolbarButton>
       </DropdownMenuTrigger>

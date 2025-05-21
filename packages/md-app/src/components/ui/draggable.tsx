@@ -1,8 +1,7 @@
 
 
-import React, { useMemo } from 'react';
+import * as React from 'react';
 
-import { cn, withRef } from '@udecode/cn';
 import { isType } from '@udecode/plate';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
@@ -35,9 +34,14 @@ import {
 import { useReadOnly, useSelected } from '@udecode/plate/react';
 import { GripVertical } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import { STRUCTURAL_TYPES } from '@/components/editor/transforms';
-
-import { TooltipButton } from './tooltip';
 
 const UNDRAGGABLE_KEYS = [
   ColumnItemPlugin.key,
@@ -49,7 +53,7 @@ export const DraggableAboveNodes: RenderNodeWrapper = (props) => {
   const { editor, element, path } = props;
   const readOnly = useReadOnly();
 
-  const enabled = useMemo(() => {
+  const enabled = React.useMemo(() => {
     if (readOnly) return false;
     if (path.length === 1 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
       return true;
@@ -87,80 +91,80 @@ export const DraggableAboveNodes: RenderNodeWrapper = (props) => {
   return (props) => <Draggable {...props} />;
 };
 
-export const Draggable = withRef<'div', PlateElementProps>(
-  ({ className, ...props }, ref) => {
-    const { children, editor, element, path } = props;
-    const blockSelectionApi =
-      editor.getApi(BlockSelectionPlugin).blockSelection;
-    const { isDragging, previewRef, handleRef } = useDraggable({
-      element,
-      onDropHandler: (_, { dragItem }) => {
-        const id = (dragItem as any).id;
+export function Draggable(props: PlateElementProps) {
+  const { children, editor, element, path } = props;
+  const blockSelectionApi = editor.getApi(BlockSelectionPlugin).blockSelection;
+  const { isDragging, previewRef, handleRef } = useDraggable({
+    element,
+    onDropHandler: (_, { dragItem }) => {
+      const id = (dragItem as { id: string }).id;
 
-        if (blockSelectionApi && id) {
-          blockSelectionApi.set(id);
-        }
-      },
-    });
+      if (blockSelectionApi && id) {
+        blockSelectionApi.set(id);
+      }
+    },
+  });
 
-    const isInColumn = path.length === 3;
-    const isInTable = path.length === 4;
+  const isInColumn = path.length === 3;
+  const isInTable = path.length === 4;
 
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'relative',
-          isDragging && 'opacity-50',
-          STRUCTURAL_TYPES.includes(element.type) ? 'group/structural' : 'group',
-          className
-        )}
-      >
-        {!isInTable && (
-          <Gutter>
+  return (
+    <div
+      className={cn(
+        'relative',
+        isDragging && 'opacity-50',
+        STRUCTURAL_TYPES.includes(element.type) ? 'group/structural' : 'group'
+      )}
+    >
+      {!isInTable && (
+        <Gutter>
+          <div
+            className={cn(
+              'slate-blockToolbarWrapper',
+              'flex h-[1.5em]',
+              isType(editor, element, [
+                HEADING_KEYS.h1,
+                HEADING_KEYS.h2,
+                HEADING_KEYS.h3,
+                HEADING_KEYS.h4,
+                HEADING_KEYS.h5,
+              ]) && 'h-[1.3em]',
+              isInColumn && 'h-4'
+            )}
+          >
             <div
               className={cn(
-                'slate-blockToolbarWrapper',
-                'flex h-[1.5em]',
-                isType(editor, element, [
-                  HEADING_KEYS.h1,
-                  HEADING_KEYS.h2,
-                  HEADING_KEYS.h3,
-                  HEADING_KEYS.h4,
-                  HEADING_KEYS.h5,
-                ]) && 'h-[1.3em]',
-                isInColumn && 'h-4'
+                'slate-blockToolbar',
+                'pointer-events-auto mr-1 flex items-center',
+                isInColumn && 'mr-1.5'
               )}
             >
-              <div
-                className={cn(
-                  'slate-blockToolbar',
-                  'pointer-events-auto mr-1 flex items-center',
-                  isInColumn && 'mr-1.5'
-                )}
+              <Button
+                ref={handleRef}
+                variant="ghost"
+                className="h-6 w-4.5 p-0"
+                data-plate-prevent-deselect
               >
-                <div ref={handleRef} className="size-4">
-                  <DragHandle />
-                </div>
-              </div>
+                <DragHandle />
+              </Button>
             </div>
-          </Gutter>
-        )}
+          </div>
+        </Gutter>
+      )}
 
-        <div ref={previewRef} className="slate-blockWrapper">
-          <MemoizedChildren>{children}</MemoizedChildren>
-
-          <DropLine />
-        </div>
+      <div ref={previewRef} className="slate-blockWrapper">
+        <MemoizedChildren>{children}</MemoizedChildren>
+        <DropLine />
       </div>
-    );
-  }
-);
+    </div>
+  );
+}
 
-const Gutter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ children, className, ...props }, ref) => {
+function Gutter({
+  children,
+  className,
+  ...props
+}: React.ComponentProps<'div'>) {
   const editor = useEditorRef();
   const element = useElement();
   const path = usePath();
@@ -176,10 +180,10 @@ const Gutter = React.forwardRef<
 
   return (
     <div
-      ref={ref}
+      {...props}
       className={cn(
         'slate-gutterLeft',
-        'absolute -top-px z-50 flex h-full -translate-x-full cursor-text hover:opacity-100 sm:opacity-0',
+        'absolute top-0 z-50 flex h-full -translate-x-full cursor-text hover:opacity-100 sm:opacity-0',
         STRUCTURAL_TYPES.includes(element.type)
           ? 'group-hover/structural:opacity-100'
           : 'group-hover:opacity-100',
@@ -189,9 +193,9 @@ const Gutter = React.forwardRef<
         isNodeType(HEADING_KEYS.h2) && 'pb-1 text-[1.5em]',
         isNodeType(HEADING_KEYS.h3) && 'pt-[2px] pb-1 text-[1.25em]',
         isNodeType([HEADING_KEYS.h4, HEADING_KEYS.h5]) &&
-          'pt-[3px] pb-0 text-[1.1em]',
+        'pt-1 pb-0 text-[1.1em]',
         isNodeType(HEADING_KEYS.h6) && 'pb-0',
-        isNodeType(ParagraphPlugin.key) && 'pt-[3px] pb-0',
+        isNodeType(ParagraphPlugin.key) && 'pt-1 pb-0',
         isNodeType(['ul', 'ol']) && 'pb-0',
         isNodeType(BlockquotePlugin.key) && 'pb-0',
         isNodeType(CodeBlockPlugin.key) && 'pt-6 pb-0',
@@ -207,55 +211,55 @@ const Gutter = React.forwardRef<
         className
       )}
       contentEditable={false}
-      {...props}
     >
       {children}
     </div>
   );
-});
+}
 
-const DragHandle = React.memo(() => {
+const DragHandle = React.memo(function DragHandle() {
   const editor = useEditorRef();
   const element = useElement();
 
   return (
-    <TooltipButton
-      variant="ghost"
-      className="h-6 w-4.5 p-0"
-      onClick={() => {
-        editor
-          .getApi(BlockSelectionPlugin)
-          .blockSelection.set(element.id as string);
-      }}
-      data-plate-prevent-deselect
-      tooltip="Drag to move"
-    >
-      <GripVertical className="text-muted-foreground" />
-    </TooltipButton>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div
+          className="flex size-full items-center justify-center"
+          onClick={() => {
+            editor
+              .getApi(BlockSelectionPlugin)
+              .blockSelection.set(element.id as string);
+          }}
+          role="button"
+        >
+          <GripVertical className="text-muted-foreground" />
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>Drag to move</TooltipContent>
+    </Tooltip>
   );
 });
 
-const DropLine = React.memo(
-  React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-    ({ className, ...props }, ref) => {
-      const { dropLine } = useDropLine();
+const DropLine = React.memo(function DropLine({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) {
+  const { dropLine } = useDropLine();
 
-      if (!dropLine) return null;
+  if (!dropLine) return null;
 
-      return (
-        <div
-          ref={ref}
-          {...props}
-          className={cn(
-            'slate-dropLine',
-            'absolute inset-x-0 h-0.5 opacity-100 transition-opacity',
-            'bg-brand/50',
-            dropLine === 'top' && '-top-px',
-            dropLine === 'bottom' && '-bottom-px',
-            className
-          )}
-        />
-      );
-    }
-  )
-);
+  return (
+    <div
+      {...props}
+      className={cn(
+        'slate-dropLine',
+        'absolute inset-x-0 h-0.5 opacity-100 transition-opacity',
+        'bg-brand/50',
+        dropLine === 'top' && '-top-px',
+        dropLine === 'bottom' && '-bottom-px',
+        className
+      )}
+    />
+  );
+});

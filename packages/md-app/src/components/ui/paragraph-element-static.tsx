@@ -1,17 +1,14 @@
 
 import type { SlateElementProps } from '@udecode/plate';
 
-import { cn } from '@udecode/cn';
 import { SlateElement } from '@udecode/plate';
 
-export const ParagraphElementStatic = ({
-  children,
-  className,
-  ...props
-}: SlateElementProps) => {
+import { cn } from '@/lib/utils';
+
+export function ParagraphElementStatic(props: SlateElementProps) {
   return (
-    <SlateElement className={cn(className, 'm-0 px-0 py-1')} {...props}>
-      {children}
+    <SlateElement {...props} className={cn('m-0 px-0 py-1')}>
+      {props.children}
     </SlateElement>
   );
-};
+}

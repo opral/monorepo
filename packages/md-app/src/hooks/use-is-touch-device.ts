@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import * as React from "react";
 
 export function useIsTouchDevice() {
-	const [isTouchDevice, setIsTouchDevice] = useState(false);
+	const [isTouchDevice, setIsTouchDevice] = React.useState(false);
 
-	useEffect(() => {
+	React.useEffect(() => {
 		function onResize() {
 			setIsTouchDevice(
 				"ontouchstart" in window ||

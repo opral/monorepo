@@ -1,6 +1,6 @@
 
 
-import { useCallback, useState } from 'react';
+import * as React from 'react';
 
 import { AIChatPlugin } from '@udecode/plate-ai/react';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
@@ -17,8 +17,6 @@ import {
   usePlateState,
 } from '@udecode/plate/react';
 
-import { useIsTouchDevice } from '@/hooks/use-is-touch-device';
-
 import {
   ContextMenu,
   ContextMenuContent,
@@ -28,17 +26,18 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from './context-menu';
+} from '@/components/ui/context-menu';
+import { useIsTouchDevice } from '@/hooks/use-is-touch-device';
 
 type Value = 'askAI' | null;
 
 export function BlockContextMenu({ children }: { children: React.ReactNode }) {
   const { api, editor } = useEditorPlugin(BlockMenuPlugin);
-  const [value, setValue] = useState<Value>(null);
+  const [value, setValue] = React.useState<Value>(null);
   const isTouch = useIsTouchDevice();
   const [readOnly] = usePlateState('readOnly');
 
-  const handleTurnInto = useCallback(
+  const handleTurnInto = React.useCallback(
     (type: string) => {
       editor
         .getApi(BlockSelectionPlugin)
@@ -56,7 +55,7 @@ export function BlockContextMenu({ children }: { children: React.ReactNode }) {
     [editor]
   );
 
-  // const handleAlign = useCallback(
+  // const handleAlign = React.useCallback(
   //   (align: 'center' | 'left' | 'right') => {
   //     editor
   //       .getTransforms(BlockSelectionPlugin)

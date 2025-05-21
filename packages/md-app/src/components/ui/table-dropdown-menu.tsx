@@ -1,10 +1,9 @@
 
 
-import { useState } from 'react';
+import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
-import { cn } from '@udecode/cn';
 import { TablePlugin, useTableMergeState } from '@udecode/plate-table/react';
 import { useEditorPlugin, useEditorSelector } from '@udecode/plate/react';
 import {
@@ -29,8 +28,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-  useOpenState,
-} from './dropdown-menu';
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+
 import { ToolbarButton } from './toolbar';
 
 export function TableDropdownMenu(props: DropdownMenuProps) {
@@ -40,13 +40,13 @@ export function TableDropdownMenu(props: DropdownMenuProps) {
   );
 
   const { editor, tf } = useEditorPlugin(TablePlugin);
-  const openState = useOpenState();
+  const [open, setOpen] = React.useState(false);
   const mergeState = useTableMergeState();
 
   return (
-    <DropdownMenu modal={false} {...openState} {...props}>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={openState.open} tooltip="Table" isDropdown>
+        <ToolbarButton pressed={open} tooltip="Table" isDropdown>
           <Table />
         </ToolbarButton>
       </DropdownMenuTrigger>
@@ -57,8 +57,8 @@ export function TableDropdownMenu(props: DropdownMenuProps) {
       >
         <DropdownMenuGroup>
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Grid3x3Icon />
+            <DropdownMenuSubTrigger className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              <Grid3x3Icon className="size-4" />
               <span>Table</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent className="m-0 p-0">
@@ -67,7 +67,10 @@ export function TableDropdownMenu(props: DropdownMenuProps) {
           </DropdownMenuSub>
 
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger disabled={!tableSelected}>
+            <DropdownMenuSubTrigger
+              className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              disabled={!tableSelected}
+            >
               <div className="size-4" />
               <span>Cell</span>
             </DropdownMenuSubTrigger>
@@ -98,7 +101,10 @@ export function TableDropdownMenu(props: DropdownMenuProps) {
           </DropdownMenuSub>
 
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger disabled={!tableSelected}>
+            <DropdownMenuSubTrigger
+              className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              disabled={!tableSelected}
+            >
               <div className="size-4" />
               <span>Row</span>
             </DropdownMenuSubTrigger>
@@ -140,7 +146,10 @@ export function TableDropdownMenu(props: DropdownMenuProps) {
           </DropdownMenuSub>
 
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger disabled={!tableSelected}>
+            <DropdownMenuSubTrigger
+              className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              disabled={!tableSelected}
+            >
               <div className="size-4" />
               <span>Column</span>
             </DropdownMenuSubTrigger>
@@ -201,7 +210,7 @@ export function TableDropdownMenu(props: DropdownMenuProps) {
 export function TablePicker() {
   const { editor, tf } = useEditorPlugin(TablePlugin);
 
-  const [tablePicker, setTablePicker] = useState({
+  const [tablePicker, setTablePicker] = React.useState({
     grid: Array.from({ length: 8 }, () => Array.from({ length: 8 }).fill(0)),
     size: { colCount: 0, rowCount: 0 },
   });

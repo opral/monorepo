@@ -1,6 +1,6 @@
 
 
-import React, { useEffect } from 'react';
+import * as React from 'react';
 
 import type { WithRequiredKey } from '@udecode/plate';
 
@@ -18,13 +18,22 @@ import {
   useRemoveNodeButton,
   useSelected,
 } from '@udecode/plate/react';
+import { cva } from 'class-variance-authority';
 import { Link, Trash2Icon } from 'lucide-react';
 
-import { Button, buttonVariants } from './button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+
 import { CaptionButton } from './caption';
-import { inputVariants } from './input';
-import { Popover, PopoverAnchor, PopoverContent } from './popover';
-import { Separator } from './separator';
+
+const inputVariants = cva(
+  'flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:ring-transparent focus-visible:outline-none md:text-sm'
+);
 
 export interface MediaPopoverProps {
   children: React.ReactNode;
@@ -45,7 +54,7 @@ export function MediaPopover({ children, plugin }: MediaPopoverProps) {
     !readOnly && selected && selectionCollapsed && !isImagePreviewOpen;
   const isEditing = useFloatingMediaValue('isEditing');
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isOpen && isEditing) {
       FloatingMediaStore.set('isEditing', false);
     }
@@ -72,7 +81,7 @@ export function MediaPopover({ children, plugin }: MediaPopoverProps) {
               </div>
 
               <FloatingMediaPrimitive.UrlInput
-                className={inputVariants({ h: 'sm', variant: 'ghost' })}
+                className={inputVariants()}
                 placeholder="Paste the embed link..."
                 options={{ plugin }}
               />

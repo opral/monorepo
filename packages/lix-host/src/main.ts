@@ -66,38 +66,75 @@ const CHUNKING_REGEXPS = {
  * @param buffer - The buffer to detect the first chunk in.
  * @returns The first detected chunk, or `undefined` if no chunk was detected.
  */
-type ChunkDetector = (buffer: string) => string | null | undefined;
-type Delayer = (buffer: string) => number;
+export type ChunkDetector = (buffer: string) => string | null | undefined;
 
+type delayer = (buffer: string) => number;
+
+/**
+ * Smooths text streaming output.
+ *
+ * @param delayInMs - The delay in milliseconds between each chunk. Defaults to
+ *   10ms. Can be set to `null` to skip the delay.
+ * @param chunking - Controls how the text is chunked for streaming. Use "word"
+ *   to stream word by word (default), "line" to stream line by line, or provide
+ *   a custom RegExp pattern for custom chunking.
+ * @returns A transform stream that smooths text streaming output.
+ */
 function smoothStream<TOOLS extends ToolSet>({
   _internal: { delay = originalDelay } = {},
   chunking = "word",
   delayInMs = 10,
 }: {
+  /** Internal. For test use only. May change without notice. */
   _internal?: {
     delay?: (delayInMs: number | null) => Promise<void>;
   };
   chunking?: ChunkDetector | RegExp | "line" | "word";
-  delayInMs?: Delayer | number | null;
-} = {}) {
+  delayInMs?: delayer | number | null;
+} = {}): (options: {
+  tools: TOOLS;
+}) => TransformStream<TextStreamPart<TOOLS>, TextStreamPart<TOOLS>> {
   let detectChunk: ChunkDetector;
 
   if (typeof chunking === "function") {
-    detectChunk = chunking;
+    detectChunk = (buffer) => {
+      const match = chunking(buffer);
+
+      if (match == null) {
+        return null;
+      }
+
+      if (match.length === 0) {
+        throw new Error(`Chunking function must return a non-empty string.`);
+      }
+
+      if (!buffer.startsWith(match)) {
+        throw new Error(
+          `Chunking function must return a match that is a prefix of the buffer. Received: "${match}" expected to start with "${buffer}"`
+        );
+      }
+
+      return match;
+    };
   } else {
     const chunkingRegex =
       typeof chunking === "string" ? CHUNKING_REGEXPS[chunking] : chunking;
-    if (!chunkingRegex) {
+
+    if (chunkingRegex == null) {
       throw new InvalidArgumentError({
         argument: "chunking",
-        message: `Invalid chunking type`,
+        message: `Chunking must be "word" or "line" or a RegExp. Received: ${chunking}`,
       });
     }
 
     detectChunk = (buffer) => {
       const match = chunkingRegex.exec(buffer);
-      if (!match) return null;
-      return buffer.slice(0, match.index) + match[0];
+
+      if (!match) {
+        return null;
+      }
+
+      return buffer.slice(0, match.index) + match?.[0];
     };
   }
 
@@ -108,9 +145,10 @@ function smoothStream<TOOLS extends ToolSet>({
       async transform(chunk, controller) {
         if (chunk.type !== "text-delta") {
           if (buffer.length > 0) {
-            controller.enqueue({ type: "text-delta", textDelta: buffer });
+            controller.enqueue({ textDelta: buffer, type: "text-delta" });
             buffer = "";
           }
+
           controller.enqueue(chunk);
           return;
         }
@@ -118,14 +156,17 @@ function smoothStream<TOOLS extends ToolSet>({
         buffer += chunk.textDelta;
 
         let match;
+
         while ((match = detectChunk(buffer)) != null) {
-          controller.enqueue({ type: "text-delta", textDelta: match });
+          controller.enqueue({ textDelta: match, type: "text-delta" });
           buffer = buffer.slice(match.length);
-          const ms =
+
+          const _delayInMs =
             typeof delayInMs === "number"
               ? delayInMs
               : (delayInMs?.(buffer) ?? 10);
-          await delay(ms);
+
+          await delay(_delayInMs);
         }
       },
     });
@@ -166,41 +207,51 @@ app.post("/api/ai/command", async (req, res) => {
       abortSignal: signal,
       experimental_transform: smoothStream({
         chunking: (buffer) => {
+          // Check for code block markers
           if (/```[^\s]+/.test(buffer)) {
             isInCodeBlock = true;
           } else if (isInCodeBlock && buffer.includes("```")) {
             isInCodeBlock = false;
           }
-
-          if (buffer.includes("http") || buffer.includes("https")) {
+          // test case: should not deserialize link with markdown syntax
+          if (buffer.includes("http")) {
+            isInLink = true;
+          } else if (buffer.includes("https")) {
             isInLink = true;
           } else if (buffer.includes("\n") && isInLink) {
             isInLink = false;
           }
-
           if (buffer.includes("*") || buffer.includes("-")) {
             isInList = true;
           } else if (buffer.includes("\n") && isInList) {
             isInList = false;
           }
-
+          // Simple table detection: enter on |, exit on double newline
           if (!isInTable && buffer.includes("|")) {
             isInTable = true;
           } else if (isInTable && buffer.includes("\n\n")) {
             isInTable = false;
           }
 
+          // Use line chunking for code blocks and tables, word chunking otherwise
+          // Choose the appropriate chunking strategy based on content type
           let match;
+
           if (isInCodeBlock || isInTable || isInLink) {
+            // Use line chunking for code blocks and tables
             match = CHUNKING_REGEXPS.line.exec(buffer);
           } else if (isInList) {
+            // Use list chunking for lists
             match = CHUNKING_REGEXPS.list.exec(buffer);
           } else {
+            // Use word chunking for regular text
             match = CHUNKING_REGEXPS.word.exec(buffer);
           }
+          if (!match) {
+            return null;
+          }
 
-          if (!match) return null;
-          return buffer.slice(0, match.index) + match[0];
+          return buffer.slice(0, match.index) + match?.[0];
         },
         delayInMs: () => (isInCodeBlock || isInTable ? 100 : 30),
       }),

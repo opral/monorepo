@@ -5,7 +5,7 @@ import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 import { BlockSelection } from '@/components/ui/block-selection';
 import { ExtendedMarkdownPlugin } from "./markdown/markdown-plugin";
 
-export const blockSelectionPlugins: any = [
+export const blockSelectionPlugins = [
   BlockSelectionPlugin.configure(({ editor }) => ({
     options: {
       enableContextMenu: true,
@@ -37,7 +37,8 @@ export const blockSelectionPlugins: any = [
     },
     render: {
       belowRootNodes: (props) => {
-        if (!props.className?.includes('slate-selectable')) return null;
+        if (!props.attributes.className?.includes('slate-selectable'))
+          return null;
 
         return <BlockSelection />;
       },
@@ -45,7 +46,7 @@ export const blockSelectionPlugins: any = [
   })),
 ] as const;
 
-export const blockSelectionReadOnlyPlugin: any = BlockSelectionPlugin.configure({
+export const blockSelectionReadOnlyPlugin = BlockSelectionPlugin.configure({
   api: {},
   extendEditor: null,
   handlers: {},

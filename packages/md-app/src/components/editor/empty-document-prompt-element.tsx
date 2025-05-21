@@ -167,6 +167,7 @@ export function EmptyDocumentPromptElement({
             <Button
               type="button"
               variant="secondary"
+              size="sm"
               onClick={handleDismiss}
               disabled={isLoading}
             >
@@ -174,6 +175,7 @@ export function EmptyDocumentPromptElement({
             </Button>)}
           <Button
             type="submit"
+            size="sm"
             disabled={isLoading || !prompt.trim()}
           >
             {isLoading ?

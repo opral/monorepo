@@ -11,6 +11,7 @@ import {
 	// UnderlinePlugin,
 } from "@udecode/plate-basic-marks/react";
 import { BlockquotePlugin } from "@udecode/plate-block-quote/react";
+// import { CalloutPlugin } from "@udecode/plate-callout/react";
 import {
 	CodeBlockPlugin,
 	CodeLinePlugin,
@@ -65,6 +66,7 @@ import { FixedToolbarPlugin } from "@/components/editor/plugins/fixed-toolbar-pl
 import { FloatingToolbarPlugin } from "@/components/editor/plugins/floating-toolbar-plugin";
 import { AILeaf } from "@/components/ui/ai-leaf";
 import { BlockquoteElement } from "@/components/ui/blockquote-element";
+// import { CalloutElement } from "@/components/ui/callout-element";
 import { CodeBlockElement } from "@/components/ui/code-block-element";
 import { CodeLeaf } from "@/components/ui/code-leaf";
 import { CodeLineElement } from "@/components/ui/code-line-element";
@@ -119,6 +121,7 @@ export const viewComponents = {
 	[AudioPlugin.key]: MediaAudioElement,
 	[BlockquotePlugin.key]: BlockquoteElement,
 	[BoldPlugin.key]: withProps(PlateLeaf, { as: "strong" }),
+	// [CalloutPlugin.key]: CalloutElement,
 	[CodeBlockPlugin.key]: CodeBlockElement,
 	[CodeLinePlugin.key]: CodeLineElement,
 	[CodePlugin.key]: CodeLeaf,
@@ -178,20 +181,26 @@ export const useCreateEditor = (
 	{
 		components,
 		override,
+		placeholders,
 		readOnly,
 		...options
 	}: {
 		components?: Record<string, any>;
+		placeholders?: boolean;
 		plugins?: any[];
 		readOnly?: boolean;
 	} & Omit<CreatePlateEditorOptions, "plugins"> = {},
 	deps: any[] = []
 ) => {
-	return usePlateEditor<Value>(
+	return usePlateEditor<Value, (typeof editorPlugins)[number]>(
 		{
 			override: {
 				components: {
-					...(readOnly ? viewComponents : withPlaceholders(editorComponents)),
+					...(readOnly
+						? viewComponents
+						: placeholders
+							? withPlaceholders(editorComponents)
+							: editorComponents),
 					...components,
 				},
 				...override,

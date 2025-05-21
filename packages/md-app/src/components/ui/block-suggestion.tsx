@@ -1,6 +1,6 @@
 
 
-import React, { useMemo, useState } from 'react';
+import * as React from 'react';
 
 import type {
   TResolvedSuggestion,
@@ -8,7 +8,6 @@ import type {
   TSuggestionText,
 } from '@udecode/plate-suggestion';
 
-import { cn } from '@udecode/cn';
 import {
   type NodeEntry,
   type Path,
@@ -50,14 +49,15 @@ import {
 } from '@udecode/plate/react';
 import { CheckIcon, XIcon } from 'lucide-react';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   type TDiscussion,
   discussionPlugin,
 } from '@/components/editor/plugins/discussion-plugin';
 import { suggestionPlugin } from '@/components/editor/plugins/suggestion-plugin';
 
-import { Avatar, AvatarFallback, AvatarImage } from './avatar';
-import { Button } from './button';
 import { type TComment, Comment, formatCommentDate } from './comment';
 import { CommentCreateForm } from './comment-create-form';
 
@@ -124,7 +124,7 @@ export const BlockSuggestionCard = ({
     });
   };
 
-  const [hovering, setHovering] = useState(false);
+  const [hovering, setHovering] = React.useState(false);
 
   const suggestionText2Array = (text: string) => {
     if (text === BLOCK_SUGGESTION) return ['line breaks'];
@@ -132,7 +132,7 @@ export const BlockSuggestionCard = ({
     return text.split(BLOCK_SUGGESTION).filter(Boolean);
   };
 
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = React.useState<string | null>(null);
 
   return (
     <div
@@ -318,7 +318,7 @@ export const useResolveSuggestion = (
     setOption('uniquePathMap', new Map(map).set(id, blockPath));
   });
 
-  const resolvedSuggestion: ResolvedSuggestion[] = useMemo(() => {
+  const resolvedSuggestion: ResolvedSuggestion[] = React.useMemo(() => {
     const map = getOption('uniquePathMap');
 
     if (suggestionNodes.length === 0) return [];

@@ -17,14 +17,20 @@ import {
   useHotkeys,
   usePluginOption,
 } from '@udecode/plate/react';
+import { Command as CommandPrimitive } from 'cmdk';
 import { Loader2Icon } from 'lucide-react';
 
+import { Command, CommandList } from '@/components/ui/command';
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import { useChat } from '@/components/editor/use-chat';
 
 import { AIChatEditor } from './ai-chat-editor';
 import { AIMenuItems } from './ai-menu-items';
-import { Command, CommandList, InputCommand } from './command';
-import { Popover, PopoverAnchor, PopoverContent } from './popover';
 
 export function AIMenu() {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
@@ -149,9 +155,12 @@ export function AIMenu() {
               {messages.length > 1 ? 'Editing...' : 'Thinking...'}
             </div>
           ) : (
-            <InputCommand
-              variant="ghost"
-              className="rounded-none border-b border-solid border-border [&_svg]:hidden"
+            <CommandPrimitive.Input
+              className={cn(
+                'flex h-9 w-full min-w-0 border-input bg-transparent px-3 py-1 text-base transition-[color,box-shadow] outline-none placeholder:text-muted-foreground md:text-sm dark:bg-input/30',
+                'aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
+                'border-b focus-visible:ring-transparent'
+              )}
               value={input}
               onKeyDown={(e) => {
                 if (isHotkey('backspace')(e) && input.length === 0) {

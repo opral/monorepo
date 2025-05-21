@@ -1,10 +1,9 @@
 
-import {
-  cn,
-  createPrimitiveComponent,
-  withCn,
-  withVariants,
-} from '@udecode/cn';
+import * as React from 'react';
+
+import type { VariantProps } from 'class-variance-authority';
+
+import { createPrimitiveComponent } from '@udecode/cn';
 import {
   Caption as CaptionPrimitive,
   CaptionTextarea as CaptionTextareaPrimitive,
@@ -13,7 +12,8 @@ import {
 } from '@udecode/plate-caption/react';
 import { cva } from 'class-variance-authority';
 
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const captionVariants = cva('max-w-full', {
   defaultVariants: {
@@ -28,18 +28,35 @@ const captionVariants = cva('max-w-full', {
   },
 });
 
-export const Caption = withVariants(CaptionPrimitive, captionVariants, [
-  'align',
-]);
+export function Caption({
+  align,
+  className,
+  ...props
+}: React.ComponentProps<typeof CaptionPrimitive> &
+  VariantProps<typeof captionVariants>) {
+  return (
+    <CaptionPrimitive
+      {...props}
+      className={cn(captionVariants({ align }), className)}
+    />
+  );
+}
 
-export const CaptionTextarea = withCn(
-  CaptionTextareaPrimitive,
-  cn(
-    'mt-2 w-full resize-none border-none bg-inherit p-0 font-[inherit] text-inherit',
-    'focus:outline-none focus:[&::placeholder]:opacity-0',
-    'text-center print:placeholder:text-transparent'
-  )
-);
+export function CaptionTextarea(
+  props: React.ComponentProps<typeof CaptionTextareaPrimitive>
+) {
+  return (
+    <CaptionTextareaPrimitive
+      {...props}
+      className={cn(
+        'mt-2 w-full resize-none border-none bg-inherit p-0 font-[inherit] text-inherit',
+        'focus:outline-none focus:[&::placeholder]:opacity-0',
+        'text-center print:placeholder:text-transparent',
+        props.className
+      )}
+    />
+  );
+}
 
 export const CaptionButton: any = createPrimitiveComponent(Button)({
   propsHook: useCaptionButton,

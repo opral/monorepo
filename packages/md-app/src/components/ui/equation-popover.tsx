@@ -1,13 +1,12 @@
 
 
-import { useEffect } from 'react';
+import * as React from 'react';
 import TextareaAutosize, {
   type TextareaAutosizeProps,
 } from 'react-textarea-autosize';
 
 import type { TEquationElement } from '@udecode/plate-math';
 
-import { cn } from '@udecode/cn';
 import { useEquationInput } from '@udecode/plate-math/react';
 import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 import {
@@ -18,8 +17,9 @@ import {
 } from '@udecode/plate/react';
 import { CornerDownLeftIcon } from 'lucide-react';
 
-import { Button } from './button';
-import { PopoverContent } from './popover';
+import { Button } from '@/components/ui/button';
+import { PopoverContent } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,
@@ -40,7 +40,7 @@ const EquationPopoverContent = ({
   const readOnly = useReadOnly();
   const element = useElement<TEquationElement>();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isInline && open) {
       setOpen(true);
     }
@@ -52,7 +52,7 @@ const EquationPopoverContent = ({
     setOpen(false);
 
     if (isInline) {
-      editor.tf.select(element, { next: true });
+      editor.tf.select(element, { focus: true, next: true });
     } else {
       editor
         .getApi(BlockSelectionPlugin)

@@ -1,6 +1,6 @@
 
 
-import React from 'react';
+import * as React from 'react';
 
 import { getDraftCommentKey } from '@udecode/plate-comments';
 import { useEditorPlugin } from '@udecode/plate/react';
