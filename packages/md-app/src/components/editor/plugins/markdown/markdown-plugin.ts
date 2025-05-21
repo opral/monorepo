@@ -9,6 +9,7 @@ import {
 	MdParagraph,
 } from "@udecode/plate-markdown";
 import { TText } from "@udecode/plate";
+import { AIChatPlugin } from "@udecode/plate-ai/react";
 
 export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 	options: {
@@ -193,10 +194,17 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 					) as MdParagraph["children"];
 
 					if (convertedNodes.length === 0) {
-						// return {
-						// 	type: "html",
-						// 	value: "<br /> test 1",
-						// } as any;
+						// @ts-expect-error -- options not exposed by plate
+						const streaming = options.editor.getOption(
+							AIChatPlugin,
+							"streaming"
+						);
+						if (!streaming) {
+							return {
+								type: "html",
+								value: "<br />",
+							} as any;
+						}
 					} else if (
 						convertedNodes.length === 1 &&
 						enrichedChildren.at(-1)!.type === "break"
