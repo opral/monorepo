@@ -69,11 +69,6 @@ export function applyStateDatabaseSchema(
         v.entity_id AS version_id
       FROM all_changes_with_snapshots v
       WHERE v.schema_key = 'lix_version'
-      AND v.rowid = ( -- Get the latest state of each lix_version entity
-        SELECT MAX(v2.rowid)
-        FROM all_changes_with_snapshots v2
-        WHERE v2.entity_id = v.entity_id AND v2.schema_key = 'lix_version'
-      )
     ),
 
     /* 2. Recursively find all change_set_ids that are ancestors of EACH version's root */
@@ -86,11 +81,6 @@ export function applyStateDatabaseSchema(
       FROM all_changes_with_snapshots e 
       JOIN reachable_cs_from_roots r ON json_extract(e.snapshot_content, '$.child_id') = r.id
       WHERE e.schema_key = 'lix_change_set_edge'
-      AND e.rowid = ( -- Get the latest state of each lix_change_set_edge entity
-        SELECT MAX(e2.rowid)
-        FROM all_changes_with_snapshots e2
-        WHERE e2.entity_id = e.entity_id AND e2.schema_key = 'lix_change_set_edge'
-      )
     ),
 
     /* === Change Set Element (CSE) Processing === */
@@ -107,11 +97,6 @@ export function applyStateDatabaseSchema(
       JOIN reachable_cs_from_roots rcs 
         ON json_extract(ias.snapshot_content, '$.change_set_id') = rcs.id
       WHERE ias.schema_key = 'lix_change_set_element'
-      AND ias.rowid = ( -- Get the latest state of each lix_change_set_element entity
-        SELECT MAX(ias2.rowid)
-        FROM all_changes_with_snapshots ias2
-        WHERE ias2.entity_id = ias.entity_id AND ias2.schema_key = 'lix_change_set_element'
-      )
     ),
 
     /* 4. Filter to 'leaf' CSEs per version and retrieve their target entity's full snapshot */
@@ -133,12 +118,6 @@ export function applyStateDatabaseSchema(
           FROM all_changes_with_snapshots edge
           JOIN descendants_of_current_cs d ON json_extract(edge.snapshot_content, '$.parent_id') = d.id
           WHERE edge.schema_key = 'lix_change_set_edge'
-            AND edge.rowid = ( -- Use latest edge definition for descendant traversal
-              SELECT MAX(edge2.rowid)
-              FROM all_changes_with_snapshots edge2
-              WHERE edge2.entity_id = edge.entity_id AND edge2.schema_key = 'lix_change_set_edge'
-            )
-            -- Ensure descendants are within the same version's graph
             AND json_extract(edge.snapshot_content, '$.child_id') IN (SELECT id FROM reachable_cs_from_roots WHERE version_id = r.version_id) 
         )
         SELECT 1
