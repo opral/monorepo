@@ -44,37 +44,36 @@ export function applyStateDatabaseSchema(
 	const sql = `
   CREATE VIEW IF NOT EXISTS state AS
   WITH
-    /* 0. Base data: the latest version of each change record, joined with its snapshot */
-    latest_change_with_snapshot AS (
+    /* 0. Base data: all change records, joined with their snapshot, including rowid */
+    all_changes_with_snapshots AS (
       SELECT
         ic.id, 
         ic.entity_id,
         ic.schema_key,
         ic.file_id,
         ic.plugin_key,
+        ic.rowid, -- expose rowid for specific MAX filters later
         json(s.content) AS snapshot_content 
       FROM internal_change ic
       LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
       WHERE ic.snapshot_id != 'no-content'
-      AND ic.rowid = (
-        SELECT MAX(ic2.rowid)
-        FROM internal_change ic2
-        WHERE ic2.entity_id = ic.entity_id
-          AND ic2.schema_key = ic.schema_key
-          AND ic2.file_id = ic.file_id
-      )
     ),
 
     /* === Graph Traversal Logic === */
     /* 
-      1. Identify the root change_set_id for ALL versions.
+      1. Identify the root change_set_id for ALL LATEST versions.
     */
     root_cs_of_all_versions AS (
       SELECT 
         json_extract(v.snapshot_content, '$.change_set_id') AS version_change_set_id, 
         v.entity_id AS version_id
-      FROM latest_change_with_snapshot v
+      FROM all_changes_with_snapshots v
       WHERE v.schema_key = 'lix_version'
+      AND v.rowid = ( -- Get the latest state of each lix_version entity
+        SELECT MAX(v2.rowid)
+        FROM all_changes_with_snapshots v2
+        WHERE v2.entity_id = v.entity_id AND v2.schema_key = 'lix_version'
+      )
     ),
 
     /* 2. Recursively find all change_set_ids that are ancestors of EACH version's root */
@@ -84,13 +83,18 @@ export function applyStateDatabaseSchema(
       SELECT 
         json_extract(e.snapshot_content, '$.parent_id'),
         r.version_id -- Propagate version_id
-      FROM latest_change_with_snapshot e 
+      FROM all_changes_with_snapshots e 
       JOIN reachable_cs_from_roots r ON json_extract(e.snapshot_content, '$.child_id') = r.id
       WHERE e.schema_key = 'lix_change_set_edge'
+      AND e.rowid = ( -- Get the latest state of each lix_change_set_edge entity
+        SELECT MAX(e2.rowid)
+        FROM all_changes_with_snapshots e2
+        WHERE e2.entity_id = e.entity_id AND e2.schema_key = 'lix_change_set_edge'
+      )
     ),
 
     /* === Change Set Element (CSE) Processing === */
-    /* 3. Select all CSEs that belong to any of the reachable change sets, include version_id */
+    /* 3. Select all LATEST CSEs that belong to any of the reachable change sets, include version_id */
     cse_in_reachable_cs AS (
       SELECT
         json_extract(ias.snapshot_content, '$.entity_id')    AS target_entity_id,
@@ -99,10 +103,15 @@ export function applyStateDatabaseSchema(
         json_extract(ias.snapshot_content, '$.change_id')    AS target_change_id,
         json_extract(ias.snapshot_content, '$.change_set_id') AS cse_origin_change_set_id,
         rcs.version_id -- Propagate version_id
-      FROM latest_change_with_snapshot ias
+      FROM all_changes_with_snapshots ias
       JOIN reachable_cs_from_roots rcs 
         ON json_extract(ias.snapshot_content, '$.change_set_id') = rcs.id
       WHERE ias.schema_key = 'lix_change_set_element'
+      AND ias.rowid = ( -- Get the latest state of each lix_change_set_element entity
+        SELECT MAX(ias2.rowid)
+        FROM all_changes_with_snapshots ias2
+        WHERE ias2.entity_id = ias.entity_id AND ias2.schema_key = 'lix_change_set_element'
+      )
     ),
 
     /* 4. Filter to 'leaf' CSEs per version and retrieve their target entity's full snapshot */
@@ -115,15 +124,20 @@ export function applyStateDatabaseSchema(
         target_change.snapshot_content AS snapshot_content,
         r.version_id -- Include version_id in the final selection
       FROM cse_in_reachable_cs r 
-      INNER JOIN latest_change_with_snapshot target_change ON r.target_change_id = target_change.id
+      INNER JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
       WHERE NOT EXISTS (
         WITH RECURSIVE descendants_of_current_cs(id) AS ( 
           SELECT r.cse_origin_change_set_id 
           UNION
           SELECT json_extract(edge.snapshot_content, '$.child_id')
-          FROM latest_change_with_snapshot edge
+          FROM all_changes_with_snapshots edge
           JOIN descendants_of_current_cs d ON json_extract(edge.snapshot_content, '$.parent_id') = d.id
           WHERE edge.schema_key = 'lix_change_set_edge'
+            AND edge.rowid = ( -- Use latest edge definition for descendant traversal
+              SELECT MAX(edge2.rowid)
+              FROM all_changes_with_snapshots edge2
+              WHERE edge2.entity_id = edge.entity_id AND edge2.schema_key = 'lix_change_set_edge'
+            )
             -- Ensure descendants are within the same version's graph
             AND json_extract(edge.snapshot_content, '$.child_id') IN (SELECT id FROM reachable_cs_from_roots WHERE version_id = r.version_id) 
         )
@@ -134,15 +148,17 @@ export function applyStateDatabaseSchema(
           AND newer_r.target_schema_key = r.target_schema_key 
           AND newer_r.version_id = r.version_id -- Crucial: only compare within the same version context
           AND (newer_r.cse_origin_change_set_id != r.cse_origin_change_set_id OR newer_r.target_change_id != r.target_change_id) 
-          AND newer_r.cse_origin_change_set_id IN (SELECT id FROM descendants_of_current_cs WHERE id != r.cse_origin_change_set_id) 
+          AND newer_r.cse_origin_change_set_id IN descendants_of_current_cs
       )
     )
-        
-    /* 5. Final Projection: Expose the snapshots of the leaf target entities and their version_id */
-    SELECT
-      lts.*
-      -- version_id is now part of lts
-    FROM leaf_target_snapshots lts;
+  SELECT 
+    ls.entity_id,
+    ls.schema_key,
+    ls.file_id,
+    ls.plugin_key,
+    ls.snapshot_content,
+    ls.version_id
+  FROM leaf_target_snapshots ls;
 
   CREATE TRIGGER IF NOT EXISTS state_insert
   INSTEAD OF INSERT ON state
