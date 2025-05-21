@@ -38,7 +38,7 @@ export function validateSnapshotContent(args: {
 			const receivedValue = error.instancePath 
 				? getValueByPath(args.snapshot_content, error.instancePath) 
 				: args.snapshot_content;
-			return `${error.message}. Received value: ${JSON.stringify(receivedValue)}`;
+			return `${error.instancePath} ${error.message}. Received value: ${JSON.stringify(receivedValue)}`;
 		}).join('; ');
 
 		throw new Error(
