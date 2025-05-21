@@ -243,6 +243,7 @@ const CreateCheckpointInput = () => {
         </Button>
       </div>
       <Button
+        size="sm"
         onClick={handleCreateCheckpoint}
         className="w-full"
         disabled={!description.trim() || isGeneratingDescription}

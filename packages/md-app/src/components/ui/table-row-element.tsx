@@ -1,12 +1,15 @@
 
 
-import React from 'react';
+import * as React from 'react';
 
-import { cn, useComposedRef, withRef } from '@udecode/cn';
-import { PathApi } from '@udecode/plate';
+import type { TTableRowElement } from '@udecode/plate-table';
+
+import { useComposedRef } from '@udecode/cn';
+import { type TElement, PathApi } from '@udecode/plate';
 import { useDraggable, useDropLine } from '@udecode/plate-dnd';
 import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 import {
+  type PlateElementProps,
   PlateElement,
   useEditorRef,
   useElement,
@@ -16,57 +19,59 @@ import {
 } from '@udecode/plate/react';
 import { GripVertical } from 'lucide-react';
 
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-export const TableRowElement = withRef<typeof PlateElement>(
-  ({ children, className, ...props }, ref) => {
-    const { element } = props;
-    const readOnly = useReadOnly();
-    const selected = useSelected();
-    const editor = useEditorRef();
-    const isSelectionAreaVisible = usePluginOption(
-      BlockSelectionPlugin,
-      'isSelectionAreaVisible'
-    );
-    const hasControls = !readOnly && !isSelectionAreaVisible;
+export function TableRowElement(props: PlateElementProps<TTableRowElement>) {
+  const { element } = props;
+  const readOnly = useReadOnly();
+  const selected = useSelected();
+  const editor = useEditorRef();
+  const isSelectionAreaVisible = usePluginOption(
+    BlockSelectionPlugin,
+    'isSelectionAreaVisible'
+  );
+  const hasControls = !readOnly && !isSelectionAreaVisible;
 
-    const { isDragging, previewRef, handleRef } = useDraggable({
-      element,
-      type: element.type,
-      canDropNode: ({ dragEntry, dropEntry }) =>
-        PathApi.equals(
-          PathApi.parent(dragEntry[1]),
-          PathApi.parent(dropEntry[1])
-        ),
-      onDropHandler: (_, { dragItem }) => {
-        const dragElement = (dragItem as any).element;
+  const { isDragging, previewRef, handleRef } = useDraggable({
+    element,
+    type: element.type,
+    canDropNode: ({ dragEntry, dropEntry }) =>
+      PathApi.equals(
+        PathApi.parent(dragEntry[1]),
+        PathApi.parent(dropEntry[1])
+      ),
+    onDropHandler: (_, { dragItem }) => {
+      const dragElement = (dragItem as { element: TElement }).element;
 
-        if (dragElement) {
-          editor.tf.select(dragElement);
-        }
-      },
-    });
+      if (dragElement) {
+        editor.tf.select(dragElement);
+      }
+    },
+  });
 
-    return (
-      <PlateElement
-        ref={useComposedRef(ref, previewRef)}
-        as="tr"
-        className={cn(className, 'group/row', isDragging && 'opacity-50')}
-        data-selected={selected ? 'true' : undefined}
-        {...props}
-      >
-        {hasControls && (
-          <td className="w-2 select-none" contentEditable={false}>
-            <RowDragHandle dragRef={handleRef} />
-            <DropLine />
-          </td>
-        )}
+  return (
+    <PlateElement
+      {...props}
+      ref={useComposedRef(props.ref, previewRef)}
+      as="tr"
+      className={cn('group/row', isDragging && 'opacity-50')}
+      attributes={{
+        ...props.attributes,
+        'data-selected': selected ? 'true' : undefined,
+      }}
+    >
+      {hasControls && (
+        <td className="w-2 select-none" contentEditable={false}>
+          <RowDragHandle dragRef={handleRef} />
+          <DropLine />
+        </td>
+      )}
 
-        {children}
-      </PlateElement>
-    );
-  }
-);
+      {props.children}
+    </PlateElement>
+  );
+}
 
 function RowDragHandle({ dragRef }: { dragRef: React.Ref<any> }) {
   const editor = useEditorRef();

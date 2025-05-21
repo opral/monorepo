@@ -1,10 +1,9 @@
 
 
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import type { Value } from '@udecode/plate';
 
-import { cn } from '@udecode/cn';
 import { CommentsPlugin } from '@udecode/plate-comments/react';
 import {
   Plate,
@@ -26,18 +25,19 @@ import {
   XIcon,
 } from 'lucide-react';
 
-import { discussionPlugin } from '@/components/editor/plugins/discussion-plugin';
-
-import { Avatar, AvatarFallback, AvatarImage } from './avatar';
-import { Button } from './button';
-import { useCommentEditor } from './comment-create-form';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from './dropdown-menu';
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import { discussionPlugin } from '@/components/editor/plugins/discussion-plugin';
+
+import { useCommentEditor } from './comment-create-form';
 import { Editor, EditorContainer } from './editor';
 
 export const formatCommentDate = (date: Date) => {
@@ -108,13 +108,13 @@ export function Comment(props: {
   const removeDiscussion = async (id: string) => {
     const updatedDiscussions = editor
       .getOption(discussionPlugin, 'discussions')
-      .filter((discussion: any) => discussion.id !== id);
+      .filter((discussion) => discussion.id !== id);
     editor.setOption(discussionPlugin, 'discussions', updatedDiscussions);
   };
 
   const updateComment = async (input: {
     id: string;
-    contentRich: any;
+    contentRich: Value;
     discussionId: string;
     isEdited: boolean;
   }) => {
@@ -182,8 +182,8 @@ export function Comment(props: {
   const isLast = index === discussionLength - 1;
   const isEditing = editingId && editingId === comment.id;
 
-  const [hovering, setHovering] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [hovering, setHovering] = React.useState(false);
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   return (
     <div
@@ -329,13 +329,13 @@ export function CommentMoreDropdown(props: CommentMoreDropdownProps) {
     // Find and update the discussion
     const updatedDiscussions = editor
       .getOption(discussionPlugin, 'discussions')
-      .map((discussion: any) => {
+      .map((discussion) => {
         if (discussion.id !== comment.discussionId) {
           return discussion;
         }
 
         const commentIndex = discussion.comments.findIndex(
-          (c: any) => c.id === comment.id
+          (c) => c.id === comment.id
         );
         if (commentIndex === -1) {
           return discussion;

@@ -1,9 +1,10 @@
 
 import type { VariantProps } from 'class-variance-authority';
 
-import { cn } from '@udecode/cn';
 import { type PlateStaticProps, PlateStatic } from '@udecode/plate';
 import { cva } from 'class-variance-authority';
+
+import { cn } from '@/lib/utils';
 
 export const editorVariants = cva(
   cn(
@@ -40,7 +41,6 @@ export const editorVariants = cva(
 );
 
 export function EditorStatic({
-  // children,
   className,
   variant,
   ...props

@@ -1,24 +1,17 @@
 
 import type { SlateElementProps } from '@udecode/plate';
+import type { TLinkElement } from '@udecode/plate-link';
 
-import { cn } from '@udecode/cn';
 import { SlateElement } from '@udecode/plate';
 
-export const LinkElementStatic = ({
-  children,
-  className,
-  ...props
-}: SlateElementProps) => {
+export function LinkElementStatic(props: SlateElementProps<TLinkElement>) {
   return (
     <SlateElement
-      as="a"
-      className={cn(
-        className,
-        'font-medium text-primary underline decoration-primary underline-offset-4'
-      )}
       {...props}
+      as="a"
+      className="font-medium text-primary underline decoration-primary underline-offset-4"
     >
-      {children}
+      {props.children}
     </SlateElement>
   );
-};
+}

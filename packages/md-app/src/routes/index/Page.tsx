@@ -50,12 +50,12 @@ function PageContent() {
 
 			{/* Center content */}
 			<div className="flex-1 flex flex-col overflow-hidden bg-background">
-				<div className="bg-slate-50 border-b-[1px] border-border p-2 flex items-center justify-between">
+				<div className="bg-slate-50 border-b-[1px] border-border px-2 py-1.5 flex items-center justify-between">
 					<div className="flex items-center">
 						<Button
 							variant="ghost"
 							size="icon"
-							className="mr-2 size-7"
+							className="mr-2 size-8"
 							onClick={toggleLeftSidebar}
 						>
 							{leftSidebar.open ? <PanelLeftClose /> : <PanelLeftOpen />}
@@ -67,7 +67,7 @@ function PageContent() {
 						<Button
 							variant="ghost"
 							size="icon"
-							className="size-7 relative"
+							className="size-8 relative"
 							onClick={toggleRightSidebar}
 						>
 							{intermediateChanges.length > 0 && !rightSidebar.open && (

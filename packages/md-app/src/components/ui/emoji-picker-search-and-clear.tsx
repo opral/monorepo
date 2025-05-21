@@ -2,9 +2,9 @@
 
 import type { UseEmojiPickerType } from '@udecode/plate-emoji/react';
 
-import { cn } from '@udecode/cn';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-import { Button } from './button';
 import { emojiSearchIcons } from './emoji-icons';
 
 export type EmojiPickerSearchAndClearProps = Pick<

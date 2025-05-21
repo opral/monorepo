@@ -358,3 +358,13 @@
 @utility slide-out-to-right-* {
 	--tw-exit-translate-x: --value([percentage], [length]);
 }
+
+:root {
+	--brand: oklch(0.623 0.214 259.815);
+	--highlight: oklch(0.852 0.199 91.936);
+}
+
+.dark {
+	--brand: oklch(0.707 0.165 254.624);
+	--highlight: oklch(0.852 0.199 91.936);
+}

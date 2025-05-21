@@ -1,6 +1,6 @@
 
 
-import { useEffect, useMemo } from 'react';
+import * as React from 'react';
 
 import { type SlateEditor, NodeApi } from '@udecode/plate';
 import { AIChatPlugin, AIPlugin } from '@udecode/plate-ai/react';
@@ -26,7 +26,7 @@ import {
   Zap,
 } from 'lucide-react';
 
-import { CommandGroup, CommandItem } from './command';
+import { CommandGroup, CommandItem } from '@/components/ui/command';
 
 export type EditorChatState =
   | 'cursorCommand'
@@ -116,6 +116,16 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
     onSelect: ({ editor }) => {
       void editor.getApi(AIChatPlugin).aiChat.submit({
         prompt: 'Generate a markdown sample',
+      });
+    },
+  },
+  generateMdxSample: {
+    icon: <BookOpenCheck />,
+    label: 'Generate MDX sample',
+    value: 'generateMdxSample',
+    onSelect: ({ editor }) => {
+      void editor.getApi(AIChatPlugin).aiChat.submit({
+        prompt: 'Generate a mdx sample',
       });
     },
   },
@@ -264,6 +274,7 @@ const menuStateItems: Record<
 
 if (import.meta.env.DEV) {
   menuStateItems.cursorCommand[0].items.push(aiChatItems.generateMarkdownSample);
+  menuStateItems.cursorCommand[0].items.push(aiChatItems.generateMdxSample);
 }
 
 
@@ -277,7 +288,7 @@ export const AIMenuItems = ({
   const aiEditor = usePluginOption(AIChatPlugin, 'aiEditor')!;
   const isSelecting = useIsSelecting();
 
-  const menuState = useMemo(() => {
+  const menuState = React.useMemo(() => {
     if (messages && messages.length > 0) {
       return isSelecting ? 'selectionSuggestion' : 'cursorSuggestion';
     }
@@ -285,13 +296,13 @@ export const AIMenuItems = ({
     return isSelecting ? 'selectionCommand' : 'cursorCommand';
   }, [isSelecting, messages]);
 
-  const menuGroups = useMemo(() => {
+  const menuGroups = React.useMemo(() => {
     const items = menuStateItems[menuState];
 
     return items;
   }, [menuState]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (menuGroups.length > 0 && menuGroups[0].items.length > 0) {
       setValue(menuGroups[0].items[0].value);
     }

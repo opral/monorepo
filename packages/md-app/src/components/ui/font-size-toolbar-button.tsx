@@ -1,17 +1,22 @@
 
 
-import { useState } from 'react';
+import * as React from 'react';
 
 import type { TElement } from '@udecode/plate';
 
-import { cn } from '@udecode/cn';
 import { toUnitLess } from '@udecode/plate-font';
 import { FontSizePlugin } from '@udecode/plate-font/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
 import { useEditorPlugin, useEditorSelector } from '@udecode/plate/react';
 import { Minus, Plus } from 'lucide-react';
 
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+
 import { ToolbarButton } from './toolbar';
 
 const DEFAULT_FONT_SIZE = '16';
@@ -40,8 +45,8 @@ const FONT_SIZES = [
 ] as const;
 
 export function FontSizeToolbarButton() {
-  const [inputValue, setInputValue] = useState(DEFAULT_FONT_SIZE);
-  const [isFocused, setIsFocused] = useState(false);
+  const [inputValue, setInputValue] = React.useState(DEFAULT_FONT_SIZE);
+  const [isFocused, setIsFocused] = React.useState(false);
   const { api, editor } = useEditorPlugin(FontSizePlugin);
 
   const cursorFontSize = useEditorSelector((editor) => {

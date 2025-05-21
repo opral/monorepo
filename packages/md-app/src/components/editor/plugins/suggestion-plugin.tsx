@@ -79,7 +79,7 @@ export const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(
     },
     render: {
       belowRootNodes: ({ api, element }) => {
-        if (!api.suggestion!.isBlockSuggestion(element)) {
+        if (!api || !api.suggestion!.isBlockSuggestion(element)) {
           return null;
         }
 

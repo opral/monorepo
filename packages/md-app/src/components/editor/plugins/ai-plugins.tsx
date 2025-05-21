@@ -25,6 +25,7 @@ Rules:
 - Your response should be tailored to the user's prompt, providing precise assistance to optimize note management.
 - For INSTRUCTIONS: Follow the <Reminder> exactly. Provide ONLY the content to be inserted or replaced. No explanations or comments.
 - For QUESTIONS: Provide a helpful and concise answer. You may include brief explanations if necessary.
+- CRITICAL: DO NOT remove or modify the following custom MDX tags: <u>, <callout>, <kbd>, <toc>, <sub>, <sup>, <mark>, <del>, <date>, <span>, <column>, <column_group>, <file>, <audio>, <video> in <Selection> unless the user explicitly requests this change.
 - CRITICAL: Distinguish between INSTRUCTIONS and QUESTIONS. Instructions typically ask you to modify or add content. Questions ask for information or clarification.
 - CRITICAL: when asked to write in markdown, do not start with \`\`\`markdown.
 `;
@@ -94,8 +95,7 @@ export const PROMPT_TEMPLATES = {
   userSelecting,
 };
 
-// @ts-expect-error - inferred type of 'aiPlugins' is not assignable to 'Plugin[]'
-export const aiPlugins: readonly [PlatePlugin<PluginConfig<"cursorOverlay">>] = [
+export const aiPlugins = [
   cursorOverlayPlugin,
   ExtendedMarkdownPlugin,
   AIPlugin,
@@ -121,18 +121,14 @@ export const aiPlugins: readonly [PlatePlugin<PluginConfig<"cursorOverlay">>] = 
       afterEditable: () => <AIMenu />,
     },
   }).extend({
-    useHooks: ({ editor, getOption,
-      // setOption
-    }) => {
+    useHooks: ({ editor, getOption }) => {
       const mode = usePluginOption(
         { key: 'aiChat' } as AIChatPluginConfig,
         'mode'
       );
 
       useChatChunk({
-        onChunk: ({ chunk, isFirst, nodes,
-          // text
-        }) => {
+        onChunk: ({ chunk, isFirst, nodes }) => {
           if (isFirst && mode == 'insert') {
             // Make sure the document is focused
             if (editor.selection === null) {
@@ -169,9 +165,7 @@ export const aiPlugins: readonly [PlatePlugin<PluginConfig<"cursorOverlay">>] = 
             );
           }
         },
-        onFinish: (
-          // { content }
-        ) => {
+        onFinish: () => {
           editor.setOption(AIChatPlugin, 'streaming', false);
           editor.setOption(AIChatPlugin, '_blockChunks', '');
           editor.setOption(AIChatPlugin, '_blockPath', null);

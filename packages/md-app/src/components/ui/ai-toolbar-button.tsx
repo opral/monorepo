@@ -1,28 +1,26 @@
 
 
-import { withRef } from '@udecode/cn';
+import * as React from 'react';
+
 import { AIChatPlugin } from '@udecode/plate-ai/react';
 import { useEditorPlugin } from '@udecode/plate/react';
 
 import { ToolbarButton } from './toolbar';
 
-export const AIToolbarButton = withRef<typeof ToolbarButton>(
-  ({ children, ...rest }, ref) => {
-    const { api } = useEditorPlugin(AIChatPlugin);
+export function AIToolbarButton(
+  props: React.ComponentProps<typeof ToolbarButton>
+) {
+  const { api } = useEditorPlugin(AIChatPlugin);
 
-    return (
-      <ToolbarButton
-        ref={ref}
-        {...rest}
-        onClick={() => {
-          api.aiChat.show();
-        }}
-        onMouseDown={(e) => {
-          e.preventDefault();
-        }}
-      >
-        {children}
-      </ToolbarButton>
-    );
-  }
-);
+  return (
+    <ToolbarButton
+      {...props}
+      onClick={() => {
+        api.aiChat.show();
+      }}
+      onMouseDown={(e) => {
+        e.preventDefault();
+      }}
+    />
+  );
+}

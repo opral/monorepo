@@ -1,45 +1,64 @@
 
 
+import * as React from 'react';
 
-import { cn } from '@udecode/cn';
 import {
   type UseVirtualFloatingOptions,
   flip,
   offset,
 } from '@udecode/plate-floating';
+import { type TLinkElement, getLinkAttributes } from '@udecode/plate-link';
 import {
   type LinkFloatingToolbarState,
   FloatingLinkUrlInput,
-  LinkOpenButton,
+  LinkPlugin,
   useFloatingLinkEdit,
   useFloatingLinkEditState,
   useFloatingLinkInsert,
   useFloatingLinkInsertState,
 } from '@udecode/plate-link/react';
-import { useFormInputProps } from '@udecode/plate/react';
+import {
+  useEditorRef,
+  useEditorSelection,
+  useFormInputProps,
+  usePluginOption,
+} from '@udecode/plate/react';
+import { cva } from 'class-variance-authority';
 import { ExternalLink, Link, Text, Unlink } from 'lucide-react';
 
-import { buttonVariants } from './button';
-import { inputVariants } from './input';
-import { popoverVariants } from './popover';
-import { Separator } from './separator';
+import { buttonVariants } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
-const floatingOptions: UseVirtualFloatingOptions = {
-  middleware: [
-    offset(12),
-    flip({
-      fallbackPlacements: ['bottom-end', 'top-start', 'top-end'],
-      padding: 12,
-    }),
-  ],
-  placement: 'bottom-start',
-};
+const popoverVariants = cva(
+  'z-50 w-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-hidden'
+);
 
-export interface LinkFloatingToolbarProps {
+const inputVariants = cva(
+  'flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:ring-transparent focus-visible:outline-none md:text-sm'
+);
+
+export function LinkFloatingToolbar({
+  state,
+}: {
   state?: LinkFloatingToolbarState;
-}
+}) {
+  const activeCommentId = usePluginOption({ key: 'comment' }, 'activeId');
+  const activeSuggestionId = usePluginOption({ key: 'suggestion' }, 'activeId');
 
-export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
+  const floatingOptions: UseVirtualFloatingOptions = React.useMemo(() => {
+    return {
+      middleware: [
+        offset(8),
+        flip({
+          fallbackPlacements: ['bottom-end', 'top-start', 'top-end'],
+          padding: 12,
+        }),
+      ],
+      placement:
+        activeSuggestionId || activeCommentId ? 'top-start' : 'bottom-start',
+    };
+  }, [activeCommentId, activeSuggestionId]);
+
   const insertState = useFloatingLinkInsertState({
     ...state,
     floatingOptions: {
@@ -81,7 +100,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
         </div>
 
         <FloatingLinkUrlInput
-          className={inputVariants({ h: 'sm', variant: 'ghost' })}
+          className={inputVariants()}
           placeholder="Paste link"
           data-plate-focus
         />
@@ -92,7 +111,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
           <Text className="size-4" />
         </div>
         <input
-          className={inputVariants({ h: 'sm', variant: 'ghost' })}
+          className={inputVariants()}
           placeholder="Text to display"
           data-plate-focus
           {...textInputProps}
@@ -115,14 +134,7 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
 
       <Separator orientation="vertical" />
 
-      <LinkOpenButton
-        className={buttonVariants({
-          size: 'icon',
-          variant: 'ghost',
-        })}
-      >
-        <ExternalLink width={18} />
-      </LinkOpenButton>
+      <LinkOpenButton />
 
       <Separator orientation="vertical" />
 
@@ -141,21 +153,49 @@ export function LinkFloatingToolbar({ state }: LinkFloatingToolbarProps) {
 
   return (
     <>
-      <div
-        ref={insertRef}
-        className={cn(popoverVariants(), 'w-auto p-1')}
-        {...insertProps}
-      >
+      <div ref={insertRef} className={popoverVariants()} {...insertProps}>
         {input}
       </div>
 
-      <div
-        ref={editRef}
-        className={cn(popoverVariants(), 'w-auto p-1')}
-        {...editProps}
-      >
+      <div ref={editRef} className={popoverVariants()} {...editProps}>
         {editContent}
       </div>
     </>
+  );
+}
+
+function LinkOpenButton() {
+  const editor = useEditorRef();
+  const selection = useEditorSelection();
+
+  const attributes = React.useMemo(
+    () => {
+      const entry = editor.api.node<TLinkElement>({
+        match: { type: editor.getType(LinkPlugin) },
+      });
+      if (!entry) {
+        return {};
+      }
+      const [element] = entry;
+      return getLinkAttributes(editor, element);
+    },
+    [editor, selection]
+  );
+
+  return (
+    <a
+      {...attributes}
+      className={buttonVariants({
+        size: 'icon',
+        variant: 'ghost',
+      })}
+      onMouseOver={(e) => {
+        e.stopPropagation();
+      }}
+      aria-label="Open link in a new tab"
+      target="_blank"
+    >
+      <ExternalLink width={18} />
+    </a>
   );
 }

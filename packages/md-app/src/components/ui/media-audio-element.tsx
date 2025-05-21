@@ -1,7 +1,8 @@
 
 
+import type { TAudioElement } from '@udecode/plate-media';
+import type { PlateElementProps } from '@udecode/plate/react';
 
-import { cn, withRef } from '@udecode/cn';
 import { useMediaState } from '@udecode/plate-media/react';
 import { ResizableProvider } from '@udecode/plate-resizable';
 import { PlateElement, withHOC } from '@udecode/plate/react';
@@ -10,31 +11,29 @@ import { Caption, CaptionTextarea } from './caption';
 
 export const MediaAudioElement = withHOC(
   ResizableProvider,
-  withRef<typeof PlateElement>(
-    ({ children, className, ...props }, ref) => {
-      const { align = 'center', readOnly, unsafeUrl } = useMediaState();
+  function MediaAudioElement(props: PlateElementProps<TAudioElement>) {
+    const { align = 'center', readOnly, unsafeUrl } = useMediaState();
 
-      return (
-        <PlateElement ref={ref} className={cn(className, 'mb-1')} {...props}>
-          <figure
-            className="group relative cursor-default"
-            contentEditable={false}
-          >
-            <div className="h-16">
-              <audio className="size-full" src={unsafeUrl} controls />
-            </div>
+    return (
+      <PlateElement {...props} className="mb-1">
+        <figure
+          className="group relative cursor-default"
+          contentEditable={false}
+        >
+          <div className="h-16">
+            <audio className="size-full" src={unsafeUrl} controls />
+          </div>
 
-            <Caption style={{ width: '100%' }} align={align}>
-              <CaptionTextarea
-                className="h-20"
-                readOnly={readOnly}
-                placeholder="Write a caption..."
-              />
-            </Caption>
-          </figure>
-          {children}
-        </PlateElement>
-      );
-    }
-  )
+          <Caption style={{ width: '100%' }} align={align}>
+            <CaptionTextarea
+              className="h-20"
+              readOnly={readOnly}
+              placeholder="Write a caption..."
+            />
+          </Caption>
+        </figure>
+        {props.children}
+      </PlateElement>
+    );
+  }
 );

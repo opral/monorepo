@@ -1,10 +1,11 @@
 
 
-import React from 'react';
+import * as React from 'react';
 
 import type { TColumnElement } from '@udecode/plate-layout';
+import type { PlateElementProps } from '@udecode/plate/react';
 
-import { cn, useComposedRef, withRef } from '@udecode/cn';
+import { useComposedRef } from '@udecode/cn';
 import { PathApi } from '@udecode/plate';
 import { useDraggable, useDropLine } from '@udecode/plate-dnd';
 import { ResizableProvider } from '@udecode/plate-resizable';
@@ -17,19 +18,19 @@ import {
 } from '@udecode/plate/react';
 import { GripHorizontal } from 'lucide-react';
 
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
-  TooltipPortal,
   TooltipProvider,
   TooltipTrigger,
-} from './tooltip';
+} from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 export const ColumnElement = withHOC(
   ResizableProvider,
-  withRef<typeof PlateElement>(({ children, className, ...props }, ref) => {
-    const { width } = props.element as TColumnElement;
+  function ColumnElement(props: PlateElementProps<TColumnElement>) {
+    const { width } = props.element;
     const readOnly = useReadOnly();
     const isSelectionAreaVisible = usePluginOption(
       BlockSelectionPlugin,
@@ -63,12 +64,9 @@ export const ColumnElement = withHOC(
         )}
 
         <PlateElement
-          ref={useComposedRef(ref, previewRef)}
-          className={cn(
-            className,
-            'h-full px-2 pt-2 group-first/column:pl-0 group-last/column:pr-0'
-          )}
           {...props}
+          ref={useComposedRef(props.ref, previewRef)}
+          className="h-full px-2 pt-2 group-first/column:pl-0 group-last/column:pr-0"
         >
           <div
             className={cn(
@@ -77,24 +75,24 @@ export const ColumnElement = withHOC(
               isDragging && 'opacity-50'
             )}
           >
-            {children}
+            {props.children}
 
             {!readOnly && !isSelectionAreaVisible && <DropLine />}
           </div>
         </PlateElement>
       </div>
     );
-  })
+  }
 );
 
-const ColumnDragHandle = React.memo(() => {
+const ColumnDragHandle = React.memo(function ColumnDragHandle() {
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size="none" variant="ghost" className="h-5 px-1">
+          <Button variant="ghost" className="h-5 !px-1">
             <GripHorizontal
-              className="size-4 text-muted-foreground"
+              className="text-muted-foreground"
               onClick={(event) => {
                 event.stopPropagation();
                 event.preventDefault();
@@ -102,35 +100,28 @@ const ColumnDragHandle = React.memo(() => {
             />
           </Button>
         </TooltipTrigger>
-        <TooltipPortal>
-          <TooltipContent>Drag to move column</TooltipContent>
-        </TooltipPortal>
+
+        <TooltipContent>Drag to move column</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );
 });
 
-const DropLine = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
+function DropLine() {
   const { dropLine } = useDropLine({ orientation: 'horizontal' });
 
   if (!dropLine) return null;
 
   return (
     <div
-      ref={ref}
-      {...props}
       className={cn(
         'slate-dropLine',
         'absolute bg-brand/50',
         dropLine === 'left' &&
-          'inset-y-0 left-[-10.5px] w-1 group-first/column:-left-1',
+        'inset-y-0 left-[-10.5px] w-1 group-first/column:-left-1',
         dropLine === 'right' &&
-          'inset-y-0 right-[-11px] w-1 group-last/column:-right-1',
-        className
+        'inset-y-0 right-[-11px] w-1 group-last/column:-right-1'
       )}
     />
   );
-});
+}

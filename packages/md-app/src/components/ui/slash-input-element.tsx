@@ -1,10 +1,12 @@
 
 
-import React from 'react';
+import * as React from 'react';
 
-import { withRef } from '@udecode/cn';
+import type { TSlashInputElement } from '@udecode/plate-slash-command';
+
 import { AIChatPlugin } from '@udecode/plate-ai/react';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
+// import { CalloutPlugin } from '@udecode/plate-callout/react';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
 // import { DatePlugin } from '@udecode/plate-date/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
@@ -16,7 +18,11 @@ import { INDENT_LIST_KEYS, ListStyleType } from '@udecode/plate-indent-list';
 // } from '@udecode/plate-math/react';
 // import { TablePlugin } from '@udecode/plate-table/react';
 // import { TogglePlugin } from '@udecode/plate-toggle/react';
-import { type PlateEditor, ParagraphPlugin } from '@udecode/plate/react';
+import {
+  type PlateEditor,
+  type PlateElementProps,
+  ParagraphPlugin,
+} from '@udecode/plate/react';
 import { PlateElement } from '@udecode/plate/react';
 import {
   // CalendarIcon,
@@ -26,6 +32,7 @@ import {
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
+  // LightbulbIcon,
   ListIcon,
   ListOrdered,
   PilcrowIcon,
@@ -59,9 +66,7 @@ type Group = {
 
 interface Item {
   icon: React.ReactNode;
-
   value: string;
-
   onSelect: (editor: PlateEditor, value: string) => void;
   className?: string;
   focusEditor?: boolean;
@@ -151,6 +156,13 @@ const groups: Group[] = [
         label: 'Blockquote',
         value: BlockquotePlugin.key,
       },
+      // {
+      //   description: 'Insert a highlighted block.',
+      //   icon: <LightbulbIcon />,
+      //   keywords: ['note'],
+      //   label: 'Callout',
+      //   value: CalloutPlugin.key,
+      // },
     ].map((item) => ({
       ...item,
       onSelect: (editor, value) => {
@@ -210,51 +222,45 @@ const groups: Group[] = [
   // },
 ];
 
-export const SlashInputElement = withRef<typeof PlateElement>(
-  ({ className, ...props }, ref) => {
-    const { children, editor, element } = props;
+export function SlashInputElement(
+  props: PlateElementProps<TSlashInputElement>
+) {
+  const { editor, element } = props;
 
-    return (
-      <PlateElement
-        ref={ref}
-        as="span"
-        className={className}
-        data-slate-value={element.value}
-        {...props}
-      >
-        <InlineCombobox element={element} trigger="/">
-          <InlineComboboxInput />
+  return (
+    <PlateElement {...props} as="span" data-slate-value={element.value}>
+      <InlineCombobox element={element} trigger="/">
+        <InlineComboboxInput />
 
-          <InlineComboboxContent>
-            <InlineComboboxEmpty>No results</InlineComboboxEmpty>
+        <InlineComboboxContent>
+          <InlineComboboxEmpty>No results</InlineComboboxEmpty>
 
-            {groups.map(({ group, items }) => (
-              <InlineComboboxGroup key={group}>
-                <InlineComboboxGroupLabel>{group}</InlineComboboxGroupLabel>
+          {groups.map(({ group, items }) => (
+            <InlineComboboxGroup key={group}>
+              <InlineComboboxGroupLabel>{group}</InlineComboboxGroupLabel>
 
-                {items.map(
-                  ({ focusEditor, icon, keywords, label, value, onSelect }) => (
-                    <InlineComboboxItem
-                      key={value}
-                      value={value}
-                      onClick={() => onSelect(editor, value)}
-                      label={label}
-                      focusEditor={focusEditor}
-                      group={group}
-                      keywords={keywords}
-                    >
-                      <div className="mr-2 text-muted-foreground">{icon}</div>
-                      {label ?? value}
-                    </InlineComboboxItem>
-                  )
-                )}
-              </InlineComboboxGroup>
-            ))}
-          </InlineComboboxContent>
-        </InlineCombobox>
+              {items.map(
+                ({ focusEditor, icon, keywords, label, value, onSelect }) => (
+                  <InlineComboboxItem
+                    key={value}
+                    value={value}
+                    onClick={() => onSelect(editor, value)}
+                    label={label}
+                    focusEditor={focusEditor}
+                    group={group}
+                    keywords={keywords}
+                  >
+                    <div className="mr-2 text-muted-foreground">{icon}</div>
+                    {label ?? value}
+                  </InlineComboboxItem>
+                )
+              )}
+            </InlineComboboxGroup>
+          ))}
+        </InlineComboboxContent>
+      </InlineCombobox>
 
-        {children}
-      </PlateElement>
-    );
-  }
-);
+      {props.children}
+    </PlateElement>
+  );
+}

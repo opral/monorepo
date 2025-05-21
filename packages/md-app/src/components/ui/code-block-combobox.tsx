@@ -1,14 +1,13 @@
 
 
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import type { TCodeBlockElement } from '@udecode/plate-code-block';
 
-import { cn } from '@udecode/cn';
 import { useEditorRef, useElement, useReadOnly } from '@udecode/plate/react';
 import { Check } from 'lucide-react';
 
-import { Button } from './button';
+import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
@@ -16,8 +15,13 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from './command';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 const languages: { label: string; value: string }[] = [
   { label: 'Auto', value: 'auto' },
@@ -103,6 +107,7 @@ const languages: { label: string; value: string }[] = [
   { label: 'Swift', value: 'swift' },
   { label: 'TOML', value: 'toml' },
   { label: 'TypeScript', value: 'typescript' },
+  { label: 'TypeScript (ts)', value: 'ts' },
   { label: 'VB.Net', value: 'vbnet' },
   { label: 'Verilog', value: 'verilog' },
   { label: 'VHDL', value: 'vhdl' },
@@ -113,7 +118,7 @@ const languages: { label: string; value: string }[] = [
 ];
 
 export function CodeBlockCombobox() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = React.useState(false);
   const readOnly = useReadOnly();
   const editor = useEditorRef();
   const element = useElement<TCodeBlockElement>();
@@ -136,7 +141,7 @@ export function CodeBlockCombobox() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          size="xs"
+          size="sm"
           variant="ghost"
           className="h-6 justify-between gap-1 px-2 text-xs text-muted-foreground select-none"
           aria-expanded={open}

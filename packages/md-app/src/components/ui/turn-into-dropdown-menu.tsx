@@ -1,20 +1,23 @@
 
 
-import React from 'react';
+import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
+import type { TElement } from '@udecode/plate';
 
-import {
-  ParagraphPlugin,
-  useEditorRef,
-  useSelectionFragmentProp,
-} from '@udecode/plate/react';
+import { DropdownMenuItemIndicator } from '@radix-ui/react-dropdown-menu';
 import { BlockquotePlugin } from '@udecode/plate-block-quote/react';
 import { CodeBlockPlugin } from '@udecode/plate-code-block/react';
 import { HEADING_KEYS } from '@udecode/plate-heading';
 // import { INDENT_LIST_KEYS, ListStyleType } from '@udecode/plate-indent-list';
 // import { TogglePlugin } from '@udecode/plate-toggle/react';
 import {
+  ParagraphPlugin,
+  useEditorRef,
+  useSelectionFragmentProp,
+} from '@udecode/plate/react';
+import {
+  CheckIcon,
   // ChevronRightIcon,
   // Columns3Icon,
   FileCodeIcon,
@@ -29,20 +32,18 @@ import {
 } from 'lucide-react';
 
 import {
-  STRUCTURAL_TYPES,
-  getBlockType,
-  setBlockType,
-} from '@/components/editor/transforms';
-
-import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-  useOpenState,
-} from './dropdown-menu';
-import { ToolbarButton } from './toolbar';
+} from '@/components/ui/dropdown-menu';
+import {
+  getBlockType,
+  setBlockType,
+  STRUCTURAL_TYPES,
+} from '@/components/editor/transforms';
+
+import { ToolbarButton, ToolbarMenuGroup } from './toolbar';
 
 const turnIntoItems = [
   {
@@ -114,12 +115,12 @@ const turnIntoItems = [
 
 export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
   const editor = useEditorRef();
-  const openState = useOpenState();
+  const [open, setOpen] = React.useState(false);
 
   const value = useSelectionFragmentProp({
     defaultValue: ParagraphPlugin.key,
-    getProp: (node) => getBlockType(node as any),
     structuralTypes: STRUCTURAL_TYPES,
+    getProp: (node) => getBlockType(node as TElement),
   });
   const selectedItem = React.useMemo(
     () =>
@@ -130,11 +131,11 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
   );
 
   return (
-    <DropdownMenu modal={false} {...openState} {...props}>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
         <ToolbarButton
           className="min-w-[125px]"
-          pressed={openState.open}
+          pressed={open}
           tooltip="Turn into"
           isDropdown
         >
@@ -150,7 +151,7 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
         }}
         align="start"
       >
-        <DropdownMenuRadioGroup
+        <ToolbarMenuGroup
           value={value}
           onValueChange={(type) => {
             setBlockType(editor, type);
@@ -160,14 +161,19 @@ export function TurnIntoDropdownMenu(props: DropdownMenuProps) {
           {turnIntoItems.map(({ icon, label, value: itemValue }) => (
             <DropdownMenuRadioItem
               key={itemValue}
-              className="min-w-[180px]"
+              className="min-w-[180px] pl-2 *:first:[span]:hidden"
               value={itemValue}
             >
+              <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
+                <DropdownMenuItemIndicator>
+                  <CheckIcon />
+                </DropdownMenuItemIndicator>
+              </span>
               {icon}
               {label}
             </DropdownMenuRadioItem>
           ))}
-        </DropdownMenuRadioGroup>
+        </ToolbarMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -1,20 +1,19 @@
 
 
-import { cn } from '@udecode/cn';
-import { type TCommentText, getCommentCount } from '@udecode/plate-comments';
+import type { TCommentText } from '@udecode/plate-comments';
+import type { PlateLeafProps } from '@udecode/plate/react';
+
+import { getCommentCount } from '@udecode/plate-comments';
 import {
-  type PlateLeafProps,
   PlateLeaf,
   useEditorPlugin,
   usePluginOption,
 } from '@udecode/plate/react';
 
+import { cn } from '@/lib/utils';
 import { commentsPlugin } from '@/components/editor/plugins/comments-plugin';
 
-export function CommentLeaf({
-  className,
-  ...props
-}: PlateLeafProps<TCommentText>) {
+export function CommentLeaf(props: PlateLeafProps<TCommentText>) {
   const { children, leaf } = props;
 
   const { api, setOption } = useEditorPlugin(commentsPlugin);
@@ -30,7 +29,6 @@ export function CommentLeaf({
     <PlateLeaf
       {...props}
       className={cn(
-        className,
         'border-b-2 border-b-highlight/[.36] bg-highlight/[.13] transition-colors duration-200',
         (isHover || isActive) && 'border-b-highlight bg-highlight/25',
         isOverlapping && 'border-b-2 border-b-highlight/[.7] bg-highlight/25',

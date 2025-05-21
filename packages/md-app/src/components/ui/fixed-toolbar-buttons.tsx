@@ -1,7 +1,5 @@
 
 
-
-import { useEditorReadOnly } from '@udecode/plate/react';
 import {
   BoldPlugin,
   CodePlugin,
@@ -20,6 +18,7 @@ import {
   ImagePlugin,
   // VideoPlugin,
 } from '@udecode/plate-media/react';
+import { useEditorReadOnly } from '@udecode/plate/react';
 import {
   // ArrowUpToLineIcon,
   // BaselineIcon,
@@ -90,8 +89,6 @@ export function FixedToolbarButtons() {
             <ImportToolbarButton />
           </ToolbarGroup> */}
 
-
-
           <ToolbarGroup>
             <InsertDropdownMenu />
             <TurnIntoDropdownMenu />
@@ -160,6 +157,7 @@ export function FixedToolbarButtons() {
           </ToolbarGroup>
 
           {/* <ToolbarGroup>
+            <MediaToolbarButton nodeType={ImagePlugin.key} />
             <MediaToolbarButton nodeType={VideoPlugin.key} />
             <MediaToolbarButton nodeType={AudioPlugin.key} />
             <MediaToolbarButton nodeType={FilePlugin.key} />

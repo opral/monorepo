@@ -1,11 +1,6 @@
 
-import type { SlateElementProps } from '@udecode/plate';
+import { type SlateElementProps, SlateElement } from '@udecode/plate';
 
-import { SlateElement } from '@udecode/plate';
-
-export const CodeLineElementStatic = ({
-  children,
-  ...props
-}: SlateElementProps) => {
-  return <SlateElement {...props}>{children}</SlateElement>;
-};
+export function CodeLineElementStatic(props: SlateElementProps) {
+  return <SlateElement {...props} />;
+}
