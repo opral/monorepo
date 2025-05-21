@@ -151,16 +151,9 @@ export class DiffComponent extends LitElement {
 			vertical-align: middle;
 		}
 
-		.content-for-mobile {
-			display: none;
-		}
-		.content-for-desktop {
-			display: inline; /* Allows internal spans like char-added to flow */
-		}
-		/* Hide entire row-pair */
-		.row-pair.mobile-row-pair-empty {
-			display: none;
-		}
+		// .content-for-desktop {
+		// 	display: inline; /* Allows internal spans like char-added to flow */
+		// }
 
 		/* Container query for smaller container widths */
 		@container diff (max-width: 600px) {
@@ -175,7 +168,12 @@ export class DiffComponent extends LitElement {
 			}
 
 			/* Hide right column in inline mode */
-			.row-pair > div.diff-row:nth-child(2) {
+
+			.row-pair > div.diff-row.unchanged:nth-child(2) {
+				display: none;
+			}
+
+			.row-pair > div.diff-row.empty:nth-child(2) {
 				display: none;
 			}
 
@@ -196,14 +194,6 @@ export class DiffComponent extends LitElement {
 				display: inline-block;
 				width: 100%;
 				max-width: calc(100% - 30px);
-			}
-
-			/* Show mobile content, hide desktop content */
-			.content-for-desktop {
-				display: none;
-			}
-			.content-for-mobile {
-				display: inline; /* Or block if it needs to take full width of .line */
 			}
 
 			/* Enhanced highlighting for inline view */
@@ -566,10 +556,6 @@ export class DiffComponent extends LitElement {
 			pair.right.content,
 		);
 		// Get inline diff for single column (mobile) view
-		const inlineResult = this.renderInlineDiff(
-			pair.left.content,
-			pair.right.content,
-		);
 
 		// Determine if the mobile content would be empty
 		isMobileRowPairEmpty = !pair.left.content && !pair.right.content;
@@ -580,63 +566,17 @@ export class DiffComponent extends LitElement {
 			>
 				<div class="diff-row ${pair.left.type || ""}">
 					<div class="line">
-						<span class="content-for-desktop">${detailedResult.before}</span>
-						<span class="content-for-mobile">${inlineResult}</span>
+						<span>${detailedResult.before}</span>
 					</div>
 				</div>
 				<div class="diff-row ${pair.right.type || ""}">
 					<div class="line">
-						<span class="content-for-desktop">${detailedResult.after}</span>
+						<span>${detailedResult.after}</span>
 						<!-- Mobile view hides this entire .diff-row, so no specific mobile content needed here -->
 					</div>
 				</div>
 			</div>
 		`;
-	}
-
-	renderInlineDiff(text1: string, text2: string) {
-		// Handle empty strings
-		if (!text1) {
-			return text2 ? html`<span class="char-added">${text2}</span>` : html``;
-		}
-
-		if (!text2) {
-			return text1 ? html`<span class="char-deleted">${text1}</span>` : html``;
-		}
-
-		// Normalize trailing newlines to prevent false positives
-		const normalizedText1 = text1.replace(/\n+$/, "");
-		const normalizedText2 = text2.replace(/\n+$/, "");
-
-		// If texts are identical after normalization, no highlighting needed
-		if (normalizedText1 === normalizedText2) {
-			return html`<span>${text1}</span>`;
-		}
-
-		// Character-level diffing
-		const charDiffs = diffChars(normalizedText1, normalizedText2);
-
-		// Process and render the character differences
-		const combinedElements: unknown[] = [];
-
-		charDiffs.forEach((part) => {
-			if (!part) return;
-
-			if (part.added && part.value) {
-				combinedElements.push(
-					html`<span class="char-added">${part.value}</span>`,
-				);
-			} else if (part.removed && part.value) {
-				combinedElements.push(
-					html`<span class="char-deleted">${part.value}</span>`,
-				);
-			} else {
-				// Unchanged parts
-				combinedElements.push(html`<span>${part.value || ""}</span>`);
-			}
-		});
-
-		return html`${combinedElements}`;
 	}
 
 	toggleBlock(blockId: string, e: Event) {
