@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/multisidebar";
 import { LixSidebar } from "@/components/ui/sidebar-lix";
 import { useEffect, useState } from "react";
-import { Button } from '@/components/plate-ui/button';
+import { Button } from '@/components/ui/button';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import ChangeControlSidebar from '@/components/ui/sidebar-change-control';
 import { activeAccountAtom } from '@/state';

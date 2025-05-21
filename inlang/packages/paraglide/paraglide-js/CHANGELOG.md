@@ -1,5 +1,14 @@
 # @inlang/paraglide-js
 
+## 2.0.13
+
+### Patch Changes
+
+- 688c7c8: Add support for callbacks in server middleware
+- 635861b: `extractLocaleFromUrl()` now uses a cache for the last value.
+
+  Useful on the client-side where the same URL is being extracted many times for each message on a given page.
+
 ## 2.0.12
 
 ### Patch Changes

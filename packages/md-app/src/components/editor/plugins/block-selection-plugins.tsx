@@ -2,7 +2,7 @@
 
 import { BlockSelectionPlugin } from '@udecode/plate-selection/react';
 
-import { BlockSelection } from '@/components/plate-ui/block-selection';
+import { BlockSelection } from '@/components/ui/block-selection';
 import { ExtendedMarkdownPlugin } from "./markdown/markdown-plugin";
 
 export const blockSelectionPlugins: any = [

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"; // Added useRef, useEffect
-import { Button } from "@/components/plate-ui/button";
+import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { checkpointChangeSetsAtom, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";

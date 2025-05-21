@@ -38,7 +38,7 @@ test("file.data is potentially undefined", () => {
 	const plugin: LixPlugin = {
 		key: "plugin1",
 		applyChanges: async ({ file }) => {
-			assertType<ArrayBuffer | undefined>(file.data);
+			assertType<Uint8Array | undefined>(file.data);
 			return { fileData: new Uint8Array() };
 		},
 	};

@@ -2,7 +2,7 @@ import { Import } from "lucide-react";
 import { useEditorRef } from "@udecode/plate/react";
 import { useFilePicker } from 'use-file-picker';
 import { ExtendedMarkdownPlugin } from "./editor/plugins/markdown/markdown-plugin";
-import { ToolbarButton } from "./plate-ui/toolbar";
+import { ToolbarButton } from "./ui/toolbar";
 
 export const ImportMarkdown = () => {
   const editor = useEditorRef()

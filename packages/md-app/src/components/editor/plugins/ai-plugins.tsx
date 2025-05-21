@@ -8,8 +8,8 @@ import { streamInsertChunk, withAIBatch } from '@udecode/plate-ai';
 import { AIChatPlugin, AIPlugin, useChatChunk } from '@udecode/plate-ai/react';
 import { usePluginOption } from '@udecode/plate/react';
 
-import { AILoadingBar } from '@/components/plate-ui/ai-loading-bar';
-import { AIMenu } from '@/components/plate-ui/ai-menu';
+import { AILoadingBar } from '@/components/ui/ai-loading-bar';
+import { AIMenu } from '@/components/ui/ai-menu';
 
 import { cursorOverlayPlugin } from './cursor-overlay-plugin';
 import { ExtendedMarkdownPlugin } from './markdown/markdown-plugin';
