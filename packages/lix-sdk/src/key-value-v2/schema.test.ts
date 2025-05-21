@@ -75,7 +75,7 @@ test("arbitrary json is allowed", async () => {
 
 	const viewAfterInsert = await lix.db
 		.selectFrom("key_value")
-		.selectAll()
+		.select(["key", "value"])
 		.execute();
 
 	expect(viewAfterInsert).toEqual(kvs);
@@ -84,101 +84,86 @@ test("arbitrary json is allowed", async () => {
 test("view should show changes across versions", async () => {
 	const lix = await openLixInMemory({});
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "active_version.version_id", "version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+	const versionA = await createVersion({ lix, id: "versionA" });
 
-	const result = await lix.db
+	await lix.db
 		.insertInto("key_value")
 		.values({
 			key: "foo",
 			value: "bar",
+			version_id: versionA.id,
 		})
-		.returningAll()
 		.execute();
 
-	expect(result).toMatchObject([
-		{
-			key: "foo",
-			value: "bar",
-		},
-	]);
-	const viewResult0 = await lix.db
-		.selectFrom("key_value")
-		.selectAll()
-		.execute();
-
-	expect(viewResult0).toMatchObject([
-		{
-			key: "foo",
-			value: "bar",
-			version_id: activeVersion.id,
-		},
-	]);
-
-	const activeVersionAfterUpdate = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "active_version.version_id", "version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
-
-	const versionB = await createVersion({
-		lix,
-		id: "versionB",
-		name: "versionB",
-		changeSet: { id: activeVersionAfterUpdate.change_set_id },
-	});
-
-	await lix.db
-		.updateTable("active_version")
-		.set({ version_id: versionB.id })
-		.execute();
-
-	const kvViewAfterSwitch = await lix.db
-		.selectFrom("key_value")
-		.selectAll()
-		.execute();
-
-	expect(kvViewAfterSwitch).toMatchObject([
-		{
-			key: "foo",
-			value: "bar",
-			version_id: activeVersion.id,
-		},
-		{
-			key: "foo",
-			value: "bar",
-			version_id: versionB.id,
-		},
-	]);
-
-	await lix.db
-		.insertInto("key_value")
-		.values({ key: "foo_versionB", value: "bar" })
-		.execute();
-
-	const viewResult1 = await lix.db
+	const kvAfterInsert = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();
 
-	expect(viewResult1).toMatchObject([
+	expect(kvAfterInsert).toMatchObject([
 		{
 			key: "foo",
 			value: "bar",
-			version_id: activeVersion.id,
+			version_id: versionA.id,
+		},
+	]);
+
+	const versionAAfterUpdate = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// creating a new version from the active version
+	const versionB = await createVersion({
+		lix,
+		id: "versionB",
+		name: "versionB",
+		changeSet: { id: versionAAfterUpdate.change_set_id },
+	});
+
+	const kvAfterCreateVersionB = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.execute();
+
+	expect(kvAfterCreateVersionB).toMatchObject([
+		{
+			key: "foo",
+			value: "bar",
+			version_id: versionA.id,
 		},
 		{
 			key: "foo",
 			value: "bar",
 			version_id: versionB.id,
 		},
+	]);
+
+	await lix.db
+		.updateTable("key_value")
+		.where("key", "=", "foo")
+		.where("version_id", "=", versionB.id)
+		.set({ value: "bar_updated" })
+		.execute();
+
+	const kvAfterUpdate = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll()
+		.execute();
+
+	expect(kvAfterUpdate).toMatchObject([
 		{
-			key: "foo_versionB",
+			key: "foo",
 			value: "bar",
+			version_id: versionA.id,
+		},
+		{
+			key: "foo",
+			value: "bar_updated",
 			version_id: versionB.id,
 		},
 	]);

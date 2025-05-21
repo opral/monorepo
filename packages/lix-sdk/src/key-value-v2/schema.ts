@@ -1,6 +1,6 @@
 import { type Selectable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { Insertable, Updateable } from "kysely";
+import type { Generated, Insertable, Updateable } from "kysely";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import {
 	JSONTypeSchema,
@@ -10,11 +10,12 @@ import {
 export function applyKeyValueDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): SqliteWasmDatabase {
-	return sqlite.exec`
+	return sqlite.exec(`
 	CREATE VIEW IF NOT EXISTS key_value AS
   SELECT
     json_extract(snapshot_content, '$.key') AS key,
-    json_extract(snapshot_content, '$.value') AS value
+    json_extract(snapshot_content, '$.value') AS value,
+		version_id
   FROM state
   WHERE schema_key = 'lix_key_value';
 
@@ -26,13 +27,15 @@ export function applyKeyValueDatabaseSchema(
 			schema_key,
 			file_id,
 			plugin_key,
-			snapshot_content
+			snapshot_content,
+			version_id
 		) VALUES (
 			NEW.key,
 			'lix_key_value',
 			'lix',
 			'lix_own_entity',
-			json_object('key', NEW.key, 'value', NEW.value)
+			json_object('key', NEW.key, 'value', NEW.value),
+			COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
 		);
 	END;
 
@@ -45,11 +48,13 @@ export function applyKeyValueDatabaseSchema(
 			schema_key = 'lix_key_value',
 			file_id = 'lix',
 			plugin_key = 'lix_own_entity',
-			snapshot_content = json_object('key', NEW.key, 'value', NEW.value)
+			snapshot_content = json_object('key', NEW.key, 'value', NEW.value),
+			version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
 		WHERE
 			state.entity_id = OLD.key
 			AND state.schema_key = 'lix_key_value'
-			AND state.file_id = 'lix';
+			AND state.file_id = 'lix'
+			AND state.version_id = OLD.version_id;
 	END;
 
 	CREATE TRIGGER key_value_delete
@@ -60,7 +65,7 @@ export function applyKeyValueDatabaseSchema(
 		AND schema_key = 'lix_key_value'
 		AND file_id = 'lix';
 	END;
-`;
+`);
 }
 
 export const KeyValueSchema = {
@@ -82,6 +87,7 @@ export type KeyValueUpdate = Updateable<KeyValueView>;
 export type KeyValueView = {
 	key: string;
 	value: JSONType;
+	version_id: Generated<string>;
 };
 
 type PredefinedKeys =

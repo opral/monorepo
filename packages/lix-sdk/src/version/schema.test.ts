@@ -146,13 +146,6 @@ test("querying by id", async () => {
 test("update, delete on the active version view", async () => {
 	const lix = await openLixInMemory({});
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.select("version_id")
-		.executeTakeFirstOrThrow();
-
-	console.log(activeVersion);
-
 	await lix.db
 		.updateTable("active_version")
 		.set({ version_id: "version_id_1" })

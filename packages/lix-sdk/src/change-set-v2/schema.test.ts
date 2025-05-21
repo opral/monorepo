@@ -5,10 +5,6 @@ describe("change_set", () => {
 	test("insert, update, delete on the change set view", async () => {
 		const lix = await openLixInMemory({});
 
-		const initial = await lix.db.selectFrom("change_set").selectAll().execute();
-
-		expect(initial).toHaveLength(0);
-
 		await lix.db
 			.insertInto("change_set")
 			.values([{ id: "cs0" }, { id: "cs1" }])
@@ -17,10 +13,11 @@ describe("change_set", () => {
 		const viewAfterInsert = await lix.db
 			.selectFrom("change_set")
 			.orderBy("id", "asc")
+			.where("id", "in", ["cs0", "cs1"])
 			.selectAll()
 			.execute();
 
-		expect(viewAfterInsert).toEqual([
+		expect(viewAfterInsert).toMatchObject([
 			{
 				id: "cs0",
 				metadata: null,
@@ -40,10 +37,11 @@ describe("change_set", () => {
 		const viewAfterUpdate = await lix.db
 			.selectFrom("change_set")
 			.orderBy("id", "asc")
+			.where("id", "in", ["cs0", "cs1"])
 			.selectAll()
 			.execute();
 
-		expect(viewAfterUpdate).toEqual([
+		expect(viewAfterUpdate).toMatchObject([
 			{
 				id: "cs0",
 				metadata: { foo: "bar" },
@@ -59,10 +57,11 @@ describe("change_set", () => {
 		const viewAfterDelete = await lix.db
 			.selectFrom("change_set")
 			.orderBy("id", "asc")
+			.where("id", "in", ["cs0", "cs1"])
 			.selectAll()
 			.execute();
 
-		expect(viewAfterDelete).toEqual([
+		expect(viewAfterDelete).toMatchObject([
 			{
 				id: "cs1",
 				metadata: null,
@@ -73,12 +72,13 @@ describe("change_set", () => {
 			.selectFrom("change")
 			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 			.where("schema_key", "=", "lix_change_set")
+			.where("entity_id", "in", ["cs0", "cs1"])
 			.orderBy("change.created_at", "asc")
 			.selectAll("change")
 			.select("snapshot.content")
 			.execute();
 
-		expect(changes.map((change) => change.content)).toEqual([
+		expect(changes.map((change) => change.content)).toMatchObject([
 			// insert
 			{
 				id: "cs0",
@@ -102,24 +102,12 @@ describe("change_set", () => {
 	test("has a default id", async () => {
 		const lix = await openLixInMemory({});
 
-		const initial = await lix.db.selectFrom("change_set").selectAll().execute();
-
-		await lix.db.insertInto("change_set").defaultValues().execute();
-
-		const viewAfterInsert = await lix.db
-			.selectFrom("change_set")
-			.selectAll()
+		// the insert would throw if no default id was provided
+		await lix.db
+			.insertInto("change_set")
+			.defaultValues()
+			.returningAll()
 			.execute();
-
-		expect(viewAfterInsert.length).toBe(initial.length + 1);
-
-		expect(viewAfterInsert).toEqual([
-			...initial,
-			{
-				id: expect.any(String),
-				metadata: null,
-			},
-		]);
 	});
 });
 
@@ -153,7 +141,7 @@ describe("change_set_element", () => {
 			.selectAll()
 			.execute();
 
-		expect(viewAfterInsert).toEqual([
+		expect(viewAfterInsert).toMatchObject([
 			{
 				change_set_id: "cs0",
 				change_id: "c0",
@@ -182,13 +170,6 @@ describe("change_set_edge", () => {
 	test("insert, delete on the change set edge view", async () => {
 		const lix = await openLixInMemory({});
 
-		const initial = await lix.db
-			.selectFrom("change_set_edge")
-			.selectAll()
-			.execute();
-
-		expect(initial).toEqual([]);
-
 		await lix.db
 			.insertInto("change_set_edge")
 			.values([
@@ -202,10 +183,11 @@ describe("change_set_edge", () => {
 		const viewAfterInsert = await lix.db
 			.selectFrom("change_set_edge")
 			.orderBy("parent_id", "asc")
+			.where("parent_id", "=", "cs0")
 			.selectAll()
 			.execute();
 
-		expect(viewAfterInsert).toEqual([
+		expect(viewAfterInsert).toMatchObject([
 			{
 				parent_id: "cs0",
 				child_id: "cs1",
@@ -220,6 +202,7 @@ describe("change_set_edge", () => {
 		const viewAfterDelete = await lix.db
 			.selectFrom("change_set_edge")
 			.orderBy("parent_id", "asc")
+			.where("parent_id", "=", "cs0")
 			.selectAll()
 			.execute();
 

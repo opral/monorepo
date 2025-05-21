@@ -24,7 +24,8 @@ export function handleStateMutation(
 	schema_key: string,
 	file_id: string,
 	plugin_key: string,
-	snapshot_content: string // stringified json
+	snapshot_content: string, // stringified json
+	version_id: string
 ): 0 | 1 {
 	const rootChange = createChangeWithSnapshot({
 		sqlite,
@@ -49,40 +50,7 @@ export function handleStateMutation(
 		return 0;
 	}
 
-	// to avoid querying the own state view
-	// Step 1: Get the latest 'lix_active_version' entity's snapshot content
-	const [activeVersionRecord] = executeSync({
-		lix: { sqlite },
-		query: db
-			.selectFrom("internal_change")
-			.innerJoin(
-				"internal_snapshot",
-				"internal_change.snapshot_id",
-				"internal_snapshot.id"
-			)
-			.where("internal_change.schema_key", "=", "lix_active_version")
-			.where("internal_change.snapshot_id", "!=", "no-content")
-			.orderBy("internal_change.rowid", "desc")
-			.limit(1)
-			.select(sql`json(internal_snapshot.content)`.as("content")),
-	}) as [{ content: string } | undefined];
-
-	if (!activeVersionRecord) {
-		throw new Error(
-			"No active version found. Database may be in an inconsistent state."
-		);
-	}
-
-	const activeVersionSnapshot = JSON.parse(activeVersionRecord.content);
-	const activeVersionId = activeVersionSnapshot.version_id;
-
-	if (!activeVersionId || typeof activeVersionId !== "string") {
-		throw new Error(
-			"'version_id' not found or invalid in active_version snapshot."
-		);
-	}
-
-	// Step 2: Get the latest 'lix_version' entity's snapshot content using the activeVersionId
+	// Get the latest 'lix_version' entity's snapshot content using the activeVersionId
 	const [versionRecord] = executeSync({
 		lix: { sqlite },
 		query: db
@@ -93,7 +61,7 @@ export function handleStateMutation(
 				"internal_snapshot.id"
 			)
 			.where("internal_change.schema_key", "=", "lix_version")
-			.where("internal_change.entity_id", "=", activeVersionId)
+			.where("internal_change.entity_id", "=", version_id)
 			.where("internal_change.snapshot_id", "!=", "no-content")
 			.orderBy("internal_change.rowid", "desc")
 			.limit(1)
@@ -101,30 +69,10 @@ export function handleStateMutation(
 	}) as [{ content: string } | undefined];
 
 	if (!versionRecord) {
-		throw new Error(
-			`Version with id '${activeVersionId}' not found for active_version.`
-		);
+		throw new Error(`Version with id '${version_id}' not found.`);
 	}
 
-	const versionSnapshot = JSON.parse(versionRecord.content);
-
-	// Reconstruct the activeVersion object based on the Version type structure
-	const activeVersion: Version = {
-		id: versionSnapshot.id,
-		name: versionSnapshot.name,
-		change_set_id: versionSnapshot.change_set_id,
-		working_change_set_id: versionSnapshot.working_change_set_id,
-	};
-
-	if (
-		!activeVersion.id ||
-		!activeVersion.change_set_id ||
-		!activeVersion.working_change_set_id
-	) {
-		throw new Error(
-			"Failed to reconstruct a valid activeVersion object from internal tables."
-		);
-	}
+	const version = JSON.parse(versionRecord.content) as Version;
 
 	const changeSetId = nanoid();
 
@@ -139,7 +87,7 @@ export function handleStateMutation(
 			snapshot_content: JSON.stringify({
 				id: changeSetId,
 				metadata: null,
-			} satisfies ChangeSet),
+			} satisfies Omit<ChangeSet, "version_id">),
 		},
 	});
 
@@ -147,14 +95,14 @@ export function handleStateMutation(
 		sqlite,
 		db,
 		data: {
-			entity_id: `${activeVersion.change_set_id}::${changeSetId}`,
+			entity_id: `${version.change_set_id}::${changeSetId}`,
 			schema_key: "lix_change_set_edge",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
-				parent_id: activeVersion.change_set_id,
+				parent_id: version.change_set_id,
 				child_id: changeSetId,
-			} satisfies ChangeSetEdge),
+			} satisfies Omit<ChangeSetEdge, "version_id">),
 		},
 	});
 
@@ -162,14 +110,14 @@ export function handleStateMutation(
 		sqlite,
 		db,
 		data: {
-			entity_id: activeVersion.id,
+			entity_id: version.id,
 			schema_key: "lix_version",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
-				...activeVersion,
+				...version,
 				change_set_id: changeSetId,
-			} satisfies Version),
+			} satisfies Omit<Version, "version_id">),
 		},
 	});
 
@@ -193,7 +141,7 @@ export function handleStateMutation(
 					schema_key: change.schema_key,
 					file_id: change.file_id,
 					entity_id: change.entity_id,
-				} satisfies ChangeSetElement),
+				} satisfies Omit<ChangeSetElement, "version_id">),
 			},
 		});
 		// TODO investigate if needed as part of a change set itself
@@ -219,6 +167,16 @@ export function handleStateMutation(
 		// });
 	}
 
+	console.log(
+		"handleStateMutation:",
+		"version_id",
+		version_id,
+		"schema_key",
+		schema_key,
+		"entity_id",
+		entity_id
+	);
+
 	return 1;
 }
 
@@ -226,7 +184,7 @@ function createChangeWithSnapshot(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 	id?: string;
-	data: NewStateRow;
+	data: Omit<NewStateRow, "version_id">;
 }): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
 	const [snapshot] = args.data.snapshot_content
 		? executeSync({

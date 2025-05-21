@@ -1,6 +1,7 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { Version } from "../version/schema.js";
 
 export function applyChangeSetDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -9,7 +10,8 @@ export function applyChangeSetDatabaseSchema(
   CREATE VIEW IF NOT EXISTS change_set AS
 	SELECT
 		json_extract(snapshot_content, '$.id') AS id,
-    json_extract(snapshot_content, '$.metadata') AS metadata
+    json_extract(snapshot_content, '$.metadata') AS metadata,
+    version_id
 	FROM state
 	WHERE schema_key = 'lix_change_set';
 
@@ -21,14 +23,16 @@ export function applyChangeSetDatabaseSchema(
       schema_key,
       file_id,
       plugin_key,
-      snapshot_content
+      snapshot_content,
+      version_id
     )
     SELECT
       with_default_values.id,
       'lix_change_set',
       'lix',
       'lix_own_entity',
-      json_object('id', with_default_values.id, 'metadata', with_default_values.metadata)
+      json_object('id', with_default_values.id, 'metadata', with_default_values.metadata),
+      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT
         COALESCE(NEW.id, nano_id()) AS id,
@@ -45,7 +49,8 @@ export function applyChangeSetDatabaseSchema(
       schema_key = 'lix_change_set',
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('id', NEW.id, 'metadata', NEW.metadata)
+      snapshot_content = json_object('id', NEW.id, 'metadata', NEW.metadata),
+      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_change_set'
@@ -69,7 +74,8 @@ export function applyChangeSetDatabaseSchema(
     json_extract(snapshot_content, '$.change_id') AS change_id,
     json_extract(snapshot_content, '$.entity_id') AS entity_id,
     json_extract(snapshot_content, '$.schema_key') AS schema_key,
-    json_extract(snapshot_content, '$.file_id') AS file_id
+    json_extract(snapshot_content, '$.file_id') AS file_id,
+    version_id
 	FROM state
 	WHERE schema_key = 'lix_change_set_element';
 
@@ -81,13 +87,15 @@ export function applyChangeSetDatabaseSchema(
       schema_key,
       file_id,
       plugin_key,
-      snapshot_content
+      snapshot_content,
+      version_id
     ) VALUES (
       NEW.change_set_id || '::' || NEW.change_id,
       'lix_change_set_element',
       'lix',
       'lix_own_entity',
-      json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id)
+      json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id),
+      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     );
   END;
 
@@ -100,7 +108,8 @@ export function applyChangeSetDatabaseSchema(
       schema_key = 'lix_change_set_element',
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id)
+      snapshot_content = json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id),
+      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.change_set_id || '::' || OLD.change_id
       AND schema_key = 'lix_change_set_element'
@@ -121,7 +130,8 @@ export function applyChangeSetDatabaseSchema(
   CREATE VIEW IF NOT EXISTS change_set_edge AS
   SELECT
     json_extract(snapshot_content, '$.parent_id') AS parent_id,
-    json_extract(snapshot_content, '$.child_id') AS child_id
+    json_extract(snapshot_content, '$.child_id') AS child_id,
+    version_id
   FROM state
   WHERE schema_key = 'lix_change_set_edge';
 
@@ -129,13 +139,19 @@ export function applyChangeSetDatabaseSchema(
   INSTEAD OF INSERT ON change_set_edge
   BEGIN
     INSERT INTO state (
-      entity_id, schema_key, file_id, plugin_key, snapshot_content
+      entity_id, 
+      schema_key, 
+      file_id, 
+      plugin_key, 
+      snapshot_content,
+      version_id
     ) VALUES (
       NEW.parent_id || '::' || NEW.child_id,
       'lix_change_set_edge',
       'lix',
       'lix_own_entity',
-      json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id)
+      json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id),
+      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     ); 
   END;
 
@@ -148,7 +164,8 @@ export function applyChangeSetDatabaseSchema(
       schema_key = 'lix_change_set_edge',
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id)
+      snapshot_content = json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id),
+      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.parent_id || '::' || OLD.child_id
       AND schema_key = 'lix_change_set_edge'
@@ -186,6 +203,7 @@ export type ChangeSetUpdate = Updateable<ChangeSetView>;
 export type ChangeSetView = {
 	id: Generated<string>;
 	metadata: Record<string, any> | null;
+	version_id: Generated<Version["id"]>;
 };
 
 export const ChangeSetElementSchema: LixSchemaDefinition = {
@@ -227,6 +245,7 @@ export type ChangeSetElementView = {
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
+	version_id: Generated<string>;
 };
 
 export const ChangeSetEdgeSchema: LixSchemaDefinition = {
@@ -248,6 +267,7 @@ export type ChangeSetEdgeUpdate = Updateable<ChangeSetEdgeView>;
 export type ChangeSetEdgeView = {
 	parent_id: string;
 	child_id: string;
+	version_id: Generated<string>;
 };
 
 // export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;

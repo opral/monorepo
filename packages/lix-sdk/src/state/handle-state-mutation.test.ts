@@ -61,7 +61,7 @@ test("creates a new change set and updates the version's change set id for mutat
 
 	const edges = await lix.db
 		.selectFrom("change_set_edge")
-		.selectAll()
+		.select(["parent_id", "child_id"])
 		.execute();
 
 	expect(edges).toEqual(
@@ -78,7 +78,7 @@ test("creates a new change set and updates the version's change set id for mutat
 				parent_id: versionAfterUpdate.change_set_id,
 				child_id: versionAfterDelete.change_set_id,
 			},
-		] satisfies ChangeSetEdge[])
+		] satisfies Omit<ChangeSetEdge, "version_id">[])
 	);
 });
 

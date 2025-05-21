@@ -27,7 +27,8 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
         schema_key,
         file_id,
         plugin_key,
-        snapshot_content
+        snapshot_content,
+        version_id
       )
       SELECT
         id,
@@ -39,7 +40,8 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
           'name', name,            
           'change_set_id', NEW.change_set_id,
           'working_change_set_id', NEW.working_change_set_id
-        )
+        ),
+        (SELECT version_id FROM active_version)
       FROM (
           SELECT
               COALESCE(NEW.id, nano_id()) AS id,
@@ -61,7 +63,8 @@ BEGIN
         'name', NEW.name,
         'change_set_id', NEW.change_set_id,
         'working_change_set_id', NEW.working_change_set_id
-      )
+      ),
+      version_id = (SELECT version_id FROM active_version)
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_version'
@@ -91,13 +94,15 @@ BEGIN
       schema_key,
       file_id,
       plugin_key,
-      snapshot_content
+      snapshot_content,
+      version_id
     ) VALUES (
       'lix_active_version',
       'lix_active_version',
       'lix',
       'lix_own_entity',
-      json_object('version_id', NEW.version_id)
+      json_object('version_id', NEW.version_id),
+      (SELECT version_id FROM active_version)
     );
   END;
 
@@ -106,7 +111,8 @@ BEGIN
   BEGIN
     UPDATE state
     SET
-      snapshot_content = json_object('version_id', NEW.version_id)
+      snapshot_content = json_object('version_id', NEW.version_id),
+      version_id = (SELECT version_id FROM active_version)
     WHERE
       entity_id = 'lix_active_version'
       AND schema_key = 'lix_active_version'
@@ -121,7 +127,7 @@ BEGIN
     AND schema_key = 'lix_active_version';
   END;
 
-  -- Insert the default change set if missing
+   -- Insert the default change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id)
   SELECT '${INITIAL_CHANGE_SET_ID}'
@@ -135,15 +141,56 @@ BEGIN
 
   -- Insert the default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO version (id, name, change_set_id, working_change_set_id)
-  SELECT '${INITIAL_VERSION_ID}', 'main', '${INITIAL_CHANGE_SET_ID}', '${INITIAL_WORKING_CHANGE_SET_ID}'
-  WHERE NOT EXISTS (SELECT 1 FROM version);
+  INSERT INTO state (
+    entity_id, 
+    schema_key, 
+    file_id, 
+    plugin_key, 
+    snapshot_content, 
+    version_id
+  )
+  SELECT 
+    '${INITIAL_VERSION_ID}', 
+    'lix_version', 
+    'lix', 
+    'lix_own_entity', 
+    json_object(
+      'id', '${INITIAL_VERSION_ID}',                
+      'name', 'main',            
+      'change_set_id', '${INITIAL_CHANGE_SET_ID}',
+      'working_change_set_id', '${INITIAL_WORKING_CHANGE_SET_ID}'
+    ),
+    '${INITIAL_VERSION_ID}'
+  WHERE NOT EXISTS (
+    SELECT 1 
+    FROM state 
+    WHERE entity_id = '${INITIAL_VERSION_ID}' 
+    AND schema_key = 'lix_version'
+  );
 
   -- Set the default current version to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
-  INSERT INTO active_version (version_id)
-  SELECT '${INITIAL_VERSION_ID}'
-  WHERE NOT EXISTS (SELECT 1 FROM active_version);
+  INSERT INTO state (
+    entity_id, 
+    schema_key, 
+    file_id, 
+    plugin_key, 
+    snapshot_content, 
+    version_id
+  )
+  SELECT 
+    'lix_active_version', 
+    'lix_active_version', 
+    'lix', 
+    'lix_own_entity', 
+    json_object('version_id', '${INITIAL_VERSION_ID}'), 
+    '${INITIAL_VERSION_ID}'
+  WHERE NOT EXISTS (
+    SELECT 1 
+    FROM state 
+    WHERE entity_id = 'lix_active_version' 
+    AND schema_key = 'lix_active_version'
+  );
 `);
 }
 

@@ -1,7 +1,8 @@
-import { createChangeSet } from "../change-set/create-change-set.js";
-import type { ChangeSet } from "../change-set/database-schema.js";
+import { createChangeSet } from "../change-set-v2/create-change-set.js";
+import type { ChangeSet } from "../change-set-v2/schema.js";
+import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { Version } from "./database-schema.js";
+import type { Version } from "./schema.js";
 
 /**
  * Creates a new version.
@@ -14,23 +15,32 @@ import type { Version } from "./database-schema.js";
 export async function createVersion(args: {
 	lix: Lix;
 	id?: Version["id"];
-	changeSet: Pick<ChangeSet, "id">;
+	changeSet?: Pick<ChangeSet, "id">;
 	name?: Version["name"];
 }): Promise<Version> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			immutableElements: false,
 		});
-		const newVersion = await trx
+		const cs =
+			args.changeSet ??
+			(await createChangeSet({ lix: { ...args.lix, db: trx } }));
+
+		const versionId = args.id ?? nanoid();
+		await trx
 			.insertInto("version")
 			.values({
-				id: args.id,
+				id: versionId,
 				name: args.name,
-				change_set_id: args.changeSet.id,
+				change_set_id: cs.id,
 				working_change_set_id: workingCs.id,
 			})
-			.returningAll()
+			.execute();
+
+		const newVersion = await trx
+			.selectFrom("version")
+			.selectAll()
+			.where("id", "=", versionId)
 			.executeTakeFirstOrThrow();
 
 		return newVersion;

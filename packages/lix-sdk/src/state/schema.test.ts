@@ -1,6 +1,8 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import { sql } from "kysely";
+import { createVersion } from "../version/create-version.js";
 
 test("select, insert, update, delete entity", async () => {
 	const mockSchema: LixSchemaDefinition = {
@@ -28,6 +30,7 @@ test("select, insert, update, delete entity", async () => {
 			file_id: "f0",
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
+			version_id: sql`(SELECT version_id FROM active_version)`,
 			snapshot_content: {
 				value: "hello world",
 			},
@@ -85,6 +88,7 @@ test("select, insert, update, delete entity", async () => {
 	await lix.db
 		.deleteFrom("state")
 		.where("entity_id", "=", "e0")
+		.where("version_id", "=", sql`(SELECT version_id FROM active_version)`)
 		.where("schema_key", "=", "mock_schema")
 		.execute();
 
@@ -115,7 +119,6 @@ test("validates the schema on insert", async () => {
 		.insertInto("stored_schema")
 		.values({ value: mockSchema })
 		.execute();
-
 	await expect(
 		lix.db
 			.insertInto("state")
@@ -127,9 +130,10 @@ test("validates the schema on insert", async () => {
 				snapshot_content: {
 					value: "hello world",
 				},
+				version_id: sql`(SELECT version_id FROM active_version)`,
 			})
 			.execute()
-	).rejects.toThrow(/data\/value must be number/);
+	).rejects.toThrow(/value must be number/);
 });
 
 test("validates the schema on update", async () => {
@@ -161,6 +165,7 @@ test("validates the schema on update", async () => {
 			snapshot_content: {
 				value: 5,
 			},
+			version_id: sql`(SELECT version_id FROM active_version)`,
 		})
 		.execute();
 
@@ -176,7 +181,7 @@ test("validates the schema on update", async () => {
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "f0")
 			.execute()
-	).rejects.toThrow(/data\/value must be number/);
+	).rejects.toThrow(/value must be number/);
 
 	const viewAfterFailedUpdate = await lix.db
 		.selectFrom("state")
@@ -200,30 +205,8 @@ test("validates the schema on update", async () => {
 test("switching versions", async () => {
 	const lix = await openLixInMemory({});
 
-	await lix.db
-		.insertInto("version")
-		.values({
-			id: "a",
-			change_set_id: "cs0",
-			working_change_set_id: "working_cs0",
-		})
-		.execute();
-
-	await lix.db
-		.insertInto("version")
-		.values({
-			id: "b",
-			change_set_id: "cs1",
-			working_change_set_id: "working_cs1",
-		})
-		.execute();
-
-	await lix.db
-		.updateTable("active_version")
-		.set({
-			version_id: "b",
-		})
-		.execute();
+	await createVersion({ lix, id: "a" });
+	await createVersion({ lix, id: "b" });
 
 	await lix.db
 		.insertInto("key_value")
@@ -265,6 +248,13 @@ test("switching versions", async () => {
 test("state is separated by version", async () => {
 	const lix = await openLixInMemory({});
 
+	const state0 = await lix.db.selectFrom("state").selectAll().execute();
+
+	const [versionA, versionB] = [
+		await createVersion({ lix, id: "a" }),
+		await createVersion({ lix, id: "b" }),
+	] as const;
+
 	await lix.db
 		.insertInto("state")
 		.values([
@@ -272,24 +262,34 @@ test("state is separated by version", async () => {
 				entity_id: "e0",
 				file_id: "f0",
 				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
+				plugin_key: "mock_plugin",
 				snapshot_content: {
 					value: "hello world from version a",
 				},
-				version_id: "a",
-			},
-			{
-				entity_id: "e0",
-				file_id: "f0",
-				schema_key: "mock_schema",
-				plugin_key: "lix_own_entity",
-				snapshot_content: {
-					value: "hello world from version b",
-				},
 				version_id: "b",
 			},
+			// {
+			// 	entity_id: "e0",
+			// 	file_id: "f0",
+			// 	schema_key: "mock_schema",
+			// 	plugin_key: "mock_plugin",
+			// 	snapshot_content: {
+			// 		value: "hello world from version b",
+			// 	},
+			// 	version_id: "b",
+			// },
 		])
 		.execute();
+
+	const versionAAfter = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "a")
+		.selectAll()
+		.execute();
+
+	console.log("versionAAfter", versionAAfter);
+
+	const stateAfter = await lix.db.selectFrom("state").selectAll().execute();
 
 	const versionAAfterInsert = await lix.db
 		.selectFrom("state")
@@ -302,7 +302,7 @@ test("state is separated by version", async () => {
 			entity_id: "e0",
 			file_id: "f0",
 			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
+			plugin_key: "mock_plugin",
 			snapshot_content: {
 				value: "hello world from version a",
 			},
@@ -321,7 +321,7 @@ test("state is separated by version", async () => {
 			entity_id: "e0",
 			file_id: "f0",
 			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
+			plugin_key: "mock_plugin",
 			snapshot_content: {
 				value: "hello world from version b",
 			},

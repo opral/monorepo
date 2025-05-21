@@ -1,18 +1,15 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "./create-version.js";
-import type { ChangeSet } from "../change-set/database-schema.js";
+import type { ChangeSet } from "../change-set-v2/schema.js";
+import { createChangeSet } from "../change-set-v2/create-change-set.js";
 
 test("should create a version linked to the provided change_set_id", async () => {
 	const lix = await openLixInMemory({});
 	// Setup: Create a change_set to link to
-	const changeSet = await lix.db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const changeSet = await createChangeSet({ lix });
 
-	const newVersion = await createVersion({ lix, changeSet: changeSet });
+	const newVersion = await createVersion({ lix, changeSet });
 
 	expect(newVersion.change_set_id).toBe(changeSet.id);
 	expect(newVersion.id).toBeDefined();
@@ -22,16 +19,12 @@ test("should create a version linked to the provided change_set_id", async () =>
 
 test("should create a version with the specified name", async () => {
 	const lix = await openLixInMemory({});
-	const changeSet = await lix.db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const changeSet = await createChangeSet({ lix });
 	const versionName = "My Test Version";
 
 	const newVersion = await createVersion({
 		lix,
-		changeSet: changeSet,
+		changeSet,
 		name: versionName,
 	});
 
@@ -42,15 +35,11 @@ test("should create a version with the specified name", async () => {
 
 test("should create a version with the specified id", async () => {
 	const lix = await openLixInMemory({});
-	const changeSet = await lix.db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const changeSet = await createChangeSet({ lix });
 
 	const newVersion = await createVersion({
 		lix,
-		changeSet: changeSet,
+		changeSet,
 		id: "hello world",
 	});
 
@@ -62,17 +51,13 @@ test("should create a version with the specified id", async () => {
 
 test("should work within an existing transaction", async () => {
 	const lix = await openLixInMemory({});
-	const changeSet = await lix.db
-		.insertInto("change_set")
-		.defaultValues()
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const changeSet = await createChangeSet({ lix });
 	const versionName = "Transaction Test Version";
 
 	const newVersion = await lix.db.transaction().execute(async (trx) => {
 		return createVersion({
 			lix: { ...lix, db: trx }, // Pass the transaction object
-			changeSet: { id: changeSet.id },
+			changeSet,
 			name: versionName,
 		});
 	});
