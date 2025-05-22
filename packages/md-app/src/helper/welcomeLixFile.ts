@@ -83,7 +83,7 @@ export const serverUrl = import.meta.env.PROD
 	? "https://lix.host/app/flashtype"
 	: "http://localhost:3009";
 
-export const welcomeMd = `# Flashtype.ai ⚡️
+export const welcomeMd = `# Flashtype.ai ⚡️ - The AI Markdown Editor
 
 <br />
 
@@ -105,17 +105,20 @@ export const welcomeMd = `# Flashtype.ai ⚡️
 
 ***
 
-### 📚 Learns your writing style ([Upvote #45](https://github.com/opral/flashtype.ai/issues/45))
+### 📝 Markdown Editor - familiar & powerful ([Upvote #45](https://github.com/opral/flashtype.ai/issues/45))
+Write the way you know and love. Flashtype is a Markdown editor that supports all the features you need to write efficiently. It includes syntax highlighting, auto-completion, and a clean interface.
 
-![](${serverUrl}/images/WritingStyle.png)
+![](${serverUrl}/images/markdown.png)
 
-### 📝 Work with AI Cowriters ([Upvote #46](https://github.com/opral/flashtype.ai/issues/46))
+### 🤖 AI Editor - Go beyond Google Docs and Notion ([Upvote #46](https://github.com/opral/flashtype.ai/issues/46))
+AI is at the heart of your writing experience. It helps you write better, faster, and more efficiently. The AI editor includes features like auto-completion, summaries, and style suggestions.
 
-![](${serverUrl}/images/Cowriters.png)
+![](${serverUrl}/images/ai.png)
 
-### 🤝 Collaborate and Publish ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))
+### ⚡️ Change Control - Make AI features truly usable ([Upvote #47](https://github.com/opral/flashtype.ai/issues/47))
+What makes Flashtype unique is its change control system. It allows you to track changes made by the AI and revert to previous versions if needed. This makes it easy to experiment with different writing styles and ideas without losing your original work.
 
-![](${serverUrl}/images/Collaborate.png)
+![](${serverUrl}/images/diff.png)
 
 <p><br /></p>\n`;
 
