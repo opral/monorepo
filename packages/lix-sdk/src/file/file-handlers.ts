@@ -31,7 +31,7 @@ export function materializeFileData(args: {
 	// Format changes for plugin
 	const formattedChanges = changes.map((change) => ({
 		...change,
-		snapshot:
+		snapshot_content:
 			typeof change.snapshot_content === "string"
 				? JSON.parse(change.snapshot_content)
 				: change.snapshot_content,

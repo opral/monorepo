@@ -219,3 +219,89 @@ test("file insert data materialization", async () => {
 		},
 	]);
 });
+
+test("file ids should have a default", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const version0 = await createVersion({
+		lix,
+		id: "version0",
+	});
+
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			path: "/mock.txt",
+			data: new Uint8Array(),
+			version_id: version0.id,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(file.id).toBeDefined();
+});
+
+test("files should be able to have metadata", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const version0 = await createVersion({
+		lix,
+		id: "version0",
+	});
+
+	const file = await lix.db
+		.insertInto("file")
+		.values({
+			path: "/mock.csv",
+			data: new Uint8Array(),
+			metadata: {
+				primary_key: "email",
+			},
+			version_id: version0.id,
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(file.metadata?.primary_key).toBe("email");
+
+	const updatedFile = await lix.db
+		.updateTable("file")
+		.where("path", "=", "/mock.csv")
+		.where("version_id", "=", version0.id)
+		.set({
+			metadata: {
+				primary_key: "something-else",
+			},
+		})
+		.returningAll()
+		.executeTakeFirstOrThrow();
+
+	expect(updatedFile.metadata?.primary_key).toBe("something-else");
+});
+
+test("invalid file paths should be rejected", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const version0 = await createVersion({
+		lix,
+		id: "version0",
+	});
+
+	await expect(
+		lix.db
+			.insertInto("file")
+			.values({
+				path: "invalid-path",
+				data: new Uint8Array(),
+				version_id: version0.id,
+			})
+			.execute()
+	).rejects.toThrowError("path must match pattern");
+});
+

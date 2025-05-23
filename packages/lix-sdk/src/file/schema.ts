@@ -22,6 +22,16 @@ export function applyFileDatabaseSchema(
 		name: "handle_file_insert",
 		arity: 5,
 		xFunc: (_ctx: number, ...args: any[]) => {
+			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
+			let metadata = args[3];
+			if (typeof metadata === 'string' && metadata !== null) {
+				try {
+					metadata = JSON.parse(metadata);
+				} catch {
+					// If parsing fails, keep as string
+				}
+			}
+
 			const result = handleFileInsert({
 				sqlite,
 				db,
@@ -29,7 +39,7 @@ export function applyFileDatabaseSchema(
 					id: args[0],
 					path: args[1],
 					data: args[2],
-					metadata: args[3],
+					metadata: metadata,
 					version_id: args[4],
 				},
 			});
@@ -42,6 +52,16 @@ export function applyFileDatabaseSchema(
 		name: "handle_file_update",
 		arity: 5,
 		xFunc: (_ctx: number, ...args: any[]) => {
+			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
+			let metadata = args[3];
+			if (typeof metadata === "string" && metadata !== null) {
+				try {
+					metadata = JSON.parse(metadata);
+				} catch {
+					// If parsing fails, keep as string
+				}
+			}
+
 			const result = handleFileUpdate({
 				sqlite,
 				db,
@@ -49,7 +69,7 @@ export function applyFileDatabaseSchema(
 					id: args[0],
 					path: args[1],
 					data: args[2],
-					metadata: args[3],
+					metadata: metadata,
 					version_id: args[4],
 				},
 			});
@@ -97,7 +117,7 @@ export function applyFileDatabaseSchema(
   INSTEAD OF INSERT ON file
   BEGIN
       SELECT handle_file_insert(
-        NEW.id,
+        COALESCE(NEW.id, nano_id()),
         NEW.path,
         NEW.data,
         NEW.metadata,
@@ -136,7 +156,12 @@ export const LixFileSchema = {
 	type: "object",
 	properties: {
 		id: { type: "string" },
-		path: { type: "string" },
+		path: {
+			type: "string",
+			pattern: "^/(?!.*//|.*\\\\)(?!.*/$|^/$).+",
+			description:
+				"File path must start with a slash, not contain backslashes or consecutive slashes, and not end with a slash",
+		},
 		metadata: {
 			type: "object",
 			nullable: true,
