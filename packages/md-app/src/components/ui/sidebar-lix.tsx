@@ -494,16 +494,18 @@ export function LixSidebar() {
   return (
     <>
       <SidebarHeader className="flex flex-row justify-between items-center gap-1 h-11">
-        <a href={`https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0 mr-1"
-            title="To lix file manager"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </a>
+        {(window.location.hostname !== "flashtype.ai" && lixIdSearchParams && fileIdSearchParams) && (
+          <a href={`https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 mr-1"
+              title="To lix file manager"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </a>
+        )}
 
         {isRenamingLix ? (
           <div className="h-7 flex-1 flex items-center border-b border-input max-w-[calc(100%-4rem)]" id="rename-lix-container">
