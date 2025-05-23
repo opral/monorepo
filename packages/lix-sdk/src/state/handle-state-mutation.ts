@@ -167,16 +167,6 @@ export function handleStateMutation(
 		// });
 	}
 
-	console.log(
-		"handleStateMutation:",
-		"version_id",
-		version_id,
-		"schema_key",
-		schema_key,
-		"entity_id",
-		entity_id
-	);
-
 	return 1;
 }
 

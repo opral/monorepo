@@ -11,7 +11,7 @@ const ajv = new Ajv({
 });
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
 
-export function validateSnapshotContent(args: {
+export function validateLixSchemaWithConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition | null;
 	snapshot_content: Snapshot["content"];
@@ -34,12 +34,14 @@ export function validateSnapshotContent(args: {
 	);
 
 	if (!isValidSnapshotContent) {
-		const errorDetails = ajv.errors?.map(error => {
-			const receivedValue = error.instancePath 
-				? getValueByPath(args.snapshot_content, error.instancePath) 
-				: args.snapshot_content;
-			return `${error.instancePath} ${error.message}. Received value: ${JSON.stringify(receivedValue)}`;
-		}).join('; ');
+		const errorDetails = ajv.errors
+			?.map((error) => {
+				const receivedValue = error.instancePath
+					? getValueByPath(args.snapshot_content, error.instancePath)
+					: args.snapshot_content;
+				return `${error.instancePath} ${error.message}. Received value: ${JSON.stringify(receivedValue)}`;
+			})
+			.join("; ");
 
 		throw new Error(
 			`The provided snapshot content does not match the schema: ${errorDetails || ajv.errorsText(ajv.errors)}`
