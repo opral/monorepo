@@ -457,3 +457,318 @@ test("handles composite unique constraints", async () => {
 		})
 	).toThrowError("Unique constraint violation");
 });
+
+test("passes when foreign key references exist", async () => {
+	const lix = await openLixInMemory({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const postSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "post",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			"author_id": {
+				"schemaKey": "user",
+				"property": "id"
+			}
+		},
+		properties: {
+			id: { type: "string" },
+			author_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "author_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db.insertInto("stored_schema").values([
+		{ value: userSchema },
+		{ value: postSchema }
+	]).execute();
+
+	// Insert a user that will be referenced
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "user1",
+			file_id: "file1",
+			schema_key: "user",
+			plugin_key: "test_plugin",
+			version_id: lix.db.selectFrom("active_version").select("version_id"),
+			snapshot_content: {
+				id: "user1",
+				name: "John Doe",
+			},
+		})
+		.execute();
+
+	// This should pass - foreign key reference exists
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post1",
+				author_id: "user1",
+				title: "My First Post",
+			},
+		})
+	).not.toThrowError();
+});
+
+test("throws when foreign key reference does not exist", async () => {
+	const lix = await openLixInMemory({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const postSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "post",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			"author_id": {
+				"schemaKey": "user",
+				"property": "id"
+			}
+		},
+		properties: {
+			id: { type: "string" },
+			author_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "author_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db.insertInto("stored_schema").values([
+		{ value: userSchema },
+		{ value: postSchema }
+	]).execute();
+
+	// This should fail - foreign key reference does not exist
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post1",
+				author_id: "nonexistent_user",
+				title: "My First Post",
+			},
+		})
+	).toThrowError("Foreign key constraint violation");
+});
+
+test("handles multiple foreign keys", async () => {
+	const lix = await openLixInMemory({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const categorySchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "category",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const postSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "post",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			"author_id": {
+				"schemaKey": "user",
+				"property": "id"
+			},
+			"category_id": {
+				"schemaKey": "category",
+				"property": "id"
+			}
+		},
+		properties: {
+			id: { type: "string" },
+			author_id: { type: "string" },
+			category_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "author_id", "category_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db.insertInto("stored_schema").values([
+		{ value: userSchema },
+		{ value: categorySchema },
+		{ value: postSchema }
+	]).execute();
+
+	// Insert referenced entities
+	await lix.db
+		.insertInto("state")
+		.values([
+			{
+				entity_id: "user1",
+				file_id: "file1",
+				schema_key: "user",
+				plugin_key: "test_plugin",
+				version_id: lix.db.selectFrom("active_version").select("version_id"),
+				snapshot_content: {
+					id: "user1",
+					name: "John Doe",
+				},
+			},
+			{
+				entity_id: "category1",
+				file_id: "file1",
+				schema_key: "category",
+				plugin_key: "test_plugin",
+				version_id: lix.db.selectFrom("active_version").select("version_id"),
+				snapshot_content: {
+					id: "category1",
+					name: "Technology",
+				},
+			}
+		])
+		.execute();
+
+	// This should pass - all foreign key references exist
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post1",
+				author_id: "user1",
+				category_id: "category1",
+				title: "My Tech Post",
+			},
+		})
+	).not.toThrowError();
+
+	// This should fail - category reference does not exist
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post2",
+				author_id: "user1",
+				category_id: "nonexistent_category",
+				title: "Another Post",
+			},
+		})
+	).toThrowError("Foreign key constraint violation");
+});
+
+test("allows null foreign key values", async () => {
+	const lix = await openLixInMemory({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const postSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "post",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			"author_id": {
+				"schemaKey": "user",
+				"property": "id"
+			}
+		},
+		properties: {
+			id: { type: "string" },
+			author_id: { type: ["string", "null"] },
+			title: { type: "string" },
+		},
+		required: ["id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db.insertInto("stored_schema").values([
+		{ value: userSchema },
+		{ value: postSchema }
+	]).execute();
+
+	// This should pass - null foreign key is allowed
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post1",
+				author_id: null,
+				title: "Anonymous Post",
+			},
+		})
+	).not.toThrowError();
+
+	// This should also pass - undefined foreign key (when not required)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post2",
+				title: "Another Anonymous Post",
+			},
+		})
+	).not.toThrowError();
+});

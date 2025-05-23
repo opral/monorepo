@@ -67,6 +67,15 @@ export function validateStateMutation(args: {
 			snapshot_content: args.snapshot_content,
 		});
 	}
+
+	// Validate foreign key constraints
+	if (args.schema["x-lix-foreign-keys"]) {
+		validateForeignKeyConstraints({
+			lix: args.lix,
+			schema: args.schema,
+			snapshot_content: args.snapshot_content,
+		});
+	}
 }
 
 function validatePrimaryKeyConstraints(args: {
@@ -195,4 +204,66 @@ function getValueByPath(obj: any, path: string): any {
 		current = current[part];
 	}
 	return current;
+}
+
+function validateForeignKeyConstraints(args: {
+	lix: Pick<Lix, "sqlite" | "db">;
+	schema: LixSchemaDefinition;
+	snapshot_content: Snapshot["content"];
+}): void {
+	const foreignKeys = args.schema["x-lix-foreign-keys"];
+	if (!foreignKeys) {
+		return;
+	}
+
+	// Validate each foreign key constraint
+	for (const [localProperty, foreignKeyDef] of Object.entries(foreignKeys)) {
+		const foreignKeyValue = (args.snapshot_content as any)[localProperty];
+		
+		// Skip validation if foreign key value is null or undefined
+		// (like SQL foreign keys, null values are allowed)
+		if (foreignKeyValue === null || foreignKeyValue === undefined) {
+			continue;
+		}
+
+		// Build query to check if the referenced entity exists
+		let query = args.lix.db
+			.selectFrom("state")
+			.select("snapshot_content")
+			.where("schema_key", "=", foreignKeyDef.schemaKey);
+
+		// Add version constraint if specified
+		if (foreignKeyDef.schemaVersion) {
+			// Get stored schema with specific version
+			const referencedSchema = executeSync({
+				lix: args.lix,
+				query: args.lix.db
+					.selectFrom("stored_schema")
+					.select("value")
+					.where(sql.raw(`json_extract(value, '$.["x-lix-key"]')`), "=", foreignKeyDef.schemaKey)
+					.where(sql.raw(`json_extract(value, '$.["x-lix-version"]')`), "=", foreignKeyDef.schemaVersion)
+			});
+
+			if (referencedSchema.length === 0) {
+				throw new Error(
+					`Foreign key constraint violation: Referenced schema '${foreignKeyDef.schemaKey}' with version '${foreignKeyDef.schemaVersion}' does not exist`
+				);
+			}
+		}
+
+		// Use JSON extraction to check if the referenced property value matches
+		query = query.where(
+			sql.raw(`json_extract(snapshot_content, '$.${foreignKeyDef.property}')`),
+			"=",
+			foreignKeyValue
+		);
+
+		const referencedStates = executeSync({ lix: args.lix, query });
+
+		if (referencedStates.length === 0) {
+			throw new Error(
+				`Foreign key constraint violation: The foreign key constraint on '${localProperty}' references '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}'`
+			);
+		}
+	}
 }

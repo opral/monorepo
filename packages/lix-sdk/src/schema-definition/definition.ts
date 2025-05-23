@@ -27,6 +27,28 @@ export const LixSchemaDefinition = {
 						type: "string",
 					},
 				},
+				"x-lix-foreign-keys": {
+					type: "object",
+					additionalProperties: {
+						type: "object",
+						properties: {
+							schemaKey: {
+								type: "string",
+								description: "The x-lix-key of the referenced schema",
+							},
+							property: {
+								type: "string",
+								description: "The property name in the referenced schema",
+							},
+							schemaVersion: {
+								type: "string",
+								pattern: "^\\d+\\.\\d+$",
+								description: "Optional version of the referenced schema",
+							},
+						},
+						required: ["schemaKey", "property"],
+					},
+				},
 				"x-lix-key": {
 					type: "string",
 					description:
@@ -98,6 +120,30 @@ export type LixSchemaDefinition = JSONSchema & {
 	 *   }
 	 */
 	"x-lix-unique"?: string[][] | readonly (readonly string[])[];
+	/**
+	 * Foreign key constraints referencing other schemas.
+	 * 
+	 * @example
+	 *   {
+	 *     "x-lix-foreign-keys": {
+	 *       "author_id": {
+	 *         "schemaKey": "user_profile",
+	 *         "property": "id"
+	 *       },
+	 *       "category_id": {
+	 *         "schemaKey": "post_category",
+	 *         "property": "id"
+	 *       }
+	 *     }
+	 *   }
+	 */
+	"x-lix-foreign-keys"?: {
+		[localProperty: string]: {
+			schemaKey: string;
+			property: string;
+			schemaVersion?: string;
+		}
+	};
 };
 
 export type FromLixSchemaDefinition<T extends LixSchemaDefinition> =
