@@ -43,6 +43,62 @@ test("x-key is required", () => {
 	expect(valid).toBe(false);
 });
 
+test("x-lix-unique is optional", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(true);
+});
+
+test("x-lix-unique must be array of arrays when present", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-unique": [["id"], ["name", "age"]],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+			age: { type: "number" },
+		},
+		required: ["id", "name", "age"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(true);
+});
+
+test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-unique": ["id", "name"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	};
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(false);
+});
+
 test("x-version is required", () => {
 	const schema = {
 		type: "object",
@@ -55,6 +111,62 @@ test("x-version is required", () => {
 		required: ["name"],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(false);
+});
+
+test("x-lix-unique is optional", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(true);
+});
+
+test("x-lix-unique must be array of arrays when present", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-unique": [["id"], ["name", "age"]],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+			age: { type: "number" },
+		},
+		required: ["id", "name", "age"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+
+	expect(valid).toBe(true);
+});
+
+test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
+	const schema = {
+		type: "object",
+		"x-lix-key": "mock",
+		"x-lix-version": "1.0",
+		"x-lix-unique": ["id", "name"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	};
 
 	const valid = ajv.validate(LixSchemaDefinition, schema);
 
