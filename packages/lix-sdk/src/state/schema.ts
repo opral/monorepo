@@ -13,15 +13,16 @@ export function applyStateDatabaseSchema(
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
 		deterministic: true,
-		arity: 4,
+		arity: 5,
 		// @ts-expect-error - type mismatch
 		xFunc: (_ctxPtr: number, ...args: any[]) => {
 			return validateStateMutation({
 				lix: { sqlite, db: db as any },
-				schema: JSON.parse(args[0]),
+				schema: args[0] ? JSON.parse(args[0]) : null,
 				snapshot_content: JSON.parse(args[1]),
 				operation: args[2] || undefined,
 				entity_id: args[3] || undefined,
+				version_id: args[4],
 			});
 		},
 	});
@@ -148,7 +149,8 @@ export function applyStateDatabaseSchema(
       (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = NEW.schema_key),
       NEW.snapshot_content,
       'insert',
-      NEW.entity_id
+      NEW.entity_id,
+      NEW.version_id
     );
 
     SELECT handle_state_mutation(
@@ -168,7 +170,8 @@ export function applyStateDatabaseSchema(
       (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = NEW.schema_key),
       NEW.snapshot_content,
       'update',
-      NEW.entity_id
+      NEW.entity_id,
+      NEW.version_id
     );
 
     SELECT handle_state_mutation(

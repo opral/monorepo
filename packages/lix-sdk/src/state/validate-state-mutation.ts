@@ -21,8 +21,26 @@ export function validateStateMutation(args: {
 	entity_id?: string;
 	version_id: string;
 }): void {
+	// Validate version_id is provided
+	// Skip validation if schema is null (during initialization when schemas aren't stored yet)
 	if (!args.schema) {
 		return;
+	}
+
+	if (!args.version_id) {
+		throw new Error("version_id is required");
+	}
+
+	const existingVersion = executeSync({
+		lix: args.lix,
+		query: args.lix.db
+			.selectFrom("version")
+			.select("id")
+			.where("id", "=", args.version_id),
+	});
+
+	if (existingVersion.length === 0) {
+		throw new Error("Version does not exist");
 	}
 
 	const isValidLixSchema = validateLixSchema(args.schema);
@@ -90,7 +108,9 @@ export function validateStateMutation(args: {
 	if (args.schema["x-lix-key"] === "lix_change_set_edge") {
 		const content = args.snapshot_content as any;
 		if (content.parent_id === content.child_id) {
-			throw new Error("Self-referencing edges are not allowed: parent_id cannot equal child_id");
+			throw new Error(
+				"Self-referencing edges are not allowed: parent_id cannot equal child_id"
+			);
 		}
 	}
 }

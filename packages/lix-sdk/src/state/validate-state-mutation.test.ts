@@ -1096,3 +1096,90 @@ test("unique constraints are validated per version, not globally", async () => {
 		})
 	).toThrowError("Unique constraint violation");
 });
+
+test("throws when version_id is not provided", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema,
+			snapshot_content: { id: "user1", name: "John" },
+			operation: "insert",
+			// @ts-expect-error - version_id is required but missing
+			version_id: undefined,
+		})
+	).toThrowError("version_id is required");
+});
+
+test("throws when referenced version does not exist", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema,
+			snapshot_content: { id: "user1", name: "John" },
+			operation: "insert",
+			version_id: "nonexistent_version",
+		})
+	).toThrowError("Version does not exist");
+});
+
+test("passes when version_id is provided and version exists", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema,
+			snapshot_content: { id: "user1", name: "John" },
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+});
