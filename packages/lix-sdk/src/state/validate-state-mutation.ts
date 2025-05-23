@@ -82,6 +82,14 @@ export function validateStateMutation(args: {
 			snapshot_content: args.snapshot_content,
 		});
 	}
+
+	// Hardcoded validation for change_set_edge self-referencing
+	if (args.schema["x-lix-key"] === "lix_change_set_edge") {
+		const content = args.snapshot_content as any;
+		if (content.parent_id === content.child_id) {
+			throw new Error("Self-referencing edges are not allowed: parent_id cannot equal child_id");
+		}
+	}
 }
 
 function validatePrimaryKeyConstraints(args: {

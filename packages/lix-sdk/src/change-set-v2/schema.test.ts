@@ -563,4 +563,22 @@ describe("change_set_edge", () => {
 				.execute()
 		).rejects.toThrow(/Foreign key constraint violation/i);
 	});
+
+	test("should prevent self-referencing edges", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create a change set
+		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+
+		// Attempt to create self-referencing edge
+		await expect(
+			lix.db
+				.insertInto("change_set_edge")
+				.values({
+					parent_id: "cs1",
+					child_id: "cs1", // Same as parent_id
+				})
+				.execute()
+		).rejects.toThrow(/Self-referencing edges are not allowed/i);
+	});
 });
