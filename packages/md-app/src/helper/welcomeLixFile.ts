@@ -111,7 +111,7 @@ export const welcomeMd = `# Flashtype.ai ⚡️ - The AI Markdown Editor
 
 Write the way you know and love. Flashtype is a Markdown editor that supports all the features you need to write efficiently. It includes syntax highlighting, auto-completion, and a clean interface.
 
-![](${serverUrl}}/images/markdown.png)
+![](${serverUrl}/images/markdown.png)
 
 ### 🤖 AI Editor - Go beyond Google Docs and Notion ([Upvote #46](https://github.com/opral/flashtype.ai/issues/46))
 
