@@ -112,7 +112,7 @@ function validatePrimaryKeyConstraints(args: {
 		const value = primaryKeyValues[i];
 		// Use JSON extraction to check the field value in the content
 		query = query.where(
-			sql.raw(`json_extract(snapshot_content, '$.${field}')`),
+			sql`json_extract(snapshot_content, '$.' || ${field})`,
 			"=",
 			value
 		);
@@ -175,7 +175,7 @@ function validateUniqueConstraints(args: {
 			const value = uniqueValues[i];
 			// Use JSON extraction to check the field value in the content
 			query = query.where(
-				sql.raw(`json_extract(snapshot_content, '$.${field}')`),
+				sql`json_extract(snapshot_content, '$.' || ${field})`,
 				"=",
 				value
 			);
@@ -240,8 +240,8 @@ function validateForeignKeyConstraints(args: {
 				query: args.lix.db
 					.selectFrom("stored_schema")
 					.select("value")
-					.where(sql.raw(`json_extract(value, '$.["x-lix-key"]')`), "=", foreignKeyDef.schemaKey)
-					.where(sql.raw(`json_extract(value, '$.["x-lix-version"]')`), "=", foreignKeyDef.schemaVersion)
+					.where(sql`json_extract(value, '$.["x-lix-key"]')`, "=", foreignKeyDef.schemaKey)
+					.where(sql`json_extract(value, '$.["x-lix-version"]')`, "=", foreignKeyDef.schemaVersion)
 			});
 
 			if (referencedSchema.length === 0) {
@@ -253,7 +253,7 @@ function validateForeignKeyConstraints(args: {
 
 		// Use JSON extraction to check if the referenced property value matches
 		query = query.where(
-			sql.raw(`json_extract(snapshot_content, '$.${foreignKeyDef.property}')`),
+			sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
 			"=",
 			foreignKeyValue
 		);
