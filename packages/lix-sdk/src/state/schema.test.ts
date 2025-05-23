@@ -88,7 +88,11 @@ test("select, insert, update, delete entity", async () => {
 	await lix.db
 		.deleteFrom("state")
 		.where("entity_id", "=", "e0")
-		.where("version_id", "=", sql`(SELECT version_id FROM active_version)`)
+		.where(
+			"version_id",
+			"=",
+			lix.db.selectFrom("active_version").select("version_id")
+		)
 		.where("schema_key", "=", "mock_schema")
 		.execute();
 

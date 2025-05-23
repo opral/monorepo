@@ -236,3 +236,99 @@ test("should use default id and name if not provided", async () => {
 
 	expect(updatedVersion?.name).toBe("new_name");
 });
+
+test("should enforce foreign key constraint on change_set_id", async () => {
+	const lix = await openLixInMemory({});
+
+	// Attempt to insert version with non-existent change_set_id
+	await expect(
+		lix.db
+			.insertInto("version")
+			.values({
+				id: "version1",
+				name: "test_version",
+				change_set_id: "cs_nonexistent",
+				working_change_set_id: "cs_nonexistent",
+			})
+			.execute()
+	).rejects.toThrow(/Foreign key constraint violation/i);
+});
+
+test("should enforce foreign key constraint on working_change_set_id", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create valid change set for change_set_id
+	await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+
+	// Attempt to insert version with non-existent working_change_set_id
+	await expect(
+		lix.db
+			.insertInto("version")
+			.values({
+				id: "version1",
+				name: "test_version",
+				change_set_id: "cs1",
+				working_change_set_id: "cs_nonexistent",
+			})
+			.execute()
+	).rejects.toThrow(/Foreign key constraint violation/i);
+});
+
+test("should allow version insertion with valid change set references", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create valid change sets
+	await lix.db
+		.insertInto("change_set")
+		.values([{ id: "cs1" }, { id: "cs2" }])
+		.execute();
+
+	// This should succeed with valid foreign key references
+	await expect(
+		lix.db
+			.insertInto("version")
+			.values({
+				id: "version1",
+				name: "test_version",
+				change_set_id: "cs1",
+				working_change_set_id: "cs2",
+			})
+			.execute()
+	).resolves.toBeDefined();
+});
+
+test("should enforce foreign key constraint on active_version.version_id", async () => {
+	const lix = await openLixInMemory({});
+
+	// Now attempt to update active_version with non-existent version_id
+	await expect(
+		lix.db
+			.updateTable("active_version")
+			.set({ version_id: "version_nonexistent" })
+			.execute()
+	).rejects.toThrow(/Foreign key constraint violation/i);
+});
+
+test("should allow active_version update with valid version_id", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create valid change set and version
+	await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "version1",
+			name: "test_version",
+			change_set_id: "cs1",
+			working_change_set_id: "cs1",
+		})
+		.execute();
+
+	// This should succeed with valid foreign key reference
+	await expect(
+		lix.db
+			.updateTable("active_version")
+			.set({ version_id: "version1" })
+			.execute()
+	).resolves.toBeDefined();
+});

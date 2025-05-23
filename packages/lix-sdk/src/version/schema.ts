@@ -198,6 +198,16 @@ export const VersionSchema = {
 	"x-lix-key": "lix_version",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
+	"x-lix-foreign-keys": {
+		change_set_id: {
+			schemaKey: "lix_change_set",
+			property: "id",
+		},
+		working_change_set_id: {
+			schemaKey: "lix_change_set",
+			property: "id",
+		},
+	},
 	type: "object",
 	properties: {
 		id: { type: "string" },
@@ -222,7 +232,13 @@ export type VersionView = {
 export const ActiveVersionSchema = {
 	"x-lix-key": "lix_active_version",
 	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["version_id"],
+	"x-lix-unique": [["version_id"]],
+	"x-lix-foreign-keys": {
+		version_id: {
+			schemaKey: "lix_version",
+			property: "id",
+		},
+	},
 	type: "object",
 	properties: {
 		version_id: { type: "string" },

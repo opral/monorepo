@@ -9,6 +9,7 @@ import {
 	type ChangeSetEdgeView,
 } from "../change-set-v2/schema.js";
 import {
+	ActiveVersionSchema,
 	VersionSchema,
 	type ActiveVersionView,
 	type VersionView,
@@ -37,6 +38,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
+	active_version: ActiveVersionSchema,
 	version: VersionSchema,
 	change_set: ChangeSetSchema,
 	change_set_element: ChangeSetElementSchema,
