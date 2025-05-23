@@ -6,16 +6,17 @@ import { applySchema } from "./apply-schema.js";
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
-import { LixSchemaMap } from "./schema.js";
+import { LixSchemaViewMap } from "./schema.js";
 import { isJsonType } from "../schema-definition/json-type.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
 const ViewsWithJsonColumns = {
 	state: ["snapshot_content"],
+	snapshot: ["content"],
 	...(() => {
 		const result: Record<string, string[]> = {};
-		for (const [viewName, schema] of Object.entries(LixSchemaMap)) {
+		for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
 			// Check if schema is an object and has properties
 			if (typeof schema === "boolean" || !schema.properties) continue;
 			const jsonColumns = Object.entries(schema.properties)

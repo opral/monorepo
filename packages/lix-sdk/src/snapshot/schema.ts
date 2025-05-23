@@ -30,7 +30,7 @@ export function applySnapshotDatabaseSchema(
   FOR EACH ROW
   BEGIN
     INSERT INTO internal_snapshot (id, content)
-    VALUES (NEW.id, NEW.content);
+    VALUES (COALESCE(NEW.id, uuid_v7()), jsonb(NEW.content));
   END;
 
   CREATE TRIGGER IF NOT EXISTS snapshot_delete_trigger

@@ -20,6 +20,34 @@ export function applyChangeDatabaseSchema(
 
   CREATE VIEW change AS
   SELECT * FROM internal_change;
+
+  CREATE TRIGGER change_insert
+  INSTEAD OF INSERT ON change
+  BEGIN
+    -- Check if the referenced snapshot exists
+    SELECT CASE
+      WHEN NOT EXISTS (SELECT 1 FROM internal_snapshot WHERE id = NEW.snapshot_id)
+      THEN RAISE(FAIL, 'FOREIGN KEY constraint failed: snapshot_id does not exist')
+    END;
+    
+    INSERT INTO internal_change (
+      id,
+      entity_id,
+      schema_key,
+      file_id,
+      plugin_key,
+      snapshot_id,
+      created_at
+    ) VALUES (
+      COALESCE(NEW.id, uuid_v7()),
+      NEW.entity_id,
+      NEW.schema_key,
+      NEW.file_id,
+      NEW.plugin_key,
+      NEW.snapshot_id,
+      COALESCE(NEW.created_at, CURRENT_TIMESTAMP)
+    );
+  END;
 `);
 }
 
