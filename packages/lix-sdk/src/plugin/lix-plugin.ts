@@ -1,6 +1,5 @@
 import type { Change } from "../change/schema.js";
-import type { LixFile } from "../file/database-schema.js";
-import type { Lix } from "../lix/open-lix.js";
+import type { LixFile } from "../file/schema.js";
 import type {
 	FromLixSchemaDefinition,
 	LixSchemaDefinition,
@@ -48,7 +47,7 @@ export type LixPlugin = {
 		 * that did not exist in the target version. Or, a file
 		 * has been deleted and should be restored at a later point.
 		 */
-		file: Omit<LixFile, "data"> & { data?: LixFile["data"] };
+		file: Omit<LixFile, "data" | "version_id"> & { data?: LixFile["data"] };
 		changes: Array<Change & { snapshot_content: Snapshot["content"] }>;
 	}) => { fileData: Uint8Array };
 	/**
@@ -116,13 +115,6 @@ export type DetectedConflict = {
 	 * The changes that are conflicting.
 	 */
 	conflictingChangeIds: Set<Change["id"]>;
-};
-
-export type LixReadonly = Pick<Lix, "plugin"> & {
-	db: {
-		selectFrom: Lix["db"]["selectFrom"];
-		withRecursive: Lix["db"]["withRecursive"];
-	};
 };
 
 export type UiDiffComponentProps = {
