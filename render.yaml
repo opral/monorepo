@@ -236,7 +236,7 @@ services:
     type: web
     runtime: static
     autoDeploy: true
-    staticPublishPath: packages/md-app/
+    staticPublishPath: ./packages/md-app/dist
     envVars:
       - fromGroup: production
     buildCommand: pnpm install && pnpm run --filter md-app... build
