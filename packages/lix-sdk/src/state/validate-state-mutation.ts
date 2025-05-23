@@ -17,6 +17,8 @@ export function validateStateMutation(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition | null;
 	snapshot_content: Snapshot["content"];
+	operation?: "insert" | "update";
+	entity_id?: string;
 }): void {
 	if (!args.schema) {
 		return;
@@ -56,6 +58,8 @@ export function validateStateMutation(args: {
 			lix: args.lix,
 			schema: args.schema,
 			snapshot_content: args.snapshot_content,
+			operation: args.operation,
+			entity_id: args.entity_id,
 		});
 	}
 
@@ -65,6 +69,8 @@ export function validateStateMutation(args: {
 			lix: args.lix,
 			schema: args.schema,
 			snapshot_content: args.snapshot_content,
+			operation: args.operation,
+			entity_id: args.entity_id,
 		});
 	}
 
@@ -82,6 +88,8 @@ function validatePrimaryKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	snapshot_content: Snapshot["content"];
+	operation?: "insert" | "update";
+	entity_id?: string;
 }): void {
 	const primaryKeyFields = args.schema["x-lix-primary-key"];
 	if (!primaryKeyFields || primaryKeyFields.length === 0) {
@@ -105,6 +113,11 @@ function validatePrimaryKeyConstraints(args: {
 		.selectFrom("state")
 		.select("snapshot_content")
 		.where("schema_key", "=", args.schema["x-lix-key"]);
+
+	// For updates, exclude the current entity from the check
+	if (args.operation === "update" && args.entity_id) {
+		query = query.where("entity_id", "!=", args.entity_id);
+	}
 
 	// Build WHERE conditions for each primary key field
 	for (let i = 0; i < primaryKeyFields.length; i++) {
@@ -134,6 +147,8 @@ function validateUniqueConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	snapshot_content: Snapshot["content"];
+	operation?: "insert" | "update";
+	entity_id?: string;
 }): void {
 	const uniqueConstraints = args.schema["x-lix-unique"];
 	if (!uniqueConstraints || uniqueConstraints.length === 0) {
@@ -168,6 +183,11 @@ function validateUniqueConstraints(args: {
 			.selectFrom("state")
 			.select("snapshot_content")
 			.where("schema_key", "=", args.schema["x-lix-key"]);
+
+		// For updates, exclude the current entity from the check
+		if (args.operation === "update" && args.entity_id) {
+			query = query.where("entity_id", "!=", args.entity_id);
+		}
 
 		// Build WHERE conditions for each field in the unique constraint
 		for (let i = 0; i < uniqueFields.length; i++) {
@@ -227,13 +247,15 @@ function validateForeignKeyConstraints(args: {
 		}
 
 		// Check if this references a real SQL table vs a JSON schema entity
-		const isRealSqlTable = ["change", "snapshot"].includes(foreignKeyDef.schemaKey);
+		const isRealSqlTable = ["lix_change"].includes(foreignKeyDef.schemaKey);
 		
 		let query: any;
 		if (isRealSqlTable) {
 			// Query the real SQL table directly
+			// Map schema key to actual table name
+			const tableName = foreignKeyDef.schemaKey === "lix_change" ? "change" : foreignKeyDef.schemaKey;
 			query = args.lix.db
-				.selectFrom(foreignKeyDef.schemaKey as any)
+				.selectFrom(tableName as any)
 				.select(foreignKeyDef.property as any)
 				.where(foreignKeyDef.property as any, "=", foreignKeyValue);
 		} else {

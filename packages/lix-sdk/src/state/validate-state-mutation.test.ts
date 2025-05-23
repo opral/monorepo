@@ -782,6 +782,7 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 
 	// Insert a real change record into the change table
 	await lix.db
+		// @ts-expect-error - internal_snapshot is not a public table
 		.insertInto("internal_snapshot")
 		.values({
 			id: "snap1",
@@ -790,6 +791,7 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		.execute();
 
 	await lix.db
+		// @ts-expect-error - internal_change is not a public table
 		.insertInto("internal_change")
 		.values({
 			id: "change1",
@@ -807,7 +809,7 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		"x-lix-key": "change_set_element_test",
 		"x-lix-foreign-keys": {
 			change_id: {
-				schemaKey: "change",
+				schemaKey: "lix_change",
 				property: "id",
 			},
 		},
@@ -842,4 +844,51 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 			},
 		})
 	).toThrowError("Foreign key constraint violation");
+});
+
+test("allows updates with same primary key", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema first
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	// Insert initial user
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "user1",
+			file_id: "file1",
+			schema_key: "user",
+			plugin_key: "test_plugin",
+			version_id: lix.db.selectFrom("active_version").select("version_id"),
+			snapshot_content: { id: "user1", name: "John Doe" },
+		})
+		.execute();
+
+	// This should pass - updating existing record with same primary key
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema,
+			snapshot_content: {
+				id: "user1", // Same primary key
+				name: "John Smith", // Different data
+			},
+			operation: "update",
+			entity_id: "user1",
+		})
+	).not.toThrowError();
 });
