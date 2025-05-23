@@ -7,7 +7,15 @@ export type JSONType =
 	| { [key: string]: JSONType };
 
 /**
- * JSON schema definition for JSON values (object or array).
+ * JSON schema definition for JSON values (object, array, string, number, boolean, null).
+ * 
+ * @example
+ *   const MySchema = {
+ *     type: "object",
+ *     properties: {
+ *       myJsonField: JSONTypeSchema,
+ *     },
+ *   }
  */
 export const JSONTypeSchema: Record<string, any> = {
 	anyOf: [
