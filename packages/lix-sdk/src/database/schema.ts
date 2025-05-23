@@ -1,30 +1,33 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { ChangeView, InternalChangeTable } from "../change/schema.js";
 import {
-	ChangeSetEdgeSchema,
-	ChangeSetElementSchema,
-	ChangeSetSchema,
+	LixChangeSetEdgeSchema,
+	LixChangeSetElementSchema,
+	LixChangeSetSchema,
 	type ChangeSetElementView,
 	type ChangeSetView,
 	type ChangeSetEdgeView,
 } from "../change-set-v2/schema.js";
 import {
-	ActiveVersionSchema,
-	VersionSchema,
+	LixActiveVersionSchema,
+	LixVersionSchema,
 	type ActiveVersionView,
 	type VersionView,
 } from "../version/schema.js";
 import {
-	SnapshotSchema,
+	LixSnapshotSchema,
 	type InternalSnapshotTable,
 	type SnapshotView,
 } from "../snapshot/schema.js";
 import {
-	StoredSchemaSchema,
+	LixStoredSchemaSchema,
 	type StoredSchemaView,
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { KeyValueSchema, type KeyValueView } from "../key-value-v2/schema.js";
+import {
+	LixKeyValueSchema,
+	type KeyValueView,
+} from "../key-value-v2/schema.js";
 import type { StateView } from "../state/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
@@ -38,14 +41,14 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
-	active_version: ActiveVersionSchema,
-	version: VersionSchema,
-	change_set: ChangeSetSchema,
-	change_set_element: ChangeSetElementSchema,
-	change_set_edge: ChangeSetEdgeSchema,
-	stored_schema: StoredSchemaSchema,
-	key_value: KeyValueSchema,
-	snapshot: SnapshotSchema,
+	active_version: LixActiveVersionSchema,
+	version: LixVersionSchema,
+	change_set: LixChangeSetSchema,
+	change_set_element: LixChangeSetElementSchema,
+	change_set_edge: LixChangeSetEdgeSchema,
+	stored_schema: LixStoredSchemaSchema,
+	key_value: LixKeyValueSchema,
+	snapshot: LixSnapshotSchema,
 };
 
 export type LixDatabaseSchema = {

@@ -43,7 +43,7 @@ export function applySnapshotDatabaseSchema(
 `);
 }
 
-export const SnapshotSchema = {
+export const LixSnapshotSchema = {
 	"x-lix-key": "lix_snapshot",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
@@ -54,7 +54,7 @@ export const SnapshotSchema = {
 	},
 	required: ["id", "content"],
 } as const;
-SnapshotSchema satisfies LixSchemaDefinition;
+LixSnapshotSchema satisfies LixSchemaDefinition;
 
 // Types for the internal_snapshot TABLE
 export type InternalSnapshot = Selectable<InternalSnapshotTable>;

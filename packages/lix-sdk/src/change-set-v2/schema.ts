@@ -185,7 +185,7 @@ export function applyChangeSetDatabaseSchema(
 	return sqlite.exec(sql);
 }
 
-export const ChangeSetSchema: LixSchemaDefinition = {
+export const LixChangeSetSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
@@ -206,7 +206,7 @@ export type ChangeSetView = {
 	version_id: Generated<Version["id"]>;
 };
 
-export const ChangeSetElementSchema: LixSchemaDefinition = {
+export const LixChangeSetElementSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set_element",
 	"x-lix-version": "1.0",
 	"x-lix-foreign-keys": {
@@ -255,7 +255,7 @@ export type ChangeSetElementView = {
 	version_id: Generated<string>;
 };
 
-export const ChangeSetEdgeSchema: LixSchemaDefinition = {
+export const LixChangeSetEdgeSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set_edge",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["parent_id", "child_id"],

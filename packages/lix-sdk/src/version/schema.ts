@@ -194,7 +194,7 @@ BEGIN
 `);
 }
 
-export const VersionSchema = {
+export const LixVersionSchema = {
 	"x-lix-key": "lix_version",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
@@ -218,7 +218,7 @@ export const VersionSchema = {
 	required: ["id", "name", "change_set_id", "working_change_set_id"],
 	additionalProperties: false,
 } as const;
-VersionSchema satisfies LixSchemaDefinition;
+LixVersionSchema satisfies LixSchemaDefinition;
 
 export type Version = Selectable<VersionView>;
 export type NewVersion = Insertable<VersionView>;
@@ -229,7 +229,7 @@ export type VersionView = {
 	working_change_set_id: string;
 };
 
-export const ActiveVersionSchema = {
+export const LixActiveVersionSchema = {
 	"x-lix-key": "lix_active_version",
 	"x-lix-version": "1.0",
 	"x-lix-unique": [["version_id"]],
@@ -246,7 +246,7 @@ export const ActiveVersionSchema = {
 	required: ["version_id"],
 	additionalProperties: false,
 } as const;
-ActiveVersionSchema satisfies LixSchemaDefinition;
+LixActiveVersionSchema satisfies LixSchemaDefinition;
 
 export type ActiveVersion = Selectable<ActiveVersionView>;
 export type NewActiveVersion = Insertable<ActiveVersionView>;

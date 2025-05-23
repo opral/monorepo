@@ -61,7 +61,7 @@ export function applyStoredSchemaDatabaseSchema(
 `);
 }
 
-export const StoredSchemaSchema = {
+export const LixStoredSchemaSchema = {
 	"x-lix-key": "lix_stored_schema",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["key", "version"],
@@ -74,7 +74,7 @@ export const StoredSchemaSchema = {
 	additionalProperties: false,
 } as const;
 
-StoredSchemaSchema satisfies LixSchemaDefinition;
+LixStoredSchemaSchema satisfies LixSchemaDefinition;
 
 export type StoredSchema = Selectable<StoredSchemaView>;
 export type NewStoredSchema = Insertable<StoredSchemaView>;

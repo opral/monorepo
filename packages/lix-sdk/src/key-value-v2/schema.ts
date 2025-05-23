@@ -68,7 +68,7 @@ export function applyKeyValueDatabaseSchema(
 `);
 }
 
-export const KeyValueSchema = {
+export const LixKeyValueSchema = {
 	"x-lix-key": "lix_key_value",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["key"],
@@ -79,7 +79,7 @@ export const KeyValueSchema = {
 	},
 	required: ["key", "value"],
 } as const;
-KeyValueSchema satisfies LixSchemaDefinition;
+LixKeyValueSchema satisfies LixSchemaDefinition;
 
 export type KeyValue = Selectable<KeyValueView>;
 export type NewKeyValue = Insertable<KeyValueView>;
