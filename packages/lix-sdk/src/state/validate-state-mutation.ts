@@ -226,14 +226,31 @@ function validateForeignKeyConstraints(args: {
 			continue;
 		}
 
-		// Build query to check if the referenced entity exists
-		let query = args.lix.db
-			.selectFrom("state")
-			.select("snapshot_content")
-			.where("schema_key", "=", foreignKeyDef.schemaKey);
+		// Check if this references a real SQL table vs a JSON schema entity
+		const isRealSqlTable = ["change", "snapshot"].includes(foreignKeyDef.schemaKey);
+		
+		let query: any;
+		if (isRealSqlTable) {
+			// Query the real SQL table directly
+			query = args.lix.db
+				.selectFrom(foreignKeyDef.schemaKey as any)
+				.select(foreignKeyDef.property as any)
+				.where(foreignKeyDef.property as any, "=", foreignKeyValue);
+		} else {
+			// Query JSON schema entities in the state table
+			query = args.lix.db
+				.selectFrom("state")
+				.select("snapshot_content")
+				.where("schema_key", "=", foreignKeyDef.schemaKey)
+				.where(
+					sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
+					"=",
+					foreignKeyValue
+				);
+		}
 
-		// Add version constraint if specified
-		if (foreignKeyDef.schemaVersion) {
+		// Add version constraint if specified (only for JSON schema entities)
+		if (foreignKeyDef.schemaVersion && !isRealSqlTable) {
 			// Get stored schema with specific version
 			const referencedSchema = executeSync({
 				lix: args.lix,
@@ -250,13 +267,6 @@ function validateForeignKeyConstraints(args: {
 				);
 			}
 		}
-
-		// Use JSON extraction to check if the referenced property value matches
-		query = query.where(
-			sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
-			"=",
-			foreignKeyValue
-		);
 
 		const referencedStates = executeSync({ lix: args.lix, query });
 

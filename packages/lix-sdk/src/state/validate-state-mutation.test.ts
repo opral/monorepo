@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import { sql } from "kysely";
 
 test("throws if the schema is not a valid lix schema", async () => {
 	const lix = await openLixInMemory({});
@@ -480,10 +481,10 @@ test("passes when foreign key references exist", async () => {
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
 		"x-lix-foreign-keys": {
-			"author_id": {
-				"schemaKey": "user",
-				"property": "id"
-			}
+			author_id: {
+				schemaKey: "user",
+				property: "id",
+			},
 		},
 		properties: {
 			id: { type: "string" },
@@ -495,10 +496,10 @@ test("passes when foreign key references exist", async () => {
 	} as const satisfies LixSchemaDefinition;
 
 	// Store schemas
-	await lix.db.insertInto("stored_schema").values([
-		{ value: userSchema },
-		{ value: postSchema }
-	]).execute();
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
 
 	// Insert a user that will be referenced
 	await lix.db
@@ -552,10 +553,10 @@ test("throws when foreign key reference does not exist", async () => {
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
 		"x-lix-foreign-keys": {
-			"author_id": {
-				"schemaKey": "user",
-				"property": "id"
-			}
+			author_id: {
+				schemaKey: "user",
+				property: "id",
+			},
 		},
 		properties: {
 			id: { type: "string" },
@@ -567,10 +568,10 @@ test("throws when foreign key reference does not exist", async () => {
 	} as const satisfies LixSchemaDefinition;
 
 	// Store schemas
-	await lix.db.insertInto("stored_schema").values([
-		{ value: userSchema },
-		{ value: postSchema }
-	]).execute();
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
 
 	// This should fail - foreign key reference does not exist
 	expect(() =>
@@ -621,14 +622,14 @@ test("handles multiple foreign keys", async () => {
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
 		"x-lix-foreign-keys": {
-			"author_id": {
-				"schemaKey": "user",
-				"property": "id"
+			author_id: {
+				schemaKey: "user",
+				property: "id",
 			},
-			"category_id": {
-				"schemaKey": "category",
-				"property": "id"
-			}
+			category_id: {
+				schemaKey: "category",
+				property: "id",
+			},
 		},
 		properties: {
 			id: { type: "string" },
@@ -641,11 +642,14 @@ test("handles multiple foreign keys", async () => {
 	} as const satisfies LixSchemaDefinition;
 
 	// Store schemas
-	await lix.db.insertInto("stored_schema").values([
-		{ value: userSchema },
-		{ value: categorySchema },
-		{ value: postSchema }
-	]).execute();
+	await lix.db
+		.insertInto("stored_schema")
+		.values([
+			{ value: userSchema },
+			{ value: categorySchema },
+			{ value: postSchema },
+		])
+		.execute();
 
 	// Insert referenced entities
 	await lix.db
@@ -672,7 +676,7 @@ test("handles multiple foreign keys", async () => {
 					id: "category1",
 					name: "Technology",
 				},
-			}
+			},
 		])
 		.execute();
 
@@ -727,10 +731,10 @@ test("allows null foreign key values", async () => {
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
 		"x-lix-foreign-keys": {
-			"author_id": {
-				"schemaKey": "user",
-				"property": "id"
-			}
+			author_id: {
+				schemaKey: "user",
+				property: "id",
+			},
 		},
 		properties: {
 			id: { type: "string" },
@@ -742,10 +746,10 @@ test("allows null foreign key values", async () => {
 	} as const satisfies LixSchemaDefinition;
 
 	// Store schemas
-	await lix.db.insertInto("stored_schema").values([
-		{ value: userSchema },
-		{ value: postSchema }
-	]).execute();
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
 
 	// This should pass - null foreign key is allowed
 	expect(() =>
@@ -771,4 +775,71 @@ test("allows null foreign key values", async () => {
 			},
 		})
 	).not.toThrowError();
+});
+
+test("foreign key referencing real SQL table (change.id)", async () => {
+	const lix = await openLixInMemory({});
+
+	// Insert a real change record into the change table
+	await lix.db
+		.insertInto("internal_snapshot")
+		.values({
+			id: "snap1",
+			content: sql`jsonb(${JSON.stringify({ id: "entity1" })})`,
+		})
+		.execute();
+
+	await lix.db
+		.insertInto("internal_change")
+		.values({
+			id: "change1",
+			entity_id: "entity1",
+			plugin_key: "test_plugin",
+			schema_key: "test_schema",
+			file_id: "file1",
+			snapshot_id: "snap1",
+		})
+		.execute();
+
+	const changeSetElementSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "change_set_element_test",
+		"x-lix-foreign-keys": {
+			change_id: {
+				schemaKey: "change",
+				property: "id",
+			},
+		},
+		properties: {
+			id: { type: "string" },
+			change_id: { type: "string" },
+		},
+		required: ["id", "change_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// This should pass - foreign key references existing change record
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: changeSetElementSchema,
+			snapshot_content: {
+				id: "element1",
+				change_id: "change1",
+			},
+		})
+	).not.toThrowError();
+
+	// This should fail - foreign key references non-existent change
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: changeSetElementSchema,
+			snapshot_content: {
+				id: "element2",
+				change_id: "nonexistent_change",
+			},
+		})
+	).toThrowError("Foreign key constraint violation");
 });
