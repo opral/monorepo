@@ -109,18 +109,69 @@ describe("change_set", () => {
 			.returningAll()
 			.execute();
 	});
+
+	test("should allow inserting with explicit ID", async () => {
+		const lix = await openLixInMemory({});
+		const explicitId = "my-custom-changeset-id";
+
+		await expect(
+			lix.db.insertInto("change_set").values({ id: explicitId }).execute()
+		).resolves.toBeDefined();
+
+		const changeSet = await lix.db
+			.selectFrom("change_set")
+			.where("id", "=", explicitId)
+			.selectAll()
+			.executeTakeFirst();
+		expect(changeSet?.id).toBe(explicitId);
+	});
 });
 
 describe("change_set_element", () => {
 	test("insert, delete on the change set element view", async () => {
 		const lix = await openLixInMemory({});
 
-		const initial = await lix.db
-			.selectFrom("change_set_element")
-			.selectAll()
+		// Create change set
+		await lix.db.insertInto("change_set").values({ id: "cs0" }).execute();
+
+		// Create snapshot
+		await lix.db
+			.insertInto("snapshot")
+			.values({
+				id: "s0",
+				content: { id: "e0" },
+			})
 			.execute();
 
-		expect(initial).toEqual([]);
+		// Create change
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: "c0",
+				entity_id: "e0",
+				schema_key: "mock_schema",
+				file_id: "f0",
+				plugin_key: "test_plugin",
+				snapshot_id: "s0",
+			})
+			.execute();
+
+		// Create stored schema
+		await lix.db
+			.insertInto("stored_schema")
+			.values({
+				key: "mock_schema",
+				value: {
+					"x-lix-key": "mock_schema",
+					"x-lix-version": "1.0",
+					type: "object",
+					properties: {
+						id: { type: "string" },
+					},
+					required: ["id"],
+				},
+			})
+			.execute();
 
 		await lix.db
 			.insertInto("change_set_element")
@@ -164,11 +215,249 @@ describe("change_set_element", () => {
 
 		expect(viewAfterDelete).toEqual([]);
 	});
+
+	test("should enforce primary key constraint (change_set_id, change_id)", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create change set
+		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+
+		// Create snapshot and change
+		await lix.db
+			.insertInto("snapshot")
+			.values({ id: "s1", content: { id: "e1" } })
+			.execute();
+
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: "c1",
+				entity_id: "e1",
+				schema_key: "mock_schema",
+				file_id: "f1",
+				plugin_key: "test_plugin",
+				snapshot_id: "s1",
+			})
+			.execute();
+
+		// Create stored schema
+		await lix.db
+			.insertInto("stored_schema")
+			.values({
+				key: "mock_schema",
+				value: {
+					"x-lix-key": "mock_schema",
+					"x-lix-version": "1.0",
+					type: "object",
+					properties: { id: { type: "string" } },
+					required: ["id"],
+				},
+			})
+			.execute();
+
+		// Insert first element
+		await lix.db
+			.insertInto("change_set_element")
+			.values({
+				change_set_id: "cs1",
+				change_id: "c1",
+				entity_id: "e1",
+				schema_key: "mock_schema",
+				file_id: "f1",
+			})
+			.execute();
+
+		// Attempt duplicate insert with same primary key
+		await expect(
+			lix.db
+				.insertInto("change_set_element")
+				.values({
+					change_set_id: "cs1",
+					change_id: "c1",
+					entity_id: "e1",
+					schema_key: "mock_schema",
+					file_id: "f1",
+				})
+				.execute()
+		).rejects.toThrow(/Primary key constraint violation/i);
+	});
+
+	test("should enforce foreign key constraint on change_set_id", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create snapshot and change (but NOT change set)
+		await lix.db
+			.insertInto("snapshot")
+			.values({ id: "s1", content: { id: "e1" } })
+			.execute();
+
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: "c1",
+				entity_id: "e1",
+				schema_key: "mock_schema",
+				file_id: "f1",
+				plugin_key: "test_plugin",
+				snapshot_id: "s1",
+			})
+			.execute();
+
+		// Create stored schema
+		await lix.db
+			.insertInto("stored_schema")
+			.values({
+				key: "mock_schema",
+				value: {
+					"x-lix-key": "mock_schema",
+					"x-lix-version": "1.0",
+					type: "object",
+					properties: { id: { type: "string" } },
+					required: ["id"],
+				},
+			})
+			.execute();
+
+		// Attempt to insert with non-existent change_set_id
+		await expect(
+			lix.db
+				.insertInto("change_set_element")
+				.values({
+					change_set_id: "cs_nonexistent",
+					change_id: "c1",
+					entity_id: "e1",
+					schema_key: "mock_schema",
+					file_id: "f1",
+				})
+				.execute()
+		).rejects.toThrow(/Foreign key constraint violation/i);
+	});
+
+	test("should enforce foreign key constraint on change_id", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create change set (but NOT change)
+		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+
+		// Create stored schema
+		await lix.db
+			.insertInto("stored_schema")
+			.values({
+				key: "mock_schema",
+				value: {
+					"x-lix-key": "mock_schema",
+					"x-lix-version": "1.0",
+					type: "object",
+					properties: { id: { type: "string" } },
+					required: ["id"],
+				},
+			})
+			.execute();
+
+		// Attempt to insert with non-existent change_id
+		await expect(
+			lix.db
+				.insertInto("change_set_element")
+				.values({
+					change_set_id: "cs1",
+					change_id: "c_nonexistent",
+					entity_id: "mock_entity",
+					schema_key: "mock_schema",
+					file_id: "mock_file",
+				})
+				.execute()
+		).rejects.toThrow(/Foreign key constraint violation/i);
+	});
+
+	test("should enforce UNIQUE constraint on (change_set_id, entity_id, schema_key, file_id)", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create change set
+		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+
+		// Create snapshots and changes for same entity
+		await lix.db
+			.insertInto("snapshot")
+			.values([
+				{ id: "s1", content: { id: "ent1" } },
+				{ id: "s2", content: { id: "ent1" } },
+			])
+			.execute();
+
+		await lix.db
+			.insertInto("change")
+			.values([
+				{
+					id: "c1",
+					entity_id: "ent1",
+					schema_key: "sk1",
+					file_id: "f1",
+					plugin_key: "test_plugin",
+					snapshot_id: "s1",
+				},
+				{
+					id: "c2",
+					entity_id: "ent1", // Same entity
+					schema_key: "sk1", // Same schema
+					file_id: "f1", // Same file
+					plugin_key: "test_plugin",
+					snapshot_id: "s2",
+				},
+			])
+			.execute();
+
+		// Create stored schema
+		await lix.db
+			.insertInto("stored_schema")
+			.values({
+				key: "sk1",
+				value: {
+					"x-lix-key": "sk1",
+					"x-lix-version": "1.0",
+					type: "object",
+					properties: { id: { type: "string" } },
+					required: ["id"],
+				},
+			})
+			.execute();
+
+		// Insert first element successfully
+		await lix.db
+			.insertInto("change_set_element")
+			.values({
+				change_set_id: "cs1",
+				change_id: "c1",
+				entity_id: "ent1",
+				schema_key: "sk1",
+				file_id: "f1",
+			})
+			.execute();
+
+		// Attempt to insert second element with same entity for same change set
+		await expect(
+			lix.db
+				.insertInto("change_set_element")
+				.values({
+					change_set_id: "cs1",
+					change_id: "c2",
+					entity_id: "ent1", // Same entity
+					schema_key: "sk1", // Same schema
+					file_id: "f1", // Same file
+				})
+				.execute()
+		).rejects.toThrow(); // Should fail on unique constraint
+	});
 });
 
 describe("change_set_edge", () => {
 	test("insert, delete on the change set edge view", async () => {
 		const lix = await openLixInMemory({});
+
+		// Create the referenced change sets first
+		await lix.db
+			.insertInto("change_set")
+			.values([{ id: "cs0" }, { id: "cs1" }])
+			.execute();
 
 		await lix.db
 			.insertInto("change_set_edge")
@@ -207,5 +496,71 @@ describe("change_set_edge", () => {
 			.execute();
 
 		expect(viewAfterDelete).toEqual([]);
+	});
+
+	test("should enforce primary key constraint (parent_id, child_id)", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create the referenced change sets first
+		await lix.db
+			.insertInto("change_set")
+			.values([{ id: "cs0" }, { id: "cs1" }])
+			.execute();
+
+		// Insert first edge
+		await lix.db
+			.insertInto("change_set_edge")
+			.values({
+				parent_id: "cs0",
+				child_id: "cs1",
+			})
+			.execute();
+
+		// Attempt duplicate insert with same primary key
+		await expect(
+			lix.db
+				.insertInto("change_set_edge")
+				.values({
+					parent_id: "cs0",
+					child_id: "cs1",
+				})
+				.execute()
+		).rejects.toThrow(/Primary key constraint violation/i);
+	});
+
+	test("should enforce foreign key constraint on parent_id", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create only child change set (not parent)
+		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+
+		// Attempt to insert edge with non-existent parent_id
+		await expect(
+			lix.db
+				.insertInto("change_set_edge")
+				.values({
+					parent_id: "cs_nonexistent",
+					child_id: "cs1",
+				})
+				.execute()
+		).rejects.toThrow(/Foreign key constraint violation/i);
+	});
+
+	test("should enforce foreign key constraint on child_id", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create only parent change set (not child)
+		await lix.db.insertInto("change_set").values({ id: "cs0" }).execute();
+
+		// Attempt to insert edge with non-existent child_id
+		await expect(
+			lix.db
+				.insertInto("change_set_edge")
+				.values({
+					parent_id: "cs0",
+					child_id: "cs_nonexistent",
+				})
+				.execute()
+		).rejects.toThrow(/Foreign key constraint violation/i);
 	});
 });

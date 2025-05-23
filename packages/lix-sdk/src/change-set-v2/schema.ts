@@ -209,13 +209,20 @@ export type ChangeSetView = {
 export const ChangeSetElementSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set_element",
 	"x-lix-version": "1.0",
-	// TODO foreign key constraint
-	// "x-foreign-keys": {
-	//   "change_set_id": "lix_change_set.id",
-	//   "change_id": "lix_change.id",
-	//   "schema_key": "lix_schema.key",
-	//   "file_id": "lix_file.id",
-	// }
+	"x-lix-foreign-keys": {
+		change_set_id: {
+			schemaKey: "lix_change_set",
+			property: "id",
+		},
+		change_id: {
+			schemaKey: "lix_change",
+			property: "id",
+		},
+		schema_key: {
+			schemaKey: "lix_stored_schema",
+			property: "key",
+		},
+	},
 	"x-lix-primary-key": ["change_set_id", "change_id"],
 	"x-lix-unique": [["entity_id", "schema_key", "file_id"]],
 	type: "object",
@@ -252,6 +259,16 @@ export const ChangeSetEdgeSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set_edge",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["parent_id", "child_id"],
+	"x-lix-foreign-keys": {
+		parent_id: {
+			schemaKey: "lix_change_set",
+			property: "id",
+		},
+		child_id: {
+			schemaKey: "lix_change_set",
+			property: "id",
+		},
+	},
 	type: "object",
 	properties: {
 		parent_id: { type: "string" },
