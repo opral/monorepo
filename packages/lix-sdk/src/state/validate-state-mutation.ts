@@ -17,8 +17,9 @@ export function validateStateMutation(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition | null;
 	snapshot_content: Snapshot["content"];
-	operation?: "insert" | "update";
+	operation: "insert" | "update";
 	entity_id?: string;
+	version_id: string;
 }): void {
 	if (!args.schema) {
 		return;
@@ -60,6 +61,7 @@ export function validateStateMutation(args: {
 			snapshot_content: args.snapshot_content,
 			operation: args.operation,
 			entity_id: args.entity_id,
+			version_id: args.version_id,
 		});
 	}
 
@@ -71,6 +73,7 @@ export function validateStateMutation(args: {
 			snapshot_content: args.snapshot_content,
 			operation: args.operation,
 			entity_id: args.entity_id,
+			version_id: args.version_id,
 		});
 	}
 
@@ -96,8 +99,9 @@ function validatePrimaryKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	snapshot_content: Snapshot["content"];
-	operation?: "insert" | "update";
+	operation: "insert" | "update";
 	entity_id?: string;
+	version_id: string;
 }): void {
 	const primaryKeyFields = args.schema["x-lix-primary-key"];
 	if (!primaryKeyFields || primaryKeyFields.length === 0) {
@@ -120,7 +124,8 @@ function validatePrimaryKeyConstraints(args: {
 	let query = args.lix.db
 		.selectFrom("state")
 		.select("snapshot_content")
-		.where("schema_key", "=", args.schema["x-lix-key"]);
+		.where("schema_key", "=", args.schema["x-lix-key"])
+		.where("version_id", "=", args.version_id);
 
 	// For updates, exclude the current entity from the check
 	if (args.operation === "update" && args.entity_id) {
@@ -155,8 +160,9 @@ function validateUniqueConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	snapshot_content: Snapshot["content"];
-	operation?: "insert" | "update";
+	operation: "insert" | "update";
 	entity_id?: string;
+	version_id: string;
 }): void {
 	const uniqueConstraints = args.schema["x-lix-unique"];
 	if (!uniqueConstraints || uniqueConstraints.length === 0) {
@@ -190,7 +196,8 @@ function validateUniqueConstraints(args: {
 		let query = args.lix.db
 			.selectFrom("state")
 			.select("snapshot_content")
-			.where("schema_key", "=", args.schema["x-lix-key"]);
+			.where("schema_key", "=", args.schema["x-lix-key"])
+			.where("version_id", "=", args.version_id);
 
 		// For updates, exclude the current entity from the check
 		if (args.operation === "update" && args.entity_id) {

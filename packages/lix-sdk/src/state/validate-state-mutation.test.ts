@@ -3,6 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { sql } from "kysely";
+import { createVersion } from "../version/create-version.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
 	const lix = await openLixInMemory({});
@@ -18,9 +19,20 @@ test("throws if the schema is not a valid lix schema", async () => {
 		// @ts-expect-error - x-version is missing
 	} as const satisfies LixSchemaDefinition;
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	expect(() =>
-		// @ts-expect-error - x-key is missing
-		validateStateMutation({ lix, schema, data: {} })
+		validateStateMutation({
+			lix,
+			// @ts-expect-error - x-key is missing
+			schema,
+			snapshot_content: {},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
 	).toThrowError();
 });
 
@@ -56,11 +68,18 @@ test("valid lix schema with a valid snapshot passes", async () => {
 		},
 	};
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	expect(() =>
 		validateStateMutation({
 			lix,
 			schema,
 			snapshot_content: snapshot.content,
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 });
@@ -85,11 +104,18 @@ test("an invalid snapshot fails", async () => {
 		},
 	};
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	expect(() =>
 		validateStateMutation({
 			lix,
 			schema,
 			snapshot_content: snapshot.content,
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError();
 });
@@ -117,11 +143,18 @@ test("passes when primary key is unique", async () => {
 		},
 	};
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	expect(() =>
 		validateStateMutation({
 			lix,
 			schema,
 			snapshot_content: snapshot.content,
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 });
@@ -166,11 +199,18 @@ test("throws when primary key violates uniqueness constraint", async () => {
 		},
 	};
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	expect(() =>
 		validateStateMutation({
 			lix,
 			schema,
 			snapshot_content: duplicateSnapshot.content,
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Primary key constraint violation");
 });
@@ -212,6 +252,11 @@ test("handles composite primary keys", async () => {
 		})
 		.execute();
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	// This should pass (different composite key)
 	expect(() =>
 		validateStateMutation({
@@ -222,6 +267,8 @@ test("handles composite primary keys", async () => {
 				role_id: "editor",
 				assigned_date: "2024-01-02",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 
@@ -235,12 +282,19 @@ test("handles composite primary keys", async () => {
 				role_id: "admin",
 				assigned_date: "2024-01-03",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Primary key constraint violation");
 });
 
 test("passes when unique constraint is satisfied", async () => {
 	const lix = await openLixInMemory({});
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
 
 	const schema = {
 		type: "object",
@@ -272,6 +326,8 @@ test("passes when unique constraint is satisfied", async () => {
 			lix,
 			schema,
 			snapshot_content: snapshot.content,
+			version_id: activeVersion.version_id,
+			operation: "insert",
 		})
 	).not.toThrowError();
 });
@@ -326,11 +382,18 @@ test("throws when single field unique constraint is violated", async () => {
 		},
 	};
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	expect(() =>
 		validateStateMutation({
 			lix,
 			schema,
 			snapshot_content: duplicateEmailSnapshot.content,
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Unique constraint violation");
 
@@ -349,6 +412,8 @@ test("throws when single field unique constraint is violated", async () => {
 			lix,
 			schema,
 			snapshot_content: duplicateUsernameSnapshot.content,
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Unique constraint violation");
 });
@@ -398,6 +463,11 @@ test("handles composite unique constraints", async () => {
 		})
 		.execute();
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	// This should pass (different composite unique key)
 	expect(() =>
 		validateStateMutation({
@@ -410,6 +480,8 @@ test("handles composite unique constraints", async () => {
 				sku: "ELEC-DES-001",
 				price: 1299.99,
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 
@@ -425,6 +497,8 @@ test("handles composite unique constraints", async () => {
 				sku: "FURN-LAP-001",
 				price: 599.99,
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 
@@ -440,6 +514,8 @@ test("handles composite unique constraints", async () => {
 				sku: "ELEC-LAP-002",
 				price: 899.99,
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Unique constraint violation");
 
@@ -455,6 +531,8 @@ test("handles composite unique constraints", async () => {
 				sku: "ELEC-LAP-001", // Same SKU
 				price: 29.99,
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Unique constraint violation");
 });
@@ -517,6 +595,11 @@ test("passes when foreign key references exist", async () => {
 		})
 		.execute();
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	// This should pass - foreign key reference exists
 	expect(() =>
 		validateStateMutation({
@@ -527,6 +610,8 @@ test("passes when foreign key references exist", async () => {
 				author_id: "user1",
 				title: "My First Post",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 });
@@ -573,6 +658,11 @@ test("throws when foreign key reference does not exist", async () => {
 		.values([{ value: userSchema }, { value: postSchema }])
 		.execute();
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	// This should fail - foreign key reference does not exist
 	expect(() =>
 		validateStateMutation({
@@ -583,6 +673,8 @@ test("throws when foreign key reference does not exist", async () => {
 				author_id: "nonexistent_user",
 				title: "My First Post",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Foreign key constraint violation");
 });
@@ -680,6 +772,11 @@ test("handles multiple foreign keys", async () => {
 		])
 		.execute();
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	// This should pass - all foreign key references exist
 	expect(() =>
 		validateStateMutation({
@@ -691,6 +788,8 @@ test("handles multiple foreign keys", async () => {
 				category_id: "category1",
 				title: "My Tech Post",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 
@@ -705,6 +804,8 @@ test("handles multiple foreign keys", async () => {
 				category_id: "nonexistent_category",
 				title: "Another Post",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Foreign key constraint violation");
 });
@@ -751,6 +852,11 @@ test("allows null foreign key values", async () => {
 		.values([{ value: userSchema }, { value: postSchema }])
 		.execute();
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	// This should pass - null foreign key is allowed
 	expect(() =>
 		validateStateMutation({
@@ -761,6 +867,8 @@ test("allows null foreign key values", async () => {
 				author_id: null,
 				title: "Anonymous Post",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 
@@ -773,6 +881,8 @@ test("allows null foreign key values", async () => {
 				id: "post2",
 				title: "Another Anonymous Post",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 });
@@ -821,6 +931,11 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	// This should pass - foreign key references existing change record
 	expect(() =>
 		validateStateMutation({
@@ -830,6 +945,8 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 				id: "element1",
 				change_id: "change1",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 
@@ -842,12 +959,19 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 				id: "element2",
 				change_id: "nonexistent_change",
 			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).toThrowError("Foreign key constraint violation");
 });
 
 test("allows updates with same primary key", async () => {
 	const lix = await openLixInMemory({});
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
 
 	const schema = {
 		type: "object",
@@ -889,6 +1013,86 @@ test("allows updates with same primary key", async () => {
 			},
 			operation: "update",
 			entity_id: "user1",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
+});
+
+test("unique constraints are validated per version, not globally", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "file",
+		"x-lix-primary-key": ["id"],
+		"x-lix-unique": [["path"]], // Unique path constraint
+		properties: {
+			id: { type: "string" },
+			path: { type: "string" },
+			content: { type: "string" },
+		},
+		required: ["id", "path", "content"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema first
+	await lix.db.insertInto("stored_schema").values({ value: schema }).execute();
+
+	// Create two different versions
+	await createVersion({
+		lix,
+		id: "version0",
+	});
+
+	await createVersion({
+		lix,
+		id: "version1",
+	});
+	// Insert file with path "/app.js" in version1
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "file1",
+			file_id: "file1",
+			schema_key: "file",
+			plugin_key: "test_plugin",
+			version_id: "version0",
+			snapshot_content: {
+				id: "file1",
+				path: "/app.js",
+				content: "console.log('version 0');",
+			},
+		})
+		.execute();
+
+	// This should pass - same path in different version should be allowed
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema,
+			snapshot_content: {
+				id: "file2",
+				path: "/app.js", // Same path but different version
+				content: "console.log('version 1');",
+			},
+			operation: "insert",
+			version_id: "version1",
+		})
+	).not.toThrowError();
+
+	// This should fail - same path in same version
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema,
+			snapshot_content: {
+				id: "file3",
+				path: "/app.js", // Same path and same version
+				content: "console.log('duplicate');",
+			},
+			operation: "insert",
+			version_id: "version0",
+		})
+	).toThrowError("Unique constraint violation");
 });
