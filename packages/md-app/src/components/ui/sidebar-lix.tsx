@@ -491,11 +491,15 @@ export function LixSidebar() {
 
   const mdFiles = files.filter(file => file.path.endsWith('.md'))
 
+  const backlink = React.useCallback(() => {
+    return `https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`
+  }, [lixIdSearchParams, fileIdSearchParams])
+
   return (
     <>
       <SidebarHeader className="flex flex-row justify-between items-center gap-1 h-11">
-        {(window.location.hostname !== "flashtype.ai" && lixIdSearchParams && fileIdSearchParams) && (
-          <a href={`https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
+        {window.location.hostname !== "flashtype.ai" && (
+          <a href={backlink()}>
             <Button
               variant="ghost"
               size="icon"
