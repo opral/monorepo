@@ -2,6 +2,8 @@ import { Ajv } from "ajv";
 import type { Lix } from "../lix/open-lix.js";
 import type { Snapshot } from "../snapshot/schema.js";
 import { LixSchemaDefinition } from "../schema-definition/definition.js";
+import { executeSync } from "../database/execute-sync.js";
+import { sql } from "kysely";
 
 const ajv = new Ajv({
 	strict: true,
@@ -45,6 +47,74 @@ export function validateStateMutation(args: {
 
 		throw new Error(
 			`The provided snapshot content does not match the schema: ${errorDetails || ajv.errorsText(ajv.errors)}`
+		);
+	}
+
+	// Validate primary key constraints
+	if (args.schema["x-lix-primary-key"]) {
+		validatePrimaryKeyConstraints({
+			lix: args.lix,
+			schema: args.schema,
+			snapshot_content: args.snapshot_content,
+		});
+	}
+}
+
+function validatePrimaryKeyConstraints(args: {
+	lix: Pick<Lix, "sqlite" | "db">;
+	schema: LixSchemaDefinition;
+	snapshot_content: Snapshot["content"];
+}): void {
+	const primaryKeyFields = args.schema["x-lix-primary-key"];
+	if (!primaryKeyFields || primaryKeyFields.length === 0) {
+		return;
+	}
+
+	// Extract primary key values from the snapshot content
+	const primaryKeyValues: any[] = [];
+	for (const field of primaryKeyFields) {
+		const value = (args.snapshot_content as any)[field];
+		if (value === undefined || value === null) {
+			throw new Error(
+				`Primary key field '${field}' cannot be null or undefined`
+			);
+		}
+		primaryKeyValues.push(value);
+	}
+
+	// Query existing state to check for duplicates
+	let query = args.lix.db
+		.selectFrom("state")
+		.select("snapshot_content")
+		.where("schema_key", "=", args.schema["x-lix-key"]);
+
+	// Build WHERE conditions for each primary key field
+	for (let i = 0; i < primaryKeyFields.length; i++) {
+		const field = primaryKeyFields[i];
+		const value = primaryKeyValues[i];
+		// Use JSON extraction to check the field value in the content
+		query = query.where(
+			sql.raw(`json_extract(snapshot_content, '$.${field}')`),
+			"=",
+			value
+		);
+	}
+
+	const existingStates = executeSync({ lix: args.lix, query });
+
+	if (existingStates.length > 0) {
+		const primaryKeyDescription =
+			primaryKeyFields.length === 1
+				? `Primary key '${primaryKeyFields[0]}'`
+				: `Composite primary key [${primaryKeyFields.join(", ")}]`;
+
+		const valueDescription =
+			primaryKeyFields.length === 1
+				? `'${primaryKeyValues[0]}'`
+				: `[${primaryKeyValues.map((v) => `'${v}'`).join(", ")}]`;
+
+		throw new Error(
+			`Primary key constraint violation: ${primaryKeyDescription} with value ${valueDescription} already exists`
 		);
 	}
 }
