@@ -21,6 +21,7 @@ import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value-v2/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
+import { applyFileDatabaseSchema } from "../file/schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -36,6 +37,7 @@ export function applySchema(args: {
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyVersionDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
+	applyFileDatabaseSchema(args.sqlite, args.db);
 
 	// insert the schemas into the stored_schema table
 	// to enable validation. must be done after the database

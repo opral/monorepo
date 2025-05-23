@@ -29,6 +29,7 @@ import {
 	type KeyValueView,
 } from "../key-value-v2/schema.js";
 import type { StateView } from "../state/schema.js";
+import { LixFileSchema, type LixFileView } from "../file/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -46,6 +47,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
 	change_set_edge: LixChangeSetEdgeSchema,
+	file: LixFileSchema,
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
 	snapshot: LixSnapshotSchema,
@@ -62,7 +64,7 @@ export type LixDatabaseSchema = {
 	// label: LabelTable;
 
 	// file
-	// file: LixFileTable;
+	file: LixFileView;
 	// file_queue: FileQueueTable;
 
 	// change

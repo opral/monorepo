@@ -16,6 +16,7 @@ test("file ids should default to nano_id(10)", async () => {
 		.values({
 			path: "/mock.txt",
 			data: new Uint8Array(),
+			version_id: "version0",
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

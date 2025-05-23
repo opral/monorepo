@@ -1,10 +1,11 @@
-import type {
-	ExperimentalChangeSchema,
-	ExperimentalInferType,
-} from "../change-schema/types.js";
-import { type Change } from "../database/schema.js";
+import type { Change } from "../change/schema.js";
 import type { LixFile } from "../file/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import type {
+	FromLixSchemaDefinition,
+	LixSchemaDefinition,
+} from "../schema-definition/definition.js";
+import type { Snapshot } from "../snapshot/schema.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin = {
@@ -27,24 +28,17 @@ export type LixPlugin = {
 	 * deleted. If the file is deleted, lix own change control
 	 * will handle the deletion. Hence, `after` is always be defined.
 	 */
-	detectChanges?: (args: {
-		lix: LixReadonly;
-		before?: LixFile;
-		after: LixFile;
-	}) => Promise<Array<DetectedChange>>;
-	/**
-	 * UI components that are used to render the diff view.
-	 */
-	diffUiComponent?: CustomElementConstructor;
-	/**
-	 * Detects changes from the source lix that conflict with changes in the target lix.
-	 */
-	detectConflicts?: (args: {
-		lix: LixReadonly;
-		changes: Array<Change>;
-	}) => Promise<DetectedConflict[]>;
-	applyChanges?: (args: {
-		lix: LixReadonly;
+	detectChanges?: ({
+		before,
+		after,
+	}: {
+		before?: { data: Uint8Array };
+		after?: { data: Uint8Array };
+	}) => DetectedChange<any>[];
+	applyChanges?: ({
+		file,
+		changes,
+	}: {
 		/**
 		 * The file to which the changes should be applied.
 		 *
@@ -55,10 +49,19 @@ export type LixPlugin = {
 		 * has been deleted and should be restored at a later point.
 		 */
 		file: Omit<LixFile, "data"> & { data?: LixFile["data"] };
-		changes: Array<Change>;
-	}) => Promise<{
-		fileData: LixFile["data"];
-	}>;
+		changes: Array<Change & { snapshot_content: Snapshot["content"] }>;
+	}) => { fileData: Uint8Array };
+	/**
+	 * UI components that are used to render the diff view.
+	 */
+	diffUiComponent?: CustomElementConstructor;
+	/**
+	 * Detects changes from the source lix that conflict with changes in the target lix.
+	 */
+	// detectConflicts?: (args: {
+	// 	lix: LixReadonly;
+	// 	changes: Array<Change>;
+	// }) => Promise<DetectedConflict[]>;
 	// // TODO multiple resolution strategies should be reported to the user
 	// // similar to fixable lint rules. We likely need to expose in
 	// // detect conflicts how conflicts could potentially be resolved.
@@ -95,14 +98,13 @@ export type LixPlugin = {
  *   ```
  */
 
-export type DetectedChange<Schema extends ExperimentalChangeSchema = any> = {
+export type DetectedChange<Schema extends LixSchemaDefinition = any> = {
 	entity_id: string;
-	schema: Omit<ExperimentalChangeSchema, "schema">;
+	schema: Schema;
 	/**
-	 * The change is considered a deletion if `snapshot` is `undefined`.
+	 * The change is considered a deletion if `snapshot_content` is `null`.
 	 */
-
-	snapshot?: ExperimentalInferType<Schema>;
+	snapshot_content: FromLixSchemaDefinition<Schema> | null;
 };
 
 export type DetectedConflict = {
