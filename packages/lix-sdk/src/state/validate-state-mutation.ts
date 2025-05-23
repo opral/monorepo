@@ -58,6 +58,15 @@ export function validateStateMutation(args: {
 			snapshot_content: args.snapshot_content,
 		});
 	}
+
+	// Validate unique constraints
+	if (args.schema["x-lix-unique"]) {
+		validateUniqueConstraints({
+			lix: args.lix,
+			schema: args.schema,
+			snapshot_content: args.snapshot_content,
+		});
+	}
 }
 
 function validatePrimaryKeyConstraints(args: {
@@ -103,19 +112,76 @@ function validatePrimaryKeyConstraints(args: {
 	const existingStates = executeSync({ lix: args.lix, query });
 
 	if (existingStates.length > 0) {
-		const primaryKeyDescription =
-			primaryKeyFields.length === 1
-				? `Primary key '${primaryKeyFields[0]}'`
-				: `Composite primary key [${primaryKeyFields.join(", ")}]`;
-
-		const valueDescription =
-			primaryKeyFields.length === 1
-				? `'${primaryKeyValues[0]}'`
-				: `[${primaryKeyValues.map((v) => `'${v}'`).join(", ")}]`;
-
+		const fieldNames = primaryKeyFields.join(", ");
+		const fieldValues = primaryKeyValues.map(v => `'${v}'`).join(", ");
+		
 		throw new Error(
-			`Primary key constraint violation: ${primaryKeyDescription} with value ${valueDescription} already exists`
+			`Primary key constraint violation: The primary key constraint on (${fieldNames}) is violated by values (${fieldValues})`
 		);
+	}
+}
+
+function validateUniqueConstraints(args: {
+	lix: Pick<Lix, "sqlite" | "db">;
+	schema: LixSchemaDefinition;
+	snapshot_content: Snapshot["content"];
+}): void {
+	const uniqueConstraints = args.schema["x-lix-unique"];
+	if (!uniqueConstraints || uniqueConstraints.length === 0) {
+		return;
+	}
+
+	// Validate each unique constraint
+	for (const uniqueFields of uniqueConstraints) {
+		if (!uniqueFields || uniqueFields.length === 0) {
+			continue;
+		}
+
+		// Extract values for this unique constraint
+		const uniqueValues: any[] = [];
+		for (const field of uniqueFields) {
+			const value = (args.snapshot_content as any)[field];
+			if (value === undefined || value === null) {
+				// Skip unique constraint validation if any field is null/undefined
+				// This allows nullable unique fields (like SQL UNIQUE constraints)
+				continue;
+			}
+			uniqueValues.push(value);
+		}
+
+		// If we didn't get all values (some were null), skip this constraint
+		if (uniqueValues.length !== uniqueFields.length) {
+			continue;
+		}
+
+		// Query existing state to check for duplicates
+		let query = args.lix.db
+			.selectFrom("state")
+			.select("snapshot_content")
+			.where("schema_key", "=", args.schema["x-lix-key"]);
+
+		// Build WHERE conditions for each field in the unique constraint
+		for (let i = 0; i < uniqueFields.length; i++) {
+			const field = uniqueFields[i];
+			const value = uniqueValues[i];
+			// Use JSON extraction to check the field value in the content
+			query = query.where(
+				sql.raw(`json_extract(snapshot_content, '$.${field}')`),
+				"=",
+				value
+			);
+		}
+
+		const existingStates = executeSync({ lix: args.lix, query });
+
+		if (existingStates.length > 0) {
+			const fieldNames = uniqueFields.join(", ");
+			const fieldValues = uniqueValues.map(v => `'${v}'`).join(", ");
+			
+			throw new Error(
+				`Unique constraint violation: The unique constraint on (${fieldNames}) is violated by values (${fieldValues})`
+			);
+		}
 	}
 }
 
