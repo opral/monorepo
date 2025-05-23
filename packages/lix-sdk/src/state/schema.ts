@@ -1,6 +1,6 @@
 import type { Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { validateLixSchemaWithConstraints } from "./validate-schema-with-constraints.js";
+import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import type { JSONType } from "../schema-definition/json-type.js";
@@ -16,7 +16,7 @@ export function applyStateDatabaseSchema(
 		arity: 2,
 		// @ts-expect-error - type mismatch
 		xFunc: (_ctxPtr: number, ...args: any[]) => {
-			return validateLixSchemaWithConstraints({
+			return validateStateMutation({
 				lix: { sqlite, db: db as any },
 				schema: JSON.parse(args[0]),
 				snapshot_content: JSON.parse(args[1]),

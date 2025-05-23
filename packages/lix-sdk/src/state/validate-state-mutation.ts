@@ -11,7 +11,7 @@ const ajv = new Ajv({
 });
 const validateLixSchema = ajv.compile(LixSchemaDefinition);
 
-export function validateLixSchemaWithConstraints(args: {
+export function validateStateMutation(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition | null;
 	snapshot_content: Snapshot["content"];
