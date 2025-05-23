@@ -10,7 +10,7 @@
 		"url": "https://github.com/opral/monorepo.git"
 	},
 	"icon": "assets/sherlock-logo.png",
-	"version": "2.0.16",
+	"version": "2.0.17",
 	"engines": {
 		"vscode": "^1.84.2"
 	},
