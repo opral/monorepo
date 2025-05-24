@@ -305,3 +305,121 @@ test("invalid file paths should be rejected", async () => {
 	).rejects.toThrowError("path must match pattern");
 });
 
+test("file operations are version specific and isolated", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const versionA = await createVersion({
+		lix,
+		id: "versionA",
+	});
+
+	const versionB = await createVersion({
+		lix,
+		id: "versionB",
+	});
+
+	// Insert file in version A
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "fileA",
+			path: "/shared/file.txt",
+			data: new TextEncoder().encode(JSON.stringify({ content: "versionA" })),
+			version_id: versionA.id,
+		})
+		.execute();
+
+	// Insert file in version B with same path but different content
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "fileB",
+			path: "/shared/file.txt",
+			data: new TextEncoder().encode(JSON.stringify({ content: "versionB" })),
+			version_id: versionB.id,
+		})
+		.execute();
+
+	// Verify both versions have their own files
+	const filesInVersionA = await lix.db
+		.selectFrom("file")
+		.where("version_id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	const filesInVersionB = await lix.db
+		.selectFrom("file")
+		.where("version_id", "=", versionB.id)
+		.selectAll()
+		.execute();
+
+	expect(filesInVersionA).toHaveLength(1);
+	expect(filesInVersionB).toHaveLength(1);
+	expect(
+		JSON.parse(new TextDecoder().decode(filesInVersionA[0]?.data))
+	).toEqual({ content: "versionA" });
+	expect(
+		JSON.parse(new TextDecoder().decode(filesInVersionB[0]?.data))
+	).toEqual({ content: "versionB" });
+
+	// Update file in version A
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", "fileA")
+		.where("version_id", "=", versionA.id)
+		.set({
+			data: new TextEncoder().encode(
+				JSON.stringify({ content: "versionA-updated" })
+			),
+		})
+		.execute();
+
+	// Verify update only affected version A
+	const updatedFilesA = await lix.db
+		.selectFrom("file")
+		.where("version_id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	const unchangedFilesB = await lix.db
+		.selectFrom("file")
+		.where("version_id", "=", versionB.id)
+		.selectAll()
+		.execute();
+
+	expect(JSON.parse(new TextDecoder().decode(updatedFilesA[0]?.data))).toEqual({
+		content: "versionA-updated",
+	});
+	expect(
+		JSON.parse(new TextDecoder().decode(unchangedFilesB[0]?.data))
+	).toEqual({ content: "versionB" });
+
+	// Delete file from version A
+	await lix.db
+		.deleteFrom("file")
+		.where("id", "=", "fileA")
+		.where("version_id", "=", versionA.id)
+		.execute();
+
+	// Verify deletion only affected version A
+	const remainingFilesA = await lix.db
+		.selectFrom("file")
+		.where("version_id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	const remainingFilesB = await lix.db
+		.selectFrom("file")
+		.where("version_id", "=", versionB.id)
+		.selectAll()
+		.execute();
+
+	expect(remainingFilesA).toHaveLength(0);
+	expect(remainingFilesB).toHaveLength(1);
+	expect(
+		JSON.parse(new TextDecoder().decode(remainingFilesB[0]?.data))
+	).toEqual({ content: "versionB" });
+});
+
