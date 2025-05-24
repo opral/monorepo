@@ -1,4 +1,4 @@
-import type { Insertable, Selectable, Updateable } from "kysely";
+import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
@@ -139,7 +139,26 @@ export function applyStateDatabaseSchema(
     ls.file_id,
     ls.plugin_key,
     ls.snapshot_content,
-    ls.version_id
+    ls.version_id,
+    (
+      SELECT MIN(ic.created_at)
+      FROM internal_change ic
+      WHERE ic.entity_id = ls.entity_id
+        AND ic.schema_key = ls.schema_key
+        AND ic.file_id = ls.file_id
+    ) AS created_at,
+    (
+      SELECT MAX(ic.created_at)
+      FROM internal_change ic
+      WHERE ic.entity_id = ls.entity_id
+        AND ic.schema_key = ls.schema_key
+        AND ic.file_id = ls.file_id
+        AND ic.id IN (
+          SELECT cse.target_change_id 
+          FROM cse_in_reachable_cs cse 
+          WHERE cse.version_id = ls.version_id
+        )
+    ) AS updated_at
   FROM leaf_target_snapshots ls;
 
   CREATE TRIGGER IF NOT EXISTS state_insert
@@ -211,4 +230,6 @@ export type StateView = {
 	plugin_key: string;
 	snapshot_content: JSONType;
 	version_id: string;
+	created_at: Generated<string>;
+	updated_at: Generated<string>;
 };
