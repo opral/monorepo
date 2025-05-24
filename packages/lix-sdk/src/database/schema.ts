@@ -30,6 +30,7 @@ import {
 } from "../key-value-v2/schema.js";
 import type { StateView } from "../state/schema.js";
 import { LixFileSchema, type LixFileView } from "../file/schema.js";
+import { LixLogSchema, type LogView } from "../log/database-schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -48,6 +49,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set_element: LixChangeSetElementSchema,
 	change_set_edge: LixChangeSetEdgeSchema,
 	file: LixFileSchema,
+	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
 	snapshot: LixSnapshotSchema,
@@ -96,8 +98,8 @@ export type LixDatabaseSchema = {
 	version: VersionView;
 	active_version: ActiveVersionView;
 
-	// // logging
-	// log: LogTable;
+	// logging
+	log: LogView;
 };
 // ----- tags -----
 
