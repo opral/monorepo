@@ -1,3 +1,4 @@
+import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { Log } from "./schema.js";
 
@@ -29,13 +30,22 @@ export async function createLog(args: {
 	level: string;
 	key: string;
 }): Promise<Log> {
-	return await args.lix.db
+	// Insert the log entry
+	const id = nanoid();
+	await args.lix.db
 		.insertInto("log")
 		.values({
+			id,
 			key: args.key,
 			message: args.message,
 			level: args.level,
 		})
-		.returningAll()
+		.execute();
+
+	// Query to get the created log entry
+	return await args.lix.db
+		.selectFrom("log")
+		.where("id", "=", id)
+		.selectAll()
 		.executeTakeFirstOrThrow();
 }
