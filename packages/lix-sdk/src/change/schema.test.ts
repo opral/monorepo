@@ -144,6 +144,124 @@ describe("change", () => {
 		expect(change[0]?.created_at).not.toBe("");
 	});
 
+	// the default SQLite timestamp is only precise to seconds,
+	// changes can happen rapidly and while the graph is usually
+	// used to order changes, certain queries may require
+	// more precision, so we test that the timestamp format includes milliseconds
+	test("timestamp format includes milliseconds", async () => {
+		const lix = await openLixInMemory({});
+
+		await lix.db
+			.insertInto("snapshot")
+			.values({
+				id: "snap_timestamp",
+				content: { id: "entity_timestamp" },
+			})
+			.execute();
+
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: "change_timestamp",
+				entity_id: "entity_timestamp",
+				schema_key: "test_schema",
+				file_id: "file_timestamp",
+				plugin_key: "test_plugin",
+				snapshot_id: "snap_timestamp",
+			})
+			.execute();
+
+		const change = await lix.db
+			.selectFrom("change")
+			.where("id", "=", "change_timestamp")
+			.selectAll()
+			.execute();
+
+		expect(change).toHaveLength(1);
+		const timestamp = change[0]?.created_at;
+		expect(timestamp).toBeDefined();
+
+		// Verify format: YYYY-MM-DDTHH:MM:SS.SSSSSSZ (ISO 8601 with fractional seconds)
+		const timestampRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,6}Z$/;
+		expect(timestamp).toMatch(timestampRegex);
+
+		// Verify it contains a decimal point (fractional seconds)
+		expect(timestamp).toContain(".");
+	});
+
+	test("can insert with custom timestamp", async () => {
+		const lix = await openLixInMemory({});
+
+		await lix.db
+			.insertInto("snapshot")
+			.values({
+				id: "snap_custom",
+				content: { id: "entity_custom" },
+			})
+			.execute();
+
+		const customTimestamp = "2023-01-01T12:00:00.123456Z";
+
+		await lix.db
+			.insertInto("change")
+			.values({
+				id: "change_custom",
+				entity_id: "entity_custom",
+				schema_key: "test_schema",
+				file_id: "file_custom",
+				plugin_key: "test_plugin",
+				snapshot_id: "snap_custom",
+				created_at: customTimestamp,
+			})
+			.execute();
+
+		const change = await lix.db
+			.selectFrom("change")
+			.where("id", "=", "change_custom")
+			.selectAll()
+			.execute();
+
+		expect(change).toHaveLength(1);
+		expect(change[0]?.created_at).toBe(customTimestamp);
+	});
+
+	test("rejects non-UTC timestamps", async () => {
+		const lix = await openLixInMemory({});
+
+		await lix.db
+			.insertInto("snapshot")
+			.values({
+				id: "snap_invalid_tz",
+				content: { id: "entity_invalid_tz" },
+			})
+			.execute();
+
+		// Test various invalid timezone formats
+		const invalidTimestamps = [
+			"2023-01-01T12:00:00.123456",     // No timezone
+			"2023-01-01T12:00:00.123456+05:30", // Non-UTC timezone
+			"2023-01-01T12:00:00.123456-08:00", // Non-UTC timezone
+			"2023-01-01T12:00:00.123456+00:00", // UTC but wrong format (should be Z)
+			"2023-01-01 12:00:00.123456",     // Space separator, no timezone
+		];
+
+		for (const invalidTimestamp of invalidTimestamps) {
+			await expect(
+				lix.db
+					.insertInto("change")
+					.values({
+						entity_id: "entity_invalid_tz",
+						schema_key: "test_schema",
+						file_id: "file_invalid_tz",
+						plugin_key: "test_plugin",
+						snapshot_id: "snap_invalid_tz",
+						created_at: invalidTimestamp,
+					})
+					.execute()
+			).rejects.toThrow(/CHECK constraint failed.*created_at/i);
+		}
+	});
+
 	test("insert fails with foreign key violation when snapshot does not exist", async () => {
 		const lix = await openLixInMemory({});
 

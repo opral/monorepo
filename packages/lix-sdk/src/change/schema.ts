@@ -12,7 +12,7 @@ export function applyChangeDatabaseSchema(
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL, -- Foreign key to internal_snapshot
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
 
     UNIQUE (id, entity_id, file_id, schema_key),
     FOREIGN KEY(snapshot_id) REFERENCES internal_snapshot(id)
@@ -45,7 +45,7 @@ export function applyChangeDatabaseSchema(
       NEW.file_id,
       NEW.plugin_key,
       NEW.snapshot_id,
-      COALESCE(NEW.created_at, CURRENT_TIMESTAMP)
+      COALESCE(NEW.created_at, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
   END;
 `);
