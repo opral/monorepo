@@ -12,7 +12,7 @@ import type { Kysely } from "kysely";
 import { LixSchemaViewMap, type LixInternalDatabaseSchema } from "./schema.js";
 // import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
 // import { applyThreadDatabaseSchema } from "../thread/database-schema.js";
-import { applyLogDatabaseSchema } from "../log/database-schema.js";
+import { applyLogDatabaseSchema } from "../log/schema.js";
 // import { applyKeyValueViewDatabaseSchema } from "../key-value-v2/database-schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set-v2/schema.js";

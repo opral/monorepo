@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { Log } from "./database-schema.js";
+import type { Log } from "./schema.js";
 
 /**
  * Directly creates a log entry in the Lix database without applying any filters.

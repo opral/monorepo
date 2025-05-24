@@ -30,7 +30,7 @@ import {
 } from "../key-value-v2/schema.js";
 import type { StateView } from "../state/schema.js";
 import { LixFileSchema, type LixFileView } from "../file/schema.js";
-import { LixLogSchema, type LogView } from "../log/database-schema.js";
+import { LixLogSchema, type LogView } from "../log/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
