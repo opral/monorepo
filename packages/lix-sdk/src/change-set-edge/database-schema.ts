@@ -26,7 +26,7 @@ export function applyChangeSetEdgeDatabaseSchema(
       (SELECT immutable_elements FROM change_set WHERE id = NEW.parent_id) = 0 OR
       (SELECT immutable_elements FROM change_set WHERE id = NEW.child_id) = 0
     BEGIN
-      SELECT RAISE(ABORT, 'Change set edges can only be created between change sets with immutable elements.');
+      SELECT RAISE(ABORT, 'Change set edges can only be created between change sets with immutable elements. Parent change set: ' || NEW.parent_id || ', Child change set: ' || NEW.child_id);
     END;
   `;
 

@@ -1,4 +1,4 @@
-export { changeSetElementInSymmetricDifference } from "./change-set-element-in-symmetric-difference.js";
+export { changeSetElementInSymmetricDifferenceOf } from "../query-filter/change-set-element-in-symmetric-difference-of.js";
 export { createChangeSet } from "./create-change-set.js";
 export * from "./database-schema.js";
 export { createMergeChangeSet } from "./create-merge-change-set.js";
