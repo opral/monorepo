@@ -5,6 +5,17 @@ import { INITIAL_VERSION_ID } from "./schema.js";
 test("insert, update, delete on the version view", async () => {
 	const lix = await openLixInMemory({});
 
+	// Create required change sets first
+	await lix.db
+		.insertInto("change_set")
+		.values([
+			{ id: "change_set_id_0" },
+			{ id: "change_set_id_1" },
+			{ id: "working_cs_0" },
+			{ id: "working_cs_1" },
+		])
+		.execute();
+
 	await lix.db
 		.insertInto("version")
 		.values([
@@ -115,6 +126,17 @@ test("insert, update, delete on the version view", async () => {
 test("querying by id", async () => {
 	const lix = await openLixInMemory({});
 
+	// Create required change sets first
+	await lix.db
+		.insertInto("change_set")
+		.values([
+			{ id: "change_set_id_0" },
+			{ id: "change_set_id_1" },
+			{ id: "working_cs_0" },
+			{ id: "working_cs_1" },
+		])
+		.execute();
+
 	await lix.db
 		.insertInto("version")
 		.values([
@@ -145,6 +167,22 @@ test("querying by id", async () => {
 
 test("update, delete on the active version view", async () => {
 	const lix = await openLixInMemory({});
+
+	// Create required change sets and version first
+	await lix.db
+		.insertInto("change_set")
+		.values([{ id: "cs1" }])
+		.execute();
+
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "version_id_1",
+			name: "test_version",
+			change_set_id: "cs1",
+			working_change_set_id: "cs1",
+		})
+		.execute();
 
 	await lix.db
 		.updateTable("active_version")
