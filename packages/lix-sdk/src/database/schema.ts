@@ -32,6 +32,7 @@ import type { StateView } from "../state/schema.js";
 import { LixFileSchema, type LixFileView } from "../file/schema.js";
 import { LixLogSchema, type LogView } from "../log/schema.js";
 import { LixAccountSchema, type AccountView, type ActiveAccountTable } from "../account/schema.js";
+import { LixChangeAuthorSchema, type ChangeAuthorView } from "../change-author/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -55,6 +56,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	key_value: LixKeyValueSchema,
 	snapshot: LixSnapshotSchema,
 	account: LixAccountSchema,
+	change_author: LixChangeAuthorSchema,
 };
 
 export type LixDatabaseSchema = {
@@ -62,6 +64,7 @@ export type LixDatabaseSchema = {
 	// account
 	account: AccountView;
 	active_account: ActiveAccountTable;
+	change_author: ChangeAuthorView;
 
 	// snapshot
 	snapshot: SnapshotView;

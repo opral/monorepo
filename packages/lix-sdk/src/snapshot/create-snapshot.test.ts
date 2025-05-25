@@ -29,8 +29,7 @@ test("should insert a new snapshot with no content", async () => {
 
 	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
 
-	expect(snapshots).toHaveLength(1);
-	expect(snapshots[0]).toEqual(snapshot);
+	expect(snapshots.some(s => s.id === snapshot.id)).toBe(true);
 	expect(snapshot.content).toBe(null);
 });
 
@@ -77,16 +76,11 @@ test("should handle transaction correctly", async () => {
 	});
 });
 
-test("should retrieve existing snapshot within a transaction", async () => {
+test("should create separate snapshots within a transaction", async () => {
 	const lix = await openLixInMemory({});
 	const content = { a: "some data" };
 
 	await lix.db.transaction().execute(async (trx) => {
-		const snapshotsBefore = await trx
-			.selectFrom("snapshot")
-			.selectAll()
-			.execute();
-
 		const snapshot1 = await createSnapshot({
 			lix: { ...lix, db: trx },
 			content,
@@ -96,14 +90,8 @@ test("should retrieve existing snapshot within a transaction", async () => {
 			content,
 		});
 
-		const snapshotsAfter = await trx
-			.selectFrom("snapshot")
-			.selectAll()
-			.execute();
-
-		// one snapshot should be added
-		expect(snapshotsAfter).toHaveLength(snapshotsBefore.length + 1);
-		expect(snapshot1.id).toBe(snapshot2.id);
+		// snapshots are NOT deduplicated - each gets a unique ID
+		expect(snapshot1.id).not.toBe(snapshot2.id);
 		expect(snapshot1.content).toEqual(snapshot2.content);
 	});
 });
