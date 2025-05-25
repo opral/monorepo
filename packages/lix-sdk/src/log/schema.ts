@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 
 export function applyLogDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -78,9 +78,10 @@ export const LixLogSchema = {
 } as const;
 LixLogSchema satisfies LixSchemaDefinition;
 
-export type Log = Selectable<LogView>;
-export type NewLog = Insertable<LogView>;
-export type LogUpdate = Updateable<LogView>;
+// Pure business logic type (inferred from schema)
+export type LixLog = FromLixSchemaDefinition<typeof LixLogSchema>;
+
+// Database view type (includes operational columns)
 export type LogView = {
 	/**
 	 * The unique identifier of the log entry.
@@ -115,3 +116,8 @@ export type LogView = {
 	 */
 	version_id: Generated<string>;
 };
+
+// Kysely operation types
+export type Log = Selectable<LogView>;
+export type NewLog = Insertable<LogView>;
+export type LogUpdate = Updateable<LogView>;

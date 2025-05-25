@@ -1,5 +1,8 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import type { Selectable, Insertable, Updateable, Generated } from "kysely";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
 
@@ -76,11 +79,17 @@ export const LixStoredSchemaSchema = {
 
 LixStoredSchemaSchema satisfies LixSchemaDefinition;
 
-export type StoredSchema = Selectable<StoredSchemaView>;
-export type NewStoredSchema = Insertable<StoredSchemaView>;
-export type StoredSchemaUpdate = Updateable<StoredSchemaView>;
+// Pure business logic type (inferred from schema)
+export type LixStoredSchema = FromLixSchemaDefinition<typeof LixStoredSchemaSchema>;
+
+// Database view type (includes operational columns)
 export type StoredSchemaView = {
 	key: Generated<string>;
 	version: Generated<string>;
 	value: LixSchemaDefinition;
 };
+
+// Kysely operation types
+export type StoredSchema = Selectable<StoredSchemaView>;
+export type NewStoredSchema = Insertable<StoredSchemaView>;
+export type StoredSchemaUpdate = Updateable<StoredSchemaView>;

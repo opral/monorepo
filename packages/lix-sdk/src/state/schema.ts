@@ -220,9 +220,11 @@ export function applyStateDatabaseSchema(
 	return sqlite.exec(sql);
 }
 
-export type StateRow = Selectable<StateView>;
-export type NewStateRow = Insertable<StateView>;
-export type StateRowUpdate = Updateable<StateView>;
+// State is a special case - it's purely a database view for operational purposes
+// and doesn't have a corresponding business logic schema definition since it's 
+// a computed view over the underlying change/snapshot data
+
+// Database view type (includes operational columns)
 export type StateView = {
 	entity_id: string;
 	schema_key: string;
@@ -233,3 +235,8 @@ export type StateView = {
 	created_at: Generated<string>;
 	updated_at: Generated<string>;
 };
+
+// Kysely operation types
+export type StateRow = Selectable<StateView>;
+export type NewStateRow = Insertable<StateView>;
+export type StateRowUpdate = Updateable<StateView>;

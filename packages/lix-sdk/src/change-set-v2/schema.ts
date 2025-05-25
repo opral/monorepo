@@ -1,6 +1,6 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Version } from "../version/schema.js";
 
 export function applyChangeSetDatabaseSchema(
@@ -197,14 +197,21 @@ export const LixChangeSetSchema: LixSchemaDefinition = {
 	required: ["id"],
 	additionalProperties: false,
 };
-export type ChangeSet = Selectable<ChangeSetView>;
-export type NewChangeSet = Insertable<ChangeSetView>;
-export type ChangeSetUpdate = Updateable<ChangeSetView>;
+
+// Pure business logic type (inferred from schema)
+export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
+
+// Database view type (includes operational columns)
 export type ChangeSetView = {
 	id: Generated<string>;
 	metadata: Record<string, any> | null;
 	version_id: Generated<Version["id"]>;
 };
+
+// Kysely operation types
+export type ChangeSet = Selectable<ChangeSetView>;
+export type NewChangeSet = Insertable<ChangeSetView>;
+export type ChangeSetUpdate = Updateable<ChangeSetView>;
 
 export const LixChangeSetElementSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set_element",
@@ -243,9 +250,10 @@ export const LixChangeSetElementSchema: LixSchemaDefinition = {
 	additionalProperties: false,
 };
 
-export type ChangeSetElement = Selectable<ChangeSetElementView>;
-export type NewChangeSetElement = Insertable<ChangeSetElementView>;
-export type ChangeSetElementUpdate = Updateable<ChangeSetElementView>;
+// Pure business logic type (inferred from schema)
+export type LixChangeSetElement = FromLixSchemaDefinition<typeof LixChangeSetElementSchema>;
+
+// Database view type (includes operational columns)
 export type ChangeSetElementView = {
 	change_set_id: string;
 	change_id: string;
@@ -254,6 +262,11 @@ export type ChangeSetElementView = {
 	file_id: string;
 	version_id: Generated<string>;
 };
+
+// Kysely operation types
+export type ChangeSetElement = Selectable<ChangeSetElementView>;
+export type NewChangeSetElement = Insertable<ChangeSetElementView>;
+export type ChangeSetElementUpdate = Updateable<ChangeSetElementView>;
 
 export const LixChangeSetEdgeSchema: LixSchemaDefinition = {
 	"x-lix-key": "lix_change_set_edge",
@@ -278,14 +291,20 @@ export const LixChangeSetEdgeSchema: LixSchemaDefinition = {
 	additionalProperties: false,
 };
 
-export type ChangeSetEdge = Selectable<ChangeSetEdgeView>;
-export type NewChangeSetEdge = Insertable<ChangeSetEdgeView>;
-export type ChangeSetEdgeUpdate = Updateable<ChangeSetEdgeView>;
+// Pure business logic type (inferred from schema)
+export type LixChangeSetEdge = FromLixSchemaDefinition<typeof LixChangeSetEdgeSchema>;
+
+// Database view type (includes operational columns)
 export type ChangeSetEdgeView = {
 	parent_id: string;
 	child_id: string;
 	version_id: Generated<string>;
 };
+
+// Kysely operation types
+export type ChangeSetEdge = Selectable<ChangeSetEdgeView>;
+export type NewChangeSetEdge = Insertable<ChangeSetEdgeView>;
+export type ChangeSetEdgeUpdate = Updateable<ChangeSetEdgeView>;
 
 // export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
 // export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;

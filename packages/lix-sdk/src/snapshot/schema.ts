@@ -1,10 +1,10 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { Selectable, Insertable, Generated } from "kysely";
+import type { Selectable, Insertable, Updateable, Generated } from "kysely";
 import {
 	type JSONType,
 	JSONTypeSchema,
 } from "../schema-definition/json-type.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 
 export function applySnapshotDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -56,6 +56,9 @@ export const LixSnapshotSchema = {
 } as const;
 LixSnapshotSchema satisfies LixSchemaDefinition;
 
+// Pure business logic type (inferred from schema)
+export type LixSnapshot = FromLixSchemaDefinition<typeof LixSnapshotSchema>;
+
 // Types for the internal_snapshot TABLE
 export type InternalSnapshot = Selectable<InternalSnapshotTable>;
 export type NewInternalSnapshot = Insertable<InternalSnapshotTable>;
@@ -64,9 +67,13 @@ export type InternalSnapshotTable = {
 	content: JSONType;
 };
 
-export type Snapshot = Selectable<SnapshotView>;
-export type NewSnapshot = Insertable<SnapshotView>;
+// Database view type (includes operational columns)
 export type SnapshotView = {
 	id: Generated<string>;
 	content: JSONType;
 };
+
+// Kysely operation types
+export type Snapshot = Selectable<SnapshotView>;
+export type NewSnapshot = Insertable<SnapshotView>;
+export type SnapshotUpdate = Updateable<SnapshotView>;

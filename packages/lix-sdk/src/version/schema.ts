@@ -1,6 +1,6 @@
-import type { Generated, Insertable, Selectable } from "kysely";
+import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 
 // initial ids (lack of having a separate creation and migration schema)
 export const INITIAL_VERSION_ID = "BoIaHTW9ePX6pNc8";
@@ -220,14 +220,21 @@ export const LixVersionSchema = {
 } as const;
 LixVersionSchema satisfies LixSchemaDefinition;
 
-export type Version = Selectable<VersionView>;
-export type NewVersion = Insertable<VersionView>;
+// Pure business logic type (inferred from schema)
+export type LixVersion = FromLixSchemaDefinition<typeof LixVersionSchema>;
+
+// Database view type (includes operational columns)
 export type VersionView = {
 	id: Generated<string>;
 	name: Generated<string>;
 	change_set_id: string;
 	working_change_set_id: string;
 };
+
+// Kysely operation types
+export type Version = Selectable<VersionView>;
+export type NewVersion = Insertable<VersionView>;
+export type VersionUpdate = Updateable<VersionView>;
 
 export const LixActiveVersionSchema = {
 	"x-lix-key": "lix_active_version",
@@ -248,8 +255,15 @@ export const LixActiveVersionSchema = {
 } as const;
 LixActiveVersionSchema satisfies LixSchemaDefinition;
 
-export type ActiveVersion = Selectable<ActiveVersionView>;
-export type NewActiveVersion = Insertable<ActiveVersionView>;
+// Pure business logic type (inferred from schema)
+export type LixActiveVersion = FromLixSchemaDefinition<typeof LixActiveVersionSchema>;
+
+// Database view type (includes operational columns)
 export type ActiveVersionView = {
 	version_id: Generated<string>;
 };
+
+// Kysely operation types
+export type ActiveVersion = Selectable<ActiveVersionView>;
+export type NewActiveVersion = Insertable<ActiveVersionView>;
+export type ActiveVersionUpdate = Updateable<ActiveVersionView>;

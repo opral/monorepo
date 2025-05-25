@@ -4,7 +4,7 @@ import {
 	handleFileUpdate,
 	materializeFileData,
 } from "./file-handlers.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyFileDatabaseSchema(
@@ -160,10 +160,16 @@ export const LixFileSchema = {
 } as const;
 LixFileSchema satisfies LixSchemaDefinition;
 
-// named lix file to avoid conflict with built-in file type
-export type LixFile = Selectable<LixFileView>;
-export type NewLixFile = Insertable<LixFileView>;
-export type LixFileUpdate = Updateable<LixFileView>;
+/**
+ * Pure business logic type inferred from the LixFileSchema.
+ * 
+ * Uses "Type" suffix to avoid collision with JavaScript's built-in File type,
+ * while maintaining consistency with our naming pattern where schema-derived
+ * types represent the pure business logic without database infrastructure columns.
+ */
+export type LixFileType = FromLixSchemaDefinition<typeof LixFileSchema>;
+
+// Database view type (includes operational columns)
 export type LixFileView = {
 	id: Generated<string>;
 	/**
@@ -180,3 +186,14 @@ export type LixFileView = {
 	metadata: Record<string, any> | null;
 	version_id: Generated<string>;
 };
+
+/**
+ * Kysely operation types for the file view.
+ * 
+ * These use the "Lix" prefix to avoid collision with JavaScript's built-in File type
+ * and to clearly distinguish them as Lix-specific database view operations rather
+ * than pure business logic types.
+ */
+export type LixFile = Selectable<LixFileView>;
+export type NewLixFile = Insertable<LixFileView>;
+export type LixFileUpdate = Updateable<LixFileView>;

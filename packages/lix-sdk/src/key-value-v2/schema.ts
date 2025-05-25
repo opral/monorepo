@@ -1,7 +1,10 @@
 import { type Selectable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Generated, Insertable, Updateable } from "kysely";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import {
 	JSONTypeSchema,
 	type JSONType,
@@ -81,14 +84,31 @@ export const LixKeyValueSchema = {
 } as const;
 LixKeyValueSchema satisfies LixSchemaDefinition;
 
-export type KeyValue = Selectable<KeyValueView>;
-export type NewKeyValue = Insertable<KeyValueView>;
-export type KeyValueUpdate = Updateable<KeyValueView>;
+// Pure business logic type (inferred from schema)
+export type LixKeyValue = FromLixSchemaDefinition<typeof LixKeyValueSchema>;
+
+// Database view type (includes operational columns)
 export type KeyValueView = {
-	key: string;
+	/**
+	 * The key of the key-value pair.
+	 *
+	 * Lix prefixes its keys with "lix_" to avoid conflicts with user-defined keys.
+	 * Provides autocomplete for predefined keys while allowing custom keys.
+	 *
+	 * @example
+	 *   "lix_id"
+	 *   "lix_sync"
+	 *   "namespace_cool_key"
+	 */
+	key: KeyValueKeys;
 	value: JSONType;
 	version_id: Generated<string>;
 };
+
+// Kysely operation types
+export type KeyValue = Selectable<KeyValueView>;
+export type NewKeyValue = Insertable<KeyValueView>;
+export type KeyValueUpdate = Updateable<KeyValueView>;
 
 type PredefinedKeys =
 	| "lix_id"
