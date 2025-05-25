@@ -14,10 +14,8 @@ test("should create an account", async () => {
 	const accountName = "test_account";
 	const account = await createAccount({ 
 		lix, 
-		data: { 
-			name: accountName,
-			version_id: version.id,
-		}
+		name: accountName,
+		version_id: version.id,
 	});
 
 	// Verify the account was created

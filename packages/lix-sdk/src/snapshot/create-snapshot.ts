@@ -7,9 +7,9 @@ import { executeSync } from "../database/execute-sync.js";
 
 export function createSnapshot(args: {
 	lix: Pick<Lix, "db" | "sqlite">;
-	data: NewSnapshot;
+	content: NewSnapshot["content"];
 }): Promise<Snapshot> {
-	const id = args.data.content ? v7() : "no-content";
+	const id = args.content ? v7() : "no-content";
 
 	executeSync({
 		lix: args.lix,
@@ -17,7 +17,7 @@ export function createSnapshot(args: {
 			.insertInto("internal_snapshot")
 			.values({
 				id,
-				content: sql`jsonb(${JSON.stringify(args.data.content)})`,
+				content: sql`jsonb(${JSON.stringify(args.content)})`,
 			})
 			.onConflict((oc) => oc.doNothing()),
 	});

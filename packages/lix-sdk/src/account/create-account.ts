@@ -1,22 +1,24 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { Account, NewAccount } from "./schema.js";
+import type { Account } from "./schema.js";
 import { v7 as uuid_v7 } from "uuid";
 
 export async function createAccount(args: {
 	lix: Pick<Lix, "db">;
-	data: Omit<NewAccount, "version_id"> & { version_id?: string };
+	id?: Account["id"];
+	name: Account["name"];
+	version_id?: Account["version_id"];
 }): Promise<Account> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
-		const accountId = args.data.id || uuid_v7();
+		const accountId = args.id || uuid_v7();
 		
 		// Insert the account (views don't support returningAll)
 		await trx
 			.insertInto("account")
 			.values({
 				id: accountId,
-				name: args.data.name,
-				version_id: args.data.version_id,
+				name: args.name,
+				version_id: args.version_id,
 			})
 			.execute();
 

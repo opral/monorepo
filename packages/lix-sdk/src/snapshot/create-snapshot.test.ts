@@ -5,7 +5,7 @@ import { createSnapshot } from "./create-snapshot.js";
 test("should insert a new snapshot", async () => {
 	const lix = await openLixInMemory({});
 	const content = { a: "some data" };
-	const snapshot = await createSnapshot({ lix, data: { content } });
+	const snapshot = await createSnapshot({ lix, content });
 
 	expect(snapshot.content).toEqual(content);
 });
@@ -17,7 +17,7 @@ test("should insert a new snapshot", async () => {
  */
 test("snapshots with no content lead to a no-content snapshot", async () => {
 	const lix = await openLixInMemory({});
-	const snapshot = await createSnapshot({ lix, data: { content: undefined } });
+	const snapshot = await createSnapshot({ lix, content: undefined });
 
 	expect(snapshot.id).toBe("no-content");
 	expect(snapshot.content).toBe(null);
@@ -25,7 +25,7 @@ test("snapshots with no content lead to a no-content snapshot", async () => {
 
 test("should insert a new snapshot with no content", async () => {
 	const lix = await openLixInMemory({});
-	const snapshot = await createSnapshot({ lix, data: { content: undefined } });
+	const snapshot = await createSnapshot({ lix, content: undefined });
 
 	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
 
@@ -56,8 +56,8 @@ test("should insert a new snapshot with no content", async () => {
 test("the id is NOT content addressable", async () => {
 	const lix = await openLixInMemory({});
 	const content = { a: "some data" };
-	const snapshot1 = await createSnapshot({ lix, data: { content } });
-	const snapshot2 = await createSnapshot({ lix, data: { content } });
+	const snapshot1 = await createSnapshot({ lix, content });
+	const snapshot2 = await createSnapshot({ lix, content });
 
 	expect(snapshot1.id).not.toBe(snapshot2.id);
 	expect(snapshot1.content).toEqual(snapshot2.content);
@@ -70,7 +70,7 @@ test("should handle transaction correctly", async () => {
 	await lix.db.transaction().execute(async (trx) => {
 		const snapshot = await createSnapshot({
 			lix: { ...lix, db: trx },
-			data: { content },
+			content,
 		});
 
 		expect(snapshot.content).toEqual(content);
@@ -89,11 +89,11 @@ test("should retrieve existing snapshot within a transaction", async () => {
 
 		const snapshot1 = await createSnapshot({
 			lix: { ...lix, db: trx },
-			data: { content },
+			content,
 		});
 		const snapshot2 = await createSnapshot({
 			lix: { ...lix, db: trx },
-			data: { content },
+			content,
 		});
 
 		const snapshotsAfter = await trx
