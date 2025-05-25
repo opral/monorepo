@@ -28,10 +28,10 @@ export const mockJsonPlugin: LixPlugin = {
 		const detectedChanges: DetectedChange<any>[] = [];
 
 		const beforeParsed = before?.data
-			? JSON.parse(new TextDecoder().decode(before?.data))
+			? JSON.parse(new TextDecoder().decode(before.data))
 			: {};
-		const afterParsed = after?.data
-			? JSON.parse(new TextDecoder().decode(after?.data))
+		const afterParsed = after.data
+			? JSON.parse(new TextDecoder().decode(after.data))
 			: {};
 
 		const flattenedBefore = flatten(beforeParsed, {

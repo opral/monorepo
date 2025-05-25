@@ -8,6 +8,7 @@ import type { NewKeyValue } from "../key-value/database-schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { Account } from "../account/database-schema.js";
+import { applyFileDatabaseSchema } from "../file/schema.js";
 
 export type Lix = {
 	/**
@@ -24,6 +25,7 @@ export type Lix = {
 	db: Kysely<LixDatabaseSchema>;
 	plugin: {
 		getAll: () => Promise<LixPlugin[]>;
+		getAllSync: () => LixPlugin[];
 	};
 };
 
@@ -67,13 +69,29 @@ export async function openLix(args: {
 	const db = initDb({ sqlite: args.database });
 
 	if (args.keyValues && args.keyValues.length > 0) {
-		await db
-			.insertInto("key_value")
-			.values(args.keyValues)
-			.onConflict((oc) =>
-				oc.doUpdateSet((eb) => ({ value: eb.ref("excluded.value") }))
-			)
-			.execute();
+		for (const keyValue of args.keyValues) {
+			// Check if the key already exists
+			const existing = await db
+				.selectFrom("key_value")
+				.select("key")
+				.where("key", "=", keyValue.key)
+				.executeTakeFirst();
+
+			if (existing) {
+				// Update existing key
+				await db
+					.updateTable("key_value")
+					.set({ value: keyValue.value })
+					.where("key", "=", keyValue.key)
+					.execute();
+			} else {
+				// Insert new key
+				await db
+					.insertInto("key_value")
+					.values(keyValue)
+					.execute();
+			}
+		}
 	}
 
 	if (args.account) {
@@ -95,6 +113,7 @@ export async function openLix(args: {
 
 	const plugin = {
 		getAll: async () => plugins,
+		getAllSync: () => plugins,
 	};
 
 	// await initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
@@ -103,11 +122,16 @@ export async function openLix(args: {
 
 	captureOpened({ db });
 
-	return {
+	const lix = {
 		db,
 		sqlite: args.database,
 		plugin,
 	};
+
+	// Apply file schema now that we have the full lix object with plugins
+	applyFileDatabaseSchema(lix);
+
+	return lix;
 }
 
 async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {

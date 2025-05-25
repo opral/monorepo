@@ -1,59 +1,100 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { Kysely } from "kysely";
 import { executeSync } from "../database/execute-sync.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { LixFile } from "./schema.js";
+import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
+import type { Lix } from "../lix/open-lix.js";
+import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
+
+function globSync(args: {
+	lix: Pick<Lix, "sqlite">;
+	glob: string;
+	path: string;
+}): boolean {
+	const columnNames: string[] = [];
+	const result = args.lix.sqlite.exec({
+		sql: `SELECT CASE WHEN ? GLOB ? THEN 1 ELSE 0 END AS matches`,
+		bind: [args.path, args.glob],
+		returnValue: "resultRows",
+		columnNames,
+	});
+
+	return (result[0]?.[0] as any) === 1;
+}
 
 export function materializeFileData(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
+	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
 	file: Omit<LixFile, "data">;
 }): Uint8Array {
-	// Get plugin changes from state table
-	const changes = executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
-			.selectFrom("state")
-			.where("plugin_key", "=", mockJsonPlugin.key)
-			.where("file_id", "=", args.file.id)
-			.where("version_id", "=", args.file.version_id)
-			.select([
-				"entity_id",
-				"schema_key",
-				"file_id",
-				"plugin_key",
-				"snapshot_content",
-				"version_id",
-			]),
-	});
+	const plugins = [
+		...args.lix.plugin.getAllSync(),
+		lixUnknownFileFallbackPlugin,
+	];
 
-	// Format changes for plugin
-	const formattedChanges = changes.map((change) => ({
-		...change,
-		snapshot_content:
-			typeof change.snapshot_content === "string"
-				? JSON.parse(change.snapshot_content)
-				: change.snapshot_content,
-	}));
+	// Find a plugin that can handle this file
+	for (const plugin of plugins) {
+		if (
+			!plugin.detectChangesGlob ||
+			!globSync({
+				lix: args.lix,
+				path: args.file.path,
+				glob: plugin.detectChangesGlob,
+			})
+		) {
+			continue;
+		}
 
-	const file = mockJsonPlugin.applyChanges!({
-		file: args.file,
-		changes: formattedChanges,
-	});
+		if (!plugin.applyChanges) {
+			continue;
+		}
 
-	return file.fileData;
+		// Get plugin changes from state table
+		const changes = executeSync({
+			lix: args.lix,
+			query: args.lix.db
+				.selectFrom("state")
+				.where("plugin_key", "=", plugin.key)
+				.where("file_id", "=", args.file.id)
+				.where("version_id", "=", args.file.version_id)
+				.select([
+					"entity_id",
+					"schema_key",
+					"file_id",
+					"plugin_key",
+					"snapshot_content",
+					"version_id",
+				]),
+		});
+
+		// Format changes for plugin
+		const formattedChanges = changes.map((change) => ({
+			...change,
+			snapshot_content:
+				typeof change.snapshot_content === "string"
+					? JSON.parse(change.snapshot_content)
+					: change.snapshot_content,
+		}));
+
+		const file = plugin.applyChanges({
+			file: args.file,
+			changes: formattedChanges,
+		});
+
+		return file.fileData;
+	}
+
+	// This should never happen since lixUnknownFileFallbackPlugin matches all files
+	throw new Error(
+		`Unexpected: No plugin found to materialize file data for: ${args.file.path}`
+	);
 }
 
 export function handleFileInsert(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
+	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
 	file: LixFile;
 }): 0 | 1 {
 	// Insert the file metadata into state table
 	executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db.insertInto("state").values({
+		lix: args.lix,
+		query: args.lix.db.insertInto("state").values({
 			entity_id: args.file.id,
 			schema_key: "lix_file",
 			file_id: args.file.id,
@@ -67,23 +108,96 @@ export function handleFileInsert(args: {
 		}),
 	});
 
-	// Detect and store plugin changes
-	const detectedChanges = mockJsonPlugin.detectChanges!({
-		after: { data: args.file.data },
-	});
+	const plugins = args.lix.plugin.getAllSync();
+	let foundPlugin = false;
+	let hasChanges = false;
 
-	// Store plugin detected changes in state table
-	for (const change of detectedChanges) {
-		executeSync({
-			lix: { sqlite: args.sqlite },
-			query: args.db.insertInto("state").values({
-				entity_id: change.entity_id,
-				schema_key: change.schema["x-lix-key"],
-				file_id: args.file.id,
-				plugin_key: mockJsonPlugin.key,
-				snapshot_content: change.snapshot_content as any,
-				version_id: args.file.version_id,
-			}),
+	for (const plugin of plugins) {
+		// Check if plugin glob matches file path
+		if (
+			!plugin.detectChangesGlob ||
+			!globSync({
+				lix: args.lix,
+				path: args.file.path,
+				glob: plugin.detectChangesGlob,
+			})
+		) {
+			continue;
+		}
+
+		foundPlugin = true;
+
+		if (plugin.detectChanges === undefined) {
+			createLixOwnLogSync({
+				lix: args.lix,
+				key: "lix_file_no_plugin",
+				level: "warn",
+				message: `File inserted at ${args.file.path} but plugin does not support detecting changes`,
+			});
+			continue;
+		}
+
+		// Detect changes with the plugin
+		const detectedChanges = plugin.detectChanges({
+			after: args.file,
+		});
+
+		if (detectedChanges.length > 0) {
+			hasChanges = true;
+			// Store plugin detected changes in state table
+			for (const change of detectedChanges) {
+				executeSync({
+					lix: args.lix,
+					query: args.lix.db.insertInto("state").values({
+						entity_id: change.entity_id,
+						schema_key: change.schema["x-lix-key"],
+						file_id: args.file.id,
+						plugin_key: plugin.key,
+						snapshot_content: change.snapshot_content as any,
+						version_id: args.file.version_id,
+					}),
+				});
+			}
+		}
+	}
+
+	// Log appropriate messages based on what happened
+	if (!foundPlugin) {
+		createLixOwnLogSync({
+			lix: args.lix,
+			key: "lix_file_no_plugin",
+			level: "warn",
+			message: `File inserted at ${args.file.path} but no plugin available to detect changes`,
+		});
+
+		// Use fallback plugin to handle the file
+		if (lixUnknownFileFallbackPlugin.detectChanges) {
+			const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
+				after: args.file,
+			});
+
+			if (detectedChanges.length > 0) {
+				for (const change of detectedChanges) {
+					executeSync({
+						lix: args.lix,
+						query: args.lix.db.insertInto("state").values({
+							entity_id: change.entity_id,
+							schema_key: change.schema["x-lix-key"],
+							file_id: args.file.id,
+							plugin_key: lixUnknownFileFallbackPlugin.key,
+							snapshot_content: change.snapshot_content as any,
+							version_id: args.file.version_id,
+						}),
+					});
+				}
+			}
+		}
+	} else if (!hasChanges) {
+		createLixOwnLogSync({
+			lix: args.lix,
+			key: "lix_file_no_changes_detected",
+			level: "debug",
+			message: `File inserted at ${args.file.path} but plugin detected no changes`,
 		});
 	}
 
@@ -91,14 +205,13 @@ export function handleFileInsert(args: {
 }
 
 export function handleFileUpdate(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
+	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
 	file: LixFile;
 }): 0 | 1 {
 	// Update the file metadata in state table
 	executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
+		lix: args.lix,
+		query: args.lix.db
 			.updateTable("state")
 			.set({
 				snapshot_content: {
@@ -114,8 +227,8 @@ export function handleFileUpdate(args: {
 
 	// Get current file data for comparison
 	const currentFile = executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
+		lix: args.lix,
+		query: args.lix.db
 			.selectFrom("file")
 			.where("id", "=", args.file.id)
 			.where("version_id", "=", args.file.version_id)
@@ -123,56 +236,161 @@ export function handleFileUpdate(args: {
 	})[0] as LixFile | undefined;
 
 	if (currentFile) {
-		// Detect changes between current and updated file
-		const detectedChanges = mockJsonPlugin.detectChanges?.({
-			before: { data: currentFile.data },
-			after: { data: args.file.data },
-		});
+		const plugins = args.lix.plugin.getAllSync();
+		let foundPlugin = false;
+		let hasChanges = false;
 
-		// Update plugin detected changes in state table
-		for (const change of detectedChanges ?? []) {
-			// Check if the plugin change already exists
-			const existingChange = executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.selectFrom("state")
-					.where("entity_id", "=", change.entity_id)
-					.where("schema_key", "=", change.schema["x-lix-key"])
-					.where("file_id", "=", args.file.id)
-					.where("version_id", "=", args.file.version_id)
-					.where("plugin_key", "=", mockJsonPlugin.key)
-					.select("entity_id"),
+		for (const plugin of plugins) {
+			// Check if plugin glob matches file path
+			if (
+				!plugin.detectChangesGlob ||
+				!globSync({
+					lix: args.lix,
+					path: args.file.path,
+					glob: plugin.detectChangesGlob,
+				})
+			) {
+				continue;
+			}
+
+			foundPlugin = true;
+
+			if (plugin.detectChanges === undefined) {
+				createLixOwnLogSync({
+					lix: args.lix,
+					key: "lix_file_no_plugin",
+					level: "warn",
+					message: `File updated at ${args.file.path} but plugin does not support detecting changes`,
+				});
+				continue;
+			}
+
+			// Detect changes between current and updated file
+			const detectedChanges = plugin.detectChanges({
+				before: currentFile,
+				after: args.file,
 			});
 
-			if (existingChange.length > 0) {
-				// Update existing change
-				executeSync({
-					lix: { sqlite: args.sqlite },
-					query: args.db
-						.updateTable("state")
-						.set({
-							snapshot_content: change.snapshot_content as any,
-						})
-						.where("entity_id", "=", change.entity_id)
-						.where("schema_key", "=", change.schema["x-lix-key"])
-						.where("file_id", "=", args.file.id)
-						.where("version_id", "=", args.file.version_id)
-						.where("plugin_key", "=", mockJsonPlugin.key),
-				});
-			} else {
-				// Insert new change
-				executeSync({
-					lix: { sqlite: args.sqlite },
-					query: args.db.insertInto("state").values({
-						entity_id: change.entity_id,
-						schema_key: change.schema["x-lix-key"],
-						file_id: args.file.id,
-						plugin_key: mockJsonPlugin.key,
-						snapshot_content: change.snapshot_content as any,
-						version_id: args.file.version_id,
-					}),
-				});
+			if (detectedChanges.length > 0) {
+				hasChanges = true;
+				// Update plugin detected changes in state table
+				for (const change of detectedChanges) {
+					// Check if the plugin change already exists
+					const existingChange = executeSync({
+						lix: args.lix,
+						query: args.lix.db
+							.selectFrom("state")
+							.where("entity_id", "=", change.entity_id)
+							.where("schema_key", "=", change.schema["x-lix-key"])
+							.where("file_id", "=", args.file.id)
+							.where("version_id", "=", args.file.version_id)
+							.where("plugin_key", "=", plugin.key)
+							.select("entity_id"),
+					});
+
+					if (existingChange.length > 0) {
+						// Update existing change
+						executeSync({
+							lix: args.lix,
+							query: args.lix.db
+								.updateTable("state")
+								.set({
+									snapshot_content: change.snapshot_content as any,
+								})
+								.where("entity_id", "=", change.entity_id)
+								.where("schema_key", "=", change.schema["x-lix-key"])
+								.where("file_id", "=", args.file.id)
+								.where("version_id", "=", args.file.version_id)
+								.where("plugin_key", "=", plugin.key),
+						});
+					} else {
+						// Insert new change
+						executeSync({
+							lix: args.lix,
+							query: args.lix.db.insertInto("state").values({
+								entity_id: change.entity_id,
+								schema_key: change.schema["x-lix-key"],
+								file_id: args.file.id,
+								plugin_key: plugin.key,
+								snapshot_content: change.snapshot_content as any,
+								version_id: args.file.version_id,
+							}),
+						});
+					}
+				}
 			}
+		}
+
+		// Log appropriate messages based on what happened
+		if (!foundPlugin) {
+			createLixOwnLogSync({
+				lix: args.lix,
+				key: "lix_file_no_plugin",
+				level: "warn",
+				message: `File updated at ${args.file.path} but no plugin available to detect changes`,
+			});
+
+			// Use fallback plugin to handle the file
+			if (lixUnknownFileFallbackPlugin.detectChanges) {
+				const detectedChanges = lixUnknownFileFallbackPlugin.detectChanges({
+					before: currentFile,
+					after: args.file,
+				});
+
+				if (detectedChanges.length > 0) {
+					for (const change of detectedChanges) {
+						// Check if the plugin change already exists
+						const existingChange = executeSync({
+							lix: args.lix,
+							query: args.lix.db
+								.selectFrom("state")
+								.where("entity_id", "=", change.entity_id)
+								.where("schema_key", "=", change.schema["x-lix-key"])
+								.where("file_id", "=", args.file.id)
+								.where("version_id", "=", args.file.version_id)
+								.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
+								.select("entity_id"),
+						});
+
+						if (existingChange.length > 0) {
+							// Update existing change
+							executeSync({
+								lix: args.lix,
+								query: args.lix.db
+									.updateTable("state")
+									.set({
+										snapshot_content: change.snapshot_content as any,
+									})
+									.where("entity_id", "=", change.entity_id)
+									.where("schema_key", "=", change.schema["x-lix-key"])
+									.where("file_id", "=", args.file.id)
+									.where("version_id", "=", args.file.version_id)
+									.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key),
+							});
+						} else {
+							// Insert new change
+							executeSync({
+								lix: args.lix,
+								query: args.lix.db.insertInto("state").values({
+									entity_id: change.entity_id,
+									schema_key: change.schema["x-lix-key"],
+									file_id: args.file.id,
+									plugin_key: lixUnknownFileFallbackPlugin.key,
+									snapshot_content: change.snapshot_content as any,
+									version_id: args.file.version_id,
+								}),
+							});
+						}
+					}
+				}
+			}
+		} else if (!hasChanges) {
+			createLixOwnLogSync({
+				lix: args.lix,
+				key: "lix_file_no_changes_detected",
+				level: "debug",
+				message: `File updated at ${args.file.path} but plugin detected no changes`,
+			});
 		}
 	}
 

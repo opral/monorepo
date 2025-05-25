@@ -23,7 +23,7 @@ test("insert, update, delete on the file view", async () => {
 		.values([
 			{
 				id: "file0",
-				path: "/path/to/file.txt",
+				path: "/path/to/file.json",
 				data: new TextEncoder().encode(
 					JSON.stringify({
 						prop0: "file0-value0",
@@ -33,7 +33,7 @@ test("insert, update, delete on the file view", async () => {
 			},
 			{
 				id: "file1",
-				path: "/path/to/file.txt",
+				path: "/path/to/file.json",
 				data: new TextEncoder().encode(
 					JSON.stringify({
 						prop0: "file1-value0",
@@ -53,14 +53,14 @@ test("insert, update, delete on the file view", async () => {
 	expect(viewAfterInsert).toEqual([
 		{
 			id: "file0",
-			path: "/path/to/file.txt",
+			path: "/path/to/file.json",
 			version_id: "version0",
 			data: { prop0: "file0-value0" },
 			metadata: null,
 		},
 		{
 			id: "file1",
-			path: "/path/to/file.txt",
+			path: "/path/to/file.json",
 			version_id: "version1",
 			data: { prop0: "file1-value0" },
 			metadata: null,
@@ -72,7 +72,7 @@ test("insert, update, delete on the file view", async () => {
 		.where("id", "=", "file0")
 		.where("version_id", "=", "version0")
 		.set({
-			path: "/path/to/renamed_file.txt",
+			path: "/path/to/renamed_file.json",
 			data: new TextEncoder().encode(JSON.stringify({ prop0: "file0-value1" })),
 		})
 		.execute();
@@ -91,14 +91,14 @@ test("insert, update, delete on the file view", async () => {
 	expect(viewAfterUpdate).toEqual([
 		{
 			id: "file0",
-			path: "/path/to/renamed_file.txt",
+			path: "/path/to/renamed_file.json",
 			version_id: "version0",
 			data: { prop0: "file0-value1" },
 			metadata: null,
 		},
 		{
 			id: "file1",
-			path: "/path/to/file.txt",
+			path: "/path/to/file.json",
 			version_id: "version1",
 			data: { prop0: "file1-value0" },
 			metadata: null,
@@ -120,7 +120,7 @@ test("insert, update, delete on the file view", async () => {
 	expect(viewAfterDelete).toEqual([
 		{
 			id: "file1",
-			path: "/path/to/file.txt",
+			path: "/path/to/file.json",
 			version_id: "version1",
 		},
 	]);
@@ -193,7 +193,7 @@ test("file insert data materialization", async () => {
 		.insertInto("file")
 		.values({
 			id: "file0",
-			path: "/path/to/file.txt",
+			path: "/path/to/file.json",
 			data: new TextEncoder().encode(
 				JSON.stringify({
 					prop0: "file0-value0",
@@ -212,7 +212,7 @@ test("file insert data materialization", async () => {
 	expect(viewAfterInsert).toEqual([
 		{
 			id: "file0",
-			path: "/path/to/file.txt",
+			path: "/path/to/file.json",
 			version_id: "version0",
 			data: { prop0: "file0-value0" },
 			metadata: null,
@@ -233,7 +233,7 @@ test("file ids should have a default", async () => {
 	const file = await lix.db
 		.insertInto("file")
 		.values({
-			path: "/mock.txt",
+			path: "/mock.json",
 			data: new Uint8Array(),
 			version_id: version0.id,
 		})
@@ -256,7 +256,7 @@ test("files should be able to have metadata", async () => {
 	const file = await lix.db
 		.insertInto("file")
 		.values({
-			path: "/mock.csv",
+			path: "/mock.json",
 			data: new Uint8Array(),
 			metadata: {
 				primary_key: "email",
@@ -270,7 +270,7 @@ test("files should be able to have metadata", async () => {
 
 	const updatedFile = await lix.db
 		.updateTable("file")
-		.where("path", "=", "/mock.csv")
+		.where("path", "=", "/mock.json")
 		.where("version_id", "=", version0.id)
 		.set({
 			metadata: {
@@ -325,7 +325,7 @@ test("file operations are version specific and isolated", async () => {
 		.insertInto("file")
 		.values({
 			id: "fileA",
-			path: "/shared/file.txt",
+			path: "/shared/file.json",
 			data: new TextEncoder().encode(JSON.stringify({ content: "versionA" })),
 			version_id: versionA.id,
 		})
@@ -336,7 +336,7 @@ test("file operations are version specific and isolated", async () => {
 		.insertInto("file")
 		.values({
 			id: "fileB",
-			path: "/shared/file.txt",
+			path: "/shared/file.json",
 			data: new TextEncoder().encode(JSON.stringify({ content: "versionB" })),
 			version_id: versionB.id,
 		})

@@ -1,30 +1,22 @@
-import type {
-	Generated,
-	Insertable,
-	Kysely,
-	Selectable,
-	Updateable,
-} from "kysely";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import {
 	handleFileInsert,
 	handleFileUpdate,
 	materializeFileData,
 } from "./file-handlers.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { Lix } from "../lix/open-lix.js";
 
 export function applyFileDatabaseSchema(
-	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>
+	lix: Pick<Lix, "sqlite" | "db" | "plugin">
 ): void {
-	sqlite.createFunction({
+	lix.sqlite.createFunction({
 		name: "handle_file_insert",
 		arity: 5,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
 			let metadata = args[3];
-			if (typeof metadata === 'string' && metadata !== null) {
+			if (typeof metadata === "string" && metadata !== null) {
 				try {
 					metadata = JSON.parse(metadata);
 				} catch {
@@ -33,8 +25,7 @@ export function applyFileDatabaseSchema(
 			}
 
 			const result = handleFileInsert({
-				sqlite,
-				db,
+				lix,
 				file: {
 					id: args[0],
 					path: args[1],
@@ -48,7 +39,7 @@ export function applyFileDatabaseSchema(
 		deterministic: true,
 	});
 
-	sqlite.createFunction({
+	lix.sqlite.createFunction({
 		name: "handle_file_update",
 		arity: 5,
 		xFunc: (_ctx: number, ...args: any[]) => {
@@ -63,8 +54,7 @@ export function applyFileDatabaseSchema(
 			}
 
 			const result = handleFileUpdate({
-				sqlite,
-				db,
+				lix,
 				file: {
 					id: args[0],
 					path: args[1],
@@ -78,14 +68,13 @@ export function applyFileDatabaseSchema(
 		deterministic: true,
 	});
 
-	sqlite.createFunction({
+	lix.sqlite.createFunction({
 		name: "materialize_file_data",
 		arity: 4,
 		deterministic: false,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			return materializeFileData({
-				sqlite,
-				db,
+				lix,
 				file: {
 					id: args[0],
 					path: args[1],
@@ -96,7 +85,7 @@ export function applyFileDatabaseSchema(
 		},
 	});
 
-	sqlite.exec(`
+	lix.sqlite.exec(`
   CREATE VIEW IF NOT EXISTS file AS
 	SELECT
 		json_extract(snapshot_content, '$.id') AS id,

@@ -101,7 +101,7 @@ export type LogView = {
 	/**
 	 * The level of the log entry.
 	 *
-	 * @example "info", "warn", "error"
+	 * @example "debug", "info", "warning", "error"
 	 */
 	level: string;
 	/**

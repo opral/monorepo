@@ -31,8 +31,8 @@ export type LixPlugin = {
 		before,
 		after,
 	}: {
-		before?: { data: Uint8Array };
-		after?: { data: Uint8Array };
+		before?: LixFile & { data?: Uint8Array };
+		after: LixFile;
 	}) => DetectedChange<any>[];
 	applyChanges?: ({
 		file,
