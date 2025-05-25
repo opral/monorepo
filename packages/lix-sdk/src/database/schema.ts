@@ -27,7 +27,7 @@ import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import {
 	LixKeyValueSchema,
 	type KeyValueView,
-} from "../key-value-v2/schema.js";
+} from "../key-value/schema.js";
 import type { StateView } from "../state/schema.js";
 import { LixFileSchema, type LixFileView } from "../file/schema.js";
 import { LixLogSchema, type LogView } from "../log/schema.js";
