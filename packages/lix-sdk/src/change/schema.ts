@@ -18,10 +18,10 @@ export function applyChangeDatabaseSchema(
     FOREIGN KEY(snapshot_id) REFERENCES internal_snapshot(id)
   ) STRICT;
 
-  CREATE VIEW change AS
+  CREATE VIEW IF NOT EXISTS change AS
   SELECT * FROM internal_change;
 
-  CREATE TRIGGER change_insert
+  CREATE TRIGGER IF NOT EXISTS change_insert
   INSTEAD OF INSERT ON change
   BEGIN
     -- Check if the referenced snapshot exists

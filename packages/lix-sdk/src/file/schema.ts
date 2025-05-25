@@ -102,7 +102,7 @@ export function applyFileDatabaseSchema(
 	WHERE schema_key = 'lix_file';
 
 
-  CREATE TRIGGER file_insert
+  CREATE TRIGGER IF NOT EXISTS file_insert
   INSTEAD OF INSERT ON file
   BEGIN
       SELECT handle_file_insert(
@@ -114,7 +114,7 @@ export function applyFileDatabaseSchema(
       );
   END;
 
-  CREATE TRIGGER file_update
+  CREATE TRIGGER IF NOT EXISTS file_update
   INSTEAD OF UPDATE ON file
   BEGIN
       SELECT handle_file_update(
@@ -126,7 +126,7 @@ export function applyFileDatabaseSchema(
       );
   END;
 
-  CREATE TRIGGER file_delete
+  CREATE TRIGGER IF NOT EXISTS file_delete
   INSTEAD OF DELETE ON file
   BEGIN
       DELETE FROM state

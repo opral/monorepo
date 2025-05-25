@@ -31,6 +31,7 @@ import {
 import type { StateView } from "../state/schema.js";
 import { LixFileSchema, type LixFileView } from "../file/schema.js";
 import { LixLogSchema, type LogView } from "../log/schema.js";
+import { LixAccountSchema, type AccountView, type ActiveAccountTable } from "../account/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -53,16 +54,17 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
 	snapshot: LixSnapshotSchema,
+	account: LixAccountSchema,
 };
 
 export type LixDatabaseSchema = {
 	state: StateView;
 	// account
-	// account: AccountTable;
-	// active_account: ActiveAccountTable;
+	account: AccountView;
+	active_account: ActiveAccountTable;
 
 	// snapshot
-	// snapshot: SnapshotTable;
+	snapshot: SnapshotView;
 	// label: LabelTable;
 
 	// file
@@ -70,10 +72,7 @@ export type LixDatabaseSchema = {
 	// file_queue: FileQueueTable;
 
 	// change
-	// internal_change: InternalChangeTable;
-	// internal_snapshot: InternalSnapshotTable;
 	change: ChangeView;
-	snapshot: SnapshotView;
 
 	stored_schema: StoredSchemaView;
 
@@ -84,17 +83,17 @@ export type LixDatabaseSchema = {
 	// change_set_label: ChangeSetLabelTable;
 	// change_set_thread: ChangeSetThreadTable;
 
-	// // key value
+	// key value
 	key_value: KeyValueView;
 
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;
 
-	// // thread
+	// thread
 	// thread: ThreadTable;
 	// thread_comment: ThreadCommentTable;
 
-	// // version
+	// version
 	version: VersionView;
 	active_version: ActiveVersionView;
 

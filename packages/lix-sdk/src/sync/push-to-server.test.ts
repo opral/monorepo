@@ -2,7 +2,7 @@ import { expect, test, vi } from "vitest";
 import { createServerProtocolHandler } from "../server-protocol-handler/create-server-protocol-handler.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pushToServer } from "./push-to-server.js";
-import type { Account } from "../account/database-schema.js";
+import type { Account } from "../account/schema.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { NewKeyValue } from "../key-value/database-schema.js";
 import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";

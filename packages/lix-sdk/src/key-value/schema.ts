@@ -22,7 +22,7 @@ export function applyKeyValueDatabaseSchema(
   FROM state
   WHERE schema_key = 'lix_key_value';
 
-	CREATE TRIGGER key_value_insert
+	CREATE TRIGGER IF NOT EXISTS key_value_insert
 	INSTEAD OF INSERT ON key_value
 	BEGIN
 		INSERT INTO state (
@@ -42,7 +42,7 @@ export function applyKeyValueDatabaseSchema(
 		);
 	END;
 
-	CREATE TRIGGER key_value_update
+	CREATE TRIGGER IF NOT EXISTS key_value_update
 	INSTEAD OF UPDATE ON key_value
 	BEGIN
 		UPDATE state
@@ -60,7 +60,7 @@ export function applyKeyValueDatabaseSchema(
 			AND state.version_id = OLD.version_id;
 	END;
 
-	CREATE TRIGGER key_value_delete
+	CREATE TRIGGER IF NOT EXISTS key_value_delete
 	INSTEAD OF DELETE ON key_value
 	BEGIN
 		DELETE FROM state

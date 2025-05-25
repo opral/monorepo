@@ -7,8 +7,9 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 import type { NewKeyValue } from "../key-value/database-schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import type { Account } from "../account/database-schema.js";
+import type { Account } from "../account/schema.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
+import { applyAccountDatabaseSchema } from "../account/schema.js";
 
 export type Lix = {
 	/**
@@ -128,8 +129,9 @@ export async function openLix(args: {
 		plugin,
 	};
 
-	// Apply file schema now that we have the full lix object with plugins
+	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
+	applyAccountDatabaseSchema(lix);
 
 	return lix;
 }

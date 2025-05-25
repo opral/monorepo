@@ -1,4 +1,4 @@
-import type { Account } from "../account/database-schema.js";
+import type { Account } from "../account/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { Snapshot } from "../snapshot/database-schema.js";

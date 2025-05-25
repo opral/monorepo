@@ -2,13 +2,31 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createAccount } from "./create-account.js";
 import { switchAccount } from "./switch-account.js";
+import { createVersion } from "../version/create-version.js";
 
 test("should switch the current account", async () => {
 	const lix = await openLixInMemory({});
 
+	const version = await createVersion({
+		lix,
+		id: "test-version",
+	});
+
 	// Create two accounts
-	const account1 = await createAccount({ lix, name: "account1" });
-	const account2 = await createAccount({ lix, name: "account2" });
+	const account1 = await createAccount({ 
+		lix, 
+		data: { 
+			name: "account1",
+			version_id: version.id,
+		}
+	});
+	const account2 = await createAccount({ 
+		lix, 
+		data: { 
+			name: "account2",
+			version_id: version.id,
+		}
+	});
 
 	// Switch to account1
 	await switchAccount({ lix, to: [account1] });
@@ -36,8 +54,19 @@ test("should switch the current account", async () => {
 test("should handle switching to the same account", async () => {
 	const lix = await openLixInMemory({});
 
+	const version = await createVersion({
+		lix,
+		id: "test-version-2",
+	});
+
 	// Create an account
-	const account = await createAccount({ lix, name: "account" });
+	const account = await createAccount({ 
+		lix, 
+		data: { 
+			name: "account",
+			version_id: version.id,
+		}
+	});
 
 	// Switch to the account
 	await switchAccount({ lix, to: [account] });

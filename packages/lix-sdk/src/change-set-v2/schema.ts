@@ -15,7 +15,7 @@ export function applyChangeSetDatabaseSchema(
 	FROM state
 	WHERE schema_key = 'lix_change_set';
 
-  CREATE TRIGGER change_set_insert
+  CREATE TRIGGER IF NOT EXISTS change_set_insert
   INSTEAD OF INSERT ON change_set
   BEGIN
     INSERT INTO state (
@@ -40,7 +40,7 @@ export function applyChangeSetDatabaseSchema(
     ) AS with_default_values;
   END;
 
-  CREATE TRIGGER change_set_update
+  CREATE TRIGGER IF NOT EXISTS change_set_update
   INSTEAD OF UPDATE ON change_set
   BEGIN
     UPDATE state
@@ -57,7 +57,7 @@ export function applyChangeSetDatabaseSchema(
       AND file_id = 'lix';
   END;
 
-  CREATE TRIGGER change_set_delete
+  CREATE TRIGGER IF NOT EXISTS change_set_delete
   INSTEAD OF DELETE ON change_set
   BEGIN
     DELETE FROM state
@@ -79,7 +79,7 @@ export function applyChangeSetDatabaseSchema(
 	FROM state
 	WHERE schema_key = 'lix_change_set_element';
 
-  CREATE TRIGGER change_set_element_insert
+  CREATE TRIGGER IF NOT EXISTS change_set_element_insert
   INSTEAD OF INSERT ON change_set_element
   BEGIN
     INSERT INTO state (
@@ -99,7 +99,7 @@ export function applyChangeSetDatabaseSchema(
     );
   END;
 
-  CREATE TRIGGER change_set_element_update
+  CREATE TRIGGER IF NOT EXISTS change_set_element_update
   INSTEAD OF UPDATE ON change_set_element
   BEGIN
     UPDATE state
@@ -116,7 +116,7 @@ export function applyChangeSetDatabaseSchema(
       AND file_id = 'lix';
   END;
 
-  CREATE TRIGGER change_set_element_delete
+  CREATE TRIGGER IF NOT EXISTS change_set_element_delete
   INSTEAD OF DELETE ON change_set_element
   BEGIN
     DELETE FROM state
@@ -135,7 +135,7 @@ export function applyChangeSetDatabaseSchema(
   FROM state
   WHERE schema_key = 'lix_change_set_edge';
 
-  CREATE TRIGGER change_set_edge_insert
+  CREATE TRIGGER IF NOT EXISTS change_set_edge_insert
   INSTEAD OF INSERT ON change_set_edge
   BEGIN
     INSERT INTO state (
@@ -155,7 +155,7 @@ export function applyChangeSetDatabaseSchema(
     ); 
   END;
 
-  CREATE TRIGGER change_set_edge_update
+  CREATE TRIGGER IF NOT EXISTS change_set_edge_update
   INSTEAD OF UPDATE ON change_set_edge
   BEGIN
     UPDATE state
@@ -172,7 +172,7 @@ export function applyChangeSetDatabaseSchema(
       AND file_id = 'lix';
   END;
 
-  CREATE TRIGGER change_set_edge_delete
+  CREATE TRIGGER IF NOT EXISTS change_set_edge_delete
   INSTEAD OF DELETE ON change_set_edge
   BEGIN
     DELETE FROM state

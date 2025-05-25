@@ -19,7 +19,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
   FROM state
   WHERE schema_key = 'lix_version';
 
-  CREATE TRIGGER version_insert
+  CREATE TRIGGER IF NOT EXISTS version_insert
   INSTEAD OF INSERT ON version
   BEGIN
       INSERT INTO state (
@@ -49,7 +49,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
       ) AS with_default_values;
   END;
 
-CREATE TRIGGER version_update
+CREATE TRIGGER IF NOT EXISTS version_update
 INSTEAD OF UPDATE ON version
 BEGIN
     UPDATE state
@@ -71,7 +71,7 @@ BEGIN
       AND file_id = 'lix';
   END;
 
-  CREATE TRIGGER version_delete
+  CREATE TRIGGER IF NOT EXISTS version_delete
   INSTEAD OF DELETE ON version
   BEGIN
     DELETE FROM state
@@ -86,7 +86,7 @@ BEGIN
   FROM state
   WHERE schema_key = 'lix_active_version';
 
-  CREATE TRIGGER active_version_insert
+  CREATE TRIGGER IF NOT EXISTS active_version_insert
   INSTEAD OF INSERT ON active_version
   BEGIN
     INSERT INTO state (
@@ -106,7 +106,7 @@ BEGIN
     );
   END;
 
-  CREATE TRIGGER active_version_update
+  CREATE TRIGGER IF NOT EXISTS active_version_update
   INSTEAD OF UPDATE ON active_version
   BEGIN
     UPDATE state
@@ -119,7 +119,7 @@ BEGIN
       AND file_id = 'lix';
   END;
 
-  CREATE TRIGGER active_version_delete
+  CREATE TRIGGER IF NOT EXISTS active_version_delete
   INSTEAD OF DELETE ON active_version
   BEGIN
     DELETE FROM state

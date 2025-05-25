@@ -15,10 +15,10 @@ export function applySnapshotDatabaseSchema(
     content BLOB -- jsonb or binary file
   ) STRICT;
 
-  INSERT INTO internal_snapshot (id, content)
+  INSERT OR IGNORE INTO internal_snapshot (id, content)
   VALUES ('no-content', NULL);
 
-  CREATE VIEW snapshot AS
+  CREATE VIEW IF NOT EXISTS snapshot AS
   SELECT 
     internal_snapshot.id as id, 
     json(internal_snapshot.content) 

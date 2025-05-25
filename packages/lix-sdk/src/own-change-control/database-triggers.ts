@@ -8,7 +8,7 @@ import {
 } from "./change-controlled-tables.js";
 import { executeSync } from "../database/execute-sync.js";
 import { createChange } from "../change/create-change.js";
-import type { Account } from "../account/database-schema.js";
+import type { Account } from "../account/schema.js";
 import type { Snapshot } from "../snapshot/database-schema.js";
 
 export const LIX_OWN_CHANGE_CONTROL_CHANGE_SET_ID =

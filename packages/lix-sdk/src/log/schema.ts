@@ -17,7 +17,7 @@ export function applyLogDatabaseSchema(
 	FROM state
 	WHERE schema_key = 'lix_log';
 
-	CREATE TRIGGER log_insert
+	CREATE TRIGGER IF NOT EXISTS log_insert
 	INSTEAD OF INSERT ON log
 	BEGIN
 		INSERT INTO state (entity_id, schema_key, file_id, plugin_key, snapshot_content, version_id)
@@ -39,7 +39,7 @@ export function applyLogDatabaseSchema(
 		) AS with_default_values;
 	END;
 
-CREATE TRIGGER log_delete
+CREATE TRIGGER IF NOT EXISTS log_delete
 	INSTEAD OF DELETE ON log
 	BEGIN
 		DELETE FROM state

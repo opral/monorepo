@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { Account } from "./database-schema.js";
+import type { Account } from "./schema.js";
 
 /**
  * Switch the current account to the provided account.
@@ -28,7 +28,16 @@ export async function switchAccount(args: {
 		// delete all rows from the current_account table
 		await trx.deleteFrom("active_account").execute();
 		// insert the new account id into the current_account table
-		await trx.insertInto("active_account").values(args.to).execute();
+		// active_account table only has id and name columns
+		await trx
+			.insertInto("active_account")
+			.values(
+				args.to.map((account) => ({
+					id: account.id,
+					name: account.name,
+				}))
+			)
+			.execute();
 	};
 
 	if (args.lix.db.isTransaction) {
