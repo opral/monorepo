@@ -1183,3 +1183,259 @@ test("passes when version_id is provided and version exists", async () => {
 		})
 	).not.toThrowError();
 });
+
+test("should prevent deletion when foreign keys reference the entity", async () => {
+	const lix = await openLixInMemory({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const postSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "post",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			author_id: {
+				schemaKey: "user",
+				property: "id",
+			},
+		},
+		properties: {
+			id: { type: "string" },
+			author_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "author_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert a user that will be referenced
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "user1",
+			file_id: "file1",
+			schema_key: "user",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: {
+				id: "user1",
+				name: "John Doe",
+			},
+		})
+		.execute();
+
+	// Insert a post that references the user
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "post1",
+			file_id: "file1",
+			schema_key: "post",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: {
+				id: "post1",
+				author_id: "user1",
+				title: "My First Post",
+			},
+		})
+		.execute();
+
+	// This should fail - cannot delete user because post references it
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: userSchema,
+			snapshot_content: {}, // Not used for delete operations
+			operation: "delete",
+			entity_id: "user1",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(/Foreign key constraint violation.*referenced by.*post.*author_id/i);
+});
+
+test("should allow deletion when no foreign keys reference the entity", async () => {
+	const lix = await openLixInMemory({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schema
+	await lix.db.insertInto("stored_schema").values({ value: userSchema }).execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert a user with no references
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "user1",
+			file_id: "file1",
+			schema_key: "user",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: {
+				id: "user1",
+				name: "John Doe",
+			},
+		})
+		.execute();
+
+	// This should pass - no foreign keys reference this user
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: userSchema,
+			snapshot_content: {}, // Not used for delete operations
+			operation: "delete",
+			entity_id: "user1",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+});
+
+test("should throw when deleting non-existent entity", async () => {
+	const lix = await openLixInMemory({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// This should fail - entity does not exist
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: userSchema,
+			snapshot_content: {},
+			operation: "delete",
+			entity_id: "nonexistent_user",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError("Entity does not exist, cannot delete");
+});
+
+test("should throw when entity_id is missing for delete operations", async () => {
+	const lix = await openLixInMemory({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// This should fail - entity_id is required for delete
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: userSchema,
+			snapshot_content: {},
+			operation: "delete",
+			// entity_id is missing
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError("entity_id is required for delete operations");
+});
+
+test("should handle deletion validation for change sets referenced by versions", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create a change set
+	await lix.db.insertInto("change_set").values({ id: "cs_referenced" }).execute();
+
+	// Create a version that references the change set
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "v1",
+			name: "test_version",
+			change_set_id: "cs_referenced",
+			working_change_set_id: "cs_referenced",
+		})
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Get the change set schema
+	const changeSetSchema = await lix.db
+		.selectFrom("stored_schema")
+		.select("value")
+		.where("key", "=", "lix_change_set")
+		.executeTakeFirstOrThrow();
+
+	// This should fail - cannot delete change set because version references it
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: changeSetSchema.value as LixSchemaDefinition,
+			snapshot_content: {},
+			operation: "delete",
+			entity_id: "cs_referenced",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(/Foreign key constraint violation.*Cannot delete entity.*referenced by.*lix_version/i);
+});

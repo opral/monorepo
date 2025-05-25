@@ -17,10 +17,11 @@ export function validateStateMutation(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition | null;
 	snapshot_content: Snapshot["content"];
-	operation: "insert" | "update";
+	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
 }): void {
+	// console.log(`validateStateMutation called with operation: ${args.operation}, schema: ${args.schema?.["x-lix-key"]}, entity_id: ${args.entity_id}`);
 	// Validate version_id is provided
 	// Skip validation if schema is null (during initialization when schemas aren't stored yet)
 	if (!args.schema) {
@@ -51,57 +52,70 @@ export function validateStateMutation(args: {
 		);
 	}
 
-	const isValidSnapshotContent = ajv.validate(
-		args.schema,
-		args.snapshot_content
-	);
-
-	if (!isValidSnapshotContent) {
-		const errorDetails = ajv.errors
-			?.map((error) => {
-				const receivedValue = error.instancePath
-					? getValueByPath(args.snapshot_content, error.instancePath)
-					: args.snapshot_content;
-				return `${error.instancePath} ${error.message}. Received value: ${JSON.stringify(receivedValue)}`;
-			})
-			.join("; ");
-
-		throw new Error(
-			`The provided snapshot content does not match the schema: ${errorDetails || ajv.errorsText(ajv.errors)}`
+	// Skip snapshot content validation for delete operations
+	if (args.operation !== "delete") {
+		const isValidSnapshotContent = ajv.validate(
+			args.schema,
+			args.snapshot_content
 		);
+
+		if (!isValidSnapshotContent) {
+			const errorDetails = ajv.errors
+				?.map((error) => {
+					const receivedValue = error.instancePath
+						? getValueByPath(args.snapshot_content, error.instancePath)
+						: args.snapshot_content;
+					return `${error.instancePath} ${error.message}. Received value: ${JSON.stringify(receivedValue)}`;
+				})
+				.join("; ");
+
+			throw new Error(
+				`The provided snapshot content does not match the schema: ${errorDetails || ajv.errorsText(ajv.errors)}`
+			);
+		}
 	}
 
-	// Validate primary key constraints
-	if (args.schema["x-lix-primary-key"]) {
-		validatePrimaryKeyConstraints({
+	// For deletion operations, validate foreign key references to prevent deletion
+	if (args.operation === "delete") {
+		validateDeletionConstraints({
 			lix: args.lix,
 			schema: args.schema,
-			snapshot_content: args.snapshot_content,
-			operation: args.operation,
 			entity_id: args.entity_id,
 			version_id: args.version_id,
 		});
-	}
+	} else {
+		// Validate primary key constraints (only for insert/update)
+		if (args.schema["x-lix-primary-key"]) {
+			validatePrimaryKeyConstraints({
+				lix: args.lix,
+				schema: args.schema,
+				snapshot_content: args.snapshot_content,
+				operation: args.operation,
+				entity_id: args.entity_id,
+				version_id: args.version_id,
+			});
+		}
 
-	// Validate unique constraints
-	if (args.schema["x-lix-unique"]) {
-		validateUniqueConstraints({
-			lix: args.lix,
-			schema: args.schema,
-			snapshot_content: args.snapshot_content,
-			operation: args.operation,
-			entity_id: args.entity_id,
-			version_id: args.version_id,
-		});
-	}
+		// Validate unique constraints (only for insert/update)
+		if (args.schema["x-lix-unique"]) {
+			validateUniqueConstraints({
+				lix: args.lix,
+				schema: args.schema,
+				snapshot_content: args.snapshot_content,
+				operation: args.operation,
+				entity_id: args.entity_id,
+				version_id: args.version_id,
+			});
+		}
 
-	// Validate foreign key constraints
-	if (args.schema["x-lix-foreign-keys"]) {
-		validateForeignKeyConstraints({
-			lix: args.lix,
-			schema: args.schema,
-			snapshot_content: args.snapshot_content,
-		});
+		// Validate foreign key constraints (only for insert/update)
+		if (args.schema["x-lix-foreign-keys"]) {
+			validateForeignKeyConstraints({
+				lix: args.lix,
+				schema: args.schema,
+				snapshot_content: args.snapshot_content,
+			});
+		}
 	}
 
 	// Hardcoded validation for change_set_edge self-referencing
@@ -119,7 +133,7 @@ function validatePrimaryKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	snapshot_content: Snapshot["content"];
-	operation: "insert" | "update";
+	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
 }): void {
@@ -180,7 +194,7 @@ function validateUniqueConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	snapshot_content: Snapshot["content"];
-	operation: "insert" | "update";
+	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
 }): void {
@@ -331,6 +345,104 @@ function validateForeignKeyConstraints(args: {
 			throw new Error(
 				`Foreign key constraint violation: The foreign key constraint on '${localProperty}' references '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}'`
 			);
+		}
+	}
+}
+
+function validateDeletionConstraints(args: {
+	lix: Pick<Lix, "sqlite" | "db">;
+	schema: LixSchemaDefinition;
+	entity_id?: string;
+	version_id: string;
+}): void {
+	console.log(`validateDeletionConstraints called for entity ${args.entity_id} with schema ${args.schema["x-lix-key"]}`);
+	if (!args.entity_id) {
+		throw new Error("entity_id is required for delete operations");
+	}
+
+	// Get the current entity data to check what's being referenced
+	const currentEntity = executeSync({
+		lix: args.lix,
+		query: args.lix.db
+			.selectFrom("state")
+			.select("snapshot_content")
+			.where("entity_id", "=", args.entity_id)
+			.where("schema_key", "=", args.schema["x-lix-key"])
+			.where("version_id", "=", args.version_id)
+	});
+
+	if (currentEntity.length === 0) {
+		throw new Error("Entity does not exist, cannot delete");
+	}
+
+	// Get all schemas to check which ones have foreign keys that might reference this entity
+	const allSchemas = executeSync({
+		lix: args.lix,
+		query: args.lix.db.selectFrom("stored_schema").selectAll()
+	});
+
+	console.log(`Found ${allSchemas.length} schemas to check`);
+
+	// Check each schema for foreign keys that reference this entity's schema
+	for (const storedSchema of allSchemas) {
+		// Parse the JSON string value
+		const schema = typeof storedSchema.value === 'string' 
+			? JSON.parse(storedSchema.value) as LixSchemaDefinition
+			: storedSchema.value as LixSchemaDefinition;
+		
+		console.log(`Checking schema ${schema["x-lix-key"]}, has foreign keys: ${!!schema["x-lix-foreign-keys"]}`);
+		if (!schema["x-lix-foreign-keys"]) {
+			continue;
+		}
+
+		// Check each foreign key in this schema
+		for (const [localProperty, foreignKeyDef] of Object.entries(schema["x-lix-foreign-keys"])) {
+			console.log(`Checking foreign key ${localProperty} in schema ${schema["x-lix-key"]}, references ${foreignKeyDef.schemaKey}, target schema is ${args.schema["x-lix-key"]}`);
+			// Skip if this foreign key doesn't reference our schema
+			if (foreignKeyDef.schemaKey !== args.schema["x-lix-key"]) {
+				console.log(`Skipping: ${foreignKeyDef.schemaKey} !== ${args.schema["x-lix-key"]}`);
+				continue;
+			}
+			console.log(`Found matching foreign key!`);
+
+			// Get the value of the property that is being referenced
+			const rawContent = currentEntity[0].snapshot_content;
+			const entityContent = typeof rawContent === 'string' 
+				? JSON.parse(rawContent) 
+				: rawContent as any;
+			const referencedValue = entityContent[foreignKeyDef.property];
+
+			console.log(`Entity content:`, JSON.stringify(entityContent));
+			console.log(`Foreign key def:`, JSON.stringify(foreignKeyDef));
+			console.log(`Referenced property '${foreignKeyDef.property}' has value:`, JSON.stringify(referencedValue));
+
+			if (referencedValue === null || referencedValue === undefined) {
+				console.log(`Skipping null/undefined referenced value`);
+				continue;
+			}
+
+			// Check if any entities reference this value
+			const referencingEntities = executeSync({
+				lix: args.lix,
+				query: args.lix.db
+					.selectFrom("state")
+					.select("entity_id")
+					.where("schema_key", "=", schema["x-lix-key"])
+					.where("version_id", "=", args.version_id)
+					.where(
+						sql`json_extract(snapshot_content, '$.' || ${localProperty})`,
+						"=",
+						referencedValue
+					)
+			});
+
+			console.log(`Found ${referencingEntities.length} entities referencing this value`);
+
+			if (referencingEntities.length > 0) {
+				throw new Error(
+					`Foreign key constraint violation: Cannot delete entity because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}' via foreign key '${localProperty}'`
+				);
+			}
 		}
 	}
 }
