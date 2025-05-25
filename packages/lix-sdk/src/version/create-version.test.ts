@@ -85,5 +85,5 @@ test("should fail if the 'from' change_set_id does not exist", async () => {
 		createVersion({ lix, changeSet: nonExistentChangeSet })
 		// Check for foreign key constraint error
 		// The specific error message might vary based on the db driver
-	).rejects.toThrow(/FOREIGN KEY constraint failed/i);
+	).rejects.toThrow(/Foreign key constraint violation/i);
 });
