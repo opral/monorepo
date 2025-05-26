@@ -1439,3 +1439,100 @@ test("should handle deletion validation for change sets referenced by versions",
 		})
 	).toThrowError(/Foreign key constraint violation.*Cannot delete entity.*referenced by.*lix_version/i);
 });
+
+test("should parse JSON object properties before validation", async () => {
+	const lix = await openLixInMemory({});
+
+	// Define a schema with an object property
+	const documentSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "document",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			title: { type: "string" },
+			body: { 
+				type: "object",
+				properties: {
+					type: { type: "string" },
+					content: { type: "array" }
+				},
+				required: ["type", "content"]
+			},
+		},
+		required: ["id", "title", "body"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db.insertInto("stored_schema").values({ value: documentSchema }).execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Test with valid JSON object - this should pass
+	const validSnapshotContent = {
+		id: "doc1",
+		title: "Test Document",
+		body: JSON.stringify({
+			type: "zettel_doc",
+			content: [
+				{
+					type: "zettel_text_block",
+					zettel_key: "test_key",
+					style: "zettel_normal",
+					children: []
+				}
+			]
+		})
+	};
+
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: documentSchema,
+			snapshot_content: validSnapshotContent,
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+
+	// Test with invalid JSON object - this should fail
+	const invalidSnapshotContent = {
+		id: "doc2",
+		title: "Invalid Document",
+		body: JSON.stringify({
+			type: "invalid_type", // Missing required 'content' property
+		})
+	};
+
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: documentSchema,
+			snapshot_content: invalidSnapshotContent,
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(/body.*must have required property.*content/);
+
+	// Test with malformed JSON string - this should fail
+	const malformedSnapshotContent = {
+		id: "doc3",
+		title: "Malformed Document",
+		body: "{ invalid json"
+	};
+
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: documentSchema,
+			snapshot_content: malformedSnapshotContent,
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(/Invalid JSON in property 'body'/);
+});

@@ -54,17 +54,23 @@ export function validateStateMutation(args: {
 
 	// Skip snapshot content validation for delete operations
 	if (args.operation !== "delete") {
+		// Parse JSON strings back to objects for properties defined as objects in the schema
+		const parsedSnapshotContent = parseJsonPropertiesInSnapshotContent(
+			args.snapshot_content,
+			args.schema
+		);
+
 		const isValidSnapshotContent = ajv.validate(
 			args.schema,
-			args.snapshot_content
+			parsedSnapshotContent
 		);
 
 		if (!isValidSnapshotContent) {
 			const errorDetails = ajv.errors
 				?.map((error) => {
 					const receivedValue = error.instancePath
-						? getValueByPath(args.snapshot_content, error.instancePath)
-						: args.snapshot_content;
+						? getValueByPath(parsedSnapshotContent, error.instancePath)
+						: parsedSnapshotContent;
 					return `${error.instancePath} ${error.message}. Received value: ${JSON.stringify(receivedValue)}`;
 				})
 				.join("; ");
@@ -445,4 +451,46 @@ function validateDeletionConstraints(args: {
 			}
 		}
 	}
+}
+
+/**
+ * Parse JSON strings back to objects for properties defined as objects in the schema.
+ * This is needed because when JSON objects are stored in SQLite, they get stringified,
+ * but validation expects them to be actual objects.
+ */
+function parseJsonPropertiesInSnapshotContent(
+	snapshotContent: any,
+	schema: LixSchemaDefinition
+): any {
+	if (!(schema as any).properties || typeof snapshotContent !== 'object' || snapshotContent === null) {
+		return snapshotContent;
+	}
+
+	const parsed = { ...snapshotContent };
+
+	// Check each property in the schema
+	for (const [propertyName, propertySchema] of Object.entries((schema as any).properties)) {
+		const value = parsed[propertyName];
+		
+		// Skip if the value doesn't exist or is already an object
+		if (value === undefined || value === null || typeof value === 'object') {
+			continue;
+		}
+
+		// Check if the property is defined as an object type in the schema
+		if (typeof propertySchema === 'object' && propertySchema && (propertySchema as any).type === 'object') {
+			// Try to parse the JSON string
+			if (typeof value === 'string') {
+				try {
+					parsed[propertyName] = JSON.parse(value);
+				} catch (error) {
+					throw new Error(
+						`Invalid JSON in property '${propertyName}': ${error instanceof Error ? error.message : String(error)}`
+					);
+				}
+			}
+		}
+	}
+
+	return parsed;
 }
