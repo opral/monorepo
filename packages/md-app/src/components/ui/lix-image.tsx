@@ -35,8 +35,8 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
 
   // Encapsulate the image loading logic to make it reusable
   const loadImage = useCallback(async (imageUrl: string) => {
-    if (!imageUrl ||
-      !imageUrl.startsWith("https://lix.host") || imageUrl.startsWith("https://lix.host/app/flashtype/images/") ||
+    if (!imageUrl &&
+      !imageUrl.startsWith("https://lix.host") || imageUrl.startsWith("https://lix.host/app/flashtype/images/") &&
       !imageUrl.startsWith("http://localhost:3009") || imageUrl.startsWith("http://localhost:3009/images/")
     ) {
       return;
@@ -111,7 +111,7 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
 
     // Only process if src is a https://lix.host URL
     if (
-      !src.startsWith("https://lix.host") || src.startsWith("https://lix.host/app/flashtype/images/") ||
+      !src.startsWith("https://lix.host") || src.startsWith("https://lix.host/app/flashtype/images/") &&
       !src.startsWith("http://localhost:3009") || src.startsWith("http://localhost:3009/images/")
     ) {
       setObjectUrl(src);
