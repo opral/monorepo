@@ -2,8 +2,8 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import {
 	handleFileInsert,
 	handleFileUpdate,
-	materializeFileData,
 } from "./file-handlers.js";
+import { materializeFileData } from "./materialize-file-data.js";
 import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Lix } from "../lix/open-lix.js";
 
