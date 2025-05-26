@@ -2,7 +2,6 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { Kysely } from "kysely";
 import { LixSchemaViewMap, type LixInternalDatabaseSchema } from "./schema.js";
 // import { applyOwnChangeControlTriggers } from "../own-change-control/database-triggers.js";
-// import { applyThreadDatabaseSchema } from "../thread/database-schema.js";
 import { applyLogDatabaseSchema } from "../log/schema.js";
 // import { applyKeyValueViewDatabaseSchema } from "../key-value/database-schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
@@ -13,6 +12,8 @@ import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
 import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
+import { applyLabelDatabaseSchema } from "../label/schema.js";
+import { applyThreadDatabaseSchema } from "../thread/schema.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -29,6 +30,8 @@ export function applySchema(args: {
 	applyVersionDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 	applyChangeAuthorDatabaseSchema(args.sqlite);
+	applyLabelDatabaseSchema(args.sqlite);
+	applyThreadDatabaseSchema(args.sqlite);
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	applyLogDatabaseSchema(args.sqlite);
 

@@ -3,7 +3,8 @@ import type {
 	NewThreadComment,
 	Thread,
 	ThreadComment,
-} from "./database-schema.js";
+} from "./schema.js";
+import { nanoid } from "../database/nano-id.js";
 
 export async function createThread(args: {
 	lix: Lix;
@@ -11,27 +12,41 @@ export async function createThread(args: {
 	comments?: Pick<NewThreadComment, "body">[];
 }): Promise<Thread & { comments: ThreadComment[] }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const thread = await trx
+		const threadId = args.id ?? nanoid();
+		
+		await trx
 			.insertInto("thread")
-			.$if(args.id !== undefined, (qb) => qb.values({ id: args.id }))
-			.$if(!args.id, (qb) => qb.defaultValues())
-			.returningAll()
+			.values({ id: threadId })
+			.execute();
+
+		const thread = await trx
+			.selectFrom("thread")
+			.selectAll()
+			.where("id", "=", threadId)
 			.executeTakeFirstOrThrow();
 
 		const insertedComments: ThreadComment[] = [];
 
 		for (const [index, comment] of (args.comments ?? []).entries()) {
-			insertedComments.push(
-				await trx
-					.insertInto("thread_comment")
-					.values({
-						thread_id: thread.id,
-						body: comment.body,
-						parent_id: index > 0 ? insertedComments[index - 1]!.id : null,
-					})
-					.returningAll()
-					.executeTakeFirstOrThrow()
-			);
+			const commentId = nanoid();
+			
+			await trx
+				.insertInto("thread_comment")
+				.values({
+					id: commentId,
+					thread_id: thread.id,
+					body: comment.body,
+					parent_id: index > 0 ? insertedComments[index - 1]!.id : null,
+				})
+				.execute();
+
+			const insertedComment = await trx
+				.selectFrom("thread_comment")
+				.selectAll()
+				.where("id", "=", commentId)
+				.executeTakeFirstOrThrow();
+
+			insertedComments.push(insertedComment);
 		}
 
 		return { ...thread, comments: insertedComments };

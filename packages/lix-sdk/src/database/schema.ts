@@ -1,4 +1,3 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { ChangeView, InternalChangeTable } from "../change/schema.js";
 import {
 	LixChangeSetEdgeSchema,
@@ -24,15 +23,26 @@ import {
 	type StoredSchemaView,
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import {
-	LixKeyValueSchema,
-	type KeyValueView,
-} from "../key-value/schema.js";
+import { LixKeyValueSchema, type KeyValueView } from "../key-value/schema.js";
 import type { StateView } from "../state/schema.js";
 import { LixFileSchema, type LixFileView } from "../file/schema.js";
 import { LixLogSchema, type LogView } from "../log/schema.js";
-import { LixAccountSchema, type AccountView, type ActiveAccountTable } from "../account/schema.js";
-import { LixChangeAuthorSchema, type ChangeAuthorView } from "../change-author/schema.js";
+import {
+	LixAccountSchema,
+	type AccountView,
+	type ActiveAccountTable,
+} from "../account/schema.js";
+import {
+	LixChangeAuthorSchema,
+	type ChangeAuthorView,
+} from "../change-author/schema.js";
+import { LixLabelSchema, type LabelView } from "../label/schema.js";
+import {
+	LixThreadSchema,
+	LixThreadCommentSchema,
+	type ThreadView,
+	type ThreadCommentView,
+} from "../thread/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -57,6 +67,9 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	snapshot: LixSnapshotSchema,
 	account: LixAccountSchema,
 	change_author: LixChangeAuthorSchema,
+	label: LixLabelSchema,
+	thread: LixThreadSchema,
+	thread_comment: LixThreadCommentSchema,
 };
 
 export type LixDatabaseSchema = {
@@ -64,18 +77,17 @@ export type LixDatabaseSchema = {
 	// account
 	account: AccountView;
 	active_account: ActiveAccountTable;
-	change_author: ChangeAuthorView;
 
 	// snapshot
 	snapshot: SnapshotView;
-	// label: LabelTable;
+	label: LabelView;
 
 	// file
 	file: LixFileView;
-	// file_queue: FileQueueTable;
 
 	// change
 	change: ChangeView;
+	change_author: ChangeAuthorView;
 
 	stored_schema: StoredSchemaView;
 
@@ -93,8 +105,8 @@ export type LixDatabaseSchema = {
 	// // change_proposal: ChangeProposalTable;
 
 	// thread
-	// thread: ThreadTable;
-	// thread_comment: ThreadCommentTable;
+	thread: ThreadView;
+	thread_comment: ThreadCommentView;
 
 	// version
 	version: VersionView;
@@ -102,13 +114,4 @@ export type LixDatabaseSchema = {
 
 	// logging
 	log: LogView;
-};
-// ----- tags -----
-
-export type Label = Selectable<LabelTable>;
-export type NewLabel = Insertable<LabelTable>;
-export type LabelUpdate = Updateable<LabelTable>;
-type LabelTable = {
-	id: Generated<string>;
-	name: string;
 };

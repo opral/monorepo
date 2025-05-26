@@ -5,10 +5,12 @@ import { fromPlainText } from "@opral/zettel-ast";
 test("thread.id should default to nano_id", async () => {
 	const lix = await openLixInMemory({});
 
+	await lix.db.insertInto("thread").defaultValues().execute();
+
 	const result = await lix.db
-		.insertInto("thread")
-		.defaultValues()
-		.returningAll()
+		.selectFrom("thread")
+		.selectAll()
+		.orderBy("version_id", "desc")
 		.executeTakeFirstOrThrow();
 
 	expect(result.id).toBeDefined();
@@ -17,10 +19,12 @@ test("thread.id should default to nano_id", async () => {
 test("an invalid thread comment content should throw an error", async () => {
 	const lix = await openLixInMemory({});
 
+	await lix.db.insertInto("thread").defaultValues().execute();
+
 	const thread = await lix.db
-		.insertInto("thread")
-		.defaultValues()
-		.returningAll()
+		.selectFrom("thread")
+		.selectAll()
+		.orderBy("version_id", "desc")
 		.executeTakeFirstOrThrow();
 
 	await expect(
@@ -33,38 +37,43 @@ test("an invalid thread comment content should throw an error", async () => {
 					body: {
 						type: "zettel_doc",
 						content: [
-							// @ts-expect-error - missing _key prop
+							// @ts-expect-error - missing zettel_key prop
 							{
-								_type: "zettel.textBlock",
-								style: "zettel.normal",
-								markDefs: [],
-								children: [{ _type: "zettel.span", text: "Hello world" }],
+								type: "zettel_text_block",
+								style: "zettel_normal",
+								children: [{ type: "zettel_span", text: "Hello world" }],
 							},
 						],
 					},
 				})
-				.returningAll()
-				.executeTakeFirstOrThrow()
+				.execute()
 	).rejects.toThrowError();
 });
 
 test("valid thread comment content should pass", async () => {
 	const lix = await openLixInMemory({});
 
+	await lix.db.insertInto("thread").defaultValues().execute();
+
 	const thread = await lix.db
-		.insertInto("thread")
-		.defaultValues()
-		.returningAll()
+		.selectFrom("thread")
+		.selectAll()
+		.orderBy("version_id", "desc")
 		.executeTakeFirstOrThrow();
 
-	const comment = await lix.db
+	await lix.db
 		.insertInto("thread_comment")
 		.values({
 			thread_id: thread.id,
 			parent_id: null,
 			body: fromPlainText("Hello world"),
 		})
-		.returningAll()
+		.execute();
+
+	const comment = await lix.db
+		.selectFrom("thread_comment")
+		.selectAll()
+		.orderBy("version_id", "desc")
 		.executeTakeFirstOrThrow();
 
 	expect(comment).toBeDefined();
