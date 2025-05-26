@@ -391,6 +391,80 @@ describe("Paraglide Message Parser", () => {
     ]);
   });
 
+  it("should match nested message format using bracket notation", () => {
+    const sourceCode = `
+		import * as m from "../../i18n-generated/messages";
+		m["simple"]();
+		m['simple']();
+		m["with.dot"]();
+		m["with.two.dots"]();
+		`;
+    const result = parse(sourceCode);
+    expect(result).toEqual([
+      {
+        messageId: "simple",
+        position: {
+          start: { line: 3, character: 6 },
+          end: { line: 3, character: 16 },
+        },
+      },
+      {
+        messageId: "simple",
+        position: {
+          start: { line: 4, character: 6 },
+          end: { line: 4, character: 16 },
+        },
+      },
+      {
+        messageId: "with.dot",
+        position: {
+          start: { line: 5, character: 6 },
+          end: { line: 5, character: 18 },
+        },
+      },
+      {
+        messageId: "with.two.dots",
+        position: {
+          start: { line: 6, character: 6 },
+          end: { line: 6, character: 23 },
+        },
+      },
+   ]);
+  });
+
+  it("should match if both dot and bracket notation are used in the same file", () => {
+    const sourceCode = `
+		import * as m from "../../i18n-generated/messages";
+		m.simple();
+		m["simple"]();
+		m.simple();
+		`;
+    const result = parse(sourceCode);
+    expect(result).toEqual([
+      {
+        messageId: "simple",
+        position: {
+          start: { line: 3, character: 5 },
+          end: { line: 3, character: 13 },
+        },
+      },
+      {
+        messageId: "simple",
+        position: {
+          start: { line: 4, character: 6 },
+          end: { line: 4, character: 16 },
+        },
+      },
+      {
+        messageId: "simple",
+        position: {
+          start: { line: 5, character: 5 },
+          end: { line: 5, character: 13 },
+        },
+      },
+    ]);
+  });
+
   it("should match if m is defined before the reference to paraglide", () => {
     const sourceCode = `
 		m.helloWorld();
@@ -428,6 +502,15 @@ describe("Paraglide Message Parser", () => {
     const result = parse(sourceCode);
     expect(result).toEqual([]);
   });
+
+	it("should match invalid bracket notation syntax", () => {
+		const sourceCode = `
+		import * as m from "../../i18n-generated/messages";
+		m['simple"]();
+		`;
+		const result = parse(sourceCode);
+		expect(result).toEqual([]);
+	});
 
   it("should return an empty array when parsing fails", () => {
     const sourceCode = undefined;
