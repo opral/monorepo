@@ -6,6 +6,7 @@ import { applySchema } from "./apply-schema.js";
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
+import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
 import { LixSchemaViewMap } from "./schema.js";
 import { isJsonType } from "../schema-definition/json-type.js";
 
@@ -42,6 +43,7 @@ export function initDb(args: {
 			// fallback json parser in case column aliases are used
 			// new ParseJSONResultsPlugin(),
 			JSONColumnPlugin(ViewsWithJsonColumns),
+			new ViewInsertReturningErrorPlugin(Object.keys(LixSchemaViewMap)),
 		],
 	});
 	initFunctions({
