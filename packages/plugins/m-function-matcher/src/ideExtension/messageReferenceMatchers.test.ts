@@ -434,11 +434,11 @@ describe("Paraglide Message Parser", () => {
 
   it("should match if both dot and bracket notation are used in the same file", () => {
     const sourceCode = `
-    import * as m from "../../i18n-generated/messages";
-    m.simple();
-    m["simple"]();
-    m.simple();
-    `;
+		import * as m from "../../i18n-generated/messages";
+		m.simple();
+		m["simple"]();
+		m.simple();
+		`;
     const result = parse(sourceCode);
     expect(result).toEqual([
       {
