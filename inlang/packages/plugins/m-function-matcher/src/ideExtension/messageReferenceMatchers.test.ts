@@ -503,6 +503,15 @@ describe("Paraglide Message Parser", () => {
     expect(result).toEqual([]);
   });
 
+	it("should match invalid bracket notation syntax", () => {
+		const sourceCode = `
+		import * as m from "../../i18n-generated/messages";
+		m['simple"]();
+		`;
+		const result = parse(sourceCode);
+		expect(result).toEqual([]);
+	});
+
   it("should return an empty array when parsing fails", () => {
     const sourceCode = undefined;
 
