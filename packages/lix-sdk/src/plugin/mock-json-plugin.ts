@@ -4,7 +4,11 @@ import type { DetectedChange, LixPlugin } from "./lix-plugin.js";
 import { flatten, unflatten } from "./mock-json-plugin.flatten.js";
 
 const MockJsonPropertySchema = {
-	type: JSONTypeSchema as any,
+	type: "object",
+	properties: {
+		value: JSONTypeSchema,
+	},
+	required: ["value"],
 	"x-lix-key": "mock_json_property",
 	"x-lix-version": "1.0",
 } as const satisfies LixSchemaDefinition;
@@ -28,10 +32,10 @@ export const mockJsonPlugin: LixPlugin = {
 		const detectedChanges: DetectedChange<any>[] = [];
 
 		const beforeParsed = before?.data
-			? JSON.parse(new TextDecoder().decode(before.data))
+			? JSON.parse(new TextDecoder().decode(before?.data))
 			: {};
-		const afterParsed = after.data
-			? JSON.parse(new TextDecoder().decode(after.data))
+		const afterParsed = after?.data
+			? JSON.parse(new TextDecoder().decode(after?.data))
 			: {};
 
 		const flattenedBefore = flatten(beforeParsed, {
@@ -46,7 +50,7 @@ export const mockJsonPlugin: LixPlugin = {
 				detectedChanges.push({
 					schema: MockJsonPropertySchema,
 					entity_id: key,
-					snapshot_content: null,
+					snapshot_content: null, // Indicates deletion of this property
 				});
 			} else if (
 				JSON.stringify(flattenedBefore[key]) !==
@@ -55,7 +59,7 @@ export const mockJsonPlugin: LixPlugin = {
 				detectedChanges.push({
 					schema: MockJsonPropertySchema,
 					entity_id: key,
-					snapshot_content: flattenedAfter[key],
+					snapshot_content: { value: flattenedAfter[key] },
 				});
 			}
 		}
@@ -65,7 +69,7 @@ export const mockJsonPlugin: LixPlugin = {
 				detectedChanges.push({
 					schema: MockJsonPropertySchema,
 					entity_id: key,
-					snapshot_content: flattenedAfter[key],
+					snapshot_content: { value: flattenedAfter[key] },
 				});
 			}
 		}
@@ -96,7 +100,7 @@ export const mockJsonPlugin: LixPlugin = {
 				// Update the current state with the new change content
 				// Need to decode the BLOB content from the snapshot
 				// The plugin should handle deserializing the object stored in the BLOB
-				flattened[change.entity_id] = change.snapshot_content;
+				flattened[change.entity_id] = (change.snapshot_content as any).value;
 			}
 		}
 

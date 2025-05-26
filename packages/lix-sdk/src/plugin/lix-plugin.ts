@@ -1,5 +1,5 @@
 import type { Change } from "../change/schema.js";
-import type { LixFile } from "../file/schema.js";
+import type { LixFile, LixFileType } from "../file/schema.js";
 import type {
 	FromLixSchemaDefinition,
 	LixSchemaDefinition,
@@ -31,8 +31,8 @@ export type LixPlugin = {
 		before,
 		after,
 	}: {
-		before?: LixFile & { data?: Uint8Array };
-		after: LixFile;
+		before?: LixFileType & { data?: Uint8Array };
+		after: LixFileType & { data: Uint8Array };
 	}) => DetectedChange<any>[];
 	applyChanges?: ({
 		file,

@@ -230,14 +230,20 @@ test("file ids should have a default", async () => {
 		id: "version0",
 	});
 
-	const file = await lix.db
+	await lix.db
 		.insertInto("file")
 		.values({
 			path: "/mock.json",
 			data: new Uint8Array(),
 			version_id: version0.id,
 		})
-		.returningAll()
+		.execute();
+	
+	const file = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/mock.json")
+		.where("version_id", "=", version0.id)
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(file.id).toBeDefined();
@@ -253,7 +259,7 @@ test("files should be able to have metadata", async () => {
 		id: "version0",
 	});
 
-	const file = await lix.db
+	await lix.db
 		.insertInto("file")
 		.values({
 			path: "/mock.json",
@@ -263,7 +269,13 @@ test("files should be able to have metadata", async () => {
 			},
 			version_id: version0.id,
 		})
-		.returningAll()
+		.execute();
+	
+	const file = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/mock.json")
+		.where("version_id", "=", version0.id)
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(file.metadata?.primary_key).toBe("email");

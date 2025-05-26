@@ -70,7 +70,7 @@ test("it handles update changes", async () => {
 	const after = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Samuel",
-			Age: "New York",
+			City: "New York",
 		})
 	);
 

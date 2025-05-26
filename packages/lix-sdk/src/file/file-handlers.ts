@@ -238,29 +238,12 @@ export function handleFileUpdate(args: {
 				
 				// Update plugin detected changes in state table
 				for (const change of detectedChanges) {
-					// Check if the plugin change already exists
-					const existingChange = executeSync({
-						lix: args.lix,
-						query: args.lix.db
-							.selectFrom("state")
-							.where("entity_id", "=", change.entity_id)
-							.where("schema_key", "=", change.schema["x-lix-key"])
-							.where("file_id", "=", args.file.id)
-							.where("version_id", "=", args.file.version_id)
-							.where("plugin_key", "=", plugin.key)
-							.select("entity_id"),
-					});
-
-					if (existingChange.length > 0) {
-						// Update existing change
+					if (change.snapshot_content === null) {
+						// Handle deletion: remove the entity from state table
 						executeSync({
 							lix: args.lix,
 							query: args.lix.db
-								.updateTable("state")
-								.set({
-									snapshot_content: change.snapshot_content as any,
-									schema_version: change.schema["x-lix-version"],
-								})
+								.deleteFrom("state")
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
 								.where("file_id", "=", args.file.id)
@@ -268,19 +251,50 @@ export function handleFileUpdate(args: {
 								.where("plugin_key", "=", plugin.key),
 						});
 					} else {
-						// Insert new change
-						executeSync({
+						// Check if the plugin change already exists
+						const existingChange = executeSync({
 							lix: args.lix,
-							query: args.lix.db.insertInto("state").values({
-								entity_id: change.entity_id,
-								schema_key: change.schema["x-lix-key"],
-								file_id: args.file.id,
-								plugin_key: plugin.key,
-								snapshot_content: change.snapshot_content as any,
-								schema_version: change.schema["x-lix-version"],
-								version_id: args.file.version_id,
-							}),
+							query: args.lix.db
+								.selectFrom("state")
+								.where("entity_id", "=", change.entity_id)
+								.where("schema_key", "=", change.schema["x-lix-key"])
+								.where("file_id", "=", args.file.id)
+								.where("version_id", "=", args.file.version_id)
+								.where("plugin_key", "=", plugin.key)
+								.select("entity_id"),
 						});
+
+						if (existingChange.length > 0) {
+							// Update existing change
+							executeSync({
+								lix: args.lix,
+								query: args.lix.db
+									.updateTable("state")
+									.set({
+										snapshot_content: change.snapshot_content as any,
+										schema_version: change.schema["x-lix-version"],
+									})
+									.where("entity_id", "=", change.entity_id)
+									.where("schema_key", "=", change.schema["x-lix-key"])
+									.where("file_id", "=", args.file.id)
+									.where("version_id", "=", args.file.version_id)
+									.where("plugin_key", "=", plugin.key),
+							});
+						} else {
+							// Insert new change
+							executeSync({
+								lix: args.lix,
+								query: args.lix.db.insertInto("state").values({
+									entity_id: change.entity_id,
+									schema_key: change.schema["x-lix-key"],
+									file_id: args.file.id,
+									plugin_key: plugin.key,
+									snapshot_content: change.snapshot_content as any,
+									schema_version: change.schema["x-lix-version"],
+									version_id: args.file.version_id,
+								}),
+							});
+						}
 					}
 				}
 			}
@@ -312,29 +326,12 @@ export function handleFileUpdate(args: {
 					}
 					
 					for (const change of detectedChanges) {
-						// Check if the plugin change already exists
-						const existingChange = executeSync({
-							lix: args.lix,
-							query: args.lix.db
-								.selectFrom("state")
-								.where("entity_id", "=", change.entity_id)
-								.where("schema_key", "=", change.schema["x-lix-key"])
-								.where("file_id", "=", args.file.id)
-								.where("version_id", "=", args.file.version_id)
-								.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
-								.select("entity_id"),
-						});
-
-						if (existingChange.length > 0) {
-							// Update existing change
+						if (change.snapshot_content === null) {
+							// Handle deletion: remove the entity from state table
 							executeSync({
 								lix: args.lix,
 								query: args.lix.db
-									.updateTable("state")
-									.set({
-										snapshot_content: change.snapshot_content as any,
-										schema_version: change.schema["x-lix-version"],
-									})
+									.deleteFrom("state")
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
 									.where("file_id", "=", args.file.id)
@@ -342,19 +339,50 @@ export function handleFileUpdate(args: {
 									.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key),
 							});
 						} else {
-							// Insert new change
-							executeSync({
+							// Check if the plugin change already exists
+							const existingChange = executeSync({
 								lix: args.lix,
-								query: args.lix.db.insertInto("state").values({
-									entity_id: change.entity_id,
-									schema_key: change.schema["x-lix-key"],
-									file_id: args.file.id,
-									plugin_key: lixUnknownFileFallbackPlugin.key,
-									snapshot_content: change.snapshot_content as any,
-									schema_version: change.schema["x-lix-version"],
-									version_id: args.file.version_id,
-								}),
+								query: args.lix.db
+									.selectFrom("state")
+									.where("entity_id", "=", change.entity_id)
+									.where("schema_key", "=", change.schema["x-lix-key"])
+									.where("file_id", "=", args.file.id)
+									.where("version_id", "=", args.file.version_id)
+									.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
+									.select("entity_id"),
 							});
+
+							if (existingChange.length > 0) {
+								// Update existing change
+								executeSync({
+									lix: args.lix,
+									query: args.lix.db
+										.updateTable("state")
+										.set({
+											snapshot_content: change.snapshot_content as any,
+											schema_version: change.schema["x-lix-version"],
+										})
+										.where("entity_id", "=", change.entity_id)
+										.where("schema_key", "=", change.schema["x-lix-key"])
+										.where("file_id", "=", args.file.id)
+										.where("version_id", "=", args.file.version_id)
+										.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key),
+								});
+							} else {
+								// Insert new change
+								executeSync({
+									lix: args.lix,
+									query: args.lix.db.insertInto("state").values({
+										entity_id: change.entity_id,
+										schema_key: change.schema["x-lix-key"],
+										file_id: args.file.id,
+										plugin_key: lixUnknownFileFallbackPlugin.key,
+										snapshot_content: change.snapshot_content as any,
+										schema_version: change.schema["x-lix-version"],
+										version_id: args.file.version_id,
+									}),
+								});
+							}
 						}
 					}
 				}

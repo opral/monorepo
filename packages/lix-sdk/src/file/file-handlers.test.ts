@@ -3,6 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "../version/create-version.js";
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
 import { nanoid } from "../database/nano-id.js";
+import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 
 describe("file insert", () => {
 	it("should handle unknown file types with fallback plugin", async () => {
@@ -86,5 +87,84 @@ describe("file update", () => {
 			.execute();
 
 		expect(logs.length).toBeGreaterThanOrEqual(1);
+	});
+
+	it("should handle deleted entities during file update", async () => {
+		const lix = await openLixInMemory({
+			providePlugins: [mockJsonPlugin],
+		});
+		const version = await createVersion({ lix });
+		const fileId = nanoid();
+
+		// Initial JSON data with two users
+		const initialJsonData = {
+			users: {
+				john: { name: "John", age: 30 },
+				jane: { name: "Jane", age: 25 }
+			}
+		};
+
+		// Insert the file initially - this should create entities for both users
+		handleFileInsert({
+			lix,
+			file: {
+				id: fileId,
+				path: "/users.json",
+				data: new TextEncoder().encode(JSON.stringify(initialJsonData)),
+				version_id: version.id,
+				metadata: null,
+			},
+		});
+
+		// Verify both entities were created
+		const initialEntities = await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", "mock_json_property")
+			.where("version_id", "=", version.id)
+			.selectAll()
+			.execute();
+
+		expect(initialEntities.length).toBeGreaterThan(0);
+
+		// Updated JSON data with jane removed
+		const updatedJsonData = {
+			users: {
+				john: { name: "John", age: 30 }
+				// jane is removed
+			}
+		};
+
+		// Update the file - this should trigger deletion of jane's entities
+		handleFileUpdate({
+			lix,
+			file: {
+				id: fileId,
+				path: "/users.json",
+				data: new TextEncoder().encode(JSON.stringify(updatedJsonData)),
+				version_id: version.id,
+				metadata: null,
+			},
+		});
+
+		// Verify that jane's entities were deleted
+		const finalEntities = await lix.db
+			.selectFrom("state")
+			.where("file_id", "=", fileId)
+			.where("schema_key", "=", "mock_json_property")
+			.where("version_id", "=", version.id)
+			.selectAll()
+			.execute();
+
+		// Should have fewer entities after the update (jane's entities removed)
+		expect(finalEntities.length).toBeLessThan(initialEntities.length);
+		
+		// John's entities should still exist
+		const johnEntities = finalEntities.filter(e => e.entity_id.includes("john"));
+		expect(johnEntities.length).toBeGreaterThan(0);
+
+		// Jane's entities should be gone
+		const janeEntities = finalEntities.filter(e => e.entity_id.includes("jane"));
+		expect(janeEntities.length).toBe(0);
 	});
 });
