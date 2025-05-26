@@ -40,6 +40,7 @@ test("materializeFileData with plugin that has changes", async () => {
 			file_id: "test-file-2",
 			plugin_key: "test-plugin-2",
 			snapshot_content: { value: "test-content" },
+			schema_version: "1.0",
 			version_id: (
 				await lix.db
 					.selectFrom("active_version")

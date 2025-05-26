@@ -20,7 +20,7 @@ export function applyLogDatabaseSchema(
 	CREATE TRIGGER IF NOT EXISTS log_insert
 	INSTEAD OF INSERT ON log
 	BEGIN
-		INSERT INTO state (entity_id, schema_key, file_id, plugin_key, snapshot_content, version_id)
+		INSERT INTO state (entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version, version_id)
 		SELECT
 			with_default_values.id,
 			'lix_log',
@@ -32,6 +32,7 @@ export function applyLogDatabaseSchema(
 				'message', NEW.message,
 				'level', NEW.level
 			),
+			'${LixLogSchema["x-lix-version"]}',
 			COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
 		FROM (
 			SELECT

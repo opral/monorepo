@@ -28,6 +28,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
         file_id,
         plugin_key,
         snapshot_content,
+        schema_version,
         version_id
       )
       SELECT
@@ -41,6 +42,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
           'change_set_id', NEW.change_set_id,
           'working_change_set_id', NEW.working_change_set_id
         ),
+        '${LixVersionSchema["x-lix-version"]}',
         (SELECT version_id FROM active_version)
       FROM (
           SELECT
@@ -95,6 +97,7 @@ BEGIN
       file_id,
       plugin_key,
       snapshot_content,
+      schema_version,
       version_id
     ) VALUES (
       'lix_active_version',
@@ -102,6 +105,7 @@ BEGIN
       'lix',
       'lix_own_entity',
       json_object('version_id', NEW.version_id),
+      '${LixActiveVersionSchema["x-lix-version"]}',
       (SELECT version_id FROM active_version)
     );
   END;
@@ -147,6 +151,7 @@ BEGIN
     file_id, 
     plugin_key, 
     snapshot_content, 
+    schema_version,
     version_id
   )
   SELECT 
@@ -160,6 +165,7 @@ BEGIN
       'change_set_id', '${INITIAL_CHANGE_SET_ID}',
       'working_change_set_id', '${INITIAL_WORKING_CHANGE_SET_ID}'
     ),
+    '${LixVersionSchema["x-lix-version"]}',
     '${INITIAL_VERSION_ID}'
   WHERE NOT EXISTS (
     SELECT 1 
@@ -176,6 +182,7 @@ BEGIN
     file_id, 
     plugin_key, 
     snapshot_content, 
+    schema_version,
     version_id
   )
   SELECT 
@@ -184,6 +191,7 @@ BEGIN
     'lix', 
     'lix_own_entity', 
     json_object('version_id', '${INITIAL_VERSION_ID}'), 
+    '${LixActiveVersionSchema["x-lix-version"]}',
     '${INITIAL_VERSION_ID}'
   WHERE NOT EXISTS (
     SELECT 1 

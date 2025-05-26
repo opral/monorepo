@@ -10,11 +10,16 @@ import {
 	INITIAL_VERSION_ID,
 	INITIAL_WORKING_CHANGE_SET_ID,
 	type Version,
+	type LixVersion,
+	LixVersionSchema,
 } from "../version/schema.js";
-import type {
-	ChangeSet,
-	ChangeSetEdge,
-	ChangeSetElement,
+import {
+	type LixChangeSet,
+	type LixChangeSetEdge,
+	type LixChangeSetElement,
+	LixChangeSetSchema,
+	LixChangeSetEdgeSchema,
+	LixChangeSetElementSchema,
 } from "../change-set-v2/schema.js";
 
 export function handleStateMutation(
@@ -25,7 +30,8 @@ export function handleStateMutation(
 	file_id: string,
 	plugin_key: string,
 	snapshot_content: string, // stringified json
-	version_id: string
+	version_id: string,
+	schema_version: string
 ): 0 | 1 {
 	const rootChange = createChangeWithSnapshot({
 		sqlite,
@@ -36,6 +42,7 @@ export function handleStateMutation(
 			file_id,
 			plugin_key,
 			snapshot_content,
+			schema_version,
 		},
 	});
 
@@ -63,6 +70,7 @@ export function handleStateMutation(
 			.where("internal_change.schema_key", "=", "lix_version")
 			.where("internal_change.entity_id", "=", version_id)
 			.where("internal_change.snapshot_id", "!=", "no-content")
+			// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
 			.orderBy("internal_change.rowid", "desc")
 			.limit(1)
 			.select(sql`json(internal_snapshot.content)`.as("content")),
@@ -87,7 +95,8 @@ export function handleStateMutation(
 			snapshot_content: JSON.stringify({
 				id: changeSetId,
 				metadata: null,
-			} satisfies Omit<ChangeSet, "version_id">),
+			} satisfies LixChangeSet),
+			schema_version: LixChangeSetSchema["x-lix-version"],
 		},
 	});
 
@@ -102,7 +111,8 @@ export function handleStateMutation(
 			snapshot_content: JSON.stringify({
 				parent_id: version.change_set_id,
 				child_id: changeSetId,
-			} satisfies Omit<ChangeSetEdge, "version_id">),
+			} satisfies LixChangeSetEdge),
+			schema_version: LixChangeSetEdgeSchema["x-lix-version"],
 		},
 	});
 
@@ -117,7 +127,8 @@ export function handleStateMutation(
 			snapshot_content: JSON.stringify({
 				...version,
 				change_set_id: changeSetId,
-			} satisfies Omit<Version, "version_id">),
+			} satisfies LixVersion),
+			schema_version: LixVersionSchema["x-lix-version"],
 		},
 	});
 
@@ -141,7 +152,8 @@ export function handleStateMutation(
 					schema_key: change.schema_key,
 					file_id: change.file_id,
 					entity_id: change.entity_id,
-				} satisfies Omit<ChangeSetElement, "version_id">),
+				} satisfies LixChangeSetElement),
+				schema_version: LixChangeSetElementSchema["x-lix-version"],
 			},
 		});
 		// TODO investigate if needed as part of a change set itself
@@ -174,7 +186,7 @@ function createChangeWithSnapshot(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 	id?: string;
-	data: Omit<NewStateRow, "version_id">;
+	data: Omit<NewStateRow, "version_id" | "created_at" | "updated_at">;
 }): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
 	const [snapshot] = args.data.snapshot_content
 		? executeSync({
@@ -199,6 +211,7 @@ function createChangeWithSnapshot(args: {
 				snapshot_id: snapshot.id,
 				file_id: args.data.file_id,
 				plugin_key: args.data.plugin_key,
+				schema_version: args.data.schema_version,
 			})
 			.returning(["id", "schema_key", "file_id", "entity_id"]),
 	});

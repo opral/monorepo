@@ -41,6 +41,7 @@ export function applyStoredSchemaDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_content,
+      schema_version,
       version_id
       ) VALUES (
       json_extract(NEW.value, '$.x-lix-key') || '::' || json_extract(NEW.value, '$.x-lix-version'), 
@@ -52,6 +53,7 @@ export function applyStoredSchemaDatabaseSchema(
         'version', json_extract(NEW.value, '$.x-lix-version'), 
         'value', json(NEW.value)
       ),
+      '${LixStoredSchemaSchema["x-lix-version"]}',
       (SELECT version_id FROM active_version)
     );
   END;

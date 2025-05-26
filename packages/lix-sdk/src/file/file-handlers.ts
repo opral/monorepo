@@ -1,5 +1,6 @@
 import { executeSync } from "../database/execute-sync.js";
 import type { LixFile } from "./schema.js";
+import { LixFileSchema } from "./schema.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
@@ -39,6 +40,7 @@ export function handleFileInsert(args: {
 				path: args.file.path,
 				metadata: args.file.metadata || null,
 			},
+			schema_version: LixFileSchema["x-lix-version"],
 			version_id: args.file.version_id,
 		}),
 	});
@@ -97,6 +99,7 @@ export function handleFileInsert(args: {
 						file_id: args.file.id,
 						plugin_key: plugin.key,
 						snapshot_content: change.snapshot_content as any,
+						schema_version: change.schema["x-lix-version"],
 						version_id: args.file.version_id,
 					}),
 				});
@@ -137,6 +140,7 @@ export function handleFileInsert(args: {
 							file_id: args.file.id,
 							plugin_key: lixUnknownFileFallbackPlugin.key,
 							snapshot_content: change.snapshot_content as any,
+							schema_version: change.schema["x-lix-version"],
 							version_id: args.file.version_id,
 						}),
 					});
@@ -255,6 +259,7 @@ export function handleFileUpdate(args: {
 								.updateTable("state")
 								.set({
 									snapshot_content: change.snapshot_content as any,
+									schema_version: change.schema["x-lix-version"],
 								})
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
@@ -272,6 +277,7 @@ export function handleFileUpdate(args: {
 								file_id: args.file.id,
 								plugin_key: plugin.key,
 								snapshot_content: change.snapshot_content as any,
+								schema_version: change.schema["x-lix-version"],
 								version_id: args.file.version_id,
 							}),
 						});
@@ -327,6 +333,7 @@ export function handleFileUpdate(args: {
 									.updateTable("state")
 									.set({
 										snapshot_content: change.snapshot_content as any,
+										schema_version: change.schema["x-lix-version"],
 									})
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
@@ -344,6 +351,7 @@ export function handleFileUpdate(args: {
 									file_id: args.file.id,
 									plugin_key: lixUnknownFileFallbackPlugin.key,
 									snapshot_content: change.snapshot_content as any,
+									schema_version: change.schema["x-lix-version"],
 									version_id: args.file.version_id,
 								}),
 							});

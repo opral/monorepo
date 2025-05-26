@@ -153,6 +153,7 @@ describe("change_set_element", () => {
 				file_id: "f0",
 				plugin_key: "test_plugin",
 				snapshot_id: "s0",
+				schema_version: "1.0",
 			})
 			.execute();
 
@@ -237,6 +238,7 @@ describe("change_set_element", () => {
 				file_id: "f1",
 				plugin_key: "test_plugin",
 				snapshot_id: "s1",
+				schema_version: "1.0",
 			})
 			.execute();
 
@@ -300,6 +302,7 @@ describe("change_set_element", () => {
 				file_id: "f1",
 				plugin_key: "test_plugin",
 				snapshot_id: "s1",
+				schema_version: "1.0",
 			})
 			.execute();
 
@@ -394,6 +397,7 @@ describe("change_set_element", () => {
 					file_id: "f1",
 					plugin_key: "test_plugin",
 					snapshot_id: "s1",
+					schema_version: "1.0",
 				},
 				{
 					id: "c2",
@@ -402,6 +406,7 @@ describe("change_set_element", () => {
 					file_id: "f1", // Same file
 					plugin_key: "test_plugin",
 					snapshot_id: "s2",
+					schema_version: "1.0",
 				},
 			])
 			.execute();

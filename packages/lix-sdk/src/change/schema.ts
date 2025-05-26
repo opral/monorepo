@@ -9,6 +9,7 @@ export function applyChangeDatabaseSchema(
     id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
     entity_id TEXT NOT NULL,
     schema_key TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL, -- Foreign key to internal_snapshot
@@ -34,6 +35,7 @@ export function applyChangeDatabaseSchema(
       id,
       entity_id,
       schema_key,
+      schema_version,
       file_id,
       plugin_key,
       snapshot_id,
@@ -42,6 +44,7 @@ export function applyChangeDatabaseSchema(
       COALESCE(NEW.id, uuid_v7()),
       NEW.entity_id,
       NEW.schema_key,
+      NEW.schema_version,
       NEW.file_id,
       NEW.plugin_key,
       NEW.snapshot_id,
@@ -58,6 +61,7 @@ export type InternalChangeTable = {
 	id: Generated<string>;
 	entity_id: string;
 	schema_key: string;
+	schema_version: string;
 	file_id: string;
 	plugin_key: string;
 	snapshot_id: string; // The foreign key
@@ -71,6 +75,7 @@ export type ChangeView = {
 	id: Generated<string>;
 	entity_id: string;
 	schema_key: string;
+	schema_version: string;
 	file_id: string;
 	plugin_key: string;
 	snapshot_id: string;

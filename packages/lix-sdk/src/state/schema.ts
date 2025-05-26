@@ -39,7 +39,8 @@ export function applyStateDatabaseSchema(
 				args[2], // file_id
 				args[3], // plugin_key
 				args[4], // snapshot_content,
-				args[5] // version_id
+				args[5], // version_id
+				args[6] // schema_version
 			);
 		},
 	});
@@ -56,6 +57,7 @@ export function applyStateDatabaseSchema(
         ic.file_id,
         ic.plugin_key,
         ic.rowid, -- expose rowid for specific MAX filters later
+        ic.schema_version,
         json(s.content) AS snapshot_content 
       FROM internal_change ic
       LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
@@ -110,6 +112,7 @@ export function applyStateDatabaseSchema(
         target_change.file_id,
         target_change.plugin_key,
         target_change.snapshot_content AS snapshot_content,
+        target_change.schema_version,
         r.version_id -- Include version_id in the final selection
       FROM cse_in_reachable_cs r 
       INNER JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
@@ -139,6 +142,7 @@ export function applyStateDatabaseSchema(
     ls.file_id,
     ls.plugin_key,
     ls.snapshot_content,
+    ls.schema_version,
     ls.version_id,
     (
       SELECT MIN(ic.created_at)
@@ -178,7 +182,8 @@ export function applyStateDatabaseSchema(
       NEW.file_id,
       NEW.plugin_key,
       NEW.snapshot_content,
-      NEW.version_id
+      NEW.version_id,
+      NEW.schema_version
     );
   END;
 
@@ -199,7 +204,8 @@ export function applyStateDatabaseSchema(
       NEW.file_id,
       NEW.plugin_key,
       NEW.snapshot_content,
-      NEW.version_id
+      NEW.version_id,
+      NEW.schema_version
     );
   END;
 
@@ -212,7 +218,8 @@ export function applyStateDatabaseSchema(
       OLD.file_id,
       OLD.plugin_key,
       null,
-      OLD.version_id
+      OLD.version_id,
+      OLD.schema_version
     );
   END;
 `;
@@ -231,6 +238,7 @@ export type StateView = {
 	file_id: string;
 	plugin_key: string;
 	snapshot_content: JSONType;
+	schema_version: string;
 	version_id: string;
 	created_at: Generated<string>;
 	updated_at: Generated<string>;

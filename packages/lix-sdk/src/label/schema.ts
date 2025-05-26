@@ -23,6 +23,7 @@ export function applyLabelDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_content,
+      schema_version,
       version_id
     )
     SELECT
@@ -31,6 +32,7 @@ export function applyLabelDatabaseSchema(
       'lix',
       'lix_own_entity',
       json_object('id', with_default_values.id, 'name', with_default_values.name),
+      '${LixLabelSchema["x-lix-version"]}',
       COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT

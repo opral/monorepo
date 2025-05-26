@@ -188,6 +188,7 @@ test("throws when primary key violates uniqueness constraint", async () => {
 			plugin_key: "test_plugin",
 			version_id: lix.db.selectFrom("active_version").select("version_id"),
 			snapshot_content: { id: "user1", name: "John" },
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -249,6 +250,7 @@ test("handles composite primary keys", async () => {
 				role_id: "admin",
 				assigned_date: "2024-01-01",
 			},
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -369,6 +371,7 @@ test("throws when single field unique constraint is violated", async () => {
 				username: "john_doe",
 				name: "John Doe",
 			},
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -460,6 +463,7 @@ test("handles composite unique constraints", async () => {
 				sku: "ELEC-LAP-001",
 				price: 999.99,
 			},
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -592,6 +596,7 @@ test("passes when foreign key references exist", async () => {
 				id: "user1",
 				name: "John Doe",
 			},
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -757,6 +762,7 @@ test("handles multiple foreign keys", async () => {
 					id: "user1",
 					name: "John Doe",
 				},
+				schema_version: "1.0",
 			},
 			{
 				entity_id: "category1",
@@ -768,6 +774,7 @@ test("handles multiple foreign keys", async () => {
 					id: "category1",
 					name: "Technology",
 				},
+				schema_version: "1.0",
 			},
 		])
 		.execute();
@@ -908,6 +915,7 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 			entity_id: "entity1",
 			plugin_key: "test_plugin",
 			schema_key: "test_schema",
+			schema_version: "1.0",
 			file_id: "file1",
 			snapshot_id: "snap1",
 		})
@@ -999,6 +1007,7 @@ test("allows updates with same primary key", async () => {
 			plugin_key: "test_plugin",
 			version_id: lix.db.selectFrom("active_version").select("version_id"),
 			snapshot_content: { id: "user1", name: "John Doe" },
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -1063,6 +1072,7 @@ test("unique constraints are validated per version, not globally", async () => {
 				path: "/app.js",
 				content: "console.log('version 0');",
 			},
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -1244,6 +1254,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 				id: "user1",
 				name: "John Doe",
 			},
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -1261,6 +1272,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 				author_id: "user1",
 				title: "My First Post",
 			},
+			schema_version: "1.0",
 		})
 		.execute();
 
@@ -1314,6 +1326,7 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 				id: "user1",
 				name: "John Doe",
 			},
+			schema_version: "1.0",
 		})
 		.execute();
 

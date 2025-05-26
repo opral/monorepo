@@ -30,6 +30,7 @@ test("select, insert, update, delete entity", async () => {
 			file_id: "f0",
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
 			version_id: sql`(SELECT version_id FROM active_version)`,
 			snapshot_content: {
 				value: "hello world",
@@ -131,6 +132,7 @@ test("validates the schema on insert", async () => {
 				file_id: "f0",
 				schema_key: "mock_schema",
 				plugin_key: "lix_own_entity",
+				schema_version: "1.0",
 				snapshot_content: {
 					value: "hello world",
 				},
@@ -166,6 +168,7 @@ test("validates the schema on update", async () => {
 			file_id: "f0",
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
 			snapshot_content: {
 				value: 5,
 			},
@@ -220,6 +223,7 @@ test("state is separated by version", async () => {
 				file_id: "f0",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
+				schema_version: "1.0",
 				snapshot_content: {
 					value: "hello world from version a",
 				},
@@ -230,6 +234,7 @@ test("state is separated by version", async () => {
 				file_id: "f0",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
+				schema_version: "1.0",
 				snapshot_content: {
 					value: "hello world from version b",
 				},
@@ -366,6 +371,7 @@ test("created_at and updated_at timestamps are computed correctly", async () => 
 			file_id: "f0",
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
 			version_id: sql`(SELECT version_id FROM active_version)`,
 			snapshot_content: {
 				value: "initial value",
@@ -449,6 +455,7 @@ test("created_at and updated_at are version specific", async () => {
 			file_id: "f0",
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
 			version_id: "version_a",
 			snapshot_content: {
 				value: "value in version a",
@@ -467,6 +474,7 @@ test("created_at and updated_at are version specific", async () => {
 			file_id: "f0",
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
 			version_id: "version_b",
 			snapshot_content: {
 				value: "value in version b",

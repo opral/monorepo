@@ -11,6 +11,7 @@ export function createChange(args: {
 	id?: Change["id"];
 	entity_id: Change["entity_id"];
 	schema_key: Change["schema_key"];
+	schema_version: Change["schema_version"];
 	file_id: Change["file_id"];
 	plugin_key: Change["plugin_key"];
 	snapshot: Omit<NewSnapshot, "id">;
@@ -38,6 +39,7 @@ Promise<Change> {
 			.values({
 				entity_id: args.entity_id,
 				schema_key: args.schema_key,
+				schema_version: args.schema_version,
 				snapshot_id: snapshot.id,
 				file_id: args.file_id,
 				plugin_key: args.plugin_key,

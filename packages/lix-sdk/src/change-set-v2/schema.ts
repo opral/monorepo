@@ -24,6 +24,7 @@ export function applyChangeSetDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_content,
+      schema_version,
       version_id
     )
     SELECT
@@ -32,6 +33,7 @@ export function applyChangeSetDatabaseSchema(
       'lix',
       'lix_own_entity',
       json_object('id', with_default_values.id, 'metadata', with_default_values.metadata),
+      '${LixChangeSetSchema["x-lix-version"]}',
       COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT
@@ -88,6 +90,7 @@ export function applyChangeSetDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_content,
+      schema_version,
       version_id
     ) VALUES (
       NEW.change_set_id || '::' || NEW.change_id,
@@ -95,6 +98,7 @@ export function applyChangeSetDatabaseSchema(
       'lix',
       'lix_own_entity',
       json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id),
+      '${LixChangeSetElementSchema["x-lix-version"]}',
       COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     );
   END;
@@ -144,6 +148,7 @@ export function applyChangeSetDatabaseSchema(
       file_id, 
       plugin_key, 
       snapshot_content,
+      schema_version,
       version_id
     ) VALUES (
       NEW.parent_id || '::' || NEW.child_id,
@@ -151,6 +156,7 @@ export function applyChangeSetDatabaseSchema(
       'lix',
       'lix_own_entity',
       json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id),
+      '${LixChangeSetEdgeSchema["x-lix-version"]}',
       COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     ); 
   END;

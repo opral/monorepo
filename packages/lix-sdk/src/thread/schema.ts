@@ -24,6 +24,7 @@ export function applyThreadDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_content,
+      schema_version,
       version_id
     )
     SELECT
@@ -32,6 +33,7 @@ export function applyThreadDatabaseSchema(
       'lix',
       'lix_own_entity',
       json_object('id', with_default_values.id, 'metadata', with_default_values.metadata),
+      '${LixThreadSchema["x-lix-version"]}',
       COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT
@@ -88,6 +90,7 @@ export function applyThreadDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_content,
+      schema_version,
       version_id
     )
     SELECT
@@ -96,6 +99,7 @@ export function applyThreadDatabaseSchema(
       'lix',
       'lix_own_entity',
       json_object('id', with_default_values.id, 'thread_id', with_default_values.thread_id, 'parent_id', with_default_values.parent_id, 'body', with_default_values.body),
+      '${LixThreadCommentSchema["x-lix-version"]}',
       COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT

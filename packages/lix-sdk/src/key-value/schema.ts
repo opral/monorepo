@@ -31,6 +31,7 @@ export function applyKeyValueDatabaseSchema(
 			file_id,
 			plugin_key,
 			snapshot_content,
+			schema_version,
 			version_id
 		) VALUES (
 			NEW.key,
@@ -38,6 +39,7 @@ export function applyKeyValueDatabaseSchema(
 			'lix',
 			'lix_own_entity',
 			json_object('key', NEW.key, 'value', NEW.value),
+			'${LixKeyValueSchema["x-lix-version"]}',
 			COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
 		);
 	END;

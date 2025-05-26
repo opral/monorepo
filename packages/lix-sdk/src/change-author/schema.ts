@@ -26,6 +26,7 @@ export function applyChangeAuthorDatabaseSchema(
 				file_id,
 				plugin_key,
 				snapshot_content,
+				schema_version,
 				version_id
 			) VALUES (
 				NEW.change_id || '::' || NEW.account_id,
@@ -33,6 +34,7 @@ export function applyChangeAuthorDatabaseSchema(
 				'lix',
 				'lix_own_entity',
 				json_object('change_id', NEW.change_id, 'account_id', NEW.account_id),
+				'${LixChangeAuthorSchema["x-lix-version"]}',
 				COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
 			);
 		END;

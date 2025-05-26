@@ -34,6 +34,7 @@ export function applyAccountDatabaseSchema(
       file_id,
       plugin_key,
       snapshot_content,
+      schema_version,
       version_id
     )
     SELECT
@@ -42,6 +43,7 @@ export function applyAccountDatabaseSchema(
       'lix',
       'lix_own_entity',
       json_object('id', with_default_values.id, 'name', with_default_values.name),
+      '${LixAccountSchema["x-lix-version"]}',
       COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT

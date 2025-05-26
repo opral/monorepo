@@ -11,6 +11,7 @@ test("creating changes", async () => {
 		id: "c0",
 		entity_id: "entity1",
 		schema_key: "schema1",
+		schema_version: "1.0",
 		file_id: "file1",
 		plugin_key: "plugin1",
 		snapshot: {
@@ -35,6 +36,7 @@ test("uses the 'no-content' id if the snapshot content is null for de-duplicatio
 		id: "c0",
 		entity_id: "entity1",
 		schema_key: "schema1",
+		schema_version: "1.0",
 		file_id: "file1",
 		plugin_key: "plugin1",
 		snapshot: {
@@ -64,6 +66,7 @@ test("creating changes with authors", async () => {
 		id: "c1",
 		entity_id: "entity1",
 		schema_key: "schema1",
+		schema_version: "1.0",
 		file_id: "file1",
 		plugin_key: "plugin1",
 		snapshot: {
@@ -111,6 +114,7 @@ test("creating changes without authors should not create change_author records",
 		id: "c2",
 		entity_id: "entity1",
 		schema_key: "schema1",
+		schema_version: "1.0",
 		file_id: "file1",
 		plugin_key: "plugin1",
 		snapshot: {
@@ -151,6 +155,7 @@ test("should create a snapshot with the correct content", async () => {
 		id: "c4",
 		entity_id: "entity1",
 		schema_key: "schema1",
+		schema_version: "1.0",
 		file_id: "file1",
 		plugin_key: "plugin1",
 		snapshot: {
@@ -185,6 +190,7 @@ test("should create a change and a snapshot in a transaction", async () => {
 			id: "c5",
 			entity_id: "entity1",
 			schema_key: "schema1",
+			schema_version: "1.0",
 			file_id: "file1",
 			plugin_key: "plugin1",
 			snapshot: {
