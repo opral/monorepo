@@ -549,3 +549,295 @@ test("created_at and updated_at are version specific", async () => {
 		new Date(updatedStateVersionB[0]!.updated_at).getTime()
 	).toBeGreaterThan(new Date(stateVersionB[0]!.updated_at).getTime());
 });
+
+test("state appears in both versions when they share the same change set", async () => {
+	const lix = await openLixInMemory({});
+
+	const versionA = await createVersion({ lix, id: "version_a" });
+
+	console.log(
+		"Version A changeset before state insert:",
+		versionA.change_set_id
+	);
+
+	// Insert state into version A
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "e0",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "mock_plugin",
+			schema_version: "1.0",
+			snapshot_content: {
+				value: "shared state",
+			},
+			version_id: "version_a",
+		})
+		.execute();
+
+	const versionAAfterInsert = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	console.log(
+		"Version A changeset after state insert:",
+		versionAAfterInsert.change_set_id
+	);
+
+	// Create version B with the same change set as version A
+	const versionB = await createVersion({
+		lix,
+		id: "version_b",
+		changeSet: { id: versionAAfterInsert.change_set_id },
+	});
+
+	console.log("Version B changeset:", versionB.change_set_id);
+
+	const stateInBothVersions = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "mock_schema")
+		.where("entity_id", "=", "e0")
+		.selectAll()
+		.execute();
+
+	// Both versions should see the same state
+	expect(stateInBothVersions).toMatchObject([
+		{
+			entity_id: "e0",
+			schema_key: "mock_schema",
+			snapshot_content: { value: "shared state" },
+			version_id: "version_a",
+		},
+		{
+			entity_id: "e0",
+			schema_key: "mock_schema",
+			snapshot_content: { value: "shared state" },
+			version_id: "version_b",
+		},
+	]);
+});
+
+test("direct state insertion vs view insertion changeset behavior", async () => {
+	const lix = await openLixInMemory({});
+
+	// Test 1: Insert via key_value view
+	const versionBefore = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Log changes before key_value insert
+	const changesBefore = await sql`
+		SELECT 
+			ic.entity_id,
+			ic.schema_key,
+			ic.created_at,
+			json_extract(s.content, '$.change_set_id') as content_change_set_id
+		FROM internal_change ic
+		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
+		WHERE ic.schema_key IN ('lix_version', 'lix_change_set', 'lix_change_set_element', 'lix_change_set_edge')
+		ORDER BY ic.created_at DESC
+		LIMIT 10
+	`.execute(lix.db);
+
+	console.log("Changes before key_value insert:", changesBefore.rows);
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "test_key",
+			value: "test_value",
+		})
+		.execute();
+
+	// Log changes after key_value insert
+	const changesAfterKeyValue = await sql`
+		SELECT 
+			ic.entity_id,
+			ic.schema_key,
+			ic.created_at,
+			json_extract(s.content, '$.change_set_id') as content_change_set_id
+		FROM internal_change ic
+		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
+		WHERE ic.schema_key IN ('lix_version', 'lix_change_set', 'lix_change_set_element', 'lix_change_set_edge')
+		ORDER BY ic.created_at DESC
+		LIMIT 10
+	`.execute(lix.db);
+
+	console.log("Changes after key_value insert:", changesAfterKeyValue.rows);
+
+	const versionAfterKeyValue = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	console.log("Version changeset before key_value insert:", versionBefore.change_set_id);
+	console.log("Version changeset after key_value insert:", versionAfterKeyValue.change_set_id);
+
+	// Test 2: Insert directly into state table
+	const testVersion = await createVersion({ lix, id: "test_version" });
+	
+	// Log changes before state insert
+	const changesBeforeState = await sql`
+		SELECT 
+			ic.entity_id,
+			ic.schema_key,
+			ic.created_at,
+			json_extract(s.content, '$.change_set_id') as content_change_set_id
+		FROM internal_change ic
+		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
+		WHERE ic.schema_key IN ('lix_version', 'lix_change_set', 'lix_change_set_element', 'lix_change_set_edge')
+		ORDER BY ic.created_at DESC
+		LIMIT 10
+	`.execute(lix.db);
+
+	console.log("Changes before state insert:", changesBeforeState.rows);
+	
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "e0",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "mock_plugin",
+			schema_version: "1.0",
+			snapshot_content: {
+				value: "test state",
+			},
+			version_id: "test_version",
+		})
+		.execute();
+
+	// Log changes after state insert
+	const changesAfterState = await sql`
+		SELECT 
+			ic.entity_id,
+			ic.schema_key,
+			ic.created_at,
+			json_extract(s.content, '$.change_set_id') as content_change_set_id
+		FROM internal_change ic
+		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
+		WHERE ic.schema_key IN ('lix_version', 'lix_change_set', 'lix_change_set_element', 'lix_change_set_edge')
+		ORDER BY ic.created_at DESC
+		LIMIT 10
+	`.execute(lix.db);
+
+	console.log("Changes after state insert:", changesAfterState.rows);
+
+	const testVersionAfter = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "test_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	console.log("Test version changeset before state insert:", testVersion.change_set_id);
+	console.log("Test version changeset after state insert:", testVersionAfter.change_set_id);
+
+	// key_value view should update the version's changeset
+	expect(versionAfterKeyValue.change_set_id).not.toBe(versionBefore.change_set_id);
+	
+	// Direct state insertion should also update the version's changeset
+	expect(testVersionAfter.change_set_id).not.toBe(testVersion.change_set_id);
+});
+
+test("state diverges when versions have common ancestor but different changes", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create base version and add initial state
+	const baseVersion = await createVersion({ lix, id: "base_version" });
+
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "e0",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "mock_plugin",
+			schema_version: "1.0",
+			snapshot_content: {
+				value: "base state",
+			},
+			version_id: "base_version",
+		})
+		.execute();
+
+	const baseVersionAfterInsert = await lix.db
+		.selectFrom("version")
+		.where("id", "=", baseVersion.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Create two versions from the same base changeset
+	const versionA = await createVersion({
+		lix,
+		id: "version_a",
+		changeSet: { id: baseVersionAfterInsert.change_set_id },
+	});
+
+	const versionB = await createVersion({
+		lix,
+		id: "version_b",
+		changeSet: { id: baseVersionAfterInsert.change_set_id },
+	});
+
+	// Both versions should initially see the base state
+	const initialState = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "mock_schema")
+		.where("entity_id", "=", "e0")
+		.selectAll()
+		.execute();
+
+	expect(initialState).toHaveLength(3); // base, version_a, version_b
+
+	// Update state in version A
+	await lix.db
+		.updateTable("state")
+		.set({
+			snapshot_content: { value: "updated in version A" },
+		})
+		.where("entity_id", "=", "e0")
+		.where("version_id", "=", "version_a")
+		.execute();
+
+	// Update state in version B differently
+	await lix.db
+		.updateTable("state")
+		.set({
+			snapshot_content: { value: "updated in version B" },
+		})
+		.where("entity_id", "=", "e0")
+		.where("version_id", "=", "version_b")
+		.execute();
+
+	const divergedState = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "mock_schema")
+		.where("entity_id", "=", "e0")
+		.selectAll()
+		.execute();
+
+	// All three versions should have different states
+	expect(divergedState).toMatchObject([
+		{
+			entity_id: "e0",
+			snapshot_content: { value: "base state" },
+			version_id: "base_version",
+		},
+		{
+			entity_id: "e0",
+			snapshot_content: { value: "updated in version A" },
+			version_id: "version_a",
+		},
+		{
+			entity_id: "e0",
+			snapshot_content: { value: "updated in version B" },
+			version_id: "version_b",
+		},
+	]);
+});

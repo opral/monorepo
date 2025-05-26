@@ -84,7 +84,17 @@ test("arbitrary json is allowed", async () => {
 test("view should show changes across versions", async () => {
 	const lix = await openLixInMemory({});
 
+	const versionsBefore = await lix.db
+		.selectFrom("version")
+		.selectAll()
+		.execute();
+
 	const versionA = await createVersion({ lix, id: "versionA" });
+
+	const versionsAfterCreate = await lix.db
+		.selectFrom("version")
+		.selectAll()
+		.execute();
 
 	await lix.db
 		.insertInto("key_value")
@@ -109,27 +119,32 @@ test("view should show changes across versions", async () => {
 		},
 	]);
 
-	const versionAAfterUpdate = await lix.db
+	const versionsAfterInsert = await lix.db
+		.selectFrom("version")
+		.selectAll()
+		.execute();
+
+	const versionAAfterKvInsert = await lix.db
 		.selectFrom("version")
 		.where("id", "=", versionA.id)
 		.selectAll()
-		.executeTakeFirstOrThrow();
+		.execute();
 
 	// creating a new version from the active version
 	const versionB = await createVersion({
 		lix,
 		id: "versionB",
 		name: "versionB",
-		changeSet: { id: versionAAfterUpdate.change_set_id },
+		changeSet: { id: versionAAfterKvInsert.change_set_id },
 	});
 
-	const kvAfterCreateVersionB = await lix.db
+	const kvAfterInsertInVersionB = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();
 
-	expect(kvAfterCreateVersionB).toMatchObject([
+	expect(kvAfterInsertInVersionB).toMatchObject([
 		{
 			key: "foo",
 			value: "bar",

@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { INITIAL_VERSION_ID } from "./schema.js";
+import { createVersion } from "./create-version.js";
 
 test("insert, update, delete on the version view", async () => {
 	const lix = await openLixInMemory({});
@@ -369,4 +370,187 @@ test("should allow active_version update with valid version_id", async () => {
 			.set({ version_id: "version1" })
 			.execute()
 	).resolves.toBeDefined();
+});
+
+test("versions should be globally accessible regardless of version context", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create required change sets
+	await lix.db
+		.insertInto("change_set")
+		.values([{ id: "cs_a" }, { id: "cs_b" }, { id: "cs_c" }])
+		.execute();
+
+	// Create versions using the version view (simulating creation from different version contexts)
+	await lix.db
+		.insertInto("version")
+		.values([
+			{
+				id: "version_a",
+				name: "Version A",
+				change_set_id: "cs_a",
+				working_change_set_id: "cs_a",
+			},
+			{
+				id: "version_b",
+				name: "Version B",
+				change_set_id: "cs_b",
+				working_change_set_id: "cs_b",
+			},
+			{
+				id: "version_c",
+				name: "Version C",
+				change_set_id: "cs_c",
+				working_change_set_id: "cs_c",
+			},
+		])
+		.execute();
+
+	// Query all versions globally (without version_id filtering)
+	const allVersions = await lix.db
+		.selectFrom("version")
+		.selectAll()
+		.orderBy("name", "asc")
+		.execute();
+
+	// Should include main version (created automatically) + our 3 created versions
+	expect(allVersions).toHaveLength(4);
+
+	const versionNames = allVersions.map((v) => v.name);
+	expect(versionNames).toContain("main");
+	expect(versionNames).toContain("Version A");
+	expect(versionNames).toContain("Version B");
+	expect(versionNames).toContain("Version C");
+});
+
+test("mutation of a version's state should NOT lead to duplicate version entries", async () => {
+	const lix = await openLixInMemory({});
+
+	const versionA = await createVersion({
+		lix,
+		id: "versionA",
+		name: "versionA",
+	});
+
+	const versionsBeforeMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	expect(versionsBeforeMutation).toMatchObject([
+		{
+			id: versionA.id,
+			name: "versionA",
+			change_set_id: expect.any(String),
+			working_change_set_id: expect.any(String),
+		},
+	]);
+
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "test_entity",
+			version_id: versionA.id,
+			snapshot_content: { foo: "bar" },
+			schema_key: "test_schema",
+			file_id: "test_file",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+		})
+		.execute();
+
+	const versionsAfterMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	// With global version architecture, should only see one version record (in global context)
+	expect(versionsAfterMutation).toHaveLength(1);
+	expect(versionsAfterMutation[0]).toMatchObject({
+		id: versionA.id,
+		name: "versionA",
+		version_id: "global",
+		change_set_id: expect.any(String),
+		working_change_set_id: expect.any(String),
+	});
+
+	// The changeset should have advanced due to the state mutation
+	expect(versionsAfterMutation[0]?.change_set_id).not.toEqual(
+		versionA.change_set_id
+	);
+});
+
+test("direct mutation of a version shouldn't lead to duplicate entries", async () => {
+	const lix = await openLixInMemory({});
+
+	const versionA = await createVersion({
+		lix,
+		id: "versionA",
+		name: "versionA",
+	});
+
+	const versionABeforeMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	const globalVersionBeforeMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(versionABeforeMutation).toMatchObject([
+		{
+			id: versionA.id,
+			name: "versionA",
+			version_id: "global",
+			change_set_id: expect.any(String),
+			working_change_set_id: expect.any(String),
+		},
+	]);
+
+	await lix.db
+		.updateTable("version")
+		.where("id", "=", versionA.id)
+		.set({
+			name: "new name",
+		})
+		.execute();
+
+	const versionsAfterMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	const globalVersionAfterMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(versionsAfterMutation).toMatchObject([
+		{
+			id: versionA.id,
+			version_id: "global",
+			name: "new name",
+			change_set_id: expect.any(String),
+			working_change_set_id: expect.any(String),
+		},
+	]);
+
+	// the version was updated in the global version aka
+	// the versions change set did not change itself
+	expect(versionsAfterMutation[0]?.change_set_id).toEqual(
+		versionABeforeMutation[0]?.change_set_id
+	);
+
+	// but the global version's change set id should have changed
+	expect(globalVersionAfterMutation.change_set_id).not.toEqual(
+		globalVersionBeforeMutation.change_set_id
+	);
 });

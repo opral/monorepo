@@ -1,6 +1,9 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
 
 // initial ids (lack of having a separate creation and migration schema)
 export const INITIAL_VERSION_ID = "BoIaHTW9ePX6pNc8";
@@ -15,7 +18,8 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
     json_extract(snapshot_content, '$.id') AS id,
     json_extract(snapshot_content, '$.name') AS name,
     json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
-    json_extract(snapshot_content, '$.working_change_set_id') AS working_change_set_id
+    json_extract(snapshot_content, '$.working_change_set_id') AS working_change_set_id,
+    version_id
   FROM state
   WHERE schema_key = 'lix_version';
 
@@ -237,6 +241,7 @@ export type VersionView = {
 	name: Generated<string>;
 	change_set_id: string;
 	working_change_set_id: string;
+	version_id: Generated<string>;
 };
 
 // Kysely operation types
@@ -264,7 +269,9 @@ export const LixActiveVersionSchema = {
 LixActiveVersionSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixActiveVersion = FromLixSchemaDefinition<typeof LixActiveVersionSchema>;
+export type LixActiveVersion = FromLixSchemaDefinition<
+	typeof LixActiveVersionSchema
+>;
 
 // Database view type (includes operational columns)
 export type ActiveVersionView = {
