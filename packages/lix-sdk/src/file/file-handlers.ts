@@ -3,6 +3,7 @@ import type { LixFile } from "./schema.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
+import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
 
 function globSync(args: {
 	lix: Pick<Lix, "sqlite">;
@@ -19,6 +20,7 @@ function globSync(args: {
 
 	return (result[0]?.[0] as any) === 1;
 }
+
 
 export function handleFileInsert(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
@@ -77,6 +79,14 @@ export function handleFileInsert(args: {
 
 		if (detectedChanges.length > 0) {
 			hasChanges = true;
+			// Validate and store schemas for all detected changes
+			for (const change of detectedChanges) {
+				storeDetectedChangeSchema({
+					lix: args.lix,
+					schema: change.schema,
+				});
+			}
+			
 			// Store plugin detected changes in state table
 			for (const change of detectedChanges) {
 				executeSync({
@@ -110,6 +120,14 @@ export function handleFileInsert(args: {
 			});
 
 			if (detectedChanges.length > 0) {
+				// Validate and store schemas for fallback plugin changes
+				for (const change of detectedChanges) {
+					storeDetectedChangeSchema({
+						lix: args.lix,
+						schema: change.schema,
+					});
+				}
+				
 				for (const change of detectedChanges) {
 					executeSync({
 						lix: args.lix,
@@ -206,6 +224,14 @@ export function handleFileUpdate(args: {
 
 			if (detectedChanges.length > 0) {
 				hasChanges = true;
+				// Validate and store schemas for all detected changes
+				for (const change of detectedChanges) {
+					storeDetectedChangeSchema({
+						lix: args.lix,
+						schema: change.schema,
+					});
+				}
+				
 				// Update plugin detected changes in state table
 				for (const change of detectedChanges) {
 					// Check if the plugin change already exists
@@ -271,6 +297,14 @@ export function handleFileUpdate(args: {
 				});
 
 				if (detectedChanges.length > 0) {
+					// Validate and store schemas for fallback plugin changes
+					for (const change of detectedChanges) {
+						storeDetectedChangeSchema({
+							lix: args.lix,
+							schema: change.schema,
+						});
+					}
+					
 					for (const change of detectedChanges) {
 						// Check if the plugin change already exists
 						const existingChange = executeSync({
