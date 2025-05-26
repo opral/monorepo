@@ -125,10 +125,10 @@ const createParser = () => {
 
 // Parse the expression
 export function parse(sourceCode: string) {
-  try {
-    const parser = createParser();
-    return parser.entry!.tryParse(sourceCode);
-  } catch (e) {
-    return [];
-  }
+	try {
+		const parser = createParser();
+		return parser.entry!.tryParse(sourceCode);
+	} catch (e) {
+		return [];
+	}
 }
