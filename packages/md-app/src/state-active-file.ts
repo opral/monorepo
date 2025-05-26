@@ -26,10 +26,7 @@ import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
 
 const setFirstMarkdownFile = (() => {
-	let isExecuting = false;
 	return async (lix: Lix) => {
-		if (isExecuting) return;
-		isExecuting = true;
 		try {
 			if (!lix) return null;
 			const files =
@@ -52,8 +49,8 @@ const setFirstMarkdownFile = (() => {
 				updateUrlParams({ f: markdownFiles[0].id });
 			}
 			return markdownFiles[0];
-		} finally {
-			isExecuting = false;
+		} catch (error) {
+			console.log("Error setting first markdown file: ", error);
 		}
 	};
 })();

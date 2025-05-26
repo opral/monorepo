@@ -143,7 +143,6 @@ export function PlateEditor() {
 
       // needed because lix is not writing to OPFS yet
       await saveLixToOpfs({ lix });
-      console.log("saved to lix db");
     }, 500),
     [lix, activeFile?.id] // Include activeFile.id in dependencies
   );

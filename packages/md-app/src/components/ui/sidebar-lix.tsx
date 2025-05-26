@@ -376,12 +376,7 @@ export function LixSidebar() {
     if (!lix) return;
 
     try {
-
       const root = await navigator.storage.getDirectory();
-
-      // The file is saved with the current name displayed in the UI (with .lix extension)
-      await root.removeEntry(`${currentLixName}.lix`);
-
       // Find another lix to navigate to
       const availableLixFiles = [];
       // @ts-expect-error - TS doesn't know about values() yet
@@ -392,6 +387,9 @@ export function LixSidebar() {
       }
 
       if (availableLixFiles.length > 0) {
+        // The file is saved with the current name displayed in the UI (with .lix extension)
+        await root.removeEntry(`${currentLixName}.lix`);
+
         // Navigate to another lix
         const nextLixId = availableLixFiles[0].replace(/\.lix$/, '');
         navigate(`?lix=${nextLixId}`);
