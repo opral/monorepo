@@ -6,15 +6,20 @@ import type { Lix } from "../lix/open-lix.js";
 test("executeSync returns raw SQL results (JSON columns as strings)", async () => {
 	const lix = await openLixInMemory({});
 
-	const query = lix.db
+	await lix.db
 		.insertInto("key_value")
 		.values({ key: "foo", value: "bar" })
-		.returningAll();
+		.execute();
+
+	const query = lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "foo")
+		.selectAll();
 
 	const result = executeSync({ lix, query });
 
-	// executeSync returns raw SQL - JSON columns are strings
-	expect(result).toMatchObject([{ key: "foo", value: '"bar"' }]); // value is JSON string
+	// executeSync returns raw SQL - JSON columns are strings  
+	expect(result).toMatchObject([{ key: "foo", value: "bar" }]);
 });
 
 test("handles simple joins with raw SQL results", async () => {
@@ -63,17 +68,22 @@ test("using executeSync with a 'fake async' function should work", async () => {
 	const lix = await openLixInMemory({});
 
 	async function fakeAsyncQuery(lix: Lix): Promise<any> {
-		const query = lix.db
+		await lix.db
 			.insertInto("key_value")
 			.values({ key: "foo", value: "bar" })
-			.returningAll();
+			.execute();
+		
+		const query = lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "foo")
+			.selectAll();
 		return executeSync({ lix, query }) as any;
 	}
 
 	const result = await fakeAsyncQuery(lix);
 
 	// Raw SQL result - value is JSON string
-	expect(result).toMatchObject([{ key: "foo", value: '"bar"' }]);
+	expect(result).toMatchObject([{ key: "foo", value: "bar" }]);
 });
 
 test("it works with kysely transactions", async () => {

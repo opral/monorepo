@@ -104,13 +104,19 @@ test("account ids should have a default", async () => {
 		id: "version0",
 	});
 
-	const account = await lix.db
+	await lix.db
 		.insertInto("account")
 		.values({
 			name: "Test User",
 			version_id: version0.id,
 		})
-		.returningAll()
+		.execute();
+	
+	const account = await lix.db
+		.selectFrom("account")
+		.where("name", "=", "Test User")
+		.where("version_id", "=", version0.id)
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(account.id).toBeDefined();

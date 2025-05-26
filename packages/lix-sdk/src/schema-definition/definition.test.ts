@@ -179,14 +179,14 @@ test("x-lix-foreign-keys with valid structure", () => {
 		"x-lix-key": "blog_post",
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": {
-			"author_id": {
-				"schemaKey": "user_profile",
-				"property": "id"
+			author_id: {
+				schemaKey: "user_profile",
+				property: "id",
 			},
-			"category_id": {
-				"schemaKey": "post_category",
-				"property": "id"
-			}
+			category_id: {
+				schemaKey: "post_category",
+				property: "id",
+			},
 		},
 		properties: {
 			id: { type: "string" },
@@ -208,11 +208,11 @@ test("x-lix-foreign-keys with schemaVersion", () => {
 		"x-lix-key": "comment",
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": {
-			"post_id": {
-				"schemaKey": "blog_post",
-				"property": "id",
-				"schemaVersion": "1.0"
-			}
+			post_id: {
+				schemaKey: "blog_post",
+				property: "id",
+				schemaVersion: "1.0",
+			},
 		},
 		properties: {
 			id: { type: "string" },
@@ -234,10 +234,10 @@ test("x-lix-foreign-keys fails without required fields", () => {
 		"x-lix-key": "blog_post",
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": {
-			"author_id": {
-				"schemaKey": "user_profile"
+			author_id: {
+				schemaKey: "user_profile",
 				// Missing required "property" field
-			}
+			},
 		},
 		properties: {
 			id: { type: "string" },
@@ -258,11 +258,11 @@ test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
 		"x-lix-key": "comment",
 		"x-lix-version": "1.0",
 		"x-lix-foreign-keys": {
-			"post_id": {
-				"schemaKey": "blog_post",
-				"property": "id",
-				"schemaVersion": "v1.0.0" // Invalid format
-			}
+			post_id: {
+				schemaKey: "blog_post",
+				property: "id",
+				schemaVersion: "v1.0.0", // Invalid format
+			},
 		},
 		properties: {
 			id: { type: "string" },
@@ -276,7 +276,6 @@ test("x-lix-foreign-keys fails with invalid schemaVersion format", () => {
 
 	expect(valid).toBe(false);
 });
-
 
 test("x-version is required", () => {
 	const schema = {
@@ -350,4 +349,15 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 	const valid = ajv.validate(LixSchemaDefinition, schema);
 
 	expect(valid).toBe(false);
+});
+
+test("top level type can be a primitive", () => {
+	const schema = {
+		type: "string",
+		"x-lix-key": "mock_json",
+		"x-lix-version": "1.0",
+	} as const satisfies LixSchemaDefinition;
+
+	const valid = ajv.validate(LixSchemaDefinition, schema);
+	expect(valid).toBe(true);
 });

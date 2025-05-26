@@ -25,6 +25,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 				id: "c0",
 				entity_id: "e0",
 				file_id: "f1",
+				schema_version: "1.0",
 				schema_key: "test",
 				plugin_key: "p",
 				snapshot_id: snapshots[0]!.id,
@@ -33,6 +34,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 				id: "c1",
 				entity_id: "e1",
 				file_id: "f1",
+				schema_version: "1.0",
 				schema_key: "test",
 				plugin_key: "p",
 				snapshot_id: snapshots[1]!.id,
@@ -41,6 +43,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 				id: "c2",
 				entity_id: "e1",
 				file_id: "f1",
+				schema_version: "1.0",
 				schema_key: "test",
 				plugin_key: "p",
 				snapshot_id: snapshots[2]!.id,
@@ -120,6 +123,7 @@ test("correctly identifies leaves at different points in history", async () => {
 			{
 				id: "c0",
 				entity_id: "l0",
+				schema_version: "1.0",
 				file_id: "file1",
 				schema_key: "line",
 				plugin_key: "mock_plugin",
@@ -128,6 +132,7 @@ test("correctly identifies leaves at different points in history", async () => {
 			{
 				id: "c1",
 				entity_id: "l1",
+				schema_version: "1.0",
 				file_id: "file1",
 				schema_key: "line",
 				plugin_key: "mock_plugin",
@@ -137,6 +142,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				id: "c2",
 				entity_id: "l2",
 				file_id: "file1",
+				schema_version: "1.0",
 				schema_key: "line",
 				plugin_key: "mock_plugin",
 				snapshot_id: snapshots[2]!.id,
@@ -145,6 +151,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				id: "c3",
 				entity_id: "l2", // Same entity as c2, but newer version
 				file_id: "file1",
+				schema_version: "1.0",
 				schema_key: "line",
 				plugin_key: "mock_plugin",
 				snapshot_id: snapshots[3]!.id,
@@ -153,6 +160,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				id: "c4",
 				entity_id: "l3", // New entity
 				file_id: "file1",
+				schema_version: "1.0",
 				schema_key: "line",
 				plugin_key: "mock_plugin",
 				snapshot_id: snapshots[4]!.id,
@@ -360,6 +368,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 			{
 				id: "c0",
 				entity_id: "entity3",
+				schema_version: "1.0",
 				file_id: "file3",
 				schema_key: "schema3",
 				plugin_key: "mock_plugin",
@@ -368,6 +377,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 			{
 				id: "c1",
 				entity_id: "entity1",
+				schema_version: "1.0",
 				file_id: "file1",
 				schema_key: "schema1",
 				plugin_key: "mock_plugin",
@@ -376,6 +386,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 			{
 				id: "c2",
 				entity_id: "entity2",
+				schema_version: "1.0",
 				file_id: "file2",
 				schema_key: "schema2",
 				plugin_key: "mock_plugin",
@@ -385,6 +396,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				// Same entity as c2
 				id: "c3",
 				entity_id: "entity2",
+				schema_version: "1.0",
 				file_id: "file2",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
@@ -393,6 +405,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 			{
 				id: "c4",
 				entity_id: "entity4",
+				schema_version: "1.0",
 				file_id: "file4",
 				schema_key: "schema4",
 				plugin_key: "mock_plugin",
@@ -401,6 +414,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 			{
 				id: "c5",
 				entity_id: "entity5",
+				schema_version: "1.0",
 				file_id: "file5",
 				schema_key: "schema5",
 				plugin_key: "mock_plugin",
@@ -411,6 +425,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				id: "c6",
 				entity_id: "entity3", // Same entity as c0
 				file_id: "file3",
+				schema_version: "1.0",
 				schema_key: "schema3",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",

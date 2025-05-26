@@ -2,7 +2,7 @@
 import { test, expect } from "vitest";
 import { changeSetHasLabel } from "./change-set-has-label.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createChangeSet } from "../change-set/create-change-set.js";
+import { createChangeSet } from "../change-set-v2/create-change-set.js";
 import { mockChange } from "../change/mock-change.js";
 
 test("should only return change sets with the given label", async () => {

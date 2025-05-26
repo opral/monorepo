@@ -1286,7 +1286,9 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 			entity_id: "user1",
 			version_id: activeVersion.version_id,
 		})
-	).toThrowError(/Foreign key constraint violation.*referenced by.*post.*author_id/i);
+	).toThrowError(
+		/Foreign key constraint violation.*referenced by.*post.*author_id/i
+	);
 });
 
 test("should allow deletion when no foreign keys reference the entity", async () => {
@@ -1306,7 +1308,10 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 	} as const satisfies LixSchemaDefinition;
 
 	// Store schema
-	await lix.db.insertInto("stored_schema").values({ value: userSchema }).execute();
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: userSchema })
+		.execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -1415,7 +1420,10 @@ test("should handle deletion validation for change sets referenced by versions",
 	const lix = await openLixInMemory({});
 
 	// Create a change set
-	await lix.db.insertInto("change_set").values({ id: "cs_referenced" }).execute();
+	await lix.db
+		.insertInto("change_set")
+		.values({ id: "cs_referenced" })
+		.execute();
 
 	// Create a version that references the change set
 	await lix.db
@@ -1450,7 +1458,9 @@ test("should handle deletion validation for change sets referenced by versions",
 			entity_id: "cs_referenced",
 			version_id: activeVersion.version_id,
 		})
-	).toThrowError(/Foreign key constraint violation.*Cannot delete entity.*referenced by.*lix_version/i);
+	).toThrowError(
+		/Foreign key constraint violation.*Cannot delete entity.*referenced by.*lix_version/i
+	);
 });
 
 test("should parse JSON object properties before validation", async () => {
@@ -1465,13 +1475,13 @@ test("should parse JSON object properties before validation", async () => {
 		properties: {
 			id: { type: "string" },
 			title: { type: "string" },
-			body: { 
+			body: {
 				type: "object",
 				properties: {
 					type: { type: "string" },
-					content: { type: "array" }
+					content: { type: "array" },
 				},
-				required: ["type", "content"]
+				required: ["type", "content"],
 			},
 		},
 		required: ["id", "title", "body"],
@@ -1479,7 +1489,10 @@ test("should parse JSON object properties before validation", async () => {
 	} as const satisfies LixSchemaDefinition;
 
 	// Store the schema
-	await lix.db.insertInto("stored_schema").values({ value: documentSchema }).execute();
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: documentSchema })
+		.execute();
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -1497,10 +1510,10 @@ test("should parse JSON object properties before validation", async () => {
 					type: "zettel_text_block",
 					zettel_key: "test_key",
 					style: "zettel_normal",
-					children: []
-				}
-			]
-		})
+					children: [],
+				},
+			],
+		}),
 	};
 
 	expect(() =>
@@ -1519,7 +1532,7 @@ test("should parse JSON object properties before validation", async () => {
 		title: "Invalid Document",
 		body: JSON.stringify({
 			type: "invalid_type", // Missing required 'content' property
-		})
+		}),
 	};
 
 	expect(() =>
@@ -1536,7 +1549,7 @@ test("should parse JSON object properties before validation", async () => {
 	const malformedSnapshotContent = {
 		id: "doc3",
 		title: "Malformed Document",
-		body: "{ invalid json"
+		body: "{ invalid json",
 	};
 
 	expect(() =>

@@ -56,7 +56,6 @@ export async function createChangeSet(args: {
 					parent_id: parent.id,
 					child_id: csId,
 				})
-				.onConflict((oc) => oc.doNothing())
 				.execute();
 		}
 

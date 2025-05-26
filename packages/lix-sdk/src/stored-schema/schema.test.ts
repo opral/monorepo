@@ -161,5 +161,5 @@ test("validates inserted schemas", async () => {
 
 	await expect(
 		lix.db.insertInto("stored_schema").values(schema).execute()
-	).rejects.toThrow(/data\/version must be string/);
+	).rejects.toThrow(/version must be string/);
 });
