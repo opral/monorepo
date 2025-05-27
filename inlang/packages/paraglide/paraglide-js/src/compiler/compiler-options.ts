@@ -8,6 +8,7 @@ export const defaultCompilerOptions = {
 	cleanOutdir: true,
 	disableAsyncLocalStorage: false,
 	experimentalMiddlewareLocaleSplitting: false,
+	experimentalFallbackToBaseLocale: false,
 	localStorageKey: "PARAGLIDE_LOCALE",
 	isServer: "typeof window === 'undefined'",
 	strategy: ["cookie", "globalVariable", "baseLocale"],
@@ -73,6 +74,21 @@ export type CompilerOptions = {
 	 * @default false
 	 */
 	experimentalMiddlewareLocaleSplitting?: boolean;
+	/**
+	 * Whether or not to fallback to the base locale's translation if
+	 * the message is not found in the current locale.
+	 * This improves the user experience by showing a translation
+	 * even if the current locale does not have a translation for a message
+	 * (instead of showing the internal message ID).
+	 *
+	 * This also reduces the bundle size by not including message ids and allowing
+	 * minifiers to remove dead branches more effectively.
+	 *
+	 * ⚠️ This feature is experimental
+	 *
+	 * @default false
+	 */
+	experimentalFallbackToBaseLocale?: boolean;
 	/**
 	 * The name of the localStorage key to use for the localStorage strategy.
 	 *

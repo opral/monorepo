@@ -1,9 +1,15 @@
-import type { Bundle, BundleNested, Message } from "@inlang/sdk";
+import type {
+	Bundle,
+	BundleNested,
+	Message,
+	ProjectSettings,
+} from "@inlang/sdk";
 import { compileMessage } from "./compile-message.js";
 import type { Compiled } from "./types.js";
 import { jsDocBundleFunctionTypes } from "./jsdoc-types.js";
 import { toSafeModuleId } from "./safe-module-id.js";
 import { escapeForDoubleQuoteString } from "../services/codegen/escape.js";
+import type { CompilerOptions } from "./compiler-options.js";
 
 export type CompiledBundleWithMessages = {
 	/** The compilation result for the bundle index */
@@ -21,6 +27,8 @@ export const compileBundle = (args: {
 	bundle: BundleNested;
 	fallbackMap: Record<string, string | undefined>;
 	messageReferenceExpression: (locale: string, bundleId: string) => string;
+	compilerOptions?: Omit<CompilerOptions, "fs" | "project" | "outdir">;
+	settings?: ProjectSettings;
 }): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
 
@@ -44,6 +52,8 @@ export const compileBundle = (args: {
 			bundle: args.bundle,
 			availableLocales: Object.keys(args.fallbackMap),
 			messageReferenceExpression: args.messageReferenceExpression,
+			compilerOptions: args.compilerOptions,
+			settings: args.settings,
 		}),
 		messages: compiledMessages,
 	};
@@ -62,6 +72,14 @@ const compileBundleFunction = (args: {
 	 * The message reference expression
 	 */
 	messageReferenceExpression: (locale: string, bundleId: string) => string;
+	/**
+	 * The compiler options
+	 */
+	compilerOptions?: Omit<CompilerOptions, "fs" | "project" | "outdir">;
+	/**
+	 * The project settings
+	 */
+	settings?: ProjectSettings;
 }): Compiled<Bundle> => {
 	const inputs = args.bundle.declarations.filter(
 		(decl) => decl.type === "input-variable"
@@ -71,6 +89,15 @@ const compileBundleFunction = (args: {
 	const safeBundleId = toSafeModuleId(args.bundle.id);
 
 	const isSafeBundleId = safeBundleId === args.bundle.id;
+
+	let locales = args.availableLocales;
+	const shouldFallbackToBaseLocale =
+		args.compilerOptions?.experimentalFallbackToBaseLocale &&
+		args.settings &&
+		locales.includes(args.settings.baseLocale);
+	if (shouldFallbackToBaseLocale) {
+		locales = locales.filter((locale) => locale !== args.settings!.baseLocale);
+	}
 
 	let code = `/**
 * This function has been compiled by [Paraglide JS](https://inlang.com/m/gerre34r).
@@ -88,13 +115,13 @@ ${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "
 	}
 	const locale = options.locale ?? getLocale()
 	trackMessageCall("${safeBundleId}", locale)
-	${args.availableLocales
+	${locales
 		.map(
 			(locale, index) =>
 				`${index > 0 ? "	" : ""}if (locale === "${locale}") return ${args.messageReferenceExpression(locale, args.bundle.id)}(inputs)`
 		)
 		.join("\n")}
-	return "${args.bundle.id}"
+	return ${shouldFallbackToBaseLocale ? `${args.messageReferenceExpression(args.settings!.baseLocale, args.bundle.id)}(inputs)` : `"${args.bundle.id}"`}
 };`;
 
 	if (isSafeBundleId === false) {

@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { compileBundle } from "./compile-bundle.js";
-import type { BundleNested } from "@inlang/sdk";
+import type { BundleNested, ProjectSettings } from "@inlang/sdk";
 import { toSafeModuleId } from "./safe-module-id.js";
 
 test("compiles to jsdoc", async () => {
@@ -169,4 +169,53 @@ test("handles message pattern with duplicate variable references", async () => {
 	expect(enMessage?.code).toContain(
 		"Last ${i.days} days, showing ${i.days} items"
 	);
+});
+
+test("supports experimentalFallbackToBaseLocale", async () => {
+	const mockBundle: BundleNested = {
+		id: "blue_moon_bottle",
+		declarations: [{ type: "input-variable", name: "age" }],
+		messages: [
+			{
+				id: "message-id",
+				bundleId: "blue_moon_bottle",
+				locale: "en",
+				selectors: [],
+				variants: [
+					{
+						id: "1",
+						messageId: "message-id",
+						matches: [],
+						pattern: [
+							{ type: "text", value: "Hello" },
+							{
+								type: "expression",
+								arg: { type: "variable-reference", name: "age" },
+							},
+						],
+					},
+				],
+			},
+		],
+	};
+
+	const result = compileBundle({
+		fallbackMap: {
+			en: "en",
+			de: "de",
+		},
+		bundle: mockBundle,
+		messageReferenceExpression: (locale) =>
+			`${toSafeModuleId(locale)}.blue_moon_bottle`,
+		settings: {
+			baseLocale: "en",
+		} as ProjectSettings,
+		compilerOptions: {
+			experimentalFallbackToBaseLocale: true,
+		},
+	});
+
+	expect(result.bundle.code).toContain("return en.blue_moon_bottle(inputs)");
+	expect(result.bundle.code).toContain('locale === "de"');
+	expect(result.bundle.code).not.toContain('locale === "en"');
 });
