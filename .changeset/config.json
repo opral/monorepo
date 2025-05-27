@@ -16,6 +16,7 @@
     "@inlang/paraglide-js-example-next-js-ssg",
     "@inlang/paraglide-js-example-astro",
     "@inlang/paraglide-js-example-sveltekit",
+    "@inlang/paraglide-js-example-solidstart",
     "@inlang/paraglide-js-example-incremental-migration",
     "@inlang/plugin-icu1",
     "@inlang/server",
