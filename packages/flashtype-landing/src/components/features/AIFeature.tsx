@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { Sparkles, Bot, Zap, Brain, Cpu, Command } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Sparkles, Zap, Brain, Cpu } from "lucide-react";
 import FlashIcon from "../FlashIcon";
 
 const AIFeature = () => {
