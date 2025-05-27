@@ -3,6 +3,7 @@ import Logo from "./Logo";
 import PromptInput from "./PromptInput";
 import PromptPills from "./PromptPills";
 import { Sparkles } from "lucide-react";
+import { IconBrandDiscord, IconBrandGithub } from "@tabler/icons-react";
 
 // LixIcon component for the Change Control feature
 const LixIcon = ({ size = 24, className = "" }) => {
@@ -68,54 +69,154 @@ const Hero = () => {
 
       {/* Navbar with logo and waitlist button */}
       <div className="w-full pt-6 pb-2 z-20 relative">
-        <div className="container mx-auto flex justify-between items-center px-4">
-          <Logo />
-          <a
-            href="#waitlist-form"
-            className="glassmorphic px-5 py-2 text-sm text-white border border-white/10 hover:border-yellow-primary/30 transition-all duration-300 group inline-flex animated-border"
-            onClick={(e) => {
-              e.preventDefault();
-              // Scroll to the waitlist form
-              document.getElementById("waitlist-form")?.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
+        <div className="container mx-auto px-4">
+          {/* Desktop layout */}
+          <div className="hidden md:flex justify-between items-center">
+            <Logo />
+            <div className="flex items-center">
+              {/* Social icons navigation */}
+              <div className="flex items-center space-x-4 mr-6">
+                {/* Discord */}
+                <a
+                  href="https://discord.gg/CNPfhWpcAa"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 relative group"
+                  aria-label="Join our Discord"
+                >
+                  <IconBrandDiscord size={20} stroke={1.5} />
+                  <div className="absolute -inset-2 bg-yellow-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </a>
 
-              // Focus the input field after scrolling is complete
-              setTimeout(() => {
-                const emailInput = document.getElementById(
-                  "waitlist-email-input"
-                ) as HTMLInputElement;
-                if (emailInput) {
-                  emailInput.focus();
-                  // Optional: move cursor to end of any existing text
-                  const length = emailInput.value.length;
-                  emailInput.setSelectionRange(length, length);
-                }
-              }, 1000); // Delay to allow smooth scrolling to complete
-            }}
-          >
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              <span>Join the waitlist</span>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                {/* GitHub */}
+                <a
+                  href="https://github.com/opral/monorepo"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 relative group"
+                  aria-label="View on GitHub"
+                >
+                  <IconBrandGithub size={20} stroke={1.5} />
+                  <div className="absolute -inset-2 bg-yellow-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </a>
+
+                {/* Lix link */}
+                <a
+                  href="https://lix.opral.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 relative group"
+                  aria-label="Visit Lix"
+                >
+                  <LixIcon size={20} className="text-current" />
+                  <div className="absolute -inset-2 bg-yellow-primary/5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </a>
+              </div>
+              
+              {/* Join waitlist button */}
+              <a
+                href="#waitlist-form"
+                className="glassmorphic px-5 py-2 text-sm text-white border border-white/10 hover:border-yellow-primary/30 transition-all duration-300 group inline-flex animated-border"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Scroll to the waitlist form
+                  document.getElementById("waitlist-form")?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+
+                  // Focus the input field after scrolling is complete
+                  setTimeout(() => {
+                    const emailInput = document.getElementById(
+                      "waitlist-email-input"
+                    ) as HTMLInputElement;
+                    if (emailInput) {
+                      emailInput.focus();
+                      // Optional: move cursor to end of any existing text
+                      const length = emailInput.value.length;
+                      emailInput.setSelectionRange(length, length);
+                    }
+                  }, 1000); // Delay to allow smooth scrolling to complete
+                }}
               >
-                <path
-                  d="M5 12H19M19 12L12 5M19 12L12 19"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </svg>
-            </span>
-            <div className="absolute inset-0 bg-yellow-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[16px]"></div>
-          </a>
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <span>Join the waitlist</span>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5 12H19M19 12L12 5M19 12L12 19"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                    />
+                  </svg>
+                </span>
+                <div className="absolute inset-0 bg-yellow-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[16px]"></div>
+              </a>
+            </div>
+          </div>
+          
+          {/* Mobile layout */}
+          <div className="flex flex-col md:hidden">
+            <div className="flex justify-center mb-4">
+              <Logo />
+            </div>
+            <div className="flex justify-center">
+              <a
+                href="#waitlist-form"
+                className="glassmorphic px-5 py-2 text-sm text-white border border-white/10 hover:border-yellow-primary/30 transition-all duration-300 group inline-flex animated-border"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Scroll to the waitlist form
+                  document.getElementById("waitlist-form")?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+
+                  // Focus the input field after scrolling is complete
+                  setTimeout(() => {
+                    const emailInput = document.getElementById(
+                      "waitlist-email-input"
+                    ) as HTMLInputElement;
+                    if (emailInput) {
+                      emailInput.focus();
+                      // Optional: move cursor to end of any existing text
+                      const length = emailInput.value.length;
+                      emailInput.setSelectionRange(length, length);
+                    }
+                  }, 1000); // Delay to allow smooth scrolling to complete
+                }}
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <span>Join the waitlist</span>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M5 12H19M19 12L12 5M19 12L12 19"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                    />
+                  </svg>
+                </span>
+                <div className="absolute inset-0 bg-yellow-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-[16px]"></div>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
