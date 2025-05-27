@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sparkles, Zap, Brain, Cpu } from "lucide-react";
 import FlashIcon from "../FlashIcon";
 

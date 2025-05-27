@@ -82,7 +82,6 @@ const ChangeControlFeature = () => {
 
   // Character-based diff function
   const generateCharacterDiff = (oldText: string, newText: string) => {
-    const result = [];
     let i = 0;
     let j = 0;
 
