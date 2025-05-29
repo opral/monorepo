@@ -1,5 +1,4 @@
 import { assertIsLocale } from "./assert-is-locale.js";
-import { isLocale } from "./is-locale.js";
 import {
 	baseLocale,
 	strategy,
@@ -14,6 +13,7 @@ import {
 } from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
+import { extractLocaleFromNavigator } from "./extract-locale-from-navigator.js";
 import { setLocale } from "./set-locale.js";
 
 /**
@@ -77,7 +77,7 @@ export let getLocale = () => {
 			strat === "preferredLanguage" &&
 			!isServer
 		) {
-			locale = negotiatePreferredLanguageFromNavigator();
+			locale = extractLocaleFromNavigator();
 		} else if (
 			TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
 			strat === "localStorage" &&
@@ -102,32 +102,6 @@ export let getLocale = () => {
 		"No locale found. Read the docs https://inlang.com/m/gerre34r/library-inlang-paraglideJs/errors#no-locale-found"
 	);
 };
-
-/**
- * Negotiates a preferred language from navigator.languages.
- *
- * @returns {string|undefined} The negotiated preferred language.
- */
-function negotiatePreferredLanguageFromNavigator() {
-	if (!navigator?.languages?.length) {
-		return undefined;
-	}
-
-	const languages = navigator.languages.map((lang) => ({
-		fullTag: lang.toLowerCase(),
-		baseTag: lang.split("-")[0]?.toLowerCase(),
-	}));
-
-	for (const lang of languages) {
-		if (isLocale(lang.fullTag)) {
-			return lang.fullTag;
-		} else if (isLocale(lang.baseTag)) {
-			return lang.baseTag;
-		}
-	}
-
-	return undefined;
-}
 
 /**
  * Overwrite the \`getLocale()\` function.
