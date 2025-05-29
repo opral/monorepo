@@ -28,6 +28,8 @@ export type Runtime = {
 	extractLocaleFromUrl: typeof import("./extract-locale-from-url.js").extractLocaleFromUrl;
 	extractLocaleFromRequest: typeof import("./extract-locale-from-request.js").extractLocaleFromRequest;
 	extractLocaleFromCookie: typeof import("./extract-locale-from-cookie.js").extractLocaleFromCookie;
+	extractLocaleFromHeader: typeof import("./extract-locale-from-header.js").extractLocaleFromHeader;
+	extractLocaleFromNavigator: typeof import("./extract-locale-from-navigator.js").extractLocaleFromNavigator;
 	generateStaticLocalizedUrls: typeof import("./generate-static-localized-urls.js").generateStaticLocalizedUrls;
 	trackMessageCall: typeof import("./track-message-call.js").trackMessageCall;
 };
