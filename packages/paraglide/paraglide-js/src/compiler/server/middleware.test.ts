@@ -186,6 +186,91 @@ test("call onRedirect callback when redirecting to new url", async () => {
 	);
 });
 
+test("sets Vary: Accept-Language header when preferredLanguage strategy is used and redirect occurs", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["preferredLanguage", "url"],
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:path(.*)?",
+				localized: [
+					["en", "https://example.com/en/:path(.*)?"],
+					["fr", "https://example.com/fr/:path(.*)?"],
+				],
+			},
+		],
+	});
+
+	// Request with Accept-Language header preferring French
+	const request = new Request("https://example.com/en/some-path", {
+		headers: {
+			"Accept-Language": "fr,en;q=0.8",
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	const response = await runtime.paraglideMiddleware(request, () => {
+		// This shouldn't be called since we should redirect
+		throw new Error("Should not reach here");
+	});
+
+	expect(response instanceof Response).toBe(true);
+	expect(response.status).toBe(307); // Redirect status code
+	expect(response.headers.get("Location")).toBe(
+		"https://example.com/fr/some-path"
+	);
+	// Should have Vary header when preferredLanguage strategy is used
+	expect(response.headers.get("Vary")).toBe("Accept-Language");
+});
+
+test("does not set Vary header when preferredLanguage strategy is not used", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["cookie", "url"],
+		cookieName: "PARAGLIDE_LOCALE",
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:path(.*)?",
+				localized: [
+					["en", "https://example.com/en/:path(.*)?"],
+					["fr", "https://example.com/fr/:path(.*)?"],
+				],
+			},
+		],
+	});
+
+	// Request with cookie specifying French
+	const request = new Request("https://example.com/en/some-path", {
+		headers: {
+			cookie: `PARAGLIDE_LOCALE=fr`,
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	const response = await runtime.paraglideMiddleware(request, () => {
+		// This shouldn't be called since we should redirect
+		throw new Error("Should not reach here");
+	});
+
+	expect(response instanceof Response).toBe(true);
+	expect(response.status).toBe(307); // Redirect status code
+	expect(response.headers.get("Location")).toBe(
+		"https://example.com/fr/some-path"
+	);
+	// Should NOT have Vary header when preferredLanguage strategy is not used
+	expect(response.headers.get("Vary")).toBe(null);
+});
+
 test("does not call onRedirect callback when there is no redirecting", async () => {
 	const runtime = await createParaglide({
 		blob: await newProject({
