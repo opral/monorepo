@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { compileBundle } from "./compile-bundle.js";
-import type { BundleNested } from "@inlang/sdk";
+import type { BundleNested, ProjectSettings } from "@inlang/sdk";
 import { toSafeModuleId } from "./safe-module-id.js";
 
 test("compiles to jsdoc", async () => {
@@ -39,6 +39,9 @@ test("compiles to jsdoc", async () => {
 		bundle: mockBundle,
 		messageReferenceExpression: (locale) =>
 			`${toSafeModuleId(locale)}.blue_moon_bottle`,
+		settings: {
+			locales: ["en", "en-US"],
+		} as ProjectSettings,
 	});
 
 	expect(result.bundle.code).toMatchInlineSnapshot(
@@ -62,8 +65,7 @@ export const blue_moon_bottle = (inputs, options = {}) => {
 	const locale = options.locale ?? getLocale()
 	trackMessageCall("blue_moon_bottle", locale)
 	if (locale === "en") return en.blue_moon_bottle(inputs)
-	if (locale === "en-US") return en_us2.blue_moon_bottle(inputs)
-	return "blue_moon_bottle"
+	return en_us2.blue_moon_bottle(inputs)
 };"`
 	);
 });
