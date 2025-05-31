@@ -1,4 +1,3 @@
-import { fileQueueSettled } from "../../file-queue/file-queue-settled.js";
 import { closeLix } from "../../lix/close-lix.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import type { Lix } from "../../lix/open-lix.js";
@@ -87,7 +86,7 @@ export const createLspInMemoryEnvironment = (): LspEnvironment => {
 			if (connections.size === 0) {
 				// TODO no concurrency guarantees
 				const lix = openLixes.get(args.id);
-				await fileQueueSettled({ lix: lix! });
+				// await fileQueueSettled({ lix: lix! });
 				const blob = await toBlob({ lix: lix! });
 				await closeLix({ lix: lix! });
 				openConnections.delete(args.id);

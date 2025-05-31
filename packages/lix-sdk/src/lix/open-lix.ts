@@ -4,10 +4,10 @@ import { initDb } from "../database/init-db.js";
 // import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { NewKeyValue } from "../key-value/database-schema.js";
+import type { NewKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import type { Account } from "../account/schema.js";
+import type { LixAccount } from "../account/schema.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 
@@ -43,7 +43,7 @@ export async function openLix(args: {
 	 *   const account = localStorage.getItem("account")
 	 *   const lix = await openLix({ account })
 	 */
-	account?: Account;
+	account?: LixAccount;
 	database: SqliteWasmDatabase;
 	/**
 	 * Usecase are lix apps that define their own file format,
@@ -87,10 +87,7 @@ export async function openLix(args: {
 					.execute();
 			} else {
 				// Insert new key
-				await db
-					.insertInto("key_value")
-					.values(keyValue)
-					.execute();
+				await db.insertInto("key_value").values(keyValue).execute();
 			}
 		}
 	}
@@ -163,8 +160,8 @@ async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {
 		if (Math.random() > 0.1) {
 			await capture("LIX-SDK lix opened", {
 				accountId: activeAccount.id,
-				lixId: lixId.value,
-				telemetryKeyValue: telemetry?.value ?? "on",
+				lixId: lixId.value as string,
+				telemetryKeyValue: (telemetry?.value ?? "on") as string,
 				properties: {
 					lix_sdk_version: ENV_VARIABLES.LIX_SDK_VERSION,
 					stored_file_extensions: fileExtensions,

@@ -81,21 +81,14 @@ test("arbitrary json is allowed", async () => {
 	expect(viewAfterInsert).toEqual(kvs);
 });
 
-test("view should show changes across versions", async () => {
+// requires global version feature
+test.todo("view should show changes across versions", async () => {
 	const lix = await openLixInMemory({});
 
-	const versionsBefore = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.execute();
-
+	// creating a new version
 	const versionA = await createVersion({ lix, id: "versionA" });
 
-	const versionsAfterCreate = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.execute();
-
+	// inserting a key-value pair in version A
 	await lix.db
 		.insertInto("key_value")
 		.values({
@@ -119,16 +112,11 @@ test("view should show changes across versions", async () => {
 		},
 	]);
 
-	const versionsAfterInsert = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.execute();
-
 	const versionAAfterKvInsert = await lix.db
 		.selectFrom("version")
 		.where("id", "=", versionA.id)
 		.selectAll()
-		.execute();
+		.executeTakeFirstOrThrow();
 
 	// creating a new version from the active version
 	const versionB = await createVersion({

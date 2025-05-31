@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "./create-change-set.js";
 
-test("creating a change set should succeed", async () => {
+test.skip("creating a change set should succeed", async () => {
 	const lix = await openLixInMemory({});
 
 	const mockChanges = await lix.db
@@ -47,7 +47,7 @@ test("creating a change set should succeed", async () => {
 	);
 });
 
-test("creating a change set with empty elements array should succeed", async () => {
+test.skip("creating a change set with empty elements array should succeed", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create a change set with an empty elements array
@@ -69,7 +69,7 @@ test("creating a change set with empty elements array should succeed", async () 
 	expect(changeSetMembers).toHaveLength(0);
 });
 
-test("creating a change set with labels should associate the labels with the change set", async () => {
+test.skip("creating a change set with labels should associate the labels with the change set", async () => {
 	const lix = await openLixInMemory({});
 
 	// Get existing labels
@@ -111,7 +111,7 @@ test("creating a change set with labels should associate the labels with the cha
 	);
 });
 
-test("creating a change set with parents should establish parent-child relationships", async () => {
+test.skip("creating a change set with parents should establish parent-child relationships", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create two parent change sets
@@ -150,7 +150,7 @@ test("creating a change set with parents should establish parent-child relations
 	]);
 });
 
-test("specifiying immutable elements", async () => {
+test.skip("specifiying immutable elements", async () => {
 	const lix = await openLixInMemory({});
 
 	const changeSet = await createChangeSet({

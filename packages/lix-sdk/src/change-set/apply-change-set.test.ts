@@ -8,8 +8,6 @@ import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { fileQueueSettled } from "../file-queue/index.js";
-import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
 import { mockChange } from "../change/mock-change.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";

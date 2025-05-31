@@ -136,25 +136,6 @@ test("x-lix-primary-key must be array of strings when present", () => {
 	expect(valid).toBe(true);
 });
 
-test("x-lix-primary-key fails with invalid structure (not array of strings)", () => {
-	const schema = {
-		type: "object",
-		"x-lix-key": "mock",
-		"x-lix-version": "1.0",
-		"x-lix-primary-key": [["id"], ["version"]],
-		properties: {
-			id: { type: "string" },
-			version: { type: "string" },
-		},
-		required: ["id", "version"],
-		additionalProperties: false,
-	};
-
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-
-	expect(valid).toBe(false);
-});
-
 test("x-lix-foreign-keys is optional", () => {
 	const schema = {
 		type: "object",

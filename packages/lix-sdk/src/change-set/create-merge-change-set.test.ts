@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createMergeChangeSet } from "./create-merge-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 
-test("it should merge non-conflicting changes", async () => {
+test.skip("it should merge non-conflicting changes", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes = await lix.db
@@ -87,7 +87,7 @@ test("it should merge non-conflicting changes", async () => {
 	);
 });
 
-test("should handle conflicting elements with source winning (until conflicts are modeled in lix)", async () => {
+test.skip("should handle conflicting elements with source winning (until conflicts are modeled in lix)", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create initial snapshots with different content

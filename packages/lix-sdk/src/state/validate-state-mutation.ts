@@ -361,7 +361,6 @@ function validateDeletionConstraints(args: {
 	entity_id?: string;
 	version_id: string;
 }): void {
-	console.log(`validateDeletionConstraints called for entity ${args.entity_id} with schema ${args.schema["x-lix-key"]}`);
 	if (!args.entity_id) {
 		throw new Error("entity_id is required for delete operations");
 	}
@@ -374,7 +373,7 @@ function validateDeletionConstraints(args: {
 			.select("snapshot_content")
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
-			.where("version_id", "=", args.version_id)
+			.where("version_id", "=", args.version_id),
 	});
 
 	if (currentEntity.length === 0) {
@@ -384,46 +383,39 @@ function validateDeletionConstraints(args: {
 	// Get all schemas to check which ones have foreign keys that might reference this entity
 	const allSchemas = executeSync({
 		lix: args.lix,
-		query: args.lix.db.selectFrom("stored_schema").selectAll()
+		query: args.lix.db.selectFrom("stored_schema").selectAll(),
 	});
-
-	console.log(`Found ${allSchemas.length} schemas to check`);
 
 	// Check each schema for foreign keys that reference this entity's schema
 	for (const storedSchema of allSchemas) {
 		// Parse the JSON string value
-		const schema = typeof storedSchema.value === 'string' 
-			? JSON.parse(storedSchema.value) as LixSchemaDefinition
-			: storedSchema.value as LixSchemaDefinition;
-		
-		console.log(`Checking schema ${schema["x-lix-key"]}, has foreign keys: ${!!schema["x-lix-foreign-keys"]}`);
+		const schema =
+			typeof storedSchema.value === "string"
+				? (JSON.parse(storedSchema.value) as LixSchemaDefinition)
+				: (storedSchema.value as LixSchemaDefinition);
+
 		if (!schema["x-lix-foreign-keys"]) {
 			continue;
 		}
 
 		// Check each foreign key in this schema
-		for (const [localProperty, foreignKeyDef] of Object.entries(schema["x-lix-foreign-keys"])) {
-			console.log(`Checking foreign key ${localProperty} in schema ${schema["x-lix-key"]}, references ${foreignKeyDef.schemaKey}, target schema is ${args.schema["x-lix-key"]}`);
+		for (const [localProperty, foreignKeyDef] of Object.entries(
+			schema["x-lix-foreign-keys"]
+		)) {
 			// Skip if this foreign key doesn't reference our schema
 			if (foreignKeyDef.schemaKey !== args.schema["x-lix-key"]) {
-				console.log(`Skipping: ${foreignKeyDef.schemaKey} !== ${args.schema["x-lix-key"]}`);
 				continue;
 			}
-			console.log(`Found matching foreign key!`);
 
 			// Get the value of the property that is being referenced
 			const rawContent = currentEntity[0].snapshot_content;
-			const entityContent = typeof rawContent === 'string' 
-				? JSON.parse(rawContent) 
-				: rawContent as any;
+			const entityContent =
+				typeof rawContent === "string"
+					? JSON.parse(rawContent)
+					: (rawContent as any);
 			const referencedValue = entityContent[foreignKeyDef.property];
 
-			console.log(`Entity content:`, JSON.stringify(entityContent));
-			console.log(`Foreign key def:`, JSON.stringify(foreignKeyDef));
-			console.log(`Referenced property '${foreignKeyDef.property}' has value:`, JSON.stringify(referencedValue));
-
 			if (referencedValue === null || referencedValue === undefined) {
-				console.log(`Skipping null/undefined referenced value`);
 				continue;
 			}
 
@@ -439,10 +431,8 @@ function validateDeletionConstraints(args: {
 						sql`json_extract(snapshot_content, '$.' || ${localProperty})`,
 						"=",
 						referencedValue
-					)
+					),
 			});
-
-			console.log(`Found ${referencingEntities.length} entities referencing this value`);
 
 			if (referencingEntities.length > 0) {
 				throw new Error(

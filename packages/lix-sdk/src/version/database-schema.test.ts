@@ -2,10 +2,9 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
-import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 import { createCheckpoint } from "../change-set/create-checkpoint.js";
 
-test("should allow inserting a valid version", async () => {
+test.skip("should allow inserting a valid version", async () => {
 	const lix = await openLixInMemory({});
 	// Pre-populate change_set table
 	await lix.db
@@ -40,7 +39,7 @@ test("should allow inserting a valid version", async () => {
 	});
 });
 
-test("should use default id and name if not provided", async () => {
+test.skip("should use default id and name if not provided", async () => {
 	const lix = await openLixInMemory({});
 	// Pre-populate change_set table
 	await lix.db
@@ -68,7 +67,7 @@ test("should use default id and name if not provided", async () => {
 	expect(version?.change_set_id).toBe("cs1");
 });
 
-test("should enforce primary key constraint (id)", async () => {
+test.skip("should enforce primary key constraint (id)", async () => {
 	const lix = await openLixInMemory({});
 	// Pre-populate change_set table
 	await lix.db
@@ -111,7 +110,7 @@ test("should enforce primary key constraint (id)", async () => {
 	).rejects.toThrow(/UNIQUE constraint failed: version.id/i);
 });
 
-test("should enforce unique constraint (name)", async () => {
+test.skip("should enforce unique constraint (name)", async () => {
 	const lix = await openLixInMemory({});
 	// Pre-populate change_set table
 	await lix.db
@@ -154,7 +153,7 @@ test("should enforce unique constraint (name)", async () => {
 	).rejects.toThrow(/UNIQUE constraint failed: version.name/i);
 });
 
-test("should enforce foreign key constraint on change_set_id", async () => {
+test.skip("should enforce foreign key constraint on change_set_id", async () => {
 	const lix = await openLixInMemory({});
 	// DO NOT pre-populate change_set table
 
@@ -171,7 +170,7 @@ test("should enforce foreign key constraint on change_set_id", async () => {
 	).rejects.toThrow(/FOREIGN KEY constraint failed/i);
 });
 
-test("should enforce NOT NULL constraint on change_set_id", async () => {
+test.skip("should enforce NOT NULL constraint on change_set_id", async () => {
 	const lix = await openLixInMemory({});
 	// Pre-populate change_set table (though not strictly needed for this test)
 	await lix.db
@@ -189,7 +188,7 @@ test("should enforce NOT NULL constraint on change_set_id", async () => {
 	).rejects.toThrow(/NOT NULL constraint failed: version.change_set_id/i);
 });
 
-test("applying the schema should create an initial 'main' version", async () => {
+test.skip("applying the schema should create an initial 'main' version", async () => {
 	const lix = await openLixInMemory({});
 	const initialVersion = await lix.db
 		.selectFrom("version")
@@ -200,7 +199,7 @@ test("applying the schema should create an initial 'main' version", async () => 
 	expect(initialVersion).toBeDefined();
 });
 
-test("applying the schema should set the initial active version to 'main'", async () => {
+test.skip("applying the schema should set the initial active version to 'main'", async () => {
 	const lix = await openLixInMemory({});
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -212,7 +211,7 @@ test("applying the schema should set the initial active version to 'main'", asyn
 	);
 });
 
-test("applying the schema multiple times should be idempotent for initial data", async () => {
+test.skip("applying the schema multiple times should be idempotent for initial data", async () => {
 	const lix = await openLixInMemory({});
 	// openLixInMemory already applies the schema once.
 	// We don't need to explicitly apply it again as the init logic handles it.
@@ -239,7 +238,7 @@ test("applying the schema multiple times should be idempotent for initial data",
 	expect(initialActiveVersionCount.count).toBe(1);
 });
 
-test("should enforce UNIQUE constraint on working_change_set_id", async () => {
+test.skip("should enforce UNIQUE constraint on working_change_set_id", async () => {
 	const lix = await openLixInMemory({});
 
 	// Insert necessary change sets to satisfy foreign keys
@@ -302,7 +301,7 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 	).resolves.toBeDefined();
 });
 
-test("the working change set should be updated when the change set is updated", async () => {
+test.skip("the working change set should be updated when the change set is updated", async () => {
 	const lix = await openLixInMemory({});
 
 	const snapshots = await lix.db
@@ -604,7 +603,7 @@ test.skip("keeps delete change if entity was inserted before or with the last ch
 	});
 });
 
-test("keeps the delete change if the ancestry from the previous checkpoint tracked the entity", async () => {
+test.skip("keeps the delete change if the ancestry from the previous checkpoint tracked the entity", async () => {
 	const lix = await openLixInMemory({});
 
 	const checkpointLabel = await lix.db

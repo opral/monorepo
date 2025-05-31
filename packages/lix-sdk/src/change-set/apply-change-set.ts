@@ -1,13 +1,9 @@
 import type { Lix } from "../lix/index.js";
-import { applyOwnChanges } from "../own-change-control/apply-own-change.js";
 import type { ChangeSet } from "./database-schema.js";
 import type { GraphTraversalMode } from "../database/graph-traversal-mode.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import type { Version } from "../version/database-schema.js";
-import { withSkipOwnChangeControl } from "../own-change-control/with-skip-own-change-control.js";
-import { withSkipFileQueue } from "../file-queue/with-skip-file-queue.js";
-import type { LixFile } from "../file/database-schema.js";
 
 /**
  * Applies a change set to the lix.

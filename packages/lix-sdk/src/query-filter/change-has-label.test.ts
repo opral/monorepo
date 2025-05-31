@@ -3,7 +3,7 @@ import { changeHasLabel } from "./change-has-label.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 
-test("should only return changes with the given label", async () => {
+test.todo("should only return changes with the given label", async () => {
 	const lix = await openLixInMemory({});
 
 	const changes0 = await lix.db

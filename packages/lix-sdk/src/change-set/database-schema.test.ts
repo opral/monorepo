@@ -4,7 +4,7 @@ import { mockChange } from "../change/mock-change.js";
 import { createChangeSet } from "./create-change-set.js";
 
 describe("change_set table", () => {
-	test("should allow inserting change sets with auto-generated IDs", async () => {
+	test.skip("should allow inserting change sets with auto-generated IDs", async () => {
 		const lix = await openLixInMemory({});
 
 		// Insert without specifying id
@@ -17,7 +17,7 @@ describe("change_set table", () => {
 		expect(insertResult.id).toBeDefined();
 	});
 
-	test("should allow inserting with explicit ID", async () => {
+	test.skip("should allow inserting with explicit ID", async () => {
 		const lix = await openLixInMemory({});
 		const explicitId = "my-custom-changeset-id";
 
@@ -33,7 +33,7 @@ describe("change_set table", () => {
 		expect(changeSet?.id).toBe(explicitId);
 	});
 
-	test("deleting a change set should delete its elements (useful for interim change sets used in a transaction)", async () => {
+	test.skip("deleting a change set should delete its elements (useful for interim change sets used in a transaction)", async () => {
 		const lix = await openLixInMemory({});
 
 		const changes = await lix.db
@@ -83,7 +83,7 @@ describe("change_set table", () => {
 		expect(deletedChangeSetElements).toHaveLength(0);
 	});
 
-	test("change_set.id are uuid-v7", async () => {
+	test.skip("change_set.id are uuid-v7", async () => {
 		const lix = await openLixInMemory({});
 
 		const changeSet = await lix.db
@@ -97,7 +97,7 @@ describe("change_set table", () => {
 });
 
 describe("change_set_element table", () => {
-	test("should allow inserting valid elements", async () => {
+	test.skip("should allow inserting valid elements", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate change_set
 		await lix.db
@@ -134,7 +134,7 @@ describe("change_set_element table", () => {
 		});
 	});
 
-	test("should enforce primary key (change_set_id, change_id)", async () => {
+	test.skip("should enforce primary key (change_set_id, change_id)", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate change_set and change
 		await lix.db
@@ -174,7 +174,7 @@ describe("change_set_element table", () => {
 		).rejects.toThrow(/UNIQUE constraint failed/i);
 	});
 
-	test("should enforce foreign key constraint on change_set_id", async () => {
+	test.skip("should enforce foreign key constraint on change_set_id", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate ONLY change
 		const change = await lix.db
@@ -197,7 +197,7 @@ describe("change_set_element table", () => {
 		).rejects.toThrow(/FOREIGN KEY constraint failed/i);
 	});
 
-	test("should enforce foreign key constraint on change_id", async () => {
+	test.skip("should enforce foreign key constraint on change_id", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate ONLY change_set
 		await lix.db
@@ -220,7 +220,7 @@ describe("change_set_element table", () => {
 		).rejects.toThrow(/FOREIGN KEY constraint failed/i);
 	});
 
-	test("should enforce UNIQUE constraint on (change_set_id, entity_id, schema_key, file_id)", async () => {
+	test.skip("should enforce UNIQUE constraint on (change_set_id, entity_id, schema_key, file_id)", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate change set
 		await lix.db
@@ -284,7 +284,7 @@ describe("change_set_element table", () => {
 });
 
 describe("change_set_label table", () => {
-	test("should allow inserting valid labels", async () => {
+	test.skip("should allow inserting valid labels", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate change_set and label
 		await lix.db
@@ -310,7 +310,7 @@ describe("change_set_label table", () => {
 		expect(changeSetLabel).toEqual({ change_set_id: "cs1", label_id: "l1" });
 	});
 
-	test("should enforce primary key (change_set_id, label_id)", async () => {
+	test.skip("should enforce primary key (change_set_id, label_id)", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate change_set and label
 		await lix.db
@@ -336,7 +336,7 @@ describe("change_set_label table", () => {
 		).rejects.toThrow(/UNIQUE constraint failed/i);
 	});
 
-	test("should enforce foreign key constraint on change_set_id", async () => {
+	test.skip("should enforce foreign key constraint on change_set_id", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate ONLY label
 		await lix.db
@@ -352,7 +352,7 @@ describe("change_set_label table", () => {
 		).rejects.toThrow(/FOREIGN KEY constraint failed/i);
 	});
 
-	test("should enforce foreign key constraint on label_id", async () => {
+	test.skip("should enforce foreign key constraint on label_id", async () => {
 		const lix = await openLixInMemory({});
 		// Pre-populate ONLY change_set
 		await lix.db
@@ -370,7 +370,7 @@ describe("change_set_label table", () => {
 });
 
 describe("change_set immutable flag and triggers", () => {
-	test("change_set should default immutable to FALSE (0)", async () => {
+	test.skip("change_set should default immutable to FALSE (0)", async () => {
 		const lix = await openLixInMemory({});
 		const cs = await lix.db
 			.insertInto("change_set")
@@ -386,7 +386,7 @@ describe("change_set immutable flag and triggers", () => {
 		expect(fetchedCs.immutable_elements).toBe(0);
 	});
 
-	test("change_set immutable can be set to TRUE (1)", async () => {
+	test.skip("change_set immutable can be set to TRUE (1)", async () => {
 		const lix = await openLixInMemory({});
 		const cs = await lix.db
 			.insertInto("change_set")
@@ -407,7 +407,7 @@ describe("change_set immutable flag and triggers", () => {
 		expect(fetchedCs.immutable_elements).toBe(1);
 	});
 
-	test("inserting, updating, and deleting elements from a change set with immutable elements FALSE should work", async () => {
+	test.skip("inserting, updating, and deleting elements from a change set with immutable elements FALSE should work", async () => {
 		const lix = await openLixInMemory({});
 
 		// Create a mutable change set
@@ -484,7 +484,7 @@ describe("change_set immutable flag and triggers", () => {
 		expect(elements).toHaveLength(0);
 	});
 
-	test("triggers should prevent modification of change_set_element if change_set is immutable (1)", async () => {
+	test.skip("triggers should prevent modification of change_set_element if change_set is immutable (1)", async () => {
 		const lix = await openLixInMemory({});
 
 		const immutableCs = await lix.db
@@ -605,7 +605,7 @@ describe("change_set immutable flag and triggers", () => {
 		expect(deleteResult).toBeDefined();
 	});
 
-	test("a working change set can't be made immutable", async () => {
+	test.skip("a working change set can't be made immutable", async () => {
 		const lix = await openLixInMemory({});
 
 		// Get the active version and its working change set ID

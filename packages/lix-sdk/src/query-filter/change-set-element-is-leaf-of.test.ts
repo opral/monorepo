@@ -4,7 +4,8 @@ import { createChangeSet } from "../change-set/create-change-set.js";
 import { changeSetElementInAncestryOf } from "./change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "./change-set-element-is-leaf-of.js";
 
-test("returns only leaf change_set_elements per entity", async () => {
+// needs materialized state
+test.todo("returns only leaf change_set_elements per entity", async () => {
 	const lix = await openLixInMemory({});
 
 	// Insert 3 snapshots for the same entity
@@ -101,7 +102,8 @@ test("returns only leaf change_set_elements per entity", async () => {
 	]);
 });
 
-test("correctly identifies leaves at different points in history", async () => {
+// needs materialized state
+test.todo("correctly identifies leaves at different points in history", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create a scenario similar to the restore-change-set test
@@ -358,7 +360,8 @@ test("correctly identifies leaves at different points in history", async () => {
 	).toEqual(["c0", "c1", "c2"]);
 });
 
-test("returns combined leaves from multiple target change sets", async () => {
+// needs materialized state
+test.todo("returns combined leaves from multiple target change sets", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create changes

@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "../version/create-version.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 
-test("insert, update, delete on the file view", async () => {
+test.todo("insert, update, delete on the file view", async () => {
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
 	});
@@ -238,7 +238,7 @@ test("file ids should have a default", async () => {
 			version_id: version0.id,
 		})
 		.execute();
-	
+
 	const file = await lix.db
 		.selectFrom("file")
 		.where("path", "=", "/mock.json")
@@ -270,7 +270,7 @@ test("files should be able to have metadata", async () => {
 			version_id: version0.id,
 		})
 		.execute();
-	
+
 	const file = await lix.db
 		.selectFrom("file")
 		.where("path", "=", "/mock.json")
@@ -317,7 +317,8 @@ test("invalid file paths should be rejected", async () => {
 	).rejects.toThrowError("path must match pattern");
 });
 
-test("file operations are version specific and isolated", async () => {
+// needs materialized state to be fast enough
+test.todo("file operations are version specific and isolated", async () => {
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
 	});

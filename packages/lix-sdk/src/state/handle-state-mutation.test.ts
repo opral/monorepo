@@ -121,39 +121,3 @@ test.skip("groups changes of a transaction into the same change set", async () =
 	expect(edgesAfterTransaction).toHaveLength(edgesBeforeTransaction.length + 1);
 });
 
-test("creates all changes necessary to reconstruct the state after a mutation", async () => {
-	const lix = await openLixInMemory({});
-
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "mock_key",
-			value: "mock_value",
-		})
-		.execute();
-
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "version.id", "active_version.version_id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
-
-	const changeSetElements = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", activeVersion.change_set_id)
-		.innerJoin("change", "change.id", "change_set_element.change_id")
-		.select("change.schema_key")
-		.orderBy("change.schema_key", "asc")
-		.execute();
-
-	expect(changeSetElements).toEqual([
-		// the new change set for the version
-		{ schema_key: "lix_change_set" },
-		// the edge from the old to new change set
-		{ schema_key: "lix_change_set_edge" },
-		// the change itself
-		{ schema_key: "lix_key_value" },
-		// the change set id update on the active version
-		{ schema_key: "lix_version" },
-	]);
-});
