@@ -9,7 +9,8 @@ import { isLocale } from "./is-locale.js";
  * @example
  *   const locale = extractLocaleFromNavigator();
  *
- * @type {() => Locale}
+ * @type {() => Locale | undefined}
+ * @returns {string | undefined}
  */
 export function extractLocaleFromNavigator() {
 	if (!navigator?.languages?.length) {
