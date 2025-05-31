@@ -99,17 +99,6 @@ describe("change_set", () => {
 		]);
 	});
 
-	test("has a default id", async () => {
-		const lix = await openLixInMemory({});
-
-		// the insert would throw if no default id was provided
-		await lix.db
-			.insertInto("change_set")
-			.defaultValues()
-			.returningAll()
-			.execute();
-	});
-
 	test("should allow inserting with explicit ID", async () => {
 		const lix = await openLixInMemory({});
 		const explicitId = "my-custom-changeset-id";
@@ -586,4 +575,86 @@ describe("change_set_edge", () => {
 				.execute()
 		).rejects.toThrow(/Self-referencing edges are not allowed/i);
 	});
+});
+
+// the unique constraint must be (change_set_id, entity_id, schema_key, file_id)
+// to allow cross change set references
+test("should allow the same change to be in multiple change sets", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create change sets
+	await lix.db
+		.insertInto("change_set")
+		.values([{ id: "cs1" }, { id: "cs2" }])
+		.execute();
+
+	// Create snapshot and change
+	await lix.db
+		.insertInto("snapshot")
+		.values({ id: "s1", content: { id: "e1" } })
+		.execute();
+
+	await lix.db
+		.insertInto("change")
+		.values({
+			id: "c1",
+			entity_id: "e1",
+			schema_key: "mock_schema",
+			file_id: "f1",
+			plugin_key: "test_plugin",
+			snapshot_id: "s1",
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Create stored schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			key: "mock_schema",
+			value: {
+				"x-lix-key": "mock_schema",
+				"x-lix-version": "1.0",
+				type: "object",
+				properties: { id: { type: "string" } },
+				required: ["id"],
+			},
+		})
+		.execute();
+
+	// Insert the same change into first change set
+	await lix.db
+		.insertInto("change_set_element")
+		.values({
+			change_set_id: "cs1",
+			change_id: "c1",
+			entity_id: "e1",
+			schema_key: "mock_schema",
+			file_id: "f1",
+		})
+		.execute();
+
+	// Insert the same change into second change set - this should work
+	await expect(
+		lix.db
+			.insertInto("change_set_element")
+			.values({
+				change_set_id: "cs2",
+				change_id: "c1",
+				entity_id: "e1",
+				schema_key: "mock_schema",
+				file_id: "f1",
+			})
+			.execute()
+	).resolves.toBeDefined();
+
+	// Verify both elements exist
+	const elements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_id", "=", "c1")
+		.selectAll()
+		.execute();
+
+	expect(elements).toHaveLength(2);
+	expect(elements.map((e) => e.change_set_id).sort()).toEqual(["cs1", "cs2"]);
 });

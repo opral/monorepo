@@ -237,7 +237,7 @@ export const LixChangeSetElementSchema: LixSchemaDefinition = {
 		},
 	},
 	"x-lix-primary-key": ["change_set_id", "change_id"],
-	"x-lix-unique": [["entity_id", "schema_key", "file_id"]],
+	"x-lix-unique": [["change_set_id", "entity_id", "schema_key", "file_id"]],
 	type: "object",
 	properties: {
 		change_set_id: { type: "string" },
