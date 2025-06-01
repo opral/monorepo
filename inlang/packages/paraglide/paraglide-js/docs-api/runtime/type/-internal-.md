@@ -323,7 +323,7 @@ Defined in: [runtime/extract-locale-from-cookie.js:12](https://github.com/opral/
 
 Extracts a cookie from the document.
 
-Will return undefined if the docuement is not available or if the cookie is not set.
+Will return undefined if the document is not available or if the cookie is not set.
 The `document` object is not available in server-side rendering, so this function should not be called in that context.
 
 ### Returns
@@ -332,11 +332,63 @@ The `document` object is not available in server-side rendering, so this functio
 
 ***
 
+## extractLocaleFromHeader()
+
+> **extractLocaleFromHeader**(`request`): `any`
+
+Defined in: [runtime/extract-locale-from-header.js:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-header.js)
+
+Extracts a locale from the accept-language header.
+
+Use the function on the server to extract the locale
+from the accept-language header that is sent by the client.
+
+### Parameters
+
+#### request
+
+`Request`
+
+### Returns
+
+`any`
+
+### Example
+
+```ts
+const locale = extractLocaleFromHeader(request);
+```
+
+***
+
+## extractLocaleFromNavigator()
+
+> **extractLocaleFromNavigator**(): `any`
+
+Defined in: [runtime/extract-locale-from-navigator.js:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-navigator.js)
+
+Negotiates a preferred language from navigator.languages.
+
+Use the function on the client to extract the locale
+from the navigator.languages array.
+
+### Returns
+
+`any`
+
+### Example
+
+```ts
+const locale = extractLocaleFromNavigator();
+```
+
+***
+
 ## extractLocaleFromRequest()
 
 > **extractLocaleFromRequest**(`request`): `any`
 
-Defined in: [runtime/extract-locale-from-request.js:28](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
+Defined in: [runtime/extract-locale-from-request.js:29](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
 
 Extracts a locale from a request.
 
@@ -639,7 +691,7 @@ localizeUrl(url, { locale: "de" });
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:147](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:121](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
