@@ -1,5 +1,5 @@
 ---
-"@inlang/paraglide-js": major
+"@inlang/paraglide-js": minor
 ---
 
 Provide functions for getting the preferred language on server and client.
