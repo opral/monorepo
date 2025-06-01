@@ -33,6 +33,8 @@ export declare const {
 	extractLocaleFromUrl,
 	extractLocaleFromRequest,
 	extractLocaleFromCookie,
+	extractLocaleFromHeader,
+	extractLocaleFromNavigator,
 	withMessageCallTracking,
 	trackMessageCall,
 }: Runtime;
