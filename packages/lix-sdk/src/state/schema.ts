@@ -5,6 +5,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import type { JSONType } from "../schema-definition/json-type.js";
 import { handleStateMutation } from "./handle-state-mutation.js";
+import { handleSelectState } from "./handle-select-state.js";
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
@@ -46,6 +47,19 @@ export function applyStateDatabaseSchema(
 	});
 
 	const sql = `
+  CREATE TABLE IF NOT EXISTS internal_state_cache (
+    entity_id TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
+    file_id TEXT NOT NULL,
+    version_id TEXT NOT NULL,
+    plugin_key TEXT NOT NULL,
+    snapshot_content TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (entity_id, schema_key, file_id, version_id)
+  );
+
   CREATE VIEW IF NOT EXISTS state AS
   WITH
     /* 0. Base data: all change records, joined with their snapshot, including rowid */
@@ -228,7 +242,7 @@ export function applyStateDatabaseSchema(
 }
 
 // State is a special case - it's purely a database view for operational purposes
-// and doesn't have a corresponding business logic schema definition since it's 
+// and doesn't have a corresponding business logic schema definition since it's
 // a computed view over the underlying change/snapshot data
 
 // Database view type (includes operational columns)
@@ -244,7 +258,24 @@ export type StateView = {
 	updated_at: Generated<string>;
 };
 
+// Cache table type (internal table for state materialization)
+export type InternalStateCacheTable = {
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
+	version_id: string;
+	plugin_key: string;
+	snapshot_content: string; // JSON string
+	schema_version: string;
+	created_at: string;
+	updated_at: string;
+};
+
 // Kysely operation types
 export type StateRow = Selectable<StateView>;
 export type NewStateRow = Insertable<StateView>;
 export type StateRowUpdate = Updateable<StateView>;
+
+export type StateCacheRow = Selectable<InternalStateCacheTable>;
+export type NewStateCacheRow = Insertable<InternalStateCacheTable>;
+export type StateCacheRowUpdate = Updateable<InternalStateCacheTable>;

@@ -4,7 +4,7 @@ import { createVersion } from "../version/create-version.js";
 
 // pre-eliminary testing for queries.
 bench(
-	"query leaf state for entity with 10 changes in one version",
+	"query leaf state for entity with 100 changes in one version",
 	async () => {
 		const lix = await openLixInMemory({});
 
@@ -16,7 +16,7 @@ bench(
 		});
 
 		// Create 100 changes for the same entity in the same version
-		for (let i = 0; i < 10; i++) {
+		for (let i = 0; i < 100; i++) {
 			await lix.db
 				.insertInto("state")
 				.values({

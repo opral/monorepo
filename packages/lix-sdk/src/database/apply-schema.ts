@@ -14,6 +14,7 @@ import { applyStateDatabaseSchema } from "../state/schema.js";
 import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
 import { applyLabelDatabaseSchema } from "../label/schema.js";
 import { applyThreadDatabaseSchema } from "../thread/schema.js";
+import { applyStateV2DatabaseSchema } from "../state/schema_v2.js";
 
 /**
  * Applies the database schema to the given sqlite database.
@@ -26,6 +27,7 @@ export function applySchema(args: {
 	applyChangeDatabaseSchema(args.sqlite);
 	applyChangeSetDatabaseSchema(args.sqlite);
 	applyStateDatabaseSchema(args.sqlite, args.db);
+	applyStateV2DatabaseSchema(args.sqlite, args.db);
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyVersionDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
