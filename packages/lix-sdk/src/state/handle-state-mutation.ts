@@ -47,6 +47,7 @@ export function handleStateMutation(
 			schema_version,
 		},
 		timestamp: currentTime,
+		version_id,
 	});
 
 	// workaround to bootstrap the initial state
@@ -127,6 +128,7 @@ export function handleStateMutation(
 			schema_version: LixChangeSetSchema["x-lix-version"],
 		},
 		timestamp: currentTime,
+		version_id,
 	});
 
 	const changeSetEdgeChange = createChangeWithSnapshot({
@@ -144,6 +146,7 @@ export function handleStateMutation(
 			schema_version: LixChangeSetEdgeSchema["x-lix-version"],
 		},
 		timestamp: currentTime,
+		version_id,
 	});
 
 	const versionChange = createChangeWithSnapshot({
@@ -161,6 +164,7 @@ export function handleStateMutation(
 			schema_version: LixVersionSchema["x-lix-version"],
 		},
 		timestamp: currentTime,
+		version_id,
 	});
 
 	for (const change of [
@@ -188,6 +192,7 @@ export function handleStateMutation(
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 			},
 			timestamp: currentTime,
+			version_id,
 		});
 		// TODO investigate if needed as part of a change set itself
 		// seems to make queries slower
@@ -212,20 +217,6 @@ export function handleStateMutation(
 		// });
 	}
 
-	// Write-through cache: Update the state cache for this entity
-	updateStateCache({
-		sqlite,
-		db,
-		entity_id,
-		schema_key,
-		file_id,
-		version_id,
-		plugin_key,
-		snapshot_content,
-		schema_version,
-		timestamp: currentTime,
-	});
-
 	return 1;
 }
 
@@ -235,6 +226,7 @@ function createChangeWithSnapshot(args: {
 	id?: string;
 	data: Omit<NewStateRow, "version_id" | "created_at" | "updated_at">;
 	timestamp?: string;
+	version_id?: string;
 }): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
 	const [snapshot] = args.data.snapshot_content
 		? executeSync({
@@ -264,6 +256,22 @@ function createChangeWithSnapshot(args: {
 			})
 			.returning(["id", "schema_key", "file_id", "entity_id"]),
 	});
+
+	// Update cache for every change (including deletions)
+	if (args.version_id) {
+		updateStateCache({
+			sqlite: args.sqlite,
+			db: args.db,
+			entity_id: args.data.entity_id,
+			schema_key: args.data.schema_key,
+			file_id: args.data.file_id,
+			version_id: args.version_id,
+			plugin_key: args.data.plugin_key,
+			snapshot_content: args.data.snapshot_content as string | null,
+			schema_version: args.data.schema_version,
+			timestamp: args.timestamp || new Date().toISOString(),
+		});
+	}
 
 	return change;
 }

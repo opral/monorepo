@@ -178,7 +178,7 @@ describe("change_set_element", () => {
 
 		const viewAfterInsert = await lix.db
 			.selectFrom("change_set_element")
-			.orderBy("change_set_id", "asc")
+			.where("change_set_id", "=", "cs0")
 			.selectAll()
 			.execute();
 
@@ -199,7 +199,7 @@ describe("change_set_element", () => {
 
 		const viewAfterDelete = await lix.db
 			.selectFrom("change_set_element")
-			.orderBy("change_set_id", "asc")
+			.where("change_set_id", "=", "cs0")
 			.selectAll()
 			.execute();
 
