@@ -9,7 +9,6 @@ import {
 	INITIAL_CHANGE_SET_ID,
 	INITIAL_VERSION_ID,
 	INITIAL_WORKING_CHANGE_SET_ID,
-	type Version,
 	type LixVersion,
 	LixVersionSchema,
 } from "../version/schema.js";
@@ -33,6 +32,9 @@ export function handleStateMutation(
 	version_id: string,
 	schema_version: string
 ): 0 | 1 {
+	// Use consistent timestamp for both changes and cache
+	const currentTime = new Date().toISOString();
+	
 	const rootChange = createChangeWithSnapshot({
 		sqlite,
 		db,
@@ -44,6 +46,7 @@ export function handleStateMutation(
 			snapshot_content,
 			schema_version,
 		},
+		timestamp: currentTime,
 	});
 
 	// workaround to bootstrap the initial state
@@ -58,29 +61,54 @@ export function handleStateMutation(
 	}
 
 	// Get the latest 'lix_version' entity's snapshot content using the activeVersionId
-	const [versionRecord] = executeSync({
+	// During bootstrap, try cache first since direct state inserts populate it
+	let [versionRecord] = executeSync({
 		lix: { sqlite },
 		query: db
-			.selectFrom("internal_change")
-			.innerJoin(
-				"internal_snapshot",
-				"internal_change.snapshot_id",
-				"internal_snapshot.id"
-			)
-			.where("internal_change.schema_key", "=", "lix_version")
-			.where("internal_change.entity_id", "=", version_id)
-			.where("internal_change.snapshot_id", "!=", "no-content")
-			// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
-			.orderBy("internal_change.rowid", "desc")
-			.limit(1)
-			.select(sql`json(internal_snapshot.content)`.as("content")),
+			.selectFrom("internal_state_cache")
+			.where("schema_key", "=", "lix_version")
+			.where("entity_id", "=", version_id)
+			.select("snapshot_content as content"),
 	}) as [{ content: string } | undefined];
+
+	// If not found in cache, try the change/snapshot tables (normal operation)
+	if (!versionRecord) {
+		[versionRecord] = executeSync({
+			lix: { sqlite },
+			query: db
+				.selectFrom("internal_change")
+				.innerJoin(
+					"internal_snapshot",
+					"internal_change.snapshot_id",
+					"internal_snapshot.id"
+				)
+				.where("internal_change.schema_key", "=", "lix_version")
+				.where("internal_change.entity_id", "=", version_id)
+				.where("internal_change.snapshot_id", "!=", "no-content")
+				// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
+				.orderBy("internal_change.rowid", "desc")
+				.limit(1)
+				.select(sql`json(internal_snapshot.content)`.as("content")),
+		}) as [{ content: string } | undefined];
+	}
+
+	// Bootstrap fallback: If this is the initial version during bootstrap, create a minimal version record
+	if (!versionRecord && version_id === INITIAL_VERSION_ID) {
+		versionRecord = {
+			content: JSON.stringify({
+				id: INITIAL_VERSION_ID,
+				name: "main",
+				change_set_id: INITIAL_CHANGE_SET_ID,
+				working_change_set_id: INITIAL_WORKING_CHANGE_SET_ID,
+			} satisfies LixVersion),
+		};
+	}
 
 	if (!versionRecord) {
 		throw new Error(`Version with id '${version_id}' not found.`);
 	}
 
-	const version = JSON.parse(versionRecord.content) as Version;
+	const version = JSON.parse(versionRecord.content) as LixVersion;
 
 	const changeSetId = nanoid();
 
@@ -98,6 +126,7 @@ export function handleStateMutation(
 			} satisfies LixChangeSet),
 			schema_version: LixChangeSetSchema["x-lix-version"],
 		},
+		timestamp: currentTime,
 	});
 
 	const changeSetEdgeChange = createChangeWithSnapshot({
@@ -114,6 +143,7 @@ export function handleStateMutation(
 			} satisfies LixChangeSetEdge),
 			schema_version: LixChangeSetEdgeSchema["x-lix-version"],
 		},
+		timestamp: currentTime,
 	});
 
 	const versionChange = createChangeWithSnapshot({
@@ -130,6 +160,7 @@ export function handleStateMutation(
 			} satisfies LixVersion),
 			schema_version: LixVersionSchema["x-lix-version"],
 		},
+		timestamp: currentTime,
 	});
 
 	for (const change of [
@@ -138,6 +169,7 @@ export function handleStateMutation(
 		changeSetEdgeChange,
 		versionChange,
 	]) {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const changeSetElementChange = createChangeWithSnapshot({
 			sqlite,
 			db,
@@ -155,6 +187,7 @@ export function handleStateMutation(
 				} satisfies LixChangeSetElement),
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 			},
+			timestamp: currentTime,
 		});
 		// TODO investigate if needed as part of a change set itself
 		// seems to make queries slower
@@ -190,6 +223,7 @@ export function handleStateMutation(
 		plugin_key,
 		snapshot_content,
 		schema_version,
+		timestamp: currentTime,
 	});
 
 	return 1;
@@ -200,6 +234,7 @@ function createChangeWithSnapshot(args: {
 	db: Kysely<LixInternalDatabaseSchema>;
 	id?: string;
 	data: Omit<NewStateRow, "version_id" | "created_at" | "updated_at">;
+	timestamp?: string;
 }): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
 	const [snapshot] = args.data.snapshot_content
 		? executeSync({
@@ -224,6 +259,7 @@ function createChangeWithSnapshot(args: {
 				snapshot_id: snapshot.id,
 				file_id: args.data.file_id,
 				plugin_key: args.data.plugin_key,
+				created_at: args.timestamp || new Date().toISOString(),
 				schema_version: args.data.schema_version,
 			})
 			.returning(["id", "schema_key", "file_id", "entity_id"]),
@@ -242,6 +278,7 @@ function updateStateCache(args: {
 	plugin_key: string;
 	snapshot_content: string | null; // Allow null for DELETE operations
 	schema_version: string;
+	timestamp: string;
 }): void {
 	// Handle DELETE operations (snapshot_content is null)
 	if (args.snapshot_content === null) {
@@ -258,9 +295,6 @@ function updateStateCache(args: {
 	}
 
 	// Handle INSERT/UPDATE operations
-	// TODO: Use proper timestamps once tests pass - using mock date for now
-	const mockDate = "2024-01-01T00:00:00.000Z";
-	
 	executeSync({
 		lix: { sqlite: args.sqlite },
 		query: args.db
@@ -273,16 +307,18 @@ function updateStateCache(args: {
 				plugin_key: args.plugin_key,
 				snapshot_content: args.snapshot_content,
 				schema_version: args.schema_version,
-				created_at: mockDate,
-				updated_at: mockDate,
+				created_at: args.timestamp,
+				updated_at: args.timestamp,
 			})
-			.onConflict((oc) => 
-				oc.columns(["entity_id", "schema_key", "file_id", "version_id"]).doUpdateSet({
-					plugin_key: args.plugin_key,
-					snapshot_content: args.snapshot_content,
-					schema_version: args.schema_version,
-					updated_at: mockDate,
-				})
+			.onConflict((oc) =>
+				oc
+					.columns(["entity_id", "schema_key", "file_id", "version_id"])
+					.doUpdateSet({
+						plugin_key: args.plugin_key,
+						snapshot_content: args.snapshot_content as string,
+						schema_version: args.schema_version,
+						updated_at: args.timestamp,
+					})
 			),
 	});
 }

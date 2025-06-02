@@ -58,9 +58,10 @@ test("should allow returning on non-view tables", async () => {
 				entity_id: "test",
 				schema_key: "test",
 				file_id: "test",
+				schema_version: "1.0",
 				plugin_key: "test",
 				snapshot_content: {},
-				version_id: "test"
+				version_id: "test",
 			})
 			.returningAll()
 			.compile();

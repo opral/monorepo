@@ -55,6 +55,7 @@ export function initDb(args: {
 		sqlite: args.sqlite,
 		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
 	});
+
 	return db;
 }
 
