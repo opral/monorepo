@@ -121,3 +121,39 @@ test.skip("groups changes of a transaction into the same change set", async () =
 	expect(edgesAfterTransaction).toHaveLength(edgesBeforeTransaction.length + 1);
 });
 
+test("should throw error when version_id is null", async () => {
+	const lix = await openLixInMemory({});
+	
+	// Try to insert state with null version_id - should throw
+	await expect(
+		lix.db.insertInto("state").values({
+			entity_id: "test_entity",
+			schema_key: "lix_key_value", 
+			file_id: "lix",
+			plugin_key: "test_plugin",
+			snapshot_content: { key: "test", value: "test" },
+			schema_version: "1.0",
+			version_id: null as any // Explicitly null version_id
+		}).execute()
+	).rejects.toThrow("version_id is required");
+});
+
+test("should throw error when version_id does not exist", async () => {
+	const lix = await openLixInMemory({});
+	
+	const nonExistentVersionId = "non-existent-version-id";
+	
+	// Try to insert state with non-existent version_id - should throw
+	await expect(
+		lix.db.insertInto("state").values({
+			entity_id: "test_entity",
+			schema_key: "lix_key_value",
+			file_id: "lix", 
+			plugin_key: "test_plugin",
+			snapshot_content: { key: "test", value: "test" },
+			schema_version: "1.0",
+			version_id: nonExistentVersionId
+		}).execute()
+	).rejects.toThrow(`Version with id '${nonExistentVersionId}' does not exist`);
+});
+

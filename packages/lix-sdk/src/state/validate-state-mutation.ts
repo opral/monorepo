@@ -41,7 +41,7 @@ export function validateStateMutation(args: {
 	});
 
 	if (existingVersion.length === 0) {
-		throw new Error("Version does not exist");
+		throw new Error(`Version with id '${args.version_id}' does not exist`);
 	}
 
 	const isValidLixSchema = validateLixSchema(args.schema);

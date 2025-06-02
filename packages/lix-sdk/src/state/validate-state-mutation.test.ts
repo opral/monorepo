@@ -1159,7 +1159,7 @@ test("throws when referenced version does not exist", async () => {
 			operation: "insert",
 			version_id: "nonexistent_version",
 		})
-	).toThrowError("Version does not exist");
+	).toThrowError("Version with id 'nonexistent_version' does not exist");
 });
 
 test("passes when version_id is provided and version exists", async () => {

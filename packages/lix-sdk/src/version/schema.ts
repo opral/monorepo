@@ -7,8 +7,8 @@ import type {
 
 // initial ids (lack of having a separate creation and migration schema)
 export const INITIAL_VERSION_ID = "BoIaHTW9ePX6pNc8";
-export const INITIAL_WORKING_CHANGE_SET_ID = "h2h09ha92jfaw2";
 export const INITIAL_CHANGE_SET_ID = "2j9jm90ajc9j90";
+export const INITIAL_WORKING_CHANGE_SET_ID = "h2h09ha92jfaw2";
 
 export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	sqlite.exec(`
@@ -137,14 +137,14 @@ BEGIN
 
    -- Insert the default change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id)
-  SELECT '${INITIAL_CHANGE_SET_ID}'
+  INSERT INTO change_set (id, version_id)
+  SELECT '${INITIAL_CHANGE_SET_ID}', '${INITIAL_VERSION_ID}'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_CHANGE_SET_ID}');
 
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id)
-  SELECT '${INITIAL_WORKING_CHANGE_SET_ID}'
+  INSERT INTO change_set (id, version_id)
+  SELECT '${INITIAL_WORKING_CHANGE_SET_ID}', '${INITIAL_VERSION_ID}'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_WORKING_CHANGE_SET_ID}');
 
   -- Insert the default version if missing

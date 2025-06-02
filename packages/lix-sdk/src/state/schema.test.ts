@@ -954,3 +954,98 @@ test("change.created_at and state timestamps are consistent", async () => {
 	expect(changeRecord.created_at).toBe(cacheRecord.created_at);
 	expect(changeRecord.created_at).toBe(cacheRecord.updated_at);
 });
+
+// Important to note that only a full cache clear (like during schema changes) triggers
+// a cache miss and repopulation from the CTE at the moment!
+//
+// This is simpler, at the cost of state inconsistencies when changes are made 
+// without populating or invalidating the cache.
+test("state view should work and re-populate the cache after cache is fully (!) cleared", async () => {
+	const lix = await openLixInMemory({});
+
+	// Insert a key-value pair
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "test_cache_miss",
+			value: "initial_value",
+		})
+		.execute();
+
+	// Verify it's accessible through state view (should populate cache)
+	const stateBeforeCacheClear = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "=", "test_cache_miss")
+		.selectAll()
+		.execute();
+
+	expect(stateBeforeCacheClear).toHaveLength(1);
+	expect(stateBeforeCacheClear[0]).toMatchObject({
+		entity_id: "test_cache_miss",
+		schema_key: "lix_key_value",
+		snapshot_content: {
+			key: "test_cache_miss",
+			value: "initial_value",
+		},
+	});
+
+	// Verify it's in the cache
+	const cacheBeforeClear = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_state_cache")
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "=", "test_cache_miss")
+		.selectAll()
+		.execute();
+
+	expect(cacheBeforeClear).toHaveLength(1);
+
+	// Simulate cache invalidation (like what happens during stored_schema insertion)
+	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.deleteFrom("internal_state_cache")
+		.execute();
+
+	// Verify cache is empty
+	const cacheAfterClear = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_state_cache")
+		.selectAll()
+		.execute();
+
+	expect(cacheAfterClear).toHaveLength(0);
+
+	// Try to access the same data through state view again
+	// This should trigger cache miss logic and repopulate from CTE
+	const stateAfterCacheClear = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "=", "test_cache_miss")
+		.selectAll()
+		.execute();
+
+	// This should work - if cache miss logic is working correctly
+	expect(stateAfterCacheClear).toHaveLength(1);
+	expect(stateAfterCacheClear[0]).toMatchObject({
+		entity_id: "test_cache_miss",
+		schema_key: "lix_key_value",
+		snapshot_content: {
+			key: "test_cache_miss",
+			value: "initial_value",
+		},
+	});
+
+	// Verify cache was repopulated
+	const cacheAfterRefill = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_state_cache")
+		.where("schema_key", "=", "lix_key_value")
+		.where("entity_id", "=", "test_cache_miss")
+		.selectAll()
+		.execute();
+
+	expect(cacheAfterRefill).toHaveLength(1);
+});

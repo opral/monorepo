@@ -34,7 +34,6 @@ export function handleStateMutation(
 ): 0 | 1 {
 	// Use consistent timestamp for both changes and cache
 	const currentTime = new Date().toISOString();
-	
 	const rootChange = createChangeWithSnapshot({
 		sqlite,
 		db,

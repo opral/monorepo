@@ -80,24 +80,6 @@ export function initDb(args: {
 	applyLogDatabaseSchema(args.sqlite);
 
 	// insert the schemas into the stored_schema table to enable validation.
-	// Check if any schemas need to be inserted, and if so, clear cache once before all insertions
-	// because invalid cache issues occur otherwise
-	let needsCacheClear = false;
-	for (const schema of Object.values(LixSchemaViewMap)) {
-		const exists = args.sqlite.exec({
-			sql: `SELECT 1 FROM stored_schema WHERE key = '${schema["x-lix-key"]}' AND version = '${schema["x-lix-version"]}'`,
-			returnValue: "resultRows",
-		});
-
-		if (!exists || exists.length === 0) {
-			needsCacheClear = true;
-			break;
-		}
-	}
-
-	if (needsCacheClear) {
-		args.sqlite.exec("DELETE FROM internal_state_cache");
-	}
 
 	for (const schema of Object.values(LixSchemaViewMap)) {
 		args.sqlite.exec(
