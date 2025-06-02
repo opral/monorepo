@@ -2,10 +2,12 @@ import type { ChangeView, InternalChangeTable } from "../change/schema.js";
 import {
 	LixChangeSetEdgeSchema,
 	LixChangeSetElementSchema,
+	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 	type ChangeSetElementView,
 	type ChangeSetView,
 	type ChangeSetEdgeView,
+	type ChangeSetLabelView,
 } from "../change-set-v2/schema.js";
 import {
 	LixActiveVersionSchema,
@@ -61,6 +63,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
 	change_set_edge: LixChangeSetEdgeSchema,
+	change_set_label: LixChangeSetLabelSchema,
 	file: LixFileSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
@@ -96,7 +99,7 @@ export type LixDatabaseSchema = {
 	change_set: ChangeSetView;
 	change_set_element: ChangeSetElementView;
 	change_set_edge: ChangeSetEdgeView;
-	// change_set_label: ChangeSetLabelTable;
+	change_set_label: ChangeSetLabelView;
 	// change_set_thread: ChangeSetThreadTable;
 
 	// key value

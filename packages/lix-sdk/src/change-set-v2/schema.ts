@@ -186,6 +186,65 @@ export function applyChangeSetDatabaseSchema(
     AND schema_key = 'lix_change_set_edge'
     AND file_id = 'lix';
   END;
+
+  -- change set label
+
+  CREATE VIEW IF NOT EXISTS change_set_label AS
+  SELECT
+    json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
+    json_extract(snapshot_content, '$.label_id') AS label_id,
+    json_extract(snapshot_content, '$.metadata') AS metadata,
+    version_id
+  FROM state
+  WHERE schema_key = 'lix_change_set_label';
+
+  CREATE TRIGGER IF NOT EXISTS change_set_label_insert
+  INSTEAD OF INSERT ON change_set_label
+  BEGIN
+    INSERT INTO state (
+      entity_id, 
+      schema_key, 
+      file_id, 
+      plugin_key, 
+      snapshot_content,
+      schema_version,
+      version_id
+    ) VALUES (
+      NEW.change_set_id || '::' || NEW.label_id,
+      'lix_change_set_label',
+      'lix',
+      'lix_own_entity',
+      json_object('change_set_id', NEW.change_set_id, 'label_id', NEW.label_id, 'metadata', NEW.metadata),
+      '${LixChangeSetLabelSchema["x-lix-version"]}',
+      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+    ); 
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS change_set_label_update
+  INSTEAD OF UPDATE ON change_set_label
+  BEGIN
+    UPDATE state
+    SET
+      entity_id = NEW.change_set_id || '::' || NEW.label_id,
+      schema_key = 'lix_change_set_label',
+      file_id = 'lix',
+      plugin_key = 'lix_own_entity',
+      snapshot_content = json_object('change_set_id', NEW.change_set_id, 'label_id', NEW.label_id, 'metadata', NEW.metadata),
+      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+    WHERE
+      entity_id = OLD.change_set_id || '::' || OLD.label_id
+      AND schema_key = 'lix_change_set_label'
+      AND file_id = 'lix';
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS change_set_label_delete
+  INSTEAD OF DELETE ON change_set_label
+  BEGIN
+    DELETE FROM state
+    WHERE entity_id = OLD.change_set_id || '::' || OLD.label_id
+    AND schema_key = 'lix_change_set_label'
+    AND file_id = 'lix';
+  END;
 `;
 
 	return sqlite.exec(sql);
@@ -312,13 +371,45 @@ export type ChangeSetEdge = Selectable<ChangeSetEdgeView>;
 export type NewChangeSetEdge = Insertable<ChangeSetEdgeView>;
 export type ChangeSetEdgeUpdate = Updateable<ChangeSetEdgeView>;
 
-// export type ChangeSetLabel = Selectable<ChangeSetLabelTable>;
-// export type NewChangeSetLabel = Insertable<ChangeSetLabelTable>;
-// export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelTable>;
-// export type ChangeSetLabelTable = {
-// 	label_id: string;
-// 	change_set_id: string;
-// };
+export const LixChangeSetLabelSchema: LixSchemaDefinition = {
+	"x-lix-key": "lix_change_set_label",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["change_set_id", "label_id"],
+	"x-lix-foreign-keys": {
+		change_set_id: {
+			schemaKey: "lix_change_set",
+			property: "id",
+		},
+		label_id: {
+			schemaKey: "lix_label", 
+			property: "id",
+		},
+	},
+	type: "object",
+	properties: {
+		change_set_id: { type: "string" },
+		label_id: { type: "string" },
+		metadata: { type: "object", nullable: true },
+	},
+	required: ["change_set_id", "label_id"],
+	additionalProperties: false,
+};
+
+// Pure business logic type (inferred from schema)
+export type LixChangeSetLabel = FromLixSchemaDefinition<typeof LixChangeSetLabelSchema>;
+
+// Database view type (includes operational columns)
+export type ChangeSetLabelView = {
+	change_set_id: string;
+	label_id: string;
+	metadata: Record<string, any> | null;
+	version_id: Generated<string>;
+};
+
+// Kysely operation types
+export type ChangeSetLabel = Selectable<ChangeSetLabelView>;
+export type NewChangeSetLabel = Insertable<ChangeSetLabelView>;
+export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelView>;
 
 // export type ChangeSetThread = Selectable<ChangeSetThreadTable>;
 // export type NewChangeSetThread = Insertable<ChangeSetThreadTable>;

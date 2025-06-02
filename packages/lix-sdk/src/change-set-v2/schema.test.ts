@@ -658,3 +658,184 @@ test("should allow the same change to be in multiple change sets", async () => {
 	expect(elements).toHaveLength(2);
 	expect(elements.map((e) => e.change_set_id).sort()).toEqual(["cs1", "cs2"]);
 });
+
+describe("change_set_label", () => {
+	test("insert, update, delete on the change set label view", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create the referenced change set and label first
+		await lix.db
+			.insertInto("change_set")
+			.values({ id: "cs0" })
+			.execute();
+
+		await lix.db
+			.insertInto("label")
+			.values({ id: "label0", name: "bug" })
+			.execute();
+
+		await lix.db
+			.insertInto("change_set_label")
+			.values({
+				change_set_id: "cs0",
+				label_id: "label0",
+				metadata: { priority: "high", assignee: "alice" },
+			})
+			.execute();
+
+		const viewAfterInsert = await lix.db
+			.selectFrom("change_set_label")
+			.where("change_set_id", "=", "cs0")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterInsert).toMatchObject([
+			{
+				change_set_id: "cs0",
+				label_id: "label0",
+				metadata: { priority: "high", assignee: "alice" },
+			},
+		]);
+
+		// Test update - update the metadata (non-primary key field)
+		await lix.db
+			.updateTable("change_set_label")
+			.where("change_set_id", "=", "cs0")
+			.where("label_id", "=", "label0")
+			.set({ metadata: { priority: "low", assignee: "bob", notes: "updated" } })
+			.execute();
+
+		const viewAfterUpdate = await lix.db
+			.selectFrom("change_set_label")
+			.where("change_set_id", "=", "cs0")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterUpdate).toMatchObject([
+			{
+				change_set_id: "cs0",
+				label_id: "label0",
+				metadata: { priority: "low", assignee: "bob", notes: "updated" },
+			},
+		]);
+
+		// Test delete
+		await lix.db
+			.deleteFrom("change_set_label")
+			.where("change_set_id", "=", "cs0")
+			.where("label_id", "=", "label0")
+			.execute();
+
+		const viewAfterDelete = await lix.db
+			.selectFrom("change_set_label")
+			.where("change_set_id", "=", "cs0")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterDelete).toEqual([]);
+
+		// Verify changes were recorded
+		const changes = await lix.db
+			.selectFrom("change")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			.where("schema_key", "=", "lix_change_set_label")
+			.orderBy("change.created_at", "asc")
+			.selectAll("change")
+			.select("snapshot.content")
+			.execute();
+
+		expect(changes.map((change) => change.content)).toMatchObject([
+			// insert
+			{
+				change_set_id: "cs0",
+				label_id: "label0",
+				metadata: { priority: "high", assignee: "alice" },
+			},
+			// update
+			{
+				change_set_id: "cs0",
+				label_id: "label0",
+				metadata: { priority: "low", assignee: "bob", notes: "updated" },
+			},
+			// delete
+			null,
+		]);
+	});
+
+	test("should enforce primary key constraint (change_set_id, label_id)", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create the referenced change set and label
+		await lix.db
+			.insertInto("change_set")
+			.values({ id: "cs1" })
+			.execute();
+
+		await lix.db
+			.insertInto("label")
+			.values({ id: "label1", name: "test" })
+			.execute();
+
+		// Insert first label
+		await lix.db
+			.insertInto("change_set_label")
+			.values({
+				change_set_id: "cs1",
+				label_id: "label1",
+			})
+			.execute();
+
+		// Attempt duplicate insert with same primary key
+		await expect(
+			lix.db
+				.insertInto("change_set_label")
+				.values({
+					change_set_id: "cs1",
+					label_id: "label1",
+				})
+				.execute()
+		).rejects.toThrow(/Primary key constraint violation/i);
+	});
+
+	test("should enforce foreign key constraint on change_set_id", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create only label (not change set)
+		await lix.db
+			.insertInto("label")
+			.values({ id: "label1", name: "test" })
+			.execute();
+
+		// Attempt to insert with non-existent change_set_id
+		await expect(
+			lix.db
+				.insertInto("change_set_label")
+				.values({
+					change_set_id: "cs_nonexistent",
+					label_id: "label1",
+				})
+				.execute()
+		).rejects.toThrow(/Foreign key constraint violation/i);
+	});
+
+	test("should enforce foreign key constraint on label_id", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create only change set (not label)
+		await lix.db
+			.insertInto("change_set")
+			.values({ id: "cs1" })
+			.execute();
+
+		// Attempt to insert with non-existent label_id
+		await expect(
+			lix.db
+				.insertInto("change_set_label")
+				.values({
+					change_set_id: "cs1",
+					label_id: "label_nonexistent",
+				})
+				.execute()
+		).rejects.toThrow(/Foreign key constraint violation/i);
+	});
+});
