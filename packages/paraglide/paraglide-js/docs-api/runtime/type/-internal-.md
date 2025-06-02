@@ -338,11 +338,6 @@ The `document` object is not available in server-side rendering, so this functio
 
 Defined in: [runtime/extract-locale-from-header.js:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-header.js)
 
-Extracts a locale from the accept-language header.
-
-Use the function on the server to extract the locale
-from the accept-language header that is sent by the client.
-
 ### Parameters
 
 #### request
@@ -353,12 +348,6 @@ from the accept-language header that is sent by the client.
 
 `any`
 
-### Example
-
-```ts
-const locale = extractLocaleFromHeader(request);
-```
-
 ***
 
 ## extractLocaleFromNavigator()
@@ -367,20 +356,9 @@ const locale = extractLocaleFromHeader(request);
 
 Defined in: [runtime/extract-locale-from-navigator.js:12](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-navigator.js)
 
-Negotiates a preferred language from navigator.languages.
-
-Use the function on the client to extract the locale
-from the navigator.languages array.
-
 ### Returns
 
 `any`
-
-### Example
-
-```ts
-const locale = extractLocaleFromNavigator();
-```
 
 ***
 

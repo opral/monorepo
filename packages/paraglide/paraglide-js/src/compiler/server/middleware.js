@@ -86,7 +86,7 @@ export async function paraglideMiddleware(request, resolve, callbacks) {
 			if (runtime.strategy.includes("preferredLanguage")) {
 				headers["Vary"] = "Accept-Language";
 			}
-			
+
 			const response = new Response(null, {
 				status: 307,
 				headers: {
@@ -94,7 +94,7 @@ export async function paraglideMiddleware(request, resolve, callbacks) {
 					...headers,
 				},
 			});
-			
+
 			callbacks?.onRedirect(response);
 			return response;
 		}
