@@ -287,6 +287,9 @@ export function applyStateDatabaseSchema(
 		`CREATE VIRTUAL TABLE IF NOT EXISTS state_vtab_impl USING state_vtab();`
 	);
 
+	// TODO replace state view with instead of triggers by implementing xUpdate
+	// in the virtual table
+
 	const sql = `
   CREATE TABLE IF NOT EXISTS internal_state_cache (
     entity_id TEXT NOT NULL,
