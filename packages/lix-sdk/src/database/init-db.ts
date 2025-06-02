@@ -2,13 +2,24 @@ import { Kysely } from "kysely";
 import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
-import { applySchema } from "./apply-schema.js";
 import { humanId } from "human-id";
 import { nanoid } from "./nano-id.js";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
 import { LixSchemaViewMap } from "./schema.js";
 import { isJsonType } from "../schema-definition/json-type.js";
+// Schema imports
+import { applyLogDatabaseSchema } from "../log/schema.js";
+import { applyChangeDatabaseSchema } from "../change/schema.js";
+import { applyChangeSetDatabaseSchema } from "../change-set-v2/schema.js";
+import { applyVersionDatabaseSchema } from "../version/schema.js";
+import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
+import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
+import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
+import { applyStateDatabaseSchema } from "../state/schema.js";
+import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
+import { applyLabelDatabaseSchema } from "../label/schema.js";
+import { applyThreadDatabaseSchema } from "../thread/schema.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
@@ -51,10 +62,58 @@ export function initDb(args: {
 		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
 	});
 
-	applySchema({
-		sqlite: args.sqlite,
-		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
-	});
+	// Apply all database schemas
+	applySnapshotDatabaseSchema(args.sqlite);
+	applyChangeDatabaseSchema(args.sqlite);
+	applyChangeSetDatabaseSchema(args.sqlite);
+	applyStateDatabaseSchema(
+		args.sqlite,
+		db as unknown as Kysely<LixInternalDatabaseSchema>
+	);
+	applyStoredSchemaDatabaseSchema(args.sqlite);
+	applyVersionDatabaseSchema(args.sqlite);
+	applyKeyValueDatabaseSchema(args.sqlite);
+	applyChangeAuthorDatabaseSchema(args.sqlite);
+	applyLabelDatabaseSchema(args.sqlite);
+	applyThreadDatabaseSchema(args.sqlite);
+	// applyFileDatabaseSchema will be called later when lix is fully constructed
+	applyLogDatabaseSchema(args.sqlite);
+
+	// insert the schemas into the stored_schema table to enable validation.
+	// Check if any schemas need to be inserted, and if so, clear cache once before all insertions
+	// because invalid cache issues occur otherwise
+	let needsCacheClear = false;
+	for (const schema of Object.values(LixSchemaViewMap)) {
+		const exists = args.sqlite.exec({
+			sql: `SELECT 1 FROM stored_schema WHERE key = '${schema["x-lix-key"]}' AND version = '${schema["x-lix-version"]}'`,
+			returnValue: "resultRows",
+		});
+
+		if (!exists || exists.length === 0) {
+			needsCacheClear = true;
+			break;
+		}
+	}
+
+	if (needsCacheClear) {
+		args.sqlite.exec("DELETE FROM internal_state_cache");
+	}
+
+	for (const schema of Object.values(LixSchemaViewMap)) {
+		args.sqlite.exec(
+			`
+			INSERT INTO stored_schema (value)
+			SELECT ?
+			WHERE NOT EXISTS (
+				SELECT 1
+				FROM stored_schema
+				WHERE key = '${schema["x-lix-key"]}'
+				AND version = '${schema["x-lix-version"]}'
+			);
+			`,
+			{ bind: [JSON.stringify(schema)] }
+		);
+	}
 
 	return db;
 }

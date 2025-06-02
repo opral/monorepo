@@ -460,6 +460,7 @@ function selectStateViaCTE(
 			ls.snapshot_content,
 			ls.schema_version,
 			ls.version_id,
+      -- TODO dont use max/min here for created_at
 			(SELECT MIN(ic.created_at) FROM internal_change ic 
 			 WHERE ic.entity_id = ls.entity_id AND ic.schema_key = ls.schema_key AND ic.file_id = ls.file_id) AS created_at,
 			(SELECT MAX(ic.created_at) FROM internal_change ic 
