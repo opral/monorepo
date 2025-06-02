@@ -32,4 +32,6 @@ export type Runtime = {
 	extractLocaleFromNavigator: typeof import("./extract-locale-from-navigator.js").extractLocaleFromNavigator;
 	generateStaticLocalizedUrls: typeof import("./generate-static-localized-urls.js").generateStaticLocalizedUrls;
 	trackMessageCall: typeof import("./track-message-call.js").trackMessageCall;
+	defineCustomServerStrategy: typeof import("./strategy.js").defineCustomServerStrategy;
+	defineCustomClientStrategy: typeof import("./strategy.js").defineCustomClientStrategy;
 };

@@ -36,6 +36,18 @@ Defined in: [runtime/type.ts:9](https://github.com/opral/monorepo/tree/main/inla
 
 Defined in: [runtime/type.ts:8](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
+#### defineCustomClientStrategy
+
+> **defineCustomClientStrategy**: [`defineCustomClientStrategy`](-internal-.md#definecustomclientstrategy)
+
+Defined in: [runtime/type.ts:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+
+#### defineCustomServerStrategy
+
+> **defineCustomServerStrategy**: [`defineCustomServerStrategy`](-internal-.md#definecustomserverstrategy)
+
+Defined in: [runtime/type.ts:35](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+
 #### deLocalizeHref
 
 > **deLocalizeHref**: [`deLocalizeHref`](-internal-.md#delocalizehref)
@@ -98,7 +110,7 @@ Defined in: [runtime/type.ts:33](https://github.com/opral/monorepo/tree/main/inl
 
 #### getLocale
 
-> **getLocale**: [`getLocale`](-internal-.md#getlocale)
+> **getLocale**: [`getLocale`](-internal-.md#getlocale-2)
 
 Defined in: [runtime/type.ts:15](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
@@ -170,7 +182,7 @@ Defined in: [runtime/type.ts:12](https://github.com/opral/monorepo/tree/main/inl
 
 #### setLocale
 
-> **setLocale**: [`setLocale`](-internal-.md#setlocale)
+> **setLocale**: [`setLocale`](-internal-.md#setlocale-1)
 
 Defined in: [runtime/type.ts:16](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
