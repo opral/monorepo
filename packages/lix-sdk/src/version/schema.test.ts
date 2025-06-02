@@ -550,3 +550,55 @@ test.todo("direct mutation of a version shouldn't lead to duplicate entries", as
 		globalVersionBeforeMutation.change_set_id
 	);
 });
+
+test("should enforce UNIQUE constraint on working_change_set_id", async () => {
+	const lix = await openLixInMemory({});
+
+	// Insert necessary change sets to satisfy foreign keys
+	await lix.db
+		.insertInto("change_set")
+		.values([
+			{ id: "cs1" },
+			{ id: "cs2" },
+			{ id: "workingCs1" },
+			{ id: "workingCs2" }
+		])
+		.execute();
+
+	// Insert first version referencing workingCs1
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "v1",
+			name: "version one",
+			change_set_id: "cs1",
+			working_change_set_id: "workingCs1",
+		})
+		.execute();
+
+	// Attempt to insert another version referencing the SAME workingCs1 -> should fail
+	await expect(
+		lix.db
+			.insertInto("version")
+			.values({
+				id: "v2",
+				name: "version two",
+				change_set_id: "cs2", // Different historical point is fine
+				working_change_set_id: "workingCs1", // <<< Same working_change_set_id
+			})
+			.execute()
+	).rejects.toThrow(/Unique constraint violation.*working_change_set_id.*workingCs1/i);
+
+	// Inserting another version with a DIFFERENT working_change_set_id should succeed
+	await expect(
+		lix.db
+			.insertInto("version")
+			.values({
+				id: "v3",
+				name: "version three",
+				change_set_id: "cs1", // Can branch from same historical point
+				working_change_set_id: "workingCs2", // <<< Different working_change_set_id
+			})
+			.execute()
+	).resolves.toBeDefined();
+});

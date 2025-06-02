@@ -210,6 +210,7 @@ export const LixVersionSchema = {
 	"x-lix-key": "lix_version",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
+	"x-lix-unique": [["working_change_set_id"]],
 	"x-lix-foreign-keys": {
 		change_set_id: {
 			schemaKey: "lix_change_set",

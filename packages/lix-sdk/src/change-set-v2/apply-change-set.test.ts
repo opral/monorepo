@@ -1,4 +1,4 @@
-import { test, expect, vi } from "vitest";
+import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";

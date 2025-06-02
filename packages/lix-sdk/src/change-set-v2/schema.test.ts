@@ -648,10 +648,11 @@ test("should allow the same change to be in multiple change sets", async () => {
 			.execute()
 	).resolves.toBeDefined();
 
-	// Verify both elements exist
+	// Verify elements exist in both explicit change sets (not counting working change set)
 	const elements = await lix.db
 		.selectFrom("change_set_element")
 		.where("change_id", "=", "c1")
+		.where("change_set_id", "in", ["cs1", "cs2"]) // Only count the explicit change sets
 		.selectAll()
 		.execute();
 
