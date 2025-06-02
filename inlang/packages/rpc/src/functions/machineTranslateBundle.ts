@@ -25,7 +25,9 @@ export async function machineTranslateBundle(args: {
 		);
 
 		if (!sourceMessage) {
-			return { error: "Source locale not found in the bundle" };
+			return {
+				error: `Source locale not found in the bundle: ${args.bundle.id}`,
+			};
 		}
 
 		for (const sourceVariant of sourceMessage.variants) {
