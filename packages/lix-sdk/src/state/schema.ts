@@ -270,12 +270,6 @@ export function applyStateDatabaseSchema(
 				sqlite.sqlite3.vtab.xRowid(pRowid, cursorState.rowIndex);
 				return capi.SQLITE_OK;
 			},
-
-			// For now, disable xUpdate to focus on read-only virtual table functionality
-			// The original triggers can be restored separately if needed
-			// xUpdate: (pVtab: any, argc: number, argv: any) => {
-			//     return capi.SQLITE_READONLY;
-			// }
 		},
 		false
 	);
