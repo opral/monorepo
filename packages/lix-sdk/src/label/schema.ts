@@ -66,6 +66,32 @@ export function applyLabelDatabaseSchema(
     AND schema_key = 'lix_label'
     AND file_id = 'lix';
   END;
+
+  -- Insert the default checkpoint label if missing
+  -- (this is a workaround for not having a separate creation and migration schema)
+  INSERT INTO state (
+    entity_id, 
+    schema_key, 
+    file_id, 
+    plugin_key, 
+    snapshot_content, 
+    schema_version,
+    version_id
+  )
+  SELECT 
+    nano_id(), 
+    'lix_label', 
+    'lix', 
+    'lix_own_entity', 
+    json_object('id', nano_id(), 'name', 'checkpoint'), 
+    '${LixLabelSchema["x-lix-version"]}',
+    (SELECT version_id FROM active_version LIMIT 1)
+  WHERE NOT EXISTS (
+    SELECT 1 
+    FROM state 
+    WHERE json_extract(snapshot_content, '$.name') = 'checkpoint'
+    AND schema_key = 'lix_label'
+  );
 `;
 
 	return sqlite.exec(sql);
