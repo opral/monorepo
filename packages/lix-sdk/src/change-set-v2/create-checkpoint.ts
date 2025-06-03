@@ -84,6 +84,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 		.updateTable("version")
 		.where("id", "=", activeVersion.id)
 		.set({
+			change_set_id: activeVersion.working_change_set_id,
 			working_change_set_id: newWorkingChangeSetId,
 		})
 		.execute();

@@ -34,31 +34,17 @@ export function handleStateMutation(
 ): 0 | 1 {
 	// Use consistent timestamp for both changes and cache
 	const currentTime = new Date().toISOString();
-	const rootChange = createChangeWithSnapshot({
-		sqlite,
-		db,
-		data: {
-			entity_id,
-			schema_key,
-			file_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-		},
-		timestamp: currentTime,
-		version_id,
-	});
 
-	// workaround to bootstrap the initial state
-	// TODO implement skip_change_control flag which
-	// the initial state can use.
-	if (
-		entity_id.includes(INITIAL_VERSION_ID) ||
-		entity_id.includes(INITIAL_CHANGE_SET_ID) ||
-		entity_id.includes(INITIAL_WORKING_CHANGE_SET_ID)
-	) {
-		return 0;
-	}
+	// // workaround to bootstrap the initial state
+	// // TODO implement skip_change_control flag which
+	// // the initial state can use.
+	// if (
+	// 	entity_id.includes(INITIAL_VERSION_ID) ||
+	// 	entity_id.includes(INITIAL_CHANGE_SET_ID) ||
+	// 	entity_id.includes(INITIAL_WORKING_CHANGE_SET_ID)
+	// ) {
+	// 	return 0;
+	// }
 
 	// Get the latest 'lix_version' entity's snapshot content using the activeVersionId
 	// During bootstrap, try cache first since direct state inserts populate it
@@ -111,6 +97,57 @@ export function handleStateMutation(
 	const version = JSON.parse(versionRecord.content) as LixVersion;
 
 	const changeSetId = nanoid();
+	
+	// Check if the root change is a version change for the same entity
+	const isVersionChange = schema_key === "lix_version" && entity_id === version.id;
+	
+	// Check if this is specifically a change_set_id update (should skip mutation handler logic)
+	let isChangeSetIdUpdate = false;
+	let finalSnapshotContent = snapshot_content;
+	
+	if (isVersionChange) {
+		const rootSnapshot = JSON.parse(snapshot_content) as LixVersion;
+		// Check if ONLY change_set_id changed (and nothing else)
+		const isOnlyChangeSetIdUpdate = 
+			rootSnapshot.change_set_id !== version.change_set_id &&
+			rootSnapshot.name === version.name &&
+			rootSnapshot.working_change_set_id === version.working_change_set_id;
+		
+		if (isOnlyChangeSetIdUpdate) {
+			// Skip mutation handler logic for change_set_id updates
+			isChangeSetIdUpdate = true;
+			// Use the user's change_set_id as-is
+			finalSnapshotContent = snapshot_content;
+		} else {
+			// Normal version update - apply mutation handler logic
+			finalSnapshotContent = JSON.stringify({
+				...rootSnapshot,
+				change_set_id: changeSetId,
+			} satisfies LixVersion);
+		}
+	}
+	
+	const rootChange = createChangeWithSnapshot({
+		sqlite,
+		db,
+		data: {
+			entity_id,
+			schema_key,
+			file_id,
+			plugin_key,
+			snapshot_content: finalSnapshotContent,
+			schema_version,
+		},
+		timestamp: currentTime,
+		version_id,
+	});
+
+	// Skip mutation handler logic for change_set_id updates
+	if (isChangeSetIdUpdate) {
+		// For change_set_id updates, just create the root change and return
+		// No edges, no new change sets, no additional logic
+		return 1;
+	}
 
 	const changeSetChange = createChangeWithSnapshot({
 		sqlite,
@@ -148,30 +185,35 @@ export function handleStateMutation(
 		version_id,
 	});
 
-	const versionChange = createChangeWithSnapshot({
-		sqlite,
-		db,
-		data: {
-			entity_id: version.id,
-			schema_key: "lix_version",
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify({
-				...version,
-				change_set_id: changeSetId,
-			} satisfies LixVersion),
-			schema_version: LixVersionSchema["x-lix-version"],
-		},
-		timestamp: currentTime,
-		version_id,
-	});
-
-	for (const change of [
+	// Only create separate version change if root change is not already a version change
+	const changesToProcess = [
 		rootChange,
 		changeSetChange,
 		changeSetEdgeChange,
-		versionChange,
-	]) {
+	];
+	
+	if (!isVersionChange) {
+		const versionChange = createChangeWithSnapshot({
+			sqlite,
+			db,
+			data: {
+				entity_id: version.id,
+				schema_key: "lix_version",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					...version,
+					change_set_id: changeSetId,
+				} satisfies LixVersion),
+				schema_version: LixVersionSchema["x-lix-version"],
+			},
+			timestamp: currentTime,
+			version_id,
+		});
+		changesToProcess.push(versionChange);
+	}
+
+	for (const change of changesToProcess) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const changeSetElementChange = createChangeWithSnapshot({
 			sqlite,
