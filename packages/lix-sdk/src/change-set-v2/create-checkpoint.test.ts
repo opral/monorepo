@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createCheckpoint } from "./create-checkpoint.js";
+import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 
 // we should have https://github.com/opral/lix-sdk/issues/305 before this test
 test.todo("creates a checkpoint from working change set elements", async () => {
@@ -196,7 +197,7 @@ test.todo(
 	}
 );
 
-test.todo("creates proper change set ancestry chain", async () => {
+test("creates proper change set ancestry chain", async () => {
 	const lix = await openLixInMemory({});
 
 	// Get initial state
@@ -216,6 +217,14 @@ test.todo("creates proper change set ancestry chain", async () => {
 		lix,
 	});
 
+	const versionAfterCheckpoint1 = await lix.db
+		.selectFrom("version")
+		.where("id", "=", initialVersion.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(versionAfterCheckpoint1.change_set_id).toBe(checkpoint1.id);
+
 	// Make more changes and create second checkpoint
 	await lix.db
 		.insertInto("key_value")
@@ -226,22 +235,41 @@ test.todo("creates proper change set ancestry chain", async () => {
 		lix,
 	});
 
-	// Verify edge chain: initial -> checkpoint1 -> checkpoint2
-	const edges = await lix.db
-		.selectFrom("change_set_edge")
+	const versionAfterCheckpoint2 = await lix.db
+		.selectFrom("version")
+		.where("id", "=", initialVersion.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(versionAfterCheckpoint2.change_set_id).toBe(checkpoint2.id);
+
+	// Verify ancestry: initial change set should be an ancestor of checkpoint1
+	const initialIsAncestorOfCheckpoint1 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", initialVersion.change_set_id)
+		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
 		.selectAll()
 		.execute();
 
-	expect(edges).toEqual(
-		expect.arrayContaining([
-			expect.objectContaining({
-				parent_id: initialVersion.change_set_id,
-				child_id: checkpoint1.id,
-			}),
-			expect.objectContaining({
-				parent_id: checkpoint1.id,
-				child_id: checkpoint2.id,
-			}),
-		])
-	);
+	expect(initialIsAncestorOfCheckpoint1).toHaveLength(1);
+
+	// Verify ancestry: checkpoint1 should be an ancestor of checkpoint2
+	const checkpoint1IsAncestorOfCheckpoint2 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", checkpoint1.id)
+		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
+		.selectAll()
+		.execute();
+
+	expect(checkpoint1IsAncestorOfCheckpoint2).toHaveLength(1);
+
+	// Verify full chain: initial should be an ancestor of checkpoint2
+	const initialIsAncestorOfCheckpoint2 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", initialVersion.change_set_id)
+		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
+		.selectAll()
+		.execute();
+
+	expect(initialIsAncestorOfCheckpoint2).toHaveLength(1);
 });

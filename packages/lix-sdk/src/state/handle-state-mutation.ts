@@ -97,36 +97,56 @@ export function handleStateMutation(
 	const version = JSON.parse(versionRecord.content) as LixVersion;
 
 	const changeSetId = nanoid();
-	
+
 	// Check if the root change is a version change for the same entity
-	const isVersionChange = schema_key === "lix_version" && entity_id === version.id;
-	
+	const isVersionChange =
+		schema_key === "lix_version" && entity_id === version.id;
+
+	// Check skip flag early since it's used in version change logic
+	const [skipFlag] = executeSync({
+		lix: { sqlite },
+		query: db
+			.selectFrom("state")
+			.where("schema_key", "=", "lix_key_value")
+			.where(
+				"entity_id",
+				"=",
+				"lix_state_mutation_handler_skip_change_set_creation"
+			)
+			.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),
+	}) as [{ value: string } | undefined];
+
+	const shouldSkipEdges = skipFlag?.value === "true";
+
 	// Check if this is specifically a change_set_id update (should skip mutation handler logic)
 	let isChangeSetIdUpdate = false;
 	let finalSnapshotContent = snapshot_content;
-	
+
 	if (isVersionChange) {
 		const rootSnapshot = JSON.parse(snapshot_content) as LixVersion;
 		// Check if ONLY change_set_id changed (and nothing else)
-		const isOnlyChangeSetIdUpdate = 
+		const isOnlyChangeSetIdUpdate =
 			rootSnapshot.change_set_id !== version.change_set_id &&
 			rootSnapshot.name === version.name &&
 			rootSnapshot.working_change_set_id === version.working_change_set_id;
-		
+
 		if (isOnlyChangeSetIdUpdate) {
 			// Skip mutation handler logic for change_set_id updates
 			isChangeSetIdUpdate = true;
-			// Use the user's change_set_id as-is
+		} 
+
+		if (shouldSkipEdges || isChangeSetIdUpdate) {
+			// Use user's data as-is (no mutation handler modifications)
 			finalSnapshotContent = snapshot_content;
 		} else {
-			// Normal version update - apply mutation handler logic
+			// Apply mutation handler logic
 			finalSnapshotContent = JSON.stringify({
 				...rootSnapshot,
 				change_set_id: changeSetId,
 			} satisfies LixVersion);
 		}
 	}
-	
+
 	const rootChange = createChangeWithSnapshot({
 		sqlite,
 		db,
@@ -142,9 +162,27 @@ export function handleStateMutation(
 		version_id,
 	});
 
-	// Skip mutation handler logic for change_set_id updates
-	if (isChangeSetIdUpdate) {
-		// For change_set_id updates, just create the root change and return
+	// TEMPORARY WORKAROUND: Skip mutation handler edge/change set creation
+	//
+	// This exists to solve the "change set per mutation" vs "change set per transaction" problem.
+	// Currently, every mutation creates its own change set and edges, but ideally all mutations
+	// within a transaction should be grouped into a single change set with proper edges.
+	//
+	// When the skip flag is set, only the root change is created without automatic
+	// change set orchestration. This allows functions like createCheckpoint() to manually
+	// control change set creation and avoid orphaned change sets.
+	//
+
+	// Skip mutation handler logic for:
+	// 1. change_set_id updates
+	// 2. when skip flag is set
+	// 3. when setting/deleting the skip flag itself (avoid circular dependency)
+	const isSkipFlagOperation =
+		schema_key === "lix_key_value" &&
+		entity_id === "lix_state_mutation_handler_skip_change_set_creation";
+
+	if (isChangeSetIdUpdate || shouldSkipEdges || isSkipFlagOperation) {
+		// For change_set_id updates or when skip flag is set, just create the root change and return
 		// No edges, no new change sets, no additional logic
 		return 1;
 	}
@@ -186,12 +224,8 @@ export function handleStateMutation(
 	});
 
 	// Only create separate version change if root change is not already a version change
-	const changesToProcess = [
-		rootChange,
-		changeSetChange,
-		changeSetEdgeChange,
-	];
-	
+	const changesToProcess = [rootChange, changeSetChange, changeSetEdgeChange];
+
 	if (!isVersionChange) {
 		const versionChange = createChangeWithSnapshot({
 			sqlite,

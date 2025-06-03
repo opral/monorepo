@@ -403,3 +403,84 @@ test("updating version name should create edges (normal mutation behavior)", asy
 	expect(newEdge).toBeDefined();
 });
 
+test("lix_state_mutation_handler_skip_change_set_creation flag bypasses change set creation", async () => {
+	const lix = await openLixInMemory({});
+
+	// Get initial state
+	const initialVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const initialChangeSetId = initialVersion.change_set_id;
+
+	// Count initial change sets and edges
+	const changeSetsBefore = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
+	const changeSetEdgesBefore = await lix.db
+		.selectFrom("change_set_edge")
+		.selectAll()
+		.execute();
+
+	// Set the skip flag
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "lix_state_mutation_handler_skip_change_set_creation",
+			value: "true",
+		})
+		.execute();
+
+	// Make a change that would normally trigger mutation handler
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "test-key", value: "test-value" })
+		.execute();
+
+	// Update version name (would normally create change sets + edges)
+	await lix.db
+		.updateTable("version")
+		.where("id", "=", initialVersion.id)
+		.set({ name: "test-branch" })
+		.execute();
+
+	// Verify NO new change sets were created (skip flag working)
+	const changeSetsAfter = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+
+	expect(changeSetsAfter).toHaveLength(changeSetsBefore.length);
+
+	// Verify NO new edges were created (skip flag working)
+	const changeSetEdgesAfter = await lix.db
+		.selectFrom("change_set_edge")
+		.selectAll()
+		.execute();
+
+	expect(changeSetEdgesAfter).toHaveLength(changeSetEdgesBefore.length);
+
+	// Verify changes were still created (only edge creation is skipped)
+	const updatedVersion = await lix.db
+		.selectFrom("version")
+		.where("id", "=", initialVersion.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(updatedVersion.name).toBe("test-branch");
+	// Version change_set_id should be unchanged (no automatic updates)
+	expect(updatedVersion.change_set_id).toBe(initialChangeSetId);
+
+	const testKeyValue = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "test-key")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(testKeyValue.value).toBe("test-value");
+});
+
