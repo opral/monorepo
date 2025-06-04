@@ -5,18 +5,8 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 	id: string;
 }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// Set skip flag to prevent mutation handler from creating edges/change sets
-		await trx
-			.insertInto("key_value")
-			.values({
-				key: "lix_state_mutation_handler_skip_change_set_creation",
-				value: "true",
-			})
-			.execute();
-
-		try {
-			// Get current active version
-			const activeVersion = await trx
+		// Get current active version
+		const activeVersion = await trx
 				.selectFrom("active_version")
 				.innerJoin("version", "version.id", "active_version.version_id")
 				.selectAll("version")
@@ -26,7 +16,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			// Use the current change_set_id as parent - this represents the latest changes
 			const parentChangeSetId = activeVersion.change_set_id;
 
-			// Get current working change set elements (virtually computed)
+			// Check if there are any working change set elements to checkpoint
 			const workingElements = await trx
 				.selectFrom("change_set_element")
 				.where("change_set_id", "=", workingChangeSetId)
@@ -39,21 +29,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 				);
 			}
 
-			// 1. Copy working elements to the working change set (solidify virtual elements)
-			for (const element of workingElements) {
-				await trx
-					.insertInto("change_set_element")
-					.values({
-						change_set_id: workingChangeSetId,
-						change_id: element.change_id,
-						entity_id: element.entity_id,
-						schema_key: element.schema_key,
-						file_id: element.file_id,
-					})
-					.execute();
-			}
-
-			// 2. Add ancestry edge to working change set (edge becomes part of checkpoint)
+			// 1. Add ancestry edge from parent to working change set (working becomes checkpoint)
 			await trx
 				.insertInto("change_set_edge")
 				.values({
@@ -62,7 +38,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 				})
 				.execute();
 
-			// 3. Create new empty working change set for continued work
+			// 2. Create new empty working change set for continued work
 			const newWorkingChangeSetId = nanoid();
 			await trx
 				.insertInto("change_set")
@@ -71,12 +47,36 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 				})
 				.execute();
 
-			// 4. Update version (now uses mutation handler to ensure proper change recording)
+			// 3. Get checkpoint label and assign it to the checkpoint change set
+			const checkpointLabel = await trx
+				.selectFrom("label")
+				.where("name", "=", "checkpoint")
+				.select("id")
+				.executeTakeFirstOrThrow();
+
+			await trx
+				.insertInto("change_set_label")
+				.values({
+					change_set_id: workingChangeSetId,
+					label_id: checkpointLabel.id,
+				})
+				.execute();
+
+			// 4. Update version in two steps to ensure proper mutation handler behavior
+			// First, update change_set_id (this should skip mutation handler logic)
 			await trx
 				.updateTable("version")
 				.where("id", "=", activeVersion.id)
 				.set({
 					change_set_id: workingChangeSetId, // Working becomes checkpoint
+				})
+				.execute();
+
+			// Then, update working_change_set_id (this should also skip mutation handler logic)
+			await trx
+				.updateTable("version")
+				.where("id", "=", activeVersion.id)
+				.set({
 					working_change_set_id: newWorkingChangeSetId, // New empty working
 				})
 				.execute();
@@ -84,16 +84,6 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			return {
 				id: workingChangeSetId,
 			};
-		} finally {
-			await trx
-				.deleteFrom("key_value")
-				.where(
-					"key",
-					"=",
-					"lix_state_mutation_handler_skip_change_set_creation"
-				)
-				.execute();
-		}
 	};
 
 	if (args.lix.db.isTransaction) {

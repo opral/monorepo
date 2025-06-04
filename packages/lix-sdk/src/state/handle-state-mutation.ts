@@ -102,21 +102,6 @@ export function handleStateMutation(
 	const isVersionChange =
 		schema_key === "lix_version" && entity_id === version.id;
 
-	// Check skip flag early since it's used in version change logic
-	const [skipFlag] = executeSync({
-		lix: { sqlite },
-		query: db
-			.selectFrom("state")
-			.where("schema_key", "=", "lix_key_value")
-			.where(
-				"entity_id",
-				"=",
-				"lix_state_mutation_handler_skip_change_set_creation"
-			)
-			.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),
-	}) as [{ value: string } | undefined];
-
-	const shouldSkipEdges = skipFlag?.value === "true";
 
 	// Check if this is specifically a change_set_id update (should skip mutation handler logic)
 	let isChangeSetIdUpdate = false;
@@ -133,9 +118,6 @@ export function handleStateMutation(
 		if (isOnlyChangeSetIdUpdate) {
 			// Skip mutation handler logic for change_set_id updates
 			isChangeSetIdUpdate = true;
-		} 
-
-		if (shouldSkipEdges || isChangeSetIdUpdate) {
 			// Use user's data as-is (no mutation handler modifications)
 			finalSnapshotContent = snapshot_content;
 		} else {
@@ -162,27 +144,9 @@ export function handleStateMutation(
 		version_id,
 	});
 
-	// TEMPORARY WORKAROUND: Skip mutation handler edge/change set creation
-	//
-	// This exists to solve the "change set per mutation" vs "change set per transaction" problem.
-	// Currently, every mutation creates its own change set and edges, but ideally all mutations
-	// within a transaction should be grouped into a single change set with proper edges.
-	//
-	// When the skip flag is set, only the root change is created without automatic
-	// change set orchestration. This allows functions like createCheckpoint() to manually
-	// control change set creation and avoid orphaned change sets.
-	//
-
-	// Skip mutation handler logic for:
-	// 1. change_set_id updates
-	// 2. when skip flag is set
-	// 3. when setting/deleting the skip flag itself (avoid circular dependency)
-	const isSkipFlagOperation =
-		schema_key === "lix_key_value" &&
-		entity_id === "lix_state_mutation_handler_skip_change_set_creation";
-
-	if (isChangeSetIdUpdate || shouldSkipEdges || isSkipFlagOperation) {
-		// For change_set_id updates or when skip flag is set, just create the root change and return
+	// Skip mutation handler logic for change_set_id updates only
+	if (isChangeSetIdUpdate) {
+		// For change_set_id updates, just create the root change and return
 		// No edges, no new change sets, no additional logic
 		return 1;
 	}
@@ -290,6 +254,69 @@ export function handleStateMutation(
 		// 		} satisfies ChangeSetElement),
 		// 	},
 		// });
+	}
+
+	// Create/update working change set element for user data changes
+	// Skip lix internal entities (change sets, edges, etc.)
+	if (!isChangeSetIdUpdate && rootChange.schema_key !== "lix_change_set" && 
+		rootChange.schema_key !== "lix_change_set_edge" && rootChange.schema_key !== "lix_change_set_element" &&
+		rootChange.schema_key !== "lix_version") {
+		
+		const parsedSnapshot = finalSnapshotContent ? JSON.parse(finalSnapshotContent) : null;
+		const isDeletion = !parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
+		
+		if (isDeletion) {
+			// Simple deletion: remove from working change set
+			executeSync({
+				lix: { sqlite },
+				query: db
+					.deleteFrom("state")
+					.where("entity_id", "like", `${version.working_change_set_id}::%`)
+					.where("schema_key", "=", "lix_change_set_element")
+					.where("file_id", "=", "lix")
+					.where("version_id", "=", version_id)
+					.where(sql`json_extract(snapshot_content, '$.entity_id')`, "=", rootChange.entity_id)
+					.where(sql`json_extract(snapshot_content, '$.schema_key')`, "=", rootChange.schema_key)
+					.where(sql`json_extract(snapshot_content, '$.file_id')`, "=", rootChange.file_id),
+			});
+		} else {
+			// Non-deletion: create/update working change set element (latest change wins)
+			// First, remove any existing working change set element for this entity
+			executeSync({
+				lix: { sqlite },
+				query: db
+					.deleteFrom("state")
+					.where("entity_id", "like", `${version.working_change_set_id}::%`)
+					.where("schema_key", "=", "lix_change_set_element")
+					.where("file_id", "=", "lix")
+					.where("version_id", "=", version_id)
+					.where(sql`json_extract(snapshot_content, '$.entity_id')`, "=", rootChange.entity_id)
+					.where(sql`json_extract(snapshot_content, '$.schema_key')`, "=", rootChange.schema_key)
+					.where(sql`json_extract(snapshot_content, '$.file_id')`, "=", rootChange.file_id),
+			});
+
+			// Then create new element with latest change
+			createChangeWithSnapshot({
+				sqlite,
+				db,
+				data: {
+					entity_id: `${version.working_change_set_id}::${rootChange.id}`,
+					schema_key: "lix_change_set_element",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						change_set_id: version.working_change_set_id,
+						change_id: rootChange.id,
+						entity_id: rootChange.entity_id,
+						schema_key: rootChange.schema_key,
+						file_id: rootChange.file_id,
+					} satisfies LixChangeSetElement),
+					schema_version: LixChangeSetElementSchema["x-lix-version"],
+				},
+				timestamp: currentTime,
+				version_id,
+			});
+		}
 	}
 
 	return 1;
