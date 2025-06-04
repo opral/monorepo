@@ -1,4 +1,4 @@
-import type { Snapshot } from "./database-schema.js";
+import type { Snapshot } from "./schema.js";
 import { jsonSha256 } from "./json-sha-256.js";
 
 /**

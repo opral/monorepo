@@ -20,6 +20,8 @@ import {
 	LixChangeSetEdgeSchema,
 	LixChangeSetElementSchema,
 } from "../change-set-v2/schema.js";
+import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,

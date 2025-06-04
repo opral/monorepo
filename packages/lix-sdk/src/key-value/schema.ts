@@ -5,10 +5,7 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import {
-	JSONTypeSchema,
-	type JSONType,
-} from "../schema-definition/json-type.js";
+import { JSONTypeSchema } from "../schema-definition/json-type.js";
 
 export function applyKeyValueDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -103,7 +100,7 @@ export type KeyValueView = {
 	 *   "namespace_cool_key"
 	 */
 	key: KeyValueKeys;
-	value: JSONType;
+	value: any; // JSONType, can be any valid JSON value
 	version_id: Generated<string>;
 };
 
