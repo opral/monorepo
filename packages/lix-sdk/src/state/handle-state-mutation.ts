@@ -19,7 +19,7 @@ import {
 	LixChangeSetSchema,
 	LixChangeSetEdgeSchema,
 	LixChangeSetElementSchema,
-} from "../change-set-v2/schema.js";
+} from "../change-set/schema.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";

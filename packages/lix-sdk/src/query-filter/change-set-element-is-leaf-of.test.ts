@@ -1,22 +1,31 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createChangeSet } from "../change-set-v2/create-change-set.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
 import { changeSetElementInAncestryOf } from "./change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "./change-set-element-is-leaf-of.js";
 
-// needs materialized state
-test.todo("returns only leaf change_set_elements per entity", async () => {
+test("returns only leaf change_set_elements per entity", async () => {
 	const lix = await openLixInMemory({});
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "mock_schema",
+				"x-lix-version": "1.0",
+				type: "object",
+			},
+		})
+		.execute();
+
 	// Insert 3 snapshots for the same entity
-	const snapshots = await lix.db
+	await lix.db
 		.insertInto("snapshot")
 		.values([
-			{ content: { val: "0" } },
-			{ content: { val: "1" } },
-			{ content: { val: "2" } },
+			{ id: "s0", content: { val: "0" } },
+			{ id: "s1", content: { val: "1" } },
+			{ id: "s2", content: { val: "2" } },
 		])
-		.returning("id")
 		.execute();
 
 	const changes = await lix.db
@@ -27,27 +36,27 @@ test.todo("returns only leaf change_set_elements per entity", async () => {
 				entity_id: "e0",
 				file_id: "f1",
 				schema_version: "1.0",
-				schema_key: "test",
+				schema_key: "mock_schema",
 				plugin_key: "p",
-				snapshot_id: snapshots[0]!.id,
+				snapshot_id: "s0",
 			},
 			{
 				id: "c1",
 				entity_id: "e1",
 				file_id: "f1",
 				schema_version: "1.0",
-				schema_key: "test",
+				schema_key: "mock_schema",
 				plugin_key: "p",
-				snapshot_id: snapshots[1]!.id,
+				snapshot_id: "s1",
 			},
 			{
 				id: "c2",
 				entity_id: "e1",
 				file_id: "f1",
 				schema_version: "1.0",
-				schema_key: "test",
+				schema_key: "mock_schema",
 				plugin_key: "p",
-				snapshot_id: snapshots[2]!.id,
+				snapshot_id: "s2",
 			},
 		])
 		.returningAll()
@@ -102,21 +111,30 @@ test.todo("returns only leaf change_set_elements per entity", async () => {
 	]);
 });
 
-// needs materialized state
-test.todo("correctly identifies leaves at different points in history", async () => {
+test("correctly identifies leaves at different points in history", async () => {
 	const lix = await openLixInMemory({});
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "mock_schema",
+				"x-lix-version": "1.0",
+				type: "object",
+			},
+		})
+		.execute();
+
 	// Create a scenario similar to the restore-change-set test
-	const snapshots = await lix.db
+	await lix.db
 		.insertInto("snapshot")
 		.values([
-			{ content: { text: "Line 0" } },
-			{ content: { text: "Line 1" } },
-			{ content: { text: "Line 2" } },
-			{ content: { text: "Line 2 Modified" } },
-			{ content: { text: "Line 3" } },
+			{ id: "s0", content: { text: "Line 0" } },
+			{ id: "s1", content: { text: "Line 1" } },
+			{ id: "s2", content: { text: "Line 2" } },
+			{ id: "s2-modified", content: { text: "Line 2 Modified" } },
+			{ id: "s3", content: { text: "Line 3" } },
 		])
-		.returning("id")
 		.execute();
 
 	const changes = await lix.db
@@ -127,45 +145,45 @@ test.todo("correctly identifies leaves at different points in history", async ()
 				entity_id: "l0",
 				schema_version: "1.0",
 				file_id: "file1",
-				schema_key: "line",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[0]!.id,
+				snapshot_id: "s0",
 			},
 			{
 				id: "c1",
 				entity_id: "l1",
 				schema_version: "1.0",
 				file_id: "file1",
-				schema_key: "line",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[1]!.id,
+				snapshot_id: "s1",
 			},
 			{
 				id: "c2",
 				entity_id: "l2",
 				file_id: "file1",
 				schema_version: "1.0",
-				schema_key: "line",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[2]!.id,
+				snapshot_id: "s2",
 			},
 			{
 				id: "c3",
 				entity_id: "l2", // Same entity as c2, but newer version
 				file_id: "file1",
 				schema_version: "1.0",
-				schema_key: "line",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[3]!.id,
+				snapshot_id: "s2-modified",
 			},
 			{
 				id: "c4",
 				entity_id: "l3", // New entity
 				file_id: "file1",
 				schema_version: "1.0",
-				schema_key: "line",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[4]!.id,
+				snapshot_id: "s3",
 			},
 		])
 		.returningAll()
@@ -360,9 +378,19 @@ test.todo("correctly identifies leaves at different points in history", async ()
 	).toEqual(["c0", "c1", "c2"]);
 });
 
-// needs materialized state
-test.todo("returns combined leaves from multiple target change sets", async () => {
+test("returns combined leaves from multiple target change sets", async () => {
 	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "mock_schema",
+				"x-lix-version": "1.0",
+				type: "object",
+			},
+		})
+		.execute();
 
 	// Create changes
 	const changes = await lix.db
@@ -373,7 +401,7 @@ test.todo("returns combined leaves from multiple target change sets", async () =
 				entity_id: "entity3",
 				schema_version: "1.0",
 				file_id: "file3",
-				schema_key: "schema3",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
 			},
@@ -382,7 +410,7 @@ test.todo("returns combined leaves from multiple target change sets", async () =
 				entity_id: "entity1",
 				schema_version: "1.0",
 				file_id: "file1",
-				schema_key: "schema1",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
 			},
@@ -391,7 +419,7 @@ test.todo("returns combined leaves from multiple target change sets", async () =
 				entity_id: "entity2",
 				schema_version: "1.0",
 				file_id: "file2",
-				schema_key: "schema2",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
 			},
@@ -403,14 +431,14 @@ test.todo("returns combined leaves from multiple target change sets", async () =
 				file_id: "file2",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
-				schema_key: "schema2",
+				schema_key: "mock_schema",
 			},
 			{
 				id: "c4",
 				entity_id: "entity4",
 				schema_version: "1.0",
 				file_id: "file4",
-				schema_key: "schema4",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
 			},
@@ -419,7 +447,7 @@ test.todo("returns combined leaves from multiple target change sets", async () =
 				entity_id: "entity5",
 				schema_version: "1.0",
 				file_id: "file5",
-				schema_key: "schema5",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
 			},
@@ -429,7 +457,7 @@ test.todo("returns combined leaves from multiple target change sets", async () =
 				entity_id: "entity3", // Same entity as c0
 				file_id: "file3",
 				schema_version: "1.0",
-				schema_key: "schema3",
+				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
 				snapshot_id: "no-content",
 			},

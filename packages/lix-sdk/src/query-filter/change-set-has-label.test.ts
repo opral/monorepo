@@ -1,46 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { test, expect } from "vitest";
 import { changeSetHasLabel } from "./change-set-has-label.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createChangeSet } from "../change-set-v2/create-change-set.js";
-import { mockChange } from "../change/mock-change.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import { createLabel } from "../label/create-label.js";
 
-test.todo("should only return change sets with the given label", async () => {
+test("should only return change sets with the given label", async () => {
 	const lix = await openLixInMemory({});
-
-	const changes0 = await lix.db
-		.insertInto("change")
-		.values([mockChange({ id: "change1" }), mockChange({ id: "change2" })])
-		.returningAll()
-		.execute();
 
 	// Create two change sets
 	const cs0 = await createChangeSet({
 		lix,
-		elements: [changes0[0]!].map((change) => ({
-			change_id: change.id,
-			entity_id: change.entity_id,
-			schema_key: change.schema_key,
-			file_id: change.file_id,
-		})),
+		id: "cs0",
+		elements: [],
 	});
 
-	const cs1 = await createChangeSet({
+	await createChangeSet({
 		lix,
-		elements: [changes0[1]!].map((change) => ({
-			change_id: change.id,
-			entity_id: change.entity_id,
-			schema_key: change.schema_key,
-			file_id: change.file_id,
-		})),
+		id: "cs1",
+		elements: [],
 	});
 
 	// Insert a label
-	const label = await lix.db
-		.insertInto("label")
-		.values({ name: "mocked" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const label = await createLabel({ lix, name: "mocked" });
 
 	// Assign the label to one of the change sets
 	await lix.db

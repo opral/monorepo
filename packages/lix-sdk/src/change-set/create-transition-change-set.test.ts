@@ -1,64 +1,19 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type { LixPlugin } from "../plugin/lix-plugin.js";
+import {
+	mockJsonPlugin,
+	MockJsonPropertySchema,
+} from "../plugin/mock-json-plugin.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
+import { createTransitionChangeSet } from "./create-transition-change-set.js";
 
-test.todo("it restores the state to a specific change set", async () => {
-	// Create a mock plugin that handles JSON data (entity_id -> snapshot content)
-	const mockPlugin: LixPlugin = {
-		key: "mock_plugin",
-		applyChanges: async ({ lix, file, changes }) => {
-			// Get the current state from the file data
-			let currentJsonState: Record<string, any> = {};
-			// Check if file.data exists and is not empty before parsing
-			// Note: applyChanges is called *after* the file record is updated by restoreChangeSet,
-			// so file.data should already reflect the restored state.
-			// We expect the content to be an object like { text: "..." }
-			if (file.data && file.data.length > 0) {
-				try {
-					currentJsonState = JSON.parse(new TextDecoder().decode(file.data));
-				} catch (error) {
-					// Handle potential parsing errors if the initial file data isn't valid JSON
-					console.error("Failed to parse existing file data:", error);
-					// Depending on the desired behavior, you might want to throw or start fresh
-					currentJsonState = {};
-				}
-			}
-
-			const withSnapshots = await Promise.all(
-				changes.map(async (change) => {
-					return await lix.db
-						.selectFrom("change")
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-						.where("change.id", "=", change.id)
-						.select(["change.id", "change.entity_id", "snapshot.content"])
-						.executeTakeFirstOrThrow();
-				})
-			);
-
-			// Build a JSON object mapping entity_id to snapshot content
-			for (const change of withSnapshots) {
-				if (change.content === null) {
-					// If the content is null, remove the entity from the state
-					delete currentJsonState[change.entity_id];
-				} else {
-					// Update the current state with the new change content
-					// Need to decode the BLOB content from the snapshot
-					// The plugin should handle deserializing the object stored in the BLOB
-					currentJsonState[change.entity_id] = change.content;
-				}
-			}
-
-			return {
-				fileData: new TextEncoder().encode(JSON.stringify(currentJsonState)),
-			};
-		},
-	};
-
+// needs faster graph traversal. currently timing out.
+// related https://github.com/opral/lix-sdk/issues/311
+test.skip("it transitions state to a specific change set", async () => {
 	// Create a Lix instance with our plugin
 	const lix = await openLixInMemory({
-		providePlugins: [mockPlugin],
+		providePlugins: [mockJsonPlugin],
 	});
 
 	const activeVersion = await lix.db
@@ -67,29 +22,41 @@ test.todo("it restores the state to a specific change set", async () => {
 		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
+	// Insert the schema that the mockJsonPlugin uses
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: MockJsonPropertySchema,
+		})
+		.execute();
+
 	// Create a file
-	const file = await lix.db
+	await lix.db
 		.insertInto("file")
 		.values({
 			id: "file1",
 			data: new TextEncoder().encode(""),
-			path: "/test.txt",
+			path: "/test.json",
 		})
-		.returningAll()
+		.execute();
+
+	const file = await lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("id", "=", "file1")
 		.executeTakeFirstOrThrow();
 
-	// Insert snapshots with { text: "..." } content
-	const snapshots = await lix.db
+	// Insert snapshots with { value: "..." } content to match mockJsonPlugin format
+	await lix.db
 		.insertInto("snapshot")
 		.values([
-			{ content: { text: "Value 0" } },
-			{ content: { text: "Value 1" } },
-			{ content: { text: "Value 2" } },
-			{ content: { text: "Value 2 Modified" } }, // For c3
-			{ content: { text: "Value 3" } }, // For c4
-			{ content: { text: "Value 4" } }, // For c5
+			{ id: "s0", content: { value: "Value 0" } },
+			{ id: "s1", content: { value: "Value 1" } },
+			{ id: "s2", content: { value: "Value 2" } },
+			{ id: "s3", content: { value: "Value 2 Modified" } }, // For c3
+			{ id: "s4", content: { value: "Value 3" } }, // For c4
+			{ id: "s5", content: { value: "Value 4" } }, // For c5
 		])
-		.returning("id")
 		.execute();
 
 	const changes = await lix.db
@@ -98,50 +65,56 @@ test.todo("it restores the state to a specific change set", async () => {
 			{
 				id: "c0",
 				file_id: file.id,
-				plugin_key: mockPlugin.key,
+				plugin_key: mockJsonPlugin.key,
 				entity_id: "l0",
-				schema_key: "test_schema",
-				snapshot_id: snapshots[0]!.id,
+				schema_key: "mock_json_property",
+				schema_version: "1.0",
+				snapshot_id: "s0",
 			},
 			{
 				id: "c1",
 				file_id: file.id,
-				plugin_key: mockPlugin.key,
+				plugin_key: mockJsonPlugin.key,
 				entity_id: "l1",
-				schema_key: "test_schema",
-				snapshot_id: snapshots[1]!.id,
+				schema_key: "mock_json_property",
+				schema_version: "1.0",
+				snapshot_id: "s1",
 			},
 			{
 				id: "c2",
 				file_id: file.id,
-				plugin_key: mockPlugin.key,
+				plugin_key: mockJsonPlugin.key,
 				entity_id: "l2",
-				schema_key: "test_schema",
-				snapshot_id: snapshots[2]!.id,
+				schema_key: "mock_json_property",
+				schema_version: "1.0",
+				snapshot_id: "s2",
 			},
 			{
 				id: "c3",
 				file_id: file.id,
-				plugin_key: mockPlugin.key,
+				plugin_key: mockJsonPlugin.key,
 				entity_id: "l2",
-				schema_key: "test_schema",
-				snapshot_id: snapshots[3]!.id,
+				schema_key: "mock_json_property",
+				schema_version: "1.0",
+				snapshot_id: "s3",
 			},
 			{
 				id: "c4",
 				file_id: file.id,
-				plugin_key: mockPlugin.key,
+				plugin_key: mockJsonPlugin.key,
 				entity_id: "l3",
-				schema_key: "test_schema",
-				snapshot_id: snapshots[4]!.id,
+				schema_key: "mock_json_property",
+				schema_version: "1.0",
+				snapshot_id: "s4",
 			},
 			{
 				id: "c5", // Add another change/entity for complexity
 				entity_id: "l4",
 				file_id: "file1",
-				schema_key: "test_schema",
-				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[5]!.id,
+				schema_key: "mock_json_property",
+				schema_version: "1.0",
+				plugin_key: mockJsonPlugin.key,
+				snapshot_id: "s5",
 			},
 		])
 		.returningAll()
@@ -182,6 +155,8 @@ test.todo("it restores the state to a specific change set", async () => {
 		parents: [cs1],
 	});
 
+	// Apply change sets in order: cs0, then cs1, then cs2
+	// This demonstrates the explicit, predictable "direct" behavior
 	await applyChangeSet({
 		lix,
 		changeSet: cs0,
@@ -195,9 +170,9 @@ test.todo("it restores the state to a specific change set", async () => {
 
 	// The file data should now be a JSON string representing the state at cs0
 	const expectedJsonStateCs0 = {
-		l0: { text: "Value 0" },
-		l1: { text: "Value 1" },
-		l2: { text: "Value 2" },
+		l0: "Value 0",
+		l1: "Value 1",
+		l2: "Value 2",
 	};
 
 	const actualJsonStateCs0 = JSON.parse(
@@ -206,6 +181,13 @@ test.todo("it restores the state to a specific change set", async () => {
 
 	expect(actualJsonStateCs0).toEqual(expectedJsonStateCs0);
 
+	// Apply cs1 (which modifies l2 to "Value 2 Modified")
+	await applyChangeSet({
+		lix,
+		changeSet: cs1,
+	});
+
+	// Apply cs2 (which adds l3 and l4)
 	await applyChangeSet({
 		lix,
 		changeSet: cs2,
@@ -220,11 +202,11 @@ test.todo("it restores the state to a specific change set", async () => {
 
 	// The file data should now be a JSON string representing the state at cs2
 	const expectedJsonStateCs2 = {
-		l0: { text: "Value 0" },
-		l1: { text: "Value 1" },
-		l2: { text: "Value 2 Modified" }, // c3 replaced c2
-		l3: { text: "Value 3" }, // c4 added
-		l4: { text: "Value 4" }, // c5 added
+		l0: "Value 0",
+		l1: "Value 1",
+		l2: "Value 2 Modified", // c3 replaced c2
+		l3: "Value 3", // c4 added
+		l4: "Value 4", // c5 added
 	};
 
 	const actualJsonStateCs2 = JSON.parse(
@@ -233,12 +215,18 @@ test.todo("it restores the state to a specific change set", async () => {
 
 	expect(actualJsonStateCs2).toEqual(expectedJsonStateCs2);
 
-	// Action: Restore to cs0
-	// await experimentalCreateRestoreChangeSet({
-	// 	lix,
-	// 	changeSet: cs0,
-	// 	version: activeVersion,
-	// });
+	// Action: Create transition change set to restore to cs0
+	const transitionChangeSet = await createTransitionChangeSet({
+		lix,
+		sourceChangeSet: cs2,
+		targetChangeSet: cs0,
+	});
+
+	// Apply the transition change set
+	await applyChangeSet({
+		lix,
+		changeSet: transitionChangeSet,
+	});
 
 	// Verify final state
 	// 1. Check that versions change set parent is cs2

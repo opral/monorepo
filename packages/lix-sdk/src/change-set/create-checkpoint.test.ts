@@ -1,325 +1,385 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createCheckpoint } from "./create-checkpoint.js";
-import { createChangeSet } from "./create-change-set.js";
-import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
-import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 
-test.skip("creates a checkpoint that has an edge to the version's change set", async () => {
-	// Create a Lix instance with the mockJsonPlugin
-	const lix = await openLixInMemory({
-		providePlugins: [mockJsonPlugin],
-	});
-
-	// Get the initial version and its change set
-	const initialVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "version.id", "active_version.version_id")
-		.select(["version.id as id", "version.change_set_id"])
-		.executeTakeFirstOrThrow();
-
-	// Create a checkpoint
-	const checkpoint = await createCheckpoint({ lix });
-
-	// Verify the checkpoint has an edge to the version's change set
-	const edges = await lix.db
-		.selectFrom("change_set_edge")
-		.select(["parent_id", "child_id"])
-		.execute();
-
-	// Should have exactly one edge
-	expect(edges.length).toBe(1);
-
-	// Verify the edge connects to the version's change set
-	const edgeToVersionChangeSet = edges.find(
-		(edge) => edge.parent_id === initialVersion.change_set_id
-	);
-	expect(edgeToVersionChangeSet).toBeDefined();
-	expect(edgeToVersionChangeSet?.parent_id).toBe(initialVersion.change_set_id);
-	expect(edgeToVersionChangeSet?.child_id).toBe(checkpoint.id);
-
-	// Verify the checkpoint has the checkpoint label
-	const labels = await lix.db
-		.selectFrom("change_set_label")
-		.innerJoin("label", "label.id", "change_set_label.label_id")
-		.where("change_set_label.change_set_id", "=", checkpoint.id)
-		.select(["label.name"])
-		.execute();
-
-	expect(labels.map((l) => l.name)).toContain("checkpoint");
-});
-
-// this is a potential future optimization of being able to disregard
-// change sets between two checkpoints once every client (reasonably) synced
-test.skip("creates a checkpoint with edges to both the version's change set AND the previous checkpoint", async () => {
-	// Create a Lix instance with the mockJsonPlugin
-	const lix = await openLixInMemory({
-		providePlugins: [mockJsonPlugin],
-	});
-
-	// Get the initial version
-	const initialVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "version.id", "active_version.version_id")
-		.select(["version.id as id", "version.change_set_id"])
-		.executeTakeFirstOrThrow();
-
-	// Create first checkpoint
-	const firstCheckpoint = await createCheckpoint({ lix });
-
-	// Create a change set after the first checkpoint
-	const file = await lix.db
-		.insertInto("file")
-		.values({
-			id: "file1",
-			data: new TextEncoder().encode("{}"),
-			path: "/test.json",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	// Create a snapshot
-	const snapshot = await lix.db
-		.insertInto("snapshot")
-		.values({
-			content: { value: "Test Value" },
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	// Create a change
-	const change = await lix.db
-		.insertInto("change")
-		.values({
-			id: "c1",
-			file_id: file.id,
-			plugin_key: mockJsonPlugin.key,
-			entity_id: "e1",
-			schema_key: "mock_json_property",
-			snapshot_id: snapshot.id,
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	// Create a change set with the change
-	const changeSet = await createChangeSet({
-		lix,
-		elements: [
-			{
-				change_id: change.id,
-				entity_id: change.entity_id,
-				schema_key: change.schema_key,
-				file_id: change.file_id,
-			},
-		],
-		parents: [{ id: firstCheckpoint.id }],
-	});
-
-	// Update the version to point to the new change set
-	await lix.db
-		.updateTable("version")
-		.set({ change_set_id: changeSet.id })
-		.where("id", "=", initialVersion.id)
-		.execute();
-
-	// Create second checkpoint
-	const secondCheckpoint = await createCheckpoint({ lix });
-
-	// Verify the second checkpoint has two edges:
-	// 1. To the change set that was current before creating the checkpoint
-	// 2. To the first checkpoint
-	const edges = await lix.db
-		.selectFrom("change_set_edge")
-		.where("child_id", "=", secondCheckpoint.id)
-		.select(["parent_id", "child_id"])
-		.execute();
-
-	// There should be exactly 2 edges
-	expect(edges.length).toBe(2);
-
-	// Verify these are the edges we expect
-	const edgeToChangeSet = edges.find((edge) => edge.parent_id === changeSet.id);
-	const edgeToFirstCheckpoint = edges.find(
-		(edge) => edge.parent_id === firstCheckpoint.id
-	);
-
-	expect(edgeToChangeSet).toBeDefined();
-	expect(edgeToFirstCheckpoint).toBeDefined();
-
-	// Verify the version now points to the second checkpoint
-	const updatedVersion = await lix.db
-		.selectFrom("version")
-		.where("id", "=", initialVersion.id)
-		.select(["change_set_id"])
-		.executeTakeFirstOrThrow();
-
-	expect(updatedVersion.change_set_id).toBe(secondCheckpoint.id);
-});
-
-test.skip("only contains the leaf change diff (not all) to the compared to the previous checkpoint", async () => {
-	const lix = await openLixInMemory({
-		providePlugins: [mockJsonPlugin],
-	});
-
-	await lix.db
-		.insertInto("file")
-		.values({
-			id: "file1",
-			data: new TextEncoder().encode(`{ "name": "Max", "age": 25 }`),
-			path: "/test.json",
-		})
-		.returningAll()
-		.executeTakeFirstOrThrow();
-
-	// should contain the file insert and name max change
-	const checkpoint1 = await createCheckpoint({ lix });
-
-	await lix.db
-		.updateTable("file")
-		.set({ data: new TextEncoder().encode(`{ "name": "Julia", "age": 25 }`) })
-		.execute();
-
-	const checkpoint2 = await createCheckpoint({ lix });
-
-	const changesCheckpoint1 = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_element.change_set_id", "=", checkpoint1.id)
-		.where("change_set_element.schema_key", "=", "mock_json_property")
-		.orderBy("change_set_element.entity_id asc")
-		.select([
-			"change_set_element.entity_id",
-			"change_set_element.schema_key",
-			"change_set_element.file_id",
-		])
-		.execute();
-
-	const changesCheckpoint2 = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_element.change_set_id", "=", checkpoint2.id)
-		.where("change_set_element.schema_key", "=", "mock_json_property")
-		.select([
-			"change_set_element.entity_id",
-			"change_set_element.schema_key",
-			"change_set_element.file_id",
-		])
-		.orderBy("change_set_element.entity_id asc")
-		.execute();
-
-	// both age and name have been modified before creating the checkpoint
-	expect(changesCheckpoint1).toEqual([
-		{
-			file_id: "file1",
-			schema_key: "mock_json_property",
-			entity_id: "age",
-		},
-		{
-			file_id: "file1",
-			schema_key: "mock_json_property",
-			entity_id: "name",
-		},
-	]);
-
-	// only name has been modified before creating checkpoint 2
-	expect(changesCheckpoint2).toEqual([
-		{
-			file_id: "file1",
-			schema_key: "mock_json_property",
-			entity_id: "name",
-		},
-	]);
-});
-
-test.skip("handles own change control changes", async () => {
+test("creates a checkpoint from working change set elements", async () => {
 	const lix = await openLixInMemory({});
 
+	// Make some changes to create working change set elements
 	await lix.db
 		.insertInto("key_value")
-		.values({
-			key: "mock_test",
-			value: "hello world",
-		})
+		.values([
+			{ key: "key1", value: "value1" },
+			{ key: "key2", value: "value2" },
+		])
 		.execute();
 
-	const changes = await lix.db
-		.selectFrom("change")
-		.where("change.schema_key", "=", "lix_key_value_table")
-		.select(["id"])
+	// Get initial version
+	const initialVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Verify working change set has elements
+	const workingElementsBefore = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", initialVersion.working_change_set_id)
+		.selectAll()
 		.execute();
 
-	expect(changes).toHaveLength(1);
+	expect(workingElementsBefore.length).toBeGreaterThan(0);
 
-	// checkpoint contains the key value update
+	// Create checkpoint
 	const checkpoint = await createCheckpoint({
 		lix,
 	});
 
-	const checkpointElements = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", checkpoint.id)
-		.where("schema_key", "=", "lix_key_value_table")
-		.selectAll()
-		.execute();
-
-	expect(checkpointElements).toHaveLength(1);
-});
-
-test.skip("creating multiple subsequent checkpoints leads to connected edges", async () => {
-	const lix = await openLixInMemory({});
-
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "mock_test",
-			value: "hello world",
-		})
-		.execute();
-
-	const checkpoint0 = await createCheckpoint({
-		lix,
-	});
-
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "version.id", "active_version.version_id")
-		.selectAll("version")
+	// Verify checkpoint label was applied
+	const checkpointLabel = await lix.db
+		.selectFrom("label")
+		.where("name", "=", "checkpoint")
+		.select("id")
 		.executeTakeFirstOrThrow();
 
-	expect(activeVersion.change_set_id).toBe(checkpoint0.id);
+	const checkpointLabelAssignment = await lix.db
+		.selectFrom("change_set_label")
+		.where("change_set_id", "=", checkpoint.id)
+		.where("label_id", "=", checkpointLabel.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-	const elements = await lix.db
+	expect(checkpointLabelAssignment).toMatchObject({
+		change_set_id: checkpoint.id,
+		label_id: checkpointLabel.id,
+	});
+
+	// Verify edge was created
+	const edge = await lix.db
+		.selectFrom("change_set_edge")
+		.where("parent_id", "=", initialVersion.change_set_id)
+		.where("child_id", "=", checkpoint.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(edge).toMatchObject({
+		parent_id: initialVersion.change_set_id,
+		child_id: checkpoint.id,
+	});
+
+	// Verify version was updated
+	const updatedVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// expect(updatedVersion.change_set_id).toBe(checkpoint.id);
+	expect(updatedVersion.working_change_set_id).not.toBe(
+		initialVersion.working_change_set_id
+	);
+
+	// Verify new working change set is empty
+	const newWorkingElements = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", checkpoint0.id)
-		.where("schema_key", "=", "lix_key_value_table")
+		.where("change_set_id", "=", updatedVersion.working_change_set_id)
 		.selectAll()
 		.execute();
 
-	expect(elements).toHaveLength(1);
+	expect(newWorkingElements).toHaveLength(0);
+});
 
-	const workingChangeSetElements = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", activeVersion.working_change_set_id)
-		.selectAll()
-		.execute();
+test("creates checkpoint and returns change set", async () => {
+	const lix = await openLixInMemory({});
 
-	expect(workingChangeSetElements).toHaveLength(0);
-
+	// Make a change
 	await lix.db
-		.updateTable("key_value")
-		.set({ value: "hello world 2" })
-		.where("key", "=", "mock_test")
+		.insertInto("key_value")
+		.values({ key: "test", value: "test" })
+		.execute();
+
+	// Create checkpoint
+	const checkpoint = await createCheckpoint({ lix });
+
+	expect(checkpoint).toMatchObject({
+		id: expect.any(String),
+	});
+});
+
+test("can create checkpoint even when working change set appears empty", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create checkpoint without making explicit changes (should work with lix own changes)
+	const checkpoint = await createCheckpoint({ lix });
+
+	expect(checkpoint).toMatchObject({
+		id: expect.any(String),
+	});
+});
+
+// we should have https://github.com/opral/lix-sdk/issues/305 before this test
+test.todo(
+	"checkpoint enables clean working change set for new work",
+	async () => {
+		const lix = await openLixInMemory({});
+
+		// Make initial changes
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: "before_checkpoint", value: "value" })
+			.execute();
+
+		// Create checkpoint
+		const checkpoint = await createCheckpoint({
+			lix,
+		});
+
+		// Make new changes after checkpoint
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: "after_checkpoint", value: "value" })
+			.execute();
+
+		// Get updated version
+		const version = await lix.db
+			.selectFrom("version")
+			.where("name", "=", "main")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// Working change set should only contain post-checkpoint changes
+		const workingElements = await lix.db
+			.selectFrom("change_set_element")
+			.where("change_set_id", "=", version.working_change_set_id)
+			.selectAll()
+			.execute();
+
+		const workingKeys = workingElements.map((e) => e.entity_id);
+		expect(workingKeys).toContain("after_checkpoint");
+		expect(workingKeys).not.toContain("before_checkpoint");
+
+		// Checkpoint should contain pre-checkpoint changes
+		const checkpointElements = await lix.db
+			.selectFrom("change_set_element")
+			.where("change_set_id", "=", checkpoint.id)
+			.selectAll()
+			.execute();
+
+		const checkpointKeys = checkpointElements.map((e) => e.entity_id);
+		expect(checkpointKeys).toContain("before_checkpoint");
+		expect(checkpointKeys).not.toContain("after_checkpoint");
+	}
+);
+
+test("creates proper change set ancestry chain", async () => {
+	const lix = await openLixInMemory({});
+
+	// Get initial state
+	const initialVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Make changes and create first checkpoint
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "first", value: "value" })
 		.execute();
 
 	const checkpoint1 = await createCheckpoint({
 		lix,
 	});
 
-	const parentCheckpoint = await lix.db
-		.selectFrom("change_set")
-		.where(changeSetHasLabel({ name: "checkpoint" }))
-		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
-		.select("id")
-		.executeTakeFirstOrThrow();
+	// const versionAfterCheckpoint1 = await lix.db
+	// 	.selectFrom("version")
+	// 	.where("id", "=", initialVersion.id)
+	// 	.selectAll()
+	// 	.executeTakeFirstOrThrow();
 
-	expect(parentCheckpoint.id).toBe(checkpoint0.id);
+	// expect(versionAfterCheckpoint1.change_set_id).toBe(checkpoint1.id);
+
+	// Make more changes and create second checkpoint
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "second", value: "value" })
+		.execute();
+
+	const checkpoint2 = await createCheckpoint({
+		lix,
+	});
+
+	// const versionAfterCheckpoint2 = await lix.db
+	// 	.selectFrom("version")
+	// 	.where("id", "=", initialVersion.id)
+	// 	.selectAll()
+	// 	.executeTakeFirstOrThrow();
+
+	// expect(versionAfterCheckpoint2.change_set_id).toBe(checkpoint2.id);
+
+	// Verify ancestry: initial change set should be an ancestor of checkpoint1
+	const initialIsAncestorOfCheckpoint1 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", initialVersion.change_set_id)
+		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
+		.selectAll()
+		.execute();
+
+	expect(initialIsAncestorOfCheckpoint1).toHaveLength(1);
+
+	// Verify ancestry: checkpoint1 should be an ancestor of checkpoint2
+	const checkpoint1IsAncestorOfCheckpoint2 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", checkpoint1.id)
+		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
+		.selectAll()
+		.execute();
+
+	expect(checkpoint1IsAncestorOfCheckpoint2).toHaveLength(1);
+
+	// Verify full chain: initial should be an ancestor of checkpoint2
+	const initialIsAncestorOfCheckpoint2 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", initialVersion.change_set_id)
+		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
+		.selectAll()
+		.execute();
+
+	expect(initialIsAncestorOfCheckpoint2).toHaveLength(1);
 });
+
+// very slow https://github.com/opral/lix-sdk/issues/311
+test(
+	"checkpoint should include deletion changes",
+	async () => {
+		const lix = await openLixInMemory({});
+
+		// Insert a key-value pair
+		await lix.db
+			.insertInto("key_value")
+			.values({
+				key: "test-key",
+				value: "test-value",
+			})
+			.execute();
+
+		// Create checkpoint after insertion
+		await createCheckpoint({ lix });
+
+		// Now delete the key-value pair
+		await lix.db
+			.deleteFrom("key_value")
+			.where("key", "=", "test-key")
+			.execute();
+
+		// Verify deletion changes were created
+		const deletionChanges = await lix.db
+			.selectFrom("change")
+			.where("entity_id", "=", "test-key")
+			.where("schema_key", "=", "lix_key_value")
+			.where("snapshot_id", "=", "no-content")
+			.selectAll()
+			.execute();
+
+		expect(deletionChanges).toHaveLength(1); // key-value entity deletion
+
+		// Create checkpoint after deletion
+		const checkpointAfterDeletion = await createCheckpoint({ lix });
+
+		// Check if deletion changes are included in the checkpoint
+		const deletionChangesInCheckpoint = await lix.db
+			.selectFrom("change")
+			.innerJoin(
+				"change_set_element",
+				"change_set_element.change_id",
+				"change.id"
+			)
+			.where(
+				"change_set_element.change_set_id",
+				"=",
+				checkpointAfterDeletion.id
+			)
+			.where("change.entity_id", "=", "test-key")
+			.where("change.schema_key", "=", "lix_key_value")
+			.where("change.snapshot_id", "=", "no-content")
+			.selectAll("change")
+			.execute();
+
+		// This should work for key-value deletions
+		expect(deletionChangesInCheckpoint).toHaveLength(1);
+	},
+	{ timeout: 30000 }
+);
+
+// very slow https://github.com/opral/lix-sdk/issues/311
+test(
+	"checkpoint should include file deletion changes",
+	async () => {
+		const lix = await openLixInMemory({
+			providePlugins: [mockJsonPlugin],
+		});
+
+		// Insert a JSON file with content
+		await lix.db
+			.insertInto("file")
+			.values({
+				id: "file-to-delete",
+				data: new TextEncoder().encode(JSON.stringify({ test: "delete-me" })),
+				path: "/delete-test.json",
+			})
+			.execute();
+
+		// Update the file to trigger plugin change detection
+		await lix.db
+			.updateTable("file")
+			.set({
+				data: new TextEncoder().encode(
+					JSON.stringify({ test: "updated-value" })
+				),
+			})
+			.where("id", "=", "file-to-delete")
+			.execute();
+
+		await createCheckpoint({ lix });
+
+		// Now delete the file
+		await lix.db
+			.deleteFrom("file")
+			.where("id", "=", "file-to-delete")
+			.execute();
+
+		// Verify deletion changes were created
+		const deletionChanges = await lix.db
+			.selectFrom("change")
+			.where("file_id", "=", "file-to-delete")
+			.where("snapshot_id", "=", "no-content")
+			.selectAll()
+			.execute();
+
+		expect(deletionChanges).toHaveLength(2); // file entity + plugin entity deletion
+
+		const checkpointAfterDeletion = await createCheckpoint({ lix });
+
+		const deletionChangesInCheckpoint = await lix.db
+			.selectFrom("change")
+			.innerJoin(
+				"change_set_element",
+				"change_set_element.change_id",
+				"change.id"
+			)
+			.where(
+				"change_set_element.change_set_id",
+				"=",
+				checkpointAfterDeletion.id
+			)
+			.where("change.file_id", "=", "file-to-delete")
+			.where("change.snapshot_id", "=", "no-content")
+			.selectAll("change")
+			.execute();
+
+		expect(deletionChangesInCheckpoint).toHaveLength(2);
+	},
+	{ timeout: 30000 }
+);

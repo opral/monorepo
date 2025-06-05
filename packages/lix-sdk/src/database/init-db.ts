@@ -11,7 +11,7 @@ import { isJsonType } from "../schema-definition/json-type.js";
 // Schema imports
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
-import { applyChangeSetDatabaseSchema } from "../change-set-v2/schema.js";
+import { applyChangeSetDatabaseSchema } from "../change-set/schema.js";
 import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";

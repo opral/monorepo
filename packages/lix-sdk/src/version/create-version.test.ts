@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "./create-version.js";
-import type { ChangeSet } from "../change-set-v2/schema.js";
-import { createChangeSet } from "../change-set-v2/create-change-set.js";
+import type { ChangeSet } from "../change-set/schema.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("should create a version linked to the provided change_set_id", async () => {
 	const lix = await openLixInMemory({});

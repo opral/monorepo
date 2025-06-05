@@ -1,55 +1,13 @@
-import type { Label } from "../database/schema.js";
+import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { ChangeSet, ChangeSetElementTable } from "./database-schema.js";
+import type { ChangeSet, ChangeSetElement } from "./schema.js";
+import type { Label } from "../label/schema.js";
 
-/**
- * Creates a change set with the given elements, optionally within an open transaction.
- *
- * @example
- *   ```ts
- *   const elements = await lix.db.selectFrom("change_set_element").selectAll().execute();
- *   const changeSet = await createChangeSet({ db: lix.db, elements });
- *   ```
- *
- * @example
- *   ```ts
- *   // Create a change set with labels
- *   const labels = await lix.db.selectFrom("label").selectAll().execute();
- *   const changeSet = await createChangeSet({
- *     lix,
- *     elements: [],
- *     labels
- *   });
- *   ```
- *
- * @example
- *   ```ts
- *   // Create a change set with parent change sets
- *   const parentChangeSet = await createChangeSet({ lix, elements: [] });
- *   const childChangeSet = await createChangeSet({
- *     lix,
- *     elements: [],
- *     parents: [parentChangeSet]
- *   });
- *   ```
- */
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
 	id?: string;
-	/**
-	 * If true, all elements of the change set will be immutable after creation.
-	 *
-	 * Immutable change set elements is required to create change set edges (the graph).
-	 *
-	 * WARNING: The SQL schema defaults to false to allow crating change sets
-	 * and inserting elements. For ease of use, the `createChangeSet()` utility
-	 * defaults to true because in the majority of cases change set elements should be immutable.
-	 *
-	 * @default true
-	 */
-	immutableElements?: boolean;
 	elements?: Pick<
-		ChangeSetElementTable,
+		ChangeSetElement,
 		"change_id" | "entity_id" | "schema_key" | "file_id"
 	>[];
 	labels?: Pick<Label, "id">[];
@@ -57,14 +15,12 @@ export async function createChangeSet(args: {
 	parents?: Pick<ChangeSet, "id">[];
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const changeSet = await trx
+		const csId = args.id ?? nanoid();
+		await trx
 			.insertInto("change_set")
 			.values({
-				id: args.id,
-				// needs to be false when creating the change set to insert elements
-				immutable_elements: false,
+				id: csId,
 			})
-			.returningAll()
 			.executeTakeFirstOrThrow();
 
 		if (args.elements && args.elements.length > 0) {
@@ -73,7 +29,7 @@ export async function createChangeSet(args: {
 				.insertInto("change_set_element")
 				.values(
 					args.elements.map((element) => ({
-						change_set_id: changeSet.id,
+						change_set_id: csId,
 						...element,
 					}))
 				)
@@ -87,18 +43,11 @@ export async function createChangeSet(args: {
 				.values(
 					args.labels.map((label) => ({
 						label_id: label.id,
-						change_set_id: changeSet.id,
+						change_set_id: csId,
 					}))
 				)
 				.execute();
 		}
-
-		const updatedCs = await trx
-			.updateTable("change_set")
-			.set({ immutable_elements: args.immutableElements ?? true })
-			.where("id", "=", changeSet.id)
-			.returningAll()
-			.executeTakeFirstOrThrow();
 
 		// Add parent-child relationships if parents are provided
 		for (const parent of args.parents ?? []) {
@@ -106,13 +55,18 @@ export async function createChangeSet(args: {
 				.insertInto("change_set_edge")
 				.values({
 					parent_id: parent.id,
-					child_id: changeSet.id,
+					child_id: csId,
 				})
-				.onConflict((oc) => oc.doNothing())
 				.execute();
 		}
 
-		return updatedCs;
+		const changeSet = await trx
+			.selectFrom("change_set")
+			.selectAll()
+			.where("id", "=", csId)
+			.executeTakeFirstOrThrow();
+
+		return changeSet;
 	};
 
 	if (args.lix.db.isTransaction) {

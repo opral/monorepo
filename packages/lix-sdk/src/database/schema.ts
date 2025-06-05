@@ -8,7 +8,7 @@ import {
 	type ChangeSetView,
 	type ChangeSetEdgeView,
 	type ChangeSetLabelView,
-} from "../change-set-v2/schema.js";
+} from "../change-set/schema.js";
 import {
 	LixActiveVersionSchema,
 	LixVersionSchema,

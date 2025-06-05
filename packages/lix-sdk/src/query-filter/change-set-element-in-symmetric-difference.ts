@@ -1,6 +1,6 @@
 import type { ExpressionBuilder, ExpressionWrapper, SqlBool } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { ChangeSet } from "../change-set-v2/schema.js";
+import type { ChangeSet } from "../change-set/schema.js";
 
 /**
  * Returns the symmetric difference between two change sets.

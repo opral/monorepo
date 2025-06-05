@@ -1,96 +1,89 @@
+import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { Version } from "../version/database-schema.js";
-import type { ChangeSet } from "./database-schema.js";
 
-export async function createCheckpoint(args: {
-	lix: Lix;
-	/**
-	 * Optional version to create checkpoint from.
-	 * @default The active version
-	 */
-	version?: Pick<Version, "id">;
-}): Promise<ChangeSet> {
+export async function createCheckpoint(args: { lix: Lix }): Promise<{
+	id: string;
+}> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// need to disable the trigger to avoid
-		// duplicate working change set updates
-		await trx
-			.insertInto("key_value")
-			.values({
-				key: "lix_skip_update_working_change_set",
-				value: "true",
-				skip_change_control: true,
-			})
-			.execute();
+		// Get current active version
+		const activeVersion = await trx
+				.selectFrom("active_version")
+				.innerJoin("version", "version.id", "active_version.version_id")
+				.selectAll("version")
+				.executeTakeFirstOrThrow();
 
-		const version = args.version
-			? await trx
-					.selectFrom("version")
-					.where("id", "=", args.version.id)
-					.selectAll("version")
-					.executeTakeFirstOrThrow()
-			: await trx
-					.selectFrom("active_version")
-					.innerJoin("version", "version.id", "active_version.version_id")
-					.selectAll("version")
-					.executeTakeFirstOrThrow();
+			const workingChangeSetId = activeVersion.working_change_set_id;
+			// Use the current change_set_id as parent - this represents the latest changes
+			const parentChangeSetId = activeVersion.change_set_id;
 
-		const checkpointLabel = await trx
-			.selectFrom("label")
-			.where("name", "=", "checkpoint")
-			.select("id")
-			.executeTakeFirstOrThrow();
+			// Check if there are any working change set elements to checkpoint
+			const workingElements = await trx
+				.selectFrom("change_set_element")
+				.where("change_set_id", "=", workingChangeSetId)
+				.selectAll()
+				.execute();
 
-		await trx
-			.insertInto("change_set_label")
-			.values({
-				change_set_id: version.working_change_set_id,
-				label_id: checkpointLabel.id,
-			})
-			.execute();
+			if (workingElements.length === 0) {
+				throw new Error(
+					"No changes in working change set to create a checkpoint for."
+				);
+			}
 
-		const newWorkingCs = await trx
-			.insertInto("change_set")
-			.defaultValues()
-			.returningAll()
-			.executeTakeFirstOrThrow();
+			// 1. Add ancestry edge from parent to working change set (working becomes checkpoint)
+			await trx
+				.insertInto("change_set_edge")
+				.values({
+					parent_id: parentChangeSetId,
+					child_id: workingChangeSetId,
+				})
+				.execute();
 
-		await trx
-			.updateTable("version")
-			.set({
-				working_change_set_id: newWorkingCs.id,
-			})
-			.where("id", "=", version.id)
-			.execute();
+			// 2. Create new empty working change set for continued work
+			const newWorkingChangeSetId = nanoid();
+			await trx
+				.insertInto("change_set")
+				.values({
+					id: newWorkingChangeSetId,
+				})
+				.execute();
 
-		// seal the working change set to insert it into the graph
-		const formerWorkingCs = await trx
-			.updateTable("change_set")
-			.where("change_set.id", "=", version.working_change_set_id)
-			.set({ immutable_elements: true })
-			.returningAll()
-			.executeTakeFirstOrThrow();
+			// 3. Get checkpoint label and assign it to the checkpoint change set
+			const checkpointLabel = await trx
+				.selectFrom("label")
+				.where("name", "=", "checkpoint")
+				.select("id")
+				.executeTakeFirstOrThrow();
 
-		await trx
-			.updateTable("version")
-			.set({
-				change_set_id: formerWorkingCs.id,
-			})
-			.execute();
+			await trx
+				.insertInto("change_set_label")
+				.values({
+					change_set_id: workingChangeSetId,
+					label_id: checkpointLabel.id,
+				})
+				.execute();
 
-		await trx
-			.insertInto("change_set_edge")
-			.values({
-				parent_id: version.change_set_id,
-				child_id: formerWorkingCs.id,
-			})
-			.execute();
+			// 4. Update version in two steps to ensure proper mutation handler behavior
+			// First, update change_set_id (this should skip mutation handler logic)
+			await trx
+				.updateTable("version")
+				.where("id", "=", activeVersion.id)
+				.set({
+					change_set_id: workingChangeSetId, // Working becomes checkpoint
+				})
+				.execute();
 
-		await trx
-			.deleteFrom("key_value")
-			.where("key", "=", "lix_skip_update_working_change_set")
-			.execute();
+			// Then, update working_change_set_id (this should also skip mutation handler logic)
+			await trx
+				.updateTable("version")
+				.where("id", "=", activeVersion.id)
+				.set({
+					working_change_set_id: newWorkingChangeSetId, // New empty working
+				})
+				.execute();
 
-		return formerWorkingCs;
+			return {
+				id: workingChangeSetId,
+			};
 	};
 
 	if (args.lix.db.isTransaction) {

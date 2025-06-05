@@ -3,8 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "./create-version.js";
 import { switchVersion } from "./switch-version.js";
 
-// todo needs global state/version feature
-test.todo("switching versiones should update the active_version", async () => {
+test("switching versiones should update the active_version", async () => {
 	const lix = await openLixInMemory({});
 
 	const activeVersion = await lix.db

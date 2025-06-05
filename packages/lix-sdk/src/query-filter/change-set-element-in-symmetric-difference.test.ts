@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { changeSetElementInSymmetricDifference } from "./change-set-element-in-symmetric-difference.js";
 import type {
 	NewChangeSetElement,
-} from "../change-set-v2/schema.js";
+} from "../change-set/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 // Helper function to extract necessary fields from a Change object

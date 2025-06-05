@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type { ChangeSetEdge } from "../change-set-v2/schema.js";
+import type { ChangeSetEdge } from "../change-set/schema.js";
 
 // re-enable after https://github.com/opral/lix-sdk/issues/305
 // which avoids the massive chain of change sets event

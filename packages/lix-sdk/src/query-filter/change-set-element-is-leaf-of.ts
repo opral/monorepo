@@ -1,4 +1,4 @@
-import type { ChangeSet } from "../change-set/database-schema.js";
+import type { ChangeSet } from "../change-set/schema.js";
 import {
 	sql,
 	type ExpressionBuilder,

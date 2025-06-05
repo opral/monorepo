@@ -1,22 +1,42 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "./create-change-set.js";
+import type { Change } from "../change/schema.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
-test.skip("creating a change set should succeed", async () => {
+test("creating a change set should succeed", async () => {
 	const lix = await openLixInMemory({});
 
-	const mockChanges = await lix.db
-		.insertInto("change")
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "mock-schema",
+				"x-lix-version": "1.0",
+				type: "object",
+				properties: {
+					id: { type: "string" },
+				},
+				required: ["id"],
+			} satisfies LixSchemaDefinition,
+		})
+		.execute();
+
+	const mockChanges = (await lix.db
+		// @ts-expect-error - internal change table
+		.insertInto("internal_change")
 		.values([
 			{
-				schema_key: "file",
+				schema_key: "mock-schema",
+				schema_version: "1.0",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
 				snapshot_id: "no-content",
 			},
 			{
-				schema_key: "file",
+				schema_key: "mock-schema",
+				schema_version: "1.0",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
@@ -24,7 +44,7 @@ test.skip("creating a change set should succeed", async () => {
 			},
 		])
 		.returningAll()
-		.execute();
+		.execute()) as Change[];
 
 	const changeSet = await createChangeSet({
 		lix: lix,
@@ -47,7 +67,8 @@ test.skip("creating a change set should succeed", async () => {
 	);
 });
 
-test.skip("creating a change set with empty elements array should succeed", async () => {
+
+test("creating a change set with empty elements array should succeed", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create a change set with an empty elements array
@@ -69,7 +90,7 @@ test.skip("creating a change set with empty elements array should succeed", asyn
 	expect(changeSetMembers).toHaveLength(0);
 });
 
-test.skip("creating a change set with labels should associate the labels with the change set", async () => {
+test("creating a change set with labels should associate the labels with the change set", async () => {
 	const lix = await openLixInMemory({});
 
 	// Get existing labels
@@ -80,10 +101,15 @@ test.skip("creating a change set with labels should associate the labels with th
 		.executeTakeFirstOrThrow();
 
 	// Create a new label
-	const testLabel = await lix.db
+	await lix.db
 		.insertInto("label")
 		.values({ name: "test-label" })
-		.returningAll()
+		.execute();
+	
+	const testLabel = await lix.db
+		.selectFrom("label")
+		.selectAll()
+		.where("name", "=", "test-label")
 		.executeTakeFirstOrThrow();
 
 	// Create a change set with labels
@@ -111,7 +137,7 @@ test.skip("creating a change set with labels should associate the labels with th
 	);
 });
 
-test.skip("creating a change set with parents should establish parent-child relationships", async () => {
+test("creating a change set with parents should establish parent-child relationships", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create two parent change sets
@@ -148,21 +174,4 @@ test.skip("creating a change set with parents should establish parent-child rela
 		childChangeSet.id,
 		childChangeSet.id,
 	]);
-});
-
-test.skip("specifiying immutable elements", async () => {
-	const lix = await openLixInMemory({});
-
-	const changeSet = await createChangeSet({
-		lix,
-		immutableElements: true,
-	});
-
-	const fetchedCs = await lix.db
-		.selectFrom("change_set")
-		.where("id", "=", changeSet.id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	expect(fetchedCs.immutable_elements).toBe(1);
 });

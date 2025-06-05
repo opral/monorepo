@@ -1,5 +1,5 @@
-import { createChangeSet } from "../change-set-v2/create-change-set.js";
-import type { ChangeSet } from "../change-set-v2/schema.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import type { ChangeSet } from "../change-set/schema.js";
 import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { Version } from "./schema.js";

@@ -1,10 +1,21 @@
 import { test, expect } from "vitest";
 import { changeHasLabel } from "./change-has-label.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createChangeSet } from "../change-set-v2/create-change-set.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
 
-test.todo("should only return changes with the given label", async () => {
+test("should only return changes with the given label", async () => {
 	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "mock_schema",
+				"x-lix-version": "1.0",
+				type: "object",
+			},
+		})
+		.execute();
 
 	const changes0 = await lix.db
 		.insertInto("change")
@@ -16,7 +27,7 @@ test.todo("should only return changes with the given label", async () => {
 				file_id: "mock",
 				schema_version: "1.0",
 				plugin_key: "mock",
-				schema_key: "mock",
+				schema_key: "mock_schema",
 			},
 			{
 				id: "change2",
@@ -25,7 +36,7 @@ test.todo("should only return changes with the given label", async () => {
 				file_id: "mock",
 				schema_version: "1.0",
 				plugin_key: "mock",
-				schema_key: "mock",
+				schema_key: "mock_schema",
 			},
 		])
 		.returningAll()
@@ -44,10 +55,12 @@ test.todo("should only return changes with the given label", async () => {
 		labels: [],
 	});
 
+	await lix.db.insertInto("label").values({ name: "mocked" }).execute();
+
 	const label = await lix.db
-		.insertInto("label")
-		.values({ name: "mocked" })
-		.returningAll()
+		.selectFrom("label")
+		.where("name", "=", "mocked")
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	await lix.db
