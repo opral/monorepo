@@ -1,7 +1,7 @@
 import type { Lix } from "../lix/index.js";
 import type { ChangeSet } from "./schema.js";
-import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
-import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
+import { sql, type Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 /**
  * Applies a change set to the lix.
@@ -11,8 +11,43 @@ export async function applyChangeSet(args: {
 	changeSet: Pick<ChangeSet, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// Select changes associated with the specified change set (recursive by default)
-		const query = trx
+		// Get the current version
+		const version = await trx
+			.selectFrom("active_version")
+			.innerJoin("version", "version.id", "active_version.version_id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
+
+		// Update the version to point to the new change set
+		await trx
+			.updateTable("version")
+			.set({ change_set_id: args.changeSet.id })
+			.where("id", "=", version.id)
+			.execute();
+
+		// Add a parent relationship (create the edge in the change set graph)
+		if (version.change_set_id !== args.changeSet.id) {
+			// Check if edge already exists to avoid conflict
+			const existingEdge = await trx
+				.selectFrom("change_set_edge")
+				.where("parent_id", "=", version.change_set_id)
+				.where("child_id", "=", args.changeSet.id)
+				.selectAll()
+				.executeTakeFirst();
+
+			if (!existingEdge) {
+				await trx
+					.insertInto("change_set_edge")
+					.values({
+						parent_id: version.change_set_id,
+						child_id: args.changeSet.id,
+					})
+					.execute();
+			}
+		}
+
+		// Query for changes in the provided change set (direct mode only)
+		const changesResult = await trx
 			.selectFrom("change")
 			.innerJoin(
 				"change_set_element",
@@ -20,37 +55,89 @@ export async function applyChangeSet(args: {
 				"change.id"
 			)
 			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-			.where(changeSetElementInAncestryOf([args.changeSet]))
-			.where(changeSetElementIsLeafOf([args.changeSet]))
-			.select([
-				"change.id",
-				"change.entity_id",
-				"change.schema_key",
-				"change.file_id",
-				"change.plugin_key",
-				"change.snapshot_id",
-				"change.created_at",
-				"snapshot.content as snapshot_content",
-			]);
+			.where("change_set_element.change_set_id", "=", args.changeSet.id)
+			.selectAll("change")
+			.select("snapshot.content as snapshot_content")
+			.select(sql`${version.id}`.as("version_id"))
+			.execute();
 
-		const changesResult = await query.execute();
+		// Write-through cache: populate internal_state_cache for all applied changes
+		for (const change of changesResult) {
+			const cacheKey = {
+				entity_id: change.entity_id,
+				schema_key: change.schema_key,
+				file_id: change.file_id,
+				version_id: version.id,
+			};
+
+			if (change.snapshot_id === "no-content") {
+				// deletion – remove from cache
+				await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
+					.deleteFrom("internal_state_cache")
+					.where("entity_id", "=", cacheKey.entity_id)
+					.where("schema_key", "=", cacheKey.schema_key)
+					.where("file_id", "=", cacheKey.file_id)
+					.where("version_id", "=", version.id)
+					.execute();
+			} else {
+				// insertion/update – upsert into cache
+				await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
+					.insertInto("internal_state_cache")
+					.values({
+						...cacheKey,
+						plugin_key: change.plugin_key,
+						snapshot_content: JSON.stringify(change.snapshot_content),
+						schema_version: change.schema_version,
+						created_at: change.created_at,
+						updated_at: change.created_at,
+					})
+					.onConflict((oc) =>
+						oc
+							.columns(["entity_id", "schema_key", "file_id", "version_id"])
+							.doUpdateSet({
+								plugin_key: change.plugin_key,
+								snapshot_content: sql`excluded.snapshot_content`,
+								schema_version: change.schema_version,
+								updated_at: change.created_at,
+							})
+					)
+					.execute();
+			}
+		}
 
 		// Group changes by file_id for processing
 		const changesGroupedByFile = Object.groupBy(
 			changesResult,
 			(c) => c.file_id
 		);
-
 		const plugins = await args.lix.plugin.getAll();
 
-		// Iterate over files and apply plugin changes
+		// Apply changes file by file
 		for (const [file_id, changes] of Object.entries(changesGroupedByFile)) {
-			// Skip if no changes for this file
-			if (!changes || changes.length === 0) {
+			if (!changes?.length) continue;
+
+			// Handle lix own entity changes separately (no file operations needed)
+			if (file_id === "lix") {
+				// Lix's own entity changes don't need plugin processing
+				// They are applied directly through the state/view system
 				continue;
 			}
 
-			// Get the file data
+			// Skip plugin processing for lix own file changes (file metadata changes)
+			// These are handled by the database triggers and don't need plugin processing
+			const hasLixOwnEntityChanges = changes.some(c => c.plugin_key === "lix_own_entity");
+			if (hasLixOwnEntityChanges) {
+				continue;
+			}
+
+			// Check if this file has deletion changes
+			const hasFileDeletion = changes.some(c => c.snapshot_id === "no-content");
+			if (hasFileDeletion) {
+				// File is being deleted - bypass plugin processing and delete the file
+				await trx.deleteFrom("file").where("id", "=", file_id).execute();
+				continue;
+			}
+
 			const file = await trx
 				.selectFrom("file")
 				.where("id", "=", file_id)
@@ -60,14 +147,13 @@ export async function applyChangeSet(args: {
 			const groupByPlugin = Object.groupBy(changes, (c) => c.plugin_key);
 
 			for (const [pluginKey, pluginChanges] of Object.entries(groupByPlugin)) {
-				if (!pluginChanges || pluginChanges.length === 0) {
-					continue;
-				}
+				if (!pluginChanges?.length) continue;
 
-				const plugin = plugins.find((plugin) => plugin.key === pluginKey);
+				const plugin = plugins.find((p) => p.key === pluginKey);
 				if (!plugin) {
 					throw new Error(`Plugin with key ${pluginKey} not found`);
-				} else if (!plugin.applyChanges) {
+				}
+				if (!plugin.applyChanges) {
 					throw new Error(
 						`Plugin with key ${pluginKey} does not support applying changes`
 					);
@@ -78,23 +164,16 @@ export async function applyChangeSet(args: {
 					file,
 				});
 
-				const resultingFile = {
-					...file,
-					data: fileData,
-				};
-
 				await trx
 					.updateTable("file")
-					.set(resultingFile)
-					.where("id", "=", resultingFile.id)
+					.set({ data: fileData })
+					.where("id", "=", file.id)
 					.execute();
 			}
 		}
 	};
 
-	if (args.lix.db.isTransaction) {
-		return executeInTransaction(args.lix.db);
-	} else {
-		return args.lix.db.transaction().execute(executeInTransaction);
-	}
+	return args.lix.db.isTransaction
+		? executeInTransaction(args.lix.db)
+		: args.lix.db.transaction().execute(executeInTransaction);
 }
