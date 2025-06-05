@@ -5,7 +5,7 @@ import type { ChangeSet } from "../change-set/database-schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { ChangeProposal } from "./database-schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
-import { changeSetElementInSymmetricDifference } from "../change-set/change-set-element-in-symmetric-difference.js";
+import { changeSetElementInSymmetricDifference } from "../query-filter/change-set-element-in-symmetric-difference.js";
 
 /**
  * Creates a change proposal that represents the symmetric difference

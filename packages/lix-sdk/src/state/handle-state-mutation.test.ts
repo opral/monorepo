@@ -586,82 +586,88 @@ test("mutation handler removes working change set elements on entity deletion", 
 	expect(allChanges[0]!.snapshot_id).toBe("no-content"); // Latest change is deletion
 });
 
-test("delete reconciliation: entities added after checkpoint then deleted are excluded from working change set", async () => {
-	const lix = await openLixInMemory({});
+// slow, needs https://github.com/opral/lix-sdk/issues/311
+test(
+	"delete reconciliation: entities added after checkpoint then deleted are excluded from working change set",
+	async () => {
+		const lix = await openLixInMemory({});
 
-	// Get initial version and working change set
-	const initialVersion = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.where("name", "=", "main")
-		.executeTakeFirstOrThrow();
+		// Get initial version and working change set
+		const initialVersion = await lix.db
+			.selectFrom("version")
+			.selectAll()
+			.where("name", "=", "main")
+			.executeTakeFirstOrThrow();
 
-	// Create a checkpoint label to mark the current state
-	const checkpointLabel = await lix.db
-		.selectFrom("label")
-		.where("name", "=", "checkpoint")
-		.select("id")
-		.executeTakeFirstOrThrow();
+		// Create a checkpoint label to mark the current state
+		const checkpointLabel = await lix.db
+			.selectFrom("label")
+			.where("name", "=", "checkpoint")
+			.select("id")
+			.executeTakeFirstOrThrow();
 
-	// Add checkpoint label to the current change set (simulating a checkpoint)
-	await lix.db
-		.insertInto("change_set_label")
-		.values({
-			change_set_id: initialVersion.change_set_id,
-			label_id: checkpointLabel.id,
-		})
-		.execute();
+		// Add checkpoint label to the current change set (simulating a checkpoint)
+		await lix.db
+			.insertInto("change_set_label")
+			.values({
+				change_set_id: initialVersion.change_set_id,
+				label_id: checkpointLabel.id,
+			})
+			.execute();
 
-	// AFTER checkpoint: Insert an entity
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "post_checkpoint_key",
-			value: "post_checkpoint_value",
-		})
-		.execute();
+		// AFTER checkpoint: Insert an entity
+		await lix.db
+			.insertInto("key_value")
+			.values({
+				key: "post_checkpoint_key",
+				value: "post_checkpoint_value",
+			})
+			.execute();
 
-	// Verify entity appears in working change set after insert
-	const workingElementsAfterInsert = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", initialVersion.working_change_set_id)
-		.where("entity_id", "=", "post_checkpoint_key")
-		.where("schema_key", "=", "lix_key_value")
-		.selectAll()
-		.execute();
+		// Verify entity appears in working change set after insert
+		const workingElementsAfterInsert = await lix.db
+			.selectFrom("change_set_element")
+			.where("change_set_id", "=", initialVersion.working_change_set_id)
+			.where("entity_id", "=", "post_checkpoint_key")
+			.where("schema_key", "=", "lix_key_value")
+			.selectAll()
+			.execute();
 
-	expect(workingElementsAfterInsert).toHaveLength(1);
+		expect(workingElementsAfterInsert).toHaveLength(1);
 
-	// AFTER checkpoint: Delete the same entity
-	await lix.db
-		.deleteFrom("key_value")
-		.where("key", "=", "post_checkpoint_key")
-		.execute();
+		// AFTER checkpoint: Delete the same entity
+		await lix.db
+			.deleteFrom("key_value")
+			.where("key", "=", "post_checkpoint_key")
+			.execute();
 
-	// Verify entity is excluded from working change set (added after checkpoint then deleted)
-	const workingElementsAfterDelete = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", initialVersion.working_change_set_id)
-		.where("entity_id", "=", "post_checkpoint_key")
-		.where("schema_key", "=", "lix_key_value")
-		.selectAll()
-		.execute();
+		// Verify entity is excluded from working change set (added after checkpoint then deleted)
+		const workingElementsAfterDelete = await lix.db
+			.selectFrom("change_set_element")
+			.where("change_set_id", "=", initialVersion.working_change_set_id)
+			.where("entity_id", "=", "post_checkpoint_key")
+			.where("schema_key", "=", "lix_key_value")
+			.selectAll()
+			.execute();
 
-	expect(workingElementsAfterDelete).toHaveLength(0);
+		expect(workingElementsAfterDelete).toHaveLength(0);
 
-	// Verify the changes were recorded
-	const allChanges = await lix.db
-		.selectFrom("change")
-		.where("entity_id", "=", "post_checkpoint_key")
-		.where("schema_key", "=", "lix_key_value")
-		.orderBy("created_at", "asc")
-		.selectAll()
-		.execute();
+		// Verify the changes were recorded
+		const allChanges = await lix.db
+			.selectFrom("change")
+			.where("entity_id", "=", "post_checkpoint_key")
+			.where("schema_key", "=", "lix_key_value")
+			.orderBy("created_at", "asc")
+			.selectAll()
+			.execute();
 
-	expect(allChanges).toHaveLength(2); // Insert + Delete
-	expect(allChanges[1]!.snapshot_id).toBe("no-content"); // Delete change
-});
+		expect(allChanges).toHaveLength(2); // Insert + Delete
+		expect(allChanges[1]!.snapshot_id).toBe("no-content"); // Delete change
+	},
+	{ timeout: 20000 }
+);
 
+// slow, needs https://github.com/opral/lix-sdk/issues/311
 // this is expensive to compute because the historical state must be reconstructed
 // ideally, we have a state_at read view which makes this peformant, or we find ways
 // to design the working change set differently.
