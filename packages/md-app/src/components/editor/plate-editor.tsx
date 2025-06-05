@@ -33,14 +33,14 @@ export function PlateEditor() {
   }, [editor, setEditorRef]);
 
   useEffect(() => {
-    if (editor && loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()) {
+    if (editor && loadedMd && loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()) {
       const nodes = editor
         .getApi(ExtendedMarkdownPlugin)
         .markdown.deserialize(loadedMd);
       editor.tf.setValue(nodes);
     }
     setPreviousHasPromptElement(false);
-  }, [activeFile?.id]);
+  }, [activeFile?.id, loadedMd, editor]);
 
   useEffect(() => {
     if (!editor || !lix || !activeFile?.id) return;
