@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
-import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import { mockJsonPlugin, MockJsonPropertySchema } from "../plugin/mock-json-plugin.js";
 import type { Change } from "../change/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { createCheckpoint } from "./create-checkpoint.js";
@@ -331,4 +331,159 @@ test(
 	},
 	{ timeout: 30000 }
 );
+
+test("it should delete entities but not files when applying entity deletion changes", async () => {
+	// Create a Lix instance with the mockJsonPlugin
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// Insert the schema that the mockJsonPlugin uses
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: MockJsonPropertySchema,
+		})
+		.execute();
+
+	// 1. Create a file
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "test-file",
+			data: new TextEncoder().encode("{}"),
+			path: "/test.json",
+		})
+		.execute();
+
+	const file = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "test-file")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Create snapshots for entities
+	await lix.db
+		.insertInto("snapshot")
+		.values([
+			{ id: "s1", content: { value: "Entity 1" } },
+			{ id: "s2", content: { value: "Entity 2" } },
+		])
+		.execute();
+
+	// Create changes that add entities to the file
+	const addChanges = await lix.db
+		.insertInto("change")
+		.values([
+			{
+				id: "c1",
+				file_id: file.id,
+				plugin_key: mockJsonPlugin.key,
+				entity_id: "e1",
+				schema_key: "mock_json_property",
+				schema_version: "1.0",
+				snapshot_id: "s1",
+			},
+			{
+				id: "c2",
+				file_id: file.id,
+				plugin_key: mockJsonPlugin.key,
+				entity_id: "e2",
+				schema_key: "mock_json_property",
+				schema_version: "1.0",
+				snapshot_id: "s2",
+			},
+		])
+		.execute();
+
+	// Apply changes to add entities
+	const addChangeSet = await createChangeSet({
+		lix,
+		id: "cs-add",
+		elements: [
+			{
+				change_id: "c1",
+				entity_id: "e1",
+				schema_key: "mock_json_property",
+				file_id: file.id,
+			},
+			{
+				change_id: "c2",
+				entity_id: "e2",
+				schema_key: "mock_json_property",
+				file_id: file.id,
+			},
+		],
+	});
+
+	await applyChangeSet({
+		lix,
+		changeSet: addChangeSet,
+	});
+
+	// Verify file has the entities
+	const fileAfterAdd = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const contentAfterAdd = JSON.parse(new TextDecoder().decode(fileAfterAdd.data));
+	expect(contentAfterAdd).toEqual({
+		e1: "Entity 1",
+		e2: "Entity 2",
+	});
+
+	// 2. Create entity deletion changes (but NOT file deletion)
+	const deleteEntityChange = await lix.db
+		.insertInto("change")
+		.values({
+			id: "c3",
+			file_id: file.id,
+			plugin_key: mockJsonPlugin.key,
+			entity_id: "e1",
+			schema_key: "mock_json_property", // NOT "lix_file"
+			schema_version: "1.0",
+			snapshot_id: "no-content", // Entity deletion
+		})
+		.execute();
+
+	// 3. Apply the entity deletion change
+	const deleteChangeSet = await createChangeSet({
+		lix,
+		id: "cs-delete-entity",
+		elements: [
+			{
+				change_id: "c3",
+				entity_id: "e1",
+				schema_key: "mock_json_property",
+				file_id: file.id,
+			},
+		],
+	});
+
+	await applyChangeSet({
+		lix,
+		changeSet: deleteChangeSet,
+	});
+
+	// Verify: The entity should be deleted, but the file should still exist
+	const fileAfterEntityDeletion = await lix.db
+		.selectFrom("file")
+		.where("id", "=", file.id)
+		.selectAll()
+		.executeTakeFirst();
+
+	// BUG: This will currently fail because the file gets incorrectly deleted
+	expect(fileAfterEntityDeletion).toBeDefined();
+	expect(fileAfterEntityDeletion?.id).toBe(file.id);
+
+	// The file content should have e1 removed but e2 still present
+	const contentAfterEntityDeletion = JSON.parse(
+		new TextDecoder().decode(fileAfterEntityDeletion!.data)
+	);
+	expect(contentAfterEntityDeletion).toEqual({
+		e2: "Entity 2", // e1 should be gone, e2 should remain
+	});
+});
 

@@ -131,7 +131,7 @@ export async function applyChangeSet(args: {
 			}
 
 			// Check if this file has deletion changes
-			const hasFileDeletion = changes.some(c => c.snapshot_id === "no-content");
+			const hasFileDeletion = changes.some(c => c.snapshot_id === "no-content" && c.schema_key === "lix_file");
 			if (hasFileDeletion) {
 				// File is being deleted - bypass plugin processing and delete the file
 				await trx.deleteFrom("file").where("id", "=", file_id).execute();
