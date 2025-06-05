@@ -1,6 +1,7 @@
 import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { ChangeSet, ChangeSetElement } from "./schema.js";
+import type { Label } from "../label/schema.js";
 
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
@@ -9,7 +10,7 @@ export async function createChangeSet(args: {
 		ChangeSetElement,
 		"change_id" | "entity_id" | "schema_key" | "file_id"
 	>[];
-	// labels?: Pick<Label, "id">[];
+	labels?: Pick<Label, "id">[];
 	/** Parent change sets that this change set will be a child of */
 	parents?: Pick<ChangeSet, "id">[];
 }): Promise<ChangeSet> {
@@ -36,17 +37,17 @@ export async function createChangeSet(args: {
 		}
 
 		// Add labels if provided
-		// if (args.labels && args.labels.length > 0) {
-		// 	await trx
-		// 		.insertInto("change_set_label")
-		// 		.values(
-		// 			args.labels.map((label) => ({
-		// 				label_id: label.id,
-		// 				change_set_id: changeSet.id,
-		// 			}))
-		// 		)
-		// 		.execute();
-		// }
+		if (args.labels && args.labels.length > 0) {
+			await trx
+				.insertInto("change_set_label")
+				.values(
+					args.labels.map((label) => ({
+						label_id: label.id,
+						change_set_id: csId,
+					}))
+				)
+				.execute();
+		}
 
 		// Add parent-child relationships if parents are provided
 		for (const parent of args.parents ?? []) {
