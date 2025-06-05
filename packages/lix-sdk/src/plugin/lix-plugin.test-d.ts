@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { assertType, test } from "vitest";
 import type { DetectedChange, LixPlugin } from "./lix-plugin.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	FromLixSchemaDefinition,
+	LixSchemaDefinition,
+} from "../schema-definition/definition.js";
 
 test("json schema type of a detected change", () => {
 	const MockChangeSchema = {
@@ -23,7 +26,9 @@ test("json schema type of a detected change", () => {
 		required: ["name", "age", "location"],
 	} as const satisfies LixSchemaDefinition;
 
-	const change: DetectedChange<typeof MockChangeSchema> = {
+	const change: DetectedChange<
+		FromLixSchemaDefinition<typeof MockChangeSchema>
+	> = {
 		entity_id: "123",
 		schema: MockChangeSchema,
 		snapshot_content: {

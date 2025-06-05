@@ -33,7 +33,7 @@ export type LixPlugin = {
 	}: {
 		before?: LixFileType & { data?: Uint8Array };
 		after: LixFileType & { data: Uint8Array };
-	}) => DetectedChange<any>[];
+	}) => DetectedChange[];
 	applyChanges?: ({
 		file,
 		changes,
@@ -97,25 +97,25 @@ export type LixPlugin = {
  *   ```
  */
 
-export type DetectedChange<Schema extends LixSchemaDefinition = any> = {
+export type DetectedChange<T = any> = {
 	entity_id: string;
-	schema: Schema;
+	schema: LixSchemaDefinition;
 	/**
 	 * The change is considered a deletion if `snapshot_content` is `null`.
 	 */
-	snapshot_content: FromLixSchemaDefinition<Schema> | null;
+	snapshot_content: T | null;
 };
 
-export type DetectedConflict = {
-	/**
-	 * @see {ChangeConflict.key}
-	 */
-	key: string;
-	/**
-	 * The changes that are conflicting.
-	 */
-	conflictingChangeIds: Set<Change["id"]>;
-};
+// export type DetectedConflict = {
+// 	/**
+// 	 * @see {ChangeConflict.key}
+// 	 */
+// 	key: string;
+// 	/**
+// 	 * The changes that are conflicting.
+// 	 */
+// 	conflictingChangeIds: Set<Change["id"]>;
+// };
 
 export type UiDiffComponentProps = {
 	diffs: Array<

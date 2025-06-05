@@ -9,7 +9,6 @@ import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
 import type { NewKeyValue } from "../key-value/schema.js";
-import type { LixFileType } from "../file/schema.js";
 
 test.skip("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
@@ -388,6 +387,6 @@ test.todo("it should handle binary values", async () => {
 			path: "/hello.txt",
 			metadata: null,
 			data: new TextEncoder().encode("Hello, World!"),
-		} satisfies LixFileType,
+		},
 	]);
 });

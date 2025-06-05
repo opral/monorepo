@@ -1,7 +1,6 @@
 export type {
 	LixPlugin,
 	DetectedChange,
-	DetectedConflict,
 	UiDiffComponentProps,
 } from "./lix-plugin.js";
 
