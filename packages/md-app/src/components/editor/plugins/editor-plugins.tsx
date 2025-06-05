@@ -54,6 +54,7 @@ import {
   SanitizedInlineHtmlPlugin,
   SanitizedBlockPlugin,
 } from "./sanitized-html";
+import { changeIndicatorPlugin } from "./change-indicator-plugin";
 
 export const viewPlugins = [
   ...basicNodesPlugins,
@@ -111,6 +112,7 @@ export const editorPlugins = [
   cursorOverlayPlugin,
   ...blockMenuPlugins,
   ...dndPlugins,
+  changeIndicatorPlugin,
   EmojiPlugin.configure({ options: { data: emojiMartData as any } }),
   exitBreakPlugin,
   resetBlockTypePlugin,
