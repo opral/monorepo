@@ -3,7 +3,7 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "../version/create-version.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 
-test.todo("insert, update, delete on the file view", async () => {
+test("insert, update, delete on the file view", async () => {
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
 	});
@@ -11,11 +11,6 @@ test.todo("insert, update, delete on the file view", async () => {
 	const version0 = await createVersion({
 		lix,
 		id: "version0",
-	});
-
-	const version1 = await createVersion({
-		lix,
-		id: "version1",
 	});
 
 	await lix.db
@@ -30,16 +25,6 @@ test.todo("insert, update, delete on the file view", async () => {
 					})
 				),
 				version_id: version0.id,
-			},
-			{
-				id: "file1",
-				path: "/path/to/file.json",
-				data: new TextEncoder().encode(
-					JSON.stringify({
-						prop0: "file1-value0",
-					})
-				),
-				version_id: version1.id,
 			},
 		])
 		.execute();
@@ -56,13 +41,6 @@ test.todo("insert, update, delete on the file view", async () => {
 			path: "/path/to/file.json",
 			version_id: "version0",
 			data: { prop0: "file0-value0" },
-			metadata: null,
-		},
-		{
-			id: "file1",
-			path: "/path/to/file.json",
-			version_id: "version1",
-			data: { prop0: "file1-value0" },
 			metadata: null,
 		},
 	]);
@@ -96,13 +74,6 @@ test.todo("insert, update, delete on the file view", async () => {
 			data: { prop0: "file0-value1" },
 			metadata: null,
 		},
-		{
-			id: "file1",
-			path: "/path/to/file.json",
-			version_id: "version1",
-			data: { prop0: "file1-value0" },
-			metadata: null,
-		},
 	]);
 
 	await lix.db
@@ -117,66 +88,61 @@ test.todo("insert, update, delete on the file view", async () => {
 		.select(["id", "path", "version_id"])
 		.execute();
 
-	expect(viewAfterDelete).toEqual([
+	expect(viewAfterDelete).toEqual([]);
+
+	const changes = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("change.file_id", "in", ["file0", "file1"])
+		.select(["entity_id", "snapshot_id", "snapshot.content", "schema_key"])
+		.execute();
+
+	expect(changes).toMatchObject([
+		// insert
 		{
-			id: "file1",
-			path: "/path/to/file.json",
-			version_id: "version1",
+			schema_key: "lix_file",
+			entity_id: "file0",
+			snapshot_id: expect.any(String),
+			content: expect.any(Object),
+		},
+		{
+			schema_key: "mock_json_property",
+			entity_id: "prop0",
+			content: {
+				value: "file0-value0",
+			},
+			snapshot_id: expect.any(String),
+		},
+		// update
+		{
+			schema_key: "lix_file",
+			entity_id: "file0",
+			snapshot_id: expect.any(String),
+			content: expect.any(Object),
+		},
+		{
+			schema_key: "mock_json_property",
+			entity_id: "prop0",
+			content: {
+				value: "file0-value1",
+			},
+			snapshot_id: expect.any(String),
+		},
+		// delete (file‑level)
+		{
+			schema_key: "lix_file",
+			entity_id: "file0",
+			snapshot_id: "no-content",
+			content: null,
+		},
+		// delete (all plugin entities that existed in the file)
+		{
+			schema_key: "mock_json_property",
+			entity_id: "prop0",
+			snapshot_id: "no-content",
+			content: null,
 		},
 	]);
-
-	// const changes = await db
-	// 	.selectFrom("change")
-	// 	.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-	// 	.select(["entity_id", "snapshot_id", "snapshot.content", "schema_key"])
-	// 	.execute();
-
-	// expect(changes).toMatchObject([
-	// 	// insert
-	// 	{
-	// 		schema_key: "lix_file_table",
-	// 		entity_id: "file0",
-	// 		snapshot_id: expect.any(String),
-	// 		content: expect.any(Object),
-	// 	},
-	// 	{
-	// 		schema_key: "mock_json_property",
-	// 		entity_id: "value",
-	// 		content: {
-	// 			value: "file0-value0",
-	// 		},
-	// 		snapshot_id: expect.any(String),
-	// 	},
-	// 	// insert
-	// 	{
-	// 		schema_key: "lix_file_table",
-	// 		entity_id: "file1",
-	// 		snapshot_id: expect.any(String),
-	// 		content: expect.any(Object),
-	// 	},
-	// 	{
-	// 		schema_key: "mock_json_property",
-	// 		entity_id: "value",
-	// 		content: {
-	// 			value: "file1-value0",
-	// 		},
-	// 		snapshot_id: expect.any(String),
-	// 	},
-	// 	// update
-	// 	{
-	// 		schema_key: "lix_file_table",
-	// 		entity_id: "file0",
-	// 		snapshot_id: expect.any(String),
-	// 		content: expect.any(Object),
-	// 	},
-	// 	// delete
-	// 	{
-	// 		schema_key: "lix_file_table",
-	// 		entity_id: "file0",
-	// 		snapshot_id: "no-content",
-	// 		content: expect.any(Object),
-	// 	},
-	// ]);
 });
 
 test("file insert data materialization", async () => {

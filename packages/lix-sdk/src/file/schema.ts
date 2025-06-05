@@ -129,6 +129,12 @@ export function applyFileDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS file_delete
   INSTEAD OF DELETE ON file
   BEGIN
+      -- Delete all plugin entities associated with this file
+      DELETE FROM state
+      WHERE file_id = OLD.id
+        AND version_id = OLD.version_id;
+        
+      -- Delete the file entity itself
       DELETE FROM state
       WHERE entity_id = OLD.id
         AND schema_key = 'lix_file'
