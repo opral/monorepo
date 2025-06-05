@@ -2,87 +2,93 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { ChangeSetEdge } from "../change-set-v2/schema.js";
 
-// re-enable after https://github.com/opral/lix-sdk/issues/305 
+// re-enable after https://github.com/opral/lix-sdk/issues/305
 // which avoids the massive chain of change sets event
-test.todo("creates a new change set and updates the version's change set id for mutations", async () => {
-	const lix = await openLixInMemory({});
+test.todo(
+	"creates a new change set and updates the version's change set id for mutations",
+	async () => {
+		const lix = await openLixInMemory({});
 
-	const versionBeforeInsert = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.where("name", "=", "main")
-		.executeTakeFirstOrThrow();
+		const versionBeforeInsert = await lix.db
+			.selectFrom("version")
+			.selectAll()
+			.where("name", "=", "main")
+			.executeTakeFirstOrThrow();
 
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "mock_key",
-			value: "mock_value",
-		})
-		.execute();
+		await lix.db
+			.insertInto("key_value")
+			.values({
+				key: "mock_key",
+				value: "mock_value",
+			})
+			.execute();
 
-	const versionAfterInsert = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.where("name", "=", "main")
-		.executeTakeFirstOrThrow();
+		const versionAfterInsert = await lix.db
+			.selectFrom("version")
+			.selectAll()
+			.where("name", "=", "main")
+			.executeTakeFirstOrThrow();
 
-	expect(versionAfterInsert.change_set_id).not.toEqual(
-		versionBeforeInsert.change_set_id
-	);
+		expect(versionAfterInsert.change_set_id).not.toEqual(
+			versionBeforeInsert.change_set_id
+		);
 
-	await lix.db
-		.updateTable("key_value")
-		.where("key", "=", "mock_key")
-		.set({
-			value: "mock_value_updated",
-		})
-		.execute();
+		await lix.db
+			.updateTable("key_value")
+			.where("key", "=", "mock_key")
+			.set({
+				value: "mock_value_updated",
+			})
+			.execute();
 
-	const versionAfterUpdate = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.where("name", "=", "main")
-		.executeTakeFirstOrThrow();
+		const versionAfterUpdate = await lix.db
+			.selectFrom("version")
+			.selectAll()
+			.where("name", "=", "main")
+			.executeTakeFirstOrThrow();
 
-	expect(versionAfterUpdate.change_set_id).not.toEqual(
-		versionAfterInsert.change_set_id
-	);
+		expect(versionAfterUpdate.change_set_id).not.toEqual(
+			versionAfterInsert.change_set_id
+		);
 
-	await lix.db.deleteFrom("key_value").where("key", "=", "mock_key").execute();
+		await lix.db
+			.deleteFrom("key_value")
+			.where("key", "=", "mock_key")
+			.execute();
 
-	const versionAfterDelete = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.where("name", "=", "main")
-		.executeTakeFirstOrThrow();
+		const versionAfterDelete = await lix.db
+			.selectFrom("version")
+			.selectAll()
+			.where("name", "=", "main")
+			.executeTakeFirstOrThrow();
 
-	expect(versionAfterDelete.change_set_id).not.toEqual(
-		versionAfterUpdate.change_set_id
-	);
+		expect(versionAfterDelete.change_set_id).not.toEqual(
+			versionAfterUpdate.change_set_id
+		);
 
-	const edges = await lix.db
-		.selectFrom("change_set_edge")
-		.select(["parent_id", "child_id"])
-		.execute();
+		const edges = await lix.db
+			.selectFrom("change_set_edge")
+			.select(["parent_id", "child_id"])
+			.execute();
 
-	expect(edges).toEqual(
-		expect.arrayContaining([
-			{
-				parent_id: versionBeforeInsert.change_set_id,
-				child_id: versionAfterInsert.change_set_id,
-			},
-			{
-				parent_id: versionAfterInsert.change_set_id,
-				child_id: versionAfterUpdate.change_set_id,
-			},
-			{
-				parent_id: versionAfterUpdate.change_set_id,
-				child_id: versionAfterDelete.change_set_id,
-			},
-		] satisfies Omit<ChangeSetEdge, "version_id">[])
-	);
-});
+		expect(edges).toEqual(
+			expect.arrayContaining([
+				{
+					parent_id: versionBeforeInsert.change_set_id,
+					child_id: versionAfterInsert.change_set_id,
+				},
+				{
+					parent_id: versionAfterInsert.change_set_id,
+					child_id: versionAfterUpdate.change_set_id,
+				},
+				{
+					parent_id: versionAfterUpdate.change_set_id,
+					child_id: versionAfterDelete.change_set_id,
+				},
+			] satisfies Omit<ChangeSetEdge, "version_id">[])
+		);
+	}
+);
 
 // SQLite does not provide a "before transaction commits" hook which would allow
 // us to group changes of a transaction into the same change set.
@@ -125,42 +131,48 @@ test.skip("groups changes of a transaction into the same change set", async () =
 
 test("should throw error when version_id is null", async () => {
 	const lix = await openLixInMemory({});
-	
+
 	// Try to insert state with null version_id - should throw
 	await expect(
-		lix.db.insertInto("state").values({
-			entity_id: "test_entity",
-			schema_key: "lix_key_value", 
-			file_id: "lix",
-			plugin_key: "test_plugin",
-			snapshot_content: { key: "test", value: "test" },
-			schema_version: "1.0",
-			version_id: null as any // Explicitly null version_id
-		}).execute()
+		lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "test_entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "test_plugin",
+				snapshot_content: { key: "test", value: "test" },
+				schema_version: "1.0",
+				version_id: null as any, // Explicitly null version_id
+			})
+			.execute()
 	).rejects.toThrow("version_id is required");
 });
 
 test("should throw error when version_id does not exist", async () => {
 	const lix = await openLixInMemory({});
-	
+
 	const nonExistentVersionId = "non-existent-version-id";
-	
+
 	// Try to insert state with non-existent version_id - should throw
 	await expect(
-		lix.db.insertInto("state").values({
-			entity_id: "test_entity",
-			schema_key: "lix_key_value",
-			file_id: "lix", 
-			plugin_key: "test_plugin",
-			snapshot_content: { key: "test", value: "test" },
-			schema_version: "1.0",
-			version_id: nonExistentVersionId
-		}).execute()
+		lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "test_entity",
+				schema_key: "lix_key_value",
+				file_id: "lix",
+				plugin_key: "test_plugin",
+				snapshot_content: { key: "test", value: "test" },
+				schema_version: "1.0",
+				version_id: nonExistentVersionId,
+			})
+			.execute()
 	).rejects.toThrow(`Version with id '${nonExistentVersionId}' does not exist`);
 });
 
-// Deciding on the behavior when updating version.change_set_id is a tradeoff. 
-// Implicit magic of "updating change_set_id creates edges" would mutate the target change set, 
+// Deciding on the behavior when updating version.change_set_id is a tradeoff.
+// Implicit magic of "updating change_set_id creates edges" would mutate the target change set,
 // a more explicit behavior is to not create edges or orphaned change sets and the calling code should handle it.
 test("updating version change_set_id should not create edges or orphaned change sets", async () => {
 	const lix = await openLixInMemory({});
@@ -292,7 +304,7 @@ test("updating version change_set_id should not create edges or orphaned change 
 });
 
 // under no circumstances should a change set contain duplicate entity changes
-// given that we directly insert into internal_change and internal_snapshot, 
+// given that we directly insert into internal_change and internal_snapshot,
 // we need to ensure that the change set does not contain duplicates manually
 test("updating a version should merge the change with the mutation handlers change", async () => {
 	const lix = await openLixInMemory({});
@@ -404,7 +416,6 @@ test("updating version name should create edges (normal mutation behavior)", asy
 	);
 	expect(newEdge).toBeDefined();
 });
-
 
 test("inserts working change set elements", async () => {
 	const lix = await openLixInMemory({});
@@ -654,7 +665,7 @@ test("delete reconciliation: entities added after checkpoint then deleted are ex
 // this is expensive to compute because the historical state must be reconstructed
 // ideally, we have a state_at read view which makes this peformant, or we find ways
 // to design the working change set differently.
-test.skip("delete reconciliation: entities existing before checkpoint show deletions in working change set", async () => {
+test("delete reconciliation: entities existing before checkpoint show deletions in working change set", async () => {
 	const lix = await openLixInMemory({});
 
 	// BEFORE checkpoint: Insert an entity
@@ -826,4 +837,3 @@ test.todo("working change set elements are separated per version", async () => {
 	expect(mainCrossCheck).toHaveLength(0);
 	expect(newCrossCheck).toHaveLength(0);
 });
-

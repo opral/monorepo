@@ -22,6 +22,8 @@ import {
 } from "../change-set-v2/schema.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
+import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
+import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,
@@ -103,7 +105,6 @@ export function handleStateMutation(
 	// Check if the root change is a version change for the same entity
 	const isVersionChange =
 		schema_key === "lix_version" && entity_id === version.id;
-
 
 	// Check if this is specifically a change_set_id update (should skip mutation handler logic)
 	let isChangeSetIdUpdate = false;
@@ -260,15 +261,64 @@ export function handleStateMutation(
 
 	// Create/update working change set element for user data changes
 	// Skip lix internal entities (change sets, edges, etc.)
-	if (!isChangeSetIdUpdate && rootChange.schema_key !== "lix_change_set" && 
-		rootChange.schema_key !== "lix_change_set_edge" && rootChange.schema_key !== "lix_change_set_element" &&
-		rootChange.schema_key !== "lix_version") {
-		
-		const parsedSnapshot = finalSnapshotContent ? JSON.parse(finalSnapshotContent) : null;
-		const isDeletion = !parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
-		
+	if (
+		!isChangeSetIdUpdate &&
+		rootChange.schema_key !== "lix_change_set" &&
+		rootChange.schema_key !== "lix_change_set_edge" &&
+		rootChange.schema_key !== "lix_change_set_element" &&
+		rootChange.schema_key !== "lix_version"
+	) {
+		const parsedSnapshot = finalSnapshotContent
+			? JSON.parse(finalSnapshotContent)
+			: null;
+		const isDeletion =
+			!parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
+
 		if (isDeletion) {
-			// Simple deletion: remove from working change set
+			// Delete reconciliation: check if entity existed at last checkpoint
+			const lastCheckpointChangeSet = executeSync({
+				lix: { sqlite },
+				query: db
+					.selectFrom("change_set")
+					.where(changeSetHasLabel({ name: "checkpoint" }))
+					.where(changeSetIsAncestorOf({ id: version.change_set_id }))
+					.select("id")
+					.limit(1),
+			});
+
+			let entityExistedAtCheckpoint = false;
+
+			if (lastCheckpointChangeSet.length > 0) {
+				// Check if entity existed in state at the last checkpoint
+				const entityAtCheckpoint = executeSync({
+					lix: { sqlite },
+					query: db
+						.selectFrom("change")
+						.innerJoin(
+							"change_set_element",
+							"change_set_element.change_id",
+							"change.id"
+						)
+						.where("change.entity_id", "=", rootChange.entity_id)
+						.where("change.schema_key", "=", rootChange.schema_key)
+						.where("change.file_id", "=", rootChange.file_id)
+						.where(
+							changeSetElementInAncestryOf([
+								{ id: lastCheckpointChangeSet[0]!.id },
+							])
+						)
+						.where(
+							changeSetElementIsLeafOf([{ id: lastCheckpointChangeSet[0]!.id }])
+						)
+						.where("change.snapshot_id", "!=", "no-content")
+						.select("change.id")
+						.limit(1),
+				});
+
+				entityExistedAtCheckpoint = entityAtCheckpoint.length > 0;
+			}
+
+			// Always remove existing working change set element first
 			executeSync({
 				lix: { sqlite },
 				query: db
@@ -277,10 +327,47 @@ export function handleStateMutation(
 					.where("schema_key", "=", "lix_change_set_element")
 					.where("file_id", "=", "lix")
 					.where("version_id", "=", version_id)
-					.where(sql`json_extract(snapshot_content, '$.entity_id')`, "=", rootChange.entity_id)
-					.where(sql`json_extract(snapshot_content, '$.schema_key')`, "=", rootChange.schema_key)
-					.where(sql`json_extract(snapshot_content, '$.file_id')`, "=", rootChange.file_id),
+					.where(
+						sql`json_extract(snapshot_content, '$.entity_id')`,
+						"=",
+						rootChange.entity_id
+					)
+					.where(
+						sql`json_extract(snapshot_content, '$.schema_key')`,
+						"=",
+						rootChange.schema_key
+					)
+					.where(
+						sql`json_extract(snapshot_content, '$.file_id')`,
+						"=",
+						rootChange.file_id
+					),
 			});
+
+			// If entity existed at checkpoint, add deletion to working change set
+			if (entityExistedAtCheckpoint) {
+				createChangeWithSnapshot({
+					sqlite,
+					db,
+					data: {
+						entity_id: `${version.working_change_set_id}::${rootChange.id}`,
+						schema_key: "lix_change_set_element",
+						file_id: "lix",
+						plugin_key: "lix_own_entity",
+						snapshot_content: JSON.stringify({
+							change_set_id: version.working_change_set_id,
+							change_id: rootChange.id,
+							entity_id: rootChange.entity_id,
+							schema_key: rootChange.schema_key,
+							file_id: rootChange.file_id,
+						} satisfies LixChangeSetElement),
+						schema_version: LixChangeSetElementSchema["x-lix-version"],
+					},
+					timestamp: currentTime,
+					version_id,
+				});
+			}
+			// If entity didn't exist at checkpoint, just remove from working change set (already done above)
 		} else {
 			// Non-deletion: create/update working change set element (latest change wins)
 			// First, remove any existing working change set element for this entity
@@ -292,9 +379,21 @@ export function handleStateMutation(
 					.where("schema_key", "=", "lix_change_set_element")
 					.where("file_id", "=", "lix")
 					.where("version_id", "=", version_id)
-					.where(sql`json_extract(snapshot_content, '$.entity_id')`, "=", rootChange.entity_id)
-					.where(sql`json_extract(snapshot_content, '$.schema_key')`, "=", rootChange.schema_key)
-					.where(sql`json_extract(snapshot_content, '$.file_id')`, "=", rootChange.file_id),
+					.where(
+						sql`json_extract(snapshot_content, '$.entity_id')`,
+						"=",
+						rootChange.entity_id
+					)
+					.where(
+						sql`json_extract(snapshot_content, '$.schema_key')`,
+						"=",
+						rootChange.schema_key
+					)
+					.where(
+						sql`json_extract(snapshot_content, '$.file_id')`,
+						"=",
+						rootChange.file_id
+					),
 			});
 
 			// Then create new element with latest change
