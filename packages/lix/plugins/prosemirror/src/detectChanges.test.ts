@@ -1,10 +1,7 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
-import { openLixInMemory } from "@lix-js/sdk";
 
 test("it should not detect changes if the document did not update", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -25,8 +22,7 @@ test("it should not detect changes if the document did not update", async () => 
 	// same file
 	const after = before;
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -44,8 +40,6 @@ test("it should not detect changes if the document did not update", async () => 
 });
 
 test("it should detect insertion of a new node", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -92,8 +86,7 @@ test("it should detect insertion of a new node", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -111,12 +104,10 @@ test("it should detect insertion of a new node", async () => {
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
 	expect(change.entity_id).toEqual("paragraph-2");
-	expect(change.snapshot).toBeDefined();
+	expect(change.snapshot_content).toBeDefined();
 });
 
 test("it should detect modification of an existing node", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -153,8 +144,7 @@ test("it should detect modification of an existing node", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -172,17 +162,15 @@ test("it should detect modification of an existing node", async () => {
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
 	expect(change.entity_id).toEqual("paragraph-1");
-	expect(change.snapshot).toBeDefined();
-	if (change.snapshot) {
-		expect((change.snapshot as any).content[0].text).toEqual(
+	expect(change.snapshot_content).toBeDefined();
+	if (change.snapshot_content) {
+		expect((change.snapshot_content as any).content[0].text).toEqual(
 			"Hello, updated world!",
 		);
 	}
 });
 
 test("it should detect deletion of a node", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -229,8 +217,7 @@ test("it should detect deletion of a node", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -246,14 +233,12 @@ test("it should detect deletion of a node", async () => {
 	});
 
 	expect(detectedChanges).toHaveLength(1);
-	const change = detectedChanges[0]!;
+	const change = detectedChanges![0]!;
 	expect(change.entity_id).toEqual("paragraph-2");
-	expect(change.snapshot).toBeUndefined();
+	expect(change.snapshot_content).toBeNull();
 });
 
 test("it should detect multiple changes in a single document", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -330,8 +315,7 @@ test("it should detect multiple changes in a single document", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -364,28 +348,26 @@ test("it should detect multiple changes in a single document", async () => {
 	expect(addedChange).toBeDefined();
 
 	// Verify modification
-	expect(modifiedChange?.snapshot).toBeDefined();
-	if (modifiedChange?.snapshot) {
-		expect((modifiedChange.snapshot as any).content[0].text).toEqual(
+	expect(modifiedChange?.snapshot_content).toBeDefined();
+	if (modifiedChange?.snapshot_content) {
+		expect((modifiedChange.snapshot_content as any).content[0].text).toEqual(
 			"Second paragraph modified",
 		);
 	}
 
 	// Verify deletion
-	expect(deletedChange?.snapshot).toBeUndefined();
+	expect(deletedChange?.snapshot_content).toBeNull();
 
 	// Verify addition
-	expect(addedChange?.snapshot).toBeDefined();
-	if (addedChange?.snapshot) {
-		expect((addedChange.snapshot as any).content[0].text).toEqual(
+	expect(addedChange?.snapshot_content).toBeDefined();
+	if (addedChange?.snapshot_content) {
+		expect((addedChange.snapshot_content as any).content[0].text).toEqual(
 			"New fourth paragraph",
 		);
 	}
 });
 
 test("it should detect changes in headings with different levels", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -422,8 +404,7 @@ test("it should detect changes in headings with different levels", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -441,17 +422,17 @@ test("it should detect changes in headings with different levels", async () => {
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
 	expect(change.entity_id).toEqual("heading-1");
-	expect(change.snapshot).toBeDefined();
+	expect(change.snapshot_content).toBeDefined();
 
-	if (change.snapshot) {
-		expect((change.snapshot as any).attrs.level).toEqual(2);
-		expect((change.snapshot as any).content[0].text).toEqual("Level 2 Heading");
+	if (change.snapshot_content) {
+		expect((change.snapshot_content as any).attrs.level).toEqual(2);
+		expect((change.snapshot_content as any).content[0].text).toEqual(
+			"Level 2 Heading",
+		);
 	}
 });
 
 test("it should detect changes in text marks", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -502,8 +483,7 @@ test("it should detect changes in text marks", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -521,18 +501,20 @@ test("it should detect changes in text marks", async () => {
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
 	expect(change.entity_id).toEqual("paragraph-1");
-	expect(change.snapshot).toBeDefined();
+	expect(change.snapshot_content).toBeDefined();
 
-	if (change.snapshot) {
-		expect((change.snapshot as any).content).toHaveLength(4);
-		expect((change.snapshot as any).content[0].marks[0].type).toEqual("strong");
-		expect((change.snapshot as any).content[2].marks[0].type).toEqual("em");
+	if (change.snapshot_content) {
+		expect((change.snapshot_content as any).content).toHaveLength(4);
+		expect((change.snapshot_content as any).content[0].marks[0].type).toEqual(
+			"strong",
+		);
+		expect((change.snapshot_content as any).content[2].marks[0].type).toEqual(
+			"em",
+		);
 	}
 });
 
 test("it should detect changes in complex block structures like lists", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -633,8 +615,7 @@ test("it should detect changes in complex block structures like lists", async ()
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -664,22 +645,20 @@ test("it should detect changes in complex block structures like lists", async ()
 	expect(item3Change).toBeDefined();
 
 	// Verify first item modification
-	if (item1Change?.snapshot) {
-		expect((item1Change.snapshot as any).content[0].text).toEqual(
+	if (item1Change?.snapshot_content) {
+		expect((item1Change.snapshot_content as any).content[0].text).toEqual(
 			"First item modified",
 		);
 	}
 
 	// Verify new nested list
-	expect(nestedListChange?.snapshot).toBeDefined();
+	expect(nestedListChange?.snapshot_content).toBeDefined();
 
 	// Verify new third item
-	expect(item3Change?.snapshot).toBeDefined();
+	expect(item3Change?.snapshot_content).toBeDefined();
 });
 
 test("it should detect changes in nodes with custom attributes", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -718,8 +697,7 @@ test("it should detect changes in nodes with custom attributes", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -737,19 +715,19 @@ test("it should detect changes in nodes with custom attributes", async () => {
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
 	expect(change.entity_id).toEqual("image-1");
-	expect(change.snapshot).toBeDefined();
+	expect(change.snapshot_content).toBeDefined();
 
-	if (change.snapshot) {
-		expect((change.snapshot as any).attrs.src).toEqual("new-image.jpg");
-		expect((change.snapshot as any).attrs.alt).toEqual("New image description");
-		expect((change.snapshot as any).attrs.width).toEqual(400);
-		expect((change.snapshot as any).attrs.height).toEqual(300);
+	if (change.snapshot_content) {
+		expect((change.snapshot_content as any).attrs.src).toEqual("new-image.jpg");
+		expect((change.snapshot_content as any).attrs.alt).toEqual(
+			"New image description",
+		);
+		expect((change.snapshot_content as any).attrs.width).toEqual(400);
+		expect((change.snapshot_content as any).attrs.height).toEqual(300);
 	}
 });
 
 test("it should detect changes in tables", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -864,8 +842,7 @@ test("it should detect changes in tables", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -893,19 +870,17 @@ test("it should detect changes in tables", async () => {
 	expect(row2Change).toBeDefined();
 
 	// Verify cell-1-1 modification
-	if (cell11Change?.snapshot) {
-		expect((cell11Change.snapshot as any).content[0].text).toEqual(
+	if (cell11Change?.snapshot_content) {
+		expect((cell11Change.snapshot_content as any).content[0].text).toEqual(
 			"Row 1, Cell 1 modified",
 		);
 	}
 
 	// Verify new row-2 addition
-	expect(row2Change?.snapshot).toBeDefined();
+	expect(row2Change?.snapshot_content).toBeDefined();
 });
 
 test("it should detect changes in code blocks", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -948,8 +923,7 @@ test("it should detect changes in code blocks", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -967,19 +941,19 @@ test("it should detect changes in code blocks", async () => {
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
 	expect(change.entity_id).toEqual("code-1");
-	expect(change.snapshot).toBeDefined();
+	expect(change.snapshot_content).toBeDefined();
 
-	if (change.snapshot) {
-		expect((change.snapshot as any).attrs.language).toEqual("typescript");
-		expect((change.snapshot as any).content[0].text).toContain(
+	if (change.snapshot_content) {
+		expect((change.snapshot_content as any).attrs.language).toEqual(
+			"typescript",
+		);
+		expect((change.snapshot_content as any).content[0].text).toContain(
 			"function hello(): void",
 		);
 	}
 });
 
 test("it should detect changes in blockquotes", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -1038,8 +1012,7 @@ test("it should detect changes in blockquotes", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -1068,24 +1041,22 @@ test("it should detect changes in blockquotes", async () => {
 	expect(quoteParagraph2Change).toBeDefined();
 
 	// Verify paragraph 1 modification
-	if (quoteParagraph1Change?.snapshot) {
-		expect((quoteParagraph1Change.snapshot as any).content[0].text).toEqual(
-			"Modified quote text",
-		);
+	if (quoteParagraph1Change?.snapshot_content) {
+		expect(
+			(quoteParagraph1Change.snapshot_content as any).content[0].text,
+		).toEqual("Modified quote text");
 	}
 
 	// Verify paragraph 2 addition
-	expect(quoteParagraph2Change?.snapshot).toBeDefined();
-	if (quoteParagraph2Change?.snapshot) {
-		expect((quoteParagraph2Change.snapshot as any).content[0].text).toEqual(
-			"Additional paragraph in quote",
-		);
+	expect(quoteParagraph2Change?.snapshot_content).toBeDefined();
+	if (quoteParagraph2Change?.snapshot_content) {
+		expect(
+			(quoteParagraph2Change.snapshot_content as any).content[0].text,
+		).toEqual("Additional paragraph in quote");
 	}
 });
 
 test("it should detect changes in links", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -1156,8 +1127,7 @@ test("it should detect changes in links", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",
@@ -1175,10 +1145,10 @@ test("it should detect changes in links", async () => {
 	expect(detectedChanges).toHaveLength(1);
 	const change = detectedChanges[0]!;
 	expect(change.entity_id).toEqual("p-1");
-	expect(change.snapshot).toBeDefined();
+	expect(change.snapshot_content).toBeDefined();
 
-	if (change.snapshot) {
-		const linkNode = (change.snapshot as any).content[1];
+	if (change.snapshot_content) {
+		const linkNode = (change.snapshot_content as any).content[1];
 		expect(linkNode.text).toEqual("new link");
 		expect(linkNode.marks[0].attrs.href).toEqual("https://new-example.com");
 		expect(linkNode.marks[0].attrs.title).toEqual("New title");
@@ -1186,8 +1156,6 @@ test("it should detect changes in links", async () => {
 });
 
 test("it should NOT report changes for parent nodes when only children change", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			type: "doc",
@@ -1246,8 +1214,7 @@ test("it should NOT report changes for parent nodes when only children change", 
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: {
 			id: "random",
 			path: "prosemirror.json",

@@ -134,14 +134,13 @@ test("it detects and applies changes to a Prosemirror document", async () => {
 	);
 
 	// Create the Lix instance and simulate the file updates
-	const { lix, changes } = await mockChanges({
+	const changes = await mockChanges({
 		file: { id: "prosemirror-doc", path: "/prosemirror.json" },
 		fileUpdates: [before, firstUpdate, secondUpdate, thirdUpdate, fourthUpdate],
 	});
 
 	// Apply the detected changes back to the initial document
-	const { fileData: applied } = await applyChanges({
-		lix,
+	const { fileData: applied } = applyChanges({
 		file: {
 			id: "prosemirror-doc",
 			path: "/prosemirror.json",
@@ -263,14 +262,13 @@ test("it handles create, update, and delete operations correctly", async () => {
 	);
 
 	// Create the Lix instance and simulate the file updates to generate changes
-	const { lix, changes } = await mockChanges({
+	const changes = await mockChanges({
 		file: { id: "test-doc-crud", path: "/test-crud.json" },
 		fileUpdates: [initial, firstUpdate, secondUpdate],
 	});
 
 	// Apply the detected changes back to the initial document
-	const { fileData: applied } = await applyChanges({
-		lix,
+	const { fileData: applied } = applyChanges({
 		file: {
 			id: "test-doc-crud",
 			path: "/test-crud.json",
@@ -378,14 +376,13 @@ test("it correctly applies changes to text with marks", async () => {
 	const update = new TextEncoder().encode(JSON.stringify(afterChange));
 
 	// Create the Lix instance and simulate the file updates
-	const { lix, changes } = await mockChanges({
+	const changes = await mockChanges({
 		file: { id: "text-with-marks", path: "/text-with-marks.json" },
 		fileUpdates: [initial, update],
 	});
 
 	// Apply the detected changes back to the initial document
-	const { fileData: applied } = await applyChanges({
-		lix,
+	const { fileData: applied } = applyChanges({
 		file: {
 			id: "text-with-marks",
 			path: "/text-with-marks.json",
@@ -517,14 +514,13 @@ test("it correctly applies changes to mixed content", async () => {
 	const update = new TextEncoder().encode(JSON.stringify(afterChange));
 
 	// Create the Lix instance and simulate the file updates
-	const { lix, changes } = await mockChanges({
+	const changes = await mockChanges({
 		file: { id: "mixed-content", path: "/mixed-content.json" },
 		fileUpdates: [initial, update],
 	});
 
 	// Apply the detected changes back to the initial document
-	const { fileData: applied } = await applyChanges({
-		lix,
+	const { fileData: applied } = applyChanges({
 		file: {
 			id: "mixed-content",
 			path: "/mixed-content.json",
