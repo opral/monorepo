@@ -372,7 +372,7 @@ test("it should delete entities but not files when applying entity deletion chan
 		.execute();
 
 	// Create changes that add entities to the file
-	const addChanges = await lix.db
+	await lix.db
 		.insertInto("change")
 		.values([
 			{
@@ -435,7 +435,7 @@ test("it should delete entities but not files when applying entity deletion chan
 	});
 
 	// 2. Create entity deletion changes (but NOT file deletion)
-	const deleteEntityChange = await lix.db
+	await lix.db
 		.insertInto("change")
 		.values({
 			id: "c3",

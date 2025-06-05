@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createChangeSet } from "../change-set/create-change-set.js";
+import { createChangeSet } from "../change-set-v2/create-change-set.js";
 import { changeSetElementInAncestryOf } from "./change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "./change-set-element-is-leaf-of.js";
 

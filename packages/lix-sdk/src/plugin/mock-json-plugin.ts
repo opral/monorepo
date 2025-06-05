@@ -3,7 +3,7 @@ import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import type { DetectedChange, LixPlugin } from "./lix-plugin.js";
 import { flatten, unflatten } from "./mock-json-plugin.flatten.js";
 
-const MockJsonPropertySchema = {
+export const MockJsonPropertySchema: LixSchemaDefinition = {
 	type: "object",
 	properties: {
 		value: JSONTypeSchema,
@@ -11,7 +11,7 @@ const MockJsonPropertySchema = {
 	required: ["value"],
 	"x-lix-key": "mock_json_property",
 	"x-lix-version": "1.0",
-} as const satisfies LixSchemaDefinition;
+} as const;
 
 /**
  * A mock plugin that handles JSON data.
