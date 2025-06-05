@@ -283,8 +283,7 @@ test("invalid file paths should be rejected", async () => {
 	).rejects.toThrowError("path must match pattern");
 });
 
-// needs materialized state to be fast enough
-test.todo("file operations are version specific and isolated", async () => {
+test("file operations are version specific and isolated", async () => {
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
 	});

@@ -4,73 +4,71 @@ import type { Lix } from "../lix/open-lix.js";
 import type { Log } from "./schema.js";
 import { createLixOwnLog } from "./create-lix-own-log.js";
 
-test.todo(
-	"should insert logs default log levels when lix_log_levels is not set)",
-	async () => {
-		const lix = await openLixInMemory({});
+test("should insert logs default log levels when lix_log_levels is not set)", async () => {
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: ["info", "warn", "error"] }],
+	});
 
-		await createLogs(lix);
+	await createLogs(lix);
 
-		const logs = await getLogs(lix);
+	const logs = await getLogs(lix);
 
-		expect(logs).toHaveLength(3); // info, warn, error
+	expect(logs).toHaveLength(3); // info, warn, error
 
-		expect(logs.find((log) => log.level === "debug")).toBeUndefined();
-		expect(logs.find((log) => log.level === "info")?.message).toBe(
-			"info message"
-		);
-		expect(logs.find((log) => log.level === "warn")?.message).toBe(
-			"warn message"
-		);
-		expect(logs.find((log) => log.level === "error")?.message).toBe(
-			"error message"
-		);
-	}
-);
+	expect(logs.find((log) => log.level === "debug")).toBeUndefined();
+	expect(logs.find((log) => log.level === "info")?.message).toBe(
+		"info message"
+	);
+	expect(logs.find((log) => log.level === "warn")?.message).toBe(
+		"warn message"
+	);
+	expect(logs.find((log) => log.level === "error")?.message).toBe(
+		"error message"
+	);
+});
 
-test.todo(
-	"should insert only specified levels when lix_log_levels=['warn', 'error']",
-	async () => {
-		const lix = await openLixInMemory({});
+test("should insert only specified levels when lix_log_levels=['warn', 'error']", async () => {
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: ["warn", "error"] }],
+	});
 
-		await setLogLevels(lix, ["warn", "error"]);
-		await createLogs(lix);
+	await createLogs(lix);
 
-		const logs = await getLogs(lix);
+	const logs = await getLogs(lix);
 
-		expect(logs).toHaveLength(2); // warn, error
-		expect(logs.find((log) => log.level === "debug")).toBeUndefined();
-		expect(logs.find((log) => log.level === "info")).toBeUndefined();
-		expect(logs.find((log) => log.level === "warn")?.message).toBe(
-			"warn message"
-		);
-		expect(logs.find((log) => log.level === "error")?.message).toBe(
-			"error message"
-		);
-	}
-);
+	expect(logs).toHaveLength(2); // warn, error
+	expect(logs.find((log) => log.level === "debug")).toBeUndefined();
+	expect(logs.find((log) => log.level === "info")).toBeUndefined();
+	expect(logs.find((log) => log.level === "warn")?.message).toBe(
+		"warn message"
+	);
+	expect(logs.find((log) => log.level === "error")?.message).toBe(
+		"error message"
+	);
+});
 
-test.todo(
-	"should insert only specified levels when lix_log_levels=['debug']",
-	async () => {
-		const lix = await openLixInMemory({});
-		await setLogLevels(lix, ["debug"]);
-		await createLogs(lix);
+test("should insert only specified levels when lix_log_levels=['debug']", async () => {
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: ["debug"] }],
+	});
 
-		const logs = await getLogs(lix);
-		expect(logs).toHaveLength(1); // debug
-		expect(logs.find((log) => log.level === "debug")?.message).toBe(
-			"debug message"
-		);
-		expect(logs.find((log) => log.level === "info")).toBeUndefined();
-		expect(logs.find((log) => log.level === "warn")).toBeUndefined();
-		expect(logs.find((log) => log.level === "error")).toBeUndefined();
-	}
-);
+	await createLogs(lix);
 
-test.todo("should insert all levels when lix_log_levels=['*']", async () => {
-	const lix = await openLixInMemory({});
-	await setLogLevels(lix, ["*"]);
+	const logs = await getLogs(lix);
+	expect(logs).toHaveLength(1); // debug
+	expect(logs.find((log) => log.level === "debug")?.message).toBe(
+		"debug message"
+	);
+	expect(logs.find((log) => log.level === "info")).toBeUndefined();
+	expect(logs.find((log) => log.level === "warn")).toBeUndefined();
+	expect(logs.find((log) => log.level === "error")).toBeUndefined();
+});
+
+test("should insert all levels contain wildcard '*'", async () => {
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: ["*"] }],
+	});
+
 	await createLogs(lix);
 
 	const logs = await getLogs(lix);
@@ -120,17 +118,3 @@ async function getLogs(lix: Lix): Promise<Log[]> {
 	return lix.db.selectFrom("log").selectAll().execute();
 }
 
-// Helper to set the lix_log_levels key
-async function setLogLevels(lix: Lix, levels: string[]) {
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_log_levels",
-			value: JSON.stringify(levels),
-			// skip_change_control: true,
-		})
-		.onConflict((oc) =>
-			oc.column("key").doUpdateSet({ value: JSON.stringify(levels) })
-		)
-		.execute();
-}

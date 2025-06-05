@@ -120,58 +120,55 @@ test("can create checkpoint even when working change set appears empty", async (
 });
 
 // we should have https://github.com/opral/lix-sdk/issues/305 before this test
-test.todo(
-	"checkpoint enables clean working change set for new work",
-	async () => {
-		const lix = await openLixInMemory({});
+test("checkpoint enables clean working change set for new work", async () => {
+	const lix = await openLixInMemory({});
 
-		// Make initial changes
-		await lix.db
-			.insertInto("key_value")
-			.values({ key: "before_checkpoint", value: "value" })
-			.execute();
+	// Make initial changes
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "before_checkpoint", value: "value" })
+		.execute();
 
-		// Create checkpoint
-		const checkpoint = await createCheckpoint({
-			lix,
-		});
+	// Create checkpoint
+	const checkpoint = await createCheckpoint({
+		lix,
+	});
 
-		// Make new changes after checkpoint
-		await lix.db
-			.insertInto("key_value")
-			.values({ key: "after_checkpoint", value: "value" })
-			.execute();
+	// Make new changes after checkpoint
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "after_checkpoint", value: "value" })
+		.execute();
 
-		// Get updated version
-		const version = await lix.db
-			.selectFrom("version")
-			.where("name", "=", "main")
-			.selectAll()
-			.executeTakeFirstOrThrow();
+	// Get updated version
+	const version = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-		// Working change set should only contain post-checkpoint changes
-		const workingElements = await lix.db
-			.selectFrom("change_set_element")
-			.where("change_set_id", "=", version.working_change_set_id)
-			.selectAll()
-			.execute();
+	// Working change set should only contain post-checkpoint changes
+	const workingElements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", version.working_change_set_id)
+		.selectAll()
+		.execute();
 
-		const workingKeys = workingElements.map((e) => e.entity_id);
-		expect(workingKeys).toContain("after_checkpoint");
-		expect(workingKeys).not.toContain("before_checkpoint");
+	const workingKeys = workingElements.map((e) => e.entity_id);
+	expect(workingKeys).toContain("after_checkpoint");
+	expect(workingKeys).not.toContain("before_checkpoint");
 
-		// Checkpoint should contain pre-checkpoint changes
-		const checkpointElements = await lix.db
-			.selectFrom("change_set_element")
-			.where("change_set_id", "=", checkpoint.id)
-			.selectAll()
-			.execute();
+	// Checkpoint should contain pre-checkpoint changes
+	const checkpointElements = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", checkpoint.id)
+		.selectAll()
+		.execute();
 
-		const checkpointKeys = checkpointElements.map((e) => e.entity_id);
-		expect(checkpointKeys).toContain("before_checkpoint");
-		expect(checkpointKeys).not.toContain("after_checkpoint");
-	}
-);
+	const checkpointKeys = checkpointElements.map((e) => e.entity_id);
+	expect(checkpointKeys).toContain("before_checkpoint");
+	expect(checkpointKeys).not.toContain("after_checkpoint");
+});
 
 test("creates proper change set ancestry chain", async () => {
 	const lix = await openLixInMemory({});
