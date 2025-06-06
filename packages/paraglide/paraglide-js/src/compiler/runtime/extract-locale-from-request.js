@@ -1,4 +1,8 @@
 import { assertIsLocale } from "./assert-is-locale.js";
+import { extractLocaleFromHeader } from "./extract-locale-from-header.js";
+import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
+import { isLocale } from "./is-locale.js";
+import { customServerStrategies, isCustomStrategy } from "./strategy.js";
 import {
 	baseLocale,
 	cookieName,
@@ -7,9 +11,6 @@ import {
 	TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
 } from "./variables.js";
-import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
-import { extractLocaleFromHeader } from "./extract-locale-from-header.js";
-import { isLocale } from "./is-locale.js";
 
 /**
  * Extracts a locale from a request.
@@ -50,6 +51,9 @@ export const extractLocaleFromRequest = (request) => {
 			return baseLocale;
 		} else if (strat === "localStorage") {
 			continue;
+		} else if (isCustomStrategy(strat) && customServerStrategies.has(strat)) {
+			const handler = customServerStrategies.get(strat);
+			locale = handler.getLocale(request);
 		}
 		if (locale !== undefined) {
 			if (!isLocale(locale)) {

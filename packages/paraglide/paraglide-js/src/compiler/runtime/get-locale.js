@@ -1,20 +1,21 @@
 import { assertIsLocale } from "./assert-is-locale.js";
+import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
+import { extractLocaleFromNavigator } from "./extract-locale-from-navigator.js";
+import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
+import { setLocale } from "./set-locale.js";
+import { customClientStrategies, isCustomStrategy } from "./strategy.js";
 import {
 	baseLocale,
-	strategy,
+	isServer,
+	localStorageKey,
 	serverAsyncLocalStorage,
+	strategy,
 	TREE_SHAKE_COOKIE_STRATEGY_USED,
 	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
 	TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED,
 	TREE_SHAKE_URL_STRATEGY_USED,
-	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
-	localStorageKey,
-	isServer,
 } from "./variables.js";
-import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
-import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
-import { extractLocaleFromNavigator } from "./extract-locale-from-navigator.js";
-import { setLocale } from "./set-locale.js";
 
 /**
  * This is a fallback to get started with a custom
@@ -84,6 +85,9 @@ export let getLocale = () => {
 			!isServer
 		) {
 			locale = localStorage.getItem(localStorageKey) ?? undefined;
+		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
+			const handler = customClientStrategies.get(strat);
+			locale = handler.getLocale();
 		}
 		// check if match, else continue loop
 		if (locale !== undefined) {

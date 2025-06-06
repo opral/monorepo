@@ -319,3 +319,173 @@ test("should set locale in all configured storage mechanisms regardless of which
 		"PARAGLIDE_LOCALE=fr; path=/; max-age=34560000; domain=example.com"
 	);
 });
+
+test("calls setLocale on custom strategy", async () => {
+	let customLocale = "en";
+	let setLocaleCalled = false;
+
+	globalThis.window = {
+		location: { reload: vi.fn() },
+	} as any;
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-setter", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-setter", {
+		getLocale: () => customLocale,
+		setLocale: (locale) => {
+			customLocale = locale;
+			setLocaleCalled = true;
+		},
+	});
+
+	runtime.setLocale("fr");
+
+	expect(setLocaleCalled).toBe(true);
+	expect(customLocale).toBe("fr");
+	expect(globalThis.window.location.reload).toHaveBeenCalled();
+});
+
+test("calls setLocale on multiple custom strategies", async () => {
+	let customLocale1 = "en";
+	let customLocale2 = "en";
+	let setLocaleCalled1 = false;
+	let setLocaleCalled2 = false;
+
+	globalThis.window = {
+		location: { reload: vi.fn() },
+	} as any;
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-multi1", "custom-multi2", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-multi1", {
+		getLocale: () => customLocale1,
+		setLocale: (locale) => {
+			customLocale1 = locale;
+			setLocaleCalled1 = true;
+		},
+	});
+
+	runtime.defineCustomClientStrategy("custom-multi2", {
+		getLocale: () => customLocale2,
+		setLocale: (locale) => {
+			customLocale2 = locale;
+			setLocaleCalled2 = true;
+		},
+	});
+
+	runtime.setLocale("de");
+
+	expect(setLocaleCalled1).toBe(true);
+	expect(setLocaleCalled2).toBe(true);
+	expect(customLocale1).toBe("de");
+	expect(customLocale2).toBe("de");
+});
+
+test("custom strategy setLocale works with cookie and localStorage", async () => {
+	let customData = "en";
+
+	globalThis.document = { cookie: "" } as any;
+	globalThis.localStorage = {
+		setItem: vi.fn(),
+		getItem: () => null,
+	} as any;
+	globalThis.window = {
+		location: {
+			hostname: "example.com",
+			reload: vi.fn(),
+		},
+	} as any;
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-api", "localStorage", "cookie", "baseLocale"],
+		cookieName: "PARAGLIDE_LOCALE",
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-api", {
+		getLocale: () => customData,
+		setLocale: (locale) => {
+			customData = locale;
+		},
+	});
+
+	runtime.setLocale("fr");
+
+	expect(customData).toBe("fr");
+	expect(globalThis.localStorage.setItem).toHaveBeenCalledWith(
+		"PARAGLIDE_LOCALE",
+		"fr"
+	);
+	expect(globalThis.document.cookie).toBe(
+		"PARAGLIDE_LOCALE=fr; path=/; max-age=34560000; domain=example.com"
+	);
+});
+
+test("custom strategy setLocale integrates with URL strategy", async () => {
+	let customStoredLocale = "en";
+
+	globalThis.window = {
+		location: {
+			hostname: "example.com",
+			href: "https://example.com/en/page",
+			reload: vi.fn(),
+		},
+	} as any;
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["url", "custom-urlIntegration", "baseLocale"],
+		urlPatterns: [
+			{
+				pattern: "https://example.com/:locale/:path*",
+				localized: [
+					["en", "https://example.com/en/:path*"],
+					["fr", "https://example.com/fr/:path*"],
+					["de", "https://example.com/de/:path*"],
+				],
+			},
+		],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-urlIntegration", {
+		getLocale: () => customStoredLocale,
+		setLocale: (locale) => {
+			customStoredLocale = locale;
+		},
+	});
+
+	runtime.setLocale("de");
+
+	expect(globalThis.window.location.href).toBe("https://example.com/de/page");
+	expect(customStoredLocale).toBe("de");
+});
