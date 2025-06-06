@@ -16,7 +16,7 @@ const ChangeIndicator = React.memo(function ChangeIndicator({
   type,
   className
 }: {
-    type: 'added' | 'modified' | 'deleted';
+  type: 'added' | 'modified' | 'deleted';
   className?: string;
 }) {
   const indicatorColor = type === 'added' ? 'bg-green-500' :
@@ -29,13 +29,17 @@ const ChangeIndicator = React.memo(function ChangeIndicator({
 
   return (
     <div
-      className={cn(
-        'absolute -left-6 top-0 w-1 h-full z-10 opacity-50 hover:opacity-100 transition-opacity',
-        indicatorColor,
-        className
-      )}
+      className="absolute -left-14 top-0 w-10 h-full z-10 cursor-pointer group/hover"
       title={title}
-    />
+    >
+      <div
+        className={cn(
+          'absolute right-2 top-0 w-1 h-full opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all',
+          indicatorColor,
+          className
+        )}
+      />
+    </div>
   );
 });
 
@@ -77,7 +81,7 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
   // Find document-level changes for the current file
   const documentChanges = useMemo(() => {
     if (!activeFile) return [];
-    
+
     return intermediateChanges.filter(change => {
       // For txt plugin, entity_id is the file ID
       return change.entity_id === activeFile.id;
@@ -251,9 +255,9 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
 
 
   return (
-    <div className="relative">
+    <div className="relative group/indicator">
       {/* Single debug panel for the first paragraph only */}
-      {import.meta.env.DEV && (
+      {/* {import.meta.env.DEV && (
         <div className="absolute -left-48 top-0 w-40 bg-yellow-200 text-black text-xs p-2 border border-yellow-600 z-30 hover:z-40">
           <div><strong>DEBUG PANEL</strong></div>
           <div>File ID: {activeFile?.id?.slice(-8) || 'None'}</div>
@@ -268,8 +272,8 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
             <div>First Entity: {intermediateChanges[0]?.entity_id?.slice(-8)}</div>
           )}
         </div>
-      )}
-      
+      )} */}
+
       {blockChangeInfo && shouldShowIndicator && (
         <ChangeIndicator
           type={blockChangeInfo.type as 'added' | 'modified' | 'deleted'}
