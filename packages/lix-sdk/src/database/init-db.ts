@@ -1,4 +1,4 @@
-import { Kysely } from "kysely";
+import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
@@ -51,8 +51,8 @@ export function initDb(args: {
 			database: args.sqlite,
 		}),
 		plugins: [
-			// fallback json parser in case column aliases are used
-			// new ParseJSONResultsPlugin(),
+			// needed for things like `jsonArrayFrom()`
+			new ParseJSONResultsPlugin(),
 			JSONColumnPlugin(ViewsWithJsonColumns),
 			new ViewInsertReturningErrorPlugin(Object.keys(LixSchemaViewMap)),
 		],
