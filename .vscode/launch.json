@@ -99,6 +99,13 @@
       "webRoot": "${workspaceFolder}/packages/csv-app"
     },
     {
+      "name": "lix-inspector:5173",
+      "port": 5173,
+      "request": "launch",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/packages/lix/lix-inspector"
+    },
+    {
       "name": "lix-host",
       "type": "node",
       "request": "launch",
