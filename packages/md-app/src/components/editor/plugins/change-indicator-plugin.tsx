@@ -51,7 +51,7 @@ const DeletionIndicator = React.memo(function DeletionIndicator({
 }) {
   return (
     <div
-      className="absolute -left-14 bottom-0 w-10 h-2 z-10 cursor-pointer group/hover"
+      className="absolute -left-14 bottom-0 w-10 h-full z-10 cursor-pointer group/hover"
       title="Content was deleted after this line"
     >
       <div
