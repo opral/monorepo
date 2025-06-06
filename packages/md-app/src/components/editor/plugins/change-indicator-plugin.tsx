@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useAtom } from 'jotai/react';
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import {
   type PlateElementProps,
   type RenderNodeWrapper,
@@ -10,6 +10,9 @@ import { createPlatePlugin } from '@udecode/plate/react';
 import { NodeApi } from '@udecode/plate';
 import { cn } from '@/lib/utils';
 import { intermediateChangesAtom, activeFileAtom } from '@/state-active-file';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ChangeDiffComponent } from '@/components/ChangeDiffComponent';
+import { type UiDiffComponentProps } from '@lix-js/sdk';
 
 // Change indicator component
 const ChangeIndicator = React.memo(function ChangeIndicator({
@@ -45,22 +48,50 @@ const ChangeIndicator = React.memo(function ChangeIndicator({
 
 // Deletion indicator component that shows at the bottom of a line
 const DeletionIndicator = React.memo(function DeletionIndicator({
-  className
+  className,
+  onClick,
+  diffData
 }: {
   className?: string;
+    onClick?: () => void;
+    diffData?: { diffs: UiDiffComponentProps["diffs"]; title: string; };
 }) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+    setIsPopoverOpen(true);
+  };
+
   return (
-    <div
-      className="absolute -left-14 bottom-0 w-10 h-full z-10 cursor-pointer group/hover"
-      title="Content was deleted after this line"
-    >
-      <div
-        className={cn(
-          'absolute right-2 bottom-0 w-1 h-2 bg-red-500 opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all',
-          className
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+      <PopoverTrigger asChild>
+        <div
+          className="absolute -left-14 bottom-0 w-10 h-full z-10 cursor-pointer group/hover"
+          title="Content was deleted after this line"
+          onClick={handleClick}
+        >
+          <div
+            className={cn(
+              'absolute right-2 bottom-0 w-1 h-2 bg-red-500 opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all',
+              className
+            )}
+          />
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-96 max-h-80 overflow-auto">
+        {diffData && (
+          <div className="space-y-2">
+            <h3 className="font-semibold text-sm">{diffData.title}</h3>
+            <ChangeDiffComponent
+              diffs={diffData.diffs}
+            />
+          </div>
         )}
-      />
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 });
 
@@ -108,6 +139,48 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
       return change.entity_id === activeFile.id;
     });
   }, [intermediateChanges, activeFile]);
+
+  // Generate diff data for deletion indicator
+  const generateDiffData = useCallback((currentBlockText: string, beforeText: string, afterText: string) => {
+    if (!activeFile || !documentChanges.length) return null;
+
+    const latestChange = documentChanges[0];
+    if (!latestChange) return null;
+
+    // Find the position of the current line in the after text
+    const afterLines = afterText.split('\n').map(line => line.trim()).filter(line => line);
+    const currentLineIndex = afterLines.findIndex(line => line === currentBlockText.trim());
+
+    if (currentLineIndex === -1) return null;
+
+    // Get content before and after this line
+    const beforeLines = beforeText.split('\n').map(line => line.trim()).filter(line => line);
+    const beforeLineIndex = beforeLines.findIndex(line => line === currentBlockText.trim());
+
+    if (beforeLineIndex === -1) return null;
+
+    // Extract the deleted content (what was after this line in before but not in after)
+    const contextBefore = beforeLines.slice(Math.max(0, beforeLineIndex - 1), beforeLineIndex + 3);
+    const contextAfter = afterLines.slice(Math.max(0, currentLineIndex - 1), currentLineIndex + 3);
+
+    // Create diff structure for ChangeDiffComponent
+    const diffData: UiDiffComponentProps["diffs"] = [{
+      entity_id: activeFile.id,
+      plugin_key: "lix_plugin_txt", // This should match the plugin that handles txt files
+      schema_key: "file", // The schema key for file content
+      snapshot_content_before: {
+        text: contextBefore.join('\n')
+      },
+      snapshot_content_after: {
+        text: contextAfter.join('\n')
+      }
+    }];
+
+    return {
+      diffs: diffData,
+      title: `Content deleted after: "${currentBlockText.slice(0, 30)}${currentBlockText.length > 30 ? '...' : ''}"`
+    };
+  }, [activeFile, documentChanges]);
 
   // Determine if this specific block has changed
   const blockChangeInfo = useMemo(() => {
@@ -340,6 +413,22 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
       blockChangeInfo?.isThisBlockChanged !== true;
   }, [element.type, blockChangeInfo]);
 
+  // Generate diff data for deletion indicator when it should be shown
+  const deletionDiffData = useMemo(() => {
+    if (!shouldShowDeletionIndicator || documentChanges.length === 0 || !activeFile) {
+      return null;
+    }
+
+    const latestChange = documentChanges[0];
+    if (!latestChange) return null;
+
+    const beforeText = latestChange.snapshot_content_before?.text || '';
+    const afterText = latestChange.snapshot_content_after?.text || '';
+    const currentBlockText = getBlockText(element);
+
+    return generateDiffData(currentBlockText, beforeText, afterText);
+  }, [shouldShowDeletionIndicator, documentChanges, activeFile, element, generateDiffData]);
+
 
   return (
     <div className="relative group/indicator">
@@ -368,7 +457,7 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
         />
       )}
       {blockChangeInfo && shouldShowDeletionIndicator && (
-        <DeletionIndicator />
+        <DeletionIndicator diffData={deletionDiffData || undefined} />
       )}
       <div className={cn(
         'pl-2',
