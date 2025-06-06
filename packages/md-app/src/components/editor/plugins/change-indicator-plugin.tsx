@@ -14,108 +14,51 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ChangeDiffComponent } from '@/components/ChangeDiffComponent';
 import { type UiDiffComponentProps } from '@lix-js/sdk';
 
-// Change indicator component
+// Unified indicator component that handles both change and deletion indicators
 const ChangeIndicator = React.memo(function ChangeIndicator({
   type,
+  variant = 'change',
   className,
-  onClick,
   diffData
 }: {
-  type: 'added' | 'modified' | 'deleted';
-  className?: string;
-  onClick?: () => void;
+    type?: 'added' | 'modified' | 'deleted';
+    variant?: 'change' | 'deletion';
+    className?: string;
   diffData?: { diffs: UiDiffComponentProps["diffs"]; title: string; };
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const indicatorColor = type === 'added' ? 'bg-green-500' :
-    type === 'modified' ? 'bg-blue-500' :
-      'bg-red-500';
-
-  const title = type === 'added' ? 'Line was added' :
-    type === 'modified' ? 'Line was modified' :
-      'Line was deleted';
-
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
+  // Configuration based on variant and type
+  const config = variant === 'deletion'
+    ? {
+      color: 'bg-red-500',
+      title: 'Content was deleted after this line',
+      position: 'absolute -left-14 bottom-0 w-10 h-full z-10 cursor-pointer group/hover',
+      indicator: 'absolute right-2 bottom-0 w-1 h-2 bg-red-500 opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all'
     }
-    setIsPopoverOpen(true);
-  };
+    : {
+      color: type === 'added' ? 'bg-green-500' : type === 'modified' ? 'bg-blue-500' : 'bg-red-500',
+      title: type === 'added' ? 'Line was added' : type === 'modified' ? 'Line was modified' : 'Line was deleted',
+      position: 'absolute -left-14 top-0 w-10 h-full z-10 cursor-pointer group/hover',
+      indicator: `absolute right-2 top-0 w-1 h-full opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all ${type === 'added' ? 'bg-green-500' : type === 'modified' ? 'bg-blue-500' : 'bg-red-500'}`
+    };
 
   return (
     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       <PopoverTrigger asChild>
         <div
-          className="absolute -left-14 top-0 w-10 h-full z-10 cursor-pointer group/hover"
-          title={title}
-          onClick={handleClick}
+          className={config.position}
+          title={config.title}
+          onClick={() => setIsPopoverOpen(true)}
         >
-          <div
-            className={cn(
-              'absolute right-2 top-0 w-1 h-full opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all',
-              indicatorColor,
-              className
-            )}
-          />
+          <div className={cn(config.indicator, className)} />
         </div>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-96 max-h-80 overflow-auto">
         {diffData && (
           <div className="space-y-2">
             <h3 className="font-semibold text-sm">{diffData.title}</h3>
-            <ChangeDiffComponent
-              diffs={diffData.diffs}
-            />
-          </div>
-        )}
-      </PopoverContent>
-    </Popover>
-  );
-});
-
-// Deletion indicator component that shows at the bottom of a line
-const DeletionIndicator = React.memo(function DeletionIndicator({
-  className,
-  onClick,
-  diffData
-}: {
-  className?: string;
-  onClick?: () => void;
-  diffData?: { diffs: UiDiffComponentProps["diffs"]; title: string; };
-}) {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    }
-    setIsPopoverOpen(true);
-  };
-
-  return (
-    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-      <PopoverTrigger asChild>
-        <div
-          className="absolute -left-14 bottom-0 w-10 h-full z-10 cursor-pointer group/hover"
-          title="Content was deleted after this line"
-          onClick={handleClick}
-        >
-          <div
-            className={cn(
-              'absolute right-2 bottom-0 w-1 h-2 bg-red-500 opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all',
-              className
-            )}
-          />
-        </div>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-96 max-h-80 overflow-auto">
-        {diffData && (
-          <div className="space-y-2">
-            <h3 className="font-semibold text-sm">{diffData.title}</h3>
-            <ChangeDiffComponent
-              diffs={diffData.diffs}
-            />
+            <ChangeDiffComponent diffs={diffData.diffs} />
           </div>
         )}
       </PopoverContent>
@@ -283,47 +226,27 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
 
   // Determine if this specific block has changed
   const blockChangeInfo = useMemo(() => {
-    console.log('🔍 ChangeIndicator: Starting analysis for element:', element.type);
-
     if (documentChanges.length === 0 || !activeFile) {
-      console.log('❌ ChangeIndicator: No changes or no active file');
       return null;
     }
 
     // Find the most recent document change
     const latestChange = documentChanges[0];
     if (!latestChange) {
-      console.log('❌ ChangeIndicator: No latest change found');
       return null;
     }
-
-    console.log('📄 ChangeIndicator: Latest change:', {
-      entity_id: latestChange.entity_id,
-      has_before: !!latestChange.snapshot_content_before,
-      has_after: !!latestChange.snapshot_content_after
-    });
 
     // Get the text content before and after from the change
     const beforeText = latestChange.snapshot_content_before?.text || '';
     const afterText = latestChange.snapshot_content_after?.text || '';
 
-    console.log('📝 ChangeIndicator: Text comparison:', {
-      beforeText: beforeText.slice(0, 50), // Show first 50 chars for brevity
-      afterText: afterText.slice(0, 50), // Show first 50 chars for brevity
-      beforeLength: beforeText.length,
-      afterLength: afterText.length,
-      textsEqual: beforeText === afterText
-    });
-
     // If no change in text content, no indicators needed
     if (beforeText === afterText) {
-      console.log('✅ ChangeIndicator: Texts are identical, no changes');
       return null;
     }
 
     // If after is null, this represents a deletion
     if (latestChange.snapshot_content_after === null) {
-      console.log('🗑️ ChangeIndicator: File deleted');
       return { type: 'deleted', isThisBlockChanged: true, hasDeletedContentAfter: false };
     }
 
@@ -332,11 +255,8 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     const currentBlockText = getBlockText(element);
     const currentBlockTextTrimmed = currentBlockText.trim();
 
-    console.log('🎯 ChangeIndicator: Current block text:', `"${currentBlockTextTrimmed}"`);
-
     // Skip empty blocks - they shouldn't show indicators
     if (!currentBlockTextTrimmed) {
-      console.log('⚪ ChangeIndicator: Empty block, skipping');
       return null;
     }
 
@@ -344,32 +264,16 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     const beforeLines = beforeText.split('\n').map((line: string) => line.trim()).filter((line: string) => line);
     const afterLines = afterText.split('\n').map((line: string) => line.trim()).filter((line: string) => line);
 
-    console.log('📊 ChangeIndicator: Line analysis:', {
-      beforeLinesCount: beforeLines.length,
-      afterLinesCount: afterLines.length,
-      beforeLines: beforeLines,
-      afterLines: afterLines
-    });
-
     // Find the line number of current block in the after state
     const currentLineIndexInAfter = afterLines.findIndex((line: string) => line === currentBlockTextTrimmed);
 
-    console.log('🔎 ChangeIndicator: Line position in after:', currentLineIndexInAfter);
-
     // If current block doesn't exist in after state, something is wrong
     if (currentLineIndexInAfter === -1) {
-      console.log('❌ ChangeIndicator: Current block not found in after state');
       return null;
     }
 
     // Check if this line exists in the before state
     const existsInBefore = beforeLines.includes(currentBlockTextTrimmed);
-
-    console.log('🧪 ChangeIndicator: Line existence check:', {
-      currentText: currentBlockTextTrimmed,
-      existsInBefore,
-      existsInAfter: true // We know it exists since we found it
-    });
 
     // Check if content was deleted after this line
     const hasDeletedContentAfter = () => {
@@ -395,7 +299,6 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
 
     // Case 1: Line is completely new (doesn't exist in before)
     if (!existsInBefore) {
-      console.log('🆕 NEW LINE DETECTED:', currentBlockTextTrimmed);
       return {
         type: 'added',
         isThisBlockChanged: true,
@@ -406,15 +309,8 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     // Case 2: Line exists in both, but check if it's in the same position
     const beforeLineIndex = beforeLines.findIndex((line: string) => line === currentBlockTextTrimmed);
 
-    console.log('📍 ChangeIndicator: Position comparison:', {
-      beforeLineIndex,
-      currentLineIndexInAfter,
-      moved: beforeLineIndex !== currentLineIndexInAfter
-    });
-
     // If line moved position, consider it changed
     if (beforeLineIndex !== currentLineIndexInAfter) {
-      console.log('🔄 LINE MOVED:', { beforeLineIndex, currentLineIndexInAfter });
       return {
         type: 'modified',
         isThisBlockChanged: true,
@@ -425,7 +321,6 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     // Case 3: If document has any changes and we have fewer lines before than after, 
     // this suggests lines were added, so show indicators on all existing lines too
     if (afterLines.length > beforeLines.length) {
-      console.log('📈 DOCUMENT GREW - showing indicator on existing line');
       return {
         type: 'modified',
         isThisBlockChanged: true,
@@ -464,25 +359,12 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     // Case 5: Check if content was deleted after this line (even if the line itself didn't change)
     const deletedAfter = hasDeletedContentAfter();
     if (deletedAfter) {
-      console.log('🗑️ CONTENT DELETED after line:', currentBlockTextTrimmed);
       return {
         type: null,
         isThisBlockChanged: false,
         hasDeletedContentAfter: true
       };
     }
-
-    // Debug logging to understand what's happening
-    console.log('ChangeIndicator Debug:', {
-      currentBlockText: currentBlockTextTrimmed,
-      existsInBefore,
-      beforeLineIndex,
-      currentLineIndexInAfter,
-      beforeLinesCount: beforeLines.length,
-      afterLinesCount: afterLines.length,
-      beforeLines: beforeLines.slice(0, 5), // First 5 lines
-      afterLines: afterLines.slice(0, 5),   // First 5 lines
-    });
 
     return null;
   }, [documentChanges, activeFile, element, children]);
@@ -566,14 +448,12 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
         </div>
       )}
 
-      {blockChangeInfo && shouldShowIndicator && (
+      {blockChangeInfo && (shouldShowIndicator || shouldShowDeletionIndicator) && (
         <ChangeIndicator
           type={blockChangeInfo.type as 'added' | 'modified' | 'deleted'}
-          diffData={changeDiffData || undefined}
+          variant={shouldShowIndicator ? "change" : "deletion"}
+          diffData={(shouldShowIndicator ? changeDiffData : deletionDiffData) || undefined}
         />
-      )}
-      {blockChangeInfo && shouldShowDeletionIndicator && (
-        <DeletionIndicator diffData={deletionDiffData || undefined} />
       )}
       <div className={cn(
         'pl-2',
