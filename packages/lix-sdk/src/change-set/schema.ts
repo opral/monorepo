@@ -167,18 +167,7 @@ export function applyChangeSetDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS change_set_edge_update
   INSTEAD OF UPDATE ON change_set_edge
   BEGIN
-    UPDATE state
-    SET
-      entity_id = NEW.parent_id || '::' || NEW.child_id,
-      schema_key = 'lix_change_set_edge',
-      file_id = 'lix',
-      plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id),
-      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
-    WHERE
-      entity_id = OLD.parent_id || '::' || OLD.child_id
-      AND schema_key = 'lix_change_set_edge'
-      AND file_id = 'lix';
+    SELECT RAISE(ABORT, 'Updates on change_set_edge are not supported because all fields are primary keys. Updating would create a new entity_id. Use DELETE + INSERT instead.');
   END;
 
   CREATE TRIGGER IF NOT EXISTS change_set_edge_delete
@@ -187,6 +176,53 @@ export function applyChangeSetDatabaseSchema(
     DELETE FROM state
     WHERE entity_id = OLD.parent_id || '::' || OLD.child_id
     AND schema_key = 'lix_change_set_edge'
+    AND file_id = 'lix';
+  END;
+
+  -- change set thread
+
+  CREATE VIEW IF NOT EXISTS change_set_thread AS
+  SELECT
+    json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
+    json_extract(snapshot_content, '$.thread_id') AS thread_id,
+    version_id
+  FROM state
+  WHERE schema_key = 'lix_change_set_thread';
+
+  CREATE TRIGGER IF NOT EXISTS change_set_thread_insert
+  INSTEAD OF INSERT ON change_set_thread
+  BEGIN
+    INSERT INTO state (
+      entity_id, 
+      schema_key, 
+      file_id, 
+      plugin_key, 
+      snapshot_content,
+      schema_version,
+      version_id
+    ) VALUES (
+      NEW.change_set_id || '::' || NEW.thread_id,
+      'lix_change_set_thread',
+      'lix',
+      'lix_own_entity',
+      json_object('change_set_id', NEW.change_set_id, 'thread_id', NEW.thread_id),
+      '${LixChangeSetThreadSchema["x-lix-version"]}',
+      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+    ); 
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS change_set_thread_update
+  INSTEAD OF UPDATE ON change_set_thread
+  BEGIN
+    SELECT RAISE(ABORT, 'Updates on change_set_thread are not supported because all fields are primary keys. Updating would create a new entity_id. Use DELETE + INSERT instead.');
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS change_set_thread_delete
+  INSTEAD OF DELETE ON change_set_thread
+  BEGIN
+    DELETE FROM state
+    WHERE entity_id = OLD.change_set_id || '::' || OLD.thread_id
+    AND schema_key = 'lix_change_set_thread'
     AND file_id = 'lix';
   END;
 
@@ -319,7 +355,9 @@ export const LixChangeSetElementSchema: LixSchemaDefinition = {
 };
 
 // Pure business logic type (inferred from schema)
-export type LixChangeSetElement = FromLixSchemaDefinition<typeof LixChangeSetElementSchema>;
+export type LixChangeSetElement = FromLixSchemaDefinition<
+	typeof LixChangeSetElementSchema
+>;
 
 // Database view type (includes operational columns)
 export type ChangeSetElementView = {
@@ -360,7 +398,9 @@ export const LixChangeSetEdgeSchema: LixSchemaDefinition = {
 };
 
 // Pure business logic type (inferred from schema)
-export type LixChangeSetEdge = FromLixSchemaDefinition<typeof LixChangeSetEdgeSchema>;
+export type LixChangeSetEdge = FromLixSchemaDefinition<
+	typeof LixChangeSetEdgeSchema
+>;
 
 // Database view type (includes operational columns)
 export type ChangeSetEdgeView = {
@@ -384,7 +424,7 @@ export const LixChangeSetLabelSchema: LixSchemaDefinition = {
 			property: "id",
 		},
 		label_id: {
-			schemaKey: "lix_label", 
+			schemaKey: "lix_label",
 			property: "id",
 		},
 	},
@@ -399,7 +439,9 @@ export const LixChangeSetLabelSchema: LixSchemaDefinition = {
 };
 
 // Pure business logic type (inferred from schema)
-export type LixChangeSetLabel = FromLixSchemaDefinition<typeof LixChangeSetLabelSchema>;
+export type LixChangeSetLabel = FromLixSchemaDefinition<
+	typeof LixChangeSetLabelSchema
+>;
 
 // Database view type (includes operational columns)
 export type ChangeSetLabelView = {
@@ -414,10 +456,42 @@ export type ChangeSetLabel = Selectable<ChangeSetLabelView>;
 export type NewChangeSetLabel = Insertable<ChangeSetLabelView>;
 export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelView>;
 
-// export type ChangeSetThread = Selectable<ChangeSetThreadTable>;
-// export type NewChangeSetThread = Insertable<ChangeSetThreadTable>;
-// export type ChangeSetThreadUpdate = Updateable<ChangeSetThreadTable>;
-// export type ChangeSetThreadTable = {
-// 	change_set_id: string;
-// 	thread_id: string;
-// };
+export const LixChangeSetThreadSchema: LixSchemaDefinition = {
+	"x-lix-key": "lix_change_set_thread",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["change_set_id", "thread_id"],
+	"x-lix-foreign-keys": {
+		change_set_id: {
+			schemaKey: "lix_change_set",
+			property: "id",
+		},
+		thread_id: {
+			schemaKey: "lix_thread",
+			property: "id",
+		},
+	},
+	type: "object",
+	properties: {
+		change_set_id: { type: "string" },
+		thread_id: { type: "string" },
+	},
+	required: ["change_set_id", "thread_id"],
+	additionalProperties: false,
+};
+
+// Pure business logic type (inferred from schema)
+export type LixChangeSetThread = FromLixSchemaDefinition<
+	typeof LixChangeSetThreadSchema
+>;
+
+// Database view type (includes operational columns)
+export type ChangeSetThreadView = {
+	change_set_id: string;
+	thread_id: string;
+	version_id: Generated<string>;
+};
+
+// Kysely operation types
+export type ChangeSetThread = Selectable<ChangeSetThreadView>;
+export type NewChangeSetThread = Insertable<ChangeSetThreadView>;
+export type ChangeSetThreadUpdate = Updateable<ChangeSetThreadView>;

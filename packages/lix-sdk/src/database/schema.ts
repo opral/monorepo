@@ -8,6 +8,7 @@ import {
 	type ChangeSetView,
 	type ChangeSetEdgeView,
 	type ChangeSetLabelView,
+	type ChangeSetThreadView,
 } from "../change-set/schema.js";
 import {
 	LixActiveVersionSchema,
@@ -45,6 +46,7 @@ import {
 	type ThreadView,
 	type ThreadCommentView,
 } from "../thread/schema.js";
+import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -64,6 +66,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set_element: LixChangeSetElementSchema,
 	change_set_edge: LixChangeSetEdgeSchema,
 	change_set_label: LixChangeSetLabelSchema,
+	change_set_thread: LixChangeSetThreadSchema,
 	file: LixFileSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
@@ -100,7 +103,7 @@ export type LixDatabaseSchema = {
 	change_set_element: ChangeSetElementView;
 	change_set_edge: ChangeSetEdgeView;
 	change_set_label: ChangeSetLabelView;
-	// change_set_thread: ChangeSetThreadTable;
+	change_set_thread: ChangeSetThreadView;
 
 	// key value
 	key_value: KeyValueView;

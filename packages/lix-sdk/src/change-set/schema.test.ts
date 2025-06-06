@@ -575,6 +575,31 @@ describe("change_set_edge", () => {
 				.execute()
 		).rejects.toThrow(/Self-referencing edges are not allowed/i);
 	});
+
+	test("change_set_edge view does not support updates", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create change sets
+		await lix.db
+			.insertInto("change_set")
+			.values([{ id: "cs0" }, { id: "cs1" }, { id: "cs2" }])
+			.execute();
+
+		// Insert an edge
+		await lix.db
+			.insertInto("change_set_edge")
+			.values({ parent_id: "cs0", child_id: "cs1" })
+			.execute();
+
+		// Attempt to update should fail with custom error message
+		await expect(
+			lix.db
+				.updateTable("change_set_edge")
+				.where("parent_id", "=", "cs0")
+				.set({ child_id: "cs2" })
+				.execute()
+		).rejects.toThrow(/Updates on change_set_edge are not supported because all fields are primary keys/i);
+	});
 });
 
 // the unique constraint must be (change_set_id, entity_id, schema_key, file_id)
@@ -838,5 +863,159 @@ describe("change_set_label", () => {
 				})
 				.execute()
 		).rejects.toThrow(/Foreign key constraint violation/i);
+	});
+});
+
+describe("change_set_thread", () => {
+	test("insert and delete on the change_set_thread view", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create change sets and threads to test with
+		await lix.db
+			.insertInto("change_set")
+			.values([{ id: "cs0" }, { id: "cs1" }])
+			.execute();
+
+		await lix.db
+			.insertInto("thread")
+			.values([{ id: "t0" }, { id: "t1" }])
+			.execute();
+
+		// Test insert
+		await lix.db
+			.insertInto("change_set_thread")
+			.values([
+				{ change_set_id: "cs0", thread_id: "t0" },
+				{ change_set_id: "cs1", thread_id: "t1" },
+			])
+			.execute();
+
+		const viewAfterInsert = await lix.db
+			.selectFrom("change_set_thread")
+			.orderBy("change_set_id", "asc")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterInsert).toMatchObject([
+			{
+				change_set_id: "cs0",
+				thread_id: "t0",
+				version_id: expect.any(String),
+			},
+			{
+				change_set_id: "cs1",
+				thread_id: "t1",
+				version_id: expect.any(String),
+			},
+		]);
+
+		// Test delete
+		await lix.db
+			.deleteFrom("change_set_thread")
+			.where("change_set_id", "=", "cs0")
+			.execute();
+
+		const viewAfterDelete = await lix.db
+			.selectFrom("change_set_thread")
+			.orderBy("change_set_id", "asc")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterDelete).toMatchObject([
+			{
+				change_set_id: "cs1",
+				thread_id: "t1",
+				version_id: expect.any(String),
+			},
+		]);
+
+		// Verify the underlying state table changes
+		const changes = await lix.db
+			.selectFrom("change")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			.where("schema_key", "=", "lix_change_set_thread")
+			.where("entity_id", "in", ["cs0::t0", "cs1::t1"])
+			.orderBy("change.created_at", "asc")
+			.selectAll("change")
+			.select("snapshot.content")
+			.execute();
+
+		expect(changes).toHaveLength(3); // 2 inserts, 1 delete
+		expect(changes[0]?.content).toMatchObject({
+			change_set_id: "cs0",
+			thread_id: "t0",
+		});
+		expect(changes[1]?.content).toMatchObject({
+			change_set_id: "cs1",
+			thread_id: "t1",
+		});
+		expect(changes[2]?.content).toBe(null); // delete
+	});
+
+	test("change_set_thread view enforces foreign key constraints", async () => {
+		const lix = await openLixInMemory({});
+
+		// Try to insert with non-existent change_set_id
+		await expect(
+			lix.db
+				.insertInto("change_set_thread")
+				.values({ change_set_id: "non_existent", thread_id: "t0" })
+				.execute()
+		).rejects.toThrow();
+
+		// Try to insert with non-existent thread_id
+		await expect(
+			lix.db
+				.insertInto("change_set_thread")
+				.values({ change_set_id: "cs0", thread_id: "non_existent" })
+				.execute()
+		).rejects.toThrow();
+
+		// Create valid records
+		await lix.db
+			.insertInto("change_set")
+			.values([{ id: "cs0" }])
+			.execute();
+
+		await lix.db
+			.insertInto("thread")
+			.values([{ id: "t0" }])
+			.execute();
+
+		// Now insert should succeed
+		await lix.db
+			.insertInto("change_set_thread")
+			.values({ change_set_id: "cs0", thread_id: "t0" })
+			.execute();
+	});
+
+	test("change_set_thread view does not support updates", async () => {
+		const lix = await openLixInMemory({});
+
+		// Create change sets and threads
+		await lix.db
+			.insertInto("change_set")
+			.values([{ id: "cs0" }])
+			.execute();
+
+		await lix.db
+			.insertInto("thread")
+			.values([{ id: "t0" }, { id: "t1" }])
+			.execute();
+
+		// Insert a record
+		await lix.db
+			.insertInto("change_set_thread")
+			.values({ change_set_id: "cs0", thread_id: "t0" })
+			.execute();
+
+		// Attempt to update should fail with custom error message
+		await expect(
+			lix.db
+				.updateTable("change_set_thread")
+				.where("change_set_id", "=", "cs0")
+				.set({ thread_id: "t1" })
+				.execute()
+		).rejects.toThrow(/Updates on change_set_thread are not supported because all fields are primary keys/i);
 	});
 });
