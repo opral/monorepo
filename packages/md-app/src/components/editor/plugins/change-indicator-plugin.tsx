@@ -17,11 +17,17 @@ import { type UiDiffComponentProps } from '@lix-js/sdk';
 // Change indicator component
 const ChangeIndicator = React.memo(function ChangeIndicator({
   type,
-  className
+  className,
+  onClick,
+  diffData
 }: {
   type: 'added' | 'modified' | 'deleted';
   className?: string;
+  onClick?: () => void;
+  diffData?: { diffs: UiDiffComponentProps["diffs"]; title: string; };
 }) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const indicatorColor = type === 'added' ? 'bg-green-500' :
     type === 'modified' ? 'bg-blue-500' :
       'bg-red-500';
@@ -30,19 +36,41 @@ const ChangeIndicator = React.memo(function ChangeIndicator({
     type === 'modified' ? 'Line was modified' :
       'Line was deleted';
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+    setIsPopoverOpen(true);
+  };
+
   return (
-    <div
-      className="absolute -left-14 top-0 w-10 h-full z-10 cursor-pointer group/hover"
-      title={title}
-    >
-      <div
-        className={cn(
-          'absolute right-2 top-0 w-1 h-full opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all',
-          indicatorColor,
-          className
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+      <PopoverTrigger asChild>
+        <div
+          className="absolute -left-14 top-0 w-10 h-full z-10 cursor-pointer group/hover"
+          title={title}
+          onClick={handleClick}
+        >
+          <div
+            className={cn(
+              'absolute right-2 top-0 w-1 h-full opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all',
+              indicatorColor,
+              className
+            )}
+          />
+        </div>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-96 max-h-80 overflow-auto">
+        {diffData && (
+          <div className="space-y-2">
+            <h3 className="font-semibold text-sm">{diffData.title}</h3>
+            <ChangeDiffComponent
+              diffs={diffData.diffs}
+            />
+          </div>
         )}
-      />
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 });
 
@@ -53,8 +81,8 @@ const DeletionIndicator = React.memo(function DeletionIndicator({
   diffData
 }: {
   className?: string;
-    onClick?: () => void;
-    diffData?: { diffs: UiDiffComponentProps["diffs"]; title: string; };
+  onClick?: () => void;
+  diffData?: { diffs: UiDiffComponentProps["diffs"]; title: string; };
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -81,7 +109,7 @@ const DeletionIndicator = React.memo(function DeletionIndicator({
           />
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-96 max-h-80 overflow-auto">
+      <PopoverContent align="start" className="w-96 max-h-80 overflow-auto">
         {diffData && (
           <div className="space-y-2">
             <h3 className="font-semibold text-sm">{diffData.title}</h3>
@@ -179,6 +207,77 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     return {
       diffs: diffData,
       title: `Content deleted after: "${currentBlockText.slice(0, 30)}${currentBlockText.length > 30 ? '...' : ''}"`
+    };
+  }, [activeFile, documentChanges]);
+
+  // Generate diff data for change indicator
+  const generateChangeDiffData = useCallback((currentBlockText: string, beforeText: string, afterText: string, changeType: 'added' | 'modified' | 'deleted') => {
+    if (!activeFile || !documentChanges.length) return null;
+
+    const latestChange = documentChanges[0];
+    if (!latestChange) return null;
+
+    // Find the position of the current line in both before and after text
+    const afterLines = afterText.split('\n').map(line => line.trim()).filter(line => line);
+    const beforeLines = beforeText.split('\n').map(line => line.trim()).filter(line => line);
+
+    const currentLineIndex = afterLines.findIndex(line => line === currentBlockText.trim());
+    const beforeLineIndex = beforeLines.findIndex(line => line === currentBlockText.trim());
+
+    let contextBefore: string[] = [];
+    let contextAfter: string[] = [];
+
+    if (changeType === 'added') {
+      // For added lines, show context around the new line
+      contextAfter = afterLines.slice(Math.max(0, currentLineIndex - 1), currentLineIndex + 3);
+
+      // For before context, show what was at this position (if anything)
+      if (currentLineIndex < beforeLines.length) {
+        contextBefore = beforeLines.slice(Math.max(0, currentLineIndex - 1), currentLineIndex + 2);
+      } else {
+        // Line was added at the end
+        contextBefore = beforeLines.slice(Math.max(0, beforeLines.length - 2));
+      }
+    } else if (changeType === 'modified') {
+      // For modified lines, show context around both versions
+      if (beforeLineIndex !== -1) {
+        contextBefore = beforeLines.slice(Math.max(0, beforeLineIndex - 1), beforeLineIndex + 3);
+      }
+      contextAfter = afterLines.slice(Math.max(0, currentLineIndex - 1), currentLineIndex + 3);
+    } else if (changeType === 'deleted') {
+      // For deleted lines, the line might not exist in after
+      if (beforeLineIndex !== -1) {
+        contextBefore = beforeLines.slice(Math.max(0, beforeLineIndex - 1), beforeLineIndex + 3);
+      }
+
+      // Show what's at this position now in after
+      if (currentLineIndex !== -1) {
+        contextAfter = afterLines.slice(Math.max(0, currentLineIndex - 1), currentLineIndex + 2);
+      } else {
+        contextAfter = afterLines.slice(Math.max(0, afterLines.length - 2));
+      }
+    }
+
+    // Create diff structure for ChangeDiffComponent
+    const diffData: UiDiffComponentProps["diffs"] = [{
+      entity_id: activeFile.id,
+      plugin_key: "lix_plugin_txt",
+      schema_key: "file",
+      snapshot_content_before: {
+        text: contextBefore.join('\n')
+      },
+      snapshot_content_after: {
+        text: contextAfter.join('\n')
+      }
+    }];
+
+    const actionText = changeType === 'added' ? 'added' :
+      changeType === 'modified' ? 'modified' :
+        'deleted';
+
+    return {
+      diffs: diffData,
+      title: `Line ${actionText}: "${currentBlockText.slice(0, 30)}${currentBlockText.length > 30 ? '...' : ''}"`
     };
   }, [activeFile, documentChanges]);
 
@@ -429,6 +528,22 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     return generateDiffData(currentBlockText, beforeText, afterText);
   }, [shouldShowDeletionIndicator, documentChanges, activeFile, element, generateDiffData]);
 
+  // Generate diff data for change indicator when it should be shown
+  const changeDiffData = useMemo(() => {
+    if (!shouldShowIndicator || !blockChangeInfo || documentChanges.length === 0 || !activeFile) {
+      return null;
+    }
+
+    const latestChange = documentChanges[0];
+    if (!latestChange) return null;
+
+    const beforeText = latestChange.snapshot_content_before?.text || '';
+    const afterText = latestChange.snapshot_content_after?.text || '';
+    const currentBlockText = getBlockText(element);
+
+    return generateChangeDiffData(currentBlockText, beforeText, afterText, blockChangeInfo.type as 'added' | 'modified' | 'deleted');
+  }, [shouldShowIndicator, blockChangeInfo, documentChanges, activeFile, element, generateChangeDiffData]);
+
 
   return (
     <div className="relative group/indicator">
@@ -454,6 +569,7 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
       {blockChangeInfo && shouldShowIndicator && (
         <ChangeIndicator
           type={blockChangeInfo.type as 'added' | 'modified' | 'deleted'}
+          diffData={changeDiffData || undefined}
         />
       )}
       {blockChangeInfo && shouldShowDeletionIndicator && (
