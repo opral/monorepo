@@ -1,5 +1,13 @@
 # @inlang/rpc
 
+## 0.3.51
+
+### Patch Changes
+
+- 9f510a8: Make "Source locale not found in the bundle" error message include the bundle id for better debuggability
+- Updated dependencies [22089a2]
+  - @inlang/sdk@2.4.9
+
 ## 0.3.50
 
 ### Patch Changes
