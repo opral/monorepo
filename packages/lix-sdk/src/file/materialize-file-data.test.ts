@@ -70,3 +70,44 @@ test("materializeFileData with plugin that has changes", async () => {
 	expect(result).toBeInstanceOf(Uint8Array);
 	expect(new TextDecoder().decode(result)).toBe("processed-entity1");
 });
+
+test("materializeFileData throws when plugin has no applyChanges", async () => {
+	const mockPlugin: LixPlugin = {
+		key: "test-plugin-no-apply",
+		detectChangesGlob: "*.txt",
+		detectChanges: () => [],
+		// No applyChanges method - this should cause materialization to fail
+	};
+
+	const lix = await openLixInMemory({
+		providePlugins: [mockPlugin],
+	});
+
+	// Insert a file that the plugin will match but cannot materialize
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "test-file-no-apply",
+			data: new TextEncoder().encode("initial-data"),
+			path: "/test.txt",
+			version_id: (
+				await lix.db
+					.selectFrom("active_version")
+					.select("version_id")
+					.executeTakeFirstOrThrow()
+			).version_id,
+		})
+		.execute();
+
+	// Test that selecting the file throws when plugin cannot materialize
+	await expect(
+		async () =>
+			await lix.db
+				.selectFrom("file")
+				.where("id", "=", "test-file-no-apply")
+				.selectAll()
+				.executeTakeFirstOrThrow()
+	).rejects.toThrow(
+		"[materializeFileData] No changes found for file test-file-no-apply with plugin lix_unknown_file_fallback_plugin. Cannot materialize file data."
+	);
+});

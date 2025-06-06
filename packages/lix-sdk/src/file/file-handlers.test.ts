@@ -60,7 +60,7 @@ describe("file update", () => {
 			.values({
 				id: fileId,
 				path: "/test.unknown",
-				data: new TextEncoder().encode('some data'),
+				data: new TextEncoder().encode("some data"),
 				version_id: version.id,
 				metadata: null,
 			})
@@ -72,7 +72,7 @@ describe("file update", () => {
 			file: {
 				id: fileId,
 				path: "/test.unknown",
-				data: new TextEncoder().encode('updated data'),
+				data: new TextEncoder().encode("updated data"),
 				version_id: version.id,
 				metadata: null,
 			},
@@ -100,8 +100,8 @@ describe("file update", () => {
 		const initialJsonData = {
 			users: {
 				john: { name: "John", age: 30 },
-				jane: { name: "Jane", age: 25 }
-			}
+				jane: { name: "Jane", age: 25 },
+			},
 		};
 
 		// Insert the file initially - this should create entities for both users
@@ -130,9 +130,9 @@ describe("file update", () => {
 		// Updated JSON data with jane removed
 		const updatedJsonData = {
 			users: {
-				john: { name: "John", age: 30 }
+				john: { name: "John", age: 30 },
 				// jane is removed
-			}
+			},
 		};
 
 		// Update the file - this should trigger deletion of jane's entities
@@ -158,13 +158,17 @@ describe("file update", () => {
 
 		// Should have fewer entities after the update (jane's entities removed)
 		expect(finalEntities.length).toBeLessThan(initialEntities.length);
-		
+
 		// John's entities should still exist
-		const johnEntities = finalEntities.filter(e => e.entity_id.includes("john"));
+		const johnEntities = finalEntities.filter((e) =>
+			e.entity_id.includes("john")
+		);
 		expect(johnEntities.length).toBeGreaterThan(0);
 
 		// Jane's entities should be gone
-		const janeEntities = finalEntities.filter(e => e.entity_id.includes("jane"));
+		const janeEntities = finalEntities.filter((e) =>
+			e.entity_id.includes("jane")
+		);
 		expect(janeEntities.length).toBe(0);
 	});
 });

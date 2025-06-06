@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "../version/create-version.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import type { LixPlugin } from "../plugin/lix-plugin.js";
 
 test("insert, update, delete on the file view", async () => {
 	const lix = await openLixInMemory({
@@ -401,3 +402,58 @@ test("file operations are version specific and isolated", async () => {
 	).toEqual({ content: "versionB" });
 });
 
+test("the plugin is the source of truth. the fallback plugin is not invoked if a plugin is configured for the file type", async () => {
+	const mockTxtPlugin: LixPlugin = {
+		key: "mock-txt",
+		detectChanges: () => {
+			return [];
+		},
+		applyChanges: () => ({ fileData: new Uint8Array() }),
+		detectChangesGlob: "*.txt",
+	};
+
+	const lix = await openLixInMemory({
+		providePlugins: [mockTxtPlugin],
+	});
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "mock-file",
+			path: "/mock.txt",
+			data: new TextEncoder().encode("some content"),
+		})
+		.execute();
+
+	const fileAfterInsert = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "mock-file")
+		.select("data")
+		.executeTakeFirstOrThrow();
+
+	expect(fileAfterInsert.data).toEqual(new Uint8Array());
+
+	await lix.db
+		.updateTable("file")
+		.set({ data: new TextEncoder().encode("some other content") })
+		.where("id", "=", "mock-file")
+		.execute();
+
+	const fileAfterUpdate = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "mock-file")
+		.select("data")
+		.executeTakeFirstOrThrow();
+
+	expect(fileAfterUpdate.data).toEqual(new Uint8Array());
+
+	await lix.db.deleteFrom("file").where("id", "=", "mock-file").execute();
+
+	const fileAfterDelete = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "mock-file")
+		.select("data")
+		.executeTakeFirst();
+
+	expect(fileAfterDelete).toBeUndefined();
+});

@@ -23,12 +23,9 @@ export function materializeFileData(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
 	file: Omit<LixFile, "data">;
 }): Uint8Array {
-	const plugins = [
-		...args.lix.plugin.getAllSync(),
-		lixUnknownFileFallbackPlugin,
-	];
+	const plugins = args.lix.plugin.getAllSync();
 
-	// Find a plugin that can handle this file
+	// First, try to find a specific plugin that can handle this file (excluding fallback)
 	for (const plugin of plugins) {
 		if (
 			!plugin.detectChangesGlob ||
@@ -80,8 +77,43 @@ export function materializeFileData(args: {
 		return file.fileData;
 	}
 
-	// This should never happen since lixUnknownFileFallbackPlugin matches all files
-	throw new Error(
-		`Unexpected: No plugin found to materialize file data for: ${args.file.path}`
-	);
+	// If no specific plugin matched, use the fallback plugin
+	const changes = executeSync({
+		lix: args.lix,
+		query: args.lix.db
+			.selectFrom("state")
+			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
+			.where("file_id", "=", args.file.id)
+			.where("version_id", "=", args.file.version_id)
+			.select([
+				"entity_id",
+				"schema_key",
+				"file_id",
+				"plugin_key",
+				"snapshot_content",
+				"version_id",
+			]),
+	});
+
+	// Format changes for plugin
+	const formattedChanges = changes.map((change) => ({
+		...change,
+		snapshot_content:
+			typeof change.snapshot_content === "string"
+				? JSON.parse(change.snapshot_content)
+				: change.snapshot_content,
+	}));
+
+	if (formattedChanges.length === 0) {
+		throw new Error(
+			`[materializeFileData] No changes found for file ${args.file.id} with plugin ${lixUnknownFileFallbackPlugin.key}. Cannot materialize file data.`
+		);
+	}
+
+	const file = lixUnknownFileFallbackPlugin.applyChanges!({
+		file: args.file,
+		changes: formattedChanges,
+	});
+
+	return file.fileData;
 }

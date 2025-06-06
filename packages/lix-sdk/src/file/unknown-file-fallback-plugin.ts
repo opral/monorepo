@@ -54,19 +54,25 @@ export const lixUnknownFileFallbackPlugin: LixPlugin = {
 	applyChanges: ({ file, changes }) => {
 		// This plugin snapshots the entire file, so there should only be one change
 		if (changes.length > 1) {
-			throw new Error(`Expected exactly one change for file ${file.id}, but received ${changes.length} changes`);
+			throw new Error(
+				`[lix_unknown_file_fallback_plugin] Expected exactly one change for file ${file.id}, but received ${changes.length} changes`
+			);
 		}
 
 		// There must be exactly one change for this file
 		if (changes.length === 0) {
-			throw new Error(`Expected exactly one change for file ${file.id}, but received no changes`);
+			throw new Error(
+				`[lix_unknown_file_fallback_plugin] Expected exactly one change for file ${file.id}, but received no changes`
+			);
 		}
 
 		const fileChange = changes[0]!; // Safe since we validated length > 0
 
 		// The change must match this file's ID
 		if (fileChange.entity_id !== file.id) {
-			throw new Error(`Expected change for file ${file.id}, but received change for entity ${fileChange.entity_id}`);
+			throw new Error(
+				`[lix_unknown_file_fallback_plugin] Expected change for file ${file.id}, but received change for entity ${fileChange.entity_id}`
+			);
 		}
 
 		if (typeof fileChange.snapshot_content === 'string') {
@@ -76,6 +82,8 @@ export const lixUnknownFileFallbackPlugin: LixPlugin = {
 			};
 		}
 
-		throw new Error(`Expected base64 string content for file ${file.id}, but received ${typeof fileChange.snapshot_content}`);
+		throw new Error(
+			`[lix_unknown_file_fallback_plugin] Expected base64 string content for file ${file.id}, but received ${typeof fileChange.snapshot_content}`
+		);
 	},
 };
