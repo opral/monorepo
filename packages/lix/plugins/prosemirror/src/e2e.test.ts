@@ -1,9 +1,5 @@
 import { expect, test } from "vitest";
-import {
-	openLixInMemory,
-	fileQueueSettled,
-	// beforeAfterOfFile,
-} from "@lix-js/sdk";
+import { openLixInMemory } from "@lix-js/sdk";
 import { plugin } from "./index.js";
 // import fs from "node:fs/promises";
 
@@ -67,14 +63,13 @@ test("detects changes when inserting a prosemirror document", async () => {
 		.where("path", "=", "/prosemirror.json")
 		.execute();
 
-	await fileQueueSettled({ lix });
-
 	// Get the changes from the database
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.innerJoin("file", "change.file_id", "file.id")
 		.where("file.path", "=", "/prosemirror.json")
+		.where("plugin_key", "=", plugin.key)
 		.select(["change.entity_id", "snapshot.content"])
 		.execute();
 

@@ -88,7 +88,7 @@ export function lixProsemirror(options: LixPluginOptions) {
 				.values({
 					key: "prosemirror_is_editor_update",
 					value: "true",
-					skip_change_control: true,
+					// skip_change_control: true,
 				})
 				.onConflict((oc) => oc.doUpdateSet({ value: "true" }))
 				.execute();
