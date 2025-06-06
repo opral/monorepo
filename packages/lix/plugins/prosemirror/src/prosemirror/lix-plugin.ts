@@ -53,14 +53,14 @@ export function lixProsemirror(options: LixPluginOptions) {
 		},
 	);
 
-	lix.sqlite.exec(`
-    CREATE TEMP TRIGGER IF NOT EXISTS lix_prosemirror_update
-    AFTER UPDATE ON file
-    WHEN NEW.id = '${options.fileId}'
-    BEGIN
-      SELECT handle_lix_prosemirror_update(NEW.data, json(NEW.metadata));
-    END;
-    `);
+	// lix.sqlite.exec(`
+	//   CREATE TEMP TRIGGER IF NOT EXISTS lix_prosemirror_update
+	//   AFTER UPDATE ON file
+	//   WHEN NEW.id = '${options.fileId}'
+	//   BEGIN
+	//     SELECT handle_lix_prosemirror_update(NEW.data, json(NEW.metadata));
+	//   END;
+	//   `);
 
 	// Track if there's a save in progress to prevent multiple simultaneous saves
 	let saveInProgress = false;
@@ -83,15 +83,29 @@ export function lixProsemirror(options: LixPluginOptions) {
 
 			saveInProgress = true;
 			const fileData = new TextEncoder().encode(JSON.stringify(docJSON));
-			await lix.db
-				.insertInto("key_value")
-				.values({
-					key: "prosemirror_is_editor_update",
+
+			// Upsert the prosemirror_is_editor_update flag
+			const updateResult = await lix.db
+				.updateTable("key_value")
+				.set({
 					value: "true",
 					// skip_change_control: true,
 				})
-				.onConflict((oc) => oc.doUpdateSet({ value: "true" }))
+				.where("key", "=", "prosemirror_is_editor_update")
 				.execute();
+
+			// If no rows were updated, insert a new row
+			if (updateResult.length === 0 || updateResult[0]?.numUpdatedRows === 0n) {
+				await lix.db
+					.insertInto("key_value")
+					.values({
+						key: "prosemirror_is_editor_update",
+						value: "true",
+						// skip_change_control: true,
+					})
+					.execute();
+			}
+
 			await lix.db
 				.updateTable("file")
 				.set({ data: fileData })

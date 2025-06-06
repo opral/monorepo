@@ -8,7 +8,7 @@ import { lix } from "../state";
 
 const Checkpoints: React.FC = () => {
 	const [checkpoints] = useQuery(selectCheckpoints);
-	const [currentChangeSet] = useQuery(selectWorkingChangeSet);
+	const [workingChangeSet] = useQuery(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
 	);
@@ -35,12 +35,12 @@ const Checkpoints: React.FC = () => {
 				style={{ maxHeight: "400px", overflow: "auto" }}
 			>
 				{/* Current changes (to be checkpointed) */}
-				{currentChangeSet && currentChangeSet.change_count > 0 && (
+				{workingChangeSet && (
 					<div className="border-b border-base-300">
 						<ChangeSet
 							ref={changeSetRef}
 							key="current-changes"
-							changeSet={currentChangeSet}
+							changeSet={workingChangeSet}
 							isWorkingChangeSet={true}
 							previousChangeSetId={checkpoints?.[0]?.id ?? undefined}
 							showRestore={false}
