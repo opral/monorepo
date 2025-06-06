@@ -140,6 +140,8 @@ ${injectCode("./track-message-call.js")}
 
 ${injectCode("./generate-static-localized-urls.js")}
 
+${injectCode("./strategy.js")}
+
 // ------ TYPES ------
 
 /**

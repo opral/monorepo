@@ -5,7 +5,7 @@ imports:
 
 # Strategy
 
-Paraglide JS comes with various strategies to determine the locale out of the box. 
+Paraglide JS comes with various strategies to determine the locale out of the box.
 
 The strategy is defined with the `strategy` option. The priority is determined by the order of the strategies in the array. The first strategy that returns a locale will be used.
 
@@ -21,9 +21,9 @@ compile({
 
 ## Built-in strategies
 
-### cookie 
+### cookie
 
-The cookie strategy determines the locale from a cookie. 
+The cookie strategy determines the locale from a cookie.
 
 ```diff
 compile({
@@ -35,9 +35,9 @@ compile({
 
 ### baseLocale
 
-Returns the `baseLocale` defined in the settings. 
+Returns the `baseLocale` defined in the settings.
 
-It is useful as a fallback strategy if no other strategy returns a locale, for example, if a cookie has not been set yet. 
+It is useful as a fallback strategy if no other strategy returns a locale, for example, if a cookie has not been set yet.
 
 ```diff
 compile({
@@ -49,7 +49,7 @@ compile({
 
 ### globalVariable
 
-Uses a global variable to determine the locale. 
+Uses a global variable to determine the locale.
 
 This strategy is only useful in testing environments or to get started quickly. Setting a global variable can lead to cross-request issues in server-side environments, and the locale is not persisted between page reloads in client-side environments.
 
@@ -109,14 +109,14 @@ compile({
 })
 ```
 
-The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs. 
+The URL-based strategy uses the web standard [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) to match and localize URLs.
 
 <doc-callout type="tip">Use https://urlpattern.com/ to test your URL patterns.</doc-callout>
 
 #### Locale prefixing
 
 ```
-https://example.com/about 
+https://example.com/about
 https://example.com/de/about
 ```
 
@@ -130,7 +130,7 @@ compile({
 			pattern: "/:path(.*)?",
 			localized: [
 				["de", "/de/:path(.*)?"],
-                                // ✅ make sure to match the least specific path last 
+                                // ✅ make sure to match the least specific path last
 				["en", "/:path(.*)?"],
 			],
 		},
@@ -220,7 +220,7 @@ compile({
 
 #### Adding a base path
 
-You can add a base path to your URL patterns to support localized URLs with a common base path. 
+You can add a base path to your URL patterns to support localized URLs with a common base path.
 
 For example, with the base path set to "shop":
 
@@ -257,7 +257,7 @@ The curly braces `{}` with the `?` modifier ensure that the group is treated as 
 
 #### Making URL patterns unavailable in specific locales
 
-You can configure certain URL patterns to be unavailable in specific locales by redirecting them to a 404 page or any other designated error page. 
+You can configure certain URL patterns to be unavailable in specific locales by redirecting them to a 404 page or any other designated error page.
 
 This is useful when some content or features should only be accessible in certain languages.
 
@@ -275,7 +275,7 @@ compile({
 	strategy: ["url", "cookie"],
 	urlPatterns: [
 		// 404 page definition.
-		// 
+		//
 		// 💡 make sure to define the 404 pattern
 		// before a catch all pattern
 		{
@@ -284,8 +284,8 @@ compile({
 				["en", "/404"],
 				["de", "/de/404"],
 				// defining paths for locales that should not
-				// be caught by the catch all pattern 
-				// 
+				// be caught by the catch all pattern
+				//
 				// this will be matched first and the catch all
 				// pattern will not be triggered and a redirect
 				// from /de/unavailable to /de/404 will be triggered
@@ -327,7 +327,7 @@ When working with URL patterns, there are a few important considerations to keep
 
 ##### Excluding paths is not supported
 
-[URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API#regex_matchers_limitations) does not support negative lookahead regex patterns. 
+[URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API#regex_matchers_limitations) does not support negative lookahead regex patterns.
 
 The decision to not support negative lookaheads is likely related to ReDoS (Regular Expression Denial of Service) attacks. Read [this blog post](https://blakeembrey.com/posts/2024-09-web-redos/) or the [CVE on GitHub](https://github.com/pillarjs/path-to-regexp/security/advisories/GHSA-9wv6-86v2-598j).
 
@@ -337,7 +337,7 @@ URL patterns are evaluated in the order they appear in the `urlPatterns` array. 
 
 ```js
 urlPatterns: [
-  // ❌ INCORRECT ORDER: The wildcard pattern will match everything, 
+  // ❌ INCORRECT ORDER: The wildcard pattern will match everything,
   // so the specific pattern will never be reached
   {
     pattern: "https://example.com/:path(.*)?", // This will match ANY path
@@ -468,17 +468,17 @@ With this configuration:
 
 Write your own cookie, http header, or i18n routing based locale strategy to integrate Paraglide into any framework or app.
 
-Only two APIs are needed to define this behaviour and adapt Paraglide JS to your requirements: 
+Only two APIs are needed to define this behaviour and adapt Paraglide JS to your requirements:
 
 - `overwriteGetLocale` defines the `getLocale()` function that messages use to determine the locale
 - `overwriteSetLocale` defines the `setLocale()` function that apps call to change the locale
 
-Because the client and server have separate Paraglide runtimes, you will need to define these behaviours separately on the client and server. 
+Because the client and server have separate Paraglide runtimes, you will need to define these behaviours separately on the client and server.
 
 The steps are usually the same, irrespective of the strategy and framework you use:
 
 1. Use `overwriteGetLocale()` function that reads the locale from a cookie, HTTP header, or i18n routing.
-2. Handle any side effects of changing the locale and trigger a re-render in your application via `overwriteSetLocale()` (for many apps, this may only be required on the client side). 
+2. Handle any side effects of changing the locale and trigger a re-render in your application via `overwriteSetLocale()` (for many apps, this may only be required on the client side).
 
 _Read the [architecture documentation](https://inlang.com/m/gerre34r/library-inlang-paraglideJs/architecture) to learn more about's Paraglide's inner workings._
 
@@ -495,9 +495,9 @@ overwriteGetLocale(() => document.documentElement.lang /** en */);
 m.orange_dog_wheel(); // Hello world!
 ```
 
-On the server, you might determine the locale from a cookie, a locale route, a http header, or anything else. When calling `overwriteGetLocale()` on the server, you need to be mindful of race conditions caused when multiple requests come in at the same time with different locales. 
+On the server, you might determine the locale from a cookie, a locale route, a http header, or anything else. When calling `overwriteGetLocale()` on the server, you need to be mindful of race conditions caused when multiple requests come in at the same time with different locales.
 
-To avoid this, use `AsyncLocaleStorage` in Node, or its equivalent for other server-side JS runtimes. 
+To avoid this, use `AsyncLocaleStorage` in Node, or its equivalent for other server-side JS runtimes.
 
 ```js
 import { m } from "./paraglide/messages.js";
@@ -514,6 +514,123 @@ export function onRequest(request, next) {
   const locale = detectLocale(request); //parse the locale from headers, cookies, etc.
   // set the async locale storage for the current request
   // to the detected locale and let the request continue
-  // in that context 
+  // in that context
   return localeStorage.run(locale, async () => await next());
 }
+```
+
+### Custom strategies
+
+In addition to overwriting the `getLocale()` and `setLocale()` functions, Paraglide supports defining custom strategies that can be included alongside built-in strategies in your strategy array. This approach provides a cleaner way to encapsulate custom locale resolution logic.
+
+Custom strategies must follow the naming pattern `custom-<name>` where `<name>` contains only alphanumeric characters.
+
+They can be defined in both client- and server-side environments, enabling you to develop reusable locale resolution logic that integrates seamlessly with Paraglide's runtime. Use the `defineCustomClientStrategy()` and `defineCustomServerStrategy()` functions to write strategies for each environment. Follow the examples below to define your own custom strategies.
+
+To use them, you need to include them in the `strategy` array when configuring your project.
+
+```diff
+compile({
+	project: "./project.inlang",
+	outdir: "./src/paraglide",
++	strategy: ["custom-userPreferences", "cookie", "baseLocale"]
+})
+```
+
+#### Client-side custom strategies
+
+Define a custom strategy for client-side locale resolution using `defineCustomClientStrategy()`. The handler must implement both `getLocale()` and `setLocale()` methods.
+
+```js
+import { defineCustomClientStrategy } from "./paraglide/runtime.js";
+
+defineCustomClientStrategy("custom-sessionStorage", {
+  getLocale: () => {
+    return sessionStorage.getItem("user-locale") ?? undefined;
+  },
+  setLocale: (locale) => {
+    sessionStorage.setItem("user-locale", locale);
+  }
+})
+```
+
+#### Server-side custom strategies
+
+For server-side custom strategies, use `defineCustomServerStrategy()`. The handler only needs to implement a `getLocale()` method that accepts an optional `Request` parameter.
+
+```js
+import { defineCustomServerStrategy } from "./paraglide/runtime.js";
+
+defineCustomServerStrategy("custom-header", {
+  getLocale: (request) => {
+    const locale = request?.headers.get("X-Custom-Locale");
+    return locale ?? undefined;
+  }
+});
+```
+
+#### Advanced example: Custom database strategy
+
+Here's a more complex example that retrieves the user's preferred locale from a database:
+
+```js
+import { defineCustomClientStrategy, defineCustomServerStrategy } from "./paraglide/runtime.js";
+import { getUserLocale, setUserLocale, extractUserIdFromRequest } from "./services/userService.js";
+
+// Client-side strategy
+defineCustomClientStrategy("custom-userPreference", {
+  getLocale: () => {
+    // Get from memory cache, framework based state store or return undefined to fall back to next strategy
+    return window.__userLocale ?? undefined;
+  },
+  setLocale: async (locale) => {
+    // Update user preference in database
+    await setUserLocale(locale);
+    window.__userLocale = locale;
+  }
+});
+
+// Server-side strategy
+defineCustomServerStrategy("custom-userPreference", {
+  getLocale: async (request) => {
+    const userId = extractUserIdFromRequest(request);
+    if (!userId) return undefined;
+
+    try {
+      return await getUserLocale(userId);
+    } catch (error) {
+      console.warn("Failed to fetch user locale from database:", error);
+      return undefined;
+    }
+  }
+});
+```
+
+#### Custom strategy benefits
+
+Custom strategies offer several advantages over the traditional `overwriteGetLocale()` approach:
+
+- **Composability**: They can be combined with built-in strategies in a single strategy array
+- **Priority handling**: They respect the strategy order, allowing fallbacks to other strategies
+- **Framework integration**: Easier to package and distribute with framework adapters
+- **Type safety**: Better TypeScript support for custom strategy handlers
+- **Error isolation**: If a custom strategy fails, execution continues with the next strategy
+
+#### Custom strategy validation
+
+Custom strategies are validated at definition time. The strategy name must:
+
+- Start with `custom-`
+- Contain only alphanumeric characters after the prefix
+- Be unique (you cannot define the same custom strategy twice)
+
+Invalid examples:
+- `custom-my_strategy` (contains underscore)
+- `custom-` (no name after prefix)
+- `my-custom-strategy` (doesn't start with `custom-`)
+- `custom-my-strategy` (contains hyphen in name part)
+
+Valid examples:
+- `custom-sessionStorage`
+- `custom-userPreference`
+- `custom-header`

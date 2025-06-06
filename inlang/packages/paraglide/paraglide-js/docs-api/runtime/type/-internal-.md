@@ -1,3 +1,63 @@
+## CustomClientStrategyHandler
+
+> **CustomClientStrategyHandler**\<\> = `object`
+
+Defined in: [runtime/strategy.js:22](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+
+### Type Parameters
+
+### Type declaration
+
+#### getLocale()
+
+> **getLocale**: () => `string` \| `undefined`
+
+##### Returns
+
+`string` \| `undefined`
+
+#### setLocale()
+
+> **setLocale**: (`locale`) => `void`
+
+##### Parameters
+
+###### locale
+
+`string`
+
+##### Returns
+
+`void`
+
+***
+
+## CustomServerStrategyHandler
+
+> **CustomServerStrategyHandler**\<\> = `object`
+
+Defined in: [runtime/strategy.js:18](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+
+### Type Parameters
+
+### Type declaration
+
+#### getLocale()
+
+> **getLocale**: (`request?`) => `string` \| `undefined`
+
+##### Parameters
+
+###### request?
+
+`Request`
+
+##### Returns
+
+`string` \| `undefined`
+
+***
+
 ## Locale
 
 > **Locale** = `any`
@@ -145,7 +205,7 @@ rendering context without effecting other requests.
 
 ## strategy
 
-> `const` **strategy**: (`"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"` \| `"preferredLanguage"` \| `"localStorage"`)[]
+> `const` **strategy**: (`` `custom-${string}` `` \| `"cookie"` \| `"baseLocale"` \| `"globalVariable"` \| `"url"` \| `"preferredLanguage"` \| `"localStorage"`)[]
 
 Defined in: [runtime/variables.js:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/variables.js)
 
@@ -196,6 +256,66 @@ The input if it is a locale.
 ### Throws
 
 If the input is not a locale.
+
+***
+
+## defineCustomClientStrategy()
+
+> **defineCustomClientStrategy**(`strategy`, `handler`): `void`
+
+Defined in: [runtime/strategy.js:68](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+
+Defines a custom strategy that is executed on the client.
+
+### Parameters
+
+#### strategy
+
+`any`
+
+The name of the custom strategy to define. Must follow the pattern `custom-<name>` where
+`<name>` contains only alphanumeric characters.
+
+#### handler
+
+[`CustomClientStrategyHandler`](#customclientstrategyhandler)
+
+The handler for the custom strategy, which should implement the
+methods `getLocale` and `setLocale`.
+
+### Returns
+
+`void`
+
+***
+
+## defineCustomServerStrategy()
+
+> **defineCustomServerStrategy**(`strategy`, `handler`): `void`
+
+Defined in: [runtime/strategy.js:48](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+
+Defines a custom strategy that is executed on the server.
+
+### Parameters
+
+#### strategy
+
+`any`
+
+The name of the custom strategy to define. Must follow the pattern `custom-<name>` where
+`<name>` contains only alphanumeric characters.
+
+#### handler
+
+[`CustomServerStrategyHandler`](#customserverstrategyhandler)
+
+The handler for the custom strategy, which should implement
+the method `getLocale`.
+
+### Returns
+
+`void`
 
 ***
 
@@ -366,7 +486,7 @@ Defined in: [runtime/extract-locale-from-navigator.js:12](https://github.com/opr
 
 > **extractLocaleFromRequest**(`request`): `any`
 
-Defined in: [runtime/extract-locale-from-request.js:29](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
+Defined in: [runtime/extract-locale-from-request.js:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
 
 Extracts a locale from a request.
 
@@ -464,7 +584,7 @@ urls[3].href // => "https://example.com/de/blog"
 
 > **getLocale**(): `any`
 
-Defined in: [runtime/get-locale.js:44](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:45](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Get the current locale.
 
@@ -669,7 +789,7 @@ localizeUrl(url, { locale: "de" });
 
 > **overwriteGetLocale**(`fn`): `void`
 
-Defined in: [runtime/get-locale.js:121](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
+Defined in: [runtime/get-locale.js:125](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/get-locale.js)
 
 Overwrite the `getLocale()` function.
 
@@ -750,7 +870,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-Defined in: [runtime/set-locale.js:128](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:132](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
@@ -782,7 +902,7 @@ overwriteSetLocale((newLocale) => {
 
 > **setLocale**(`newLocale`, `options?`): `void`
 
-Defined in: [runtime/set-locale.js:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
+Defined in: [runtime/set-locale.js:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Set the locale.
 
