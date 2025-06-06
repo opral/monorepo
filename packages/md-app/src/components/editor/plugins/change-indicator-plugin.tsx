@@ -43,6 +43,27 @@ const ChangeIndicator = React.memo(function ChangeIndicator({
   );
 });
 
+// Deletion indicator component that shows at the bottom of a line
+const DeletionIndicator = React.memo(function DeletionIndicator({
+  className
+}: {
+  className?: string;
+}) {
+  return (
+    <div
+      className="absolute -left-14 bottom-0 w-10 h-2 z-10 cursor-pointer group/hover"
+      title="Content was deleted after this line"
+    >
+      <div
+        className={cn(
+          'absolute right-2 bottom-0 w-1 h-2 bg-red-500 opacity-50 group-hover/hover:opacity-100 group-hover/hover:w-2 transition-all',
+          className
+        )}
+      />
+    </div>
+  );
+});
+
 // Main wrapper component that shows change indicators
 export const ChangeIndicatorAboveNodes: RenderNodeWrapper = (props) => {
   const { path } = props;
@@ -131,7 +152,7 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     // If after is null, this represents a deletion
     if (latestChange.snapshot_content_after === null) {
       console.log('🗑️ ChangeIndicator: File deleted');
-      return { type: 'deleted', isThisBlockChanged: true };
+      return { type: 'deleted', isThisBlockChanged: true, hasDeletedContentAfter: false };
     }
 
     // For txt plugin, we need to determine if this specific block/line has changed
@@ -178,10 +199,36 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
       existsInAfter: true // We know it exists since we found it
     });
 
+    // Check if content was deleted after this line
+    const hasDeletedContentAfter = () => {
+      // Find where this line appears in the before state
+      const beforeLineIndex = beforeLines.findIndex((line: string) => line === currentBlockTextTrimmed);
+
+      // If the line doesn't exist in before, we can't determine deletion after it
+      if (beforeLineIndex === -1) return false;
+
+      // Compare what comes after this line in before vs after
+      const nextLinesInBefore = beforeLines.slice(beforeLineIndex + 1);
+      const nextLinesInAfter = afterLines.slice(currentLineIndexInAfter + 1);
+
+      // If there are more lines after this position in before than in after, content was deleted
+      if (nextLinesInBefore.length > nextLinesInAfter.length) return true;
+
+      // If any of the lines that should be after this one are missing or changed, content was deleted
+      return nextLinesInBefore.some((line: string, index: number) => {
+        const correspondingAfterLine = nextLinesInAfter[index];
+        return !correspondingAfterLine || correspondingAfterLine !== line;
+      });
+    };
+
     // Case 1: Line is completely new (doesn't exist in before)
     if (!existsInBefore) {
       console.log('🆕 NEW LINE DETECTED:', currentBlockTextTrimmed);
-      return { type: 'added', isThisBlockChanged: true };
+      return {
+        type: 'added',
+        isThisBlockChanged: true,
+        hasDeletedContentAfter: hasDeletedContentAfter()
+      };
     }
 
     // Case 2: Line exists in both, but check if it's in the same position
@@ -196,15 +243,25 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     // If line moved position, consider it changed
     if (beforeLineIndex !== currentLineIndexInAfter) {
       console.log('🔄 LINE MOVED:', { beforeLineIndex, currentLineIndexInAfter });
-      return { type: 'modified', isThisBlockChanged: true };
+      return {
+        type: 'modified',
+        isThisBlockChanged: true,
+        hasDeletedContentAfter: hasDeletedContentAfter()
+      };
     }
 
     // Case 3: If document has any changes and we have fewer lines before than after, 
     // this suggests lines were added, so show indicators on all existing lines too
     if (afterLines.length > beforeLines.length) {
       console.log('📈 DOCUMENT GREW - showing indicator on existing line');
-      return { type: 'modified', isThisBlockChanged: true };
-    }// Case 3: Check if surrounding context changed (lines above/below are different)
+      return {
+        type: 'modified',
+        isThisBlockChanged: true,
+        hasDeletedContentAfter: hasDeletedContentAfter()
+      };
+    }
+
+    // Case 4: Check if surrounding context changed (lines above/below are different)
     const hasContextChanged = () => {
       // Check line above
       if (currentLineIndexInAfter > 0) {
@@ -225,7 +282,22 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
 
     // Show indicator if context changed (new lines added around this line)
     if (hasContextChanged()) {
-      return { type: 'modified', isThisBlockChanged: true };
+      return {
+        type: 'modified',
+        isThisBlockChanged: true,
+        hasDeletedContentAfter: hasDeletedContentAfter()
+      };
+    }
+
+    // Case 5: Check if content was deleted after this line (even if the line itself didn't change)
+    const deletedAfter = hasDeletedContentAfter();
+    if (deletedAfter) {
+      console.log('🗑️ CONTENT DELETED after line:', currentBlockTextTrimmed);
+      return {
+        type: null,
+        isThisBlockChanged: false,
+        hasDeletedContentAfter: true
+      };
     }
 
     // Debug logging to understand what's happening
@@ -253,11 +325,26 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     return isSupportedType && blockChangeInfo?.isThisBlockChanged === true;
   }, [element.type, blockChangeInfo]);
 
+  // Determine if we should show deletion indicator
+  const shouldShowDeletionIndicator = useMemo(() => {
+    // Check if this block type is supported
+    const blockTypes = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'ul', 'ol', 'li', 'text'];
+    const isSupportedType = blockTypes.includes(element.type);
+
+    // Show deletion indicator if there's deleted content after this line
+    // But don't show it if the line itself was modified (blue indicator takes priority)
+    // This ensures that if a line is both modified AND has deletions after it,
+    // we only show the blue modification indicator, not both
+    return isSupportedType &&
+      blockChangeInfo?.hasDeletedContentAfter === true &&
+      blockChangeInfo?.isThisBlockChanged !== true;
+  }, [element.type, blockChangeInfo]);
+
 
   return (
     <div className="relative group/indicator">
       {/* Single debug panel for the first paragraph only */}
-      {/* {import.meta.env.DEV && (
+      {import.meta.env.DEV && (
         <div className="absolute -left-48 top-0 w-40 bg-yellow-200 text-black text-xs p-2 border border-yellow-600 z-30 hover:z-40">
           <div><strong>DEBUG PANEL</strong></div>
           <div>File ID: {activeFile?.id?.slice(-8) || 'None'}</div>
@@ -267,17 +354,21 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
           <div>Block Changed: {blockChangeInfo?.isThisBlockChanged ? 'Yes' : 'No'}</div>
           <div>Element: {element.type}</div>
           <div>Should Show: {shouldShowIndicator ? 'Yes' : 'No'}</div>
-          <div>Block Text: "{getBlockText(element).slice(0, 20)}..."</div>
+          <div>Should Show Deletion: {shouldShowDeletionIndicator ? 'Yes' : 'No'}</div>
+          <div>Block Text: "{getBlockText(element).slice(0, 20)}"</div>
           {intermediateChanges.length > 0 && (
             <div>First Entity: {intermediateChanges[0]?.entity_id?.slice(-8)}</div>
           )}
         </div>
-      )} */}
+      )}
 
       {blockChangeInfo && shouldShowIndicator && (
         <ChangeIndicator
           type={blockChangeInfo.type as 'added' | 'modified' | 'deleted'}
         />
+      )}
+      {blockChangeInfo && shouldShowDeletionIndicator && (
+        <DeletionIndicator />
       )}
       <div className={cn(
         'pl-2',
