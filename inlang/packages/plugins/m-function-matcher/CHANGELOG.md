@@ -1,5 +1,16 @@
 # @inlang/plugin-m-function-matcher
 
+## 2.1.0
+
+### Minor Changes
+
+- 90b86e9: Adds support for nested messages
+
+### Patch Changes
+
+- Updated dependencies [22089a2]
+  - @inlang/sdk@2.4.9
+
 ## 2.0.10
 
 ### Patch Changes
