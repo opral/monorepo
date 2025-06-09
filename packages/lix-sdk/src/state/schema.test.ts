@@ -1049,3 +1049,124 @@ test("state view should work and re-populate the cache after cache is fully (!) 
 
 	expect(cacheAfterRefill).toHaveLength(1);
 });
+
+test("delete operations are validated for foreign key constraints", async () => {
+	const lix = await openLixInMemory({});
+
+	// Define parent schema (referenced entity)
+	const parentSchema: LixSchemaDefinition = {
+		"x-lix-key": "parent_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	};
+
+	// Define child schema with foreign key to parent
+	const childSchema: LixSchemaDefinition = {
+		"x-lix-key": "child_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			parent_id: {
+				schemaKey: "parent_entity",
+				property: "id",
+			},
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			parent_id: { type: "string" },
+			value: { type: "string" },
+		},
+		required: ["id", "parent_id", "value"],
+		additionalProperties: false,
+	};
+
+	// Register both schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([
+			{ value: parentSchema },
+			{ value: childSchema },
+		])
+		.execute();
+
+	// Insert parent entity
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "parent-1",
+			schema_key: "parent_entity",
+			file_id: "test-file",
+			plugin_key: "test-plugin",
+			snapshot_content: {
+				id: "parent-1",
+				name: "Parent Entity",
+			},
+			schema_version: "1.0",
+			version_id: sql`(SELECT version_id FROM active_version)`,
+		})
+		.execute();
+
+	// Insert child entity that references the parent
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "child-1",
+			schema_key: "child_entity",
+			file_id: "test-file",
+			plugin_key: "test-plugin",
+			snapshot_content: {
+				id: "child-1",
+				parent_id: "parent-1",
+				value: "Child Value",
+			},
+			schema_version: "1.0",
+			version_id: sql`(SELECT version_id FROM active_version)`,
+		})
+		.execute();
+
+	// Verify both entities exist
+	const parentBefore = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "parent-1")
+		.where("schema_key", "=", "parent_entity")
+		.selectAll()
+		.execute();
+
+	const childBefore = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "child-1")
+		.where("schema_key", "=", "child_entity")
+		.selectAll()
+		.execute();
+
+	expect(parentBefore).toHaveLength(1);
+	expect(childBefore).toHaveLength(1);
+
+	// Attempting to delete the parent entity should fail due to foreign key constraint
+	// because there's a child entity that references it
+	await expect(
+		lix.db
+			.deleteFrom("state")
+			.where("entity_id", "=", "parent-1")
+			.where("schema_key", "=", "parent_entity")
+			.execute()
+	).rejects.toThrow(/foreign key/i);
+
+	// Verify the parent still exists after failed deletion attempt
+	const parentAfter = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "parent-1")
+		.where("schema_key", "=", "parent_entity")
+		.selectAll()
+		.execute();
+
+	expect(parentAfter).toHaveLength(1);
+});

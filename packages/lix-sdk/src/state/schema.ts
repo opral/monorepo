@@ -350,6 +350,14 @@ export function applyStateDatabaseSchema(
   CREATE TRIGGER IF NOT EXISTS state_delete
   INSTEAD OF DELETE ON state
   BEGIN
+    SELECT validate_snapshot_content(
+      (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = OLD.schema_key),
+      OLD.snapshot_content,
+      'delete',
+      OLD.entity_id,
+      OLD.version_id
+    );
+
     SELECT handle_state_mutation(
       OLD.entity_id,
       OLD.schema_key,
