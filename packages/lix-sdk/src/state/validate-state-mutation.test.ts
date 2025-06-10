@@ -1422,7 +1422,7 @@ test("should handle deletion validation for change sets referenced by versions",
 	// Create a change set
 	await lix.db
 		.insertInto("change_set")
-		.values({ id: "cs_referenced" })
+		.values({ id: "cs_referenced", version_id: "global" })
 		.execute();
 
 	// Create a version that references the change set
@@ -1436,10 +1436,10 @@ test("should handle deletion validation for change sets referenced by versions",
 		})
 		.execute();
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.select("version_id")
-		.executeTakeFirstOrThrow();
+	// const activeVersion = await lix.db
+	// 	.selectFrom("active_version")
+	// 	.select("version_id")
+	// 	.executeTakeFirstOrThrow();
 
 	// Get the change set schema
 	const changeSetSchema = await lix.db
@@ -1456,7 +1456,7 @@ test("should handle deletion validation for change sets referenced by versions",
 			snapshot_content: {},
 			operation: "delete",
 			entity_id: "cs_referenced",
-			version_id: activeVersion.version_id,
+			version_id: "global",
 		})
 	).toThrowError(
 		/Foreign key constraint violation.*Cannot delete entity.*referenced by.*lix_version/i
@@ -1561,4 +1561,135 @@ test("should parse JSON object properties before validation", async () => {
 			version_id: activeVersion.version_id,
 		})
 	).toThrowError(/Invalid JSON in property 'body'/);
+});
+
+test("foreign key validation should fail when referenced entity exists in different non-inheriting version", async () => {
+	const lix = await openLixInMemory({});
+
+	// Mock schema for a "User" entity
+	const userSchema = {
+		"x-lix-key": "mock_user",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Mock schema for a "Post" entity that references User
+	const postSchema = {
+		"x-lix-key": "mock_post",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			author_id: {
+				schemaKey: "mock_user",
+				property: "id",
+			},
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			title: { type: "string" },
+			author_id: { type: "string" },
+		},
+		required: ["id", "title", "author_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Register our mock schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
+
+	// Create two separate versions that don't inherit from each other
+	const versionA = await createVersion({
+		lix,
+		name: "version-a",
+	});
+
+	const versionB = await createVersion({
+		lix,
+		name: "version-b",
+	});
+
+	// Verify they don't inherit from each other
+	const inheritanceA = await lix.db
+		.selectFrom("version_inheritance")
+		.where("parent_version_id", "=", versionB.id)
+		.where("child_version_id", "=", versionA.id)
+		.selectAll()
+		.executeTakeFirst();
+
+	const inheritanceB = await lix.db
+		.selectFrom("version_inheritance")
+		.where("parent_version_id", "=", versionA.id)
+		.where("child_version_id", "=", versionB.id)
+		.selectAll()
+		.executeTakeFirst();
+
+	// Both should only inherit from global
+	expect(inheritanceA).toBeUndefined();
+	expect(inheritanceB).toBeUndefined();
+
+	// Create a user in version A
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "user-1",
+			schema_key: "mock_user",
+			file_id: "test",
+			plugin_key: "test_plugin",
+			snapshot_content: {
+				id: "user-1",
+				name: "Alice",
+			},
+			schema_version: "1.0",
+			version_id: versionA.id,
+		})
+		.execute();
+
+	// BUG: This should FAIL because user-1 doesn't exist in version B's context
+	// but the current foreign key validation logic will find user-1 in version A
+	// and incorrectly allow this validation to succeed
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post-1",
+				title: "My Post",
+				author_id: "user-1", // References user-1 which only exists in version A
+			},
+			operation: "insert",
+			version_id: versionB.id,
+		})
+	).toThrow(/Foreign key constraint violation.*mock_user.*user-1/);
+
+	// Verify that user-1 indeed doesn't exist in version B's context
+	const userInVersionB = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "user-1")
+		.where("schema_key", "=", "mock_user")
+		.where("version_id", "=", versionB.id)
+		.selectAll()
+		.execute();
+
+	expect(userInVersionB).toHaveLength(0);
+
+	// But verify it does exist in version A
+	const userInVersionA = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "user-1")
+		.where("schema_key", "=", "mock_user")
+		.where("version_id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	expect(userInVersionA).toHaveLength(1);
 });

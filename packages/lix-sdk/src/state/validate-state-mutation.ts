@@ -120,6 +120,7 @@ export function validateStateMutation(args: {
 				lix: args.lix,
 				schema: args.schema,
 				snapshot_content: args.snapshot_content,
+				version_id: args.version_id,
 			});
 		}
 	}
@@ -188,8 +189,8 @@ function validatePrimaryKeyConstraints(args: {
 
 	if (existingStates.length > 0) {
 		const fieldNames = primaryKeyFields.join(", ");
-		const fieldValues = primaryKeyValues.map(v => `'${v}'`).join(", ");
-		
+		const fieldValues = primaryKeyValues.map((v) => `'${v}'`).join(", ");
+
 		throw new Error(
 			`Primary key constraint violation: The primary key constraint on (${fieldNames}) is violated by values (${fieldValues})`
 		);
@@ -260,8 +261,8 @@ function validateUniqueConstraints(args: {
 
 		if (existingStates.length > 0) {
 			const fieldNames = uniqueFields.join(", ");
-			const fieldValues = uniqueValues.map(v => `'${v}'`).join(", ");
-			
+			const fieldValues = uniqueValues.map((v) => `'${v}'`).join(", ");
+
 			throw new Error(
 				`Unique constraint violation: The unique constraint on (${fieldNames}) is violated by values (${fieldValues})`
 			);
@@ -272,7 +273,7 @@ function validateUniqueConstraints(args: {
 // Helper function to get nested value by path (e.g., 'foo.bar' from { foo: { bar: 'baz' } })
 function getValueByPath(obj: any, path: string): any {
 	if (!path) return obj;
-	const parts = path.split('/').filter(part => part);
+	const parts = path.split("/").filter((part) => part);
 	let current = obj;
 	for (const part of parts) {
 		if (current === undefined || current === null) return undefined;
@@ -285,6 +286,7 @@ function validateForeignKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	snapshot_content: Snapshot["content"];
+	version_id: string;
 }): void {
 	const foreignKeys = args.schema["x-lix-foreign-keys"];
 	if (!foreignKeys) {
@@ -294,7 +296,7 @@ function validateForeignKeyConstraints(args: {
 	// Validate each foreign key constraint
 	for (const [localProperty, foreignKeyDef] of Object.entries(foreignKeys)) {
 		const foreignKeyValue = (args.snapshot_content as any)[localProperty];
-		
+
 		// Skip validation if foreign key value is null or undefined
 		// (like SQL foreign keys, null values are allowed)
 		if (foreignKeyValue === null || foreignKeyValue === undefined) {
@@ -303,12 +305,15 @@ function validateForeignKeyConstraints(args: {
 
 		// Check if this references a real SQL table vs a JSON schema entity
 		const isRealSqlTable = ["lix_change"].includes(foreignKeyDef.schemaKey);
-		
+
 		let query: any;
 		if (isRealSqlTable) {
 			// Query the real SQL table directly
 			// Map schema key to actual table name
-			const tableName = foreignKeyDef.schemaKey === "lix_change" ? "change" : foreignKeyDef.schemaKey;
+			const tableName =
+				foreignKeyDef.schemaKey === "lix_change"
+					? "change"
+					: foreignKeyDef.schemaKey;
 			query = args.lix.db
 				.selectFrom(tableName as any)
 				.select(foreignKeyDef.property as any)
@@ -319,6 +324,7 @@ function validateForeignKeyConstraints(args: {
 				.selectFrom("state")
 				.select("snapshot_content")
 				.where("schema_key", "=", foreignKeyDef.schemaKey)
+				.where("version_id", "=", args.version_id)
 				.where(
 					sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
 					"=",
@@ -334,13 +340,21 @@ function validateForeignKeyConstraints(args: {
 				query: args.lix.db
 					.selectFrom("stored_schema")
 					.select("value")
-					.where(sql`json_extract(value, '$.["x-lix-key"]')`, "=", foreignKeyDef.schemaKey)
-					.where(sql`json_extract(value, '$.["x-lix-version"]')`, "=", foreignKeyDef.schemaVersion)
+					.where(
+						sql`json_extract(value, '$.["x-lix-key"]')`,
+						"=",
+						foreignKeyDef.schemaKey
+					)
+					.where(
+						sql`json_extract(value, '$.["x-lix-version"]')`,
+						"=",
+						foreignKeyDef.schemaVersion
+					),
 			});
 
 			if (referencedSchema.length === 0) {
 				throw new Error(
-					`Foreign key constraint violation: Referenced schema '${foreignKeyDef.schemaKey}' with version '${foreignKeyDef.schemaVersion}' does not exist`
+					`Foreign key constraint violation. Referenced schema '${foreignKeyDef.schemaKey}' with version '${foreignKeyDef.schemaVersion}' does not exist.`
 				);
 			}
 		}
@@ -349,7 +363,7 @@ function validateForeignKeyConstraints(args: {
 
 		if (referencedStates.length === 0) {
 			throw new Error(
-				`Foreign key constraint violation: The foreign key constraint on '${localProperty}' references '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}'`
+				`Foreign key constraint violation. The schema '${args.schema["x-lix-key"]}::${args.schema["x-lix-version"]}' has a foreign key constraint on '${localProperty}' referencing '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}' in version '${args.version_id}'.`
 			);
 		}
 	}
