@@ -1,24 +1,24 @@
 import { openLixInMemory } from "@lix-js/sdk";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
-import { plugin as txtPlugin } from "@lix-js/plugin-txt";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
 export interface LixFileInfo {
-  handle: FileSystemFileHandle;
-  name: string;  // File name without extension
-  fullName: string;  // File name with extension
-  id: string;  // The lix_id
+	handle: FileSystemFileHandle;
+	name: string; // File name without extension
+	fullName: string; // File name with extension
+	id: string; // The lix_id
 }
 
 /**
  * Finds all Lix files in OPFS with the specified ID
- * 
+ *
  * @param lixId The Lix ID to search for (if not provided, returns all Lix files)
  * @param providePlugins Optional array of plugins to provide when opening the Lix
  * @returns Promise resolving to an array of LixFileInfo objects
  */
 export async function findLixFilesInOpfs(
 	lixId?: string,
-	providePlugins = [txtPlugin]
+	providePlugins = [mdPlugin]
 ): Promise<LixFileInfo[]> {
 	const rootHandle = await getOriginPrivateDirectory();
 	const results: LixFileInfo[] = [];
@@ -66,14 +66,14 @@ export async function findLixFilesInOpfs(
 
 /**
  * Finds a single Lix file in OPFS with the specified ID
- * 
+ *
  * @param lixId The Lix ID to search for
  * @param providePlugins Optional array of plugins to provide when opening the Lix
  * @returns Promise resolving to a LixFileInfo object or undefined if not found
  */
 export async function findLixFileInOpfs(
 	lixId: string,
-	providePlugins = [txtPlugin]
+	providePlugins = [mdPlugin]
 ): Promise<LixFileInfo | undefined> {
 	const files = await findLixFilesInOpfs(lixId, providePlugins);
 	return files.length > 0 ? files[0] : undefined;

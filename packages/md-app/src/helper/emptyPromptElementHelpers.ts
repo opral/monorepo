@@ -11,7 +11,7 @@ export const insertEmptyPromptElement = (editor: PlateEditor) => {
 		(node: TElement) => node.type !== EMPTY_DOCUMENT_PROMPT_KEY
 	);
 
-	const emptyPromptElement = {
+	const emptyPromptElement: TElement = {
 		type: EMPTY_DOCUMENT_PROMPT_KEY,
 		children: [{ text: "" }],
 	};

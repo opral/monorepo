@@ -10,7 +10,7 @@ import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
 import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
-import { plugin as txtPlugin } from "@lix-js/plugin-txt";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 import { initLixInspector } from "@lix-js/inspector";
 
@@ -61,7 +61,7 @@ export const lixAtom = atom(async (get) => {
 			const { findLixFileInOpfs } = await import("./helper/findLixInOpfs");
 
 			// Find the Lix file with the specified ID
-			const lixFile = await findLixFileInOpfs(lixIdSearchParam, [txtPlugin]);
+			const lixFile = await findLixFileInOpfs(lixIdSearchParam, [mdPlugin]);
 
 			if (!lixFile) {
 				throw new Error("Lix file not found with ID: " + lixIdSearchParam);
@@ -94,7 +94,7 @@ export const lixAtom = atom(async (get) => {
 					const blob = await response.blob();
 					const lix = await openLixInMemory({
 						blob,
-						providePlugins: [txtPlugin],
+						providePlugins: [mdPlugin],
 					});
 					await saveLixToOpfs({ lix });
 					return lix;
@@ -130,13 +130,13 @@ export const lixAtom = atom(async (get) => {
 		if (storedActiveAccount) {
 			lix = await openLixInMemory({
 				blob: lixBlob!,
-				providePlugins: [txtPlugin],
+				providePlugins: [mdPlugin],
 				account: JSON.parse(storedActiveAccount),
 			});
 		} else {
 			lix = await openLixInMemory({
 				blob: lixBlob!,
-				providePlugins: [txtPlugin],
+				providePlugins: [mdPlugin],
 			});
 		}
 	} catch {

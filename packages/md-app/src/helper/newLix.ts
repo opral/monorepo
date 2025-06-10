@@ -1,11 +1,11 @@
 import { newLixFile as _newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { saveLixToOpfs } from "./saveLixToOpfs.ts";
-import { plugin as txtPlugin } from "@lix-js/plugin-txt";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
 export async function createNewLixFileInOpfs(): Promise<{ id: string }> {
 	const lix = await openLixInMemory({
 		blob: await _newLixFile(),
-		providePlugins: [txtPlugin],
+		providePlugins: [mdPlugin],
 	});
 
 	const id = await lix.db

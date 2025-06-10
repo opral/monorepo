@@ -100,13 +100,13 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
   const [intermediateChanges] = useAtom(intermediateChangesAtom);
   const [activeFile] = useAtom(activeFileAtom);
 
-  // For txt plugin, changes are tracked at the file level
+  // For md plugin, changes are tracked at the file level
   // Find document-level changes for the current file
   const documentChanges = useMemo(() => {
     if (!activeFile) return [];
 
     return intermediateChanges.filter(change => {
-      // For txt plugin, entity_id is the file ID
+      // For md plugin, entity_id is the file ID
       return change.entity_id === activeFile.id;
     });
   }, [intermediateChanges, activeFile]);
@@ -137,7 +137,7 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     // Create diff structure for ChangeDiffComponent
     const diffData: UiDiffComponentProps["diffs"] = [{
       entity_id: activeFile.id,
-      plugin_key: "lix_plugin_txt", // This should match the plugin that handles txt files
+      plugin_key: "lix_plugin_md", // This should match the plugin that handles md files
       schema_key: "file", // The schema key for file content
       snapshot_content_before: {
         text: contextBefore.join('\n')
@@ -204,7 +204,7 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
     // Create diff structure for ChangeDiffComponent
     const diffData: UiDiffComponentProps["diffs"] = [{
       entity_id: activeFile.id,
-      plugin_key: "lix_plugin_txt",
+      plugin_key: "lix_plugin_md",
       schema_key: "file",
       snapshot_content_before: {
         text: contextBefore.join('\n')
@@ -250,7 +250,7 @@ function ChangeIndicatorWrapper(props: PlateElementProps) {
       return { type: 'deleted', isThisBlockChanged: true, hasDeletedContentAfter: false };
     }
 
-    // For txt plugin, we need to determine if this specific block/line has changed
+    // For md plugin, we need to determine if this specific block/line has changed
     // Get the current block's text content
     const currentBlockText = getBlockText(element);
     const currentBlockTextTrimmed = currentBlockText.trim();

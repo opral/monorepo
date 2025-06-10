@@ -162,7 +162,7 @@ const CreateCheckpointInput = () => {
 
     // Use the last change in the intermediate changes for generating the description
     const lastTextChange = intermediateChanges.filter(
-      (change) => change.plugin_key === "lix_plugin_txt"
+      (change) => change.plugin_key === "lix_plugin_md"
     ).slice(-1)[0];
 
     if (!lastTextChange) {

@@ -7,7 +7,7 @@ import {
 	createCheckpoint,
 	createThread,
 } from "@lix-js/sdk";
-import { plugin as txtPlugin } from "@lix-js/plugin-txt";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { switchActiveAccount } from "@/state";
 import { getWorkingChangeSet } from "../state-active-file";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
@@ -66,7 +66,7 @@ export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
 	if (!lix) {
 		lix = await openLixInMemory({
 			blob: await newLixFile(),
-			providePlugins: [txtPlugin],
+			providePlugins: [mdPlugin],
 		});
 	}
 

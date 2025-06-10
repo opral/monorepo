@@ -21,6 +21,7 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
+		"allowUnreachableCode": true,
 
 		/* Shadcn */
 		"baseUrl": ".",
