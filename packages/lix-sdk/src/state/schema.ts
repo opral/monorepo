@@ -395,7 +395,7 @@ function selectStateViaCTE(
 	sqlite: SqliteWasmDatabase,
 	filters: Record<string, string>
 ): any[] {
-	// This is the expensive CTE from the original recursive state view
+	// Fixed query to handle versions sharing change sets
 	let sql = `
 		WITH
 			all_changes_with_snapshots AS (
@@ -411,10 +411,46 @@ function selectStateViaCTE(
 				FROM all_changes_with_snapshots v
 				WHERE v.schema_key = 'lix_version'
 			),
-			reachable_cs_from_roots(id, version_id) AS (
-				SELECT version_change_set_id, version_id FROM root_cs_of_all_versions
+			-- Calculate inheritance chain for each version
+			version_inheritance_chain(child_version_id, parent_version_id, depth) AS (
+				-- Base case: direct parent relationships
+				SELECT 
+					json_extract(vi.snapshot_content, '$.child_version_id') AS child_version_id,
+					json_extract(vi.snapshot_content, '$.parent_version_id') AS parent_version_id,
+					1 AS depth
+				FROM all_changes_with_snapshots vi
+				WHERE vi.schema_key = 'lix_version_inheritance'
+				
+				UNION ALL
+				
+				-- Recursive case: follow inheritance chain
+				SELECT 
+					vic.child_version_id,
+					json_extract(vi.snapshot_content, '$.parent_version_id') AS parent_version_id,
+					vic.depth + 1
+				FROM version_inheritance_chain vic
+				JOIN all_changes_with_snapshots vi ON json_extract(vi.snapshot_content, '$.child_version_id') = vic.parent_version_id
+				WHERE vi.schema_key = 'lix_version_inheritance'
+				AND vic.depth < 100 -- Prevent infinite recursion
+			),
+			-- Extend root change sets to include inherited change sets
+			inherited_root_cs AS (
+				SELECT rcv.version_change_set_id, rcv.version_id, 0 AS inheritance_depth
+				FROM root_cs_of_all_versions rcv
+				
+				UNION ALL
+				
+				SELECT 
+					parent_rcv.version_change_set_id, 
+					vic.child_version_id AS version_id,
+					vic.depth AS inheritance_depth
+				FROM version_inheritance_chain vic
+				JOIN root_cs_of_all_versions parent_rcv ON parent_rcv.version_id = vic.parent_version_id
+			),
+			reachable_cs_from_roots(id, version_id, inheritance_depth) AS (
+				SELECT version_change_set_id, version_id, inheritance_depth FROM inherited_root_cs
 				UNION
-				SELECT json_extract(e.snapshot_content, '$.parent_id'), r.version_id
+				SELECT json_extract(e.snapshot_content, '$.parent_id'), r.version_id, r.inheritance_depth
 				FROM all_changes_with_snapshots e 
 				JOIN reachable_cs_from_roots r ON json_extract(e.snapshot_content, '$.child_id') = r.id
 				WHERE e.schema_key = 'lix_change_set_edge'
@@ -425,7 +461,8 @@ function selectStateViaCTE(
 					   json_extract(ias.snapshot_content, '$.schema_key') AS target_schema_key, 
 					   json_extract(ias.snapshot_content, '$.change_id') AS target_change_id,
 					   json_extract(ias.snapshot_content, '$.change_set_id') AS cse_origin_change_set_id,
-					   rcs.version_id
+					   rcs.version_id,
+					   rcs.inheritance_depth
 				FROM all_changes_with_snapshots ias
 				JOIN reachable_cs_from_roots rcs ON json_extract(ias.snapshot_content, '$.change_set_id') = rcs.id
 				WHERE ias.schema_key = 'lix_change_set_element'
@@ -433,7 +470,7 @@ function selectStateViaCTE(
 			leaf_target_snapshots AS (
 				SELECT target_change.entity_id, target_change.schema_key, target_change.file_id,
 					   target_change.plugin_key, target_change.snapshot_content AS snapshot_content,
-					   target_change.schema_version, r.version_id
+					   target_change.schema_version, r.version_id, r.inheritance_depth
 				FROM cse_in_reachable_cs r 
 				INNER JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
 				WHERE NOT EXISTS (
@@ -456,22 +493,65 @@ function selectStateViaCTE(
 					  AND (newer_r.cse_origin_change_set_id != r.cse_origin_change_set_id OR newer_r.target_change_id != r.target_change_id) 
 					  AND newer_r.cse_origin_change_set_id IN descendants_of_current_cs
 				)
+			),
+			-- Apply inheritance override logic: child state wins over parent state
+			final_state AS (
+				SELECT 
+					ls.entity_id,
+					ls.schema_key,
+					ls.file_id,
+					ls.plugin_key,
+					ls.snapshot_content,
+					ls.schema_version,
+					ls.version_id,
+					ls.inheritance_depth,
+					ROW_NUMBER() OVER (
+						PARTITION BY ls.entity_id, ls.schema_key, ls.file_id, ls.version_id
+						ORDER BY ls.inheritance_depth ASC
+					) AS priority_rank
+				FROM leaf_target_snapshots ls
+			),
+			-- Get the deduplicated state (one per entity per version)
+			deduplicated_state AS (
+				SELECT * FROM final_state WHERE priority_rank = 1
+			),
+			-- Get all versions and their change sets
+			all_version_changesets AS (
+				SELECT DISTINCT
+					v.version_id,
+					v.version_change_set_id
+				FROM root_cs_of_all_versions v
+			),
+			-- For each state entry, find all versions that share its change set
+			expanded_state AS (
+				SELECT 
+					ds.entity_id,
+					ds.schema_key,
+					ds.file_id,
+					ds.plugin_key,
+					ds.snapshot_content,
+					ds.schema_version,
+					avc2.version_id AS expanded_version_id,
+					ds.version_id AS original_version_id
+				FROM deduplicated_state ds
+				JOIN all_version_changesets avc1 ON ds.version_id = avc1.version_id
+				JOIN all_version_changesets avc2 ON avc1.version_change_set_id = avc2.version_change_set_id
 			)
 		SELECT 
-			ls.entity_id,
-			ls.schema_key,
-			ls.file_id,
-			ls.plugin_key,
-			ls.snapshot_content,
-			ls.schema_version,
-			ls.version_id,
-      -- TODO dont use max/min here for created_at
+			es.entity_id,
+			es.schema_key,
+			es.file_id,
+			es.plugin_key,
+			es.snapshot_content,
+			es.schema_version,
+			es.expanded_version_id AS version_id,
+			-- TODO dont use max/min here for created_at
 			(SELECT MIN(ic.created_at) FROM internal_change ic 
-			 WHERE ic.entity_id = ls.entity_id AND ic.schema_key = ls.schema_key AND ic.file_id = ls.file_id) AS created_at,
+			 WHERE ic.entity_id = es.entity_id AND ic.schema_key = es.schema_key AND ic.file_id = es.file_id) AS created_at,
 			(SELECT MAX(ic.created_at) FROM internal_change ic 
-			 WHERE ic.entity_id = ls.entity_id AND ic.schema_key = ls.schema_key AND ic.file_id = ls.file_id
-			   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = ls.version_id)) AS updated_at
-		FROM leaf_target_snapshots ls
+			 WHERE ic.entity_id = es.entity_id AND ic.schema_key = es.schema_key AND ic.file_id = es.file_id
+			   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = es.original_version_id)) AS updated_at
+		FROM expanded_state es
 	`;
 
 	const bindings: string[] = [];
@@ -494,7 +574,6 @@ function selectStateViaCTE(
 
 	return result || [];
 }
-
 
 export type StateView = {
 	entity_id: string;

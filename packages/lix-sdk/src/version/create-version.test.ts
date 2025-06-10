@@ -6,8 +6,8 @@ import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("should create a version linked to the provided change_set_id", async () => {
 	const lix = await openLixInMemory({});
-	// Setup: Create a change_set to link to
-	const changeSet = await createChangeSet({ lix });
+	// Setup: Create a change_set to link to (must be in global version for version graph)
+	const changeSet = await createChangeSet({ lix, version_id: "global" });
 
 	const newVersion = await createVersion({ lix, changeSet });
 
@@ -19,7 +19,7 @@ test("should create a version linked to the provided change_set_id", async () =>
 
 test("should create a version with the specified name", async () => {
 	const lix = await openLixInMemory({});
-	const changeSet = await createChangeSet({ lix });
+	const changeSet = await createChangeSet({ lix, version_id: "global" });
 	const versionName = "My Test Version";
 
 	const newVersion = await createVersion({
@@ -35,7 +35,7 @@ test("should create a version with the specified name", async () => {
 
 test("should create a version with the specified id", async () => {
 	const lix = await openLixInMemory({});
-	const changeSet = await createChangeSet({ lix });
+	const changeSet = await createChangeSet({ lix, version_id: "global" });
 
 	const newVersion = await createVersion({
 		lix,
@@ -51,7 +51,7 @@ test("should create a version with the specified id", async () => {
 
 test("should work within an existing transaction", async () => {
 	const lix = await openLixInMemory({});
-	const changeSet = await createChangeSet({ lix });
+	const changeSet = await createChangeSet({ lix, version_id: "global" });
 	const versionName = "Transaction Test Version";
 
 	const newVersion = await lix.db.transaction().execute(async (trx) => {

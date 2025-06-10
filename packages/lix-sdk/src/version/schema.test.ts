@@ -414,9 +414,10 @@ test("versions should be globally accessible regardless of version context", asy
 		.execute();
 
 	// Should include main version (created automatically) + our 3 created versions
-	expect(allVersions).toHaveLength(4);
+	expect(allVersions).toHaveLength(5);
 
 	const versionNames = allVersions.map((v) => v.name);
+	expect(versionNames).toContain("global");
 	expect(versionNames).toContain("main");
 	expect(versionNames).toContain("Version A");
 	expect(versionNames).toContain("Version B");

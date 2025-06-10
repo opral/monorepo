@@ -47,6 +47,10 @@ import {
 	type ThreadCommentView,
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
+import {
+	LixVersionInheritanceSchema,
+	type VersionInheritanceView,
+} from "../version-inheritance/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -62,6 +66,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	active_version: LixActiveVersionSchema,
 	version: LixVersionSchema,
+	version_inheritance: LixVersionInheritanceSchema,
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
 	change_set_edge: LixChangeSetEdgeSchema,
@@ -118,6 +123,7 @@ export type LixDatabaseSchema = {
 	// version
 	version: VersionView;
 	active_version: ActiveVersionView;
+	version_inheritance: VersionInheritanceView;
 
 	// logging
 	log: LogView;

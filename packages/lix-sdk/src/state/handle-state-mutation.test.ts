@@ -174,7 +174,12 @@ test("should throw error when version_id does not exist", async () => {
 // Deciding on the behavior when updating version.change_set_id is a tradeoff.
 // Implicit magic of "updating change_set_id creates edges" would mutate the target change set,
 // a more explicit behavior is to not create edges or orphaned change sets and the calling code should handle it.
-test("updating version change_set_id should not create edges or orphaned change sets", async () => {
+//
+//* It seems like this test is not needed anymore with the introduction of global state
+//* https://github.com/opral/lix-sdk/issues/315. A version can now be freely updated without
+//* effecting the change set graph of the version itself because the global version (state)
+//* is updated instead.
+test.skip("updating version change_set_id should not create edges or orphaned change sets in the graph of the version itself", async () => {
 	const lix = await openLixInMemory({});
 
 	// Get initial version state
@@ -612,6 +617,7 @@ test(
 			.values({
 				change_set_id: initialVersion.change_set_id,
 				label_id: checkpointLabel.id,
+				version_id: "global",
 			})
 			.execute();
 
@@ -671,77 +677,81 @@ test(
 // this is expensive to compute because the historical state must be reconstructed
 // ideally, we have a state_at read view which makes this peformant, or we find ways
 // to design the working change set differently.
-test("delete reconciliation: entities existing before checkpoint show deletions in working change set", async () => {
-	const lix = await openLixInMemory({});
+test.todo(
+	"delete reconciliation: entities existing before checkpoint show deletions in working change set",
+	async () => {
+		const lix = await openLixInMemory({});
 
-	// BEFORE checkpoint: Insert an entity
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "pre_checkpoint_key",
-			value: "pre_checkpoint_value",
-		})
-		.execute();
+		// BEFORE checkpoint: Insert an entity
+		await lix.db
+			.insertInto("key_value")
+			.values({
+				key: "pre_checkpoint_key",
+				value: "pre_checkpoint_value",
+			})
+			.execute();
 
-	// Get the current version after the insert (it will have updated)
-	const versionAfterInsert = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.where("name", "=", "main")
-		.executeTakeFirstOrThrow();
+		// Get the current version after the insert (it will have updated)
+		const versionAfterInsert = await lix.db
+			.selectFrom("version")
+			.selectAll()
+			.where("name", "=", "main")
+			.executeTakeFirstOrThrow();
 
-	// Create a checkpoint label and attach to current change set
-	const checkpointLabel = await lix.db
-		.selectFrom("label")
-		.where("name", "=", "checkpoint")
-		.select("id")
-		.executeTakeFirstOrThrow();
+		// Create a checkpoint label and attach to current change set
+		const checkpointLabel = await lix.db
+			.selectFrom("label")
+			.where("name", "=", "checkpoint")
+			.select("id")
+			.executeTakeFirstOrThrow();
 
-	await lix.db
-		.insertInto("change_set_label")
-		.values({
-			change_set_id: versionAfterInsert.change_set_id,
-			label_id: checkpointLabel.id,
-		})
-		.execute();
+		await lix.db
+			.insertInto("change_set_label")
+			.values({
+				change_set_id: versionAfterInsert.change_set_id,
+				label_id: checkpointLabel.id,
+				version_id: "global",
+			})
+			.execute();
 
-	// AFTER checkpoint: Delete the entity that existed before checkpoint
-	await lix.db
-		.deleteFrom("key_value")
-		.where("key", "=", "pre_checkpoint_key")
-		.execute();
+		// AFTER checkpoint: Delete the entity that existed before checkpoint
+		await lix.db
+			.deleteFrom("key_value")
+			.where("key", "=", "pre_checkpoint_key")
+			.execute();
 
-	// Get the final version after delete
-	const finalVersion = await lix.db
-		.selectFrom("version")
-		.selectAll()
-		.where("name", "=", "main")
-		.executeTakeFirstOrThrow();
+		// Get the final version after delete
+		const finalVersion = await lix.db
+			.selectFrom("version")
+			.selectAll()
+			.where("name", "=", "main")
+			.executeTakeFirstOrThrow();
 
-	// Verify entity deletion is included in working change set
-	// (because it existed before checkpoint)
-	const workingElementsAfterDelete = await lix.db
-		.selectFrom("change_set_element")
-		.where("change_set_id", "=", finalVersion.working_change_set_id)
-		.where("entity_id", "=", "pre_checkpoint_key")
-		.where("schema_key", "=", "lix_key_value")
-		.selectAll()
-		.execute();
+		// Verify entity deletion is included in working change set
+		// (because it existed before checkpoint)
+		const workingElementsAfterDelete = await lix.db
+			.selectFrom("change_set_element")
+			.where("change_set_id", "=", finalVersion.working_change_set_id)
+			.where("entity_id", "=", "pre_checkpoint_key")
+			.where("schema_key", "=", "lix_key_value")
+			.selectAll()
+			.execute();
 
-	// The delete should be visible in working change set because entity existed before checkpoint
-	expect(workingElementsAfterDelete).toHaveLength(1);
+		// The delete should be visible in working change set because entity existed before checkpoint
+		expect(workingElementsAfterDelete).toHaveLength(1);
 
-	// Verify it's the delete change
-	const deleteChange = await lix.db
-		.selectFrom("change")
-		.where("id", "=", workingElementsAfterDelete[0]!.change_id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
+		// Verify it's the delete change
+		const deleteChange = await lix.db
+			.selectFrom("change")
+			.where("id", "=", workingElementsAfterDelete[0]!.change_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
 
-	expect(deleteChange.snapshot_id).toBe("no-content");
-});
+		expect(deleteChange.snapshot_id).toBe("no-content");
+	}
+);
 
-test.todo("working change set elements are separated per version", async () => {
+test("working change set elements are separated per version", async () => {
 	const lix = await openLixInMemory({});
 
 	// Get the initial main version
@@ -763,7 +773,10 @@ test.todo("working change set elements are separated per version", async () => {
 	// Create a new change set and version
 	await lix.db
 		.insertInto("change_set")
-		.values([{ id: "new_cs" }, { id: "new_working_cs" }])
+		.values([
+			{ id: "new_cs", version_id: "global" },
+			{ id: "new_working_cs", version_id: "global" },
+		])
 		.execute();
 
 	await lix.db

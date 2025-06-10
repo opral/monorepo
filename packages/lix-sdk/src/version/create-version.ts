@@ -21,10 +21,14 @@ export async function createVersion(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
 			lix: { ...args.lix, db: trx },
+			version_id: "global",
 		});
 		const cs =
 			args.changeSet ??
-			(await createChangeSet({ lix: { ...args.lix, db: trx } }));
+			(await createChangeSet({ 
+				lix: { ...args.lix, db: trx },
+				version_id: "global",
+			}));
 
 		const versionId = args.id ?? nanoid();
 		await trx
@@ -36,6 +40,27 @@ export async function createVersion(args: {
 				working_change_set_id: workingCs.id,
 			})
 			.execute();
+
+		// Auto-inherit from global version (unless this is the global version itself)
+		if (versionId !== "global") {
+			// Check if inheritance already exists
+			const existingInheritance = await trx
+				.selectFrom("version_inheritance")
+				.where("child_version_id", "=", versionId)
+				.where("parent_version_id", "=", "global")
+				.selectAll()
+				.executeTakeFirst();
+
+			if (!existingInheritance) {
+				await trx
+					.insertInto("version_inheritance")
+					.values({
+						child_version_id: versionId,
+						parent_version_id: "global",
+					})
+					.execute();
+			}
+		}
 
 		const newVersion = await trx
 			.selectFrom("version")
