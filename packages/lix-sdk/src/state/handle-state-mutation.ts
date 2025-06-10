@@ -65,6 +65,7 @@ export function handleStateMutation(
 	if (!versionRecord) {
 		[versionRecord] = executeSync({
 			lix: { sqlite },
+			// TODO @samuelstroschein wouldn't we need the view that quieries the union of the temp table and this one?
 			query: db
 				.selectFrom("internal_change")
 				.innerJoin(
@@ -75,6 +76,7 @@ export function handleStateMutation(
 				.where("internal_change.schema_key", "=", "lix_version")
 				.where("internal_change.entity_id", "=", version_id)
 				.where("internal_change.snapshot_id", "!=", "no-content")
+				// TODO @samuelstroschein how does this ording work with a second branch in version?
 				// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
 				.orderBy("internal_change.rowid", "desc")
 				.limit(1)
@@ -100,6 +102,7 @@ export function handleStateMutation(
 
 	const version = JSON.parse(versionRecord.content) as LixVersion;
 
+	// TODO @samuelstroschein  until here we only collected information
 	const changeSetId = nanoid();
 
 	// Check if the root change is a version change for the same entity
@@ -111,7 +114,9 @@ export function handleStateMutation(
 	let finalSnapshotContent = snapshot_content;
 
 	if (isVersionChange) {
-		const rootSnapshot = JSON.parse(snapshot_content) as LixVersion;
+		// TODO @samuelstroschein why ROOTSnapshot?
+		// TODO @samuelstroschein in case of a version change we can expect a snapshot right?
+		const rootSnapshot = JSON.parse(snapshot_content!) as LixVersion;
 		// Check if ONLY change_set_id changed (and nothing else)
 		const isOnlyChangeSetIdUpdate =
 			rootSnapshot.change_set_id !== version.change_set_id &&
@@ -431,34 +436,34 @@ function createChangeWithSnapshot(args: {
 	timestamp?: string;
 	version_id?: string;
 }): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
-	const [snapshot] = args.data.snapshot_content
-		? executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.insertInto("internal_snapshot")
-					.values({
-						content: sql`jsonb(${args.data.snapshot_content})`,
-					})
-					.returning("id"),
-			})
-		: [{ id: "no-content" }];
+	// const [snapshot] = args.data.snapshot_content
+	// 	? executeSync({
+	// 			lix: { sqlite: args.sqlite },
+	// 			query: args.db
+	// 				.insertInto("internal_snapshot")
+	// 				.values({
+	// 					content: sql`jsonb(${args.data.snapshot_content})`,
+	// 				})
+	// 				.returning("id"),
+	// 		})
+	// 	: [{ id: "no-content" }];
 
-	const [change] = executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
-			.insertInto("internal_change")
-			.values({
-				id: args.id,
-				entity_id: args.data.entity_id,
-				schema_key: args.data.schema_key,
-				snapshot_id: snapshot.id,
-				file_id: args.data.file_id,
-				plugin_key: args.data.plugin_key,
-				created_at: args.timestamp || new Date().toISOString(),
-				schema_version: args.data.schema_version,
-			})
-			.returning(["id", "schema_key", "file_id", "entity_id"]),
-	});
+	// const [change] = executeSync({
+	// 	lix: { sqlite: args.sqlite },
+	// 	query: args.db
+	// 		.insertInto("internal_change")
+	// 		.values({
+	// 			id: args.id,
+	// 			entity_id: args.data.entity_id,
+	// 			schema_key: args.data.schema_key,
+	// 			snapshot_id: snapshot.id,
+	// 			file_id: args.data.file_id,
+	// 			plugin_key: args.data.plugin_key,
+	// 			created_at: args.timestamp || new Date().toISOString(),
+	// 			schema_version: args.data.schema_version,
+	// 		})
+	// 		.returning(["id", "schema_key", "file_id", "entity_id"]),
+	// });
 
 	// Update cache for every change (including deletions)
 	if (args.version_id) {
@@ -475,6 +480,41 @@ function createChangeWithSnapshot(args: {
 			timestamp: args.timestamp || new Date().toISOString(),
 		});
 	}
+
+	// we don't need the created snapshot
+	const [change] = executeSync({
+		lix: { sqlite: args.sqlite },
+		query: args.db
+			.insertInto("internal_change_in_transaction")
+			.values({
+				id: args.id,
+				entity_id: args.data.entity_id,
+				schema_key: args.data.schema_key,
+				snapshot_content: args.data.snapshot_content
+					? sql`jsonb(${args.data.snapshot_content})`
+					: null,
+				file_id: args.data.file_id,
+				plugin_key: args.data.plugin_key,
+				created_at: args.timestamp || new Date().toISOString(),
+				schema_version: args.data.schema_version,
+			})
+			.onConflict((oc) =>
+				// we assume that a conflic is always on the unique constraint of entity_id, file_id, schema_key
+				oc.doUpdateSet({
+					id: args.id,
+					entity_id: args.data.entity_id,
+					schema_key: args.data.schema_key,
+					snapshot_content: args.data.snapshot_content
+						? sql`jsonb(${args.data.snapshot_content})`
+						: null,
+					file_id: args.data.file_id,
+					plugin_key: args.data.plugin_key,
+					created_at: args.timestamp || new Date().toISOString(),
+					schema_version: args.data.schema_version,
+				})
+			)
+			.returning(["id", "schema_key", "file_id", "entity_id"]),
+	});
 
 	return change;
 }
