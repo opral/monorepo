@@ -85,12 +85,13 @@ export function applyLabelDatabaseSchema(
     'lix_own_entity', 
     json_object('id', nano_id(), 'name', 'checkpoint'), 
     '${LixLabelSchema["x-lix-version"]}',
-    (SELECT version_id FROM active_version LIMIT 1)
+    'global'
   WHERE NOT EXISTS (
     SELECT 1 
     FROM state 
     WHERE json_extract(snapshot_content, '$.name') = 'checkpoint'
     AND schema_key = 'lix_label'
+    AND version_id = 'global'
   );
 `;
 

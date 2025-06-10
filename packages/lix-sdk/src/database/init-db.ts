@@ -20,6 +20,7 @@ import { applyStateDatabaseSchema } from "../state/schema.js";
 import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
 import { applyLabelDatabaseSchema } from "../label/schema.js";
 import { applyThreadDatabaseSchema } from "../thread/schema.js";
+import { applyVersionInheritanceDatabaseSchema } from "../version-inheritance/schema.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
@@ -72,6 +73,7 @@ export function initDb(args: {
 	);
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyVersionDatabaseSchema(args.sqlite);
+	applyVersionInheritanceDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 	applyChangeAuthorDatabaseSchema(args.sqlite);
 	applyLabelDatabaseSchema(args.sqlite);

@@ -26,6 +26,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
   CREATE TRIGGER IF NOT EXISTS version_insert
   INSTEAD OF INSERT ON version
   BEGIN
+      -- Create version state first
       INSERT INTO state (
         entity_id,
         schema_key,
@@ -36,18 +37,18 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
         version_id
       )
       SELECT
-        id,
+        with_default_values.id,
         'lix_version',
         'lix',
         'lix_own_entity',
         json_object(
-          'id', id,                
-          'name', name,            
+          'id', with_default_values.id,                
+          'name', with_default_values.name,            
           'change_set_id', NEW.change_set_id,
           'working_change_set_id', NEW.working_change_set_id
         ),
         '${LixVersionSchema["x-lix-version"]}',
-        (SELECT version_id FROM active_version)
+        'global'
       FROM (
           SELECT
               COALESCE(NEW.id, nano_id()) AS id,
@@ -60,17 +61,17 @@ INSTEAD OF UPDATE ON version
 BEGIN
     UPDATE state
     SET
-      entity_id = NEW.id,
+      entity_id = COALESCE(NEW.id, OLD.id),
       schema_key = 'lix_version',
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
       snapshot_content = json_object(
-        'id', NEW.id,
-        'name', NEW.name,
-        'change_set_id', NEW.change_set_id,
-        'working_change_set_id', NEW.working_change_set_id
+        'id', COALESCE(NEW.id, OLD.id),
+        'name', COALESCE(NEW.name, OLD.name),
+        'change_set_id', COALESCE(NEW.change_set_id, OLD.change_set_id),
+        'working_change_set_id', COALESCE(NEW.working_change_set_id, OLD.working_change_set_id)
       ),
-      version_id = (SELECT version_id FROM active_version)
+      version_id = 'global'
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_version'
@@ -80,6 +81,17 @@ BEGIN
   CREATE TRIGGER IF NOT EXISTS version_delete
   INSTEAD OF DELETE ON version
   BEGIN
+    -- Delete inheritance relationships where this version is a child
+    DELETE FROM state
+    WHERE schema_key = 'lix_version_inheritance'
+    AND json_extract(snapshot_content, '$.child_version_id') = OLD.id;
+    
+    -- Delete inheritance relationships where this version is a parent
+    DELETE FROM state
+    WHERE schema_key = 'lix_version_inheritance'
+    AND json_extract(snapshot_content, '$.parent_version_id') = OLD.id;
+    
+    -- Delete the version itself
     DELETE FROM state
     WHERE entity_id = OLD.id
     AND schema_key = 'lix_version';
@@ -110,7 +122,7 @@ BEGIN
       'lix_own_entity',
       json_object('version_id', NEW.version_id),
       '${LixActiveVersionSchema["x-lix-version"]}',
-      (SELECT version_id FROM active_version)
+      'global'
     );
   END;
 
@@ -120,7 +132,7 @@ BEGIN
     UPDATE state
     SET
       snapshot_content = json_object('version_id', NEW.version_id),
-      version_id = (SELECT version_id FROM active_version)
+      version_id = 'global'
     WHERE
       entity_id = 'lix_active_version'
       AND schema_key = 'lix_active_version'
@@ -138,13 +150,13 @@ BEGIN
    -- Insert the default change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id, version_id)
-  SELECT '${INITIAL_CHANGE_SET_ID}', '${INITIAL_VERSION_ID}'
+  SELECT '${INITIAL_CHANGE_SET_ID}', 'global'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_CHANGE_SET_ID}');
 
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id, version_id)
-  SELECT '${INITIAL_WORKING_CHANGE_SET_ID}', '${INITIAL_VERSION_ID}'
+  SELECT '${INITIAL_WORKING_CHANGE_SET_ID}', 'global'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_WORKING_CHANGE_SET_ID}');
 
   -- Insert the default version if missing
@@ -170,13 +182,42 @@ BEGIN
       'working_change_set_id', '${INITIAL_WORKING_CHANGE_SET_ID}'
     ),
     '${LixVersionSchema["x-lix-version"]}',
-    '${INITIAL_VERSION_ID}'
+    'global'
   WHERE NOT EXISTS (
     SELECT 1 
     FROM state 
     WHERE entity_id = '${INITIAL_VERSION_ID}' 
     AND schema_key = 'lix_version'
   );
+
+  -- Create global change sets if they don't exist
+		INSERT OR IGNORE INTO change_set (id, version_id) VALUES ('global_change_set', 'global');
+		INSERT OR IGNORE INTO change_set (id, version_id) VALUES ('global_working_change_set', 'global');
+		
+		-- Create global version if it doesn't exist
+		INSERT OR IGNORE INTO state (
+			entity_id,
+			schema_key,
+			file_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			version_id
+		) VALUES (
+			'global',
+			'lix_version',
+			'lix',
+			'lix_own_entity',
+			json_object(
+				'id', 'global',
+				'name', 'global',
+				'change_set_id', 'global_change_set',
+				'working_change_set_id', 'global_working_change_set'
+			),
+			'1.0',
+			'global'
+		);
+
 
   -- Set the default current version to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
@@ -196,7 +237,7 @@ BEGIN
     'lix_own_entity', 
     json_object('version_id', '${INITIAL_VERSION_ID}'), 
     '${LixActiveVersionSchema["x-lix-version"]}',
-    '${INITIAL_VERSION_ID}'
+    'global'
   WHERE NOT EXISTS (
     SELECT 1 
     FROM state 
