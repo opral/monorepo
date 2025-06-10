@@ -32,7 +32,7 @@ export function handleStateMutation(
 	schema_key: string,
 	file_id: string,
 	plugin_key: string,
-	snapshot_content: string, // stringified json
+	snapshot_content: string | null, // stringified json
 	version_id: string,
 	schema_version: string
 ): 0 | 1 {

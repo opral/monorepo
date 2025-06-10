@@ -22,6 +22,12 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
     version_id
   FROM state
   WHERE schema_key = 'lix_version';
+  
+  
+
+  `);
+  
+	sqlite.exec(`
 
   CREATE TRIGGER IF NOT EXISTS version_insert
   INSTEAD OF INSERT ON version
@@ -54,7 +60,8 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
               COALESCE(NEW.name, human_id()) AS name
       ) AS with_default_values;
   END;
-
+  `);
+	sqlite.exec(`
 CREATE TRIGGER IF NOT EXISTS version_update
 INSTEAD OF UPDATE ON version
 BEGIN
@@ -92,6 +99,10 @@ BEGIN
   FROM state
   WHERE schema_key = 'lix_active_version';
 
+
+  `);
+	sqlite.exec(`
+
   CREATE TRIGGER IF NOT EXISTS active_version_insert
   INSTEAD OF INSERT ON active_version
   BEGIN
@@ -114,6 +125,9 @@ BEGIN
     );
   END;
 
+  `);
+	sqlite.exec(`
+
   CREATE TRIGGER IF NOT EXISTS active_version_update
   INSTEAD OF UPDATE ON active_version
   BEGIN
@@ -127,6 +141,10 @@ BEGIN
       AND file_id = 'lix';
   END;
 
+
+  `);
+	sqlite.exec(`
+
   CREATE TRIGGER IF NOT EXISTS active_version_delete
   INSTEAD OF DELETE ON active_version
   BEGIN
@@ -135,18 +153,27 @@ BEGIN
     AND schema_key = 'lix_active_version';
   END;
 
+
+  `);
+	sqlite.exec(`
+
    -- Insert the default change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id, version_id)
   SELECT '${INITIAL_CHANGE_SET_ID}', '${INITIAL_VERSION_ID}'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_CHANGE_SET_ID}');
 
+  `);
+	sqlite.exec(`
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id, version_id)
   SELECT '${INITIAL_WORKING_CHANGE_SET_ID}', '${INITIAL_VERSION_ID}'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_WORKING_CHANGE_SET_ID}');
 
+
+  `);
+	sqlite.exec(`
   -- Insert the default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO state (
@@ -178,6 +205,9 @@ BEGIN
     AND schema_key = 'lix_version'
   );
 
+
+  `);
+	sqlite.exec(`
   -- Set the default current version to 'main' if both tables are empty
   -- (this is a workaround for not having a separata creation and migration schema's)
   INSERT INTO state (

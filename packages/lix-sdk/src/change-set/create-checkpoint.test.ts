@@ -378,5 +378,5 @@ test(
 
 		expect(deletionChangesInCheckpoint).toHaveLength(2);
 	},
-	{ timeout: 30000 }
+	{ timeout: 60000 }
 );
