@@ -95,3 +95,26 @@ A paragraph without an ID.`;
 		},
 	]);
 });
+
+test("it handles Unicode characters without throwing errors", () => {
+	const markdown = `# Testing Unicode 🚀
+
+This contains emojis 😀 and other Unicode: ñáéíóú
+
+<!-- id: test123 -->
+A paragraph with special chars: ©®™ and Chinese: 你好世界`;
+
+	// Should not throw an error
+	expect(() => {
+		const blocks = parseMdBlocks(new TextEncoder().encode(markdown));
+		expect(blocks).toHaveLength(3);
+		expect(blocks[0]!.content).toBe("# Testing Unicode 🚀");
+		expect(blocks[1]!.content).toBe(
+			"This contains emojis 😀 and other Unicode: ñáéíóú",
+		);
+		expect(blocks[2]!.id).toBe("test123");
+		expect(blocks[2]!.content).toBe(
+			"A paragraph with special chars: ©®™ and Chinese: 你好世界",
+		);
+	}).not.toThrow();
+});
