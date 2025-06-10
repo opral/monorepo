@@ -175,3 +175,31 @@ test("creating a change set with parents should establish parent-child relations
 		childChangeSet.id,
 	]);
 });
+
+test("creating a change set with version_id should store it in the specified version", async () => {
+	const lix = await openLixInMemory({});
+
+	// Get the global version ID
+	const globalVersion = "global";
+
+	// Create a change set explicitly in the global version
+	const changeSet = await createChangeSet({
+		lix,
+		elements: [],
+		version_id: globalVersion,
+	});
+
+	// Verify the change set was created with the correct version_id
+	expect(changeSet.id).toBeDefined();
+	expect(changeSet.version_id).toBe(globalVersion);
+
+	// Also verify by querying the database directly
+	const storedChangeSet = await lix.db
+		.selectFrom("change_set")
+		.selectAll()
+		.where("id", "=", changeSet.id)
+		.executeTakeFirstOrThrow();
+
+	expect(storedChangeSet.version_id).toBe(globalVersion);
+});
+
