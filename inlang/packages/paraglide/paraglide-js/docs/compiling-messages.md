@@ -57,7 +57,7 @@ export default defineConfig({
 });
 ```
 
-## Programatically
+## Programmatically
 
 The Paraglide compiler can be invoked programatically via the `compile` function.
 
