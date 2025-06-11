@@ -87,6 +87,7 @@ export async function applyChangeSet(args: {
 					.values({
 						...cacheKey,
 						plugin_key: change.plugin_key,
+						inheritance_delete_marker: change.snapshot_content === null ? 1 : 0,
 						snapshot_content: JSON.stringify(change.snapshot_content),
 						schema_version: change.schema_version,
 						created_at: change.created_at,

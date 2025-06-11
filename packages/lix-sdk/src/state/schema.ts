@@ -136,7 +136,7 @@ export function applyStateDatabaseSchema(
 							   snapshot_content, schema_version, created_at, updated_at,
 							   inherited_from_version_id
 						FROM internal_state_cache
-							WHERE NOT (snapshot_content LIKE '%"__deleted":true%')						
+							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions						
 						UNION ALL
 						
 						-- Inherited entities: child versions see parent entities they don't override
@@ -155,7 +155,9 @@ export function applyStateDatabaseSchema(
 						) vi
 						JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
 						WHERE vi.parent_version_id IS NOT NULL
-						-- Don't inherit if child already has this entity  
+						-- Only inherit entities that exist (not deleted) in parent
+						AND isc.inheritance_delete_marker = 0
+						-- Don't inherit if child already has this entity (including deletion markers)
 						AND NOT EXISTS (
 							SELECT 1 FROM internal_state_cache child_isc
 							WHERE child_isc.version_id = vi.version_id
@@ -182,7 +184,8 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Run the expensive recursive CTE to materialize state
-					const stateResults = selectStateViaCTE(sqlite, {});
+					// Include deletions when populating cache so inheritance blocking works
+					const stateResults = selectStateViaCTE(sqlite, {}, true);
 
 					// Populate cache with materialized state results
 					if (stateResults && stateResults.length > 0) {
@@ -211,19 +214,23 @@ export function applyStateDatabaseSchema(
 								continue;
 							}
 
+							const isDeletion = snapshot_content === null;
+
 							sqlite.exec({
 								sql: `INSERT OR REPLACE INTO internal_state_cache 
-									  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id)
-									  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+									  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker)
+									  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 								bind: [
 									entity_id,
 									schema_key,
 									file_id,
 									version_id,
 									plugin_key,
-									typeof snapshot_content === "string"
-										? snapshot_content
-										: JSON.stringify(snapshot_content),
+									isDeletion
+										? null
+										: typeof snapshot_content === "string"
+											? snapshot_content
+											: JSON.stringify(snapshot_content),
 									schema_version,
 									created_at,
 									updated_at,
@@ -231,6 +238,7 @@ export function applyStateDatabaseSchema(
 									inherited_from_version_id === undefined
 										? null
 										: inherited_from_version_id,
+									isDeletion ? 1 : 0,
 								],
 							});
 							cachePopulated = true;
@@ -247,9 +255,44 @@ export function applyStateDatabaseSchema(
 
 					// Re-query cache after population
 
-					// Re-query after population
+					// Re-query after population with inheritance logic
 					const newResults = sqlite.exec({
-						sql: "SELECT * FROM internal_state_cache",
+						sql: `
+							-- Direct entities from cache
+							SELECT entity_id, schema_key, file_id, version_id, plugin_key, 
+								   snapshot_content, schema_version, created_at, updated_at,
+								   inherited_from_version_id
+							FROM internal_state_cache
+								WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions						
+							UNION ALL
+							
+							-- Inherited entities: child versions see parent entities they don't override
+							SELECT isc.entity_id, isc.schema_key, isc.file_id, 
+								   vi.version_id, -- Return child version_id
+								   isc.plugin_key, isc.snapshot_content, isc.schema_version, 
+								   isc.created_at, isc.updated_at,
+								   vi.parent_version_id as inherited_from_version_id
+							FROM (
+								-- Get version inheritance relationships from cache
+								SELECT 
+									json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+									json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+								FROM internal_state_cache isc_v
+								WHERE isc_v.schema_key = 'lix_version'
+							) vi
+							JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
+							WHERE vi.parent_version_id IS NOT NULL
+							-- Only inherit entities that exist (not deleted) in parent
+							AND isc.inheritance_delete_marker = 0
+							-- Don't inherit if child already has this entity (including deletion markers)
+							AND NOT EXISTS (
+								SELECT 1 FROM internal_state_cache child_isc
+								WHERE child_isc.version_id = vi.version_id
+								  AND child_isc.entity_id = isc.entity_id
+								  AND child_isc.schema_key = isc.schema_key
+								  AND child_isc.file_id = isc.file_id
+							)
+						`,
 						returnValue: "resultRows",
 					});
 					cursorState.results = newResults || [];
@@ -342,11 +385,12 @@ export function applyStateDatabaseSchema(
     file_id TEXT NOT NULL,
     version_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
-    snapshot_content TEXT NOT NULL,
+    snapshot_content TEXT, -- Allow NULL for deletions
     schema_version TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     inherited_from_version_id TEXT,
+    inheritance_delete_marker INTEGER DEFAULT 0, -- Flag for copy-on-write deletion markers
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   );
 
@@ -446,16 +490,20 @@ function getColumnName(columnIndex: number): string {
 
 function selectStateViaCTE(
 	sqlite: SqliteWasmDatabase,
-	filters: Record<string, string>
+	filters: Record<string, string>,
+	includeDeletions: boolean = false
 ): any[] {
 	let sql = `
 		WITH
 			all_changes_with_snapshots AS (
 				SELECT ic.id, ic.entity_id, ic.schema_key, ic.file_id, ic.plugin_key,
-					   ic.schema_version, json(s.content) AS snapshot_content 
+					   ic.schema_version, 
+					   CASE 
+					     WHEN ic.snapshot_id = 'no-content' THEN NULL
+					     ELSE json(s.content)
+					   END AS snapshot_content 
 				FROM internal_change ic
 				LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
-				WHERE ic.snapshot_id != 'no-content'
 			),
 			root_cs_of_all_versions AS (
 				SELECT json_extract(v.snapshot_content, '$.change_set_id') AS version_change_set_id, 
@@ -511,7 +559,7 @@ function selectStateViaCTE(
 			),
 			-- Get version inheritance relationships
 			version_inheritance AS (
-				SELECT 
+				SELECT DISTINCT
 					v.entity_id AS version_id,
 					json_extract(v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
 				FROM all_changes_with_snapshots v
@@ -536,34 +584,65 @@ function selectStateViaCTE(
 				FROM version_inheritance vi
 				JOIN leaf_target_snapshots ls ON ls.version_id = vi.parent_version_id
 				WHERE vi.parent_version_id IS NOT NULL
-				-- Don't inherit if child already has this entity
+				AND ls.snapshot_content IS NOT NULL -- Don't inherit deleted entities
+				-- Don't inherit if child already has this entity (including deletion markers)
+				-- Use a more comprehensive check that includes both leaf snapshots and direct inheritance blocking
 				AND NOT EXISTS (
+					-- Check if there's ANY change for this entity in the child version
+					-- This includes creation, update, AND deletion changes
 					SELECT 1 FROM leaf_target_snapshots child_ls
 					WHERE child_ls.version_id = vi.version_id
 					  AND child_ls.entity_id = ls.entity_id
 					  AND child_ls.schema_key = ls.schema_key
 					  AND child_ls.file_id = ls.file_id
 				)
-			)
-		SELECT 
-			ae.entity_id,
-			ae.schema_key,
-			ae.file_id,
-			ae.plugin_key,
-			ae.snapshot_content,
-			ae.schema_version,
-			ae.version_id,
+				-- Additional safeguard: check that no change set element exists for this entity in child
+				AND NOT EXISTS (
+					SELECT 1 FROM cse_in_reachable_cs cse
+					JOIN all_changes_with_snapshots target_change ON cse.target_change_id = target_change.id
+					WHERE cse.version_id = vi.version_id
+					  AND target_change.entity_id = ls.entity_id
+					  AND target_change.schema_key = ls.schema_key
+					  AND target_change.file_id = ls.file_id
+				)
+			),
+		-- Prioritize direct entities over inherited ones, then deduplicate
+		prioritized_entities AS (
+			SELECT *,
+				   -- Priority: direct entities (inherited_from_version_id IS NULL) over inherited
+				   CASE WHEN inherited_from_version_id IS NULL THEN 1 ELSE 2 END as priority,
+				   -- Row number for deduplication within same priority
+				   ROW_NUMBER() OVER (
+					   PARTITION BY entity_id, schema_key, file_id, visible_in_version 
+					   ORDER BY CASE WHEN inherited_from_version_id IS NULL THEN 1 ELSE 2 END,
+					            -- Among inherited entities, prefer those with earlier timestamps
+					            version_id
+				   ) as rn
+			FROM all_entities ae
+			-- Don't filter out entities with null snapshot_content here
+			-- We need deletion markers to be included for proper inheritance blocking
+		)
+		SELECT DISTINCT
+			pe.entity_id,
+			pe.schema_key,
+			pe.file_id,
+			pe.plugin_key,
+			pe.snapshot_content,
+			pe.schema_version,
+			pe.version_id,
 			(SELECT MIN(ic.created_at) FROM internal_change ic 
-			 WHERE ic.entity_id = ae.entity_id AND ic.schema_key = ae.schema_key AND ic.file_id = ae.file_id) AS created_at,
+			 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id) AS created_at,
 			COALESCE(
 				(SELECT MAX(ic.created_at) FROM internal_change ic 
-				 WHERE ic.entity_id = ae.entity_id AND ic.schema_key = ae.schema_key AND ic.file_id = ae.file_id
-				   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = ae.version_id)),
+				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id
+				   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = pe.version_id)),
 				(SELECT MIN(ic.created_at) FROM internal_change ic 
-				 WHERE ic.entity_id = ae.entity_id AND ic.schema_key = ae.schema_key AND ic.file_id = ae.file_id)
+				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id)
 			) AS updated_at,
-			ae.inherited_from_version_id
-		FROM all_entities ae
+			pe.inherited_from_version_id
+		FROM prioritized_entities pe
+		WHERE pe.rn = 1
+		${includeDeletions ? "" : "-- Filter out deletion markers from final results\n		AND pe.snapshot_content IS NOT NULL"}
 	`;
 
 	const bindings: string[] = [];
@@ -580,7 +659,7 @@ function selectStateViaCTE(
 	});
 
 	if (conditions.length > 0) {
-		sql += " WHERE " + conditions.join(" AND ");
+		sql += " AND " + conditions.join(" AND ");
 	}
 
 	const result = sqlite.exec({
@@ -612,11 +691,12 @@ export type InternalStateCacheTable = {
 	file_id: string;
 	version_id: string;
 	plugin_key: string;
-	snapshot_content: string; // JSON string
+	snapshot_content: string | null; // JSON string, NULL for deletions
 	schema_version: string;
 	created_at: string;
 	updated_at: string;
 	inherited_from_version_id: string | null;
+	inheritance_delete_marker: number; // 1 for copy-on-write deletion markers, 0 otherwise
 };
 
 // Kysely operation types
