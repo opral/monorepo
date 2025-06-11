@@ -2,6 +2,10 @@
 
 This plugin is a general purpose plugin to read and write messages of json files.
 
+> The plugin uses the inlang SDK v1 API but can be used in V2 projects.
+>
+> A slight difference is that `languageTag` is called `locale` in v2 projects. Use `languageTag` for this plugin.   
+
 ## Manual Installation
 
 > We recommend using the install button, but if you want to do it manually:
