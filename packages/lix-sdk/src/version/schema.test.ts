@@ -10,10 +10,10 @@ test("insert, update, delete on the version view", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "change_set_id_0" },
-			{ id: "change_set_id_1" },
-			{ id: "working_cs_0" },
-			{ id: "working_cs_1" },
+			{ id: "change_set_id_0", version_id: "global" },
+			{ id: "change_set_id_1", version_id: "global" },
+			{ id: "working_cs_0", version_id: "global" },
+			{ id: "working_cs_1", version_id: "global" },
 		])
 		.execute();
 
@@ -39,6 +39,7 @@ test("insert, update, delete on the version view", async () => {
 		.selectFrom("version")
 		.orderBy("name", "asc")
 		.where("id", "in", ["version0", "version1"])
+		.where("version.version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -56,6 +57,7 @@ test("insert, update, delete on the version view", async () => {
 	await lix.db
 		.updateTable("version")
 		.where("name", "=", "version0")
+		.where("version.version_id", "=", "global")
 		.set({ change_set_id: "change_set_id_1" })
 		.execute();
 
@@ -63,6 +65,7 @@ test("insert, update, delete on the version view", async () => {
 		.selectFrom("version")
 		.orderBy("name", "asc")
 		.where("id", "in", ["version0", "version1"])
+		.where("version.version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -131,10 +134,10 @@ test("querying by id", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "change_set_id_0" },
-			{ id: "change_set_id_1" },
-			{ id: "working_cs_0" },
-			{ id: "working_cs_1" },
+			{ id: "change_set_id_0", version_id: "global" },
+			{ id: "change_set_id_1", version_id: "global" },
+			{ id: "working_cs_0", version_id: "global" },
+			{ id: "working_cs_1", version_id: "global" },
 		])
 		.execute();
 
@@ -159,6 +162,7 @@ test("querying by id", async () => {
 	const versions = await lix.db
 		.selectFrom("version")
 		.where("id", "=", "version0")
+		.where("version.version_id", "=", "global")
 		.select("id")
 		.execute();
 
@@ -166,13 +170,13 @@ test("querying by id", async () => {
 	expect(versions[0]?.id).toBe("version0");
 });
 
-test("update, delete on the active version view", async () => {
+test("update active version view", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create required change sets and version first
 	await lix.db
 		.insertInto("change_set")
-		.values([{ id: "cs1" }])
+		.values([{ id: "cs1", version_id: "global" }])
 		.execute();
 
 	await lix.db
@@ -182,6 +186,7 @@ test("update, delete on the active version view", async () => {
 			name: "test_version",
 			change_set_id: "cs1",
 			working_change_set_id: "cs1",
+			version_id: "global",
 		})
 		.execute();
 
@@ -200,15 +205,6 @@ test("update, delete on the active version view", async () => {
 			version_id: "version_id_1",
 		},
 	]);
-
-	await lix.db.deleteFrom("active_version").execute();
-
-	const viewAfterDelete = await lix.db
-		.selectFrom("active_version")
-		.selectAll()
-		.execute();
-
-	expect(viewAfterDelete).toHaveLength(0);
 });
 
 test("applying the schema should create an initial 'main' version", async () => {
@@ -237,7 +233,7 @@ test("should use default id and name if not provided", async () => {
 	// Pre-populate change_set table
 	await lix.db
 		.insertInto("change_set")
-		.values([{ id: "cs1" }])
+		.values([{ id: "cs1", version_id: "global" }])
 		.execute();
 
 	// Insert a version providing only change_set_id
@@ -319,7 +315,10 @@ test("should allow version insertion with valid change set references", async ()
 	// Create valid change sets
 	await lix.db
 		.insertInto("change_set")
-		.values([{ id: "cs1" }, { id: "cs2" }])
+		.values([
+			{ id: "cs1", version_id: "global" },
+			{ id: "cs2", version_id: "global" },
+		])
 		.execute();
 
 	// This should succeed with valid foreign key references
@@ -352,7 +351,11 @@ test("should allow active_version update with valid version_id", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create valid change set and version
-	await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+	await lix.db
+		.insertInto("change_set")
+		.values({ id: "cs1", version_id: "global" })
+		.execute();
+
 	await lix.db
 		.insertInto("version")
 		.values({
@@ -378,7 +381,11 @@ test("versions should be globally accessible regardless of version context", asy
 	// Create required change sets
 	await lix.db
 		.insertInto("change_set")
-		.values([{ id: "cs_a" }, { id: "cs_b" }, { id: "cs_c" }])
+		.values([
+			{ id: "cs_a", version_id: "global" },
+			{ id: "cs_b", version_id: "global" },
+			{ id: "cs_c", version_id: "global" },
+		])
 		.execute();
 
 	// Create versions using the version view (simulating creation from different version contexts)
@@ -390,18 +397,21 @@ test("versions should be globally accessible regardless of version context", asy
 				name: "Version A",
 				change_set_id: "cs_a",
 				working_change_set_id: "cs_a",
+				version_id: "global",
 			},
 			{
 				id: "version_b",
 				name: "Version B",
 				change_set_id: "cs_b",
 				working_change_set_id: "cs_b",
+				version_id: "global",
 			},
 			{
 				id: "version_c",
 				name: "Version C",
 				change_set_id: "cs_c",
 				working_change_set_id: "cs_c",
+				version_id: "global",
 			},
 		])
 		.execute();
@@ -409,6 +419,7 @@ test("versions should be globally accessible regardless of version context", asy
 	// Query all versions globally (without version_id filtering)
 	const allVersions = await lix.db
 		.selectFrom("version")
+		.where("version.version_id", "=", "global")
 		.selectAll()
 		.orderBy("name", "asc")
 		.execute();
@@ -424,139 +435,135 @@ test("versions should be globally accessible regardless of version context", asy
 	expect(versionNames).toContain("Version C");
 });
 
-// requires global state follow up PR
-test.todo(
-	"mutation of a version's state should NOT lead to duplicate version entries",
-	async () => {
-		const lix = await openLixInMemory({});
+test("mutation of a version's state should NOT lead to duplicate version entries", async () => {
+	const lix = await openLixInMemory({});
 
-		const versionA = await createVersion({
-			lix,
-			id: "versionA",
-			name: "versionA",
-		});
+	const versionA = await createVersion({
+		lix,
+		id: "versionA",
+		name: "versionA",
+	});
 
-		const versionsBeforeMutation = await lix.db
-			.selectFrom("version")
-			.where("id", "=", versionA.id)
-			.groupBy("id")
-			.select(["id", "name", "change_set_id", "working_change_set_id"])
-			.execute();
+	const versionsBeforeMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.groupBy("id")
+		.select(["id", "name", "change_set_id", "working_change_set_id"])
+		.execute();
 
-		expect(versionsBeforeMutation).toHaveLength(1);
+	expect(versionsBeforeMutation).toHaveLength(1);
 
-		expect(versionsBeforeMutation[0]).toMatchObject({
+	expect(versionsBeforeMutation[0]).toMatchObject({
+		id: versionA.id,
+		name: "versionA",
+		change_set_id: expect.any(String),
+		working_change_set_id: expect.any(String),
+	});
+
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "test_entity",
+			version_id: versionA.id,
+			snapshot_content: { foo: "bar" },
+			schema_key: "test_schema",
+			file_id: "test_file",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+		})
+		.execute();
+
+	const versionAAfterMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.groupBy("id")
+		.select(["id", "name", "change_set_id", "working_change_set_id"])
+		.execute();
+
+	expect(versionAAfterMutation).toHaveLength(1);
+
+	// The changeset should have advanced due to the state mutation
+	expect(versionAAfterMutation[0]?.change_set_id).not.toEqual(
+		versionA.change_set_id
+	);
+});
+
+test("direct mutation of a version shouldn't lead to duplicate entries", async () => {
+	const lix = await openLixInMemory({});
+
+	const versionA = await createVersion({
+		lix,
+		id: "versionA",
+		name: "versionA",
+	});
+
+	const versionABeforeMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.where("version_id", "=", "global")
+		.selectAll()
+		.execute();
+
+	const globalVersionBeforeMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(versionABeforeMutation).toMatchObject([
+		{
 			id: versionA.id,
 			name: "versionA",
+			version_id: "global",
 			change_set_id: expect.any(String),
 			working_change_set_id: expect.any(String),
-		});
+		},
+	]);
 
-		await lix.db
-			.insertInto("state")
-			.values({
-				entity_id: "test_entity",
-				version_id: versionA.id,
-				snapshot_content: { foo: "bar" },
-				schema_key: "test_schema",
-				file_id: "test_file",
-				plugin_key: "test_plugin",
-				schema_version: "1.0",
-			})
-			.execute();
+	await lix.db
+		.updateTable("version")
+		.where("id", "=", versionA.id)
+		.where("version.version_id", "=", "global")
+		.set({
+			name: "new name",
+		})
+		.execute();
 
-		const versionAAfterMutation = await lix.db
-			.selectFrom("version")
-			.where("id", "=", versionA.id)
-			.groupBy("id")
-			.select(["id", "name", "change_set_id", "working_change_set_id"])
-			.execute();
+	const versionsAfterMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", versionA.id)
+		.where("version.version_id", "=", "global")
+		.selectAll()
+		.execute();
 
-		expect(versionAAfterMutation).toHaveLength(1);
+	const globalVersionAfterMutation = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.where("version.version_id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-		// The changeset should have advanced due to the state mutation
-		expect(versionAAfterMutation[0]?.change_set_id).not.toEqual(
-			versionA.change_set_id
-		);
-	}
-);
+	expect(versionsAfterMutation).toMatchObject([
+		{
+			id: versionA.id,
+			version_id: "global",
+			name: "new name",
+			change_set_id: expect.any(String),
+			working_change_set_id: expect.any(String),
+		},
+	]);
 
-// requires global state follow up PR
-test.todo(
-	"direct mutation of a version shouldn't lead to duplicate entries",
-	async () => {
-		const lix = await openLixInMemory({});
+	// the version was updated in the global version aka
+	// the versions change set did not change itself
+	expect(versionsAfterMutation[0]?.change_set_id).toEqual(
+		versionABeforeMutation[0]?.change_set_id
+	);
 
-		const versionA = await createVersion({
-			lix,
-			id: "versionA",
-			name: "versionA",
-		});
-
-		const versionABeforeMutation = await lix.db
-			.selectFrom("version")
-			.where("id", "=", versionA.id)
-			.selectAll()
-			.execute();
-
-		const globalVersionBeforeMutation = await lix.db
-			.selectFrom("version")
-			.where("id", "=", "global")
-			.selectAll()
-			.executeTakeFirstOrThrow();
-
-		expect(versionABeforeMutation).toMatchObject([
-			{
-				id: versionA.id,
-				name: "versionA",
-				version_id: "global",
-				change_set_id: expect.any(String),
-				working_change_set_id: expect.any(String),
-			},
-		]);
-
-		await lix.db
-			.updateTable("version")
-			.where("id", "=", versionA.id)
-			.set({
-				name: "new name",
-			})
-			.execute();
-
-		const versionsAfterMutation = await lix.db
-			.selectFrom("version")
-			.where("id", "=", versionA.id)
-			.selectAll()
-			.execute();
-
-		const globalVersionAfterMutation = await lix.db
-			.selectFrom("version")
-			.where("id", "=", "global")
-			.selectAll()
-			.executeTakeFirstOrThrow();
-
-		expect(versionsAfterMutation).toMatchObject([
-			{
-				id: versionA.id,
-				version_id: "global",
-				name: "new name",
-				change_set_id: expect.any(String),
-				working_change_set_id: expect.any(String),
-			},
-		]);
-
-		// the version was updated in the global version aka
-		// the versions change set did not change itself
-		expect(versionsAfterMutation[0]?.change_set_id).toEqual(
-			versionABeforeMutation[0]?.change_set_id
-		);
-
-		// but the global version's change set id should have changed
-		expect(globalVersionAfterMutation.change_set_id).not.toEqual(
-			globalVersionBeforeMutation.change_set_id
-		);
-	}
-);
+	// but the global version's change set id should have changed
+	expect(globalVersionAfterMutation.change_set_id).not.toEqual(
+		globalVersionBeforeMutation.change_set_id
+	);
+});
 
 test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 	const lix = await openLixInMemory({});
@@ -565,10 +572,10 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "cs1" },
-			{ id: "cs2" },
-			{ id: "workingCs1" },
-			{ id: "workingCs2" },
+			{ id: "cs1", version_id: "global" },
+			{ id: "cs2", version_id: "global" },
+			{ id: "workingCs1", version_id: "global" },
+			{ id: "workingCs2", version_id: "global" },
 		])
 		.execute();
 
@@ -642,4 +649,46 @@ test("initial version's change_set_id and working_change_set_id should exist in 
 
 	expect(workingChangeSet).toBeDefined();
 	expect(workingChangeSet?.id).toBe(mainVersion.working_change_set_id);
+});
+
+test("inherits_from_version_id should default to 'global' when not specified", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create version using createVersion without specifying inherits_from_version_id
+	const version = await createVersion({
+		lix,
+		id: "test_version",
+		name: "test version",
+		// inherits_from_version_id NOT specified - should default to 'global'
+	});
+
+	expect(version.inherits_from_version_id).toBe("global");
+});
+
+test("inherits_from_version_id should stay null when explicitly set to null", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create version with explicit null inheritance using createVersion
+	const version = await createVersion({
+		lix,
+		id: "standalone_version",
+		name: "standalone version",
+		inherits_from_version_id: null, // Explicitly set to null
+	});
+
+	expect(version.inherits_from_version_id).toBeNull();
+});
+
+test("global version should not inherit from itself", async () => {
+	const lix = await openLixInMemory({});
+
+	// Get the existing global version
+	const globalVersion = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Global version should not inherit from anything
+	expect(globalVersion.inherits_from_version_id).toBeNull();
 });

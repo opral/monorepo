@@ -4,6 +4,7 @@ import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
 	const lix = await openLixInMemory({});
@@ -1619,23 +1620,9 @@ test("foreign key validation should fail when referenced entity exists in differ
 	});
 
 	// Verify they don't inherit from each other
-	const inheritanceA = await lix.db
-		.selectFrom("version_inheritance")
-		.where("parent_version_id", "=", versionB.id)
-		.where("child_version_id", "=", versionA.id)
-		.selectAll()
-		.executeTakeFirst();
-
-	const inheritanceB = await lix.db
-		.selectFrom("version_inheritance")
-		.where("parent_version_id", "=", versionA.id)
-		.where("child_version_id", "=", versionB.id)
-		.selectAll()
-		.executeTakeFirst();
-
-	// Both should only inherit from global
-	expect(inheritanceA).toBeUndefined();
-	expect(inheritanceB).toBeUndefined();
+	// Both should inherit from global, but not from each other
+	expect(versionA.inherits_from_version_id).toBe("global");
+	expect(versionB.inherits_from_version_id).toBe("global");
 
 	// Create a user in version A
 	await lix.db
@@ -1692,4 +1679,170 @@ test("foreign key validation should fail when referenced entity exists in differ
 		.execute();
 
 	expect(userInVersionA).toHaveLength(1);
+});
+
+test("foreign key validation should work correctly with version inheritance", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create a parent schema that will exist in global version
+	const parentSchema = {
+		"x-lix-key": "global_parent",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Create a child schema that will reference the parent
+	const childSchema = {
+		"x-lix-key": "version_child",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			parent_id: {
+				schemaKey: "global_parent",
+				property: "id",
+			},
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			parent_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "parent_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Register schemas in global version
+	await lix.db
+		.insertInto("stored_schema")
+		.values([
+			{ value: parentSchema, version_id: "global" },
+			{ value: childSchema, version_id: "global" },
+		])
+		.execute();
+
+	// Insert parent entity into global version
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "parent-global-1",
+			file_id: "test-file",
+			schema_key: "global_parent",
+			plugin_key: "test_plugin",
+			version_id: "global",
+			snapshot_content: {
+				id: "parent-global-1",
+				name: "Global Parent Entity",
+			},
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Create a child version that inherits from global
+	const childVersion = await createVersion({
+		lix,
+		name: "child-version",
+	});
+
+	// Verify the parent entity is accessible from child version via inheritance
+	const parentInChildVersion = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "parent-global-1")
+		.where("schema_key", "=", "global_parent")
+		.where("version_id", "=", childVersion.id)
+		.selectAll()
+		.execute();
+
+	expect(parentInChildVersion).toHaveLength(1);
+	expect(parentInChildVersion[0]?.snapshot_content).toEqual({
+		id: "parent-global-1",
+		name: "Global Parent Entity",
+	});
+
+	// This should PASS - child entity referencing parent via inheritance should work
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: childSchema,
+			snapshot_content: {
+				id: "child-1",
+				parent_id: "parent-global-1", // References entity that exists in global (inherited)
+				title: "Child Entity",
+			},
+			operation: "insert",
+			version_id: childVersion.id,
+		})
+	).not.toThrowError();
+
+	// This should FAIL - referencing non-existent entity should show cross-version results
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: childSchema,
+			snapshot_content: {
+				id: "child-2",
+				parent_id: "nonexistent-parent", // References entity that doesn't exist anywhere
+				title: "Invalid Child Entity",
+			},
+			operation: "insert",
+			version_id: childVersion.id,
+		})
+	).toThrowError(
+		/Foreign key constraint violation.*global_parent.*nonexistent-parent/
+	);
+});
+
+test("foreign key validation should allow referencing label that exists in global version via inheritance", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create a child version that inherits from global
+	const childVersion = await createVersion({
+		lix,
+		name: "child-version",
+	});
+
+	await createChangeSet({
+		lix,
+		id: "test-change-set",
+		version_id: childVersion.id,
+	});
+
+	// Verify the label is visible in the child version via inheritance
+	const checkpointLabel = await lix.db
+		.selectFrom("state")
+		.where("version_id", "=", childVersion.id)
+		.where("schema_key", "=", "lix_label")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(checkpointLabel.inherited_from_version_id).toBe("global");
+
+	// Get the change set label schema
+	const changeSetLabelSchema = await lix.db
+		.selectFrom("stored_schema")
+		.select("value")
+		.where("key", "=", "lix_change_set_label")
+		.executeTakeFirstOrThrow();
+
+	// This should PASS - child version should be able to reference label that exists in global via inheritance
+	// But currently it FAILS because foreign key validation doesn't check inheritance
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: changeSetLabelSchema.value as LixSchemaDefinition,
+			snapshot_content: {
+				change_set_id: "test-change-set",
+				label_id: checkpointLabel.snapshot_content.id,
+			},
+			operation: "insert",
+			version_id: childVersion.id,
+		})
+	).not.toThrowError();
 });

@@ -17,6 +17,7 @@ test("it creates an undo change set that reverses the operations of the original
 		.insertInto("stored_schema")
 		.values({
 			value: MockJsonPropertySchema,
+			version_id: "global",
 		})
 		.execute();
 
@@ -75,7 +76,9 @@ test("it creates an undo change set that reverses the operations of the original
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
+		version_id: "global",
 		elements: changes.map((change) => ({
+			version_id: "global",
 			change_id: change.id,
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,
@@ -151,6 +154,7 @@ test("it correctly undoes delete operations by restoring previous state", async 
 		.insertInto("stored_schema")
 		.values({
 			value: MockJsonPropertySchema,
+			version_id: "global",
 		})
 		.execute();
 
@@ -199,8 +203,10 @@ test("it correctly undoes delete operations by restoring previous state", async 
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
+		version_id: "global",
 		elements: initialChanges.map((change) => ({
 			change_id: change.id,
+			version_id: "global",
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,
 			file_id: change.file_id,
@@ -228,13 +234,15 @@ test("it correctly undoes delete operations by restoring previous state", async 
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
+		version_id: "global",
 		elements: deleteChanges.map((change) => ({
 			change_id: change.id,
+			version_id: "global",
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0], 
+		parents: [cs0],
 	});
 
 	// Create undo change set for the delete operation

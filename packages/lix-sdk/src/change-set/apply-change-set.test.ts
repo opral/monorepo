@@ -39,6 +39,7 @@ test("it applies lix own entity changes", async () => {
 
 	const changeSet = await createChangeSet({
 		lix,
+		version_id: "global",
 		elements: [
 			{
 				change_id: mockKeyValueChange.id,
@@ -166,6 +167,7 @@ test("throws an error if plugin does not exist", async () => {
 	// Create a change set
 	const changeSet = await createChangeSet({
 		lix,
+		version_id: "global",
 		elements: [
 			{
 				change_id: change.id,
@@ -230,6 +232,7 @@ test("throws an error if plugin does not support applying changes", async () => 
 	// Create a change set
 	const changeSet = await createChangeSet({
 		lix,
+		version_id: "global",
 		elements: [
 			{
 				change_id: change.id,
@@ -343,6 +346,7 @@ test("it should delete entities but not files when applying entity deletion chan
 		.insertInto("stored_schema")
 		.values({
 			value: MockJsonPropertySchema,
+			version_id: "global",
 		})
 		.execute();
 
@@ -400,6 +404,7 @@ test("it should delete entities but not files when applying entity deletion chan
 	const addChangeSet = await createChangeSet({
 		lix,
 		id: "cs-add",
+		version_id: "global",
 		elements: [
 			{
 				change_id: "c1",
@@ -428,7 +433,10 @@ test("it should delete entities but not files when applying entity deletion chan
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const contentAfterAdd = JSON.parse(new TextDecoder().decode(fileAfterAdd.data));
+	const contentAfterAdd = JSON.parse(
+		new TextDecoder().decode(fileAfterAdd.data)
+	);
+
 	expect(contentAfterAdd).toEqual({
 		e1: "Entity 1",
 		e2: "Entity 2",
@@ -452,6 +460,7 @@ test("it should delete entities but not files when applying entity deletion chan
 	const deleteChangeSet = await createChangeSet({
 		lix,
 		id: "cs-delete-entity",
+		version_id: "global",
 		elements: [
 			{
 				change_id: "c3",

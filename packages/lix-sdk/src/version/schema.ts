@@ -9,6 +9,8 @@ import type {
 export const INITIAL_VERSION_ID = "BoIaHTW9ePX6pNc8";
 export const INITIAL_CHANGE_SET_ID = "2j9jm90ajc9j90";
 export const INITIAL_WORKING_CHANGE_SET_ID = "h2h09ha92jfaw2";
+export const INITIAL_GLOBAL_VERSION_CHANGE_SET_ID = "23n0ajsf328ns";
+export const INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID = "om3290j08gj8j23";
 
 export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	sqlite.exec(`
@@ -19,6 +21,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
     json_extract(snapshot_content, '$.name') AS name,
     json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
     json_extract(snapshot_content, '$.working_change_set_id') AS working_change_set_id,
+    json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
     version_id
   FROM state
   WHERE schema_key = 'lix_version';
@@ -45,14 +48,16 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
           'id', with_default_values.id,                
           'name', with_default_values.name,            
           'change_set_id', NEW.change_set_id,
-          'working_change_set_id', NEW.working_change_set_id
+          'working_change_set_id', NEW.working_change_set_id,
+          'inherits_from_version_id', NEW.inherits_from_version_id
         ),
         '${LixVersionSchema["x-lix-version"]}',
         'global'
       FROM (
           SELECT
               COALESCE(NEW.id, nano_id()) AS id,
-              COALESCE(NEW.name, human_id()) AS name
+              COALESCE(NEW.name, human_id()) AS name,
+              NEW.inherits_from_version_id AS inherits_from_version_id
       ) AS with_default_values;
   END;
 
@@ -69,7 +74,8 @@ BEGIN
         'id', COALESCE(NEW.id, OLD.id),
         'name', COALESCE(NEW.name, OLD.name),
         'change_set_id', COALESCE(NEW.change_set_id, OLD.change_set_id),
-        'working_change_set_id', COALESCE(NEW.working_change_set_id, OLD.working_change_set_id)
+        'working_change_set_id', COALESCE(NEW.working_change_set_id, OLD.working_change_set_id),
+        'inherits_from_version_id', COALESCE(NEW.inherits_from_version_id, OLD.inherits_from_version_id)
       ),
       version_id = 'global'
     WHERE
@@ -102,7 +108,8 @@ BEGIN
   SELECT
     json_extract(snapshot_content, '$.version_id') AS version_id
   FROM state
-  WHERE schema_key = 'lix_active_version';
+  WHERE schema_key = 'lix_active_version'
+  AND state.version_id = 'global';
 
   CREATE TRIGGER IF NOT EXISTS active_version_insert
   INSTEAD OF INSERT ON active_version
@@ -147,7 +154,35 @@ BEGIN
     AND schema_key = 'lix_active_version';
   END;
 
-   -- Insert the default change set if missing
+  -- Create change sets for global version if they don't exist
+	INSERT OR IGNORE INTO change_set (id, version_id) VALUES ('${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}', 'global');
+	INSERT OR IGNORE INTO change_set (id, version_id) VALUES ('${INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID}', 'global');
+
+	-- Create global version if it doesn't exist
+	INSERT OR IGNORE INTO state (
+			entity_id,
+			schema_key,
+			file_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			version_id
+		) VALUES (
+			'global',
+			'lix_version',
+			'lix',
+			'lix_own_entity',
+			json_object(
+				'id', 'global',
+				'name', 'global',
+				'change_set_id', '${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}',
+				'working_change_set_id', '${INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID}'
+			),
+			'1.0',
+			'global'
+		);
+
+  -- Create change set for default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
   INSERT INTO change_set (id, version_id)
   SELECT '${INITIAL_CHANGE_SET_ID}', 'global'
@@ -179,7 +214,8 @@ BEGIN
       'id', '${INITIAL_VERSION_ID}',                
       'name', 'main',            
       'change_set_id', '${INITIAL_CHANGE_SET_ID}',
-      'working_change_set_id', '${INITIAL_WORKING_CHANGE_SET_ID}'
+      'working_change_set_id', '${INITIAL_WORKING_CHANGE_SET_ID}',
+      'inherits_from_version_id', 'global'
     ),
     '${LixVersionSchema["x-lix-version"]}',
     'global'
@@ -189,34 +225,6 @@ BEGIN
     WHERE entity_id = '${INITIAL_VERSION_ID}' 
     AND schema_key = 'lix_version'
   );
-
-  -- Create global change sets if they don't exist
-		INSERT OR IGNORE INTO change_set (id, version_id) VALUES ('global_change_set', 'global');
-		INSERT OR IGNORE INTO change_set (id, version_id) VALUES ('global_working_change_set', 'global');
-		
-		-- Create global version if it doesn't exist
-		INSERT OR IGNORE INTO state (
-			entity_id,
-			schema_key,
-			file_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-			version_id
-		) VALUES (
-			'global',
-			'lix_version',
-			'lix',
-			'lix_own_entity',
-			json_object(
-				'id', 'global',
-				'name', 'global',
-				'change_set_id', 'global_change_set',
-				'working_change_set_id', 'global_working_change_set'
-			),
-			'1.0',
-			'global'
-		);
 
 
   -- Set the default current version to 'main' if both tables are empty
@@ -261,6 +269,10 @@ export const LixVersionSchema = {
 			schemaKey: "lix_change_set",
 			property: "id",
 		},
+		inherits_from_version_id: {
+			schemaKey: "lix_version",
+			property: "id",
+		},
 	},
 	type: "object",
 	properties: {
@@ -268,6 +280,7 @@ export const LixVersionSchema = {
 		name: { type: "string" },
 		change_set_id: { type: "string" },
 		working_change_set_id: { type: "string" },
+		inherits_from_version_id: { type: ["string", "null"] },
 	},
 	required: ["id", "name", "change_set_id", "working_change_set_id"],
 	additionalProperties: false,
@@ -283,6 +296,7 @@ export type VersionView = {
 	name: Generated<string>;
 	change_set_id: string;
 	working_change_set_id: string;
+	inherits_from_version_id: string | null;
 	version_id: Generated<string>;
 };
 

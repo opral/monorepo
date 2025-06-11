@@ -67,7 +67,6 @@ test("creating a change set should succeed", async () => {
 	);
 });
 
-
 test("creating a change set with empty elements array should succeed", async () => {
 	const lix = await openLixInMemory({});
 
@@ -101,11 +100,8 @@ test("creating a change set with labels should associate the labels with the cha
 		.executeTakeFirstOrThrow();
 
 	// Create a new label
-	await lix.db
-		.insertInto("label")
-		.values({ name: "test-label" })
-		.execute();
-	
+	await lix.db.insertInto("label").values({ name: "test-label" }).execute();
+
 	const testLabel = await lix.db
 		.selectFrom("label")
 		.selectAll()
@@ -126,8 +122,13 @@ test("creating a change set with labels should associate the labels with the cha
 	const changeSetLabels = await lix.db
 		.selectFrom("change_set_label")
 		.innerJoin("label", "label.id", "change_set_label.label_id")
-		.select(["label.name"])
+		.selectAll()
 		.where("change_set_id", "=", changeSet.id)
+		.where(
+			"label.version_id",
+			"=",
+			lix.db.selectFrom("active_version").select("version_id")
+		)
 		.execute();
 
 	// Verify both labels are associated with the change set
@@ -202,4 +203,3 @@ test("creating a change set with version_id should store it in the specified ver
 
 	expect(storedChangeSet.version_id).toBe(globalVersion);
 });
-

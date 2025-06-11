@@ -3,7 +3,6 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
-import type { JSONType } from "../schema-definition/json-type.js";
 import { handleStateMutation } from "./handle-state-mutation.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
@@ -83,7 +82,8 @@ export function applyStateDatabaseSchema(
 				snapshot_content TEXT,
 				schema_version TEXT,
 				created_at TEXT,
-				updated_at TEXT
+				updated_at TEXT,
+				inherited_from_version_id TEXT
 			)`;
 
 				const result = capi.sqlite3_declare_vtab(db, sql);
@@ -128,9 +128,42 @@ export function applyStateDatabaseSchema(
 			xFilter: (pCursor: any) => {
 				const cursorState = cursorStates.get(pCursor);
 
-				// Try cache first
+				// Try cache first - include inherited entities via union
 				const cacheResults = sqlite.exec({
-					sql: "SELECT * FROM internal_state_cache",
+					sql: `
+						-- Direct entities from cache
+						SELECT entity_id, schema_key, file_id, version_id, plugin_key, 
+							   snapshot_content, schema_version, created_at, updated_at,
+							   inherited_from_version_id
+						FROM internal_state_cache
+							WHERE NOT (snapshot_content LIKE '%"__deleted":true%')						
+						UNION ALL
+						
+						-- Inherited entities: child versions see parent entities they don't override
+						SELECT isc.entity_id, isc.schema_key, isc.file_id, 
+							   vi.version_id, -- Return child version_id
+							   isc.plugin_key, isc.snapshot_content, isc.schema_version, 
+							   isc.created_at, isc.updated_at,
+							   vi.parent_version_id as inherited_from_version_id
+						FROM (
+							-- Get version inheritance relationships from cache
+							SELECT 
+								json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+								json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+							FROM internal_state_cache isc_v
+							WHERE isc_v.schema_key = 'lix_version'
+						) vi
+						JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
+						WHERE vi.parent_version_id IS NOT NULL
+						-- Don't inherit if child already has this entity  
+						AND NOT EXISTS (
+							SELECT 1 FROM internal_state_cache child_isc
+							WHERE child_isc.version_id = vi.version_id
+							  AND child_isc.entity_id = isc.entity_id
+							  AND child_isc.schema_key = isc.schema_key
+							  AND child_isc.file_id = isc.file_id
+						)
+					`,
 					returnValue: "resultRows",
 				});
 
@@ -169,6 +202,9 @@ export function applyStateDatabaseSchema(
 							const version_id = Array.isArray(row) ? row[6] : row.version_id;
 							const created_at = Array.isArray(row) ? row[7] : row.created_at;
 							const updated_at = Array.isArray(row) ? row[8] : row.updated_at;
+							const inherited_from_version_id = Array.isArray(row)
+								? row[9]
+								: row.inherited_from_version_id;
 
 							// Skip rows with null entity_id (no actual state data found)
 							if (!entity_id) {
@@ -177,8 +213,8 @@ export function applyStateDatabaseSchema(
 
 							sqlite.exec({
 								sql: `INSERT OR REPLACE INTO internal_state_cache 
-									  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at)
-									  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+									  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id)
+									  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 								bind: [
 									entity_id,
 									schema_key,
@@ -191,6 +227,10 @@ export function applyStateDatabaseSchema(
 									schema_version,
 									created_at,
 									updated_at,
+									inherited_from_version_id === null ||
+									inherited_from_version_id === undefined
+										? null
+										: inherited_from_version_id,
 								],
 							});
 							cachePopulated = true;
@@ -256,7 +296,18 @@ export function applyStateDatabaseSchema(
 					value = row[columnName];
 				}
 
-				if (typeof value === "object") {
+				// Handle special cases for null values that might be stored as strings
+				if (
+					value === "null" &&
+					getColumnName(iCol) === "inherited_from_version_id"
+				) {
+					capi.sqlite3_result_null(pContext);
+					return capi.SQLITE_OK;
+				}
+
+				if (value === null || value === undefined) {
+					capi.sqlite3_result_null(pContext);
+				} else if (typeof value === "object") {
 					capi.sqlite3_result_js(pContext, JSON.stringify(value));
 				} else {
 					capi.sqlite3_result_js(pContext, value);
@@ -295,6 +346,7 @@ export function applyStateDatabaseSchema(
     schema_version TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
+    inherited_from_version_id TEXT,
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   );
 
@@ -387,6 +439,7 @@ function getColumnName(columnIndex: number): string {
 		"schema_version",
 		"created_at",
 		"updated_at",
+		"inherited_from_version_id",
 	];
 	return columns[columnIndex] || "unknown";
 }
@@ -395,12 +448,11 @@ function selectStateViaCTE(
 	sqlite: SqliteWasmDatabase,
 	filters: Record<string, string>
 ): any[] {
-	// Fixed query to handle versions sharing change sets
 	let sql = `
 		WITH
 			all_changes_with_snapshots AS (
 				SELECT ic.id, ic.entity_id, ic.schema_key, ic.file_id, ic.plugin_key,
-					   ic.rowid, ic.schema_version, json(s.content) AS snapshot_content 
+					   ic.schema_version, json(s.content) AS snapshot_content 
 				FROM internal_change ic
 				LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
 				WHERE ic.snapshot_id != 'no-content'
@@ -411,46 +463,10 @@ function selectStateViaCTE(
 				FROM all_changes_with_snapshots v
 				WHERE v.schema_key = 'lix_version'
 			),
-			-- Calculate inheritance chain for each version
-			version_inheritance_chain(child_version_id, parent_version_id, depth) AS (
-				-- Base case: direct parent relationships
-				SELECT 
-					json_extract(vi.snapshot_content, '$.child_version_id') AS child_version_id,
-					json_extract(vi.snapshot_content, '$.parent_version_id') AS parent_version_id,
-					1 AS depth
-				FROM all_changes_with_snapshots vi
-				WHERE vi.schema_key = 'lix_version_inheritance'
-				
-				UNION ALL
-				
-				-- Recursive case: follow inheritance chain
-				SELECT 
-					vic.child_version_id,
-					json_extract(vi.snapshot_content, '$.parent_version_id') AS parent_version_id,
-					vic.depth + 1
-				FROM version_inheritance_chain vic
-				JOIN all_changes_with_snapshots vi ON json_extract(vi.snapshot_content, '$.child_version_id') = vic.parent_version_id
-				WHERE vi.schema_key = 'lix_version_inheritance'
-				AND vic.depth < 100 -- Prevent infinite recursion
-			),
-			-- Extend root change sets to include inherited change sets
-			inherited_root_cs AS (
-				SELECT rcv.version_change_set_id, rcv.version_id, 0 AS inheritance_depth
-				FROM root_cs_of_all_versions rcv
-				
-				UNION ALL
-				
-				SELECT 
-					parent_rcv.version_change_set_id, 
-					vic.child_version_id AS version_id,
-					vic.depth AS inheritance_depth
-				FROM version_inheritance_chain vic
-				JOIN root_cs_of_all_versions parent_rcv ON parent_rcv.version_id = vic.parent_version_id
-			),
-			reachable_cs_from_roots(id, version_id, inheritance_depth) AS (
-				SELECT version_change_set_id, version_id, inheritance_depth FROM inherited_root_cs
+			reachable_cs_from_roots(id, version_id) AS (
+				SELECT version_change_set_id, version_id FROM root_cs_of_all_versions
 				UNION
-				SELECT json_extract(e.snapshot_content, '$.parent_id'), r.version_id, r.inheritance_depth
+				SELECT json_extract(e.snapshot_content, '$.parent_id'), r.version_id
 				FROM all_changes_with_snapshots e 
 				JOIN reachable_cs_from_roots r ON json_extract(e.snapshot_content, '$.child_id') = r.id
 				WHERE e.schema_key = 'lix_change_set_edge'
@@ -461,8 +477,7 @@ function selectStateViaCTE(
 					   json_extract(ias.snapshot_content, '$.schema_key') AS target_schema_key, 
 					   json_extract(ias.snapshot_content, '$.change_id') AS target_change_id,
 					   json_extract(ias.snapshot_content, '$.change_set_id') AS cse_origin_change_set_id,
-					   rcs.version_id,
-					   rcs.inheritance_depth
+					   rcs.version_id
 				FROM all_changes_with_snapshots ias
 				JOIN reachable_cs_from_roots rcs ON json_extract(ias.snapshot_content, '$.change_set_id') = rcs.id
 				WHERE ias.schema_key = 'lix_change_set_element'
@@ -470,7 +485,7 @@ function selectStateViaCTE(
 			leaf_target_snapshots AS (
 				SELECT target_change.entity_id, target_change.schema_key, target_change.file_id,
 					   target_change.plugin_key, target_change.snapshot_content AS snapshot_content,
-					   target_change.schema_version, r.version_id, r.inheritance_depth
+					   target_change.schema_version, r.version_id
 				FROM cse_in_reachable_cs r 
 				INNER JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
 				WHERE NOT EXISTS (
@@ -494,71 +509,73 @@ function selectStateViaCTE(
 					  AND newer_r.cse_origin_change_set_id IN descendants_of_current_cs
 				)
 			),
-			-- Apply inheritance override logic: child state wins over parent state
-			final_state AS (
+			-- Get version inheritance relationships
+			version_inheritance AS (
 				SELECT 
-					ls.entity_id,
-					ls.schema_key,
-					ls.file_id,
-					ls.plugin_key,
-					ls.snapshot_content,
-					ls.schema_version,
-					ls.version_id,
-					ls.inheritance_depth,
-					ROW_NUMBER() OVER (
-						PARTITION BY ls.entity_id, ls.schema_key, ls.file_id, ls.version_id
-						ORDER BY ls.inheritance_depth ASC
-					) AS priority_rank
-				FROM leaf_target_snapshots ls
+					v.entity_id AS version_id,
+					json_extract(v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+				FROM all_changes_with_snapshots v
+				WHERE v.schema_key = 'lix_version'
 			),
-			-- Get the deduplicated state (one per entity per version)
-			deduplicated_state AS (
-				SELECT * FROM final_state WHERE priority_rank = 1
-			),
-			-- Get all versions and their change sets
-			all_version_changesets AS (
-				SELECT DISTINCT
-					v.version_id,
-					v.version_change_set_id
-				FROM root_cs_of_all_versions v
-			),
-			-- For each state entry, find all versions that share its change set
-			expanded_state AS (
+			-- Combine direct entities with inherited entities
+			all_entities AS (
+				-- Direct entities from leaf_target_snapshots
 				SELECT 
-					ds.entity_id,
-					ds.schema_key,
-					ds.file_id,
-					ds.plugin_key,
-					ds.snapshot_content,
-					ds.schema_version,
-					avc2.version_id AS expanded_version_id,
-					ds.version_id AS original_version_id
-				FROM deduplicated_state ds
-				JOIN all_version_changesets avc1 ON ds.version_id = avc1.version_id
-				JOIN all_version_changesets avc2 ON avc1.version_change_set_id = avc2.version_change_set_id
+					entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version,
+					version_id, version_id as visible_in_version, NULL as inherited_from_version_id
+				FROM leaf_target_snapshots
+				
+				UNION ALL
+				
+				-- Inherited entities from parent versions
+				SELECT 
+					ls.entity_id, ls.schema_key, ls.file_id, ls.plugin_key, ls.snapshot_content, ls.schema_version,
+					vi.version_id, -- Use child version_id for testing
+					vi.version_id as visible_in_version, -- Make visible in child version
+					vi.parent_version_id as inherited_from_version_id
+				FROM version_inheritance vi
+				JOIN leaf_target_snapshots ls ON ls.version_id = vi.parent_version_id
+				WHERE vi.parent_version_id IS NOT NULL
+				-- Don't inherit if child already has this entity
+				AND NOT EXISTS (
+					SELECT 1 FROM leaf_target_snapshots child_ls
+					WHERE child_ls.version_id = vi.version_id
+					  AND child_ls.entity_id = ls.entity_id
+					  AND child_ls.schema_key = ls.schema_key
+					  AND child_ls.file_id = ls.file_id
+				)
 			)
 		SELECT 
-			es.entity_id,
-			es.schema_key,
-			es.file_id,
-			es.plugin_key,
-			es.snapshot_content,
-			es.schema_version,
-			es.expanded_version_id AS version_id,
-			-- TODO dont use max/min here for created_at
+			ae.entity_id,
+			ae.schema_key,
+			ae.file_id,
+			ae.plugin_key,
+			ae.snapshot_content,
+			ae.schema_version,
+			ae.version_id,
 			(SELECT MIN(ic.created_at) FROM internal_change ic 
-			 WHERE ic.entity_id = es.entity_id AND ic.schema_key = es.schema_key AND ic.file_id = es.file_id) AS created_at,
-			(SELECT MAX(ic.created_at) FROM internal_change ic 
-			 WHERE ic.entity_id = es.entity_id AND ic.schema_key = es.schema_key AND ic.file_id = es.file_id
-			   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = es.original_version_id)) AS updated_at
-		FROM expanded_state es
+			 WHERE ic.entity_id = ae.entity_id AND ic.schema_key = ae.schema_key AND ic.file_id = ae.file_id) AS created_at,
+			COALESCE(
+				(SELECT MAX(ic.created_at) FROM internal_change ic 
+				 WHERE ic.entity_id = ae.entity_id AND ic.schema_key = ae.schema_key AND ic.file_id = ae.file_id
+				   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = ae.version_id)),
+				(SELECT MIN(ic.created_at) FROM internal_change ic 
+				 WHERE ic.entity_id = ae.entity_id AND ic.schema_key = ae.schema_key AND ic.file_id = ae.file_id)
+			) AS updated_at,
+			ae.inherited_from_version_id
+		FROM all_entities ae
 	`;
 
 	const bindings: string[] = [];
 	const conditions: string[] = [];
 
 	Object.entries(filters).forEach(([key, value]) => {
-		conditions.push(`ls.${key} = ?`);
+		if (key === "version_id") {
+			// For version_id filter, use visible_in_version
+			conditions.push(`ae.visible_in_version = ?`);
+		} else {
+			conditions.push(`ae.${key} = ?`);
+		}
 		bindings.push(value);
 	});
 
@@ -580,11 +597,12 @@ export type StateView = {
 	schema_key: string;
 	file_id: string;
 	plugin_key: string;
-	snapshot_content: JSONType;
+	snapshot_content: Record<string, any>;
 	schema_version: string;
 	version_id: string;
 	created_at: Generated<string>;
 	updated_at: Generated<string>;
+	inherited_from_version_id: string | null;
 };
 
 // Cache table type (internal table for state materialization)
@@ -598,6 +616,7 @@ export type InternalStateCacheTable = {
 	schema_version: string;
 	created_at: string;
 	updated_at: string;
+	inherited_from_version_id: string | null;
 };
 
 // Kysely operation types

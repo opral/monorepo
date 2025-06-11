@@ -14,7 +14,8 @@ export function applyStoredSchemaDatabaseSchema(
   SELECT
     json_extract(snapshot_content, '$.value.x-lix-key') AS key,
     json_extract(snapshot_content, '$.value.x-lix-version') AS version,
-    json_extract(snapshot_content, '$.value') AS value
+    json_extract(snapshot_content, '$.value') AS value,
+    version_id
   FROM state
   WHERE schema_key = 'lix_stored_schema';
 
@@ -54,14 +55,16 @@ export function applyStoredSchemaDatabaseSchema(
         'value', json(NEW.value)
       ),
       '${LixStoredSchemaSchema["x-lix-version"]}',
-      (SELECT version_id FROM active_version)
+      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
     );
   END;
 
   CREATE TRIGGER IF NOT EXISTS stored_schema_delete
   INSTEAD OF DELETE ON stored_schema
   BEGIN
-      DELETE FROM state WHERE entity_id = OLD.key || '::' || OLD.version AND schema_key = 'lix_stored_schema';
+      DELETE FROM state 
+      WHERE entity_id = OLD.key || '::' || OLD.version 
+      AND schema_key = 'lix_stored_schema';
   END;
 `);
 }
@@ -88,6 +91,7 @@ export type LixStoredSchema = FromLixSchemaDefinition<typeof LixStoredSchemaSche
 export type StoredSchemaView = {
 	key: Generated<string>;
 	version: Generated<string>;
+	version_id: Generated<string>;
 	value: LixSchemaDefinition;
 };
 

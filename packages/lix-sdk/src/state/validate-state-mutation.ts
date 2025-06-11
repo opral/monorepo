@@ -465,18 +465,73 @@ function validateDeletionConstraints(args: {
 	}
 
 	// Get the current entity data to check what's being referenced
+	// Check both direct entities and inherited entities
 	const currentEntity = executeSync({
 		lix: args.lix,
 		query: args.lix.db
 			.selectFrom("state")
-			.select("snapshot_content")
+			.select(["snapshot_content", "inherited_from_version_id"])
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
 			.where("version_id", "=", args.version_id),
 	});
 
 	if (currentEntity.length === 0) {
-		throw new Error("Entity does not exist, cannot delete");
+		// Enhanced error message for better copy-on-write deletion context
+		let errorMessage = `Entity deletion failed. Cannot delete entity '${args.entity_id}' from schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) in version '${args.version_id}' because the entity does not exist.`;
+
+		// Add deletion context section
+		errorMessage += `\n\nDeletion Context:\n`;
+		errorMessage += `┌─────────────────┬──────────────────────────────────────┐\n`;
+		errorMessage += `│ Property        │ Value                                │\n`;
+		errorMessage += `├─────────────────┼──────────────────────────────────────┤\n`;
+		errorMessage += `│ Entity ID       │ ${(args.entity_id || "undefined").substring(0, 36).padEnd(36)} │\n`;
+		errorMessage += `│ Schema Key      │ ${args.schema["x-lix-key"].substring(0, 36).padEnd(36)} │\n`;
+		errorMessage += `│ Schema Version  │ ${(args.schema["x-lix-version"] || "undefined").substring(0, 36).padEnd(36)} │\n`;
+		errorMessage += `│ Version ID      │ ${args.version_id.substring(0, 36).padEnd(36)} │\n`;
+		errorMessage += `└─────────────────┴──────────────────────────────────────┘\n`;
+
+		// Check if entity exists in other versions
+		const entityInOtherVersions = executeSync({
+			lix: args.lix,
+			query: args.lix.db
+				.selectFrom("state")
+				.select(["version_id", "snapshot_content", "inherited_from_version_id"])
+				.where("entity_id", "=", args.entity_id)
+				.where("schema_key", "=", args.schema["x-lix-key"]),
+		});
+
+		if (entityInOtherVersions.length > 0) {
+			errorMessage += `\nEntity Search Results (${args.schema["x-lix-key"]}):\n`;
+			errorMessage += `┌─────────────────────┬────────────────┬─────────────────────────────────────┐\n`;
+			errorMessage += `│ Version             │ Entity Found   │ Entity Content                      │\n`;
+			errorMessage += `├─────────────────────┼────────────────┼─────────────────────────────────────┤\n`;
+			
+			// Helper function to truncate property values
+			const truncateValue = (value: any, maxLength: number = 35): string => {
+				const str = typeof value === 'string' ? value : JSON.stringify(value);
+				return str.length > maxLength ? str.substring(0, maxLength - 3) + '...' : str;
+			};
+
+			// Show current version first
+			errorMessage += `│ ${args.version_id.substring(0, 19).padEnd(19)} │ ${"No".padEnd(14)} │ ${"-".padEnd(35)} │\n`;
+			
+			// Show other versions where entity exists
+			for (const state of entityInOtherVersions) {
+				if (state.version_id && state.version_id !== args.version_id) {
+					const versionDisplay = state.version_id.substring(0, 19).padEnd(19);
+					const contentDisplay = truncateValue(state.snapshot_content, 35).padEnd(35);
+					errorMessage += `│ ${versionDisplay} │ ${"Yes".padEnd(14)} │ ${contentDisplay} │\n`;
+				}
+			}
+			
+			errorMessage += `└─────────────────────┴────────────────┴─────────────────────────────────────┘\n`;
+			errorMessage += `\nThe entity exists in other version(s) but is not accessible in '${args.version_id}'. Check version inheritance configuration.`;
+		} else {
+			errorMessage += `\nThe entity with ID '${args.entity_id}' does not exist in any version for schema '${args.schema["x-lix-key"]}'.`;
+		}
+
+		throw new Error(errorMessage);
 	}
 
 	// Get all schemas to check which ones have foreign keys that might reference this entity

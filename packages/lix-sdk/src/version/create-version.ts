@@ -17,6 +17,7 @@ export async function createVersion(args: {
 	id?: Version["id"];
 	changeSet?: Pick<ChangeSet, "id">;
 	name?: Version["name"];
+	inherits_from_version_id?: Version["inherits_from_version_id"];
 }): Promise<Version> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
@@ -31,6 +32,20 @@ export async function createVersion(args: {
 			}));
 
 		const versionId = args.id ?? nanoid();
+		
+		// Determine inheritance: 
+		// - If explicitly provided, use that value (including null)
+		// - If not provided and not global version, default to 'global'
+		// - If global version, no inheritance (null)
+		let inherits_from_version_id: string | null;
+		if (args.inherits_from_version_id !== undefined) {
+			inherits_from_version_id = args.inherits_from_version_id;
+		} else if (versionId === "global") {
+			inherits_from_version_id = null;
+		} else {
+			inherits_from_version_id = "global";
+		}
+		
 		await trx
 			.insertInto("version")
 			.values({
@@ -38,29 +53,9 @@ export async function createVersion(args: {
 				name: args.name,
 				change_set_id: cs.id,
 				working_change_set_id: workingCs.id,
+				inherits_from_version_id,
 			})
 			.execute();
-
-		// Auto-inherit from global version (unless this is the global version itself)
-		if (versionId !== "global") {
-			// Check if inheritance already exists
-			const existingInheritance = await trx
-				.selectFrom("version_inheritance")
-				.where("child_version_id", "=", versionId)
-				.where("parent_version_id", "=", "global")
-				.selectAll()
-				.executeTakeFirst();
-
-			if (!existingInheritance) {
-				await trx
-					.insertInto("version_inheritance")
-					.values({
-						child_version_id: versionId,
-						parent_version_id: "global",
-					})
-					.execute();
-			}
-		}
 
 		const newVersion = await trx
 			.selectFrom("version")

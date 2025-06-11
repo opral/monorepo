@@ -35,6 +35,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 				.values({
 					parent_id: parentChangeSetId,
 					child_id: workingChangeSetId,
+					version_id: "global",
 				})
 				.execute();
 
@@ -44,6 +45,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 				.insertInto("change_set")
 				.values({
 					id: newWorkingChangeSetId,
+					version_id: "global",
 				})
 				.execute();
 
@@ -59,6 +61,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 				.values({
 					change_set_id: workingChangeSetId,
 					label_id: checkpointLabel.id,
+					version_id: "global",
 				})
 				.execute();
 

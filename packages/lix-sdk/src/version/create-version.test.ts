@@ -87,3 +87,17 @@ test("should fail if the 'from' change_set_id does not exist", async () => {
 		// The specific error message might vary based on the db driver
 	).rejects.toThrow(/Foreign key constraint violation/i);
 });
+
+test("should automatically create inheritance from global version", async () => {
+	const lix = await openLixInMemory({});
+	
+	// Create a new version (should automatically inherit from global)
+	const newVersion = await createVersion({
+		lix,
+		name: "test-version",
+	});
+
+	// Check that inheritance column was set correctly
+	expect(newVersion.inherits_from_version_id).toBe("global");
+});
+

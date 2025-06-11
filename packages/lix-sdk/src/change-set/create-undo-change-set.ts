@@ -125,11 +125,13 @@ export async function createUndoChangeSet(args: {
 		const undoChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
 			labels: args.labels,
+			version_id: "global",
 			elements: createdUndoChanges.map((change) => ({
 				change_id: change.id,
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,
 				file_id: change.file_id,
+				version_id: "global",
 			})),
 		});
 

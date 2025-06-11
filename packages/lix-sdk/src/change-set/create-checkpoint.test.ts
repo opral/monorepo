@@ -221,6 +221,11 @@ test("creates proper change set ancestry chain", async () => {
 		.selectFrom("change_set")
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
+		.where(
+			"version_id",
+			"=",
+			lix.db.selectFrom("active_version").select("version_id")
+		)
 		.selectAll()
 		.execute();
 
@@ -231,6 +236,11 @@ test("creates proper change set ancestry chain", async () => {
 		.selectFrom("change_set")
 		.where("id", "=", checkpoint1.id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
+		.where(
+			"version_id",
+			"=",
+			lix.db.selectFrom("active_version").select("version_id")
+		)
 		.selectAll()
 		.execute();
 
@@ -241,6 +251,11 @@ test("creates proper change set ancestry chain", async () => {
 		.selectFrom("change_set")
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
+		.where(
+			"version_id",
+			"=",
+			lix.db.selectFrom("active_version").select("version_id")
+		)
 		.selectAll()
 		.execute();
 
@@ -250,6 +265,7 @@ test("creates proper change set ancestry chain", async () => {
 // very slow https://github.com/opral/lix-sdk/issues/311
 test(
 	"checkpoint should include deletion changes",
+	{ timeout: 30000 },
 	async () => {
 		const lix = await openLixInMemory({});
 
@@ -306,13 +322,13 @@ test(
 
 		// This should work for key-value deletions
 		expect(deletionChangesInCheckpoint).toHaveLength(1);
-	},
-	{ timeout: 30000 }
+	}
 );
 
 // very slow https://github.com/opral/lix-sdk/issues/311
 test(
 	"checkpoint should include file deletion changes",
+	{ timeout: 30000 },
 	async () => {
 		const lix = await openLixInMemory({
 			providePlugins: [mockJsonPlugin],
@@ -377,6 +393,5 @@ test(
 			.execute();
 
 		expect(deletionChangesInCheckpoint).toHaveLength(2);
-	},
-	{ timeout: 30000 }
+	}
 );

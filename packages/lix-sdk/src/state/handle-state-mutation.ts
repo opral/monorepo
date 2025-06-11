@@ -7,6 +7,8 @@ import { nanoid } from "../database/nano-id.js";
 import type { NewStateRow } from "./schema.js";
 import {
 	INITIAL_CHANGE_SET_ID,
+	INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
+	INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
 	INITIAL_VERSION_ID,
 	INITIAL_WORKING_CHANGE_SET_ID,
 	type LixVersion,
@@ -100,8 +102,8 @@ export function handleStateMutation(
 			content: JSON.stringify({
 				id: "global",
 				name: "global",
-				change_set_id: "global_change_set",
-				working_change_set_id: "global_working_change_set",
+				change_set_id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
+				working_change_set_id: INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
 			} satisfies LixVersion),
 		};
 	}
@@ -110,57 +112,9 @@ export function handleStateMutation(
 		throw new Error(`Version with id '${version_id}' not found.`);
 	}
 
-	const version = JSON.parse(versionRecord.content) as LixVersion;
+	const mutatedVersion = JSON.parse(versionRecord.content) as LixVersion;
 
-	const changeSetId = nanoid();
-
-	// Check if the root change is a version change for the same entity
-	const isVersionChange = schema_key === "lix_version";
-
-	// Check if this is specifically a change_set_id update (should skip mutation handler logic)
-	const isChangeSetIdUpdate = false;
-	let finalSnapshotContent = snapshot_content;
-
-	// For version updates, we need to get the current version data from global scope
-	// because version state is always stored with version_id = 'global'
-	let currentVersionData = version;
-	if (isVersionChange && entity_id !== "global") {
-		// Query the actual stored version data from global scope
-		const [currentVersionRecord] = executeSync({
-			lix: { sqlite },
-			query: db
-				.selectFrom("internal_state_cache")
-				.where("schema_key", "=", "lix_version")
-				.where("entity_id", "=", entity_id)
-				.where("version_id", "=", "global")
-				.select("snapshot_content as content"),
-		}) as [{ content: string } | undefined];
-
-		if (currentVersionRecord) {
-			currentVersionData = JSON.parse(
-				currentVersionRecord.content
-			) as LixVersion;
-		}
-	}
-
-	if (isVersionChange && snapshot_content !== null) {
-		const rootSnapshot = JSON.parse(snapshot_content) as LixVersion;
-
-		// Check if ONLY change_set_id changed (and nothing else)
-		const isChangeSetIdUpdate =
-			rootSnapshot.change_set_id !== currentVersionData.change_set_id;
-
-		if (isChangeSetIdUpdate) {
-			// Use user's data as-is (no mutation handler modifications)
-			finalSnapshotContent = snapshot_content;
-		} else {
-			// Apply mutation handler logic
-			finalSnapshotContent = JSON.stringify({
-				...rootSnapshot,
-				change_set_id: changeSetId,
-			} satisfies LixVersion);
-		}
-	}
+	const nextChangeSetId = nanoid();
 
 	const rootChange = createChangeWithSnapshot({
 		sqlite,
@@ -170,30 +124,23 @@ export function handleStateMutation(
 			schema_key,
 			file_id,
 			plugin_key,
-			snapshot_content: finalSnapshotContent,
+			snapshot_content,
 			schema_version,
 		},
 		timestamp: currentTime,
 		version_id,
 	});
 
-	// Skip mutation handler logic for change_set_id updates only
-	if (isChangeSetIdUpdate) {
-		// For change_set_id updates, just create the root change and return
-		// No edges, no new change sets, no additional logic
-		return 1;
-	}
-
 	const changeSetChange = createChangeWithSnapshot({
 		sqlite,
 		db,
 		data: {
-			entity_id: changeSetId,
+			entity_id: nextChangeSetId,
 			schema_key: "lix_change_set",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
-				id: changeSetId,
+				id: nextChangeSetId,
 				metadata: null,
 			} satisfies LixChangeSet),
 			schema_version: LixChangeSetSchema["x-lix-version"],
@@ -206,13 +153,13 @@ export function handleStateMutation(
 		sqlite,
 		db,
 		data: {
-			entity_id: `${currentVersionData.change_set_id}::${changeSetId}`,
+			entity_id: `${mutatedVersion.change_set_id}::${nextChangeSetId}`,
 			schema_key: "lix_change_set_edge",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: JSON.stringify({
-				parent_id: currentVersionData.change_set_id,
-				child_id: changeSetId,
+				parent_id: mutatedVersion.change_set_id,
+				child_id: nextChangeSetId,
 			} satisfies LixChangeSetEdge),
 			schema_version: LixChangeSetEdgeSchema["x-lix-version"],
 		},
@@ -223,26 +170,24 @@ export function handleStateMutation(
 	// Only create separate version change if root change is not already a version change
 	const changesToProcess = [rootChange, changeSetChange, changeSetEdgeChange];
 
-	if (!isVersionChange) {
-		const versionChange = createChangeWithSnapshot({
-			sqlite,
-			db,
-			data: {
-				entity_id: currentVersionData.id,
-				schema_key: "lix_version",
-				file_id: "lix",
-				plugin_key: "lix_own_entity",
-				snapshot_content: JSON.stringify({
-					...currentVersionData,
-					change_set_id: changeSetId,
-				} satisfies LixVersion),
-				schema_version: LixVersionSchema["x-lix-version"],
-			},
-			timestamp: currentTime,
-			version_id: "global",
-		});
-		changesToProcess.push(versionChange);
-	}
+	const versionChange = createChangeWithSnapshot({
+		sqlite,
+		db,
+		data: {
+			entity_id: mutatedVersion.id,
+			schema_key: "lix_version",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				...mutatedVersion,
+				change_set_id: nextChangeSetId,
+			} satisfies LixVersion),
+			schema_version: LixVersionSchema["x-lix-version"],
+		},
+		timestamp: currentTime,
+		version_id: "global",
+	});
+	changesToProcess.push(versionChange);
 
 	for (const change of changesToProcess) {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -250,12 +195,12 @@ export function handleStateMutation(
 			sqlite,
 			db,
 			data: {
-				entity_id: `${changeSetId}::${change.id}`,
+				entity_id: `${nextChangeSetId}::${change.id}`,
 				schema_key: "lix_change_set_element",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
-					change_set_id: changeSetId,
+					change_set_id: nextChangeSetId,
 					change_id: change.id,
 					schema_key: change.schema_key,
 					file_id: change.file_id,
@@ -293,14 +238,13 @@ export function handleStateMutation(
 	// TODO skipping lix internal entities is likely undesired.
 	// Skip lix internal entities (change sets, edges, etc.)
 	if (
-		!isChangeSetIdUpdate &&
 		rootChange.schema_key !== "lix_change_set" &&
 		rootChange.schema_key !== "lix_change_set_edge" &&
 		rootChange.schema_key !== "lix_change_set_element" &&
 		rootChange.schema_key !== "lix_version"
 	) {
-		const parsedSnapshot = finalSnapshotContent
-			? JSON.parse(finalSnapshotContent)
+		const parsedSnapshot = snapshot_content
+			? JSON.parse(snapshot_content)
 			: null;
 		const isDeletion =
 			!parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
@@ -312,9 +256,7 @@ export function handleStateMutation(
 				query: db
 					.selectFrom("change_set")
 					.where(changeSetHasLabel({ name: "checkpoint" }))
-					.where(
-						changeSetIsAncestorOf({ id: currentVersionData.change_set_id })
-					)
+					.where(changeSetIsAncestorOf({ id: mutatedVersion.change_set_id }))
 					.select("id")
 					.limit(1),
 			});
@@ -360,7 +302,7 @@ export function handleStateMutation(
 					.where(
 						"entity_id",
 						"like",
-						`${currentVersionData.working_change_set_id}::%`
+						`${mutatedVersion.working_change_set_id}::%`
 					)
 					.where("schema_key", "=", "lix_change_set_element")
 					.where("file_id", "=", "lix")
@@ -388,12 +330,12 @@ export function handleStateMutation(
 					sqlite,
 					db,
 					data: {
-						entity_id: `${currentVersionData.working_change_set_id}::${rootChange.id}`,
+						entity_id: `${mutatedVersion.working_change_set_id}::${rootChange.id}`,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
 						plugin_key: "lix_own_entity",
 						snapshot_content: JSON.stringify({
-							change_set_id: currentVersionData.working_change_set_id,
+							change_set_id: mutatedVersion.working_change_set_id,
 							change_id: rootChange.id,
 							entity_id: rootChange.entity_id,
 							schema_key: rootChange.schema_key,
@@ -413,7 +355,11 @@ export function handleStateMutation(
 				lix: { sqlite },
 				query: db
 					.deleteFrom("state")
-					.where("entity_id", "like", `${version.working_change_set_id}::%`)
+					.where(
+						"entity_id",
+						"like",
+						`${mutatedVersion.working_change_set_id}::%`
+					)
 					.where("schema_key", "=", "lix_change_set_element")
 					.where("file_id", "=", "lix")
 					.where("version_id", "=", version_id)
@@ -439,12 +385,12 @@ export function handleStateMutation(
 				sqlite,
 				db,
 				data: {
-					entity_id: `${version.working_change_set_id}::${rootChange.id}`,
+					entity_id: `${mutatedVersion.working_change_set_id}::${rootChange.id}`,
 					schema_key: "lix_change_set_element",
 					file_id: "lix",
 					plugin_key: "lix_own_entity",
 					snapshot_content: JSON.stringify({
-						change_set_id: version.working_change_set_id,
+						change_set_id: mutatedVersion.working_change_set_id,
 						change_id: rootChange.id,
 						entity_id: rootChange.entity_id,
 						schema_key: rootChange.schema_key,
@@ -465,7 +411,10 @@ function createChangeWithSnapshot(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 	id?: string;
-	data: Omit<NewStateRow, "version_id" | "created_at" | "updated_at">;
+	data: Omit<
+		NewStateRow,
+		"version_id" | "created_at" | "updated_at" | "snapshot_content"
+	> & { snapshot_content: string | null };
 	timestamp?: string;
 	version_id?: string;
 }): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
@@ -558,6 +507,7 @@ function updateStateCache(args: {
 				schema_version: args.schema_version,
 				created_at: args.timestamp,
 				updated_at: args.timestamp,
+				inherited_from_version_id: null, // Direct entities are not inherited
 			})
 			.onConflict((oc) =>
 				oc
@@ -567,6 +517,7 @@ function updateStateCache(args: {
 						snapshot_content: args.snapshot_content as string,
 						schema_version: args.schema_version,
 						updated_at: args.timestamp,
+						inherited_from_version_id: null, // Direct entities are not inherited
 					})
 			),
 	});

@@ -1,15 +1,12 @@
 import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { ChangeSet, ChangeSetElement } from "./schema.js";
+import type { ChangeSet, NewChangeSetElement } from "./schema.js";
 import type { Label } from "../label/schema.js";
 
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
 	id?: string;
-	elements?: Pick<
-		ChangeSetElement,
-		"change_id" | "entity_id" | "schema_key" | "file_id"
-	>[];
+	elements?: Omit<NewChangeSetElement, "change_set_id">[];
 	labels?: Pick<Label, "id">[];
 	/** Parent change sets that this change set will be a child of */
 	parents?: Pick<ChangeSet, "id">[];
@@ -33,6 +30,7 @@ export async function createChangeSet(args: {
 				.values(
 					args.elements.map((element) => ({
 						change_set_id: csId,
+						version_id: args.version_id,
 						...element,
 					}))
 				)
@@ -45,6 +43,7 @@ export async function createChangeSet(args: {
 				.insertInto("change_set_label")
 				.values(
 					args.labels.map((label) => ({
+						version_id: args.version_id,
 						label_id: label.id,
 						change_set_id: csId,
 					}))
@@ -59,6 +58,7 @@ export async function createChangeSet(args: {
 				.values({
 					parent_id: parent.id,
 					child_id: csId,
+					version_id: args.version_id,
 				})
 				.execute();
 		}
