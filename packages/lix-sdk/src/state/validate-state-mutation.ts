@@ -416,7 +416,7 @@ function validateForeignKeyConstraints(args: {
 						}
 					}
 
-					errorMessage += `\nReferenced Entity Search Results:\n`;
+					errorMessage += `\nReferenced Entity Search Results (${foreignKeyDef.schemaKey}):\n`;
 					errorMessage += `┌─────────────────────┬────────────────┬─────────────────────────────────────┐\n`;
 					errorMessage += `│ Version             │ Entity Found   │ Entity Content                      │\n`;
 					errorMessage += `├─────────────────────┼────────────────┼─────────────────────────────────────┤\n`;
@@ -426,7 +426,7 @@ function validateForeignKeyConstraints(args: {
 					const currentVersionDisplay = (args.version_id || "unknown")
 						.substring(0, 19)
 						.padEnd(19);
-					const currentContent = versionMap.has(args.version_id) 
+					const currentContent = versionMap.has(args.version_id)
 						? truncateValue(versionMap.get(args.version_id), 35)
 						: "-";
 					errorMessage += `│ ${currentVersionDisplay} │ ${currentFound.padEnd(14)} │ ${currentContent.padEnd(35)} │\n`;
@@ -444,7 +444,7 @@ function validateForeignKeyConstraints(args: {
 
 					// Add helpful suggestion if entity exists in other versions
 					if (versionMap.size > 0 && !versionMap.has(args.version_id)) {
-						errorMessage += `\nSuggestion: The referenced entity exists in other version(s) but is not accessible in '${args.version_id}'. Check version inheritance configuration.`;
+						errorMessage += `\nThe referenced entity exists in other version(s) but is not accessible in '${args.version_id}'. Check version inheritance configuration.`;
 					}
 				}
 			}
