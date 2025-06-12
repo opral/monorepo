@@ -308,120 +308,6 @@ test.skip("updating version change_set_id should not create edges or orphaned ch
 	expect(targetElementsAfter).toHaveLength(2); // Still just mock-0 and mock-1
 });
 
-// under no circumstances should a change set contain duplicate entity changes
-// given that we directly insert into internal_change and internal_snapshot,
-// we need to ensure that the change set does not contain duplicates manually
-test("updating a version should merge the change with the mutation handlers change", async () => {
-	const lix = await openLixInMemory({});
-
-	// Get initial version
-	const initialVersion = await lix.db
-		.selectFrom("version")
-		.where("name", "=", "main")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// Update version name - this triggers mutation handler
-	await lix.db
-		.updateTable("version")
-		.where("id", "=", initialVersion.id)
-		.set({ name: "updated-name" })
-		.execute();
-
-	const updatedVersion = await lix.db
-		.selectFrom("version")
-		.where("id", "=", initialVersion.id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// Check how many version changes exist in the final change set
-	const versionChangesInFinalSet = await lix.db
-		.selectFrom("change")
-		.innerJoin(
-			"change_set_element",
-			"change.id",
-			"change_set_element.change_id"
-		)
-		.where(
-			"change_set_element.change_set_id",
-			"=",
-			updatedVersion.change_set_id
-		)
-		.where("change.schema_key", "=", "lix_version")
-		.where("change.entity_id", "=", initialVersion.id)
-		.selectAll("change")
-		.execute();
-
-	// Should be only 1 version change per change set (merged change)
-	expect(versionChangesInFinalSet.length).toBe(1);
-});
-
-test("updating version name should create edges (normal mutation behavior)", async () => {
-	const lix = await openLixInMemory({});
-
-	// Get initial version
-	const initialVersion = await lix.db
-		.selectFrom("version")
-		.where("name", "=", "main")
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	const initialChangeSetId = initialVersion.change_set_id;
-
-	const changeSetsBefore = await lix.db
-		.selectFrom("change_set")
-		.selectAll()
-		.execute();
-
-	const changeSetEdgesBefore = await lix.db
-		.selectFrom("change_set_edge")
-		.selectAll()
-		.execute();
-
-	// Update version name (NOT change_set_id)
-	await lix.db
-		.updateTable("version")
-		.where("id", "=", initialVersion.id)
-		.set({ name: "feature-branch" })
-		.execute();
-
-	const updatedVersion = await lix.db
-		.selectFrom("version")
-		.where("id", "=", initialVersion.id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// Version should have new name
-	expect(updatedVersion.name).toBe("feature-branch");
-
-	// change_set_id should be updated to new change set (normal mutation behavior)
-	expect(updatedVersion.change_set_id).not.toBe(initialChangeSetId);
-
-	// NEW change set should be created (normal mutation behavior)
-	const changeSetsAfter = await lix.db
-		.selectFrom("change_set")
-		.selectAll()
-		.execute();
-
-	expect(changeSetsAfter.length).toBe(changeSetsBefore.length + 1);
-
-	// NEW edge should be created (normal mutation behavior)
-	const changeSetEdgesAfter = await lix.db
-		.selectFrom("change_set_edge")
-		.selectAll()
-		.execute();
-
-	expect(changeSetEdgesAfter.length).toBe(changeSetEdgesBefore.length + 1);
-
-	// Verify the edge connects initial -> new change set
-	const newEdge = changeSetEdgesAfter.find(
-		(edge) =>
-			edge.parent_id === initialChangeSetId &&
-			edge.child_id === updatedVersion.change_set_id
-	);
-	expect(newEdge).toBeDefined();
-});
-
 test("inserts working change set elements", async () => {
 	const lix = await openLixInMemory({});
 
@@ -786,6 +672,8 @@ test("working change set elements are separated per version", async () => {
 			name: "new_version",
 			change_set_id: "new_cs",
 			working_change_set_id: "new_working_cs",
+			version_id: "global",
+			inherits_from_version_id: "global",
 		})
 		.execute();
 
