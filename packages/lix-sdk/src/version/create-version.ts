@@ -26,26 +26,13 @@ export async function createVersion(args: {
 		});
 		const cs =
 			args.changeSet ??
-			(await createChangeSet({ 
+			(await createChangeSet({
 				lix: { ...args.lix, db: trx },
 				version_id: "global",
 			}));
 
 		const versionId = args.id ?? nanoid();
-		
-		// Determine inheritance: 
-		// - If explicitly provided, use that value (including null)
-		// - If not provided and not global version, default to 'global'
-		// - If global version, no inheritance (null)
-		let inherits_from_version_id: string | null;
-		if (args.inherits_from_version_id !== undefined) {
-			inherits_from_version_id = args.inherits_from_version_id;
-		} else if (versionId === "global") {
-			inherits_from_version_id = null;
-		} else {
-			inherits_from_version_id = "global";
-		}
-		
+
 		await trx
 			.insertInto("version")
 			.values({
@@ -53,7 +40,7 @@ export async function createVersion(args: {
 				name: args.name,
 				change_set_id: cs.id,
 				working_change_set_id: workingCs.id,
-				inherits_from_version_id,
+				inherits_from_version_id: args.inherits_from_version_id ?? "global",
 			})
 			.execute();
 
@@ -61,6 +48,7 @@ export async function createVersion(args: {
 			.selectFrom("version")
 			.selectAll()
 			.where("id", "=", versionId)
+			.where("version.version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
 		return newVersion;

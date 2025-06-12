@@ -57,7 +57,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
           SELECT
               COALESCE(NEW.id, nano_id()) AS id,
               COALESCE(NEW.name, human_id()) AS name,
-              NEW.inherits_from_version_id AS inherits_from_version_id
+              COALESCE(NEW.inherits_from_version_id, 'global') AS inherits_from_version_id
       ) AS with_default_values;
   END;
 
@@ -87,6 +87,8 @@ BEGIN
   CREATE TRIGGER IF NOT EXISTS version_delete
   INSTEAD OF DELETE ON version
   BEGIN
+    -- TODO implement CASCADE delete for state
+
     -- Delete inheritance relationships where this version is a child
     DELETE FROM state
     WHERE schema_key = 'lix_version_inheritance'
