@@ -1498,3 +1498,70 @@ describe.each([
 		});
 	}
 );
+
+test("deleting without filtering for the version_id deletes the entity from all versions", async () => {
+	const lix = await openLixInMemory({});
+
+	// Insert an entity into global version
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "shared-entity",
+			file_id: "test-file",
+			schema_key: "test_schema",
+			plugin_key: "test_plugin",
+			version_id: "global",
+			snapshot_content: {
+				id: "shared-entity",
+				name: "Global Entity",
+			},
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Create a child version that inherits from global
+	const childVersion = await createVersion({
+		lix,
+		name: "child-version",
+		inherits_from_version_id: "global",
+	});
+
+	// Verify inheritance - both global and child should see the entity
+	const beforeDelete = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "shared-entity")
+		.where("version_id", "in", ["global", childVersion.id])
+		.selectAll()
+		.execute();
+
+	expect(beforeDelete).toHaveLength(2); // One in global, one inherited in child
+	expect(beforeDelete).toMatchObject([
+		{
+			entity_id: "shared-entity",
+			version_id: "global",
+			inherited_from_version_id: null,
+			snapshot_content: { id: "shared-entity", name: "Global Entity" },
+		},
+		{
+			entity_id: "shared-entity",
+			version_id: childVersion.id,
+			inherited_from_version_id: "global",
+			snapshot_content: { id: "shared-entity", name: "Global Entity" },
+		},
+	]);
+
+	await lix.db
+		.deleteFrom("state")
+		.where("entity_id", "=", "shared-entity")
+		.where("schema_key", "=", "test_schema")
+		.execute();
+
+	const afterDelete = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "shared-entity")
+		.selectAll()
+		.execute();
+
+	// Should be deleted from every version
+	expect(afterDelete).toHaveLength(0);
+});
