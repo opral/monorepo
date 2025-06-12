@@ -10,15 +10,15 @@ Defined in: [runtime/strategy.js:22](https://github.com/opral/monorepo/tree/main
 
 #### getLocale()
 
-> **getLocale**: () => `string` \| `undefined`
+> **getLocale**: () => `Promise`\<`string` \| `undefined`\> \| `string` \| `undefined`
 
 ##### Returns
 
-`string` \| `undefined`
+`Promise`\<`string` \| `undefined`\> \| `string` \| `undefined`
 
 #### setLocale()
 
-> **setLocale**: (`locale`) => `void`
+> **setLocale**: (`locale`) => `Promise`\<`void`\> \| `void`
 
 ##### Parameters
 
@@ -28,7 +28,7 @@ Defined in: [runtime/strategy.js:22](https://github.com/opral/monorepo/tree/main
 
 ##### Returns
 
-`void`
+`Promise`\<`void`\> \| `void`
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [runtime/strategy.js:18](https://github.com/opral/monorepo/tree/main
 
 #### getLocale()
 
-> **getLocale**: (`request?`) => `string` \| `undefined`
+> **getLocale**: (`request?`) => `Promise`\<`string` \| `undefined`\> \| `string` \| `undefined`
 
 ##### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [runtime/strategy.js:18](https://github.com/opral/monorepo/tree/main
 
 ##### Returns
 
-`string` \| `undefined`
+`Promise`\<`string` \| `undefined`\> \| `string` \| `undefined`
 
 ***
 
