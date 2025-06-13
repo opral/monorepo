@@ -529,7 +529,7 @@ export function handleStateMutation(
 		}
 	}
 
-	return 1;
+	return 0; // Return 0 to indicate success
 }
 
 function createChangeWithSnapshot(args: {

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type { ChangeSetEdge } from "../change-set/schema.js";
+import type { LixChangeSetEdge } from "../change-set/schema.js";
 
 // re-enable after https://github.com/opral/lix-sdk/issues/305
 // which avoids the massive chain of change sets event
@@ -85,7 +85,7 @@ test.todo(
 					parent_id: versionAfterUpdate.change_set_id,
 					child_id: versionAfterDelete.change_set_id,
 				},
-			] satisfies Omit<ChangeSetEdge, "version_id">[])
+			] satisfies LixChangeSetEdge[])
 		);
 	}
 );
@@ -503,7 +503,7 @@ test(
 			.values({
 				change_set_id: initialVersion.change_set_id,
 				label_id: checkpointLabel.id,
-				version_id: "global",
+				state_version_id: "global",
 			})
 			.execute();
 
@@ -596,7 +596,7 @@ test.todo(
 			.values({
 				change_set_id: versionAfterInsert.change_set_id,
 				label_id: checkpointLabel.id,
-				version_id: "global",
+				state_version_id: "global",
 			})
 			.execute();
 
@@ -660,8 +660,8 @@ test("working change set elements are separated per version", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "new_cs", version_id: "global" },
-			{ id: "new_working_cs", version_id: "global" },
+			{ id: "new_cs", state_version_id: "global" },
+			{ id: "new_working_cs", state_version_id: "global" },
 		])
 		.execute();
 

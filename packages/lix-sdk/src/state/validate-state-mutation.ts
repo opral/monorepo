@@ -28,6 +28,7 @@ export function validateStateMutation(args: {
 		return;
 	}
 
+
 	if (!args.version_id) {
 		throw new Error("version_id is required");
 	}
@@ -361,7 +362,11 @@ function validateForeignKeyConstraints(args: {
 
 		const referencedStates = executeSync({
 			lix: args.lix,
-			query: isRealSqlTable ? query : query.where("version_id", "=", args.version_id),
+			query: isRealSqlTable
+				? query
+				: query
+						.where("version_id", "=", args.version_id)
+						.where("inherited_from_version_id", "is", null),
 		});
 
 		if (referencedStates.length === 0) {
@@ -370,8 +375,10 @@ function validateForeignKeyConstraints(args: {
 
 			// Helper function to truncate property values
 			const truncateValue = (value: any, maxLength: number = 20): string => {
-				const str = typeof value === 'string' ? value : JSON.stringify(value);
-				return str.length > maxLength ? str.substring(0, maxLength - 3) + '...' : str;
+				const str = typeof value === "string" ? value : JSON.stringify(value);
+				return str.length > maxLength
+					? str.substring(0, maxLength - 3) + "..."
+					: str;
 			};
 
 			// Add entity being inserted section
@@ -379,7 +386,7 @@ function validateForeignKeyConstraints(args: {
 			errorMessage += `┌─────────────────┬──────────────────┐\n`;
 			errorMessage += `│ Property        │ Value            │\n`;
 			errorMessage += `├─────────────────┼──────────────────┤\n`;
-			
+
 			const content = args.snapshot_content as Record<string, any>;
 			for (const [prop, value] of Object.entries(content)) {
 				const propDisplay = prop.substring(0, 15).padEnd(15);
@@ -392,63 +399,8 @@ function validateForeignKeyConstraints(args: {
 			errorMessage += `\nForeign Key Relationship:\n`;
 			errorMessage += `  ${args.schema["x-lix-key"]}.${localProperty} → ${foreignKeyDef.schemaKey}.${foreignKeyDef.property}\n`;
 
-			if (!isRealSqlTable) {
-				// For JSON schema entities, query across all versions (rebuild query without version constraint)
-				const allStates = executeSync({
-					lix: args.lix,
-					query: args.lix.db
-						.selectFrom("state")
-						.select(["snapshot_content", "version_id"])
-						.where("schema_key", "=", foreignKeyDef.schemaKey)
-						.where(
-							sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
-							"=",
-							foreignKeyValue
-						),
-				});
-
-				if (allStates.length > 0) {
-					// Group by version and show in enhanced table with content
-					const versionMap = new Map<string, any>();
-
-					for (const state of allStates) {
-						if (state.version_id) {
-							versionMap.set(state.version_id, state.snapshot_content);
-						}
-					}
-
-					errorMessage += `\nReferenced Entity Search Results (${foreignKeyDef.schemaKey}):\n`;
-					errorMessage += `┌─────────────────────┬────────────────┬─────────────────────────────────────┐\n`;
-					errorMessage += `│ Version             │ Entity Found   │ Entity Content                      │\n`;
-					errorMessage += `├─────────────────────┼────────────────┼─────────────────────────────────────┤\n`;
-
-					// Show current version first
-					const currentFound = versionMap.has(args.version_id) ? "Yes" : "No";
-					const currentVersionDisplay = (args.version_id || "unknown")
-						.substring(0, 19)
-						.padEnd(19);
-					const currentContent = versionMap.has(args.version_id)
-						? truncateValue(versionMap.get(args.version_id), 35)
-						: "-";
-					errorMessage += `│ ${currentVersionDisplay} │ ${currentFound.padEnd(14)} │ ${currentContent.padEnd(35)} │\n`;
-
-					// Show other versions where entity exists
-					for (const [versionId, content] of versionMap) {
-						if (versionId && versionId !== args.version_id) {
-							const versionDisplay = versionId.substring(0, 19).padEnd(19);
-							const contentDisplay = truncateValue(content, 35).padEnd(35);
-							errorMessage += `│ ${versionDisplay} │ ${"Yes".padEnd(14)} │ ${contentDisplay} │\n`;
-						}
-					}
-
-					errorMessage += `└─────────────────────┴────────────────┴─────────────────────────────────────┘\n`;
-
-					// Add helpful suggestion if entity exists in other versions
-					if (versionMap.size > 0 && !versionMap.has(args.version_id)) {
-						errorMessage += `\nThe referenced entity exists in other version(s) but is not accessible in '${args.version_id}'. Check version inheritance configuration.`;
-					}
-				}
-			}
+			// Add note about version-scoped behavior
+			errorMessage += `\nNote: Foreign key constraints only validate entities that exist in the version context. Inherited entities from other versions cannot be referenced by foreign keys.`;
 
 			throw new Error(errorMessage);
 		}
@@ -471,11 +423,12 @@ function validateDeletionConstraints(args: {
 		lix: args.lix,
 		query: args.lix.db
 			.selectFrom("state")
-			.select(["snapshot_content", "inherited_from_version_id"])
+			.select(["snapshot_content", "inherited_from_version_id", "version_id"])
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
 			.where("version_id", "=", args.version_id),
 	});
+
 
 	if (currentEntity.length === 0) {
 		// Enhanced error message for better copy-on-write deletion context
