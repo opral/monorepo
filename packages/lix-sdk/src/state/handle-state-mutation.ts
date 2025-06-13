@@ -381,7 +381,8 @@ export function handleStateMutation(
 				query: db
 					.selectFrom("change_set")
 					.where(changeSetHasLabel({ name: "checkpoint" }))
-					.where(changeSetIsAncestorOf({ id: mutatedVersion.change_set_id }))
+					.where(changeSetIsAncestorOf({ id: mutatedVersion.change_set_id }, { includeSelf: true }))
+					.where("state_version_id", "=", "global")
 					.select("id")
 					.limit(1),
 			});
@@ -431,7 +432,7 @@ export function handleStateMutation(
 					)
 					.where("schema_key", "=", "lix_change_set_element")
 					.where("file_id", "=", "lix")
-					.where("version_id", "=", version_id)
+					.where("version_id", "=", "global")
 					.where(
 						sql`json_extract(snapshot_content, '$.entity_id')`,
 						"=",
@@ -469,7 +470,7 @@ export function handleStateMutation(
 						schema_version: LixChangeSetElementSchema["x-lix-version"],
 					},
 					timestamp: currentTime,
-					version_id,
+					version_id: "global",
 				});
 			}
 			// If entity didn't exist at checkpoint, just remove from working change set (already done above)
@@ -487,7 +488,7 @@ export function handleStateMutation(
 					)
 					.where("schema_key", "=", "lix_change_set_element")
 					.where("file_id", "=", "lix")
-					.where("version_id", "=", version_id)
+					.where("version_id", "=", "global")
 					.where(
 						sql`json_extract(snapshot_content, '$.entity_id')`,
 						"=",
@@ -524,7 +525,7 @@ export function handleStateMutation(
 					schema_version: LixChangeSetElementSchema["x-lix-version"],
 				},
 				timestamp: currentTime,
-				version_id,
+				version_id: "global",
 			});
 		}
 	}
