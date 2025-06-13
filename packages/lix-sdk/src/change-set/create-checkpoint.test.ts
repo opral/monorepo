@@ -111,15 +111,11 @@ test("creates checkpoint and returns change set", async () => {
 	});
 });
 
-test("can create checkpoint even when working change set appears empty", async () => {
+test("creating a checkpoint with no changes throws", async () => {
 	const lix = await openLixInMemory({});
 
 	// Create checkpoint without making explicit changes (should work with lix own changes)
-	const checkpoint = await createCheckpoint({ lix });
-
-	expect(checkpoint).toMatchObject({
-		id: expect.any(String),
-	});
+	await expect(createCheckpoint({ lix })).rejects.toThrow();
 });
 
 // we should have https://github.com/opral/lix-sdk/issues/305 before this test
@@ -508,6 +504,7 @@ test(
 				"=",
 				checkpointAfterDeletion.id
 			)
+			.where("change_set_element.state_version_id", "=", "global")
 			.where("change.entity_id", "=", "test-key")
 			.where("change.schema_key", "=", "lix_key_value")
 			.where("change.snapshot_id", "=", "no-content")
@@ -535,6 +532,7 @@ test(
 				id: "file-to-delete",
 				data: new TextEncoder().encode(JSON.stringify({ test: "delete-me" })),
 				path: "/delete-test.json",
+				version_id: lix.db.selectFrom("active_version").select("version_id"),
 			})
 			.execute();
 
@@ -547,6 +545,11 @@ test(
 				),
 			})
 			.where("id", "=", "file-to-delete")
+			.where(
+				"version_id",
+				"=",
+				lix.db.selectFrom("active_version").select("version_id")
+			)
 			.execute();
 
 		await createCheckpoint({ lix });
@@ -555,6 +558,11 @@ test(
 		await lix.db
 			.deleteFrom("file")
 			.where("id", "=", "file-to-delete")
+			.where(
+				"version_id",
+				"=",
+				lix.db.selectFrom("active_version").select("version_id")
+			)
 			.execute();
 
 		// Verify deletion changes were created
@@ -581,6 +589,7 @@ test(
 				"=",
 				checkpointAfterDeletion.id
 			)
+			.where("change_set_element.state_version_id", "=", "global")
 			.where("change.file_id", "=", "file-to-delete")
 			.where("change.snapshot_id", "=", "no-content")
 			.selectAll("change")

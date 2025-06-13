@@ -78,7 +78,7 @@ test("it creates an undo change set that reverses the operations of the original
 		id: "cs0",
 		state_version_id: "global",
 		elements: changes.map((change) => ({
-			version_id: "global",
+			state_version_id: "global",
 			change_id: change.id,
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,

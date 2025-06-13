@@ -32,6 +32,7 @@ export async function createUndoChangeSet(args: {
 		// Check for multiple parents (not supported yet)
 		const parents = await trx
 			.selectFrom("change_set_edge")
+			.where("state_version_id", "=", "global")
 			.where("child_id", "=", args.changeSet.id)
 			.select("parent_id")
 			.execute();
@@ -50,6 +51,7 @@ export async function createUndoChangeSet(args: {
 				"change_set_element.change_id",
 				"change.id"
 			)
+			.where("change_set_element.state_version_id", "=", "global")
 			.where("change_set_element.change_set_id", "=", args.changeSet.id)
 			.selectAll("change")
 			.execute();

@@ -20,6 +20,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 		const workingElements = await trx
 			.selectFrom("change_set_element")
 			.where("change_set_id", "=", workingChangeSetId)
+			.where("state_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
