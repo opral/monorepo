@@ -22,7 +22,8 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
     json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
     json_extract(snapshot_content, '$.working_change_set_id') AS working_change_set_id,
     json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
-    version_id
+    version_id,
+    inherited_from_version_id
   FROM state
   WHERE schema_key = 'lix_version';
 
@@ -81,7 +82,8 @@ BEGIN
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_version'
-      AND file_id = 'lix';
+      AND file_id = 'lix'
+      AND version_id = 'global';
   END;
 
   CREATE TRIGGER IF NOT EXISTS version_delete
@@ -102,7 +104,8 @@ BEGIN
     -- Delete the version itself
     DELETE FROM state
     WHERE entity_id = OLD.id
-    AND schema_key = 'lix_version';
+    AND schema_key = 'lix_version'
+    AND version_id = 'global';
   END;
 
   -- active version 
@@ -157,8 +160,8 @@ BEGIN
   END;
 
   -- Create change sets for global version if they don't exist
-	INSERT OR IGNORE INTO change_set (id, version_id) VALUES ('${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}', 'global');
-	INSERT OR IGNORE INTO change_set (id, version_id) VALUES ('${INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID}', 'global');
+	INSERT OR IGNORE INTO change_set (id, state_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}', 'global');
+	INSERT OR IGNORE INTO change_set (id, state_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID}', 'global');
 
 	-- Create global version if it doesn't exist
 	INSERT OR IGNORE INTO state (
@@ -186,13 +189,13 @@ BEGIN
 
   -- Create change set for default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id, version_id)
+  INSERT INTO change_set (id, state_version_id)
   SELECT '${INITIAL_CHANGE_SET_ID}', 'global'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_CHANGE_SET_ID}');
 
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id, version_id)
+  INSERT INTO change_set (id, state_version_id)
   SELECT '${INITIAL_WORKING_CHANGE_SET_ID}', 'global'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_WORKING_CHANGE_SET_ID}');
 
