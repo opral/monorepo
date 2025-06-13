@@ -47,29 +47,66 @@ Configuration happens in `project.inlang/settings.json` under the `"plugin.inlan
 
 ### `pathPattern`
 
-The path pattern defines _where_ the plugin will be looking for your message files. The default is `./messages/{locale}.json`. The `{locale}` placeholder will be replaced with the language tag for each of your languages.
+You can define a single `pathPattern` or provide an array of patterns to split your messages across multiple JSON files. Messages from **all matching files will be merged**, and if the same message key appears in multiple files, the **value from the last file in the array will override** earlier ones.
+
+This allows for patterns like having a shared base file and extending or overriding it with domain- or customer-specific files.
+
+#### Single path pattern example
 
 ```json
-// project.inlang/settings.json
 {
-  "modules": [ ... ],
   "plugin.inlang.messageFormat": {
-		"pathPattern": "./messages/{locale}.json"
-	}
-}
-```
-
-You can also define an array of paths. The last path in the array will take precedence over the previous ones. This is useful if you want to have a default message file that is overridden by a customer-specific file.
-
-```json
-// project.inlang/settings.json
-{
-  "modules": [ ... ],
-  "plugin.inlang.messageFormat": {
-    "pathPattern": ["./defaults/{locale}.json", "./customer1/{locale}.json"]
+    "pathPattern": "./messages/{locale}.json"
   }
 }
 ```
+
+#### Multiple path patterns example
+
+```json
+{
+  "plugin.inlang.messageFormat": {
+    "pathPattern": ["./defaults/{locale}.json", "./clothing/{locale}.json"]
+  }
+}
+```
+
+Given the following files:
+
+```json
+// ./defaults/en.json
+{
+  "hello": "Hello!",
+  "cart": {
+    "title": "Your cart"
+  },
+  "size": "Size"
+}
+```
+
+```json
+// ./clothing/en.json
+{
+  "size": "Clothing size",
+  "fit": "Fit"
+}
+```
+
+The merged result for locale `en` will be:
+
+```json
+{
+  "hello": "Hello!",
+  "cart": {
+    "title": "Your cart"
+  },
+  "size": "Clothing size", // Overridden
+  "fit": "Fit"              // Added
+}
+```
+
+This lets you modularize and override translations while keeping a shared base.
+
 
 ## Messages
 
