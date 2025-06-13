@@ -57,7 +57,7 @@ true
 Defined in: [compiler-options.ts:116](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
 The host to which the cookie will be sent.
-If null, this defaults to the host portion of the current document location and the cookie is not available on subdomains.
+If undefined, this defaults to the host portion of the current document location and the cookie is not available on subdomains.
 Otherwise, subdomains are always included.
 
 ##### Default
