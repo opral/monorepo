@@ -92,27 +92,34 @@ test("creating a change set with empty elements array should succeed", async () 
 test("creating a change set with labels should associate the labels with the change set", async () => {
 	const lix = await openLixInMemory({});
 
-	// Get existing labels
-	const checkpointLabel = await lix.db
-		.selectFrom("label")
-		.selectAll()
-		.where("name", "=", "checkpoint")
+	// Get the active version to ensure we work in the same context
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
 		.executeTakeFirstOrThrow();
 
-	// Create a new label
-	await lix.db.insertInto("label").values({ name: "test-label" }).execute();
+	// Create a new label in the active version context
+	await lix.db
+		.insertInto("label")
+		.values({
+			name: "test-label",
+			version_id: activeVersion.version_id,
+		})
+		.execute();
 
 	const testLabel = await lix.db
 		.selectFrom("label")
 		.selectAll()
 		.where("name", "=", "test-label")
+		.where("version_id", "=", activeVersion.version_id)
 		.executeTakeFirstOrThrow();
 
-	// Create a change set with labels
+	// Create a change set with labels in the same version context
 	const changeSet = await createChangeSet({
 		lix: lix,
 		elements: [],
-		labels: [checkpointLabel, testLabel],
+		labels: [testLabel],
+		state_version_id: activeVersion.version_id,
 	});
 
 	// Verify the change set was created
@@ -124,17 +131,13 @@ test("creating a change set with labels should associate the labels with the cha
 		.innerJoin("label", "label.id", "change_set_label.label_id")
 		.selectAll()
 		.where("change_set_id", "=", changeSet.id)
-		.where(
-			"label.version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
+		.where("label.version_id", "=", activeVersion.version_id)
 		.execute();
 
 	// Verify both labels are associated with the change set
-	expect(changeSetLabels).toHaveLength(2);
+	expect(changeSetLabels).toHaveLength(1);
 	expect(changeSetLabels.map((label) => label.name)).toEqual(
-		expect.arrayContaining(["test-label", "checkpoint"])
+		expect.arrayContaining(["test-label"])
 	);
 });
 
@@ -187,12 +190,12 @@ test("creating a change set with version_id should store it in the specified ver
 	const changeSet = await createChangeSet({
 		lix,
 		elements: [],
-		version_id: globalVersion,
+		state_version_id: globalVersion,
 	});
 
 	// Verify the change set was created with the correct version_id
 	expect(changeSet.id).toBeDefined();
-	expect(changeSet.version_id).toBe(globalVersion);
+	expect(changeSet.state_version_id).toBe(globalVersion);
 
 	// Also verify by querying the database directly
 	const storedChangeSet = await lix.db
@@ -201,5 +204,5 @@ test("creating a change set with version_id should store it in the specified ver
 		.where("id", "=", changeSet.id)
 		.executeTakeFirstOrThrow();
 
-	expect(storedChangeSet.version_id).toBe(globalVersion);
+	expect(storedChangeSet.state_version_id).toBe(globalVersion);
 });

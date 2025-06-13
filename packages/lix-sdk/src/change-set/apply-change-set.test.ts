@@ -39,7 +39,7 @@ test("it applies lix own entity changes", async () => {
 
 	const changeSet = await createChangeSet({
 		lix,
-		version_id: "global",
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: mockKeyValueChange.id,
@@ -167,7 +167,7 @@ test("throws an error if plugin does not exist", async () => {
 	// Create a change set
 	const changeSet = await createChangeSet({
 		lix,
-		version_id: "global",
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: change.id,
@@ -232,7 +232,7 @@ test("throws an error if plugin does not support applying changes", async () => 
 	// Create a change set
 	const changeSet = await createChangeSet({
 		lix,
-		version_id: "global",
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: change.id,
@@ -404,7 +404,7 @@ test("it should delete entities but not files when applying entity deletion chan
 	const addChangeSet = await createChangeSet({
 		lix,
 		id: "cs-add",
-		version_id: "global",
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: "c1",
@@ -460,7 +460,7 @@ test("it should delete entities but not files when applying entity deletion chan
 	const deleteChangeSet = await createChangeSet({
 		lix,
 		id: "cs-delete-entity",
-		version_id: "global",
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: "c3",

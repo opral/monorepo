@@ -3,6 +3,9 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
+import type { Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 test("creates a checkpoint from working change set elements", async () => {
 	const lix = await openLixInMemory({});
@@ -222,7 +225,7 @@ test("creates proper change set ancestry chain", async () => {
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
 		.where(
-			"version_id",
+			"state_version_id",
 			"=",
 			lix.db.selectFrom("active_version").select("version_id")
 		)
@@ -237,7 +240,7 @@ test("creates proper change set ancestry chain", async () => {
 		.where("id", "=", checkpoint1.id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
 		.where(
-			"version_id",
+			"state_version_id",
 			"=",
 			lix.db.selectFrom("active_version").select("version_id")
 		)
@@ -252,7 +255,7 @@ test("creates proper change set ancestry chain", async () => {
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
 		.where(
-			"version_id",
+			"state_version_id",
 			"=",
 			lix.db.selectFrom("active_version").select("version_id")
 		)
@@ -262,12 +265,122 @@ test("creates proper change set ancestry chain", async () => {
 	expect(initialIsAncestorOfCheckpoint2).toHaveLength(1);
 });
 
+test("debug working change set elements after insertion", async () => {
+	const lix = await openLixInMemory({});
+
+	// Try both approaches to see the difference
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.where("version.version_id", "=", "global")
+		.executeTakeFirstOrThrow();
+
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.selectAll()
+		.where("name", "=", "main")
+		.executeTakeFirstOrThrow();
+
+	const cs = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", activeVersion.working_change_set_id)
+		.selectAll()
+		.execute();
+
+	console.log("0. Change set:", cs);
+
+	console.log("1. Active version:", activeVersion);
+	console.log("1b. Main version:", mainVersion);
+
+	// Check working change set elements BEFORE insertion
+	const elementsBefore = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", activeVersion.working_change_set_id)
+		.where("state_version_id", "=", "global")
+		.selectAll()
+		.execute();
+
+	console.log("2. Elements before insertion:", elementsBefore);
+
+	const elementsBeforeMain = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", mainVersion.working_change_set_id)
+		.selectAll()
+		.execute();
+	console.log("2b. Elements before insertion (main):", elementsBeforeMain);
+
+	// Insert a key-value pair
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "test-key",
+			value: "test-value",
+		})
+		.execute();
+
+	console.log("3. Inserted key-value pair");
+
+	// Check working change set elements AFTER insertion
+	const elementsAfter = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", activeVersion.working_change_set_id)
+		.where("state_version_id", "=", activeVersion.id)
+		.selectAll()
+		.execute();
+	console.log("4. Elements after insertion:", elementsAfter);
+
+	const elementsAfterMain = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", mainVersion.working_change_set_id)
+		.selectAll()
+		.execute();
+	console.log("4b. Elements after insertion (main):", elementsAfterMain);
+
+	// Check if key-value was actually inserted
+	const keyValues = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "test-key")
+		.selectAll()
+		.execute();
+	console.log("5. Key-value records:", keyValues);
+
+	// Check internal state cache
+	const stateCache = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_state_cache")
+		.where("entity_id", "=", "test-key")
+		.selectAll()
+		.execute();
+	console.log("6. State cache records:", stateCache);
+
+	// Check changes
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "test-key")
+		.selectAll()
+		.execute();
+	console.log("7. Change records:", changes);
+
+	expect(elementsAfterMain.length).toBeGreaterThan(0);
+});
+
 // very slow https://github.com/opral/lix-sdk/issues/311
 test(
 	"checkpoint should include deletion changes",
 	{ timeout: 30000 },
 	async () => {
 		const lix = await openLixInMemory({});
+
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "version.id", "active_version.version_id")
+			.selectAll("version")
+			.where("version.version_id", "=", "global")
+			.executeTakeFirstOrThrow();
+
+		console.log("Active version:", activeVersion);
 
 		// Insert a key-value pair
 		await lix.db
@@ -278,14 +391,95 @@ test(
 			})
 			.execute();
 
+		const versionAfterInsertion = await lix.db
+			.selectFrom("version")
+			.where("id", "=", activeVersion.id)
+			.where("version_id", "=", "global")
+			.selectAll()
+			.execute();
+
+		console.log("Version after insertion:", versionAfterInsertion);
+
 		// Create checkpoint after insertion
 		await createCheckpoint({ lix });
+
+		const versionAfterCheckpoint = await lix.db
+			.selectFrom("version")
+			.where("id", "=", activeVersion.id)
+			.where("version_id", "=", "global")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		console.log("Version after checkpoint:", versionAfterCheckpoint);
+
+		const ancestorsOfActiveVersion = await lix.db
+			.selectFrom("change_set")
+			// .where("version_id", "=", activeVersion.version_id)
+			// .where(changeSetHasLabel({ name: "checkpoint" }))
+			.where(
+				changeSetIsAncestorOf(
+					{ id: versionAfterCheckpoint.change_set_id },
+					{ includeSelf: true }
+				)
+			)
+			.where("state_version_id", "=", "global")
+			.selectAll()
+			.execute();
+
+		console.log("Ancestors of active version:", ancestorsOfActiveVersion);
+
+		const checkpointsOfActiveVersion = await lix.db
+			.selectFrom("change_set")
+			// .where("version_id", "=", activeVersion.version_id)
+			.where(changeSetHasLabel({ name: "checkpoint" }))
+			.where(
+				changeSetIsAncestorOf(
+					{ id: versionAfterCheckpoint.change_set_id },
+					{ includeSelf: true }
+				)
+			)
+			.where("state_version_id", "=", "global")
+			.selectAll()
+			.execute();
+
+		console.log("Checkpoints of active version:", checkpointsOfActiveVersion);
+
+		const elementsBeforeDeletion = await lix.db
+			.selectFrom("change_set_element")
+			.where("change_set_id", "=", versionAfterCheckpoint.working_change_set_id)
+			.where("state_version_id", "=", "global")
+			.selectAll()
+			.execute();
+		console.log("Elements before deletion:", elementsBeforeDeletion);
 
 		// Now delete the key-value pair
 		await lix.db
 			.deleteFrom("key_value")
 			.where("key", "=", "test-key")
+			.where("version_id", "=", activeVersion.id)
 			.execute();
+
+		const activeVersionAfterDeletion = await lix.db
+			.selectFrom("version")
+			.where("id", "=", activeVersion.id)
+			.where("version_id", "=", "global")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		console.log("Active version after deletion:", activeVersionAfterDeletion);
+
+		const elementsAfterDeletion = await lix.db
+			.selectFrom("change_set_element")
+			.where(
+				"change_set_id",
+				"=",
+				activeVersionAfterDeletion.working_change_set_id
+			)
+			.where("state_version_id", "=", "global")
+			.selectAll()
+			.execute();
+
+		console.log("Elements after deletion:", elementsAfterDeletion);
 
 		// Verify deletion changes were created
 		const deletionChanges = await lix.db

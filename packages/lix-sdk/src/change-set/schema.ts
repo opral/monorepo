@@ -1,7 +1,9 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
-import type { Version } from "../version/schema.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
 
 export function applyChangeSetDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -11,7 +13,8 @@ export function applyChangeSetDatabaseSchema(
 	SELECT
 		json_extract(snapshot_content, '$.id') AS id,
     json_extract(snapshot_content, '$.metadata') AS metadata,
-    version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
 	FROM state
 	WHERE schema_key = 'lix_change_set';
 
@@ -34,7 +37,7 @@ export function applyChangeSetDatabaseSchema(
       'lix_own_entity',
       json_object('id', with_default_values.id, 'metadata', with_default_values.metadata),
       '${LixChangeSetSchema["x-lix-version"]}',
-      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT
         COALESCE(NEW.id, nano_id()) AS id,
@@ -52,7 +55,7 @@ export function applyChangeSetDatabaseSchema(
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
       snapshot_content = json_object('id', NEW.id, 'metadata', NEW.metadata),
-      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      version_id = COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_change_set'
@@ -80,7 +83,8 @@ export function applyChangeSetDatabaseSchema(
     json_extract(snapshot_content, '$.entity_id') AS entity_id,
     json_extract(snapshot_content, '$.schema_key') AS schema_key,
     json_extract(snapshot_content, '$.file_id') AS file_id,
-    version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
   FROM state
   WHERE schema_key = 'lix_change_set_element';
 
@@ -102,7 +106,7 @@ export function applyChangeSetDatabaseSchema(
       'lix_own_entity',
       json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id),
       '${LixChangeSetElementSchema["x-lix-version"]}',
-      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     );
   END;
 
@@ -116,7 +120,7 @@ export function applyChangeSetDatabaseSchema(
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
       snapshot_content = json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id),
-      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      version_id = COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.change_set_id || '::' || OLD.change_id
       AND schema_key = 'lix_change_set_element'
@@ -138,7 +142,8 @@ export function applyChangeSetDatabaseSchema(
   SELECT
     json_extract(snapshot_content, '$.parent_id') AS parent_id,
     json_extract(snapshot_content, '$.child_id') AS child_id,
-    version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
   FROM state
   WHERE schema_key = 'lix_change_set_edge';
 
@@ -160,7 +165,7 @@ export function applyChangeSetDatabaseSchema(
       'lix_own_entity',
       json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id),
       '${LixChangeSetEdgeSchema["x-lix-version"]}',
-      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     ); 
   END;
 
@@ -185,7 +190,8 @@ export function applyChangeSetDatabaseSchema(
   SELECT
     json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
     json_extract(snapshot_content, '$.thread_id') AS thread_id,
-    version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
   FROM state
   WHERE schema_key = 'lix_change_set_thread';
 
@@ -207,7 +213,7 @@ export function applyChangeSetDatabaseSchema(
       'lix_own_entity',
       json_object('change_set_id', NEW.change_set_id, 'thread_id', NEW.thread_id),
       '${LixChangeSetThreadSchema["x-lix-version"]}',
-      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     ); 
   END;
 
@@ -233,7 +239,8 @@ export function applyChangeSetDatabaseSchema(
     json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
     json_extract(snapshot_content, '$.label_id') AS label_id,
     json_extract(snapshot_content, '$.metadata') AS metadata,
-    version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
   FROM state
   WHERE schema_key = 'lix_change_set_label';
 
@@ -255,7 +262,7 @@ export function applyChangeSetDatabaseSchema(
       'lix_own_entity',
       json_object('change_set_id', NEW.change_set_id, 'label_id', NEW.label_id, 'metadata', NEW.metadata),
       '${LixChangeSetLabelSchema["x-lix-version"]}',
-      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     ); 
   END;
 
@@ -269,7 +276,7 @@ export function applyChangeSetDatabaseSchema(
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
       snapshot_content = json_object('change_set_id', NEW.change_set_id, 'label_id', NEW.label_id, 'metadata', NEW.metadata),
-      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      version_id = COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.change_set_id || '::' || OLD.label_id
       AND schema_key = 'lix_change_set_label'
@@ -309,7 +316,8 @@ export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
 export type ChangeSetView = {
 	id: Generated<string>;
 	metadata: Record<string, any> | null;
-	version_id: Generated<Version["id"]>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: string | null;
 };
 
 // Kysely operation types
@@ -366,7 +374,8 @@ export type ChangeSetElementView = {
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: string | null;
 };
 
 // Kysely operation types
@@ -406,7 +415,8 @@ export type LixChangeSetEdge = FromLixSchemaDefinition<
 export type ChangeSetEdgeView = {
 	parent_id: string;
 	child_id: string;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: string | null;
 };
 
 // Kysely operation types
@@ -448,7 +458,8 @@ export type ChangeSetLabelView = {
 	change_set_id: string;
 	label_id: string;
 	metadata: Record<string, any> | null;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: string | null;
 };
 
 // Kysely operation types
@@ -488,7 +499,8 @@ export type LixChangeSetThread = FromLixSchemaDefinition<
 export type ChangeSetThreadView = {
 	change_set_id: string;
 	thread_id: string;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: string | null;
 };
 
 // Kysely operation types

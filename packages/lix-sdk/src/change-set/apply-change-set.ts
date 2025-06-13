@@ -41,7 +41,7 @@ export async function applyChangeSet(args: {
 					.values({
 						parent_id: version.change_set_id,
 						child_id: args.changeSet.id,
-						version_id: "global",
+						state_version_id: "global",
 					})
 					.execute();
 			}
