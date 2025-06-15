@@ -1,4 +1,4 @@
-import { createCheckpoint, openLixInMemory } from "@lix-js/sdk";
+import { openLixInMemory } from "@lix-js/sdk";
 import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
 import { initLixInspector } from "@lix-js/inspector";
 
@@ -8,8 +8,6 @@ export const lix = await openLixInMemory({
 
 // dev tool for debugging
 initLixInspector({ lix });
-
-await createCheckpoint({ lix });
 
 const mockId = "mock-prosemirror-file-id";
 
