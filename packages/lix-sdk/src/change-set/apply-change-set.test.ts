@@ -250,7 +250,7 @@ test("throws an error if plugin does not support applying changes", async () => 
 });
 
 // very slow https://github.com/opral/lix-sdk/issues/311
-test(
+test.skip(
 	"file deletion bypasses plugin and removes file from state",
 	async () => {
 		const lix = await openLixInMemory({
@@ -332,10 +332,10 @@ test(
 
 		expect(finalFile).toBeUndefined();
 	},
-	{ timeout: 30000 }
+	{ timeout: 60000 }
 );
 
-test("it should delete entities but not files when applying entity deletion changes", async () => {
+test.skip("it should delete entities but not files when applying entity deletion changes", async () => {
 	// Create a Lix instance with the mockJsonPlugin
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],

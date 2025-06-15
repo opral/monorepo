@@ -27,7 +27,11 @@ import {
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type KeyValueView } from "../key-value/schema.js";
-import type { StateView, InternalStateCacheTable } from "../state/schema.js";
+import type {
+	StateView,
+	InternalStateCacheTable,
+	InternalChangeInTransactionTable,
+} from "../state/schema.js";
 import { LixFileSchema, type LixFileView } from "../file/schema.js";
 import { LixLogSchema, type LogView } from "../log/schema.js";
 import {
@@ -54,6 +58,7 @@ export const LixDatabaseSchemaJsonColumns = {
 } as const;
 
 export type LixInternalDatabaseSchema = LixDatabaseSchema & {
+	internal_change_in_transaction: InternalChangeInTransactionTable;
 	internal_change: InternalChangeTable;
 	internal_snapshot: InternalSnapshotTable;
 	internal_state_cache: InternalStateCacheTable;

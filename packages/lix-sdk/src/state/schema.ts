@@ -27,24 +27,6 @@ export function applyStateDatabaseSchema(
 		},
 	});
 
-	sqlite.createFunction({
-		name: "handle_state_mutation",
-		arity: -1,
-		xFunc: (_ctxPtr: number, ...args: any[]) => {
-			return handleStateMutation(
-				sqlite,
-				db,
-				args[0], // entity_id
-				args[1], // schema_key
-				args[2], // file_id
-				args[3], // plugin_key
-				args[4], // snapshot_content,
-				args[5], // version_id
-				args[6] // schema_version
-			);
-		},
-	});
-
 	// Create virtual table using the proper SQLite WASM API (following vtab-experiment pattern)
 	const capi = sqlite.sqlite3.capi;
 	const module = new capi.sqlite3_module();
@@ -69,6 +51,26 @@ export function applyStateDatabaseSchema(
 		}
 		return loggingInitialized;
 	};
+
+	const create_temp_change_table_sql = `
+  -- add a table we use within the transaction
+  CREATE TEMP TABLE IF NOT EXISTS internal_change_in_transaction (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    entity_id TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
+    file_id TEXT NOT NULL,
+    plugin_key TEXT NOT NULL,
+    snapshot_content BLOB,
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
+	--- NOTE schena_key must be unique per entity_id and file_id
+	-- TODO add version column to avoid conflicts within differetn versions
+	UNIQUE(entity_id, file_id, schema_key)
+  ) STRICT;
+
+`;
+
+	sqlite.exec(create_temp_change_table_sql);
 
 	module.installMethods(
 		{
@@ -97,6 +99,94 @@ export function applyStateDatabaseSchema(
 
 			xConnect: () => {
 				return capi.SQLITE_OK;
+			},
+
+			xBegin: () => {
+				// assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
+				if (
+					sqlite.exec({
+						sql: "SELECT * FROM internal_change_in_transaction",
+						returnValue: "resultRows",
+					}).length > 0
+				) {
+					const errorMessage = "Transaction already in progress";
+					if (canLog()) {
+						createLixOwnLogSync({
+							lix: { sqlite, db: db as any },
+							key: "lix_state_xbegin_error",
+							level: "error",
+							message: `xBegin error: ${errorMessage}`,
+						});
+					}
+					throw new Error(errorMessage);
+				}
+			},
+
+			xCommit: () => {
+				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
+				// using the same id for snapshot_id in internal_change as in internal_snapshot.
+				const rows = sqlite.exec({
+					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_content, created_at FROM internal_change_in_transaction",
+					returnValue: "resultRows",
+				});
+
+				for (const row of rows) {
+					const [
+						id,
+						entity_id,
+						schema_key,
+						schema_version,
+						file_id,
+						plugin_key,
+						snapshot_content,
+						created_at,
+					] = row;
+
+					let snapshot_id = "no-content";
+
+					if (snapshot_content) {
+						// Insert into internal_snapshot
+						const result = sqlite.exec({
+							sql: `INSERT OR IGNORE INTO internal_snapshot (content) VALUES (?) RETURNING id`,
+							bind: [snapshot_content],
+							returnValue: "resultRows",
+						});
+						// Get the 'id' column of the newly created row
+						if (result && result.length > 0) {
+							snapshot_id = result[0]![0] as string; // assuming 'id' is the first column
+						}
+					}
+
+					// Insert into internal_change
+					sqlite.exec({
+						sql: `INSERT OR IGNORE INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
+							   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+						bind: [
+							id,
+							entity_id,
+							schema_key,
+							schema_version,
+							file_id,
+							plugin_key,
+							snapshot_id,
+							created_at,
+						],
+					});
+				}
+
+				sqlite.exec({
+					sql: "DELETE FROM internal_change_in_transaction",
+					returnValue: "resultRows",
+				});
+
+				return capi.SQLITE_OK;
+			},
+
+			xRollback: () => {
+				sqlite.exec({
+					sql: "DELETE FROM internal_change_in_transaction",
+					returnValue: "resultRows",
+				});
 			},
 
 			xBestIndex: () => {
@@ -364,20 +454,184 @@ export function applyStateDatabaseSchema(
 				sqlite.sqlite3.vtab.xRowid(pRowid, cursorState.rowIndex);
 				return capi.SQLITE_OK;
 			},
+
+			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
+				try {
+					// Extract arguments using the proper SQLite WASM API
+					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
+
+					// DELETE operation: nArg = 1, args[0] = old rowid
+					if (nArg === 1) {
+						// For DELETE, we need the old row data to pass to handleStateMutation
+						// We can't get this from the virtual table directly, so we'll need to
+						// handle DELETE differently:
+						// we query the row by rowid and pass it to handleStateMutation
+
+						const rowToDelete = sqlite.exec({
+							sql: "SELECT * FROM state WHERE rowid = ?",
+							bind: [args[0]],
+							returnValue: "resultRows",
+						})[0]!;
+
+						const entity_id = rowToDelete[0];
+						const schema_key = rowToDelete[1];
+						const file_id = rowToDelete[2];
+						const version_id = rowToDelete[3];
+						const plugin_key = rowToDelete[4];
+						const snapshot_content = rowToDelete[5];
+						const schema_version = rowToDelete[6];
+
+						const storedSchemaResult = sqlite.exec({
+							sql: "SELECT value FROM stored_schema WHERE key = ?",
+							bind: [String(schema_key)],
+							returnValue: "resultRows",
+						});
+
+						const storedSchema =
+							storedSchemaResult && storedSchemaResult.length > 0
+								? storedSchemaResult[0]![0]
+								: null;
+
+						validateStateMutation({
+							lix: { sqlite, db: db as any },
+							schema: storedSchema ? JSON.parse(storedSchema as string) : null,
+							snapshot_content: JSON.parse(snapshot_content as string),
+							operation: "delete",
+							entity_id: String(entity_id),
+							version_id: String(version_id),
+						});
+
+						handleStateMutation(
+							sqlite,
+							db,
+							String(entity_id),
+							String(schema_key),
+							String(file_id),
+							String(plugin_key),
+							null, // No snapshot content for DELETE
+							String(version_id),
+							String(schema_version)
+						);
+
+						return capi.SQLITE_OK;
+					}
+
+					// INSERT operation: nArg = N+2, args[0] = NULL, args[1] = new rowid
+					// UPDATE operation: nArg = N+2, args[0] = old rowid, args[1] = new rowid
+					const isInsert = args[0] === null || args[0] === undefined;
+					const isUpdate = args[0] !== null && args[0] !== undefined;
+
+					if (!isInsert && !isUpdate) {
+						throw new Error("Invalid xUpdate operation");
+					}
+
+					// Extract column values (args[2] through args[N+1])
+					// Column order: entity_id, schema_key, file_id, version_id, plugin_key,
+					//               snapshot_content, schema_version, created_at, updated_at
+					const entity_id = args[2];
+					const schema_key = args[3];
+					const file_id = args[4];
+					const version_id = args[5];
+					const plugin_key = args[6];
+					const snapshot_content = args[7];
+					const schema_version = args[8];
+
+					// assert required fields
+					if (!entity_id || !schema_key || !file_id || !plugin_key) {
+						throw new Error("Missing required fields for state mutation");
+					}
+
+					if (!version_id) {
+						throw new Error("version_id is required for state mutation");
+					}
+
+					// Ensure snapshot_content is a string
+					const snapshotStr =
+						typeof snapshot_content === "string"
+							? snapshot_content
+							: JSON.stringify(snapshot_content);
+
+					// Call validation function (same logic as triggers)
+					const storedSchemaResult = sqlite.exec({
+						sql: "SELECT value FROM stored_schema WHERE key = ?",
+						bind: [String(schema_key)],
+						returnValue: "resultRows",
+					});
+
+					const storedSchema =
+						storedSchemaResult && storedSchemaResult.length > 0
+							? storedSchemaResult[0]![0]
+							: null;
+
+					validateStateMutation({
+						lix: { sqlite, db: db as any },
+						schema: storedSchema ? JSON.parse(storedSchema as string) : null,
+						snapshot_content: JSON.parse(snapshotStr),
+						operation: isInsert ? "insert" : "update",
+						entity_id: String(entity_id),
+						version_id: String(version_id),
+					});
+
+					// Call handleStateMutation (same logic as triggers)
+					handleStateMutation(
+						sqlite,
+						db,
+						String(entity_id),
+						String(schema_key),
+						String(file_id),
+						String(plugin_key),
+						snapshotStr,
+						String(version_id),
+						String(schema_version)
+					);
+
+					return capi.SQLITE_OK;
+				} catch (error) {
+					const errorMessage =
+						error instanceof Error ? error.message : String(error);
+
+					// Log error for debugging
+					if (canLog()) {
+						createLixOwnLogSync({
+							lix: { sqlite, db: db as any },
+							key: "lix_state_xupdate_error",
+							level: "error",
+							message: `xUpdate error: ${errorMessage}`,
+						});
+					}
+
+					throw error; //new Error("test");
+
+					// const vtab = sqlite.sqlite3.vtab.xVtab.get(_pVTab);
+
+					// // Set proper error message on the virtual table
+					// if (vtab) {
+					// 	// Free any existing error message first
+					// 	if (vtab.zErrMsg) {
+					// 		capi.sqlite3_free(vtab.zErrMsg);
+					// 	}
+					// 	// Allocate new error message using sqlite3_malloc
+					// 	const errorBytes = new TextEncoder().encode(errorMessage + "\0");
+					// 	const errorPtr = capi.sqlite3_malloc(errorBytes.length);
+					// 	if (errorPtr) {
+					// 		sqlite.sqlite3.wasm.heap8u().set(errorBytes, errorPtr);
+					// 		vtab.zErrMsg = errorPtr;
+					// 	}
+					// }
+
+					// return capi.SQLITE_ERROR;
+				}
+			},
 		},
 		false
 	);
 
 	capi.sqlite3_create_module(sqlite.pointer!, "state_vtab", module, 0);
 
-	// Create the virtual table but don't activate it until after initialization
-	sqlite.exec(
-		`CREATE VIRTUAL TABLE IF NOT EXISTS state_vtab_impl USING state_vtab();`
-	);
+	// Create the virtual table as 'state' directly (no more _impl suffix or view layer)
+	sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS state USING state_vtab();`);
 
-	// TODO replace state view with instead of triggers by implementing xUpdate
-	// in the virtual table
-
+	// Create the cache table for performance optimization
 	const sql = `
   CREATE TABLE IF NOT EXISTS internal_state_cache (
     entity_id TEXT NOT NULL,
@@ -394,77 +648,7 @@ export function applyStateDatabaseSchema(
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   );
 
-  -- Create state view that selects from the virtual table
-  CREATE VIEW IF NOT EXISTS state AS SELECT * FROM state_vtab_impl;
 
-  CREATE TRIGGER IF NOT EXISTS state_insert
-  INSTEAD OF INSERT ON state
-  BEGIN
-    SELECT validate_snapshot_content(
-      (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = NEW.schema_key),
-      NEW.snapshot_content,
-      'insert',
-      NEW.entity_id,
-      NEW.version_id
-    );
-
-    SELECT handle_state_mutation(
-      NEW.entity_id,
-      NEW.schema_key,
-      NEW.file_id,
-      NEW.plugin_key,
-      json(NEW.snapshot_content),
-      NEW.version_id,
-      NEW.schema_version
-    );
-    
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS state_update
-  INSTEAD OF UPDATE ON state
-  BEGIN
-    SELECT validate_snapshot_content(
-      (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = NEW.schema_key),
-      NEW.snapshot_content,
-      'update',
-      NEW.entity_id,
-      NEW.version_id
-    );
-
-    SELECT handle_state_mutation(
-      NEW.entity_id,
-      NEW.schema_key,
-      NEW.file_id,
-      NEW.plugin_key,
-      json(NEW.snapshot_content),
-      NEW.version_id,
-      NEW.schema_version
-    );
-    
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS state_delete
-  INSTEAD OF DELETE ON state
-  BEGIN
-    SELECT validate_snapshot_content(
-      (SELECT stored_schema.value FROM stored_schema WHERE stored_schema.key = OLD.schema_key),
-      OLD.snapshot_content,
-      'delete',
-      OLD.entity_id,
-      OLD.version_id
-    );
-
-    SELECT handle_state_mutation(
-      OLD.entity_id,
-      OLD.schema_key,
-      OLD.file_id,
-      OLD.plugin_key,
-      null,
-      OLD.version_id,
-      OLD.schema_version
-    );
-    
-  END;
 `;
 
 	return sqlite.exec(sql);
@@ -707,3 +891,20 @@ export type StateRowUpdate = Updateable<StateView>;
 export type StateCacheRow = Selectable<InternalStateCacheTable>;
 export type NewStateCacheRow = Insertable<InternalStateCacheTable>;
 export type StateCacheRowUpdate = Updateable<InternalStateCacheTable>;
+
+// Types for the internal_change TABLE
+export type InternalChangeInTransaction =
+	Selectable<InternalChangeInTransactionTable>;
+export type NewInternalChangeInTransaction =
+	Insertable<InternalChangeInTransactionTable>;
+export type InternalChangeInTransactionTable = {
+	id: Generated<string>;
+	entity_id: string;
+	schema_key: string;
+	schema_version: string;
+	file_id: string;
+	plugin_key: string;
+	snapshot_content: Record<string, any> | null;
+	created_at: Generated<string>;
+};
+
