@@ -15,7 +15,7 @@
  */
 
 /**
- * @typedef {{ getLocale: (request?: Request) => string | undefined }} CustomServerStrategyHandler
+ * @typedef {{ getLocale: (request?: Request) => Promise<string | undefined> | (string | undefined) }} CustomServerStrategyHandler
  */
 
 /**

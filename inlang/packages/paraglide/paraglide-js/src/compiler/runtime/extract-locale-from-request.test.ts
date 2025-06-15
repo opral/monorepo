@@ -18,7 +18,7 @@ test("returns the locale from the cookie", async () => {
 			cookie: `PARAGLIDE_LOCALE=fr`,
 		},
 	});
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("fr");
 });
 
@@ -43,7 +43,7 @@ test("returns the locale from the pathname for document requests", async () => {
 			"Sec-Fetch-Dest": "document",
 		},
 	});
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("en");
 });
 
@@ -58,7 +58,7 @@ test("returns the baseLocale if no other strategy matches", async () => {
 		strategy: ["baseLocale"],
 	});
 	const request = new Request("http://example.com");
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("en");
 });
 
@@ -73,7 +73,7 @@ test("throws an error if no locale is found", async () => {
 		strategy: ["cookie"],
 	});
 	const request = new Request("http://example.com");
-	expect(() => runtime.extractLocaleFromRequest(request)).toThrow(
+	expect(runtime.extractLocaleFromRequest(request)).rejects.toThrowError(
 		"No locale found. There is an error in your strategy. Try adding 'baseLocale' as the very last strategy."
 	);
 });
@@ -95,7 +95,7 @@ test("returns the preferred locale from Accept-Language header", async () => {
 			"Accept-Language": "en-US;q=0.8,fr;q=0.9,de;q=0.6",
 		},
 	});
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("fr");
 
 	// language tag match
@@ -104,7 +104,7 @@ test("returns the preferred locale from Accept-Language header", async () => {
 			"Accept-Language": "en-US;q=0.8,nl;q=0.9,de;q=0.7",
 		},
 	});
-	const locale2 = runtime.extractLocaleFromRequest(request2);
+	const locale2 = await runtime.extractLocaleFromRequest(request2);
 	// Since "nl" isn't in our locales, and "de" has the highest q-value after "nl"
 	expect(locale2).toBe("en");
 
@@ -114,7 +114,7 @@ test("returns the preferred locale from Accept-Language header", async () => {
 			"Accept-Language": "nl;q=0.9,es;q=0.6",
 		},
 	});
-	const locale3 = runtime.extractLocaleFromRequest(request3);
+	const locale3 = await runtime.extractLocaleFromRequest(request3);
 	expect(locale3).toBe("en");
 });
 
@@ -138,7 +138,7 @@ test("should fall back to next strategy when cookie contains invalid locale", as
 	});
 
 	// Should fall back to baseLocale
-	expect(runtime.extractLocaleFromRequest(request)).toBe("en");
+	expect(runtime.extractLocaleFromRequest(request)).resolves.toBe("en");
 });
 
 test("skips over localStorage strategy as it is not supported on the server", async () => {
@@ -155,7 +155,7 @@ test("skips over localStorage strategy as it is not supported on the server", as
 	const request = new Request("http://example.com");
 
 	// expecting baseLocale
-	expect(runtime.extractLocaleFromRequest(request)).toBe("en");
+	expect(runtime.extractLocaleFromRequest(request)).resolves.toBe("en");
 });
 
 test("resolves the locale from the url for all request types", async () => {
@@ -184,7 +184,7 @@ test("resolves the locale from the url for all request types", async () => {
 			"Sec-Fetch-Dest": "something",
 		},
 	});
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("fr");
 });
 
@@ -217,7 +217,8 @@ test("cookie strategy precedes URL strategy for API requests with wildcards", as
 			cookie: "PARAGLIDE_LOCALE=de",
 		},
 	});
-	const apiLocale = runtime.extractLocaleFromRequest(apiRequestWithCookie);
+	const apiLocale =
+		await runtime.extractLocaleFromRequest(apiRequestWithCookie);
 	expect(apiLocale).toBe("de");
 
 	// API request without cookie should fall back to URL strategy
@@ -226,7 +227,8 @@ test("cookie strategy precedes URL strategy for API requests with wildcards", as
 			"Sec-Fetch-Dest": "empty",
 		},
 	});
-	const fallbackLocale = runtime.extractLocaleFromRequest(apiRequestNoMatch);
+	const fallbackLocale =
+		await runtime.extractLocaleFromRequest(apiRequestNoMatch);
 	expect(fallbackLocale).toBe("en");
 });
 
@@ -259,7 +261,7 @@ test("preferredLanguage precedence over url", async () => {
 		},
 	});
 
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("de");
 });
 
@@ -286,7 +288,55 @@ test("returns locale from custom strategy", async () => {
 		},
 	});
 
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
+	expect(locale).toBe("fr");
+});
+
+test("returns locale from custom strategy with an asynchronous function", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-header", "baseLocale"],
+	});
+
+	class FakeDB {
+		db = new Map<string, string>();
+		constructor() {
+			this.db.set("1", "fr");
+		}
+
+		async getUserLocaleById(id: string) {
+			setTimeout(() => null, 4);
+			return this.db.get(id);
+		}
+	}
+
+	const db = new FakeDB();
+
+	async function getLocaleFromUserRequest(request?: Request) {
+		const userId = request?.headers.get("X-Custom-User-ID") ?? undefined;
+		if (!userId) throw Error("No User ID");
+		const locale = await db.getUserLocaleById(userId);
+		return locale;
+	}
+
+	// Define a custom strategy that extracts locale from a custom header
+	runtime.defineCustomServerStrategy("custom-header", {
+		getLocale: async (request) =>
+			(await getLocaleFromUserRequest(request)) ?? undefined,
+	});
+
+	const request = new Request("http://example.com", {
+		headers: {
+			"X-Custom-User-ID": "1",
+		},
+	});
+
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("fr");
 });
 
@@ -306,7 +356,7 @@ test("falls back to next strategy when custom strategy returns undefined", async
 	});
 
 	const request = new Request("http://example.com");
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("en"); // Should fall back to baseLocale
 });
 
@@ -332,7 +382,7 @@ test("custom strategy takes precedence over built-in strategies", async () => {
 		},
 	});
 
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("de"); // Should use custom strategy, not cookie
 });
 
@@ -356,6 +406,6 @@ test("multiple custom strategies work in order", async () => {
 	});
 
 	const request = new Request("http://example.com");
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("fr"); // Should use second custom strategy
 });
