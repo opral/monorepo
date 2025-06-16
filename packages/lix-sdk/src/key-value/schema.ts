@@ -6,7 +6,7 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
-import type { StateEntityView } from "../state/entity-view-builder.js";
+import type { StateEntityView, StateEntityAllView } from "../state/entity-view-builder.js";
 import { createEntityViewsIfNotExists } from "../state/entity-view-builder.js";
 
 export function applyKeyValueDatabaseSchema(sqlite: SqliteWasmDatabase): void {
@@ -35,7 +35,7 @@ LixKeyValueSchema satisfies LixSchemaDefinition;
 // Pure business logic type (inferred from schema)
 export type LixKeyValue = FromLixSchemaDefinition<typeof LixKeyValueSchema>;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type KeyValueView = {
 	/**
 	 * The key of the key-value pair.
@@ -51,6 +51,12 @@ export type KeyValueView = {
 	key: KeyValueKeys;
 	value: any; // JSONType, can be any valid JSON value
 } & StateEntityView;
+
+// Database view type for cross-version operations
+export type KeyValueAllView = {
+	key: KeyValueKeys;
+	value: any; // JSONType, can be any valid JSON value
+} & StateEntityAllView;
 
 // Kysely operation types
 export type KeyValue = Selectable<KeyValueView>;

@@ -86,8 +86,8 @@ describe("createEntityViewsIfNotExists", () => {
 		expect(entity).toHaveProperty("name", "test_name");
 		expect(entity).toHaveProperty("value", 42);
 
-		// Operational columns
-		expect(entity).toHaveProperty("lixcol_version_id");
+		// Operational columns (regular view doesn't expose lixcol_version_id)
+		expect(entity).not.toHaveProperty("lixcol_version_id");
 		expect(entity).toHaveProperty("lixcol_inherited_from_version_id");
 		expect(entity).toHaveProperty("lixcol_created_at");
 		expect(entity).toHaveProperty("lixcol_updated_at");
@@ -506,6 +506,112 @@ describe("createEntityViewsIfNotExists", () => {
 			name: "test_name",
 			value: 42,
 		});
+	});
+
+	test("should create both primary and _all views", async () => {
+		const lix = await openLixInMemory({});
+
+		createEntityViewsIfNotExists({
+			lix,
+			schema: testSchema,
+			overrideName: "dual_test",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Insert data through primary view (active only)
+		await lix.db
+			.insertInto("dual_test" as any)
+			.values({ id: "test_id", name: "test_name", value: 42 })
+			.execute();
+
+		// Both views should be queryable
+		const primaryResult = await lix.db
+			.selectFrom("dual_test" as any)
+			.selectAll()
+			.execute();
+
+		const allResult = await lix.db
+			.selectFrom("dual_test_all" as any)
+			.selectAll()
+			.execute();
+
+		// Both should return the same data for active version
+		expect(primaryResult).toHaveLength(1);
+		expect(allResult).toHaveLength(1);
+		expect(primaryResult[0]).toMatchObject({
+			id: "test_id",
+			name: "test_name", 
+			value: 42,
+		});
+		expect(allResult[0]).toMatchObject({
+			id: "test_id",
+			name: "test_name",
+			value: 42,
+		});
+		
+		// Verify version column visibility
+		expect(primaryResult[0]).not.toHaveProperty("lixcol_version_id"); // Regular view hides version_id
+		expect(allResult[0]).toHaveProperty("lixcol_version_id"); // _all view exposes version_id
+	});
+
+	test("should handle CRUD operations on both views", async () => {
+		const lix = await openLixInMemory({});
+
+		createEntityViewsIfNotExists({
+			lix,
+			schema: testSchema,
+			overrideName: "crud_test",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Insert through _all view
+		await lix.db
+			.insertInto("crud_test_all" as any)
+			.values({ id: "test_id", name: "test_name", value: 42 })
+			.execute();
+
+		// Update through primary view
+		await lix.db
+			.updateTable("crud_test" as any)
+			.where("id", "=", "test_id")
+			.set({ name: "updated_name" })
+			.execute();
+
+		// Verify update in both views
+		const primaryResult = await lix.db
+			.selectFrom("crud_test" as any)
+			.selectAll()
+			.execute();
+
+		const allResult = await lix.db
+			.selectFrom("crud_test_all" as any)
+			.selectAll()
+			.execute();
+
+		expect(primaryResult[0]).toMatchObject({ name: "updated_name" });
+		expect(allResult[0]).toMatchObject({ name: "updated_name" });
+
+		// Delete through primary view
+		await lix.db
+			.deleteFrom("crud_test" as any)
+			.where("id", "=", "test_id")
+			.execute();
+
+		// Verify deletion in both views
+		const afterDeletePrimary = await lix.db
+			.selectFrom("crud_test" as any)
+			.selectAll()
+			.execute();
+
+		const afterDeleteAll = await lix.db
+			.selectFrom("crud_test_all" as any)
+			.selectAll()
+			.execute();
+
+		expect(afterDeletePrimary).toHaveLength(0);
+		expect(afterDeleteAll).toHaveLength(0);
 	});
 
 });

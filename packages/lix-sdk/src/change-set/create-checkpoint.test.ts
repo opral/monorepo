@@ -450,7 +450,7 @@ test(
 
 		// Now delete the key-value pair
 		await lix.db
-			.deleteFrom("key_value")
+			.deleteFrom("key_value_all")
 			.where("key", "=", "test-key")
 			.where("lixcol_version_id", "=", activeVersion.id)
 			.execute();

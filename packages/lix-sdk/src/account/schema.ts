@@ -3,7 +3,7 @@ import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-def
 import type { Lix } from "../lix/open-lix.js";
 import { humanId } from "human-id";
 import { nanoid } from "../database/nano-id.js";
-import { createEntityViewsIfNotExists, type StateEntityView } from "../state/entity-view-builder.js";
+import { createEntityViewsIfNotExists, type StateEntityView, type StateEntityAllView } from "../state/entity-view-builder.js";
 
 export function applyAccountDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin">
@@ -62,11 +62,17 @@ LixAccountSchema satisfies LixSchemaDefinition;
 // Pure business logic type (inferred from schema)
 export type LixAccount = FromLixSchemaDefinition<typeof LixAccountSchema>;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type AccountView = {
 	id: Generated<string>;
 	name: string;
 } & StateEntityView;
+
+// Database view type for cross-version operations
+export type AccountAllView = {
+	id: Generated<string>;
+	name: string;
+} & StateEntityAllView;
 
 // Kysely operation types
 export type Account = Selectable<AccountView>;

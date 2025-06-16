@@ -12,7 +12,7 @@ test("creates a new change set and updates the version's change set id for mutat
 		.executeTakeFirstOrThrow();
 
 	await lix.db
-		.insertInto("key_value")
+		.insertInto("key_value_all")
 		.values({
 			key: "mock_key",
 			value: "mock_value",
@@ -33,7 +33,7 @@ test("creates a new change set and updates the version's change set id for mutat
 	);
 
 	await lix.db
-		.updateTable("key_value")
+		.updateTable("key_value_all")
 		.where("key", "=", "mock_key")
 		.where(
 			"lixcol_version_id",
@@ -321,7 +321,7 @@ test("inserts working change set elements", async () => {
 
 	// Make a mutation
 	await lix.db
-		.insertInto("key_value")
+		.insertInto("key_value_all")
 		.values({
 			key: "test_key",
 			value: "test_value",
@@ -370,7 +370,7 @@ test("updates working change set elements on entity updates (latest change wins)
 
 	// Insert entity
 	await lix.db
-		.insertInto("key_value")
+		.insertInto("key_value_all")
 		.values({
 			key: "test_key",
 			value: "test_value",
@@ -438,7 +438,7 @@ test("mutation handler removes working change set elements on entity deletion", 
 
 	// Insert entity
 	await lix.db
-		.insertInto("key_value")
+		.insertInto("key_value_all")
 		.values({
 			key: "test_key",
 			value: "test_value",
@@ -518,7 +518,7 @@ test(
 
 		// AFTER checkpoint: Insert an entity
 		await lix.db
-			.insertInto("key_value")
+			.insertInto("key_value_all")
 			.values({
 				key: "post_checkpoint_key",
 				value: "post_checkpoint_value",
@@ -661,7 +661,7 @@ test("working change set elements are separated per version", async () => {
 
 	// Make changes in the main version context
 	await lix.db
-		.insertInto("key_value")
+		.insertInto("key_value_all")
 		.values({
 			key: "main_version_key",
 			value: "main_version_value",
@@ -697,7 +697,7 @@ test("working change set elements are separated per version", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("key_value")
+		.insertInto("key_value_all")
 		.values({
 			key: "new_version_key",
 			value: "new_version_value",

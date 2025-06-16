@@ -26,7 +26,7 @@ import {
 	type StoredSchemaView,
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { LixKeyValueSchema, type KeyValueView } from "../key-value/schema.js";
+import { LixKeyValueSchema, type KeyValueView, type KeyValueAllView } from "../key-value/schema.js";
 import type {
 	StateView,
 	InternalStateCacheTable,
@@ -37,6 +37,7 @@ import { LixLogSchema, type LogView } from "../log/schema.js";
 import {
 	LixAccountSchema,
 	type AccountView,
+	type AccountAllView,
 	type ActiveAccountTable,
 } from "../account/schema.js";
 import {
@@ -86,8 +87,10 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 
 export type LixDatabaseSchema = {
 	state: StateView;
+	state_active: StateView;
 	// account
 	account: AccountView;
+	account_all: AccountAllView;
 	active_account: ActiveAccountTable;
 
 	// snapshot
@@ -112,6 +115,7 @@ export type LixDatabaseSchema = {
 
 	// key value
 	key_value: KeyValueView;
+	key_value_all: KeyValueAllView;
 
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;

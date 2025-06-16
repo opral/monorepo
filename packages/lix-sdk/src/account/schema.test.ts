@@ -6,54 +6,40 @@ import { toBlob } from "../lix/to-blob.js";
 test("insert, update, delete on the account view", async () => {
 	const lix = await openLixInMemory({});
 
-	const version0 = await createVersion({
-		lix,
-		id: "version0",
-	});
-
-	const version1 = await createVersion({
-		lix,
-		id: "version1",
-	});
-
 	await lix.db
 		.insertInto("account")
 		.values([
 			{
 				id: "account0",
 				name: "Alice",
-				lixcol_version_id: version0.id,
 			},
 			{
 				id: "account1",
 				name: "Bob",
-				lixcol_version_id: version1.id,
 			},
 		])
 		.execute();
 
 	const viewAfterInsert = await lix.db
 		.selectFrom("account")
-		.select(["id", "name", "lixcol_version_id"])
+		.select(["id", "name"])
+		.orderBy("id")
 		.execute();
 
 	expect(viewAfterInsert).toEqual([
 		{
 			id: "account0",
 			name: "Alice",
-			lixcol_version_id: "version0",
 		},
 		{
 			id: "account1",
 			name: "Bob",
-			lixcol_version_id: "version1",
 		},
 	]);
 
 	await lix.db
 		.updateTable("account")
 		.where("id", "=", "account0")
-		.where("lixcol_version_id", "=", "version0")
 		.set({
 			name: "Alice Updated",
 		})
@@ -62,39 +48,32 @@ test("insert, update, delete on the account view", async () => {
 	const viewAfterUpdate = await lix.db
 		.selectFrom("account")
 		.orderBy("id")
-		.select(["id", "name", "lixcol_version_id"])
+		.select(["id", "name"])
 		.execute();
 
 	expect(viewAfterUpdate).toEqual([
 		{
 			id: "account0",
 			name: "Alice Updated",
-			lixcol_version_id: "version0",
 		},
 		{
 			id: "account1",
 			name: "Bob",
-			lixcol_version_id: "version1",
 		},
 	]);
 
-	await lix.db
-		.deleteFrom("account")
-		.where("id", "=", "account0")
-		.where("lixcol_version_id", "=", "version0")
-		.execute();
+	await lix.db.deleteFrom("account").where("id", "=", "account0").execute();
 
 	const viewAfterDelete = await lix.db
 		.selectFrom("account")
 		.orderBy("id")
-		.select(["id", "name", "lixcol_version_id"])
+		.select(["id", "name"])
 		.execute();
 
 	expect(viewAfterDelete).toEqual([
 		{
 			id: "account1",
 			name: "Bob",
-			lixcol_version_id: "version1",
 		},
 	]);
 });
@@ -102,23 +81,16 @@ test("insert, update, delete on the account view", async () => {
 test("account ids should have a default", async () => {
 	const lix = await openLixInMemory({});
 
-	const version0 = await createVersion({
-		lix,
-		id: "version0",
-	});
-
 	await lix.db
 		.insertInto("account")
 		.values({
 			name: "Test User",
-			lixcol_version_id: version0.id,
 		})
 		.execute();
-	
+
 	const account = await lix.db
 		.selectFrom("account")
 		.where("name", "=", "Test User")
-		.where("lixcol_version_id", "=", version0.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -141,7 +113,7 @@ test("account operations are version specific and isolated", async () => {
 
 	// Insert account in version A
 	await lix.db
-		.insertInto("account")
+		.insertInto("account_all")
 		.values({
 			id: "accountA",
 			name: "User A",
@@ -151,7 +123,7 @@ test("account operations are version specific and isolated", async () => {
 
 	// Insert account in version B with same id but different name
 	await lix.db
-		.insertInto("account")
+		.insertInto("account_all")
 		.values({
 			id: "accountB",
 			name: "User B",
@@ -161,13 +133,13 @@ test("account operations are version specific and isolated", async () => {
 
 	// Verify both versions have their own accounts
 	const accountsInVersionA = await lix.db
-		.selectFrom("account")
+		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const accountsInVersionB = await lix.db
-		.selectFrom("account")
+		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
@@ -179,7 +151,7 @@ test("account operations are version specific and isolated", async () => {
 
 	// Update account in version A
 	await lix.db
-		.updateTable("account")
+		.updateTable("account_all")
 		.where("id", "=", "accountA")
 		.where("lixcol_version_id", "=", versionA.id)
 		.set({
@@ -189,13 +161,13 @@ test("account operations are version specific and isolated", async () => {
 
 	// Verify update only affected version A
 	const updatedAccountsA = await lix.db
-		.selectFrom("account")
+		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const unchangedAccountsB = await lix.db
-		.selectFrom("account")
+		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
@@ -205,20 +177,20 @@ test("account operations are version specific and isolated", async () => {
 
 	// Delete account from version A
 	await lix.db
-		.deleteFrom("account")
+		.deleteFrom("account_all")
 		.where("id", "=", "accountA")
 		.where("lixcol_version_id", "=", versionA.id)
 		.execute();
 
 	// Verify deletion only affected version A
 	const remainingAccountsA = await lix.db
-		.selectFrom("account")
+		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const remainingAccountsB = await lix.db
-		.selectFrom("account")
+		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
@@ -255,7 +227,7 @@ test("active_account temp table operations", async () => {
 		.execute();
 
 	expect(updatedActiveAccounts).toHaveLength(2);
-	expect(updatedActiveAccounts.some(acc => acc.name === "Alice")).toBe(true);
+	expect(updatedActiveAccounts.some((acc) => acc.name === "Alice")).toBe(true);
 
 	// Update active account
 	await lix.db
@@ -284,7 +256,7 @@ test("active_account temp table operations", async () => {
 		.execute();
 
 	expect(afterDelete).toHaveLength(1);
-	expect(afterDelete.some(acc => acc.id === "user123")).toBe(false);
+	expect(afterDelete.some((acc) => acc.id === "user123")).toBe(false);
 });
 
 test("account table should have no entries initially but active_account should have default", async () => {
@@ -329,68 +301,71 @@ test("should generate different anonymous account names", async () => {
 });
 
 // TODO reopening a lix leads to "no tables specified"
-test.todo('it should drop the temp "active_account" table on reboot to not persist the current account', async () => {
-	const lix = await openLixInMemory({});
+test.todo(
+	'it should drop the temp "active_account" table on reboot to not persist the current account',
+	async () => {
+		const lix = await openLixInMemory({});
 
-	const version = await createVersion({
-		lix,
-		id: "version1",
-	});
+		const version = await createVersion({
+			lix,
+			id: "version1",
+		});
 
-	// Insert a regular account
-	await lix.db
-		.insertInto("account")
-		.values({
+		// Insert a regular account
+		await lix.db
+			.insertInto("account_all")
+			.values({
+				id: "test-account",
+				name: "Test User",
+				lixcol_version_id: version.id,
+			})
+			.execute();
+
+		// Clear the active_account and set it to our test account
+		await lix.db.deleteFrom("active_account").execute();
+		await lix.db
+			.insertInto("active_account")
+			.values({
+				id: "test-account",
+				name: "Test User",
+			})
+			.execute();
+
+		// Verify the active account is set
+		const currentAccount = await lix.db
+			.selectFrom("active_account")
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(currentAccount).toMatchObject({
 			id: "test-account",
 			name: "Test User",
-			lixcol_version_id: version.id,
-		})
-		.execute();
+		});
 
-	// Clear the active_account and set it to our test account
-	await lix.db.deleteFrom("active_account").execute();
-	await lix.db
-		.insertInto("active_account")
-		.values({
+		// Serialize and reload the database (simulating restart)
+		const blob = await toBlob({ lix });
+		const lix2 = await openLixInMemory({ blob });
+
+		// Verify that active_account got reset to a new anonymous account
+		const reloadedActiveAccount = await lix2.db
+			.selectFrom("active_account")
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(reloadedActiveAccount?.id).not.toBe("test-account");
+		expect(reloadedActiveAccount?.name).toMatch(/^Anonymous \w+$/);
+		expect(reloadedActiveAccount?.name).not.toBe("Test User");
+
+		// But the regular account should still exist
+		const persistedAccount = await lix2.db
+			.selectFrom("account")
+			.where("id", "=", "test-account")
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(persistedAccount).toMatchObject({
 			id: "test-account",
 			name: "Test User",
-		})
-		.execute();
-
-	// Verify the active account is set
-	const currentAccount = await lix.db
-		.selectFrom("active_account")
-		.selectAll()
-		.executeTakeFirst();
-
-	expect(currentAccount).toMatchObject({
-		id: "test-account",
-		name: "Test User",
-	});
-
-	// Serialize and reload the database (simulating restart)
-	const blob = await toBlob({ lix });
-	const lix2 = await openLixInMemory({ blob });
-
-	// Verify that active_account got reset to a new anonymous account
-	const reloadedActiveAccount = await lix2.db
-		.selectFrom("active_account")
-		.selectAll()
-		.executeTakeFirst();
-
-	expect(reloadedActiveAccount?.id).not.toBe("test-account");
-	expect(reloadedActiveAccount?.name).toMatch(/^Anonymous \w+$/);
-	expect(reloadedActiveAccount?.name).not.toBe("Test User");
-
-	// But the regular account should still exist
-	const persistedAccount = await lix2.db
-		.selectFrom("account")
-		.where("id", "=", "test-account")
-		.selectAll()
-		.executeTakeFirst();
-
-	expect(persistedAccount).toMatchObject({
-		id: "test-account",
-		name: "Test User",
-	});
-});
+		});
+	}
+);
