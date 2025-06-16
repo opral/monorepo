@@ -61,11 +61,11 @@ export function applyStateDatabaseSchema(
     schema_version TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
+	version_id TEXT NOT NULL,
     snapshot_content BLOB,
     created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
 	--- NOTE schena_key must be unique per entity_id and file_id
-	-- TODO add version column to avoid conflicts within differetn versions
-	UNIQUE(entity_id, file_id, schema_key)
+	UNIQUE(entity_id, file_id, schema_key, version_id)
   ) STRICT;
 
 `;
@@ -904,6 +904,7 @@ export type InternalChangeInTransactionTable = {
 	schema_version: string;
 	file_id: string;
 	plugin_key: string;
+	version_id: string;
 	snapshot_content: Record<string, any> | null;
 	created_at: Generated<string>;
 };

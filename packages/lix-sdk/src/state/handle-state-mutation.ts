@@ -611,11 +611,12 @@ function createChangeWithSnapshot(args: {
 					: null,
 				file_id: args.data.file_id,
 				plugin_key: args.data.plugin_key,
+				version_id: args.version_id!,
 				created_at: args.timestamp || new Date().toISOString(),
 				schema_version: args.data.schema_version,
 			})
 			.onConflict((oc) =>
-				// we assume that a conflic is always on the unique constraint of entity_id, file_id, schema_key
+				// we assume that a conflic is always on the unique constraint of entity_id, file_id, schema_key, version_id
 				oc.doUpdateSet({
 					id: args.id,
 					entity_id: args.data.entity_id,
@@ -625,6 +626,7 @@ function createChangeWithSnapshot(args: {
 						: null,
 					file_id: args.data.file_id,
 					plugin_key: args.data.plugin_key,
+					version_id: args.version_id!,
 					created_at: args.timestamp || new Date().toISOString(),
 					schema_version: args.data.schema_version,
 				})
