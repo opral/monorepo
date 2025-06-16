@@ -343,7 +343,7 @@ test.skip("it should delete entities but not files when applying entity deletion
 
 	// Insert the schema that the mockJsonPlugin uses
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			value: MockJsonPropertySchema,
 			lixcol_version_id: "global",

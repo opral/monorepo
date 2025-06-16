@@ -1990,7 +1990,7 @@ test("should prevent foreign key references to inherited entities from different
 
 	// Create a thread in global context
 	await lix.db
-		.insertInto("thread")
+		.insertInto("thread_all")
 		.values({
 			id: "global_thread",
 			metadata: { title: "Global Thread" },

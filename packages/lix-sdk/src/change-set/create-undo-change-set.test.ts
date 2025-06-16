@@ -14,7 +14,7 @@ test("it creates an undo change set that reverses the operations of the original
 
 	// Insert the schema that the mockJsonPlugin uses
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			value: MockJsonPropertySchema,
 			lixcol_version_id: "global",
@@ -151,7 +151,7 @@ test("it correctly undoes delete operations by restoring previous state", async 
 
 	// Insert the schema that the mockJsonPlugin uses
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			value: MockJsonPropertySchema,
 			lixcol_version_id: "global",

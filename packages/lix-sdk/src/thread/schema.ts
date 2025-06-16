@@ -2,144 +2,40 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
+import {
+	createEntityViewsIfNotExists,
+	type StateEntityView,
+	type StateEntityAllView,
+} from "../state/entity-view-builder.js";
 
 export function applyThreadDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): SqliteWasmDatabase {
-	const sql = `
-  CREATE VIEW IF NOT EXISTS thread AS
-	SELECT
-		json_extract(snapshot_content, '$.id') AS id,
-    json_extract(snapshot_content, '$.metadata') AS metadata,
-    version_id AS lixcol_version_id,
-    inherited_from_version_id AS lixcol_inherited_from_version_id
-	FROM state
-	WHERE schema_key = 'lix_thread';
+	// Create both primary and _all views for thread with default ID generation
+	createEntityViewsIfNotExists({
+		lix: { sqlite },
+		schema: LixThreadSchema,
+		overrideName: "thread",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+		defaultValues: {
+			id: () => "nano_id()",
+		},
+	});
 
-  CREATE TRIGGER IF NOT EXISTS thread_insert
-  INSTEAD OF INSERT ON thread
-  BEGIN
-    INSERT INTO state (
-      entity_id,
-      schema_key,
-      file_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      version_id
-    )
-    SELECT
-      with_default_values.id,
-      'lix_thread',
-      'lix',
-      'lix_own_entity',
-      json_object('id', with_default_values.id, 'metadata', with_default_values.metadata),
-      '${LixThreadSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    FROM (
-      SELECT
-        COALESCE(NEW.id, nano_id()) AS id,
-        NEW.metadata AS metadata
-    ) AS with_default_values;
-  END;
+	// Create both primary and _all views for thread_comment with default ID generation
+	createEntityViewsIfNotExists({
+		lix: { sqlite },
+		schema: LixThreadCommentSchema,
+		overrideName: "thread_comment",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+		defaultValues: {
+			id: () => "nano_id()",
+		},
+	});
 
-  CREATE TRIGGER IF NOT EXISTS thread_update
-  INSTEAD OF UPDATE ON thread
-  BEGIN
-    UPDATE state
-    SET
-      entity_id = NEW.id,
-      schema_key = 'lix_thread',
-      file_id = 'lix',
-      plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('id', NEW.id, 'metadata', NEW.metadata),
-      version_id = COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    WHERE
-      entity_id = OLD.id
-      AND schema_key = 'lix_thread'
-      AND file_id = 'lix';
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS thread_delete
-  INSTEAD OF DELETE ON thread
-  BEGIN
-    DELETE FROM state
-    WHERE entity_id = OLD.id
-    AND schema_key = 'lix_thread'
-    AND file_id = 'lix';
-  END;
-
-  -- thread comment
-
-  CREATE VIEW IF NOT EXISTS thread_comment AS
-	SELECT
-		json_extract(snapshot_content, '$.id') AS id,
-    json_extract(snapshot_content, '$.thread_id') AS thread_id,
-    json_extract(snapshot_content, '$.parent_id') AS parent_id,
-    json_extract(snapshot_content, '$.body') AS body,
-    datetime(state.created_at) || 'Z' AS created_at,
-    version_id AS lixcol_version_id,
-    inherited_from_version_id AS lixcol_inherited_from_version_id
-	FROM state
-	WHERE schema_key = 'lix_thread_comment';
-
-  CREATE TRIGGER IF NOT EXISTS thread_comment_insert
-  INSTEAD OF INSERT ON thread_comment
-  BEGIN
-    INSERT INTO state (
-      entity_id,
-      schema_key,
-      file_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      version_id
-    )
-    SELECT
-      with_default_values.id,
-      'lix_thread_comment',
-      'lix',
-      'lix_own_entity',
-      json_object('id', with_default_values.id, 'thread_id', with_default_values.thread_id, 'parent_id', with_default_values.parent_id, 'body', with_default_values.body),
-      '${LixThreadCommentSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    FROM (
-      SELECT
-        COALESCE(NEW.id, nano_id()) AS id,
-        NEW.thread_id AS thread_id,
-        NEW.parent_id AS parent_id,
-        NEW.body AS body
-    ) AS with_default_values;
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS thread_comment_update
-  INSTEAD OF UPDATE ON thread_comment
-  BEGIN
-    UPDATE state
-    SET
-      entity_id = NEW.id,
-      schema_key = 'lix_thread_comment',
-      file_id = 'lix',
-      plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('id', NEW.id, 'thread_id', NEW.thread_id, 'parent_id', NEW.parent_id, 'body', NEW.body),
-      version_id = COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    WHERE
-      entity_id = OLD.id
-      AND schema_key = 'lix_thread_comment'
-      AND file_id = 'lix';
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS thread_comment_delete
-  INSTEAD OF DELETE ON thread_comment
-  BEGIN
-    DELETE FROM state
-    WHERE entity_id = OLD.id
-    AND schema_key = 'lix_thread_comment'
-    AND file_id = 'lix';
-  END;
-`;
-
-	return sqlite.exec(sql);
+	return sqlite;
 }
 
 export const LixThreadSchema: LixSchemaDefinition = {
@@ -186,23 +82,31 @@ export type LixThreadComment = FromLixSchemaDefinition<
 	typeof LixThreadCommentSchema
 >;
 
-// Database view types
+// Database view types (active version only)
 export type ThreadView = {
 	id: Generated<string>;
 	metadata: Record<string, any> | null;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: Generated<string | null>;
-};
+} & StateEntityView;
 
 export type ThreadCommentView = {
 	id: Generated<string>;
 	thread_id: string;
 	parent_id: string | null;
 	body: ZettelDoc;
-	created_at: Generated<string>;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: Generated<string | null>;
-};
+} & StateEntityView;
+
+// Database view types for cross-version operations
+export type ThreadAllView = {
+	id: Generated<string>;
+	metadata: Record<string, any> | null;
+} & StateEntityAllView;
+
+export type ThreadCommentAllView = {
+	id: Generated<string>;
+	thread_id: string;
+	parent_id: string | null;
+	body: ZettelDoc;
+} & StateEntityAllView;
 
 // Kysely operation types
 export type Thread = Selectable<ThreadView>;

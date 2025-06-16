@@ -29,6 +29,7 @@ import {
 import {
 	LixStoredSchemaSchema,
 	type StoredSchemaView,
+	type StoredSchemaAllView,
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type KeyValueView, type KeyValueAllView } from "../key-value/schema.js";
@@ -38,7 +39,7 @@ import type {
 	InternalChangeInTransactionTable,
 } from "../state/schema.js";
 import { LixFileSchema, type LixFileView } from "../file/schema.js";
-import { LixLogSchema, type LogView } from "../log/schema.js";
+import { LixLogSchema, type LogView, type LogAllView } from "../log/schema.js";
 import {
 	LixAccountSchema,
 	type AccountView,
@@ -50,12 +51,14 @@ import {
 	type ChangeAuthorView,
 	type ChangeAuthorAllView,
 } from "../change-author/schema.js";
-import { LixLabelSchema, type LabelView } from "../label/schema.js";
+import { LixLabelSchema, type LabelView, type LabelAllView } from "../label/schema.js";
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,
 	type ThreadView,
 	type ThreadCommentView,
+	type ThreadAllView,
+	type ThreadCommentAllView,
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 
@@ -102,6 +105,7 @@ export type LixDatabaseSchema = {
 	// snapshot
 	snapshot: SnapshotView;
 	label: LabelView;
+	label_all: LabelAllView;
 
 	// file
 	file: LixFileView;
@@ -112,6 +116,7 @@ export type LixDatabaseSchema = {
 	change_author_all: ChangeAuthorAllView;
 
 	stored_schema: StoredSchemaView;
+	stored_schema_all: StoredSchemaAllView;
 
 	// change set
 	change_set: ChangeSetView;
@@ -134,7 +139,9 @@ export type LixDatabaseSchema = {
 
 	// thread
 	thread: ThreadView;
+	thread_all: ThreadAllView;
 	thread_comment: ThreadCommentView;
+	thread_comment_all: ThreadCommentAllView;
 
 	// version
 	version: VersionView;
@@ -142,4 +149,5 @@ export type LixDatabaseSchema = {
 
 	// logging
 	log: LogView;
+	log_all: LogAllView;
 };

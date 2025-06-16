@@ -83,11 +83,12 @@ test("should create a label with specific version_id", async () => {
 		lixcol_version_id: version.id,
 	});
 
-	// Verify the label exists in the database
+	// Verify the label exists in the database (use label_all to access lixcol_version_id)
 	const dbLabel = await lix.db
-		.selectFrom("label")
+		.selectFrom("label_all")
 		.selectAll()
 		.where("id", "=", label.id)
+		.where("lixcol_version_id", "=", version.id)
 		.executeTakeFirstOrThrow();
 
 	expect(dbLabel).toMatchObject({

@@ -53,6 +53,29 @@ export type StateEntityAllView = {
 };
 
 /**
+ * Validation rule for SQL trigger generation.
+ */
+export type ValidationRule = {
+	/** SQL condition that must be true, or error will be raised */
+	condition: string;
+	/** Error message to display when validation fails */
+	errorMessage: string;
+};
+
+/**
+ * Validation callbacks for entity operations.
+ * These are converted to SQL validation triggers.
+ */
+export type ValidationCallbacks = {
+	/** Validation logic for INSERT operations */
+	onInsert?: ValidationRule[];
+	/** Validation logic for UPDATE operations */
+	onUpdate?: ValidationRule[];
+	/** Validation logic for DELETE operations */
+	onDelete?: ValidationRule[];
+};
+
+/**
  * Creates SQL views and CRUD triggers for an entity based on its schema definition.
  *
  * This function automatically generates two views:
@@ -87,10 +110,25 @@ export type StateEntityAllView = {
  *   pluginKey: "lix_own_entity",
  *   hardcodedFileId: "lix",
  *   defaultValues: {
- *     id: () => nanoid()
+ *     id: (row) => nanoid()
  *   }
  * });
  * // Creates: account (active only) and account_all (all versions)
+ *
+ * // With custom validation
+ * createEntityViewsIfNotExists({
+ *   lix,
+ *   schema: LixStoredSchemaSchema,
+ *   overrideName: "stored_schema",
+ *   pluginKey: "lix_own_entity",
+ *   hardcodedFileId: "lix",
+ *   validation: {
+ *     onInsert: [{
+ *       condition: "NEW.key IS NULL OR NEW.key = json_extract(NEW.value, '$.x-lix-key')",
+ *       errorMessage: "Key must match value.x-lix-key"
+ *     }]
+ *   }
+ * });
  * ```
  */
 export function createEntityViewsIfNotExists(args: {
@@ -103,7 +141,9 @@ export function createEntityViewsIfNotExists(args: {
 	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
 	hardcodedFileId?: string;
 	/** Object mapping property names to functions that generate default values */
-	defaultValues?: Record<string, () => string>;
+	defaultValues?: Record<string, (() => string) | ((row: Record<string, any>) => string)>;
+	/** Custom validation logic for entity operations */
+	validation?: ValidationCallbacks;
 }): void {
 	const view_name = args.overrideName ?? args.schema["x-lix-key"];
 	
@@ -122,7 +162,9 @@ function createSingleEntityView(args: {
 	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
 	hardcodedFileId?: string;
 	/** Object mapping property names to functions that generate default values */
-	defaultValues?: Record<string, () => string>;
+	defaultValues?: Record<string, (() => string) | ((row: Record<string, any>) => string)>;
+	/** Custom validation logic for entity operations */
+	validation?: ValidationCallbacks;
 }): void {
 	if (!args.schema["x-lix-primary-key"]) {
 		throw new Error(
@@ -134,6 +176,7 @@ function createSingleEntityView(args: {
 	const schema_key = args.schema["x-lix-key"];
 	const properties = Object.keys((args.schema as any).properties);
 	const primaryKeys = args.schema["x-lix-primary-key"];
+	
 	const fileId = args.hardcodedFileId
 		? `'${args.hardcodedFileId}'`
 		: "NEW.lixcol_file_id";
@@ -150,7 +193,37 @@ function createSingleEntityView(args: {
 	if (args.defaultValues) {
 		for (const [prop, defaultFn] of Object.entries(args.defaultValues)) {
 			const udfName = `${schema_key}_default_${prop}`;
-			args.lix.sqlite.createFunction(udfName, () => defaultFn());
+			const needsRow = defaultFn.length > 0; // Check if function expects parameters
+			
+			if (needsRow) {
+				// Function needs row data - use variadic function
+				args.lix.sqlite.createFunction(udfName, (...rowValues: any[]) => {
+					// Reconstruct row object from passed values
+					// Skip the first argument (pointer/internal value)
+					const actualValues = rowValues.slice(1);
+					const row: Record<string, any> = {};
+					
+					properties.forEach((prop, index) => {
+						let value = actualValues[index];
+						
+						// Try to parse JSON strings
+						if (typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))) {
+							try {
+								value = JSON.parse(value);
+							} catch {
+								// Keep as string if JSON parsing fails
+							}
+						}
+						
+						row[prop] = value;
+					});
+					
+					return (defaultFn as (row: Record<string, any>) => string)(row);
+				}, { arity: -1 }); // -1 means variadic
+			} else {
+				// Function doesn't need row data - simple 0-arg function
+				args.lix.sqlite.createFunction(udfName, () => (defaultFn as () => string)(), { arity: 0 });
+			}
 		}
 	}
 
@@ -161,12 +234,20 @@ function createSingleEntityView(args: {
 				.join(",\n        ");
 		}
 
+		const rowValuesArgs = properties.map(prop => `NEW.${prop}`).join(", ");
+
 		return properties
 			.map((prop) => {
-				const hasDefault = args.defaultValues![prop];
-				return hasDefault
-					? `COALESCE(NEW.${prop}, ${schema_key}_default_${prop}()) AS ${prop}`
-					: `NEW.${prop} AS ${prop}`;
+				const defaultFn = args.defaultValues![prop];
+				if (defaultFn) {
+					const needsRow = defaultFn.length > 0;
+					const fnCall = needsRow 
+						? `${schema_key}_default_${prop}(${rowValuesArgs})`
+						: `${schema_key}_default_${prop}()`;
+					return `COALESCE(NEW.${prop}, ${fnCall}) AS ${prop}`;
+				} else {
+					return `NEW.${prop} AS ${prop}`;
+				}
 			})
 			.join(",\n        ");
 	};
@@ -205,6 +286,27 @@ function createSingleEntityView(args: {
 		? "OLD.lixcol_version_id"
 		: "(SELECT version_id FROM active_version)";
 
+	// Generate validation SQL
+	const generateValidationSQL = (rules: ValidationRule[]): string => {
+		return rules.map(rule => `
+			SELECT CASE
+				WHEN NOT (${rule.condition})
+				THEN RAISE(FAIL, '${rule.errorMessage.replace(/'/g, "''")}')
+			END;`).join('\n');
+	};
+
+	const insertValidationSQL = args.validation?.onInsert 
+		? generateValidationSQL(args.validation.onInsert)
+		: "";
+	
+	const updateValidationSQL = args.validation?.onUpdate 
+		? generateValidationSQL(args.validation.onUpdate)
+		: "";
+		
+	const deleteValidationSQL = args.validation?.onDelete 
+		? generateValidationSQL(args.validation.onDelete)
+		: "";
+
 	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
 	const sqlQuery = `
     CREATE VIEW IF NOT EXISTS ${view_name} AS
@@ -221,6 +323,7 @@ function createSingleEntityView(args: {
       CREATE TRIGGER IF NOT EXISTS ${view_name}_insert
       INSTEAD OF INSERT ON ${view_name}
       BEGIN      
+        ${insertValidationSQL}
         INSERT INTO state (
           entity_id,
           schema_key,
@@ -262,6 +365,7 @@ function createSingleEntityView(args: {
       CREATE TRIGGER IF NOT EXISTS ${view_name}_update
       INSTEAD OF UPDATE ON ${view_name}
       BEGIN
+        ${updateValidationSQL}
         UPDATE state
         SET
           entity_id = ${entityIdNew},
@@ -280,6 +384,7 @@ function createSingleEntityView(args: {
       CREATE TRIGGER IF NOT EXISTS ${view_name}_delete
       INSTEAD OF DELETE ON ${view_name}
       BEGIN
+        ${deleteValidationSQL}
         DELETE FROM state
         WHERE entity_id = ${entityIdOld}
         AND schema_key = '${schema_key}'

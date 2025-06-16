@@ -5,69 +5,48 @@ import type {
 } from "../schema-definition/definition.js";
 import type { Selectable, Insertable, Updateable, Generated } from "kysely";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
+import {
+	createEntityViewsIfNotExists,
+	type StateEntityView,
+	type StateEntityAllView,
+} from "../state/entity-view-builder.js";
 
 export function applyStoredSchemaDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): void {
-	sqlite.exec(`
-  CREATE VIEW IF NOT EXISTS stored_schema AS
-  SELECT
-    json_extract(snapshot_content, '$.value.x-lix-key') AS key,
-    json_extract(snapshot_content, '$.value.x-lix-version') AS version,
-    json_extract(snapshot_content, '$.value') AS value,
-    version_id AS lixcol_version_id,
-    inherited_from_version_id AS lixcol_inherited_from_version_id
-  FROM state
-  WHERE schema_key = 'lix_stored_schema';
-
-  CREATE TRIGGER IF NOT EXISTS stored_schema_insert
-  INSTEAD OF INSERT ON stored_schema
-  FOR EACH ROW
-  BEGIN 
-    -- Check x-lix-key if present
-    SELECT CASE
-      WHEN NEW.key IS NOT NULL
-        AND NEW.key IS NOT json_extract(NEW.value, '$.x-lix-key')
-      THEN RAISE(FAIL, 'Inserted key does not match value.x-lix-key: key=' || NEW.key || ' x-lix-key=' || json_extract(NEW.value, '$.x-lix-key'))
-    END;
-    -- Check x-lix-version if present
-    SELECT CASE
-      WHEN NEW.version IS NOT NULL
-        AND NEW.version IS NOT json_extract(NEW.value, '$.x-lix-version')
-      THEN RAISE(FAIL, 'Inserted version does not match value.x-lix-version: version=' || NEW.version || ' x-lix-version=' || json_extract(NEW.value, '$.x-lix-version'))
-    END;
-    -- Proceed with insert
-    INSERT INTO state (
-      entity_id,
-      schema_key,
-      file_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      version_id
-      ) VALUES (
-      json_extract(NEW.value, '$.x-lix-key') || '::' || json_extract(NEW.value, '$.x-lix-version'), 
-      'lix_stored_schema',
-      'lix',
-      'lix_own_entity',
-      json_object(
-        'key', json_extract(NEW.value, '$.x-lix-key'), 
-        'version', json_extract(NEW.value, '$.x-lix-version'), 
-        'value', json(NEW.value)
-      ),
-      '${LixStoredSchemaSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    );
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS stored_schema_delete
-  INSTEAD OF DELETE ON stored_schema
-  BEGIN
-      DELETE FROM state 
-      WHERE entity_id = OLD.key || '::' || OLD.version 
-      AND schema_key = 'lix_stored_schema';
-  END;
-`);
+	// Create both primary and _all views for stored_schema with validation
+	createEntityViewsIfNotExists({
+		lix: { sqlite },
+		schema: LixStoredSchemaSchema,
+		overrideName: "stored_schema",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+		defaultValues: {
+			key: (row) => row.value?.["x-lix-key"] || "",
+			version: (row) => row.value?.["x-lix-version"] || "",
+		},
+		validation: {
+			onInsert: [
+				{
+					condition:
+						"NEW.key IS NULL OR NEW.key = json_extract(NEW.value, '$.x-lix-key')",
+					errorMessage: `Inserted key does not match value.x-lix-key: key=" || NEW.key || " x-lix-key=" || json_extract(NEW.value, '$.x-lix-key')`,
+				},
+				{
+					condition:
+						"NEW.version IS NULL OR NEW.version = json_extract(NEW.value, '$.x-lix-version')",
+					errorMessage: `Inserted version does not match value.x-lix-version: version=" || NEW.version || " x-lix-version=" || json_extract(NEW.value, '$.x-lix-version')`,
+				},
+			],
+			onUpdate: [
+				{
+					condition: "0", // Always fail
+					errorMessage:
+						"Schemas are immutable and cannot be updated for backwards compatibility. Bump the version number instead.",
+				},
+			],
+		},
+	});
 }
 
 export const LixStoredSchemaSchema = {
@@ -90,14 +69,19 @@ export type LixStoredSchema = FromLixSchemaDefinition<
 	typeof LixStoredSchemaSchema
 >;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type StoredSchemaView = {
 	key: Generated<string>;
 	version: Generated<string>;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: Generated<string | null>;
 	value: LixSchemaDefinition;
-};
+} & StateEntityView;
+
+// Database view type for cross-version operations
+export type StoredSchemaAllView = {
+	key: Generated<string>;
+	version: Generated<string>;
+	value: LixSchemaDefinition;
+} & StateEntityAllView;
 
 // Kysely operation types
 export type StoredSchema = Selectable<StoredSchemaView>;
