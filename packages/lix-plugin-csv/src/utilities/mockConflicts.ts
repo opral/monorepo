@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { openLixInMemory, toBlob } from "@lix-js/sdk";
 import { mockChanges } from "./mockChanges.js";
 import { detectChanges } from "../detectChanges.js";

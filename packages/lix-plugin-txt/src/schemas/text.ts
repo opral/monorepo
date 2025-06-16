@@ -1,15 +1,13 @@
-import type { ExperimentalChangeSchema } from "@lix-js/sdk";
+import type { LixSchemaDefinition } from "@lix-js/sdk";
 
 export const TextSchemaV1 = {
-	key: "lix_plugin_txt",
-	type: "json",
-	schema: {
-		type: "object",
-		properties: {
-			id: { type: "string" },
-			content: { type: "string" },
-		},
-		required: ["id", "content"],
-		additionalProperties: false,
+	"x-lix-key": "plugin_txt",
+	"x-lix-version": "1.0",
+	type: "object",
+	properties: {
+		id: { type: "string" },
+		content: { type: "string" },
 	},
-} as const satisfies ExperimentalChangeSchema;
+	required: ["id", "content"],
+	additionalProperties: false,
+} as const satisfies LixSchemaDefinition;

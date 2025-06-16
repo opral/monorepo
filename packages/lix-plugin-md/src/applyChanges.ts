@@ -2,30 +2,26 @@ import { type LixPlugin } from "@lix-js/sdk";
 import { parseMdBlocks } from "./utilities/parseMdBlocks.js";
 import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
 
-export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
-	lix,
+export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	file,
 	changes,
 }) => {
 	let parsedBlocks = parseMdBlocks(file.data ?? new Uint8Array());
 
 	for (const change of changes) {
-		if (change.schema_key === MarkdownBlockSchemaV1.key) {
-			const snapshot = await lix.db
-				.selectFrom("snapshot")
-				.where("id", "=", change.snapshot_id)
-				.selectAll()
-				.executeTakeFirstOrThrow();
-
+		if (change.schema_key === MarkdownBlockSchemaV1["x-lix-key"]) {
 			const blockId = change.entity_id;
 
-			if (snapshot.content === null) {
+			if (
+				change.snapshot_content === null ||
+				change.snapshot_content === undefined
+			) {
 				parsedBlocks = parsedBlocks.filter((block) => block.id !== blockId);
 			} else {
 				const updatedBlock = {
 					id: blockId,
-					content: snapshot.content.text,
-					type: snapshot.content.type,
+					content: change.snapshot_content?.text,
+					type: change.snapshot_content?.type,
 				};
 				const index = parsedBlocks.findIndex((block) => block.id === blockId);
 				if (index !== -1) {

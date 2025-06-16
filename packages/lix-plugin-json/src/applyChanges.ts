@@ -2,23 +2,16 @@ import { type LixPlugin } from "@lix-js/sdk";
 import { JSONPropertySchema } from "./schemas/JSONPropertySchema.js";
 import { unflatten } from "flat";
 
-export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
-	lix,
+export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	changes,
 }) => {
 	const flattened: Record<string, any> = {};
 
 	for (const change of changes) {
-		if (change.schema_key === JSONPropertySchema.key) {
-			const snapshot = await lix.db
-				.selectFrom("snapshot")
-				.where("id", "=", change.snapshot_id)
-				.selectAll()
-				.executeTakeFirstOrThrow();
-
+		if (change.schema_key === JSONPropertySchema["x-lix-key"]) {
 			const propertyPath = change.entity_id;
 
-			flattened[propertyPath] = snapshot.content?.value;
+			flattened[propertyPath] = change.snapshot_content?.value;
 		}
 	}
 
