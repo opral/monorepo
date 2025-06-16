@@ -199,9 +199,10 @@ test("creating a change set with version_id should store it in the specified ver
 
 	// Also verify by querying the database directly
 	const storedChangeSet = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.selectAll()
 		.where("id", "=", changeSet.id)
+		.where("lixcol_version_id", "=", globalVersion)
 		.executeTakeFirstOrThrow();
 
 	expect(storedChangeSet.lixcol_version_id).toBe(globalVersion);

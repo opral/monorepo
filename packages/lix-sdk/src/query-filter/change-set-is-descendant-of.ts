@@ -29,7 +29,7 @@ import type { ChangeSet } from "../change-set/schema.js";
  *
  * @example Selecting strict descendants (default)
  * ```ts
- * db.selectFrom("change_set")
+ * db.selectFrom("change_set_all")
  *   .where(changeSetIsDescendantOf({ id: "cs1" }))
  *   .selectAll()
  * ```
@@ -37,7 +37,7 @@ import type { ChangeSet } from "../change-set/schema.js";
  * @example Combining with changeSetIsAncestorOf to select change sets between two points in time
  * ```ts
  * // Select all change sets between startPoint and endPoint (inclusive)
- * db.selectFrom("change_set")
+ * db.selectFrom("change_set_all")
  *   .where(changeSetIsDescendantOf({ id: "startPoint" }))
  *   .where(changeSetIsAncestorOf({ id: "endPoint" }))
  *   .selectAll()
@@ -47,20 +47,20 @@ export function changeSetIsDescendantOf(
 	changeSet: Pick<ChangeSet, "id">,
 	options?: { depth?: number; includeSelf?: boolean }
 ): (
-	eb: ExpressionBuilder<LixDatabaseSchema, "change_set">
-) => ExpressionWrapper<LixDatabaseSchema, "change_set", SqlBool> {
+	eb: ExpressionBuilder<LixDatabaseSchema, "change_set_all">
+) => ExpressionWrapper<LixDatabaseSchema, "change_set_all", SqlBool> {
 	const depthLimit = options?.depth;
 	const includeSelf = options?.includeSelf ?? false;
 
 	return () =>
 		sql<SqlBool>`
-			change_set.id IN (
+			change_set_all.id IN (
 				WITH RECURSIVE dp(id, depth) AS (
-					SELECT id, 0 AS depth FROM change_set WHERE id = ${sql.lit(changeSet.id)}
+					SELECT id, 0 AS depth FROM change_set_all WHERE id = ${sql.lit(changeSet.id)}
 					UNION ALL
-					SELECT change_set_edge.child_id, dp.depth + 1
-					FROM change_set_edge
-					JOIN dp ON change_set_edge.parent_id = dp.id
+					SELECT change_set_edge_all.child_id, dp.depth + 1
+					FROM change_set_edge_all
+					JOIN dp ON change_set_edge_all.parent_id = dp.id
 					${depthLimit !== undefined ? sql`WHERE dp.depth < ${sql.lit(depthLimit)}` : sql``}
 				)
 				-- Select based on the includeSelf flag

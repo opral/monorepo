@@ -27,7 +27,7 @@ test("selects all ancestors of the current change set", async () => {
 
 	// Should select cs0, cs1 as ancestors of cs2
 	const results = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where(changeSetIsAncestorOf(cs2))
 		.select("id")
 		.execute();
@@ -59,7 +59,7 @@ test("respects the optional depth limit", async () => {
 
 	// With depth: 1, we expect cs1 only
 	const results = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where(changeSetIsAncestorOf(cs2, { depth: 1 }))
 		.select("id")
 		.execute();
@@ -91,7 +91,7 @@ test("includeSelf true selects the current change set as well", async () => {
 
 	// Should select cs0, cs1, cs2
 	const results = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where(changeSetIsAncestorOf(cs2, { includeSelf: true }))
 		.select("id")
 		.execute();
@@ -125,7 +125,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 
 	// Test: Check if cs2 is an ancestor of cs3 (should return cs2)
 	const cs2IsAncestorOfCs3 = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where("id", "=", cs2.id)
 		.where(changeSetIsAncestorOf(cs3))
 		.select("id")
@@ -136,7 +136,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 
 	// Test: Check if cs1 is an ancestor of cs3 (should return cs1)
 	const cs1IsAncestorOfCs3 = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where("id", "=", cs1.id)
 		.where(changeSetIsAncestorOf(cs3))
 		.select("id")
@@ -147,7 +147,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 
 	// Test: Check if cs3 is an ancestor of cs3 (should return empty - not inclusive by default)
 	const cs3IsAncestorOfCs3 = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where("id", "=", cs3.id)
 		.where(changeSetIsAncestorOf(cs3))
 		.select("id")
@@ -157,7 +157,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 
 	// Test: Check if cs3 is an ancestor of cs1 (should return empty - wrong direction)
 	const cs3IsAncestorOfCs1 = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where("id", "=", cs3.id)
 		.where(changeSetIsAncestorOf(cs1))
 		.select("id")
@@ -167,7 +167,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 
 	// Test: Check with includeSelf option
 	const cs3IsAncestorOfCs3Inclusive = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where("id", "=", cs3.id)
 		.where(changeSetIsAncestorOf(cs3, { includeSelf: true }))
 		.select("id")

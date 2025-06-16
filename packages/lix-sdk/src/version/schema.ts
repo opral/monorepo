@@ -180,8 +180,8 @@ BEGIN
   END;
 
   -- Create change sets for global version if they don't exist
-	INSERT OR IGNORE INTO change_set (id, lixcol_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}', 'global');
-	INSERT OR IGNORE INTO change_set (id, lixcol_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID}', 'global');
+	INSERT OR IGNORE INTO change_set_all (id, lixcol_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}', 'global');
+	INSERT OR IGNORE INTO change_set_all (id, lixcol_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID}', 'global');
 
 	-- Create global version if it doesn't exist
 	INSERT OR IGNORE INTO state (
@@ -209,17 +209,17 @@ BEGIN
 
   -- Create change set for default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id, lixcol_version_id)
+  INSERT INTO change_set_all (id, lixcol_version_id)
   SELECT '${INITIAL_CHANGE_SET_ID}', 'global'
-  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_CHANGE_SET_ID}');
+  WHERE NOT EXISTS (SELECT 1 FROM change_set_all WHERE id = '${INITIAL_CHANGE_SET_ID}');
 
   `);
 	sqlite.exec(`
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id, lixcol_version_id)
+  INSERT INTO change_set_all (id, lixcol_version_id)
   SELECT '${INITIAL_WORKING_CHANGE_SET_ID}', 'global'
-  WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_WORKING_CHANGE_SET_ID}');
+  WHERE NOT EXISTS (SELECT 1 FROM change_set_all WHERE id = '${INITIAL_WORKING_CHANGE_SET_ID}');
 
 
   `);

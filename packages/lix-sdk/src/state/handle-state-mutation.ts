@@ -382,7 +382,7 @@ export function handleStateMutation(
 			const lastCheckpointChangeSet = executeSync({
 				lix: { sqlite },
 				query: db
-					.selectFrom("change_set")
+					.selectFrom("change_set_all")
 					.where(changeSetHasLabel({ name: "checkpoint" }))
 					.where(
 						changeSetIsAncestorOf(
@@ -390,7 +390,6 @@ export function handleStateMutation(
 							{ includeSelf: true }
 						)
 					)
-					.where("lixcol_version_id", "=", "global")
 					.select("id")
 					.limit(1),
 			});

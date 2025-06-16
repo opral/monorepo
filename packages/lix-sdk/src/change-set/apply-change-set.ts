@@ -29,15 +29,16 @@ export async function applyChangeSet(args: {
 		if (version.change_set_id !== args.changeSet.id) {
 			// Check if edge already exists to avoid conflict
 			const existingEdge = await trx
-				.selectFrom("change_set_edge")
+				.selectFrom("change_set_edge_all")
 				.where("parent_id", "=", version.change_set_id)
 				.where("child_id", "=", args.changeSet.id)
+				.where("lixcol_version_id", "=", "global")
 				.selectAll()
 				.executeTakeFirst();
 
 			if (!existingEdge) {
 				await trx
-					.insertInto("change_set_edge")
+					.insertInto("change_set_edge_all")
 					.values({
 						parent_id: version.change_set_id,
 						child_id: args.changeSet.id,
@@ -51,12 +52,13 @@ export async function applyChangeSet(args: {
 		const changesResult = await trx
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
+				"change_set_element_all",
+				"change_set_element_all.change_id",
 				"change.id"
 			)
 			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-			.where("change_set_element.change_set_id", "=", args.changeSet.id)
+			.where("change_set_element_all.change_set_id", "=", args.changeSet.id)
+			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.selectAll("change")
 			.select("snapshot.content as snapshot_content")
 			.select(sql`${version.id}`.as("version_id"))

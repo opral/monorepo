@@ -14,7 +14,7 @@ export function applyKeyValueDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 		lix: { sqlite },
 		schema: LixKeyValueSchema,
 		overrideName: "key_value",
-		pluginKey: "lix_key_value",
+		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 	});
 }

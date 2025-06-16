@@ -37,13 +37,13 @@ export function changeSetHasLabel(
 	label: { id: string; name?: string } | { name: string; id?: string }
 ) {
 	return (
-		eb: ExpressionBuilder<LixDatabaseSchema, "change_set">
-	): ExpressionWrapper<LixDatabaseSchema, "change_set", SqlBool> =>
-		eb("change_set.id", "in", (subquery) =>
+		eb: ExpressionBuilder<LixDatabaseSchema, "change_set_all">
+	): ExpressionWrapper<LixDatabaseSchema, "change_set_all", SqlBool> =>
+		eb("change_set_all.id", "in", (subquery) =>
 			subquery
-				.selectFrom("change_set_label")
-				.innerJoin("label", "label.id", "change_set_label.label_id")
-				.select("change_set_label.change_set_id")
+				.selectFrom("change_set_label_all")
+				.innerJoin("label", "label.id", "change_set_label_all.label_id")
+				.select("change_set_label_all.change_set_id")
 				.$if("name" in label, (eb) => eb.where("label.name", "=", label.name!))
 				.$if("id" in label, (eb) => eb.where("label.id", "=", label.id!))
 		);

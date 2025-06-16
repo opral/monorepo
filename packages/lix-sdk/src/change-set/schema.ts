@@ -4,306 +4,61 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
+import { createEntityViewsIfNotExists, type StateEntityView, type StateEntityAllView } from "../state/entity-view-builder.js";
+import { nanoid } from "../database/nano-id.js";
 
 export function applyChangeSetDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): SqliteWasmDatabase {
-	const sql = `
-  CREATE VIEW IF NOT EXISTS change_set AS
-	SELECT
-		json_extract(snapshot_content, '$.id') AS id,
-    json_extract(snapshot_content, '$.metadata') AS metadata,
-    version_id AS lixcol_version_id,
-    inherited_from_version_id AS lixcol_inherited_from_version_id,
-    created_at AS lixcol_created_at,
-    updated_at AS lixcol_updated_at
-	FROM state
-	WHERE schema_key = 'lix_change_set';
+	// Create change_set view using the generalized entity view builder
+	createEntityViewsIfNotExists({
+		lix: { sqlite },
+		schema: LixChangeSetSchema,
+		overrideName: "change_set",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+		defaultValues: {
+			id: () => nanoid(),
+		},
+	});
 
-  CREATE TRIGGER IF NOT EXISTS change_set_insert
-  INSTEAD OF INSERT ON change_set
-  BEGIN
-    INSERT INTO state (
-      entity_id,
-      schema_key,
-      file_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      version_id
-    )
-    SELECT
-      with_default_values.id,
-      'lix_change_set',
-      'lix',
-      'lix_own_entity',
-      json_object('id', with_default_values.id, 'metadata', with_default_values.metadata),
-      '${LixChangeSetSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    FROM (
-      SELECT
-        COALESCE(NEW.id, nano_id()) AS id,
-        NEW.metadata AS metadata
-    ) AS with_default_values;
-  END;
+	// Create change_set_element views
+	createEntityViewsIfNotExists({
+		lix: { sqlite },
+		schema: LixChangeSetElementSchema,
+		overrideName: "change_set_element",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+	});
 
-  CREATE TRIGGER IF NOT EXISTS change_set_update
-  INSTEAD OF UPDATE ON change_set
-  BEGIN
-    UPDATE state
-    SET
-      entity_id = NEW.id,
-      schema_key = 'lix_change_set',
-      file_id = 'lix',
-      plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('id', NEW.id, 'metadata', NEW.metadata),
-      version_id = COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    WHERE
-      entity_id = OLD.id
-      AND schema_key = 'lix_change_set'
-      AND file_id = 'lix';
-  END;
+	// Create change_set_edge views
+	createEntityViewsIfNotExists({
+		lix: { sqlite },
+		schema: LixChangeSetEdgeSchema,
+		overrideName: "change_set_edge",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+	});
 
-  CREATE TRIGGER IF NOT EXISTS change_set_delete
-  INSTEAD OF DELETE ON change_set
-  BEGIN
-    DELETE FROM state
-    WHERE entity_id = OLD.id
-    AND schema_key = 'lix_change_set'
-    AND file_id = 'lix';
-  END;
+	// Create change_set_thread views
+	createEntityViewsIfNotExists({
+		lix: { sqlite },
+		schema: LixChangeSetThreadSchema,
+		overrideName: "change_set_thread",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+	});
 
-  -- change set element
+	// Create change_set_label views
+	createEntityViewsIfNotExists({
+		lix: { sqlite },
+		schema: LixChangeSetLabelSchema,
+		overrideName: "change_set_label",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+	});
 
-  -- TODO expensive graph computation - optimize later
-  -- we prob need a general way to cache graph traversals
-  -- to speed up this query and all other history related queries
-  CREATE VIEW IF NOT EXISTS change_set_element AS
-  SELECT 
-    json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
-    json_extract(snapshot_content, '$.change_id') AS change_id,
-    json_extract(snapshot_content, '$.entity_id') AS entity_id,
-    json_extract(snapshot_content, '$.schema_key') AS schema_key,
-    json_extract(snapshot_content, '$.file_id') AS file_id,
-    version_id AS lixcol_version_id,
-    inherited_from_version_id AS lixcol_inherited_from_version_id,
-    created_at AS lixcol_created_at,
-    updated_at AS lixcol_updated_at
-  FROM state
-  WHERE schema_key = 'lix_change_set_element';
-
-  CREATE TRIGGER IF NOT EXISTS change_set_element_insert
-  INSTEAD OF INSERT ON change_set_element
-  BEGIN
-    INSERT INTO state (
-      entity_id,
-      schema_key,
-      file_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      version_id
-    ) VALUES (
-      NEW.change_set_id || '::' || NEW.change_id,
-      'lix_change_set_element',
-      'lix',
-      'lix_own_entity',
-      json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id),
-      '${LixChangeSetElementSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    );
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS change_set_element_update
-  INSTEAD OF UPDATE ON change_set_element
-  BEGIN
-    UPDATE state
-    SET
-      entity_id = NEW.entity_id,
-      schema_key = 'lix_change_set_element',
-      file_id = 'lix',
-      plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('change_set_id', NEW.change_set_id, 'change_id', NEW.change_id, 'entity_id', NEW.entity_id, 'schema_key', NEW.schema_key, 'file_id', NEW.file_id),
-      version_id = COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    WHERE
-      entity_id = OLD.change_set_id || '::' || OLD.change_id
-      AND schema_key = 'lix_change_set_element'
-      AND file_id = 'lix';
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS change_set_element_delete
-  INSTEAD OF DELETE ON change_set_element
-  BEGIN
-    DELETE FROM state
-    WHERE entity_id = OLD.change_set_id || '::' || OLD.change_id
-    AND schema_key = 'lix_change_set_element'
-    AND file_id = 'lix';
-  END;
-
-  -- change set edge
-
-  CREATE VIEW IF NOT EXISTS change_set_edge AS
-  SELECT
-    json_extract(snapshot_content, '$.parent_id') AS parent_id,
-    json_extract(snapshot_content, '$.child_id') AS child_id,
-    version_id AS lixcol_version_id,
-    inherited_from_version_id AS lixcol_inherited_from_version_id,
-    created_at AS lixcol_created_at,
-    updated_at AS lixcol_updated_at
-  FROM state
-  WHERE schema_key = 'lix_change_set_edge';
-
-  CREATE TRIGGER IF NOT EXISTS change_set_edge_insert
-  INSTEAD OF INSERT ON change_set_edge
-  BEGIN
-    INSERT INTO state (
-      entity_id, 
-      schema_key, 
-      file_id, 
-      plugin_key, 
-      snapshot_content,
-      schema_version,
-      version_id
-    ) VALUES (
-      NEW.parent_id || '::' || NEW.child_id,
-      'lix_change_set_edge',
-      'lix',
-      'lix_own_entity',
-      json_object('parent_id', NEW.parent_id, 'child_id', NEW.child_id),
-      '${LixChangeSetEdgeSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    ); 
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS change_set_edge_update
-  INSTEAD OF UPDATE ON change_set_edge
-  BEGIN
-    SELECT RAISE(ABORT, 'Updates on change_set_edge are not supported because all fields are primary keys. Updating would create a new entity_id. Use DELETE + INSERT instead.');
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS change_set_edge_delete
-  INSTEAD OF DELETE ON change_set_edge
-  BEGIN
-    DELETE FROM state
-    WHERE entity_id = OLD.parent_id || '::' || OLD.child_id
-    AND schema_key = 'lix_change_set_edge'
-    AND file_id = 'lix';
-  END;
-
-  -- change set thread
-
-  CREATE VIEW IF NOT EXISTS change_set_thread AS
-  SELECT
-    json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
-    json_extract(snapshot_content, '$.thread_id') AS thread_id,
-    version_id AS lixcol_version_id,
-    inherited_from_version_id AS lixcol_inherited_from_version_id,
-    created_at AS lixcol_created_at,
-    updated_at AS lixcol_updated_at
-  FROM state
-  WHERE schema_key = 'lix_change_set_thread';
-
-  CREATE TRIGGER IF NOT EXISTS change_set_thread_insert
-  INSTEAD OF INSERT ON change_set_thread
-  BEGIN
-    INSERT INTO state (
-      entity_id, 
-      schema_key, 
-      file_id, 
-      plugin_key, 
-      snapshot_content,
-      schema_version,
-      version_id
-    ) VALUES (
-      NEW.change_set_id || '::' || NEW.thread_id,
-      'lix_change_set_thread',
-      'lix',
-      'lix_own_entity',
-      json_object('change_set_id', NEW.change_set_id, 'thread_id', NEW.thread_id),
-      '${LixChangeSetThreadSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    ); 
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS change_set_thread_update
-  INSTEAD OF UPDATE ON change_set_thread
-  BEGIN
-    SELECT RAISE(ABORT, 'Updates on change_set_thread are not supported because all fields are primary keys. Updating would create a new entity_id. Use DELETE + INSERT instead.');
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS change_set_thread_delete
-  INSTEAD OF DELETE ON change_set_thread
-  BEGIN
-    DELETE FROM state
-    WHERE entity_id = OLD.change_set_id || '::' || OLD.thread_id
-    AND schema_key = 'lix_change_set_thread'
-    AND file_id = 'lix';
-  END;
-
-  -- change set label
-
-  CREATE VIEW IF NOT EXISTS change_set_label AS
-  SELECT
-    json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
-    json_extract(snapshot_content, '$.label_id') AS label_id,
-    json_extract(snapshot_content, '$.metadata') AS metadata,
-    version_id AS lixcol_version_id,
-    inherited_from_version_id AS lixcol_inherited_from_version_id,
-    created_at AS lixcol_created_at,
-    updated_at AS lixcol_updated_at
-  FROM state
-  WHERE schema_key = 'lix_change_set_label';
-
-  CREATE TRIGGER IF NOT EXISTS change_set_label_insert
-  INSTEAD OF INSERT ON change_set_label
-  BEGIN
-    INSERT INTO state (
-      entity_id, 
-      schema_key, 
-      file_id, 
-      plugin_key, 
-      snapshot_content,
-      schema_version,
-      version_id
-    ) VALUES (
-      NEW.change_set_id || '::' || NEW.label_id,
-      'lix_change_set_label',
-      'lix',
-      'lix_own_entity',
-      json_object('change_set_id', NEW.change_set_id, 'label_id', NEW.label_id, 'metadata', NEW.metadata),
-      '${LixChangeSetLabelSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    ); 
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS change_set_label_update
-  INSTEAD OF UPDATE ON change_set_label
-  BEGIN
-    UPDATE state
-    SET
-      entity_id = NEW.change_set_id || '::' || NEW.label_id,
-      schema_key = 'lix_change_set_label',
-      file_id = 'lix',
-      plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('change_set_id', NEW.change_set_id, 'label_id', NEW.label_id, 'metadata', NEW.metadata),
-      version_id = COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    WHERE
-      entity_id = OLD.change_set_id || '::' || OLD.label_id
-      AND schema_key = 'lix_change_set_label'
-      AND file_id = 'lix';
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS change_set_label_delete
-  INSTEAD OF DELETE ON change_set_label
-  BEGIN
-    DELETE FROM state
-    WHERE entity_id = OLD.change_set_id || '::' || OLD.label_id
-    AND schema_key = 'lix_change_set_label'
-    AND file_id = 'lix';
-  END;
-`;
-
-	return sqlite.exec(sql);
+	return sqlite;
 }
 
 export const LixChangeSetSchema: LixSchemaDefinition = {
@@ -322,15 +77,17 @@ export const LixChangeSetSchema: LixSchemaDefinition = {
 // Pure business logic type (inferred from schema)
 export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type ChangeSetView = {
 	id: Generated<string>;
 	metadata: Record<string, any> | null;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: string | null;
-	lixcol_created_at: Generated<string>;
-	lixcol_updated_at: Generated<string>;
-};
+} & StateEntityView;
+
+// Database view type for cross-version operations
+export type ChangeSetAllView = {
+	id: Generated<string>;
+	metadata: Record<string, any> | null;
+} & StateEntityAllView;
 
 // Kysely operation types
 export type ChangeSet = Selectable<ChangeSetView>;
@@ -379,18 +136,23 @@ export type LixChangeSetElement = FromLixSchemaDefinition<
 	typeof LixChangeSetElementSchema
 >;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type ChangeSetElementView = {
 	change_set_id: string;
 	change_id: string;
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: string | null;
-	lixcol_created_at: Generated<string>;
-	lixcol_updated_at: Generated<string>;
-};
+} & StateEntityView;
+
+// Database view type for cross-version operations
+export type ChangeSetElementAllView = {
+	change_set_id: string;
+	change_id: string;
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
+} & StateEntityAllView;
 
 // Kysely operation types
 export type ChangeSetElement = Selectable<ChangeSetElementView>;
@@ -425,15 +187,17 @@ export type LixChangeSetEdge = FromLixSchemaDefinition<
 	typeof LixChangeSetEdgeSchema
 >;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type ChangeSetEdgeView = {
 	parent_id: string;
 	child_id: string;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: string | null;
-	lixcol_created_at: Generated<string>;
-	lixcol_updated_at: Generated<string>;
-};
+} & StateEntityView;
+
+// Database view type for cross-version operations
+export type ChangeSetEdgeAllView = {
+	parent_id: string;
+	child_id: string;
+} & StateEntityAllView;
 
 // Kysely operation types
 export type ChangeSetEdge = Selectable<ChangeSetEdgeView>;
@@ -469,16 +233,19 @@ export type LixChangeSetLabel = FromLixSchemaDefinition<
 	typeof LixChangeSetLabelSchema
 >;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type ChangeSetLabelView = {
 	change_set_id: string;
 	label_id: string;
 	metadata: Record<string, any> | null;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: string | null;
-	lixcol_created_at: Generated<string>;
-	lixcol_updated_at: Generated<string>;
-};
+} & StateEntityView;
+
+// Database view type for cross-version operations
+export type ChangeSetLabelAllView = {
+	change_set_id: string;
+	label_id: string;
+	metadata: Record<string, any> | null;
+} & StateEntityAllView;
 
 // Kysely operation types
 export type ChangeSetLabel = Selectable<ChangeSetLabelView>;
@@ -513,15 +280,17 @@ export type LixChangeSetThread = FromLixSchemaDefinition<
 	typeof LixChangeSetThreadSchema
 >;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type ChangeSetThreadView = {
 	change_set_id: string;
 	thread_id: string;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: string | null;
-	lixcol_created_at: Generated<string>;
-	lixcol_updated_at: Generated<string>;
-};
+} & StateEntityView;
+
+// Database view type for cross-version operations
+export type ChangeSetThreadAllView = {
+	change_set_id: string;
+	thread_id: string;
+} & StateEntityAllView;
 
 // Kysely operation types
 export type ChangeSetThread = Selectable<ChangeSetThreadView>;

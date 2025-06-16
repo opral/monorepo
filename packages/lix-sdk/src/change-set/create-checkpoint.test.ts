@@ -217,7 +217,7 @@ test("creates proper change set ancestry chain", async () => {
 
 	// Verify ancestry: initial change set should be an ancestor of checkpoint1
 	const initialIsAncestorOfCheckpoint1 = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
 		.where(
@@ -232,7 +232,7 @@ test("creates proper change set ancestry chain", async () => {
 
 	// Verify ancestry: checkpoint1 should be an ancestor of checkpoint2
 	const checkpoint1IsAncestorOfCheckpoint2 = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where("id", "=", checkpoint1.id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
 		.where(
@@ -247,7 +247,7 @@ test("creates proper change set ancestry chain", async () => {
 
 	// Verify full chain: initial should be an ancestor of checkpoint2
 	const initialIsAncestorOfCheckpoint2 = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
 		.where(
@@ -291,7 +291,7 @@ test("debug working change set elements after insertion", async () => {
 
 	// Check working change set elements BEFORE insertion
 	const elementsBefore = await lix.db
-		.selectFrom("change_set_element")
+		.selectFrom("change_set_element_all")
 		.where("change_set_id", "=", activeVersion.working_change_set_id)
 		.where("lixcol_version_id", "=", "global")
 		.selectAll()
@@ -319,7 +319,7 @@ test("debug working change set elements after insertion", async () => {
 
 	// Check working change set elements AFTER insertion
 	const elementsAfter = await lix.db
-		.selectFrom("change_set_element")
+		.selectFrom("change_set_element_all")
 		.where("change_set_id", "=", activeVersion.working_change_set_id)
 		.where("lixcol_version_id", "=", activeVersion.id)
 		.selectAll()
@@ -409,7 +409,7 @@ test(
 		console.log("Version after checkpoint:", versionAfterCheckpoint);
 
 		const ancestorsOfActiveVersion = await lix.db
-			.selectFrom("change_set")
+			.selectFrom("change_set_all")
 			// .where("version_id", "=", activeVersion.version_id)
 			// .where(changeSetHasLabel({ name: "checkpoint" }))
 			.where(
@@ -425,7 +425,7 @@ test(
 		console.log("Ancestors of active version:", ancestorsOfActiveVersion);
 
 		const checkpointsOfActiveVersion = await lix.db
-			.selectFrom("change_set")
+			.selectFrom("change_set_all")
 			// .where("version_id", "=", activeVersion.version_id)
 			.where(changeSetHasLabel({ name: "checkpoint" }))
 			.where(
@@ -441,7 +441,7 @@ test(
 		console.log("Checkpoints of active version:", checkpointsOfActiveVersion);
 
 		const elementsBeforeDeletion = await lix.db
-			.selectFrom("change_set_element")
+			.selectFrom("change_set_element_all")
 			.where("change_set_id", "=", versionAfterCheckpoint.working_change_set_id)
 			.where("lixcol_version_id", "=", "global")
 			.selectAll()
@@ -465,7 +465,7 @@ test(
 		console.log("Active version after deletion:", activeVersionAfterDeletion);
 
 		const elementsAfterDeletion = await lix.db
-			.selectFrom("change_set_element")
+			.selectFrom("change_set_element_all")
 			.where(
 				"change_set_id",
 				"=",
@@ -495,16 +495,16 @@ test(
 		const deletionChangesInCheckpoint = await lix.db
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
+				"change_set_element_all",
+				"change_set_element_all.change_id",
 				"change.id"
 			)
 			.where(
-				"change_set_element.change_set_id",
+				"change_set_element_all.change_set_id",
 				"=",
 				checkpointAfterDeletion.id
 			)
-			.where("change_set_element.lixcol_version_id", "=", "global")
+			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.entity_id", "=", "test-key")
 			.where("change.schema_key", "=", "lix_key_value")
 			.where("change.snapshot_id", "=", "no-content")
@@ -582,16 +582,16 @@ test(
 		const deletionChangesInCheckpoint = await lix.db
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
+				"change_set_element_all",
+				"change_set_element_all.change_id",
 				"change.id"
 			)
 			.where(
-				"change_set_element.change_set_id",
+				"change_set_element_all.change_set_id",
 				"=",
 				checkpointAfterDeletion.id
 			)
-			.where("change_set_element.lixcol_version_id", "=", "global")
+			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.file_id", "=", "file-to-delete")
 			.where("change.snapshot_id", "=", "no-content")
 			.selectAll("change")

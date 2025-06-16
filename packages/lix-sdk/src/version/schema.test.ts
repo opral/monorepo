@@ -7,7 +7,7 @@ test("selecting from the version view", async () => {
 	const lix = await openLixInMemory({});
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([
 			{ id: "change_set_id_0", lixcol_version_id: "global" },
 			{ id: "change_set_id_1", lixcol_version_id: "global" },
@@ -75,7 +75,7 @@ test("insert, update, delete on the version view", async () => {
 
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([
 			{ id: "change_set_id_0", lixcol_version_id: "global" },
 			{ id: "change_set_id_1", lixcol_version_id: "global" },
@@ -212,7 +212,7 @@ test("querying by id", async () => {
 
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([
 			{ id: "change_set_id_0", lixcol_version_id: "global" },
 			{ id: "change_set_id_1", lixcol_version_id: "global" },
@@ -255,7 +255,7 @@ test("update active version view", async () => {
 
 	// Create required change sets and version first
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([{ id: "cs1", lixcol_version_id: "global" }])
 		.execute();
 
@@ -312,7 +312,7 @@ test("should use default id and name if not provided", async () => {
 	const lix = await openLixInMemory({});
 	// Pre-populate change_set table
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([{ id: "cs1", lixcol_version_id: "global" }])
 		.execute();
 
@@ -376,7 +376,7 @@ test("should enforce foreign key constraint on working_change_set_id", async () 
 	const lix = await openLixInMemory({});
 
 	// Create valid change set for change_set_id
-	await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
+	await lix.db.insertInto("change_set_all").values({ id: "cs1" }).execute();
 
 	// Attempt to insert version with non-existent working_change_set_id
 	await expect(
@@ -397,7 +397,7 @@ test("should allow version insertion with valid change set references", async ()
 
 	// Create valid change sets
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "cs2", lixcol_version_id: "global" },
@@ -435,7 +435,7 @@ test("should allow active_version update with valid version_id", async () => {
 
 	// Create valid change set and version
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values({ id: "cs1", lixcol_version_id: "global" })
 		.execute();
 
@@ -463,7 +463,7 @@ test("versions should be globally accessible regardless of version context", asy
 
 	// Create required change sets
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([
 			{ id: "cs_a", lixcol_version_id: "global" },
 			{ id: "cs_b", lixcol_version_id: "global" },
@@ -653,7 +653,7 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 
 	// Insert necessary change sets to satisfy foreign keys
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
 			{ id: "cs2", lixcol_version_id: "global" },
@@ -739,7 +739,7 @@ test("inherits_from_version_id should default to global", async () => {
 
 	// Create required change sets first
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values([
 			{ id: "change_set_1", lixcol_version_id: "global" },
 			{ id: "working_change_set_1", lixcol_version_id: "global" },

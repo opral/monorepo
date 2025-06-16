@@ -31,7 +31,7 @@ export async function createUndoChangeSet(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Check for multiple parents (not supported yet)
 		const parents = await trx
-			.selectFrom("change_set_edge")
+			.selectFrom("change_set_edge_all")
 			.where("lixcol_version_id", "=", "global")
 			.where("child_id", "=", args.changeSet.id)
 			.select("parent_id")
@@ -47,12 +47,12 @@ export async function createUndoChangeSet(args: {
 		const targetChanges = await trx
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
+				"change_set_element_all",
+				"change_set_element_all.change_id",
 				"change.id"
 			)
-			.where("change_set_element.lixcol_version_id", "=", "global")
-			.where("change_set_element.change_set_id", "=", args.changeSet.id)
+			.where("change_set_element_all.lixcol_version_id", "=", "global")
+			.where("change_set_element_all.change_set_id", "=", args.changeSet.id)
 			.selectAll("change")
 			.execute();
 
@@ -133,7 +133,6 @@ export async function createUndoChangeSet(args: {
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,
 				file_id: change.file_id,
-				lixcol_version_id: "global",
 			})),
 		});
 

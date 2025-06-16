@@ -12,61 +12,112 @@ export async function createChangeSet(args: {
 	parents?: Pick<ChangeSet, "id">[];
 	/** Version ID where the change set should be stored. Defaults to active version */
 	lixcol_version_id?: string;
-}): Promise<ChangeSet> {
+}): Promise<ChangeSet & { lixcol_version_id: string }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const csId = args.id ?? nanoid();
-		await trx
-			.insertInto("change_set")
-			.values({
-				id: csId,
-				lixcol_version_id: args.lixcol_version_id,
-			})
-			.executeTakeFirstOrThrow();
+
+		// Use _all view if version_id is specified, otherwise use regular view
+		if (args.lixcol_version_id) {
+			await trx
+				.insertInto("change_set_all")
+				.values({
+					id: csId,
+					lixcol_version_id: args.lixcol_version_id,
+				})
+				.executeTakeFirstOrThrow();
+		} else {
+			await trx
+				.insertInto("change_set")
+				.values({
+					id: csId,
+				})
+				.executeTakeFirstOrThrow();
+		}
 
 		if (args.elements && args.elements.length > 0) {
 			// Insert elements linking change set to changes
-			await trx
-				.insertInto("change_set_element")
-				.values(
-					args.elements.map((element) => ({
-						change_set_id: csId,
-						lixcol_version_id: args.lixcol_version_id,
-						...element,
-					}))
-				)
-				.execute();
+			if (args.lixcol_version_id) {
+				await trx
+					.insertInto("change_set_element_all")
+					.values(
+						args.elements.map((element) => ({
+							change_set_id: csId,
+							lixcol_version_id: args.lixcol_version_id,
+							...element,
+						}))
+					)
+					.execute();
+			} else {
+				await trx
+					.insertInto("change_set_element")
+					.values(
+						args.elements.map((element) => ({
+							change_set_id: csId,
+							...element,
+						}))
+					)
+					.execute();
+			}
 		}
 
 		// Add labels if provided
 		if (args.labels && args.labels.length > 0) {
-			await trx
-				.insertInto("change_set_label")
-				.values(
-					args.labels.map((label) => ({
-						lixcol_version_id: args.lixcol_version_id,
-						label_id: label.id,
-						change_set_id: csId,
-					}))
-				)
-				.execute();
+			if (args.lixcol_version_id) {
+				await trx
+					.insertInto("change_set_label_all")
+					.values(
+						args.labels.map((label) => ({
+							lixcol_version_id: args.lixcol_version_id,
+							label_id: label.id,
+							change_set_id: csId,
+						}))
+					)
+					.execute();
+			} else {
+				await trx
+					.insertInto("change_set_label")
+					.values(
+						args.labels.map((label) => ({
+							label_id: label.id,
+							change_set_id: csId,
+						}))
+					)
+					.execute();
+			}
 		}
 
 		// Add parent-child relationships if parents are provided
 		for (const parent of args.parents ?? []) {
-			await trx
-				.insertInto("change_set_edge")
-				.values({
-					parent_id: parent.id,
-					child_id: csId,
-					lixcol_version_id: args.lixcol_version_id,
-				})
-				.execute();
+			if (args.lixcol_version_id) {
+				await trx
+					.insertInto("change_set_edge_all")
+					.values({
+						parent_id: parent.id,
+						child_id: csId,
+						lixcol_version_id: args.lixcol_version_id,
+					})
+					.execute();
+			} else {
+				await trx
+					.insertInto("change_set_edge")
+					.values({
+						parent_id: parent.id,
+						child_id: csId,
+					})
+					.execute();
+			}
 		}
 
 		const changeSet = await trx
-			.selectFrom("change_set")
+			.selectFrom("change_set_all")
 			.selectAll()
 			.where("id", "=", csId)
+			.where(
+				"lixcol_version_id",
+				"=",
+				args.lixcol_version_id ??
+					trx.selectFrom("active_version").select("version_id")
+			)
 			.executeTakeFirstOrThrow();
 
 		return changeSet;

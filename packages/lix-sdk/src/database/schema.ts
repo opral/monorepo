@@ -5,10 +5,15 @@ import {
 	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 	type ChangeSetElementView,
+	type ChangeSetElementAllView,
 	type ChangeSetView,
+	type ChangeSetAllView,
 	type ChangeSetEdgeView,
+	type ChangeSetEdgeAllView,
 	type ChangeSetLabelView,
+	type ChangeSetLabelAllView,
 	type ChangeSetThreadView,
+	type ChangeSetThreadAllView,
 } from "../change-set/schema.js";
 import {
 	LixActiveVersionSchema,
@@ -43,6 +48,7 @@ import {
 import {
 	LixChangeAuthorSchema,
 	type ChangeAuthorView,
+	type ChangeAuthorAllView,
 } from "../change-author/schema.js";
 import { LixLabelSchema, type LabelView } from "../label/schema.js";
 import {
@@ -103,15 +109,21 @@ export type LixDatabaseSchema = {
 	// change
 	change: ChangeView;
 	change_author: ChangeAuthorView;
+	change_author_all: ChangeAuthorAllView;
 
 	stored_schema: StoredSchemaView;
 
 	// change set
 	change_set: ChangeSetView;
+	change_set_all: ChangeSetAllView;
 	change_set_element: ChangeSetElementView;
+	change_set_element_all: ChangeSetElementAllView;
 	change_set_edge: ChangeSetEdgeView;
+	change_set_edge_all: ChangeSetEdgeAllView;
 	change_set_label: ChangeSetLabelView;
+	change_set_label_all: ChangeSetLabelAllView;
 	change_set_thread: ChangeSetThreadView;
+	change_set_thread_all: ChangeSetThreadAllView;
 
 	// key value
 	key_value: KeyValueView;

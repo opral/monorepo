@@ -1422,7 +1422,7 @@ test("should handle deletion validation for change sets referenced by versions",
 
 	// Create a change set
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values({ id: "cs_referenced", lixcol_version_id: "global" })
 		.execute();
 
@@ -2045,7 +2045,7 @@ test("should prevent change set elements from referencing change sets defined in
 
 	// Create a change set in global context
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values({
 			id: "global_change_set",
 			lixcol_version_id: "global",

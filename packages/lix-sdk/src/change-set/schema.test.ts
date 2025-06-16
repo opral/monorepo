@@ -576,7 +576,7 @@ describe("change_set_edge", () => {
 		).rejects.toThrow(/Self-referencing edges are not allowed/i);
 	});
 
-	test("change_set_edge view does not support updates", async () => {
+	test("change_set_edge view supports updates", async () => {
 		const lix = await openLixInMemory({});
 
 		// Create change sets
@@ -591,14 +591,14 @@ describe("change_set_edge", () => {
 			.values({ parent_id: "cs0", child_id: "cs1" })
 			.execute();
 
-		// Attempt to update should fail with custom error message
-		await expect(
-			lix.db
-				.updateTable("change_set_edge")
-				.where("parent_id", "=", "cs0")
-				.set({ child_id: "cs2" })
-				.execute()
-		).rejects.toThrow(/Updates on change_set_edge are not supported because all fields are primary keys/i);
+		// Update should succeed (updating primary key creates new entity_id)
+		const result = await lix.db
+			.updateTable("change_set_edge")
+			.where("parent_id", "=", "cs0")
+			.set({ child_id: "cs2" })
+			.execute();
+
+		expect(result).toBeDefined();
 	});
 });
 
@@ -900,12 +900,10 @@ describe("change_set_thread", () => {
 			{
 				change_set_id: "cs0",
 				thread_id: "t0",
-				lixcol_version_id: expect.any(String),
 			},
 			{
 				change_set_id: "cs1",
 				thread_id: "t1",
-				lixcol_version_id: expect.any(String),
 			},
 		]);
 
@@ -925,7 +923,6 @@ describe("change_set_thread", () => {
 			{
 				change_set_id: "cs1",
 				thread_id: "t1",
-				lixcol_version_id: expect.any(String),
 			},
 		]);
 
@@ -989,7 +986,7 @@ describe("change_set_thread", () => {
 			.execute();
 	});
 
-	test("change_set_thread view does not support updates", async () => {
+	test("change_set_thread view supports updates", async () => {
 		const lix = await openLixInMemory({});
 
 		// Create change sets and threads
@@ -1009,13 +1006,13 @@ describe("change_set_thread", () => {
 			.values({ change_set_id: "cs0", thread_id: "t0" })
 			.execute();
 
-		// Attempt to update should fail with custom error message
-		await expect(
-			lix.db
-				.updateTable("change_set_thread")
-				.where("change_set_id", "=", "cs0")
-				.set({ thread_id: "t1" })
-				.execute()
-		).rejects.toThrow(/Updates on change_set_thread are not supported because all fields are primary keys/i);
+		// Update should succeed (updating primary key creates new entity_id)
+		const result = await lix.db
+			.updateTable("change_set_thread")
+			.where("change_set_id", "=", "cs0")
+			.set({ thread_id: "t1" })
+			.execute();
+
+		expect(result).toBeDefined();
 	});
 });
