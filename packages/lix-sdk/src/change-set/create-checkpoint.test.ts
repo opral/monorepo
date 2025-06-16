@@ -217,14 +217,9 @@ test("creates proper change set ancestry chain", async () => {
 
 	// Verify ancestry: initial change set should be an ancestor of checkpoint1
 	const initialIsAncestorOfCheckpoint1 = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set")
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
-		.where(
-			"lixcol_version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
 		.selectAll()
 		.execute();
 
@@ -232,14 +227,9 @@ test("creates proper change set ancestry chain", async () => {
 
 	// Verify ancestry: checkpoint1 should be an ancestor of checkpoint2
 	const checkpoint1IsAncestorOfCheckpoint2 = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set")
 		.where("id", "=", checkpoint1.id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
-		.where(
-			"lixcol_version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
 		.selectAll()
 		.execute();
 
@@ -247,14 +237,9 @@ test("creates proper change set ancestry chain", async () => {
 
 	// Verify full chain: initial should be an ancestor of checkpoint2
 	const initialIsAncestorOfCheckpoint2 = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set")
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
-		.where(
-			"lixcol_version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
 		.selectAll()
 		.execute();
 
@@ -409,7 +394,7 @@ test(
 		console.log("Version after checkpoint:", versionAfterCheckpoint);
 
 		const ancestorsOfActiveVersion = await lix.db
-			.selectFrom("change_set_all")
+			.selectFrom("change_set")
 			// .where("version_id", "=", activeVersion.version_id)
 			// .where(changeSetHasLabel({ name: "checkpoint" }))
 			.where(
@@ -418,14 +403,13 @@ test(
 					{ includeSelf: true }
 				)
 			)
-			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
 		console.log("Ancestors of active version:", ancestorsOfActiveVersion);
 
 		const checkpointsOfActiveVersion = await lix.db
-			.selectFrom("change_set_all")
+			.selectFrom("change_set")
 			// .where("version_id", "=", activeVersion.version_id)
 			.where(changeSetHasLabel({ name: "checkpoint" }))
 			.where(
@@ -434,7 +418,6 @@ test(
 					{ includeSelf: true }
 				)
 			)
-			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.execute();
 

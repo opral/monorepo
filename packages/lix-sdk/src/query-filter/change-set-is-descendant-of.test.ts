@@ -27,7 +27,7 @@ test("selects all descendants excluding the current change set", async () => {
 
 	// Should select cs0, cs1, cs2 as descendants of cs0
 	const results = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set")
 		.where(changeSetIsDescendantOf(cs0))
 		.select("id")
 		.execute();
@@ -58,7 +58,7 @@ test("respects the optional depth limit", async () => {
 
 	// With depth: 1 starting from cs0, we expect cs0 and cs1 only
 	const results = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set")
 		.where(changeSetIsDescendantOf(cs0, { depth: 1 }))
 		.select("id")
 		.execute();
@@ -95,7 +95,7 @@ test("can be combined with ancestor filter to select sets between two points", a
 
 	// Select change sets that are descendants of cs1 AND ancestors of cs3
 	const results = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set")
 		.where(changeSetIsDescendantOf(cs1))
 		.where(changeSetIsAncestorOf(cs3))
 		.select("id")
@@ -127,7 +127,7 @@ test("selects descendants including the current change set when includeSelf is t
 
 	// Should select cs0, cs1, cs2 when includeSelf: true starting from cs0
 	const results = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set")
 		.where(changeSetIsDescendantOf(cs0, { includeSelf: true }))
 		.select("id")
 		.execute();
@@ -160,7 +160,7 @@ test("respects depth limit when includeSelf is true", async () => {
 
 	// With depth: 1 and includeSelf: true starting from cs0, we expect cs0 and cs1
 	const results = await lix.db
-		.selectFrom("change_set_all")
+		.selectFrom("change_set")
 		.where(changeSetIsDescendantOf(cs0, { depth: 1, includeSelf: true }))
 		.select("id")
 		.execute();

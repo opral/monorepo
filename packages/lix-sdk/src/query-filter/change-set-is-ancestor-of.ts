@@ -54,20 +54,20 @@ export function changeSetIsAncestorOf(
 	changeSet: Pick<ChangeSet, "id">,
 	options?: { depth?: number; includeSelf?: boolean }
 ): (
-	eb: ExpressionBuilder<LixDatabaseSchema, "change_set_all">
-) => ExpressionWrapper<LixDatabaseSchema, "change_set_all", SqlBool> {
+	eb: ExpressionBuilder<LixDatabaseSchema, "change_set">
+) => ExpressionWrapper<LixDatabaseSchema, "change_set", SqlBool> {
 	const depthLimit = options?.depth;
 	const includeSelf = options?.includeSelf ?? false;
 
 	return () =>
 		sql<SqlBool>`
-			change_set_all.id IN (
+			change_set.id IN (
 				WITH RECURSIVE ap(id, depth) AS (
-					SELECT id, 0 AS depth FROM change_set_all WHERE id = ${sql.lit(changeSet.id)}
+					SELECT id, 0 AS depth FROM change_set WHERE id = ${sql.lit(changeSet.id)}
 					UNION ALL
-					SELECT change_set_edge_all.parent_id, ap.depth + 1
-					FROM change_set_edge_all
-					JOIN ap ON change_set_edge_all.child_id = ap.id
+					SELECT change_set_edge.parent_id, ap.depth + 1
+					FROM change_set_edge
+					JOIN ap ON change_set_edge.child_id = ap.id
 					${depthLimit !== undefined ? sql`WHERE ap.depth < ${sql.lit(depthLimit)}` : sql``}
 				)
 				-- Select based on the includeSelf flag
