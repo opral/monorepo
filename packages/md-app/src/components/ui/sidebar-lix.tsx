@@ -3,7 +3,8 @@ import {
   Download, MoreVertical,
   PenSquare, Trash2, FileText,
   Plus, ArrowLeft, Folder, FolderOpen,
-  Upload, FolderPlus
+  FolderPlus,
+  FileInput
 } from "lucide-react"
 import { setupAriaHiddenFixes } from "@/helper/fixAriaHidden"
 import { useAtom } from "jotai"
@@ -640,7 +641,7 @@ export function LixSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center pr-0">
-            Files {mdFiles.length > 0 && (
+            Local files {mdFiles.length > 0 && (
               <span className="ml-1.5 text-xs text-muted-foreground">({mdFiles.length})</span>
             )}
             <div className="flex flex-grow" />
@@ -651,7 +652,7 @@ export function LixSidebar() {
               onClick={handleImportFile}
               disabled={isLoading}
             >
-              <Upload className="size-4" />
+              <FileInput className="size-4" />
             </Button>
             <Button
               variant="ghost"
