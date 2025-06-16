@@ -2,6 +2,8 @@ import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Lix } from "../lix/open-lix.js";
 import { humanId } from "human-id";
+import { nanoid } from "../database/nano-id.js";
+import { createEntityViewsIfNotExists, type StateEntityView } from "../state/entity-view-builder.js";
 
 export function applyAccountDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin">
@@ -16,82 +18,32 @@ export function applyAccountDatabaseSchema(
 		// Human ID uses plural, remove the last character to make it singular
 		.slice(0, -1)}`;
 
+	// Create account view using the generalized entity view builder
+	createEntityViewsIfNotExists({
+		lix,
+		schema: LixAccountSchema,
+		overrideName: "account",
+		pluginKey: "lix_own_entity",
+		hardcodedFileId: "lix",
+		defaultValues: {
+			id: () => nanoid(),
+		},
+	});
+
+	// Create session-specific temp table and default account
 	lix.sqlite.exec(`
-  CREATE VIEW IF NOT EXISTS account AS
-	SELECT
-		json_extract(snapshot_content, '$.id') AS id,
-		json_extract(snapshot_content, '$.name') AS name,
-		version_id AS lixcol_version_id,
-		inherited_from_version_id AS lixcol_inherited_from_version_id,
-		created_at AS lixcol_created_at,
-		updated_at AS lixcol_updated_at
-	FROM state
-	WHERE schema_key = 'lix_account';
+		-- current account(s)
+		-- temp table because current accounts are session
+		-- specific and should not be persisted
+		CREATE TEMP TABLE IF NOT EXISTS active_account (
+			id TEXT PRIMARY KEY,
+			name TEXT NOT NULL
+			-- can't use foreign keys in temp tables... :(
+		) STRICT;
 
-  CREATE TRIGGER IF NOT EXISTS account_insert
-  INSTEAD OF INSERT ON account
-  BEGIN
-    INSERT INTO state (
-      entity_id,
-      schema_key,
-      file_id,
-      plugin_key,
-      snapshot_content,
-      schema_version,
-      version_id
-    )
-    SELECT
-      with_default_values.id,
-      'lix_account',
-      'lix',
-      'lix_own_entity',
-      json_object('id', with_default_values.id, 'name', with_default_values.name),
-      '${LixAccountSchema["x-lix-version"]}',
-      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
-    FROM (
-      SELECT
-        COALESCE(NEW.id, nano_id()) AS id,
-        NEW.name AS name
-    ) AS with_default_values;
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS account_update
-  INSTEAD OF UPDATE ON account
-  BEGIN
-    UPDATE state
-    SET
-      entity_id = NEW.id,
-      schema_key = 'lix_account',
-      file_id = 'lix',
-      plugin_key = 'lix_own_entity',
-      snapshot_content = json_object('id', NEW.id, 'name', NEW.name),
-      version_id = COALESCE(NEW.lixcol_version_id, OLD.lixcol_version_id)
-    WHERE entity_id = OLD.id
-      AND schema_key = 'lix_account'
-      AND version_id = OLD.lixcol_version_id;
-  END;
-
-  CREATE TRIGGER IF NOT EXISTS account_delete
-  INSTEAD OF DELETE ON account
-  BEGIN
-    DELETE FROM state
-    WHERE entity_id = OLD.id
-      AND schema_key = 'lix_account'
-      AND version_id = OLD.lixcol_version_id;
-  END;
-
-  -- current account(s)
-  -- temp table because current accounts are session
-  -- specific and should not be persisted
-  CREATE TEMP TABLE IF NOT EXISTS active_account (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL
-    -- can't use foreign keys in temp tables... :(
-  ) STRICT;
-
-  -- default to a new account
-  INSERT INTO active_account (id, name) values (nano_id(), '${anonymousAccountName}');
-`);
+		-- default to a new account
+		INSERT INTO active_account (id, name) values (nano_id(), '${anonymousAccountName}');
+	`);
 }
 
 export const LixAccountSchema = {
@@ -114,11 +66,7 @@ export type LixAccount = FromLixSchemaDefinition<typeof LixAccountSchema>;
 export type AccountView = {
 	id: Generated<string>;
 	name: string;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: Generated<string | null>;
-	lixcol_created_at: Generated<string>;
-	lixcol_updated_at: Generated<string>;
-};
+} & StateEntityView;
 
 // Kysely operation types
 export type Account = Selectable<AccountView>;

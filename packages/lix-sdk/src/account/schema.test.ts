@@ -32,24 +32,21 @@ test("insert, update, delete on the account view", async () => {
 		])
 		.execute();
 
-	const viewAfterInsert = await lix.db.selectFrom("account").selectAll().execute();
+	const viewAfterInsert = await lix.db
+		.selectFrom("account")
+		.select(["id", "name", "lixcol_version_id"])
+		.execute();
 
 	expect(viewAfterInsert).toEqual([
 		{
 			id: "account0",
 			name: "Alice",
 			lixcol_version_id: "version0",
-			lixcol_inherited_from_version_id: null,
-			lixcol_created_at: expect.any(String),
-			lixcol_updated_at: expect.any(String),
 		},
 		{
 			id: "account1",
 			name: "Bob",
 			lixcol_version_id: "version1",
-			lixcol_inherited_from_version_id: null,
-			lixcol_created_at: expect.any(String),
-			lixcol_updated_at: expect.any(String),
 		},
 	]);
 
@@ -65,7 +62,7 @@ test("insert, update, delete on the account view", async () => {
 	const viewAfterUpdate = await lix.db
 		.selectFrom("account")
 		.orderBy("id")
-		.selectAll()
+		.select(["id", "name", "lixcol_version_id"])
 		.execute();
 
 	expect(viewAfterUpdate).toEqual([
@@ -73,17 +70,11 @@ test("insert, update, delete on the account view", async () => {
 			id: "account0",
 			name: "Alice Updated",
 			lixcol_version_id: "version0",
-			lixcol_inherited_from_version_id: null,
-			lixcol_created_at: expect.any(String),
-			lixcol_updated_at: expect.any(String),
 		},
 		{
 			id: "account1",
 			name: "Bob",
 			lixcol_version_id: "version1",
-			lixcol_inherited_from_version_id: null,
-			lixcol_created_at: expect.any(String),
-			lixcol_updated_at: expect.any(String),
 		},
 	]);
 
@@ -96,7 +87,7 @@ test("insert, update, delete on the account view", async () => {
 	const viewAfterDelete = await lix.db
 		.selectFrom("account")
 		.orderBy("id")
-		.selectAll()
+		.select(["id", "name", "lixcol_version_id"])
 		.execute();
 
 	expect(viewAfterDelete).toEqual([
@@ -104,9 +95,6 @@ test("insert, update, delete on the account view", async () => {
 			id: "account1",
 			name: "Bob",
 			lixcol_version_id: "version1",
-			lixcol_inherited_from_version_id: null,
-			lixcol_created_at: expect.any(String),
-			lixcol_updated_at: expect.any(String),
 		},
 	]);
 });
