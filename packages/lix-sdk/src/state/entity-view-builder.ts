@@ -136,7 +136,8 @@ export function createEntityViewsIfNotExists(args: {
 	const hasDefaults =
 		args.defaultValues && Object.keys(args.defaultValues).length > 0;
 
-	args.lix.sqlite.exec(`
+	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
+	const sqlQuery = `
     CREATE VIEW IF NOT EXISTS ${view_name} AS
       SELECT
         ${Object.keys((args.schema as any).properties)
@@ -219,5 +220,7 @@ export function createEntityViewsIfNotExists(args: {
         AND schema_key = '${schema_key}'
         AND file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"};
       END;
-    `);
+    `;
+
+	args.lix.sqlite.exec(sqlQuery);
 }
