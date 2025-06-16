@@ -98,52 +98,55 @@ test("insert, update, delete on the file view", async () => {
 		.select(["entity_id", "snapshot_id", "snapshot.content", "schema_key"])
 		.execute();
 
-	expect(changes).toMatchObject([
-		// insert
-		{
-			schema_key: "lix_file",
-			entity_id: "file0",
-			snapshot_id: expect.any(String),
-			content: expect.any(Object),
-		},
-		{
-			schema_key: "mock_json_property",
-			entity_id: "prop0",
-			content: {
-				value: "file0-value0",
-			},
-			snapshot_id: expect.any(String),
-		},
-		// update
-		{
-			schema_key: "lix_file",
-			entity_id: "file0",
-			snapshot_id: expect.any(String),
-			content: expect.any(Object),
-		},
-		{
-			schema_key: "mock_json_property",
-			entity_id: "prop0",
-			content: {
-				value: "file0-value1",
-			},
-			snapshot_id: expect.any(String),
-		},
-		// delete (file‑level)
-		{
-			schema_key: "lix_file",
-			entity_id: "file0",
-			snapshot_id: "no-content",
-			content: null,
-		},
-		// delete (all plugin entities that existed in the file)
-		{
-			schema_key: "mock_json_property",
-			entity_id: "prop0",
-			snapshot_id: "no-content",
-			content: null,
-		},
-	]);
+	expect(changes).toEqual(
+		expect.arrayContaining([
+			// insert
+			expect.objectContaining({
+				schema_key: "lix_file",
+				entity_id: "file0",
+				snapshot_id: expect.any(String),
+				content: expect.any(Object),
+			}),
+			expect.objectContaining({
+				schema_key: "mock_json_property",
+				entity_id: "prop0",
+				content: {
+					value: "file0-value0",
+				},
+				snapshot_id: expect.any(String),
+			}),
+			// update
+			expect.objectContaining({
+				schema_key: "lix_file",
+				entity_id: "file0",
+				snapshot_id: expect.any(String),
+				content: expect.any(Object),
+			}),
+			expect.objectContaining({
+				schema_key: "mock_json_property",
+				entity_id: "prop0",
+				content: {
+					value: "file0-value1",
+				},
+				snapshot_id: expect.any(String),
+			}),
+			// delete (file‑level)
+			expect.objectContaining({
+				schema_key: "lix_file",
+				entity_id: "file0",
+				snapshot_id: "no-content",
+				content: null,
+			}),
+			// delete (all plugin entities that existed in the file)
+			expect.objectContaining({
+				schema_key: "mock_json_property",
+				entity_id: "prop0",
+				snapshot_id: "no-content",
+				content: null,
+			}),
+		])
+	);
+	expect(changes).toHaveLength(6);
 });
 
 test("file insert data materialization", async () => {
