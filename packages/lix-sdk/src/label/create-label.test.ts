@@ -74,13 +74,13 @@ test("should create a label with specific version_id", async () => {
 	const label = await createLabel({ 
 		lix, 
 		name: labelName,
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 
-	// Verify the label was created with the specified version_id
+	// Verify the label was created with the specified state_version_id
 	expect(label).toMatchObject({
 		name: labelName,
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 
 	// Verify the label exists in the database
@@ -92,7 +92,7 @@ test("should create a label with specific version_id", async () => {
 
 	expect(dbLabel).toMatchObject({
 		name: labelName,
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 });
 

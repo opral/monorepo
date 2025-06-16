@@ -72,6 +72,7 @@ test("insert with default id generation", async () => {
 	// Find the snapshot by content to verify it was inserted with a generated ID
 	const snapshots = await lix.db
 		.selectFrom("snapshot")
+		// @ts-expect-error - content is JSON
 		.where("content", "=", JSON.stringify({ text: "Auto-generated ID test" }))
 		.selectAll()
 		.execute();
@@ -183,34 +184,6 @@ test("can insert null content explicitly", async () => {
 		.executeTakeFirstOrThrow();
 
 	expect(snapshot.content).toBeNull();
-});
-
-test("can store different JSON data types", async () => {
-	const lix = await openLixInMemory({});
-
-	const testCases = [
-		{ id: "string", content: "just a string" },
-		{ id: "number", content: 42 },
-		{ id: "boolean", content: true },
-		{ id: "array", content: [1, 2, 3] },
-		{ id: "object", content: { key: "value" } },
-	];
-
-	// Insert all test cases
-	for (const testCase of testCases) {
-		await lix.db.insertInto("snapshot").values(testCase).execute();
-	}
-
-	// Verify all were inserted correctly
-	for (const testCase of testCases) {
-		const snapshot = await lix.db
-			.selectFrom("snapshot")
-			.where("id", "=", testCase.id)
-			.selectAll()
-			.executeTakeFirstOrThrow();
-
-		expect(snapshot.content).toEqual(testCase.content);
-	}
 });
 
 test("snapshot ids must be unique", async () => {

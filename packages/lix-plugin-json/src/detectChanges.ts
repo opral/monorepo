@@ -2,12 +2,11 @@ import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
 import { flatten } from "flat";
 import { JSONPropertySchema } from "./schemas/JSONPropertySchema.js";
 
-// @ts-expect-error - possibly too recursive inference
-export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
+export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
 	after,
 }) => {
-	const detectedChanges: DetectedChange<typeof JSONPropertySchema>[] = [];
+	const detectedChanges: DetectedChange[] = [];
 
 	const beforeParsed = before?.data
 		? JSON.parse(new TextDecoder().decode(before?.data))
@@ -28,7 +27,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				schema: JSONPropertySchema,
 				entity_id: key,
-				snapshot: undefined,
+				snapshot_content: undefined,
 			});
 		} else if (
 			JSON.stringify(flattenedBefore[key]) !==
@@ -37,7 +36,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				schema: JSONPropertySchema,
 				entity_id: key,
-				snapshot: {
+				snapshot_content: {
 					property: key,
 					value: flattenedAfter[key],
 				},
@@ -50,7 +49,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				schema: JSONPropertySchema,
 				entity_id: key,
-				snapshot: {
+				snapshot_content: {
 					property: key,
 					value: flattenedAfter[key],
 				},

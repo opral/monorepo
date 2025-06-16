@@ -28,6 +28,7 @@ export function validateStateMutation(args: {
 		return;
 	}
 
+
 	if (!args.version_id) {
 		throw new Error("version_id is required");
 	}
@@ -37,7 +38,8 @@ export function validateStateMutation(args: {
 		query: args.lix.db
 			.selectFrom("version")
 			.select("id")
-			.where("id", "=", args.version_id),
+			.where("id", "=", args.version_id)
+			.where("version.state_version_id", "=", args.version_id),
 	});
 
 	if (existingVersion.length === 0) {
@@ -120,6 +122,7 @@ export function validateStateMutation(args: {
 				lix: args.lix,
 				schema: args.schema,
 				snapshot_content: args.snapshot_content,
+				version_id: args.version_id,
 			});
 		}
 	}
@@ -188,8 +191,8 @@ function validatePrimaryKeyConstraints(args: {
 
 	if (existingStates.length > 0) {
 		const fieldNames = primaryKeyFields.join(", ");
-		const fieldValues = primaryKeyValues.map(v => `'${v}'`).join(", ");
-		
+		const fieldValues = primaryKeyValues.map((v) => `'${v}'`).join(", ");
+
 		throw new Error(
 			`Primary key constraint violation: The primary key constraint on (${fieldNames}) is violated by values (${fieldValues})`
 		);
@@ -260,8 +263,8 @@ function validateUniqueConstraints(args: {
 
 		if (existingStates.length > 0) {
 			const fieldNames = uniqueFields.join(", ");
-			const fieldValues = uniqueValues.map(v => `'${v}'`).join(", ");
-			
+			const fieldValues = uniqueValues.map((v) => `'${v}'`).join(", ");
+
 			throw new Error(
 				`Unique constraint violation: The unique constraint on (${fieldNames}) is violated by values (${fieldValues})`
 			);
@@ -272,7 +275,7 @@ function validateUniqueConstraints(args: {
 // Helper function to get nested value by path (e.g., 'foo.bar' from { foo: { bar: 'baz' } })
 function getValueByPath(obj: any, path: string): any {
 	if (!path) return obj;
-	const parts = path.split('/').filter(part => part);
+	const parts = path.split("/").filter((part) => part);
 	let current = obj;
 	for (const part of parts) {
 		if (current === undefined || current === null) return undefined;
@@ -285,6 +288,7 @@ function validateForeignKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
 	snapshot_content: Snapshot["content"];
+	version_id: string;
 }): void {
 	const foreignKeys = args.schema["x-lix-foreign-keys"];
 	if (!foreignKeys) {
@@ -294,7 +298,7 @@ function validateForeignKeyConstraints(args: {
 	// Validate each foreign key constraint
 	for (const [localProperty, foreignKeyDef] of Object.entries(foreignKeys)) {
 		const foreignKeyValue = (args.snapshot_content as any)[localProperty];
-		
+
 		// Skip validation if foreign key value is null or undefined
 		// (like SQL foreign keys, null values are allowed)
 		if (foreignKeyValue === null || foreignKeyValue === undefined) {
@@ -303,12 +307,15 @@ function validateForeignKeyConstraints(args: {
 
 		// Check if this references a real SQL table vs a JSON schema entity
 		const isRealSqlTable = ["lix_change"].includes(foreignKeyDef.schemaKey);
-		
+
 		let query: any;
 		if (isRealSqlTable) {
 			// Query the real SQL table directly
 			// Map schema key to actual table name
-			const tableName = foreignKeyDef.schemaKey === "lix_change" ? "change" : foreignKeyDef.schemaKey;
+			const tableName =
+				foreignKeyDef.schemaKey === "lix_change"
+					? "change"
+					: foreignKeyDef.schemaKey;
 			query = args.lix.db
 				.selectFrom(tableName as any)
 				.select(foreignKeyDef.property as any)
@@ -334,23 +341,68 @@ function validateForeignKeyConstraints(args: {
 				query: args.lix.db
 					.selectFrom("stored_schema")
 					.select("value")
-					.where(sql`json_extract(value, '$.["x-lix-key"]')`, "=", foreignKeyDef.schemaKey)
-					.where(sql`json_extract(value, '$.["x-lix-version"]')`, "=", foreignKeyDef.schemaVersion)
+					.where(
+						sql`json_extract(value, '$.["x-lix-key"]')`,
+						"=",
+						foreignKeyDef.schemaKey
+					)
+					.where(
+						sql`json_extract(value, '$.["x-lix-version"]')`,
+						"=",
+						foreignKeyDef.schemaVersion
+					),
 			});
 
 			if (referencedSchema.length === 0) {
 				throw new Error(
-					`Foreign key constraint violation: Referenced schema '${foreignKeyDef.schemaKey}' with version '${foreignKeyDef.schemaVersion}' does not exist`
+					`Foreign key constraint violation. Referenced schema '${foreignKeyDef.schemaKey}' with version '${foreignKeyDef.schemaVersion}' does not exist.`
 				);
 			}
 		}
 
-		const referencedStates = executeSync({ lix: args.lix, query });
+		const referencedStates = executeSync({
+			lix: args.lix,
+			query: isRealSqlTable
+				? query
+				: query
+						.where("version_id", "=", args.version_id)
+						.where("inherited_from_version_id", "is", null),
+		});
 
 		if (referencedStates.length === 0) {
-			throw new Error(
-				`Foreign key constraint violation: The foreign key constraint on '${localProperty}' references '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}'`
-			);
+			// First line: compact string for regex matching (backwards compatibility)
+			let errorMessage = `Foreign key constraint violation. The schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) has a foreign key constraint on '${localProperty}' referencing '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}' in version '${args.version_id}'.`;
+
+			// Helper function to truncate property values
+			const truncateValue = (value: any, maxLength: number = 20): string => {
+				const str = typeof value === "string" ? value : JSON.stringify(value);
+				return str.length > maxLength
+					? str.substring(0, maxLength - 3) + "..."
+					: str;
+			};
+
+			// Add entity being inserted section
+			errorMessage += `\n\nEntity Being Inserted (${args.schema["x-lix-key"]}):\n`;
+			errorMessage += `┌─────────────────┬──────────────────┐\n`;
+			errorMessage += `│ Property        │ Value            │\n`;
+			errorMessage += `├─────────────────┼──────────────────┤\n`;
+
+			const content = args.snapshot_content as Record<string, any>;
+			for (const [prop, value] of Object.entries(content)) {
+				const propDisplay = prop.substring(0, 15).padEnd(15);
+				const valueDisplay = truncateValue(value, 16).padEnd(16);
+				errorMessage += `│ ${propDisplay} │ ${valueDisplay} │\n`;
+			}
+			errorMessage += `└─────────────────┴──────────────────┘\n`;
+
+			// Add foreign key relationship visualization
+			errorMessage += `\nForeign Key Relationship:\n`;
+			errorMessage += `  ${args.schema["x-lix-key"]}.${localProperty} → ${foreignKeyDef.schemaKey}.${foreignKeyDef.property}\n`;
+
+			// Add note about version-scoped behavior
+			errorMessage += `\nNote: Foreign key constraints only validate entities that exist in the version context. Inherited entities from other versions cannot be referenced by foreign keys.`;
+
+			throw new Error(errorMessage);
 		}
 	}
 }
@@ -366,18 +418,74 @@ function validateDeletionConstraints(args: {
 	}
 
 	// Get the current entity data to check what's being referenced
+	// Check both direct entities and inherited entities
 	const currentEntity = executeSync({
 		lix: args.lix,
 		query: args.lix.db
 			.selectFrom("state")
-			.select("snapshot_content")
+			.select(["snapshot_content", "inherited_from_version_id", "version_id"])
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
 			.where("version_id", "=", args.version_id),
 	});
 
+
 	if (currentEntity.length === 0) {
-		throw new Error("Entity does not exist, cannot delete");
+		// Enhanced error message for better copy-on-write deletion context
+		let errorMessage = `Entity deletion failed. Cannot delete entity '${args.entity_id}' from schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) in version '${args.version_id}' because the entity does not exist.`;
+
+		// Add deletion context section
+		errorMessage += `\n\nDeletion Context:\n`;
+		errorMessage += `┌─────────────────┬──────────────────────────────────────┐\n`;
+		errorMessage += `│ Property        │ Value                                │\n`;
+		errorMessage += `├─────────────────┼──────────────────────────────────────┤\n`;
+		errorMessage += `│ Entity ID       │ ${(args.entity_id || "undefined").substring(0, 36).padEnd(36)} │\n`;
+		errorMessage += `│ Schema Key      │ ${args.schema["x-lix-key"].substring(0, 36).padEnd(36)} │\n`;
+		errorMessage += `│ Schema Version  │ ${(args.schema["x-lix-version"] || "undefined").substring(0, 36).padEnd(36)} │\n`;
+		errorMessage += `│ Version ID      │ ${args.version_id.substring(0, 36).padEnd(36)} │\n`;
+		errorMessage += `└─────────────────┴──────────────────────────────────────┘\n`;
+
+		// Check if entity exists in other versions
+		const entityInOtherVersions = executeSync({
+			lix: args.lix,
+			query: args.lix.db
+				.selectFrom("state")
+				.select(["version_id", "snapshot_content", "inherited_from_version_id"])
+				.where("entity_id", "=", args.entity_id)
+				.where("schema_key", "=", args.schema["x-lix-key"]),
+		});
+
+		if (entityInOtherVersions.length > 0) {
+			errorMessage += `\nEntity Search Results (${args.schema["x-lix-key"]}):\n`;
+			errorMessage += `┌─────────────────────┬────────────────┬─────────────────────────────────────┐\n`;
+			errorMessage += `│ Version             │ Entity Found   │ Entity Content                      │\n`;
+			errorMessage += `├─────────────────────┼────────────────┼─────────────────────────────────────┤\n`;
+			
+			// Helper function to truncate property values
+			const truncateValue = (value: any, maxLength: number = 35): string => {
+				const str = typeof value === 'string' ? value : JSON.stringify(value);
+				return str.length > maxLength ? str.substring(0, maxLength - 3) + '...' : str;
+			};
+
+			// Show current version first
+			errorMessage += `│ ${args.version_id.substring(0, 19).padEnd(19)} │ ${"No".padEnd(14)} │ ${"-".padEnd(35)} │\n`;
+			
+			// Show other versions where entity exists
+			for (const state of entityInOtherVersions) {
+				if (state.version_id && state.version_id !== args.version_id) {
+					const versionDisplay = state.version_id.substring(0, 19).padEnd(19);
+					const contentDisplay = truncateValue(state.snapshot_content, 35).padEnd(35);
+					errorMessage += `│ ${versionDisplay} │ ${"Yes".padEnd(14)} │ ${contentDisplay} │\n`;
+				}
+			}
+			
+			errorMessage += `└─────────────────────┴────────────────┴─────────────────────────────────────┘\n`;
+			errorMessage += `\nThe entity exists in other version(s) but is not accessible in '${args.version_id}'. Check version inheritance configuration.`;
+		} else {
+			errorMessage += `\nThe entity with ID '${args.entity_id}' does not exist in any version for schema '${args.schema["x-lix-key"]}'.`;
+		}
+
+		throw new Error(errorMessage);
 	}
 
 	// Get all schemas to check which ones have foreign keys that might reference this entity

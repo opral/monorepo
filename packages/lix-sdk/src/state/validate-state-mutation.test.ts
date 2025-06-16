@@ -4,6 +4,7 @@ import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
+import type { LixChangeSetElement } from "../change-set/schema.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
 	const lix = await openLixInMemory({});
@@ -1379,7 +1380,7 @@ test("should throw when deleting non-existent entity", async () => {
 			entity_id: "nonexistent_user",
 			version_id: activeVersion.version_id,
 		})
-	).toThrowError("Entity does not exist, cannot delete");
+	).toThrowError(/Entity deletion failed/);
 });
 
 test("should throw when entity_id is missing for delete operations", async () => {
@@ -1422,7 +1423,7 @@ test("should handle deletion validation for change sets referenced by versions",
 	// Create a change set
 	await lix.db
 		.insertInto("change_set")
-		.values({ id: "cs_referenced" })
+		.values({ id: "cs_referenced", state_version_id: "global" })
 		.execute();
 
 	// Create a version that references the change set
@@ -1436,10 +1437,10 @@ test("should handle deletion validation for change sets referenced by versions",
 		})
 		.execute();
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.select("version_id")
-		.executeTakeFirstOrThrow();
+	// const activeVersion = await lix.db
+	// 	.selectFrom("active_version")
+	// 	.select("version_id")
+	// 	.executeTakeFirstOrThrow();
 
 	// Get the change set schema
 	const changeSetSchema = await lix.db
@@ -1456,7 +1457,7 @@ test("should handle deletion validation for change sets referenced by versions",
 			snapshot_content: {},
 			operation: "delete",
 			entity_id: "cs_referenced",
-			version_id: activeVersion.version_id,
+			version_id: "global",
 		})
 	).toThrowError(
 		/Foreign key constraint violation.*Cannot delete entity.*referenced by.*lix_version/i
@@ -1561,4 +1562,527 @@ test("should parse JSON object properties before validation", async () => {
 			version_id: activeVersion.version_id,
 		})
 	).toThrowError(/Invalid JSON in property 'body'/);
+});
+
+test("foreign key validation should fail when referenced entity exists in different non-inheriting version", async () => {
+	const lix = await openLixInMemory({});
+
+	// Mock schema for a "User" entity
+	const userSchema = {
+		"x-lix-key": "mock_user",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Mock schema for a "Post" entity that references User
+	const postSchema = {
+		"x-lix-key": "mock_post",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			author_id: {
+				schemaKey: "mock_user",
+				property: "id",
+			},
+		},
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			title: { type: "string" },
+			author_id: { type: "string" },
+		},
+		required: ["id", "title", "author_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Register our mock schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
+
+	// Create two separate versions that don't inherit from each other
+	const versionA = await createVersion({
+		lix,
+		name: "version-a",
+	});
+
+	const versionB = await createVersion({
+		lix,
+		name: "version-b",
+	});
+
+	// Verify they don't inherit from each other
+	// Both should inherit from global, but not from each other
+	expect(versionA.inherits_from_version_id).toBe("global");
+	expect(versionB.inherits_from_version_id).toBe("global");
+
+	// Create a user in version A
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "user-1",
+			schema_key: "mock_user",
+			file_id: "test",
+			plugin_key: "test_plugin",
+			snapshot_content: {
+				id: "user-1",
+				name: "Alice",
+			},
+			schema_version: "1.0",
+			version_id: versionA.id,
+		})
+		.execute();
+
+	// BUG: This should FAIL because user-1 doesn't exist in version B's context
+	// but the current foreign key validation logic will find user-1 in version A
+	// and incorrectly allow this validation to succeed
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post-1",
+				title: "My Post",
+				author_id: "user-1", // References user-1 which only exists in version A
+			},
+			operation: "insert",
+			version_id: versionB.id,
+		})
+	).toThrow(/Foreign key constraint violation.*mock_user.*user-1/);
+
+	// Verify that user-1 indeed doesn't exist in version B's context
+	const userInVersionB = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "user-1")
+		.where("schema_key", "=", "mock_user")
+		.where("version_id", "=", versionB.id)
+		.selectAll()
+		.execute();
+
+	expect(userInVersionB).toHaveLength(0);
+
+	// But verify it does exist in version A
+	const userInVersionA = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "user-1")
+		.where("schema_key", "=", "mock_user")
+		.where("version_id", "=", versionA.id)
+		.selectAll()
+		.execute();
+
+	expect(userInVersionA).toHaveLength(1);
+});
+
+test("should allow self-referential foreign keys", async () => {
+	const lix = await openLixInMemory({});
+
+	// Define a schema with self-referential foreign key (like version inheritance)
+	const versionSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_version",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			inherits_from_version_id: {
+				schemaKey: "mock_version", // Self-referential foreign key
+				property: "id",
+			},
+		},
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+			inherits_from_version_id: { type: ["string", "null"] },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: versionSchema })
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert a parent version first (with null inheritance)
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "version0",
+			file_id: "file1",
+			schema_key: "mock_version",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: {
+				id: "version0",
+				name: "version0",
+				inherits_from_version_id: null,
+			},
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// This should pass - child version referencing parent version (valid self-referential FK)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: versionSchema,
+			snapshot_content: {
+				id: "version1",
+				name: "version1",
+				inherits_from_version_id: "version0", // References another entity in same schema
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+
+	// This should also pass - version with null inheritance (no foreign key constraint)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: versionSchema,
+			snapshot_content: {
+				id: "version2",
+				name: "version2",
+				inherits_from_version_id: null, // No foreign key reference
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+
+	// This should fail - referencing non-existent version
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: versionSchema,
+			snapshot_content: {
+				id: "version3",
+				name: "version3",
+				inherits_from_version_id: "nonexistent_version",
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError("Foreign key constraint violation");
+});
+
+test("should allow self-referential foreign keys for update operations", async () => {
+	const lix = await openLixInMemory({});
+
+	// Define a schema with self-referential foreign key
+	const versionSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_version",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			inherits_from_version_id: {
+				schemaKey: "mock_version",
+				property: "id",
+			},
+		},
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+			inherits_from_version_id: { type: ["string", "null"] },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: versionSchema })
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert initial versions
+	await lix.db
+		.insertInto("state")
+		.values([
+			{
+				entity_id: "version0",
+				file_id: "file1",
+				schema_key: "mock_version",
+				plugin_key: "test_plugin",
+				version_id: activeVersion.version_id,
+				snapshot_content: {
+					id: "version0",
+					name: "version0",
+					inherits_from_version_id: null,
+				},
+				schema_version: "1.0",
+			},
+			{
+				entity_id: "version1",
+				file_id: "file1",
+				schema_key: "mock_version",
+				plugin_key: "test_plugin",
+				version_id: activeVersion.version_id,
+				snapshot_content: {
+					id: "version1",
+					name: "version1",
+					inherits_from_version_id: "version0",
+				},
+				schema_version: "1.0",
+			},
+		])
+		.execute();
+
+	// This should pass - updating to reference a different valid version
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: versionSchema,
+			snapshot_content: {
+				id: "version1",
+				name: "version1_updated",
+				inherits_from_version_id: null, // Change from version0 to null
+			},
+			operation: "update",
+			entity_id: "version1",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+
+	// This should fail - updating to reference non-existent version
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: versionSchema,
+			snapshot_content: {
+				id: "version1",
+				name: "version1_updated",
+				inherits_from_version_id: "nonexistent_version",
+			},
+			operation: "update",
+			entity_id: "version1",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError("Foreign key constraint violation");
+});
+
+test("should prevent deletion when self-referential foreign keys reference the entity", async () => {
+	const lix = await openLixInMemory({});
+
+	// Define a schema with self-referential foreign key
+	const versionSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_version",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			inherits_from_version_id: {
+				schemaKey: "mock_version",
+				property: "id",
+			},
+		},
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+			inherits_from_version_id: { type: ["string", "null"] },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: versionSchema })
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert parent and child versions
+	await lix.db
+		.insertInto("state")
+		.values([
+			{
+				entity_id: "version0",
+				file_id: "file1",
+				schema_key: "mock_version",
+				plugin_key: "test_plugin",
+				version_id: activeVersion.version_id,
+				snapshot_content: {
+					id: "version0",
+					name: "version0",
+					inherits_from_version_id: null,
+				},
+				schema_version: "1.0",
+			},
+			{
+				entity_id: "version1",
+				file_id: "file1",
+				schema_key: "mock_version",
+				plugin_key: "test_plugin",
+				version_id: activeVersion.version_id,
+				snapshot_content: {
+					id: "version1",
+					name: "version1",
+					inherits_from_version_id: "version0", // References version0
+				},
+				schema_version: "1.0",
+			},
+		])
+		.execute();
+
+	// This should fail - cannot delete version0 because version1 references it
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: versionSchema,
+			snapshot_content: {},
+			operation: "delete",
+			entity_id: "version0",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(
+		/Foreign key constraint violation.*referenced by.*mock_version.*inherits_from_version_id/
+	);
+
+	// This should pass - can delete version1 (no other versions reference it)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: versionSchema,
+			snapshot_content: {},
+			operation: "delete",
+			entity_id: "version1",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+});
+
+// Foreign keys are restricted to the current version context to maintain data integrity
+// and prevent confusing dependency relationships across version boundaries. While entities
+// can be inherited from parent versions through the copy-on-write system, foreign key
+// constraints require explicit, direct relationships within the same version scope.
+// This design choice ensures that:
+// 1. FK constraints are predictable and version-scoped
+// 2. No hidden dependencies exist across version boundaries
+// 3. Copy-on-write semantics remain clear and isolated
+// 4. Data integrity is maintained within each version context
+test("should prevent foreign key references to inherited entities from different version contexts", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create a thread in global context
+	await lix.db
+		.insertInto("thread")
+		.values({
+			id: "global_thread",
+			metadata: { title: "Global Thread" },
+			state_version_id: "global",
+		})
+		.execute();
+
+	// Get the active version (should be "main" version)
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Get the thread comment schema
+	const threadCommentSchema = await lix.db
+		.selectFrom("stored_schema")
+		.select("value")
+		.where("key", "=", "lix_thread_comment")
+		.executeTakeFirstOrThrow();
+
+	// This should FAIL: attempting to create a thread_comment in the active version
+	// that references a thread that only exists in global context.
+	// Foreign keys should only work within the same version context.
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: threadCommentSchema.value as LixSchemaDefinition,
+			snapshot_content: {
+				id: "comment1",
+				thread_id: "global_thread", // References thread in global context
+				parent_id: null,
+				body: {
+					type: "zettel_doc",
+					content: [
+						{
+							type: "zettel_text_block",
+							zettel_key: "test_key",
+							style: "zettel_normal",
+							children: [],
+						},
+					],
+				},
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id, // But creating comment in active version context
+		})
+	).toThrow(/Foreign key constraint violation.*lix_thread.*global_thread/);
+});
+
+test("should prevent change set elements from referencing change sets defined in global context", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create a change set in global context
+	await lix.db
+		.insertInto("change_set")
+		.values({
+			id: "global_change_set",
+			state_version_id: "global",
+		})
+		.execute();
+
+	// Get the active version (should be "main" version)
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Get the change set element schema
+	const changeSetElementSchema = await lix.db
+		.selectFrom("stored_schema")
+		.select("value")
+		.where("key", "=", "lix_change_set_element")
+		.executeTakeFirstOrThrow();
+
+	// This should FAIL: attempting to create a change_set_element in the active version
+	// that references a change set that exists in global context.
+	// The bug is that this currently passes when it should fail.
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: changeSetElementSchema.value as LixSchemaDefinition,
+			snapshot_content: {
+				change_set_id: "global_change_set", // References change set in global context
+				change_id: "dummy_change_id",
+				entity_id: "dummy_entity_id",
+				file_id: "dummy_file_id",
+				schema_key: "dummy_schema_key",
+			} satisfies LixChangeSetElement,
+			operation: "insert",
+			version_id: activeVersion.version_id, // But creating element in active version context
+		})
+	).toThrow(
+		/Foreign key constraint violation.*lix_change_set.*global_change_set/
+	);
 });

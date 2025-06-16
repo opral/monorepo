@@ -13,7 +13,8 @@ export function applyChangeAuthorDatabaseSchema(
 		SELECT
 			json_extract(snapshot_content, '$.change_id') AS change_id,
 			json_extract(snapshot_content, '$.account_id') AS account_id,
-			version_id
+			version_id AS state_version_id,
+			inherited_from_version_id AS state_inherited_from_version_id
 		FROM state
 		WHERE schema_key = 'lix_change_author';
 
@@ -35,7 +36,7 @@ export function applyChangeAuthorDatabaseSchema(
 				'lix_own_entity',
 				json_object('change_id', NEW.change_id, 'account_id', NEW.account_id),
 				'${LixChangeAuthorSchema["x-lix-version"]}',
-				COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+				COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
 			);
 		END;
 
@@ -49,10 +50,10 @@ export function applyChangeAuthorDatabaseSchema(
 				file_id = 'lix',
 				plugin_key = 'lix_own_entity',
 				snapshot_content = json_object('change_id', NEW.change_id, 'account_id', NEW.account_id),
-				version_id = COALESCE(NEW.version_id, OLD.version_id)
+				version_id = COALESCE(NEW.state_version_id, OLD.state_version_id)
 			WHERE entity_id = OLD.change_id || '::' || OLD.account_id
 				AND schema_key = 'lix_change_author'
-				AND version_id = OLD.version_id;
+				AND version_id = OLD.state_version_id;
 		END;
 
 		CREATE TRIGGER IF NOT EXISTS change_author_delete
@@ -61,7 +62,7 @@ export function applyChangeAuthorDatabaseSchema(
 			DELETE FROM state
 			WHERE entity_id = OLD.change_id || '::' || OLD.account_id
 				AND schema_key = 'lix_change_author'
-				AND version_id = OLD.version_id;
+				AND version_id = OLD.state_version_id;
 		END;
 	`);
 }
@@ -98,7 +99,8 @@ export type LixChangeAuthor = FromLixSchemaDefinition<
 export type ChangeAuthorView = {
 	change_id: string;
 	account_id: string;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: Generated<string | null>;
 };
 
 // Kysely operation types

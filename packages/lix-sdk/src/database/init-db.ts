@@ -85,8 +85,8 @@ export function initDb(args: {
 	for (const schema of Object.values(LixSchemaViewMap)) {
 		args.sqlite.exec(
 			`
-			INSERT INTO stored_schema (value)
-			SELECT ?
+			INSERT INTO stored_schema (value, state_version_id)
+			SELECT ?, ?
 			WHERE NOT EXISTS (
 				SELECT 1
 				FROM stored_schema
@@ -94,7 +94,7 @@ export function initDb(args: {
 				AND version = '${schema["x-lix-version"]}'
 			);
 			`,
-			{ bind: [JSON.stringify(schema)] }
+			{ bind: [JSON.stringify(schema), "global"] }
 		);
 	}
 

@@ -22,12 +22,12 @@ test("insert, update, delete on the account view", async () => {
 			{
 				id: "account0",
 				name: "Alice",
-				version_id: version0.id,
+				state_version_id: version0.id,
 			},
 			{
 				id: "account1",
 				name: "Bob",
-				version_id: version1.id,
+				state_version_id: version1.id,
 			},
 		])
 		.execute();
@@ -38,19 +38,21 @@ test("insert, update, delete on the account view", async () => {
 		{
 			id: "account0",
 			name: "Alice",
-			version_id: "version0",
+			state_version_id: "version0",
+			state_inherited_from_version_id: null,
 		},
 		{
 			id: "account1",
 			name: "Bob",
-			version_id: "version1",
+			state_version_id: "version1",
+			state_inherited_from_version_id: null,
 		},
 	]);
 
 	await lix.db
 		.updateTable("account")
 		.where("id", "=", "account0")
-		.where("version_id", "=", "version0")
+		.where("state_version_id", "=", "version0")
 		.set({
 			name: "Alice Updated",
 		})
@@ -66,19 +68,21 @@ test("insert, update, delete on the account view", async () => {
 		{
 			id: "account0",
 			name: "Alice Updated",
-			version_id: "version0",
+			state_version_id: "version0",
+			state_inherited_from_version_id: null,
 		},
 		{
 			id: "account1",
 			name: "Bob",
-			version_id: "version1",
+			state_version_id: "version1",
+			state_inherited_from_version_id: null,
 		},
 	]);
 
 	await lix.db
 		.deleteFrom("account")
 		.where("id", "=", "account0")
-		.where("version_id", "=", "version0")
+		.where("state_version_id", "=", "version0")
 		.execute();
 
 	const viewAfterDelete = await lix.db
@@ -91,7 +95,8 @@ test("insert, update, delete on the account view", async () => {
 		{
 			id: "account1",
 			name: "Bob",
-			version_id: "version1",
+			state_version_id: "version1",
+			state_inherited_from_version_id: null,
 		},
 	]);
 });
@@ -108,14 +113,14 @@ test("account ids should have a default", async () => {
 		.insertInto("account")
 		.values({
 			name: "Test User",
-			version_id: version0.id,
+			state_version_id: version0.id,
 		})
 		.execute();
 	
 	const account = await lix.db
 		.selectFrom("account")
 		.where("name", "=", "Test User")
-		.where("version_id", "=", version0.id)
+		.where("state_version_id", "=", version0.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -142,7 +147,7 @@ test("account operations are version specific and isolated", async () => {
 		.values({
 			id: "accountA",
 			name: "User A",
-			version_id: versionA.id,
+			state_version_id: versionA.id,
 		})
 		.execute();
 
@@ -152,20 +157,20 @@ test("account operations are version specific and isolated", async () => {
 		.values({
 			id: "accountB",
 			name: "User B",
-			version_id: versionB.id,
+			state_version_id: versionB.id,
 		})
 		.execute();
 
 	// Verify both versions have their own accounts
 	const accountsInVersionA = await lix.db
 		.selectFrom("account")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const accountsInVersionB = await lix.db
 		.selectFrom("account")
-		.where("version_id", "=", versionB.id)
+		.where("state_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 
@@ -178,7 +183,7 @@ test("account operations are version specific and isolated", async () => {
 	await lix.db
 		.updateTable("account")
 		.where("id", "=", "accountA")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.set({
 			name: "User A Updated",
 		})
@@ -187,13 +192,13 @@ test("account operations are version specific and isolated", async () => {
 	// Verify update only affected version A
 	const updatedAccountsA = await lix.db
 		.selectFrom("account")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const unchangedAccountsB = await lix.db
 		.selectFrom("account")
-		.where("version_id", "=", versionB.id)
+		.where("state_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 
@@ -204,19 +209,19 @@ test("account operations are version specific and isolated", async () => {
 	await lix.db
 		.deleteFrom("account")
 		.where("id", "=", "accountA")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.execute();
 
 	// Verify deletion only affected version A
 	const remainingAccountsA = await lix.db
 		.selectFrom("account")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const remainingAccountsB = await lix.db
 		.selectFrom("account")
-		.where("version_id", "=", versionB.id)
+		.where("state_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 
@@ -340,7 +345,7 @@ test.todo('it should drop the temp "active_account" table on reboot to not persi
 		.values({
 			id: "test-account",
 			name: "Test User",
-			version_id: version.id,
+			state_version_id: version.id,
 		})
 		.execute();
 

@@ -39,6 +39,7 @@ test("it applies lix own entity changes", async () => {
 
 	const changeSet = await createChangeSet({
 		lix,
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: mockKeyValueChange.id,
@@ -166,6 +167,7 @@ test("throws an error if plugin does not exist", async () => {
 	// Create a change set
 	const changeSet = await createChangeSet({
 		lix,
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: change.id,
@@ -230,6 +232,7 @@ test("throws an error if plugin does not support applying changes", async () => 
 	// Create a change set
 	const changeSet = await createChangeSet({
 		lix,
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: change.id,
@@ -343,6 +346,7 @@ test.skip("it should delete entities but not files when applying entity deletion
 		.insertInto("stored_schema")
 		.values({
 			value: MockJsonPropertySchema,
+			state_version_id: "global",
 		})
 		.execute();
 
@@ -400,6 +404,7 @@ test.skip("it should delete entities but not files when applying entity deletion
 	const addChangeSet = await createChangeSet({
 		lix,
 		id: "cs-add",
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: "c1",
@@ -431,6 +436,7 @@ test.skip("it should delete entities but not files when applying entity deletion
 	const contentAfterAdd = JSON.parse(
 		new TextDecoder().decode(fileAfterAdd.data)
 	);
+
 	expect(contentAfterAdd).toEqual({
 		e1: "Entity 1",
 		e2: "Entity 2",
@@ -454,6 +460,7 @@ test.skip("it should delete entities but not files when applying entity deletion
 	const deleteChangeSet = await createChangeSet({
 		lix,
 		id: "cs-delete-entity",
+		state_version_id: "global",
 		elements: [
 			{
 				change_id: "c3",

@@ -1,14 +1,12 @@
-import type { ExperimentalChangeSchema } from "@lix-js/sdk";
+import type { LixSchemaDefinition } from "@lix-js/sdk";
 
 export const MarkdownBlockPositionSchemaV1 = {
-	key: "lix_plugin_md_block_positions",
-	type: "json",
-	schema: {
-		type: "object",
-		properties: {
-			idPositions: { type: "object" },
-		},
-		required: ["idPositions"],
-		additionalProperties: false,
+	"x-lix-key": "lix_plugin_md_block_positions",
+	"x-lix-version": "1.0",
+	type: "object",
+	properties: {
+		idPositions: { type: "object" },
 	},
-} as const satisfies ExperimentalChangeSchema;
+	required: ["idPositions"],
+	additionalProperties: false,
+} as const satisfies LixSchemaDefinition;

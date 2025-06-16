@@ -17,16 +17,22 @@ export async function createVersion(args: {
 	id?: Version["id"];
 	changeSet?: Pick<ChangeSet, "id">;
 	name?: Version["name"];
+	inherits_from_version_id?: Version["inherits_from_version_id"];
 }): Promise<Version> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
 			lix: { ...args.lix, db: trx },
+			state_version_id: "global",
 		});
 		const cs =
 			args.changeSet ??
-			(await createChangeSet({ lix: { ...args.lix, db: trx } }));
+			(await createChangeSet({
+				lix: { ...args.lix, db: trx },
+				state_version_id: "global",
+			}));
 
 		const versionId = args.id ?? nanoid();
+
 		await trx
 			.insertInto("version")
 			.values({
@@ -34,6 +40,7 @@ export async function createVersion(args: {
 				name: args.name,
 				change_set_id: cs.id,
 				working_change_set_id: workingCs.id,
+				inherits_from_version_id: args.inherits_from_version_id ?? "global",
 			})
 			.execute();
 
@@ -41,6 +48,7 @@ export async function createVersion(args: {
 			.selectFrom("version")
 			.selectAll()
 			.where("id", "=", versionId)
+			.where("version.state_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
 		return newVersion;

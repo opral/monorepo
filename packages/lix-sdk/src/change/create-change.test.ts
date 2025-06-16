@@ -15,7 +15,7 @@ test("creating changes", async () => {
 		file_id: "file1",
 		plugin_key: "plugin1",
 		snapshot: {
-			content: "snapshot-content",
+			content: { value: "snapshot-content" },
 		},
 	});
 
@@ -70,7 +70,7 @@ test("creating changes with authors", async () => {
 		file_id: "file1",
 		plugin_key: "plugin1",
 		snapshot: {
-			content: "snapshot-content",
+			content: { value: "snapshot-content" },
 		},
 		authors: [author1, author2],
 	});
@@ -118,7 +118,7 @@ test("creating changes without authors should not create change_author records",
 		file_id: "file1",
 		plugin_key: "plugin1",
 		snapshot: {
-			content: "snapshot-content",
+			content: { value: "snapshot-content" },
 		},
 		// No authors specified
 	});

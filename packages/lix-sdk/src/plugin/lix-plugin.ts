@@ -1,9 +1,6 @@
 import type { Change } from "../change/schema.js";
 import type { LixFile, LixFileType } from "../file/schema.js";
-import type {
-	FromLixSchemaDefinition,
-	LixSchemaDefinition,
-} from "../schema-definition/definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Snapshot } from "../snapshot/schema.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
@@ -47,7 +44,7 @@ export type LixPlugin = {
 		 * that did not exist in the target version. Or, a file
 		 * has been deleted and should be restored at a later point.
 		 */
-		file: Omit<LixFile, "data" | "version_id"> & { data?: LixFile["data"] };
+		file: LixFileType & { data?: LixFile["data"] };
 		changes: Array<Change & { snapshot_content: Snapshot["content"] }>;
 	}) => { fileData: Uint8Array };
 	/**

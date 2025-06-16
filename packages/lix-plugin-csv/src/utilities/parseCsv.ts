@@ -17,7 +17,7 @@ import * as papaparse from "papaparse";
  *   ```
  */
 export function parseCsv(
-	data: ArrayBuffer | undefined,
+	data: Uint8Array | undefined,
 	uniqueColumn: string,
 ): {
 	index: Map<string, Record<string, string>>;

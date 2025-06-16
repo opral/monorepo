@@ -15,7 +15,8 @@ export function applyKeyValueDatabaseSchema(
   SELECT
     json_extract(snapshot_content, '$.key') AS key,
     json_extract(snapshot_content, '$.value') AS value,
-		version_id
+		version_id AS state_version_id,
+		inherited_from_version_id AS state_inherited_from_version_id
   FROM state
   WHERE schema_key = 'lix_key_value';
 
@@ -37,7 +38,7 @@ export function applyKeyValueDatabaseSchema(
 			'lix_own_entity',
 			json_object('key', NEW.key, 'value', NEW.value),
 			'${LixKeyValueSchema["x-lix-version"]}',
-			COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+			COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
 		);
 	END;
 
@@ -51,12 +52,12 @@ export function applyKeyValueDatabaseSchema(
 			file_id = 'lix',
 			plugin_key = 'lix_own_entity',
 			snapshot_content = json_object('key', NEW.key, 'value', NEW.value),
-			version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+			version_id = COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
 		WHERE
 			state.entity_id = OLD.key
 			AND state.schema_key = 'lix_key_value'
 			AND state.file_id = 'lix'
-			AND state.version_id = OLD.version_id;
+			AND state.version_id = OLD.state_version_id;
 	END;
 
 	CREATE TRIGGER IF NOT EXISTS key_value_delete
@@ -101,7 +102,8 @@ export type KeyValueView = {
 	 */
 	key: KeyValueKeys;
 	value: any; // JSONType, can be any valid JSON value
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: Generated<string | null>;
 };
 
 // Kysely operation types

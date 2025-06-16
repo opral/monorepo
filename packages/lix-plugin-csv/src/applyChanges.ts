@@ -1,41 +1,31 @@
-import { type Change, type LixPlugin, type LixReadonly } from "@lix-js/sdk";
+import { type Change, type LixPlugin } from "@lix-js/sdk";
 import papaparse from "papaparse";
 import { parseCsv } from "./utilities/parseCsv.js";
 import { CellSchemaV1 } from "./schemas/cell.js";
 
-export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
-	lix,
+export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	file,
 	changes,
 }) => {
-	const uniqueColumn = file.metadata?.unique_column;
+	const uniqueColumn = file.metadata?.unique_column as string | undefined;
 
 	if (uniqueColumn === undefined) {
 		throw new Error("The unique_column metadata is required to apply changes");
 	}
 
-	const parsed = parseCsv(
-		file.data ?? (await newCsvFile(lix, changes)),
-		uniqueColumn,
-	);
+	const parsed = parseCsv(file.data ?? newCsvFile(changes), uniqueColumn);
 
 	if (parsed === undefined) {
 		throw new Error("Failed to parse csv");
 	}
 
-	const rowOrderChanges: Change[] = [];
+	const rowOrderChanges: (Change & { snapshot_content: any })[] = [];
 
 	for (const change of changes) {
 		// save row order changes for later
 		rowOrderChanges.push(change);
 
-		if (change.schema_key === CellSchemaV1.key) {
-			const snapshot = await lix.db
-				.selectFrom("snapshot")
-				.where("id", "=", change.snapshot_id)
-				.selectAll()
-				.executeTakeFirstOrThrow();
-
+		if (change.schema_key === CellSchemaV1["x-lix-key"]) {
 			const [uniqueColumn, uniqueColumnValue, column] = change.entity_id.split(
 				"|",
 			) as [string, string, string];
@@ -44,7 +34,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 
 			// console.log("processing change " + rowId + " col " + column, change);
 			// change is a deletion
-			if (snapshot.content === null) {
+			if (change.snapshot_content === null) {
 				delete parsed.index.get(rowId)?.[column];
 				// Check if the column deletion lead to an empty row - if so delete the entire row
 				if (Object.keys(parsed.index.get(rowId) ?? {})?.length === 0) {
@@ -58,19 +48,13 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 				if (parsed.index.get(rowId) === undefined) {
 					parsed.index.set(rowId, {});
 				}
-				parsed.index.get(rowId)![column] = snapshot.content.text;
+				parsed.index.get(rowId)![column] = change.snapshot_content?.text;
 			}
 		}
 	}
 
 	for (const change of rowOrderChanges) {
-		const snapshot = await lix.db
-			.selectFrom("snapshot")
-			.where("id", "=", change.snapshot_id)
-			.selectAll()
-			.executeTakeFirstOrThrow();
-
-		if (snapshot.content === null) {
+		if (change.snapshot_content === null) {
 			// row has been deleted
 			parsed.index.delete(change.entity_id);
 		} else {
@@ -81,7 +65,7 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 				parsed.index,
 				change.entity_id,
 				rowContent!,
-				snapshot.content.lineNumber,
+				change.snapshot_content?.lineNumber,
 			);
 		}
 	}
@@ -127,23 +111,20 @@ function insertIntoMapAtPosition<K, V>(
 	return newMap;
 }
 
-async function newCsvFile(lix: LixReadonly, changes: Change[]) {
-	const header = changes.find((c) => c.entity_id === "header");
-	if (header === undefined) {
+function newCsvFile(changes: Change[]) {
+	const headerChange = changes.find((c) => c.entity_id === "header");
+	if (headerChange === undefined) {
 		throw new Error("No header change found. Can't reconstruct csv file.");
 	}
-	const headerSnapshot = await lix.db
-		.selectFrom("snapshot")
-		.where("id", "=", header.snapshot_id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
 
-	if (headerSnapshot.content === null) {
+	// @ts-expect-error - waiting for inlining https://github.com/opral/lix-sdk/issues/307
+	if (headerChange.snapshot_content === null) {
 		throw new Error("Header snapshot is empty. Can't reconstruct csv file.");
 	}
 
 	// create a csv file that has the header column names
 	return new TextEncoder().encode(
-		headerSnapshot.content.columnNames.join(",") + "\n",
+		// @ts-expect-error - waiting for inlining https://github.com/opral/lix-sdk/issues/307
+		headerChange.snapshot_content.columnNames.join(",") + "\n",
 	);
 }
