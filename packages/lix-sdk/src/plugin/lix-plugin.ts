@@ -1,9 +1,6 @@
 import type { Change } from "../change/schema.js";
 import type { LixFile, LixFileType } from "../file/schema.js";
-import type {
-	FromLixSchemaDefinition,
-	LixSchemaDefinition,
-} from "../schema-definition/definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Snapshot } from "../snapshot/schema.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
