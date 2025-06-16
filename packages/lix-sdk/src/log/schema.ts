@@ -13,8 +13,8 @@ export function applyLogDatabaseSchema(
 		json_extract(snapshot_content, '$.message') AS message,
 		json_extract(snapshot_content, '$.level') AS level,
 		created_at,
-		version_id AS state_version_id,
-		inherited_from_version_id AS state_inherited_from_version_id
+		version_id AS lixcol_version_id,
+		inherited_from_version_id AS lixcol_inherited_from_version_id
 	FROM state
 	WHERE schema_key = 'lix_log';
 
@@ -34,7 +34,7 @@ export function applyLogDatabaseSchema(
 				'level', NEW.level
 			),
 			'${LixLogSchema["x-lix-version"]}',
-			COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
+			COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
 		FROM (
 			SELECT
 				COALESCE(NEW.id, nano_id()) AS id
@@ -48,7 +48,7 @@ CREATE TRIGGER IF NOT EXISTS log_delete
 		WHERE entity_id = OLD.id
 		AND schema_key = 'lix_log'
 		AND file_id = 'lix'
-		AND version_id = OLD.state_version_id;
+		AND version_id = OLD.lixcol_version_id;
 	END;
 `);
 }
@@ -116,8 +116,8 @@ export type LogView = {
 	/**
 	 * The version this log entry belongs to.
 	 */
-	state_version_id: Generated<string>;
-	state_inherited_from_version_id: Generated<string | null>;
+	lixcol_version_id: Generated<string>;
+	lixcol_inherited_from_version_id: Generated<string | null>;
 };
 
 // Kysely operation types

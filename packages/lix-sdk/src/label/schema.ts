@@ -10,8 +10,8 @@ export function applyLabelDatabaseSchema(
 	SELECT
 		json_extract(snapshot_content, '$.id') AS id,
     json_extract(snapshot_content, '$.name') AS name,
-    version_id AS state_version_id,
-    inherited_from_version_id AS state_inherited_from_version_id
+    version_id AS lixcol_version_id,
+    inherited_from_version_id AS lixcol_inherited_from_version_id
 	FROM state
 	WHERE schema_key = 'lix_label';
 
@@ -34,7 +34,7 @@ export function applyLabelDatabaseSchema(
       'lix_own_entity',
       json_object('id', with_default_values.id, 'name', with_default_values.name),
       '${LixLabelSchema["x-lix-version"]}',
-      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT
         COALESCE(NEW.id, nano_id()) AS id,
@@ -52,7 +52,7 @@ export function applyLabelDatabaseSchema(
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
       snapshot_content = json_object('id', NEW.id, 'name', NEW.name),
-      version_id = COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
+      version_id = COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_label'
@@ -119,8 +119,8 @@ export type LixLabel = FromLixSchemaDefinition<typeof LixLabelSchema>;
 export type LabelView = {
 	id: Generated<string>;
 	name: string;
-	state_version_id: Generated<string>;
-	state_inherited_from_version_id: Generated<string | null>;
+	lixcol_version_id: Generated<string>;
+	lixcol_inherited_from_version_id: Generated<string | null>;
 };
 
 // Kysely operation types

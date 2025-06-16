@@ -10,7 +10,7 @@ test("thread.id should default to nano_id", async () => {
 	const result = await lix.db
 		.selectFrom("thread")
 		.selectAll()
-		.orderBy("state_version_id", "desc")
+		.orderBy("lixcol_version_id", "desc")
 		.executeTakeFirstOrThrow();
 
 	expect(result.id).toBeDefined();
@@ -24,7 +24,7 @@ test("an invalid thread comment content should throw an error", async () => {
 	const thread = await lix.db
 		.selectFrom("thread")
 		.selectAll()
-		.orderBy("state_version_id", "desc")
+		.orderBy("lixcol_version_id", "desc")
 		.executeTakeFirstOrThrow();
 
 	await expect(
@@ -58,7 +58,7 @@ test("valid thread comment content should pass", async () => {
 	const thread = await lix.db
 		.selectFrom("thread")
 		.selectAll()
-		.orderBy("state_version_id", "desc")
+		.orderBy("lixcol_version_id", "desc")
 		.executeTakeFirstOrThrow();
 
 	await lix.db
@@ -73,7 +73,7 @@ test("valid thread comment content should pass", async () => {
 	const comment = await lix.db
 		.selectFrom("thread_comment")
 		.selectAll()
-		.orderBy("state_version_id", "desc")
+		.orderBy("lixcol_version_id", "desc")
 		.executeTakeFirstOrThrow();
 
 	expect(comment).toBeDefined();

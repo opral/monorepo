@@ -11,7 +11,7 @@ export async function createChangeSet(args: {
 	/** Parent change sets that this change set will be a child of */
 	parents?: Pick<ChangeSet, "id">[];
 	/** Version ID where the change set should be stored. Defaults to active version */
-	state_version_id?: string;
+	lixcol_version_id?: string;
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const csId = args.id ?? nanoid();
@@ -19,7 +19,7 @@ export async function createChangeSet(args: {
 			.insertInto("change_set")
 			.values({
 				id: csId,
-				state_version_id: args.state_version_id,
+				lixcol_version_id: args.lixcol_version_id,
 			})
 			.executeTakeFirstOrThrow();
 
@@ -30,7 +30,7 @@ export async function createChangeSet(args: {
 				.values(
 					args.elements.map((element) => ({
 						change_set_id: csId,
-						state_version_id: args.state_version_id,
+						lixcol_version_id: args.lixcol_version_id,
 						...element,
 					}))
 				)
@@ -43,7 +43,7 @@ export async function createChangeSet(args: {
 				.insertInto("change_set_label")
 				.values(
 					args.labels.map((label) => ({
-						state_version_id: args.state_version_id,
+						lixcol_version_id: args.lixcol_version_id,
 						label_id: label.id,
 						change_set_id: csId,
 					}))
@@ -58,7 +58,7 @@ export async function createChangeSet(args: {
 				.values({
 					parent_id: parent.id,
 					child_id: csId,
-					state_version_id: args.state_version_id,
+					lixcol_version_id: args.lixcol_version_id,
 				})
 				.execute();
 		}

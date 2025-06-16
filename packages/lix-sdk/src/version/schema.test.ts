@@ -9,10 +9,10 @@ test("selecting from the version view", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "change_set_id_0", state_version_id: "global" },
-			{ id: "change_set_id_1", state_version_id: "global" },
-			{ id: "working_cs_0", state_version_id: "global" },
-			{ id: "working_cs_1", state_version_id: "global" },
+			{ id: "change_set_id_0", lixcol_version_id: "global" },
+			{ id: "change_set_id_1", lixcol_version_id: "global" },
+			{ id: "working_cs_0", lixcol_version_id: "global" },
+			{ id: "working_cs_1", lixcol_version_id: "global" },
 		])
 		.execute();
 
@@ -25,7 +25,7 @@ test("selecting from the version view", async () => {
 				change_set_id: "change_set_id_0",
 				working_change_set_id: "working_cs_0",
 				inherits_from_version_id: null,
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			},
 			{
 				id: "version1",
@@ -33,7 +33,7 @@ test("selecting from the version view", async () => {
 				change_set_id: "change_set_id_1",
 				working_change_set_id: "working_cs_1",
 				inherits_from_version_id: null,
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			},
 		])
 		.execute();
@@ -41,7 +41,7 @@ test("selecting from the version view", async () => {
 	const versions = await lix.db
 		.selectFrom("version")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -57,7 +57,7 @@ test("selecting from the version view", async () => {
 			change_set_id: "change_set_id_0",
 			working_change_set_id: "working_cs_0",
 			inherits_from_version_id: null,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		},
 		{
 			id: "version1",
@@ -65,7 +65,7 @@ test("selecting from the version view", async () => {
 			change_set_id: "change_set_id_1",
 			working_change_set_id: "working_cs_1",
 			inherits_from_version_id: null,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		},
 	]);
 });
@@ -77,10 +77,10 @@ test("insert, update, delete on the version view", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "change_set_id_0", state_version_id: "global" },
-			{ id: "change_set_id_1", state_version_id: "global" },
-			{ id: "working_cs_0", state_version_id: "global" },
-			{ id: "working_cs_1", state_version_id: "global" },
+			{ id: "change_set_id_0", lixcol_version_id: "global" },
+			{ id: "change_set_id_1", lixcol_version_id: "global" },
+			{ id: "working_cs_0", lixcol_version_id: "global" },
+			{ id: "working_cs_1", lixcol_version_id: "global" },
 		])
 		.execute();
 
@@ -106,7 +106,7 @@ test("insert, update, delete on the version view", async () => {
 		.selectFrom("version")
 		.orderBy("name", "asc")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -124,7 +124,7 @@ test("insert, update, delete on the version view", async () => {
 	await lix.db
 		.updateTable("version")
 		.where("name", "=", "version0")
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.set({ change_set_id: "change_set_id_1" })
 		.execute();
 
@@ -132,7 +132,7 @@ test("insert, update, delete on the version view", async () => {
 		.selectFrom("version")
 		.orderBy("name", "asc")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -163,7 +163,7 @@ test("insert, update, delete on the version view", async () => {
 			change_set_id: "change_set_id_1",
 			working_change_set_id: "working_cs_1",
 			inherits_from_version_id: null,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		},
 		{
 			id: "version1",
@@ -171,8 +171,8 @@ test("insert, update, delete on the version view", async () => {
 			change_set_id: "change_set_id_1",
 			working_change_set_id: "working_cs_1",
 			inherits_from_version_id: null,
-			state_version_id: "BoIaHTW9ePX6pNc8",
-			state_inherited_from_version_id: "global",
+			lixcol_version_id: "BoIaHTW9ePX6pNc8",
+			lixcol_inherited_from_version_id: "global",
 		},
 	]);
 
@@ -214,10 +214,10 @@ test("querying by id", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "change_set_id_0", state_version_id: "global" },
-			{ id: "change_set_id_1", state_version_id: "global" },
-			{ id: "working_cs_0", state_version_id: "global" },
-			{ id: "working_cs_1", state_version_id: "global" },
+			{ id: "change_set_id_0", lixcol_version_id: "global" },
+			{ id: "change_set_id_1", lixcol_version_id: "global" },
+			{ id: "working_cs_0", lixcol_version_id: "global" },
+			{ id: "working_cs_1", lixcol_version_id: "global" },
 		])
 		.execute();
 
@@ -242,7 +242,7 @@ test("querying by id", async () => {
 	const versions = await lix.db
 		.selectFrom("version")
 		.where("id", "=", "version0")
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.select("id")
 		.execute();
 
@@ -256,7 +256,7 @@ test("update active version view", async () => {
 	// Create required change sets and version first
 	await lix.db
 		.insertInto("change_set")
-		.values([{ id: "cs1", state_version_id: "global" }])
+		.values([{ id: "cs1", lixcol_version_id: "global" }])
 		.execute();
 
 	await lix.db
@@ -266,7 +266,7 @@ test("update active version view", async () => {
 			name: "test_version",
 			change_set_id: "cs1",
 			working_change_set_id: "cs1",
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -313,7 +313,7 @@ test("should use default id and name if not provided", async () => {
 	// Pre-populate change_set table
 	await lix.db
 		.insertInto("change_set")
-		.values([{ id: "cs1", state_version_id: "global" }])
+		.values([{ id: "cs1", lixcol_version_id: "global" }])
 		.execute();
 
 	// Insert a version providing only change_set_id
@@ -399,8 +399,8 @@ test("should allow version insertion with valid change set references", async ()
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "cs1", state_version_id: "global" },
-			{ id: "cs2", state_version_id: "global" },
+			{ id: "cs1", lixcol_version_id: "global" },
+			{ id: "cs2", lixcol_version_id: "global" },
 		])
 		.execute();
 
@@ -436,7 +436,7 @@ test("should allow active_version update with valid version_id", async () => {
 	// Create valid change set and version
 	await lix.db
 		.insertInto("change_set")
-		.values({ id: "cs1", state_version_id: "global" })
+		.values({ id: "cs1", lixcol_version_id: "global" })
 		.execute();
 
 	await lix.db
@@ -465,9 +465,9 @@ test("versions should be globally accessible regardless of version context", asy
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "cs_a", state_version_id: "global" },
-			{ id: "cs_b", state_version_id: "global" },
-			{ id: "cs_c", state_version_id: "global" },
+			{ id: "cs_a", lixcol_version_id: "global" },
+			{ id: "cs_b", lixcol_version_id: "global" },
+			{ id: "cs_c", lixcol_version_id: "global" },
 		])
 		.execute();
 
@@ -480,21 +480,21 @@ test("versions should be globally accessible regardless of version context", asy
 				name: "Version A",
 				change_set_id: "cs_a",
 				working_change_set_id: "cs_a",
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			},
 			{
 				id: "version_b",
 				name: "Version B",
 				change_set_id: "cs_b",
 				working_change_set_id: "cs_b",
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			},
 			{
 				id: "version_c",
 				name: "Version C",
 				change_set_id: "cs_c",
 				working_change_set_id: "cs_c",
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			},
 		])
 		.execute();
@@ -502,7 +502,7 @@ test("versions should be globally accessible regardless of version context", asy
 	// Query all versions globally (without version_id filtering)
 	const allVersions = await lix.db
 		.selectFrom("version")
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.orderBy("name", "asc")
 		.execute();
@@ -583,7 +583,7 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	const versionABeforeMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", versionA.id)
-		.where("state_version_id", "=", "global")
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -597,7 +597,7 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 		{
 			id: versionA.id,
 			name: "versionA",
-			state_version_id: "global",
+			lixcol_version_id: "global",
 			change_set_id: expect.any(String),
 			working_change_set_id: expect.any(String),
 		},
@@ -606,7 +606,7 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	await lix.db
 		.updateTable("version")
 		.where("id", "=", versionA.id)
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.set({
 			name: "new name",
 		})
@@ -615,21 +615,21 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	const versionsAfterMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", versionA.id)
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
 	const globalVersionAfterMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", "global")
-		.where("version.state_version_id", "=", "global")
+		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(versionsAfterMutation).toMatchObject([
 		{
 			id: versionA.id,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 			name: "new name",
 			change_set_id: expect.any(String),
 			working_change_set_id: expect.any(String),
@@ -655,10 +655,10 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "cs1", state_version_id: "global" },
-			{ id: "cs2", state_version_id: "global" },
-			{ id: "workingCs1", state_version_id: "global" },
-			{ id: "workingCs2", state_version_id: "global" },
+			{ id: "cs1", lixcol_version_id: "global" },
+			{ id: "cs2", lixcol_version_id: "global" },
+			{ id: "workingCs1", lixcol_version_id: "global" },
+			{ id: "workingCs2", lixcol_version_id: "global" },
 		])
 		.execute();
 
@@ -741,8 +741,8 @@ test("inherits_from_version_id should default to global", async () => {
 	await lix.db
 		.insertInto("change_set")
 		.values([
-			{ id: "change_set_1", state_version_id: "global" },
-			{ id: "working_change_set_1", state_version_id: "global" },
+			{ id: "change_set_1", lixcol_version_id: "global" },
+			{ id: "working_change_set_1", lixcol_version_id: "global" },
 		])
 		.execute();
 

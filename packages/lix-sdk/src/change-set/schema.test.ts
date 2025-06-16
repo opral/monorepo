@@ -900,12 +900,12 @@ describe("change_set_thread", () => {
 			{
 				change_set_id: "cs0",
 				thread_id: "t0",
-				state_version_id: expect.any(String),
+				lixcol_version_id: expect.any(String),
 			},
 			{
 				change_set_id: "cs1",
 				thread_id: "t1",
-				state_version_id: expect.any(String),
+				lixcol_version_id: expect.any(String),
 			},
 		]);
 
@@ -925,7 +925,7 @@ describe("change_set_thread", () => {
 			{
 				change_set_id: "cs1",
 				thread_id: "t1",
-				state_version_id: expect.any(String),
+				lixcol_version_id: expect.any(String),
 			},
 		]);
 

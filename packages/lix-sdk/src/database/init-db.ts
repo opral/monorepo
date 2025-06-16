@@ -85,7 +85,7 @@ export function initDb(args: {
 	for (const schema of Object.values(LixSchemaViewMap)) {
 		args.sqlite.exec(
 			`
-			INSERT INTO stored_schema (value, state_version_id)
+			INSERT INTO stored_schema (value, lixcol_version_id)
 			SELECT ?, ?
 			WHERE NOT EXISTS (
 				SELECT 1

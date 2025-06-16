@@ -20,7 +20,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 		const workingElements = await trx
 			.selectFrom("change_set_element")
 			.where("change_set_id", "=", workingChangeSetId)
-			.where("state_version_id", "=", "global")
+			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
@@ -36,7 +36,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			.values({
 				parent_id: parentChangeSetId,
 				child_id: workingChangeSetId,
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			})
 			.execute();
 
@@ -46,7 +46,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			.insertInto("change_set")
 			.values({
 				id: newWorkingChangeSetId,
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			})
 			.execute();
 
@@ -62,14 +62,14 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			.values({
 				change_set_id: workingChangeSetId,
 				label_id: checkpointLabel.id,
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			})
 			.execute();
 
 		await trx
 			.updateTable("version")
 			.where("id", "=", activeVersion.id)
-			.where("state_version_id", "=", "global")
+			.where("lixcol_version_id", "=", "global")
 			.set({
 				change_set_id: workingChangeSetId, // becomes checkpoint
 				working_change_set_id: newWorkingChangeSetId,

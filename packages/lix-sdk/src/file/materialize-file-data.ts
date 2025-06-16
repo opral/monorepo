@@ -21,7 +21,7 @@ function globSync(args: {
 
 export function materializeFileData(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: Omit<LixFile, "data" | "state_inherited_from_version_id">;
+	file: Omit<LixFile, "data" | "lixcol_inherited_from_version_id">;
 }): Uint8Array {
 	const plugins = args.lix.plugin.getAllSync();
 
@@ -49,7 +49,7 @@ export function materializeFileData(args: {
 				.selectFrom("state")
 				.where("plugin_key", "=", plugin.key)
 				.where("file_id", "=", args.file.id)
-				.where("version_id", "=", args.file.state_version_id)
+				.where("version_id", "=", args.file.lixcol_version_id)
 				.select([
 					"entity_id",
 					"schema_key",
@@ -84,7 +84,7 @@ export function materializeFileData(args: {
 			.selectFrom("state")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
 			.where("file_id", "=", args.file.id)
-			.where("version_id", "=", args.file.state_version_id)
+			.where("version_id", "=", args.file.lixcol_version_id)
 			.select([
 				"entity_id",
 				"schema_key",

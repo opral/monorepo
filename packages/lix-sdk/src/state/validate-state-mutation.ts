@@ -39,7 +39,7 @@ export function validateStateMutation(args: {
 			.selectFrom("version")
 			.select("id")
 			.where("id", "=", args.version_id)
-			.where("version.state_version_id", "=", args.version_id),
+			.where("version.lixcol_version_id", "=", args.version_id),
 	});
 
 	if (existingVersion.length === 0) {

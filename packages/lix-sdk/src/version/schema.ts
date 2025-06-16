@@ -22,8 +22,10 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
     json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
     json_extract(snapshot_content, '$.working_change_set_id') AS working_change_set_id,
     json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
-    version_id AS state_version_id,
-    inherited_from_version_id AS state_inherited_from_version_id
+    version_id AS lixcol_version_id,
+    inherited_from_version_id AS lixcol_inherited_from_version_id,
+    created_at AS lixcol_created_at,
+    updated_at AS lixcol_updated_at
   FROM state
   WHERE schema_key = 'lix_version';
   
@@ -178,8 +180,8 @@ BEGIN
   END;
 
   -- Create change sets for global version if they don't exist
-	INSERT OR IGNORE INTO change_set (id, state_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}', 'global');
-	INSERT OR IGNORE INTO change_set (id, state_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID}', 'global');
+	INSERT OR IGNORE INTO change_set (id, lixcol_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}', 'global');
+	INSERT OR IGNORE INTO change_set (id, lixcol_version_id) VALUES ('${INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID}', 'global');
 
 	-- Create global version if it doesn't exist
 	INSERT OR IGNORE INTO state (
@@ -207,7 +209,7 @@ BEGIN
 
   -- Create change set for default version if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id, state_version_id)
+  INSERT INTO change_set (id, lixcol_version_id)
   SELECT '${INITIAL_CHANGE_SET_ID}', 'global'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_CHANGE_SET_ID}');
 
@@ -215,7 +217,7 @@ BEGIN
 	sqlite.exec(`
   -- Insert the default working change set if missing
   -- (this is a workaround for not having a separate creation and migration schema's)
-  INSERT INTO change_set (id, state_version_id)
+  INSERT INTO change_set (id, lixcol_version_id)
   SELECT '${INITIAL_WORKING_CHANGE_SET_ID}', 'global'
   WHERE NOT EXISTS (SELECT 1 FROM change_set WHERE id = '${INITIAL_WORKING_CHANGE_SET_ID}');
 
@@ -325,8 +327,10 @@ export type VersionView = {
 	change_set_id: string;
 	working_change_set_id: string;
 	inherits_from_version_id: string | null;
-	state_version_id: Generated<string>;
-	state_inherited_from_version_id: Generated<string | null>;
+	lixcol_version_id: Generated<string>;
+	lixcol_inherited_from_version_id: Generated<string | null>;
+	lixcol_created_at: Generated<string>;
+	lixcol_updated_at: Generated<string>;
 };
 
 // Kysely operation types

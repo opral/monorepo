@@ -24,7 +24,7 @@ describe("file insert", () => {
 				id: nanoid(),
 				path: "/test.unknown",
 				data: new TextEncoder().encode("some content"),
-				state_version_id: version.id,
+				lixcol_version_id: version.id,
 				metadata: null,
 			},
 		});
@@ -61,7 +61,7 @@ describe("file update", () => {
 				id: fileId,
 				path: "/test.unknown",
 				data: new TextEncoder().encode("some data"),
-				state_version_id: version.id,
+				lixcol_version_id: version.id,
 				metadata: null,
 			})
 			.execute();
@@ -73,7 +73,7 @@ describe("file update", () => {
 				id: fileId,
 				path: "/test.unknown",
 				data: new TextEncoder().encode("updated data"),
-				state_version_id: version.id,
+				lixcol_version_id: version.id,
 				metadata: null,
 			},
 		});
@@ -111,7 +111,7 @@ describe("file update", () => {
 				id: fileId,
 				path: "/users.json",
 				data: new TextEncoder().encode(JSON.stringify(initialJsonData)),
-				state_version_id: version.id,
+				lixcol_version_id: version.id,
 				metadata: null,
 			},
 		});
@@ -142,7 +142,7 @@ describe("file update", () => {
 				id: fileId,
 				path: "/users.json",
 				data: new TextEncoder().encode(JSON.stringify(updatedJsonData)),
-				state_version_id: version.id,
+				lixcol_version_id: version.id,
 				metadata: null,
 			},
 		});

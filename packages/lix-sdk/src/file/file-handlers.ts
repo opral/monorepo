@@ -25,7 +25,7 @@ function globSync(args: {
 
 export function handleFileInsert(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: Omit<LixFile, "state_inherited_from_version_id">;
+	file: Omit<LixFile, "lixcol_inherited_from_version_id">;
 }): 0 | 1 {
 	// Insert the file metadata into state table
 	executeSync({
@@ -41,7 +41,7 @@ export function handleFileInsert(args: {
 				metadata: args.file.metadata || null,
 			},
 			schema_version: LixFileSchema["x-lix-version"],
-			version_id: args.file.state_version_id,
+			version_id: args.file.lixcol_version_id,
 		}),
 	});
 
@@ -100,7 +100,7 @@ export function handleFileInsert(args: {
 						plugin_key: plugin.key,
 						snapshot_content: change.snapshot_content as any,
 						schema_version: change.schema["x-lix-version"],
-						version_id: args.file.state_version_id,
+						version_id: args.file.lixcol_version_id,
 					}),
 				});
 			}
@@ -147,7 +147,7 @@ export function handleFileInsert(args: {
 							plugin_key: lixUnknownFileFallbackPlugin.key,
 							snapshot_content: change.snapshot_content as any,
 							schema_version: change.schema["x-lix-version"],
-							version_id: args.file.state_version_id,
+							version_id: args.file.lixcol_version_id,
 						}),
 					});
 				}
@@ -170,7 +170,7 @@ export function handleFileInsert(args: {
 
 export function handleFileUpdate(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: Omit<LixFile, "state_inherited_from_version_id">;
+	file: Omit<LixFile, "lixcol_inherited_from_version_id">;
 }): 0 | 1 {
 	// Update the file metadata in state table
 	executeSync({
@@ -186,7 +186,7 @@ export function handleFileUpdate(args: {
 			})
 			.where("entity_id", "=", args.file.id)
 			.where("schema_key", "=", "lix_file")
-			.where("version_id", "=", args.file.state_version_id),
+			.where("version_id", "=", args.file.lixcol_version_id),
 	});
 
 	// Get current file data for comparison
@@ -195,7 +195,7 @@ export function handleFileUpdate(args: {
 		query: args.lix.db
 			.selectFrom("file")
 			.where("id", "=", args.file.id)
-			.where("state_version_id", "=", args.file.state_version_id)
+			.where("lixcol_version_id", "=", args.file.lixcol_version_id)
 			.selectAll(),
 	})[0] as LixFile | undefined;
 
@@ -256,7 +256,7 @@ export function handleFileUpdate(args: {
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
 								.where("file_id", "=", args.file.id)
-								.where("version_id", "=", args.file.state_version_id),
+								.where("version_id", "=", args.file.lixcol_version_id),
 						});
 					} else {
 						// Handle update/insert: upsert the entity in state table
@@ -269,7 +269,7 @@ export function handleFileUpdate(args: {
 								plugin_key: plugin.key,
 								snapshot_content: change.snapshot_content as any,
 								schema_version: change.schema["x-lix-version"],
-								version_id: args.file.state_version_id,
+								version_id: args.file.lixcol_version_id,
 							}),
 						});
 					}
@@ -318,7 +318,7 @@ export function handleFileUpdate(args: {
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
 									.where("file_id", "=", args.file.id)
-									.where("version_id", "=", args.file.state_version_id),
+									.where("version_id", "=", args.file.lixcol_version_id),
 							});
 						} else {
 							// Handle update/insert: upsert the entity in state table
@@ -331,7 +331,7 @@ export function handleFileUpdate(args: {
 									plugin_key: lixUnknownFileFallbackPlugin.key,
 									snapshot_content: change.snapshot_content as any,
 									schema_version: change.schema["x-lix-version"],
-									version_id: args.file.state_version_id,
+									version_id: args.file.lixcol_version_id,
 								}),
 							});
 						}
