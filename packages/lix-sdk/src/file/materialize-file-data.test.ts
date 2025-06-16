@@ -62,7 +62,7 @@ test("materializeFileData with plugin that has changes", async () => {
 		file: {
 			id: file.id,
 			path: file.path,
-			version_id: file.version_id,
+			state_version_id: file.state_version_id,
 			metadata: file.metadata,
 		},
 	});
@@ -90,7 +90,7 @@ test("materializeFileData throws when plugin has no applyChanges", async () => {
 			id: "test-file-no-apply",
 			data: new TextEncoder().encode("initial-data"),
 			path: "/test.txt",
-			version_id: (
+			state_version_id: (
 				await lix.db
 					.selectFrom("active_version")
 					.select("version_id")

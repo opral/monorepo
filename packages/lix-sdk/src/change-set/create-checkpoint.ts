@@ -69,7 +69,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 		await trx
 			.updateTable("version")
 			.where("id", "=", activeVersion.id)
-			.where("version_id", "=", "global")
+			.where("state_version_id", "=", "global")
 			.set({
 				change_set_id: workingChangeSetId, // becomes checkpoint
 				working_change_set_id: newWorkingChangeSetId,

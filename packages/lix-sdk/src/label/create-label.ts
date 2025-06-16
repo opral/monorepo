@@ -6,7 +6,7 @@ export async function createLabel(args: {
 	lix: Pick<Lix, "db">;
 	id?: Label["id"];
 	name: Label["name"];
-	version_id?: Label["version_id"];
+	state_version_id?: Label["state_version_id"];
 }): Promise<Label> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
@@ -18,7 +18,7 @@ export async function createLabel(args: {
 			.values({
 				id: labelId,
 				name: args.name,
-				version_id: args.version_id,
+				state_version_id: args.state_version_id,
 			})
 			.execute();
 

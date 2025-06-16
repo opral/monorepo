@@ -48,7 +48,7 @@ export async function createVersion(args: {
 			.selectFrom("version")
 			.selectAll()
 			.where("id", "=", versionId)
-			.where("version.version_id", "=", "global")
+			.where("version.state_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
 		return newVersion;

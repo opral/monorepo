@@ -22,8 +22,8 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
     json_extract(snapshot_content, '$.change_set_id') AS change_set_id,
     json_extract(snapshot_content, '$.working_change_set_id') AS working_change_set_id,
     json_extract(snapshot_content, '$.inherits_from_version_id') AS inherits_from_version_id,
-    version_id,
-    inherited_from_version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
   FROM state
   WHERE schema_key = 'lix_version';
   
@@ -325,7 +325,8 @@ export type VersionView = {
 	change_set_id: string;
 	working_change_set_id: string;
 	inherits_from_version_id: string | null;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: Generated<string | null>;
 };
 
 // Kysely operation types

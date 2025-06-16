@@ -1994,7 +1994,7 @@ test("should prevent foreign key references to inherited entities from different
 		.values({
 			id: "global_thread",
 			metadata: { title: "Global Thread" },
-			version_id: "global",
+			state_version_id: "global",
 		})
 		.execute();
 

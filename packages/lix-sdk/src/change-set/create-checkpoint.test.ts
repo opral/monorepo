@@ -269,7 +269,7 @@ test("debug working change set elements after insertion", async () => {
 		.selectFrom("active_version")
 		.innerJoin("version", "version.id", "active_version.version_id")
 		.selectAll("version")
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.executeTakeFirstOrThrow();
 
 	const mainVersion = await lix.db
@@ -373,7 +373,7 @@ test(
 			.selectFrom("active_version")
 			.innerJoin("version", "version.id", "active_version.version_id")
 			.selectAll("version")
-			.where("version.version_id", "=", "global")
+			.where("version.state_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
 		console.log("Active version:", activeVersion);
@@ -390,7 +390,7 @@ test(
 		const versionAfterInsertion = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("version_id", "=", "global")
+			.where("state_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
@@ -402,7 +402,7 @@ test(
 		const versionAfterCheckpoint = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("version_id", "=", "global")
+			.where("state_version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -452,13 +452,13 @@ test(
 		await lix.db
 			.deleteFrom("key_value")
 			.where("key", "=", "test-key")
-			.where("version_id", "=", activeVersion.id)
+			.where("state_version_id", "=", activeVersion.id)
 			.execute();
 
 		const activeVersionAfterDeletion = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("version_id", "=", "global")
+			.where("state_version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -532,7 +532,9 @@ test(
 				id: "file-to-delete",
 				data: new TextEncoder().encode(JSON.stringify({ test: "delete-me" })),
 				path: "/delete-test.json",
-				version_id: lix.db.selectFrom("active_version").select("version_id"),
+				state_version_id: lix.db
+					.selectFrom("active_version")
+					.select("version_id"),
 			})
 			.execute();
 
@@ -546,7 +548,7 @@ test(
 			})
 			.where("id", "=", "file-to-delete")
 			.where(
-				"version_id",
+				"state_version_id",
 				"=",
 				lix.db.selectFrom("active_version").select("version_id")
 			)
@@ -559,7 +561,7 @@ test(
 			.deleteFrom("file")
 			.where("id", "=", "file-to-delete")
 			.where(
-				"version_id",
+				"state_version_id",
 				"=",
 				lix.db.selectFrom("active_version").select("version_id")
 			)

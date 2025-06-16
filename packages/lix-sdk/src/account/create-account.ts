@@ -6,7 +6,7 @@ export async function createAccount(args: {
 	lix: Pick<Lix, "db">;
 	id?: Account["id"];
 	name: Account["name"];
-	version_id?: Account["version_id"];
+	state_version_id?: Account["state_version_id"];
 }): Promise<Account> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
@@ -18,7 +18,7 @@ export async function createAccount(args: {
 			.values({
 				id: accountId,
 				name: args.name,
-				version_id: args.version_id,
+				state_version_id: args.state_version_id,
 			})
 			.execute();
 

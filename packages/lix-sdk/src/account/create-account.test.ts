@@ -15,13 +15,13 @@ test("should create an account", async () => {
 	const account = await createAccount({ 
 		lix, 
 		name: accountName,
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 
 	// Verify the account was created
 	expect(account).toMatchObject({
 		name: accountName,
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 
 	// Verify the account exists in the database
@@ -33,6 +33,6 @@ test("should create an account", async () => {
 
 	expect(dbAccount).toMatchObject({
 		name: accountName,
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 });

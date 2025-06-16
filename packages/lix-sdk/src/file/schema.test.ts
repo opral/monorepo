@@ -25,7 +25,7 @@ test("insert, update, delete on the file view", async () => {
 						prop0: "file0-value0",
 					})
 				),
-				version_id: version0.id,
+				state_version_id: version0.id,
 			},
 		])
 		.execute();
@@ -40,7 +40,8 @@ test("insert, update, delete on the file view", async () => {
 		{
 			id: "file0",
 			path: "/path/to/file.json",
-			version_id: "version0",
+			state_version_id: "version0",
+			state_inherited_from_version_id: null,
 			data: { prop0: "file0-value0" },
 			metadata: null,
 		},
@@ -49,7 +50,7 @@ test("insert, update, delete on the file view", async () => {
 	await lix.db
 		.updateTable("file")
 		.where("id", "=", "file0")
-		.where("version_id", "=", "version0")
+		.where("state_version_id", "=", "version0")
 		.set({
 			path: "/path/to/renamed_file.json",
 			data: new TextEncoder().encode(JSON.stringify({ prop0: "file0-value1" })),
@@ -71,7 +72,8 @@ test("insert, update, delete on the file view", async () => {
 		{
 			id: "file0",
 			path: "/path/to/renamed_file.json",
-			version_id: "version0",
+			state_version_id: "version0",
+			state_inherited_from_version_id: null,
 			data: { prop0: "file0-value1" },
 			metadata: null,
 		},
@@ -80,13 +82,13 @@ test("insert, update, delete on the file view", async () => {
 	await lix.db
 		.deleteFrom("file")
 		.where("id", "=", "file0")
-		.where("version_id", "=", "version0")
+		.where("state_version_id", "=", "version0")
 		.execute();
 
 	const viewAfterDelete = await lix.db
 		.selectFrom("file")
 		.orderBy("id")
-		.select(["id", "path", "version_id"])
+		.select(["id", "path", "state_version_id"])
 		.execute();
 
 	expect(viewAfterDelete).toEqual([]);
@@ -169,7 +171,7 @@ test("file insert data materialization", async () => {
 					prop0: "file0-value0",
 				})
 			),
-			version_id: version0.id,
+			state_version_id: version0.id,
 		})
 		.execute();
 
@@ -183,7 +185,8 @@ test("file insert data materialization", async () => {
 		{
 			id: "file0",
 			path: "/path/to/file.json",
-			version_id: "version0",
+			state_version_id: "version0",
+			state_inherited_from_version_id: null,
 			data: { prop0: "file0-value0" },
 			metadata: null,
 		},
@@ -205,14 +208,14 @@ test("file ids should have a default", async () => {
 		.values({
 			path: "/mock.json",
 			data: new Uint8Array(),
-			version_id: version0.id,
+			state_version_id: version0.id,
 		})
 		.execute();
 
 	const file = await lix.db
 		.selectFrom("file")
 		.where("path", "=", "/mock.json")
-		.where("version_id", "=", version0.id)
+		.where("state_version_id", "=", version0.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -237,14 +240,14 @@ test("files should be able to have metadata", async () => {
 			metadata: {
 				primary_key: "email",
 			},
-			version_id: version0.id,
+			state_version_id: version0.id,
 		})
 		.execute();
 
 	const file = await lix.db
 		.selectFrom("file")
 		.where("path", "=", "/mock.json")
-		.where("version_id", "=", version0.id)
+		.where("state_version_id", "=", version0.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -253,7 +256,7 @@ test("files should be able to have metadata", async () => {
 	const updatedFile = await lix.db
 		.updateTable("file")
 		.where("path", "=", "/mock.json")
-		.where("version_id", "=", version0.id)
+		.where("state_version_id", "=", version0.id)
 		.set({
 			metadata: {
 				primary_key: "something-else",
@@ -281,7 +284,7 @@ test("invalid file paths should be rejected", async () => {
 			.values({
 				path: "invalid-path",
 				data: new Uint8Array(),
-				version_id: version0.id,
+				state_version_id: version0.id,
 			})
 			.execute()
 	).rejects.toThrowError("path must match pattern");
@@ -309,7 +312,7 @@ test("file operations are version specific and isolated", async () => {
 			id: "fileA",
 			path: "/shared/file.json",
 			data: new TextEncoder().encode(JSON.stringify({ content: "versionA" })),
-			version_id: versionA.id,
+			state_version_id: versionA.id,
 		})
 		.execute();
 
@@ -320,20 +323,20 @@ test("file operations are version specific and isolated", async () => {
 			id: "fileB",
 			path: "/shared/file.json",
 			data: new TextEncoder().encode(JSON.stringify({ content: "versionB" })),
-			version_id: versionB.id,
+			state_version_id: versionB.id,
 		})
 		.execute();
 
 	// Verify both versions have their own files
 	const filesInVersionA = await lix.db
 		.selectFrom("file")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const filesInVersionB = await lix.db
 		.selectFrom("file")
-		.where("version_id", "=", versionB.id)
+		.where("state_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 
@@ -350,7 +353,7 @@ test("file operations are version specific and isolated", async () => {
 	await lix.db
 		.updateTable("file")
 		.where("id", "=", "fileA")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.set({
 			data: new TextEncoder().encode(
 				JSON.stringify({ content: "versionA-updated" })
@@ -361,13 +364,13 @@ test("file operations are version specific and isolated", async () => {
 	// Verify update only affected version A
 	const updatedFilesA = await lix.db
 		.selectFrom("file")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const unchangedFilesB = await lix.db
 		.selectFrom("file")
-		.where("version_id", "=", versionB.id)
+		.where("state_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 
@@ -382,19 +385,19 @@ test("file operations are version specific and isolated", async () => {
 	await lix.db
 		.deleteFrom("file")
 		.where("id", "=", "fileA")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.execute();
 
 	// Verify deletion only affected version A
 	const remainingFilesA = await lix.db
 		.selectFrom("file")
-		.where("version_id", "=", versionA.id)
+		.where("state_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const remainingFilesB = await lix.db
 		.selectFrom("file")
-		.where("version_id", "=", versionB.id)
+		.where("state_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 

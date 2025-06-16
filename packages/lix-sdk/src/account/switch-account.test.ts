@@ -16,12 +16,12 @@ test("should switch the current account", async () => {
 	const account1 = await createAccount({ 
 		lix, 
 		name: "account1",
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 	const account2 = await createAccount({ 
 		lix, 
 		name: "account2",
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 
 	// Switch to account1
@@ -59,7 +59,7 @@ test("should handle switching to the same account", async () => {
 	const account = await createAccount({ 
 		lix, 
 		name: "account",
-		version_id: version.id,
+		state_version_id: version.id,
 	});
 
 	// Switch to the account

@@ -16,7 +16,9 @@ test("creates a new change set and updates the version's change set id for mutat
 		.values({
 			key: "mock_key",
 			value: "mock_value",
-			version_id: lix.db.selectFrom("active_version").select("version_id"),
+			state_version_id: lix.db
+				.selectFrom("active_version")
+				.select("version_id"),
 		})
 		.execute();
 
@@ -34,7 +36,7 @@ test("creates a new change set and updates the version's change set id for mutat
 		.updateTable("key_value")
 		.where("key", "=", "mock_key")
 		.where(
-			"version_id",
+			"state_version_id",
 			"=",
 			lix.db.selectFrom("active_version").select("version_id")
 		)
@@ -323,7 +325,7 @@ test("inserts working change set elements", async () => {
 		.values({
 			key: "test_key",
 			value: "test_value",
-			version_id: activeVersion.id,
+			state_version_id: activeVersion.id,
 		})
 		.execute();
 
@@ -372,7 +374,7 @@ test("updates working change set elements on entity updates (latest change wins)
 		.values({
 			key: "test_key",
 			value: "test_value",
-			version_id: activeVersion.id,
+			state_version_id: activeVersion.id,
 		})
 		.execute();
 
@@ -440,7 +442,7 @@ test("mutation handler removes working change set elements on entity deletion", 
 		.values({
 			key: "test_key",
 			value: "test_value",
-			version_id: activeVersion.id,
+			state_version_id: activeVersion.id,
 		})
 		.execute();
 
@@ -520,7 +522,7 @@ test(
 			.values({
 				key: "post_checkpoint_key",
 				value: "post_checkpoint_value",
-				version_id: activeVersion.id,
+				state_version_id: activeVersion.id,
 			})
 			.execute();
 
@@ -663,7 +665,7 @@ test("working change set elements are separated per version", async () => {
 		.values({
 			key: "main_version_key",
 			value: "main_version_value",
-			version_id: mainVersion.id,
+			state_version_id: mainVersion.id,
 		})
 		.execute();
 
@@ -683,7 +685,7 @@ test("working change set elements are separated per version", async () => {
 			name: "new_version",
 			change_set_id: "new_cs",
 			working_change_set_id: "new_working_cs",
-			version_id: "global",
+			state_version_id: "global",
 			inherits_from_version_id: "global",
 		})
 		.execute();
@@ -699,7 +701,7 @@ test("working change set elements are separated per version", async () => {
 		.values({
 			key: "new_version_key",
 			value: "new_version_value",
-			version_id: "new_version",
+			state_version_id: "new_version",
 		})
 		.execute();
 

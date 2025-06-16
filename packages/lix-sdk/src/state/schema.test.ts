@@ -655,7 +655,7 @@ test("state diverges when versions have common ancestor but different changes", 
 	const versions = await lix.db
 		.selectFrom("version")
 		.where("id", "in", ["base_version", "version_a", "version_b"])
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.select(["id", "change_set_id"])
 		.execute();
 

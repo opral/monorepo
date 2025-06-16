@@ -103,7 +103,7 @@ test("creating a change set with labels should associate the labels with the cha
 		.insertInto("label")
 		.values({
 			name: "test-label",
-			version_id: activeVersion.version_id,
+			state_version_id: activeVersion.version_id,
 		})
 		.execute();
 
@@ -111,7 +111,7 @@ test("creating a change set with labels should associate the labels with the cha
 		.selectFrom("label")
 		.selectAll()
 		.where("name", "=", "test-label")
-		.where("version_id", "=", activeVersion.version_id)
+		.where("state_version_id", "=", activeVersion.version_id)
 		.executeTakeFirstOrThrow();
 
 	// Create a change set with labels in the same version context
@@ -131,7 +131,7 @@ test("creating a change set with labels should associate the labels with the cha
 		.innerJoin("label", "label.id", "change_set_label.label_id")
 		.selectAll()
 		.where("change_set_id", "=", changeSet.id)
-		.where("label.version_id", "=", activeVersion.version_id)
+		.where("label.state_version_id", "=", activeVersion.version_id)
 		.execute();
 
 	// Verify both labels are associated with the change set

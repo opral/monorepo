@@ -25,7 +25,7 @@ test("selecting from the version view", async () => {
 				change_set_id: "change_set_id_0",
 				working_change_set_id: "working_cs_0",
 				inherits_from_version_id: null,
-				version_id: "global",
+				state_version_id: "global",
 			},
 			{
 				id: "version1",
@@ -33,7 +33,7 @@ test("selecting from the version view", async () => {
 				change_set_id: "change_set_id_1",
 				working_change_set_id: "working_cs_1",
 				inherits_from_version_id: null,
-				version_id: "global",
+				state_version_id: "global",
 			},
 		])
 		.execute();
@@ -41,7 +41,7 @@ test("selecting from the version view", async () => {
 	const versions = await lix.db
 		.selectFrom("version")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -57,7 +57,7 @@ test("selecting from the version view", async () => {
 			change_set_id: "change_set_id_0",
 			working_change_set_id: "working_cs_0",
 			inherits_from_version_id: null,
-			version_id: "global",
+			state_version_id: "global",
 		},
 		{
 			id: "version1",
@@ -65,7 +65,7 @@ test("selecting from the version view", async () => {
 			change_set_id: "change_set_id_1",
 			working_change_set_id: "working_cs_1",
 			inherits_from_version_id: null,
-			version_id: "global",
+			state_version_id: "global",
 		},
 	]);
 });
@@ -106,7 +106,7 @@ test("insert, update, delete on the version view", async () => {
 		.selectFrom("version")
 		.orderBy("name", "asc")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -124,7 +124,7 @@ test("insert, update, delete on the version view", async () => {
 	await lix.db
 		.updateTable("version")
 		.where("name", "=", "version0")
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.set({ change_set_id: "change_set_id_1" })
 		.execute();
 
@@ -132,7 +132,7 @@ test("insert, update, delete on the version view", async () => {
 		.selectFrom("version")
 		.orderBy("name", "asc")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -163,8 +163,7 @@ test("insert, update, delete on the version view", async () => {
 			change_set_id: "change_set_id_1",
 			working_change_set_id: "working_cs_1",
 			inherits_from_version_id: null,
-			version_id: "global",
-			inherited_from_version_id: null,
+			state_version_id: "global",
 		},
 		{
 			id: "version1",
@@ -172,8 +171,8 @@ test("insert, update, delete on the version view", async () => {
 			change_set_id: "change_set_id_1",
 			working_change_set_id: "working_cs_1",
 			inherits_from_version_id: null,
-			version_id: "BoIaHTW9ePX6pNc8",
-			inherited_from_version_id: "global",
+			state_version_id: "BoIaHTW9ePX6pNc8",
+			state_inherited_from_version_id: "global",
 		},
 	]);
 
@@ -243,7 +242,7 @@ test("querying by id", async () => {
 	const versions = await lix.db
 		.selectFrom("version")
 		.where("id", "=", "version0")
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.select("id")
 		.execute();
 
@@ -267,7 +266,7 @@ test("update active version view", async () => {
 			name: "test_version",
 			change_set_id: "cs1",
 			working_change_set_id: "cs1",
-			version_id: "global",
+			state_version_id: "global",
 		})
 		.execute();
 
@@ -481,21 +480,21 @@ test("versions should be globally accessible regardless of version context", asy
 				name: "Version A",
 				change_set_id: "cs_a",
 				working_change_set_id: "cs_a",
-				version_id: "global",
+				state_version_id: "global",
 			},
 			{
 				id: "version_b",
 				name: "Version B",
 				change_set_id: "cs_b",
 				working_change_set_id: "cs_b",
-				version_id: "global",
+				state_version_id: "global",
 			},
 			{
 				id: "version_c",
 				name: "Version C",
 				change_set_id: "cs_c",
 				working_change_set_id: "cs_c",
-				version_id: "global",
+				state_version_id: "global",
 			},
 		])
 		.execute();
@@ -503,7 +502,7 @@ test("versions should be globally accessible regardless of version context", asy
 	// Query all versions globally (without version_id filtering)
 	const allVersions = await lix.db
 		.selectFrom("version")
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.selectAll()
 		.orderBy("name", "asc")
 		.execute();
@@ -584,7 +583,7 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	const versionABeforeMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", versionA.id)
-		.where("version_id", "=", "global")
+		.where("state_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -598,7 +597,7 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 		{
 			id: versionA.id,
 			name: "versionA",
-			version_id: "global",
+			state_version_id: "global",
 			change_set_id: expect.any(String),
 			working_change_set_id: expect.any(String),
 		},
@@ -607,7 +606,7 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	await lix.db
 		.updateTable("version")
 		.where("id", "=", versionA.id)
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.set({
 			name: "new name",
 		})
@@ -616,21 +615,21 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	const versionsAfterMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", versionA.id)
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
 	const globalVersionAfterMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", "global")
-		.where("version.version_id", "=", "global")
+		.where("version.state_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(versionsAfterMutation).toMatchObject([
 		{
 			id: versionA.id,
-			version_id: "global",
+			state_version_id: "global",
 			name: "new name",
 			change_set_id: expect.any(String),
 			working_change_set_id: expect.any(String),

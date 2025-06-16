@@ -17,7 +17,7 @@ test("it creates an undo change set that reverses the operations of the original
 		.insertInto("stored_schema")
 		.values({
 			value: MockJsonPropertySchema,
-			version_id: "global",
+			state_version_id: "global",
 		})
 		.execute();
 
@@ -154,7 +154,7 @@ test("it correctly undoes delete operations by restoring previous state", async 
 		.insertInto("stored_schema")
 		.values({
 			value: MockJsonPropertySchema,
-			version_id: "global",
+			state_version_id: "global",
 		})
 		.execute();
 

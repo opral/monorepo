@@ -94,7 +94,7 @@ test.todo("view should show changes across versions", async () => {
 		.values({
 			key: "foo",
 			value: "bar",
-			version_id: versionA.id,
+			state_version_id: versionA.id,
 		})
 		.execute();
 
@@ -108,7 +108,7 @@ test.todo("view should show changes across versions", async () => {
 		{
 			key: "foo",
 			value: "bar",
-			version_id: versionA.id,
+			state_version_id: versionA.id,
 		},
 	]);
 
@@ -136,7 +136,7 @@ test.todo("view should show changes across versions", async () => {
 		{
 			key: "foo",
 			value: "bar",
-			version_id: versionA.id,
+			state_version_id: versionA.id,
 		},
 		{
 			key: "foo",
@@ -148,7 +148,7 @@ test.todo("view should show changes across versions", async () => {
 	await lix.db
 		.updateTable("key_value")
 		.where("key", "=", "foo")
-		.where("version_id", "=", versionB.id)
+		.where("state_version_id", "=", versionB.id)
 		.set({ value: "bar_updated" })
 		.execute();
 
@@ -162,7 +162,7 @@ test.todo("view should show changes across versions", async () => {
 		{
 			key: "foo",
 			value: "bar",
-			version_id: versionA.id,
+			state_version_id: versionA.id,
 		},
 		{
 			key: "foo",

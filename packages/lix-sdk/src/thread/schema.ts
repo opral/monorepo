@@ -11,7 +11,8 @@ export function applyThreadDatabaseSchema(
 	SELECT
 		json_extract(snapshot_content, '$.id') AS id,
     json_extract(snapshot_content, '$.metadata') AS metadata,
-    version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
 	FROM state
 	WHERE schema_key = 'lix_thread';
 
@@ -34,7 +35,7 @@ export function applyThreadDatabaseSchema(
       'lix_own_entity',
       json_object('id', with_default_values.id, 'metadata', with_default_values.metadata),
       '${LixThreadSchema["x-lix-version"]}',
-      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT
         COALESCE(NEW.id, nano_id()) AS id,
@@ -52,7 +53,7 @@ export function applyThreadDatabaseSchema(
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
       snapshot_content = json_object('id', NEW.id, 'metadata', NEW.metadata),
-      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      version_id = COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_thread'
@@ -77,7 +78,8 @@ export function applyThreadDatabaseSchema(
     json_extract(snapshot_content, '$.parent_id') AS parent_id,
     json_extract(snapshot_content, '$.body') AS body,
     datetime(state.created_at) || 'Z' AS created_at,
-    version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
 	FROM state
 	WHERE schema_key = 'lix_thread_comment';
 
@@ -100,7 +102,7 @@ export function applyThreadDatabaseSchema(
       'lix_own_entity',
       json_object('id', with_default_values.id, 'thread_id', with_default_values.thread_id, 'parent_id', with_default_values.parent_id, 'body', with_default_values.body),
       '${LixThreadCommentSchema["x-lix-version"]}',
-      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     FROM (
       SELECT
         COALESCE(NEW.id, nano_id()) AS id,
@@ -120,7 +122,7 @@ export function applyThreadDatabaseSchema(
       file_id = 'lix',
       plugin_key = 'lix_own_entity',
       snapshot_content = json_object('id', NEW.id, 'thread_id', NEW.thread_id, 'parent_id', NEW.parent_id, 'body', NEW.body),
-      version_id = COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      version_id = COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     WHERE
       entity_id = OLD.id
       AND schema_key = 'lix_thread_comment'
@@ -186,7 +188,8 @@ export type LixThreadComment = FromLixSchemaDefinition<typeof LixThreadCommentSc
 export type ThreadView = {
 	id: Generated<string>;
 	metadata: Record<string, any> | null;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: Generated<string | null>;
 };
 
 export type ThreadCommentView = {
@@ -195,7 +198,8 @@ export type ThreadCommentView = {
 	parent_id: string | null;
 	body: ZettelDoc;
 	created_at: Generated<string>;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: Generated<string | null>;
 };
 
 // Kysely operation types

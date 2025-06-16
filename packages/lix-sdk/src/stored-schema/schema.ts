@@ -15,7 +15,8 @@ export function applyStoredSchemaDatabaseSchema(
     json_extract(snapshot_content, '$.value.x-lix-key') AS key,
     json_extract(snapshot_content, '$.value.x-lix-version') AS version,
     json_extract(snapshot_content, '$.value') AS value,
-    version_id
+    version_id AS state_version_id,
+    inherited_from_version_id AS state_inherited_from_version_id
   FROM state
   WHERE schema_key = 'lix_stored_schema';
 
@@ -55,7 +56,7 @@ export function applyStoredSchemaDatabaseSchema(
         'value', json(NEW.value)
       ),
       '${LixStoredSchemaSchema["x-lix-version"]}',
-      COALESCE(NEW.version_id, (SELECT version_id FROM active_version))
+      COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
     );
   END;
 
@@ -91,7 +92,8 @@ export type LixStoredSchema = FromLixSchemaDefinition<typeof LixStoredSchemaSche
 export type StoredSchemaView = {
 	key: Generated<string>;
 	version: Generated<string>;
-	version_id: Generated<string>;
+	state_version_id: Generated<string>;
+	state_inherited_from_version_id: Generated<string | null>;
 	value: LixSchemaDefinition;
 };
 

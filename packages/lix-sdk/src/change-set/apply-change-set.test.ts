@@ -346,7 +346,7 @@ test.skip("it should delete entities but not files when applying entity deletion
 		.insertInto("stored_schema")
 		.values({
 			value: MockJsonPropertySchema,
-			version_id: "global",
+			state_version_id: "global",
 		})
 		.execute();
 
