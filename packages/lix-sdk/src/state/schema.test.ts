@@ -1499,6 +1499,7 @@ describe.each([
 	}
 );
 
+// TODO flaky test (ordering of deletions)
 test("deleting without filtering for the version_id deletes the entity from all versions", async () => {
 	const lix = await openLixInMemory({});
 
