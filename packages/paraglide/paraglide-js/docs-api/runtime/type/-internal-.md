@@ -486,7 +486,7 @@ Defined in: [runtime/extract-locale-from-navigator.js:12](https://github.com/opr
 
 > **extractLocaleFromRequest**(`request`): `any`
 
-Defined in: [runtime/extract-locale-from-request.js:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
+Defined in: [runtime/extract-locale-from-request.js:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
 
 Extracts a locale from a request.
 
@@ -496,6 +496,8 @@ from a request.
 The function goes through the strategies in the order
 they are defined. If a strategy returns an invalid locale,
 it will fall back to the next strategy.
+
+TODO: make this async in next major release and deprecate `extractLocaleFromRequest`
 
 ### Parameters
 
