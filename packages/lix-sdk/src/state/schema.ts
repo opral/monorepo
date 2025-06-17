@@ -126,9 +126,31 @@ export function applyStateDatabaseSchema(
 				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
 				// using the same id for snapshot_id in internal_change as in internal_snapshot.
 				const rows = sqlite.exec({
-					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_content, created_at FROM internal_change_in_transaction",
+					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, version_id, snapshot_content, created_at FROM internal_change_in_transaction ORDER BY version_id",
 					returnValue: "resultRows",
 				});
+
+				// Group changes by version_id
+				const changesByVersion = new Map<string, any[]>();
+				for (const row of rows) {
+					const version_id = row[6] as string;
+					if (!changesByVersion.has(version_id)) {
+						changesByVersion.set(version_id, []);
+					}
+					changesByVersion.get(version_id)!.push(row);
+				}
+
+				// Process each version's changes to create changesets
+				for (const [version_id, versionChanges] of changesByVersion) {
+					// Create changeset and edges for this version's transaction
+					// const changesetChanges = createChangesetForTransaction(
+					// 	sqlite,
+					// 	db as any,
+					// 	version_id,
+					// 	versionChanges
+					// );
+					// rows.push(...(changesetChanges || []));
+				}
 
 				for (const row of rows) {
 					const [
@@ -138,6 +160,7 @@ export function applyStateDatabaseSchema(
 						schema_version,
 						file_id,
 						plugin_key,
+						version_id,
 						snapshot_content,
 						created_at,
 					] = row;
