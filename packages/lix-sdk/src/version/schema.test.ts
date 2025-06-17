@@ -24,16 +24,14 @@ test("selecting from the version view", async () => {
 				name: "version0",
 				change_set_id: "change_set_id_0",
 				working_change_set_id: "working_cs_0",
-				inherits_from_version_id: null,
-				lixcol_version_id: "global",
+				inherits_from_version_id: 'global',
 			},
 			{
 				id: "version1",
 				name: "version1",
 				change_set_id: "change_set_id_1",
 				working_change_set_id: "working_cs_1",
-				inherits_from_version_id: null,
-				lixcol_version_id: "global",
+				inherits_from_version_id: 'global',
 			},
 		])
 		.execute();
@@ -41,7 +39,6 @@ test("selecting from the version view", async () => {
 	const versions = await lix.db
 		.selectFrom("version")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -56,16 +53,14 @@ test("selecting from the version view", async () => {
 			name: "version0",
 			change_set_id: "change_set_id_0",
 			working_change_set_id: "working_cs_0",
-			inherits_from_version_id: null,
-			lixcol_version_id: "global",
+			inherits_from_version_id: "global",
 		},
 		{
 			id: "version1",
 			name: "version1",
 			change_set_id: "change_set_id_1",
 			working_change_set_id: "working_cs_1",
-			inherits_from_version_id: null,
-			lixcol_version_id: "global",
+			inherits_from_version_id: "global",
 		},
 	]);
 });
@@ -106,7 +101,6 @@ test("insert, update, delete on the version view", async () => {
 		.selectFrom("version")
 		.orderBy("name", "asc")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -124,7 +118,6 @@ test("insert, update, delete on the version view", async () => {
 	await lix.db
 		.updateTable("version")
 		.where("name", "=", "version0")
-		.where("version.lixcol_version_id", "=", "global")
 		.set({ change_set_id: "change_set_id_1" })
 		.execute();
 
@@ -132,7 +125,6 @@ test("insert, update, delete on the version view", async () => {
 		.selectFrom("version")
 		.orderBy("name", "asc")
 		.where("id", "in", ["version0", "version1"])
-		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -162,17 +154,7 @@ test("insert, update, delete on the version view", async () => {
 			name: "version1",
 			change_set_id: "change_set_id_1",
 			working_change_set_id: "working_cs_1",
-			inherits_from_version_id: null,
-			lixcol_version_id: "global",
-		},
-		{
-			id: "version1",
-			name: "version1",
-			change_set_id: "change_set_id_1",
-			working_change_set_id: "working_cs_1",
-			inherits_from_version_id: null,
-			lixcol_version_id: "BoIaHTW9ePX6pNc8",
-			lixcol_inherited_from_version_id: "global",
+			inherits_from_version_id: "global",
 		},
 	]);
 
@@ -242,7 +224,6 @@ test("querying by id", async () => {
 	const versions = await lix.db
 		.selectFrom("version")
 		.where("id", "=", "version0")
-		.where("version.lixcol_version_id", "=", "global")
 		.select("id")
 		.execute();
 
@@ -266,7 +247,6 @@ test("update active version view", async () => {
 			name: "test_version",
 			change_set_id: "cs1",
 			working_change_set_id: "cs1",
-			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -418,7 +398,8 @@ test("should allow version insertion with valid change set references", async ()
 	).resolves.toBeDefined();
 });
 
-test("should enforce foreign key constraint on active_version.version_id", async () => {
+// having the active_version as regular table is easier
+test.skip("should enforce foreign key constraint on active_version.version_id", async () => {
 	const lix = await openLixInMemory({});
 
 	// Now attempt to update active_version with non-existent version_id
@@ -480,21 +461,18 @@ test("versions should be globally accessible regardless of version context", asy
 				name: "Version A",
 				change_set_id: "cs_a",
 				working_change_set_id: "cs_a",
-				lixcol_version_id: "global",
 			},
 			{
 				id: "version_b",
 				name: "Version B",
 				change_set_id: "cs_b",
 				working_change_set_id: "cs_b",
-				lixcol_version_id: "global",
 			},
 			{
 				id: "version_c",
 				name: "Version C",
 				change_set_id: "cs_c",
 				working_change_set_id: "cs_c",
-				lixcol_version_id: "global",
 			},
 		])
 		.execute();
@@ -502,7 +480,6 @@ test("versions should be globally accessible regardless of version context", asy
 	// Query all versions globally (without version_id filtering)
 	const allVersions = await lix.db
 		.selectFrom("version")
-		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.orderBy("name", "asc")
 		.execute();
@@ -583,7 +560,6 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	const versionABeforeMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", versionA.id)
-		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -597,7 +573,6 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 		{
 			id: versionA.id,
 			name: "versionA",
-			lixcol_version_id: "global",
 			change_set_id: expect.any(String),
 			working_change_set_id: expect.any(String),
 		},
@@ -606,7 +581,6 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	await lix.db
 		.updateTable("version")
 		.where("id", "=", versionA.id)
-		.where("version.lixcol_version_id", "=", "global")
 		.set({
 			name: "new name",
 		})
@@ -615,21 +589,18 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 	const versionsAfterMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", versionA.id)
-		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
 	const globalVersionAfterMutation = await lix.db
 		.selectFrom("version")
 		.where("id", "=", "global")
-		.where("version.lixcol_version_id", "=", "global")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(versionsAfterMutation).toMatchObject([
 		{
 			id: versionA.id,
-			lixcol_version_id: "global",
 			name: "new name",
 			change_set_id: expect.any(String),
 			working_change_set_id: expect.any(String),

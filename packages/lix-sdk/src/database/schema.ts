@@ -16,10 +16,10 @@ import {
 	type ChangeSetThreadAllView,
 } from "../change-set/schema.js";
 import {
-	LixActiveVersionSchema,
 	LixVersionSchema,
-	type ActiveVersionView,
+	type ActiveVersionTable,
 	type VersionView,
+	type VersionAllView,
 } from "../version/schema.js";
 import {
 	LixSnapshotSchema,
@@ -75,7 +75,6 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
-	active_version: LixActiveVersionSchema,
 	version: LixVersionSchema,
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
@@ -146,7 +145,8 @@ export type LixDatabaseSchema = {
 
 	// version
 	version: VersionView;
-	active_version: ActiveVersionView;
+	version_all: VersionAllView;
+	active_version: ActiveVersionTable;
 
 	// logging
 	log: LogView;

@@ -140,6 +140,8 @@ export function createEntityViewsIfNotExists(args: {
 	pluginKey: string;
 	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
 	hardcodedFileId?: string;
+	/** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
+	hardcodedVersionId?: string;
 	/** Object mapping property names to functions that generate default values */
 	defaultValues?: Record<string, (() => string) | ((row: Record<string, any>) => string)>;
 	/** Custom validation logic for entity operations */
@@ -161,6 +163,8 @@ function createSingleEntityView(args: {
 	pluginKey: string;
 	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
 	hardcodedFileId?: string;
+	/** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
+	hardcodedVersionId?: string;
 	/** Object mapping property names to functions that generate default values */
 	defaultValues?: Record<string, (() => string) | ((row: Record<string, any>) => string)>;
 	/** Custom validation logic for entity operations */
@@ -273,18 +277,22 @@ function createSingleEntityView(args: {
 			"file_id AS lixcol_file_id"
 		];
 
-	// Handle version_id column availability based on view type
-	const versionIdReference = isAllView 
-		? "COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))"
-		: "(SELECT version_id FROM active_version)";
+	// Handle version_id column availability based on view type and hardcoded version
+	const versionIdReference = args.hardcodedVersionId
+		? `'${args.hardcodedVersionId}'`
+		: isAllView 
+			? "COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))"
+			: "(SELECT version_id FROM active_version)";
 	
 	const versionIdInDefaults = isAllView 
 		? "NEW.lixcol_version_id AS lixcol_version_id,"
 		: "";
 
-	const oldVersionIdReference = isAllView 
-		? "OLD.lixcol_version_id"
-		: "(SELECT version_id FROM active_version)";
+	const oldVersionIdReference = args.hardcodedVersionId
+		? `'${args.hardcodedVersionId}'`
+		: isAllView 
+			? "OLD.lixcol_version_id"
+			: "(SELECT version_id FROM active_version)";
 
 	// Generate validation SQL
 	const generateValidationSQL = (rules: ValidationRule[]): string => {
@@ -388,7 +396,8 @@ function createSingleEntityView(args: {
         DELETE FROM state
         WHERE entity_id = ${entityIdOld}
         AND schema_key = '${schema_key}'
-        AND file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"};
+        AND file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}
+        ${args.hardcodedVersionId ? `AND version_id = '${args.hardcodedVersionId}'` : ""};
       END;
     `;
 

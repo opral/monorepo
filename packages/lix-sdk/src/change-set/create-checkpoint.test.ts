@@ -254,7 +254,6 @@ test("debug working change set elements after insertion", async () => {
 		.selectFrom("active_version")
 		.innerJoin("version", "version.id", "active_version.version_id")
 		.selectAll("version")
-		.where("version.lixcol_version_id", "=", "global")
 		.executeTakeFirstOrThrow();
 
 	const mainVersion = await lix.db
@@ -358,7 +357,6 @@ test(
 			.selectFrom("active_version")
 			.innerJoin("version", "version.id", "active_version.version_id")
 			.selectAll("version")
-			.where("version.lixcol_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
 		console.log("Active version:", activeVersion);
@@ -375,7 +373,6 @@ test(
 		const versionAfterInsertion = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
@@ -387,7 +384,6 @@ test(
 		const versionAfterCheckpoint = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -441,7 +437,6 @@ test(
 		const activeVersionAfterDeletion = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 

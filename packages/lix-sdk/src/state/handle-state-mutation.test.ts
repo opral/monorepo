@@ -685,7 +685,6 @@ test("working change set elements are separated per version", async () => {
 			name: "new_version",
 			change_set_id: "new_cs",
 			working_change_set_id: "new_working_cs",
-			lixcol_version_id: "global",
 			inherits_from_version_id: "global",
 		})
 		.execute();

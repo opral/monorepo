@@ -38,8 +38,8 @@ export function validateStateMutation(args: {
 		query: args.lix.db
 			.selectFrom("version")
 			.select("id")
-			.where("id", "=", args.version_id)
-			.where("version.lixcol_version_id", "=", args.version_id),
+			.where("id", "=", args.version_id),
+		// .where("version.lixcol_version_id", "=", args.version_id),
 	});
 
 	if (existingVersion.length === 0) {
