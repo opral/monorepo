@@ -4,7 +4,11 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { createEntityViewsIfNotExists, type StateEntityView, type StateEntityAllView } from "../state/entity-view-builder.js";
+import {
+	createEntityViewsIfNotExists,
+	type StateEntityView,
+	type StateEntityAllView,
+} from "../state/entity-view-builder.js";
 
 export function applyChangeAuthorDatabaseSchema(
 	sqlite: SqliteWasmDatabase

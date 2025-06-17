@@ -171,7 +171,9 @@ test("should create a snapshot with the correct content", async () => {
 		.execute();
 
 	expect(snapshots).toHaveLength(1);
-	expect(snapshots[0]?.content).toStrictEqual({ content: { text: "snapshot-content" } });
+	expect(snapshots[0]?.content).toStrictEqual({
+		content: { text: "snapshot-content" },
+	});
 });
 
 test("should create a change and a snapshot in a transaction", async () => {

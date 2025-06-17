@@ -960,4 +960,3 @@ export type InternalChangeInTransactionTable = {
 	snapshot_content: Record<string, any> | null;
 	created_at: Generated<string>;
 };
-

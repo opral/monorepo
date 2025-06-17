@@ -1,5 +1,4 @@
 import {
-	fileQueueSettled,
 	Lix,
 	newLixFile,
 	openLixInMemory,
@@ -72,7 +71,6 @@ export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
 
 	await withFlashtypeAccount(lix, async (lixWithFlashtype) => {
 		const file = await setupMdWelcome(lixWithFlashtype);
-		await fileQueueSettled({ lix: lixWithFlashtype });
 		await createInitialCheckpoint(lixWithFlashtype, file.id);
 	});
 

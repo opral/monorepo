@@ -6,7 +6,10 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
-import type { StateEntityView, StateEntityAllView } from "../state/entity-view-builder.js";
+import type {
+	StateEntityView,
+	StateEntityAllView,
+} from "../state/entity-view-builder.js";
 import { createEntityViewsIfNotExists } from "../state/entity-view-builder.js";
 
 export function applyKeyValueDatabaseSchema(sqlite: SqliteWasmDatabase): void {

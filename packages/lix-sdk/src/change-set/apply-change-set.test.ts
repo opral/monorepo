@@ -3,7 +3,10 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
-import { mockJsonPlugin, MockJsonPropertySchema } from "../plugin/mock-json-plugin.js";
+import {
+	mockJsonPlugin,
+	MockJsonPropertySchema,
+} from "../plugin/mock-json-plugin.js";
 import type { Change } from "../change/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { createCheckpoint } from "./create-checkpoint.js";
@@ -495,4 +498,3 @@ test.skip("it should delete entities but not files when applying entity deletion
 		e2: "Entity 2", // e1 should be gone, e2 should remain
 	});
 });
-

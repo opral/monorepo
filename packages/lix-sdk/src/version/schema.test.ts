@@ -24,14 +24,14 @@ test("selecting from the version view", async () => {
 				name: "version0",
 				change_set_id: "change_set_id_0",
 				working_change_set_id: "working_cs_0",
-				inherits_from_version_id: 'global',
+				inherits_from_version_id: "global",
 			},
 			{
 				id: "version1",
 				name: "version1",
 				change_set_id: "change_set_id_1",
 				working_change_set_id: "working_cs_1",
-				inherits_from_version_id: 'global',
+				inherits_from_version_id: "global",
 			},
 		])
 		.execute();

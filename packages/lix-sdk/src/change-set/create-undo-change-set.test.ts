@@ -3,7 +3,10 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createUndoChangeSet } from "./create-undo-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
-import { mockJsonPlugin, MockJsonPropertySchema } from "../plugin/mock-json-plugin.js";
+import {
+	mockJsonPlugin,
+	MockJsonPropertySchema,
+} from "../plugin/mock-json-plugin.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 
 test("it creates an undo change set that reverses the operations of the original change set", async () => {

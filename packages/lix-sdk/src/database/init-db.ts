@@ -96,7 +96,14 @@ export function initDb(args: {
 				AND version = '${schema["x-lix-version"]}'
 			);
 			`,
-			{ bind: [schema["x-lix-key"], schema["x-lix-version"], JSON.stringify(schema), "global"] }
+			{
+				bind: [
+					schema["x-lix-key"],
+					schema["x-lix-version"],
+					JSON.stringify(schema),
+					"global",
+				],
+			}
 		);
 	}
 

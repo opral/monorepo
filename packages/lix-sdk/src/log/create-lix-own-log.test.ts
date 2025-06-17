@@ -117,4 +117,3 @@ async function createLogs(lix: Lix) {
 async function getLogs(lix: Lix): Promise<Log[]> {
 	return lix.db.selectFrom("log").selectAll().execute();
 }
-

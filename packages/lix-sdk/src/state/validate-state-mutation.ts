@@ -28,7 +28,6 @@ export function validateStateMutation(args: {
 		return;
 	}
 
-
 	if (!args.version_id) {
 		throw new Error("version_id is required");
 	}
@@ -429,7 +428,6 @@ function validateDeletionConstraints(args: {
 			.where("version_id", "=", args.version_id),
 	});
 
-
 	if (currentEntity.length === 0) {
 		// Enhanced error message for better copy-on-write deletion context
 		let errorMessage = `Entity deletion failed. Cannot delete entity '${args.entity_id}' from schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) in version '${args.version_id}' because the entity does not exist.`;
@@ -460,25 +458,30 @@ function validateDeletionConstraints(args: {
 			errorMessage += `┌─────────────────────┬────────────────┬─────────────────────────────────────┐\n`;
 			errorMessage += `│ Version             │ Entity Found   │ Entity Content                      │\n`;
 			errorMessage += `├─────────────────────┼────────────────┼─────────────────────────────────────┤\n`;
-			
+
 			// Helper function to truncate property values
 			const truncateValue = (value: any, maxLength: number = 35): string => {
-				const str = typeof value === 'string' ? value : JSON.stringify(value);
-				return str.length > maxLength ? str.substring(0, maxLength - 3) + '...' : str;
+				const str = typeof value === "string" ? value : JSON.stringify(value);
+				return str.length > maxLength
+					? str.substring(0, maxLength - 3) + "..."
+					: str;
 			};
 
 			// Show current version first
 			errorMessage += `│ ${args.version_id.substring(0, 19).padEnd(19)} │ ${"No".padEnd(14)} │ ${"-".padEnd(35)} │\n`;
-			
+
 			// Show other versions where entity exists
 			for (const state of entityInOtherVersions) {
 				if (state.version_id && state.version_id !== args.version_id) {
 					const versionDisplay = state.version_id.substring(0, 19).padEnd(19);
-					const contentDisplay = truncateValue(state.snapshot_content, 35).padEnd(35);
+					const contentDisplay = truncateValue(
+						state.snapshot_content,
+						35
+					).padEnd(35);
 					errorMessage += `│ ${versionDisplay} │ ${"Yes".padEnd(14)} │ ${contentDisplay} │\n`;
 				}
 			}
-			
+
 			errorMessage += `└─────────────────────┴────────────────┴─────────────────────────────────────┘\n`;
 			errorMessage += `\nThe entity exists in other version(s) but is not accessible in '${args.version_id}'. Check version inheritance configuration.`;
 		} else {
@@ -560,25 +563,35 @@ function parseJsonPropertiesInSnapshotContent(
 	snapshotContent: any,
 	schema: LixSchemaDefinition
 ): any {
-	if (!(schema as any).properties || typeof snapshotContent !== 'object' || snapshotContent === null) {
+	if (
+		!(schema as any).properties ||
+		typeof snapshotContent !== "object" ||
+		snapshotContent === null
+	) {
 		return snapshotContent;
 	}
 
 	const parsed = { ...snapshotContent };
 
 	// Check each property in the schema
-	for (const [propertyName, propertySchema] of Object.entries((schema as any).properties)) {
+	for (const [propertyName, propertySchema] of Object.entries(
+		(schema as any).properties
+	)) {
 		const value = parsed[propertyName];
-		
+
 		// Skip if the value doesn't exist or is already an object
-		if (value === undefined || value === null || typeof value === 'object') {
+		if (value === undefined || value === null || typeof value === "object") {
 			continue;
 		}
 
 		// Check if the property is defined as an object type in the schema
-		if (typeof propertySchema === 'object' && propertySchema && (propertySchema as any).type === 'object') {
+		if (
+			typeof propertySchema === "object" &&
+			propertySchema &&
+			(propertySchema as any).type === "object"
+		) {
 			// Try to parse the JSON string
-			if (typeof value === 'string') {
+			if (typeof value === "string") {
 				try {
 					parsed[propertyName] = JSON.parse(value);
 				} catch (error) {

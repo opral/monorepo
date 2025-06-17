@@ -48,7 +48,9 @@ describe("createEntityViewsIfNotExists", () => {
 				schema: invalidSchema,
 				pluginKey: "test_plugin",
 			});
-		}).toThrow("Schema must define 'x-lix-primary-key' for entity view generation");
+		}).toThrow(
+			"Schema must define 'x-lix-primary-key' for entity view generation"
+		);
 	});
 
 	test("should create view with correct columns", async () => {
@@ -106,7 +108,7 @@ describe("createEntityViewsIfNotExists", () => {
 		});
 
 		// Test that CRUD operations work (which proves triggers exist and function)
-		
+
 		// INSERT trigger test
 		await lix.db
 			.insertInto("test_view" as any)
@@ -436,7 +438,9 @@ describe("createEntityViewsIfNotExists", () => {
 
 		expect(allData).toHaveLength(2);
 		// Find the explicit entry (ordering might vary)
-		const explicitEntry = allData.find((item: any) => item.id === "explicit_id");
+		const explicitEntry = allData.find(
+			(item: any) => item.id === "explicit_id"
+		);
 		expect(explicitEntry).toMatchObject({
 			id: "explicit_id",
 			name: "test_name_2",
@@ -541,7 +545,7 @@ describe("createEntityViewsIfNotExists", () => {
 		expect(allResult).toHaveLength(1);
 		expect(primaryResult[0]).toMatchObject({
 			id: "test_id",
-			name: "test_name", 
+			name: "test_name",
 			value: 42,
 		});
 		expect(allResult[0]).toMatchObject({
@@ -549,7 +553,7 @@ describe("createEntityViewsIfNotExists", () => {
 			name: "test_name",
 			value: 42,
 		});
-		
+
 		// Verify version column visibility
 		expect(primaryResult[0]).not.toHaveProperty("lixcol_version_id"); // Regular view hides version_id
 		expect(allResult[0]).toHaveProperty("lixcol_version_id"); // _all view exposes version_id
@@ -613,5 +617,4 @@ describe("createEntityViewsIfNotExists", () => {
 		expect(afterDeletePrimary).toHaveLength(0);
 		expect(afterDeleteAll).toHaveLength(0);
 	});
-
 });

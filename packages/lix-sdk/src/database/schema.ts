@@ -32,13 +32,21 @@ import {
 	type StoredSchemaAllView,
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { LixKeyValueSchema, type KeyValueView, type KeyValueAllView } from "../key-value/schema.js";
+import {
+	LixKeyValueSchema,
+	type KeyValueView,
+	type KeyValueAllView,
+} from "../key-value/schema.js";
 import type {
 	StateView,
 	InternalStateCacheTable,
 	InternalChangeInTransactionTable,
 } from "../state/schema.js";
-import { LixFileSchema, type LixFileView, type LixFileAllView } from "../file/schema.js";
+import {
+	LixFileSchema,
+	type LixFileView,
+	type LixFileAllView,
+} from "../file/schema.js";
 import { LixLogSchema, type LogView, type LogAllView } from "../log/schema.js";
 import {
 	LixAccountSchema,
@@ -51,7 +59,11 @@ import {
 	type ChangeAuthorView,
 	type ChangeAuthorAllView,
 } from "../change-author/schema.js";
-import { LixLabelSchema, type LabelView, type LabelAllView } from "../label/schema.js";
+import {
+	LixLabelSchema,
+	type LabelView,
+	type LabelAllView,
+} from "../label/schema.js";
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,

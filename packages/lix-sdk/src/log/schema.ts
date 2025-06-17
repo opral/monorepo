@@ -1,7 +1,14 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
-import { createEntityViewsIfNotExists, type StateEntityView, type StateEntityAllView } from "../state/entity-view-builder.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
+import {
+	createEntityViewsIfNotExists,
+	type StateEntityView,
+	type StateEntityAllView,
+} from "../state/entity-view-builder.js";
 import { nanoid } from "../database/nano-id.js";
 
 export function applyLogDatabaseSchema(

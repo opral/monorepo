@@ -1,10 +1,10 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import {
-	handleFileInsert,
-	handleFileUpdate,
-} from "./file-handlers.js";
+import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
 import { materializeFileData } from "./materialize-file-data.js";
-import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyFileDatabaseSchema(
@@ -279,7 +279,7 @@ export type LixFileAllView = {
 
 /**
  * Kysely operation types for the file view.
- * 
+ *
  * These use the "Lix" prefix to avoid collision with JavaScript's built-in File type
  * and to clearly distinguish them as Lix-specific database view operations rather
  * than pure business logic types.

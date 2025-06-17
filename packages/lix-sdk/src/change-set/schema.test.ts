@@ -690,10 +690,7 @@ describe("change_set_label", () => {
 		const lix = await openLixInMemory({});
 
 		// Create the referenced change set and label first
-		await lix.db
-			.insertInto("change_set")
-			.values({ id: "cs0" })
-			.execute();
+		await lix.db.insertInto("change_set").values({ id: "cs0" }).execute();
 
 		await lix.db
 			.insertInto("label")
@@ -792,10 +789,7 @@ describe("change_set_label", () => {
 		const lix = await openLixInMemory({});
 
 		// Create the referenced change set and label
-		await lix.db
-			.insertInto("change_set")
-			.values({ id: "cs1" })
-			.execute();
+		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
 
 		await lix.db
 			.insertInto("label")
@@ -848,10 +842,7 @@ describe("change_set_label", () => {
 		const lix = await openLixInMemory({});
 
 		// Create only change set (not label)
-		await lix.db
-			.insertInto("change_set")
-			.values({ id: "cs1" })
-			.execute();
+		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
 
 		// Attempt to insert with non-existent label_id
 		await expect(

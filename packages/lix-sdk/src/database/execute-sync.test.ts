@@ -18,7 +18,7 @@ test("executeSync returns raw SQL results (JSON columns as strings)", async () =
 
 	const result = executeSync({ lix, query });
 
-	// executeSync returns raw SQL - JSON columns are strings  
+	// executeSync returns raw SQL - JSON columns are strings
 	expect(result).toMatchObject([{ key: "foo", value: "bar" }]);
 });
 
@@ -72,7 +72,7 @@ test("using executeSync with a 'fake async' function should work", async () => {
 			.insertInto("key_value")
 			.values({ key: "foo", value: "bar" })
 			.execute();
-		
+
 		const query = lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "foo")

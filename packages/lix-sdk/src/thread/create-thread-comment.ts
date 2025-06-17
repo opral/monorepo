@@ -7,7 +7,7 @@ export async function createThreadComment(
 ): Promise<ThreadComment> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const commentId = args.id ?? nanoid();
-		
+
 		await trx
 			.insertInto("thread_comment")
 			.values({

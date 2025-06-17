@@ -129,13 +129,17 @@ export async function applyChangeSet(args: {
 
 			// Skip plugin processing for lix own file changes (file metadata changes)
 			// These are handled by the database triggers and don't need plugin processing
-			const hasLixOwnEntityChanges = changes.some(c => c.plugin_key === "lix_own_entity");
+			const hasLixOwnEntityChanges = changes.some(
+				(c) => c.plugin_key === "lix_own_entity"
+			);
 			if (hasLixOwnEntityChanges) {
 				continue;
 			}
 
 			// Check if this file has deletion changes
-			const hasFileDeletion = changes.some(c => c.snapshot_id === "no-content" && c.schema_key === "lix_file");
+			const hasFileDeletion = changes.some(
+				(c) => c.snapshot_id === "no-content" && c.schema_key === "lix_file"
+			);
 			if (hasFileDeletion) {
 				// File is being deleted - bypass plugin processing and delete the file
 				await trx.deleteFrom("file").where("id", "=", file_id).execute();

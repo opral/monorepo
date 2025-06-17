@@ -276,17 +276,17 @@ test("it should detect updated properties on nested levels", async () => {
 		{
 			entity_id: "level1.prop",
 			schema: JSONPropertySchema,
-			snapshot_content: undefined,
+			snapshot_content: null,
 		},
 		{
 			entity_id: "level1.level2.prop",
 			schema: JSONPropertySchema,
-			snapshot_content: undefined,
+			snapshot_content: null,
 		},
 		{
 			entity_id: "level1.level2.level3.prop",
 			schema: JSONPropertySchema,
-			snapshot_content: undefined,
+			snapshot_content: null,
 		},
 		{
 			entity_id: "level1.newProp",

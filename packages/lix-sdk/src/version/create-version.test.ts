@@ -90,7 +90,7 @@ test("should fail if the 'from' change_set_id does not exist", async () => {
 
 test("should automatically create inheritance from global version", async () => {
 	const lix = await openLixInMemory({});
-	
+
 	// Create a new version (should automatically inherit from global)
 	const newVersion = await createVersion({
 		lix,
@@ -100,4 +100,3 @@ test("should automatically create inheritance from global version", async () => 
 	// Check that inheritance column was set correctly
 	expect(newVersion.inherits_from_version_id).toBe("global");
 });
-

@@ -1,9 +1,16 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import type { Lix } from "../lix/open-lix.js";
 import { humanId } from "human-id";
 import { nanoid } from "../database/nano-id.js";
-import { createEntityViewsIfNotExists, type StateEntityView, type StateEntityAllView } from "../state/entity-view-builder.js";
+import {
+	createEntityViewsIfNotExists,
+	type StateEntityView,
+	type StateEntityAllView,
+} from "../state/entity-view-builder.js";
 
 export function applyAccountDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin">
@@ -56,6 +63,7 @@ export const LixAccountSchema = {
 		name: { type: "string" },
 	},
 	required: ["id", "name"],
+	additionalProperties: false,
 } as const;
 LixAccountSchema satisfies LixSchemaDefinition;
 

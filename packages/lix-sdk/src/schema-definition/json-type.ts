@@ -8,7 +8,7 @@ export type JSONType =
 
 /**
  * JSON schema definition for JSON values (object, array, string, number, boolean, null).
- * 
+ *
  * @example
  *   const MySchema = {
  *     type: "object",

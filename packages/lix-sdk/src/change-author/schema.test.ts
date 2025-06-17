@@ -150,7 +150,9 @@ describe("change_author", () => {
 					account_id: account.id,
 				})
 				.execute()
-		).rejects.toThrow(/Foreign key constraint violation.*change_id.*lix_change.id/i);
+		).rejects.toThrow(
+			/Foreign key constraint violation.*change_id.*lix_change.id/i
+		);
 	});
 
 	test("should enforce foreign key constraint on account_id", async () => {
@@ -185,7 +187,9 @@ describe("change_author", () => {
 					account_id: "account_nonexistent",
 				})
 				.execute()
-		).rejects.toThrow(/Foreign key constraint violation.*account_id.*lix_account.id/i);
+		).rejects.toThrow(
+			/Foreign key constraint violation.*account_id.*lix_account.id/i
+		);
 	});
 
 	test("should allow multiple authors for the same change", async () => {

@@ -29,7 +29,7 @@ test("should insert a new snapshot with no content", async () => {
 
 	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
 
-	expect(snapshots.some(s => s.id === snapshot.id)).toBe(true);
+	expect(snapshots.some((s) => s.id === snapshot.id)).toBe(true);
 	expect(snapshot.content).toBe(null);
 });
 

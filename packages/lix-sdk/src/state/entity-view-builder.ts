@@ -143,15 +143,26 @@ export function createEntityViewsIfNotExists(args: {
 	/** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
 	hardcodedVersionId?: string;
 	/** Object mapping property names to functions that generate default values */
-	defaultValues?: Record<string, (() => string) | ((row: Record<string, any>) => string)>;
+	defaultValues?: Record<
+		string,
+		(() => string) | ((row: Record<string, any>) => string)
+	>;
 	/** Custom validation logic for entity operations */
 	validation?: ValidationCallbacks;
 }): void {
 	const view_name = args.overrideName ?? args.schema["x-lix-key"];
-	
+
 	// Create both the primary view (active only) and the _all view (all versions)
-	createSingleEntityView({ ...args, viewName: view_name, stateTable: "state_active" });
-	createSingleEntityView({ ...args, viewName: view_name + "_all", stateTable: "state" });
+	createSingleEntityView({
+		...args,
+		viewName: view_name,
+		stateTable: "state_active",
+	});
+	createSingleEntityView({
+		...args,
+		viewName: view_name + "_all",
+		stateTable: "state",
+	});
 }
 
 function createSingleEntityView(args: {
@@ -166,7 +177,10 @@ function createSingleEntityView(args: {
 	/** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
 	hardcodedVersionId?: string;
 	/** Object mapping property names to functions that generate default values */
-	defaultValues?: Record<string, (() => string) | ((row: Record<string, any>) => string)>;
+	defaultValues?: Record<
+		string,
+		(() => string) | ((row: Record<string, any>) => string)
+	>;
 	/** Custom validation logic for entity operations */
 	validation?: ValidationCallbacks;
 }): void {
@@ -180,7 +194,7 @@ function createSingleEntityView(args: {
 	const schema_key = args.schema["x-lix-key"];
 	const properties = Object.keys((args.schema as any).properties);
 	const primaryKeys = args.schema["x-lix-primary-key"];
-	
+
 	const fileId = args.hardcodedFileId
 		? `'${args.hardcodedFileId}'`
 		: "NEW.lixcol_file_id";
@@ -198,35 +212,46 @@ function createSingleEntityView(args: {
 		for (const [prop, defaultFn] of Object.entries(args.defaultValues)) {
 			const udfName = `${schema_key}_default_${prop}`;
 			const needsRow = defaultFn.length > 0; // Check if function expects parameters
-			
+
 			if (needsRow) {
 				// Function needs row data - use variadic function
-				args.lix.sqlite.createFunction(udfName, (...rowValues: any[]) => {
-					// Reconstruct row object from passed values
-					// Skip the first argument (pointer/internal value)
-					const actualValues = rowValues.slice(1);
-					const row: Record<string, any> = {};
-					
-					properties.forEach((prop, index) => {
-						let value = actualValues[index];
-						
-						// Try to parse JSON strings
-						if (typeof value === 'string' && (value.startsWith('{') || value.startsWith('['))) {
-							try {
-								value = JSON.parse(value);
-							} catch {
-								// Keep as string if JSON parsing fails
+				args.lix.sqlite.createFunction(
+					udfName,
+					(...rowValues: any[]) => {
+						// Reconstruct row object from passed values
+						// Skip the first argument (pointer/internal value)
+						const actualValues = rowValues.slice(1);
+						const row: Record<string, any> = {};
+
+						properties.forEach((prop, index) => {
+							let value = actualValues[index];
+
+							// Try to parse JSON strings
+							if (
+								typeof value === "string" &&
+								(value.startsWith("{") || value.startsWith("["))
+							) {
+								try {
+									value = JSON.parse(value);
+								} catch {
+									// Keep as string if JSON parsing fails
+								}
 							}
-						}
-						
-						row[prop] = value;
-					});
-					
-					return (defaultFn as (row: Record<string, any>) => string)(row);
-				}, { arity: -1 }); // -1 means variadic
+
+							row[prop] = value;
+						});
+
+						return (defaultFn as (row: Record<string, any>) => string)(row);
+					},
+					{ arity: -1 }
+				); // -1 means variadic
 			} else {
 				// Function doesn't need row data - simple 0-arg function
-				args.lix.sqlite.createFunction(udfName, () => (defaultFn as () => string)(), { arity: 0 });
+				args.lix.sqlite.createFunction(
+					udfName,
+					() => (defaultFn as () => string)(),
+					{ arity: 0 }
+				);
 			}
 		}
 	}
@@ -238,14 +263,14 @@ function createSingleEntityView(args: {
 				.join(",\n        ");
 		}
 
-		const rowValuesArgs = properties.map(prop => `NEW.${prop}`).join(", ");
+		const rowValuesArgs = properties.map((prop) => `NEW.${prop}`).join(", ");
 
 		return properties
 			.map((prop) => {
 				const defaultFn = args.defaultValues![prop];
 				if (defaultFn) {
 					const needsRow = defaultFn.length > 0;
-					const fnCall = needsRow 
+					const fnCall = needsRow
 						? `${schema_key}_default_${prop}(${rowValuesArgs})`
 						: `${schema_key}_default_${prop}()`;
 					return `COALESCE(NEW.${prop}, ${fnCall}) AS ${prop}`;
@@ -262,56 +287,60 @@ function createSingleEntityView(args: {
 
 	// Choose which operational columns to expose based on whether this is the _all view
 	const isAllView = args.viewName.endsWith("_all");
-	const operationalColumns = isAllView 
+	const operationalColumns = isAllView
 		? [
-			"version_id AS lixcol_version_id",
-			"inherited_from_version_id AS lixcol_inherited_from_version_id", 
-			"created_at AS lixcol_created_at",
-			"updated_at AS lixcol_updated_at",
-			"file_id AS lixcol_file_id"
-		]
+				"version_id AS lixcol_version_id",
+				"inherited_from_version_id AS lixcol_inherited_from_version_id",
+				"created_at AS lixcol_created_at",
+				"updated_at AS lixcol_updated_at",
+				"file_id AS lixcol_file_id",
+			]
 		: [
-			"inherited_from_version_id AS lixcol_inherited_from_version_id",
-			"created_at AS lixcol_created_at", 
-			"updated_at AS lixcol_updated_at",
-			"file_id AS lixcol_file_id"
-		];
+				"inherited_from_version_id AS lixcol_inherited_from_version_id",
+				"created_at AS lixcol_created_at",
+				"updated_at AS lixcol_updated_at",
+				"file_id AS lixcol_file_id",
+			];
 
 	// Handle version_id column availability based on view type and hardcoded version
 	const versionIdReference = args.hardcodedVersionId
 		? `'${args.hardcodedVersionId}'`
-		: isAllView 
+		: isAllView
 			? "COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))"
 			: "(SELECT version_id FROM active_version)";
-	
-	const versionIdInDefaults = isAllView 
+
+	const versionIdInDefaults = isAllView
 		? "NEW.lixcol_version_id AS lixcol_version_id,"
 		: "";
 
 	const oldVersionIdReference = args.hardcodedVersionId
 		? `'${args.hardcodedVersionId}'`
-		: isAllView 
+		: isAllView
 			? "OLD.lixcol_version_id"
 			: "(SELECT version_id FROM active_version)";
 
 	// Generate validation SQL
 	const generateValidationSQL = (rules: ValidationRule[]): string => {
-		return rules.map(rule => `
+		return rules
+			.map(
+				(rule) => `
 			SELECT CASE
 				WHEN NOT (${rule.condition})
 				THEN RAISE(FAIL, '${rule.errorMessage.replace(/'/g, "''")}')
-			END;`).join('\n');
+			END;`
+			)
+			.join("\n");
 	};
 
-	const insertValidationSQL = args.validation?.onInsert 
+	const insertValidationSQL = args.validation?.onInsert
 		? generateValidationSQL(args.validation.onInsert)
 		: "";
-	
-	const updateValidationSQL = args.validation?.onUpdate 
+
+	const updateValidationSQL = args.validation?.onUpdate
 		? generateValidationSQL(args.validation.onUpdate)
 		: "";
-		
-	const deleteValidationSQL = args.validation?.onDelete 
+
+	const deleteValidationSQL = args.validation?.onDelete
 		? generateValidationSQL(args.validation.onDelete)
 		: "";
 

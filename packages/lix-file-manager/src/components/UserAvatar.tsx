@@ -8,10 +8,10 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip.js";
-import type { Account } from "@lix-js/sdk";
+import type { LixAccount } from "@lix-js/sdk";
 
 interface UserAvatarProps {
-	account: Account | null;
+	account: LixAccount | null;
 	onClick?: () => void;
 }
 

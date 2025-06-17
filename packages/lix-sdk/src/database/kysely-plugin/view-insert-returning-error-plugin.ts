@@ -8,10 +8,10 @@ import type {
 } from "kysely";
 
 /**
- * A Kysely plugin that prevents using `returning()` or `returningAll()` 
+ * A Kysely plugin that prevents using `returning()` or `returningAll()`
  * with INSERT operations on database views.
- * 
- * This provides better developer experience by failing fast with clear 
+ *
+ * This provides better developer experience by failing fast with clear
  * error messages instead of letting SQLite return cryptic errors.
  */
 export class ViewInsertReturningErrorPlugin implements KyselyPlugin {
@@ -27,13 +27,13 @@ export class ViewInsertReturningErrorPlugin implements KyselyPlugin {
 		// Check if this is an INSERT operation
 		if (node.kind === "InsertQueryNode") {
 			const tableName = node.into?.table.identifier.name;
-			
+
 			// Check if inserting into a view and has returning clause
 			if (tableName && this.viewNames.has(tableName) && node.returning) {
 				throw new Error(
 					`Cannot use returning() or returningAll() with INSERT operations on view '${tableName}'. ` +
-					`Views do not support returning clauses in INSERT statements. ` +
-					`Use a separate SELECT query after the INSERT to retrieve the data.`
+						`Views do not support returning clauses in INSERT statements. ` +
+						`Use a separate SELECT query after the INSERT to retrieve the data.`
 				);
 			}
 		}

@@ -1,6 +1,9 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import {
 	createEntityViewsIfNotExists,

@@ -57,9 +57,7 @@ Promise<Change> {
 
 		executeSync({
 			lix: args.lix,
-			query: args.lix.db
-				.insertInto("change_author")
-				.values(changeAuthorValues),
+			query: args.lix.db.insertInto("change_author").values(changeAuthorValues),
 		});
 	}
 
