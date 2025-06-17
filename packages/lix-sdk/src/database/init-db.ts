@@ -12,13 +12,19 @@ import { isJsonType } from "../schema-definition/json-type.js";
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set/schema.js";
-import { applyVersionDatabaseSchema } from "../version/schema.js";
+import {
+	applyVersionDatabaseSchema,
+	populateVersionRecords,
+} from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
 import { applyKeyValueDatabaseSchema } from "../key-value/schema.js";
 import { applyStateDatabaseSchema } from "../state/schema.js";
 import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
-import { applyLabelDatabaseSchema } from "../label/schema.js";
+import {
+	applyLabelDatabaseSchema,
+	populateLabelRecords,
+} from "../label/schema.js";
 import { applyThreadDatabaseSchema } from "../thread/schema.js";
 
 // dynamically computes the json columns for each view
@@ -64,7 +70,7 @@ export function initDb(args: {
 		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
 	});
 
-	// Apply all database schemas
+	// Apply all database schemas first (tables, views, triggers)
 	applyStateDatabaseSchema(
 		args.sqlite,
 		db as unknown as Kysely<LixInternalDatabaseSchema>
@@ -81,6 +87,11 @@ export function initDb(args: {
 	applyThreadDatabaseSchema(args.sqlite);
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	applyLogDatabaseSchema(args.sqlite);
+
+	// Then populate with initial records
+
+	populateVersionRecords(args.sqlite);
+	populateLabelRecords(args.sqlite);
 
 	// insert the schemas into the stored_schema table to enable validation.
 

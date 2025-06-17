@@ -24,6 +24,12 @@ export function applyLabelDatabaseSchema(
 		defaultValues: { id: () => nanoid() },
 	});
 
+	return sqlite;
+}
+
+export function populateLabelRecords(
+	sqlite: SqliteWasmDatabase
+): SqliteWasmDatabase {
 	// Insert the default checkpoint label if missing
 	// (this is a workaround for not having a separate creation and migration schema)
 	const sql = `

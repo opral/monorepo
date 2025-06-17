@@ -41,7 +41,9 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
       version_id TEXT NOT NULL
     );
   `);
+}
 
+export function populateVersionRecords(sqlite: SqliteWasmDatabase): void {
 	// Initialize database with required change sets and versions
 	sqlite.exec(`
     -- Create change sets for global version if they don't exist

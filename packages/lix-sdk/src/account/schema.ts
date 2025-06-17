@@ -15,16 +15,6 @@ import {
 export function applyAccountDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin">
 ): void {
-	const anonymousAccountName = `Anonymous ${humanId({
-		capitalize: true,
-		adjectiveCount: 0,
-		separator: "_",
-	})
-		// Human ID has two words, remove the last one
-		.split("_")[0]!
-		// Human ID uses plural, remove the last character to make it singular
-		.slice(0, -1)}`;
-
 	// Create account view using the generalized entity view builder
 	createEntityViewsIfNotExists({
 		lix,
@@ -37,7 +27,7 @@ export function applyAccountDatabaseSchema(
 		},
 	});
 
-	// Create session-specific temp table and default account
+	// Create session-specific temp table
 	lix.sqlite.exec(`
 		-- current account(s)
 		-- temp table because current accounts are session
@@ -47,7 +37,24 @@ export function applyAccountDatabaseSchema(
 			name TEXT NOT NULL
 			-- can't use foreign keys in temp tables... :(
 		) STRICT;
+	`);
+}
 
+export function populateAccountRecords(
+	lix: Pick<Lix, "sqlite" | "db" | "plugin">
+): void {
+	const anonymousAccountName = `Anonymous ${humanId({
+		capitalize: true,
+		adjectiveCount: 0,
+		separator: "_",
+	})
+		// Human ID has two words, remove the last one
+		.split("_")[0]!
+		// Human ID uses plural, remove the last character to make it singular
+		.slice(0, -1)}`;
+
+	// Insert default account
+	lix.sqlite.exec(`
 		-- default to a new account
 		INSERT INTO active_account (id, name) values (nano_id(), '${anonymousAccountName}');
 	`);

@@ -9,7 +9,10 @@ import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { LixAccount } from "../account/schema.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
-import { applyAccountDatabaseSchema } from "../account/schema.js";
+import {
+	applyAccountDatabaseSchema,
+	populateAccountRecords,
+} from "../account/schema.js";
 
 export type Lix = {
 	/**
@@ -129,6 +132,7 @@ export async function openLix(args: {
 	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
 	applyAccountDatabaseSchema(lix);
+	populateAccountRecords(lix);
 
 	return lix;
 }
