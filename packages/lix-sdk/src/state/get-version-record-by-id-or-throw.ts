@@ -11,15 +11,11 @@ import {
 	INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
 } from "../version/schema.js";
 
-export function getVersionRecordById(
+export function getVersionRecordByIdOrThrow(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
 	version_id: string
-):
-	| {
-			content: string;
-	  }
-	| undefined {
+): LixVersion {
 	let [versionRecord] = executeSync({
 		lix: { sqlite },
 		query: db
@@ -76,5 +72,9 @@ export function getVersionRecordById(
 		};
 	}
 
-	return versionRecord;
+	if (!versionRecord) {
+		throw new Error(`Version with id '${version_id}' not found.`);
+	}
+
+	return JSON.parse(versionRecord.content) as LixVersion;
 }

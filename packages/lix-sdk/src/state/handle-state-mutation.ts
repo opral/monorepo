@@ -5,18 +5,10 @@ import { executeSync } from "../database/execute-sync.js";
 import type { Change } from "../change/schema.js";
 
 import type { NewStateRow } from "./schema.js";
-import {
-	INITIAL_CHANGE_SET_ID,
-	INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
-	INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
-	INITIAL_VERSION_ID,
-	INITIAL_WORKING_CHANGE_SET_ID,
-	type LixVersion,
-} from "../version/schema.js";
+import { type LixVersion } from "../version/schema.js";
 import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
-import { version } from "uuid";
 
-import { getVersionRecordById } from "./get-version-record-by-id.js";
+import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,
@@ -168,18 +160,6 @@ export function handleStateMutation(
 	// 	return 0;
 	// }
 
-	// Get the latest 'lix_version' entity's snapshot content using the activeVersionId
-	// During bootstrap, try cache first since direct state inserts populate it
-	const versionRecord = getVersionRecordById(sqlite, db, version_id);
-
-	if (!versionRecord) {
-		throw new Error(`Version with id '${version_id}' not found.`);
-	}
-
-	const mutatedVersion = JSON.parse(versionRecord.content) as LixVersion;
-
-	// TODO @samuelstroschein  until here we only collected information
-
 	const rootChange = createChangeWithSnapshot({
 		sqlite,
 		db,
@@ -195,7 +175,7 @@ export function handleStateMutation(
 		version_id,
 	});
 
-	createChangesetForTransaction(sqlite, db, currentTime, mutatedVersion, [
+	createChangesetForTransaction(sqlite, db, currentTime, version_id, [
 		{
 			...rootChange,
 			snapshot_content,

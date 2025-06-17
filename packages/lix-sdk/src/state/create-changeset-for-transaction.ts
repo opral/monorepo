@@ -17,18 +17,13 @@ import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of
 import { type LixVersion, LixVersionSchema } from "../version/schema.js";
 import { createChangeWithSnapshot } from "./handle-state-mutation.js";
 import { nanoid } from "../database/nano-id.js";
+import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 
 export function createChangesetForTransaction(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
 	currentTime: string,
-	mutatedVersion: {
-		inherits_from_version_id?: string | null | undefined;
-		id: string;
-		working_change_set_id: string;
-		name: string;
-		change_set_id: string;
-	},
+	version_id: string,
 	changes: Pick<
 		{
 			id: string;
@@ -44,6 +39,12 @@ export function createChangesetForTransaction(
 		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
 	>[]
 ): void {
+	const versionRecord = getVersionRecordByIdOrThrow(sqlite, db, version_id);
+
+	if (!versionRecord) {
+		throw new Error(`Version with id '${version_id}' not found.`);
+	}
+	const mutatedVersion = versionRecord as any;
 	const nextChangeSetId = nanoid();
 	const changeSetChange = createChangeWithSnapshot({
 		sqlite,
