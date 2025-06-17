@@ -22,14 +22,12 @@ import {
  * they are defined. If a strategy returns an invalid locale,
  * it will fall back to the next strategy.
  *
- * This function is async to allow for a db call for example in a custom strategy
- *
  * @example
  *   const locale = extractLocaleFromRequest(request);
  *
- * @type {(request: Request) => Promise<Locale>}
+ * @type {(request: Request) => Locale}
  */
-export const extractLocaleFromRequest = async (request) => {
+export const extractLocaleFromRequest = (request) => {
 	/** @type {string|undefined} */
 	let locale;
 
@@ -55,7 +53,7 @@ export const extractLocaleFromRequest = async (request) => {
 			continue;
 		} else if (isCustomStrategy(strat) && customServerStrategies.has(strat)) {
 			const handler = customServerStrategies.get(strat);
-			locale = await handler.getLocale(request);
+			locale = handler.getLocale(request);
 		}
 		if (locale !== undefined) {
 			if (!isLocale(locale)) {

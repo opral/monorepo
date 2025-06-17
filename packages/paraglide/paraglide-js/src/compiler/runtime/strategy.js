@@ -19,7 +19,7 @@
  */
 
 /**
- * @typedef {{ getLocale: () => string | undefined, setLocale: (locale: string) => void }} CustomClientStrategyHandler
+ * @typedef {{ getLocale: () => Promise<string|undefined> | (string | undefined), setLocale: (locale: string) => Promise<void> | void }} CustomClientStrategyHandler
  */
 
 export const customServerStrategies = new Map();
