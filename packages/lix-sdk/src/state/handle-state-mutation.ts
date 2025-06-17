@@ -27,6 +27,8 @@ import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 
+
+
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
@@ -259,6 +261,258 @@ export function handleStateMutation(
 		version_id,
 	});
 
+	createChangesetForTransaction(
+		sqlite,
+		db,
+		nextChangeSetId,
+		currentTime,
+		mutatedVersion,
+		rootChange,
+		snapshot_content
+	);
+
+	return 0; // Return 0 to indicate success
+}
+
+function createChangeWithSnapshot(args: {
+	sqlite: SqliteWasmDatabase;
+	db: Kysely<LixInternalDatabaseSchema>;
+	id?: string;
+	data: Omit<
+		NewStateRow,
+		"version_id" | "created_at" | "updated_at" | "snapshot_content"
+	> & { snapshot_content: string | null };
+	timestamp?: string;
+	version_id?: string;
+}): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
+	// const [snapshot] = args.data.snapshot_content
+	// 	? executeSync({
+	// 			lix: { sqlite: args.sqlite },
+	// 			query: args.db
+	// 				.insertInto("internal_snapshot")
+	// 				.values({
+	// 					content: sql`jsonb(${args.data.snapshot_content})`,
+	// 				})
+	// 				.returning("id"),
+	// 		})
+	// 	: [{ id: "no-content" }];
+
+	// const [change] = executeSync({
+	// 	lix: { sqlite: args.sqlite },
+	// 	query: args.db
+	// 		.insertInto("internal_change")
+	// 		.values({
+	// 			id: args.id,
+	// 			entity_id: args.data.entity_id,
+	// 			schema_key: args.data.schema_key,
+	// 			snapshot_id: snapshot.id,
+	// 			file_id: args.data.file_id,
+	// 			plugin_key: args.data.plugin_key,
+	// 			created_at: args.timestamp || new Date().toISOString(),
+	// 			schema_version: args.data.schema_version,
+	// 		})
+	// 		.returning(["id", "schema_key", "file_id", "entity_id"]),
+	// });
+
+	// Update cache for every change (including deletions)
+	if (args.version_id) {
+		updateStateCache({
+			sqlite: args.sqlite,
+			db: args.db,
+			entity_id: args.data.entity_id,
+			schema_key: args.data.schema_key,
+			file_id: args.data.file_id,
+			version_id: args.version_id,
+			plugin_key: args.data.plugin_key,
+			snapshot_content: args.data.snapshot_content as string | null,
+			schema_version: args.data.schema_version,
+			timestamp: args.timestamp || new Date().toISOString(),
+		});
+	}
+
+	// we don't need the created snapshot
+	const [change] = executeSync({
+		lix: { sqlite: args.sqlite },
+		query: args.db
+			.insertInto("internal_change_in_transaction")
+			.values({
+				id: args.id,
+				entity_id: args.data.entity_id,
+				schema_key: args.data.schema_key,
+				snapshot_content: args.data.snapshot_content
+					? sql`jsonb(${args.data.snapshot_content})`
+					: null,
+				file_id: args.data.file_id,
+				plugin_key: args.data.plugin_key,
+				version_id: args.version_id!,
+				created_at: args.timestamp || new Date().toISOString(),
+				schema_version: args.data.schema_version,
+			})
+			.onConflict((oc) =>
+				// we assume that a conflic is always on the unique constraint of entity_id, file_id, schema_key, version_id
+				oc.doUpdateSet({
+					id: args.id,
+					entity_id: args.data.entity_id,
+					schema_key: args.data.schema_key,
+					snapshot_content: args.data.snapshot_content
+						? sql`jsonb(${args.data.snapshot_content})`
+						: null,
+					file_id: args.data.file_id,
+					plugin_key: args.data.plugin_key,
+					version_id: args.version_id!,
+					created_at: args.timestamp || new Date().toISOString(),
+					schema_version: args.data.schema_version,
+				})
+			)
+			.returning(["id", "schema_key", "file_id", "entity_id"]),
+	});
+
+	return change;
+}
+
+function updateStateCache(args: {
+	sqlite: SqliteWasmDatabase;
+	db: Kysely<LixInternalDatabaseSchema>;
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
+	version_id: string;
+	plugin_key: string;
+	snapshot_content: string | null; // Allow null for DELETE operations
+	schema_version: string;
+	timestamp: string;
+}): void {
+	// Handle DELETE operations (snapshot_content is null)
+	if (args.snapshot_content === null) {
+		// Check if this is an inherited entity being deleted
+		const existingEntity = executeSync({
+			lix: { sqlite: args.sqlite },
+			query: args.db
+				.selectFrom("internal_state_cache")
+				.where("entity_id", "=", args.entity_id)
+				.where("schema_key", "=", args.schema_key)
+				.where("file_id", "=", args.file_id)
+				.where("version_id", "=", args.version_id)
+				.select(["inherited_from_version_id", "inheritance_delete_marker"]),
+		});
+
+		// Check if existing entity is already a deletion marker
+		const isAlreadyDeletionMarker =
+			existingEntity.length > 0 &&
+			existingEntity[0]?.inheritance_delete_marker === 1;
+
+		// If it's an inherited entity or already a deletion marker, keep the deletion marker
+		if (
+			existingEntity.length > 0 &&
+			(existingEntity[0]?.inherited_from_version_id !== null ||
+				isAlreadyDeletionMarker)
+		) {
+			// Create/keep a local deletion marker with NULL content
+			executeSync({
+				lix: { sqlite: args.sqlite },
+				query: args.db
+					.insertInto("internal_state_cache")
+					.values({
+						entity_id: args.entity_id,
+						schema_key: args.schema_key,
+						file_id: args.file_id,
+						version_id: args.version_id,
+						plugin_key: args.plugin_key,
+						snapshot_content: null, // NULL indicates deletion
+						schema_version: args.schema_version,
+						created_at: args.timestamp,
+						updated_at: args.timestamp,
+						inherited_from_version_id: null, // Local entity, not inherited
+						inheritance_delete_marker: 1, // Flag as deletion marker
+					})
+					.onConflict((oc) =>
+						oc
+							.columns(["entity_id", "schema_key", "file_id", "version_id"])
+							.doUpdateSet({
+								plugin_key: args.plugin_key,
+								snapshot_content: null,
+								schema_version: args.schema_version,
+								updated_at: args.timestamp,
+								inherited_from_version_id: null,
+								inheritance_delete_marker: 1,
+							})
+					),
+			});
+		} else {
+			// Regular deletion - remove from cache entirely
+			executeSync({
+				lix: { sqlite: args.sqlite },
+				query: args.db
+					.deleteFrom("internal_state_cache")
+					.where("entity_id", "=", args.entity_id)
+					.where("schema_key", "=", args.schema_key)
+					.where("file_id", "=", args.file_id)
+					.where("version_id", "=", args.version_id),
+			});
+		}
+		return;
+	}
+
+	// Handle INSERT/UPDATE operations
+	executeSync({
+		lix: { sqlite: args.sqlite },
+		query: args.db
+			.insertInto("internal_state_cache")
+			.values({
+				entity_id: args.entity_id,
+				schema_key: args.schema_key,
+				file_id: args.file_id,
+				version_id: args.version_id,
+				plugin_key: args.plugin_key,
+				snapshot_content: args.snapshot_content,
+				schema_version: args.schema_version,
+				created_at: args.timestamp,
+				updated_at: args.timestamp,
+				inherited_from_version_id: null, // Direct entities are not inherited
+				inheritance_delete_marker: 0, // Not a deletion marker
+			})
+			.onConflict((oc) =>
+				oc
+					.columns(["entity_id", "schema_key", "file_id", "version_id"])
+					.doUpdateSet({
+						plugin_key: args.plugin_key,
+						snapshot_content: args.snapshot_content as string,
+						schema_version: args.schema_version,
+						updated_at: args.timestamp,
+						inherited_from_version_id: null, // Direct entities are not inherited
+						inheritance_delete_marker: 0, // Not a deletion marker
+					})
+			),
+	});
+}
+
+function createChangesetForTransaction(
+	sqlite: SqliteWasmDatabase,
+	db: Kysely<LixInternalDatabaseSchema>,
+	nextChangeSetId: string,
+	currentTime: string,
+	mutatedVersion: {
+		inherits_from_version_id?: string | null | undefined;
+		id: string;
+		working_change_set_id: string;
+		name: string;
+		change_set_id: string;
+	},
+	rootChange: Pick<
+		{
+			id: string;
+			entity_id: string;
+			schema_key: string;
+			schema_version: string;
+			file_id: string;
+			plugin_key: string;
+			snapshot_id: string;
+			created_at: string;
+		},
+		"id" | "entity_id" | "schema_key" | "file_id"
+	>,
+	snapshot_content: string | null
+) {
 	const changeSetChange = createChangeWithSnapshot({
 		sqlite,
 		db,
@@ -536,218 +790,4 @@ export function handleStateMutation(
 			});
 		}
 	}
-
-	return 0; // Return 0 to indicate success
-}
-
-function createChangeWithSnapshot(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
-	id?: string;
-	data: Omit<
-		NewStateRow,
-		"version_id" | "created_at" | "updated_at" | "snapshot_content"
-	> & { snapshot_content: string | null };
-	timestamp?: string;
-	version_id?: string;
-}): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
-	// const [snapshot] = args.data.snapshot_content
-	// 	? executeSync({
-	// 			lix: { sqlite: args.sqlite },
-	// 			query: args.db
-	// 				.insertInto("internal_snapshot")
-	// 				.values({
-	// 					content: sql`jsonb(${args.data.snapshot_content})`,
-	// 				})
-	// 				.returning("id"),
-	// 		})
-	// 	: [{ id: "no-content" }];
-
-	// const [change] = executeSync({
-	// 	lix: { sqlite: args.sqlite },
-	// 	query: args.db
-	// 		.insertInto("internal_change")
-	// 		.values({
-	// 			id: args.id,
-	// 			entity_id: args.data.entity_id,
-	// 			schema_key: args.data.schema_key,
-	// 			snapshot_id: snapshot.id,
-	// 			file_id: args.data.file_id,
-	// 			plugin_key: args.data.plugin_key,
-	// 			created_at: args.timestamp || new Date().toISOString(),
-	// 			schema_version: args.data.schema_version,
-	// 		})
-	// 		.returning(["id", "schema_key", "file_id", "entity_id"]),
-	// });
-
-	// Update cache for every change (including deletions)
-	if (args.version_id) {
-		updateStateCache({
-			sqlite: args.sqlite,
-			db: args.db,
-			entity_id: args.data.entity_id,
-			schema_key: args.data.schema_key,
-			file_id: args.data.file_id,
-			version_id: args.version_id,
-			plugin_key: args.data.plugin_key,
-			snapshot_content: args.data.snapshot_content as string | null,
-			schema_version: args.data.schema_version,
-			timestamp: args.timestamp || new Date().toISOString(),
-		});
-	}
-
-	// we don't need the created snapshot
-	const [change] = executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
-			.insertInto("internal_change_in_transaction")
-			.values({
-				id: args.id,
-				entity_id: args.data.entity_id,
-				schema_key: args.data.schema_key,
-				snapshot_content: args.data.snapshot_content
-					? sql`jsonb(${args.data.snapshot_content})`
-					: null,
-				file_id: args.data.file_id,
-				plugin_key: args.data.plugin_key,
-				version_id: args.version_id!,
-				created_at: args.timestamp || new Date().toISOString(),
-				schema_version: args.data.schema_version,
-			})
-			.onConflict((oc) =>
-				// we assume that a conflic is always on the unique constraint of entity_id, file_id, schema_key, version_id
-				oc.doUpdateSet({
-					id: args.id,
-					entity_id: args.data.entity_id,
-					schema_key: args.data.schema_key,
-					snapshot_content: args.data.snapshot_content
-						? sql`jsonb(${args.data.snapshot_content})`
-						: null,
-					file_id: args.data.file_id,
-					plugin_key: args.data.plugin_key,
-					version_id: args.version_id!,
-					created_at: args.timestamp || new Date().toISOString(),
-					schema_version: args.data.schema_version,
-				})
-			)
-			.returning(["id", "schema_key", "file_id", "entity_id"]),
-	});
-
-	return change;
-}
-
-function updateStateCache(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
-	entity_id: string;
-	schema_key: string;
-	file_id: string;
-	version_id: string;
-	plugin_key: string;
-	snapshot_content: string | null; // Allow null for DELETE operations
-	schema_version: string;
-	timestamp: string;
-}): void {
-	// Handle DELETE operations (snapshot_content is null)
-	if (args.snapshot_content === null) {
-		// Check if this is an inherited entity being deleted
-		const existingEntity = executeSync({
-			lix: { sqlite: args.sqlite },
-			query: args.db
-				.selectFrom("internal_state_cache")
-				.where("entity_id", "=", args.entity_id)
-				.where("schema_key", "=", args.schema_key)
-				.where("file_id", "=", args.file_id)
-				.where("version_id", "=", args.version_id)
-				.select(["inherited_from_version_id", "inheritance_delete_marker"]),
-		});
-
-		// Check if existing entity is already a deletion marker
-		const isAlreadyDeletionMarker =
-			existingEntity.length > 0 &&
-			existingEntity[0]?.inheritance_delete_marker === 1;
-
-		// If it's an inherited entity or already a deletion marker, keep the deletion marker
-		if (
-			existingEntity.length > 0 &&
-			(existingEntity[0]?.inherited_from_version_id !== null ||
-				isAlreadyDeletionMarker)
-		) {
-			// Create/keep a local deletion marker with NULL content
-			executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.insertInto("internal_state_cache")
-					.values({
-						entity_id: args.entity_id,
-						schema_key: args.schema_key,
-						file_id: args.file_id,
-						version_id: args.version_id,
-						plugin_key: args.plugin_key,
-						snapshot_content: null, // NULL indicates deletion
-						schema_version: args.schema_version,
-						created_at: args.timestamp,
-						updated_at: args.timestamp,
-						inherited_from_version_id: null, // Local entity, not inherited
-						inheritance_delete_marker: 1, // Flag as deletion marker
-					})
-					.onConflict((oc) =>
-						oc
-							.columns(["entity_id", "schema_key", "file_id", "version_id"])
-							.doUpdateSet({
-								plugin_key: args.plugin_key,
-								snapshot_content: null,
-								schema_version: args.schema_version,
-								updated_at: args.timestamp,
-								inherited_from_version_id: null,
-								inheritance_delete_marker: 1,
-							})
-					),
-			});
-		} else {
-			// Regular deletion - remove from cache entirely
-			executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.deleteFrom("internal_state_cache")
-					.where("entity_id", "=", args.entity_id)
-					.where("schema_key", "=", args.schema_key)
-					.where("file_id", "=", args.file_id)
-					.where("version_id", "=", args.version_id),
-			});
-		}
-		return;
-	}
-
-	// Handle INSERT/UPDATE operations
-	executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
-			.insertInto("internal_state_cache")
-			.values({
-				entity_id: args.entity_id,
-				schema_key: args.schema_key,
-				file_id: args.file_id,
-				version_id: args.version_id,
-				plugin_key: args.plugin_key,
-				snapshot_content: args.snapshot_content,
-				schema_version: args.schema_version,
-				created_at: args.timestamp,
-				updated_at: args.timestamp,
-				inherited_from_version_id: null, // Direct entities are not inherited
-				inheritance_delete_marker: 0, // Not a deletion marker
-			})
-			.onConflict((oc) =>
-				oc
-					.columns(["entity_id", "schema_key", "file_id", "version_id"])
-					.doUpdateSet({
-						plugin_key: args.plugin_key,
-						snapshot_content: args.snapshot_content as string,
-						schema_version: args.schema_version,
-						updated_at: args.timestamp,
-						inherited_from_version_id: null, // Direct entities are not inherited
-						inheritance_delete_marker: 0, // Not a deletion marker
-					})
-			),
-	});
 }
