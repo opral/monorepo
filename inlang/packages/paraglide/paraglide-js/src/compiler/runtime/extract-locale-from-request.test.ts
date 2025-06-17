@@ -286,51 +286,7 @@ test("returns locale from custom strategy", async () => {
 		},
 	});
 
-test("returns locale from custom strategy with an asynchronous function", async () => {
-	const runtime = await createParaglide({
-		blob: await newProject({
-			settings: {
-				baseLocale: "en",
-				locales: ["en", "fr", "de"],
-			},
-		}),
-		strategy: ["custom-header", "baseLocale"],
-	});
-
-	class FakeDB {
-		db = new Map<string, string>();
-		constructor() {
-			this.db.set("1", "fr");
-		}
-
-		async getUserLocaleById(id: string) {
-			setTimeout(() => null, 4);
-			return this.db.get(id);
-		}
-	}
-
-	const db = new FakeDB();
-
-	async function getLocaleFromUserRequest(request?: Request) {
-		const userId = request?.headers.get("X-Custom-User-ID") ?? undefined;
-		if (!userId) throw Error("No User ID");
-		const locale = await db.getUserLocaleById(userId);
-		return locale;
-	}
-
-	// Define a custom strategy that extracts locale from a custom header
-	runtime.defineCustomServerStrategy("custom-header", {
-		getLocale: async (request) =>
-			(await getLocaleFromUserRequest(request)) ?? undefined,
-	});
-
-	const request = new Request("http://example.com", {
-		headers: {
-			"X-Custom-User-ID": "1",
-		},
-	});
-
-	const locale = await runtime.extractLocaleFromRequest(request);
+	const locale = runtime.extractLocaleFromRequest(request);
 	expect(locale).toBe("fr");
 });
 
