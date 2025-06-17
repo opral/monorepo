@@ -331,14 +331,3 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 
 	expect(valid).toBe(false);
 });
-
-test("top level type can be a primitive", () => {
-	const schema = {
-		type: "string",
-		"x-lix-key": "mock_json",
-		"x-lix-version": "1.0",
-	} as const satisfies LixSchemaDefinition;
-
-	const valid = ajv.validate(LixSchemaDefinition, schema);
-	expect(valid).toBe(true);
-});

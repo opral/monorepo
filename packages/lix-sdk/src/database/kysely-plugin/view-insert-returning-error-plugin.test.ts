@@ -6,15 +6,11 @@ test("should throw error when using returningAll() on view insert", async () => 
 
 	// Test with a view that's in the plugin's view list
 	expect(() => {
-		lix.db
-			.insertInto("change_set")
-			.defaultValues()
-			.returningAll()
-			.compile();
+		lix.db.insertInto("change_set").defaultValues().returningAll().compile();
 	}).toThrow(
 		"Cannot use returning() or returningAll() with INSERT operations on view 'change_set'. " +
-		"Views do not support returning clauses in INSERT statements. " +
-		"Use a separate SELECT query after the INSERT to retrieve the data."
+			"Views do not support returning clauses in INSERT statements. " +
+			"Use a separate SELECT query after the INSERT to retrieve the data."
 	);
 });
 
@@ -30,8 +26,8 @@ test("should throw error when using returning() on view insert", async () => {
 			.compile();
 	}).toThrow(
 		"Cannot use returning() or returningAll() with INSERT operations on view 'thread'. " +
-		"Views do not support returning clauses in INSERT statements. " +
-		"Use a separate SELECT query after the INSERT to retrieve the data."
+			"Views do not support returning clauses in INSERT statements. " +
+			"Use a separate SELECT query after the INSERT to retrieve the data."
 	);
 });
 
@@ -40,10 +36,7 @@ test("should allow insert without returning on views", async () => {
 
 	// This should not throw
 	expect(() => {
-		lix.db
-			.insertInto("change_set")
-			.defaultValues()
-			.compile();
+		lix.db.insertInto("change_set").defaultValues().compile();
 	}).not.toThrow();
 });
 

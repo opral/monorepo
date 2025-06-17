@@ -1,5 +1,3 @@
-
-
 import { SuggestionPlugin } from "@udecode/plate-suggestion/react";
 import remarkGfm from "remark-gfm";
 import { sanatizeUnknownNodeStructuresInTree } from "./sanitizeUnsupported";
@@ -11,11 +9,12 @@ import {
 	MdParagraph,
 } from "@udecode/plate-markdown";
 import { TText } from "@udecode/plate";
+import { AIChatPlugin } from "@udecode/plate-ai/react";
+import { EMPTY_DOCUMENT_PROMPT_KEY } from "../empty-document-prompt-plugin";
 
 export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 	options: {
-		
-		disallowedNodes: [SuggestionPlugin.key],
+		disallowedNodes: [SuggestionPlugin.key, EMPTY_DOCUMENT_PROMPT_KEY],
 		remarkPlugins: [
 			remarkGfm as any,
 			// remarkMdx,
@@ -196,10 +195,17 @@ export const ExtendedMarkdownPlugin = MarkdownPlugin.configure({
 					) as MdParagraph["children"];
 
 					if (convertedNodes.length === 0) {
-						return {
-							type: "html",
-							value: "<br />",
-						} as any;
+						// @ts-expect-error -- options not exposed by plate
+						const streaming = options.editor.getOption(
+							AIChatPlugin,
+							"streaming"
+						);
+						if (!streaming) {
+							return {
+								type: "html",
+								value: "<br />",
+							} as any;
+						}
 					} else if (
 						convertedNodes.length === 1 &&
 						enrichedChildren.at(-1)!.type === "break"

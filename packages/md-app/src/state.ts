@@ -1,9 +1,9 @@
 import {
 	openLixInMemory,
-	Account,
 	switchAccount,
 	Lix,
 	Version,
+	LixAccount,
 } from "@lix-js/sdk";
 import { atom, createStore } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -180,17 +180,6 @@ export const lixAtom = atom(async (get) => {
 	// 	.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
 	// 	.execute();
 
-	// Check if there is a file in lix
-	let file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
-	if (!file) {
-		await setupWelcomeFile(lix);
-		file = await lix.db.selectFrom("file").selectAll().executeTakeFirst();
-	}
-	if (file && !get(fileIdSearchParamsAtom)) {
-		// Set the file ID as searchParams without page reload
-		updateUrlParams({ f: file.id });
-	}
-
 	await saveLixToOpfs({ lix });
 
 	// mismatch in id, update URL without full reload if possible
@@ -208,7 +197,9 @@ export const lixAtom = atom(async (get) => {
 
 	await initLixInspector({
 		lix,
-		show: import.meta.env.DEV,
+		show: localStorage.getItem("lix-inspector:show")
+			? localStorage.getItem("lix-inspector:show") === "true"
+			: import.meta.env.DEV,
 	});
 
 	// lix.sqlite.createFunction("handle_save_lix_to_opfs", () => {
@@ -291,7 +282,7 @@ export const accountsAtom = atom(async (get) => {
 const ACTIVE_ACCOUNT_STORAGE_KEY = "active_account";
 
 // Helper function to switch active account
-export const switchActiveAccount = async (lix: Lix, account: Account) => {
+export const switchActiveAccount = async (lix: Lix, account: LixAccount) => {
 	await lix.db.transaction().execute(async (trx) => {
 		// in case the user switched the lix and this lix does not have
 		// the account yet, then insert it.

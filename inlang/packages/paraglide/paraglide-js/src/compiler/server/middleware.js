@@ -19,7 +19,7 @@ import * as runtime from "./runtime.js";
  *
  * @param {Request} request - The incoming request object
  * @param {(args: { request: Request, locale: import("./runtime.js").Locale }) => T | Promise<T>} resolve - Function to handle the request
- *
+ * @param {{ onRedirect:(response: Response) => void }} [callbacks] - Callbacks to handle events from middleware
  * @returns {Promise<Response>}
  *
  * @example
@@ -61,7 +61,7 @@ import * as runtime from "./runtime.js";
  * };
  * ```
  */
-export async function paraglideMiddleware(request, resolve) {
+export async function paraglideMiddleware(request, resolve, callbacks) {
 	if (!runtime.disableAsyncLocalStorage && !runtime.serverAsyncLocalStorage) {
 		const { AsyncLocalStorage } = await import("async_hooks");
 		runtime.overwriteServerAsyncLocalStorage(new AsyncLocalStorage());
@@ -80,7 +80,23 @@ export async function paraglideMiddleware(request, resolve) {
 	) {
 		const localizedUrl = runtime.localizeUrl(request.url, { locale });
 		if (normalizeURL(localizedUrl.href) !== normalizeURL(request.url)) {
-			return Response.redirect(localizedUrl, 307);
+			// Create headers object with Vary header if preferredLanguage strategy is used
+			/** @type {Record<string, string>} */
+			const headers = {};
+			if (runtime.strategy.includes("preferredLanguage")) {
+				headers["Vary"] = "Accept-Language";
+			}
+
+			const response = new Response(null, {
+				status: 307,
+				headers: {
+					Location: localizedUrl.href,
+					...headers,
+				},
+			});
+
+			callbacks?.onRedirect(response);
+			return response;
 		}
 	}
 

@@ -49,6 +49,7 @@ export const compileProject = async (args: {
 			bundle,
 			fallbackMap,
 			messageReferenceExpression: outputStructure.messageReferenceExpression,
+			settings,
 		})
 	);
 

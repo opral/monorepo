@@ -20,7 +20,7 @@ services:
     type: web
     runtime: static
     branch: main
-    staticPublishPath: ./packages/lix-website/dist
+    staticPublishPath: ./packages/lix/website/dist
     envVars:
       - fromGroup: production
       - key: PORT
@@ -105,6 +105,7 @@ services:
       - fromGroup: production
     buildFilter:
       paths:
+        - inlang/packages/server/**
         - inlang/packages/website/**
         - inlang/packages/marketplace-registry/**
         - inlang/packages/**/marketplace-manifest.json
@@ -230,3 +231,17 @@ services:
       - path: "/*"
         name: Access-Control-Allow-Headers
         value: Content-Type
+
+  - name: flashtype.ai
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: ./packages/md-app/dist
+    envVars:
+      - fromGroup: production
+    buildCommand: pnpm install && pnpm run --filter md-app... build
+    buildFilter:
+      paths:
+        - packages/md-app/**
+    domains:
+      - flashtype.ai

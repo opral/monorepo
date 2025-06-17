@@ -21,6 +21,11 @@ test("materializeFileData with plugin that has changes", async () => {
 		providePlugins: [mockPlugin],
 	});
 
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
 	// Insert a file
 	await lix.db
 		.insertInto("file")
@@ -41,12 +46,7 @@ test("materializeFileData with plugin that has changes", async () => {
 			plugin_key: "test-plugin-2",
 			snapshot_content: { value: "test-content" },
 			schema_version: "1.0",
-			version_id: (
-				await lix.db
-					.selectFrom("active_version")
-					.select("version_id")
-					.executeTakeFirstOrThrow()
-			).version_id,
+			version_id: activeVersion.version_id,
 		})
 		.execute();
 
@@ -62,9 +62,9 @@ test("materializeFileData with plugin that has changes", async () => {
 		file: {
 			id: file.id,
 			path: file.path,
-			state_version_id: file.state_version_id,
 			metadata: file.metadata,
 		},
+		versionId: activeVersion.version_id,
 	});
 
 	expect(result).toBeInstanceOf(Uint8Array);
@@ -90,12 +90,6 @@ test("materializeFileData throws when plugin has no applyChanges", async () => {
 			id: "test-file-no-apply",
 			data: new TextEncoder().encode("initial-data"),
 			path: "/test.txt",
-			state_version_id: (
-				await lix.db
-					.selectFrom("active_version")
-					.select("version_id")
-					.executeTakeFirstOrThrow()
-			).version_id,
 		})
 		.execute();
 

@@ -18,9 +18,9 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 
 		// Check if there are any working change set elements to checkpoint
 		const workingElements = await trx
-			.selectFrom("change_set_element")
+			.selectFrom("change_set_element_all")
 			.where("change_set_id", "=", workingChangeSetId)
-			.where("state_version_id", "=", "global")
+			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
@@ -32,21 +32,21 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 
 		// 1. Add ancestry edge from parent to working change set (working becomes checkpoint)
 		await trx
-			.insertInto("change_set_edge")
+			.insertInto("change_set_edge_all")
 			.values({
 				parent_id: parentChangeSetId,
 				child_id: workingChangeSetId,
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			})
 			.execute();
 
 		// 2. Create new empty working change set for continued work
 		const newWorkingChangeSetId = nanoid();
 		await trx
-			.insertInto("change_set")
+			.insertInto("change_set_all")
 			.values({
 				id: newWorkingChangeSetId,
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			})
 			.execute();
 
@@ -58,18 +58,17 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			.executeTakeFirstOrThrow();
 
 		await trx
-			.insertInto("change_set_label")
+			.insertInto("change_set_label_all")
 			.values({
 				change_set_id: workingChangeSetId,
 				label_id: checkpointLabel.id,
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			})
 			.execute();
 
 		await trx
 			.updateTable("version")
 			.where("id", "=", activeVersion.id)
-			.where("state_version_id", "=", "global")
 			.set({
 				change_set_id: workingChangeSetId, // becomes checkpoint
 				working_change_set_id: newWorkingChangeSetId,

@@ -27,7 +27,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 			detectedChanges.push({
 				schema: JSONPropertySchema,
 				entity_id: key,
-				snapshot_content: undefined,
+				snapshot_content: null,
 			});
 		} else if (
 			JSON.stringify(flattenedBefore[key]) !==

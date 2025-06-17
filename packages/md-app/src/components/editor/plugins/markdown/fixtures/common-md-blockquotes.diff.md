@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 7/12 (58%)
+- 🟢 Perfect roundtrip (input = output): 8/12 (67%)
 - 🟡 Acceptable transformation (output ≠ input, output = expected): 4/12 (33%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/12 (8%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/12 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (8 perfect, 4 acceptable)
 
 ---
 
@@ -95,13 +95,11 @@ in the source Markdown.</code></pre>
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - blockquote - inline formatting</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - blockquote - inline formatting</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -109,31 +107,11 @@ in the source Markdown.</code></pre>
 > This blockquote contains **formatted** text with _emphasis_ and `code`.
 
 </td>
-<td>
-
-> This blockquote contains **formatted** text with *emphasis* and `code`.
-
-</td>
-<td>
-
-> This blockquote contains **formatted** text with *emphasis* and `code`.
-
-</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>&gt; This blockquote contains **formatted** text with _emphasis_ and `code`.</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; This blockquote contains **formatted** text with *emphasis* and `code`.</code></pre>
-
-</td>
-<td>
-
-<pre><code>&gt; This blockquote contains **formatted** text with *emphasis* and `code`.</code></pre>
 
 </td>
 </tr>
@@ -289,8 +267,8 @@ in the source Markdown.</code></pre>
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - blockquote - multiple lines - using the break tag</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - blockquote - multiple lines - using the break tag</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -316,8 +294,9 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-> Blockquote with multiple lines:<br />
-> This is the second line in the blockquote.<br />This is the third line in **the** blockquote.  
+> Blockquote with multiple lines:\
+> This is the second line in the blockquote.\
+> This is the third line in **the** blockquote.\
 > This is the fourth line in the blockquote.
 
 </td>
@@ -340,8 +319,9 @@ in the source Markdown.</code></pre>
 </td>
 <td>
 
-<pre><code>&gt; Blockquote with multiple lines:&lt;br /&gt;
-&gt; This is the second line in the blockquote.&lt;br /&gt;This is the third line in **the** blockquote.  
+<pre><code>&gt; Blockquote with multiple lines:\
+&gt; This is the second line in the blockquote.\
+&gt; This is the third line in **the** blockquote.\
 &gt; This is the fourth line in the blockquote.</code></pre>
 
 </td>

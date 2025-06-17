@@ -5,16 +5,21 @@ import {
 	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 	type ChangeSetElementView,
+	type ChangeSetElementAllView,
 	type ChangeSetView,
+	type ChangeSetAllView,
 	type ChangeSetEdgeView,
+	type ChangeSetEdgeAllView,
 	type ChangeSetLabelView,
+	type ChangeSetLabelAllView,
 	type ChangeSetThreadView,
+	type ChangeSetThreadAllView,
 } from "../change-set/schema.js";
 import {
-	LixActiveVersionSchema,
 	LixVersionSchema,
-	type ActiveVersionView,
+	type ActiveVersionTable,
 	type VersionView,
+	type VersionAllView,
 } from "../version/schema.js";
 import {
 	LixSnapshotSchema,
@@ -24,31 +29,48 @@ import {
 import {
 	LixStoredSchemaSchema,
 	type StoredSchemaView,
+	type StoredSchemaAllView,
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { LixKeyValueSchema, type KeyValueView } from "../key-value/schema.js";
+import {
+	LixKeyValueSchema,
+	type KeyValueView,
+	type KeyValueAllView,
+} from "../key-value/schema.js";
 import type {
 	StateView,
 	InternalStateCacheTable,
 	InternalChangeInTransactionTable,
 } from "../state/schema.js";
-import { LixFileSchema, type LixFileView } from "../file/schema.js";
-import { LixLogSchema, type LogView } from "../log/schema.js";
+import {
+	LixFileSchema,
+	type LixFileView,
+	type LixFileAllView,
+} from "../file/schema.js";
+import { LixLogSchema, type LogView, type LogAllView } from "../log/schema.js";
 import {
 	LixAccountSchema,
 	type AccountView,
+	type AccountAllView,
 	type ActiveAccountTable,
 } from "../account/schema.js";
 import {
 	LixChangeAuthorSchema,
 	type ChangeAuthorView,
+	type ChangeAuthorAllView,
 } from "../change-author/schema.js";
-import { LixLabelSchema, type LabelView } from "../label/schema.js";
+import {
+	LixLabelSchema,
+	type LabelView,
+	type LabelAllView,
+} from "../label/schema.js";
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,
 	type ThreadView,
 	type ThreadCommentView,
+	type ThreadAllView,
+	type ThreadCommentAllView,
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 
@@ -65,7 +87,6 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
-	active_version: LixActiveVersionSchema,
 	version: LixVersionSchema,
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
@@ -86,44 +107,60 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 
 export type LixDatabaseSchema = {
 	state: StateView;
+	state_active: StateView;
 	// account
 	account: AccountView;
+	account_all: AccountAllView;
 	active_account: ActiveAccountTable;
 
 	// snapshot
 	snapshot: SnapshotView;
 	label: LabelView;
+	label_all: LabelAllView;
 
 	// file
 	file: LixFileView;
+	file_all: LixFileAllView;
 
 	// change
 	change: ChangeView;
 	change_author: ChangeAuthorView;
+	change_author_all: ChangeAuthorAllView;
 
 	stored_schema: StoredSchemaView;
+	stored_schema_all: StoredSchemaAllView;
 
 	// change set
 	change_set: ChangeSetView;
+	change_set_all: ChangeSetAllView;
 	change_set_element: ChangeSetElementView;
+	change_set_element_all: ChangeSetElementAllView;
 	change_set_edge: ChangeSetEdgeView;
+	change_set_edge_all: ChangeSetEdgeAllView;
 	change_set_label: ChangeSetLabelView;
+	change_set_label_all: ChangeSetLabelAllView;
 	change_set_thread: ChangeSetThreadView;
+	change_set_thread_all: ChangeSetThreadAllView;
 
 	// key value
 	key_value: KeyValueView;
+	key_value_all: KeyValueAllView;
 
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;
 
 	// thread
 	thread: ThreadView;
+	thread_all: ThreadAllView;
 	thread_comment: ThreadCommentView;
+	thread_comment_all: ThreadCommentAllView;
 
 	// version
 	version: VersionView;
-	active_version: ActiveVersionView;
+	version_all: VersionAllView;
+	active_version: ActiveVersionTable;
 
 	// logging
 	log: LogView;
+	log_all: LogAllView;
 };

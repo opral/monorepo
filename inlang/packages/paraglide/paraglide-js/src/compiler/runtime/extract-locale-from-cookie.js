@@ -4,7 +4,7 @@ import { cookieName } from "./variables.js";
 /**
  * Extracts a cookie from the document.
  *
- * Will return undefined if the docuement is not available or if the cookie is not set.
+ * Will return undefined if the document is not available or if the cookie is not set.
  * The `document` object is not available in server-side rendering, so this function should not be called in that context.
  *
  * @returns {string | undefined}

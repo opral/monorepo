@@ -1,4 +1,9 @@
-import type { Bundle, BundleNested, Message } from "@inlang/sdk";
+import type {
+	Bundle,
+	BundleNested,
+	Message,
+	ProjectSettings,
+} from "@inlang/sdk";
 import { compileMessage } from "./compile-message.js";
 import type { Compiled } from "./types.js";
 import { jsDocBundleFunctionTypes } from "./jsdoc-types.js";
@@ -21,6 +26,7 @@ export const compileBundle = (args: {
 	bundle: BundleNested;
 	fallbackMap: Record<string, string | undefined>;
 	messageReferenceExpression: (locale: string, bundleId: string) => string;
+	settings?: ProjectSettings;
 }): CompiledBundleWithMessages => {
 	const compiledMessages: Record<string, Compiled<Message>> = {};
 
@@ -44,6 +50,7 @@ export const compileBundle = (args: {
 			bundle: args.bundle,
 			availableLocales: Object.keys(args.fallbackMap),
 			messageReferenceExpression: args.messageReferenceExpression,
+			settings: args.settings,
 		}),
 		messages: compiledMessages,
 	};
@@ -62,6 +69,10 @@ const compileBundleFunction = (args: {
 	 * The message reference expression
 	 */
 	messageReferenceExpression: (locale: string, bundleId: string) => string;
+	/**
+	 * The project settings
+	 */
+	settings?: ProjectSettings;
 }): Compiled<Bundle> => {
 	const inputs = args.bundle.declarations.filter(
 		(decl) => decl.type === "input-variable"
@@ -71,6 +82,9 @@ const compileBundleFunction = (args: {
 	const safeBundleId = toSafeModuleId(args.bundle.id);
 
 	const isSafeBundleId = safeBundleId === args.bundle.id;
+
+	const isFullyTranslated =
+		args.availableLocales.length === args.settings?.locales.length;
 
 	let code = `/**
 * This function has been compiled by [Paraglide JS](https://inlang.com/m/gerre34r).
@@ -91,10 +105,9 @@ ${isSafeBundleId ? "export " : ""}const ${safeBundleId} = (inputs${hasInputs ? "
 	${args.availableLocales
 		.map(
 			(locale, index) =>
-				`${index > 0 ? "	" : ""}if (locale === "${locale}") return ${args.messageReferenceExpression(locale, args.bundle.id)}(inputs)`
+				`${index > 0 ? "	" : ""}${!isFullyTranslated || index < args.availableLocales.length - 1 ? `if (locale === "${locale}") ` : ""}return ${args.messageReferenceExpression(locale, args.bundle.id)}(inputs)`
 		)
-		.join("\n")}
-	return "${args.bundle.id}"
+		.join("\n")}${!isFullyTranslated ? `\n	return "${args.bundle.id}"` : ""}
 };`;
 
 	if (isSafeBundleId === false) {

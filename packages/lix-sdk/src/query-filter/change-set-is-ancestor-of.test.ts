@@ -107,7 +107,7 @@ test("can be combined with where(id = X) to check specific ancestry", async () =
 	// Create chain: cs1 <- cs2 <- cs3
 	const cs1 = await createChangeSet({
 		lix,
-		id: "cs1", 
+		id: "cs1",
 		elements: [],
 	});
 	const cs2 = await createChangeSet({

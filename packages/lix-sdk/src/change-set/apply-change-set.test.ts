@@ -3,7 +3,10 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { createSnapshot } from "../snapshot/create-snapshot.js";
-import { mockJsonPlugin, MockJsonPropertySchema } from "../plugin/mock-json-plugin.js";
+import {
+	mockJsonPlugin,
+	MockJsonPropertySchema,
+} from "../plugin/mock-json-plugin.js";
 import type { Change } from "../change/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { createCheckpoint } from "./create-checkpoint.js";
@@ -39,7 +42,7 @@ test("it applies lix own entity changes", async () => {
 
 	const changeSet = await createChangeSet({
 		lix,
-		state_version_id: "global",
+		lixcol_version_id: "global",
 		elements: [
 			{
 				change_id: mockKeyValueChange.id,
@@ -167,7 +170,7 @@ test("throws an error if plugin does not exist", async () => {
 	// Create a change set
 	const changeSet = await createChangeSet({
 		lix,
-		state_version_id: "global",
+		lixcol_version_id: "global",
 		elements: [
 			{
 				change_id: change.id,
@@ -232,7 +235,7 @@ test("throws an error if plugin does not support applying changes", async () => 
 	// Create a change set
 	const changeSet = await createChangeSet({
 		lix,
-		state_version_id: "global",
+		lixcol_version_id: "global",
 		elements: [
 			{
 				change_id: change.id,
@@ -343,10 +346,10 @@ test.skip("it should delete entities but not files when applying entity deletion
 
 	// Insert the schema that the mockJsonPlugin uses
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			value: MockJsonPropertySchema,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -404,7 +407,7 @@ test.skip("it should delete entities but not files when applying entity deletion
 	const addChangeSet = await createChangeSet({
 		lix,
 		id: "cs-add",
-		state_version_id: "global",
+		lixcol_version_id: "global",
 		elements: [
 			{
 				change_id: "c1",
@@ -460,7 +463,7 @@ test.skip("it should delete entities but not files when applying entity deletion
 	const deleteChangeSet = await createChangeSet({
 		lix,
 		id: "cs-delete-entity",
-		state_version_id: "global",
+		lixcol_version_id: "global",
 		elements: [
 			{
 				change_id: "c3",
@@ -495,4 +498,3 @@ test.skip("it should delete entities but not files when applying entity deletion
 		e2: "Entity 2", // e1 should be gone, e2 should remain
 	});
 });
-

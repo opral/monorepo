@@ -1422,8 +1422,8 @@ test("should handle deletion validation for change sets referenced by versions",
 
 	// Create a change set
 	await lix.db
-		.insertInto("change_set")
-		.values({ id: "cs_referenced", state_version_id: "global" })
+		.insertInto("change_set_all")
+		.values({ id: "cs_referenced", lixcol_version_id: "global" })
 		.execute();
 
 	// Create a version that references the change set
@@ -1990,11 +1990,11 @@ test("should prevent foreign key references to inherited entities from different
 
 	// Create a thread in global context
 	await lix.db
-		.insertInto("thread")
+		.insertInto("thread_all")
 		.values({
 			id: "global_thread",
 			metadata: { title: "Global Thread" },
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -2045,10 +2045,10 @@ test("should prevent change set elements from referencing change sets defined in
 
 	// Create a change set in global context
 	await lix.db
-		.insertInto("change_set")
+		.insertInto("change_set_all")
 		.values({
 			id: "global_change_set",
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		})
 		.execute();
 

@@ -1,5 +1,4 @@
 import {
-	fileQueueSettled,
 	newLixFile,
 	openLixInMemory,
 	toBlob,
@@ -62,7 +61,6 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 			.execute();
 	}
 
-	await fileQueueSettled({ lix });
 
 	return await toBlob({ lix });
 }

@@ -8,7 +8,7 @@ export function storeDetectedChangeSchema(args: {
 }): void {
 	const schemaKey = args.schema["x-lix-key"];
 	const schemaVersion = args.schema["x-lix-version"];
-	
+
 	// Check if schema already exists
 	const existingSchema = executeSync({
 		lix: args.lix,
@@ -23,15 +23,16 @@ export function storeDetectedChangeSchema(args: {
 	if (existingSchema) {
 		// Compare schemas using JSON.stringify for strict determinism
 		// Handle case where stored value might already be stringified
-		const existingSchemaJson = typeof existingSchema.value === 'string' 
-			? existingSchema.value 
-			: JSON.stringify(existingSchema.value);
+		const existingSchemaJson =
+			typeof existingSchema.value === "string"
+				? existingSchema.value
+				: JSON.stringify(existingSchema.value);
 		const newSchemaJson = JSON.stringify(args.schema);
-		
+
 		if (existingSchemaJson !== newSchemaJson) {
 			throw new Error(
 				`Schema differs from stored version for key '${schemaKey}' version '${schemaVersion}'. ` +
-				`Please bump the schema version (x-lix-version) to use a different schema.`
+					`Please bump the schema version (x-lix-version) to use a different schema.`
 			);
 		}
 		// Schemas match, continue

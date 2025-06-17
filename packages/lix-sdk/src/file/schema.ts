@@ -1,10 +1,10 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
-import {
-	handleFileInsert,
-	handleFileUpdate,
-} from "./file-handlers.js";
+import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
 import { materializeFileData } from "./materialize-file-data.js";
-import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyFileDatabaseSchema(
@@ -31,8 +31,8 @@ export function applyFileDatabaseSchema(
 					path: args[1],
 					data: args[2],
 					metadata: metadata,
-					state_version_id: args[4],
 				},
+				versionId: args[4],
 			});
 			return result;
 		},
@@ -60,8 +60,8 @@ export function applyFileDatabaseSchema(
 					path: args[1],
 					data: args[2],
 					metadata: metadata,
-					state_version_id: args[4],
 				},
+				versionId: args[4],
 			});
 			return result;
 		},
@@ -78,9 +78,9 @@ export function applyFileDatabaseSchema(
 				file: {
 					id: args[0],
 					path: args[1],
-					state_version_id: args[2],
 					metadata: args[3],
 				},
+				versionId: args[2],
 			});
 		},
 	});
@@ -97,8 +97,27 @@ export function applyFileDatabaseSchema(
 			json_extract(snapshot_content, '$.metadata')
 		) AS data,
 		json_extract(snapshot_content, '$.metadata') AS metadata,
-		version_id AS state_version_id,
-		inherited_from_version_id AS state_inherited_from_version_id
+		inherited_from_version_id AS lixcol_inherited_from_version_id,
+		created_at AS lixcol_created_at,
+		updated_at AS lixcol_updated_at
+	FROM state_active
+	WHERE schema_key = 'lix_file';
+
+  CREATE VIEW IF NOT EXISTS file_all AS
+	SELECT
+		json_extract(snapshot_content, '$.id') AS id,
+		json_extract(snapshot_content, '$.path') AS path,
+		materialize_file_data(
+			json_extract(snapshot_content, '$.id'), 
+			json_extract(snapshot_content, '$.path'), 
+			version_id,
+			json_extract(snapshot_content, '$.metadata')
+		) AS data,
+		json_extract(snapshot_content, '$.metadata') AS metadata,
+		version_id AS lixcol_version_id,
+		inherited_from_version_id AS lixcol_inherited_from_version_id,
+		created_at AS lixcol_created_at,
+		updated_at AS lixcol_updated_at
 	FROM state
 	WHERE schema_key = 'lix_file';
 
@@ -111,7 +130,7 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
-        COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
+        (SELECT version_id FROM active_version)
       );
   END;
 
@@ -123,7 +142,7 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
-        COALESCE(NEW.state_version_id, (SELECT version_id FROM active_version))
+        (SELECT version_id FROM active_version)
       );
   END;
 
@@ -133,14 +152,54 @@ export function applyFileDatabaseSchema(
       -- Delete all non-lix_file entities associated with this file first
       DELETE FROM state
       WHERE file_id = OLD.id
-        AND version_id = OLD.state_version_id
+        AND version_id = (SELECT version_id FROM active_version)
         AND schema_key != 'lix_file';
         
       -- Delete the file entity itself
       DELETE FROM state
       WHERE entity_id = OLD.id
         AND schema_key = 'lix_file'
-        AND version_id = OLD.state_version_id;
+        AND version_id = (SELECT version_id FROM active_version);
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS file_all_insert
+  INSTEAD OF INSERT ON file_all
+  BEGIN
+      SELECT handle_file_insert(
+        COALESCE(NEW.id, nano_id()),
+        NEW.path,
+        NEW.data,
+        NEW.metadata,
+        COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
+      );
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS file_all_update
+  INSTEAD OF UPDATE ON file_all
+  BEGIN
+      SELECT handle_file_update(
+        NEW.id,
+        NEW.path,
+        NEW.data,
+        NEW.metadata,
+        COALESCE(NEW.lixcol_version_id, OLD.lixcol_version_id)
+      );
+  END;
+
+  CREATE TRIGGER IF NOT EXISTS file_all_delete
+  INSTEAD OF DELETE ON file_all
+  BEGIN
+      -- Delete all non-lix_file entities associated with this file first
+      DELETE FROM state
+      WHERE file_id = OLD.id
+        AND version_id = OLD.lixcol_version_id
+        AND schema_key != 'lix_file';
+        
+      -- Delete the file entity itself
+      DELETE FROM state
+      WHERE entity_id = OLD.id
+        AND schema_key = 'lix_file'
+        AND version_id = OLD.lixcol_version_id;
   END;
 `);
 }
@@ -177,7 +236,7 @@ LixFileSchema satisfies LixSchemaDefinition;
  */
 export type LixFileType = FromLixSchemaDefinition<typeof LixFileSchema>;
 
-// Database view type (includes operational columns)
+// Database view type (includes operational columns) - active version only
 export type LixFileView = {
 	id: Generated<string>;
 	/**
@@ -192,13 +251,35 @@ export type LixFileView = {
 	path: string;
 	data: Uint8Array;
 	metadata: Record<string, any> | null;
-	state_version_id: Generated<string>;
-	state_inherited_from_version_id: Generated<string | null>;
+	lixcol_inherited_from_version_id: Generated<string | null>;
+	lixcol_created_at: Generated<string>;
+	lixcol_updated_at: Generated<string>;
+};
+
+// Database view type for cross-version operations
+export type LixFileAllView = {
+	id: Generated<string>;
+	/**
+	 * The path of the file.
+	 *
+	 * The path is currently defined as a subset of RFC 3986.
+	 * Any path can be tested with the `isValidFilePath()` function.
+	 *
+	 * @example
+	 *   - `/path/to/file.txt`
+	 */
+	path: string;
+	data: Uint8Array;
+	metadata: Record<string, any> | null;
+	lixcol_version_id: Generated<string>;
+	lixcol_inherited_from_version_id: Generated<string | null>;
+	lixcol_created_at: Generated<string>;
+	lixcol_updated_at: Generated<string>;
 };
 
 /**
  * Kysely operation types for the file view.
- * 
+ *
  * These use the "Lix" prefix to avoid collision with JavaScript's built-in File type
  * and to clearly distinguish them as Lix-specific database view operations rather
  * than pure business logic types.

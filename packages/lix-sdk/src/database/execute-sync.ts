@@ -4,12 +4,12 @@ import type { Lix } from "../lix/open-lix.js";
  * Execute a query synchronously.
  *
  * ⚠️  MAJOR WARNING: This function is a PURE SQL LAYER without transformations!
- * 
+ *
  * - JSON columns return as RAW JSON STRINGS, not parsed objects
  * - You must manually parse/stringify JSON data
  * - No automatic type conversions happen
  * - Results are raw SQLite values
- * 
+ *
  * Only use this for triggers, database functions, or when you specifically
  * need synchronous database access and understand you're working with raw SQL.
  *

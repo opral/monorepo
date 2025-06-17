@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
+import {
+	lixUnknownFileFallbackPlugin,
+	LixUnknownFileSchema,
+} from "./unknown-file-fallback-plugin.js";
 
 // From https://developer.mozilla.org/en-US/docs/Glossary/Base64#the_unicode_problem.
 function bytesToBase64(bytes: Uint8Array): string {
@@ -27,14 +30,11 @@ describe("detectChanges", () => {
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]).toMatchObject({
-			schema: {
-				"x-lix-key": "lix_unknown_file",
-				"x-lix-version": "1.0",
-			},
+			schema: LixUnknownFileSchema,
 			entity_id: "file1",
-			snapshot_content: bytesToBase64(
-				new TextEncoder().encode("updated content")
-			),
+			snapshot_content: {
+				value: bytesToBase64(new TextEncoder().encode("updated content")),
+			},
 		});
 	});
 
@@ -59,14 +59,11 @@ describe("detectChanges", () => {
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]).toMatchObject({
-			schema: {
-				"x-lix-key": "lix_unknown_file",
-				"x-lix-version": "1.0",
-			},
+			schema: LixUnknownFileSchema,
 			entity_id: "file1",
-			snapshot_content: bytesToBase64(
-				new TextEncoder().encode("new file content")
-			),
+			snapshot_content: {
+				value: bytesToBase64(new TextEncoder().encode("new file content")),
+			},
 		});
 	});
 
@@ -82,7 +79,9 @@ describe("detectChanges", () => {
 		expect(changes).toHaveLength(1);
 		expect(changes[0]).toMatchObject({
 			entity_id: "file1",
-			snapshot_content: bytesToBase64(new TextEncoder().encode("new content")),
+			snapshot_content: {
+				value: bytesToBase64(new TextEncoder().encode("new content")),
+			},
 		});
 	});
 
@@ -99,7 +98,9 @@ describe("detectChanges", () => {
 		});
 
 		expect(changes).toHaveLength(1);
-		expect(changes[0]?.snapshot_content).toEqual(bytesToBase64(binaryData2));
+		expect(changes[0]?.snapshot_content.value).toEqual(
+			bytesToBase64(binaryData2)
+		);
 	});
 
 	it("should handle empty files", () => {
@@ -112,7 +113,7 @@ describe("detectChanges", () => {
 		});
 
 		expect(changes).toHaveLength(1);
-		expect(changes[0]?.snapshot_content).toEqual(
+		expect(changes[0]?.snapshot_content.value).toEqual(
 			bytesToBase64(new Uint8Array([]))
 		);
 	});
@@ -130,12 +131,11 @@ describe("detectChanges", () => {
 
 		expect(changes).toHaveLength(1);
 		expect(changes[0]).toMatchObject({
-			schema: {
-				"x-lix-key": "lix_unknown_file",
-				"x-lix-version": "1.0",
-			},
+			schema: LixUnknownFileSchema,
 			entity_id: "file1",
-			snapshot_content: bytesToBase64(new TextEncoder().encode(unicodeContent)),
+			snapshot_content: {
+				value: bytesToBase64(new TextEncoder().encode(unicodeContent)),
+			},
 		});
 
 		// Verify the content can be round-tripped correctly
@@ -176,7 +176,9 @@ describe("applyChanges", () => {
 				plugin_key: "lix_unknown_file_fallback_plugin",
 				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
-				snapshot_content: bytesToBase64(new TextEncoder().encode(originalData)),
+				snapshot_content: {
+					value: bytesToBase64(new TextEncoder().encode(originalData)),
+				},
 				version_id: "test-version",
 			},
 		] as any;
@@ -200,7 +202,7 @@ describe("applyChanges", () => {
 				plugin_key: "lix_unknown_file_fallback_plugin",
 				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
-				snapshot_content: bytesToBase64(binaryData),
+				snapshot_content: { value: bytesToBase64(binaryData) },
 				version_id: "test-version",
 			},
 		] as any;
@@ -213,7 +215,7 @@ describe("applyChanges", () => {
 		expect(result.fileData).toEqual(binaryData);
 	});
 
-	// The plugin should throw when no changes are provided because we snapshot 
+	// The plugin should throw when no changes are provided because we snapshot
 	// the entire file, so there must always be exactly one change per file
 	it("should throw when no changes are provided", () => {
 		expect(() => {
@@ -221,7 +223,9 @@ describe("applyChanges", () => {
 				file: createTestFile("test-file", ""),
 				changes: [],
 			});
-		}).toThrow("Expected exactly one change for file test-file, but received no changes");
+		}).toThrow(
+			"Expected exactly one change for file test-file, but received no changes"
+		);
 	});
 
 	// The plugin should throw when the change doesn't match the file ID because
@@ -236,7 +240,9 @@ describe("applyChanges", () => {
 				plugin_key: "lix_unknown_file_fallback_plugin",
 				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
-				snapshot_content: "some content",
+				snapshot_content: {
+					value: "some content",
+				},
 				version_id: "test-version",
 			},
 		] as any;
@@ -246,7 +252,9 @@ describe("applyChanges", () => {
 				file: createTestFile("test-file", ""),
 				changes,
 			});
-		}).toThrow("Expected change for file test-file, but received change for entity different-file-id");
+		}).toThrow(
+			"Expected change for file test-file, but received change for entity different-file-id"
+		);
 	});
 
 	it("should handle valid base64 content", () => {
@@ -260,7 +268,9 @@ describe("applyChanges", () => {
 				plugin_key: "lix_unknown_file_fallback_plugin",
 				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
-				snapshot_content: "", // Empty base64 string
+				snapshot_content: {
+					value: "",
+				},
 				version_id: "test-version",
 			},
 		] as any;
@@ -273,7 +283,7 @@ describe("applyChanges", () => {
 		expect(result.fileData).toEqual(new Uint8Array());
 	});
 
-	// The plugin should throw when receiving more than one change because 
+	// The plugin should throw when receiving more than one change because
 	// we snapshot the entire file as a single blob, not multiple pieces
 	it("should throw when receiving more than one change", () => {
 		const changes = [
@@ -285,7 +295,9 @@ describe("applyChanges", () => {
 				plugin_key: "lix_unknown_file_fallback_plugin",
 				snapshot_id: "test-snapshot-1",
 				created_at: "2023-01-01T00:00:00Z",
-				snapshot_content: bytesToBase64(new TextEncoder().encode("content1")),
+				snapshot_content: {
+					value: bytesToBase64(new TextEncoder().encode("content1")),
+				},
 				version_id: "test-version",
 			},
 			{
@@ -296,7 +308,9 @@ describe("applyChanges", () => {
 				plugin_key: "lix_unknown_file_fallback_plugin",
 				snapshot_id: "test-snapshot-2",
 				created_at: "2023-01-01T00:00:00Z",
-				snapshot_content: bytesToBase64(new TextEncoder().encode("content2")),
+				snapshot_content: {
+					value: bytesToBase64(new TextEncoder().encode("content2")),
+				},
 				version_id: "test-version",
 			},
 		] as any;
@@ -306,7 +320,9 @@ describe("applyChanges", () => {
 				file: createTestFile("test-file", ""),
 				changes,
 			});
-		}).toThrow("Expected exactly one change for file test-file, but received 2 changes");
+		}).toThrow(
+			"Expected exactly one change for file test-file, but received 2 changes"
+		);
 	});
 
 	// The plugin should throw when snapshot_content is not a string because
@@ -321,7 +337,7 @@ describe("applyChanges", () => {
 				plugin_key: "lix_unknown_file_fallback_plugin",
 				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
-				snapshot_content: { not: "a string" },
+				snapshot_content: { value: { not: "a string" } },
 				version_id: "test-version",
 			},
 		] as any;
@@ -331,7 +347,9 @@ describe("applyChanges", () => {
 				file: createTestFile("test-file", ""),
 				changes,
 			});
-		}).toThrow("Expected base64 string content for file test-file, but received object");
+		}).toThrow(
+			"Expected base64 string content for file test-file, but received object"
+		);
 	});
 });
 

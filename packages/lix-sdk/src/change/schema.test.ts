@@ -243,11 +243,11 @@ describe("change", () => {
 
 		// Test various invalid timezone formats
 		const invalidTimestamps = [
-			"2023-01-01T12:00:00.123456",     // No timezone
+			"2023-01-01T12:00:00.123456", // No timezone
 			"2023-01-01T12:00:00.123456+05:30", // Non-UTC timezone
 			"2023-01-01T12:00:00.123456-08:00", // Non-UTC timezone
 			"2023-01-01T12:00:00.123456+00:00", // UTC but wrong format (should be Z)
-			"2023-01-01 12:00:00.123456",     // Space separator, no timezone
+			"2023-01-01 12:00:00.123456", // Space separator, no timezone
 		];
 
 		for (const invalidTimestamp of invalidTimestamps) {

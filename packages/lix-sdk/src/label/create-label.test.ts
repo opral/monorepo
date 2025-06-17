@@ -7,8 +7,8 @@ test("should create a label with auto-generated ID", async () => {
 	const lix = await openLixInMemory({});
 
 	const labelName = "feature";
-	const label = await createLabel({ 
-		lix, 
+	const label = await createLabel({
+		lix,
 		name: labelName,
 	});
 
@@ -37,8 +37,8 @@ test("should create a label with custom ID", async () => {
 
 	const customId = "custom-label-id";
 	const labelName = "bugfix";
-	const label = await createLabel({ 
-		lix, 
+	const label = await createLabel({
+		lix,
 		id: customId,
 		name: labelName,
 	});
@@ -71,28 +71,29 @@ test("should create a label with specific version_id", async () => {
 	});
 
 	const labelName = "hotfix";
-	const label = await createLabel({ 
-		lix, 
+	const label = await createLabel({
+		lix,
 		name: labelName,
-		state_version_id: version.id,
+		lixcol_version_id: version.id,
 	});
 
-	// Verify the label was created with the specified state_version_id
+	// Verify the label was created with the specified lixcol_version_id
 	expect(label).toMatchObject({
 		name: labelName,
-		state_version_id: version.id,
+		lixcol_version_id: version.id,
 	});
 
-	// Verify the label exists in the database
+	// Verify the label exists in the database (use label_all to access lixcol_version_id)
 	const dbLabel = await lix.db
-		.selectFrom("label")
+		.selectFrom("label_all")
 		.selectAll()
 		.where("id", "=", label.id)
+		.where("lixcol_version_id", "=", version.id)
 		.executeTakeFirstOrThrow();
 
 	expect(dbLabel).toMatchObject({
 		name: labelName,
-		state_version_id: version.id,
+		lixcol_version_id: version.id,
 	});
 });
 
@@ -123,13 +124,13 @@ test("should handle transaction correctly", async () => {
 test("should create multiple labels with unique IDs", async () => {
 	const lix = await openLixInMemory({});
 
-	const label1 = await createLabel({ 
-		lix, 
+	const label1 = await createLabel({
+		lix,
 		name: "label-1",
 	});
 
-	const label2 = await createLabel({ 
-		lix, 
+	const label2 = await createLabel({
+		lix,
 		name: "label-2",
 	});
 
@@ -146,7 +147,7 @@ test("should create multiple labels with unique IDs", async () => {
 		.execute();
 
 	expect(labels).toHaveLength(2);
-	expect(labels.map(l => l.name).sort()).toEqual(["label-1", "label-2"]);
+	expect(labels.map((l) => l.name).sort()).toEqual(["label-1", "label-2"]);
 });
 
 test("should create multiple labels within a transaction", async () => {
@@ -182,13 +183,13 @@ test("should create multiple labels within a transaction", async () => {
 test("should use nanoid for ID generation", async () => {
 	const lix = await openLixInMemory({});
 
-	const label1 = await createLabel({ 
-		lix, 
+	const label1 = await createLabel({
+		lix,
 		name: "nanoid-test-1",
 	});
 
-	const label2 = await createLabel({ 
-		lix, 
+	const label2 = await createLabel({
+		lix,
 		name: "nanoid-test-2",
 	});
 
@@ -196,7 +197,7 @@ test("should use nanoid for ID generation", async () => {
 	expect(typeof label1.id).toBe("string");
 	expect(typeof label2.id).toBe("string");
 	expect(label1.id).not.toBe(label2.id);
-	
+
 	// nanoid typically generates 21-character strings
 	expect(label1.id.length).toBeGreaterThan(0);
 	expect(label2.id.length).toBeGreaterThan(0);
@@ -206,13 +207,13 @@ test("should handle labels with same name but different IDs", async () => {
 	const lix = await openLixInMemory({});
 
 	const sameName = "duplicate-name";
-	const label1 = await createLabel({ 
-		lix, 
+	const label1 = await createLabel({
+		lix,
 		name: sameName,
 	});
 
-	const label2 = await createLabel({ 
-		lix, 
+	const label2 = await createLabel({
+		lix,
 		name: sameName,
 	});
 
@@ -229,5 +230,5 @@ test("should handle labels with same name but different IDs", async () => {
 		.execute();
 
 	expect(labels).toHaveLength(2);
-	expect(labels.map(l => l.id).sort()).toEqual([label1.id, label2.id].sort());
+	expect(labels.map((l) => l.id).sort()).toEqual([label1.id, label2.id].sort());
 });

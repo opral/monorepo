@@ -1,6 +1,7 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { NewStoredSchema } from "./schema.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("insert and delete a stored schema", async () => {
 	const lix = await openLixInMemory({});
@@ -111,7 +112,9 @@ test("updating is not possible (schema is immutable, needs new version bumb)", a
 
 	await expect(
 		lix.db.updateTable("stored_schema").set({ version: "2.0" }).execute()
-	).rejects.toThrow(/cannot modify stored_schema because it is a view/);
+	).rejects.toThrow(
+		/Schemas are immutable and cannot be updated for backwards compatibility. Bump the version number instead./
+	);
 });
 
 test("default fills in key and version from the schema value", async () => {
@@ -162,4 +165,77 @@ test("validates inserted schemas", async () => {
 	await expect(
 		lix.db.insertInto("stored_schema").values(schema).execute()
 	).rejects.toThrow(/version must be string/);
+});
+
+test("can insert into stored_schema_all with explicit key and version", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema: LixSchemaDefinition = {
+		type: "object",
+		"x-lix-key": "mock_all",
+		"x-lix-version": "1.0",
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	};
+
+	// Insert with explicit key and version
+	await lix.db
+		.insertInto("stored_schema_all")
+		.values({
+			key: "mock_all",
+			version: "1.0",
+			// @ts-expect-error - todo why does implicit json stringify not work here
+			value: JSON.stringify(schema),
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	const result = await lix.db
+		.selectFrom("stored_schema_all")
+		.selectAll()
+		.where("key", "=", "mock_all")
+		.where("version", "=", "1.0")
+		.executeTakeFirstOrThrow();
+
+	expect(result.key).toBe("mock_all");
+	expect(result.version).toBe("1.0");
+	expect(result.value).toEqual(schema);
+});
+
+test("can insert into stored_schema_all with default key and version extraction", async () => {
+	const lix = await openLixInMemory({});
+
+	const schema: LixSchemaDefinition = {
+		type: "object",
+		"x-lix-key": "mock_extract",
+		"x-lix-version": "2.0",
+		properties: {
+			name: { type: "string" },
+		},
+		required: ["name"],
+		additionalProperties: false,
+	};
+
+	// Insert without key and version - should be extracted from value
+	await lix.db
+		.insertInto("stored_schema_all")
+		.values({
+			value: schema,
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	const result = await lix.db
+		.selectFrom("stored_schema_all")
+		.selectAll()
+		.where("key", "=", "mock_extract")
+		.where("version", "=", "2.0")
+		.executeTakeFirstOrThrow();
+
+	expect(result.key).toBe("mock_extract");
+	expect(result.version).toBe("2.0");
+	expect(result.value).toEqual(schema);
 });

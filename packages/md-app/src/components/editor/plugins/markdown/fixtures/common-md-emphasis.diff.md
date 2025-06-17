@@ -2,41 +2,16 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 7/11 (64%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 3/11 (27%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/11 (9%)
+- 🟢 Perfect roundtrip (input = output): 3/11 (27%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 8/11 (73%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/11 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (3 perfect, 8 acceptable)
 
 ---
 
 <details >
-<summary><span style="color:green; font-weight:bold;">tc - italic with asterisks</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
-
-<table>
-<tr>
-<th style="width: 100%">Input / Output (identical)</th>
-</tr>
-<tr>
-<td>
-
-*Italic text* using single asterisks.
-
-</td>
-</tr>
-<tr>
-<td>
-
-<pre><code>*Italic text* using single asterisks.</code></pre>
-
-</td>
-</tr>
-</table>
-
-</details>
-
-<details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - italic with underscores</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:#cc7700; font-weight:bold;">tc - italic with asterisks</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -47,17 +22,52 @@
 <tr>
 <td>
 
+*Italic text* using single asterisks.
+
+</td>
+<td>
+
+_Italic text_ using single asterisks.
+
+</td>
+<td>
+
+_Italic text_ using single asterisks.
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code>*Italic text* using single asterisks.</code></pre>
+
+</td>
+<td>
+
+<pre><code>_Italic text_ using single asterisks.</code></pre>
+
+</td>
+<td>
+
+<pre><code>_Italic text_ using single asterisks.</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+
+<details >
+<summary><span style="color:green; font-weight:bold;">tc - italic with underscores</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 100%">Input / Output (identical)</th>
+</tr>
+<tr>
+<td>
+
 _Italic text_ using single underscores.
-
-</td>
-<td>
-
-*Italic text* using single underscores.
-
-</td>
-<td>
-
-*Italic text* using single underscores.
 
 </td>
 </tr>
@@ -65,16 +75,6 @@ _Italic text_ using single underscores.
 <td>
 
 <pre><code>_Italic text_ using single underscores.</code></pre>
-
-</td>
-<td>
-
-<pre><code>*Italic text* using single underscores.</code></pre>
-
-</td>
-<td>
-
-<pre><code>*Italic text* using single underscores.</code></pre>
 
 </td>
 </tr>
@@ -155,11 +155,13 @@ __Bold text__ using double underscores.
 </details>
 
 <details >
-<summary><span style="color:green; font-weight:bold;">tc - bold-italic with asterisks</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:#cc7700; font-weight:bold;">tc - bold-italic with asterisks</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -167,11 +169,31 @@ __Bold text__ using double underscores.
 ***Bold and italic*** using triple asterisks.
 
 </td>
+<td>
+
+_**Bold and italic**_ using triple asterisks.
+
+</td>
+<td>
+
+_**Bold and italic**_ using triple asterisks.
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>***Bold and italic*** using triple asterisks.</code></pre>
+
+</td>
+<td>
+
+<pre><code>_**Bold and italic**_ using triple asterisks.</code></pre>
+
+</td>
+<td>
+
+<pre><code>_**Bold and italic**_ using triple asterisks.</code></pre>
 
 </td>
 </tr>
@@ -196,12 +218,12 @@ ___Bold and italic___ using triple underscores.
 </td>
 <td>
 
-***Bold and italic*** using triple underscores.
+_**Bold and italic**_ using triple underscores.
 
 </td>
 <td>
 
-***Bold and italic*** using triple underscores.
+_**Bold and italic**_ using triple underscores.
 
 </td>
 </tr>
@@ -213,12 +235,12 @@ ___Bold and italic___ using triple underscores.
 </td>
 <td>
 
-<pre><code>***Bold and italic*** using triple underscores.</code></pre>
+<pre><code>_**Bold and italic**_ using triple underscores.</code></pre>
 
 </td>
 <td>
 
-<pre><code>***Bold and italic*** using triple underscores.</code></pre>
+<pre><code>_**Bold and italic**_ using triple underscores.</code></pre>
 
 </td>
 </tr>
@@ -226,13 +248,14 @@ ___Bold and italic___ using triple underscores.
 
 </details>
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">tc - mixed formatting inline - nested</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">tc - mixed formatting inline - nested</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 50%">Input</th>
-<th style="width: 50%">Actual Output</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -242,7 +265,12 @@ ___Bold and italic___ using triple underscores.
 </td>
 <td>
 
-**Bold text with *italic*** **inside**.
+**Bold text with _italic_** **inside**.
+
+</td>
+<td>
+
+**Bold text with _italic_** **inside**.
 
 </td>
 </tr>
@@ -254,7 +282,12 @@ ___Bold and italic___ using triple underscores.
 </td>
 <td>
 
-<pre><code>**Bold text with *italic*** **inside**.</code></pre>
+<pre><code>**Bold text with _italic_** **inside**.</code></pre>
+
+</td>
+<td>
+
+<pre><code>**Bold text with _italic_** **inside**.</code></pre>
 
 </td>
 </tr>
@@ -263,16 +296,28 @@ ___Bold and italic___ using triple underscores.
 </details>
 
 <details >
-<summary><span style="color:green; font-weight:bold;">tc - mixed formatting inline - not nested</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:#cc7700; font-weight:bold;">tc - mixed formatting inline - not nested</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
 
 **Bold text with** ***italic*** **not nested**.
+
+</td>
+<td>
+
+**Bold text with** _**italic**_ **not nested**.
+
+</td>
+<td>
+
+**Bold text with** _**italic**_ **not nested**.
 
 </td>
 </tr>
@@ -282,17 +327,29 @@ ___Bold and italic___ using triple underscores.
 <pre><code>**Bold text with** ***italic*** **not nested**.</code></pre>
 
 </td>
+<td>
+
+<pre><code>**Bold text with** _**italic**_ **not nested**.</code></pre>
+
+</td>
+<td>
+
+<pre><code>**Bold text with** _**italic**_ **not nested**.</code></pre>
+
+</td>
 </tr>
 </table>
 
 </details>
 
 <details >
-<summary><span style="color:green; font-weight:bold;">tc - italic with bold inside</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:#cc7700; font-weight:bold;">tc - italic with bold inside</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -300,11 +357,31 @@ ___Bold and italic___ using triple underscores.
 *Italic text with **bold** inside*.
 
 </td>
+<td>
+
+_Italic text with **bold** inside_.
+
+</td>
+<td>
+
+_Italic text with **bold** inside_.
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>*Italic text with **bold** inside*.</code></pre>
+
+</td>
+<td>
+
+<pre><code>_Italic text with **bold** inside_.</code></pre>
+
+</td>
+<td>
+
+<pre><code>_Italic text with **bold** inside_.</code></pre>
 
 </td>
 </tr>
@@ -338,11 +415,13 @@ ___Bold and italic___ using triple underscores.
 </details>
 
 <details >
-<summary><span style="color:green; font-weight:bold;">tc - mixed styles in paragraph</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:#cc7700; font-weight:bold;">tc - mixed styles in paragraph</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -350,11 +429,31 @@ ___Bold and italic___ using triple underscores.
 Mixed **bold** and *italic* and ~~strikethrough~~ in one paragraph.
 
 </td>
+<td>
+
+Mixed **bold** and _italic_ and ~~strikethrough~~ in one paragraph.
+
+</td>
+<td>
+
+Mixed **bold** and _italic_ and ~~strikethrough~~ in one paragraph.
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>Mixed **bold** and *italic* and ~~strikethrough~~ in one paragraph.</code></pre>
+
+</td>
+<td>
+
+<pre><code>Mixed **bold** and _italic_ and ~~strikethrough~~ in one paragraph.</code></pre>
+
+</td>
+<td>
+
+<pre><code>Mixed **bold** and _italic_ and ~~strikethrough~~ in one paragraph.</code></pre>
 
 </td>
 </tr>

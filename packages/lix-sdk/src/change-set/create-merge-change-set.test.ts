@@ -135,11 +135,7 @@ test("should handle conflicting elements with source winning (until conflicts ar
 		])
 		.execute();
 
-	const snapshots = [
-		{ id: "snap1" },
-		{ id: "snap2" },
-		{ id: "snap3" },
-	];
+	const snapshots = [{ id: "snap1" }, { id: "snap2" }, { id: "snap3" }];
 
 	// Create changes for the different states of the same entity
 	const changes = await lix.db

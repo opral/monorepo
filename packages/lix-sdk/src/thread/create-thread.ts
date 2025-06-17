@@ -1,9 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type {
-	NewThreadComment,
-	Thread,
-	ThreadComment,
-} from "./schema.js";
+import type { NewThreadComment, Thread, ThreadComment } from "./schema.js";
 import { nanoid } from "../database/nano-id.js";
 
 export async function createThread(args: {
@@ -13,11 +9,8 @@ export async function createThread(args: {
 }): Promise<Thread & { comments: ThreadComment[] }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const threadId = args.id ?? nanoid();
-		
-		await trx
-			.insertInto("thread")
-			.values({ id: threadId })
-			.execute();
+
+		await trx.insertInto("thread").values({ id: threadId }).execute();
 
 		const thread = await trx
 			.selectFrom("thread")
@@ -29,7 +22,7 @@ export async function createThread(args: {
 
 		for (const [index, comment] of (args.comments ?? []).entries()) {
 			const commentId = nanoid();
-			
+
 			await trx
 				.insertInto("thread_comment")
 				.values({

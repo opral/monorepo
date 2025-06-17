@@ -654,6 +654,59 @@ export function applyStateDatabaseSchema(
 	// Create the virtual table as 'state' directly (no more _impl suffix or view layer)
 	sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS state USING state_vtab();`);
 
+	// Create state_active view that filters to active version only
+	sqlite.exec(`
+		CREATE VIEW IF NOT EXISTS state_active AS
+		SELECT *
+		FROM state
+		WHERE version_id IN (SELECT version_id FROM active_version);
+
+		-- Add INSTEAD OF triggers for state_active that forward to state virtual table
+		CREATE TRIGGER IF NOT EXISTS state_active_insert
+		INSTEAD OF INSERT ON state_active
+		BEGIN
+			INSERT INTO state (
+				entity_id, schema_key, file_id, version_id, plugin_key,
+				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id
+			) VALUES (
+				NEW.entity_id, NEW.schema_key, NEW.file_id, NEW.version_id, NEW.plugin_key,
+				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id
+			);
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS state_active_update
+		INSTEAD OF UPDATE ON state_active
+		BEGIN
+			UPDATE state
+			SET
+				entity_id = NEW.entity_id,
+				schema_key = NEW.schema_key,
+				file_id = NEW.file_id,
+				version_id = NEW.version_id,
+				plugin_key = NEW.plugin_key,
+				snapshot_content = NEW.snapshot_content,
+				schema_version = NEW.schema_version,
+				created_at = NEW.created_at,
+				updated_at = NEW.updated_at,
+				inherited_from_version_id = NEW.inherited_from_version_id
+			WHERE
+				entity_id = OLD.entity_id
+				AND schema_key = OLD.schema_key
+				AND file_id = OLD.file_id
+				AND version_id = OLD.version_id;
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS state_active_delete
+		INSTEAD OF DELETE ON state_active
+		BEGIN
+			DELETE FROM state
+			WHERE entity_id = OLD.entity_id
+				AND schema_key = OLD.schema_key
+				AND file_id = OLD.file_id
+				AND version_id = OLD.version_id;
+		END;
+	`);
+
 	// Create the cache table for performance optimization
 	const sql = `
   CREATE TABLE IF NOT EXISTS internal_state_cache (
@@ -931,4 +984,3 @@ export type InternalChangeInTransactionTable = {
 	snapshot_content: Record<string, any> | null;
 	created_at: Generated<string>;
 };
-

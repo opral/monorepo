@@ -2,53 +2,36 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAtom } from 'jotai';
 import { PlateElementProps } from '@udecode/plate/react';
 import { activeFileAtom } from '@/state-active-file';
-import { ExtendedMarkdownPlugin } from './plugins/markdown/markdown-plugin';
 import { useChat } from './use-chat';
 import { toast } from 'sonner';
-import { Button } from '../plate-ui/button';
+import { Button } from '../ui/button';
 import { Loader2, Zap } from 'lucide-react';
 import { lixAtom, withPollingAtom } from '@/state';
 import { saveLixToOpfs } from '@/helper/saveLixToOpfs';
 import { generateHumanId } from '@/helper/generateHumanId';
 import { updateUrlParams } from '@/helper/updateUrlParams';
 import { removeEmptyPromptElement, setPromptDismissed } from '@/helper/emptyPromptElementHelpers';
+import { AIChatPlugin } from '@udecode/plate-ai/react';
 
 export function EmptyDocumentPromptElement({
   attributes,
   editor
 }: PlateElementProps) {
   const [prompt, setPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [activeFile] = useAtom(activeFileAtom);
   const [lix] = useAtom(lixAtom);
-  const [, setPolling] = useAtom(withPollingAtom)
+  const [, setPolling] = useAtom(withPollingAtom);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const chat = useChat({
-    streamProtocol: "text",
-    onResponse: async (res) => {
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      let result = "";
 
-      while (reader) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        result += decoder.decode(value);
-        applyMdContent(result); // apply progressively or buffer chunks
-      }
-    },
+  const chat = useChat({
+    streamProtocol: 'text',
     onFinish: () => {
-      if (isGenerating) {
-        setIsGenerating(false);
-        setPrompt('');
-      }
+      setPrompt('');
     }
   });
 
-  const applyMdContent = (content: string) => {
-    const nodes = editor.getApi(ExtendedMarkdownPlugin).markdown.deserialize(content);
-    editor.tf.setValue(nodes);
-  };
+  const { status } = chat
+  const isLoading = status === 'streaming' || status === 'submitted';
 
   // Adjust textarea height when content changes
   const adjustHeight = () => {
@@ -106,7 +89,6 @@ export function EmptyDocumentPromptElement({
   // Handle document generation
   const handleGenerateDocument = async () => {
     if (!activeFile || !prompt.trim()) return;
-    setIsGenerating(true);
 
     try {
       // If we're in welcome.md, create a new file first
@@ -121,14 +103,12 @@ export function EmptyDocumentPromptElement({
         }
       }
 
-      await chat.append({
-        role: 'user',
-        content: `Generate a complete, well-structured markdown document about: ${prompt}. Include appropriate headings starting with level 1 heading (#), paragraphs, and relevant formatting like lists or emphasis where appropriate.`,
+      editor.getApi(AIChatPlugin).aiChat.submit({
+        prompt: `Generate a complete, well-structured markdown document about: ${prompt}. Include appropriate headings starting with level 1 heading (#), paragraphs, and relevant formatting like lists or emphasis where appropriate.`,
       });
     } catch (error) {
       console.error('Error starting document generation:', error);
       toast.error("Failed to generate document. Please try again.");
-      setIsGenerating(false);
     }
   };
 
@@ -142,7 +122,7 @@ export function EmptyDocumentPromptElement({
       e.preventDefault();
 
       // Submit if not already generating
-      if (!isGenerating && prompt.trim() && !chat.isLoading) {
+      if (!isLoading && prompt.trim()) {
         handleGenerateDocument();
       }
     }
@@ -174,7 +154,6 @@ export function EmptyDocumentPromptElement({
       >
         <textarea
           ref={textareaRef}
-          autoFocus
           id="prompt"
           className="w-full min-h-8 p-3 border-none focus:outline-none resize-none overflow-hidden"
           placeholder="What do you want to write?"
@@ -184,20 +163,22 @@ export function EmptyDocumentPromptElement({
         />
 
         <div className='flex gap-2 max-w-full'>
-          {!isGenerating && (
+          {!isLoading && (
             <Button
               type="button"
               variant="secondary"
+              size="sm"
               onClick={handleDismiss}
-              disabled={isGenerating}
+              disabled={isLoading}
             >
               Dismiss
             </Button>)}
           <Button
             type="submit"
-            disabled={isGenerating || !prompt.trim() || chat.isLoading}
+            size="sm"
+            disabled={isLoading || !prompt.trim()}
           >
-            {isGenerating ?
+            {isLoading ?
               (<>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Generating...

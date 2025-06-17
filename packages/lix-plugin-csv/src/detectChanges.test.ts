@@ -91,17 +91,17 @@ test("it should detect a deletion of a row and its cells", async () => {
 		{
 			entity_id: "Name|Peter",
 			schema: RowSchemaV1,
-			snapshot_content: undefined,
+			snapshot_content: null,
 		},
 		{
 			entity_id: "Name|Peter|Name",
 			schema: CellSchemaV1,
-			snapshot_content: undefined,
+			snapshot_content: null,
 		},
 		{
 			entity_id: "Name|Peter|Age",
 			schema: CellSchemaV1,
-			snapshot_content: undefined,
+			snapshot_content: null,
 		},
 	] satisfies DetectedChange<
 		FromLixSchemaDefinition<typeof CellSchemaV1 | typeof RowSchemaV1>
@@ -146,22 +146,22 @@ test("changing the unique column should lead to a new cell entity_ids to avoid b
 			{
 				entity_id: "Name|Anna|Name",
 				schema: CellSchemaV1,
-				snapshot_content: undefined,
+				snapshot_content: null,
 			},
 			{
 				entity_id: "Name|Anna|Age",
 				schema: CellSchemaV1,
-				snapshot_content: undefined,
+				snapshot_content: null,
 			},
 			{
 				entity_id: "Name|Peter|Name",
 				schema: CellSchemaV1,
-				snapshot_content: undefined,
+				snapshot_content: null,
 			},
 			{
 				entity_id: "Name|Peter|Age",
 				schema: CellSchemaV1,
-				snapshot_content: undefined,
+				snapshot_content: null,
 			},
 			// detect the insertion of the new unique column
 

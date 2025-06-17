@@ -11,8 +11,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "./plate-ui/dropdown-menu";
-import { Button } from "./plate-ui/button";
+} from "./ui/dropdown-menu";
+import { Button } from "./ui/button";
 import { Check, ChevronDown, FileText, Plus } from "lucide-react";
 
 

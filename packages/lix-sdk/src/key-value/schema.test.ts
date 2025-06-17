@@ -81,7 +81,6 @@ test("arbitrary json is allowed", async () => {
 	expect(viewAfterInsert).toEqual(kvs);
 });
 
-// requires global version feature
 test.todo("view should show changes across versions", async () => {
 	const lix = await openLixInMemory({});
 
@@ -90,16 +89,16 @@ test.todo("view should show changes across versions", async () => {
 
 	// inserting a key-value pair in version A
 	await lix.db
-		.insertInto("key_value")
+		.insertInto("key_value_all")
 		.values({
 			key: "foo",
 			value: "bar",
-			state_version_id: versionA.id,
+			lixcol_version_id: versionA.id,
 		})
 		.execute();
 
 	const kvAfterInsert = await lix.db
-		.selectFrom("key_value")
+		.selectFrom("key_value_all")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();
@@ -108,7 +107,7 @@ test.todo("view should show changes across versions", async () => {
 		{
 			key: "foo",
 			value: "bar",
-			state_version_id: versionA.id,
+			lixcol_version_id: versionA.id,
 		},
 	]);
 
@@ -127,7 +126,7 @@ test.todo("view should show changes across versions", async () => {
 	});
 
 	const kvAfterInsertInVersionB = await lix.db
-		.selectFrom("key_value")
+		.selectFrom("key_value_all")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();
@@ -136,24 +135,24 @@ test.todo("view should show changes across versions", async () => {
 		{
 			key: "foo",
 			value: "bar",
-			state_version_id: versionA.id,
+			lixcol_version_id: versionA.id,
 		},
 		{
 			key: "foo",
 			value: "bar",
-			version_id: versionB.id,
+			lixcol_version_id: versionB.id,
 		},
 	]);
 
 	await lix.db
-		.updateTable("key_value")
+		.updateTable("key_value_all")
 		.where("key", "=", "foo")
-		.where("state_version_id", "=", versionB.id)
+		.where("lixcol_version_id", "=", versionB.id)
 		.set({ value: "bar_updated" })
 		.execute();
 
 	const kvAfterUpdate = await lix.db
-		.selectFrom("key_value")
+		.selectFrom("key_value_all")
 		.where("key", "=", "foo")
 		.selectAll()
 		.execute();
@@ -162,12 +161,12 @@ test.todo("view should show changes across versions", async () => {
 		{
 			key: "foo",
 			value: "bar",
-			state_version_id: versionA.id,
+			lixcol_version_id: versionA.id,
 		},
 		{
 			key: "foo",
 			value: "bar_updated",
-			version_id: versionB.id,
+			lixcol_version_id: versionB.id,
 		},
 	]);
 });

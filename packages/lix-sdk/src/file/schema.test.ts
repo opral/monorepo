@@ -9,11 +9,6 @@ test("insert, update, delete on the file view", async () => {
 		providePlugins: [mockJsonPlugin],
 	});
 
-	const version0 = await createVersion({
-		lix,
-		id: "version0",
-	});
-
 	await lix.db
 		.insertInto("file")
 		.values([
@@ -25,7 +20,6 @@ test("insert, update, delete on the file view", async () => {
 						prop0: "file0-value0",
 					})
 				),
-				state_version_id: version0.id,
 			},
 		])
 		.execute();
@@ -40,8 +34,9 @@ test("insert, update, delete on the file view", async () => {
 		{
 			id: "file0",
 			path: "/path/to/file.json",
-			state_version_id: "version0",
-			state_inherited_from_version_id: null,
+			lixcol_inherited_from_version_id: null,
+			lixcol_created_at: expect.any(String),
+			lixcol_updated_at: expect.any(String),
 			data: { prop0: "file0-value0" },
 			metadata: null,
 		},
@@ -50,7 +45,6 @@ test("insert, update, delete on the file view", async () => {
 	await lix.db
 		.updateTable("file")
 		.where("id", "=", "file0")
-		.where("state_version_id", "=", "version0")
 		.set({
 			path: "/path/to/renamed_file.json",
 			data: new TextEncoder().encode(JSON.stringify({ prop0: "file0-value1" })),
@@ -72,23 +66,20 @@ test("insert, update, delete on the file view", async () => {
 		{
 			id: "file0",
 			path: "/path/to/renamed_file.json",
-			state_version_id: "version0",
-			state_inherited_from_version_id: null,
+			lixcol_inherited_from_version_id: null,
+			lixcol_created_at: expect.any(String),
+			lixcol_updated_at: expect.any(String),
 			data: { prop0: "file0-value1" },
 			metadata: null,
 		},
 	]);
 
-	await lix.db
-		.deleteFrom("file")
-		.where("id", "=", "file0")
-		.where("state_version_id", "=", "version0")
-		.execute();
+	await lix.db.deleteFrom("file").where("id", "=", "file0").execute();
 
 	const viewAfterDelete = await lix.db
 		.selectFrom("file")
 		.orderBy("id")
-		.select(["id", "path", "state_version_id"])
+		.select(["id", "path"])
 		.execute();
 
 	expect(viewAfterDelete).toEqual([]);
@@ -156,11 +147,6 @@ test("file insert data materialization", async () => {
 		providePlugins: [mockJsonPlugin],
 	});
 
-	const version0 = await createVersion({
-		lix,
-		id: "version0",
-	});
-
 	await lix.db
 		.insertInto("file")
 		.values({
@@ -171,7 +157,6 @@ test("file insert data materialization", async () => {
 					prop0: "file0-value0",
 				})
 			),
-			state_version_id: version0.id,
 		})
 		.execute();
 
@@ -185,8 +170,9 @@ test("file insert data materialization", async () => {
 		{
 			id: "file0",
 			path: "/path/to/file.json",
-			state_version_id: "version0",
-			state_inherited_from_version_id: null,
+			lixcol_inherited_from_version_id: null,
+			lixcol_created_at: expect.any(String),
+			lixcol_updated_at: expect.any(String),
 			data: { prop0: "file0-value0" },
 			metadata: null,
 		},
@@ -198,24 +184,17 @@ test("file ids should have a default", async () => {
 		providePlugins: [mockJsonPlugin],
 	});
 
-	const version0 = await createVersion({
-		lix,
-		id: "version0",
-	});
-
 	await lix.db
 		.insertInto("file")
 		.values({
 			path: "/mock.json",
 			data: new Uint8Array(),
-			state_version_id: version0.id,
 		})
 		.execute();
 
 	const file = await lix.db
 		.selectFrom("file")
 		.where("path", "=", "/mock.json")
-		.where("state_version_id", "=", version0.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -227,11 +206,6 @@ test("files should be able to have metadata", async () => {
 		providePlugins: [mockJsonPlugin],
 	});
 
-	const version0 = await createVersion({
-		lix,
-		id: "version0",
-	});
-
 	await lix.db
 		.insertInto("file")
 		.values({
@@ -240,14 +214,12 @@ test("files should be able to have metadata", async () => {
 			metadata: {
 				primary_key: "email",
 			},
-			state_version_id: version0.id,
 		})
 		.execute();
 
 	const file = await lix.db
 		.selectFrom("file")
 		.where("path", "=", "/mock.json")
-		.where("state_version_id", "=", version0.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
@@ -256,7 +228,6 @@ test("files should be able to have metadata", async () => {
 	const updatedFile = await lix.db
 		.updateTable("file")
 		.where("path", "=", "/mock.json")
-		.where("state_version_id", "=", version0.id)
 		.set({
 			metadata: {
 				primary_key: "something-else",
@@ -273,24 +244,18 @@ test("invalid file paths should be rejected", async () => {
 		providePlugins: [mockJsonPlugin],
 	});
 
-	const version0 = await createVersion({
-		lix,
-		id: "version0",
-	});
-
 	await expect(
 		lix.db
 			.insertInto("file")
 			.values({
 				path: "invalid-path",
 				data: new Uint8Array(),
-				state_version_id: version0.id,
 			})
 			.execute()
 	).rejects.toThrowError("path must match pattern");
 });
 
-test("file operations are version specific and isolated", async () => {
+test("file_all operations are version specific and isolated", async () => {
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
 	});
@@ -307,36 +272,36 @@ test("file operations are version specific and isolated", async () => {
 
 	// Insert file in version A
 	await lix.db
-		.insertInto("file")
+		.insertInto("file_all")
 		.values({
 			id: "fileA",
 			path: "/shared/file.json",
 			data: new TextEncoder().encode(JSON.stringify({ content: "versionA" })),
-			state_version_id: versionA.id,
+			lixcol_version_id: versionA.id,
 		})
 		.execute();
 
 	// Insert file in version B with same path but different content
 	await lix.db
-		.insertInto("file")
+		.insertInto("file_all")
 		.values({
 			id: "fileB",
 			path: "/shared/file.json",
 			data: new TextEncoder().encode(JSON.stringify({ content: "versionB" })),
-			state_version_id: versionB.id,
+			lixcol_version_id: versionB.id,
 		})
 		.execute();
 
 	// Verify both versions have their own files
 	const filesInVersionA = await lix.db
-		.selectFrom("file")
-		.where("state_version_id", "=", versionA.id)
+		.selectFrom("file_all")
+		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const filesInVersionB = await lix.db
-		.selectFrom("file")
-		.where("state_version_id", "=", versionB.id)
+		.selectFrom("file_all")
+		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 
@@ -351,9 +316,9 @@ test("file operations are version specific and isolated", async () => {
 
 	// Update file in version A
 	await lix.db
-		.updateTable("file")
+		.updateTable("file_all")
 		.where("id", "=", "fileA")
-		.where("state_version_id", "=", versionA.id)
+		.where("lixcol_version_id", "=", versionA.id)
 		.set({
 			data: new TextEncoder().encode(
 				JSON.stringify({ content: "versionA-updated" })
@@ -363,14 +328,14 @@ test("file operations are version specific and isolated", async () => {
 
 	// Verify update only affected version A
 	const updatedFilesA = await lix.db
-		.selectFrom("file")
-		.where("state_version_id", "=", versionA.id)
+		.selectFrom("file_all")
+		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const unchangedFilesB = await lix.db
-		.selectFrom("file")
-		.where("state_version_id", "=", versionB.id)
+		.selectFrom("file_all")
+		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 
@@ -383,21 +348,21 @@ test("file operations are version specific and isolated", async () => {
 
 	// Delete file from version A
 	await lix.db
-		.deleteFrom("file")
+		.deleteFrom("file_all")
 		.where("id", "=", "fileA")
-		.where("state_version_id", "=", versionA.id)
+		.where("lixcol_version_id", "=", versionA.id)
 		.execute();
 
 	// Verify deletion only affected version A
 	const remainingFilesA = await lix.db
-		.selectFrom("file")
-		.where("state_version_id", "=", versionA.id)
+		.selectFrom("file_all")
+		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const remainingFilesB = await lix.db
-		.selectFrom("file")
-		.where("state_version_id", "=", versionB.id)
+		.selectFrom("file_all")
+		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();
 

@@ -5,7 +5,6 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { toBlob } from "./to-blob.js";
 import { usedFileExtensions } from "./open-lix.js";
 
-
 // TODO reopening a lix leads to "no tables specified"
 test.todo("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {

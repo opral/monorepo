@@ -122,7 +122,7 @@ export type LixSchemaDefinition = JSONSchema & {
 	"x-lix-unique"?: string[][] | readonly (readonly string[])[];
 	/**
 	 * Foreign key constraints referencing other schemas.
-	 * 
+	 *
 	 * @example
 	 *   {
 	 *     "x-lix-foreign-keys": {
@@ -142,8 +142,9 @@ export type LixSchemaDefinition = JSONSchema & {
 			schemaKey: string;
 			property: string;
 			schemaVersion?: string;
-		}
+		};
 	};
+	type: "object";
 };
 
 export type FromLixSchemaDefinition<T extends LixSchemaDefinition> =

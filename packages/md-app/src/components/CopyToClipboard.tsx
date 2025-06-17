@@ -2,7 +2,7 @@ import { Copy } from "lucide-react";
 import { toast } from 'sonner';
 import { useEditorRef } from "@udecode/plate/react";
 import { ExtendedMarkdownPlugin } from "./editor/plugins/markdown/markdown-plugin";
-import { ToolbarButton } from "./plate-ui/toolbar";
+import { ToolbarButton } from "./ui/toolbar";
 
 export const CopyToClipboard = () => {
   const editor = useEditorRef()

@@ -77,10 +77,10 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 			detectedChanges.push({
 				schema: RowSchemaV1,
 				entity_id: rowId,
-				// if the row was deleted, snapshot is undefined
+				// if the row was deleted, snapshot is null
 				snapshot_content:
 					rowLineNumberAfter === undefined
-						? undefined
+						? null
 						: { lineNumber: rowLineNumberAfter },
 			});
 		}
@@ -111,7 +111,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 				detectedChanges.push({
 					schema: CellSchemaV1,
 					entity_id,
-					snapshot_content: undefined,
+					snapshot_content: null,
 				});
 			}
 			// Cell exists only in after -> insert

@@ -23,7 +23,6 @@
     "dotenv": "^16.4.7",
     "http-proxy-middleware": "^3.0.3",
     "lix-file-manager": "workspace:*",
-    "lix-website": "workspace:*",
     "md-app": "workspace:*"
   },
   "devDependencies": {

@@ -1,13 +1,19 @@
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { DetectedChange, LixPlugin } from "../plugin/lix-plugin.js";
 
-const LixUnknownFileSchema = {
-	type: "string",
-	contentEncoding: "base64",
-	description: "Base64-encoded binary file data",
+export const LixUnknownFileSchema = {
+	type: "object",
+	properties: {
+		value: {
+			type: "string",
+			contentEncoding: "base64",
+			description: "Base64-encoded binary file data",
+		},
+	},
 	"x-lix-key": "lix_unknown_file",
 	"x-lix-version": "1.0",
-} as const satisfies LixSchemaDefinition;
+} as const;
+LixUnknownFileSchema satisfies LixSchemaDefinition;
 
 // From https://developer.mozilla.org/en-US/docs/Glossary/Base64#the_unicode_problem.
 function base64ToBytes(base64: string): Uint8Array {
@@ -24,7 +30,7 @@ function bytesToBase64(bytes: Uint8Array): string {
 /**
  * Internal fallback plugin that handles unknown file types by storing the entire blob.
  * This serves as a fallback for materialization when no specific plugin matches a file.
- * 
+ *
  * This plugin always matches any file path and stores the complete file data
  * as a single entity, allowing retrieval of the original file content.
  */
@@ -45,7 +51,7 @@ export const lixUnknownFileFallbackPlugin: LixPlugin = {
 			detectedChanges.push({
 				schema: LixUnknownFileSchema,
 				entity_id: after.id,
-				snapshot_content: afterBase64, // Store as Unicode-safe base64 string
+				snapshot_content: { value: afterBase64 }, // Store as Unicode-safe base64 string
 			});
 		}
 
@@ -75,10 +81,10 @@ export const lixUnknownFileFallbackPlugin: LixPlugin = {
 			);
 		}
 
-		if (typeof fileChange.snapshot_content === 'string') {
+		if (typeof fileChange.snapshot_content?.value === "string") {
 			// Restore the blob from Unicode-safe base64 string
 			return {
-				fileData: base64ToBytes(fileChange.snapshot_content),
+				fileData: base64ToBytes(fileChange.snapshot_content.value),
 			};
 		}
 

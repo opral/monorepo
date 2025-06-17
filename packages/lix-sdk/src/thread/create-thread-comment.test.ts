@@ -8,10 +8,7 @@ test("creates a thread comment", async () => {
 	const lix = await openLixInMemory({});
 
 	const threadId = nanoid();
-	await lix.db
-		.insertInto("thread")
-		.values({ id: threadId })
-		.execute();
+	await lix.db.insertInto("thread").values({ id: threadId }).execute();
 
 	const thread = await lix.db
 		.selectFrom("thread")

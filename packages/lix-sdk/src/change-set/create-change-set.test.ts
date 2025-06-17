@@ -103,7 +103,6 @@ test("creating a change set with labels should associate the labels with the cha
 		.insertInto("label")
 		.values({
 			name: "test-label",
-			state_version_id: activeVersion.version_id,
 		})
 		.execute();
 
@@ -111,7 +110,6 @@ test("creating a change set with labels should associate the labels with the cha
 		.selectFrom("label")
 		.selectAll()
 		.where("name", "=", "test-label")
-		.where("state_version_id", "=", activeVersion.version_id)
 		.executeTakeFirstOrThrow();
 
 	// Create a change set with labels in the same version context
@@ -119,7 +117,7 @@ test("creating a change set with labels should associate the labels with the cha
 		lix: lix,
 		elements: [],
 		labels: [testLabel],
-		state_version_id: activeVersion.version_id,
+		lixcol_version_id: activeVersion.version_id,
 	});
 
 	// Verify the change set was created
@@ -131,7 +129,6 @@ test("creating a change set with labels should associate the labels with the cha
 		.innerJoin("label", "label.id", "change_set_label.label_id")
 		.selectAll()
 		.where("change_set_id", "=", changeSet.id)
-		.where("label.state_version_id", "=", activeVersion.version_id)
 		.execute();
 
 	// Verify both labels are associated with the change set
@@ -190,19 +187,20 @@ test("creating a change set with version_id should store it in the specified ver
 	const changeSet = await createChangeSet({
 		lix,
 		elements: [],
-		state_version_id: globalVersion,
+		lixcol_version_id: globalVersion,
 	});
 
 	// Verify the change set was created with the correct version_id
 	expect(changeSet.id).toBeDefined();
-	expect(changeSet.state_version_id).toBe(globalVersion);
+	expect(changeSet.lixcol_version_id).toBe(globalVersion);
 
 	// Also verify by querying the database directly
 	const storedChangeSet = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("change_set_all")
 		.selectAll()
 		.where("id", "=", changeSet.id)
+		.where("lixcol_version_id", "=", globalVersion)
 		.executeTakeFirstOrThrow();
 
-	expect(storedChangeSet.state_version_id).toBe(globalVersion);
+	expect(storedChangeSet.lixcol_version_id).toBe(globalVersion);
 });

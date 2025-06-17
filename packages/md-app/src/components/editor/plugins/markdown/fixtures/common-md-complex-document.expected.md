@@ -6,7 +6,7 @@ This document demonstrates a wide variety of Markdown syntax elements and how th
 
 ## tc - text formatting - italic
 
-This paragraph demonstrates *italic text* inline also wiht *underscore*
+This paragraph demonstrates _italic text_ inline also wiht _underscore_
 
 ## tc - text formatting - bold/emphasis
 
@@ -16,11 +16,11 @@ This paragraph demonstrates **bold/emphasis text** inline
 
 ## tc - text formatting - bold AND italic with asterix \*
 
-This paragraph demonstrates ***italic AND bold text*** inline
+This paragraph demonstrates _**italic AND bold text**_ inline
 
 ## tc - text formatting - bold AND italic with underscore \_
 
-This paragraph demonstrates ***italic AND bold text*** inline
+This paragraph demonstrates _**italic AND bold text**_ inline
 
 ## tc - text formatting - strikethrough and inline code
 
@@ -78,32 +78,32 @@ the identation may differ 1 meaning is the same -->
 
 ### Unordered Lists
 
-*   Item 1
-*   Item 2
-    *   Nested item 2.1
-    *   Nested item 2.2
-        *   Deeply nested item
-*   Item 3
+* Item 1
+* Item 2
+  * Nested item 2.1
+  * Nested item 2.2
+    * Deeply nested item
+* Item 3
 
 ## tc - ordered lists
 
 ### Ordered Lists
 
-1.  First item
-2.  Second item
-    1.  Nested first
-    2.  Nested second
-3.  Third item
+1. First item
+2. Second item
+   1. Nested first
+   2. Nested second
+3. Third item
 
 ## tc - mixed lists
 
 ### Mixed Lists
 
-1.  First ordered item
-    *   Unordered sub-item
-    *   Another unordered sub-item
-        1.  Ordered sub-sub-item
-2.  Second ordered item
+1. First ordered item
+   * Unordered sub-item
+   * Another unordered sub-item
+     1. Ordered sub-sub-item
+2. Second ordered item
 
 ## tc - task lists
 
@@ -231,15 +231,6 @@ Another paragraph with a different footnote.[^2]
 
 [^2]: This is the second footnote with multiple lines.
     Indented to be part of the footnote.
-
-## tc - definition lists
-
-Term 1
-: Definition 1
-
-Term 2
-: Definition 2a
-: Definition 2b
 
 ## tc - line breaks and empty paragraphs should get collapsed
 

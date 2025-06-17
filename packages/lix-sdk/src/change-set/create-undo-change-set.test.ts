@@ -3,7 +3,10 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createUndoChangeSet } from "./create-undo-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
-import { mockJsonPlugin, MockJsonPropertySchema } from "../plugin/mock-json-plugin.js";
+import {
+	mockJsonPlugin,
+	MockJsonPropertySchema,
+} from "../plugin/mock-json-plugin.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 
 test("it creates an undo change set that reverses the operations of the original change set", async () => {
@@ -14,10 +17,10 @@ test("it creates an undo change set that reverses the operations of the original
 
 	// Insert the schema that the mockJsonPlugin uses
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			value: MockJsonPropertySchema,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -76,9 +79,9 @@ test("it creates an undo change set that reverses the operations of the original
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		state_version_id: "global",
+		lixcol_version_id: "global",
 		elements: changes.map((change) => ({
-			state_version_id: "global",
+			lixcol_version_id: "global",
 			change_id: change.id,
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,
@@ -151,10 +154,10 @@ test("it correctly undoes delete operations by restoring previous state", async 
 
 	// Insert the schema that the mockJsonPlugin uses
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			value: MockJsonPropertySchema,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -203,10 +206,10 @@ test("it correctly undoes delete operations by restoring previous state", async 
 	const cs0 = await createChangeSet({
 		lix,
 		id: "cs0",
-		state_version_id: "global",
+		lixcol_version_id: "global",
 		elements: initialChanges.map((change) => ({
 			change_id: change.id,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,
 			file_id: change.file_id,
@@ -234,10 +237,10 @@ test("it correctly undoes delete operations by restoring previous state", async 
 	const cs1 = await createChangeSet({
 		lix,
 		id: "cs1",
-		state_version_id: "global",
+		lixcol_version_id: "global",
 		elements: deleteChanges.map((change) => ({
 			change_id: change.id,
-			state_version_id: "global",
+			lixcol_version_id: "global",
 			entity_id: change.entity_id,
 			schema_key: change.schema_key,
 			file_id: change.file_id,

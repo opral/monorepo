@@ -153,7 +153,6 @@ export const intermediateChangesAtom = atom<
 							"change_set_element.change_id",
 							"change.id"
 						)
-						.where(changeSetElementIsLeafOf([{ id: workingChangeSetId }]))
 						.where(
 							"change_set_element.change_set_id",
 							"=",

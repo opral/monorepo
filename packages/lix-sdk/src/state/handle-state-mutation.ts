@@ -390,7 +390,6 @@ export function handleStateMutation(
 							{ includeSelf: true }
 						)
 					)
-					.where("state_version_id", "=", "global")
 					.select("id")
 					.limit(1),
 			});

@@ -29,19 +29,20 @@ export async function applyChangeSet(args: {
 		if (version.change_set_id !== args.changeSet.id) {
 			// Check if edge already exists to avoid conflict
 			const existingEdge = await trx
-				.selectFrom("change_set_edge")
+				.selectFrom("change_set_edge_all")
 				.where("parent_id", "=", version.change_set_id)
 				.where("child_id", "=", args.changeSet.id)
+				.where("lixcol_version_id", "=", "global")
 				.selectAll()
 				.executeTakeFirst();
 
 			if (!existingEdge) {
 				await trx
-					.insertInto("change_set_edge")
+					.insertInto("change_set_edge_all")
 					.values({
 						parent_id: version.change_set_id,
 						child_id: args.changeSet.id,
-						state_version_id: "global",
+						lixcol_version_id: "global",
 					})
 					.execute();
 			}
@@ -51,12 +52,13 @@ export async function applyChangeSet(args: {
 		const changesResult = await trx
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
+				"change_set_element_all",
+				"change_set_element_all.change_id",
 				"change.id"
 			)
 			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-			.where("change_set_element.change_set_id", "=", args.changeSet.id)
+			.where("change_set_element_all.change_set_id", "=", args.changeSet.id)
+			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.selectAll("change")
 			.select("snapshot.content as snapshot_content")
 			.select(sql`${version.id}`.as("version_id"))
@@ -127,13 +129,17 @@ export async function applyChangeSet(args: {
 
 			// Skip plugin processing for lix own file changes (file metadata changes)
 			// These are handled by the database triggers and don't need plugin processing
-			const hasLixOwnEntityChanges = changes.some(c => c.plugin_key === "lix_own_entity");
+			const hasLixOwnEntityChanges = changes.some(
+				(c) => c.plugin_key === "lix_own_entity"
+			);
 			if (hasLixOwnEntityChanges) {
 				continue;
 			}
 
 			// Check if this file has deletion changes
-			const hasFileDeletion = changes.some(c => c.snapshot_id === "no-content" && c.schema_key === "lix_file");
+			const hasFileDeletion = changes.some(
+				(c) => c.snapshot_id === "no-content" && c.schema_key === "lix_file"
+			);
 			if (hasFileDeletion) {
 				// File is being deleted - bypass plugin processing and delete the file
 				await trx.deleteFrom("file").where("id", "=", file_id).execute();

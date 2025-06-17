@@ -22,13 +22,13 @@ export async function createVersion(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
 			lix: { ...args.lix, db: trx },
-			state_version_id: "global",
+			lixcol_version_id: "global",
 		});
 		const cs =
 			args.changeSet ??
 			(await createChangeSet({
 				lix: { ...args.lix, db: trx },
-				state_version_id: "global",
+				lixcol_version_id: "global",
 			}));
 
 		const versionId = args.id ?? nanoid();
@@ -48,7 +48,6 @@ export async function createVersion(args: {
 			.selectFrom("version")
 			.selectAll()
 			.where("id", "=", versionId)
-			.where("version.state_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
 		return newVersion;

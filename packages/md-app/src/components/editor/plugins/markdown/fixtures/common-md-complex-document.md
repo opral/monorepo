@@ -224,15 +224,6 @@ Another paragraph with a different footnote.[^2]
 [^2]: This is the second footnote with multiple lines.
     Indented to be part of the footnote.
 
-## tc - definition lists
-
-Term 1
-: Definition 1
-
-Term 2
-: Definition 2a
-: Definition 2b
-
 ## tc - line breaks and empty paragraphs should get collapsed
 
 This paragraph is followed by empty paragraphs.

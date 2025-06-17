@@ -16,7 +16,6 @@ import { ChevronDown } from "lucide-react";
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
     id: string;
-    immutable_elements: boolean;
     change_count: number;
     created_at: string | null;
     author_name: string | null;
@@ -144,7 +143,7 @@ export const CheckpointComponent = (props: {
           </div>
 
           <div className="pb-2">
-            <p className="text-sm text-slate-500 truncate text-ellipsis overflow-hidden pr-2">
+            <p className="text-sm text-slate-500 overflow-hidden pr-2 whitespace-normal">
               {truncatedComment || "Create checkpoint"}
             </p>
           </div>

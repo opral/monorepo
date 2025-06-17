@@ -220,11 +220,6 @@ test("creates proper change set ancestry chain", async () => {
 		.selectFrom("change_set")
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
-		.where(
-			"state_version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
 		.selectAll()
 		.execute();
 
@@ -235,11 +230,6 @@ test("creates proper change set ancestry chain", async () => {
 		.selectFrom("change_set")
 		.where("id", "=", checkpoint1.id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
-		.where(
-			"state_version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
 		.selectAll()
 		.execute();
 
@@ -250,11 +240,6 @@ test("creates proper change set ancestry chain", async () => {
 		.selectFrom("change_set")
 		.where("id", "=", initialVersion.change_set_id)
 		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
-		.where(
-			"state_version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
 		.selectAll()
 		.execute();
 
@@ -269,7 +254,6 @@ test("debug working change set elements after insertion", async () => {
 		.selectFrom("active_version")
 		.innerJoin("version", "version.id", "active_version.version_id")
 		.selectAll("version")
-		.where("version.state_version_id", "=", "global")
 		.executeTakeFirstOrThrow();
 
 	const mainVersion = await lix.db
@@ -291,9 +275,9 @@ test("debug working change set elements after insertion", async () => {
 
 	// Check working change set elements BEFORE insertion
 	const elementsBefore = await lix.db
-		.selectFrom("change_set_element")
+		.selectFrom("change_set_element_all")
 		.where("change_set_id", "=", activeVersion.working_change_set_id)
-		.where("state_version_id", "=", "global")
+		.where("lixcol_version_id", "=", "global")
 		.selectAll()
 		.execute();
 
@@ -319,9 +303,9 @@ test("debug working change set elements after insertion", async () => {
 
 	// Check working change set elements AFTER insertion
 	const elementsAfter = await lix.db
-		.selectFrom("change_set_element")
+		.selectFrom("change_set_element_all")
 		.where("change_set_id", "=", activeVersion.working_change_set_id)
-		.where("state_version_id", "=", activeVersion.id)
+		.where("lixcol_version_id", "=", activeVersion.id)
 		.selectAll()
 		.execute();
 	console.log("4. Elements after insertion:", elementsAfter);
@@ -373,7 +357,6 @@ test(
 			.selectFrom("active_version")
 			.innerJoin("version", "version.id", "active_version.version_id")
 			.selectAll("version")
-			.where("version.state_version_id", "=", "global")
 			.executeTakeFirstOrThrow();
 
 		console.log("Active version:", activeVersion);
@@ -390,7 +373,6 @@ test(
 		const versionAfterInsertion = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("state_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
@@ -402,7 +384,6 @@ test(
 		const versionAfterCheckpoint = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("state_version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
@@ -418,7 +399,6 @@ test(
 					{ includeSelf: true }
 				)
 			)
-			.where("state_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
@@ -434,44 +414,42 @@ test(
 					{ includeSelf: true }
 				)
 			)
-			.where("state_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
 		console.log("Checkpoints of active version:", checkpointsOfActiveVersion);
 
 		const elementsBeforeDeletion = await lix.db
-			.selectFrom("change_set_element")
+			.selectFrom("change_set_element_all")
 			.where("change_set_id", "=", versionAfterCheckpoint.working_change_set_id)
-			.where("state_version_id", "=", "global")
+			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.execute();
 		console.log("Elements before deletion:", elementsBeforeDeletion);
 
 		// Now delete the key-value pair
 		await lix.db
-			.deleteFrom("key_value")
+			.deleteFrom("key_value_all")
 			.where("key", "=", "test-key")
-			.where("state_version_id", "=", activeVersion.id)
+			.where("lixcol_version_id", "=", activeVersion.id)
 			.execute();
 
 		const activeVersionAfterDeletion = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersion.id)
-			.where("state_version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
 		console.log("Active version after deletion:", activeVersionAfterDeletion);
 
 		const elementsAfterDeletion = await lix.db
-			.selectFrom("change_set_element")
+			.selectFrom("change_set_element_all")
 			.where(
 				"change_set_id",
 				"=",
 				activeVersionAfterDeletion.working_change_set_id
 			)
-			.where("state_version_id", "=", "global")
+			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.execute();
 
@@ -495,16 +473,16 @@ test(
 		const deletionChangesInCheckpoint = await lix.db
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
+				"change_set_element_all",
+				"change_set_element_all.change_id",
 				"change.id"
 			)
 			.where(
-				"change_set_element.change_set_id",
+				"change_set_element_all.change_set_id",
 				"=",
 				checkpointAfterDeletion.id
 			)
-			.where("change_set_element.state_version_id", "=", "global")
+			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.entity_id", "=", "test-key")
 			.where("change.schema_key", "=", "lix_key_value")
 			.where("change.snapshot_id", "=", "no-content")
@@ -532,9 +510,6 @@ test(
 				id: "file-to-delete",
 				data: new TextEncoder().encode(JSON.stringify({ test: "delete-me" })),
 				path: "/delete-test.json",
-				state_version_id: lix.db
-					.selectFrom("active_version")
-					.select("version_id"),
 			})
 			.execute();
 
@@ -547,11 +522,6 @@ test(
 				),
 			})
 			.where("id", "=", "file-to-delete")
-			.where(
-				"state_version_id",
-				"=",
-				lix.db.selectFrom("active_version").select("version_id")
-			)
 			.execute();
 
 		await createCheckpoint({ lix });
@@ -560,11 +530,6 @@ test(
 		await lix.db
 			.deleteFrom("file")
 			.where("id", "=", "file-to-delete")
-			.where(
-				"state_version_id",
-				"=",
-				lix.db.selectFrom("active_version").select("version_id")
-			)
 			.execute();
 
 		// Verify deletion changes were created
@@ -582,16 +547,16 @@ test(
 		const deletionChangesInCheckpoint = await lix.db
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
+				"change_set_element_all",
+				"change_set_element_all.change_id",
 				"change.id"
 			)
 			.where(
-				"change_set_element.change_set_id",
+				"change_set_element_all.change_set_id",
 				"=",
 				checkpointAfterDeletion.id
 			)
-			.where("change_set_element.state_version_id", "=", "global")
+			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.file_id", "=", "file-to-delete")
 			.where("change.snapshot_id", "=", "no-content")
 			.selectAll("change")

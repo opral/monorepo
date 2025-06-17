@@ -36,6 +36,8 @@ const ViewsWithJsonColumns = {
 				.map(([key]) => key);
 			if (jsonColumns.length) {
 				result[viewName] = jsonColumns;
+				// Also add the _all variant view with the same JSON columns
+				result[viewName + "_all"] = jsonColumns;
 			}
 		}
 		return result;
@@ -85,16 +87,23 @@ export function initDb(args: {
 	for (const schema of Object.values(LixSchemaViewMap)) {
 		args.sqlite.exec(
 			`
-			INSERT INTO stored_schema (value, state_version_id)
-			SELECT ?, ?
+			INSERT INTO stored_schema_all (key, version, value, lixcol_version_id)
+			SELECT ?, ?, ?, ?
 			WHERE NOT EXISTS (
 				SELECT 1
-				FROM stored_schema
+				FROM stored_schema_all
 				WHERE key = '${schema["x-lix-key"]}'
 				AND version = '${schema["x-lix-version"]}'
 			);
 			`,
-			{ bind: [JSON.stringify(schema), "global"] }
+			{
+				bind: [
+					schema["x-lix-key"],
+					schema["x-lix-version"],
+					JSON.stringify(schema),
+					"global",
+				],
+			}
 		);
 	}
 
