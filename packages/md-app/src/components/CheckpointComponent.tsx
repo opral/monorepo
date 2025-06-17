@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/plate-ui/avatar.tsx";
-import { Button } from "@/components/plate-ui/button.tsx";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/plate-ui/tooltip.tsx";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
@@ -144,7 +144,7 @@ export const CheckpointComponent = (props: {
           </div>
 
           <div className="pb-2">
-            <p className="text-sm text-slate-500 truncate text-ellipsis overflow-hidden pr-2">
+            <p className="text-sm text-slate-500 overflow-hidden pr-2 whitespace-normal">
               {truncatedComment || "Create checkpoint"}
             </p>
           </div>

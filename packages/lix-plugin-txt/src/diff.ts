@@ -93,11 +93,6 @@ export class DiffComponent extends LitElement {
 			border-right: 1px solid var(--color-border);
 		}
 
-		.line-wrapper {
-			display: flow;
-			white-space: inherit;
-		}
-
 		/* Character-level highlighting */
 		.char-added {
 			background-color: var(--color-added-bg);
@@ -156,6 +151,10 @@ export class DiffComponent extends LitElement {
 			vertical-align: middle;
 		}
 
+		// .content-for-desktop {
+		// 	display: inline; /* Allows internal spans like char-added to flow */
+		// }
+
 		/* Container query for smaller container widths */
 		@container diff (max-width: 600px) {
 			.diff-section {
@@ -165,12 +164,16 @@ export class DiffComponent extends LitElement {
 
 			.row-pair {
 				display: block;
-				margin-bottom: 8px;
-				padding-bottom: 4px;
+				padding-bottom: 2px;
 			}
 
-			/* Hide duplicate content in inline mode */
-			.row-pair > div.diff-row:nth-child(2) {
+			/* Hide right column in inline mode */
+
+			.row-pair > div.diff-row.unchanged:nth-child(2) {
+				display: none;
+			}
+
+			.row-pair > div.diff-row.empty:nth-child(2) {
 				display: none;
 			}
 
@@ -191,11 +194,6 @@ export class DiffComponent extends LitElement {
 				display: inline-block;
 				width: 100%;
 				max-width: calc(100% - 30px);
-			}
-
-			/* Expand line-wrapper to full width */
-			.line-wrapper {
-				width: 100%;
 			}
 
 			/* Enhanced highlighting for inline view */
@@ -530,82 +528,55 @@ export class DiffComponent extends LitElement {
 	}
 
 	renderDiffRow(pair: AlignedChange) {
+		let isMobileRowPairEmpty = false;
+
 		// For unchanged lines, render normally
 		if (!pair.left.type && !pair.right.type) {
+			isMobileRowPairEmpty = !pair.left.content;
 			return html`
-				<div class="row-pair">
+				<div
+					class="row-pair ${isMobileRowPairEmpty
+						? "mobile-row-pair-empty"
+						: ""}"
+				>
 					<div class="diff-row unchanged">
-						<span class="line">${pair.left.content}</span>
+						<div class="line">${pair.left.content}</div>
 					</div>
 					<div class="diff-row unchanged">
-						<span class="line">${pair.right.content}</span>
+						<div class="line">${pair.right.content}</div>
 					</div>
 				</div>
 			`;
 		}
 
-		// For mobile view, we'll combine both sides for the char-level diff
-		// This creates a unified view with inline highlighting
-		const detailedDiff = this.renderInlineDiff(
+		// For changed lines:
+		// Get detailed diffs for side-by-side (desktop) view
+		const detailedResult = this.renderDetailedDiff(
 			pair.left.content,
 			pair.right.content,
 		);
+		// Get inline diff for single column (mobile) view
+
+		// Determine if the mobile content would be empty
+		isMobileRowPairEmpty = !pair.left.content && !pair.right.content;
 
 		return html`
-			<div class="row-pair">
+			<div
+				class="row-pair ${isMobileRowPairEmpty ? "mobile-row-pair-empty" : ""}"
+			>
 				<div class="diff-row ${pair.left.type || ""}">
-					<div class="line line-wrapper">${detailedDiff}</div>
+					<div class="line">
+						<span>${detailedResult.before}</span>
+					</div>
 				</div>
 				<div class="diff-row ${pair.right.type || ""}">
-					<div class="line line-wrapper">${detailedDiff}</div>
+					<div class="line">
+						<span>${detailedResult.after}</span>
+						<!-- Mobile view hides this entire .diff-row, so no specific mobile content needed here -->
+					</div>
 				</div>
 			</div>
 		`;
-	}
-
-	renderInlineDiff(text1: string, text2: string) {
-		// Handle empty strings
-		if (!text1) {
-			return text2 ? html`<span class="char-added">${text2}</span>` : html``;
-		}
-
-		if (!text2) {
-			return text1 ? html`<span class="char-deleted">${text1}</span>` : html``;
-		}
-
-		// Normalize trailing newlines to prevent false positives
-		const normalizedText1 = text1.replace(/\n+$/, "");
-		const normalizedText2 = text2.replace(/\n+$/, "");
-
-		// If texts are identical after normalization, no highlighting needed
-		if (normalizedText1 === normalizedText2) {
-			return html`<span>${text1}</span>`;
-		}
-
-		// Character-level diffing
-		const charDiffs = diffChars(normalizedText1, normalizedText2);
-
-		// Process and render the character differences
-		const combinedElements: unknown[] = [];
-
-		charDiffs.forEach((part) => {
-			if (!part) return;
-
-			if (part.added && part.value) {
-				combinedElements.push(
-					html`<span class="char-added">${part.value}</span>`,
-				);
-			} else if (part.removed && part.value) {
-				combinedElements.push(
-					html`<span class="char-deleted">${part.value}</span>`,
-				);
-			} else {
-				// Unchanged parts
-				combinedElements.push(html`<span>${part.value || ""}</span>`);
-			}
-		});
-
-		return html`${combinedElements}`;
 	}
 
 	toggleBlock(blockId: string, e: Event) {

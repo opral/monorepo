@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { posthog } from "posthog-js";
+import posthog from "posthog-js";
 export function App({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
@@ -10,8 +10,11 @@ export function App({ children }: { children: React.ReactNode }) {
 				autocapture: {
 					capture_copied_text: true,
 				},
+				persistence: 'localStorage', // Ensure persistence works correctly
+				loaded: (posthog) => {
+					posthog.capture("$pageview");
+				}
 			});
-			posthog.capture("$pageview");
 		} else {
 			console.info("No posthog token found");
 		}

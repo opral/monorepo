@@ -39,32 +39,35 @@ if (isProduction) {
 
 // ----------------- ROUTES ----------------------
 
-// used by sdk load test
+// Block suspicious/bot-like routes early
+app.use((req, res, next) => {
+  if (req.path.startsWith("/badge") || req.path.endsWith(".php")) {
+    return res.status(404).send("Not Found");
+  }
+  return next();
+});
+
 app.get("/ping", (_, response) => {
   response.send(
-    `http://localhost:3000 ${process.env.MOCK_TRANSLATE ? "MOCK_TRANSLATE" : ""}\n`
+    `http://localhost:3000 ${
+      process.env.MOCK_TRANSLATE ? "MOCK_TRANSLATE" : ""
+    }\n`
   );
 });
 
-const serializedMarketplaceManifest = JSON.stringify(MarketplaceManifest);
-
 app.get("/schema/marketplace-manifest", (_, response) => {
   response.header("Content-Type", "application/json");
-  response.send(serializedMarketplaceManifest);
+  response.send(JSON.stringify(MarketplaceManifest));
 });
-
-const serializedProjectSettings = JSON.stringify(ProjectSettings);
 
 app.get("/schema/project-settings", (_, response) => {
   response.header("Content-Type", "application/json");
-  response.send(serializedProjectSettings);
+  response.send(JSON.stringify(ProjectSettings));
 });
-
-const serializedMessageStorageFormat = JSON.stringify(FileSchema);
 
 app.get("/schema/inlang-message-format", (_, response) => {
   response.header("Content-Type", "application/json");
-  response.send(serializedMessageStorageFormat);
+  response.send(JSON.stringify(FileSchema));
 });
 
 app.use(rpcRouter);
@@ -77,7 +80,12 @@ app.use(
     headers: {
       Connection: "keep-alive",
     },
-  }),
+    onError(err, req, res, target) {
+      if (!res.headersSent) {
+        res.status(502).send("Bad Gateway");
+      }
+    },
+  })
 );
 
 // ! website comes last in the routes because it uses the wildcard `*` to catch all routes

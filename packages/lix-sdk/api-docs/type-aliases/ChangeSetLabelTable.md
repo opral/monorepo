@@ -8,7 +8,7 @@
 
 > **ChangeSetLabelTable** = `object`
 
-Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:119](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/change-set/database-schema.ts#L119)
+Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:119](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change-set/database-schema.ts#L119)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:119](https://git
 
 > **change\_set\_id**: `string`
 
-Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:121](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/change-set/database-schema.ts#L121)
+Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:121](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change-set/database-schema.ts#L121)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:121](https://git
 
 > **label\_id**: `string`
 
-Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:120](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/change-set/database-schema.ts#L120)
+Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:120](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change-set/database-schema.ts#L120)

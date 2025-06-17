@@ -1,5 +1,76 @@
 # @inlang/paraglide-js
 
+## 2.1.0
+
+### Minor Changes
+
+- 4255bd5: Provide functions for getting the preferred language on server and client.
+
+  This defines two new functions for getting the preferred language:
+
+  - `extractLocaleFromHeader`: Extracts the locale from the accept-language header on the server.
+  - `extractLocaleFromNavigator`: Extracts the locale from the navigator.languages array on the client.
+
+  The code was already present in the `@inlang/paraglide-js` package, but it was not exported. Now it is exported so that
+  it can be used in custom strategies.
+
+- dc287f1: Implement custom strategy concept for locale resolution.
+
+  This introduces a new way to define custom locale resolution strategies alongside built-in strategies. Custom strategies provide a cleaner, more composable approach compared to overwriting `getLocale()` and `setLocale()` functions directly.
+
+  **New APIs:**
+
+  - `defineCustomClientStrategy()`: Define custom strategies for client-side locale resolution
+  - `defineCustomServerStrategy()`: Define custom strategies for server-side locale resolution
+
+  **Key features:**
+
+  - Custom strategies must follow the pattern `custom-<name>` where `<name>` contains only alphanumeric characters
+  - Can be combined with built-in strategies in the strategy array
+  - Respect strategy order for fallback handling
+  - Support both client and server environments
+  - Provide better error isolation and type safety
+
+  **Usage example:**
+
+  ```js
+  import { defineCustomClientStrategy } from "./paraglide/runtime.js";
+
+  defineCustomClientStrategy("custom-sessionStorage", {
+  	getLocale: () => sessionStorage.getItem("user-locale") ?? undefined,
+  	setLocale: (locale) => sessionStorage.setItem("user-locale", locale),
+  });
+  ```
+
+  Then include in your strategy configuration:
+
+  ```js
+  compile({
+  	strategy: ["custom-sessionStorage", "cookie", "baseLocale"],
+  });
+  ```
+
+### Patch Changes
+
+- 4c0b997: perf(paraglide): improve bundle size by removing message id fallback for fully translated messages
+- 9621803: Add Vary: Accept-Language header when preferredLanguage strategy is used
+
+  Paraglide middleware now automatically sets the `Vary: Accept-Language` header when performing redirects based on the `preferredLanguage` strategy. This indicates to clients (CDN cache, crawlers, etc.) that the response will be different depending on the `Accept-Language` header, ensuring proper caching behavior and SEO compliance.
+
+  Closes https://github.com/opral/inlang-paraglide-js/issues/522
+
+- Updated dependencies [22089a2]
+  - @inlang/sdk@2.4.9
+
+## 2.0.13
+
+### Patch Changes
+
+- 688c7c8: Add support for callbacks in server middleware
+- 635861b: `extractLocaleFromUrl()` now uses a cache for the last value.
+
+  Useful on the client-side where the same URL is being extracted many times for each message on a given page.
+
 ## 2.0.12
 
 ### Patch Changes

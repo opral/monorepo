@@ -1,20 +1,21 @@
 import { assertIsLocale } from "./assert-is-locale.js";
-import { isLocale } from "./is-locale.js";
-import {
-	baseLocale,
-	strategy,
-	serverAsyncLocalStorage,
-	TREE_SHAKE_COOKIE_STRATEGY_USED,
-	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
-	TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED,
-	TREE_SHAKE_URL_STRATEGY_USED,
-	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
-	localStorageKey,
-	isServer,
-} from "./variables.js";
 import { extractLocaleFromCookie } from "./extract-locale-from-cookie.js";
+import { extractLocaleFromNavigator } from "./extract-locale-from-navigator.js";
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 import { setLocale } from "./set-locale.js";
+import { customClientStrategies, isCustomStrategy } from "./strategy.js";
+import {
+	baseLocale,
+	isServer,
+	localStorageKey,
+	serverAsyncLocalStorage,
+	strategy,
+	TREE_SHAKE_COOKIE_STRATEGY_USED,
+	TREE_SHAKE_GLOBAL_VARIABLE_STRATEGY_USED,
+	TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED,
+	TREE_SHAKE_PREFERRED_LANGUAGE_STRATEGY_USED,
+	TREE_SHAKE_URL_STRATEGY_USED,
+} from "./variables.js";
 
 /**
  * This is a fallback to get started with a custom
@@ -77,13 +78,16 @@ export let getLocale = () => {
 			strat === "preferredLanguage" &&
 			!isServer
 		) {
-			locale = negotiatePreferredLanguageFromNavigator();
+			locale = extractLocaleFromNavigator();
 		} else if (
 			TREE_SHAKE_LOCAL_STORAGE_STRATEGY_USED &&
 			strat === "localStorage" &&
 			!isServer
 		) {
 			locale = localStorage.getItem(localStorageKey) ?? undefined;
+		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
+			const handler = customClientStrategies.get(strat);
+			locale = handler.getLocale();
 		}
 		// check if match, else continue loop
 		if (locale !== undefined) {
@@ -102,32 +106,6 @@ export let getLocale = () => {
 		"No locale found. Read the docs https://inlang.com/m/gerre34r/library-inlang-paraglideJs/errors#no-locale-found"
 	);
 };
-
-/**
- * Negotiates a preferred language from navigator.languages.
- *
- * @returns {string|undefined} The negotiated preferred language.
- */
-function negotiatePreferredLanguageFromNavigator() {
-	if (!navigator?.languages?.length) {
-		return undefined;
-	}
-
-	const languages = navigator.languages.map((lang) => ({
-		fullTag: lang.toLowerCase(),
-		baseTag: lang.split("-")[0]?.toLowerCase(),
-	}));
-
-	for (const lang of languages) {
-		if (isLocale(lang.fullTag)) {
-			return lang.fullTag;
-		} else if (isLocale(lang.baseTag)) {
-			return lang.baseTag;
-		}
-	}
-
-	return undefined;
-}
 
 /**
  * Overwrite the \`getLocale()\` function.

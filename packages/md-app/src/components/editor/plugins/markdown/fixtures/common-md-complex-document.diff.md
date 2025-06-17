@@ -2,11 +2,11 @@
 
 ## Test Summary
 
-- 🟢 Perfect roundtrip (input = output): 11/24 (46%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 13/24 (54%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 0/24 (0%)
+- 🟢 Perfect roundtrip (input = output): 9/23 (39%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 12/23 (52%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 2/23 (9%)
 
-**Overall Status**: ✅ All tests passing (11 perfect, 13 acceptable)
+**Overall Status**: ❌ 2 failing tests
 
 ---
 
@@ -52,12 +52,12 @@ This paragraph demonstrates *italic text* inline also wiht _underscore_
 </td>
 <td>
 
-This paragraph demonstrates *italic text* inline also wiht *underscore*
+This paragraph demonstrates _italic text_ inline also wiht _underscore_
 
 </td>
 <td>
 
-This paragraph demonstrates *italic text* inline also wiht *underscore*
+This paragraph demonstrates _italic text_ inline also wiht _underscore_
 
 </td>
 </tr>
@@ -69,12 +69,12 @@ This paragraph demonstrates *italic text* inline also wiht *underscore*
 </td>
 <td>
 
-<pre><code>This paragraph demonstrates *italic text* inline also wiht *underscore*</code></pre>
+<pre><code>This paragraph demonstrates _italic text_ inline also wiht _underscore_</code></pre>
 
 </td>
 <td>
 
-<pre><code>This paragraph demonstrates *italic text* inline also wiht *underscore*</code></pre>
+<pre><code>This paragraph demonstrates _italic text_ inline also wiht _underscore_</code></pre>
 
 </td>
 </tr>
@@ -158,12 +158,12 @@ This paragraph demonstrates **bold/emphasis text** inline</code></pre>
 </td>
 <td>
 
-This paragraph demonstrates ***italic AND bold text*** inline
+This paragraph demonstrates _**italic AND bold text**_ inline
 
 </td>
 <td>
 
-This paragraph demonstrates ***italic AND bold text*** inline
+This paragraph demonstrates _**italic AND bold text**_ inline
 
 </td>
 </tr>
@@ -175,12 +175,12 @@ This paragraph demonstrates ***italic AND bold text*** inline
 </td>
 <td>
 
-<pre><code>This paragraph demonstrates ***italic AND bold text*** inline</code></pre>
+<pre><code>This paragraph demonstrates _**italic AND bold text**_ inline</code></pre>
 
 </td>
 <td>
 
-<pre><code>This paragraph demonstrates ***italic AND bold text*** inline</code></pre>
+<pre><code>This paragraph demonstrates _**italic AND bold text**_ inline</code></pre>
 
 </td>
 </tr>
@@ -205,12 +205,12 @@ This paragraph demonstrates ___italic AND bold text___ inline
 </td>
 <td>
 
-This paragraph demonstrates ***italic AND bold text*** inline
+This paragraph demonstrates _**italic AND bold text**_ inline
 
 </td>
 <td>
 
-This paragraph demonstrates ***italic AND bold text*** inline
+This paragraph demonstrates _**italic AND bold text**_ inline
 
 </td>
 </tr>
@@ -222,12 +222,12 @@ This paragraph demonstrates ***italic AND bold text*** inline
 </td>
 <td>
 
-<pre><code>This paragraph demonstrates ***italic AND bold text*** inline</code></pre>
+<pre><code>This paragraph demonstrates _**italic AND bold text**_ inline</code></pre>
 
 </td>
 <td>
 
-<pre><code>This paragraph demonstrates ***italic AND bold text*** inline</code></pre>
+<pre><code>This paragraph demonstrates _**italic AND bold text**_ inline</code></pre>
 
 </td>
 </tr>
@@ -448,12 +448,13 @@ we currently expect a line break after each paragraph --&gt;
 
 </details>
 
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - images</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - images</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 50%">Input</th>
+<th style="width: 50%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -467,11 +468,33 @@ we currently expect a line break after each paragraph --&gt;
 [![Image with link](https://example.com/image.jpg "Click me")](https://example.com)
 
 </td>
+<td>
+
+![Image example](https://example.com/image.jpg "Image example")
+
+![Reference image][img-ref]
+
+[img-ref]: https://example.com/ref-image.jpg "Reference Image"
+
+[![Image with link](https://example.com/image.jpg "Click me")](https://example.com)
+
+</td>
 </tr>
 <tr>
 <td>
 
 <pre><code>![Image example](https://example.com/image.jpg &quot;Sample Image&quot;)
+
+![Reference image][img-ref]
+
+[img-ref]: https://example.com/ref-image.jpg &quot;Reference Image&quot;
+
+[![Image with link](https://example.com/image.jpg &quot;Click me&quot;)](https://example.com)</code></pre>
+
+</td>
+<td>
+
+<pre><code>![Image example](https://example.com/image.jpg &quot;Image example&quot;)
 
 ![Reference image][img-ref]
 
@@ -517,12 +540,12 @@ the identation may differ 1 meaning is the same -->
 
 ### Unordered Lists
 
-*   Item 1
-*   Item 2
-    *   Nested item 2.1
-    *   Nested item 2.2
-        *   Deeply nested item
-*   Item 3
+* Item 1
+* Item 2
+  * Nested item 2.1
+  * Nested item 2.2
+    * Deeply nested item
+* Item 3
 
 </td>
 <td>
@@ -532,12 +555,12 @@ the identation may differ 1 meaning is the same -->
 
 ### Unordered Lists
 
-*   Item 1
-*   Item 2
-    *   Nested item 2.1
-    *   Nested item 2.2
-        *   Deeply nested item
-*   Item 3
+* Item 1
+* Item 2
+  * Nested item 2.1
+  * Nested item 2.2
+    * Deeply nested item
+* Item 3
 
 </td>
 </tr>
@@ -564,12 +587,12 @@ the identation may differ 1 meaning is the same --&gt;
 
 ### Unordered Lists
 
-*   Item 1
-*   Item 2
-    *   Nested item 2.1
-    *   Nested item 2.2
-        *   Deeply nested item
-*   Item 3</code></pre>
+* Item 1
+* Item 2
+  * Nested item 2.1
+  * Nested item 2.2
+    * Deeply nested item
+* Item 3</code></pre>
 
 </td>
 <td>
@@ -579,12 +602,12 @@ the identation may differ 1 meaning is the same --&gt;
 
 ### Unordered Lists
 
-*   Item 1
-*   Item 2
-    *   Nested item 2.1
-    *   Nested item 2.2
-        *   Deeply nested item
-*   Item 3</code></pre>
+* Item 1
+* Item 2
+  * Nested item 2.1
+  * Nested item 2.2
+    * Deeply nested item
+* Item 3</code></pre>
 
 </td>
 </tr>
@@ -593,13 +616,11 @@ the identation may differ 1 meaning is the same --&gt;
 </details>
 
 <details >
-<summary><span style="color:#cc7700; font-weight:bold;">tc - ordered lists</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+<summary><span style="color:green; font-weight:bold;">tc - ordered lists</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
-<th style="width: 33%">Original Input</th>
-<th style="width: 33%">Expected Output</th>
-<th style="width: 33%">Actual Output</th>
+<th style="width: 100%">Input / Output (identical)</th>
 </tr>
 <tr>
 <td>
@@ -613,28 +634,6 @@ the identation may differ 1 meaning is the same --&gt;
 3. Third item
 
 </td>
-<td>
-
-### Ordered Lists
-
-1.  First item
-2.  Second item
-    1.  Nested first
-    2.  Nested second
-3.  Third item
-
-</td>
-<td>
-
-### Ordered Lists
-
-1.  First item
-2.  Second item
-    1.  Nested first
-    2.  Nested second
-3.  Third item
-
-</td>
 </tr>
 <tr>
 <td>
@@ -646,28 +645,6 @@ the identation may differ 1 meaning is the same --&gt;
    1. Nested first
    2. Nested second
 3. Third item</code></pre>
-
-</td>
-<td>
-
-<pre><code>### Ordered Lists
-
-1.  First item
-2.  Second item
-    1.  Nested first
-    2.  Nested second
-3.  Third item</code></pre>
-
-</td>
-<td>
-
-<pre><code>### Ordered Lists
-
-1.  First item
-2.  Second item
-    1.  Nested first
-    2.  Nested second
-3.  Third item</code></pre>
 
 </td>
 </tr>
@@ -700,22 +677,22 @@ the identation may differ 1 meaning is the same --&gt;
 
 ### Mixed Lists
 
-1.  First ordered item
-    *   Unordered sub-item
-    *   Another unordered sub-item
-        1.  Ordered sub-sub-item
-2.  Second ordered item
+1. First ordered item
+   * Unordered sub-item
+   * Another unordered sub-item
+     1. Ordered sub-sub-item
+2. Second ordered item
 
 </td>
 <td>
 
 ### Mixed Lists
 
-1.  First ordered item
-    *   Unordered sub-item
-    *   Another unordered sub-item
-        1.  Ordered sub-sub-item
-2.  Second ordered item
+1. First ordered item
+   * Unordered sub-item
+   * Another unordered sub-item
+     1. Ordered sub-sub-item
+2. Second ordered item
 
 </td>
 </tr>
@@ -735,22 +712,22 @@ the identation may differ 1 meaning is the same --&gt;
 
 <pre><code>### Mixed Lists
 
-1.  First ordered item
-    *   Unordered sub-item
-    *   Another unordered sub-item
-        1.  Ordered sub-sub-item
-2.  Second ordered item</code></pre>
+1. First ordered item
+   * Unordered sub-item
+   * Another unordered sub-item
+     1. Ordered sub-sub-item
+2. Second ordered item</code></pre>
 
 </td>
 <td>
 
 <pre><code>### Mixed Lists
 
-1.  First ordered item
-    *   Unordered sub-item
-    *   Another unordered sub-item
-        1.  Ordered sub-sub-item
-2.  Second ordered item</code></pre>
+1. First ordered item
+   * Unordered sub-item
+   * Another unordered sub-item
+     1. Ordered sub-sub-item
+2. Second ordered item</code></pre>
 
 </td>
 </tr>
@@ -758,12 +735,13 @@ the identation may differ 1 meaning is the same --&gt;
 
 </details>
 
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - task lists</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
+<details open>
+<summary><span style="color:red; font-weight:bold;">tc - task lists</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
 
 <table>
 <tr>
-<th style="width: 100%">Input / Output (identical)</th>
+<th style="width: 50%">Input</th>
+<th style="width: 50%">Actual Output</th>
 </tr>
 <tr>
 <td>
@@ -775,6 +753,15 @@ the identation may differ 1 meaning is the same --&gt;
 - [x] Another completed task
 
 </td>
+<td>
+
+### Task Lists
+
+* Completed task
+* Incomplete task
+* Another completed task
+
+</td>
 </tr>
 <tr>
 <td>
@@ -784,6 +771,15 @@ the identation may differ 1 meaning is the same --&gt;
 - [x] Completed task
 - [ ] Incomplete task
 - [x] Another completed task</code></pre>
+
+</td>
+<td>
+
+<pre><code>### Task Lists
+
+* Completed task
+* Incomplete task
+* Another completed task</code></pre>
 
 </td>
 </tr>
@@ -1445,41 +1441,6 @@ Another paragraph with a different footnote.[^2]
 
 [^2]: This is the second footnote with multiple lines.
     Indented to be part of the footnote.</code></pre>
-
-</td>
-</tr>
-</table>
-
-</details>
-
-<details >
-<summary><span style="color:green; font-weight:bold;">tc - definition lists</span> 🟢 <span title="Input = Output?">✅</span> <span title="Visual match?">✅</span></summary>
-
-<table>
-<tr>
-<th style="width: 100%">Input / Output (identical)</th>
-</tr>
-<tr>
-<td>
-
-Term 1
-: Definition 1
-
-Term 2
-: Definition 2a
-: Definition 2b
-
-</td>
-</tr>
-<tr>
-<td>
-
-<pre><code>Term 1
-: Definition 1
-
-Term 2
-: Definition 2a
-: Definition 2b</code></pre>
 
 </td>
 </tr>

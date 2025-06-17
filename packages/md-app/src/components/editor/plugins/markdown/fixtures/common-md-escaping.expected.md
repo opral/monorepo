@@ -62,11 +62,11 @@ Literal characters: & < > " '
 
 ## tc - escaped asterisk in italic
 
-*Italic text with \* escaped asterisk*
+_Italic text with \* escaped asterisk_
 
 ## tc - escaped asterisks in bold
 
-*Bold text with \* escaped asterisks*\*
+**Bold text with \** escaped asterisks**
 
 ## tc - escaped bracket in link
 

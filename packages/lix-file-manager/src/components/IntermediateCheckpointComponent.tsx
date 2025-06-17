@@ -13,7 +13,7 @@ import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
 import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 
 export const IntermediateCheckpointComponent = () => {
-  const [isExpandedState, setIsExpandedState] = useState<boolean>(false);
+  const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
   const [intermediateChanges] = useAtom(intermediateChangesAtom);
   const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 

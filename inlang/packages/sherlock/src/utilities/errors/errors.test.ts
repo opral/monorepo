@@ -61,11 +61,8 @@ describe("error handling", () => {
 		const errorNode = createErrorNode(undefined)
 		expect(errorNode).toEqual({
 			label: "No project found in workspace",
-			tooltip:
-				"No project found in workspace. Please open a project to see errors. To create a new project, visit https://manage.inlang.com",
-			error: new Error(
-				"No project found in workspace. Please open a project to see errors. To create a new project, visit https://manage.inlang.com"
-			),
+			tooltip: "No project found in workspace. Please open a project to see errors.",
+			error: new Error("No project found in workspace. Please open a project to see errors."),
 		})
 	})
 

@@ -3,7 +3,8 @@ import {
   Download, MoreVertical,
   PenSquare, Trash2, FileText,
   Plus, ArrowLeft, Folder, FolderOpen,
-  Upload, FolderPlus
+  FolderPlus,
+  FileInput
 } from "lucide-react"
 import { setupAriaHiddenFixes } from "@/helper/fixAriaHidden"
 import { useAtom } from "jotai"
@@ -40,13 +41,13 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/multisidebar"
-import { Button } from "@/components/plate-ui/button"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/plate-ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import {
   Dialog,
   DialogClose,
@@ -55,10 +56,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/plate-ui/dialog"
+} from "@/components/ui/dialog"
 import InfoCard from "../InfoCard"
-import { Separator } from "../plate-ui/separator"
+import { Separator } from "./separator"
 import { generateHumanId } from "@/helper/generateHumanId"
+import { useChat } from "../editor/use-chat"
 
 export function LixSidebar() {
   const [lix] = useAtom(lixAtom)
@@ -80,6 +82,10 @@ export function LixSidebar() {
   const lixInputRef = React.useRef<HTMLInputElement>(null)
 
   const navigate = useNavigate()
+
+  const chat = useChat();
+  const { status } = chat;
+  const isLoading = status === 'streaming' || status === 'submitted';
 
   // Set up automatic aria-hidden fixes for the entire app
   React.useEffect(() => {
@@ -224,9 +230,6 @@ export function LixSidebar() {
         const remainingFiles = files.filter((f) => f.id !== fileId)
         if (remainingFiles.length > 0) {
           await switchToFile(remainingFiles[0].id)
-        } else {
-          // No files left, create a new one
-          await createNewFile()
         }
       }
 
@@ -374,12 +377,7 @@ export function LixSidebar() {
     if (!lix) return;
 
     try {
-
       const root = await navigator.storage.getDirectory();
-
-      // The file is saved with the current name displayed in the UI (with .lix extension)
-      await root.removeEntry(`${currentLixName}.lix`);
-
       // Find another lix to navigate to
       const availableLixFiles = [];
       // @ts-expect-error - TS doesn't know about values() yet
@@ -390,6 +388,9 @@ export function LixSidebar() {
       }
 
       if (availableLixFiles.length > 0) {
+        // The file is saved with the current name displayed in the UI (with .lix extension)
+        await root.removeEntry(`${currentLixName}.lix`);
+
         // Navigate to another lix
         const nextLixId = availableLixFiles[0].replace(/\.lix$/, '');
         navigate(`?lix=${nextLixId}`);
@@ -428,8 +429,7 @@ export function LixSidebar() {
         }
       }
 
-      navigate("/");
-      // trigger "polling" to reset all atoms
+      updateUrlParams({ lix: "", f: "" });
       setPolling(Date.now());
     } catch (error) {
       console.error("Error resetting OPFS:", error);
@@ -490,19 +490,25 @@ export function LixSidebar() {
 
   const mdFiles = files.filter(file => file.path.endsWith('.md'))
 
+  const backlink = React.useCallback(() => {
+    return `https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`
+  }, [lixIdSearchParams, fileIdSearchParams])
+
   return (
     <>
-      <SidebarHeader className="flex flex-row justify-between items-center gap-1">
-        <a href={`https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`}>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0 mr-1"
-            title="To lix file manager"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </a>
+      <SidebarHeader className="flex flex-row justify-between items-center gap-1 h-11">
+        {window.location.hostname !== "flashtype.ai" && (
+          <a href={backlink()}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 mr-1"
+              title="To lix file manager"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </a>
+        )}
 
         {isRenamingLix ? (
           <div className="h-7 flex-1 flex items-center border-b border-input max-w-[calc(100%-4rem)]" id="rename-lix-container">
@@ -607,7 +613,7 @@ export function LixSidebar() {
               className="text-destructive focus:text-destructive"
               onClick={() => setShowDeleteProjectsDialog(true)}
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-4 w-4 mr-2 text-current" />
               <span>Delete Lix</span>
             </DropdownMenuItem>
 
@@ -619,7 +625,7 @@ export function LixSidebar() {
                   className="text-amber-600 focus:text-amber-600mt-1 pt-1"
                   onClick={handleResetAllOpfs}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 mr-2 text-current" />
                   <span>Reset OPFS (Dev)</span>
                 </DropdownMenuItem>
               </>
@@ -628,12 +634,14 @@ export function LixSidebar() {
         </DropdownMenu>
       </SidebarHeader>
 
-      <SidebarSeparator />
+      <div className="w-full px-2">
+        <SidebarSeparator className="mx-0" />
+      </div>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="flex items-center">
-            Files {mdFiles.length > 0 && (
+          <SidebarGroupLabel className="flex items-center pr-0">
+            Local files {mdFiles.length > 0 && (
               <span className="ml-1.5 text-xs text-muted-foreground">({mdFiles.length})</span>
             )}
             <div className="flex flex-grow" />
@@ -641,23 +649,23 @@ export function LixSidebar() {
               variant="ghost"
               size="icon"
               title="Import Markdown Document"
-              className="flex justify-between items-center mr-1"
               onClick={handleImportFile}
+              disabled={isLoading}
             >
-              <Upload className="h-4 w-4" />
+              <FileInput className="size-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               title="New File"
-              className="flex justify-between items-center"
               onClick={createNewFile}
+              disabled={isLoading}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="size-4" />
             </Button>
           </SidebarGroupLabel>
 
-          <SidebarMenu>
+          <SidebarMenu className="pt-1">
             {mdFiles.map((file) => (
               <SidebarMenuItem key={file.id}>
                 {inlineEditingFile?.id === file.id ? (
@@ -707,6 +715,7 @@ export function LixSidebar() {
                         }
                       }, 50)
                     }}
+                    disabled={isLoading}
                     className={`w-full justify-start ${file.id === activeFile?.id ? 'font-medium' : ''}`}
                   >
                     <FileText className={`h-4 w-4 ${file.id === activeFile?.id ? 'text-primary' : ''}`} />
@@ -743,7 +752,7 @@ export function LixSidebar() {
                       className="text-destructive focus:text-destructive"
                       onClick={() => setFileToDelete(file.id)}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-4 w-4 mr-2 text-current" />
                       <span>Delete</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>

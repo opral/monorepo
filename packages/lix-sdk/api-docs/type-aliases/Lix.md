@@ -8,7 +8,7 @@
 
 > **Lix** = `object`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:12](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/lix/open-lix.ts#L12)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:12](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/lix/open-lix.ts#L12)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:12](https://github.com/opral/m
 
 > **db**: `Kysely`\<[`LixDatabaseSchema`](LixDatabaseSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:24](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/lix/open-lix.ts#L24)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:24](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/lix/open-lix.ts#L24)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:24](https://github.com/opral/m
 
 > **plugin**: `object`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/lix/open-lix.ts#L25)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/lix/open-lix.ts#L25)
 
 #### getAll()
 
@@ -40,7 +40,7 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/m
 
 > **sqlite**: `SqliteWasmDatabase`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:23](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/lix/open-lix.ts#L23)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:23](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/lix/open-lix.ts#L23)
 
 The raw SQLite instance.
 

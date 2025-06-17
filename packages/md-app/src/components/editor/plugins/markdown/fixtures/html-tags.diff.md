@@ -3,15 +3,15 @@
 ## Test Summary
 
 - 🟢 Perfect roundtrip (input = output): 0/1 (0%)
-- 🟡 Acceptable transformation (output ≠ input, output = expected): 0/1 (0%)
-- 🔴 Failing test (output ≠ input, output ≠ expected): 1/1 (100%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/1 (100%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/1 (0%)
 
-**Overall Status**: ❌ 1 failing tests
+**Overall Status**: ✅ All tests passing (0 perfect, 1 acceptable)
 
 ---
 
-<details open>
-<summary><span style="color:red; font-weight:bold;">Document</span> 🔴 <span title="Input = Output?">❌</span> <span title="Visual match?">❌</span></summary>
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">Document</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
 
 <table>
 <tr>
@@ -66,9 +66,9 @@ test
 
 # Markdown with inline html
 
-Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works *perfectly fine*
+Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works _perfectly fine_
 
-Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works *perfectly fine*
+Inline html node <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> works _perfectly fine_
 
 # markdown with block html element
 
@@ -89,17 +89,17 @@ test
 
 # inline html in list
 
-*   📦 **Import/Export**: Import and export messages in different file formats.
-*   <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
+* 📦 **Import/Export**: Import and export messages in different file formats.
+* <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
 
 <details>
 <summary>yo</summary>
 
-*   asdasdsad
-*   asdasdasdasd
-*   asdasdsad
+* asdasdsad
+* asdasdasdasd
+* asdasdsad
 
 </details>
 
@@ -132,17 +132,17 @@ test
 
 # inline html in list
 
-- 📦 **Import/Export**: Import and export messages in different file formats.
-- <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
+* 📦 **Import/Export**: Import and export messages in different file formats.
+* <img src="https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg" width="20" height="12" alt="Lix Icon"/> **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
 
 <details>
 <summary>yo</summary>
 
-*   asdasdsad
-*   asdasdasdasd
-*   asdasdsad
+* asdasdsad
+* asdasdasdasd
+* asdasdsad
 
 </details>
 
@@ -196,9 +196,9 @@ test
 
 <pre><code># Markdown with inline html
 
-Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works *perfectly fine*
+Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works _perfectly fine_
 
-Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works *perfectly fine*
+Inline html node &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; works _perfectly fine_
 
 # markdown with block html element
 
@@ -219,17 +219,17 @@ test
 
 # inline html in list
 
-*   📦 **Import/Export**: Import and export messages in different file formats.
-*   &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
+* 📦 **Import/Export**: Import and export messages in different file formats.
+* &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
 
 &lt;details&gt;
 &lt;summary&gt;yo&lt;/summary&gt;
 
-*   asdasdsad
-*   asdasdasdasd
-*   asdasdsad
+* asdasdsad
+* asdasdasdasd
+* asdasdsad
 
 &lt;/details&gt;
 </code></pre>
@@ -262,17 +262,17 @@ test
 
 # inline html in list
 
-- 📦 **Import/Export**: Import and export messages in different file formats.
-- &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
+* 📦 **Import/Export**: Import and export messages in different file formats.
+* &lt;img src=&quot;https://raw.githubusercontent.com/opral/monorepo/refs/heads/main/lix/assets/lix-icon.svg&quot; width=&quot;20&quot; height=&quot;12&quot; alt=&quot;Lix Icon&quot;/&gt; **Change control**: Collaboration, change proposals, reviews, and automation.
 
 # random
 
 &lt;details&gt;
 &lt;summary&gt;yo&lt;/summary&gt;
 
-*   asdasdsad
-*   asdasdasdasd
-*   asdasdsad
+* asdasdsad
+* asdasdasdasd
+* asdasdsad
 
 &lt;/details&gt;
 </code></pre>

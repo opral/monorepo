@@ -28,7 +28,9 @@ const ChangeControlSidebar = () => {
         <h2 className="font-semibold text-sm">Checkpoints</h2>
       </SidebarHeader>
 
-      <SidebarSeparator />
+      <div className="w-full px-2">
+        <SidebarSeparator className="mx-0" />
+      </div>
 
       {/* Scrollable content area */}
       <div className="overflow-y-auto flex-1 px-2 pt-2">

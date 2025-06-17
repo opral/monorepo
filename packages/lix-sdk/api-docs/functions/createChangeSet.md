@@ -8,7 +8,7 @@
 
 > **createChangeSet**(`args`): `Promise`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:36](https://github.com/opral/monorepo/blob/bc82d6c7272aa8ad8661dcf0fee644d9229ef5eb/packages/lix-sdk/src/change-set/create-change-set.ts#L36)
+Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:36](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change-set/create-change-set.ts#L36)
 
 Creates a change set with the given elements, optionally within an open transaction.
 

@@ -52,7 +52,7 @@ export default function Page() {
 			<MarketplaceLayout>
 				<HeroSearch />
 				<Features />
-				<div class="max-w-4xl prose prose-lg mx-auto">
+				{/* <div class="max-w-4xl prose prose-lg mx-auto">
 					<h2>Adoption</h2>
 					<p>
 						Inlang is used by multiple large enterprises as well as many small
@@ -68,7 +68,7 @@ export default function Page() {
 						// @ts-ignore
 						frameBorder="0"
 					></iframe>
-				</div>
+				</div> */}
 				<div class="max-w-4xl prose prose-lg mx-auto">
 					<SolidMarkdown children={landingMarkdown} />
 				</div>

@@ -14,7 +14,7 @@ import {
 import { toTPlatePlugin } from '@udecode/plate/react';
 
 import { discussionPlugin } from '@/components/editor/plugins/discussion-plugin';
-import { BlockSuggestion } from '@/components/plate-ui/block-suggestion';
+import { BlockSuggestion } from '@/components/ui/block-suggestion';
 
 export type SuggestionConfig = ExtendConfig<
   BaseSuggestionConfig,
@@ -79,7 +79,7 @@ export const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(
     },
     render: {
       belowRootNodes: ({ api, element }) => {
-        if (!api.suggestion!.isBlockSuggestion(element)) {
+        if (!api || !api.suggestion!.isBlockSuggestion(element)) {
           return null;
         }
 

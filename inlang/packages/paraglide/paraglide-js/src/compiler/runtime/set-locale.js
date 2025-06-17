@@ -1,9 +1,10 @@
 import { getLocale } from "./get-locale.js";
 import { localizeUrl } from "./localize-url.js";
+import { customClientStrategies, isCustomStrategy } from "./strategy.js";
 import {
+	cookieDomain,
 	cookieMaxAge,
 	cookieName,
-	cookieDomain,
 	isServer,
 	localStorageKey,
 	strategy,
@@ -91,6 +92,9 @@ export let setLocale = (newLocale, options) => {
 		) {
 			// set the localStorage
 			localStorage.setItem(localStorageKey, newLocale);
+		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
+			const handler = customClientStrategies.get(strat);
+			handler.setLocale(newLocale);
 		}
 	}
 	if (
