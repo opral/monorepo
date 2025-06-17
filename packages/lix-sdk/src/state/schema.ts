@@ -146,13 +146,13 @@ export function applyStateDatabaseSchema(
 				// Process each version's changes to create changesets
 				for (const [version_id, versionChanges] of changesByVersion) {
 					// Create changeset and edges for this version's transaction
-					// createChangesetForTransaction(
-					// 	sqlite,
-					// 	db as any,
-					// 	currentTime,
-					// 	version_id,
-					// 	versionChanges
-					// );
+					createChangesetForTransaction(
+						sqlite,
+						db as any,
+						currentTime,
+						version_id,
+						versionChanges
+					);
 				}
 
 				const changesToRealize = sqlite.exec({

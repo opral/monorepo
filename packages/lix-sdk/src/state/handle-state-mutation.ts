@@ -175,12 +175,12 @@ export function handleStateMutation(
 		version_id,
 	});
 
-	createChangesetForTransaction(sqlite, db, currentTime, version_id, [
-		{
-			...rootChange,
-			snapshot_content,
-		},
-	]);
+	// createChangesetForTransaction(sqlite, db, currentTime, version_id, [
+	// 	{
+	// 		...rootChange,
+	// 		snapshot_content,
+	// 	},
+	// ]);
 
 	return 0; // Return 0 to indicate success
 }
