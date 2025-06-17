@@ -1568,3 +1568,62 @@ test.todo(
 		expect(afterDelete).toHaveLength(0);
 	}
 );
+
+// todo @martin-lysk the insert or ignore is not working as expected
+// i am not fixing this now to avoid merge conflicts in the xUpdate function 
+test.todo("INSERT OR IGNORE into state virtual table should not throw validation errors for duplicates or update the row", async () => {
+	const lix = await openLixInMemory({});
+
+	// First, insert a record successfully
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "test-duplicate-entity",
+			schema_key: "test_schema", 
+			file_id: "test",
+			plugin_key: "test_plugin",
+			snapshot_content: { id: "test-duplicate-entity", name: "Original" },
+			schema_version: "1.0",
+			version_id: "global",
+		})
+		.execute();
+
+	// Verify the record exists
+	const originalRecord = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-duplicate-entity")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(originalRecord).toBeDefined();
+	expect(originalRecord?.snapshot_content).toMatchObject({ 
+		id: "test-duplicate-entity", 
+		name: "Original" 
+	});
+
+	// Now try to INSERT OR IGNORE the same entity - this should NOT throw an error
+	// but currently it does because validation runs before OR IGNORE logic
+	expect(() => {
+		lix.sqlite.exec(`
+			INSERT OR IGNORE INTO state (
+				entity_id, schema_key, file_id, plugin_key, 
+				snapshot_content, schema_version, version_id
+			) VALUES (
+				'test-duplicate-entity', 'test_schema', 'test', 'test_plugin',
+				'{"id":"test-duplicate-entity","name":"Duplicate"}', '1.0', 'global'
+			)
+		`);
+	}).not.toThrow(); // This should not throw, but currently does
+
+	// Verify the original record is unchanged (OR IGNORE should have ignored the duplicate)
+	const afterIgnore = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-duplicate-entity")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(afterIgnore?.snapshot_content).toMatchObject({ 
+		id: "test-duplicate-entity", 
+		name: "Original" // Should still be original, not "Duplicate"
+	});
+});
