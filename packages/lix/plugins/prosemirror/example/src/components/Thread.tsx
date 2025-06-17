@@ -7,7 +7,11 @@ import { getInitials } from "../utilities/nameUtils";
 export function Thread(props: {
 	lix: Lix;
 	thread: Thread;
-	comments: Array<ThreadComment & { author_name: string; created_at: string }>;
+	comments: Array<
+		Pick<ThreadComment, "id" | "lixcol_created_at" | "body"> & {
+			author_name: string;
+		}
+	>;
 	onComposerSubmit: (args: { body: ZettelDoc }) => void;
 }) {
 	// Handler for adding a new comment to THIS thread
@@ -87,7 +91,9 @@ export function Composer(props: {
 
 function ThreadComment(props: {
 	lix: Lix;
-	comment: ThreadComment & { author_name: string; created_at: string };
+	comment: Pick<ThreadComment, "lixcol_created_at" | "body"> & {
+		author_name: string;
+	};
 }) {
 	return (
 		<div>
@@ -105,7 +111,7 @@ function ThreadComment(props: {
 							{props.comment.author_name}
 						</span>
 						<span className="text-xs text-muted-foreground ml-2">
-							{toRelativeTime(props.comment.created_at)}
+							{toRelativeTime(props.comment.lixcol_created_at)}
 						</span>
 					</div>
 					<div className="text-xs mt-1">{toPlainText(props.comment.body)}</div>

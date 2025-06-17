@@ -61,7 +61,7 @@ export function applyChangeSetDatabaseSchema(
 	return sqlite;
 }
 
-export const LixChangeSetSchema: LixSchemaDefinition = {
+export const LixChangeSetSchema = {
 	"x-lix-key": "lix_change_set",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
@@ -72,7 +72,8 @@ export const LixChangeSetSchema: LixSchemaDefinition = {
 	},
 	required: ["id"],
 	additionalProperties: false,
-};
+} as const;
+LixChangeSetSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
 export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
@@ -94,7 +95,7 @@ export type ChangeSet = Selectable<ChangeSetView>;
 export type NewChangeSet = Insertable<ChangeSetView>;
 export type ChangeSetUpdate = Updateable<ChangeSetView>;
 
-export const LixChangeSetElementSchema: LixSchemaDefinition = {
+export const LixChangeSetElementSchema = {
 	"x-lix-key": "lix_change_set_element",
 	"x-lix-version": "1.0",
 	"x-lix-foreign-keys": {
@@ -129,7 +130,8 @@ export const LixChangeSetElementSchema: LixSchemaDefinition = {
 		"file_id",
 	],
 	additionalProperties: false,
-};
+} as const;
+LixChangeSetElementSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
 export type LixChangeSetElement = FromLixSchemaDefinition<
@@ -159,7 +161,7 @@ export type ChangeSetElement = Selectable<ChangeSetElementView>;
 export type NewChangeSetElement = Insertable<ChangeSetElementView>;
 export type ChangeSetElementUpdate = Updateable<ChangeSetElementView>;
 
-export const LixChangeSetEdgeSchema: LixSchemaDefinition = {
+export const LixChangeSetEdgeSchema = {
 	"x-lix-key": "lix_change_set_edge",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["parent_id", "child_id"],
@@ -180,7 +182,8 @@ export const LixChangeSetEdgeSchema: LixSchemaDefinition = {
 	},
 	required: ["parent_id", "child_id"],
 	additionalProperties: false,
-};
+} as const;
+LixChangeSetEdgeSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
 export type LixChangeSetEdge = FromLixSchemaDefinition<
@@ -204,7 +207,7 @@ export type ChangeSetEdge = Selectable<ChangeSetEdgeView>;
 export type NewChangeSetEdge = Insertable<ChangeSetEdgeView>;
 export type ChangeSetEdgeUpdate = Updateable<ChangeSetEdgeView>;
 
-export const LixChangeSetLabelSchema: LixSchemaDefinition = {
+export const LixChangeSetLabelSchema = {
 	"x-lix-key": "lix_change_set_label",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["change_set_id", "label_id"],
@@ -226,7 +229,8 @@ export const LixChangeSetLabelSchema: LixSchemaDefinition = {
 	},
 	required: ["change_set_id", "label_id"],
 	additionalProperties: false,
-};
+} as const;
+LixChangeSetLabelSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
 export type LixChangeSetLabel = FromLixSchemaDefinition<
@@ -252,7 +256,7 @@ export type ChangeSetLabel = Selectable<ChangeSetLabelView>;
 export type NewChangeSetLabel = Insertable<ChangeSetLabelView>;
 export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelView>;
 
-export const LixChangeSetThreadSchema: LixSchemaDefinition = {
+export const LixChangeSetThreadSchema = {
 	"x-lix-key": "lix_change_set_thread",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["change_set_id", "thread_id"],
@@ -273,7 +277,8 @@ export const LixChangeSetThreadSchema: LixSchemaDefinition = {
 	},
 	required: ["change_set_id", "thread_id"],
 	additionalProperties: false,
-};
+} as const;
+LixChangeSetThreadSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
 export type LixChangeSetThread = FromLixSchemaDefinition<

@@ -38,7 +38,7 @@ export function applyThreadDatabaseSchema(
 	return sqlite;
 }
 
-export const LixThreadSchema: LixSchemaDefinition = {
+export const LixThreadSchema = {
 	"x-lix-key": "lix_thread",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
@@ -49,9 +49,10 @@ export const LixThreadSchema: LixSchemaDefinition = {
 	},
 	required: ["id"],
 	additionalProperties: false,
-};
+} as const;
+LixThreadSchema satisfies LixSchemaDefinition;
 
-export const LixThreadCommentSchema: LixSchemaDefinition = {
+export const LixThreadCommentSchema = {
 	"x-lix-key": "lix_thread_comment",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
@@ -70,17 +71,19 @@ export const LixThreadCommentSchema: LixSchemaDefinition = {
 		id: { type: "string" },
 		thread_id: { type: "string" },
 		parent_id: { type: "string", nullable: true },
-		body: ZettelDocJsonSchema,
+		body: ZettelDocJsonSchema as any,
 	},
 	required: ["id", "thread_id", "body"],
 	additionalProperties: false,
-};
+} as const;
+LixThreadCommentSchema satisfies LixSchemaDefinition;
 
 // Pure business logic types
 export type LixThread = FromLixSchemaDefinition<typeof LixThreadSchema>;
-export type LixThreadComment = FromLixSchemaDefinition<
-	typeof LixThreadCommentSchema
->;
+export type LixThreadComment = Omit<
+	FromLixSchemaDefinition<typeof LixThreadCommentSchema>,
+	"body"
+> & { body: ZettelDoc };
 
 // Database view types (active version only)
 export type ThreadView = {

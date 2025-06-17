@@ -163,8 +163,8 @@ export async function selectThreads(args: { changeSetId: ChangeSet["id"] }) {
 						"thread_comment.body",
 						"thread_comment.thread_id",
 						"thread_comment.parent_id",
-						"thread_comment.created_at",
-						"thread_comment.version_id",
+						"thread_comment.lixcol_created_at",
+						"thread_comment.lixcol_updated_at",
 					])
 					.select((eb) => eb.val("TODO username").as("author_name"))
 					.whereRef("thread_comment.thread_id", "=", "thread.id"),

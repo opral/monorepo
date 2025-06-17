@@ -49,7 +49,7 @@ export function applyLabelDatabaseSchema(
 	return sqlite.exec(sql);
 }
 
-export const LixLabelSchema: LixSchemaDefinition = {
+export const LixLabelSchema = {
 	"x-lix-key": "lix_label",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
@@ -60,7 +60,8 @@ export const LixLabelSchema: LixSchemaDefinition = {
 	},
 	required: ["id", "name"],
 	additionalProperties: false,
-};
+} as const;
+LixLabelSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
 export type LixLabel = FromLixSchemaDefinition<typeof LixLabelSchema>;
