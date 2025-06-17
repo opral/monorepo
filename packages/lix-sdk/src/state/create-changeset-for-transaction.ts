@@ -1,0 +1,326 @@
+import { type Kysely, sql } from "kysely";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import {
+	type LixChangeSet,
+	LixChangeSetSchema,
+	type LixChangeSetEdge,
+	LixChangeSetEdgeSchema,
+	type LixChangeSetElement,
+	LixChangeSetElementSchema,
+} from "../change-set/schema.js";
+import { executeSync } from "../database/execute-sync.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
+import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
+import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
+import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import { type LixVersion, LixVersionSchema } from "../version/schema.js";
+import { createChangeWithSnapshot } from "./handle-state-mutation.js";
+
+export function createChangesetForTransaction(
+	sqlite: SqliteWasmDatabase,
+	db: Kysely<LixInternalDatabaseSchema>,
+	nextChangeSetId: string,
+	currentTime: string,
+	mutatedVersion: {
+		inherits_from_version_id?: string | null | undefined;
+		id: string;
+		working_change_set_id: string;
+		name: string;
+		change_set_id: string;
+	},
+	changes: Pick<
+		{
+			id: string;
+			entity_id: string;
+			schema_key: string;
+			schema_version: string;
+			file_id: string;
+			plugin_key: string;
+			snapshot_id: string;
+			created_at: string;
+			snapshot_content: string | null;
+		},
+		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
+	>[]
+): void {
+	// eslint-disable-next-line prefer-const -- change this
+	let change = changes[0]!;
+	const changeSetChange = createChangeWithSnapshot({
+		sqlite,
+		db,
+		data: {
+			entity_id: nextChangeSetId,
+			schema_key: "lix_change_set",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: nextChangeSetId,
+				metadata: null,
+			} satisfies LixChangeSet),
+			schema_version: LixChangeSetSchema["x-lix-version"],
+		},
+		timestamp: currentTime,
+		version_id: "global", // Always use 'global' for change sets
+	});
+
+	const changeSetEdgeChange = createChangeWithSnapshot({
+		sqlite,
+		db,
+		data: {
+			entity_id: `${mutatedVersion.change_set_id}::${nextChangeSetId}`,
+			schema_key: "lix_change_set_edge",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				parent_id: mutatedVersion.change_set_id,
+				child_id: nextChangeSetId,
+			} satisfies LixChangeSetEdge),
+			schema_version: LixChangeSetEdgeSchema["x-lix-version"],
+		},
+		timestamp: currentTime,
+		version_id: "global", // Always use 'global' for change set edges
+	});
+
+	// Only create separate version change if root change is not already a version change
+	const changesToProcess = [change, changeSetChange, changeSetEdgeChange];
+
+	const versionChange = createChangeWithSnapshot({
+		sqlite,
+		db,
+		data: {
+			entity_id: mutatedVersion.id,
+			schema_key: "lix_version",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				...mutatedVersion,
+				change_set_id: nextChangeSetId,
+			} satisfies LixVersion),
+			schema_version: LixVersionSchema["x-lix-version"],
+		},
+		timestamp: currentTime,
+		version_id: "global",
+	});
+	changesToProcess.push(versionChange);
+
+	for (const change of changesToProcess) {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const changeSetElementChange = createChangeWithSnapshot({
+			sqlite,
+			db,
+			data: {
+				entity_id: `${nextChangeSetId}::${change.id}`,
+				schema_key: "lix_change_set_element",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					change_set_id: nextChangeSetId,
+					change_id: change.id,
+					schema_key: change.schema_key,
+					file_id: change.file_id,
+					entity_id: change.entity_id,
+				} satisfies LixChangeSetElement),
+				schema_version: LixChangeSetElementSchema["x-lix-version"],
+			},
+			timestamp: currentTime,
+			version_id: "global",
+		});
+		// TODO investigate if needed as part of a change set itself
+		// seems to make queries slower
+		// creating a change set element for the change set element change
+		// this is meta but allows us to reconstruct and mutate a change set
+		// createChangeWithSnapshot({
+		// 	sqlite,
+		// 	db,
+		// 	data: {
+		// 		entity_id: changeSetElementChange.entity_id,
+		// 		schema_key: "lix_change_set_element",
+		// 		file_id: "lix",
+		// 		plugin_key: "lix_own_entity",
+		// 		snapshot_content: JSON.stringify({
+		// 			change_set_id: changeSetId,
+		// 			change_id: changeSetElementChange.id,
+		// 			schema_key: "lix_change_set_element",
+		// 			file_id: "lix",
+		// 			entity_id: changeSetElementChange.entity_id,
+		// 		} satisfies ChangeSetElement),
+		// 	},
+		// });
+	}
+
+	// Create/update working change set element for user data changes
+	// TODO skipping lix internal entities is likely undesired.
+	// Skip lix internal entities (change sets, edges, etc.)
+	if (
+		change.schema_key !== "lix_change_set" &&
+		change.schema_key !== "lix_change_set_edge" &&
+		change.schema_key !== "lix_change_set_element" &&
+		change.schema_key !== "lix_version"
+	) {
+		const parsedSnapshot = change.snapshot_content
+			? JSON.parse(change.snapshot_content)
+			: null;
+		const isDeletion =
+			!parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
+
+		if (isDeletion) {
+			// Delete reconciliation: check if entity existed at last checkpoint
+			const lastCheckpointChangeSet = executeSync({
+				lix: { sqlite },
+				query: db
+					.selectFrom("change_set")
+					.where(changeSetHasLabel({ name: "checkpoint" }))
+					.where(
+						changeSetIsAncestorOf(
+							{ id: mutatedVersion.change_set_id },
+							{ includeSelf: true }
+						)
+					)
+					.select("id")
+					.limit(1),
+			});
+
+			let entityExistedAtCheckpoint = false;
+
+			if (lastCheckpointChangeSet.length > 0) {
+				// Check if entity existed in state at the last checkpoint
+				// TODO use state_at query https://github.com/opral/lix-sdk/issues/312
+				const entityAtCheckpoint = executeSync({
+					lix: { sqlite },
+					query: db
+						.selectFrom("change")
+						.innerJoin(
+							"change_set_element",
+							"change_set_element.change_id",
+							"change.id"
+						)
+						.where("change.entity_id", "=", change.entity_id)
+						.where("change.schema_key", "=", change.schema_key)
+						.where("change.file_id", "=", change.file_id)
+						.where(
+							changeSetElementInAncestryOf([
+								{ id: lastCheckpointChangeSet[0]!.id },
+							])
+						)
+						.where(
+							changeSetElementIsLeafOf([{ id: lastCheckpointChangeSet[0]!.id }])
+						)
+						.where("change.snapshot_id", "!=", "no-content")
+						.select("change.id")
+						.limit(1),
+				});
+
+				entityExistedAtCheckpoint = entityAtCheckpoint.length > 0;
+			}
+
+			// Always remove existing working change set element first
+			executeSync({
+				lix: { sqlite },
+				query: db
+					.deleteFrom("state")
+					.where(
+						"entity_id",
+						"like",
+						`${mutatedVersion.working_change_set_id}::%`
+					)
+					.where("schema_key", "=", "lix_change_set_element")
+					.where("file_id", "=", "lix")
+					.where("version_id", "=", "global")
+					.where(
+						sql`json_extract(snapshot_content, '$.entity_id')`,
+						"=",
+						change.entity_id
+					)
+					.where(
+						sql`json_extract(snapshot_content, '$.schema_key')`,
+						"=",
+						change.schema_key
+					)
+					.where(
+						sql`json_extract(snapshot_content, '$.file_id')`,
+						"=",
+						change.file_id
+					),
+			});
+
+			// If entity existed at checkpoint, add deletion to working change set
+			if (entityExistedAtCheckpoint) {
+				createChangeWithSnapshot({
+					sqlite,
+					db,
+					data: {
+						entity_id: `${mutatedVersion.working_change_set_id}::${change.id}`,
+						schema_key: "lix_change_set_element",
+						file_id: "lix",
+						plugin_key: "lix_own_entity",
+						snapshot_content: JSON.stringify({
+							change_set_id: mutatedVersion.working_change_set_id,
+							change_id: change.id,
+							entity_id: change.entity_id,
+							schema_key: change.schema_key,
+							file_id: change.file_id,
+						} satisfies LixChangeSetElement),
+						schema_version: LixChangeSetElementSchema["x-lix-version"],
+					},
+					timestamp: currentTime,
+					version_id: "global",
+				});
+			}
+			// If entity didn't exist at checkpoint, just remove from working change set (already done above)
+		} else {
+			// Non-deletion: create/update working change set element (latest change wins)
+			// First, remove any existing working change set element for this entity
+			executeSync({
+				lix: { sqlite },
+				query: db
+					.deleteFrom("state")
+					.where(
+						"entity_id",
+						"like",
+						`${mutatedVersion.working_change_set_id}::%`
+					)
+					.where("schema_key", "=", "lix_change_set_element")
+					.where("file_id", "=", "lix")
+					.where("version_id", "=", "global")
+					.where(
+						sql`json_extract(snapshot_content, '$.entity_id')`,
+						"=",
+						change.entity_id
+					)
+					.where(
+						sql`json_extract(snapshot_content, '$.schema_key')`,
+						"=",
+						change.schema_key
+					)
+					.where(
+						sql`json_extract(snapshot_content, '$.file_id')`,
+						"=",
+						change.file_id
+					),
+			});
+
+			// Then create new element with latest change
+			createChangeWithSnapshot({
+				sqlite,
+				db,
+				data: {
+					entity_id: `${mutatedVersion.working_change_set_id}::${change.id}`,
+					schema_key: "lix_change_set_element",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
+						change_set_id: mutatedVersion.working_change_set_id,
+						change_id: change.id,
+						entity_id: change.entity_id,
+						schema_key: change.schema_key,
+						file_id: change.file_id,
+					} satisfies LixChangeSetElement),
+					schema_version: LixChangeSetElementSchema["x-lix-version"],
+				},
+				timestamp: currentTime,
+				version_id: "global",
+			});
+		}
+	}
+}
