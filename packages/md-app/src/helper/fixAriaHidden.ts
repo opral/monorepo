@@ -55,11 +55,14 @@ export function setupAriaHiddenFixes(): () => void {
   const handleFocus = (event: FocusEvent) => {
     const target = event.target as Element;
     
-    // Only fix aria-hidden for inputs, textareas, selects
+    // Fix aria-hidden for interactive elements that can receive focus
     if (target && (
       target.tagName === 'INPUT' || 
       target.tagName === 'TEXTAREA' || 
-      target.tagName === 'SELECT'
+      target.tagName === 'SELECT' ||
+      target.tagName === 'BUTTON' ||
+      target.hasAttribute('tabindex') ||
+      target.getAttribute('role') === 'button'
     )) {
       fixAriaHiddenForElement(target);
     }
@@ -73,7 +76,10 @@ export function setupAriaHiddenFixes(): () => void {
       if (!document.activeElement || (
         document.activeElement.tagName !== 'INPUT' &&
         document.activeElement.tagName !== 'TEXTAREA' &&
-        document.activeElement.tagName !== 'SELECT'
+        document.activeElement.tagName !== 'SELECT' &&
+        document.activeElement.tagName !== 'BUTTON' &&
+        !document.activeElement.hasAttribute('tabindex') &&
+        document.activeElement.getAttribute('role') !== 'button'
       )) {
         restoreAriaHidden();
       }

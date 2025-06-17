@@ -96,6 +96,34 @@ export function LixSidebar() {
     return cleanupAriaFixes;
   }, []);
 
+  // Force focus on Lix input when editing starts and fix aria-hidden issues
+  // React.useEffect(() => {
+  //   if (isRenamingLix && lixInputRef.current) {
+  //     requestAnimationFrame(() => {
+  //       if (lixInputRef.current) {
+  //         // Fix aria-hidden issues before focusing
+  //         fixAriaHiddenForElement(lixInputRef.current);
+  //         lixInputRef.current.focus();
+  //         lixInputRef.current.select();
+  //       }
+  //     });
+  //   }
+  // }, [isRenamingLix]);
+
+  // Force focus on file input when editing starts and fix aria-hidden issues
+  // React.useEffect(() => {
+  //   if (inlineEditingFile && inlineInputRef.current) {
+  //     requestAnimationFrame(() => {
+  //       if (inlineInputRef.current) {
+  //         // Fix aria-hidden issues before focusing
+  //         fixAriaHiddenForElement(inlineInputRef.current);
+  //         inlineInputRef.current.focus();
+  //         inlineInputRef.current.select();
+  //       }
+  //     });
+  //   }
+  // }, [inlineEditingFile?.id]); // Use inlineEditingFile?.id to trigger when editing starts
+
   const switchToFile = React.useCallback(
     async (fileId: string) => {
       updateUrlParams({ f: fileId })
@@ -206,6 +234,56 @@ export function LixSidebar() {
       setIsRenamingLix(false)
     }
   }, [lix, lixName, currentLixName, setPolling])
+
+  // Add click-outside detection for Lix rename input
+  React.useEffect(() => {
+    if (!isRenamingLix || !lixInputRef.current) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const lixInput = lixInputRef.current;
+
+      // Check if the click is outside the input and its container
+      if (lixInput && !lixInput.contains(target) && !lixInput.closest('#rename-lix-container')?.contains(target)) {
+        handleSaveLixName();
+      }
+    };
+
+    // Add event listener after a small delay to prevent immediate triggering
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isRenamingLix, handleSaveLixName]);
+
+  // Add click-outside detection for file rename input
+  React.useEffect(() => {
+    if (!inlineEditingFile || !inlineInputRef.current) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const fileInput = inlineInputRef.current;
+
+      // Check if the click is outside the input and its container
+      if (fileInput && !fileInput.contains(target) && !fileInput.closest(`#rename-file-container-${inlineEditingFile.id}`)?.contains(target)) {
+        saveInlineRename();
+      }
+    };
+
+    // Add event listener after a small delay to prevent immediate triggering
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [inlineEditingFile?.id, saveInlineRename]);
 
   const switchToLix = React.useCallback((lixId: string) => {
     navigate(`?lix=${lixId}`)
@@ -447,14 +525,7 @@ export function LixSidebar() {
     // Set the current name as previous name for potential cancel
     setPreviousLixName(displayName);
     setIsRenamingLix(true);
-
-    // Focus on the input field with a slight delay to ensure the DOM has updated
-    setTimeout(() => {
-      if (lixInputRef.current) {
-        lixInputRef.current.focus()
-        lixInputRef.current.select() // Select all text for easy replacement
-      }
-    }, 50)
+    // Focus will be handled by useEffect with aria-hidden fix
   }, [currentLixName, lixName])
 
   const cancelRenameLix = React.useCallback(() => {
@@ -519,7 +590,6 @@ export function LixSidebar() {
               value={lixName}
               onChange={(e) => setLixName(e.target.value)}
               onFocus={(e) => e.target.select()}
-              onBlur={handleSaveLixName}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   handleSaveLixName();
@@ -684,7 +754,6 @@ export function LixSidebar() {
                         data-current-editing-id={inlineEditingFile.id}
                         onChange={(e) => setInlineEditingFile(prev => prev ? { ...prev, name: e.target.value } : null)}
                         onFocus={(e) => e.target.select()}
-                        onBlur={saveInlineRename}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             saveInlineRename()
@@ -707,13 +776,7 @@ export function LixSidebar() {
                     onDoubleClick={() => {
                       const fileName = file.path.split('/').pop()?.replace(/\.md$/, '') || ''
                       setInlineEditingFile({ id: file.id, name: fileName })
-                      // Focus and select the input text
-                      setTimeout(() => {
-                        if (inlineInputRef.current) {
-                          inlineInputRef.current.focus()
-                          inlineInputRef.current.select()
-                        }
-                      }, 50)
+                      // Focus is now handled by useEffect
                     }}
                     disabled={isLoading}
                     className={`w-full justify-start ${file.id === activeFile?.id ? 'font-medium' : ''}`}
@@ -733,13 +796,7 @@ export function LixSidebar() {
                     <DropdownMenuItem onClick={() => {
                       const fileName = file.path.split('/').pop()?.replace(/\.md$/, '') || ''
                       setInlineEditingFile({ id: file.id, name: fileName })
-                      // Focus on the input field with a slight delay to ensure the DOM has updated
-                      setTimeout(() => {
-                        if (inlineInputRef.current) {
-                          inlineInputRef.current.focus()
-                          inlineInputRef.current.select() // Select all text for easy replacement
-                        }
-                      }, 50)
+                      // Focus is now handled by useEffect
                     }}>
                       <PenSquare className="h-4 w-4 mr-2" />
                       <span>Rename</span>
