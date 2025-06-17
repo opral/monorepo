@@ -16,11 +16,11 @@ import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { type LixVersion, LixVersionSchema } from "../version/schema.js";
 import { createChangeWithSnapshot } from "./handle-state-mutation.js";
+import { nanoid } from "../database/nano-id.js";
 
 export function createChangesetForTransaction(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
-	nextChangeSetId: string,
 	currentTime: string,
 	mutatedVersion: {
 		inherits_from_version_id?: string | null | undefined;
@@ -44,6 +44,7 @@ export function createChangesetForTransaction(
 		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
 	>[]
 ): void {
+	const nextChangeSetId = nanoid();
 	const changeSetChange = createChangeWithSnapshot({
 		sqlite,
 		db,
