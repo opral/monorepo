@@ -5,6 +5,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { handleStateMutation } from "./handle-state-mutation.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
+import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
@@ -123,36 +124,43 @@ export function applyStateDatabaseSchema(
 			},
 
 			xCommit: () => {
+				const currentTime = new Date().toISOString();
+
 				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
 				// using the same id for snapshot_id in internal_change as in internal_snapshot.
-				const rows = sqlite.exec({
+				const changesWithoutChangeSets = sqlite.exec({
 					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, version_id, snapshot_content, created_at FROM internal_change_in_transaction ORDER BY version_id",
 					returnValue: "resultRows",
 				});
 
 				// Group changes by version_id
 				const changesByVersion = new Map<string, any[]>();
-				for (const row of rows) {
-					const version_id = row[6] as string;
+				for (const changeWithoutChangeset of changesWithoutChangeSets) {
+					const version_id = changeWithoutChangeset[6] as string;
 					if (!changesByVersion.has(version_id)) {
 						changesByVersion.set(version_id, []);
 					}
-					changesByVersion.get(version_id)!.push(row);
+					changesByVersion.get(version_id)!.push(changeWithoutChangeset);
 				}
 
 				// Process each version's changes to create changesets
 				for (const [version_id, versionChanges] of changesByVersion) {
 					// Create changeset and edges for this version's transaction
-					// const changesetChanges = createChangesetForTransaction(
+					// createChangesetForTransaction(
 					// 	sqlite,
 					// 	db as any,
+					// 	currentTime,
 					// 	version_id,
 					// 	versionChanges
 					// );
-					// rows.push(...(changesetChanges || []));
 				}
 
-				for (const row of rows) {
+				const changesToRealize = sqlite.exec({
+					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, version_id, snapshot_content, created_at FROM internal_change_in_transaction ORDER BY version_id",
+					returnValue: "resultRows",
+				});
+
+				for (const changeToRealize of changesToRealize) {
 					const [
 						id,
 						entity_id,
@@ -163,7 +171,7 @@ export function applyStateDatabaseSchema(
 						version_id,
 						snapshot_content,
 						created_at,
-					] = row;
+					] = changeToRealize;
 
 					let snapshot_id = "no-content";
 
