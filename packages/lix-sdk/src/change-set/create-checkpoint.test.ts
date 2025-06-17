@@ -515,9 +515,6 @@ test(
 				id: "file-to-delete",
 				data: new TextEncoder().encode(JSON.stringify({ test: "delete-me" })),
 				path: "/delete-test.json",
-				lixcol_version_id: lix.db
-					.selectFrom("active_version")
-					.select("version_id"),
 			})
 			.execute();
 
@@ -530,11 +527,6 @@ test(
 				),
 			})
 			.where("id", "=", "file-to-delete")
-			.where(
-				"lixcol_version_id",
-				"=",
-				lix.db.selectFrom("active_version").select("version_id")
-			)
 			.execute();
 
 		await createCheckpoint({ lix });
@@ -543,11 +535,6 @@ test(
 		await lix.db
 			.deleteFrom("file")
 			.where("id", "=", "file-to-delete")
-			.where(
-				"lixcol_version_id",
-				"=",
-				lix.db.selectFrom("active_version").select("version_id")
-			)
 			.execute();
 
 		// Verify deletion changes were created

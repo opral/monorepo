@@ -1,5 +1,5 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { LixFile } from "./schema.js";
+import type { LixFileType } from "./schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 
@@ -21,7 +21,8 @@ function globSync(args: {
 
 export function materializeFileData(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: Omit<LixFile, "data" | "lixcol_inherited_from_version_id">;
+	file: LixFileType;
+	versionId: string;
 }): Uint8Array {
 	const plugins = args.lix.plugin.getAllSync();
 
@@ -49,7 +50,7 @@ export function materializeFileData(args: {
 				.selectFrom("state")
 				.where("plugin_key", "=", plugin.key)
 				.where("file_id", "=", args.file.id)
-				.where("version_id", "=", args.file.lixcol_version_id)
+				.where("version_id", "=", args.versionId)
 				.select([
 					"entity_id",
 					"schema_key",
@@ -84,7 +85,7 @@ export function materializeFileData(args: {
 			.selectFrom("state")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
 			.where("file_id", "=", args.file.id)
-			.where("version_id", "=", args.file.lixcol_version_id)
+			.where("version_id", "=", args.versionId)
 			.select([
 				"entity_id",
 				"schema_key",

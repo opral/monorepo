@@ -24,9 +24,9 @@ describe("file insert", () => {
 				id: nanoid(),
 				path: "/test.unknown",
 				data: new TextEncoder().encode("some content"),
-				lixcol_version_id: version.id,
 				metadata: null,
 			},
+			versionId: version.id,
 		});
 
 		// Should log "no plugin" warning but still handle the file with fallback plugin
@@ -56,7 +56,7 @@ describe("file update", () => {
 
 		// Manually insert the file into the file table first
 		await lix.db
-			.insertInto("file")
+			.insertInto("file_all")
 			.values({
 				id: fileId,
 				path: "/test.unknown",
@@ -73,9 +73,9 @@ describe("file update", () => {
 				id: fileId,
 				path: "/test.unknown",
 				data: new TextEncoder().encode("updated data"),
-				lixcol_version_id: version.id,
 				metadata: null,
 			},
+			versionId: version.id,
 		});
 
 		// Should log "no plugin" warning but still handle the file with fallback plugin
@@ -111,9 +111,9 @@ describe("file update", () => {
 				id: fileId,
 				path: "/users.json",
 				data: new TextEncoder().encode(JSON.stringify(initialJsonData)),
-				lixcol_version_id: version.id,
 				metadata: null,
 			},
+			versionId: version.id,
 		});
 
 		// Verify both entities were created
@@ -142,9 +142,9 @@ describe("file update", () => {
 				id: fileId,
 				path: "/users.json",
 				data: new TextEncoder().encode(JSON.stringify(updatedJsonData)),
-				lixcol_version_id: version.id,
 				metadata: null,
 			},
+			versionId: version.id,
 		});
 
 		// Verify that jane's entities were deleted

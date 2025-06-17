@@ -1,5 +1,5 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { LixFile } from "./schema.js";
+import type { LixFile, LixFileType } from "./schema.js";
 import { LixFileSchema } from "./schema.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -22,10 +22,10 @@ function globSync(args: {
 	return (result[0]?.[0] as any) === 1;
 }
 
-
 export function handleFileInsert(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: Omit<LixFile, "lixcol_inherited_from_version_id">;
+	file: LixFileType & { data: Uint8Array };
+	versionId: string;
 }): 0 | 1 {
 	// Insert the file metadata into state table
 	executeSync({
@@ -41,7 +41,7 @@ export function handleFileInsert(args: {
 				metadata: args.file.metadata || null,
 			},
 			schema_version: LixFileSchema["x-lix-version"],
-			version_id: args.file.lixcol_version_id,
+			version_id: args.versionId,
 		}),
 	});
 
@@ -100,7 +100,7 @@ export function handleFileInsert(args: {
 						plugin_key: plugin.key,
 						snapshot_content: change.snapshot_content as any,
 						schema_version: change.schema["x-lix-version"],
-						version_id: args.file.lixcol_version_id,
+						version_id: args.versionId,
 					}),
 				});
 			}
@@ -147,7 +147,7 @@ export function handleFileInsert(args: {
 							plugin_key: lixUnknownFileFallbackPlugin.key,
 							snapshot_content: change.snapshot_content as any,
 							schema_version: change.schema["x-lix-version"],
-							version_id: args.file.lixcol_version_id,
+							version_id: args.versionId,
 						}),
 					});
 				}
@@ -170,7 +170,8 @@ export function handleFileInsert(args: {
 
 export function handleFileUpdate(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: Omit<LixFile, "lixcol_inherited_from_version_id">;
+	file: LixFileType & { data: Uint8Array };
+	versionId: string;
 }): 0 | 1 {
 	// Update the file metadata in state table
 	executeSync({
@@ -186,16 +187,16 @@ export function handleFileUpdate(args: {
 			})
 			.where("entity_id", "=", args.file.id)
 			.where("schema_key", "=", "lix_file")
-			.where("version_id", "=", args.file.lixcol_version_id),
+			.where("version_id", "=", args.versionId),
 	});
 
 	// Get current file data for comparison
 	const currentFile = executeSync({
 		lix: args.lix,
 		query: args.lix.db
-			.selectFrom("file")
+			.selectFrom("file_all")
 			.where("id", "=", args.file.id)
-			.where("lixcol_version_id", "=", args.file.lixcol_version_id)
+			.where("lixcol_version_id", "=", args.versionId)
 			.selectAll(),
 	})[0] as LixFile | undefined;
 
@@ -256,7 +257,7 @@ export function handleFileUpdate(args: {
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
 								.where("file_id", "=", args.file.id)
-								.where("version_id", "=", args.file.lixcol_version_id),
+								.where("version_id", "=", args.versionId),
 						});
 					} else {
 						// Handle update/insert: upsert the entity in state table
@@ -269,7 +270,7 @@ export function handleFileUpdate(args: {
 								plugin_key: plugin.key,
 								snapshot_content: change.snapshot_content as any,
 								schema_version: change.schema["x-lix-version"],
-								version_id: args.file.lixcol_version_id,
+								version_id: args.versionId,
 							}),
 						});
 					}
@@ -318,7 +319,7 @@ export function handleFileUpdate(args: {
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
 									.where("file_id", "=", args.file.id)
-									.where("version_id", "=", args.file.lixcol_version_id),
+									.where("version_id", "=", args.versionId),
 							});
 						} else {
 							// Handle update/insert: upsert the entity in state table
@@ -331,7 +332,7 @@ export function handleFileUpdate(args: {
 									plugin_key: lixUnknownFileFallbackPlugin.key,
 									snapshot_content: change.snapshot_content as any,
 									schema_version: change.schema["x-lix-version"],
-									version_id: args.file.lixcol_version_id,
+									version_id: args.versionId,
 								}),
 							});
 						}

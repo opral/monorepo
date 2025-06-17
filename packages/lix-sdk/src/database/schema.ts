@@ -38,7 +38,7 @@ import type {
 	InternalStateCacheTable,
 	InternalChangeInTransactionTable,
 } from "../state/schema.js";
-import { LixFileSchema, type LixFileView } from "../file/schema.js";
+import { LixFileSchema, type LixFileView, type LixFileAllView } from "../file/schema.js";
 import { LixLogSchema, type LogView, type LogAllView } from "../log/schema.js";
 import {
 	LixAccountSchema,
@@ -109,6 +109,7 @@ export type LixDatabaseSchema = {
 
 	// file
 	file: LixFileView;
+	file_all: LixFileAllView;
 
 	// change
 	change: ChangeView;
