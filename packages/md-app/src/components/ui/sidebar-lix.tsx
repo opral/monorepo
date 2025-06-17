@@ -124,7 +124,7 @@ export function LixSidebar() {
     } catch (error) {
       console.error("Failed to create new file:", error)
     }
-  }, [lix, setPolling])
+  }, [lix, switchToFile])
 
   const saveInlineRename = React.useCallback(async () => {
     if (!lix || !inlineEditingFile || !inlineEditingFile.name.trim()) {

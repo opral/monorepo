@@ -95,14 +95,19 @@ export function EmptyDocumentPromptElement({
       if (activeFile.path === '/welcome.md') {
         const newFileId = await createNewFile(prompt);
         if (newFileId) {
-          // Wait a moment for navigation to complete
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Wait longer for navigation and editor synchronization to complete
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Clear the editor content before starting generation
+          const currentEditor = editor;
+          if (currentEditor) {
+            currentEditor.tf.setValue([]);
+          }
         } else {
           // If file creation failed, stay in current file
           toast.error("Failed to create new file. Generating in current file instead.");
         }
       }
-
       editor.getApi(AIChatPlugin).aiChat.submit({
         prompt: `Generate a complete, well-structured markdown document about: ${prompt}. Include appropriate headings starting with level 1 heading (#), paragraphs, and relevant formatting like lists or emphasis where appropriate.`,
       });
