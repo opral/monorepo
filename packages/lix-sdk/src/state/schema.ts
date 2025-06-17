@@ -193,7 +193,8 @@ export function applyStateDatabaseSchema(
 						schema_version,
 						file_id,
 						plugin_key,
-						// version_id,
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						version_id,
 						snapshot_content,
 						created_at,
 					] = changeToRealize;
