@@ -18,6 +18,7 @@ import { type LixVersion, LixVersionSchema } from "../version/schema.js";
 import { createChangeWithSnapshot } from "./handle-state-mutation.js";
 import { nanoid } from "../database/nano-id.js";
 import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
+import { handleStateDelete } from "./schema.js";
 
 export function createChangesetForTransaction(
 	sqlite: SqliteWasmDatabase,
@@ -218,10 +219,13 @@ export function createChangesetForTransaction(
 				}
 
 				// Always remove existing working change set element first
-				executeSync({
+				const toDelete = executeSync({
 					lix: { sqlite },
 					query: db
-						.deleteFrom("state")
+						.selectFrom("state")
+						
+						// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
+						.select("rowid")
 						.where(
 							"entity_id",
 							"like",
@@ -246,6 +250,10 @@ export function createChangesetForTransaction(
 							change.file_id
 						),
 				});
+
+				if (toDelete.length > 0) {
+					handleStateDelete(sqlite, toDelete[0]!.rowid, db);
+				}
 
 				// If entity existed at checkpoint, add deletion to working change set
 				if (entityExistedAtCheckpoint) {
@@ -274,10 +282,12 @@ export function createChangesetForTransaction(
 			} else {
 				// Non-deletion: create/update working change set element (latest change wins)
 				// First, remove any existing working change set element for this entity
-				executeSync({
+				const toDelete = executeSync({
 					lix: { sqlite },
 					query: db
-						.deleteFrom("state")
+						.selectFrom("state")
+						// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
+						.select("rowid")
 						.where(
 							"entity_id",
 							"like",
@@ -302,6 +312,11 @@ export function createChangesetForTransaction(
 							change.file_id
 						),
 				});
+
+				if (toDelete.length > 0) {
+					// throw new Error("not implement - us the delete function ");
+					handleStateDelete(sqlite, toDelete[0]!.rowid, db);
+				}
 
 				// Then create new element with latest change
 				createChangeWithSnapshot({

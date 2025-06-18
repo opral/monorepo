@@ -93,7 +93,7 @@ test("creates a new change set and updates the version's change set id for mutat
 //
 // The workaround of using sqlite3_commit_hook is not possible because
 // SQLite forbids mutations in the commit hook https://www.sqlite.org/c3ref/commit_hook.html
-test.skip("groups changes of a transaction into the same change set", async () => {
+test("groups changes of a transaction into the same change set", async () => {
 	const lix = await openLixInMemory({});
 
 	const edgesBeforeTransaction = await lix.db
