@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import { nodeResolve } from "@rollup/plugin-node-resolve"
 import commonjs from "@rollup/plugin-commonjs"
+import json from "@rollup/plugin-json";
 
 export default {
 	// taking the compiled output from typescript to avoid duplicate
@@ -14,15 +15,15 @@ export default {
 	onwarn: function (message, next) {
 		// if dependencies have circular dependencies, we can't do nothing about it
 		if (message.code === "CIRCULAR_DEPENDENCY") {
-			return
+			return;
 		}
 		// typescript compiles experimental decorators with this
 		// the component works regardless. hence, surpressing this warning
 		else if (message.code === "THIS_IS_UNDEFINED") {
-			return
+			return;
 		}
-		next(message)
+		next(message);
 	},
 	preserveEntrySignatures: false,
-	plugins: [commonjs(), nodeResolve()],
-}
+	plugins: [commonjs(), nodeResolve(), json()],
+};
