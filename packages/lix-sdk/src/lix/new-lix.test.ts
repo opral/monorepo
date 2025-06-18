@@ -101,3 +101,19 @@ test("newLixFile creates change set elements for all changes", async () => {
 	// Should have change set elements for all bootstrap changes
 	expect(changeSetElements.length).toBeGreaterThan(0);
 });
+
+test("bootstrap changes include lix_id key-value in global version", async () => {
+	const blob = await newLixFile();
+	const lix = await openLixInMemory({ blob });
+
+	const kv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_id")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.execute();
+
+	expect(kv).toHaveLength(1);
+	expect(kv[0]?.key).toBe("lix_id");
+	expect(kv[0]?.value).toBeDefined();
+});
