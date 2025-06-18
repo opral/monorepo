@@ -375,9 +375,10 @@ function validateForeignKeyConstraints(args: {
 				query: args.lix.db
 					.selectFrom("version")
 					.select("name")
-					.where("id", "=", args.version_id)
+					.where("id", "=", args.version_id),
 			});
-			const versionName = versionInfo.length > 0 ? versionInfo[0].name : "unknown";
+			const versionName =
+				versionInfo.length > 0 ? versionInfo[0].name : "unknown";
 
 			// First line: compact string for regex matching (backwards compatibility)
 			let errorMessage = `Foreign key constraint violation. The schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) has a foreign key constraint on '${localProperty}' referencing '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}' in version '${args.version_id}' (${versionName}).`;

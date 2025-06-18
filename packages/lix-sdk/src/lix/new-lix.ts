@@ -272,4 +272,3 @@ function createBootstrapChanges(): BootstrapChange[] {
 
 	return changes;
 }
-
