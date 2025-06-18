@@ -49,10 +49,10 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 			detectedChanges.push({
 				schema: MarkdownBlockSchemaV1,
 				entity_id: id,
-				snapshot_content: { 
+				snapshot_content: {
 					id: afterBlock.id,
-					text: afterBlock.content, 
-					type: afterBlock.type 
+					text: afterBlock.content,
+					type: afterBlock.type,
 				},
 			});
 		}

@@ -86,7 +86,11 @@ Updated text.`);
 		{
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "def456",
-			snapshot_content: { id: "def456", text: "Updated text.", type: "paragraph" },
+			snapshot_content: {
+				id: "def456",
+				text: "Updated text.",
+				type: "paragraph",
+			},
 		},
 	]);
 });
