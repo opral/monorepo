@@ -8,6 +8,7 @@ import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { LixAccount } from "../account/schema.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
+import { QueryManager } from "../query/query-manager.js";
 
 export type Lix = {
 	/**
@@ -122,10 +123,13 @@ export async function openLix(args: {
 		db,
 		sqlite: args.database,
 		plugin,
-	};
+	} as Lix;
 
 	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
+	
+	// Initialize the query manager
+	lix.query = new QueryManager(lix);
 
 	return lix;
 }

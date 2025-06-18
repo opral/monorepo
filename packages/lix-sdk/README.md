@@ -32,7 +32,7 @@ Try a [demo lix app](https://lix.opral.com/app/fm).
 
 ### Good to know
 
-- 🔍 **Everything is SQL**: Querying lix happens via SQL. No new query language to learn. The lix SDK conveniently exposes [Kysely](https://kysely.dev/), a type-safe SQL query builder.
+- 🔍 **SQL and Repository Pattern**: Lix offers both a low-level SQL API via [Kysely](https://kysely.dev/) and a high-level Repository Pattern for simpler data access.
 - 🌐 **Browser-based**: Lix targets the browser as target platform. Node/unix dependencies are ruled out.  
 
 ## Getting Started
@@ -76,6 +76,8 @@ const lix = await openLixInMemory({
 
 Inserting an examplary JSON file into lix:
 
+#### Using Repository Pattern (Recommended)
+
 ```javascript
 const json = {
 	name: "Hello World",
@@ -86,7 +88,28 @@ const json = {
 	},
 };
 
-// Insert the file 
+// Insert the file using repository pattern
+const file = await lix.repositories.files.create({
+	path: "/example.json",
+	data: new TextEncoder().encode(JSON.stringify(json)),
+});
+
+console.log("JSON file inserted with ID:", file.id);
+```
+
+#### Using Raw SQL
+
+```javascript
+const json = {
+	name: "Hello World",
+	version: "1.0.0",
+	settings: {
+		enableFeatureX: true,
+		maxUsers: 10,
+	},
+};
+
+// Insert the file using SQL
 const file = await lix.db
 	.insertInto("file")
 	.values({
@@ -116,20 +139,40 @@ Let's update our JSON file with some changes:
 };
 ```
 
+#### Using Repository Pattern (Recommended)
+
 ```javascript
-// updating the json from the previous example
+// Updating the json from the previous example
 json["version"] = "1.1.0";
 json["settings"]["maxUsers"] = 20;
 
-// Update the file
+// Update the file using repository pattern
+await lix.repositories.files.createOrUpdate(
+  "/example.json", 
+  new TextEncoder().encode(JSON.stringify(json))
+);
+
+// Alternatively, if you have the file ID:
+// await lix.repositories.files.update(file.id, {
+//   data: new TextEncoder().encode(JSON.stringify(json))
+// });
+```
+
+#### Using Raw SQL
+
+```javascript
+// Updating the json from the previous example
+json["version"] = "1.1.0";
+json["settings"]["maxUsers"] = 20;
+
+// Update the file using SQL
 await lix.db
 	.updateTable("file")
 	.set({
-		data: new TextEncoder().encode(JSON.stringify(updatedJson)),
+		data: new TextEncoder().encode(JSON.stringify(json)),
 	})
 	.where("path", "=", "/example.json")
 	.execute();
-
 ```
 
 Lix detect changes in file updates via the [file-queue](https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src/file-queue) and the provided plugin which detects changes. 
@@ -198,6 +241,17 @@ console.log(
 
 The file table is derived from the changes in the current version. Hence, querying the file after updating the json in the previous step will return the updated file:
 
+#### Using Repository Pattern (Recommended)
+
+```ts
+// Get a file by path
+const file = await lix.repositories.files.getByPath("/example.json");
+
+console.log(file);
+```
+
+#### Using Raw SQL
+
 ```ts
 const file = await lix.db
   .selectFrom("file")
@@ -205,7 +259,7 @@ const file = await lix.db
   .selectAll()
   .executeTakeFirstOrThrow();
 
-console.log(file)
+console.log(file);
 ```
 
 ```json
@@ -277,6 +331,55 @@ console.log("File state after merge:", JSON.parse(file_after_merge.data));
 	},
 }
 ```
+
+## Repository Pattern
+
+The Lix SDK provides a Repository Pattern implementation that simplifies data access and manipulation. This approach offers a more intuitive, object-oriented API that abstracts away the SQL complexity and change management details.
+
+### Key Benefits
+
+- **Simplified API** - No SQL knowledge required
+- **Type-Safe** - Full TypeScript support
+- **Reduced Boilerplate** - Common operations handled by the repositories
+- **Domain-Specific Methods** - Specialized methods for each entity type
+
+### Core Components
+
+1. **Entity Repositories**
+   - `FileRepository` - Working with files
+   - `KeyValueRepository` - Working with key-value pairs
+
+2. **Query Builder**
+   - Fluent API for building queries
+   - Filtering, sorting, and pagination
+   - Type-safe operation
+
+### Usage Examples
+
+```typescript
+// Get a file by path
+const readme = await lix.repositories.files.getByPath('/README.md');
+
+// Find all markdown files in a directory
+const docs = await lix.repositories.files.query()
+  .where('path', 'startsWith', '/docs/')
+  .where('path', 'endsWith', '.md')
+  .orderBy('lixcol_updated_at', 'desc')
+  .limit(10)
+  .execute();
+
+// Create or update a file
+await lix.repositories.files.createOrUpdate(
+  '/docs/guide.md',
+  new TextEncoder().encode('# User Guide')
+);
+
+// Store key-value data
+await lix.repositories.keyValues.set('user:preferences:theme', 'dark');
+const theme = await lix.repositories.keyValues.get('user:preferences:theme');
+```
+
+For more details, see the [Repository Pattern documentation](https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src/repository).
 
 ## Plugins
 

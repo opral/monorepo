@@ -9,6 +9,7 @@ export * from "./lix/index.js";
 export * from "./log/index.js";
 export * from "./plugin/index.js";
 export * from "./query-filter/index.js";
+export * from "./query/index.js";
 export * from "./schema-definition/index.js";
 export * from "./server-protocol-handler/index.js";
 export * from "./snapshot/index.js";
