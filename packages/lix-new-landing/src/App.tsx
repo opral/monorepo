@@ -374,22 +374,86 @@ function App() {
             </div>
             <div className="group cursor-pointer text-center">
               <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* Spreadsheet UI */}
+                {/* Spreadsheet UI - Enhanced */}
                 <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative">
                   <div className="absolute inset-0 flex">
                     <div className="w-3/4 bg-white p-3">
-                      <div className="h-6 w-full bg-gray-100 rounded-sm mb-1 flex">
-                        <div className="w-1/5 border-r border-gray-200 h-full"></div>
-                        <div className="w-1/5 border-r border-gray-200 h-full"></div>
-                        <div className="w-1/5 border-r border-gray-200 h-full"></div>
-                        <div className="w-1/5 border-r border-gray-200 h-full"></div>
-                        <div className="w-1/5 h-full"></div>
+                      {/* Spreadsheet Tab and Toolbar */}
+                      <div className="flex mb-2">
+                        <div className="h-6 px-3 bg-blue-500 rounded-t-md text-white text-[8px] font-medium flex items-center mr-1">Budget 2025</div>
+                        <div className="h-6 px-3 bg-gray-200 rounded-t-md text-gray-600 text-[8px] font-medium flex items-center">History</div>
+                        <div className="ml-auto flex space-x-1">
+                          <div className="h-5 w-5 bg-blue-100 rounded flex items-center justify-center">
+                            <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                          </div>
+                          <div className="h-5 w-5 bg-gray-100 rounded flex items-center justify-center">
+                            <div className="h-2 w-2 bg-gray-500 rounded-full"></div>
+                          </div>
+                        </div>
                       </div>
-                      {[...Array(6)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100"
-                        >
+                      
+                      {/* Spreadsheet Header Row */}
+                      <div className="h-6 w-full bg-gray-100 rounded-t-sm mb-1 flex font-medium">
+                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
+                          <div className="text-[8px] text-gray-600">A</div>
+                        </div>
+                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
+                          <div className="text-[8px] text-gray-600">B</div>
+                        </div>
+                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
+                          <div className="text-[8px] text-gray-600">C</div>
+                        </div>
+                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
+                          <div className="text-[8px] text-gray-600">D</div>
+                        </div>
+                        <div className="w-1/5 h-full flex items-center justify-center">
+                          <div className="text-[8px] text-gray-600">E</div>
+                        </div>
+                      </div>
+                      
+                      {/* Spreadsheet Data Rows */}
+                      {[...Array(2)].map((_, i) => (
+                        <div key={i} className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100">
+                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
+                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
+                          </div>
+                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
+                            <div className="h-2 w-2/3 bg-gray-300 mx-1 rounded-sm"></div>
+                          </div>
+                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
+                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
+                          </div>
+                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
+                            <div className="h-2 w-3/4 bg-gray-300 mx-1 rounded-sm"></div>
+                          </div>
+                          <div className="w-1/5 h-full flex items-center">
+                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {/* Highlighted Row (Active Edit) */}
+                      <div className="h-5 w-full bg-blue-50 rounded-sm mb-1 flex border-b border-blue-200 shadow-sm">
+                        <div className="w-1/5 border-r border-blue-100 h-full flex items-center">
+                          <div className="h-2 w-1/2 bg-blue-200 mx-1 rounded-sm"></div>
+                        </div>
+                        <div className="w-1/5 border-r border-blue-100 h-full flex items-center">
+                          <div className="h-2 w-2/3 bg-blue-300 mx-1 rounded-sm"></div>
+                        </div>
+                        <div className="w-1/5 border-r border-blue-100 h-full flex items-center">
+                          <div className="h-2 w-1/2 bg-blue-200 mx-1 rounded-sm"></div>
+                        </div>
+                        <div className="w-1/5 border-r border-blue-100 h-full flex items-center">
+                          <div className="h-2 w-3/4 bg-blue-300 mx-1 rounded-sm"></div>
+                        </div>
+                        <div className="w-1/5 h-full flex items-center">
+                          <div className="h-2 w-1/2 bg-blue-200 mx-1 rounded-sm"></div>
+                        </div>
+                      </div>
+                      
+                      {/* Regular Rows */}
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100">
                           <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
                             <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
                           </div>
@@ -408,16 +472,54 @@ function App() {
                         </div>
                       ))}
                     </div>
+                    
+                    {/* History Panel */}
                     <div className="w-1/4 bg-gray-50 p-2 border-l border-gray-200">
-                      <div className="h-4 w-5/6 bg-gray-300 rounded-sm mb-3"></div>
-                      <div className="h-20 bg-white rounded-sm border border-gray-200 p-2 mb-2">
-                        <div className="h-2 w-full bg-gray-100 rounded-sm mb-1"></div>
-                        <div className="h-2 w-3/4 bg-gray-100 rounded-sm mb-2"></div>
-                        <div className="h-3 w-full bg-gray-200 rounded-sm mb-1"></div>
-                        <div className="h-2 w-5/6 bg-gray-100 rounded-sm"></div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-[8px] font-semibold text-gray-600">CELL HISTORY</div>
+                        <div className="h-4 w-4 bg-gray-200 rounded-full flex items-center justify-center">
+                          <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
+                        </div>
                       </div>
-                      <div className="h-3 w-1/2 bg-blue-500 rounded-sm text-white text-[8px] flex items-center justify-center">
-                        Cell History
+                      
+                      {/* History Timeline */}
+                      <div className="relative mb-2">
+                        <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200"></div>
+                        
+                        <div className="flex items-start mb-2 relative">
+                          <div className="h-3 w-3 rounded-full bg-green-500 shadow-sm z-10 mt-1 mr-2"></div>
+                          <div className="flex-1">
+                            <div className="text-[8px] font-medium mb-1 text-gray-700">Current Value</div>
+                            <div className="h-4 w-full bg-white border border-gray-200 rounded-sm shadow-sm flex items-center px-1">
+                              <div className="h-2 w-2/3 bg-green-100 rounded-sm"></div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start mb-2 relative">
+                          <div className="h-3 w-3 rounded-full bg-blue-500 shadow-sm z-10 mt-1 mr-2"></div>
+                          <div className="flex-1">
+                            <div className="text-[8px] font-medium mb-1 text-gray-700">Previous Edit</div>
+                            <div className="h-4 w-full bg-white border border-gray-200 rounded-sm flex items-center px-1">
+                              <div className="h-2 w-1/2 bg-blue-100 rounded-sm"></div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start relative">
+                          <div className="h-3 w-3 rounded-full bg-gray-400 shadow-sm z-10 mt-1 mr-2"></div>
+                          <div className="flex-1">
+                            <div className="text-[8px] font-medium mb-1 text-gray-700">Original Value</div>
+                            <div className="h-4 w-full bg-white border border-gray-200 rounded-sm flex items-center px-1">
+                              <div className="h-2 w-1/3 bg-gray-200 rounded-sm"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <div className="h-5 px-2 bg-blue-500 rounded-sm text-white text-[8px] flex items-center justify-center shadow-sm">RESTORE</div>
+                        <div className="h-5 px-2 bg-gray-200 rounded-sm text-gray-600 text-[8px] flex items-center justify-center">COMPARE</div>
                       </div>
                     </div>
                   </div>
