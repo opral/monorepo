@@ -77,7 +77,7 @@ export function validateStateMutation(args: {
 				.join("; ");
 
 			throw new Error(
-				`The provided snapshot content does not match the schema: ${errorDetails || ajv.errorsText(ajv.errors)}`
+				`The provided snapshot content does not match the schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}).\n\n ${errorDetails || ajv.errorsText(ajv.errors)}`
 			);
 		}
 	}
