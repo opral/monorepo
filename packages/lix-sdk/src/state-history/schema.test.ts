@@ -2,6 +2,11 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { createCheckpoint } from "../change-set/create-checkpoint.js";
+import {
+	changeSetHasLabel,
+	changeSetIsAncestorOf,
+	changeSetIsDescendantOf,
+} from "../query-filter/index.js";
 
 test("query current state at head of version lineage", async () => {
 	const lix = await openLixInMemory({});
@@ -300,7 +305,9 @@ test("diff detection between current and checkpoint state", async () => {
 	expect(checkpointState).toHaveLength(1);
 
 	// Different change_set_ids indicate diff detected
-	expect(currentState[0]?.change_set_id).not.toBe(checkpointState[0]?.change_set_id);
+	expect(currentState[0]?.change_set_id).not.toBe(
+		checkpointState[0]?.change_set_id
+	);
 	expect(currentState[0]?.snapshot_content).toEqual({ value: "modified" });
 	expect(checkpointState[0]?.snapshot_content).toEqual({ value: "initial" });
 });
@@ -609,4 +616,99 @@ test("working change set diff - compare current vs checkpoints", async () => {
 		checkpointStates.find((s) => s.change_set_id === checkpoint2.id)
 			?.snapshot_content
 	).toEqual({ value: "checkpoint 2 content" });
+});
+
+test("query history between two change sets using ancestor/descendant filters", async () => {
+	const lix = await openLixInMemory({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			value: { type: "string" },
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	// Create a series of checkpoints with entity changes
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "tracked-entity",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
+			version_id: lix.db.selectFrom("active_version").select("version_id"),
+			snapshot_content: { value: "checkpoint 1 content" },
+		})
+		.execute();
+
+	const checkpoint1 = await createCheckpoint({ lix });
+
+	// Modify and create checkpoint 2
+	await lix.db
+		.updateTable("state")
+		.set({ snapshot_content: { value: "checkpoint 2 content" } })
+		.where("entity_id", "=", "tracked-entity")
+		.execute();
+
+	const checkpoint2 = await createCheckpoint({ lix });
+
+	// Modify and create checkpoint 3
+	await lix.db
+		.updateTable("state")
+		.set({ snapshot_content: { value: "checkpoint 3 content" } })
+		.where("entity_id", "=", "tracked-entity")
+		.execute();
+
+	const checkpoint3 = await createCheckpoint({ lix });
+
+	// Modify and create checkpoint 4
+	await lix.db
+		.updateTable("state")
+		.set({ snapshot_content: { value: "checkpoint 4 content" } })
+		.where("entity_id", "=", "tracked-entity")
+		.execute();
+
+	const checkpoint4 = await createCheckpoint({ lix });
+
+	// Query history between checkpoint1 and checkpoint4 (should include checkpoint2 and checkpoint3)
+	const betweenChangeSets = await lix.db
+		.selectFrom("change_set")
+		.where(changeSetIsDescendantOf({ id: checkpoint1.id }))
+		.where(changeSetIsAncestorOf({ id: checkpoint4.id }))
+		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.select("id")
+		.execute();
+
+	// Should find checkpoint2 and checkpoint3 (between checkpoint1 and checkpoint4)
+	expect(betweenChangeSets).toHaveLength(2);
+	const betweenIds = betweenChangeSets.map((cs) => cs.id);
+	expect(betweenIds).toContain(checkpoint2.id);
+	expect(betweenIds).toContain(checkpoint3.id);
+
+	// Query state_history for entities in the range between checkpoint1 and checkpoint4
+	const historyInRange = await lix.db
+		.selectFrom("state_history")
+		.where("entity_id", "=", "tracked-entity")
+		.where("change_set_id", "in", [checkpoint2.id, checkpoint3.id])
+		.where("depth", "=", 0)
+		.orderBy("change_id", "asc")
+		.selectAll()
+		.execute();
+
+	// Should get 2 historical states between the checkpoints, ordered by creation time
+	expect(historyInRange).toHaveLength(2);
+	expect(historyInRange[0]?.snapshot_content).toEqual({
+		value: "checkpoint 2 content",
+	});
+	expect(historyInRange[1]?.snapshot_content).toEqual({
+		value: "checkpoint 3 content",
+	});
 });
