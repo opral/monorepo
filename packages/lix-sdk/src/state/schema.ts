@@ -5,7 +5,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { handleStateMutation } from "./handle-state-mutation.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
-import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
+// import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
@@ -98,7 +98,32 @@ export function applyStateDatabaseSchema(
 				return capi.SQLITE_OK;
 			},
 
-			xConnect: () => {
+			xConnect: (
+				db: any,
+				_pAux: any,
+				_argc: number,
+				_argv: any,
+				pVTab: any
+			) => {
+				const sql = `CREATE TABLE x(
+				entity_id TEXT,
+				schema_key TEXT,
+				file_id TEXT,
+				version_id TEXT,
+				plugin_key TEXT,
+				snapshot_content TEXT,
+				schema_version TEXT,
+				created_at TEXT,
+				updated_at TEXT,
+				inherited_from_version_id TEXT
+			)`;
+
+				const result = capi.sqlite3_declare_vtab(db, sql);
+				if (result !== capi.SQLITE_OK) {
+					return result;
+				}
+
+				sqlite.sqlite3.vtab.xVtab.create(pVTab);
 				return capi.SQLITE_OK;
 			},
 
@@ -124,7 +149,7 @@ export function applyStateDatabaseSchema(
 			},
 
 			xCommit: () => {
-				const currentTime = new Date().toISOString();
+				// const currentTime = new Date().toISOString();
 
 				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
 				// using the same id for snapshot_id in internal_change as in internal_snapshot.
@@ -144,16 +169,16 @@ export function applyStateDatabaseSchema(
 				}
 
 				// Process each version's changes to create changesets
-				for (const [version_id, versionChanges] of changesByVersion) {
-					// Create changeset and edges for this version's transaction
-					// createChangesetForTransaction(
-					// 	sqlite,
-					// 	db as any,
-					// 	currentTime,
-					// 	version_id,
-					// 	versionChanges
-					// );
-				}
+				// for (const [version_id, versionChanges] of changesByVersion) {
+				// Create changeset and edges for this version's transaction
+				// createChangesetForTransaction(
+				// 	sqlite,
+				// 	db as any,
+				// 	currentTime,
+				// 	version_id,
+				// 	versionChanges
+				// );
+				// }
 
 				const changesToRealize = sqlite.exec({
 					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, version_id, snapshot_content, created_at FROM internal_change_in_transaction ORDER BY version_id",
@@ -168,6 +193,7 @@ export function applyStateDatabaseSchema(
 						schema_version,
 						file_id,
 						plugin_key,
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						version_id,
 						snapshot_content,
 						created_at,
@@ -336,6 +362,15 @@ export function applyStateDatabaseSchema(
 							}
 
 							const isDeletion = snapshot_content === null;
+
+							// TODO the CTE should not return inherited entities (optimization for later)
+							// Skip inherited entities - they should be resolved via inheritance logic, not stored as duplicates
+							if (
+								inherited_from_version_id !== null &&
+								inherited_from_version_id !== undefined
+							) {
+								continue;
+							}
 
 							sqlite.exec({
 								sql: `INSERT OR REPLACE INTO internal_state_cache 
@@ -835,7 +870,7 @@ function selectStateViaCTE(
 			),
 			-- Combine direct entities with inherited entities
 			all_entities AS (
-				-- Direct entities from leaf_target_snapshots
+				-- Direct entities from leaf_target_snapshots 
 				SELECT 
 					entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version,
 					version_id, version_id as visible_in_version, NULL as inherited_from_version_id

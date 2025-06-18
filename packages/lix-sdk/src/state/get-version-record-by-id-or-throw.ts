@@ -2,14 +2,7 @@ import { type Kysely, sql } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { executeSync } from "../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import {
-	INITIAL_VERSION_ID,
-	INITIAL_CHANGE_SET_ID,
-	INITIAL_WORKING_CHANGE_SET_ID,
-	type LixVersion,
-	INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
-	INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
-} from "../version/schema.js";
+import { type LixVersion } from "../version/schema.js";
 
 export function getVersionRecordByIdOrThrow(
 	sqlite: SqliteWasmDatabase,
@@ -48,29 +41,7 @@ export function getVersionRecordByIdOrThrow(
 		}) as [{ content: string } | undefined];
 	}
 
-	// Bootstrap fallback: If this is the initial version during bootstrap, create a minimal version record
-	if (!versionRecord && version_id === INITIAL_VERSION_ID) {
-		versionRecord = {
-			content: JSON.stringify({
-				id: INITIAL_VERSION_ID,
-				name: "main",
-				change_set_id: INITIAL_CHANGE_SET_ID,
-				working_change_set_id: INITIAL_WORKING_CHANGE_SET_ID,
-			} satisfies LixVersion),
-		};
-	}
-
-	// Bootstrap fallback: If this is the global version during bootstrap, create a minimal version record
-	if (!versionRecord && version_id === "global") {
-		versionRecord = {
-			content: JSON.stringify({
-				id: "global",
-				name: "global",
-				change_set_id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
-				working_change_set_id: INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
-			} satisfies LixVersion),
-		};
-	}
+	// Bootstrap is now handled through proper change tracking in newLixFile()
 
 	if (!versionRecord) {
 		throw new Error(`Version with id '${version_id}' not found.`);

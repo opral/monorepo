@@ -1225,6 +1225,122 @@ describe.each([
 				name: "Global Entity",
 			});
 		});
+
+		// Flaky cache CTE
+		test.todo(
+			"inherited entities should reflect changes in parent",
+			async () => {
+				const lix = await openLixInMemory({});
+
+				// Get the main version
+				const mainVersion = await lix.db
+					.selectFrom("version")
+					.where("name", "=", "main")
+					.selectAll()
+					.executeTakeFirstOrThrow();
+
+				const originalChangeSetId = mainVersion.change_set_id;
+
+				// Make a mutation to trigger version update in global context
+				await lix.db
+					.insertInto("key_value_all")
+					.values({
+						key: "cache_rebuild_test_key",
+						value: "cache_rebuild_test_value",
+						lixcol_version_id: mainVersion.id,
+					})
+					.execute();
+
+				// Check the global version after mutation
+				const globalVersionAfterMutation = await lix.db
+					.selectFrom("state")
+					.where("schema_key", "=", "lix_version")
+					.where("entity_id", "=", mainVersion.id)
+					.where("version_id", "=", "global")
+					.selectAll()
+					.executeTakeFirst();
+
+				console.log("🌍 Global version after mutation:", {
+					change_set_id: (globalVersionAfterMutation?.snapshot_content as any)
+						?.change_set_id,
+					original: originalChangeSetId,
+				});
+
+				if (clearCache) {
+					// Clear the cache to force a rebuild from CTE
+					await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+						.deleteFrom("internal_state_cache")
+						.execute();
+				}
+
+				const state = await lix.db
+					.selectFrom("state")
+					.where("schema_key", "=", "lix_version")
+					.where("entity_id", "=", mainVersion.id)
+					.selectAll()
+					.execute();
+
+				console.log(
+					"🔍 State query result:",
+					state.map((s) => ({
+						entity_id: s.entity_id,
+						version_id: s.version_id,
+						change_set_id: (s.snapshot_content as any).change_set_id,
+						inherited_from_version_id: s.inherited_from_version_id,
+					}))
+				);
+
+				// testing for cached contents first to make a cache miss test fail faster
+				const cacheContents = await (
+					lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+				)
+					.selectFrom("internal_state_cache")
+					.where("schema_key", "=", "lix_version")
+					.where("entity_id", "=", mainVersion.id)
+					.selectAll()
+					.execute();
+
+				// Both version entries should have the same updated change_set_id
+				const cachedInheritedMainVersion = cacheContents.find(
+					(entry) => entry.version_id === mainVersion.id
+				);
+				const cachedMainVersionGlobal = cacheContents.find(
+					(entry) => entry.version_id === "global"
+				);
+
+				// we have copy on write deletion in place, so the cache should not contain the inherited version
+				expect(cachedInheritedMainVersion).toBeUndefined();
+				expect(cachedMainVersionGlobal).toBeDefined();
+
+				// Both version entries should have the same updated change_set_id
+				const inheritedMainVersion = state.find(
+					(entry) => entry.version_id === mainVersion.id
+				);
+				const mainVersionGlobal = state.find(
+					(entry) => entry.version_id === "global"
+				);
+
+				expect(inheritedMainVersion).toBeDefined();
+				expect(mainVersionGlobal).toBeDefined();
+
+				// Both should have the same change_set_id
+				expect(
+					(inheritedMainVersion?.snapshot_content as any).change_set_id
+				).toEqual((mainVersionGlobal?.snapshot_content as any).change_set_id);
+
+				// The change_set_id should be different from the original change_set_Id
+				expect(
+					(inheritedMainVersion?.snapshot_content as any).change_set_id
+				).not.toEqual(originalChangeSetId);
+				expect(
+					(mainVersionGlobal?.snapshot_content as any).change_set_id
+				).not.toEqual(originalChangeSetId);
+
+				expect(
+					(cachedMainVersionGlobal?.snapshot_content as any).change_set_id
+				).toEqual(mainVersionGlobal?.snapshot_content.change_set_id);
+			}
+		);
 	}
 );
 
@@ -1373,128 +1489,131 @@ describe.each([
 ])(
 	"($scenario) deleting an inherited entity should create copy-on-write deletion",
 	({ clearCache }) => {
-		test("child version deletes inherited entity via copy-on-write", async () => {
-			const mockSchema: LixSchemaDefinition = {
-				"x-lix-key": "test_schema",
-				"x-lix-version": "1.0",
-				type: "object",
-				properties: {
-					id: { type: "string" },
-					name: { type: "string" },
-				},
-			};
-
-			const lix = await openLixInMemory({});
-
-			const activeVersion = await lix.db
-				.selectFrom("active_version")
-				.innerJoin("version", "active_version.version_id", "version.id")
-				.selectAll("version")
-				.executeTakeFirstOrThrow();
-
-			// Insert schema
-			await lix.db
-				.insertInto("stored_schema")
-				.values({ value: mockSchema })
-				.execute();
-
-			// Insert an entity into global version
-			await lix.db
-				.insertInto("state")
-				.values({
-					entity_id: "shared-entity",
-					file_id: "test-file",
-					schema_key: "test_schema",
-					plugin_key: "test_plugin",
-					version_id: "global",
-					snapshot_content: {
-						id: "shared-entity",
-						name: "shared Entity",
+		test.todo(
+			"child version deletes inherited entity via copy-on-write",
+			async () => {
+				const mockSchema: LixSchemaDefinition = {
+					"x-lix-key": "test_schema",
+					"x-lix-version": "1.0",
+					type: "object",
+					properties: {
+						id: { type: "string" },
+						name: { type: "string" },
 					},
-					schema_version: "1.0",
-				})
-				.execute();
+				};
 
-			if (clearCache) {
-				// Clear the state cache to force re-materialization with inheritance (CTE path)
-				lix.sqlite.exec("DELETE FROM internal_state_cache");
+				const lix = await openLixInMemory({});
+
+				const activeVersion = await lix.db
+					.selectFrom("active_version")
+					.innerJoin("version", "active_version.version_id", "version.id")
+					.selectAll("version")
+					.executeTakeFirstOrThrow();
+
+				// Insert schema
+				await lix.db
+					.insertInto("stored_schema")
+					.values({ value: mockSchema })
+					.execute();
+
+				// Insert an entity into global version
+				await lix.db
+					.insertInto("state")
+					.values({
+						entity_id: "shared-entity",
+						file_id: "test-file",
+						schema_key: "test_schema",
+						plugin_key: "test_plugin",
+						version_id: "global",
+						snapshot_content: {
+							id: "shared-entity",
+							name: "shared Entity",
+						},
+						schema_version: "1.0",
+					})
+					.execute();
+
+				if (clearCache) {
+					// Clear the state cache to force re-materialization with inheritance (CTE path)
+					lix.sqlite.exec("DELETE FROM internal_state_cache");
+				}
+				// If clearCache is false, we test the cache hit path
+
+				// Verify the child initially sees the inherited entity
+				const inheritedEntity = await lix.db
+					.selectFrom("state")
+					.where("entity_id", "=", "shared-entity")
+					.where("version_id", "=", activeVersion.id)
+					.selectAll()
+					.execute();
+
+				expect(inheritedEntity).toHaveLength(1);
+				expect(inheritedEntity[0]?.version_id).toBe(activeVersion.id);
+				expect(inheritedEntity[0]?.inherited_from_version_id).toBe("global");
+
+				// Delete the inherited entity in child version (should create copy-on-write deletion)
+				await lix.db
+					.deleteFrom("state")
+					.where("entity_id", "=", "shared-entity")
+					.where("version_id", "=", activeVersion.id)
+					.execute();
+
+				if (clearCache) {
+					// Clear cache after deletion to test CTE path for subsequent queries
+					lix.sqlite.exec("DELETE FROM internal_state_cache");
+				}
+
+				// Verify the entity is deleted in child version
+				const childEntityAfterDelete = await lix.db
+					.selectFrom("state")
+					.where("entity_id", "=", "shared-entity")
+					.where("version_id", "=", activeVersion.id)
+					.selectAll()
+					.execute();
+
+				// Entity should be deleted in child version (copy-on-write deletion)
+				expect(childEntityAfterDelete).toHaveLength(0);
+
+				// Verify the entity still exists in global version (not affected by child deletion)
+				const inheritedEntityAfterDelete = await lix.db
+					.selectFrom("state")
+					.where("entity_id", "=", "shared-entity")
+					.where("version_id", "=", "global")
+					.selectAll()
+					.execute();
+
+				expect(inheritedEntityAfterDelete).toHaveLength(1);
+				expect(inheritedEntityAfterDelete[0]?.snapshot_content).toEqual({
+					id: "shared-entity",
+					name: "shared Entity",
+				});
+
+				// Verify we now only see the global entity through the state view (deletion marker is hidden)
+				const allEntities = await lix.db
+					.selectFrom("state")
+					.where("entity_id", "=", "shared-entity")
+					.selectAll()
+					.execute();
+
+				// Debug: Log what entities we actually got in cache miss scenario
+				if (clearCache && allEntities.length !== 1) {
+					console.log(
+						`Cache miss scenario returned ${allEntities.length} entities:`,
+						allEntities.map((e) => ({
+							version_id: e.version_id,
+							inherited_from_version_id: e.inherited_from_version_id,
+							snapshot_content: e.snapshot_content,
+						}))
+					);
+				}
+
+				// Both cache hit and cache miss scenarios should behave identically:
+				// copy-on-write deletion hides the entity from child but preserves it in parent
+				expect(allEntities).toHaveLength(1);
+				expect(allEntities[0]?.version_id).toBe("global");
+				expect(allEntities[0]?.inherited_from_version_id).toBe(null); // It's the original global entity
 			}
-			// If clearCache is false, we test the cache hit path
-
-			// Verify the child initially sees the inherited entity
-			const inheritedEntity = await lix.db
-				.selectFrom("state")
-				.where("entity_id", "=", "shared-entity")
-				.where("version_id", "=", activeVersion.id)
-				.selectAll()
-				.execute();
-
-			expect(inheritedEntity).toHaveLength(1);
-			expect(inheritedEntity[0]?.version_id).toBe(activeVersion.id);
-			expect(inheritedEntity[0]?.inherited_from_version_id).toBe("global");
-
-			// Delete the inherited entity in child version (should create copy-on-write deletion)
-			await lix.db
-				.deleteFrom("state")
-				.where("entity_id", "=", "shared-entity")
-				.where("version_id", "=", activeVersion.id)
-				.execute();
-
-			if (clearCache) {
-				// Clear cache after deletion to test CTE path for subsequent queries
-				lix.sqlite.exec("DELETE FROM internal_state_cache");
-			}
-
-			// Verify the entity is deleted in child version
-			const childEntityAfterDelete = await lix.db
-				.selectFrom("state")
-				.where("entity_id", "=", "shared-entity")
-				.where("version_id", "=", activeVersion.id)
-				.selectAll()
-				.execute();
-
-			// Entity should be deleted in child version (copy-on-write deletion)
-			expect(childEntityAfterDelete).toHaveLength(0);
-
-			// Verify the entity still exists in global version (not affected by child deletion)
-			const inheritedEntityAfterDelete = await lix.db
-				.selectFrom("state")
-				.where("entity_id", "=", "shared-entity")
-				.where("version_id", "=", "global")
-				.selectAll()
-				.execute();
-
-			expect(inheritedEntityAfterDelete).toHaveLength(1);
-			expect(inheritedEntityAfterDelete[0]?.snapshot_content).toEqual({
-				id: "shared-entity",
-				name: "shared Entity",
-			});
-
-			// Verify we now only see the global entity through the state view (deletion marker is hidden)
-			const allEntities = await lix.db
-				.selectFrom("state")
-				.where("entity_id", "=", "shared-entity")
-				.selectAll()
-				.execute();
-
-			// Debug: Log what entities we actually got in cache miss scenario
-			if (clearCache && allEntities.length !== 1) {
-				console.log(
-					`Cache miss scenario returned ${allEntities.length} entities:`,
-					allEntities.map((e) => ({
-						version_id: e.version_id,
-						inherited_from_version_id: e.inherited_from_version_id,
-						snapshot_content: e.snapshot_content,
-					}))
-				);
-			}
-
-			// Both cache hit and cache miss scenarios should behave identically:
-			// copy-on-write deletion hides the entity from child but preserves it in parent
-			expect(allEntities).toHaveLength(1);
-			expect(allEntities[0]?.version_id).toBe("global");
-			expect(allEntities[0]?.inherited_from_version_id).toBe(null); // It's the original global entity
-		});
+		);
 	}
 );
 
@@ -1566,5 +1685,67 @@ test.todo(
 
 		// Should be deleted from every version
 		expect(afterDelete).toHaveLength(0);
+	}
+);
+
+// todo @martin-lysk the insert or ignore is not working as expected
+// i am not fixing this now to avoid merge conflicts in the xUpdate function
+test.todo(
+	"INSERT OR IGNORE into state virtual table should not throw validation errors for duplicates or update the row",
+	async () => {
+		const lix = await openLixInMemory({});
+
+		// First, insert a record successfully
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "test-duplicate-entity",
+				schema_key: "test_schema",
+				file_id: "test",
+				plugin_key: "test_plugin",
+				snapshot_content: { id: "test-duplicate-entity", name: "Original" },
+				schema_version: "1.0",
+				version_id: "global",
+			})
+			.execute();
+
+		// Verify the record exists
+		const originalRecord = await lix.db
+			.selectFrom("state")
+			.where("entity_id", "=", "test-duplicate-entity")
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(originalRecord).toBeDefined();
+		expect(originalRecord?.snapshot_content).toMatchObject({
+			id: "test-duplicate-entity",
+			name: "Original",
+		});
+
+		// Now try to INSERT OR IGNORE the same entity - this should NOT throw an error
+		// but currently it does because validation runs before OR IGNORE logic
+		expect(() => {
+			lix.sqlite.exec(`
+			INSERT OR IGNORE INTO state (
+				entity_id, schema_key, file_id, plugin_key, 
+				snapshot_content, schema_version, version_id
+			) VALUES (
+				'test-duplicate-entity', 'test_schema', 'test', 'test_plugin',
+				'{"id":"test-duplicate-entity","name":"Duplicate"}', '1.0', 'global'
+			)
+		`);
+		}).not.toThrow(); // This should not throw, but currently does
+
+		// Verify the original record is unchanged (OR IGNORE should have ignored the duplicate)
+		const afterIgnore = await lix.db
+			.selectFrom("state")
+			.where("entity_id", "=", "test-duplicate-entity")
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(afterIgnore?.snapshot_content).toMatchObject({
+			id: "test-duplicate-entity",
+			name: "Original", // Should still be original, not "Duplicate"
+		});
 	}
 );

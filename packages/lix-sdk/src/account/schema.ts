@@ -3,7 +3,6 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import type { Lix } from "../lix/open-lix.js";
 import { humanId } from "human-id";
 import { nanoid } from "../database/nano-id.js";
 import {
@@ -11,13 +10,12 @@ import {
 	type StateEntityView,
 	type StateEntityAllView,
 } from "../state/entity-view-builder.js";
+import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
-export function applyAccountDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "plugin">
-): void {
+export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	// Create account view using the generalized entity view builder
 	createEntityViewsIfNotExists({
-		lix,
+		lix: { sqlite },
 		schema: LixAccountSchema,
 		overrideName: "account",
 		pluginKey: "lix_own_entity",
@@ -28,7 +26,7 @@ export function applyAccountDatabaseSchema(
 	});
 
 	// Create session-specific temp table
-	lix.sqlite.exec(`
+	sqlite.exec(`
 		-- current account(s)
 		-- temp table because current accounts are session
 		-- specific and should not be persisted
@@ -38,11 +36,7 @@ export function applyAccountDatabaseSchema(
 			-- can't use foreign keys in temp tables... :(
 		) STRICT;
 	`);
-}
 
-export function populateAccountRecords(
-	lix: Pick<Lix, "sqlite" | "db" | "plugin">
-): void {
 	const anonymousAccountName = `Anonymous ${humanId({
 		capitalize: true,
 		adjectiveCount: 0,
@@ -54,7 +48,7 @@ export function populateAccountRecords(
 		.slice(0, -1)}`;
 
 	// Insert default account
-	lix.sqlite.exec(`
+	sqlite.exec(`
 		-- default to a new account
 		INSERT INTO active_account (id, name) values (nano_id(), '${anonymousAccountName}');
 	`);

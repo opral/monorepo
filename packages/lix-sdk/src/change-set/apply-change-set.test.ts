@@ -253,92 +253,85 @@ test("throws an error if plugin does not support applying changes", async () => 
 });
 
 // very slow https://github.com/opral/lix-sdk/issues/311
-test.skip(
-	"file deletion bypasses plugin and removes file from state",
-	async () => {
-		const lix = await openLixInMemory({
-			providePlugins: [mockJsonPlugin],
-		});
+test("file deletion bypasses plugin and removes file from state", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
 
-		// Insert a JSON file with initial content
-		await lix.db
-			.insertInto("file")
-			.values({
-				id: "file-to-delete",
-				data: new TextEncoder().encode(
-					JSON.stringify({ test: "will-be-deleted" })
-				),
-				path: "/delete-test.json",
-			})
-			.execute();
+	// Insert a JSON file with initial content
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file-to-delete",
+			data: new TextEncoder().encode(
+				JSON.stringify({ test: "will-be-deleted" })
+			),
+			path: "/delete-test.json",
+		})
+		.execute();
 
-		// Update the file to trigger change detection by the mock json plugin
-		await lix.db
-			.updateTable("file")
-			.set({
-				data: new TextEncoder().encode(
-					JSON.stringify({ test: "updated-before-delete" })
-				),
-			})
-			.where("id", "=", "file-to-delete")
-			.execute();
+	// Update the file to trigger change detection by the mock json plugin
+	await lix.db
+		.updateTable("file")
+		.set({
+			data: new TextEncoder().encode(
+				JSON.stringify({ test: "updated-before-delete" })
+			),
+		})
+		.where("id", "=", "file-to-delete")
+		.execute();
 
-		await createCheckpoint({ lix });
+	await createCheckpoint({ lix });
 
-		// Now delete the file
-		await lix.db
-			.deleteFrom("file")
-			.where("id", "=", "file-to-delete")
-			.execute();
+	// Now delete the file
+	await lix.db.deleteFrom("file").where("id", "=", "file-to-delete").execute();
 
-		// Create checkpoint to capture the file deletion
-		const checkpointAfterDeletion = await createCheckpoint({ lix });
+	// Create checkpoint to capture the file deletion
+	const checkpointAfterDeletion = await createCheckpoint({ lix });
 
-		// Verify file is deleted
-		const fileAfterDeletion = await lix.db
-			.selectFrom("file")
-			.where("id", "=", "file-to-delete")
-			.selectAll()
-			.executeTakeFirst();
+	// Verify file is deleted
+	const fileAfterDeletion = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "file-to-delete")
+		.selectAll()
+		.executeTakeFirst();
 
-		expect(fileAfterDeletion).toBeUndefined();
+	expect(fileAfterDeletion).toBeUndefined();
 
-		// Recreate the file to test applying the deletion change set
-		await lix.db
-			.insertInto("file")
-			.values({
-				id: "file-to-delete",
-				data: new TextEncoder().encode(
-					JSON.stringify({ test: "recreated-file" })
-				),
-				path: "/delete-test.json",
-			})
-			.execute();
+	// Recreate the file to test applying the deletion change set
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "file-to-delete",
+			data: new TextEncoder().encode(
+				JSON.stringify({ test: "recreated-file" })
+			),
+			path: "/delete-test.json",
+		})
+		.execute();
 
-		// Verify file is recreated
-		const recreatedFile = await lix.db
-			.selectFrom("file")
-			.where("id", "=", "file-to-delete")
-			.selectAll()
-			.executeTakeFirst();
+	// Verify file is recreated
+	const recreatedFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "file-to-delete")
+		.selectAll()
+		.executeTakeFirst();
 
-		expect(recreatedFile).toBeDefined();
-		// Apply the deletion change set
-		await applyChangeSet({ lix, changeSet: checkpointAfterDeletion });
+	expect(recreatedFile).toBeDefined();
+	// Apply the deletion change set
+	await applyChangeSet({ lix, changeSet: checkpointAfterDeletion });
 
-		// Verify file is deleted again after applying change set
-		const finalFile = await lix.db
-			.selectFrom("file")
-			.where("id", "=", "file-to-delete")
-			.selectAll()
-			.executeTakeFirst();
+	// Verify file is deleted again after applying change set
+	const finalFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "file-to-delete")
+		.selectAll()
+		.executeTakeFirst();
 
-		expect(finalFile).toBeUndefined();
-	},
-	{ timeout: 60000 }
-);
+	expect(finalFile).toBeUndefined();
+});
 
-test.skip("it should delete entities but not files when applying entity deletion changes", async () => {
+test("it should delete entities but not files when applying entity deletion changes", async () => {
 	// Create a Lix instance with the mockJsonPlugin
 	const lix = await openLixInMemory({
 		providePlugins: [mockJsonPlugin],
