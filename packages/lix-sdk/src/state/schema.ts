@@ -363,6 +363,15 @@ export function applyStateDatabaseSchema(
 
 							const isDeletion = snapshot_content === null;
 
+							// TODO the CTE should not return inherited entities (optimization for later)
+							// Skip inherited entities - they should be resolved via inheritance logic, not stored as duplicates
+							if (
+								inherited_from_version_id !== null &&
+								inherited_from_version_id !== undefined
+							) {
+								continue;
+							}
+
 							sqlite.exec({
 								sql: `INSERT OR REPLACE INTO internal_state_cache 
 									  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker)
@@ -861,7 +870,7 @@ function selectStateViaCTE(
 			),
 			-- Combine direct entities with inherited entities
 			all_entities AS (
-				-- Direct entities from leaf_target_snapshots
+				-- Direct entities from leaf_target_snapshots 
 				SELECT 
 					entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version,
 					version_id, version_id as visible_in_version, NULL as inherited_from_version_id

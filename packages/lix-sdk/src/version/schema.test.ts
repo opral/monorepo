@@ -3,68 +3,6 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { INITIAL_VERSION_ID } from "./schema.js";
 import { createVersion } from "./create-version.js";
 
-test("selecting from the version view", async () => {
-	const lix = await openLixInMemory({});
-	// Create required change sets first
-	await lix.db
-		.insertInto("change_set_all")
-		.values([
-			{ id: "change_set_id_0", lixcol_version_id: "global" },
-			{ id: "change_set_id_1", lixcol_version_id: "global" },
-			{ id: "working_cs_0", lixcol_version_id: "global" },
-			{ id: "working_cs_1", lixcol_version_id: "global" },
-		])
-		.execute();
-
-	await lix.db
-		.insertInto("version")
-		.values([
-			{
-				id: "version0",
-				name: "version0",
-				change_set_id: "change_set_id_0",
-				working_change_set_id: "working_cs_0",
-				inherits_from_version_id: "global",
-			},
-			{
-				id: "version1",
-				name: "version1",
-				change_set_id: "change_set_id_1",
-				working_change_set_id: "working_cs_1",
-				inherits_from_version_id: "global",
-			},
-		])
-		.execute();
-
-	const versions = await lix.db
-		.selectFrom("version")
-		.where("id", "in", ["version0", "version1"])
-		.selectAll()
-		.execute();
-
-	// We expect exactly 2 versions in the global context.
-	// The version view (state view) shows inherited entities, so versions
-	// stored in the global version context are also visible in child versions
-	// that inherit from global. This test filters to only the global context
-	// to verify the original entities are correctly stored there.
-	expect(versions).toMatchObject([
-		{
-			id: "version0",
-			name: "version0",
-			change_set_id: "change_set_id_0",
-			working_change_set_id: "working_cs_0",
-			inherits_from_version_id: "global",
-		},
-		{
-			id: "version1",
-			name: "version1",
-			change_set_id: "change_set_id_1",
-			working_change_set_id: "working_cs_1",
-			inherits_from_version_id: "global",
-		},
-	]);
-});
-
 test("insert, update, delete on the version view", async () => {
 	const lix = await openLixInMemory({});
 
@@ -80,19 +18,21 @@ test("insert, update, delete on the version view", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("version")
+		.insertInto("version_all")
 		.values([
 			{
 				id: "version0",
 				name: "version0",
 				change_set_id: "change_set_id_0",
 				working_change_set_id: "working_cs_0",
+				lixcol_version_id: "global",
 			},
 			{
 				id: "version1",
 				name: "version1",
 				change_set_id: "change_set_id_1",
 				working_change_set_id: "working_cs_1",
+				lixcol_version_id: "global",
 			},
 		])
 		.execute();

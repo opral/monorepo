@@ -1,7 +1,6 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-// import { initFileQueueProcess } from "../file-queue/file-queue-process.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
 import type { NewKeyValue } from "../key-value/schema.js";
@@ -9,10 +8,6 @@ import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { LixAccount } from "../account/schema.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
-import {
-	applyAccountDatabaseSchema,
-	populateAccountRecords,
-} from "../account/schema.js";
 
 export type Lix = {
 	/**
@@ -131,8 +126,6 @@ export async function openLix(args: {
 
 	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
-	applyAccountDatabaseSchema(lix);
-	populateAccountRecords(lix);
 
 	return lix;
 }

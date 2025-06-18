@@ -109,12 +109,6 @@ export function handleFileInsert(args: {
 
 	// Log appropriate messages based on what happened
 	if (!foundPlugin) {
-		console.debug(
-			"[handleFileInsert] No plugin found for file, invoking fallback plugin. foundPlugin:",
-			foundPlugin,
-			"file path:",
-			args.file.path
-		);
 		createLixOwnLogSync({
 			lix: args.lix,
 			key: "lix_file_no_plugin",

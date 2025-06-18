@@ -6,26 +6,24 @@ test("creates a new change set and updates the version's change set id for mutat
 	const lix = await openLixInMemory({});
 
 	const versionBeforeInsert = await lix.db
-		.selectFrom("version")
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
 		.selectAll()
 		.where("name", "=", "main")
 		.executeTakeFirstOrThrow();
 
 	await lix.db
-		.insertInto("key_value_all")
+		.insertInto("key_value")
 		.values({
 			key: "mock_key",
 			value: "mock_value",
-			lixcol_version_id: lix.db
-				.selectFrom("active_version")
-				.select("version_id"),
 		})
 		.execute();
 
 	const versionAfterInsert = await lix.db
 		.selectFrom("version")
 		.selectAll()
-		.where("name", "=", "main")
+		.where("id", "=", versionBeforeInsert.id)
 		.executeTakeFirstOrThrow();
 
 	expect(versionAfterInsert.change_set_id).not.toEqual(
@@ -48,7 +46,7 @@ test("creates a new change set and updates the version's change set id for mutat
 	const versionAfterUpdate = await lix.db
 		.selectFrom("version")
 		.selectAll()
-		.where("name", "=", "main")
+		.where("id", "=", versionAfterInsert.id)
 		.executeTakeFirstOrThrow();
 
 	expect(versionAfterUpdate.change_set_id).not.toEqual(
@@ -60,7 +58,7 @@ test("creates a new change set and updates the version's change set id for mutat
 	const versionAfterDelete = await lix.db
 		.selectFrom("version")
 		.selectAll()
-		.where("name", "=", "main")
+		.where("id", "=", versionAfterUpdate.id)
 		.executeTakeFirstOrThrow();
 
 	expect(versionAfterDelete.change_set_id).not.toEqual(
