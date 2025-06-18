@@ -1,6 +1,6 @@
 import { EMPTY_DOCUMENT_PROMPT_KEY } from "@/components/editor/plugins/empty-document-prompt-plugin";
 import { TElement } from "@udecode/plate";
-import { PlateEditor } from "@udecode/plate-core/react";
+import { PlateEditor } from "@udecode/plate/react";
 import { Lix } from "@lix-js/sdk";
 
 export const insertEmptyPromptElement = (editor: PlateEditor) => {
