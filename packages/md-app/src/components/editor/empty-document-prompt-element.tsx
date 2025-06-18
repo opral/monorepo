@@ -1,20 +1,26 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useAtom } from 'jotai';
-import { PlateElementProps } from '@udecode/plate/react';
-import { activeFileAtom } from '@/state-active-file';
-import { useChat } from './use-chat';
-import { toast } from 'sonner';
-import { Button } from '../ui/button';
-import { Loader2, Zap } from 'lucide-react';
-import { lixAtom, withPollingAtom } from '@/state';
-import { saveLixToOpfs } from '@/helper/saveLixToOpfs';
-import { generateHumanId } from '@/helper/generateHumanId';
-import { updateUrlParams } from '@/helper/updateUrlParams';
-import { removeEmptyPromptElement, setPromptDismissed } from '@/helper/emptyPromptElementHelpers';
-import { AIChatPlugin } from '@udecode/plate-ai/react';
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useAtom } from "jotai";
+import { PlateElementProps } from "@udecode/plate/react";
+import { activeFileAtom } from "@/state-active-file";
+import { useChat } from "./use-chat";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { Loader2, Zap } from "lucide-react";
+import { lixAtom, withPollingAtom } from "@/state";
+import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
+import { generateHumanId } from "@/helper/generateHumanId";
+import { updateUrlParams } from "@/helper/updateUrlParams";
+import {
+	removeEmptyPromptElement,
+	setPromptDismissed,
+} from "@/helper/emptyPromptElementHelpers";
+import { AIChatPlugin } from "@udecode/plate-ai/react";
 import { nanoid } from "@lix-js/sdk";
 
-export function EmptyDocumentPromptElement({ attributes, editor }: PlateElementProps) {
+export function EmptyDocumentPromptElement({
+	attributes,
+	editor,
+}: PlateElementProps) {
 	const [prompt, setPrompt] = useState("");
 	const [activeFile] = useAtom(activeFileAtom);
 	const [lix] = useAtom(lixAtom);
@@ -100,8 +106,14 @@ export function EmptyDocumentPromptElement({ attributes, editor }: PlateElementP
 			if (activeFile.path === "/welcome.md") {
 				const newFileId = await createNewFile(prompt);
 				if (newFileId) {
-					// Wait a moment for navigation to complete
-					await new Promise((resolve) => setTimeout(resolve, 100));
+					// Wait longer for navigation and editor synchronization to complete
+					await new Promise((resolve) => setTimeout(resolve, 500));
+
+					// Clear the editor content before starting generation
+					const currentEditor = editor;
+					if (currentEditor) {
+						currentEditor.tf.setValue([]);
+					}
 				} else {
 					// If file creation failed, stay in current file
 					toast.error(
@@ -109,7 +121,6 @@ export function EmptyDocumentPromptElement({ attributes, editor }: PlateElementP
 					);
 				}
 			}
-
 			editor.getApi(AIChatPlugin).aiChat.submit({
 				prompt: `Generate a complete, well-structured markdown document about: ${prompt}. Include appropriate headings starting with level 1 heading (#), paragraphs, and relevant formatting like lists or emphasis where appropriate.`,
 			});

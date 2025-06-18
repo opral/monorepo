@@ -12,7 +12,6 @@ import {
 	FolderPlus,
 	FileInput,
 } from "lucide-react";
-import { setupAriaHiddenFixes } from "@/helper/fixAriaHidden";
 import { useAtom } from "jotai";
 import posthog from "posthog-js";
 import { useNavigate } from "react-router-dom";
@@ -96,6 +95,10 @@ export function LixSidebar() {
 	const [isRenamingLix, setIsRenamingLix] = React.useState(false);
 	const [lixName, setLixName] = React.useState(currentLixName);
 	const [previousLixName, setPreviousLixName] = React.useState("");
+	const [lixDropdownOpen, setLixDropdownOpen] = React.useState(false);
+	const [fileDropdownOpen, setFileDropdownOpen] = React.useState<string | null>(
+		null
+	);
 	const inlineInputRef = React.useRef<HTMLInputElement>(null);
 	const lixInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -104,15 +107,6 @@ export function LixSidebar() {
 	const chat = useChat();
 	const { status } = chat;
 	const isLoading = status === "streaming" || status === "submitted";
-
-	// Set up automatic aria-hidden fixes for the entire app
-	React.useEffect(() => {
-		// This function will automatically fix aria-hidden issues when inputs get focus
-		const cleanupAriaFixes = setupAriaHiddenFixes();
-
-		// Clean up when component unmounts
-		return cleanupAriaFixes;
-	}, []);
 
 	const switchToFile = React.useCallback(
 		async (fileId: string) => {
@@ -144,7 +138,7 @@ export function LixSidebar() {
 		} catch (error) {
 			console.error("Failed to create new file:", error);
 		}
-	}, [lix, setPolling]);
+	}, [lix, switchToFile]);
 
 	const saveInlineRename = React.useCallback(async () => {
 		if (!lix || !inlineEditingFile || !inlineEditingFile.name.trim()) {
@@ -166,10 +160,11 @@ export function LixSidebar() {
 				.pop()
 				?.replace(/\.md$/, "");
 
-			// Skip if the name hasn't changed
+			// Exit rename mode regardless of whether name changed
+			setInlineEditingFile(null);
+
+			// Only perform database operation if name actually changed
 			if (currentFileName === inlineEditingFile.name.trim()) {
-				console.log("File name hasn't changed, skipping rename operation");
-				setInlineEditingFile(null);
 				return;
 			}
 
@@ -181,7 +176,6 @@ export function LixSidebar() {
 
 			await saveLixToOpfs({ lix });
 			setPolling(Date.now());
-			setInlineEditingFile(null);
 		} catch (error) {
 			console.error("Failed to rename file:", error);
 			setInlineEditingFile(null);
@@ -194,14 +188,13 @@ export function LixSidebar() {
 		}
 
 		try {
-			// Check if the name has actually changed from the current one
+			// Exit rename mode regardless of whether name changed
+			setIsRenamingLix(false);
+
+			// Only perform database operation if name actually changed
 			if (lixName.trim() === currentLixName) {
-				console.log("Name hasn't changed, skipping rename operation");
-				setIsRenamingLix(false);
 				return;
 			}
-
-			console.log(`Renaming lix to: ${lixName}`);
 
 			// Use the imported saveLixName helper function which handles the file renaming
 			// This will also update the URL
@@ -212,7 +205,6 @@ export function LixSidebar() {
 
 			// Refresh everything to update the UI with the new file name
 			setPolling(Date.now());
-			setIsRenamingLix(false);
 
 			// The currentLixId should still be the lix_id, not the new name
 			// The saveLixName function will handle updating the URL params correctly
@@ -229,6 +221,66 @@ export function LixSidebar() {
 			setIsRenamingLix(false);
 		}
 	}, [lix, lixName, currentLixName, setPolling]);
+
+	// Add click-outside detection for Lix rename input
+	React.useEffect(() => {
+		if (!isRenamingLix || !lixInputRef.current) return;
+
+		const handleClickOutside = (event: MouseEvent) => {
+			const target = event.target as Node;
+			const lixInput = lixInputRef.current;
+
+			// Check if the click is outside the input and its container
+			if (
+				lixInput &&
+				!lixInput.contains(target) &&
+				!lixInput.closest("#rename-lix-container")?.contains(target)
+			) {
+				handleSaveLixName();
+			}
+		};
+
+		// Add event listener after a small delay to prevent immediate triggering
+		const timeoutId = setTimeout(() => {
+			document.addEventListener("mousedown", handleClickOutside);
+		}, 100);
+
+		return () => {
+			clearTimeout(timeoutId);
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [isRenamingLix, handleSaveLixName]);
+
+	// Add click-outside detection for file rename input
+	React.useEffect(() => {
+		if (!inlineEditingFile || !inlineInputRef.current) return;
+
+		const handleClickOutside = (event: MouseEvent) => {
+			const target = event.target as Node;
+			const fileInput = inlineInputRef.current;
+
+			// Check if the click is outside the input and its container
+			if (
+				fileInput &&
+				!fileInput.contains(target) &&
+				!fileInput
+					.closest(`#rename-file-container-${inlineEditingFile.id}`)
+					?.contains(target)
+			) {
+				saveInlineRename();
+			}
+		};
+
+		// Add event listener after a small delay to prevent immediate triggering
+		const timeoutId = setTimeout(() => {
+			document.addEventListener("mousedown", handleClickOutside);
+		}, 100);
+
+		return () => {
+			clearTimeout(timeoutId);
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [inlineEditingFile?.id, saveInlineRename]);
 
 	const switchToLix = React.useCallback(
 		(lixId: string) => {
@@ -291,7 +343,7 @@ export function LixSidebar() {
 					const fileContent = await file.text();
 					const fileName = file.name.replace(/\.md$/, "");
 
-          const importedFileId = nanoid();
+					const importedFileId = nanoid();
 
 					await lix.db
 						.insertInto("file")
@@ -477,22 +529,58 @@ export function LixSidebar() {
 	const [currentLixId, setCurrentLixId] = React.useState<string>("");
 
 	const startRenamingLix = React.useCallback(() => {
+		// Close the dropdown first
+		setLixDropdownOpen(false);
+
 		// Use the current display name from our atom
 		const displayName = currentLixName || lixName;
 		setLixName(displayName);
 
-		// Set the current name as previous name for potential cancel
 		setPreviousLixName(displayName);
 		setIsRenamingLix(true);
-
-		// Focus on the input field with a slight delay to ensure the DOM has updated
-		setTimeout(() => {
-			if (lixInputRef.current) {
-				lixInputRef.current.focus();
-				lixInputRef.current.select(); // Select all text for easy replacement
-			}
-		}, 50);
 	}, [currentLixName, lixName]);
+
+	// Focus the lix input when starting to rename
+	React.useEffect(() => {
+		if (isRenamingLix && lixInputRef.current) {
+			const input = lixInputRef.current;
+
+			// Use requestAnimationFrame for proper DOM timing
+			const rafId = requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					if (input && document.contains(input)) {
+						input.focus();
+						input.select();
+					}
+				});
+			});
+
+			return () => {
+				cancelAnimationFrame(rafId);
+			};
+		}
+	}, [isRenamingLix]);
+
+	// Focus the file input when starting to rename
+	React.useEffect(() => {
+		if (inlineEditingFile && inlineInputRef.current) {
+			const input = inlineInputRef.current;
+
+			// Use requestAnimationFrame for proper DOM timing
+			const rafId = requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					if (input && document.contains(input)) {
+						input.focus();
+						input.select();
+					}
+				});
+			});
+
+			return () => {
+				cancelAnimationFrame(rafId);
+			};
+		}
+	}, [inlineEditingFile]);
 
 	const cancelRenameLix = React.useCallback(() => {
 		setLixName(previousLixName);
@@ -559,7 +647,6 @@ export function LixSidebar() {
 							value={lixName}
 							onChange={(e) => setLixName(e.target.value)}
 							onFocus={(e) => e.target.select()}
-							onBlur={handleSaveLixName}
 							onKeyDown={(e) => {
 								if (e.key === "Enter") {
 									handleSaveLixName();
@@ -623,13 +710,21 @@ export function LixSidebar() {
 						</Select>
 					</div>
 				)}
-				<DropdownMenu>
+				<DropdownMenu open={lixDropdownOpen} onOpenChange={setLixDropdownOpen}>
 					<DropdownMenuTrigger asChild>
 						<Button variant="ghost" size="icon" title="Workspace Options">
 							<MoreVertical className="h-4 w-4" />
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="w-60 py-1">
+					<DropdownMenuContent
+						align="end"
+						className="w-60 py-1"
+						onCloseAutoFocus={(e) => {
+							if (isRenamingLix) {
+								e.preventDefault();
+							}
+						}}
+					>
 						<DropdownMenuItem onClick={handleCreateNewLix}>
 							<FolderPlus className="h-4 w-4 mr-2" />
 							<span>New Lix</span>
@@ -732,9 +827,9 @@ export function LixSidebar() {
 													)
 												}
 												onFocus={(e) => e.target.select()}
-												onBlur={saveInlineRename}
 												onKeyDown={(e) => {
 													if (e.key === "Enter") {
+														console.log("Enter");
 														saveInlineRename();
 													} else if (e.key === "Escape") {
 														setInlineEditingFile(null);
@@ -758,13 +853,7 @@ export function LixSidebar() {
 											const fileName =
 												file.path.split("/").pop()?.replace(/\.md$/, "") || "";
 											setInlineEditingFile({ id: file.id, name: fileName });
-											// Focus and select the input text
-											setTimeout(() => {
-												if (inlineInputRef.current) {
-													inlineInputRef.current.focus();
-													inlineInputRef.current.select();
-												}
-											}, 50);
+											// Focus is now handled by useEffect
 										}}
 										disabled={isLoading}
 										className={`w-full justify-start ${file.id === activeFile?.id ? "font-medium" : ""}`}
@@ -776,26 +865,33 @@ export function LixSidebar() {
 									</SidebarMenuButton>
 								)}
 
-								<DropdownMenu>
+								<DropdownMenu
+									open={fileDropdownOpen === file.id}
+									onOpenChange={(open) =>
+										setFileDropdownOpen(open ? file.id : null)
+									}
+								>
 									<DropdownMenuTrigger asChild>
 										<SidebarMenuAction showOnHover>
 											<MoreVertical className="h-4 w-4" />
 										</SidebarMenuAction>
 									</DropdownMenuTrigger>
-									<DropdownMenuContent align="end" className="w-48 py-1">
+									<DropdownMenuContent
+										align="end"
+										className="w-48 py-1"
+										onCloseAutoFocus={(e) => {
+											if (inlineEditingFile?.id === file.id) {
+												e.preventDefault();
+											}
+										}}
+									>
 										<DropdownMenuItem
 											onClick={() => {
 												const fileName =
 													file.path.split("/").pop()?.replace(/\.md$/, "") ||
 													"";
 												setInlineEditingFile({ id: file.id, name: fileName });
-												// Focus on the input field with a slight delay to ensure the DOM has updated
-												setTimeout(() => {
-													if (inlineInputRef.current) {
-														inlineInputRef.current.focus();
-														inlineInputRef.current.select(); // Select all text for easy replacement
-													}
-												}, 50);
+												setFileDropdownOpen(null);
 											}}
 										>
 											<PenSquare className="h-4 w-4 mr-2" />
