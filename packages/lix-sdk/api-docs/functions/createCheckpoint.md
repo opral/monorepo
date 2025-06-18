@@ -6,9 +6,9 @@
 
 # Function: createCheckpoint()
 
-> **createCheckpoint**(`args`): `Promise`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}\>
+> **createCheckpoint**(`args`): `Promise`\<\{ `id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-checkpoint.ts:5](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change-set/create-checkpoint.ts#L5)
+Defined in: [packages/lix-sdk/src/change-set/create-checkpoint.ts:4](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/change-set/create-checkpoint.ts#L4)
 
 ## Parameters
 
@@ -18,18 +18,6 @@ Defined in: [packages/lix-sdk/src/change-set/create-checkpoint.ts:5](https://git
 
 [`Lix`](../type-aliases/Lix.md)
 
-#### version?
-
-`Pick`\<\{ `change_set_id`: `string`; `id`: `string`; `name`: `null` \| `string`; `working_change_set_id`: `string`; \}, `"id"`\>
-
-Optional version to create checkpoint from.
-
-**Default**
-
-```ts
-The active version
-```
-
 ## Returns
 
-`Promise`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}\>
+`Promise`\<\{ `id`: `string`; \}\>

@@ -6,9 +6,9 @@
 
 # Function: createLog()
 
-> **createLog**(`args`): `Promise`\<\{ `created_at`: `string`; `key`: `string`; `level`: `string`; `message`: `string`; \}\>
+> **createLog**(`args`): `Promise`\<\{ `created_at`: `string`; `id`: `string`; `key`: `string`; `level`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `message`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/log/create-log.ts:26](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/log/create-log.ts#L26)
+Defined in: [packages/lix-sdk/src/log/create-log.ts:27](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/log/create-log.ts#L27)
 
 Directly creates a log entry in the Lix database without applying any filters.
 
@@ -32,7 +32,7 @@ It is recommended to use dot notation for log keys (e.g., 'app.module.component'
 
 #### lix
 
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"sqlite"`\>
+`Pick`\<[`Lix`](../type-aliases/Lix.md), `"sqlite"` \| `"db"`\>
 
 #### message
 
@@ -40,7 +40,7 @@ It is recommended to use dot notation for log keys (e.g., 'app.module.component'
 
 ## Returns
 
-`Promise`\<\{ `created_at`: `string`; `key`: `string`; `level`: `string`; `message`: `string`; \}\>
+`Promise`\<\{ `created_at`: `string`; `id`: `string`; `key`: `string`; `level`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `message`: `string`; \}\>
 
 A promise that resolves with the created log entry.
 
