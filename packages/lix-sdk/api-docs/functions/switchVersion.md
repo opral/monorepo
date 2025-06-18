@@ -8,7 +8,7 @@
 
 > **switchVersion**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/version/switch-version.ts:29](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/version/switch-version.ts#L29)
+Defined in: [packages/lix-sdk/src/version/switch-version.ts:24](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/version/switch-version.ts#L24)
 
 Switches the current Version to the given Version.
 
@@ -24,7 +24,7 @@ The Version must already exist before calling this function.
 
 #### to
 
-`Pick`\<\{ `change_set_id`: `string`; `id`: `string`; `name`: `null` \| `string`; `working_change_set_id`: `string`; \}, `"id"`\>
+`Pick`\<[`LixVersion`](../type-aliases/LixVersion.md), `"id"`\>
 
 ## Returns
 
@@ -36,11 +36,11 @@ The Version must already exist before calling this function.
   await switchVersion({ lix, to: otherVersion });
   ```
 
-Switching Versiones to a newly created Version.
+Switching to a newly created version.
 
   ```ts
   await lix.db.transaction().execute(async (trx) => {
-     const newVersion = await createVersion({ lix: { db: trx }, parent: currentVersion });
+     const newVersion = await createVersion({ lix: { db: trx }, changeSet: { id: currentVersion.change_set_id } });
      await switchVersion({ lix: { db: trx }, to: newVersion });
   });
   ```

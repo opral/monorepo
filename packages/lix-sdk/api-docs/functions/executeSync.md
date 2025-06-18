@@ -8,14 +8,19 @@
 
 > **executeSync**(`args`): `any`[]
 
-Defined in: [packages/lix-sdk/src/database/execute-sync.ts:15](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/database/execute-sync.ts#L15)
+Defined in: [packages/lix-sdk/src/database/execute-sync.ts:21](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/database/execute-sync.ts#L21)
 
 Execute a query synchronously.
 
-WARNING: This function is not recommended for general use.
-Only if you need sync queries, like in a trigger for exmaple,
-you should use this function. The function is not transforming
-the query or the result as the db API does. You get raw SQL.
+⚠️  MAJOR WARNING: This function is a PURE SQL LAYER without transformations!
+
+- JSON columns return as RAW JSON STRINGS, not parsed objects
+- You must manually parse/stringify JSON data
+- No automatic type conversions happen
+- Results are raw SQLite values
+
+Only use this for triggers, database functions, or when you specifically
+need synchronous database access and understand you're working with raw SQL.
 
 ## Parameters
 
@@ -36,6 +41,7 @@ the query or the result as the db API does. You get raw SQL.
 ## Example
 
 ```ts
-const query = lix.db.selectFrom("key_value").selectAll();
-  const result = executeSync({ lix, query }) as KeyValue[];
+// JSON columns are returned as strings - you must parse manually:
+  const result = executeSync({ lix, query });
+  result[0].metadata = JSON.parse(result[0].metadata);
 ```

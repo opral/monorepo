@@ -132,12 +132,13 @@ const CreateCheckpointInput = () => {
         comments: [{ body: args.content }],
       });
       await trx
-        .insertInto("change_set_thread")
-        .values({
-          change_set_id: currentChangeSet!.id,
-          thread_id: thread.id,
-        })
-        .execute();
+				.insertInto("change_set_thread_all")
+				.values({
+					change_set_id: currentChangeSet!.id,
+					thread_id: thread.id,
+					lixcol_version_id: "global",
+				})
+				.execute();
     });
   };
 

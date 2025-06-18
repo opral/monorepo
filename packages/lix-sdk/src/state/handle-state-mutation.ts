@@ -5,10 +5,10 @@ import { executeSync } from "../database/execute-sync.js";
 import type { Change } from "../change/schema.js";
 
 import type { NewStateRow } from "./schema.js";
-import { type LixVersion } from "../version/schema.js";
+// import { type LixVersion } from "../version/schema.js";
 import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 
-import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
+// import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,
@@ -396,4 +396,3 @@ function updateStateCache(args: {
 			),
 	});
 }
-

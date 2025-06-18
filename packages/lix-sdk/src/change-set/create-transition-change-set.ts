@@ -20,10 +20,6 @@ export async function createTransitionChangeSet(args: {
 	targetChangeSet: Pick<ChangeSet, "id">;
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		console.log(
-			`createTransitionChangeSet: Source=${args.sourceChangeSet.id}, Target=${args.targetChangeSet.id}`
-		);
-
 		// 1. Find leaf changes defining the state AT the *target* change set
 		const leafChangesToApply = await trx
 			.selectFrom("change")
@@ -42,10 +38,6 @@ export async function createTransitionChangeSet(args: {
 			])
 			.distinct()
 			.execute();
-
-		console.log(
-			` >> Found ${leafChangesToApply.length} leaf changes to apply from target.`
-		);
 
 		// 2. Find leaf changes that are present in the *source* state but NOT in the *target* state,
 		//    AND whose entity is not being restored by a different change in the target state.
@@ -133,10 +125,7 @@ export async function createTransitionChangeSet(args: {
 		const combinedChanges = [...leafChangesToApply, ...deleteChanges];
 
 		if (combinedChanges.length === 0) {
-			// Handle case where source and target are identical or transition is empty
-			console.log(
-				"No changes needed for transition. Creating empty change set."
-			);
+			throw new Error("No changes to apply in the transition change set.");
 		}
 
 		const transitionChangeSet = await createChangeSet({

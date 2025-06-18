@@ -33,6 +33,7 @@ test("inserts, updates, deletes are handled", async () => {
 
 	const viewAfterDelete = await lix.db
 		.selectFrom("key_value")
+		.where("key", "=", "key0")
 		.selectAll()
 		.execute();
 
@@ -42,6 +43,7 @@ test("inserts, updates, deletes are handled", async () => {
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("schema_key", "=", "lix_key_value")
+		.where("change.entity_id", "=", "key0")
 		.selectAll()
 		.orderBy("change.created_at", "asc")
 		.execute();
@@ -76,6 +78,11 @@ test("arbitrary json is allowed", async () => {
 	const viewAfterInsert = await lix.db
 		.selectFrom("key_value")
 		.select(["key", "value"])
+		.where(
+			"key",
+			"in",
+			kvs.map((kv) => kv.key)
+		)
 		.execute();
 
 	expect(viewAfterInsert).toEqual(kvs);

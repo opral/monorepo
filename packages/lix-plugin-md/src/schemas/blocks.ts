@@ -6,7 +6,7 @@ export const MarkdownBlockSchemaV1 = {
 	type: "object",
 	properties: {
 		id: { type: "string" },
-		content: { type: "string" },
+		text: { type: "string" },
 		type: {
 			type: "string",
 			enum: [
@@ -25,6 +25,6 @@ export const MarkdownBlockSchemaV1 = {
 			],
 		},
 	},
-	required: ["id", "content", "type"],
+	required: ["id", "text", "type"],
 	additionalProperties: false,
 } as const satisfies LixSchemaDefinition;

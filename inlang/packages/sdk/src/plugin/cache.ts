@@ -41,17 +41,28 @@ async function writeModuleToCache(
 	const moduleHash = escape(moduleURI);
 	const filePath = `/cache/plugins/${moduleHash}`;
 
-	await lix.db
-		.insertInto("file")
-		.values({
-			path: filePath,
-			data: new TextEncoder().encode(moduleContent),
-		})
-		// update the cache
-		.onConflict((oc) =>
-			oc.doUpdateSet({ data: new TextEncoder().encode(moduleContent) })
-		)
-		.execute();
+	const existingFile = await lix.db
+		.selectFrom("file")
+		.where("path", "=", filePath)
+		.select(["id"])
+		.executeTakeFirst();
+
+	if (existingFile) {
+		// If the file already exists, we can skip the insert and just update
+		await lix.db
+			.updateTable("file")
+			.set({ data: new TextEncoder().encode(moduleContent) })
+			.where("id", "=", existingFile.id)
+			.execute();
+	} else {
+		await lix.db
+			.insertInto("file")
+			.values({
+				path: filePath,
+				data: new TextEncoder().encode(moduleContent),
+			})
+			.execute();
+	}
 }
 
 /**

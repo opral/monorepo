@@ -5,9 +5,8 @@ export const TextSchemaV1 = {
 	"x-lix-version": "1.0",
 	type: "object",
 	properties: {
-		id: { type: "string" },
-		content: { type: "string" },
+		text: { type: "string" },
 	},
-	required: ["id", "content"],
+	required: ["text"],
 	additionalProperties: false,
 } as const satisfies LixSchemaDefinition;

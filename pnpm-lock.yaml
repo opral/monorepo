@@ -1593,6 +1593,9 @@ importers:
       '@rollup/plugin-commonjs':
         specifier: ^25.0.7
         version: 25.0.8(rollup@3.29.1)
+      '@rollup/plugin-json':
+        specifier: ^6.1.0
+        version: 6.1.0(rollup@3.29.1)
       '@rollup/plugin-node-resolve':
         specifier: ^15.2.3
         version: 15.3.1(rollup@3.29.1)
@@ -1675,6 +1678,9 @@ importers:
       '@rollup/plugin-commonjs':
         specifier: ^25.0.7
         version: 25.0.8(rollup@3.29.1)
+      '@rollup/plugin-json':
+        specifier: ^6.1.0
+        version: 6.1.0(rollup@3.29.1)
       '@rollup/plugin-node-resolve':
         specifier: ^15.2.3
         version: 15.3.1(rollup@3.29.1)
@@ -3101,8 +3107,8 @@ importers:
         specifier: ^48.0.0
         version: 48.0.0(@udecode/plate@48.0.5(@types/react@19.1.2)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@udecode/plate-core':
-        specifier: ^48.0.1
-        version: 48.0.1(@types/react@19.1.2)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)(use-sync-external-store@1.5.0(react@19.1.0))
+        specifier: ^48.0.5
+        version: 48.0.5(@types/react@19.1.2)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)(use-sync-external-store@1.5.0(react@19.1.0))
       '@udecode/plate-date':
         specifier: ^48.0.0
         version: 48.0.0(@udecode/plate@48.0.5(@types/react@19.1.2)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)(use-sync-external-store@1.5.0(react@19.1.0)))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -7390,6 +7396,15 @@ packages:
       rollup:
         optional: true
 
+  '@rollup/plugin-json@6.1.0':
+    resolution: {integrity: sha512-EGI2te5ENk1coGeADSIwZ7G2Q8CJS2sF120T7jLw4xFw9n7wIOXHo+kIYRAoVpJAN+kmqZSoO3Fp4JtoNF4ReA==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+
   '@rollup/plugin-node-resolve@15.3.1':
     resolution: {integrity: sha512-tgg6b91pAybXHJQMAAwW9VuWBO6Thi+q7BCNARLwSqlmsHz0XYURtGvh/AuwSADXSI4h/2uHbs7s4FzlZDGSGA==}
     engines: {node: '>=14.0.0'}
@@ -9138,12 +9153,6 @@ packages:
     resolution: {integrity: sha512-bHv+9vBURoZDsL+rxYjMxzWpvNgI/po14HPlHZg6s1f/quB379n02IZlZrNzxiDs3IubZjdX4seFPLwYQkK9aw==}
     peerDependencies:
       '@udecode/plate': '>=48.0.0'
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-
-  '@udecode/plate-core@48.0.1':
-    resolution: {integrity: sha512-GTSGlVs/qDTD7lk62FqKTNNytUJhku+wOo8NrmYjGi+ibN3KgsMFFIvzMsiuXcSn/mq47WegLaMv0kZzJHZ3Og==}
-    peerDependencies:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
@@ -24438,6 +24447,12 @@ snapshots:
     optionalDependencies:
       rollup: 3.29.1
 
+  '@rollup/plugin-json@6.1.0(rollup@3.29.1)':
+    dependencies:
+      '@rollup/pluginutils': 5.1.4(rollup@3.29.1)
+    optionalDependencies:
+      rollup: 3.29.1
+
   '@rollup/plugin-node-resolve@15.3.1(rollup@3.29.1)':
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@3.29.1)
@@ -26581,37 +26596,6 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
-  '@udecode/plate-core@48.0.1(@types/react@19.1.2)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)(use-sync-external-store@1.5.0(react@19.1.0))':
-    dependencies:
-      '@udecode/react-hotkeys': 37.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@udecode/react-utils': 47.3.1(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@udecode/slate': 48.0.1
-      '@udecode/utils': 47.2.7
-      clsx: 2.1.1
-      html-entities: 2.6.0
-      is-hotkey: 0.2.0
-      jotai: 2.8.4(@types/react@19.1.2)(react@19.1.0)
-      jotai-optics: 0.4.0(jotai@2.8.4(@types/react@19.1.2)(react@19.1.0))(optics-ts@2.4.1)
-      jotai-x: 2.3.2(@types/react@19.1.2)(jotai@2.8.4(@types/react@19.1.2)(react@19.1.0))(react@19.1.0)
-      lodash: 4.17.21
-      nanoid: 5.1.5
-      optics-ts: 2.4.1
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-      slate-hyperscript: 0.100.0(slate@0.114.0)
-      slate-react: 0.114.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)
-      use-deep-compare: 1.3.0(react@19.1.0)
-      zustand: 5.0.3(@types/react@19.1.2)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
-      zustand-x: 6.1.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(scheduler@0.26.0)(zustand@5.0.3(@types/react@19.1.2)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0)))
-    transitivePeerDependencies:
-      - '@types/react'
-      - immer
-      - react-native
-      - scheduler
-      - slate
-      - slate-dom
-      - use-sync-external-store
-
   '@udecode/plate-core@48.0.5(@types/react@19.1.2)(immer@10.1.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(scheduler@0.26.0)(slate-dom@0.114.0(slate@0.114.0))(slate@0.114.0)(use-sync-external-store@1.5.0(react@19.1.0))':
     dependencies:
       '@udecode/react-hotkeys': 37.0.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -28108,7 +28092,7 @@ snapshots:
     dependencies:
       react: 18.3.1
       use-isomorphic-layout-effect: 1.2.0(@types/react@18.3.18)(react@18.3.1)
-      use-sync-external-store: 1.4.0(react@18.3.1)
+      use-sync-external-store: 1.5.0(react@18.3.1)
     optionalDependencies:
       xstate: 5.19.2
     transitivePeerDependencies:
@@ -39032,13 +39016,13 @@ snapshots:
     dependencies:
       react: 19.1.0
 
-  use-sync-external-store@1.4.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-
   use-sync-external-store@1.4.0(react@19.1.0):
     dependencies:
       react: 19.1.0
+
+  use-sync-external-store@1.5.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   use-sync-external-store@1.5.0(react@19.1.0):
     dependencies:

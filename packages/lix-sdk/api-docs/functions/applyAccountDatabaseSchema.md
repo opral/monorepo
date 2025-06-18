@@ -6,9 +6,9 @@
 
 # Function: applyAccountDatabaseSchema()
 
-> **applyAccountDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+> **applyAccountDatabaseSchema**(`sqlite`): `void`
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:5](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/account/database-schema.ts#L5)
+Defined in: [packages/lix-sdk/src/account/schema.ts:15](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/account/schema.ts#L15)
 
 ## Parameters
 
@@ -18,4 +18,4 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:5](https://github.c
 
 ## Returns
 
-`SqliteWasmDatabase`
+`void`

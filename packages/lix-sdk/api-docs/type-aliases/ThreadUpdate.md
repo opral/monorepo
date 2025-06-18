@@ -6,6 +6,6 @@
 
 # Type Alias: ThreadUpdate
 
-> **ThreadUpdate** = `Updateable`\<[`ThreadTable`](ThreadTable.md)\>
+> **ThreadUpdate** = `Updateable`\<[`ThreadView`](ThreadView.md)\>
 
-Defined in: [packages/lix-sdk/src/thread/database-schema.ts:72](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/thread/database-schema.ts#L72)
+Defined in: [packages/lix-sdk/src/thread/schema.ts:120](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/thread/schema.ts#L120)

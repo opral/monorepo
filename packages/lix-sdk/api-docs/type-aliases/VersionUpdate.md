@@ -6,6 +6,6 @@
 
 # Type Alias: VersionUpdate
 
-> **VersionUpdate** = `Updateable`\<[`VersionTable`](VersionTable.md)\>
+> **VersionUpdate** = `Updateable`\<[`VersionView`](VersionView.md)\>
 
-Defined in: [packages/lix-sdk/src/version/database-schema.ts:216](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/version/database-schema.ts#L216)
+Defined in: [packages/lix-sdk/src/version/schema.ts:102](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/version/schema.ts#L102)

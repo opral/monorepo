@@ -617,16 +617,28 @@ async function upsertFileInLix(
 		posixPath = "/" + posixPath;
 	}
 
-	await args.lix.db
-		.insertInto("file") // change queue
-		.values({
-			path: posixPath,
-			data: new Uint8Array(data),
-		})
-		.onConflict((oc) =>
-			oc.column("path").doUpdateSet({ data: new Uint8Array(data) })
-		)
-		.execute();
+	const existing = await args.lix.db
+		.selectFrom("file")
+		.where("path", "=", posixPath)
+		.select("id")
+		.executeTakeFirst();
+
+	if (existing) {
+		await args.lix.db
+			.updateTable("file")
+			.set({ data: new Uint8Array(data) })
+			.where("id", "=", existing.id)
+			.execute();
+		return;
+	} else {
+		await args.lix.db
+			.insertInto("file") // change queue
+			.values({
+				path: posixPath,
+				data: new Uint8Array(data),
+			})
+			.execute();
+	}
 }
 /**
  * Filters legacy load and save messages plugins.
