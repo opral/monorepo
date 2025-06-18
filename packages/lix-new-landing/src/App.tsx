@@ -318,16 +318,66 @@ function App() {
                     </div>
                     <div className="w-1/4 bg-gray-50 p-2 border-l border-gray-200">
                       <div className="h-4 w-5/6 bg-gray-300 rounded-sm mb-3"></div>
-                      <div className="flex mb-2">
-                        <div className="h-6 w-6 bg-green-100 rounded-full flex items-center justify-center text-[8px] mr-1">AI</div>
-                        <div className="h-4 w-12 bg-blue-100 rounded-sm"></div>
+                      <div className="mb-3">
+                        {/* Robot AI Agent Icon - Much more obvious */}
+                        <div className="h-16 w-16 mx-auto relative">
+                          {/* Robot Head */}
+                          <div className="h-8 w-12 bg-blue-500 rounded-t-lg border-2 border-blue-600 absolute top-0 left-2 flex items-center justify-center shadow-md">
+                            {/* Robot Eyes */}
+                            <div className="flex space-x-3">
+                              <div className="h-2.5 w-2.5 bg-white rounded-full flex items-center justify-center">
+                                <div className="h-1.5 w-1.5 bg-blue-700 rounded-full"></div>
+                              </div>
+                              <div className="h-2.5 w-2.5 bg-white rounded-full flex items-center justify-center">
+                                <div className="h-1.5 w-1.5 bg-blue-700 rounded-full"></div>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Robot Body */}
+                          <div className="h-7 w-14 bg-blue-400 rounded-b-lg border-2 border-blue-500 absolute top-8 left-1 flex flex-col items-center justify-center shadow-md">
+                            {/* Mouth/Display */}
+                            <div className="h-1.5 w-8 bg-green-300 rounded-sm mb-1 border border-green-400"></div>
+                            <div className="flex space-x-1">
+                              <div className="h-1 w-1 bg-red-500 rounded-full"></div>
+                              <div className="h-1 w-1 bg-yellow-500 rounded-full"></div>
+                              <div className="h-1 w-1 bg-green-500 rounded-full"></div>
+                            </div>
+                          </div>
+                          {/* Robot Antenna */}
+                          <div className="h-3 w-1 bg-gray-600 absolute top-[-3px] left-8">
+                            <div className="h-2 w-2 bg-red-500 rounded-full absolute top-[-1px] left-[-0.5px]"></div>
+                          </div>
+                          {/* Robot Arms */}
+                          <div className="h-1.5 w-4 bg-blue-300 absolute top-10 left-[-2px] rounded-full border border-blue-400"></div>
+                          <div className="h-1.5 w-4 bg-blue-300 absolute top-10 right-[-2px] rounded-full border border-blue-400"></div>
+                        </div>
+                        <div className="flex justify-center mt-1">
+                          <div className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md">AI AGENT</div>
+                        </div>
                       </div>
-                      <div className="h-16 bg-white rounded-sm border border-gray-200 p-2 mb-2">
-                        <div className="h-2 w-1/3 bg-gray-100 rounded-sm mb-1"></div>
-                        <div className="h-3 w-full bg-green-100 rounded-sm mb-1 border border-green-200"></div>
-                        <div className="h-2 w-2/3 bg-gray-100 rounded-sm"></div>
+                      <div className="h-16 bg-white rounded-lg border border-gray-200 p-2 mb-2 shadow-sm">
+                        <div className="flex items-center mb-1.5">
+                          <div className="h-2.5 w-2.5 rounded-full bg-blue-500 mr-1.5"></div>
+                          <div className="h-2 w-2/3 bg-gray-200 rounded-sm"></div>
+                        </div>
+                        <div className="h-3 w-full bg-green-100 rounded-sm mb-1.5 border border-green-200 flex items-center px-1">
+                          <div className="h-1.5 w-1/4 bg-green-300 rounded-sm"></div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="h-2 w-1/2 bg-gray-200 rounded-sm"></div>
+                          <div className="h-2 w-2 rounded-full bg-yellow-400"></div>
+                        </div>
                       </div>
-                      <div className="h-3 w-1/2 bg-green-500 rounded-sm text-white text-[8px] flex items-center justify-center">In Progress</div>
+                      <div className="flex justify-between">
+                        <div className="h-3 w-1/2 bg-green-500 rounded-sm text-white text-[8px] flex items-center justify-center shadow-sm">Processing</div>
+                        <div className="h-3 w-6 bg-gray-200 rounded-sm flex items-center justify-center shadow-sm">
+                          <div className="flex space-x-0.5">
+                            <div className="h-1.5 w-1 bg-gray-400 rounded-sm"></div>
+                            <div className="h-1.5 w-1 bg-gray-400 rounded-sm"></div>
+                            <div className="h-1.5 w-1 bg-gray-400 rounded-sm"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
