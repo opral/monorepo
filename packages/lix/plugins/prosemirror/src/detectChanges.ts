@@ -1,4 +1,8 @@
-import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
+import type {
+	DetectedChange,
+	LixPlugin,
+	LixSchemaDefinition,
+} from "@lix-js/sdk";
 
 export interface ProsemirrorNode {
 	type: string;
@@ -14,13 +18,13 @@ export interface ProsemirrorNode {
 }
 
 // Define a schema for ProsemirrorNode
-const ProsemirrorNodeSchema = {
-	key: "prosemirror_node_v1",
-	type: "json" as const,
+const ProsemirrorNodeSchema: LixSchemaDefinition = {
+	"x-lix-key": "prosemirror_node_v1",
+	"x-lix-version": "1.0",
+	type: "object",
 };
 
-// @ts-expect-error - ignore the "excessively deep type instantiation" error
-export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
+export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
 	after,
 }) => {
@@ -36,7 +40,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		new TextDecoder().decode(after?.data),
 	);
 
-	const detectedChanges: DetectedChange[] = [];
+	const detectedChanges: DetectedChange<ProsemirrorNode>[] = [];
 
 	// Build a map of nodes in the before document for easy lookup
 	const beforeNodeMap = new Map<string, ProsemirrorNode>();
@@ -68,7 +72,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				entity_id: id,
 				schema: ProsemirrorNodeSchema,
-				snapshot: afterNode,
+				snapshot_content: afterNode,
 			});
 		} else {
 			// Check if the node itself has changed (ignoring child content)
@@ -91,7 +95,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 				detectedChanges.push({
 					entity_id: id,
 					schema: ProsemirrorNodeSchema,
-					snapshot: afterNode,
+					snapshot_content: afterNode,
 				});
 			}
 		}
@@ -104,7 +108,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 				entity_id: id,
 				schema: ProsemirrorNodeSchema,
 				// For deletions, omit the snapshot
-				snapshot: undefined,
+				snapshot_content: null,
 			});
 		}
 	}

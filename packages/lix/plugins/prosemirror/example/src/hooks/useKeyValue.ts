@@ -44,11 +44,7 @@ async function selectKeyValue(key: string) {
 
 	// Return the value if found, otherwise null
 	// need to figure out why json parsing is flaky
-	return result
-		? typeof result.value === "string"
-			? JSON.parse(result.value)
-			: result.value
-		: null;
+	return result?.value;
 }
 
 /**
@@ -61,21 +57,35 @@ async function selectKeyValue(key: string) {
  * @returns The stored value
  */
 async function upsertKeyValue(key: string, value: any) {
-	// Convert value to JSON string for storage
-	const jsonValue = JSON.stringify(value);
+	// Use a transaction to ensure atomicity and handle race conditions
+	return await lix.db.transaction().execute(async (trx) => {
+		const existing = await trx
+			.selectFrom("key_value")
+			.where("key", "=", key)
+			.select(["key"])
+			.executeTakeFirst();
 
-	// Update existing key
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key,
-			value: jsonValue,
-			// skip change control as this is only UI state that
-			// should be persisted but not controlled
-			skip_change_control: true,
-		})
-		.onConflict((oc) => oc.doUpdateSet({ value: jsonValue }))
-		.execute();
+		if (existing) {
+			await trx
+				.updateTable("key_value")
+				.set({
+					value,
+					// skip change control as this is only UI state that
+					// should be persisted but not controlled
+					// skip_change_control: true,
+				})
+				.where("key", "=", key)
+				.execute();
+		} else {
+			await trx
+				.insertInto("key_value")
+				.values({
+					key,
+					value,
+				})
+				.execute();
+		}
 
-	return value;
+		return value;
+	});
 }

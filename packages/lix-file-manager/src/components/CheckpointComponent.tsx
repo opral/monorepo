@@ -16,7 +16,6 @@ import { ChevronDown } from "lucide-react";
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
     id: string;
-    immutable_elements: boolean;
     change_count: number;
     created_at: string | null;
     author_name: string | null;

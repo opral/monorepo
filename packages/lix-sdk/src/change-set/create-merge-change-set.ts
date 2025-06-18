@@ -2,7 +2,7 @@ import type { Lix } from "../lix/open-lix.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import { createChangeSet } from "./create-change-set.js";
-import type { ChangeSet } from "./database-schema.js";
+import type { ChangeSet } from "./schema.js";
 
 /**
  * Merges two change sets using a "source wins" strategy (until lix models conflicts).
@@ -25,8 +25,6 @@ export async function createMergeChangeSet(args: {
 	target: Pick<ChangeSet, "id">;
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// Create edges from source and target parents to the new merge change set
-
 		// --- Calculate the merged elements using "source wins" logic ---
 		const mergedElements = await trx
 			.with("SourceLeaves", (db) =>

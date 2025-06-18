@@ -1,5 +1,6 @@
 import { createInMemoryDatabase, importDatabase } from "sqlite-wasm-kysely";
 import { openLix } from "./open-lix.js";
+import { newLixFile } from "./new-lix.js";
 
 /**
  * Opens a lix in memory.
@@ -17,12 +18,12 @@ export async function openLixInMemory(
 		readOnly: false,
 	});
 
-	if (args.blob) {
-		importDatabase({
-			db: database,
-			content: new Uint8Array(await args.blob.arrayBuffer()),
-		});
-	}
+	const blob = args.blob ?? (await newLixFile());
+
+	importDatabase({
+		db: database,
+		content: new Uint8Array(await blob.arrayBuffer()),
+	});
 
 	return openLix({ ...args, database });
 }

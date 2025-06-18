@@ -6,9 +6,9 @@
 
 - The api reference for lix can be found in [./api-docs/README.md](./api-docs/README.md)
 
-- tests for the lix sdk can be run with `npx vitest run ...` 
+- tests for the lix sdk can be run with `pnpm exec vitest run ...` 
 
-- validate the types AFTER the tests pass with `npx tsc --noEmit`
+- validate the types AFTER the tests pass with `pnpm exec tsc --noEmit`
 
 - always start with implementing test cases that reproduce bugs before implementing a fix to validate if the test captures the bug
 

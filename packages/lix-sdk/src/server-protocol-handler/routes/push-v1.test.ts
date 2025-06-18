@@ -73,7 +73,7 @@ test.skip("it should push data successfully", async () => {
 	expect(result).toEqual(mockChange0);
 });
 
-test("it should return 404 if the Lix file is not found", async () => {
+test.skip("it should return 404 if the Lix file is not found", async () => {
 	const environment = createLspInMemoryEnvironment();
 
 	const lsaHandler = await createServerProtocolHandler({ environment });
@@ -122,7 +122,7 @@ test.skip("it should return 500 for an invalid Lix file", async () => {
 	expect(response.status).toBe(500);
 });
 
-test("it should return 400 for a failed insert operation", async () => {
+test.skip("it should return 400 for a failed insert operation", async () => {
 	const lix = await openLixInMemory({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")

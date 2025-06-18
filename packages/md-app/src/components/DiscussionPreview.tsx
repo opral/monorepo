@@ -4,15 +4,21 @@ import { useEffect, useState } from "react";
 import timeAgo from "@/helper/timeAgo.ts";
 import { ArrowRight, MessagesSquare } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ThreadComment } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
 
 const DiscussionPreview = ({ threadId }: { threadId: string }) => {
   const [lix] = useAtom(lixAtom);
-  const [firstComment, setFirstComment] = useState<ThreadComment & {
-    author_name: string;
-    created_at: string;
-  } | undefined>(undefined);
+  const [firstComment, setFirstComment] = useState<
+		| {
+				id: string;
+				thread_id: string;
+				parent_id: string | null;
+				body: any;
+				author_name: string;
+				created_at: string;
+		  }
+		| undefined
+	>(undefined);
   const [fileId] = useAtom(fileIdSearchParamsAtom);
 
   useEffect(() => {

@@ -37,11 +37,11 @@ export function useKeyValue<K extends string>(key: K) {
 
   // setValue expects the inferred type T
   const setValue = async (
-    newValue: T,
-    options?: { skipChangeControl?: boolean }
+    newValue: T
+    // options?: { skipChangeControl?: boolean }
   ) => {
     // Pass inferred type T to upsertKeyValue
-    await upsertKeyValue<T>(lix, key, newValue, options);
+    await upsertKeyValue<T>(lix, key, newValue);
     refetch();
   };
 
@@ -69,8 +69,8 @@ async function selectKeyValue<T>(lix: Lix, key: string): Promise<T | null> {
 async function upsertKeyValue<T>(
   lix: Lix,
   key: string,
-  value: T,
-  options?: { skipChangeControl?: boolean }
+  value: T
+  // options?: { skipChangeControl?: boolean }
 ) {
   const jsonValue = JSON.stringify(value);
 
@@ -79,7 +79,7 @@ async function upsertKeyValue<T>(
     .values({
       key,
       value: jsonValue,
-      skip_change_control: options?.skipChangeControl,
+      // skip_change_control: options?.skipChangeControl,
     })
     .onConflict((oc) => oc.doUpdateSet({ value: jsonValue }))
     .execute();

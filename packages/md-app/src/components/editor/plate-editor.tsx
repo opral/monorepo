@@ -138,11 +138,10 @@ export function PlateEditor() {
       const serializedMd = newData.editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
 
       await lix.db
-        .updateTable("file")
-        .set("data", new TextEncoder().encode(serializedMd))
-        .where("id", "=", activeFile.id)
-        .returningAll()
-        .execute();
+				.updateTable("file")
+				.set("data", new TextEncoder().encode(serializedMd))
+				.where("id", "=", activeFile.id)
+				.execute();
 
       // needed because lix is not writing to OPFS yet
       await saveLixToOpfs({ lix });

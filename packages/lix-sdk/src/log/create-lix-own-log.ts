@@ -105,8 +105,8 @@ export async function createLixOwnLog(args: {
 	// Check if the level is allowed
 	const shouldLog =
 		(logLevels === undefined && DEFAULT_LOG_LEVELS.includes(args.level)) ||
-		(logLevels?.value && logLevels.value.includes("*")) ||
-		logLevels?.value.includes(args.level);
+		(logLevels?.value && (logLevels.value as string[]).includes("*")) ||
+		(logLevels?.value as string[] | undefined)?.includes(args.level);
 
 	if (!shouldLog) {
 		return undefined; // Filtered out

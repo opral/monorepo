@@ -2,13 +2,6 @@ import { test, expect } from "vitest";
 import { openLixInMemory } from "./open-lix-in-memory.js";
 import { toBlob } from "./to-blob.js";
 
-test("it should open a lix in memory", async () => {
-	const lix = await openLixInMemory({});
-	// querying a table to see if the schema is applied
-	const changes = await lix.db.selectFrom("change").selectAll().execute();
-	expect(changes).toEqual([]);
-});
-
 test("it should open a lix in memory from a blob", async () => {
 	const lix1 = await openLixInMemory({});
 

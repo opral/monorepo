@@ -7,6 +7,7 @@ import { type ColumnFiltersState } from "@tanstack/react-table";
 
 interface TableInfo {
   name: string;
+  type: 'table' | 'view';
 }
 
 export default function DataExplorer() {
@@ -23,12 +24,12 @@ export default function DataExplorer() {
     try {
       // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
       const result = lix.sqlite.exec(
-        "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;",
+        "SELECT name, type FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY type, name;",
         { returnValue: "resultRows" }
       );
       return result as any;
     } catch (error) {
-      console.error("Error querying tables:", error);
+      console.error("Error querying tables and views:", error);
       return [];
     }
   }, []);
@@ -38,6 +39,7 @@ export default function DataExplorer() {
     if (tablesResult && tablesResult.length > 0) {
       const tableInfos = tablesResult.map((row) => ({
         name: row[0],
+        type: row[1] as 'table' | 'view',
       }));
       setTables(tableInfos);
 
@@ -205,20 +207,39 @@ export default function DataExplorer() {
   return (
     <div className="container mx-auto p-4">
       <div className="mb-4 flex items-center gap-2">
-        <label className="font-medium whitespace-nowrap">Select table:</label>
+        <label className="font-medium whitespace-nowrap">Select table/view:</label>
         <select
           className="select select-bordered w-full"
           value={selectedTable}
           onChange={handleTableChange}
         >
           <option value="" disabled>
-            Select a table
+            Select a table or view
           </option>
-          {tables.map((table) => (
-            <option key={table.name} value={table.name}>
-              {table.name}
-            </option>
-          ))}
+          {/* Group views first */}
+          {tables.filter(table => table.type === 'view').length > 0 && (
+            <optgroup label="Views">
+              {tables
+                .filter(table => table.type === 'view')
+                .map((table) => (
+                  <option key={table.name} value={table.name}>
+                    {table.name}
+                  </option>
+                ))}
+            </optgroup>
+          )}
+          {/* Then group tables */}
+          {tables.filter(table => table.type === 'table').length > 0 && (
+            <optgroup label="Tables">
+              {tables
+                .filter(table => table.type === 'table')
+                .map((table) => (
+                  <option key={table.name} value={table.name}>
+                    {table.name}
+                  </option>
+                ))}
+            </optgroup>
+          )}
         </select>
       </div>
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { lix, prosemirrorFile } from "../state";
-import { getBeforeAfterOfFile } from "@lix-js/sdk";
+// import { lix, prosemirrorFile } from "../state";
 import { Node, DOMSerializer } from "prosemirror-model";
 import { schema } from "../prosemirror/schema";
 import { renderUniversalDiff } from "@lix-js/universal-diff";
@@ -27,20 +26,26 @@ export function DiffView() {
 				setError(null);
 				setDiffHtml(null);
 
-				const { beforeCsId, afterCsId } = diffView;
+				// const { beforeCsId, afterCsId } = diffView;
 
-				const { before, after } = await getBeforeAfterOfFile({
-					lix,
-					changeSetBefore: beforeCsId ? { id: beforeCsId } : undefined,
-					changeSetAfter: afterCsId ? { id: afterCsId } : undefined,
-					file: { id: prosemirrorFile.id },
-				});
+				// needs state_at table
+				// https://github.com/opral/lix-sdk/issues/312
+				const before = {};
+				const after = {};
+
+				// const { before, after } = await getBeforeAfterOfFile({
+				// 	lix,
+				// 	changeSetBefore: beforeCsId ? { id: beforeCsId } : undefined,
+				// 	changeSetAfter: afterCsId ? { id: afterCsId } : undefined,
+				// 	file: { id: prosemirrorFile.id },
+				// });
 
 				let beforeHtml: string | undefined;
 				let afterHtml: string | undefined;
 
 				for (const doc of [before, after]) {
 					if (doc) {
+						// @ts-expect-error - outcommented fileBeforeOrFile
 						const docData = JSON.parse(new TextDecoder().decode(doc.data));
 						const node = Node.fromJSON(schema, docData);
 						const serializer = DOMSerializer.fromSchema(schema);

@@ -1,9 +1,9 @@
 import type { Lix } from "../lix/index.js";
-import type { ChangeSet } from "./database-schema.js";
+import type { ChangeSet } from "./schema.js";
 import { createChangeSet } from "./create-change-set.js";
-import { changeSetIsDescendantOf } from "../query-filter/change-set-is-descendant-of.js";
-import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
-import type { Change, Label, NewChange } from "../database/schema.js";
+import type { Label } from "../label/schema.js";
+import type { NewChange } from "../change/schema.js";
+import { v7 } from "uuid";
 
 /**
  * Creates a "reverse" change set that undoes the changes made by the specified change set.
@@ -29,97 +29,106 @@ export async function createUndoChangeSet(args: {
 	labels?: Pick<Label, "id">[];
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// Get all changes in the target change set
+		// Check for multiple parents (not supported yet)
+		const parents = await trx
+			.selectFrom("change_set_edge_all")
+			.where("lixcol_version_id", "=", "global")
+			.where("child_id", "=", args.changeSet.id)
+			.select("parent_id")
+			.execute();
+
+		if (parents.length > 1) {
+			throw new Error(
+				"Cannot undo change sets with multiple parents (merge scenarios not yet supported)"
+			);
+		}
+
+		// Get all changes in the target change set (direct changes only, non-recursive)
 		const targetChanges = await trx
 			.selectFrom("change")
 			.innerJoin(
-				"change_set_element",
-				"change_set_element.change_id",
+				"change_set_element_all",
+				"change_set_element_all.change_id",
 				"change.id"
 			)
-			.where("change_set_element.change_set_id", "=", args.changeSet.id)
-			// exclude own change control changes that interfere with history
-			// todo this needs better handling/testing
-			.where("change.schema_key", "not in", [
-				"lix_change_set_table",
-				"lix_change_set_edge_table",
-				"lix_change_author_table",
-			])
+			.where("change_set_element_all.lixcol_version_id", "=", "global")
+			.where("change_set_element_all.change_set_id", "=", args.changeSet.id)
 			.selectAll("change")
 			.execute();
 
-		// Define the shape of data we will insert. Exclude DB-generated columns.
-		// Assuming Change type includes all columns. Adjust if needed.
-
-		const newUndoChanges: Array<NewChange> = [];
-		const ancestorChanges: Array<Change> = [];
+		const undoChanges: Array<NewChange> = [];
 
 		for (const change of targetChanges) {
-			const descendantChange = await trx
-				.selectFrom("change_set_element")
-				.innerJoin(
-					"change_set",
-					"change_set.id",
-					"change_set_element.change_set_id"
-				)
-				.innerJoin("change", "change.id", "change_set_element.change_id")
-				.where(changeSetIsDescendantOf({ id: args.changeSet.id }))
-				.where("change_set_element.entity_id", "=", change.entity_id)
-				.where("change_set_element.file_id", "=", change.file_id)
-				.where("change_set_element.schema_key", "=", change.schema_key)
-				.where("change_set_element.change_id", "!=", change.id)
-				.selectAll("change")
-				.executeTakeFirst();
-
-			if (descendantChange) {
-				// the change was already overwritten, so we can skip it
-				continue;
-			}
-
-			const ancestorChange = await trx
-				.selectFrom("change_set_element")
-				.innerJoin(
-					"change_set",
-					"change_set.id",
-					"change_set_element.change_set_id"
-				)
-				.innerJoin("change", "change.id", "change_set_element.change_id")
-				.where(changeSetIsAncestorOf({ id: args.changeSet.id }))
-				.where("change_set_element.entity_id", "=", change.entity_id)
-				.where("change_set_element.file_id", "=", change.file_id)
-				.where("change_set_element.schema_key", "=", change.schema_key)
-				.where("change.id", "!=", change.id)
-				.selectAll("change") // Select all columns needed for ChangeInsertData
-				.executeTakeFirst();
-
-			if (ancestorChange === undefined) {
-				// Create a 'deletion' change object
-				newUndoChanges.push({
+			if (parents.length === 0) {
+				// No parent = this was the first change set, undo = delete everything
+				undoChanges.push({
 					entity_id: change.entity_id,
 					file_id: change.file_id,
 					plugin_key: change.plugin_key,
 					schema_key: change.schema_key,
-					snapshot_id: "no-content", // Mark as deletion/no content
+					schema_version: change.schema_version,
+					snapshot_id: "no-content", // Mark as deletion
 				});
 			} else {
-				ancestorChanges.push(ancestorChange);
+				// Find the previous state in the parent change set
+				const parentChangeSet = parents[0]!.parent_id;
+
+				const previousChange = await trx
+					.selectFrom("change")
+					.innerJoin(
+						"change_set_element",
+						"change_set_element.change_id",
+						"change.id"
+					)
+					.where("change_set_element.change_set_id", "=", parentChangeSet)
+					.where("change_set_element.entity_id", "=", change.entity_id)
+					.where("change_set_element.file_id", "=", change.file_id)
+					.where("change_set_element.schema_key", "=", change.schema_key)
+					.selectAll("change")
+					.executeTakeFirst();
+
+				if (previousChange) {
+					// Restore to previous state
+					undoChanges.push({
+						id: v7(),
+						entity_id: change.entity_id,
+						file_id: change.file_id,
+						plugin_key: change.plugin_key,
+						schema_key: change.schema_key,
+						schema_version: change.schema_version,
+						snapshot_id: previousChange.snapshot_id, // Restore previous snapshot
+					});
+				} else {
+					// Entity didn't exist before, so delete it
+					undoChanges.push({
+						id: v7(),
+						entity_id: change.entity_id,
+						file_id: change.file_id,
+						plugin_key: change.plugin_key,
+						schema_key: change.schema_key,
+						schema_version: change.schema_version,
+						snapshot_id: "no-content", // Mark as deletion
+					});
+				}
 			}
 		}
 
-		const undoChanges =
-			newUndoChanges.length > 0
+		// Insert the undo changes
+		const createdUndoChanges =
+			undoChanges.length > 0
 				? await trx
 						.insertInto("change")
-						.values(newUndoChanges)
+						.values(undoChanges)
 						.returningAll()
 						.execute()
 				: [];
 
-		// Create the change set linking to these changes
+		// Create the undo change set
 		const undoChangeSet = await createChangeSet({
 			lix: { ...args.lix, db: trx },
 			labels: args.labels,
-			elements: [...ancestorChanges, ...undoChanges].map((change) => ({
+			lixcol_version_id: "global",
+			elements: createdUndoChanges.map((change) => ({
 				change_id: change.id,
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,

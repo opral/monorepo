@@ -75,12 +75,12 @@ export class DiffComponent extends LitElement {
 
 	override render() {
 		const orderDiff = this.diffs.find(
-			(diff) => diff.schema_key === MarkdownBlockPositionSchemaV1.key,
+			(diff) => diff.schema_key === MarkdownBlockPositionSchemaV1["x-lix-key"],
 		);
 		if (orderDiff === undefined) return html`<div>No order diff found</div>`;
 
 		const contentDiffs = this.diffs
-			.filter((diff) => diff.schema_key === MarkdownBlockSchemaV1.key)
+			.filter((diff) => diff.schema_key === MarkdownBlockSchemaV1["x-lix-key"])
 			.sort((a, b) => {
 				const posA = orderDiff.snapshot_content_after?.idPositions[a.entity_id]
 					? orderDiff.snapshot_content_after?.idPositions[a.entity_id]
