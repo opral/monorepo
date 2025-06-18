@@ -1,10 +1,10 @@
 import path from "node:path";
 import os from "node:os";
-import type { Account } from "@inlang/sdk/lix";
+import type { LixAccount } from "@inlang/sdk/lix";
 
 export function getLocalAccount(args: {
 	fs: typeof import("node:fs");
-}): Account | undefined {
+}): LixAccount | undefined {
 	try {
 		const accountPath = getAccountFilePath();
 
@@ -20,7 +20,7 @@ export function getLocalAccount(args: {
 
 export function saveLocalAccount(args: {
 	fs: typeof import("node:fs");
-	account: Account;
+	account: LixAccount;
 }): void {
 	try {
 		const accountPath = getAccountFilePath();
