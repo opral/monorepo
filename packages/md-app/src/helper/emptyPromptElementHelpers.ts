@@ -57,27 +57,24 @@ export const setPromptDismissed = async (lix: Lix, activeFileId: string) => {
 	try {
 		await lix.db.transaction().execute(async (trx) => {
 			const existing = await trx
-				.selectFrom("key_value_all")
+				.selectFrom("key_value")
 				.where("key", "=", `flashtype_prompt_dismissed_${activeFileId}`)
-				.where("lixcol_version_id", "=", "global")
 				.select("value")
 				.executeTakeFirst();
 
 			if (!existing) {
 				await trx
-					.insertInto("key_value_all")
+					.insertInto("key_value")
 					.values({
 						key: `flashtype_prompt_dismissed_${activeFileId}`,
-						value: "true",
-						lixcol_version_id: "global",
+						value: true,
 					})
 					.execute();
 			} else {
 				await trx
-					.updateTable("key_value_all")
+					.updateTable("key_value")
 					.where("key", "=", `flashtype_prompt_dismissed_${activeFileId}`)
-					.where("lixcol_version_id", "=", "global")
-					.set({ value: "true" })
+					.set({ value: true })
 					.execute();
 			}
 		});
@@ -94,7 +91,5 @@ export const getPromptDismissed = async (lix: Lix, activeFileId: string) => {
 		.select("value")
 		.executeTakeFirst();
 
-	console.log("Prompt dismissed status:", promptDismissed);
-
-	return promptDismissed?.value === "true";
+	return promptDismissed?.value === true || promptDismissed?.value === "true" || promptDismissed?.value === 1;
 };
