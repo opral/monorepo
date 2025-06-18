@@ -87,7 +87,7 @@ const PackageInstaller = ({
       </div>
       <div className="relative group w-full sm:w-auto">
         <button
-          className="bg-gray-900 text-white px-4 py-2 rounded-md font-mono text-xs hover:bg-black transition-all duration-200 flex items-center w-full sm:w-auto justify-between space-x-4"
+          className="bg-white text-gray-800 px-4 py-2 rounded-md font-mono text-sm hover:bg-gray-50 transition-all duration-200 flex items-center w-full sm:w-auto justify-between space-x-4 border border-gray-200 shadow-sm"
           onClick={copyToClipboard}
         >
           <span className="tracking-wide">
@@ -95,7 +95,7 @@ const PackageInstaller = ({
             {packageManager === 'yarn' && 'yarn add @lix-js/sdk'}
             {packageManager === 'pnpm' && 'pnpm add @lix-js/sdk'}
           </span>
-          <span className="bg-black rounded p-1 transition-colors duration-200 flex-shrink-0">
+          <span className="bg-gray-50 rounded p-1 transition-colors duration-200 flex-shrink-0">
             {copied ? <CheckIcon /> : <CopyIcon />}
           </span>
         </button>
@@ -197,8 +197,8 @@ function App() {
 
         {/* What You Can Build Section */}
         <section className="py-20 bg-gradient-to-r from-gray-50 to-white w-full px-6 sm:px-12 md:px-16">
-          <h2 className="text-center text-3xl sm:text-4xl font-bold mb-16 text-gray-800 flex items-center justify-center">
-            <span>What you can build with</span> <LixLogo className="ml-2 w-12 h-9 transform translate-y-[-2px]" />
+          <h2 className="text-center text-2xl sm:text-3xl font-bold mb-12 text-gray-800 flex items-center justify-center">
+            <span>What you can build with</span> <LixLogo className="ml-2 w-10 h-8 transform translate-y-[-2px]" />
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-14 max-w-[100rem] mx-auto px-4 sm:px-6">
             <div className="group cursor-pointer text-center">
@@ -342,122 +342,85 @@ function App() {
 
         {/* Feature Comparison */}
         <section className="py-20 bg-gradient-to-r from-white to-gray-50 w-full">
-          <h2 className="text-center text-3xl sm:text-4xl font-bold mb-16 text-gray-800">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold mb-12 text-gray-800">
             Out of the box features
           </h2>
           
           <div className="max-w-[100rem] mx-auto px-8 sm:px-12">
             {/* Feature 1: Traceability */}
-            <div className="grid grid-cols-1 md:grid-cols-10 gap-8 mb-20 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-8 gap-8 mb-20 items-start">
               {/* Left Visual - 30% */}
               <div className="md:col-span-3">
                 <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
-                  <svg className="mx-auto" width="100" height="150" viewBox="0 0 100 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <line x1="50" y1="10" x2="50" y2="140" stroke="#4B5563" strokeWidth="2" />
-                    <circle cx="50" cy="30" r="8" fill="#E5E7EB" stroke="#4B5563" strokeWidth="2" />
-                    <circle cx="50" cy="70" r="8" fill="#E5E7EB" stroke="#4B5563" strokeWidth="2" />
-                    <circle cx="50" cy="110" r="8" fill="#E5E7EB" stroke="#4B5563" strokeWidth="2" />
-                    <text x="65" y="35" fill="#4B5563" fontSize="12">initial</text>
-                    <text x="65" y="75" fill="#4B5563" fontSize="12">fixed input</text>
-                    <text x="65" y="115" fill="#4B5563" fontSize="12">hired peter neumann</text>
-                    <rect x="20" y="130" width="60" height="20" rx="4" fill="#DBEAFE" stroke="#2563EB" strokeWidth="1" />
-                    <text x="30" y="144" fill="#2563EB" fontSize="12">Revert</text>
-                  </svg>
+                  <img src="/traceability.png" alt="Traceability" className="w-full h-auto" />
                 </div>
               </div>
               
-              {/* Middle Content - 50% */}
+              {/* Right Content - 70% */}
               <div className="md:col-span-5">
                 <h4 className="text-2xl font-medium mb-3 text-blue-600">Traceability</h4>
                 <p className="text-gray-700 text-lg mb-2">
                   Enabling versioning in your app.
                 </p>
-                <p className="text-gray-700 text-lg leading-relaxed">
+                <p className="text-gray-700 text-lg leading-relaxed mb-4">
                   Rollback, branch, or restore any state — even in AI-generated output.
                 </p>
-              </div>
-              
-              {/* Right API - 20% */}
-              <div className="md:col-span-2 flex items-center">
-                <div className="bg-slate-800 rounded-md p-3 font-mono text-sm w-full hover:bg-slate-700 transition-colors cursor-pointer shadow-sm">
-                  <a href="/docs/api/get-history" className="block w-full h-full"><span className="text-yellow-400">lix</span><span className="text-white">.</span><span className="text-green-400">getHistory</span><span className="text-blue-400">()</span></a>
+                
+                {/* API */}
+                <div className="bg-white rounded-md p-3 font-mono text-base inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-4">
+                  <a href="/docs/api/get-history" className="block w-full h-full"><span className="text-amber-600">lix</span><span className="text-gray-800">.</span><span className="text-green-600">getHistory</span><span className="text-blue-600">()</span></a>
                 </div>
               </div>
             </div>
             
             {/* Feature 2: Diffing */}
-            <div className="grid grid-cols-1 md:grid-cols-10 gap-8 mb-20 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-8 gap-8 mb-20 items-start">
               {/* Left Visual - 30% */}
               <div className="md:col-span-3">
                 <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
-                  <div className="flex justify-center space-x-4">
-                    <div className="w-20 h-32 bg-green-100 rounded-md flex items-center justify-center text-lg font-bold text-green-800">A</div>
-                    <div className="w-20 h-32 bg-red-100 rounded-md flex items-center justify-center text-lg font-bold text-red-800">B</div>
-                  </div>
+                  <img src="/a vs b.png" alt="A vs B Diffing" className="w-full h-auto" />
                 </div>
               </div>
               
-              {/* Middle Content - 50% */}
+              {/* Right Content - 70% */}
               <div className="md:col-span-5">
                 <h4 className="text-2xl font-medium mb-3 text-blue-600">Diffing</h4>
                 <p className="text-gray-700 text-lg mb-2">
                   Introduce diffing for your data.
                 </p>
-                <p className="text-gray-700 text-lg leading-relaxed">
+                <p className="text-gray-700 text-lg leading-relaxed mb-4">
                   AIs make mistakes. With Lix, you can inspect and merge multiple versions together easily.
                 </p>
-              </div>
-              
-              {/* Right API - 20% */}
-              <div className="md:col-span-2 flex items-center">
-                <div className="bg-slate-800 rounded-md p-3 font-mono text-sm w-full hover:bg-slate-700 transition-colors cursor-pointer shadow-sm">
-                  <a href="/docs/api/get-diff" className="block w-full h-full"><span className="text-yellow-400">lix</span><span className="text-white">.</span><span className="text-green-400">getDiff</span><span className="text-blue-400">()</span></a>
+                
+                {/* API */}
+                <div className="bg-white rounded-md p-3 font-mono text-base inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-4">
+                  <a href="/docs/api/get-diff" className="block w-full h-full"><span className="text-amber-600">lix</span><span className="text-gray-800">.</span><span className="text-green-600">getDiff</span><span className="text-blue-600">()</span></a>
                 </div>
               </div>
             </div>
             
             {/* Feature 3: Change Proposals */}
-            <div className="grid grid-cols-1 md:grid-cols-10 gap-8 mb-20 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-8 gap-8 mb-20 items-start">
               {/* Left Visual - 30% */}
               <div className="md:col-span-3">
                 <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
-                  <div className="space-y-2 mb-4">
-                    <div className="w-full h-2 bg-gray-200 rounded"></div>
-                    <div className="w-3/4 h-2 bg-gray-200 rounded"></div>
-                    <div className="w-5/6 h-2 bg-gray-200 rounded"></div>
-                    <div className="w-2/3 h-2 bg-gray-200 rounded"></div>
-                  </div>
-                  <div className="flex space-x-2 mb-3">
-                    <button className="px-3 py-1 bg-green-100 text-green-800 text-xs rounded">Accept</button>
-                    <button className="px-3 py-1 bg-red-100 text-red-800 text-xs rounded">Reject</button>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                    <div className="text-xs text-gray-500 ml-2">User collaboration</div>
-                  </div>
+                  <img src="/change proposal.png" alt="Change Proposal" className="w-full h-auto" />
                 </div>
               </div>
               
-              {/* Middle Content - 50% */}
+              {/* Right Content - 70% */}
               <div className="md:col-span-5">
                 <h4 className="text-2xl font-medium mb-3 text-blue-600">Change Proposals</h4>
                 <p className="text-gray-700 text-lg mb-2">
                   Build collaboration features with humans & AI agents.
                 </p>
-                <p className="text-gray-700 text-lg leading-relaxed">
+                <p className="text-gray-700 text-lg leading-relaxed mb-4">
                   Let other people or the AI suggest changes, review and accept them.
                 </p>
-              </div>
-              
-              {/* Right API - 20% */}
-              <div className="md:col-span-2 flex items-center">
-                <div className="bg-slate-800 rounded-md p-3 font-mono text-sm w-full hover:bg-slate-700 transition-colors cursor-pointer shadow-sm">
-                  <a href="/docs/api/create-proposal" className="block w-full h-full"><span className="text-yellow-400">lix</span><span className="text-white">.</span><span className="text-green-400">createProposal</span><span className="text-blue-400">()</span></a>
+                
+                {/* API */}
+                <div className="bg-white rounded-md p-3 font-mono text-base inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-4">
+                  <a href="/docs/api/create-proposal" className="block w-full h-full"><span className="text-amber-600">lix</span><span className="text-gray-800">.</span><span className="text-green-600">createProposal</span><span className="text-blue-600">()</span></a>
                 </div>
               </div>
             </div>
