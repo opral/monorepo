@@ -46,6 +46,7 @@ New paragraph.`);
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "xyz789",
 			snapshot_content: {
+				id: "xyz789",
 				text: "New paragraph.",
 				type: "paragraph",
 			},
@@ -85,7 +86,7 @@ Updated text.`);
 		{
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "def456",
-			snapshot_content: { text: "Updated text.", type: "paragraph" },
+			snapshot_content: { id: "def456", text: "Updated text.", type: "paragraph" },
 		},
 	]);
 });
@@ -155,6 +156,7 @@ test
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "bcd",
 			snapshot_content: {
+				id: "bcd",
 				text: "<br>",
 				type: "paragraph",
 			},
@@ -163,6 +165,7 @@ test
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "cde",
 			snapshot_content: {
+				id: "cde",
 				text: "test",
 				type: "paragraph",
 			},
