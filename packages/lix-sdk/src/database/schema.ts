@@ -42,6 +42,7 @@ import type {
 	InternalStateCacheTable,
 	InternalChangeInTransactionTable,
 } from "../state/schema.js";
+import type { StateHistoryView } from "../state-history/schema.js";
 import {
 	LixFileSchema,
 	type LixFileView,
@@ -108,6 +109,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 export type LixDatabaseSchema = {
 	state: StateView;
 	state_active: StateView;
+	state_history: StateHistoryView;
 	// account
 	account: AccountView;
 	account_all: AccountAllView;
