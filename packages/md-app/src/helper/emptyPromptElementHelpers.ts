@@ -1,7 +1,7 @@
 import { EMPTY_DOCUMENT_PROMPT_KEY } from "@/components/editor/plugins/empty-document-prompt-plugin";
 import { TElement } from "@udecode/plate";
 import { PlateEditor } from "@udecode/plate-core/react";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
+import { Lix } from "@lix-js/sdk";
 
 export const insertEmptyPromptElement = (editor: PlateEditor) => {
 	if (!editor) return;
@@ -52,32 +52,49 @@ export const removeEmptyPromptElement = (editor: PlateEditor) => {
 	}
 };
 
-export const setPromptDismissed = (lix: any, activeFileId: string) => {
+export const setPromptDismissed = async (lix: Lix, activeFileId: string) => {
 	// Store in database that this file has had the prompt dismissed
-	(async () => {
-		try {
-			await lix.db
-				.insertInto("key_value")
-				.values({
-					key: `flashtype_prompt_dismissed_${activeFileId}`,
-					value: "true",
-				})
-				.onConflict((oc: any) => oc.doUpdateSet({ value: "true" }))
-				.execute();
-			await saveLixToOpfs({ lix });
-		} catch (error) {
-			console.error("Error saving prompt dismissed state:", error);
-		}
-	})();
+	try {
+		await lix.db.transaction().execute(async (trx) => {
+			const existing = await trx
+				.selectFrom("key_value_all")
+				.where("key", "=", `flashtype_prompt_dismissed_${activeFileId}`)
+				.where("lixcol_version_id", "=", "global")
+				.select("value")
+				.executeTakeFirst();
+
+			if (!existing) {
+				await trx
+					.insertInto("key_value_all")
+					.values({
+						key: `flashtype_prompt_dismissed_${activeFileId}`,
+						value: "true",
+						lixcol_version_id: "global",
+					})
+					.execute();
+			} else {
+				await trx
+					.updateTable("key_value_all")
+					.where("key", "=", `flashtype_prompt_dismissed_${activeFileId}`)
+					.where("lixcol_version_id", "=", "global")
+					.set({ value: "true" })
+					.execute();
+			}
+		});
+	} catch (error) {
+		console.error("Error saving prompt dismissed state:", error);
+	}
 };
 
-export const getPromptDismissed = async (lix: any, activeFileId: string) => {
+export const getPromptDismissed = async (lix: Lix, activeFileId: string) => {
 	// Check if the prompt has been dismissed for this file
 	const promptDismissed = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", `flashtype_prompt_dismissed_${activeFileId}`)
 		.select("value")
 		.executeTakeFirst();
+
+	console.log("Prompt dismissed status:", promptDismissed);
 
 	return promptDismissed?.value === "true";
 };

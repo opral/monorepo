@@ -5,6 +5,7 @@ import {
 	toBlob,
 	createCheckpoint,
 	createThread,
+	createAccount,
 } from "@lix-js/sdk";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { switchActiveAccount } from "@/state";
@@ -36,16 +37,15 @@ export async function withFlashtypeAccount<T>(
 	let accountToUse;
 	// Create a Flashtype account if it doesn't exist
 	if (!flashtypeAccount) {
-		accountToUse = await lix.db
-			.insertInto("account")
-			.values({
-				name: "Flashtype",
-			})
-			.returningAll()
-			.executeTakeFirstOrThrow();
+		accountToUse = await createAccount({
+			lix,
+			name: "Flashtype",
+		});
 	} else {
 		accountToUse = flashtypeAccount;
 	}
+
+	console.log("hello world");
 
 	// Switch to the Flashtype account using the existing helper function
 	await switchActiveAccount(lix, accountToUse);
@@ -125,13 +125,18 @@ AI is at the heart of your writing experience. It helps you write better, faster
 
 export const setupMdWelcome = async (lix: Lix) => {
 	// Load a demo md file and save it to OPFS
-	const file = await lix.db
+	await lix.db
 		.insertInto("file")
 		.values({
 			path: "/welcome.md",
 			data: new TextEncoder().encode(welcomeMd),
 		})
-		.returningAll()
+		.execute();
+
+	const file = await lix.db
+		.selectFrom("file")
+		.selectAll()
+		.where("path", "=", "/welcome.md")
 		.executeTakeFirstOrThrow();
 	return file;
 };
@@ -148,10 +153,11 @@ const createInitialCheckpoint = async (lix: Lix, fileId: string) => {
 				comments: [{ body: initialComment }],
 			});
 			await trx
-				.insertInto("change_set_thread")
+				.insertInto("change_set_thread_all")
 				.values({
 					change_set_id: changeSet.id,
 					thread_id: thread.id,
+					lixcol_version_id: "global",
 				})
 				.execute();
 		});
