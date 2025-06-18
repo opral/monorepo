@@ -13,6 +13,7 @@ test.skip("creating a change proposal should compute the symmetric difference", 
 			// Change 1 - only in source change set
 			{
 				schema_key: "file",
+				schema_version: "1.0",
 				entity_id: "value1",
 				file_id: "mock1",
 				plugin_key: "mock-plugin",
@@ -21,6 +22,7 @@ test.skip("creating a change proposal should compute the symmetric difference", 
 			// Change 2 - in both source and target (so not in symmetric difference)
 			{
 				schema_key: "file",
+				schema_version: "1.0",
 				entity_id: "value2",
 				file_id: "mock2",
 				plugin_key: "mock-plugin",
@@ -31,6 +33,7 @@ test.skip("creating a change proposal should compute the symmetric difference", 
 				schema_key: "file",
 				entity_id: "value3",
 				file_id: "mock3",
+				schema_version: "1.0",
 				plugin_key: "mock-plugin",
 				snapshot_id: "no-content",
 			},

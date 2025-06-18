@@ -1,13 +1,11 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
 import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
-import { openLixInMemory } from "@lix-js/sdk";
 import { MarkdownBlockPositionSchemaV1 } from "./schemas/blockPositions.js";
 
 const encode = (text: string) => new TextEncoder().encode(text);
 
 test("it should not detect changes if the markdown file did not update", async () => {
-	const lix = await openLixInMemory({});
 	const before = encode(`<!-- id: abc123 -->
 # Heading
 
@@ -15,8 +13,7 @@ test("it should not detect changes if the markdown file did not update", async (
 Some text.`);
 	const after = before;
 
-	const detectedChanges = await detectChanges({
-		lix,
+	const detectedChanges = detectChanges({
 		before: { id: "random", path: "x.md", data: before, metadata: {} },
 		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
@@ -25,7 +22,6 @@ Some text.`);
 });
 
 test("it should detect a new block", async () => {
-	const lix = await openLixInMemory({});
 	const before = encode(`<!-- id: abc123 -->
 # Heading
 
@@ -40,8 +36,7 @@ Some text.
 <!-- id: xyz789 -->
 New paragraph.`);
 
-	const detectedChanges = await detectChanges({
-		lix,
+	const detectedChanges = detectChanges({
 		before: { id: "random", path: "x.md", data: before, metadata: {} },
 		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
@@ -50,7 +45,8 @@ New paragraph.`);
 		{
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "xyz789",
-			snapshot: {
+			snapshot_content: {
+				id: "xyz789",
 				text: "New paragraph.",
 				type: "paragraph",
 			},
@@ -58,7 +54,7 @@ New paragraph.`);
 		{
 			schema: MarkdownBlockPositionSchemaV1,
 			entity_id: "block_positions",
-			snapshot: {
+			snapshot_content: {
 				idPositions: {
 					abc123: 0,
 					def456: 1,
@@ -70,7 +66,6 @@ New paragraph.`);
 });
 
 test("it should detect an updated block", async () => {
-	const lix = await openLixInMemory({});
 	const before = encode(`<!-- id: abc123 -->
 # Heading
 
@@ -82,8 +77,7 @@ Some text.`);
 <!-- id: def456 -->
 Updated text.`);
 
-	const detectedChanges = await detectChanges({
-		lix,
+	const detectedChanges = detectChanges({
 		before: { id: "random", path: "x.md", data: before, metadata: {} },
 		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
@@ -92,13 +86,16 @@ Updated text.`);
 		{
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "def456",
-			snapshot: { text: "Updated text.", type: "paragraph" },
+			snapshot_content: {
+				id: "def456",
+				text: "Updated text.",
+				type: "paragraph",
+			},
 		},
 	]);
 });
 
 test("it should detect a deleted block", async () => {
-	const lix = await openLixInMemory({});
 	const before = encode(`<!-- id: abc123 -->
 # Heading
 
@@ -113,8 +110,7 @@ Another paragraph.`);
 <!-- id: def456 -->
 Some text.`);
 
-	const detectedChanges = await detectChanges({
-		lix,
+	const detectedChanges = detectChanges({
 		before: { id: "random", path: "x.md", data: before, metadata: {} },
 		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
@@ -123,12 +119,12 @@ Some text.`);
 		{
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "xyz789",
-			snapshot: undefined,
+			snapshot_content: undefined,
 		},
 		{
 			schema: MarkdownBlockPositionSchemaV1,
 			entity_id: "block_positions",
-			snapshot: {
+			snapshot_content: {
 				idPositions: {
 					abc123: 0,
 					def456: 1,
@@ -139,7 +135,6 @@ Some text.`);
 });
 
 test("it should detect an empty block", async () => {
-	const lix = await openLixInMemory({});
 	const before = encode(`<!-- id: abc123 -->
 # Heading
 
@@ -155,8 +150,7 @@ Some text.
 test
 `);
 
-	const detectedChanges = await detectChanges({
-		lix,
+	const detectedChanges = detectChanges({
 		before: { id: "random", path: "x.md", data: before, metadata: {} },
 		after: { id: "random", path: "x.md", data: after, metadata: {} },
 	});
@@ -165,7 +159,8 @@ test
 		{
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "bcd",
-			snapshot: {
+			snapshot_content: {
+				id: "bcd",
 				text: "<br>",
 				type: "paragraph",
 			},
@@ -173,7 +168,8 @@ test
 		{
 			schema: MarkdownBlockSchemaV1,
 			entity_id: "cde",
-			snapshot: {
+			snapshot_content: {
+				id: "cde",
 				text: "test",
 				type: "paragraph",
 			},
@@ -181,7 +177,7 @@ test
 		{
 			schema: MarkdownBlockPositionSchemaV1,
 			entity_id: "block_positions",
-			snapshot: {
+			snapshot_content: {
 				idPositions: {
 					abc123: 0,
 					def456: 1,

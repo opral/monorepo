@@ -8,27 +8,33 @@
 
 > **LixPlugin** = `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:10](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/plugin/lix-plugin.ts#L10)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:7](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/plugin/lix-plugin.ts#L7)
 
 ## Properties
 
 ### applyChanges()?
 
-> `optional` **applyChanges**: (`args`) => `Promise`\<\{ `fileData`: [`LixFile`](LixFile.md)\[`"data"`\]; \}\>
+> `optional` **applyChanges**: (`{
+		file,
+		changes,
+	}`) => `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:46](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/plugin/lix-plugin.ts#L46)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:34](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/plugin/lix-plugin.ts#L34)
 
 #### Parameters
 
-##### args
+##### \{
+		file,
+		changes,
+	\}
 
 ###### changes
 
-[`Change`](Change.md)[]
+[`Change`](Change.md) & `object`[]
 
 ###### file
 
-`Omit`\<[`LixFile`](LixFile.md), `"data"`\> & `object`
+[`LixFileType`](LixFileType.md) & `object`
 
 The file to which the changes should be applied.
 
@@ -38,21 +44,24 @@ happen when merging a version that created a new file
 that did not exist in the target version. Or, a file
 has been deleted and should be restored at a later point.
 
-###### lix
-
-[`LixReadonly`](LixReadonly.md)
-
 #### Returns
 
-`Promise`\<\{ `fileData`: [`LixFile`](LixFile.md)\[`"data"`\]; \}\>
+`object`
+
+##### fileData
+
+> **fileData**: `Uint8Array`
 
 ***
 
 ### detectChanges()?
 
-> `optional` **detectChanges**: (`args`) => `Promise`\<[`DetectedChange`](DetectedChange.md)[]\>
+> `optional` **detectChanges**: (`{
+		before,
+		after,
+	}`) => [`DetectedChange`](DetectedChange.md)[]
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:30](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/plugin/lix-plugin.ts#L30)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:27](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/plugin/lix-plugin.ts#L27)
 
 Detects changes between the `before` and `after` file update(s).
 
@@ -65,23 +74,22 @@ will handle the deletion. Hence, `after` is always be defined.
 
 #### Parameters
 
-##### args
+##### \{
+		before,
+		after,
+	\}
 
 ###### after
 
-[`LixFile`](LixFile.md)
+[`LixFileType`](LixFileType.md) & `object`
 
 ###### before?
 
-[`LixFile`](LixFile.md)
-
-###### lix
-
-[`LixReadonly`](LixReadonly.md)
+[`LixFileType`](LixFileType.md) & `object`
 
 #### Returns
 
-`Promise`\<[`DetectedChange`](DetectedChange.md)[]\>
+[`DetectedChange`](DetectedChange.md)[]
 
 ***
 
@@ -89,7 +97,7 @@ will handle the deletion. Hence, `after` is always be defined.
 
 > `optional` **detectChangesGlob**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:19](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/plugin/lix-plugin.ts#L19)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:16](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/plugin/lix-plugin.ts#L16)
 
 The glob pattern that should invoke `detectChanges()`.
 
@@ -102,37 +110,11 @@ The glob pattern that should invoke `detectChanges()`.
 
 ***
 
-### detectConflicts()?
-
-> `optional` **detectConflicts**: (`args`) => `Promise`\<[`DetectedConflict`](DetectedConflict.md)[]\>
-
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:42](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/plugin/lix-plugin.ts#L42)
-
-Detects changes from the source lix that conflict with changes in the target lix.
-
-#### Parameters
-
-##### args
-
-###### changes
-
-[`Change`](Change.md)[]
-
-###### lix
-
-[`LixReadonly`](LixReadonly.md)
-
-#### Returns
-
-`Promise`\<[`DetectedConflict`](DetectedConflict.md)[]\>
-
-***
-
 ### diffUiComponent?
 
 > `optional` **diffUiComponent**: `CustomElementConstructor`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:38](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/plugin/lix-plugin.ts#L38)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:53](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/plugin/lix-plugin.ts#L53)
 
 UI components that are used to render the diff view.
 
@@ -142,4 +124,4 @@ UI components that are used to render the diff view.
 
 > **key**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:11](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/plugin/lix-plugin.ts#L11)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:8](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/plugin/lix-plugin.ts#L8)

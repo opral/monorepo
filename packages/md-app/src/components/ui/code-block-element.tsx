@@ -9,14 +9,35 @@ import {
   isLangSupported,
 } from '@udecode/plate-code-block';
 import { type PlateElementProps, PlateElement } from '@udecode/plate/react';
-import { BracesIcon, CheckIcon, CopyIcon } from 'lucide-react';
+import { BracesIcon, CheckIcon, CopyIcon, EyeIcon, CodeIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
 import { CodeBlockCombobox } from './code-block-combobox';
+import { MermaidRenderer } from './mermaid-renderer';
 
 export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
   const { editor, element } = props;
+  const [showMermaidDiagram, setShowMermaidDiagram] = React.useState(false);
+
+  const isMermaid = element.lang === 'mermaid';
+  
+  // Extract code content properly by joining code lines with newlines
+  const extractCodeContent = (element: any): string => {
+    if (element.children && Array.isArray(element.children)) {
+      return element.children
+        .map((child: any) => {
+          if (child.type === 'code_line' && child.children) {
+            return child.children.map((textNode: any) => textNode.text || '').join('');
+          }
+          return '';
+        })
+        .join('\n');
+    }
+    return NodeApi.string(element);
+  };
+  
+  const codeContent = extractCodeContent(element);
 
   return (
     <PlateElement
@@ -24,14 +45,36 @@ export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
       {...props}
     >
       <div className="relative rounded-md bg-muted/50">
-        <pre className="overflow-x-auto p-8 pr-4 font-mono text-sm leading-[normal] [tab-size:2] print:break-inside-avoid">
-          <code>{props.children}</code>
-        </pre>
+        {isMermaid && showMermaidDiagram ? (
+          <div className="p-4">
+            <MermaidRenderer code={codeContent} />
+          </div>
+        ) : (
+          <pre className="overflow-x-auto p-8 pr-4 font-mono text-sm leading-[normal] [tab-size:2] print:break-inside-avoid">
+            <code>{props.children}</code>
+          </pre>
+        )}
 
         <div
           className="absolute top-1 right-1 z-10 flex gap-0.5 select-none"
           contentEditable={false}
         >
+          {isMermaid && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-6 text-xs"
+              onClick={() => setShowMermaidDiagram(!showMermaidDiagram)}
+              title={showMermaidDiagram ? "Show code" : "Show diagram"}
+            >
+              {showMermaidDiagram ? (
+                <CodeIcon className="!size-3.5 text-muted-foreground" />
+              ) : (
+                <EyeIcon className="!size-3.5 text-muted-foreground" />
+              )}
+            </Button>
+          )}
+
           {isLangSupported(element.lang) && (
             <Button
               size="icon"

@@ -1,8 +1,7 @@
-import { type Change, type LixPlugin, type LixReadonly } from "@lix-js/sdk";
+import { type LixPlugin } from "@lix-js/sdk";
 import type { ProsemirrorNode } from "./detectChanges.js";
 
-export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
-	lix,
+export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	file,
 	changes,
 }) => {
@@ -40,12 +39,9 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 		const entityId = change.entity_id;
 		if (!entityId) continue;
 
-		// Get the snapshot which contains the updated node
-		const snapshot = await getChangeSnapshot(lix, change);
-
-		if (snapshot) {
+		if (change.snapshot_content) {
 			// Create or update - add to the map
-			nodeMap.set(entityId, snapshot as ProsemirrorNode);
+			nodeMap.set(entityId, change.snapshot_content as ProsemirrorNode);
 		} else {
 			// Delete - remove from the map
 			nodeMap.delete(entityId);
@@ -105,19 +101,6 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
 
 	return { fileData: encodedDocument };
 };
-
-/**
- * Gets the snapshot content from a change
- */
-async function getChangeSnapshot(lix: LixReadonly, change: Change) {
-	const snapshot = await lix.db
-		.selectFrom("snapshot")
-		.where("id", "=", change.snapshot_id)
-		.select("content")
-		.executeTakeFirst();
-
-	return snapshot?.content;
-}
 
 /**
  * Recursively collects all nodes with IDs into a map and tracks parent-child relationships

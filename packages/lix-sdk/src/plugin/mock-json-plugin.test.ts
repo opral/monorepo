@@ -1,7 +1,6 @@
 import { expect, test } from "vitest";
 import { mockJsonPlugin } from "./mock-json-plugin.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { fileQueueSettled } from "../file-queue/file-queue-settled.js";
 
 test("it handles insert changes", async () => {
 	const lix = await openLixInMemory({
@@ -21,32 +20,35 @@ test("it handles insert changes", async () => {
 		})
 	);
 
+	// Insert the initial file
 	await lix.db
 		.insertInto("file")
-		.values(
-			[before, after].map((data) => ({
-				id: "mock",
-				path: "/mock.json",
-				data,
-			}))
-		)
-		.onConflict((oc) =>
-			oc.doUpdateSet((eb) => ({ data: eb.ref("excluded.data") }))
-		)
+		.values({
+			id: "mock",
+			path: "/mock.json",
+			data: before,
+		})
 		.execute();
 
-	await fileQueueSettled({ lix });
+	// Update the file with new data
+	await lix.db
+		.updateTable("file")
+		.set({ data: after })
+		.where("id", "=", "mock")
+		.execute();
 
 	const changes = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("file_id", "=", "mock")
+		.where("plugin_key", "=", mockJsonPlugin.key)
 		.selectAll("change")
+		.select("snapshot.content as snapshot_content")
 		.execute();
 
-	const { fileData: applied } = await mockJsonPlugin.applyChanges!({
+	const { fileData: applied } = mockJsonPlugin.applyChanges!({
 		file: { id: "mock", path: "/mock", data: before, metadata: {} },
 		changes,
-		lix,
 	});
 
 	expect(new TextDecoder().decode(applied)).toEqual(
@@ -68,36 +70,39 @@ test("it handles update changes", async () => {
 	const after = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Samuel",
-			Age: "New York",
+			City: "New York",
 		})
 	);
 
+	// Insert the initial file
 	await lix.db
 		.insertInto("file")
-		.values(
-			[before, after].map((data) => ({
-				id: "mock",
-				path: "/mock.json",
-				data,
-			}))
-		)
-		.onConflict((oc) =>
-			oc.doUpdateSet((eb) => ({ data: eb.ref("excluded.data") }))
-		)
+		.values({
+			id: "mock",
+			path: "/mock.json",
+			data: before,
+		})
 		.execute();
 
-	await fileQueueSettled({ lix });
+	// Update the file with new data
+	await lix.db
+		.updateTable("file")
+		.set({ data: after })
+		.where("id", "=", "mock")
+		.execute();
 
 	const changes = await lix.db
 		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("file_id", "=", "mock")
+		.where("plugin_key", "=", mockJsonPlugin.key)
 		.selectAll("change")
+		.select("snapshot.content as snapshot_content")
 		.execute();
 
-	const { fileData: applied } = await mockJsonPlugin.applyChanges!({
+	const { fileData: applied } = mockJsonPlugin.applyChanges!({
 		file: { id: "mock", path: "/mock", data: before, metadata: {} },
 		changes,
-		lix,
 	});
 
 	expect(new TextDecoder().decode(applied)).toEqual(
@@ -122,32 +127,35 @@ test("it handles delete changes", async () => {
 		})
 	);
 
+	// Insert the initial file
 	await lix.db
 		.insertInto("file")
-		.values(
-			[before, after].map((data) => ({
-				id: "mock",
-				path: "/mock.json",
-				data,
-			}))
-		)
-		.onConflict((oc) =>
-			oc.doUpdateSet((eb) => ({ data: eb.ref("excluded.data") }))
-		)
+		.values({
+			id: "mock",
+			path: "/mock.json",
+			data: before,
+		})
 		.execute();
 
-	await fileQueueSettled({ lix });
+	// Update the file with new data
+	await lix.db
+		.updateTable("file")
+		.set({ data: after })
+		.where("id", "=", "mock")
+		.execute();
 
 	const changes = await lix.db
 		.selectFrom("change")
 		.where("file_id", "=", "mock")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.selectAll("change")
+		.where("plugin_key", "=", mockJsonPlugin.key)
+		.select("snapshot.content as snapshot_content")
 		.execute();
 
 	const { fileData: applied } = await mockJsonPlugin.applyChanges!({
 		file: { id: "mock", path: "/mock", data: before, metadata: {} },
 		changes,
-		lix,
 	});
 
 	expect(new TextDecoder().decode(applied)).toEqual(
@@ -177,32 +185,35 @@ test("it handles nested properties and arrays", async () => {
 		})
 	);
 
+	// Insert the initial file
 	await lix.db
 		.insertInto("file")
-		.values(
-			[before, after].map((data) => ({
-				id: "mock",
-				path: "/mock.json",
-				data,
-			}))
-		)
-		.onConflict((oc) =>
-			oc.doUpdateSet((eb) => ({ data: eb.ref("excluded.data") }))
-		)
+		.values({
+			id: "mock",
+			path: "/mock.json",
+			data: before,
+		})
 		.execute();
 
-	await fileQueueSettled({ lix });
+	// Update the file with new data
+	await lix.db
+		.updateTable("file")
+		.set({ data: after })
+		.where("id", "=", "mock")
+		.execute();
 
 	const changes = await lix.db
 		.selectFrom("change")
 		.where("file_id", "=", "mock")
+		.where("plugin_key", "=", mockJsonPlugin.key)
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.selectAll("change")
+		.select("snapshot.content as snapshot_content")
 		.execute();
 
 	const { fileData: applied } = await mockJsonPlugin.applyChanges!({
 		file: { id: "mock", path: "/mock", data: before, metadata: {} },
 		changes,
-		lix,
 	});
 
 	expect(new TextDecoder().decode(applied)).toEqual(

@@ -8,7 +8,7 @@
 
 > **changeSetElementInAncestryOf**(`target`, `options?`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-set-element-in-ancestry-of.ts:33](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/query-filter/change-set-element-in-ancestry-of.ts#L33)
+Defined in: [packages/lix-sdk/src/query-filter/change-set-element-in-ancestry-of.ts:33](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/query-filter/change-set-element-in-ancestry-of.ts#L33)
 
 Filters elements that are in the ancestry of the given change set(s).
 
@@ -18,7 +18,7 @@ Filters elements that are in the ancestry of the given change set(s).
 
 A target change set object (or its id), or an array of such objects/ids.
 
-`Pick`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}, `"id"`\> | `Pick`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}, `"id"`\>[]
+`Pick`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `metadata`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\> | `Pick`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `metadata`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>[]
 
 ### options?
 

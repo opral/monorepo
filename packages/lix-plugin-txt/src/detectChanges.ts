@@ -1,6 +1,7 @@
 import type { LixPlugin } from "@lix-js/sdk";
 import { TextSchemaV1 } from "./schemas/text.js";
-export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
+
+export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
 	after,
 }) => {
@@ -12,7 +13,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		detectedChanges.push({
 			schema: TextSchemaV1,
 			entity_id: after?.id ?? before?.id,
-			snapshot: {
+			snapshot_content: {
 				text: afterText,
 			},
 		});

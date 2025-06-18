@@ -1,4 +1,4 @@
-import type { Change, NewChange } from "../database/schema.js";
+import type { Change, NewChange } from "./schema.js";
 
 /**
  * Creates a mock change object with the given properties.
@@ -15,6 +15,7 @@ export function mockChange(args: Partial<NewChange>): Change {
 		file_id: "mock",
 		entity_id: "mock",
 		schema_key: "mock",
+		schema_version: "1.0",
 		snapshot_id: "no-content",
 		...args,
 	};

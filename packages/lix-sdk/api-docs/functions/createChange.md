@@ -6,28 +6,27 @@
 
 # Function: createChange()
 
-> **createChange**(`args`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
+> **createChange**(`args`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `schema_version`: `string`; `snapshot_id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change/create-change.ts:13](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change/create-change.ts#L13)
-
-Programatically create a change in the database.
-
-Use this function to directly create a change from a lix app
-with bypassing of file-based change detection.
+Defined in: [packages/lix-sdk/src/change/create-change.ts:9](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/change/create-change.ts#L9)
 
 ## Parameters
 
 ### args
 
-#### authors
+#### authors?
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>[]
+`Pick`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `name`: `string`; \}, `"id"`\>[]
 
-#### entityId
+#### entity_id
 
 `string`
 
-#### fileId
+#### file_id
+
+`string`
+
+#### id?
 
 `string`
 
@@ -35,18 +34,22 @@ with bypassing of file-based change detection.
 
 `Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"sqlite"`\>
 
-#### pluginKey
+#### plugin_key
 
 `string`
 
-#### schemaKey
+#### schema_key
 
 `string`
 
-#### snapshotContent
+#### schema_version
 
-`null` \| `Record`\<`string`, `any`\>
+`string`
+
+#### snapshot
+
+`Omit`\<[`NewSnapshot`](../type-aliases/NewSnapshot.md), `"id"`\>
 
 ## Returns
 
-`Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
+`Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `schema_version`: `string`; `snapshot_id`: `string`; \}\>

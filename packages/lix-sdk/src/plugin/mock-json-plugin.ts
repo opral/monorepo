@@ -1,5 +1,17 @@
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import type { DetectedChange, LixPlugin } from "./lix-plugin.js";
 import { flatten, unflatten } from "./mock-json-plugin.flatten.js";
+
+export const MockJsonPropertySchema: LixSchemaDefinition = {
+	type: "object",
+	properties: {
+		value: JSONTypeSchema,
+	},
+	required: ["value"],
+	"x-lix-key": "mock_json_property",
+	"x-lix-version": "1.0",
+} as const;
 
 /**
  * A mock plugin that handles JSON data.
@@ -16,7 +28,7 @@ import { flatten, unflatten } from "./mock-json-plugin.flatten.js";
 export const mockJsonPlugin: LixPlugin = {
 	key: "mock_json_plugin",
 	detectChangesGlob: "*.json",
-	detectChanges: async ({ before, after }) => {
+	detectChanges: ({ before, after }) => {
 		const detectedChanges: DetectedChange<any>[] = [];
 
 		const beforeParsed = before?.data
@@ -36,26 +48,18 @@ export const mockJsonPlugin: LixPlugin = {
 		for (const key in flattenedBefore) {
 			if (!(key in flattenedAfter)) {
 				detectedChanges.push({
-					schema: {
-						key: "mock_json_property",
-						type: "json",
-					},
+					schema: MockJsonPropertySchema,
 					entity_id: key,
-					snapshot: undefined,
+					snapshot_content: null, // Indicates deletion of this property
 				});
 			} else if (
 				JSON.stringify(flattenedBefore[key]) !==
 				JSON.stringify(flattenedAfter[key])
 			) {
 				detectedChanges.push({
-					schema: {
-						key: "mock_json_property",
-						type: "json",
-					},
+					schema: MockJsonPropertySchema,
 					entity_id: key,
-					snapshot: {
-						value: flattenedAfter[key],
-					},
+					snapshot_content: { value: flattenedAfter[key] },
 				});
 			}
 		}
@@ -63,21 +67,16 @@ export const mockJsonPlugin: LixPlugin = {
 		for (const key in flattenedAfter) {
 			if (!(key in flattenedBefore)) {
 				detectedChanges.push({
-					schema: {
-						key: "mock_json_property",
-						type: "json",
-					},
+					schema: MockJsonPropertySchema,
 					entity_id: key,
-					snapshot: {
-						value: flattenedAfter[key],
-					},
+					snapshot_content: { value: flattenedAfter[key] },
 				});
 			}
 		}
 
 		return detectedChanges;
 	},
-	applyChanges: async ({ lix, file, changes }) => {
+	applyChanges: ({ file, changes }) => {
 		// Get the current state from the file data
 		let flattened: Record<string, any> = {};
 
@@ -92,27 +91,16 @@ export const mockJsonPlugin: LixPlugin = {
 			}
 		}
 
-		const withSnapshots = await Promise.all(
-			changes.map(async (change) => {
-				return await lix.db
-					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-					.where("change.id", "=", change.id)
-					.select(["change.id", "change.entity_id", "snapshot.content"])
-					.executeTakeFirstOrThrow();
-			})
-		);
-
 		// Build a JSON object mapping entity_id to snapshot content
-		for (const change of withSnapshots) {
-			if (change.content === null) {
+		for (const change of changes) {
+			if (change.snapshot_content === null) {
 				// If the content is null, remove the entity from the state
 				delete flattened[change.entity_id];
 			} else {
 				// Update the current state with the new change content
 				// Need to decode the BLOB content from the snapshot
 				// The plugin should handle deserializing the object stored in the BLOB
-				flattened[change.entity_id] = change.content.value;
+				flattened[change.entity_id] = (change.snapshot_content as any).value;
 			}
 		}
 

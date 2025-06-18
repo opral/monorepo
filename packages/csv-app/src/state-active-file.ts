@@ -105,7 +105,7 @@ export const activeCellChangesAtom = atom(async (get) => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.where("change.schema_key", "=", CellSchemaV1.key)
+		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 		.where("change.entity_id", "=", cellEntityId)
 		.where("change.file_id", "=", activeFile.id)
 		// .leftJoin("version_change", "version_change.change_id", "change.id")

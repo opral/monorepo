@@ -126,6 +126,10 @@ ${injectCode("./extract-locale-from-request.js")}
 
 ${injectCode("./extract-locale-from-cookie.js")}
 
+${injectCode("./extract-locale-from-header.js")}
+
+${injectCode("./extract-locale-from-navigator.js")}
+
 ${injectCode("./extract-locale-from-url.js")}
 
 ${injectCode("./localize-url.js")}
@@ -135,6 +139,8 @@ ${injectCode("./localize-href.js")}
 ${injectCode("./track-message-call.js")}
 
 ${injectCode("./generate-static-localized-urls.js")}
+
+${injectCode("./strategy.js")}
 
 // ------ TYPES ------
 

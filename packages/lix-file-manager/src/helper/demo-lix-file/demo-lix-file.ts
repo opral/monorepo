@@ -2,7 +2,6 @@ import {
 	createAccount,
 	createCheckpoint,
 	createThread,
-	fileQueueSettled,
 	Lix,
 	newLixFile,
 	openLixInMemory,
@@ -28,7 +27,6 @@ export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
 
 	await demoSalariesCsv(lix);
 
-	await fileQueueSettled({ lix });
 	return { blob: await toBlob({ lix }), id: id.value };
 }
 
@@ -208,8 +206,6 @@ async function createChangesWithCheckpoint(args: {
 		})
 		.where("id", "=", args.file.id)
 		.execute();
-
-	await fileQueueSettled({ lix: args.lix });
 
 	const changeSet = await getWorkingChangeSet(args.lix, args.file.id);
 

@@ -28,6 +28,28 @@ const VersionToolbar: React.FC = () => {
 		}
 	};
 
+	const handleNewVersion = async () => {
+		try {
+			// Extract the first name from the account name
+			const firstName = activeAccount?.name
+				? activeAccount.name.split(" ")[0]
+				: "User";
+
+			const newVersion = await createVersion({
+				lix,
+				name: `${firstName}'s Version`,
+				changeSet: { id: currentVersion!.change_set_id },
+			});
+			await switchVersion({ lix, to: newVersion });
+			// Scroll to the end of the scrollbar after a short delay to ensure DOM update
+			setTimeout(() => {
+				scrollToEnd();
+			}, 100);
+		} catch (error) {
+			console.error("Error creating new version:", error);
+		}
+	};
+
 	const handleProposeChanges = async () => {
 		try {
 			// Extract the first name from the account name
@@ -44,7 +66,7 @@ const VersionToolbar: React.FC = () => {
 				const newVersion = await createVersion({
 					lix,
 					name: `${firstName}'s Version`,
-					changeSet: { id: currentVersion!.id },
+					changeSet: { id: currentVersion!.change_set_id },
 				});
 				await switchVersion({ lix, to: { id: newVersion.id } });
 			}
@@ -91,6 +113,22 @@ const VersionToolbar: React.FC = () => {
 				{isMainVersion ? (
 					<button
 						className="mode-tab"
+						onClick={handleNewVersion}
+						style={{
+							height: "40px",
+							boxSizing: "border-box",
+							borderRadius: "0",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							paddingRight: "12px",
+						}}
+					>
+						<span>+ new version</span>
+					</button>
+				) : (
+					<button
+						className="mode-tab"
 						onClick={handleProposeChanges}
 						style={{
 							height: "40px",
@@ -118,7 +156,7 @@ const VersionToolbar: React.FC = () => {
 						</svg>
 						<span>Propose changes</span>
 					</button>
-				) : null}
+				)}
 			</div>
 		</div>
 	);

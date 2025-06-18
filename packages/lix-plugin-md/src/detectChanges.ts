@@ -1,15 +1,15 @@
-import type { LixPlugin } from "@lix-js/sdk";
+import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
 import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
 import { parseMdBlocks } from "./utilities/parseMdBlocks.js";
 import { MarkdownBlockPositionSchemaV1 } from "./schemas/blockPositions.js";
 
-export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
+export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
 	after,
 }) => {
 	const beforeBlocks = parseMdBlocks(before?.data ?? new Uint8Array());
 	const afterBlocks = parseMdBlocks(after?.data ?? new Uint8Array());
-	const detectedChanges = [];
+	const detectedChanges: DetectedChange[] = [];
 
 	// Create maps for fast lookup
 	const beforeMap = new Map(beforeBlocks.map((block) => [block.id, block]));
@@ -24,7 +24,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				schema: MarkdownBlockSchemaV1,
 				entity_id: id,
-				snapshot: undefined,
+				snapshot_content: undefined,
 			});
 		} else if (
 			beforeBlock.content !== afterBlock.content ||
@@ -34,7 +34,8 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				schema: MarkdownBlockSchemaV1,
 				entity_id: id,
-				snapshot: {
+				snapshot_content: {
+					id: afterBlock.id,
 					text: afterBlock.content,
 					type: afterBlock.type,
 				},
@@ -48,7 +49,11 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				schema: MarkdownBlockSchemaV1,
 				entity_id: id,
-				snapshot: { text: afterBlock.content, type: afterBlock.type },
+				snapshot_content: {
+					id: afterBlock.id,
+					text: afterBlock.content,
+					type: afterBlock.type,
+				},
 			});
 		}
 	}
@@ -64,7 +69,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		detectedChanges.push({
 			schema: MarkdownBlockPositionSchemaV1,
 			entity_id: "block_positions",
-			snapshot: {
+			snapshot_content: {
 				idPositions: Object.fromEntries(
 					afterBlocks.map((block, index) => [block.id, index]),
 				),

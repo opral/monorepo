@@ -1,8 +1,8 @@
 import type { Lix } from "../lix/index.js";
-import type { ChangeSet } from "./database-schema.js";
-import { createChangeSet } from "./create-change-set.js";
+import type { ChangeSet } from "./schema.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
+import { createChangeSet } from "./create-change-set.js";
 
 /**
  * Creates a change set that enables a transition from a source state
@@ -20,10 +20,6 @@ export async function createTransitionChangeSet(args: {
 	targetChangeSet: Pick<ChangeSet, "id">;
 }): Promise<ChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		console.log(
-			`createTransitionChangeSet: Source=${args.sourceChangeSet.id}, Target=${args.targetChangeSet.id}`
-		);
-
 		// 1. Find leaf changes defining the state AT the *target* change set
 		const leafChangesToApply = await trx
 			.selectFrom("change")
@@ -42,10 +38,6 @@ export async function createTransitionChangeSet(args: {
 			])
 			.distinct()
 			.execute();
-
-		console.log(
-			` >> Found ${leafChangesToApply.length} leaf changes to apply from target.`
-		);
 
 		// 2. Find leaf changes that are present in the *source* state but NOT in the *target* state,
 		//    AND whose entity is not being restored by a different change in the target state.
@@ -104,6 +96,7 @@ export async function createTransitionChangeSet(args: {
 				"change.id",
 				"change.entity_id",
 				"change.plugin_key",
+				"change.schema_version",
 				"change.schema_key",
 				"change.file_id",
 			])
@@ -115,25 +108,15 @@ export async function createTransitionChangeSet(args: {
 				? await trx
 						.insertInto("change")
 						.values(
-							leafEntitiesToDelete
-								.filter((c) => {
-									// deleting accounts and versions when switching is
-									// not desired. a version should be able to jump to a
-									// different version and the accounts are not affected
-									const isInternalProtected =
-										c.plugin_key === "lix_own_change_control" &&
-										(c.schema_key === "lix_account_table" ||
-											c.schema_key === "lix_version_table");
-									return !isInternalProtected;
-								})
-								.map((c) => ({
-									schema_key: c.schema_key,
-									plugin_key: c.plugin_key,
-									entity_id: c.entity_id,
-									file_id: c.file_id,
-									// delete change
-									snapshot_id: "no-content",
-								}))
+							leafEntitiesToDelete.map((c) => ({
+								schema_key: c.schema_key,
+								schema_version: c.schema_version,
+								plugin_key: c.plugin_key,
+								entity_id: c.entity_id,
+								file_id: c.file_id,
+								// delete change
+								snapshot_id: "no-content",
+							}))
 						)
 						.returning(["id", "entity_id", "schema_key", "file_id"])
 						.execute()
@@ -142,10 +125,7 @@ export async function createTransitionChangeSet(args: {
 		const combinedChanges = [...leafChangesToApply, ...deleteChanges];
 
 		if (combinedChanges.length === 0) {
-			// Handle case where source and target are identical or transition is empty
-			console.log(
-				"No changes needed for transition. Creating empty change set."
-			);
+			throw new Error("No changes to apply in the transition change set.");
 		}
 
 		const transitionChangeSet = await createChangeSet({

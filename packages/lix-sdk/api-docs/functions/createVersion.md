@@ -6,9 +6,9 @@
 
 # Function: createVersion()
 
-> **createVersion**(`args`): `Promise`\<\{ `change_set_id`: `string`; `id`: `string`; `name`: `null` \| `string`; `working_change_set_id`: `string`; \}\>
+> **createVersion**(`args`): `Promise`\<\{ `change_set_id`: `string`; `id`: `string`; `inherits_from_version_id`: `null` \| `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `name`: `string`; `working_change_set_id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/version/create-version.ts:14](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/version/create-version.ts#L14)
+Defined in: [packages/lix-sdk/src/version/create-version.ts:15](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/version/create-version.ts#L15)
 
 Creates a new version.
 
@@ -18,13 +18,17 @@ The changeSet can be any change set e.g. another version, a checkpoint, etc.
 
 ### args
 
-#### changeSet
+#### changeSet?
 
-`Pick`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}, `"id"`\>
+`Pick`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `metadata`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>
 
 #### id?
 
 `string`
+
+#### inherits_from_version_id?
+
+`null` \| `string`
 
 #### lix
 
@@ -32,11 +36,11 @@ The changeSet can be any change set e.g. another version, a checkpoint, etc.
 
 #### name?
 
-`null` \| `string`
+`string`
 
 ## Returns
 
-`Promise`\<\{ `change_set_id`: `string`; `id`: `string`; `name`: `null` \| `string`; `working_change_set_id`: `string`; \}\>
+`Promise`\<\{ `change_set_id`: `string`; `id`: `string`; `inherits_from_version_id`: `null` \| `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `name`: `string`; `working_change_set_id`: `string`; \}\>
 
 ## Example
 

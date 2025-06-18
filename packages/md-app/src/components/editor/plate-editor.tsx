@@ -33,14 +33,17 @@ export function PlateEditor() {
   }, [editor, setEditorRef]);
 
   useEffect(() => {
-    if (editor && loadedMd !== editor.getApi(ExtendedMarkdownPlugin).markdown.serialize()) {
-      const nodes = editor
-        .getApi(ExtendedMarkdownPlugin)
-        .markdown.deserialize(loadedMd);
-      editor.tf.setValue(nodes);
+    if (editor && loadedMd !== undefined) {
+      const currentSerialized = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
+      if (loadedMd !== currentSerialized) {
+        const nodes = editor
+          .getApi(ExtendedMarkdownPlugin)
+          .markdown.deserialize(loadedMd);
+        editor.tf.setValue(nodes);
+      }
     }
     setPreviousHasPromptElement(false);
-  }, [activeFile?.id]);
+  }, [activeFile?.id, loadedMd, editor]);
 
   useEffect(() => {
     if (!editor || !lix || !activeFile?.id) return;
@@ -135,11 +138,10 @@ export function PlateEditor() {
       const serializedMd = newData.editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
 
       await lix.db
-        .updateTable("file")
-        .set("data", new TextEncoder().encode(serializedMd))
-        .where("id", "=", activeFile.id)
-        .returningAll()
-        .execute();
+				.updateTable("file")
+				.set("data", new TextEncoder().encode(serializedMd))
+				.where("id", "=", activeFile.id)
+				.execute();
 
       // needed because lix is not writing to OPFS yet
       await saveLixToOpfs({ lix });

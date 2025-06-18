@@ -4,6 +4,7 @@ import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { toBlob } from "./to-blob.js";
 import { usedFileExtensions } from "./open-lix.js";
+import type { LixAccount } from "../account/schema.js";
 
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
@@ -46,7 +47,7 @@ test("providing key values should be possible", async () => {
 });
 
 test("providing an account should be possible", async () => {
-	const mockAccount = {
+	const mockAccount: LixAccount = {
 		id: "mock-account",
 		name: "peter",
 	};
@@ -63,22 +64,6 @@ test("providing an account should be possible", async () => {
 
 	expect(accounts, "to be the provided account").toContainEqual(mockAccount);
 	expect(accounts, "no other active account is inserted").lengthOf(1);
-
-	await lix.db
-		.insertInto("key_value")
-		.values([{ key: "mock_key", value: "something" }])
-		.execute();
-
-	// lix automatically handles inserting the active account into the account table
-	const change = await lix.db
-		.selectFrom("change")
-		.innerJoin("change_author", "change_author.change_id", "change.id")
-		.where("schema_key", "=", "lix_key_value_table")
-		.where("entity_id", "=", "mock_key")
-		.select("change_author.account_id")
-		.executeTakeFirstOrThrow();
-
-	expect(change.account_id).toBe(mockAccount.id);
 });
 
 test("usedFileExtensions", async () => {
