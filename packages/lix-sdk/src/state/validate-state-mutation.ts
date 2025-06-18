@@ -369,11 +369,25 @@ function validateForeignKeyConstraints(args: {
 		});
 
 		if (referencedStates.length === 0) {
+			// Get version name for the error message
+			const versionInfo = executeSync({
+				lix: args.lix,
+				query: args.lix.db
+					.selectFrom("version")
+					.select("name")
+					.where("id", "=", args.version_id)
+			});
+			const versionName = versionInfo.length > 0 ? versionInfo[0].name : "unknown";
+
 			// First line: compact string for regex matching (backwards compatibility)
-			let errorMessage = `Foreign key constraint violation. The schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) has a foreign key constraint on '${localProperty}' referencing '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}' in version '${args.version_id}'.`;
+			let errorMessage = `Foreign key constraint violation. The schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) has a foreign key constraint on '${localProperty}' referencing '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}' in version '${args.version_id}' (${versionName}).`;
+
+			// Add foreign key relationship visualization
+			errorMessage += `\n\nForeign Key Relationship:\n`;
+			errorMessage += `  ${args.schema["x-lix-key"]}.${localProperty} → ${foreignKeyDef.schemaKey}.${foreignKeyDef.property}\n`;
 
 			// Helper function to truncate property values
-			const truncateValue = (value: any, maxLength: number = 20): string => {
+			const truncateValue = (value: any, maxLength: number = 40): string => {
 				const str = typeof value === "string" ? value : JSON.stringify(value);
 				return str.length > maxLength
 					? str.substring(0, maxLength - 3) + "..."
@@ -381,22 +395,18 @@ function validateForeignKeyConstraints(args: {
 			};
 
 			// Add entity being inserted section
-			errorMessage += `\n\nEntity Being Inserted (${args.schema["x-lix-key"]}):\n`;
-			errorMessage += `┌─────────────────┬──────────────────┐\n`;
-			errorMessage += `│ Property        │ Value            │\n`;
-			errorMessage += `├─────────────────┼──────────────────┤\n`;
+			errorMessage += `\nEntity Being Inserted (${args.schema["x-lix-key"]}):\n`;
+			errorMessage += `┌─────────────────┬──────────────────────────────────────────┐\n`;
+			errorMessage += `│ Property        │ Value                                    │\n`;
+			errorMessage += `├─────────────────┼──────────────────────────────────────────┤\n`;
 
 			const content = args.snapshot_content as Record<string, any>;
 			for (const [prop, value] of Object.entries(content)) {
 				const propDisplay = prop.substring(0, 15).padEnd(15);
-				const valueDisplay = truncateValue(value, 16).padEnd(16);
+				const valueDisplay = truncateValue(value, 40).padEnd(40);
 				errorMessage += `│ ${propDisplay} │ ${valueDisplay} │\n`;
 			}
-			errorMessage += `└─────────────────┴──────────────────┘\n`;
-
-			// Add foreign key relationship visualization
-			errorMessage += `\nForeign Key Relationship:\n`;
-			errorMessage += `  ${args.schema["x-lix-key"]}.${localProperty} → ${foreignKeyDef.schemaKey}.${foreignKeyDef.property}\n`;
+			errorMessage += `└─────────────────┴──────────────────────────────────────────┘\n`;
 
 			// Add note about version-scoped behavior
 			errorMessage += `\nNote: Foreign key constraints only validate entities that exist in the version context. Inherited entities from other versions cannot be referenced by foreign keys. If you reference global state, ensure that you are creating the entity in the global version.`;
@@ -455,12 +465,12 @@ function validateDeletionConstraints(args: {
 
 		if (entityInOtherVersions.length > 0) {
 			errorMessage += `\nEntity Search Results (${args.schema["x-lix-key"]}):\n`;
-			errorMessage += `┌─────────────────────┬────────────────┬─────────────────────────────────────┐\n`;
-			errorMessage += `│ Version             │ Entity Found   │ Entity Content                      │\n`;
-			errorMessage += `├─────────────────────┼────────────────┼─────────────────────────────────────┤\n`;
+			errorMessage += `┌─────────────────────┬────────────────┬──────────────────────────────────────────┐\n`;
+			errorMessage += `│ Version             │ Entity Found   │ Entity Content                           │\n`;
+			errorMessage += `├─────────────────────┼────────────────┼──────────────────────────────────────────┤\n`;
 
 			// Helper function to truncate property values
-			const truncateValue = (value: any, maxLength: number = 35): string => {
+			const truncateValue = (value: any, maxLength: number = 40): string => {
 				const str = typeof value === "string" ? value : JSON.stringify(value);
 				return str.length > maxLength
 					? str.substring(0, maxLength - 3) + "..."
@@ -468,7 +478,7 @@ function validateDeletionConstraints(args: {
 			};
 
 			// Show current version first
-			errorMessage += `│ ${args.version_id.substring(0, 19).padEnd(19)} │ ${"No".padEnd(14)} │ ${"-".padEnd(35)} │\n`;
+			errorMessage += `│ ${args.version_id.substring(0, 19).padEnd(19)} │ ${"No".padEnd(14)} │ ${"-".padEnd(40)} │\n`;
 
 			// Show other versions where entity exists
 			for (const state of entityInOtherVersions) {
@@ -476,13 +486,13 @@ function validateDeletionConstraints(args: {
 					const versionDisplay = state.version_id.substring(0, 19).padEnd(19);
 					const contentDisplay = truncateValue(
 						state.snapshot_content,
-						35
-					).padEnd(35);
+						40
+					).padEnd(40);
 					errorMessage += `│ ${versionDisplay} │ ${"Yes".padEnd(14)} │ ${contentDisplay} │\n`;
 				}
 			}
 
-			errorMessage += `└─────────────────────┴────────────────┴─────────────────────────────────────┘\n`;
+			errorMessage += `└─────────────────────┴────────────────┴──────────────────────────────────────────┘\n`;
 			errorMessage += `\nThe entity exists in other version(s) but is not accessible in '${args.version_id}'. Check version inheritance configuration.`;
 		} else {
 			errorMessage += `\nThe entity with ID '${args.entity_id}' does not exist in any version for schema '${args.schema["x-lix-key"]}'.`;
