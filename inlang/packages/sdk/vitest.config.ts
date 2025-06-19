@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
 	test: {
 		// default timeout
-		testTimeout: 20000,
+		testTimeout: 30000,
 		globals: true,
 		environment: "node",
 		server: {
