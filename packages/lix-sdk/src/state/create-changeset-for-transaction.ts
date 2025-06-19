@@ -10,8 +10,6 @@ import {
 } from "../change-set/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
-import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { type LixVersion, LixVersionSchema } from "../version/schema.js";
@@ -166,56 +164,34 @@ export function createChangesetForTransaction(
 				!parsedSnapshot || parsedSnapshot.snapshot_id === "no-content";
 
 			if (isDeletion) {
-				// Delete reconciliation: check if entity existed at last checkpoint
-				const lastCheckpointChangeSet = executeSync({
+				// Delete reconciliation: check if entity existed at last checkpoint using state_history
+				const entityAtCheckpoint = executeSync({
 					lix: { sqlite },
 					query: db
-						.selectFrom("change_set")
-						.where(changeSetHasLabel({ name: "checkpoint" }))
+						.selectFrom("state_history")
+						.where("entity_id", "=", change.entity_id)
+						.where("schema_key", "=", change.schema_key)
+						.where("file_id", "=", change.file_id)
+						.where("depth", "=", 0)
 						.where(
-							changeSetIsAncestorOf(
-								{ id: mutatedVersion.change_set_id },
-								{ includeSelf: true }
-							)
+							"change_set_id",
+							"=",
+							// get the previous checkpoint change set
+							db
+								.selectFrom("change_set")
+								.where(changeSetHasLabel({ name: "checkpoint" }))
+								.where(
+									changeSetIsAncestorOf(
+										{ id: mutatedVersion.change_set_id },
+										{ includeSelf: true, depth: 1 }
+									)
+								)
+								.select("id")
 						)
-						.select("id")
-						.limit(1),
+						.select("entity_id"),
 				});
 
-				let entityExistedAtCheckpoint = false;
-
-				if (lastCheckpointChangeSet.length > 0) {
-					// Check if entity existed in state at the last checkpoint
-					// TODO use state_at query https://github.com/opral/lix-sdk/issues/312
-					const entityAtCheckpoint = executeSync({
-						lix: { sqlite },
-						query: db
-							.selectFrom("change")
-							.innerJoin(
-								"change_set_element",
-								"change_set_element.change_id",
-								"change.id"
-							)
-							.where("change.entity_id", "=", change.entity_id)
-							.where("change.schema_key", "=", change.schema_key)
-							.where("change.file_id", "=", change.file_id)
-							.where(
-								changeSetElementInAncestryOf([
-									{ id: lastCheckpointChangeSet[0]!.id },
-								])
-							)
-							.where(
-								changeSetElementIsLeafOf([
-									{ id: lastCheckpointChangeSet[0]!.id },
-								])
-							)
-							.where("change.snapshot_id", "!=", "no-content")
-							.select("change.id")
-							.limit(1),
-					});
-
-					entityExistedAtCheckpoint = entityAtCheckpoint.length > 0;
-				}
+				const entityExistedAtCheckpoint = entityAtCheckpoint.length > 0;
 
 				// Always remove existing working change set element first
 				executeSync({
