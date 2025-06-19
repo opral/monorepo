@@ -22,6 +22,8 @@ import {
  * they are defined. If a strategy returns an invalid locale,
  * it will fall back to the next strategy.
  *
+ * TODO: make this async in next major release and deprecate `extractLocaleFromRequest`
+ *
  * @example
  *   const locale = extractLocaleFromRequest(request);
  *

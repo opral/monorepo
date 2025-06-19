@@ -15,11 +15,11 @@
  */
 
 /**
- * @typedef {{ getLocale: (request?: Request) => string | undefined }} CustomServerStrategyHandler
+ * @typedef {{ getLocale: (request?: Request) => Promise<string | undefined> | (string | undefined) }} CustomServerStrategyHandler
  */
 
 /**
- * @typedef {{ getLocale: () => string | undefined, setLocale: (locale: string) => void }} CustomClientStrategyHandler
+ * @typedef {{ getLocale: () => Promise<string|undefined> | (string | undefined), setLocale: (locale: string) => Promise<void> | void }} CustomClientStrategyHandler
  */
 
 export const customServerStrategies = new Map();
