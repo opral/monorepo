@@ -223,7 +223,7 @@ export function createChangesetForTransaction(
 					lix: { sqlite },
 					query: db
 						.selectFrom("state")
-						
+
 						// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
 						.select("rowid")
 						.where(
