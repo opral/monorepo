@@ -103,12 +103,11 @@ This is the original paragraph content.`;
 	await lix.db
 		.updateTable("state_active")
 		.set({
-			// @ts-expect-error - todo schema mismatch
-			snapshot_content: JSON.stringify({
+			snapshot_content: {
 				id: "def456",
 				text: "This is the updated paragraph content.",
 				type: "paragraph",
-			}),
+			},
 		})
 		.where("entity_id", "=", "def456")
 		.where("schema_key", "=", MarkdownBlockSchemaV1["x-lix-key"])
@@ -119,12 +118,11 @@ This is the original paragraph content.`;
 	await lix.db
 		.updateTable("state_active")
 		.set({
-			// @ts-expect-error - todo schema mismatch
-			snapshot_content: JSON.stringify({
+			snapshot_content: {
 				id: "abc123",
 				text: "# This is the updated title.",
 				type: "heading",
-			}),
+			},
 		})
 		.where("entity_id", "=", "abc123")
 		.where("schema_key", "=", MarkdownBlockSchemaV1["x-lix-key"])
