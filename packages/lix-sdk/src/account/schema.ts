@@ -9,7 +9,7 @@ import {
 	createEntityViewsIfNotExists,
 	type StateEntityView,
 	type StateEntityAllView,
-} from "../state/entity-view-builder.js";
+} from "../entity-views/entity-view-builder.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {

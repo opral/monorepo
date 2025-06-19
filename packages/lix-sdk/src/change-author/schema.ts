@@ -8,7 +8,7 @@ import {
 	createEntityViewsIfNotExists,
 	type StateEntityView,
 	type StateEntityAllView,
-} from "../state/entity-view-builder.js";
+} from "../entity-views/entity-view-builder.js";
 
 export function applyChangeAuthorDatabaseSchema(
 	sqlite: SqliteWasmDatabase

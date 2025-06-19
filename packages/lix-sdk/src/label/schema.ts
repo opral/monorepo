@@ -8,7 +8,7 @@ import {
 	createEntityViewsIfNotExists,
 	type StateEntityView,
 	type StateEntityAllView,
-} from "../state/entity-view-builder.js";
+} from "../entity-views/entity-view-builder.js";
 import { nanoid } from "../database/nano-id.js";
 
 export function applyLabelDatabaseSchema(
