@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
@@ -711,4 +712,106 @@ test("query history between two change sets using ancestor/descendant filters", 
 	expect(historyInRange[1]?.snapshot_content).toEqual({
 		value: "checkpoint 3 content",
 	});
+});
+
+// Introducing parent_change_set_ids is ambigious now. we need a UI use case
+// for building graphs to know how parent change set ids should be used.
+// https://github.com/opral/lix-sdk/issues/320
+test.skip("parent_change_set_ids field shows correct parent relationships", async () => {
+	const lix = await openLixInMemory({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		properties: {
+			value: { type: "string" },
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	// Create initial entity
+	await lix.db
+		.insertInto("state_active")
+		.values({
+			entity_id: "test-entity",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
+			version_id: lix.db.selectFrom("active_version").select("version_id"),
+			snapshot_content: { value: "value0" },
+		})
+		.execute();
+
+	// Get change set after first insert
+	const changeSet1 = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.select("version.change_set_id")
+		.executeTakeFirstOrThrow();
+
+	// Update entity to value1
+	await lix.db
+		.updateTable("state_active")
+		.set({ snapshot_content: { value: "value1" } })
+		.where("entity_id", "=", "test-entity")
+		.execute();
+
+	// Get change set after first update
+	const changeSet2 = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.select("version.change_set_id")
+		.executeTakeFirstOrThrow();
+
+	// Update entity to value2
+	await lix.db
+		.updateTable("state_active")
+		.set({ snapshot_content: { value: "value2" } })
+		.where("entity_id", "=", "test-entity")
+		.execute();
+
+	// Get final change set
+	const changeSet3 = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.select("version.change_set_id")
+		.executeTakeFirstOrThrow();
+
+	// Query all history in one go using the final change set
+	const history = await lix.db
+		.selectFrom("state_history")
+		.where("entity_id", "=", "test-entity")
+		.where("change_set_id", "=", changeSet3.change_set_id)
+		.orderBy("depth", "asc")
+		.selectAll()
+		.execute();
+
+	// Verify we have the expected history
+	expect(history).toHaveLength(3);
+	expect(history[0]?.depth).toBe(0); // Current
+	expect(history[1]?.depth).toBe(1); // Previous
+	expect(history[2]?.depth).toBe(2); // Oldest
+
+	// Verify content progression
+	expect(history[0]?.snapshot_content).toEqual({ value: "value2" });
+	expect(history[1]?.snapshot_content).toEqual({ value: "value1" });
+	expect(history[2]?.snapshot_content).toEqual({ value: "value0" });
+
+	// Verify parent_change_set_ids relationships
+	// The current state (depth 0) should show parents for changeSet3
+	// expect(Array.isArray(history[0]?.parent_change_set_ids)).toBe(true);
+	// expect(history[0]?.parent_change_set_ids).toEqual([changeSet2.change_set_id]);
+
+	// // The previous state (depth 1) should show parents for changeSet2
+	// expect(Array.isArray(history[1]?.parent_change_set_ids)).toBe(true);
+	// expect(history[1]?.parent_change_set_ids).toEqual([changeSet1.change_set_id]);
+
+	// // The oldest state (depth 2) should show parents for changeSet1 (may be empty or have working change set)
+	// expect(Array.isArray(history[2]?.parent_change_set_ids)).toBe(true);
 });

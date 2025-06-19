@@ -3,68 +3,96 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 /**
  * State history table interface for querying historical entity states.
- * 
+ *
  * This view provides access to entity states at specific points in change set history,
  * with depth-based traversal for blame functionality and diff operations.
  */
 export interface StateHistoryTable {
 	/** Unique identifier of the entity */
 	entity_id: string;
-	
+
 	/** Schema type identifier (e.g., 'paragraph', 'comment') */
 	schema_key: string;
-	
+
 	/** File identifier where this entity is stored */
 	file_id: string;
-	
+
 	/** Plugin identifier that manages this entity type */
 	plugin_key: string;
-	
+
 	/** JSON content of the entity at this point in history */
 	snapshot_content: Record<string, any>;
-	
+
 	/** Version of the schema used for this entity */
 	schema_version: string;
-	
-	/** 
+
+	/**
 	 * ID of the change that created this entity state.
 	 * Join with the `change` table to get created_at, author info, and other change metadata.
 	 * Example: `JOIN change ON state_history.change_id = change.id`
 	 */
 	change_id: string;
-	
-	/** 
+
+	/**
 	 * Change set ID that serves as the root/starting point for depth calculation.
-	 * This is the change_set_id that was queried, NOT the change set where this 
+	 * This is the change_set_id that was queried, NOT the change set where this
 	 * specific entity state was originally created.
-	 * 
+	 *
 	 * For example, if you query `WHERE change_set_id = 'checkpoint-123'`, then
 	 * all returned rows will have `change_set_id = 'checkpoint-123'`, even if
 	 * some entity states came from earlier change sets (at depth > 0).
-	 * 
+	 *
 	 * To get the actual change set where this entity state was created,
 	 * join with the change table: `JOIN change ON state_history.change_id = change.id`
 	 * and then `JOIN change_set_element ON change.id = change_set_element.change_id`.
 	 */
 	change_set_id: string;
-	
-	/** 
+
+	/**
 	 * Depth of this entity state relative to the queried change_set_id.
 	 * - depth = 0: Current state at the queried change_set_id
 	 * - depth = 1: One change set back in history (parent)
 	 * - depth = 2: Two change sets back in history (grandparent)
 	 * - etc.
-	 * 
+	 *
 	 * Depth is calculated by traversing the change set ancestry graph backwards
 	 * from the queried change_set_id through parent change set edges.
 	 * Used for blame functionality to show how entities evolved over time.
 	 */
 	depth: number;
+
+	/**
+	 * TODO https://github.com/opral/lix-sdk/issues/320
+	 *
+	 * JSON array of change-set IDs that are the direct parents of the given change-set.
+	 * For a merge change set this array has ≥2 IDs; for the initial version it is empty.
+	 *
+	 * Use the property to display graphs in the UI by providing parent relationships.
+	 *
+	 * Example change set graph (newest to oldest):
+	 *
+	 * ```
+	 *     A (parent_change_set_ids: ["B"])      <- queried change set
+	 *     |
+	 *     B (parent_change_set_ids: ["C","D"])  <- merge change set
+	 *    / \
+	 *   C   D (parent_change_set_ids: ["E"], ["F"])
+	 *   |   |
+	 *   |   F (parent_change_set_ids: ["E"])
+	 *    \ /
+	 *     E (parent_change_set_ids: ["G"])      <- common ancestor of C & F
+	 *     |
+	 *     G (parent_change_set_ids: [])         <- initial (no parents)
+	 * ```
+	 */
+	// parent_change_set_ids: string[];
 }
 
 export type StateHistoryView = Selectable<StateHistoryTable>;
 
-export function applyStateHistoryDatabaseSchema(sqlite: SqliteWasmDatabase): SqliteWasmDatabase {
+export function applyStateHistoryDatabaseSchema(
+	sqlite: SqliteWasmDatabase
+): SqliteWasmDatabase {
 	sqlite.exec(STATE_HISTORY_VIEW_SQL);
 	return sqlite;
 }
