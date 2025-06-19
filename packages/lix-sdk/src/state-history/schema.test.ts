@@ -90,19 +90,19 @@ test("query state at specific depth in history", async () => {
 			plugin_key: "lix_own_entity",
 			schema_version: "1.0",
 			version_id: lix.db.selectFrom("active_version").select("version_id"),
-			snapshot_content: { value: "version 1" },
+			snapshot_content: { value: "value0" },
 		})
 		.execute();
 
 	await lix.db
 		.updateTable("state")
-		.set({ snapshot_content: { value: "version 2" } })
+		.set({ snapshot_content: { value: "value1" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
 	await lix.db
 		.updateTable("state")
-		.set({ snapshot_content: { value: "version 3" } })
+		.set({ snapshot_content: { value: "value2" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
@@ -122,7 +122,7 @@ test("query state at specific depth in history", async () => {
 		.execute();
 
 	expect(currentState).toHaveLength(1);
-	expect(currentState[0]?.snapshot_content).toEqual({ value: "version 3" });
+	expect(currentState[0]?.snapshot_content).toEqual({ value: "value2" });
 
 	// Query previous state (depth 1)
 	const previousState = await lix.db
@@ -134,7 +134,7 @@ test("query state at specific depth in history", async () => {
 		.execute();
 
 	expect(previousState).toHaveLength(1);
-	expect(previousState[0]?.snapshot_content).toEqual({ value: "version 2" });
+	expect(previousState[0]?.snapshot_content).toEqual({ value: "value1" });
 
 	// Query oldest state (depth 2)
 	const oldestState = await lix.db
@@ -146,7 +146,7 @@ test("query state at specific depth in history", async () => {
 		.execute();
 
 	expect(oldestState).toHaveLength(1);
-	expect(oldestState[0]?.snapshot_content).toEqual({ value: "version 1" });
+	expect(oldestState[0]?.snapshot_content).toEqual({ value: "value0" });
 });
 
 test("query state at specific change set", async () => {
