@@ -245,3 +245,18 @@ services:
         - packages/md-app/**
     domains:
       - flashtype.ai
+      
+  - name: lix-landing
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./packages/lix-new-landing/dist
+    buildCommand: pnpm install && pnpm run --filter lix-new-landing... build
+    buildFilter:
+      paths:
+        - packages/lix-new-landing/**
+    envVars:
+      - fromGroup: production
+    domains:
+      - lix.dev
