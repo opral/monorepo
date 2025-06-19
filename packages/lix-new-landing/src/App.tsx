@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 // Copy icon component
 const CopyIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-4 w-4 mr-2"
+    className="h-4 w-4"
     viewBox="0 0 20 20"
     fill="currentColor"
   >
@@ -17,7 +17,7 @@ const CopyIcon = () => (
 const CheckIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-4 w-4 mr-2"
+    className="h-4 w-4"
     viewBox="0 0 20 20"
     fill="currentColor"
   >
@@ -64,91 +64,32 @@ const LixLogo = ({ className = "" }) => (
   </svg>
 );
 
-// Package installer component types
-interface PackageInstallerProps {
-  externalPackageManager?: string;
-  setExternalPackageManager?: React.Dispatch<React.SetStateAction<string>>;
-  externalCopied?: boolean;
-  setExternalCopied?: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
 // Package installer component
-const PackageInstaller = ({
-  externalPackageManager,
-  setExternalPackageManager,
-  externalCopied,
-  setExternalCopied,
-}: PackageInstallerProps) => {
-  // Use internal state if external state is not provided
-  const [internalCopied, setInternalCopied] = useState(false);
-  const [internalPackageManager, setInternalPackageManager] = useState("npm");
+const PackageInstaller = () => {
+  const [copied, setCopied] = useState(false);
 
-  // Use either external or internal state
-  const copied = externalCopied !== undefined ? externalCopied : internalCopied;
-  const setCopied = setExternalCopied || setInternalCopied;
-  const packageManager = externalPackageManager || internalPackageManager;
-  const setPackageManager =
-    setExternalPackageManager || setInternalPackageManager;
-
-  const copyToClipboard = () => {
-    const command =
-      packageManager === "yarn"
-        ? "yarn add @lix-js/sdk"
-        : packageManager === "pnpm"
-        ? "pnpm add @lix-js/sdk"
-        : "npm install @lix-js/sdk";
+  const copyFullCommand = () => {
+    const command = "npm install @lix-js/sdk";
     navigator.clipboard.writeText(command);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 mt-4">
-      <div className="flex justify-center mb-2 border-b border-gray-200 w-48">
-        <button
-          className={`text-xs px-3 py-1 transition-all duration-200 border-b-2 ${
-            packageManager === "npm"
-              ? "border-gray-600 text-gray-800 font-medium"
-              : "border-transparent text-gray-500 hover:text-gray-700"
-          }`}
-          onClick={() => setPackageManager("npm")}
-        >
-          npm
-        </button>
-        <button
-          className={`text-xs px-3 py-1 transition-all duration-200 border-b-2 ${
-            packageManager === "yarn"
-              ? "border-gray-600 text-gray-800 font-medium"
-              : "border-transparent text-gray-500 hover:text-gray-700"
-          }`}
-          onClick={() => setPackageManager("yarn")}
-        >
-          yarn
-        </button>
-        <button
-          className={`text-xs px-3 py-1 transition-all duration-200 border-b-2 ${
-            packageManager === "pnpm"
-              ? "border-gray-600 text-gray-800 font-medium"
-              : "border-transparent text-gray-500 hover:text-gray-700"
-          }`}
-          onClick={() => setPackageManager("pnpm")}
-        >
-          pnpm
-        </button>
-      </div>
-      <div className="relative group w-full sm:w-auto">
-        <button
-          className="bg-white text-gray-800 px-4 py-2 rounded-md font-mono text-sm hover:bg-gray-50 transition-all duration-200 flex items-center w-full sm:w-auto justify-between space-x-4 border border-gray-200 shadow-sm"
-          onClick={copyToClipboard}
-        >
-          <span className="tracking-wide">
-            {packageManager === "npm" && "npm install @lix-js/sdk"}
-            {packageManager === "yarn" && "yarn add @lix-js/sdk"}
-            {packageManager === "pnpm" && "pnpm add @lix-js/sdk"}
+    <div className="relative w-full sm:w-auto">
+      <div className="bg-white text-gray-800 px-4 rounded-md font-mono text-sm flex items-center w-full sm:w-auto justify-between space-x-4 border border-gray-200 shadow-sm h-10">
+        <div className="flex items-center h-full">
+          <span className="text-gray-500 mr-1 select-none">npm install</span>
+          <span className="text-blue-600 tracking-wide cursor-text select-all">
+            @lix-js/sdk
           </span>
-          <span className="bg-gray-50 rounded p-1 transition-colors duration-200 flex-shrink-0">
-            {copied ? <CheckIcon /> : <CopyIcon />}
-          </span>
+        </div>
+        <button
+          onClick={copyFullCommand}
+          className="h-full px-1.5 transition-colors duration-200 flex-shrink-0 cursor-pointer flex items-center justify-center min-w-[28px] text-gray-500 hover:text-gray-700"
+          title="Copy full command"
+        >
+          {copied ? <CheckIcon /> : <CopyIcon />}
         </button>
       </div>
     </div>
@@ -156,9 +97,6 @@ const PackageInstaller = ({
 };
 
 function App() {
-  const [packageManager, setPackageManager] = useState("npm");
-  const [copied, setCopied] = useState(false);
-
   return (
     <div className="font-sans text-gray-900 bg-gradient-to-b from-gray-50 to-white min-h-screen">
       {/* Navigation */}
@@ -185,7 +123,7 @@ function App() {
             docs
           </a>
           <a
-            href="https://github.com/opral/monorepo"
+            href="https://github.com/opral/lix-sdk"
             className="text-gray-600 text-base lowercase flex items-center gap-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600 transition-all duration-200 px-2 py-1"
           >
             <svg
@@ -203,7 +141,7 @@ function App() {
             github
           </a>
           <a
-            href="https://discord.gg/opral"
+            href="https://discord.gg/cAby6NTwyT"
             className="text-gray-600 text-base lowercase flex items-center gap-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600 transition-all duration-200 px-2 py-1"
           >
             <svg
@@ -224,46 +162,23 @@ function App() {
         {/* Hero Section */}
         <section className="py-28 text-center max-w-3xl mx-auto">
           <h1 className="text-gray-900 text-5xl sm:text-6xl font-bold mb-6 leading-tight">
-            Embed change control
+            Enable change control
             <br />
-            into your app
+            in your app or agent
           </h1>
-
-          <div className="flex items-center justify-center mb-10">
-            <a
-              href="https://www.npmjs.com/package/@lix-js/sdk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-1.5 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex items-center gap-1.5"
-            >
-              <svg
-                className="w-4 h-4 text-red-500"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
-              </svg>
-              <span className="text-sm text-gray-700">
-                27k+ monthly downloads
-              </span>
-            </a>
-          </div>
 
           <p className="text-gray-600 max-w-xl mx-auto mb-12 text-xl leading-relaxed">
             Build versioned workflows, AI proposals, diffs, and review UIs with
             one SDK. Designed for modern collaborative applications.
           </p>
-          <PackageInstaller
-            externalPackageManager={packageManager}
-            setExternalPackageManager={setPackageManager}
-            externalCopied={copied}
-            setExternalCopied={setCopied}
-          />
-          <div className="flex justify-center mt-6">
+
+          {/* Command and buttons in one row */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+            <PackageInstaller />
+
             <a
               href="/demo"
-              className="bg-blue-600 text-white px-6 py-3 rounded-md text-base hover:bg-blue-700 transition-all duration-200 flex items-center font-medium group shadow-sm"
+              className="bg-blue-600 text-white px-6 py-2 rounded-md text-base hover:bg-blue-700 transition-all duration-200 flex items-center font-medium group shadow-sm"
             >
               <span className="flex items-center">
                 Try a demo app
@@ -281,6 +196,69 @@ function App() {
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
+              </span>
+            </a>
+          </div>
+
+          {/* Stats row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+            {/* NPM Downloads */}
+            <a
+              href="https://www.npmjs.com/package/@lix-js/sdk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
+            >
+              <svg
+                className="w-5 h-5 text-red-500"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">
+                27k+ monthly downloads
+              </span>
+            </a>
+
+            {/* GitHub Contributors */}
+            <a
+              href="https://github.com/opral/monorepo/graphs/contributors"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
+            >
+              <svg
+                className="w-5 h-5 text-gray-700"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.48 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.645.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">
+                100+ contributors
+              </span>
+            </a>
+
+            {/* MIT License */}
+            <a
+              href="https://github.com/opral/monorepo/blob/main/LICENSE"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
+            >
+              <svg
+                className="w-5 h-5 text-gray-700"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.95-7 10.18-3.87-1.23-7-5.51-7-10.18V6.3l7-3.12zM11 7h2v6h-2V7zm0 8h2v2h-2v-2z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">
+                MIT Open Source
               </span>
             </a>
           </div>
@@ -380,18 +358,22 @@ function App() {
                     <div className="w-3/4 bg-white p-3">
                       {/* Spreadsheet Tab and Toolbar */}
                       <div className="flex mb-2">
-                        <div className="h-6 px-3 bg-blue-500 rounded-t-md text-white text-[8px] font-medium flex items-center mr-1">Budget 2025</div>
-                        <div className="h-6 px-3 bg-gray-200 rounded-t-md text-gray-600 text-[8px] font-medium flex items-center">History</div>
+                        <div className="h-6 px-3 bg-blue-500 rounded-t-md text-white text-[8px] font-medium flex items-center mr-1">
+                          Budget 2025
+                        </div>
+                        <div className="h-6 px-3 bg-gray-200 rounded-t-md text-gray-600 text-[8px] font-medium flex items-center">
+                          History
+                        </div>
                         <div className="ml-auto flex space-x-1">
                           <div className="h-5 w-5 bg-blue-100 rounded flex items-center justify-center">
                             <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
                           </div>
                           <div className="h-5 w-5 bg-gray-100 rounded flex items-center justify-center">
-                            <div className="h-2 w-2 bg-gray-500 rounded-full"></div>
+                            <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Spreadsheet Header Row */}
                       <div className="h-6 w-full bg-gray-100 rounded-t-sm mb-1 flex font-medium">
                         <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
@@ -410,10 +392,13 @@ function App() {
                           <div className="text-[8px] text-gray-600">E</div>
                         </div>
                       </div>
-                      
+
                       {/* Spreadsheet Data Rows */}
                       {[...Array(2)].map((_, i) => (
-                        <div key={i} className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100">
+                        <div
+                          key={i}
+                          className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100"
+                        >
                           <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
                             <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
                           </div>
@@ -431,29 +416,32 @@ function App() {
                           </div>
                         </div>
                       ))}
-                      
+
                       {/* Highlighted Row (Active Edit) */}
-                      <div className="h-5 w-full bg-blue-50 rounded-sm mb-1 flex border-b border-blue-200 shadow-sm">
-                        <div className="w-1/5 border-r border-blue-100 h-full flex items-center">
-                          <div className="h-2 w-1/2 bg-blue-200 mx-1 rounded-sm"></div>
+                      <div className="h-5 w-full bg-gray-100 rounded-sm mb-1 flex border-b border-gray-300 shadow-sm">
+                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center">
+                          <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
                         </div>
-                        <div className="w-1/5 border-r border-blue-100 h-full flex items-center">
-                          <div className="h-2 w-2/3 bg-blue-300 mx-1 rounded-sm"></div>
+                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center">
+                          <div className="h-2 w-2/3 bg-gray-400 mx-1 rounded-sm"></div>
                         </div>
-                        <div className="w-1/5 border-r border-blue-100 h-full flex items-center">
-                          <div className="h-2 w-1/2 bg-blue-200 mx-1 rounded-sm"></div>
+                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center">
+                          <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
                         </div>
-                        <div className="w-1/5 border-r border-blue-100 h-full flex items-center">
-                          <div className="h-2 w-3/4 bg-blue-300 mx-1 rounded-sm"></div>
+                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center">
+                          <div className="h-2 w-3/4 bg-gray-400 mx-1 rounded-sm"></div>
                         </div>
                         <div className="w-1/5 h-full flex items-center">
-                          <div className="h-2 w-1/2 bg-blue-200 mx-1 rounded-sm"></div>
+                          <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
                         </div>
                       </div>
-                      
+
                       {/* Regular Rows */}
                       {[...Array(3)].map((_, i) => (
-                        <div key={i} className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100">
+                        <div
+                          key={i}
+                          className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100"
+                        >
                           <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
                             <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
                           </div>
@@ -472,54 +460,66 @@ function App() {
                         </div>
                       ))}
                     </div>
-                    
+
                     {/* History Panel */}
                     <div className="w-1/4 bg-gray-50 p-2 border-l border-gray-200">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="text-[8px] font-semibold text-gray-600">CELL HISTORY</div>
+                        <div className="text-[8px] font-semibold text-gray-600">
+                          CELL HISTORY
+                        </div>
                         <div className="h-4 w-4 bg-gray-200 rounded-full flex items-center justify-center">
                           <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
                         </div>
                       </div>
-                      
+
                       {/* History Timeline */}
                       <div className="relative mb-2">
-                        <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200"></div>
-                        
+                        <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+
                         <div className="flex items-start mb-2 relative">
                           <div className="h-3 w-3 rounded-full bg-green-500 shadow-sm z-10 mt-1 mr-2"></div>
                           <div className="flex-1">
-                            <div className="text-[8px] font-medium mb-1 text-gray-700">Current Value</div>
+                            <div className="text-[8px] font-medium mb-1 text-gray-700">
+                              Current Value
+                            </div>
                             <div className="h-4 w-full bg-white border border-gray-200 rounded-sm shadow-sm flex items-center px-1">
                               <div className="h-2 w-2/3 bg-green-100 rounded-sm"></div>
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start mb-2 relative">
                           <div className="h-3 w-3 rounded-full bg-blue-500 shadow-sm z-10 mt-1 mr-2"></div>
                           <div className="flex-1">
-                            <div className="text-[8px] font-medium mb-1 text-gray-700">Previous Edit</div>
+                            <div className="text-[8px] font-medium mb-1 text-gray-700">
+                              Previous Edit
+                            </div>
                             <div className="h-4 w-full bg-white border border-gray-200 rounded-sm flex items-center px-1">
                               <div className="h-2 w-1/2 bg-blue-100 rounded-sm"></div>
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start relative">
                           <div className="h-3 w-3 rounded-full bg-gray-400 shadow-sm z-10 mt-1 mr-2"></div>
                           <div className="flex-1">
-                            <div className="text-[8px] font-medium mb-1 text-gray-700">Original Value</div>
+                            <div className="text-[8px] font-medium mb-1 text-gray-700">
+                              Original Value
+                            </div>
                             <div className="h-4 w-full bg-white border border-gray-200 rounded-sm flex items-center px-1">
                               <div className="h-2 w-1/3 bg-gray-200 rounded-sm"></div>
                             </div>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex justify-between">
-                        <div className="h-5 px-2 bg-blue-500 rounded-sm text-white text-[8px] flex items-center justify-center shadow-sm">RESTORE</div>
-                        <div className="h-5 px-2 bg-gray-200 rounded-sm text-gray-600 text-[8px] flex items-center justify-center">COMPARE</div>
+                        <div className="h-5 px-2 bg-blue-500 rounded-sm text-white text-[8px] flex items-center justify-center shadow-sm">
+                          RESTORE
+                        </div>
+                        <div className="h-5 px-2 bg-gray-200 rounded-sm text-gray-600 text-[8px] flex items-center justify-center">
+                          COMPARE
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -588,21 +588,21 @@ function App() {
                         {/* Robot AI Agent Icon - Much more obvious */}
                         <div className="h-16 w-16 mx-auto relative">
                           {/* Robot Head */}
-                          <div className="h-8 w-12 bg-blue-500 rounded-t-lg border-2 border-blue-600 absolute top-0 left-2 flex items-center justify-center shadow-md">
+                          <div className="h-8 w-12 bg-gray-600 rounded-t-lg border-2 border-gray-700 absolute top-0 left-2 flex items-center justify-center shadow-md">
                             {/* Robot Eyes */}
                             <div className="flex space-x-3">
                               <div className="h-2.5 w-2.5 bg-white rounded-full flex items-center justify-center">
-                                <div className="h-1.5 w-1.5 bg-blue-700 rounded-full"></div>
+                                <div className="h-1.5 w-1.5 bg-gray-800 rounded-full"></div>
                               </div>
                               <div className="h-2.5 w-2.5 bg-white rounded-full flex items-center justify-center">
-                                <div className="h-1.5 w-1.5 bg-blue-700 rounded-full"></div>
+                                <div className="h-1.5 w-1.5 bg-gray-800 rounded-full"></div>
                               </div>
                             </div>
                           </div>
                           {/* Robot Body */}
-                          <div className="h-7 w-14 bg-blue-400 rounded-b-lg border-2 border-blue-500 absolute top-8 left-1 flex flex-col items-center justify-center shadow-md">
+                          <div className="h-7 w-14 bg-gray-500 rounded-b-lg border-2 border-gray-600 absolute top-8 left-1 flex flex-col items-center justify-center shadow-md">
                             {/* Mouth/Display */}
-                            <div className="h-1.5 w-8 bg-green-300 rounded-sm mb-1 border border-green-400"></div>
+                            <div className="h-1.5 w-8 bg-gray-300 rounded-sm mb-1 border border-gray-400"></div>
                             <div className="flex space-x-1">
                               <div className="h-1 w-1 bg-red-500 rounded-full"></div>
                               <div className="h-1 w-1 bg-yellow-500 rounded-full"></div>
@@ -614,8 +614,8 @@ function App() {
                             <div className="h-2 w-2 bg-red-500 rounded-full absolute top-[-1px] left-[-0.5px]"></div>
                           </div>
                           {/* Robot Arms */}
-                          <div className="h-1.5 w-4 bg-blue-300 absolute top-10 left-[-2px] rounded-full border border-blue-400"></div>
-                          <div className="h-1.5 w-4 bg-blue-300 absolute top-10 right-[-2px] rounded-full border border-blue-400"></div>
+                          <div className="h-1.5 w-4 bg-gray-400 absolute top-10 left-[-2px] rounded-full border border-gray-500"></div>
+                          <div className="h-1.5 w-4 bg-gray-400 absolute top-10 right-[-2px] rounded-full border border-gray-500"></div>
                         </div>
                         <div className="flex justify-center mt-1">
                           <div className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md">
@@ -663,40 +663,40 @@ function App() {
         </section>
 
         {/* Feature Comparison */}
-        <section className="py-20 bg-gradient-to-r from-white to-gray-50 w-full">
-          <h2 className="text-center text-2xl sm:text-3xl font-bold mb-12 text-gray-800">
+        <section className="py-16 bg-gradient-to-r from-white to-gray-50 w-full">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold mb-16 text-gray-800">
             Out of the box features
           </h2>
 
-          <div className="max-w-[100rem] mx-auto px-8 sm:px-12">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
             {/* Feature 1: Traceability */}
-            <div className="grid grid-cols-1 md:grid-cols-8 gap-8 mb-20 items-start">
-              {/* Left Visual - 30% */}
+            <div className="grid grid-cols-1 md:grid-cols-10 gap-6 mb-16 items-start">
+              {/* Left Visual - smaller image */}
               <div className="md:col-span-3">
-                <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
+                <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
                   <img
                     src="/traceability.png"
                     alt="Traceability"
-                    className="w-full h-auto"
+                    className="w-full h-auto max-w-[200px] mx-auto"
                   />
                 </div>
               </div>
 
               {/* Right Content - 70% */}
-              <div className="md:col-span-5">
-                <h4 className="text-2xl font-medium mb-3 text-blue-600">
+              <div className="md:col-span-7">
+                <h4 className="text-xl font-medium mb-2 text-blue-600">
                   Traceability
                 </h4>
-                <p className="text-gray-700 text-lg mb-2">
+                <p className="text-gray-700 text-base mb-1">
                   Enabling versioning in your app.
                 </p>
-                <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                <p className="text-gray-700 text-base leading-relaxed mb-3">
                   Rollback, branch, or restore any state — even in AI-generated
                   output.
                 </p>
 
                 {/* API */}
-                <div className="bg-white rounded-md p-3 font-mono text-base inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-4">
+                <div className="bg-white rounded-md p-2 font-mono text-sm inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-2">
                   <a
                     href="/docs/api/get-history"
                     className="block w-full h-full"
@@ -711,33 +711,33 @@ function App() {
             </div>
 
             {/* Feature 2: Diffing */}
-            <div className="grid grid-cols-1 md:grid-cols-8 gap-8 mb-20 items-start">
-              {/* Left Visual - 30% */}
+            <div className="grid grid-cols-1 md:grid-cols-10 gap-6 mb-16 items-start">
+              {/* Left Visual - smaller image */}
               <div className="md:col-span-3">
-                <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
+                <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
                   <img
                     src="/a vs b.png"
                     alt="A vs B Diffing"
-                    className="w-full h-auto"
+                    className="w-full h-auto max-w-[200px] mx-auto"
                   />
                 </div>
               </div>
 
               {/* Right Content - 70% */}
-              <div className="md:col-span-5">
-                <h4 className="text-2xl font-medium mb-3 text-blue-600">
+              <div className="md:col-span-7">
+                <h4 className="text-xl font-medium mb-2 text-blue-600">
                   Diffing
                 </h4>
-                <p className="text-gray-700 text-lg mb-2">
+                <p className="text-gray-700 text-base mb-1">
                   Introduce diffing for your data.
                 </p>
-                <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                <p className="text-gray-700 text-base leading-relaxed mb-3">
                   AIs make mistakes. With Lix, you can inspect and merge
                   multiple versions together easily.
                 </p>
 
                 {/* API */}
-                <div className="bg-white rounded-md p-3 font-mono text-base inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-4">
+                <div className="bg-white rounded-md p-2 font-mono text-sm inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-2">
                   <a href="/docs/api/get-diff" className="block w-full h-full">
                     <span className="text-amber-600">lix</span>
                     <span className="text-gray-800">.</span>
@@ -749,33 +749,33 @@ function App() {
             </div>
 
             {/* Feature 3: Change Proposals */}
-            <div className="grid grid-cols-1 md:grid-cols-8 gap-8 mb-20 items-start">
-              {/* Left Visual - 30% */}
+            <div className="grid grid-cols-1 md:grid-cols-10 gap-6 mb-16 items-start">
+              {/* Left Visual - smaller image */}
               <div className="md:col-span-3">
-                <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
+                <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
                   <img
                     src="/change proposal.png"
                     alt="Change Proposal"
-                    className="w-full h-auto"
+                    className="w-full h-auto max-w-[200px] mx-auto"
                   />
                 </div>
               </div>
 
               {/* Right Content - 70% */}
-              <div className="md:col-span-5">
-                <h4 className="text-2xl font-medium mb-3 text-blue-600">
+              <div className="md:col-span-7">
+                <h4 className="text-xl font-medium mb-2 text-blue-600">
                   Change Proposals
                 </h4>
-                <p className="text-gray-700 text-lg mb-2">
+                <p className="text-gray-700 text-base mb-1">
                   Build collaboration features with humans & AI agents.
                 </p>
-                <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                <p className="text-gray-700 text-base leading-relaxed mb-3">
                   Let other people or the AI suggest changes, review and accept
                   them.
                 </p>
 
                 {/* API */}
-                <div className="bg-white rounded-md p-3 font-mono text-base inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-4">
+                <div className="bg-white rounded-md p-2 font-mono text-sm inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-2">
                   <a
                     href="/docs/api/create-proposal"
                     className="block w-full h-full"
@@ -823,7 +823,7 @@ function App() {
               </div>
             </a>
             <a
-              href="https://discord.gg/opral"
+              href="https://discord.gg/cAby6NTwyT"
               className="h-44 bg-gray-50 text-gray-800 rounded-lg p-6 font-medium hover:bg-gray-100 transition-all duration-200 border border-gray-200 hover:border-gray-300 flex flex-col justify-between group"
             >
               <span className="text-xl font-semibold">Join Discord</span>
@@ -834,7 +834,7 @@ function App() {
               </div>
             </a>
             <a
-              href="https://github.com/opral/monorepo"
+              href="https://github.com/opral/lix-sdk"
               className="h-44 bg-gray-50 text-gray-800 rounded-lg p-6 font-medium hover:bg-gray-100 transition-all duration-200 border border-gray-200 hover:border-gray-300 flex flex-col justify-between group"
             >
               <span className="text-xl font-semibold">Visit GitHub</span>
@@ -845,7 +845,7 @@ function App() {
               </div>
             </a>
             <a
-              href="https://substack.com/profile/21812518-opral"
+              href="https://opral.substack.com/"
               className="h-44 bg-gray-50 text-gray-800 rounded-lg p-6 font-medium hover:bg-gray-100 transition-all duration-200 border border-gray-200 hover:border-gray-300 flex flex-col justify-between group"
             >
               <span className="text-xl font-semibold">Read Substack</span>
@@ -861,34 +861,16 @@ function App() {
 
       {/* Footer */}
       <footer className="max-w-3xl mx-auto px-5 py-16 text-center border-t border-gray-100 mt-10">
-        <div className="flex justify-center space-x-8 mb-8">
+        <div className="mb-8">
           <a
-            href="https://opral.io"
+            href="https://opral.com"
             className="text-gray-500 hover:text-gray-800 transition-colors duration-200"
           >
-            opral.io
-          </a>
-          <a
-            href="/privacy"
-            className="text-gray-500 hover:text-gray-800 transition-colors duration-200"
-          >
-            Privacy
-          </a>
-          <a
-            href="/terms"
-            className="text-gray-500 hover:text-gray-800 transition-colors duration-200"
-          >
-            Terms
-          </a>
-          <a
-            href="/contact"
-            className="text-gray-500 hover:text-gray-800 transition-colors duration-200"
-          >
-            Contact
+            opral.com
           </a>
         </div>
         <p className="text-gray-400 text-sm">
-          ©opral (c) 2025 • Building better collaborative software
+          ©Opral (c) 2025 • The Change Control Company
         </p>
       </footer>
     </div>
