@@ -5,7 +5,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { handleStateMutation } from "./handle-state-mutation.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
-// import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
+import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
@@ -149,36 +149,73 @@ export function applyStateDatabaseSchema(
 			},
 
 			xCommit: () => {
-				// const currentTime = new Date().toISOString();
+				const currentTime = new Date().toISOString();
 
 				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
 				// using the same id for snapshot_id in internal_change as in internal_snapshot.
 				const changesWithoutChangeSets = sqlite.exec({
-					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, version_id, snapshot_content, created_at FROM internal_change_in_transaction ORDER BY version_id",
+					sql: `
+						SELECT 
+							id, 
+							entity_id, 
+							schema_key, 
+							schema_version, 
+							file_id, 
+							plugin_key, 
+							version_id, 
+							CASE 
+								WHEN snapshot_content IS NOT NULL THEN json(snapshot_content) 
+								ELSE NULL 
+							END as snapshot_content, 
+							created_at 
+						FROM internal_change_in_transaction 
+						ORDER BY version_id
+					`,
 					returnValue: "resultRows",
 				});
 
 				// Group changes by version_id
-				const changesByVersion = new Map<string, any[]>();
+				const changesByVersion = new Map<
+					string,
+					{
+						id: string;
+						entity_id: string;
+						schema_key: string;
+						schema_version: string;
+						file_id: string;
+						plugin_key: string;
+						created_at: string;
+						snapshot_content: string | null;
+					}[]
+				>();
 				for (const changeWithoutChangeset of changesWithoutChangeSets) {
 					const version_id = changeWithoutChangeset[6] as string;
 					if (!changesByVersion.has(version_id)) {
 						changesByVersion.set(version_id, []);
 					}
-					changesByVersion.get(version_id)!.push(changeWithoutChangeset);
+					changesByVersion.get(version_id)!.push({
+						id: changeWithoutChangeset[0] as string,
+						entity_id: changeWithoutChangeset[1] as string,
+						schema_key: changeWithoutChangeset[2] as string,
+						schema_version: changeWithoutChangeset[3] as string,
+						file_id: changeWithoutChangeset[4] as string,
+						plugin_key: changeWithoutChangeset[5] as string,
+						snapshot_content: changeWithoutChangeset[7] as string,
+						created_at: changeWithoutChangeset[8] as string,
+					});
 				}
 
 				// Process each version's changes to create changesets
-				// for (const [version_id, versionChanges] of changesByVersion) {
-				// Create changeset and edges for this version's transaction
-				// createChangesetForTransaction(
-				// 	sqlite,
-				// 	db as any,
-				// 	currentTime,
-				// 	version_id,
-				// 	versionChanges
-				// );
-				// }
+				for (const [version_id, versionChanges] of changesByVersion) {
+					// Create changeset and edges for this version's transaction
+					createChangesetForTransaction(
+						sqlite,
+						db as any,
+						currentTime,
+						version_id,
+						versionChanges
+					);
+				}
 
 				const changesToRealize = sqlite.exec({
 					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, version_id, snapshot_content, created_at FROM internal_change_in_transaction ORDER BY version_id",
@@ -216,7 +253,7 @@ export function applyStateDatabaseSchema(
 
 					// Insert into internal_change
 					sqlite.exec({
-						sql: `INSERT OR IGNORE INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
+						sql: `INSERT INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
 							   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 						bind: [
 							id,
@@ -228,6 +265,7 @@ export function applyStateDatabaseSchema(
 							snapshot_id,
 							created_at,
 						],
+						returnValue: "resultRows",
 					});
 				}
 
@@ -533,51 +571,7 @@ export function applyStateDatabaseSchema(
 						// handle DELETE differently:
 						// we query the row by rowid and pass it to handleStateMutation
 
-						const rowToDelete = sqlite.exec({
-							sql: "SELECT * FROM state WHERE rowid = ?",
-							bind: [args[0]],
-							returnValue: "resultRows",
-						})[0]!;
-
-						const entity_id = rowToDelete[0];
-						const schema_key = rowToDelete[1];
-						const file_id = rowToDelete[2];
-						const version_id = rowToDelete[3];
-						const plugin_key = rowToDelete[4];
-						const snapshot_content = rowToDelete[5];
-						const schema_version = rowToDelete[6];
-
-						const storedSchemaResult = sqlite.exec({
-							sql: "SELECT value FROM stored_schema WHERE key = ?",
-							bind: [String(schema_key)],
-							returnValue: "resultRows",
-						});
-
-						const storedSchema =
-							storedSchemaResult && storedSchemaResult.length > 0
-								? storedSchemaResult[0]![0]
-								: null;
-
-						validateStateMutation({
-							lix: { sqlite, db: db as any },
-							schema: storedSchema ? JSON.parse(storedSchema as string) : null,
-							snapshot_content: JSON.parse(snapshot_content as string),
-							operation: "delete",
-							entity_id: String(entity_id),
-							version_id: String(version_id),
-						});
-
-						handleStateMutation(
-							sqlite,
-							db,
-							String(entity_id),
-							String(schema_key),
-							String(file_id),
-							String(plugin_key),
-							null, // No snapshot content for DELETE
-							String(version_id),
-							String(schema_version)
-						);
+						handleStateDelete(sqlite, args[0]! as number, db);
 
 						return capi.SQLITE_OK;
 					}
@@ -771,6 +765,58 @@ export function applyStateDatabaseSchema(
 `;
 
 	return sqlite.exec(sql);
+}
+
+export function handleStateDelete(
+	sqlite: SqliteWasmDatabase,
+	rowId: number,
+	db: Kysely<LixInternalDatabaseSchema>
+): void {
+	const rowToDelete = sqlite.exec({
+		sql: "SELECT * FROM state WHERE rowid = ?",
+		bind: [rowId],
+		returnValue: "resultRows",
+	})[0]!;
+
+	const entity_id = rowToDelete[0];
+	const schema_key = rowToDelete[1];
+	const file_id = rowToDelete[2];
+	const version_id = rowToDelete[3];
+	const plugin_key = rowToDelete[4];
+	const snapshot_content = rowToDelete[5];
+	const schema_version = rowToDelete[6];
+
+	const storedSchemaResult = sqlite.exec({
+		sql: "SELECT value FROM stored_schema WHERE key = ?",
+		bind: [String(schema_key)],
+		returnValue: "resultRows",
+	});
+
+	const storedSchema =
+		storedSchemaResult && storedSchemaResult.length > 0
+			? storedSchemaResult[0]![0]
+			: null;
+
+	validateStateMutation({
+		lix: { sqlite, db: db as any },
+		schema: storedSchema ? JSON.parse(storedSchema as string) : null,
+		snapshot_content: JSON.parse(snapshot_content as string),
+		operation: "delete",
+		entity_id: String(entity_id),
+		version_id: String(version_id),
+	});
+
+	handleStateMutation(
+		sqlite,
+		db,
+		String(entity_id),
+		String(schema_key),
+		String(file_id),
+		String(plugin_key),
+		null, // No snapshot content for DELETE
+		String(version_id),
+		String(schema_version)
+	);
 }
 
 // Helper functions for the virtual table

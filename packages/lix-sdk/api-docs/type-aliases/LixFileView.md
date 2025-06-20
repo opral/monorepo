@@ -8,7 +8,7 @@
 
 > **LixFileView** = `object`
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:240](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/file/schema.ts#L240)
+Defined in: [packages/lix-sdk/src/file/schema.ts:240](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/file/schema.ts#L240)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/file/schema.ts:240](https://github.com/opral/m
 
 > **data**: `Uint8Array`
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:252](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/file/schema.ts#L252)
+Defined in: [packages/lix-sdk/src/file/schema.ts:252](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/file/schema.ts#L252)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/lix-sdk/src/file/schema.ts:252](https://github.com/opral/m
 
 > **id**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:241](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/file/schema.ts#L241)
+Defined in: [packages/lix-sdk/src/file/schema.ts:241](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/file/schema.ts#L241)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/lix-sdk/src/file/schema.ts:241](https://github.com/opral/m
 
 > **lixcol\_created\_at**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:255](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/file/schema.ts#L255)
+Defined in: [packages/lix-sdk/src/file/schema.ts:255](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/file/schema.ts#L255)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/lix-sdk/src/file/schema.ts:255](https://github.com/opral/m
 
 > **lixcol\_inherited\_from\_version\_id**: `Generated`\<`string` \| `null`\>
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:254](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/file/schema.ts#L254)
+Defined in: [packages/lix-sdk/src/file/schema.ts:254](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/file/schema.ts#L254)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/lix-sdk/src/file/schema.ts:254](https://github.com/opral/m
 
 > **lixcol\_updated\_at**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:256](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/file/schema.ts#L256)
+Defined in: [packages/lix-sdk/src/file/schema.ts:256](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/file/schema.ts#L256)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/lix-sdk/src/file/schema.ts:256](https://github.com/opral/m
 
 > **metadata**: `Record`\<`string`, `any`\> \| `null`
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:253](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/file/schema.ts#L253)
+Defined in: [packages/lix-sdk/src/file/schema.ts:253](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/file/schema.ts#L253)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/lix-sdk/src/file/schema.ts:253](https://github.com/opral/m
 
 > **path**: `string`
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:251](https://github.com/opral/monorepo/blob/0501d8fe7eed9db1f8058e8d1d58b1d613ceaf43/packages/lix-sdk/src/file/schema.ts#L251)
+Defined in: [packages/lix-sdk/src/file/schema.ts:251](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/file/schema.ts#L251)
 
 The path of the file.
 
