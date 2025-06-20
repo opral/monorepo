@@ -1,10 +1,12 @@
 import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
 import { materializeFileData } from "./materialize-file-data.js";
+import { materializeFileDataAtChangeset } from "./materialize-file-data-at-changeset.js";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyFileDatabaseSchema(
@@ -81,6 +83,24 @@ export function applyFileDatabaseSchema(
 					metadata: args[3],
 				},
 				versionId: args[2],
+			});
+		},
+	});
+
+	lix.sqlite.createFunction({
+		name: "materialize_file_data_at_changeset",
+		arity: 5,
+		deterministic: false,
+		xFunc: (_ctx: number, ...args: any[]) => {
+			return materializeFileDataAtChangeset({
+				lix,
+				file: {
+					id: args[0],
+					path: args[1],
+					metadata: args[4],
+				},
+				changeSetId: args[2],
+				depth: args[3],
 			});
 		},
 	});
@@ -201,6 +221,27 @@ export function applyFileDatabaseSchema(
         AND schema_key = 'lix_file'
         AND version_id = OLD.lixcol_version_id;
   END;
+
+  CREATE VIEW IF NOT EXISTS file_history AS
+  SELECT
+    json_extract(snapshot_content, '$.id') AS id,
+    json_extract(snapshot_content, '$.path') AS path,
+    materialize_file_data_at_changeset(
+      json_extract(snapshot_content, '$.id'),
+      json_extract(snapshot_content, '$.path'),
+      change_set_id,
+      depth,
+      json_extract(snapshot_content, '$.metadata')
+    ) AS data,
+    json_extract(snapshot_content, '$.metadata') AS metadata,
+    file_id AS lixcol_file_id,
+    plugin_key AS lixcol_plugin_key,
+    schema_version AS lixcol_schema_version,
+    change_id AS lixcol_change_id,
+    change_set_id AS lixcol_change_set_id,
+    depth AS lixcol_depth
+  FROM state_history
+  WHERE schema_key = 'lix_file';
 `);
 }
 
@@ -276,6 +317,23 @@ export type LixFileAllView = {
 	lixcol_created_at: Generated<string>;
 	lixcol_updated_at: Generated<string>;
 };
+
+// Database view type for historical operations
+export type LixFileHistoryView = {
+	id: Generated<string>;
+	/**
+	 * The path of the file.
+	 *
+	 * The path is currently defined as a subset of RFC 3986.
+	 * Any path can be tested with the `isValidFilePath()` function.
+	 *
+	 * @example
+	 *   - `/path/to/file.txt`
+	 */
+	path: string;
+	data: Uint8Array;
+	metadata: Record<string, any> | null;
+} & StateEntityHistoryView;
 
 /**
  * Kysely operation types for the file view.

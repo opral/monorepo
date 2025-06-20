@@ -11,6 +11,7 @@ import type {
 	StateEntityAllView,
 } from "../entity-views/entity-view-builder.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 
 export function applyKeyValueDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	return createEntityViewsIfNotExists({
@@ -60,6 +61,12 @@ export type KeyValueAllView = {
 	key: KeyValueKeys;
 	value: any; // JSONType, can be any valid JSON value
 } & StateEntityAllView;
+
+// Database view type for historical operations
+export type KeyValueHistoryView = {
+	key: KeyValueKeys;
+	value: any; // JSONType, can be any valid JSON value
+} & StateEntityHistoryView;
 
 // Kysely operation types
 export type KeyValue = Selectable<KeyValueView>;

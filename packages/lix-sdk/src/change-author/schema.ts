@@ -9,6 +9,7 @@ import {
 	type StateEntityView,
 	type StateEntityAllView,
 } from "../entity-views/entity-view-builder.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 
 export function applyChangeAuthorDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -62,6 +63,12 @@ export type ChangeAuthorAllView = {
 	change_id: string;
 	account_id: string;
 } & StateEntityAllView;
+
+// Database view type for historical operations
+export type ChangeAuthorHistoryView = {
+	change_id: string;
+	account_id: string;
+} & StateEntityHistoryView;
 
 // Kysely operation types
 export type ChangeAuthor = Selectable<ChangeAuthorView>;

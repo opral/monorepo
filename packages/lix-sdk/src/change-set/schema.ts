@@ -9,6 +9,7 @@ import {
 	type StateEntityView,
 	type StateEntityAllView,
 } from "../entity-views/entity-view-builder.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 import { nanoid } from "../database/nano-id.js";
 
 export function applyChangeSetDatabaseSchema(
@@ -94,6 +95,12 @@ export type ChangeSetAllView = {
 	metadata: Record<string, any> | null;
 } & StateEntityAllView;
 
+// Database view type for historical operations
+export type ChangeSetHistoryView = {
+	id: Generated<string>;
+	metadata: Record<string, any> | null;
+} & StateEntityHistoryView;
+
 // Kysely operation types
 export type ChangeSet = Selectable<ChangeSetView>;
 export type NewChangeSet = Insertable<ChangeSetView>;
@@ -160,6 +167,15 @@ export type ChangeSetElementAllView = {
 	file_id: string;
 } & StateEntityAllView;
 
+// Database view type for historical operations
+export type ChangeSetElementHistoryView = {
+	change_set_id: string;
+	change_id: string;
+	entity_id: string;
+	schema_key: string;
+	file_id: string;
+} & StateEntityHistoryView;
+
 // Kysely operation types
 export type ChangeSetElement = Selectable<ChangeSetElementView>;
 export type NewChangeSetElement = Insertable<ChangeSetElementView>;
@@ -205,6 +221,12 @@ export type ChangeSetEdgeAllView = {
 	parent_id: string;
 	child_id: string;
 } & StateEntityAllView;
+
+// Database view type for historical operations
+export type ChangeSetEdgeHistoryView = {
+	parent_id: string;
+	child_id: string;
+} & StateEntityHistoryView;
 
 // Kysely operation types
 export type ChangeSetEdge = Selectable<ChangeSetEdgeView>;
@@ -255,6 +277,13 @@ export type ChangeSetLabelAllView = {
 	metadata: Record<string, any> | null;
 } & StateEntityAllView;
 
+// Database view type for historical operations
+export type ChangeSetLabelHistoryView = {
+	change_set_id: string;
+	label_id: string;
+	metadata: Record<string, any> | null;
+} & StateEntityHistoryView;
+
 // Kysely operation types
 export type ChangeSetLabel = Selectable<ChangeSetLabelView>;
 export type NewChangeSetLabel = Insertable<ChangeSetLabelView>;
@@ -300,6 +329,12 @@ export type ChangeSetThreadAllView = {
 	change_set_id: string;
 	thread_id: string;
 } & StateEntityAllView;
+
+// Database view type for historical operations
+export type ChangeSetThreadHistoryView = {
+	change_set_id: string;
+	thread_id: string;
+} & StateEntityHistoryView;
 
 // Kysely operation types
 export type ChangeSetThread = Selectable<ChangeSetThreadView>;

@@ -9,6 +9,7 @@ import {
 	type StateEntityView,
 	type StateEntityAllView,
 } from "../entity-views/entity-view-builder.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 import { nanoid } from "../database/nano-id.js";
 
 export function applyLabelDatabaseSchema(
@@ -90,6 +91,12 @@ export type LabelAllView = {
 	id: Generated<string>;
 	name: string;
 } & StateEntityAllView;
+
+// Database view type for historical operations
+export type LabelHistoryView = {
+	id: Generated<string>;
+	name: string;
+} & StateEntityHistoryView;
 
 // Kysely operation types
 export type Label = Selectable<LabelView>;

@@ -1,6 +1,7 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "../version/create-version.js";
+import { createCheckpoint } from "../change-set/create-checkpoint.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 
@@ -427,4 +428,76 @@ test("the plugin is the source of truth. the fallback plugin is not invoked if a
 		.executeTakeFirst();
 
 	expect(fileAfterDelete).toBeUndefined();
+});
+
+test("file_history provides access to historical file data", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// 1. Insert file
+	const initialData = { prop0: "initial-value" };
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "test-file",
+			path: "/test.json",
+			data: new TextEncoder().encode(JSON.stringify(initialData)),
+		})
+		.execute();
+
+	// 2. Create checkpoint
+	const checkpoint = await createCheckpoint({
+		lix,
+	});
+
+	// 3. Update file
+	const updatedData = { prop0: "updated-value" };
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", "test-file")
+		.set({
+			data: new TextEncoder().encode(JSON.stringify(updatedData)),
+		})
+		.execute();
+
+	// 4. Query file, assert that file equals update
+	const currentFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "test-file")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const currentFileData = JSON.parse(
+		new TextDecoder().decode(currentFile.data)
+	);
+	expect(currentFileData).toEqual(updatedData);
+
+	// 5. Query history at checkpoint and assert is initial
+	const historicalFiles = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", "test-file")
+		.where("lixcol_change_set_id", "=", checkpoint.id)
+		.where("lixcol_depth", "=", 0)
+		.selectAll()
+		.execute();
+
+	expect(historicalFiles).toHaveLength(1);
+
+	const historicalFile = historicalFiles[0]!;
+	const historicalFileData = JSON.parse(
+		new TextDecoder().decode(historicalFile.data)
+	);
+
+	expect(historicalFileData).toEqual(initialData);
+	expect(historicalFile.id).toBe("test-file");
+	expect(historicalFile.path).toBe("/test.json");
+
+	// Verify historical file has the expected history columns
+	expect(historicalFile.lixcol_change_set_id).toBe(checkpoint.id);
+	expect(historicalFile.lixcol_depth).toBe(0);
+	expect(historicalFile.lixcol_change_id).toBeDefined();
+	expect(historicalFile.lixcol_file_id).toBeDefined();
+	expect(historicalFile.lixcol_plugin_key).toBeDefined();
+	expect(historicalFile.lixcol_schema_version).toBeDefined();
 });
