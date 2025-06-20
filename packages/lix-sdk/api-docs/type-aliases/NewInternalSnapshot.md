@@ -8,4 +8,4 @@
 
 > **NewInternalSnapshot** = `Insertable`\<[`InternalSnapshotTable`](InternalSnapshotTable.md)\>
 
-Defined in: [packages/lix-sdk/src/snapshot/schema.ts:64](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/snapshot/schema.ts#L64)
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:64](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/snapshot/schema.ts#L64)

@@ -8,7 +8,7 @@
 
 > `const` **LixAccountSchema**: `object`
 
-Defined in: [packages/lix-sdk/src/account/schema.ts:57](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/account/schema.ts#L57)
+Defined in: [packages/lix-sdk/src/account/schema.ts:58](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/account/schema.ts#L58)
 
 ## Type declaration
 

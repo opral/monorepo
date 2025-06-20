@@ -8,7 +8,7 @@
 
 > **createLog**(`args`): `Promise`\<\{ `created_at`: `string`; `id`: `string`; `key`: `string`; `level`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `message`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/log/create-log.ts:27](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/log/create-log.ts#L27)
+Defined in: [packages/lix-sdk/src/log/create-log.ts:27](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/log/create-log.ts#L27)
 
 Directly creates a log entry in the Lix database without applying any filters.
 

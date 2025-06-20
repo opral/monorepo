@@ -8,7 +8,7 @@
 
 > **KeyValueAllView** = `object` & `StateEntityAllView`
 
-Defined in: [packages/lix-sdk/src/key-value/schema.ts:59](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/key-value/schema.ts#L59)
+Defined in: [packages/lix-sdk/src/key-value/schema.ts:60](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/key-value/schema.ts#L60)
 
 ## Type declaration
 

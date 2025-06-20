@@ -8,7 +8,7 @@
 
 > **createAccount**(`args`): `Promise`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `name`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/account/create-account.ts:5](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/account/create-account.ts#L5)
+Defined in: [packages/lix-sdk/src/account/create-account.ts:5](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/account/create-account.ts#L5)
 
 ## Parameters
 

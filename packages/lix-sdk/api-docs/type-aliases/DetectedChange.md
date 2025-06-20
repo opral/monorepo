@@ -8,7 +8,7 @@
 
 > **DetectedChange**\<`T`\> = `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:97](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/plugin/lix-plugin.ts#L97)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:97](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/plugin/lix-plugin.ts#L97)
 
 A detected change that lix ingests in to the database.
 
@@ -48,7 +48,7 @@ Type narrowing with a change schema:
 
 > **entity\_id**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:98](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/plugin/lix-plugin.ts#L98)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:98](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/plugin/lix-plugin.ts#L98)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:98](https://github.com/op
 
 > **schema**: [`LixSchemaDefinition`](LixSchemaDefinition.md)
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:99](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/plugin/lix-plugin.ts#L99)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:99](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/plugin/lix-plugin.ts#L99)
 
 ***
 
@@ -64,6 +64,6 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:99](https://github.com/op
 
 > **snapshot\_content**: `T` \| `null`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:103](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/plugin/lix-plugin.ts#L103)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:103](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/plugin/lix-plugin.ts#L103)
 
 The change is considered a deletion if `snapshot_content` is `null`.

@@ -8,7 +8,7 @@
 
 > **applyChangeSet**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/change-set/apply-change-set.ts:9](https://github.com/opral/monorepo/blob/3bcc1f95be292671fbdc30a84e807512030f233b/packages/lix-sdk/src/change-set/apply-change-set.ts#L9)
+Defined in: [packages/lix-sdk/src/change-set/apply-change-set.ts:9](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/change-set/apply-change-set.ts#L9)
 
 Applies a change set to the lix.
 
