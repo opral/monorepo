@@ -254,7 +254,7 @@ export function applyStateDatabaseSchema(
 					// Insert into internal_change
 					sqlite.exec({
 						sql: `INSERT INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
-							   VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
+							   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 						bind: [
 							id,
 							entity_id,
