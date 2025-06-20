@@ -8,7 +8,8 @@ import {
 	createEntityViewsIfNotExists,
 	type StateEntityView,
 	type StateEntityAllView,
-} from "../state/entity-view-builder.js";
+} from "../entity-views/entity-view-builder.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 import { nanoid } from "../database/nano-id.js";
 import { humanId } from "human-id";
 
@@ -95,6 +96,15 @@ export type VersionAllView = {
 	working_change_set_id: string;
 	inherits_from_version_id: string | null;
 } & StateEntityAllView;
+
+// Database view type for historical operations
+export type VersionHistoryView = {
+	id: Generated<string>;
+	name: Generated<string>;
+	change_set_id: string;
+	working_change_set_id: string;
+	inherits_from_version_id: string | null;
+} & StateEntityHistoryView;
 
 // Kysely operation types
 export type Version = Selectable<VersionView>;

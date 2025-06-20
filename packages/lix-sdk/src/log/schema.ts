@@ -8,7 +8,8 @@ import {
 	createEntityViewsIfNotExists,
 	type StateEntityView,
 	type StateEntityAllView,
-} from "../state/entity-view-builder.js";
+} from "../entity-views/entity-view-builder.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 import { nanoid } from "../database/nano-id.js";
 
 export function applyLogDatabaseSchema(
@@ -94,6 +95,9 @@ export type LogView = LogEntryBase & StateEntityView;
 
 // Database view type for cross-version operations
 export type LogAllView = LogEntryBase & StateEntityAllView;
+
+// Database view type for historical operations
+export type LogHistoryView = LogEntryBase & StateEntityHistoryView;
 
 // Kysely operation types
 export type Log = Selectable<LogView>;

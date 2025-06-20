@@ -9,7 +9,8 @@ import {
 	createEntityViewsIfNotExists,
 	type StateEntityView,
 	type StateEntityAllView,
-} from "../state/entity-view-builder.js";
+} from "../entity-views/entity-view-builder.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 
 export function applyThreadDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -113,6 +114,19 @@ export type ThreadCommentAllView = {
 	parent_id: string | null;
 	body: ZettelDoc;
 } & StateEntityAllView;
+
+// Database view type for historical operations
+export type ThreadHistoryView = {
+	id: Generated<string>;
+	metadata: Record<string, any> | null;
+} & StateEntityHistoryView;
+
+export type ThreadCommentHistoryView = {
+	id: Generated<string>;
+	thread_id: string;
+	parent_id: string | null;
+	body: ZettelDoc;
+} & StateEntityHistoryView;
 
 // Kysely operation types
 export type Thread = Selectable<ThreadView>;

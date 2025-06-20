@@ -9,7 +9,8 @@ import {
 	createEntityViewsIfNotExists,
 	type StateEntityView,
 	type StateEntityAllView,
-} from "../state/entity-view-builder.js";
+} from "../entity-views/entity-view-builder.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
@@ -82,6 +83,12 @@ export type AccountAllView = {
 	id: Generated<string>;
 	name: string;
 } & StateEntityAllView;
+
+// Database view type for historical operations  
+export type AccountHistoryView = {
+	id: Generated<string>;
+	name: string;
+} & StateEntityHistoryView;
 
 // Kysely operation types
 export type Account = Selectable<AccountView>;

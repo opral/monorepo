@@ -27,32 +27,6 @@ export type StateEntityView = {
 };
 
 /**
- * Base type for _all entity views (cross-version) that include operational columns from the state table.
- * These views expose lixcol_version_id for version-specific operations.
- *
- * @example
- * ```typescript
- * // Define an entity view type for cross-version operations
- * export type AccountAllView = {
- *   id: Generated<string>;
- *   name: string;
- * } & StateEntityAllView;
- * ```
- */
-export type StateEntityAllView = {
-	/** File identifier where this entity is stored */
-	lixcol_file_id: Generated<string>;
-	/** Version identifier when this entity was created/modified */
-	lixcol_version_id: Generated<string>;
-	/** Version identifier this entity was inherited from (for branching) */
-	lixcol_inherited_from_version_id: Generated<string | null>;
-	/** Timestamp when this entity was created */
-	lixcol_created_at: Generated<string>;
-	/** Timestamp when this entity was last updated */
-	lixcol_updated_at: Generated<string>;
-};
-
-/**
  * Validation rule for SQL trigger generation.
  */
 export type ValidationRule = {
@@ -76,14 +50,10 @@ export type ValidationCallbacks = {
 };
 
 /**
- * Creates SQL views and CRUD triggers for an entity based on its schema definition.
+ * Creates SQL view and CRUD triggers for an entity based on its schema definition (active version only).
  *
- * This function automatically generates two views:
- * - Primary view (e.g., "key_value") - uses state_active (active version only)
- * - All view (e.g., "key_value_all") - uses state (all versions)
- *
- * Each view includes:
- * - A view that extracts JSON properties from the state table
+ * This function generates:
+ * - A view that extracts JSON properties from the state_active table
  * - INSERT trigger that serializes entity data to JSON in the state table
  * - UPDATE trigger that updates the corresponding state record
  * - DELETE trigger that removes the state record
@@ -93,17 +63,16 @@ export type ValidationCallbacks = {
  * @example
  * ```typescript
  * // Basic usage for key-value entities
- * createEntityViewsIfNotExists({
+ * createEntityViewIfNotExists({
  *   lix,
  *   schema: LixKeyValueSchema,
  *   overrideName: "key_value",
  *   pluginKey: "lix_key_value",
  *   hardcodedFileId: "lix"
  * });
- * // Creates: key_value (active only) and key_value_all (all versions)
  *
  * // With default values for account entities
- * createEntityViewsIfNotExists({
+ * createEntityViewIfNotExists({
  *   lix,
  *   schema: LixAccountSchema,
  *   overrideName: "account",
@@ -113,25 +82,9 @@ export type ValidationCallbacks = {
  *     id: (row) => nanoid()
  *   }
  * });
- * // Creates: account (active only) and account_all (all versions)
- *
- * // With custom validation
- * createEntityViewsIfNotExists({
- *   lix,
- *   schema: LixStoredSchemaSchema,
- *   overrideName: "stored_schema",
- *   pluginKey: "lix_own_entity",
- *   hardcodedFileId: "lix",
- *   validation: {
- *     onInsert: [{
- *       condition: "NEW.key IS NULL OR NEW.key = json_extract(NEW.value, '$.x-lix-key')",
- *       errorMessage: "Key must match value.x-lix-key"
- *     }]
- *   }
- * });
  * ```
  */
-export function createEntityViewsIfNotExists(args: {
+export function createEntityStateView(args: {
 	lix: Pick<Lix, "sqlite">;
 	schema: LixSchemaDefinition;
 	/** Overrides the view name which defaults to schema["x-lix-key"] */
@@ -140,7 +93,7 @@ export function createEntityViewsIfNotExists(args: {
 	pluginKey: string;
 	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
 	hardcodedFileId?: string;
-	/** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
+	/** Optional hardcoded version_id (if not provided, uses active version) */
 	hardcodedVersionId?: string;
 	/** Object mapping property names to functions that generate default values */
 	defaultValues?: Record<
@@ -152,16 +105,10 @@ export function createEntityViewsIfNotExists(args: {
 }): void {
 	const view_name = args.overrideName ?? args.schema["x-lix-key"];
 
-	// Create both the primary view (active only) and the _all view (all versions)
 	createSingleEntityView({
 		...args,
 		viewName: view_name,
 		stateTable: "state_active",
-	});
-	createSingleEntityView({
-		...args,
-		viewName: view_name + "_all",
-		stateTable: "state",
 	});
 }
 
@@ -169,12 +116,12 @@ function createSingleEntityView(args: {
 	lix: Pick<Lix, "sqlite">;
 	schema: LixSchemaDefinition;
 	viewName: string;
-	stateTable: "state" | "state_active";
+	stateTable: "state_active";
 	/** Plugin identifier for the entity */
 	pluginKey: string;
 	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
 	hardcodedFileId?: string;
-	/** Optional hardcoded version_id (if not provided, uses lixcol_version_id from mutations or active version) */
+	/** Optional hardcoded version_id (if not provided, uses active version) */
 	hardcodedVersionId?: string;
 	/** Object mapping property names to functions that generate default values */
 	defaultValues?: Record<
@@ -285,39 +232,22 @@ function createSingleEntityView(args: {
 	const hasDefaults =
 		args.defaultValues && Object.keys(args.defaultValues).length > 0;
 
-	// Choose which operational columns to expose based on whether this is the _all view
-	const isAllView = args.viewName.endsWith("_all");
-	const operationalColumns = isAllView
-		? [
-				"version_id AS lixcol_version_id",
-				"inherited_from_version_id AS lixcol_inherited_from_version_id",
-				"created_at AS lixcol_created_at",
-				"updated_at AS lixcol_updated_at",
-				"file_id AS lixcol_file_id",
-			]
-		: [
-				"inherited_from_version_id AS lixcol_inherited_from_version_id",
-				"created_at AS lixcol_created_at",
-				"updated_at AS lixcol_updated_at",
-				"file_id AS lixcol_file_id",
-			];
+	// Operational columns for active view (no version_id exposed)
+	const operationalColumns = [
+		"inherited_from_version_id AS lixcol_inherited_from_version_id",
+		"created_at AS lixcol_created_at",
+		"updated_at AS lixcol_updated_at",
+		"file_id AS lixcol_file_id",
+	];
 
-	// Handle version_id column availability based on view type and hardcoded version
+	// Handle version_id for active view
 	const versionIdReference = args.hardcodedVersionId
 		? `'${args.hardcodedVersionId}'`
-		: isAllView
-			? "COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))"
-			: "(SELECT version_id FROM active_version)";
-
-	const versionIdInDefaults = isAllView
-		? "NEW.lixcol_version_id AS lixcol_version_id,"
-		: "";
+		: "(SELECT version_id FROM active_version)";
 
 	const oldVersionIdReference = args.hardcodedVersionId
 		? `'${args.hardcodedVersionId}'`
-		: isAllView
-			? "OLD.lixcol_version_id"
-			: "(SELECT version_id FROM active_version)";
+		: "(SELECT version_id FROM active_version)";
 
 	// Generate validation SQL
 	const generateValidationSQL = (rules: ValidationRule[]): string => {
@@ -383,7 +313,6 @@ function createSingleEntityView(args: {
         FROM (
           SELECT
             ${defaultsSubquery},
-            ${versionIdInDefaults}
             NEW.lixcol_file_id AS lixcol_file_id
         ) AS with_default_values`
 						: `

@@ -1,9 +1,9 @@
 import { test, expect, describe } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createEntityViewsIfNotExists } from "./entity-view-builder.js";
+import { createEntityStateView } from "./entity-state.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
-describe("createEntityViewsIfNotExists", () => {
+describe("createEntityViewIfNotExists", () => {
 	const testSchema: LixSchemaDefinition = {
 		"x-lix-key": "test_entity",
 		"x-lix-version": "1.0",
@@ -43,7 +43,7 @@ describe("createEntityViewsIfNotExists", () => {
 		} as const;
 
 		expect(() => {
-			createEntityViewsIfNotExists({
+			createEntityStateView({
 				lix,
 				schema: invalidSchema,
 				pluginKey: "test_plugin",
@@ -53,10 +53,10 @@ describe("createEntityViewsIfNotExists", () => {
 		);
 	});
 
-	test("should create view with correct columns", async () => {
+	test("should create view with correct columns (no lixcol_version_id)", async () => {
 		const lix = await openLixInMemory({});
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: testSchema,
 			overrideName: "test_view",
@@ -99,7 +99,7 @@ describe("createEntityViewsIfNotExists", () => {
 	test("should create CRUD triggers", async () => {
 		const lix = await openLixInMemory({});
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: testSchema,
 			overrideName: "test_view",
@@ -150,7 +150,7 @@ describe("createEntityViewsIfNotExists", () => {
 	test("should handle insert operations without defaults", async () => {
 		const lix = await openLixInMemory({});
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: testSchema,
 			overrideName: "test_view",
@@ -205,7 +205,7 @@ describe("createEntityViewsIfNotExists", () => {
 	test("should handle update operations", async () => {
 		const lix = await openLixInMemory({});
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: testSchema,
 			overrideName: "test_view",
@@ -263,7 +263,7 @@ describe("createEntityViewsIfNotExists", () => {
 	test("should handle delete operations", async () => {
 		const lix = await openLixInMemory({});
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: testSchema,
 			overrideName: "test_view",
@@ -308,7 +308,7 @@ describe("createEntityViewsIfNotExists", () => {
 	test("should handle composite primary keys", async () => {
 		const lix = await openLixInMemory({});
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: compositeKeySchema,
 			overrideName: "composite_view",
@@ -377,7 +377,7 @@ describe("createEntityViewsIfNotExists", () => {
 		let defaultIdCalled = false;
 		let defaultValueCalled = false;
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: testSchema,
 			overrideName: "test_view",
@@ -451,7 +451,7 @@ describe("createEntityViewsIfNotExists", () => {
 	test("should use dynamic file_id when not hardcoded", async () => {
 		const lix = await openLixInMemory({});
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: testSchema,
 			overrideName: "test_view",
@@ -485,7 +485,7 @@ describe("createEntityViewsIfNotExists", () => {
 	test("should use schema key as default view name", async () => {
 		const lix = await openLixInMemory({});
 
-		createEntityViewsIfNotExists({
+		createEntityStateView({
 			lix,
 			schema: testSchema,
 			// No overrideName - should use schema["x-lix-key"]
@@ -510,111 +510,5 @@ describe("createEntityViewsIfNotExists", () => {
 			name: "test_name",
 			value: 42,
 		});
-	});
-
-	test("should create both primary and _all views", async () => {
-		const lix = await openLixInMemory({});
-
-		createEntityViewsIfNotExists({
-			lix,
-			schema: testSchema,
-			overrideName: "dual_test",
-			pluginKey: "test_plugin",
-			hardcodedFileId: "test_file",
-		});
-
-		// Insert data through primary view (active only)
-		await lix.db
-			.insertInto("dual_test" as any)
-			.values({ id: "test_id", name: "test_name", value: 42 })
-			.execute();
-
-		// Both views should be queryable
-		const primaryResult = await lix.db
-			.selectFrom("dual_test" as any)
-			.selectAll()
-			.execute();
-
-		const allResult = await lix.db
-			.selectFrom("dual_test_all" as any)
-			.selectAll()
-			.execute();
-
-		// Both should return the same data for active version
-		expect(primaryResult).toHaveLength(1);
-		expect(allResult).toHaveLength(1);
-		expect(primaryResult[0]).toMatchObject({
-			id: "test_id",
-			name: "test_name",
-			value: 42,
-		});
-		expect(allResult[0]).toMatchObject({
-			id: "test_id",
-			name: "test_name",
-			value: 42,
-		});
-
-		// Verify version column visibility
-		expect(primaryResult[0]).not.toHaveProperty("lixcol_version_id"); // Regular view hides version_id
-		expect(allResult[0]).toHaveProperty("lixcol_version_id"); // _all view exposes version_id
-	});
-
-	test("should handle CRUD operations on both views", async () => {
-		const lix = await openLixInMemory({});
-
-		createEntityViewsIfNotExists({
-			lix,
-			schema: testSchema,
-			overrideName: "crud_test",
-			pluginKey: "test_plugin",
-			hardcodedFileId: "test_file",
-		});
-
-		// Insert through _all view
-		await lix.db
-			.insertInto("crud_test_all" as any)
-			.values({ id: "test_id", name: "test_name", value: 42 })
-			.execute();
-
-		// Update through primary view
-		await lix.db
-			.updateTable("crud_test" as any)
-			.where("id", "=", "test_id")
-			.set({ name: "updated_name" })
-			.execute();
-
-		// Verify update in both views
-		const primaryResult = await lix.db
-			.selectFrom("crud_test" as any)
-			.selectAll()
-			.execute();
-
-		const allResult = await lix.db
-			.selectFrom("crud_test_all" as any)
-			.selectAll()
-			.execute();
-
-		expect(primaryResult[0]).toMatchObject({ name: "updated_name" });
-		expect(allResult[0]).toMatchObject({ name: "updated_name" });
-
-		// Delete through primary view
-		await lix.db
-			.deleteFrom("crud_test" as any)
-			.where("id", "=", "test_id")
-			.execute();
-
-		// Verify deletion in both views
-		const afterDeletePrimary = await lix.db
-			.selectFrom("crud_test" as any)
-			.selectAll()
-			.execute();
-
-		const afterDeleteAll = await lix.db
-			.selectFrom("crud_test_all" as any)
-			.selectAll()
-			.execute();
-
-		expect(afterDeletePrimary).toHaveLength(0);
-		expect(afterDeleteAll).toHaveLength(0);
 	});
 });

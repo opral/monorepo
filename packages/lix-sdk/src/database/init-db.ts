@@ -21,11 +21,14 @@ import { applyChangeAuthorDatabaseSchema } from "../change-author/schema.js";
 import { applyLabelDatabaseSchema } from "../label/schema.js";
 import { applyThreadDatabaseSchema } from "../thread/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
+import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
 const ViewsWithJsonColumns = {
 	state: ["snapshot_content"],
+	state_active: ["snapshot_content"],
+	state_history: ["snapshot_content"],
 	snapshot: ["content"],
 	...(() => {
 		const result: Record<string, string[]> = {};
@@ -81,6 +84,7 @@ export function initDb(args: {
 	applyChangeAuthorDatabaseSchema(args.sqlite);
 	applyLabelDatabaseSchema(args.sqlite);
 	applyThreadDatabaseSchema(args.sqlite);
+	applyStateHistoryDatabaseSchema(args.sqlite);
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	applyLogDatabaseSchema(args.sqlite);
 
