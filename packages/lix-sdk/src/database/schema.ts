@@ -39,12 +39,7 @@ import {
 	type StoredSchemaHistoryView,
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import {
-	LixKeyValueSchema,
-	type KeyValueView,
-	type KeyValueAllView,
-	type KeyValueHistoryView,
-} from "../key-value/schema.js";
+import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import type {
 	StateView,
 	InternalStateCacheTable,
@@ -57,7 +52,12 @@ import {
 	type LixFileAllView,
 	type LixFileHistoryView,
 } from "../file/schema.js";
-import { LixLogSchema, type LogView, type LogAllView, type LogHistoryView } from "../log/schema.js";
+import {
+	LixLogSchema,
+	type LogView,
+	type LogAllView,
+	type LogHistoryView,
+} from "../log/schema.js";
 import {
 	LixAccountSchema,
 	type AccountView,
@@ -88,6 +88,7 @@ import {
 	type ThreadCommentHistoryView,
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
+import type { DatabaseEntityViewsOf } from "../entity-views/entity-view-builder.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -168,11 +169,6 @@ export type LixDatabaseSchema = {
 	change_set_thread_all: ChangeSetThreadAllView;
 	change_set_thread_history: ChangeSetThreadHistoryView;
 
-	// key value
-	key_value: KeyValueView;
-	key_value_all: KeyValueAllView;
-	key_value_history: KeyValueHistoryView;
-
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;
 
@@ -194,4 +190,4 @@ export type LixDatabaseSchema = {
 	log: LogView;
 	log_all: LogAllView;
 	log_history: LogHistoryView;
-};
+} & DatabaseEntityViewsOf<LixKeyValue, "key_value">;

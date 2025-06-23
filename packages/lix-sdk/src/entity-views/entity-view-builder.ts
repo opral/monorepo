@@ -14,10 +14,39 @@ import {
 	createEntityStateHistoryView,
 	type StateEntityHistoryView,
 } from "./entity-state-history.js";
+import type {
+	EntityStateView,
+	EntityStateAllView,
+	EntityStateHistoryView,
+	ToKysely,
+} from "./generic-types.js";
 
 // Re-export types for backward compatibility
 export type { StateEntityView, StateEntityAllView, StateEntityHistoryView };
 export type { ValidationRule, ValidationCallbacks };
+
+/**
+ * Utility type that generates database schema view entries for an entity.
+ * Creates three views: normal (active version), all versions, and history.
+ *
+ * @example
+ * ```typescript
+ * type KeyValueSchema = EntityViewsOf<LixKeyValue, "key_value">;
+ * // Result:
+ * // {
+ * //   key_value: ToKysely<EntityStateView<LixKeyValue>>;
+ * //   key_value_all: ToKysely<EntityStateAllView<LixKeyValue>>;
+ * //   key_value_history: ToKysely<EntityStateHistoryView<LixKeyValue>>;
+ * // }
+ * ```
+ */
+export type DatabaseEntityViewsOf<TEntity, TViewName extends string> = {
+	[K in TViewName]: ToKysely<EntityStateView<TEntity>>;
+} & {
+	[K in `${TViewName}_all`]: ToKysely<EntityStateAllView<TEntity>>;
+} & {
+	[K in `${TViewName}_history`]: ToKysely<EntityStateHistoryView<TEntity>>;
+};
 
 /**
  * Creates SQL views and CRUD triggers for an entity based on its schema definition.

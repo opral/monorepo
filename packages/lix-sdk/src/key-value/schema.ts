@@ -37,7 +37,10 @@ export const LixKeyValueSchema = {
 LixKeyValueSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixKeyValue = FromLixSchemaDefinition<typeof LixKeyValueSchema>;
+export type LixKeyValue = FromLixSchemaDefinition<typeof LixKeyValueSchema> & {
+	// override the value to any to allow any JSON type (instead of unknown which is annoying)
+	value: any;
+};
 
 export type KeyValueView = ToKysely<EntityStateView<LixKeyValue>> & {
 	// override the value to any to allow any JSON type (instead of unknown which is annoying)
