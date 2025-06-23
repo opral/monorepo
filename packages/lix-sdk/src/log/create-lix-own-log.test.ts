@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { Log } from "./schema.js";
 import { createLixOwnLog } from "./create-lix-own-log.js";
+import type { LixLog } from "./schema.js";
 
 test("should insert logs default log levels when lix_log_levels is not set)", async () => {
 	const lix = await openLixInMemory({
@@ -114,6 +114,6 @@ async function createLogs(lix: Lix) {
 	});
 }
 
-async function getLogs(lix: Lix): Promise<Log[]> {
+async function getLogs(lix: Lix): Promise<LixLog[]> {
 	return lix.db.selectFrom("log").selectAll().execute();
 }

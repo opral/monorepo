@@ -52,12 +52,7 @@ import {
 	type LixFileAllView,
 	type LixFileHistoryView,
 } from "../file/schema.js";
-import {
-	LixLogSchema,
-	type LogView,
-	type LogAllView,
-	type LogHistoryView,
-} from "../log/schema.js";
+import { LixLogSchema } from "../log/schema.js";
 import {
 	LixAccountSchema,
 	type AccountView,
@@ -88,7 +83,7 @@ import {
 	type ThreadCommentHistoryView,
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
-import type { DatabaseEntityViewsOf } from "../entity-views/entity-view-builder.js";
+import type { EntityViews } from "../entity-views/generic-types.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -185,9 +180,6 @@ export type LixDatabaseSchema = {
 	version_all: VersionAllView;
 	version_history: VersionHistoryView;
 	active_version: ActiveVersionTable;
+} & EntityViews<LixKeyValue, "key_value"> &
+	EntityViews<typeof LixLogSchema, "log">;
 
-	// logging
-	log: LogView;
-	log_all: LogAllView;
-	log_history: LogHistoryView;
-} & DatabaseEntityViewsOf<LixKeyValue, "key_value">;

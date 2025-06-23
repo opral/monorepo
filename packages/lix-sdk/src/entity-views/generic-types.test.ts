@@ -6,7 +6,9 @@ import type {
 	LixSelectable,
 	LixUpdateable,
 	ToKysely,
+	EntityView,
 } from "./generic-types.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Generated as KyselyGenerated } from "kysely";
 
 test("LixInsertable combined with LixGenerated makes columns optional", () => {
@@ -223,7 +225,7 @@ test("ToKysely converts LixGenerated to Kysely Generated", () => {
 	type NestedCreatedType = NestedKysely["data"]["created"]; // Should be KyselyGenerated<Date>
 	type NestedGeneratedType = NestedKysely["data"]["nested"]["generated"]; // Should be KyselyGenerated<boolean>
 	type NestedNormalType = NestedKysely["data"]["nested"]["normal"]; // Should be string
-	
+
 	const nestedCreated: NestedCreatedType = {} as KyselyGenerated<Date>;
 	const nestedGenerated: NestedGeneratedType = {} as KyselyGenerated<boolean>;
 	const nestedNormal: NestedNormalType = "string";
@@ -274,7 +276,7 @@ test("Composing entity types with StateEntityColumns and using ToKysely", () => 
 
 	// Test ToKysely conversion for database operations
 	type KyselyEntityView = ToKysely<EntityWithViewColumns>;
-	
+
 	// This is what Kysely would expect at the database boundary
 	const kyselyView: KyselyEntityView = {
 		key: "test-key",
@@ -288,7 +290,42 @@ test("Composing entity types with StateEntityColumns and using ToKysely", () => 
 	// Verify types are correctly mapped
 	type FileIdType = KyselyEntityView["lixcol_file_id"]; // Should be KyselyGenerated<string>
 	type InheritedType = KyselyEntityView["lixcol_inherited_from_version_id"]; // Should be KyselyGenerated<string | null>
-	
+
 	const fileId: FileIdType = {} as KyselyGenerated<string>;
 	const inherited: InheritedType = {} as KyselyGenerated<string | null>;
+});
+
+test("EntityView transforms schema with x-lix-generated to LixGenerated types", () => {
+	// Define a test schema with x-lix-generated properties
+	const TestSchema = {
+		"x-lix-key": "test_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: {
+				type: "string",
+				"x-lix-generated": true,
+			},
+			name: {
+				type: "string",
+			},
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	type TestEntityView = EntityView<typeof TestSchema>;
+
+	// Test with LixInsertable - generated fields should be optional
+	const insertable: LixInsertable<TestEntityView> = {
+		// id is optional
+		name: "test",
+	};
+
+	// Can also provide generated fields
+	const insertableWithGenerated: LixInsertable<TestEntityView> = {
+		id: "custom-id",
+		name: "test",
+	};
 });

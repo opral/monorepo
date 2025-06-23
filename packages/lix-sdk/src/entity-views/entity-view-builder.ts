@@ -19,6 +19,7 @@ import type {
 	EntityStateAllView,
 	EntityStateHistoryView,
 	ToKysely,
+	EntityView,
 } from "./generic-types.js";
 
 // Re-export types for backward compatibility
@@ -28,25 +29,33 @@ export type { ValidationRule, ValidationCallbacks };
 /**
  * Utility type that generates database schema view entries for an entity.
  * Creates three views: normal (active version), all versions, and history.
+ * 
+ * If TEntity is a LixSchemaDefinition, it automatically applies EntityView transformation.
  *
  * @example
  * ```typescript
- * type KeyValueSchema = EntityViewsOf<LixKeyValue, "key_value">;
- * // Result:
- * // {
- * //   key_value: ToKysely<EntityStateView<LixKeyValue>>;
- * //   key_value_all: ToKysely<EntityStateAllView<LixKeyValue>>;
- * //   key_value_history: ToKysely<EntityStateHistoryView<LixKeyValue>>;
- * // }
+ * // With schema definition (automatic EntityView transformation)
+ * type LogViews = DatabaseEntityViewsOf<typeof LixLogSchema, "log">;
+ * 
+ * // With already transformed entity type
+ * type KeyValueViews = DatabaseEntityViewsOf<LixKeyValue, "key_value">;
  * ```
  */
-export type DatabaseEntityViewsOf<TEntity, TViewName extends string> = {
-	[K in TViewName]: ToKysely<EntityStateView<TEntity>>;
-} & {
-	[K in `${TViewName}_all`]: ToKysely<EntityStateAllView<TEntity>>;
-} & {
-	[K in `${TViewName}_history`]: ToKysely<EntityStateHistoryView<TEntity>>;
-};
+export type EntityViews<TEntity, TViewName extends string> = TEntity extends LixSchemaDefinition
+	? {
+		[K in TViewName]: ToKysely<EntityStateView<EntityView<TEntity>>>;
+	} & {
+		[K in `${TViewName}_all`]: ToKysely<EntityStateAllView<EntityView<TEntity>>>;
+	} & {
+		[K in `${TViewName}_history`]: ToKysely<EntityStateHistoryView<EntityView<TEntity>>>;
+	}
+	: {
+		[K in TViewName]: ToKysely<EntityStateView<TEntity>>;
+	} & {
+		[K in `${TViewName}_all`]: ToKysely<EntityStateAllView<TEntity>>;
+	} & {
+		[K in `${TViewName}_history`]: ToKysely<EntityStateHistoryView<TEntity>>;
+	};
 
 /**
  * Creates SQL views and CRUD triggers for an entity based on its schema definition.

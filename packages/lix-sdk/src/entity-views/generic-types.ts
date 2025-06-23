@@ -2,6 +2,7 @@ import type { EntityStateAllColumns } from "./entity-state-all.js";
 import type { EntityStateColumns } from "./entity-state.js";
 import type { StateEntityHistoryColumns } from "./entity-state-history.js";
 import type { Generated as KyselyGenerated } from "kysely";
+import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 
 /**
  * Our own Generated marker type for database columns that are auto-generated.
@@ -93,6 +94,37 @@ export type ToKysely<T> = {
 		? KyselyGenerated<SelectType<T[K]>>
 		: T[K];
 };
+
+/**
+ * Creates an entity view type from a LixSchemaDefinition.
+ * Properties marked with x-lix-generated: true are wrapped in LixGenerated.
+ * 
+ * This is a simplified version that manually checks each property.
+ * 
+ * @example
+ * ```typescript
+ * const LogSchema = {
+ *   properties: {
+ *     id: { type: "string", "x-lix-generated": true },
+ *     name: { type: "string" }
+ *   }
+ * } as const;
+ * 
+ * type LogView = EntityView<typeof LogSchema>;
+ * // Result: { id: LixGenerated<string>, name: string }
+ * ```
+ */
+export type EntityView<TSchema extends LixSchemaDefinition> = TSchema extends {
+	properties: infer Props;
+}
+	? {
+			[K in keyof FromLixSchemaDefinition<TSchema>]: K extends keyof Props
+				? Props[K] extends { "x-lix-generated": true }
+					? LixGenerated<FromLixSchemaDefinition<TSchema>[K]>
+					: FromLixSchemaDefinition<TSchema>[K]
+				: FromLixSchemaDefinition<TSchema>[K];
+		}
+	: never;
 
 /**
  * View type that preserves Generated markers for database schema.
@@ -201,3 +233,6 @@ export type NewStateAll<T> = LixInsertable<EntityStateAllView<T>>;
  * ```
  */
 export type StateAllUpdate<T> = LixUpdateable<EntityStateAllView<T>>;
+
+// Re-export EntityViews from entity-view-builder for convenience
+export type { EntityViews } from "./entity-view-builder.js";
