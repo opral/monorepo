@@ -13,7 +13,7 @@ import {
 import {
 	createEntityStateHistoryView,
 	type StateEntityHistoryView,
-} from "./entity-state_history.js";
+} from "./entity-state-history.js";
 
 // Re-export types for backward compatibility
 export type { StateEntityView, StateEntityAllView, StateEntityHistoryView };

@@ -3,11 +3,12 @@ import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { NewKeyValue } from "../key-value/schema.js";
+import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { LixAccount } from "../account/schema.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
+import type { NewState } from "../entity-views/generic-types.js";
 
 export type Lix = {
 	/**
@@ -63,7 +64,7 @@ export async function openLix(args: {
 	 * @example
 	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: NewKeyValue[];
+	keyValues?: NewState<LixKeyValue>[];
 }): Promise<Lix> {
 	const db = initDb({ sqlite: args.database });
 

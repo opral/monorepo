@@ -1,6 +1,7 @@
 import type { Generated } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixGenerated } from "./generic-types.js";
 
 /**
  * Base type for regular entity views (active version only) that include operational columns from the state table.
@@ -24,6 +25,30 @@ export type StateEntityView = {
 	lixcol_created_at: Generated<string>;
 	/** Timestamp when this entity was last updated */
 	lixcol_updated_at: Generated<string>;
+};
+
+/**
+ * Base type for regular entity views (active version only) that include operational columns from the state table.
+ * These views do NOT expose lixcol_version_id to prevent accidental version-specific operations.
+ *
+ * @example
+ * ```typescript
+ * // Define an entity view type for active version operations
+ * export type AccountView = {
+ *   id: Generated<string>;
+ *   name: string;
+ * } & StateEntityView;
+ * ```
+ */
+export type EntityStateColumns = {
+	/** File identifier where this entity is stored */
+	lixcol_file_id: LixGenerated<string>;
+	/** Version identifier this entity was inherited from (for branching) */
+	lixcol_inherited_from_version_id: LixGenerated<string | null>;
+	/** Timestamp when this entity was created */
+	lixcol_created_at: LixGenerated<string>;
+	/** Timestamp when this entity was last updated */
+	lixcol_updated_at: LixGenerated<string>;
 };
 
 /**

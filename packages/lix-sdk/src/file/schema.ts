@@ -6,7 +6,7 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state-history.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyFileDatabaseSchema(

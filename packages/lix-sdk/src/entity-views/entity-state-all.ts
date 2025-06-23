@@ -2,6 +2,7 @@ import type { Generated } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { ValidationRule, ValidationCallbacks } from "./entity-state.js";
+import type { LixGenerated } from "./generic-types.js";
 
 /**
  * Base type for _all entity views (cross-version) that include operational columns from the state table.
@@ -28,6 +29,20 @@ export type StateEntityAllView = {
 	/** Timestamp when this entity was last updated */
 	lixcol_updated_at: Generated<string>;
 };
+
+export type EntityStateAllColumns = {
+	/** File identifier where this entity is stored */
+	lixcol_file_id: LixGenerated<string>;
+	/** Version identifier for this state record */
+	lixcol_version_id: LixGenerated<string>;
+	/** Timestamp when this entity was created */
+	lixcol_created_at: LixGenerated<string>;
+	/** Timestamp when this entity was last updated */
+	lixcol_updated_at: LixGenerated<string>;
+	/** Version identifier this entity was inherited from (for branching) */
+	lixcol_inherited_from_version_id: LixGenerated<string | null>;
+};
+
 
 /**
  * Creates SQL view and CRUD triggers for an entity based on its schema definition (all versions).

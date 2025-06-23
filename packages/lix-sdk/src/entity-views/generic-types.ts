@@ -1,0 +1,203 @@
+import type { EntityStateAllColumns } from "./entity-state-all.js";
+import type { EntityStateColumns } from "./entity-state.js";
+import type { StateEntityHistoryColumns } from "./entity-state-history.js";
+import type { Generated as KyselyGenerated } from "kysely";
+
+/**
+ * Our own Generated marker type for database columns that are auto-generated.
+ * This allows us to control type transformations independently of Kysely.
+ */
+export type LixGenerated<T> = {
+	readonly __select__: T;
+	readonly __insert__: T | undefined;
+	readonly __update__: T;
+};
+
+/**
+ * Extract the select type from LixGenerated or return the type as-is
+ */
+type SelectType<T> = T extends LixGenerated<infer S> ? S : T;
+
+/**
+ * Extract the insert type from LixGenerated or return the type as-is
+ */
+type InsertType<T> = T extends LixGenerated<infer S> ? S | undefined : T;
+
+/**
+ * Extract the update type from LixGenerated or return the type as-is
+ */
+type UpdateType<T> = T extends LixGenerated<infer S> ? S : T;
+
+/**
+ * Evaluates to K if T can be null or undefined
+ */
+type IfNullable<T, K> = undefined extends T ? K : null extends T ? K : never;
+
+/**
+ * Evaluates to K if T can't be null or undefined
+ */
+type IfNotNullable<T, K> = undefined extends T
+	? never
+	: null extends T
+		? never
+		: T extends never
+			? never
+			: K;
+
+/**
+ * Keys whose InsertType can be null or undefined (optional in inserts)
+ */
+type NullableInsertKeys<T> = {
+	[K in keyof T]: IfNullable<InsertType<T[K]>, K>;
+}[keyof T];
+
+/**
+ * Keys whose InsertType can't be null or undefined (required in inserts)
+ */
+type NonNullableInsertKeys<T> = {
+	[K in keyof T]: IfNotNullable<InsertType<T[K]>, K>;
+}[keyof T];
+
+/**
+ * Transform a type to make LixGenerated fields optional (for inserts).
+ * Non-generated fields remain required.
+ */
+export type LixInsertable<T> = {
+	[K in NonNullableInsertKeys<T>]: InsertType<T[K]>;
+} & {
+	[K in NullableInsertKeys<T>]?: InsertType<T[K]>;
+};
+
+/**
+ * Transform a type to make all fields optional (for updates).
+ * LixGenerated fields are unwrapped to their base type.
+ */
+export type LixUpdateable<T> = {
+	[K in keyof T]?: UpdateType<T[K]>;
+};
+
+/**
+ * Transform a type to unwrap LixGenerated fields (for selects).
+ * This gives you the actual runtime types.
+ */
+export type LixSelectable<T> = {
+	[K in keyof T]: SelectType<T[K]>;
+};
+
+/**
+ * Convert our LixGenerated types to Kysely's Generated types.
+ * This adapter is used at the database boundary.
+ */
+export type ToKysely<T> = {
+	[K in keyof T]: T[K] extends LixGenerated<any>
+		? KyselyGenerated<SelectType<T[K]>>
+		: T[K];
+};
+
+/**
+ * View type that preserves Generated markers for database schema.
+ * This type is used in the database schema to ensure Kysely recognizes generated columns.
+ *
+ * @example
+ * ```typescript
+ * type KeyValueView = StateEntityView<LixKeyValue>;
+ * ```
+ */
+export type EntityStateView<T> = T & EntityStateColumns;
+
+/**
+ * View type for all versions that preserves Generated markers.
+ *
+ * @example
+ * ```typescript
+ * type KeyValueAllView = StateEntityAllView<LixKeyValue>;
+ * ```
+ */
+export type EntityStateAllView<T> = T & EntityStateAllColumns;
+
+/**
+ * View type for history that preserves Generated markers.
+ *
+ * @example
+ * ```typescript
+ * type KeyValueHistoryView = StateEntityHistoryView<LixKeyValue>;
+ * ```
+ */
+export type EntityStateHistoryView<T> = T & StateEntityHistoryColumns;
+
+/**
+ * Generic type for entity state (active version only).
+ * Unwraps LixGenerated<T> columns to their underlying types for select operations.
+ *
+ * @example
+ * ```typescript
+ * type KeyValue = State<LixKeyValue>;
+ * ```
+ */
+export type State<T> = LixSelectable<EntityStateView<T>>;
+
+/**
+ * Generic type for entity state across all versions.
+ * Unwraps LixGenerated<T> columns to their underlying types for select operations.
+ *
+ * @example
+ * ```typescript
+ * type KeyValueAll = StateAll<LixKeyValue>;
+ * ```
+ */
+export type StateAll<T> = LixSelectable<EntityStateAllView<T>>;
+
+/**
+ * Generic type for entity history state.
+ * Unwraps LixGenerated<T> columns to their underlying types for select operations.
+ *
+ * @example
+ * ```typescript
+ * type KeyValueHistory = StateHistory<LixKeyValue>;
+ * ```
+ */
+export type StateHistory<T> = LixSelectable<EntityStateHistoryView<T>>;
+
+/**
+ * Generic type for creating new entity state (active version).
+ * Uses LixInsertable to make generated columns optional.
+ *
+ * @example
+ * ```typescript
+ * type NewKeyValue = NewState<LixKeyValue>;
+ * ```
+ */
+export type NewState<T> = LixInsertable<EntityStateView<T>>;
+
+/**
+ * Generic type for updating entity state (active version).
+ * Uses LixUpdateable to make all columns optional.
+ *
+ * @example
+ * ```typescript
+ * type KeyValueUpdate = StateUpdate<LixKeyValue>;
+ * ```
+ */
+export type StateUpdate<T> = LixUpdateable<EntityStateView<T>>;
+
+/**
+ * Generic type for creating new entity state (all versions).
+ * Uses LixInsertable to make generated columns optional.
+ *
+ * @example
+ * ```typescript
+ * type NewKeyValueAll = NewStateAll<LixKeyValue>;
+ * ```
+ */
+export type NewStateAll<T> = LixInsertable<EntityStateAllView<T>>;
+
+/**
+ * Generic type for updating entity state (all versions).
+ * Uses LixUpdateable to make all columns optional.
+ *
+ * @example
+ * ```typescript
+ * type KeyValueAllUpdate = StateAllUpdate<LixKeyValue>;
+ * ```
+ */
+export type StateAllUpdate<T> = LixUpdateable<EntityStateAllView<T>>;

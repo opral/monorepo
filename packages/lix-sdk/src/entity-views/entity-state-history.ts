@@ -1,6 +1,7 @@
 import type { Generated } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixGenerated } from "./generic-types.js";
 
 /**
  * Base type for entity history views that include historical data from the state_history table.
@@ -28,6 +29,34 @@ export type StateEntityHistoryView = {
 	lixcol_change_set_id: Generated<string>;
 	/** Depth of this entity state relative to the queried change_set_id */
 	lixcol_depth: Generated<number>;
+};
+
+/**
+ * Base type for entity history views that include historical data from the state_history table.
+ * These views provide access to entity states at different points in change set history.
+ *
+ * @example
+ * ```typescript
+ * // Define an entity history view type
+ * export type AccountHistoryView = {
+ *   id: Generated<string>;
+ *   name: string;
+ * } & StateEntityHistoryView;
+ * ```
+ */
+export type StateEntityHistoryColumns = {
+	/** File identifier where this entity is stored */
+	lixcol_file_id: LixGenerated<string>;
+	/** Plugin identifier that manages this entity type */
+	lixcol_plugin_key: LixGenerated<string>;
+	/** Version of the schema used for this entity */
+	lixcol_schema_version: LixGenerated<string>;
+	/** ID of the change that created this entity state */
+	lixcol_change_id: LixGenerated<string>;
+	/** Change set ID that serves as the root/starting point for depth calculation */
+	lixcol_change_set_id: LixGenerated<string>;
+	/** Depth of this entity state relative to the queried change_set_id */
+	lixcol_depth: LixGenerated<number>;
 };
 
 /**

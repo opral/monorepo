@@ -1,6 +1,6 @@
 import { test, expect, describe } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { createEntityStateHistoryView } from "./entity-state_history.js";
+import { createEntityStateHistoryView } from "./entity-state-history.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 describe("createEntityHistoryViewIfNotExists", () => {

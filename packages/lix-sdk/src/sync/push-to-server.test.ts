@@ -8,7 +8,7 @@ import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
-import type { NewKeyValue } from "../key-value/schema.js";
+import type { LixKeyValue } from "../key-value/schema.js";
 
 test.skip("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
@@ -170,7 +170,7 @@ test.skip("push-pull-push with two clients", async () => {
 			expect.objectContaining({
 				key: "mock-key",
 				value: "mock-value from client 1",
-			} satisfies NewKeyValue),
+			} satisfies LixKeyValue),
 		])
 	);
 

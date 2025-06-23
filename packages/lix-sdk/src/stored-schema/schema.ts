@@ -10,7 +10,7 @@ import {
 	type StateEntityView,
 	type StateEntityAllView,
 } from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
+import { type StateEntityHistoryView } from "../entity-views/entity-state-history.js";
 
 export function applyStoredSchemaDatabaseSchema(
 	sqlite: SqliteWasmDatabase
