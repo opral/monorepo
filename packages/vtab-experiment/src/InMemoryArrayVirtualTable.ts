@@ -149,20 +149,56 @@ export class InMemoryArrayVirtualTable {
     return this.sqlite3.capi.SQLITE_OK;
   }
 
-  xBestIndex(
-    pVtab: WasmPointer,
-    pIndexInfo: WasmPointer,
-    pp: WasmPointer,
-    pCost: WasmPointer,
-  ) {
-    const tableName = this.vtabToName.get(pVtab)!;
+  xBestIndex(pVtab: WasmPointer, pIndexInfo: WasmPointer) {
+    const idxInfo = this.sqlite3.vtab.xIndexInfo(pIndexInfo);
 
-    // console.log('xBestIndex')
+    // Track which columns have equality constraints
+    const usableConstraints: string[] = [];
+    let argIndex = 0;
 
-    // All the code here is for an optional optimization. If we simply
-    // returned SQLITE_OK instead then we would traverse all the array
-    // data and SQLite would ignore whatever it doesn't need.
-    return this.sqlite3.capi.SQLITE_OK;
+    // Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
+    const columnMap = [
+      "name", // 0
+      "age", // 1
+    ];
+
+    // Process constraints
+    for (let i = 0; i < idxInfo.$nConstraint; i++) {
+      const constraint = idxInfo.nthConstraint(i);
+
+      // Only handle equality constraints that are usable
+      if (
+        constraint.$op === this.sqlite3.capi.SQLITE_INDEX_CONSTRAINT_EQ &&
+        constraint.$usable
+      ) {
+        const columnName = columnMap[constraint.$iColumn];
+        if (columnName) {
+          usableConstraints.push(columnName);
+
+          // Mark this constraint as used
+          idxInfo.nthConstraintUsage(i).$argvIndex = ++argIndex;
+          idxInfo.nthConstraintUsage(i).$omit = 1; // SQLite can omit this constraint
+        }
+      }
+    }
+
+    // Set the index string to pass column names to xFilter
+    if (usableConstraints.length > 0) {
+      const idxStr = usableConstraints.join(",");
+      idxInfo.$idxStr = this.sqlite3.wasm.allocCString(idxStr, false);
+      idxInfo.$needToFreeIdxStr = 1;
+
+      // Lower cost when we can use filters (more selective)
+      idxInfo.$estimatedCost = 1000.0;
+      idxInfo.$estimatedRows = 1000;
+    } else {
+      // idxInfo.$idxStr = "";
+      idxInfo.$needToFreeIdxStr = 0;
+
+      // Higher cost for full table scan
+      idxInfo.$estimatedCost = 1000000.0;
+      idxInfo.$estimatedRows = 100000;
+    }
   }
 
   xDisconnect(pVTab: WasmPointer) {
@@ -204,7 +240,7 @@ export class InMemoryArrayVirtualTable {
   xFilter(
     pCursor: WasmPointer,
     idxNum: number,
-    idxStr: WasmPointer,
+    pIdxStr: WasmPointer,
     argc: number,
     argv: WasmPointer,
   ) {
@@ -214,6 +250,24 @@ export class InMemoryArrayVirtualTable {
     console.log("this.tableData", this.tableData);
     console.log("tableName:", cursorState.tableName);
     cursorState.endIndex = this.tableData[cursorState.tableName].length;
+
+    const idxStr = this.sqlite3.wasm.cstrToJs(pIdxStr) as string;
+
+    // Extract filter arguments if provided
+    const filters: Record<string, string> = {};
+    if (argc > 0 && argv) {
+      const args = this.sqlite3.capi.sqlite3_values_to_js(argc, argv);
+      // Parse idxStr to understand which columns are being filtered
+      // idxStr format: "column1,column2,..."
+      if (idxStr) {
+        const columns = idxStr.split(",").filter((c) => c.length > 0);
+        for (let i = 0; i < Math.min(columns.length, args.length); i++) {
+          if (args[i] !== null && args[i] !== undefined) {
+            filters[columns[i]!] = String(args[i]);
+          }
+        }
+      }
+    }
 
     // TODO implement filtering
     return this.sqlite3.capi.SQLITE_OK;
