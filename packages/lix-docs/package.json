@@ -1,0 +1,26 @@
+{
+  "name": "@lix-js/docs",
+  "version": "0.1.0",
+  "description": "Technical documentation for the Lix SDK - a browser-native change control system for structured data",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0-rc.40",
+    "vue": "^3.3.4"
+  },
+  "keywords": [
+    "lix",
+    "sdk",
+    "documentation",
+    "change control",
+    "version control",
+    "browser"
+  ],
+  "author": "Opral, Inc.",
+  "license": "MIT"
+}
