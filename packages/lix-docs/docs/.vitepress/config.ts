@@ -1,9 +1,13 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from "vitepress";
 
 export default defineConfig({
   title: "Lix SDK Documentation",
   description:
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
+  appearance: {
+    // @ts-expect-error not fully supported yet
+    initialValue: "light",
+  },
   head: [
     ["link", { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
     ["link", { rel: "alternate icon", href: "/favicon.ico" }], // Fallback for browsers that don't support SVG
@@ -116,6 +120,12 @@ export default defineConfig({
 
     search: {
       provider: "local",
+    },
+
+    // Enable appearance switch with light mode as default
+    appearance: {
+      lighten: "0.15",
+      darken: "0.15",
     },
   },
 });
