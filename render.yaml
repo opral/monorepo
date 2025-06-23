@@ -260,3 +260,19 @@ services:
       - fromGroup: production
     domains:
       - lix.dev
+      
+  - name: lix-docs
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./packages/lix-docs/docs/.vitepress/dist
+    buildCommand: pnpm install && pnpm run --filter @lix-js/docs... build
+    buildFilter:
+      paths:
+        - packages/lix-docs/**
+        - packages/lix-sdk/**
+    envVars:
+      - fromGroup: production
+    domains:
+      - docs.lix.dev

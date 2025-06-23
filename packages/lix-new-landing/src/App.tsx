@@ -109,7 +109,9 @@ function App() {
         </a>
         <div className="flex space-x-6">
           <a
-            href="/docs"
+            href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-gray-600 text-base lowercase flex items-center gap-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600 transition-all duration-200 px-2 py-1"
           >
             <svg
@@ -177,7 +179,9 @@ function App() {
             <PackageInstaller />
 
             <a
-              href="/demo"
+              href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/examples"
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-blue-600 text-white px-6 py-2 rounded-md text-base hover:bg-blue-700 transition-all duration-200 flex items-center font-medium group shadow-sm"
             >
               <span className="flex items-center">
@@ -698,7 +702,9 @@ function App() {
                 {/* API */}
                 <div className="bg-white rounded-md p-2 font-mono text-sm inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-2">
                   <a
-                    href="/docs/api/get-history"
+                    href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/index.ts"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="block w-full h-full"
                   >
                     <span className="text-amber-600">lix</span>
@@ -738,7 +744,12 @@ function App() {
 
                 {/* API */}
                 <div className="bg-white rounded-md p-2 font-mono text-sm inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-2">
-                  <a href="/docs/api/get-diff" className="block w-full h-full">
+                  <a 
+                    href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/change-set/get-diff.ts" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full h-full"
+                  >
                     <span className="text-amber-600">lix</span>
                     <span className="text-gray-800">.</span>
                     <span className="text-green-600">getDiff</span>
@@ -777,7 +788,9 @@ function App() {
                 {/* API */}
                 <div className="bg-white rounded-md p-2 font-mono text-sm inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-2">
                   <a
-                    href="/docs/api/create-proposal"
+                    href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/change-proposal/create-change-proposal.ts"
+                    target="_blank"
+                    rel="noopener noreferrer" 
                     className="block w-full h-full"
                   >
                     <span className="text-amber-600">lix</span>
@@ -802,7 +815,9 @@ function App() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <a
-              href="/docs"
+              href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
+              target="_blank" 
+              rel="noopener noreferrer"
               className="h-44 bg-blue-600 text-white rounded-lg p-6 font-medium hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg border border-blue-700 flex flex-col justify-between group"
             >
               <span className="text-xl font-semibold flex items-center gap-2">
