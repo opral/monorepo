@@ -8,7 +8,7 @@
 
 > **createThread**(`args`): `Promise`\<`object` & `object`\>
 
-Defined in: [packages/lix-sdk/src/thread/create-thread.ts:5](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/thread/create-thread.ts#L5)
+Defined in: [packages/lix-sdk/src/thread/create-thread.ts:6](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/thread/create-thread.ts#L6)
 
 ## Parameters
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/thread/create-thread.ts:5](https://github.com/
 
 #### comments?
 
-`Pick`\<`object` & `object`, `"body"`\>[]
+`Pick`\<[`NewState`](../type-aliases/NewState.md)\<[`ThreadComment`](../type-aliases/ThreadComment.md)\>, `"body"`\>[]
 
 #### id?
 

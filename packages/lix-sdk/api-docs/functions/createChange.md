@@ -8,7 +8,7 @@
 
 > **createChange**(`args`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `schema_version`: `string`; `snapshot_id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change/create-change.ts:9](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/change/create-change.ts#L9)
+Defined in: [packages/lix-sdk/src/change/create-change.ts:9](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/change/create-change.ts#L9)
 
 ## Parameters
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/change/create-change.ts:9](https://github.com/
 
 #### authors?
 
-`Pick`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `name`: `string`; \}, `"id"`\>[]
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}, `"id"`\>[]
 
 #### entity_id
 
@@ -48,7 +48,7 @@ Defined in: [packages/lix-sdk/src/change/create-change.ts:9](https://github.com/
 
 #### snapshot
 
-`Omit`\<[`NewSnapshot`](../type-aliases/NewSnapshot.md), `"id"`\>
+`Omit`\<[`Snapshot`](../type-aliases/Snapshot.md), `"id"`\>
 
 ## Returns
 

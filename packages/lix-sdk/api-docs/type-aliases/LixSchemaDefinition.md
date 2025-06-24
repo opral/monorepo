@@ -8,7 +8,7 @@
 
 > **LixSchemaDefinition** = `JSONSchema` & `object`
 
-Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:3](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/schema-definition/definition.ts#L3)
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:3](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/schema-definition/definition.ts#L3)
 
 LixSchema
 
@@ -18,6 +18,14 @@ and supports custom extensions.
 Custom extensions may be added with any x-* prefix.
 
 ## Type declaration
+
+### properties?
+
+> `optional` **properties**: `object`
+
+#### Index Signature
+
+\[`key`: `string`\]: `LixPropertySchema`
 
 ### type
 

@@ -8,7 +8,7 @@
 
 > **openLix**(`args`): `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:34](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/lix/open-lix.ts#L34)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:35](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/lix/open-lix.ts#L35)
 
 Common setup between different lix environments.
 
@@ -18,7 +18,7 @@ Common setup between different lix environments.
 
 #### account?
 
-\{ `id`: `string`; `name`: `string`; \}
+\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}
 
 The account that is opening this lix.
 
@@ -33,7 +33,7 @@ const account = localStorage.getItem("account")
 
 #### account.id
 
-`string`
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
 
 #### account.name
 
@@ -45,7 +45,7 @@ const account = localStorage.getItem("account")
 
 #### keyValues?
 
-`object` & `object`[]
+[`NewState`](../type-aliases/NewState.md)\<[`KeyValue`](../type-aliases/KeyValue.md)\>[]
 
 Set the key values when opening the lix.
 

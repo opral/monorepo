@@ -6,6 +6,6 @@
 
 # Type Alias: Thread
 
-> **Thread** = `Selectable`\<[`ThreadView`](ThreadView.md)\>
+> **Thread** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixThreadSchema`](../variables/LixThreadSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/thread/schema.ts:132](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/thread/schema.ts#L132)
+Defined in: [packages/lix-sdk/src/thread/schema.ts:80](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/thread/schema.ts#L80)

@@ -6,9 +6,9 @@
 
 # Function: createAccount()
 
-> **createAccount**(`args`): `Promise`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `name`: `string`; \}\>
+> **createAccount**(`args`): `Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/account/create-account.ts:5](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/account/create-account.ts#L5)
+Defined in: [packages/lix-sdk/src/account/create-account.ts:5](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/account/create-account.ts#L5)
 
 ## Parameters
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/account/create-account.ts:5](https://github.co
 
 #### id?
 
-`string`
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
 
 #### lix
 
@@ -32,4 +32,4 @@ Defined in: [packages/lix-sdk/src/account/create-account.ts:5](https://github.co
 
 ## Returns
 
-`Promise`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `name`: `string`; \}\>
+`Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}\>

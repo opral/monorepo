@@ -8,9 +8,13 @@
 
 > `const` **LixFileSchema**: `object`
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:248](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/file/schema.ts#L248)
+Defined in: [packages/lix-sdk/src/file/schema.ts:246](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/file/schema.ts#L246)
 
 ## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
 
 ### properties
 
@@ -23,6 +27,10 @@ Defined in: [packages/lix-sdk/src/file/schema.ts:248](https://github.com/opral/m
 #### properties.id.type
 
 > `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
 
 #### properties.metadata
 

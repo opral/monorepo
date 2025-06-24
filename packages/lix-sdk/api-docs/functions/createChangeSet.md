@@ -8,7 +8,7 @@
 
 > **createChangeSet**(`args`): `Promise`\<`object` & `object`\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:6](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/change-set/create-change-set.ts#L6)
+Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:7](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/change-set/create-change-set.ts#L7)
 
 ## Parameters
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:6](https://git
 
 #### elements?
 
-`Omit`\<`object` & `object`, `"change_set_id"`\>[]
+`Omit`\<[`NewState`](../type-aliases/NewState.md)\<\{ `change_id`: `string`; `change_set_id`: `string`; `entity_id`: `string`; `file_id`: `string`; `schema_key`: `string`; \}\>, `"change_set_id"`\>[]
 
 #### id?
 
@@ -24,7 +24,7 @@ Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:6](https://git
 
 #### labels?
 
-`Pick`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `name`: `string`; \}, `"id"`\>[]
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}, `"id"`\>[]
 
 #### lix
 
@@ -38,7 +38,7 @@ Version ID where the change set should be stored. Defaults to active version
 
 #### parents?
 
-`Pick`\<\{ `id`: `string`; `lixcol_created_at`: `string`; `lixcol_file_id`: `string`; `lixcol_inherited_from_version_id`: `null` \| `string`; `lixcol_updated_at`: `string`; `metadata`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>[]
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>[]
 
 Parent change sets that this change set will be a child of
 

@@ -6,6 +6,6 @@
 
 # Type Alias: Account
 
-> **Account** = `Selectable`\<[`AccountView`](AccountView.md)\>
+> **Account** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixAccountSchema`](../variables/LixAccountSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/account/schema.ts:94](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/account/schema.ts#L94)
+Defined in: [packages/lix-sdk/src/account/schema.ts:68](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/account/schema.ts#L68)

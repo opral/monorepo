@@ -6,12 +6,18 @@
 
 # Type Alias: LixFile
 
-> **LixFile** = `Selectable`\<[`LixFileView`](LixFileView.md)\>
+> **LixFile** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixFileSchema`](../variables/LixFileSchema.md)\> & `object`
 
-Defined in: [packages/lix-sdk/src/file/schema.ts:345](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/file/schema.ts#L345)
+Defined in: [packages/lix-sdk/src/file/schema.ts:277](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/file/schema.ts#L277)
 
-Kysely operation types for the file view.
+Pure business logic type inferred from the LixFileSchema.
 
-These use the "Lix" prefix to avoid collision with JavaScript's built-in File type
-and to clearly distinguish them as Lix-specific database view operations rather
-than pure business logic types.
+Uses "Type" suffix to avoid collision with JavaScript's built-in File type,
+while maintaining consistency with our naming pattern where schema-derived
+types represent the pure business logic without database infrastructure columns.
+
+## Type declaration
+
+### data
+
+> **data**: `Uint8Array`

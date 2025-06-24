@@ -8,7 +8,7 @@
 
 > `const` **LixChangeSetThreadSchema**: `object`
 
-Defined in: [packages/lix-sdk/src/change-set/schema.ts:292](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/change-set/schema.ts#L292)
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:181](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/change-set/schema.ts#L181)
 
 ## Type declaration
 

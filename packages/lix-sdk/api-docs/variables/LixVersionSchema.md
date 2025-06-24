@@ -8,7 +8,7 @@
 
 > `const` **LixVersionSchema**: `object`
 
-Defined in: [packages/lix-sdk/src/version/schema.ts:47](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/version/schema.ts#L47)
+Defined in: [packages/lix-sdk/src/version/schema.ts:43](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/version/schema.ts#L43)
 
 ## Type declaration
 
@@ -36,6 +36,10 @@ Defined in: [packages/lix-sdk/src/version/schema.ts:47](https://github.com/opral
 
 > `readonly` **type**: `"string"` = `"string"`
 
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
 #### properties.inherits\_from\_version\_id
 
 > `readonly` **inherits\_from\_version\_id**: `object`
@@ -43,6 +47,10 @@ Defined in: [packages/lix-sdk/src/version/schema.ts:47](https://github.com/opral
 #### properties.inherits\_from\_version\_id.type
 
 > `readonly` **type**: readonly \[`"string"`, `"null"`\]
+
+#### properties.inherits\_from\_version\_id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
 
 #### properties.name
 
@@ -52,6 +60,10 @@ Defined in: [packages/lix-sdk/src/version/schema.ts:47](https://github.com/opral
 
 > `readonly` **type**: `"string"` = `"string"`
 
+#### properties.name.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
 #### properties.working\_change\_set\_id
 
 > `readonly` **working\_change\_set\_id**: `object`
@@ -59,6 +71,10 @@ Defined in: [packages/lix-sdk/src/version/schema.ts:47](https://github.com/opral
 #### properties.working\_change\_set\_id.type
 
 > `readonly` **type**: `"string"` = `"string"`
+
+#### properties.working\_change\_set\_id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
 
 ### required
 

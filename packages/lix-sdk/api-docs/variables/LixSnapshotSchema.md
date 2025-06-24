@@ -8,9 +8,13 @@
 
 > `const` **LixSnapshotSchema**: `object`
 
-Defined in: [packages/lix-sdk/src/snapshot/schema.ts:46](https://github.com/opral/monorepo/blob/fb8153a2c5d4710eaaabf056fe653be88060a185/packages/lix-sdk/src/snapshot/schema.ts#L46)
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:46](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/snapshot/schema.ts#L46)
 
 ## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
 
 ### properties
 
@@ -27,6 +31,10 @@ Defined in: [packages/lix-sdk/src/snapshot/schema.ts:46](https://github.com/opra
 #### properties.id.type
 
 > `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
 
 ### required
 
