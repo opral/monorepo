@@ -284,7 +284,78 @@ export function applyStateDatabaseSchema(
 				});
 			},
 
-			xBestIndex: () => {
+			xBestIndex: (pVTab: any, pIdxInfo: any) => {
+				const idxInfo = sqlite.sqlite3.vtab.xIndexInfo(pIdxInfo);
+
+				// Track which columns have equality constraints
+				const usableConstraints: string[] = [];
+				let argIndex = 0;
+
+				// Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
+				const columnMap = [
+					"entity_id", // 0
+					"schema_key", // 1
+					"file_id", // 2
+					"version_id", // 3
+					"plugin_key", // 4
+					"snapshot_content", // 5
+					"schema_version", // 6
+					"created_at", // 7
+					"updated_at", // 8
+					"inherited_from_version_id", // 9
+				];
+
+				// Process constraints
+				// @ts-expect-error - idxInfo.$nConstraint is not defined in the type
+				for (let i = 0; i < idxInfo.$nConstraint; i++) {
+					// @ts-expect-error - idxInfo.nthConstraint is not defined in the type
+					const constraint = idxInfo.nthConstraint(i);
+
+					// Only handle equality constraints that are usable
+					if (
+						constraint.$op === capi.SQLITE_INDEX_CONSTRAINT_EQ &&
+						constraint.$usable
+					) {
+						const columnName = columnMap[constraint.$iColumn];
+						if (columnName) {
+							usableConstraints.push(columnName);
+
+							// Mark this constraint as used
+							// @ts-expect-error - idxInfo.nthConstraintUsage is not defined in the type
+							idxInfo.nthConstraintUsage(i).$argvIndex = ++argIndex;
+						}
+					}
+				}
+
+				let fullTableCost = 1000000; // Default cost for full table scan
+				let fullTableRows = 10000000;
+
+				// Set the index string to pass column names to xFilter
+				if (usableConstraints.length > 0) {
+					const idxStr = usableConstraints.join(",");
+					// @ts-expect-error - idxInfo.$idxStr is not defined in the type
+					idxInfo.$idxStr = sqlite.sqlite3.wasm.allocCString(idxStr, false);
+					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
+					idxInfo.$needToFreeIdxStr = 1; // We don't need SQLite to free this string
+
+					// Lower cost when we can use filters (more selective)
+					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
+					idxInfo.$estimatedCost = fullTableCost / usableConstraints.length;
+					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
+					idxInfo.$estimatedRows = Math.ceil(
+						fullTableRows / usableConstraints.length
+					);
+				} else {
+					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
+					idxInfo.$needToFreeIdxStr = 0;
+
+					// Higher cost for full table scan
+					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
+					idxInfo.$estimatedCost = fullTableCost;
+					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
+					idxInfo.$estimatedRows = fullTableRows;
+				}
+
 				return capi.SQLITE_OK;
 			},
 
