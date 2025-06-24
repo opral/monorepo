@@ -28,10 +28,18 @@ import type { Change } from "../change/schema.js";
 import type { StoredSchema } from "../stored-schema/schema.js";
 
 /**
- * Creates a new lix file.
+ * Returns a new empty Lix file as a {@link Blob}.
  *
- * The app is responsible for saving the project "whereever"
- * e.g. the user's computer, cloud storage, or OPFS in the browser.
+ * The function bootstraps an in‑memory SQLite database with all
+ * required tables, change sets and metadata so that it represents
+ * a valid Lix project. The caller is responsible for persisting the
+ * resulting blob to disk, IndexedDB or any other storage location.
+ *
+ * @example
+ * ```ts
+ * const blob = await newLixFile()
+ * await saveToDisk(blob)
+ * ```
  */
 export async function newLixFile(): Promise<Blob> {
 	const sqlite = await createInMemoryDatabase({

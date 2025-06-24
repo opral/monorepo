@@ -30,7 +30,18 @@ export type Lix = {
 };
 
 /**
- * Common setup between different lix environments.
+ * Opens a Lix instance using an existing SQLite database.
+ *
+ * The database may originate from a file, IndexedDB or an
+ * in‑memory instance. During opening all required schemas are
+ * applied, optional plugins are initialised and provided key‑values
+ * are written to the database.
+ *
+ * @example
+ * ```ts
+ * const db = await createInMemoryDatabase({ readOnly: false })
+ * const lix = await openLix({ database: db })
+ * ```
  */
 export async function openLix(args: {
 	/**

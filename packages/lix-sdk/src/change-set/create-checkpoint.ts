@@ -1,6 +1,19 @@
 import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
 
+/**
+ * Converts the current working change set into a checkpoint.
+ *
+ * The working change set becomes immutable and receives the
+ * `checkpoint` label. A fresh empty working change set is created so
+ * that new changes can continue to accumulate.
+ *
+ * @example
+ * ```ts
+ * const { id } = await createCheckpoint({ lix })
+ * ```
+ */
+
 export async function createCheckpoint(args: { lix: Lix }): Promise<{
 	id: string;
 }> {

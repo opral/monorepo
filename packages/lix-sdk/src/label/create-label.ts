@@ -2,6 +2,18 @@ import type { Lix } from "../lix/open-lix.js";
 import type { Label } from "./schema.js";
 import { nanoid } from "../database/nano-id.js";
 
+/**
+ * Creates a label that can be attached to change sets.
+ *
+ * Labels help categorise change sets, for example "checkpoint" or
+ * "reviewed". They are simple name identifiers stored per version.
+ *
+ * @example
+ * ```ts
+ * const label = await createLabel({ lix, name: "checkpoint" })
+ * ```
+ */
+
 export async function createLabel(args: {
 	lix: Pick<Lix, "db">;
 	id?: Label["id"];
