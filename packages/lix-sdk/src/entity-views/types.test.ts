@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { test } from "vitest";
-import type { ToKysely, NewState } from "./generic-types.js";
+import type { ToKysely, NewState } from "./types.js";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,

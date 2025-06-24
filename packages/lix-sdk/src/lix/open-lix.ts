@@ -8,7 +8,7 @@ import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { LixAccount } from "../account/schema.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
-import type { NewState } from "../entity-views/generic-types.js";
+import type { NewState } from "../entity-views/types.js";
 
 export type Lix = {
 	/**

@@ -1,5 +1,5 @@
 import { nanoid } from "../database/nano-id.js";
-import type { State } from "../entity-views/generic-types.js";
+import type { State } from "../entity-views/types.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { Log } from "./schema.js";
 

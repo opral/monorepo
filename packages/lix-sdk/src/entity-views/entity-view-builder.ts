@@ -22,7 +22,7 @@ import type {
 	EntityStateAllView,
 	EntityStateHistoryView,
 	ToKysely,
-} from "./generic-types.js";
+} from "./types.js";
 
 // Re-export types for backward compatibility
 export type { StateEntityView, StateEntityAllView, StateEntityHistoryView };

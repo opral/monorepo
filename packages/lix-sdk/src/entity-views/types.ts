@@ -9,14 +9,6 @@ import type {
 	LixSelectable,
 } from "../schema-definition/definition.js";
 
-// Re-export types from schema-definition for backward compatibility
-export type {
-	LixGenerated,
-	LixInsertable,
-	LixUpdateable,
-	LixSelectable,
-} from "../schema-definition/definition.js";
-
 /**
  * Check if a type has the LixGenerated brand
  */

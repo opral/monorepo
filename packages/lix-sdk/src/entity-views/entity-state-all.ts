@@ -1,8 +1,10 @@
 import type { Generated } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixGenerated,
+	LixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import type { ValidationRule, ValidationCallbacks } from "./entity-state.js";
-import type { LixGenerated } from "./generic-types.js";
 
 /**
  * Base type for _all entity views (cross-version) that include operational columns from the state table.

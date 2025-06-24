@@ -1,7 +1,9 @@
 import type { Generated } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { LixGenerated } from "./generic-types.js";
+import type {
+	LixGenerated,
+	LixSchemaDefinition,
+} from "../schema-definition/definition.js";
 
 /**
  * Base type for regular entity views (active version only) that include operational columns from the state table.
