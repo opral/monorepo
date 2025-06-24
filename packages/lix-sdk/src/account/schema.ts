@@ -1,16 +1,11 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type { Selectable } from "kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { humanId } from "human-id";
 import { nanoid } from "../database/nano-id.js";
-import {
-	createEntityViewsIfNotExists,
-	type StateEntityView,
-	type StateEntityAllView,
-} from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state-history.js";
+import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
@@ -70,30 +65,7 @@ export const LixAccountSchema = {
 LixAccountSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixAccount = FromLixSchemaDefinition<typeof LixAccountSchema>;
-
-// Database view type (includes operational columns) - active version only
-export type AccountView = {
-	id: Generated<string>;
-	name: string;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type AccountAllView = {
-	id: Generated<string>;
-	name: string;
-} & StateEntityAllView;
-
-// Database view type for historical operations  
-export type AccountHistoryView = {
-	id: Generated<string>;
-	name: string;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type Account = Selectable<AccountView>;
-export type NewAccount = Insertable<AccountView>;
-export type AccountUpdate = Updateable<AccountView>;
+export type Account = FromLixSchemaDefinition<typeof LixAccountSchema>;
 
 // Active account table type (temp table)
 export type ActiveAccountTable = {
@@ -102,5 +74,3 @@ export type ActiveAccountTable = {
 };
 
 export type ActiveAccount = Selectable<ActiveAccountTable>;
-export type NewActiveAccount = Insertable<ActiveAccountTable>;
-export type ActiveAccountUpdate = Updateable<ActiveAccountTable>;

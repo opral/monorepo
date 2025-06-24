@@ -65,4 +65,3 @@ export type StoredSchema = FromLixSchemaDefinition<
 	// override the value to any to allow any JSON type (instead of unknown which is annoying)
 	value: any;
 };
-

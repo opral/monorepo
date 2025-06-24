@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixAccount } from "./schema.js";
+import type { Account } from "./schema.js";
 
 /**
  * Switch the current account to the provided account.
@@ -22,7 +22,7 @@ import type { LixAccount } from "./schema.js";
  */
 export async function switchAccount(args: {
 	lix: Pick<Lix, "db">;
-	to: Pick<LixAccount, "id" | "name">[];
+	to: Pick<Account, "id" | "name">[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// delete all rows from the current_account table

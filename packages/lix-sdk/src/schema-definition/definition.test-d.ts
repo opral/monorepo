@@ -218,3 +218,36 @@ test("FromLixSchemaDefinition transforms schema with x-lix-generated to LixGener
 		name: "test",
 	};
 });
+
+test("FromLixSchemaDefinition transforms empty object types to Record<string, any>", () => {
+	const TestSchema = {
+		"x-lix-key": "test_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: { type: "string" },
+			metadata: { type: "object" },
+			config: { type: "object", nullable: true },
+		},
+		required: ["id", "metadata"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	type TestEntity = FromLixSchemaDefinition<typeof TestSchema>;
+
+	// Test that metadata is Record<string, any>
+	const entity: TestEntity = {
+		id: "test",
+		metadata: {
+			author: "test-user",
+			created_at: new Date().toISOString(),
+			nested: { deep: { value: 123 } },
+		},
+		config: null,
+	};
+
+	// Verify types
+	assertType<Record<string, any>>(entity.metadata);
+	assertType<Record<string, any> | null | undefined>(entity.config);
+});

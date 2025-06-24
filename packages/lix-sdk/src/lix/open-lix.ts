@@ -6,9 +6,9 @@ import type { LixDatabaseSchema } from "../database/schema.js";
 import type { KeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
-import type { LixAccount } from "../account/schema.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewState } from "../entity-views/types.js";
+import type { Account } from "../account/schema.js";
 
 export type Lix = {
 	/**
@@ -42,7 +42,7 @@ export async function openLix(args: {
 	 *   const account = localStorage.getItem("account")
 	 *   const lix = await openLix({ account })
 	 */
-	account?: LixAccount;
+	account?: Account;
 	database: SqliteWasmDatabase;
 	/**
 	 * Usecase are lix apps that define their own file format,

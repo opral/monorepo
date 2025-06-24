@@ -3,7 +3,7 @@ import {
 	switchAccount,
 	Lix,
 	Version,
-	LixAccount,
+	Account,
 } from "@lix-js/sdk";
 import { atom, createStore } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -282,7 +282,7 @@ export const accountsAtom = atom(async (get) => {
 const ACTIVE_ACCOUNT_STORAGE_KEY = "active_account";
 
 // Helper function to switch active account
-export const switchActiveAccount = async (lix: Lix, account: LixAccount) => {
+export const switchActiveAccount = async (lix: Lix, account: Account) => {
 	await lix.db.transaction().execute(async (trx) => {
 		// in case the user switched the lix and this lix does not have
 		// the account yet, then insert it.

@@ -7,7 +7,10 @@ import type {
 
 /**
  * Base type for entity history views that include historical data from the state_history table.
- * These views provide access to entity states at different points in change set history.
+ * These views provide access to entity states at different points in change set history,
+ * enabling features like blame functionality and historical diffs.
+ *
+ * History views are read-only and show how entities evolved over time through changes.
  *
  * @example
  * ```typescript
@@ -16,48 +19,139 @@ import type {
  *   id: Generated<string>;
  *   name: string;
  * } & StateEntityHistoryView;
+ *
+ * // Query entity history at a specific change set
+ * const history = await lix.db
+ *   .selectFrom("account_history")
+ *   .where("lixcol_change_set_id", "=", changeSetId)
+ *   .where("lixcol_depth", "=", 0) // Get the state at this exact change set
+ *   .selectAll()
+ *   .execute();
  * ```
  */
 export type StateEntityHistoryView = {
-	/** File identifier where this entity is stored */
+	/**
+	 * File identifier where this entity is stored.
+	 *
+	 * This references the file_id in the state_history table and links the entity
+	 * to a specific file in the Lix file system.
+	 */
 	lixcol_file_id: Generated<string>;
-	/** Plugin identifier that manages this entity type */
+
+	/**
+	 * Plugin identifier that manages this entity type.
+	 *
+	 * This identifies which plugin is responsible for this entity's behavior
+	 * and schema definition.
+	 */
 	lixcol_plugin_key: Generated<string>;
-	/** Version of the schema used for this entity */
+
+	/**
+	 * Version of the schema used for this entity at this point in history.
+	 *
+	 * Format: "major.minor" (e.g., "1.0", "2.1")
+	 * This allows tracking schema evolution over time.
+	 */
 	lixcol_schema_version: Generated<string>;
-	/** ID of the change that created this entity state */
+
+	/**
+	 * ID of the change that created this specific entity state.
+	 *
+	 * Each modification to an entity creates a new change, and this ID
+	 * references that specific change in the change table.
+	 */
 	lixcol_change_id: Generated<string>;
-	/** Change set ID that serves as the root/starting point for depth calculation */
+
+	/**
+	 * Change set ID that serves as the query root for depth calculation.
+	 *
+	 * When querying history, this represents the "perspective" from which
+	 * you're viewing the entity's history. The depth is calculated relative
+	 * to this change set.
+	 */
 	lixcol_change_set_id: Generated<string>;
-	/** Depth of this entity state relative to the queried change_set_id */
+
+	/**
+	 * Depth of this entity state relative to the queried change_set_id.
+	 *
+	 * - `0`: The entity state at the exact queried change set
+	 * - `1`: The entity state one change before the queried change set
+	 * - `2+`: Earlier states, going back in history
+	 *
+	 * This is useful for blame functionality and understanding how an entity
+	 * evolved to reach its current state.
+	 */
 	lixcol_depth: Generated<number>;
 };
 
 /**
- * Base type for entity history views that include historical data from the state_history table.
- * These views provide access to entity states at different points in change set history.
+ * Base type for entity history views using LixGenerated markers instead of Kysely's Generated type.
+ * This type is compatible with the Lix SDK's type transformation system and provides
+ * access to historical entity states.
+ *
+ * History views are read-only and show how entities evolved over time through changes.
  *
  * @example
  * ```typescript
- * // Define an entity history view type
- * export type AccountHistoryView = {
- *   id: Generated<string>;
+ * // Define an entity history type
+ * export type AccountHistory = {
+ *   id: string;  // No LixGenerated marker in history views
  *   name: string;
- * } & StateEntityHistoryView;
+ * } & StateEntityHistoryColumns;
  * ```
  */
 export type StateEntityHistoryColumns = {
-	/** File identifier where this entity is stored */
+	/**
+	 * File identifier where this entity is stored.
+	 *
+	 * This references the file_id in the state_history table and links the entity
+	 * to a specific file in the Lix file system.
+	 */
 	lixcol_file_id: LixGenerated<string>;
-	/** Plugin identifier that manages this entity type */
+
+	/**
+	 * Plugin identifier that manages this entity type.
+	 *
+	 * This identifies which plugin is responsible for this entity's behavior
+	 * and schema definition.
+	 */
 	lixcol_plugin_key: LixGenerated<string>;
-	/** Version of the schema used for this entity */
+
+	/**
+	 * Version of the schema used for this entity at this point in history.
+	 *
+	 * Format: "major.minor" (e.g., "1.0", "2.1")
+	 * This allows tracking schema evolution over time.
+	 */
 	lixcol_schema_version: LixGenerated<string>;
-	/** ID of the change that created this entity state */
+
+	/**
+	 * ID of the change that created this specific entity state.
+	 *
+	 * Each modification to an entity creates a new change, and this ID
+	 * references that specific change in the change table.
+	 */
 	lixcol_change_id: LixGenerated<string>;
-	/** Change set ID that serves as the root/starting point for depth calculation */
+
+	/**
+	 * Change set ID that serves as the query root for depth calculation.
+	 *
+	 * When querying history, this represents the "perspective" from which
+	 * you're viewing the entity's history. The depth is calculated relative
+	 * to this change set.
+	 */
 	lixcol_change_set_id: LixGenerated<string>;
-	/** Depth of this entity state relative to the queried change_set_id */
+
+	/**
+	 * Depth of this entity state relative to the queried change_set_id.
+	 *
+	 * - `0`: The entity state at the exact queried change set
+	 * - `1`: The entity state one change before the queried change set
+	 * - `2+`: Earlier states, going back in history
+	 *
+	 * This is useful for blame functionality and understanding how an entity
+	 * evolved to reach its current state.
+	 */
 	lixcol_depth: LixGenerated<number>;
 };
 

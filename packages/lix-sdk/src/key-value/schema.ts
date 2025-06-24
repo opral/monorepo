@@ -35,4 +35,3 @@ export type KeyValue = FromLixSchemaDefinition<typeof LixKeyValueSchema> & {
 	// override the value to any to allow any JSON type (instead of unknown which is annoying)
 	value: any;
 };
-

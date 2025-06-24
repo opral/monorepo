@@ -109,4 +109,3 @@ export type LixDatabaseSchema = {
 		{ body: ThreadComment["body"] }
 	> &
 	EntityViews<typeof LixVersionSchema, "version">;
-

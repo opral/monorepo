@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lix, type Thread, type ThreadComment } from "@lix-js/sdk";
+import { Lix, State, type Thread, type ThreadComment } from "@lix-js/sdk";
 import { fromPlainText, toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 import { toRelativeTime } from "../utilities/timeUtils";
 import { getInitials } from "../utilities/nameUtils";
@@ -8,7 +8,7 @@ export function Thread(props: {
 	lix: Lix;
 	thread: Thread;
 	comments: Array<
-		Pick<ThreadComment, "id" | "lixcol_created_at" | "body"> & {
+		Pick<State<ThreadComment>, "id" | "lixcol_created_at" | "body"> & {
 			author_name: string;
 		}
 	>;
@@ -91,7 +91,7 @@ export function Composer(props: {
 
 function ThreadComment(props: {
 	lix: Lix;
-	comment: Pick<ThreadComment, "lixcol_created_at" | "body"> & {
+	comment: Pick<State<ThreadComment>, "lixcol_created_at" | "body"> & {
 		author_name: string;
 	};
 }) {

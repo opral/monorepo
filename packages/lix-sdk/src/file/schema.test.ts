@@ -1,9 +1,10 @@
-import { test, expect } from "vitest";
+import { test, expect, expectTypeOf } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createVersion } from "../version/create-version.js";
 import { createCheckpoint } from "../change-set/create-checkpoint.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
+import type { LixFile } from "./schema.js";
 
 test("insert, update, delete on the file view", async () => {
 	const lix = await openLixInMemory({
@@ -500,4 +501,21 @@ test("file_history provides access to historical file data", async () => {
 	expect(historicalFile.lixcol_file_id).toBeDefined();
 	expect(historicalFile.lixcol_plugin_key).toBeDefined();
 	expect(historicalFile.lixcol_schema_version).toBeDefined();
+});
+
+// its super annoying to work with metadata otherwise
+test("file metadata is Record<string, any>", async () => {
+	const mockFile: LixFile = {
+		id: "test-file",
+		path: "/test.json",
+		data: new TextEncoder().encode(JSON.stringify({ prop0: "value0" })),
+		metadata: {
+			author: "test-user",
+			created_at: new Date().toISOString(),
+		},
+	};
+
+	expectTypeOf(mockFile.metadata).toEqualTypeOf<
+		Record<string, any> | null | undefined
+	>();
 });
