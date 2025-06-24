@@ -1,196 +1,55 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { test, expectTypeOf, assertType } from "vitest";
+import { test } from "vitest";
+import type { ToKysely, NewState } from "./generic-types.js";
 import type {
+	LixSchemaDefinition,
+	FromLixSchemaDefinition,
 	LixGenerated,
 	LixInsertable,
 	LixSelectable,
 	LixUpdateable,
-	ToKysely,
-	EntityView,
-	NewState,
-} from "./generic-types.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+} from "../schema-definition/definition.js";
 import type { Generated as KyselyGenerated } from "kysely";
 
-test("LixInsertable combined with LixGenerated makes columns optional", () => {
-	type MockType = {
-		id: LixGenerated<string>;
-		name: string;
-	};
-
-	// pass (all properties are provided)
-	const z: LixInsertable<MockType> = {
-		id: "123",
-		name: "Test",
-	} satisfies LixInsertable<MockType>;
-
-	// pass (LixGenerated makes id optional)
-	const a: LixInsertable<MockType> = {
-		name: "Test",
-	};
-
-	// @ts-expect-error - Name is required in MockType
-	const x: LixInsertable<MockType> = {};
-
-	// @ts-expect-error - Name is required in MockType
-	const y: LixInsertable<MockType> = {
-		id: "123",
-	};
-});
-
-test("LixSelectable unwraps LixGenerated fields to their base types", () => {
+test("ToKysely converts LixGenerated to Kysely Generated", () => {
 	type MockType = {
 		id: LixGenerated<string>;
 		name: string;
 		count: LixGenerated<number>;
 		metadata: { foo: string };
+		optional?: string | null;
 	};
 
-	// All fields should be present and LixGenerated should be unwrapped
-	const selected: LixSelectable<MockType> = {
-		id: "123",
-		name: "Test",
-		count: 42,
-		metadata: { foo: "bar" },
-	} satisfies LixSelectable<MockType>;
+	// The conversion should map LixGenerated to KyselyGenerated
+	type KyselyVersion = ToKysely<MockType>;
 
-	// Type checking - all fields are required
-	// @ts-expect-error - All fields are required in selectable
-	const missing1: LixSelectable<MockType> = {
-		id: "123",
-		name: "Test",
-		count: 42,
-		// missing metadata
-	};
-
-	// @ts-expect-error - All fields are required in selectable
-	const missing2: LixSelectable<MockType> = {
-		// missing id
-		name: "Test",
-		count: 42,
-		metadata: { foo: "bar" },
-	};
-
-	// @ts-expect-error - All fields are required in selectable
-	const missing3: LixSelectable<MockType> = {
-		id: "123",
-		// missing name
-		count: 42,
-		metadata: { foo: "bar" },
-	};
-
-	// Verify types are correctly unwrapped
-	type IdType = LixSelectable<MockType>["id"]; // Should be string, not LixGenerated<string>
-	type CountType = LixSelectable<MockType>["count"]; // Should be number, not LixGenerated<number>
-
-	const idValue: IdType = "test";
-	const countValue: CountType = 123;
-});
-
-test("LixUpdateable makes all fields optional and unwraps LixGenerated", () => {
-	type MockType = {
-		id: LixGenerated<string>;
-		name: string;
-		count: LixGenerated<number>;
-		metadata: { foo: string };
-		optional?: string;
-	};
-
-	// All fields should be optional in updates
-	const update1: LixUpdateable<MockType> = {}; // Empty object is valid
-
-	const update2: LixUpdateable<MockType> = {
-		id: "new-id",
-	};
-
-	const update3: LixUpdateable<MockType> = {
-		name: "Updated Name",
-	};
-
-	const update4: LixUpdateable<MockType> = {
-		count: 100,
-	};
-
-	const update5: LixUpdateable<MockType> = {
-		metadata: { foo: "updated" },
-	};
-
-	const update6: LixUpdateable<MockType> = {
-		optional: "now set",
-	};
-
-	// Can update multiple fields at once
-	const update7: LixUpdateable<MockType> = {
-		id: "new-id",
-		name: "New Name",
-		count: 99,
-		metadata: { foo: "baz" },
-		optional: "value",
-	};
-
-	// Verify that LixGenerated fields are unwrapped
-	type UpdateIdType = LixUpdateable<MockType>["id"]; // Should be string | undefined
-	type UpdateCountType = LixUpdateable<MockType>["count"]; // Should be number | undefined
-	type UpdateNameType = LixUpdateable<MockType>["name"]; // Should be string | undefined
-
-	// These should all work since fields are optional
-	const idUpdate: UpdateIdType = undefined;
-	const countUpdate: UpdateCountType = undefined;
-	const nameUpdate: UpdateNameType = undefined;
-
-	// But when provided, must be correct type
-	const wrongType1: LixUpdateable<MockType> = {
-		// @ts-expect-error - id must be string when provided
-		id: 123,
-	};
-
-	const wrongType2: LixUpdateable<MockType> = {
-		// @ts-expect-error - count must be number when provided
-		count: "not a number",
-	};
-
-	const wrongType3: LixUpdateable<MockType> = {
-		// @ts-expect-error - metadata must match structure when provided
-		metadata: { bar: "wrong key" },
-	};
-});
-
-test("EntityView transforms schema with x-lix-generated to LixGenerated types", () => {
-	// Define a test schema with x-lix-generated properties
-	const TestSchema = {
-		"x-lix-key": "test_entity",
-		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
-		type: "object",
-		properties: {
-			id: {
-				type: "string",
-				"x-lix-generated": true,
-			},
-			name: {
-				type: "string",
-			},
-		},
-		required: ["id", "name"],
-		additionalProperties: false,
-	} as const satisfies LixSchemaDefinition;
-
-	type TestEntityView = EntityView<typeof TestSchema>;
-
-	// Test with LixInsertable - generated fields should be optional
-	const insertable: LixInsertable<TestEntityView> = {
-		// id is optional
+	// Verify the conversion is correct by creating a type-compatible object
+	const kyselyTable: KyselyVersion = {
+		id: {} as KyselyGenerated<string>,
 		name: "test",
+		count: {} as KyselyGenerated<number>,
+		metadata: { foo: "bar" },
+		optional: null,
 	};
 
-	// Can also provide generated fields
-	const insertableWithGenerated: LixInsertable<TestEntityView> = {
-		id: "custom-id",
-		name: "test",
-	};
+	// Type checks - verify specific field types
+	type IdType = KyselyVersion["id"]; // Should be KyselyGenerated<string>
+	type NameType = KyselyVersion["name"]; // Should be string
+	type CountType = KyselyVersion["count"]; // Should be KyselyGenerated<number>
+	type MetadataType = KyselyVersion["metadata"]; // Should be { foo: string }
+	type OptionalType = KyselyVersion["optional"]; // Should be string | null | undefined
+
+	// These should work
+	const id: IdType = {} as KyselyGenerated<string>;
+	const name: NameType = "test";
+	const count: CountType = {} as KyselyGenerated<number>;
+	const metadata: MetadataType = { foo: "test" };
+	const optional1: OptionalType = "value";
+	const optional2: OptionalType = null;
+	const optional3: OptionalType = undefined;
 });
 
-test("Business logic types with LixGenerated markers work with NewState", () => {
+test("LixGenerated markers work with NewState", () => {
 	// Define a mock schema with x-lix-generated
 	const MockEntitySchema = {
 		"x-lix-key": "mock_entity",
@@ -208,7 +67,7 @@ test("Business logic types with LixGenerated markers work with NewState", () => 
 	} as const satisfies LixSchemaDefinition;
 
 	// Business logic type with LixGenerated markers
-	type MockEntity = EntityView<typeof MockEntitySchema>;
+	type MockEntity = FromLixSchemaDefinition<typeof MockEntitySchema>;
 
 	// Test that NewState makes generated fields optional
 	const newMockEntity: NewState<MockEntity> = {

@@ -174,5 +174,130 @@ export type LixSchemaDefinition = JSONSchema & {
 	};
 };
 
+/**
+ * Our own Generated marker type for database columns that are auto-generated.
+ * This allows us to control type transformations independently of Kysely.
+ * 
+ * Note: For developer convenience, this accepts T values but preserves
+ * the generated marker for type transformations.
+ */
+export type LixGenerated<T> = T & {
+	readonly __lixGenerated?: true;
+};
+
+/**
+ * Check if a type has the LixGenerated brand
+ */
+type IsLixGenerated<T> = T extends { readonly __lixGenerated?: true } ? true : false;
+
+/**
+ * Extract the base type from LixGenerated<T>
+ * Since LixGenerated<T> = T & { brand }, we need to extract T
+ */
+type ExtractFromGenerated<T> = T extends LixGenerated<infer U> ? U : T;
+
+/**
+ * Extract the select type from LixGenerated or return the type as-is
+ */
+type SelectType<T> = ExtractFromGenerated<T>;
+
+/**
+ * Extract the insert type from LixGenerated or return the type as-is
+ */
+type InsertType<T> = IsLixGenerated<T> extends true ? ExtractFromGenerated<T> | undefined : T;
+
+/**
+ * Extract the update type from LixGenerated or return the type as-is
+ */
+type UpdateType<T> = ExtractFromGenerated<T>;
+
+/**
+ * Evaluates to K if T can be null or undefined
+ */
+type IfNullable<T, K> = undefined extends T ? K : null extends T ? K : never;
+
+/**
+ * Evaluates to K if T can't be null or undefined
+ */
+type IfNotNullable<T, K> = undefined extends T
+	? never
+	: null extends T
+		? never
+		: T extends never
+			? never
+			: K;
+
+/**
+ * Keys whose InsertType can be null or undefined (optional in inserts)
+ */
+type NullableInsertKeys<T> = {
+	[K in keyof T]: IfNullable<InsertType<T[K]>, K>;
+}[keyof T];
+
+/**
+ * Keys whose InsertType can't be null or undefined (required in inserts)
+ */
+type NonNullableInsertKeys<T> = {
+	[K in keyof T]: IfNotNullable<InsertType<T[K]>, K>;
+}[keyof T];
+
+/**
+ * Transform a type to make LixGenerated fields optional (for inserts).
+ * Non-generated fields remain required.
+ */
+export type LixInsertable<T> = {
+	[K in NonNullableInsertKeys<T>]: InsertType<T[K]>;
+} & {
+	[K in NullableInsertKeys<T>]?: InsertType<T[K]>;
+};
+
+/**
+ * Transform a type to make all fields optional (for updates).
+ * LixGenerated fields are unwrapped to their base type.
+ */
+export type LixUpdateable<T> = {
+	[K in keyof T]?: UpdateType<T[K]>;
+};
+
+/**
+ * Transform a type to unwrap LixGenerated fields (for selects).
+ * This gives you the actual runtime types.
+ */
+export type LixSelectable<T> = {
+	[K in keyof T]: SelectType<T[K]>;
+};
+
+/**
+ * Internal type that applies LixGenerated markers to properties with x-lix-generated: true
+ */
+type ApplyLixGenerated<TSchema extends LixSchemaDefinition> = TSchema extends {
+	properties: infer Props;
+}
+	? {
+			[K in keyof FromSchema<TSchema>]: K extends keyof Props
+				? Props[K] extends { "x-lix-generated": true }
+					? LixGenerated<FromSchema<TSchema>[K]>
+					: FromSchema<TSchema>[K]
+				: FromSchema<TSchema>[K];
+		}
+	: never;
+
+/**
+ * Convert a LixSchemaDefinition to a TypeScript type.
+ * Properties marked with x-lix-generated: true are wrapped in LixGenerated.
+ * 
+ * @example
+ * ```typescript
+ * const LogSchema = {
+ *   properties: {
+ *     id: { type: "string", "x-lix-generated": true },
+ *     name: { type: "string" }
+ *   }
+ * } as const;
+ * 
+ * type Log = FromLixSchemaDefinition<typeof LogSchema>;
+ * // Result: { id: LixGenerated<string>, name: string }
+ * ```
+ */
 export type FromLixSchemaDefinition<T extends LixSchemaDefinition> =
-	FromSchema<T>;
+	ApplyLixGenerated<T>;

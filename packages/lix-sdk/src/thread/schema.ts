@@ -1,8 +1,7 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import type { EntityView } from "../entity-views/generic-types.js";
 
 export function applyThreadDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -75,7 +74,7 @@ export const LixThreadCommentSchema = {
 LixThreadCommentSchema satisfies LixSchemaDefinition;
 
 // Business logic types with LixGenerated markers
-export type Thread = EntityView<typeof LixThreadSchema>;
-export type ThreadComment = EntityView<typeof LixThreadCommentSchema> & {
+export type Thread = FromLixSchemaDefinition<typeof LixThreadSchema>;
+export type ThreadComment = FromLixSchemaDefinition<typeof LixThreadCommentSchema> & {
 	body: ZettelDoc; // Override the body type
 };

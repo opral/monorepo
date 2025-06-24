@@ -78,7 +78,7 @@ import {
 	type ThreadComment,
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
-import type { EntityViews } from "../entity-views/generic-types.js";
+import type { EntityViews } from "../entity-views/entity-view-builder.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],

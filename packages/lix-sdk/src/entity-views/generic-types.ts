@@ -2,18 +2,20 @@ import type { EntityStateAllColumns } from "./entity-state-all.js";
 import type { EntityStateColumns } from "./entity-state.js";
 import type { StateEntityHistoryColumns } from "./entity-state-history.js";
 import type { Generated as KyselyGenerated } from "kysely";
-import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixGenerated,
+	LixInsertable,
+	LixUpdateable,
+	LixSelectable,
+} from "../schema-definition/definition.js";
 
-/**
- * Our own Generated marker type for database columns that are auto-generated.
- * This allows us to control type transformations independently of Kysely.
- * 
- * Note: For developer convenience, this accepts T values but preserves
- * the generated marker for type transformations.
- */
-export type LixGenerated<T> = T & {
-	readonly __lixGenerated?: true;
-};
+// Re-export types from schema-definition for backward compatibility
+export type {
+	LixGenerated,
+	LixInsertable,
+	LixUpdateable,
+	LixSelectable,
+} from "../schema-definition/definition.js";
 
 /**
  * Check if a type has the LixGenerated brand
@@ -32,72 +34,6 @@ type ExtractFromGenerated<T> = T extends LixGenerated<infer U> ? U : T;
 type SelectType<T> = ExtractFromGenerated<T>;
 
 /**
- * Extract the insert type from LixGenerated or return the type as-is
- */
-type InsertType<T> = IsLixGenerated<T> extends true ? ExtractFromGenerated<T> | undefined : T;
-
-/**
- * Extract the update type from LixGenerated or return the type as-is
- */
-type UpdateType<T> = ExtractFromGenerated<T>;
-
-/**
- * Evaluates to K if T can be null or undefined
- */
-type IfNullable<T, K> = undefined extends T ? K : null extends T ? K : never;
-
-/**
- * Evaluates to K if T can't be null or undefined
- */
-type IfNotNullable<T, K> = undefined extends T
-	? never
-	: null extends T
-		? never
-		: T extends never
-			? never
-			: K;
-
-/**
- * Keys whose InsertType can be null or undefined (optional in inserts)
- */
-type NullableInsertKeys<T> = {
-	[K in keyof T]: IfNullable<InsertType<T[K]>, K>;
-}[keyof T];
-
-/**
- * Keys whose InsertType can't be null or undefined (required in inserts)
- */
-type NonNullableInsertKeys<T> = {
-	[K in keyof T]: IfNotNullable<InsertType<T[K]>, K>;
-}[keyof T];
-
-/**
- * Transform a type to make LixGenerated fields optional (for inserts).
- * Non-generated fields remain required.
- */
-export type LixInsertable<T> = {
-	[K in NonNullableInsertKeys<T>]: InsertType<T[K]>;
-} & {
-	[K in NullableInsertKeys<T>]?: InsertType<T[K]>;
-};
-
-/**
- * Transform a type to make all fields optional (for updates).
- * LixGenerated fields are unwrapped to their base type.
- */
-export type LixUpdateable<T> = {
-	[K in keyof T]?: UpdateType<T[K]>;
-};
-
-/**
- * Transform a type to unwrap LixGenerated fields (for selects).
- * This gives you the actual runtime types.
- */
-export type LixSelectable<T> = {
-	[K in keyof T]: SelectType<T[K]>;
-};
-
-/**
  * Convert our LixGenerated types to Kysely's Generated types.
  * This adapter is used at the database boundary.
  */
@@ -106,37 +42,6 @@ export type ToKysely<T> = {
 		? KyselyGenerated<SelectType<T[K]>>
 		: T[K];
 };
-
-/**
- * Creates an entity view type from a LixSchemaDefinition.
- * Properties marked with x-lix-generated: true are wrapped in LixGenerated.
- * 
- * This is a simplified version that manually checks each property.
- * 
- * @example
- * ```typescript
- * const LogSchema = {
- *   properties: {
- *     id: { type: "string", "x-lix-generated": true },
- *     name: { type: "string" }
- *   }
- * } as const;
- * 
- * type LogView = EntityView<typeof LogSchema>;
- * // Result: { id: LixGenerated<string>, name: string }
- * ```
- */
-export type EntityView<TSchema extends LixSchemaDefinition> = TSchema extends {
-	properties: infer Props;
-}
-	? {
-			[K in keyof FromLixSchemaDefinition<TSchema>]: K extends keyof Props
-				? Props[K] extends { "x-lix-generated": true }
-					? LixGenerated<FromLixSchemaDefinition<TSchema>[K]>
-					: FromLixSchemaDefinition<TSchema>[K]
-				: FromLixSchemaDefinition<TSchema>[K];
-		}
-	: never;
 
 /**
  * View type that preserves Generated markers for database schema.
@@ -246,5 +151,3 @@ export type NewStateAll<T> = LixInsertable<EntityStateAllView<T>>;
  */
 export type StateAllUpdate<T> = LixUpdateable<EntityStateAllView<T>>;
 
-// Re-export EntityViews from entity-view-builder for convenience
-export type { EntityViews } from "./entity-view-builder.js";
