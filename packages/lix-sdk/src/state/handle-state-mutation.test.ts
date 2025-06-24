@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type { LixChangeSetEdge } from "../change-set/schema.js";
+import type { ChangeSetEdge } from "../change-set/schema.js";
 
 test("creates a new change set and updates the version's change set id for mutations", async () => {
 	const lix = await openLixInMemory({});
@@ -84,7 +84,7 @@ test("creates a new change set and updates the version's change set id for mutat
 				parent_id: versionAfterUpdate.change_set_id,
 				child_id: versionAfterDelete.change_set_id,
 			},
-		] satisfies LixChangeSetEdge[])
+		] satisfies ChangeSetEdge[])
 	);
 });
 

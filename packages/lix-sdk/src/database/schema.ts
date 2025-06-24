@@ -4,28 +4,10 @@ import {
 	LixChangeSetElementSchema,
 	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
-	type ChangeSetElementView,
-	type ChangeSetElementAllView,
-	type ChangeSetElementHistoryView,
-	type ChangeSetView,
-	type ChangeSetAllView,
-	type ChangeSetHistoryView,
-	type ChangeSetEdgeView,
-	type ChangeSetEdgeAllView,
-	type ChangeSetEdgeHistoryView,
-	type ChangeSetLabelView,
-	type ChangeSetLabelAllView,
-	type ChangeSetLabelHistoryView,
-	type ChangeSetThreadView,
-	type ChangeSetThreadAllView,
-	type ChangeSetThreadHistoryView,
 } from "../change-set/schema.js";
 import {
 	LixVersionSchema,
 	type ActiveVersionTable,
-	type VersionView,
-	type VersionAllView,
-	type VersionHistoryView,
 } from "../version/schema.js";
 import {
 	LixSnapshotSchema,
@@ -47,12 +29,7 @@ import {
 	LixAccountSchema,
 	type ActiveAccountTable,
 } from "../account/schema.js";
-import {
-	LixChangeAuthorSchema,
-	type ChangeAuthorView,
-	type ChangeAuthorAllView,
-	type ChangeAuthorHistoryView,
-} from "../change-author/schema.js";
+import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { LixLabelSchema } from "../label/schema.js";
 import {
 	LixThreadSchema,
@@ -101,39 +78,13 @@ export type LixDatabaseSchema = {
 	// account
 	active_account: ActiveAccountTable;
 
-	// snapshot
 	snapshot: ToKysely<Snapshot>;
 
-	// change
 	change: ChangeView;
-	change_author: ChangeAuthorView;
-	change_author_all: ChangeAuthorAllView;
-	change_author_history: ChangeAuthorHistoryView;
-
-	// change set
-	change_set: ChangeSetView;
-	change_set_all: ChangeSetAllView;
-	change_set_history: ChangeSetHistoryView;
-	change_set_element: ChangeSetElementView;
-	change_set_element_all: ChangeSetElementAllView;
-	change_set_element_history: ChangeSetElementHistoryView;
-	change_set_edge: ChangeSetEdgeView;
-	change_set_edge_all: ChangeSetEdgeAllView;
-	change_set_edge_history: ChangeSetEdgeHistoryView;
-	change_set_label: ChangeSetLabelView;
-	change_set_label_all: ChangeSetLabelAllView;
-	change_set_label_history: ChangeSetLabelHistoryView;
-	change_set_thread: ChangeSetThreadView;
-	change_set_thread_all: ChangeSetThreadAllView;
-	change_set_thread_history: ChangeSetThreadHistoryView;
 
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;
 
-	// version
-	version: VersionView;
-	version_all: VersionAllView;
-	version_history: VersionHistoryView;
 	active_version: ActiveVersionTable;
 } & EntityViews<
 	typeof LixKeyValueSchema,
@@ -141,6 +92,12 @@ export type LixDatabaseSchema = {
 	{ value: KeyValue["value"] }
 > &
 	EntityViews<typeof LixAccountSchema, "account"> &
+	EntityViews<typeof LixChangeSetSchema, "change_set"> &
+	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
+	EntityViews<typeof LixChangeSetEdgeSchema, "change_set_edge"> &
+	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
+	EntityViews<typeof LixChangeSetThreadSchema, "change_set_thread"> &
+	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
 	EntityViews<typeof LixFileSchema, "file", { data: Uint8Array }> &
 	EntityViews<typeof LixLabelSchema, "label"> &
 	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
@@ -150,5 +107,6 @@ export type LixDatabaseSchema = {
 		typeof LixThreadCommentSchema,
 		"thread_comment",
 		{ body: ThreadComment["body"] }
-	>;
+	> &
+	EntityViews<typeof LixVersionSchema, "version">;
 

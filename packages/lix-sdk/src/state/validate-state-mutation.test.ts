@@ -4,7 +4,7 @@ import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
-import type { LixChangeSetElement } from "../change-set/schema.js";
+import type { ChangeSetElement } from "../change-set/schema.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
 	const lix = await openLixInMemory({});
@@ -2078,7 +2078,7 @@ test("should prevent change set elements from referencing change sets defined in
 				entity_id: "dummy_entity_id",
 				file_id: "dummy_file_id",
 				schema_key: "dummy_schema_key",
-			} satisfies LixChangeSetElement,
+			} satisfies ChangeSetElement,
 			operation: "insert",
 			version_id: activeVersion.version_id, // But creating element in active version context
 		})

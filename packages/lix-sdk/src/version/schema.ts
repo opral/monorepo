@@ -1,15 +1,10 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
+import type { Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import {
-	createEntityViewsIfNotExists,
-	type StateEntityView,
-	type StateEntityAllView,
-} from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state-history.js";
+import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoid } from "../database/nano-id.js";
 import { humanId } from "human-id";
 
@@ -32,6 +27,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 		defaultValues: {
 			id: () => nanoid(),
 			name: () => humanId(),
+			working_change_set_id: () => nanoid(),
 			inherits_from_version_id: () => "global",
 		},
 	});
@@ -65,11 +61,14 @@ export const LixVersionSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string" },
-		name: { type: "string" },
+		id: { type: "string", "x-lix-generated": true },
+		name: { type: "string", "x-lix-generated": true },
 		change_set_id: { type: "string" },
-		working_change_set_id: { type: "string" },
-		inherits_from_version_id: { type: ["string", "null"] },
+		working_change_set_id: { type: "string", "x-lix-generated": true },
+		inherits_from_version_id: {
+			type: ["string", "null"],
+			"x-lix-generated": true,
+		},
 	},
 	required: ["id", "name", "change_set_id", "working_change_set_id"],
 	additionalProperties: false,
@@ -77,39 +76,7 @@ export const LixVersionSchema = {
 LixVersionSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixVersion = FromLixSchemaDefinition<typeof LixVersionSchema>;
-
-// Database view type (includes operational columns) - active version only
-export type VersionView = {
-	id: Generated<string>;
-	name: Generated<string>;
-	change_set_id: string;
-	working_change_set_id: string;
-	inherits_from_version_id: string | null;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type VersionAllView = {
-	id: Generated<string>;
-	name: Generated<string>;
-	change_set_id: string;
-	working_change_set_id: string;
-	inherits_from_version_id: string | null;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type VersionHistoryView = {
-	id: Generated<string>;
-	name: Generated<string>;
-	change_set_id: string;
-	working_change_set_id: string;
-	inherits_from_version_id: string | null;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type Version = Selectable<VersionView>;
-export type NewVersion = Insertable<VersionView>;
-export type VersionUpdate = Updateable<VersionView>;
+export type Version = FromLixSchemaDefinition<typeof LixVersionSchema>;
 
 // Simple table type for active_version (no schema needed - it's not change-controlled)
 export type ActiveVersionTable = {
