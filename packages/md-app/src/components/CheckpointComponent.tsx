@@ -69,7 +69,7 @@ export const CheckpointComponent = (props: {
 		//   setDiffs([diffs]);
 		// });
 
-		setIsExpanded(true);
+		setIsExpanded(!isExpanded);
 	};
 
 	// Group changes by plugin_key
@@ -120,8 +120,8 @@ export const CheckpointComponent = (props: {
 											<AvatarFallback className="bg-[#fff] text-[#141A21] border border-[#DBDFE7] text-xs">
 												{props.checkpointChangeSet.author_name
 													? props.checkpointChangeSet.author_name
-															.substring(0, 2)
-															.toUpperCase()
+														.substring(0, 2)
+														.toUpperCase()
 													: "XX"}
 											</AvatarFallback>
 										</Avatar>
@@ -166,7 +166,7 @@ export const CheckpointComponent = (props: {
 									key={pluginKey}
 									diffs={groupedChanges[pluginKey]}
 									contentClassName="text-sm"
-									// debug={true}
+								// debug={true}
 								/>
 							))}
 						</div>
