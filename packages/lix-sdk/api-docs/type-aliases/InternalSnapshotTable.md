@@ -8,7 +8,7 @@
 
 > **InternalSnapshotTable** = `object`
 
-Defined in: [packages/lix-sdk/src/snapshot/schema.ts:66](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/snapshot/schema.ts#L66)
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:66](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/snapshot/schema.ts#L66)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/snapshot/schema.ts:66](https://github.com/opra
 
 > **content**: `Record`\<`string`, `any`\> \| `null`
 
-Defined in: [packages/lix-sdk/src/snapshot/schema.ts:68](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/snapshot/schema.ts#L68)
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:68](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/snapshot/schema.ts#L68)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/lix-sdk/src/snapshot/schema.ts:68](https://github.com/opra
 
 > **id**: `Generated`\<`string`\>
 
-Defined in: [packages/lix-sdk/src/snapshot/schema.ts:67](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/snapshot/schema.ts#L67)
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:67](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/snapshot/schema.ts#L67)

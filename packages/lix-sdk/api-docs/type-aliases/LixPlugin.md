@@ -8,7 +8,7 @@
 
 > **LixPlugin** = `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:7](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/plugin/lix-plugin.ts#L7)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:7](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/plugin/lix-plugin.ts#L7)
 
 ## Properties
 
@@ -19,7 +19,7 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:7](https://github.com/opr
 		changes,
 	}`) => `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:34](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/plugin/lix-plugin.ts#L34)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:34](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/plugin/lix-plugin.ts#L34)
 
 #### Parameters
 
@@ -61,7 +61,7 @@ has been deleted and should be restored at a later point.
 		after,
 	}`) => [`DetectedChange`](DetectedChange.md)[]
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:27](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/plugin/lix-plugin.ts#L27)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:27](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/plugin/lix-plugin.ts#L27)
 
 Detects changes between the `before` and `after` file update(s).
 
@@ -97,7 +97,7 @@ will handle the deletion. Hence, `after` is always be defined.
 
 > `optional` **detectChangesGlob**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:16](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/plugin/lix-plugin.ts#L16)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:16](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/plugin/lix-plugin.ts#L16)
 
 The glob pattern that should invoke `detectChanges()`.
 
@@ -114,7 +114,7 @@ The glob pattern that should invoke `detectChanges()`.
 
 > `optional` **diffUiComponent**: `CustomElementConstructor`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:53](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/plugin/lix-plugin.ts#L53)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:53](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/plugin/lix-plugin.ts#L53)
 
 UI components that are used to render the diff view.
 
@@ -124,4 +124,4 @@ UI components that are used to render the diff view.
 
 > **key**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:8](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/plugin/lix-plugin.ts#L8)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:8](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/plugin/lix-plugin.ts#L8)

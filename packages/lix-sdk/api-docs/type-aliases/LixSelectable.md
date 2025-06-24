@@ -8,7 +8,7 @@
 
 > **LixSelectable**\<`T`\> = `{ [K in keyof T]: SelectType<T[K]> }`
 
-Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:363](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/schema-definition/definition.ts#L363)
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:363](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/schema-definition/definition.ts#L363)
 
 Transform a type for select/query operations.
 

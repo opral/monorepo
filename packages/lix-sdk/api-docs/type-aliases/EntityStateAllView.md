@@ -8,7 +8,7 @@
 
 > **EntityStateAllView**\<`T`\> = `T` & `EntityStateAllColumns`
 
-Defined in: [packages/lix-sdk/src/entity-views/types.ts:84](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/entity-views/types.ts#L84)
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:84](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/entity-views/types.ts#L84)
 
 View type for entities across all versions.
 

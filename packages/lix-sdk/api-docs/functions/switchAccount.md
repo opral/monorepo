@@ -8,7 +8,7 @@
 
 > **switchAccount**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/account/switch-account.ts:23](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/account/switch-account.ts#L23)
+Defined in: [packages/lix-sdk/src/account/switch-account.ts:23](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/account/switch-account.ts#L23)
 
 Switch the current account to the provided account.
 
