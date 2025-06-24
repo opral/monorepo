@@ -13,19 +13,19 @@ import {
 	INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
 	INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
 	LixVersionSchema,
-	type LixVersion,
+	type Version,
 } from "../version/schema.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
-	type LixChangeSet,
-	type LixChangeSetElement,
+	type ChangeSet,
+	type ChangeSetElement,
 } from "../change-set/schema.js";
-import { LixLabelSchema, type LixLabel } from "../label/schema.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
+import { LixLabelSchema, type Label } from "../label/schema.js";
+import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
 import { LixSchemaViewMap } from "../database/schema.js";
 import type { Change } from "../change/schema.js";
-import type { LixStoredSchema } from "../stored-schema/schema.js";
+import type { StoredSchema } from "../stored-schema/schema.js";
 
 /**
  * Creates a new lix file.
@@ -104,7 +104,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 	const created_at = new Date().toISOString();
 
 	// Create all required change sets
-	const changeSets: LixChangeSet[] = [
+	const changeSets: ChangeSet[] = [
 		{
 			id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
 		},
@@ -145,7 +145,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 			name: "global",
 			change_set_id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
 			working_change_set_id: INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
-		} satisfies LixVersion,
+		} satisfies Version,
 		created_at,
 	});
 
@@ -163,7 +163,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 			change_set_id: INITIAL_CHANGE_SET_ID,
 			working_change_set_id: INITIAL_WORKING_CHANGE_SET_ID,
 			inherits_from_version_id: "global",
-		} satisfies LixVersion,
+		} satisfies Version,
 		created_at,
 	});
 
@@ -179,7 +179,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 		snapshot_content: {
 			id: checkpointLabelId,
 			name: "checkpoint",
-		} satisfies LixLabel,
+		} satisfies Label,
 		created_at,
 	});
 
@@ -194,7 +194,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 		snapshot_content: {
 			key: "lix_id",
 			value: nanoid(10),
-		} satisfies LixKeyValue,
+		} satisfies KeyValue,
 		created_at,
 	});
 
@@ -211,7 +211,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 				key: schema["x-lix-key"],
 				version: schema["x-lix-version"],
 				value: JSON.stringify(schema),
-			} satisfies LixStoredSchema,
+			} satisfies StoredSchema,
 			created_at,
 		});
 	}
@@ -235,7 +235,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,
 				file_id: change.file_id,
-			} satisfies LixChangeSetElement,
+			} satisfies ChangeSetElement,
 			created_at,
 		};
 		changes.push(changeSetElementChange);
@@ -265,7 +265,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 				entity_id: changeSetElementChange.entity_id,
 				schema_key: changeSetElementChange.schema_key,
 				file_id: changeSetElementChange.file_id,
-			} satisfies LixChangeSetElement,
+			} satisfies ChangeSetElement,
 			created_at,
 		});
 	}

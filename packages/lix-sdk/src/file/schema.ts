@@ -1,4 +1,3 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import { materializeFileDataAtChangeset } from "./materialize-file-data-at-changeset.js";
@@ -6,7 +5,6 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyFileDatabaseSchema(
@@ -252,7 +250,7 @@ export const LixFileSchema = {
 	"x-lix-unique": [["path"]],
 	type: "object",
 	properties: {
-		id: { type: "string" },
+		id: { type: "string", "x-lix-generated": true },
 		path: {
 			type: "string",
 			pattern: "^/(?!.*//|.*\\\\)(?!.*/$|^/$).+",
@@ -265,6 +263,7 @@ export const LixFileSchema = {
 		},
 	},
 	required: ["id", "path"],
+	additionalProperties: false,
 } as const;
 LixFileSchema satisfies LixSchemaDefinition;
 
@@ -275,73 +274,6 @@ LixFileSchema satisfies LixSchemaDefinition;
  * while maintaining consistency with our naming pattern where schema-derived
  * types represent the pure business logic without database infrastructure columns.
  */
-export type LixFileType = FromLixSchemaDefinition<typeof LixFileSchema>;
-
-// Database view type (includes operational columns) - active version only
-export type LixFileView = {
-	id: Generated<string>;
-	/**
-	 * The path of the file.
-	 *
-	 * The path is currently defined as a subset of RFC 3986.
-	 * Any path can be tested with the `isValidFilePath()` function.
-	 *
-	 * @example
-	 *   - `/path/to/file.txt`
-	 */
-	path: string;
+export type LixFile = FromLixSchemaDefinition<typeof LixFileSchema> & {
 	data: Uint8Array;
-	metadata: Record<string, any> | null;
-	lixcol_inherited_from_version_id: Generated<string | null>;
-	lixcol_created_at: Generated<string>;
-	lixcol_updated_at: Generated<string>;
 };
-
-// Database view type for cross-version operations
-export type LixFileAllView = {
-	id: Generated<string>;
-	/**
-	 * The path of the file.
-	 *
-	 * The path is currently defined as a subset of RFC 3986.
-	 * Any path can be tested with the `isValidFilePath()` function.
-	 *
-	 * @example
-	 *   - `/path/to/file.txt`
-	 */
-	path: string;
-	data: Uint8Array;
-	metadata: Record<string, any> | null;
-	lixcol_version_id: Generated<string>;
-	lixcol_inherited_from_version_id: Generated<string | null>;
-	lixcol_created_at: Generated<string>;
-	lixcol_updated_at: Generated<string>;
-};
-
-// Database view type for historical operations
-export type LixFileHistoryView = {
-	id: Generated<string>;
-	/**
-	 * The path of the file.
-	 *
-	 * The path is currently defined as a subset of RFC 3986.
-	 * Any path can be tested with the `isValidFilePath()` function.
-	 *
-	 * @example
-	 *   - `/path/to/file.txt`
-	 */
-	path: string;
-	data: Uint8Array;
-	metadata: Record<string, any> | null;
-} & StateEntityHistoryView;
-
-/**
- * Kysely operation types for the file view.
- *
- * These use the "Lix" prefix to avoid collision with JavaScript's built-in File type
- * and to clearly distinguish them as Lix-specific database view operations rather
- * than pure business logic types.
- */
-export type LixFile = Selectable<LixFileView>;
-export type NewLixFile = Insertable<LixFileView>;
-export type LixFileUpdate = Updateable<LixFileView>;

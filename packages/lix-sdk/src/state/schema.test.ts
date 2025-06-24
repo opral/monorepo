@@ -10,6 +10,7 @@ test("select, insert, update, delete entity", async () => {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			value: {
 				type: "string",
@@ -114,6 +115,7 @@ test("validates the schema on insert", async () => {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			value: {
 				type: "number",
@@ -150,6 +152,7 @@ test("validates the schema on update", async () => {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			value: {
 				type: "number",
@@ -352,6 +355,7 @@ test("created_at and updated_at timestamps are computed correctly", async () => 
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			value: {
 				type: "string",
@@ -435,6 +439,7 @@ test("created_at and updated_at are version specific", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: {
@@ -902,6 +907,7 @@ test("change.created_at and state timestamps are consistent", async () => {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			value: {
 				type: "string",
@@ -1499,6 +1505,7 @@ describe.each([
 					"x-lix-key": "test_schema",
 					"x-lix-version": "1.0",
 					type: "object",
+					additionalProperties: false,
 					properties: {
 						id: { type: "string" },
 						name: { type: "string" },

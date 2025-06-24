@@ -1,4 +1,4 @@
-import { uuidV7, type Change, type NewLixFile } from "@lix-js/sdk";
+import { uuidV7, type Change, type LixFile } from "@lix-js/sdk";
 import { detectChanges } from "../detectChanges.js";
 
 /**
@@ -11,7 +11,7 @@ import { detectChanges } from "../detectChanges.js";
  *   ```
  */
 export async function mockChanges(args: {
-	file: Omit<NewLixFile, "data">;
+	file: Omit<LixFile, "data">;
 	fileUpdates: Uint8Array[];
 }) {
 	const allChanges = [];

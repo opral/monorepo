@@ -331,3 +331,47 @@ test("x-lix-unique fails with invalid structure (not array of arrays)", () => {
 
 	expect(valid).toBe(false);
 });
+
+test("x-lix-generated property is allowed in schema definition", () => {
+	// Test that schemas with x-lix-generated compile correctly
+	const TestSchemaWithGenerated = {
+		"x-lix-key": "test_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: {
+				type: "string",
+				description: "The unique identifier",
+				"x-lix-generated": true,
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const;
+	TestSchemaWithGenerated satisfies LixSchemaDefinition;
+
+	// Validate with Ajv
+	const valid = ajv.validate(LixSchemaDefinition, TestSchemaWithGenerated);
+	expect(valid).toBe(true);
+
+	// Test that x-lix-generated can be false
+	const TestSchemaWithExplicitFalse = {
+		"x-lix-key": "test_entity2",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: {
+				type: "string",
+				"x-lix-generated": false,
+			},
+		},
+		required: ["id"],
+		additionalProperties: false,
+	} as const;
+
+	TestSchemaWithExplicitFalse satisfies LixSchemaDefinition;
+	const valid2 = ajv.validate(LixSchemaDefinition, TestSchemaWithExplicitFalse);
+	expect(valid2).toBe(true);
+});

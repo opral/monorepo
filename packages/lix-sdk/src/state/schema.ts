@@ -62,7 +62,7 @@ export function applyStateDatabaseSchema(
     schema_version TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
-	version_id TEXT NOT NULL,
+	  version_id TEXT NOT NULL,
     snapshot_content BLOB,
     created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
 	--- NOTE schena_key must be unique per entity_id and file_id

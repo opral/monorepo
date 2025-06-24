@@ -1,12 +1,12 @@
 import { sql, type Kysely } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
-import type { NewSnapshot, Snapshot } from "./schema.js";
+import type { Snapshot } from "./schema.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { v7 } from "uuid";
 
 export async function createSnapshot(args: {
 	lix: Pick<Lix, "db" | "sqlite">;
-	content: NewSnapshot["content"];
+	content: Snapshot["content"];
 }): Promise<Snapshot> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const id = args.content ? v7() : "no-content";

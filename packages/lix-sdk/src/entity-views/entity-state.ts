@@ -1,6 +1,9 @@
 import type { Generated } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixGenerated,
+	LixSchemaDefinition,
+} from "../schema-definition/definition.js";
 
 /**
  * Base type for regular entity views (active version only) that include operational columns from the state table.
@@ -16,14 +19,103 @@ import type { LixSchemaDefinition } from "../schema-definition/definition.js";
  * ```
  */
 export type StateEntityView = {
-	/** File identifier where this entity is stored */
+	/**
+	 * File identifier where this entity is stored.
+	 *
+	 * This references the file_id in the state table and links the entity
+	 * to a specific file in the Lix file system.
+	 */
 	lixcol_file_id: Generated<string>;
-	/** Version identifier this entity was inherited from (for branching) */
+
+	/**
+	 * Version identifier this entity was inherited from during branching.
+	 *
+	 * - `null` if the entity was created in the current version
+	 * - Contains the source version_id if the entity was inherited from another version
+	 *
+	 * This is useful for tracking entity lineage across version branches.
+	 */
 	lixcol_inherited_from_version_id: Generated<string | null>;
-	/** Timestamp when this entity was created */
+
+	/**
+	 * Timestamp when this entity was created in the current version.
+	 *
+	 * **Important**: This timestamp is relative to the version, not global.
+	 * - When an entity is first created, this is the actual creation time
+	 * - When an entity is inherited from another version, this is the time it was inherited
+	 *
+	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
+	 */
 	lixcol_created_at: Generated<string>;
-	/** Timestamp when this entity was last updated */
+
+	/**
+	 * Timestamp when this entity was last updated in the current version.
+	 *
+	 * **Important**: This timestamp is relative to the version, not global.
+	 * - Updates only when the entity is modified within the current version
+	 * - When first inherited, this equals lixcol_created_at
+	 *
+	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
+	 */
 	lixcol_updated_at: Generated<string>;
+};
+
+/**
+ * Base type for regular entity views (active version only) that include operational columns from the state table.
+ * These views do NOT expose lixcol_version_id to prevent accidental version-specific operations.
+ *
+ * This type uses LixGenerated markers instead of Kysely's Generated type, making it compatible
+ * with the Lix SDK's type transformation system.
+ *
+ * @example
+ * ```typescript
+ * // Define an entity view type for active version operations
+ * export type AccountView = {
+ *   id: LixGenerated<string>;
+ *   name: string;
+ * } & EntityStateColumns;
+ * ```
+ */
+export type EntityStateColumns = {
+	/**
+	 * File identifier where this entity is stored.
+	 *
+	 * This references the file_id in the state table and links the entity
+	 * to a specific file in the Lix file system.
+	 */
+	lixcol_file_id: LixGenerated<string>;
+
+	/**
+	 * Version identifier this entity was inherited from during branching.
+	 *
+	 * - `null` if the entity was created in the current version
+	 * - Contains the source version_id if the entity was inherited from another version
+	 *
+	 * This is useful for tracking entity lineage across version branches.
+	 */
+	lixcol_inherited_from_version_id: LixGenerated<string | null>;
+
+	/**
+	 * Timestamp when this entity was created in the current version.
+	 *
+	 * **Important**: This timestamp is relative to the version, not global.
+	 * - When an entity is first created, this is the actual creation time
+	 * - When an entity is inherited from another version, this is the time it was inherited
+	 *
+	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
+	 */
+	lixcol_created_at: LixGenerated<string>;
+
+	/**
+	 * Timestamp when this entity was last updated in the current version.
+	 *
+	 * **Important**: This timestamp is relative to the version, not global.
+	 * - Updates only when the entity is modified within the current version
+	 * - When first inherited, this equals lixcol_created_at
+	 *
+	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
+	 */
+	lixcol_updated_at: LixGenerated<string>;
 };
 
 /**

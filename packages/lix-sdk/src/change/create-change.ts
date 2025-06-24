@@ -1,10 +1,10 @@
 import type { Lix } from "../lix/open-lix.js";
 import { Kysely, sql } from "kysely";
 import type { Change } from "./schema.js";
-import type { NewSnapshot } from "../snapshot/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Account } from "../account/schema.js";
+import type { Snapshot } from "../snapshot/schema.js";
 
 export function createChange(args: {
 	lix: Pick<Lix, "db" | "sqlite">;
@@ -14,7 +14,7 @@ export function createChange(args: {
 	schema_version: Change["schema_version"];
 	file_id: Change["file_id"];
 	plugin_key: Change["plugin_key"];
-	snapshot: Omit<NewSnapshot, "id">;
+	snapshot: Omit<Snapshot, "id">;
 	authors?: Pick<Account, "id">[];
 }): // fake async API to to use the function in instead of triggers while keeping the public
 // api async in anticipation that we will move to async once we figure out how to make

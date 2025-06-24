@@ -15,6 +15,8 @@ test("returns all elements from a single change set and its ancestors", async ()
 			value: {
 				"x-lix-key": "mock",
 				"x-lix-version": "1",
+				additionalProperties: false,
+				properties: {},
 				type: "object",
 			},
 		})
@@ -96,6 +98,8 @@ test("respects depth limit when provided for a single target", async () => {
 			value: {
 				"x-lix-key": "mock",
 				"x-lix-version": "1",
+				additionalProperties: false,
+				properties: {},
 				type: "object",
 			},
 		})
@@ -176,6 +180,8 @@ test("returns combined elements from multiple divergent change set ancestries", 
 			value: {
 				"x-lix-key": "mock",
 				"x-lix-version": "1",
+				additionalProperties: false,
+				properties: {},
 				type: "object",
 			},
 		})
@@ -280,6 +286,8 @@ test("respects depth limit with multiple divergent targets", async () => {
 			value: {
 				"x-lix-key": "mock",
 				"x-lix-version": "1",
+				additionalProperties: false,
+				properties: {},
 				type: "object",
 			},
 		})

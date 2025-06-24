@@ -1,11 +1,15 @@
 import type { Generated } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
-import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type {
+	LixGenerated,
+	LixSchemaDefinition,
+} from "../schema-definition/definition.js";
 import type { ValidationRule, ValidationCallbacks } from "./entity-state.js";
 
 /**
  * Base type for _all entity views (cross-version) that include operational columns from the state table.
- * These views expose lixcol_version_id for version-specific operations.
+ * These views expose lixcol_version_id for version-specific operations and allow querying entities
+ * across all versions in the database.
  *
  * @example
  * ```typescript
@@ -14,19 +18,127 @@ import type { ValidationRule, ValidationCallbacks } from "./entity-state.js";
  *   id: Generated<string>;
  *   name: string;
  * } & StateEntityAllView;
+ *
+ * // Query entities across versions
+ * const accounts = await lix.db
+ *   .selectFrom("account_all")
+ *   .where("lixcol_version_id", "=", "v1")
+ *   .selectAll()
+ *   .execute();
  * ```
  */
 export type StateEntityAllView = {
-	/** File identifier where this entity is stored */
+	/**
+	 * File identifier where this entity is stored.
+	 *
+	 * This references the file_id in the state table and links the entity
+	 * to a specific file in the Lix file system.
+	 */
 	lixcol_file_id: Generated<string>;
-	/** Version identifier when this entity was created/modified */
+
+	/**
+	 * Version identifier for this specific state of the entity.
+	 *
+	 * This column allows you to query and modify entities in specific versions.
+	 * Each version may have its own state for the same entity.
+	 */
 	lixcol_version_id: Generated<string>;
-	/** Version identifier this entity was inherited from (for branching) */
+
+	/**
+	 * Version identifier this entity was inherited from during branching.
+	 *
+	 * - `null` if the entity was created in this version
+	 * - Contains the source version_id if the entity was inherited from another version
+	 *
+	 * This is useful for tracking entity lineage across version branches.
+	 */
 	lixcol_inherited_from_version_id: Generated<string | null>;
-	/** Timestamp when this entity was created */
+
+	/**
+	 * Timestamp when this entity was created in this version.
+	 *
+	 * **Important**: This timestamp is relative to the version specified by lixcol_version_id.
+	 * - When an entity is first created, this is the actual creation time
+	 * - When an entity is inherited from another version, this is the time it was inherited
+	 *
+	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
+	 */
 	lixcol_created_at: Generated<string>;
-	/** Timestamp when this entity was last updated */
+
+	/**
+	 * Timestamp when this entity was last updated in this version.
+	 *
+	 * **Important**: This timestamp is relative to the version specified by lixcol_version_id.
+	 * - Updates only when the entity is modified within this specific version
+	 * - When first inherited, this equals lixcol_created_at
+	 *
+	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
+	 */
 	lixcol_updated_at: Generated<string>;
+};
+
+/**
+ * Base type for _all entity views using LixGenerated markers instead of Kysely's Generated type.
+ * This type is compatible with the Lix SDK's type transformation system and allows
+ * cross-version entity operations.
+ *
+ * @example
+ * ```typescript
+ * // Define an entity type for cross-version operations
+ * export type Account = {
+ *   id: LixGenerated<string>;
+ *   name: string;
+ * } & EntityStateAllColumns;
+ * ```
+ */
+export type EntityStateAllColumns = {
+	/**
+	 * File identifier where this entity is stored.
+	 *
+	 * This references the file_id in the state table and links the entity
+	 * to a specific file in the Lix file system.
+	 */
+	lixcol_file_id: LixGenerated<string>;
+
+	/**
+	 * Version identifier for this specific state of the entity.
+	 *
+	 * This column allows you to query and modify entities in specific versions.
+	 * Each version may have its own state for the same entity.
+	 */
+	lixcol_version_id: LixGenerated<string>;
+
+	/**
+	 * Timestamp when this entity was created in this version.
+	 *
+	 * **Important**: This timestamp is relative to the version specified by lixcol_version_id.
+	 * - When an entity is first created, this is the actual creation time
+	 * - When an entity is inherited from another version, this is the time it was inherited
+	 *
+	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
+	 */
+	lixcol_created_at: LixGenerated<string>;
+
+	/**
+	 * Timestamp when this entity was last updated in this version.
+	 *
+	 * **Important**: This timestamp is relative to the version specified by lixcol_version_id.
+	 * - Updates only when the entity is modified within this specific version
+	 * - When first inherited, this equals lixcol_created_at
+	 *
+	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
+	 */
+	lixcol_updated_at: LixGenerated<string>;
+
+	/**
+	 * Version identifier this entity was inherited from during branching.
+	 *
+	 * - `null` if the entity was created in this version
+	 * - Contains the source version_id if the entity was inherited from another version
+	 *
+	 * This is useful for tracking entity lineage across version branches.
+	 */
+	lixcol_inherited_from_version_id: LixGenerated<string | null>;
 };
 
 /**

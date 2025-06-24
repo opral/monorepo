@@ -1,15 +1,9 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import {
-	createEntityViewsIfNotExists,
-	type StateEntityView,
-	type StateEntityAllView,
-} from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
+import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoid } from "../database/nano-id.js";
 
 export function applyChangeSetDatabaseSchema(
@@ -72,7 +66,7 @@ export const LixChangeSetSchema = {
 	"x-lix-primary-key": ["id"],
 	type: "object",
 	properties: {
-		id: { type: "string" },
+		id: { type: "string", "x-lix-generated": true },
 		metadata: { type: "object", nullable: true },
 	},
 	required: ["id"],
@@ -81,30 +75,7 @@ export const LixChangeSetSchema = {
 LixChangeSetSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
-
-// Database view type (includes operational columns) - active version only
-export type ChangeSetView = {
-	id: Generated<string>;
-	metadata: Record<string, any> | null;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type ChangeSetAllView = {
-	id: Generated<string>;
-	metadata: Record<string, any> | null;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type ChangeSetHistoryView = {
-	id: Generated<string>;
-	metadata: Record<string, any> | null;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type ChangeSet = Selectable<ChangeSetView>;
-export type NewChangeSet = Insertable<ChangeSetView>;
-export type ChangeSetUpdate = Updateable<ChangeSetView>;
+export type ChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
 
 export const LixChangeSetElementSchema = {
 	"x-lix-key": "lix_change_set_element",
@@ -144,42 +115,9 @@ export const LixChangeSetElementSchema = {
 } as const;
 LixChangeSetElementSchema satisfies LixSchemaDefinition;
 
-// Pure business logic type (inferred from schema)
-export type LixChangeSetElement = FromLixSchemaDefinition<
+export type ChangeSetElement = FromLixSchemaDefinition<
 	typeof LixChangeSetElementSchema
 >;
-
-// Database view type (includes operational columns) - active version only
-export type ChangeSetElementView = {
-	change_set_id: string;
-	change_id: string;
-	entity_id: string;
-	schema_key: string;
-	file_id: string;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type ChangeSetElementAllView = {
-	change_set_id: string;
-	change_id: string;
-	entity_id: string;
-	schema_key: string;
-	file_id: string;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type ChangeSetElementHistoryView = {
-	change_set_id: string;
-	change_id: string;
-	entity_id: string;
-	schema_key: string;
-	file_id: string;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type ChangeSetElement = Selectable<ChangeSetElementView>;
-export type NewChangeSetElement = Insertable<ChangeSetElementView>;
-export type ChangeSetElementUpdate = Updateable<ChangeSetElementView>;
 
 export const LixChangeSetEdgeSchema = {
 	"x-lix-key": "lix_change_set_edge",
@@ -206,32 +144,9 @@ export const LixChangeSetEdgeSchema = {
 LixChangeSetEdgeSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixChangeSetEdge = FromLixSchemaDefinition<
+export type ChangeSetEdge = FromLixSchemaDefinition<
 	typeof LixChangeSetEdgeSchema
 >;
-
-// Database view type (includes operational columns) - active version only
-export type ChangeSetEdgeView = {
-	parent_id: string;
-	child_id: string;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type ChangeSetEdgeAllView = {
-	parent_id: string;
-	child_id: string;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type ChangeSetEdgeHistoryView = {
-	parent_id: string;
-	child_id: string;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type ChangeSetEdge = Selectable<ChangeSetEdgeView>;
-export type NewChangeSetEdge = Insertable<ChangeSetEdgeView>;
-export type ChangeSetEdgeUpdate = Updateable<ChangeSetEdgeView>;
 
 export const LixChangeSetLabelSchema = {
 	"x-lix-key": "lix_change_set_label",
@@ -259,35 +174,9 @@ export const LixChangeSetLabelSchema = {
 LixChangeSetLabelSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixChangeSetLabel = FromLixSchemaDefinition<
+export type ChangeSetLabel = FromLixSchemaDefinition<
 	typeof LixChangeSetLabelSchema
 >;
-
-// Database view type (includes operational columns) - active version only
-export type ChangeSetLabelView = {
-	change_set_id: string;
-	label_id: string;
-	metadata: Record<string, any> | null;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type ChangeSetLabelAllView = {
-	change_set_id: string;
-	label_id: string;
-	metadata: Record<string, any> | null;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type ChangeSetLabelHistoryView = {
-	change_set_id: string;
-	label_id: string;
-	metadata: Record<string, any> | null;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type ChangeSetLabel = Selectable<ChangeSetLabelView>;
-export type NewChangeSetLabel = Insertable<ChangeSetLabelView>;
-export type ChangeSetLabelUpdate = Updateable<ChangeSetLabelView>;
 
 export const LixChangeSetThreadSchema = {
 	"x-lix-key": "lix_change_set_thread",
@@ -313,30 +202,6 @@ export const LixChangeSetThreadSchema = {
 } as const;
 LixChangeSetThreadSchema satisfies LixSchemaDefinition;
 
-// Pure business logic type (inferred from schema)
-export type LixChangeSetThread = FromLixSchemaDefinition<
+export type ChangeSetThread = FromLixSchemaDefinition<
 	typeof LixChangeSetThreadSchema
 >;
-
-// Database view type (includes operational columns) - active version only
-export type ChangeSetThreadView = {
-	change_set_id: string;
-	thread_id: string;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type ChangeSetThreadAllView = {
-	change_set_id: string;
-	thread_id: string;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type ChangeSetThreadHistoryView = {
-	change_set_id: string;
-	thread_id: string;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type ChangeSetThread = Selectable<ChangeSetThreadView>;
-export type NewChangeSetThread = Insertable<ChangeSetThreadView>;
-export type ChangeSetThreadUpdate = Updateable<ChangeSetThreadView>;

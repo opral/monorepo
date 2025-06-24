@@ -1,11 +1,12 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { NewThreadComment, Thread, ThreadComment } from "./schema.js";
+import type { Thread, ThreadComment } from "./schema.js";
 import { nanoid } from "../database/nano-id.js";
+import type { NewState } from "../entity-views/types.js";
 
 export async function createThread(args: {
 	lix: Lix;
 	id?: string;
-	comments?: Pick<NewThreadComment, "body">[];
+	comments?: Pick<NewState<ThreadComment>, "body">[];
 	/** defaults to global */
 	versionId?: string;
 }): Promise<

@@ -1,15 +1,9 @@
-import type { Insertable, Selectable, Updateable } from "kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import {
-	createEntityViewsIfNotExists,
-	type StateEntityView,
-	type StateEntityAllView,
-} from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
+import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 
 export function applyChangeAuthorDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -44,33 +38,11 @@ export const LixChangeAuthorSchema = {
 		account_id: { type: "string" },
 	},
 	required: ["change_id", "account_id"],
+	additionalProperties: false,
 } as const;
 LixChangeAuthorSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixChangeAuthor = FromLixSchemaDefinition<
+export type ChangeAuthor = FromLixSchemaDefinition<
 	typeof LixChangeAuthorSchema
 >;
-
-// Database view type (includes operational columns) - active version only
-export type ChangeAuthorView = {
-	change_id: string;
-	account_id: string;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type ChangeAuthorAllView = {
-	change_id: string;
-	account_id: string;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type ChangeAuthorHistoryView = {
-	change_id: string;
-	account_id: string;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type ChangeAuthor = Selectable<ChangeAuthorView>;
-export type NewChangeAuthor = Insertable<ChangeAuthorView>;
-export type ChangeAuthorUpdate = Updateable<ChangeAuthorView>;

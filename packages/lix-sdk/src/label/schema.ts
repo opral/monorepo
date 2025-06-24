@@ -1,15 +1,9 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import {
-	createEntityViewsIfNotExists,
-	type StateEntityView,
-	type StateEntityAllView,
-} from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
+import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoid } from "../database/nano-id.js";
 
 export function applyLabelDatabaseSchema(
@@ -69,7 +63,7 @@ export const LixLabelSchema = {
 	"x-lix-primary-key": ["id"],
 	type: "object",
 	properties: {
-		id: { type: "string" },
+		id: { type: "string", "x-lix-generated": true },
 		name: { type: "string" },
 	},
 	required: ["id", "name"],
@@ -78,27 +72,4 @@ export const LixLabelSchema = {
 LixLabelSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixLabel = FromLixSchemaDefinition<typeof LixLabelSchema>;
-
-// Database view type (includes operational columns) - active version only
-export type LabelView = {
-	id: Generated<string>;
-	name: string;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type LabelAllView = {
-	id: Generated<string>;
-	name: string;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type LabelHistoryView = {
-	id: Generated<string>;
-	name: string;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type Label = Selectable<LabelView>;
-export type NewLabel = Insertable<LabelView>;
-export type LabelUpdate = Updateable<LabelView>;
+export type Label = FromLixSchemaDefinition<typeof LixLabelSchema>;

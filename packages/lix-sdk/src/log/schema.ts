@@ -1,15 +1,9 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import {
-	createEntityViewsIfNotExists,
-	type StateEntityView,
-	type StateEntityAllView,
-} from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state_history.js";
+import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoid } from "../database/nano-id.js";
 
 export function applyLogDatabaseSchema(
@@ -37,6 +31,7 @@ export const LixLogSchema = {
 		id: {
 			type: "string",
 			description: "The unique identifier of the log entry",
+			"x-lix-generated": true,
 		},
 		key: {
 			type: "string",
@@ -52,54 +47,9 @@ export const LixLogSchema = {
 		},
 	},
 	required: ["id", "key", "message", "level"],
+	additionalProperties: false,
 } as const;
 LixLogSchema satisfies LixSchemaDefinition;
 
-// Pure business logic type (inferred from schema)
-export type LixLog = FromLixSchemaDefinition<typeof LixLogSchema>;
-
-// Common log entry structure to avoid duplication
-type LogEntryBase = {
-	/**
-	 * The unique identifier of the log entry.
-	 */
-	id: Generated<string>;
-	/**
-	 * The key of the log entry.
-	 *
-	 * @example "lix.file_queue.skipped"
-	 */
-	key: string;
-	/**
-	 * The message of the log entry.
-	 *
-	 * @example "Something went wrong"
-	 */
-	message: string;
-	/**
-	 * The level of the log entry.
-	 *
-	 * @example "debug", "info", "warning", "error"
-	 */
-	level: string;
-	/**
-	 * The timestamp when the log entry was first created.
-	 *
-	 * Computed from the underlying change timestamps.
-	 */
-	created_at: Generated<string>;
-};
-
-// Database view type (includes operational columns) - active version only
-export type LogView = LogEntryBase & StateEntityView;
-
-// Database view type for cross-version operations
-export type LogAllView = LogEntryBase & StateEntityAllView;
-
-// Database view type for historical operations
-export type LogHistoryView = LogEntryBase & StateEntityHistoryView;
-
-// Kysely operation types
-export type Log = Selectable<LogView>;
-export type NewLog = Insertable<LogView>;
-export type LogUpdate = Updateable<LogView>;
+// Pure business logic type (runtime/selectable type)
+export type Log = FromLixSchemaDefinition<typeof LixLogSchema>;

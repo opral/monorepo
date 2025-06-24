@@ -1,6 +1,6 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { LixFileType } from "./schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { LixFile } from "./schema.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
 
 function globSync(args: {
@@ -21,7 +21,7 @@ function globSync(args: {
 
 export function materializeFileDataAtChangeset(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: LixFileType;
+	file: Omit<LixFile, "data">;
 	changeSetId: string;
 	depth: number;
 }): Uint8Array {

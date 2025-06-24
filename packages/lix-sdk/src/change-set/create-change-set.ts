@@ -1,12 +1,13 @@
 import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { ChangeSet, NewChangeSetElement } from "./schema.js";
+import type { ChangeSet, ChangeSetElement } from "./schema.js";
 import type { Label } from "../label/schema.js";
+import type { NewState } from "../entity-views/types.js";
 
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
 	id?: string;
-	elements?: Omit<NewChangeSetElement, "change_set_id">[];
+	elements?: Omit<NewState<ChangeSetElement>, "change_set_id">[];
 	labels?: Pick<Label, "id">[];
 	/** Parent change sets that this change set will be a child of */
 	parents?: Pick<ChangeSet, "id">[];

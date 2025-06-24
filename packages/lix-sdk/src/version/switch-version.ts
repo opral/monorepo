@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { LixVersion } from "./schema.js";
+import type { Version } from "./schema.js";
 
 /**
  * Switches the current Version to the given Version.
@@ -23,7 +23,7 @@ import type { LixVersion } from "./schema.js";
  */
 export async function switchVersion(args: {
 	lix: Lix;
-	to: Pick<LixVersion, "id">;
+	to: Pick<Version, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		await trx

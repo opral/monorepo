@@ -17,7 +17,7 @@ test("should insert a new snapshot", async () => {
  */
 test("snapshots with no content lead to a no-content snapshot", async () => {
 	const lix = await openLixInMemory({});
-	const snapshot = await createSnapshot({ lix, content: undefined });
+	const snapshot = await createSnapshot({ lix, content: null });
 
 	expect(snapshot.id).toBe("no-content");
 	expect(snapshot.content).toBe(null);
@@ -25,7 +25,7 @@ test("snapshots with no content lead to a no-content snapshot", async () => {
 
 test("should insert a new snapshot with no content", async () => {
 	const lix = await openLixInMemory({});
-	const snapshot = await createSnapshot({ lix, content: undefined });
+	const snapshot = await createSnapshot({ lix, content: null });
 
 	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
 

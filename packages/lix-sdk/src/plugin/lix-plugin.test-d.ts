@@ -24,6 +24,7 @@ test("json schema type of a detected change", () => {
 			},
 		},
 		required: ["name", "age", "location"],
+		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
 	const change: DetectedChange<

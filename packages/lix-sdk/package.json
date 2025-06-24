@@ -16,8 +16,8 @@
 	"scripts": {
 		"prebuild": "npm run env-variables",
 		"build": "tsc --build",
-		"test": "tsc --noEmit && vitest run",
-		"test:watch": "vitest",
+		"test": "vitest run --typecheck",
+		"test:watch": "vitest --typecheck",
 		"env-variables": "node ./src/services/env-variables/create-index-file.js",
 		"bench": "vitest bench",
 		"lint": "eslint src/**/* --fix",

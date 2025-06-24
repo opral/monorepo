@@ -1,5 +1,5 @@
 import type { Change } from "../change/schema.js";
-import type { LixFile, LixFileType } from "../file/schema.js";
+import type { LixFile } from "../file/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Snapshot } from "../snapshot/schema.js";
 
@@ -28,8 +28,8 @@ export type LixPlugin = {
 		before,
 		after,
 	}: {
-		before?: LixFileType & { data?: Uint8Array };
-		after: LixFileType & { data: Uint8Array };
+		before?: Omit<LixFile, "data"> & { data?: Uint8Array };
+		after: Omit<LixFile, "data"> & { data: Uint8Array };
 	}) => DetectedChange[];
 	applyChanges?: ({
 		file,
@@ -44,7 +44,7 @@ export type LixPlugin = {
 		 * that did not exist in the target version. Or, a file
 		 * has been deleted and should be restored at a later point.
 		 */
-		file: LixFileType & { data?: LixFile["data"] };
+		file: Omit<LixFile, "data"> & { data?: Uint8Array };
 		changes: Array<Change & { snapshot_content: Snapshot["content"] }>;
 	}) => { fileData: Uint8Array };
 	/**

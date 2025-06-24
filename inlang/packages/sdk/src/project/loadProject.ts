@@ -1,4 +1,4 @@
-import { toBlob, type LixAccount, type Lix } from "@lix-js/sdk";
+import { toBlob, type Account, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
@@ -32,7 +32,7 @@ export async function loadProject(args: {
 	 *   const account = localStorage.getItem("account")
 	 *   const project = await loadProject({ account })
 	 */
-	account?: LixAccount;
+	account?: Account;
 	/**
 	 * Provide plugins to the project.
 	 *

@@ -14,6 +14,7 @@ test("it should merge non-conflicting changes", async () => {
 				"x-lix-key": "test_schema",
 				"x-lix-version": "1.0",
 				type: "object",
+				additionalProperties: false,
 				properties: {
 					id: { type: "string" },
 				},
@@ -115,6 +116,7 @@ test("should handle conflicting elements with source winning (until conflicts ar
 			value: {
 				"x-lix-key": "s1",
 				"x-lix-version": "1.0",
+				additionalProperties: false,
 				type: "object",
 				properties: {
 					id: { type: "string" },
