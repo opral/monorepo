@@ -7,27 +7,39 @@ import type { LixSchemaDefinition, FromLixSchemaDefinition } from "../schema-def
 /**
  * Our own Generated marker type for database columns that are auto-generated.
  * This allows us to control type transformations independently of Kysely.
+ * 
+ * Note: For developer convenience, this accepts T values but preserves
+ * the generated marker for type transformations.
  */
-export type LixGenerated<T> = {
-	readonly __select__: T;
-	readonly __insert__: T | undefined;
-	readonly __update__: T;
+export type LixGenerated<T> = T & {
+	readonly __lixGenerated?: true;
 };
+
+/**
+ * Check if a type has the LixGenerated brand
+ */
+type IsLixGenerated<T> = T extends { readonly __lixGenerated?: true } ? true : false;
+
+/**
+ * Extract the base type from LixGenerated<T>
+ * Since LixGenerated<T> = T & { brand }, we need to extract T
+ */
+type ExtractFromGenerated<T> = T extends LixGenerated<infer U> ? U : T;
 
 /**
  * Extract the select type from LixGenerated or return the type as-is
  */
-type SelectType<T> = T extends LixGenerated<infer S> ? S : T;
+type SelectType<T> = ExtractFromGenerated<T>;
 
 /**
  * Extract the insert type from LixGenerated or return the type as-is
  */
-type InsertType<T> = T extends LixGenerated<infer S> ? S | undefined : T;
+type InsertType<T> = IsLixGenerated<T> extends true ? ExtractFromGenerated<T> | undefined : T;
 
 /**
  * Extract the update type from LixGenerated or return the type as-is
  */
-type UpdateType<T> = T extends LixGenerated<infer S> ? S : T;
+type UpdateType<T> = ExtractFromGenerated<T>;
 
 /**
  * Evaluates to K if T can be null or undefined
@@ -90,7 +102,7 @@ export type LixSelectable<T> = {
  * This adapter is used at the database boundary.
  */
 export type ToKysely<T> = {
-	[K in keyof T]: T[K] extends LixGenerated<any>
+	[K in keyof T]: IsLixGenerated<T[K]> extends true
 		? KyselyGenerated<SelectType<T[K]>>
 		: T[K];
 };

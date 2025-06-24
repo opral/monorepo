@@ -1,16 +1,8 @@
-import type { Generated, Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type {
-	LixSchemaDefinition,
-	FromLixSchemaDefinition,
-} from "../schema-definition/definition.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
-import {
-	createEntityViewsIfNotExists,
-	type StateEntityView,
-	type StateEntityAllView,
-} from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state-history.js";
+import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
+import type { EntityView } from "../entity-views/generic-types.js";
 
 export function applyThreadDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -48,7 +40,7 @@ export const LixThreadSchema = {
 	"x-lix-primary-key": ["id"],
 	type: "object",
 	properties: {
-		id: { type: "string" },
+		id: { type: "string", "x-lix-generated": true },
 		metadata: { type: "object", nullable: true },
 	},
 	required: ["id"],
@@ -72,7 +64,7 @@ export const LixThreadCommentSchema = {
 	},
 	type: "object",
 	properties: {
-		id: { type: "string" },
+		id: { type: "string", "x-lix-generated": true },
 		thread_id: { type: "string" },
 		parent_id: { type: "string", nullable: true },
 		body: ZettelDocJsonSchema as any,
@@ -82,57 +74,8 @@ export const LixThreadCommentSchema = {
 } as const;
 LixThreadCommentSchema satisfies LixSchemaDefinition;
 
-// Pure business logic types
-export type LixThread = FromLixSchemaDefinition<typeof LixThreadSchema>;
-export type LixThreadComment = Omit<
-	FromLixSchemaDefinition<typeof LixThreadCommentSchema>,
-	"body"
-> & { body: ZettelDoc };
-
-// Database view types (active version only)
-export type ThreadView = {
-	id: Generated<string>;
-	metadata: Record<string, any> | null;
-} & StateEntityView;
-
-export type ThreadCommentView = {
-	id: Generated<string>;
-	thread_id: string;
-	parent_id: string | null;
-	body: ZettelDoc;
-} & StateEntityView;
-
-// Database view types for cross-version operations
-export type ThreadAllView = {
-	id: Generated<string>;
-	metadata: Record<string, any> | null;
-} & StateEntityAllView;
-
-export type ThreadCommentAllView = {
-	id: Generated<string>;
-	thread_id: string;
-	parent_id: string | null;
-	body: ZettelDoc;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type ThreadHistoryView = {
-	id: Generated<string>;
-	metadata: Record<string, any> | null;
-} & StateEntityHistoryView;
-
-export type ThreadCommentHistoryView = {
-	id: Generated<string>;
-	thread_id: string;
-	parent_id: string | null;
-	body: ZettelDoc;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type Thread = Selectable<ThreadView>;
-export type NewThread = Insertable<ThreadView>;
-export type ThreadUpdate = Updateable<ThreadView>;
-
-export type ThreadComment = Selectable<ThreadCommentView>;
-export type NewThreadComment = Insertable<ThreadCommentView>;
-export type ThreadCommentUpdate = Updateable<ThreadCommentView>;
+// Business logic types with LixGenerated markers
+export type Thread = EntityView<typeof LixThreadSchema>;
+export type ThreadComment = EntityView<typeof LixThreadCommentSchema> & {
+	body: ZettelDoc; // Override the body type
+};

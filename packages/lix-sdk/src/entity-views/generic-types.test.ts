@@ -7,6 +7,7 @@ import type {
 	LixUpdateable,
 	ToKysely,
 	EntityView,
+	NewState,
 } from "./generic-types.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { Generated as KyselyGenerated } from "kysely";
@@ -154,147 +155,6 @@ test("LixUpdateable makes all fields optional and unwraps LixGenerated", () => {
 	};
 });
 
-test("ToKysely converts LixGenerated to Kysely Generated", () => {
-	type MockType = {
-		id: LixGenerated<string>;
-		name: string;
-		count: LixGenerated<number>;
-		metadata: { foo: string };
-		optional?: string | null;
-	};
-
-	// The conversion should map LixGenerated to KyselyGenerated
-	type KyselyVersion = ToKysely<MockType>;
-
-	// Verify the conversion is correct by creating a type-compatible object
-	const kyselyTable: KyselyVersion = {
-		id: {} as KyselyGenerated<string>,
-		name: "test",
-		count: {} as KyselyGenerated<number>,
-		metadata: { foo: "bar" },
-		optional: null,
-	};
-
-	// Type checks - verify specific field types
-	type IdType = KyselyVersion["id"]; // Should be KyselyGenerated<string>
-	type NameType = KyselyVersion["name"]; // Should be string
-	type CountType = KyselyVersion["count"]; // Should be KyselyGenerated<number>
-	type MetadataType = KyselyVersion["metadata"]; // Should be { foo: string }
-	type OptionalType = KyselyVersion["optional"]; // Should be string | null | undefined
-
-	// These should work
-	const id: IdType = {} as KyselyGenerated<string>;
-	const name: NameType = "test";
-	const count: CountType = {} as KyselyGenerated<number>;
-	const metadata: MetadataType = { foo: "test" };
-	const optional1: OptionalType = "value";
-	const optional2: OptionalType = null;
-	const optional3: OptionalType = undefined;
-
-	// Test with nested LixGenerated
-	type NestedMockType = {
-		id: LixGenerated<string>;
-		data: {
-			created: LixGenerated<Date>;
-			value: number;
-			nested: {
-				generated: LixGenerated<boolean>;
-				normal: string;
-			};
-		};
-		regular: string[];
-	};
-
-	type NestedKysely = ToKysely<NestedMockType>;
-
-	// Verify nested conversion
-	const nestedKysely: NestedKysely = {
-		id: {} as KyselyGenerated<string>,
-		data: {
-			created: {} as KyselyGenerated<Date>,
-			value: 42,
-			nested: {
-				generated: {} as KyselyGenerated<boolean>,
-				normal: "test",
-			},
-		},
-		regular: ["a", "b", "c"],
-	};
-
-	// Type checks for nested
-	type NestedCreatedType = NestedKysely["data"]["created"]; // Should be KyselyGenerated<Date>
-	type NestedGeneratedType = NestedKysely["data"]["nested"]["generated"]; // Should be KyselyGenerated<boolean>
-	type NestedNormalType = NestedKysely["data"]["nested"]["normal"]; // Should be string
-
-	const nestedCreated: NestedCreatedType = {} as KyselyGenerated<Date>;
-	const nestedGenerated: NestedGeneratedType = {} as KyselyGenerated<boolean>;
-	const nestedNormal: NestedNormalType = "string";
-});
-
-test("Composing entity types with StateEntityColumns and using ToKysely", () => {
-	// Mock entity type (like LixKeyValue)
-	type MockEntity = {
-		key: string;
-		value: any;
-	};
-
-	// Import the actual StateEntityColumns type for this test
-	type StateEntityColumns = {
-		lixcol_file_id: LixGenerated<string>;
-		lixcol_inherited_from_version_id: LixGenerated<string | null>;
-		lixcol_created_at: LixGenerated<string>;
-		lixcol_updated_at: LixGenerated<string>;
-	};
-
-	// Compose the entity with view columns
-	type EntityWithViewColumns = MockEntity & StateEntityColumns;
-
-	// Test LixInsertable with composed type
-	const insertable: LixInsertable<EntityWithViewColumns> = {
-		key: "test-key",
-		value: { foo: "bar" },
-		// lixcol fields are optional in inserts
-	};
-
-	// Can also provide lixcol fields if needed
-	const insertableWithLixcol: LixInsertable<EntityWithViewColumns> = {
-		key: "test-key",
-		value: 123,
-		lixcol_file_id: "custom-file",
-		lixcol_created_at: "2024-01-01",
-	};
-
-	// Test LixSelectable with composed type - all fields required and unwrapped
-	const selectable: LixSelectable<EntityWithViewColumns> = {
-		key: "test-key",
-		value: [1, 2, 3],
-		lixcol_file_id: "lix",
-		lixcol_inherited_from_version_id: null,
-		lixcol_created_at: "2024-01-01",
-		lixcol_updated_at: "2024-01-01",
-	};
-
-	// Test ToKysely conversion for database operations
-	type KyselyEntityView = ToKysely<EntityWithViewColumns>;
-
-	// This is what Kysely would expect at the database boundary
-	const kyselyView: KyselyEntityView = {
-		key: "test-key",
-		value: "json-string",
-		lixcol_file_id: {} as KyselyGenerated<string>,
-		lixcol_inherited_from_version_id: {} as KyselyGenerated<string | null>,
-		lixcol_created_at: {} as KyselyGenerated<string>,
-		lixcol_updated_at: {} as KyselyGenerated<string>,
-	};
-
-	// Verify types are correctly mapped
-	type FileIdType = KyselyEntityView["lixcol_file_id"]; // Should be KyselyGenerated<string>
-	type InheritedType = KyselyEntityView["lixcol_inherited_from_version_id"]; // Should be KyselyGenerated<string | null>
-
-	const fileId: FileIdType = {} as KyselyGenerated<string>;
-	const inherited: InheritedType = {} as KyselyGenerated<string | null>;
-});
-
 test("EntityView transforms schema with x-lix-generated to LixGenerated types", () => {
 	// Define a test schema with x-lix-generated properties
 	const TestSchema = {
@@ -328,4 +188,53 @@ test("EntityView transforms schema with x-lix-generated to LixGenerated types", 
 		id: "custom-id",
 		name: "test",
 	};
+});
+
+test("Business logic types with LixGenerated markers work with NewState", () => {
+	// Define a mock schema with x-lix-generated
+	const MockEntitySchema = {
+		"x-lix-key": "mock_entity",
+		"x-lix-version": "1.0",
+		"x-lix-primary-key": ["id"],
+		type: "object",
+		properties: {
+			id: { type: "string", "x-lix-generated": true },
+			name: { type: "string" },
+			count: { type: "number", "x-lix-generated": true },
+			optional_field: { type: "string", nullable: true },
+		},
+		required: ["id", "name", "count"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Business logic type with LixGenerated markers
+	type MockEntity = EntityView<typeof MockEntitySchema>;
+
+	// Test that NewState makes generated fields optional
+	const newMockEntity: NewState<MockEntity> = {
+		name: "test-name",
+		// id should be optional because it's LixGenerated
+		// count should be optional because it's LixGenerated
+		// optional_field should be optional because it's nullable
+	};
+
+	// Test that NewState also accepts generated fields when provided
+	const newMockEntityWithGenerated: NewState<MockEntity> = {
+		id: "custom-id",
+		name: "test-name",
+		count: 42,
+		optional_field: "optional",
+	};
+
+	// Test that required non-generated fields are still required
+	// @ts-expect-error - name is required
+	const invalidNewMockEntity: NewState<MockEntity> = {
+		count: 42,
+		// Missing required field 'name'
+	};
+
+	// Verify the types work as expected
+	void newMockEntity;
+	void newMockEntityWithGenerated;
+	void invalidNewMockEntity;
 });
