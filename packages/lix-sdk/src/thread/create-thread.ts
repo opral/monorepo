@@ -3,6 +3,19 @@ import type { Thread, ThreadComment } from "./schema.js";
 import { nanoid } from "../database/nano-id.js";
 import type { NewState } from "../entity-views/types.js";
 
+/**
+ * Starts a new discussion thread.
+ *
+ * Threads allow collaborators to attach comments to a specific
+ * version or entity. Initial comments can be provided and will be
+ * inserted sequentially.
+ *
+ * @example
+ * ```ts
+ * const thread = await createThread({ lix, comments: [{ body: "Hello" }] })
+ * ```
+ */
+
 export async function createThread(args: {
 	lix: Lix;
 	id?: string;

@@ -4,6 +4,19 @@ import type { ChangeSet, ChangeSetElement } from "./schema.js";
 import type { Label } from "../label/schema.js";
 import type { NewState } from "../entity-views/types.js";
 
+/**
+ * Creates a change set and optionally attaches elements, labels and parents.
+ *
+ * Change sets are the building blocks of versions and checkpoints. This
+ * function inserts all provided relations in a single transaction and
+ * returns the newly created record.
+ *
+ * @example
+ * ```ts
+ * const cs = await createChangeSet({ lix, elements: [{ change_id, entity_id }] })
+ * ```
+ */
+
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
 	id?: string;

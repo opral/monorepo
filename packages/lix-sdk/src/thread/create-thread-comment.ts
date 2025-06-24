@@ -3,6 +3,18 @@ import { nanoid } from "../database/nano-id.js";
 import type { NewState, State } from "../entity-views/types.js";
 import type { ThreadComment } from "./schema.js";
 
+/**
+ * Adds a comment to an existing thread.
+ *
+ * The comment inherits the version context from the thread and can
+ * be nested by supplying a parent id.
+ *
+ * @example
+ * ```ts
+ * await createThreadComment({ lix, thread_id, body: "Thanks" })
+ * ```
+ */
+
 export async function createThreadComment(
 	args: { lix: Lix } & NewState<ThreadComment>
 ): Promise<State<ThreadComment>> {

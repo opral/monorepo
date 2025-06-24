@@ -2,10 +2,17 @@ import { contentFromDatabase } from "sqlite-wasm-kysely";
 import type { Lix } from "./open-lix.js";
 
 /**
- * Convert the lix to a blob.
+ * Serialises the Lix database into a {@link Blob}.
+ *
+ * Use this helper to persist the current state to disk or send it to a
+ * server. The blob contains the raw SQLite file representing the Lix
+ * project.
  *
  * @example
- *   const blob = await toBlob({ lix })
+ * ```ts
+ * const blob = await toBlob({ lix })
+ * download(blob)
+ * ```
  */
 export async function toBlob(args: {
 	lix: Pick<Lix, "db" | "sqlite">;
