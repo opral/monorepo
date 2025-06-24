@@ -612,6 +612,18 @@ function parseJsonPropertiesInSnapshotContent(
 				}
 			}
 		}
+
+		// Check if the property is defined as a boolean type in the schema
+		if (
+			typeof propertySchema === "object" &&
+			propertySchema &&
+			(propertySchema as any).type === "boolean"
+		) {
+			// Convert SQLite's integer representation (0/1) to boolean
+			if (typeof value === "number") {
+				parsed[propertyName] = value === 1;
+			}
+		}
 	}
 
 	return parsed;

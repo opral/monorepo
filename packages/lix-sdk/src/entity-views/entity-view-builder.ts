@@ -120,7 +120,7 @@ export function createEntityViewsIfNotExists(args: {
 	/** Object mapping property names to functions that generate default values */
 	defaultValues?: Record<
 		string,
-		(() => string) | ((row: Record<string, any>) => string)
+		(() => any) | ((row: Record<string, any>) => any)
 	>;
 	/** Custom validation logic for entity operations */
 	validation?: ValidationCallbacks;
