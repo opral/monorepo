@@ -26,7 +26,7 @@ export function parseMarkdown(markdown: string): MdAst {
 		.use(remarkParse as any)
 		.use(remarkGfm as any)
 		.use(remarkFrontmatter as any, ["yaml"]);
-	
+
 	const ast = processor.parse(markdown) as Root;
 	return enrichWithIds(ast);
 }

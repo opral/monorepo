@@ -43,7 +43,7 @@ New paragraph.`);
 		});
 
 		expect(detectedChanges.length).toBeGreaterThan(0);
-		const addedNode = detectedChanges.find(c => c.entity_id === "xyz789");
+		const addedNode = detectedChanges.find((c) => c.entity_id === "xyz789");
 		expect(addedNode).toBeTruthy();
 		expect(addedNode?.schema).toBe(MarkdownNodeSchemaV1);
 	});
@@ -66,7 +66,7 @@ Updated text.`);
 		});
 
 		expect(detectedChanges.length).toBeGreaterThan(0);
-		const updatedNode = detectedChanges.find(c => c.entity_id === "def456");
+		const updatedNode = detectedChanges.find((c) => c.entity_id === "def456");
 		expect(updatedNode).toBeTruthy();
 		expect(updatedNode?.schema).toBe(MarkdownNodeSchemaV1);
 	});
@@ -92,7 +92,7 @@ Some text.`);
 		});
 
 		expect(detectedChanges.length).toBeGreaterThan(0);
-		const deletedNode = detectedChanges.find(c => c.entity_id === "xyz789");
+		const deletedNode = detectedChanges.find((c) => c.entity_id === "xyz789");
 		expect(deletedNode).toBeTruthy();
 		expect(deletedNode?.snapshot_content).toBe(null);
 	});
@@ -115,10 +115,13 @@ First paragraph`);
 			after: { id: "random", path: "x.md", data: after, metadata: {} },
 		});
 
-		const orderChange = detectedChanges.find(c => c.entity_id === "root");
+		const orderChange = detectedChanges.find((c) => c.entity_id === "root");
 		expect(orderChange).toBeTruthy();
 		expect(orderChange?.schema).toBe(MarkdownRootSchemaV1);
-		expect((orderChange?.snapshot_content as any)?.order).toEqual(["para-2", "para-1"]);
+		expect((orderChange?.snapshot_content as any)?.order).toEqual([
+			"para-2",
+			"para-1",
+		]);
 	});
 
 	test("it should handle empty documents", async () => {
@@ -131,9 +134,9 @@ First paragraph`);
 		});
 
 		expect(detectedChanges.length).toBeGreaterThan(0);
-		const addedNode = detectedChanges.find(c => 
-			c.snapshot_content && 
-			(c.snapshot_content as any).type === "heading"
+		const addedNode = detectedChanges.find(
+			(c) =>
+				c.snapshot_content && (c.snapshot_content as any).type === "heading",
 		);
 		expect(addedNode).toBeTruthy();
 	});

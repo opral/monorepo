@@ -8,9 +8,9 @@ export const MarkdownRootSchemaV1 = {
 		order: {
 			type: "array",
 			items: { type: "string" },
-			description: "Array of node IDs in their order within the document"
-		}
+			description: "Array of node IDs in their order within the document",
+		},
 	},
 	required: ["order"],
-	additionalProperties: false
+	additionalProperties: false,
 } as const satisfies LixSchemaDefinition;

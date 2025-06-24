@@ -85,8 +85,12 @@ export class DiffComponent extends LitElement {
 			.sort((a, b) => {
 				// Sort by position in order array if available
 				if (orderDiff?.snapshot_content_after?.order) {
-					const posA = orderDiff.snapshot_content_after.order.indexOf(a.entity_id);
-					const posB = orderDiff.snapshot_content_after.order.indexOf(b.entity_id);
+					const posA = orderDiff.snapshot_content_after.order.indexOf(
+						a.entity_id,
+					);
+					const posB = orderDiff.snapshot_content_after.order.indexOf(
+						b.entity_id,
+					);
 					if (posA !== -1 && posB !== -1) {
 						return posA - posB;
 					}
@@ -158,7 +162,7 @@ export class DiffComponent extends LitElement {
 
 	private getNodeContent(node: any): string {
 		if (!node) return "";
-		
+
 		// Handle root order changes
 		if (node.order) {
 			return `Order: [${node.order.join(", ")}]`;
@@ -169,7 +173,7 @@ export class DiffComponent extends LitElement {
 			try {
 				const tempAst = {
 					type: "root" as const,
-					children: [node as MdAstNode]
+					children: [node as MdAstNode],
 				};
 				return serializeMarkdown(tempAst, { skip_id_comments: true }).trim();
 			} catch {
