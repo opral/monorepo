@@ -44,6 +44,7 @@ export const LixChangeAuthorSchema = {
 		account_id: { type: "string" },
 	},
 	required: ["change_id", "account_id"],
+	additionalProperties: false,
 } as const;
 LixChangeAuthorSchema satisfies LixSchemaDefinition;
 

@@ -30,14 +30,9 @@ import {
 import {
 	LixSnapshotSchema,
 	type InternalSnapshotTable,
-	type SnapshotView,
+	type Snapshot,
 } from "../snapshot/schema.js";
-import {
-	LixStoredSchemaSchema,
-	type StoredSchemaView,
-	type StoredSchemaAllView,
-	type StoredSchemaHistoryView,
-} from "../stored-schema/schema.js";
+import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
 import type {
@@ -46,18 +41,10 @@ import type {
 	InternalChangeInTransactionTable,
 } from "../state/schema.js";
 import type { StateHistoryView } from "../state-history/schema.js";
-import {
-	LixFileSchema,
-	type LixFileView,
-	type LixFileAllView,
-	type LixFileHistoryView,
-} from "../file/schema.js";
+import { LixFileSchema } from "../file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
 import {
 	LixAccountSchema,
-	type AccountView,
-	type AccountAllView,
-	type AccountHistoryView,
 	type ActiveAccountTable,
 } from "../account/schema.js";
 import {
@@ -66,12 +53,7 @@ import {
 	type ChangeAuthorAllView,
 	type ChangeAuthorHistoryView,
 } from "../change-author/schema.js";
-import {
-	LixLabelSchema,
-	type LabelView,
-	type LabelAllView,
-	type LabelHistoryView,
-} from "../label/schema.js";
+import { LixLabelSchema } from "../label/schema.js";
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,
@@ -79,6 +61,7 @@ import {
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
+import type { ToKysely } from "../entity-views/types.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -116,31 +99,16 @@ export type LixDatabaseSchema = {
 	state_active: StateView;
 	state_history: StateHistoryView;
 	// account
-	account: AccountView;
-	account_all: AccountAllView;
-	account_history: AccountHistoryView;
 	active_account: ActiveAccountTable;
 
 	// snapshot
-	snapshot: SnapshotView;
-	label: LabelView;
-	label_all: LabelAllView;
-	label_history: LabelHistoryView;
-
-	// file
-	file: LixFileView;
-	file_all: LixFileAllView;
-	file_history: LixFileHistoryView;
+	snapshot: ToKysely<Snapshot>;
 
 	// change
 	change: ChangeView;
 	change_author: ChangeAuthorView;
 	change_author_all: ChangeAuthorAllView;
 	change_author_history: ChangeAuthorHistoryView;
-
-	stored_schema: StoredSchemaView;
-	stored_schema_all: StoredSchemaAllView;
-	stored_schema_history: StoredSchemaHistoryView;
 
 	// change set
 	change_set: ChangeSetView;
@@ -172,9 +140,11 @@ export type LixDatabaseSchema = {
 	"key_value",
 	{ value: KeyValue["value"] }
 > &
-	// -- logging
+	EntityViews<typeof LixAccountSchema, "account"> &
+	EntityViews<typeof LixFileSchema, "file", { data: Uint8Array }> &
+	EntityViews<typeof LixLabelSchema, "label"> &
+	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
 	EntityViews<typeof LixLogSchema, "log"> &
-	// -- threads
 	EntityViews<typeof LixThreadSchema, "thread"> &
 	EntityViews<
 		typeof LixThreadCommentSchema,

@@ -368,6 +368,7 @@ test("x-lix-generated property is allowed in schema definition", () => {
 			},
 		},
 		required: ["id"],
+		additionalProperties: false,
 	} as const;
 
 	TestSchemaWithExplicitFalse satisfies LixSchemaDefinition;

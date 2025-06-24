@@ -1,12 +1,13 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import type { NewStoredSchema } from "./schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
+import type { NewState } from "../entity-views/types.js";
+import type { StoredSchema } from "./schema.js";
 
 test("insert and delete a stored schema", async () => {
 	const lix = await openLixInMemory({});
 
-	const schema: NewStoredSchema = {
+	const schema: NewState<StoredSchema> = {
 		value: {
 			type: "object",
 			"x-lix-key": "mock",
@@ -49,7 +50,7 @@ test("insert and delete a stored schema", async () => {
 test("throws if the stored schema version does not match the x-lix-version prop", async () => {
 	const lix = await openLixInMemory({});
 
-	const schema: NewStoredSchema = {
+	const schema: NewState<StoredSchema> = {
 		version: "2.0",
 		key: "mock",
 		value: {
@@ -72,7 +73,7 @@ test("throws if the stored schema version does not match the x-lix-version prop"
 test("throws if the stored schema key does not match the x-lix-key prop", async () => {
 	const lix = await openLixInMemory({});
 
-	const schema: NewStoredSchema = {
+	const schema: NewState<StoredSchema> = {
 		key: "mock",
 		version: "1.0",
 		value: {
@@ -95,7 +96,7 @@ test("throws if the stored schema key does not match the x-lix-key prop", async 
 test("updating is not possible (schema is immutable, needs new version bumb)", async () => {
 	const lix = await openLixInMemory({});
 
-	const schema: NewStoredSchema = {
+	const schema: NewState<StoredSchema> = {
 		value: {
 			type: "object",
 			"x-lix-key": "mock",
@@ -120,7 +121,7 @@ test("updating is not possible (schema is immutable, needs new version bumb)", a
 test("default fills in key and version from the schema value", async () => {
 	const lix = await openLixInMemory({});
 
-	const schema: NewStoredSchema = {
+	const schema: NewState<StoredSchema> = {
 		value: {
 			"x-lix-key": "mock",
 			"x-lix-version": "1.0",
@@ -148,11 +149,10 @@ test("default fills in key and version from the schema value", async () => {
 test("validates inserted schemas", async () => {
 	const lix = await openLixInMemory({});
 
-	const schema: NewStoredSchema = {
+	const schema: NewState<StoredSchema> = {
 		value: {
 			type: "object",
 			"x-lix-key": "mock",
-			// @ts-expect-error - x-lix-version must be a string
 			"x-lix-version": 1,
 			properties: {
 				name: { type: "string" },
@@ -187,8 +187,7 @@ test("can insert into stored_schema_all with explicit key and version", async ()
 		.values({
 			key: "mock_all",
 			version: "1.0",
-			// @ts-expect-error - todo why does implicit json stringify not work here
-			value: JSON.stringify(schema),
+			value: schema,
 			lixcol_version_id: "global",
 		})
 		.execute();

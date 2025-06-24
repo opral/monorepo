@@ -3,14 +3,8 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import type { Selectable, Insertable, Updateable, Generated } from "kysely";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
-import {
-	createEntityViewsIfNotExists,
-	type StateEntityView,
-	type StateEntityAllView,
-} from "../entity-views/entity-view-builder.js";
-import { type StateEntityHistoryView } from "../entity-views/entity-state-history.js";
+import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 
 export function applyStoredSchemaDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -56,8 +50,8 @@ export const LixStoredSchemaSchema = {
 	"x-lix-primary-key": ["key", "version"],
 	type: "object",
 	properties: {
-		key: { type: "string" },
-		version: { type: "string" },
+		key: { type: "string", "x-lix-generated": true },
+		version: { type: "string", "x-lix-generated": true },
 		value: JSONTypeSchema as any,
 	},
 	additionalProperties: false,
@@ -65,33 +59,10 @@ export const LixStoredSchemaSchema = {
 
 LixStoredSchemaSchema satisfies LixSchemaDefinition;
 
-// Pure business logic type (inferred from schema)
-export type LixStoredSchema = FromLixSchemaDefinition<
+export type StoredSchema = FromLixSchemaDefinition<
 	typeof LixStoredSchemaSchema
->;
+> & {
+	// override the value to any to allow any JSON type (instead of unknown which is annoying)
+	value: any;
+};
 
-// Database view type (includes operational columns) - active version only
-export type StoredSchemaView = {
-	key: Generated<string>;
-	version: Generated<string>;
-	value: LixSchemaDefinition;
-} & StateEntityView;
-
-// Database view type for cross-version operations
-export type StoredSchemaAllView = {
-	key: Generated<string>;
-	version: Generated<string>;
-	value: LixSchemaDefinition;
-} & StateEntityAllView;
-
-// Database view type for historical operations
-export type StoredSchemaHistoryView = {
-	key: Generated<string>;
-	version: Generated<string>;
-	value: LixSchemaDefinition;
-} & StateEntityHistoryView;
-
-// Kysely operation types
-export type StoredSchema = Selectable<StoredSchemaView>;
-export type NewStoredSchema = Insertable<StoredSchemaView>;
-export type StoredSchemaUpdate = Updateable<StoredSchemaView>;

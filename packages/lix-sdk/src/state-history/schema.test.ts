@@ -15,6 +15,7 @@ test("query current state at head of version lineage", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },
@@ -70,6 +71,7 @@ test("query state at specific depth in history", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },
@@ -156,6 +158,7 @@ test("query state at specific change set", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },
@@ -191,6 +194,7 @@ test("query state at checkpoint using createCheckpoint API", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },
@@ -241,6 +245,7 @@ test("diff detection between current and checkpoint state", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },
@@ -319,6 +324,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },
@@ -390,6 +396,7 @@ test("insertion diff - entity exists current but not at checkpoint", async () =>
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
+		additionalProperties: false,
 		"x-lix-version": "1.0",
 		type: "object",
 		properties: {
@@ -457,6 +464,7 @@ test("blame functionality - track entity changes over time", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },
@@ -534,6 +542,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },
@@ -626,6 +635,7 @@ test("query history between two change sets using ancestor/descendant filters", 
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
 		type: "object",
+		additionalProperties: false,
 		properties: {
 			value: { type: "string" },
 		},
@@ -723,6 +733,7 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
 		properties: {
 			value: { type: "string" },

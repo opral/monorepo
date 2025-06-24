@@ -15,6 +15,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 			value: { type: "number" },
 		},
 		required: ["id", "name"],
+		additionalProperties: false,
 	} as const;
 
 	test("should throw error if schema has no primary key", async () => {
@@ -24,6 +25,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 			"x-lix-key": "invalid_schema",
 			"x-lix-version": "1.0",
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				name: { type: "string" },
 			},
@@ -159,6 +161,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 			"x-lix-key": "test_entity",
 			"x-lix-version": "1.0",
 			type: "object",
+			additionalProperties: false,
 			properties: {
 				id: { type: "string" },
 				name: { type: "string" },

@@ -21,11 +21,11 @@ import {
 	type LixChangeSet,
 	type LixChangeSetElement,
 } from "../change-set/schema.js";
-import { LixLabelSchema, type LixLabel } from "../label/schema.js";
+import { LixLabelSchema, type Label } from "../label/schema.js";
 import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
 import { LixSchemaViewMap } from "../database/schema.js";
 import type { Change } from "../change/schema.js";
-import type { LixStoredSchema } from "../stored-schema/schema.js";
+import type { StoredSchema } from "../stored-schema/schema.js";
 
 /**
  * Creates a new lix file.
@@ -179,7 +179,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 		snapshot_content: {
 			id: checkpointLabelId,
 			name: "checkpoint",
-		} satisfies LixLabel,
+		} satisfies Label,
 		created_at,
 	});
 
@@ -211,7 +211,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 				key: schema["x-lix-key"],
 				version: schema["x-lix-version"],
 				value: JSON.stringify(schema),
-			} satisfies LixStoredSchema,
+			} satisfies StoredSchema,
 			created_at,
 		});
 	}

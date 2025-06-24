@@ -61,7 +61,7 @@ export const LixAccountSchema = {
 	"x-lix-primary-key": ["id"],
 	type: "object",
 	properties: {
-		id: { type: "string" },
+		id: { type: "string", "x-lix-generated": true },
 		name: { type: "string" },
 	},
 	required: ["id", "name"],

@@ -19,6 +19,8 @@ test("should return the symmetric difference between two change sets", async () 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
+		properties: {},
 		type: "object",
 	};
 
@@ -145,7 +147,9 @@ test("should return an empty array if there are no differences", async () => {
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
+		additionalProperties: false,
 		type: "object",
+		properties: {},
 	};
 
 	// Insert test data
@@ -273,6 +277,8 @@ test("should handle disjoint change sets", async () => {
 		"x-lix-key": "mock_schema",
 		"x-lix-version": "1.0",
 		type: "object",
+		additionalProperties: false,
+		properties: {},
 	};
 
 	// Insert test data

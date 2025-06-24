@@ -1,10 +1,10 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { Selectable, Insertable, Updateable, Generated } from "kysely";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
+import type { Generated } from "kysely";
 
 export function applySnapshotDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -49,31 +49,21 @@ export const LixSnapshotSchema = {
 	"x-lix-primary-key": ["id"],
 	type: "object",
 	properties: {
-		id: { type: "string" },
+		id: { type: "string", "x-lix-generated": true },
 		content: JSONTypeSchema as any,
 	},
 	required: ["id", "content"],
+	additionalProperties: false,
 } as const;
 LixSnapshotSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type LixSnapshot = FromLixSchemaDefinition<typeof LixSnapshotSchema>;
+export type Snapshot = FromLixSchemaDefinition<typeof LixSnapshotSchema> & {
+	// override the content to any to allow any JSON type (instead of unknown which is annoying)
+	content: Record<string, any> | null;
+};
 
-// Types for the internal_snapshot TABLE
-export type InternalSnapshot = Selectable<InternalSnapshotTable>;
-export type NewInternalSnapshot = Insertable<InternalSnapshotTable>;
 export type InternalSnapshotTable = {
 	id: Generated<string>;
 	content: Record<string, any> | null;
 };
-
-// Database view type (includes operational columns)
-export type SnapshotView = {
-	id: Generated<string>;
-	content: Record<string, any> | null;
-};
-
-// Kysely operation types
-export type Snapshot = Selectable<SnapshotView>;
-export type NewSnapshot = Insertable<SnapshotView>;
-export type SnapshotUpdate = Updateable<SnapshotView>;

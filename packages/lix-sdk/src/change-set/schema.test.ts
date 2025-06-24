@@ -154,6 +154,7 @@ describe("change_set_element", () => {
 				value: {
 					"x-lix-key": "mock_schema",
 					"x-lix-version": "1.0",
+					additionalProperties: false,
 					type: "object",
 					properties: {
 						id: { type: "string" },
@@ -239,6 +240,7 @@ describe("change_set_element", () => {
 				value: {
 					"x-lix-key": "mock_schema",
 					"x-lix-version": "1.0",
+					additionalProperties: false,
 					type: "object",
 					properties: { id: { type: "string" } },
 					required: ["id"],
@@ -303,6 +305,7 @@ describe("change_set_element", () => {
 				value: {
 					"x-lix-key": "mock_schema",
 					"x-lix-version": "1.0",
+					additionalProperties: false,
 					type: "object",
 					properties: { id: { type: "string" } },
 					required: ["id"],
@@ -338,6 +341,7 @@ describe("change_set_element", () => {
 				key: "mock_schema",
 				value: {
 					"x-lix-key": "mock_schema",
+					additionalProperties: false,
 					"x-lix-version": "1.0",
 					type: "object",
 					properties: { id: { type: "string" } },
@@ -408,6 +412,7 @@ describe("change_set_element", () => {
 				value: {
 					"x-lix-key": "sk1",
 					"x-lix-version": "1.0",
+					additionalProperties: false,
 					type: "object",
 					properties: { id: { type: "string" } },
 					required: ["id"],
@@ -640,6 +645,7 @@ test("should allow the same change to be in multiple change sets", async () => {
 			value: {
 				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",
+				additionalProperties: false,
 				type: "object",
 				properties: { id: { type: "string" } },
 				required: ["id"],

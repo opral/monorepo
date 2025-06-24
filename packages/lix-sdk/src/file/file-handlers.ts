@@ -1,5 +1,5 @@
 import { executeSync } from "../database/execute-sync.js";
-import type { LixFile, LixFileType } from "./schema.js";
+import type { LixFile } from "./schema.js";
 import { LixFileSchema } from "./schema.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
@@ -24,7 +24,7 @@ function globSync(args: {
 
 export function handleFileInsert(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: LixFileType & { data: Uint8Array };
+	file: LixFile;
 	versionId: string;
 }): 0 | 1 {
 	// Insert the file metadata into state table
@@ -164,7 +164,7 @@ export function handleFileInsert(args: {
 
 export function handleFileUpdate(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
-	file: LixFileType & { data: Uint8Array };
+	file: LixFile;
 	versionId: string;
 }): 0 | 1 {
 	// Update the file metadata in state table

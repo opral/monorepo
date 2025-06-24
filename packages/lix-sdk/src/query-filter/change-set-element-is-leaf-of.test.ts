@@ -13,6 +13,8 @@ test("returns only leaf change_set_elements per entity", async () => {
 			value: {
 				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",
+				additionalProperties: false,
+				properties: {},
 				type: "object",
 			},
 		})
@@ -120,6 +122,8 @@ test("correctly identifies leaves at different points in history", async () => {
 			value: {
 				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",
+				additionalProperties: false,
+				properties: {},
 				type: "object",
 			},
 		})
@@ -387,6 +391,8 @@ test("returns combined leaves from multiple target change sets", async () => {
 			value: {
 				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",
+				additionalProperties: false,
+				properties: {},
 				type: "object",
 			},
 		})

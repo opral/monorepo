@@ -88,7 +88,7 @@ export const LixSchemaDefinition = {
 /**
  * Extended property schema that includes Lix-specific extensions
  */
-export type LixPropertySchema = JSONSchema & {
+type LixPropertySchema = JSONSchema & {
 	"x-lix-generated"?: boolean;
 };
 
