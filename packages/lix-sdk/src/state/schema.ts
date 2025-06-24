@@ -307,7 +307,7 @@ export function applyStateDatabaseSchema(
 
 				// Process constraints
 				// @ts-expect-error - idxInfo.$nConstraint is not defined in the type
-				for (let i = 0; i < idxInfo.$nConstraint; i++) {
+				for (let i = 0; i < idxInfo.$nConstraint; i++) { 
 					// @ts-expect-error - idxInfo.nthConstraint is not defined in the type
 					const constraint = idxInfo.nthConstraint(i);
 
@@ -340,10 +340,11 @@ export function applyStateDatabaseSchema(
 
 					// Lower cost when we can use filters (more selective)
 					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
-					idxInfo.$estimatedCost = fullTableCost / usableConstraints.length;
+					idxInfo.$estimatedCost =
+						fullTableCost / (usableConstraints.length + 1);
 					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
 					idxInfo.$estimatedRows = Math.ceil(
-						fullTableRows / usableConstraints.length
+						fullTableRows / (usableConstraints.length + 1)
 					);
 				} else {
 					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
@@ -381,8 +382,44 @@ export function applyStateDatabaseSchema(
 				return capi.SQLITE_OK;
 			},
 
-			xFilter: (pCursor: any) => {
+			xFilter: (
+				pCursor: any,
+				idxNum: number,
+				idxStrPtr: number,
+				argc: number,
+				argv: any
+			) => {
 				const cursorState = cursorStates.get(pCursor);
+				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
+
+				// Extract filter arguments if provided
+				const filters: Record<string, string> = {};
+				if (argc > 0 && argv) {
+					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(argc, argv);
+					// Parse idxStr to understand which columns are being filtered
+					// idxStr format: "column1,column2,..."
+					if (idxStr) {
+						const columns = idxStr.split(",").filter((c) => c.length > 0);
+						for (let i = 0; i < Math.min(columns.length, args.length); i++) {
+							if (args[i] !== null && args[i] !== undefined) {
+								filters[columns[i]!] = String(args[i]);
+							}
+						}
+					}
+				}
+
+				const buildWhereClause = (tableAlias: string = "") => {
+					const conditions: string[] = [];
+					const prefix = tableAlias ? `${tableAlias}.` : "";
+
+					Object.keys(filters).forEach((column) => {
+						conditions.push(`${prefix}${column} = ?`);
+					});
+
+					return conditions.length > 0 ? `AND ${conditions.join(" AND ")}` : "";
+				};
+
+				const filterBindings = Object.values(filters);
 
 				// Try cache first - include inherited entities via union
 				const cacheResults = sqlite.exec({
@@ -392,18 +429,27 @@ export function applyStateDatabaseSchema(
 							   snapshot_content, schema_version, created_at, updated_at,
 							   inherited_from_version_id
 						FROM internal_state_cache
-							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions						
+							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions	
+							${buildWhereClause()}					
 						UNION ALL
 						
 						-- Inherited entities: child versions see parent entities they don't override
-						SELECT isc.entity_id, isc.schema_key, isc.file_id, 
-							   vi.version_id, -- Return child version_id
-							   isc.plugin_key, isc.snapshot_content, isc.schema_version, 
-							   isc.created_at, isc.updated_at,
-							   vi.parent_version_id as inherited_from_version_id
+						SELECT 
+							isc.entity_id as entity_id, 
+							isc.schema_key as schema_key,
+							isc.file_id as file_id, 
+							vi.version_id as version_id, -- Return child version_id
+							isc.plugin_key as plugin_key, 
+							isc.snapshot_content as snapshot_content, 
+							isc.schema_version as schema_version, 
+							isc.created_at as created_at, isc.updated_at as updated_at,
+							vi.parent_version_id as inherited_from_version_id
 						FROM (
 							-- Get version inheritance relationships from cache
 							SELECT 
+								isc_v.schema_key,
+								isc_v.file_id,
+								isc_v.entity_id,
 								json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 								json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
 							FROM internal_state_cache isc_v
@@ -421,7 +467,10 @@ export function applyStateDatabaseSchema(
 							  AND child_isc.schema_key = isc.schema_key
 							  AND child_isc.file_id = isc.file_id
 						)
+						${buildWhereClause()}
 					`,
+					bind: [...filterBindings, ...filterBindings],
+
 					returnValue: "resultRows",
 				});
 

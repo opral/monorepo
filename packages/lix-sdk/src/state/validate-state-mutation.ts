@@ -502,6 +502,7 @@ function validateDeletionConstraints(args: {
 		throw new Error(errorMessage);
 	}
 
+
 	// Get all schemas to check which ones have foreign keys that might reference this entity
 	const allSchemas = executeSync({
 		lix: args.lix,
