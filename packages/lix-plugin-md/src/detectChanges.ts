@@ -8,12 +8,16 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
 	after,
 }) => {
-	const beforeMarkdown = new TextDecoder().decode(before?.data ?? new Uint8Array());
-	const afterMarkdown = new TextDecoder().decode(after?.data ?? new Uint8Array());
-	
+	const beforeMarkdown = new TextDecoder().decode(
+		before?.data ?? new Uint8Array(),
+	);
+	const afterMarkdown = new TextDecoder().decode(
+		after?.data ?? new Uint8Array(),
+	);
+
 	const beforeAst = parseMarkdown(beforeMarkdown);
 	const afterAst = parseMarkdown(afterMarkdown);
-	
+
 	const detectedChanges: DetectedChange[] = [];
 
 	// Create maps for fast lookup

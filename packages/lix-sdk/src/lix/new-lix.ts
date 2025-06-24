@@ -153,6 +153,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 			name: "global",
 			change_set_id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
 			working_change_set_id: INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
+			hidden: true,
 		} satisfies Version,
 		created_at,
 	});
@@ -171,6 +172,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 			change_set_id: INITIAL_CHANGE_SET_ID,
 			working_change_set_id: INITIAL_WORKING_CHANGE_SET_ID,
 			inherits_from_version_id: "global",
+			hidden: false,
 		} satisfies Version,
 		created_at,
 	});

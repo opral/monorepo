@@ -115,7 +115,11 @@ export async function selectCheckpoints(): Promise<
  * Selects all versions
  */
 export async function selectVersions() {
-	return lix.db.selectFrom("version").selectAll().execute();
+	return lix.db
+		.selectFrom("version")
+		.selectAll()
+		.where("hidden", "=", false)
+		.execute();
 }
 
 /**

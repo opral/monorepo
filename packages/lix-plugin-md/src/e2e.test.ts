@@ -40,9 +40,12 @@ Another paragraph here.`;
 	// Verify that changes were detected for each markdown block
 	expect(changes.length).toBeGreaterThan(0);
 
-	// Check that we have the expected nodes 
+	// Check that we have the expected nodes
 	const nodeChanges = changes.filter(
-		(c) => c.snapshot_content && typeof c.snapshot_content === 'object' && c.snapshot_content.type,
+		(c) =>
+			c.snapshot_content &&
+			typeof c.snapshot_content === "object" &&
+			c.snapshot_content.type,
 	);
 
 	// Should have detected the heading nodes
@@ -76,7 +79,9 @@ Another paragraph here.`;
 
 	const hasParagraphContent = nodeChanges.some((c) => {
 		if (c.snapshot_content?.type === "paragraph") {
-			return c.snapshot_content?.children?.[0]?.value?.includes("paragraph with some content");
+			return c.snapshot_content?.children?.[0]?.value?.includes(
+				"paragraph with some content",
+			);
 		}
 		return false;
 	});
@@ -84,7 +89,9 @@ Another paragraph here.`;
 
 	const hasAnotherParagraph = nodeChanges.some((c) => {
 		if (c.snapshot_content?.type === "paragraph") {
-			return c.snapshot_content?.children?.[0]?.value?.includes("Another paragraph here");
+			return c.snapshot_content?.children?.[0]?.value?.includes(
+				"Another paragraph here",
+			);
 		}
 		return false;
 	});
@@ -126,9 +133,9 @@ This is the original paragraph content.`;
 					{
 						type: "text",
 						value: "This is the updated paragraph content.",
-						mdast_id: "def456-text"
-					}
-				]
+						mdast_id: "def456-text",
+					},
+				],
 			},
 		})
 		.where("entity_id", "=", "def456")
@@ -149,9 +156,9 @@ This is the original paragraph content.`;
 					{
 						type: "text",
 						value: "This is the updated title.",
-						mdast_id: "abc123-text"
-					}
-				]
+						mdast_id: "abc123-text",
+					},
+				],
 			},
 		})
 		.where("entity_id", "=", "abc123")

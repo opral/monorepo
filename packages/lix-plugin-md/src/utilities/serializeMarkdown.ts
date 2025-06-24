@@ -34,17 +34,15 @@ export function serializeMarkdown(
 		children,
 	};
 
-	return (
-		unified()
-			.use(remarkStringify, {
-				bullet: "-",
-				fences: true,
-				incrementListMarker: false,
-			})
-			.use(remarkGfm as any)
-			.use(remarkFrontmatter as any, ["yaml"])
-			.stringify(processedAst)
-	);
+	return unified()
+		.use(remarkStringify, {
+			bullet: "-",
+			fences: true,
+			incrementListMarker: false,
+		})
+		.use(remarkGfm as any)
+		.use(remarkFrontmatter as any, ["yaml"])
+		.stringify(processedAst);
 }
 
 function stripMdastIds(node: any): any {
