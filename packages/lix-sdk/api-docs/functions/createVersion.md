@@ -8,7 +8,7 @@
 
 > **createVersion**(`args`): `Promise`\<\{ `change_set_id`: `string`; `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `inherits_from_version_id?`: `string` & `object`; `name`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `working_change_set_id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; \}\>
 
-Defined in: [packages/lix-sdk/src/version/create-version.ts:15](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/version/create-version.ts#L15)
+Defined in: [packages/lix-sdk/src/version/create-version.ts:15](https://github.com/opral/monorepo/blob/affb4c9a3f726a3aa66c498084ff5c7f09d2d503/packages/lix-sdk/src/version/create-version.ts#L15)
 
 Creates a new version.
 

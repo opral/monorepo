@@ -8,7 +8,13 @@
 
 > **createChangeSet**(`args`): `Promise`\<`object` & `object`\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:7](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/change-set/create-change-set.ts#L7)
+Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:20](https://github.com/opral/monorepo/blob/affb4c9a3f726a3aa66c498084ff5c7f09d2d503/packages/lix-sdk/src/change-set/create-change-set.ts#L20)
+
+Creates a change set and optionally attaches elements, labels and parents.
+
+Change sets are the building blocks of versions and checkpoints. This
+function inserts all provided relations in a single transaction and
+returns the newly created record.
 
 ## Parameters
 
@@ -45,3 +51,9 @@ Parent change sets that this change set will be a child of
 ## Returns
 
 `Promise`\<`object` & `object`\>
+
+## Example
+
+```ts
+const cs = await createChangeSet({ lix, elements: [{ change_id, entity_id }] })
+```

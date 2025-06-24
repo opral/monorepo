@@ -8,9 +8,14 @@
 
 > **openLix**(`args`): `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:35](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/lix/open-lix.ts#L35)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:46](https://github.com/opral/monorepo/blob/affb4c9a3f726a3aa66c498084ff5c7f09d2d503/packages/lix-sdk/src/lix/open-lix.ts#L46)
 
-Common setup between different lix environments.
+Opens a Lix instance using an existing SQLite database.
+
+The database may originate from a file, IndexedDB or an
+in‑memory instance. During opening all required schemas are
+applied, optional plugins are initialised and provided key‑values
+are written to the database.
 
 ## Parameters
 
@@ -77,3 +82,10 @@ const lix = await openLixInMemory({ providePlugins: [myPlugin] })
 ## Returns
 
 `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
+
+## Example
+
+```ts
+const db = await createInMemoryDatabase({ readOnly: false })
+const lix = await openLix({ database: db })
+```
