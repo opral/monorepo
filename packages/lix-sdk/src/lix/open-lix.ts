@@ -3,7 +3,7 @@ import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { LixKeyValue } from "../key-value/schema.js";
+import type { KeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import type { LixAccount } from "../account/schema.js";
@@ -64,7 +64,7 @@ export async function openLix(args: {
 	 * @example
 	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: NewState<LixKeyValue>[];
+	keyValues?: NewState<KeyValue>[];
 }): Promise<Lix> {
 	const db = initDb({ sqlite: args.database });
 

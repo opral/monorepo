@@ -27,35 +27,40 @@ export type { StateEntityView, StateEntityAllView, StateEntityHistoryView };
 export type { ValidationRule, ValidationCallbacks };
 
 /**
- * Utility type that generates database schema view entries for an entity.
+ * Utility type that generates database schema view entries for an entity schema.
  * Creates three views: normal (active version), all versions, and history.
  * 
- * If TEntity is a LixSchemaDefinition, it automatically applies EntityView transformation.
+ * TSchema should be a LixSchemaDefinition (typeof SomeSchema).
+ * TOverride allows you to provide partial type overrides for specific properties.
  *
  * @example
  * ```typescript
- * // With schema definition (automatic EntityView transformation)
- * type LogViews = DatabaseEntityViewsOf<typeof LixLogSchema, "log">;
+ * // Basic usage with schema definition
+ * type LogViews = EntityViews<typeof LixLogSchema, "log">;
  * 
- * // With already transformed entity type
- * type KeyValueViews = DatabaseEntityViewsOf<LixKeyValue, "key_value">;
+ * // With partial property override
+ * type ThreadCommentViews = EntityViews<
+ *   typeof LixThreadCommentSchema, 
+ *   "thread_comment", 
+ *   { body: ZettelDoc }
+ * >;
  * ```
  */
-export type EntityViews<TEntity, TViewName extends string> = TEntity extends LixSchemaDefinition
-	? {
-		[K in TViewName]: ToKysely<EntityStateView<EntityView<TEntity>>>;
-	} & {
-		[K in `${TViewName}_all`]: ToKysely<EntityStateAllView<EntityView<TEntity>>>;
-	} & {
-		[K in `${TViewName}_history`]: ToKysely<EntityStateHistoryView<EntityView<TEntity>>>;
-	}
-	: {
-		[K in TViewName]: ToKysely<EntityStateView<TEntity>>;
-	} & {
-		[K in `${TViewName}_all`]: ToKysely<EntityStateAllView<TEntity>>;
-	} & {
-		[K in `${TViewName}_history`]: ToKysely<EntityStateHistoryView<TEntity>>;
-	};
+export type EntityViews<
+	TSchema extends LixSchemaDefinition,
+	TViewName extends string,
+	TOverride = object,
+> = {
+	[K in TViewName]: ToKysely<EntityStateView<EntityView<TSchema> & TOverride>>;
+} & {
+	[K in `${TViewName}_all`]: ToKysely<
+		EntityStateAllView<EntityView<TSchema> & TOverride>
+	>;
+} & {
+	[K in `${TViewName}_history`]: ToKysely<
+		EntityStateHistoryView<EntityView<TSchema> & TOverride>
+	>;
+};
 
 /**
  * Creates SQL views and CRUD triggers for an entity based on its schema definition.

@@ -22,7 +22,7 @@ import {
 	type LixChangeSetElement,
 } from "../change-set/schema.js";
 import { LixLabelSchema, type LixLabel } from "../label/schema.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
+import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
 import { LixSchemaViewMap } from "../database/schema.js";
 import type { Change } from "../change/schema.js";
 import type { LixStoredSchema } from "../stored-schema/schema.js";
@@ -194,7 +194,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 		snapshot_content: {
 			key: "lix_id",
 			value: nanoid(10),
-		} satisfies LixKeyValue,
+		} satisfies KeyValue,
 		created_at,
 	});
 

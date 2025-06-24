@@ -8,7 +8,7 @@ import {
 	MockJsonPropertySchema,
 } from "../plugin/mock-json-plugin.js";
 import type { Change } from "../change/schema.js";
-import type { LixKeyValue } from "../key-value/schema.js";
+import type { KeyValue } from "../key-value/schema.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 
 test("it applies lix own entity changes", async () => {
@@ -17,7 +17,7 @@ test("it applies lix own entity changes", async () => {
 	const mockKeyValue = {
 		key: "test",
 		value: "something",
-	} as const satisfies LixKeyValue;
+	} as const satisfies KeyValue;
 
 	await lix.db
 		.insertInto("snapshot")

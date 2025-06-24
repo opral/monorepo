@@ -1,10 +1,11 @@
-import type { NewThreadComment, ThreadComment } from "./schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { nanoid } from "../database/nano-id.js";
+import type { NewState, State } from "../entity-views/generic-types.js";
+import type { ThreadComment } from "./schema.js";
 
 export async function createThreadComment(
-	args: { lix: Lix } & NewThreadComment
-): Promise<ThreadComment> {
+	args: { lix: Lix } & NewState<ThreadComment>
+): Promise<State<ThreadComment>> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const commentId = args.id ?? nanoid();
 

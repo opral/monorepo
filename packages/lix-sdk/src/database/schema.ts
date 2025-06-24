@@ -39,7 +39,7 @@ import {
 	type StoredSchemaHistoryView,
 } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
+import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
 import type {
 	StateView,
 	InternalStateCacheTable,
@@ -75,12 +75,7 @@ import {
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,
-	type ThreadView,
-	type ThreadCommentView,
-	type ThreadAllView,
-	type ThreadCommentAllView,
-	type ThreadHistoryView,
-	type ThreadCommentHistoryView,
+	type ThreadComment,
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/generic-types.js";
@@ -167,19 +162,23 @@ export type LixDatabaseSchema = {
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;
 
-	// thread
-	thread: ThreadView;
-	thread_all: ThreadAllView;
-	thread_history: ThreadHistoryView;
-	thread_comment: ThreadCommentView;
-	thread_comment_all: ThreadCommentAllView;
-	thread_comment_history: ThreadCommentHistoryView;
-
 	// version
 	version: VersionView;
 	version_all: VersionAllView;
 	version_history: VersionHistoryView;
 	active_version: ActiveVersionTable;
-} & EntityViews<LixKeyValue, "key_value"> &
-	EntityViews<typeof LixLogSchema, "log">;
+} & EntityViews<
+	typeof LixKeyValueSchema,
+	"key_value",
+	{ value: KeyValue["value"] }
+> &
+	// -- logging
+	EntityViews<typeof LixLogSchema, "log"> &
+	// -- threads
+	EntityViews<typeof LixThreadSchema, "thread"> &
+	EntityViews<
+		typeof LixThreadCommentSchema,
+		"thread_comment",
+		{ body: ThreadComment["body"] }
+	>;
 
