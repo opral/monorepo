@@ -8,7 +8,7 @@
 
 > **LixInsertable**\<`T`\> = `{ [K in NonNullableInsertKeys<T>]: InsertType<T[K]> }` & `{ [K in NullableInsertKeys<T>]?: InsertType<T[K]> }`
 
-Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:293](https://github.com/opral/monorepo/blob/b744c06f94e2e95227e07cc6016002a653e430d8/packages/lix-sdk/src/schema-definition/definition.ts#L293)
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:293](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/schema-definition/definition.ts#L293)
 
 Transform a type for insert operations.
 

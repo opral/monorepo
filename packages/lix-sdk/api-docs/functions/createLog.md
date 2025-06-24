@@ -8,7 +8,7 @@
 
 > **createLog**(`args`): `Promise`\<[`LixSelectable`](../type-aliases/LixSelectable.md)\<[`EntityStateView`](../type-aliases/EntityStateView.md)\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `key`: `string`; `level`: `string`; `message`: `string`; \}\>\>\>
 
-Defined in: [packages/lix-sdk/src/log/create-log.ts:28](https://github.com/opral/monorepo/blob/b744c06f94e2e95227e07cc6016002a653e430d8/packages/lix-sdk/src/log/create-log.ts#L28)
+Defined in: [packages/lix-sdk/src/log/create-log.ts:28](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/log/create-log.ts#L28)
 
 Directly creates a log entry in the Lix database without applying any filters.
 

@@ -8,4 +8,4 @@
 
 > `const` **INITIAL\_GLOBAL\_VERSION\_CHANGE\_SET\_ID**: `"23n0ajsf328ns"` = `"23n0ajsf328ns"`
 
-Defined in: [packages/lix-sdk/src/version/schema.ts:15](https://github.com/opral/monorepo/blob/b744c06f94e2e95227e07cc6016002a653e430d8/packages/lix-sdk/src/version/schema.ts#L15)
+Defined in: [packages/lix-sdk/src/version/schema.ts:15](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/version/schema.ts#L15)

@@ -8,7 +8,7 @@
 
 > **ActiveAccountTable** = `object`
 
-Defined in: [packages/lix-sdk/src/account/schema.ts:71](https://github.com/opral/monorepo/blob/b744c06f94e2e95227e07cc6016002a653e430d8/packages/lix-sdk/src/account/schema.ts#L71)
+Defined in: [packages/lix-sdk/src/account/schema.ts:71](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/account/schema.ts#L71)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/account/schema.ts:71](https://github.com/opral
 
 > **id**: `string`
 
-Defined in: [packages/lix-sdk/src/account/schema.ts:72](https://github.com/opral/monorepo/blob/b744c06f94e2e95227e07cc6016002a653e430d8/packages/lix-sdk/src/account/schema.ts#L72)
+Defined in: [packages/lix-sdk/src/account/schema.ts:72](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/account/schema.ts#L72)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [packages/lix-sdk/src/account/schema.ts:72](https://github.com/opral
 
 > **name**: `string`
 
-Defined in: [packages/lix-sdk/src/account/schema.ts:73](https://github.com/opral/monorepo/blob/b744c06f94e2e95227e07cc6016002a653e430d8/packages/lix-sdk/src/account/schema.ts#L73)
+Defined in: [packages/lix-sdk/src/account/schema.ts:73](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/account/schema.ts#L73)
