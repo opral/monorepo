@@ -17,7 +17,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		required: ["id", "name"],
 	} as const;
 
-	test("should create all three views: primary, _all, and _history", async () => {
+	test("should create all three views: active, _all, and _history", async () => {
 		const lix = await openLixInMemory({});
 
 		// Add stored schema
@@ -52,7 +52,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 			.execute();
 
 		// All three views should be queryable
-		const primaryResult = await lix.db
+		const activeResult = await lix.db
 			.selectFrom("triple_test" as any)
 			.selectAll()
 			.execute();
@@ -76,12 +76,12 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 			.execute();
 
 		// All views should return data
-		expect(primaryResult).toHaveLength(1);
+		expect(activeResult).toHaveLength(1);
 		expect(allResult).toHaveLength(1);
 		expect(historyResult).toHaveLength(1);
 
 		// Verify business data consistency across all views
-		expect(primaryResult[0]).toMatchObject({
+		expect(activeResult[0]).toMatchObject({
 			id: "test_id",
 			name: "test_name",
 			value: 42,
@@ -98,7 +98,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		});
 
 		// Verify column differences between views
-		expect(primaryResult[0]).not.toHaveProperty("lixcol_version_id"); // Primary view hides version_id
+		expect(activeResult[0]).not.toHaveProperty("lixcol_version_id"); // Primary view hides version_id
 		expect(allResult[0]).toHaveProperty("lixcol_version_id"); // _all view exposes version_id
 		expect(historyResult[0]).toHaveProperty("lixcol_change_set_id"); // _history view has history columns
 		expect(historyResult[0]).toHaveProperty("lixcol_depth", 0); // Current state is at depth 0

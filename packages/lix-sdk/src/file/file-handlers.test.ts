@@ -118,7 +118,7 @@ describe("file update", () => {
 
 		// Verify both entities were created
 		const initialEntities = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("file_id", "=", fileId)
 			.where("schema_key", "=", "mock_json_property")
 			.where("version_id", "=", version.id)
@@ -149,7 +149,7 @@ describe("file update", () => {
 
 		// Verify that jane's entities were deleted
 		const finalEntities = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("file_id", "=", fileId)
 			.where("schema_key", "=", "mock_json_property")
 			.where("version_id", "=", version.id)

@@ -164,7 +164,7 @@ function validatePrimaryKeyConstraints(args: {
 
 	// Query existing state to check for duplicates
 	let query = args.lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.select("snapshot_content")
 		.where("schema_key", "=", args.schema["x-lix-key"])
 		.where("version_id", "=", args.version_id);
@@ -236,7 +236,7 @@ function validateUniqueConstraints(args: {
 
 		// Query existing state to check for duplicates
 		let query = args.lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.select("snapshot_content")
 			.where("schema_key", "=", args.schema["x-lix-key"])
 			.where("version_id", "=", args.version_id);
@@ -322,7 +322,7 @@ function validateForeignKeyConstraints(args: {
 		} else {
 			// Query JSON schema entities in the state table
 			query = args.lix.db
-				.selectFrom("state")
+				.selectFrom("state_all")
 				.select("snapshot_content")
 				.where("schema_key", "=", foreignKeyDef.schemaKey)
 				.where(
@@ -432,7 +432,7 @@ function validateDeletionConstraints(args: {
 	const currentEntity = executeSync({
 		lix: args.lix,
 		query: args.lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.select(["snapshot_content", "inherited_from_version_id", "version_id"])
 			.where("entity_id", "=", args.entity_id)
 			.where("schema_key", "=", args.schema["x-lix-key"])
@@ -458,7 +458,7 @@ function validateDeletionConstraints(args: {
 		const entityInOtherVersions = executeSync({
 			lix: args.lix,
 			query: args.lix.db
-				.selectFrom("state")
+				.selectFrom("state_all")
 				.select(["version_id", "snapshot_content", "inherited_from_version_id"])
 				.where("entity_id", "=", args.entity_id)
 				.where("schema_key", "=", args.schema["x-lix-key"]),
@@ -545,7 +545,7 @@ function validateDeletionConstraints(args: {
 			const referencingEntities = executeSync({
 				lix: args.lix,
 				query: args.lix.db
-					.selectFrom("state")
+					.selectFrom("state_all")
 					.select("entity_id")
 					.where("schema_key", "=", schema["x-lix-key"])
 					.where("version_id", "=", args.version_id)

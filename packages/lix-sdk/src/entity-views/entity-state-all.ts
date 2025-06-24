@@ -200,7 +200,7 @@ export function createEntityStateAllView(args: {
 	createSingleEntityAllView({
 		...args,
 		viewName: view_name,
-		stateTable: "state",
+		stateTable: "state_all",
 	});
 }
 
@@ -208,7 +208,7 @@ function createSingleEntityAllView(args: {
 	lix: Pick<Lix, "sqlite">;
 	schema: LixSchemaDefinition;
 	viewName: string;
-	stateTable: "state";
+	stateTable: "state_all";
 	/** Plugin identifier for the entity */
 	pluginKey: string;
 	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
@@ -386,7 +386,7 @@ function createSingleEntityAllView(args: {
       INSTEAD OF INSERT ON ${view_name}
       BEGIN      
         ${insertValidationSQL}
-        INSERT INTO state (
+        INSERT INTO state_all (
           entity_id,
           schema_key,
           file_id,
@@ -428,7 +428,7 @@ function createSingleEntityAllView(args: {
       INSTEAD OF UPDATE ON ${view_name}
       BEGIN
         ${updateValidationSQL}
-        UPDATE state
+        UPDATE state_all
         SET
           entity_id = ${entityIdNew},
           schema_key = '${schema_key}',
@@ -437,17 +437,17 @@ function createSingleEntityAllView(args: {
           snapshot_content = json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
           version_id = ${versionIdReference}
         WHERE
-          state.entity_id = ${entityIdOld}
-          AND state.schema_key = '${schema_key}'
-          AND state.file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}
-          AND state.version_id = ${oldVersionIdReference};
+          state_all.entity_id = ${entityIdOld}
+          AND state_all.schema_key = '${schema_key}'
+          AND state_all.file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}
+          AND state_all.version_id = ${oldVersionIdReference};
       END;
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_delete
       INSTEAD OF DELETE ON ${view_name}
       BEGIN
         ${deleteValidationSQL}
-        DELETE FROM state
+        DELETE FROM state_all
         WHERE entity_id = ${entityIdOld}
         AND schema_key = '${schema_key}'
         AND file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}

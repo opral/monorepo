@@ -170,7 +170,7 @@ describe("createEntityViewIfNotExists", () => {
 
 		// Verify data was inserted into state table
 		const stateData = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.selectAll()
 			.where("schema_key", "=", "test_entity")
 			.execute();
@@ -248,7 +248,7 @@ describe("createEntityViewIfNotExists", () => {
 
 		// Verify update in state table
 		const stateData = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.selectAll()
 			.where("entity_id", "=", "test_id")
 			.execute();
@@ -297,7 +297,7 @@ describe("createEntityViewIfNotExists", () => {
 
 		// Verify deletion in state table
 		const stateData = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.selectAll()
 			.where("entity_id", "=", "test_id")
 			.execute();
@@ -328,7 +328,7 @@ describe("createEntityViewIfNotExists", () => {
 
 		// Verify data was inserted with composite entity_id
 		const stateData = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.selectAll()
 			.where("schema_key", "=", "composite_entity")
 			.execute();
@@ -472,7 +472,7 @@ describe("createEntityViewIfNotExists", () => {
 
 		// Verify file_id was used from the mutation
 		const stateData = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.selectAll()
 			.where("entity_id", "=", "test_id")
 			.execute();

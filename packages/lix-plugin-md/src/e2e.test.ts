@@ -121,10 +121,10 @@ This is the original paragraph content.`;
 		})
 		.execute();
 
-	// 2. Mutate the paragraph via state_active using the known entity_id
+	// 2. Mutate the paragraph via state using the known entity_id
 	// Create proper MD-AST node structure for paragraph
 	await lix.db
-		.updateTable("state_active")
+		.updateTable("state_all")
 		.set({
 			snapshot_content: {
 				type: "paragraph",
@@ -143,10 +143,10 @@ This is the original paragraph content.`;
 		.where("file_id", "=", "file1")
 		.execute();
 
-	// 3. Mutate the title via state_active using the known entity_id
+	// 3. Mutate the title via state using the known entity_id
 	// Create proper MD-AST node structure for heading
 	await lix.db
-		.updateTable("state_active")
+		.updateTable("state_all")
 		.set({
 			snapshot_content: {
 				type: "heading",
