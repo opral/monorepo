@@ -94,6 +94,7 @@ export async function applyChangeSet(args: {
 						schema_version: change.schema_version,
 						created_at: change.created_at,
 						updated_at: change.created_at,
+						change_id: change.id,
 					})
 					.onConflict((oc) =>
 						oc

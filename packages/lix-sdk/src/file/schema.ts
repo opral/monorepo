@@ -117,7 +117,8 @@ export function applyFileDatabaseSchema(
 		json_extract(snapshot_content, '$.metadata') AS metadata,
 		inherited_from_version_id AS lixcol_inherited_from_version_id,
 		created_at AS lixcol_created_at,
-		updated_at AS lixcol_updated_at
+		updated_at AS lixcol_updated_at,
+		change_id AS lixcol_change_id
 	FROM state
 	WHERE schema_key = 'lix_file';
 
@@ -135,7 +136,8 @@ export function applyFileDatabaseSchema(
 		version_id AS lixcol_version_id,
 		inherited_from_version_id AS lixcol_inherited_from_version_id,
 		created_at AS lixcol_created_at,
-		updated_at AS lixcol_updated_at
+		updated_at AS lixcol_updated_at,
+		change_id AS lixcol_change_id
 	FROM state_all
 	WHERE schema_key = 'lix_file';
 

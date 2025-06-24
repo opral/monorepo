@@ -86,7 +86,8 @@ export function applyStateDatabaseSchema(
 				schema_version TEXT,
 				created_at TEXT,
 				updated_at TEXT,
-				inherited_from_version_id TEXT
+				inherited_from_version_id TEXT,
+				change_id TEXT
 			)`;
 
 				const result = capi.sqlite3_declare_vtab(db, sql);
@@ -115,7 +116,8 @@ export function applyStateDatabaseSchema(
 				schema_version TEXT,
 				created_at TEXT,
 				updated_at TEXT,
-				inherited_from_version_id TEXT
+				inherited_from_version_id TEXT,
+				change_id TEXT
 			)`;
 
 				const result = capi.sqlite3_declare_vtab(db, sql);
@@ -319,7 +321,7 @@ export function applyStateDatabaseSchema(
 						-- Direct entities from cache
 						SELECT entity_id, schema_key, file_id, version_id, plugin_key, 
 							   snapshot_content, schema_version, created_at, updated_at,
-							   inherited_from_version_id
+							   inherited_from_version_id, change_id
 						FROM internal_state_cache
 							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions						
 						UNION ALL
@@ -329,7 +331,7 @@ export function applyStateDatabaseSchema(
 							   vi.version_id, -- Return child version_id
 							   isc.plugin_key, isc.snapshot_content, isc.schema_version, 
 							   isc.created_at, isc.updated_at,
-							   vi.parent_version_id as inherited_from_version_id
+							   vi.parent_version_id as inherited_from_version_id, isc.change_id
 						FROM (
 							-- Get version inheritance relationships from cache
 							SELECT 
@@ -393,6 +395,7 @@ export function applyStateDatabaseSchema(
 							const inherited_from_version_id = Array.isArray(row)
 								? row[9]
 								: row.inherited_from_version_id;
+							const change_id = Array.isArray(row) ? row[10] : row.change_id;
 
 							// Skip rows with null entity_id (no actual state data found)
 							if (!entity_id) {
@@ -412,8 +415,8 @@ export function applyStateDatabaseSchema(
 
 							sqlite.exec({
 								sql: `INSERT OR REPLACE INTO internal_state_cache 
-									  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker)
-									  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+									  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id)
+									  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 								bind: [
 									entity_id,
 									schema_key,
@@ -433,6 +436,7 @@ export function applyStateDatabaseSchema(
 										? null
 										: inherited_from_version_id,
 									isDeletion ? 1 : 0,
+									change_id || "unknown-change-id",
 								],
 							});
 							cachePopulated = true;
@@ -455,7 +459,7 @@ export function applyStateDatabaseSchema(
 							-- Direct entities from cache
 							SELECT entity_id, schema_key, file_id, version_id, plugin_key, 
 								   snapshot_content, schema_version, created_at, updated_at,
-								   inherited_from_version_id
+								   inherited_from_version_id, change_id
 							FROM internal_state_cache
 								WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions						
 							UNION ALL
@@ -465,7 +469,7 @@ export function applyStateDatabaseSchema(
 								   vi.version_id, -- Return child version_id
 								   isc.plugin_key, isc.snapshot_content, isc.schema_version, 
 								   isc.created_at, isc.updated_at,
-								   vi.parent_version_id as inherited_from_version_id
+								   vi.parent_version_id as inherited_from_version_id, isc.change_id
 							FROM (
 								-- Get version inheritance relationships from cache
 								SELECT 
@@ -706,10 +710,10 @@ export function applyStateDatabaseSchema(
 		BEGIN
 			INSERT INTO state_all (
 				entity_id, schema_key, file_id, version_id, plugin_key,
-				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id
+				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id
 			) VALUES (
 				NEW.entity_id, NEW.schema_key, NEW.file_id, NEW.version_id, NEW.plugin_key,
-				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id
+				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id, NEW.change_id
 			);
 		END;
 
@@ -727,7 +731,8 @@ export function applyStateDatabaseSchema(
 				schema_version = NEW.schema_version,
 				created_at = NEW.created_at,
 				updated_at = NEW.updated_at,
-				inherited_from_version_id = NEW.inherited_from_version_id
+				inherited_from_version_id = NEW.inherited_from_version_id,
+				change_id = NEW.change_id
 			WHERE
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
@@ -760,6 +765,7 @@ export function applyStateDatabaseSchema(
     updated_at TEXT NOT NULL,
     inherited_from_version_id TEXT,
     inheritance_delete_marker INTEGER DEFAULT 0, -- Flag for copy-on-write deletion markers
+    change_id TEXT, -- Allow NULL during migration and for deletion markers 
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   );
 
@@ -835,6 +841,7 @@ function getColumnName(columnIndex: number): string {
 		"created_at",
 		"updated_at",
 		"inherited_from_version_id",
+		"change_id",
 	];
 	return columns[columnIndex] || "unknown";
 }
@@ -847,6 +854,7 @@ function selectStateViaCTE(
 	let sql = `
 		WITH
 			all_changes_with_snapshots AS (
+				-- Include committed changes
 				SELECT ic.id, ic.entity_id, ic.schema_key, ic.file_id, ic.plugin_key,
 					   ic.schema_version, 
 					   CASE 
@@ -855,6 +863,13 @@ function selectStateViaCTE(
 					   END AS snapshot_content 
 				FROM internal_change ic
 				LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
+				
+				UNION ALL
+				
+				-- Include changes from current transaction
+				SELECT ict.id, ict.entity_id, ict.schema_key, ict.file_id, ict.plugin_key,
+					   ict.schema_version, ict.snapshot_content
+				FROM internal_change_in_transaction ict
 			),
 			root_cs_of_all_versions AS (
 				SELECT json_extract(v.snapshot_content, '$.change_set_id') AS version_change_set_id, 
@@ -884,7 +899,7 @@ function selectStateViaCTE(
 			leaf_target_snapshots AS (
 				SELECT target_change.entity_id, target_change.schema_key, target_change.file_id,
 					   target_change.plugin_key, target_change.snapshot_content AS snapshot_content,
-					   target_change.schema_version, r.version_id
+					   target_change.schema_version, r.version_id, target_change.id as change_id
 				FROM cse_in_reachable_cs r 
 				INNER JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
 				WHERE NOT EXISTS (
@@ -921,7 +936,7 @@ function selectStateViaCTE(
 				-- Direct entities from leaf_target_snapshots 
 				SELECT 
 					entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version,
-					version_id, version_id as visible_in_version, NULL as inherited_from_version_id
+					version_id, version_id as visible_in_version, NULL as inherited_from_version_id, change_id
 				FROM leaf_target_snapshots
 				
 				UNION ALL
@@ -931,7 +946,7 @@ function selectStateViaCTE(
 					ls.entity_id, ls.schema_key, ls.file_id, ls.plugin_key, ls.snapshot_content, ls.schema_version,
 					vi.version_id, -- Use child version_id for testing
 					vi.version_id as visible_in_version, -- Make visible in child version
-					vi.parent_version_id as inherited_from_version_id
+					vi.parent_version_id as inherited_from_version_id, ls.change_id
 				FROM version_inheritance vi
 				JOIN leaf_target_snapshots ls ON ls.version_id = vi.parent_version_id
 				WHERE vi.parent_version_id IS NOT NULL
@@ -990,7 +1005,8 @@ function selectStateViaCTE(
 				(SELECT MIN(ic.created_at) FROM internal_change ic 
 				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id)
 			) AS updated_at,
-			pe.inherited_from_version_id
+			pe.inherited_from_version_id,
+			pe.change_id
 		FROM prioritized_entities pe
 		WHERE pe.rn = 1
 		${includeDeletions ? "" : "-- Filter out deletion markers from final results\n		AND pe.snapshot_content IS NOT NULL"}
@@ -1033,6 +1049,7 @@ export type StateView = {
 	created_at: Generated<string>;
 	updated_at: Generated<string>;
 	inherited_from_version_id: string | null;
+	change_id: Generated<string>;
 };
 
 // Cache table type (internal table for state materialization)
@@ -1048,6 +1065,7 @@ export type InternalStateCacheTable = {
 	updated_at: string;
 	inherited_from_version_id: string | null;
 	inheritance_delete_marker: number; // 1 for copy-on-write deletion markers, 0 otherwise
+	change_id: string;
 };
 
 // Kysely operation types

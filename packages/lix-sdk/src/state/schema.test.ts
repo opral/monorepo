@@ -959,6 +959,127 @@ test("change.created_at and state timestamps are consistent", async () => {
 	expect(changeRecord.created_at).toBe(cacheRecord.updated_at);
 });
 
+test("state and state_all views expose change_id for blame and diff functionality", async () => {
+	const lix = await openLixInMemory({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	// Insert initial state using Kysely to ensure virtual table is triggered
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "change-id-test-entity",
+			schema_key: "mock_schema",
+			file_id: "change-id-test-file",
+			plugin_key: "change-id-test-plugin",
+			snapshot_content: { value: "initial value" },
+			schema_version: "1.0",
+			version_id: sql`(SELECT version_id FROM active_version)`,
+		})
+		.execute();
+
+	// Query state_all view to verify change_id is exposed
+	const stateAllResult = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "change-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.selectAll()
+		.execute();
+
+	expect(stateAllResult).toHaveLength(1);
+	expect(stateAllResult[0]?.change_id).toBeDefined();
+	expect(typeof stateAllResult[0]?.change_id).toBe("string");
+
+	// Query state view (filtered by active version) to verify change_id is exposed
+	const stateResult = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "change-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.selectAll()
+		.execute();
+
+	expect(stateResult).toHaveLength(1);
+	expect(stateResult[0]?.change_id).toBeDefined();
+	expect(typeof stateResult[0]?.change_id).toBe("string");
+
+	// Verify that change_id matches between state and state_all views
+	expect(stateResult[0]?.change_id).toBe(stateAllResult[0]?.change_id);
+
+	// Get the actual change record to verify the change_id is correct
+	const changeRecord = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("entity_id", "=", "change-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.select(["change.id", "content as snapshot_content"])
+		.executeTakeFirstOrThrow();
+
+	// Verify that the change_id in the views matches the actual change.id
+	expect(stateResult[0]?.change_id).toBe(changeRecord.id);
+	expect(stateAllResult[0]?.change_id).toBe(changeRecord.id);
+
+	// Verify that the snapshot content in the change matches the state view
+	expect(changeRecord.snapshot_content).toEqual({ value: "initial value" });
+	expect(stateResult[0]?.snapshot_content).toEqual({ value: "initial value" });
+
+	// Update the entity to create a new change
+	await lix.db
+		.updateTable("state_all")
+		.set({
+			snapshot_content: { value: "updated value" },
+		})
+		.where("entity_id", "=", "change-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.execute();
+
+	// Query again to verify change_id updated after modification
+	const updatedStateResult = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "change-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.selectAll()
+		.execute();
+
+	expect(updatedStateResult).toHaveLength(1);
+	expect(updatedStateResult[0]?.change_id).toBeDefined();
+	// The change_id should be different after the update (new change created)
+	expect(updatedStateResult[0]?.change_id).not.toBe(stateResult[0]?.change_id);
+
+	// Get the new change record
+	const newChangeRecord = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("entity_id", "=", "change-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.orderBy("created_at", "desc")
+		.select(["change.id", "content as snapshot_content"])
+		.executeTakeFirstOrThrow();
+
+	// Verify the new change_id matches the latest change
+	expect(updatedStateResult[0]?.change_id).toBe(newChangeRecord.id);
+
+	// Verify that the updated snapshot content in the change matches the state view
+	expect(newChangeRecord.snapshot_content).toEqual({ value: "updated value" });
+	expect(updatedStateResult[0]?.snapshot_content).toEqual({
+		value: "updated value",
+	});
+});
+
 // Important to note that only a full cache clear (like during schema changes) triggers
 // a cache miss and repopulation from the CTE at the moment!
 //
