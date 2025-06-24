@@ -1,78 +1,77 @@
 import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
-import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
-import { parseMdBlocks } from "./utilities/parseMdBlocks.js";
-import { MarkdownBlockPositionSchemaV1 } from "./schemas/blockPositions.js";
+import { MarkdownNodeSchemaV1 } from "./schemas/nodes.js";
+import { MarkdownRootSchemaV1 } from "./schemas/root.js";
+import { parseMarkdown } from "./utilities/parseMarkdown.js";
+import type { MdAstNode } from "./utilities/parseMarkdown.js";
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
 	after,
 }) => {
-	const beforeBlocks = parseMdBlocks(before?.data ?? new Uint8Array());
-	const afterBlocks = parseMdBlocks(after?.data ?? new Uint8Array());
+	const beforeMarkdown = new TextDecoder().decode(before?.data ?? new Uint8Array());
+	const afterMarkdown = new TextDecoder().decode(after?.data ?? new Uint8Array());
+	
+	const beforeAst = parseMarkdown(beforeMarkdown);
+	const afterAst = parseMarkdown(afterMarkdown);
+	
 	const detectedChanges: DetectedChange[] = [];
 
 	// Create maps for fast lookup
-	const beforeMap = new Map(beforeBlocks.map((block) => [block.id, block]));
-	const afterMap = new Map(afterBlocks.map((block) => [block.id, block]));
+	const beforeNodes = new Map<string, MdAstNode>();
+	const afterNodes = new Map<string, MdAstNode>();
+	const beforeOrder: string[] = [];
+	const afterOrder: string[] = [];
 
-	// Detect deleted or modified blocks
-	for (const [id, beforeBlock] of beforeMap) {
-		const afterBlock = afterMap.get(id);
+	// Build node maps and order arrays (only for top-level nodes)
+	for (const node of beforeAst.children) {
+		beforeNodes.set(node.mdast_id, node);
+		beforeOrder.push(node.mdast_id);
+	}
 
-		if (!afterBlock) {
-			// Block was removed
+	for (const node of afterAst.children) {
+		afterNodes.set(node.mdast_id, node);
+		afterOrder.push(node.mdast_id);
+	}
+
+	// Detect removed nodes
+	for (const [id, beforeNode] of beforeNodes) {
+		if (!afterNodes.has(id)) {
 			detectedChanges.push({
-				schema: MarkdownBlockSchemaV1,
+				schema: MarkdownNodeSchemaV1,
 				entity_id: id,
-				snapshot_content: undefined,
-			});
-		} else if (
-			beforeBlock.content !== afterBlock.content ||
-			beforeBlock.type !== afterBlock.type
-		) {
-			// Block was modified
-			detectedChanges.push({
-				schema: MarkdownBlockSchemaV1,
-				entity_id: id,
-				snapshot_content: {
-					id: afterBlock.id,
-					text: afterBlock.content,
-					type: afterBlock.type,
-				},
+				snapshot_content: null,
 			});
 		}
 	}
 
-	// Detect newly added blocks
-	for (const [id, afterBlock] of afterMap) {
-		if (!beforeMap.has(id)) {
+	// Detect added and modified nodes
+	for (const [id, afterNode] of afterNodes) {
+		const beforeNode = beforeNodes.get(id);
+
+		if (!beforeNode) {
+			// Node was added
 			detectedChanges.push({
-				schema: MarkdownBlockSchemaV1,
+				schema: MarkdownNodeSchemaV1,
 				entity_id: id,
-				snapshot_content: {
-					id: afterBlock.id,
-					text: afterBlock.content,
-					type: afterBlock.type,
-				},
+				snapshot_content: afterNode,
+			});
+		} else if (JSON.stringify(beforeNode) !== JSON.stringify(afterNode)) {
+			// Node was modified
+			detectedChanges.push({
+				schema: MarkdownNodeSchemaV1,
+				entity_id: id,
+				snapshot_content: afterNode,
 			});
 		}
 	}
 
-	const idPositionsBefore = Object.fromEntries(
-		beforeBlocks.map((block, index) => [block.id, index]),
-	);
-	const idPositionsAfter = Object.fromEntries(
-		afterBlocks.map((block, index) => [block.id, index]),
-	);
-
-	if (JSON.stringify(idPositionsBefore) !== JSON.stringify(idPositionsAfter)) {
+	// Check if order changed
+	if (JSON.stringify(beforeOrder) !== JSON.stringify(afterOrder)) {
 		detectedChanges.push({
-			schema: MarkdownBlockPositionSchemaV1,
-			entity_id: "block_positions",
+			schema: MarkdownRootSchemaV1,
+			entity_id: "root",
 			snapshot_content: {
-				idPositions: Object.fromEntries(
-					afterBlocks.map((block, index) => [block.id, index]),
-				),
+				order: afterOrder,
 			},
 		});
 	}
