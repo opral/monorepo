@@ -51,8 +51,13 @@ test("manual JSON parsing with executeSync", async () => {
 
 	const result = executeSync({
 		lix,
-		query: lix.db.selectFrom("key_value").selectAll(),
+		query: lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "test-key")
+			.selectAll(),
 	});
+
+	expect(result).toHaveLength(1);
 
 	// Raw result - value is a JSON string
 	expect(typeof result[0].value).toBe("string");

@@ -27,7 +27,7 @@ import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 // via the json schemas.
 const ViewsWithJsonColumns = {
 	state: ["snapshot_content"],
-	state_active: ["snapshot_content"],
+	state_all: ["snapshot_content"],
 	state_history: ["snapshot_content"],
 	snapshot: ["content"],
 	...(() => {

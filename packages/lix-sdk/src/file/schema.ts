@@ -118,7 +118,7 @@ export function applyFileDatabaseSchema(
 		inherited_from_version_id AS lixcol_inherited_from_version_id,
 		created_at AS lixcol_created_at,
 		updated_at AS lixcol_updated_at
-	FROM state_active
+	FROM state
 	WHERE schema_key = 'lix_file';
 
   CREATE VIEW IF NOT EXISTS file_all AS
@@ -136,7 +136,7 @@ export function applyFileDatabaseSchema(
 		inherited_from_version_id AS lixcol_inherited_from_version_id,
 		created_at AS lixcol_created_at,
 		updated_at AS lixcol_updated_at
-	FROM state
+	FROM state_all
 	WHERE schema_key = 'lix_file';
 
 
@@ -168,13 +168,13 @@ export function applyFileDatabaseSchema(
   INSTEAD OF DELETE ON file
   BEGIN
       -- Delete all non-lix_file entities associated with this file first
-      DELETE FROM state
+      DELETE FROM state_all
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version)
         AND schema_key != 'lix_file';
         
       -- Delete the file entity itself
-      DELETE FROM state
+      DELETE FROM state_all
       WHERE entity_id = OLD.id
         AND schema_key = 'lix_file'
         AND version_id = (SELECT version_id FROM active_version);
@@ -208,13 +208,13 @@ export function applyFileDatabaseSchema(
   INSTEAD OF DELETE ON file_all
   BEGIN
       -- Delete all non-lix_file entities associated with this file first
-      DELETE FROM state
+      DELETE FROM state_all
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id
         AND schema_key != 'lix_file';
         
       -- Delete the file entity itself
-      DELETE FROM state
+      DELETE FROM state_all
       WHERE entity_id = OLD.id
         AND schema_key = 'lix_file'
         AND version_id = OLD.lixcol_version_id;

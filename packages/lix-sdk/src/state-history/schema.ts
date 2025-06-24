@@ -115,7 +115,7 @@ WITH
 	-- For state_history, we work with any change_set_id, not just version heads
 	requested_change_sets AS (
 		SELECT DISTINCT cs.id as change_set_id
-		FROM change_set cs
+		FROM change_set_all cs
 		-- This will be filtered by the WHERE clause in queries
 	),
 	-- Find all change sets reachable from requested ones (including ancestors)

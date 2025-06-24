@@ -164,7 +164,7 @@ describe("createEntityAllViewIfNotExists", () => {
 
 		// Verify explicit version_id was used
 		const stateData = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.selectAll()
 			.where("entity_id", "=", "test_id")
 			.execute();

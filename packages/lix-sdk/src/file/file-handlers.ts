@@ -30,7 +30,7 @@ export function handleFileInsert(args: {
 	// Insert the file metadata into state table
 	executeSync({
 		lix: args.lix,
-		query: args.lix.db.insertInto("state").values({
+		query: args.lix.db.insertInto("state_all").values({
 			entity_id: args.file.id,
 			schema_key: "lix_file",
 			file_id: args.file.id,
@@ -93,7 +93,7 @@ export function handleFileInsert(args: {
 			for (const change of detectedChanges) {
 				executeSync({
 					lix: args.lix,
-					query: args.lix.db.insertInto("state").values({
+					query: args.lix.db.insertInto("state_all").values({
 						entity_id: change.entity_id,
 						schema_key: change.schema["x-lix-key"],
 						file_id: args.file.id,
@@ -134,7 +134,7 @@ export function handleFileInsert(args: {
 				for (const change of detectedChanges) {
 					executeSync({
 						lix: args.lix,
-						query: args.lix.db.insertInto("state").values({
+						query: args.lix.db.insertInto("state_all").values({
 							entity_id: change.entity_id,
 							schema_key: change.schema["x-lix-key"],
 							file_id: args.file.id,
@@ -171,7 +171,7 @@ export function handleFileUpdate(args: {
 	executeSync({
 		lix: args.lix,
 		query: args.lix.db
-			.updateTable("state")
+			.updateTable("state_all")
 			.set({
 				snapshot_content: {
 					id: args.file.id,
@@ -247,7 +247,7 @@ export function handleFileUpdate(args: {
 						executeSync({
 							lix: args.lix,
 							query: args.lix.db
-								.deleteFrom("state")
+								.deleteFrom("state_all")
 								.where("entity_id", "=", change.entity_id)
 								.where("schema_key", "=", change.schema["x-lix-key"])
 								.where("file_id", "=", args.file.id)
@@ -257,7 +257,7 @@ export function handleFileUpdate(args: {
 						// Handle update/insert: upsert the entity in state table
 						executeSync({
 							lix: args.lix,
-							query: args.lix.db.insertInto("state").values({
+							query: args.lix.db.insertInto("state_all").values({
 								entity_id: change.entity_id,
 								schema_key: change.schema["x-lix-key"],
 								file_id: args.file.id,
@@ -303,7 +303,7 @@ export function handleFileUpdate(args: {
 							executeSync({
 								lix: args.lix,
 								query: args.lix.db
-									.deleteFrom("state")
+									.deleteFrom("state_all")
 									.where("entity_id", "=", change.entity_id)
 									.where("schema_key", "=", change.schema["x-lix-key"])
 									.where("file_id", "=", args.file.id)
@@ -313,7 +313,7 @@ export function handleFileUpdate(args: {
 							// Handle update/insert: upsert the entity in state table
 							executeSync({
 								lix: args.lix,
-								query: args.lix.db.insertInto("state").values({
+								query: args.lix.db.insertInto("state_all").values({
 									entity_id: change.entity_id,
 									schema_key: change.schema["x-lix-key"],
 									file_id: args.file.id,

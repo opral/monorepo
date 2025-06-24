@@ -26,7 +26,7 @@ test("select, insert, update, delete entity", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "e0",
 			file_id: "f0",
@@ -41,7 +41,7 @@ test("select, insert, update, delete entity", async () => {
 		.execute();
 
 	const viewAfterInsert = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.selectAll()
 		.execute();
@@ -59,7 +59,7 @@ test("select, insert, update, delete entity", async () => {
 	]);
 
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({
 			snapshot_content: {
 				value: "hello world - updated",
@@ -71,7 +71,7 @@ test("select, insert, update, delete entity", async () => {
 		.execute();
 
 	const viewAfterUpdate = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.selectAll()
 		.execute();
@@ -89,7 +89,7 @@ test("select, insert, update, delete entity", async () => {
 	]);
 
 	await lix.db
-		.deleteFrom("state")
+		.deleteFrom("state_all")
 		.where("entity_id", "=", "e0")
 		.where(
 			"version_id",
@@ -100,7 +100,7 @@ test("select, insert, update, delete entity", async () => {
 		.execute();
 
 	const viewAfterDelete = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.selectAll()
 		.execute();
@@ -129,7 +129,7 @@ test("validates the schema on insert", async () => {
 		.execute();
 	await expect(
 		lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "e0",
 				file_id: "f0",
@@ -166,7 +166,7 @@ test("validates the schema on update", async () => {
 		.execute();
 
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "e0",
 			file_id: "f0",
@@ -182,7 +182,7 @@ test("validates the schema on update", async () => {
 
 	await expect(
 		lix.db
-			.updateTable("state")
+			.updateTable("state_all")
 			.set({
 				snapshot_content: {
 					value: "hello world - updated",
@@ -195,7 +195,7 @@ test("validates the schema on update", async () => {
 	).rejects.toThrow(/value must be number/);
 
 	const viewAfterFailedUpdate = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.selectAll()
 		.execute();
@@ -220,7 +220,7 @@ test("state is separated by version", async () => {
 	await createVersion({ lix, id: "version_b" });
 
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values([
 			{
 				entity_id: "e0",
@@ -248,7 +248,7 @@ test("state is separated by version", async () => {
 		.execute();
 
 	const stateAfterInserts = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.where("entity_id", "=", "e0")
 		.selectAll()
@@ -284,7 +284,7 @@ test("state is separated by version", async () => {
 	expect(stateAfterInserts[1]?.updated_at).toBeDefined();
 
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "hello world from version b UPDATED" } })
 		.where("entity_id", "=", "e0")
 		.where("schema_key", "=", "mock_schema")
@@ -292,7 +292,7 @@ test("state is separated by version", async () => {
 		.execute();
 
 	const stateAfterUpdate = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.where("entity_id", "=", "e0")
 		.selectAll()
@@ -322,13 +322,13 @@ test("state is separated by version", async () => {
 	]);
 
 	await lix.db
-		.deleteFrom("state")
+		.deleteFrom("state_all")
 		.where("entity_id", "=", "e0")
 		.where("version_id", "=", "version_b")
 		.execute();
 
 	const stateAfterDelete = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.where("entity_id", "=", "e0")
 		.selectAll()
@@ -370,7 +370,7 @@ test("created_at and updated_at timestamps are computed correctly", async () => 
 
 	// Insert initial entity
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "e0",
 			file_id: "f0",
@@ -385,7 +385,7 @@ test("created_at and updated_at timestamps are computed correctly", async () => 
 		.execute();
 
 	const stateAfterInsert = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "e0")
 		.selectAll()
 		.execute();
@@ -400,7 +400,7 @@ test("created_at and updated_at timestamps are computed correctly", async () => 
 
 	// Update the entity
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({
 			snapshot_content: {
 				value: "updated value",
@@ -411,7 +411,7 @@ test("created_at and updated_at timestamps are computed correctly", async () => 
 		.execute();
 
 	const stateAfterUpdate = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "e0")
 		.selectAll()
 		.execute();
@@ -455,7 +455,7 @@ test("created_at and updated_at are version specific", async () => {
 
 	// Insert entity in version A
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "e0",
 			file_id: "f0",
@@ -474,7 +474,7 @@ test("created_at and updated_at are version specific", async () => {
 
 	// Insert same entity in version B
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "e0",
 			file_id: "f0",
@@ -489,14 +489,14 @@ test("created_at and updated_at are version specific", async () => {
 		.execute();
 
 	const stateVersionA = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "e0")
 		.where("version_id", "=", "version_a")
 		.selectAll()
 		.execute();
 
 	const stateVersionB = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "e0")
 		.where("version_id", "=", "version_b")
 		.selectAll()
@@ -518,7 +518,7 @@ test("created_at and updated_at are version specific", async () => {
 	await new Promise((resolve) => setTimeout(resolve, 1));
 
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({
 			snapshot_content: {
 				value: "updated value in version b",
@@ -529,14 +529,14 @@ test("created_at and updated_at are version specific", async () => {
 		.execute();
 
 	const updatedStateVersionA = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "e0")
 		.where("version_id", "=", "version_a")
 		.selectAll()
 		.execute();
 
 	const updatedStateVersionB = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "e0")
 		.where("version_id", "=", "version_b")
 		.selectAll()
@@ -562,7 +562,7 @@ test("state appears in both versions when they share the same change set", async
 	const versionA = await createVersion({ lix, id: "version_a" });
 	// Insert state into version A
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "e0",
 			file_id: "f0",
@@ -594,7 +594,7 @@ test("state appears in both versions when they share the same change set", async
 	await (lix.db as any).deleteFrom("internal_state_cache").execute();
 
 	const stateInBothVersions = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.where("entity_id", "=", "e0")
 		.selectAll()
@@ -624,7 +624,7 @@ test("state diverges when versions have common ancestor but different changes", 
 	const baseVersion = await createVersion({ lix, id: "base_version" });
 
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "e0",
 			file_id: "f0",
@@ -671,7 +671,7 @@ test("state diverges when versions have common ancestor but different changes", 
 
 	// Both versions should initially see the base state
 	const initialState = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.where("entity_id", "=", "e0")
 		.selectAll()
@@ -681,7 +681,7 @@ test("state diverges when versions have common ancestor but different changes", 
 
 	// Update state in version A
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({
 			snapshot_content: { value: "updated in version A" },
 		})
@@ -691,7 +691,7 @@ test("state diverges when versions have common ancestor but different changes", 
 
 	// Update state in version B differently
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({
 			snapshot_content: { value: "updated in version B" },
 		})
@@ -700,7 +700,7 @@ test("state diverges when versions have common ancestor but different changes", 
 		.execute();
 
 	const divergedState = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
 		.where("entity_id", "=", "e0")
 		.selectAll()
@@ -738,7 +738,7 @@ test("write-through cache: insert operations populate cache immediately", async 
 
 	// Insert state data - should populate cache via write-through
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "write-through-entity",
 			schema_key: "write-through-schema",
@@ -771,7 +771,7 @@ test("write-through cache: insert operations populate cache immediately", async 
 
 	// State view should return the same data (from cache)
 	const stateResults = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "write-through-entity")
 		.selectAll()
 		.execute();
@@ -794,7 +794,7 @@ test("write-through cache: update operations update cache immediately", async ()
 
 	// Insert initial state
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "update-cache-entity",
 			schema_key: "update-cache-schema",
@@ -808,7 +808,7 @@ test("write-through cache: update operations update cache immediately", async ()
 
 	// Update the state - should update cache via write-through
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({
 			snapshot_content: { updated: "value" },
 			plugin_key: "updated-plugin",
@@ -839,7 +839,7 @@ test("write-through cache: update operations update cache immediately", async ()
 
 	// State view should return updated data
 	const stateResults = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "update-cache-entity")
 		.selectAll()
 		.execute();
@@ -860,7 +860,7 @@ test("delete operations remove entries from underlying data", async () => {
 
 	// Insert initial state
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "delete-cache-entity",
 			schema_key: "delete-cache-schema",
@@ -874,7 +874,7 @@ test("delete operations remove entries from underlying data", async () => {
 
 	// Verify data exists
 	const beforeDelete = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "delete-cache-entity")
 		.selectAll()
 		.execute();
@@ -883,7 +883,7 @@ test("delete operations remove entries from underlying data", async () => {
 
 	// Delete the state - this creates a deletion change (doesn't physically remove cache entry)
 	await lix.db
-		.deleteFrom("state")
+		.deleteFrom("state_all")
 		.where("entity_id", "=", "delete-cache-entity")
 		.where("schema_key", "=", "delete-cache-schema")
 		.where("file_id", "=", "delete-cache-file")
@@ -892,7 +892,7 @@ test("delete operations remove entries from underlying data", async () => {
 
 	// Data should no longer be accessible through state view
 	const afterDelete = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "delete-cache-entity")
 		.selectAll()
 		.execute();
@@ -922,7 +922,7 @@ test("change.created_at and state timestamps are consistent", async () => {
 
 	// Insert state data
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "timestamp-test-entity",
 			schema_key: "mock_schema",
@@ -980,7 +980,7 @@ test.todo(
 
 		// Verify it's accessible through state view (should populate cache)
 		const stateBeforeCacheClear = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "=", "test_cache_miss")
 			.selectAll()
@@ -1026,7 +1026,7 @@ test.todo(
 		// Try to access the same data through state view again
 		// This should trigger cache miss logic and repopulate from CTE
 		const stateAfterCacheClear = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("schema_key", "=", "lix_key_value")
 			.where("entity_id", "=", "test_cache_miss")
 			.selectAll()
@@ -1103,7 +1103,7 @@ test("delete operations are validated for foreign key constraints", async () => 
 
 	// Insert parent entity
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "parent-1",
 			schema_key: "parent_entity",
@@ -1120,7 +1120,7 @@ test("delete operations are validated for foreign key constraints", async () => 
 
 	// Insert child entity that references the parent
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "child-1",
 			schema_key: "child_entity",
@@ -1138,14 +1138,14 @@ test("delete operations are validated for foreign key constraints", async () => 
 
 	// Verify both entities exist
 	const parentBefore = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "parent-1")
 		.where("schema_key", "=", "parent_entity")
 		.selectAll()
 		.execute();
 
 	const childBefore = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "child-1")
 		.where("schema_key", "=", "child_entity")
 		.selectAll()
@@ -1158,7 +1158,7 @@ test("delete operations are validated for foreign key constraints", async () => 
 	// because there's a child entity that references it
 	await expect(
 		lix.db
-			.deleteFrom("state")
+			.deleteFrom("state_all")
 			.where("entity_id", "=", "parent-1")
 			.where("schema_key", "=", "parent_entity")
 			.execute()
@@ -1166,7 +1166,7 @@ test("delete operations are validated for foreign key constraints", async () => 
 
 	// Verify the parent still exists after failed deletion attempt
 	const parentAfter = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "parent-1")
 		.where("schema_key", "=", "parent_entity")
 		.selectAll()
@@ -1186,7 +1186,7 @@ describe.each([
 
 			// Insert an entity into global version
 			await lix.db
-				.insertInto("state")
+				.insertInto("state_all")
 				.values({
 					entity_id: "global-entity-1",
 					file_id: "test-file",
@@ -1218,7 +1218,7 @@ describe.each([
 
 			// The child version should inherit the entity from global
 			const inheritedEntity = await lix.db
-				.selectFrom("state")
+				.selectFrom("state_all")
 				.where("entity_id", "=", "global-entity-1")
 				.where("version_id", "=", childVersion.id)
 				.selectAll()
@@ -1262,7 +1262,7 @@ describe.each([
 
 				// Check the global version after mutation
 				const globalVersionAfterMutation = await lix.db
-					.selectFrom("state")
+					.selectFrom("state_all")
 					.where("schema_key", "=", "lix_version")
 					.where("entity_id", "=", mainVersion.id)
 					.where("version_id", "=", "global")
@@ -1283,7 +1283,7 @@ describe.each([
 				}
 
 				const state = await lix.db
-					.selectFrom("state")
+					.selectFrom("state_all")
 					.where("schema_key", "=", "lix_version")
 					.where("entity_id", "=", mainVersion.id)
 					.selectAll()
@@ -1365,7 +1365,7 @@ describe.skip.each([
 
 			// Insert an entity into global version
 			await lix.db
-				.insertInto("state")
+				.insertInto("state_all")
 				.values({
 					entity_id: "shared-entity",
 					file_id: "test-file",
@@ -1391,7 +1391,7 @@ describe.skip.each([
 
 			// Verify the child initially sees the inherited entity
 			const inheritedEntity = await lix.db
-				.selectFrom("state")
+				.selectFrom("state_all")
 				.where("entity_id", "=", "shared-entity")
 				.where("version_id", "=", childVersion.id)
 				.selectAll()
@@ -1408,7 +1408,7 @@ describe.skip.each([
 
 			// Now modify the entity in the child version (copy-on-write)
 			await lix.db
-				.updateTable("state")
+				.updateTable("state_all")
 				.set({
 					snapshot_content: {
 						id: "shared-entity",
@@ -1427,7 +1427,7 @@ describe.skip.each([
 
 			// Verify the child now has its own version of the entity
 			const childEntity = await lix.db
-				.selectFrom("state")
+				.selectFrom("state_all")
 				.where("entity_id", "=", "shared-entity")
 				.where("version_id", "=", childVersion.id)
 				.selectAll()
@@ -1444,7 +1444,7 @@ describe.skip.each([
 
 			// Verify the global version still has the original value
 			const globalEntity = await lix.db
-				.selectFrom("state")
+				.selectFrom("state_all")
 				.where("entity_id", "=", "shared-entity")
 				.where("version_id", "=", "global")
 				.selectAll()
@@ -1461,7 +1461,7 @@ describe.skip.each([
 
 			// Verify we now have 2 separate entities (one in global, one in child)
 			const allEntities = await lix.db
-				.selectFrom("state")
+				.selectFrom("state_all")
 				.where("entity_id", "=", "shared-entity")
 				.selectAll()
 				.execute();
@@ -1528,7 +1528,7 @@ describe.each([
 
 				// Insert an entity into global version
 				await lix.db
-					.insertInto("state")
+					.insertInto("state_all")
 					.values({
 						entity_id: "shared-entity",
 						file_id: "test-file",
@@ -1551,7 +1551,7 @@ describe.each([
 
 				// Verify the child initially sees the inherited entity
 				const inheritedEntity = await lix.db
-					.selectFrom("state")
+					.selectFrom("state_all")
 					.where("entity_id", "=", "shared-entity")
 					.where("version_id", "=", activeVersion.id)
 					.selectAll()
@@ -1563,7 +1563,7 @@ describe.each([
 
 				// Delete the inherited entity in child version (should create copy-on-write deletion)
 				await lix.db
-					.deleteFrom("state")
+					.deleteFrom("state_all")
 					.where("entity_id", "=", "shared-entity")
 					.where("version_id", "=", activeVersion.id)
 					.execute();
@@ -1575,7 +1575,7 @@ describe.each([
 
 				// Verify the entity is deleted in child version
 				const childEntityAfterDelete = await lix.db
-					.selectFrom("state")
+					.selectFrom("state_all")
 					.where("entity_id", "=", "shared-entity")
 					.where("version_id", "=", activeVersion.id)
 					.selectAll()
@@ -1586,7 +1586,7 @@ describe.each([
 
 				// Verify the entity still exists in global version (not affected by child deletion)
 				const inheritedEntityAfterDelete = await lix.db
-					.selectFrom("state")
+					.selectFrom("state_all")
 					.where("entity_id", "=", "shared-entity")
 					.where("version_id", "=", "global")
 					.selectAll()
@@ -1600,7 +1600,7 @@ describe.each([
 
 				// Verify we now only see the global entity through the state view (deletion marker is hidden)
 				const allEntities = await lix.db
-					.selectFrom("state")
+					.selectFrom("state_all")
 					.where("entity_id", "=", "shared-entity")
 					.selectAll()
 					.execute();
@@ -1635,7 +1635,7 @@ test.todo(
 
 		// Insert an entity into global version
 		await lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "shared-entity",
 				file_id: "test-file",
@@ -1659,7 +1659,7 @@ test.todo(
 
 		// Verify inheritance - both global and child should see the entity
 		const beforeDelete = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "in", ["global", childVersion.id])
 			.selectAll()
@@ -1682,13 +1682,13 @@ test.todo(
 		]);
 
 		await lix.db
-			.deleteFrom("state")
+			.deleteFrom("state_all")
 			.where("entity_id", "=", "shared-entity")
 			.where("schema_key", "=", "test_schema")
 			.execute();
 
 		const afterDelete = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("entity_id", "=", "shared-entity")
 			.selectAll()
 			.execute();
@@ -1707,7 +1707,7 @@ test.todo(
 
 		// First, insert a record successfully
 		await lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "test-duplicate-entity",
 				schema_key: "test_schema",
@@ -1721,7 +1721,7 @@ test.todo(
 
 		// Verify the record exists
 		const originalRecord = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("entity_id", "=", "test-duplicate-entity")
 			.selectAll()
 			.executeTakeFirst();
@@ -1748,7 +1748,7 @@ test.todo(
 
 		// Verify the original record is unchanged (OR IGNORE should have ignored the duplicate)
 		const afterIgnore = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("entity_id", "=", "test-duplicate-entity")
 			.selectAll()
 			.executeTakeFirst();

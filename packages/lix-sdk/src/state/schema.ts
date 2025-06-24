@@ -689,20 +689,22 @@ export function applyStateDatabaseSchema(
 	capi.sqlite3_create_module(sqlite.pointer!, "state_vtab", module, 0);
 
 	// Create the virtual table as 'state' directly (no more _impl suffix or view layer)
-	sqlite.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS state USING state_vtab();`);
+	sqlite.exec(
+		`CREATE VIRTUAL TABLE IF NOT EXISTS state_all USING state_vtab();`
+	);
 
-	// Create state_active view that filters to active version only
+	// Create state view that filters to active version only
 	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS state_active AS
+		CREATE VIEW IF NOT EXISTS state AS
 		SELECT *
-		FROM state
+		FROM state_all
 		WHERE version_id IN (SELECT version_id FROM active_version);
 
-		-- Add INSTEAD OF triggers for state_active that forward to state virtual table
-		CREATE TRIGGER IF NOT EXISTS state_active_insert
-		INSTEAD OF INSERT ON state_active
+		-- Add INSTEAD OF triggers for state that forward to state virtual table
+		CREATE TRIGGER IF NOT EXISTS state_insert
+		INSTEAD OF INSERT ON state
 		BEGIN
-			INSERT INTO state (
+			INSERT INTO state_all (
 				entity_id, schema_key, file_id, version_id, plugin_key,
 				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id
 			) VALUES (
@@ -711,10 +713,10 @@ export function applyStateDatabaseSchema(
 			);
 		END;
 
-		CREATE TRIGGER IF NOT EXISTS state_active_update
-		INSTEAD OF UPDATE ON state_active
+		CREATE TRIGGER IF NOT EXISTS state_update
+		INSTEAD OF UPDATE ON state	
 		BEGIN
-			UPDATE state
+			UPDATE state_all
 			SET
 				entity_id = NEW.entity_id,
 				schema_key = NEW.schema_key,
@@ -733,10 +735,10 @@ export function applyStateDatabaseSchema(
 				AND version_id = OLD.version_id;
 		END;
 
-		CREATE TRIGGER IF NOT EXISTS state_active_delete
-		INSTEAD OF DELETE ON state_active
+		CREATE TRIGGER IF NOT EXISTS state_delete
+		INSTEAD OF DELETE ON state
 		BEGIN
-			DELETE FROM state
+			DELETE FROM state_all
 			WHERE entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
 				AND file_id = OLD.file_id
@@ -773,7 +775,7 @@ export function handleStateDelete(
 	db: Kysely<LixInternalDatabaseSchema>
 ): void {
 	const rowToDelete = sqlite.exec({
-		sql: "SELECT * FROM state WHERE rowid = ?",
+		sql: "SELECT * FROM state_all WHERE rowid = ?",
 		bind: [rowId],
 		returnValue: "resultRows",
 	})[0]!;

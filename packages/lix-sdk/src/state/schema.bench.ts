@@ -18,7 +18,7 @@ bench(
 		// Create 100 changes for the same entity in the same version
 		for (let i = 0; i < 100; i++) {
 			await lix.db
-				.insertInto("state")
+				.insertInto("state_all")
 				.values({
 					entity_id: "mock_entity_id",
 					version_id: version.id,
@@ -33,7 +33,7 @@ bench(
 
 		// Benchmark querying the leaf state for this entity (should return the latest change)
 		await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("entity_id", "=", "mock_entity_id")
 			.where("version_id", "=", version.id)
 			.selectAll()

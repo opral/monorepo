@@ -12,7 +12,7 @@ test("newLixFile creates a valid lix that can be reopened", async () => {
 	const lix = await openLixInMemory({ blob });
 
 	// Try to query the state table to ensure it works
-	const result = await lix.db.selectFrom("state").selectAll().execute();
+	const result = await lix.db.selectFrom("state_all").selectAll().execute();
 	expect(Array.isArray(result)).toBe(true);
 });
 

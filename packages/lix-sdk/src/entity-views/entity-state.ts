@@ -145,7 +145,7 @@ export type ValidationCallbacks = {
  * Creates SQL view and CRUD triggers for an entity based on its schema definition (active version only).
  *
  * This function generates:
- * - A view that extracts JSON properties from the state_active table
+ * - A view that extracts JSON properties from the state table
  * - INSERT trigger that serializes entity data to JSON in the state table
  * - UPDATE trigger that updates the corresponding state record
  * - DELETE trigger that removes the state record
@@ -200,7 +200,7 @@ export function createEntityStateView(args: {
 	createSingleEntityView({
 		...args,
 		viewName: view_name,
-		stateTable: "state_active",
+		stateTable: "state",
 	});
 }
 
@@ -208,7 +208,7 @@ function createSingleEntityView(args: {
 	lix: Pick<Lix, "sqlite">;
 	schema: LixSchemaDefinition;
 	viewName: string;
-	stateTable: "state_active";
+	stateTable: "state";
 	/** Plugin identifier for the entity */
 	pluginKey: string;
 	/** Optional hardcoded file_id (if not provided, uses lixcol_file_id from mutations) */
@@ -383,7 +383,7 @@ function createSingleEntityView(args: {
       INSTEAD OF INSERT ON ${view_name}
       BEGIN      
         ${insertValidationSQL}
-        INSERT INTO state (
+        INSERT INTO state_all (
           entity_id,
           schema_key,
           file_id,
@@ -424,7 +424,7 @@ function createSingleEntityView(args: {
       INSTEAD OF UPDATE ON ${view_name}
       BEGIN
         ${updateValidationSQL}
-        UPDATE state
+        UPDATE state_all
         SET
           entity_id = ${entityIdNew},
           schema_key = '${schema_key}',
@@ -433,17 +433,17 @@ function createSingleEntityView(args: {
           snapshot_content = json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
           version_id = ${versionIdReference}
         WHERE
-          state.entity_id = ${entityIdOld}
-          AND state.schema_key = '${schema_key}'
-          AND state.file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}
-          AND state.version_id = ${oldVersionIdReference};
+          state_all.entity_id = ${entityIdOld}
+          AND state_all.schema_key = '${schema_key}'
+          AND state_all.file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}
+          AND state_all.version_id = ${oldVersionIdReference};
       END;
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_delete
       INSTEAD OF DELETE ON ${view_name}
       BEGIN
         ${deleteValidationSQL}
-        DELETE FROM state
+        DELETE FROM state_all
         WHERE entity_id = ${entityIdOld}
         AND schema_key = '${schema_key}'
         AND file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}

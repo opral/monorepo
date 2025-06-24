@@ -198,7 +198,7 @@ export function createChangesetForTransaction(
 				const toDelete = executeSync({
 					lix: { sqlite },
 					query: db
-						.selectFrom("state")
+						.selectFrom("state_all")
 
 						// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
 						.select("rowid")
@@ -261,7 +261,7 @@ export function createChangesetForTransaction(
 				const toDelete = executeSync({
 					lix: { sqlite },
 					query: db
-						.selectFrom("state")
+						.selectFrom("state_all")
 						// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
 						.select("rowid")
 						.where(
