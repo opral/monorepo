@@ -20,7 +20,9 @@ When URL strategy is used:
 
 ### Type Parameters
 
-• **T**
+#### T
+
+`T`
 
 The return type of the resolve function
 
