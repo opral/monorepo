@@ -441,7 +441,7 @@ test("custom strategy setLocale works with cookie and localStorage", async () =>
 		"fr"
 	);
 	expect(globalThis.document.cookie).toBe(
-		"PARAGLIDE_LOCALE=fr; path=/; max-age=34560000; domain=example.com"
+		"PARAGLIDE_LOCALE=fr; path=/; max-age=34560000"
 	);
 });
 
