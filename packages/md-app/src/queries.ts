@@ -46,7 +46,6 @@ export async function selectLix(): Promise<Lix> {
 
 	// If initialization is already in progress, wait for it
 	if (lixInitializationPromise) {
-		console.log("Waiting for existing lix initialization...");
 		return await lixInitializationPromise;
 	}
 
@@ -54,144 +53,152 @@ export async function selectLix(): Promise<Lix> {
 
 	// Create the initialization promise
 	lixInitializationPromise = (async () => {
-	const lixIdSearchParam = getLixIdFromUrl();
-	const rootHandle = await getOriginPrivateDirectory();
-	let lixBlob: Blob;
+		const lixIdSearchParam = getLixIdFromUrl();
+		const rootHandle = await getOriginPrivateDirectory();
+		let lixBlob: Blob;
 
-	if (lixIdSearchParam) {
-		// try reading the lix file from OPFS
-		try {
-			// Find the Lix file with the specified ID
-			const lixFile = await findLixFileInOpfs(lixIdSearchParam, [txtPlugin]);
-
-			if (!lixFile) {
-				throw new Error("Lix file not found with ID: " + lixIdSearchParam);
-			}
-
-			console.log(
-				`Found lix with ID ${lixIdSearchParam} in file: ${lixFile.fullName}`
-			);
-
-			const file = await lixFile.handle.getFile();
-			lixBlob = new Blob([await file.arrayBuffer()]);
-		} catch {
-			// Try server if lix doesn't exist in OPFS
+		if (lixIdSearchParam) {
+			// try reading the lix file from OPFS
 			try {
-				const response = await fetch(
-					new Request(
-						import.meta.env.PROD
-							? "https://lix.host/lsa/get-v1"
-							: "http://localhost:3005/lsa/get-v1",
-						{
-							method: "POST",
-							headers: {
-								"Content-Type": "application/json",
-							},
-							body: JSON.stringify({ lix_id: lixIdSearchParam }),
-						}
-					)
-				);
-				if (response.ok) {
-					const blob = await response.blob();
-					const lix = await openLixInMemory({
-						blob,
-						providePlugins: [txtPlugin],
-					});
-					await saveLixToOpfs({ lix });
-					lixBlob = blob;
+				// Find the Lix file with the specified ID
+				const lixFile = await findLixFileInOpfs(lixIdSearchParam, [txtPlugin]);
+
+				if (!lixFile) {
+					throw new Error("Lix file not found with ID: " + lixIdSearchParam);
 				}
-			} catch (error) {
-				console.error("Failed to fetch from server:", error);
+
+				console.log(
+					`Found lix with ID ${lixIdSearchParam} in file: ${lixFile.fullName}`
+				);
+
+				// Get a fresh file handle to avoid stale references
+				const rootHandle = await getOriginPrivateDirectory();
+				const freshFileHandle = await rootHandle.getFileHandle(
+					lixFile.fullName
+				);
+				const file = await freshFileHandle.getFile();
+				lixBlob = new Blob([await file.arrayBuffer()]);
+			} catch (opfsError) {
+				console.warn("Failed to read lix from OPFS:", opfsError);
+				// Try server if lix doesn't exist in OPFS
+				try {
+					const response = await fetch(
+						new Request(
+							import.meta.env.PROD
+								? "https://lix.host/lsa/get-v1"
+								: "http://localhost:3005/lsa/get-v1",
+							{
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({ lix_id: lixIdSearchParam }),
+							}
+						)
+					);
+					if (response.ok) {
+						const blob = await response.blob();
+						const lix = await openLixInMemory({
+							blob,
+							providePlugins: [txtPlugin],
+						});
+						await saveLixToOpfs({ lix });
+						lixBlob = blob;
+					}
+				} catch (error) {
+					console.error("Failed to fetch from server:", error);
+				}
 			}
-		}
-	} else {
-		const availableLixFiles: FileSystemHandle[] = [];
-		for await (const [name, handle] of rootHandle) {
-			if (handle.kind === "file" && name.endsWith(".lix")) {
-				availableLixFiles.push(handle);
-			}
-		}
-		// naively pick the first lix file
-		if (availableLixFiles.length > 0) {
-			const fileHandle = await rootHandle.getFileHandle(
-				availableLixFiles[0].name
-			);
-			const file = await fileHandle.getFile();
-			lixBlob = new Blob([await file.arrayBuffer()]);
 		} else {
-			const welcomeLix = await setupWelcomeFile();
-			lixBlob = welcomeLix.blob;
+			const availableLixFiles: FileSystemHandle[] = [];
+			for await (const [name, handle] of rootHandle) {
+				if (handle.kind === "file" && name.endsWith(".lix")) {
+					availableLixFiles.push(handle);
+				}
+			}
+			// naively pick the first lix file
+			if (availableLixFiles.length > 0) {
+				const fileHandle = await rootHandle.getFileHandle(
+					availableLixFiles[0].name
+				);
+				const file = await fileHandle.getFile();
+				lixBlob = new Blob([await file.arrayBuffer()]);
+			} else {
+				const welcomeLix = await setupWelcomeFile();
+				lixBlob = welcomeLix.blob;
+			}
 		}
-	}
 
-	let lix: Lix;
-	const storedActiveAccount = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+		let lix: Lix;
+		const storedActiveAccount = localStorage.getItem(
+			ACTIVE_ACCOUNT_STORAGE_KEY
+		);
 
-	try {
-		console.log("Opening lix in memory...");
+		try {
+			console.log("Opening lix in memory...");
+			if (storedActiveAccount) {
+				lix = await openLixInMemory({
+					blob: lixBlob!,
+					providePlugins: [txtPlugin],
+					account: JSON.parse(storedActiveAccount),
+				});
+			} else {
+				lix = await openLixInMemory({
+					blob: lixBlob!,
+					providePlugins: [txtPlugin],
+				});
+			}
+			console.log("Lix opened successfully");
+		} catch (error) {
+			console.error("Error opening lix:", error);
+			// https://linear.app/opral/issue/INBOX-199/fix-loading-lix-file-if-schema-changed
+			// CLEAR OPFS. The lix file is likely corrupted.
+			for await (const entry of rootHandle.values()) {
+				if (entry.kind === "file") {
+					await rootHandle.removeEntry(entry.name);
+				}
+			}
+			window.location.reload();
+			// tricksing the TS typechecker. This will never be reached.
+			lix = {} as any;
+		}
+
+		const lixId = await lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "lix_id")
+			.select("value")
+			.executeTakeFirstOrThrow();
+
 		if (storedActiveAccount) {
-			lix = await openLixInMemory({
-				blob: lixBlob!,
-				providePlugins: [txtPlugin],
-				account: JSON.parse(storedActiveAccount),
-			});
-		} else {
-			lix = await openLixInMemory({
-				blob: lixBlob!,
-				providePlugins: [txtPlugin],
-			});
+			const activeAccount = JSON.parse(storedActiveAccount);
+			await switchActiveAccount(lix, activeAccount);
 		}
-		console.log("Lix opened successfully");
-	} catch (error) {
-		console.error("Error opening lix:", error);
-		// https://linear.app/opral/issue/INBOX-199/fix-loading-lix-file-if-schema-changed
-		// CLEAR OPFS. The lix file is likely corrupted.
-		for await (const entry of rootHandle.values()) {
-			if (entry.kind === "file") {
-				await rootHandle.removeEntry(entry.name);
+
+		await saveLixToOpfs({ lix });
+
+		// mismatch in id, update URL without full reload if possible
+		if (lixId.value !== lixIdSearchParam) {
+			// Try to update URL without full navigation
+			const updateSuccessful = updateUrlParams({ lix: lixId.value });
+
+			// If update failed, fall back to full navigation
+			if (!updateSuccessful) {
+				const url = new URL(window.location.href);
+				url.searchParams.set("lix", lixId.value);
+				window.location.href = url.toString();
 			}
 		}
-		window.location.reload();
-		// tricksing the TS typechecker. This will never be reached.
-		lix = {} as any;
-	}
 
-	const lixId = await lix.db
-		.selectFrom("key_value")
-		.where("key", "=", "lix_id")
-		.select("value")
-		.executeTakeFirstOrThrow();
+		await initLixInspector({
+			lix,
+			show: localStorage.getItem("lix-inspector:show")
+				? localStorage.getItem("lix-inspector:show") === "true"
+				: import.meta.env.DEV,
+		});
 
-	if (storedActiveAccount) {
-		const activeAccount = JSON.parse(storedActiveAccount);
-		await switchActiveAccount(lix, activeAccount);
-	}
-
-	await saveLixToOpfs({ lix });
-
-	// mismatch in id, update URL without full reload if possible
-	if (lixId.value !== lixIdSearchParam) {
-		// Try to update URL without full navigation
-		const updateSuccessful = updateUrlParams({ lix: lixId.value });
-
-		// If update failed, fall back to full navigation
-		if (!updateSuccessful) {
-			const url = new URL(window.location.href);
-			url.searchParams.set("lix", lixId.value);
-			window.location.href = url.toString();
-		}
-	}
-
-	await initLixInspector({
-		lix,
-		show: localStorage.getItem("lix-inspector:show")
-			? localStorage.getItem("lix-inspector:show") === "true"
-			: import.meta.env.DEV,
-	});
-
-	globalLix = lix;
-	console.log("Lix instance stored globally");
-	return lix;
+		globalLix = lix;
+		console.log("Lix instance stored globally");
+		return lix;
 	})();
 
 	try {
