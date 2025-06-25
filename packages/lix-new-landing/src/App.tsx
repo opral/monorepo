@@ -744,8 +744,8 @@ function App() {
 
                 {/* API */}
                 <div className="bg-white rounded-md p-2 font-mono text-sm inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-2">
-                  <a 
-                    href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/change-set/get-diff.ts" 
+                  <a
+                    href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/change-set/get-diff.ts"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full h-full"
@@ -790,7 +790,7 @@ function App() {
                   <a
                     href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/change-proposal/create-change-proposal.ts"
                     target="_blank"
-                    rel="noopener noreferrer" 
+                    rel="noopener noreferrer"
                     className="block w-full h-full"
                   >
                     <span className="text-amber-600">lix</span>
@@ -800,6 +800,271 @@ function App() {
                   </a>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Human-AI Collaboration Section */}
+        <section className="py-20 w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <h2 className="text-center text-2xl sm:text-3xl font-bold mb-6 text-gray-800 flex items-center justify-center">
+              <span>Every "Cursor for X" needs</span>{" "}
+              <LixLogo className="ml-2 w-10 h-8 transform translate-y-[-2px]" />
+            </h2>
+            <p className="text-center text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
+              Lix provides the foundation for effective human-AI collaboration
+              with complete transparency and control over AI-generated changes.
+            </p>
+
+            {/* Human-AI Collaboration Wireframe - Compact Version */}
+            <div className="max-w-4xl mx-auto mb-10 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-all">
+              <div className="flex flex-col sm:flex-row">
+                {/* Left panel - AI changes */}
+                <div className="w-full sm:w-1/2 p-4 border-b sm:border-b-0 sm:border-r border-gray-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <span className="font-medium text-sm text-gray-800">AI Changes</span>
+                    </div>
+                  </div>
+                  
+                  {/* Simple diff visualization */}
+                  <div className="p-3 bg-gray-50 rounded border border-gray-200">
+                    <div className="h-3 bg-gray-200 rounded w-full mb-1.5"></div>
+                    <div className="h-3 bg-red-100 rounded w-3/4 mb-1.5"></div>
+                    <div className="h-3 bg-green-100 rounded w-4/5 mb-1.5"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+
+                {/* Right panel - Human review */}
+                <div className="w-full sm:w-1/2 p-4">
+                  <div className="flex items-center mb-3">
+                    <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="font-medium text-sm text-gray-800">Human Review</span>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex space-x-2">
+                    <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      Approve
+                    </button>
+                    <button className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1z" clipRule="evenodd" />
+                      </svg>
+                      Request Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+              {/* Card 1: AI Proposals with Human Review */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
+                <div className="p-7">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-7 w-7 text-blue-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-800">
+                      AI Proposal Review
+                    </h3>
+                  </div>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    AI suggests changes while humans maintain oversight with
+                    approve/reject workflows.
+                  </p>
+                </div>
+                <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
+                  <div className="font-mono text-sm text-gray-700 overflow-x-auto">
+                    <code>
+                      <span className="text-gray-500">
+                        {"// AI proposes, human approves"}
+                      </span>
+                      <br />
+                      <span className="text-blue-600">{"const"}</span>
+                      {" proposal = "}
+                      <span className="text-purple-600">{"await"}</span>
+                      {" lix.createProposal({"}
+                      <br />
+                      {"  changes: aiChanges,"}
+                      <br />
+                      {"  title: "}
+                      <span className="text-green-600">
+                        {'"AI suggestion"'}
+                      </span>
+                      <br />
+                      {"});"}
+                      <br />
+                      <span className="text-purple-600">{"await"}</span>
+                      {" lix.approveProposal(proposal.id);"}
+                    </code>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Parallel AI Exploration */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
+                <div className="p-7">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-7 w-7 text-green-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-800">
+                      Parallel AI Exploration
+                    </h3>
+                  </div>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    Run multiple AI agents with different parameters and merge
+                    the best results.
+                  </p>
+                </div>
+                <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
+                  <div className="font-mono text-sm text-gray-700 overflow-x-auto">
+                    <code>
+                      <span className="text-gray-500">
+                        {"// Multiple AI versions"}
+                      </span>
+                      <br />
+                      <span className="text-blue-600">{"const"}</span>
+                      {" v1 = "}
+                      <span className="text-purple-600">{"await"}</span>
+                      {" lix.createVersion("}
+                      <span className="text-green-600">{'"creative-ai"'}</span>
+                      {");"}
+                      <br />
+                      <span className="text-blue-600">{"const"}</span>
+                      {" v2 = "}
+                      <span className="text-purple-600">{"await"}</span>
+                      {" lix.createVersion("}
+                      <span className="text-green-600">{'"precise-ai"'}</span>
+                      {");"}
+                      <br />
+                      <span className="text-gray-500">
+                        {"// Compare and merge"}
+                      </span>
+                      <br />
+                      <span className="text-blue-600">{"const"}</span>
+                      {" diff = "}
+                      <span className="text-purple-600">{"await"}</span>
+                      {" lix.getDiff(v1, v2);"}
+                      <br />
+                      <span className="text-purple-600">{"await"}</span>
+                      {" lix.merge(diff);"}
+                    </code>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Transparent Change History */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
+                <div className="p-7">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-7 w-7 text-purple-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-800">
+                      Change Attribution
+                    </h3>
+                  </div>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    Track every AI modification with source attribution for full
+                    audit trails and compliance.
+                  </p>
+                </div>
+                <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
+                  <div className="font-mono text-sm text-gray-700 overflow-x-auto">
+                    <code>
+                      <span className="text-gray-500">
+                        {"// Track AI changes with attribution"}
+                      </span>
+                      <br />
+                      <span className="text-purple-600">{"await"}</span>
+                      {" lix.addLabel({"}
+                      <br />
+                      {"  changeId: change.id,"}
+                      <br />
+                      {"  label: "}
+                      <span className="text-green-600">{'"source:gpt4"'}</span>
+                      <br />
+                      {"});"}
+                      <br />
+                      <span className="text-gray-500">
+                        {"// Get full history"}
+                      </span>
+                      <br />
+                      <span className="text-blue-600">{"const"}</span>
+                      {" history = "}
+                      <span className="text-purple-600">{"await"}</span>
+                      {" lix.getHistory();"}
+                    </code>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center">
+              <a
+                href="https://github.com/opral/monorepo/tree/main/packages/lix-docs/docs/guide/concepts/change-proposals.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-gray-800 border border-gray-300 px-6 py-3 rounded-md text-base hover:bg-gray-50 transition-all duration-200 inline-flex items-center font-medium shadow-sm"
+              >
+                Learn more about Human ↔ AI collaboration with{" "}
+                <LixLogo className="mx-1 w-5 h-4 transform translate-y-[-1px]" />
+              </a>
             </div>
           </div>
         </section>
@@ -816,7 +1081,7 @@ function App() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <a
               href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
               className="h-44 bg-blue-600 text-white rounded-lg p-6 font-medium hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg border border-blue-700 flex flex-col justify-between group"
             >
