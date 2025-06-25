@@ -53,5 +53,5 @@ export const extractLocaleFromRequestAsync = async (request) => {
 
 	// If no custom strategy provided a valid locale, fall back to sync version
 	locale = extractLocaleFromRequest(request);
-	return locale;
+	return assertIsLocale(locale);
 };
