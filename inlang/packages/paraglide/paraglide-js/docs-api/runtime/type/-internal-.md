@@ -263,7 +263,7 @@ If the input is not a locale.
 
 > **defineCustomClientStrategy**(`strategy`, `handler`): `void`
 
-Defined in: [runtime/strategy.js:68](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+Defined in: [runtime/strategy.js:65](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
 
 Defines a custom strategy that is executed on the client.
 
@@ -273,15 +273,14 @@ Defines a custom strategy that is executed on the client.
 
 `any`
 
-The name of the custom strategy to define. Must follow the pattern `custom-<name>` where
-`<name>` contains only alphanumeric characters.
+The name of the custom strategy to define. Must follow the pattern custom-name.
 
 #### handler
 
 [`CustomClientStrategyHandler`](#customclientstrategyhandler)
 
 The handler for the custom strategy, which should implement the
-methods `getLocale` and `setLocale`.
+methods getLocale and setLocale.
 
 ### Returns
 
@@ -293,7 +292,7 @@ methods `getLocale` and `setLocale`.
 
 > **defineCustomServerStrategy**(`strategy`, `handler`): `void`
 
-Defined in: [runtime/strategy.js:48](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+Defined in: [runtime/strategy.js:47](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
 
 Defines a custom strategy that is executed on the server.
 
@@ -303,15 +302,14 @@ Defines a custom strategy that is executed on the server.
 
 `any`
 
-The name of the custom strategy to define. Must follow the pattern `custom-<name>` where
-`<name>` contains only alphanumeric characters.
+The name of the custom strategy to define. Must follow the pattern custom-name.
 
 #### handler
 
 [`CustomServerStrategyHandler`](#customserverstrategyhandler)
 
 The handler for the custom strategy, which should implement
-the method `getLocale`.
+the method getLocale.
 
 ### Returns
 
@@ -556,13 +554,13 @@ to the synchronous `extractLocaleFromRequest` for all other strategies.
 
 ```ts
 // With custom async server strategy
-  defineCustomServerStrategy("database", {
+  defineCustomServerStrategy("custom-database", {
     getLocale: async (request) => {
       const userId = extractUserIdFromRequest(request);
       return await getUserLocaleFromDatabase(userId);
     }
   });
-  
+
   const locale = await extractLocaleFromRequestAsync(request);
 ```
 
