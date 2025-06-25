@@ -561,7 +561,9 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	expect(typeof fileResult[0]?.lixcol_change_id).toBe("string");
 
 	// Verify that change_id matches between file and file_all views
-	expect(fileResult[0]?.lixcol_change_id).toBe(fileAllResult[0]?.lixcol_change_id);
+	expect(fileResult[0]?.lixcol_change_id).toBe(
+		fileAllResult[0]?.lixcol_change_id
+	);
 
 	// Get the actual file entity change record to verify the change_id is correct
 	const fileChangeRecord = await lix.db
@@ -604,7 +606,9 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	expect(updatedFileResult).toHaveLength(1);
 	expect(updatedFileResult[0]?.lixcol_change_id).toBeDefined();
 	// The change_id should be different after the update (new change created)
-	expect(updatedFileResult[0]?.lixcol_change_id).not.toBe(fileResult[0]?.lixcol_change_id);
+	expect(updatedFileResult[0]?.lixcol_change_id).not.toBe(
+		fileResult[0]?.lixcol_change_id
+	);
 
 	// Get the new file entity change record
 	const newFileChangeRecord = await lix.db
@@ -655,7 +659,9 @@ test("file data updates create new change_id", async () => {
 	await lix.db
 		.updateTable("file")
 		.set({
-			data: new TextEncoder().encode(JSON.stringify({ content: "updated data" })),
+			data: new TextEncoder().encode(
+				JSON.stringify({ content: "updated data" })
+			),
 		})
 		.where("id", "=", "data-change-test")
 		.execute();
@@ -680,13 +686,20 @@ test("file data updates create new change_id", async () => {
 		.where("schema_key", "=", "mock_json_property")
 		.where("entity_id", "=", "content")
 		.orderBy("change.created_at", "desc")
-		.select(["change.id", "entity_id", "schema_key", "content as snapshot_content"])
+		.select([
+			"change.id",
+			"entity_id",
+			"schema_key",
+			"content as snapshot_content",
+		])
 		.executeTakeFirst();
 
 	expect(contentChangeRecord).toBeDefined();
 	expect(contentChangeRecord?.entity_id).toBe("content");
 	expect(contentChangeRecord?.schema_key).toBe("mock_json_property");
-	expect(contentChangeRecord?.snapshot_content).toEqual({ value: "updated data" });
+	expect(contentChangeRecord?.snapshot_content).toEqual({
+		value: "updated data",
+	});
 });
 
 test("file metadata updates create new change_id", async () => {
@@ -734,7 +747,9 @@ test("file metadata updates create new change_id", async () => {
 
 	// Verify that updating file path created a new change_id
 	expect(updatedPathFile.lixcol_change_id).toBeDefined();
-	expect(updatedPathFile.lixcol_change_id).not.toBe(initialFile.lixcol_change_id);
+	expect(updatedPathFile.lixcol_change_id).not.toBe(
+		initialFile.lixcol_change_id
+	);
 	expect(updatedPathFile.path).toBe("/updated-metadata-test.json");
 
 	// Update the file metadata
@@ -755,8 +770,13 @@ test("file metadata updates create new change_id", async () => {
 
 	// Verify that updating file metadata created another new change_id
 	expect(updatedMetadataFile.lixcol_change_id).toBeDefined();
-	expect(updatedMetadataFile.lixcol_change_id).not.toBe(updatedPathFile.lixcol_change_id);
-	expect(updatedMetadataFile.metadata).toEqual({ author: "updated author", version: "2.0" });
+	expect(updatedMetadataFile.lixcol_change_id).not.toBe(
+		updatedPathFile.lixcol_change_id
+	);
+	expect(updatedMetadataFile.metadata).toEqual({
+		author: "updated author",
+		version: "2.0",
+	});
 
 	// Verify the final file entity change record exists and is correct
 	const finalFileChangeRecord = await lix.db

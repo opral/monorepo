@@ -20,7 +20,7 @@
 		"test:watch": "vitest --typecheck",
 		"env-variables": "node ./src/services/env-variables/create-index-file.js",
 		"bench": "vitest bench",
-		"lint": "eslint src/**/* --fix",
+		"lint": "eslint \"src/**/*.{js,ts}\" --fix",
 		"dev": "tsc --watch",
 		"format": "prettier ./src --write"
 	},
