@@ -95,7 +95,15 @@ export let setLocale = (newLocale, options) => {
 			localStorage.setItem(localStorageKey, newLocale);
 		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
 			const handler = customClientStrategies.get(strat);
-			handler.setLocale(newLocale);
+			if (handler) {
+				const result = handler.setLocale(newLocale);
+				// Handle async setLocale - fire and forget
+				if (result instanceof Promise) {
+					result.catch((error) => {
+						console.warn(`Custom strategy "${strat}" setLocale failed:`, error);
+					});
+				}
+			}
 		}
 	}
 	if (

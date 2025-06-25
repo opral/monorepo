@@ -87,7 +87,15 @@ export let getLocale = () => {
 			locale = localStorage.getItem(localStorageKey) ?? undefined;
 		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
 			const handler = customClientStrategies.get(strat);
-			locale = handler.getLocale();
+			if (handler) {
+				const result = handler.getLocale();
+				// Handle both sync and async results - skip async in sync getLocale
+				if (result instanceof Promise) {
+					// Can't await in sync function, skip async strategies
+					continue;
+				}
+				locale = result;
+			}
 		}
 		// check if match, else continue loop
 		if (locale !== undefined) {
