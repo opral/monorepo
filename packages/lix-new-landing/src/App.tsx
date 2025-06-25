@@ -816,97 +816,56 @@ function App() {
               with complete transparency and control over AI-generated changes.
             </p>
 
-            {/* Human-AI Collaboration Wireframe */}
-            <div className="max-w-5xl mx-auto mb-16 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-all">
-              <div className="flex flex-col md:flex-row">
+            {/* Human-AI Collaboration Wireframe - Compact Version */}
+            <div className="max-w-4xl mx-auto mb-10 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-all">
+              <div className="flex flex-col sm:flex-row">
                 {/* Left panel - AI changes */}
-                <div className="w-full md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-gray-100">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="w-full sm:w-1/2 p-4 border-b sm:border-b-0 sm:border-r border-gray-100">
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <span className="font-medium text-gray-800">AI Generated Changes</span>
-                    </div>
-                    <div className="px-3 py-1 bg-blue-100 rounded text-xs text-blue-800 font-medium">
-                      Proposal
+                      <span className="font-medium text-sm text-gray-800">AI Changes</span>
                     </div>
                   </div>
                   
-                  {/* Generic diff visualization */}
-                  <div className="border border-gray-200 rounded overflow-hidden">
-                    <div className="bg-gray-50 px-3 py-2 border-b border-gray-200 flex justify-between items-center">
-                      <span className="text-xs text-gray-600">Modified Data</span>
-                      <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">Changes</span>
-                    </div>
-                    
-                    {/* Generic diff representation */}
-                    <div className="p-4 bg-gray-50">
-                      <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                      <div className="h-4 bg-red-100 rounded w-3/4 mb-2"></div>
-                      <div className="h-4 bg-green-100 rounded w-4/5 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                      <div className="h-4 bg-green-100 rounded w-2/3 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/5"></div>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 text-xs text-gray-500 bg-blue-50 p-3 rounded border border-blue-100">
-                    <div className="font-medium mb-1">AI Explanation</div>
+                  {/* Simple diff visualization */}
+                  <div className="p-3 bg-gray-50 rounded border border-gray-200">
                     <div className="h-3 bg-gray-200 rounded w-full mb-1.5"></div>
-                    <div className="h-3 bg-gray-200 rounded w-4/5"></div>
+                    <div className="h-3 bg-red-100 rounded w-3/4 mb-1.5"></div>
+                    <div className="h-3 bg-green-100 rounded w-4/5 mb-1.5"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                   </div>
                 </div>
 
                 {/* Right panel - Human review */}
-                <div className="w-full md:w-1/2 p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
+                <div className="w-full sm:w-1/2 p-4">
+                  <div className="flex items-center mb-3">
+                    <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <span className="font-medium text-gray-800">Human Review</span>
-                  </div>
-
-                  {/* Generic review notes */}
-                  <div className="bg-gray-50 p-4 rounded border border-gray-200 mb-3">
-                    <div className="text-sm font-medium text-gray-700 mb-2">Discussion</div>
-                    
-                    {/* Placeholder comment blocks */}
-                    <div className="mb-2 bg-white p-2 rounded border border-gray-100">
-                      <div className="h-3 bg-gray-200 rounded w-1/4 mb-1.5"></div>
-                      <div className="h-3 bg-gray-200 rounded w-full"></div>
-                    </div>
-                    
-                    <div className="bg-white p-2 rounded border border-gray-100">
-                      <div className="h-3 bg-gray-200 rounded w-1/4 mb-1.5"></div>
-                      <div className="h-3 bg-gray-200 rounded w-11/12"></div>
-                    </div>
+                    <span className="font-medium text-sm text-gray-800">Human Review</span>
                   </div>
 
                   {/* Action buttons */}
-                  <div className="flex space-x-3 mt-4">
-                    <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded px-4 py-2 text-sm font-medium flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <div className="flex space-x-2">
+                    <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                       Approve
                     </button>
-                    <button className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 rounded px-4 py-2 text-sm font-medium flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                    <button className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1z" clipRule="evenodd" />
                       </svg>
                       Request Changes
                     </button>
-                  </div>
-                  
-                  {/* Status indicators */}
-                  <div className="flex mt-4 items-center justify-between">
-                    <div className="h-6 bg-gray-100 rounded w-1/3"></div>
-                    <div className="h-6 bg-gray-100 rounded w-1/4"></div>
                   </div>
                 </div>
               </div>
