@@ -106,19 +106,11 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 #### getStore()
 
-<<<<<<< HEAD
 > **getStore**(): `undefined` \| \{ `locale?`: [`Locale`](#locale); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
 
 ##### Returns
 
 `undefined` \| \{ `locale?`: [`Locale`](#locale); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
-=======
-> **getStore**(): `undefined` \| \{ `locale`: [`Locale`](#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
-
-##### Returns
-
-`undefined` \| \{ `locale`: [`Locale`](#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
->>>>>>> b93f07f90e77bcf5d27917834411adb4b4484390
 
 ***
 
@@ -878,11 +870,7 @@ avoid a circular import between `runtime.js` and
 
 > **overwriteSetLocale**(`fn`): `void`
 
-<<<<<<< HEAD
-Defined in: [runtime/set-locale.js:129](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
-=======
-Defined in: [runtime/set-locale.js:132](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
->>>>>>> b93f07f90e77bcf5d27917834411adb4b4484390
+Defined in: [runtime/set-locale.js:133](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/set-locale.js)
 
 Overwrite the `setLocale()` function.
 
