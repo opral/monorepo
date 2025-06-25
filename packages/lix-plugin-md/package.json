@@ -25,6 +25,8 @@
 		"papaparse": "^5.4.1",
 		"remark-parse": "10.0.2",
 		"remark-stringify": "^11.0.0",
+		"remark-gfm": "^3.0.1",
+		"remark-frontmatter": "^4.0.1",
 		"unified": "11.0.3",
 		"unist-util-visit": "5.0.0"
 	},

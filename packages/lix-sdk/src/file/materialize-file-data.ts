@@ -47,7 +47,7 @@ export function materializeFileData(args: {
 		const changes = executeSync({
 			lix: args.lix,
 			query: args.lix.db
-				.selectFrom("state")
+				.selectFrom("state_all")
 				.where("plugin_key", "=", plugin.key)
 				.where("file_id", "=", args.file.id)
 				.where("version_id", "=", args.versionId)
@@ -82,7 +82,7 @@ export function materializeFileData(args: {
 	const changes = executeSync({
 		lix: args.lix,
 		query: args.lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
 			.where("file_id", "=", args.file.id)
 			.where("version_id", "=", args.versionId)

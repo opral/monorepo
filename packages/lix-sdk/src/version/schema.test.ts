@@ -461,7 +461,7 @@ test("mutation of a version's state should NOT lead to duplicate version entries
 	});
 
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "test_entity",
 			version_id: versionA.id,
@@ -689,4 +689,96 @@ test("global version should not inherit from itself", async () => {
 
 	// Global version should not inherit from anything
 	expect(globalVersion.inherits_from_version_id).toBeNull();
+});
+
+test("versions should have hidden property defaulting to false", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create required change sets first
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "cs_test", lixcol_version_id: "global" },
+			{ id: "working_cs_test", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	// Insert a version without specifying hidden
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "test_version",
+			name: "Test Version",
+			change_set_id: "cs_test",
+			working_change_set_id: "working_cs_test",
+		})
+		.execute();
+
+	const version = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "test_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Hidden should default to false (SQLite stores as 0)
+	expect(version.hidden).toBe(0);
+});
+
+test("global version should have hidden set to true", async () => {
+	const lix = await openLixInMemory({});
+
+	const globalVersion = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Global version should be hidden (SQLite stores as 1)
+	expect(globalVersion.hidden).toBe(1);
+});
+
+test("main version should have hidden set to false", async () => {
+	const lix = await openLixInMemory({});
+
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Main version should not be hidden (SQLite stores as 0)
+	expect(mainVersion.hidden).toBe(0);
+});
+
+test("can explicitly set hidden to true", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create required change sets first
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "cs_hidden", lixcol_version_id: "global" },
+			{ id: "working_cs_hidden", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	// Insert a version with hidden explicitly set to true
+	await lix.db
+		.insertInto("version")
+		.values({
+			id: "hidden_version",
+			name: "Hidden Version",
+			change_set_id: "cs_hidden",
+			working_change_set_id: "working_cs_hidden",
+			hidden: true,
+		})
+		.execute();
+
+	const version = await lix.db
+		.selectFrom("version")
+		.where("id", "=", "hidden_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(version.hidden).toBe(1);
 });

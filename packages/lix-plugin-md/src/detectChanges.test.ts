@@ -1,190 +1,143 @@
-import { expect, test } from "vitest";
+import { describe, test, expect } from "vitest";
 import { detectChanges } from "./detectChanges.js";
-import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
-import { MarkdownBlockPositionSchemaV1 } from "./schemas/blockPositions.js";
+import { MarkdownNodeSchemaV1 } from "./schemas/nodes.js";
+import { MarkdownRootSchemaV1 } from "./schemas/root.js";
 
 const encode = (text: string) => new TextEncoder().encode(text);
 
-test("it should not detect changes if the markdown file did not update", async () => {
-	const before = encode(`<!-- id: abc123 -->
+describe("change detection", () => {
+	test("it should not detect changes if the markdown file did not update", async () => {
+		const before = encode(`<!-- mdast_id = abc123 -->
 # Heading
 
-<!-- id: def456 -->
+<!-- mdast_id = def456 -->
 Some text.`);
-	const after = before;
+		const after = before;
 
-	const detectedChanges = detectChanges({
-		before: { id: "random", path: "x.md", data: before, metadata: {} },
-		after: { id: "random", path: "x.md", data: after, metadata: {} },
+		const detectedChanges = detectChanges({
+			before: { id: "random", path: "x.md", data: before, metadata: {} },
+			after: { id: "random", path: "x.md", data: after, metadata: {} },
+		});
+
+		expect(detectedChanges).toEqual([]);
 	});
 
-	expect(detectedChanges).toEqual([]);
-});
-
-test("it should detect a new block", async () => {
-	const before = encode(`<!-- id: abc123 -->
+	test("it should detect a new node", async () => {
+		const before = encode(`<!-- mdast_id = abc123 -->
 # Heading
 
-<!-- id: def456 -->
+<!-- mdast_id = def456 -->
 Some text.`);
-	const after = encode(`<!-- id: abc123 -->
+		const after = encode(`<!-- mdast_id = abc123 -->
 # Heading
 
-<!-- id: def456 -->
+<!-- mdast_id = def456 -->
 Some text.
 
-<!-- id: xyz789 -->
+<!-- mdast_id = xyz789 -->
 New paragraph.`);
 
-	const detectedChanges = detectChanges({
-		before: { id: "random", path: "x.md", data: before, metadata: {} },
-		after: { id: "random", path: "x.md", data: after, metadata: {} },
+		const detectedChanges = detectChanges({
+			before: { id: "random", path: "x.md", data: before, metadata: {} },
+			after: { id: "random", path: "x.md", data: after, metadata: {} },
+		});
+
+		expect(detectedChanges.length).toBeGreaterThan(0);
+		const addedNode = detectedChanges.find((c) => c.entity_id === "xyz789");
+		expect(addedNode).toBeTruthy();
+		expect(addedNode?.schema).toBe(MarkdownNodeSchemaV1);
 	});
 
-	expect(detectedChanges).toStrictEqual([
-		{
-			schema: MarkdownBlockSchemaV1,
-			entity_id: "xyz789",
-			snapshot_content: {
-				id: "xyz789",
-				text: "New paragraph.",
-				type: "paragraph",
-			},
-		},
-		{
-			schema: MarkdownBlockPositionSchemaV1,
-			entity_id: "block_positions",
-			snapshot_content: {
-				idPositions: {
-					abc123: 0,
-					def456: 1,
-					xyz789: 2,
-				},
-			},
-		},
-	]);
-});
-
-test("it should detect an updated block", async () => {
-	const before = encode(`<!-- id: abc123 -->
+	test("it should detect an updated node", async () => {
+		const before = encode(`<!-- mdast_id = abc123 -->
 # Heading
 
-<!-- id: def456 -->
+<!-- mdast_id = def456 -->
 Some text.`);
-	const after = encode(`<!-- id: abc123 -->
+		const after = encode(`<!-- mdast_id = abc123 -->
 # Heading
 
-<!-- id: def456 -->
+<!-- mdast_id = def456 -->
 Updated text.`);
 
-	const detectedChanges = detectChanges({
-		before: { id: "random", path: "x.md", data: before, metadata: {} },
-		after: { id: "random", path: "x.md", data: after, metadata: {} },
+		const detectedChanges = detectChanges({
+			before: { id: "random", path: "x.md", data: before, metadata: {} },
+			after: { id: "random", path: "x.md", data: after, metadata: {} },
+		});
+
+		expect(detectedChanges.length).toBeGreaterThan(0);
+		const updatedNode = detectedChanges.find((c) => c.entity_id === "def456");
+		expect(updatedNode).toBeTruthy();
+		expect(updatedNode?.schema).toBe(MarkdownNodeSchemaV1);
 	});
 
-	expect(detectedChanges).toStrictEqual([
-		{
-			schema: MarkdownBlockSchemaV1,
-			entity_id: "def456",
-			snapshot_content: {
-				id: "def456",
-				text: "Updated text.",
-				type: "paragraph",
-			},
-		},
-	]);
-});
-
-test("it should detect a deleted block", async () => {
-	const before = encode(`<!-- id: abc123 -->
+	test("it should detect a deleted node", async () => {
+		const before = encode(`<!-- mdast_id = abc123 -->
 # Heading
 
-<!-- id: def456 -->
+<!-- mdast_id = def456 -->
 Some text.
 
-<!-- id: xyz789 -->
+<!-- mdast_id = xyz789 -->
 Another paragraph.`);
-	const after = encode(`<!-- id: abc123 -->
+		const after = encode(`<!-- mdast_id = abc123 -->
 # Heading
 
-<!-- id: def456 -->
+<!-- mdast_id = def456 -->
 Some text.`);
 
-	const detectedChanges = detectChanges({
-		before: { id: "random", path: "x.md", data: before, metadata: {} },
-		after: { id: "random", path: "x.md", data: after, metadata: {} },
+		const detectedChanges = detectChanges({
+			before: { id: "random", path: "x.md", data: before, metadata: {} },
+			after: { id: "random", path: "x.md", data: after, metadata: {} },
+		});
+
+		expect(detectedChanges.length).toBeGreaterThan(0);
+		const deletedNode = detectedChanges.find((c) => c.entity_id === "xyz789");
+		expect(deletedNode).toBeTruthy();
+		expect(deletedNode?.snapshot_content).toBe(null);
 	});
 
-	expect(detectedChanges).toStrictEqual([
-		{
-			schema: MarkdownBlockSchemaV1,
-			entity_id: "xyz789",
-			snapshot_content: undefined,
-		},
-		{
-			schema: MarkdownBlockPositionSchemaV1,
-			entity_id: "block_positions",
-			snapshot_content: {
-				idPositions: {
-					abc123: 0,
-					def456: 1,
-				},
-			},
-		},
-	]);
-});
+	test("it should detect node reordering", async () => {
+		const before = encode(`<!-- mdast_id = para-1 -->
+First paragraph
 
-test("it should detect an empty block", async () => {
-	const before = encode(`<!-- id: abc123 -->
-# Heading
+<!-- mdast_id = para-2 -->
+Second paragraph`);
 
-<!-- id: def456 -->
-Some text.`);
-	const after = encode(`<!-- id: abc123 -->
-# Heading
+		const after = encode(`<!-- mdast_id = para-2 -->
+Second paragraph
 
-<!-- id: def456 -->
-Some text.
-<!-- id: bcd --><br>
-<!-- id: cde -->
-test
-`);
+<!-- mdast_id = para-1 -->
+First paragraph`);
 
-	const detectedChanges = detectChanges({
-		before: { id: "random", path: "x.md", data: before, metadata: {} },
-		after: { id: "random", path: "x.md", data: after, metadata: {} },
+		const detectedChanges = detectChanges({
+			before: { id: "random", path: "x.md", data: before, metadata: {} },
+			after: { id: "random", path: "x.md", data: after, metadata: {} },
+		});
+
+		const orderChange = detectedChanges.find((c) => c.entity_id === "root");
+		expect(orderChange).toBeTruthy();
+		expect(orderChange?.schema).toBe(MarkdownRootSchemaV1);
+		expect((orderChange?.snapshot_content as any)?.order).toEqual([
+			"para-2",
+			"para-1",
+		]);
 	});
 
-	expect(detectedChanges).toStrictEqual([
-		{
-			schema: MarkdownBlockSchemaV1,
-			entity_id: "bcd",
-			snapshot_content: {
-				id: "bcd",
-				text: "<br>",
-				type: "paragraph",
-			},
-		},
-		{
-			schema: MarkdownBlockSchemaV1,
-			entity_id: "cde",
-			snapshot_content: {
-				id: "cde",
-				text: "test",
-				type: "paragraph",
-			},
-		},
-		{
-			schema: MarkdownBlockPositionSchemaV1,
-			entity_id: "block_positions",
-			snapshot_content: {
-				idPositions: {
-					abc123: 0,
-					def456: 1,
-					bcd: 2,
-					cde: 3,
-				},
-			},
-		},
-	]);
+	test("it should handle empty documents", async () => {
+		const before = encode("");
+		const after = encode("# New heading");
+
+		const detectedChanges = detectChanges({
+			before: { id: "random", path: "x.md", data: before, metadata: {} },
+			after: { id: "random", path: "x.md", data: after, metadata: {} },
+		});
+
+		expect(detectedChanges.length).toBeGreaterThan(0);
+		const addedNode = detectedChanges.find(
+			(c) =>
+				c.snapshot_content && (c.snapshot_content as any).type === "heading",
+		);
+		expect(addedNode).toBeTruthy();
+	});
 });

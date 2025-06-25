@@ -8,7 +8,13 @@
 
 > **createThread**(`args`): `Promise`\<`object` & `object`\>
 
-Defined in: [packages/lix-sdk/src/thread/create-thread.ts:6](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/thread/create-thread.ts#L6)
+Defined in: [packages/lix-sdk/src/thread/create-thread.ts:19](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/thread/create-thread.ts#L19)
+
+Starts a new discussion thread.
+
+Threads allow collaborators to attach comments to a specific
+version or entity. Initial comments can be provided and will be
+inserted sequentially.
 
 ## Parameters
 
@@ -35,3 +41,9 @@ defaults to global
 ## Returns
 
 `Promise`\<`object` & `object`\>
+
+## Example
+
+```ts
+const thread = await createThread({ lix, comments: [{ body: "Hello" }] })
+```

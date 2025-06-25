@@ -3,8 +3,16 @@ import { openLix } from "./open-lix.js";
 import { newLixFile } from "./new-lix.js";
 
 /**
- * Opens a lix in memory.
+ * Loads a Lix file into a temporary in‑memory database.
  *
+ * The returned instance behaves like {@link openLix} but keeps all
+ * data only for the lifetime of the current JavaScript context. If no
+ * blob is provided a fresh Lix project is created automatically.
+ *
+ * @example
+ * ```ts
+ * const lix = await openLixInMemory({})
+ * ```
  */
 export async function openLixInMemory(
 	args: {

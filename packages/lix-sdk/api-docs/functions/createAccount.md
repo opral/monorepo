@@ -8,7 +8,13 @@
 
 > **createAccount**(`args`): `Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/account/create-account.ts:5](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/account/create-account.ts#L5)
+Defined in: [packages/lix-sdk/src/account/create-account.ts:18](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/account/create-account.ts#L18)
+
+Inserts a new account into the Lix database.
+
+Accounts represent different identities working with the same Lix
+file. Switching the active account is handled separately via
+[switchAccount](switchAccount.md).
 
 ## Parameters
 
@@ -33,3 +39,9 @@ Defined in: [packages/lix-sdk/src/account/create-account.ts:5](https://github.co
 ## Returns
 
 `Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}\>
+
+## Example
+
+```ts
+const account = await createAccount({ lix, name: "Jane" })
+```

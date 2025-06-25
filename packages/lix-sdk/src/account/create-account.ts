@@ -2,6 +2,19 @@ import type { Lix } from "../lix/open-lix.js";
 import type { Account } from "./schema.js";
 import { v7 as uuid_v7 } from "uuid";
 
+/**
+ * Inserts a new account into the Lix database.
+ *
+ * Accounts represent different identities working with the same Lix
+ * file. Switching the active account is handled separately via
+ * {@link switchAccount}.
+ *
+ * @example
+ * ```ts
+ * const account = await createAccount({ lix, name: "Jane" })
+ * ```
+ */
+
 export async function createAccount(args: {
 	lix: Pick<Lix, "db">;
 	id?: Account["id"];

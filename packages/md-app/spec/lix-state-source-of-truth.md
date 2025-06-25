@@ -32,7 +32,7 @@ Plate AST → Markdown String → File → lix-plugin-md → lix entities → li
 **lix-plugin-md:**
 - Parses markdown string into simple blocks (text, type, id)
 - Uses `btoa(markdown) + position` for auto-generated IDs
-- Stores in `state_active.snapshot_content` as JSON
+- Stores in `state.snapshot_content` as JSON
 - Materializes file from entities via `applyChanges()`
 
 ## Proposed Architecture
@@ -591,7 +591,7 @@ export function useLixState(fileId: string) {
     try {
       setIsLoading(true);
       const result = await lix.db
-        .selectFrom('state_active')
+        .selectFrom('state')
         .select(['entity_id', 'snapshot_content'])
         .where('file_id', '=', fileId)
         .where('schema_key', '=', 'lix_plugin_md_block')
@@ -620,7 +620,7 @@ export function useLixState(fileId: string) {
       
       // Delete existing entities
       await lix.db
-        .deleteFrom('state_active')
+        .deleteFrom('state')
         .where('file_id', '=', fileId)
         .where('schema_key', '=', 'lix_plugin_md_block')
         .execute();
@@ -628,7 +628,7 @@ export function useLixState(fileId: string) {
       // Insert new entities
       if (newEntities.length > 0) {
         await lix.db
-          .insertInto('state_active')
+          .insertInto('state')
           .values(
             newEntities.map(entity => ({
               entity_id: entity.id,
@@ -763,7 +763,7 @@ This paragraph has **bold text** and [a link](https://example.com).`;
   }).execute();
 
   // Mutate heading entity using enhanced AST schema
-  await lix.db.updateTable("state_active")
+  await lix.db.updateTable("state_all")
     .set({
       snapshot_content: JSON.stringify({
         id: "V1StGXR8_Z",
@@ -777,7 +777,7 @@ This paragraph has **bold text** and [a link](https://example.com).`;
     .execute();
 
   // Mutate paragraph entity
-  await lix.db.updateTable("state_active")
+  await lix.db.updateTable("state_all")
     .set({
       snapshot_content: JSON.stringify({
         id: "3BqYGqeRws",
@@ -804,7 +804,7 @@ This paragraph has **bold text** and [a link](https://example.com).`;
   
   // Verify Plate editor would load with correct IDs
   const entities = await lix.db
-    .selectFrom("state_active")
+    .selectFrom("state_all")
     .where("file_id", "=", "file1")
     .where("schema_key", "=", "lix_plugin_md_block")
     .select(["entity_id", "snapshot_content"])

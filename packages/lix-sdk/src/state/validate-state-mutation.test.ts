@@ -181,7 +181,7 @@ test("throws when primary key violates uniqueness constraint", async () => {
 
 	// Insert first user into state
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -239,7 +239,7 @@ test("handles composite primary keys", async () => {
 
 	// Insert first user-role into state
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "user_role1",
 			file_id: "file1",
@@ -359,7 +359,7 @@ test("throws when single field unique constraint is violated", async () => {
 
 	// Insert first user into state
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -450,7 +450,7 @@ test("handles composite unique constraints", async () => {
 
 	// Insert first product into state
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "product1",
 			file_id: "file1",
@@ -586,7 +586,7 @@ test("passes when foreign key references exist", async () => {
 
 	// Insert a user that will be referenced
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -751,7 +751,7 @@ test("handles multiple foreign keys", async () => {
 
 	// Insert referenced entities
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values([
 			{
 				entity_id: "user1",
@@ -1000,7 +1000,7 @@ test("allows updates with same primary key", async () => {
 
 	// Insert initial user
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -1061,7 +1061,7 @@ test("unique constraints are validated per version, not globally", async () => {
 	});
 	// Insert file with path "/app.js" in version1
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "file1",
 			file_id: "file1",
@@ -1244,7 +1244,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 
 	// Insert a user that will be referenced
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -1261,7 +1261,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 
 	// Insert a post that references the user
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "post1",
 			file_id: "file1",
@@ -1321,7 +1321,7 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 
 	// Insert a user with no references
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "user1",
 			file_id: "file1",
@@ -1626,7 +1626,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 
 	// Create a user in version A
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "user-1",
 			schema_key: "mock_user",
@@ -1660,7 +1660,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 
 	// Verify that user-1 indeed doesn't exist in version B's context
 	const userInVersionB = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "user-1")
 		.where("schema_key", "=", "mock_user")
 		.where("version_id", "=", versionB.id)
@@ -1671,7 +1671,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 
 	// But verify it does exist in version A
 	const userInVersionA = await lix.db
-		.selectFrom("state")
+		.selectFrom("state_all")
 		.where("entity_id", "=", "user-1")
 		.where("schema_key", "=", "mock_user")
 		.where("version_id", "=", versionA.id)
@@ -1718,7 +1718,7 @@ test("should allow self-referential foreign keys", async () => {
 
 	// Insert a parent version first (with null inheritance)
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "version0",
 			file_id: "file1",
@@ -1817,7 +1817,7 @@ test("should allow self-referential foreign keys for update operations", async (
 
 	// Insert initial versions
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values([
 			{
 				entity_id: "version0",
@@ -1918,7 +1918,7 @@ test("should prevent deletion when self-referential foreign keys reference the e
 
 	// Insert parent and child versions
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values([
 			{
 				entity_id: "version0",

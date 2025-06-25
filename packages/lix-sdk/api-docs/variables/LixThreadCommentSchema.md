@@ -8,7 +8,7 @@
 
 > `const` **LixThreadCommentSchema**: `object`
 
-Defined in: [packages/lix-sdk/src/thread/schema.ts:53](https://github.com/opral/monorepo/blob/f6145848c50035d05b8b3729072a23a67228ebc3/packages/lix-sdk/src/thread/schema.ts#L53)
+Defined in: [packages/lix-sdk/src/thread/schema.ts:53](https://github.com/opral/monorepo/blob/e71bdb871680205b7a92b34085dd7fe79344e0d0/packages/lix-sdk/src/thread/schema.ts#L53)
 
 ## Type declaration
 

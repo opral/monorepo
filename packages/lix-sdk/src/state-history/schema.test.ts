@@ -29,7 +29,7 @@ test("query current state at head of version lineage", async () => {
 
 	// Insert initial state (defaults to active version)
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -85,7 +85,7 @@ test("query state at specific depth in history", async () => {
 
 	// Insert and modify entity multiple times
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -98,13 +98,13 @@ test("query state at specific depth in history", async () => {
 		.execute();
 
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "value1" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "value2" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -208,7 +208,7 @@ test("query state at checkpoint using createCheckpoint API", async () => {
 
 	// Insert initial state
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -259,7 +259,7 @@ test("diff detection between current and checkpoint state", async () => {
 
 	// Insert entity
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -276,7 +276,7 @@ test("diff detection between current and checkpoint state", async () => {
 
 	// Modify the same entity after checkpoint
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "modified" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -338,7 +338,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 
 	// Insert entity
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -355,7 +355,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 
 	// Delete entity
 	await lix.db
-		.deleteFrom("state")
+		.deleteFrom("state_all")
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
@@ -414,7 +414,7 @@ test("insertion diff - entity exists current but not at checkpoint", async () =>
 
 	// Insert entity after checkpoint
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -479,7 +479,7 @@ test("blame functionality - track entity changes over time", async () => {
 
 	// Simulate multiple edits by different authors
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -492,13 +492,13 @@ test("blame functionality - track entity changes over time", async () => {
 		.execute();
 
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "bob's revision", author: "bob" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "charlie's final", author: "charlie" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -556,7 +556,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 
 	// Insert initial entity
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
@@ -573,7 +573,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 
 	// Modify and create second checkpoint
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "checkpoint 2 content" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -582,7 +582,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 
 	// Modify for current working state
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "working content" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
@@ -648,7 +648,7 @@ test("query history between two change sets using ancestor/descendant filters", 
 
 	// Create a series of checkpoints with entity changes
 	await lix.db
-		.insertInto("state")
+		.insertInto("state_all")
 		.values({
 			entity_id: "tracked-entity",
 			file_id: "f0",
@@ -664,7 +664,7 @@ test("query history between two change sets using ancestor/descendant filters", 
 
 	// Modify and create checkpoint 2
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "checkpoint 2 content" } })
 		.where("entity_id", "=", "tracked-entity")
 		.execute();
@@ -673,7 +673,7 @@ test("query history between two change sets using ancestor/descendant filters", 
 
 	// Modify and create checkpoint 3
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "checkpoint 3 content" } })
 		.where("entity_id", "=", "tracked-entity")
 		.execute();
@@ -682,7 +682,7 @@ test("query history between two change sets using ancestor/descendant filters", 
 
 	// Modify and create checkpoint 4
 	await lix.db
-		.updateTable("state")
+		.updateTable("state_all")
 		.set({ snapshot_content: { value: "checkpoint 4 content" } })
 		.where("entity_id", "=", "tracked-entity")
 		.execute();
@@ -747,7 +747,7 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 
 	// Create initial entity
 	await lix.db
-		.insertInto("state_active")
+		.insertInto("state")
 		.values({
 			entity_id: "test-entity",
 			file_id: "f0",
@@ -768,7 +768,7 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 
 	// Update entity to value1
 	await lix.db
-		.updateTable("state_active")
+		.updateTable("state")
 		.set({ snapshot_content: { value: "value1" } })
 		.where("entity_id", "=", "test-entity")
 		.execute();
@@ -782,7 +782,7 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 
 	// Update entity to value2
 	await lix.db
-		.updateTable("state_active")
+		.updateTable("state")
 		.set({ snapshot_content: { value: "value2" } })
 		.where("entity_id", "=", "test-entity")
 		.execute();

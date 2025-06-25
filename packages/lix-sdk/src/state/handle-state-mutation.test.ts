@@ -133,7 +133,7 @@ test("should throw error when version_id is null", async () => {
 	// Try to insert state with null version_id - should throw
 	await expect(
 		lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "test_entity",
 				schema_key: "lix_key_value",
@@ -155,7 +155,7 @@ test("should throw error when version_id does not exist", async () => {
 	// Try to insert state with non-existent version_id - should throw
 	await expect(
 		lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "test_entity",
 				schema_key: "lix_key_value",

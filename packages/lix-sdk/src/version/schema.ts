@@ -29,6 +29,7 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 			name: () => humanId(),
 			working_change_set_id: () => nanoid(),
 			inherits_from_version_id: () => "global",
+			hidden: () => false,
 		},
 	});
 
@@ -69,6 +70,7 @@ export const LixVersionSchema = {
 			type: ["string", "null"],
 			"x-lix-generated": true,
 		},
+		hidden: { type: "boolean", "x-lix-generated": true },
 	},
 	required: ["id", "name", "change_set_id", "working_change_set_id"],
 	additionalProperties: false,

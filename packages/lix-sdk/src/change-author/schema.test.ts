@@ -74,7 +74,7 @@ describe("change_author", () => {
 
 		// After delete, there should be no state records for the change_author
 		const allStates = await lix.db
-			.selectFrom("state")
+			.selectFrom("state_all")
 			.where("schema_key", "=", "lix_change_author")
 			.selectAll()
 			.execute();

@@ -2,8 +2,10 @@ import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import type { UiDiffComponentProps } from "@lix-js/sdk";
 import { diffLines } from "diff";
-import { MarkdownBlockPositionSchemaV1 } from "./schemas/blockPositions.js";
-import { MarkdownBlockSchemaV1 } from "./schemas/blocks.js";
+import { MarkdownRootSchemaV1 } from "./schemas/root.js";
+import { MarkdownNodeSchemaV1 } from "./schemas/nodes.js";
+import { serializeMarkdown } from "./utilities/serializeMarkdown.js";
+import type { MdAstNode } from "./utilities/parseMarkdown.js";
 
 export class DiffComponent extends LitElement {
 	static override styles = css`
@@ -75,20 +77,26 @@ export class DiffComponent extends LitElement {
 
 	override render() {
 		const orderDiff = this.diffs.find(
-			(diff) => diff.schema_key === MarkdownBlockPositionSchemaV1["x-lix-key"],
+			(diff) => diff.schema_key === MarkdownRootSchemaV1["x-lix-key"],
 		);
-		if (orderDiff === undefined) return html`<div>No order diff found</div>`;
 
 		const contentDiffs = this.diffs
-			.filter((diff) => diff.schema_key === MarkdownBlockSchemaV1["x-lix-key"])
+			.filter((diff) => diff.schema_key === MarkdownNodeSchemaV1["x-lix-key"])
 			.sort((a, b) => {
-				const posA = orderDiff.snapshot_content_after?.idPositions[a.entity_id]
-					? orderDiff.snapshot_content_after?.idPositions[a.entity_id]
-					: orderDiff.snapshot_content_before?.idPositions[a.entity_id];
-				const posB = orderDiff.snapshot_content_after?.idPositions[b.entity_id]
-					? orderDiff.snapshot_content_after?.idPositions[b.entity_id]
-					: orderDiff.snapshot_content_before?.idPositions[b.entity_id];
-				return posA - posB;
+				// Sort by position in order array if available
+				if (orderDiff?.snapshot_content_after?.order) {
+					const posA = orderDiff.snapshot_content_after.order.indexOf(
+						a.entity_id,
+					);
+					const posB = orderDiff.snapshot_content_after.order.indexOf(
+						b.entity_id,
+					);
+					if (posA !== -1 && posB !== -1) {
+						return posA - posB;
+					}
+				}
+				// Fall back to entity_id comparison
+				return a.entity_id.localeCompare(b.entity_id);
 			});
 
 		return html`
@@ -99,14 +107,9 @@ export class DiffComponent extends LitElement {
 	}
 
 	renderDiff(diff: UiDiffComponentProps["diffs"][0]) {
-		const before =
-			diff.snapshot_content_before?.text ||
-			JSON.stringify(diff.snapshot_content_before?.idPositions) ||
-			"";
-		const after =
-			diff.snapshot_content_after?.text ||
-			JSON.stringify(diff.snapshot_content_after?.idPositions) ||
-			"";
+		// Convert MD-AST nodes to readable markdown for diff display
+		const before = this.getNodeContent(diff.snapshot_content_before);
+		const after = this.getNodeContent(diff.snapshot_content_after);
 		const lineDiffs = diffLines(before, after);
 
 		// Track left and right columns
@@ -155,5 +158,31 @@ export class DiffComponent extends LitElement {
 				<div class="column">${rightColumn}</div>
 			</div>
 		`;
+	}
+
+	private getNodeContent(node: any): string {
+		if (!node) return "";
+
+		// Handle root order changes
+		if (node.order) {
+			return `Order: [${node.order.join(", ")}]`;
+		}
+
+		// Handle MD-AST nodes - serialize them to markdown
+		if (node.type && node.mdast_id) {
+			try {
+				const tempAst = {
+					type: "root" as const,
+					children: [node as MdAstNode],
+				};
+				return serializeMarkdown(tempAst, { skip_id_comments: true }).trim();
+			} catch {
+				// Fallback to JSON representation
+				return JSON.stringify(node, null, 2);
+			}
+		}
+
+		// Fallback for other content
+		return typeof node === "string" ? node : JSON.stringify(node, null, 2);
 	}
 }

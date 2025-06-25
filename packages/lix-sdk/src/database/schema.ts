@@ -73,7 +73,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 
 export type LixDatabaseSchema = {
 	state: StateView;
-	state_active: StateView;
+	state_all: StateView;
 	state_history: StateHistoryView;
 	// account
 	active_account: ActiveAccountTable;

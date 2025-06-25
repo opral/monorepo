@@ -70,7 +70,7 @@ export type EntityViews<
  * Creates SQL views and CRUD triggers for an entity based on its schema definition.
  *
  * This function automatically generates three views:
- * - Primary view (e.g., "key_value") - uses state_active (active version only)
+ * - Primary view (e.g., "key_value") - uses state (active version only)
  * - All view (e.g., "key_value_all") - uses state (all versions)
  * - History view (e.g., "key_value_history") - uses state_history (historical states)
  *
@@ -120,7 +120,7 @@ export function createEntityViewsIfNotExists(args: {
 	/** Object mapping property names to functions that generate default values */
 	defaultValues?: Record<
 		string,
-		(() => string) | ((row: Record<string, any>) => string)
+		(() => any) | ((row: Record<string, any>) => any)
 	>;
 	/** Custom validation logic for entity operations */
 	validation?: ValidationCallbacks;

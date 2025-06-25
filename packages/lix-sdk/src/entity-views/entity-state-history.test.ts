@@ -52,7 +52,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 
 		// Insert some test data into state to create history
 		await lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "test_id",
 				schema_key: "test_entity",
@@ -115,7 +115,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 
 		// Insert test data
 		await lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "test_id",
 				schema_key: "test_entity",
@@ -182,7 +182,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 
 		// Insert initial state
 		await lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "tracked_entity",
 				schema_key: "test_entity",
@@ -196,7 +196,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 
 		// Update to create history
 		await lix.db
-			.updateTable("state")
+			.updateTable("state_all")
 			.set({
 				snapshot_content: { id: "tracked_entity", name: "updated", value: 2 },
 			})
@@ -205,7 +205,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 
 		// Update again to create more history
 		await lix.db
-			.updateTable("state")
+			.updateTable("state_all")
 			.set({
 				snapshot_content: { id: "tracked_entity", name: "final", value: 3 },
 			})
@@ -272,7 +272,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 
 		// Insert some data directly into state for testing UPDATE/DELETE
 		await lix.db
-			.insertInto("state")
+			.insertInto("state_all")
 			.values({
 				entity_id: "test_id",
 				schema_key: "test_entity",

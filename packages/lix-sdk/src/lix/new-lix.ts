@@ -28,10 +28,18 @@ import type { Change } from "../change/schema.js";
 import type { StoredSchema } from "../stored-schema/schema.js";
 
 /**
- * Creates a new lix file.
+ * Returns a new empty Lix file as a {@link Blob}.
  *
- * The app is responsible for saving the project "whereever"
- * e.g. the user's computer, cloud storage, or OPFS in the browser.
+ * The function bootstraps an in‑memory SQLite database with all
+ * required tables, change sets and metadata so that it represents
+ * a valid Lix project. The caller is responsible for persisting the
+ * resulting blob to disk, IndexedDB or any other storage location.
+ *
+ * @example
+ * ```ts
+ * const blob = await newLixFile()
+ * await saveToDisk(blob)
+ * ```
  */
 export async function newLixFile(): Promise<Blob> {
 	const sqlite = await createInMemoryDatabase({
@@ -145,6 +153,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 			name: "global",
 			change_set_id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
 			working_change_set_id: INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
+			hidden: true,
 		} satisfies Version,
 		created_at,
 	});
@@ -163,6 +172,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 			change_set_id: INITIAL_CHANGE_SET_ID,
 			working_change_set_id: INITIAL_WORKING_CHANGE_SET_ID,
 			inherits_from_version_id: "global",
+			hidden: false,
 		} satisfies Version,
 		created_at,
 	});
