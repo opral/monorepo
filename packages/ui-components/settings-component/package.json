@@ -36,6 +36,7 @@
 		"@nx/storybook": "^18.0.4",
 		"@opral/tsconfig": "workspace:*",
 		"@rollup/plugin-commonjs": "^25.0.7",
+		"@rollup/plugin-json": "^6.1.0",
 		"@rollup/plugin-node-resolve": "^15.2.3",
 		"@storybook/addon-essentials": "^8.6.12",
 		"@storybook/addon-links": "^8.6.12",
