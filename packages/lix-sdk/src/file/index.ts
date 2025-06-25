@@ -1,1 +1,1 @@
-export * from "./schema.js";
+export { LixFileSchema, type LixFile } from "./schema.js";
