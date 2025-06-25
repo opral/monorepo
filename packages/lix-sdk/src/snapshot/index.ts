@@ -1,3 +1,2 @@
-export { mockJsonSnapshot } from "./mock-json-snapshot.js";
 export { createSnapshot } from "./create-snapshot.js";
-export * from "./schema.js";
+export { LixSnapshotSchema, type Snapshot } from "./schema.js";

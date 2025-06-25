@@ -6,17 +6,24 @@ import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { NewChange, Snapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { resolveChangeConflictBySelecting } from "./resolve-conflict-by-selecting.js";
 
 test.skip("it should resolve a conflict and apply the changes", async () => {
 	const mockSnapshots: Snapshot[] = [
-		mockJsonSnapshot({
+		{
 			id: "value1",
-		}),
-		mockJsonSnapshot({
+			content: {
+				key: "test-key-1",
+				value: "test-value-1",
+			},
+		},
+		{
 			id: "value2",
-		}),
+			content: {
+				key: "test-key-2",
+				value: "test-value-2",
+			},
+		},
 	];
 
 	const mockChanges: NewChange[] = [

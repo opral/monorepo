@@ -1,6 +1,5 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-import { INITIAL_VERSION_ID } from "./schema.js";
 import { createVersion } from "./create-version.js";
 
 test("insert, update, delete on the version view", async () => {
@@ -225,7 +224,15 @@ test("applying the schema should set the initial active version to 'main'", asyn
 		.selectAll()
 		.executeTakeFirst();
 	expect(activeVersion).toBeDefined();
-	expect(activeVersion?.version_id).toBe(INITIAL_VERSION_ID);
+	
+	// Verify the active version points to the main version
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirst();
+	expect(mainVersion).toBeDefined();
+	expect(activeVersion?.version_id).toBe(mainVersion?.id);
 });
 
 test("should use default id and name if not provided", async () => {
