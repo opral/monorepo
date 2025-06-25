@@ -558,9 +558,89 @@ function validateDeletionConstraints(args: {
 			});
 
 			if (referencingEntities.length > 0) {
-				throw new Error(
-					`Foreign key constraint violation: Cannot delete entity because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}' via foreign key '${localProperty}'`
-				);
+				// Helper function to truncate property values
+				const truncateValue = (value: any, maxLength: number = 40): string => {
+					const str = typeof value === "string" ? value : JSON.stringify(value);
+					return str.length > maxLength
+						? str.substring(0, maxLength - 3) + "..."
+						: str;
+				};
+
+				// Get the entity being deleted for display
+				const rawContent = currentEntity[0].snapshot_content;
+				const entityContent =
+					typeof rawContent === "string"
+						? JSON.parse(rawContent)
+						: (rawContent as any);
+
+				// Get a sample referencing entity for display
+				const sampleReferencingEntity = executeSync({
+					lix: args.lix,
+					query: args.lix.db
+						.selectFrom("state_all")
+						.selectAll()
+						.where("schema_key", "=", schema["x-lix-key"])
+						.where("version_id", "=", args.version_id)
+						.where(
+							sql`json_extract(snapshot_content, '$.' || ${localProperty})`,
+							"=",
+							referencedValue
+						)
+						.limit(1),
+				});
+
+				let errorMessage = `Foreign key constraint violation: Cannot delete entity '${args.entity_id}' from schema '${args.schema["x-lix-key"]}' because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}'.`;
+
+				// Add relationship visualization
+				errorMessage += `\n\nForeign Key Relationship:\n`;
+				errorMessage += `  ${schema["x-lix-key"]}.${localProperty} → ${args.schema["x-lix-key"]}.${foreignKeyDef.property}\n`;
+
+				// Show entity being deleted
+				errorMessage += `\nEntity Being Deleted (${args.schema["x-lix-key"]}):\n`;
+				errorMessage += `┌─────────────────┬──────────────────────────────────────────┐\n`;
+				errorMessage += `│ Property        │ Value                                    │\n`;
+				errorMessage += `├─────────────────┼──────────────────────────────────────────┤\n`;
+				
+				// Show key properties of the entity being deleted
+				const entityKeys = Object.keys(entityContent).slice(0, 3); // Show first 3 properties
+				for (const key of entityKeys) {
+					const displayKey = key.substring(0, 15).padEnd(15);
+					const displayValue = truncateValue(entityContent[key], 40).padEnd(40);
+					errorMessage += `│ ${displayKey} │ ${displayValue} │\n`;
+				}
+				errorMessage += `└─────────────────┴──────────────────────────────────────────┘\n`;
+
+				// Show sample referencing record
+				if (sampleReferencingEntity.length > 0) {
+					const referencingContent = typeof sampleReferencingEntity[0].snapshot_content === "string"
+						? JSON.parse(sampleReferencingEntity[0].snapshot_content)
+						: sampleReferencingEntity[0].snapshot_content;
+
+					errorMessage += `\nReferencing Records (${schema["x-lix-key"]}):\n`;
+					errorMessage += `┌─────────────────┬──────────────────────────────────────────┐\n`;
+					errorMessage += `│ Property        │ Value                                    │\n`;
+					errorMessage += `├─────────────────┼──────────────────────────────────────────┤\n`;
+					
+					// Show the foreign key property and a few other key properties
+					const refKeys = [localProperty, ...Object.keys(referencingContent).filter(k => k !== localProperty).slice(0, 2)];
+					for (const key of refKeys) {
+						const displayKey = key.substring(0, 15).padEnd(15);
+						const displayValue = truncateValue(referencingContent[key], 40).padEnd(40);
+						errorMessage += `│ ${displayKey} │ ${displayValue} │\n`;
+					}
+					errorMessage += `└─────────────────┴──────────────────────────────────────────┘\n`;
+
+					if (referencingEntities.length > 1) {
+						errorMessage += `\n(${referencingEntities.length - 1} additional referencing record(s) not shown)\n`;
+					}
+				}
+
+				// Add resolution guidance
+				errorMessage += `\nTo resolve this constraint violation:\n`;
+				errorMessage += `• Delete or update the referencing records first\n`;
+				errorMessage += `• Or modify the foreign key constraint to CASCADE deletes`;
+
+				throw new Error(errorMessage);
 			}
 		}
 	}

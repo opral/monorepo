@@ -1288,7 +1288,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 			version_id: activeVersion.version_id,
 		})
 	).toThrowError(
-		/Foreign key constraint violation.*referenced by.*post.*author_id/i
+		/Foreign key constraint violation.*Cannot delete entity.*referenced by.*post/i
 	);
 });
 
@@ -1960,7 +1960,7 @@ test("should prevent deletion when self-referential foreign keys reference the e
 			version_id: activeVersion.version_id,
 		})
 	).toThrowError(
-		/Foreign key constraint violation.*referenced by.*mock_version.*inherits_from_version_id/
+		/Foreign key constraint violation.*Cannot delete entity.*referenced by.*mock_version/i
 	);
 
 	// This should pass - can delete version1 (no other versions reference it)
