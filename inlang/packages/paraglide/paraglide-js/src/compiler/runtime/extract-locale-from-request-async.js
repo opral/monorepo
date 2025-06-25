@@ -41,8 +41,10 @@ export const extractLocaleFromRequestAsync = async (request) => {
 	for (const strat of strategy) {
 		if (isCustomStrategy(strat) && customServerStrategies.has(strat)) {
 			const handler = customServerStrategies.get(strat);
-			/** @type {string|undefined} */
-			locale = await handler.getLocale(request);
+			if (handler) {
+				/** @type {string|undefined} */
+				locale = await handler.getLocale(request);
+			}
 
 			// If we got a valid locale from this custom strategy, use it
 			if (locale !== undefined && isLocale(locale)) {
