@@ -1,15 +1,33 @@
 import {
-	Version,
 	openLixInMemory,
 	Account,
 	switchAccount,
 	Lix,
+	Version,
 } from "@lix-js/sdk";
 import { atom } from "jotai";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
+import { plugin as txtPlugin } from "@lix-js/plugin-txt";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { lixCsvDemoFile } from "./helper/demo-lix-file/demo-lix-file.ts";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
+import { initLixInspector } from "@lix-js/inspector";
+
+// plugin, file and app configuration (add supported apps to list in lix-website-server)
+export const supportedFileTypes = [
+	{
+		plugin: csvPlugin,
+		extension: ".csv",
+		route: "/csv/editor",
+		appName: "CSV app",
+	},
+	{
+		plugin: txtPlugin,
+		extension: ".md",
+		route: "/flashtype",
+		appName: "Flashtype",
+	},
+];
 
 export const fileIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
@@ -20,13 +38,13 @@ export const fileIdSearchParamsAtom = atom((get) => {
 export const lixIdSearchParamsAtom = atom((get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("l") || undefined;
+	return searchParams.get("lix") || undefined;
 });
 
-export const discussionSearchParamsAtom = atom(async (get) => {
+export const threadSearchParamsAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const searchParams = new URL(window.location.href).searchParams;
-	return searchParams.get("d");
+	return searchParams.get("t");
 });
 
 export const availableLixFilesInOpfsAtom = atom(async (get) => {
@@ -64,7 +82,7 @@ export const lixAtom = atom(async (get) => {
 					new Request(
 						import.meta.env.PROD
 							? "https://lix.host/lsp/get-v1"
-							: "http://localhost:3000/lsp/get-v1",
+							: "http://localhost:3005/lsp/get-v1",
 						{
 							method: "POST",
 							headers: {
@@ -78,7 +96,7 @@ export const lixAtom = atom(async (get) => {
 					const blob = await response.blob();
 					const lix = await openLixInMemory({
 						blob,
-						providePlugins: [csvPlugin],
+						providePlugins: supportedFileTypes.map((type) => type.plugin),
 					});
 					await saveLixToOpfs({ lix });
 					return lix;
@@ -116,13 +134,13 @@ export const lixAtom = atom(async (get) => {
 		if (storedActiveAccount) {
 			lix = await openLixInMemory({
 				blob: lixBlob!,
-				providePlugins: [csvPlugin],
+				providePlugins: supportedFileTypes.map((type) => type.plugin),
 				account: JSON.parse(storedActiveAccount),
 			});
 		} else {
 			lix = await openLixInMemory({
 				blob: lixBlob!,
-				providePlugins: [csvPlugin],
+				providePlugins: supportedFileTypes.map((type) => type.plugin),
 			});
 		}
 	} catch {
@@ -144,7 +162,6 @@ export const lixAtom = atom(async (get) => {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-
 	if (storedActiveAccount) {
 		const activeAccount = JSON.parse(storedActiveAccount);
 		await switchActiveAccount(lix, activeAccount);
@@ -153,29 +170,36 @@ export const lixAtom = atom(async (get) => {
 	// TODO use env varibale
 	// const serverUrl = import.meta.env.PROD
 	// ? "https://lix.host"
-	// : "http://localhost:3000";
-	const serverUrl = import.meta.env.PROD
-		? "https://lix.host"
-		: "http://localhost:3000";
+	// : "http://localhost:3005";
+	// const serverUrl = import.meta.env.PROD
+	// 	? "https://lix.host"
+	// 	: "http://localhost:3005";
 
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_server_url",
-			value: serverUrl,
-		})
-		.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
-		.execute();
+	// await lix.db
+	// 	.insertInto("key_value")
+	// 	.values({
+	// 		key: "lix_server_url",
+	// 		value: serverUrl,
+	// 	})
+	// 	.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
+	// 	.execute();
 
 	await saveLixToOpfs({ lix });
 
 	// mismatch in id, load correct url
 	if (lixId.value !== lixIdSearchParam) {
 		const url = new URL(window.location.href);
-		url.searchParams.set("l", lixId.value);
+		url.searchParams.set("lix", lixId.value);
 		// need to use window.location because react router complains otherwise
 		window.location.href = url.toString();
 	}
+
+	await initLixInspector({
+		lix,
+		show: localStorage.getItem("lix-inspector:show")
+			? localStorage.getItem("lix-inspector:show") === "true"
+			: import.meta.env.DEV,
+	});
 
 	return lix;
 });
@@ -187,18 +211,18 @@ export const lixAtom = atom(async (get) => {
  */
 export const withPollingAtom = atom(Date.now());
 
-export const currentVersionAtom = atom<Promise<Version | null>>(async (get) => {
+export const activeVersionAtom = atom<Promise<Version | null>>(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	if (!lix) return null;
 
-	const currentVersion = await lix.db
-		.selectFrom("current_version")
-		.innerJoin("version", "version.id", "current_version.id")
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
 		.selectAll("version")
 		.executeTakeFirstOrThrow();
 
-	return currentVersion;
+	return activeVersion;
 });
 
 export const existingVersionsAtom = atom(async (get) => {
@@ -222,7 +246,7 @@ export const activeAccountAtom = atom(async (get) => {
 
 	return await lix.db
 		.selectFrom("active_account")
-		.selectAll("active_account")
+		.selectAll()
 		// assuming only one account active at a time
 		.executeTakeFirstOrThrow();
 });

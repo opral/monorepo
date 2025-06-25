@@ -6,17 +6,17 @@
 
 # Function: changeHasLabel()
 
-> **changeHasLabel**(`name`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
+> **changeHasLabel**(`label`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-has-label.ts:25](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-has-label.ts#L25)
+Defined in: [packages/lix-sdk/src/query-filter/change-has-label.ts:25](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/query-filter/change-has-label.ts#L25)
 
 Selects changes that have a label with the given name.
 
 ## Parameters
 
-### name
+### label
 
-`string`
+\{ `id`: `string`; `name?`: `string`; \} | \{ `id?`: `string`; `name`: `string`; \}
 
 ## Returns
 
@@ -36,7 +36,7 @@ Selects changes that have a label with the given name.
 
 ```ts
   await lix.db.selectFrom("change")
-     .where(changeHasLabel("checkpoint"))
+     .where(changeHasLabel({ name: "checkpoint" }))
      .selectAll()
      .execute();
   ```
@@ -45,7 +45,7 @@ You can use eb.not() to negate the filter.
 
   ```ts
   await lix.db.selectFrom("change")
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint"})))
 		.selectAll()
 		.execute();
   ```

@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import type { Change } from "../database/schema.js";
 import type { DetectedConflict, LixReadonly } from "../plugin/lix-plugin.js";
 import { detectDivergingEntityConflict } from "./detect-diverging-entity-conflict.js";

@@ -1,4 +1,8 @@
-import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
+import type {
+	DetectedChange,
+	FromLixSchemaDefinition,
+	LixPlugin,
+} from "@lix-js/sdk";
 import { CellSchemaV1 } from "./schemas/cell.js";
 import { HeaderSchemaV1 } from "./schemas/header.js";
 import { parseCsv } from "./utilities/parseCsv.js";
@@ -11,14 +15,13 @@ function toEntityId(rowId: string, columnName: string) {
 	return rowId + "|" + columnName;
 }
 
-// @ts-expect-error - possibly too recursive inference
-export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
+export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
 	after,
 }) => {
 	// heuristic can be improved later by deriving a unique column
-	const uniqueColumnBefore = before?.metadata?.unique_column;
-	const uniqueColumnAfter = after?.metadata?.unique_column;
+	const uniqueColumnBefore = before?.metadata?.unique_column as string;
+	const uniqueColumnAfter = after?.metadata?.unique_column as string;
 
 	if (uniqueColumnBefore === undefined && uniqueColumnAfter === undefined) {
 		console.warn("The unique_column metadata is required to detect changes");
@@ -26,7 +29,9 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 	}
 
 	const detectedChanges: DetectedChange<
-		typeof CellSchemaV1 | typeof HeaderSchemaV1 | typeof RowSchemaV1
+		FromLixSchemaDefinition<
+			typeof CellSchemaV1 | typeof HeaderSchemaV1 | typeof RowSchemaV1
+		>
 	>[] = [];
 
 	const beforeParsed = parseCsv(before?.data, uniqueColumnBefore);
@@ -47,7 +52,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 		detectedChanges.push({
 			schema: HeaderSchemaV1,
 			entity_id: "header",
-			snapshot: {
+			snapshot_content: {
 				columnNames: afterParsed.header,
 			},
 		});
@@ -72,10 +77,10 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 			detectedChanges.push({
 				schema: RowSchemaV1,
 				entity_id: rowId,
-				// if the row was deleted, snapshot is undefined
-				snapshot:
+				// if the row was deleted, snapshot is null
+				snapshot_content:
 					rowLineNumberAfter === undefined
-						? undefined
+						? null
 						: { lineNumber: rowLineNumberAfter },
 			});
 		}
@@ -97,7 +102,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 					detectedChanges.push({
 						schema: CellSchemaV1,
 						entity_id,
-						snapshot: { text: afterCell, rowId: rowId },
+						snapshot_content: { text: afterCell, rowId: rowId },
 					});
 				}
 			}
@@ -106,7 +111,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 				detectedChanges.push({
 					schema: CellSchemaV1,
 					entity_id,
-					snapshot: undefined,
+					snapshot_content: null,
 				});
 			}
 			// Cell exists only in after -> insert
@@ -114,7 +119,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = async ({
 				detectedChanges.push({
 					schema: CellSchemaV1,
 					entity_id,
-					snapshot: { text: afterCell, rowId: rowId },
+					snapshot_content: { text: afterCell, rowId: rowId },
 				});
 			}
 		}

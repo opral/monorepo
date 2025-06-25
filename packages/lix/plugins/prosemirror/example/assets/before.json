@@ -1,0 +1,162 @@
+{
+	"type": "doc",
+	"content": [
+		{
+			"type": "title",
+			"attrs": {
+				"dragHandlesDisabled": true,
+				"level": 1,
+				"id": "f052363a-269f-4d68-93e1-dae96bc04c2a"
+			},
+			"content": [
+				{
+					"type": "text",
+					"text": "Example for Lix"
+				}
+			]
+		},
+		{
+			"type": "description",
+			"attrs": {
+				"dragHandlesDisabled": true,
+				"id": "af78574b-e0c7-48e6-9b31-7b9634d1dd1a"
+			},
+			"content": [
+				{
+					"type": "paragraph",
+					"attrs": {
+						"id": "c50f2420-428f-4cd8-a841-d9292ef33976"
+					}
+				}
+			]
+		},
+		{
+			"type": "inputs",
+			"attrs": {
+				"dragHandlesDisabled": true,
+				"id": "INPUTS",
+				"mode": "inputs"
+			},
+			"content": [
+				{
+					"type": "input",
+					"attrs": {
+						"dragHandlesDisabled": true,
+						"label": "my_input",
+						"id": "input_dw1PasbG1elleF3w",
+						"description": "",
+						"type": "longtext",
+						"strictType": {
+							"typeId": "wtString",
+							"constraints": [],
+							"metadata": {
+								"attributes": []
+							}
+						},
+						"variableType": null,
+						"fromTrigger": false
+					}
+				}
+			]
+		},
+		{
+			"type": "horizontalRule",
+			"attrs": {
+				"id": "e56f0bba-12ff-409a-9496-b7294371d962"
+			}
+		},
+		{
+			"type": "paragraph",
+			"attrs": {
+				"id": "9f9babb9-b95b-487a-8618-e44ef0390819"
+			},
+			"content": [
+				{
+					"type": "text",
+					"text": "Here's a simple prompt "
+				},
+				{
+					"type": "mention",
+					"attrs": {
+						"referenceId": "input_dw1PasbG1elleF3w",
+						"path": "input_dw1PasbG1elleF3w",
+						"lastType": "longtext",
+						"lastStrictType": {
+							"typeId": "wtString",
+							"constraints": [],
+							"metadata": {
+								"attributes": []
+							}
+						},
+						"lastLabel": "my_input",
+						"id": "a28983e9-9b72-4322-a809-11bae41027be"
+					}
+				},
+				{
+					"type": "text",
+					"text": " "
+				}
+			]
+		},
+		{
+			"type": "paragraph",
+			"attrs": {
+				"id": "24fb9fd7-e7ba-41c8-aceb-70acb20bdd54"
+			},
+			"content": [
+				{
+					"type": "generation",
+					"attrs": {
+						"id": "gen_U0i3eChqJFG5ZWwS",
+						"label": "generation",
+						"state": "editing",
+						"temperature": 0.5,
+						"effort": "medium",
+						"includeReasoning": false,
+						"model": "gpt-4o",
+						"type": "full",
+						"stopBefore": "[\"\",\"\",\"\",\"\"]",
+						"responseModel": "{}"
+					}
+				}
+			]
+		},
+		{
+			"type": "tool",
+			"attrs": {
+				"id": "tool_lin2fKNgFg4YcGzb",
+				"toolId": "elevenLabs",
+				"includeOutput": "false",
+				"parameters": "{\"voice\":{\"type\":\"literal\",\"value\":\"Will (US male)\"},\"text\":{\"type\":\"variable\",\"value\":\"gen_U0i3eChqJFG5ZWwS\"}}",
+				"label": "Text-to-speech with ElevenLabs",
+				"outputs": "[]",
+				"state": null
+			}
+		},
+		{
+			"type": "paragraph",
+			"attrs": {
+				"id": "a831a0de-b143-45e8-aded-c2e3a7607b05"
+			},
+			"content": [
+				{
+					"type": "mention",
+					"attrs": {
+						"referenceId": "tool_lin2fKNgFg4YcGzb",
+						"path": "tool_lin2fKNgFg4YcGzb.output",
+						"lastType": "audio",
+						"lastStrictType": {
+							"typeId": "wtFile",
+							"constraints": [],
+							"metadata": {
+								"fileType": "audio"
+							}
+						},
+						"lastLabel": "output",
+						"id": "9280e387-1faa-4dab-a3b3-4135da84f7c9"
+					}
+				}
+			]
+		}
+	]
+}

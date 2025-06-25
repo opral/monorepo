@@ -1,81 +1,54 @@
-import type { Version } from "../database/schema.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import type { ChangeSet } from "../change-set/schema.js";
+import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { Version } from "./schema.js";
 
 /**
- * Creates a new Version.
+ * Creates a new version.
  *
- * If `from` is provided, the new version will be identical to the from version.
- *
- * @example
- *   _Without from_
- *
- *   ```ts
- *   const version = await createVersion({ lix });
- *   ```
+ * The changeSet can be any change set e.g. another version, a checkpoint, etc.
  *
  * @example
- *   _With from_
- *
- *   ```ts
- *   const version = await createVersion({ lix, from: otherVersion });
- *   ```
+ *   const version = await createVersion({ lix, changeSet: otherVersion.change_set_id });
  */
 export async function createVersion(args: {
-	lix: Pick<Lix, "db">;
-	from?: Pick<Version, "id">;
+	lix: Lix;
+	id?: Version["id"];
+	changeSet?: Pick<ChangeSet, "id">;
 	name?: Version["name"];
+	inherits_from_version_id?: Version["inherits_from_version_id"];
 }): Promise<Version> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		let query = trx.insertInto("version").returningAll();
+		const workingCs = await createChangeSet({
+			lix: { ...args.lix, db: trx },
+			lixcol_version_id: "global",
+		});
+		const cs =
+			args.changeSet ??
+			(await createChangeSet({
+				lix: { ...args.lix, db: trx },
+				lixcol_version_id: "global",
+			}));
 
-		if (args.name) {
-			query = query.values({ name: args.name });
-		} else {
-			query = query.defaultValues();
-		}
+		const versionId = args.id ?? nanoid();
 
-		const newVersion = await query.executeTakeFirstOrThrow();
+		await trx
+			.insertInto("version")
+			.values({
+				id: versionId,
+				name: args.name,
+				change_set_id: cs.id,
+				working_change_set_id: workingCs.id,
+				inherits_from_version_id: args.inherits_from_version_id ?? "global",
+			})
+			.execute();
 
-		// copy the change pointers from the from Version
-		if (args.from) {
-			await trx
-				.insertInto("version_change")
-				.columns([
-					"version_id",
-					"change_id",
-					"entity_id",
-					"schema_key",
-					"file_id",
-				])
-				.expression((eb) =>
-					eb
-						.selectFrom("version_change")
-						.select([
-							eb.val(newVersion.id).as("version_id"),
-							"change_id",
-							"entity_id",
-							"schema_key",
-							"file_id",
-						])
-						.where("version_id", "=", args.from!.id)
-				)
-				.execute();
-
-			// copy the change conflicts from the from Version
-			await trx
-				.insertInto("version_change_conflict")
-				.columns(["version_id", "change_conflict_id"])
-				.expression((eb) =>
-					eb
-						.selectFrom("version_change_conflict")
-						.select([
-							eb.val(newVersion.id).as("version_id"),
-							"change_conflict_id",
-						])
-						.where("version_id", "=", args.from!.id)
-				)
-				.execute();
-		}
+		const newVersion = await trx
+			.selectFrom("version")
+			.selectAll()
+			.where("id", "=", versionId)
+			.executeTakeFirstOrThrow();
 
 		return newVersion;
 	};

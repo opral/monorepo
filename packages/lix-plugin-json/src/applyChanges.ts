@@ -1,50 +1,35 @@
-import {
-	changeIsLeafOf,
-	type Change,
-	type LixPlugin,
-	type LixReadonly,
-} from "@lix-js/sdk";
+import { type LixPlugin } from "@lix-js/sdk";
 import { JSONPropertySchema } from "./schemas/JSONPropertySchema.js";
-import { unflatten } from "flat";
+import { flatten, unflatten } from "flat";
 
-export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = async ({
-	lix,
-	// _file, - we don't need to apply changes since the leaf changes should be complete
+export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
+	file,
 	changes,
 }) => {
-	// We only apply the leafchanges
-	// - since lix doesn't provide the changes in order
-	// - fetching all snapshots for all changes will become costy
-	// the award for the most inefficient deduplication goes to... (comment by @samuelstroschein)
-	const leafChanges = [
-		...new Set(
-			await Promise.all(
-				changes.map(async (change) => {
-					const leafChange = await lix.db
-						.selectFrom("change")
-						.where(changeIsLeafOf({ id: change.id }))
-						.selectAll()
-						.executeTakeFirst();
-					// enable string comparison to avoid duplicates
-					return JSON.stringify(leafChange);
-				}),
-			),
-		),
-	].map((v) => JSON.parse(v));
+	// Get the current state from the file data
+	let flattened: Record<string, any> = {};
 
-	const flattened: Record<string, any> = {};
+	if (file.data && file.data.length > 0) {
+		try {
+			const parsed = JSON.parse(new TextDecoder().decode(file.data));
+			flattened = flatten(parsed, { safe: true }) as Record<string, any>;
+		} catch (error) {
+			// Handle potential parsing errors if the initial file data isn't valid JSON
+			console.error("Failed to parse existing file data:", error);
+		}
+	}
 
-	for (const change of leafChanges) {
-		if (change.schema_key === JSONPropertySchema.key) {
-			const snapshot = await lix.db
-				.selectFrom("snapshot")
-				.where("id", "=", change.snapshot_id)
-				.selectAll()
-				.executeTakeFirstOrThrow();
-
+	for (const change of changes) {
+		if (change.schema_key === JSONPropertySchema["x-lix-key"]) {
 			const propertyPath = change.entity_id;
 
-			flattened[propertyPath] = snapshot.content?.value;
+			if (change.snapshot_content === null) {
+				// If the content is null, remove the property from the state
+				delete flattened[propertyPath];
+			} else {
+				// Update the current state with the new change content
+				flattened[propertyPath] = change.snapshot_content?.value;
+			}
 		}
 	}
 

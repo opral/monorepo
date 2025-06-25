@@ -10,9 +10,35 @@
 
 # Function: applyAccountDatabaseSchema()
 
-> **applyAccountDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+> **applyAccountDatabaseSchema**(`sqlite`): `void`
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:5](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L5)
+Defined in: [packages/lix-sdk/src/account/schema.ts:11](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/schema.ts#L11)
+
+## Parameters
+
+### sqlite
+
+`SqliteWasmDatabase`
+
+## Returns
+
+`void`
+
+---
+
+## applyChangeDatabaseSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / applyChangeDatabaseSchema
+
+# Function: applyChangeDatabaseSchema()
+
+> **applyChangeDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:4](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L4)
 
 ## Parameters
 
@@ -26,53 +52,89 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:5](https://github.c
 
 ---
 
-## applyChanges
+## applyChangeSet
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / applyChanges
+[@lix-js/sdk](../README.md) / applyChangeSet
 
-# Function: applyChanges()
+# Function: applyChangeSet()
 
-> **applyChanges**(`args`): `Promise`\<`void`\>
+> **applyChangeSet**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/change/apply-changes.ts:24](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change/apply-changes.ts#L24)
+Defined in: [packages/lix-sdk/src/change-set/apply-change-set.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/apply-change-set.ts#L9)
 
-Applies the given changes to the lix.
-
-Calls the `applyChanges` method of the corresponding plugin for each change.
-**Carefull**, the changes are not validated before applying them. It is up to
-the caller to ensure that the changes are valid. Usually, only the leaf changes
-of a given version should be applied.
+Applies a change set to the lix.
 
 ## Parameters
 
 ### args
 
-#### changes
+#### changeSet
 
-`object`[]
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
 
 #### lix
 
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"plugin"`\>
+[`Lix`](../type-aliases/Lix.md)
 
 ## Returns
 
 `Promise`\<`void`\>
 
-## Example
+---
 
-```ts
-  const changes = await lix.db.selectFrom("change")
-     .where(changeIsLeafInVersion(currentVersion))
-     .selectAll()
-     .execute();
+## applyChangeSetDatabaseSchema
 
-  await applyChanges({ lix, changes });
-  ```
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / applyChangeSetDatabaseSchema
+
+# Function: applyChangeSetDatabaseSchema()
+
+> **applyChangeSetDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L9)
+
+## Parameters
+
+### sqlite
+
+`SqliteWasmDatabase`
+
+## Returns
+
+`SqliteWasmDatabase`
+
+---
+
+## applyFileDatabaseSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / applyFileDatabaseSchema
+
+# Function: applyFileDatabaseSchema()
+
+> **applyFileDatabaseSchema**(`lix`): `void`
+
+Defined in: [packages/lix-sdk/src/file/schema.ts:10](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/file/schema.ts#L10)
+
+## Parameters
+
+### lix
+
+`Pick`\<[`Lix`](../type-aliases/Lix.md), `"sqlite"` \| `"db"` \| `"plugin"`\>
+
+## Returns
+
+`void`
 
 ---
 
@@ -86,9 +148,35 @@ of a given version should be applied.
 
 # Function: applyKeyValueDatabaseSchema()
 
-> **applyKeyValueDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+> **applyKeyValueDatabaseSchema**(`sqlite`): `void`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:4](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L4)
+Defined in: [packages/lix-sdk/src/key-value/schema.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/key-value/schema.ts#L9)
+
+## Parameters
+
+### sqlite
+
+`SqliteWasmDatabase`
+
+## Returns
+
+`void`
+
+---
+
+## applyLabelDatabaseSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / applyLabelDatabaseSchema
+
+# Function: applyLabelDatabaseSchema()
+
+> **applyLabelDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+
+Defined in: [packages/lix-sdk/src/label/schema.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/label/schema.ts#L9)
 
 ## Parameters
 
@@ -102,50 +190,107 @@ Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:4](https://github
 
 ---
 
-## changeConflictInVersion
+## applyLogDatabaseSchema
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / changeConflictInVersion
+[@lix-js/sdk](../README.md) / applyLogDatabaseSchema
 
-# Function: changeConflictInVersion()
+# Function: applyLogDatabaseSchema()
 
-> **changeConflictInVersion**(`version`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_conflict"`, `SqlBool`\>
+> **applyLogDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
 
-Defined in: [packages/lix-sdk/src/query-filter/change-conflict-in-version.ts:15](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-conflict-in-version.ts#L15)
-
-Filters if a conflict is in the given version.
+Defined in: [packages/lix-sdk/src/log/schema.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/log/schema.ts#L9)
 
 ## Parameters
 
-### version
+### sqlite
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
+`SqliteWasmDatabase`
 
 ## Returns
 
-> (`eb`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_conflict"`, `SqlBool`\>
+`SqliteWasmDatabase`
 
-### Parameters
+---
 
-#### eb
+## applySnapshotDatabaseSchema
 
-`ExpressionBuilder`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_conflict"`\>
+[**@lix-js/sdk**](../README.md)
 
-### Returns
+***
 
-`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_conflict"`, `SqlBool`\>
+[@lix-js/sdk](../README.md) / applySnapshotDatabaseSchema
 
-## Example
+# Function: applySnapshotDatabaseSchema()
 
-```ts
-  const conflicts = await lix.db.selectFrom("change_conflict")
-     .where(changeConflictInVersion(currentVersion))
-     .selectAll()
-     .execute();
-  ```
+> **applySnapshotDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/schema.ts#L9)
+
+## Parameters
+
+### sqlite
+
+`SqliteWasmDatabase`
+
+## Returns
+
+`SqliteWasmDatabase`
+
+---
+
+## applyThreadDatabaseSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / applyThreadDatabaseSchema
+
+# Function: applyThreadDatabaseSchema()
+
+> **applyThreadDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+
+Defined in: [packages/lix-sdk/src/thread/schema.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/thread/schema.ts#L9)
+
+## Parameters
+
+### sqlite
+
+`SqliteWasmDatabase`
+
+## Returns
+
+`SqliteWasmDatabase`
+
+---
+
+## applyVersionDatabaseSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / applyVersionDatabaseSchema
+
+# Function: applyVersionDatabaseSchema()
+
+> **applyVersionDatabaseSchema**(`sqlite`): `void`
+
+Defined in: [packages/lix-sdk/src/version/schema.ts:18](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L18)
+
+## Parameters
+
+### sqlite
+
+`SqliteWasmDatabase`
+
+## Returns
+
+`void`
 
 ---
 
@@ -159,17 +304,17 @@ Filters if a conflict is in the given version.
 
 # Function: changeHasLabel()
 
-> **changeHasLabel**(`name`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
+> **changeHasLabel**(`label`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-has-label.ts:25](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-has-label.ts#L25)
+Defined in: [packages/lix-sdk/src/query-filter/change-has-label.ts:25](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/query-filter/change-has-label.ts#L25)
 
 Selects changes that have a label with the given name.
 
 ## Parameters
 
-### name
+### label
 
-`string`
+\{ `id`: `string`; `name?`: `string`; \} | \{ `id?`: `string`; `name`: `string`; \}
 
 ## Returns
 
@@ -189,7 +334,7 @@ Selects changes that have a label with the given name.
 
 ```ts
   await lix.db.selectFrom("change")
-     .where(changeHasLabel("checkpoint"))
+     .where(changeHasLabel({ name: "checkpoint" }))
      .selectAll()
      .execute();
   ```
@@ -198,214 +343,79 @@ You can use eb.not() to negate the filter.
 
   ```ts
   await lix.db.selectFrom("change")
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeHasLabel({ name: "checkpoint"})))
 		.selectAll()
 		.execute();
   ```
 
 ---
 
-## changeInVersion
+## changeSetElementInAncestryOf
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / changeInVersion
+[@lix-js/sdk](../README.md) / changeSetElementInAncestryOf
 
-# Function: changeInVersion()
+# Function: changeSetElementInAncestryOf()
 
-> **changeInVersion**(`version`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
+> **changeSetElementInAncestryOf**(`target`, `options?`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-in-version.ts:16](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-in-version.ts#L16)
+Defined in: [packages/lix-sdk/src/query-filter/change-set-element-in-ancestry-of.ts:33](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/query-filter/change-set-element-in-ancestry-of.ts#L33)
 
-Filters if a change is in the given Version.
+Filters elements that are in the ancestry of the given change set(s).
 
 ## Parameters
 
-### version
+### target
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
+A target change set object (or its id), or an array of such objects/ids.
 
-## Returns
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\> | `Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>[]
 
-`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
+### options?
 
-## Example
+Optional options object (e.g., depth limit)
 
-```ts
-  const changes = await lix.db.selectFrom("change")
-     .where(changeInVersion(currentVersion))
-     .selectAll()
-     .execute();
-  ```
+#### depth?
 
----
-
-## changeIsLeaf
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / changeIsLeaf
-
-# Function: changeIsLeaf()
-
-> **changeIsLeaf**(): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
-
-Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf.ts:18](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-is-leaf.ts#L18)
-
-Selects changes that are not a parent of any other change.
-
-**Careful**: This filter is not specific to any version.
-If you want to filter changes in a specific version, use `changeIsLeafInversion`.
+`number`
 
 ## Returns
 
-> (`eb`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
+A Kysely ExpressionBuilder function for filtering.
+
+> (`eb`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
 
 ### Parameters
 
 #### eb
 
-`ExpressionBuilder`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`\>
+`ExpressionBuilder`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`\>
 
 ### Returns
 
-`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
+`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
 
 ## Example
 
 ```ts
-  await lix.db.selectFrom("change")
-    .where(changeIsLeaf())
-    .selectAll()
-    .execute();
-  ```
+// Elements from the history of cs2 (object)
+db.selectFrom("change_set_element")
+  .where(changeSetElementInAncestryOf(cs2))
+  .selectAll()
 
----
+// Elements from the history of cs2 (id)
+db.selectFrom("change_set_element")
+  .where(changeSetElementInAncestryOf(cs2.id))
+  .selectAll()
 
-## changeIsLeafInVersion
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / changeIsLeafInVersion
-
-# Function: changeIsLeafInVersion()
-
-> **changeIsLeafInVersion**(`version`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
-
-Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf-in-version.ts:16](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-is-leaf-in-version.ts#L16)
-
-Selects changes that are not a parent of any other change within the specified version.
-
-## Parameters
-
-### version
-
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
-
-## Returns
-
-`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
-
-## Example
-
-```ts
-  await lix.db.selectFrom("change")
-    .where(changeIsLeafInVersion(currentVersion))
-    .selectAll()
-    .execute();
-  ```
-
----
-
-## changeIsLeafOf
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / changeIsLeafOf
-
-# Function: changeIsLeafOf()
-
-> **changeIsLeafOf**(`change`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
-
-Defined in: [packages/lix-sdk/src/query-filter/change-is-leaf-of.ts:29](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-is-leaf-of.ts#L29)
-
-Filter to select the last descendant of the specified change.
-
-## Parameters
-
-### change
-
-`Pick`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}, `"id"`\>
-
-## Returns
-
-`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
-
-## Examples
-
-Checking for the leaf of a change in all versiones.
-
-  ```ts
-  await lix.db.selectFrom("change")
-     .where(changeIsLeafOf(someChange))
-     .selectAll()
-     .execute();
-  ```
-
-Checking for the leaf of a change in a specific version.
-
-  ```ts
-  await lix.db.selectFrom("change")
-    .where(changeIsLeafOf(someChange))
-    .where(changeInVersion(someVersion))
-    .selectAll()
-    .execute();
-  ```
-
----
-
-## changeIsLowestCommonAncestorOf
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / changeIsLowestCommonAncestorOf
-
-# Function: changeIsLowestCommonAncestorOf()
-
-> **changeIsLowestCommonAncestorOf**(`changes`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
-
-Defined in: [packages/lix-sdk/src/query-filter/change-is-lowest-common-ancestor-of.ts:16](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-is-lowest-common-ancestor-of.ts#L16)
-
-Filters changes that are the lowest common ancestor of the given changes.
-
-## Parameters
-
-### changes
-
-`Pick`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}, `"id"`\>[]
-
-## Returns
-
-`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change"`, `SqlBool`\>
-
-## Example
-
-```ts
-  const lowestCommonAncestor = await lix.db.selectFrom("change")
-     .where(changeIsLowestCommonAncestorOf([change1, change2, change3]))
-     .selectAll()
-     .executeTakeFirst();
-  ```
+// Elements from the combined history of cs2 and cs4 (divergent branches)
+db.selectFrom("change_set_element")
+  .where(changeSetElementInAncestryOf([cs2, cs4]))
+  .selectAll()
+```
 
 ---
 
@@ -421,7 +431,7 @@ Filters changes that are the lowest common ancestor of the given changes.
 
 > **changeSetElementInSymmetricDifference**(`a`, `b`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts:19](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change-set/change-set-element-in-symmetric-difference.ts#L19)
+Defined in: [packages/lix-sdk/src/query-filter/change-set-element-in-symmetric-difference.ts:20](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/query-filter/change-set-element-in-symmetric-difference.ts#L20)
 
 Returns the symmetric difference between two change sets.
 
@@ -433,11 +443,11 @@ Modeled after https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
 
 ### a
 
-`Pick`\<\{ `id`: `string`; \}, `"id"`\>
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
 
 ### b
 
-`Pick`\<\{ `id`: `string`; \}, `"id"`\>
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
 
 ## Returns
 
@@ -464,6 +474,68 @@ Modeled after https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
 
 ---
 
+## changeSetElementIsLeafOf
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / changeSetElementIsLeafOf
+
+# Function: changeSetElementIsLeafOf()
+
+> **changeSetElementIsLeafOf**(`target`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
+
+Defined in: [packages/lix-sdk/src/query-filter/change-set-element-is-leaf-of.ts:34](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/query-filter/change-set-element-is-leaf-of.ts#L34)
+
+Filters the leaves of the given change set(s).
+
+An element is considered a **leaf** if no other element in the combined ancestry
+of the target change sets redefines the same entity at a later point in the graph.
+
+## Parameters
+
+### target
+
+A target change set object (or its id), or an array of such objects/ids.
+
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\> | `Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>[]
+
+## Returns
+
+> (`eb`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
+
+### Parameters
+
+#### eb
+
+`ExpressionBuilder`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`\>
+
+### Returns
+
+`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set_element"`, `SqlBool`\>
+
+## Example
+
+```ts
+// Find leaves relative to a single change set (object)
+db.selectFrom("change_set_element")
+  .where(changeSetElementIsLeafOf(cs))
+  .selectAll()
+
+// Find leaves relative to a single change set (id)
+db.selectFrom("change_set_element")
+  .where(changeSetElementIsLeafOf(cs.id))
+  .selectAll()
+
+// Find leaves relative to multiple change sets
+db.selectFrom("change_set_element")
+  .where(changeSetElementIsLeafOf([cs_source, cs_target]))
+  .selectAll()
+```
+
+---
+
 ## changeSetHasLabel
 
 [**@lix-js/sdk**](../README.md)
@@ -474,17 +546,17 @@ Modeled after https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
 
 # Function: changeSetHasLabel()
 
-> **changeSetHasLabel**(`name`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
+> **changeSetHasLabel**(`label`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
 
-Defined in: [packages/lix-sdk/src/query-filter/change-set-has-label.ts:25](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/query-filter/change-set-has-label.ts#L25)
+Defined in: [packages/lix-sdk/src/query-filter/change-set-has-label.ts:35](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/query-filter/change-set-has-label.ts#L35)
 
 Selects change sets that have a label with the given name.
 
 ## Parameters
 
-### name
+### label
 
-`string`
+\{ `id`: `string`; `name?`: `string`; \} | \{ `id?`: `string`; `name`: `string`; \}
 
 ## Returns
 
@@ -504,7 +576,7 @@ Selects change sets that have a label with the given name.
 
 ```ts
   await lix.db.selectFrom("change_set")
-     .where(changeSetHasLabel("checkpoint"))
+     .where(changeSetHasLabel({ name: "checkpoint" }))
      .selectAll()
      .execute();
   ```
@@ -513,10 +585,187 @@ You can use eb.not() to negate the filter.
 
   ```ts
   await lix.db.selectFrom("change_set")
-		.where((eb) => eb.not(changeSetHasLabel("checkpoint")))
+		.where((eb) => eb.not(changeSetHasLabel({ name: "checkpoint" })))
 		.selectAll()
 		.execute();
   ```
+
+Id lookup also works:
+
+  ```ts
+  await lix.db.selectFrom("change_set")
+		.where(changeSetHasLabel({ id: "39j9afj2" }))
+		.selectAll()
+		.execute();
+  ```
+
+---
+
+## changeSetIsAncestorOf
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / changeSetIsAncestorOf
+
+# Function: changeSetIsAncestorOf()
+
+> **changeSetIsAncestorOf**(`changeSet`, `options?`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
+
+Defined in: [packages/lix-sdk/src/query-filter/change-set-is-ancestor-of.ts:53](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/query-filter/change-set-is-ancestor-of.ts#L53)
+
+Filters change sets that are ancestors of the given change set.
+
+By default, this is **exclusive**, meaning it returns only change sets strictly
+*before* the provided change set in the graph.
+
+Traverses the `change_set_edge` graph recursively, starting from the provided change set
+(or its parents if exclusive), and returns all change sets reachable via parent edges.
+
+This filter is typically used to scope the graph before applying filters like `changeIsLeaf()`.
+
+⚠️ This filter only defines the traversal scope — it does not filter changes directly.
+
+--- Options ---
+- `includeSelf`: If `true`, includes the starting `changeSet` in the results. Defaults to `false`.
+- `depth`: Limits the traversal depth. `depth: 1` selects only immediate parents (if exclusive)
+  or the starting node and its immediate parents (if inclusive).
+
+--- Examples ---
+
+## Parameters
+
+### changeSet
+
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
+
+### options?
+
+#### depth?
+
+`number`
+
+#### includeSelf?
+
+`boolean`
+
+## Returns
+
+> (`eb`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
+
+### Parameters
+
+#### eb
+
+`ExpressionBuilder`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`\>
+
+### Returns
+
+`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
+
+## Examples
+
+```ts
+db.selectFrom("change_set")
+  .where(changeSetIsAncestorOf({ id: "cs3" }))
+  .selectAll()
+```
+
+```ts
+db.selectFrom("change_set")
+  .where(changeSetIsAncestorOf({ id: "cs3" }, { includeSelf: true }))
+  .selectAll()
+```
+
+```ts
+// Select all change sets between startPoint and endPoint (inclusive)
+db.selectFrom("change_set")
+  .where(changeSetIsDescendantOf({ id: "startPoint" }))
+  .where(changeSetIsAncestorOf({ id: "endPoint" }))
+  .selectAll()
+```
+
+---
+
+## changeSetIsDescendantOf
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / changeSetIsDescendantOf
+
+# Function: changeSetIsDescendantOf()
+
+> **changeSetIsDescendantOf**(`changeSet`, `options?`): (`eb`) => `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
+
+Defined in: [packages/lix-sdk/src/query-filter/change-set-is-descendant-of.ts:46](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/query-filter/change-set-is-descendant-of.ts#L46)
+
+Filters change sets that are descendants of the given change set.
+
+By default, this is **exclusive**, meaning it returns only change sets strictly
+*after* the provided change set in the graph.
+
+Traverses the `change_set_edge` graph recursively, starting from the provided change set
+(or its children if exclusive), and returns all change sets reachable via child edges.
+
+This filter is useful for finding changes made *after* a specific point in time (e.g., a checkpoint).
+
+⚠️ This filter only defines the traversal scope — it does not filter changes directly.
+
+--- Options ---
+- `includeSelf`: If `true`, includes the starting `changeSet` in the results. Defaults to `false`.
+- `depth`: Limits the traversal depth. `depth: 1` selects only immediate children (if exclusive)
+  or the starting node and its immediate children (if includeSelf is true).
+
+--- Examples ---
+
+## Parameters
+
+### changeSet
+
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
+
+### options?
+
+#### depth?
+
+`number`
+
+#### includeSelf?
+
+`boolean`
+
+## Returns
+
+> (`eb`): `ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
+
+### Parameters
+
+#### eb
+
+`ExpressionBuilder`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`\>
+
+### Returns
+
+`ExpressionWrapper`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md), `"change_set"`, `SqlBool`\>
+
+## Examples
+
+```ts
+db.selectFrom("change_set")
+  .where(changeSetIsDescendantOf({ id: "cs1" }))
+  .selectAll()
+```
+
+```ts
+// Select all change sets between startPoint and endPoint (inclusive)
+db.selectFrom("change_set")
+  .where(changeSetIsDescendantOf({ id: "startPoint" }))
+  .where(changeSetIsAncestorOf({ id: "endPoint" }))
+  .selectAll()
+```
 
 ---
 
@@ -532,9 +781,13 @@ You can use eb.not() to negate the filter.
 
 > **closeLix**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/lix/close-lix.ts:6](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/close-lix.ts#L6)
+Defined in: [packages/lix-sdk/src/lix/close-lix.ts:15](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/close-lix.ts#L15)
 
-Closes the lix.
+Destroys the underlying database connection.
+
+After closing the Lix instance all subsequent operations on it
+will fail. Call this when your application no longer needs access
+to the file.
 
 ## Parameters
 
@@ -548,6 +801,12 @@ Closes the lix.
 
 `Promise`\<`void`\>
 
+## Example
+
+```ts
+await closeLix({ lix })
+```
+
 ---
 
 ## createAccount
@@ -560,17 +819,31 @@ Closes the lix.
 
 # Function: createAccount()
 
-> **createAccount**(`args`): `Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
+> **createAccount**(`args`): `Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/account/create-account.ts:4](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/create-account.ts#L4)
+Defined in: [packages/lix-sdk/src/account/create-account.ts:18](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/create-account.ts#L18)
+
+Inserts a new account into the Lix database.
+
+Accounts represent different identities working with the same Lix
+file. Switching the active account is handled separately via
+[switchAccount](switchAccount.md).
 
 ## Parameters
 
 ### args
 
+#### id?
+
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
+
 #### lix
 
-[`Lix`](../type-aliases/Lix.md)
+`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
+
+#### lixcol_version_id?
+
+`string`
 
 #### name
 
@@ -578,7 +851,13 @@ Defined in: [packages/lix-sdk/src/account/create-account.ts:4](https://github.co
 
 ## Returns
 
-`Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
+`Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}\>
+
+## Example
+
+```ts
+const account = await createAccount({ lix, name: "Jane" })
+```
 
 ---
 
@@ -592,28 +871,27 @@ Defined in: [packages/lix-sdk/src/account/create-account.ts:4](https://github.co
 
 # Function: createChange()
 
-> **createChange**(`args`, `options?`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
+> **createChange**(`args`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `schema_version`: `string`; `snapshot_id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change/create-change.ts:15](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change/create-change.ts#L15)
-
-Programatically create a change in the database.
-
-Use this function to directly create a change from a lix app
-with bypassing of file-based change detection.
+Defined in: [packages/lix-sdk/src/change/create-change.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/create-change.ts#L9)
 
 ## Parameters
 
 ### args
 
-#### authors
+#### authors?
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>[]
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}, `"id"`\>[]
 
-#### entityId
+#### entity_id
 
 `string`
 
-#### fileId
+#### file_id
+
+`string`
+
+#### id?
 
 `string`
 
@@ -621,79 +899,25 @@ with bypassing of file-based change detection.
 
 `Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"sqlite"`\>
 
-#### pluginKey
+#### plugin_key
 
 `string`
 
-#### schemaKey
+#### schema_key
 
 `string`
 
-#### snapshotContent
+#### schema_version
 
-`null` \| `Record`\<`string`, `any`\>
+`string`
 
-#### version
+#### snapshot
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
-
-### options?
-
-#### updateVersionChanges?
-
-`boolean`
-
-When true, the version changes will be updated.
-
-Defaults to true.
+`Omit`\<[`Snapshot`](../type-aliases/Snapshot.md), `"id"`\>
 
 ## Returns
 
-`Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
-
----
-
-## createChangeConflict
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / createChangeConflict
-
-# Function: createChangeConflict()
-
-> **createChangeConflict**(`args`): `Promise`\<\{ `change_set_id`: `string`; `id`: `string`; `key`: `string`; \}\>
-
-Defined in: [packages/lix-sdk/src/change-conflict/create-change-conflict.ts:10](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change-conflict/create-change-conflict.ts#L10)
-
-Creates a new change conflict with the given conflicting changes.
-
-## Parameters
-
-### args
-
-#### conflictingChangeIds
-
-`Set`\<`string`\>
-
-#### key
-
-`string`
-
-The key of the change conflict.
-
-#### lix
-
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
-
-#### version
-
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
-
-## Returns
-
-`Promise`\<\{ `change_set_id`: `string`; `id`: `string`; `key`: `string`; \}\>
+`Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `schema_version`: `string`; `snapshot_id`: `string`; \}\>
 
 ---
 
@@ -707,131 +931,212 @@ The key of the change conflict.
 
 # Function: createChangeSet()
 
-> **createChangeSet**(`args`): `Promise`\<\{ `id`: `string`; \}\>
+> **createChangeSet**(`args`): `Promise`\<`object` & `object`\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:24](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change-set/create-change-set.ts#L24)
+Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:20](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/create-change-set.ts#L20)
 
-Creates a change set with the given changes, optionally within an open transaction.
+Creates a change set and optionally attaches elements, labels and parents.
 
-## Parameters
-
-### args
-
-#### changes
-
-`Pick`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}, `"id"`\>[]
-
-#### labels?
-
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>[]
-
-#### lix
-
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
-
-## Returns
-
-`Promise`\<\{ `id`: `string`; \}\>
-
-## Examples
-
-```ts
-  const changes = await lix.db.selectFrom("change").selectAll().execute();
-  const changeSet = await createChangeSet({ db: lix.db, changes });
-  ```
-
-```ts
-  // Create a change set with labels
-  const labels = await lix.db.selectFrom("label").selectAll().execute();
-  const changeSet = await createChangeSet({
-    lix,
-    changes: [],
-    labels
-  });
-  ```
-
----
-
-## createComment
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / createComment
-
-# Function: createComment()
-
-> **createComment**(`args`): `Promise`\<\{ `content`: `string`; `discussion_id`: `string`; `id`: `string`; `parent_id`: `null` \| `string`; \}\>
-
-Defined in: [packages/lix-sdk/src/discussion/create-comment.ts:4](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/discussion/create-comment.ts#L4)
+Change sets are the building blocks of versions and checkpoints. This
+function inserts all provided relations in a single transaction and
+returns the newly created record.
 
 ## Parameters
 
 ### args
 
-#### content
+#### elements?
+
+`Omit`\<[`NewState`](../type-aliases/NewState.md)\<\{ `change_id`: `string`; `change_set_id`: `string`; `entity_id`: `string`; `file_id`: `string`; `schema_key`: `string`; \}\>, `"change_set_id"`\>[]
+
+#### id?
 
 `string`
 
-#### lix
+#### labels?
 
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
-
-#### parentComment
-
-`Pick`\<\{ `content`: `string`; `discussion_id`: `string`; `id`: `string`; `parent_id`: `null` \| `string`; \}, `"id"` \| `"discussion_id"`\>
-
-## Returns
-
-`Promise`\<\{ `content`: `string`; `discussion_id`: `string`; `id`: `string`; `parent_id`: `null` \| `string`; \}\>
-
----
-
-## createDiscussion
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / createDiscussion
-
-# Function: createDiscussion()
-
-> **createDiscussion**(`args`): `Promise`\<`object` & `object`\>
-
-Defined in: [packages/lix-sdk/src/discussion/create-discussion.ts:15](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/discussion/create-discussion.ts#L15)
-
-Creates a new discussion with the first comment.
-
-## Parameters
-
-### args
-
-#### changeSet
-
-`Pick`\<\{ `id`: `string`; \}, `"id"`\>
-
-#### firstComment
-
-`Pick`\<\{ `content`: `string`; `discussion_id`: `string`; `id`: `string`; `parent_id`: `null` \| `string`; \}, `"content"`\>
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}, `"id"`\>[]
 
 #### lix
 
 `Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
+
+#### lixcol_version_id?
+
+`string`
+
+Version ID where the change set should be stored. Defaults to active version
+
+#### parents?
+
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>[]
+
+Parent change sets that this change set will be a child of
 
 ## Returns
 
 `Promise`\<`object` & `object`\>
 
-the created discussion
+## Example
+
+```ts
+const cs = await createChangeSet({ lix, elements: [{ change_id, entity_id }] })
+```
+
+---
+
+## createCheckpoint
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / createCheckpoint
+
+# Function: createCheckpoint()
+
+> **createCheckpoint**(`args`): `Promise`\<\{ `id`: `string`; \}\>
+
+Defined in: [packages/lix-sdk/src/change-set/create-checkpoint.ts:17](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/create-checkpoint.ts#L17)
+
+Converts the current working change set into a checkpoint.
+
+The working change set becomes immutable and receives the
+`checkpoint` label. A fresh empty working change set is created so
+that new changes can continue to accumulate.
+
+## Parameters
+
+### args
+
+#### lix
+
+[`Lix`](../type-aliases/Lix.md)
+
+## Returns
+
+`Promise`\<\{ `id`: `string`; \}\>
 
 ## Example
 
 ```ts
-  const changeSet = await createChangeSet({ lix, changes: ["change1", "change2"] });
-  const discussion = await createDiscussion({ lix, changeSet, firstComment: { content: "first comment" } });
-  ```
+const { id } = await createCheckpoint({ lix })
+```
+
+---
+
+## createLabel
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / createLabel
+
+# Function: createLabel()
+
+> **createLabel**(`args`): `Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}\>
+
+Defined in: [packages/lix-sdk/src/label/create-label.ts:17](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/label/create-label.ts#L17)
+
+Creates a label that can be attached to change sets.
+
+Labels help categorise change sets, for example "checkpoint" or
+"reviewed". They are simple name identifiers stored per version.
+
+## Parameters
+
+### args
+
+#### id?
+
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
+
+#### lix
+
+`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
+
+#### lixcol_version_id?
+
+`string`
+
+#### name
+
+`string`
+
+## Returns
+
+`Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}\>
+
+## Example
+
+```ts
+const label = await createLabel({ lix, name: "checkpoint" })
+```
+
+---
+
+## createLog
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / createLog
+
+# Function: createLog()
+
+> **createLog**(`args`): `Promise`\<[`LixSelectable`](../type-aliases/LixSelectable.md)\<[`EntityStateView`](../type-aliases/EntityStateView.md)\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `key`: `string`; `level`: `string`; `message`: `string`; \}\>\>\>
+
+Defined in: [packages/lix-sdk/src/log/create-log.ts:28](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/log/create-log.ts#L28)
+
+Directly creates a log entry in the Lix database without applying any filters.
+
+This function inserts the log entry regardless of the `lix_log_levels` setting
+in the key-value store. It is the responsibility of the calling application
+to implement any desired log level filtering before invoking this function.
+
+It is recommended to use dot notation for log keys (e.g., 'app.module.component').
+
+## Parameters
+
+### args
+
+#### key
+
+`string`
+
+#### level
+
+`string`
+
+#### lix
+
+`Pick`\<[`Lix`](../type-aliases/Lix.md), `"sqlite"` \| `"db"`\>
+
+#### message
+
+`string`
+
+## Returns
+
+`Promise`\<[`LixSelectable`](../type-aliases/LixSelectable.md)\<[`EntityStateView`](../type-aliases/EntityStateView.md)\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `key`: `string`; `level`: `string`; `message`: `string`; \}\>\>\>
+
+A promise that resolves with the created log entry.
+
+## Example
+
+```ts
+// Directly log an info message
+
+if (shouldLog) {
+  await createLog({
+    lix,
+    key: 'app.init',
+    level: 'info',
+    message: 'Application initialized'
+});
+```
 
 ---
 
@@ -847,7 +1152,7 @@ the created discussion
 
 > **createLspInMemoryEnvironment**(): `LspEnvironment`
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/environment/create-in-memory-environment.ts:13](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/server-protocol-handler/environment/create-in-memory-environment.ts#L13)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/environment/create-in-memory-environment.ts:12](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/environment/create-in-memory-environment.ts#L12)
 
 Create an in-memory storage.
 
@@ -856,6 +1161,59 @@ Great for testing or quick prototyping.
 ## Returns
 
 `LspEnvironment`
+
+---
+
+## createMergeChangeSet
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / createMergeChangeSet
+
+# Function: createMergeChangeSet()
+
+> **createMergeChangeSet**(`args`): `Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}\>
+
+Defined in: [packages/lix-sdk/src/change-set/create-merge-change-set.ts:22](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/create-merge-change-set.ts#L22)
+
+Merges two change sets using a "source wins" strategy (until lix models conflicts).
+
+Creates a new change set containing the merged result. If an element
+(identified by entity_id, file_id, schema_key) exists in both the source
+and target change sets (considering their respective histories), the element
+from the source change set's history takes precedence.
+
+## Parameters
+
+### args
+
+The arguments for the merge operation.
+
+#### lix
+
+[`Lix`](../type-aliases/Lix.md)
+
+The Lix instance.
+
+#### source
+
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
+
+The source change set (only `id` is needed).
+
+#### target
+
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
+
+The target change set (only `id` is needed).
+
+## Returns
+
+`Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}\>
+
+A Promise resolving to the newly created ChangeSet representing the merged state.
 
 ---
 
@@ -871,7 +1229,7 @@ Great for testing or quick prototyping.
 
 > **createServerProtocolHandler**(`args`): `Promise`\<`LixServerProtocolHandler`\>
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:55](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L55)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:55](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L55)
 
 The handler for the lix server protocol.
 
@@ -932,35 +1290,214 @@ Testing the handler.
 
 # Function: createSnapshot()
 
-> **createSnapshot**(`args`): `Promise`\<\{ `content`: `null` \| `Record`\<`string`, `any`\>; `id`: `string`; \}\>
+> **createSnapshot**(`args`): `Promise`\<[`Snapshot`](../type-aliases/Snapshot.md)\>
 
-Defined in: [packages/lix-sdk/src/snapshot/create-snapshot.ts:15](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/snapshot/create-snapshot.ts#L15)
-
-Creates a snapshot and inserts it or retrieves the existing snapshot from the database.
-
-Snapshots are content-addressed to avoid storing the same snapshot multiple times.
-Hence, an insert might not actually insert a new snapshot but return an existing one.
+Defined in: [packages/lix-sdk/src/snapshot/create-snapshot.ts:7](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/create-snapshot.ts#L7)
 
 ## Parameters
 
 ### args
 
-#### content?
+#### content
 
 `null` \| `Record`\<`string`, `any`\>
 
 #### lix
 
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
+`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"sqlite"`\>
 
 ## Returns
 
-`Promise`\<\{ `content`: `null` \| `Record`\<`string`, `any`\>; `id`: `string`; \}\>
+`Promise`\<[`Snapshot`](../type-aliases/Snapshot.md)\>
+
+---
+
+## createThread
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / createThread
+
+# Function: createThread()
+
+> **createThread**(`args`): `Promise`\<`object` & `object`\>
+
+Defined in: [packages/lix-sdk/src/thread/create-thread.ts:19](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/thread/create-thread.ts#L19)
+
+Starts a new discussion thread.
+
+Threads allow collaborators to attach comments to a specific
+version or entity. Initial comments can be provided and will be
+inserted sequentially.
+
+## Parameters
+
+### args
+
+#### comments?
+
+`Pick`\<[`NewState`](../type-aliases/NewState.md)\<[`ThreadComment`](../type-aliases/ThreadComment.md)\>, `"body"`\>[]
+
+#### id?
+
+`string`
+
+#### lix
+
+[`Lix`](../type-aliases/Lix.md)
+
+#### versionId?
+
+`string`
+
+defaults to global
+
+## Returns
+
+`Promise`\<`object` & `object`\>
 
 ## Example
 
 ```ts
-  const snapshot = await createSnapshot({ lix, content });
+const thread = await createThread({ lix, comments: [{ body: "Hello" }] })
+```
+
+---
+
+## createThreadComment
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / createThreadComment
+
+# Function: createThreadComment()
+
+> **createThreadComment**(`args`): `Promise`\<[`LixSelectable`](../type-aliases/LixSelectable.md)\<[`EntityStateView`](../type-aliases/EntityStateView.md)\<[`ThreadComment`](../type-aliases/ThreadComment.md)\>\>\>
+
+Defined in: [packages/lix-sdk/src/thread/create-thread-comment.ts:18](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/thread/create-thread-comment.ts#L18)
+
+Adds a comment to an existing thread.
+
+The comment inherits the version context from the thread and can
+be nested by supplying a parent id.
+
+## Parameters
+
+### args
+
+`object` & `object` & `object`
+
+## Returns
+
+`Promise`\<[`LixSelectable`](../type-aliases/LixSelectable.md)\<[`EntityStateView`](../type-aliases/EntityStateView.md)\<[`ThreadComment`](../type-aliases/ThreadComment.md)\>\>\>
+
+## Example
+
+```ts
+await createThreadComment({ lix, thread_id, body: "Thanks" })
+```
+
+---
+
+## createTransitionChangeSet
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / createTransitionChangeSet
+
+# Function: createTransitionChangeSet()
+
+> **createTransitionChangeSet**(`args`): `Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}\>
+
+Defined in: [packages/lix-sdk/src/change-set/create-transition-change-set.ts:17](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/create-transition-change-set.ts#L17)
+
+Creates a change set that enables a transition from a source state
+(defined by `sourceChangeSet`) to a target state (defined by `targetChangeSet`).
+
+Applying the returned change set to the source state will result in a state
+that matches the target state.
+
+- switch between state (switching versions, checkpoints, etc.)
+- restore old state (applying the transition set on top of current state)
+
+## Parameters
+
+### args
+
+#### lix
+
+[`Lix`](../type-aliases/Lix.md)
+
+#### sourceChangeSet
+
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
+
+#### targetChangeSet
+
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
+
+## Returns
+
+`Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}\>
+
+---
+
+## createUndoChangeSet
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / createUndoChangeSet
+
+# Function: createUndoChangeSet()
+
+> **createUndoChangeSet**(`args`): `Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}\>
+
+Defined in: [packages/lix-sdk/src/change-set/create-undo-change-set.ts:26](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/create-undo-change-set.ts#L26)
+
+Creates a "reverse" change set that undoes the changes made by the specified change set.
+
+## Parameters
+
+### args
+
+#### changeSet
+
+`Pick`\<[`ChangeSet`](../type-aliases/ChangeSet.md), `"id"`\>
+
+#### labels?
+
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}, `"id"`\>[]
+
+#### lix
+
+[`Lix`](../type-aliases/Lix.md)
+
+## Returns
+
+`Promise`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}\>
+
+The newly created change set that contains the undo operations
+
+## Example
+
+```ts
+  const undoChangeSet = await createUndoChangeSet({
+    lix,
+    changeSet: targetChangeSet
+  });
+
+  await applyChangeSet({
+    lix,
+    changeSet: undoChangeSet
+  });
   ```
 
 ---
@@ -975,96 +1512,46 @@ Hence, an insert might not actually insert a new snapshot but return an existing
 
 # Function: createVersion()
 
-> **createVersion**(`args`): `Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
+> **createVersion**(`args`): `Promise`\<\{ `change_set_id`: `string`; `hidden?`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`undefined` \| `boolean`\>; `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `inherits_from_version_id?`: `string` & `object`; `name`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `working_change_set_id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; \}\>
 
-Defined in: [packages/lix-sdk/src/version/create-version.ts:23](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/version/create-version.ts#L23)
+Defined in: [packages/lix-sdk/src/version/create-version.ts:15](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/create-version.ts#L15)
 
-Creates a new Version.
+Creates a new version.
 
-If `from` is provided, the new version will be identical to the from version.
+The changeSet can be any change set e.g. another version, a checkpoint, etc.
 
 ## Parameters
 
 ### args
 
-#### from?
+#### changeSet?
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>
+
+#### id?
+
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
+
+#### inherits_from_version_id?
+
+`string` & `object`
 
 #### lix
 
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
+[`Lix`](../type-aliases/Lix.md)
 
 #### name?
 
-`string`
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
 
 ## Returns
 
-`Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
-
-## Examples
-
-_Without from_
-
-  ```ts
-  const version = await createVersion({ lix });
-  ```
-
-_With from_
-
-  ```ts
-  const version = await createVersion({ lix, from: otherVersion });
-  ```
-
----
-
-## detectChangeConflicts
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / detectChangeConflicts
-
-# Function: detectChangeConflicts()
-
-> **detectChangeConflicts**(`args`): `Promise`\<[`DetectedConflict`](../type-aliases/DetectedConflict.md)[]\>
-
-Defined in: [packages/lix-sdk/src/change-conflict/detect-change-conflicts.ts:21](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change-conflict/detect-change-conflicts.ts#L21)
-
-Detects conflicts in the given set of changes.
-
-The caller is responsible for filtering out changes
-that should not lead to conflicts before calling this function.
-
-For example, detecting conflicts between two versiones should
-only include changes that are different between the two versiones
-when calling this function.
-
-## Parameters
-
-### args
-
-#### changes
-
-`object`[]
-
-#### lix
-
-`Pick`\<[`LixReadonly`](../type-aliases/LixReadonly.md), `"db"` \| `"plugin"`\>
-
-## Returns
-
-`Promise`\<[`DetectedConflict`](../type-aliases/DetectedConflict.md)[]\>
+`Promise`\<\{ `change_set_id`: `string`; `hidden?`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`undefined` \| `boolean`\>; `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `inherits_from_version_id?`: `string` & `object`; `name`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `working_change_set_id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; \}\>
 
 ## Example
 
 ```ts
-const detectedConflicts = await detectChangeConflicts({
-       lix: lix,
-       changes: diffingChages,
-  });
+const version = await createVersion({ lix, changeSet: otherVersion.change_set_id });
 ```
 
 ---
@@ -1081,14 +1568,19 @@ const detectedConflicts = await detectChangeConflicts({
 
 > **executeSync**(`args`): `any`[]
 
-Defined in: [packages/lix-sdk/src/database/execute-sync.ts:15](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/execute-sync.ts#L15)
+Defined in: [packages/lix-sdk/src/database/execute-sync.ts:21](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/execute-sync.ts#L21)
 
 Execute a query synchronously.
 
-WARNING: This function is not recommended for general use.
-Only if you need sync queries, like in a trigger for exmaple,
-you should use this function. The function is not transforming
-the query or the result as the db API does. You get raw SQL.
+⚠️  MAJOR WARNING: This function is a PURE SQL LAYER without transformations!
+
+- JSON columns return as RAW JSON STRINGS, not parsed objects
+- You must manually parse/stringify JSON data
+- No automatic type conversions happen
+- Results are raw SQLite values
+
+Only use this for triggers, database functions, or when you specifically
+need synchronous database access and understand you're working with raw SQL.
 
 ## Parameters
 
@@ -1109,71 +1601,10 @@ the query or the result as the db API does. You get raw SQL.
 ## Example
 
 ```ts
-const query = lix.db.selectFrom("key_value").selectAll();
-  const result = executeSync({ lix, query }) as KeyValue[];
+// JSON columns are returned as strings - you must parse manually:
+  const result = executeSync({ lix, query });
+  result[0].metadata = JSON.parse(result[0].metadata);
 ```
-
----
-
-## fileQueueSettled
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / fileQueueSettled
-
-# Function: fileQueueSettled()
-
-> **fileQueueSettled**(`args`): `Promise`\<`void`\>
-
-Defined in: [packages/lix-sdk/src/file-queue/file-queue-settled.ts:11](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/file-queue/file-queue-settled.ts#L11)
-
-Waits until the file queue is settled.
-
-## Parameters
-
-### args
-
-#### lix
-
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
-
-## Returns
-
-`Promise`\<`void`\>
-
-## Example
-
-```ts
-  await fileQueueSettled({ lix });
-  ```
-
----
-
-## isValidFilePath
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / isValidFilePath
-
-# Function: isValidFilePath()
-
-> **isValidFilePath**(`path`): `boolean`
-
-Defined in: [packages/lix-sdk/src/file/validate-file-path.ts:53](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/file/validate-file-path.ts#L53)
-
-## Parameters
-
-### path
-
-`string`
-
-## Returns
-
-`boolean`
 
 ---
 
@@ -1189,7 +1620,7 @@ Defined in: [packages/lix-sdk/src/file/validate-file-path.ts:53](https://github.
 
 > **jsonArrayFrom**\<`O`\>(`expr`): `RawBuilder`\<`Simplify`\<`O`\>[]\>
 
-Defined in: node\_modules/.pnpm/kysely@0.27.4/node\_modules/kysely/dist/esm/helpers/sqlite.d.ts:58
+Defined in: node\_modules/.pnpm/kysely@0.27.6/node\_modules/kysely/dist/esm/helpers/sqlite.d.ts:66
 
 A SQLite helper for aggregating a subquery into a JSON array.
 
@@ -1199,8 +1630,14 @@ Otherwise the nested selections will be returned as JSON strings.
 The plugin can be installed like this:
 
 ```ts
-const db = new Kysely({
-  dialect: new SqliteDialect(config),
+import * as Sqlite from 'better-sqlite3'
+import { Kysely, ParseJSONResultsPlugin, SqliteDialect } from 'kysely'
+import type { Database } from 'type-editor' // imaginary module
+
+const db = new Kysely<Database>({
+  dialect: new SqliteDialect({
+    database: new Sqlite(':memory:')
+  }),
   plugins: [new ParseJSONResultsPlugin()]
 })
 ```
@@ -1208,6 +1645,8 @@ const db = new Kysely({
 ### Examples
 
 ```ts
+import { jsonArrayFrom } from 'kysely/helpers/sqlite'
+
 const result = await db
   .selectFrom('person')
   .select((eb) => [
@@ -1221,9 +1660,9 @@ const result = await db
   ])
   .execute()
 
-result[0].id
-result[0].pets[0].pet_id
-result[0].pets[0].name
+result[0]?.id
+result[0]?.pets[0].pet_id
+result[0]?.pets[0].name
 ```
 
 The generated SQL (SQLite):
@@ -1273,7 +1712,7 @@ from "person"
 
 > **jsonObjectFrom**\<`O`\>(`expr`): `RawBuilder`\<`null` \| `Simplify`\<`O`\>\>
 
-Defined in: node\_modules/.pnpm/kysely@0.27.4/node\_modules/kysely/dist/esm/helpers/sqlite.d.ts:114
+Defined in: node\_modules/.pnpm/kysely@0.27.6/node\_modules/kysely/dist/esm/helpers/sqlite.d.ts:130
 
 A SQLite helper for turning a subquery into a JSON object.
 
@@ -1285,8 +1724,14 @@ Otherwise the nested selections will be returned as JSON strings.
 The plugin can be installed like this:
 
 ```ts
-const db = new Kysely({
-  dialect: new SqliteDialect(config),
+import * as Sqlite from 'better-sqlite3'
+import { Kysely, ParseJSONResultsPlugin, SqliteDialect } from 'kysely'
+import type { Database } from 'type-editor' // imaginary module
+
+const db = new Kysely<Database>({
+  dialect: new SqliteDialect({
+    database: new Sqlite(':memory:')
+  }),
   plugins: [new ParseJSONResultsPlugin()]
 })
 ```
@@ -1294,6 +1739,8 @@ const db = new Kysely({
 ### Examples
 
 ```ts
+import { jsonObjectFrom } from 'kysely/helpers/sqlite'
+
 const result = await db
   .selectFrom('person')
   .select((eb) => [
@@ -1307,9 +1754,9 @@ const result = await db
   ])
   .execute()
 
-result[0].id
-result[0].favorite_pet.pet_id
-result[0].favorite_pet.name
+result[0]?.id
+result[0]?.favorite_pet?.pet_id
+result[0]?.favorite_pet?.name
 ```
 
 The generated SQL (SQLite):
@@ -1347,58 +1794,6 @@ from "person";
 
 ---
 
-## mergeVersion
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / mergeVersion
-
-# Function: mergeVersion()
-
-> **mergeVersion**(`args`): `Promise`\<`void`\>
-
-Defined in: [packages/lix-sdk/src/version/merge-version.ts:8](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/version/merge-version.ts#L8)
-
-## Parameters
-
-### args
-
-#### lix
-
-[`Lix`](../type-aliases/Lix.md)
-
-#### sourceVersion
-
-\{ `id`: `string`; `name`: `string`; \}
-
-#### sourceVersion.id
-
-`string`
-
-#### sourceVersion.name
-
-`string`
-
-#### targetVersion
-
-\{ `id`: `string`; `name`: `string`; \}
-
-#### targetVersion.id
-
-`string`
-
-#### targetVersion.name
-
-`string`
-
-## Returns
-
-`Promise`\<`void`\>
-
----
-
 ## mockJsonSnapshot
 
 [**@lix-js/sdk**](../README.md)
@@ -1409,9 +1804,9 @@ Defined in: [packages/lix-sdk/src/version/merge-version.ts:8](https://github.com
 
 # Function: mockJsonSnapshot()
 
-> **mockJsonSnapshot**(`content`): `object`
+> **mockJsonSnapshot**(`content`): [`Snapshot`](../type-aliases/Snapshot.md)
 
-Defined in: [packages/lix-sdk/src/snapshot/mock-json-snapshot.ts:9](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/snapshot/mock-json-snapshot.ts#L9)
+Defined in: [packages/lix-sdk/src/snapshot/mock-json-snapshot.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/mock-json-snapshot.ts#L9)
 
 Util function for tests that creates a snapshot that looks like one you got returned from the database after inserting
 
@@ -1423,15 +1818,7 @@ Util function for tests that creates a snapshot that looks like one you got retu
 
 ## Returns
 
-`object`
-
-### content
-
-> **content**: `null` \| `Record`\<`string`, `any`\>
-
-### id
-
-> **id**: `string`
+[`Snapshot`](../type-aliases/Snapshot.md)
 
 ---
 
@@ -1447,16 +1834,25 @@ Util function for tests that creates a snapshot that looks like one you got retu
 
 > **newLixFile**(): `Promise`\<`Blob`\>
 
-Defined in: [packages/lix-sdk/src/lix/new-lix.ts:14](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/new-lix.ts#L14)
+Defined in: [packages/lix-sdk/src/lix/new-lix.ts:44](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/new-lix.ts#L44)
 
-Creates a new lix file.
+Returns a new empty Lix file as a Blob.
 
-The app is responsible for saving the project "whereever"
-e.g. the user's computer, cloud storage, or OPFS in the browser.
+The function bootstraps an in‑memory SQLite database with all
+required tables, change sets and metadata so that it represents
+a valid Lix project. The caller is responsible for persisting the
+resulting blob to disk, IndexedDB or any other storage location.
 
 ## Returns
 
 `Promise`\<`Blob`\>
+
+## Example
+
+```ts
+const blob = await newLixFile()
+await saveToDisk(blob)
+```
 
 ---
 
@@ -1472,9 +1868,14 @@ e.g. the user's computer, cloud storage, or OPFS in the browser.
 
 > **openLix**(`args`): `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:34](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/open-lix.ts#L34)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:46](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix.ts#L46)
 
-Common setup between different lix environments.
+Opens a Lix instance using an existing SQLite database.
+
+The database may originate from a file, IndexedDB or an
+in‑memory instance. During opening all required schemas are
+applied, optional plugins are initialised and provided key‑values
+are written to the database.
 
 ## Parameters
 
@@ -1482,7 +1883,7 @@ Common setup between different lix environments.
 
 #### account?
 
-\{ `id`: `string`; `name`: `string`; \}
+\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}
 
 The account that is opening this lix.
 
@@ -1497,7 +1898,7 @@ const account = localStorage.getItem("account")
 
 #### account.id
 
-`string`
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
 
 #### account.name
 
@@ -1509,7 +1910,7 @@ const account = localStorage.getItem("account")
 
 #### keyValues?
 
-`object` & `object`[]
+[`NewState`](../type-aliases/NewState.md)\<[`KeyValue`](../type-aliases/KeyValue.md)\>[]
 
 Set the key values when opening the lix.
 
@@ -1542,6 +1943,13 @@ const lix = await openLixInMemory({ providePlugins: [myPlugin] })
 
 `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
 
+## Example
+
+```ts
+const db = await createInMemoryDatabase({ readOnly: false })
+const lix = await openLix({ database: db })
+```
+
 ---
 
 ## openLixInMemory
@@ -1556,98 +1964,55 @@ const lix = await openLixInMemory({ providePlugins: [myPlugin] })
 
 > **openLixInMemory**(`args`): `Promise`\<`Promise`\<[`Lix`](../type-aliases/Lix.md)\>\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix-in-memory.ts:8](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/open-lix-in-memory.ts#L8)
+Defined in: [packages/lix-sdk/src/lix/open-lix-in-memory.ts:17](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix-in-memory.ts#L17)
 
-Opens a lix in memory.
+Loads a Lix file into a temporary in‑memory database.
+
+The returned instance behaves like [openLix](openLix.md) but keeps all
+data only for the lifetime of the current JavaScript context. If no
+blob is provided a fresh Lix project is created automatically.
 
 ## Parameters
 
 ### args
 
-`object` & `Omit`\<\{ `account`: \{ `id`: `string`; `name`: `string`; \}; `database`: `SqliteWasmDatabase`; `keyValues`: `object` & `object`[]; `providePlugins`: [`LixPlugin`](../type-aliases/LixPlugin.md)[]; \}, `"database"`\>
+`object` & `Omit`\<\{ `account?`: \{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}; `database`: `SqliteWasmDatabase`; `keyValues?`: [`NewState`](../type-aliases/NewState.md)\<[`KeyValue`](../type-aliases/KeyValue.md)\>[]; `providePlugins?`: [`LixPlugin`](../type-aliases/LixPlugin.md)[]; \}, `"database"`\>
 
 ## Returns
 
 `Promise`\<`Promise`\<[`Lix`](../type-aliases/Lix.md)\>\>
 
+## Example
+
+```ts
+const lix = await openLixInMemory({})
+```
+
 ---
 
-## resolveChangeConflictBySelecting
+## populateLabelRecords
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / resolveChangeConflictBySelecting
+[@lix-js/sdk](../README.md) / populateLabelRecords
 
-# Function: resolveChangeConflictBySelecting()
+# Function: populateLabelRecords()
 
-> **resolveChangeConflictBySelecting**(`args`): `Promise`\<`void`\>
+> **populateLabelRecords**(`sqlite`): `SqliteWasmDatabase`
 
-Defined in: [packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts:10](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change-conflict/resolve-conflict-by-selecting.ts#L10)
-
-Resolves a conflict by selecting one of the two
-changes in the conflict.
+Defined in: [packages/lix-sdk/src/label/schema.ts:25](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/label/schema.ts#L25)
 
 ## Parameters
 
-### args
+### sqlite
 
-#### conflict
-
-\{ `change_set_id`: `string`; `id`: `string`; `key`: `string`; \}
-
-#### conflict.change_set_id
-
-`string`
-
-#### conflict.id
-
-`string`
-
-#### conflict.key
-
-`string`
-
-#### lix
-
-[`Lix`](../type-aliases/Lix.md)
-
-#### select
-
-\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}
-
-#### select.created_at
-
-`string`
-
-#### select.entity_id
-
-`string`
-
-#### select.file_id
-
-`string`
-
-#### select.id
-
-`string`
-
-#### select.plugin_key
-
-`string`
-
-#### select.schema_key
-
-`string`
-
-#### select.snapshot_id
-
-`string`
+`SqliteWasmDatabase`
 
 ## Returns
 
-`Promise`\<`void`\>
+`SqliteWasmDatabase`
 
 ---
 
@@ -1663,7 +2028,7 @@ changes in the conflict.
 
 > **switchAccount**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/account/switch-account.ts:23](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/switch-account.ts#L23)
+Defined in: [packages/lix-sdk/src/account/switch-account.ts:23](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/switch-account.ts#L23)
 
 Switch the current account to the provided account.
 
@@ -1677,7 +2042,7 @@ Switch the current account to the provided account.
 
 #### to
 
-`object`[]
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}, `"id"` \| `"name"`\>[]
 
 ## Returns
 
@@ -1711,7 +2076,7 @@ Multiple active accounts
 
 > **switchVersion**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/version/switch-version.ts:27](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/version/switch-version.ts#L27)
+Defined in: [packages/lix-sdk/src/version/switch-version.ts:24](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/switch-version.ts#L24)
 
 Switches the current Version to the given Version.
 
@@ -1723,11 +2088,11 @@ The Version must already exist before calling this function.
 
 #### lix
 
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"plugin"`\>
+[`Lix`](../type-aliases/Lix.md)
 
 #### to
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
+`Pick`\<[`Version`](../type-aliases/Version.md), `"id"`\>
 
 ## Returns
 
@@ -1739,11 +2104,11 @@ The Version must already exist before calling this function.
   await switchVersion({ lix, to: otherVersion });
   ```
 
-Switching Versiones to a newly created Version.
+Switching to a newly created version.
 
   ```ts
   await lix.db.transaction().execute(async (trx) => {
-     const newVersion = await createVersion({ lix: { db: trx }, parent: currentVersion });
+     const newVersion = await createVersion({ lix: { db: trx }, changeSet: { id: currentVersion.change_set_id } });
      await switchVersion({ lix: { db: trx }, to: newVersion });
   });
   ```
@@ -1762,9 +2127,13 @@ Switching Versiones to a newly created Version.
 
 > **toBlob**(`args`): `Promise`\<`Blob`\>
 
-Defined in: [packages/lix-sdk/src/lix/to-blob.ts:10](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/to-blob.ts#L10)
+Defined in: [packages/lix-sdk/src/lix/to-blob.ts:17](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/to-blob.ts#L17)
 
-Convert the lix to a blob.
+Serialises the Lix database into a Blob.
+
+Use this helper to persist the current state to disk or send it to a
+server. The blob contains the raw SQLite file representing the Lix
+project.
 
 ## Parameters
 
@@ -1782,115 +2151,8 @@ Convert the lix to a blob.
 
 ```ts
 const blob = await toBlob({ lix })
+download(blob)
 ```
-
----
-
-## updateChangesInVersion
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / updateChangesInVersion
-
-# Function: updateChangesInVersion()
-
-> **updateChangesInVersion**(`args`): `Promise`\<`void`\>
-
-Defined in: [packages/lix-sdk/src/version/update-changes-in-version.ts:10](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/version/update-changes-in-version.ts#L10)
-
-Updates the changes that are part of a version.
-
-This function will update the change_set_element table to point to the new changes.
-
-## Parameters
-
-### args
-
-#### changes
-
-`object`[]
-
-#### lix
-
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"sqlite"`\>
-
-#### version
-
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
-
-## Returns
-
-`Promise`\<`void`\>
-
----
-
-## validateFilePath
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / validateFilePath
-
-# Function: validateFilePath()
-
-> **validateFilePath**(`path`): `void`
-
-Defined in: [packages/lix-sdk/src/file/validate-file-path.ts:12](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/file/validate-file-path.ts#L12)
-
-Validates a file path.
-
-## Parameters
-
-### path
-
-`string`
-
-## Returns
-
-`void`
-
-## Throws
-
-If the file path is invalid.
-
----
-
-## withSkipOwnChangeControl
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / withSkipOwnChangeControl
-
-# Function: withSkipOwnChangeControl()
-
-> **withSkipOwnChangeControl**\<`T`\>(`db`, `operation`): `Promise`\<`T`\>
-
-Defined in: [packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts:3](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/own-change-control/with-skip-own-change-control.ts#L3)
-
-## Type Parameters
-
-### T
-
-`T`
-
-## Parameters
-
-### db
-
-`Kysely`\<[`LixDatabaseSchema`](../type-aliases/LixDatabaseSchema.md)\>
-
-### operation
-
-(`trx`) => `Promise`\<`T`\>
-
-## Returns
-
-`Promise`\<`T`\>
 
 ---
 
@@ -1904,57 +2166,9 @@ Defined in: [packages/lix-sdk/src/own-change-control/with-skip-own-change-contro
 
 # Type Alias: Account
 
-> **Account** = `Selectable`\<[`AccountTable`](AccountTable.md)\>
+> **Account** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixAccountSchema`](../variables/LixAccountSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:40](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L40)
-
----
-
-## AccountTable
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / AccountTable
-
-# Type Alias: AccountTable
-
-> **AccountTable** = `object`
-
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:43](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L43)
-
-## Properties
-
-### id
-
-> **id**: `Generated`\<`string`\>
-
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:44](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L44)
-
-***
-
-### name
-
-> **name**: `string`
-
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:45](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L45)
-
----
-
-## AccountUpdate
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / AccountUpdate
-
-# Type Alias: AccountUpdate
-
-> **AccountUpdate** = `Updateable`\<[`AccountTable`](AccountTable.md)\>
-
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:42](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L42)
+Defined in: [packages/lix-sdk/src/account/schema.ts:68](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/schema.ts#L68)
 
 ---
 
@@ -1970,7 +2184,7 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:42](https://github.
 
 > **ActiveAccount** = `Selectable`\<[`ActiveAccountTable`](ActiveAccountTable.md)\>
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:48](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L48)
+Defined in: [packages/lix-sdk/src/account/schema.ts:76](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/schema.ts#L76)
 
 ---
 
@@ -1986,7 +2200,7 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:48](https://github.
 
 > **ActiveAccountTable** = `object`
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:51](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L51)
+Defined in: [packages/lix-sdk/src/account/schema.ts:71](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/schema.ts#L71)
 
 ## Properties
 
@@ -1994,7 +2208,7 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:51](https://github.
 
 > **id**: `string`
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:52](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L52)
+Defined in: [packages/lix-sdk/src/account/schema.ts:72](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/schema.ts#L72)
 
 ***
 
@@ -2002,23 +2216,63 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:52](https://github.
 
 > **name**: `string`
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:53](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L53)
+Defined in: [packages/lix-sdk/src/account/schema.ts:73](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/schema.ts#L73)
 
 ---
 
-## ActiveAccountUpdate
+## ActiveVersion
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / ActiveAccountUpdate
+[@lix-js/sdk](../README.md) / ActiveVersion
 
-# Type Alias: ActiveAccountUpdate
+# Type Alias: ActiveVersion
 
-> **ActiveAccountUpdate** = `Updateable`\<[`ActiveAccountTable`](ActiveAccountTable.md)\>
+> **ActiveVersion** = `Selectable`\<[`ActiveVersionTable`](ActiveVersionTable.md)\>
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:50](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L50)
+Defined in: [packages/lix-sdk/src/version/schema.ts:89](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L89)
+
+---
+
+## ActiveVersionTable
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / ActiveVersionTable
+
+# Type Alias: ActiveVersionTable
+
+> **ActiveVersionTable** = `object`
+
+Defined in: [packages/lix-sdk/src/version/schema.ts:84](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L84)
+
+## Properties
+
+### version\_id
+
+> **version\_id**: `string`
+
+Defined in: [packages/lix-sdk/src/version/schema.ts:85](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L85)
+
+---
+
+## ActiveVersionUpdate
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / ActiveVersionUpdate
+
+# Type Alias: ActiveVersionUpdate
+
+> **ActiveVersionUpdate** = `Updateable`\<[`ActiveVersionTable`](ActiveVersionTable.md)\>
+
+Defined in: [packages/lix-sdk/src/version/schema.ts:91](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L91)
 
 ---
 
@@ -2032,105 +2286,9 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:50](https://github.
 
 # Type Alias: Change
 
-> **Change** = `Selectable`\<`ChangeTable`\>
+> **Change** = `Selectable`\<[`ChangeView`](ChangeView.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:86](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L86)
-
----
-
-## ChangeAuthor
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / ChangeAuthor
-
-# Type Alias: ChangeAuthor
-
-> **ChangeAuthor** = `Selectable`\<`ChangeAuthorTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:120](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L120)
-
----
-
-## ChangeConflict
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / ChangeConflict
-
-# Type Alias: ChangeConflict
-
-> **ChangeConflict** = `Selectable`\<`ChangeConflictTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:245](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L245)
-
----
-
-## ChangeConflictResolution
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / ChangeConflictResolution
-
-# Type Alias: ChangeConflictResolution
-
-> **ChangeConflictResolution** = `Selectable`\<`ChangeConflictResolutionTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:264](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L264)
-
----
-
-## ChangeConflictResolutionUpdate
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / ChangeConflictResolutionUpdate
-
-# Type Alias: ChangeConflictResolutionUpdate
-
-> **ChangeConflictResolutionUpdate** = `Updateable`\<`ChangeConflictResolutionTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:268](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L268)
-
----
-
-## ChangeConflictUpdate
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / ChangeConflictUpdate
-
-# Type Alias: ChangeConflictUpdate
-
-> **ChangeConflictUpdate** = `Updateable`\<`ChangeConflictTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:247](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L247)
-
----
-
-## ChangeEdge
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / ChangeEdge
-
-# Type Alias: ChangeEdge
-
-> **ChangeEdge** = `Selectable`\<`ChangeEdgeTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:113](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L113)
+Defined in: [packages/lix-sdk/src/change/schema.ts:71](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L71)
 
 ---
 
@@ -2144,9 +2302,25 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:113](https://github.com/opr
 
 # Type Alias: ChangeSet
 
-> **ChangeSet** = `Selectable`\<`ChangeSetTable`\>
+> **ChangeSet** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixChangeSetSchema`](../variables/LixChangeSetSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:145](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L145)
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:78](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L78)
+
+---
+
+## ChangeSetEdge
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / ChangeSetEdge
+
+# Type Alias: ChangeSetEdge
+
+> **ChangeSetEdge** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixChangeSetEdgeSchema`](../variables/LixChangeSetEdgeSchema.md)\>
+
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:147](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L147)
 
 ---
 
@@ -2160,25 +2334,9 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:145](https://github.com/opr
 
 # Type Alias: ChangeSetElement
 
-> **ChangeSetElement** = `Selectable`\<`ChangeSetElementTable`\>
+> **ChangeSetElement** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixChangeSetElementSchema`](../variables/LixChangeSetElementSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:152](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L152)
-
----
-
-## ChangeSetElementUpdate
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / ChangeSetElementUpdate
-
-# Type Alias: ChangeSetElementUpdate
-
-> **ChangeSetElementUpdate** = `Updateable`\<`ChangeSetElementTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:154](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L154)
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:118](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L118)
 
 ---
 
@@ -2192,105 +2350,121 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:154](https://github.com/opr
 
 # Type Alias: ChangeSetLabel
 
-> **ChangeSetLabel** = `Selectable`\<`ChangeSetLabelTable`\>
+> **ChangeSetLabel** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixChangeSetLabelSchema`](../variables/LixChangeSetLabelSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:190](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L190)
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:177](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L177)
 
 ---
 
-## ChangeSetLabelUpdate
+## ChangeSetThread
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / ChangeSetLabelUpdate
+[@lix-js/sdk](../README.md) / ChangeSetThread
 
-# Type Alias: ChangeSetLabelUpdate
+# Type Alias: ChangeSetThread
 
-> **ChangeSetLabelUpdate** = `Updateable`\<`ChangeSetLabelTable`\>
+> **ChangeSetThread** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixChangeSetThreadSchema`](../variables/LixChangeSetThreadSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:192](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L192)
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:205](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L205)
 
 ---
 
-## ChangeSetUpdate
+## ChangeUpdate
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / ChangeSetUpdate
+[@lix-js/sdk](../README.md) / ChangeUpdate
 
-# Type Alias: ChangeSetUpdate
+# Type Alias: ChangeUpdate
 
-> **ChangeSetUpdate** = `Updateable`\<`ChangeSetTable`\>
+> **ChangeUpdate** = `Updateable`\<[`ChangeView`](ChangeView.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:147](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L147)
+Defined in: [packages/lix-sdk/src/change/schema.ts:73](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L73)
 
 ---
 
-## Comment
+## ChangeView
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / Comment
+[@lix-js/sdk](../README.md) / ChangeView
 
-# Type Alias: Comment
+# Type Alias: ChangeView
 
-> **Comment** = `Selectable`\<`CommentTable`\>
+> **ChangeView** = `object`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:170](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L170)
+Defined in: [packages/lix-sdk/src/change/schema.ts:74](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L74)
 
----
+## Properties
 
-## CommentUpdate
+### created\_at
 
-[**@lix-js/sdk**](../README.md)
+> **created\_at**: `Generated`\<`string`\>
 
-***
-
-[@lix-js/sdk](../README.md) / CommentUpdate
-
-# Type Alias: CommentUpdate
-
-> **CommentUpdate** = `Updateable`\<`CommentTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:172](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L172)
-
----
-
-## CurrentVersion
-
-[**@lix-js/sdk**](../README.md)
+Defined in: [packages/lix-sdk/src/change/schema.ts:82](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L82)
 
 ***
 
-[@lix-js/sdk](../README.md) / CurrentVersion
+### entity\_id
 
-# Type Alias: CurrentVersion
+> **entity\_id**: `string`
 
-> **CurrentVersion** = `Selectable`\<`CurrentVersionTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:228](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L228)
-
----
-
-## CurrentVersionUpdate
-
-[**@lix-js/sdk**](../README.md)
+Defined in: [packages/lix-sdk/src/change/schema.ts:76](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L76)
 
 ***
 
-[@lix-js/sdk](../README.md) / CurrentVersionUpdate
+### file\_id
 
-# Type Alias: CurrentVersionUpdate
+> **file\_id**: `string`
 
-> **CurrentVersionUpdate** = `Updateable`\<`CurrentVersionTable`\>
+Defined in: [packages/lix-sdk/src/change/schema.ts:79](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L79)
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:230](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L230)
+***
+
+### id
+
+> **id**: `Generated`\<`string`\>
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:75](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L75)
+
+***
+
+### plugin\_key
+
+> **plugin\_key**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:80](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L80)
+
+***
+
+### schema\_key
+
+> **schema\_key**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:77](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L77)
+
+***
+
+### schema\_version
+
+> **schema\_version**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:78](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L78)
+
+***
+
+### snapshot\_id
+
+> **snapshot\_id**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:81](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L81)
 
 ---
 
@@ -2302,11 +2476,11 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:230](https://github.com/opr
 
 [@lix-js/sdk](../README.md) / DetectedChange
 
-# Type Alias: DetectedChange\<Schema\>
+# Type Alias: DetectedChange\<T\>
 
-> **DetectedChange**\<`Schema`\> = `object`
+> **DetectedChange**\<`T`\> = `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:97](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L97)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:97](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L97)
 
 A detected change that lix ingests in to the database.
 
@@ -2336,9 +2510,9 @@ Type narrowing with a change schema:
 
 ## Type Parameters
 
-### Schema
+### T
 
-`Schema` *extends* [`ExperimentalChangeSchema`](ExperimentalChangeSchema.md) = `any`
+`T` = `any`
 
 ## Properties
 
@@ -2346,185 +2520,494 @@ Type narrowing with a change schema:
 
 > **entity\_id**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:98](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L98)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:98](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L98)
 
 ***
 
 ### schema
 
-> **schema**: `Omit`\<[`ExperimentalChangeSchema`](ExperimentalChangeSchema.md), `"schema"`\>
+> **schema**: [`LixSchemaDefinition`](LixSchemaDefinition.md)
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:99](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L99)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:99](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L99)
 
 ***
 
-### snapshot?
+### snapshot\_content
 
-> `optional` **snapshot**: [`ExperimentalInferType`](ExperimentalInferType.md)\<`Schema`\>
+> **snapshot\_content**: `T` \| `null`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:104](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L104)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:103](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L103)
 
-The change is considered a deletion if `snapshot` is `undefined`.
+The change is considered a deletion if `snapshot_content` is `null`.
 
 ---
 
-## DetectedConflict
+## EntityStateAllView
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / DetectedConflict
+[@lix-js/sdk](../README.md) / EntityStateAllView
 
-# Type Alias: DetectedConflict
+# Type Alias: EntityStateAllView\<T\>
 
-> **DetectedConflict** = `object`
+> **EntityStateAllView**\<`T`\> = `T` & `EntityStateAllColumns`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:107](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L107)
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:84](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L84)
 
-## Properties
+View type for entities across all versions.
 
-### conflictingChangeIds
+This type combines your entity properties with Lix operational columns
+including the version_id, allowing you to query and manipulate entities
+in specific versions.
 
-> **conflictingChangeIds**: `Set`\<[`Change`](Change.md)\[`"id"`\]\>
+Use this type when defining database views that need to work across
+multiple versions.
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:115](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L115)
+## Type Parameters
 
-The changes that are conflicting.
+### T
 
-***
-
-### key
-
-> **key**: `string`
-
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:111](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L111)
-
-#### See
-
----
-
-## Discussion
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / Discussion
-
-# Type Alias: Discussion
-
-> **Discussion** = `Selectable`\<`DiscussionTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:162](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L162)
-
----
-
-## DiscussionUpdate
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / DiscussionUpdate
-
-# Type Alias: DiscussionUpdate
-
-> **DiscussionUpdate** = `Updateable`\<`DiscussionTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:164](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L164)
-
----
-
-## ExperimentalChangeSchema
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / ExperimentalChangeSchema
-
-# Type Alias: ExperimentalChangeSchema
-
-> **ExperimentalChangeSchema** = \{ `key`: `string`; `schema`: `JSONSchema`; `type`: `"json"`; \} \| \{ `key`: `string`; `schema`: `undefined`; `type`: `"blob"`; \}
-
-Defined in: [packages/lix-sdk/src/change-schema/types.ts:43](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change-schema/types.ts#L43)
-
-The schema of a detected change.
-
-The key is used to identify the schema. It is highly
-recommended to use a unique key for each schema and
-include a version number in the key when breaking
-changes are made.
-
-- use `as const` to narrow the types
-- use `... satisfies ChangeSchema` to get autocomplete
+`T`
 
 ## Example
 
-```ts
-const FooV1 = {
-     key: "csv-plugin-foo-v1",
-     type: "json",
-     schema: jsonSchema,
-  } as const satisfies ChangeSchema;
+```typescript
+// Define a view type for key-value entities across versions
+type KeyValueAllView = EntityStateAllView<KeyValue>;
+
+// Query entities in a specific version
+await lix.db
+  .selectFrom("key_value_all")
+  .where("lixcol_version_id", "=", "v2")
+  .selectAll()
+  .execute();
 ```
 
 ---
 
-## ExperimentalInferType
+## EntityStateHistoryView
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / ExperimentalInferType
+[@lix-js/sdk](../README.md) / EntityStateHistoryView
 
-# Type Alias: ExperimentalInferType\<ChangeSchema\>
+# Type Alias: EntityStateHistoryView\<T\>
 
-> **ExperimentalInferType**\<`ChangeSchema`\> = `ChangeSchema` *extends* `object` ? `FromSchema`\<`ChangeSchema`\[`"schema"`\]\> : `ChangeSchema` *extends* `object` ? `any` : `ChangeSchema` *extends* `object` ? `ArrayBuffer` : `never`
+> **EntityStateHistoryView**\<`T`\> = `T` & `StateEntityHistoryColumns`
 
-Defined in: [packages/lix-sdk/src/change-schema/types.ts:6](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/change-schema/types.ts#L6)
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:109](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L109)
 
-Infers the snapshot content type from the schema.
+View type for entity history (read-only).
+
+This type combines your entity properties with historical tracking columns,
+allowing you to see how entities evolved over time through different change sets.
+
+History views are read-only and include change tracking information like
+change_id, change_set_id, and depth for blame functionality.
 
 ## Type Parameters
 
-### ChangeSchema
+### T
 
-`ChangeSchema`
+`T`
+
+## Example
+
+```typescript
+// Define a history view type for key-value entities
+type KeyValueHistoryView = EntityStateHistoryView<KeyValue>;
+
+// Query entity state at a specific change set
+await lix.db
+  .selectFrom("key_value_history")
+  .where("lixcol_change_set_id", "=", changeSetId)
+  .where("lixcol_depth", "=", 0)
+  .selectAll()
+  .execute();
+```
 
 ---
 
-## FileQueueEntry
+## EntityStateView
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / FileQueueEntry
+[@lix-js/sdk](../README.md) / EntityStateView
 
-# Type Alias: FileQueueEntry
+# Type Alias: EntityStateView\<T\>
 
-> **FileQueueEntry** = `Selectable`\<`FileQueueTable`\>
+> **EntityStateView**\<`T`\> = `T` & `EntityStateColumns`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:52](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L52)
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:59](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L59)
+
+View type for entities in the active version only.
+
+This type combines your entity properties with Lix operational columns
+(file_id, timestamps, etc.) while preserving LixGenerated markers for
+database schema compatibility.
+
+Use this type when defining database views that work with the current
+active version only.
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+// Define a view type for key-value entities
+type KeyValueView = EntityStateView<KeyValue>;
+
+// The resulting type includes both entity properties and operational columns
+// { key: string, value: any, lixcol_file_id: LixGenerated<string>, ... }
+```
 
 ---
 
-## FileQueueEntryUpdate
+## FromLixSchemaDefinition
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / FileQueueEntryUpdate
+[@lix-js/sdk](../README.md) / FromLixSchemaDefinition
 
-# Type Alias: FileQueueEntryUpdate
+# Type Alias: FromLixSchemaDefinition\<T\>
 
-> **FileQueueEntryUpdate** = `Updateable`\<`FileQueueTable`\>
+> **FromLixSchemaDefinition**\<`T`\> = `ApplyLixGenerated`\<`T`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:54](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L54)
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:444](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/definition.ts#L444)
+
+Convert a LixSchemaDefinition to a TypeScript type.
+
+This type transformation:
+1. Converts JSON Schema properties to TypeScript types
+2. Wraps properties with `x-lix-generated: true` in LixGenerated markers
+3. Transforms `type: "object"` without properties to `Record<string, any>`
+
+The resulting type can be used with LixInsertable, LixUpdateable, and
+LixSelectable for database operations.
+
+## Type Parameters
+
+### T
+
+`T` *extends* [`LixSchemaDefinition`](LixSchemaDefinition.md)
+
+## Example
+
+```typescript
+const AccountSchema = {
+  "x-lix-key": "account",
+  "x-lix-version": "1.0",
+  "x-lix-primary-key": ["id"],
+  type: "object",
+  properties: {
+    id: { type: "string", "x-lix-generated": true },
+    name: { type: "string" },
+    email: { type: "string" },
+    metadata: { type: "object" },  // Becomes Record<string, any>
+    created_at: { type: "string", "x-lix-generated": true }
+  },
+  required: ["id", "name", "email"],
+  additionalProperties: false
+} as const satisfies LixSchemaDefinition;
+
+type Account = FromLixSchemaDefinition<typeof AccountSchema>;
+// Result: {
+//   id: LixGenerated<string>;
+//   name: string;
+//   email: string;
+//   metadata: Record<string, any> | undefined;
+//   created_at: LixGenerated<string> | undefined;
+// }
+```
+
+---
+
+## GraphTraversalMode
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / GraphTraversalMode
+
+# Type Alias: GraphTraversalMode
+
+> **GraphTraversalMode** = [`GraphTraversalModeDirect`](GraphTraversalModeDirect.md) \| [`GraphTraversalModeRecursive`](GraphTraversalModeRecursive.md)
+
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:10](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/graph-traversal-mode.ts#L10)
+
+Describes how to traverse a graph structure (such as a change set graph).
+
+- `direct`: [GraphTraversalModeDirect](GraphTraversalModeDirect.md)
+- `recursive`: [GraphTraversalModeRecursive](GraphTraversalModeRecursive.md)
+
+This is used throughout Lix to determine how much of the graph should be included
+during operations like applying, merging, or analyzing change sets.
+
+---
+
+## GraphTraversalModeDirect
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / GraphTraversalModeDirect
+
+# Type Alias: GraphTraversalModeDirect
+
+> **GraphTraversalModeDirect** = `object`
+
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:37](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/graph-traversal-mode.ts#L37)
+
+Direct mode: Only the specified node is included.
+
+No parent or child traversal is performed.
+
+```mermaid
+graph TD
+    A[ChangeSet A]
+    B[ChangeSet B]
+    C[ChangeSet C]
+    B --> A
+    C --> B
+    click A "Selected (direct)"
+```
+
+Selected node: A
+Included: only A
+
+## Example
+
+```ts
+const mode: GraphTraversalMode = { type: "direct" };
+```
+
+## Properties
+
+### type
+
+> **type**: `"direct"`
+
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:38](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/graph-traversal-mode.ts#L38)
+
+---
+
+## GraphTraversalModeRecursive
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / GraphTraversalModeRecursive
+
+# Type Alias: GraphTraversalModeRecursive
+
+> **GraphTraversalModeRecursive** = `object`
+
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:67](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/graph-traversal-mode.ts#L67)
+
+Recursive mode: Includes the specified node and all transitive parents (or children).
+
+Optionally limits depth of traversal.
+
+```mermaid
+graph TD
+    A[ChangeSet A]
+    B[ChangeSet B]
+    C[ChangeSet C]
+    B --> A
+    C --> B
+    click C "Selected (recursive)"
+```
+
+## Example
+
+```ts
+const mode: GraphTraversalMode = { type: "recursive" };
+const mode: GraphTraversalMode = { type: "recursive", depth: 1 };
+```
+
+Selected node: C
+Included:
+- If `depth` is undefined: C → B → A
+- If `depth` is 1: C → B only
+
+## Properties
+
+### depth?
+
+> `optional` **depth**: `number`
+
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:74](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/graph-traversal-mode.ts#L74)
+
+Optional maximum depth to traverse.
+- `depth = 0` includes direct parents/children only.
+- `undefined` includes full ancestry/descendants.
+
+***
+
+### type
+
+> **type**: `"recursive"`
+
+Defined in: [packages/lix-sdk/src/database/graph-traversal-mode.ts:68](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/graph-traversal-mode.ts#L68)
+
+---
+
+## InternalChange
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / InternalChange
+
+# Type Alias: InternalChange
+
+> **InternalChange** = `Selectable`\<[`InternalChangeTable`](InternalChangeTable.md)\>
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:58](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L58)
+
+---
+
+## InternalChangeTable
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / InternalChangeTable
+
+# Type Alias: InternalChangeTable
+
+> **InternalChangeTable** = `object`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:60](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L60)
+
+## Properties
+
+### created\_at
+
+> **created\_at**: `Generated`\<`string`\>
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:68](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L68)
+
+***
+
+### entity\_id
+
+> **entity\_id**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:62](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L62)
+
+***
+
+### file\_id
+
+> **file\_id**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:65](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L65)
+
+***
+
+### id
+
+> **id**: `Generated`\<`string`\>
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:61](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L61)
+
+***
+
+### plugin\_key
+
+> **plugin\_key**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:66](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L66)
+
+***
+
+### schema\_key
+
+> **schema\_key**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:63](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L63)
+
+***
+
+### schema\_version
+
+> **schema\_version**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:64](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L64)
+
+***
+
+### snapshot\_id
+
+> **snapshot\_id**: `string`
+
+Defined in: [packages/lix-sdk/src/change/schema.ts:67](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L67)
+
+---
+
+## InternalSnapshotTable
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / InternalSnapshotTable
+
+# Type Alias: InternalSnapshotTable
+
+> **InternalSnapshotTable** = `object`
+
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:66](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/schema.ts#L66)
+
+## Properties
+
+### content
+
+> **content**: `Record`\<`string`, `any`\> \| `null`
+
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:68](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/schema.ts#L68)
+
+***
+
+### id
+
+> **id**: `Generated`\<`string`\>
+
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:67](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/schema.ts#L67)
+
+---
+
+## JSONType
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / JSONType
+
+# Type Alias: JSONType
+
+> **JSONType** = `string` \| `number` \| `boolean` \| `null` \| `JSONType`[] \| \{[`key`: `string`]: `JSONType`; \}
+
+Defined in: [packages/lix-sdk/src/schema-definition/json-type.ts:1](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/json-type.ts#L1)
 
 ---
 
@@ -2538,97 +3021,15 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:54](https://github.com/opra
 
 # Type Alias: KeyValue
 
-> **KeyValue** = `Selectable`\<[`KeyValueTable`](KeyValueTable.md)\>
+> **KeyValue** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixKeyValueSchema`](../variables/LixKeyValueSchema.md)\> & `object`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:27](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L27)
+Defined in: [packages/lix-sdk/src/key-value/schema.ts:34](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/key-value/schema.ts#L34)
 
----
-
-## KeyValueTable
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / KeyValueTable
-
-# Type Alias: KeyValueTable
-
-> **KeyValueTable** = `object`
-
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:30](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L30)
-
-## Properties
-
-### key
-
-> **key**: `KeyValueKeys`
-
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:39](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L39)
-
-The key of the key-value pair.
-
-Lix prefixes its keys with "lix-" to avoid conflicts with user-defined keys.
-
-#### Example
-
-```ts
-"namespace-cool-key"
-```
-
-***
-
-### skip\_change\_control
-
-> **skip\_change\_control**: `Generated`\<`boolean`\>
-
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:59](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L59)
-
-If `true`, the key-value pair is not tracked with own change control.
-
-Carefull (!) when querying the database. The return value will be `0` or `1`.
-SQLite does not have a boolean select type https://www.sqlite.org/datatype3.html.
-
-#### Default
-
-```ts
-false
-```
-
-***
+## Type declaration
 
 ### value
 
-> **value**: `string`
-
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:50](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L50)
-
-The value of the key-value pair.
-
-Must be a string. A JSON is a string too ;)
-
-#### Example
-
-```ts
-"some value"
-  "{ "foo": "bar" }"
-```
-
----
-
-## KeyValueUpdate
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / KeyValueUpdate
-
-# Type Alias: KeyValueUpdate
-
-> **KeyValueUpdate** = `Updateable`\<[`KeyValueTable`](KeyValueTable.md)\>
-
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:29](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L29)
+> **value**: `any`
 
 ---
 
@@ -2642,25 +3043,9 @@ Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:29](https://githu
 
 # Type Alias: Label
 
-> **Label** = `Selectable`\<`LabelTable`\>
+> **Label** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixLabelSchema`](../variables/LixLabelSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:182](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L182)
-
----
-
-## LabelUpdate
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / LabelUpdate
-
-# Type Alias: LabelUpdate
-
-> **LabelUpdate** = `Updateable`\<`LabelTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:184](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L184)
+Defined in: [packages/lix-sdk/src/label/schema.ts:75](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/label/schema.ts#L75)
 
 ---
 
@@ -2676,7 +3061,7 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:184](https://github.com/opr
 
 > **Lix** = `object`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:13](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/open-lix.ts#L13)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:13](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix.ts#L13)
 
 ## Properties
 
@@ -2684,7 +3069,7 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:13](https://github.com/opral/m
 
 > **db**: `Kysely`\<[`LixDatabaseSchema`](LixDatabaseSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/open-lix.ts#L25)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix.ts#L25)
 
 ***
 
@@ -2692,7 +3077,7 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:25](https://github.com/opral/m
 
 > **plugin**: `object`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:26](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/open-lix.ts#L26)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:26](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix.ts#L26)
 
 #### getAll()
 
@@ -2702,13 +3087,21 @@ Defined in: [packages/lix-sdk/src/lix/open-lix.ts:26](https://github.com/opral/m
 
 `Promise`\<[`LixPlugin`](LixPlugin.md)[]\>
 
+#### getAllSync()
+
+> **getAllSync**: () => [`LixPlugin`](LixPlugin.md)[]
+
+##### Returns
+
+[`LixPlugin`](LixPlugin.md)[]
+
 ***
 
 ### sqlite
 
 > **sqlite**: `SqliteWasmDatabase`
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:24](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/open-lix.ts#L24)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:24](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix.ts#L24)
 
 The raw SQLite instance.
 
@@ -2731,185 +3124,39 @@ is not guaranteed.
 
 # Type Alias: LixDatabaseSchema
 
-> **LixDatabaseSchema** = `object`
+> **LixDatabaseSchema** = `object` & `EntityViews`\<*typeof* [`LixKeyValueSchema`](../variables/LixKeyValueSchema.md), `"key_value"`, \{ `value`: [`KeyValue`](KeyValue.md)\[`"value"`\]; \}\> & `EntityViews`\<*typeof* [`LixAccountSchema`](../variables/LixAccountSchema.md), `"account"`\> & `EntityViews`\<*typeof* [`LixChangeSetSchema`](../variables/LixChangeSetSchema.md), `"change_set"`\> & `EntityViews`\<*typeof* [`LixChangeSetElementSchema`](../variables/LixChangeSetElementSchema.md), `"change_set_element"`\> & `EntityViews`\<*typeof* [`LixChangeSetEdgeSchema`](../variables/LixChangeSetEdgeSchema.md), `"change_set_edge"`\> & `EntityViews`\<*typeof* [`LixChangeSetLabelSchema`](../variables/LixChangeSetLabelSchema.md), `"change_set_label"`\> & `EntityViews`\<*typeof* [`LixChangeSetThreadSchema`](../variables/LixChangeSetThreadSchema.md), `"change_set_thread"`\> & `EntityViews`\<*typeof* `LixChangeAuthorSchema`, `"change_author"`\> & `EntityViews`\<*typeof* [`LixFileSchema`](../variables/LixFileSchema.md), `"file"`, \{ `data`: `Uint8Array`; \}\> & `EntityViews`\<*typeof* [`LixLabelSchema`](../variables/LixLabelSchema.md), `"label"`\> & `EntityViews`\<*typeof* `LixStoredSchemaSchema`, `"stored_schema"`, \{ `value`: `any`; \}\> & `EntityViews`\<*typeof* [`LixLogSchema`](../variables/LixLogSchema.md), `"log"`\> & `EntityViews`\<*typeof* [`LixThreadSchema`](../variables/LixThreadSchema.md), `"thread"`\> & `EntityViews`\<*typeof* [`LixThreadCommentSchema`](../variables/LixThreadCommentSchema.md), `"thread_comment"`, \{ `body`: [`ThreadComment`](ThreadComment.md)\[`"body"`\]; \}\> & `EntityViews`\<*typeof* [`LixVersionSchema`](../variables/LixVersionSchema.md), `"version"`\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:9](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L9)
+Defined in: [packages/lix-sdk/src/database/schema.ts:74](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/schema.ts#L74)
 
-## Properties
-
-### account
-
-> **account**: [`AccountTable`](AccountTable.md)
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:11](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L11)
-
-***
+## Type declaration
 
 ### active\_account
 
 > **active\_account**: [`ActiveAccountTable`](ActiveAccountTable.md)
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:12](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L12)
+### active\_version
 
-***
+> **active\_version**: [`ActiveVersionTable`](ActiveVersionTable.md)
 
 ### change
 
-> **change**: `ChangeTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:23](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L23)
-
-***
-
-### change\_author
-
-> **change\_author**: `ChangeAuthorTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:25](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L25)
-
-***
-
-### change\_conflict
-
-> **change\_conflict**: `ChangeConflictTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:46](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L46)
-
-***
-
-### change\_conflict\_resolution
-
-> **change\_conflict\_resolution**: `ChangeConflictResolutionTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:47](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L47)
-
-***
-
-### change\_edge
-
-> **change\_edge**: `ChangeEdgeTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:24](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L24)
-
-***
-
-### change\_set
-
-> **change\_set**: `ChangeSetTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:28](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L28)
-
-***
-
-### change\_set\_element
-
-> **change\_set\_element**: `ChangeSetElementTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:29](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L29)
-
-***
-
-### change\_set\_label
-
-> **change\_set\_label**: `ChangeSetLabelTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:30](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L30)
-
-***
-
-### comment
-
-> **comment**: `CommentTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:37](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L37)
-
-***
-
-### current\_version
-
-> **current\_version**: `CurrentVersionTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:40](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L40)
-
-***
-
-### discussion
-
-> **discussion**: `DiscussionTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:36](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L36)
-
-***
-
-### file
-
-> **file**: `LixFileTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:19](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L19)
-
-***
-
-### file\_queue
-
-> **file\_queue**: `FileQueueTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:20](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L20)
-
-***
-
-### key\_value
-
-> **key\_value**: [`KeyValueTable`](KeyValueTable.md)
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:33](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L33)
-
-***
-
-### label
-
-> **label**: `LabelTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:16](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L16)
-
-***
-
-### mutation\_log
-
-> **mutation\_log**: `MutationLogTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:49](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L49)
-
-***
+> **change**: [`ChangeView`](ChangeView.md)
 
 ### snapshot
 
-> **snapshot**: `SnapshotTable`
+> **snapshot**: [`ToKysely`](ToKysely.md)\<[`Snapshot`](Snapshot.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:15](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L15)
+### state
 
-***
+> **state**: `StateView`
 
-### version
+### state\_all
 
-> **version**: `VersionTable`
+> **state\_all**: `StateView`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:41](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L41)
+### state\_history
 
-***
-
-### version\_change
-
-> **version\_change**: `VersionChangeTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:42](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L42)
-
-***
-
-### version\_change\_conflict
-
-> **version\_change\_conflict**: `VersionChangeConflictTable`
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:43](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L43)
+> **state\_history**: `StateHistoryView`
 
 ---
 
@@ -2923,25 +3170,157 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:43](https://github.com/opra
 
 # Type Alias: LixFile
 
-> **LixFile** = `Selectable`\<`LixFileTable`\>
+> **LixFile** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixFileSchema`](../variables/LixFileSchema.md)\> & `object`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:67](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L67)
+Defined in: [packages/lix-sdk/src/file/schema.ts:279](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/file/schema.ts#L279)
+
+Pure business logic type inferred from the LixFileSchema.
+
+Uses "Type" suffix to avoid collision with JavaScript's built-in File type,
+while maintaining consistency with our naming pattern where schema-derived
+types represent the pure business logic without database infrastructure columns.
+
+## Type declaration
+
+### data
+
+> **data**: `Uint8Array`
 
 ---
 
-## LixFileUpdate
+## LixGenerated
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / LixFileUpdate
+[@lix-js/sdk](../README.md) / LixGenerated
 
-# Type Alias: LixFileUpdate
+# Type Alias: LixGenerated\<T\>
 
-> **LixFileUpdate** = `Updateable`\<`LixFileTable`\>
+> **LixGenerated**\<`T`\> = `T` & `object`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:69](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L69)
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:202](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/definition.ts#L202)
+
+Marker type for database columns that are auto-generated.
+
+This type brands values as "generated" to enable special handling in insert/update
+operations. Generated fields become optional in inserts since the database
+provides default values.
+
+The type accepts T values directly for developer convenience while preserving
+the generated marker for type transformations.
+
+## Type declaration
+
+### \_\_lixGenerated?
+
+> `readonly` `optional` **\_\_lixGenerated**: `true`
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+type Account = {
+  id: LixGenerated<string>;  // Auto-generated UUID
+  name: string;              // User-provided
+  created_at: LixGenerated<string>;  // Auto-generated timestamp
+};
+
+// In inserts, generated fields are optional
+const newAccount: LixInsertable<Account> = {
+  name: "John"  // id and created_at are optional
+};
+```
+
+---
+
+## LixInsertable
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixInsertable
+
+# Type Alias: LixInsertable\<T\>
+
+> **LixInsertable**\<`T`\> = `{ [K in NonNullableInsertKeys<T>]: InsertType<T[K]> }` & `{ [K in NullableInsertKeys<T>]?: InsertType<T[K]> }`
+
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:293](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/definition.ts#L293)
+
+Transform a type for insert operations.
+
+This type makes LixGenerated fields optional while keeping other required
+fields mandatory. Use this when defining types for creating new entities.
+
+The database will automatically populate generated fields (like IDs,
+timestamps) if not provided.
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+type Account = {
+  id: LixGenerated<string>;
+  name: string;
+  email: string;
+  created_at: LixGenerated<string>;
+};
+
+type NewAccount = LixInsertable<Account>;
+// Result: { name: string; email: string; id?: string; created_at?: string; }
+
+const account: NewAccount = {
+  name: "John",
+  email: "john@example.com"
+  // id and created_at are optional
+};
+```
+
+---
+
+## LixInternalDatabaseSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixInternalDatabaseSchema
+
+# Type Alias: LixInternalDatabaseSchema
+
+> **LixInternalDatabaseSchema** = [`LixDatabaseSchema`](LixDatabaseSchema.md) & `object`
+
+Defined in: [packages/lix-sdk/src/database/schema.ts:48](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/schema.ts#L48)
+
+## Type declaration
+
+### internal\_change
+
+> **internal\_change**: [`InternalChangeTable`](InternalChangeTable.md)
+
+### internal\_change\_in\_transaction
+
+> **internal\_change\_in\_transaction**: `InternalChangeInTransactionTable`
+
+### internal\_snapshot
+
+> **internal\_snapshot**: [`InternalSnapshotTable`](InternalSnapshotTable.md)
+
+### internal\_state\_cache
+
+> **internal\_state\_cache**: `InternalStateCacheTable`
 
 ---
 
@@ -2957,23 +3336,29 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:69](https://github.com/opra
 
 > **LixPlugin** = `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:9](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L9)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:7](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L7)
 
 ## Properties
 
 ### applyChanges()?
 
-> `optional` **applyChanges**: (`args`) => `Promise`\<\{ `fileData`: [`LixFile`](LixFile.md)\[`"data"`\]; \}\>
+> `optional` **applyChanges**: (`{
+		file,
+		changes,
+	}`) => `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:45](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L45)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:34](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L34)
 
 #### Parameters
 
-##### args
+##### \{
+		file,
+		changes,
+	\}
 
 ###### changes
 
-[`Change`](Change.md)[]
+[`Change`](Change.md) & `object`[]
 
 ###### file
 
@@ -2987,21 +3372,24 @@ happen when merging a version that created a new file
 that did not exist in the target version. Or, a file
 has been deleted and should be restored at a later point.
 
-###### lix
-
-[`LixReadonly`](LixReadonly.md)
-
 #### Returns
 
-`Promise`\<\{ `fileData`: [`LixFile`](LixFile.md)\[`"data"`\]; \}\>
+`object`
+
+##### fileData
+
+> **fileData**: `Uint8Array`
 
 ***
 
 ### detectChanges()?
 
-> `optional` **detectChanges**: (`args`) => `Promise`\<[`DetectedChange`](DetectedChange.md)[]\>
+> `optional` **detectChanges**: (`{
+		before,
+		after,
+	}`) => [`DetectedChange`](DetectedChange.md)[]
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:29](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L29)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:27](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L27)
 
 Detects changes between the `before` and `after` file update(s).
 
@@ -3014,23 +3402,22 @@ will handle the deletion. Hence, `after` is always be defined.
 
 #### Parameters
 
-##### args
+##### \{
+		before,
+		after,
+	\}
 
 ###### after
 
-[`LixFile`](LixFile.md)
+`Omit`\<[`LixFile`](LixFile.md), `"data"`\> & `object`
 
 ###### before?
 
-[`LixFile`](LixFile.md)
-
-###### lix
-
-[`LixReadonly`](LixReadonly.md)
+`Omit`\<[`LixFile`](LixFile.md), `"data"`\> & `object`
 
 #### Returns
 
-`Promise`\<[`DetectedChange`](DetectedChange.md)[]\>
+[`DetectedChange`](DetectedChange.md)[]
 
 ***
 
@@ -3038,7 +3425,7 @@ will handle the deletion. Hence, `after` is always be defined.
 
 > `optional` **detectChangesGlob**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:18](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L18)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:16](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L16)
 
 The glob pattern that should invoke `detectChanges()`.
 
@@ -3051,37 +3438,11 @@ The glob pattern that should invoke `detectChanges()`.
 
 ***
 
-### detectConflicts()?
-
-> `optional` **detectConflicts**: (`args`) => `Promise`\<[`DetectedConflict`](DetectedConflict.md)[]\>
-
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:41](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L41)
-
-Detects changes from the source lix that conflict with changes in the target lix.
-
-#### Parameters
-
-##### args
-
-###### changes
-
-[`Change`](Change.md)[]
-
-###### lix
-
-[`LixReadonly`](LixReadonly.md)
-
-#### Returns
-
-`Promise`\<[`DetectedConflict`](DetectedConflict.md)[]\>
-
-***
-
 ### diffUiComponent?
 
 > `optional` **diffUiComponent**: `CustomElementConstructor`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:37](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L37)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:53](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L53)
 
 UI components that are used to render the diff view.
 
@@ -3091,37 +3452,184 @@ UI components that are used to render the diff view.
 
 > **key**: `string`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:10](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L10)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:8](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L8)
 
 ---
 
-## LixReadonly
+## LixSchemaDefinition
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / LixReadonly
+[@lix-js/sdk](../README.md) / LixSchemaDefinition
 
-# Type Alias: LixReadonly
+# Type Alias: LixSchemaDefinition
 
-> **LixReadonly** = `Pick`\<[`Lix`](Lix.md), `"plugin"`\> & `object`
+> **LixSchemaDefinition** = `JSONSchema` & `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:118](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L118)
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:3](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/definition.ts#L3)
+
+LixSchema
+
+A superset of JSON Schema (draft-07) that includes Lix-specific metadata
+and supports custom extensions.
+
+Custom extensions may be added with any x-* prefix.
 
 ## Type declaration
 
-### db
+### properties?
 
-> **db**: `object`
+> `optional` **properties**: `object`
 
-#### db.selectFrom
+#### Index Signature
 
-> **selectFrom**: [`Lix`](Lix.md)\[`"db"`\]\[`"selectFrom"`\]
+\[`key`: `string`\]: `LixPropertySchema`
 
-#### db.withRecursive
+### type
 
-> **withRecursive**: [`Lix`](Lix.md)\[`"db"`\]\[`"withRecursive"`\]
+> **type**: `"object"`
+
+### x-lix-foreign-keys?
+
+> `optional` **x-lix-foreign-keys**: `object`
+
+Foreign key constraints referencing other schemas.
+
+#### Index Signature
+
+\[`localProperty`: `string`\]: `object`
+
+#### Example
+
+```ts
+{
+	 *     "x-lix-foreign-keys": {
+	 *       "author_id": {
+	 *         "schemaKey": "user_profile",
+	 *         "property": "id"
+	 *       },
+	 *       "category_id": {
+	 *         "schemaKey": "post_category",
+	 *         "property": "id"
+	 *       }
+	 *     }
+	 *   }
+```
+
+### x-lix-key
+
+> **x-lix-key**: `string`
+
+The key of the schema.
+
+The key is used to identify the schema. You must use a
+unique key for each schema.
+
+#### Example
+
+```ts
+"csv_plugin_cell"
+```
+
+### x-lix-primary-key?
+
+> `optional` **x-lix-primary-key**: `string`[] \| readonly `string`[]
+
+### x-lix-unique?
+
+> `optional` **x-lix-unique**: `string`[][] \| readonly readonly `string`[][]
+
+Properties that must be unique per version.
+
+Not to be confused by `x-version` which is used for versioning the schema.
+
+#### Example
+
+```ts
+{
+	 *     "x-lix-unique": [
+	 *       // the id must be unique
+	 *       ["id"],
+	 *       // the name and age must be unique as well
+	 *       ["name", "age"],
+	 *     ],
+	 *     properties: {
+	 *       id: { type: "string" },
+	 *       name: { type: "string" },
+	 *       age: { type: "number" },
+	 *     },
+	 *   }
+```
+
+### x-lix-version
+
+> **x-lix-version**: `string`
+
+The version of the schema.
+
+Use the major version to signal breaking changes.
+Use the minor version to signal non-breaking changes.
+
+#### Example
+
+```ts
+"1.0"
+```
+
+---
+
+## LixSelectable
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixSelectable
+
+# Type Alias: LixSelectable\<T\>
+
+> **LixSelectable**\<`T`\> = `{ [K in keyof T]: SelectType<T[K]> }`
+
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:363](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/definition.ts#L363)
+
+Transform a type for select/query operations.
+
+This type unwraps all LixGenerated markers, giving you the actual runtime
+types that will be returned from database queries. All fields are required
+and have their base types.
+
+Use this type when defining the shape of data returned from queries or
+when passing entity data to UI components.
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+type Account = {
+  id: LixGenerated<string>;
+  name: string;
+  email: string;
+  created_at: LixGenerated<string>;
+};
+
+type AccountData = LixSelectable<Account>;
+// Result: { id: string; name: string; email: string; created_at: string; }
+
+// Query results have this shape
+const accounts: AccountData[] = await db
+  .selectFrom("account")
+  .selectAll()
+  .execute();
+
+console.log(accounts[0].id);  // string (not LixGenerated<string>)
+```
 
 ---
 
@@ -3137,7 +3645,7 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:118](https://github.com/o
 
 > **LixServerProtocolHandlerContext** = `object`
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:9](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L9)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L9)
 
 ## Properties
 
@@ -3145,7 +3653,7 @@ Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol
 
 > **environment**: `LspEnvironment`
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:11](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L11)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:11](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L11)
 
 ***
 
@@ -3153,7 +3661,7 @@ Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol
 
 > `optional` **params**: `Record`\<`string`, `string` \| `undefined`\>
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:12](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L12)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:12](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L12)
 
 ***
 
@@ -3161,39 +3669,90 @@ Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol
 
 > **request**: `Request`
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:10](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L10)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:10](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L10)
 
 ---
 
-## NewAccount
+## LixUpdateable
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / NewAccount
+[@lix-js/sdk](../README.md) / LixUpdateable
 
-# Type Alias: NewAccount
+# Type Alias: LixUpdateable\<T\>
 
-> **NewAccount** = `Insertable`\<[`AccountTable`](AccountTable.md)\>
+> **LixUpdateable**\<`T`\> = `{ [K in keyof T]?: UpdateType<T[K]> }`
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:41](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L41)
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:328](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/definition.ts#L328)
+
+Transform a type for update operations.
+
+This type makes all fields optional, allowing partial updates where you
+only specify the fields you want to change. LixGenerated markers are
+removed since you're providing explicit values.
+
+The database preserves existing values for any fields not included
+in the update.
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+type Account = {
+  id: LixGenerated<string>;
+  name: string;
+  email: string;
+  updated_at: LixGenerated<string>;
+};
+
+type AccountUpdate = LixUpdateable<Account>;
+// Result: { id?: string; name?: string; email?: string; updated_at?: string; }
+
+// Update only the email
+const updates: AccountUpdate = {
+  email: "newemail@example.com"
+  // Other fields remain unchanged
+};
+```
 
 ---
 
-## NewActiveAccount
+## Log
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / NewActiveAccount
+[@lix-js/sdk](../README.md) / Log
 
-# Type Alias: NewActiveAccount
+# Type Alias: Log
 
-> **NewActiveAccount** = `Insertable`\<[`ActiveAccountTable`](ActiveAccountTable.md)\>
+> **Log** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixLogSchema`](../variables/LixLogSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/account/database-schema.ts:49](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/account/database-schema.ts#L49)
+Defined in: [packages/lix-sdk/src/log/schema.ts:55](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/log/schema.ts#L55)
+
+---
+
+## NewActiveVersion
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / NewActiveVersion
+
+# Type Alias: NewActiveVersion
+
+> **NewActiveVersion** = `Insertable`\<[`ActiveVersionTable`](ActiveVersionTable.md)\>
+
+Defined in: [packages/lix-sdk/src/version/schema.ts:90](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L90)
 
 ---
 
@@ -3207,297 +3766,124 @@ Defined in: [packages/lix-sdk/src/account/database-schema.ts:49](https://github.
 
 # Type Alias: NewChange
 
-> **NewChange** = `Insertable`\<`ChangeTable`\>
+> **NewChange** = `Insertable`\<[`ChangeView`](ChangeView.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:87](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L87)
+Defined in: [packages/lix-sdk/src/change/schema.ts:72](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L72)
 
 ---
 
-## NewChangeAuthor
+## NewInternalChange
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / NewChangeAuthor
+[@lix-js/sdk](../README.md) / NewInternalChange
 
-# Type Alias: NewChangeAuthor
+# Type Alias: NewInternalChange
 
-> **NewChangeAuthor** = `Insertable`\<`ChangeAuthorTable`\>
+> **NewInternalChange** = `Insertable`\<[`InternalChangeTable`](InternalChangeTable.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:121](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L121)
+Defined in: [packages/lix-sdk/src/change/schema.ts:59](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/schema.ts#L59)
 
 ---
 
-## NewChangeConflict
+## NewState
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / NewChangeConflict
+[@lix-js/sdk](../README.md) / NewState
 
-# Type Alias: NewChangeConflict
+# Type Alias: NewState\<T\>
 
-> **NewChangeConflict** = `Insertable`\<`ChangeConflictTable`\>
+> **NewState**\<`T`\> = [`LixInsertable`](LixInsertable.md)\<[`EntityStateView`](EntityStateView.md)\<`T`\>\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:246](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L246)
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:239](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L239)
+
+Type for creating new entities in the active version.
+
+This type makes all LixGenerated columns optional (like id, timestamps),
+while keeping other required fields mandatory. The database will
+automatically populate generated fields if not provided.
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+// Use NewState for form data types
+interface SettingsFormData {
+  setting: NewState<KeyValue>;
+}
+
+async function createSetting(formData: SettingsFormData) {
+  // Only key and value are required
+  const newSetting: NewState<KeyValue> = {
+    key: formData.setting.key,
+    value: formData.setting.value
+    // lixcol_created_at, lixcol_file_id etc. are auto-generated
+  };
+
+  await lix.db
+    .insertInto("key_value")
+    .values(newSetting)
+    .execute();
+}
+```
 
 ---
 
-## NewChangeConflictResolution
+## NewStateAll
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / NewChangeConflictResolution
+[@lix-js/sdk](../README.md) / NewStateAll
 
-# Type Alias: NewChangeConflictResolution
+# Type Alias: NewStateAll\<T\>
 
-> **NewChangeConflictResolution** = `Insertable`\<`ChangeConflictResolutionTable`\>
+> **NewStateAll**\<`T`\> = [`LixInsertable`](LixInsertable.md)\<[`EntityStateAllView`](EntityStateAllView.md)\<`T`\>\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:266](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L266)
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:298](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L298)
 
----
+Type for creating new entities with version control.
 
-## NewChangeEdge
+This type includes lixcol_version_id for creating entities in specific
+versions. Like NewState, it makes LixGenerated columns optional.
 
-[**@lix-js/sdk**](../README.md)
+## Type Parameters
 
-***
+### T
 
-[@lix-js/sdk](../README.md) / NewChangeEdge
+`T`
 
-# Type Alias: NewChangeEdge
+## Example
 
-> **NewChangeEdge** = `Insertable`\<`ChangeEdgeTable`\>
+```typescript
+// Use NewStateAll for version-specific creation
+async function createFeatureFlag(versionId: string, flag: {
+  key: string;
+  value: boolean;
+}) {
+  const newFlag: NewStateAll<KeyValue> = {
+    key: flag.key,
+    value: flag.value,
+    lixcol_version_id: versionId  // Create in specific version
+  };
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:114](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L114)
-
----
-
-## NewChangeSet
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewChangeSet
-
-# Type Alias: NewChangeSet
-
-> **NewChangeSet** = `Insertable`\<`ChangeSetTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:146](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L146)
-
----
-
-## NewChangeSetElement
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewChangeSetElement
-
-# Type Alias: NewChangeSetElement
-
-> **NewChangeSetElement** = `Insertable`\<`ChangeSetElementTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:153](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L153)
-
----
-
-## NewChangeSetLabel
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewChangeSetLabel
-
-# Type Alias: NewChangeSetLabel
-
-> **NewChangeSetLabel** = `Insertable`\<`ChangeSetLabelTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:191](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L191)
-
----
-
-## NewComment
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewComment
-
-# Type Alias: NewComment
-
-> **NewComment** = `Insertable`\<`CommentTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:171](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L171)
-
----
-
-## NewCurrentVersion
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewCurrentVersion
-
-# Type Alias: NewCurrentVersion
-
-> **NewCurrentVersion** = `Insertable`\<`CurrentVersionTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:229](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L229)
-
----
-
-## NewDiscussion
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewDiscussion
-
-# Type Alias: NewDiscussion
-
-> **NewDiscussion** = `Insertable`\<`DiscussionTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:163](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L163)
-
----
-
-## NewFileQueueEntry
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewFileQueueEntry
-
-# Type Alias: NewFileQueueEntry
-
-> **NewFileQueueEntry** = `Insertable`\<`FileQueueTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:53](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L53)
-
----
-
-## NewKeyValue
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewKeyValue
-
-# Type Alias: NewKeyValue
-
-> **NewKeyValue** = `Insertable`\<[`KeyValueTable`](KeyValueTable.md)\>
-
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:28](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L28)
-
----
-
-## NewLabel
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewLabel
-
-# Type Alias: NewLabel
-
-> **NewLabel** = `Insertable`\<`LabelTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:183](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L183)
-
----
-
-## NewLixFile
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewLixFile
-
-# Type Alias: NewLixFile
-
-> **NewLixFile** = `Insertable`\<`LixFileTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:68](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L68)
-
----
-
-## NewSnapshot
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewSnapshot
-
-# Type Alias: NewSnapshot
-
-> **NewSnapshot** = `Insertable`\<`SnapshotTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:128](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L128)
-
----
-
-## NewVersionChange
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewVersionChange
-
-# Type Alias: NewVersionChange
-
-> **NewVersionChange** = `Insertable`\<`VersionChangeTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:209](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L209)
-
----
-
-## Newversion
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / Newversion
-
-# Type Alias: Newversion
-
-> **Newversion** = `Insertable`\<`VersionTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:201](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L201)
-
----
-
-## NewversionChangeConflict
-
-[**@lix-js/sdk**](../README.md)
-
-***
-
-[@lix-js/sdk](../README.md) / NewversionChangeConflict
-
-# Type Alias: NewversionChangeConflict
-
-> **NewversionChangeConflict** = `Insertable`\<`VersionChangeConflictTable`\>
-
-Defined in: [packages/lix-sdk/src/database/schema.ts:220](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L220)
+  await lix.db
+    .insertInto("key_value_all")
+    .values(newFlag)
+    .execute();
+}
+```
 
 ---
 
@@ -3511,9 +3897,338 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:220](https://github.com/opr
 
 # Type Alias: Snapshot
 
-> **Snapshot** = `Selectable`\<`SnapshotTable`\>
+> **Snapshot** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixSnapshotSchema`](../variables/LixSnapshotSchema.md)\> & `object`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:127](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L127)
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:61](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/schema.ts#L61)
+
+## Type declaration
+
+### content
+
+> **content**: `Record`\<`string`, `any`\> \| `null`
+
+---
+
+## State
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / State
+
+# Type Alias: State\<T\>
+
+> **State**\<`T`\> = [`LixSelectable`](LixSelectable.md)\<[`EntityStateView`](EntityStateView.md)\<`T`\>\>
+
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:146](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L146)
+
+Type for querying entities from the active version.
+
+This type unwraps all LixGenerated markers, giving you the actual runtime types
+for entity properties and operational columns. Use this when working with
+query results from the database or passing data to UI components.
+
+All properties are required and have their actual types (no LixGenerated wrappers).
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+// Use State type for UI components that display entity data
+interface SettingsCardProps {
+  setting: State<KeyValue>;
+}
+
+function SettingsCard({ setting }: SettingsCardProps) {
+  return (
+    <div>
+      <h3>{setting.key}</h3>
+      <p>{setting.value}</p>
+      <time>{setting.lixcol_updated_at}</time>
+    </div>
+  );
+}
+
+// Query and pass to UI
+const settings = await lix.db
+  .selectFrom("key_value")
+  .selectAll()
+  .execute();
+
+settings.map(setting => <SettingsCard setting={setting} />);
+```
+
+---
+
+## StateAll
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / StateAll
+
+# Type Alias: StateAll\<T\>
+
+> **StateAll**\<`T`\> = [`LixSelectable`](LixSelectable.md)\<[`EntityStateAllView`](EntityStateAllView.md)\<`T`\>\>
+
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:175](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L175)
+
+Type for querying entities across all versions.
+
+This type unwraps all LixGenerated markers and includes the version_id column,
+allowing you to work with entities from any version in the database.
+
+All properties are required and have their actual types (no LixGenerated wrappers).
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+// Use StateAll for version comparison UI
+interface VersionDiffProps {
+  oldValue: StateAll<KeyValue>;
+  newValue: StateAll<KeyValue>;
+}
+
+function VersionDiff({ oldValue, newValue }: VersionDiffProps) {
+  return (
+    <div>
+      <h4>{oldValue.key}</h4>
+      <div>Version {oldValue.lixcol_version_id}: {oldValue.value}</div>
+      <div>Version {newValue.lixcol_version_id}: {newValue.value}</div>
+    </div>
+  );
+}
+```
+
+---
+
+## StateAllUpdate
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / StateAllUpdate
+
+# Type Alias: StateAllUpdate\<T\>
+
+> **StateAllUpdate**\<`T`\> = [`LixUpdateable`](LixUpdateable.md)\<[`EntityStateAllView`](EntityStateAllView.md)\<`T`\>\>
+
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:328](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L328)
+
+Type for updating entities in specific versions.
+
+This type makes all columns optional for partial updates and includes
+version control. You can update entities in any version or change
+an entity's version.
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+// Use StateAllUpdate for version-specific updates
+async function toggleFeatureFlag(
+  key: string,
+  versionId: string,
+  enabled: boolean
+) {
+  const updates: StateAllUpdate<KeyValue> = {
+    value: enabled
+  };
+
+  await lix.db
+    .updateTable("key_value_all")
+    .set(updates)
+    .where("key", "=", key)
+    .where("lixcol_version_id", "=", versionId)
+    .execute();
+}
+```
+
+---
+
+## StateHistory
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / StateHistory
+
+# Type Alias: StateHistory\<T\>
+
+> **StateHistory**\<`T`\> = [`LixSelectable`](LixSelectable.md)\<[`EntityStateHistoryView`](EntityStateHistoryView.md)\<`T`\>\>
+
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:208](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L208)
+
+Type for querying entity history.
+
+This type unwraps all LixGenerated markers and includes historical tracking
+columns like change_id, change_set_id, and depth. Use this for blame
+functionality and understanding how entities evolved.
+
+History queries are read-only.
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+// Use StateHistory for blame UI
+interface BlameViewProps {
+  history: StateHistory<KeyValue>[];
+}
+
+function BlameView({ history }: BlameViewProps) {
+  return (
+    <ul>
+      {history.map(state => (
+        <li key={state.lixcol_change_id}>
+          <strong>Depth {state.lixcol_depth}:</strong> {state.value}
+          <br />
+          <small>Change: {state.lixcol_change_id}</small>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+---
+
+## StateUpdate
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / StateUpdate
+
+# Type Alias: StateUpdate\<T\>
+
+> **StateUpdate**\<`T`\> = [`LixUpdateable`](LixUpdateable.md)\<[`EntityStateView`](EntityStateView.md)\<`T`\>\>
+
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:270](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L270)
+
+Type for updating entities in the active version.
+
+This type makes all columns optional, allowing partial updates.
+Only include the fields you want to change - the database will
+preserve existing values for omitted fields.
+
+## Type Parameters
+
+### T
+
+`T`
+
+## Example
+
+```typescript
+// Use StateUpdate for update form data
+interface UpdateSettingData {
+  updates: StateUpdate<KeyValue>;
+}
+
+async function updateSetting(key: string, updates: UpdateSettingData) {
+  // Only update the fields that changed
+  const patch: StateUpdate<KeyValue> = {
+    value: updates.updates.value
+    // key, timestamps, etc. remain unchanged
+  };
+
+  await lix.db
+    .updateTable("key_value")
+    .set(patch)
+    .where("key", "=", key)
+    .execute();
+}
+```
+
+---
+
+## Thread
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / Thread
+
+# Type Alias: Thread
+
+> **Thread** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixThreadSchema`](../variables/LixThreadSchema.md)\>
+
+Defined in: [packages/lix-sdk/src/thread/schema.ts:80](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/thread/schema.ts#L80)
+
+---
+
+## ThreadComment
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / ThreadComment
+
+# Type Alias: ThreadComment
+
+> **ThreadComment** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixThreadCommentSchema`](../variables/LixThreadCommentSchema.md)\> & `object`
+
+Defined in: [packages/lix-sdk/src/thread/schema.ts:81](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/thread/schema.ts#L81)
+
+## Type declaration
+
+### body
+
+> **body**: `ZettelDoc`
+
+---
+
+## ToKysely
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / ToKysely
+
+# Type Alias: ToKysely\<T\>
+
+> **ToKysely**\<`T`\> = `{ [K in keyof T]: IsLixGenerated<T[K]> extends true ? KyselyGenerated<SelectType<T[K]>> : T[K] }`
+
+Defined in: [packages/lix-sdk/src/entity-views/types.ts:34](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/entity-views/types.ts#L34)
+
+Convert our LixGenerated types to Kysely's Generated types.
+This adapter is used at the database boundary.
+
+## Type Parameters
+
+### T
+
+`T`
 
 ---
 
@@ -3529,7 +4244,7 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:127](https://github.com/opr
 
 > **UiDiffComponentProps** = `object`
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:125](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L125)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:117](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L117)
 
 ## Properties
 
@@ -3537,7 +4252,7 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:125](https://github.com/o
 
 > **diffs**: `Pick`\<[`Change`](Change.md), `"entity_id"` \| `"plugin_key"` \| `"schema_key"`\> & `object`[]
 
-Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:126](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/plugin/lix-plugin.ts#L126)
+Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:118](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/lix-plugin.ts#L118)
 
 ---
 
@@ -3551,89 +4266,1516 @@ Defined in: [packages/lix-sdk/src/plugin/lix-plugin.ts:126](https://github.com/o
 
 # Type Alias: Version
 
-> **Version** = `Selectable`\<`VersionTable`\>
+> **Version** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixVersionSchema`](../variables/LixVersionSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:200](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L200)
+Defined in: [packages/lix-sdk/src/version/schema.ts:81](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L81)
 
 ---
 
-## VersionChange
+## INITIAL_CHANGE_SET_ID
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / VersionChange
+[@lix-js/sdk](../README.md) / INITIAL\_CHANGE\_SET\_ID
 
-# Type Alias: VersionChange
+# Variable: INITIAL\_CHANGE\_SET\_ID
 
-> **VersionChange** = `Selectable`\<`VersionChangeTable`\>
+> `const` **INITIAL\_CHANGE\_SET\_ID**: `"2j9jm90ajc9j90"` = `"2j9jm90ajc9j90"`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:208](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L208)
+Defined in: [packages/lix-sdk/src/version/schema.ts:13](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L13)
 
 ---
 
-## VersionChangeConflict
+## INITIAL_GLOBAL_VERSION_CHANGE_SET_ID
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / VersionChangeConflict
+[@lix-js/sdk](../README.md) / INITIAL\_GLOBAL\_VERSION\_CHANGE\_SET\_ID
 
-# Type Alias: VersionChangeConflict
+# Variable: INITIAL\_GLOBAL\_VERSION\_CHANGE\_SET\_ID
 
-> **VersionChangeConflict** = `Selectable`\<`VersionChangeConflictTable`\>
+> `const` **INITIAL\_GLOBAL\_VERSION\_CHANGE\_SET\_ID**: `"23n0ajsf328ns"` = `"23n0ajsf328ns"`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:219](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L219)
+Defined in: [packages/lix-sdk/src/version/schema.ts:15](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L15)
 
 ---
 
-## VersionChangeConflictUpdate
+## INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / VersionChangeConflictUpdate
+[@lix-js/sdk](../README.md) / INITIAL\_GLOBAL\_VERSION\_WORKING\_CHANGE\_SET\_ID
 
-# Type Alias: VersionChangeConflictUpdate
+# Variable: INITIAL\_GLOBAL\_VERSION\_WORKING\_CHANGE\_SET\_ID
 
-> **VersionChangeConflictUpdate** = `Updateable`\<`VersionChangeConflictTable`\>
+> `const` **INITIAL\_GLOBAL\_VERSION\_WORKING\_CHANGE\_SET\_ID**: `"om3290j08gj8j23"` = `"om3290j08gj8j23"`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:221](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L221)
+Defined in: [packages/lix-sdk/src/version/schema.ts:16](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L16)
 
 ---
 
-## VersionChangeUpdate
+## INITIAL_VERSION_ID
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / VersionChangeUpdate
+[@lix-js/sdk](../README.md) / INITIAL\_VERSION\_ID
 
-# Type Alias: VersionChangeUpdate
+# Variable: INITIAL\_VERSION\_ID
 
-> **VersionChangeUpdate** = `Updateable`\<`VersionChangeTable`\>
+> `const` **INITIAL\_VERSION\_ID**: `"BoIaHTW9ePX6pNc8"` = `"BoIaHTW9ePX6pNc8"`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:210](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L210)
+Defined in: [packages/lix-sdk/src/version/schema.ts:12](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L12)
 
 ---
 
-## VersionUpdate
+## INITIAL_WORKING_CHANGE_SET_ID
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / VersionUpdate
+[@lix-js/sdk](../README.md) / INITIAL\_WORKING\_CHANGE\_SET\_ID
 
-# Type Alias: VersionUpdate
+# Variable: INITIAL\_WORKING\_CHANGE\_SET\_ID
 
-> **VersionUpdate** = `Updateable`\<`VersionTable`\>
+> `const` **INITIAL\_WORKING\_CHANGE\_SET\_ID**: `"h2h09ha92jfaw2"` = `"h2h09ha92jfaw2"`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:202](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L202)
+Defined in: [packages/lix-sdk/src/version/schema.ts:14](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L14)
+
+---
+
+## JSONTypeSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / JSONTypeSchema
+
+# Variable: JSONTypeSchema
+
+> `const` **JSONTypeSchema**: `Record`\<`string`, `any`\>
+
+Defined in: [packages/lix-sdk/src/schema-definition/json-type.ts:20](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/json-type.ts#L20)
+
+JSON schema definition for JSON values (object, array, string, number, boolean, null).
+
+## Example
+
+```ts
+const MySchema = {
+    type: "object",
+    properties: {
+      myJsonField: JSONTypeSchema,
+    },
+  }
+```
+
+---
+
+## LixAccountSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixAccountSchema
+
+# Variable: LixAccountSchema
+
+> `const` **LixAccountSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/account/schema.ts:53](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/account/schema.ts#L53)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.name
+
+> `readonly` **name**: `object`
+
+#### properties.name.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`, `"name"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_account"` = `"lix_account"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixChangeSetEdgeSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixChangeSetEdgeSchema
+
+# Variable: LixChangeSetEdgeSchema
+
+> `const` **LixChangeSetEdgeSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:122](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L122)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.child\_id
+
+> `readonly` **child\_id**: `object`
+
+#### properties.child\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.parent\_id
+
+> `readonly` **parent\_id**: `object`
+
+#### properties.parent\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+### required
+
+> `readonly` **required**: readonly \[`"parent_id"`, `"child_id"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-foreign-keys
+
+> `readonly` **x-lix-foreign-keys**: `object`
+
+#### x-lix-foreign-keys.child\_id
+
+> `readonly` **child\_id**: `object`
+
+#### x-lix-foreign-keys.child\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.child\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_change_set"` = `"lix_change_set"`
+
+#### x-lix-foreign-keys.parent\_id
+
+> `readonly` **parent\_id**: `object`
+
+#### x-lix-foreign-keys.parent\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.parent\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_change_set"` = `"lix_change_set"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_change_set_edge"` = `"lix_change_set_edge"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"parent_id"`, `"child_id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixChangeSetElementSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixChangeSetElementSchema
+
+# Variable: LixChangeSetElementSchema
+
+> `const` **LixChangeSetElementSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:80](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L80)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.change\_id
+
+> `readonly` **change\_id**: `object`
+
+#### properties.change\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.change\_set\_id
+
+> `readonly` **change\_set\_id**: `object`
+
+#### properties.change\_set\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.entity\_id
+
+> `readonly` **entity\_id**: `object`
+
+#### properties.entity\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.file\_id
+
+> `readonly` **file\_id**: `object`
+
+#### properties.file\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.schema\_key
+
+> `readonly` **schema\_key**: `object`
+
+#### properties.schema\_key.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+### required
+
+> `readonly` **required**: readonly \[`"change_set_id"`, `"change_id"`, `"entity_id"`, `"schema_key"`, `"file_id"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-foreign-keys
+
+> `readonly` **x-lix-foreign-keys**: `object`
+
+#### x-lix-foreign-keys.change\_id
+
+> `readonly` **change\_id**: `object`
+
+#### x-lix-foreign-keys.change\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.change\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_change"` = `"lix_change"`
+
+#### x-lix-foreign-keys.change\_set\_id
+
+> `readonly` **change\_set\_id**: `object`
+
+#### x-lix-foreign-keys.change\_set\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.change\_set\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_change_set"` = `"lix_change_set"`
+
+#### x-lix-foreign-keys.schema\_key
+
+> `readonly` **schema\_key**: `object`
+
+#### x-lix-foreign-keys.schema\_key.property
+
+> `readonly` **property**: `"key"` = `"key"`
+
+#### x-lix-foreign-keys.schema\_key.schemaKey
+
+> `readonly` **schemaKey**: `"lix_stored_schema"` = `"lix_stored_schema"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_change_set_element"` = `"lix_change_set_element"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"change_set_id"`, `"change_id"`\]
+
+### x-lix-unique
+
+> `readonly` **x-lix-unique**: readonly \[readonly \[`"change_set_id"`, `"entity_id"`, `"schema_key"`, `"file_id"`\]\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixChangeSetLabelSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixChangeSetLabelSchema
+
+# Variable: LixChangeSetLabelSchema
+
+> `const` **LixChangeSetLabelSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:151](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L151)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.change\_set\_id
+
+> `readonly` **change\_set\_id**: `object`
+
+#### properties.change\_set\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.label\_id
+
+> `readonly` **label\_id**: `object`
+
+#### properties.label\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.metadata
+
+> `readonly` **metadata**: `object`
+
+#### properties.metadata.nullable
+
+> `readonly` **nullable**: `true` = `true`
+
+#### properties.metadata.type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### required
+
+> `readonly` **required**: readonly \[`"change_set_id"`, `"label_id"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-foreign-keys
+
+> `readonly` **x-lix-foreign-keys**: `object`
+
+#### x-lix-foreign-keys.change\_set\_id
+
+> `readonly` **change\_set\_id**: `object`
+
+#### x-lix-foreign-keys.change\_set\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.change\_set\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_change_set"` = `"lix_change_set"`
+
+#### x-lix-foreign-keys.label\_id
+
+> `readonly` **label\_id**: `object`
+
+#### x-lix-foreign-keys.label\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.label\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_label"` = `"lix_label"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_change_set_label"` = `"lix_change_set_label"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"change_set_id"`, `"label_id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixChangeSetSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixChangeSetSchema
+
+# Variable: LixChangeSetSchema
+
+> `const` **LixChangeSetSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:63](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L63)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.metadata
+
+> `readonly` **metadata**: `object`
+
+#### properties.metadata.nullable
+
+> `readonly` **nullable**: `true` = `true`
+
+#### properties.metadata.type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_change_set"` = `"lix_change_set"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixChangeSetThreadSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixChangeSetThreadSchema
+
+# Variable: LixChangeSetThreadSchema
+
+> `const` **LixChangeSetThreadSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:181](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L181)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.change\_set\_id
+
+> `readonly` **change\_set\_id**: `object`
+
+#### properties.change\_set\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.thread\_id
+
+> `readonly` **thread\_id**: `object`
+
+#### properties.thread\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+### required
+
+> `readonly` **required**: readonly \[`"change_set_id"`, `"thread_id"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-foreign-keys
+
+> `readonly` **x-lix-foreign-keys**: `object`
+
+#### x-lix-foreign-keys.change\_set\_id
+
+> `readonly` **change\_set\_id**: `object`
+
+#### x-lix-foreign-keys.change\_set\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.change\_set\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_change_set"` = `"lix_change_set"`
+
+#### x-lix-foreign-keys.thread\_id
+
+> `readonly` **thread\_id**: `object`
+
+#### x-lix-foreign-keys.thread\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.thread\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_thread"` = `"lix_thread"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_change_set_thread"` = `"lix_change_set_thread"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"change_set_id"`, `"thread_id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixDatabaseSchemaJsonColumns
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixDatabaseSchemaJsonColumns
+
+# Variable: LixDatabaseSchemaJsonColumns
+
+> `const` **LixDatabaseSchemaJsonColumns**: `object`
+
+Defined in: [packages/lix-sdk/src/database/schema.ts:43](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/schema.ts#L43)
+
+## Type declaration
+
+### change\_set
+
+> `readonly` **change\_set**: readonly \[`"metadata"`\]
+
+### snapshot
+
+> `readonly` **snapshot**: readonly \[`"content"`\]
+
+---
+
+## LixFileSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixFileSchema
+
+# Variable: LixFileSchema
+
+> `const` **LixFileSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/file/schema.ts:248](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/file/schema.ts#L248)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.metadata
+
+> `readonly` **metadata**: `object`
+
+#### properties.metadata.nullable
+
+> `readonly` **nullable**: `true` = `true`
+
+#### properties.metadata.type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+#### properties.path
+
+> `readonly` **path**: `object`
+
+#### properties.path.description
+
+> `readonly` **description**: `"File path must start with a slash, not contain backslashes or consecutive slashes, and not end with a slash"` = `"File path must start with a slash, not contain backslashes or consecutive slashes, and not end with a slash"`
+
+#### properties.path.pattern
+
+> `readonly` **pattern**: "^/(?!.\*//\|.\*\\\\)(?!.\*/$\|^/$).+" = `"^/(?!.*//|.*\\\\)(?!.*/$|^/$).+"`
+
+#### properties.path.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`, `"path"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_file"` = `"lix_file"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-unique
+
+> `readonly` **x-lix-unique**: readonly \[readonly \[`"path"`\]\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixKeyValueSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixKeyValueSchema
+
+# Variable: LixKeyValueSchema
+
+> `const` **LixKeyValueSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/key-value/schema.ts:19](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/key-value/schema.ts#L19)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.key
+
+> `readonly` **key**: `object`
+
+#### properties.key.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.value
+
+> `readonly` **value**: `any`
+
+### required
+
+> `readonly` **required**: readonly \[`"key"`, `"value"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_key_value"` = `"lix_key_value"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"key"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixLabelSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixLabelSchema
+
+# Variable: LixLabelSchema
+
+> `const` **LixLabelSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/label/schema.ts:60](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/label/schema.ts#L60)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.name
+
+> `readonly` **name**: `object`
+
+#### properties.name.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`, `"name"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_label"` = `"lix_label"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixLogSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixLogSchema
+
+# Variable: LixLogSchema
+
+> `const` **LixLogSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/log/schema.ts:25](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/log/schema.ts#L25)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.description
+
+> `readonly` **description**: `"The unique identifier of the log entry"` = `"The unique identifier of the log entry"`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.key
+
+> `readonly` **key**: `object`
+
+#### properties.key.description
+
+> `readonly` **description**: `"The key of the log entry"` = `"The key of the log entry"`
+
+#### properties.key.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.level
+
+> `readonly` **level**: `object`
+
+#### properties.level.description
+
+> `readonly` **description**: `"The level of the log entry"` = `"The level of the log entry"`
+
+#### properties.level.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.message
+
+> `readonly` **message**: `object`
+
+#### properties.message.description
+
+> `readonly` **description**: `"The message of the log entry"` = `"The message of the log entry"`
+
+#### properties.message.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`, `"key"`, `"message"`, `"level"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_log"` = `"lix_log"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixSchemaDefinition
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixSchemaDefinition
+
+# Variable: LixSchemaDefinition
+
+> `const` **LixSchemaDefinition**: `object`
+
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:3](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/definition.ts#L3)
+
+## Type declaration
+
+### $schema
+
+> `readonly` **$schema**: `"http://json-schema.org/draft-07/schema#"` = `"http://json-schema.org/draft-07/schema#"`
+
+### allOf
+
+> `readonly` **allOf**: readonly \[\{ `$ref`: `"http://json-schema.org/draft-07/schema#"`; \}, \{ `properties`: \{ `properties`: \{ `additionalProperties`: \{ `allOf`: readonly \[\{ `$ref`: `"http://json-schema.org/draft-07/schema#"`; \}, \{ `properties`: \{ `x-lix-generated`: \{ `description`: `"Whether this property is auto-generated by the database"`; `type`: `"boolean"`; \}; \}; `type`: `"object"`; \}\]; \}; `type`: `"object"`; \}; `x-lix-foreign-keys`: \{ `additionalProperties`: \{ `properties`: \{ `property`: \{ `description`: `"The property name in the referenced schema"`; `type`: `"string"`; \}; `schemaKey`: \{ `description`: `"The x-lix-key of the referenced schema"`; `type`: `"string"`; \}; `schemaVersion`: \{ `description`: `"Optional version of the referenced schema"`; `pattern`: "^\\d+\\.\\d+$"; `type`: `"string"`; \}; \}; `required`: readonly \[`"schemaKey"`, `"property"`\]; `type`: `"object"`; \}; `type`: `"object"`; \}; `x-lix-key`: \{ `description`: `"The key of the schema. The key is used to identify the schema. You must use a unique key for each schema."`; `examples`: readonly \[`"csv_plugin_cell"`\]; `type`: `"string"`; \}; `x-lix-unique`: \{ `items`: \{ `items`: \{ `type`: `"string"`; \}; `type`: `"array"`; \}; `type`: `"array"`; \}; `x-lix-version`: \{ `description`: `"The version of the schema. Use the major version to signal breaking changes. Use the minor version to signal non-breaking changes."`; `examples`: readonly \[`"1.0"`\]; `pattern`: "^\\d+\\.\\d+$"; `type`: `"string"`; \}; `x-primary-key`: \{ `items`: \{ `type`: `"string"`; \}; `type`: `"array"`; \}; \}; `required`: readonly \[`"x-lix-key"`, `"x-lix-version"`\]; `type`: `"object"`; \}\]
+
+### description
+
+> `readonly` **description**: `"A JSON schema document that also includes custom x-key and x-version properties for identification and versioning."` = `"A JSON schema document that also includes custom x-key and x-version properties for identification and versioning."`
+
+### title
+
+> `readonly` **title**: `"Lix Change Schema"` = `"Lix Change Schema"`
+
+---
+
+## LixSchemaViewMap
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixSchemaViewMap
+
+# Variable: LixSchemaViewMap
+
+> `const` **LixSchemaViewMap**: `Record`\<`string`, [`LixSchemaDefinition`](../type-aliases/LixSchemaDefinition.md)\>
+
+Defined in: [packages/lix-sdk/src/database/schema.ts:55](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/schema.ts#L55)
+
+---
+
+## LixSnapshotSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixSnapshotSchema
+
+# Variable: LixSnapshotSchema
+
+> `const` **LixSnapshotSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:46](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/schema.ts#L46)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.content
+
+> `readonly` **content**: `any`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`, `"content"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_snapshot"` = `"lix_snapshot"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixThreadCommentSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixThreadCommentSchema
+
+# Variable: LixThreadCommentSchema
+
+> `const` **LixThreadCommentSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/thread/schema.ts:53](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/thread/schema.ts#L53)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.body
+
+> `readonly` **body**: `any`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.parent\_id
+
+> `readonly` **parent\_id**: `object`
+
+#### properties.parent\_id.nullable
+
+> `readonly` **nullable**: `true` = `true`
+
+#### properties.parent\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.thread\_id
+
+> `readonly` **thread\_id**: `object`
+
+#### properties.thread\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`, `"thread_id"`, `"body"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-foreign-keys
+
+> `readonly` **x-lix-foreign-keys**: `object`
+
+#### x-lix-foreign-keys.parent\_id
+
+> `readonly` **parent\_id**: `object`
+
+#### x-lix-foreign-keys.parent\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.parent\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_thread_comment"` = `"lix_thread_comment"`
+
+#### x-lix-foreign-keys.thread\_id
+
+> `readonly` **thread\_id**: `object`
+
+#### x-lix-foreign-keys.thread\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.thread\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_thread"` = `"lix_thread"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_thread_comment"` = `"lix_thread_comment"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixThreadSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixThreadSchema
+
+# Variable: LixThreadSchema
+
+> `const` **LixThreadSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/thread/schema.ts:39](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/thread/schema.ts#L39)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.metadata
+
+> `readonly` **metadata**: `object`
+
+#### properties.metadata.nullable
+
+> `readonly` **nullable**: `true` = `true`
+
+#### properties.metadata.type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_thread"` = `"lix_thread"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## LixVersionSchema
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / LixVersionSchema
+
+# Variable: LixVersionSchema
+
+> `const` **LixVersionSchema**: `object`
+
+Defined in: [packages/lix-sdk/src/version/schema.ts:44](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/schema.ts#L44)
+
+## Type declaration
+
+### additionalProperties
+
+> `readonly` **additionalProperties**: `false` = `false`
+
+### properties
+
+> `readonly` **properties**: `object`
+
+#### properties.change\_set\_id
+
+> `readonly` **change\_set\_id**: `object`
+
+#### properties.change\_set\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.hidden
+
+> `readonly` **hidden**: `object`
+
+#### properties.hidden.type
+
+> `readonly` **type**: `"boolean"` = `"boolean"`
+
+#### properties.hidden.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.id
+
+> `readonly` **id**: `object`
+
+#### properties.id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.inherits\_from\_version\_id
+
+> `readonly` **inherits\_from\_version\_id**: `object`
+
+#### properties.inherits\_from\_version\_id.type
+
+> `readonly` **type**: readonly \[`"string"`, `"null"`\]
+
+#### properties.inherits\_from\_version\_id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.name
+
+> `readonly` **name**: `object`
+
+#### properties.name.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.name.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+#### properties.working\_change\_set\_id
+
+> `readonly` **working\_change\_set\_id**: `object`
+
+#### properties.working\_change\_set\_id.type
+
+> `readonly` **type**: `"string"` = `"string"`
+
+#### properties.working\_change\_set\_id.x-lix-generated
+
+> `readonly` **x-lix-generated**: `true` = `true`
+
+### required
+
+> `readonly` **required**: readonly \[`"id"`, `"name"`, `"change_set_id"`, `"working_change_set_id"`\]
+
+### type
+
+> `readonly` **type**: `"object"` = `"object"`
+
+### x-lix-foreign-keys
+
+> `readonly` **x-lix-foreign-keys**: `object`
+
+#### x-lix-foreign-keys.change\_set\_id
+
+> `readonly` **change\_set\_id**: `object`
+
+#### x-lix-foreign-keys.change\_set\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.change\_set\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_change_set"` = `"lix_change_set"`
+
+#### x-lix-foreign-keys.inherits\_from\_version\_id
+
+> `readonly` **inherits\_from\_version\_id**: `object`
+
+#### x-lix-foreign-keys.inherits\_from\_version\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.inherits\_from\_version\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_version"` = `"lix_version"`
+
+#### x-lix-foreign-keys.working\_change\_set\_id
+
+> `readonly` **working\_change\_set\_id**: `object`
+
+#### x-lix-foreign-keys.working\_change\_set\_id.property
+
+> `readonly` **property**: `"id"` = `"id"`
+
+#### x-lix-foreign-keys.working\_change\_set\_id.schemaKey
+
+> `readonly` **schemaKey**: `"lix_change_set"` = `"lix_change_set"`
+
+### x-lix-key
+
+> `readonly` **x-lix-key**: `"lix_version"` = `"lix_version"`
+
+### x-lix-primary-key
+
+> `readonly` **x-lix-primary-key**: readonly \[`"id"`\]
+
+### x-lix-unique
+
+> `readonly` **x-lix-unique**: readonly \[readonly \[`"working_change_set_id"`\]\]
+
+### x-lix-version
+
+> `readonly` **x-lix-version**: `"1.0"` = `"1.0"`
+
+---
+
+## mockJsonPlugin
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / mockJsonPlugin
+
+# Variable: mockJsonPlugin
+
+> `const` **mockJsonPlugin**: [`LixPlugin`](../type-aliases/LixPlugin.md)
+
+Defined in: [packages/lix-sdk/src/plugin/mock-json-plugin.ts:28](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/plugin/mock-json-plugin.ts#L28)
+
+A mock plugin that handles JSON data.
+
+Use this mock plugin for testing purposes. Do not
+use this plugin in production! It may change at
+any time.
+
+## Example
+
+```ts
+const lix = await openLixInMemory({
+    providePlugins: [mockJsonPlugin],
+  });
+```
+
+---
+
+## nanoid
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / nanoid
+
+# Variable: nanoid()
+
+> `const` **nanoid**: (`size?`) => `string`
+
+Defined in: [packages/lix-sdk/src/database/nano-id.ts:96](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/database/nano-id.ts#L96)
+
+Generate secure URL-friendly unique ID.
+
+Use https://zelark.github.io/nano-id-cc/ to calculate the length
+of the ID for the use case with the alphabet provided in the
+implementation.
+
+## Parameters
+
+### size?
+
+`number`
+
+## Returns
+
+`string`
 
 ---
 
@@ -3649,7 +5791,23 @@ Defined in: [packages/lix-sdk/src/database/schema.ts:202](https://github.com/opr
 
 > `const` **sql**: `Sql`
 
-Defined in: node\_modules/.pnpm/kysely@0.27.4/node\_modules/kysely/dist/esm/raw-builder/sql.d.ts:347
+Defined in: node\_modules/.pnpm/kysely@0.27.6/node\_modules/kysely/dist/esm/raw-builder/sql.d.ts:366
+
+---
+
+## uuidV7
+
+[**@lix-js/sdk**](../README.md)
+
+***
+
+[@lix-js/sdk](../README.md) / uuidV7
+
+# Variable: uuidV7
+
+> `const` **uuidV7**: `v7`
+
+Defined in: node\_modules/.pnpm/@types+uuid@10.0.0/node\_modules/@types/uuid/index.d.ts:111
 
 ---
 

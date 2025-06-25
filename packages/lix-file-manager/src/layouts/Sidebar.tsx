@@ -23,9 +23,7 @@ export function AppSidebar() {
 		>
 			<TooltipProvider>
 				<SidebarHeader className="w-14 h-[60px] flex justify-center items-center">
-					<a href="/">
-						<img src="/lix.svg" alt="logo" className="w-6 h-6" />
-					</a>
+					<img src="/lix.svg" alt="logo" className="w-6 h-6" />
 				</SidebarHeader>
 
 				<SidebarContent className="flex-1 pt-1.5">

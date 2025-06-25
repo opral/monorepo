@@ -6,6 +6,12 @@
 
 # Type Alias: Snapshot
 
-> **Snapshot** = `Selectable`\<`SnapshotTable`\>
+> **Snapshot** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixSnapshotSchema`](../variables/LixSnapshotSchema.md)\> & `object`
 
-Defined in: [packages/lix-sdk/src/database/schema.ts:127](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/database/schema.ts#L127)
+Defined in: [packages/lix-sdk/src/snapshot/schema.ts:61](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/schema.ts#L61)
+
+## Type declaration
+
+### content
+
+> **content**: `Record`\<`string`, `any`\> \| `null`

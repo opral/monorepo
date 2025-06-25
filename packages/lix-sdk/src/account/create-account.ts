@@ -1,17 +1,47 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { Account } from "./database-schema.js";
+import type { Account } from "./schema.js";
+import { v7 as uuid_v7 } from "uuid";
+
+/**
+ * Inserts a new account into the Lix database.
+ *
+ * Accounts represent different identities working with the same Lix
+ * file. Switching the active account is handled separately via
+ * {@link switchAccount}.
+ *
+ * @example
+ * ```ts
+ * const account = await createAccount({ lix, name: "Jane" })
+ * ```
+ */
 
 export async function createAccount(args: {
-	lix: Lix;
-	name: string;
+	lix: Pick<Lix, "db">;
+	id?: Account["id"];
+	name: Account["name"];
+	lixcol_version_id?: string;
 }): Promise<Account> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const account = await trx
-			.insertInto("account")
+		// Generate ID if not provided (views handle this, but we need it for querying back)
+		const accountId = args.id || uuid_v7();
+
+		// Insert the account (views don't support returningAll)
+		await trx
+			.insertInto("account_all")
 			.values({
+				id: accountId,
 				name: args.name,
+				lixcol_version_id:
+					args.lixcol_version_id ??
+					trx.selectFrom("active_version").select("version_id"),
 			})
-			.returningAll()
+			.execute();
+
+		// Query back the inserted account
+		const account = await trx
+			.selectFrom("account_all")
+			.selectAll()
+			.where("id", "=", accountId)
 			.executeTakeFirstOrThrow();
 
 		return account;

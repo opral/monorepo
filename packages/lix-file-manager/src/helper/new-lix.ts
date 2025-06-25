@@ -1,11 +1,11 @@
 import { newLixFile as _newLixFile, openLixInMemory } from "@lix-js/sdk";
-import { plugin as csvPlugin } from "@lix-js/plugin-csv";
+import { supportedFileTypes } from "@/state.ts";
 import { saveLixToOpfs } from "./saveLixToOpfs.ts";
 
 export async function createNewLixFileInOpfs(): Promise<{ id: string }> {
 	const lix = await openLixInMemory({
 		blob: await _newLixFile(),
-		providePlugins: [csvPlugin],
+		providePlugins: supportedFileTypes.map((type) => type.plugin),
 	});
 
 	const id = await lix.db

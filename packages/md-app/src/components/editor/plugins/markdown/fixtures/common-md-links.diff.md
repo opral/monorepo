@@ -1,0 +1,275 @@
+# Diff Results for common-md-links
+
+## Test Summary
+
+- 🟢 Perfect roundtrip (input = output): 0/1 (0%)
+- 🟡 Acceptable transformation (output ≠ input, output = expected): 1/1 (100%)
+- 🔴 Failing test (output ≠ input, output ≠ expected): 0/1 (0%)
+
+**Overall Status**: ✅ All tests passing (0 perfect, 1 acceptable)
+
+---
+
+<details >
+<summary><span style="color:#cc7700; font-weight:bold;">Document</span> 🟡 <span title="Input = Output?">⚠️</span> <span title="Visual match?">✅</span></summary>
+
+<table>
+<tr>
+<th style="width: 33%">Original Input</th>
+<th style="width: 33%">Expected Output</th>
+<th style="width: 33%">Actual Output</th>
+</tr>
+<tr>
+<td>
+
+# Links
+
+[Basic link](https://example.com)
+
+[Link with title](https://example.com "Example Website")
+
+[Link with formatting **bold**](https://example.com)
+
+[Link with formatting *italic*](https://example.com)
+
+[Link with formatting `code`](https://example.com)
+
+<https://example.com> (Automatic link)
+
+<email@example.com> (Email link)
+
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
+Paragraph with a [link](https://example.com) in the middle.
+
+Paragraph with *[formatted link](https://example.com)* in italics.
+
+Paragraph with **[formatted link](https://example.com)** in bold.
+
+Paragraph with **[formatted link](https://example.com) beyond** in bold.
+
+[ref]: https://example.com "Reference Example"
+[different-ref]: https://example.com/different "Different Reference"
+[shorthand reference]: https://example.com
+
+</td>
+<td>
+
+# Links
+
+[Basic link](https://example.com)
+
+[Link with title](https://example.com "Example Website")
+
+[Link with formatting **bold**](https://example.com)
+
+[Link with formatting _italic_](https://example.com)
+
+[Link with formatting `code`](https://example.com)
+
+<https://example.com> (Automatic link)
+
+<email@example.com> (Email link)
+
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
+Paragraph with a [link](https://example.com) in the middle.
+
+Paragraph with [_formatted link_](https://example.com) in italics.
+
+Paragraph with [**formatted link**](https://example.com) in bold.
+
+Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
+
+[ref]: https://example.com "Reference Example"
+
+[different-ref]: https://example.com/different "Different Reference"
+
+[shorthand reference]: https://example.com
+
+
+</td>
+<td>
+
+# Links
+
+[Basic link](https://example.com)
+
+[Link with title](https://example.com "Example Website")
+
+[Link with formatting **bold**](https://example.com)
+
+[Link with formatting _italic_](https://example.com)
+
+[Link with formatting `code`](https://example.com)
+
+<https://example.com> (Automatic link)
+
+<email@example.com> (Email link)
+
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
+Paragraph with a [link](https://example.com) in the middle.
+
+Paragraph with [_formatted link_](https://example.com) in italics.
+
+Paragraph with [**formatted link**](https://example.com) in bold.
+
+Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
+
+[ref]: https://example.com "Reference Example"
+
+[different-ref]: https://example.com/different "Different Reference"
+
+[shorthand reference]: https://example.com
+
+
+</td>
+</tr>
+<tr>
+<td>
+
+<pre><code># Links
+
+[Basic link](https://example.com)
+
+[Link with title](https://example.com &quot;Example Website&quot;)
+
+[Link with formatting **bold**](https://example.com)
+
+[Link with formatting *italic*](https://example.com)
+
+[Link with formatting `code`](https://example.com)
+
+&lt;https://example.com&gt; (Automatic link)
+
+&lt;email@example.com&gt; (Email link)
+
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
+Paragraph with a [link](https://example.com) in the middle.
+
+Paragraph with *[formatted link](https://example.com)* in italics.
+
+Paragraph with **[formatted link](https://example.com)** in bold.
+
+Paragraph with **[formatted link](https://example.com) beyond** in bold.
+
+[ref]: https://example.com &quot;Reference Example&quot;
+[different-ref]: https://example.com/different &quot;Different Reference&quot;
+[shorthand reference]: https://example.com</code></pre>
+
+</td>
+<td>
+
+<pre><code># Links
+
+[Basic link](https://example.com)
+
+[Link with title](https://example.com &quot;Example Website&quot;)
+
+[Link with formatting **bold**](https://example.com)
+
+[Link with formatting _italic_](https://example.com)
+
+[Link with formatting `code`](https://example.com)
+
+&lt;https://example.com&gt; (Automatic link)
+
+&lt;email@example.com&gt; (Email link)
+
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
+Paragraph with a [link](https://example.com) in the middle.
+
+Paragraph with [_formatted link_](https://example.com) in italics.
+
+Paragraph with [**formatted link**](https://example.com) in bold.
+
+Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
+
+[ref]: https://example.com &quot;Reference Example&quot;
+
+[different-ref]: https://example.com/different &quot;Different Reference&quot;
+
+[shorthand reference]: https://example.com
+</code></pre>
+
+</td>
+<td>
+
+<pre><code># Links
+
+[Basic link](https://example.com)
+
+[Link with title](https://example.com &quot;Example Website&quot;)
+
+[Link with formatting **bold**](https://example.com)
+
+[Link with formatting _italic_](https://example.com)
+
+[Link with formatting `code`](https://example.com)
+
+&lt;https://example.com&gt; (Automatic link)
+
+&lt;email@example.com&gt; (Email link)
+
+[Reference link][ref]
+
+[Another reference link][ref]
+
+[Reference link with different text][different-ref]
+
+[Shorthand reference]
+
+Paragraph with a [link](https://example.com) in the middle.
+
+Paragraph with [_formatted link_](https://example.com) in italics.
+
+Paragraph with [**formatted link**](https://example.com) in bold.
+
+Paragraph with [**formatted link**](https://example.com) **beyond** in bold.
+
+[ref]: https://example.com &quot;Reference Example&quot;
+
+[different-ref]: https://example.com/different &quot;Different Reference&quot;
+
+[shorthand reference]: https://example.com
+</code></pre>
+
+</td>
+</tr>
+</table>
+
+</details>
+

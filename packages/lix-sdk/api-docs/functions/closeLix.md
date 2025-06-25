@@ -8,9 +8,13 @@
 
 > **closeLix**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/lix/close-lix.ts:6](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/close-lix.ts#L6)
+Defined in: [packages/lix-sdk/src/lix/close-lix.ts:15](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/close-lix.ts#L15)
 
-Closes the lix.
+Destroys the underlying database connection.
+
+After closing the Lix instance all subsequent operations on it
+will fail. Call this when your application no longer needs access
+to the file.
 
 ## Parameters
 
@@ -23,3 +27,9 @@ Closes the lix.
 ## Returns
 
 `Promise`\<`void`\>
+
+## Example
+
+```ts
+await closeLix({ lix })
+```

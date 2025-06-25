@@ -1,34 +1,43 @@
 import {
-	Version,
 	Change,
 	changeHasLabel,
-	changeInVersion,
-	changeIsLeafInVersion,
 	Lix,
 	Snapshot,
-	createDiscussion,
+	createThread,
+	createCheckpoint,
+	Thread,
+	Version,
+	changeSetElementIsLeafOf,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { currentVersionAtom, lixAtom } from "../state.ts";
 import clsx from "clsx";
 import {
 	activeFileAtom,
-	intermediateChangesAtom,
+	checkpointChangeSetsAtom,
+	getThreads,
+	workingChangeSetAtom,
 } from "../state-active-file.ts";
 import { SlButton, SlInput } from "@shoelace-style/shoelace/dist/react";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
-import { createCheckpoint } from "../helper/createCheckpoint.ts";
 import RowDiff from "./RowDiff.tsx";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
+import { fromPlainText, toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 
 export default function Component(props: {
-	id: string;
+	changeSetid: string;
+	previousChangeSetId?: string | null;
 	authorName: string | null;
-	firstComment: string | null;
 }) {
+	const [workingChangeSet] = useAtom(workingChangeSetAtom);
+	const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
+	const isWorkingChangeSet = useCallback(
+		() => props.changeSetid === workingChangeSet?.id,
+		[props.changeSetid, workingChangeSet]
+	);
 	const [isOpen, setIsOpen] = useState(
-		props.id === "intermediate-changes" ? true : false
+		isWorkingChangeSet() ? true : false
 	);
 
 	const [lix] = useAtom(lixAtom);
@@ -36,6 +45,7 @@ export default function Component(props: {
 	const [changes, setChanges] = useState<
 		Awaited<ReturnType<typeof getChanges>>
 	>({});
+	const [threads, setThreads] = useState<Thread[]>([]);
 
 	const [intermediateChanges, setIntermediateChanges] = useState<
 		Awaited<ReturnType<typeof getIntermediateChanges>>
@@ -45,29 +55,52 @@ export default function Component(props: {
 
 	useEffect(() => {
 		if (isOpen) {
-			if (props.id !== "intermediate-changes") {
-				getChanges(lix, props.id, activeFile!.id, currentVersion).then(
+			if (!isWorkingChangeSet()) {
+				getChanges(lix, props.changeSetid, activeFile!.id, currentVersion, props.previousChangeSetId).then(
 					setChanges
 				);
 			} else {
-				getIntermediateChanges(lix, activeFile!.id, currentVersion).then(
+				getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets?.[0]?.id).then(
 					setIntermediateChanges
 				);
 			}
 			const interval = setInterval(async () => {
-				if (props.id !== "intermediate-changes") {
-					getChanges(lix, props.id, activeFile!.id, currentVersion).then(
+				if (!isWorkingChangeSet()) {
+					getChanges(lix, props.changeSetid, activeFile!.id, currentVersion, props.previousChangeSetId).then(
 						setChanges
 					);
 				} else {
-					getIntermediateChanges(lix, activeFile!.id, currentVersion).then(
+					getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets?.[0]?.id).then(
 						setIntermediateChanges
 					);
 				}
 			}, 1000);
 			return () => clearInterval(interval);
 		}
-	}, [lix, activeFile, props.id]);
+	}, [lix, activeFile, props.changeSetid]);
+
+	useEffect(() => {
+		const fetchThreads = async () => {
+			if (props.changeSetid) {
+				const threads = await getThreads(lix, props.changeSetid);
+				if (threads) setThreads(threads);
+			}
+		};
+
+		fetchThreads();
+	}, []);
+
+	// Get the first comment if it exists
+	// @ts-expect-error - Typescript doesn't know that threads are created with initial comment
+	const firstComment = threads?.[0]?.comments?.[0];
+
+	// Truncate comment content if it's longer than 50 characters
+	const truncatedComment =
+		firstComment?.body
+			? firstComment.body.content.length > 50
+				? `${toPlainText(firstComment.body).substring(0, 50)}...`
+				: toPlainText(firstComment.body)
+			: null;
 
 	return (
 		<div
@@ -86,11 +119,11 @@ export default function Component(props: {
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded md:h-[46px]">
 					<div className="flex flex-col md:flex-row md:gap-2 md:items-center flex-1">
 						<p className="text-zinc-950 text-sm! font-semibold">
-							{props.id === "intermediate-changes"
-								? "Intermediate changes"
+							{isWorkingChangeSet()
+								? "Working changes"
 								: props.authorName}
 						</p>
-						<p className="text-sm! text-zinc-600">{props.firstComment}</p>
+						<p className="text-sm! text-zinc-600">{truncatedComment}</p>
 					</div>
 					<p className="text-sm! pr-5 flex items-center gap-4 flex-1]">
 						{/* {timeAgo(change.created_at)} */}
@@ -118,14 +151,15 @@ export default function Component(props: {
 					{Object.keys(intermediateChanges).length > 0 && <CreateCheckpointBox />}
 
 					{Object.keys(
-						props.id === "intermediate-changes" ? intermediateChanges : changes
+						isWorkingChangeSet() ? intermediateChanges : changes
 					).map((rowId) => {
 						const uniqueColumnValue = rowId.split("|")[1];
 						return (
 							<RowDiff
+								key={`${props.changeSetid}-${rowId}`}
 								uniqueColumnValue={uniqueColumnValue}
 								changes={
-									props.id === "intermediate-changes"
+									isWorkingChangeSet()
 										? intermediateChanges[rowId]
 										: changes[rowId]
 								}
@@ -141,19 +175,40 @@ export default function Component(props: {
 const CreateCheckpointBox = () => {
 	const [description, setDescription] = useState("");
 	const [lix] = useAtom(lixAtom);
-	const [intermediateChanges] = useAtom(intermediateChangesAtom);
+	const [workingChangeSet] = useAtom(workingChangeSetAtom);
+
+	const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
+		if (!description) return;
+
+		lix.db.transaction().execute(async (trx) => {
+			const thread = await createThread({
+				lix: { ...lix, db: trx },
+				comments: [{ body: args.content }],
+			});
+			await trx
+				.insertInto("change_set_thread")
+				.values({
+					change_set_id: workingChangeSet!.id,
+					thread_id: thread.id,
+				})
+				.execute();
+		});
+	};
 
 	const handleCreateCheckpoint = async () => {
-		const changeSet = await createCheckpoint(lix, intermediateChanges);
-		if (description !== "") {
-			await createDiscussion({
-				lix,
-				changeSet,
-				firstComment: { content: description },
-			});
-			await saveLixToOpfs({ lix });
+		await onThreadComposerSubmit({ content: fromPlainText(description!) });
+		await createCheckpoint({ lix });
+		await saveLixToOpfs({ lix });
+	};
+
+	// Handle key down in the comment textarea
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === "Enter" && !e.shiftKey) {
+			e.preventDefault();
+			handleCreateCheckpoint();
 		}
 	};
+
 
 	return (
 		<div className="flex gap-2">
@@ -161,6 +216,8 @@ const CreateCheckpointBox = () => {
 				className="w-full"
 				placeholder="Describe the changes"
 				onInput={(event: any) => setDescription(event.target?.value)}
+				onKeyDown={handleKeyDown}
+				value={description}
 			></SlInput>
 			<SlButton slot="footer" variant="primary" onClick={handleCreateCheckpoint}>
 				{description === "" ? "Create checkpoint without description" : "Create checkpoint"}
@@ -173,7 +230,9 @@ const getChanges = async (
 	lix: Lix,
 	changeSetId: string,
 	fileId: string,
-	currentVersion: Version
+	// @ts-expect-error - not used yet
+	currentVersion: Version,
+	previousChangeSetId?: string | undefined | null,
 ): Promise<
 	Record<
 		string,
@@ -193,41 +252,46 @@ const getChanges = async (
 			"change_set_element.change_id",
 			"change.id"
 		)
-		.where("change.schema_key", "=", CellSchemaV1.key)
-		.where(changeHasLabel("checkpoint"))
+		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
+		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
 
-	// Group changes by row
-	//
-	// TODO this is a workaround for the fact that the changes are not groupable by row with SQL
-	//
-	//      this can be achieved by adding a row_entity to the snapshot but ...
-	//      then the snapshot === undefined can't be used to detect a deletion.
-	//
-	//      1. Snapshot === undefined is not good for deletions. It is probably
-	//         better to have a dedicated concept of deleted changes
-	//
-	//      2. The row_entity could be change metadata but what's the differenc to snapshot then?
-	//
-	//      3. Lix should probably have a concept of dependent changes that are linked.
-	//         e.g. a row change is dependent on N cell changes via detectedChange.dependsOn: [detectedCellChange1, detectedCellChange2]
-	//
-	//      EDIT regarding 3:
-	//      We can define an row and have as snapshot { dependsOn: [detectedCellChange1, detectedCellChange2] }
-	//      before introducing a first level concept in lix. Yes, foreign keys wouldn't work but that's OK at the moment.
-	const groupedByRow: any = {};
+	// Process content fields if they are JSON strings
+	const processedChanges = changes.map(change => {
+		if (typeof change.content === 'string') {
+			try {
+				change.content = JSON.parse(change.content);
+			} catch (e) {
+				console.log("Error parsing JSON:", e);
+				// Keep as is if not valid JSON
+			}
+		}
+		return change;
+	});
 
-	for (const change of changes) {
+	// Group changes by row
+	const groupedByRow: Record<
+		string,
+		Array<
+			Change & {
+				content: Snapshot["content"];
+				parent: Change & { content: Snapshot["content"] };
+			}
+		>
+	> = {};
+
+	for (const change of processedChanges) {
 		const parts = change.entity_id.split("|");
 		const rowEntityId = parts[0] + "|" + parts[1];
 
 		if (!groupedByRow[rowEntityId]) {
 			groupedByRow[rowEntityId] = [];
 		}
+		// @ts-expect-error - We'll add parent property later
 		groupedByRow[rowEntityId].push(change);
 	}
 
@@ -235,18 +299,51 @@ const getChanges = async (
 		const row = groupedByRow[id];
 
 		for (const change of row) {
-			const parent = await lix.db
-				.selectFrom("change")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-				.innerJoin("change_edge", "change_edge.parent_id", "change.id")
-				.where("change_edge.child_id", "=", change.id)
-				.where(changeInVersion(currentVersion))
-				.where(changeHasLabel("checkpoint"))
-				.selectAll("change")
-				.select("snapshot.content")
-				.executeTakeFirst();
+			let parent;
 
-			change.parent = parent;
+			// If we have a previousChangeSetId, look for the change in that change set
+			if (previousChangeSetId) {
+				parent = await lix.db
+					.selectFrom("change")
+					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+					.innerJoin(
+						"change_set_element",
+						"change_set_element.change_id",
+						"change.id"
+					)
+					.where(changeSetElementIsLeafOf([{ id: previousChangeSetId }]))
+					.where("change.entity_id", "=", change.entity_id)
+					.where("change.schema_key", "=", change.schema_key)
+					.where("change.file_id", "=", fileId)
+					.where(changeHasLabel({ name: "checkpoint" }))
+					.selectAll("change")
+					.select("snapshot.content")
+					.orderBy("change.created_at", "desc")
+					.executeTakeFirst();
+			}
+
+			// Process parent content if it exists
+			if (parent && typeof parent.content === 'string') {
+				try {
+					parent.content = JSON.parse(parent.content);
+				} catch (e) {
+					console.log("Error parsing parent JSON:", e);
+					// Keep as is if not valid JSON
+				}
+			}
+
+			// Provide a full parent object with all necessary properties
+			change.parent = parent || {
+				id: "",
+				entity_id: change.entity_id,
+				file_id: change.file_id,
+				plugin_key: change.plugin_key,
+				schema_key: change.schema_key,
+				schema_version: change.schema_version,
+				snapshot_id: "",
+				created_at: "",
+				content: null
+			};
 		}
 	}
 	return groupedByRow;
@@ -256,7 +353,7 @@ const getChanges = async (
 const getIntermediateChanges = async (
 	lix: Lix,
 	fileId: string,
-	currentVersion: Version
+	latestCheckpointChangeSetId?: string | null,
 ): Promise<
 	Record<
 		string,
@@ -268,26 +365,66 @@ const getIntermediateChanges = async (
 		>
 	>
 > => {
+	// Get the working change set ID 
+	const workingChangeSetId = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
+		.executeTakeFirst()
+		.then(version => version?.working_change_set_id);
+
 	const intermediateLeafChanges = await lix.db
 		.selectFrom("change")
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin("change_set_element", "change_set_element.change_id", "change.id")
+		.where(changeSetElementIsLeafOf([{ id: workingChangeSetId! }]))
+		.where(eb =>
+			workingChangeSetId
+				? eb("change_set_element.change_set_id", "=", workingChangeSetId)
+				: eb.exists(
+					eb.selectFrom("change_set_element")
+						.whereRef("change_set_element.change_id", "=", "change.id")
+						.where(eb => eb.not(changeHasLabel({ name: "checkpoint" })))
+				)
+		)
 		.where("change.file_id", "=", fileId)
-		.where(changeIsLeafInVersion(currentVersion))
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
-		.where("change.schema_key", "=", CellSchemaV1.key)
+		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
 
-	const groupedByRow: any = {};
+	// Parse the content fields if they are JSON strings
+	const processedChanges = intermediateLeafChanges.map(change => {
+		// Ensure content field is properly parsed from JSON if needed
+		if (typeof change.content === 'string') {
+			try {
+				change.content = JSON.parse(change.content);
+			} catch (e) {
+				console.log("Error parsing JSON:", e);
+				// Keep as is if not valid JSON
+			}
+		}
+		return change;
+	});
 
-	for (const change of intermediateLeafChanges) {
+	const groupedByRow: Record<
+		string,
+		Array<
+			Change & {
+				content: Snapshot["content"];
+				parent: Change & { content: Snapshot["content"] };
+			}
+		>
+	> = {};
+
+	for (const change of processedChanges) {
 		const parts = change.entity_id.split("|");
 		const rowEntityId = parts[0] + "|" + parts[1];
 
 		if (!groupedByRow[rowEntityId]) {
 			groupedByRow[rowEntityId] = [];
 		}
+		// @ts-expect-error - We'll add parent property later
 		groupedByRow[rowEntityId].push(change);
 	}
 
@@ -296,21 +433,51 @@ const getIntermediateChanges = async (
 
 		for (const change of row) {
 			// defining a parent as the last checkpoint change
-			const parent = await lix.db
-				.selectFrom("change")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-				.where("change.entity_id", "=", change.entity_id)
-				.where(changeHasLabel("checkpoint"))
-				.where(changeInVersion(currentVersion))
-				// TODO fix the filter
-				// https://github.com/opral/lix-sdk/issues/151
-				// .where(changeIsLowestCommonAncestorOf([change]))
-				.where("change.schema_key", "=", CellSchemaV1.key)
-				.selectAll("change")
-				.select("snapshot.content")
-				.executeTakeFirst();
+			if (latestCheckpointChangeSetId) {
 
-			change.parent = parent;
+				const parent = await lix.db
+					.selectFrom("change")
+					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+					.innerJoin(
+						"change_set_element",
+						"change_set_element.change_id",
+						"change.id"
+					)
+					.where(
+						"change_set_element.change_set_id",
+						"=",
+						latestCheckpointChangeSetId
+					)
+					.where("change.entity_id", "=", change.entity_id)
+					.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
+					.where(changeHasLabel({ name: "checkpoint" }))
+					.selectAll("change")
+					.select("snapshot.content")
+					.executeTakeFirst();
+
+				// Process parent content if it exists
+				if (parent && typeof parent.content === 'string') {
+					try {
+						parent.content = JSON.parse(parent.content);
+					} catch (e) {
+						console.log("Error parsing JSON:", e);
+						// Keep as is if not valid JSON
+					}
+				}
+
+				// Provide a full parent object with all necessary properties
+				change.parent = parent || {
+					id: "",
+					entity_id: change.entity_id,
+					file_id: change.file_id,
+					plugin_key: change.plugin_key,
+					schema_key: change.schema_key,
+					schema_version: change.schema_version,
+					snapshot_id: "",
+					created_at: "",
+					content: null
+				};
+			}
 		}
 	}
 	return groupedByRow;

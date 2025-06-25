@@ -6,33 +6,22 @@
 
 # Function: createSnapshot()
 
-> **createSnapshot**(`args`): `Promise`\<\{ `content`: `null` \| `Record`\<`string`, `any`\>; `id`: `string`; \}\>
+> **createSnapshot**(`args`): `Promise`\<[`Snapshot`](../type-aliases/Snapshot.md)\>
 
-Defined in: [packages/lix-sdk/src/snapshot/create-snapshot.ts:15](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/snapshot/create-snapshot.ts#L15)
-
-Creates a snapshot and inserts it or retrieves the existing snapshot from the database.
-
-Snapshots are content-addressed to avoid storing the same snapshot multiple times.
-Hence, an insert might not actually insert a new snapshot but return an existing one.
+Defined in: [packages/lix-sdk/src/snapshot/create-snapshot.ts:7](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/create-snapshot.ts#L7)
 
 ## Parameters
 
 ### args
 
-#### content?
+#### content
 
 `null` \| `Record`\<`string`, `any`\>
 
 #### lix
 
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
+`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"sqlite"`\>
 
 ## Returns
 
-`Promise`\<\{ `content`: `null` \| `Record`\<`string`, `any`\>; `id`: `string`; \}\>
-
-## Example
-
-```ts
-  const snapshot = await createSnapshot({ lix, content });
-  ```
+`Promise`\<[`Snapshot`](../type-aliases/Snapshot.md)\>

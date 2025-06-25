@@ -1,37 +1,33 @@
-import type { Snapshot } from "../database/schema.js";
+import { sql, type Kysely } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
+import type { Snapshot } from "./schema.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { v7 } from "uuid";
 
-/**
- * Creates a snapshot and inserts it or retrieves the existing snapshot from the database.
- *
- * Snapshots are content-addressed to avoid storing the same snapshot multiple times.
- * Hence, an insert might not actually insert a new snapshot but return an existing one.
- *
- * @example
- *   ```ts
- *   const snapshot = await createSnapshot({ lix, content });
- *   ```
- */
 export async function createSnapshot(args: {
-	lix: Pick<Lix, "db">;
-	content?: Snapshot["content"];
+	lix: Pick<Lix, "db" | "sqlite">;
+	content: Snapshot["content"];
 }): Promise<Snapshot> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const snapshot = await trx
-			.insertInto("snapshot")
+		const id = args.content ? v7() : "no-content";
+
+		await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
+			.insertInto("internal_snapshot")
 			.values({
-				content: args.content ?? null,
+				id,
+				content: sql`jsonb(${JSON.stringify(args.content)})`,
 			})
-			.onConflict((oc) =>
-				oc.doUpdateSet((eb) => ({
-					content: eb.ref("excluded.content"),
-				}))
-			)
-			.returningAll()
+			.onConflict((oc) => oc.doNothing())
+			.execute();
+
+		return await trx
+			.selectFrom("snapshot")
+			.where("id", "=", id)
+			.selectAll()
 			.executeTakeFirstOrThrow();
-		return snapshot;
 	};
 
+	// user provided an open transaction
 	if (args.lix.db.isTransaction) {
 		return executeInTransaction(args.lix.db);
 	} else {

@@ -178,7 +178,7 @@ function AccountContent({
 							placeholder="Enter account name"
 							value={newAccountName}
 							onChange={(e) => setNewAccountName(e.target.value)}
-							onKeyPress={handleKeyPress}
+							onKeyDown={handleKeyPress}
 							className="flex-1 h-9"
 						/>
 						<Button

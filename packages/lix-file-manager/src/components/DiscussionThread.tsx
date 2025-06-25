@@ -2,16 +2,16 @@ import { useAtom } from "jotai/react";
 import timeAgo from "@/helper/timeAgo.ts";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar.tsx";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./ui/tooltip.tsx";
-import { activeDiscussionAtom } from "@/state-active-file.ts";
+import { activeThreadAtom } from "@/state-active-file.ts";
 
 const DiscussionThread = () => {
-  const [activeDiscussion] = useAtom(activeDiscussionAtom);
+  const [activeThread] = useAtom(activeThreadAtom);
 
   return (
     <div>
-      {activeDiscussion?.comments &&
+      {activeThread?.comments &&
       // @ts-expect-error - comments is a stringified JSON
-        JSON.parse(activeDiscussion?.comments)
+        JSON.parse(activeThread?.comments)
           .map((comment: {
             id: string;
             created_at: string;

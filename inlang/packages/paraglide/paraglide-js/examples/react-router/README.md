@@ -37,12 +37,61 @@ export default defineConfig({
 
 Run the app and start translating. See the [basics documentation](/m/gerre34r/library-inlang-paraglideJs/basics) for information on how to use Paraglide's messages, parameters, and locale management.
 
-## Server side rendering
+## Server side rendering using middleware
 
+In your middleware file:
+```ts
+import { paraglideMiddleware } from "~/paraglide/server";
+import type { Route } from "../+types/root";
+
+const localeMiddleware: Route.unstable_MiddlewareFunction = async (
+  { request },
+  next,
+) => {
+  return await paraglideMiddleware(request, () => {
+    return next();
+  }, { onRedirect: (response) => throw response });
+};
+
+export { localeMiddleware };
+
+```
+
+In `root.tsx`:
+```ts
+export const unstable_middleware = [localeMiddleware];
+```
+
+In `routes.ts`: 
+
+```diff
+import {
+	type RouteConfig,
+	index,
+	prefix,
+	route,
+} from "@react-router/dev/routes";
+
+export default [
+	// prefixing each path with an optional :locale
+	// optional to match a path with no locale `/page`
+	// or with a locale `/en/page`
+	//
+	// * make sure that the pattern you define here matches
+	// * with the urlPatterns of paraglide JS if you use
+	// * the `url` strategy
++	...prefix(":locale?", [
+		index("routes/home.tsx"),
+		route("about", "routes/about.tsx"),
++	]),
+] satisfies RouteConfig;
+```
+
+Now you can use `getLocale` function anywhere in your project.
+
+## Server side rendering without middleware
 
 If you use React Router v7 with SSR you will need to add the following code:
-
-<doc-callout type="info">The setup will be even easier when React Router receives middlewares which is expected to arrive in early 2025 https://github.com/remix-run/react-router/issues/12695</doc-callout>
 
 In `root.tsx`:
 

@@ -6,44 +6,44 @@
 
 # Function: createVersion()
 
-> **createVersion**(`args`): `Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
+> **createVersion**(`args`): `Promise`\<\{ `change_set_id`: `string`; `hidden?`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`undefined` \| `boolean`\>; `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `inherits_from_version_id?`: `string` & `object`; `name`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `working_change_set_id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; \}\>
 
-Defined in: [packages/lix-sdk/src/version/create-version.ts:23](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/version/create-version.ts#L23)
+Defined in: [packages/lix-sdk/src/version/create-version.ts:15](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/create-version.ts#L15)
 
-Creates a new Version.
+Creates a new version.
 
-If `from` is provided, the new version will be identical to the from version.
+The changeSet can be any change set e.g. another version, a checkpoint, etc.
 
 ## Parameters
 
 ### args
 
-#### from?
+#### changeSet?
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>
+
+#### id?
+
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
+
+#### inherits_from_version_id?
+
+`string` & `object`
 
 #### lix
 
-`Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
+[`Lix`](../type-aliases/Lix.md)
 
 #### name?
 
-`string`
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
 
 ## Returns
 
-`Promise`\<\{ `id`: `string`; `name`: `string`; \}\>
+`Promise`\<\{ `change_set_id`: `string`; `hidden?`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`undefined` \| `boolean`\>; `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `inherits_from_version_id?`: `string` & `object`; `name`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `working_change_set_id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; \}\>
 
-## Examples
+## Example
 
-_Without from_
-
-  ```ts
-  const version = await createVersion({ lix });
-  ```
-
-_With from_
-
-  ```ts
-  const version = await createVersion({ lix, from: otherVersion });
-  ```
+```ts
+const version = await createVersion({ lix, changeSet: otherVersion.change_set_id });
+```

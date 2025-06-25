@@ -1,0 +1,38 @@
+{
+	"name": "@opral/papier-file-format",
+	"type": "module",
+	"version": "0.1.0",
+	"private": "true",
+	"license": "MIT",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"_filesComment": "Shipping src for better debugging experience",
+	"files": [
+		"dist",
+		"src"
+	],
+	"scripts": {
+		"dev": "tsc --watch",
+		"build": "tsc --build",
+		"test": "tsc --noEmit && vitest run --coverage --passWithNoTests",
+		"test:watch": "vitest",
+		"format": "prettier ./src --write"
+	},
+	"_comment": "Required for tree-shaking https://webpack.js.org/guides/tree-shaking/#mark-the-file-as-side-effect-free",
+	"sideEffects": false,
+	"engines": {
+		"node": ">=20"
+	},
+	"dependencies": {
+		"@opral/zettel-ast": "workspace:*"
+	},
+	"devDependencies": {
+		"@opral/tsconfig": "workspace:*",
+		"@vitest/coverage-v8": "3.1.1",
+		"prettier": "^3.3.3",
+		"typescript": "^5.5.4",
+		"vitest": "3.1.1"
+	}
+}

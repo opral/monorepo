@@ -8,13 +8,22 @@
 
 > **newLixFile**(): `Promise`\<`Blob`\>
 
-Defined in: [packages/lix-sdk/src/lix/new-lix.ts:14](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/lix/new-lix.ts#L14)
+Defined in: [packages/lix-sdk/src/lix/new-lix.ts:44](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/new-lix.ts#L44)
 
-Creates a new lix file.
+Returns a new empty Lix file as a Blob.
 
-The app is responsible for saving the project "whereever"
-e.g. the user's computer, cloud storage, or OPFS in the browser.
+The function bootstraps an in‑memory SQLite database with all
+required tables, change sets and metadata so that it represents
+a valid Lix project. The caller is responsible for persisting the
+resulting blob to disk, IndexedDB or any other storage location.
 
 ## Returns
 
 `Promise`\<`Blob`\>
+
+## Example
+
+```ts
+const blob = await newLixFile()
+await saveToDisk(blob)
+```

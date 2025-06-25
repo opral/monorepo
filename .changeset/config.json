@@ -21,6 +21,7 @@
     "@inlang/server",
     "@inlang/template-plugin",
     "@inlang/website",
-    "@lix-js/sdk-example-server-protocol-handler-hono"
+    "@lix-js/sdk-example-server-protocol-handler-hono",
+    "@lix-js/plugin-prosemirror-example"
   ]
 }

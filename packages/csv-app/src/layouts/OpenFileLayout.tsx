@@ -15,7 +15,6 @@ import {
 import { useAtom } from "jotai";
 import {
 	activeFileAtom,
-	changeConflictsAtom,
 	parsedCsvAtom,
 	uniqueColumnAtom,
 } from "../state-active-file.ts";
@@ -27,13 +26,12 @@ import {
 	Version,
 	createVersion,
 	switchVersion,
-	mergeVersion,
 } from "@lix-js/sdk";
 import CustomLink from "../components/CustomLink.tsx";
 
 export default function Layout(props: { children: React.ReactNode }) {
 	const [activeFile] = useAtom(activeFileAtom);
-	const [changeConflicts] = useAtom(changeConflictsAtom);
+	// const [changeConflicts] = useAtom(changeConflictsAtom);
 	const [currentVersion] = useAtom(currentVersionAtom);
 	const [searchParams] = useSearchParams();
 
@@ -49,7 +47,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 									// route to lix fm in production,
 									// else csv app root
 									(import.meta.env.PROD ? "/app/fm" : "/") +
-									`?l=${searchParams.get("l")}`
+									`?lix=${searchParams.get("lix")}`
 								}
 								className="flex justify-center items-center text-zinc-500 w-9 h-9 hover:bg-zinc-100 hover:text-zinc-950 rounded-lg cursor-pointer"
 							>
@@ -111,7 +109,7 @@ export default function Layout(props: { children: React.ReactNode }) {
 							// }
 							name="Changes"
 						/>
-						<NavItem
+						{/* <NavItem
 							to={`/conflicts?${searchParams.toString()}`}
 							counter={
 								Object.values(changeConflicts).length !== 0
@@ -119,8 +117,8 @@ export default function Layout(props: { children: React.ReactNode }) {
 									: undefined
 							}
 							name="Conflicts"
-						/>
-						<NavItem to={`/graph?${searchParams.toString()}`} name="Graph" />
+						/> */}
+						{/* <NavItem to={`/graph?${searchParams.toString()}`} name="Graph" /> */}
 						{/* <NavItem to={`/proposal?f=${activeFile.id}`} name="Proposal" /> */}
 					</div>
 				</div>
@@ -247,12 +245,12 @@ const VersionDropdown = () => {
 								<SlIconButton
 									name="sign-merge-right"
 									onClick={async () => {
-										await mergeVersion({
-											lix,
-											sourceVersion: version,
-											targetVersion: currentVersion,
-										});
-										await saveLixToOpfs({ lix });
+										// await mergeVersion({
+										// 	lix,
+										// 	sourceVersion: version,
+										// 	targetVersion: currentVersion,
+										// });
+										// await saveLixToOpfs({ lix });
 									}}
 								></SlIconButton>
 								<SlIconButton
@@ -275,7 +273,7 @@ const VersionDropdown = () => {
 					onClick={async () => {
 						const newversion = await createVersion({
 							lix,
-							from: currentVersion,
+							changeSet: { id: currentVersion.change_set_id },
 						});
 						await switchToversion(newversion);
 					}}

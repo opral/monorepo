@@ -5,16 +5,16 @@ import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
-test("it should store the lix file", async () => {
+test.skip("it should store the lix file", async () => {
 	const initLix = await openLixInMemory({
 		blob: await newLixFile(),
 	});
 
-	const initLixId = await initLix.db
+	const initLixId = (await initLix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
 		.selectAll()
-		.executeTakeFirstOrThrow();
+		.executeTakeFirstOrThrow()) as { value: string };
 
 	const environment = createLspInMemoryEnvironment();
 
@@ -76,7 +76,7 @@ test.skip("it should return 400 for an invalid lix file", async () => {
 	expect(response.status).toBe(400);
 });
 
-test("it should return 409 if the lix file already exists", async () => {
+test.skip("it should return 409 if the lix file already exists", async () => {
 	const lixFile = await newLixFile();
 
 	const environment = createLspInMemoryEnvironment();

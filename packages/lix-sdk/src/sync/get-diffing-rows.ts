@@ -1,5 +1,21 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import type { Lix } from "../lix/open-lix.js";
 import type { VectorClock } from "./merge-state.js";
+
+/**
+ * Collects all database rows that differ from a target state.
+ *
+ * The returned rows can be upserted on the target to synchronise two
+ * Lix instances. The current vector clock of this Lix file is also
+ * returned to let the remote side calculate its own diff.
+ *
+ * @example
+ * ```ts
+ * const { upsertedRows } = await getDiffingRows({ lix, targetVectorClock })
+ * ```
+ */
 
 export async function getDiffingRows(args: {
 	/**

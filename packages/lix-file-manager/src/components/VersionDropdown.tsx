@@ -16,7 +16,7 @@ import {
 	DialogFooter,
 } from "@/components/ui/dialog.js";
 import {
-	currentVersionAtom,
+	activeVersionAtom,
 	existingVersionsAtom,
 	isSyncingAtom,
 	lixAtom,
@@ -28,7 +28,7 @@ import { MergeDialog } from "./MergeDialog.js";
 import IconMerge from "./icons/IconMerge.js";
 
 export function VersionDropdown() {
-	const [currentVersion] = useAtom(currentVersionAtom);
+	const [activeVersion] = useAtom(activeVersionAtom);
 	const [existingVersions] = useAtom(existingVersionsAtom);
 	const [lix] = useAtom(lixAtom);
 	const [isSyncing] = useAtom(isSyncingAtom);
@@ -50,15 +50,15 @@ export function VersionDropdown() {
 	);
 
 	const handleCreateVersion = useCallback(async () => {
-		if (!lix || !currentVersion) return;
+		if (!lix || !activeVersion) return;
 
 		const newVersion = await createVersion({
 			lix,
-			from: currentVersion,
+			changeSet: { id: activeVersion.change_set_id },
 		});
 
 		await switchToVersion(newVersion);
-	}, [lix, currentVersion, switchToVersion]);
+	}, [lix, activeVersion, switchToVersion]);
 
 	const handleDeleteVersion = async (version: Version) => {
 		if (!lix) return;
@@ -66,8 +66,8 @@ export function VersionDropdown() {
 		await lix.db.transaction().execute(async (trx) => {
 			// First delete version_change references
 			await trx
-				.deleteFrom("version_change")
-				.where("version_change.version_id", "=", version.id)
+				.deleteFrom("version")
+				.where("version.id", "=", version.id)
 				.execute();
 
 			// Then delete the version itself
@@ -110,7 +110,7 @@ export function VersionDropdown() {
 		await saveLixToOpfs({ lix });
 	};
 
-	if (!currentVersion) return null;
+	if (!activeVersion) return null;
 
 	return (
 		<>
@@ -119,7 +119,7 @@ export function VersionDropdown() {
 					<DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
 						<DropdownMenuTrigger asChild>
 							<Button variant="secondary" size="default" className="gap-2">
-								{currentVersion.name}
+								{activeVersion.name}
 								<ChevronDown className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
@@ -134,7 +134,7 @@ export function VersionDropdown() {
 										<span>{version.name}</span>
 									</div>
 									<div className="flex items-center gap-1">
-										{version.id === currentVersion.id ? (
+										{version.id === activeVersion.id ? (
 											<Check className="h-4 w-4 opacity-50" />
 										) : (
 											<>
@@ -271,7 +271,7 @@ export function VersionDropdown() {
 					if (!open) setSelectedSourceVersion(null);
 				}}
 				versions={existingVersions}
-				currentVersion={currentVersion}
+				activeVersion={activeVersion}
 				lix={lix}
 				initialSourceVersion={selectedSourceVersion}
 				onMergeComplete={() => {

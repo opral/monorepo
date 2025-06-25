@@ -6,9 +6,9 @@
 
 # Function: mockJsonSnapshot()
 
-> **mockJsonSnapshot**(`content`): `object`
+> **mockJsonSnapshot**(`content`): [`Snapshot`](../type-aliases/Snapshot.md)
 
-Defined in: [packages/lix-sdk/src/snapshot/mock-json-snapshot.ts:9](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/snapshot/mock-json-snapshot.ts#L9)
+Defined in: [packages/lix-sdk/src/snapshot/mock-json-snapshot.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/snapshot/mock-json-snapshot.ts#L9)
 
 Util function for tests that creates a snapshot that looks like one you got returned from the database after inserting
 
@@ -20,12 +20,4 @@ Util function for tests that creates a snapshot that looks like one you got retu
 
 ## Returns
 
-`object`
-
-### content
-
-> **content**: `null` \| `Record`\<`string`, `any`\>
-
-### id
-
-> **id**: `string`
+[`Snapshot`](../type-aliases/Snapshot.md)

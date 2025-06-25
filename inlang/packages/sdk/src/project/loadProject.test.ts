@@ -133,7 +133,7 @@ test("providing an account should work", async () => {
 		.selectAll()
 		.execute();
 
-	expect(activeAccount).toEqual([mockAccount]);
+	expect(activeAccount).toEqual([expect.objectContaining(mockAccount)]);
 });
 
 // test("subscribing to errors should work", async () => {

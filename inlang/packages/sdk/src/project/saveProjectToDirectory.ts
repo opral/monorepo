@@ -69,33 +69,42 @@ export async function saveProjectToDirectory(args: {
 			});
 			for (const file of files) {
 				const pathPattern = settings[plugin.key]?.pathPattern;
-				const p = pathPattern
-					? absolutePathFromProject(
-							args.path,
-							pathPattern.replace(/\{(languageTag|locale)\}/g, file.locale)
-						)
-					: absolutePathFromProject(args.path, file.name);
-				const dirname = path.dirname(p);
-				if ((await args.fs.stat(dirname)).isDirectory() === false) {
-					await args.fs.mkdir(dirname, { recursive: true });
-				}
-				if (p.endsWith(".json")) {
-					try {
-						const existing = await args.fs.readFile(p, "utf-8");
-						const stringify = detectJsonFormatting(existing);
-						await args.fs.writeFile(
-							p,
-							new TextEncoder().encode(
-								stringify(JSON.parse(new TextDecoder().decode(file.content)))
+
+				// We need to check if pathPattern is a string or an array of strings
+				// and handle both cases.
+				const formattedPathPatterns = Array.isArray(pathPattern)
+					? pathPattern
+					: [pathPattern];
+
+				for (const pathPattern of formattedPathPatterns) {
+					const p = pathPattern
+						? absolutePathFromProject(
+								args.path,
+								pathPattern.replace(/\{(languageTag|locale)\}/g, file.locale)
 							)
-						);
-					} catch {
-						// write the file to disk (json doesn't exist yet)
-						// yeah ugly duplication of write file but it works.
+						: absolutePathFromProject(args.path, file.name);
+					const dirname = path.dirname(p);
+					if ((await args.fs.stat(dirname)).isDirectory() === false) {
+						await args.fs.mkdir(dirname, { recursive: true });
+					}
+					if (p.endsWith(".json")) {
+						try {
+							const existing = await args.fs.readFile(p, "utf-8");
+							const stringify = detectJsonFormatting(existing);
+							await args.fs.writeFile(
+								p,
+								new TextEncoder().encode(
+									stringify(JSON.parse(new TextDecoder().decode(file.content)))
+								)
+							);
+						} catch {
+							// write the file to disk (json doesn't exist yet)
+							// yeah ugly duplication of write file but it works.
+							await args.fs.writeFile(p, new Uint8Array(file.content));
+						}
+					} else {
 						await args.fs.writeFile(p, new Uint8Array(file.content));
 					}
-				} else {
-					await args.fs.writeFile(p, new Uint8Array(file.content));
 				}
 			}
 		}

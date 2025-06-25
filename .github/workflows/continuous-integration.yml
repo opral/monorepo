@@ -5,13 +5,12 @@ env:
 
 on:
   workflow_dispatch:
-    
   push:
     branches:
       - "main"
   pull_request:
     branches:
-      - "main"
+      - "**"
 
 jobs:
   ci:
@@ -20,7 +19,7 @@ jobs:
         os: [ubuntu-latest]
         version: [22]
     runs-on: ${{ matrix.os }}
-    environment: production
+    environment: staging
     steps:
       - name: Checkout project
         uses: actions/checkout@v3
@@ -30,8 +29,6 @@ jobs:
 
       - name: Setup Pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 10
 
       - name: Install node
         uses: actions/setup-node@v3

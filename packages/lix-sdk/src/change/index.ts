@@ -1,2 +1,2 @@
 export { createChange } from "./create-change.js";
-export { applyChanges } from "./apply-changes.js";
+export { type Change, type NewChange, type ChangeUpdate } from "./schema.js";

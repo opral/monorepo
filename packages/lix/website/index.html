@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lix - Change Control System</title>
+    <meta
+      name="description"
+      content="The lix change control system allows storing, tracking, querying, and reviewing changes in different file formats, e.g. .xlsx, .sqlite, or .inlang."
+    />
+    <meta
+      name="keywords"
+      content="change control, file-based apps, collaboration, automation, change graph"
+    />
+
+    <!-- Environment variables -->
+    <script type="module">
+      // Runtime environment variables
+      window.__ENV__ = window.__ENV__ || {};
+      // Make environment variables available to the client code
+      window.process = window.process || {};
+      window.process.env = window.process.env || {};
+      window.process.env.PUBLIC_LIX_POSTHOG_TOKEN = import.meta.env?.PUBLIC_LIX_POSTHOG_TOKEN || "";
+    </script>
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

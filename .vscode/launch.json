@@ -2,6 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "prosemirror-plugin-example:3000",
+      "port": 3000,
+      "request": "launch",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/lix/packages/plugins/prosemirror/example",
+      "url": "http://localhost:3000"
+    },
+    {
       "name": "sdk multi-project-test translate4",
       "type": "node",
       "request": "launch",
@@ -89,6 +97,13 @@
       "request": "launch",
       "type": "chrome",
       "webRoot": "${workspaceFolder}/packages/csv-app"
+    },
+    {
+      "name": "lix-inspector:5173",
+      "port": 5173,
+      "request": "launch",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/packages/lix/lix-inspector"
     },
     {
       "name": "lix-host",

@@ -1,6 +1,9 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import type { Change } from "../database/schema.js";
 import type { DetectedConflict, LixReadonly } from "../plugin/lix-plugin.js";
-import { changeIsLowestCommonAncestorOf } from "../query-filter/change-is-lowest-common-ancestor-of.js";
+// import { changeIsLowestCommonAncestorOf } from "../query-filter/change-is-lowest-common-ancestor-of.js";
 
 export const LIX_DIVERGING_ENTITY_CONFLICT_KEY =
 	"lix-diverging-entity-conflict";

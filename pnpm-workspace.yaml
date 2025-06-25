@@ -1,8 +1,9 @@
 packages:
-  - 'inlang/packages/**/*'
-  - 'lix/packages/**/*'
-  - "!**/*/dist"
-  - 'packages/*'
-  - 'packages/*/example'
-  - 'packages/*/examples/*'
-  
+  - inlang/packages/**/*
+  - lix/packages/**/*
+  - '!**/*/dist'
+  - packages/**/*
+  - packages/*/example
+  - packages/*/examples/*
+onlyBuiltDependencies:
+  - '@tailwindcss/oxide'

@@ -1,62 +1,138 @@
-import type { Change, ChangeSet, Label } from "../database/schema.js";
+import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { ChangeSet, ChangeSetElement } from "./schema.js";
+import type { Label } from "../label/schema.js";
+import type { NewState } from "../entity-views/types.js";
 
 /**
- * Creates a change set with the given changes, optionally within an open transaction.
+ * Creates a change set and optionally attaches elements, labels and parents.
+ *
+ * Change sets are the building blocks of versions and checkpoints. This
+ * function inserts all provided relations in a single transaction and
+ * returns the newly created record.
  *
  * @example
- *   ```ts
- *   const changes = await lix.db.selectFrom("change").selectAll().execute();
- *   const changeSet = await createChangeSet({ db: lix.db, changes });
- *   ```
- *
- * @example
- *   ```ts
- *   // Create a change set with labels
- *   const labels = await lix.db.selectFrom("label").selectAll().execute();
- *   const changeSet = await createChangeSet({
- *     lix,
- *     changes: [],
- *     labels
- *   });
- *   ```
+ * ```ts
+ * const cs = await createChangeSet({ lix, elements: [{ change_id, entity_id }] })
+ * ```
  */
+
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
-	changes: Pick<Change, "id">[];
+	id?: string;
+	elements?: Omit<NewState<ChangeSetElement>, "change_set_id">[];
 	labels?: Pick<Label, "id">[];
-}): Promise<ChangeSet> {
+	/** Parent change sets that this change set will be a child of */
+	parents?: Pick<ChangeSet, "id">[];
+	/** Version ID where the change set should be stored. Defaults to active version */
+	lixcol_version_id?: string;
+}): Promise<ChangeSet & { lixcol_version_id: string }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const changeSet = await trx
-			.insertInto("change_set")
-			.defaultValues()
-			.returningAll()
-			.executeTakeFirstOrThrow();
+		const csId = args.id ?? nanoid();
 
-		if (args.changes.length > 0) {
+		// Use _all view if version_id is specified, otherwise use regular view
+		if (args.lixcol_version_id) {
 			await trx
-				.insertInto("change_set_element")
-				.values(
-					args.changes.map((change) => ({
-						change_id: change.id,
-						change_set_id: changeSet.id,
-					}))
-				)
-				.execute();
+				.insertInto("change_set_all")
+				.values({
+					id: csId,
+					lixcol_version_id: args.lixcol_version_id,
+				})
+				.executeTakeFirstOrThrow();
+		} else {
+			await trx
+				.insertInto("change_set")
+				.values({
+					id: csId,
+				})
+				.executeTakeFirstOrThrow();
+		}
+
+		if (args.elements && args.elements.length > 0) {
+			// Insert elements linking change set to changes
+			if (args.lixcol_version_id) {
+				await trx
+					.insertInto("change_set_element_all")
+					.values(
+						args.elements.map((element) => ({
+							change_set_id: csId,
+							lixcol_version_id: args.lixcol_version_id,
+							...element,
+						}))
+					)
+					.execute();
+			} else {
+				await trx
+					.insertInto("change_set_element")
+					.values(
+						args.elements.map((element) => ({
+							change_set_id: csId,
+							...element,
+						}))
+					)
+					.execute();
+			}
 		}
 
 		// Add labels if provided
 		if (args.labels && args.labels.length > 0) {
-			await trx
-				.insertInto("change_set_label")
-				.values(
-					args.labels.map((label) => ({
-						label_id: label.id,
-						change_set_id: changeSet.id,
-					}))
-				)
-				.execute();
+			if (args.lixcol_version_id) {
+				await trx
+					.insertInto("change_set_label_all")
+					.values(
+						args.labels.map((label) => ({
+							lixcol_version_id: args.lixcol_version_id,
+							label_id: label.id,
+							change_set_id: csId,
+						}))
+					)
+					.execute();
+			} else {
+				await trx
+					.insertInto("change_set_label")
+					.values(
+						args.labels.map((label) => ({
+							label_id: label.id,
+							change_set_id: csId,
+						}))
+					)
+					.execute();
+			}
 		}
+
+		// Add parent-child relationships if parents are provided
+		for (const parent of args.parents ?? []) {
+			if (args.lixcol_version_id) {
+				await trx
+					.insertInto("change_set_edge_all")
+					.values({
+						parent_id: parent.id,
+						child_id: csId,
+						lixcol_version_id: args.lixcol_version_id,
+					})
+					.execute();
+			} else {
+				await trx
+					.insertInto("change_set_edge")
+					.values({
+						parent_id: parent.id,
+						child_id: csId,
+					})
+					.execute();
+			}
+		}
+
+		const changeSet = await trx
+			.selectFrom("change_set_all")
+			.selectAll()
+			.where("id", "=", csId)
+			.where(
+				"lixcol_version_id",
+				"=",
+				args.lixcol_version_id ??
+					trx.selectFrom("active_version").select("version_id")
+			)
+			.executeTakeFirstOrThrow();
 
 		return changeSet;
 	};

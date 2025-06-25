@@ -16,26 +16,20 @@ services:
     domains:
       - opral.com
 
-  - name: lix-website-server
+  - name: lix-website
     type: web
-    runtime: node
-    region: frankfurt
-    plan: starter
+    runtime: static
     branch: main
-    pullRequestPreviewsEnabled: false
-    buildCommand: pnpm --filter lix-website-server... i && pnpm --filter lix-website-server... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter lix-website-server production
-    autoDeploy: true
+    staticPublishPath: ./packages/lix/website/dist
     envVars:
       - fromGroup: production
       - key: PORT
-        value: 3005
+        value: 3006
+    buildCommand: pnpm --filter lix-website... i && pnpm --filter lix-website... build
+    autoDeploy: true
     buildFilter:
       paths:
-        - packages/lix-website-server/**
         - packages/lix-website/**
-        - packages/lix-file-manager/**
-        - packages/csv-app/**
     domains:
       - lix.opral.com
 
@@ -46,17 +40,22 @@ services:
     plan: starter
     branch: main
     pullRequestPreviewsEnabled: false
-    buildCommand: corepack enable && pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host start
+    buildCommand: pnpm --filter @lix-js/host... i && pnpm --filter @lix-js/host... build
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @lix-js/host production
     autoDeploy: true
     envVars:
       - fromGroup: production
       - key: PORT
-        value: 3000
+        value: 3005
+      - key: NODE_VERSION
+        value: 22.11.0
     buildFilter:
       paths:
         - packages/lix-host/**
         - packages/lix-sdk/**
+        - packages/lix-file-manager/**
+        - packages/csv-app/**
+        - packages/md-app/**
     domains:
       - lix.host
 
@@ -66,7 +65,7 @@ services:
     autoDeploy: true
     branch: main
     staticPublishPath: ./inlang/packages/fink2/dist
-    routes: 
+    routes:
       - type: rewrite
         source: /*
         destination: /index.html
@@ -90,30 +89,15 @@ services:
     envVars:
       - fromGroup: production
 
-  - name: lix-md
-    type: web
-    runtime: static
-    autoDeploy: true
-    branch: md-app
-    staticPublishPath: ./packages/md-app/dist
-    buildCommand: pnpm install && pnpm run --filter md-app... build
-    buildFilter:
-      paths:
-        - packages/md-app/**
-    envVars:
-      - fromGroup: production
-      - key: NODE_VERSION
-        value: 22.12.0
-
   - name: inlang-website
     type: web
     runtime: node
     region: frankfurt
     plan: standard
     branch: main
-    # corepack has some key matching issues. disable the checks for now. 
+    # corepack has some key matching issues. disable the checks for now.
     buildCommand: npm i pnpm@10 -g --force && pnpm install && pnpm run --filter @inlang/server... build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production 
+    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/server production
     autoDeploy: true
     envVars:
       - key: PORT
@@ -121,12 +105,13 @@ services:
       - fromGroup: production
     buildFilter:
       paths:
+        - inlang/packages/server/**
         - inlang/packages/website/**
         - inlang/packages/marketplace-registry/**
         - inlang/packages/**/marketplace-manifest.json
-        - '**/*.md'
+        - "**/*.md"
       ignoredPaths:
-        - '**/CHANGELOG.md'
+        - "**/CHANGELOG.md"
     domains:
       - inlang.com
 
@@ -151,23 +136,6 @@ services:
     domains:
       - git.inlang.com
 
-  - name: badge-service
-    type: web
-    runtime: node
-    region: frankfurt
-    plan: standard
-    branch: inlang-v1
-    buildCommand: pnpm install && pnpm run build --projects=@inlang/badge
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/badge run production
-    autoDeploy: true
-    envVars:
-      - fromGroup: production
-    buildFilter:
-      paths:
-        - inlang/packages/badge/CHANGELOG.md
-    domains:
-      - badge.inlang.com
-
   - name: fink-editor
     type: web
     runtime: node
@@ -187,26 +155,6 @@ services:
         - inlang/packages/editor/CHANGELOG.md
     domains:
       - fink.inlang.com
-
-  - name: inlang-manage
-    type: web
-    runtime: node
-    region: frankfurt
-    plan: standard
-    branch: inlang-v1
-    pullRequestPreviewsEnabled: false
-    buildCommand: pnpm install && pnpm run build
-    startCommand: NX_REJECT_UNKNOWN_LOCAL_CACHE=0 pnpm --filter @inlang/manage production
-    autoDeploy: true
-    envVars:
-      - fromGroup: production
-      - key: PORT
-        value: 4004
-    buildFilter:
-      paths:
-        - inlang/packages/manage/CHANGELOG.md
-    domains:
-      - manage.inlang.com
 
   - name: telemetry-proxy
     type: web
@@ -263,10 +211,10 @@ services:
     runtime: static
     autoDeploy: true
     # TODO replace with main when we deploy parrot-figma in prod
-    branch: add-parrot-figma
+    branch: main
     staticPublishPath: ./inlang/packages/parrot-figma/dist
     # buildCommand: pnpm install && pnpm run --filter csv-app... build
-    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build 
+    buildCommand: pnpm install && pnpm run --filter @inlang/parrot-figma... build
     buildFilter:
       paths:
         - ./inlang/packages/parrot-figma/**
@@ -283,3 +231,48 @@ services:
       - path: "/*"
         name: Access-Control-Allow-Headers
         value: Content-Type
+
+  - name: flashtype.ai
+    type: web
+    runtime: static
+    autoDeploy: true
+    staticPublishPath: ./packages/md-app/dist
+    envVars:
+      - fromGroup: production
+    buildCommand: pnpm install && pnpm run --filter md-app... build
+    buildFilter:
+      paths:
+        - packages/md-app/**
+    domains:
+      - flashtype.ai
+      
+  - name: lix-landing
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./packages/lix-new-landing/dist
+    buildCommand: pnpm install && pnpm run --filter lix-new-landing... build
+    buildFilter:
+      paths:
+        - packages/lix-new-landing/**
+    envVars:
+      - fromGroup: production
+    domains:
+      - lix.dev
+      
+  - name: lix-docs
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./packages/lix-docs/docs/.vitepress/dist
+    buildCommand: pnpm install && pnpm run --filter @lix-js/docs... build
+    buildFilter:
+      paths:
+        - packages/lix-docs/**
+        - packages/lix-sdk/**
+    envVars:
+      - fromGroup: production
+    domains:
+      - docs.lix.dev

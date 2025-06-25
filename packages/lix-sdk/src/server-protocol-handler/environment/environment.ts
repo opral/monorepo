@@ -4,11 +4,6 @@ import type { Lix } from "../../lix/open-lix.js";
  * Key value storage interface.
  */
 export type LspEnvironment = {
-	get(key: string): Promise<Blob | undefined>;
-	set(key: string, value: Blob): Promise<void>;
-	has(key: string): Promise<boolean>;
-	delete(key: string): Promise<void>;
-
 	getLix(args: { id: string }): Promise<Blob | undefined>;
 
 	/**

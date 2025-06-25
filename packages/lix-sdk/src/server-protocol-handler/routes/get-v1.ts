@@ -47,7 +47,9 @@ export const route: LixServerProtocolHandlerRoute = async (context) => {
 		content: new Uint8Array(await blob!.arrayBuffer()),
 	});
 
-	sqlite.exec("UPDATE key_value SET value = 'true' WHERE key = 'lix_sync'");
+	sqlite.exec(
+		"UPDATE key_value SET value = json('true') WHERE key = 'lix_sync'"
+	);
 
 	const blob2 = new Blob([contentFromDatabase(sqlite)]);
 

@@ -6,9 +6,9 @@
 
 # Function: applyKeyValueDatabaseSchema()
 
-> **applyKeyValueDatabaseSchema**(`sqlite`): `SqliteWasmDatabase`
+> **applyKeyValueDatabaseSchema**(`sqlite`): `void`
 
-Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:4](https://github.com/opral/monorepo/blob/bb6249bc1f353fcb132d1694b6c77522c0283a94/packages/lix-sdk/src/key-value/database-schema.ts#L4)
+Defined in: [packages/lix-sdk/src/key-value/schema.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/key-value/schema.ts#L9)
 
 ## Parameters
 
@@ -18,4 +18,4 @@ Defined in: [packages/lix-sdk/src/key-value/database-schema.ts:4](https://github
 
 ## Returns
 
-`SqliteWasmDatabase`
+`void`

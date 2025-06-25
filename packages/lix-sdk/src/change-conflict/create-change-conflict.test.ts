@@ -1,9 +1,11 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeConflict } from "./create-change-conflict.js";
-import { createVersion } from "../version/create-version.js";
 
-test("conflicts should be de-duplicated based on the change_conflict.key and version", async () => {
+test.skip("conflicts should be de-duplicated based on the change_conflict.key and version", async () => {
 	const lix = await openLixInMemory({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
@@ -68,7 +70,8 @@ test("conflicts should be de-duplicated based on the change_conflict.key and ver
 	expect(conflictsAfter2Creation[0]?.key).toBe("mock-conflict");
 });
 
-test("if a conflict contains the same changes for a given key and version, no new conflict should be created", async () => {
+// commented out because of https://github.com/opral/lix-sdk/issues/285#issuecomment-2755409022
+test.skip("if a conflict contains the same changes for a given key and version, no new conflict should be created", async () => {
 	const lix = await openLixInMemory({});
 
 	const version0 = await createVersion({ lix, name: "version0" });

@@ -7,6 +7,17 @@ test("should only return changes with the given label", async () => {
 	const lix = await openLixInMemory({});
 
 	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "mock_schema",
+				"x-lix-version": "1.0",
+				type: "object",
+			},
+		})
+		.execute();
+
+	const changes0 = await lix.db
 		.insertInto("change")
 		.values([
 			{
@@ -14,26 +25,42 @@ test("should only return changes with the given label", async () => {
 				snapshot_id: "no-content",
 				entity_id: "mock",
 				file_id: "mock",
+				schema_version: "1.0",
 				plugin_key: "mock",
-				schema_key: "mock",
+				schema_key: "mock_schema",
 			},
 			{
 				id: "change2",
 				snapshot_id: "no-content",
 				entity_id: "mock",
 				file_id: "mock",
+				schema_version: "1.0",
 				plugin_key: "mock",
-				schema_key: "mock",
+				schema_key: "mock_schema",
 			},
 		])
+		.returningAll()
 		.execute();
 
-	const set = await createChangeSet({ lix, changes: [{ id: "change1" }] });
+	const set = await createChangeSet({
+		lix,
+		elements: [
+			{
+				change_id: changes0[0]!.id,
+				entity_id: changes0[0]!.entity_id,
+				schema_key: changes0[0]!.schema_key,
+				file_id: changes0[0]!.file_id,
+			},
+		],
+		labels: [],
+	});
+
+	await lix.db.insertInto("label").values({ name: "mocked" }).execute();
 
 	const label = await lix.db
-		.insertInto("label")
-		.values({ name: "mocked" })
-		.returningAll()
+		.selectFrom("label")
+		.where("name", "=", "mocked")
+		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	await lix.db
@@ -43,7 +70,7 @@ test("should only return changes with the given label", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.where(changeHasLabel("mocked"))
+		.where(changeHasLabel({ name: "mocked" }))
 		.selectAll()
 		.execute();
 

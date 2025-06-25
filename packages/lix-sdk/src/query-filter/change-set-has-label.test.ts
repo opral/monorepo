@@ -1,50 +1,42 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { test, expect } from "vitest";
 import { changeSetHasLabel } from "./change-set-has-label.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
-import { mockChange } from "../change/mock-change.js";
+import { createLabel } from "../label/create-label.js";
 
 test("should only return change sets with the given label", async () => {
 	const lix = await openLixInMemory({});
 
-	await lix.db
-		.insertInto("change")
-		.values([mockChange({ id: "change1" }), mockChange({ id: "change2" })])
-		.execute();
-
 	// Create two change sets
-	const changeSet1 = await createChangeSet({
+	const cs0 = await createChangeSet({
 		lix,
-		changes: [{ id: "change1" }],
+		id: "cs0",
+		elements: [],
 	});
 
-	const changeSet2 = await createChangeSet({
+	await createChangeSet({
 		lix,
-		changes: [{ id: "change2" }],
+		id: "cs1",
+		elements: [],
 	});
 
 	// Insert a label
-	const label = await lix.db
-		.insertInto("label")
-		.values({ name: "mocked" })
-		.returningAll()
-		.executeTakeFirstOrThrow();
+	const label = await createLabel({ lix, name: "mocked" });
 
 	// Assign the label to one of the change sets
 	await lix.db
 		.insertInto("change_set_label")
-		.values({ change_set_id: changeSet1.id, label_id: label.id })
+		.values({ change_set_id: cs0.id, label_id: label.id })
 		.execute();
 
 	// Query change sets with the label
 	const changeSets = await lix.db
 		.selectFrom("change_set")
-		.where(changeSetHasLabel("mocked"))
+		.where(changeSetHasLabel({ name: "mocked" }))
 		.selectAll()
 		.execute();
 
 	// Assertions
 	expect(changeSets).toHaveLength(1);
-	expect(changeSets[0]?.id).toBe(changeSet1.id);
+	expect(changeSets[0]?.id).toBe(cs0.id);
 });

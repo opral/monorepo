@@ -15,13 +15,13 @@ import {
 	SelectValue,
 } from "@/components/ui/select.js";
 import { useState, useEffect } from "react";
-import { mergeVersion } from "@lix-js/sdk";
+import { createMergeChangeSet } from "@lix-js/sdk";
 
 interface MergeDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	versions: Version[];
-	currentVersion: Version;
+	activeVersion: Version;
 	lix: any;
 	initialSourceVersion: Version | null;
 	onMergeComplete: () => void;
@@ -31,12 +31,12 @@ export function MergeDialog({
 	open,
 	onOpenChange,
 	versions,
-	currentVersion,
+	activeVersion,
 	lix,
 	initialSourceVersion,
 	onMergeComplete,
 }: MergeDialogProps) {
-	const [targetVersion, setTargetVersion] = useState<string>(currentVersion.id);
+	const [targetVersion, setTargetVersion] = useState<string>(activeVersion.id);
 	const [sourceVersion, setSourceVersion] = useState<string>(
 		initialSourceVersion?.id || ""
 	);
@@ -44,13 +44,13 @@ export function MergeDialog({
 	useEffect(() => {
 		if (open) {
 			if (!targetVersion) {
-				setTargetVersion(currentVersion.id);
+				setTargetVersion(activeVersion.id);
 			}
 			if (!sourceVersion && initialSourceVersion) {
 				setSourceVersion(initialSourceVersion.id);
 			}
 		} else {
-			setTargetVersion(currentVersion.id);
+			setTargetVersion(activeVersion.id);
 			setSourceVersion("");
 		}
 	}, [open]);
@@ -62,10 +62,10 @@ export function MergeDialog({
 
 			if (!source || !target) return;
 
-			await mergeVersion({
+			await createMergeChangeSet({
 				lix,
-				sourceVersion: source,
-				targetVersion: target,
+				source,
+				target,
 			});
 
 			onMergeComplete();

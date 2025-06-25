@@ -1,0 +1,19 @@
+{
+  "entryPoints": ["../lix-sdk/src/index.ts"],
+  "out": "docs/api/reference",
+  "excludePrivate": true,
+  "excludeExternals": true,
+  "excludeInternal": true,
+  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
+  "readme": "none",
+  "sort": ["alphabetical"],
+  "hideGenerator": true,
+  "entryPointStrategy": "expand",
+  "tsconfig": "./typedoc.tsconfig.json",
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false
+  }
+}

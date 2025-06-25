@@ -11,16 +11,20 @@ import {
 } from "./state.ts";
 import Papa from "papaparse";
 import {
-	changeConflictInVersion,
-	changeHasLabel,
-	changeInVersion,
-	changeIsLeafInVersion,
+	ChangeSet,
+	// changeSetElementIsLeafOf,
+	changeSetHasLabel,
+	changeSetIsAncestorOf,
+	jsonArrayFrom,
+	Lix,
+	sql,
+	UiDiffComponentProps,
 } from "@lix-js/sdk";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
 
 export const activeFileAtom = atom(async (get) => {
 	get(withPollingAtom);
-	const fileId = await get(fileIdSearchParamsAtom);
+	const fileId = get(fileIdSearchParamsAtom);
 
 	if (!fileId) {
 		// Not the best UX to implicitly route to the root
@@ -93,18 +97,24 @@ export const activeCellEntityIdAtom = atom(async (get) => {
  */
 export const activeCellChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
+	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
 	const cellEntityId = await get(activeCellEntityIdAtom);
-	const currentBranch = await get(currentVersionAtom);
-	const lix = await get(lixAtom);
+	// const currentVersion = await get(currentVersionAtom);
 	if (!cellEntityId || !activeFile) return [];
 	const changes = await lix.db
 		.selectFrom("change")
-		.where("change.schema_key", "=", CellSchemaV1.key)
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 		.where("change.entity_id", "=", cellEntityId)
 		.where("change.file_id", "=", activeFile.id)
-		.where(changeInVersion(currentBranch))
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		// .leftJoin("version_change", "version_change.change_id", "change.id")
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("version_change.version_id", "=", currentVersion.id),
+		// 		eb("version_change.change_id", "is", null),
+		// 	])
+		// )
 		// .innerJoin("change_set_item", "change_set_item.change_id", "change.id")
 		// .innerJoin("change_set", "change_set.id", "change_set_item.change_set_id")
 		// .innerJoin("discussion", "discussion.change_set_id", "change_set.id")
@@ -140,21 +150,203 @@ export const activeCellChangesAtom = atom(async (get) => {
 	return changes;
 });
 
-// The CSV app treats changes that are not in a change set as intermediate changes.
-export const intermediateChangesAtom = atom(async (get) => {
+/**
+ * Get working change set for a specific file
+ * This is extracted to be reusable across the application
+ */
+export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
+	// Get the active version with working change set id
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
+		.executeTakeFirst();
+
+	if (!activeVersion) return null;
+
+	// Get the working change set
+	return await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", activeVersion.working_change_set_id)
+		// left join in case the change set has no elements
+		.leftJoin(
+			"change_set_element",
+			"change_set.id",
+			"change_set_element.change_set_id"
+		)
+		.where("file_id", "=", fileId)
+		.selectAll("change_set")
+		.groupBy("change_set.id")
+		.select((eb) => [
+			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		])
+		.executeTakeFirst();
+};
+
+/**
+ * Special change set which describes the current changes
+ * that are not yet checkpointed.
+ */
+export const workingChangeSetAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentBranch = await get(currentVersionAtom);
+	if (!lix || !activeFile) return null;
 
-	if (!activeFile) return [];
+	return await getWorkingChangeSet(lix, activeFile.id);
+});
+
+// The file manager app treats changes that are in the working change set as intermediate changes.
+export const intermediateChangesAtom = atom<
+	Promise<UiDiffComponentProps["diffs"]>
+>(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	const activeVersion = await get(currentVersionAtom);
+	const checkpointChanges = await get(checkpointChangeSetsAtom);
+	if (!activeVersion || !activeFile) return [];
+
+	// Get all changes in the working change set
+	const workingChangeSetId = activeVersion.working_change_set_id;
+
+	// Get changes that are in the working change set
+	const intermediateChanges = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_id",
+			"change.id"
+		)
+		.where("change_set_element.change_set_id", "=", workingChangeSetId)
+		.where("change.file_id", "=", activeFile.id)
+		.where("change.file_id", "!=", "lix_own_change_control")
+		.select([
+			"change.id",
+			"change.entity_id",
+			"change.file_id",
+			"change.plugin_key",
+			"change.schema_key",
+			"change.created_at",
+			sql`json(snapshot.content)`.as("snapshot_content_after"),
+		])
+		.execute();
+
+	const latestCheckpointChangeSetId = checkpointChanges?.[0]?.id;
+	// If there are no checkpoint changes, we can't get the before snapshot
+
+	const changesWithBeforeSnapshots: UiDiffComponentProps["diffs"] =
+		await Promise.all(
+			intermediateChanges.map(async (change) => {
+				let snapshotBefore = null;
+
+				// First try to find the entity in the latest checkpoint change set
+				if (latestCheckpointChangeSetId) {
+					snapshotBefore = await lix.db
+						.selectFrom("change")
+						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+						.innerJoin(
+							"change_set_element",
+							"change_set_element.change_id",
+							"change.id"
+						)
+						.where(
+							"change_set_element.change_set_id",
+							"=",
+							latestCheckpointChangeSetId
+						)
+						.where("change.entity_id", "=", change.entity_id)
+						.where("change.schema_key", "=", change.schema_key)
+						.where("change.file_id", "=", activeFile.id)
+						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+						.orderBy("change.created_at", "desc")
+						.limit(1)
+						.executeTakeFirst();
+				}
+
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { id, ...rest } = change;
+
+				return {
+					...rest,
+					snapshot_content_after: change.snapshot_content_after
+						? typeof change.snapshot_content_after === "string"
+							? JSON.parse(change.snapshot_content_after)
+							: change.snapshot_content_after
+						: null,
+					snapshot_content_before: snapshotBefore?.snapshot_content_before
+						? typeof snapshotBefore.snapshot_content_before === "string"
+							? JSON.parse(snapshotBefore.snapshot_content_before)
+							: snapshotBefore.snapshot_content_before
+						: null,
+				};
+			})
+		);
+
+	return changesWithBeforeSnapshots;
+});
+
+export const checkpointChangeSetsAtom = atom(async (get) => {
+	get(withPollingAtom);
+	const lix = await get(lixAtom);
+	const activeFile = await get(activeFileAtom);
+	const activeVersion = await get(currentVersionAtom);
+	if (!activeFile || !activeVersion) return [];
 
 	return await lix.db
-		.selectFrom("change")
-		.where("change.file_id", "=", activeFile.id)
-		.where(changeIsLeafInVersion(currentBranch))
-		.where((eb) => eb.not(changeHasLabel("checkpoint")))
-		.selectAll("change")
+		.selectFrom("change_set")
+		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.where(
+			changeSetIsAncestorOf(
+				{ id: activeVersion.change_set_id },
+				// in case the checkpoint is the active version's change set
+				{ includeSelf: true }
+			)
+		)
+		// left join in case the change set has no elements
+		.leftJoin(
+			"change_set_element",
+			"change_set.id",
+			"change_set_element.change_set_id"
+		)
+		.where("file_id", "=", activeFile.id)
+		.selectAll("change_set")
+		.groupBy("change_set.id")
+		.select((eb) => [
+			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		])
+		.select((eb) =>
+			eb
+				.selectFrom("change")
+				.where("change.schema_key", "=", "lix_change_set_label_table")
+				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.where(
+					// @ts-expect-error - this is a workaround for the type system
+					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					"=",
+					eb.ref("change_set.id")
+				)
+				.select("change.created_at")
+				.as("created_at")
+		)
+		.select((eb) =>
+			eb
+				.selectFrom("change_author")
+				.innerJoin("change", "change.id", "change_author.change_id")
+				.innerJoin("account", "account.id", "change_author.account_id")
+				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+				.where("change.schema_key", "=", "lix_change_set_label_table")
+				.where(
+					// @ts-expect-error - this is a workaround for the type system
+					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					"=",
+					eb.ref("change_set.id")
+				)
+				.select("account.name")
+				.as("author_name")
+		)
+		.orderBy("created_at", "desc")
 		.execute();
 });
 
@@ -162,14 +354,20 @@ export const allChangesAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
+	// const currentVersion = await get(currentVersionAtom);
 
 	if (!activeFile) return [];
-	// const currentBranch = await get(currentBranchAtom);
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		// .where(changeInVersion(currentBranch))
+		// .leftJoin("version_change", "version_change.change_id", "change.id")
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("version_change.version_id", "=", currentVersion.id),
+		// 		eb("version_change.change_id", "is", null),
+		// 	])
+		// )
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
@@ -179,7 +377,7 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 	get(withPollingAtom);
 	const lix = await get(lixAtom);
 	const activeFile = await get(activeFileAtom);
-	const currentBranch = await get(currentVersionAtom);
+	// const currentVersion = await get(currentVersionAtom);
 
 	if (!activeFile) return [];
 
@@ -187,11 +385,45 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.where(changeInVersion(currentBranch))
+		// .leftJoin("version_change", "version_change.change_id", "change.id")
+		// .where((eb) =>
+		// 	eb.or([
+		// 		eb("version_change.version_id", "=", currentVersion.id),
+		// 		eb("version_change.change_id", "is", null),
+		// 	])
+		// )
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
 });
+
+export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
+	if (!changeSetId || !lix) return null;
+
+	return await lix.db
+		.selectFrom("thread")
+		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
+		.where("change_set_thread.change_set_id", "=", changeSetId)
+		.select((eb) => [
+			jsonArrayFrom(
+				eb
+					.selectFrom("thread_comment")
+					.innerJoin("change", "change.entity_id", "thread_comment.id")
+					.innerJoin("change_author", "change_author.change_id", "change.id")
+					.innerJoin("account", "account.id", "change_author.account_id")
+					.select([
+						"thread_comment.id",
+						"thread_comment.body",
+						"thread_comment.thread_id",
+						"thread_comment.parent_id",
+					])
+					.select(["change.created_at", "account.name as author_name"])
+					.whereRef("thread_comment.thread_id", "=", "thread.id")
+			).as("comments"),
+		])
+		.selectAll("thread")
+		.execute();
+};
 
 export const allEdgesAtom = atom(async (get) => {
 	get(withPollingAtom);
@@ -201,80 +433,88 @@ export const allEdgesAtom = atom(async (get) => {
 	if (!activeFile) return [];
 
 	return await lix.db
-		.selectFrom("change_edge")
-		.innerJoin("change", "change.id", "change_edge.parent_id")
+		.selectFrom("change_set_edge")
+		.innerJoin("change", "change.id", "change_set_edge.parent_id")
 		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_edge")
+		.selectAll("change_set_edge")
 		.execute();
 });
 
-export const changeConflictsAtom = atom(async (get) => {
-	get(withPollingAtom);
-	const lix = await get(lixAtom);
-	// const activeFile = await get(activeFileAtom);
-	const currentVersion = await get(currentVersionAtom);
+// Conflict resolution is not yet implemented
+// export const changeConflictsAtom = atom(async (get) => {
+// 	get(withPollingAtom);
+// 	const lix = await get(lixAtom);
+// 	// const activeFile = await get(activeFileAtom);
+// 	const currentVersion = await get(currentVersionAtom);
 
-	const changeConflictElements = await lix.db
-		.selectFrom("change_set_element")
-		.innerJoin(
-			"change_conflict",
-			"change_conflict.change_set_id",
-			"change_set_element.change_set_id"
-		)
-		.innerJoin("change", "change.id", "change_set_element.change_id")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.leftJoin("version_change", (join) =>
-			join
-				.onRef("version_change.change_id", "=", "change.id")
-				.on("version_change.version_id", "=", currentVersion.id)
-		)
-		// .where((eb) =>
-		// 	eb.or([
-		// 		eb("change.file_id", "=", activeFile.id),
-		// 		eb("change.file_id", "=", "null"),
-		// 	])
-		// )
-		.where(changeConflictInVersion(currentVersion))
-		.selectAll("change_set_element")
-		.select([
-			"change_conflict.id as change_conflict_id",
-			"change_conflict.change_set_id as change_conflict_change_set_id",
-		])
-		.selectAll("change")
-		.select((eb) =>
-			eb
-				.case()
-				.when("version_change.change_id", "is not", null)
-				// using boolean still returns 0 or 1
-				// for typesafety, number is used
-				.then(1)
-				.else(0)
-				.end()
-				.as("is_current_version_change")
-		)
-		.select((eb) =>
-			eb
-				.case()
-				.when(changeInVersion(currentVersion))
-				.then(1)
-				.else(0)
-				.end()
-				.as("is_in_current_version")
-		)
-		.select("snapshot.content")
-		.select("change_conflict.key as change_conflict_key")
-		.execute();
+// 	const changeConflictElements = await lix.db
+// 		.selectFrom("change_set_element")
+// 		.innerJoin(
+// 			"change_conflict",
+// 			"change_conflict.change_set_id",
+// 			"change_set_element.change_set_id"
+// 		)
+// 		.innerJoin("change", "change.id", "change_set_element.change_id")
+// 		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+// 		.leftJoin("version_change", (join) =>
+// 			join
+// 				.onRef("version_change.change_id", "=", "change.id")
+// 				.on("version_change.version_id", "=", currentVersion.id)
+// 		)
+// 		// .where((eb) =>
+// 		// 	eb.or([
+// 		// 		eb("change.file_id", "=", activeFile.id),
+// 		// 		eb("change.file_id", "=", "null"),
+// 		// 	])
+// 		// )
+// 		// .where(changeConflictInVersion(currentVersion))
+// 		.selectAll("change_set_element")
+// 		.select([
+// 			"change_conflict.id as change_conflict_id",
+// 			"change_conflict.change_set_id as change_conflict_change_set_id",
+// 		])
+// 		.selectAll("change")
+// 		.select((eb) =>
+// 			eb
+// 				.case()
+// 				.when("version_change.change_id", "is not", null)
+// 				// using boolean still returns 0 or 1
+// 				// for typesafety, number is used
+// 				.then(1)
+// 				.else(0)
+// 				.end()
+// 				.as("is_current_version_change")
+// 		)
+// 		.select((eb) =>
+// 			eb
+// 				.case()
+// 				.when(
+// 					eb.exists(
+// 						eb
+// 							.selectFrom("version_change")
+// 							.whereRef("version_change.change_id", "=", "change.id")
+// 							.where("version_change.version_id", "=", currentVersion.id)
+// 					)
+// 				)
+// 				.then(1)
+// 				.else(0)
+// 				.end()
+// 				.as("is_in_current_version")
+// 		)
+// 		.select("snapshot.content")
+// 		.select("change_conflict.key as change_conflict_key")
+// 		.execute();
 
-	const groupedByConflictId: { [key: string]: typeof changeConflictElements } =
-		{};
+// 	const groupedByConflictId: { [key: string]: typeof changeConflictElements } =
+// 		{};
 
-	for (const element of changeConflictElements) {
-		const conflictId = element.change_conflict_id;
-		if (!groupedByConflictId[conflictId]) {
-			groupedByConflictId[conflictId] = [];
-		}
-		groupedByConflictId[conflictId].push(element);
-	}
+// 	for (const element of changeConflictElements) {
+// 		const conflictId = element.change_conflict_id;
+// 		if (!groupedByConflictId[conflictId]) {
+// 			groupedByConflictId[conflictId] = [];
+// 		}
+// 		groupedByConflictId[conflictId].push(element);
+// 	}
 
-	return groupedByConflictId;
-});
+// 	return groupedByConflictId;
+// });

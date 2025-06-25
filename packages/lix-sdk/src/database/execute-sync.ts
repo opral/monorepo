@@ -3,14 +3,20 @@ import type { Lix } from "../lix/open-lix.js";
 /**
  * Execute a query synchronously.
  *
- * WARNING: This function is not recommended for general use.
- * Only if you need sync queries, like in a trigger for exmaple,
- * you should use this function. The function is not transforming
- * the query or the result as the db API does. You get raw SQL.
+ * ⚠️  MAJOR WARNING: This function is a PURE SQL LAYER without transformations!
+ *
+ * - JSON columns return as RAW JSON STRINGS, not parsed objects
+ * - You must manually parse/stringify JSON data
+ * - No automatic type conversions happen
+ * - Results are raw SQLite values
+ *
+ * Only use this for triggers, database functions, or when you specifically
+ * need synchronous database access and understand you're working with raw SQL.
  *
  * @example
- *   const query = lix.db.selectFrom("key_value").selectAll();
- *   const result = executeSync({ lix, query }) as KeyValue[];
+ *   // JSON columns are returned as strings - you must parse manually:
+ *   const result = executeSync({ lix, query });
+ *   result[0].metadata = JSON.parse(result[0].metadata);
  */
 export function executeSync(args: {
 	lix: Pick<Lix, "sqlite">;
@@ -20,28 +26,21 @@ export function executeSync(args: {
 
 	const columnNames: string[] = [];
 
-	try {
-		const result = args.lix.sqlite.exec({
-			sql: compiledQuery.sql,
-			bind: compiledQuery.parameters as any[],
-			returnValue: "resultRows",
-			columnNames,
+	const result = args.lix.sqlite.exec({
+		sql: compiledQuery.sql,
+		bind: compiledQuery.parameters as any[],
+		returnValue: "resultRows",
+		columnNames,
+	});
+
+	return result.map((row) => {
+		const obj: any = {};
+
+		columnNames.forEach((columnName, index) => {
+			obj[columnName] = row[index];
 		});
 
-		return result.map((row) => {
-			const obj: any = {};
-
-			columnNames.forEach((columnName, index) => {
-				obj[columnName] = row[index];
-			});
-
-			return obj;
-		});
-	} catch (e) {
-		console.error(
-			`Error in executeSync for query:\n\n${compiledQuery.sql}\n\n`,
-			e
-		);
-		return [];
-	}
+		// NO JSON PARSING - pure SQL results
+		return obj;
+	});
 }
