@@ -39,6 +39,7 @@ test("insert, update, delete on the file view", async () => {
 			lixcol_inherited_from_version_id: null,
 			lixcol_created_at: expect.any(String),
 			lixcol_updated_at: expect.any(String),
+			lixcol_change_id: expect.any(String),
 			data: { prop0: "file0-value0" },
 			metadata: null,
 		},
@@ -71,6 +72,7 @@ test("insert, update, delete on the file view", async () => {
 			lixcol_inherited_from_version_id: null,
 			lixcol_created_at: expect.any(String),
 			lixcol_updated_at: expect.any(String),
+			lixcol_change_id: expect.any(String),
 			data: { prop0: "file0-value1" },
 			metadata: null,
 		},
@@ -175,6 +177,7 @@ test("file insert data materialization", async () => {
 			lixcol_inherited_from_version_id: null,
 			lixcol_created_at: expect.any(String),
 			lixcol_updated_at: expect.any(String),
+			lixcol_change_id: expect.any(String),
 			data: { prop0: "file0-value0" },
 			metadata: null,
 		},
@@ -518,4 +521,253 @@ test("file metadata is Record<string, any>", async () => {
 	expectTypeOf(mockFile.metadata).toEqualTypeOf<
 		Record<string, any> | null | undefined
 	>();
+});
+
+test("file and file_all views expose change_id for blame and diff functionality", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// Insert initial file using file view to ensure triggers are executed
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "change-id-test-file",
+			path: "/test-change-id.json",
+			data: new TextEncoder().encode(JSON.stringify({ prop: "initial value" })),
+		})
+		.execute();
+
+	// Query file_all view to verify change_id is exposed
+	const fileAllResult = await lix.db
+		.selectFrom("file_all")
+		.where("id", "=", "change-id-test-file")
+		.selectAll()
+		.execute();
+
+	expect(fileAllResult).toHaveLength(1);
+	expect(fileAllResult[0]?.lixcol_change_id).toBeDefined();
+	expect(typeof fileAllResult[0]?.lixcol_change_id).toBe("string");
+
+	// Query file view (filtered by active version) to verify change_id is exposed
+	const fileResult = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "change-id-test-file")
+		.selectAll()
+		.execute();
+
+	expect(fileResult).toHaveLength(1);
+	expect(fileResult[0]?.lixcol_change_id).toBeDefined();
+	expect(typeof fileResult[0]?.lixcol_change_id).toBe("string");
+
+	// Verify that change_id matches between file and file_all views
+	expect(fileResult[0]?.lixcol_change_id).toBe(fileAllResult[0]?.lixcol_change_id);
+
+	// Get the actual file entity change record to verify the change_id is correct
+	const fileChangeRecord = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("entity_id", "=", "change-id-test-file")
+		.where("schema_key", "=", "lix_file")
+		.select(["change.id", "content as snapshot_content"])
+		.executeTakeFirstOrThrow();
+
+	// Verify that the change_id in the views matches the actual file change.id
+	expect(fileResult[0]?.lixcol_change_id).toBe(fileChangeRecord.id);
+	expect(fileAllResult[0]?.lixcol_change_id).toBe(fileChangeRecord.id);
+
+	// Verify that the snapshot content in the change matches the file view
+	expect(fileChangeRecord.snapshot_content).toMatchObject({
+		id: "change-id-test-file",
+		path: "/test-change-id.json",
+	});
+	expect(fileResult[0]?.id).toBe("change-id-test-file");
+	expect(fileResult[0]?.path).toBe("/test-change-id.json");
+
+	// Update the file to create a new change
+	await lix.db
+		.updateTable("file")
+		.set({
+			path: "/test-change-id-updated.json",
+			data: new TextEncoder().encode(JSON.stringify({ prop: "updated value" })),
+		})
+		.where("id", "=", "change-id-test-file")
+		.execute();
+
+	// Query again to verify change_id updated after modification
+	const updatedFileResult = await lix.db
+		.selectFrom("file_all")
+		.where("id", "=", "change-id-test-file")
+		.selectAll()
+		.execute();
+
+	expect(updatedFileResult).toHaveLength(1);
+	expect(updatedFileResult[0]?.lixcol_change_id).toBeDefined();
+	// The change_id should be different after the update (new change created)
+	expect(updatedFileResult[0]?.lixcol_change_id).not.toBe(fileResult[0]?.lixcol_change_id);
+
+	// Get the new file entity change record
+	const newFileChangeRecord = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("entity_id", "=", "change-id-test-file")
+		.where("schema_key", "=", "lix_file")
+		.orderBy("change.created_at", "desc")
+		.select(["change.id", "content as snapshot_content"])
+		.executeTakeFirstOrThrow();
+
+	// Verify the new change_id matches the latest file change
+	expect(updatedFileResult[0]?.lixcol_change_id).toBe(newFileChangeRecord.id);
+
+	// Verify that the updated snapshot content in the change matches the file view
+	expect(newFileChangeRecord.snapshot_content).toMatchObject({
+		id: "change-id-test-file",
+		path: "/test-change-id-updated.json",
+	});
+	expect(updatedFileResult[0]?.path).toBe("/test-change-id-updated.json");
+});
+
+test("file data updates create new change_id", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// Insert initial file
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "data-change-test",
+			path: "/data-test.json",
+			data: new TextEncoder().encode(JSON.stringify({ content: "initial" })),
+		})
+		.execute();
+
+	// Get initial change_id
+	const initialFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "data-change-test")
+		.select(["lixcol_change_id"])
+		.executeTakeFirstOrThrow();
+
+	expect(initialFile.lixcol_change_id).toBeDefined();
+
+	// Update only the file data
+	await lix.db
+		.updateTable("file")
+		.set({
+			data: new TextEncoder().encode(JSON.stringify({ content: "updated data" })),
+		})
+		.where("id", "=", "data-change-test")
+		.execute();
+
+	// Get updated change_id
+	const updatedFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "data-change-test")
+		.select(["lixcol_change_id"])
+		.executeTakeFirstOrThrow();
+
+	// Verify that updating file data created a new change_id
+	expect(updatedFile.lixcol_change_id).toBeDefined();
+	expect(updatedFile.lixcol_change_id).not.toBe(initialFile.lixcol_change_id);
+
+	// Verify the change record exists - this should be for the content entity, not the file entity
+	// When file data changes, it creates changes for the plugin-managed entities within the file
+	const contentChangeRecord = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
+		.where("change.file_id", "=", "data-change-test")
+		.where("schema_key", "=", "mock_json_property")
+		.where("entity_id", "=", "content")
+		.orderBy("change.created_at", "desc")
+		.select(["change.id", "entity_id", "schema_key", "content as snapshot_content"])
+		.executeTakeFirst();
+
+	expect(contentChangeRecord).toBeDefined();
+	expect(contentChangeRecord?.entity_id).toBe("content");
+	expect(contentChangeRecord?.schema_key).toBe("mock_json_property");
+	expect(contentChangeRecord?.snapshot_content).toEqual({ value: "updated data" });
+});
+
+test("file metadata updates create new change_id", async () => {
+	const lix = await openLixInMemory({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// Insert initial file with metadata
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "metadata-change-test",
+			path: "/metadata-test.json",
+			data: new TextEncoder().encode(JSON.stringify({ content: "test" })),
+			metadata: { author: "initial author" },
+		})
+		.execute();
+
+	// Get initial change_id
+	const initialFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "metadata-change-test")
+		.select(["lixcol_change_id", "path", "metadata"])
+		.executeTakeFirstOrThrow();
+
+	expect(initialFile.lixcol_change_id).toBeDefined();
+	expect(initialFile.path).toBe("/metadata-test.json");
+	expect(initialFile.metadata).toEqual({ author: "initial author" });
+
+	// Update the file path (which is part of the file entity metadata)
+	await lix.db
+		.updateTable("file")
+		.set({
+			path: "/updated-metadata-test.json",
+		})
+		.where("id", "=", "metadata-change-test")
+		.execute();
+
+	// Get updated change_id after path change
+	const updatedPathFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "metadata-change-test")
+		.select(["lixcol_change_id", "path"])
+		.executeTakeFirstOrThrow();
+
+	// Verify that updating file path created a new change_id
+	expect(updatedPathFile.lixcol_change_id).toBeDefined();
+	expect(updatedPathFile.lixcol_change_id).not.toBe(initialFile.lixcol_change_id);
+	expect(updatedPathFile.path).toBe("/updated-metadata-test.json");
+
+	// Update the file metadata
+	await lix.db
+		.updateTable("file")
+		.set({
+			metadata: { author: "updated author", version: "2.0" },
+		})
+		.where("id", "=", "metadata-change-test")
+		.execute();
+
+	// Get updated change_id after metadata change
+	const updatedMetadataFile = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "metadata-change-test")
+		.select(["lixcol_change_id", "metadata"])
+		.executeTakeFirstOrThrow();
+
+	// Verify that updating file metadata created another new change_id
+	expect(updatedMetadataFile.lixcol_change_id).toBeDefined();
+	expect(updatedMetadataFile.lixcol_change_id).not.toBe(updatedPathFile.lixcol_change_id);
+	expect(updatedMetadataFile.metadata).toEqual({ author: "updated author", version: "2.0" });
+
+	// Verify the final file entity change record exists and is correct
+	const finalFileChangeRecord = await lix.db
+		.selectFrom("change")
+		.where("id", "=", updatedMetadataFile.lixcol_change_id)
+		.where("entity_id", "=", "metadata-change-test")
+		.where("schema_key", "=", "lix_file")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(finalFileChangeRecord).toBeDefined();
+	expect(finalFileChangeRecord?.entity_id).toBe("metadata-change-test");
+	expect(finalFileChangeRecord?.schema_key).toBe("lix_file");
 });

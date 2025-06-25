@@ -58,6 +58,15 @@ export type StateEntityView = {
 	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
 	 */
 	lixcol_updated_at: Generated<string>;
+
+	/**
+	 * Change identifier for the last modification to this entity.
+	 *
+	 * This references the change.id that last modified this entity, enabling
+	 * blame and diff functionality. Useful for tracking who made changes
+	 * and when they were made.
+	 */
+	lixcol_change_id: Generated<string>;
 };
 
 /**
@@ -116,6 +125,15 @@ export type EntityStateColumns = {
 	 * Format: ISO 8601 string (e.g., "2024-03-20T10:30:00.000Z")
 	 */
 	lixcol_updated_at: LixGenerated<string>;
+
+	/**
+	 * Change identifier for the last modification to this entity.
+	 *
+	 * This references the change.id that last modified this entity, enabling
+	 * blame and diff functionality. Useful for tracking who made changes
+	 * and when they were made.
+	 */
+	lixcol_change_id: LixGenerated<string>;
 };
 
 /**
@@ -330,6 +348,7 @@ function createSingleEntityView(args: {
 		"created_at AS lixcol_created_at",
 		"updated_at AS lixcol_updated_at",
 		"file_id AS lixcol_file_id",
+		"change_id AS lixcol_change_id",
 	];
 
 	// Handle version_id for active view

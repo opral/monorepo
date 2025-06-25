@@ -86,6 +86,8 @@ export function handleStateMutation(
 									updated_at: currentTime,
 									inherited_from_version_id: null, // Local entity, not inherited
 									inheritance_delete_marker: 1, // Flag as copy-on-write deletion marker
+									// delete markers are never materialized, so we use a placeholder
+									change_id: "delete-marker-no-change-id",
 								})
 								.onConflict((oc) =>
 									oc
@@ -102,6 +104,8 @@ export function handleStateMutation(
 											updated_at: currentTime,
 											inherited_from_version_id: null,
 											inheritance_delete_marker: 1,
+											// delete markers are never materialized, so we use a placeholder
+											change_id: "delete-marker-no-change-id",
 										})
 								),
 						});
@@ -127,6 +131,8 @@ export function handleStateMutation(
 						updated_at: currentTime,
 						inherited_from_version_id: null, // Local entity, not inherited
 						inheritance_delete_marker: 1, // Flag as copy-on-write deletion marker
+						// delete markers are never materialized, so we use a placeholder
+						change_id: "delete-marker-no-change-id",
 					})
 					.onConflict((oc) =>
 						oc
@@ -138,6 +144,8 @@ export function handleStateMutation(
 								updated_at: currentTime,
 								inherited_from_version_id: null,
 								inheritance_delete_marker: 1,
+								// delete markers are never materialized, so we use a placeholder
+								change_id: "delete-marker-no-change-id",
 							})
 					),
 			});
@@ -221,22 +229,6 @@ export function createChangeWithSnapshot(args: {
 	// 		.returning(["id", "schema_key", "file_id", "entity_id"]),
 	// });
 
-	// Update cache for every change (including deletions)
-	if (args.version_id) {
-		updateStateCache({
-			sqlite: args.sqlite,
-			db: args.db,
-			entity_id: args.data.entity_id,
-			schema_key: args.data.schema_key,
-			file_id: args.data.file_id,
-			version_id: args.version_id,
-			plugin_key: args.data.plugin_key,
-			snapshot_content: args.data.snapshot_content as string | null,
-			schema_version: args.data.schema_version,
-			timestamp: args.timestamp || new Date().toISOString(),
-		});
-	}
-
 	// we don't need the created snapshot
 	const [change] = executeSync({
 		lix: { sqlite: args.sqlite },
@@ -274,6 +266,24 @@ export function createChangeWithSnapshot(args: {
 			.returning(["id", "schema_key", "file_id", "entity_id"]),
 	});
 
+	// Update cache for every change (including deletions)
+	// Use the actual change.id from the insert
+	if (args.version_id) {
+		updateStateCache({
+			sqlite: args.sqlite,
+			db: args.db,
+			entity_id: args.data.entity_id,
+			schema_key: args.data.schema_key,
+			file_id: args.data.file_id,
+			version_id: args.version_id,
+			plugin_key: args.data.plugin_key,
+			snapshot_content: args.data.snapshot_content as string | null,
+			schema_version: args.data.schema_version,
+			timestamp: args.timestamp || new Date().toISOString(),
+			change_id: change.id,
+		});
+	}
+
 	return change;
 }
 
@@ -288,7 +298,28 @@ function updateStateCache(args: {
 	snapshot_content: string | null; // Allow null for DELETE operations
 	schema_version: string;
 	timestamp: string;
+	change_id?: string;
 }): void {
+	// If no change_id provided, try to get it from the transaction table
+	const resolvedChangeId =
+		args.change_id ||
+		(() => {
+			const transactionRecord = executeSync({
+				lix: { sqlite: args.sqlite },
+				query: args.db
+					.selectFrom("internal_change_in_transaction")
+					.where("entity_id", "=", args.entity_id)
+					.where("schema_key", "=", args.schema_key)
+					.where("file_id", "=", args.file_id)
+					.where("version_id", "=", args.version_id)
+					.select(["id"])
+					.limit(1),
+			});
+			return transactionRecord.length > 0
+				? transactionRecord[0]!.id
+				: "no-transaction-change-id";
+		})();
+
 	// Handle DELETE operations (snapshot_content is null)
 	if (args.snapshot_content === null) {
 		// Check if this is an inherited entity being deleted
@@ -331,6 +362,7 @@ function updateStateCache(args: {
 						updated_at: args.timestamp,
 						inherited_from_version_id: null, // Local entity, not inherited
 						inheritance_delete_marker: 1, // Flag as deletion marker
+						change_id: resolvedChangeId,
 					})
 					.onConflict((oc) =>
 						oc
@@ -342,6 +374,7 @@ function updateStateCache(args: {
 								updated_at: args.timestamp,
 								inherited_from_version_id: null,
 								inheritance_delete_marker: 1,
+								change_id: resolvedChangeId,
 							})
 					),
 			});
@@ -377,6 +410,7 @@ function updateStateCache(args: {
 				updated_at: args.timestamp,
 				inherited_from_version_id: null, // Direct entities are not inherited
 				inheritance_delete_marker: 0, // Not a deletion marker
+				change_id: args.change_id || "no-change-id",
 			})
 			.onConflict((oc) =>
 				oc
@@ -388,6 +422,7 @@ function updateStateCache(args: {
 						updated_at: args.timestamp,
 						inherited_from_version_id: null, // Direct entities are not inherited
 						inheritance_delete_marker: 0, // Not a deletion marker
+						change_id: resolvedChangeId,
 					})
 			),
 	});
