@@ -10,15 +10,15 @@ Defined in: [runtime/strategy.js:22](https://github.com/opral/monorepo/tree/main
 
 #### getLocale()
 
-> **getLocale**: () => `string` \| `undefined`
+> **getLocale**: () => `Promise`\<`string` \| `undefined`\> \| `string` \| `undefined`
 
 ##### Returns
 
-`string` \| `undefined`
+`Promise`\<`string` \| `undefined`\> \| `string` \| `undefined`
 
 #### setLocale()
 
-> **setLocale**: (`locale`) => `void`
+> **setLocale**: (`locale`) => `Promise`\<`void`\> \| `void`
 
 ##### Parameters
 
@@ -28,7 +28,7 @@ Defined in: [runtime/strategy.js:22](https://github.com/opral/monorepo/tree/main
 
 ##### Returns
 
-`void`
+`Promise`\<`void`\> \| `void`
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [runtime/strategy.js:18](https://github.com/opral/monorepo/tree/main
 
 #### getLocale()
 
-> **getLocale**: (`request?`) => `string` \| `undefined`
+> **getLocale**: (`request?`) => `Promise`\<`string` \| `undefined`\> \| `string` \| `undefined`
 
 ##### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [runtime/strategy.js:18](https://github.com/opral/monorepo/tree/main
 
 ##### Returns
 
-`string` \| `undefined`
+`Promise`\<`string` \| `undefined`\> \| `string` \| `undefined`
 
 ***
 
@@ -263,7 +263,7 @@ If the input is not a locale.
 
 > **defineCustomClientStrategy**(`strategy`, `handler`): `void`
 
-Defined in: [runtime/strategy.js:68](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+Defined in: [runtime/strategy.js:67](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
 
 Defines a custom strategy that is executed on the client.
 
@@ -273,15 +273,14 @@ Defines a custom strategy that is executed on the client.
 
 `any`
 
-The name of the custom strategy to define. Must follow the pattern `custom-<name>` where
-`<name>` contains only alphanumeric characters.
+The name of the custom strategy to define. Must follow the pattern custom-name with alphanumeric characters, hyphens, or underscores.
 
 #### handler
 
 [`CustomClientStrategyHandler`](#customclientstrategyhandler)
 
 The handler for the custom strategy, which should implement the
-methods `getLocale` and `setLocale`.
+methods getLocale and setLocale.
 
 ### Returns
 
@@ -293,7 +292,7 @@ methods `getLocale` and `setLocale`.
 
 > **defineCustomServerStrategy**(`strategy`, `handler`): `void`
 
-Defined in: [runtime/strategy.js:48](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+Defined in: [runtime/strategy.js:49](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
 
 Defines a custom strategy that is executed on the server.
 
@@ -303,15 +302,14 @@ Defines a custom strategy that is executed on the server.
 
 `any`
 
-The name of the custom strategy to define. Must follow the pattern `custom-<name>` where
-`<name>` contains only alphanumeric characters.
+The name of the custom strategy to define. Must follow the pattern custom-name with alphanumeric characters, hyphens, or underscores.
 
 #### handler
 
 [`CustomServerStrategyHandler`](#customserverstrategyhandler)
 
 The handler for the custom strategy, which should implement
-the method `getLocale`.
+the method getLocale.
 
 ### Returns
 
@@ -486,7 +484,7 @@ Defined in: [runtime/extract-locale-from-navigator.js:12](https://github.com/opr
 
 > **extractLocaleFromRequest**(`request`): `any`
 
-Defined in: [runtime/extract-locale-from-request.js:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
+Defined in: [runtime/extract-locale-from-request.js:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
 
 Extracts a locale from a request.
 
@@ -496,6 +494,9 @@ from a request.
 The function goes through the strategies in the order
 they are defined. If a strategy returns an invalid locale,
 it will fall back to the next strategy.
+
+Note: Custom server strategies are not supported in this synchronous version.
+Use `extractLocaleFromRequestAsync` if you need custom server strategies with async getLocale methods.
 
 ### Parameters
 
@@ -511,6 +512,56 @@ it will fall back to the next strategy.
 
 ```ts
 const locale = extractLocaleFromRequest(request);
+```
+
+***
+
+## extractLocaleFromRequestAsync()
+
+> **extractLocaleFromRequestAsync**(`request`): `Promise`\<`any`\>
+
+Defined in: [runtime/extract-locale-from-request-async.js:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request-async.js)
+
+Asynchronously extracts a locale from a request.
+
+This function supports async custom server strategies, unlike the synchronous
+`extractLocaleFromRequest`. Use this function when you have custom server strategies
+that need to perform asynchronous operations (like database calls) in their getLocale method.
+
+The function first processes any custom server strategies asynchronously, then falls back
+to the synchronous `extractLocaleFromRequest` for all other strategies.
+
+### Parameters
+
+#### request
+
+`Request`
+
+### Returns
+
+`Promise`\<`any`\>
+
+### See
+
+[https://github.com/opral/inlang-paraglide-js/issues/527#issuecomment-2978151022](https://github.com/opral/inlang-paraglide-js/issues/527#issuecomment-2978151022)
+
+### Examples
+
+```ts
+// Basic usage
+  const locale = await extractLocaleFromRequestAsync(request);
+```
+
+```ts
+// With custom async server strategy
+  defineCustomServerStrategy("custom-database", {
+    getLocale: async (request) => {
+      const userId = extractUserIdFromRequest(request);
+      return await getUserLocaleFromDatabase(userId);
+    }
+  });
+
+  const locale = await extractLocaleFromRequestAsync(request);
 ```
 
 ***
