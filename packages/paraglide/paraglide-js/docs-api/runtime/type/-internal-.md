@@ -106,11 +106,11 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 #### getStore()
 
-> **getStore**(): `undefined` \| \{ `locale`: [`Locale`](#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
+> **getStore**(): `undefined` \| \{ `locale?`: [`Locale`](#locale); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
 
 ##### Returns
 
-`undefined` \| \{ `locale`: [`Locale`](#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
+`undefined` \| \{ `locale?`: [`Locale`](#locale); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
 
 ***
 
@@ -486,7 +486,7 @@ Defined in: [runtime/extract-locale-from-navigator.js:12](https://github.com/opr
 
 > **extractLocaleFromRequest**(`request`): `any`
 
-Defined in: [runtime/extract-locale-from-request.js:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
+Defined in: [runtime/extract-locale-from-request.js:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request.js)
 
 Extracts a locale from a request.
 
@@ -497,7 +497,8 @@ The function goes through the strategies in the order
 they are defined. If a strategy returns an invalid locale,
 it will fall back to the next strategy.
 
-TODO: make this async in next major release and deprecate `extractLocaleFromRequest`
+Note: Custom server strategies are not supported in this synchronous version.
+Use `extractLocaleFromRequestAsync` if you need custom server strategies with async getLocale methods.
 
 ### Parameters
 
@@ -513,6 +514,56 @@ TODO: make this async in next major release and deprecate `extractLocaleFromRequ
 
 ```ts
 const locale = extractLocaleFromRequest(request);
+```
+
+***
+
+## extractLocaleFromRequestAsync()
+
+> **extractLocaleFromRequestAsync**(`request`): `Promise`\<`any`\>
+
+Defined in: [runtime/extract-locale-from-request-async.js:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/extract-locale-from-request-async.js)
+
+Asynchronously extracts a locale from a request.
+
+This function supports async custom server strategies, unlike the synchronous
+`extractLocaleFromRequest`. Use this function when you have custom server strategies
+that need to perform asynchronous operations (like database calls) in their getLocale method.
+
+The function first processes any custom server strategies asynchronously, then falls back
+to the synchronous `extractLocaleFromRequest` for all other strategies.
+
+### Parameters
+
+#### request
+
+`Request`
+
+### Returns
+
+`Promise`\<`any`\>
+
+### See
+
+[https://github.com/opral/inlang-paraglide-js/issues/527#issuecomment-2978151022](https://github.com/opral/inlang-paraglide-js/issues/527#issuecomment-2978151022)
+
+### Examples
+
+```ts
+// Basic usage
+  const locale = await extractLocaleFromRequestAsync(request);
+```
+
+```ts
+// With custom async server strategy
+  defineCustomServerStrategy("database", {
+    getLocale: async (request) => {
+      const userId = extractUserIdFromRequest(request);
+      return await getUserLocaleFromDatabase(userId);
+    }
+  });
+  
+  const locale = await extractLocaleFromRequestAsync(request);
 ```
 
 ***

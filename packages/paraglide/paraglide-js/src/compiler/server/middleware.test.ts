@@ -712,3 +712,219 @@ test("does not catch errors thrown by downstream resolve call", async () => {
 		)
 	).rejects.toThrow();
 });
+
+test("middleware supports async custom server strategies", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-database", "baseLocale"],
+	});
+
+	// Mock an async custom strategy that simulates a database call
+	let databaseCallCount = 0;
+	runtime.defineCustomServerStrategy("custom-database", {
+		getLocale: async (request) => {
+			databaseCallCount++;
+			// Simulate async database call delay
+			await new Promise(resolve => setTimeout(resolve, 10));
+			
+			// Extract user ID from a custom header (simulating authentication)
+			if (!request) return undefined;
+			const userId = request.headers.get("X-User-ID");
+			if (userId === "user123") {
+				return "fr";
+			}
+			if (userId === "user456") {
+				return "de";
+			}
+			return undefined; // No user preference found
+		}
+	});
+
+	// Test 1: Request with user preference
+	const requestWithUserPref = new Request("https://example.com/page", {
+		headers: {
+			"X-User-ID": "user123",
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	let middlewareResolveWasCalled = false;
+	await runtime.paraglideMiddleware(requestWithUserPref, (args) => {
+		middlewareResolveWasCalled = true;
+		expect(args.locale).toBe("fr"); // Should get locale from async custom strategy
+		return new Response("User preference locale");
+	});
+
+	expect(middlewareResolveWasCalled).toBe(true);
+	expect(databaseCallCount).toBe(1);
+
+	// Test 2: Request with different user preference
+	const requestWithOtherUser = new Request("https://example.com/page", {
+		headers: {
+			"X-User-ID": "user456",
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	await runtime.paraglideMiddleware(requestWithOtherUser, (args) => {
+		expect(args.locale).toBe("de"); // Should get different locale
+		return new Response("Other user preference");
+	});
+
+	expect(databaseCallCount).toBe(2);
+});
+
+test("middleware falls back to other strategies when async custom strategy returns undefined", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-database", "cookie", "baseLocale"],
+		cookieName: "PARAGLIDE_LOCALE",
+	});
+
+	// Mock async custom strategy that returns undefined for unknown users
+	runtime.defineCustomServerStrategy("custom-database", {
+		getLocale: async (request) => {
+			await new Promise(resolve => setTimeout(resolve, 5));
+			if (!request) return undefined;
+			const userId = request.headers.get("X-User-ID");
+			// Only return locale for known users
+			if (userId === "known-user") {
+				return "fr";
+			}
+			return undefined; // Unknown user, fallback to other strategies
+		}
+	});
+
+	// Request from unknown user with cookie fallback
+	const request = new Request("https://example.com/page", {
+		headers: {
+			"X-User-ID": "unknown-user",
+			"cookie": "PARAGLIDE_LOCALE=de",
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	let middlewareResolveWasCalled = false;
+	await runtime.paraglideMiddleware(request, (args) => {
+		middlewareResolveWasCalled = true;
+		expect(args.locale).toBe("de"); // Should fallback to cookie strategy
+		return new Response("Fallback locale");
+	});
+
+	expect(middlewareResolveWasCalled).toBe(true);
+});
+
+test("middleware handles async custom strategy errors gracefully", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["custom-database", "baseLocale"],
+	});
+
+	// Mock async custom strategy that throws an error
+	runtime.defineCustomServerStrategy("custom-database", {
+		getLocale: async () => {
+			await new Promise(resolve => setTimeout(resolve, 5));
+			throw new Error("Database connection failed");
+		}
+	});
+
+	const request = new Request("https://example.com/page", {
+		headers: { "Sec-Fetch-Dest": "document" },
+	});
+
+	// The middleware should handle the error and not crash
+	await expect(
+		runtime.paraglideMiddleware(request, (args) => {
+			// If we reach here, the error was handled and fallback worked
+			expect(args.locale).toBe("en"); // Should fallback to baseLocale
+			return new Response("Error handled");
+		})
+	).rejects.toThrow("Database connection failed");
+});
+
+test("middleware works with multiple async custom strategies", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de", "es"],
+			},
+		}),
+		strategy: ["custom-userPref", "custom-region", "baseLocale"],
+	});
+
+	let userPrefCallCount = 0;
+	let regionCallCount = 0;
+
+	// First strategy: user preference
+	runtime.defineCustomServerStrategy("custom-userPref", {
+		getLocale: async (request) => {
+			userPrefCallCount++;
+			await new Promise(resolve => setTimeout(resolve, 5));
+			if (!request) return undefined;
+			const userId = request.headers.get("X-User-ID");
+			return userId === "premium-user" ? "fr" : undefined;
+		}
+	});
+
+	// Second strategy: region detection
+	runtime.defineCustomServerStrategy("custom-region", {
+		getLocale: async (request) => {
+			regionCallCount++;
+			await new Promise(resolve => setTimeout(resolve, 5));
+			if (!request) return undefined;
+			const region = request.headers.get("X-Region");
+			return region === "europe" ? "de" : undefined;
+		}
+	});
+
+	// Test 1: First strategy succeeds
+	const premiumUserRequest = new Request("https://example.com/page", {
+		headers: {
+			"X-User-ID": "premium-user",
+			"X-Region": "europe",
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	await runtime.paraglideMiddleware(premiumUserRequest, (args) => {
+		expect(args.locale).toBe("fr"); // Should use first strategy result
+		return new Response("Premium user");
+	});
+
+	expect(userPrefCallCount).toBe(1);
+	// Second strategy should not be called since first one succeeded
+	expect(regionCallCount).toBe(0);
+
+	// Test 2: First strategy fails, second succeeds
+	const regionalUserRequest = new Request("https://example.com/page", {
+		headers: {
+			"X-User-ID": "regular-user",
+			"X-Region": "europe",
+			"Sec-Fetch-Dest": "document",
+		},
+	});
+
+	await runtime.paraglideMiddleware(regionalUserRequest, (args) => {
+		expect(args.locale).toBe("de"); // Should use second strategy result
+		return new Response("Regional user");
+	});
+
+	expect(userPrefCallCount).toBe(2);
+	expect(regionCallCount).toBe(1);
+});
