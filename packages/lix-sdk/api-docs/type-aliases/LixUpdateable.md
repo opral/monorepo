@@ -8,7 +8,7 @@
 
 > **LixUpdateable**\<`T`\> = `{ [K in keyof T]?: UpdateType<T[K]> }`
 
-Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:328](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/schema-definition/definition.ts#L328)
+Defined in: [packages/lix-sdk/src/schema-definition/definition.ts:328](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/schema-definition/definition.ts#L328)
 
 Transform a type for update operations.
 

@@ -8,7 +8,7 @@
 
 > **jsonArrayFrom**\<`O`\>(`expr`): `RawBuilder`\<`Simplify`\<`O`\>[]\>
 
-Defined in: node\_modules/.pnpm/kysely@0.27.4/node\_modules/kysely/dist/esm/helpers/sqlite.d.ts:58
+Defined in: node\_modules/.pnpm/kysely@0.27.6/node\_modules/kysely/dist/esm/helpers/sqlite.d.ts:66
 
 A SQLite helper for aggregating a subquery into a JSON array.
 
@@ -18,8 +18,14 @@ Otherwise the nested selections will be returned as JSON strings.
 The plugin can be installed like this:
 
 ```ts
-const db = new Kysely({
-  dialect: new SqliteDialect(config),
+import * as Sqlite from 'better-sqlite3'
+import { Kysely, ParseJSONResultsPlugin, SqliteDialect } from 'kysely'
+import type { Database } from 'type-editor' // imaginary module
+
+const db = new Kysely<Database>({
+  dialect: new SqliteDialect({
+    database: new Sqlite(':memory:')
+  }),
   plugins: [new ParseJSONResultsPlugin()]
 })
 ```
@@ -27,6 +33,8 @@ const db = new Kysely({
 ### Examples
 
 ```ts
+import { jsonArrayFrom } from 'kysely/helpers/sqlite'
+
 const result = await db
   .selectFrom('person')
   .select((eb) => [
@@ -40,9 +48,9 @@ const result = await db
   ])
   .execute()
 
-result[0].id
-result[0].pets[0].pet_id
-result[0].pets[0].name
+result[0]?.id
+result[0]?.pets[0].pet_id
+result[0]?.pets[0].name
 ```
 
 The generated SQL (SQLite):
