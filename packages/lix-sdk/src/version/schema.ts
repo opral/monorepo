@@ -8,13 +8,6 @@ import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builde
 import { nanoid } from "../database/nano-id.js";
 import { humanId } from "human-id";
 
-// initial ids (lack of having a separate creation and migration schema)
-export const INITIAL_VERSION_ID = "BoIaHTW9ePX6pNc8";
-export const INITIAL_CHANGE_SET_ID = "2j9jm90ajc9j90";
-export const INITIAL_WORKING_CHANGE_SET_ID = "h2h09ha92jfaw2";
-export const INITIAL_GLOBAL_VERSION_CHANGE_SET_ID = "23n0ajsf328ns";
-export const INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID = "om3290j08gj8j23";
-
 export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	// Create both primary and _all views for version with global version constraint
 	createEntityViewsIfNotExists({
