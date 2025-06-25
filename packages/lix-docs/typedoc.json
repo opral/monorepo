@@ -1,5 +1,5 @@
 {
-  "entryPoints": ["../lix-sdk/dist/index.d.ts"],
+  "entryPoints": ["../lix-sdk/src/index.ts"],
   "out": "docs/api/reference",
   "excludePrivate": true,
   "excludeExternals": true,
@@ -9,6 +9,7 @@
   "sort": ["alphabetical"],
   "hideGenerator": true,
   "entryPointStrategy": "expand",
+  "tsconfig": "./typedoc.tsconfig.json",
   "visibilityFilters": {
     "protected": false,
     "private": false,
