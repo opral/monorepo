@@ -106,11 +106,11 @@ Defined in: [runtime/variables.js:54](https://github.com/opral/monorepo/tree/mai
 
 #### getStore()
 
-> **getStore**(): `undefined` \| \{ `locale?`: [`Locale`](#locale); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
+> **getStore**(): `undefined` \| \{ `locale`: [`Locale`](#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
 
 ##### Returns
 
-`undefined` \| \{ `locale?`: [`Locale`](#locale); `messageCalls?`: `Set`\<`string`\>; `origin?`: `string`; \}
+`undefined` \| \{ `locale`: [`Locale`](#locale); `messageCalls`: `Set`\<`string`\>; `origin`: `string`; \}
 
 ***
 
