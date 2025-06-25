@@ -1,4 +1,5 @@
-import { useLix, useFileIdFromUrl } from "@/state-queries";
+import { useQuery } from "@/hooks/useQuery";
+import { selectLix } from "@/queries";
 import { useEffect, useState } from "react";
 import timeAgo from "@/helper/timeAgo.ts";
 import { ArrowRight, MessagesSquare } from "lucide-react";
@@ -7,11 +8,14 @@ import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { State, ThreadComment } from "@lix-js/sdk";
 
 const DiscussionPreview = ({ threadId }: { threadId: string }) => {
-	const { lix } = useLix();
+	const [lix] = useQuery(selectLix);
 	const [firstComment, setFirstComment] = useState<
 		State<ThreadComment & { author_name: string }> | undefined
 	>(undefined);
-	const fileId = useFileIdFromUrl();
+	const [fileId] = useQuery(() => {
+		const searchParams = new URL(window.location.href).searchParams;
+		return Promise.resolve(searchParams.get("f") || undefined);
+	}, 100);
 
 	useEffect(() => {
 		getFirstComment(threadId);

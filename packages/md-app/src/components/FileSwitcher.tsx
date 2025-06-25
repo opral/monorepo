@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { useActiveFile, useFiles, useLix } from "@/state-queries";
+import { useQuery } from "@/hooks/useQuery";
+import { selectActiveFile, selectFiles, selectLix } from "@/queries";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { generateHumanId } from "@/helper/generateHumanId";
@@ -15,9 +16,9 @@ import { Check, ChevronDown, FileText, Plus } from "lucide-react";
 import { nanoid } from "@lix-js/sdk";
 
 export default function FileSwitcher() {
-	const { file: activeFile } = useActiveFile();
-	const { files } = useFiles();
-	const { lix, refetch } = useLix();
+	const [activeFile] = useQuery(selectActiveFile);
+	const [files] = useQuery(selectFiles, 500);
+	const [lix, , , refetch] = useQuery(selectLix);
 
 	const switchToFile = useCallback(
 		async (fileId: string) => {

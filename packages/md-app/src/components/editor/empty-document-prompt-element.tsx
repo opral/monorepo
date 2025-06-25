@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { PlateElementProps } from "@udecode/plate/react";
-import { useActiveFile, useLix } from "@/state-queries";
+import { useQuery } from "@/hooks/useQuery";
+import { selectActiveFile, selectLix } from "@/queries";
 import { useChat } from "./use-chat";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -20,8 +21,8 @@ export function EmptyDocumentPromptElement({
 	editor,
 }: PlateElementProps) {
 	const [prompt, setPrompt] = useState("");
-	const { file: activeFile } = useActiveFile();
-	const { lix, refetch } = useLix();
+	const [activeFile] = useQuery(selectActiveFile);
+	const [lix, , , refetch] = useQuery(selectLix);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const chat = useChat({

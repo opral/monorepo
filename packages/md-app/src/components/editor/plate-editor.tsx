@@ -1,5 +1,5 @@
 // import { DOMEditor } from 'slate-dom';
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -9,17 +9,18 @@ import { useCreateEditor } from "@/components/editor/use-create-editor";
 // import { SettingsDialog } from "@/components/editor/settings";
 import { Editor, EditorContainer } from "@/components/ui/editor";
 import { debounce } from "lodash-es";
-import { useLix, useActiveFile, useLoadedMarkdown, useEditorRef } from "@/state-queries";
+import { useQuery } from "@/hooks/useQuery";
+import { selectLix, selectActiveFile, selectLoadedMarkdown } from "@/queries";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { welcomeMd } from "@/helper/welcomeLixFile";
 import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
 export function PlateEditor() {
-  const { lix } = useLix();
-  const { file: activeFile } = useActiveFile();
-  const { markdown: loadedMd } = useLoadedMarkdown();
-  const editorRef = useEditorRef();
+  const [lix] = useQuery(selectLix);
+  const [activeFile] = useQuery(selectActiveFile);
+  const [loadedMd] = useQuery(selectLoadedMarkdown);
+  const editorRef = useRef<any>(null);
 
   const editor = useCreateEditor();
   const [previousHasPromptElement, setPreviousHasPromptElement] = useState(false);

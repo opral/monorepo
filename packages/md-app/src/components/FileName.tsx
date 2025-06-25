@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { useActiveFile, useLix } from "@/state-queries";
+import { useQuery } from "@/hooks/useQuery";
+import { selectActiveFile, selectLix } from "@/queries";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 
 export default function FileName() {
-  const { file: activeFile } = useActiveFile();
-  const { lix, refetch } = useLix();
+  const [activeFile] = useQuery(selectActiveFile);
+  const [lix, , , refetch] = useQuery(selectLix);
   const [isEditing, setIsEditing] = useState(false);
   const [fileName, setFileName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);

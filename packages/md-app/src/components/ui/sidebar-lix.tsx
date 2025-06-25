@@ -25,15 +25,14 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
+import { useQuery } from "@/hooks/useQuery";
 import {
-	useLix,
-	useFiles,
-	useActiveFile,
-	useCurrentLixName,
-	useAvailableLixes,
-	useFileIdFromUrl,
-	useLixIdFromUrl,
-} from "@/state-queries";
+	selectLix,
+	selectFiles,
+	selectActiveFile,
+	selectCurrentLixName,
+	selectAvailableLixes,
+} from "@/queries";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
 import { updateUrlParams } from "@/helper/updateUrlParams";
@@ -74,13 +73,19 @@ import { generateHumanId } from "@/helper/generateHumanId";
 import { useChat } from "../editor/use-chat";
 
 export function LixSidebar() {
-	const { lix, refetch } = useLix();
-	const { files } = useFiles();
-	const { file: activeFile } = useActiveFile();
-	const { name: currentLixName } = useCurrentLixName();
-	const { lixes: availableLixes } = useAvailableLixes();
-	const lixIdSearchParams = useLixIdFromUrl();
-	const fileIdSearchParams = useFileIdFromUrl();
+	const [lix, , , refetch] = useQuery(selectLix);
+	const [files] = useQuery(selectFiles, 500);
+	const [activeFile] = useQuery(selectActiveFile);
+	const [currentLixName] = useQuery(selectCurrentLixName, 1000);
+	const [availableLixes] = useQuery(selectAvailableLixes, 1000);
+	const [lixIdSearchParams] = useQuery(() => {
+		const searchParams = new URL(window.location.href).searchParams;
+		return Promise.resolve(searchParams.get("lix") || undefined);
+	}, 100);
+	const [fileIdSearchParams] = useQuery(() => {
+		const searchParams = new URL(window.location.href).searchParams;
+		return Promise.resolve(searchParams.get("f") || undefined);
+	}, 100);
 
 	const [fileToDelete, setFileToDelete] = React.useState<string | null>(null);
 	const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] =
@@ -144,7 +149,7 @@ export function LixSidebar() {
 
 		try {
 			// Find the file to check its current name
-			const currentFile = files.find((f) => f.id === inlineEditingFile.id);
+			const currentFile = files?.find((f) => f.id === inlineEditingFile.id);
 			if (!currentFile) {
 				console.error("File not found for inline renaming");
 				setInlineEditingFile(null);
@@ -673,7 +678,7 @@ export function LixSidebar() {
 							<SelectContent align="center" className="w-60 -ml-0.5">
 								<SelectGroup>
 									<SelectLabel className="font-medium">Lixes</SelectLabel>
-									{availableLixes.map((lix: { id: string; name: string }) => (
+									{availableLixes?.map((lix: { id: string; name: string }) => (
 										<SelectItem key={lix.id} value={lix.id}>
 											<div className="flex items-center w-full">
 												<Folder className="h-4 w-4 mr-2 shrink-0" />

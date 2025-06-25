@@ -8,7 +8,8 @@ import ChangeDot from "./ChangeDot.tsx";
 import { UiDiffComponentProps } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { useThreads, useChangeDiffs } from "@/state-queries";
+import { useQuery } from "@/hooks/useQuery";
+import { selectThreads, selectChangeDiffs } from "@/queries";
 import { ChevronDown } from "lucide-react";
 
 export const CheckpointComponent = (props: {
@@ -24,11 +25,14 @@ export const CheckpointComponent = (props: {
 }) => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
 	const [shouldLoadDiffs, setShouldLoadDiffs] = useState<boolean>(false);
-	const { threads } = useThreads(props.checkpointChangeSet.id);
-	const { diffs } = useChangeDiffs(
-		shouldLoadDiffs ? props.checkpointChangeSet.id : undefined,
-		props.previousChangeSetId
-	);
+	const [threads] = useQuery(async () => {
+		if (!props.checkpointChangeSet.id) return [];
+		return await selectThreads({ changeSetId: props.checkpointChangeSet.id });
+	}, 500);
+	const [diffs] = useQuery(async () => {
+		if (!shouldLoadDiffs || !props.checkpointChangeSet.id) return [];
+		return await selectChangeDiffs(props.checkpointChangeSet.id, props.previousChangeSetId);
+	}, 500);
 
 	// No longer need useEffect for threads - handled by useThreads hook
 

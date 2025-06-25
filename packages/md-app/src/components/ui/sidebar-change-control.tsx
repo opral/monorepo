@@ -1,15 +1,16 @@
 import CheckpointComponent from "../CheckpointComponent";
 import IntermediateCheckpointComponent from "../IntermediateCheckpointComponent";
-import { useActiveFile, useCheckpointChangeSets, useIntermediateChanges } from "@/state-queries";
+import { useQuery } from "@/hooks/useQuery";
+import { selectActiveFile, selectCheckpointChangeSets, selectIntermediateChanges } from "@/queries";
 import { useMemo } from "react";
 import { isEqual } from "lodash-es";
 import { SidebarHeader, SidebarSeparator } from "./multisidebar";
 import { History } from "lucide-react";
 
 const ChangeControlSidebar = () => {
-  const { file: activeFile } = useActiveFile();
-  const { checkpoints: checkpointChangeSets } = useCheckpointChangeSets();
-  const { changes: intermediateChanges } = useIntermediateChanges();
+  const [activeFile] = useQuery(selectActiveFile);
+  const [checkpointChangeSets] = useQuery(selectCheckpointChangeSets, 500);
+  const [intermediateChanges] = useQuery(selectIntermediateChanges);
 
   // Filter out changes where before and after content are identical (ghost changes)
   const filteredChanges = useMemo(() => {

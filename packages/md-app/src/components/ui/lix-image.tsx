@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { getFileFromLix, IMAGE_REPLACED_EVENT } from '@/helper/uploadToLix';
 import { Spinner } from './spinner';
-import { useLix } from '@/state-queries';
+import { useQuery } from '@/hooks/useQuery';
+import { selectLix } from '@/queries';
 import { cn } from '@udecode/cn';
 
 interface LixImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -15,7 +16,7 @@ export function LixImage({ src, alt, className, ...props }: LixImageProps) {
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const { lix } = useLix();
+  const [lix] = useQuery(selectLix);
   // Keep track of the last timestamp to force reload when src is the same
   const timestampRef = useRef<number>(Date.now());
   // Store the fileId for this image to respond to replacement events

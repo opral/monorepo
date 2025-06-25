@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { UiDiffComponentProps, createCheckpoint, createThread } from "@lix-js/sdk";
-import { useLix, useCheckpointChangeSets, useIntermediateChanges, useWorkingChangeSet } from "@/state-queries";
+import { useQuery } from "@/hooks/useQuery";
+import { selectLix, selectCheckpointChangeSets, selectIntermediateChanges, selectWorkingChangeSet } from "@/queries";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown, Zap, Loader2 } from "lucide-react";
@@ -17,7 +18,7 @@ interface IntermediateCheckpointComponentProps {
 
 export const IntermediateCheckpointComponent = ({ filteredChanges }: IntermediateCheckpointComponentProps) => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
-  const { checkpoints: checkpointChangeSets } = useCheckpointChangeSets();
+  const [checkpointChangeSets] = useQuery(selectCheckpointChangeSets, 500);
 
 
   // Don't render anything if there's no change data
@@ -46,7 +47,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
         }
       }}
     >
-      <ChangeDot top={false} bottom={checkpointChangeSets && checkpointChangeSets.length > 0} highlighted />
+      <ChangeDot top={false} bottom={!!checkpointChangeSets && checkpointChangeSets.length > 0} highlighted />
       <div className="flex-1 z-10">
         <div className="h-12 flex items-center w-full gap-2">
           <p className="flex-1 truncate text-ellipsis overflow-hidden text-sm">
@@ -88,9 +89,9 @@ export default IntermediateCheckpointComponent;
 
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
-  const { lix } = useLix();
-  const { workingChangeSet: currentChangeSet } = useWorkingChangeSet();
-  const { changes: intermediateChanges } = useIntermediateChanges(); // Added to access changes for prompt
+  const [lix] = useQuery(selectLix);
+  const [currentChangeSet] = useQuery(selectWorkingChangeSet);
+  const [intermediateChanges] = useQuery(selectIntermediateChanges); // Added to access changes for prompt
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 

@@ -1,6 +1,7 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-import { useActiveFile, useIntermediateChanges, useActiveAccount } from '@/state-queries';
+import { useQuery } from '@/hooks/useQuery';
+import { selectActiveFile, selectIntermediateChanges, selectActiveAccount } from '@/queries';
 import FileName from '@/components/FileName';
 import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
 import {
@@ -16,9 +17,9 @@ import posthog from 'posthog-js';
 
 // Wrapper component that has access to the MultiSidebar context
 function PageContent() {
-	const { file: activeFile } = useActiveFile();
-	const { account: activeAccount } = useActiveAccount();
-	const { changes: intermediateChanges } = useIntermediateChanges();
+	const [activeFile] = useQuery(selectActiveFile);
+	const [activeAccount] = useQuery(selectActiveAccount, 500);
+	const [intermediateChanges] = useQuery(selectIntermediateChanges);
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
 	useEffect(() => {
