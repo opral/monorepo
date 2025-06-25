@@ -203,16 +203,7 @@ export function LixSidebar() {
 			// Refresh everything to update the UI with the new file name
 			refetch();
 
-			// The currentLixId should still be the lix_id, not the new name
-			// The saveLixName function will handle updating the URL params correctly
-			const lixId = await lix.db
-				.selectFrom("key_value")
-				.where("key", "=", "lix_id")
-				.select("value")
-				.executeTakeFirstOrThrow();
-
-			// Keep the ID the same, just update the display name
-			setCurrentLixId(lixId.value);
+			// The currentLixId will be automatically updated via URL parameter
 		} catch (error) {
 			console.error("Failed to save lix name:", error);
 			setIsRenamingLix(false);
@@ -476,8 +467,8 @@ export function LixSidebar() {
 			if (availableLixFiles.length > 0) {
 				// The file is saved with the current name displayed in the UI (with .lix extension)
 				if (currentLixName) {
-				await root.removeEntry(`${currentLixName}.lix`);
-			}
+					await root.removeEntry(`${currentLixName}.lix`);
+				}
 
 				// Navigate to another lix
 				const nextLixId = availableLixFiles[0].replace(/\.lix$/, "");
@@ -524,8 +515,19 @@ export function LixSidebar() {
 		}
 	}, [navigate, refetch]);
 
-	// Track current lix ID
-	const [currentLixId, setCurrentLixId] = React.useState<string>("");
+	// Get current lix ID, with fallback to first available lix
+	const currentLixId = React.useMemo(() => {
+		// Prefer the URL parameter as it's immediately available
+		if (lixIdSearchParams) {
+			return lixIdSearchParams;
+		}
+		// If no URL parameter and we have available lixes, use the first one
+		if (availableLixes && availableLixes.length > 0) {
+			return availableLixes[0].id;
+		}
+		// Fall back to empty string if no URL parameter and no available lixes
+		return "";
+	}, [lixIdSearchParams, availableLixes]);
 
 	const startRenamingLix = React.useCallback(() => {
 		// Close the dropdown first
@@ -586,31 +588,13 @@ export function LixSidebar() {
 		setIsRenamingLix(false);
 	}, [previousLixName]);
 
+
+	// Update lix name when the current lix name changes
 	React.useEffect(() => {
-		if (lix) {
-			const loadLixData = async () => {
-				try {
-					const lixId = await lix.db
-						.selectFrom("key_value")
-						.where("key", "=", "lix_id")
-						.select("value")
-						.executeTakeFirstOrThrow();
-
-					// Store current lix ID for the select component
-					setCurrentLixId(lixId.value);
-
-					// Use the name from our currentLixNameAtom
-					if (currentLixName) {
-						setLixName(currentLixName || "");
-					}
-				} catch (error) {
-					console.error("Failed to load lix data:", error);
-				}
-			};
-
-			loadLixData();
+		if (currentLixName) {
+			setLixName(currentLixName || "");
 		}
-	}, [lix, currentLixName]);
+	}, [currentLixName]);
 
 	const mdFiles = files ? files.filter((file) => file.path.endsWith(".md")) : [];
 
