@@ -327,8 +327,8 @@ export function applyStateDatabaseSchema(
 					}
 				}
 
-				let fullTableCost = 1000000; // Default cost for full table scan
-				let fullTableRows = 10000000;
+				const fullTableCost = 1000000; // Default cost for full table scan
+				const fullTableRows = 10000000;
 
 				// Set the index string to pass column names to xFilter
 				if (usableConstraints.length > 0) {
