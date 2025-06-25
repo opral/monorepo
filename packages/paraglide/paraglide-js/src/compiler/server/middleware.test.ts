@@ -730,8 +730,8 @@ test("middleware supports async custom server strategies", async () => {
 		getLocale: async (request) => {
 			databaseCallCount++;
 			// Simulate async database call delay
-			await new Promise(resolve => setTimeout(resolve, 10));
-			
+			await new Promise((resolve) => setTimeout(resolve, 10));
+
 			// Extract user ID from a custom header (simulating authentication)
 			if (!request) return undefined;
 			const userId = request.headers.get("X-User-ID");
@@ -742,7 +742,7 @@ test("middleware supports async custom server strategies", async () => {
 				return "de";
 			}
 			return undefined; // No user preference found
-		}
+		},
 	});
 
 	// Test 1: Request with user preference
@@ -794,7 +794,7 @@ test("middleware falls back to other strategies when async custom strategy retur
 	// Mock async custom strategy that returns undefined for unknown users
 	runtime.defineCustomServerStrategy("custom-database", {
 		getLocale: async (request) => {
-			await new Promise(resolve => setTimeout(resolve, 5));
+			await new Promise((resolve) => setTimeout(resolve, 5));
 			if (!request) return undefined;
 			const userId = request.headers.get("X-User-ID");
 			// Only return locale for known users
@@ -802,14 +802,14 @@ test("middleware falls back to other strategies when async custom strategy retur
 				return "fr";
 			}
 			return undefined; // Unknown user, fallback to other strategies
-		}
+		},
 	});
 
 	// Request from unknown user with cookie fallback
 	const request = new Request("https://example.com/page", {
 		headers: {
 			"X-User-ID": "unknown-user",
-			"cookie": "PARAGLIDE_LOCALE=de",
+			cookie: "PARAGLIDE_LOCALE=de",
 			"Sec-Fetch-Dest": "document",
 		},
 	});
@@ -838,9 +838,9 @@ test("middleware handles async custom strategy errors gracefully", async () => {
 	// Mock async custom strategy that throws an error
 	runtime.defineCustomServerStrategy("custom-database", {
 		getLocale: async () => {
-			await new Promise(resolve => setTimeout(resolve, 5));
+			await new Promise((resolve) => setTimeout(resolve, 5));
 			throw new Error("Database connection failed");
-		}
+		},
 	});
 
 	const request = new Request("https://example.com/page", {
@@ -875,22 +875,22 @@ test("middleware works with multiple async custom strategies", async () => {
 	runtime.defineCustomServerStrategy("custom-userPref", {
 		getLocale: async (request) => {
 			userPrefCallCount++;
-			await new Promise(resolve => setTimeout(resolve, 5));
+			await new Promise((resolve) => setTimeout(resolve, 5));
 			if (!request) return undefined;
 			const userId = request.headers.get("X-User-ID");
 			return userId === "premium-user" ? "fr" : undefined;
-		}
+		},
 	});
 
 	// Second strategy: region detection
 	runtime.defineCustomServerStrategy("custom-region", {
 		getLocale: async (request) => {
 			regionCallCount++;
-			await new Promise(resolve => setTimeout(resolve, 5));
+			await new Promise((resolve) => setTimeout(resolve, 5));
 			if (!request) return undefined;
 			const region = request.headers.get("X-Region");
 			return region === "europe" ? "de" : undefined;
-		}
+		},
 	});
 
 	// Test 1: First strategy succeeds

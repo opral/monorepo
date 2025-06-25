@@ -28,7 +28,7 @@ import { extractLocaleFromRequest } from "./extract-locale-from-request.js";
  *       return await getUserLocaleFromDatabase(userId);
  *     }
  *   });
- *   
+ *
  *   const locale = await extractLocaleFromRequestAsync(request);
  *
  * @type {(request: Request) => Promise<Locale>}
@@ -36,21 +36,21 @@ import { extractLocaleFromRequest } from "./extract-locale-from-request.js";
 export const extractLocaleFromRequestAsync = async (request) => {
 	/** @type {string|undefined} */
 	let locale;
-	
+
 	// Process custom strategies first, in order
 	for (const strat of strategy) {
 		if (isCustomStrategy(strat) && customServerStrategies.has(strat)) {
 			const handler = customServerStrategies.get(strat);
 			/** @type {string|undefined} */
 			locale = await handler.getLocale(request);
-			
+
 			// If we got a valid locale from this custom strategy, use it
 			if (locale !== undefined && isLocale(locale)) {
 				return assertIsLocale(locale);
 			}
 		}
 	}
-	
+
 	// If no custom strategy provided a valid locale, fall back to sync version
 	locale = extractLocaleFromRequest(request);
 	return locale;
