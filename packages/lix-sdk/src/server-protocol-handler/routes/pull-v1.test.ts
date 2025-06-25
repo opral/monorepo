@@ -2,7 +2,6 @@ import { test, expect } from "vitest";
 import type * as LixServerProtocol from "../../../../lix/server-protocol-schema/dist/schema.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
-import { mockJsonSnapshot } from "../../snapshot/mock-json-snapshot.js";
 import { mockChange } from "../../change/mock-change.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
@@ -68,10 +67,13 @@ test.skip("it should specifically be able to handle snapshots which use json bin
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const mockSnapshot = mockJsonSnapshot({
-		key: "test-key-1",
-		value: "test-value-1",
-	});
+	const mockSnapshot = {
+		id: "snapshot0",
+		content: {
+			key: "test-key-1",
+			value: "test-value-1",
+		},
+	};
 
 	// Add data to multiple tables
 	await lix.db

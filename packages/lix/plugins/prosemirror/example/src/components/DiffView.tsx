@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { lix, prosemirrorFile } from "../state";
-import { getBeforeAfterOfFile } from "@lix-js/sdk";
 import { Node, DOMSerializer } from "prosemirror-model";
 import { schema } from "../prosemirror/schema";
 import { renderUniversalDiff } from "@lix-js/universal-diff";
@@ -29,41 +28,26 @@ export function DiffView() {
 
 				const { beforeCsId, afterCsId } = diffView;
 
-				const { before, after } = await getBeforeAfterOfFile({
-					lix,
-					changeSetBefore: beforeCsId ? { id: beforeCsId } : undefined,
-					changeSetAfter: afterCsId ? { id: afterCsId } : undefined,
-					file: { id: prosemirrorFile.id },
-				});
+				const before = await lix.db
+					.selectFrom("file_history")
+					.where("lixcol_change_set_id", "=", beforeCsId)
+					.where("id", "=", prosemirrorFile.id)
+					.where("lixcol_depth", "=", 0)
+					.selectAll()
+					.executeTakeFirst();
 
-				let beforeHtml: string | undefined;
-				let afterHtml: string | undefined;
-
-				for (const doc of [before, after]) {
-					if (doc) {
-						const docData = JSON.parse(new TextDecoder().decode(doc.data));
-						const node = Node.fromJSON(schema, docData);
-						const serializer = DOMSerializer.fromSchema(schema);
-						const htmlFragment = serializer.serializeFragment(node.content);
-						const tempDiv = document.createElement("div");
-						tempDiv.appendChild(htmlFragment);
-						const html = tempDiv.innerHTML;
-						if (doc === before) {
-							beforeHtml = html;
-						} else {
-							afterHtml = html;
-						}
-					}
-				}
+				const after = await lix.db
+					.selectFrom("file_history")
+					.where("lixcol_change_set_id", "=", afterCsId)
+					.where("id", "=", prosemirrorFile.id)
+					.where("lixcol_depth", "=", 0)
+					.selectAll()
+					.executeTakeFirst();
 
 				const diffHtml = renderUniversalDiff({
-					beforeHtml: beforeHtml ?? "",
-					afterHtml: afterHtml ?? "",
+					beforeHtml: renderDocToHtml(before) ?? "",
+					afterHtml: renderDocToHtml(after) ?? "",
 				});
-
-				console.log("Before HTML:", beforeHtml);
-				console.log("After HTML:", afterHtml);
-				console.log("Diff HTML:", diffHtml);
 
 				setDiffHtml(diffHtml);
 			} catch (err) {
@@ -78,6 +62,13 @@ export function DiffView() {
 
 		fetchDocuments();
 	}, [diffView]);
+
+	console.log("Rendering DiffView", {
+		diffView,
+		diffHtml,
+		loading,
+		error,
+	});
 
 	if (loading) {
 		return <div className="diff-loading">Loading diff view...</div>;
@@ -96,4 +87,17 @@ export function DiffView() {
 	}
 
 	return <div dangerouslySetInnerHTML={{ __html: diffHtml }} />;
+}
+
+function renderDocToHtml(doc: any) {
+	if (!doc || !doc.data) {
+		return undefined;
+	}
+	const docData = JSON.parse(new TextDecoder().decode(doc.data));
+	const node = Node.fromJSON(schema, docData);
+	const serializer = DOMSerializer.fromSchema(schema);
+	const htmlFragment = serializer.serializeFragment(node.content);
+	const tempDiv = document.createElement("div");
+	tempDiv.appendChild(htmlFragment);
+	return tempDiv.innerHTML;
 }

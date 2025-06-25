@@ -6,11 +6,15 @@
 
 # Function: createChangeSet()
 
-> **createChangeSet**(`args`): `Promise`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}\>
+> **createChangeSet**(`args`): `Promise`\<`object` & `object`\>
 
-Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:36](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change-set/create-change-set.ts#L36)
+Defined in: [packages/lix-sdk/src/change-set/create-change-set.ts:20](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/create-change-set.ts#L20)
 
-Creates a change set with the given elements, optionally within an open transaction.
+Creates a change set and optionally attaches elements, labels and parents.
+
+Change sets are the building blocks of versions and checkpoints. This
+function inserts all provided relations in a single transaction and
+returns the newly created record.
 
 ## Parameters
 
@@ -18,71 +22,38 @@ Creates a change set with the given elements, optionally within an open transact
 
 #### elements?
 
-`Pick`\<[`ChangeSetElementTable`](../type-aliases/ChangeSetElementTable.md), `"entity_id"` \| `"file_id"` \| `"schema_key"` \| `"change_id"`\>[]
+`Omit`\<[`NewState`](../type-aliases/NewState.md)\<\{ `change_id`: `string`; `change_set_id`: `string`; `entity_id`: `string`; `file_id`: `string`; `schema_key`: `string`; \}\>, `"change_set_id"`\>[]
 
 #### id?
 
 `string`
 
-#### immutableElements?
-
-`boolean`
-
-If true, all elements of the change set will be immutable after creation.
-
-Immutable change set elements is required to create change set edges (the graph).
-
-WARNING: The SQL schema defaults to false to allow crating change sets
-and inserting elements. For ease of use, the `createChangeSet()` utility
-defaults to true because in the majority of cases change set elements should be immutable.
-
-**Default**
-
-```ts
-true
-```
-
 #### labels?
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>[]
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}, `"id"`\>[]
 
 #### lix
 
 `Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"`\>
 
+#### lixcol_version_id?
+
+`string`
+
+Version ID where the change set should be stored. Defaults to active version
+
 #### parents?
 
-`Pick`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}, `"id"`\>[]
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `metadata?`: `null` \| `Record`\<`string`, `any`\>; \}, `"id"`\>[]
 
 Parent change sets that this change set will be a child of
 
 ## Returns
 
-`Promise`\<\{ `id`: `string`; `immutable_elements`: `boolean`; \}\>
+`Promise`\<`object` & `object`\>
 
-## Examples
-
-```ts
-  const elements = await lix.db.selectFrom("change_set_element").selectAll().execute();
-  const changeSet = await createChangeSet({ db: lix.db, elements });
-  ```
+## Example
 
 ```ts
-  // Create a change set with labels
-  const labels = await lix.db.selectFrom("label").selectAll().execute();
-  const changeSet = await createChangeSet({
-    lix,
-    elements: [],
-    labels
-  });
-  ```
-
-```ts
-  // Create a change set with parent change sets
-  const parentChangeSet = await createChangeSet({ lix, elements: [] });
-  const childChangeSet = await createChangeSet({
-    lix,
-    elements: [],
-    parents: [parentChangeSet]
-  });
-  ```
+const cs = await createChangeSet({ lix, elements: [{ change_id, entity_id }] })
+```

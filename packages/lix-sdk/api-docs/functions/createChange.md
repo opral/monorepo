@@ -6,28 +6,27 @@
 
 # Function: createChange()
 
-> **createChange**(`args`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
+> **createChange**(`args`): `Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `schema_version`: `string`; `snapshot_id`: `string`; \}\>
 
-Defined in: [packages/lix-sdk/src/change/create-change.ts:13](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change/create-change.ts#L13)
-
-Programatically create a change in the database.
-
-Use this function to directly create a change from a lix app
-with bypassing of file-based change detection.
+Defined in: [packages/lix-sdk/src/change/create-change.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change/create-change.ts#L9)
 
 ## Parameters
 
 ### args
 
-#### authors
+#### authors?
 
-`Pick`\<\{ `id`: `string`; `name`: `string`; \}, `"id"`\>[]
+`Pick`\<\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}, `"id"`\>[]
 
-#### entityId
+#### entity_id
 
 `string`
 
-#### fileId
+#### file_id
+
+`string`
+
+#### id?
 
 `string`
 
@@ -35,18 +34,22 @@ with bypassing of file-based change detection.
 
 `Pick`\<[`Lix`](../type-aliases/Lix.md), `"db"` \| `"sqlite"`\>
 
-#### pluginKey
+#### plugin_key
 
 `string`
 
-#### schemaKey
+#### schema_key
 
 `string`
 
-#### snapshotContent
+#### schema_version
 
-`null` \| `Record`\<`string`, `any`\>
+`string`
+
+#### snapshot
+
+`Omit`\<[`Snapshot`](../type-aliases/Snapshot.md), `"id"`\>
 
 ## Returns
 
-`Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `snapshot_id`: `string`; \}\>
+`Promise`\<\{ `created_at`: `string`; `entity_id`: `string`; `file_id`: `string`; `id`: `string`; `plugin_key`: `string`; `schema_key`: `string`; `schema_version`: `string`; `snapshot_id`: `string`; \}\>

@@ -6,6 +6,6 @@
 
 # Type Alias: Log
 
-> **Log** = `Selectable`\<[`LogTable`](LogTable.md)\>
+> **Log** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixLogSchema`](../variables/LixLogSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/log/database-schema.ts:20](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/log/database-schema.ts#L20)
+Defined in: [packages/lix-sdk/src/log/schema.ts:55](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/log/schema.ts#L55)

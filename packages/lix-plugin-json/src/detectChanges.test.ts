@@ -1,11 +1,9 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
-import { openLixInMemory, type DetectedChange } from "@lix-js/sdk";
+import { type FromLixSchemaDefinition, type DetectedChange } from "@lix-js/sdk";
 import { JSONPropertySchema } from "./schemas/JSONPropertySchema.js";
 
 test("it should not detect changes if the json did not update", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Anna",
@@ -15,8 +13,7 @@ test("it should not detect changes if the json did not update", async () => {
 	// same file
 	const after = before;
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: { id: "random", path: "x.json", data: before, metadata: {} },
 		after: { id: "random", path: "x.json", data: after, metadata: {} },
 	});
@@ -24,8 +21,6 @@ test("it should not detect changes if the json did not update", async () => {
 });
 
 test("it should detect a new property on root level", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Anna",
@@ -40,8 +35,7 @@ test("it should detect a new property on root level", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: { id: "random", path: "x.json", data: before, metadata: {} },
 		after: { id: "random", path: "x.json", data: after, metadata: {} },
 	});
@@ -50,17 +44,17 @@ test("it should detect a new property on root level", async () => {
 		{
 			entity_id: "City",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "City",
 				value: "New York",
 			},
 		},
-	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
+	] satisfies DetectedChange<
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
+	>[]);
 });
 
 test("it should detect a new properties on nested levels", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Anna",
@@ -83,8 +77,7 @@ test("it should detect a new properties on nested levels", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: { id: "random", path: "x.json", data: before, metadata: {} },
 		after: { id: "random", path: "x.json", data: after, metadata: {} },
 	});
@@ -93,7 +86,7 @@ test("it should detect a new properties on nested levels", async () => {
 		{
 			entity_id: "level1.newProp",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.newProp",
 				value: "level1.newProp",
 			},
@@ -102,7 +95,7 @@ test("it should detect a new properties on nested levels", async () => {
 			entity_id: "level1.level2.newProp",
 
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.level2.newProp",
 				value: "level1.level2.newProp",
 			},
@@ -110,17 +103,17 @@ test("it should detect a new properties on nested levels", async () => {
 		{
 			entity_id: "level1.level2.level3.newProp",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.level2.level3.newProp",
 				value: "level1.level2.level3.newProp",
 			},
 		},
-	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
+	] satisfies DetectedChange<
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
+	>[]);
 });
 
 test("it should detect a new property containing an array on root level", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Anna",
@@ -135,8 +128,7 @@ test("it should detect a new property containing an array on root level", async 
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: { id: "random", path: "x.json", data: before, metadata: {} },
 		after: { id: "random", path: "x.json", data: after, metadata: {} },
 	});
@@ -145,17 +137,17 @@ test("it should detect a new property containing an array on root level", async 
 		{
 			entity_id: "array",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "array",
 				value: [1, 2, 3],
 			},
 		},
-	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
+	] satisfies DetectedChange<
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
+	>[]);
 });
 
 test("it should detect new properties containing an array in nested levels", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			prop: "level0",
@@ -176,8 +168,7 @@ test("it should detect new properties containing an array in nested levels", asy
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: { id: "random", path: "x.json", data: before, metadata: {} },
 		after: { id: "random", path: "x.json", data: after, metadata: {} },
 	});
@@ -186,7 +177,7 @@ test("it should detect new properties containing an array in nested levels", asy
 		{
 			entity_id: "level1.prop",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.prop",
 				value: ["level1", 2, 3],
 			},
@@ -194,7 +185,7 @@ test("it should detect new properties containing an array in nested levels", asy
 		{
 			entity_id: "level1.level2.prop",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.level2.prop",
 				value: ["level2", 2, 3],
 			},
@@ -202,17 +193,17 @@ test("it should detect new properties containing an array in nested levels", asy
 		{
 			entity_id: "level1.level2.level3.prop",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.level2.level3.prop",
 				value: ["level3", 2, 3],
 			},
 		},
-	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
+	] satisfies DetectedChange<
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
+	>[]);
 });
 
 test("it should detect an updated property on root level", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			Name: "Samuel",
@@ -226,8 +217,7 @@ test("it should detect an updated property on root level", async () => {
 		}),
 	);
 
-	const detectedChanges = await detectChanges?.({
-		lix,
+	const detectedChanges = detectChanges?.({
 		before: { id: "random", path: "x.json", data: before, metadata: {} },
 		after: { id: "random", path: "x.json", data: after, metadata: {} },
 	});
@@ -236,17 +226,17 @@ test("it should detect an updated property on root level", async () => {
 		{
 			entity_id: "City",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "City",
 				value: "New York",
 			},
 		},
-	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
+	] satisfies DetectedChange<
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
+	>[]);
 });
 
 test("it should detect updated properties on nested levels", async () => {
-	const lix = await openLixInMemory({});
-
 	const before = new TextEncoder().encode(
 		JSON.stringify({
 			prop: "prop",
@@ -278,7 +268,6 @@ test("it should detect updated properties on nested levels", async () => {
 	);
 
 	const detectedChanges = await detectChanges?.({
-		lix,
 		before: { id: "random", path: "x.json", data: before, metadata: {} },
 		after: { id: "random", path: "x.json", data: after, metadata: {} },
 	});
@@ -287,22 +276,22 @@ test("it should detect updated properties on nested levels", async () => {
 		{
 			entity_id: "level1.prop",
 			schema: JSONPropertySchema,
-			snapshot: undefined,
+			snapshot_content: null,
 		},
 		{
 			entity_id: "level1.level2.prop",
 			schema: JSONPropertySchema,
-			snapshot: undefined,
+			snapshot_content: null,
 		},
 		{
 			entity_id: "level1.level2.level3.prop",
 			schema: JSONPropertySchema,
-			snapshot: undefined,
+			snapshot_content: null,
 		},
 		{
 			entity_id: "level1.newProp",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.newProp",
 				value: "level1.newProp",
 			},
@@ -310,7 +299,7 @@ test("it should detect updated properties on nested levels", async () => {
 		{
 			entity_id: "level1.level2.newProp",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.level2.newProp",
 				value: "level1.level2.newProp",
 			},
@@ -318,12 +307,14 @@ test("it should detect updated properties on nested levels", async () => {
 		{
 			entity_id: "level1.level2.level3.newProp",
 			schema: JSONPropertySchema,
-			snapshot: {
+			snapshot_content: {
 				property: "level1.level2.level3.newProp",
 				value: "level1.level2.level3.newProp",
 			},
 		},
-	] satisfies DetectedChange<typeof JSONPropertySchema>[]);
+	] satisfies DetectedChange<
+		FromLixSchemaDefinition<typeof JSONPropertySchema>
+	>[]);
 });
 
 // test("it should detect updates", async () => {

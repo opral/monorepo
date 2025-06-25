@@ -1,5 +1,7 @@
+import { nanoid } from "../database/nano-id.js";
+import type { State } from "../entity-views/types.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { Log } from "./database-schema.js";
+import type { Log } from "./schema.js";
 
 /**
  * Directly creates a log entry in the Lix database without applying any filters.
@@ -28,14 +30,23 @@ export async function createLog(args: {
 	message: string;
 	level: string;
 	key: string;
-}): Promise<Log> {
-	return await args.lix.db
+}): Promise<State<Log>> {
+	// Insert the log entry
+	const id = nanoid();
+	await args.lix.db
 		.insertInto("log")
 		.values({
+			id,
 			key: args.key,
 			message: args.message,
 			level: args.level,
 		})
-		.returningAll()
+		.execute();
+
+	// Query to get the created log entry
+	return await args.lix.db
+		.selectFrom("log")
+		.where("id", "=", id)
+		.selectAll()
 		.executeTakeFirstOrThrow();
 }

@@ -6,6 +6,6 @@
 
 # Type Alias: ChangeSetThread
 
-> **ChangeSetThread** = `Selectable`\<[`ChangeSetThreadTable`](ChangeSetThreadTable.md)\>
+> **ChangeSetThread** = [`FromLixSchemaDefinition`](FromLixSchemaDefinition.md)\<*typeof* [`LixChangeSetThreadSchema`](../variables/LixChangeSetThreadSchema.md)\>
 
-Defined in: [packages/lix-sdk/src/change-set/database-schema.ts:124](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/change-set/database-schema.ts#L124)
+Defined in: [packages/lix-sdk/src/change-set/schema.ts:205](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/change-set/schema.ts#L205)

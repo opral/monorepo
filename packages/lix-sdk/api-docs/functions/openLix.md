@@ -8,9 +8,14 @@
 
 > **openLix**(`args`): `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:33](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/lix/open-lix.ts#L33)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:46](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix.ts#L46)
 
-Common setup between different lix environments.
+Opens a Lix instance using an existing SQLite database.
+
+The database may originate from a file, IndexedDB or an
+in‑memory instance. During opening all required schemas are
+applied, optional plugins are initialised and provided key‑values
+are written to the database.
 
 ## Parameters
 
@@ -18,7 +23,7 @@ Common setup between different lix environments.
 
 #### account?
 
-\{ `id`: `string`; `name`: `string`; \}
+\{ `id`: [`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>; `name`: `string`; \}
 
 The account that is opening this lix.
 
@@ -33,7 +38,7 @@ const account = localStorage.getItem("account")
 
 #### account.id
 
-`string`
+[`LixGenerated`](../type-aliases/LixGenerated.md)\<`string`\>
 
 #### account.name
 
@@ -45,7 +50,7 @@ const account = localStorage.getItem("account")
 
 #### keyValues?
 
-`object` & `object`[]
+[`NewState`](../type-aliases/NewState.md)\<[`KeyValue`](../type-aliases/KeyValue.md)\>[]
 
 Set the key values when opening the lix.
 
@@ -77,3 +82,10 @@ const lix = await openLixInMemory({ providePlugins: [myPlugin] })
 ## Returns
 
 `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
+
+## Example
+
+```ts
+const db = await createInMemoryDatabase({ readOnly: false })
+const lix = await openLix({ database: db })
+```

@@ -11,7 +11,7 @@ import {
 } from "prosemirror-schema-list";
 import { schema } from "../prosemirror/schema";
 import { useEffect, useRef, useState } from "react";
-import { prosemirrorFile, lix } from "../state";
+import { lix, prosemirrorFile } from "../state";
 import { registerCustomNodeViews } from "../prosemirror/custom-node-views";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { DiffView } from "./DiffView";
@@ -54,9 +54,10 @@ const Editor: React.FC = () => {
 		// Create the initial state with an EMPTY document
 		// The lixProsemirror plugin will load the actual document
 		const state = EditorState.create({
-			doc: schema.nodeFromJSON(
-				JSON.parse(new TextDecoder().decode(prosemirrorFile.data)),
-			),
+			doc: schema.nodeFromJSON({
+				type: "doc",
+				content: [],
+			}),
 			schema,
 			plugins: [
 				history(),

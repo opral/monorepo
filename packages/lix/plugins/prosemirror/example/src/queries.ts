@@ -115,7 +115,11 @@ export async function selectCheckpoints(): Promise<
  * Selects all versions
  */
 export async function selectVersions() {
-	return lix.db.selectFrom("version").selectAll().execute();
+	return lix.db
+		.selectFrom("version")
+		.selectAll()
+		.where("hidden", "=", false)
+		.execute();
 }
 
 /**
@@ -157,16 +161,16 @@ export async function selectThreads(args: { changeSetId: ChangeSet["id"] }) {
 			jsonArrayFrom(
 				eb
 					.selectFrom("thread_comment")
-					.innerJoin("change", "change.entity_id", "thread_comment.id")
-					.innerJoin("change_author", "change_author.change_id", "change.id")
-					.innerJoin("account", "account.id", "change_author.account_id")
+					// .innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"thread_comment.id",
 						"thread_comment.body",
 						"thread_comment.thread_id",
 						"thread_comment.parent_id",
+						"thread_comment.lixcol_created_at",
+						"thread_comment.lixcol_updated_at",
 					])
-					.select(["change.created_at", "account.name as author_name"])
+					.select((eb) => eb.val("TODO username").as("author_name"))
 					.whereRef("thread_comment.thread_id", "=", "thread.id"),
 			).as("comments"),
 		])

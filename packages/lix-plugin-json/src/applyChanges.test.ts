@@ -17,15 +17,14 @@ test("it applies an insert change", async () => {
 		}),
 	);
 
-	const { lix, changes } = await mockChanges({
+	const changes = mockChanges({
 		file: { id: "mock", path: "/mock", metadata: {} },
 		fileUpdates: [before, after],
 	});
 
-	const { fileData: applied } = await applyChanges({
+	const { fileData: applied } = applyChanges({
 		file: { id: "mock", path: "/mock", data: before, metadata: {} },
 		changes,
-		lix,
 	});
 
 	expect(new TextDecoder().decode(applied)).toEqual(
@@ -47,15 +46,14 @@ test("it applies an update change", async () => {
 		}),
 	);
 
-	const { lix, changes } = await mockChanges({
+	const changes = mockChanges({
 		file: { id: "mock", path: "/mock", metadata: {} },
 		fileUpdates: [before, after],
 	});
 
-	const { fileData: applied } = await applyChanges({
+	const { fileData: applied } = applyChanges({
 		file: { id: "mock", path: "/mock", data: before, metadata: {} },
 		changes,
-		lix,
 	});
 
 	expect(new TextDecoder().decode(applied)).toEqual(
@@ -76,15 +74,14 @@ test("it applies a delete change", async () => {
 		}),
 	);
 
-	const { lix, changes } = await mockChanges({
+	const changes = mockChanges({
 		file: { id: "mock", path: "/mock", metadata: {} },
 		fileUpdates: [before, after],
 	});
 
-	const { fileData: applied } = await applyChanges({
+	const { fileData: applied } = applyChanges({
 		file: { id: "mock", path: "/mock", data: before, metadata: {} },
 		changes,
-		lix,
 	});
 
 	expect(new TextDecoder().decode(applied)).toEqual(

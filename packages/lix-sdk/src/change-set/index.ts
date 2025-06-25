@@ -1,8 +1,18 @@
-export { changeSetElementInSymmetricDifference } from "./change-set-element-in-symmetric-difference.js";
+export {
+	LixChangeSetSchema,
+	LixChangeSetElementSchema,
+	LixChangeSetEdgeSchema,
+	LixChangeSetLabelSchema,
+	LixChangeSetThreadSchema,
+	type ChangeSet,
+	type ChangeSetElement,
+	type ChangeSetEdge,
+	type ChangeSetLabel,
+	type ChangeSetThread,
+} from "./schema.js";
 export { createChangeSet } from "./create-change-set.js";
-export * from "./database-schema.js";
-export { createMergeChangeSet } from "./create-merge-change-set.js";
 export { applyChangeSet } from "./apply-change-set.js";
+export { createMergeChangeSet } from "./create-merge-change-set.js";
 export { createUndoChangeSet } from "./create-undo-change-set.js";
 export { createCheckpoint } from "./create-checkpoint.js";
-export { getBeforeAfterOfFile } from "./get-before-after-of-file.js";
+export { createTransitionChangeSet } from "./create-transition-change-set.js";

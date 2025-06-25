@@ -4,7 +4,16 @@ import type { VectorClock } from "./merge-state.js";
 import { getDiffingRows } from "./get-diffing-rows.js";
 
 /**
- * Pushes rows to the server.
+ * Pushes local changes to a Lix server.
+ *
+ * Only rows unknown to the server are transmitted based on the provided
+ * vector clock. An error is thrown when the server responds with a non
+ * successful status.
+ *
+ * @example
+ * ```ts
+ * await pushToServer({ id, serverUrl, lix, targetVectorClock })
+ * ```
  */
 export async function pushToServer(args: {
 	id: string;

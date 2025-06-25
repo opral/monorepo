@@ -19,19 +19,16 @@ interface IntermediateCheckpointComponentProps {
 
 export const IntermediateCheckpointComponent = ({ filteredChanges }: IntermediateCheckpointComponentProps) => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
-  const [intermediateChanges] = useAtom(intermediateChangesAtom);
   const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
 
-  // Use filtered changes if provided, otherwise use all intermediate changes
-  const changesData = filteredChanges || intermediateChanges;
 
   // Don't render anything if there's no change data
-  if (changesData.length === 0) {
+  if (filteredChanges!.length === 0) {
     return null;
   }
 
   // Group changes by plugin_key
-  const groupedChanges = changesData.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
+  const groupedChanges = filteredChanges!.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
     const key = change.plugin_key;
     if (!acc[key]) {
       acc[key] = [];
@@ -76,7 +73,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
                 <ChangeDiffComponent
                   key={pluginKey}
                   // TODO: Rework changes query to what we need
-                  diffs={[changesData[changesData.length - 1]]}
+                  diffs={[filteredChanges![filteredChanges!.length - 1]]}
                   contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
                 // debug={true}
                 />
@@ -132,10 +129,11 @@ const CreateCheckpointInput = () => {
         comments: [{ body: args.content }],
       });
       await trx
-        .insertInto("change_set_thread")
+        .insertInto("change_set_thread_all")
         .values({
           change_set_id: currentChangeSet!.id,
           thread_id: thread.id,
+          lixcol_version_id: "global",
         })
         .execute();
     });

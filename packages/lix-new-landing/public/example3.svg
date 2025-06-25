@@ -1,0 +1,5 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f9fafb" />
+  <polygon points="200,80 280,150 200,220 120,150" fill="#e5e7eb" />
+  <text x="200" y="155" font-family="sans-serif" font-size="14" text-anchor="middle">AI Proposal Example</text>
+</svg>

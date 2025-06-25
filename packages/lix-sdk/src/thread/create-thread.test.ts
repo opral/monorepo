@@ -20,3 +20,13 @@ test("creates a thread with sequential comments where only the first has null pa
 	expect(insertedComments[1]!.parent_id).toBe(insertedComments[0]!.id);
 	expect(insertedComments[2]!.parent_id).toBe(insertedComments[1]!.id);
 });
+
+test("defaults to global version if no versionId is provided", async () => {
+	const lix = await openLixInMemory({});
+
+	const comments = [{ body: fromPlainText("Global comment") }];
+
+	const threadWithComments = await createThread({ lix, comments });
+	expect(threadWithComments.lixcol_version_id).toBe("global");
+	expect(threadWithComments.comments[0]!.lixcol_version_id).toBe("global");
+});

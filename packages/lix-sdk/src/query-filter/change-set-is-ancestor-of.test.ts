@@ -100,3 +100,79 @@ test("includeSelf true selects the current change set as well", async () => {
 		[cs0.id, cs1.id, cs2.id].sort()
 	);
 });
+
+test("can be combined with where(id = X) to check specific ancestry", async () => {
+	const lix = await openLixInMemory({});
+
+	// Create chain: cs1 <- cs2 <- cs3
+	const cs1 = await createChangeSet({
+		lix,
+		id: "cs1",
+		elements: [],
+	});
+	const cs2 = await createChangeSet({
+		lix,
+		id: "cs2",
+		elements: [],
+		parents: [cs1],
+	});
+	const cs3 = await createChangeSet({
+		lix,
+		id: "cs3",
+		elements: [],
+		parents: [cs2],
+	});
+
+	// Test: Check if cs2 is an ancestor of cs3 (should return cs2)
+	const cs2IsAncestorOfCs3 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", cs2.id)
+		.where(changeSetIsAncestorOf(cs3))
+		.select("id")
+		.execute();
+
+	expect(cs2IsAncestorOfCs3).toHaveLength(1);
+	expect(cs2IsAncestorOfCs3[0]!.id).toBe(cs2.id);
+
+	// Test: Check if cs1 is an ancestor of cs3 (should return cs1)
+	const cs1IsAncestorOfCs3 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", cs1.id)
+		.where(changeSetIsAncestorOf(cs3))
+		.select("id")
+		.execute();
+
+	expect(cs1IsAncestorOfCs3).toHaveLength(1);
+	expect(cs1IsAncestorOfCs3[0]!.id).toBe(cs1.id);
+
+	// Test: Check if cs3 is an ancestor of cs3 (should return empty - not inclusive by default)
+	const cs3IsAncestorOfCs3 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", cs3.id)
+		.where(changeSetIsAncestorOf(cs3))
+		.select("id")
+		.execute();
+
+	expect(cs3IsAncestorOfCs3).toHaveLength(0);
+
+	// Test: Check if cs3 is an ancestor of cs1 (should return empty - wrong direction)
+	const cs3IsAncestorOfCs1 = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", cs3.id)
+		.where(changeSetIsAncestorOf(cs1))
+		.select("id")
+		.execute();
+
+	expect(cs3IsAncestorOfCs1).toHaveLength(0);
+
+	// Test: Check with includeSelf option
+	const cs3IsAncestorOfCs3Inclusive = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", cs3.id)
+		.where(changeSetIsAncestorOf(cs3, { includeSelf: true }))
+		.select("id")
+		.execute();
+
+	expect(cs3IsAncestorOfCs3Inclusive).toHaveLength(1);
+	expect(cs3IsAncestorOfCs3Inclusive[0]!.id).toBe(cs3.id);
+});

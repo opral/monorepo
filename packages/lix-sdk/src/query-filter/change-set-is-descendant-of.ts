@@ -5,7 +5,7 @@ import {
 	type ExpressionWrapper,
 } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { ChangeSet } from "../change-set/database-schema.js";
+import type { ChangeSet } from "../change-set/schema.js";
 
 /**
  * Filters change sets that are descendants of the given change set.

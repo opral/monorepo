@@ -1,25 +1,26 @@
 import Checkpoints from "./Checkpoints";
 // import Proposals from "./Proposals";
 import clsx from "clsx";
-import { useQuery } from "../hooks/useQuery";
-import { selectActiveVersion, selectMainVersion } from "../queries";
-import NewProposal from "./NewProposal";
+// import { useQuery } from "../hooks/useQuery";
+// import { selectActiveVersion, selectMainVersion } from "../queries";
+// import NewProposal from "./NewProposal";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { useEffect } from "react";
 
 export default function Sidebar() {
-	const [currentVersion] = useQuery(selectActiveVersion);
-	const [mainVersion] = useQuery(selectMainVersion);
+	// const [currentVersion] = useQuery(selectActiveVersion);
+	// const [mainVersion] = useQuery(selectMainVersion);
 
-	const isMainVersion = currentVersion?.id === mainVersion?.id;
+	// const isMainVersion = currentVersion?.id === mainVersion?.id;
 
-	return isMainVersion ? (
-		<MainVersionSidebar />
-	) : (
-		<div className="flex flex-col h-full">
-			<NewProposal />
-		</div>
-	);
+	// return isMainVersion ? (
+	// 	<MainVersionSidebar />
+	// ) : (
+	// 	<div className="flex flex-col h-full">
+	// 		<NewProposal />
+	// 	</div>
+	// );
+	return MainVersionSidebar();
 }
 
 function MainVersionSidebar() {

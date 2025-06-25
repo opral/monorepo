@@ -43,7 +43,7 @@ const DiscussionPreview = ({ threadId }: { threadId: string }) => {
       .limit(1)
       .executeTakeFirstOrThrow();
 
-    setFirstComment(comment);
+    setFirstComment(comment as any);
   };
 
   return (

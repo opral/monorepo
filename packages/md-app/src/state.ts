@@ -1,9 +1,9 @@
 import {
 	openLixInMemory,
-	Account,
 	switchAccount,
 	Lix,
 	Version,
+	Account,
 } from "@lix-js/sdk";
 import { atom, createStore } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
@@ -286,11 +286,14 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 	await lix.db.transaction().execute(async (trx) => {
 		// in case the user switched the lix and this lix does not have
 		// the account yet, then insert it.
-		await trx
-			.insertInto("account")
-			.values(account)
-			.onConflict((oc) => oc.doNothing())
-			.execute();
+		try {
+			await trx
+				.insertInto("account")
+				.values({ id: account.id, name: account.name })
+				.execute();
+		} catch {
+			// do nothing, account already exists
+		}
 
 		// switch the active account
 		await switchAccount({ lix: { ...lix, db: trx }, to: [account] });

@@ -252,7 +252,7 @@ const getChanges = async (
 			"change_set_element.change_id",
 			"change.id"
 		)
-		.where("change.schema_key", "=", CellSchemaV1.key)
+		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
@@ -339,6 +339,7 @@ const getChanges = async (
 				file_id: change.file_id,
 				plugin_key: change.plugin_key,
 				schema_key: change.schema_key,
+				schema_version: change.schema_version,
 				snapshot_id: "",
 				created_at: "",
 				content: null
@@ -387,7 +388,7 @@ const getIntermediateChanges = async (
 				)
 		)
 		.where("change.file_id", "=", fileId)
-		.where("change.schema_key", "=", CellSchemaV1.key)
+		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 		.selectAll("change")
 		.select("snapshot.content")
 		.execute();
@@ -448,7 +449,7 @@ const getIntermediateChanges = async (
 						latestCheckpointChangeSetId
 					)
 					.where("change.entity_id", "=", change.entity_id)
-					.where("change.schema_key", "=", CellSchemaV1.key)
+					.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 					.where(changeHasLabel({ name: "checkpoint" }))
 					.selectAll("change")
 					.select("snapshot.content")
@@ -471,6 +472,7 @@ const getIntermediateChanges = async (
 					file_id: change.file_id,
 					plugin_key: change.plugin_key,
 					schema_key: change.schema_key,
+					schema_version: change.schema_version,
 					snapshot_id: "",
 					created_at: "",
 					content: null

@@ -2,35 +2,55 @@ import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createMergeChangeSet } from "./create-merge-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
+import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("it should merge non-conflicting changes", async () => {
 	const lix = await openLixInMemory({});
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "test_schema",
+				"x-lix-version": "1.0",
+				type: "object",
+				additionalProperties: false,
+				properties: {
+					id: { type: "string" },
+				},
+				required: ["id"],
+			} satisfies LixSchemaDefinition,
+		})
+		.execute();
 
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
 			{
 				id: "c0",
+				schema_key: "test_schema",
+				schema_version: "1.0",
 				entity_id: "e0",
 				file_id: "file0",
 				plugin_key: "mock_plugin",
-				schema_key: "test_schema",
 				snapshot_id: "no-content",
 			},
 			{
 				id: "c1",
+				schema_key: "test_schema",
+				schema_version: "1.0",
 				entity_id: "e1",
 				file_id: "file0",
 				plugin_key: "mock_plugin",
-				schema_key: "test_schema",
 				snapshot_id: "no-content",
 			},
 			{
 				id: "c2",
+				schema_key: "test_schema",
+				schema_version: "1.0",
 				entity_id: "e2",
 				file_id: "file0",
 				plugin_key: "mock_plugin",
-				schema_key: "test_schema",
 				snapshot_id: "no-content",
 			},
 		])
@@ -90,16 +110,34 @@ test("it should merge non-conflicting changes", async () => {
 test("should handle conflicting elements with source winning (until conflicts are modeled in lix)", async () => {
 	const lix = await openLixInMemory({});
 
+	await lix.db
+		.insertInto("stored_schema")
+		.values({
+			value: {
+				"x-lix-key": "s1",
+				"x-lix-version": "1.0",
+				additionalProperties: false,
+				type: "object",
+				properties: {
+					id: { type: "string" },
+					text: { type: "string" },
+				},
+				required: ["id"],
+			} satisfies LixSchemaDefinition,
+		})
+		.execute();
+
 	// Create initial snapshots with different content
-	const snapshots = await lix.db
+	await lix.db
 		.insertInto("snapshot")
 		.values([
-			{ content: { text: "base" } },
-			{ content: { text: "target mod" } },
-			{ content: { text: "source mod" } },
+			{ id: "snap1", content: { text: "base" } },
+			{ id: "snap2", content: { text: "target mod" } },
+			{ id: "snap3", content: { text: "source mod" } },
 		])
-		.returning("id")
 		.execute();
+
+	const snapshots = [{ id: "snap1" }, { id: "snap2" }, { id: "snap3" }];
 
 	// Create changes for the different states of the same entity
 	const changes = await lix.db
@@ -107,26 +145,29 @@ test("should handle conflicting elements with source winning (until conflicts ar
 		.values([
 			{
 				id: "c_base",
+				schema_key: "s1",
+				schema_version: "1.0",
 				entity_id: "e1",
 				file_id: "file1",
 				plugin_key: "mock_plugin",
-				schema_key: "s1",
 				snapshot_id: snapshots[0]!.id,
 			},
 			{
 				id: "c_target",
+				schema_key: "s1",
+				schema_version: "1.0",
 				entity_id: "e1", // Same entity as base, different content
 				file_id: "file1",
 				plugin_key: "mock_plugin",
-				schema_key: "s1",
 				snapshot_id: snapshots[1]!.id,
 			},
 			{
 				id: "c_source",
+				schema_key: "s1",
+				schema_version: "1.0",
 				entity_id: "e1", // Same entity as base, different content
 				file_id: "file1",
 				plugin_key: "mock_plugin",
-				schema_key: "s1",
 				snapshot_id: snapshots[2]!.id,
 			},
 		])

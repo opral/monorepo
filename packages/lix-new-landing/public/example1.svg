@@ -1,0 +1,5 @@
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#f9fafb" />
+  <circle cx="200" cy="150" r="80" fill="#e5e7eb" />
+  <text x="200" y="155" font-family="sans-serif" font-size="14" text-anchor="middle">Version Control Example</text>
+</svg>

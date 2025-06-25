@@ -8,9 +8,13 @@
 
 > **toBlob**(`args`): `Promise`\<`Blob`\>
 
-Defined in: [packages/lix-sdk/src/lix/to-blob.ts:10](https://github.com/opral/monorepo/blob/985ffce1eb6542fd7d2a659b02ab83cb2ccd8d57/packages/lix-sdk/src/lix/to-blob.ts#L10)
+Defined in: [packages/lix-sdk/src/lix/to-blob.ts:17](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/to-blob.ts#L17)
 
-Convert the lix to a blob.
+Serialises the Lix database into a Blob.
+
+Use this helper to persist the current state to disk or send it to a
+server. The blob contains the raw SQLite file representing the Lix
+project.
 
 ## Parameters
 
@@ -28,4 +32,5 @@ Convert the lix to a blob.
 
 ```ts
 const blob = await toBlob({ lix })
+download(blob)
 ```

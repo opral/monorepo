@@ -1,51 +1,58 @@
-import {
-	fileQueueSettled,
-	openLixInMemory,
-	type Lix,
-	type NewLixFile,
-} from "@lix-js/sdk";
+import { uuidV7, type Change, type LixFile } from "@lix-js/sdk";
 import { detectChanges } from "../detectChanges.js";
 
 /**
- * Instantiates a Lix instance with a mock plugin with the detectChanges function.
+ * Directly feeds an array of file updates into the plugin's detectChanges function,
+ * bypassing Lix database operations.
  *
  * @example
  *   ```
- *   const mock = await mockChanges({ ... })
- *   const applied = await detectChanges(mock)
+ *   const changes = await mockChanges({ ... })
  *   ```
  */
 export async function mockChanges(args: {
-	lix?: Lix;
-	file: Omit<NewLixFile, "data">;
+	file: Omit<LixFile, "data">;
 	fileUpdates: Uint8Array[];
 }) {
-	const lix =
-		args.lix ??
-		(await openLixInMemory({
-			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
-		}));
-	for (const update of args.fileUpdates) {
-		await lix.db
-			.insertInto("file")
-			.values({
-				id: args.file.id ?? "mock",
-				path: args.file.path,
-				data: update,
-				metadata: args.file.metadata,
-			})
-			.onConflict((oc) => oc.doUpdateSet({ data: update }))
-			.execute();
+	const allChanges = [];
+
+	// Process each update sequentially, comparing with the previous state
+	for (let i = 0; i < args.fileUpdates.length; i++) {
+		const before =
+			i === 0
+				? undefined
+				: {
+						id: args.file.id ?? "mock",
+						path: args.file.path,
+						data: args.fileUpdates[i - 1],
+						metadata: args.file.metadata,
+					};
+
+		const after = {
+			id: args.file.id ?? "mock",
+			path: args.file.path,
+			data: args.fileUpdates[i]!,
+			metadata: args.file.metadata,
+		};
+
+		const detectedChanges = detectChanges({ before, after });
+
+		// Transform DetectedChange objects to the format expected by applyChanges
+		const formattedChanges: (Change & { snapshot_content: any })[] =
+			detectedChanges.map((change) => ({
+				id: uuidV7(),
+				entity_id: change.entity_id,
+				created_at: new Date().toISOString(),
+				snapshot_content: change.snapshot_content,
+				schema_key: change.schema["x-lix-key"],
+				schema_version: change.schema["x-lix-version"],
+				file_id: after.id,
+				plugin_key: "mock",
+				snapshot_id: "mock",
+			}));
+
+		allChanges.push(...formattedChanges);
 	}
 
-	await fileQueueSettled({ lix });
-
-	const changes = await lix.db
-		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.selectAll("change")
-		.select("snapshot.content")
-		.execute();
-
-	return { lix, changes };
+	return allChanges;
 }

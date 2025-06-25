@@ -1,11 +1,13 @@
 import { expect, test } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { Log } from "./database-schema.js";
 import { createLixOwnLog } from "./create-lix-own-log.js";
+import type { Log } from "./schema.js";
 
 test("should insert logs default log levels when lix_log_levels is not set)", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: ["info", "warn", "error"] }],
+	});
 
 	await createLogs(lix);
 
@@ -26,9 +28,10 @@ test("should insert logs default log levels when lix_log_levels is not set)", as
 });
 
 test("should insert only specified levels when lix_log_levels=['warn', 'error']", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: ["warn", "error"] }],
+	});
 
-	await setLogLevels(lix, ["warn", "error"]);
 	await createLogs(lix);
 
 	const logs = await getLogs(lix);
@@ -45,8 +48,10 @@ test("should insert only specified levels when lix_log_levels=['warn', 'error']"
 });
 
 test("should insert only specified levels when lix_log_levels=['debug']", async () => {
-	const lix = await openLixInMemory({});
-	await setLogLevels(lix, ["debug"]);
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: ["debug"] }],
+	});
+
 	await createLogs(lix);
 
 	const logs = await getLogs(lix);
@@ -59,9 +64,11 @@ test("should insert only specified levels when lix_log_levels=['debug']", async 
 	expect(logs.find((log) => log.level === "error")).toBeUndefined();
 });
 
-test("should insert all levels when lix_log_levels=['*']", async () => {
-	const lix = await openLixInMemory({});
-	await setLogLevels(lix, ["*"]);
+test("should insert all levels contain wildcard '*'", async () => {
+	const lix = await openLixInMemory({
+		keyValues: [{ key: "lix_log_levels", value: ["*"] }],
+	});
+
 	await createLogs(lix);
 
 	const logs = await getLogs(lix);
@@ -109,19 +116,4 @@ async function createLogs(lix: Lix) {
 
 async function getLogs(lix: Lix): Promise<Log[]> {
 	return lix.db.selectFrom("log").selectAll().execute();
-}
-
-// Helper to set the lix_log_levels key
-async function setLogLevels(lix: Lix, levels: string[]) {
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "lix_log_levels",
-			value: JSON.stringify(levels),
-			skip_change_control: true,
-		})
-		.onConflict((oc) =>
-			oc.column("key").doUpdateSet({ value: JSON.stringify(levels) })
-		)
-		.execute();
 }
