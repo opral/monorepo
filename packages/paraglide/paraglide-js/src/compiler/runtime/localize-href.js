@@ -41,17 +41,20 @@ import { deLocalizeUrl, localizeUrl } from "./localize-url.js";
  * @returns {string} The localized href, relative if input was relative
  */
 export function localizeHref(href, options) {
-	const locale = options?.locale ?? getLocale();
+	const currentLocale = getLocale();
+	const locale = options?.locale ?? currentLocale;
 	const url = new URL(href, getUrlOrigin());
 
-	const localized = localizeUrl(url, options);
+	const localized = localizeUrl(url, { locale });
 
 	// if the origin is identical and the href is relative,
 	// return the relative path
 	if (href.startsWith("/") && url.origin === localized.origin) {
 		// check for cross origin localization in which case an absolute URL must be returned.
-		if (locale !== getLocale()) {
-			const localizedCurrentLocale = localizeUrl(url, { locale: getLocale() });
+		if (locale !== currentLocale) {
+			const localizedCurrentLocale = localizeUrl(url, {
+				locale: currentLocale,
+			});
 			if (localizedCurrentLocale.origin !== localized.origin) {
 				return localized.href;
 			}

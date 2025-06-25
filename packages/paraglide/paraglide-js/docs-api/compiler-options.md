@@ -1,9 +1,11 @@
 ## CompilerOptions
 
 > **CompilerOptions** = `object`
+> **CompilerOptions** = `object`
 
 Defined in: [compiler-options.ts:19](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/compiler-options.ts)
 
+### Properties
 ### Properties
 
 #### additionalFiles?
@@ -349,6 +351,8 @@ fallback to the base locale.
 The default ensures that the browser takes a cookie approach,
 server-side takes the globalVariable (because cookie is unavailable),
 whereas both fallback to the base locale if not available.
+
+Custom strategies with the pattern `custom-[A-Za-z0-9]+` are supported.
 
 ##### Default
 

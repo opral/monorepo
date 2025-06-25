@@ -10,12 +10,6 @@ const HelpMenu = () => {
 					: "http://localhost:3000/m/tdozzpar",
 			},
 			{
-				name: "User Guide",
-				href: import.meta.env.PROD
-					? "https://inlang.com/g/6ddyhpoi"
-					: "http://localhost:3000/g/6ddyhpoi",
-			},
-			{
 				name: "About the ecosystem",
 				href: import.meta.env.PROD
 					? "https://inlang.com/documentation"

@@ -216,3 +216,184 @@ test("initially sets the locale after resolving it for the first time", async ()
 	);
 	expect(globalThis.window.location.href).toBe("https://example.com/de/page");
 });
+
+test("returns locale from custom strategy", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-client", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-client", {
+		getLocale: () => "fr",
+		setLocale: () => {},
+	});
+
+	const locale = runtime.getLocale();
+	expect(locale).toBe("fr");
+});
+
+test("falls back to next strategy when custom strategy returns undefined", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["custom-undefined", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-undefined", {
+		getLocale: () => undefined,
+		setLocale: () => {},
+	});
+
+	const locale = runtime.getLocale();
+	expect(locale).toBe("en"); // Should fall back to baseLocale
+});
+
+test("throws error if custom strategy returns invalid locale", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr"],
+			},
+		}),
+		strategy: ["custom-invalid", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-invalid", {
+		getLocale: () => "invalid-locale",
+		setLocale: () => {},
+	});
+
+	expect(() => runtime.getLocale()).toThrow();
+});
+
+test("custom strategy takes precedence over built-in strategies in getLocale", async () => {
+	// @ts-expect-error - global variable definition
+	globalThis.document = { cookie: "PARAGLIDE_LOCALE=fr" };
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-priority", "cookie", "baseLocale"],
+		cookieName: "PARAGLIDE_LOCALE",
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-priority", {
+		getLocale: () => "de",
+		setLocale: () => {},
+	});
+
+	const locale = runtime.getLocale();
+	expect(locale).toBe("de"); // Should use custom strategy, not cookie
+});
+
+test("multiple custom strategies work in order in getLocale", async () => {
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-first", "custom-second", "baseLocale"],
+		isServer: "false",
+	});
+
+	// Define two custom strategies
+	runtime.defineCustomClientStrategy("custom-first", {
+		getLocale: () => undefined, // This one returns undefined
+		setLocale: () => {},
+	});
+
+	runtime.defineCustomClientStrategy("custom-second", {
+		getLocale: () => "fr", // This one returns a locale
+		setLocale: () => {},
+	});
+
+	const locale = runtime.getLocale();
+	expect(locale).toBe("fr"); // Should use second custom strategy
+});
+
+test("custom strategy works with session storage simulation", async () => {
+	// Simulate a custom strategy that reads from session storage
+	let sessionData = "de";
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-session", "baseLocale"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-session", {
+		getLocale: () => sessionData,
+		setLocale: (locale) => {
+			sessionData = locale;
+		},
+	});
+
+	const locale = runtime.getLocale();
+	expect(locale).toBe("de");
+});
+
+test("custom strategy integrates with locale initialization", async () => {
+	// @ts-expect-error - global variable definition
+	globalThis.window = {};
+
+	// Define a custom strategy that tracks if it was called
+	let getLocaleCalled = false;
+	let setLocaleCalled = false;
+
+	const runtime = await createParaglide({
+		blob: await newProject({
+			settings: {
+				baseLocale: "en",
+				locales: ["en", "fr", "de"],
+			},
+		}),
+		strategy: ["custom-tracking"],
+		isServer: "false",
+	});
+
+	runtime.defineCustomClientStrategy("custom-tracking", {
+		getLocale: () => {
+			getLocaleCalled = true;
+			return "fr";
+		},
+		setLocale: () => {
+			setLocaleCalled = true;
+		},
+	});
+
+	// First call should trigger the custom strategy
+	const locale = runtime.getLocale();
+	expect(locale).toBe("fr");
+	expect(getLocaleCalled).toBe(true);
+
+	// Setting the locale should also call the custom strategy
+	runtime.setLocale("de");
+
+	// The locale should be set internally after first resolution
+	expect(setLocaleCalled).toBe(true);
+});

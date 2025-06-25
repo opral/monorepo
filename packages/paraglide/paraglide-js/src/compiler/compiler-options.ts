@@ -54,6 +54,8 @@ export type CompilerOptions = {
 	 * server-side takes the globalVariable (because cookie is unavailable),
 	 * whereas both fallback to the base locale if not available.
 	 *
+	 * Custom strategies with the pattern `custom-[A-Za-z0-9]+` are supported.
+	 *
 	 * @default ["cookie", "globalVariable", "baseLocale"]
 	 */
 	strategy?: Runtime["strategy"];

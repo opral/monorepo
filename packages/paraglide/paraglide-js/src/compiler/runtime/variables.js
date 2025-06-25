@@ -31,7 +31,7 @@ export const cookieDomain = "<cookie-domain>";
 export const localStorageKey = "PARAGLIDE_LOCALE";
 
 /**
- * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url" | "preferredLanguage" | "localStorage">}
+ * @type {Array<"cookie" | "baseLocale" | "globalVariable" | "url" | "preferredLanguage" | "localStorage" | `custom-${string}`>}
  */
 export const strategy = ["globalVariable"];
 
