@@ -121,21 +121,52 @@ AI is at the heart of your writing experience. It helps you write better, faster
 <p><br /></p>\n`;
 
 export const setupMdWelcome = async (lix: Lix) => {
-	// Load a demo md file and save it to OPFS
-	await lix.db
-		.insertInto("file")
-		.values({
-			path: "/welcome.md",
-			data: new TextEncoder().encode(welcomeMd),
-		})
-		.execute();
+	// Use a transaction to ensure atomicity
+	return await lix.db.transaction().execute(async (trx) => {
+		// Check if welcome file already exists to avoid duplicate creation
+		const existingFile = await trx
+			.selectFrom("file")
+			.selectAll()
+			.where("path", "=", "/welcome.md")
+			.executeTakeFirst();
+		
+		if (existingFile) {
+			return existingFile;
+		}
 
-	const file = await lix.db
-		.selectFrom("file")
-		.selectAll()
-		.where("path", "=", "/welcome.md")
-		.executeTakeFirstOrThrow();
-	return file;
+		try {
+			// Load a demo md file and save it to OPFS
+			await trx
+				.insertInto("file")
+				.values({
+					path: "/welcome.md",
+					data: new TextEncoder().encode(welcomeMd),
+				})
+				.execute();
+
+			const file = await trx
+				.selectFrom("file")
+				.selectAll()
+				.where("path", "=", "/welcome.md")
+				.executeTakeFirstOrThrow();
+			return file;
+		} catch (error) {
+			// If insertion fails due to unique constraint, try to get existing file
+			console.warn("Welcome file creation failed, attempting to retrieve existing file:", error);
+			const file = await trx
+				.selectFrom("file")
+				.selectAll()
+				.where("path", "=", "/welcome.md")
+				.executeTakeFirst();
+			
+			if (file) {
+				return file;
+			}
+			
+			// If we still can't find it, re-throw the error
+			throw error;
+		}
+	});
 };
 
 const initialComment = fromPlainText("Setup welcome file");

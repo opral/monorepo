@@ -25,6 +25,9 @@ import { initLixInspector } from "@lix-js/inspector";
 let globalLix: Lix | null = null;
 let lixInitializationPromise: Promise<Lix> | null = null;
 
+// Lock to prevent concurrent welcome file creation
+let welcomeFileSetupPromise: Promise<any> | null = null;
+
 /**
  * Helper function to ensure lix is initialized
  */
@@ -594,28 +597,62 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 const setFirstMarkdownFile = async (lix: Lix) => {
 	try {
 		if (!lix) return null;
+		
+		// Get all files and filter for markdown files
 		const files =
 			(await lix.db.selectFrom("file").selectAll().execute()) ?? [];
-		const markdownFiles = files.filter(
+		let markdownFiles = files.filter(
 			(file) => file.path && file.path.endsWith(".md")
 		);
 
+		// If no markdown files exist, create welcome file with locking
 		if (markdownFiles.length === 0) {
-			await setupWelcomeFile(lix);
-			await saveLixToOpfs({ lix });
-
-			const welcomeFile = await lix.db
-				.selectFrom("file")
-				.selectAll()
-				.executeTakeFirst();
-			markdownFiles.push(welcomeFile!);
+			// If welcome file setup is already in progress, wait for it
+			if (welcomeFileSetupPromise) {
+				await welcomeFileSetupPromise;
+				// Re-check for files after waiting
+				const retryFiles = await lix.db.selectFrom("file").selectAll().execute();
+				markdownFiles = retryFiles.filter(
+					(file) => file.path && file.path.endsWith(".md")
+				);
+			} else {
+				// Start welcome file setup
+				welcomeFileSetupPromise = (async () => {
+					try {
+						await setupWelcomeFile(lix);
+						await saveLixToOpfs({ lix });
+					} catch (error) {
+						console.warn("Failed to setup welcome file:", error);
+						// Don't throw here, let the caller handle the retry logic
+					} finally {
+						welcomeFileSetupPromise = null; // Reset the lock
+					}
+				})();
+				
+				await welcomeFileSetupPromise;
+				
+				// Refresh the file list after creating welcome file
+				const updatedFiles = await lix.db.selectFrom("file").selectAll().execute();
+				markdownFiles = updatedFiles.filter(
+					(file) => file.path && file.path.endsWith(".md")
+				);
+				
+				// If still no markdown files after setup, something went wrong
+				if (markdownFiles.length === 0) {
+					throw new Error("Failed to create or find any markdown files");
+				}
+			}
 		}
+		
 		if (markdownFiles.length > 0) {
 			updateUrlParams({ f: markdownFiles[0].id });
+			return markdownFiles[0];
 		}
-		return markdownFiles[0];
+		
+		return null;
 	} catch (error) {
-		console.log("Error setting first markdown file: ", error);
+		console.error("Error setting first markdown file: ", error);
+		return null;
 	}
 };
 
