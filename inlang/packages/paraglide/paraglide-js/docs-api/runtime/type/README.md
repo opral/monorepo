@@ -98,7 +98,7 @@ Defined in: [runtime/type.ts:29](https://github.com/opral/monorepo/tree/main/inl
 
 #### extractLocaleFromRequestAsync
 
-> **extractLocaleFromRequestAsync**: `extractLocaleFromRequestAsync`
+> **extractLocaleFromRequestAsync**: [`extractLocaleFromRequestAsync`](-internal-.md#extractlocalefromrequestasync)
 
 Defined in: [runtime/type.ts:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 

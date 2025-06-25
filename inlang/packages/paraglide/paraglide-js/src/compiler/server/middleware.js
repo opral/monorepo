@@ -69,7 +69,7 @@ export async function paraglideMiddleware(request, resolve, callbacks) {
 		runtime.overwriteServerAsyncLocalStorage(createMockAsyncLocalStorage());
 	}
 
-	const locale = runtime.extractLocaleFromRequest(request);
+	const locale = await runtime.extractLocaleFromRequestAsync(request);
 	const origin = new URL(request.url).origin;
 
 	// if the client makes a request to a URL that doesn't match
