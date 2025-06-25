@@ -1,7 +1,6 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-import { activeFileAtom, intermediateChangesAtom } from '@/state-active-file';
-import { useAtom } from 'jotai/react';
+import { useActiveFile, useIntermediateChanges, useActiveAccount } from '@/state-queries';
 import FileName from '@/components/FileName';
 import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
 import {
@@ -13,14 +12,13 @@ import { useEffect, useState } from "react";
 import { Button } from '@/components/ui/button';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import ChangeControlSidebar from '@/components/ui/sidebar-change-control';
-import { activeAccountAtom } from '@/state';
 import posthog from 'posthog-js';
 
 // Wrapper component that has access to the MultiSidebar context
 function PageContent() {
-	const [activeFile] = useAtom(activeFileAtom);
-	const [activeAccount] = useAtom(activeAccountAtom);
-	const [intermediateChanges] = useAtom(intermediateChangesAtom);
+	const { file: activeFile } = useActiveFile();
+	const { account: activeAccount } = useActiveAccount();
+	const { changes: intermediateChanges } = useIntermediateChanges();
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
 	useEffect(() => {
@@ -70,7 +68,7 @@ function PageContent() {
 							className="size-8 relative"
 							onClick={toggleRightSidebar}
 						>
-							{intermediateChanges.length > 0 && !rightSidebar.open && (
+							{intermediateChanges && intermediateChanges.length > 0 && !rightSidebar.open && (
 								<>
 									<span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary animate-ping" />
 									<span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary" />

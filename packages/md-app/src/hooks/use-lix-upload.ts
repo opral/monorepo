@@ -7,8 +7,7 @@ import {
 	getFileFromLix,
 } from "@/helper/uploadToLix";
 import { toast } from "sonner";
-import { lixAtom } from "@/state";
-import { useAtom } from "jotai";
+import { useLix } from "@/state-queries";
 
 export function useLixUpload() {
 	const [uploadedFile, setUploadedFile] = useState<LixUploadedFile>();
@@ -18,7 +17,7 @@ export function useLixUpload() {
 	const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
 	const [pendingFile, setPendingFile] = useState<File | null>(null);
 	const [duplicateInfo, setDuplicateInfo] = useState<{fileName: string, fileId: string} | null>(null);
-	const [lix] = useAtom(lixAtom);
+	const { lix } = useLix();
 
 	// Function to process pending file after duplicate resolution
 	const processPendingFile = useCallback(async (file: File) => {
@@ -36,6 +35,10 @@ export function useLixUpload() {
 					return newValue < 90 ? newValue : prev;
 				});
 			}, 100);
+
+			if (!lix) {
+				throw new Error('Lix not available');
+			}
 
 			// Upload file to lix
 			const result = await uploadFileToLix(file, lix);
@@ -77,6 +80,10 @@ export function useLixUpload() {
 				});
 			}, 100);
 			
+			if (!lix) {
+				throw new Error('Lix not available');
+			}
+
 			// Replace the image in Lix
 			const result = await replaceImageInLix(duplicateInfo.fileId, pendingFile, lix);
 			
@@ -114,6 +121,11 @@ export function useLixUpload() {
 			if (!duplicateInfo) return null;
 			
 			try {
+				if (!lix) {
+					toast.error('Lix not available');
+					return null;
+				}
+
 				// Get existing file data
 				const fileBlob = await getFileFromLix(duplicateInfo.fileId, lix);
 				if (!fileBlob) {
@@ -123,7 +135,7 @@ export function useLixUpload() {
 				
 				// Create URL for existing file
 				const serverUrl = "https://lix.host";
-				const lixIdRecord = await lix.db
+				const lixIdRecord = await lix!.db
 					.selectFrom("key_value")
 					.where("key", "=", "lix_id")
 					.select("value")
@@ -172,6 +184,11 @@ export function useLixUpload() {
 	const uploadFile = useCallback(async (file: File) => {
 		if (!file) return null;
 		
+		if (!lix) {
+			toast.error('Lix not available');
+			return null;
+		}
+
 		// First check if a file with the same name already exists
 		const duplicateCheck = await checkDuplicateImage(file.name, lix);
 		

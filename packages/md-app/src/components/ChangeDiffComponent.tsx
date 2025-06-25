@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { UiDiffComponentProps } from "@lix-js/sdk";
-import { lixAtom } from "@/state.ts";
-import { useAtom } from "jotai/react";
+import { useLix } from "@/state-queries";
 import clsx from "clsx";
 
 export const ChangeDiffComponent = (props: {
@@ -10,7 +9,7 @@ export const ChangeDiffComponent = (props: {
 	contentClassName?: string; // Add new prop for styling the actual diff content
 	debug?: boolean;
 }) => {
-	const [lix] = useAtom(lixAtom);
+	const { lix } = useLix();
 	const [isComponentLoaded, setIsComponentLoaded] = useState(false);
 
 	const pluginKey = props.diffs[0]?.plugin_key;
@@ -18,6 +17,8 @@ export const ChangeDiffComponent = (props: {
 
 	useEffect(() => {
 		const loadDiffComponent = async () => {
+			if (!lix) return; // Don't try to load if lix is not ready
+			
 			const component = (await lix.plugin.getAll()).find(
 				(p) => p.key === pluginKey
 			)?.diffUiComponent;

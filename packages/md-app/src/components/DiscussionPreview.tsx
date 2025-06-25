@@ -1,5 +1,4 @@
-import { fileIdSearchParamsAtom, lixAtom } from "@/state.ts";
-import { useAtom } from "jotai/react";
+import { useLix, useFileIdFromUrl } from "@/state-queries";
 import { useEffect, useState } from "react";
 import timeAgo from "@/helper/timeAgo.ts";
 import { ArrowRight, MessagesSquare } from "lucide-react";
@@ -8,17 +7,19 @@ import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { State, ThreadComment } from "@lix-js/sdk";
 
 const DiscussionPreview = ({ threadId }: { threadId: string }) => {
-	const [lix] = useAtom(lixAtom);
+	const { lix } = useLix();
 	const [firstComment, setFirstComment] = useState<
 		State<ThreadComment & { author_name: string }> | undefined
 	>(undefined);
-	const [fileId] = useAtom(fileIdSearchParamsAtom);
+	const fileId = useFileIdFromUrl();
 
 	useEffect(() => {
 		getFirstComment(threadId);
-	}, [threadId]);
+	}, [threadId, lix]);
 
 	const getFirstComment = async (threadId: string) => {
+		if (!lix) return; // Don't try to query if lix is not ready
+		
 		const comment = await lix.db
 			.selectFrom("thread_comment")
 			.innerJoin("change", (join) =>

@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useAtom } from "jotai";
 import { PlateElementProps } from "@udecode/plate/react";
-import { activeFileAtom } from "@/state-active-file";
+import { useActiveFile, useLix } from "@/state-queries";
 import { useChat } from "./use-chat";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Loader2, Zap } from "lucide-react";
-import { lixAtom, withPollingAtom } from "@/state";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { generateHumanId } from "@/helper/generateHumanId";
 import { updateUrlParams } from "@/helper/updateUrlParams";
@@ -22,9 +20,8 @@ export function EmptyDocumentPromptElement({
 	editor,
 }: PlateElementProps) {
 	const [prompt, setPrompt] = useState("");
-	const [activeFile] = useAtom(activeFileAtom);
-	const [lix] = useAtom(lixAtom);
-	const [, setPolling] = useAtom(withPollingAtom);
+	const { file: activeFile } = useActiveFile();
+	const { lix, refetch } = useLix();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const chat = useChat({
@@ -80,7 +77,7 @@ export function EmptyDocumentPromptElement({
 
 				await saveLixToOpfs({ lix });
 				updateUrlParams({ f: newFileId });
-				setPolling(Date.now());
+				refetch();
 
 				// Return the new file ID for later use
 				return newFileId;
@@ -89,7 +86,7 @@ export function EmptyDocumentPromptElement({
 				return null;
 			}
 		},
-		[lix, setPolling, prompt]
+		[lix, refetch, prompt]
 	);
 
 	// Initialize height and reset on changes

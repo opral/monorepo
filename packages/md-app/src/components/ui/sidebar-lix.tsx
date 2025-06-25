@@ -12,7 +12,6 @@ import {
 	FolderPlus,
 	FileInput,
 } from "lucide-react";
-import { useAtom } from "jotai";
 import posthog from "posthog-js";
 import { useNavigate } from "react-router-dom";
 import {
@@ -27,15 +26,14 @@ import {
 } from "@/components/ui/select";
 
 import {
-	availableLixesAtom,
-	currentLixNameAtom,
-	fileIdSearchParamsAtom,
-	filesAtom,
-	lixAtom,
-	lixIdSearchParamsAtom,
-	withPollingAtom,
-} from "@/state";
-import { activeFileAtom } from "@/state-active-file";
+	useLix,
+	useFiles,
+	useActiveFile,
+	useCurrentLixName,
+	useAvailableLixes,
+	useFileIdFromUrl,
+	useLixIdFromUrl,
+} from "@/state-queries";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
 import { updateUrlParams } from "@/helper/updateUrlParams";
@@ -76,14 +74,13 @@ import { generateHumanId } from "@/helper/generateHumanId";
 import { useChat } from "../editor/use-chat";
 
 export function LixSidebar() {
-	const [lix] = useAtom(lixAtom);
-	const [files] = useAtom(filesAtom);
-	const [activeFile] = useAtom(activeFileAtom);
-	const [, setPolling] = useAtom(withPollingAtom);
-	const [currentLixName] = useAtom(currentLixNameAtom);
-	const [availableLixes] = useAtom(availableLixesAtom);
-	const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom);
-	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
+	const { lix, refetch } = useLix();
+	const { files } = useFiles();
+	const { file: activeFile } = useActiveFile();
+	const { name: currentLixName } = useCurrentLixName();
+	const { lixes: availableLixes } = useAvailableLixes();
+	const lixIdSearchParams = useLixIdFromUrl();
+	const fileIdSearchParams = useFileIdFromUrl();
 
 	const [fileToDelete, setFileToDelete] = React.useState<string | null>(null);
 	const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] =
@@ -93,7 +90,7 @@ export function LixSidebar() {
 		name: string;
 	} | null>(null);
 	const [isRenamingLix, setIsRenamingLix] = React.useState(false);
-	const [lixName, setLixName] = React.useState(currentLixName);
+	const [lixName, setLixName] = React.useState(currentLixName || "");
 	const [previousLixName, setPreviousLixName] = React.useState("");
 	const [lixDropdownOpen, setLixDropdownOpen] = React.useState(false);
 	const [fileDropdownOpen, setFileDropdownOpen] = React.useState<string | null>(
@@ -111,9 +108,9 @@ export function LixSidebar() {
 	const switchToFile = React.useCallback(
 		async (fileId: string) => {
 			updateUrlParams({ f: fileId });
-			setPolling(Date.now());
+			refetch();
 		},
-		[setPolling]
+		[refetch]
 	);
 
 	const createNewFile = React.useCallback(async () => {
@@ -175,15 +172,15 @@ export function LixSidebar() {
 				.execute();
 
 			await saveLixToOpfs({ lix });
-			setPolling(Date.now());
+			refetch();
 		} catch (error) {
 			console.error("Failed to rename file:", error);
 			setInlineEditingFile(null);
 		}
-	}, [lix, inlineEditingFile, files, setPolling]);
+	}, [lix, inlineEditingFile, files, refetch]);
 
 	const handleSaveLixName = React.useCallback(async () => {
-		if (!lix || !lixName.trim()) {
+		if (!lix || !lixName?.trim()) {
 			return;
 		}
 
@@ -192,7 +189,7 @@ export function LixSidebar() {
 			setIsRenamingLix(false);
 
 			// Only perform database operation if name actually changed
-			if (lixName.trim() === currentLixName) {
+			if (lixName?.trim() === currentLixName) {
 				return;
 			}
 
@@ -200,11 +197,11 @@ export function LixSidebar() {
 			// This will also update the URL
 			await saveLixName({
 				lix,
-				newName: lixName,
+				newName: lixName || "",
 			});
 
 			// Refresh everything to update the UI with the new file name
-			setPolling(Date.now());
+			refetch();
 
 			// The currentLixId should still be the lix_id, not the new name
 			// The saveLixName function will handle updating the URL params correctly
@@ -220,7 +217,7 @@ export function LixSidebar() {
 			console.error("Failed to save lix name:", error);
 			setIsRenamingLix(false);
 		}
-	}, [lix, lixName, currentLixName, setPolling]);
+	}, [lix, lixName, currentLixName, refetch]);
 
 	// Add click-outside detection for Lix rename input
 	React.useEffect(() => {
@@ -303,18 +300,18 @@ export function LixSidebar() {
 
 				// If we deleted the active file, switch to another file
 				if (isActiveFile) {
-					const remainingFiles = files.filter((f) => f.id !== fileId);
+					const remainingFiles = files ? files.filter((f) => f.id !== fileId) : [];
 					if (remainingFiles.length > 0) {
 						await switchToFile(remainingFiles[0].id);
 					}
 				}
 
-				setPolling(Date.now());
+				refetch();
 			} catch (error) {
 				console.error("Failed to delete file:", error);
 			}
 		},
-		[lix, files, activeFile, setPolling, createNewFile]
+		[lix, files, activeFile, refetch, createNewFile]
 	);
 
 	const handleCreateNewLix = React.useCallback(async () => {
@@ -326,7 +323,7 @@ export function LixSidebar() {
 			navigate(`?lix=${id}`);
 
 			// Set polling to refresh the UI
-			setPolling(Date.now());
+			refetch();
 		} catch (error) {
 			console.error("Failed to create new lix:", error);
 		}
@@ -360,14 +357,14 @@ export function LixSidebar() {
 
 					await saveLixToOpfs({ lix });
 					updateUrlParams({ f: importedFileId });
-					setPolling(Date.now());
+					refetch();
 				} catch (error) {
 					console.error("Failed to import file:", error);
 				}
 			}
 		};
 		input.click();
-	}, [lix, setPolling]);
+	}, [lix, refetch]);
 
 	const handleOpenLixFile = React.useCallback(async () => {
 		const input = document.createElement("input");
@@ -470,7 +467,7 @@ export function LixSidebar() {
 				if (
 					entry.kind === "file" &&
 					entry.name.endsWith(".lix") &&
-					entry.name !== `${currentLixName}.lix`
+					entry.name !== `${currentLixName || ""}.lix`
 				) {
 					availableLixFiles.push(entry.name);
 				}
@@ -478,7 +475,9 @@ export function LixSidebar() {
 
 			if (availableLixFiles.length > 0) {
 				// The file is saved with the current name displayed in the UI (with .lix extension)
+				if (currentLixName) {
 				await root.removeEntry(`${currentLixName}.lix`);
+			}
 
 				// Navigate to another lix
 				const nextLixId = availableLixFiles[0].replace(/\.lix$/, "");
@@ -489,12 +488,12 @@ export function LixSidebar() {
 			}
 
 			// Trigger polling to refresh the UI
-			setPolling(Date.now());
+			refetch();
 			setShowDeleteProjectsDialog(false);
 		} catch (error) {
 			console.error("Error deleting current lix:", error);
 		}
-	}, [lix, navigate, setPolling]);
+	}, [lix, navigate, refetch]);
 
 	const handleResetAllOpfs = React.useCallback(async () => {
 		try {
@@ -519,11 +518,11 @@ export function LixSidebar() {
 			}
 
 			updateUrlParams({ lix: "", f: "" });
-			setPolling(Date.now());
+			refetch();
 		} catch (error) {
 			console.error("Error resetting OPFS:", error);
 		}
-	}, [navigate, setPolling]);
+	}, [navigate, refetch]);
 
 	// Track current lix ID
 	const [currentLixId, setCurrentLixId] = React.useState<string>("");
@@ -533,7 +532,7 @@ export function LixSidebar() {
 		setLixDropdownOpen(false);
 
 		// Use the current display name from our atom
-		const displayName = currentLixName || lixName;
+		const displayName = currentLixName || lixName || "";
 		setLixName(displayName);
 
 		setPreviousLixName(displayName);
@@ -602,7 +601,7 @@ export function LixSidebar() {
 
 					// Use the name from our currentLixNameAtom
 					if (currentLixName) {
-						setLixName(currentLixName);
+						setLixName(currentLixName || "");
 					}
 				} catch (error) {
 					console.error("Failed to load lix data:", error);
@@ -613,7 +612,7 @@ export function LixSidebar() {
 		}
 	}, [lix, currentLixName]);
 
-	const mdFiles = files.filter((file) => file.path.endsWith(".md"));
+	const mdFiles = files ? files.filter((file) => file.path.endsWith(".md")) : [];
 
 	const backlink = React.useCallback(() => {
 		return `https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`;
@@ -644,7 +643,7 @@ export function LixSidebar() {
 						<input
 							ref={lixInputRef}
 							type="text"
-							value={lixName}
+							value={lixName || ""}
 							onChange={(e) => setLixName(e.target.value)}
 							onFocus={(e) => e.target.select()}
 							onKeyDown={(e) => {
@@ -682,7 +681,7 @@ export function LixSidebar() {
 								<SelectValue placeholder="Select Workspace">
 									<div className="flex items-center justify-between w-full">
 										<span className="truncate mr-1">
-											{currentLixName || lixName}
+											{currentLixName || lixName || ""}
 										</span>
 									</div>
 								</SelectValue>

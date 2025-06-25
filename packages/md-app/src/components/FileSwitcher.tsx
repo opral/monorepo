@@ -1,7 +1,5 @@
-import { useAtom } from "jotai";
 import { useCallback } from "react";
-import { activeFileAtom } from "@/state-active-file";
-import { filesAtom, lixAtom, withPollingAtom } from "@/state";
+import { useActiveFile, useFiles, useLix } from "@/state-queries";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { generateHumanId } from "@/helper/generateHumanId";
@@ -17,20 +15,19 @@ import { Check, ChevronDown, FileText, Plus } from "lucide-react";
 import { nanoid } from "@lix-js/sdk";
 
 export default function FileSwitcher() {
-	const [activeFile] = useAtom(activeFileAtom);
-	const [files] = useAtom(filesAtom);
-	const [lix] = useAtom(lixAtom);
-	const [, setPolling] = useAtom(withPollingAtom);
+	const { file: activeFile } = useActiveFile();
+	const { files } = useFiles();
+	const { lix, refetch } = useLix();
 
 	const switchToFile = useCallback(
 		async (fileId: string) => {
 			// Update URL without causing a navigation
 			updateUrlParams({ f: fileId });
 
-			// Trigger polling to refresh state without full page reload
-			setPolling(Date.now());
+			// Trigger refetch to refresh state without full page reload
+			refetch();
 		},
-		[setPolling]
+		[refetch]
 	);
 
 	const createNewFile = useCallback(async () => {
@@ -58,16 +55,16 @@ export default function FileSwitcher() {
 			updateUrlParams({ f: newFileId });
 
 			// Refresh state
-			setPolling(Date.now());
+			refetch();
 		} catch (error) {
 			console.error("Failed to create new file:", error);
 		}
-	}, [lix, setPolling]);
+	}, [lix, refetch]);
 
 	if (!activeFile) return null;
 
 	// Filter only markdown files (assuming they end with .md)
-	const mdFiles = files.filter((file) => file.path.endsWith(".md"));
+	const mdFiles = files ? files.filter((file) => file.path.endsWith(".md")) : [];
 
 	return (
 		<DropdownMenu>

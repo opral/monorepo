@@ -9,31 +9,29 @@ import { useCreateEditor } from "@/components/editor/use-create-editor";
 // import { SettingsDialog } from "@/components/editor/settings";
 import { Editor, EditorContainer } from "@/components/ui/editor";
 import { debounce } from "lodash-es";
-import { useAtom } from "jotai";
-import { editorRefAtom, lixAtom } from "@/state";
-import { activeFileAtom, loadedMdAtom } from "@/state-active-file";
+import { useLix, useActiveFile, useLoadedMarkdown, useEditorRef } from "@/state-queries";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { welcomeMd } from "@/helper/welcomeLixFile";
 import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
 export function PlateEditor() {
-  const [lix] = useAtom(lixAtom);
-  const [activeFile] = useAtom(activeFileAtom);
-  const [loadedMd] = useAtom(loadedMdAtom);
-  const [, setEditorRef] = useAtom(editorRefAtom);
+  const { lix } = useLix();
+  const { file: activeFile } = useActiveFile();
+  const { markdown: loadedMd } = useLoadedMarkdown();
+  const editorRef = useEditorRef();
 
   const editor = useCreateEditor();
   const [previousHasPromptElement, setPreviousHasPromptElement] = useState(false);
 
   useEffect(() => {
-    if (editor) {
-      setEditorRef(editor);
+    if (editor && editorRef) {
+      editorRef.current = editor;
     }
-  }, [editor, setEditorRef]);
+  }, [editor, editorRef]);
 
   useEffect(() => {
-    if (editor && loadedMd !== undefined) {
+    if (editor && loadedMd !== undefined && loadedMd !== null) {
       const currentSerialized = editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
       if (loadedMd !== currentSerialized) {
         const nodes = editor
@@ -132,8 +130,8 @@ export function PlateEditor() {
   // delete changes/disregard keystroke changes on merge
   const handleUpdateMdData = useCallback(
     debounce(async (newData) => {
-      // Only save if we have an active file
-      if (!activeFile) return;
+      // Only save if we have an active file and lix
+      if (!activeFile || !lix) return;
 
       const serializedMd = newData.editor.getApi(ExtendedMarkdownPlugin).markdown.serialize();
 

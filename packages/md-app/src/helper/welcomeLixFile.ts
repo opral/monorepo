@@ -8,8 +8,7 @@ import {
 	createAccount,
 } from "@lix-js/sdk";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
-import { switchActiveAccount } from "@/state";
-import { getWorkingChangeSet } from "../state-active-file";
+import { switchActiveAccount } from "../queries";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 /**
@@ -44,8 +43,6 @@ export async function withFlashtypeAccount<T>(
 	} else {
 		accountToUse = flashtypeAccount;
 	}
-
-	console.log("hello world");
 
 	// Switch to the Flashtype account using the existing helper function
 	await switchActiveAccount(lix, accountToUse);
@@ -144,7 +141,30 @@ export const setupMdWelcome = async (lix: Lix) => {
 const initialComment = fromPlainText("Setup welcome file");
 
 const createInitialCheckpoint = async (lix: Lix, fileId: string) => {
-	const changeSet = await getWorkingChangeSet(lix, fileId);
+	// Get the working change set for this specific file
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
+		.executeTakeFirst();
+
+	if (!activeVersion) return;
+
+	const changeSet = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", activeVersion.working_change_set_id)
+		.leftJoin(
+			"change_set_element",
+			"change_set.id",
+			"change_set_element.change_set_id"
+		)
+		.where("file_id", "=", fileId)
+		.selectAll("change_set")
+		.groupBy("change_set.id")
+		.select((eb) => [
+			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		])
+		.executeTakeFirst();
 
 	if (changeSet) {
 		lix.db.transaction().execute(async (trx) => {
