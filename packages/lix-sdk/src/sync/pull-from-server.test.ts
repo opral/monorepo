@@ -5,7 +5,6 @@ import { expect, test, vi } from "vitest";
 import { createServerProtocolHandler } from "../server-protocol-handler/create-server-protocol-handler.js";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pullFromServer } from "./pull-from-server.js";
-import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
 

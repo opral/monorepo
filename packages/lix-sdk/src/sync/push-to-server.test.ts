@@ -3,7 +3,6 @@ import { createServerProtocolHandler } from "../server-protocol-handler/create-s
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { pushToServer } from "./push-to-server.js";
 import { newLixFile } from "../lix/new-lix.js";
-import { mockJsonSnapshot } from "../snapshot/mock-json-snapshot.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
 import { toBlob } from "../lix/to-blob.js";
@@ -300,9 +299,12 @@ test.skip("it should handle snapshots.content json binaries", async () => {
 		})
 	);
 
-	const mockSnapshot = mockJsonSnapshot({
-		location: "Berlin",
-	});
+	const mockSnapshot = {
+		id: "snapshot0",
+		content: {
+			location: "Berlin",
+		},
+	};
 
 	// insert a snapshot
 	await lix.db
