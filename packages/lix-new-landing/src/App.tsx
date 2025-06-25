@@ -871,65 +871,8 @@ function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-              {/* Card 1: AI Proposals with Human Review */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
-                <div className="p-7">
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-7 w-7 text-blue-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-medium text-gray-800">
-                      AI Proposal Review
-                    </h3>
-                  </div>
-                  <p className="text-gray-600 text-base leading-relaxed">
-                    AI suggests changes while humans maintain oversight with
-                    approve/reject workflows.
-                  </p>
-                </div>
-                <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
-                  <div className="font-mono text-sm text-gray-700 overflow-x-auto">
-                    <code>
-                      <span className="text-gray-500">
-                        {"// AI proposes, human approves"}
-                      </span>
-                      <br />
-                      <span className="text-blue-600">{"const"}</span>
-                      {" proposal = "}
-                      <span className="text-purple-600">{"await"}</span>
-                      {" lix.createProposal({"}
-                      <br />
-                      {"  changes: aiChanges,"}
-                      <br />
-                      {"  title: "}
-                      <span className="text-green-600">
-                        {'"AI suggestion"'}
-                      </span>
-                      <br />
-                      {"});"}
-                      <br />
-                      <span className="text-purple-600">{"await"}</span>
-                      {" lix.approveProposal(proposal.id);"}
-                    </code>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Parallel AI Exploration */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 max-w-[100rem] mx-auto px-4">
+              {/* Card 1: Parallel AI Exploration - STEP 1 */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
                 <div className="p-7">
                   <div className="flex items-center gap-4 mb-5">
@@ -954,48 +897,80 @@ function App() {
                     </h3>
                   </div>
                   <p className="text-gray-600 text-base leading-relaxed">
-                    Run multiple AI agents with different parameters and merge
-                    the best results.
+                    Initialize parallel versions for different AI agents to explore solutions independently.
                   </p>
                 </div>
                 <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
-                  <div className="font-mono text-sm text-gray-700 overflow-x-auto">
-                    <code>
-                      <span className="text-gray-500">
-                        {"// Multiple AI versions"}
-                      </span>
-                      <br />
-                      <span className="text-blue-600">{"const"}</span>
-                      {" v1 = "}
-                      <span className="text-purple-600">{"await"}</span>
-                      {" lix.createVersion("}
-                      <span className="text-green-600">{'"creative-ai"'}</span>
-                      {");"}
-                      <br />
-                      <span className="text-blue-600">{"const"}</span>
-                      {" v2 = "}
-                      <span className="text-purple-600">{"await"}</span>
-                      {" lix.createVersion("}
-                      <span className="text-green-600">{'"precise-ai"'}</span>
-                      {");"}
-                      <br />
-                      <span className="text-gray-500">
-                        {"// Compare and merge"}
-                      </span>
-                      <br />
-                      <span className="text-blue-600">{"const"}</span>
-                      {" diff = "}
-                      <span className="text-purple-600">{"await"}</span>
-                      {" lix.getDiff(v1, v2);"}
-                      <br />
-                      <span className="text-purple-600">{"await"}</span>
-                      {" lix.merge(diff);"}
-                    </code>
+                  <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                    <div className="text-gray-400 mb-2">// Create separate versions for different AI approaches</div>
+                    <div className="text-white mb-1">
+                      <span className="text-blue-400">const</span> creativeVersion = <span className="text-purple-400">await</span> lix.createVersion(<span className="text-green-400">"creative-ai"</span>);
+                    </div>
+                    <div className="text-white mb-3">
+                      <span className="text-blue-400">const</span> preciseVersion = <span className="text-purple-400">await</span> lix.createVersion(<span className="text-green-400">"precise-ai"</span>);
+                    </div>
+                    <div className="text-gray-400 mb-2">// AI agents work in parallel on their versions</div>
+                    <div className="text-white mb-1">
+                      <span className="text-purple-400">await</span> Promise.all([
+                    </div>
+                    <div className="text-white ml-4 mb-1">runCreativeAI(creativeVersion),</div>
+                    <div className="text-white ml-4 mb-1">runPreciseAI(preciseVersion)</div>
+                    <div className="text-white">]);</div>
                   </div>
                 </div>
               </div>
 
-              {/* Card 3: Transparent Change History */}
+              {/* Card 2: AI Proposals - STEP 2 */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
+                <div className="p-7">
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-7 w-7 text-blue-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-800">
+                      AI Change Proposals
+                    </h3>
+                  </div>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    AI creates formal change proposals from exploration results that humans can review.
+                  </p>
+                </div>
+                <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
+                  <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                    <div className="text-gray-400 mb-2">// Compare the different AI approaches</div>
+                    <div className="text-white mb-3">
+                      <span className="text-blue-400">const</span> diff = <span className="text-purple-400">await</span> lix.getDiff(creativeVersion, preciseVersion);
+                    </div>
+                    <div className="text-gray-400 mb-2">// AI creates a proposal with the best changes</div>
+                    <div className="text-white mb-1">
+                      <span className="text-blue-400">const</span> proposal = <span className="text-purple-400">await</span> lix.createProposal({`{`}
+                    </div>
+                    <div className="text-white ml-4 mb-1">changes: selectBestChanges(diff),</div>
+                    <div className="text-white ml-4 mb-1">
+                      title: <span className="text-green-400">"AI-suggested improvements"</span>,
+                    </div>
+                    <div className="text-white ml-4 mb-1">
+                      description: <span className="text-green-400">"Combined creative + precise approach"</span>
+                    </div>
+                    <div className="text-white">{`}`});</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Human Review & Attribution - STEP 3 */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
                 <div className="p-7">
                   <div className="flex items-center gap-4 mb-5">
@@ -1016,40 +991,35 @@ function App() {
                       </svg>
                     </div>
                     <h3 className="text-xl font-medium text-gray-800">
-                      Change Attribution
+                      Human Review & Attribution
                     </h3>
                   </div>
                   <p className="text-gray-600 text-base leading-relaxed">
-                    Track every AI modification with source attribution for full
-                    audit trails and compliance.
+                    Humans review proposals with full change attribution before applying them to production.
                   </p>
                 </div>
                 <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
-                  <div className="font-mono text-sm text-gray-700 overflow-x-auto">
-                    <code>
-                      <span className="text-gray-500">
-                        {"// Track AI changes with attribution"}
-                      </span>
-                      <br />
-                      <span className="text-purple-600">{"await"}</span>
-                      {" lix.addLabel({"}
-                      <br />
-                      {"  changeId: change.id,"}
-                      <br />
-                      {"  label: "}
-                      <span className="text-green-600">{'"source:gpt4"'}</span>
-                      <br />
-                      {"});"}
-                      <br />
-                      <span className="text-gray-500">
-                        {"// Get full history"}
-                      </span>
-                      <br />
-                      <span className="text-blue-600">{"const"}</span>
-                      {" history = "}
-                      <span className="text-purple-600">{"await"}</span>
-                      {" lix.getHistory();"}
-                    </code>
+                  <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm overflow-x-auto">
+                    <div className="text-gray-400 mb-2">// Human reviews and labels the changes</div>
+                    <div className="text-white mb-1">
+                      <span className="text-purple-400">await</span> lix.addLabel({`{`}
+                    </div>
+                    <div className="text-white ml-4 mb-1">changeId: proposal.id,</div>
+                    <div className="text-white ml-4 mb-1">
+                      label: <span className="text-green-400">"reviewed-by:human"</span>
+                    </div>
+                    <div className="text-white mb-3">{`}`});</div>
+                    <div className="text-gray-400 mb-2">// Apply changes when approved</div>
+                    <div className="text-white mb-1">
+                      <span className="text-blue-400">const</span> approved = <span className="text-purple-400">await</span> humanReview(proposal);
+                    </div>
+                    <div className="text-white mb-1">
+                      <span className="text-blue-400">if</span> (approved) {`{`}
+                    </div>
+                    <div className="text-white ml-4 mb-1">
+                      <span className="text-purple-400">await</span> lix.applyProposal(proposal.id);
+                    </div>
+                    <div className="text-white">{`}`}</div>
                   </div>
                 </div>
               </div>
