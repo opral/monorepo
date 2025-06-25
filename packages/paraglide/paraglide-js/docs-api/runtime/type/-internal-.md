@@ -263,7 +263,7 @@ If the input is not a locale.
 
 > **defineCustomClientStrategy**(`strategy`, `handler`): `void`
 
-Defined in: [runtime/strategy.js:65](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+Defined in: [runtime/strategy.js:67](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
 
 Defines a custom strategy that is executed on the client.
 
@@ -273,7 +273,7 @@ Defines a custom strategy that is executed on the client.
 
 `any`
 
-The name of the custom strategy to define. Must follow the pattern custom-name.
+The name of the custom strategy to define. Must follow the pattern custom-name with alphanumeric characters, hyphens, or underscores.
 
 #### handler
 
@@ -292,7 +292,7 @@ methods getLocale and setLocale.
 
 > **defineCustomServerStrategy**(`strategy`, `handler`): `void`
 
-Defined in: [runtime/strategy.js:47](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
+Defined in: [runtime/strategy.js:49](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/strategy.js)
 
 Defines a custom strategy that is executed on the server.
 
@@ -302,7 +302,7 @@ Defines a custom strategy that is executed on the server.
 
 `any`
 
-The name of the custom strategy to define. Must follow the pattern custom-name.
+The name of the custom strategy to define. Must follow the pattern custom-name with alphanumeric characters, hyphens, or underscores.
 
 #### handler
 
