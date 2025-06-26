@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 
 test("creates checkpoint label on boot up", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const checkpointLabel = await lix.db
 		.selectFrom("label")
@@ -16,7 +16,7 @@ test("creates checkpoint label on boot up", async () => {
 });
 
 test("insert, update, delete on the label view", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("label")

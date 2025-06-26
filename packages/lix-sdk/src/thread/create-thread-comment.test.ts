@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
 import { createThreadComment } from "./create-thread-comment.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { fromPlainText } from "@opral/zettel-ast";
 import { nanoid } from "../database/nano-id.js";
 
 test("creates a thread comment", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const threadId = nanoid();
 	await lix.db.insertInto("thread").values({ id: threadId }).execute();
@@ -26,7 +26,7 @@ test("creates a thread comment", async () => {
 });
 
 test("defaults to the version of the thread", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const threadId = nanoid();
 	await lix.db.insertInto("thread").values({ id: threadId }).execute();

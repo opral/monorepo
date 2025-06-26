@@ -2,13 +2,13 @@
 // @ts-nocheck
 
 import { test, expect, vi } from "vitest";
-// import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+// import { openLix } from "../lix/open-lix.js";
 // import type { Change } from "../database/schema.js";
 // import { detectChangeConflicts } from "./detect-change-conflicts.js";
 // import type { LixPlugin } from "../plugin/lix-plugin.js";
 
 test.skip("should detect conflicts using plugins", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
@@ -55,7 +55,7 @@ test.skip("should detect conflicts using plugins", async () => {
 });
 
 test.skip("should handle no conflicts detected by plugins", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
@@ -93,7 +93,7 @@ test.skip("should handle no conflicts detected by plugins", async () => {
 });
 
 test.skip("should handle multiple plugins detecting conflicts", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockPlugin1: LixPlugin = {
 		key: "mock-plugin1",
@@ -164,7 +164,7 @@ test.skip("should handle multiple plugins detecting conflicts", async () => {
 });
 
 test.skip("it should auto detect diverging entity conflicts", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const changes = await lix.db
 		.insertInto("change")

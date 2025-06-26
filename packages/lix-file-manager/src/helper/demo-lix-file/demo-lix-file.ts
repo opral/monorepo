@@ -4,7 +4,7 @@ import {
 	createThread,
 	Lix,
 	newLixFile,
-	openLixInMemory,
+	openLix,
 	switchAccount,
 	Thread,
 	toBlob,
@@ -14,7 +14,7 @@ import { getThreads, getWorkingChangeSet } from "@/state-active-file.ts";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 		providePlugins: supportedFileTypes.map((type) => type.plugin),
 	});

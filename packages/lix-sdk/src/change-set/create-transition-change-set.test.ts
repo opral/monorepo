@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import {
 	mockJsonPlugin,
 	MockJsonPropertySchema,
@@ -12,7 +12,7 @@ import { createTransitionChangeSet } from "./create-transition-change-set.js";
 // related https://github.com/opral/lix-sdk/issues/311
 test.skip("it transitions state to a specific change set", async () => {
 	// Create a Lix instance with our plugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 

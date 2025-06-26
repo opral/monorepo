@@ -50,12 +50,12 @@ npm install @lix-js/plugin-md
 To use a plugin, you need to provide it when opening a Lix file:
 
 ```javascript
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 
 // Open a Lix file with support for both JSON and CSV
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [jsonPlugin, csvPlugin],
 });

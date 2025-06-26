@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import { test, expect, vi } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import {
 	createLspInMemoryEnvironment,
 	createServerProtocolHandler,
@@ -18,7 +18,7 @@ test.skip("versions should be synced", async () => {
 
 	global.fetch = vi.fn((request) => lspHandler(request));
 
-	const lix0 = await openLixInMemory({
+	const lix0 = await openLix({
 		keyValues: [{ key: "lix_server_url", value: "http://mock.com" }],
 	});
 
@@ -40,7 +40,7 @@ test.skip("versions should be synced", async () => {
 	);
 
 	// create a second client
-	const lix1 = await openLixInMemory({
+	const lix1 = await openLix({
 		blob: await toBlob({ lix: lix0 }),
 		keyValues: [{ key: "lix_sync", value: "true" }],
 	});
@@ -137,7 +137,7 @@ test.skip("switching synced versions should work", async () => {
 	// @ts-expect-error - eases debugging
 	global.executeSync = executeSync;
 
-	const lix0 = await openLixInMemory({
+	const lix0 = await openLix({
 		keyValues: [{ key: "lix_sync", value: "true" }],
 	});
 	// @ts-expect-error - eases debugging
@@ -169,7 +169,7 @@ test.skip("switching synced versions should work", async () => {
 		.execute();
 
 	// create a second client
-	const lix1 = await openLixInMemory({
+	const lix1 = await openLix({
 		blob: await toBlob({ lix: lix0 }),
 		keyValues: [{ key: "lix_sync", value: "true" }],
 	});
@@ -251,7 +251,7 @@ test.skip("doesnt sync if lix_sync is not true", async () => {
 	const lspHandler = await createServerProtocolHandler({ environment });
 	global.fetch = vi.fn((request) => lspHandler(request));
 
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const lixId = await lix.db
 		.selectFrom("key_value")

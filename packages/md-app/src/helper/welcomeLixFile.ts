@@ -1,7 +1,7 @@
 import {
 	Lix,
 	newLixFile,
-	openLixInMemory,
+	openLix,
 	toBlob,
 	createCheckpoint,
 	createThread,
@@ -63,7 +63,7 @@ export async function withFlashtypeAccount<T>(
 
 export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
 	if (!lix) {
-		lix = await openLixInMemory({
+		lix = await openLix({
 			blob: await newLixFile(),
 			providePlugins: [txtPlugin],
 		});

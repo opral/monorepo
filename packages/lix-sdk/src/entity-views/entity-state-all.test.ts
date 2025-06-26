@@ -1,5 +1,5 @@
 import { test, expect, describe } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createEntityStateAllView } from "./entity-state-all.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
@@ -18,7 +18,7 @@ describe("createEntityAllViewIfNotExists", () => {
 	} as const;
 
 	test("should throw error if schema has no primary key", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		const invalidSchema: LixSchemaDefinition = {
 			"x-lix-key": "invalid_schema",
@@ -41,7 +41,7 @@ describe("createEntityAllViewIfNotExists", () => {
 	});
 
 	test("should create view with correct columns (including lixcol_version_id)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateAllView({
 			lix,
@@ -84,7 +84,7 @@ describe("createEntityAllViewIfNotExists", () => {
 	});
 
 	test("should create CRUD triggers for _all view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateAllView({
 			lix,
@@ -135,7 +135,7 @@ describe("createEntityAllViewIfNotExists", () => {
 	});
 
 	test("should handle explicit version_id in _all view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateAllView({
 			lix,
@@ -186,7 +186,7 @@ describe("createEntityAllViewIfNotExists", () => {
 	});
 
 	test("should handle default values in _all view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		let defaultIdCalled = false;
 		let defaultValueCalled = false;
@@ -239,7 +239,7 @@ describe("createEntityAllViewIfNotExists", () => {
 	});
 
 	test("should use schema key + _all as default view name", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateAllView({
 			lix,
@@ -270,7 +270,7 @@ describe("createEntityAllViewIfNotExists", () => {
 	});
 
 	test("should handle cross-version operations", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateAllView({
 			lix,

@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { MarkdownNodeSchemaV1, plugin } from "./index.js";
 
 test("detects changes when inserting markdown file", async () => {
 	// Initialize Lix with the markdown plugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [plugin],
 	});
 
@@ -99,7 +99,7 @@ Another paragraph here.`;
 
 test("programatically mutating entities should be reflected in the file", async () => {
 	// Initialize Lix with the markdown plugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [plugin],
 	});
 

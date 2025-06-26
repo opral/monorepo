@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { plugin } from "./index.js";
 
 test("detects changes when modifying a text document", async () => {
 	// Initialize Lix with the text plugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [plugin],
 	});
 

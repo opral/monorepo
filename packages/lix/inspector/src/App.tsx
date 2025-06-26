@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLix } from "./hooks/use-lix.ts";
-import { openLixInMemory, toBlob } from "@lix-js/sdk";
+import { openLix, toBlob } from "@lix-js/sdk";
 import { useContext } from "react";
 import { Context } from "./context";
 import {
@@ -243,7 +243,7 @@ export default function App(args: { show: boolean }) {
       if (!file) return;
 
       const buffer = await file.arrayBuffer();
-      const newLix = await openLixInMemory({ blob: new Blob([buffer]) });
+      const newLix = await openLix({ blob: new Blob([buffer]) });
       setLix(newLix);
     };
 

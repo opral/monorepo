@@ -1,5 +1,5 @@
 import { test, expect, describe } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
@@ -18,7 +18,7 @@ test("select, insert, update, delete entity", async () => {
 		},
 	};
 
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("stored_schema")
@@ -109,7 +109,7 @@ test("select, insert, update, delete entity", async () => {
 });
 
 test("validates the schema on insert", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -146,7 +146,7 @@ test("validates the schema on insert", async () => {
 });
 
 test("validates the schema on update", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -214,7 +214,7 @@ test("validates the schema on update", async () => {
 });
 
 test("state is separated by version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await createVersion({ lix, id: "version_a" });
 	await createVersion({ lix, id: "version_b" });
@@ -349,7 +349,7 @@ test("state is separated by version", async () => {
 });
 
 test("created_at and updated_at timestamps are computed correctly", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -431,7 +431,7 @@ test("created_at and updated_at timestamps are computed correctly", async () => 
 });
 
 test("created_at and updated_at are version specific", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await createVersion({ lix, id: "version_a" });
 	await createVersion({ lix, id: "version_b" });
@@ -557,7 +557,7 @@ test("created_at and updated_at are version specific", async () => {
 });
 
 test("state appears in both versions when they share the same change set", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const versionA = await createVersion({ lix, id: "version_a" });
 	// Insert state into version A
@@ -618,7 +618,7 @@ test("state appears in both versions when they share the same change set", async
 });
 
 test("state diverges when versions have common ancestor but different changes", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create base version and add initial state
 	const baseVersion = await createVersion({ lix, id: "base_version" });
@@ -728,7 +728,7 @@ test("state diverges when versions have common ancestor but different changes", 
 
 // Write-through cache behavior tests
 test("write-through cache: insert operations populate cache immediately", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -784,7 +784,7 @@ test("write-through cache: insert operations populate cache immediately", async 
 });
 
 test("write-through cache: update operations update cache immediately", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -850,7 +850,7 @@ test("write-through cache: update operations update cache immediately", async ()
 });
 
 test("delete operations remove entries from underlying data", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -901,7 +901,7 @@ test("delete operations remove entries from underlying data", async () => {
 });
 
 test("change.created_at and state timestamps are consistent", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -960,7 +960,7 @@ test("change.created_at and state timestamps are consistent", async () => {
 });
 
 test("state and state_all views expose change_id for blame and diff functionality", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -1086,7 +1086,7 @@ test("state and state_all views expose change_id for blame and diff functionalit
 test.todo(
 	"state view should work and re-populate the cache after cache is fully (!) cleared",
 	async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Insert a key-value pair
 		await lix.db
@@ -1177,7 +1177,7 @@ test.todo(
 );
 
 test("delete operations are validated for foreign key constraints", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Define parent schema (referenced entity)
 	const parentSchema: LixSchemaDefinition = {
@@ -1301,7 +1301,7 @@ describe.each([
 	"($scenario) inheritance should work - child version should see entities from parent version",
 	({ clearCache }) => {
 		test("child version inherits entities from parent version", async () => {
-			const lix = await openLixInMemory({});
+			const lix = await openLix({});
 
 			// Insert an entity into global version
 			await lix.db
@@ -1358,7 +1358,7 @@ describe.each([
 		test.todo(
 			"inherited entities should reflect changes in parent",
 			async () => {
-				const lix = await openLixInMemory({});
+				const lix = await openLix({});
 
 				// Get the main version
 				const mainVersion = await lix.db
@@ -1480,7 +1480,7 @@ describe.skip.each([
 	"($scenario) updating an inherited entity in child version should create a copy-on-write entity",
 	() => {
 		test("child version inherits then overrides with own entity", async () => {
-			const lix = await openLixInMemory({});
+			const lix = await openLix({});
 
 			// Insert an entity into global version
 			await lix.db
@@ -1631,7 +1631,7 @@ describe.each([
 					},
 				};
 
-				const lix = await openLixInMemory({});
+				const lix = await openLix({});
 
 				const activeVersion = await lix.db
 					.selectFrom("active_version")
@@ -1750,7 +1750,7 @@ describe.each([
 test.todo(
 	"deleting without filtering for the version_id deletes the entity from all versions",
 	async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Insert an entity into global version
 		await lix.db
@@ -1822,7 +1822,7 @@ test.todo(
 test.todo(
 	"INSERT OR IGNORE into state virtual table should not throw validation errors for duplicates or update the row",
 	async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// First, insert a record successfully
 		await lix.db

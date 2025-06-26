@@ -1,4 +1,4 @@
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { openLix } from "../../lix/open-lix.js";
 import type { Lix } from "../../lix/open-lix.js";
 import type { LixServerProtocolHandlerRoute } from "../create-server-protocol-handler.js";
 
@@ -8,7 +8,7 @@ export const route: LixServerProtocolHandlerRoute = async (context) => {
 	let lix: Lix;
 
 	try {
-		lix = await openLixInMemory({
+		lix = await openLix({
 			blob,
 			// turn off sync for server
 			keyValues: [{ key: "lix_sync", value: "false" }],

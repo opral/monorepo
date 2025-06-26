@@ -1,12 +1,12 @@
 import { test, expect } from "vitest";
 import { createLsaInMemoryEnvironment } from "./create-in-memory-environment.js";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { openLix } from "../../lix/open-lix.js";
 import { toBlob } from "../../lix/to-blob.js";
 
 test.skip("opening a lix works", async () => {
 	const environment = createLsaInMemoryEnvironment();
 
-	const mockLix = await openLixInMemory({});
+	const mockLix = await openLix({});
 
 	const { value: lixId } = (await mockLix.db
 		.selectFrom("key_value")
@@ -53,7 +53,7 @@ test.skip("opening a lix works", async () => {
 test.todo("it handles concurrent connections", async () => {
 	const environment = createLsaInMemoryEnvironment();
 
-	const mockLix = await openLixInMemory({});
+	const mockLix = await openLix({});
 
 	const { value: lixId } = (await mockLix.db
 		.selectFrom("key_value")

@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
 import { switchVersion } from "./switch-version.js";
 
 test("switching versiones should update the active_version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")

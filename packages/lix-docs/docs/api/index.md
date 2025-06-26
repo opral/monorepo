@@ -53,7 +53,7 @@ interface Lix {
 Here's a complete example of using the Lix API:
 
 ```typescript
-import { newLixFile, openLixInMemory, handleFileInsert, createChangeSet, toBlob } from "@lix-js/sdk";
+import { newLixFile, openLix, handleFileInsert, createChangeSet, toBlob } from "@lix-js/sdk";
 import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 
 async function workWithLix() {
@@ -61,7 +61,7 @@ async function workWithLix() {
   const lixFile = await newLixFile();
   
   // Open it with the JSON plugin
-  const lix = await openLixInMemory({
+  const lix = await openLix({
     blob: lixFile,
     providePlugins: [jsonPlugin]
   });

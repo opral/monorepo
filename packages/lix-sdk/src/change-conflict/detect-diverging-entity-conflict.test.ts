@@ -3,7 +3,7 @@
 
 import { expect, test } from "vitest";
 import type { Change } from "../database/schema.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import {
 	detectDivergingEntityConflict,
 	LIX_DIVERGING_ENTITY_CONFLICT_KEY,
@@ -11,7 +11,7 @@ import {
 import type { DetectedConflict } from "../plugin/lix-plugin.js";
 
 test.skip("it should detect a diverging entity conflict", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockChanges = [
 		{
@@ -69,7 +69,7 @@ test.skip("it should detect a diverging entity conflict", async () => {
 });
 
 test.skip("it should return a conflict if no common ancestor is found (two clients created different entities without being aware of it (aka distributed system))", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockChanges = [
 		{
@@ -119,7 +119,7 @@ test.skip("it should return a conflict if no common ancestor is found (two clien
 });
 
 test.skip("it should return undefined if one of either change is the lowest common ancestor", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockChanges = [
 		{
@@ -165,7 +165,7 @@ test.skip("it should return undefined if one of either change is the lowest comm
 });
 
 test.skip("it should detect a diverging entity conflict with multiple divering entity changes", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockChanges = [
 		{

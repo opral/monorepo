@@ -33,7 +33,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import IconMerge from "@/components/icons/IconMerge.tsx";
-import { Lix, openLixInMemory, toBlob } from "@lix-js/sdk";
+import { Lix, openLix, toBlob } from "@lix-js/sdk";
 import { posthog } from "posthog-js";
 import CheckpointComponent from "@/components/CheckpointComponent.tsx";
 import IntermediateCheckpointComponent from "@/components/IntermediateCheckpointComponent.tsx";
@@ -112,7 +112,7 @@ export default function Page() {
 			if (file) {
 				const fileContent = await file.arrayBuffer();
 				const opfsRoot = await navigator.storage.getDirectory();
-				const lix = await openLixInMemory({
+				const lix = await openLix({
 					blob: new Blob([fileContent]),
 				});
 				const lixId = await lix.db

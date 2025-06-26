@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 
 describe("change_set", () => {
 	test("insert, update, delete on the change set view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		await lix.db
 			.insertInto("change_set")
@@ -98,7 +98,7 @@ describe("change_set", () => {
 	});
 
 	test("should allow inserting with explicit ID", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 		const explicitId = "my-custom-changeset-id";
 
 		await expect(
@@ -116,7 +116,7 @@ describe("change_set", () => {
 
 describe("change_set_element", () => {
 	test("insert, delete on the change set element view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create change set
 		await lix.db.insertInto("change_set").values({ id: "cs0" }).execute();
@@ -197,7 +197,7 @@ describe("change_set_element", () => {
 	});
 
 	test("should enforce primary key constraint (change_set_id, change_id)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create change set
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
@@ -260,7 +260,7 @@ describe("change_set_element", () => {
 	});
 
 	test("should enforce foreign key constraint on change_set_id", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create change (but NOT change set)
 		await lix.db
@@ -308,7 +308,7 @@ describe("change_set_element", () => {
 	});
 
 	test("should enforce foreign key constraint on change_id", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create change set (but NOT change)
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
@@ -345,7 +345,7 @@ describe("change_set_element", () => {
 	});
 
 	test("should enforce UNIQUE constraint on (change_set_id, entity_id, schema_key, file_id)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create change set
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
@@ -421,7 +421,7 @@ describe("change_set_element", () => {
 
 describe("change_set_edge", () => {
 	test("insert, delete on the change set edge view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create the referenced change sets first
 		await lix.db
@@ -469,7 +469,7 @@ describe("change_set_edge", () => {
 	});
 
 	test("should enforce primary key constraint (parent_id, child_id)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create the referenced change sets first
 		await lix.db
@@ -499,7 +499,7 @@ describe("change_set_edge", () => {
 	});
 
 	test("should enforce foreign key constraint on parent_id", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create only child change set (not parent)
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
@@ -517,7 +517,7 @@ describe("change_set_edge", () => {
 	});
 
 	test("should enforce foreign key constraint on child_id", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create only parent change set (not child)
 		await lix.db.insertInto("change_set").values({ id: "cs0" }).execute();
@@ -535,7 +535,7 @@ describe("change_set_edge", () => {
 	});
 
 	test("should prevent self-referencing edges", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create a change set
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
@@ -553,7 +553,7 @@ describe("change_set_edge", () => {
 	});
 
 	test("change_set_edge view supports updates", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create change sets
 		await lix.db
@@ -581,7 +581,7 @@ describe("change_set_edge", () => {
 // the unique constraint must be (change_set_id, entity_id, schema_key, file_id)
 // to allow cross change set references
 test("should allow the same change to be in multiple change sets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create change sets
 	await lix.db
@@ -659,7 +659,7 @@ test("should allow the same change to be in multiple change sets", async () => {
 
 describe("change_set_label", () => {
 	test("insert, update, delete on the change set label view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create the referenced change set and label first
 		await lix.db.insertInto("change_set").values({ id: "cs0" }).execute();
@@ -758,7 +758,7 @@ describe("change_set_label", () => {
 	});
 
 	test("should enforce primary key constraint (change_set_id, label_id)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create the referenced change set and label
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
@@ -790,7 +790,7 @@ describe("change_set_label", () => {
 	});
 
 	test("should enforce foreign key constraint on change_set_id", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create only label (not change set)
 		await lix.db
@@ -811,7 +811,7 @@ describe("change_set_label", () => {
 	});
 
 	test("should enforce foreign key constraint on label_id", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create only change set (not label)
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
@@ -831,7 +831,7 @@ describe("change_set_label", () => {
 
 describe("change_set_thread", () => {
 	test("insert and delete on the change_set_thread view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create change sets and threads to test with
 		await lix.db
@@ -913,7 +913,7 @@ describe("change_set_thread", () => {
 	});
 
 	test("change_set_thread view enforces foreign key constraints", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Try to insert with non-existent change_set_id
 		await expect(
@@ -950,7 +950,7 @@ describe("change_set_thread", () => {
 	});
 
 	test("change_set_thread view supports updates", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create change sets and threads
 		await lix.db

@@ -24,9 +24,9 @@
     
     <script type="module" async>
       import { initLixInspector } from "/src/index.tsx";
-      import { openLixInMemory } from "@lix-js/sdk";
+      import { openLix } from "@lix-js/sdk";
 
-      const lix = await openLixInMemory({});
+      const lix = await openLix({});
 
       initLixInspector({ lix });
     </script>

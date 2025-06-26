@@ -10,7 +10,7 @@ import {
 } from "@shoelace-style/shoelace/dist/react";
 import { Lix, toBlob } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { useNavigate } from "react-router-dom";
 import { posthog } from "posthog-js";
@@ -67,7 +67,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 		if (file) {
 			const fileContent = await file.arrayBuffer();
 			const opfsRoot = await navigator.storage.getDirectory();
-			const lix = await openLixInMemory({
+			const lix = await openLix({
 				blob: new Blob([fileContent]),
 				providePlugins: [csvPlugin],
 			});

@@ -318,7 +318,7 @@ test("it should detect updated properties on nested levels", async () => {
 });
 
 // test("it should detect updates", async () => {
-// 	const lix = await openLixInMemory({});
+// 	const lix = await openLix({});
 
 // 	const before = new TextEncoder().encode(
 // 		JSON.stringify({
@@ -349,7 +349,7 @@ test("it should detect updated properties on nested levels", async () => {
 // });
 
 // test("it should detect a deletion of a property", async () => {
-// 	const lix = await openLixInMemory({});
+// 	const lix = await openLix({});
 // 	const before = new TextEncoder().encode(
 // 		JSON.stringify({
 // 			Name: "Anna",
@@ -374,7 +374,7 @@ test("it should detect updated properties on nested levels", async () => {
 // });
 
 // test("it should return [] if both before and after are empty", async () => {
-// 	const lix = await openLixInMemory({});
+// 	const lix = await openLix({});
 
 // 	const before = new TextEncoder().encode(JSON.stringify({}));
 // 	const after = before;
@@ -389,7 +389,7 @@ test("it should detect updated properties on nested levels", async () => {
 // });
 
 // test("it should detect multiple changes", async () => {
-// 	const lix = await openLixInMemory({});
+// 	const lix = await openLix({});
 
 // 	const before = new TextEncoder().encode(
 // 		JSON.stringify({

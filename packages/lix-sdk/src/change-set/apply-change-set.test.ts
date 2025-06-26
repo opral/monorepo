@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import {
@@ -11,7 +11,7 @@ import type { KeyValue } from "../key-value/schema.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 
 test("it applies lix own entity changes", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockKeyValue = {
 		key: "test",
@@ -65,7 +65,7 @@ test("it applies lix own entity changes", async () => {
 });
 
 test("it applies the changes associated with the change set", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -116,7 +116,7 @@ test("it applies the changes associated with the change set", async () => {
 });
 
 test("throws an error if plugin does not exist", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert a file
 	await lix.db
@@ -178,7 +178,7 @@ test("throws an error if plugin does not exist", async () => {
 test("throws an error if plugin does not support applying changes", async () => {
 	// Mock plugin without applyChanges function
 	const mockPlugin = { key: "plugin-no-apply" };
-	const lix = await openLixInMemory({ providePlugins: [mockPlugin] });
+	const lix = await openLix({ providePlugins: [mockPlugin] });
 
 	// Insert a file
 	await lix.db
@@ -239,7 +239,7 @@ test("throws an error if plugin does not support applying changes", async () => 
 
 // very slow https://github.com/opral/lix-sdk/issues/311
 test("file deletion bypasses plugin and removes file from state", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -318,7 +318,7 @@ test("file deletion bypasses plugin and removes file from state", async () => {
 
 test("it should delete entities but not files when applying entity deletion changes", async () => {
 	// Create a Lix instance with the mockJsonPlugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 

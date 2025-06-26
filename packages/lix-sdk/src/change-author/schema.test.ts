@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createAccount } from "../account/create-account.js";
 
 describe("change_author", () => {
 	test("insert, update, delete on the change_author view", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create account
 		const account = await createAccount({
@@ -73,7 +73,7 @@ describe("change_author", () => {
 	});
 
 	test("should enforce primary key constraint (change_id, account_id)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create account
 		const account = await createAccount({
@@ -116,7 +116,7 @@ describe("change_author", () => {
 	});
 
 	test("should enforce foreign key constraint on change_id", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create account (but NOT change)
 		const account = await createAccount({
@@ -139,7 +139,7 @@ describe("change_author", () => {
 	});
 
 	test("should enforce foreign key constraint on account_id", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		await lix.db
 			.insertInto("change")
@@ -169,7 +169,7 @@ describe("change_author", () => {
 	});
 
 	test("should allow multiple authors for the same change", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create accounts
 		const author1 = await createAccount({
@@ -231,7 +231,7 @@ describe("change_author", () => {
 	});
 
 	test("should allow same author for multiple changes", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create account
 		const author = await createAccount({

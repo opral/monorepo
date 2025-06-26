@@ -21,7 +21,7 @@ For working with JSON files and objects:
 ```typescript
 import { jsonPlugin } from '@lix-js/plugin-json';
 
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [jsonPlugin],
 });
@@ -79,7 +79,7 @@ For working with tabular data in CSV format:
 ```typescript
 import { csvPlugin } from '@lix-js/plugin-csv';
 
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [csvPlugin],
 });
@@ -130,7 +130,7 @@ For working with Markdown documents:
 ```typescript
 import { markdownPlugin } from '@lix-js/plugin-md';
 
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [markdownPlugin],
 });
@@ -192,7 +192,7 @@ import { jsonPlugin } from '@lix-js/plugin-json';
 import { csvPlugin } from '@lix-js/plugin-csv';
 import { markdownPlugin } from '@lix-js/plugin-md';
 
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [jsonPlugin, csvPlugin, markdownPlugin],
 });
@@ -341,7 +341,7 @@ Register your custom plugin the same way as built-in plugins:
 ```typescript
 import { notesPlugin } from './notes-plugin';
 
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [notesPlugin],
 });

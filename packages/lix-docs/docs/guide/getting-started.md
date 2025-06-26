@@ -21,20 +21,20 @@ npm install @lix-js/plugin-json
 The first step is to create a new Lix file and open it:
 
 ```javascript
-import { newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { newLixFile, openLix } from "@lix-js/sdk";
 import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 
 // Create a new empty Lix file
 const lixFile = await newLixFile();
 
 // Open the Lix file in memory
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [jsonPlugin],
 });
 ```
 
-*See implementation: [newLixFile](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/lix/new-lix.ts), [openLixInMemory](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/lix/open-lix-in-memory.ts)*
+*See implementation: [newLixFile](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/lix/new-lix.ts), [openLix](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/lix/open-lix-in-memory.ts)*
 
 ## Inserting Files
 

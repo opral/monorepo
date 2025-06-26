@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { executeSync } from "./execute-sync.js";
 import type { Lix } from "../lix/open-lix.js";
 
 test("executeSync returns raw SQL results (JSON columns as strings)", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("key_value")
@@ -23,7 +23,7 @@ test("executeSync returns raw SQL results (JSON columns as strings)", async () =
 });
 
 test("handles simple joins with raw SQL results", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Simple join test without complex setup
 	const query = lix.db
@@ -38,7 +38,7 @@ test("handles simple joins with raw SQL results", async () => {
 });
 
 test("manual JSON parsing with executeSync", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Test with key_value table which has JSON columns
 	await lix.db
@@ -70,7 +70,7 @@ test("manual JSON parsing with executeSync", async () => {
 // important for function like `createQuery` which are used in triggers and need to be sync
 // but are also used by users where the API is async
 test("using executeSync with a 'fake async' function should work", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	async function fakeAsyncQuery(lix: Lix): Promise<any> {
 		await lix.db
@@ -92,7 +92,7 @@ test("using executeSync with a 'fake async' function should work", async () => {
 });
 
 test("it works with kysely transactions", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// transaction that fails
 	try {

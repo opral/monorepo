@@ -13,7 +13,7 @@ You can access the database through the `db` property of your Lix instance:
 ```typescript
 // Create and open a Lix instance
 const lixFile = await newLixFile();
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [jsonPlugin],
 });

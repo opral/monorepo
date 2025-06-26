@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { changeSetElementInAncestryOf } from "./change-set-element-in-ancestry-of.js";
 
 test("returns all elements from a single change set and its ancestors", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert required schema entry
 	await lix.db
@@ -80,7 +80,7 @@ test("returns all elements from a single change set and its ancestors", async ()
 });
 
 test("respects depth limit when provided for a single target", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert required schema entry
 	await lix.db
@@ -155,7 +155,7 @@ test("respects depth limit when provided for a single target", async () => {
 });
 
 test("returns combined elements from multiple divergent change set ancestries", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert required schema entry
 	await lix.db
@@ -255,7 +255,7 @@ test("returns combined elements from multiple divergent change set ancestries", 
 });
 
 test("respects depth limit with multiple divergent targets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert required schema entry
 	await lix.db

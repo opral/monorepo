@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 
 test("inserts, updates, deletes are handled", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("key_value")
@@ -62,7 +62,7 @@ test("inserts, updates, deletes are handled", async () => {
 });
 
 test("arbitrary json is allowed", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const kvs = [
 		{ key: "key0", value: { foo: "bar" } },
@@ -89,7 +89,7 @@ test("arbitrary json is allowed", async () => {
 });
 
 test.todo("view should show changes across versions", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// creating a new version
 	const versionA = await createVersion({ lix, id: "versionA" });

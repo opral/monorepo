@@ -1,5 +1,5 @@
 import { test, expect, describe } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createEntityStateView } from "./entity-state.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
@@ -31,7 +31,7 @@ describe("createEntityViewIfNotExists", () => {
 	} as const;
 
 	test("should throw error if schema has no primary key", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		const invalidSchema: LixSchemaDefinition = {
 			"x-lix-key": "invalid_schema",
@@ -54,7 +54,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should create view with correct columns (no lixcol_version_id)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -97,7 +97,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should create CRUD triggers", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -148,7 +148,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle insert operations without defaults", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -203,7 +203,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle update operations", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -261,7 +261,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle delete operations", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -306,7 +306,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle composite primary keys", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -372,7 +372,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle default values", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		let defaultIdCalled = false;
 		let defaultValueCalled = false;
@@ -449,7 +449,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should use dynamic file_id when not hardcoded", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -483,7 +483,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should use schema key as default view name", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,

@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
 import { createThread } from "./create-thread.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { fromPlainText } from "@opral/zettel-ast";
 
 test("creates a thread with sequential comments where only the first has null parent_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const comments = [
 		{ body: fromPlainText("First comment") },
@@ -22,7 +22,7 @@ test("creates a thread with sequential comments where only the first has null pa
 });
 
 test("defaults to global version if no versionId is provided", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const comments = [{ body: fromPlainText("Global comment") }];
 

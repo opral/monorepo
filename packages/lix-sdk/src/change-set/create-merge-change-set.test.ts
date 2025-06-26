@@ -1,11 +1,11 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createMergeChangeSet } from "./create-merge-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("it should merge non-conflicting changes", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("stored_schema")
@@ -108,7 +108,7 @@ test("it should merge non-conflicting changes", async () => {
 });
 
 test("should handle conflicting elements with source winning (until conflicts are modeled in lix)", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("stored_schema")

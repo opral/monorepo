@@ -1,5 +1,9 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import {
+	type SqliteWasmDatabase,
+	createInMemoryDatabase,
+	importDatabase,
+} from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
@@ -9,6 +13,7 @@ import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewState } from "../entity-views/types.js";
 import type { Account } from "../account/schema.js";
+import { newLixFile } from "./new-lix.js";
 
 export type Lix = {
 	/**
@@ -30,15 +35,26 @@ export type Lix = {
 };
 
 /**
- * Opens a Lix instance using an existing SQLite database.
+ * Opens a Lix instance.
  *
- * The database may originate from a file, IndexedDB or an
- * in‑memory instance. During opening all required schemas are
- * applied, optional plugins are initialised and provided key‑values
- * are written to the database.
+ * Creates an in-memory database by default. If a blob is provided,
+ * the database is initialized with that data. If a database is provided,
+ * uses that database directly.
+ *
+ * TODO: Add storage abstraction to support:
+ *   - OPFS storage (persistent in browser)
+ *   - Node.js filesystem storage
+ *   - Custom storage adapters
  *
  * @example
  * ```ts
+ * // In-memory (default)
+ * const lix = await openLix({})
+ *
+ * // From existing data
+ * const lix = await openLix({ blob: existingLixFile })
+ *
+ * // With custom database (current approach)
  * const db = await createInMemoryDatabase({ readOnly: false })
  * const lix = await openLix({ database: db })
  * ```
@@ -54,7 +70,21 @@ export async function openLix(args: {
 	 *   const lix = await openLix({ account })
 	 */
 	account?: Account;
-	database: SqliteWasmDatabase;
+	/**
+	 * Lix file data to initialize the database with.
+	 */
+	blob?: Blob;
+	/**
+	 * Storage adapter for persisting lix data.
+	 *
+	 * @default InMemory
+	 *
+	 * TODO: Implement storage abstraction to support:
+	 *   - OPFS storage (persistent in browser)
+	 *   - Node.js filesystem storage
+	 *   - Custom storage adapters
+	 */
+	storage?: any;
 	/**
 	 * Usecase are lix apps that define their own file format,
 	 * like inlang (unlike a markdown, csv, or json plugin).
@@ -66,7 +96,7 @@ export async function openLix(args: {
 	 *     file format sdk. the file is not portable
 	 *
 	 * @example
-	 *   const lix = await openLixInMemory({ providePlugins: [myPlugin] })
+	 *   const lix = await openLix({ providePlugins: [myPlugin] })
 	 */
 	providePlugins?: LixPlugin[];
 	/**
@@ -77,7 +107,22 @@ export async function openLix(args: {
 	 */
 	keyValues?: NewState<KeyValue>[];
 }): Promise<Lix> {
-	const db = initDb({ sqlite: args.database });
+	if (args.storage) {
+		throw new Error("Unimplemented, please open an issue on github");
+	}
+
+	// TODO: Replace this logic with storage abstraction
+	// Currently handles in-memory database creation, but should delegate to storage adapters
+	const database = await createInMemoryDatabase({ readOnly: false });
+
+	// Initialize with blob data if provided, otherwise create new lix
+	const blob = args.blob ?? (await newLixFile());
+	importDatabase({
+		db: database,
+		content: new Uint8Array(await blob.arrayBuffer()),
+	});
+
+	const db = initDb({ sqlite: database });
 
 	if (args.keyValues && args.keyValues.length > 0) {
 		for (const keyValue of args.keyValues) {
@@ -132,7 +177,7 @@ export async function openLix(args: {
 
 	const lix = {
 		db,
-		sqlite: args.database,
+		sqlite: database,
 		plugin,
 	};
 

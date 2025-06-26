@@ -40,7 +40,7 @@ import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { saveLixName } from "@/helper/renameLix";
-import { nanoid, openLixInMemory, toBlob } from "@lix-js/sdk";
+import { nanoid, openLix, toBlob } from "@lix-js/sdk";
 
 import {
 	SidebarContent,
@@ -379,7 +379,7 @@ export function LixSidebar() {
 				try {
 					const fileContent = await file.arrayBuffer();
 					const opfsRoot = await navigator.storage.getDirectory();
-					const lix = await openLixInMemory({
+					const lix = await openLix({
 						blob: new Blob([fileContent]),
 					});
 					const lixId = await lix.db
