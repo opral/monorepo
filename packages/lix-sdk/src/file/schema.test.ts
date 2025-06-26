@@ -676,12 +676,7 @@ test("file data updates create new change_id", async () => {
 		.where("schema_key", "=", "mock_json_property")
 		.where("entity_id", "=", "content")
 		.orderBy("created_at", "desc")
-		.select([
-			"id",
-			"entity_id",
-			"schema_key",
-			"snapshot_content",
-		])
+		.select(["id", "entity_id", "schema_key", "snapshot_content"])
 		.executeTakeFirst();
 
 	expect(contentChangeRecord).toBeDefined();

@@ -67,12 +67,12 @@ test("insert, update, delete on the label view", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		
+
 		.where("schema_key", "=", "lix_label")
 		.where("entity_id", "=", "label1")
 		.orderBy("change.created_at", "asc")
 		.selectAll("change")
-		
+
 		.execute();
 
 	expect(changes.map((change) => change.snapshot_content)).toMatchObject([

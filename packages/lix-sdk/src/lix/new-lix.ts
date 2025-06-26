@@ -6,10 +6,7 @@ import { initDb } from "../database/init-db.js";
 import { closeLix } from "./close-lix.js";
 import { v7 as uuid_v7 } from "uuid";
 import { nanoid } from "../database/nano-id.js";
-import {
-	LixVersionSchema,
-	type Version,
-} from "../version/schema.js";
+import { LixVersionSchema, type Version } from "../version/schema.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
@@ -80,8 +77,10 @@ export async function newLixFile(): Promise<Blob> {
 	}
 
 	// The initial version ID will be set by createBootstrapChanges
-	const initialVersionId = bootstrapChanges.find(c => c.schema_key === "lix_version" && c.snapshot_content?.name === "main")?.entity_id;
-	
+	const initialVersionId = bootstrapChanges.find(
+		(c) => c.schema_key === "lix_version" && c.snapshot_content?.name === "main"
+	)?.entity_id;
+
 	sqlite.exec(`
 		INSERT INTO active_version (version_id)
 		SELECT '${initialVersionId}'

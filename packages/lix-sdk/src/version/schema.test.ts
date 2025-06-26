@@ -99,12 +99,12 @@ test("insert, update, delete on the version view", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		
+
 		.where("schema_key", "=", "lix_version")
 		.where("entity_id", "in", ["version0", "version1"])
 		.orderBy("change.created_at", "asc")
 		.selectAll("change")
-		
+
 		.execute();
 
 	expect(changes.map((change) => change.snapshot_content)).toMatchObject([
@@ -224,7 +224,7 @@ test("applying the schema should set the initial active version to 'main'", asyn
 		.selectAll()
 		.executeTakeFirst();
 	expect(activeVersion).toBeDefined();
-	
+
 	// Verify the active version points to the main version
 	const mainVersion = await lix.db
 		.selectFrom("version")

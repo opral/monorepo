@@ -732,11 +732,11 @@ describe("change_set_label", () => {
 		// Verify changes were recorded
 		const changes = await lix.db
 			.selectFrom("change")
-			
+
 			.where("schema_key", "=", "lix_change_set_label")
 			.orderBy("change.created_at", "asc")
 			.selectAll("change")
-			
+
 			.execute();
 
 		expect(changes.map((change) => change.snapshot_content)).toMatchObject([
@@ -892,12 +892,12 @@ describe("change_set_thread", () => {
 		// Verify the underlying state table changes
 		const changes = await lix.db
 			.selectFrom("change")
-			
+
 			.where("schema_key", "=", "lix_change_set_thread")
 			.where("entity_id", "in", ["cs0::t0", "cs1::t1"])
 			.orderBy("change.created_at", "asc")
 			.selectAll("change")
-			
+
 			.execute();
 
 		expect(changes).toHaveLength(3); // 2 inserts, 1 delete

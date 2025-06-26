@@ -266,7 +266,7 @@ test.skip("it should detect conflicts", async () => {
 		.where("change.file_id", "=", "null")
 		.where("change.schema_key", "=", "lix_key_value_table")
 		.where("version_id", "=", version0.id)
-		
+
 		.executeTakeFirstOrThrow();
 
 	// the version change pointer of the client points to the server value
@@ -291,7 +291,7 @@ test.skip("it should detect conflicts", async () => {
 			"version_change_conflict.change_conflict_id"
 		)
 		.where("version_change_conflict.version_id", "=", version0.id)
-		
+
 		.execute();
 
 	// the conflicting value of the client should be in the conflict

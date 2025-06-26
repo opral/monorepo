@@ -41,7 +41,7 @@ test("inserts, updates, deletes are handled", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		
+
 		.where("schema_key", "=", "lix_key_value")
 		.where("change.entity_id", "=", "key0")
 		.selectAll()
