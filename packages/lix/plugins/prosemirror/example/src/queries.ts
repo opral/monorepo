@@ -34,15 +34,12 @@ export async function selectProsemirrorDocument() {
 export async function selectChanges() {
 	const result = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.innerJoin("file", "change.file_id", "file.id")
 		.where("file.id", "=", prosemirrorFile.id)
 		.selectAll("change")
-		.select("snapshot.content")
 		.orderBy("change.created_at", "desc")
 		.execute();
 
-	// console.log({ result });
 	return result;
 }
 
