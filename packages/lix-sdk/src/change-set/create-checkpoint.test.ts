@@ -280,7 +280,7 @@ test(
 			.selectFrom("change")
 			.where("entity_id", "=", "test-key")
 			.where("schema_key", "=", "lix_key_value")
-			.where("snapshot_id", "=", "no-content")
+			.where("snapshot_content", "is", null)
 			.selectAll()
 			.execute();
 
@@ -305,7 +305,7 @@ test(
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.entity_id", "=", "test-key")
 			.where("change.schema_key", "=", "lix_key_value")
-			.where("change.snapshot_id", "=", "no-content")
+			.where("change.snapshot_content", "is", null)
 			.selectAll("change")
 			.execute();
 
@@ -356,7 +356,7 @@ test(
 		const deletionChanges = await lix.db
 			.selectFrom("change")
 			.where("file_id", "=", "file-to-delete")
-			.where("snapshot_id", "=", "no-content")
+			.where("snapshot_content", "is", null)
 			.selectAll()
 			.execute();
 
@@ -378,7 +378,7 @@ test(
 			)
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.file_id", "=", "file-to-delete")
-			.where("change.snapshot_id", "=", "no-content")
+			.where("change.snapshot_content", "is", null)
 			.selectAll("change")
 			.execute();
 

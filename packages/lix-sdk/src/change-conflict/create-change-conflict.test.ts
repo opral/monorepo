@@ -19,7 +19,7 @@ test.skip("conflicts should be de-duplicated based on the change_conflict.key an
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -27,7 +27,7 @@ test.skip("conflicts should be de-duplicated based on the change_conflict.key an
 				file_id: "mock",
 				entity_id: "value1",
 				schema_key: "mock",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.execute();
@@ -85,7 +85,7 @@ test.skip("if a conflict contains the same changes for a given key and version, 
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -93,7 +93,7 @@ test.skip("if a conflict contains the same changes for a given key and version, 
 				file_id: "mock",
 				entity_id: "value1",
 				schema_key: "mock",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -101,7 +101,7 @@ test.skip("if a conflict contains the same changes for a given key and version, 
 				file_id: "mock",
 				entity_id: "value1",
 				schema_key: "mock",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.execute();

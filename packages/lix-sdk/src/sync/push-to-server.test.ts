@@ -64,7 +64,6 @@ test.skip("push rows of multiple tables to server successfully", async () => {
 
 	const keyValueChangesOnServer = await openOnServer.lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_key_value_table")
 		.where("entity_id", "=", "mock-key")
 		.selectAll()
@@ -72,16 +71,15 @@ test.skip("push rows of multiple tables to server successfully", async () => {
 
 	const accountsChangesOnServer = await openOnServer.lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_account_table")
 		.where("entity_id", "=", "account0")
 		.selectAll()
 		.execute();
 
-	expect(accountsChangesOnServer.map((c) => c.content)).toEqual([
+	expect(accountsChangesOnServer.map((c) => c.snapshot_content)).toEqual([
 		{ id: "account0", name: "some account" } satisfies Account,
 	]);
-	expect(keyValueChangesOnServer.map((c) => c.content)).toEqual([
+	expect(keyValueChangesOnServer.map((c) => c.snapshot_content)).toEqual([
 		expect.objectContaining({
 			key: "mock-key",
 			value: "mock-value",
@@ -209,12 +207,11 @@ test.skip("push-pull-push with two clients", async () => {
 
 	const accountsChangesOnServer = await openOnServer.lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_account_table")
 		.selectAll()
 		.execute();
 
-	expect(accountsChangesOnServer.map((c) => c.content)).toEqual(
+	expect(accountsChangesOnServer.map((c) => c.snapshot_content)).toEqual(
 		expect.arrayContaining([
 			{ id: "account0", name: "account from client 1" },
 			{ id: "account1", name: "account from client 2" },
@@ -229,7 +226,6 @@ test.skip("push-pull-push with two clients", async () => {
 
 	const accountChangesOnClient1 = await client1.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_account_table")
 		.selectAll()
 		.execute();
@@ -245,7 +241,6 @@ test.skip("push-pull-push with two clients", async () => {
 
 	const accountChangesOnClient2 = await client2.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_account_table")
 		.selectAll()
 		.execute();
@@ -254,12 +249,11 @@ test.skip("push-pull-push with two clients", async () => {
 
 	const keyValueChangesOnServer = await openOnServer.lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("schema_key", "=", "lix_key_value_table")
 		.selectAll()
 		.execute();
 
-	expect(keyValueChangesOnServer.map((c) => c.content)).toEqual(
+	expect(keyValueChangesOnServer.map((c) => c.snapshot_content)).toEqual(
 		expect.arrayContaining([
 			expect.objectContaining({
 				key: "mock-key",
@@ -277,60 +271,60 @@ test.skip("push-pull-push with two clients", async () => {
 	);
 });
 
-test.skip("it should handle snapshots.content json binaries", async () => {
-	const lix = await openLixInMemory({});
+// test.skip("it should handle snapshots.content json binaries", async () => {
+// 	const lix = await openLixInMemory({});
 
-	const { value: id } = await lix.db
-		.selectFrom("key_value")
-		.where("key", "=", "lix_id")
-		.selectAll()
-		.executeTakeFirstOrThrow();
+// 	const { value: id } = await lix.db
+// 		.selectFrom("key_value")
+// 		.where("key", "=", "lix_id")
+// 		.selectAll()
+// 		.executeTakeFirstOrThrow();
 
-	const environment = createLspInMemoryEnvironment();
-	const lspHandler = await createServerProtocolHandler({ environment });
+// 	const environment = createLspInMemoryEnvironment();
+// 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	global.fetch = vi.fn((request) => lspHandler(request));
+// 	global.fetch = vi.fn((request) => lspHandler(request));
 
-	// initialize the lix on the server
-	await lspHandler(
-		new Request("http://localhost:3000/lsp/new-v1", {
-			method: "POST",
-			body: await toBlob({ lix }),
-		})
-	);
+// 	// initialize the lix on the server
+// 	await lspHandler(
+// 		new Request("http://localhost:3000/lsp/new-v1", {
+// 			method: "POST",
+// 			body: await toBlob({ lix }),
+// 		})
+// 	);
 
-	const mockSnapshot = {
-		id: "snapshot0",
-		content: {
-			location: "Berlin",
-		},
-	};
+// 	const mockSnapshot = {
+// 		id: "snapshot0",
+// 		content: {
+// 			location: "Berlin",
+// 		},
+// 	};
 
-	// insert a snapshot
-	await lix.db
-		.insertInto("snapshot")
-		.values({
-			content: mockSnapshot.content,
-		})
-		.execute();
+// 	// insert a snapshot
+// 	await lix.db
+// 		.insertInto("snapshot")
+// 		.values({
+// 			content: mockSnapshot.content,
+// 		})
+// 		.execute();
 
-	await pushToServer({
-		id,
-		lix,
-		serverUrl: "http://localhost:3000",
-		targetVectorClock: [],
-	});
+// 	await pushToServer({
+// 		id,
+// 		lix,
+// 		serverUrl: "http://localhost:3000",
+// 		targetVectorClock: [],
+// 	});
 
-	const openOnServer = await environment.openLix({ id });
+// 	const openOnServer = await environment.openLix({ id });
 
-	const snapshot = await openOnServer.lix.db
-		.selectFrom("snapshot")
-		.where("id", "=", mockSnapshot.id)
-		.selectAll()
-		.executeTakeFirst();
+// 	const snapshot = await openOnServer.lix.db
+// 		.selectFrom("snapshot")
+// 		.where("id", "=", mockSnapshot.id)
+// 		.selectAll()
+// 		.executeTakeFirst();
 
-	expect(snapshot).toMatchObject(mockSnapshot);
-});
+// 	expect(snapshot).toMatchObject(mockSnapshot);
+// });
 
 test.todo("it should handle binary values", async () => {
 	const lixBlob = await newLixFile();

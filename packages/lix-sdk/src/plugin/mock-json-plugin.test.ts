@@ -39,11 +39,9 @@ test("it handles insert changes", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("file_id", "=", "mock")
 		.where("plugin_key", "=", mockJsonPlugin.key)
-		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.selectAll()
 		.execute();
 
 	const { fileData: applied } = mockJsonPlugin.applyChanges!({
@@ -93,11 +91,9 @@ test("it handles update changes", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("file_id", "=", "mock")
 		.where("plugin_key", "=", mockJsonPlugin.key)
-		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.selectAll()
 		.execute();
 
 	const { fileData: applied } = mockJsonPlugin.applyChanges!({
@@ -147,10 +143,8 @@ test("it handles delete changes", async () => {
 	const changes = await lix.db
 		.selectFrom("change")
 		.where("file_id", "=", "mock")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.selectAll("change")
 		.where("plugin_key", "=", mockJsonPlugin.key)
-		.select("snapshot.content as snapshot_content")
+		.selectAll()
 		.execute();
 
 	const { fileData: applied } = await mockJsonPlugin.applyChanges!({
@@ -206,9 +200,7 @@ test("it handles nested properties and arrays", async () => {
 		.selectFrom("change")
 		.where("file_id", "=", "mock")
 		.where("plugin_key", "=", mockJsonPlugin.key)
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.selectAll("change")
-		.select("snapshot.content as snapshot_content")
+		.selectAll()
 		.execute();
 
 	const { fileData: applied } = await mockJsonPlugin.applyChanges!({

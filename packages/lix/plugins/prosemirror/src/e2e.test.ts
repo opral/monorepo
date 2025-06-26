@@ -66,11 +66,10 @@ test("detects changes when inserting a prosemirror document", async () => {
 	// Get the changes from the database
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.innerJoin("file", "change.file_id", "file.id")
 		.where("file.path", "=", "/prosemirror.json")
 		.where("plugin_key", "=", plugin.key)
-		.select(["change.entity_id", "snapshot.content"])
+		.select(["change.entity_id", "change.snapshot_content"])
 		.execute();
 
 	// Verify that the correct changes were detected
@@ -83,8 +82,8 @@ test("detects changes when inserting a prosemirror document", async () => {
 
 	// At least one p1 change should have the modified content
 	const hasModifiedP1 = p1Changes.some((change) => {
-		if (change?.content) {
-			const content = change.content as any;
+		if (change?.snapshot_content) {
+			const content = change.snapshot_content as any;
 			return content.content?.[0]?.text === "Modified paragraph";
 		}
 		return false;
@@ -95,8 +94,8 @@ test("detects changes when inserting a prosemirror document", async () => {
 	// Check for new paragraph p2
 	const p2Change = changes.find((c) => c.entity_id === "p2");
 	expect(p2Change).toBeDefined();
-	if (p2Change?.content) {
-		const content = p2Change.content as any;
+	if (p2Change?.snapshot_content) {
+		const content = p2Change.snapshot_content as any;
 		expect(content.content?.[0]?.text).toBe("New paragraph");
 	}
 });

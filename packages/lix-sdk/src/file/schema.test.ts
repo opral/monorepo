@@ -90,9 +90,8 @@ test("insert, update, delete on the file view", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("change.file_id", "in", ["file0", "file1"])
-		.select(["entity_id", "snapshot_id", "snapshot.content", "schema_key"])
+		.where("file_id", "in", ["file0", "file1"])
+		.select(["entity_id", "snapshot_content", "schema_key"])
 		.execute();
 
 	expect(changes).toEqual(
@@ -101,45 +100,39 @@ test("insert, update, delete on the file view", async () => {
 			expect.objectContaining({
 				schema_key: "lix_file",
 				entity_id: "file0",
-				snapshot_id: expect.any(String),
-				content: expect.any(Object),
+				snapshot_content: expect.any(Object),
 			}),
 			expect.objectContaining({
 				schema_key: "mock_json_property",
 				entity_id: "prop0",
-				content: {
+				snapshot_content: {
 					value: "file0-value0",
 				},
-				snapshot_id: expect.any(String),
 			}),
 			// update
 			expect.objectContaining({
 				schema_key: "lix_file",
 				entity_id: "file0",
-				snapshot_id: expect.any(String),
-				content: expect.any(Object),
+				snapshot_content: expect.any(Object),
 			}),
 			expect.objectContaining({
 				schema_key: "mock_json_property",
 				entity_id: "prop0",
-				content: {
+				snapshot_content: {
 					value: "file0-value1",
 				},
-				snapshot_id: expect.any(String),
 			}),
 			// delete (file‑level)
 			expect.objectContaining({
 				schema_key: "lix_file",
 				entity_id: "file0",
-				snapshot_id: "no-content",
-				content: null,
+				snapshot_content: null,
 			}),
 			// delete (all plugin entities that existed in the file)
 			expect.objectContaining({
 				schema_key: "mock_json_property",
 				entity_id: "prop0",
-				snapshot_id: "no-content",
-				content: null,
+				snapshot_content: null,
 			}),
 		])
 	);
@@ -568,10 +561,9 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	// Get the actual file entity change record to verify the change_id is correct
 	const fileChangeRecord = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("entity_id", "=", "change-id-test-file")
 		.where("schema_key", "=", "lix_file")
-		.select(["change.id", "content as snapshot_content"])
+		.select(["id", "snapshot_content"])
 		.executeTakeFirstOrThrow();
 
 	// Verify that the change_id in the views matches the actual file change.id
@@ -613,11 +605,10 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	// Get the new file entity change record
 	const newFileChangeRecord = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("entity_id", "=", "change-id-test-file")
 		.where("schema_key", "=", "lix_file")
-		.orderBy("change.created_at", "desc")
-		.select(["change.id", "content as snapshot_content"])
+		.orderBy("created_at", "desc")
+		.select(["id", "snapshot_content"])
 		.executeTakeFirstOrThrow();
 
 	// Verify the new change_id matches the latest file change
@@ -681,17 +672,11 @@ test("file data updates create new change_id", async () => {
 	// When file data changes, it creates changes for the plugin-managed entities within the file
 	const contentChangeRecord = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
-		.where("change.file_id", "=", "data-change-test")
+		.where("file_id", "=", "data-change-test")
 		.where("schema_key", "=", "mock_json_property")
 		.where("entity_id", "=", "content")
-		.orderBy("change.created_at", "desc")
-		.select([
-			"change.id",
-			"entity_id",
-			"schema_key",
-			"content as snapshot_content",
-		])
+		.orderBy("created_at", "desc")
+		.select(["id", "entity_id", "schema_key", "snapshot_content"])
 		.executeTakeFirst();
 
 	expect(contentChangeRecord).toBeDefined();

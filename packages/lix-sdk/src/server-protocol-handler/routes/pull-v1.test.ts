@@ -2,7 +2,6 @@ import { test, expect } from "vitest";
 import type * as LixServerProtocol from "../../../../lix/server-protocol-schema/dist/schema.js";
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
-import { mockChange } from "../../change/mock-change.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
 import { toBlob } from "../../lix/to-blob.js";
 
@@ -19,8 +18,24 @@ test.skip("it should pull rows successfully", async () => {
 		.executeTakeFirstOrThrow();
 
 	const mockChanges = [
-		mockChange({ id: "change0" }),
-		mockChange({ id: "change1" }),
+		{
+			id: "change0",
+			entity_id: "entity0",
+			schema_key: "test_schema",
+			schema_version: "1.0",
+			file_id: "file0",
+			plugin_key: "test_plugin",
+			snapshot_content: { value: "test0" },
+		},
+		{
+			id: "change1",
+			entity_id: "entity1",
+			schema_key: "test_schema",
+			schema_version: "1.0",
+			file_id: "file1",
+			plugin_key: "test_plugin",
+			snapshot_content: { value: "test1" },
+		},
 	];
 
 	await lix.db.insertInto("change").values(mockChanges).execute();
@@ -75,11 +90,11 @@ test.skip("it should specifically be able to handle snapshots which use json bin
 		},
 	};
 
-	// Add data to multiple tables
-	await lix.db
-		.insertInto("snapshot")
-		.values([{ content: mockSnapshot.content }])
-		.execute();
+	// // Add data to multiple tables
+	// await lix.db
+	// 	.insertInto("snapshot")
+	// 	.values([{ content: mockSnapshot.content }])
+	// 	.execute();
 
 	const environment = createLspInMemoryEnvironment();
 	await environment.setLix({ id, blob: await toBlob({ lix }) });

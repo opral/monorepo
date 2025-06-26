@@ -175,7 +175,7 @@ test.skip("it should auto detect diverging entity conflicts", async () => {
 				schema_key: "mock",
 				file_id: "file0",
 				entity_id: "entity0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -183,7 +183,7 @@ test.skip("it should auto detect diverging entity conflicts", async () => {
 				schema_key: "mock",
 				file_id: "file0",
 				entity_id: "entity0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -191,7 +191,7 @@ test.skip("it should auto detect diverging entity conflicts", async () => {
 				file_id: "file0",
 				entity_id: "entity0",
 				schema_key: "mock",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()

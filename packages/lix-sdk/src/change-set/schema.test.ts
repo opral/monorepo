@@ -70,15 +70,13 @@ describe("change_set", () => {
 
 		const changes = await lix.db
 			.selectFrom("change")
-			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 			.where("schema_key", "=", "lix_change_set")
 			.where("entity_id", "in", ["cs0", "cs1"])
 			.orderBy("change.created_at", "asc")
-			.selectAll("change")
-			.select("snapshot.content")
+			.selectAll()
 			.execute();
 
-		expect(changes.map((change) => change.content)).toMatchObject([
+		expect(changes.map((change) => change.snapshot_content)).toMatchObject([
 			// insert
 			{
 				id: "cs0",
@@ -123,15 +121,6 @@ describe("change_set_element", () => {
 		// Create change set
 		await lix.db.insertInto("change_set").values({ id: "cs0" }).execute();
 
-		// Create snapshot
-		await lix.db
-			.insertInto("snapshot")
-			.values({
-				id: "s0",
-				content: { id: "e0" },
-			})
-			.execute();
-
 		// Create change
 		await lix.db
 			.insertInto("change")
@@ -141,7 +130,7 @@ describe("change_set_element", () => {
 				schema_key: "mock_schema",
 				file_id: "f0",
 				plugin_key: "test_plugin",
-				snapshot_id: "s0",
+				snapshot_content: { id: "e0" },
 				schema_version: "1.0",
 			})
 			.execute();
@@ -213,12 +202,7 @@ describe("change_set_element", () => {
 		// Create change set
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
 
-		// Create snapshot and change
-		await lix.db
-			.insertInto("snapshot")
-			.values({ id: "s1", content: { id: "e1" } })
-			.execute();
-
+		// Create change
 		await lix.db
 			.insertInto("change")
 			.values({
@@ -227,7 +211,7 @@ describe("change_set_element", () => {
 				schema_key: "mock_schema",
 				file_id: "f1",
 				plugin_key: "test_plugin",
-				snapshot_id: "s1",
+				snapshot_content: { id: "e1" },
 				schema_version: "1.0",
 			})
 			.execute();
@@ -278,12 +262,7 @@ describe("change_set_element", () => {
 	test("should enforce foreign key constraint on change_set_id", async () => {
 		const lix = await openLixInMemory({});
 
-		// Create snapshot and change (but NOT change set)
-		await lix.db
-			.insertInto("snapshot")
-			.values({ id: "s1", content: { id: "e1" } })
-			.execute();
-
+		// Create change (but NOT change set)
 		await lix.db
 			.insertInto("change")
 			.values({
@@ -292,7 +271,7 @@ describe("change_set_element", () => {
 				schema_key: "mock_schema",
 				file_id: "f1",
 				plugin_key: "test_plugin",
-				snapshot_id: "s1",
+				snapshot_content: { id: "e1" },
 				schema_version: "1.0",
 			})
 			.execute();
@@ -371,15 +350,7 @@ describe("change_set_element", () => {
 		// Create change set
 		await lix.db.insertInto("change_set").values({ id: "cs1" }).execute();
 
-		// Create snapshots and changes for same entity
-		await lix.db
-			.insertInto("snapshot")
-			.values([
-				{ id: "s1", content: { id: "ent1" } },
-				{ id: "s2", content: { id: "ent1" } },
-			])
-			.execute();
-
+		// Create changes for same entity
 		await lix.db
 			.insertInto("change")
 			.values([
@@ -389,7 +360,7 @@ describe("change_set_element", () => {
 					schema_key: "sk1",
 					file_id: "f1",
 					plugin_key: "test_plugin",
-					snapshot_id: "s1",
+					snapshot_content: { id: "ent1" },
 					schema_version: "1.0",
 				},
 				{
@@ -398,7 +369,7 @@ describe("change_set_element", () => {
 					schema_key: "sk1", // Same schema
 					file_id: "f1", // Same file
 					plugin_key: "test_plugin",
-					snapshot_id: "s2",
+					snapshot_content: { id: "ent1" },
 					schema_version: "1.0",
 				},
 			])
@@ -618,12 +589,7 @@ test("should allow the same change to be in multiple change sets", async () => {
 		.values([{ id: "cs1" }, { id: "cs2" }])
 		.execute();
 
-	// Create snapshot and change
-	await lix.db
-		.insertInto("snapshot")
-		.values({ id: "s1", content: { id: "e1" } })
-		.execute();
-
+	// Create change
 	await lix.db
 		.insertInto("change")
 		.values({
@@ -632,7 +598,7 @@ test("should allow the same change to be in multiple change sets", async () => {
 			schema_key: "mock_schema",
 			file_id: "f1",
 			plugin_key: "test_plugin",
-			snapshot_id: "s1",
+			snapshot_content: { id: "e1" },
 			schema_version: "1.0",
 		})
 		.execute();
@@ -766,14 +732,14 @@ describe("change_set_label", () => {
 		// Verify changes were recorded
 		const changes = await lix.db
 			.selectFrom("change")
-			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+
 			.where("schema_key", "=", "lix_change_set_label")
 			.orderBy("change.created_at", "asc")
 			.selectAll("change")
-			.select("snapshot.content")
+
 			.execute();
 
-		expect(changes.map((change) => change.content)).toMatchObject([
+		expect(changes.map((change) => change.snapshot_content)).toMatchObject([
 			// insert
 			{
 				change_set_id: "cs0",
@@ -926,24 +892,24 @@ describe("change_set_thread", () => {
 		// Verify the underlying state table changes
 		const changes = await lix.db
 			.selectFrom("change")
-			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+
 			.where("schema_key", "=", "lix_change_set_thread")
 			.where("entity_id", "in", ["cs0::t0", "cs1::t1"])
 			.orderBy("change.created_at", "asc")
 			.selectAll("change")
-			.select("snapshot.content")
+
 			.execute();
 
 		expect(changes).toHaveLength(3); // 2 inserts, 1 delete
-		expect(changes[0]?.content).toMatchObject({
+		expect(changes[0]?.snapshot_content).toMatchObject({
 			change_set_id: "cs0",
 			thread_id: "t0",
 		});
-		expect(changes[1]?.content).toMatchObject({
+		expect(changes[1]?.snapshot_content).toMatchObject({
 			change_set_id: "cs1",
 			thread_id: "t1",
 		});
-		expect(changes[2]?.content).toBe(null); // delete
+		expect(changes[2]?.snapshot_content).toBe(null); // delete
 	});
 
 	test("change_set_thread view enforces foreign key constraints", async () => {

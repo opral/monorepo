@@ -12,19 +12,9 @@ describe("change_author", () => {
 			name: "Test Author",
 		});
 
-		// Create snapshot
-		await lix.db
-			.insertInto("snapshot")
-			.values({
-				id: "s0",
-				content: { id: "e0" },
-			})
-			.execute();
-
 		// Create change
 		await lix.db
-			// @ts-expect-error - internal_change is not a public table
-			.insertInto("internal_change")
+			.insertInto("change")
 			.values({
 				id: "c0",
 				entity_id: "e0",
@@ -32,7 +22,7 @@ describe("change_author", () => {
 				schema_version: "1",
 				file_id: "f0",
 				plugin_key: "test_plugin",
-				snapshot_id: "s0",
+				snapshot_content: { id: "e0" },
 			})
 			.execute();
 
@@ -91,15 +81,8 @@ describe("change_author", () => {
 			name: "Test Author",
 		});
 
-		// Create snapshot and change
 		await lix.db
-			.insertInto("snapshot")
-			.values({ id: "s1", content: { id: "e1" } })
-			.execute();
-
-		await lix.db
-			// @ts-expect-error - internal_change is not a public table
-			.insertInto("internal_change")
+			.insertInto("change")
 			.values({
 				id: "c1",
 				entity_id: "e1",
@@ -107,7 +90,7 @@ describe("change_author", () => {
 				schema_version: "1",
 				file_id: "f1",
 				plugin_key: "test_plugin",
-				snapshot_id: "s1",
+				snapshot_content: { id: "e1" },
 			})
 			.execute();
 
@@ -158,15 +141,8 @@ describe("change_author", () => {
 	test("should enforce foreign key constraint on account_id", async () => {
 		const lix = await openLixInMemory({});
 
-		// Create snapshot and change (but NOT account)
 		await lix.db
-			.insertInto("snapshot")
-			.values({ id: "s1", content: { id: "e1" } })
-			.execute();
-
-		await lix.db
-			// @ts-expect-error - internal_change is not a public table
-			.insertInto("internal_change")
+			.insertInto("change")
 			.values({
 				id: "c1",
 				entity_id: "e1",
@@ -174,7 +150,7 @@ describe("change_author", () => {
 				schema_version: "1",
 				file_id: "f1",
 				plugin_key: "test_plugin",
-				snapshot_id: "s1",
+				snapshot_content: { id: "e1" },
 			})
 			.execute();
 
@@ -206,15 +182,8 @@ describe("change_author", () => {
 			name: "Author Two",
 		});
 
-		// Create snapshot and change
 		await lix.db
-			.insertInto("snapshot")
-			.values({ id: "s1", content: { id: "e1" } })
-			.execute();
-
-		await lix.db
-			// @ts-expect-error - internal_change is not a public table
-			.insertInto("internal_change")
+			.insertInto("change")
 			.values({
 				id: "c1",
 				entity_id: "e1",
@@ -222,7 +191,7 @@ describe("change_author", () => {
 				schema_version: "1",
 				file_id: "f1",
 				plugin_key: "test_plugin",
-				snapshot_id: "s1",
+				snapshot_content: { id: "e1" },
 			})
 			.execute();
 
@@ -270,18 +239,8 @@ describe("change_author", () => {
 			name: "Prolific Author",
 		});
 
-		// Create snapshots and changes
 		await lix.db
-			.insertInto("snapshot")
-			.values([
-				{ id: "s1", content: { id: "e1" } },
-				{ id: "s2", content: { id: "e2" } },
-			])
-			.execute();
-
-		await lix.db
-			// @ts-expect-error - internal_change is not a public table
-			.insertInto("internal_change")
+			.insertInto("change")
 			.values([
 				{
 					id: "c1",
@@ -290,7 +249,7 @@ describe("change_author", () => {
 					schema_version: "1",
 					file_id: "f1",
 					plugin_key: "test_plugin",
-					snapshot_id: "s1",
+					snapshot_content: { id: "e1" },
 				},
 				{
 					id: "c2",
@@ -299,7 +258,7 @@ describe("change_author", () => {
 					schema_version: "1",
 					file_id: "f2",
 					plugin_key: "test_plugin",
-					snapshot_id: "s2",
+					snapshot_content: { id: "e2" },
 				},
 			])
 			.execute();

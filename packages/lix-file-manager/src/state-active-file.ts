@@ -110,7 +110,6 @@ export const intermediateChangesAtom = atom<
 	// Get changes that are in the working change set
 	const queryIntermediateLeafChanges = lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -126,7 +125,7 @@ export const intermediateChangesAtom = atom<
 			"change.plugin_key",
 			"change.schema_key",
 			"change.created_at",
-			sql`json(snapshot.content)`.as("snapshot_content_after"),
+			"change.snapshot_content as snapshot_content_after",
 		]);
 
 	if (activeFile) {
@@ -147,7 +146,6 @@ export const intermediateChangesAtom = atom<
 				if (latestCheckpointChangeSetId) {
 					let snapshotBeforeQuery = lix.db
 						.selectFrom("change")
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 						.innerJoin(
 							"change_set_element",
 							"change_set_element.change_id",
@@ -160,7 +158,7 @@ export const intermediateChangesAtom = atom<
 						)
 						.where("change.entity_id", "=", change.entity_id)
 						.where("change.schema_key", "=", change.schema_key)
-						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+						.select("change.snapshot_content as snapshot_content_before")
 						.orderBy("change.created_at", "desc")
 						.limit(1);
 
@@ -227,7 +225,6 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 			eb
 				.selectFrom("change")
 				.where("change.schema_key", "=", "lix_change_set_label_table")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
 					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
@@ -242,7 +239,6 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 				.selectFrom("change_author")
 				.innerJoin("change", "change.id", "change_author.change_id")
 				.innerJoin("account", "account.id", "change_author.account_id")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where("change.schema_key", "=", "lix_change_set_label_table")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
@@ -281,7 +277,6 @@ export const getChangeDiffs = async (
 
 	let checkpointChangesQuery = lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -313,7 +308,6 @@ export const getChangeDiffs = async (
 				if (changeSetBeforeId) {
 					let snapshotBeforeQuery = lix.db
 						.selectFrom("change")
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 						.innerJoin(
 							"change_set_element",
 							"change_set_element.change_id",

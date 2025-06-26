@@ -9,11 +9,7 @@ import {
 	LixVersionSchema,
 	type ActiveVersionTable,
 } from "../version/schema.js";
-import {
-	LixSnapshotSchema,
-	type InternalSnapshotTable,
-	type Snapshot,
-} from "../snapshot/schema.js";
+import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
@@ -38,7 +34,6 @@ import {
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
-import type { ToKysely } from "../entity-views/types.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -63,7 +58,6 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
-	snapshot: LixSnapshotSchema,
 	account: LixAccountSchema,
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
@@ -77,8 +71,6 @@ export type LixDatabaseSchema = {
 	state_history: StateHistoryView;
 	// account
 	active_account: ActiveAccountTable;
-
-	snapshot: ToKysely<Snapshot>;
 
 	change: ChangeView;
 

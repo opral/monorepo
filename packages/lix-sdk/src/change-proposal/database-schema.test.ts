@@ -17,7 +17,7 @@ test.skip("change_proposal.id should default to uuid_v7", async () => {
 			entity_id: "entity1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -59,7 +59,7 @@ test.skip("change proposals are change controlled", async () => {
 			entity_id: "entity1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -107,7 +107,7 @@ test.skip("source change set id is nullable", async () => {
 			entity_id: "entity1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -148,7 +148,7 @@ test.skip("target change set id is not nullable", async () => {
 			entity_id: "entity1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

@@ -29,7 +29,7 @@ const ViewsWithJsonColumns = {
 	state: ["snapshot_content"],
 	state_all: ["snapshot_content"],
 	state_history: ["snapshot_content"],
-	snapshot: ["content"],
+	change: ["snapshot_content"],
 	...(() => {
 		const result: Record<string, string[]> = {};
 		for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {

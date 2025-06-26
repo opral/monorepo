@@ -30,11 +30,10 @@ Another paragraph here.`;
 	// Get the detected changes
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.innerJoin("file", "change.file_id", "file.id")
 		.where("file.path", "=", "/document.md")
 		.where("plugin_key", "=", plugin.key)
-		.select(["change.entity_id", "snapshot.content as snapshot_content"])
+		.select(["change.entity_id", "change.snapshot_content"])
 		.execute();
 
 	// Verify that changes were detected for each markdown block

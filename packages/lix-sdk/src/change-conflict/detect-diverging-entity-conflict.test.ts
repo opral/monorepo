@@ -21,7 +21,7 @@ test.skip("it should detect a diverging entity conflict", async () => {
 			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value1",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 		{
 			id: "change1",
@@ -30,7 +30,7 @@ test.skip("it should detect a diverging entity conflict", async () => {
 			file_id: "mock",
 			entity_id: "value1",
 			schema_key: "mock",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 		{
 			id: "change2",
@@ -39,7 +39,7 @@ test.skip("it should detect a diverging entity conflict", async () => {
 			file_id: "mock",
 			entity_id: "value1",
 			schema_key: "mock",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 	] as const satisfies Change[];
 
@@ -79,7 +79,7 @@ test.skip("it should return a conflict if no common ancestor is found (two clien
 			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value1",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 		{
 			id: "change1",
@@ -88,7 +88,7 @@ test.skip("it should return a conflict if no common ancestor is found (two clien
 			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value1",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 		{
 			id: "change2",
@@ -97,7 +97,7 @@ test.skip("it should return a conflict if no common ancestor is found (two clien
 			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value2",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 	] as const satisfies Change[];
 
@@ -129,7 +129,7 @@ test.skip("it should return undefined if one of either change is the lowest comm
 			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value1",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 		{
 			id: "change1",
@@ -138,7 +138,7 @@ test.skip("it should return undefined if one of either change is the lowest comm
 			file_id: "mock",
 			entity_id: "value1",
 			schema_key: "mock",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 	] as const satisfies Change[];
 
@@ -175,7 +175,7 @@ test.skip("it should detect a diverging entity conflict with multiple divering e
 			schema_key: "mock",
 			file_id: "mock",
 			entity_id: "value1",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 		{
 			id: "change1",
@@ -184,7 +184,7 @@ test.skip("it should detect a diverging entity conflict with multiple divering e
 			file_id: "mock",
 			entity_id: "value1",
 			schema_key: "mock",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 		{
 			id: "change2",
@@ -193,7 +193,7 @@ test.skip("it should detect a diverging entity conflict with multiple divering e
 			file_id: "mock",
 			entity_id: "value1",
 			schema_key: "mock",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 		{
 			id: "change3",
@@ -202,7 +202,7 @@ test.skip("it should detect a diverging entity conflict with multiple divering e
 			file_id: "mock",
 			entity_id: "value1",
 			schema_key: "mock",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		},
 	] as const satisfies Change[];
 

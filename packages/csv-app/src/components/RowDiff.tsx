@@ -1,10 +1,9 @@
-import { Change, Snapshot } from "@lix-js/sdk";
+import { Change } from "@lix-js/sdk";
 
 export default function RowDiff(props: {
 	uniqueColumnValue: string;
 	changes: (Change & {
-		content: Snapshot["content"];
-		parent: Change & { content: Snapshot["content"] };
+		parent: Change;
 	})[];
 }) {
 	return (
@@ -20,8 +19,8 @@ export default function RowDiff(props: {
 				</div>
 				{props.changes.map((change) => {
 					const column = change.entity_id.split("|")[2];
-					const value = change.content?.text;
-					const parentValue = change.parent?.content?.text;
+					const value = change.snapshot_content?.text;
+					const parentValue = change.parent?.snapshot_content?.text;
 
 					return (
 						<div

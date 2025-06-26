@@ -1,7 +1,6 @@
 import { test, expect } from "vitest";
 import { openLixInMemory } from "../lix/open-lix-in-memory.js";
 import { createChangeSet } from "./create-change-set.js";
-import type { Change } from "../change/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("creating a change set should succeed", async () => {
@@ -22,29 +21,30 @@ test("creating a change set should succeed", async () => {
 		})
 		.execute();
 
-	const mockChanges = (await lix.db
-		// @ts-expect-error - internal change table
-		.insertInto("internal_change")
+	const mockChanges = await lix.db
+		.insertInto("change")
 		.values([
 			{
+				id: "change0",
 				schema_key: "mock-schema",
 				schema_version: "1.0",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
+				id: "change1",
 				schema_key: "mock-schema",
 				schema_version: "1.0",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
-		.execute()) as Change[];
+		.execute();
 
 	const changeSet = await createChangeSet({
 		lix: lix,

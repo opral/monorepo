@@ -6,7 +6,6 @@ import type * as LixServerProtocol from "../../../../lix/server-protocol-schema/
 import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
 import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
 import type { Change } from "../../database/schema.js";
-import { mockChange } from "../../change/mock-change.js";
 import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 import { pullFromServer } from "../../sync/pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
@@ -267,7 +266,7 @@ test.skip("it should detect conflicts", async () => {
 		.where("change.file_id", "=", "null")
 		.where("change.schema_key", "=", "lix_key_value_table")
 		.where("version_id", "=", version0.id)
-		.select("snapshot.content")
+
 		.executeTakeFirstOrThrow();
 
 	// the version change pointer of the client points to the server value
@@ -292,7 +291,7 @@ test.skip("it should detect conflicts", async () => {
 			"version_change_conflict.change_conflict_id"
 		)
 		.where("version_change_conflict.version_id", "=", version0.id)
-		.select("snapshot.content")
+
 		.execute();
 
 	// the conflicting value of the client should be in the conflict
