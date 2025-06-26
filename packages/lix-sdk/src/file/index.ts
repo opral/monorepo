@@ -1,1 +1,5 @@
-export { LixFileSchema, type LixFile } from "./schema.js";
+export {
+	LixFileDescriptorSchema,
+	type LixFileDescriptor,
+	type LixFile,
+} from "./schema.js";

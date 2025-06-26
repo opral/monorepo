@@ -1,6 +1,6 @@
 import { executeSync } from "../database/execute-sync.js";
 import type { LixFile } from "./schema.js";
-import { LixFileSchema } from "./schema.js";
+import { LixFileDescriptorSchema } from "./schema.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
@@ -32,7 +32,7 @@ export function handleFileInsert(args: {
 		lix: args.lix,
 		query: args.lix.db.insertInto("state_all").values({
 			entity_id: args.file.id,
-			schema_key: "lix_file",
+			schema_key: LixFileDescriptorSchema["x-lix-key"],
 			file_id: args.file.id,
 			plugin_key: "lix_own_entity",
 			snapshot_content: {
@@ -40,7 +40,7 @@ export function handleFileInsert(args: {
 				path: args.file.path,
 				metadata: args.file.metadata || null,
 			},
-			schema_version: LixFileSchema["x-lix-version"],
+			schema_version: LixFileDescriptorSchema["x-lix-version"],
 			version_id: args.versionId,
 		}),
 	});
@@ -180,7 +180,7 @@ export function handleFileUpdate(args: {
 				},
 			})
 			.where("entity_id", "=", args.file.id)
-			.where("schema_key", "=", "lix_file")
+			.where("schema_key", "=", "lix_file_descriptor")
 			.where("version_id", "=", args.versionId),
 	});
 

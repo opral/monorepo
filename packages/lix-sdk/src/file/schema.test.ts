@@ -98,7 +98,7 @@ test("insert, update, delete on the file view", async () => {
 		expect.arrayContaining([
 			// insert
 			expect.objectContaining({
-				schema_key: "lix_file",
+				schema_key: "lix_file_descriptor",
 				entity_id: "file0",
 				snapshot_content: expect.any(Object),
 			}),
@@ -111,7 +111,7 @@ test("insert, update, delete on the file view", async () => {
 			}),
 			// update
 			expect.objectContaining({
-				schema_key: "lix_file",
+				schema_key: "lix_file_descriptor",
 				entity_id: "file0",
 				snapshot_content: expect.any(Object),
 			}),
@@ -124,7 +124,7 @@ test("insert, update, delete on the file view", async () => {
 			}),
 			// delete (file‑level)
 			expect.objectContaining({
-				schema_key: "lix_file",
+				schema_key: "lix_file_descriptor",
 				entity_id: "file0",
 				snapshot_content: null,
 			}),
@@ -562,7 +562,7 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	const fileChangeRecord = await lix.db
 		.selectFrom("change")
 		.where("entity_id", "=", "change-id-test-file")
-		.where("schema_key", "=", "lix_file")
+		.where("schema_key", "=", "lix_file_descriptor")
 		.select(["id", "snapshot_content"])
 		.executeTakeFirstOrThrow();
 
@@ -606,7 +606,7 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	const newFileChangeRecord = await lix.db
 		.selectFrom("change")
 		.where("entity_id", "=", "change-id-test-file")
-		.where("schema_key", "=", "lix_file")
+		.where("schema_key", "=", "lix_file_descriptor")
 		.orderBy("created_at", "desc")
 		.select(["id", "snapshot_content"])
 		.executeTakeFirstOrThrow();
@@ -768,11 +768,11 @@ test("file metadata updates create new change_id", async () => {
 		.selectFrom("change")
 		.where("id", "=", updatedMetadataFile.lixcol_change_id)
 		.where("entity_id", "=", "metadata-change-test")
-		.where("schema_key", "=", "lix_file")
+		.where("schema_key", "=", "lix_file_descriptor")
 		.selectAll()
 		.executeTakeFirst();
 
 	expect(finalFileChangeRecord).toBeDefined();
 	expect(finalFileChangeRecord?.entity_id).toBe("metadata-change-test");
-	expect(finalFileChangeRecord?.schema_key).toBe("lix_file");
+	expect(finalFileChangeRecord?.schema_key).toBe("lix_file_descriptor");
 });

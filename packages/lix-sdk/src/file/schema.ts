@@ -120,7 +120,7 @@ export function applyFileDatabaseSchema(
 		updated_at AS lixcol_updated_at,
 		change_id AS lixcol_change_id
 	FROM state
-	WHERE schema_key = 'lix_file';
+	WHERE schema_key = 'lix_file_descriptor';
 
   CREATE VIEW IF NOT EXISTS file_all AS
 	SELECT
@@ -139,7 +139,7 @@ export function applyFileDatabaseSchema(
 		updated_at AS lixcol_updated_at,
 		change_id AS lixcol_change_id
 	FROM state_all
-	WHERE schema_key = 'lix_file';
+	WHERE schema_key = 'lix_file_descriptor';
 
 
   CREATE TRIGGER IF NOT EXISTS file_insert
@@ -173,12 +173,12 @@ export function applyFileDatabaseSchema(
       DELETE FROM state_all
       WHERE file_id = OLD.id
         AND version_id = (SELECT version_id FROM active_version)
-        AND schema_key != 'lix_file';
+        AND schema_key != 'lix_file_descriptor';
         
       -- Delete the file entity itself
       DELETE FROM state_all
       WHERE entity_id = OLD.id
-        AND schema_key = 'lix_file'
+        AND schema_key = 'lix_file_descriptor'
         AND version_id = (SELECT version_id FROM active_version);
   END;
 
@@ -213,12 +213,12 @@ export function applyFileDatabaseSchema(
       DELETE FROM state_all
       WHERE file_id = OLD.id
         AND version_id = OLD.lixcol_version_id
-        AND schema_key != 'lix_file';
+        AND schema_key != 'lix_file_descriptor';
         
       -- Delete the file entity itself
       DELETE FROM state_all
       WHERE entity_id = OLD.id
-        AND schema_key = 'lix_file'
+        AND schema_key = 'lix_file_descriptor'
         AND version_id = OLD.lixcol_version_id;
   END;
 
@@ -241,12 +241,12 @@ export function applyFileDatabaseSchema(
     change_set_id AS lixcol_change_set_id,
     depth AS lixcol_depth
   FROM state_history
-  WHERE schema_key = 'lix_file';
+  WHERE schema_key = 'lix_file_descriptor';
 `);
 }
 
-export const LixFileSchema = {
-	"x-lix-key": "lix_file",
+export const LixFileDescriptorSchema = {
+	"x-lix-key": "lix_file_descriptor",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
 	"x-lix-unique": [["path"]],
@@ -267,15 +267,26 @@ export const LixFileSchema = {
 	required: ["id", "path"],
 	additionalProperties: false,
 } as const;
-LixFileSchema satisfies LixSchemaDefinition;
+LixFileDescriptorSchema satisfies LixSchemaDefinition;
 
 /**
- * Pure business logic type inferred from the LixFileSchema.
+ * The file descriptor type representing the stored metadata for a file.
  *
- * Uses "Type" suffix to avoid collision with JavaScript's built-in File type,
- * while maintaining consistency with our naming pattern where schema-derived
- * types represent the pure business logic without database infrastructure columns.
+ * This contains the file's identity and metadata but not the actual file content.
+ * The file content (data) is materialized separately by aggregating entities from plugins.
  */
-export type LixFile = FromLixSchemaDefinition<typeof LixFileSchema> & {
+export type LixFileDescriptor = FromLixSchemaDefinition<
+	typeof LixFileDescriptorSchema
+>;
+
+/**
+ * Complete file type combining the descriptor with materialized data.
+ *
+ * Uses "Lix" prefix to avoid collision with JavaScript's built-in File type.
+ * This represents the full file as seen in views, combining:
+ * - LixFileDescriptor: stored metadata (id, path, metadata)
+ * - data: materialized file content from plugin entities
+ */
+export type LixFile = LixFileDescriptor & {
 	data: Uint8Array;
 };

@@ -19,7 +19,7 @@ import type {
 	InternalChangeInTransactionTable,
 } from "../state/schema.js";
 import type { StateHistoryView } from "../state-history/schema.js";
-import { LixFileSchema } from "../file/schema.js";
+import { LixFileDescriptorSchema } from "../file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
 import {
 	LixAccountSchema,
@@ -54,7 +54,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set_edge: LixChangeSetEdgeSchema,
 	change_set_label: LixChangeSetLabelSchema,
 	change_set_thread: LixChangeSetThreadSchema,
-	file: LixFileSchema,
+	file: LixFileDescriptorSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
@@ -90,7 +90,7 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
 	EntityViews<typeof LixChangeSetThreadSchema, "change_set_thread"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
-	EntityViews<typeof LixFileSchema, "file", { data: Uint8Array }> &
+	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
 	EntityViews<typeof LixLabelSchema, "label"> &
 	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
 	EntityViews<typeof LixLogSchema, "log"> &
