@@ -90,11 +90,11 @@ test.skip("it should specifically be able to handle snapshots which use json bin
 		},
 	};
 
-	// Add data to multiple tables
-	await lix.db
-		.insertInto("snapshot")
-		.values([{ content: mockSnapshot.content }])
-		.execute();
+	// // Add data to multiple tables
+	// await lix.db
+	// 	.insertInto("snapshot")
+	// 	.values([{ content: mockSnapshot.content }])
+	// 	.execute();
 
 	const environment = createLspInMemoryEnvironment();
 	await environment.setLix({ id, blob: await toBlob({ lix }) });

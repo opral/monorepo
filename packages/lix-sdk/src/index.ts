@@ -14,6 +14,5 @@ export * from "./query-filter/index.js";
 export * from "./schema-definition/index.js";
 export * from "./stored-schema/index.js";
 export * from "./server-protocol-handler/index.js";
-export * from "./snapshot/index.js";
 export * from "./thread/index.js";
 export * from "./version/index.js";

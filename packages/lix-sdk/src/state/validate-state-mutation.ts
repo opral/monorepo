@@ -1,9 +1,9 @@
 import { Ajv } from "ajv";
 import type { Lix } from "../lix/open-lix.js";
-import type { Snapshot } from "../snapshot/schema.js";
 import { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { executeSync } from "../database/execute-sync.js";
 import { sql } from "kysely";
+import type { Change } from "../change/schema.js";
 
 const ajv = new Ajv({
 	strict: true,
@@ -16,7 +16,7 @@ const validateLixSchema = ajv.compile(LixSchemaDefinition);
 export function validateStateMutation(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition | null;
-	snapshot_content: Snapshot["content"];
+	snapshot_content: Change["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
@@ -140,7 +140,7 @@ export function validateStateMutation(args: {
 function validatePrimaryKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Snapshot["content"];
+	snapshot_content: Change["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
@@ -201,7 +201,7 @@ function validatePrimaryKeyConstraints(args: {
 function validateUniqueConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Snapshot["content"];
+	snapshot_content: Change["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
@@ -286,7 +286,7 @@ function getValueByPath(obj: any, path: string): any {
 function validateForeignKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Snapshot["content"];
+	snapshot_content: Change["snapshot_content"];
 	version_id: string;
 }): void {
 	const foreignKeys = args.schema["x-lix-foreign-keys"];
