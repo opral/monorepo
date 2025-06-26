@@ -41,14 +41,14 @@ test("inserts, updates, deletes are handled", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		
 		.where("schema_key", "=", "lix_key_value")
 		.where("change.entity_id", "=", "key0")
 		.selectAll()
 		.orderBy("change.created_at", "asc")
 		.execute();
 
-	expect(changes.map((change) => change.content)).toMatchObject([
+	expect(changes.map((change) => change.snapshot_content)).toMatchObject([
 		{
 			key: "key0",
 			value: "value0",

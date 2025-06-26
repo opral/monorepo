@@ -217,7 +217,7 @@ test.skip("updating version change_set_id should not create edges or orphaned ch
 				schema_key: "test_schema",
 				file_id: "test_file",
 				plugin_key: "test_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				schema_version: "1.0",
 			},
 			{
@@ -226,7 +226,7 @@ test.skip("updating version change_set_id should not create edges or orphaned ch
 				schema_key: "test_schema",
 				file_id: "test_file",
 				plugin_key: "test_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				schema_version: "1.0",
 			},
 		])
@@ -481,7 +481,7 @@ test("mutation handler removes working change set elements on entity deletion", 
 		.execute();
 
 	expect(allChanges).toHaveLength(2); // Insert + Delete
-	expect(allChanges[0]!.snapshot_id).toBe("no-content"); // Latest change is deletion
+	expect(allChanges[0]!.snapshot_content).toBe(null); // Latest change is deletion
 });
 
 // slow, needs https://github.com/opral/lix-sdk/issues/311
@@ -564,7 +564,7 @@ test(
 			.execute();
 
 		expect(allChanges).toHaveLength(2); // Insert + Delete
-		expect(allChanges[1]!.snapshot_id).toBe("no-content"); // Delete change
+		expect(allChanges[1]!.snapshot_content).toBe(null); // Delete change
 	},
 	{ timeout: 20000 }
 );
@@ -643,7 +643,7 @@ test.todo(
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		expect(deleteChange.snapshot_id).toBe("no-content");
+		expect(deleteChange.snapshot_content).toBe(null);
 	}
 );
 

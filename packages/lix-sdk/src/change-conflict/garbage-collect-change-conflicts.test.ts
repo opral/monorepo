@@ -21,7 +21,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -29,7 +29,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -37,7 +37,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value2",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -118,7 +118,7 @@ test.skip("should garbage collect conflicts that no version references", async (
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -126,7 +126,7 @@ test.skip("should garbage collect conflicts that no version references", async (
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -175,7 +175,7 @@ test.skip("should NOT garbage collect conflicts that a version change conflict p
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -183,7 +183,7 @@ test.skip("should NOT garbage collect conflicts that a version change conflict p
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()

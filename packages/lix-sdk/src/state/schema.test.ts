@@ -1023,10 +1023,9 @@ test("state and state_all views expose change_id for blame and diff functionalit
 	// Get the actual change record to verify the change_id is correct
 	const changeRecord = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("entity_id", "=", "change-id-test-entity")
 		.where("schema_key", "=", "mock_schema")
-		.select(["change.id", "content as snapshot_content"])
+		.select(["change.id", "snapshot_content"])
 		.executeTakeFirstOrThrow();
 
 	// Verify that the change_id in the views matches the actual change.id
@@ -1063,11 +1062,10 @@ test("state and state_all views expose change_id for blame and diff functionalit
 	// Get the new change record
 	const newChangeRecord = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.where("entity_id", "=", "change-id-test-entity")
 		.where("schema_key", "=", "mock_schema")
 		.orderBy("created_at", "desc")
-		.select(["change.id", "content as snapshot_content"])
+		.select(["change.id", "snapshot_content"])
 		.executeTakeFirstOrThrow();
 
 	// Verify the new change_id matches the latest change

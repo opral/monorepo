@@ -21,15 +21,6 @@ test("returns only leaf change_set_elements per entity", async () => {
 		.execute();
 
 	// Insert 3 snapshots for the same entity
-	await lix.db
-		.insertInto("snapshot")
-		.values([
-			{ id: "s0", content: { val: "0" } },
-			{ id: "s1", content: { val: "1" } },
-			{ id: "s2", content: { val: "2" } },
-		])
-		.execute();
-
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
@@ -40,7 +31,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 				schema_version: "1.0",
 				schema_key: "mock_schema",
 				plugin_key: "p",
-				snapshot_id: "s0",
+				snapshot_content: { val: "0" },
 			},
 			{
 				id: "c1",
@@ -49,7 +40,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 				schema_version: "1.0",
 				schema_key: "mock_schema",
 				plugin_key: "p",
-				snapshot_id: "s1",
+				snapshot_content: { val: "1" },
 			},
 			{
 				id: "c2",
@@ -58,7 +49,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 				schema_version: "1.0",
 				schema_key: "mock_schema",
 				plugin_key: "p",
-				snapshot_id: "s2",
+				snapshot_content: { val: "2" },
 			},
 		])
 		.returningAll()
@@ -130,17 +121,6 @@ test("correctly identifies leaves at different points in history", async () => {
 		.execute();
 
 	// Create a scenario similar to the restore-change-set test
-	await lix.db
-		.insertInto("snapshot")
-		.values([
-			{ id: "s0", content: { text: "Line 0" } },
-			{ id: "s1", content: { text: "Line 1" } },
-			{ id: "s2", content: { text: "Line 2" } },
-			{ id: "s2-modified", content: { text: "Line 2 Modified" } },
-			{ id: "s3", content: { text: "Line 3" } },
-		])
-		.execute();
-
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
@@ -151,7 +131,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				file_id: "file1",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "s0",
+				snapshot_content: { text: "Line 0" },
 			},
 			{
 				id: "c1",
@@ -160,7 +140,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				file_id: "file1",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "s1",
+				snapshot_content: { text: "Line 1" },
 			},
 			{
 				id: "c2",
@@ -169,7 +149,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				schema_version: "1.0",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "s2",
+				snapshot_content: { val: "2" },
 			},
 			{
 				id: "c3",
@@ -178,7 +158,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				schema_version: "1.0",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "s2-modified",
+				snapshot_content: { text: "Line 2 Modified" },
 			},
 			{
 				id: "c4",
@@ -187,7 +167,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				schema_version: "1.0",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "s3",
+				snapshot_content: { text: "Line 3" },
 			},
 		])
 		.returningAll()
@@ -409,7 +389,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				file_id: "file3",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "c1",
@@ -418,7 +398,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				file_id: "file1",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "c2",
@@ -427,7 +407,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				file_id: "file2",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				// Same entity as c2
@@ -436,7 +416,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				schema_version: "1.0",
 				file_id: "file2",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				schema_key: "mock_schema",
 			},
 			{
@@ -446,7 +426,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				file_id: "file4",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "c5",
@@ -455,7 +435,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				file_id: "file5",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				// Index 6 - New change for entity3
@@ -465,7 +445,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				schema_version: "1.0",
 				schema_key: "mock_schema",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()

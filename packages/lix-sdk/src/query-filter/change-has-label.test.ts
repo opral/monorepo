@@ -22,7 +22,7 @@ test("should only return changes with the given label", async () => {
 		.values([
 			{
 				id: "change1",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				entity_id: "mock",
 				file_id: "mock",
 				schema_version: "1.0",
@@ -31,7 +31,7 @@ test("should only return changes with the given label", async () => {
 			},
 			{
 				id: "change2",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				entity_id: "mock",
 				file_id: "mock",
 				schema_version: "1.0",

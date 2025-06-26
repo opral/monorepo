@@ -48,7 +48,7 @@ test("should return the symmetric difference between two change sets", async () 
 				file_id: "f1",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -57,7 +57,7 @@ test("should return the symmetric difference between two change sets", async () 
 				file_id: "f2",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change3",
@@ -66,7 +66,7 @@ test("should return the symmetric difference between two change sets", async () 
 				file_id: "f3",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change4",
@@ -75,7 +75,7 @@ test("should return the symmetric difference between two change sets", async () 
 				file_id: "f4",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -176,7 +176,7 @@ test("should return an empty array if there are no differences", async () => {
 				file_id: "f1",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -185,7 +185,7 @@ test("should return an empty array if there are no differences", async () => {
 				file_id: "f2",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change3",
@@ -194,7 +194,7 @@ test("should return an empty array if there are no differences", async () => {
 				file_id: "f3",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change4",
@@ -203,7 +203,7 @@ test("should return an empty array if there are no differences", async () => {
 				file_id: "f4",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -305,7 +305,7 @@ test("should handle disjoint change sets", async () => {
 				file_id: "f1",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -314,7 +314,7 @@ test("should handle disjoint change sets", async () => {
 				file_id: "f2",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change3",
@@ -323,7 +323,7 @@ test("should handle disjoint change sets", async () => {
 				file_id: "f3",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change4",
@@ -332,7 +332,7 @@ test("should handle disjoint change sets", async () => {
 				file_id: "f4",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()

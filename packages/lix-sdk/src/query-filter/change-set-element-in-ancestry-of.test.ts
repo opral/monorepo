@@ -22,14 +22,7 @@ test("returns all elements from a single change set and its ancestors", async ()
 		})
 		.execute();
 
-	// Insert mock snapshot and change (reused across sets)
-	await lix.db
-		.insertInto("snapshot")
-		.values({ content: { hello: "world" } })
-		.execute();
-
-	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
-
+	// Insert mock change (reused across sets)
 	const changes = await lix.db
 		.insertInto("change")
 		.values({
@@ -39,7 +32,7 @@ test("returns all elements from a single change set and its ancestors", async ()
 			plugin_key: "mock",
 			schema_version: "1",
 			schema_key: "mock",
-			snapshot_id: snapshots[0]!.id,
+			snapshot_content: { hello: "world" },
 		})
 		.returningAll()
 		.execute();
@@ -105,13 +98,6 @@ test("respects depth limit when provided for a single target", async () => {
 		})
 		.execute();
 
-	await lix.db
-		.insertInto("snapshot")
-		.values({ content: { val: "hi" } })
-		.execute();
-
-	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
-
 	const changes = await lix.db
 		.insertInto("change")
 		.values({
@@ -121,7 +107,7 @@ test("respects depth limit when provided for a single target", async () => {
 			schema_version: "1",
 			plugin_key: "mock",
 			schema_key: "mock",
-			snapshot_id: snapshots[0]!.id,
+			snapshot_content: { val: "hi" },
 		})
 		.returningAll()
 		.execute();
@@ -187,13 +173,7 @@ test("returns combined elements from multiple divergent change set ancestries", 
 		})
 		.execute();
 
-	// Shared snapshot/change
-	await lix.db
-		.insertInto("snapshot")
-		.values({ content: { val: "shared" } })
-		.execute();
-
-	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
+	// Shared change
 	const changes = await lix.db
 		.insertInto("change")
 		.values({
@@ -203,7 +183,7 @@ test("returns combined elements from multiple divergent change set ancestries", 
 			schema_version: "1",
 			plugin_key: "mock",
 			schema_key: "mock",
-			snapshot_id: snapshots[0]!.id,
+			snapshot_content: { val: "shared" },
 		})
 		.returningAll()
 		.execute();
@@ -293,12 +273,6 @@ test("respects depth limit with multiple divergent targets", async () => {
 		})
 		.execute();
 
-	await lix.db
-		.insertInto("snapshot")
-		.values({ content: { val: "shared" } })
-		.execute();
-
-	const snapshots = await lix.db.selectFrom("snapshot").selectAll().execute();
 	const changes = await lix.db
 		.insertInto("change")
 		.values({
@@ -308,7 +282,7 @@ test("respects depth limit with multiple divergent targets", async () => {
 			schema_version: "1",
 			plugin_key: "mock",
 			schema_key: "mock",
-			snapshot_id: snapshots[0]!.id,
+			snapshot_content: { val: "shared" },
 		})
 		.returningAll()
 		.execute();

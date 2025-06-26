@@ -33,7 +33,7 @@ test("it should merge non-conflicting changes", async () => {
 				entity_id: "e0",
 				file_id: "file0",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "c1",
@@ -42,7 +42,7 @@ test("it should merge non-conflicting changes", async () => {
 				entity_id: "e1",
 				file_id: "file0",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "c2",
@@ -51,7 +51,7 @@ test("it should merge non-conflicting changes", async () => {
 				entity_id: "e2",
 				file_id: "file0",
 				plugin_key: "mock_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -127,18 +127,6 @@ test("should handle conflicting elements with source winning (until conflicts ar
 		})
 		.execute();
 
-	// Create initial snapshots with different content
-	await lix.db
-		.insertInto("snapshot")
-		.values([
-			{ id: "snap1", content: { text: "base" } },
-			{ id: "snap2", content: { text: "target mod" } },
-			{ id: "snap3", content: { text: "source mod" } },
-		])
-		.execute();
-
-	const snapshots = [{ id: "snap1" }, { id: "snap2" }, { id: "snap3" }];
-
 	// Create changes for the different states of the same entity
 	const changes = await lix.db
 		.insertInto("change")
@@ -150,7 +138,7 @@ test("should handle conflicting elements with source winning (until conflicts ar
 				entity_id: "e1",
 				file_id: "file1",
 				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[0]!.id,
+				snapshot_content: { text: "base" },
 			},
 			{
 				id: "c_target",
@@ -159,7 +147,7 @@ test("should handle conflicting elements with source winning (until conflicts ar
 				entity_id: "e1", // Same entity as base, different content
 				file_id: "file1",
 				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[1]!.id,
+				snapshot_content: { text: "target mod" },
 			},
 			{
 				id: "c_source",
@@ -168,7 +156,7 @@ test("should handle conflicting elements with source winning (until conflicts ar
 				entity_id: "e1", // Same entity as base, different content
 				file_id: "file1",
 				plugin_key: "mock_plugin",
-				snapshot_id: snapshots[2]!.id,
+				snapshot_content: { text: "source mod" },
 			},
 		])
 		.returningAll()
