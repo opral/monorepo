@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Bot, User } from "lucide-react";
 
 // Copy icon component
 const CopyIcon = () => (
@@ -109,7 +110,7 @@ function App() {
         </a>
         <div className="flex space-x-6">
           <a
-            href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
+            href="https://docs.lix.dev"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-600 text-base lowercase flex items-center gap-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600 transition-all duration-200 px-2 py-1"
@@ -179,7 +180,7 @@ function App() {
             <PackageInstaller />
 
             <a
-              href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/examples"
+              href="https://flashtype.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-blue-600 text-white px-6 py-2 rounded-md text-base hover:bg-blue-700 transition-all duration-200 flex items-center font-medium group shadow-sm"
@@ -248,7 +249,7 @@ function App() {
 
             {/* MIT License */}
             <a
-              href="https://github.com/opral/monorepo/blob/main/LICENSE"
+              href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
@@ -808,8 +809,7 @@ function App() {
         <section className="py-20 w-full">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <h2 className="text-center text-2xl sm:text-3xl font-bold mb-6 text-gray-800 flex items-center justify-center">
-              <span>Every "Cursor for X" needs</span>{" "}
-              <LixLogo className="ml-2 w-10 h-8 transform translate-y-[-2px]" />
+              <span>Human and AI collaboration</span>
             </h2>
             <p className="text-center text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
               Lix provides the foundation for effective human-AI collaboration
@@ -823,15 +823,15 @@ function App() {
                 <div className="w-full sm:w-1/2 p-4 border-b sm:border-b-0 sm:border-r border-gray-100">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
-                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
-                        </svg>
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                        <Bot className="h-5 w-5 text-blue-600" />
                       </div>
-                      <span className="font-medium text-sm text-gray-800">AI Changes</span>
+                      <span className="font-medium text-sm text-gray-800">
+                        AI Changes
+                      </span>
                     </div>
                   </div>
-                  
+
                   {/* Simple diff visualization */}
                   <div className="p-3 bg-gray-50 rounded border border-gray-200">
                     <div className="h-3 bg-gray-200 rounded w-full mb-1.5"></div>
@@ -844,25 +844,43 @@ function App() {
                 {/* Right panel - Human review */}
                 <div className="w-full sm:w-1/2 p-4">
                   <div className="flex items-center mb-3">
-                    <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-2">
+                      <User className="h-5 w-5 text-purple-600" />
                     </div>
-                    <span className="font-medium text-sm text-gray-800">Human Review</span>
+                    <span className="font-medium text-sm text-gray-800">
+                      Human Review
+                    </span>
                   </div>
 
                   {/* Action buttons */}
                   <div className="flex space-x-2">
                     <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3 w-3 mr-1"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       Approve
                     </button>
                     <button className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1z" clipRule="evenodd" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3 w-3 mr-1"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       Request Changes
                     </button>
@@ -871,163 +889,9 @@ function App() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 max-w-[100rem] mx-auto px-4">
-              {/* Card 1: Parallel AI Exploration - STEP 1 */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
-                <div className="p-7">
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-7 w-7 text-green-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-medium text-gray-800">
-                      Parallel AI Exploration
-                    </h3>
-                  </div>
-                  <p className="text-gray-600 text-base leading-relaxed">
-                    Initialize parallel versions for different AI agents to explore solutions independently.
-                  </p>
-                </div>
-                <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
-                  <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm overflow-x-auto">
-                    <div className="text-gray-400 mb-2">// Create separate versions for different AI approaches</div>
-                    <div className="text-white mb-1">
-                      <span className="text-blue-400">const</span> creativeVersion = <span className="text-purple-400">await</span> lix.createVersion(<span className="text-green-400">"creative-ai"</span>);
-                    </div>
-                    <div className="text-white mb-3">
-                      <span className="text-blue-400">const</span> preciseVersion = <span className="text-purple-400">await</span> lix.createVersion(<span className="text-green-400">"precise-ai"</span>);
-                    </div>
-                    <div className="text-gray-400 mb-2">// AI agents work in parallel on their versions</div>
-                    <div className="text-white mb-1">
-                      <span className="text-purple-400">await</span> Promise.all([
-                    </div>
-                    <div className="text-white ml-4 mb-1">runCreativeAI(creativeVersion),</div>
-                    <div className="text-white ml-4 mb-1">runPreciseAI(preciseVersion)</div>
-                    <div className="text-white">]);</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: AI Proposals - STEP 2 */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
-                <div className="p-7">
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-7 w-7 text-blue-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-medium text-gray-800">
-                      AI Change Proposals
-                    </h3>
-                  </div>
-                  <p className="text-gray-600 text-base leading-relaxed">
-                    AI creates formal change proposals from exploration results that humans can review.
-                  </p>
-                </div>
-                <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
-                  <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm overflow-x-auto">
-                    <div className="text-gray-400 mb-2">// Compare the different AI approaches</div>
-                    <div className="text-white mb-3">
-                      <span className="text-blue-400">const</span> diff = <span className="text-purple-400">await</span> lix.getDiff(creativeVersion, preciseVersion);
-                    </div>
-                    <div className="text-gray-400 mb-2">// AI creates a proposal with the best changes</div>
-                    <div className="text-white mb-1">
-                      <span className="text-blue-400">const</span> proposal = <span className="text-purple-400">await</span> lix.createProposal({`{`}
-                    </div>
-                    <div className="text-white ml-4 mb-1">changes: selectBestChanges(diff),</div>
-                    <div className="text-white ml-4 mb-1">
-                      title: <span className="text-green-400">"AI-suggested improvements"</span>,
-                    </div>
-                    <div className="text-white ml-4 mb-1">
-                      description: <span className="text-green-400">"Combined creative + precise approach"</span>
-                    </div>
-                    <div className="text-white">{`}`});</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: Human Review & Attribution - STEP 3 */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all h-full flex flex-col">
-                <div className="p-7">
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-7 w-7 text-purple-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-medium text-gray-800">
-                      Human Review & Attribution
-                    </h3>
-                  </div>
-                  <p className="text-gray-600 text-base leading-relaxed">
-                    Humans review proposals with full change attribution before applying them to production.
-                  </p>
-                </div>
-                <div className="mt-auto p-7 bg-gray-50 border-t border-gray-100">
-                  <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm overflow-x-auto">
-                    <div className="text-gray-400 mb-2">// Human reviews and labels the changes</div>
-                    <div className="text-white mb-1">
-                      <span className="text-purple-400">await</span> lix.addLabel({`{`}
-                    </div>
-                    <div className="text-white ml-4 mb-1">changeId: proposal.id,</div>
-                    <div className="text-white ml-4 mb-1">
-                      label: <span className="text-green-400">"reviewed-by:human"</span>
-                    </div>
-                    <div className="text-white mb-3">{`}`});</div>
-                    <div className="text-gray-400 mb-2">// Apply changes when approved</div>
-                    <div className="text-white mb-1">
-                      <span className="text-blue-400">const</span> approved = <span className="text-purple-400">await</span> humanReview(proposal);
-                    </div>
-                    <div className="text-white mb-1">
-                      <span className="text-blue-400">if</span> (approved) {`{`}
-                    </div>
-                    <div className="text-white ml-4 mb-1">
-                      <span className="text-purple-400">await</span> lix.applyProposal(proposal.id);
-                    </div>
-                    <div className="text-white">{`}`}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div className="mt-12 text-center">
               <a
-                href="https://github.com/opral/monorepo/tree/main/packages/lix-docs/docs/guide/concepts/change-proposals.md"
+                href="https://docs.lix.dev/guide/concepts/change-proposals"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-gray-800 border border-gray-300 px-6 py-3 rounded-md text-base hover:bg-gray-50 transition-all duration-200 inline-flex items-center font-medium shadow-sm"
@@ -1050,7 +914,7 @@ function App() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <a
-              href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
+              href="https://docs.lix.dev"
               target="_blank"
               rel="noopener noreferrer"
               className="h-44 bg-blue-600 text-white rounded-lg p-6 font-medium hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg border border-blue-700 flex flex-col justify-between group"

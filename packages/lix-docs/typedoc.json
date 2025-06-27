@@ -10,6 +10,9 @@
   "hideGenerator": true,
   "entryPointStrategy": "expand",
   "tsconfig": "./typedoc.tsconfig.json",
+  "gitRemote": "origin",
+  "gitRevision": "main",
+  "sourceLinkTemplate": "https://github.com/inlang/monorepo/blob/{gitRevision}/{path}#L{line}",
   "visibilityFilters": {
     "protected": false,
     "private": false,
