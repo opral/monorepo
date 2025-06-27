@@ -17,7 +17,7 @@ import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs";
 import { updateUrlParams } from "./helper/updateUrlParams";
 import { setupWelcomeFile } from "./helper/welcomeLixFile";
-import { plugin as txtPlugin } from "@lix-js/plugin-txt";
+import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 import { initLixInspector } from "@lix-js/inspector";
 
@@ -64,7 +64,7 @@ export async function selectLix(): Promise<Lix> {
 			// try reading the lix file from OPFS
 			try {
 				// Find the Lix file with the specified ID
-				const lixFile = await findLixFileInOpfs(lixIdSearchParam, [txtPlugin]);
+				const lixFile = await findLixFileInOpfs(lixIdSearchParam, [mdPlugin]);
 
 				if (!lixFile) {
 					throw new Error("Lix file not found with ID: " + lixIdSearchParam);
@@ -103,7 +103,7 @@ export async function selectLix(): Promise<Lix> {
 						const blob = await response.blob();
 						const lix = await openLixInMemory({
 							blob,
-							providePlugins: [txtPlugin],
+							providePlugins: [mdPlugin],
 						});
 						await saveLixToOpfs({ lix });
 						lixBlob = blob;
@@ -142,13 +142,13 @@ export async function selectLix(): Promise<Lix> {
 			if (storedActiveAccount) {
 				lix = await openLixInMemory({
 					blob: lixBlob!,
-					providePlugins: [txtPlugin],
+					providePlugins: [mdPlugin],
 					account: JSON.parse(storedActiveAccount),
 				});
 			} else {
 				lix = await openLixInMemory({
 					blob: lixBlob!,
-					providePlugins: [txtPlugin],
+					providePlugins: [mdPlugin],
 				});
 			}
 			console.log("Lix opened successfully");
@@ -795,4 +795,192 @@ export function resetLixInstance() {
  */
 export function getCurrentLixInstance() {
 	return globalLix;
+}
+
+/**
+ * Interface for MD-AST entities as stored in lix
+ */
+export interface MdAstEntity {
+	entity_id: string;
+	mdast_id: string;
+	type: string;
+	children?: MdAstEntity[] | string[]; // Can be inline entities or references to other entities
+	value?: string;
+	depth?: number;
+	ordered?: boolean;
+	url?: string;
+	alt?: string;
+	title?: string;
+	lang?: string;
+	meta?: string;
+	align?: Array<"left" | "right" | "center" | null>;
+	position?: {
+		start: { line: number; column: number; offset?: number };
+		end: { line: number; column: number; offset?: number };
+	};
+}
+
+/**
+ * Interface for document order
+ */
+export interface MdAstDocumentOrder {
+	order: string[];
+}
+
+/**
+ * Selects MD-AST entities for the active file from lix state
+ */
+export async function selectMdAstEntities(): Promise<MdAstEntity[]> {
+	const lix = await ensureLix();
+	const activeFile = await selectActiveFile();
+	const activeVersion = await selectActiveVersion();
+	
+	if (!activeFile || !activeVersion) return [];
+
+	// Get all md-ast node entities for the file
+	const nodeChanges = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_id",
+			"change.id"
+		)
+		.where("change_set_element.change_set_id", "=", activeVersion.change_set_id)
+		.where("change.file_id", "=", activeFile.id)
+		.where("change.schema_key", "=", "lix_plugin_md_node")
+		.select([
+			"change.entity_id",
+			sql`json(snapshot.content)`.as("snapshot_content"),
+		])
+		.execute();
+
+	// Parse entities from snapshot content
+	const entities: MdAstEntity[] = nodeChanges.map((change) => {
+		const content = typeof change.snapshot_content === "string" 
+			? JSON.parse(change.snapshot_content) 
+			: change.snapshot_content;
+		
+		return {
+			entity_id: change.entity_id,
+			...content
+		};
+	});
+
+	return entities;
+}
+
+/**
+ * Selects the document order for the active file
+ */
+export async function selectMdAstDocumentOrder(): Promise<string[]> {
+	const lix = await ensureLix();
+	const activeFile = await selectActiveFile();
+	const activeVersion = await selectActiveVersion();
+	
+	if (!activeFile || !activeVersion) return [];
+
+	// Get the root order entity
+	const orderChange = await lix.db
+		.selectFrom("change")
+		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_id",
+			"change.id"
+		)
+		.where("change_set_element.change_set_id", "=", activeVersion.change_set_id)
+		.where("change.file_id", "=", activeFile.id)
+		.where("change.schema_key", "=", "lix_plugin_md_root")
+		.where("change.entity_id", "=", "root")
+		.select(sql`json(snapshot.content)`.as("snapshot_content"))
+		.executeTakeFirst();
+
+	if (!orderChange) return [];
+
+	const content = typeof orderChange.snapshot_content === "string" 
+		? JSON.parse(orderChange.snapshot_content) 
+		: orderChange.snapshot_content;
+
+	return content?.order || [];
+}
+
+/**
+ * Selects complete MD-AST structure for the active file (entities + order)
+ */
+export async function selectMdAstDocument(): Promise<{
+	entities: MdAstEntity[];
+	order: string[];
+}> {
+	const [entities, order] = await Promise.all([
+		selectMdAstEntities(),
+		selectMdAstDocumentOrder()
+	]);
+
+	return { entities, order };
+}
+
+/**
+ * Updates MD-AST entities in lix state using proper lix entity operations
+ */
+export async function updateMdAstEntities(entities: MdAstEntity[], order: string[]): Promise<void> {
+	const lix = await ensureLix();
+	const activeFile = await selectActiveFile();
+	const activeVersion = await selectActiveVersion();
+	
+	if (!activeFile) {
+		throw new Error("No active file to update");
+	}
+
+	try {
+		// Delete existing MD-AST entities for this file
+		await lix.db
+			.deleteFrom("state")
+			.where("file_id", "=", activeFile.id)
+			.where("schema_key", "in", ["lix_plugin_md_node", "lix_plugin_md_root"])
+			.execute();
+
+		// Insert new node entities
+		if (entities.length > 0) {
+			await lix.db
+				.insertInto("state")
+				.values(
+					entities.map(entity => ({
+						entity_id: entity.mdast_id,
+						file_id: activeFile.id,
+						schema_key: "lix_plugin_md_node",
+						plugin_key: "lix_plugin_md",
+						snapshot_content: entity as any, // Store as object, not string
+						schema_version: "1.0",
+						version_id: activeVersion.id,
+						created_at: new Date().toISOString(),
+						updated_at: new Date().toISOString(),
+					}))
+				)
+				.execute();
+		}
+
+		// Insert root order entity
+		if (order.length > 0) {
+			await lix.db
+				.insertInto("state")
+				.values({
+					entity_id: "root",
+					file_id: activeFile.id,
+					schema_key: "lix_plugin_md_root",
+					plugin_key: "lix_plugin_md",
+					snapshot_content: { order } as any, // Store as object, not string
+					schema_version: "1.0",
+					version_id: activeVersion.id,
+					created_at: new Date().toISOString(),
+					updated_at: new Date().toISOString(),
+				})
+				.execute();
+		}
+
+		console.log(`Updated ${entities.length} MD-AST entities for file ${activeFile.path}`);
+	} catch (error) {
+		console.error("Failed to update MD-AST entities:", error);
+		throw error;
+	}
 }

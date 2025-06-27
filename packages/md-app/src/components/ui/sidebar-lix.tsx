@@ -523,15 +523,19 @@ export function LixSidebar() {
 	// Get current lix ID, with fallback to first available lix
 	const currentLixId = React.useMemo(() => {
 		// Prefer the URL parameter as it's immediately available
-		if (lixIdSearchParams) {
+		if (lixIdSearchParams && lixIdSearchParams.trim() !== "") {
 			return lixIdSearchParams;
 		}
-		// If no URL parameter and we have available lixes, use the first one
+		// If no URL parameter and we have available lixes, use the first one with a valid ID
 		if (availableLixes && availableLixes.length > 0) {
-			return availableLixes[0].id;
+			const validLix = availableLixes.find(lix => lix.id && lix.id.trim() !== "");
+			if (validLix) {
+				return validLix.id;
+			}
 		}
-		// Fall back to empty string if no URL parameter and no available lixes
-		return "";
+		// Return undefined if no URL parameter and no available lixes with valid IDs
+		// This prevents the Select from having an empty string value
+		return undefined;
 	}, [lixIdSearchParams, availableLixes]);
 
 	const startRenamingLix = React.useCallback(() => {
@@ -678,7 +682,7 @@ export function LixSidebar() {
 							<SelectContent align="center" className="w-60 -ml-0.5">
 								<SelectGroup>
 									<SelectLabel className="font-medium">Lixes</SelectLabel>
-									{availableLixes?.map((lix: { id: string; name: string }) => (
+									{availableLixes?.filter((lix: { id: string; name: string }) => lix.id && lix.id.trim() !== "").map((lix: { id: string; name: string }) => (
 										<SelectItem key={lix.id} value={lix.id}>
 											<div className="flex items-center w-full">
 												<Folder className="h-4 w-4 mr-2 shrink-0" />
