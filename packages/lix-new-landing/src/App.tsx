@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Bot, User } from "lucide-react";
 
 // Copy icon component
 const CopyIcon = () => (
@@ -822,19 +823,8 @@ function App() {
                 <div className="w-full sm:w-1/2 p-4 border-b sm:border-b-0 sm:border-r border-gray-100">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center">
-                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center mr-2">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3 text-blue-600"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                        <Bot className="h-5 w-5 text-blue-600" />
                       </div>
                       <span className="font-medium text-sm text-gray-800">
                         AI Changes
@@ -854,19 +844,8 @@ function App() {
                 {/* Right panel - Human review */}
                 <div className="w-full sm:w-1/2 p-4">
                   <div className="flex items-center mb-3">
-                    <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3 text-purple-600"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-2">
+                      <User className="h-5 w-5 text-purple-600" />
                     </div>
                     <span className="font-medium text-sm text-gray-800">
                       Human Review
