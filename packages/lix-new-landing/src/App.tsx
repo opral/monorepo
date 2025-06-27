@@ -180,7 +180,7 @@ function App() {
             <PackageInstaller />
 
             <a
-              href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/examples"
+              href="https://flashtype.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-blue-600 text-white px-6 py-2 rounded-md text-base hover:bg-blue-700 transition-all duration-200 flex items-center font-medium group shadow-sm"
