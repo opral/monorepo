@@ -17,7 +17,7 @@ import { nanoid } from "@lix-js/sdk";
 
 export default function FileSwitcher() {
 	const [activeFile] = useQuery(selectActiveFile);
-	const [files] = useQuery(selectFiles, 500);
+	const [files] = useQuery(selectFiles, 2000); // Reduced frequency for better performance
 	const [lix, , , refetch] = useQuery(selectLix);
 
 	const switchToFile = useCallback(

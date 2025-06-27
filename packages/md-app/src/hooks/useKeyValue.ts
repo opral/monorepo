@@ -18,7 +18,7 @@ import { useQuery } from "./useQuery";
 export function useKeyValue<T>(key: string, lix: any) {
 	// Use the query hook to keep the value in sync
 	// using 75ms interval for non perceivable polling
-	const [value, , , refetch] = useQuery(() => selectKeyValue(key, lix), 75);
+	const [value, , , refetch] = useQuery(() => selectKeyValue(key, lix), 500); // Reduced from 75ms to 500ms
 
 	// Function to update the value
 	const setValue = async (newValue: T) => {

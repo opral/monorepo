@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
  */
 export function useQuery<T>(
 	queryFn: () => Promise<T>,
-	interval = 250,
+	interval = 1000, // Reduced from 250ms to 1000ms for better performance
 ): [T | null, boolean, Error | null, () => void] {
 	const [data, setData] = useState<T | null>(null);
 	const [loading, setLoading] = useState(true);

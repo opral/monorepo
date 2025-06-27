@@ -12,11 +12,13 @@ import {
 	sql,
 	UiDiffComponentProps,
 	ChangeSet,
+	nanoid,
+	newLixFile,
+	toBlob,
 } from "@lix-js/sdk";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { saveLixToOpfs } from "./helper/saveLixToOpfs";
 import { updateUrlParams } from "./helper/updateUrlParams";
-import { setupWelcomeFile } from "./helper/welcomeLixFile";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 import { initLixInspector } from "@lix-js/inspector";
@@ -24,9 +26,6 @@ import { initLixInspector } from "@lix-js/inspector";
 // Global lix instance - this will be managed by the state layer
 let globalLix: Lix | null = null;
 let lixInitializationPromise: Promise<Lix> | null = null;
-
-// Lock to prevent concurrent welcome file creation
-let welcomeFileSetupPromise: Promise<any> | null = null;
 
 /**
  * Helper function to ensure lix is initialized
@@ -127,8 +126,12 @@ export async function selectLix(): Promise<Lix> {
 				const file = await fileHandle.getFile();
 				lixBlob = new Blob([await file.arrayBuffer()]);
 			} else {
-				const welcomeLix = await setupWelcomeFile();
-				lixBlob = welcomeLix.blob;
+				// Create a new empty lix file
+				const lix = await openLixInMemory({
+					blob: await newLixFile(),
+					providePlugins: [mdPlugin],
+				});
+				lixBlob = await toBlob({ lix });
 			}
 		}
 
@@ -238,11 +241,13 @@ export async function selectVersions(): Promise<Version[]> {
 }
 
 /**
- * Selects all files
+ * Selects all files (metadata only, no content)
  */
 export async function selectFiles() {
 	const lix = await ensureLix();
-	return await lix.db.selectFrom("file").selectAll().execute();
+	return await lix.db.selectFrom("file")
+		.select(["id", "path", "metadata"])
+		.execute();
 }
 
 /**
@@ -280,7 +285,7 @@ export async function selectActiveFile() {
 
 	const file = await lix.db
 		.selectFrom("file")
-		.selectAll()
+		.select(["id", "path", "metadata"])
 		.where("id", "=", fileId)
 		.executeTakeFirst();
 
@@ -290,15 +295,6 @@ export async function selectActiveFile() {
 	return file;
 }
 
-/**
- * Selects markdown content for the active file
- */
-export async function selectLoadedMarkdown() {
-	const file = await selectActiveFile();
-	if (!file) throw new Error("No file selected");
-	const data = await new Blob([file.data]).text();
-	return data;
-}
 
 /**
  * Selects checkpoints for the active file
@@ -441,53 +437,65 @@ export async function selectIntermediateChanges(): Promise<UiDiffComponentProps[
 
 	const latestCheckpointChangeSetId = checkpointChanges?.[0]?.id;
 
-	const changesWithBeforeSnapshots: UiDiffComponentProps["diffs"] =
-		await Promise.all(
-			intermediateChanges.map(async (change) => {
-				let snapshotBefore = null;
+	// Optimize by getting all before snapshots in a single query instead of N+1 queries
+	let beforeSnapshotMap = new Map<string, any>();
+	
+	if (latestCheckpointChangeSetId && intermediateChanges.length > 0) {
+		const entityIds = intermediateChanges.map(c => c.entity_id);
+		const schemaKeys = [...new Set(intermediateChanges.map(c => c.schema_key))];
+		
+		const beforeSnapshots = await lix.db
+			.selectFrom("change")
+			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+			.innerJoin(
+				"change_set_element",
+				"change_set_element.change_id",
+				"change.id"
+			)
+			.where("change_set_element.change_set_id", "=", latestCheckpointChangeSetId)
+			.where("change.entity_id", "in", entityIds)
+			.where("change.schema_key", "in", schemaKeys)
+			.where("change.file_id", "=", activeFile.id)
+			.select([
+				"change.entity_id",
+				"change.schema_key",
+				sql`json(snapshot.content)`.as("snapshot_content_before"),
+				"change.created_at"
+			])
+			.orderBy("change.created_at", "desc")
+			.execute();
 
-				// First try to find the entity in the latest checkpoint change set
-				if (latestCheckpointChangeSetId) {
-					snapshotBefore = await lix.db
-						.selectFrom("change")
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-						.innerJoin(
-							"change_set_element",
-							"change_set_element.change_id",
-							"change.id"
-						)
-						.where(
-							"change_set_element.change_set_id",
-							"=",
-							latestCheckpointChangeSetId
-						)
-						.where("change.entity_id", "=", change.entity_id)
-						.where("change.schema_key", "=", change.schema_key)
-						.where("change.file_id", "=", activeFile.id)
-						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
-						.orderBy("change.created_at", "desc")
-						.limit(1)
-						.executeTakeFirst();
-				}
+		// Create a map for quick lookup, keeping only the latest change per entity+schema combination
+		beforeSnapshots.forEach(snapshot => {
+			const key = `${snapshot.entity_id}_${snapshot.schema_key}`;
+			if (!beforeSnapshotMap.has(key)) {
+				beforeSnapshotMap.set(key, snapshot.snapshot_content_before);
+			}
+		});
+	}
 
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { id, ...rest } = change;
+	const changesWithBeforeSnapshots: UiDiffComponentProps["diffs"] = 
+		intermediateChanges.map((change) => {
+			const beforeKey = `${change.entity_id}_${change.schema_key}`;
+			const snapshotBefore = beforeSnapshotMap.get(beforeKey);
 
-				return {
-					...rest,
-					snapshot_content_after: change.snapshot_content_after
-						? typeof change.snapshot_content_after === "string"
-							? JSON.parse(change.snapshot_content_after)
-							: change.snapshot_content_after
-						: null,
-					snapshot_content_before: snapshotBefore?.snapshot_content_before
-						? typeof snapshotBefore.snapshot_content_before === "string"
-							? JSON.parse(snapshotBefore.snapshot_content_before)
-							: snapshotBefore.snapshot_content_before
-						: null,
-				};
-			})
-		);
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { id, ...rest } = change;
+
+			return {
+				...rest,
+				snapshot_content_after: change.snapshot_content_after
+					? typeof change.snapshot_content_after === "string"
+						? JSON.parse(change.snapshot_content_after)
+						: change.snapshot_content_after
+					: null,
+				snapshot_content_before: snapshotBefore
+					? typeof snapshotBefore === "string"
+						? JSON.parse(snapshotBefore)
+						: snapshotBefore
+					: null,
+			};
+		});
 
 	return changesWithBeforeSnapshots;
 }
@@ -598,50 +606,39 @@ const setFirstMarkdownFile = async (lix: Lix) => {
 	try {
 		if (!lix) return null;
 		
-		// Get all files and filter for markdown files
+		// Get file metadata and filter for markdown files
 		const files =
-			(await lix.db.selectFrom("file").selectAll().execute()) ?? [];
+			(await lix.db.selectFrom("file")
+				.select(["id", "path", "metadata"])
+				.execute()) ?? [];
 		let markdownFiles = files.filter(
 			(file) => file.path && file.path.endsWith(".md")
 		);
 
-		// If no markdown files exist, create welcome file with locking
+		// If no markdown files exist, create an empty file
 		if (markdownFiles.length === 0) {
-			// If welcome file setup is already in progress, wait for it
-			if (welcomeFileSetupPromise) {
-				await welcomeFileSetupPromise;
-				// Re-check for files after waiting
-				const retryFiles = await lix.db.selectFrom("file").selectAll().execute();
-				markdownFiles = retryFiles.filter(
-					(file) => file.path && file.path.endsWith(".md")
-				);
-			} else {
-				// Start welcome file setup
-				welcomeFileSetupPromise = (async () => {
-					try {
-						await setupWelcomeFile(lix);
-						await saveLixToOpfs({ lix });
-					} catch (error) {
-						console.warn("Failed to setup welcome file:", error);
-						// Don't throw here, let the caller handle the retry logic
-					} finally {
-						welcomeFileSetupPromise = null; // Reset the lock
-					}
-				})();
-				
-				await welcomeFileSetupPromise;
-				
-				// Refresh the file list after creating welcome file
-				const updatedFiles = await lix.db.selectFrom("file").selectAll().execute();
-				markdownFiles = updatedFiles.filter(
-					(file) => file.path && file.path.endsWith(".md")
-				);
-				
-				// If still no markdown files after setup, something went wrong
-				if (markdownFiles.length === 0) {
-					throw new Error("Failed to create or find any markdown files");
-				}
-			}
+			const newFileId = nanoid();
+			
+			// Create empty markdown file
+			await lix.db
+				.insertInto("file")
+				.values({
+					id: newFileId,
+					path: "/document.md",
+					data: new TextEncoder().encode(""),
+				})
+				.execute();
+
+			await saveLixToOpfs({ lix });
+			
+			const newFile = {
+				id: newFileId,
+				path: "/document.md",
+				metadata: null,
+			};
+			
+			updateUrlParams({ f: newFileId });
+			return newFile;
 		}
 		
 		if (markdownFiles.length > 0) {

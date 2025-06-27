@@ -9,7 +9,7 @@ import { History } from "lucide-react";
 
 const ChangeControlSidebar = () => {
   const [activeFile] = useQuery(selectActiveFile);
-  const [checkpointChangeSets] = useQuery(selectCheckpointChangeSets, 500);
+  const [checkpointChangeSets] = useQuery(selectCheckpointChangeSets, 2000); // Reduced frequency for better performance
   const [intermediateChanges] = useQuery(selectIntermediateChanges);
 
   // Filter out changes where before and after content are identical (ghost changes)

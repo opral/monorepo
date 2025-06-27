@@ -73,10 +73,10 @@ export function useMdAstState(): UseMdAstStateReturn {
 			// Save to lix
 			await updateMdAstEntities(entities, order);
 			
-			// Successful save - reset optimistic flag after a delay to allow query to update
+			// Successful save - reset optimistic flag after minimal delay for query consistency
 			setTimeout(() => {
 				setIsOptimisticUpdate(false);
-			}, 100);
+			}, 25);
 
 		} catch (error) {
 			console.error('Failed to update MD-AST entities:', error);

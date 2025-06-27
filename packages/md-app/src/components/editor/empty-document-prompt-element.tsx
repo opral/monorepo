@@ -100,8 +100,8 @@ export function EmptyDocumentPromptElement({
 		if (!activeFile || !prompt.trim()) return;
 
 		try {
-			// If we're in welcome.md, create a new file first
-			if (activeFile.path === "/welcome.md") {
+			// If we're in the default empty document, create a new file first
+			if (activeFile.path === "/document.md") {
 				const newFileId = await createNewFile(prompt);
 				if (newFileId) {
 					// Wait longer for navigation and editor synchronization to complete

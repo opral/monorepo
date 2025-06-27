@@ -43,7 +43,7 @@ export function PlateEditor() {
         const hasContentChanged = JSON.stringify(currentValue) !== JSON.stringify(plateNodes);
 
         if (hasContentChanged && plateNodes.length > 0) {
-          editor.tf.setValue(plateNodes);
+          editor.tf.setValue(plateNodes as any);
         }
       } catch (error) {
         console.error("Failed to load MD-AST content into Plate editor:", error);
@@ -69,11 +69,11 @@ export function PlateEditor() {
           return;
         }
 
-        // is more or less the same as the welcome file
-        const isWelcomeFile = activeFile.path === "/welcome.md";
+        // Show prompt for default empty document or any empty file
+        const isDefaultDocument = activeFile.path === "/document.md";
         const isEmptyFile = mdAstState.entities.length === 0;
 
-        if (isWelcomeFile || isEmptyFile) {
+        if (isDefaultDocument || isEmptyFile) {
           insertEmptyPromptElement(editor);
           return;
         }

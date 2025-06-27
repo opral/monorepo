@@ -32,6 +32,7 @@ import {
 	selectActiveFile,
 	selectCurrentLixName,
 	selectAvailableLixes,
+	selectMdAstDocument,
 } from "@/queries";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
@@ -71,21 +72,22 @@ import InfoCard from "../InfoCard";
 import { Separator } from "./separator";
 import { generateHumanId } from "@/helper/generateHumanId";
 import { useChat } from "../editor/use-chat";
+import { serializeMdastEntities } from "../editor/mdast-plate-bridge";
 
 export function LixSidebar() {
 	const [lix, , , refetch] = useQuery(selectLix);
-	const [files] = useQuery(selectFiles, 500);
-	const [activeFile] = useQuery(selectActiveFile);
-	const [currentLixName] = useQuery(selectCurrentLixName, 1000);
-	const [availableLixes] = useQuery(selectAvailableLixes, 1000);
+	const [files] = useQuery(selectFiles, 2000); // Reduced frequency for file list
+	const [activeFile] = useQuery(selectActiveFile, 1500); // Less frequent active file checking
+	const [currentLixName] = useQuery(selectCurrentLixName, 3000); // Name changes are rare
+	const [availableLixes] = useQuery(selectAvailableLixes, 5000); // Lix list changes are very rare
 	const [lixIdSearchParams] = useQuery(() => {
 		const searchParams = new URL(window.location.href).searchParams;
 		return Promise.resolve(searchParams.get("lix") || undefined);
-	}, 100);
+	}, 1000); // URL changes are less frequent
 	const [fileIdSearchParams] = useQuery(() => {
 		const searchParams = new URL(window.location.href).searchParams;
 		return Promise.resolve(searchParams.get("f") || undefined);
-	}, 100);
+	}, 1000); // URL changes are less frequent
 
 	const [fileToDelete, setFileToDelete] = React.useState<string | null>(null);
 	const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] =
@@ -428,22 +430,35 @@ export function LixSidebar() {
 			if (!lix) return;
 
 			try {
+				// Get file metadata for the filename
 				const file = await lix.db
 					.selectFrom("file")
 					.where("id", "=", fileId)
-					.selectAll()
+					.select(["path"])
 					.executeTakeFirstOrThrow();
 
 				const fileName = file.path.split("/").pop() || "document.md";
-				const fileContent = new TextDecoder().decode(file.data);
 
-				const blob = new Blob([fileContent], { type: "text/markdown" });
-				const a = document.createElement("a");
-				a.href = URL.createObjectURL(blob);
-				a.download = fileName;
-				document.body.appendChild(a);
-				a.click();
-				document.body.removeChild(a);
+				// Get MD-AST content for the file
+				const mdAstDocument = await selectMdAstDocument();
+				
+				if (mdAstDocument && mdAstDocument.entities.length > 0) {
+					// Generate markdown content from MD-AST entities
+					const fileContent = serializeMdastEntities(
+						mdAstDocument.entities, 
+						mdAstDocument.order
+					);
+
+					const blob = new Blob([fileContent], { type: "text/markdown" });
+					const a = document.createElement("a");
+					a.href = URL.createObjectURL(blob);
+					a.download = fileName;
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+				} else {
+					console.warn("No MD-AST content found for export");
+				}
 			} catch (error) {
 				console.error("Failed to export file:", error);
 			}
