@@ -20,6 +20,9 @@ export default defineConfig({
   title: "Lix SDK Documentation",
   description:
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
+  rewrites: {
+    "guide/index.md": "index.md",
+  },
   appearance: {
     // @ts-expect-error not fully supported yet
     initialValue: "light",
@@ -34,19 +37,18 @@ export default defineConfig({
     siteTitle: "Lix SDK",
 
     nav: [
-      { text: "Getting Started", link: "/" },
-      { text: "Guide", link: "/guide/" },
+      { text: "Guide", link: "/" },
       { text: "API", link: "/api/" },
       { text: "Plugins", link: "/plugins/" },
       { text: "Examples", link: "/examples/" },
     ],
 
     sidebar: {
-      "/guide/": [
+      "/": [
         {
           text: "Introduction",
           items: [
-            { text: "What is Lix?", link: "/guide/" },
+            { text: "What is Lix?", link: "/" },
             { text: "Getting Started", link: "/guide/getting-started" },
             { text: "How Lix Works", link: "/guide/how-lix-works" },
           ],
