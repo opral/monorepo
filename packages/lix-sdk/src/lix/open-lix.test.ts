@@ -114,3 +114,35 @@ test("it should open a lix in memory from a blob", async () => {
 		}),
 	]);
 });
+
+test("should default to InMemoryStorage when no storage is provided", async () => {
+	const lix = await openLix({});
+	
+	// Should create a valid lix with new data
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.select("value")
+		.where("key", "=", "lix_id")
+		.executeTakeFirstOrThrow();
+	
+	expect(lixId.value).toBeDefined();
+	expect(typeof lixId.value).toBe("string");
+	
+	// Should be able to add and query data
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "test-file",
+			path: "/test.txt",
+			data: new TextEncoder().encode("test content"),
+		})
+		.execute();
+	
+	const files = await lix.db.selectFrom("file").selectAll().execute();
+	expect(files).toHaveLength(1);
+	expect(files[0]).toMatchObject({
+		id: "test-file",
+		path: "/test.txt",
+		data: new TextEncoder().encode("test content"),
+	});
+});

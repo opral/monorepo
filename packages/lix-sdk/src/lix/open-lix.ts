@@ -1,9 +1,5 @@
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import {
-	type SqliteWasmDatabase,
-	createInMemoryDatabase,
-	importDatabase,
-} from "sqlite-wasm-kysely";
+import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
@@ -13,7 +9,7 @@ import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewState } from "../entity-views/types.js";
 import type { Account } from "../account/schema.js";
-import { newLixFile } from "./new-lix.js";
+import { InMemoryStorage, type LixStorageAdapter } from "./storage/in-memory.js";
 
 export type Lix = {
 	/**
@@ -77,14 +73,9 @@ export async function openLix(args: {
 	/**
 	 * Storage adapter for persisting lix data.
 	 *
-	 * @default InMemory
-	 *
-	 * TODO: Implement storage abstraction to support:
-	 *   - OPFS storage (persistent in browser)
-	 *   - Node.js filesystem storage
-	 *   - Custom storage adapters
+	 * @default InMemoryStorage
 	 */
-	storage?: any;
+	storage?: LixStorageAdapter;
 	/**
 	 * Usecase are lix apps that define their own file format,
 	 * like inlang (unlike a markdown, csv, or json plugin).
@@ -107,20 +98,13 @@ export async function openLix(args: {
 	 */
 	keyValues?: NewState<KeyValue>[];
 }): Promise<Lix> {
-	if (args.storage) {
-		throw new Error("Unimplemented, please open an issue on github");
+	const storage = args.storage ?? new InMemoryStorage();
+	const database = await storage.open();
+
+	// Import blob data if provided
+	if (args.blob) {
+		await storage.import(args.blob);
 	}
-
-	// TODO: Replace this logic with storage abstraction
-	// Currently handles in-memory database creation, but should delegate to storage adapters
-	const database = await createInMemoryDatabase({ readOnly: false });
-
-	// Initialize with blob data if provided, otherwise create new lix
-	const blob = args.blob ?? (await newLixFile());
-	importDatabase({
-		db: database,
-		content: new Uint8Array(await blob.arrayBuffer()),
-	});
 
 	const db = initDb({ sqlite: database });
 
