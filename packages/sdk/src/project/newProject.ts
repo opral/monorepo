@@ -1,4 +1,4 @@
-import { newLixFile, openLix, toBlob } from "@lix-js/sdk";
+import { newLixFile, openLix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
 	contentFromDatabase,
@@ -60,7 +60,7 @@ export async function newProject(args?: {
 				},
 			])
 			.execute();
-		const blob = toBlob({ lix });
+		const blob = await lix.toBlob();
 		lix.sqlite.close();
 		return blob;
 	} catch (e) {
