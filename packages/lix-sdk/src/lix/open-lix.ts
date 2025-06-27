@@ -9,7 +9,8 @@ import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewState } from "../entity-views/types.js";
 import type { Account } from "../account/schema.js";
-import { InMemoryStorage, type LixStorageAdapter } from "./storage/in-memory.js";
+import { InMemoryStorage } from "./storage/in-memory.js";
+import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 
 export type Lix = {
@@ -31,11 +32,15 @@ export type Lix = {
 	};
 	/**
 	 * Hooks for listening to database lifecycle events.
-	 * 
+	 *
 	 * Allows registering callbacks that fire at specific points
 	 * in Lix's execution, such as when state changes are committed.
 	 */
 	hooks: LixHooks;
+	/**
+	 * Closes the lix instance and its storage.
+	 */
+	close: () => Promise<void>;
 };
 
 /**
@@ -119,6 +124,13 @@ export async function openLix(args: {
 
 	const db = initDb({ sqlite: database, hooks });
 
+	// Connect storage to state commit hooks if it supports it
+	if ("onStateCommit" in storage && storage.onStateCommit) {
+		hooks.onStateCommit(() => {
+			storage.onStateCommit!();
+		});
+	}
+
 	if (args.keyValues && args.keyValues.length > 0) {
 		for (const keyValue of args.keyValues) {
 			// Check if the key already exists
@@ -175,6 +187,9 @@ export async function openLix(args: {
 		sqlite: database,
 		plugin,
 		hooks,
+		close: async () => {
+			await storage.close();
+		},
 	};
 
 	// Apply file and account schemas now that we have the full lix object with plugins

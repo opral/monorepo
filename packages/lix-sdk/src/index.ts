@@ -5,6 +5,7 @@ export * from "./change-set/index.js";
 export * from "./database/index.js";
 export * from "./entity-views/index.js";
 export * from "./file/index.js";
+export * from "./hooks/create-hooks.js";
 export * from "./key-value/schema.js";
 export * from "./label/index.js";
 export * from "./lix/index.js";

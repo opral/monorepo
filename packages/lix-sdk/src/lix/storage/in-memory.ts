@@ -1,15 +1,6 @@
 import { type SqliteWasmDatabase, createInMemoryDatabase, importDatabase, contentFromDatabase } from "sqlite-wasm-kysely";
 import { newLixFile } from "../new-lix.js";
-
-/**
- * Storage adapter interface for Lix.
- */
-export interface LixStorageAdapter {
-	open(): Promise<SqliteWasmDatabase>;
-	close(): Promise<void>;
-	import(blob: Blob): Promise<void>;
-	export(): Promise<Blob>;
-}
+import type { LixStorageAdapter } from "./lix-storage-adapter.js";
 
 /**
  * In-memory storage adapter for Lix.
