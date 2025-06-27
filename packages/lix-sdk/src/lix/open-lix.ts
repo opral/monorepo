@@ -9,6 +9,9 @@ import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewState } from "../entity-views/types.js";
 import type { Account } from "../account/schema.js";
+import { InMemoryStorage } from "./storage/in-memory.js";
+import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
+import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 
 export type Lix = {
 	/**
@@ -27,18 +30,54 @@ export type Lix = {
 		getAll: () => Promise<LixPlugin[]>;
 		getAllSync: () => LixPlugin[];
 	};
+	/**
+	 * Hooks for listening to database lifecycle events.
+	 *
+	 * Allows registering callbacks that fire at specific points
+	 * in Lix's execution, such as when state changes are committed.
+	 */
+	hooks: LixHooks;
+	/**
+	 * Closes the lix instance and its storage.
+	 */
+	close: () => Promise<void>;
+	/**
+	 * Serialises the Lix into a {@link Blob}.
+	 *
+	 * Use this helper to persist the current state to disk or send it to a
+	 * server. The blob contains the raw SQLite file representing the Lix
+	 * project.
+	 *
+	 * @example
+	 * ```ts
+	 * const blob = await lix.toBlob()
+	 * download(blob)
+	 * ```
+	 */
+	toBlob: () => Promise<Blob>;
 };
 
 /**
- * Opens a Lix instance using an existing SQLite database.
+ * Opens a Lix instance.
  *
- * The database may originate from a file, IndexedDB or an
- * in‑memory instance. During opening all required schemas are
- * applied, optional plugins are initialised and provided key‑values
- * are written to the database.
+ * Creates an in-memory database by default. If a blob is provided,
+ * the database is initialized with that data. If a database is provided,
+ * uses that database directly.
+ *
+ * TODO: Add storage abstraction to support:
+ *   - OPFS storage (persistent in browser)
+ *   - Node.js filesystem storage
+ *   - Custom storage adapters
  *
  * @example
  * ```ts
+ * // In-memory (default)
+ * const lix = await openLix({})
+ *
+ * // From existing data
+ * const lix = await openLix({ blob: existingLixFile })
+ *
+ * // With custom database (current approach)
  * const db = await createInMemoryDatabase({ readOnly: false })
  * const lix = await openLix({ database: db })
  * ```
@@ -54,7 +93,16 @@ export async function openLix(args: {
 	 *   const lix = await openLix({ account })
 	 */
 	account?: Account;
-	database: SqliteWasmDatabase;
+	/**
+	 * Lix file data to initialize the database with.
+	 */
+	blob?: Blob;
+	/**
+	 * Storage adapter for persisting lix data.
+	 *
+	 * @default InMemoryStorage
+	 */
+	storage?: LixStorageAdapter;
 	/**
 	 * Usecase are lix apps that define their own file format,
 	 * like inlang (unlike a markdown, csv, or json plugin).
@@ -66,7 +114,7 @@ export async function openLix(args: {
 	 *     file format sdk. the file is not portable
 	 *
 	 * @example
-	 *   const lix = await openLixInMemory({ providePlugins: [myPlugin] })
+	 *   const lix = await openLix({ providePlugins: [myPlugin] })
 	 */
 	providePlugins?: LixPlugin[];
 	/**
@@ -77,7 +125,25 @@ export async function openLix(args: {
 	 */
 	keyValues?: NewState<KeyValue>[];
 }): Promise<Lix> {
-	const db = initDb({ sqlite: args.database });
+	const storage = args.storage ?? new InMemoryStorage();
+	const database = await storage.open();
+
+	// Import blob data if provided
+	if (args.blob) {
+		await storage.import(args.blob);
+	}
+
+	// Create hooks before initializing database so they can be used in schema setup
+	const hooks = createHooks();
+
+	const db = initDb({ sqlite: database, hooks });
+
+	// Connect storage to state commit hooks if it supports it
+	if ("onStateCommit" in storage && storage.onStateCommit) {
+		hooks.onStateCommit(() => {
+			storage.onStateCommit!();
+		});
+	}
 
 	if (args.keyValues && args.keyValues.length > 0) {
 		for (const keyValue of args.keyValues) {
@@ -132,8 +198,15 @@ export async function openLix(args: {
 
 	const lix = {
 		db,
-		sqlite: args.database,
+		sqlite: database,
 		plugin,
+		hooks,
+		close: async () => {
+			await storage.close();
+		},
+		toBlob: async () => {
+			return storage.export();
+		},
 	};
 
 	// Apply file and account schemas now that we have the full lix object with plugins

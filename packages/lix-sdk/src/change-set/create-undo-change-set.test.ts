@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createUndoChangeSet } from "./create-undo-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
@@ -11,7 +11,7 @@ import { createCheckpoint } from "./create-checkpoint.js";
 
 test("it creates an undo change set that reverses the operations of the original change set", async () => {
 	// Create a Lix instance with the mockJsonPlugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -139,7 +139,7 @@ test("it creates an undo change set that reverses the operations of the original
 
 test("it correctly undoes delete operations by restoring previous state", async () => {
 	// Create a Lix instance with the mockJsonPlugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -258,7 +258,7 @@ test("it correctly undoes delete operations by restoring previous state", async 
 });
 
 test.skip("does not naively create delete changes if a previous state existed", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 

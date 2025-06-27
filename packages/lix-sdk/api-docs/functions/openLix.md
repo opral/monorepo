@@ -76,7 +76,7 @@ like inlang (unlike a markdown, csv, or json plugin).
 **Example**
 
 ```ts
-const lix = await openLixInMemory({ providePlugins: [myPlugin] })
+const lix = await openLix({ providePlugins: [myPlugin] })
 ```
 
 ## Returns

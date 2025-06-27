@@ -19,7 +19,7 @@ any time.
 ## Example
 
 ```ts
-const lix = await openLixInMemory({
+const lix = await openLix({
     providePlugins: [mockJsonPlugin],
   });
 ```

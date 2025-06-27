@@ -1,15 +1,14 @@
 import { test, expect } from "vitest";
 import type * as LixServerProtocol from "../../../../lix/server-protocol-schema/dist/schema.js";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { openLix } from "../../lix/open-lix.js";
 import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
-import { toBlob } from "../../lix/to-blob.js";
 
 type RequestBody =
 	LixServerProtocol.paths["/lsp/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
 
 test.skip("it should pull rows successfully", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const id = await lix.db
 		.selectFrom("key_value")
@@ -42,7 +41,7 @@ test.skip("it should pull rows successfully", async () => {
 
 	const environment = createLspInMemoryEnvironment();
 
-	await environment.setLix({ id: id.value, blob: await toBlob({ lix }) });
+	await environment.setLix({ id: id.value, blob: await lix.toBlob() });
 
 	const lsaHandler = await createServerProtocolHandler({ environment });
 
@@ -75,7 +74,7 @@ test.skip("it should pull rows successfully", async () => {
 });
 
 test.skip("it should specifically be able to handle snapshots which use json binary and should not transfer the id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
@@ -97,7 +96,7 @@ test.skip("it should specifically be able to handle snapshots which use json bin
 	// 	.execute();
 
 	const environment = createLspInMemoryEnvironment();
-	await environment.setLix({ id, blob: await toBlob({ lix }) });
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsa = await createServerProtocolHandler({ environment });
 
@@ -182,7 +181,7 @@ test.skip("it should return 500 if the Lix file is invalid", async () => {
 });
 
 test.skip("it should handle empty tables gracefully", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
@@ -190,7 +189,7 @@ test.skip("it should handle empty tables gracefully", async () => {
 		.executeTakeFirstOrThrow();
 
 	const environment = createLspInMemoryEnvironment();
-	await environment.setLix({ id, blob: await toBlob({ lix }) });
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsa = await createServerProtocolHandler({ environment });
 

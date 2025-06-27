@@ -3,16 +3,15 @@
 
 import { test, expect, vi } from "vitest";
 import type * as LixServerProtocol from "../../../../lix/server-protocol-schema/dist/schema.js";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { openLix } from "../../lix/open-lix.js";
 import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
 import type { Change } from "../../database/schema.js";
 import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 import { pullFromServer } from "../../sync/pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
-import { toBlob } from "../../lix/to-blob.js";
 
 test.skip("it should push data successfully", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
@@ -20,7 +19,7 @@ test.skip("it should push data successfully", async () => {
 		.executeTakeFirstOrThrow();
 
 	const environment = createLspInMemoryEnvironment();
-	await environment.setLix({ id, blob: await toBlob({ lix }) });
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsaHandler = await createServerProtocolHandler({ environment });
 
@@ -122,7 +121,7 @@ test.skip("it should return 500 for an invalid Lix file", async () => {
 });
 
 test.skip("it should return 400 for a failed insert operation", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
@@ -131,7 +130,7 @@ test.skip("it should return 400 for a failed insert operation", async () => {
 
 	const environment = createLspInMemoryEnvironment();
 
-	environment.setLix({ id, blob: await toBlob({ lix }) });
+	environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsa = await createServerProtocolHandler({ environment });
 
@@ -159,7 +158,7 @@ test.skip("it should return 400 for a failed insert operation", async () => {
 
 //! reactivate with conflict milestone https://linear.app/opral/project/lix-sdk-v10-7c08040ec223/overview#milestone-32b0f41c-63f7-4513-9b47-86ced752d5e0
 test.skip("it should detect conflicts", async () => {
-	let lixOnServer = await openLixInMemory({});
+	let lixOnServer = await openLix({});
 
 	// ensure that both client and server create
 	// changes in the same version
@@ -169,8 +168,8 @@ test.skip("it should detect conflicts", async () => {
 	await switchVersion({ lix: lixOnServer, to: version0 });
 
 	// initialize client
-	const lixOnClient = await openLixInMemory({
-		blob: await toBlob({ lix: lixOnServer }),
+	const lixOnClient = await openLix({
+		blob: await lixOnServer.toBlob(),
 	});
 
 	const lixId = await lixOnServer.db
@@ -193,7 +192,7 @@ test.skip("it should detect conflicts", async () => {
 
 	await environment.setLix({
 		id: lixId.value,
-		blob: await toBlob({ lix: lixOnServer }),
+		blob: await lixOnServer.toBlob(),
 	});
 
 	// client has/creates value1 for mock_key
@@ -223,7 +222,7 @@ test.skip("it should detect conflicts", async () => {
 
 	expect(response.status).toBe(201);
 
-	lixOnServer = await openLixInMemory({
+	lixOnServer = await openLix({
 		blob: await environment.getLix({ id: lixId.value }),
 	});
 

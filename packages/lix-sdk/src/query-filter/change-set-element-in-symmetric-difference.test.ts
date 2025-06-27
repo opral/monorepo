@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { changeSetElementInSymmetricDifference } from "./change-set-element-in-symmetric-difference.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { ChangeSetElement } from "../change-set/schema.js";
@@ -14,7 +14,7 @@ function getEntityChangeFields(change: any) {
 }
 
 test("should return the symmetric difference between two change sets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -142,7 +142,7 @@ test("should return the symmetric difference between two change sets", async () 
 });
 
 test("should return an empty array if there are no differences", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -249,7 +249,7 @@ test("should return an empty array if there are no differences", async () => {
 });
 
 test("should handle empty change sets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert test data
 	const changeSetA = { id: "changeSetA" };
@@ -271,7 +271,7 @@ test("should handle empty change sets", async () => {
 });
 
 test("should handle disjoint change sets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",

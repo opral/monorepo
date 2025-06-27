@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { createChangeProposal } from "./create-change-proposal.js";
 
 test.skip("creating a change proposal should compute the symmetric difference", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create some changes for change sets
 	const mockChanges = await lix.db

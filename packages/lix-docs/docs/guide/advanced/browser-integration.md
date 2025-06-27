@@ -13,7 +13,7 @@ The simplest approach is to use in-memory storage, which is useful for temporary
 ```typescript
 // Create and open a Lix instance in memory
 const lixFile = await newLixFile();
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [jsonPlugin],
 });
@@ -70,7 +70,7 @@ async function saveLixToIDB(lixFile) {
 async function loadLixFromIDB() {
   const lixFile = await get('my-document.lix');
   if (lixFile) {
-    return await openLixInMemory({
+    return await openLix({
       blob: lixFile,
       providePlugins: [jsonPlugin],
     });
@@ -78,7 +78,7 @@ async function loadLixFromIDB() {
   // Create new file if not found
   const newLixFile = await newLixFile();
   await set('my-document.lix', newLixFile);
-  return await openLixInMemory({
+  return await openLix({
     blob: newLixFile,
     providePlugins: [jsonPlugin],
   });
@@ -109,7 +109,7 @@ if ('storage' in navigator && 'getDirectory' in navigator.storage) {
   }
   
   // Open Lix with the file
-  const lix = await openLixInMemory({
+  const lix = await openLix({
     blob: lixFile,
     providePlugins: [jsonPlugin],
   });
@@ -155,7 +155,7 @@ self.onmessage = async (event) => {
   switch (type) {
     case 'CREATE_FILE':
       const lixFile = await newLixFile();
-      lix = await openLixInMemory({
+      lix = await openLix({
         blob: lixFile,
         providePlugins: [jsonPlugin],
       });

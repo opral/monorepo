@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { type Kysely } from "kysely";
 
 test("insert on the change view", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const snapshotContent = { id: "entity1", name: "Test Entity" };
 
@@ -74,7 +74,7 @@ test("insert on the change view", async () => {
 });
 
 test("insert with default id generation", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const snapshotContent = { id: "entity2" };
 
@@ -111,7 +111,7 @@ test("insert with default id generation", async () => {
 });
 
 test("insert with default timestamp", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const snapshotContent = { id: "entity3" };
 
@@ -146,7 +146,7 @@ test("insert with default timestamp", async () => {
 // used to order changes, certain queries may require
 // more precision, so we test that the timestamp format includes milliseconds
 test("timestamp format includes milliseconds", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const snapshotContent = { id: "entity_timestamp" };
 
@@ -182,7 +182,7 @@ test("timestamp format includes milliseconds", async () => {
 });
 
 test("can insert with custom timestamp", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const snapshotContent = { id: "entity_custom" };
 	const customTimestamp = "2023-01-01T12:00:00.123456Z";
@@ -212,7 +212,7 @@ test("can insert with custom timestamp", async () => {
 });
 
 test("rejects non-UTC timestamps", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const snapshotContent = { id: "entity_invalid_tz" };
 
@@ -244,7 +244,7 @@ test("rejects non-UTC timestamps", async () => {
 });
 
 test("inserting a change with snapshot_content: null uses no-content snapshot", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert a change with null snapshot_content (deletion)
 	await lix.db

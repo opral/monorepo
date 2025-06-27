@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { sql } from "kysely";
@@ -7,7 +7,7 @@ import { createVersion } from "../version/create-version.js";
 import type { ChangeSetElement } from "../change-set/schema.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -38,7 +38,7 @@ test("throws if the schema is not a valid lix schema", async () => {
 });
 
 test("inserts the version and active version schemas to enable validation", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const result = await lix.db
 		.selectFrom("stored_schema")
@@ -50,7 +50,7 @@ test("inserts the version and active version schemas to enable validation", asyn
 });
 
 test("valid lix schema with a valid snapshot passes", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -86,7 +86,7 @@ test("valid lix schema with a valid snapshot passes", async () => {
 });
 
 test("an invalid snapshot fails", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -122,7 +122,7 @@ test("an invalid snapshot fails", async () => {
 });
 
 test("passes when primary key is unique", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -161,7 +161,7 @@ test("passes when primary key is unique", async () => {
 });
 
 test("throws when primary key violates uniqueness constraint", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -218,7 +218,7 @@ test("throws when primary key violates uniqueness constraint", async () => {
 });
 
 test("handles composite primary keys", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -292,7 +292,7 @@ test("handles composite primary keys", async () => {
 });
 
 test("passes when unique constraint is satisfied", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -336,7 +336,7 @@ test("passes when unique constraint is satisfied", async () => {
 });
 
 test("throws when single field unique constraint is violated", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -423,7 +423,7 @@ test("throws when single field unique constraint is violated", async () => {
 });
 
 test("handles composite unique constraints", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -543,7 +543,7 @@ test("handles composite unique constraints", async () => {
 });
 
 test("passes when foreign key references exist", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const userSchema = {
 		type: "object",
@@ -623,7 +623,7 @@ test("passes when foreign key references exist", async () => {
 });
 
 test("throws when foreign key reference does not exist", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const userSchema = {
 		type: "object",
@@ -686,7 +686,7 @@ test("throws when foreign key reference does not exist", async () => {
 });
 
 test("handles multiple foreign keys", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const userSchema = {
 		type: "object",
@@ -819,7 +819,7 @@ test("handles multiple foreign keys", async () => {
 });
 
 test("allows null foreign key values", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const userSchema = {
 		type: "object",
@@ -896,7 +896,7 @@ test("allows null foreign key values", async () => {
 });
 
 test("foreign key referencing real SQL table (change.id)", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert a real change record into the change table
 	await lix.db
@@ -975,7 +975,7 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 });
 
 test("allows updates with same primary key", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
@@ -1029,7 +1029,7 @@ test("allows updates with same primary key", async () => {
 });
 
 test("unique constraints are validated per version, not globally", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -1109,7 +1109,7 @@ test("unique constraints are validated per version, not globally", async () => {
 });
 
 test("throws when version_id is not provided", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -1137,7 +1137,7 @@ test("throws when version_id is not provided", async () => {
 });
 
 test("throws when referenced version does not exist", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -1164,7 +1164,7 @@ test("throws when referenced version does not exist", async () => {
 });
 
 test("passes when version_id is provided and version exists", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schema = {
 		type: "object",
@@ -1196,7 +1196,7 @@ test("passes when version_id is provided and version exists", async () => {
 });
 
 test("should prevent deletion when foreign keys reference the entity", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const userSchema = {
 		type: "object",
@@ -1293,7 +1293,7 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 });
 
 test("should allow deletion when no foreign keys reference the entity", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const userSchema = {
 		type: "object",
@@ -1350,7 +1350,7 @@ test("should allow deletion when no foreign keys reference the entity", async ()
 });
 
 test("should throw when deleting non-existent entity", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const userSchema = {
 		type: "object",
@@ -1384,7 +1384,7 @@ test("should throw when deleting non-existent entity", async () => {
 });
 
 test("should throw when entity_id is missing for delete operations", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const userSchema = {
 		type: "object",
@@ -1418,7 +1418,7 @@ test("should throw when entity_id is missing for delete operations", async () =>
 });
 
 test("should handle deletion validation for change sets referenced by versions", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create a change set
 	await lix.db
@@ -1465,7 +1465,7 @@ test("should handle deletion validation for change sets referenced by versions",
 });
 
 test("should parse JSON object properties before validation", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Define a schema with an object property
 	const documentSchema = {
@@ -1565,7 +1565,7 @@ test("should parse JSON object properties before validation", async () => {
 });
 
 test("foreign key validation should fail when referenced entity exists in different non-inheriting version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Mock schema for a "User" entity
 	const userSchema = {
@@ -1682,7 +1682,7 @@ test("foreign key validation should fail when referenced entity exists in differ
 });
 
 test("should allow self-referential foreign keys", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Define a schema with self-referential foreign key (like version inheritance)
 	const versionSchema = {
@@ -1781,7 +1781,7 @@ test("should allow self-referential foreign keys", async () => {
 });
 
 test("should allow self-referential foreign keys for update operations", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Define a schema with self-referential foreign key
 	const versionSchema = {
@@ -1882,7 +1882,7 @@ test("should allow self-referential foreign keys for update operations", async (
 });
 
 test("should prevent deletion when self-referential foreign keys reference the entity", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Define a schema with self-referential foreign key
 	const versionSchema = {
@@ -1986,7 +1986,7 @@ test("should prevent deletion when self-referential foreign keys reference the e
 // 3. Copy-on-write semantics remain clear and isolated
 // 4. Data integrity is maintained within each version context
 test("should prevent foreign key references to inherited entities from different version contexts", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create a thread in global context
 	await lix.db
@@ -2041,7 +2041,7 @@ test("should prevent foreign key references to inherited entities from different
 });
 
 test("should prevent change set elements from referencing change sets defined in global context", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create a change set in global context
 	await lix.db

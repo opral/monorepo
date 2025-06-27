@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
 
 test("insert, update, delete on the version view", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create required change sets first
 	await lix.db
@@ -129,7 +129,7 @@ test("insert, update, delete on the version view", async () => {
 });
 
 test("querying by id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create required change sets first
 	await lix.db
@@ -171,7 +171,7 @@ test("querying by id", async () => {
 });
 
 test("update active version view", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create required change sets and version first
 	await lix.db
@@ -207,7 +207,7 @@ test("update active version view", async () => {
 });
 
 test("applying the schema should create an initial 'main' version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const initialVersion = await lix.db
 		.selectFrom("version")
 		.where("name", "=", "main")
@@ -218,7 +218,7 @@ test("applying the schema should create an initial 'main' version", async () => 
 });
 
 test("applying the schema should set the initial active version to 'main'", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.selectAll()
@@ -236,7 +236,7 @@ test("applying the schema should set the initial active version to 'main'", asyn
 });
 
 test("should use default id and name if not provided", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	// Pre-populate change_set table
 	await lix.db
 		.insertInto("change_set_all")
@@ -283,7 +283,7 @@ test("should use default id and name if not provided", async () => {
 });
 
 test("should enforce foreign key constraint on change_set_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Attempt to insert version with non-existent change_set_id
 	await expect(
@@ -300,7 +300,7 @@ test("should enforce foreign key constraint on change_set_id", async () => {
 });
 
 test("should enforce foreign key constraint on working_change_set_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create valid change set for change_set_id
 	await lix.db.insertInto("change_set_all").values({ id: "cs1" }).execute();
@@ -320,7 +320,7 @@ test("should enforce foreign key constraint on working_change_set_id", async () 
 });
 
 test("should allow version insertion with valid change set references", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create valid change sets
 	await lix.db
@@ -347,7 +347,7 @@ test("should allow version insertion with valid change set references", async ()
 
 // having the active_version as regular table is easier
 test.skip("should enforce foreign key constraint on active_version.version_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Now attempt to update active_version with non-existent version_id
 	await expect(
@@ -359,7 +359,7 @@ test.skip("should enforce foreign key constraint on active_version.version_id", 
 });
 
 test("should allow active_version update with valid version_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create valid change set and version
 	await lix.db
@@ -387,7 +387,7 @@ test("should allow active_version update with valid version_id", async () => {
 });
 
 test("versions should be globally accessible regardless of version context", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create required change sets
 	await lix.db
@@ -443,7 +443,7 @@ test("versions should be globally accessible regardless of version context", asy
 });
 
 test("mutation of a version's state should NOT lead to duplicate version entries", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const versionA = await createVersion({
 		lix,
@@ -496,7 +496,7 @@ test("mutation of a version's state should NOT lead to duplicate version entries
 });
 
 test("direct mutation of a version shouldn't lead to duplicate entries", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const versionA = await createVersion({
 		lix,
@@ -567,7 +567,7 @@ test("direct mutation of a version shouldn't lead to duplicate entries", async (
 });
 
 test("should enforce UNIQUE constraint on working_change_set_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert necessary change sets to satisfy foreign keys
 	await lix.db
@@ -622,7 +622,7 @@ test("should enforce UNIQUE constraint on working_change_set_id", async () => {
 
 // there was a bug that wiped the cache, leading to a missing change_set
 test("initial version's change_set_id and working_change_set_id should exist in the change_set table", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get the initial 'main' version
 	const mainVersion = await lix.db
@@ -653,7 +653,7 @@ test("initial version's change_set_id and working_change_set_id should exist in 
 });
 
 test("inherits_from_version_id should default to global", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create required change sets first
 	await lix.db
@@ -685,7 +685,7 @@ test("inherits_from_version_id should default to global", async () => {
 });
 
 test("global version should not inherit from itself", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get the existing global version
 	const globalVersion = await lix.db
@@ -699,7 +699,7 @@ test("global version should not inherit from itself", async () => {
 });
 
 test("versions should have hidden property defaulting to false", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create required change sets first
 	await lix.db
@@ -732,7 +732,7 @@ test("versions should have hidden property defaulting to false", async () => {
 });
 
 test("global version should have hidden set to true", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const globalVersion = await lix.db
 		.selectFrom("version")
@@ -745,7 +745,7 @@ test("global version should have hidden set to true", async () => {
 });
 
 test("main version should have hidden set to false", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mainVersion = await lix.db
 		.selectFrom("version")
@@ -758,7 +758,7 @@ test("main version should have hidden set to false", async () => {
 });
 
 test("can explicitly set hidden to true", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create required change sets first
 	await lix.db

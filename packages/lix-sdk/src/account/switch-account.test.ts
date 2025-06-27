@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createAccount } from "./create-account.js";
 import { switchAccount } from "./switch-account.js";
 import { createVersion } from "../version/create-version.js";
 
 test("should switch the current account", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version = await createVersion({
 		lix,
@@ -48,7 +48,7 @@ test("should switch the current account", async () => {
 });
 
 test("should handle switching to the same account", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version = await createVersion({
 		lix,

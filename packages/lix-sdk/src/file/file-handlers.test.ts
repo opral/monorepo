@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
 import { nanoid } from "../database/nano-id.js";
@@ -7,7 +7,7 @@ import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 
 describe("file insert", () => {
 	it("should handle unknown file types with fallback plugin", async () => {
-		const lix = await openLixInMemory({
+		const lix = await openLix({
 			keyValues: [
 				{
 					key: "lix_log_levels",
@@ -43,7 +43,7 @@ describe("file insert", () => {
 
 describe("file update", () => {
 	it("should handle unknown file types with fallback plugin", async () => {
-		const lix = await openLixInMemory({
+		const lix = await openLix({
 			keyValues: [
 				{
 					key: "lix_log_levels",
@@ -90,7 +90,7 @@ describe("file update", () => {
 	});
 
 	it("should handle deleted entities during file update", async () => {
-		const lix = await openLixInMemory({
+		const lix = await openLix({
 			providePlugins: [mockJsonPlugin],
 		});
 		const version = await createVersion({ lix });

@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 test("insert with default id generation", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert a snapshot without specifying an id
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
@@ -34,7 +34,7 @@ test("insert with default id generation", async () => {
 });
 
 test("handles complex JSON content", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const complexContent = {
 		string: "test",
@@ -71,7 +71,7 @@ test("handles complex JSON content", async () => {
 });
 
 test("no-content snapshot exists by default", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Verify the no-content snapshot exists in the internal table
 	const internalNoContent = await (
@@ -88,7 +88,7 @@ test("no-content snapshot exists by default", async () => {
 });
 
 test("no-content snapshot is not duplicated on multiple schema applications", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Apply the schema again (this happens in real usage)
 	lix.sqlite.exec(`
@@ -109,7 +109,7 @@ test("no-content snapshot is not duplicated on multiple schema applications", as
 });
 
 test("can insert null content explicitly", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 		.insertInto("internal_snapshot")
@@ -131,7 +131,7 @@ test("can insert null content explicitly", async () => {
 });
 
 test("snapshot ids must be unique", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert first snapshot
 	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)

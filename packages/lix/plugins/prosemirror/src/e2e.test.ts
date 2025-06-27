@@ -1,11 +1,11 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { plugin } from "./index.js";
 // import fs from "node:fs/promises";
 
 test("detects changes when inserting a prosemirror document", async () => {
 	// Initialize Lix with the ProseMirror plugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [plugin],
 	});
 
@@ -103,7 +103,7 @@ test("detects changes when inserting a prosemirror document", async () => {
 // test.each(["../example/assets/before.json", "../example/assets/after.json"])(
 // 	"beforeAfterOfFile() reconstructs the same file %s",
 // 	async (filepath) => {
-// 		const lix = await openLixInMemory({
+// 		const lix = await openLix({
 // 			providePlugins: [plugin],
 // 		});
 

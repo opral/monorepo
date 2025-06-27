@@ -3,7 +3,6 @@ import {
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { closeLix } from "./close-lix.js";
 import { v7 as uuid_v7 } from "uuid";
 import { nanoid } from "../database/nano-id.js";
 import { LixVersionSchema, type Version } from "../version/schema.js";
@@ -18,6 +17,7 @@ import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
 import { LixSchemaViewMap } from "../database/schema.js";
 import type { Change } from "../change/schema.js";
 import type { StoredSchema } from "../stored-schema/schema.js";
+import { createHooks } from "../hooks/create-hooks.js";
 
 /**
  * Returns a new empty Lix file as a {@link Blob}.
@@ -38,8 +38,10 @@ export async function newLixFile(): Promise<Blob> {
 		readOnly: false,
 	});
 
+	const hooks = createHooks();
+
 	// applying the schema etc.
-	const db = initDb({ sqlite });
+	const db = initDb({ sqlite, hooks });
 
 	// Create bootstrap changes for initial data
 	const bootstrapChanges = createBootstrapChanges();
@@ -92,7 +94,7 @@ export async function newLixFile(): Promise<Blob> {
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
-		closeLix({ lix: { db } });
+		await db.destroy();
 	}
 }
 

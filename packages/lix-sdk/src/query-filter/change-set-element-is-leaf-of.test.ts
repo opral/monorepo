@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { changeSetElementInAncestryOf } from "./change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "./change-set-element-is-leaf-of.js";
 
 test("returns only leaf change_set_elements per entity", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("stored_schema")
@@ -105,7 +105,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 });
 
 test("correctly identifies leaves at different points in history", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("stored_schema")
@@ -363,7 +363,7 @@ test("correctly identifies leaves at different points in history", async () => {
 });
 
 test("returns combined leaves from multiple target change sets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("stored_schema")

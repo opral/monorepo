@@ -1936,7 +1936,7 @@ like inlang (unlike a markdown, csv, or json plugin).
 **Example**
 
 ```ts
-const lix = await openLixInMemory({ providePlugins: [myPlugin] })
+const lix = await openLix({ providePlugins: [myPlugin] })
 ```
 
 ## Returns
@@ -1952,17 +1952,17 @@ const lix = await openLix({ database: db })
 
 ---
 
-## openLixInMemory
+## openLix
 
 [**@lix-js/sdk**](../README.md)
 
 ***
 
-[@lix-js/sdk](../README.md) / openLixInMemory
+[@lix-js/sdk](../README.md) / openLix
 
-# Function: openLixInMemory()
+# Function: openLix()
 
-> **openLixInMemory**(`args`): `Promise`\<`Promise`\<[`Lix`](../type-aliases/Lix.md)\>\>
+> **openLix**(`args`): `Promise`\<`Promise`\<[`Lix`](../type-aliases/Lix.md)\>\>
 
 Defined in: [packages/lix-sdk/src/lix/open-lix-in-memory.ts:17](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix-in-memory.ts#L17)
 
@@ -1985,7 +1985,7 @@ blob is provided a fresh Lix project is created automatically.
 ## Example
 
 ```ts
-const lix = await openLixInMemory({})
+const lix = await openLix({})
 ```
 
 ---
@@ -5740,7 +5740,7 @@ any time.
 ## Example
 
 ```ts
-const lix = await openLixInMemory({
+const lix = await openLix({
     providePlugins: [mockJsonPlugin],
   });
 ```

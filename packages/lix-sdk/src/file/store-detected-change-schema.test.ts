@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { storeDetectedChangeSchema } from "./store-detected-change-schema.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 
 test("storeDetectedChangeSchema stores new schema on first use", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const testSchema = {
 		"x-lix-key": "test_schema",
@@ -34,7 +34,7 @@ test("storeDetectedChangeSchema stores new schema on first use", async () => {
 });
 
 test("storeDetectedChangeSchema allows identical schema to be used again", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const testSchema = {
 		"x-lix-key": "test_schema_2",
@@ -70,7 +70,7 @@ test("storeDetectedChangeSchema allows identical schema to be used again", async
 });
 
 test("storeDetectedChangeSchema throws error when schema differs for same version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const originalSchema = {
 		"x-lix-key": "test_schema_3",
@@ -108,7 +108,7 @@ test("storeDetectedChangeSchema throws error when schema differs for same versio
 });
 
 test("storeDetectedChangeSchema allows different schemas with different versions", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const schemaV1 = {
 		"x-lix-key": "test_schema_4",
@@ -154,7 +154,7 @@ test("storeDetectedChangeSchema allows different schemas with different versions
 });
 
 test("storeDetectedChangeSchema enforces strict JSON determinism", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const originalSchema = {
 		"x-lix-key": "test_schema_5",
@@ -214,7 +214,7 @@ test("integration with plugin detectChanges", async () => {
 		],
 	};
 
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockPlugin],
 	});
 

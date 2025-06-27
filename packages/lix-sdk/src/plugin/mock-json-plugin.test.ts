@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
 import { mockJsonPlugin } from "./mock-json-plugin.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 
 test("it handles insert changes", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 	const before = new TextEncoder().encode(
@@ -55,7 +55,7 @@ test("it handles insert changes", async () => {
 });
 
 test("it handles update changes", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -107,7 +107,7 @@ test("it handles update changes", async () => {
 });
 
 test("it handles delete changes", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -158,7 +158,7 @@ test("it handles delete changes", async () => {
 });
 
 test("it handles nested properties and arrays", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 

@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { newLixFile } from "./new-lix.js";
-import { openLixInMemory } from "./open-lix-in-memory.js";
+import { openLix } from "./open-lix.js";
 import { LixSchemaViewMap } from "../database/schema.js";
 
 test("newLixFile creates a valid lix that can be reopened", async () => {
@@ -9,7 +9,7 @@ test("newLixFile creates a valid lix that can be reopened", async () => {
 	expect(blob.size).toBeGreaterThan(0);
 
 	// Open the created lix file
-	const lix = await openLixInMemory({ blob });
+	const lix = await openLix({ blob });
 
 	// Try to query the state table to ensure it works
 	const result = await lix.db.selectFrom("state_all").selectAll().execute();
@@ -18,7 +18,7 @@ test("newLixFile creates a valid lix that can be reopened", async () => {
 
 test("newLixFile creates a global and main version", async () => {
 	const blob = await newLixFile();
-	const lix = await openLixInMemory({ blob });
+	const lix = await openLix({ blob });
 
 	// Check that both global and main versions exist
 	const versions = await lix.db.selectFrom("version").selectAll().execute();
@@ -38,7 +38,7 @@ test("newLixFile creates a global and main version", async () => {
 
 test("newLixFile creates required bootstrap change sets", async () => {
 	const blob = await newLixFile();
-	const lix = await openLixInMemory({ blob });
+	const lix = await openLix({ blob });
 
 	// Check that change sets exist (should be 4: 2 for global, 2 for main)
 	const changeSets = await lix.db
@@ -51,7 +51,7 @@ test("newLixFile creates required bootstrap change sets", async () => {
 
 test("newLixFile creates checkpoint label", async () => {
 	const blob = await newLixFile();
-	const lix = await openLixInMemory({ blob });
+	const lix = await openLix({ blob });
 
 	// Check that checkpoint label exists
 	const labels = await lix.db.selectFrom("label").selectAll().execute();
@@ -62,7 +62,7 @@ test("newLixFile creates checkpoint label", async () => {
 
 test("newLixFile creates all schema definitions", async () => {
 	const blob = await newLixFile();
-	const lix = await openLixInMemory({ blob });
+	const lix = await openLix({ blob });
 
 	// Check that all schemas from LixSchemaViewMap are created
 	const storedSchemas = await lix.db
@@ -90,7 +90,7 @@ test("newLixFile creates all schema definitions", async () => {
 
 test("newLixFile creates change set elements for all changes", async () => {
 	const blob = await newLixFile();
-	const lix = await openLixInMemory({ blob });
+	const lix = await openLix({ blob });
 
 	// Check that change set elements exist
 	const changeSetElements = await lix.db
@@ -104,7 +104,7 @@ test("newLixFile creates change set elements for all changes", async () => {
 
 test("bootstrap changes include lix_id key-value in global version", async () => {
 	const blob = await newLixFile();
-	const lix = await openLixInMemory({ blob });
+	const lix = await openLix({ blob });
 
 	const kv = await lix.db
 		.selectFrom("key_value_all")

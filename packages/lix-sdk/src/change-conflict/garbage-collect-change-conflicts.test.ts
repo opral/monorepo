@@ -2,13 +2,13 @@
 // @ts-nocheck
 
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { garbageCollectChangeConflicts } from "./garbage-collect-change-conflicts.js";
 import { createChangeConflict } from "./create-change-conflict.js";
 
 // garbage collection is not used atm
 test.skip("should garbage collect conflicts that contain one or more changes that no version change pointer references (anymore)", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
 
@@ -107,7 +107,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 });
 
 test.skip("should garbage collect conflicts that no version references", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const changes = await lix.db
 		.insertInto("change")
@@ -164,7 +164,7 @@ test.skip("should garbage collect conflicts that no version references", async (
 });
 
 test.skip("should NOT garbage collect conflicts that a version change conflict pointer references and where each change is referenced by a version change pointer", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const changes = await lix.db
 		.insertInto("change")

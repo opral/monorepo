@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import { test, expect, vi } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { newLixFile } from "../lix/new-lix.js";
 import type { NewChange, Snapshot } from "../database/schema.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
@@ -52,7 +52,7 @@ test.skip("it should resolve a conflict and apply the changes", async () => {
 		}),
 	};
 
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});

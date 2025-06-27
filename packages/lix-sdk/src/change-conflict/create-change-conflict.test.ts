@@ -2,11 +2,11 @@
 // @ts-nocheck
 
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeConflict } from "./create-change-conflict.js";
 
 test.skip("conflicts should be de-duplicated based on the change_conflict.key and version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
 
@@ -72,7 +72,7 @@ test.skip("conflicts should be de-duplicated based on the change_conflict.key an
 
 // commented out because of https://github.com/opral/lix-sdk/issues/285#issuecomment-2755409022
 test.skip("if a conflict contains the same changes for a given key and version, no new conflict should be created", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
 

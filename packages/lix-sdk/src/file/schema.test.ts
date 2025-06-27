@@ -1,5 +1,5 @@
 import { test, expect, expectTypeOf } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 import { createCheckpoint } from "../change-set/create-checkpoint.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
@@ -7,7 +7,7 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import type { LixFile } from "./schema.js";
 
 test("insert, update, delete on the file view", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -140,7 +140,7 @@ test("insert, update, delete on the file view", async () => {
 });
 
 test("file insert data materialization", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -178,7 +178,7 @@ test("file insert data materialization", async () => {
 });
 
 test("file ids should have a default", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -200,7 +200,7 @@ test("file ids should have a default", async () => {
 });
 
 test("files should be able to have metadata", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -238,7 +238,7 @@ test("files should be able to have metadata", async () => {
 });
 
 test("invalid file paths should be rejected", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -254,7 +254,7 @@ test("invalid file paths should be rejected", async () => {
 });
 
 test("file_all operations are version specific and isolated", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -381,7 +381,7 @@ test("the plugin is the source of truth. the fallback plugin is not invoked if a
 		detectChangesGlob: "*.txt",
 	};
 
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockTxtPlugin],
 	});
 
@@ -428,7 +428,7 @@ test("the plugin is the source of truth. the fallback plugin is not invoked if a
 });
 
 test("file_history provides access to historical file data", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -517,7 +517,7 @@ test("file metadata is Record<string, any>", async () => {
 });
 
 test("file and file_all views expose change_id for blame and diff functionality", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -623,7 +623,7 @@ test("file and file_all views expose change_id for blame and diff functionality"
 });
 
 test("file data updates create new change_id", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -688,7 +688,7 @@ test("file data updates create new change_id", async () => {
 });
 
 test("file metadata updates create new change_id", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 

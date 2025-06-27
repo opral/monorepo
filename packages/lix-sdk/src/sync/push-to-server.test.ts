@@ -1,18 +1,17 @@
 import { expect, test, vi } from "vitest";
 import { createServerProtocolHandler } from "../server-protocol-handler/create-server-protocol-handler.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { pushToServer } from "./push-to-server.js";
 import { newLixFile } from "../lix/new-lix.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
-import { toBlob } from "../lix/to-blob.js";
 import type { KeyValue } from "../key-value/schema.js";
 import type { Account } from "../account/schema.js";
 
 test.skip("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
 
-	const lix = await openLixInMemory({ blob: lixBlob });
+	const lix = await openLix({ blob: lixBlob });
 
 	const id = await lix.db
 		.selectFrom("key_value")
@@ -29,7 +28,7 @@ test.skip("push rows of multiple tables to server successfully", async () => {
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix }),
+			body: await lix.toBlob(),
 		})
 	);
 
@@ -92,8 +91,8 @@ test.skip("push rows of multiple tables to server successfully", async () => {
 test.skip("push-pull-push with two clients", async () => {
 	const lixBlob = await newLixFile();
 
-	const client1 = await openLixInMemory({ blob: lixBlob });
-	const client2 = await openLixInMemory({ blob: lixBlob });
+	const client1 = await openLix({ blob: lixBlob });
+	const client2 = await openLix({ blob: lixBlob });
 
 	const { value: lixId } = await client1.db
 		.selectFrom("key_value")
@@ -110,7 +109,7 @@ test.skip("push-pull-push with two clients", async () => {
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: client1 }),
+			body: await client1.toBlob(),
 		})
 	);
 
@@ -272,7 +271,7 @@ test.skip("push-pull-push with two clients", async () => {
 });
 
 // test.skip("it should handle snapshots.content json binaries", async () => {
-// 	const lix = await openLixInMemory({});
+// 	const lix = await openLix({});
 
 // 	const { value: id } = await lix.db
 // 		.selectFrom("key_value")
@@ -289,7 +288,7 @@ test.skip("push-pull-push with two clients", async () => {
 // 	await lspHandler(
 // 		new Request("http://localhost:3000/lsp/new-v1", {
 // 			method: "POST",
-// 			body: await toBlob({ lix }),
+// 			body: await lix.toBlob(),
 // 		})
 // 	);
 
@@ -329,7 +328,7 @@ test.skip("push-pull-push with two clients", async () => {
 test.todo("it should handle binary values", async () => {
 	const lixBlob = await newLixFile();
 
-	const lix = await openLixInMemory({ blob: lixBlob });
+	const lix = await openLix({ blob: lixBlob });
 
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
@@ -346,7 +345,7 @@ test.todo("it should handle binary values", async () => {
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new", {
 			method: "POST",
-			body: await toBlob({ lix }),
+			body: await lix.toBlob(),
 		})
 	);
 
@@ -367,7 +366,7 @@ test.todo("it should handle binary values", async () => {
 		targetVectorClock: [], // initial push - server has no state
 	});
 
-	const lixFromServer = await openLixInMemory({
+	const lixFromServer = await openLix({
 		blob: await environment.getLix({ id }),
 	});
 
