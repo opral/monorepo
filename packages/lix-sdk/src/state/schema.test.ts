@@ -1878,3 +1878,63 @@ test.todo(
 		});
 	}
 );
+
+test("should emit state_commit hook when database transaction commits", async () => {
+	const lix = await openLix({});
+	
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+	
+	// Set up hook listener
+	let hookCallCount = 0;
+	lix.hooks.onStateCommit(() => {
+		hookCallCount++;
+	});
+	
+	// Perform a database operation that should trigger the hook
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "test-entity",
+			file_id: "test-file",
+			schema_key: "mock_schema",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			version_id: sql`(SELECT version_id FROM active_version)`,
+			snapshot_content: {
+				value: "test value",
+			},
+		})
+		.execute();
+	
+	// Hook should have been called once
+	expect(hookCallCount).toBe(1);
+	
+	// Perform another operation
+	await lix.db
+		.updateTable("state_all")
+		.set({
+			snapshot_content: {
+				value: "updated value",
+			},
+		})
+		.where("entity_id", "=", "test-entity")
+		.execute();
+	
+	// Hook should have been called twice now
+	expect(hookCallCount).toBe(2);
+});

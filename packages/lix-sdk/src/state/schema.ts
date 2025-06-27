@@ -6,10 +6,12 @@ import type { Kysely } from "kysely";
 import { handleStateMutation } from "./handle-state-mutation.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
+import type { LixHooks } from "../hooks/create-hooks.js";
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>
+	db: Kysely<LixInternalDatabaseSchema>,
+	hooks: LixHooks
 ): SqliteWasmDatabase {
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -275,6 +277,9 @@ export function applyStateDatabaseSchema(
 					sql: "DELETE FROM internal_change_in_transaction",
 					returnValue: "resultRows",
 				});
+
+				// Emit state commit hook after transaction is successfully committed
+				hooks._emit('state_commit');
 
 				return capi.SQLITE_OK;
 			},

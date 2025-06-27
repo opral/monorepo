@@ -22,6 +22,7 @@ import { applyLabelDatabaseSchema } from "../label/schema.js";
 import { applyThreadDatabaseSchema } from "../thread/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
+import type { LixHooks } from "../hooks/create-hooks.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
@@ -50,6 +51,7 @@ const ViewsWithJsonColumns = {
 
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
+	hooks: LixHooks;
 }): Kysely<LixDatabaseSchema> {
 	const db = new Kysely<LixDatabaseSchema>({
 		// log: ["error", "query"],
@@ -71,7 +73,8 @@ export function initDb(args: {
 	// Apply all database schemas first (tables, views, triggers)
 	applyStateDatabaseSchema(
 		args.sqlite,
-		db as unknown as Kysely<LixInternalDatabaseSchema>
+		db as unknown as Kysely<LixInternalDatabaseSchema>,
+		args.hooks
 	);
 	applySnapshotDatabaseSchema(args.sqlite);
 	applyChangeDatabaseSchema(args.sqlite);

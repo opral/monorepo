@@ -18,6 +18,7 @@ import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
 import { LixSchemaViewMap } from "../database/schema.js";
 import type { Change } from "../change/schema.js";
 import type { StoredSchema } from "../stored-schema/schema.js";
+import { createHooks } from "../hooks/create-hooks.js";
 
 /**
  * Returns a new empty Lix file as a {@link Blob}.
@@ -38,8 +39,10 @@ export async function newLixFile(): Promise<Blob> {
 		readOnly: false,
 	});
 
+	const hooks = createHooks();
+
 	// applying the schema etc.
-	const db = initDb({ sqlite });
+	const db = initDb({ sqlite, hooks });
 
 	// Create bootstrap changes for initial data
 	const bootstrapChanges = createBootstrapChanges();
