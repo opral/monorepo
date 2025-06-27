@@ -1,4 +1,3 @@
-import { closeLix } from "../../lix/close-lix.js";
 import { openLix } from "../../lix/open-lix.js";
 import type { Lix } from "../../lix/open-lix.js";
 import { toBlob } from "../../lix/to-blob.js";
@@ -88,7 +87,7 @@ export const createLspInMemoryEnvironment = (): LspEnvironment => {
 				const lix = openLixes.get(args.id);
 				// await fileQueueSettled({ lix: lix! });
 				const blob = await toBlob({ lix: lix! });
-				await closeLix({ lix: lix! });
+				await lix!.close();
 				openConnections.delete(args.id);
 				openLixes.delete(args.id);
 				store.set(args.id, blob);

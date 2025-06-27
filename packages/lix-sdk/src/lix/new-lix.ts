@@ -3,7 +3,6 @@ import {
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { closeLix } from "./close-lix.js";
 import { v7 as uuid_v7 } from "uuid";
 import { nanoid } from "../database/nano-id.js";
 import { LixVersionSchema, type Version } from "../version/schema.js";
@@ -95,7 +94,7 @@ export async function newLixFile(): Promise<Blob> {
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
-		closeLix({ lix: { db } });
+		await db.destroy();
 	}
 }
 

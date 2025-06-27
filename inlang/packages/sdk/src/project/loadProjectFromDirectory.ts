@@ -1,6 +1,6 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { closeLix, openLix, toBlob, type Lix } from "@lix-js/sdk";
+import { openLix, toBlob, type Lix } from "@lix-js/sdk";
 import fs from "node:fs";
 import nodePath from "node:path";
 import type {
@@ -89,7 +89,7 @@ export async function loadProjectFromDirectory(
 	});
 
 	// Closing the temp lix
-	await closeLix({ lix: tempLix });
+	await tempLix.close();
 
 	await syncLixFsFiles({
 		fs: args.fs,
