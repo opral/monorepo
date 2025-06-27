@@ -1,5 +1,6 @@
 import { type LixPlugin } from "@lix-js/sdk";
-import type { ProsemirrorNode } from "./detectChanges.js";
+import type { ProsemirrorNode } from "./schemas/node.js";
+import type { ProsemirrorDocument } from "./schemas/document.js";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	file,
@@ -23,6 +24,9 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	// Map to track parent-child relationships
 	const parentChildMap = new Map<string, string[]>();
 
+	// Track document order changes
+	let documentOrderChange: ProsemirrorDocument | null = null;
+
 	// First, collect all nodes with IDs and track parent-child relationships
 	if (currentDocument.content) {
 		collectNodesWithIds(currentDocument, nodeMap, parentChildMap);
@@ -39,6 +43,12 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 		const entityId = change.entity_id;
 		if (!entityId) continue;
 
+		// Check if this is a document order change
+		if (entityId === "document-root" && change.snapshot_content) {
+			documentOrderChange = change.snapshot_content as ProsemirrorDocument;
+			continue;
+		}
+
 		if (change.snapshot_content) {
 			// Create or update - add to the map
 			nodeMap.set(entityId, change.snapshot_content as ProsemirrorNode);
@@ -51,49 +61,12 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 	// Apply the changes to the document structure
 	updateDocumentWithChanges(newDocument, nodeMap, processedIds);
 
-	// Find any new top-level nodes that weren't in the original document
-	// Since we can't add just any node to the top level (it might be a child node),
-	// we need to be more selective about what we add
-
-	// First, collect all potential "new nodes" that haven't been processed yet
-	const notProcessed = new Map<string, ProsemirrorNode>();
-	const topLevelNodes = new Map<string, ProsemirrorNode>();
-
-	for (const [id, node] of nodeMap.entries()) {
-		if (!processedIds.has(id)) {
-			notProcessed.set(id, node);
-		}
-	}
-
-	// Then, identify which of these nodes are truly top-level
-	// This is a heuristic based on node type and checking if it appears as a child elsewhere
-	for (const [id, node] of notProcessed.entries()) {
-		// Only consider nodes that have appropriate types for the top level
-		// and don't appear as children in our parent-child map
-		let hasKnownParent = false;
-
-		// Check if this node is a child of any other node
-		for (const [, children] of parentChildMap.entries()) {
-			if (children.includes(id)) {
-				hasKnownParent = true;
-				break;
-			}
-		}
-
-		// If it's not a child of any other node and has an appropriate type,
-		// it's likely a top-level node
-		if (!hasKnownParent && isTopLevelNode(node)) {
-			topLevelNodes.set(id, node);
-		}
-	}
-
-	// Now add the identified top-level nodes to the document
-	for (const [id, node] of topLevelNodes.entries()) {
-		newDocument.content.push(JSON.parse(JSON.stringify(node)));
-		processedIds.add(id);
-
-		// Mark all children of this node as processed too
-		markChildrenAsProcessed(node, processedIds);
+	// Handle document order changes - reorder top-level nodes according to children_order
+	if (documentOrderChange && documentOrderChange.children_order) {
+		applyDocumentOrder(newDocument, nodeMap, documentOrderChange.children_order, processedIds);
+	} else {
+		// If no explicit order change, add any new top-level nodes that weren't processed
+		addNewTopLevelNodes(newDocument, nodeMap, processedIds, parentChildMap);
 	}
 
 	// Convert the document back to a Uint8Array
@@ -258,5 +231,109 @@ function updateDocumentWithChanges(
 				updateDocumentWithChanges(node, nodeMap, processedIds);
 			}
 		}
+	}
+}
+
+/**
+ * Apply document order by reordering top-level nodes according to children_order
+ */
+function applyDocumentOrder(
+	document: ProsemirrorNode,
+	nodeMap: Map<string, ProsemirrorNode>,
+	childrenOrder: string[],
+	processedIds: Set<string>,
+) {
+	if (!document.content) {
+		document.content = [];
+	}
+
+	// Create a new content array ordered according to children_order
+	const newContent: ProsemirrorNode[] = [];
+
+	// Add nodes in the specified order
+	for (const nodeId of childrenOrder) {
+		// First check if the node exists in the current document content
+		const existingNode = document.content.find(node => 
+			(node.attrs?.id || node._id) === nodeId
+		);
+
+		if (existingNode) {
+			newContent.push(existingNode);
+			processedIds.add(nodeId);
+		} else {
+			// If not in current content, check if it's in the nodeMap (new node)
+			const newNode = nodeMap.get(nodeId);
+			if (newNode && isTopLevelNode(newNode)) {
+				newContent.push(JSON.parse(JSON.stringify(newNode)));
+				processedIds.add(nodeId);
+				markChildrenAsProcessed(newNode, processedIds);
+			}
+		}
+	}
+
+	// Add any remaining nodes that weren't in the children_order but exist in current content
+	for (const node of document.content) {
+		const nodeId = node.attrs?.id || node._id;
+		if (nodeId && !processedIds.has(nodeId)) {
+			newContent.push(node);
+			processedIds.add(nodeId);
+		} else if (!nodeId) {
+			// Nodes without IDs (like plain text) should be preserved
+			newContent.push(node);
+		}
+	}
+
+	// Replace the document content with the reordered content
+	document.content = newContent;
+}
+
+/**
+ * Add new top-level nodes that weren't processed yet (fallback when no explicit order)
+ */
+function addNewTopLevelNodes(
+	document: ProsemirrorNode,
+	nodeMap: Map<string, ProsemirrorNode>,
+	processedIds: Set<string>,
+	parentChildMap: Map<string, string[]>,
+) {
+	// Find any new top-level nodes that weren't in the original document
+	const notProcessed = new Map<string, ProsemirrorNode>();
+	const topLevelNodes = new Map<string, ProsemirrorNode>();
+
+	for (const [id, node] of nodeMap.entries()) {
+		if (!processedIds.has(id)) {
+			notProcessed.set(id, node);
+		}
+	}
+
+	// Then, identify which of these nodes are truly top-level
+	for (const [id, node] of notProcessed.entries()) {
+		let hasKnownParent = false;
+
+		// Check if this node is a child of any other node
+		for (const [, children] of parentChildMap.entries()) {
+			if (children.includes(id)) {
+				hasKnownParent = true;
+				break;
+			}
+		}
+
+		// If it's not a child of any other node and has an appropriate type,
+		// it's likely a top-level node
+		if (!hasKnownParent && isTopLevelNode(node)) {
+			topLevelNodes.set(id, node);
+		}
+	}
+
+	// Now add the identified top-level nodes to the document
+	for (const [id, node] of topLevelNodes.entries()) {
+		if (!document.content) {
+			document.content = [];
+		}
+		document.content.push(JSON.parse(JSON.stringify(node)));
+		processedIds.add(id);
+
+		// Mark all children of this node as processed too
+		markChildrenAsProcessed(node, processedIds);
 	}
 }
