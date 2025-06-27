@@ -110,7 +110,7 @@ function App() {
         </a>
         <div className="flex space-x-6">
           <a
-            href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
+            href="https://docs.lix.dev"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-600 text-base lowercase flex items-center gap-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600 transition-all duration-200 px-2 py-1"
@@ -249,7 +249,7 @@ function App() {
 
             {/* MIT License */}
             <a
-              href="https://github.com/opral/monorepo/blob/main/LICENSE"
+              href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
@@ -891,7 +891,7 @@ function App() {
 
             <div className="mt-12 text-center">
               <a
-                href="https://github.com/opral/monorepo/tree/main/packages/lix-docs/docs/guide/concepts/change-proposals.md"
+                href="https://docs.lix.dev/guide/concepts/change-proposals"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-gray-800 border border-gray-300 px-6 py-3 rounded-md text-base hover:bg-gray-50 transition-all duration-200 inline-flex items-center font-medium shadow-sm"
@@ -914,7 +914,7 @@ function App() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <a
-              href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
+              href="https://docs.lix.dev"
               target="_blank"
               rel="noopener noreferrer"
               className="h-44 bg-blue-600 text-white rounded-lg p-6 font-medium hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg border border-blue-700 flex flex-col justify-between group"
