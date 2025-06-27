@@ -2,7 +2,6 @@ import {
 	Lix,
 	newLixFile,
 	openLix,
-	toBlob,
 	createCheckpoint,
 	createThread,
 	createAccount,
@@ -74,7 +73,7 @@ export async function setupWelcomeFile(lix?: Lix): Promise<{ blob: Blob }> {
 		await createInitialCheckpoint(lixWithFlashtype, file.id);
 	});
 
-	return { blob: await toBlob({ lix }) };
+	return { blob: await lix.toBlob() };
 }
 
 export const serverUrl = import.meta.env.PROD

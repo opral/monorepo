@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useLix } from "./hooks/use-lix.ts";
-import { openLix, toBlob } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { useContext } from "react";
 import { Context } from "./context";
 import {
@@ -167,8 +167,8 @@ export default function App(args: { show: boolean }) {
       // Command+Shift+O to toggle inspector
       if (event.metaKey && event.shiftKey && event.key.toLowerCase() === "o") {
         setIsHidden((prev) => {
-          localStorage.setItem('lix-inspector:show', String(prev));
-          return !prev
+          localStorage.setItem("lix-inspector:show", String(prev));
+          return !prev;
         });
       }
     };
@@ -213,7 +213,7 @@ export default function App(args: { show: boolean }) {
   // Export Lix as blob
   const exportLixAsBlob = async () => {
     try {
-      const blob = await toBlob({ lix });
+      const blob = await lix.toBlob();
 
       // Create a download link
       const url = URL.createObjectURL(blob);
@@ -365,8 +365,9 @@ export default function App(args: { show: boolean }) {
     <div className="flex flex-col w-full" data-theme="light">
       {!isHidden && (
         <header
-          className={`bg-background border-b ${isFrozen ? "bg-blue-50 border-blue-100" : "border-base-200"
-            }`}
+          className={`bg-background border-b ${
+            isFrozen ? "bg-blue-50 border-blue-100" : "border-base-200"
+          }`}
         >
           <div className="container mx-auto py-1 px-2 flex items-center">
             <div className="flex items-center mr-4">
@@ -381,8 +382,9 @@ export default function App(args: { show: boolean }) {
               ].map((item) => (
                 <button
                   key={item.id}
-                  className={`join-item btn btn-xs ${activeContent === item.id ? "btn-active" : "btn-ghost"
-                    }`}
+                  className={`join-item btn btn-xs ${
+                    activeContent === item.id ? "btn-active" : "btn-ghost"
+                  }`}
                   onClick={() => handleNavItemClick(item.id)}
                 >
                   {item.label}

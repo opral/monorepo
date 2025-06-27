@@ -7,7 +7,6 @@ import {
 	openLix,
 	switchAccount,
 	Thread,
-	toBlob,
 } from "@lix-js/sdk";
 import { supportedFileTypes } from "@/state.ts";
 import { getThreads, getWorkingChangeSet } from "@/state-active-file.ts";
@@ -27,7 +26,7 @@ export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
 
 	await demoSalariesCsv(lix);
 
-	return { blob: await toBlob({ lix }), id: id.value };
+	return { blob: await lix.toBlob(), id: id.value };
 }
 
 async function demoSalariesCsv(lix: Lix): Promise<void> {

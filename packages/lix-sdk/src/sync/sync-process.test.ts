@@ -8,7 +8,6 @@ import {
 	createServerProtocolHandler,
 } from "../server-protocol-handler/index.js";
 import { executeSync } from "../database/execute-sync.js";
-import { toBlob } from "../lix/to-blob.js";
 
 // commented out for lix v0.5
 // sync needs overhaul after change set graph introduction
@@ -35,13 +34,13 @@ test.skip("versions should be synced", async () => {
 	await lspHandler(
 		new Request("http://mock.com/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: lix0 }),
+			body: await lix0.toBlob(),
 		})
 	);
 
 	// create a second client
 	const lix1 = await openLix({
-		blob: await toBlob({ lix: lix0 }),
+		blob: await lix0.toBlob(),
 		keyValues: [{ key: "lix_sync", value: "true" }],
 	});
 
@@ -155,7 +154,7 @@ test.skip("switching synced versions should work", async () => {
 	await lspHandler(
 		new Request("http://mock.com/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: lix0 }),
+			body: await lix0.toBlob(),
 		})
 	);
 
@@ -170,7 +169,7 @@ test.skip("switching synced versions should work", async () => {
 
 	// create a second client
 	const lix1 = await openLix({
-		blob: await toBlob({ lix: lix0 }),
+		blob: await lix0.toBlob(),
 		keyValues: [{ key: "lix_sync", value: "true" }],
 	});
 
@@ -263,7 +262,7 @@ test.skip("doesnt sync if lix_sync is not true", async () => {
 	await lspHandler(
 		new Request("http://mock.com/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix }),
+			body: await lix.toBlob(),
 		})
 	);
 

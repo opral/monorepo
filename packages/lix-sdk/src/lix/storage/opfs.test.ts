@@ -2,7 +2,6 @@ import { test, expect, describe, beforeEach, vi } from "vitest";
 import { OpfsStorage } from "./opfs.js";
 import { openLix } from "../open-lix.js";
 import { InMemoryStorage } from "./in-memory.js";
-import { toBlob } from "../to-blob.js";
 
 // Create a realistic in-memory OPFS mock
 class MockOPFS {
@@ -128,7 +127,7 @@ describe("OpfsStorage", () => {
 			})
 			.execute();
 
-		const lixBlob = await toBlob({ lix: sourceLix });
+		const lixBlob = await sourceLix.toBlob();
 
 		// This should not throw
 		await expect(storage.import(lixBlob)).resolves.not.toThrow();

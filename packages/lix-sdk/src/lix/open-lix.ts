@@ -41,6 +41,20 @@ export type Lix = {
 	 * Closes the lix instance and its storage.
 	 */
 	close: () => Promise<void>;
+	/**
+	 * Serialises the Lix into a {@link Blob}.
+	 *
+	 * Use this helper to persist the current state to disk or send it to a
+	 * server. The blob contains the raw SQLite file representing the Lix
+	 * project.
+	 *
+	 * @example
+	 * ```ts
+	 * const blob = await lix.toBlob()
+	 * download(blob)
+	 * ```
+	 */
+	toBlob: () => Promise<Blob>;
 };
 
 /**
@@ -189,6 +203,9 @@ export async function openLix(args: {
 		hooks,
 		close: async () => {
 			await storage.close();
+		},
+		toBlob: async () => {
+			return storage.export();
 		},
 	};
 

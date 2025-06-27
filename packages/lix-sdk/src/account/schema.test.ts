@@ -1,7 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
-import { toBlob } from "../lix/to-blob.js";
 
 test("insert, update, delete on the account view", async () => {
 	const lix = await openLix({});
@@ -343,7 +342,7 @@ test.todo(
 		});
 
 		// Serialize and reload the database (simulating restart)
-		const blob = await toBlob({ lix });
+		const blob = await lix.toBlob();
 		const lix2 = await openLix({ blob });
 
 		// Verify that active_account got reset to a new anonymous account

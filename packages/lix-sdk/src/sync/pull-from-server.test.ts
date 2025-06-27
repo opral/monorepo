@@ -6,7 +6,6 @@ import { createServerProtocolHandler } from "../server-protocol-handler/create-s
 import { openLix } from "../lix/open-lix.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
-import { toBlob } from "../lix/to-blob.js";
 
 // commented out for lix v0.5
 // sync needs overhaul after change set graph introduction
@@ -14,7 +13,7 @@ test.skip("pull rows of multiple tables from server successfully and applies the
 	const lixOnServer = await openLix({});
 
 	const lix = await openLix({
-		blob: await toBlob({ lix: lixOnServer }),
+		blob: await lixOnServer.toBlob(),
 	});
 
 	const { value: id } = await lixOnServer.db
@@ -45,7 +44,7 @@ test.skip("pull rows of multiple tables from server successfully and applies the
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: lixOnServer }),
+			body: await lixOnServer.toBlob(),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -80,7 +79,7 @@ test.skip("it handles snapshot.content being json binary", async () => {
 	const lixOnServer = await openLix({});
 
 	const lix = await openLix({
-		blob: await toBlob({ lix: lixOnServer }),
+		blob: await lixOnServer.toBlob(),
 	});
 
 	const { value: id } = await lixOnServer.db
@@ -110,7 +109,7 @@ test.skip("it handles snapshot.content being json binary", async () => {
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: lixOnServer }),
+			body: await lixOnServer.toBlob(),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -151,7 +150,7 @@ test.skip("rows changed on the client more recently should not be updated", asyn
 		.executeTakeFirstOrThrow();
 
 	const lix = await openLix({
-		blob: await toBlob({ lix: lixOnServer }),
+		blob: await lixOnServer.toBlob(),
 	});
 
 	const environment = createLspInMemoryEnvironment();
@@ -163,7 +162,7 @@ test.skip("rows changed on the client more recently should not be updated", asyn
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: lixOnServer }),
+			body: await lixOnServer.toBlob(),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -207,7 +206,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 	// create a lix and clone it for the client - so they share the same lix id
 	const remoteLix = await openLix({});
 	const localLix = await openLix({
-		blob: await toBlob({ lix: remoteLix }),
+		blob: await remoteLix.toBlob(),
 	});
 
 	// insert mock data into server lix
@@ -250,7 +249,7 @@ test.skip("rows changed on the server more recently should be updated on the cli
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: remoteLix }),
+			body: await remoteLix.toBlob(),
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -365,7 +364,7 @@ test.skip("non-conflicting changes from the server should for the same version s
 
 	global.fetch = vi.fn((request) => lspHandler(request));
 
-	const lixOnServer = await openLix({ blob: await toBlob({ lix }) });
+	const lixOnServer = await openLix({ blob: await lix.toBlob() });
 
 	// insert data on the server that the client does not have yet
 	await lixOnServer.db
@@ -398,7 +397,7 @@ test.skip("non-conflicting changes from the server should for the same version s
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: lixOnServer }),
+			body: await lixOnServer.toBlob(),
 			headers: {
 				"Content-Type": "application/json",
 			},

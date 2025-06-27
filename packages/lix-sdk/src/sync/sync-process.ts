@@ -1,10 +1,9 @@
 import type { Lix } from "../lix/open-lix.js";
 import { pushToServer } from "./push-to-server.js";
 import { pullFromServer } from "./pull-from-server.js";
-import { toBlob } from "../lix/to-blob.js";
 
 export async function initSyncProcess(args: {
-	lix: Pick<Lix, "db" | "plugin" | "sqlite">;
+	lix: Pick<Lix, "db" | "plugin" | "sqlite" | "toBlob">;
 }): Promise<void> {
 	const lixId = await args.lix.db
 		.selectFrom("key_value")
@@ -57,7 +56,7 @@ export async function initSyncProcess(args: {
 			const response = await fetch(
 				new Request(`${url.value}/lsp/new-v1`, {
 					method: "POST",
-					body: await toBlob({ lix: args.lix }),
+					body: await args.lix.toBlob(),
 				})
 			);
 			if (!response.ok && response.status !== 409) {

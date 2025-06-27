@@ -8,7 +8,7 @@ import {
 	SlMenu,
 	SlMenuItem,
 } from "@shoelace-style/shoelace/dist/react";
-import { Lix, toBlob } from "@lix-js/sdk";
+import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
 import { openLix } from "@lix-js/sdk";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
@@ -185,7 +185,7 @@ const handleExportLixFile = async (lix: Lix) => {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-	const blob = await toBlob({ lix });
+	const blob = await lix.toBlob();
 	const a = document.createElement("a");
 	a.href = URL.createObjectURL(blob);
 	a.download = `${lixId.value}.lix`;

@@ -1,7 +1,6 @@
 import { expect, test } from "vitest";
 import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { toBlob } from "./to-blob.js";
 import { openLix, usedFileExtensions } from "./open-lix.js";
 import type { Account } from "../account/schema.js";
 
@@ -32,7 +31,7 @@ test("providing key values should be possible", async () => {
 
 	// testing overwriting key values
 	const lix1 = await openLix({
-		blob: await toBlob({ lix }),
+		blob: await lix.toBlob(),
 		keyValues: [{ key: "mock_key", value: "value2" }],
 	});
 
@@ -103,7 +102,7 @@ test("it should open a lix in memory from a blob", async () => {
 		})
 		.execute();
 
-	const lix2 = await openLix({ blob: await toBlob({ lix: lix1 }) });
+	const lix2 = await openLix({ blob: await lix1.toBlob() });
 	const files = await lix2.db.selectFrom("file").selectAll().execute();
 
 	expect(files).toEqual([

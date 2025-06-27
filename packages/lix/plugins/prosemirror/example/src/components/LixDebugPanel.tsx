@@ -1,4 +1,3 @@
-import { toBlob } from "@lix-js/sdk";
 import { Change } from "@lix-js/sdk";
 import { toUserTime } from "../utilities/timeUtils";
 import { useQuery } from "../hooks/useQuery";
@@ -18,7 +17,7 @@ const LixDebugPanel = () => {
 	const handleDownloadLixDb = async () => {
 		try {
 			// Get the Lix database blob using the correct API
-			const blob = await toBlob({ lix });
+			const blob = await lix.toBlob();
 
 			// Create a download link
 			const url = URL.createObjectURL(blob);

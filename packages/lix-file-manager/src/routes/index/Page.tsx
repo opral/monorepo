@@ -33,14 +33,15 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu.tsx";
 import IconMerge from "@/components/icons/IconMerge.tsx";
-import { Lix, openLix, toBlob } from "@lix-js/sdk";
+import { Lix, openLix } from "@lix-js/sdk";
 import { posthog } from "posthog-js";
 import CheckpointComponent from "@/components/CheckpointComponent.tsx";
 import IntermediateCheckpointComponent from "@/components/IntermediateCheckpointComponent.tsx";
 
 const isSupportedFile = (path: string) => {
 	return supportedFileTypes.some(
-		(supportedFileType) => supportedFileType.extension === getFileExtension(path)
+		(supportedFileType) =>
+			supportedFileType.extension === getFileExtension(path)
 	);
 };
 
@@ -177,7 +178,7 @@ export default function Page() {
 			.select("value")
 			.executeTakeFirstOrThrow();
 
-		const blob = await toBlob({ lix });
+		const blob = await lix.toBlob();
 		const a = document.createElement("a");
 		a.href = URL.createObjectURL(blob);
 		a.download = `${lixId.value}.lix`;
@@ -374,19 +375,27 @@ export default function Page() {
 								<CustomLink
 									to={
 										activeFile?.path && isSupportedFile(activeFile.path)
-											? ("/app"
-												+ supportedFileTypes.find(supportedFileType =>
-													supportedFileType.extension === getFileExtension(activeFile.path))?.route)
-											+ `?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`
+											? "/app" +
+												supportedFileTypes.find(
+													(supportedFileType) =>
+														supportedFileType.extension ===
+														getFileExtension(activeFile.path)
+												)?.route +
+												`?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`
 											: "https://github.com/opral/monorepo/tree/main/lix"
 									}
-									target={isSupportedFile(activeFile?.path || "") ? "_self" : "_blank"}
+									target={
+										isSupportedFile(activeFile?.path || "") ? "_self" : "_blank"
+									}
 								>
 									{activeFile?.path && isSupportedFile(activeFile.path)
-										? `Open in ${supportedFileTypes.find(
-											supportedFileType =>
-												supportedFileType.extension === getFileExtension(activeFile.path)
-										)?.appName}`
+										? `Open in ${
+												supportedFileTypes.find(
+													(supportedFileType) =>
+														supportedFileType.extension ===
+														getFileExtension(activeFile.path)
+												)?.appName
+											}`
 										: "Build a Lix App"}
 								</CustomLink>
 								{/* indicator for user to click on the button */}
@@ -401,21 +410,28 @@ export default function Page() {
 						<div className="absolute top-0 left-0 w-full h-[20px] bg-gradient-to-b from-white to-transparent pointer-events-none z-10" />
 						<div className="px-[10px] h-[calc(100%_-_60px)] overflow-y-auto">
 							{activeFile?.path && !isSupportedFile(activeFile.path) ? (
-								<NoPluginMessage extension={getFileExtension(activeFile.path)} />
+								<NoPluginMessage
+									extension={getFileExtension(activeFile.path)}
+								/>
 							) : (
 								<>
 									{intermediateChanges.length > 0 && (
 										<IntermediateCheckpointComponent />
 									)}
-										{checkpointChangeSets.map((checkpointChangeSet, index) => {
-											const previousCheckpointId = checkpointChangeSets[index + 1]?.id ?? undefined;
+									{checkpointChangeSets.map((checkpointChangeSet, index) => {
+										const previousCheckpointId =
+											checkpointChangeSets[index + 1]?.id ?? undefined;
 										return (
 											<CheckpointComponent
 												key={checkpointChangeSet.id}
 												checkpointChangeSet={checkpointChangeSet}
 												previousChangeSetId={previousCheckpointId}
-												showTopLine={index !== 0 || intermediateChanges.length > 0}
-												showBottomLine={index !== checkpointChangeSets.length - 1}
+												showTopLine={
+													index !== 0 || intermediateChanges.length > 0
+												}
+												showBottomLine={
+													index !== checkpointChangeSets.length - 1
+												}
 											/>
 										);
 									})}

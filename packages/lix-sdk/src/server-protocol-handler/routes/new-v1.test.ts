@@ -3,7 +3,6 @@ import { createServerProtocolHandler } from "../create-server-protocol-handler.j
 import { newLixFile } from "../../lix/new-lix.js";
 import { openLix } from "../../lix/open-lix.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
-import { toBlob } from "../../lix/to-blob.js";
 
 test.skip("it should store the lix file", async () => {
 	const initLix = await openLix({
@@ -23,7 +22,7 @@ test.skip("it should store the lix file", async () => {
 	const response = await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix: initLix }),
+			body: await initLix.toBlob(),
 		})
 	);
 	const json = await response.json();

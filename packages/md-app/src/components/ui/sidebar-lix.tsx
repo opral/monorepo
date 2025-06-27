@@ -40,7 +40,7 @@ import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { saveLixName } from "@/helper/renameLix";
-import { nanoid, openLix, toBlob } from "@lix-js/sdk";
+import { nanoid, openLix } from "@lix-js/sdk";
 
 import {
 	SidebarContent,
@@ -418,7 +418,7 @@ export function LixSidebar() {
 					.executeTakeFirstOrThrow()
 					.then((result) => result.value));
 
-			const blob = await toBlob({ lix });
+			const blob = await lix.toBlob();
 			const a = document.createElement("a");
 			a.href = URL.createObjectURL(blob);
 			a.download = `${displayName}.lix`;

@@ -9,7 +9,6 @@ import type { Change } from "../../database/schema.js";
 import { getDiffingRows } from "../../sync/get-diffing-rows.js";
 import { pullFromServer } from "../../sync/pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
-import { toBlob } from "../../lix/to-blob.js";
 
 test.skip("it should push data successfully", async () => {
 	const lix = await openLix({});
@@ -20,7 +19,7 @@ test.skip("it should push data successfully", async () => {
 		.executeTakeFirstOrThrow();
 
 	const environment = createLspInMemoryEnvironment();
-	await environment.setLix({ id, blob: await toBlob({ lix }) });
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsaHandler = await createServerProtocolHandler({ environment });
 
@@ -131,7 +130,7 @@ test.skip("it should return 400 for a failed insert operation", async () => {
 
 	const environment = createLspInMemoryEnvironment();
 
-	environment.setLix({ id, blob: await toBlob({ lix }) });
+	environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsa = await createServerProtocolHandler({ environment });
 
@@ -170,7 +169,7 @@ test.skip("it should detect conflicts", async () => {
 
 	// initialize client
 	const lixOnClient = await openLix({
-		blob: await toBlob({ lix: lixOnServer }),
+		blob: await lixOnServer.toBlob(),
 	});
 
 	const lixId = await lixOnServer.db
@@ -193,7 +192,7 @@ test.skip("it should detect conflicts", async () => {
 
 	await environment.setLix({
 		id: lixId.value,
-		blob: await toBlob({ lix: lixOnServer }),
+		blob: await lixOnServer.toBlob(),
 	});
 
 	// client has/creates value1 for mock_key
