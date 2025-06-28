@@ -23,6 +23,10 @@ const VersionToolbar: React.FC = () => {
 	const handleVersionChange = async (versionId: string) => {
 		try {
 			await switchVersion({ lix, to: { id: versionId } });
+			await lix.db
+				.insertInto("key_value")
+				.values({ key: "active_version", value: versionId })
+				.execute();
 		} catch (error) {
 			console.error("Error switching version:", error);
 		}
