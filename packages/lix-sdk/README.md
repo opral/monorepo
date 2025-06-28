@@ -59,14 +59,14 @@ npm install @lix-js/sdk
 Create and open a new Lix file:
 
 ```javascript 
-import { newLixFile, openLix } from "@lix-js/sdk";
+import { newLixFile, openLixInMemory } from "@lix-js/sdk";
 import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 
 // Create a new empty Lix file
 const lixFile = await newLixFile();
 
 // Open the Lix file in memory
-const lix = await openLix({
+const lix = await openLixInMemory({
 	blob: lixFile,
 	providePlugins: [jsonPlugin],
 });
