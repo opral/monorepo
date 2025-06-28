@@ -38,6 +38,29 @@ const LixDebugPanel = () => {
 		}
 	};
 
+	const handleReset = async () => {
+		if (!confirm("Are you sure you want to reset? This will delete all data and reload the page.")) {
+			return;
+		}
+
+		try {
+			// Close the Lix instance first
+			await lix.close();
+
+			// Delete the OPFS file
+			const opfsRoot = await navigator.storage.getDirectory();
+			await opfsRoot.removeEntry("example.lix");
+			
+			// Reload the window
+			window.location.reload();
+		} catch (error) {
+			console.error("Error during reset:", error);
+			alert("Error during reset: " + (error as Error).message);
+			// Still reload even if there was an error, in case the file was partially deleted
+			window.location.reload();
+		}
+	};
+
 	// Function to get a readable content preview for changes
 	const getContentPreview = (change: Change): string => {
 		if (!change.snapshot_content) return "No content available";
@@ -94,6 +117,9 @@ const LixDebugPanel = () => {
 					<ProsemirrorDocExport />
 					<button onClick={handleDownloadLixDb} className="btn btn-sm">
 						Download Lix Blob
+					</button>
+					<button onClick={handleReset} className="btn btn-sm btn-error">
+						Reset
 					</button>
 				</div>
 			</div>

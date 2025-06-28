@@ -1,7 +1,7 @@
-import { Plugin, PluginKey, Transaction } from "prosemirror-state";
+import { Plugin, PluginKey, Transaction, TextSelection } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { Schema } from "prosemirror-model";
-import { executeSync, type Lix } from "@lix-js/sdk";
+import { type Lix } from "@lix-js/sdk";
 
 // Create a plugin key for the Lix plugin
 export const lixPluginKey = new PluginKey("lix-plugin");
@@ -17,59 +17,19 @@ interface LixPluginOptions {
  * Creates a ProseMirror plugin that automatically saves document changes to Lix
  */
 export function lixProsemirror(options: LixPluginOptions) {
-	const { lix, debounceTime = 400 } = options;
+	const { lix, fileId, schema, debounceTime = 400 } = options;
 
-	lix.sqlite.createFunction(
-		"handle_lix_prosemirror_update",
-		(...values: any[]) => {
-			const data = new TextDecoder().decode(values[1]);
-			const json = JSON.parse(data);
-
-			const isInternalUpdate = executeSync({
-				lix,
-				query: lix.db
-					.selectFrom("key_value")
-					.where("key", "=", "prosemirror_is_editor_update")
-					.select("value"),
-			})[0];
-
-			// Only update the editor if this is an external change
-			if (!isInternalUpdate) {
-				updateEditorFromExternalDoc(json);
-			}
-
-			// clean up the update flag
-			executeSync({
-				lix,
-				query: lix.db
-					.deleteFrom("key_value")
-					.where("key", "=", "prosemirror_is_editor_update"),
-			});
-			return null;
-		},
-		{
-			name: "handle_lix_prosemirror_update",
-			arity: -1,
-		},
-	);
-
-	// lix.sqlite.exec(`
-	//   CREATE TEMP TRIGGER IF NOT EXISTS lix_prosemirror_update
-	//   AFTER UPDATE ON file
-	//   WHEN NEW.id = '${options.fileId}'
-	//   BEGIN
-	//     SELECT handle_lix_prosemirror_update(NEW.data, json(NEW.metadata));
-	//   END;
-	//   `);
-
-	// Track if there's a save in progress to prevent multiple simultaneous saves
-	let saveInProgress = false;
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+	let saveInProgress = false;
 	let view: EditorView | null = null;
 	let lastExternalDoc: any = null;
+	let isApplyingExternalUpdate = false;
 
-	// Function to save the document to Lix
+	// Function to save document directly to file with debouncing
 	const saveDocumentToLix = (docJSON: any) => {
+		// Don't save if we're currently applying an external update
+		if (isApplyingExternalUpdate) return;
+
 		// Clear any pending timeout
 		if (saveTimeout) {
 			clearTimeout(saveTimeout);
@@ -82,47 +42,24 @@ export function lixProsemirror(options: LixPluginOptions) {
 			if (saveInProgress) return;
 
 			saveInProgress = true;
-			const fileData = new TextEncoder().encode(JSON.stringify(docJSON));
+			try {
+				const fileData = new TextEncoder().encode(JSON.stringify(docJSON));
 
-			// Upsert the prosemirror_is_editor_update flag
-			const updateResult = await lix.db
-				.updateTable("key_value")
-				.set({
-					value: "true",
-					// skip_change_control: true,
-				})
-				.where("key", "=", "prosemirror_is_editor_update")
-				.execute();
-
-			// If no rows were updated, insert a new row
-			if (updateResult.length === 0 || updateResult[0]?.numUpdatedRows === 0n) {
 				await lix.db
-					.insertInto("key_value")
-					.values({
-						key: "prosemirror_is_editor_update",
-						value: "true",
-						// skip_change_control: true,
-					})
+					.updateTable("file")
+					.set({ data: fileData })
+					.where("id", "=", fileId)
 					.execute();
+			} catch (error) {
+				console.error("Error saving document to Lix:", error);
+			} finally {
+				saveInProgress = false;
 			}
-
-			await lix.db
-				.updateTable("file")
-				.set({ data: fileData })
-				.where("id", "=", options.fileId)
-				.execute()
-				.then(() => {
-					saveInProgress = false;
-				})
-				.catch((error) => {
-					console.error("Error saving document to Lix:", error);
-					saveInProgress = false;
-				});
 		}, debounceTime);
 	};
 
 	// Function to update the editor with external document changes
-	const updateEditorFromExternalDoc = (externalDoc: any) => {
+	const updateEditorFromExternalDoc = async (externalDoc: any, isInitialLoad = false) => {
 		// Skip if the view is not initialized yet
 		if (!view) return;
 
@@ -138,19 +75,32 @@ export function lixProsemirror(options: LixPluginOptions) {
 		lastExternalDoc = externalDoc;
 
 		try {
+			// Set flag to prevent saving while applying external update
+			isApplyingExternalUpdate = true;
+
+			// Create a new document from JSON
+			const newDoc = schema.nodeFromJSON(externalDoc);
+
 			// Create a transaction to replace the document
 			const tr = view.state.tr;
 
-			// Create a new document from JSON
-			const newDoc = options.schema.nodeFromJSON(externalDoc);
-
 			// Replace the current document
 			tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
+
+			// For initial load, set selection to the beginning to avoid highlighting all text
+			if (isInitialLoad) {
+				tr.setSelection(TextSelection.atStart(tr.doc));
+			}
 
 			// Apply the transaction
 			view.dispatch(tr);
 		} catch (error) {
 			console.error("Error updating document from external source:", error);
+		} finally {
+			// Reset flag after a short delay to allow the transaction to complete
+			setTimeout(() => {
+				isApplyingExternalUpdate = false;
+			}, 100);
 		}
 	};
 
@@ -185,8 +135,8 @@ export function lixProsemirror(options: LixPluginOptions) {
 			// Check if any transaction changed the document
 			const docChanged = transactions.some((tr) => tr.docChanged);
 
-			if (docChanged) {
-				// Save the document to Lix
+			if (docChanged && !isApplyingExternalUpdate) {
+				// Save document directly to file (only if not applying external update)
 				saveDocumentToLix(newState.doc.toJSON());
 			}
 
@@ -198,24 +148,71 @@ export function lixProsemirror(options: LixPluginOptions) {
 			// Store the view reference
 			view = editorView;
 
-			return {
-				update(view, prevState) {
-					// Check if we have a new external doc to apply
-					const pluginState = lixPluginKey.getState(view.state);
-					if (
-						pluginState.externalDoc &&
-						pluginState.externalDoc !==
-							lixPluginKey.getState(prevState).externalDoc
-					) {
-						updateEditorFromExternalDoc(pluginState.externalDoc);
+			// Load initial document from Lix
+			const loadInitialDocument = async () => {
+				try {
+					const file = await lix.db
+						.selectFrom("file")
+						.where("id", "=", fileId)
+						.select("data")
+						.executeTakeFirst();
+
+					if (file && file.data) {
+						const fileContent = new TextDecoder().decode(file.data);
+						const initialDoc = JSON.parse(fileContent);
+						
+						// Only load if the current document is empty (initial state)
+						const currentDoc = editorView.state.doc;
+						const isEmpty = currentDoc.content.size === 0 || 
+							(currentDoc.content.size === 2 && currentDoc.textContent === "");
+
+						if (isEmpty) {
+							await updateEditorFromExternalDoc(initialDoc, true);
+						}
 					}
+				} catch (error) {
+					console.error("Error loading initial document:", error);
+				}
+			};
+
+			// Load initial document
+			loadInitialDocument();
+
+			// Set up file change listener
+			const unsubscribe = lix.hooks.onFileChange(async (changedFileId, operation) => {
+				if (changedFileId === fileId && operation === 'updated') {
+					try {
+						// Fetch the updated file content
+						const updatedFile = await lix.db
+							.selectFrom("file")
+							.where("id", "=", fileId)
+							.select("data")
+							.executeTakeFirst();
+
+						if (updatedFile && updatedFile.data) {
+							const fileContent = new TextDecoder().decode(updatedFile.data);
+							const externalDoc = JSON.parse(fileContent);
+							
+							// Update the editor with the external document
+							await updateEditorFromExternalDoc(externalDoc);
+						}
+					} catch (error) {
+						console.error("Error handling external file update:", error);
+					}
+				}
+			});
+
+			return {
+				update() {
+					// File change handling is now done via the hook
 				},
 				destroy() {
 					// Cancel any pending save operations
 					if (saveTimeout) {
 						clearTimeout(saveTimeout);
 					}
-
+					// Remove file change listener
+					unsubscribe();
 					// Clear the view reference
 					view = null;
 				},
