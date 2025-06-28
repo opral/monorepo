@@ -58,6 +58,9 @@ describe("createEntityAllViewIfNotExists", () => {
 				id: "test_id",
 				name: "test_name",
 				value: 42,
+				lixcol_version_id: lix.db
+					.selectFrom("active_version")
+					.select("version_id"),
 			})
 			.execute();
 
@@ -99,7 +102,14 @@ describe("createEntityAllViewIfNotExists", () => {
 		// INSERT trigger test
 		await lix.db
 			.insertInto("test_view_all" as any)
-			.values({ id: "test_id", name: "test_name", value: 42 })
+			.values({
+				id: "test_id",
+				name: "test_name",
+				value: 42,
+				lixcol_version_id: lix.db
+					.selectFrom("active_version")
+					.select("version_id"),
+			})
 			.execute();
 
 		let result = await lix.db
@@ -112,6 +122,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		await lix.db
 			.updateTable("test_view_all" as any)
 			.where("id", "=", "test_id")
+			.where("lixcol_version_id", "=", result[0]!.lixcol_version_id)
 			.set({ name: "updated_name" })
 			.execute();
 
@@ -209,11 +220,18 @@ describe("createEntityAllViewIfNotExists", () => {
 			},
 		});
 
+		// Get active version
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
 		// Insert without providing default values
 		await lix.db
 			.insertInto("test_view_all" as any)
 			.values({
 				name: "test_name",
+				lixcol_version_id: activeVersion.version_id,
 				// id and value should use defaults
 			})
 			.execute();
@@ -249,10 +267,21 @@ describe("createEntityAllViewIfNotExists", () => {
 			hardcodedFileId: "test_file",
 		});
 
+		// Get active version
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
 		// Test that we can query the view using the schema key + _all name
 		await lix.db
 			.insertInto("test_entity_all" as any)
-			.values({ id: "test_id", name: "test_name", value: 42 })
+			.values({ 
+				id: "test_id", 
+				name: "test_name", 
+				value: 42,
+				lixcol_version_id: activeVersion.version_id,
+			})
 			.execute();
 
 		const result = await lix.db
@@ -341,6 +370,12 @@ describe("createEntityAllViewIfNotExists", () => {
 			hardcodedFileId: "test_file",
 		});
 
+		// Get active version
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
 		// Insert tracked entity (default)
 		await lix.db
 			.insertInto("test_view_all" as any)
@@ -348,6 +383,7 @@ describe("createEntityAllViewIfNotExists", () => {
 				id: "tracked_entity",
 				name: "tracked",
 				value: 100,
+				lixcol_version_id: activeVersion.version_id,
 			})
 			.execute();
 
@@ -358,6 +394,7 @@ describe("createEntityAllViewIfNotExists", () => {
 				id: "untracked_entity",
 				name: "untracked",
 				value: 200,
+				lixcol_version_id: activeVersion.version_id,
 				lixcol_untracked: true,
 			})
 			.execute();

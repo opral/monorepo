@@ -135,7 +135,14 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		// Insert through _all view
 		await lix.db
 			.insertInto("cross_test_all" as any)
-			.values({ id: "test_id", name: "test_name", value: 42 })
+			.values({
+				id: "test_id",
+				name: "test_name",
+				value: 42,
+				lixcol_version_id: lix.db
+					.selectFrom("active_version")
+					.select("version_id"),
+			})
 			.execute();
 
 		// Update through primary view

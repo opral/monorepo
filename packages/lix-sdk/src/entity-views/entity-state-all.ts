@@ -378,7 +378,7 @@ function createSingleEntityAllView(args: {
 	// Handle version_id for _all view
 	const versionIdReference = args.hardcodedVersionId
 		? `'${args.hardcodedVersionId}'`
-		: "COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))";
+		: "NEW.lixcol_version_id";
 
 	const versionIdInDefaults = "NEW.lixcol_version_id AS lixcol_version_id,";
 
