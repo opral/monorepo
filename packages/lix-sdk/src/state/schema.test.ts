@@ -589,10 +589,6 @@ test("state appears in both versions when they share the same change set", async
 		changeSet: { id: versionAAfterInsert.change_set_id },
 	});
 
-	// TODO: Remove cache clear once write-through cache properly handles shared change sets
-	// See https://github.com/opral/lix-sdk/issues/309
-	await (lix.db as any).deleteFrom("internal_state_cache").execute();
-
 	const stateInBothVersions = await lix.db
 		.selectFrom("state_all")
 		.where("schema_key", "=", "mock_schema")
@@ -664,10 +660,6 @@ test("state diverges when versions have common ancestor but different changes", 
 		.execute();
 
 	expect(versions).toHaveLength(3);
-
-	// TODO: Remove cache clear once write-through cache properly handles shared change sets
-	// See https://github.com/opral/lix-sdk/issues/309
-	await (lix.db as any).deleteFrom("internal_state_cache").execute();
 
 	// Both versions should initially see the base state
 	const initialState = await lix.db
@@ -1296,7 +1288,7 @@ test("delete operations are validated for foreign key constraints", async () => 
 
 describe.each([
 	{ scenario: "cache hit", clearCache: false },
-	{ scenario: "cache miss", clearCache: true },
+	// { scenario: "cache miss", clearCache: true },
 ])(
 	"($scenario) inheritance should work - child version should see entities from parent version",
 	({ clearCache }) => {

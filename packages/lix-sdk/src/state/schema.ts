@@ -725,6 +725,50 @@ export function applyStateDatabaseSchema(
 						);
 					}
 
+					// TODO: This cache copying logic is a temporary workaround for shared change sets.
+					// The proper solution requires improving cache miss logic to handle change set sharing
+					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
+					//
+					// Handle cache copying for new versions that share change sets
+					if (isInsert && String(schema_key) === 'lix_version') {
+						const versionData = JSON.parse(snapshotStr);
+						const newVersionId = versionData.id;
+						const changeSetId = versionData.change_set_id;
+
+						if (newVersionId && changeSetId) {
+							// Find other versions that already use this change set
+							const existingVersionsWithSameChangeSet = sqlite.exec({
+								sql: `
+									SELECT json_extract(snapshot_content, '$.id') as version_id
+									FROM internal_state_cache 
+									WHERE schema_key = 'lix_version' 
+									  AND json_extract(snapshot_content, '$.change_set_id') = ?
+									  AND json_extract(snapshot_content, '$.id') != ?
+								`,
+								bind: [changeSetId, newVersionId],
+								returnValue: "resultRows",
+							});
+
+							// If there are existing versions with the same change set, copy their cache entries
+							if (existingVersionsWithSameChangeSet && existingVersionsWithSameChangeSet.length > 0) {
+								const sourceVersionId = existingVersionsWithSameChangeSet[0]![0]; // Take first existing version
+								
+								// Copy cache entries from source version to new version
+								sqlite.exec({
+									sql: `
+										INSERT OR IGNORE INTO internal_state_cache 
+										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id)
+										SELECT 
+											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id
+										FROM internal_state_cache
+										WHERE version_id = ? AND schema_key != 'lix_version'
+									`,
+									bind: [newVersionId, sourceVersionId],
+								});
+							}
+						}
+					}
+
 					return capi.SQLITE_OK;
 				} catch (error) {
 					const errorMessage =
@@ -972,6 +1016,14 @@ function selectStateViaCTE(
 				SELECT ict.id, ict.entity_id, ict.schema_key, ict.file_id, ict.plugin_key,
 					   ict.schema_version, ict.snapshot_content
 				FROM internal_change_in_transaction ict
+				
+				UNION ALL
+				
+				-- Include untracked state (pseudo-changes with special change_id)
+				SELECT 'untracked-' || unt.entity_id || '-' || unt.schema_key AS id,
+					   unt.entity_id, unt.schema_key, unt.file_id, unt.plugin_key,
+					   unt.schema_version, json(unt.snapshot_content) AS snapshot_content
+				FROM state_all_untracked unt
 			),
 			root_cs_of_all_versions AS (
 				SELECT json_extract(v.snapshot_content, '$.change_set_id') AS version_change_set_id, 
