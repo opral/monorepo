@@ -20,6 +20,7 @@ export function validateStateMutation(args: {
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
+	untracked?: boolean;
 }): void {
 	// console.log(`validateStateMutation called with operation: ${args.operation}, schema: ${args.schema?.["x-lix-key"]}, entity_id: ${args.entity_id}`);
 	// Validate version_id is provided
@@ -122,6 +123,7 @@ export function validateStateMutation(args: {
 				schema: args.schema,
 				snapshot_content: args.snapshot_content,
 				version_id: args.version_id,
+				untracked: args.untracked,
 			});
 		}
 	}
@@ -288,6 +290,7 @@ function validateForeignKeyConstraints(args: {
 	schema: LixSchemaDefinition;
 	snapshot_content: Change["snapshot_content"];
 	version_id: string;
+	untracked?: boolean;
 }): void {
 	const foreignKeys = args.schema["x-lix-foreign-keys"];
 	if (!foreignKeys) {
@@ -413,6 +416,37 @@ function validateForeignKeyConstraints(args: {
 			errorMessage += `\nNote: Foreign key constraints only validate entities that exist in the version context. Inherited entities from other versions cannot be referenced by foreign keys. If you reference global state, ensure that you are creating the entity in the global version.`;
 
 			throw new Error(errorMessage);
+		}
+
+		// If this is a tracked entity, check if the referenced entity is untracked
+		if (!args.untracked && !isRealSqlTable) {
+			// Query the untracked table to see if the referenced entity is untracked
+			const untrackedReferences = executeSync({
+				lix: args.lix,
+				query: args.lix.db
+					.selectFrom("state_all")
+					.select("entity_id")
+					.where("schema_key", "=", foreignKeyDef.schemaKey)
+					.where("version_id", "=", args.version_id)
+					.where("untracked", "=", true)
+					.where(
+						sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
+						"=",
+						foreignKeyValue
+					),
+			});
+
+			if (untrackedReferences.length > 0) {
+				let errorMessage = `Foreign key constraint violation: tracked entities cannot reference untracked entities. This would create broken references during sync.\n`;
+				errorMessage += `\nThe tracked entity '${args.schema["x-lix-key"]}' is trying to reference an untracked entity '${foreignKeyDef.schemaKey}' with ${foreignKeyDef.property}='${foreignKeyValue}'.\n`;
+				errorMessage += `\nUntracked entities are local-only and will not be synced to remote. If a tracked entity references an untracked entity, it would fail validation on the remote because the untracked entity doesn't exist there.\n`;
+				errorMessage += `\nSolutions:\n`;
+				errorMessage += `1. Make the referenced entity tracked (remove untracked flag)\n`;
+				errorMessage += `2. Make the referencing entity untracked as well\n`;
+				errorMessage += `3. Remove the foreign key reference`;
+
+				throw new Error(errorMessage);
+			}
 		}
 	}
 }
