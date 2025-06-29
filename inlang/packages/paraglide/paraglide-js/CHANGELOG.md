@@ -1,5 +1,94 @@
 # @inlang/paraglide-js
 
+## 2.2.0
+
+### Minor Changes
+
+- 69ac911: Add support for async custom server strategies with `extractLocaleFromRequestAsync`
+
+  This change introduces a new `extractLocaleFromRequestAsync` function that supports asynchronous custom server strategies, enabling use cases like fetching user locale preferences from databases.
+
+  ## What's Changed
+
+  - **New Function**: Added `extractLocaleFromRequestAsync` that supports async custom server strategies
+  - **Middleware Update**: Server middleware now uses the async version to support async custom strategies
+  - **Breaking Change**: The synchronous `extractLocaleFromRequest` no longer supports custom server strategies
+  - **Improved Documentation**: Added comprehensive examples and usage guidance
+
+  ## Migration Guide
+
+  ### For users with custom server strategies:
+
+  **Before:**
+
+  ```js
+  // This no longer works in sync version
+  defineCustomServerStrategy("custom-database", {
+  	getLocale: async (request) => {
+  		return await getUserLocaleFromDatabase(request);
+  	},
+  });
+
+  const locale = extractLocaleFromRequest(request); // Won't call async custom strategies
+  ```
+
+  **After:**
+
+  ```js
+  // Use the async version for custom strategies
+  defineCustomServerStrategy("custom-database", {
+  	getLocale: async (request) => {
+  		return await getUserLocaleFromDatabase(request);
+  	},
+  });
+
+  const locale = await extractLocaleFromRequestAsync(request); // Supports async custom strategies
+  ```
+
+  ### For users calling `extractLocaleFromRequest` directly:
+
+  If you're using `extractLocaleFromRequest` directly in your code without custom strategies, no changes are needed. For custom server strategies, switch to `extractLocaleFromRequestAsync`.
+
+  The server middleware automatically uses the async version, so no changes are needed for standard middleware usage.
+
+  Closes https://github.com/opral/inlang-paraglide-js/issues/527
+
+### Patch Changes
+
+- 5589e30: (likely) fix: handler is of type `unknown` ts error https://github.com/opral/inlang-paraglide-js/issues/529
+- 3712f09: Fix cookieDomain default behavior for better server/client cookie compatibility.
+
+  When `cookieDomain` is undefined or empty, cookies are now set without a domain attribute, scoping them to the exact current domain only (no subdomains). This fixes compatibility issues with server-side cookies that don't include a domain attribute.
+
+  **Before**:
+
+  ```js
+  // When cookieDomain was undefined, cookies were set as:
+  document.cookie =
+  	"PARAGLIDE_LOCALE=en; path=/; max-age=34560000; domain=example.com";
+  // This made cookies available to subdomains
+  ```
+
+  **After**:
+
+  ```js
+  // When cookieDomain is undefined, cookies are now set as:
+  document.cookie = "PARAGLIDE_LOCALE=en; path=/; max-age=34560000";
+  // This scopes cookies to the exact current domain only
+  ```
+
+  **Migration**:
+
+  - If you want the previous behavior (subdomain sharing), explicitly set `cookieDomain` in your configuration:
+
+  ```diff
+  paraglideWebpackPlugin({
+    project: './project.inlang',
+    outdir: "./src/paraglide",
+  + cookieDomain: 'example.com'
+  })
+  ```
+
 ## 2.1.0
 
 ### Minor Changes
