@@ -2086,3 +2086,266 @@ test("should prevent change set elements from referencing change sets defined in
 		/Foreign key constraint violation.*lix_change_set.*global_change_set/
 	);
 });
+
+// Untracked state foreign key tests
+// SCENARIO: Tracked → Untracked Foreign Key Reference
+// WHY THIS TEST EXISTS: Untracked entities are local-only and won't be synced to remote.
+// If a tracked entity references an untracked entity, it would create broken references
+// when synced because the untracked entity doesn't exist on the remote.
+// BEHAVIOR: DISALLOWED - This would break data integrity during sync operations.
+test("should prevent tracked entities from referencing untracked entities", async () => {
+	const lix = await openLix({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const postSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "post",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			author_id: {
+				schemaKey: "user",
+				property: "id",
+			},
+		},
+		properties: {
+			id: { type: "string" },
+			author_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "author_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert an untracked user
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "untracked_user",
+			file_id: "file1",
+			schema_key: "user",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: {
+				id: "untracked_user",
+				name: "Untracked User",
+			},
+			schema_version: "1.0",
+			untracked: true,
+		})
+		.execute();
+
+	// This should FAIL - tracked entity cannot reference untracked entity
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: postSchema,
+			snapshot_content: {
+				id: "post1",
+				author_id: "untracked_user", // References untracked user
+				title: "My Post",
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrow(/Foreign key constraint violation.*tracked entities cannot reference untracked entities.*This would create broken references during sync/);
+});
+
+// SCENARIO: Untracked → Tracked Foreign Key Reference
+// WHY THIS TEST EXISTS: Untracked entities are local-only and won't be synced.
+// Since they remain local, they can safely reference tracked entities without
+// breaking data integrity. The untracked entity simply won't exist on remote.
+// BEHAVIOR: ALLOWED - Safe because untracked entities don't participate in sync.
+test("should allow untracked entities to reference tracked entities", async () => {
+	const lix = await openLix({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const postSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "post",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			author_id: {
+				schemaKey: "user",
+				property: "id",
+			},
+		},
+		properties: {
+			id: { type: "string" },
+			author_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "author_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert a tracked user
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "tracked_user",
+			file_id: "file1",
+			schema_key: "user",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: {
+				id: "tracked_user",
+				name: "Tracked User",
+			},
+			schema_version: "1.0",
+			untracked: false,
+		})
+		.execute();
+
+	// Create validation arguments for untracked post
+	const validationArgs = {
+		lix,
+		schema: postSchema,
+		snapshot_content: {
+			id: "untracked_post",
+			author_id: "tracked_user", // References tracked user
+			title: "My Untracked Post",
+		},
+		operation: "insert" as const,
+		version_id: activeVersion.version_id,
+		untracked: true, // Mark as untracked
+	};
+
+	// This should PASS - untracked entity can reference tracked entity
+	expect(() => validateStateMutation(validationArgs)).not.toThrow();
+});
+
+// SCENARIO: Untracked → Untracked Foreign Key Reference
+// WHY THIS TEST EXISTS: Both entities are local-only and won't be synced.
+// They exist in the same local scope, so references between them are valid
+// and won't cause any sync issues since neither entity leaves the local system.
+// BEHAVIOR: ALLOWED - Both entities remain local, maintaining referential integrity.
+test("should allow untracked entities to reference other untracked entities", async () => {
+	const lix = await openLix({});
+
+	const userSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "user",
+		"x-lix-primary-key": ["id"],
+		properties: {
+			id: { type: "string" },
+			name: { type: "string" },
+		},
+		required: ["id", "name"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	const postSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "post",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": {
+			author_id: {
+				schemaKey: "user",
+				property: "id",
+			},
+		},
+		properties: {
+			id: { type: "string" },
+			author_id: { type: "string" },
+			title: { type: "string" },
+		},
+		required: ["id", "author_id", "title"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: userSchema }, { value: postSchema }])
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert an untracked user
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "untracked_user",
+			file_id: "file1",
+			schema_key: "user",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: {
+				id: "untracked_user",
+				name: "Untracked User",
+			},
+			schema_version: "1.0",
+			untracked: true,
+		})
+		.execute();
+
+	// Create validation arguments for untracked post
+	const validationArgs = {
+		lix,
+		schema: postSchema,
+		snapshot_content: {
+			id: "untracked_post",
+			author_id: "untracked_user", // References untracked user
+			title: "My Untracked Post",
+		},
+		operation: "insert" as const,
+		version_id: activeVersion.version_id,
+		untracked: true, // Mark as untracked
+	};
+
+	// This should PASS - untracked entity can reference another untracked entity
+	expect(() => validateStateMutation(validationArgs)).not.toThrow();
+});
