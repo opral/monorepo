@@ -1951,10 +1951,10 @@ test("untracked mutations don't trigger change control", async () => {
 		.values({ value: mockSchema })
 		.execute();
 
-	// Count changes before untracked mutation
-	const changesBefore = await lix.db.selectFrom("change").selectAll().execute();
+	// Count changes before any untracked mutations
+	const changesInitial = await lix.db.selectFrom("change").selectAll().execute();
 
-	// Insert untracked state
+	// 1. INSERT untracked state
 	await lix.db
 		.insertInto("state_all")
 		.values({
@@ -1971,11 +1971,11 @@ test("untracked mutations don't trigger change control", async () => {
 		})
 		.execute();
 
-	// Count changes after untracked mutation
-	const changesAfter = await lix.db.selectFrom("change").selectAll().execute();
+	// Count changes after untracked insert
+	const changesAfterInsert = await lix.db.selectFrom("change").selectAll().execute();
 
 	// Number of changes should be identical (no change control for untracked)
-	expect(changesAfter.length).toBe(changesBefore.length);
+	expect(changesAfterInsert.length).toBe(changesInitial.length);
 
 	// Verify the untracked entity exists in state view
 	const untrackedState = await lix.db
@@ -1988,6 +1988,59 @@ test("untracked mutations don't trigger change control", async () => {
 	expect(untrackedState[0]?.snapshot_content).toEqual({
 		value: "untracked value",
 	});
+	expect(untrackedState[0]?.untracked).toBe(1);
+
+	// 2. UPDATE untracked state
+	await lix.db
+		.updateTable("state_all")
+		.where("entity_id", "=", "untracked-entity")
+		.set({
+			snapshot_content: {
+				value: "untracked value updated",
+			},
+			untracked: true,
+		})
+		.execute();
+
+	// Count changes after untracked update
+	const changesAfterUpdate = await lix.db.selectFrom("change").selectAll().execute();
+
+	// Number of changes should still be identical (no change control for untracked)
+	expect(changesAfterUpdate.length).toBe(changesInitial.length);
+
+	// Verify the untracked entity was updated
+	const updatedState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "untracked-entity")
+		.selectAll()
+		.execute();
+
+	expect(updatedState).toHaveLength(1);
+	expect(updatedState[0]?.snapshot_content).toEqual({
+		value: "untracked value updated",
+	});
+	expect(updatedState[0]?.untracked).toBe(1);
+
+	// 3. DELETE untracked state
+	await lix.db
+		.deleteFrom("state_all")
+		.where("entity_id", "=", "untracked-entity")
+		.execute();
+
+	// Count changes after untracked delete
+	const changesAfterDelete = await lix.db.selectFrom("change").selectAll().execute();
+
+	// Number of changes should still be identical (no change control for untracked)
+	expect(changesAfterDelete.length).toBe(changesInitial.length);
+
+	// Verify the untracked entity was deleted
+	const deletedState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "untracked-entity")
+		.selectAll()
+		.execute();
+
+	expect(deletedState).toHaveLength(0);
 });
 
 test("tracked update to previously untracked entity deletes untracked state", async () => {

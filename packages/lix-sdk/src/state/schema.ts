@@ -938,6 +938,24 @@ export function handleStateDelete(
 	const plugin_key = rowToDelete[4];
 	const snapshot_content = rowToDelete[5];
 	const schema_version = rowToDelete[6];
+	// Column indices: created_at[7], updated_at[8], inherited_from_version_id[9], change_id[10], untracked[11]
+	const untracked = rowToDelete[11];
+
+	// If entity is untracked, just delete it without creating changes
+	if (untracked) {
+		// Delete from untracked table
+		sqlite.exec({
+			sql: `DELETE FROM state_all_untracked 
+				  WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?`,
+			bind: [
+				String(entity_id),
+				String(schema_key),
+				String(file_id),
+				String(version_id),
+			],
+		});
+		return;
+	}
 
 	const storedSchemaResult = sqlite.exec({
 		sql: "SELECT value FROM stored_schema WHERE key = ?",
