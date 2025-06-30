@@ -24,7 +24,7 @@ test("useQuery throws error when used outside LixProvider", () => {
 	// We need to catch the error since it's thrown during render
 	expect(() => {
 		renderHook(() =>
-			useQuery((db) => db.selectFrom("key_value").selectAll()),
+			useQuery((lix) => lix.db.selectFrom("key_value").selectAll()),
 		);
 	}).toThrow("useQuery must be used inside <LixProvider>.");
 });
@@ -37,8 +37,11 @@ test("useQuery returns loading state initially", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQuery((db) =>
-				db.selectFrom("key_value").selectAll().where("key", "like", "test_%"),
+			useQuery((lix) =>
+				lix.db
+					.selectFrom("key_value")
+					.selectAll()
+					.where("key", "like", "test_%"),
 			),
 		{ wrapper },
 	);
@@ -58,8 +61,11 @@ test("useQuery returns data after initial load", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQuery((db) =>
-				db.selectFrom("key_value").selectAll().where("key", "like", "test_%"),
+			useQuery((lix) =>
+				lix.db
+					.selectFrom("key_value")
+					.selectAll()
+					.where("key", "like", "test_%"),
 			),
 		{ wrapper },
 	);
@@ -82,8 +88,8 @@ test("useQuery updates when data changes", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQuery((db) =>
-				db
+			useQuery((lix) =>
+				lix.db
 					.selectFrom("key_value")
 					.selectAll()
 					.where("key", "like", "react_test_%"),
@@ -148,7 +154,9 @@ test("useQuery handles query errors", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQuery((db) => db.selectFrom("non_existent_table" as any).selectAll()),
+			useQuery((lix) =>
+				lix.db.selectFrom("non_existent_table" as any).selectAll(),
+			),
 		{ wrapper },
 	);
 
@@ -170,8 +178,8 @@ test("useQuery multiple subscriptions work independently", async () => {
 
 	const { result: result1 } = renderHook(
 		() =>
-			useQuery((db) =>
-				db
+			useQuery((lix) =>
+				lix.db
 					.selectFrom("key_value")
 					.selectAll()
 					.where("key", "like", "multi_1_%"),
@@ -181,8 +189,8 @@ test("useQuery multiple subscriptions work independently", async () => {
 
 	const { result: result2 } = renderHook(
 		() =>
-			useQuery((db) =>
-				db
+			useQuery((lix) =>
+				lix.db
 					.selectFrom("key_value")
 					.selectAll()
 					.where("key", "like", "multi_2_%"),
@@ -244,8 +252,8 @@ test("useQueryFirst returns first item from array", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQueryFirst((db) =>
-				db
+			useQueryFirst((lix) =>
+				lix.db
 					.selectFrom("key_value")
 					.selectAll()
 					.where("key", "like", "first_test_%")
@@ -274,8 +282,8 @@ test("useQueryFirst returns undefined for empty results", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQueryFirst((db) =>
-				db
+			useQueryFirst((lix) =>
+				lix.db
 					.selectFrom("key_value")
 					.selectAll()
 					.where("key", "=", "non_existent"),
@@ -307,8 +315,8 @@ test("useQueryFirstOrThrow returns first item from array", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQueryFirstOrThrow((db) =>
-				db
+			useQueryFirstOrThrow((lix) =>
+				lix.db
 					.selectFrom("key_value")
 					.selectAll()
 					.where("key", "=", "throw_test_1"),
@@ -336,8 +344,8 @@ test("useQueryFirstOrThrow throws error for empty results", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQueryFirstOrThrow((db) =>
-				db
+			useQueryFirstOrThrow((lix) =>
+				lix.db
 					.selectFrom("key_value")
 					.selectAll()
 					.where("key", "=", "non_existent_key"),

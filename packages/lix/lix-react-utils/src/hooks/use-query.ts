@@ -22,21 +22,21 @@ type Snapshot<T> = {
  *
  * @param buildQuery – either:
  *   • a ready-made Kysely SelectQueryBuilder, **or**
- *   • a factory `(db) => builder` so you can depend on props / state.
+ *   • a factory `(lix) => builder` so you can depend on props / state.
  *
  * @returns `{ data, error, loading }`
  *
  * @example
  * ```tsx
- * const { data: todos } = useQuery(db =>
- *   db.selectFrom('todo')
+ * const { data: todos } = useQuery(lix =>
+ *   lix.db.selectFrom('todo')
  *     .where('completed','=',false)
  *     .orderBy('created_at asc')
  *     .selectAll()
  * )
  * ```
  */
-export function useQuery<TRow>(buildQuery: (db: Lix["db"]) => any): {
+export function useQuery<TRow>(buildQuery: (lix: Lix) => any): {
 	data: TRow[] | undefined;
 	error: Error | null;
 	loading: boolean;
@@ -47,7 +47,7 @@ export function useQuery<TRow>(buildQuery: (db: Lix["db"]) => any): {
 
 	/* ---------------------------- freeze builder ----------------------------- */
 	const builder = useMemo(
-		() => (typeof buildQuery === "function" ? buildQuery(lix.db) : buildQuery),
+		() => (typeof buildQuery === "function" ? buildQuery(lix) : buildQuery),
 		[], // frozen for component lifetime (recreate hook if query must change)
 	);
 
