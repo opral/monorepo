@@ -23,12 +23,18 @@
 	"dependencies": {
 		"@lix-js/sdk": "workspace:*"
 	},
+	"peerDependencies": {
+		"react": ">=18.0.0"
+	},
 	"devDependencies": {
 		"@eslint/js": "^9.12.0",
 		"@opral/tsconfig": "workspace:*",
+		"@testing-library/react": "^16.3.0",
+		"@types/react": "^19.1.8",
 		"@vitest/coverage-v8": "^2.0.5",
 		"eslint": "^9.12.0",
 		"prettier": "^3.3.3",
+		"react": "^19.1.0",
 		"typescript": "^5.5.4",
 		"typescript-eslint": "^8.9.0",
 		"vitest": "^2.0.5"

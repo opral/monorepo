@@ -7,11 +7,12 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"useDefineForClassFields": false,
-		"lib": ["ESNext"],
+		"lib": ["ESNext", "DOM"],
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"esModuleInterop": true,
 		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"jsx": "react-jsx"
 	}
 }
