@@ -303,7 +303,10 @@ test("should enforce foreign key constraint on working_change_set_id", async () 
 	const lix = await openLix({});
 
 	// Create valid change set for change_set_id
-	await lix.db.insertInto("change_set_all").values({ id: "cs1" }).execute();
+	await lix.db
+		.insertInto("change_set_all")
+		.values({ id: "cs1", lixcol_version_id: "global" })
+		.execute();
 
 	// Attempt to insert version with non-existent working_change_set_id
 	await expect(

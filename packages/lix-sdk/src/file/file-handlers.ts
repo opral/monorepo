@@ -26,6 +26,7 @@ export function handleFileInsert(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db" | "hooks">;
 	file: LixFile;
 	versionId: string;
+	untracked?: boolean;
 }): 0 | 1 {
 	// Insert the file metadata into state table
 	executeSync({
@@ -42,6 +43,7 @@ export function handleFileInsert(args: {
 			},
 			schema_version: LixFileDescriptorSchema["x-lix-version"],
 			version_id: args.versionId,
+			untracked: args.untracked || false,
 		}),
 	});
 
@@ -86,6 +88,7 @@ export function handleFileInsert(args: {
 				storeDetectedChangeSchema({
 					lix: args.lix,
 					schema: change.schema,
+					untracked: args.untracked || false,
 				});
 			}
 
@@ -101,6 +104,7 @@ export function handleFileInsert(args: {
 						snapshot_content: change.snapshot_content as any,
 						schema_version: change.schema["x-lix-version"],
 						version_id: args.versionId,
+						untracked: args.untracked || false,
 					}),
 				});
 			}
@@ -142,6 +146,7 @@ export function handleFileInsert(args: {
 							snapshot_content: change.snapshot_content as any,
 							schema_version: change.schema["x-lix-version"],
 							version_id: args.versionId,
+							untracked: args.untracked || false,
 						}),
 					});
 				}
@@ -169,6 +174,7 @@ export function handleFileUpdate(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db" | "hooks">;
 	file: LixFile;
 	versionId: string;
+	untracked?: boolean;
 }): 0 | 1 {
 	// Update the file metadata in state table
 	executeSync({
@@ -181,6 +187,7 @@ export function handleFileUpdate(args: {
 					path: args.file.path,
 					metadata: args.file.metadata || null,
 				},
+				untracked: args.untracked || false,
 			})
 			.where("entity_id", "=", args.file.id)
 			.where("schema_key", "=", "lix_file_descriptor")
@@ -240,6 +247,7 @@ export function handleFileUpdate(args: {
 					storeDetectedChangeSchema({
 						lix: args.lix,
 						schema: change.schema,
+						untracked: args.untracked || false,
 					});
 				}
 
@@ -268,6 +276,7 @@ export function handleFileUpdate(args: {
 								snapshot_content: change.snapshot_content as any,
 								schema_version: change.schema["x-lix-version"],
 								version_id: args.versionId,
+								untracked: args.untracked || false,
 							}),
 						});
 					}
@@ -297,6 +306,7 @@ export function handleFileUpdate(args: {
 						storeDetectedChangeSchema({
 							lix: args.lix,
 							schema: change.schema,
+							untracked: args.untracked || false,
 						});
 					}
 
@@ -324,6 +334,7 @@ export function handleFileUpdate(args: {
 									snapshot_content: change.snapshot_content as any,
 									schema_version: change.schema["x-lix-version"],
 									version_id: args.versionId,
+									untracked: args.untracked || false,
 								}),
 							});
 						}

@@ -7,7 +7,8 @@ import {
 } from "../change-set/schema.js";
 import {
 	LixVersionSchema,
-	type ActiveVersionTable,
+	type ActiveVersion,
+	// type ActiveVersionTable,
 } from "../version/schema.js";
 import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
@@ -35,6 +36,7 @@ import {
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
+import type { ToKysely } from "../entity-views/types.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -78,7 +80,7 @@ export type LixDatabaseSchema = {
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;
 
-	active_version: ActiveVersionTable;
+	active_version: ToKysely<ActiveVersion>;
 } & EntityViews<
 	typeof LixKeyValueSchema,
 	"key_value",

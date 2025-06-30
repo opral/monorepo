@@ -12,7 +12,7 @@ export function applyFileDatabaseSchema(
 ): void {
 	lix.sqlite.createFunction({
 		name: "handle_file_insert",
-		arity: 5,
+		arity: 6,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
 			let metadata = args[3];
@@ -33,6 +33,7 @@ export function applyFileDatabaseSchema(
 					metadata: metadata,
 				},
 				versionId: args[4],
+				untracked: Boolean(args[5]),
 			});
 			return result;
 		},
@@ -41,7 +42,7 @@ export function applyFileDatabaseSchema(
 
 	lix.sqlite.createFunction({
 		name: "handle_file_update",
-		arity: 5,
+		arity: 6,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
 			let metadata = args[3];
@@ -62,6 +63,7 @@ export function applyFileDatabaseSchema(
 					metadata: metadata,
 				},
 				versionId: args[4],
+				untracked: Boolean(args[5]),
 			});
 			return result;
 		},
@@ -118,7 +120,8 @@ export function applyFileDatabaseSchema(
 		inherited_from_version_id AS lixcol_inherited_from_version_id,
 		created_at AS lixcol_created_at,
 		updated_at AS lixcol_updated_at,
-		change_id AS lixcol_change_id
+		change_id AS lixcol_change_id,
+		untracked AS lixcol_untracked
 	FROM state
 	WHERE schema_key = 'lix_file_descriptor';
 
@@ -137,7 +140,8 @@ export function applyFileDatabaseSchema(
 		inherited_from_version_id AS lixcol_inherited_from_version_id,
 		created_at AS lixcol_created_at,
 		updated_at AS lixcol_updated_at,
-		change_id AS lixcol_change_id
+		change_id AS lixcol_change_id,
+		untracked AS lixcol_untracked
 	FROM state_all
 	WHERE schema_key = 'lix_file_descriptor';
 
@@ -150,7 +154,8 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
-        (SELECT version_id FROM active_version)
+        (SELECT version_id FROM active_version),
+        COALESCE(NEW.lixcol_untracked, 0)
       );
   END;
 
@@ -162,7 +167,8 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
-        (SELECT version_id FROM active_version)
+        (SELECT version_id FROM active_version),
+        COALESCE(NEW.lixcol_untracked, 0)
       );
   END;
 
@@ -190,7 +196,8 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
-        COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version))
+        COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version)),
+        COALESCE(NEW.lixcol_untracked, 0)
       );
   END;
 
@@ -202,7 +209,8 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
-        COALESCE(NEW.lixcol_version_id, OLD.lixcol_version_id)
+        COALESCE(NEW.lixcol_version_id, OLD.lixcol_version_id),
+        COALESCE(NEW.lixcol_untracked, 0)
       );
   END;
 
