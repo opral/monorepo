@@ -5,11 +5,10 @@ import { openLix } from "../lix/open-lix.js";
  * These tests use the key_value table as an example entity in the state.
  * The key_value table is a built-in table in Lix that stores configuration
  * and metadata. We use it here because it's always available in any Lix instance.
- * 
+ *
  * In real applications, you would observe your own domain-specific tables
  * like "users", "documents", "settings", etc.
  */
-
 
 test("observe should emit initial values and updates for key_value table", async () => {
 	const lix = await openLix({});
@@ -23,7 +22,7 @@ test("observe should emit initial values and updates for key_value table", async
 		.subscribe({ next: (rows) => values.push(rows) });
 
 	// Wait for initial emission
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 	expect(values).toHaveLength(1);
 	expect(values[0]).toEqual([]);
 
@@ -34,7 +33,7 @@ test("observe should emit initial values and updates for key_value table", async
 		.execute();
 
 	// Wait for update
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should have received an update
 	expect(values).toHaveLength(2);
@@ -65,7 +64,7 @@ test("subscribeTakeFirst should emit first row or undefined", async () => {
 		.subscribeTakeFirst({ next: (row) => values.push(row) });
 
 	// Wait for initial emission
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should have initial undefined (no demo_ keys yet)
 	expect(values).toHaveLength(1);
@@ -78,7 +77,7 @@ test("subscribeTakeFirst should emit first row or undefined", async () => {
 		.execute();
 
 	// Wait for update
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should have received an update with the new first row
 	expect(values).toHaveLength(2);
@@ -94,7 +93,7 @@ test("subscribeTakeFirst should emit first row or undefined", async () => {
 		.execute();
 
 	// Wait for update
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should now get the alphabetically first key
 	expect(values).toHaveLength(3);
@@ -127,7 +126,7 @@ test("subscribeTakeFirstOrThrow should error when no rows exist", async () => {
 		});
 
 	// Wait for initial emission (error)
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should have received an error
 	expect(values).toHaveLength(0);
@@ -164,7 +163,7 @@ test("subscribeTakeFirstOrThrow should emit value when row exists", async () => 
 		});
 
 	// Wait for initial emission
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should have received the row
 	expect(errors).toHaveLength(0);
@@ -182,7 +181,7 @@ test("subscribeTakeFirstOrThrow should emit value when row exists", async () => 
 		.execute();
 
 	// Wait for update
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should have received the updated row
 	expect(values).toHaveLength(2);
@@ -207,7 +206,7 @@ test("observe should re-execute queries on any state commit", async () => {
 		.subscribe({ next: (rows) => values.push(rows) });
 
 	// Wait for initial emission
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 	expect(values).toHaveLength(1);
 	expect(values[0]).toEqual([]);
 
@@ -266,7 +265,7 @@ test("unsubscribe should stop receiving updates", async () => {
 		.subscribe({ next: (rows) => values.push(rows) });
 
 	// Wait for initial emission
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 	const countBeforeUnsubscribe = values.length;
 
 	// Unsubscribe
@@ -312,7 +311,7 @@ test("multiple subscriptions should work independently", async () => {
 		.subscribe({ next: (rows) => values2.push(rows) });
 
 	// Wait for initial emissions
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Insert keys for different scopes
 	await lix.db
@@ -363,7 +362,7 @@ test("query errors should be delivered to error handler", async () => {
 		});
 
 	// Wait for error
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should have received an error
 	expect(values).toHaveLength(0);
@@ -488,7 +487,7 @@ test("subscribeTakeFirst with explicit limit(1) should not double-limit", async 
 		.subscribeTakeFirst({ next: (row) => values.push(row) });
 
 	// Wait for initial emission
-	await new Promise(resolve => setTimeout(resolve, 10));
+	await new Promise((resolve) => setTimeout(resolve, 10));
 
 	// Should work correctly even with double limit
 	expect(values).toHaveLength(1);

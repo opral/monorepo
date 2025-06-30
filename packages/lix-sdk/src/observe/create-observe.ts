@@ -22,7 +22,7 @@ interface ActiveObservable {
  */
 function areResultsEqual<T>(a: T[], b: T[]): boolean {
 	if (a.length !== b.length) return false;
-	
+
 	// Simple deep equality using JSON.stringify
 	// This works well for database results which are typically JSON-serializable
 	return JSON.stringify(a) === JSON.stringify(b);
@@ -89,11 +89,12 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 					if (!isActive) return;
 
 					// Check if results have changed
-					const hasChanged = !previousResult || !areResultsEqual(previousResult, result as T[]);
+					const hasChanged =
+						!previousResult || !areResultsEqual(previousResult, result as T[]);
 
 					if (hasChanged) {
 						previousResult = result as T[];
-						
+
 						// Handle different modes
 						if (options.mode === "first") {
 							observer.next?.(result as T[]);

@@ -14,23 +14,25 @@ if (typeof Symbol.observable === "undefined") {
 	(Symbol as any).observable = Symbol("observable");
 }
 
-export interface Observer<T> {
+interface Observer<T> {
 	next?: (value: T) => void;
 	error?: (error: any) => void;
 	complete?: () => void;
 }
 
-export interface Subscription {
+interface Subscription {
 	unsubscribe(): void;
 }
 
-export interface Observable<T> {
+interface Observable<T> {
 	subscribe(observer: Partial<Observer<T>>): Subscription;
 	[Symbol.observable](): Observable<T>;
 }
 
 export class LixObservable<T> implements Observable<T[]> {
-	constructor(private subscriber: (observer: Observer<T[]>) => (() => void) | void) {}
+	constructor(
+		private subscriber: (observer: Observer<T[]>) => (() => void) | void
+	) {}
 
 	subscribe(observer: Partial<Observer<T[]>>): Subscription {
 		let closed = false;
@@ -51,7 +53,7 @@ export class LixObservable<T> implements Observable<T[]> {
 		};
 
 		const cleanup = this.subscriber(safeObserver);
-		
+
 		return {
 			unsubscribe() {
 				if (!closed) {

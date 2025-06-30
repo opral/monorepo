@@ -12,13 +12,16 @@ test("should deliver values to observer", () => {
 		next: (value) => values.push(value),
 	});
 
-	expect(values).toEqual([[1, 2, 3], [4, 5, 6]]);
+	expect(values).toEqual([
+		[1, 2, 3],
+		[4, 5, 6],
+	]);
 });
 
 test("should call error handler", () => {
 	const error = new Error("Test error");
 	const errorHandler = vi.fn();
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observer.error?.(error);
 	});
@@ -32,7 +35,7 @@ test("should call error handler", () => {
 
 test("should call complete handler", () => {
 	const completeHandler = vi.fn();
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observer.complete?.();
 	});
@@ -47,7 +50,7 @@ test("should call complete handler", () => {
 test("should stop delivering values after unsubscribe", () => {
 	const values: number[][] = [];
 	let observerRef: any;
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observerRef = observer;
 		observer.next?.([1]);
@@ -61,10 +64,10 @@ test("should stop delivering values after unsubscribe", () => {
 	});
 
 	expect(values).toEqual([[1]]);
-	
+
 	subscription.unsubscribe();
 	observerRef.next?.([2]); // Should not be delivered
-	
+
 	expect(values).toEqual([[1]]);
 });
 
@@ -72,7 +75,7 @@ test("should not deliver values after error", () => {
 	const values: number[][] = [];
 	const errors: any[] = [];
 	let observerRef: any;
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observerRef = observer;
 	});
@@ -85,7 +88,7 @@ test("should not deliver values after error", () => {
 	observerRef.next?.([1]);
 	observerRef.error?.(new Error("Test"));
 	observerRef.next?.([2]); // Should not be delivered
-	
+
 	expect(values).toEqual([[1]]);
 	expect(errors).toHaveLength(1);
 });
@@ -93,7 +96,7 @@ test("should not deliver values after error", () => {
 test("should not deliver values after complete", () => {
 	const values: number[][] = [];
 	let observerRef: any;
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observerRef = observer;
 	});
@@ -105,27 +108,27 @@ test("should not deliver values after complete", () => {
 	observerRef.next?.([1]);
 	observerRef.complete?.();
 	observerRef.next?.([2]); // Should not be delivered
-	
+
 	expect(values).toEqual([[1]]);
 });
 
 test("should call cleanup function on unsubscribe", () => {
 	const cleanup = vi.fn();
-	
+
 	const observable = new LixObservable<number>(() => {
 		return cleanup;
 	});
 
 	const subscription = observable.subscribe({});
 	expect(cleanup).not.toHaveBeenCalled();
-	
+
 	subscription.unsubscribe();
 	expect(cleanup).toHaveBeenCalledOnce();
 });
 
 test("should not call cleanup multiple times", () => {
 	const cleanup = vi.fn();
-	
+
 	const observable = new LixObservable<number>(() => {
 		return cleanup;
 	});
@@ -133,7 +136,7 @@ test("should not call cleanup multiple times", () => {
 	const subscription = observable.subscribe({});
 	subscription.unsubscribe();
 	subscription.unsubscribe(); // Second call
-	
+
 	expect(cleanup).toHaveBeenCalledOnce();
 });
 
@@ -144,7 +147,7 @@ test("should implement Symbol.observable", () => {
 
 test("subscribeTakeFirst should return first element", () => {
 	const values: (number | undefined)[] = [];
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observer.next?.([1, 2, 3]);
 		observer.next?.([4, 5, 6]);
@@ -159,7 +162,7 @@ test("subscribeTakeFirst should return first element", () => {
 
 test("subscribeTakeFirst should return undefined for empty array", () => {
 	const values: (number | undefined)[] = [];
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observer.next?.([]);
 	});
@@ -173,7 +176,7 @@ test("subscribeTakeFirst should return undefined for empty array", () => {
 
 test("subscribeTakeFirstOrThrow should return first element", () => {
 	const values: number[] = [];
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observer.next?.([1, 2, 3]);
 	});
@@ -187,7 +190,7 @@ test("subscribeTakeFirstOrThrow should return first element", () => {
 
 test("subscribeTakeFirstOrThrow should error on empty array", () => {
 	const errors: any[] = [];
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observer.next?.([]);
 	});
@@ -204,7 +207,7 @@ test("subscribeTakeFirstOrThrow should error on empty array", () => {
 test("subscribeTakeFirstOrThrow should pass through original errors", () => {
 	const originalError = new Error("Original error");
 	const errors: any[] = [];
-	
+
 	const observable = new LixObservable<number>((observer) => {
 		observer.error?.(originalError);
 	});
@@ -231,11 +234,11 @@ test("should handle observer without handlers gracefully", () => {
 
 test("should support RxJS interop pattern", () => {
 	const observable = new LixObservable<number>(() => {});
-	
+
 	// Simulate RxJS from() behavior
 	const rxjsCompatible = observable[Symbol.observable]();
 	expect(rxjsCompatible).toBe(observable);
-	
+
 	// Should be able to subscribe to the returned value
 	const values: number[][] = [];
 	rxjsCompatible.subscribe({
