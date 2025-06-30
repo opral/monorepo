@@ -5,28 +5,24 @@ import {
 	selectVersions,
 	selectActiveAccount,
 } from "../queries";
-import { useQuery } from "../hooks/useQuery";
-import { lix } from "../state";
 import { createVersion, switchVersion } from "@lix-js/sdk";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 const VersionToolbar: React.FC = () => {
-	const [currentVersion] = useQuery(selectActiveVersion);
-	const [mainVersion] = useQuery(selectMainVersion);
-	const [activeAccount] = useQuery(selectActiveAccount);
-	const [versions] = useQuery(selectVersions);
+	const lix = useLix();
+	const currentVersion = useQueryTakeFirst(selectActiveVersion);
+	const mainVersion = useQueryTakeFirst(selectMainVersion);
+	const activeAccount = useQueryTakeFirst(selectActiveAccount);
+	const versions = useQuery(selectVersions);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 
 	// Determine if current version is the main version
-	const isMainVersion = mainVersion?.id === currentVersion?.id;
+	const isMainVersion = mainVersion.data?.id === currentVersion.data?.id;
 
 	// Handle version change
 	const handleVersionChange = async (versionId: string) => {
 		try {
 			await switchVersion({ lix, to: { id: versionId } });
-			await lix.db
-				.insertInto("key_value")
-				.values({ key: "active_version", value: versionId })
-				.execute();
 		} catch (error) {
 			console.error("Error switching version:", error);
 		}
@@ -35,14 +31,14 @@ const VersionToolbar: React.FC = () => {
 	const handleNewVersion = async () => {
 		try {
 			// Extract the first name from the account name
-			const firstName = activeAccount?.name
-				? activeAccount.name.split(" ")[0]
+			const firstName = activeAccount.data?.name
+				? activeAccount.data.name.split(" ")[0]
 				: "User";
 
 			const newVersion = await createVersion({
 				lix,
 				name: `${firstName}'s Version`,
-				changeSet: { id: currentVersion!.change_set_id },
+				changeSet: { id: currentVersion.data!.change_set_id },
 			});
 			await switchVersion({ lix, to: newVersion });
 			// Scroll to the end of the scrollbar after a short delay to ensure DOM update
@@ -57,11 +53,11 @@ const VersionToolbar: React.FC = () => {
 	const handleProposeChanges = async () => {
 		try {
 			// Extract the first name from the account name
-			const firstName = activeAccount?.name
-				? activeAccount.name.split(" ")[0]
+			const firstName = activeAccount.data
+				? activeAccount.data.name.split(" ")[0]
 				: "User";
 
-			const existingVersion = versions?.find(
+			const existingVersion = versions?.data?.find(
 				(version) => version.name === `${firstName}'s Version`,
 			);
 			if (existingVersion) {
@@ -70,7 +66,7 @@ const VersionToolbar: React.FC = () => {
 				const newVersion = await createVersion({
 					lix,
 					name: `${firstName}'s Version`,
-					changeSet: { id: currentVersion!.change_set_id },
+					changeSet: { id: currentVersion.data!.change_set_id },
 				});
 				await switchVersion({ lix, to: { id: newVersion.id } });
 			}
@@ -97,10 +93,10 @@ const VersionToolbar: React.FC = () => {
 			style={{ boxSizing: "border-box", height: "40px", borderRadius: "0" }}
 		>
 			<div className="mode-tabs-scroll-container" ref={scrollContainerRef}>
-				{versions?.map((version) => (
+				{versions?.data?.map((version) => (
 					<button
 						key={version.id}
-						className={`mode-tab ${version.id === currentVersion?.id ? "active" : ""}`}
+						className={`mode-tab ${version.id === currentVersion?.data?.id ? "active" : ""}`}
 						onClick={() => handleVersionChange(version.id)}
 						style={{
 							height: "40px",

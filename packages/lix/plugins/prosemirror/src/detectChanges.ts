@@ -51,7 +51,11 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 		} else if (beforeNode && !afterNode) {
 			// Node was deleted
 			detectedChanges.push(createNodeChange(id, null));
-		} else if (beforeNode && afterNode && hasNodeChanged(beforeNode, afterNode)) {
+		} else if (
+			beforeNode &&
+			afterNode &&
+			hasNodeChanged(beforeNode, afterNode)
+		) {
 			// Node was modified
 			detectedChanges.push(createNodeChange(id, afterNode));
 		}
@@ -61,7 +65,7 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	// We need to preserve order, so we use the actual document order from extractChildrenOrder
 	const childrenOrderBefore = extractChildrenOrder(documentBefore);
 	const childrenOrderAfter = extractChildrenOrder(documentAfter);
-	
+
 	if (!arraysEqual(childrenOrderBefore, childrenOrderAfter)) {
 		const documentEntity: ProsemirrorDocument = {
 			_id: "document-root",
@@ -109,12 +113,18 @@ function shouldIncludeNewNode(
 /**
  * Checks if a node has changed by comparing the relevant parts
  */
-function hasNodeChanged(beforeNode: ProsemirrorNode, afterNode: ProsemirrorNode): boolean {
+function hasNodeChanged(
+	beforeNode: ProsemirrorNode,
+	afterNode: ProsemirrorNode,
+): boolean {
 	// Check if the node itself has changed (ignoring child content)
 	const nodeItselfChanged = !areNodesEqual(beforeNode, afterNode, true);
 
 	// Check if this node's content has changed
-	const contentChanged = !areContentArraysEqual(beforeNode.content, afterNode.content);
+	const contentChanged = !areContentArraysEqual(
+		beforeNode.content,
+		afterNode.content,
+	);
 
 	// For leaf nodes (nodes with no children with IDs), we want to detect content changes
 	// For parent nodes (nodes with children that have IDs), we only want to detect changes to the node itself

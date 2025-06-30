@@ -1,4 +1,9 @@
-import { Plugin, PluginKey, Transaction, TextSelection } from "prosemirror-state";
+import {
+	Plugin,
+	PluginKey,
+	Transaction,
+	TextSelection,
+} from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import { Schema } from "prosemirror-model";
 import { type Lix } from "@lix-js/sdk";
@@ -59,7 +64,10 @@ export function lixProsemirror(options: LixPluginOptions) {
 	};
 
 	// Function to update the editor with external document changes
-	const updateEditorFromExternalDoc = async (externalDoc: any, isInitialLoad = false) => {
+	const updateEditorFromExternalDoc = async (
+		externalDoc: any,
+		isInitialLoad = false,
+	) => {
 		// Skip if the view is not initialized yet
 		if (!view) return;
 
@@ -104,17 +112,8 @@ export function lixProsemirror(options: LixPluginOptions) {
 		}
 	};
 
-	let trackSavedOrder: ((docJSON: any) => void) | undefined;
-
 	const plugin = new Plugin({
 		key: lixPluginKey,
-
-		// Store reference to track function
-		spec: {
-			get trackSavedOrder() {
-				return trackSavedOrder;
-			},
-		} as any,
 
 		// Initialize the plugin state
 		state: {
@@ -147,11 +146,6 @@ export function lixProsemirror(options: LixPluginOptions) {
 			if (docChanged && !isApplyingExternalUpdate) {
 				const docJSON = newState.doc.toJSON();
 
-				// Track the order for our own saves
-				if (this.spec.trackSavedOrder) {
-					this.spec.trackSavedOrder(docJSON);
-				}
-
 				// Save document directly to file (only if not applying external update)
 				saveDocumentToLix(docJSON);
 			}
@@ -164,89 +158,49 @@ export function lixProsemirror(options: LixPluginOptions) {
 			// Store the view reference
 			view = editorView;
 
-			// Track the last saved document order
-			let lastSavedChildrenOrder: string[] | undefined;
+			// Subscribe to file data changes using the new observe API
+			const fileSubscription = lix
+				.observe(
+					lix.db
+						.selectFrom("file")
+						.where("id", "=", fileId)
+						.select(["id", "data"]),
+				)
+				.subscribeTakeFirst({
+					next: async (file) => {
+						if (!file || !file.data) return;
 
-			// Function to check and load document from state
-			const checkAndLoadDocument = async () => {
-				try {
-					// Query for the document state
-					const documentState = await lix.db
-						.selectFrom("state")
-						.where("file_id", "=", fileId)
-						.where("schema_key", "=", "prosemirror_document")
-						.select(["snapshot_content"])
-						.executeTakeFirst();
+						// Skip if this is our own save in progress
+						if (saveInProgress) return;
 
-					if (documentState && documentState.snapshot_content) {
-						const docData = documentState.snapshot_content;
-						const currentChildrenOrder = docData.children_order;
+						try {
+							const fileContent = new TextDecoder().decode(file.data);
+							const fullDoc = JSON.parse(fileContent);
 
-						// Check if this is initial load or if order changed externally
-						const isInitialLoad = lastSavedChildrenOrder === undefined;
-						const hasExternalChange =
-							!isInitialLoad &&
-							JSON.stringify(currentChildrenOrder) !==
-								JSON.stringify(lastSavedChildrenOrder);
+							// Check if this is initial load
+							const isInitialLoad = lastExternalDoc === null;
 
-						if (isInitialLoad || hasExternalChange) {
-							// Load the full document from file
-							const file = await lix.db
-								.selectFrom("file")
-								.where("id", "=", fileId)
-								.select("data")
-								.executeTakeFirst();
-
-							if (file && file.data) {
-								const fileContent = new TextDecoder().decode(file.data);
-								const fullDoc = JSON.parse(fileContent);
-
-								// Update editor
-								await updateEditorFromExternalDoc(fullDoc, isInitialLoad);
-
-								// Update our tracked order
-								lastSavedChildrenOrder = currentChildrenOrder;
-							}
+							// Update editor with new document
+							await updateEditorFromExternalDoc(fullDoc, isInitialLoad);
+						} catch (error) {
+							console.error("Error processing file data update:", error);
 						}
-					}
-				} catch (error) {
-					console.error("Error checking document state:", error);
-				}
-			};
-
-			// Initial load
-			checkAndLoadDocument();
-
-			// Listen to state commits to detect changes
-			const unsubscribeStateCommit = lix.hooks.onStateCommit(() => {
-				// Re-check document state on any commit
-				checkAndLoadDocument();
-			});
-
-			// Set the track function so appendTransaction can use it
-			trackSavedOrder = (docJSON: any) => {
-				if (docJSON.content && Array.isArray(docJSON.content)) {
-					lastSavedChildrenOrder = docJSON.content
-						.map((child: any) => child.attrs?.id)
-						.filter(Boolean);
-				}
-			};
+					},
+					error: (error) => {
+						console.error("Error subscribing to file data:", error);
+					},
+				});
 
 			return {
-				update() {
-					// State change handling is now done via the hook
-				},
 				destroy() {
 					// Cancel any pending save operations
 					if (saveTimeout) {
 						clearTimeout(saveTimeout);
 					}
-					// Remove state commit listener
-					unsubscribeStateCommit();
+					// Unsubscribe from file data changes
+					fileSubscription.unsubscribe();
 					// Clear the view reference
 					view = null;
-					// Clear the track function
-					trackSavedOrder = undefined;
 				},
 			};
 		},

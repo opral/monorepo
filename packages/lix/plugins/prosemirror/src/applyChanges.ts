@@ -63,7 +63,12 @@ export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({
 
 	// Handle document order changes - reorder top-level nodes according to children_order
 	if (documentOrderChange && documentOrderChange.children_order) {
-		applyDocumentOrder(newDocument, nodeMap, documentOrderChange.children_order, processedIds);
+		applyDocumentOrder(
+			newDocument,
+			nodeMap,
+			documentOrderChange.children_order,
+			processedIds,
+		);
 	} else {
 		// If no explicit order change, add any new top-level nodes that weren't processed
 		addNewTopLevelNodes(newDocument, nodeMap, processedIds, parentChildMap);
@@ -253,8 +258,8 @@ function applyDocumentOrder(
 	// Add nodes in the specified order
 	for (const nodeId of childrenOrder) {
 		// First check if the node exists in the current document content
-		const existingNode = document.content.find(node => 
-			(node.attrs?.id || node._id) === nodeId
+		const existingNode = document.content.find(
+			(node) => (node.attrs?.id || node._id) === nodeId,
 		);
 
 		if (existingNode) {

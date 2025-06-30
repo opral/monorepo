@@ -102,14 +102,16 @@ test("it should detect insertion of a new node", async () => {
 	});
 
 	expect(detectedChanges).toHaveLength(2);
-	
+
 	// Find the document order change
-	const documentChange = detectedChanges.find(c => c.entity_id === "document-root");
+	const documentChange = detectedChanges.find(
+		(c) => c.entity_id === "document-root",
+	);
 	expect(documentChange).toBeDefined();
 	expect(documentChange?.snapshot_content).toBeDefined();
-	
+
 	// Find the node change
-	const nodeChange = detectedChanges.find(c => c.entity_id === "paragraph-2");
+	const nodeChange = detectedChanges.find((c) => c.entity_id === "paragraph-2");
 	expect(nodeChange).toBeDefined();
 	expect(nodeChange?.snapshot_content).toBeDefined();
 });
@@ -240,14 +242,18 @@ test("it should detect deletion of a node", async () => {
 	});
 
 	expect(detectedChanges).toHaveLength(2);
-	
+
 	// Find the document order change
-	const documentChange = detectedChanges.find(c => c.entity_id === "document-root");
+	const documentChange = detectedChanges.find(
+		(c) => c.entity_id === "document-root",
+	);
 	expect(documentChange).toBeDefined();
 	expect(documentChange?.snapshot_content).toBeDefined();
-	
+
 	// Find the deletion change
-	const deleteChange = detectedChanges.find(c => c.entity_id === "paragraph-2");
+	const deleteChange = detectedChanges.find(
+		(c) => c.entity_id === "paragraph-2",
+	);
 	expect(deleteChange).toBeDefined();
 	expect(deleteChange?.snapshot_content).toBeNull();
 });
@@ -347,7 +353,9 @@ test("it should detect multiple changes in a single document", async () => {
 	expect(detectedChanges).toHaveLength(4);
 
 	// Find the document order change
-	const documentChange = detectedChanges.find(c => c.entity_id === "document-root");
+	const documentChange = detectedChanges.find(
+		(c) => c.entity_id === "document-root",
+	);
 	expect(documentChange).toBeDefined();
 	expect(documentChange?.snapshot_content).toBeDefined();
 

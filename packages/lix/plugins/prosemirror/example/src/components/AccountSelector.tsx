@@ -1,21 +1,19 @@
 import React, { useState } from "react";
-import { lix } from "../state";
 import { createAccount, switchAccount, Account } from "@lix-js/sdk";
-import { useQuery } from "../hooks/useQuery";
 import { getInitials } from "../utilities/nameUtils";
 import { ChevronDown } from "lucide-react";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 const AccountSelector: React.FC = () => {
+	const lix = useLix();
 	const [isOpen, setIsOpen] = useState(false);
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [newAccountName, setNewAccountName] = useState("");
 
-	const [allAccounts] = useQuery(() =>
-		lix.db.selectFrom("account").selectAll().execute(),
-	);
+	const allAccounts = useQuery(() => lix.db.selectFrom("account").selectAll());
 
-	const [activeAccount] = useQuery(() =>
-		lix.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow(),
+	const activeAccount = useQueryTakeFirst(() =>
+		lix.db.selectFrom("active_account").selectAll(),
 	);
 
 	const handleAccountSelect = async (account: Account) => {
@@ -71,9 +69,9 @@ const AccountSelector: React.FC = () => {
 				<div className="flex items-center">
 					{activeAccount ? (
 						<>
-							<Avatar name={activeAccount.name} />
+							<Avatar name={activeAccount.data?.name ?? ""} />
 							<span className="overflow-hidden text-ellipsis whitespace-nowrap max-w-[120px]">
-								{activeAccount.name}
+								{activeAccount.data?.name}
 							</span>
 						</>
 					) : (
@@ -88,12 +86,12 @@ const AccountSelector: React.FC = () => {
 
 			{isOpen && (
 				<div className="absolute top-full right-0 min-w-full w-auto max-w-[200px] bg-white border border-base-300 rounded-b-md shadow-md z-10 max-h-[300px] overflow-y-auto">
-					{allAccounts?.map((account) => (
+					{allAccounts.data?.map((account) => (
 						<div
 							key={account.id}
 							onClick={() => handleAccountSelect(account)}
 							className={`p-3 cursor-pointer border-b border-base-200 flex items-center ${
-								activeAccount && account.id === activeAccount.id
+								activeAccount && account.id === activeAccount.data?.id
 									? "bg-base-200"
 									: "bg-white"
 							}`}

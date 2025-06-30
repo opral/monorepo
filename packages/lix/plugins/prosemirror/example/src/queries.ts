@@ -6,7 +6,7 @@ import {
 } from "@lix-js/sdk";
 
 // Helper to get the prosemirror file ID
-const selectFileId = (lix: Lix) =>
+export const selectFileId = (lix: Lix) =>
 	lix.db
 		.selectFrom("file")
 		.where("path", "=", "/prosemirror.json")
@@ -15,7 +15,7 @@ const selectFileId = (lix: Lix) =>
 /**
  * Selects the current prosemirror document from the lix database
  */
-export function selectProsemirrorDocument(lix: Lix) {
+export function selectProsemirrorDoc(lix: Lix) {
 	return lix.db
 		.selectFrom("file")
 		.where("id", "=", selectFileId(lix))
@@ -144,8 +144,7 @@ export function selectThreads(
 					.whereRef("thread_comment.thread_id", "=", "thread.id"),
 			).as("comments"),
 		])
-		.selectAll("thread")
-		.execute();
+		.selectAll("thread");
 }
 
 /**
