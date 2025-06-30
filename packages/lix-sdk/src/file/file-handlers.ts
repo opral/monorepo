@@ -23,7 +23,7 @@ function globSync(args: {
 }
 
 export function handleFileInsert(args: {
-	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
+	lix: Pick<Lix, "sqlite" | "plugin" | "db" | "hooks">;
 	file: LixFile;
 	versionId: string;
 	untracked?: boolean;
@@ -164,11 +164,14 @@ export function handleFileInsert(args: {
 		// Do NOT invoke fallback plugin if a plugin was found, even if it returned no changes
 	}
 
+	// Emit file change event
+	args.lix.hooks._emit("file_change", { fileId: args.file.id, operation: "inserted" });
+
 	return 0;
 }
 
 export function handleFileUpdate(args: {
-	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
+	lix: Pick<Lix, "sqlite" | "plugin" | "db" | "hooks">;
 	file: LixFile;
 	versionId: string;
 	untracked?: boolean;
@@ -347,6 +350,9 @@ export function handleFileUpdate(args: {
 			});
 		}
 	}
+
+	// Emit file change event
+	args.lix.hooks._emit("file_change", { fileId: args.file.id, operation: "updated" });
 
 	return 0;
 }

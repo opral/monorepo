@@ -28,13 +28,41 @@ export type LixHooks = {
 	onStateCommit: (handler: () => void) => () => void;
 
 	/**
+	 * Listen to file change events.
+	 *
+	 * Note: This API will become redundant once subscriptions are implemented.
+	 *
+	 * Fires when a file is inserted, updated, or deleted in the database.
+	 * Useful for updating UI, triggering re-parsing, or synchronizing external systems.
+	 *
+	 * @param handler - Function to call when a file changes
+	 * @returns Unsubscribe function to remove the listener
+	 *
+	 * @example
+	 * ```typescript
+	 * const unsubscribe = lix.hooks.onFileChange((fileId, operation) => {
+	 *   console.log(`File ${fileId} was ${operation}`);
+	 *   if (operation === 'updated') {
+	 *     reloadEditor(fileId);
+	 *   }
+	 * });
+	 *
+	 * // Later, remove the listener
+	 * unsubscribe();
+	 * ```
+	 */
+	onFileChange: (
+		handler: (fileId: string, operation: "inserted" | "updated") => void
+	) => () => void;
+
+	/**
 	 * Internal method for emitting events.
 	 *
 	 * @internal
 	 * This method is for internal use only and should not be called directly.
 	 * Use this to emit events from state mutation functions.
 	 */
-	_emit: (eventType: string) => void;
+	_emit: (eventType: string, data?: any) => void;
 };
 
 /**
@@ -54,8 +82,20 @@ export function createHooks(): LixHooks {
 			return () => eventTarget.removeEventListener("state_commit", handler);
 		},
 
-		_emit(eventType: string): void {
-			eventTarget.dispatchEvent(new CustomEvent(eventType));
+		onFileChange(
+			handler: (fileId: string, operation: "inserted" | "updated") => void
+		): () => void {
+			const wrappedHandler = (event: Event) => {
+				const customEvent = event as CustomEvent;
+				handler(customEvent.detail.fileId, customEvent.detail.operation);
+			};
+			eventTarget.addEventListener("file_change", wrappedHandler);
+			return () =>
+				eventTarget.removeEventListener("file_change", wrappedHandler);
+		},
+
+		_emit(eventType: string, data?: any): void {
+			eventTarget.dispatchEvent(new CustomEvent(eventType, { detail: data }));
 		},
 	};
 }
