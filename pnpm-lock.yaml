@@ -2773,6 +2773,9 @@ importers:
       '@lix-js/plugin-prosemirror':
         specifier: workspace:*
         version: link:..
+      '@lix-js/react-utils':
+        specifier: workspace:*
+        version: link:../../../lix-react-utils
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../../../../lix-sdk
