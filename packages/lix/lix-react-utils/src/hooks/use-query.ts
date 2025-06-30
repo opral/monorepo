@@ -108,23 +108,28 @@ export const useQueryTakeFirst = <TResult>(
 		[], // frozen for component lifetime (recreate hook if query must change)
 	);
 
-	// Simple state-based approach
-	const [state, setState] = useState<{ data: TResult | undefined; error: Error | null }>({
+	// Simple state-based approach with loading flag
+	const [state, setState] = useState<{ data: TResult | undefined; error: Error | null; hasReceived: boolean }>({
 		data: undefined,
 		error: null,
+		hasReceived: false,
 	});
 
 	useEffect(() => {
+		// Reset state when effect runs
+		setState({ data: undefined, error: null, hasReceived: false });
+		
 		// Subscribe to the observable using subscribeTakeFirst for efficiency
 		const observable = lix.observe(builder);
 		const subscription = observable.subscribeTakeFirst({
 			next: (row) => {
-				setState({ data: row as TResult, error: null });
+				setState({ data: row as TResult, error: null, hasReceived: true });
 			},
 			error: (err) => {
 				setState({
 					data: undefined,
 					error: err instanceof Error ? err : new Error(String(err)),
+					hasReceived: true,
 				});
 			},
 		});
@@ -136,7 +141,7 @@ export const useQueryTakeFirst = <TResult>(
 	}, [lix, builder]);
 
 	/* local loading flag: true until first next or error */
-	const loading = state.data === undefined && state.error === null;
+	const loading = !state.hasReceived;
 
 	return { data: state.data, error: state.error, loading };
 };

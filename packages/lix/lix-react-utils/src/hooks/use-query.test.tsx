@@ -277,6 +277,57 @@ test("useQueryTakeFirst returns undefined for empty results", async () => {
 	await lix.close();
 });
 
+test("useQuery vs useQueryTakeFirst loading behavior with empty results", async () => {
+	const lix = await openLix({});
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>{children}</LixProvider>
+	);
+
+	// Test useQuery with empty results - should return [] and loading=false
+	const { result: queryResult } = renderHook(
+		() =>
+			useQuery((lix) =>
+				lix.db
+					.selectFrom("key_value")
+					.selectAll()
+					.where("key", "=", "empty_test_query"),
+			),
+		{ wrapper },
+	);
+
+	// Test useQueryTakeFirst with empty results - should return undefined and loading=false
+	const { result: takeFirstResult } = renderHook(
+		() =>
+			useQueryTakeFirst((lix) =>
+				lix.db
+					.selectFrom("key_value")
+					.selectAll()
+					.where("key", "=", "empty_test_takefirst"),
+			),
+		{ wrapper },
+	);
+
+	// Wait for both to complete
+	await waitFor(() => {
+		expect(queryResult.current.loading).toBe(false);
+	});
+
+	await waitFor(() => {
+		expect(takeFirstResult.current.loading).toBe(false);
+	});
+
+	// Verify useQuery returns empty array
+	expect(queryResult.current.data).toEqual([]);
+	expect(queryResult.current.error).toBe(null);
+	expect(queryResult.current.loading).toBe(false);
+
+	// Verify useQueryTakeFirst returns undefined
+	expect(takeFirstResult.current.data).toBeUndefined();
+	expect(takeFirstResult.current.error).toBe(null);
+	expect(takeFirstResult.current.loading).toBe(false);
+
+	await lix.close();
+});
 
 test("useQuery return type is properly typed", async () => {
 	const lix = await openLix({});
