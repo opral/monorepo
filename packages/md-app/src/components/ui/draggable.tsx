@@ -58,6 +58,7 @@ export const DraggableAboveNodes: RenderNodeWrapper = (props) => {
     if (path.length === 1 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
       return true;
     }
+    console.log('path', path);
     if (path.length === 3 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
       const block = editor.api.some({
         at: path,

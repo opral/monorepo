@@ -6,7 +6,6 @@ import { useChat } from "./use-chat";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Loader2, Zap } from "lucide-react";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { generateHumanId } from "@/helper/generateHumanId";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import {
@@ -76,7 +75,7 @@ export function EmptyDocumentPromptElement({
 					})
 					.executeTakeFirstOrThrow();
 
-				await saveLixToOpfs({ lix });
+				// OpfsStorage now handles persistence automatically through the onStateCommit hook
 				updateUrlParams({ f: newFileId });
 				refetch();
 

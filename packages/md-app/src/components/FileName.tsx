@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import { selectActiveFile, selectLix } from "@/queries";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 
 export default function FileName() {
   const [activeFile] = useQuery(selectActiveFile);
@@ -60,7 +59,7 @@ export default function FileName() {
       .where("id", "=", activeFile.id)
       .execute();
 
-    await saveLixToOpfs({ lix });
+    // OpfsStorage now handles persistence automatically through the onStateCommit hook
     refetch(); // Refresh state
     setIsEditing(false);
   };

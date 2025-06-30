@@ -13,7 +13,6 @@ import { useQuery } from "@/hooks/useQuery";
 import { selectLix, selectActiveFile } from "@/queries";
 import { useMdAstState } from "@/hooks/useMdAstState";
 import { mdastEntitiesToPlateValue, plateValueToMdastEntities } from "./mdast-plate-bridge";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
@@ -155,8 +154,7 @@ export function PlateEditor() {
         // Update MD-AST entities in lix state using the hook
         await updateEntities(entities, order);
 
-        // needed because lix is not writing to OPFS yet
-        await saveLixToOpfs({ lix });
+        // OpfsStorage now handles persistence automatically through the onStateCommit hook
       } catch (error) {
         console.error("Failed to save MD-AST entities:", error);
         // Fallback to markdown-based saving for now
@@ -166,7 +164,7 @@ export function PlateEditor() {
           .set("data", new TextEncoder().encode(serializedMd))
           .where("id", "=", activeFile.id)
           .execute();
-        await saveLixToOpfs({ lix });
+        // OpfsStorage now handles persistence automatically through the onStateCommit hook
       }
     }, 500),
     [lix, activeFile?.id, updateEntities] // Include updateEntities in dependencies

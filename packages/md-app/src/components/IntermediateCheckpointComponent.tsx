@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react"; // Added useRef, useEffect
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { UiDiffComponentProps, createCheckpoint, createThread } from "@lix-js/sdk";
 import { useQuery } from "@/hooks/useQuery";
 import { selectLix, selectCheckpointChangeSets, selectIntermediateChanges, selectWorkingChangeSet } from "@/queries";
@@ -143,7 +142,7 @@ const CreateCheckpointInput = () => {
     if (!description.trim() || isGeneratingDescription || !lix) return;
     await onThreadComposerSubmit({ content: fromPlainText(description!) });
     await createCheckpoint({ lix });
-    await saveLixToOpfs({ lix });
+    // OpfsStorage now handles persistence automatically through the onStateCommit hook
     setDescription(""); // Clear description after submission
   };
 

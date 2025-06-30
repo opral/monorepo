@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import { selectActiveFile, selectFiles, selectLix } from "@/queries";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { generateHumanId } from "@/helper/generateHumanId";
 import {
@@ -49,8 +48,7 @@ export default function FileSwitcher() {
 				})
 				.executeTakeFirstOrThrow();
 
-			// Save the changes to OPFS
-			await saveLixToOpfs({ lix });
+			// OpfsStorage now handles persistence automatically through the onStateCommit hook
 
 			// Update URL without full navigation
 			updateUrlParams({ f: newFileId });

@@ -1,5 +1,5 @@
 import {
-	openLixInMemory,
+	openLix,
 	switchAccount,
 	Lix,
 	Version,
@@ -9,15 +9,11 @@ import {
 	changeSetElementIsLeafOf,
 	changeHasLabel,
 	jsonArrayFrom,
-	sql,
 	UiDiffComponentProps,
 	ChangeSet,
 	nanoid,
-	newLixFile,
-	toBlob,
+	OpfsStorage,
 } from "@lix-js/sdk";
-import { getOriginPrivateDirectory } from "native-file-system-adapter";
-import { saveLixToOpfs } from "./helper/saveLixToOpfs";
 import { updateUrlParams } from "./helper/updateUrlParams";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
@@ -56,33 +52,15 @@ export async function selectLix(): Promise<Lix> {
 	// Create the initialization promise
 	lixInitializationPromise = (async () => {
 		const lixIdSearchParam = getLixIdFromUrl();
-		const rootHandle = await getOriginPrivateDirectory();
-		let lixBlob: Blob;
+		const storedActiveAccount = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
+		
+		let lix: Lix;
+		let lixFileName = "Untitled.lix";
 
-		if (lixIdSearchParam) {
-			// try reading the lix file from OPFS
-			try {
-				// Find the Lix file with the specified ID
-				const lixFile = await findLixFileInOpfs(lixIdSearchParam, [mdPlugin]);
-
-				if (!lixFile) {
-					throw new Error("Lix file not found with ID: " + lixIdSearchParam);
-				}
-
-				console.log(
-					`Found lix with ID ${lixIdSearchParam} in file: ${lixFile.fullName}`
-				);
-
-				// Get a fresh file handle to avoid stale references
-				const rootHandle = await getOriginPrivateDirectory();
-				const freshFileHandle = await rootHandle.getFileHandle(
-					lixFile.fullName
-				);
-				const file = await freshFileHandle.getFile();
-				lixBlob = new Blob([await file.arrayBuffer()]);
-			} catch (opfsError) {
-				console.warn("Failed to read lix from OPFS:", opfsError);
-				// Try server if lix doesn't exist in OPFS
+		try {
+			// Try to load from server if lix ID is provided and file doesn't exist locally
+			let blob: Blob | undefined;
+			if (lixIdSearchParam) {
 				try {
 					const response = await fetch(
 						new Request(
@@ -99,70 +77,37 @@ export async function selectLix(): Promise<Lix> {
 						)
 					);
 					if (response.ok) {
-						const blob = await response.blob();
-						const lix = await openLixInMemory({
-							blob,
-							providePlugins: [mdPlugin],
-						});
-						await saveLixToOpfs({ lix });
-						lixBlob = blob;
+						blob = await response.blob();
+						lixFileName = `${lixIdSearchParam}.lix`;
 					}
 				} catch (error) {
-					console.error("Failed to fetch from server:", error);
+					console.warn("Failed to fetch from server:", error);
 				}
 			}
-		} else {
-			const availableLixFiles: FileSystemHandle[] = [];
-			for await (const [name, handle] of rootHandle) {
-				if (handle.kind === "file" && name.endsWith(".lix")) {
-					availableLixFiles.push(handle);
-				}
-			}
-			// naively pick the first lix file
-			if (availableLixFiles.length > 0) {
-				const fileHandle = await rootHandle.getFileHandle(
-					availableLixFiles[0].name
-				);
-				const file = await fileHandle.getFile();
-				lixBlob = new Blob([await file.arrayBuffer()]);
-			} else {
-				// Create a new empty lix file
-				const lix = await openLixInMemory({
-					blob: await newLixFile(),
-					providePlugins: [mdPlugin],
-				});
-				lixBlob = await toBlob({ lix });
-			}
-		}
 
-		let lix: Lix;
-		const storedActiveAccount = localStorage.getItem(
-			ACTIVE_ACCOUNT_STORAGE_KEY
-		);
+			// Open lix with OpfsStorage
+			lix = await openLix({
+				blob,
+				providePlugins: [mdPlugin],
+				account: storedActiveAccount ? JSON.parse(storedActiveAccount) : undefined,
+				storage: new OpfsStorage({ path: lixFileName }),
+			});
 
-		try {
-			console.log("Opening lix in memory...");
-			if (storedActiveAccount) {
-				lix = await openLixInMemory({
-					blob: lixBlob!,
-					providePlugins: [mdPlugin],
-					account: JSON.parse(storedActiveAccount),
-				});
-			} else {
-				lix = await openLixInMemory({
-					blob: lixBlob!,
-					providePlugins: [mdPlugin],
-				});
-			}
-			console.log("Lix opened successfully");
+			console.log("Lix opened successfully with OpfsStorage");
 		} catch (error) {
 			console.error("Error opening lix:", error);
-			// https://linear.app/opral/issue/INBOX-199/fix-loading-lix-file-if-schema-changed
 			// CLEAR OPFS. The lix file is likely corrupted.
-			for await (const entry of rootHandle.values()) {
-				if (entry.kind === "file") {
-					await rootHandle.removeEntry(entry.name);
+			// https://linear.app/opral/issue/INBOX-199/fix-loading-lix-file-if-schema-changed
+			try {
+				const opfsRoot = await navigator.storage.getDirectory();
+				// @ts-expect-error - FileSystemDirectoryHandle is iterable
+				for await (const [name, entry] of opfsRoot) {
+					if (entry.kind === "file" && name.endsWith(".lix")) {
+						await opfsRoot.removeEntry(name);
+					}
 				}
+			} catch (cleanupError) {
+				console.error("Failed to clean up OPFS:", cleanupError);
 			}
 			window.location.reload();
 			// tricksing the TS typechecker. This will never be reached.
@@ -179,8 +124,6 @@ export async function selectLix(): Promise<Lix> {
 			const activeAccount = JSON.parse(storedActiveAccount);
 			await switchActiveAccount(lix, activeAccount);
 		}
-
-		await saveLixToOpfs({ lix });
 
 		// mismatch in id, update URL without full reload if possible
 		if (lixId.value !== lixIdSearchParam) {
@@ -222,7 +165,7 @@ export async function selectLix(): Promise<Lix> {
  */
 export async function selectActiveVersion(): Promise<Version> {
 	const lix = await ensureLix();
-	
+
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
@@ -245,7 +188,8 @@ export async function selectVersions(): Promise<Version[]> {
  */
 export async function selectFiles() {
 	const lix = await ensureLix();
-	return await lix.db.selectFrom("file")
+	return await lix.db
+		.selectFrom("file")
 		.select(["id", "path", "metadata"])
 		.execute();
 }
@@ -295,17 +239,22 @@ export async function selectActiveFile() {
 	return file;
 }
 
-
 /**
  * Selects checkpoints for the active file
  */
 export async function selectCheckpointChangeSets(): Promise<
-	Array<ChangeSet & { change_count: number; created_at: string | null; author_name: string | null }>
+	Array<
+		ChangeSet & {
+			change_count: number;
+			created_at: string | null;
+			author_name: string | null;
+		}
+	>
 > {
 	const lix = await ensureLix();
 	const activeFile = await selectActiveFile();
 	const activeVersion = await selectActiveVersion();
-	
+
 	if (!activeFile || !activeVersion) return [];
 
 	const result = await lix.db
@@ -334,10 +283,9 @@ export async function selectCheckpointChangeSets(): Promise<
 			eb
 				.selectFrom("change")
 				.where("change.schema_key", "=", "lix_change_set_label_table")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
-					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					(eb) => eb.ref("change.snapshot_content", "->>").key("change_set_id"),
 					"=",
 					eb.ref("change_set.id")
 				)
@@ -349,11 +297,10 @@ export async function selectCheckpointChangeSets(): Promise<
 				.selectFrom("change_author")
 				.innerJoin("change", "change.id", "change_author.change_id")
 				.innerJoin("account", "account.id", "change_author.account_id")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where("change.schema_key", "=", "lix_change_set_label_table")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
-					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					(eb) => eb.ref("change.snapshot_content", "->>").key("change_set_id"),
 					"=",
 					eb.ref("change_set.id")
 				)
@@ -362,7 +309,7 @@ export async function selectCheckpointChangeSets(): Promise<
 		)
 		.orderBy("created_at", "desc")
 		.execute();
-	
+
 	return result;
 }
 
@@ -375,7 +322,7 @@ export async function selectWorkingChangeSet(): Promise<
 	const lix = await ensureLix();
 	const activeFile = await selectActiveFile();
 	const activeVersion = await selectActiveVersion();
-	
+
 	if (!activeFile) return null;
 
 	const result = await lix.db
@@ -394,19 +341,21 @@ export async function selectWorkingChangeSet(): Promise<
 			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 		])
 		.executeTakeFirst();
-	
+
 	return result || null;
 }
 
 /**
  * Selects intermediate changes (changes in working change set)
  */
-export async function selectIntermediateChanges(): Promise<UiDiffComponentProps["diffs"]> {
+export async function selectIntermediateChanges(): Promise<
+	UiDiffComponentProps["diffs"]
+> {
 	const lix = await ensureLix();
 	const activeFile = await selectActiveFile();
 	const activeVersion = await selectActiveVersion();
 	const checkpointChanges = await selectCheckpointChangeSets();
-	
+
 	if (!activeVersion || !activeFile) return [];
 
 	// Get all changes in the working change set
@@ -415,7 +364,6 @@ export async function selectIntermediateChanges(): Promise<UiDiffComponentProps[
 	// Get changes that are in the working change set
 	const intermediateChanges = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -431,42 +379,47 @@ export async function selectIntermediateChanges(): Promise<UiDiffComponentProps[
 			"change.plugin_key",
 			"change.schema_key",
 			"change.created_at",
-			sql`json(snapshot.content)`.as("snapshot_content_after"),
+			"change.snapshot_content as snapshot_content_after",
 		])
 		.execute();
 
 	const latestCheckpointChangeSetId = checkpointChanges?.[0]?.id;
 
 	// Optimize by getting all before snapshots in a single query instead of N+1 queries
-	let beforeSnapshotMap = new Map<string, any>();
-	
+	const beforeSnapshotMap = new Map<string, any>();
+
 	if (latestCheckpointChangeSetId && intermediateChanges.length > 0) {
-		const entityIds = intermediateChanges.map(c => c.entity_id);
-		const schemaKeys = [...new Set(intermediateChanges.map(c => c.schema_key))];
-		
+		const entityIds = intermediateChanges.map((c) => c.entity_id);
+		const schemaKeys = [
+			...new Set(intermediateChanges.map((c) => c.schema_key)),
+		];
+
 		const beforeSnapshots = await lix.db
 			.selectFrom("change")
-			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 			.innerJoin(
 				"change_set_element",
 				"change_set_element.change_id",
 				"change.id"
 			)
-			.where("change_set_element.change_set_id", "=", latestCheckpointChangeSetId)
+			.where(
+				"change_set_element.change_set_id",
+				"=",
+				latestCheckpointChangeSetId
+			)
 			.where("change.entity_id", "in", entityIds)
 			.where("change.schema_key", "in", schemaKeys)
 			.where("change.file_id", "=", activeFile.id)
 			.select([
 				"change.entity_id",
 				"change.schema_key",
-				sql`json(snapshot.content)`.as("snapshot_content_before"),
-				"change.created_at"
+				"change.snapshot_content as snapshot_content_before",
+				"change.created_at",
 			])
 			.orderBy("change.created_at", "desc")
 			.execute();
 
 		// Create a map for quick lookup, keeping only the latest change per entity+schema combination
-		beforeSnapshots.forEach(snapshot => {
+		beforeSnapshots.forEach((snapshot) => {
 			const key = `${snapshot.entity_id}_${snapshot.schema_key}`;
 			if (!beforeSnapshotMap.has(key)) {
 				beforeSnapshotMap.set(key, snapshot.snapshot_content_before);
@@ -474,7 +427,7 @@ export async function selectIntermediateChanges(): Promise<UiDiffComponentProps[
 		});
 	}
 
-	const changesWithBeforeSnapshots: UiDiffComponentProps["diffs"] = 
+	const changesWithBeforeSnapshots: UiDiffComponentProps["diffs"] =
 		intermediateChanges.map((change) => {
 			const beforeKey = `${change.entity_id}_${change.schema_key}`;
 			const snapshotBefore = beforeSnapshotMap.get(beforeKey);
@@ -548,7 +501,9 @@ export async function selectCurrentLixName(): Promise<string> {
 /**
  * Selects available lix files
  */
-export async function selectAvailableLixes(): Promise<Array<{ id: string; name: string }>> {
+export async function selectAvailableLixes(): Promise<
+	Array<{ id: string; name: string }>
+> {
 	try {
 		// Import the helper function dynamically to avoid circular dependencies
 		const { findLixFilesInOpfs } = await import("./helper/findLixInOpfs");
@@ -605,20 +560,21 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 const setFirstMarkdownFile = async (lix: Lix) => {
 	try {
 		if (!lix) return null;
-		
+
 		// Get file metadata and filter for markdown files
 		const files =
-			(await lix.db.selectFrom("file")
+			(await lix.db
+				.selectFrom("file")
 				.select(["id", "path", "metadata"])
 				.execute()) ?? [];
-		let markdownFiles = files.filter(
+		const markdownFiles = files.filter(
 			(file) => file.path && file.path.endsWith(".md")
 		);
 
 		// If no markdown files exist, create an empty file
 		if (markdownFiles.length === 0) {
 			const newFileId = nanoid();
-			
+
 			// Create empty markdown file
 			await lix.db
 				.insertInto("file")
@@ -629,23 +585,21 @@ const setFirstMarkdownFile = async (lix: Lix) => {
 				})
 				.execute();
 
-			await saveLixToOpfs({ lix });
-			
 			const newFile = {
 				id: newFileId,
 				path: "/document.md",
 				metadata: null,
 			};
-			
+
 			updateUrlParams({ f: newFileId });
 			return newFile;
 		}
-		
+
 		if (markdownFiles.length > 0) {
 			updateUrlParams({ f: markdownFiles[0].id });
 			return markdownFiles[0];
 		}
-		
+
 		return null;
 	} catch (error) {
 		console.error("Error setting first markdown file: ", error);
@@ -710,7 +664,6 @@ export async function selectChangeDiffs(
 	// Get leaf changes for this change set
 	const checkpointChanges = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -727,8 +680,8 @@ export async function selectChangeDiffs(
 			"change.schema_key",
 			"change.entity_id",
 			"change.file_id",
+			"change.snapshot_content as snapshot_content_after",
 		])
-		.select(sql`json(snapshot.content)`.as("snapshot_content_after"))
 		.execute();
 
 	// Process each change to include before snapshots
@@ -741,7 +694,6 @@ export async function selectChangeDiffs(
 				if (changeSetBeforeId) {
 					snapshotBefore = await lix.db
 						.selectFrom("change")
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 						.innerJoin(
 							"change_set_element",
 							"change_set_element.change_id",
@@ -752,7 +704,7 @@ export async function selectChangeDiffs(
 						.where("change.schema_key", "=", change.schema_key)
 						.where("change.file_id", "=", activeFile.id)
 						.where(changeHasLabel({ name: "checkpoint" }))
-						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+						.select("change.snapshot_content as snapshot_content_before")
 						.orderBy("change.created_at", "desc")
 						.executeTakeFirst();
 				}
@@ -837,7 +789,6 @@ export async function selectMdAstEntities(): Promise<MdAstEntity[]> {
 	// Get all md-ast node entities for the file
 	const nodeChanges = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -848,7 +799,7 @@ export async function selectMdAstEntities(): Promise<MdAstEntity[]> {
 		.where("change.schema_key", "=", "lix_plugin_md_node")
 		.select([
 			"change.entity_id",
-			sql`json(snapshot.content)`.as("snapshot_content"),
+			"change.snapshot_content",
 		])
 		.execute();
 
@@ -880,7 +831,6 @@ export async function selectMdAstDocumentOrder(): Promise<string[]> {
 	// Get the root order entity
 	const orderChange = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -890,7 +840,7 @@ export async function selectMdAstDocumentOrder(): Promise<string[]> {
 		.where("change.file_id", "=", activeFile.id)
 		.where("change.schema_key", "=", "lix_plugin_md_root")
 		.where("change.entity_id", "=", "root")
-		.select(sql`json(snapshot.content)`.as("snapshot_content"))
+		.select("change.snapshot_content")
 		.executeTakeFirst();
 
 	if (!orderChange) return [];
@@ -923,7 +873,6 @@ export async function selectMdAstDocument(): Promise<{
 export async function updateMdAstEntities(entities: MdAstEntity[], order: string[]): Promise<void> {
 	const lix = await ensureLix();
 	const activeFile = await selectActiveFile();
-	const activeVersion = await selectActiveVersion();
 	
 	if (!activeFile) {
 		throw new Error("No active file to update");
@@ -949,7 +898,6 @@ export async function updateMdAstEntities(entities: MdAstEntity[], order: string
 						plugin_key: "lix_plugin_md",
 						snapshot_content: entity as any, // Store as object, not string
 						schema_version: "1.0",
-						version_id: activeVersion.id,
 						created_at: new Date().toISOString(),
 						updated_at: new Date().toISOString(),
 					}))
@@ -968,7 +916,6 @@ export async function updateMdAstEntities(entities: MdAstEntity[], order: string
 					plugin_key: "lix_plugin_md",
 					snapshot_content: { order } as any, // Store as object, not string
 					schema_version: "1.0",
-					version_id: activeVersion.id,
 					created_at: new Date().toISOString(),
 					updated_at: new Date().toISOString(),
 				})

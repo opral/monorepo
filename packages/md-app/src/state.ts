@@ -7,7 +7,6 @@ import {
 } from "@lix-js/sdk";
 import { atom, createStore } from "jotai";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
-import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
 import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
 import { plugin as txtPlugin } from "@lix-js/plugin-txt";
@@ -96,7 +95,6 @@ export const lixAtom = atom(async (get) => {
 						blob,
 						providePlugins: [txtPlugin],
 					});
-					await saveLixToOpfs({ lix });
 					return lix;
 				}
 			} catch (error) {
@@ -180,7 +178,6 @@ export const lixAtom = atom(async (get) => {
 	// 	.onConflict((oc) => oc.doUpdateSet({ value: serverUrl }))
 	// 	.execute();
 
-	await saveLixToOpfs({ lix });
 
 	// mismatch in id, update URL without full reload if possible
 	if (lixId.value !== lixIdSearchParam) {

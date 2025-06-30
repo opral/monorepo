@@ -21,7 +21,6 @@ import {
 } from "@lix-js/sdk";
 // import { parseMdBlocks } from "@lix-js/plugin-md";
 import { setupWelcomeFile } from "./helper/welcomeLixFile.ts";
-import { saveLixToOpfs } from "./helper/saveLixToOpfs.ts";
 import { updateUrlParams } from "./helper/updateUrlParams.ts";
 
 const setFirstMarkdownFile = (() => {
@@ -36,7 +35,7 @@ const setFirstMarkdownFile = (() => {
 
 			if (markdownFiles.length === 0) {
 				await setupWelcomeFile(lix);
-				await saveLixToOpfs({ lix });
+				// OpfsStorage now handles persistence automatically through the onStateCommit hook
 
 				const welcomeFile = await lix.db
 					.selectFrom("file")

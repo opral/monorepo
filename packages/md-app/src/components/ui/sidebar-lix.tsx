@@ -34,7 +34,6 @@ import {
 	selectAvailableLixes,
 	selectMdAstDocument,
 } from "@/queries";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { saveLixName } from "@/helper/renameLix";
@@ -137,7 +136,7 @@ export function LixSidebar() {
 				})
 				.executeTakeFirstOrThrow();
 
-			await saveLixToOpfs({ lix });
+			// OpfsStorage now handles persistence automatically through the onStateCommit hook
 			await switchToFile(newFileId);
 		} catch (error) {
 			console.error("Failed to create new file:", error);
@@ -178,7 +177,7 @@ export function LixSidebar() {
 				.where("id", "=", inlineEditingFile.id)
 				.execute();
 
-			await saveLixToOpfs({ lix });
+			// OpfsStorage now handles persistence automatically through the onStateCommit hook
 			refetch();
 		} catch (error) {
 			console.error("Failed to rename file:", error);
@@ -294,7 +293,7 @@ export function LixSidebar() {
 				// Delete the file
 				await lix.db.deleteFrom("file").where("id", "=", fileId).execute();
 
-				await saveLixToOpfs({ lix });
+				// OpfsStorage now handles persistence automatically through the onStateCommit hook
 
 				// If we deleted the active file, switch to another file
 				if (isActiveFile) {
@@ -353,7 +352,7 @@ export function LixSidebar() {
 						fileName: file.name,
 					});
 
-					await saveLixToOpfs({ lix });
+					// OpfsStorage now handles persistence automatically through the onStateCommit hook
 					updateUrlParams({ f: importedFileId });
 					refetch();
 				} catch (error) {
