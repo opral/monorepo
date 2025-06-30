@@ -3,7 +3,7 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
 import { useQuery, useQueryFirst, useQueryFirstOrThrow } from "./use-query.js";
 import { LixProvider } from "../provider.js";
-import { openLix } from "@lix-js/sdk";
+import { openLix, type KeyValue, type State } from "@lix-js/sdk";
 
 async function waitForUpdate<T>(
 	result: { readonly current: T },
@@ -336,6 +336,31 @@ test("useQueryFirstOrThrow throws error for empty results", async () => {
 
 	expect(result.current.error).toBeInstanceOf(Error);
 	expect(result.current.error?.message).toBe("Query returned no rows");
+
+	await lix.close();
+});
+
+test("useQuery return type is properly typed", async () => {
+	const lix = await openLix({});
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>{children}</LixProvider>
+	);
+
+	const { result } = renderHook(
+		() => useQuery((lix) => lix.db.selectFrom("key_value").selectAll()),
+		{ wrapper },
+	);
+
+	// Type test: data should be properly typed as an array of {key: string, value: string}
+	// This should pass without any type errors if the types are working correctly
+	result.current.data satisfies State<KeyValue>[] | undefined;
+
+	// Wait for loading to complete
+	await waitForUpdate(result, (r) => r.loading);
+
+	expect(result.current.loading).toBe(false);
+	expect(result.current.error).toBe(null);
+	expect(Array.isArray(result.current.data)).toBe(true);
 
 	await lix.close();
 });
