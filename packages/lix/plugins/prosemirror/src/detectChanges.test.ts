@@ -101,10 +101,17 @@ test("it should detect insertion of a new node", async () => {
 		},
 	});
 
-	expect(detectedChanges).toHaveLength(1);
-	const change = detectedChanges[0]!;
-	expect(change.entity_id).toEqual("paragraph-2");
-	expect(change.snapshot_content).toBeDefined();
+	expect(detectedChanges).toHaveLength(2);
+	
+	// Find the document order change
+	const documentChange = detectedChanges.find(c => c.entity_id === "document-root");
+	expect(documentChange).toBeDefined();
+	expect(documentChange?.snapshot_content).toBeDefined();
+	
+	// Find the node change
+	const nodeChange = detectedChanges.find(c => c.entity_id === "paragraph-2");
+	expect(nodeChange).toBeDefined();
+	expect(nodeChange?.snapshot_content).toBeDefined();
 });
 
 test("it should detect modification of an existing node", async () => {
@@ -232,10 +239,17 @@ test("it should detect deletion of a node", async () => {
 		},
 	});
 
-	expect(detectedChanges).toHaveLength(1);
-	const change = detectedChanges![0]!;
-	expect(change.entity_id).toEqual("paragraph-2");
-	expect(change.snapshot_content).toBeNull();
+	expect(detectedChanges).toHaveLength(2);
+	
+	// Find the document order change
+	const documentChange = detectedChanges.find(c => c.entity_id === "document-root");
+	expect(documentChange).toBeDefined();
+	expect(documentChange?.snapshot_content).toBeDefined();
+	
+	// Find the deletion change
+	const deleteChange = detectedChanges.find(c => c.entity_id === "paragraph-2");
+	expect(deleteChange).toBeDefined();
+	expect(deleteChange?.snapshot_content).toBeNull();
 });
 
 test("it should detect multiple changes in a single document", async () => {
@@ -330,7 +344,12 @@ test("it should detect multiple changes in a single document", async () => {
 		},
 	});
 
-	expect(detectedChanges).toHaveLength(3);
+	expect(detectedChanges).toHaveLength(4);
+
+	// Find the document order change
+	const documentChange = detectedChanges.find(c => c.entity_id === "document-root");
+	expect(documentChange).toBeDefined();
+	expect(documentChange?.snapshot_content).toBeDefined();
 
 	// Find each change by entity_id
 	const modifiedChange = detectedChanges.find(
