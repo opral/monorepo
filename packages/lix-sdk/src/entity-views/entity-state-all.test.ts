@@ -276,9 +276,9 @@ describe("createEntityAllViewIfNotExists", () => {
 		// Test that we can query the view using the schema key + _all name
 		await lix.db
 			.insertInto("test_entity_all" as any)
-			.values({ 
-				id: "test_id", 
-				name: "test_name", 
+			.values({
+				id: "test_id",
+				name: "test_name",
 				value: 42,
 				lixcol_version_id: activeVersion.version_id,
 			})
