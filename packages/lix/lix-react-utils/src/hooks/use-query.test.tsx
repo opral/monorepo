@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
-import { useQuery, useQueryFirst, useQueryFirstOrThrow } from "./use-query.js";
+import { useQuery, useQueryTakeFirst } from "./use-query.js";
 import { LixProvider } from "../provider.js";
 import { openLix, type KeyValue, type State } from "@lix-js/sdk";
 
@@ -211,7 +211,7 @@ test("useQuery multiple subscriptions work independently", async () => {
 	await lix.close();
 });
 
-test("useQueryFirst returns first item from array", async () => {
+test("useQueryTakeFirst returns first item from array", async () => {
 	const lix = await openLix({});
 
 	// Insert test data
@@ -229,7 +229,7 @@ test("useQueryFirst returns first item from array", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQueryFirst((lix) =>
+			useQueryTakeFirst((lix) =>
 				lix.db
 					.selectFrom("key_value")
 					.selectAll()
@@ -251,7 +251,7 @@ test("useQueryFirst returns first item from array", async () => {
 	await lix.close();
 });
 
-test("useQueryFirst returns undefined for empty results", async () => {
+test("useQueryTakeFirst returns undefined for empty results", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
 		<LixProvider lix={lix}>{children}</LixProvider>
@@ -259,7 +259,7 @@ test("useQueryFirst returns undefined for empty results", async () => {
 
 	const { result } = renderHook(
 		() =>
-			useQueryFirst((lix) =>
+			useQueryTakeFirst((lix) =>
 				lix.db
 					.selectFrom("key_value")
 					.selectAll()
@@ -277,68 +277,6 @@ test("useQueryFirst returns undefined for empty results", async () => {
 	await lix.close();
 });
 
-test("useQueryFirstOrThrow returns first item from array", async () => {
-	const lix = await openLix({});
-
-	// Insert test data
-	await lix.db
-		.insertInto("key_value")
-		.values({ key: "throw_test_1", value: "first" })
-		.execute();
-
-	const wrapper = ({ children }: { children: React.ReactNode }) => (
-		<LixProvider lix={lix}>{children}</LixProvider>
-	);
-
-	const { result } = renderHook(
-		() =>
-			useQueryFirstOrThrow((lix) =>
-				lix.db
-					.selectFrom("key_value")
-					.selectAll()
-					.where("key", "=", "throw_test_1"),
-			),
-		{ wrapper },
-	);
-
-	await waitFor(() => {
-		expect(result.current.loading).toBe(false);
-	});
-
-	expect(result.current.data).toMatchObject({
-		key: "throw_test_1",
-		value: "first",
-	});
-
-	await lix.close();
-});
-
-test("useQueryFirstOrThrow throws error for empty results", async () => {
-	const lix = await openLix({});
-	const wrapper = ({ children }: { children: React.ReactNode }) => (
-		<LixProvider lix={lix}>{children}</LixProvider>
-	);
-
-	const { result } = renderHook(
-		() =>
-			useQueryFirstOrThrow((lix) =>
-				lix.db
-					.selectFrom("key_value")
-					.selectAll()
-					.where("key", "=", "non_existent_key"),
-			),
-		{ wrapper },
-	);
-
-	await waitFor(() => {
-		expect(result.current.loading).toBe(false);
-	});
-
-	expect(result.current.error).toBeInstanceOf(Error);
-	expect(result.current.error?.message).toBe("Query returned no rows");
-
-	await lix.close();
-});
 
 test("useQuery return type is properly typed", async () => {
 	const lix = await openLix({});
