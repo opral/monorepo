@@ -1,14 +1,18 @@
-import { useQuery } from "../hooks/useQuery";
 import { selectCheckpoints, selectWorkingChangeSet } from "../queries";
 import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
 import { useRef } from "react";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { createCheckpoint } from "@lix-js/sdk";
-import { lix } from "../state";
+import {
+	useLix,
+	useSuspenseQuery,
+	useSuspenseQueryTakeFirst,
+} from "@lix-js/react-utils";
 
 const Checkpoints: React.FC = () => {
-	const [checkpoints] = useQuery(selectCheckpoints);
-	const [workingChangeSet] = useQuery(selectWorkingChangeSet);
+	const lix = useLix();
+	const checkpoints = useSuspenseQuery(selectCheckpoints);
+	const workingChangeSet = useSuspenseQueryTakeFirst(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
 	);
@@ -55,7 +59,7 @@ const Checkpoints: React.FC = () => {
 					</div>
 				)}
 
-				{checkpoints?.map((checkpoint, index) => {
+				{checkpoints.map((checkpoint, index) => {
 					// Get the previous checkpoint ID (if available)
 					const previousCheckpointId = checkpoints[index + 1]?.id ?? undefined;
 
@@ -64,6 +68,7 @@ const Checkpoints: React.FC = () => {
 							<ChangeSet
 								key={checkpoint.id}
 								previousChangeSetId={previousCheckpointId}
+								// @ts-ignore
 								changeSet={checkpoint}
 							/>
 						</div>

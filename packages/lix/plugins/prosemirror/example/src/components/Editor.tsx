@@ -11,12 +11,13 @@ import {
 } from "prosemirror-schema-list";
 import { schema } from "../prosemirror/schema";
 import { useEffect, useRef, useState } from "react";
-import { lix, prosemirrorFile } from "../state";
 import { registerCustomNodeViews } from "../prosemirror/custom-node-views";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { DiffView } from "./DiffView";
 import Toolbar from "./Toolbar";
 import { idPlugin, lixProsemirror } from "@lix-js/plugin-prosemirror";
+import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
+import { selectFileId } from "../queries";
 
 // Custom styles for the ProseMirror editor
 const editorStyles = `
@@ -37,6 +38,8 @@ const editorStyles = `
 `;
 
 const Editor: React.FC = () => {
+	const lix = useLix();
+	const prosemirrorFile = useQueryTakeFirst(selectFileId);
 	const editorRef = useRef<HTMLDivElement>(null);
 	const [view, setView] = useState<EditorView | null>(null);
 	const [diffView] = useKeyValue<{
@@ -51,7 +54,7 @@ const Editor: React.FC = () => {
 			return;
 		}
 
-		// Create the initial state with an EMPTY document
+		// Create the initial state with an empty document
 		// The lixProsemirror plugin will load the actual document
 		const state = EditorState.create({
 			doc: schema.nodeFromJSON({
@@ -80,7 +83,7 @@ const Editor: React.FC = () => {
 				lixProsemirror({
 					lix,
 					schema,
-					fileId: prosemirrorFile.id,
+					fileId: prosemirrorFile.data?.id ?? "",
 				}),
 			],
 		});
@@ -114,7 +117,7 @@ const Editor: React.FC = () => {
 			editorView.destroy();
 			setView(null);
 		};
-	}, []); // Empty dependency array ensures this runs only once on mount
+	}, [prosemirrorFile.data?.id]);
 
 	// Handle clicks to focus the editor
 	const handleClick = () => {

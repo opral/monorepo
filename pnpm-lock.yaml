@@ -2773,6 +2773,9 @@ importers:
       '@lix-js/plugin-prosemirror':
         specifier: workspace:*
         version: link:..
+      '@lix-js/react-utils':
+        specifier: workspace:*
+        version: link:../../../lix-react-utils
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../../../../lix-sdk
@@ -2781,10 +2784,10 @@ importers:
         version: link:../../../universal-diff
       '@portabletext/editor':
         specifier: ^1.47.7
-        version: 1.55.3(@sanity/schema@3.86.0(@types/react@18.3.23))(@sanity/types@3.86.0(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.1)
+        version: 1.55.3(@sanity/schema@3.86.0(@types/react@19.1.8))(@sanity/types@3.86.0(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(rxjs@7.8.1)
       '@portabletext/react':
         specifier: ^3.2.1
-        version: 3.2.1(react@18.3.1)
+        version: 3.2.1(react@19.1.0)
       '@portabletext/types':
         specifier: ^2.0.13
         version: 2.0.13
@@ -2799,7 +2802,7 @@ importers:
         version: 5.0.43
       lucide-react:
         specifier: ^0.483.0
-        version: 0.483.0(react@18.3.1)
+        version: 0.483.0(react@19.1.0)
       prosemirror-commands:
         specifier: ^1.5.2
         version: 1.7.1
@@ -2825,24 +2828,24 @@ importers:
         specifier: ^1.31.7
         version: 1.40.0
       react:
-        specifier: ^18.3.1
-        version: 18.3.1
+        specifier: ^19.0.0
+        version: 19.1.0
       react-dom:
-        specifier: ^18.3.1
-        version: 18.3.1(react@18.3.1)
+        specifier: ^19.0.0
+        version: 19.1.0(react@19.1.0)
       tailwindcss:
         specifier: ^4.0.15
         version: 4.1.10
       usehooks-ts:
         specifier: ^3.1.1
-        version: 3.1.1(react@18.3.1)
+        version: 3.1.1(react@19.1.0)
     devDependencies:
       '@types/react':
-        specifier: ^18.3.18
-        version: 18.3.23
+        specifier: ^19.0.0
+        version: 19.1.8
       '@types/react-dom':
-        specifier: ^18.3.5
-        version: 18.3.7(@types/react@18.3.23)
+        specifier: ^19.0.0
+        version: 19.1.6(@types/react@19.1.8)
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.0.0
         version: 6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
@@ -24571,33 +24574,33 @@ snapshots:
   '@polka/url@1.0.0-next.29':
     optional: true
 
-  '@portabletext/block-tools@1.1.31(@sanity/types@3.86.0(@types/react@18.3.23))(@types/react@18.3.23)':
+  '@portabletext/block-tools@1.1.31(@sanity/types@3.86.0(@types/react@19.1.8))(@types/react@19.1.8)':
     dependencies:
-      '@sanity/types': 3.86.0(@types/react@18.3.23)
-      '@types/react': 18.3.23
+      '@sanity/types': 3.86.0(@types/react@19.1.8)
+      '@types/react': 19.1.8
       get-random-values-esm: 1.0.2
       lodash: 4.17.21
 
-  '@portabletext/editor@1.55.3(@sanity/schema@3.86.0(@types/react@18.3.23))(@sanity/types@3.86.0(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(rxjs@7.8.1)':
+  '@portabletext/editor@1.55.3(@sanity/schema@3.86.0(@types/react@19.1.8))(@sanity/types@3.86.0(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(rxjs@7.8.1)':
     dependencies:
-      '@portabletext/block-tools': 1.1.31(@sanity/types@3.86.0(@types/react@18.3.23))(@types/react@18.3.23)
+      '@portabletext/block-tools': 1.1.31(@sanity/types@3.86.0(@types/react@19.1.8))(@types/react@19.1.8)
       '@portabletext/patches': 1.1.5
       '@portabletext/to-html': 2.0.14
-      '@sanity/schema': 3.86.0(@types/react@18.3.23)
-      '@sanity/types': 3.86.0(@types/react@18.3.23)
-      '@xstate/react': 6.0.0(@types/react@18.3.23)(react@18.3.1)(xstate@5.20.0)
+      '@sanity/schema': 3.86.0(@types/react@19.1.8)
+      '@sanity/types': 3.86.0(@types/react@19.1.8)
+      '@xstate/react': 6.0.0(@types/react@19.1.8)(react@19.1.0)(xstate@5.20.0)
       debug: 4.4.1(supports-color@10.0.0)
       get-random-values-esm: 1.0.2
       immer: 10.1.1
       lodash: 4.17.21
       lodash.startcase: 4.4.0
-      react: 18.3.1
-      react-compiler-runtime: 19.1.0-rc.2(react@18.3.1)
+      react: 19.1.0
+      react-compiler-runtime: 19.1.0-rc.2(react@19.1.0)
       rxjs: 7.8.1
       slate: 0.117.0
       slate-dom: 0.116.0(slate@0.117.0)
-      slate-react: 0.117.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(slate-dom@0.116.0(slate@0.117.0))(slate@0.117.0)
-      use-effect-event: 1.0.2(react@18.3.1)
+      slate-react: 0.117.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(slate-dom@0.116.0(slate@0.117.0))(slate@0.117.0)
+      use-effect-event: 1.0.2(react@19.1.0)
       xstate: 5.20.0
     transitivePeerDependencies:
       - '@types/react'
@@ -24609,11 +24612,11 @@ snapshots:
       '@sanity/diff-match-patch': 3.2.0
       lodash: 4.17.21
 
-  '@portabletext/react@3.2.1(react@18.3.1)':
+  '@portabletext/react@3.2.1(react@19.1.0)':
     dependencies:
       '@portabletext/toolkit': 2.0.17
       '@portabletext/types': 2.0.13
-      react: 18.3.1
+      react: 19.1.0
 
   '@portabletext/to-html@2.0.14':
     dependencies:
@@ -26142,10 +26145,10 @@ snapshots:
 
   '@sanity/generate-help-url@3.0.0': {}
 
-  '@sanity/schema@3.86.0(@types/react@18.3.23)':
+  '@sanity/schema@3.86.0(@types/react@19.1.8)':
     dependencies:
       '@sanity/generate-help-url': 3.0.0
-      '@sanity/types': 3.86.0(@types/react@18.3.23)
+      '@sanity/types': 3.86.0(@types/react@19.1.8)
       arrify: 2.0.1
       groq-js: 1.17.1
       humanize-list: 1.0.1
@@ -26157,10 +26160,10 @@ snapshots:
       - debug
       - supports-color
 
-  '@sanity/types@3.86.0(@types/react@18.3.23)':
+  '@sanity/types@3.86.0(@types/react@19.1.8)':
     dependencies:
       '@sanity/client': 6.29.1
-      '@types/react': 18.3.23
+      '@types/react': 19.1.8
     transitivePeerDependencies:
       - debug
 
@@ -26571,11 +26574,11 @@ snapshots:
   '@storybook/addon-docs@8.6.14(@types/react@19.1.8)(storybook@8.6.14(prettier@3.6.1))':
     dependencies:
       '@mdx-js/react': 3.1.0(@types/react@19.1.8)(react@19.1.0)
-      '@storybook/blocks': 8.6.14(react-dom@18.3.1(react@18.3.1))(react@19.1.0)(storybook@8.6.14(prettier@3.6.1))
+      '@storybook/blocks': 8.6.14(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(storybook@8.6.14(prettier@3.6.1))
       '@storybook/csf-plugin': 8.6.14(storybook@8.6.14(prettier@3.6.1))
-      '@storybook/react-dom-shim': 8.6.14(react-dom@18.3.1(react@18.3.1))(react@19.1.0)(storybook@8.6.14(prettier@3.6.1))
+      '@storybook/react-dom-shim': 8.6.14(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(storybook@8.6.14(prettier@3.6.1))
       react: 19.1.0
-      react-dom: 18.3.1(react@19.1.0)
+      react-dom: 19.1.0(react@19.1.0)
       storybook: 8.6.14(prettier@3.6.1)
       ts-dedent: 2.2.0
     transitivePeerDependencies:
@@ -26640,14 +26643,14 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/blocks@8.6.14(react-dom@18.3.1(react@18.3.1))(react@19.1.0)(storybook@8.6.14(prettier@3.6.1))':
+  '@storybook/blocks@8.6.14(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(storybook@8.6.14(prettier@3.6.1))':
     dependencies:
-      '@storybook/icons': 1.4.0(react-dom@18.3.1(react@18.3.1))(react@19.1.0)
+      '@storybook/icons': 1.4.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       storybook: 8.6.14(prettier@3.6.1)
       ts-dedent: 2.2.0
     optionalDependencies:
       react: 19.1.0
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 19.1.0(react@19.1.0)
 
   '@storybook/builder-vite@8.6.14(storybook@8.6.14(prettier@3.6.1))(vite@6.3.5(@types/node@24.0.4)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.36.0)(tsx@4.20.3)(yaml@2.8.0))':
     dependencies:
@@ -26694,10 +26697,10 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@storybook/icons@1.4.0(react-dom@18.3.1(react@18.3.1))(react@19.1.0)':
+  '@storybook/icons@1.4.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       react: 19.1.0
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 19.1.0(react@19.1.0)
 
   '@storybook/manager-api@8.6.14(storybook@8.6.14(prettier@3.6.1))':
     dependencies:
@@ -26707,10 +26710,10 @@ snapshots:
     dependencies:
       storybook: 8.6.14(prettier@3.6.1)
 
-  '@storybook/react-dom-shim@8.6.14(react-dom@18.3.1(react@18.3.1))(react@19.1.0)(storybook@8.6.14(prettier@3.6.1))':
+  '@storybook/react-dom-shim@8.6.14(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(storybook@8.6.14(prettier@3.6.1))':
     dependencies:
       react: 19.1.0
-      react-dom: 18.3.1(react@18.3.1)
+      react-dom: 19.1.0(react@19.1.0)
       storybook: 8.6.14(prettier@3.6.1)
 
   '@storybook/theming@8.6.14(storybook@8.6.14(prettier@3.6.1))':
@@ -30013,11 +30016,11 @@ snapshots:
       get-stream: 6.0.1
       got: 13.0.0
 
-  '@xstate/react@6.0.0(@types/react@18.3.23)(react@18.3.1)(xstate@5.20.0)':
+  '@xstate/react@6.0.0(@types/react@19.1.8)(react@19.1.0)(xstate@5.20.0)':
     dependencies:
-      react: 18.3.1
-      use-isomorphic-layout-effect: 1.2.1(@types/react@18.3.23)(react@18.3.1)
-      use-sync-external-store: 1.5.0(react@18.3.1)
+      react: 19.1.0
+      use-isomorphic-layout-effect: 1.2.1(@types/react@19.1.8)(react@19.1.0)
+      use-sync-external-store: 1.5.0(react@19.1.0)
     optionalDependencies:
       xstate: 5.20.0
     transitivePeerDependencies:
@@ -35777,10 +35780,6 @@ snapshots:
     dependencies:
       react: 19.1.0
 
-  lucide-react@0.483.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-
   lucide-react@0.483.0(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -38495,9 +38494,9 @@ snapshots:
       strip-json-comments: 2.0.1
     optional: true
 
-  react-compiler-runtime@19.1.0-rc.2(react@18.3.1):
+  react-compiler-runtime@19.1.0-rc.2(react@19.1.0):
     dependencies:
-      react: 18.3.1
+      react: 19.1.0
 
   react-d3-tree@3.6.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
@@ -38613,12 +38612,6 @@ snapshots:
     dependencies:
       loose-envify: 1.4.0
       react: 18.3.1
-      scheduler: 0.23.2
-
-  react-dom@18.3.1(react@19.1.0):
-    dependencies:
-      loose-envify: 1.4.0
-      react: 19.1.0
       scheduler: 0.23.2
 
   react-dom@19.0.0-rc-941e1b4a-20240729(react@19.0.0-rc-941e1b4a-20240729):
@@ -39992,14 +39985,14 @@ snapshots:
       slate-dom: 0.116.0(slate@0.114.0)
       tiny-invariant: 1.3.1
 
-  slate-react@0.117.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(slate-dom@0.116.0(slate@0.117.0))(slate@0.117.0):
+  slate-react@0.117.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(slate-dom@0.116.0(slate@0.117.0))(slate@0.117.0):
     dependencies:
       '@juggle/resize-observer': 3.4.0
       direction: 1.0.4
       is-hotkey: 0.2.0
       lodash: 4.17.21
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
       scroll-into-view-if-needed: 3.1.0
       slate: 0.117.0
       slate-dom: 0.116.0(slate@0.117.0)
@@ -41668,9 +41661,9 @@ snapshots:
       dequal: 2.0.3
       react: 19.1.0
 
-  use-effect-event@1.0.2(react@18.3.1):
+  use-effect-event@1.0.2(react@19.1.0):
     dependencies:
-      react: 18.3.1
+      react: 19.1.0
 
   use-file-picker@2.1.4(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react@19.1.0):
     dependencies:
@@ -41691,11 +41684,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.1.8
 
-  use-isomorphic-layout-effect@1.2.1(@types/react@18.3.23)(react@18.3.1):
+  use-isomorphic-layout-effect@1.2.1(@types/react@19.1.8)(react@19.1.0):
     dependencies:
-      react: 18.3.1
+      react: 19.1.0
     optionalDependencies:
-      '@types/react': 18.3.23
+      '@types/react': 19.1.8
 
   use-latest@1.3.0(@types/react@19.1.8)(react@19.1.0):
     dependencies:
@@ -41732,18 +41725,14 @@ snapshots:
     dependencies:
       react: 19.1.0
 
-  use-sync-external-store@1.5.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-
   use-sync-external-store@1.5.0(react@19.1.0):
     dependencies:
       react: 19.1.0
 
-  usehooks-ts@3.1.1(react@18.3.1):
+  usehooks-ts@3.1.1(react@19.1.0):
     dependencies:
       lodash.debounce: 4.0.8
-      react: 18.3.1
+      react: 19.1.0
 
   userhome@1.0.0:
     optional: true

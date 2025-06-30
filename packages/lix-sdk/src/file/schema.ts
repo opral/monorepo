@@ -8,7 +8,7 @@ import type {
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyFileDatabaseSchema(
-	lix: Pick<Lix, "sqlite" | "db" | "plugin">
+	lix: Pick<Lix, "sqlite" | "db" | "plugin" | "hooks">
 ): void {
 	lix.sqlite.createFunction({
 		name: "handle_file_insert",

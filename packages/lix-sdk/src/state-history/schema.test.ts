@@ -754,7 +754,6 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
 			schema_version: "1.0",
-			version_id: lix.db.selectFrom("active_version").select("version_id"),
 			snapshot_content: { value: "value0" },
 		})
 		.execute();
