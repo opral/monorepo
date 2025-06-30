@@ -67,6 +67,17 @@ export type StateEntityView = {
 	 * and when they were made.
 	 */
 	lixcol_change_id: Generated<string>;
+
+	/**
+	 * Whether this entity is stored as untracked state.
+	 *
+	 * - `false` (default): Entity follows normal change control and versioning
+	 * - `true`: Entity bypasses change control for UI state, temporary data, etc.
+	 *
+	 * Untracked entities don't create change records and have highest priority
+	 * in the state resolution order: untracked > tracked > inherited.
+	 */
+	lixcol_untracked: Generated<boolean>;
 };
 
 /**
@@ -134,6 +145,17 @@ export type EntityStateColumns = {
 	 * and when they were made.
 	 */
 	lixcol_change_id: LixGenerated<string>;
+
+	/**
+	 * Whether this entity is stored as untracked state.
+	 *
+	 * - `false` (default): Entity follows normal change control and versioning
+	 * - `true`: Entity bypasses change control for UI state, temporary data, etc.
+	 *
+	 * Untracked entities don't create change records and have highest priority
+	 * in the state resolution order: untracked > tracked > inherited.
+	 */
+	lixcol_untracked: LixGenerated<boolean>;
 };
 
 /**
@@ -349,6 +371,7 @@ function createSingleEntityView(args: {
 		"updated_at AS lixcol_updated_at",
 		"file_id AS lixcol_file_id",
 		"change_id AS lixcol_change_id",
+		"untracked AS lixcol_untracked",
 	];
 
 	// Handle version_id for active view
@@ -409,7 +432,8 @@ function createSingleEntityView(args: {
           plugin_key,
           snapshot_content,
           schema_version,
-          version_id
+          version_id,
+          untracked
         ) ${
 					hasDefaults
 						? `
@@ -420,11 +444,13 @@ function createSingleEntityView(args: {
           '${args.pluginKey}',
           json_object(${properties.map((prop) => `'${prop}', with_default_values.${prop}`).join(", ")}),
           '${args.schema["x-lix-version"]}',
-          ${versionIdReference.replace(/NEW\./g, "with_default_values.")}
+          ${versionIdReference.replace(/NEW\./g, "with_default_values.")},
+          with_default_values.lixcol_untracked
         FROM (
           SELECT
             ${defaultsSubquery},
-            NEW.lixcol_file_id AS lixcol_file_id
+            NEW.lixcol_file_id AS lixcol_file_id,
+            NEW.lixcol_untracked AS lixcol_untracked
         ) AS with_default_values`
 						: `
         VALUES (
@@ -434,7 +460,8 @@ function createSingleEntityView(args: {
           '${args.pluginKey}',
           json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
           '${args.schema["x-lix-version"]}',
-          ${versionIdReference}
+          ${versionIdReference},
+          NEW.lixcol_untracked
         )`
 				};
       END;
@@ -450,7 +477,8 @@ function createSingleEntityView(args: {
           file_id = ${fileId},
           plugin_key = '${args.pluginKey}',
           snapshot_content = json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
-          version_id = ${versionIdReference}
+          version_id = ${versionIdReference},
+          untracked = NEW.lixcol_untracked
         WHERE
           state_all.entity_id = ${entityIdOld}
           AND state_all.schema_key = '${schema_key}'

@@ -10,6 +10,7 @@ export * from "./key-value/schema.js";
 export * from "./label/index.js";
 export * from "./lix/index.js";
 export * from "./log/index.js";
+export * from "./observe/index.js";
 export * from "./plugin/index.js";
 export * from "./query-filter/index.js";
 export * from "./schema-definition/index.js";

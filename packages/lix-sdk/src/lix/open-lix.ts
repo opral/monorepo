@@ -12,6 +12,7 @@ import type { Account } from "../account/schema.js";
 import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
+import { createObserve } from "../observe/create-observe.js";
 
 export type Lix = {
 	/**
@@ -41,6 +42,7 @@ export type Lix = {
 	 * Closes the lix instance and its storage.
 	 */
 	close: () => Promise<void>;
+	observe: ReturnType<typeof createObserve>;
 	/**
 	 * Serialises the Lix into a {@link Blob}.
 	 *
@@ -196,11 +198,14 @@ export async function openLix(args: {
 
 	captureOpened({ db });
 
+	const observe = createObserve({ hooks });
+
 	const lix = {
 		db,
 		sqlite: database,
 		plugin,
 		hooks,
+		observe,
 		close: async () => {
 			await storage.close();
 		},
