@@ -6,11 +6,13 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
+		"test": "tsc --noEmit",
 		"preview": "vite preview"
 	},
 	"dependencies": {
 		"@lix-js/inspector": "workspace:*",
 		"@lix-js/plugin-prosemirror": "workspace:*",
+		"@lix-js/react-utils": "workspace:*",
 		"@lix-js/sdk": "workspace:*",
 		"@lix-js/universal-diff": "workspace:*",
 		"@portabletext/editor": "^1.47.7",
