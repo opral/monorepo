@@ -37,10 +37,10 @@ type Snapshot<T> = {
  * )
  * ```
  */
-export function useQuery<TRow>(
-	buildQuery: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, any>,
+export function useQuery<TResult>(
+	buildQuery: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
 ): {
-	data: TRow[] | undefined;
+	data: TResult[] | undefined;
 	error: Error | null;
 	loading: boolean;
 } {
@@ -55,7 +55,7 @@ export function useQuery<TRow>(
 	);
 
 	// Simple state-based approach
-	const [state, setState] = useState<Snapshot<TRow>>({
+	const [state, setState] = useState<Snapshot<TResult>>({
 		data: undefined,
 		error: null,
 	});
@@ -65,7 +65,7 @@ export function useQuery<TRow>(
 		const observable = lix.observe(builder);
 		const subscription = observable.subscribe({
 			next: (rows) => {
-				setState({ data: rows as TRow[], error: null });
+				setState({ data: rows as TResult[], error: null });
 			},
 			error: (err) => {
 				setState({
