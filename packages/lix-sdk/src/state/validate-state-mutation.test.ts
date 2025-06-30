@@ -2171,7 +2171,9 @@ test("should prevent tracked entities from referencing untracked entities", asyn
 			operation: "insert",
 			version_id: activeVersion.version_id,
 		})
-	).toThrow(/Foreign key constraint violation.*tracked entities cannot reference untracked entities.*This would create broken references during sync/);
+	).toThrow(
+		/Foreign key constraint violation.*tracked entities cannot reference untracked entities.*This would create broken references during sync/
+	);
 });
 
 // SCENARIO: Untracked → Tracked Foreign Key Reference

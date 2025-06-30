@@ -786,10 +786,7 @@ test("file descriptor updates with untracked state", async () => {
 	});
 
 	// Count changes before untracked insert
-	const changesBefore = await lix.db
-		.selectFrom("change")
-		.selectAll()
-		.execute();
+	const changesBefore = await lix.db.selectFrom("change").selectAll().execute();
 
 	// Insert file with untracked=true
 	await lix.db
@@ -858,14 +855,13 @@ test("file descriptor updates with untracked state", async () => {
 	expect(updatedFile[0]?.path).toBe("/updated-untracked-test.json");
 
 	// Verify updated file data was processed by plugin
-	const updatedData = JSON.parse(new TextDecoder().decode(updatedFile[0]?.data));
+	const updatedData = JSON.parse(
+		new TextDecoder().decode(updatedFile[0]?.data)
+	);
 	expect(updatedData).toEqual({ prop: "updated" });
 
 	// Delete the untracked file
-	await lix.db
-		.deleteFrom("file")
-		.where("id", "=", "untracked-file")
-		.execute();
+	await lix.db.deleteFrom("file").where("id", "=", "untracked-file").execute();
 
 	// Count changes after untracked delete
 	const changesAfterDelete = await lix.db
@@ -928,7 +924,9 @@ test("file data updates with untracked state", async () => {
 	expect(insertedFile[0]?.lixcol_untracked).toBe(1);
 
 	// Verify file data was processed by plugin
-	const initialData = JSON.parse(new TextDecoder().decode(insertedFile[0]?.data));
+	const initialData = JSON.parse(
+		new TextDecoder().decode(insertedFile[0]?.data)
+	);
 	expect(initialData).toEqual({ content: "initial" });
 
 	// Update file data with untracked=true
@@ -961,7 +959,9 @@ test("file data updates with untracked state", async () => {
 	expect(updatedFile[0]?.lixcol_untracked).toBe(1);
 
 	// Verify file data was updated and processed by plugin
-	const updatedData = JSON.parse(new TextDecoder().decode(updatedFile[0]?.data));
+	const updatedData = JSON.parse(
+		new TextDecoder().decode(updatedFile[0]?.data)
+	);
 	expect(updatedData).toEqual({ content: "updated" });
 
 	// Delete the untracked file
