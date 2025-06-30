@@ -1863,8 +1863,6 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@20.5.9)(typescript@5.8.3))(terser@5.36.0)
 
-  inlang/packages/website/dist/server: {}
-
   inlang/packages/website/tailwind-color-plugin:
     dependencies:
       '@ctrl/tinycolor':
@@ -2533,15 +2531,9 @@ importers:
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
-      dedent:
-        specifier: 1.5.1
-        version: 1.5.1(babel-plugin-macros@3.1.0)
       human-id:
         specifier: ^4.1.1
         version: 4.1.1
-      js-sha256:
-        specifier: ^0.11.0
-        version: 0.11.1
       kysely:
         specifier: ^0.27.4
         version: 0.27.6
@@ -14647,9 +14639,6 @@ packages:
   js-levenshtein@1.1.6:
     resolution: {integrity: sha512-X2BB11YZtrRqY4EnQcLX5Rh373zbK4alC1FW7D7MBhL2gtcC17cTnr6DmfHZeS0s2rTHjUTMMHfG7gO8SSdw+g==}
     engines: {node: '>=0.10.0'}
-
-  js-sha256@0.11.1:
-    resolution: {integrity: sha512-o6WSo/LUvY2uC4j7mO50a2ms7E/EAdbP0swigLV+nzHKTTaYnaLIWJ02VdXrsJX0vGedDESQnLsOekr94ryfjg==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -28960,9 +28949,9 @@ snapshots:
       std-env: 3.8.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.1.8(@types/node@24.0.4)(@vitest/browser@2.1.8)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@24.0.4)(typescript@5.8.3))(terser@5.36.0)
+      vitest: 2.1.8(@types/node@22.15.33)(@vitest/browser@2.1.8)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@22.15.33)(typescript@5.8.3))(terser@5.36.0)
     optionalDependencies:
-      '@vitest/browser': 2.1.8(@types/node@24.0.4)(playwright@1.53.1)(typescript@5.8.3)(vite@5.4.19(@types/node@24.0.4)(lightningcss@1.30.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
+      '@vitest/browser': 2.1.8(@types/node@22.15.33)(playwright@1.53.1)(typescript@5.8.3)(vite@5.4.19(@types/node@22.15.33)(lightningcss@1.30.1)(terser@5.36.0))(vitest@2.1.8)(webdriverio@9.2.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -35187,8 +35176,6 @@ snapshots:
   js-cookie@3.0.5: {}
 
   js-levenshtein@1.1.6: {}
-
-  js-sha256@0.11.1: {}
 
   js-tokens@4.0.0: {}
 

@@ -1952,7 +1952,10 @@ test("untracked mutations don't trigger change control", async () => {
 		.execute();
 
 	// Count changes before any untracked mutations
-	const changesInitial = await lix.db.selectFrom("change").selectAll().execute();
+	const changesInitial = await lix.db
+		.selectFrom("change")
+		.selectAll()
+		.execute();
 
 	// 1. INSERT untracked state
 	await lix.db
@@ -1972,7 +1975,10 @@ test("untracked mutations don't trigger change control", async () => {
 		.execute();
 
 	// Count changes after untracked insert
-	const changesAfterInsert = await lix.db.selectFrom("change").selectAll().execute();
+	const changesAfterInsert = await lix.db
+		.selectFrom("change")
+		.selectAll()
+		.execute();
 
 	// Number of changes should be identical (no change control for untracked)
 	expect(changesAfterInsert.length).toBe(changesInitial.length);
@@ -2003,7 +2009,10 @@ test("untracked mutations don't trigger change control", async () => {
 		.execute();
 
 	// Count changes after untracked update
-	const changesAfterUpdate = await lix.db.selectFrom("change").selectAll().execute();
+	const changesAfterUpdate = await lix.db
+		.selectFrom("change")
+		.selectAll()
+		.execute();
 
 	// Number of changes should still be identical (no change control for untracked)
 	expect(changesAfterUpdate.length).toBe(changesInitial.length);
@@ -2028,7 +2037,10 @@ test("untracked mutations don't trigger change control", async () => {
 		.execute();
 
 	// Count changes after untracked delete
-	const changesAfterDelete = await lix.db.selectFrom("change").selectAll().execute();
+	const changesAfterDelete = await lix.db
+		.selectFrom("change")
+		.selectAll()
+		.execute();
 
 	// Number of changes should still be identical (no change control for untracked)
 	expect(changesAfterDelete.length).toBe(changesInitial.length);
