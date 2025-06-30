@@ -21,29 +21,45 @@ type Snapshot<T> = {
 /**
  * Subscribe to a live query inside React.
  *
- * @param buildQuery – either:
- *   • a ready-made Kysely SelectQueryBuilder, **or**
- *   • a factory `(lix) => builder` so you can depend on props / state.
- *
- * @returns `{ data, error, loading }`
+ * @param buildQuery - Factory function that creates a Kysely SelectQueryBuilder
+ * @returns `{ data, error, loading }` with discriminated union types for type guards
  *
  * @example
  * ```tsx
- * const { data: todos } = useQuery(lix =>
- *   lix.db.selectFrom('todo')
- *     .where('completed','=',false)
- *     .orderBy('created_at asc')
- *     .selectAll()
- * )
+ * function KeyValueList() {
+ *   const result = useQuery(lix =>
+ *     lix.db.selectFrom('key_value')
+ *       .where('key', 'like', 'user_%')
+ *       .selectAll()
+ *   );
+ *
+ *   if (result.error) {
+ *     return <div>Error: {result.error.message}</div>;
+ *   }
+ *
+ *   if (result.loading) {
+ *     return <div>Loading...</div>;
+ *   }
+ *
+ *   // TypeScript knows result.data is KeyValue[] here
+ *   return (
+ *     <ul>
+ *       {result.data.map(item => (
+ *         <li key={item.key}>{item.key}: {item.value}</li>
+ *       ))}
+ *     </ul>
+ *   );
+ * }
  * ```
  */
+type UseQueryResult<TResult> =
+	| { data: undefined; error: Error; loading: false }
+	| { data: undefined; error: null; loading: true }
+	| { data: TResult[]; error: null; loading: false };
+
 export function useQuery<TResult>(
 	buildQuery: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
-): {
-	data: TResult[] | undefined;
-	error: Error | null;
-	loading: boolean;
-} {
+): UseQueryResult<TResult> {
 	/* -------------------------------- context -------------------------------- */
 	const lix = useContext(LixContext);
 	if (!lix) throw new Error("useQuery must be used inside <LixProvider>.");
@@ -84,23 +100,62 @@ export function useQuery<TResult>(
 	/* local loading flag: true until first next or error */
 	const loading = state.data === undefined && state.error === null;
 
-	return { data: state.data, error: state.error, loading };
+	return {
+		data: state.data,
+		error: state.error,
+		loading,
+	} as UseQueryResult<TResult>;
 }
 
 /* ------------------------------------------------------------------------- */
 /* Optional single-row helper                                                */
 /* ------------------------------------------------------------------------- */
 
+/**
+ * Subscribe to a live query and return only the first result inside React.
+ * Equivalent to calling `.executeTakeFirst()` on a Kysely query.
+ *
+ * @param buildQuery - Factory function that creates a Kysely SelectQueryBuilder
+ * @returns `{ data, error, loading }` where data is TResult | undefined for empty results
+ *
+ * @example
+ * ```tsx
+ * function UserProfile({ userId }: { userId: string }) {
+ *   const result = useQueryTakeFirst(lix =>
+ *     lix.db.selectFrom('key_value')
+ *       .where('key', '=', `user_${userId}`)
+ *       .selectAll()
+ *   );
+ *
+ *   if (result.error) {
+ *     return <div>Error: {result.error.message}</div>;
+ *   }
+ *
+ *   if (result.loading) {
+ *     return <div>Loading...</div>;
+ *   }
+ *
+ *   // TypeScript knows result.data is KeyValue | undefined here
+ *   if (!result.data) {
+ *     return <div>User not found</div>;
+ *   }
+ *
+ *   return <div>User: {result.data.value}</div>;
+ * }
+ * ```
+ */
+type UseQueryTakeFirstResult<TResult> =
+	| { data: undefined; error: Error; loading: false }
+	| { data: undefined; error: null; loading: true }
+	| { data: TResult | undefined; error: null; loading: false };
+
 export const useQueryTakeFirst = <TResult>(
 	buildQuery: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
-): {
-	data: TResult | undefined;
-	error: Error | null;
-	loading: boolean;
-} => {
+): UseQueryTakeFirstResult<TResult> => {
 	/* -------------------------------- context -------------------------------- */
 	const lix = useContext(LixContext);
-	if (!lix) throw new Error("useQueryTakeFirst must be used inside <LixProvider>.");
+	if (!lix)
+		throw new Error("useQueryTakeFirst must be used inside <LixProvider>.");
 
 	/* ---------------------------- freeze builder ----------------------------- */
 	const builder = useMemo(
@@ -109,7 +164,11 @@ export const useQueryTakeFirst = <TResult>(
 	);
 
 	// Simple state-based approach with loading flag
-	const [state, setState] = useState<{ data: TResult | undefined; error: Error | null; hasReceived: boolean }>({
+	const [state, setState] = useState<{
+		data: TResult | undefined;
+		error: Error | null;
+		hasReceived: boolean;
+	}>({
 		data: undefined,
 		error: null,
 		hasReceived: false,
@@ -118,7 +177,7 @@ export const useQueryTakeFirst = <TResult>(
 	useEffect(() => {
 		// Reset state when effect runs
 		setState({ data: undefined, error: null, hasReceived: false });
-		
+
 		// Subscribe to the observable using subscribeTakeFirst for efficiency
 		const observable = lix.observe(builder);
 		const subscription = observable.subscribeTakeFirst({
@@ -143,6 +202,9 @@ export const useQueryTakeFirst = <TResult>(
 	/* local loading flag: true until first next or error */
 	const loading = !state.hasReceived;
 
-	return { data: state.data, error: state.error, loading };
+	return {
+		data: state.data,
+		error: state.error,
+		loading,
+	} as UseQueryTakeFirstResult<TResult>;
 };
-

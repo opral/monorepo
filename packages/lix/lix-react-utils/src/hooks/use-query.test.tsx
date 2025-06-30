@@ -353,3 +353,93 @@ test("useQuery return type is properly typed", async () => {
 
 	await lix.close();
 });
+
+test("useQuery type guards work with satisfies operator", async () => {
+	const lix = await openLix({});
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>{children}</LixProvider>
+	);
+
+	const { result } = renderHook(
+		() => useQuery((lix) => lix.db.selectFrom("key_value").selectAll()),
+		{ wrapper },
+	);
+
+	// Wait for loading to complete
+	await waitFor(() => {
+		expect(result.current.loading).toBe(false);
+	});
+
+	// Type guard tests with satisfies
+	if (result.current.error) {
+		// In error state
+		result.current.data satisfies undefined;
+		result.current.error satisfies Error;
+		result.current.loading satisfies false;
+	} else if (result.current.loading) {
+		// In loading state
+		result.current.data satisfies undefined;
+		result.current.error satisfies null;
+		result.current.loading satisfies true;
+	} else {
+		// Success state - data should be defined array
+		result.current.data satisfies State<KeyValue>[];
+		result.current.error satisfies null;
+		result.current.loading satisfies false;
+
+		// TypeScript should know data is not undefined here
+		const length = result.current.data.length; // No ! needed
+		expect(typeof length).toBe("number");
+	}
+
+	await lix.close();
+});
+
+test("useQueryTakeFirst type guards work with satisfies operator", async () => {
+	const lix = await openLix({});
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>{children}</LixProvider>
+	);
+
+	const { result } = renderHook(
+		() =>
+			useQueryTakeFirst((lix) =>
+				lix.db
+					.selectFrom("key_value")
+					.selectAll()
+					.where("key", "=", "nonexistent"),
+			),
+		{ wrapper },
+	);
+
+	// Wait for loading to complete
+	await waitFor(() => {
+		expect(result.current.loading).toBe(false);
+	});
+
+	// Type guard tests with satisfies
+	if (result.current.error) {
+		// In error state
+		result.current.data satisfies undefined;
+		result.current.error satisfies Error;
+		result.current.loading satisfies false;
+	} else if (result.current.loading) {
+		// In loading state
+		result.current.data satisfies undefined;
+		result.current.error satisfies null;
+		result.current.loading satisfies true;
+	} else {
+		// Success state - data can be TResult | undefined (for empty results)
+		result.current.data satisfies State<KeyValue> | undefined;
+		result.current.error satisfies null;
+		result.current.loading satisfies false;
+
+		// TypeScript should know error is null and loading is false
+		expect(result.current.error).toBe(null);
+		expect(result.current.loading).toBe(false);
+		// In this test case, data should be undefined since we're querying nonexistent key
+		expect(result.current.data).toBeUndefined();
+	}
+
+	await lix.close();
+});
