@@ -123,29 +123,6 @@ test("useQuery updates when data changes", async () => {
 	await lix.close();
 });
 
-test("useQuery accepts query builder directly", async () => {
-	const lix = await openLix({});
-	const queryBuilder = lix.db
-		.selectFrom("key_value")
-		.selectAll()
-		.where("key", "like", "direct_test_%");
-
-	const wrapper = ({ children }: { children: React.ReactNode }) => (
-		<LixProvider lix={lix}>{children}</LixProvider>
-	);
-
-	const { result } = renderHook(() => useQuery(queryBuilder), { wrapper });
-
-	await waitFor(() => {
-		expect(result.current.loading).toBe(false);
-	});
-
-	expect(result.current.data).toEqual([]);
-	expect(result.current.error).toBe(null);
-
-	await lix.close();
-});
-
 test("useQuery handles query errors", async () => {
 	const lix = await openLix({});
 	const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -155,7 +132,7 @@ test("useQuery handles query errors", async () => {
 	const { result } = renderHook(
 		() =>
 			useQuery((lix) =>
-				lix.db.selectFrom("non_existent_table" as any).selectAll(),
+				lix.db.selectFrom("non_existent_table" as never).selectAll(),
 			),
 		{ wrapper },
 	);

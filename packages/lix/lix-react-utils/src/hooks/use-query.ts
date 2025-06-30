@@ -4,8 +4,9 @@
  * ------------------------------------------------------------------------- */
 
 import { useMemo, useContext, useEffect, useState } from "react";
-import type { Lix } from "@lix-js/sdk";
+import type { Lix, LixDatabaseSchema } from "@lix-js/sdk";
 import { LixContext } from "../provider.js";
+import type { SelectQueryBuilder } from "kysely";
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* useQuery                                                                  */
@@ -36,7 +37,9 @@ type Snapshot<T> = {
  * )
  * ```
  */
-export function useQuery<TRow>(buildQuery: (lix: Lix) => any): {
+export function useQuery<TRow>(
+	buildQuery: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, any>,
+): {
 	data: TRow[] | undefined;
 	error: Error | null;
 	loading: boolean;
