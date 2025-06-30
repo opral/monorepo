@@ -1,10 +1,9 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
-import { toBlob } from "../lix/to-blob.js";
 
 test("insert, update, delete on the account view", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("account")
@@ -79,7 +78,7 @@ test("insert, update, delete on the account view", async () => {
 });
 
 test("account ids should have a default", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("account")
@@ -99,7 +98,7 @@ test("account ids should have a default", async () => {
 });
 
 test("account operations are version specific and isolated", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const versionA = await createVersion({
 		lix,
@@ -201,7 +200,7 @@ test("account operations are version specific and isolated", async () => {
 });
 
 test("active_account temp table operations", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Check if the default anonymous account was created
 	const activeAccounts = await lix.db
@@ -260,7 +259,7 @@ test("active_account temp table operations", async () => {
 });
 
 test("account table should have no entries initially but active_account should have default", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Check that account table is empty
 	const accounts = await lix.db.selectFrom("account").selectAll().execute();
@@ -277,9 +276,9 @@ test("account table should have no entries initially but active_account should h
 });
 
 test("should generate different anonymous account names", async () => {
-	const lix0 = await openLixInMemory({});
-	const lix1 = await openLixInMemory({});
-	const lix2 = await openLixInMemory({});
+	const lix0 = await openLix({});
+	const lix1 = await openLix({});
+	const lix2 = await openLix({});
 
 	const account0 = await lix0.db
 		.selectFrom("active_account")
@@ -304,7 +303,7 @@ test("should generate different anonymous account names", async () => {
 test.todo(
 	'it should drop the temp "active_account" table on reboot to not persist the current account',
 	async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		const version = await createVersion({
 			lix,
@@ -343,8 +342,8 @@ test.todo(
 		});
 
 		// Serialize and reload the database (simulating restart)
-		const blob = await toBlob({ lix });
-		const lix2 = await openLixInMemory({ blob });
+		const blob = await lix.toBlob();
+		const lix2 = await openLix({ blob });
 
 		// Verify that active_account got reset to a new anonymous account
 		const reloadedActiveAccount = await lix2.db

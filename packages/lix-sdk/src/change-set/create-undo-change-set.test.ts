@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createUndoChangeSet } from "./create-undo-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
 import { applyChangeSet } from "./apply-change-set.js";
@@ -11,7 +11,7 @@ import { createCheckpoint } from "./create-checkpoint.js";
 
 test("it creates an undo change set that reverses the operations of the original change set", async () => {
 	// Create a Lix instance with the mockJsonPlugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -40,15 +40,6 @@ test("it creates an undo change set that reverses the operations of the original
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	await lix.db
-		.insertInto("snapshot")
-		.values([
-			{ id: "s0", content: { value: "Value 1" } },
-			{ id: "s1", content: { value: "Value 2" } },
-			{ id: "s2", content: { value: "Value 3" } },
-		])
-		.execute();
-
 	// Create changes for our initial change set
 	const changes = await lix.db
 		.insertInto("change")
@@ -59,7 +50,7 @@ test("it creates an undo change set that reverses the operations of the original
 				plugin_key: mockJsonPlugin.key,
 				entity_id: "e1",
 				schema_key: "mock_json_property",
-				snapshot_id: "s0",
+				snapshot_content: { value: "Value 1" },
 				schema_version: "1.0",
 			},
 			{
@@ -68,7 +59,7 @@ test("it creates an undo change set that reverses the operations of the original
 				plugin_key: mockJsonPlugin.key,
 				entity_id: "e2",
 				schema_key: "mock_json_property",
-				snapshot_id: "s1",
+				snapshot_content: { value: "Value 2" },
 				schema_version: "1.0",
 			},
 		])
@@ -148,7 +139,7 @@ test("it creates an undo change set that reverses the operations of the original
 
 test("it correctly undoes delete operations by restoring previous state", async () => {
 	// Create a Lix instance with the mockJsonPlugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -177,15 +168,6 @@ test("it correctly undoes delete operations by restoring previous state", async 
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// Create snapshots
-	await lix.db
-		.insertInto("snapshot")
-		.values([
-			{ id: "s0", content: { value: "Initial Value" } },
-			{ id: "s1", content: { value: "Updated Value" } },
-		])
-		.execute();
-
 	// First change set - add an entity
 	const initialChanges = await lix.db
 		.insertInto("change")
@@ -197,7 +179,7 @@ test("it correctly undoes delete operations by restoring previous state", async 
 				entity_id: "e1",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "s0",
+				snapshot_content: { value: "Initial Value" },
 			},
 		])
 		.returningAll()
@@ -227,7 +209,7 @@ test("it correctly undoes delete operations by restoring previous state", async 
 				entity_id: "e1",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "no-content", // This marks it as a delete operation
+				snapshot_content: null, // This marks it as a delete operation
 			},
 		])
 		.returningAll()
@@ -276,7 +258,7 @@ test("it correctly undoes delete operations by restoring previous state", async 
 });
 
 test.skip("does not naively create delete changes if a previous state existed", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 

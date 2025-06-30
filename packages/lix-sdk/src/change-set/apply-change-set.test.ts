@@ -1,8 +1,7 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { applyChangeSet } from "./apply-change-set.js";
 import { createChangeSet } from "./create-change-set.js";
-import { createSnapshot } from "../snapshot/create-snapshot.js";
 import {
 	mockJsonPlugin,
 	MockJsonPropertySchema,
@@ -12,26 +11,18 @@ import type { KeyValue } from "../key-value/schema.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 
 test("it applies lix own entity changes", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockKeyValue = {
 		key: "test",
 		value: "something",
 	} as const satisfies KeyValue;
 
-	await lix.db
-		.insertInto("snapshot")
-		.values({
-			id: "snapshot1",
-			content: mockKeyValue,
-		})
-		.execute();
-
 	const mockKeyValueChange: Change = {
 		id: "change1",
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
-		snapshot_id: "snapshot1",
+		snapshot_content: mockKeyValue,
 		entity_id: "test", // entity_id should match the key
 		schema_key: "lix_key_value",
 		schema_version: "1.0",
@@ -74,7 +65,7 @@ test("it applies lix own entity changes", async () => {
 });
 
 test("it applies the changes associated with the change set", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -125,7 +116,7 @@ test("it applies the changes associated with the change set", async () => {
 });
 
 test("throws an error if plugin does not exist", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert a file
 	await lix.db
@@ -143,9 +134,6 @@ test("throws an error if plugin does not exist", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// Create a snapshot
-	const snapshot = await createSnapshot({ lix, content: { value: "test" } });
-
 	// Insert a change linked to a non-existent plugin
 	await lix.db
 		.insertInto("change")
@@ -153,7 +141,7 @@ test("throws an error if plugin does not exist", async () => {
 			id: "changeB",
 			file_id: file.id,
 			plugin_key: "non-existent-plugin",
-			snapshot_id: snapshot.id,
+			snapshot_content: { value: "test" },
 			entity_id: "entity2",
 			schema_key: "lix_key_value",
 			schema_version: "1.0",
@@ -190,7 +178,7 @@ test("throws an error if plugin does not exist", async () => {
 test("throws an error if plugin does not support applying changes", async () => {
 	// Mock plugin without applyChanges function
 	const mockPlugin = { key: "plugin-no-apply" };
-	const lix = await openLixInMemory({ providePlugins: [mockPlugin] });
+	const lix = await openLix({ providePlugins: [mockPlugin] });
 
 	// Insert a file
 	await lix.db
@@ -208,9 +196,6 @@ test("throws an error if plugin does not support applying changes", async () => 
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// Create a snapshot
-	const snapshot = await createSnapshot({ lix, content: { value: "test2" } });
-
 	// Insert a change linked to the mock plugin
 	await lix.db
 		.insertInto("change")
@@ -218,7 +203,7 @@ test("throws an error if plugin does not support applying changes", async () => 
 			id: "changeC",
 			file_id: file.id,
 			plugin_key: mockPlugin.key,
-			snapshot_id: snapshot.id,
+			snapshot_content: { value: "test2" },
 			entity_id: "entity3",
 			schema_key: "lix_key_value",
 			schema_version: "1.0",
@@ -254,7 +239,7 @@ test("throws an error if plugin does not support applying changes", async () => 
 
 // very slow https://github.com/opral/lix-sdk/issues/311
 test("file deletion bypasses plugin and removes file from state", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -333,7 +318,7 @@ test("file deletion bypasses plugin and removes file from state", async () => {
 
 test("it should delete entities but not files when applying entity deletion changes", async () => {
 	// Create a Lix instance with the mockJsonPlugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -362,15 +347,6 @@ test("it should delete entities but not files when applying entity deletion chan
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// Create snapshots for entities
-	await lix.db
-		.insertInto("snapshot")
-		.values([
-			{ id: "s1", content: { value: "Entity 1" } },
-			{ id: "s2", content: { value: "Entity 2" } },
-		])
-		.execute();
-
 	// Create changes that add entities to the file
 	await lix.db
 		.insertInto("change")
@@ -382,7 +358,7 @@ test("it should delete entities but not files when applying entity deletion chan
 				entity_id: "e1",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "s1",
+				snapshot_content: { value: "Entity 1" },
 			},
 			{
 				id: "c2",
@@ -391,7 +367,7 @@ test("it should delete entities but not files when applying entity deletion chan
 				entity_id: "e2",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "s2",
+				snapshot_content: { value: "Entity 2" },
 			},
 		])
 		.execute();
@@ -448,7 +424,7 @@ test("it should delete entities but not files when applying entity deletion chan
 			entity_id: "e1",
 			schema_key: "mock_json_property", // NOT "lix_file"
 			schema_version: "1.0",
-			snapshot_id: "no-content", // Entity deletion
+			snapshot_content: null, // Entity deletion
 		})
 		.execute();
 

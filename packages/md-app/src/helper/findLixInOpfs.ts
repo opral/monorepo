@@ -1,4 +1,4 @@
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
@@ -91,7 +91,7 @@ export async function findLixFilesInOpfs(
 				const tempBlob = new Blob([await file.arrayBuffer()]);
 
 				// Open the Lix to check its ID
-				const tempLix = await openLixInMemory({
+				const tempLix = await openLix({
 					blob: tempBlob,
 					providePlugins,
 				});

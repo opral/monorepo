@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Bot, User } from "lucide-react";
 
 // Copy icon component
 const CopyIcon = () => (
@@ -109,7 +110,7 @@ function App() {
         </a>
         <div className="flex space-x-6">
           <a
-            href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
+            href="https://docs.lix.dev"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-600 text-base lowercase flex items-center gap-1 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-600 transition-all duration-200 px-2 py-1"
@@ -179,7 +180,7 @@ function App() {
             <PackageInstaller />
 
             <a
-              href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/examples"
+              href="https://flashtype.ai"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-blue-600 text-white px-6 py-2 rounded-md text-base hover:bg-blue-700 transition-all duration-200 flex items-center font-medium group shadow-sm"
@@ -248,7 +249,7 @@ function App() {
 
             {/* MIT License */}
             <a
-              href="https://github.com/opral/monorepo/blob/main/LICENSE"
+              href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
@@ -744,8 +745,8 @@ function App() {
 
                 {/* API */}
                 <div className="bg-white rounded-md p-2 font-mono text-sm inline-block hover:bg-gray-50 transition-colors cursor-pointer shadow-sm border border-gray-200 mt-2">
-                  <a 
-                    href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/change-set/get-diff.ts" 
+                  <a
+                    href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/change-set/get-diff.ts"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full h-full"
@@ -790,7 +791,7 @@ function App() {
                   <a
                     href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/change-proposal/create-change-proposal.ts"
                     target="_blank"
-                    rel="noopener noreferrer" 
+                    rel="noopener noreferrer"
                     className="block w-full h-full"
                   >
                     <span className="text-amber-600">lix</span>
@@ -800,6 +801,104 @@ function App() {
                   </a>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Human-AI Collaboration Section */}
+        <section className="py-20 w-full">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <h2 className="text-center text-2xl sm:text-3xl font-bold mb-6 text-gray-800 flex items-center justify-center">
+              <span>Human and AI collaboration</span>
+            </h2>
+            <p className="text-center text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
+              Lix provides the foundation for effective human-AI collaboration
+              with complete transparency and control over AI-generated changes.
+            </p>
+
+            {/* Human-AI Collaboration Wireframe - Compact Version */}
+            <div className="max-w-4xl mx-auto mb-10 bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-all">
+              <div className="flex flex-col sm:flex-row">
+                {/* Left panel - AI changes */}
+                <div className="w-full sm:w-1/2 p-4 border-b sm:border-b-0 sm:border-r border-gray-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                        <Bot className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <span className="font-medium text-sm text-gray-800">
+                        AI Changes
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Simple diff visualization */}
+                  <div className="p-3 bg-gray-50 rounded border border-gray-200">
+                    <div className="h-3 bg-gray-200 rounded w-full mb-1.5"></div>
+                    <div className="h-3 bg-red-100 rounded w-3/4 mb-1.5"></div>
+                    <div className="h-3 bg-green-100 rounded w-4/5 mb-1.5"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+
+                {/* Right panel - Human review */}
+                <div className="w-full sm:w-1/2 p-4">
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-2">
+                      <User className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <span className="font-medium text-sm text-gray-800">
+                      Human Review
+                    </span>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex space-x-2">
+                    <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3 w-3 mr-1"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Approve
+                    </button>
+                    <button className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-3 w-3 mr-1"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Request Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center">
+              <a
+                href="https://docs.lix.dev/guide/concepts/change-proposals"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-gray-800 border border-gray-300 px-6 py-3 rounded-md text-base hover:bg-gray-50 transition-all duration-200 inline-flex items-center font-medium shadow-sm"
+              >
+                Learn more about Human ↔ AI collaboration with{" "}
+                <LixLogo className="mx-1 w-5 h-4 transform translate-y-[-1px]" />
+              </a>
             </div>
           </div>
         </section>
@@ -815,8 +914,8 @@ function App() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <a
-              href="https://github.com/opral/monorepo/tree/main/packages/lix-sdk/src"
-              target="_blank" 
+              href="https://docs.lix.dev"
+              target="_blank"
               rel="noopener noreferrer"
               className="h-44 bg-blue-600 text-white rounded-lg p-6 font-medium hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg border border-blue-700 flex flex-col justify-between group"
             >

@@ -8,9 +8,9 @@ import {
 	SlMenu,
 	SlMenuItem,
 } from "@shoelace-style/shoelace/dist/react";
-import { Lix, toBlob } from "@lix-js/sdk";
+import { Lix } from "@lix-js/sdk";
 import { saveLixToOpfs } from "../helper/saveLixToOpfs.ts";
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import { useNavigate } from "react-router-dom";
 import { posthog } from "posthog-js";
@@ -67,7 +67,7 @@ export default function RootLayout(props: { children: JSX.Element }) {
 		if (file) {
 			const fileContent = await file.arrayBuffer();
 			const opfsRoot = await navigator.storage.getDirectory();
-			const lix = await openLixInMemory({
+			const lix = await openLix({
 				blob: new Blob([fileContent]),
 				providePlugins: [csvPlugin],
 			});
@@ -185,7 +185,7 @@ const handleExportLixFile = async (lix: Lix) => {
 		.select("value")
 		.executeTakeFirstOrThrow();
 
-	const blob = await toBlob({ lix });
+	const blob = await lix.toBlob();
 	const a = document.createElement("a");
 	a.href = URL.createObjectURL(blob);
 	a.download = `${lixId.value}.lix`;

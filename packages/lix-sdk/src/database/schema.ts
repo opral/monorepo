@@ -7,13 +7,10 @@ import {
 } from "../change-set/schema.js";
 import {
 	LixVersionSchema,
-	type ActiveVersionTable,
+	type ActiveVersion,
+	// type ActiveVersionTable,
 } from "../version/schema.js";
-import {
-	LixSnapshotSchema,
-	type InternalSnapshotTable,
-	type Snapshot,
-} from "../snapshot/schema.js";
+import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
@@ -23,7 +20,7 @@ import type {
 	InternalChangeInTransactionTable,
 } from "../state/schema.js";
 import type { StateHistoryView } from "../state-history/schema.js";
-import { LixFileSchema } from "../file/schema.js";
+import { LixFileDescriptorSchema } from "../file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
 import {
 	LixAccountSchema,
@@ -59,11 +56,10 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set_edge: LixChangeSetEdgeSchema,
 	change_set_label: LixChangeSetLabelSchema,
 	change_set_thread: LixChangeSetThreadSchema,
-	file: LixFileSchema,
+	file: LixFileDescriptorSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
 	key_value: LixKeyValueSchema,
-	snapshot: LixSnapshotSchema,
 	account: LixAccountSchema,
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
@@ -78,14 +74,12 @@ export type LixDatabaseSchema = {
 	// account
 	active_account: ActiveAccountTable;
 
-	snapshot: ToKysely<Snapshot>;
-
 	change: ChangeView;
 
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;
 
-	active_version: ActiveVersionTable;
+	active_version: ToKysely<ActiveVersion>;
 } & EntityViews<
 	typeof LixKeyValueSchema,
 	"key_value",
@@ -98,7 +92,7 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
 	EntityViews<typeof LixChangeSetThreadSchema, "change_set_thread"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
-	EntityViews<typeof LixFileSchema, "file", { data: Uint8Array }> &
+	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
 	EntityViews<typeof LixLabelSchema, "label"> &
 	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
 	EntityViews<typeof LixLogSchema, "log"> &

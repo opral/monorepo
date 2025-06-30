@@ -1,8 +1,4 @@
-import {
-	newLixFile,
-	openLixInMemory,
-	toBlob,
-} from "@lix-js/sdk";
+import { newLixFile, openLix } from "@lix-js/sdk";
 import { plugin as csvPlugin } from "@lix-js/plugin-csv";
 import emailNewsletterCsv from "./email-newsletter.csv?raw";
 import captableCsv from "./cap-table.csv?raw";
@@ -16,7 +12,7 @@ export const DEMO_FILE_IDS = [
 ];
 
 export async function lixCsvDemoFile(): Promise<Blob> {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 		providePlugins: [csvPlugin],
 	});
@@ -61,6 +57,5 @@ export async function lixCsvDemoFile(): Promise<Blob> {
 			.execute();
 	}
 
-
-	return await toBlob({ lix });
+	return await lix.toBlob();
 }

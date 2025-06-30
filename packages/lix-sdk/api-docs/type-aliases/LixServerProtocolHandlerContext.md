@@ -8,7 +8,7 @@
 
 > **LixServerProtocolHandlerContext** = `object`
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:9](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L9)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:9](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L9)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol
 
 > **environment**: `LspEnvironment`
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:11](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L11)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:11](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L11)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol
 
 > `optional` **params**: `Record`\<`string`, `string` \| `undefined`\>
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:12](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L12)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:12](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L12)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol
 
 > **request**: `Request`
 
-Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:10](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L10)
+Defined in: [packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts:10](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/server-protocol-handler/create-server-protocol-handler.ts#L10)

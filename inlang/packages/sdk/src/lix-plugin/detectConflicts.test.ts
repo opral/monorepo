@@ -3,16 +3,11 @@
 
 import { test, expect } from "vitest";
 import { inlangLixPluginV1 } from "./inlangLixPluginV1.js";
-import {
-	newLixFile,
-	openLixInMemory,
-	type Change,
-	type NewChange,
-} from "@lix-js/sdk";
+import { newLixFile, openLix, type Change, type NewChange } from "@lix-js/sdk";
 
 test.skip("a create operation should not report a conflict given that the change does not exist in target", async () => {
-	const targetLix = await openLixInMemory({ blob: await newLixFile() });
-	const sourceLix = await openLixInMemory({ blob: await newLixFile() });
+	const targetLix = await openLix({ blob: await newLixFile() });
+	const sourceLix = await openLix({ blob: await newLixFile() });
 	const changes = await sourceLix.db
 		.insertInto("change")
 		.values([
@@ -39,7 +34,7 @@ test.skip("a create operation should not report a conflict given that the change
 test.todo(
 	"it should report deletions as a conflict if the parent of the target and source are not identical",
 	async () => {
-		const targetLix = await openLixInMemory({ blob: await newLixFile() });
+		const targetLix = await openLix({ blob: await newLixFile() });
 		await targetLix.db
 			.insertInto("change")
 			.values([
@@ -57,7 +52,7 @@ test.todo(
 			])
 			.execute();
 
-		const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
+		const sourceLix = await openLix({ blob: await targetLix.toBlob() });
 
 		const changesNotInTarget: NewChange[] = [
 			{
@@ -89,8 +84,8 @@ test.todo(
 );
 
 test.skip("it should report an UPDATE as a conflict if leaf changes are conflicting", async () => {
-	const targetLix = await openLixInMemory({ blob: await newLixFile() });
-	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
+	const targetLix = await openLix({ blob: await newLixFile() });
+	const sourceLix = await openLix({ blob: await targetLix.toBlob() });
 
 	const commonChanges: NewChange[] = [
 		{
@@ -160,8 +155,8 @@ test.skip("it should report an UPDATE as a conflict if leaf changes are conflict
  * in the source.
  */
 test.skip("it should NOT report an UPDATE as a conflict if the common ancestor is the leaf change of the target", async () => {
-	const targetLix = await openLixInMemory({ blob: await newLixFile() });
-	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
+	const targetLix = await openLix({ blob: await newLixFile() });
+	const sourceLix = await openLix({ blob: await targetLix.toBlob() });
 
 	const commonChanges: NewChange[] = [
 		{
@@ -224,7 +219,7 @@ test.skip("it should NOT report an UPDATE as a conflict if the common ancestor i
 });
 
 test.skip("it should NOT report a DELETE as a conflict if the parent of the target and source are identical", async () => {
-	const targetLix = await openLixInMemory({ blob: await newLixFile() });
+	const targetLix = await openLix({ blob: await newLixFile() });
 	await targetLix.db
 		.insertInto("change")
 		.values([
@@ -242,7 +237,7 @@ test.skip("it should NOT report a DELETE as a conflict if the parent of the targ
 		])
 		.execute();
 
-	const sourceLix = await openLixInMemory({ blob: await targetLix.toBlob() });
+	const sourceLix = await openLix({ blob: await targetLix.toBlob() });
 
 	const changesNotInTarget: NewChange[] = [
 		{

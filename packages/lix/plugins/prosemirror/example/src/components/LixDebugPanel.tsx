@@ -1,4 +1,3 @@
-import { toBlob } from "@lix-js/sdk";
 import { Change } from "@lix-js/sdk";
 import { toUserTime } from "../utilities/timeUtils";
 import { useQuery } from "../hooks/useQuery";
@@ -18,7 +17,7 @@ const LixDebugPanel = () => {
 	const handleDownloadLixDb = async () => {
 		try {
 			// Get the Lix database blob using the correct API
-			const blob = await toBlob({ lix });
+			const blob = await lix.toBlob();
 
 			// Create a download link
 			const url = URL.createObjectURL(blob);
@@ -40,21 +39,24 @@ const LixDebugPanel = () => {
 	};
 
 	// Function to get a readable content preview for changes
-	const getContentPreview = (change: Change & { content: any }): string => {
-		if (!change.content) return "No content available";
+	const getContentPreview = (change: Change): string => {
+		if (!change.snapshot_content) return "No content available";
 
-		if (typeof change.content === "object") {
+		if (typeof change.snapshot_content === "object") {
 			// For text nodes, show the text content
-			if (change.content.text) {
+			if (change.snapshot_content.text) {
 				return (
-					change.content.text.substring(0, 60) +
-					(change.content.text.length > 60 ? "..." : "")
+					change.snapshot_content.text.substring(0, 60) +
+					(change.snapshot_content.text.length > 60 ? "..." : "")
 				);
 			}
 
 			// For paragraph nodes, extract content from their children
-			if (change.content.content && Array.isArray(change.content.content)) {
-				const textNodes = change.content.content
+			if (
+				change.snapshot_content.content &&
+				Array.isArray(change.snapshot_content.content)
+			) {
+				const textNodes = change.snapshot_content.content
 					.filter((node: any) => node.type === "text" && node.text)
 					.map((node: any) => node.text);
 
@@ -69,8 +71,9 @@ const LixDebugPanel = () => {
 
 			// For empty paragraphs or other empty nodes, just return empty string
 			if (
-				change.content.type === "paragraph" &&
-				(!change.content.content || change.content.content.length === 0)
+				change.snapshot_content.type === "paragraph" &&
+				(!change.snapshot_content.content ||
+					change.snapshot_content.content.length === 0)
 			) {
 				return "";
 			}
@@ -123,7 +126,7 @@ const LixDebugPanel = () => {
 									</div>
 
 									<div className="mb-0.5">
-										Type: {change?.content?.type || "Unknown"}
+										Type: {change?.snapshot_content?.type || "Unknown"}
 									</div>
 
 									<div className="text-sm">

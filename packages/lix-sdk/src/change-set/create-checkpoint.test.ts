@@ -1,11 +1,11 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 
 test("creates a checkpoint from working change set elements", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Make some changes to create working change set elements
 	await lix.db
@@ -92,7 +92,7 @@ test("creates a checkpoint from working change set elements", async () => {
 });
 
 test("creates checkpoint and returns change set", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Make a change
 	await lix.db
@@ -109,7 +109,7 @@ test("creates checkpoint and returns change set", async () => {
 });
 
 test("creating a checkpoint with no changes throws", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create checkpoint without making explicit changes (should work with lix own changes)
 	await expect(createCheckpoint({ lix })).rejects.toThrow();
@@ -117,7 +117,7 @@ test("creating a checkpoint with no changes throws", async () => {
 
 // we should have https://github.com/opral/lix-sdk/issues/305 before this test
 test("checkpoint enables clean working change set for new work", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Make initial changes
 	await lix.db
@@ -167,7 +167,7 @@ test("checkpoint enables clean working change set for new work", async () => {
 });
 
 test("creates proper change set ancestry chain", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get initial state
 	const initialVersion = await lix.db
@@ -248,7 +248,7 @@ test(
 	"checkpoint should include deletion changes",
 	{ timeout: 30000 },
 	async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
@@ -280,7 +280,7 @@ test(
 			.selectFrom("change")
 			.where("entity_id", "=", "test-key")
 			.where("schema_key", "=", "lix_key_value")
-			.where("snapshot_id", "=", "no-content")
+			.where("snapshot_content", "is", null)
 			.selectAll()
 			.execute();
 
@@ -305,7 +305,7 @@ test(
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.entity_id", "=", "test-key")
 			.where("change.schema_key", "=", "lix_key_value")
-			.where("change.snapshot_id", "=", "no-content")
+			.where("change.snapshot_content", "is", null)
 			.selectAll("change")
 			.execute();
 
@@ -319,7 +319,7 @@ test(
 	"checkpoint should include file deletion changes",
 	{ timeout: 30000 },
 	async () => {
-		const lix = await openLixInMemory({
+		const lix = await openLix({
 			providePlugins: [mockJsonPlugin],
 		});
 
@@ -356,7 +356,7 @@ test(
 		const deletionChanges = await lix.db
 			.selectFrom("change")
 			.where("file_id", "=", "file-to-delete")
-			.where("snapshot_id", "=", "no-content")
+			.where("snapshot_content", "is", null)
 			.selectAll()
 			.execute();
 
@@ -378,7 +378,7 @@ test(
 			)
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.file_id", "=", "file-to-delete")
-			.where("change.snapshot_id", "=", "no-content")
+			.where("change.snapshot_content", "is", null)
 			.selectAll("change")
 			.execute();
 

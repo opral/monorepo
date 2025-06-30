@@ -1,12 +1,12 @@
 import { bench } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 
 // pre-eliminary testing for queries.
 bench(
 	"query leaf state for entity with 100 changes in one version",
 	async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Create one version
 		const version = await createVersion({

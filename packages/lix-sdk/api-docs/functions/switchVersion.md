@@ -8,7 +8,7 @@
 
 > **switchVersion**(`args`): `Promise`\<`void`\>
 
-Defined in: [packages/lix-sdk/src/version/switch-version.ts:24](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/version/switch-version.ts#L24)
+Defined in: [packages/lix-sdk/src/version/switch-version.ts:24](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/version/switch-version.ts#L24)
 
 Switches the current Version to the given Version.
 

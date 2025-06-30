@@ -3,18 +3,9 @@ import {
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { closeLix } from "./close-lix.js";
 import { v7 as uuid_v7 } from "uuid";
 import { nanoid } from "../database/nano-id.js";
-import {
-	INITIAL_VERSION_ID,
-	INITIAL_CHANGE_SET_ID,
-	INITIAL_WORKING_CHANGE_SET_ID,
-	INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
-	INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
-	LixVersionSchema,
-	type Version,
-} from "../version/schema.js";
+import { LixVersionSchema, type Version } from "../version/schema.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
@@ -26,6 +17,7 @@ import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
 import { LixSchemaViewMap } from "../database/schema.js";
 import type { Change } from "../change/schema.js";
 import type { StoredSchema } from "../stored-schema/schema.js";
+import { createHooks } from "../hooks/create-hooks.js";
 
 /**
  * Returns a new empty Lix file as a {@link Blob}.
@@ -46,8 +38,10 @@ export async function newLixFile(): Promise<Blob> {
 		readOnly: false,
 	});
 
+	const hooks = createHooks();
+
 	// applying the schema etc.
-	const db = initDb({ sqlite });
+	const db = initDb({ sqlite, hooks });
 
 	// Create bootstrap changes for initial data
 	const bootstrapChanges = createBootstrapChanges();
@@ -84,9 +78,14 @@ export async function newLixFile(): Promise<Blob> {
 		});
 	}
 
+	// The initial version ID will be set by createBootstrapChanges
+	const initialVersionId = bootstrapChanges.find(
+		(c) => c.schema_key === "lix_version" && c.snapshot_content?.name === "main"
+	)?.entity_id;
+
 	sqlite.exec(`
 		INSERT INTO active_version (version_id)
-		SELECT '${INITIAL_VERSION_ID}'
+		SELECT '${initialVersionId}'
 		WHERE NOT EXISTS (SELECT 1 FROM active_version);
 `);
 
@@ -95,7 +94,7 @@ export async function newLixFile(): Promise<Blob> {
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
-		closeLix({ lix: { db } });
+		await db.destroy();
 	}
 }
 
@@ -111,19 +110,26 @@ function createBootstrapChanges(): BootstrapChange[] {
 	const changes: BootstrapChange[] = [];
 	const created_at = new Date().toISOString();
 
+	// Generate random IDs for initial entities
+	const initialVersionId = nanoid();
+	const initialChangeSetId = nanoid();
+	const initialWorkingChangeSetId = nanoid();
+	const initialGlobalVersionChangeSetId = nanoid();
+	const initialGlobalVersionWorkingChangeSetId = nanoid();
+
 	// Create all required change sets
 	const changeSets: ChangeSet[] = [
 		{
-			id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
+			id: initialGlobalVersionChangeSetId,
 		},
 		{
-			id: INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
+			id: initialGlobalVersionWorkingChangeSetId,
 		},
 		{
-			id: INITIAL_CHANGE_SET_ID,
+			id: initialChangeSetId,
 		},
 		{
-			id: INITIAL_WORKING_CHANGE_SET_ID,
+			id: initialWorkingChangeSetId,
 		},
 	];
 
@@ -151,8 +157,8 @@ function createBootstrapChanges(): BootstrapChange[] {
 		snapshot_content: {
 			id: "global",
 			name: "global",
-			change_set_id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
-			working_change_set_id: INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID,
+			change_set_id: initialGlobalVersionChangeSetId,
+			working_change_set_id: initialGlobalVersionWorkingChangeSetId,
 			hidden: true,
 		} satisfies Version,
 		created_at,
@@ -161,16 +167,16 @@ function createBootstrapChanges(): BootstrapChange[] {
 	// Create main version
 	changes.push({
 		id: uuid_v7(),
-		entity_id: INITIAL_VERSION_ID,
+		entity_id: initialVersionId,
 		schema_key: "lix_version",
 		schema_version: LixVersionSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
 		snapshot_content: {
-			id: INITIAL_VERSION_ID,
+			id: initialVersionId,
 			name: "main",
-			change_set_id: INITIAL_CHANGE_SET_ID,
-			working_change_set_id: INITIAL_WORKING_CHANGE_SET_ID,
+			change_set_id: initialChangeSetId,
+			working_change_set_id: initialWorkingChangeSetId,
 			inherits_from_version_id: "global",
 			hidden: false,
 		} satisfies Version,
@@ -234,13 +240,13 @@ function createBootstrapChanges(): BootstrapChange[] {
 	for (const change of originalChanges) {
 		const changeSetElementChange = {
 			id: uuid_v7(),
-			entity_id: `${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}::${change.id}`,
+			entity_id: `${initialGlobalVersionChangeSetId}::${change.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: {
-				change_set_id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
+				change_set_id: initialGlobalVersionChangeSetId,
 				change_id: change.id,
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,
@@ -264,13 +270,13 @@ function createBootstrapChanges(): BootstrapChange[] {
 	for (const changeSetElementChange of changeSetElementChanges) {
 		changes.push({
 			id: uuid_v7(),
-			entity_id: `${INITIAL_GLOBAL_VERSION_CHANGE_SET_ID}::${changeSetElementChange.id}`,
+			entity_id: `${initialGlobalVersionChangeSetId}::${changeSetElementChange.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: {
-				change_set_id: INITIAL_GLOBAL_VERSION_CHANGE_SET_ID,
+				change_set_id: initialGlobalVersionChangeSetId,
 				change_id: changeSetElementChange.id,
 				entity_id: changeSetElementChange.entity_id,
 				schema_key: changeSetElementChange.schema_key,

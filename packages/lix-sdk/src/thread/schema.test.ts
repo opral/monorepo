@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { fromPlainText } from "@opral/zettel-ast";
 
 test("thread.id should default to nano_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db.insertInto("thread").defaultValues().execute();
 
@@ -16,7 +16,7 @@ test("thread.id should default to nano_id", async () => {
 });
 
 test("an invalid thread comment content should throw an error", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db.insertInto("thread").defaultValues().execute();
 
@@ -49,7 +49,7 @@ test("an invalid thread comment content should throw an error", async () => {
 });
 
 test("valid thread comment content should pass", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db.insertInto("thread").defaultValues().execute();
 

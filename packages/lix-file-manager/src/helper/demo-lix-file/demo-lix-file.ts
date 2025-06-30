@@ -4,17 +4,16 @@ import {
 	createThread,
 	Lix,
 	newLixFile,
-	openLixInMemory,
+	openLix,
 	switchAccount,
 	Thread,
-	toBlob,
 } from "@lix-js/sdk";
 import { supportedFileTypes } from "@/state.ts";
 import { getThreads, getWorkingChangeSet } from "@/state-active-file.ts";
 import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 		providePlugins: supportedFileTypes.map((type) => type.plugin),
 	});
@@ -27,7 +26,7 @@ export async function lixCsvDemoFile(): Promise<{ blob: Blob; id: string }> {
 
 	await demoSalariesCsv(lix);
 
-	return { blob: await toBlob({ lix }), id: id.value };
+	return { blob: await lix.toBlob(), id: id.value };
 }
 
 async function demoSalariesCsv(lix: Lix): Promise<void> {

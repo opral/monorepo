@@ -124,6 +124,8 @@ ${injectCode("./assert-is-locale.js")}
 
 ${injectCode("./extract-locale-from-request.js")}
 
+${injectCode("./extract-locale-from-request-async.js")}
+
 ${injectCode("./extract-locale-from-cookie.js")}
 
 ${injectCode("./extract-locale-from-header.js")}

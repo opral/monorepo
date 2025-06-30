@@ -8,7 +8,7 @@
 
 > **openLix**(`args`): `Promise`\<[`Lix`](../type-aliases/Lix.md)\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix.ts:46](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/lix/open-lix.ts#L46)
+Defined in: [packages/lix-sdk/src/lix/open-lix.ts:46](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix.ts#L46)
 
 Opens a Lix instance using an existing SQLite database.
 
@@ -76,7 +76,7 @@ like inlang (unlike a markdown, csv, or json plugin).
 **Example**
 
 ```ts
-const lix = await openLixInMemory({ providePlugins: [myPlugin] })
+const lix = await openLix({ providePlugins: [myPlugin] })
 ```
 
 ## Returns

@@ -2,13 +2,13 @@
 
 ***
 
-[@lix-js/sdk](../README.md) / openLixInMemory
+[@lix-js/sdk](../README.md) / openLix
 
-# Function: openLixInMemory()
+# Function: openLix()
 
-> **openLixInMemory**(`args`): `Promise`\<`Promise`\<[`Lix`](../type-aliases/Lix.md)\>\>
+> **openLix**(`args`): `Promise`\<`Promise`\<[`Lix`](../type-aliases/Lix.md)\>\>
 
-Defined in: [packages/lix-sdk/src/lix/open-lix-in-memory.ts:17](https://github.com/opral/monorepo/blob/e7cabbd11b2cf40d5b5e9666e006c5433c18e5da/packages/lix-sdk/src/lix/open-lix-in-memory.ts#L17)
+Defined in: [packages/lix-sdk/src/lix/open-lix-in-memory.ts:17](https://github.com/opral/monorepo/blob/3025726c2bce8185b41ef0b1b2f7cc069ebcf2b0/packages/lix-sdk/src/lix/open-lix-in-memory.ts#L17)
 
 Loads a Lix file into a temporary in‑memory database.
 
@@ -29,5 +29,5 @@ blob is provided a fresh Lix project is created automatically.
 ## Example
 
 ```ts
-const lix = await openLixInMemory({})
+const lix = await openLix({})
 ```

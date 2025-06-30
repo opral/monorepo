@@ -1,9 +1,10 @@
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix, OpfsStorage } from "@lix-js/sdk";
 import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
 import { initLixInspector } from "@lix-js/inspector";
 
-export const lix = await openLixInMemory({
+export const lix = await openLix({
 	providePlugins: [prosemirrorPlugin],
+	storage: new OpfsStorage({ path: "example.lix" }),
 });
 
 // dev tool for debugging

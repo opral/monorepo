@@ -1,17 +1,14 @@
 import { test, expect } from "vitest";
 import type * as LixServerProtocol from "../../../../lix/server-protocol-schema/dist/schema.js";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { openLix } from "../../lix/open-lix.js";
 import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
-import { mockJsonSnapshot } from "../../snapshot/mock-json-snapshot.js";
-import { mockChange } from "../../change/mock-change.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
-import { toBlob } from "../../lix/to-blob.js";
 
 type RequestBody =
 	LixServerProtocol.paths["/lsp/pull-v1"]["post"]["requestBody"]["content"]["application/json"];
 
 test.skip("it should pull rows successfully", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const id = await lix.db
 		.selectFrom("key_value")
@@ -20,15 +17,31 @@ test.skip("it should pull rows successfully", async () => {
 		.executeTakeFirstOrThrow();
 
 	const mockChanges = [
-		mockChange({ id: "change0" }),
-		mockChange({ id: "change1" }),
+		{
+			id: "change0",
+			entity_id: "entity0",
+			schema_key: "test_schema",
+			schema_version: "1.0",
+			file_id: "file0",
+			plugin_key: "test_plugin",
+			snapshot_content: { value: "test0" },
+		},
+		{
+			id: "change1",
+			entity_id: "entity1",
+			schema_key: "test_schema",
+			schema_version: "1.0",
+			file_id: "file1",
+			plugin_key: "test_plugin",
+			snapshot_content: { value: "test1" },
+		},
 	];
 
 	await lix.db.insertInto("change").values(mockChanges).execute();
 
 	const environment = createLspInMemoryEnvironment();
 
-	await environment.setLix({ id: id.value, blob: await toBlob({ lix }) });
+	await environment.setLix({ id: id.value, blob: await lix.toBlob() });
 
 	const lsaHandler = await createServerProtocolHandler({ environment });
 
@@ -61,26 +74,29 @@ test.skip("it should pull rows successfully", async () => {
 });
 
 test.skip("it should specifically be able to handle snapshots which use json binary and should not transfer the id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const mockSnapshot = mockJsonSnapshot({
-		key: "test-key-1",
-		value: "test-value-1",
-	});
+	const mockSnapshot = {
+		id: "snapshot0",
+		content: {
+			key: "test-key-1",
+			value: "test-value-1",
+		},
+	};
 
-	// Add data to multiple tables
-	await lix.db
-		.insertInto("snapshot")
-		.values([{ content: mockSnapshot.content }])
-		.execute();
+	// // Add data to multiple tables
+	// await lix.db
+	// 	.insertInto("snapshot")
+	// 	.values([{ content: mockSnapshot.content }])
+	// 	.execute();
 
 	const environment = createLspInMemoryEnvironment();
-	await environment.setLix({ id, blob: await toBlob({ lix }) });
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsa = await createServerProtocolHandler({ environment });
 
@@ -165,7 +181,7 @@ test.skip("it should return 500 if the Lix file is invalid", async () => {
 });
 
 test.skip("it should handle empty tables gracefully", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const { value: id } = await lix.db
 		.selectFrom("key_value")
 		.where("key", "=", "lix_id")
@@ -173,7 +189,7 @@ test.skip("it should handle empty tables gracefully", async () => {
 		.executeTakeFirstOrThrow();
 
 	const environment = createLspInMemoryEnvironment();
-	await environment.setLix({ id, blob: await toBlob({ lix }) });
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsa = await createServerProtocolHandler({ environment });
 

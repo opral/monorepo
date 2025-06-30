@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useFilePicker } from 'use-file-picker';
+import type { SelectedFilesOrErrors } from 'use-file-picker/types';
 
 import {
   AlertDialog,
@@ -96,8 +97,11 @@ export function MediaToolbarButton({
   const { openFilePicker } = useFilePicker({
     accept: currentConfig.accept,
     multiple: true,
-    onFilesSelected: ({ plainFiles: updatedFiles }) => {
-      editor.getTransforms(PlaceholderPlugin).insert.media(updatedFiles);
+    readFilesContent: false,
+    onFilesSelected: (data: SelectedFilesOrErrors<undefined, unknown>) => {
+      if (!data.plainFiles || data.plainFiles.length === 0) return;
+      const updatedFiles = data.plainFiles;
+      editor.getTransforms(PlaceholderPlugin).insert.media(updatedFiles as any);
     },
   });
 

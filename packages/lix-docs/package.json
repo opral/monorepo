@@ -5,11 +5,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev docs",
-    "build": "vitepress build docs",
-    "preview": "vitepress preview docs"
+    "dev": "pnpm run typedoc:clean && typedoc && vitepress dev docs",
+    "build": "pnpm run typedoc:clean && typedoc && vitepress build docs",
+    "preview": "vitepress preview docs",
+    "typedoc": "typedoc",
+    "typedoc:clean": "rm -rf docs/api/reference"
   },
   "devDependencies": {
+    "@lix-js/sdk": "workspace:*",
+    "typedoc": "^0.28.5",
+    "typedoc-plugin-markdown": "^4.7.0",
+    "typedoc-vitepress-theme": "^1.1.2",
     "vitepress": "^1.0.0-rc.40",
     "vue": "^3.3.4"
   },

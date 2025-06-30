@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
 import { changeHasLabel } from "./change-has-label.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("should only return changes with the given label", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("stored_schema")
@@ -22,7 +22,7 @@ test("should only return changes with the given label", async () => {
 		.values([
 			{
 				id: "change1",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				entity_id: "mock",
 				file_id: "mock",
 				schema_version: "1.0",
@@ -31,7 +31,7 @@ test("should only return changes with the given label", async () => {
 			},
 			{
 				id: "change2",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				entity_id: "mock",
 				file_id: "mock",
 				schema_version: "1.0",
