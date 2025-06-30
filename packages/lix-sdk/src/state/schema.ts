@@ -1228,7 +1228,9 @@ function selectStateViaCTE(
 	return result || [];
 }
 
-export type StateView = {
+export type StateView = Omit<StateAllView, "version_id">;
+
+export type StateAllView = {
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
