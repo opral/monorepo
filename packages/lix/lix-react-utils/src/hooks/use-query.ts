@@ -3,9 +3,8 @@
  *  Simple React hook for live database queries
  * ------------------------------------------------------------------------- */
 
-import { useSyncExternalStore, useMemo, useContext } from "react";
+import { useMemo, useContext, useEffect, useState } from "react";
 import type { Lix } from "@lix-js/sdk";
-import type { LixObservable } from "@lix-js/sdk";
 import { LixContext } from "../provider.js";
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -37,7 +36,7 @@ type Snapshot<T> = {
  * )
  * ```
  */
-export function useQuery<TRow>(buildQuery: any | ((db: Lix["db"]) => any)): {
+export function useQuery<TRow>(buildQuery: (db: Lix["db"]) => any): {
 	data: TRow[] | undefined;
 	error: Error | null;
 	loading: boolean;
@@ -52,45 +51,37 @@ export function useQuery<TRow>(buildQuery: any | ((db: Lix["db"]) => any)): {
 		[], // frozen for component lifetime (recreate hook if query must change)
 	);
 
-	/* ------------------------- create observable once ------------------------ */
-	const observableRef = useMemo<LixObservable<TRow>>(
-		() => lix.observe(builder),
-		[], // same reason as above
-	);
+	// Simple state-based approach
+	const [state, setState] = useState<Snapshot<TRow>>({
+		data: undefined,
+		error: null,
+	});
 
-	/* --------- internal snapshot object shared with useSyncExternalStore ---- */
-	const snapshot = useMemo<Snapshot<TRow>>(
-		() => ({ data: undefined, error: null }),
-		[],
-	);
+	useEffect(() => {
+		// Subscribe to the observable
+		const observable = lix.observe(builder);
+		const subscription = observable.subscribe({
+			next: (rows) => {
+				setState({ data: rows as TRow[], error: null });
+			},
+			error: (err) => {
+				setState({
+					data: undefined,
+					error: err instanceof Error ? err : new Error(String(err)),
+				});
+			},
+		});
 
-	/* ---------------------------- SyncExtStore hook -------------------------- */
-	const { data, error } = useSyncExternalStore<Snapshot<TRow>>(
-		(callback) => {
-			/* subscribe */
-			const sub = observableRef.subscribe({
-				next: (rows) => {
-					snapshot.data = rows;
-					snapshot.error = null;
-					callback();
-				},
-				error: (err) => {
-					snapshot.error = err instanceof Error ? err : new Error(String(err));
-					callback();
-				},
-			});
-			return () => sub.unsubscribe();
-		},
-		/* getSnapshot */
-		() => snapshot,
-		/* getServerSnapshot (SSR) */
-		() => ({ data: undefined, error: null }),
-	);
+		// Cleanup
+		return () => {
+			subscription.unsubscribe();
+		};
+	}, [lix, builder]);
 
 	/* local loading flag: true until first next or error */
-	const loading = data === undefined && error === null;
+	const loading = state.data === undefined && state.error === null;
 
-	return { data, error, loading };
+	return { data: state.data, error: state.error, loading };
 }
 
 /* ------------------------------------------------------------------------- */
@@ -108,12 +99,24 @@ export const useQueryFirstOrThrow = <TRow>(
 	q: Parameters<typeof useQuery<TRow>>[0],
 ) => {
 	const res = useQuery(q);
+
+	// If we have data but it's empty, return an error
 	if (
 		!res.loading &&
 		!res.error &&
-		(res.data === undefined || res.data.length === 0)
+		res.data !== undefined &&
+		res.data.length === 0
 	) {
-		throw new Error("useQueryFirstOrThrow: query returned no rows");
+		return {
+			data: undefined,
+			error: new Error("Query returned no rows"),
+			loading: false,
+		};
 	}
-	return { ...res, data: res.data?.[0] as TRow };
+
+	return {
+		data: res.data?.[0],
+		error: res.error,
+		loading: res.loading,
+	};
 };
