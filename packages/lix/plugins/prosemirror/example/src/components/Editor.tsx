@@ -51,7 +51,7 @@ const Editor: React.FC = () => {
 			return;
 		}
 
-		// Create the initial state with an EMPTY document
+		// Create the initial state with an empty document
 		// The lixProsemirror plugin will load the actual document
 		const state = EditorState.create({
 			doc: schema.nodeFromJSON({
