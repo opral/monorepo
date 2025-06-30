@@ -59,7 +59,7 @@ test("useSuspenseQuery returns array with data using new API", async () => {
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const [data] = useSuspenseQuery((lix) =>
+				const data = useSuspenseQuery((lix) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -96,7 +96,7 @@ test("useSuspenseQuery updates when data changes", async () => {
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const [data] = useSuspenseQuery((lix) =>
+				const data = useSuspenseQuery((lix) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -159,7 +159,7 @@ test("useSuspenseQueryTakeFirst returns array with single item or undefined", as
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const [data] = useSuspenseQueryTakeFirst((lix) =>
+				const data = useSuspenseQueryTakeFirst((lix) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -198,7 +198,7 @@ test("useSuspenseQueryTakeFirst returns undefined for empty results", async () =
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const [data] = useSuspenseQueryTakeFirst((lix) =>
+				const data = useSuspenseQueryTakeFirst((lix) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -233,7 +233,7 @@ test("useSuspenseQuery return type is properly typed", async () => {
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const [data] = useSuspenseQuery((lix) =>
+				const data = useSuspenseQuery((lix) =>
 					lix.db.selectFrom("key_value").selectAll(),
 				);
 				return data;
@@ -318,7 +318,7 @@ test("useSuspenseQueryTakeFirstOrThrow returns data when result exists", async (
 	await act(async () => {
 		const { result } = renderHook(
 			() => {
-				const [data] = useSuspenseQueryTakeFirstOrThrow((lix) =>
+				const data = useSuspenseQueryTakeFirstOrThrow((lix) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()
@@ -362,7 +362,7 @@ test("useSuspenseQueryTakeFirstOrThrow throws when no result found", async () =>
 	await act(async () => {
 		renderHook(
 			() => {
-				const [data] = useSuspenseQueryTakeFirstOrThrow((lix) =>
+				const data = useSuspenseQueryTakeFirstOrThrow((lix) =>
 					lix.db
 						.selectFrom("key_value")
 						.selectAll()

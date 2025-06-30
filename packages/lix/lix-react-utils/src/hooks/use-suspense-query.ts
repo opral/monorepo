@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------------- *
- *  lix-react/useQuery.tsx
- *  Simple React hook for live database queries using React 19 use() API
+ *  lix-react/useSuspenseQuery.tsx
+ *  React 19 Suspense-based hooks for live database queries
  * ------------------------------------------------------------------------- */
 
 import { useMemo, useContext, useEffect, useState, use } from "react";
@@ -12,12 +12,12 @@ import type { SelectQueryBuilder } from "kysely";
 const queryPromiseCache = new Map<string, Promise<any>>();
 
 /**
- * Subscribe to a live query.
+ * Subscribe to a live query using React 19 Suspense.
  *
  * @example
  * ```tsx
  * function KeyValueList() {
- *   const [keyValues] = useQuery(lix =>
+ *   const keyValues = useSuspenseQuery(lix =>
  *     lix.db.selectFrom('key_value')
  *       .where('key', 'like', 'example_%')
  *       .selectAll()
@@ -43,7 +43,7 @@ const queryPromiseCache = new Map<string, Promise<any>>();
  */
 export function useSuspenseQuery<TRow>(
 	query: (lix: Lix) => SelectQueryBuilder<any, any, TRow>,
-): [TRow[]] {
+): TRow[] {
 	const lix = useContext(LixContext);
 	if (!lix)
 		throw new Error("useSuspenseQuery must be used inside <LixProvider>.");
@@ -82,7 +82,7 @@ export function useSuspenseQuery<TRow>(
 		return () => sub.unsubscribe();
 	}, []); // Empty deps
 
-	return [rows];
+	return rows;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -96,7 +96,7 @@ export function useSuspenseQuery<TRow>(
  * @example
  * ```tsx
  * function ExampleComponent({ itemId }: { itemId: string }) {
- *   const [item] = useQueryTakeFirst(lix =>
+ *   const item = useSuspenseQueryTakeFirst(lix =>
  *     lix.db.selectFrom('key_value')
  *       .where('key', '=', `example_${itemId}`)
  *       .selectAll()
@@ -120,12 +120,12 @@ export function useSuspenseQuery<TRow>(
  */
 export const useSuspenseQueryTakeFirst = <TResult>(
 	query: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
-): [TResult | undefined] => {
+): TResult | undefined => {
 	// Wrap the builder to limit results to 1
-	const [rows] = useSuspenseQuery((lix) => query(lix).limit(1));
+	const rows = useSuspenseQuery((lix) => query(lix).limit(1));
 
 	// Return the first row or undefined
-	return [rows[0] as TResult | undefined];
+	return rows[0] as TResult | undefined;
 };
 
 /**
@@ -139,7 +139,7 @@ export const useSuspenseQueryTakeFirst = <TResult>(
  * @example
  * ```tsx
  * function ExampleDetail({ itemId }: { itemId: string }) {
- *   const [item] = useQueryTakeFirstOrThrow(lix =>
+ *   const item = useSuspenseQueryTakeFirstOrThrow(lix =>
  *     lix.db.selectFrom('key_value')
  *       .where('key', '=', `example_${itemId}`)
  *       .selectAll()
@@ -159,14 +159,14 @@ export const useSuspenseQueryTakeFirst = <TResult>(
  */
 export const useSuspenseQueryTakeFirstOrThrow = <TResult>(
 	query: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
-): [TResult] => {
+): TResult => {
 	// Use the regular takeFirst hook
-	const [data] = useSuspenseQueryTakeFirst(query);
+	const data = useSuspenseQueryTakeFirst(query);
 
 	// Throw if no data found
 	if (data === undefined) {
 		throw new Error("No result found");
 	}
 
-	return [data];
+	return data;
 };
