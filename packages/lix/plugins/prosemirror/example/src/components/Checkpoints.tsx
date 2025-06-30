@@ -3,12 +3,16 @@ import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
 import { useRef } from "react";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { createCheckpoint } from "@lix-js/sdk";
-import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
+import {
+	useLix,
+	useSuspenseQuery,
+	useSuspenseQueryTakeFirst,
+} from "@lix-js/react-utils";
 
 const Checkpoints: React.FC = () => {
 	const lix = useLix();
-	const checkpoints = useQuery(selectCheckpoints);
-	const workingChangeSet = useQueryTakeFirst(selectWorkingChangeSet);
+	const checkpoints = useSuspenseQuery(selectCheckpoints);
+	const workingChangeSet = useSuspenseQueryTakeFirst(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
 	);
@@ -35,12 +39,12 @@ const Checkpoints: React.FC = () => {
 				style={{ maxHeight: "400px", overflow: "auto" }}
 			>
 				{/* Current changes (to be checkpointed) */}
-				{workingChangeSet.data && (
+				{workingChangeSet && (
 					<div className="border-b border-base-300">
 						<ChangeSet
 							ref={changeSetRef}
 							key="current-changes"
-							changeSet={workingChangeSet.data}
+							changeSet={workingChangeSet}
 							isWorkingChangeSet={true}
 							previousChangeSetId={checkpoints?.[0]?.id ?? undefined}
 							showRestore={false}
@@ -55,10 +59,9 @@ const Checkpoints: React.FC = () => {
 					</div>
 				)}
 
-				{checkpoints?.data?.map((checkpoint, index) => {
+				{checkpoints.map((checkpoint, index) => {
 					// Get the previous checkpoint ID (if available)
-					const previousCheckpointId =
-						checkpoints.data[index + 1]?.id ?? undefined;
+					const previousCheckpointId = checkpoints[index + 1]?.id ?? undefined;
 
 					return (
 						<div key={checkpoint.id}>

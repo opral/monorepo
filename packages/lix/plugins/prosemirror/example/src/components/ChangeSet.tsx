@@ -19,7 +19,11 @@ import { selectActiveAccount, selectThreads } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { Composer, Thread } from "./Thread";
 import { toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
-import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
+import {
+	useLix,
+	useSuspenseQuery,
+	useSuspenseQueryTakeFirst,
+} from "@lix-js/react-utils";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -60,7 +64,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			afterCsId?: string;
 		} | null>("diffView");
 
-		const activeAccount = useQueryTakeFirst(selectActiveAccount);
+		const activeAccount = useSuspenseQueryTakeFirst(selectActiveAccount);
 
 		// Determine if this change set is the expanded one
 		const isExpanded = alwaysExpand || expandedChangeSetId === changeSet.id;
@@ -78,7 +82,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			changeSet,
 		]);
 
-		const threads = useQuery((lix) =>
+		const threads = useSuspenseQuery((lix) =>
 			selectThreads(lix, { changeSetId: changeSet.id }),
 		);
 
@@ -139,7 +143,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 						{isWorkingChangeSet ? (
 							<Clock size={16} />
 						) : (
-							<span>{getInitials(activeAccount?.data?.name || "")}</span>
+							<span>{getInitials(activeAccount?.name ?? "")}</span>
 						)}
 					</div>
 					<div className="flex-1">
@@ -243,7 +247,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 						{/* Render existing threads */}
 						<div className="p-2">
-							{threads.data?.map((thread) => (
+							{threads.map((thread) => (
 								<Thread
 									key={thread.id}
 									lix={lix}
@@ -253,7 +257,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 								/>
 							))}
 							{/* Conditionally render the Composer for *new* threads */}
-							{(!threads || threads.data?.length === 0) && (
+							{(!threads || threads.length === 0) && (
 								<Composer lix={lix} onComposerSubmit={onThreadComposerSubmit} />
 							)}
 						</div>

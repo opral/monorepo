@@ -4,7 +4,7 @@ import { schema } from "../prosemirror/schema";
 import { renderUniversalDiff } from "@lix-js/universal-diff";
 import "@lix-js/universal-diff/default.css";
 import { useKeyValue } from "../hooks/useKeyValue";
-import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
+import { useLix, useSuspenseQueryTakeFirstOrThrow } from "@lix-js/react-utils";
 import { selectFileId } from "../queries";
 
 export function DiffView() {
@@ -13,7 +13,7 @@ export function DiffView() {
 		afterCsId?: string;
 	} | null>("diffView");
 	const lix = useLix();
-	const fileId = useQueryTakeFirst(selectFileId);
+	const fileId = useSuspenseQueryTakeFirstOrThrow(selectFileId);
 	const [diffHtml, setDiffHtml] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export function DiffView() {
 				const before = await lix.db
 					.selectFrom("file_history")
 					.where("lixcol_change_set_id", "=", beforeCsId)
-					.where("id", "=", fileId.data!.id)
+					.where("id", "=", fileId.id)
 					.where("lixcol_depth", "=", 0)
 					.selectAll()
 					.executeTakeFirst();
@@ -42,7 +42,7 @@ export function DiffView() {
 				const after = await lix.db
 					.selectFrom("file_history")
 					.where("lixcol_change_set_id", "=", afterCsId)
-					.where("id", "=", fileId.data!.id)
+					.where("id", "=", fileId.id)
 					.where("lixcol_depth", "=", 0)
 					.selectAll()
 					.executeTakeFirst();
