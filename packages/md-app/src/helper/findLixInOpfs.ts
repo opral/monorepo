@@ -69,6 +69,22 @@ export async function findLixFilesInOpfs(
 						break; // Success, exit retry loop
 					} catch (fileError) {
 						retryCount++;
+						
+						// Don't retry certain types of errors
+						if (fileError instanceof DOMException) {
+							switch (fileError.name) {
+								case 'NotReadableError':
+									console.warn(`File ${name} not readable (permission denied), skipping:`, fileError.message);
+									return null;
+								case 'SecurityError':
+									console.warn(`Security restriction for file ${name}, skipping:`, fileError.message);
+									return null;
+								case 'NotFoundError':
+									console.warn(`File ${name} not found, skipping:`, fileError.message);
+									return null;
+							}
+						}
+						
 						if (retryCount >= maxRetries) {
 							console.warn(
 								`Could not read file ${name} after ${maxRetries} attempts, skipping:`,
@@ -123,7 +139,24 @@ export async function findLixFilesInOpfs(
 				}
 				return null;
 			} catch (e) {
-				console.error(`Error reading file ${name}:`, e);
+				// Handle different types of file errors
+				if (e instanceof DOMException) {
+					switch (e.name) {
+						case 'NotReadableError':
+							console.warn(`File ${name} not readable (permission denied), skipping:`, e.message);
+							break;
+						case 'NotFoundError':
+							console.warn(`File ${name} not found, skipping:`, e.message);
+							break;
+						case 'SecurityError':
+							console.warn(`Security restriction for file ${name}, skipping:`, e.message);
+							break;
+						default:
+							console.error(`OPFS error reading file ${name}:`, e.name, e.message);
+					}
+				} else {
+					console.error(`Error reading file ${name}:`, e);
+				}
 				return null;
 			}
 		};
@@ -181,7 +214,24 @@ export async function isFileAccessible(fileName: string): Promise<boolean> {
 		const fileHandle = await rootHandle.getFileHandle(fileName);
 		await fileHandle.getFile();
 		return true;
-	} catch {
+	} catch (error) {
+		if (error instanceof DOMException) {
+			switch (error.name) {
+				case 'NotReadableError':
+					console.warn(`File ${fileName} not readable (permission issue):`, error.message);
+					return false;
+				case 'NotFoundError':
+					// File doesn't exist, this is expected
+					return false;
+				case 'SecurityError':
+					console.warn(`Security restriction for file ${fileName}:`, error.message);
+					return false;
+				default:
+					console.warn(`OPFS error for file ${fileName}:`, error.name, error.message);
+					return false;
+			}
+		}
+		console.warn(`Unexpected error checking file ${fileName}:`, error);
 		return false;
 	}
 }
