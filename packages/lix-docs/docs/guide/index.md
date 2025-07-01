@@ -2,6 +2,8 @@
 
 Lix is a change control system that runs in the browser and provides an SDK to build web applications.
 
+![Lix features](../assets/lix-features.svg)
+
 ## Understanding Change Control
 
 A change control system allows for storing, tracking, querying, and reviewing changes in different file formats, such as `.xlsx`, `.sqlite`, or `.json`. Unlike version control systems (like Git), a change control system understands *what* specifically changed in a file - for example, cell C43 in a spreadsheet or a specific property in a JSON object.

@@ -38,7 +38,7 @@ export default defineConfig({
 
     nav: [
       { text: "Guide", link: "/" },
-      { text: "API", link: "/api/" },
+      { text: "Reference", link: "/api/" },
       { text: "Plugins", link: "/plugins/" },
       { text: "Examples", link: "/examples/" },
     ],
@@ -51,6 +51,20 @@ export default defineConfig({
             { text: "What is Lix?", link: "/" },
             { text: "Getting Started", link: "/guide/getting-started" },
             { text: "How Lix Works", link: "/guide/how-lix-works" },
+          ],
+        },
+        {
+          text: "Ready-made Features",
+          collapsed: false,
+          items: [
+            { text: "Diffs", link: "/features/diffs" },
+            { text: "Blame", link: "/features/blame" },
+            { text: "Proposals", link: "/features/change-proposals" },
+            { text: "History", link: "/features/history" },
+            { text: "Restore", link: "/features/restore" },
+            { text: "Undo/Redo", link: "/features/undo-redo" },
+            { text: "Comments", link: "/features/comments" },
+            { text: "Versions (Branching)", link: "/features/versions" },
           ],
         },
         {
