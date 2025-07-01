@@ -72,9 +72,10 @@ import { Separator } from "./separator";
 import { generateHumanId } from "@/helper/generateHumanId";
 import { useChat } from "../editor/use-chat";
 import { serializeMdastEntities } from "../editor/mdast-plate-bridge";
+import { useLix } from "@lix-js/react-utils";
 
 export function LixSidebar() {
-	const [lix, , , refetch] = useQuery(selectLix);
+	const lix = useLix();
 	const [files] = useQuery(selectFiles, 2000); // Reduced frequency for file list
 	const [activeFile] = useQuery(selectActiveFile, 1500); // Less frequent active file checking
 	const [currentLixName] = useQuery(selectCurrentLixName, 3000); // Name changes are rare
@@ -114,9 +115,8 @@ export function LixSidebar() {
 	const switchToFile = React.useCallback(
 		async (fileId: string) => {
 			updateUrlParams({ f: fileId });
-			refetch();
 		},
-		[refetch]
+		[]
 	);
 
 	const createNewFile = React.useCallback(async () => {
@@ -178,12 +178,11 @@ export function LixSidebar() {
 				.execute();
 
 			// OpfsStorage now handles persistence automatically through the onStateCommit hook
-			refetch();
 		} catch (error) {
 			console.error("Failed to rename file:", error);
 			setInlineEditingFile(null);
 		}
-	}, [lix, inlineEditingFile, files, refetch]);
+	}, [lix, inlineEditingFile, files]);
 
 	const handleSaveLixName = React.useCallback(async () => {
 		if (!lix || !lixName?.trim()) {
@@ -206,15 +205,12 @@ export function LixSidebar() {
 				newName: lixName || "",
 			});
 
-			// Refresh everything to update the UI with the new file name
-			refetch();
-
 			// The currentLixId will be automatically updated via URL parameter
 		} catch (error) {
 			console.error("Failed to save lix name:", error);
 			setIsRenamingLix(false);
 		}
-	}, [lix, lixName, currentLixName, refetch]);
+	}, [lix, lixName, currentLixName]);
 
 	// Add click-outside detection for Lix rename input
 	React.useEffect(() => {
@@ -303,12 +299,11 @@ export function LixSidebar() {
 					}
 				}
 
-				refetch();
 			} catch (error) {
 				console.error("Failed to delete file:", error);
 			}
 		},
-		[lix, files, activeFile, refetch, createNewFile]
+		[lix, files, activeFile, createNewFile]
 	);
 
 	const handleCreateNewLix = React.useCallback(async () => {
@@ -318,9 +313,6 @@ export function LixSidebar() {
 
 			// Navigate to the new lix
 			navigate(`?lix=${id}`);
-
-			// Set polling to refresh the UI
-			refetch();
 		} catch (error) {
 			console.error("Failed to create new lix:", error);
 		}
@@ -354,14 +346,13 @@ export function LixSidebar() {
 
 					// OpfsStorage now handles persistence automatically through the onStateCommit hook
 					updateUrlParams({ f: importedFileId });
-					refetch();
 				} catch (error) {
 					console.error("Failed to import file:", error);
 				}
 			}
 		};
 		input.click();
-	}, [lix, refetch]);
+	}, [lix]);
 
 	const handleOpenLixFile = React.useCallback(async () => {
 		const input = document.createElement("input");
@@ -497,13 +488,11 @@ export function LixSidebar() {
 				navigate("/");
 			}
 
-			// Trigger polling to refresh the UI
-			refetch();
 			setShowDeleteProjectsDialog(false);
 		} catch (error) {
 			console.error("Error deleting current lix:", error);
 		}
-	}, [lix, navigate, refetch]);
+	}, [lix, navigate]);
 
 	const handleResetAllOpfs = React.useCallback(async () => {
 		try {
@@ -528,11 +517,10 @@ export function LixSidebar() {
 			}
 
 			updateUrlParams({ lix: "", f: "" });
-			refetch();
 		} catch (error) {
 			console.error("Error resetting OPFS:", error);
 		}
-	}, [navigate, refetch]);
+	}, [navigate]);
 
 	// Get current lix ID, with fallback to first available lix
 	const currentLixId = React.useMemo(() => {
@@ -679,7 +667,7 @@ export function LixSidebar() {
 									switchToLix(value);
 								}
 							}}
-							value={currentLixId}
+								value={currentLixId || ""}
 						>
 							<SelectTrigger
 								size="sm"

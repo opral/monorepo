@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { UiDiffComponentProps } from "@lix-js/sdk";
-import { useQuery } from "@/hooks/useQuery";
-import { selectLix } from "@/queries";
 import clsx from "clsx";
+import { useLix } from "@lix-js/react-utils";
 
 export const ChangeDiffComponent = (props: {
 	diffs: UiDiffComponentProps["diffs"];
@@ -10,7 +9,7 @@ export const ChangeDiffComponent = (props: {
 	contentClassName?: string; // Add new prop for styling the actual diff content
 	debug?: boolean;
 }) => {
-	const [lix] = useQuery(selectLix);
+	const lix = useLix();
 	const [isComponentLoaded, setIsComponentLoaded] = useState(false);
 
 	const pluginKey = props.diffs[0]?.plugin_key;

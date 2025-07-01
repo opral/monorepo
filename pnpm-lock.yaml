@@ -3146,6 +3146,9 @@ importers:
       '@lix-js/plugin-txt':
         specifier: workspace:*
         version: link:../lix-plugin-txt
+      '@lix-js/react-utils':
+        specifier: workspace:*
+        version: link:../lix/lix-react-utils
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../lix-sdk

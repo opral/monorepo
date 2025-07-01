@@ -13,21 +13,20 @@ import {
 import { Button } from "./ui/button";
 import { Check, ChevronDown, FileText, Plus } from "lucide-react";
 import { nanoid } from "@lix-js/sdk";
+import { useLix } from "@lix-js/react-utils";
 
 export default function FileSwitcher() {
 	const [activeFile] = useQuery(selectActiveFile);
 	const [files] = useQuery(selectFiles, 2000); // Reduced frequency for better performance
-	const [lix, , , refetch] = useQuery(selectLix);
+	const lix = useLix();
 
 	const switchToFile = useCallback(
 		async (fileId: string) => {
 			// Update URL without causing a navigation
 			updateUrlParams({ f: fileId });
-
-			// Trigger refetch to refresh state without full page reload
-			refetch();
+			// Data will automatically refresh via reactive queries
 		},
-		[refetch]
+		[]
 	);
 
 	const createNewFile = useCallback(async () => {

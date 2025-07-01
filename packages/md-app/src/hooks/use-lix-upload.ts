@@ -7,8 +7,7 @@ import {
 	getFileFromLix,
 } from "@/helper/uploadToLix";
 import { toast } from "sonner";
-import { useQuery } from "@/hooks/useQuery";
-import { selectLix } from "@/queries";
+import { useLix } from "@lix-js/react-utils";
 
 export function useLixUpload() {
 	const [uploadedFile, setUploadedFile] = useState<LixUploadedFile>();
@@ -21,7 +20,7 @@ export function useLixUpload() {
 		fileName: string;
 		fileId: string;
 	} | null>(null);
-	const [lix] = useQuery(selectLix);
+	const lix = useLix();
 
 	// Function to process pending file after duplicate resolution
 	const processPendingFile = useCallback(

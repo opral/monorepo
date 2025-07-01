@@ -10,6 +10,7 @@ import { ChevronDown, Zap, Loader2 } from "lucide-react";
 import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 import { useChat } from "@/components/editor/use-chat";
 import { toast } from "sonner";
+import { useLix } from "@lix-js/react-utils";
 
 interface IntermediateCheckpointComponentProps {
   filteredChanges?: UiDiffComponentProps["diffs"];
@@ -88,7 +89,7 @@ export default IntermediateCheckpointComponent;
 
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
-  const [lix] = useQuery(selectLix);
+  const lix = useLix();
   const [currentChangeSet] = useQuery(selectWorkingChangeSet);
   const [intermediateChanges] = useQuery(selectIntermediateChanges); // Added to access changes for prompt
   const textareaRef = useRef<HTMLTextAreaElement>(null);

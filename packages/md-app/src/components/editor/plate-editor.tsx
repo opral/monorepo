@@ -10,14 +10,15 @@ import { useCreateEditor } from "@/components/editor/use-create-editor";
 import { Editor, EditorContainer } from "@/components/ui/editor";
 import { debounce } from "lodash-es";
 import { useQuery } from "@/hooks/useQuery";
-import { selectLix, selectActiveFile } from "@/queries";
+import { selectActiveFile } from "@/queries";
 import { useMdAstState } from "@/hooks/useMdAstState";
 import { mdastEntitiesToPlateValue, plateValueToMdastEntities } from "./mdast-plate-bridge";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
+import { useLix } from "@lix-js/react-utils";
 export function PlateEditor() {
-  const [lix] = useQuery(selectLix);
+  const lix = useLix();
   const [activeFile] = useQuery(selectActiveFile);
   const { state: mdAstState, updateEntities } = useMdAstState();
   const editorRef = useRef<any>(null);

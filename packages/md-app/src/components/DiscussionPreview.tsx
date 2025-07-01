@@ -1,14 +1,14 @@
 import { useQuery } from "@/hooks/useQuery";
-import { selectLix } from "@/queries";
 import { useEffect, useState } from "react";
 import timeAgo from "@/helper/timeAgo.ts";
 import { ArrowRight, MessagesSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { State, ThreadComment } from "@lix-js/sdk";
+import { useLix } from "@lix-js/react-utils";
 
 const DiscussionPreview = ({ threadId }: { threadId: string }) => {
-	const [lix] = useQuery(selectLix);
+	const lix = useLix();
 	const [firstComment, setFirstComment] = useState<
 		State<ThreadComment & { author_name: string }> | undefined
 	>(undefined);

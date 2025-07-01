@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { PlateElementProps } from "@udecode/plate/react";
 import { useQuery } from "@/hooks/useQuery";
-import { selectActiveFile, selectLix } from "@/queries";
+import { selectActiveFile } from "@/queries";
 import { useChat } from "./use-chat";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/helper/emptyPromptElementHelpers";
 import { AIChatPlugin } from "@udecode/plate-ai/react";
 import { nanoid } from "@lix-js/sdk";
+import { useLix } from "@lix-js/react-utils";
 
 export function EmptyDocumentPromptElement({
 	attributes,
@@ -21,7 +22,7 @@ export function EmptyDocumentPromptElement({
 }: PlateElementProps) {
 	const [prompt, setPrompt] = useState("");
 	const [activeFile] = useQuery(selectActiveFile);
-	const [lix, , , refetch] = useQuery(selectLix);
+	const lix = useLix();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const chat = useChat({
