@@ -5,7 +5,9 @@ const lix = await openLix({});
 ```
 
 ```ts
-const activeVersion = await selectActiveVersion({ lix }).executeTakeFirstOrThrow();
+const activeVersion = await selectActiveVersion({
+  lix,
+}).executeTakeFirstOrThrow();
 
 const newVersion = await createVersion({ lix, from: activeVersion });
 

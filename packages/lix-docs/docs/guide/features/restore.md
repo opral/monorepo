@@ -1,5 +1,7 @@
 # Restore
 
+![Restore](../../assets/restore.svg)
+
 ```ts
 const lix = await openLix({});
 ```
@@ -9,6 +11,6 @@ const checkpoints = await selectCheckpoints({ lix }).executeTakeFirstOrThrow();
 ```
 
 ```ts
-// Restore to the first ever existing checkpoint 
-await restore({ lix, to: checkpoints.at(-1) });
+// Restore to the previous checkpoint 
+await restore({ lix, to: checkpoints[0] });
 ```

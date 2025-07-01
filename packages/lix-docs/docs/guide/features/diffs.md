@@ -1,13 +1,14 @@
 # Diffs
 
-![Diff](../assets/diffs-many-types.svg)
+![Diff](../../assets/diff.svg)
+
+![Diffs come in many different types](../../assets/diffs-many-types.svg)
 
 TODOS
 
 - clarify that main value is divergent states
-- mention universal diff 
+- mention universal diff
 - mention plugin diff
-
 
 ```ts
 const lix = await openLix({});
@@ -50,4 +51,3 @@ const entityAfter = await lix.db
   .selectAll()
   .executeTakeFirst();
 ```
-

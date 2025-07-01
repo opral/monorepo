@@ -1,5 +1,7 @@
 # Change Proposals
 
+![Change Proposals](../../assets/change-proposal.svg)
+
 ```ts
 const lix = await openLix({});
 

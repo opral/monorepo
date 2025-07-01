@@ -1,5 +1,7 @@
 # History
 
+![History](../../assets/history.svg)
+
 ```ts
 const lix = await openLix({});
 ```

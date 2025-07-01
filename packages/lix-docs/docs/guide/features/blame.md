@@ -1,5 +1,7 @@
 # Blame
 
+![Blame](../../assets/blame.svg)
+
 ```ts
 const lix = await openLix({});
 ```
