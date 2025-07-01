@@ -1,5 +1,7 @@
 # Diffs
 
+![Diff](../assets/diffs-many-types.svg)
+
 TODOS
 
 - clarify that main value is divergent states

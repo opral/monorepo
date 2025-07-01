@@ -57,8 +57,8 @@ export default defineConfig({
           text: "Ready-made Features",
           collapsed: false,
           items: [
-            { text: "Diffs", link: "/features/diffs" },
             { text: "Blame", link: "/features/blame" },
+            { text: "Diffs", link: "/features/diffs" },
             { text: "Proposals", link: "/features/change-proposals" },
             { text: "History", link: "/features/history" },
             { text: "Restore", link: "/features/restore" },
