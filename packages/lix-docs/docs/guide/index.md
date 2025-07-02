@@ -1,6 +1,12 @@
 # What is Lix?
 
+TODOS
+
+- [ ] AI collaboration
+
 Lix is a change control system that runs in the browser and provides an SDK to build web applications.
+
+![Lix features](../assets/lix-features.svg)
 
 ## Understanding Change Control
 
