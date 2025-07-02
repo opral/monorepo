@@ -2,7 +2,7 @@
 
 AI agents are powerful but imperfect—they hallucinate, generate incorrect data, and break things outright. Without lix change control, there is no visibility, accountability, or control over AI agents.
 
-![AI agent changes need to be visible and controllable](../../assets/blame-what-did-you-change.svg)
+![AI agent changes need to be visible and controllable](../assets/blame-what-did-you-change.svg)
 
 ## How Lix Enables Human & AI Collaboration
 
