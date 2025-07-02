@@ -1992,9 +1992,27 @@ importers:
 
   packages/lix-docs:
     devDependencies:
+      '@braintree/sanitize-url':
+        specifier: ^7.0.2
+        version: 7.1.1
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../lix-sdk
+      cytoscape:
+        specifier: ^3.29.2
+        version: 3.30.4
+      cytoscape-cose-bilkent:
+        specifier: ^4.1.0
+        version: 4.1.0(cytoscape@3.30.4)
+      dayjs:
+        specifier: ^1.11.11
+        version: 1.11.13
+      debug:
+        specifier: ^4.3.4
+        version: 4.4.1(supports-color@10.0.0)
+      mermaid:
+        specifier: ^11.7.0
+        version: 11.7.0
       typedoc:
         specifier: ^0.28.5
         version: 0.28.5(typescript@5.8.3)
@@ -2006,7 +2024,10 @@ importers:
         version: 1.1.2(typedoc-plugin-markdown@4.7.0(typedoc@0.28.5(typescript@5.8.3)))
       vitepress:
         specifier: ^1.0.0-rc.40
-        version: 1.6.3(@algolia/client-search@5.29.0)(@types/node@24.0.4)(@types/react@18.3.23)(axios@1.10.0)(change-case@5.4.4)(lightningcss@1.30.1)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.36.0)(typescript@5.8.3)
+        version: 1.6.3(@algolia/client-search@5.29.0)(@types/node@24.0.4)(@types/react@18.3.23)(axios@1.10.0(debug@4.4.1))(change-case@5.4.4)(lightningcss@1.30.1)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.36.0)(typescript@5.8.3)
+      vitepress-plugin-mermaid:
+        specifier: ^2.0.17
+        version: 2.0.17(mermaid@11.7.0)(vitepress@1.6.3(@algolia/client-search@5.29.0)(@types/node@24.0.4)(@types/react@18.3.23)(axios@1.10.0(debug@4.4.1))(change-case@5.4.4)(lightningcss@1.30.1)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.36.0)(typescript@5.8.3))
       vue:
         specifier: ^3.3.4
         version: 3.5.17(typescript@5.8.3)
@@ -4601,6 +4622,9 @@ packages:
       react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
+  '@braintree/sanitize-url@6.0.4':
+    resolution: {integrity: sha512-s3jaWicZd0pkP0jf5ysyHUI/RE7MHos6qlToFcGWXVp+ykHOy77OUMrfbgJ9it2C5bow7OIQwYYaHjk9XlBQ2A==}
+
   '@braintree/sanitize-url@7.1.1':
     resolution: {integrity: sha512-i1L7noDNxtFyL5DmZafWy1wRVhGehQmzZaz1HiN5e7iylJMSZR7ekOV7NsIqa5qBldlLrsKv4HbgFUVlQrz8Mw==}
 
@@ -6345,6 +6369,9 @@ packages:
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
+
+  '@mermaid-js/mermaid-mindmap@9.3.0':
+    resolution: {integrity: sha512-IhtYSVBBRYviH1Ehu8gk69pMDF8DSRqXBRDMWrEfHoaMruHeaP2DXA3PBnuwsMaCdPQhlUUcy/7DBLAEIXvCAw==}
 
   '@mermaid-js/parser@0.5.0':
     resolution: {integrity: sha512-AiaN7+VjXC+3BYE+GwNezkpjIcCI2qIMB/K4S2/vMWe0q/XJCBbx5+K7iteuz7VyltX9iAK4FmVTvGc9kjOV4w==}
@@ -16095,6 +16122,9 @@ packages:
     resolution: {integrity: sha512-Pzr3rol8fvhG/oJjIq2NTVB0vmdNNlz22FENhhPojYRZ4/ee08CfK4YuKmuL54V9MLhI1kpzxfOJ/63LzmZzDg==}
     engines: {node: '>=14'}
 
+  non-layered-tidy-tree-layout@2.0.2:
+    resolution: {integrity: sha512-gkXMxRzUH+PB0ax9dUN0yYF0S25BqeAYqhgMaLUFmpXLEk7Fcu8f4emJuOAY0V8kjDICxROIKsTAKsV/v355xw==}
+
   nopt@8.1.0:
     resolution: {integrity: sha512-ieGu42u/Qsa4TFktmaKEwM6MQH0pOWnaB3htzh0JRtx84+Mebc0cbZYN5bC+6WTZ4+77xrL9Pn5m7CV6VIkV7A==}
     engines: {node: ^18.17.0 || >=20.5.0}
@@ -19941,6 +19971,12 @@ packages:
       vite:
         optional: true
 
+  vitepress-plugin-mermaid@2.0.17:
+    resolution: {integrity: sha512-IUzYpwf61GC6k0XzfmAmNrLvMi9TRrVRMsUyCA8KNXhg/mQ1VqWnO0/tBVPiX5UoKF1mDUwqn5QV4qAJl6JnUg==}
+    peerDependencies:
+      mermaid: 10 || 11
+      vitepress: ^1.0.0 || ^1.0.0-alpha
+
   vitepress@1.6.3:
     resolution: {integrity: sha512-fCkfdOk8yRZT8GD9BFqusW3+GggWYZ/rYncOfmgcDtP3ualNHCAg+Robxp2/6xfH1WwPHtGpPwv7mbA3qomtBw==}
     hasBin: true
@@ -22021,6 +22057,9 @@ snapshots:
       react-lifecycles-compat: 3.0.4
       warning: 3.0.0
 
+  '@braintree/sanitize-url@6.0.4':
+    optional: true
+
   '@braintree/sanitize-url@7.1.1': {}
 
   '@brillout/import@0.2.3': {}
@@ -23134,7 +23173,7 @@ snapshots:
       globals: 15.15.0
       kolorist: 1.8.0
       local-pkg: 0.5.1
-      mlly: 1.7.3
+      mlly: 1.7.4
     transitivePeerDependencies:
       - supports-color
 
@@ -23768,6 +23807,17 @@ snapshots:
       '@types/mdx': 2.0.13
       '@types/react': 19.1.8
       react: 19.1.0
+
+  '@mermaid-js/mermaid-mindmap@9.3.0':
+    dependencies:
+      '@braintree/sanitize-url': 6.0.4
+      cytoscape: 3.30.4
+      cytoscape-cose-bilkent: 4.1.0(cytoscape@3.30.4)
+      cytoscape-fcose: 2.2.0(cytoscape@3.30.4)
+      d3: 7.9.0
+      khroma: 2.1.0
+      non-layered-tidy-tree-layout: 2.0.2
+    optional: true
 
   '@mermaid-js/parser@0.5.0':
     dependencies:
@@ -26799,7 +26849,7 @@ snapshots:
   '@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.34.7)(vite@5.4.19(@types/node@24.0.4)(lightningcss@1.30.1)(terser@5.36.0))':
     dependencies:
       '@sveltejs/vite-plugin-svelte-inspector': 3.0.1(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.34.7)(vite@5.4.19(@types/node@24.0.4)(lightningcss@1.30.1)(terser@5.36.0)))(svelte@5.34.7)(vite@5.4.19(@types/node@24.0.4)(lightningcss@1.30.1)(terser@5.36.0))
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.1(supports-color@10.0.0)
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.17
@@ -27854,7 +27904,7 @@ snapshots:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.8.3)
       '@typescript-eslint/visitor-keys': 6.21.0
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.1(supports-color@10.0.0)
       eslint: 8.57.1
     optionalDependencies:
       typescript: 5.8.3
@@ -29585,13 +29635,13 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@vueuse/integrations@12.8.2(axios@1.10.0)(change-case@5.4.4)(focus-trap@7.6.5)(typescript@5.8.3)':
+  '@vueuse/integrations@12.8.2(axios@1.10.0(debug@4.4.1))(change-case@5.4.4)(focus-trap@7.6.5)(typescript@5.8.3)':
     dependencies:
       '@vueuse/core': 12.8.2(typescript@5.8.3)
       '@vueuse/shared': 12.8.2(typescript@5.8.3)
       vue: 3.5.17(typescript@5.8.3)
     optionalDependencies:
-      axios: 1.10.0
+      axios: 1.10.0(debug@4.4.1)
       change-case: 5.4.4
       focus-trap: 7.6.5
     transitivePeerDependencies:
@@ -30610,15 +30660,15 @@ snapshots:
 
   axios@1.1.3:
     dependencies:
-      follow-redirects: 1.15.9(debug@4.4.0)
+      follow-redirects: 1.15.9(debug@4.4.1)
       form-data: 4.0.1
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
 
-  axios@1.10.0:
+  axios@1.10.0(debug@4.4.1):
     dependencies:
-      follow-redirects: 1.15.9(debug@4.4.0)
+      follow-redirects: 1.15.9(debug@4.4.1)
       form-data: 4.0.3
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -30626,7 +30676,7 @@ snapshots:
 
   axios@1.7.7:
     dependencies:
-      follow-redirects: 1.15.9(debug@4.4.0)
+      follow-redirects: 1.15.9(debug@4.4.1)
       form-data: 4.0.1
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -32878,7 +32928,7 @@ snapshots:
   eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.1(supports-color@10.0.0)
       eslint: 8.57.1
       get-tsconfig: 4.10.1
       is-bun-module: 2.0.0
@@ -33626,9 +33676,9 @@ snapshots:
     dependencies:
       tabbable: 6.2.0
 
-  follow-redirects@1.15.9(debug@4.4.0):
+  follow-redirects@1.15.9(debug@4.4.1):
     optionalDependencies:
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.1(supports-color@10.0.0)
 
   fontace@0.3.0:
     dependencies:
@@ -33879,7 +33929,7 @@ snapshots:
     dependencies:
       '@types/follow-redirects': 1.14.4
       decompress-response: 7.0.0
-      follow-redirects: 1.15.9(debug@4.4.0)
+      follow-redirects: 1.15.9(debug@4.4.1)
       is-retry-allowed: 2.2.0
       through2: 4.0.2
       tunnel-agent: 0.6.0
@@ -34555,7 +34605,7 @@ snapshots:
   http-proxy-middleware@2.0.6(@types/express@4.17.17):
     dependencies:
       '@types/http-proxy': 1.17.15
-      http-proxy: 1.18.1(debug@4.4.0)
+      http-proxy: 1.18.1(debug@4.4.1)
       is-glob: 4.0.3
       is-plain-obj: 3.0.0
       micromatch: 4.0.8
@@ -34567,18 +34617,18 @@ snapshots:
   http-proxy-middleware@3.0.5:
     dependencies:
       '@types/http-proxy': 1.17.15
-      debug: 4.4.0(supports-color@8.1.1)
-      http-proxy: 1.18.1(debug@4.4.0)
+      debug: 4.4.1(supports-color@10.0.0)
+      http-proxy: 1.18.1(debug@4.4.1)
       is-glob: 4.0.3
       is-plain-object: 5.0.0
       micromatch: 4.0.8
     transitivePeerDependencies:
       - supports-color
 
-  http-proxy@1.18.1(debug@4.4.0):
+  http-proxy@1.18.1(debug@4.4.1):
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.9(debug@4.4.0)
+      follow-redirects: 1.15.9(debug@4.4.1)
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -35631,8 +35681,8 @@ snapshots:
 
   local-pkg@0.5.1:
     dependencies:
-      mlly: 1.7.3
-      pkg-types: 1.2.1
+      mlly: 1.7.4
+      pkg-types: 1.3.1
 
   local-pkg@1.1.1:
     dependencies:
@@ -36849,7 +36899,7 @@ snapshots:
       acorn: 8.15.0
       pathe: 2.0.3
       pkg-types: 1.3.1
-      ufo: 1.5.4
+      ufo: 1.6.1
 
   mnemonist@0.39.6:
     dependencies:
@@ -37271,6 +37321,9 @@ snapshots:
       '@types/sarif': 2.1.7
       fs-extra: 10.1.0
 
+  non-layered-tidy-tree-layout@2.0.2:
+    optional: true
+
   nopt@8.1.0:
     dependencies:
       abbrev: 3.0.0
@@ -37417,7 +37470,7 @@ snapshots:
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
-      axios: 1.10.0
+      axios: 1.10.0(debug@4.4.1)
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -37676,7 +37729,7 @@ snapshots:
     dependencies:
       '@vscode/vsce': 2.32.0
       commander: 6.2.1
-      follow-redirects: 1.15.9(debug@4.4.0)
+      follow-redirects: 1.15.9(debug@4.4.1)
       is-ci: 2.0.0
       leven: 3.1.0
       semver: 7.6.3
@@ -37982,7 +38035,7 @@ snapshots:
   pkg-types@1.2.1:
     dependencies:
       confbox: 0.1.8
-      mlly: 1.7.3
+      mlly: 1.7.4
       pathe: 1.1.2
 
   pkg-types@1.3.1:
@@ -38148,7 +38201,7 @@ snapshots:
 
   posthog-node@4.18.0:
     dependencies:
-      axios: 1.10.0
+      axios: 1.10.0(debug@4.4.1)
     transitivePeerDependencies:
       - debug
 
@@ -42055,7 +42108,7 @@ snapshots:
       '@volar/typescript': 2.4.11
       '@vue/language-core': 2.2.0(typescript@5.8.3)
       compare-versions: 6.1.1
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.1(supports-color@10.0.0)
       kolorist: 1.8.0
       local-pkg: 1.1.1
       magic-string: 0.30.17
@@ -42136,7 +42189,7 @@ snapshots:
 
   vite-tsconfig-paths@4.3.2(typescript@5.8.3)(vite@5.4.19(@types/node@20.19.1)(lightningcss@1.30.1)(terser@5.36.0)):
     dependencies:
-      debug: 4.4.0(supports-color@8.1.1)
+      debug: 4.4.1(supports-color@10.0.0)
       globrex: 0.1.2
       tsconfck: 3.1.4(typescript@5.8.3)
     optionalDependencies:
@@ -42321,7 +42374,14 @@ snapshots:
     optionalDependencies:
       vite: 5.4.19(@types/node@24.0.4)(lightningcss@1.30.1)(terser@5.36.0)
 
-  vitepress@1.6.3(@algolia/client-search@5.29.0)(@types/node@24.0.4)(@types/react@18.3.23)(axios@1.10.0)(change-case@5.4.4)(lightningcss@1.30.1)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.36.0)(typescript@5.8.3):
+  vitepress-plugin-mermaid@2.0.17(mermaid@11.7.0)(vitepress@1.6.3(@algolia/client-search@5.29.0)(@types/node@24.0.4)(@types/react@18.3.23)(axios@1.10.0(debug@4.4.1))(change-case@5.4.4)(lightningcss@1.30.1)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.36.0)(typescript@5.8.3)):
+    dependencies:
+      mermaid: 11.7.0
+      vitepress: 1.6.3(@algolia/client-search@5.29.0)(@types/node@24.0.4)(@types/react@18.3.23)(axios@1.10.0(debug@4.4.1))(change-case@5.4.4)(lightningcss@1.30.1)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.36.0)(typescript@5.8.3)
+    optionalDependencies:
+      '@mermaid-js/mermaid-mindmap': 9.3.0
+
+  vitepress@1.6.3(@algolia/client-search@5.29.0)(@types/node@24.0.4)(@types/react@18.3.23)(axios@1.10.0(debug@4.4.1))(change-case@5.4.4)(lightningcss@1.30.1)(postcss@8.5.6)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)(terser@5.36.0)(typescript@5.8.3):
     dependencies:
       '@docsearch/css': 3.8.2
       '@docsearch/js': 3.8.2(@algolia/client-search@5.29.0)(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(search-insights@2.17.3)
@@ -42334,7 +42394,7 @@ snapshots:
       '@vue/devtools-api': 7.7.7
       '@vue/shared': 3.5.13
       '@vueuse/core': 12.8.2(typescript@5.8.3)
-      '@vueuse/integrations': 12.8.2(axios@1.10.0)(change-case@5.4.4)(focus-trap@7.6.5)(typescript@5.8.3)
+      '@vueuse/integrations': 12.8.2(axios@1.10.0(debug@4.4.1))(change-case@5.4.4)(focus-trap@7.6.5)(typescript@5.8.3)
       focus-trap: 7.6.5
       mark.js: 8.11.1
       minisearch: 7.1.2

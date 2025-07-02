@@ -1,6 +1,12 @@
-# Change Proposals
+# Change Proposals 
+
+Change proposals let you build review and approval workflows for into your application. This allows users and AI agents to safely suggest, discuss, and approve edits.
 
 ![Change Proposals](../../assets/change-proposal.svg)
+
+## Examples
+
+### Create a change proposal 
 
 ```ts
 const lix = await openLix({});
@@ -9,10 +15,9 @@ const activeVersion = await selectActiveVersion({ lix }).executeTakeFirstOrThrow
 
 const mainVersion = await lix.db.selectFrom("version")
   .where("name", "=", "main")
+  .selectAll()
   .executeTakeFirstOrThrow();
-```
 
-```ts
 // Create a change proposal (like a pull request)
 const proposal = await createChangeProposal({
   lix,
@@ -22,6 +27,8 @@ const proposal = await createChangeProposal({
   targetVersion: mainVersion
 });
 ```
+
+### Accepting or rejecting a proposal
 
 ```ts
 // Merge the proposal (accepts and merges in one action)

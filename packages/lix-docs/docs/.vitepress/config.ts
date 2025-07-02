@@ -1,5 +1,6 @@
 import { defineConfig } from "vitepress";
 import typedocSidebar from "../api/reference/typedoc-sidebar.json";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
 // Fix typedoc sidebar links
 const fixTypedocSidebar = (sidebar: any) => {
@@ -16,7 +17,7 @@ const fixTypedocSidebar = (sidebar: any) => {
   });
 };
 
-export default defineConfig({
+export default withMermaid({
   title: "Lix SDK Documentation",
   description:
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
@@ -50,6 +51,10 @@ export default defineConfig({
           items: [
             { text: "What is Lix?", link: "/" },
             { text: "Getting Started", link: "/guide/getting-started" },
+            {
+              text: "AI Agent Collaboration",
+              link: "/guide/ai-agent-collaboration",
+            },
             { text: "How Lix Works", link: "/guide/how-lix-works" },
           ],
         },
@@ -57,7 +62,10 @@ export default defineConfig({
           text: "Ready-made Features",
           collapsed: false,
           items: [
-            { text: "Blame", link: "/guide/features/blame" },
+            {
+              text: "Attribution (Blame)",
+              link: "/guide/features/attribution",
+            },
             { text: "Proposals", link: "/guide/features/change-proposals" },
             { text: "Diffs", link: "/guide/features/diffs" },
             { text: "History", link: "/guide/features/history" },

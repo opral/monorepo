@@ -1,37 +1,35 @@
 # Diffs
 
+Lix provides APIs to query divergent and historical states, which is the foundation for showing users what has changed. 
+
 ![Diff](../../assets/diff.svg)
+
+The image below illustrates the variety of states you can compare, from entire files to individual entities within them.
 
 ![Diffs come in many different types](../../assets/diffs-many-types.svg)
 
-TODOS
+Lix plugins for standard file formats like JSON, Markdown, or CSV, may provide ready-to-use diffs. For custom data formats, you have the flexibility to implement your own diffing logic. You can do this by using a dedicated library, like the experimental [universal diff package](https://github.com/opral/monorepo/tree/main/packages/lix/universal-diff), or by writing your own diff logic.
 
-- clarify that main value is divergent states
-- mention universal diff
-- mention plugin diff
+## Code Examples
+
+### Diffing two files
 
 ```ts
 const lix = await openLix({});
-```
 
-```ts
-// Get file state at two different change sets for comparison
-const before = await lix.db
+const fileHistory = await lix.db
   .selectFrom("file_history")
-  .where("lixcol_change_set_id", "=", beforeChangeSetId)
   .where("id", "=", "document.md")
-  .where("lixcol_depth", "=", 0)
   .selectAll()
   .executeTakeFirst();
 
-const after = await lix.db
-  .selectFrom("file_history")
-  .where("lixcol_change_set_id", "=", afterChangeSetId)
-  .where("id", "=", "document.md")
-  .where("lixcol_depth", "=", 0)
-  .selectAll()
-  .executeTakeFirst();
+console.log(
+  "File after": fileHistory[0].data,
+  "File before": fileHistory[1].data
+)
 ```
+
+### Diffing two entities
 
 ```ts
 // Compare entity states between change sets
@@ -50,4 +48,9 @@ const entityAfter = await lix.db
   .where("schema_key", "=", "markdown_paragraph")
   .selectAll()
   .executeTakeFirst();
+
+console.log(
+  "Entity after": entityAfter.snapshot_content.text,
+  "Entity before": entityBefore.snapshot_content.text
+);
 ```
