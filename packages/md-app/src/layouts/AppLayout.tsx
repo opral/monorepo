@@ -6,6 +6,7 @@ import { nanoid, type Lix } from "@lix-js/sdk";
 import { useSearchParams } from "react-router-dom";
 import { upsertKeyValue } from "@/hooks/useKeyValue";
 import { selectFiles } from "@/queries";
+import { Suspense } from "react";
 
 function LoadingScreen() {
 	return (
@@ -91,9 +92,11 @@ export function App({ children }: { children: React.ReactNode }) {
 
 	return (
 		<LixProvider lix={lix}>
-			<main className="w-full h-screen overflow-hidden bg-white flex flex-col">
-				{children}
-			</main>
+			<Suspense fallback={<LoadingScreen />}>
+				<main className="w-full h-screen overflow-hidden bg-white flex flex-col">
+					{children}
+				</main>
+			</Suspense>
 		</LixProvider>
 	);
 }

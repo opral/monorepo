@@ -2,6 +2,7 @@ import { openLix, OpfsStorage } from "@lix-js/sdk";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 import { initLixInspector } from "@lix-js/inspector";
 import { findLixFileInOpfs } from "./findLixInOpfs";
+import { selectMdAstNodes, selectMdAstRoot } from "@/queries";
 
 /**
  * Initialize the lix instance for the application
@@ -52,6 +53,18 @@ export async function initializeLix() {
 	if (import.meta.env.DEV) {
 		initLixInspector({ lix });
 	}
+
+	selectMdAstRoot(lix)
+		.executeTakeFirst()
+		.then((value) => {
+			console.log("initialize lix mdRoot", value);
+		});
+
+	selectMdAstNodes(lix)
+		.execute()
+		.then((value) => {
+			console.log("initialize lix mdNodes", value);
+		});
 
 	return lix;
 }

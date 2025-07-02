@@ -800,7 +800,7 @@ export async function selectMdAstDocument(): Promise<{
 export function selectMdAstRoot(lix: Lix) {
 	return lix.db
 		.selectFrom("state")
-		.where("schema_key", "=", "lix_plugin_md_root")
+		.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
 		.where(
 			"file_id",
 			"=",
@@ -815,7 +815,7 @@ export function selectMdAstRoot(lix: Lix) {
 export function selectMdAstNodes(lix: Lix) {
 	return lix.db
 		.selectFrom("state")
-		.where("schema_key", "=", "lix_plugin_md_node")
+		.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
 		.where(
 			"file_id",
 			"=",
@@ -899,12 +899,35 @@ export async function updateMdAstEntities(
 						.execute();
 				}
 			}
-			await trx
-				.updateTable("state")
+			const existingRoot = await trx
+				.selectFrom("state")
 				.where("file_id", "=", activeFile.id)
 				.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
-				.set({ snapshot_content: { order } })
-				.execute();
+				.selectAll()
+				.executeTakeFirst();
+
+			if (existingRoot) {
+				await trx
+					.updateTable("state")
+					.where("file_id", "=", activeFile.id)
+					.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
+					.set({ snapshot_content: { order } })
+					.execute();
+			} else {
+				await trx
+					.insertInto("state")
+					.values({
+						entity_id: "root",
+						file_id: activeFile.id,
+						schema_key: MarkdownRootSchemaV1["x-lix-key"],
+						schema_version: MarkdownRootSchemaV1["x-lix-version"],
+						plugin_key: mdPlugin.key,
+						snapshot_content: { order },
+						// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
+						version_id: trx.selectFrom("active_version").select("version_id"),
+					})
+					.execute();
+			}
 		});
 	} catch (error) {
 		console.error("Failed to update MD-AST entities:", error);

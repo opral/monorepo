@@ -32,6 +32,7 @@ export function PlateEditor() {
   }, [editor, editorRef]);
 
   useEffect(() => {
+    console.log("running effect mdaststate", mdAstState.order, mdAstState.entities)
     if (editor && mdAstState?.entities.length > 0) {
       try {
         // Convert MD-AST entities to Plate value

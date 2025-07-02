@@ -37,33 +37,44 @@ export function useMdAstState(): UseMdAstStateReturn {
 
 	// const mdNodes = useSuspenseQuery(selectMdAstNodes);
 
-	const [mdRoot, setMdRoot] = useState();
-	const [mdNodes, setMdNodes] = useState();
+	const [state, setState] = useState({
+		order: [],
+		entities: [] as any,
+		isLoading: true,
+		error: null,
+	});
+
+	// const [mdRoot, setMdRoot] = useState();
+	// const [mdNodes, setMdNodes] = useState();
 
 	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
 
 	console.log("called hook");
 
-	useEffect(() => {
-		selectMdAstRoot(lix)
-			.executeTakeFirst()
-			.then((value) => {
-				console.log("mdRoot", mdRoot);
-				setMdRoot(value);
-			});
+	async function x() {
+		const root = await selectMdAstRoot(lix).executeTakeFirstOrThrow();
 
-		selectMdAstNodes(lix)
-			.execute()
-			.then((value) => {
-				console.log("mdNodes", mdNodes);
-				setMdNodes(value);
-			});
+		const entities = await selectMdAstNodes(lix).execute();
+
+		console.log("setting state", root, entities);
+
+		setState({
+			order: root.snapshot_content.order,
+			entities: entities.map((v) => v.snapshot_content),
+			isLoading: false,
+			error: null,
+		});
+	}
+
+	useEffect(() => {
+		x();
 	}, [lix]);
 
 	// Update entities with optimistic updates
 	const updateEntities = useCallback(
 		async (entities: MdAstEntity[], order: string[]) => {
-			console.log({ entities, order });
+			console.log("updating state", order, entities);
+			// console.log({ entities, order });
 
 			try {
 				await updateMdAstEntities(lix, activeFile ?? null, entities, order);
@@ -75,13 +86,7 @@ export function useMdAstState(): UseMdAstStateReturn {
 	);
 
 	return {
-		state: {
-			order: mdRoot?.snapshot_content?.order ?? [],
-			entities:
-				mdNodes?.map((node) => node.snapshot_content as MdAstEntity) ?? [],
-			isLoading: false,
-			error: null,
-		},
+		state,
 		updateEntities,
 	};
 }
