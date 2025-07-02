@@ -1,6 +1,6 @@
 # Change Proposals 
 
-Change proposals let you build review and approval workflows for into your application. This allows users and AI agents to safely suggest, discuss, and approve edits.
+Change proposals let you build review and approval workflows for into your application. This allows users and AI agents to safely suggest, discuss, and approve edits before they are merged.
 
 ![Change Proposals](../../assets/change-proposal.svg)
 

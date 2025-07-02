@@ -8,7 +8,7 @@ AI agents are powerful but imperfect—they hallucinate, generate incorrect data
 
 ### See Every Change
 
-[Attribution](./features/blame.md) shows exactly what changes an AI agent made.
+[Attribution](./features/attribution.md) shows exactly what changes an AI agent made.
 
 ### Accept or Reject
 
