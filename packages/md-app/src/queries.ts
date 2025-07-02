@@ -866,38 +866,34 @@ export async function updateMdAstEntities(
 	if (!activeFile) return;
 	try {
 		await lix.db.transaction().execute(async (trx) => {
+			// deleting all nodes avoids diffing delete changes
+			// if this leads to bugs, this is a bug in the lix state
+			// handler and should be reported
+			await trx
+				.deleteFrom("state")
+				.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
+				// .where(
+				// 	// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
+				// 	"version_id",
+				// 	"=",
+				// 	trx.selectFrom("active_version").select("version_id")
+				// )
+				.where("file_id", "=", activeFile.id)
+				.execute();
 			for (const entity of entities) {
-				const existing = await trx
-					.selectFrom("state")
-					.where("entity_id", "=", entity.entity_id)
-					.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
-					.where("file_id", "=", activeFile.id)
-					.selectAll()
-					.executeTakeFirst();
-
-				if (existing) {
-					await trx
-						.updateTable("state")
-						.where("entity_id", "=", entity.entity_id)
-						.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
-						.where("file_id", "=", activeFile.id)
-						.set({ snapshot_content: entity })
-						.execute();
-				} else {
-					await trx
-						.insertInto("state")
-						.values({
-							entity_id: entity.entity_id,
-							file_id: activeFile.id,
-							schema_key: MarkdownNodeSchemaV1["x-lix-key"],
-							schema_version: MarkdownNodeSchemaV1["x-lix-version"],
-							plugin_key: mdPlugin.key,
-							snapshot_content: entity,
-							// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
-							version_id: trx.selectFrom("active_version").select("version_id"),
-						})
-						.execute();
-				}
+				await trx
+					.insertInto("state")
+					.values({
+						entity_id: entity.entity_id,
+						file_id: activeFile.id,
+						schema_key: MarkdownNodeSchemaV1["x-lix-key"],
+						schema_version: MarkdownNodeSchemaV1["x-lix-version"],
+						plugin_key: mdPlugin.key,
+						snapshot_content: entity,
+						// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
+						version_id: trx.selectFrom("active_version").select("version_id"),
+					})
+					.execute();
 			}
 			const existingRoot = await trx
 				.selectFrom("state")

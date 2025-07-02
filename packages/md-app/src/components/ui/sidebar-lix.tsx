@@ -450,31 +450,18 @@ export function LixSidebar() {
 				const file = await lix.db
 					.selectFrom("file")
 					.where("id", "=", fileId)
-					.select(["path"])
+					.select(["path", "data"])
 					.executeTakeFirstOrThrow();
 
 				const fileName = file.path.split("/").pop() || "document.md";
 
-				// Get MD-AST content for the file
-				const mdAstDocument = await selectMdAstDocument();
-				
-				if (mdAstDocument && mdAstDocument.entities.length > 0) {
-					// Generate markdown content from MD-AST entities
-					const fileContent = serializeMdastEntities(
-						mdAstDocument.entities, 
-						mdAstDocument.order
-					);
-
-					const blob = new Blob([fileContent], { type: "text/markdown" });
+				const blob = new Blob([file.data], { type: "text/markdown" });
 					const a = document.createElement("a");
 					a.href = URL.createObjectURL(blob);
 					a.download = fileName;
 					document.body.appendChild(a);
 					a.click();
-					document.body.removeChild(a);
-				} else {
-					console.warn("No MD-AST content found for export");
-				}
+				document.body.removeChild(a);
 			} catch (error) {
 				console.error("Failed to export file:", error);
 			}

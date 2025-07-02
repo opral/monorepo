@@ -52,14 +52,14 @@ export function useMdAstState(): UseMdAstStateReturn {
 	console.log("called hook");
 
 	async function x() {
-		const root = await selectMdAstRoot(lix).executeTakeFirstOrThrow();
+		const root = await selectMdAstRoot(lix).executeTakeFirst();
 
 		const entities = await selectMdAstNodes(lix).execute();
 
 		console.log("setting state", root, entities);
 
 		setState({
-			order: root.snapshot_content.order,
+			order: root?.snapshot_content?.order ?? [],
 			entities: entities.map((v) => v.snapshot_content),
 			isLoading: false,
 			error: null,
