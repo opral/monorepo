@@ -12,9 +12,14 @@ import {
 	ChangeSet,
 	nanoid,
 	OpfsStorage,
+	LixFileDescriptor,
 } from "@lix-js/sdk";
 import { updateUrlParams } from "./helper/updateUrlParams";
-import { plugin as mdPlugin } from "@lix-js/plugin-md";
+import {
+	MarkdownNodeSchemaV1,
+	MarkdownRootSchemaV1,
+	plugin as mdPlugin,
+} from "@lix-js/plugin-md";
 import { findLixFileInOpfs } from "./helper/findLixInOpfs";
 import { initLixInspector } from "@lix-js/inspector";
 
@@ -185,10 +190,20 @@ export const selectFiles = (lix: Lix) =>
 	lix.db.selectFrom("file").select(["id", "path", "metadata"]);
 
 /**
- * Selects the current active account
+ * Selects the active file based on URL parameters
  */
-export const selectActiveAccount = (lix: Lix) =>
-	lix.db.selectFrom("active_account").selectAll();
+export const selectActiveFile = (lix: Lix) =>
+	lix.db
+		.selectFrom("file")
+		.where(
+			"id",
+			"=",
+			lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "flashtype_active_file")
+				.select("value")
+		)
+		.select(["id", "path", "metadata"]);
 
 /**
  * Selects all accounts
@@ -197,20 +212,10 @@ export const selectAccounts = (lix: Lix) =>
 	lix.db.selectFrom("account").selectAll();
 
 /**
- * Selects the active file based on URL parameters
+ * Selects the current active account
  */
-export const selectActiveFile = (lix: Lix) =>
-	lix.db
-		.selectFrom("file")
-		.select(["id", "path", "metadata"])
-		.where(
-			"id",
-			"=",
-			lix.db
-				.selectFrom("key_value")
-				.where("key", "=", "flashtype_active_file")
-				.select("value")
-		);
+export const selectActiveAccount = (lix: Lix) =>
+	lix.db.selectFrom("active_account").selectAll();
 
 /**
  * Selects checkpoints for the active file
@@ -746,7 +751,6 @@ export async function selectMdAstEntities(): Promise<MdAstEntity[]> {
  * Selects the document order for the active file
  */
 export async function selectMdAstDocumentOrder(): Promise<string[]> {
-	return [];
 	const lix = await ensureLix();
 	const activeFile = await selectActiveFile();
 	const activeVersion = selectActiveVersion;
@@ -793,68 +797,117 @@ export async function selectMdAstDocument(): Promise<{
 	return { entities, order };
 }
 
+export function selectMdAstRoot(lix: Lix) {
+	return lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "lix_plugin_md_root")
+		.where(
+			"file_id",
+			"=",
+			lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "flashtype_active_file")
+				.select("value")
+		)
+		.selectAll();
+}
+
+export function selectMdAstNodes(lix: Lix) {
+	return lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "lix_plugin_md_node")
+		.where(
+			"file_id",
+			"=",
+			lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "flashtype_active_file")
+				.select("value")
+		)
+		.selectAll();
+}
+
+export function selectActiveFileData(lix: Lix) {
+	// return lix.db.with("document_root", (db) =>
+	// 	db
+	// 		.selectFrom("state")
+	// 		.where("schema_key", "=", "lix_plugin_md_root")
+	// 		.where(
+	// 			"file_id",
+	// 			"=",
+	// 			db
+	// 				.selectFrom("key_value")
+	// 				.where("key", "=", "flashtype_active_file")
+	// 				.select("value")
+	// 		)
+	// );
+	return lix.db
+		.selectFrom("file")
+		.where(
+			"id",
+			"=",
+			lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "flashtype_active_file")
+				.select("value")
+		)
+		.select("data");
+}
+
 /**
  * Updates MD-AST entities in lix state using proper lix entity operations
  */
 export async function updateMdAstEntities(
+	lix: Lix,
+	activeFile: LixFileDescriptor | null,
 	entities: MdAstEntity[],
 	order: string[]
 ): Promise<void> {
-	return;
-	// const lix = await ensureLix();
-	// const activeFile = await selectActiveFile();
+	if (!activeFile) return;
+	try {
+		await lix.db.transaction().execute(async (trx) => {
+			for (const entity of entities) {
+				const existing = await trx
+					.selectFrom("state")
+					.where("entity_id", "=", entity.entity_id)
+					.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
+					.where("file_id", "=", activeFile.id)
+					.selectAll()
+					.executeTakeFirst();
 
-	// if (!activeFile) {
-	// 	throw new Error("No active file to update");
-	// }
-
-	// try {
-	// 	// Delete existing MD-AST entities for this file
-	// 	await lix.db
-	// 		.deleteFrom("state")
-	// 		.where("file_id", "=", activeFile.id)
-	// 		.where("schema_key", "in", ["lix_plugin_md_node", "lix_plugin_md_root"])
-	// 		.execute();
-
-	// 	// Insert new node entities
-	// 	if (entities.length > 0) {
-	// 		await lix.db
-	// 			.insertInto("state")
-	// 			.values(
-	// 				entities.map(entity => ({
-	// 					entity_id: entity.mdast_id,
-	// 					file_id: activeFile.id,
-	// 					schema_key: "lix_plugin_md_node",
-	// 					plugin_key: "lix_plugin_md",
-	// 					snapshot_content: entity as any, // Store as object, not string
-	// 					schema_version: "1.0",
-	// 					created_at: new Date().toISOString(),
-	// 					updated_at: new Date().toISOString(),
-	// 				}))
-	// 			)
-	// 			.execute();
-	// 	}
-
-	// 	// Insert root order entity
-	// 	if (order.length > 0) {
-	// 		await lix.db
-	// 			.insertInto("state")
-	// 			.values({
-	// 				entity_id: "root",
-	// 				file_id: activeFile.id,
-	// 				schema_key: "lix_plugin_md_root",
-	// 				plugin_key: "lix_plugin_md",
-	// 				snapshot_content: { order } as any, // Store as object, not string
-	// 				schema_version: "1.0",
-	// 				created_at: new Date().toISOString(),
-	// 				updated_at: new Date().toISOString(),
-	// 			})
-	// 			.execute();
-	// 	}
-
-	// 	console.log(`Updated ${entities.length} MD-AST entities for file ${activeFile.path}`);
-	// } catch (error) {
-	// 	console.error("Failed to update MD-AST entities:", error);
-	// 	throw error;
-	// }
+				if (existing) {
+					await trx
+						.updateTable("state")
+						.where("entity_id", "=", entity.entity_id)
+						.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
+						.where("file_id", "=", activeFile.id)
+						.set({ snapshot_content: entity })
+						.execute();
+				} else {
+					await trx
+						.insertInto("state")
+						.values({
+							entity_id: entity.entity_id,
+							file_id: activeFile.id,
+							schema_key: MarkdownNodeSchemaV1["x-lix-key"],
+							schema_version: MarkdownNodeSchemaV1["x-lix-version"],
+							plugin_key: mdPlugin.key,
+							snapshot_content: entity,
+							// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
+							version_id: trx.selectFrom("active_version").select("version_id"),
+						})
+						.execute();
+				}
+			}
+			await trx
+				.updateTable("state")
+				.where("file_id", "=", activeFile.id)
+				.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
+				.set({ snapshot_content: { order } })
+				.execute();
+		});
+	} catch (error) {
+		console.error("Failed to update MD-AST entities:", error);
+		throw error;
+	}
 }

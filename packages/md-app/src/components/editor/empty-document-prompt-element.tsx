@@ -1,27 +1,23 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { PlateElementProps } from "@udecode/plate/react";
-import { useQuery } from "@/hooks/useQuery";
 import { selectActiveFile } from "@/queries";
 import { useChat } from "./use-chat";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Loader2, Zap } from "lucide-react";
-import { generateHumanId } from "@/helper/generateHumanId";
-import { updateUrlParams } from "@/helper/updateUrlParams";
 import {
 	removeEmptyPromptElement,
 	setPromptDismissed,
 } from "@/helper/emptyPromptElementHelpers";
 import { AIChatPlugin } from "@udecode/plate-ai/react";
-import { nanoid } from "@lix-js/sdk";
-import { useLix } from "@lix-js/react-utils";
+import { useLix, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
 
 export function EmptyDocumentPromptElement({
 	attributes,
 	editor,
 }: PlateElementProps) {
 	const [prompt, setPrompt] = useState("");
-	const [activeFile] = useQuery(selectActiveFile);
+	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
 	const lix = useLix();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -43,53 +39,6 @@ export function EmptyDocumentPromptElement({
 		}
 	};
 
-	const createNewFile = useCallback(
-		async (content?: string) => {
-			if (!lix) return;
-
-			try {
-				// Use prompt-based name if generating content, otherwise use random ID
-				const fileBaseName = content
-					? prompt
-							.trim()
-							.toLowerCase()
-							.split(/\s+/)
-							.reduce((acc: string[], word: string) => {
-								if (
-									(acc.join("-") + (acc.length ? "-" : "") + word).length <= 30
-								) {
-									acc.push(word);
-								}
-								return acc;
-							}, [])
-							.join("-")
-					: generateHumanId();
-
-				const newFileId = nanoid();
-
-				await lix.db
-					.insertInto("file")
-					.values({
-						id: newFileId,
-						path: `/${fileBaseName}.md`,
-						data: new TextEncoder().encode(``),
-					})
-					.executeTakeFirstOrThrow();
-
-				// OpfsStorage now handles persistence automatically through the onStateCommit hook
-				updateUrlParams({ f: newFileId });
-				refetch();
-
-				// Return the new file ID for later use
-				return newFileId;
-			} catch (error) {
-				console.error("Failed to create new file:", error);
-				return null;
-			}
-		},
-		[lix, refetch, prompt]
-	);
-
 	// Initialize height and reset on changes
 	useEffect(() => {
 		adjustHeight();
@@ -100,25 +49,6 @@ export function EmptyDocumentPromptElement({
 		if (!activeFile || !prompt.trim()) return;
 
 		try {
-			// If we're in the default empty document, create a new file first
-			if (activeFile.path === "/document.md") {
-				const newFileId = await createNewFile(prompt);
-				if (newFileId) {
-					// Wait longer for navigation and editor synchronization to complete
-					await new Promise((resolve) => setTimeout(resolve, 500));
-
-					// Clear the editor content before starting generation
-					const currentEditor = editor;
-					if (currentEditor) {
-						currentEditor.tf.setValue([]);
-					}
-				} else {
-					// If file creation failed, stay in current file
-					toast.error(
-						"Failed to create new file. Generating in current file instead."
-					);
-				}
-			}
 			editor.getApi(AIChatPlugin).aiChat.submit({
 				prompt: `Generate a complete, well-structured markdown document about: ${prompt}. Include appropriate headings starting with level 1 heading (#), paragraphs, and relevant formatting like lists or emphasis where appropriate.`,
 			});

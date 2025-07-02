@@ -83,7 +83,7 @@ function PageContent() {
 				</div>
 				{activeFile ?
 					<div className="h-full flex-1 overflow-hidden" data-registry="plate">
-						{/* <PlateEditor /> */}
+						<PlateEditor />
 						{JSON.stringify(activeFile.id, null, 2)}
 						<Toaster />
 					</div>

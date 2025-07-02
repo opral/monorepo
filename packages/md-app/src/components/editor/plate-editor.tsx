@@ -9,17 +9,16 @@ import { useCreateEditor } from "@/components/editor/use-create-editor";
 // import { SettingsDialog } from "@/components/editor/settings";
 import { Editor, EditorContainer } from "@/components/ui/editor";
 import { debounce } from "lodash-es";
-import { useQuery } from "@/hooks/useQuery";
 import { selectActiveFile } from "@/queries";
 import { useMdAstState } from "@/hooks/useMdAstState";
 import { mdastEntitiesToPlateValue, plateValueToMdastEntities } from "./mdast-plate-bridge";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
-import { useLix } from "@lix-js/react-utils";
+import { useLix, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
 export function PlateEditor() {
   const lix = useLix();
-  const [activeFile] = useQuery(selectActiveFile);
+  const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
   const { state: mdAstState, updateEntities } = useMdAstState();
   const editorRef = useRef<any>(null);
 
@@ -33,7 +32,7 @@ export function PlateEditor() {
   }, [editor, editorRef]);
 
   useEffect(() => {
-    if (editor && mdAstState.entities.length > 0) {
+    if (editor && mdAstState?.entities.length > 0) {
       try {
         // Convert MD-AST entities to Plate value
         const plateNodes = mdastEntitiesToPlateValue(mdAstState.entities, mdAstState.order);
@@ -57,86 +56,86 @@ export function PlateEditor() {
     setPreviousHasPromptElement(false);
   }, [activeFile?.id, mdAstState, editor]);
 
-  useEffect(() => {
-    if (!editor || !lix || !activeFile?.id) return;
+  // useEffect(() => {
+  //   if (!editor || !lix || !activeFile?.id) return;
 
-    // The main function to check and potentially add a prompt
-    const checkAndAddPrompt = async () => {
-      try {
-        // If prompt has been dismissed, don't show it
-        if (await getPromptDismissed(lix, activeFile.id)) {
-          removeEmptyPromptElement(editor);
-          return;
-        }
+  //   // The main function to check and potentially add a prompt
+  //   const checkAndAddPrompt = async () => {
+  //     try {
+  //       // If prompt has been dismissed, don't show it
+  //       if (await getPromptDismissed(lix, activeFile.id)) {
+  //         removeEmptyPromptElement(editor);
+  //         return;
+  //       }
 
-        // Show prompt for default empty document or any empty file
-        const isDefaultDocument = activeFile.path === "/document.md";
-        const isEmptyFile = mdAstState.entities.length === 0;
+  //       // Show prompt for default empty document or any empty file
+  //       const isDefaultDocument = activeFile.path === "/document.md";
+  //       const isEmptyFile = mdAstState.entities.length === 0;
 
-        if (isDefaultDocument || isEmptyFile) {
-          insertEmptyPromptElement(editor);
-          return;
-        }
-      } catch (error) {
-        console.error("Error checking prompt status:", error);
-      }
-    };
+  //       if (isDefaultDocument || isEmptyFile) {
+  //         insertEmptyPromptElement(editor);
+  //         return;
+  //       }
+  //     } catch (error) {
+  //       console.error("Error checking prompt status:", error);
+  //     }
+  //   };
 
-    checkAndAddPrompt();
-  }, [editor, mdAstState, lix, activeFile]);
+  //   checkAndAddPrompt();
+  // }, [editor, mdAstState, lix, activeFile]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
-        // if (!editor.api.isFocused()) {
-        // 	editor.getApi(BlockSelectionPlugin).blockSelection.selectAll();
-        // } else {
+  // useEffect(() => {
+  //   const handleKeyDown = (event: KeyboardEvent) => {
+  //     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "a") {
+  //       // if (!editor.api.isFocused()) {
+  //       // 	editor.getApi(BlockSelectionPlugin).blockSelection.selectAll();
+  //       // } else {
 
-        // Only attempt to select all if we have editor content
-        if (!editor || !editor.children || editor.children.length === 0 || (event.target as HTMLElement).tagName === "TEXTAREA") {
-          return;
-        }
+  //       // Only attempt to select all if we have editor content
+  //       if (!editor || !editor.children || editor.children.length === 0 || (event.target as HTMLElement).tagName === "TEXTAREA") {
+  //         return;
+  //       }
 
-        // recursive function to get the length of the last text node
-        function getLastTextOffset(node: TElement): number {
-          if (!node.children || node.children.length === 0) {
-            // @ts-expect-error - length is not defined on TElement
-            return node.text ? node.text.length : 0;
-          }
-          const lastChild = node.children[node.children.length - 1];
-          if ('children' in lastChild) {
-            return getLastTextOffset(lastChild as TElement);
-          }
-          return lastChild.text ? lastChild.text.length : 0;
-        }
+  //       // recursive function to get the length of the last text node
+  //       function getLastTextOffset(node: TElement): number {
+  //         if (!node.children || node.children.length === 0) {
+  //           // @ts-expect-error - length is not defined on TElement
+  //           return node.text ? node.text.length : 0;
+  //         }
+  //         const lastChild = node.children[node.children.length - 1];
+  //         if ('children' in lastChild) {
+  //           return getLastTextOffset(lastChild as TElement);
+  //         }
+  //         return lastChild.text ? lastChild.text.length : 0;
+  //       }
 
-        try {
-          editor.tf.select(
-            {
-              anchor: { path: [0, 0], offset: 0 },
-              focus: {
-                path: [
-                  editor.children.length - 1,
-                  editor.children[editor.children.length - 1].children.length - 1,
-                ],
-                offset:
-                  getLastTextOffset(editor.children[editor.children.length - 1]),
-              },
-            },
-            { focus: true }
-          );
-          event.preventDefault();
-        } catch (err) {
-          console.error("Error selecting all text:", err);
-        }
-      }
-    };
+  //       try {
+  //         editor.tf.select(
+  //           {
+  //             anchor: { path: [0, 0], offset: 0 },
+  //             focus: {
+  //               path: [
+  //                 editor.children.length - 1,
+  //                 editor.children[editor.children.length - 1].children.length - 1,
+  //               ],
+  //               offset:
+  //                 getLastTextOffset(editor.children[editor.children.length - 1]),
+  //             },
+  //           },
+  //           { focus: true }
+  //         );
+  //         event.preventDefault();
+  //       } catch (err) {
+  //         console.error("Error selecting all text:", err);
+  //       }
+  //     }
+  //   };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [editor, mdAstState]); // Include mdAstState to re-attach event listener when content changes
+  //   document.addEventListener("keydown", handleKeyDown);
+  //   return () => {
+  //     document.removeEventListener("keydown", handleKeyDown);
+  //   };
+  // }, [editor, mdAstState]); // Include mdAstState to re-attach event listener when content changes
 
   // useCallback because react shouldn't recreate the function on every render
   // debounce because keystroke changes are not important for the lix 1.0 preview

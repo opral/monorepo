@@ -1,6 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useQuery } from './useQuery';
-import { selectLix, selectActiveFile, selectMdAstDocument, updateMdAstEntities, type MdAstEntity } from '@/queries';
+import { useCallback } from "react";
+import {
+	updateMdAstEntities,
+	type MdAstEntity,
+	selectMdAstRoot,
+	selectMdAstNodes,
+	selectActiveFile,
+} from "@/queries";
+import {
+	useLix,
+	useSuspenseQuery,
+	useSuspenseQueryTakeFirst,
+} from "@lix-js/react-utils";
+import { useState } from "react";
+import { useEffect } from "react";
 
 export interface MdAstState {
 	entities: MdAstEntity[];
@@ -12,7 +24,6 @@ export interface MdAstState {
 export interface UseMdAstStateReturn {
 	state: MdAstState;
 	updateEntities: (entities: MdAstEntity[], order: string[]) => Promise<void>;
-	reload: () => void;
 }
 
 /**
@@ -20,118 +31,57 @@ export interface UseMdAstStateReturn {
  * Provides optimistic updates and conflict resolution
  */
 export function useMdAstState(): UseMdAstStateReturn {
-	const [lix] = useQuery(selectLix);
-	const [activeFile] = useQuery(selectActiveFile);
-	const [mdAstDocument] = useQuery(selectMdAstDocument);
-	
-	const [state, setState] = useState<MdAstState>({
-		entities: [],
-		order: [],
-		isLoading: true,
-		error: null,
-	});
+	const lix = useLix();
 
-	// Track if we're in the middle of an optimistic update
-	const [isOptimisticUpdate, setIsOptimisticUpdate] = useState(false);
+	// const mdRoot = useSuspenseQueryTakeFirst(selectMdAstRoot);
 
-	// Update state when MD-AST document changes (from lix)
+	// const mdNodes = useSuspenseQuery(selectMdAstNodes);
+
+	const [mdRoot, setMdRoot] = useState();
+	const [mdNodes, setMdNodes] = useState();
+
+	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
+
+	console.log("called hook");
+
 	useEffect(() => {
-		if (mdAstDocument && !isOptimisticUpdate) {
-			setState({
-				entities: mdAstDocument.entities,
-				order: mdAstDocument.order,
-				isLoading: false,
-				error: null,
+		selectMdAstRoot(lix)
+			.executeTakeFirst()
+			.then((value) => {
+				console.log("mdRoot", mdRoot);
+				setMdRoot(value);
 			});
-		} else if (!mdAstDocument && activeFile) {
-			setState({
-				entities: [],
-				order: [],
-				isLoading: false,
-				error: null,
+
+		selectMdAstNodes(lix)
+			.execute()
+			.then((value) => {
+				console.log("mdNodes", mdNodes);
+				setMdNodes(value);
 			});
-		}
-	}, [mdAstDocument, activeFile, isOptimisticUpdate]);
+	}, [lix]);
 
 	// Update entities with optimistic updates
-	const updateEntities = useCallback(async (entities: MdAstEntity[], order: string[]) => {
-		if (!activeFile || !lix) {
-			console.warn('Cannot update entities: no active file or lix instance');
-			return;
-		}
+	const updateEntities = useCallback(
+		async (entities: MdAstEntity[], order: string[]) => {
+			console.log({ entities, order });
 
-		// Optimistic update - immediately update UI
-		setIsOptimisticUpdate(true);
-		setState(prevState => ({
-			...prevState,
-			entities,
-			order,
+			try {
+				await updateMdAstEntities(lix, activeFile ?? null, entities, order);
+			} catch (error) {
+				console.error("Failed to update MD-AST entities:", error);
+			}
+		},
+		[lix]
+	);
+
+	return {
+		state: {
+			order: mdRoot?.snapshot_content?.order ?? [],
+			entities:
+				mdNodes?.map((node) => node.snapshot_content as MdAstEntity) ?? [],
+			isLoading: false,
 			error: null,
-		}));
-
-		try {
-			// Save to lix
-			await updateMdAstEntities(entities, order);
-			
-			// Successful save - reset optimistic flag after minimal delay for query consistency
-			setTimeout(() => {
-				setIsOptimisticUpdate(false);
-			}, 25);
-
-		} catch (error) {
-			console.error('Failed to update MD-AST entities:', error);
-			
-			// Revert optimistic update on error
-			setIsOptimisticUpdate(false);
-			setState(prevState => ({
-				...prevState,
-				error: error instanceof Error ? error : new Error(String(error)),
-			}));
-		}
-	}, [activeFile, lix]);
-
-	// Reload entities from lix (useful for conflict resolution)
-	const reload = useCallback(() => {
-		setIsOptimisticUpdate(false);
-		// This will trigger a re-query of selectMdAstDocument
-		if (mdAstDocument) {
-			setState({
-				entities: mdAstDocument.entities,
-				order: mdAstDocument.order,
-				isLoading: false,
-				error: null,
-			});
-		}
-	}, [mdAstDocument]);
-
-	return {
-		state,
+		},
 		updateEntities,
-		reload,
-	};
-}
-
-/**
- * Simplified hook that just returns the current MD-AST document state
- * Use this when you only need to read the current state without updating
- */
-export function useMdAstDocument() {
-	const [mdAstDocument] = useQuery(selectMdAstDocument);
-	
-	return mdAstDocument || { entities: [], order: [] };
-}
-
-/**
- * Hook for checking if MD-AST data is available for the current file
- */
-export function useMdAstAvailability() {
-	const [activeFile] = useQuery(selectActiveFile);
-	const [mdAstDocument] = useQuery(selectMdAstDocument);
-	
-	return {
-		hasActiveFile: !!activeFile,
-		hasEntities: !!(mdAstDocument && mdAstDocument.entities.length > 0),
-		isEmpty: !!(mdAstDocument && mdAstDocument.entities.length === 0),
-		isLoading: !mdAstDocument && !!activeFile,
 	};
 }

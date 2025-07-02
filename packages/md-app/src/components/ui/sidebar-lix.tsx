@@ -29,7 +29,6 @@ import { useSuspenseQuery, useSuspenseQueryTakeFirst } from "@lix-js/react-utils
 import {
 	selectFiles,
 	selectActiveFile,
-	selectCurrentLixName,
 	selectMdAstDocument,
 } from "@/queries";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
