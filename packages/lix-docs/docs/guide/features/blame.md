@@ -1,5 +1,6 @@
 # Blame
 
+![AI agent changes need to be visible and controllable](../../assets/blame-what-did-you-change.svg)
 ![Blame](../../assets/blame.svg)
 
 ```ts

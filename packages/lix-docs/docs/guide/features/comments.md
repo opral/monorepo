@@ -1,5 +1,17 @@
 # Comments
 
+TODOS
+
+- [ ] mention zettel as AST format
+
+![Comments](../../assets/comments.svg) 
+
+## Data Model
+
+![Comments data model](../../assets/comments-data-model.svg)
+
+## Examples
+
 ```ts
 const lix = await openLix({});
 ```

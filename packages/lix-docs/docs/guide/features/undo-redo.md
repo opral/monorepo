@@ -1,5 +1,7 @@
 # Undo/Redo
 
+![Undo/Redo](../../assets/undo-redo.svg)
+
 ```ts
 import { openLix, undo, redo } from "@lix-js/sdk";
 
@@ -7,13 +9,9 @@ const lix = await openLix({});
 ```
 
 ```ts
-if (await canUndo({ lix })) {
-  await undo({ lix });
-}
+await undo({ lix });
 
-if (await canRedo({ lix })) {
-  await redo({ lix });
-}
+await redo({ lix });
 ```
 
 

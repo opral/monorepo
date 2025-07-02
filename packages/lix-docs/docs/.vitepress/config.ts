@@ -58,8 +58,8 @@ export default defineConfig({
           collapsed: false,
           items: [
             { text: "Blame", link: "/guide/features/blame" },
-            { text: "Diffs", link: "/guide/features/diffs" },
             { text: "Proposals", link: "/guide/features/change-proposals" },
+            { text: "Diffs", link: "/guide/features/diffs" },
             { text: "History", link: "/guide/features/history" },
             { text: "Restore", link: "/guide/features/restore" },
             { text: "Undo/Redo", link: "/guide/features/undo-redo" },
