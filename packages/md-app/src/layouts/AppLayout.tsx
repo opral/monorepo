@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import posthog from "posthog-js";
 import { LixProvider } from "@lix-js/react-utils";
 import { initializeLix } from "../helper/initializeLix";
-import type { Lix } from "@lix-js/sdk";
+import { nanoid, type Lix } from "@lix-js/sdk";
+import { useSearchParams } from "react-router-dom";
+import { upsertKeyValue } from "@/hooks/useKeyValue";
+import { selectFiles } from "@/queries";
 
 function LoadingScreen() {
 	return (
@@ -18,6 +21,8 @@ function LoadingScreen() {
 export function App({ children }: { children: React.ReactNode }) {
 	const [lix, setLix] = useState<Lix | null>(null);
 	const [lixError, setLixError] = useState<Error | null>(null);
+	const [searchParams] = useSearchParams();
+
 
 	useEffect(() => {
 		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
@@ -43,6 +48,25 @@ export function App({ children }: { children: React.ReactNode }) {
 			.then(setLix)
 			.catch(setLixError);
 	}, []);
+
+	useEffect(() => {
+		if (lix) {
+			const fileId = searchParams.get("f");
+			if (fileId) {
+				upsertKeyValue(lix, "flashtype_active_file", fileId)
+			} else {
+				selectFiles(lix).executeTakeFirst().then((file) => {
+					if (!file) {
+						const newFileId = nanoid()
+						lix.db.insertInto("file").values({ id: newFileId, path: "/document.md", data: new TextEncoder().encode("") }).execute()
+						searchParams.set("f", newFileId)
+					} else {
+						searchParams.set("f", file.id)
+					}
+				})
+			}
+		}
+	}, [lix, searchParams]);
 
 	if (lixError) {
 		return (

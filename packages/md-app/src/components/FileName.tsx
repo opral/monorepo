@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { useQuery } from "@/hooks/useQuery";
 import { selectActiveFile } from "@/queries";
-import { useLix } from "@lix-js/react-utils";
+import { useLix, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
 
 export default function FileName() {
-  const [activeFile] = useQuery(selectActiveFile);
+  const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
   const lix = useLix();
   const [isEditing, setIsEditing] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -61,7 +60,6 @@ export default function FileName() {
       .execute();
 
     // OpfsStorage now handles persistence automatically through the onStateCommit hook
-    refetch(); // Refresh state
     setIsEditing(false);
   };
 

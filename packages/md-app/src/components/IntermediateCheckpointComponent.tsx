@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { UiDiffComponentProps, createCheckpoint, createThread } from "@lix-js/sdk";
 import { useQuery } from "@/hooks/useQuery";
-import { selectLix, selectCheckpointChangeSets, selectIntermediateChanges, selectWorkingChangeSet } from "@/queries";
+import { selectCheckpointChangeSets, selectIntermediateChanges, selectWorkingChangeSet } from "@/queries";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown, Zap, Loader2 } from "lucide-react";

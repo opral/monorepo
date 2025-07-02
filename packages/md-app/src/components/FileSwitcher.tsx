@@ -1,14 +1,14 @@
 import { useCallback } from "react";
-import { useQuery } from "@/hooks/useQuery";
-import { selectActiveFile, selectFiles, selectLix } from "@/queries";
+import { useSuspenseQuery, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
+import { selectActiveFile, selectFiles } from "@/queries";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { generateHumanId } from "@/helper/generateHumanId";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Check, ChevronDown, FileText, Plus } from "lucide-react";
@@ -16,8 +16,8 @@ import { nanoid } from "@lix-js/sdk";
 import { useLix } from "@lix-js/react-utils";
 
 export default function FileSwitcher() {
-	const [activeFile] = useQuery(selectActiveFile);
-	const [files] = useQuery(selectFiles, 2000); // Reduced frequency for better performance
+	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
+	const files = useSuspenseQuery(selectFiles);
 	const lix = useLix();
 
 	const switchToFile = useCallback(
@@ -51,13 +51,10 @@ export default function FileSwitcher() {
 
 			// Update URL without full navigation
 			updateUrlParams({ f: newFileId });
-
-			// Refresh state
-			refetch();
 		} catch (error) {
 			console.error("Failed to create new file:", error);
 		}
-	}, [lix, refetch]);
+	}, [lix]);
 
 	if (!activeFile) return null;
 

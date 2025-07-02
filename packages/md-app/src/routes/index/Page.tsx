@@ -1,6 +1,6 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-import { useQuery } from '@/hooks/useQuery';
+import { useSuspenseQuery, useSuspenseQueryTakeFirst, useSuspenseQueryTakeFirstOrThrow } from '@lix-js/react-utils';
 import { selectActiveFile, selectIntermediateChanges, selectActiveAccount } from '@/queries';
 import FileName from '@/components/FileName';
 import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
@@ -17,9 +17,10 @@ import posthog from 'posthog-js';
 
 // Wrapper component that has access to the MultiSidebar context
 function PageContent() {
-	const [activeFile] = useQuery(selectActiveFile);
-	const [activeAccount] = useQuery(selectActiveAccount, 500);
-	const [intermediateChanges] = useQuery(selectIntermediateChanges);
+	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
+	const activeAccount = useSuspenseQueryTakeFirst(selectActiveAccount);
+	// const intermediateChanges = useSuspenseQuery(selectIntermediateChanges);
+	const intermediateChanges = []
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
 	useEffect(() => {
@@ -82,7 +83,8 @@ function PageContent() {
 				</div>
 				{activeFile ?
 					<div className="h-full flex-1 overflow-hidden" data-registry="plate">
-						<PlateEditor />
+						{/* <PlateEditor /> */}
+						{JSON.stringify(activeFile.id, null, 2)}
 						<Toaster />
 					</div>
 					: <div className="h-full flex-1 flex justify-center items-center">
@@ -91,9 +93,9 @@ function PageContent() {
 			</div>
 
 			{/* Right sidebar */}
-			<div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[20rem]' : 'w-0'}`}>
+			{/* <div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[20rem]' : 'w-0'}`}>
 				<ChangeControlSidebar />
-			</div>
+			</div> */}
 		</div>
 	);
 }

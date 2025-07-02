@@ -13,7 +13,7 @@ import {
 	FileInput,
 } from "lucide-react";
 import posthog from "posthog-js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
 	Select,
 	SelectContent,
@@ -25,13 +25,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
-import { useQuery } from "@/hooks/useQuery";
+import { useSuspenseQuery, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
 import {
-	selectLix,
 	selectFiles,
 	selectActiveFile,
 	selectCurrentLixName,
-	selectAvailableLixes,
 	selectMdAstDocument,
 } from "@/queries";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
@@ -73,21 +71,51 @@ import { generateHumanId } from "@/helper/generateHumanId";
 import { useChat } from "../editor/use-chat";
 import { serializeMdastEntities } from "../editor/mdast-plate-bridge";
 import { useLix } from "@lix-js/react-utils";
+import { findLixFilesInOpfs } from "@/helper/findLixInOpfs";
+
+/**
+ * Selects available lix files
+ */
+export const getAvailableLixes = async (): Promise<
+	Array<{ id: string; name: string }>
+> => {
+	try {
+		// Get all Lix files in OPFS
+		const lixFiles = await findLixFilesInOpfs();
+
+		// Convert to the format expected by consumers
+		// We'll use a map to ensure no duplicate IDs
+		const lixMap = new Map();
+
+		for (const file of lixFiles) {
+			// If we've already seen this ID, skip it (shouldn't happen with our cleanup, but just in case)
+			if (!lixMap.has(file.id)) {
+				lixMap.set(file.id, {
+					id: file.id,
+					name: file.name,
+				});
+			}
+		}
+
+		// Convert the map values to an array
+		return Array.from(lixMap.values());
+	} catch (error) {
+		console.error("Failed to load available lixes:", error);
+		return [];
+	}
+}
+
+const availableLixes = await getAvailableLixes()
 
 export function LixSidebar() {
 	const lix = useLix();
-	const [files] = useQuery(selectFiles, 2000); // Reduced frequency for file list
-	const [activeFile] = useQuery(selectActiveFile, 1500); // Less frequent active file checking
-	const [currentLixName] = useQuery(selectCurrentLixName, 3000); // Name changes are rare
-	const [availableLixes] = useQuery(selectAvailableLixes, 5000); // Lix list changes are very rare
-	const [lixIdSearchParams] = useQuery(() => {
-		const searchParams = new URL(window.location.href).searchParams;
-		return Promise.resolve(searchParams.get("lix") || undefined);
-	}, 1000); // URL changes are less frequent
-	const [fileIdSearchParams] = useQuery(() => {
-		const searchParams = new URL(window.location.href).searchParams;
-		return Promise.resolve(searchParams.get("f") || undefined);
-	}, 1000); // URL changes are less frequent
+	const [searchParams, setSearchParams] = useSearchParams();
+	const files = useSuspenseQuery(selectFiles);
+	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
+	// const currentLixName = useSuspenseQueryTakeFirst(selectCurrentLixName);
+	const currentLixName = "TODO"
+	const lixIdSearchParams = searchParams.get("lix");
+	const fileIdSearchParams = searchParams.get("f");
 
 	const [fileToDelete, setFileToDelete] = React.useState<string | null>(null);
 	const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] =
@@ -112,12 +140,11 @@ export function LixSidebar() {
 	const { status } = chat;
 	const isLoading = status === "streaming" || status === "submitted";
 
-	const switchToFile = React.useCallback(
-		async (fileId: string) => {
-			updateUrlParams({ f: fileId });
-		},
-		[]
-	);
+	const switchToFile = (fileId: string) =>
+		setSearchParams((currentParams) => {
+			currentParams.set("f", fileId)
+			return currentParams
+		});
 
 	const createNewFile = React.useCallback(async () => {
 		if (!lix) return;
@@ -137,7 +164,7 @@ export function LixSidebar() {
 				.executeTakeFirstOrThrow();
 
 			// OpfsStorage now handles persistence automatically through the onStateCommit hook
-			await switchToFile(newFileId);
+			switchToFile(newFileId);
 		} catch (error) {
 			console.error("Failed to create new file:", error);
 		}
