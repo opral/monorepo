@@ -1,3 +1,9 @@
+> [!NOTE]
+> The readme is mirrored from [opral/lix-sdk](https://github.com/opral/lix-sdk). The source code is in the [opral/monorepo](https://github.com/opral/monorepo/tree/main/packages/lix-sdk).
+
+> [!NOTE]
+> This repository serves as an issue tracker and documentation storage. The source code is in [opral/monorepo](https://github.com/opral/monorepo/tree/main/packages/lix-sdk).
+
 # Lix SDK
 
 [![NPM Downloads](https://img.shields.io/npm/dw/%40lix-js%2Fsdk?logo=npm&logoColor=red&label=npm%20downloads)](https://www.npmjs.com/package/@lix-js/sdk) [![Discord](https://img.shields.io/discord/897438559458430986?style=flat&logo=discord&labelColor=white)](https://discord.gg/xjQA897RyK)
@@ -27,8 +33,7 @@ Try a [demo lix app](https://lix.opral.com/app/fm).
 ### Good to know
 
 - 🔍 **Everything is SQL**: Querying lix happens via SQL. No new query language to learn. The lix SDK conveniently exposes [Kysely](https://kysely.dev/), a type-safe SQL query builder.
-- 🌐 **Browser-based**: Lix targets the browser as target platform. Node/unix dependencies are ruled out.
-- 📂 **Repository Structure**: Issues and documentation are tracked in the [opral/lix-sdk](https://github.com/opral/lix-sdk) repository, while the source code lives in the [opral/monorepo](https://github.com/opral/monorepo/tree/main/packages/lix-sdk). This separation helps maintain a clean issue tracking experience and reduces repository complexity.  
+- 🌐 **Browser-based**: Lix targets the browser as target platform. Node/unix dependencies are ruled out.  
 
 ## Getting Started
 
