@@ -55,10 +55,10 @@ export const DraggableAboveNodes: RenderNodeWrapper = (props) => {
 
   const enabled = React.useMemo(() => {
     if (readOnly) return false;
-    if (path.length === 1 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
+    if (path && path.length === 1 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
       return true;
     }
-    if (path.length === 3 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
+    if (path && path.length === 3 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
       const block = editor.api.some({
         at: path,
         match: {
@@ -70,7 +70,7 @@ export const DraggableAboveNodes: RenderNodeWrapper = (props) => {
         return true;
       }
     }
-    if (path.length === 4 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
+    if (path && path.length === 4 && !isType(editor, element, UNDRAGGABLE_KEYS)) {
       const block = editor.api.some({
         at: path,
         match: {

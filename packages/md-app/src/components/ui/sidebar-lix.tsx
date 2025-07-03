@@ -12,9 +12,8 @@ import {
 	FolderPlus,
 	FileInput,
 } from "lucide-react";
-import { useAtom } from "jotai";
 import posthog from "posthog-js";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
 	Select,
 	SelectContent,
@@ -26,17 +25,12 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
+import { useSuspenseQuery, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
 import {
-	availableLixesAtom,
-	currentLixNameAtom,
-	fileIdSearchParamsAtom,
-	filesAtom,
-	lixAtom,
-	lixIdSearchParamsAtom,
-	withPollingAtom,
-} from "@/state";
-import { activeFileAtom } from "@/state-active-file";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
+	selectFiles,
+	selectActiveFile,
+	selectMdAstDocument,
+} from "@/queries";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { saveLixName } from "@/helper/renameLix";
@@ -74,16 +68,53 @@ import InfoCard from "../InfoCard";
 import { Separator } from "./separator";
 import { generateHumanId } from "@/helper/generateHumanId";
 import { useChat } from "../editor/use-chat";
+import { serializeMdastEntities } from "../editor/mdast-plate-bridge";
+import { useLix } from "@lix-js/react-utils";
+import { findLixFilesInOpfs } from "@/helper/findLixInOpfs";
+
+/**
+ * Selects available lix files
+ */
+export const getAvailableLixes = async (): Promise<
+	Array<{ id: string; name: string }>
+> => {
+	try {
+		// Get all Lix files in OPFS
+		const lixFiles = await findLixFilesInOpfs();
+
+		// Convert to the format expected by consumers
+		// We'll use a map to ensure no duplicate IDs
+		const lixMap = new Map();
+
+		for (const file of lixFiles) {
+			// If we've already seen this ID, skip it (shouldn't happen with our cleanup, but just in case)
+			if (!lixMap.has(file.id)) {
+				lixMap.set(file.id, {
+					id: file.id,
+					name: file.name,
+				});
+			}
+		}
+
+		// Convert the map values to an array
+		return Array.from(lixMap.values());
+	} catch (error) {
+		console.error("Failed to load available lixes:", error);
+		return [];
+	}
+}
+
+const availableLixes = await getAvailableLixes()
 
 export function LixSidebar() {
-	const [lix] = useAtom(lixAtom);
-	const [files] = useAtom(filesAtom);
-	const [activeFile] = useAtom(activeFileAtom);
-	const [, setPolling] = useAtom(withPollingAtom);
-	const [currentLixName] = useAtom(currentLixNameAtom);
-	const [availableLixes] = useAtom(availableLixesAtom);
-	const [lixIdSearchParams] = useAtom(lixIdSearchParamsAtom);
-	const [fileIdSearchParams] = useAtom(fileIdSearchParamsAtom);
+	const lix = useLix();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const files = useSuspenseQuery(selectFiles);
+	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
+	// const currentLixName = useSuspenseQueryTakeFirst(selectCurrentLixName);
+	const currentLixName = "TODO"
+	const lixIdSearchParams = searchParams.get("lix");
+	const fileIdSearchParams = searchParams.get("f");
 
 	const [fileToDelete, setFileToDelete] = React.useState<string | null>(null);
 	const [showDeleteProjectsDialog, setShowDeleteProjectsDialog] =
@@ -93,7 +124,7 @@ export function LixSidebar() {
 		name: string;
 	} | null>(null);
 	const [isRenamingLix, setIsRenamingLix] = React.useState(false);
-	const [lixName, setLixName] = React.useState(currentLixName);
+	const [lixName, setLixName] = React.useState(currentLixName || "");
 	const [previousLixName, setPreviousLixName] = React.useState("");
 	const [lixDropdownOpen, setLixDropdownOpen] = React.useState(false);
 	const [fileDropdownOpen, setFileDropdownOpen] = React.useState<string | null>(
@@ -108,13 +139,11 @@ export function LixSidebar() {
 	const { status } = chat;
 	const isLoading = status === "streaming" || status === "submitted";
 
-	const switchToFile = React.useCallback(
-		async (fileId: string) => {
-			updateUrlParams({ f: fileId });
-			setPolling(Date.now());
-		},
-		[setPolling]
-	);
+	const switchToFile = (fileId: string) =>
+		setSearchParams((currentParams) => {
+			currentParams.set("f", fileId)
+			return currentParams
+		});
 
 	const createNewFile = React.useCallback(async () => {
 		if (!lix) return;
@@ -133,8 +162,8 @@ export function LixSidebar() {
 				})
 				.executeTakeFirstOrThrow();
 
-			await saveLixToOpfs({ lix });
-			await switchToFile(newFileId);
+			// OpfsStorage now handles persistence automatically through the onStateCommit hook
+			switchToFile(newFileId);
 		} catch (error) {
 			console.error("Failed to create new file:", error);
 		}
@@ -147,7 +176,7 @@ export function LixSidebar() {
 
 		try {
 			// Find the file to check its current name
-			const currentFile = files.find((f) => f.id === inlineEditingFile.id);
+			const currentFile = files?.find((f) => f.id === inlineEditingFile.id);
 			if (!currentFile) {
 				console.error("File not found for inline renaming");
 				setInlineEditingFile(null);
@@ -174,16 +203,15 @@ export function LixSidebar() {
 				.where("id", "=", inlineEditingFile.id)
 				.execute();
 
-			await saveLixToOpfs({ lix });
-			setPolling(Date.now());
+			// OpfsStorage now handles persistence automatically through the onStateCommit hook
 		} catch (error) {
 			console.error("Failed to rename file:", error);
 			setInlineEditingFile(null);
 		}
-	}, [lix, inlineEditingFile, files, setPolling]);
+	}, [lix, inlineEditingFile, files]);
 
 	const handleSaveLixName = React.useCallback(async () => {
-		if (!lix || !lixName.trim()) {
+		if (!lix || !lixName?.trim()) {
 			return;
 		}
 
@@ -192,7 +220,7 @@ export function LixSidebar() {
 			setIsRenamingLix(false);
 
 			// Only perform database operation if name actually changed
-			if (lixName.trim() === currentLixName) {
+			if (lixName?.trim() === currentLixName) {
 				return;
 			}
 
@@ -200,27 +228,15 @@ export function LixSidebar() {
 			// This will also update the URL
 			await saveLixName({
 				lix,
-				newName: lixName,
+				newName: lixName || "",
 			});
 
-			// Refresh everything to update the UI with the new file name
-			setPolling(Date.now());
-
-			// The currentLixId should still be the lix_id, not the new name
-			// The saveLixName function will handle updating the URL params correctly
-			const lixId = await lix.db
-				.selectFrom("key_value")
-				.where("key", "=", "lix_id")
-				.select("value")
-				.executeTakeFirstOrThrow();
-
-			// Keep the ID the same, just update the display name
-			setCurrentLixId(lixId.value);
+			// The currentLixId will be automatically updated via URL parameter
 		} catch (error) {
 			console.error("Failed to save lix name:", error);
 			setIsRenamingLix(false);
 		}
-	}, [lix, lixName, currentLixName, setPolling]);
+	}, [lix, lixName, currentLixName]);
 
 	// Add click-outside detection for Lix rename input
 	React.useEffect(() => {
@@ -299,22 +315,21 @@ export function LixSidebar() {
 				// Delete the file
 				await lix.db.deleteFrom("file").where("id", "=", fileId).execute();
 
-				await saveLixToOpfs({ lix });
+				// OpfsStorage now handles persistence automatically through the onStateCommit hook
 
 				// If we deleted the active file, switch to another file
 				if (isActiveFile) {
-					const remainingFiles = files.filter((f) => f.id !== fileId);
+					const remainingFiles = files ? files.filter((f) => f.id !== fileId) : [];
 					if (remainingFiles.length > 0) {
 						await switchToFile(remainingFiles[0].id);
 					}
 				}
 
-				setPolling(Date.now());
 			} catch (error) {
 				console.error("Failed to delete file:", error);
 			}
 		},
-		[lix, files, activeFile, setPolling, createNewFile]
+		[lix, files, activeFile, createNewFile]
 	);
 
 	const handleCreateNewLix = React.useCallback(async () => {
@@ -324,9 +339,6 @@ export function LixSidebar() {
 
 			// Navigate to the new lix
 			navigate(`?lix=${id}`);
-
-			// Set polling to refresh the UI
-			setPolling(Date.now());
 		} catch (error) {
 			console.error("Failed to create new lix:", error);
 		}
@@ -358,16 +370,15 @@ export function LixSidebar() {
 						fileName: file.name,
 					});
 
-					await saveLixToOpfs({ lix });
+					// OpfsStorage now handles persistence automatically through the onStateCommit hook
 					updateUrlParams({ f: importedFileId });
-					setPolling(Date.now());
 				} catch (error) {
 					console.error("Failed to import file:", error);
 				}
 			}
 		};
 		input.click();
-	}, [lix, setPolling]);
+	}, [lix]);
 
 	const handleOpenLixFile = React.useCallback(async () => {
 		const input = document.createElement("input");
@@ -435,21 +446,21 @@ export function LixSidebar() {
 			if (!lix) return;
 
 			try {
+				// Get file metadata for the filename
 				const file = await lix.db
 					.selectFrom("file")
 					.where("id", "=", fileId)
-					.selectAll()
+					.select(["path", "data"])
 					.executeTakeFirstOrThrow();
 
 				const fileName = file.path.split("/").pop() || "document.md";
-				const fileContent = new TextDecoder().decode(file.data);
 
-				const blob = new Blob([fileContent], { type: "text/markdown" });
-				const a = document.createElement("a");
-				a.href = URL.createObjectURL(blob);
-				a.download = fileName;
-				document.body.appendChild(a);
-				a.click();
+				const blob = new Blob([file.data], { type: "text/markdown" });
+					const a = document.createElement("a");
+					a.href = URL.createObjectURL(blob);
+					a.download = fileName;
+					document.body.appendChild(a);
+					a.click();
 				document.body.removeChild(a);
 			} catch (error) {
 				console.error("Failed to export file:", error);
@@ -470,7 +481,7 @@ export function LixSidebar() {
 				if (
 					entry.kind === "file" &&
 					entry.name.endsWith(".lix") &&
-					entry.name !== `${currentLixName}.lix`
+					entry.name !== `${currentLixName || ""}.lix`
 				) {
 					availableLixFiles.push(entry.name);
 				}
@@ -478,7 +489,9 @@ export function LixSidebar() {
 
 			if (availableLixFiles.length > 0) {
 				// The file is saved with the current name displayed in the UI (with .lix extension)
-				await root.removeEntry(`${currentLixName}.lix`);
+				if (currentLixName) {
+					await root.removeEntry(`${currentLixName}.lix`);
+				}
 
 				// Navigate to another lix
 				const nextLixId = availableLixFiles[0].replace(/\.lix$/, "");
@@ -488,13 +501,11 @@ export function LixSidebar() {
 				navigate("/");
 			}
 
-			// Trigger polling to refresh the UI
-			setPolling(Date.now());
 			setShowDeleteProjectsDialog(false);
 		} catch (error) {
 			console.error("Error deleting current lix:", error);
 		}
-	}, [lix, navigate, setPolling]);
+	}, [lix, navigate]);
 
 	const handleResetAllOpfs = React.useCallback(async () => {
 		try {
@@ -519,21 +530,35 @@ export function LixSidebar() {
 			}
 
 			updateUrlParams({ lix: "", f: "" });
-			setPolling(Date.now());
 		} catch (error) {
 			console.error("Error resetting OPFS:", error);
 		}
-	}, [navigate, setPolling]);
+	}, [navigate]);
 
-	// Track current lix ID
-	const [currentLixId, setCurrentLixId] = React.useState<string>("");
+	// Get current lix ID, with fallback to first available lix
+	const currentLixId = React.useMemo(() => {
+		// Prefer the URL parameter as it's immediately available
+		if (lixIdSearchParams && lixIdSearchParams.trim() !== "") {
+			return lixIdSearchParams;
+		}
+		// If no URL parameter and we have available lixes, use the first one with a valid ID
+		if (availableLixes && availableLixes.length > 0) {
+			const validLix = availableLixes.find(lix => lix.id && lix.id.trim() !== "");
+			if (validLix) {
+				return validLix.id;
+			}
+		}
+		// Return undefined if no URL parameter and no available lixes with valid IDs
+		// This prevents the Select from having an empty string value
+		return undefined;
+	}, [lixIdSearchParams, availableLixes]);
 
 	const startRenamingLix = React.useCallback(() => {
 		// Close the dropdown first
 		setLixDropdownOpen(false);
 
 		// Use the current display name from our atom
-		const displayName = currentLixName || lixName;
+		const displayName = currentLixName || lixName || "";
 		setLixName(displayName);
 
 		setPreviousLixName(displayName);
@@ -587,33 +612,15 @@ export function LixSidebar() {
 		setIsRenamingLix(false);
 	}, [previousLixName]);
 
+
+	// Update lix name when the current lix name changes
 	React.useEffect(() => {
-		if (lix) {
-			const loadLixData = async () => {
-				try {
-					const lixId = await lix.db
-						.selectFrom("key_value")
-						.where("key", "=", "lix_id")
-						.select("value")
-						.executeTakeFirstOrThrow();
-
-					// Store current lix ID for the select component
-					setCurrentLixId(lixId.value);
-
-					// Use the name from our currentLixNameAtom
-					if (currentLixName) {
-						setLixName(currentLixName);
-					}
-				} catch (error) {
-					console.error("Failed to load lix data:", error);
-				}
-			};
-
-			loadLixData();
+		if (currentLixName) {
+			setLixName(currentLixName || "");
 		}
-	}, [lix, currentLixName]);
+	}, [currentLixName]);
 
-	const mdFiles = files.filter((file) => file.path.endsWith(".md"));
+	const mdFiles = files ? files.filter((file) => file.path.endsWith(".md")) : [];
 
 	const backlink = React.useCallback(() => {
 		return `https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`;
@@ -644,7 +651,7 @@ export function LixSidebar() {
 						<input
 							ref={lixInputRef}
 							type="text"
-							value={lixName}
+							value={lixName || ""}
 							onChange={(e) => setLixName(e.target.value)}
 							onFocus={(e) => e.target.select()}
 							onKeyDown={(e) => {
@@ -673,7 +680,7 @@ export function LixSidebar() {
 									switchToLix(value);
 								}
 							}}
-							value={currentLixId}
+								value={currentLixId || ""}
 						>
 							<SelectTrigger
 								size="sm"
@@ -682,7 +689,7 @@ export function LixSidebar() {
 								<SelectValue placeholder="Select Workspace">
 									<div className="flex items-center justify-between w-full">
 										<span className="truncate mr-1">
-											{currentLixName || lixName}
+											{currentLixName || lixName || ""}
 										</span>
 									</div>
 								</SelectValue>
@@ -690,7 +697,7 @@ export function LixSidebar() {
 							<SelectContent align="center" className="w-60 -ml-0.5">
 								<SelectGroup>
 									<SelectLabel className="font-medium">Lixes</SelectLabel>
-									{availableLixes.map((lix: { id: string; name: string }) => (
+									{availableLixes?.filter((lix: { id: string; name: string }) => lix.id && lix.id.trim() !== "").map((lix: { id: string; name: string }) => (
 										<SelectItem key={lix.id} value={lix.id}>
 											<div className="flex items-center w-full">
 												<Folder className="h-4 w-4 mr-2 shrink-0" />
