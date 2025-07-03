@@ -23,5 +23,5 @@ await switchVersion({ lix, to: newVersion });
 ```
 
 ```ts
-await merge({ lix, source: activeVersion, target: newVersion });
+await mergeVersion({ lix, source: activeVersion, target: newVersion });
 ```
