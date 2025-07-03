@@ -24,10 +24,10 @@ import type { NewStateAll } from "../entity-views/types.js";
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
  *
- * For example, the `._lix` property provides immediate access to essential metadata 
+ * For example, the `._lix` property provides immediate access to essential metadata
  * like `id` and `name` without needing to parse the file. This is particularly useful
  * for scenarios where you need to identify a Lix file before fully opening it.
- * 
+ *
  * @example
  * // With `._lix`, the ID is instantly available:
  * const blob = await newLixFile();
