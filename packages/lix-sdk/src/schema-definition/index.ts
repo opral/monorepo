@@ -7,3 +7,7 @@ export {
 	type LixSelectable,
 } from "./definition.js";
 export { JSONTypeSchema, type JSONType } from "./json-type.js";
+export {
+	validateLixSchema,
+	validateLixSchemaDefinition,
+} from "./validate-lix-schema.js";
