@@ -19,22 +19,45 @@ import type { Change } from "../change/schema.js";
 import type { StoredSchema } from "../stored-schema/schema.js";
 import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
+import type { NewStateAll } from "../entity-views/types.js";
 
 /**
- * Returns a new empty Lix file as a {@link Blob}.
+ * A Blob with an attached ._lix.id property for easy access to the lix identifier.
+ */
+export interface NewLixBlob extends Blob {
+	_lix: {
+		id: string;
+		name: string;
+	};
+}
+
+/**
+ * Returns a new empty Lix file as a {@link NewLixBlob}.
  *
  * The function bootstraps an in‑memory SQLite database with all
  * required tables, change sets and metadata so that it represents
  * a valid Lix project. The caller is responsible for persisting the
  * resulting blob to disk, IndexedDB or any other storage location.
  *
+ * The returned blob includes a `._lix.id` property for immediate access
+ * to the lix identifier without needing to open the file.
+ *
  * @example
  * ```ts
  * const blob = await newLixFile()
+ * console.log(blob._lix.id) // Access the lix ID directly
  * await saveToDisk(blob)
  * ```
  */
-export async function newLixFile(): Promise<Blob> {
+export async function newLixFile(args?: {
+	/**
+	 * Set the key values when opening the lix.
+	 *
+	 * @example
+	 *   const lix = await openLix({ keyValues: [{ key: "lix_name", value: "peter-newman", lixcol_version_id: "global" }] })
+	 */
+	keyValues?: NewStateAll<KeyValue>[];
+}): Promise<NewLixBlob> {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
 	});
@@ -45,7 +68,18 @@ export async function newLixFile(): Promise<Blob> {
 	const db = initDb({ sqlite, hooks });
 
 	// Create bootstrap changes for initial data
-	const bootstrapChanges = createBootstrapChanges();
+	const bootstrapChanges = createBootstrapChanges(args?.keyValues);
+
+	// Extract the lix_id from bootstrap changes
+	const lixId = bootstrapChanges.find(
+		(c) =>
+			c.schema_key === "lix_key_value" && c.snapshot_content?.key === "lix_id"
+	)?.snapshot_content.value;
+
+	const lixName = bootstrapChanges.find(
+		(c) =>
+			c.schema_key === "lix_key_value" && c.snapshot_content?.key === "lix_name"
+	)?.snapshot_content.value;
 
 	// Insert all bootstrap changes directly into the change tables
 	for (const change of bootstrapChanges) {
@@ -91,7 +125,15 @@ export async function newLixFile(): Promise<Blob> {
 `);
 
 	try {
-		return new Blob([contentFromDatabase(sqlite)]);
+		const blob = new Blob([contentFromDatabase(sqlite)]);
+		// Create a LixBlob by extending the blob with the lix property
+		const lixBlob = Object.assign(blob, {
+			_lix: {
+				id: lixId,
+				name: lixName,
+			},
+		}) as NewLixBlob;
+		return lixBlob;
 	} catch (e) {
 		throw new Error(`Failed to create new Lix file: ${e}`, { cause: e });
 	} finally {
@@ -107,7 +149,9 @@ type BootstrapChange = Omit<Change, "snapshot_id"> & {
  * Creates all bootstrap changes needed for a new lix file.
  * All entities are created in a single change set to avoid dependency ordering issues.
  */
-function createBootstrapChanges(): BootstrapChange[] {
+function createBootstrapChanges(
+	providedKeyValues?: NewStateAll<KeyValue>[]
+): BootstrapChange[] {
 	const changes: BootstrapChange[] = [];
 	const created_at = new Date().toISOString();
 
@@ -201,6 +245,7 @@ function createBootstrapChanges(): BootstrapChange[] {
 	});
 
 	// Create lix_id key-value pair
+	const lixId = providedKeyValues?.find((kv) => kv.key === "lix_id")?.value;
 	changes.push({
 		id: uuid_v7(),
 		entity_id: "lix_id",
@@ -210,12 +255,13 @@ function createBootstrapChanges(): BootstrapChange[] {
 		plugin_key: "lix_own_entity",
 		snapshot_content: {
 			key: "lix_id",
-			value: nanoid(10),
+			value: lixId ?? nanoid(10),
 		} satisfies KeyValue,
 		created_at,
 	});
 
 	// create lix_name key-value pair
+	const lixName = providedKeyValues?.find((kv) => kv.key === "lix_name")?.value;
 	changes.push({
 		id: uuid_v7(),
 		entity_id: "lix_name",
@@ -225,10 +271,32 @@ function createBootstrapChanges(): BootstrapChange[] {
 		plugin_key: "lix_own_entity",
 		snapshot_content: {
 			key: "lix_name",
-			value: humanId({ separator: "-", capitalize: false }),
+			value: lixName ?? humanId({ separator: "-", capitalize: false }),
 		} satisfies KeyValue,
 		created_at,
 	});
+
+	// Create any other provided key-values
+	if (providedKeyValues) {
+		for (const kv of providedKeyValues) {
+			if (kv.key === "lix_id" || kv.key === "lix_name" || !kv.key || !kv.value)
+				continue;
+
+			changes.push({
+				id: uuid_v7(),
+				entity_id: kv.key,
+				schema_key: "lix_key_value",
+				schema_version: LixKeyValueSchema["x-lix-version"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					key: kv.key,
+					value: kv.value,
+				} satisfies KeyValue,
+				created_at,
+			});
+		}
+	}
 
 	// Create all schema definitions
 	for (const schema of Object.values(LixSchemaViewMap)) {
