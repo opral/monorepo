@@ -18,6 +18,7 @@ import { LixSchemaViewMap } from "../database/schema.js";
 import type { Change } from "../change/schema.js";
 import type { StoredSchema } from "../stored-schema/schema.js";
 import { createHooks } from "../hooks/create-hooks.js";
+import { humanId } from "human-id";
 
 /**
  * Returns a new empty Lix file as a {@link Blob}.
@@ -210,6 +211,21 @@ function createBootstrapChanges(): BootstrapChange[] {
 		snapshot_content: {
 			key: "lix_id",
 			value: nanoid(10),
+		} satisfies KeyValue,
+		created_at,
+	});
+
+	// create lix_name key-value pair
+	changes.push({
+		id: uuid_v7(),
+		entity_id: "lix_name",
+		schema_key: "lix_key_value",
+		schema_version: LixKeyValueSchema["x-lix-version"],
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_content: {
+			key: "lix_name",
+			value: humanId({ separator: "-", capitalize: false }),
 		} satisfies KeyValue,
 		created_at,
 	});

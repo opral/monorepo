@@ -117,3 +117,21 @@ test("bootstrap changes include lix_id key-value in global version", async () =>
 	expect(kv[0]?.key).toBe("lix_id");
 	expect(kv[0]?.value).toBeDefined();
 });
+
+test("bootstrap changes include lix_name key-value in the global version", async () => {
+	const blob = await newLixFile();
+	const lix = await openLix({ blob });
+
+	const kv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_name")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.execute();
+
+	console.log("lix_name key-value:", kv);
+
+	expect(kv).toHaveLength(1);
+	expect(kv[0]?.key).toBe("lix_name");
+	expect(kv[0]?.value).toBeDefined();
+});
