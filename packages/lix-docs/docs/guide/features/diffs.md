@@ -15,6 +15,8 @@ Lix plugins can provide ready-to-use diff components. These components can be re
 However, this convenience comes with a trade-off: you are limited to the UI and rendering logic provided by the plugin. If you need more control over the appearance or behavior of the diffs, you may want to consider other options.
 
 ```tsx
+import { openLix } from "@lix-js/sdk";
+
 const lix = await openLix({});
 
 const plugin = (await lix.plugin.getAll()).find((p) => p.key === "csv_plugin");
@@ -46,7 +48,7 @@ Lix is unopinionated about how you visualize changes. Because Lix provides "befo
 The following example shows how to query two versions of a JSON file and then generate a simple textual diff.
 
 ```ts
-import { openLix, entityIs } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 
 const lix = await openLix({});
 
