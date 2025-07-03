@@ -55,6 +55,7 @@ export default withMermaid({
               text: "AI Agent Collaboration",
               link: "/guide/ai-agent-collaboration",
             },
+            { text: "Architecture", link: "/guide/architecture" },
             { text: "How Lix Works", link: "/guide/how-lix-works" },
           ],
         },
