@@ -22,7 +22,28 @@ import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
 
 /**
- * A Blob with an attached ._lix.id property for easy access to the lix identifier.
+ * A Blob with an attached `._lix` property for easy access to some lix properties.
+ *
+ * For example, the `._lix` property provides immediate access to essential metadata 
+ * like `id` and `name` without needing to parse the file. This is particularly useful
+ * for scenarios where you need to identify a Lix file before fully opening it.
+ * 
+ * @example
+ * // With `._lix`, the ID is instantly available:
+ * const blob = await newLixFile();
+ * console.log(blob._lix.id); // e.g., "z2k9j6d"
+ *
+ * @example
+ * // Without `._lix`, you would need to open the lix to get its ID:
+ * const blob = await newLixFile();
+ * // Open the lix to access its metadata
+ * const lix = await openLix({ blob });
+ * const id = await lix.db.selectFrom("key_value")
+ *   .where("key", "=", "lix_id")
+ *   .select("value")
+ *   .executeTakeFirst();
+ * await lix.close();
+ *
  */
 export interface NewLixBlob extends Blob {
 	_lix: {
@@ -32,29 +53,50 @@ export interface NewLixBlob extends Blob {
 }
 
 /**
- * Returns a new empty Lix file as a {@link NewLixBlob}.
+ * Creates a new Lix file as a {@link NewLixBlob}.
  *
- * The function bootstraps an in‑memory SQLite database with all
- * required tables, change sets and metadata so that it represents
- * a valid Lix project. The caller is responsible for persisting the
- * resulting blob to disk, IndexedDB or any other storage location.
+ * This function bootstraps an in-memory SQLite database with the necessary
+ * schema and metadata to represent a valid Lix project. The resulting
+ * blob is ready to be persisted to disk, IndexedDB, or other storage.
  *
- * The returned blob includes a `._lix.id` property for immediate access
- * to the lix identifier without needing to open the file.
+ * The returned blob has a `._lix` property for immediate access to the
+ * lix identifier and name without needing to open the file.
  *
  * @example
  * ```ts
- * const blob = await newLixFile()
- * console.log(blob._lix.id) // Access the lix ID directly
- * await saveToDisk(blob)
+ * // Create a new lix file with default values
+ * const blob = await newLixFile();
+ * console.log(blob._lix.id); // e.g. "z2k9j6d"
+ * console.log(blob._lix.name); // e.g. "blue-gorilla"
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Create a new lix file with specific key-values
+ * const blob = await newLixFile({
+ *   keyValues: [
+ *     { key: "lix_name", value: "my-project", lixcol_version_id: "global" },
+ *     { key: "lix_id", value: "custom-id", lixcol_version_id: "global" },
+ *     { key: "my_custom_key", value: "my_custom_value", lixcol_version_id: "global" }
+ *   ],
+ * });
+ * console.log(blob._lix.id); // "custom-id"
+ * console.log(blob._lix.name); // "my-project"
  * ```
  */
 export async function newLixFile(args?: {
 	/**
-	 * Set the key values when opening the lix.
+	 * Pre-populates the key-value store of the new lix file.
+	 *
+	 * Use this to set initial values for `lix_id`, `lix_name`, or other custom keys.
+	 * If `lix_id` or `lix_name` are not provided, they will be generated automatically.
 	 *
 	 * @example
-	 *   const lix = await openLix({ keyValues: [{ key: "lix_name", value: "peter-newman", lixcol_version_id: "global" }] })
+	 *  keyValues: [
+	 *    { key: "lix_name", value: "my-project", lixcol_version_id: "global" },
+	 *    { key: "lix_id", value: "custom-id", lixcol_version_id: "global" },
+	 *    { key: "my_custom_key", value: "my_custom_value", lixcol_version_id: "global" },
+	 *  ]
 	 */
 	keyValues?: NewStateAll<KeyValue>[];
 }): Promise<NewLixBlob> {
