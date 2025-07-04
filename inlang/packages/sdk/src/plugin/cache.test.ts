@@ -1,6 +1,6 @@
 import { test, expect, vi } from "vitest";
 import { withCache } from "./cache.js";
-import { newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { newLixFile, openLix } from "@lix-js/sdk";
 import { sql } from "kysely";
 
 test("it should be network-first", async () => {
@@ -11,7 +11,7 @@ test("it should be network-first", async () => {
 
 	const mockModulePath = "https://mock.com/module.js";
 
-	const lix = await openLixInMemory({ blob: await newLixFile() });
+	const lix = await openLix({ blob: await newLixFile() });
 
 	const result1 = await withCache(mockLoader, lix)(mockModulePath);
 
@@ -55,7 +55,7 @@ test("it should throw the error from the loader if the cache does not exist", as
 
 	const mockModulePath = "https://mock.com/module.js";
 
-	const lix = await openLixInMemory({ blob: await newLixFile() });
+	const lix = await openLix({ blob: await newLixFile() });
 
 	await expect(
 		async () => await withCache(mockLoader, lix)(mockModulePath)
@@ -68,7 +68,7 @@ test("it should fallback to the cache if the loader fails", async () => {
 	const mockModulePath = "https://mock.com/module.js";
 	const mockModuleCachePath = "/cache/plugins/31i1etp0l413h";
 
-	const lix = await openLixInMemory({ blob: await newLixFile() });
+	const lix = await openLix({ blob: await newLixFile() });
 
 	await lix.db
 		.insertInto("file")

@@ -17,7 +17,6 @@ import {
 	changeSetIsAncestorOf,
 	jsonArrayFrom,
 	Lix,
-	sql,
 	UiDiffComponentProps,
 } from "@lix-js/sdk";
 // import { parseMdBlocks } from "@lix-js/plugin-md";
@@ -148,7 +147,6 @@ export const intermediateChangesAtom = atom<
 	// Get changes that are in the working change set
 	const intermediateChanges = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -164,7 +162,7 @@ export const intermediateChangesAtom = atom<
 			"change.plugin_key",
 			"change.schema_key",
 			"change.created_at",
-			sql`json(snapshot.content)`.as("snapshot_content_after"),
+			"change.snapshot_content as snapshot_content_after",
 		])
 		.execute();
 
@@ -180,7 +178,6 @@ export const intermediateChangesAtom = atom<
 				if (latestCheckpointChangeSetId) {
 					snapshotBefore = await lix.db
 						.selectFrom("change")
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 						.innerJoin(
 							"change_set_element",
 							"change_set_element.change_id",
@@ -194,7 +191,7 @@ export const intermediateChangesAtom = atom<
 						.where("change.entity_id", "=", change.entity_id)
 						.where("change.schema_key", "=", change.schema_key)
 						.where("change.file_id", "=", activeFile.id)
-						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+						.select("change.snapshot_content as snapshot_content_before")
 						.orderBy("change.created_at", "desc")
 						.limit(1)
 						.executeTakeFirst();
@@ -255,10 +252,9 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 			eb
 				.selectFrom("change")
 				.where("change.schema_key", "=", "lix_change_set_label_table")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
-					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					(eb) => eb.ref("change.snapshot_content", "->>").key("change_set_id"),
 					"=",
 					eb.ref("change_set.id")
 				)
@@ -270,11 +266,10 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 				.selectFrom("change_author")
 				.innerJoin("change", "change.id", "change_author.change_id")
 				.innerJoin("account", "account.id", "change_author.account_id")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where("change.schema_key", "=", "lix_change_set_label_table")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
-					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					(eb) => eb.ref("change.snapshot_content", "->>").key("change_set_id"),
 					"=",
 					eb.ref("change_set.id")
 				)
@@ -294,7 +289,6 @@ export const getChangeDiffs = async (
 	// Get leaf changes for this change set
 	const checkpointChanges = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -311,8 +305,8 @@ export const getChangeDiffs = async (
 			"change.schema_key",
 			"change.entity_id",
 			"change.file_id",
+			"change.snapshot_content as snapshot_content_after",
 		])
-		.select(sql`json(snapshot.content)`.as("snapshot_content_after"))
 		.execute();
 
 	// Process each change to include before snapshots
@@ -325,7 +319,6 @@ export const getChangeDiffs = async (
 				if (changeSetBeforeId) {
 					snapshotBefore = await lix.db
 						.selectFrom("change")
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 						.innerJoin(
 							"change_set_element",
 							"change_set_element.change_id",
@@ -336,7 +329,7 @@ export const getChangeDiffs = async (
 						.where("change.schema_key", "=", change.schema_key)
 						.where("change.file_id", "=", activeFileId)
 						.where(changeHasLabel({ name: "checkpoint" }))
-						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+						.select("change.snapshot_content as snapshot_content_before")
 						.orderBy("change.created_at", "desc")
 						.executeTakeFirst();
 				}

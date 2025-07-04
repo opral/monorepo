@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { changeSetElementInSymmetricDifference } from "./change-set-element-in-symmetric-difference.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { ChangeSetElement } from "../change-set/schema.js";
@@ -14,7 +14,7 @@ function getEntityChangeFields(change: any) {
 }
 
 test("should return the symmetric difference between two change sets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -48,7 +48,7 @@ test("should return the symmetric difference between two change sets", async () 
 				file_id: "f1",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -57,7 +57,7 @@ test("should return the symmetric difference between two change sets", async () 
 				file_id: "f2",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change3",
@@ -66,7 +66,7 @@ test("should return the symmetric difference between two change sets", async () 
 				file_id: "f3",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change4",
@@ -75,7 +75,7 @@ test("should return the symmetric difference between two change sets", async () 
 				file_id: "f4",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -142,7 +142,7 @@ test("should return the symmetric difference between two change sets", async () 
 });
 
 test("should return an empty array if there are no differences", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -176,7 +176,7 @@ test("should return an empty array if there are no differences", async () => {
 				file_id: "f1",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -185,7 +185,7 @@ test("should return an empty array if there are no differences", async () => {
 				file_id: "f2",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change3",
@@ -194,7 +194,7 @@ test("should return an empty array if there are no differences", async () => {
 				file_id: "f3",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change4",
@@ -203,7 +203,7 @@ test("should return an empty array if there are no differences", async () => {
 				file_id: "f4",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -249,7 +249,7 @@ test("should return an empty array if there are no differences", async () => {
 });
 
 test("should handle empty change sets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert test data
 	const changeSetA = { id: "changeSetA" };
@@ -271,7 +271,7 @@ test("should handle empty change sets", async () => {
 });
 
 test("should handle disjoint change sets", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -305,7 +305,7 @@ test("should handle disjoint change sets", async () => {
 				file_id: "f1",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -314,7 +314,7 @@ test("should handle disjoint change sets", async () => {
 				file_id: "f2",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change3",
@@ -323,7 +323,7 @@ test("should handle disjoint change sets", async () => {
 				file_id: "f3",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change4",
@@ -332,7 +332,7 @@ test("should handle disjoint change sets", async () => {
 				file_id: "f4",
 				plugin_key: "test-plugin",
 				schema_version: "1.0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()

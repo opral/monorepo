@@ -20,7 +20,7 @@
 		"test:watch": "vitest --typecheck",
 		"env-variables": "node ./src/services/env-variables/create-index-file.js",
 		"bench": "vitest bench",
-		"lint": "eslint src/**/* --fix",
+		"lint": "eslint \"src/**/*.{js,ts}\" --fix",
 		"dev": "tsc --watch",
 		"format": "prettier ./src --write"
 	},
@@ -33,9 +33,7 @@
 		"@lix-js/server-protocol-schema": "workspace:*",
 		"@opral/zettel-ast": "workspace:*",
 		"ajv": "^8.17.1",
-		"dedent": "1.5.1",
 		"human-id": "^4.1.1",
-		"js-sha256": "^0.11.0",
 		"kysely": "^0.27.4",
 		"sqlite-wasm-kysely": "workspace:*",
 		"uuid": "^10.0.0"

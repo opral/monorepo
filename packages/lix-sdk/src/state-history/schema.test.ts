@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { createCheckpoint } from "../change-set/create-checkpoint.js";
 import {
@@ -10,7 +10,7 @@ import {
 } from "../query-filter/index.js";
 
 test("query current state at head of version lineage", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -66,7 +66,7 @@ test("query current state at head of version lineage", async () => {
 });
 
 test("query state at specific depth in history", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -153,7 +153,7 @@ test("query state at specific depth in history", async () => {
 });
 
 test("query state at specific change set", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -189,7 +189,7 @@ test("query state at specific change set", async () => {
 });
 
 test("query state at checkpoint using createCheckpoint API", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -240,7 +240,7 @@ test("query state at checkpoint using createCheckpoint API", async () => {
 });
 
 test("diff detection between current and checkpoint state", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -319,7 +319,7 @@ test("diff detection between current and checkpoint state", async () => {
 });
 
 test("deletion diff - entity exists at checkpoint but not current", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -392,7 +392,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 });
 
 test("insertion diff - entity exists current but not at checkpoint", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -459,7 +459,7 @@ test("insertion diff - entity exists current but not at checkpoint", async () =>
 });
 
 test("blame functionality - track entity changes over time", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -537,7 +537,7 @@ test("blame functionality - track entity changes over time", async () => {
 });
 
 test("working change set diff - compare current vs checkpoints", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -629,7 +629,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 });
 
 test("query history between two change sets using ancestor/descendant filters", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -728,7 +728,7 @@ test("query history between two change sets using ancestor/descendant filters", 
 // for building graphs to know how parent change set ids should be used.
 // https://github.com/opral/lix-sdk/issues/320
 test.skip("parent_change_set_ids field shows correct parent relationships", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
 		"x-lix-key": "mock_schema",
@@ -754,7 +754,6 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
 			schema_version: "1.0",
-			version_id: lix.db.selectFrom("active_version").select("version_id"),
 			snapshot_content: { value: "value0" },
 		})
 		.execute();

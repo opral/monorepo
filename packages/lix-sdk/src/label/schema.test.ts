@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 
 test("creates checkpoint label on boot up", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const checkpointLabel = await lix.db
 		.selectFrom("label")
@@ -16,7 +16,7 @@ test("creates checkpoint label on boot up", async () => {
 });
 
 test("insert, update, delete on the label view", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("label")
@@ -67,15 +67,15 @@ test("insert, update, delete on the label view", async () => {
 
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
+
 		.where("schema_key", "=", "lix_label")
 		.where("entity_id", "=", "label1")
 		.orderBy("change.created_at", "asc")
 		.selectAll("change")
-		.select("snapshot.content")
+
 		.execute();
 
-	expect(changes.map((change) => change.content)).toMatchObject([
+	expect(changes.map((change) => change.snapshot_content)).toMatchObject([
 		// insert
 		{
 			id: "label1",

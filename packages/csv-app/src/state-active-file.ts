@@ -104,7 +104,6 @@ export const activeCellChangesAtom = atom(async (get) => {
 	if (!cellEntityId || !activeFile) return [];
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 		.where("change.entity_id", "=", cellEntityId)
 		.where("change.file_id", "=", activeFile.id)
@@ -121,7 +120,6 @@ export const activeCellChangesAtom = atom(async (get) => {
 		// .innerJoin("comment", "comment.discussion_id", "discussion.id")
 		// .selectAll("change")
 		// .select((eb) => eb.fn.count("comment.id").as("comment_count"))
-		.select("snapshot.content")
 		.selectAll("change")
 		.orderBy("change.created_at", "desc")
 		.execute();
@@ -213,7 +211,6 @@ export const intermediateChangesAtom = atom<
 	// Get changes that are in the working change set
 	const intermediateChanges = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -245,7 +242,6 @@ export const intermediateChangesAtom = atom<
 				if (latestCheckpointChangeSetId) {
 					snapshotBefore = await lix.db
 						.selectFrom("change")
-						.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 						.innerJoin(
 							"change_set_element",
 							"change_set_element.change_id",
@@ -259,7 +255,9 @@ export const intermediateChangesAtom = atom<
 						.where("change.entity_id", "=", change.entity_id)
 						.where("change.schema_key", "=", change.schema_key)
 						.where("change.file_id", "=", activeFile.id)
-						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
+						.select(
+							sql`json(change.snapshot_content)`.as("snapshot_content_before")
+						)
 						.orderBy("change.created_at", "desc")
 						.limit(1)
 						.executeTakeFirst();
@@ -320,10 +318,9 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 			eb
 				.selectFrom("change")
 				.where("change.schema_key", "=", "lix_change_set_label_table")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
-					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					(eb) => eb.ref("change.snapshot_content", "->>").key("change_set_id"),
 					"=",
 					eb.ref("change_set.id")
 				)
@@ -335,11 +332,10 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 				.selectFrom("change_author")
 				.innerJoin("change", "change.id", "change_author.change_id")
 				.innerJoin("account", "account.id", "change_author.account_id")
-				.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 				.where("change.schema_key", "=", "lix_change_set_label_table")
 				.where(
 					// @ts-expect-error - this is a workaround for the type system
-					(eb) => eb.ref("snapshot.content", "->>").key("change_set_id"),
+					(eb) => eb.ref("change.snapshot_content", "->>").key("change_set_id"),
 					"=",
 					eb.ref("change_set.id")
 				)
@@ -360,7 +356,6 @@ export const allChangesAtom = atom(async (get) => {
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		// .leftJoin("version_change", "version_change.change_id", "change.id")
 		// .where((eb) =>
 		// 	eb.or([
@@ -369,7 +364,6 @@ export const allChangesAtom = atom(async (get) => {
 		// 	])
 		// )
 		.selectAll("change")
-		.select("snapshot.content")
 		.execute();
 });
 
@@ -384,7 +378,6 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 	return await lix.db
 		.selectFrom("change")
 		.where("change.file_id", "=", activeFile.id)
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		// .leftJoin("version_change", "version_change.change_id", "change.id")
 		// .where((eb) =>
 		// 	eb.or([
@@ -393,7 +386,6 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		// 	])
 		// )
 		.selectAll("change")
-		.select("snapshot.content")
 		.execute();
 });
 

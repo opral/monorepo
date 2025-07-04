@@ -1,4 +1,15 @@
-export * from "./schema.js";
+export {
+	LixChangeSetSchema,
+	LixChangeSetElementSchema,
+	LixChangeSetEdgeSchema,
+	LixChangeSetLabelSchema,
+	LixChangeSetThreadSchema,
+	type ChangeSet,
+	type ChangeSetElement,
+	type ChangeSetEdge,
+	type ChangeSetLabel,
+	type ChangeSetThread,
+} from "./schema.js";
 export { createChangeSet } from "./create-change-set.js";
 export { applyChangeSet } from "./apply-change-set.js";
 export { createMergeChangeSet } from "./create-merge-change-set.js";

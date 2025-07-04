@@ -1,12 +1,11 @@
 import { test, expect } from "vitest";
 import { createServerProtocolHandler } from "../create-server-protocol-handler.js";
 import { newLixFile } from "../../lix/new-lix.js";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { openLix } from "../../lix/open-lix.js";
 import { createLspInMemoryEnvironment } from "../environment/create-in-memory-environment.js";
-import { toBlob } from "../../lix/to-blob.js";
 
 test.skip("it should fetch the lix file from the server", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 	});
 	const { value: id } = await lix.db
@@ -27,7 +26,7 @@ test.skip("it should fetch the lix file from the server", async () => {
 	await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix }),
+			body: await lix.toBlob(),
 		})
 	);
 
@@ -44,7 +43,7 @@ test.skip("it should fetch the lix file from the server", async () => {
 
 	const blob = await response.blob();
 
-	const lixFromServer = await openLixInMemory({ blob });
+	const lixFromServer = await openLix({ blob });
 
 	const mockKey = await lixFromServer.db
 		.selectFrom("key_value")
@@ -108,7 +107,7 @@ test.skip("lix_sync is set to true", async () => {
 	const environment = createLspInMemoryEnvironment();
 	const lspHandler = await createServerProtocolHandler({ environment });
 
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 		keyValues: [{ key: "lix_sync", value: "false" }],
 	});
@@ -117,7 +116,7 @@ test.skip("lix_sync is set to true", async () => {
 	const response0 = await lspHandler(
 		new Request("http://localhost:3000/lsp/new-v1", {
 			method: "POST",
-			body: await toBlob({ lix }),
+			body: await lix.toBlob(),
 		})
 	);
 
@@ -135,7 +134,7 @@ test.skip("lix_sync is set to true", async () => {
 
 	const blob = await response1.blob();
 
-	const lixFromServer = await openLixInMemory({ blob });
+	const lixFromServer = await openLix({ blob });
 
 	const lixSync = await lixFromServer.db
 		.selectFrom("key_value")

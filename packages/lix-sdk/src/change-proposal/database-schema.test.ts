@@ -2,12 +2,12 @@
 // @ts-nocheck
 
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { validate } from "uuid";
 
 test.skip("change_proposal.id should default to uuid_v7", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create some changes first
 	const mockChange = await lix.db
@@ -17,7 +17,7 @@ test.skip("change_proposal.id should default to uuid_v7", async () => {
 			entity_id: "entity1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -50,7 +50,7 @@ test.skip("change_proposal.id should default to uuid_v7", async () => {
 });
 
 test.skip("change proposals are change controlled", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockChange = await lix.db
 		.insertInto("change")
@@ -59,7 +59,7 @@ test.skip("change proposals are change controlled", async () => {
 			entity_id: "entity1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -98,7 +98,7 @@ test.skip("change proposals are change controlled", async () => {
 });
 
 test.skip("source change set id is nullable", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockChange = await lix.db
 		.insertInto("change")
@@ -107,7 +107,7 @@ test.skip("source change set id is nullable", async () => {
 			entity_id: "entity1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();
@@ -139,7 +139,7 @@ test.skip("source change set id is nullable", async () => {
 });
 
 test.skip("target change set id is not nullable", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const mockChange = await lix.db
 		.insertInto("change")
@@ -148,7 +148,7 @@ test.skip("target change set id is not nullable", async () => {
 			entity_id: "entity1",
 			file_id: "mock",
 			plugin_key: "mock-plugin",
-			snapshot_id: "no-content",
+			snapshot_content: null,
 		})
 		.returningAll()
 		.executeTakeFirstOrThrow();

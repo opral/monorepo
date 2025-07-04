@@ -6,12 +6,13 @@ import type { Kysely } from "kysely";
 import { handleStateMutation } from "./handle-state-mutation.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
-import { INITIAL_WORKING_CHANGE_SET_ID } from "../version/schema.js";
 
+import type { LixHooks } from "../hooks/create-hooks.js";
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>
+	db: Kysely<LixInternalDatabaseSchema>,
+	hooks: LixHooks
 ): SqliteWasmDatabase {
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -89,7 +90,8 @@ export function applyStateDatabaseSchema(
 				created_at TEXT,
 				updated_at TEXT,
 				inherited_from_version_id TEXT,
-				change_id TEXT
+				change_id TEXT,
+				untracked INTEGER
 			)`;
 
 				const result = capi.sqlite3_declare_vtab(db, sql);
@@ -119,7 +121,8 @@ export function applyStateDatabaseSchema(
 				created_at TEXT,
 				updated_at TEXT,
 				inherited_from_version_id TEXT,
-				change_id TEXT
+				change_id TEXT,
+				untracked INTEGER
 			)`;
 
 				const result = capi.sqlite3_declare_vtab(db, sql);
@@ -277,6 +280,9 @@ export function applyStateDatabaseSchema(
 					sql: "DELETE FROM internal_change_in_transaction",
 					returnValue: "resultRows",
 				});
+
+				// Emit state commit hook after transaction is successfully committed
+				hooks._emit("state_commit");
 
 				return capi.SQLITE_OK;
 			},
@@ -637,7 +643,7 @@ export function applyStateDatabaseSchema(
 
 					// Extract column values (args[2] through args[N+1])
 					// Column order: entity_id, schema_key, file_id, version_id, plugin_key,
-					//               snapshot_content, schema_version, created_at, updated_at
+					//               snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id, untracked
 					const entity_id = args[2];
 					const schema_key = args[3];
 					const file_id = args[4];
@@ -645,6 +651,8 @@ export function applyStateDatabaseSchema(
 					const plugin_key = args[6];
 					const snapshot_content = args[7];
 					const schema_version = args[8];
+					// Skip created_at (args[9]), updated_at (args[10]), inherited_from_version_id (args[11]), change_id (args[12])
+					const untracked = args[13] ?? false;
 
 					// assert required fields
 					if (!entity_id || !schema_key || !file_id || !plugin_key) {
@@ -680,20 +688,101 @@ export function applyStateDatabaseSchema(
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
 						version_id: String(version_id),
+						untracked: Boolean(untracked),
 					});
 
-					// Call handleStateMutation (same logic as triggers)
-					handleStateMutation(
-						sqlite,
-						db,
-						String(entity_id),
-						String(schema_key),
-						String(file_id),
-						String(plugin_key),
-						snapshotStr,
-						String(version_id),
-						String(schema_version)
-					);
+					// Route based on untracked flag
+					if (untracked) {
+						// Handle untracked mutation - write directly to untracked table
+						sqlite.exec({
+							sql: `INSERT OR REPLACE INTO internal_state_all_untracked 
+								  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version)
+								  VALUES (?, ?, ?, ?, ?, ?, ?)`,
+							bind: [
+								String(entity_id),
+								String(schema_key),
+								String(file_id),
+								String(version_id),
+								String(plugin_key),
+								snapshotStr,
+								String(schema_version),
+							],
+						});
+					} else {
+						// Handle tracked mutation - normal change control
+						// If there's existing untracked state, delete it first (tracked overrides untracked)
+						sqlite.exec({
+							sql: `DELETE FROM internal_state_all_untracked 
+								  WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?`,
+							bind: [
+								String(entity_id),
+								String(schema_key),
+								String(file_id),
+								String(version_id),
+							],
+						});
+
+						// Call handleStateMutation (same logic as triggers)
+						handleStateMutation(
+							sqlite,
+							db,
+							String(entity_id),
+							String(schema_key),
+							String(file_id),
+							String(plugin_key),
+							snapshotStr,
+							String(version_id),
+							String(schema_version)
+						);
+					}
+
+					// TODO: This cache copying logic is a temporary workaround for shared change sets.
+					// The proper solution requires improving cache miss logic to handle change set sharing
+					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
+					//
+					// Handle cache copying for new versions that share change sets
+					if (isInsert && String(schema_key) === "lix_version") {
+						const versionData = JSON.parse(snapshotStr);
+						const newVersionId = versionData.id;
+						const changeSetId = versionData.change_set_id;
+
+						if (newVersionId && changeSetId) {
+							// Find other versions that already use this change set
+							const existingVersionsWithSameChangeSet = sqlite.exec({
+								sql: `
+									SELECT json_extract(snapshot_content, '$.id') as version_id
+									FROM internal_state_cache 
+									WHERE schema_key = 'lix_version' 
+									  AND json_extract(snapshot_content, '$.change_set_id') = ?
+									  AND json_extract(snapshot_content, '$.id') != ?
+								`,
+								bind: [changeSetId, newVersionId],
+								returnValue: "resultRows",
+							});
+
+							// If there are existing versions with the same change set, copy their cache entries
+							if (
+								existingVersionsWithSameChangeSet &&
+								existingVersionsWithSameChangeSet.length > 0
+							) {
+								const sourceVersionId =
+									existingVersionsWithSameChangeSet[0]![0]; // Take first existing version
+
+								// Copy cache entries from source version to new version
+								sqlite.exec({
+									sql: `
+										INSERT OR IGNORE INTO internal_state_cache 
+										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id)
+										SELECT 
+											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id
+										FROM internal_state_cache
+										WHERE version_id = ? AND schema_key != 'lix_version'
+									`,
+									bind: [newVersionId, sourceVersionId],
+								});
+							}
+						}
+					}
 
 					return capi.SQLITE_OK;
 				} catch (error) {
@@ -756,10 +845,10 @@ export function applyStateDatabaseSchema(
 		BEGIN
 			INSERT INTO state_all (
 				entity_id, schema_key, file_id, version_id, plugin_key,
-				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id
+				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id, untracked
 			) VALUES (
 				NEW.entity_id, NEW.schema_key, NEW.file_id, NEW.version_id, NEW.plugin_key,
-				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id, NEW.change_id
+				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id, NEW.change_id, NEW.untracked
 			);
 		END;
 
@@ -778,7 +867,8 @@ export function applyStateDatabaseSchema(
 				created_at = NEW.created_at,
 				updated_at = NEW.updated_at,
 				inherited_from_version_id = NEW.inherited_from_version_id,
-				change_id = NEW.change_id
+				change_id = NEW.change_id,
+				untracked = NEW.untracked
 			WHERE
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
@@ -797,7 +887,7 @@ export function applyStateDatabaseSchema(
 		END;
 	`);
 
-	// Create the cache table for performance optimization
+	// Create the cache table for performance optimization and the untracked state table
 	const sql = `
   CREATE TABLE IF NOT EXISTS internal_state_cache (
     entity_id TEXT NOT NULL,
@@ -815,7 +905,31 @@ export function applyStateDatabaseSchema(
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   );
 
+  -- Table for untracked state that bypasses change control
+  CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
+    entity_id TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
+    file_id TEXT NOT NULL,
+    version_id TEXT NOT NULL,
+    plugin_key TEXT NOT NULL,
+    snapshot_content TEXT NOT NULL, -- JSON content
+    schema_version TEXT NOT NULL,
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
+    updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (updated_at LIKE '%Z'),
+    PRIMARY KEY (entity_id, schema_key, file_id, version_id)
+  ) STRICT;
 
+  -- Trigger to update updated_at on untracked state changes
+  CREATE TRIGGER IF NOT EXISTS internal_state_all_untracked_update_timestamp
+  AFTER UPDATE ON internal_state_all_untracked
+  BEGIN
+    UPDATE internal_state_all_untracked 
+    SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+    WHERE entity_id = NEW.entity_id 
+      AND schema_key = NEW.schema_key 
+      AND file_id = NEW.file_id 
+      AND version_id = NEW.version_id;
+  END;
 `;
 
 	return sqlite.exec(sql);
@@ -839,6 +953,24 @@ export function handleStateDelete(
 	const plugin_key = rowToDelete[4];
 	const snapshot_content = rowToDelete[5];
 	const schema_version = rowToDelete[6];
+	// Column indices: created_at[7], updated_at[8], inherited_from_version_id[9], change_id[10], untracked[11]
+	const untracked = rowToDelete[11];
+
+	// If entity is untracked, just delete it without creating changes
+	if (untracked) {
+		// Delete from untracked table
+		sqlite.exec({
+			sql: `DELETE FROM internal_state_all_untracked 
+				  WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?`,
+			bind: [
+				String(entity_id),
+				String(schema_key),
+				String(file_id),
+				String(version_id),
+			],
+		});
+		return;
+	}
 
 	const storedSchemaResult = sqlite.exec({
 		sql: "SELECT value FROM stored_schema WHERE key = ?",
@@ -888,6 +1020,7 @@ function getColumnName(columnIndex: number): string {
 		"updated_at",
 		"inherited_from_version_id",
 		"change_id",
+		"untracked",
 	];
 	return columns[columnIndex] || "unknown";
 }
@@ -916,6 +1049,14 @@ function selectStateViaCTE(
 				SELECT ict.id, ict.entity_id, ict.schema_key, ict.file_id, ict.plugin_key,
 					   ict.schema_version, ict.snapshot_content
 				FROM internal_change_in_transaction ict
+				
+				UNION ALL
+				
+				-- Include untracked state (pseudo-changes with special change_id)
+				SELECT 'untracked-' || unt.entity_id || '-' || unt.schema_key AS id,
+					   unt.entity_id, unt.schema_key, unt.file_id, unt.plugin_key,
+					   unt.schema_version, json(unt.snapshot_content) AS snapshot_content
+				FROM internal_state_all_untracked unt
 			),
 			root_cs_of_all_versions AS (
 				SELECT json_extract(v.snapshot_content, '$.change_set_id') AS version_change_set_id, 
@@ -1107,7 +1248,15 @@ function queryCache(
 	};
 
 	const statment = `select * from (
-						-- Direct entities from cache
+						
+						-- 1. Untracked state (highest priority)
+						SELECT entity_id, schema_key, file_id, version_id, plugin_key,
+							   snapshot_content, schema_version, created_at, updated_at,
+							   NULL as inherited_from_version_id, 'untracked' as change_id, 1 as untracked
+						FROM internal_state_all_untracked
+						
+						UNION ALL
+						-- 2. Tracked state (second priority) - only if no untracked exists
 						SELECT rowid,
 								entity_id, 
 								schema_key, 
@@ -1122,6 +1271,13 @@ function queryCache(
 							   	change_id
 						FROM internal_state_cache
 							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions	
+							AND NOT EXISTS (
+								SELECT 1 FROM internal_state_all_untracked unt
+								WHERE unt.entity_id = internal_state_cache.entity_id
+								AND unt.schema_key = internal_state_cache.schema_key
+								AND unt.file_id = internal_state_cache.file_id
+								AND unt.version_id = internal_state_cache.version_id
+							)
 											
 						UNION ALL
 						
@@ -1164,7 +1320,14 @@ function queryCache(
 							  AND child_isc.entity_id = isc.entity_id
 							  AND child_isc.schema_key = isc.schema_key
 							  AND child_isc.file_id = isc.file_id
-							
+						)
+						-- Don't inherit if child has untracked state
+						AND NOT EXISTS (
+							SELECT 1 FROM internal_state_all_untracked unt
+							WHERE unt.version_id = vi.version_id
+							  AND unt.entity_id = isc.entity_id
+							  AND unt.schema_key = isc.schema_key
+							  AND unt.file_id = isc.file_id
 						)
 					) as combined_results `;
 
@@ -1181,7 +1344,9 @@ function queryCache(
 	return result;
 }
 
-export type StateView = {
+export type StateView = Omit<StateAllView, "version_id">;
+
+export type StateAllView = {
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
@@ -1193,6 +1358,7 @@ export type StateView = {
 	updated_at: Generated<string>;
 	inherited_from_version_id: string | null;
 	change_id: Generated<string>;
+	untracked: Generated<boolean>;
 };
 
 // Cache table type (internal table for state materialization)

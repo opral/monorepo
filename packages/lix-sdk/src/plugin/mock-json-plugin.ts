@@ -21,7 +21,7 @@ export const MockJsonPropertySchema: LixSchemaDefinition = {
  * any time.
  *
  * @example
- *   const lix = await openLixInMemory({
+ *   const lix = await openLix({
  *     providePlugins: [mockJsonPlugin],
  *   });
  */

@@ -78,10 +78,10 @@ interface LixProgress {
 You can use this with the `signalProgress` parameter in various Lix functions:
 
 ```typescript
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 
 async function openLixWithProgress(blob) {
-  const lix = await openLixInMemory({
+  const lix = await openLix({
     blob,
     providePlugins: [/* plugins */],
     signalProgress: (progress) => {
@@ -202,7 +202,7 @@ Here's a comprehensive example demonstrating how to use the utility functions to
 ```typescript
 import { 
   newLixFile, 
-  openLixInMemory, 
+  openLix, 
   toBlob, 
   handleFileInsert 
 } from "@lix-js/sdk";
@@ -213,7 +213,7 @@ async function saveAndLoadLix() {
   const emptyLixBlob = await newLixFile();
   
   // Open the Lix file
-  const lix = await openLixInMemory({
+  const lix = await openLix({
     blob: emptyLixBlob,
     providePlugins: [jsonPlugin],
     signalProgress: (progress) => {
@@ -263,7 +263,7 @@ async function saveAndLoadLix() {
   }
   
   // Later, you can reopen the Lix file
-  const reopenedLix = await openLixInMemory({
+  const reopenedLix = await openLix({
     blob: savedLixBlob,
     providePlugins: [jsonPlugin]
   });

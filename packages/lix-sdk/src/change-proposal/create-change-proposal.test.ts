@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { createChangeProposal } from "./create-change-proposal.js";
 
 test.skip("creating a change proposal should compute the symmetric difference", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create some changes for change sets
 	const mockChanges = await lix.db
@@ -17,7 +17,7 @@ test.skip("creating a change proposal should compute the symmetric difference", 
 				entity_id: "value1",
 				file_id: "mock1",
 				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			// Change 2 - in both source and target (so not in symmetric difference)
 			{
@@ -26,7 +26,7 @@ test.skip("creating a change proposal should compute the symmetric difference", 
 				entity_id: "value2",
 				file_id: "mock2",
 				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			// Change 3 - only in target change set
 			{
@@ -35,7 +35,7 @@ test.skip("creating a change proposal should compute the symmetric difference", 
 				file_id: "mock3",
 				schema_version: "1.0",
 				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()

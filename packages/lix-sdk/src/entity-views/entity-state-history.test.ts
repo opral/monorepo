@@ -1,5 +1,5 @@
 import { test, expect, describe } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createEntityStateHistoryView } from "./entity-state-history.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
@@ -19,7 +19,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	} as const;
 
 	test("should throw error if schema has no primary key", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		const invalidSchema: LixSchemaDefinition = {
 			"x-lix-key": "invalid_schema",
@@ -42,7 +42,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	});
 
 	test("should create history view with correct columns", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateHistoryView({
 			lix,
@@ -105,7 +105,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	});
 
 	test("should use schema key + _history as default view name", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateHistoryView({
 			lix,
@@ -154,7 +154,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	});
 
 	test("should query historical states at different depths", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Add stored schema first
 		const mockSchema: LixSchemaDefinition = {
@@ -247,7 +247,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 	});
 
 	test("should be read-only (no CRUD triggers)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateHistoryView({
 			lix,

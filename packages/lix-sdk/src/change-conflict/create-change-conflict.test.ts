@@ -2,11 +2,11 @@
 // @ts-nocheck
 
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeConflict } from "./create-change-conflict.js";
 
 test.skip("conflicts should be de-duplicated based on the change_conflict.key and version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
 
@@ -19,7 +19,7 @@ test.skip("conflicts should be de-duplicated based on the change_conflict.key an
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -27,7 +27,7 @@ test.skip("conflicts should be de-duplicated based on the change_conflict.key an
 				file_id: "mock",
 				entity_id: "value1",
 				schema_key: "mock",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.execute();
@@ -72,7 +72,7 @@ test.skip("conflicts should be de-duplicated based on the change_conflict.key an
 
 // commented out because of https://github.com/opral/lix-sdk/issues/285#issuecomment-2755409022
 test.skip("if a conflict contains the same changes for a given key and version, no new conflict should be created", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
 
@@ -85,7 +85,7 @@ test.skip("if a conflict contains the same changes for a given key and version, 
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -93,7 +93,7 @@ test.skip("if a conflict contains the same changes for a given key and version, 
 				file_id: "mock",
 				entity_id: "value1",
 				schema_key: "mock",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -101,7 +101,7 @@ test.skip("if a conflict contains the same changes for a given key and version, 
 				file_id: "mock",
 				entity_id: "value1",
 				schema_key: "mock",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.execute();

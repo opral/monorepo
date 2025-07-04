@@ -62,10 +62,11 @@ export let setLocale = (newLocale, options) => {
 				continue;
 			}
 
-			const domain = cookieDomain || window.location.hostname;
-
 			// set the cookie
-			document.cookie = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}; domain=${domain}`;
+			const cookieString = `${cookieName}=${newLocale}; path=/; max-age=${cookieMaxAge}`;
+			document.cookie = cookieDomain
+				? `${cookieString}; domain=${cookieDomain}`
+				: cookieString;
 		} else if (strat === "baseLocale") {
 			// nothing to be set here. baseLocale is only a fallback
 			continue;
@@ -94,7 +95,15 @@ export let setLocale = (newLocale, options) => {
 			localStorage.setItem(localStorageKey, newLocale);
 		} else if (isCustomStrategy(strat) && customClientStrategies.has(strat)) {
 			const handler = customClientStrategies.get(strat);
-			handler.setLocale(newLocale);
+			if (handler) {
+				const result = handler.setLocale(newLocale);
+				// Handle async setLocale - fire and forget
+				if (result instanceof Promise) {
+					result.catch((error) => {
+						console.warn(`Custom strategy "${strat}" setLocale failed:`, error);
+					});
+				}
+			}
 		}
 	}
 	if (

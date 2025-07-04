@@ -1,80 +1,30 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
-
-test("insert, select, delete on the snapshot view", async () => {
-	const lix = await openLixInMemory({});
-
-	// Insert a snapshot into the view
-	await lix.db
-		.insertInto("snapshot")
-		.values({
-			id: "snap1",
-			content: { name: "Test Entity", value: 42 },
-		})
-		.execute();
-
-	// Verify the snapshot was inserted
-	const viewAfterInsert = await lix.db
-		.selectFrom("snapshot")
-		.where("id", "=", "snap1")
-		.selectAll()
-		.execute();
-
-	expect(viewAfterInsert).toHaveLength(1);
-	expect(viewAfterInsert[0]).toMatchObject({
-		id: "snap1",
-		content: { name: "Test Entity", value: 42 },
-	});
-
-	// Verify it was also inserted into the internal_snapshot table
-	const internalSnapshot = await lix.db
-		// @ts-expect-error - internal snapshot table
-		.selectFrom("internal_snapshot")
-		.where("id", "=", "snap1")
-		.selectAll()
-		.execute();
-
-	expect(internalSnapshot).toHaveLength(1);
-	expect(internalSnapshot[0]?.id).toBe("snap1");
-
-	// Delete the snapshot
-	await lix.db.deleteFrom("snapshot").where("id", "=", "snap1").execute();
-
-	// Verify it was deleted from both view and table
-	const viewAfterDelete = await lix.db
-		.selectFrom("snapshot")
-		.where("id", "=", "snap1")
-		.selectAll()
-		.execute();
-
-	const internalAfterDelete = await lix.db
-		// @ts-expect-error - internal snapshot table
-		.selectFrom("internal_snapshot")
-		.where("id", "=", "snap1")
-		.selectAll()
-		.execute();
-
-	expect(viewAfterDelete).toHaveLength(0);
-	expect(internalAfterDelete).toHaveLength(0);
-});
+import { openLix } from "../lix/open-lix.js";
+import { sql, type Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 test("insert with default id generation", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert a snapshot without specifying an id
-	await lix.db
-		.insertInto("snapshot")
+	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.insertInto("internal_snapshot")
 		.values({
-			content: { text: "Auto-generated ID test" },
+			content: sql`jsonb(${JSON.stringify({ text: "Auto-generated ID test" })})`,
 		})
 		.execute();
 
 	// Find the snapshot by content to verify it was inserted with a generated ID
-	const snapshots = await lix.db
-		.selectFrom("snapshot")
-		// @ts-expect-error - content is JSON
-		.where("content", "=", JSON.stringify({ text: "Auto-generated ID test" }))
-		.selectAll()
+	const snapshots = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_snapshot")
+		.where(
+			"content",
+			"=",
+			sql`jsonb(${JSON.stringify({ text: "Auto-generated ID test" })})`
+		)
+		.select(["id", (eb) => eb.fn("json", [`content`]).as("content")])
 		.execute();
 
 	expect(snapshots).toHaveLength(1);
@@ -84,7 +34,7 @@ test("insert with default id generation", async () => {
 });
 
 test("handles complex JSON content", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const complexContent = {
 		string: "test",
@@ -101,42 +51,32 @@ test("handles complex JSON content", async () => {
 		},
 	};
 
-	await lix.db
-		.insertInto("snapshot")
+	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.insertInto("internal_snapshot")
 		.values({
 			id: "complex",
-			content: complexContent,
+			content: sql`jsonb(${JSON.stringify(complexContent)})`,
 		})
 		.execute();
 
-	const snapshot = await lix.db
-		.selectFrom("snapshot")
+	const snapshot = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_snapshot")
 		.where("id", "=", "complex")
-		.selectAll()
+		.select(["id", (eb) => eb.fn("json", [`content`]).as("content")])
 		.executeTakeFirstOrThrow();
 
 	expect(snapshot.content).toEqual(complexContent);
 });
 
 test("no-content snapshot exists by default", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
-	// Verify the no-content snapshot exists
-	const noContentSnapshot = await lix.db
-		.selectFrom("snapshot")
-		.where("id", "=", "no-content")
-		.selectAll()
-		.execute();
-
-	expect(noContentSnapshot).toHaveLength(1);
-	expect(noContentSnapshot[0]).toMatchObject({
-		id: "no-content",
-		content: null,
-	});
-
-	// Verify it exists in the internal table too
-	const internalNoContent = await lix.db
-		// @ts-expect-error - internal snapshot table
+	// Verify the no-content snapshot exists in the internal table
+	const internalNoContent = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
 		.selectFrom("internal_snapshot")
 		.where("id", "=", "no-content")
 		.selectAll()
@@ -148,7 +88,7 @@ test("no-content snapshot exists by default", async () => {
 });
 
 test("no-content snapshot is not duplicated on multiple schema applications", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Apply the schema again (this happens in real usage)
 	lix.sqlite.exec(`
@@ -157,8 +97,10 @@ test("no-content snapshot is not duplicated on multiple schema applications", as
 		`);
 
 	// Verify there's still only one no-content snapshot
-	const noContentSnapshots = await lix.db
-		.selectFrom("snapshot")
+	const noContentSnapshots = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_snapshot")
 		.where("id", "=", "no-content")
 		.selectAll()
 		.execute();
@@ -167,18 +109,20 @@ test("no-content snapshot is not duplicated on multiple schema applications", as
 });
 
 test("can insert null content explicitly", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
-	await lix.db
-		.insertInto("snapshot")
+	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.insertInto("internal_snapshot")
 		.values({
 			id: "explicit-null",
 			content: null,
 		})
 		.execute();
 
-	const snapshot = await lix.db
-		.selectFrom("snapshot")
+	const snapshot = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_snapshot")
 		.where("id", "=", "explicit-null")
 		.selectAll()
 		.executeTakeFirstOrThrow();
@@ -187,41 +131,25 @@ test("can insert null content explicitly", async () => {
 });
 
 test("snapshot ids must be unique", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert first snapshot
-	await lix.db
-		.insertInto("snapshot")
+	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.insertInto("internal_snapshot")
 		.values({
 			id: "duplicate",
-			content: { first: true },
+			content: sql`jsonb(${JSON.stringify({ first: true })})`,
 		})
 		.execute();
 
 	// Try to insert another snapshot with the same id
 	await expect(
-		lix.db
-			.insertInto("snapshot")
+		(lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			.insertInto("internal_snapshot")
 			.values({
 				id: "duplicate",
-				content: { second: true },
+				content: sql`jsonb(${JSON.stringify({ second: true })})`,
 			})
 			.execute()
 	).rejects.toThrow(/UNIQUE constraint failed/);
-});
-
-test("delete nonexistent snapshot has no effect", async () => {
-	const lix = await openLixInMemory({});
-
-	// Try to delete a snapshot that doesn't exist
-	await lix.db.deleteFrom("snapshot").where("id", "=", "nonexistent").execute();
-
-	// Verify the no-content snapshot still exists (as a basic sanity check)
-	const noContentSnapshot = await lix.db
-		.selectFrom("snapshot")
-		.where("id", "=", "no-content")
-		.selectAll()
-		.execute();
-
-	expect(noContentSnapshot).toHaveLength(1);
 });

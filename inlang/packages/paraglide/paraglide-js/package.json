@@ -1,7 +1,7 @@
 {
 	"name": "@inlang/paraglide-js",
 	"type": "module",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public",
@@ -59,8 +59,8 @@
 		"memfs": "4.17.0",
 		"prettier": "^3.4.2",
 		"rolldown": "1.0.0-beta.1",
-		"typedoc": "0.28.3",
-		"typedoc-plugin-markdown": "^4.6.0",
+		"typedoc": "^0.28.5",
+		"typedoc-plugin-markdown": "^4.7.0",
 		"typedoc-plugin-missing-exports": "4.0.0",
 		"typescript": "^5.7.3",
 		"typescript-eslint": "^8.20.0",

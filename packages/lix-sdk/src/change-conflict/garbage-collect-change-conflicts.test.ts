@@ -2,13 +2,13 @@
 // @ts-nocheck
 
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { garbageCollectChangeConflicts } from "./garbage-collect-change-conflicts.js";
 import { createChangeConflict } from "./create-change-conflict.js";
 
 // garbage collection is not used atm
 test.skip("should garbage collect conflicts that contain one or more changes that no version change pointer references (anymore)", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version0 = await createVersion({ lix, name: "version0" });
 
@@ -21,7 +21,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -29,7 +29,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change2",
@@ -37,7 +37,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value2",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -107,7 +107,7 @@ test.skip("should garbage collect conflicts that contain one or more changes tha
 });
 
 test.skip("should garbage collect conflicts that no version references", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const changes = await lix.db
 		.insertInto("change")
@@ -118,7 +118,7 @@ test.skip("should garbage collect conflicts that no version references", async (
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -126,7 +126,7 @@ test.skip("should garbage collect conflicts that no version references", async (
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
@@ -164,7 +164,7 @@ test.skip("should garbage collect conflicts that no version references", async (
 });
 
 test.skip("should NOT garbage collect conflicts that a version change conflict pointer references and where each change is referenced by a version change pointer", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const changes = await lix.db
 		.insertInto("change")
@@ -175,7 +175,7 @@ test.skip("should NOT garbage collect conflicts that a version change conflict p
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value0",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
 				id: "change1",
@@ -183,7 +183,7 @@ test.skip("should NOT garbage collect conflicts that a version change conflict p
 				schema_key: "mock",
 				file_id: "mock",
 				entity_id: "value1",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()

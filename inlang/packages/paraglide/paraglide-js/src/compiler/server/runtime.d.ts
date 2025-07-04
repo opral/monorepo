@@ -32,6 +32,7 @@ export declare const {
 	deLocalizeUrl,
 	extractLocaleFromUrl,
 	extractLocaleFromRequest,
+	extractLocaleFromRequestAsync,
 	extractLocaleFromCookie,
 	extractLocaleFromHeader,
 	extractLocaleFromNavigator,

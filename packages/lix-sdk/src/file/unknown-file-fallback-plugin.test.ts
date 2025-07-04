@@ -146,7 +146,6 @@ describe("detectChanges", () => {
 				schema_key: "lix_unknown_file",
 				file_id: "test-file",
 				plugin_key: "lix_unknown_file_fallback_plugin",
-				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
 				snapshot_content: changes[0]?.snapshot_content,
 				version_id: "test-version",
@@ -174,7 +173,6 @@ describe("applyChanges", () => {
 				schema_key: "lix_unknown_file",
 				file_id: "test-file",
 				plugin_key: "lix_unknown_file_fallback_plugin",
-				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
 				snapshot_content: {
 					value: bytesToBase64(new TextEncoder().encode(originalData)),
@@ -200,7 +198,6 @@ describe("applyChanges", () => {
 				schema_key: "lix_unknown_file",
 				file_id: "binary-file",
 				plugin_key: "lix_unknown_file_fallback_plugin",
-				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
 				snapshot_content: { value: bytesToBase64(binaryData) },
 				version_id: "test-version",
@@ -238,7 +235,6 @@ describe("applyChanges", () => {
 				schema_key: "lix_unknown_file",
 				file_id: "test-file",
 				plugin_key: "lix_unknown_file_fallback_plugin",
-				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
 				snapshot_content: {
 					value: "some content",
@@ -266,7 +262,6 @@ describe("applyChanges", () => {
 				schema_key: "lix_unknown_file",
 				file_id: "test-file",
 				plugin_key: "lix_unknown_file_fallback_plugin",
-				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
 				snapshot_content: {
 					value: "",
@@ -335,7 +330,6 @@ describe("applyChanges", () => {
 				schema_key: "lix_unknown_file",
 				file_id: "test-file",
 				plugin_key: "lix_unknown_file_fallback_plugin",
-				snapshot_id: "test-snapshot",
 				created_at: "2023-01-01T00:00:00Z",
 				snapshot_content: { value: { not: "a string" } },
 				version_id: "test-version",

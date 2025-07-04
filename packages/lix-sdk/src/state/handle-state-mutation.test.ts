@@ -1,9 +1,9 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import type { ChangeSetEdge } from "../change-set/schema.js";
 
 test("creates a new change set and updates the version's change set id for mutations", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const versionBeforeInsert = await lix.db
 		.selectFrom("active_version")
@@ -94,7 +94,7 @@ test("creates a new change set and updates the version's change set id for mutat
 // The workaround of using sqlite3_commit_hook is not possible because
 // SQLite forbids mutations in the commit hook https://www.sqlite.org/c3ref/commit_hook.html
 test("groups changes of a transaction into the same change set", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const edgesBeforeTransaction = await lix.db
 		.selectFrom("change_set_edge")
@@ -128,7 +128,7 @@ test("groups changes of a transaction into the same change set", async () => {
 });
 
 test("should throw error when version_id is null", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Try to insert state with null version_id - should throw
 	await expect(
@@ -148,7 +148,7 @@ test("should throw error when version_id is null", async () => {
 });
 
 test("should throw error when version_id does not exist", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const nonExistentVersionId = "non-existent-version-id";
 
@@ -178,7 +178,7 @@ test("should throw error when version_id does not exist", async () => {
 //* effecting the change set graph of the version itself because the global version (state)
 //* is updated instead.
 test.skip("updating version change_set_id should not create edges or orphaned change sets in the graph of the version itself", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get initial version state
 	const initialVersion = await lix.db
@@ -217,7 +217,7 @@ test.skip("updating version change_set_id should not create edges or orphaned ch
 				schema_key: "test_schema",
 				file_id: "test_file",
 				plugin_key: "test_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				schema_version: "1.0",
 			},
 			{
@@ -226,7 +226,7 @@ test.skip("updating version change_set_id should not create edges or orphaned ch
 				schema_key: "test_schema",
 				file_id: "test_file",
 				plugin_key: "test_plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 				schema_version: "1.0",
 			},
 		])
@@ -307,7 +307,7 @@ test.skip("updating version change_set_id should not create edges or orphaned ch
 });
 
 test("inserts working change set elements", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get initial version and working change set
 	const activeVersion = await lix.db
@@ -357,7 +357,7 @@ test("inserts working change set elements", async () => {
 });
 
 test("updates working change set elements on entity updates (latest change wins)", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get initial version
 	const activeVersion = await lix.db
@@ -425,7 +425,7 @@ test("updates working change set elements on entity updates (latest change wins)
 });
 
 test("mutation handler removes working change set elements on entity deletion", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get initial version
 	const activeVersion = await lix.db
@@ -481,14 +481,14 @@ test("mutation handler removes working change set elements on entity deletion", 
 		.execute();
 
 	expect(allChanges).toHaveLength(2); // Insert + Delete
-	expect(allChanges[0]!.snapshot_id).toBe("no-content"); // Latest change is deletion
+	expect(allChanges[0]!.snapshot_content).toBe(null); // Latest change is deletion
 });
 
 // slow, needs https://github.com/opral/lix-sdk/issues/311
 test(
 	"delete reconciliation: entities added after checkpoint then deleted are excluded from working change set",
 	async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Get initial version and working change set
 		const activeVersion = await lix.db
@@ -564,7 +564,7 @@ test(
 			.execute();
 
 		expect(allChanges).toHaveLength(2); // Insert + Delete
-		expect(allChanges[1]!.snapshot_id).toBe("no-content"); // Delete change
+		expect(allChanges[1]!.snapshot_content).toBe(null); // Delete change
 	},
 	{ timeout: 20000 }
 );
@@ -576,7 +576,7 @@ test(
 test.todo(
 	"delete reconciliation: entities existing before checkpoint show deletions in working change set",
 	async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// BEFORE checkpoint: Insert an entity
 		await lix.db
@@ -643,12 +643,12 @@ test.todo(
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		expect(deleteChange.snapshot_id).toBe("no-content");
+		expect(deleteChange.snapshot_content).toBe(null);
 	}
 );
 
 test("working change set elements are separated per version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get the initial main version
 	const mainVersion = await lix.db

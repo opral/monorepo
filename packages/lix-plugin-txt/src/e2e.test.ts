@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { plugin } from "./index.js";
 
 test("detects changes when modifying a text document", async () => {
 	// Initialize Lix with the text plugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [plugin],
 	});
 
@@ -37,11 +37,10 @@ test("detects changes when modifying a text document", async () => {
 	// Get the changes from the database
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "change.snapshot_id", "snapshot.id")
 		.innerJoin("file", "change.file_id", "file.id")
 		.where("file.path", "=", "/document.md")
 		.where("plugin_key", "=", plugin.key)
-		.select(["change.entity_id", "snapshot.content as snapshot_content"])
+		.select(["change.entity_id", "change.snapshot_content"])
 		.execute();
 
 	// Verify that changes were detected
