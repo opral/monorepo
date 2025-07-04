@@ -9,13 +9,18 @@ Change proposals let you build review and approval workflows for into your appli
 ### Create a change proposal 
 
 ```ts
+import { openLix } from "@lix-js/sdk";
+
 const lix = await openLix({});
 
-const activeVersion = await selectActiveVersion({ lix }).executeTakeFirstOrThrow();
+const activeVersion = await lix.db.selectFrom("active_version")
+  .innerJoin("version", "active_version.version_id", "version.id")
+  .select("version.id")
+  .executeTakeFirstOrThrow();
 
 const mainVersion = await lix.db.selectFrom("version")
   .where("name", "=", "main")
-  .selectAll()
+  .select("id")
   .executeTakeFirstOrThrow();
 
 // Create a change proposal (like a pull request)
@@ -31,6 +36,8 @@ const proposal = await createChangeProposal({
 ### Accepting or rejecting a proposal
 
 ```ts
+import { acceptChangeProposal, rejectChangeProposal } from "@lix-js/sdk";
+
 // Merge the proposal (accepts and merges in one action)
 await acceptChangeProposal({
   lix,
