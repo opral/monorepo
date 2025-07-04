@@ -5,12 +5,25 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev docs",
-    "build": "vitepress build docs",
-    "preview": "vitepress preview docs"
+    "dev": "pnpm run typedoc:clean && typedoc && vitepress dev docs",
+    "build": "pnpm run typedoc:clean && typedoc && vitepress build docs",
+    "preview": "vitepress preview docs",
+    "typedoc": "typedoc",
+    "typedoc:clean": "rm -rf docs/api/reference"
   },
   "devDependencies": {
+    "@lix-js/sdk": "workspace:*",
+    "mermaid": "^11.7.0",
+    "@braintree/sanitize-url": "^7.0.2",
+    "cytoscape": "^3.29.2",
+    "cytoscape-cose-bilkent": "^4.1.0",
+    "dayjs": "^1.11.11",
+    "debug": "^4.3.4",
+    "typedoc": "^0.28.5",
+    "typedoc-plugin-markdown": "^4.7.0",
+    "typedoc-vitepress-theme": "^1.1.2",
     "vitepress": "^1.0.0-rc.40",
+    "vitepress-plugin-mermaid": "^2.0.17",
     "vue": "^3.3.4"
   },
   "keywords": [

@@ -56,11 +56,9 @@ export async function applyChangeSet(args: {
 				"change_set_element_all.change_id",
 				"change.id"
 			)
-			.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 			.where("change_set_element_all.change_set_id", "=", args.changeSet.id)
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.selectAll("change")
-			.select("snapshot.content as snapshot_content")
 			.select(sql`${version.id}`.as("version_id"))
 			.execute();
 
@@ -73,7 +71,7 @@ export async function applyChangeSet(args: {
 				version_id: version.id,
 			};
 
-			if (change.snapshot_id === "no-content") {
+			if (change.snapshot_content === null) {
 				// deletion – remove from cache
 				await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
 					.deleteFrom("internal_state_cache")
@@ -139,7 +137,7 @@ export async function applyChangeSet(args: {
 
 			// Check if this file has deletion changes
 			const hasFileDeletion = changes.some(
-				(c) => c.snapshot_id === "no-content" && c.schema_key === "lix_file"
+				(c) => c.snapshot_content === null && c.schema_key === "lix_file"
 			);
 			if (hasFileDeletion) {
 				// File is being deleted - bypass plugin processing and delete the file

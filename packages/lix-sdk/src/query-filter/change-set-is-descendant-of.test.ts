@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { changeSetIsDescendantOf } from "./change-set-is-descendant-of.js";
 import { changeSetIsAncestorOf } from "./change-set-is-ancestor-of.js";
 
 test("selects all descendants excluding the current change set", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create a linear chain of change sets: cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({
@@ -36,7 +36,7 @@ test("selects all descendants excluding the current change set", async () => {
 });
 
 test("respects the optional depth limit", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({
@@ -67,7 +67,7 @@ test("respects the optional depth limit", async () => {
 });
 
 test("can be combined with ancestor filter to select sets between two points", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create a linear chain: cs0 <- cs1 <- cs2 <- cs3
 	const cs0 = await createChangeSet({
@@ -105,7 +105,7 @@ test("can be combined with ancestor filter to select sets between two points", a
 });
 
 test("selects descendants including the current change set when includeSelf is true", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Setup: cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({
@@ -138,7 +138,7 @@ test("selects descendants including the current change set when includeSelf is t
 });
 
 test("respects depth limit when includeSelf is true", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Setup: cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({

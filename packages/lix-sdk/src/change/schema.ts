@@ -1,5 +1,5 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { Selectable, Insertable, Generated, Updateable } from "kysely";
+import type { Selectable, Insertable, Generated } from "kysely";
 
 export function applyChangeDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -20,17 +20,25 @@ export function applyChangeDatabaseSchema(
   ) STRICT;
 
   CREATE VIEW IF NOT EXISTS change AS
-  SELECT * FROM internal_change;
+  SELECT 
+    c.*,
+    (SELECT json(s.content)
+     FROM internal_snapshot s
+     WHERE s.id = c.snapshot_id) AS snapshot_content
+  FROM internal_change AS c;
 
   CREATE TRIGGER IF NOT EXISTS change_insert
   INSTEAD OF INSERT ON change
   BEGIN
-    -- Check if the referenced snapshot exists
-    SELECT CASE
-      WHEN NOT EXISTS (SELECT 1 FROM internal_snapshot WHERE id = NEW.snapshot_id)
-      THEN RAISE(FAIL, 'FOREIGN KEY constraint failed: snapshot_id does not exist')
-    END;
+    -- Insert the snapshot first (if there's content)
+    INSERT INTO internal_snapshot (id, content)
+    SELECT 
+      uuid_v7(), 
+      jsonb(NEW.snapshot_content)
+    WHERE NEW.snapshot_content IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM internal_snapshot WHERE id = 'no-content' AND NEW.snapshot_content IS NULL);
     
+    -- Insert the change, referencing the snapshot
     INSERT INTO internal_change (
       id,
       entity_id,
@@ -47,7 +55,10 @@ export function applyChangeDatabaseSchema(
       NEW.schema_version,
       NEW.file_id,
       NEW.plugin_key,
-      NEW.snapshot_id,
+      CASE 
+        WHEN NEW.snapshot_content IS NULL THEN 'no-content'
+        ELSE (SELECT id FROM internal_snapshot WHERE content = jsonb(NEW.snapshot_content) ORDER BY id DESC LIMIT 1)
+      END,
       COALESCE(NEW.created_at, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
     );
   END;
@@ -70,7 +81,6 @@ export type InternalChangeTable = {
 
 export type Change = Selectable<ChangeView>;
 export type NewChange = Insertable<ChangeView>;
-export type ChangeUpdate = Updateable<ChangeView>;
 export type ChangeView = {
 	id: Generated<string>;
 	entity_id: string;
@@ -78,6 +88,6 @@ export type ChangeView = {
 	schema_version: string;
 	file_id: string;
 	plugin_key: string;
-	snapshot_id: string;
 	created_at: Generated<string>;
+	snapshot_content: Record<string, any> | null;
 };

@@ -2,7 +2,7 @@ import {
 	Account,
 	Lix,
 	Version,
-	openLixInMemory,
+	openLix,
 	switchAccount,
 } from "@lix-js/sdk";
 import { atom } from "jotai";
@@ -57,7 +57,7 @@ export const lixAtom = atom(async (get) => {
 				);
 				if (response.ok) {
 					const blob = await response.blob();
-					const lix = await openLixInMemory({
+					const lix = await openLix({
 						blob,
 						providePlugins: [csvPlugin],
 					});
@@ -89,7 +89,7 @@ export const lixAtom = atom(async (get) => {
 	let lix: Lix;
 
 	try {
-		lix = await openLixInMemory({
+		lix = await openLix({
 			blob: lixBlob!,
 			providePlugins: [csvPlugin],
 		});

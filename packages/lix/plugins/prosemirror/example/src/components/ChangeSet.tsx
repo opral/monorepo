@@ -14,13 +14,16 @@ import {
 	createUndoChangeSet,
 	type ChangeSet as ChangeSetType,
 } from "@lix-js/sdk";
-import { useQuery } from "../hooks/useQuery";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { selectActiveAccount, selectThreads } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
-import { lix } from "../state";
 import { Composer, Thread } from "./Thread";
 import { toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
+import {
+	useLix,
+	useSuspenseQuery,
+	useSuspenseQueryTakeFirst,
+} from "@lix-js/react-utils";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -50,6 +53,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		},
 		ref,
 	) => {
+		const lix = useLix();
 		// Use shared key-value storage for expansion state
 		const [expandedChangeSetId, setExpandedChangeSetId] = useKeyValue<
 			string | null
@@ -60,7 +64,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			afterCsId?: string;
 		} | null>("diffView");
 
-		const [activeAccount] = useQuery(selectActiveAccount);
+		const activeAccount = useSuspenseQueryTakeFirst(selectActiveAccount);
 
 		// Determine if this change set is the expanded one
 		const isExpanded = alwaysExpand || expandedChangeSetId === changeSet.id;
@@ -78,8 +82,8 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			changeSet,
 		]);
 
-		const [threads] = useQuery(() =>
-			selectThreads({ changeSetId: changeSet.id }),
+		const threads = useSuspenseQuery((lix) =>
+			selectThreads(lix, { changeSetId: changeSet.id }),
 		);
 
 		// Get the first comment if it exists
@@ -139,7 +143,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 						{isWorkingChangeSet ? (
 							<Clock size={16} />
 						) : (
-							<span>{getInitials(activeAccount?.name || "")}</span>
+							<span>{getInitials(activeAccount?.name ?? "")}</span>
 						)}
 					</div>
 					<div className="flex-1">
@@ -243,7 +247,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 						{/* Render existing threads */}
 						<div className="p-2">
-							{threads?.map((thread) => (
+							{threads.map((thread) => (
 								<Thread
 									key={thread.id}
 									lix={lix}

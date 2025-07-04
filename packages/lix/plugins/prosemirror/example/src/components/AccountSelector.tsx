@@ -1,21 +1,25 @@
 import React, { useState } from "react";
-import { lix } from "../state";
 import { createAccount, switchAccount, Account } from "@lix-js/sdk";
-import { useQuery } from "../hooks/useQuery";
 import { getInitials } from "../utilities/nameUtils";
 import { ChevronDown } from "lucide-react";
+import {
+	useLix,
+	useSuspenseQuery,
+	useSuspenseQueryTakeFirst,
+} from "@lix-js/react-utils";
 
 const AccountSelector: React.FC = () => {
+	const lix = useLix();
 	const [isOpen, setIsOpen] = useState(false);
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [newAccountName, setNewAccountName] = useState("");
 
-	const [allAccounts] = useQuery(() =>
-		lix.db.selectFrom("account").selectAll().execute(),
+	const allAccounts = useSuspenseQuery(() =>
+		lix.db.selectFrom("account").selectAll(),
 	);
 
-	const [activeAccount] = useQuery(() =>
-		lix.db.selectFrom("active_account").selectAll().executeTakeFirstOrThrow(),
+	const activeAccount = useSuspenseQueryTakeFirst(() =>
+		lix.db.selectFrom("active_account").selectAll(),
 	);
 
 	const handleAccountSelect = async (account: Account) => {
@@ -88,7 +92,7 @@ const AccountSelector: React.FC = () => {
 
 			{isOpen && (
 				<div className="absolute top-full right-0 min-w-full w-auto max-w-[200px] bg-white border border-base-300 rounded-b-md shadow-md z-10 max-h-[300px] overflow-y-auto">
-					{allAccounts?.map((account) => (
+					{allAccounts.map((account) => (
 						<div
 							key={account.id}
 							onClick={() => handleAccountSelect(account)}

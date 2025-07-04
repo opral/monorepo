@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { materializeFileData } from "./materialize-file-data.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 
@@ -17,7 +17,7 @@ test("materializeFileData with plugin that has changes", async () => {
 		},
 	};
 
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockPlugin],
 	});
 
@@ -79,7 +79,7 @@ test("materializeFileData throws when plugin has no applyChanges", async () => {
 		// No applyChanges method - this should cause materialization to fail
 	};
 
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockPlugin],
 	});
 

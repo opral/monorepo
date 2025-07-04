@@ -1,6 +1,7 @@
 import { Import } from "lucide-react";
 import { useEditorRef } from "@udecode/plate/react";
 import { useFilePicker } from 'use-file-picker';
+import type { SelectedFilesOrErrors } from 'use-file-picker/types';
 import { ExtendedMarkdownPlugin } from "./editor/plugins/markdown/markdown-plugin";
 import { ToolbarButton } from "./ui/toolbar";
 
@@ -11,8 +12,10 @@ export const ImportMarkdown = () => {
   const { openFilePicker } = useFilePicker({
     accept,
     multiple: false,
-    onFilesSelected: async ({ plainFiles }) => {
-      const text = await plainFiles[0].text();
+    readFilesContent: false,
+    onFilesSelected: async (data: SelectedFilesOrErrors<undefined, unknown>) => {
+      if (!data.plainFiles || data.plainFiles.length === 0) return;
+      const text = await data.plainFiles[0].text();
 
       const nodes = editor.getApi(ExtendedMarkdownPlugin).markdown.deserialize(text);;
 

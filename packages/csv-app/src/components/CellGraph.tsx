@@ -1,13 +1,12 @@
 import { SlIcon } from "@shoelace-style/shoelace/dist/react";
 import timeAgo from "../helper/timeAgo.ts";
-import { Change, Snapshot } from "@lix-js/sdk";
+import { Change } from "@lix-js/sdk";
 
 /**
  * Renders change control information for a row.
  */
 export default function CellGraph(props: {
 	activeCellChanges: (Change & {
-		content: Snapshot["content"];
 		comment_count?: string | number | bigint;
 	})[];
 	activeCell: { col: number; row: number };
@@ -75,7 +74,7 @@ export default function CellGraph(props: {
 									)
 								}
 								<div className="mt-2 px-3 py-1.5 bg-zinc-100 border border-zinc-200 rounded">
-									{change.content?.text}
+									{change.snapshot_content?.text}
 								</div>
 							</div>
 						</div>

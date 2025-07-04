@@ -1,28 +1,8 @@
-import type {
-	DetectedChange,
-	LixPlugin,
-	LixSchemaDefinition,
-} from "@lix-js/sdk";
-
-export interface ProsemirrorNode {
-	type: string;
-	_id?: string;
-	content?: ProsemirrorNode[];
-	text?: string;
-	attrs?: Record<string, any>;
-	marks?: Array<{
-		type: string;
-		attrs?: Record<string, any>;
-	}>;
-	[key: string]: any;
-}
-
-// Define a schema for ProsemirrorNode
-const ProsemirrorNodeSchema: LixSchemaDefinition = {
-	"x-lix-key": "prosemirror_node_v1",
-	"x-lix-version": "1.0",
-	type: "object",
-};
+import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
+import type { ProsemirrorNode } from "./schemas/node.js";
+import { ProsemirrorNodeSchema } from "./schemas/node.js";
+import type { ProsemirrorDocument } from "./schemas/document.js";
+import { ProsemirrorDocumentSchema } from "./schemas/document.js";
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,
@@ -40,7 +20,9 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 		new TextDecoder().decode(after?.data),
 	);
 
-	const detectedChanges: DetectedChange<ProsemirrorNode>[] = [];
+	const detectedChanges: DetectedChange<
+		ProsemirrorNode | ProsemirrorDocument
+	>[] = [];
 
 	// Build a map of nodes in the before document for easy lookup
 	const beforeNodeMap = new Map<string, ProsemirrorNode>();
@@ -54,67 +36,102 @@ export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 		collectNodesWithId(documentAfter, afterNodeMap);
 	}
 
-	// Find added or modified nodes (in after but not in before, or in both but modified)
-	for (const [id, afterNode] of afterNodeMap.entries()) {
+	// Process all node changes in one pass
+	const allIds = new Set([...beforeNodeMap.keys(), ...afterNodeMap.keys()]);
+
+	for (const id of allIds) {
 		const beforeNode = beforeNodeMap.get(id);
+		const afterNode = afterNodeMap.get(id);
 
-		if (!beforeNode) {
-			// Node is new
-
-			// Check if the parent node is also new in this diff.
-			// If so, skip adding the child separately, as it's part of the parent's snapshot.
-			const parentNode = findParentNode(documentAfter, id);
-			const parentId = parentNode?.attrs?.id || parentNode?._id;
-			if (parentId && !beforeNodeMap.has(parentId)) {
-				continue; // Skip adding child node if parent is also new
+		if (!beforeNode && afterNode) {
+			// Node is new - check if we should include it
+			if (shouldIncludeNewNode(afterNode, id, beforeNodeMap, documentAfter)) {
+				detectedChanges.push(createNodeChange(id, afterNode));
 			}
-
-			detectedChanges.push({
-				entity_id: id,
-				schema: ProsemirrorNodeSchema,
-				snapshot_content: afterNode,
-			});
-		} else {
-			// Check if the node itself has changed (ignoring child content)
-			const nodeItselfChanged = !areNodesEqual(beforeNode, afterNode, true);
-
-			// Check if this node's content has changed
-			const contentChanged = !areContentArraysEqual(
-				beforeNode.content,
-				afterNode.content,
-			);
-
-			// For leaf nodes (nodes with no children with IDs), we want to detect content changes
-			// For parent nodes (nodes with children that have IDs), we only want to detect changes to the node itself
-
-			// Determine if this is a leaf node in terms of ID hierarchy
-			const isLeafNode = !hasChildrenWithIds(afterNode);
-
-			if (nodeItselfChanged || (isLeafNode && contentChanged)) {
-				// Node has been modified
-				detectedChanges.push({
-					entity_id: id,
-					schema: ProsemirrorNodeSchema,
-					snapshot_content: afterNode,
-				});
-			}
+		} else if (beforeNode && !afterNode) {
+			// Node was deleted
+			detectedChanges.push(createNodeChange(id, null));
+		} else if (
+			beforeNode &&
+			afterNode &&
+			hasNodeChanged(beforeNode, afterNode)
+		) {
+			// Node was modified
+			detectedChanges.push(createNodeChange(id, afterNode));
 		}
 	}
 
-	// Find deleted nodes (in before but not in after)
-	for (const [id] of beforeNodeMap.entries()) {
-		if (!afterNodeMap.has(id)) {
-			detectedChanges.push({
-				entity_id: id,
-				schema: ProsemirrorNodeSchema,
-				// For deletions, omit the snapshot
-				snapshot_content: null,
-			});
-		}
+	// Check if document order changed by comparing the ordered arrays
+	// We need to preserve order, so we use the actual document order from extractChildrenOrder
+	const childrenOrderBefore = extractChildrenOrder(documentBefore);
+	const childrenOrderAfter = extractChildrenOrder(documentAfter);
+
+	if (!arraysEqual(childrenOrderBefore, childrenOrderAfter)) {
+		const documentEntity: ProsemirrorDocument = {
+			_id: "document-root",
+			type: "document",
+			children_order: childrenOrderAfter,
+		};
+
+		detectedChanges.push({
+			entity_id: "document-root",
+			schema: ProsemirrorDocumentSchema,
+			snapshot_content: documentEntity,
+		});
 	}
 
 	return detectedChanges;
 };
+
+/**
+ * Creates a node change object
+ */
+function createNodeChange(id: string, node: ProsemirrorNode | null) {
+	return {
+		entity_id: id,
+		schema: ProsemirrorNodeSchema,
+		snapshot_content: node,
+	};
+}
+
+/**
+ * Checks if we should include a new node (not include if parent is also new)
+ */
+function shouldIncludeNewNode(
+	node: ProsemirrorNode,
+	nodeId: string,
+	beforeNodeMap: Map<string, ProsemirrorNode>,
+	documentAfter: ProsemirrorNode,
+): boolean {
+	// Check if the parent node is also new in this diff.
+	// If so, skip adding the child separately, as it's part of the parent's snapshot.
+	const parentNode = findParentNode(documentAfter, nodeId);
+	const parentId = parentNode?.attrs?.id || parentNode?._id;
+	return !(parentId && !beforeNodeMap.has(parentId));
+}
+
+/**
+ * Checks if a node has changed by comparing the relevant parts
+ */
+function hasNodeChanged(
+	beforeNode: ProsemirrorNode,
+	afterNode: ProsemirrorNode,
+): boolean {
+	// Check if the node itself has changed (ignoring child content)
+	const nodeItselfChanged = !areNodesEqual(beforeNode, afterNode, true);
+
+	// Check if this node's content has changed
+	const contentChanged = !areContentArraysEqual(
+		beforeNode.content,
+		afterNode.content,
+	);
+
+	// For leaf nodes (nodes with no children with IDs), we want to detect content changes
+	// For parent nodes (nodes with children that have IDs), we only want to detect changes to the node itself
+	const isLeafNode = !hasChildrenWithIds(afterNode);
+
+	return nodeItselfChanged || (isLeafNode && contentChanged);
+}
 
 /**
  * Recursively collects all nodes with IDs into a map
@@ -350,4 +367,39 @@ function findParentNode(
 	}
 
 	return null;
+}
+
+/**
+ * Extracts the ordered list of child IDs from a document
+ */
+function extractChildrenOrder(document: ProsemirrorNode): string[] {
+	if (!document.content || !Array.isArray(document.content)) {
+		return [];
+	}
+
+	const childrenOrder: string[] = [];
+	for (const child of document.content) {
+		const childId = child.attrs?.id || child._id;
+		if (childId) {
+			childrenOrder.push(childId);
+		}
+	}
+	return childrenOrder;
+}
+
+/**
+ * Compares two arrays for equality
+ */
+function arraysEqual<T>(arr1: T[], arr2: T[]): boolean {
+	if (arr1.length !== arr2.length) {
+		return false;
+	}
+
+	for (let i = 0; i < arr1.length; i++) {
+		if (arr1[i] !== arr2[i]) {
+			return false;
+		}
+	}
+
+	return true;
 }

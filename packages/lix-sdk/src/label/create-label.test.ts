@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createLabel } from "./create-label.js";
 import { createVersion } from "../version/create-version.js";
 
 test("should create a label with auto-generated ID", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const labelName = "feature";
 	const label = await createLabel({
@@ -33,7 +33,7 @@ test("should create a label with auto-generated ID", async () => {
 });
 
 test("should create a label with custom ID", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const customId = "custom-label-id";
 	const labelName = "bugfix";
@@ -63,7 +63,7 @@ test("should create a label with custom ID", async () => {
 });
 
 test("should create a label with specific version_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version = await createVersion({
 		lix,
@@ -98,7 +98,7 @@ test("should create a label with specific version_id", async () => {
 });
 
 test("should handle transaction correctly", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const labelName = "transaction-test";
 
 	await lix.db.transaction().execute(async (trx) => {
@@ -122,7 +122,7 @@ test("should handle transaction correctly", async () => {
 });
 
 test("should create multiple labels with unique IDs", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const label1 = await createLabel({
 		lix,
@@ -151,7 +151,7 @@ test("should create multiple labels with unique IDs", async () => {
 });
 
 test("should create multiple labels within a transaction", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db.transaction().execute(async (trx) => {
 		const label1 = await createLabel({
@@ -181,7 +181,7 @@ test("should create multiple labels within a transaction", async () => {
 });
 
 test("should use nanoid for ID generation", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const label1 = await createLabel({
 		lix,
@@ -204,7 +204,7 @@ test("should use nanoid for ID generation", async () => {
 });
 
 test("should handle labels with same name but different IDs", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const sameName = "duplicate-name";
 	const label1 = await createLabel({

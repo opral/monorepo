@@ -7,9 +7,12 @@ import { handleStateMutation } from "./handle-state-mutation.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 
+import type { LixHooks } from "../hooks/create-hooks.js";
+
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
-	db: Kysely<LixInternalDatabaseSchema>
+	db: Kysely<LixInternalDatabaseSchema>,
+	hooks: LixHooks
 ): SqliteWasmDatabase {
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -87,7 +90,8 @@ export function applyStateDatabaseSchema(
 				created_at TEXT,
 				updated_at TEXT,
 				inherited_from_version_id TEXT,
-				change_id TEXT
+				change_id TEXT,
+				untracked INTEGER
 			)`;
 
 				const result = capi.sqlite3_declare_vtab(db, sql);
@@ -117,7 +121,8 @@ export function applyStateDatabaseSchema(
 				created_at TEXT,
 				updated_at TEXT,
 				inherited_from_version_id TEXT,
-				change_id TEXT
+				change_id TEXT,
+				untracked INTEGER
 			)`;
 
 				const result = capi.sqlite3_declare_vtab(db, sql);
@@ -276,6 +281,9 @@ export function applyStateDatabaseSchema(
 					returnValue: "resultRows",
 				});
 
+				// Emit state commit hook after transaction is successfully committed
+				hooks._emit("state_commit");
+
 				return capi.SQLITE_OK;
 			},
 
@@ -410,156 +418,20 @@ export function applyStateDatabaseSchema(
 					}
 				}
 
-				const buildWhereClause = (tableAlias: string = "") => {
-					const conditions: string[] = [];
-					const prefix = tableAlias ? `${tableAlias}.` : "";
-
-					Object.keys(filters).forEach((column) => {
-						conditions.push(`${prefix}${column} = ?`);
-					});
-
-					return conditions.length > 0 ? `AND ${conditions.join(" AND ")}` : "";
-				};
-
-				const filterBindings = Object.values(filters);
-
 				// Try cache first - include inherited entities via union
-				const cacheResults = sqlite.exec({
-					sql: `
-					
-						-- Direct entities from cache
-						SELECT entity_id, 
-								schema_key, 
-								file_id, 
-								version_id, 
-								plugin_key, 
-								snapshot_content, 
-							   	schema_version, 
-							   	created_at, 
-							   	updated_at,
-							   	inherited_from_version_id, 
-							   	change_id
-						FROM internal_state_cache
-							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions	
-											
-						UNION ALL
-						
-						-- Inherited entities: child versions see parent entities they don't override
-
-						SELECT 
-							isc.entity_id as entity_id, 
-							isc.schema_key as schema_key,
-							isc.file_id as file_id, 
-							vi.version_id as version_id, -- Return child version_id
-							isc.plugin_key as plugin_key, 
-							isc.snapshot_content as snapshot_content, 
-							isc.schema_version as schema_version, 
-							isc.created_at as created_at, 
-							isc.updated_at as updated_at,
-							vi.parent_version_id as inherited_from_version_id,
-							isc.change_id as change_id
-
-						FROM (
-							-- Get version inheritance relationships from cache
-							SELECT 
-								isc_v.entity_id,
-								isc_v.schema_key,
-								isc_v.file_id,
-								json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-								json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-							FROM internal_state_cache isc_v
-							WHERE isc_v.schema_key = 'lix_version'
-						) vi
-						JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
-						WHERE vi.parent_version_id IS NOT NULL
-						-- Only inherit entities that exist (not deleted) in parent
-						AND isc.inheritance_delete_marker = 0
-						-- Don't inherit if child already has this entity (including deletion markers)
-						AND NOT EXISTS (
-							SELECT 1 FROM internal_state_cache child_isc
-							WHERE child_isc.version_id = vi.version_id
-							  AND child_isc.entity_id = isc.entity_id
-							  AND child_isc.schema_key = isc.schema_key
-							  AND child_isc.file_id = isc.file_id
-						)
-					
-					`,
-					// bind: [...filterBindings],
-
-					returnValue: "resultRows",
-				});
-
-				// ) as combined_results
-				// 		where 1=1 ${buildWhereClause("combined_results")}
-
-				const cacheResultsUnfiltered = sqlite.exec({
-					sql: `
-					select * from (
-						-- Direct entities from cache
-						SELECT 	entity_id, 
-								schema_key, 
-								file_id, 
-								version_id, 
-								plugin_key, 
-								snapshot_content, 
-							   	schema_version, 
-							   	created_at, 
-							   	updated_at,
-							   	inherited_from_version_id, 
-							   	change_id
-						FROM internal_state_cache
-							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions	
-											
-						UNION ALL
-						
-						-- Inherited entities: child versions see parent entities they don't override
-
-						SELECT 
-							isc.entity_id as entity_id, 
-							isc.schema_key as schema_key,
-							isc.file_id as file_id, 
-							vi.version_id as version_id, -- Return child version_id
-							isc.plugin_key as plugin_key, 
-							isc.snapshot_content as snapshot_content, 
-							isc.schema_version as schema_version, 
-							isc.created_at as created_at, 
-							isc.updated_at as updated_at,
-							vi.parent_version_id as inherited_from_version_id,
-							isc.change_id as change_id
-
-						FROM (
-							-- Get version inheritance relationships from cache
-							SELECT 
-								json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-								json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-							FROM internal_state_cache isc_v
-							WHERE isc_v.schema_key = 'lix_version'
-						) vi
-						JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
-						WHERE vi.parent_version_id IS NOT NULL
-						-- Only inherit entities that exist (not deleted) in parent
-						AND isc.inheritance_delete_marker = 0
-						-- Don't inherit if child already has this entity (including deletion markers)
-						AND NOT EXISTS (
-							SELECT 1 FROM internal_state_cache child_isc
-							WHERE child_isc.version_id = vi.version_id
-							  AND child_isc.entity_id = isc.entity_id
-							  AND child_isc.schema_key = isc.schema_key
-							  AND child_isc.file_id = isc.file_id
-						)
-					) as combined_results 
-					 where 1=1 ${buildWhereClause("combined_results")}
-					`,
-					bind: [...filterBindings],
-					rowMode: "object",
-					returnValue: "resultRows",
-				});
+				const cacheResults = queryCache(sqlite, filters);
 
 				cursorState.results = cacheResults || [];
 				cursorState.rowIndex = 0;
 
+				const recordsInCache = sqlite.exec({
+					sql: `SELECT COUNT(*) as count FROM internal_state_cache`,
+					returnValue: "resultRows",
+				})[0]![0] as number;
+
 				// Cache miss - populate cache with actual recursive state query
-				if (cursorState.results.length === 0) {
+				
+				if (cursorState.results.length === 0 && recordsInCache === 0) {
 					if (canLog()) {
 						createLixOwnLogSync({
 							lix: { sqlite, db: db as any },
@@ -653,45 +525,7 @@ export function applyStateDatabaseSchema(
 					// Re-query cache after population
 
 					// Re-query after population with inheritance logic
-					const newResults = sqlite.exec({
-						sql: `
-							-- Direct entities from cache
-							SELECT entity_id, schema_key, file_id, version_id, plugin_key, 
-								   snapshot_content, schema_version, created_at, updated_at,
-								   inherited_from_version_id, change_id
-							FROM internal_state_cache
-								WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions						
-							UNION ALL
-							
-							-- Inherited entities: child versions see parent entities they don't override
-							SELECT isc.entity_id, isc.schema_key, isc.file_id, 
-								   vi.version_id, -- Return child version_id
-								   isc.plugin_key, isc.snapshot_content, isc.schema_version, 
-								   isc.created_at, isc.updated_at,
-								   vi.parent_version_id as inherited_from_version_id, isc.change_id
-							FROM (
-								-- Get version inheritance relationships from cache
-								SELECT 
-									json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-									json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-								FROM internal_state_cache isc_v
-								WHERE isc_v.schema_key = 'lix_version'
-							) vi
-							JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
-							WHERE vi.parent_version_id IS NOT NULL
-							-- Only inherit entities that exist (not deleted) in parent
-							AND isc.inheritance_delete_marker = 0
-							-- Don't inherit if child already has this entity (including deletion markers)
-							AND NOT EXISTS (
-								SELECT 1 FROM internal_state_cache child_isc
-								WHERE child_isc.version_id = vi.version_id
-								  AND child_isc.entity_id = isc.entity_id
-								  AND child_isc.schema_key = isc.schema_key
-								  AND child_isc.file_id = isc.file_id
-							)
-						`,
-						returnValue: "resultRows",
-					});
+					const newResults = queryCache(sqlite, filters);
 					cursorState.results = newResults || [];
 				} else {
 					if (canLog()) {
@@ -730,7 +564,9 @@ export function applyStateDatabaseSchema(
 				// Handle array-style results from SQLite exec
 				let value;
 				if (Array.isArray(row)) {
-					value = row[iCol];
+					// Account for rowid being the first column (index 0)
+					// So we need to shift all column indices by 1
+					value = row[iCol + 1];
 				} else {
 					const columnName = getColumnName(iCol);
 					value = row[columnName];
@@ -749,7 +585,7 @@ export function applyStateDatabaseSchema(
 					capi.sqlite3_result_null(pContext);
 				} else if (typeof value === "object") {
 					capi.sqlite3_result_js(pContext, JSON.stringify(value));
-				} else {	
+				} else {
 					capi.sqlite3_result_js(pContext, value);
 				}
 
@@ -758,7 +594,24 @@ export function applyStateDatabaseSchema(
 
 			xRowid: (pCursor: any, pRowid: any) => {
 				const cursorState = cursorStates.get(pCursor);
-				sqlite.sqlite3.vtab.xRowid(pRowid, cursorState.rowIndex);
+				const row = cursorState.results[cursorState.rowIndex];
+
+				if (!row) {
+					return capi.SQLITE_ERROR;
+				}
+
+				// Extract rowid from the result row
+				let rowid;
+				if (Array.isArray(row)) {
+					// rowid is the first column (index 0)
+					rowid = row[0];
+				} else {
+					// rowid is a property on the object
+					rowid = row.rowid;
+				}
+
+				// Use the actual rowid from the cache table
+				sqlite.sqlite3.vtab.xRowid(pRowid, rowid);
 				return capi.SQLITE_OK;
 			},
 
@@ -790,7 +643,7 @@ export function applyStateDatabaseSchema(
 
 					// Extract column values (args[2] through args[N+1])
 					// Column order: entity_id, schema_key, file_id, version_id, plugin_key,
-					//               snapshot_content, schema_version, created_at, updated_at
+					//               snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id, untracked
 					const entity_id = args[2];
 					const schema_key = args[3];
 					const file_id = args[4];
@@ -798,6 +651,8 @@ export function applyStateDatabaseSchema(
 					const plugin_key = args[6];
 					const snapshot_content = args[7];
 					const schema_version = args[8];
+					// Skip created_at (args[9]), updated_at (args[10]), inherited_from_version_id (args[11]), change_id (args[12])
+					const untracked = args[13] ?? false;
 
 					// assert required fields
 					if (!entity_id || !schema_key || !file_id || !plugin_key) {
@@ -833,20 +688,101 @@ export function applyStateDatabaseSchema(
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
 						version_id: String(version_id),
+						untracked: Boolean(untracked),
 					});
 
-					// Call handleStateMutation (same logic as triggers)
-					handleStateMutation(
-						sqlite,
-						db,
-						String(entity_id),
-						String(schema_key),
-						String(file_id),
-						String(plugin_key),
-						snapshotStr,
-						String(version_id),
-						String(schema_version)
-					);
+					// Route based on untracked flag
+					if (untracked) {
+						// Handle untracked mutation - write directly to untracked table
+						sqlite.exec({
+							sql: `INSERT OR REPLACE INTO internal_state_all_untracked 
+								  (entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version)
+								  VALUES (?, ?, ?, ?, ?, ?, ?)`,
+							bind: [
+								String(entity_id),
+								String(schema_key),
+								String(file_id),
+								String(version_id),
+								String(plugin_key),
+								snapshotStr,
+								String(schema_version),
+							],
+						});
+					} else {
+						// Handle tracked mutation - normal change control
+						// If there's existing untracked state, delete it first (tracked overrides untracked)
+						sqlite.exec({
+							sql: `DELETE FROM internal_state_all_untracked 
+								  WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?`,
+							bind: [
+								String(entity_id),
+								String(schema_key),
+								String(file_id),
+								String(version_id),
+							],
+						});
+
+						// Call handleStateMutation (same logic as triggers)
+						handleStateMutation(
+							sqlite,
+							db,
+							String(entity_id),
+							String(schema_key),
+							String(file_id),
+							String(plugin_key),
+							snapshotStr,
+							String(version_id),
+							String(schema_version)
+						);
+					}
+
+					// TODO: This cache copying logic is a temporary workaround for shared change sets.
+					// The proper solution requires improving cache miss logic to handle change set sharing
+					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
+					//
+					// Handle cache copying for new versions that share change sets
+					if (isInsert && String(schema_key) === "lix_version") {
+						const versionData = JSON.parse(snapshotStr);
+						const newVersionId = versionData.id;
+						const changeSetId = versionData.change_set_id;
+
+						if (newVersionId && changeSetId) {
+							// Find other versions that already use this change set
+							const existingVersionsWithSameChangeSet = sqlite.exec({
+								sql: `
+									SELECT json_extract(snapshot_content, '$.id') as version_id
+									FROM internal_state_cache 
+									WHERE schema_key = 'lix_version' 
+									  AND json_extract(snapshot_content, '$.change_set_id') = ?
+									  AND json_extract(snapshot_content, '$.id') != ?
+								`,
+								bind: [changeSetId, newVersionId],
+								returnValue: "resultRows",
+							});
+
+							// If there are existing versions with the same change set, copy their cache entries
+							if (
+								existingVersionsWithSameChangeSet &&
+								existingVersionsWithSameChangeSet.length > 0
+							) {
+								const sourceVersionId =
+									existingVersionsWithSameChangeSet[0]![0]; // Take first existing version
+
+								// Copy cache entries from source version to new version
+								sqlite.exec({
+									sql: `
+										INSERT OR IGNORE INTO internal_state_cache 
+										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id)
+										SELECT 
+											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id
+										FROM internal_state_cache
+										WHERE version_id = ? AND schema_key != 'lix_version'
+									`,
+									bind: [newVersionId, sourceVersionId],
+								});
+							}
+						}
+					}
 
 					return capi.SQLITE_OK;
 				} catch (error) {
@@ -909,10 +845,10 @@ export function applyStateDatabaseSchema(
 		BEGIN
 			INSERT INTO state_all (
 				entity_id, schema_key, file_id, version_id, plugin_key,
-				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id
+				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id, untracked
 			) VALUES (
 				NEW.entity_id, NEW.schema_key, NEW.file_id, NEW.version_id, NEW.plugin_key,
-				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id, NEW.change_id
+				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id, NEW.change_id, NEW.untracked
 			);
 		END;
 
@@ -931,7 +867,8 @@ export function applyStateDatabaseSchema(
 				created_at = NEW.created_at,
 				updated_at = NEW.updated_at,
 				inherited_from_version_id = NEW.inherited_from_version_id,
-				change_id = NEW.change_id
+				change_id = NEW.change_id,
+				untracked = NEW.untracked
 			WHERE
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
@@ -950,7 +887,7 @@ export function applyStateDatabaseSchema(
 		END;
 	`);
 
-	// Create the cache table for performance optimization
+	// Create the cache table for performance optimization and the untracked state table
 	const sql = `
   CREATE TABLE IF NOT EXISTS internal_state_cache (
     entity_id TEXT NOT NULL,
@@ -968,7 +905,31 @@ export function applyStateDatabaseSchema(
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   );
 
+  -- Table for untracked state that bypasses change control
+  CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
+    entity_id TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
+    file_id TEXT NOT NULL,
+    version_id TEXT NOT NULL,
+    plugin_key TEXT NOT NULL,
+    snapshot_content TEXT NOT NULL, -- JSON content
+    schema_version TEXT NOT NULL,
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
+    updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (updated_at LIKE '%Z'),
+    PRIMARY KEY (entity_id, schema_key, file_id, version_id)
+  ) STRICT;
 
+  -- Trigger to update updated_at on untracked state changes
+  CREATE TRIGGER IF NOT EXISTS internal_state_all_untracked_update_timestamp
+  AFTER UPDATE ON internal_state_all_untracked
+  BEGIN
+    UPDATE internal_state_all_untracked 
+    SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+    WHERE entity_id = NEW.entity_id 
+      AND schema_key = NEW.schema_key 
+      AND file_id = NEW.file_id 
+      AND version_id = NEW.version_id;
+  END;
 `;
 
 	return sqlite.exec(sql);
@@ -992,6 +953,24 @@ export function handleStateDelete(
 	const plugin_key = rowToDelete[4];
 	const snapshot_content = rowToDelete[5];
 	const schema_version = rowToDelete[6];
+	// Column indices: created_at[7], updated_at[8], inherited_from_version_id[9], change_id[10], untracked[11]
+	const untracked = rowToDelete[11];
+
+	// If entity is untracked, just delete it without creating changes
+	if (untracked) {
+		// Delete from untracked table
+		sqlite.exec({
+			sql: `DELETE FROM internal_state_all_untracked 
+				  WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?`,
+			bind: [
+				String(entity_id),
+				String(schema_key),
+				String(file_id),
+				String(version_id),
+			],
+		});
+		return;
+	}
 
 	const storedSchemaResult = sqlite.exec({
 		sql: "SELECT value FROM stored_schema WHERE key = ?",
@@ -1041,6 +1020,7 @@ function getColumnName(columnIndex: number): string {
 		"updated_at",
 		"inherited_from_version_id",
 		"change_id",
+		"untracked",
 	];
 	return columns[columnIndex] || "unknown";
 }
@@ -1069,6 +1049,14 @@ function selectStateViaCTE(
 				SELECT ict.id, ict.entity_id, ict.schema_key, ict.file_id, ict.plugin_key,
 					   ict.schema_version, ict.snapshot_content
 				FROM internal_change_in_transaction ict
+				
+				UNION ALL
+				
+				-- Include untracked state (pseudo-changes with special change_id)
+				SELECT 'untracked-' || unt.entity_id || '-' || unt.schema_key AS id,
+					   unt.entity_id, unt.schema_key, unt.file_id, unt.plugin_key,
+					   unt.schema_version, json(unt.snapshot_content) AS snapshot_content
+				FROM internal_state_all_untracked unt
 			),
 			root_cs_of_all_versions AS (
 				SELECT json_extract(v.snapshot_content, '$.change_set_id') AS version_change_set_id, 
@@ -1195,14 +1183,20 @@ function selectStateViaCTE(
 			pe.snapshot_content,
 			pe.schema_version,
 			pe.version_id,
-			(SELECT MIN(ic.created_at) FROM internal_change ic 
-			 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id) AS created_at,
+			COALESCE(
+				(SELECT MIN(ic.created_at) FROM internal_change ic 
+				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id),
+				(SELECT MIN(ict.created_at) FROM internal_change_in_transaction ict 
+				 WHERE ict.entity_id = pe.entity_id AND ict.schema_key = pe.schema_key AND ict.file_id = pe.file_id)
+			) AS created_at,
 			COALESCE(
 				(SELECT MAX(ic.created_at) FROM internal_change ic 
 				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id
 				   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = pe.version_id)),
 				(SELECT MIN(ic.created_at) FROM internal_change ic 
-				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id)
+				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id),
+				(SELECT MAX(ict.created_at) FROM internal_change_in_transaction ict 
+				 WHERE ict.entity_id = pe.entity_id AND ict.schema_key = pe.schema_key AND ict.file_id = pe.file_id)
 			) AS updated_at,
 			pe.inherited_from_version_id,
 			pe.change_id
@@ -1237,7 +1231,122 @@ function selectStateViaCTE(
 	return result || [];
 }
 
-export type StateView = {
+function queryCache(
+	sqlite: SqliteWasmDatabase,
+	filters: Record<string, any>
+): any[] {
+	const filterBindings = Object.values(filters);
+	const buildWhereClause = (tableAlias: string = "") => {
+		const conditions: string[] = [];
+		const prefix = tableAlias ? `${tableAlias}.` : "";
+
+		Object.keys(filters).forEach((column) => {
+			conditions.push(`${prefix}${column} = ?`);
+		});
+
+		return conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+	};
+
+	const statment = `select * from (
+						
+						-- 1. Untracked state (highest priority)
+						SELECT entity_id, schema_key, file_id, version_id, plugin_key,
+							   snapshot_content, schema_version, created_at, updated_at,
+							   NULL as inherited_from_version_id, 'untracked' as change_id, 1 as untracked
+						FROM internal_state_all_untracked
+						
+						UNION ALL
+						-- 2. Tracked state (second priority) - only if no untracked exists
+						SELECT rowid,
+								entity_id, 
+								schema_key, 
+								file_id, 
+								version_id, 
+								plugin_key, 
+								snapshot_content, 
+							   	schema_version, 
+							   	created_at, 
+							   	updated_at,
+							   	inherited_from_version_id, 
+							   	change_id
+						FROM internal_state_cache
+							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions	
+							AND NOT EXISTS (
+								SELECT 1 FROM internal_state_all_untracked unt
+								WHERE unt.entity_id = internal_state_cache.entity_id
+								AND unt.schema_key = internal_state_cache.schema_key
+								AND unt.file_id = internal_state_cache.file_id
+								AND unt.version_id = internal_state_cache.version_id
+							)
+											
+						UNION ALL
+						
+						-- Inherited entities: child versions see parent entities they don't override
+
+						SELECT 
+							rowid,
+							isc.entity_id as entity_id, 
+							isc.schema_key as schema_key,
+							isc.file_id as file_id, 
+							vi.version_id as version_id, -- Return child version_id
+							isc.plugin_key as plugin_key, 
+							isc.snapshot_content as snapshot_content, 
+							isc.schema_version as schema_version, 
+							isc.created_at as created_at, 
+							isc.updated_at as updated_at,
+							vi.parent_version_id as inherited_from_version_id,
+							isc.change_id as change_id
+
+						FROM (
+							-- Get version inheritance relationships from cache
+							SELECT
+								isc_v.entity_id,
+								isc_v.schema_key,
+								isc_v.file_id,
+								json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+								json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+							FROM internal_state_cache isc_v
+							WHERE isc_v.schema_key = 'lix_version'
+						) vi
+						JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
+						 	
+						WHERE vi.parent_version_id IS NOT NULL
+						-- Only inherit entities that exist (not deleted) in parent
+						AND isc.inheritance_delete_marker = 0
+						-- Don't inherit if child already has this entity (including deletion markers)
+						AND NOT EXISTS (
+							SELECT 1 FROM internal_state_cache child_isc
+							WHERE child_isc.version_id = vi.version_id
+							  AND child_isc.entity_id = isc.entity_id
+							  AND child_isc.schema_key = isc.schema_key
+							  AND child_isc.file_id = isc.file_id
+						)
+						-- Don't inherit if child has untracked state
+						AND NOT EXISTS (
+							SELECT 1 FROM internal_state_all_untracked unt
+							WHERE unt.version_id = vi.version_id
+							  AND unt.entity_id = isc.entity_id
+							  AND unt.schema_key = isc.schema_key
+							  AND unt.file_id = isc.file_id
+						)
+					) as combined_results `;
+
+	const result = sqlite.exec({
+		sql: `
+					${statment}
+					${buildWhereClause("combined_results")}
+					`,
+		bind: [...filterBindings],
+
+		returnValue: "resultRows",
+	});
+
+	return result;
+}
+
+export type StateView = Omit<StateAllView, "version_id">;
+
+export type StateAllView = {
 	entity_id: string;
 	schema_key: string;
 	file_id: string;
@@ -1249,6 +1358,7 @@ export type StateView = {
 	updated_at: Generated<string>;
 	inherited_from_version_id: string | null;
 	change_id: Generated<string>;
+	untracked: Generated<boolean>;
 };
 
 // Cache table type (internal table for state materialization)

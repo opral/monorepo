@@ -1,11 +1,10 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "./create-change-set.js";
-import type { Change } from "../change/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("creating a change set should succeed", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	await lix.db
 		.insertInto("stored_schema")
@@ -22,29 +21,30 @@ test("creating a change set should succeed", async () => {
 		})
 		.execute();
 
-	const mockChanges = (await lix.db
-		// @ts-expect-error - internal change table
-		.insertInto("internal_change")
+	const mockChanges = await lix.db
+		.insertInto("change")
 		.values([
 			{
+				id: "change0",
 				schema_key: "mock-schema",
 				schema_version: "1.0",
 				entity_id: "value1",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 			{
+				id: "change1",
 				schema_key: "mock-schema",
 				schema_version: "1.0",
 				entity_id: "value2",
 				file_id: "mock",
 				plugin_key: "mock-plugin",
-				snapshot_id: "no-content",
+				snapshot_content: null,
 			},
 		])
 		.returningAll()
-		.execute()) as Change[];
+		.execute();
 
 	const changeSet = await createChangeSet({
 		lix: lix,
@@ -68,7 +68,7 @@ test("creating a change set should succeed", async () => {
 });
 
 test("creating a change set with empty elements array should succeed", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create a change set with an empty elements array
 	const changeSet = await createChangeSet({
@@ -90,7 +90,7 @@ test("creating a change set with empty elements array should succeed", async () 
 });
 
 test("creating a change set with labels should associate the labels with the change set", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get the active version to ensure we work in the same context
 	const activeVersion = await lix.db
@@ -139,7 +139,7 @@ test("creating a change set with labels should associate the labels with the cha
 });
 
 test("creating a change set with parents should establish parent-child relationships", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create two parent change sets
 	const parentChangeSet1 = await createChangeSet({
@@ -178,7 +178,7 @@ test("creating a change set with parents should establish parent-child relations
 });
 
 test("creating a change set with version_id should store it in the specified version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Get the global version ID
 	const globalVersion = "global";

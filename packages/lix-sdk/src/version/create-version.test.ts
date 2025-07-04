@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
 import type { ChangeSet } from "../change-set/schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("should create a version linked to the provided change_set_id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	// Setup: Create a change_set to link to (must be in global version for version graph)
 	const changeSet = await createChangeSet({ lix, lixcol_version_id: "global" });
 
@@ -18,7 +18,7 @@ test("should create a version linked to the provided change_set_id", async () =>
 });
 
 test("should create a version with the specified name", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const changeSet = await createChangeSet({ lix, lixcol_version_id: "global" });
 	const versionName = "My Test Version";
 
@@ -34,7 +34,7 @@ test("should create a version with the specified name", async () => {
 });
 
 test("should create a version with the specified id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const changeSet = await createChangeSet({ lix, lixcol_version_id: "global" });
 
 	const newVersion = await createVersion({
@@ -50,7 +50,7 @@ test("should create a version with the specified id", async () => {
 });
 
 test("should work within an existing transaction", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const changeSet = await createChangeSet({ lix, lixcol_version_id: "global" });
 	const versionName = "Transaction Test Version";
 
@@ -76,7 +76,7 @@ test("should work within an existing transaction", async () => {
 });
 
 test("should fail if the 'from' change_set_id does not exist", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 	const nonExistentChangeSet: Pick<ChangeSet, "id"> = {
 		id: "hello world" as ChangeSet["id"], // ID that won't exist
 	};
@@ -89,7 +89,7 @@ test("should fail if the 'from' change_set_id does not exist", async () => {
 });
 
 test("should automatically create inheritance from global version", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create a new version (should automatically inherit from global)
 	const newVersion = await createVersion({

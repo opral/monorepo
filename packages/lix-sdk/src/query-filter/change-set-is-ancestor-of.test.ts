@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { changeSetIsAncestorOf } from "./change-set-is-ancestor-of.js";
 
 test("selects all ancestors of the current change set", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create a linear chain of change sets: cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({
@@ -36,7 +36,7 @@ test("selects all ancestors of the current change set", async () => {
 });
 
 test("respects the optional depth limit", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({
@@ -68,7 +68,7 @@ test("respects the optional depth limit", async () => {
 });
 
 test("includeSelf true selects the current change set as well", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// cs0 <- cs1 <- cs2
 	const cs0 = await createChangeSet({
@@ -102,7 +102,7 @@ test("includeSelf true selects the current change set as well", async () => {
 });
 
 test("can be combined with where(id = X) to check specific ancestry", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create chain: cs1 <- cs2 <- cs3
 	const cs1 = await createChangeSet({

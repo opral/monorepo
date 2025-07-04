@@ -1,4 +1,4 @@
-import { newLixFile, openLixInMemory, toBlob } from "@lix-js/sdk";
+import { newLixFile, openLix } from "@lix-js/sdk";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
 	contentFromDatabase,
@@ -23,7 +23,7 @@ export async function newProject(args?: {
 	try {
 		const inlangDbContent = contentFromDatabase(sqlite);
 
-		const lix = await openLixInMemory({
+		const lix = await openLix({
 			blob: await newLixFile(),
 			keyValues: [
 				{ key: "lix_telemetry", value: args?.settings?.telemetry ?? "on" },
@@ -60,7 +60,7 @@ export async function newProject(args?: {
 				},
 			])
 			.execute();
-		const blob = toBlob({ lix });
+		const blob = await lix.toBlob();
 		lix.sqlite.close();
 		return blob;
 	} catch (e) {

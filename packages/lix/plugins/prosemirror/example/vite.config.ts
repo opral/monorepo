@@ -11,5 +11,10 @@ export default defineConfig({
 	server: {
 		port: 3000,
 		open: true,
+		// headers for opfs
+		headers: {
+			"Cross-Origin-Opener-Policy": "*",
+			"Cross-Origin-Embedder-Policy": "*",
+		},
 	},
 });

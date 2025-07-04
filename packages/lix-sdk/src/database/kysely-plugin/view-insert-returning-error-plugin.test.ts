@@ -1,8 +1,8 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { openLix } from "../../lix/open-lix.js";
 
 test("should throw error when using returningAll() on view insert", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Test with a view that's in the plugin's view list
 	expect(() => {
@@ -15,7 +15,7 @@ test("should throw error when using returningAll() on view insert", async () => 
 });
 
 test("should throw error when using returning() on view insert", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Test with returning() instead of returningAll()
 	expect(() => {
@@ -32,7 +32,7 @@ test("should throw error when using returning() on view insert", async () => {
 });
 
 test("should allow insert without returning on views", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// This should not throw
 	expect(() => {
@@ -41,7 +41,7 @@ test("should allow insert without returning on views", async () => {
 });
 
 test("should allow returning on non-view tables", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// This should not throw since 'state' is a table, not a view
 	expect(() => {

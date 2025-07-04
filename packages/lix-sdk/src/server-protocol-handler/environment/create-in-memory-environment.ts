@@ -1,7 +1,5 @@
-import { closeLix } from "../../lix/close-lix.js";
-import { openLixInMemory } from "../../lix/open-lix-in-memory.js";
+import { openLix } from "../../lix/open-lix.js";
 import type { Lix } from "../../lix/open-lix.js";
-import { toBlob } from "../../lix/to-blob.js";
 import type { LspEnvironment } from "./environment.js";
 
 /**
@@ -55,7 +53,7 @@ export const createLspInMemoryEnvironment = (): LspEnvironment => {
 				lix = openLixes.get(args.id)!;
 			} else {
 				const blob = store.get(args.id);
-				lix = await openLixInMemory({
+				lix = await openLix({
 					blob,
 					// don't sync the server with itself
 					keyValues: [{ key: "lix_sync", value: "false" }],
@@ -87,8 +85,8 @@ export const createLspInMemoryEnvironment = (): LspEnvironment => {
 				// TODO no concurrency guarantees
 				const lix = openLixes.get(args.id);
 				// await fileQueueSettled({ lix: lix! });
-				const blob = await toBlob({ lix: lix! });
-				await closeLix({ lix: lix! });
+				const blob = await lix!.toBlob();
+				await lix!.close();
 				openConnections.delete(args.id);
 				openLixes.delete(args.id);
 				store.set(args.id, blob);

@@ -1,6 +1,6 @@
 import { newProject } from "./newProject.js";
 import { loadProjectInMemory } from "./loadProjectInMemory.js";
-import { closeLix, openLixInMemory, toBlob, type Lix } from "@lix-js/sdk";
+import { openLix, type Lix } from "@lix-js/sdk";
 import fs from "node:fs";
 import nodePath from "node:path";
 import type {
@@ -65,7 +65,7 @@ export async function loadProjectFromDirectory(
 		settings,
 	});
 
-	const tempLix = await openLixInMemory({ blob: newLix });
+	const tempLix = await openLix({ blob: newLix });
 
 	await syncLixFsFiles({
 		fs: args.fs,
@@ -85,11 +85,11 @@ export async function loadProjectFromDirectory(
 			? // reversing the id to have distinguishable lix ids from inlang ids
 				[{ key: "lix_id", value: inlangId }]
 			: undefined,
-		blob: await toBlob({ lix: tempLix }),
+		blob: await tempLix.toBlob(),
 	});
 
 	// Closing the temp lix
-	await closeLix({ lix: tempLix });
+	await tempLix.close();
 
 	await syncLixFsFiles({
 		fs: args.fs,

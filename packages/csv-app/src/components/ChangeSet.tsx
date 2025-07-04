@@ -2,7 +2,6 @@ import {
 	Change,
 	changeHasLabel,
 	Lix,
-	Snapshot,
 	createThread,
 	createCheckpoint,
 	Thread,
@@ -36,9 +35,7 @@ export default function Component(props: {
 		() => props.changeSetid === workingChangeSet?.id,
 		[props.changeSetid, workingChangeSet]
 	);
-	const [isOpen, setIsOpen] = useState(
-		isWorkingChangeSet() ? true : false
-	);
+	const [isOpen, setIsOpen] = useState(isWorkingChangeSet() ? true : false);
 
 	const [lix] = useAtom(lixAtom);
 	const [activeFile] = useAtom(activeFileAtom);
@@ -56,23 +53,35 @@ export default function Component(props: {
 	useEffect(() => {
 		if (isOpen) {
 			if (!isWorkingChangeSet()) {
-				getChanges(lix, props.changeSetid, activeFile!.id, currentVersion, props.previousChangeSetId).then(
-					setChanges
-				);
+				getChanges(
+					lix,
+					props.changeSetid,
+					activeFile!.id,
+					currentVersion,
+					props.previousChangeSetId
+				).then(setChanges);
 			} else {
-				getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets?.[0]?.id).then(
-					setIntermediateChanges
-				);
+				getIntermediateChanges(
+					lix,
+					activeFile!.id,
+					checkpointChangeSets?.[0]?.id
+				).then(setIntermediateChanges);
 			}
 			const interval = setInterval(async () => {
 				if (!isWorkingChangeSet()) {
-					getChanges(lix, props.changeSetid, activeFile!.id, currentVersion, props.previousChangeSetId).then(
-						setChanges
-					);
+					getChanges(
+						lix,
+						props.changeSetid,
+						activeFile!.id,
+						currentVersion,
+						props.previousChangeSetId
+					).then(setChanges);
 				} else {
-					getIntermediateChanges(lix, activeFile!.id, checkpointChangeSets?.[0]?.id).then(
-						setIntermediateChanges
-					);
+					getIntermediateChanges(
+						lix,
+						activeFile!.id,
+						checkpointChangeSets?.[0]?.id
+					).then(setIntermediateChanges);
 				}
 			}, 1000);
 			return () => clearInterval(interval);
@@ -95,12 +104,11 @@ export default function Component(props: {
 	const firstComment = threads?.[0]?.comments?.[0];
 
 	// Truncate comment content if it's longer than 50 characters
-	const truncatedComment =
-		firstComment?.body
-			? firstComment.body.content.length > 50
-				? `${toPlainText(firstComment.body).substring(0, 50)}...`
-				: toPlainText(firstComment.body)
-			: null;
+	const truncatedComment = firstComment?.body
+		? firstComment.body.content.length > 50
+			? `${toPlainText(firstComment.body).substring(0, 50)}...`
+			: toPlainText(firstComment.body)
+		: null;
 
 	return (
 		<div
@@ -119,9 +127,7 @@ export default function Component(props: {
 				<div className="flex-1 flex gap-2 items-center justify-between py-3 rounded md:h-[46px]">
 					<div className="flex flex-col md:flex-row md:gap-2 md:items-center flex-1">
 						<p className="text-zinc-950 text-sm! font-semibold">
-							{isWorkingChangeSet()
-								? "Working changes"
-								: props.authorName}
+							{isWorkingChangeSet() ? "Working changes" : props.authorName}
 						</p>
 						<p className="text-sm! text-zinc-600">{truncatedComment}</p>
 					</div>
@@ -148,7 +154,9 @@ export default function Component(props: {
 			</div>
 			<div className={clsx(isOpen ? "block" : "hidden")}>
 				<div className="flex flex-col gap-2 px-3 pb-3">
-					{Object.keys(intermediateChanges).length > 0 && <CreateCheckpointBox />}
+					{Object.keys(intermediateChanges).length > 0 && (
+						<CreateCheckpointBox />
+					)}
 
 					{Object.keys(
 						isWorkingChangeSet() ? intermediateChanges : changes
@@ -209,7 +217,6 @@ const CreateCheckpointBox = () => {
 		}
 	};
 
-
 	return (
 		<div className="flex gap-2">
 			<SlInput
@@ -219,8 +226,14 @@ const CreateCheckpointBox = () => {
 				onKeyDown={handleKeyDown}
 				value={description}
 			></SlInput>
-			<SlButton slot="footer" variant="primary" onClick={handleCreateCheckpoint}>
-				{description === "" ? "Create checkpoint without description" : "Create checkpoint"}
+			<SlButton
+				slot="footer"
+				variant="primary"
+				onClick={handleCreateCheckpoint}
+			>
+				{description === ""
+					? "Create checkpoint without description"
+					: "Create checkpoint"}
 			</SlButton>
 		</div>
 	);
@@ -232,21 +245,19 @@ const getChanges = async (
 	fileId: string,
 	// @ts-expect-error - not used yet
 	currentVersion: Version,
-	previousChangeSetId?: string | undefined | null,
+	previousChangeSetId?: string | undefined | null
 ): Promise<
 	Record<
 		string,
 		Array<
 			Change & {
-				content: Snapshot["content"];
-				parent: Change & { content: Snapshot["content"] };
+				parent: Change;
 			}
 		>
 	>
 > => {
 	const changes = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 		.innerJoin(
 			"change_set_element",
 			"change_set_element.change_id",
@@ -257,14 +268,13 @@ const getChanges = async (
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
-		.select("snapshot.content")
 		.execute();
 
 	// Process content fields if they are JSON strings
-	const processedChanges = changes.map(change => {
-		if (typeof change.content === 'string') {
+	const processedChanges = changes.map((change) => {
+		if (typeof change.snapshot_content === "string") {
 			try {
-				change.content = JSON.parse(change.content);
+				change.snapshot_content = JSON.parse(change.snapshot_content);
 			} catch (e) {
 				console.log("Error parsing JSON:", e);
 				// Keep as is if not valid JSON
@@ -278,8 +288,7 @@ const getChanges = async (
 		string,
 		Array<
 			Change & {
-				content: Snapshot["content"];
-				parent: Change & { content: Snapshot["content"] };
+				parent: Change;
 			}
 		>
 	> = {};
@@ -305,7 +314,6 @@ const getChanges = async (
 			if (previousChangeSetId) {
 				parent = await lix.db
 					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.innerJoin(
 						"change_set_element",
 						"change_set_element.change_id",
@@ -317,15 +325,14 @@ const getChanges = async (
 					.where("change.file_id", "=", fileId)
 					.where(changeHasLabel({ name: "checkpoint" }))
 					.selectAll("change")
-					.select("snapshot.content")
 					.orderBy("change.created_at", "desc")
 					.executeTakeFirst();
 			}
 
 			// Process parent content if it exists
-			if (parent && typeof parent.content === 'string') {
+			if (parent && typeof parent.snapshot_content === "string") {
 				try {
-					parent.content = JSON.parse(parent.content);
+					parent.snapshot_content = JSON.parse(parent.snapshot_content);
 				} catch (e) {
 					console.log("Error parsing parent JSON:", e);
 					// Keep as is if not valid JSON
@@ -340,9 +347,8 @@ const getChanges = async (
 				plugin_key: change.plugin_key,
 				schema_key: change.schema_key,
 				schema_version: change.schema_version,
-				snapshot_id: "",
 				created_at: "",
-				content: null
+				snapshot_content: null,
 			};
 		}
 	}
@@ -353,52 +359,54 @@ const getChanges = async (
 const getIntermediateChanges = async (
 	lix: Lix,
 	fileId: string,
-	latestCheckpointChangeSetId?: string | null,
+	latestCheckpointChangeSetId?: string | null
 ): Promise<
 	Record<
 		string,
 		Array<
 			Change & {
-				content: Snapshot["content"];
-				parent: Change & { content: Snapshot["content"] };
+				parent: Change;
 			}
 		>
 	>
 > => {
-	// Get the working change set ID 
+	// Get the working change set ID
 	const workingChangeSetId = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
 		.selectAll("version")
 		.executeTakeFirst()
-		.then(version => version?.working_change_set_id);
+		.then((version) => version?.working_change_set_id);
 
 	const intermediateLeafChanges = await lix.db
 		.selectFrom("change")
-		.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
-		.innerJoin("change_set_element", "change_set_element.change_id", "change.id")
+		.innerJoin(
+			"change_set_element",
+			"change_set_element.change_id",
+			"change.id"
+		)
 		.where(changeSetElementIsLeafOf([{ id: workingChangeSetId! }]))
-		.where(eb =>
+		.where((eb) =>
 			workingChangeSetId
 				? eb("change_set_element.change_set_id", "=", workingChangeSetId)
 				: eb.exists(
-					eb.selectFrom("change_set_element")
-						.whereRef("change_set_element.change_id", "=", "change.id")
-						.where(eb => eb.not(changeHasLabel({ name: "checkpoint" })))
-				)
+						eb
+							.selectFrom("change_set_element")
+							.whereRef("change_set_element.change_id", "=", "change.id")
+							.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
+					)
 		)
 		.where("change.file_id", "=", fileId)
 		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 		.selectAll("change")
-		.select("snapshot.content")
 		.execute();
 
 	// Parse the content fields if they are JSON strings
-	const processedChanges = intermediateLeafChanges.map(change => {
+	const processedChanges = intermediateLeafChanges.map((change) => {
 		// Ensure content field is properly parsed from JSON if needed
-		if (typeof change.content === 'string') {
+		if (typeof change.snapshot_content === "string") {
 			try {
-				change.content = JSON.parse(change.content);
+				change.snapshot_content = JSON.parse(change.snapshot_content);
 			} catch (e) {
 				console.log("Error parsing JSON:", e);
 				// Keep as is if not valid JSON
@@ -411,8 +419,7 @@ const getIntermediateChanges = async (
 		string,
 		Array<
 			Change & {
-				content: Snapshot["content"];
-				parent: Change & { content: Snapshot["content"] };
+				parent: Change;
 			}
 		>
 	> = {};
@@ -434,10 +441,8 @@ const getIntermediateChanges = async (
 		for (const change of row) {
 			// defining a parent as the last checkpoint change
 			if (latestCheckpointChangeSetId) {
-
 				const parent = await lix.db
 					.selectFrom("change")
-					.innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
 					.innerJoin(
 						"change_set_element",
 						"change_set_element.change_id",
@@ -452,13 +457,12 @@ const getIntermediateChanges = async (
 					.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 					.where(changeHasLabel({ name: "checkpoint" }))
 					.selectAll("change")
-					.select("snapshot.content")
 					.executeTakeFirst();
 
 				// Process parent content if it exists
-				if (parent && typeof parent.content === 'string') {
+				if (parent && typeof parent.snapshot_content === "string") {
 					try {
-						parent.content = JSON.parse(parent.content);
+						parent.snapshot_content = JSON.parse(parent.snapshot_content);
 					} catch (e) {
 						console.log("Error parsing JSON:", e);
 						// Keep as is if not valid JSON
@@ -473,9 +477,8 @@ const getIntermediateChanges = async (
 					plugin_key: change.plugin_key,
 					schema_key: change.schema_key,
 					schema_version: change.schema_version,
-					snapshot_id: "",
 					created_at: "",
-					content: null
+					snapshot_content: null,
 				};
 			}
 		}

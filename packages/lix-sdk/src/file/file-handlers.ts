@@ -1,6 +1,6 @@
 import { executeSync } from "../database/execute-sync.js";
 import type { LixFile } from "./schema.js";
-import { LixFileSchema } from "./schema.js";
+import { LixFileDescriptorSchema } from "./schema.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import { lixUnknownFileFallbackPlugin } from "./unknown-file-fallback-plugin.js";
@@ -23,16 +23,17 @@ function globSync(args: {
 }
 
 export function handleFileInsert(args: {
-	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
+	lix: Pick<Lix, "sqlite" | "plugin" | "db" | "hooks">;
 	file: LixFile;
 	versionId: string;
+	untracked?: boolean;
 }): 0 | 1 {
 	// Insert the file metadata into state table
 	executeSync({
 		lix: args.lix,
 		query: args.lix.db.insertInto("state_all").values({
 			entity_id: args.file.id,
-			schema_key: "lix_file",
+			schema_key: LixFileDescriptorSchema["x-lix-key"],
 			file_id: args.file.id,
 			plugin_key: "lix_own_entity",
 			snapshot_content: {
@@ -40,8 +41,9 @@ export function handleFileInsert(args: {
 				path: args.file.path,
 				metadata: args.file.metadata || null,
 			},
-			schema_version: LixFileSchema["x-lix-version"],
+			schema_version: LixFileDescriptorSchema["x-lix-version"],
 			version_id: args.versionId,
+			untracked: args.untracked || false,
 		}),
 	});
 
@@ -86,6 +88,7 @@ export function handleFileInsert(args: {
 				storeDetectedChangeSchema({
 					lix: args.lix,
 					schema: change.schema,
+					untracked: args.untracked || false,
 				});
 			}
 
@@ -101,6 +104,7 @@ export function handleFileInsert(args: {
 						snapshot_content: change.snapshot_content as any,
 						schema_version: change.schema["x-lix-version"],
 						version_id: args.versionId,
+						untracked: args.untracked || false,
 					}),
 				});
 			}
@@ -142,6 +146,7 @@ export function handleFileInsert(args: {
 							snapshot_content: change.snapshot_content as any,
 							schema_version: change.schema["x-lix-version"],
 							version_id: args.versionId,
+							untracked: args.untracked || false,
 						}),
 					});
 				}
@@ -159,13 +164,20 @@ export function handleFileInsert(args: {
 		// Do NOT invoke fallback plugin if a plugin was found, even if it returned no changes
 	}
 
+	// Emit file change event
+	args.lix.hooks._emit("file_change", {
+		fileId: args.file.id,
+		operation: "inserted",
+	});
+
 	return 0;
 }
 
 export function handleFileUpdate(args: {
-	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
+	lix: Pick<Lix, "sqlite" | "plugin" | "db" | "hooks">;
 	file: LixFile;
 	versionId: string;
+	untracked?: boolean;
 }): 0 | 1 {
 	// Update the file metadata in state table
 	executeSync({
@@ -178,9 +190,10 @@ export function handleFileUpdate(args: {
 					path: args.file.path,
 					metadata: args.file.metadata || null,
 				},
+				untracked: args.untracked || false,
 			})
 			.where("entity_id", "=", args.file.id)
-			.where("schema_key", "=", "lix_file")
+			.where("schema_key", "=", "lix_file_descriptor")
 			.where("version_id", "=", args.versionId),
 	});
 
@@ -237,6 +250,7 @@ export function handleFileUpdate(args: {
 					storeDetectedChangeSchema({
 						lix: args.lix,
 						schema: change.schema,
+						untracked: args.untracked || false,
 					});
 				}
 
@@ -265,6 +279,7 @@ export function handleFileUpdate(args: {
 								snapshot_content: change.snapshot_content as any,
 								schema_version: change.schema["x-lix-version"],
 								version_id: args.versionId,
+								untracked: args.untracked || false,
 							}),
 						});
 					}
@@ -294,6 +309,7 @@ export function handleFileUpdate(args: {
 						storeDetectedChangeSchema({
 							lix: args.lix,
 							schema: change.schema,
+							untracked: args.untracked || false,
 						});
 					}
 
@@ -321,6 +337,7 @@ export function handleFileUpdate(args: {
 									snapshot_content: change.snapshot_content as any,
 									schema_version: change.schema["x-lix-version"],
 									version_id: args.versionId,
+									untracked: args.untracked || false,
 								}),
 							});
 						}
@@ -336,6 +353,12 @@ export function handleFileUpdate(args: {
 			});
 		}
 	}
+
+	// Emit file change event
+	args.lix.hooks._emit("file_change", {
+		fileId: args.file.id,
+		operation: "updated",
+	});
 
 	return 0;
 }

@@ -40,13 +40,13 @@ Defined in: [runtime/type.ts:8](https://github.com/opral/monorepo/tree/main/inla
 
 > **defineCustomClientStrategy**: [`defineCustomClientStrategy`](-internal-.md#definecustomclientstrategy)
 
-Defined in: [runtime/type.ts:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+Defined in: [runtime/type.ts:37](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 #### defineCustomServerStrategy
 
 > **defineCustomServerStrategy**: [`defineCustomServerStrategy`](-internal-.md#definecustomserverstrategy)
 
-Defined in: [runtime/type.ts:35](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+Defined in: [runtime/type.ts:36](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 #### deLocalizeHref
 
@@ -76,25 +76,31 @@ Defined in: [runtime/type.ts:13](https://github.com/opral/monorepo/tree/main/inl
 
 > **extractLocaleFromCookie**: [`extractLocaleFromCookie`](-internal-.md#extractlocalefromcookie)
 
-Defined in: [runtime/type.ts:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+Defined in: [runtime/type.ts:31](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 #### extractLocaleFromHeader
 
 > **extractLocaleFromHeader**: [`extractLocaleFromHeader`](-internal-.md#extractlocalefromheader)
 
-Defined in: [runtime/type.ts:31](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+Defined in: [runtime/type.ts:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 #### extractLocaleFromNavigator
 
 > **extractLocaleFromNavigator**: [`extractLocaleFromNavigator`](-internal-.md#extractlocalefromnavigator)
 
-Defined in: [runtime/type.ts:32](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+Defined in: [runtime/type.ts:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 #### extractLocaleFromRequest
 
 > **extractLocaleFromRequest**: [`extractLocaleFromRequest`](-internal-.md#extractlocalefromrequest)
 
 Defined in: [runtime/type.ts:29](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+
+#### extractLocaleFromRequestAsync
+
+> **extractLocaleFromRequestAsync**: [`extractLocaleFromRequestAsync`](-internal-.md#extractlocalefromrequestasync)
+
+Defined in: [runtime/type.ts:30](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 #### extractLocaleFromUrl
 
@@ -106,7 +112,7 @@ Defined in: [runtime/type.ts:28](https://github.com/opral/monorepo/tree/main/inl
 
 > **generateStaticLocalizedUrls**: [`generateStaticLocalizedUrls`](-internal-.md#generatestaticlocalizedurls)
 
-Defined in: [runtime/type.ts:33](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+Defined in: [runtime/type.ts:34](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 #### getLocale
 
@@ -196,7 +202,7 @@ Defined in: [runtime/type.ts:7](https://github.com/opral/monorepo/tree/main/inla
 
 > **trackMessageCall**: [`trackMessageCall`](-internal-.md#trackmessagecall)
 
-Defined in: [runtime/type.ts:34](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
+Defined in: [runtime/type.ts:35](https://github.com/opral/monorepo/tree/main/inlang/packages/paraglide/paraglide-js/src/compiler/runtime/type.ts)
 
 #### urlPatterns
 

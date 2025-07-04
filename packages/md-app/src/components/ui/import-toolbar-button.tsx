@@ -9,6 +9,7 @@ import { getEditorDOMFromHtmlString } from '@udecode/plate';
 import { useEditorRef } from '@udecode/plate/react';
 import { ArrowUpToLineIcon } from 'lucide-react';
 import { useFilePicker } from 'use-file-picker';
+import type { SelectedFilesOrErrors } from 'use-file-picker/types';
 
 import {
   DropdownMenu,
@@ -50,8 +51,10 @@ export function ImportToolbarButton(props: DropdownMenuProps) {
       // '.mdx'
     ],
     multiple: false,
-    onFilesSelected: async ({ plainFiles }) => {
-      const text = await plainFiles[0].text();
+    readFilesContent: false,
+    onFilesSelected: async (data: SelectedFilesOrErrors<undefined, unknown>) => {
+      if (!data.plainFiles || data.plainFiles.length === 0) return;
+      const text = await data.plainFiles[0].text();
 
       const nodes = getFileNodes(text, 'markdown');
 
@@ -62,8 +65,10 @@ export function ImportToolbarButton(props: DropdownMenuProps) {
   const { openFilePicker: openHtmlFilePicker } = useFilePicker({
     accept: ['text/html'],
     multiple: false,
-    onFilesSelected: async ({ plainFiles }) => {
-      const text = await plainFiles[0].text();
+    readFilesContent: false,
+    onFilesSelected: async (data: SelectedFilesOrErrors<undefined, unknown>) => {
+      if (!data.plainFiles || data.plainFiles.length === 0) return;
+      const text = await data.plainFiles[0].text();
 
       const nodes = getFileNodes(text, 'html');
 

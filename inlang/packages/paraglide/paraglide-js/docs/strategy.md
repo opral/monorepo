@@ -523,7 +523,7 @@ export function onRequest(request, next) {
 
 In addition to overwriting the `getLocale()` and `setLocale()` functions, Paraglide supports defining custom strategies that can be included alongside built-in strategies in your strategy array. This approach provides a cleaner way to encapsulate custom locale resolution logic.
 
-Custom strategies must follow the naming pattern `custom-<name>` where `<name>` contains only alphanumeric characters.
+Custom strategies must follow the naming pattern `custom-<name>` where `<name>` can contain any characters (including hyphens, underscores, etc.).
 
 They can be defined in both client- and server-side environments, enabling you to develop reusable locale resolution logic that integrates seamlessly with Paraglide's runtime. Use the `defineCustomClientStrategy()` and `defineCustomServerStrategy()` functions to write strategies for each environment. Follow the examples below to define your own custom strategies.
 
@@ -541,9 +541,14 @@ compile({
 
 Define a custom strategy for client-side locale resolution using `defineCustomClientStrategy()`. The handler must implement both `getLocale()` and `setLocale()` methods.
 
+**When to use**: Use client-side custom strategies when you need to read/write locale from sources that are only available in the browser (like query parameters, sessionStorage, URL hash, etc.).
+
+**Where to call**: Define your custom strategies in your app's initialization code, before the runtime starts using them. For framework apps, this is typically in your main app file, a layout component, or a plugin/middleware setup.
+
 ```js
 import { defineCustomClientStrategy } from "./paraglide/runtime.js";
 
+// Example 1: sessionStorage strategy
 defineCustomClientStrategy("custom-sessionStorage", {
   getLocale: () => {
     return sessionStorage.getItem("user-locale") ?? undefined;
@@ -551,56 +556,123 @@ defineCustomClientStrategy("custom-sessionStorage", {
   setLocale: (locale) => {
     sessionStorage.setItem("user-locale", locale);
   }
-})
+});
+
+// Example 2: Query parameter strategy (answers the original question!)
+defineCustomClientStrategy("custom-queryParam", {
+  getLocale: () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('locale') ?? undefined;
+  },
+  setLocale: (locale) => {
+    const url = new URL(window.location);
+    url.searchParams.set('locale', locale);
+    window.history.replaceState({}, '', url.toString());
+  }
+});
+
+// Example 3: URL hash strategy
+defineCustomClientStrategy("custom-hash", {
+  getLocale: () => {
+    const hash = window.location.hash.slice(1); // Remove #
+    return hash.startsWith('lang=') ? hash.replace('lang=', '') : undefined;
+  },
+  setLocale: (locale) => {
+    window.location.hash = `lang=${locale}`;
+  }
+});
 ```
 
 #### Server-side custom strategies
 
 For server-side custom strategies, use `defineCustomServerStrategy()`. The handler only needs to implement a `getLocale()` method that accepts an optional `Request` parameter.
 
+**When to use**: Use server-side custom strategies when you need to read locale from server-specific sources (like custom headers, databases, authentication systems, etc.).
+
+**Where to call**: Define your custom strategies in your server initialization code, before the middleware starts processing requests. For framework apps, this is typically in your server setup file or middleware configuration.
+
+**Async support**: Server-side custom strategies support async operations! If your `getLocale` method returns a Promise, the system will automatically use the async locale extraction path.
+
 ```js
 import { defineCustomServerStrategy } from "./paraglide/runtime.js";
 
+// Example 1: Custom header strategy
 defineCustomServerStrategy("custom-header", {
   getLocale: (request) => {
     const locale = request?.headers.get("X-Custom-Locale");
     return locale ?? undefined;
   }
 });
-```
 
-#### Advanced example: Custom database strategy
+// Example 2: Async database strategy
+defineCustomServerStrategy("custom-database", {
+  getLocale: async (request) => {
+    const userId = extractUserIdFromRequest(request);
+    if (!userId) return undefined;
 
-Here's a more complex example that retrieves the user's preferred locale from a database:
-
-```js
-import { defineCustomClientStrategy, defineCustomServerStrategy } from "./paraglide/runtime.js";
-import { getUserLocale, setUserLocale, extractUserIdFromRequest } from "./services/userService.js";
-
-// Client-side strategy
-defineCustomClientStrategy("custom-userPreference", {
-  getLocale: () => {
-    // Get from memory cache, framework based state store or return undefined to fall back to next strategy
-    return window.__userLocale ?? undefined;
-  },
-  setLocale: async (locale) => {
-    // Update user preference in database
-    await setUserLocale(locale);
-    window.__userLocale = locale;
+    try {
+      // This async call is supported!
+      return await getUserLocaleFromDatabase(userId);
+    } catch (error) {
+      console.warn("Failed to fetch user locale:", error);
+      return undefined;
+    }
   }
 });
 
-// Server-side strategy
+// Example 3: Query parameter on server (for SSR)
+defineCustomServerStrategy("custom-serverQuery", {
+  getLocale: (request) => {
+    const url = new URL(request.url);
+    return url.searchParams.get('locale') ?? undefined;
+  }
+});
+```
+
+#### Advanced example: Full-stack user preference strategy
+
+Here's a complete example showing how to implement user preference strategies on both client and server, with async database support:
+
+```js
+// File: src/locale-strategies.js
+import { defineCustomClientStrategy, defineCustomServerStrategy } from "./paraglide/runtime.js";
+import { getUserLocale, setUserLocale, extractUserIdFromRequest } from "./services/userService.js";
+
+// Client-side strategy - works with user preferences in browser
+defineCustomClientStrategy("custom-userPreference", {
+  getLocale: () => {
+    // Get from memory cache, framework state store, or return undefined to fall back
+    return window.__userLocale ?? undefined;
+  },
+  setLocale: async (locale) => {
+    try {
+      // Update user preference in database via API
+      await setUserLocale(locale);
+      window.__userLocale = locale;
+      
+      // Optional: Also update URL query param for immediate reflection
+      const url = new URL(window.location);
+      url.searchParams.set('locale', locale);
+      window.history.replaceState({}, '', url.toString());
+    } catch (error) {
+      console.warn("Failed to save user locale preference:", error);
+      // Strategy can still succeed even if save fails
+    }
+  }
+});
+
+// Server-side strategy - async database lookup
 defineCustomServerStrategy("custom-userPreference", {
   getLocale: async (request) => {
     const userId = extractUserIdFromRequest(request);
     if (!userId) return undefined;
 
     try {
+      // Async database call - this is now fully supported!
       return await getUserLocale(userId);
     } catch (error) {
       console.warn("Failed to fetch user locale from database:", error);
-      return undefined;
+      return undefined; // Fallback to next strategy
     }
   }
 });
@@ -611,26 +683,36 @@ defineCustomServerStrategy("custom-userPreference", {
 Custom strategies offer several advantages over the traditional `overwriteGetLocale()` approach:
 
 - **Composability**: They can be combined with built-in strategies in a single strategy array
-- **Priority handling**: They respect the strategy order, allowing fallbacks to other strategies
+- **Priority handling**: They respect the strategy order, allowing fallbacks to other strategies  
 - **Framework integration**: Easier to package and distribute with framework adapters
 - **Type safety**: Better TypeScript support for custom strategy handlers
 - **Error isolation**: If a custom strategy fails, execution continues with the next strategy
+- **Async support**: Server-side strategies can perform async operations like database queries
+- **Middleware compatibility**: Work seamlessly with Paraglide's server middleware
 
-#### Custom strategy validation
+#### Important Notes
 
-Custom strategies are validated at definition time. The strategy name must:
+**Async Support**: 
+- ✅ Server-side strategies support async `getLocale` methods
+- ❌ Client-side strategies must have synchronous `getLocale` methods (but `setLocale` can be async)
+- If you need async client-side locale detection, use the `overwriteGetLocale()` approach instead
 
-- Start with `custom-`
-- Contain only alphanumeric characters after the prefix
-- Be unique (you cannot define the same custom strategy twice)
+**Strategy Priority**: 
+- Custom strategies are processed in the order they appear in your `strategy` array
+- If a custom strategy returns `undefined`, the system falls back to the next strategy
+- Server-side: Custom strategies are checked first, then built-in strategies
+- Client-side: All strategies (custom and built-in) are processed in your defined order
 
-Invalid examples:
-- `custom-my_strategy` (contains underscore)
-- `custom-` (no name after prefix)
-- `my-custom-strategy` (doesn't start with `custom-`)
-- `custom-my-strategy` (contains hyphen in name part)
+**Validation**: 
+Custom strategy names must start with `custom-` followed by at least one character. The name part after `custom-` can contain any characters including hyphens, underscores, etc.
 
 Valid examples:
 - `custom-sessionStorage`
-- `custom-userPreference`
-- `custom-header`
+- `custom-user-preference` 
+- `custom-query_param`
+- `custom-database`
+
+Invalid examples:
+- `custom-` (no name after prefix)
+- `my-custom-strategy` (doesn't start with `custom-`)
+- `sessionStorage` (missing `custom-` prefix)

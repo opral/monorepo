@@ -15,10 +15,10 @@ npm install @lix-js/sdk @lix-js/plugin-prosemirror
 ### Initialize Lix with the Prosemirror Plugin
 
 ```ts
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { plugin as prosemirrorPlugin } from "@lix-js/plugin-prosemirror";
 
-export const lix = await openLixInMemory({
+export const lix = await openLix({
   providePlugins: [prosemirrorPlugin],
 });
 ```

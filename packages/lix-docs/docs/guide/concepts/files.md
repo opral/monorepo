@@ -108,7 +108,7 @@ Each file type has a corresponding plugin:
 When opening a Lix instance, you specify which plugins to use:
 
 ```javascript
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [jsonPlugin, csvPlugin],
 });

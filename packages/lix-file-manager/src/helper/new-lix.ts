@@ -1,9 +1,9 @@
-import { newLixFile as _newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { newLixFile as _newLixFile, openLix } from "@lix-js/sdk";
 import { supportedFileTypes } from "@/state.ts";
 import { saveLixToOpfs } from "./saveLixToOpfs.ts";
 
 export async function createNewLixFileInOpfs(): Promise<{ id: string }> {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await _newLixFile(),
 		providePlugins: supportedFileTypes.map((type) => type.plugin),
 	});

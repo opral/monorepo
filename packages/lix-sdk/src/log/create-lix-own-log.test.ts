@@ -1,11 +1,11 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import type { Lix } from "../lix/open-lix.js";
 import { createLixOwnLog } from "./create-lix-own-log.js";
 import type { Log } from "./schema.js";
 
 test("should insert logs default log levels when lix_log_levels is not set)", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		keyValues: [{ key: "lix_log_levels", value: ["info", "warn", "error"] }],
 	});
 
@@ -28,7 +28,7 @@ test("should insert logs default log levels when lix_log_levels is not set)", as
 });
 
 test("should insert only specified levels when lix_log_levels=['warn', 'error']", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		keyValues: [{ key: "lix_log_levels", value: ["warn", "error"] }],
 	});
 
@@ -48,7 +48,7 @@ test("should insert only specified levels when lix_log_levels=['warn', 'error']"
 });
 
 test("should insert only specified levels when lix_log_levels=['debug']", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		keyValues: [{ key: "lix_log_levels", value: ["debug"] }],
 	});
 
@@ -65,7 +65,7 @@ test("should insert only specified levels when lix_log_levels=['debug']", async 
 });
 
 test("should insert all levels contain wildcard '*'", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		keyValues: [{ key: "lix_log_levels", value: ["*"] }],
 	});
 

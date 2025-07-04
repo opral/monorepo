@@ -117,14 +117,12 @@ function newCsvFile(changes: Change[]) {
 		throw new Error("No header change found. Can't reconstruct csv file.");
 	}
 
-	// @ts-expect-error - waiting for inlining https://github.com/opral/lix-sdk/issues/307
 	if (headerChange.snapshot_content === null) {
 		throw new Error("Header snapshot is empty. Can't reconstruct csv file.");
 	}
 
 	// create a csv file that has the header column names
 	return new TextEncoder().encode(
-		// @ts-expect-error - waiting for inlining https://github.com/opral/lix-sdk/issues/307
 		headerChange.snapshot_content.columnNames.join(",") + "\n",
 	);
 }

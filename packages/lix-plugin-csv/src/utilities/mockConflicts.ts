@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-import { openLixInMemory, toBlob } from "@lix-js/sdk";
+import { openLix, toBlob } from "@lix-js/sdk";
 import { mockChanges } from "./mockChanges.js";
 import { detectChanges } from "../detectChanges.js";
 
@@ -27,7 +27,7 @@ export async function mockConflicts(args: {
 	metadata: Record<string, string>;
 }) {
 	const { lix: commonLix } = await mockChanges({
-		lix: await openLixInMemory({
+		lix: await openLix({
 			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}),
 		file: { path: "/mock", metadata: args.metadata },
@@ -37,7 +37,7 @@ export async function mockConflicts(args: {
 	const commonLixBlob = await toBlob({ lix: commonLix });
 
 	const { lix: sourceLix } = await mockChanges({
-		lix: await openLixInMemory({
+		lix: await openLix({
 			blob: commonLixBlob,
 			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}),
@@ -46,7 +46,7 @@ export async function mockConflicts(args: {
 	});
 
 	const { lix: targetLix } = await mockChanges({
-		lix: await openLixInMemory({
+		lix: await openLix({
 			blob: commonLixBlob,
 			providePlugins: [{ key: "mock", detectChanges, detectChangesGlob: "*" }],
 		}),

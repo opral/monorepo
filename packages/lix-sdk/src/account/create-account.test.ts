@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createAccount } from "./create-account.js";
 import { createVersion } from "../version/create-version.js";
 
 test("should create an account", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const version = await createVersion({
 		lix,
@@ -38,7 +38,7 @@ test("should create an account", async () => {
 });
 
 test("should create an account using active version when lixcol_version_id is not provided", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const accountName = "test_account_active";
 	const account = await createAccount({

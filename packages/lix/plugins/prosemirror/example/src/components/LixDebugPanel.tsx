@@ -1,15 +1,20 @@
-import { toBlob } from "@lix-js/sdk";
 import { Change } from "@lix-js/sdk";
 import { toUserTime } from "../utilities/timeUtils";
-import { useQuery } from "../hooks/useQuery";
-import { selectChanges, selectProsemirrorDocument } from "../queries";
+import { selectChanges, selectProsemirrorDoc } from "../queries";
 import { schema } from "../prosemirror/schema";
 import { useState, useRef } from "react";
-import { lix } from "../state";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 const LixDebugPanel = () => {
-	const [changes] = useQuery(selectChanges);
-	const [currentDoc] = useQuery(selectProsemirrorDocument);
+	const lix = useLix();
+	const changes = useQuery(selectChanges);
+	const currentDoc = useQueryTakeFirst(selectProsemirrorDoc);
+	const jsonDoc = JSON.parse(
+		new TextDecoder().decode(
+			currentDoc.data?.data ?? new TextEncoder().encode("{}"),
+		),
+	);
+
 
 	if (changes === null) {
 		return <p>Loading...</p>;
@@ -18,7 +23,7 @@ const LixDebugPanel = () => {
 	const handleDownloadLixDb = async () => {
 		try {
 			// Get the Lix database blob using the correct API
-			const blob = await toBlob({ lix });
+			const blob = await lix.toBlob();
 
 			// Create a download link
 			const url = URL.createObjectURL(blob);
@@ -39,22 +44,52 @@ const LixDebugPanel = () => {
 		}
 	};
 
-	// Function to get a readable content preview for changes
-	const getContentPreview = (change: Change & { content: any }): string => {
-		if (!change.content) return "No content available";
+	const handleReset = async () => {
+		if (
+			!confirm(
+				"Are you sure you want to reset? This will delete all data and reload the page.",
+			)
+		) {
+			return;
+		}
 
-		if (typeof change.content === "object") {
+		try {
+			// Close the Lix instance first
+			await lix.close();
+
+			// Delete the OPFS file
+			const opfsRoot = await navigator.storage.getDirectory();
+			await opfsRoot.removeEntry("example.lix");
+
+			// Reload the window
+			window.location.reload();
+		} catch (error) {
+			console.error("Error during reset:", error);
+			alert("Error during reset: " + (error as Error).message);
+			// Still reload even if there was an error, in case the file was partially deleted
+			window.location.reload();
+		}
+	};
+
+	// Function to get a readable content preview for changes
+	const getContentPreview = (change: Change): string => {
+		if (!change.snapshot_content) return "No content available";
+
+		if (typeof change.snapshot_content === "object") {
 			// For text nodes, show the text content
-			if (change.content.text) {
+			if (change.snapshot_content.text) {
 				return (
-					change.content.text.substring(0, 60) +
-					(change.content.text.length > 60 ? "..." : "")
+					change.snapshot_content.text.substring(0, 60) +
+					(change.snapshot_content.text.length > 60 ? "..." : "")
 				);
 			}
 
 			// For paragraph nodes, extract content from their children
-			if (change.content.content && Array.isArray(change.content.content)) {
-				const textNodes = change.content.content
+			if (
+				change.snapshot_content.content &&
+				Array.isArray(change.snapshot_content.content)
+			) {
+				const textNodes = change.snapshot_content.content
 					.filter((node: any) => node.type === "text" && node.text)
 					.map((node: any) => node.text);
 
@@ -69,8 +104,9 @@ const LixDebugPanel = () => {
 
 			// For empty paragraphs or other empty nodes, just return empty string
 			if (
-				change.content.type === "paragraph" &&
-				(!change.content.content || change.content.content.length === 0)
+				change.snapshot_content.type === "paragraph" &&
+				(!change.snapshot_content.content ||
+					change.snapshot_content.content.length === 0)
 			) {
 				return "";
 			}
@@ -92,6 +128,9 @@ const LixDebugPanel = () => {
 					<button onClick={handleDownloadLixDb} className="btn btn-sm">
 						Download Lix Blob
 					</button>
+					<button onClick={handleReset} className="btn btn-sm btn-error">
+						Reset
+					</button>
 				</div>
 			</div>
 
@@ -101,7 +140,7 @@ const LixDebugPanel = () => {
 					<h4 className="text-lg font-medium mb-2">Current Document AST</h4>
 					<div className="border border-base-300 rounded overflow-auto">
 						<pre className="p-4 whitespace-pre">
-							{JSON.stringify(currentDoc, null, 2)}
+							{JSON.stringify(jsonDoc, null, 2)}
 						</pre>
 					</div>
 				</div>
@@ -109,11 +148,12 @@ const LixDebugPanel = () => {
 				{/* All Changes */}
 				<div>
 					<h4 className="text-lg font-medium mb-2">
-						All Changes {changes.length > 0 ? `(${changes.length})` : ""}
+						All Changes{" "}
+						{(changes.data?.length ?? 0 > 0) ? `(${changes.data?.length})` : ""}
 					</h4>
 					<div className="border border-base-300 rounded overflow-auto">
-						{changes.length > 0 ? (
-							changes.map((change) => (
+						{(changes.data?.length ?? 0 > 0) ? (
+							changes.data?.map((change) => (
 								<div
 									key={`change-${change?.id}`}
 									className="p-2 border border-base-300"
@@ -123,7 +163,7 @@ const LixDebugPanel = () => {
 									</div>
 
 									<div className="mb-0.5">
-										Type: {change?.content?.type || "Unknown"}
+										Type: {change?.snapshot_content?.type || "Unknown"}
 									</div>
 
 									<div className="text-sm">
@@ -145,6 +185,7 @@ const LixDebugPanel = () => {
 
 // Component for importing ProseMirror documents
 const ProsemirrorDocImport = () => {
+	const lix = useLix();
 	const [importError, setImportError] = useState<string | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -222,12 +263,12 @@ const ProsemirrorDocImport = () => {
 
 // Component for exporting ProseMirror document
 const ProsemirrorDocExport = () => {
-	const [currentDoc] = useQuery(selectProsemirrorDocument);
+	const currentDoc = useQuery(selectProsemirrorDoc);
 
 	const handleExportDocument = () => {
 		try {
 			// Create a blob with the document content
-			const docContent = JSON.stringify(currentDoc, null, 2);
+			const docContent = JSON.stringify(currentDoc.data, null, 2);
 			const blob = new Blob([docContent], { type: "application/json" });
 
 			// Create a download link

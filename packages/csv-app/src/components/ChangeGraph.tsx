@@ -11,10 +11,10 @@ import {
 import dagre from "@dagrejs/dagre";
 import "@xyflow/react/dist/style.css";
 import { useMemo } from "react";
-import { Change, ChangeSetEdge, Snapshot } from "@lix-js/sdk";
+import { Change, ChangeSetEdge } from "@lix-js/sdk";
 
 export const ChangeGraph = (props: {
-	changes: Array<Change & { content: Snapshot["content"] }>;
+	changes: Array<Change>;
 	edges: ChangeSetEdge[];
 	highlightChanges: Array<Change>;
 }) => {
@@ -46,7 +46,7 @@ export const ChangeGraph = (props: {
  */
 const layoutElements = (
 	dagreGraph: dagre.graphlib.Graph,
-	changes: Array<Change & { content: Snapshot["content"] }>,
+	changes: Array<Change>,
 	edges: ChangeSetEdge[],
 	highlightChanges: Array<Change>,
 	direction: "TB" | "LR" = "TB"
@@ -57,7 +57,7 @@ const layoutElements = (
 		const dimensions = calculateNodeDimensions(
 			// simulate two line node where the bottom line
 			// is a uuid
-			(JSON.stringify(change.content) ?? "deleted") +
+			(JSON.stringify(change.snapshot_content) ?? "deleted") +
 				"\n00000000-0000-0000-0000-000000000000"
 		);
 		dagreGraph.setNode(change.id, dimensions);

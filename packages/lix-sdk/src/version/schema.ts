@@ -1,4 +1,3 @@
-import type { Insertable, Selectable, Updateable } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
@@ -7,13 +6,6 @@ import type {
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import { nanoid } from "../database/nano-id.js";
 import { humanId } from "human-id";
-
-// initial ids (lack of having a separate creation and migration schema)
-export const INITIAL_VERSION_ID = "BoIaHTW9ePX6pNc8";
-export const INITIAL_CHANGE_SET_ID = "2j9jm90ajc9j90";
-export const INITIAL_WORKING_CHANGE_SET_ID = "h2h09ha92jfaw2";
-export const INITIAL_GLOBAL_VERSION_CHANGE_SET_ID = "23n0ajsf328ns";
-export const INITIAL_GLOBAL_VERSION_WORKING_CHANGE_SET_ID = "om3290j08gj8j23";
 
 export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 	// Create both primary and _all views for version with global version constraint
@@ -33,12 +25,66 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 		},
 	});
 
-	// Create the active_version table (simple table - no change control needed)
+	// Create active_version as an entity view manually with untracked state
 	sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS active_version (
-      version_id TEXT NOT NULL
-    );
-  `);
+		CREATE VIEW IF NOT EXISTS active_version AS
+		SELECT
+			json_extract(snapshot_content, '$.version_id') AS version_id,
+			inherited_from_version_id AS lixcol_inherited_from_version_id,
+			created_at AS lixcol_created_at,
+			updated_at AS lixcol_updated_at,
+			file_id AS lixcol_file_id,
+			change_id AS lixcol_change_id,
+			untracked AS lixcol_untracked
+		FROM state_all
+		WHERE schema_key = 'lix_active_version' AND version_id = 'global';
+
+		CREATE TRIGGER IF NOT EXISTS active_version_insert
+		INSTEAD OF INSERT ON active_version
+		BEGIN
+			INSERT INTO state_all (
+				entity_id,
+				schema_key,
+				file_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				version_id,
+				untracked
+			) VALUES (
+				'active',
+				'lix_active_version',
+				'lix',
+				'lix_own_entity',
+				json_object('version_id', NEW.version_id),
+				'1.0',
+				'global',
+				1
+			);
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS active_version_update
+		INSTEAD OF UPDATE ON active_version
+		BEGIN
+			UPDATE state_all
+			SET
+				snapshot_content = json_object('version_id', NEW.version_id),
+				untracked = 1
+			WHERE
+				entity_id = 'active'
+				AND schema_key = 'lix_active_version'
+				AND version_id = 'global';
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS active_version_delete
+		INSTEAD OF DELETE ON active_version
+		BEGIN
+			DELETE FROM state_all
+			WHERE entity_id = 'active'
+			AND schema_key = 'lix_active_version'
+			AND version_id = 'global';
+		END;
+	`);
 }
 
 export const LixVersionSchema = {
@@ -77,15 +123,27 @@ export const LixVersionSchema = {
 } as const;
 LixVersionSchema satisfies LixSchemaDefinition;
 
+export const LixActiveVersionSchema = {
+	"x-lix-key": "lix_active_version",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["version_id"],
+	"x-lix-foreign-keys": {
+		version_id: {
+			schemaKey: "lix_version",
+			property: "id",
+		},
+	},
+	type: "object",
+	properties: {
+		version_id: { type: "string" },
+	},
+	required: ["version_id"],
+	additionalProperties: false,
+} as const;
+LixActiveVersionSchema satisfies LixSchemaDefinition;
+
 // Pure business logic type (inferred from schema)
 export type Version = FromLixSchemaDefinition<typeof LixVersionSchema>;
-
-// Simple table type for active_version (no schema needed - it's not change-controlled)
-export type ActiveVersionTable = {
-	version_id: string;
-};
-
-// Kysely operation types for the active_version table
-export type ActiveVersion = Selectable<ActiveVersionTable>;
-export type NewActiveVersion = Insertable<ActiveVersionTable>;
-export type ActiveVersionUpdate = Updateable<ActiveVersionTable>;
+export type ActiveVersion = FromLixSchemaDefinition<
+	typeof LixActiveVersionSchema
+>;

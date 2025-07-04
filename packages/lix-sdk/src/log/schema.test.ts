@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 
 test("log insert creates entries in the view", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert a log entry
 	await lix.db
@@ -26,7 +26,7 @@ test("log insert creates entries in the view", async () => {
 });
 
 test("log insert with custom id", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	const customId = "custom-log-id";
 
@@ -54,7 +54,7 @@ test("log insert with custom id", async () => {
 });
 
 test("log delete removes entries from the view", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert multiple logs
 	await lix.db
@@ -100,7 +100,7 @@ test("log delete removes entries from the view", async () => {
 });
 
 test("multiple log inserts with unique ids", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Insert multiple logs
 	await lix.db

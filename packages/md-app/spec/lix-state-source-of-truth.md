@@ -745,7 +745,7 @@ The existing e2e test demonstrates the core functionality and will be updated to
 ```typescript
 test("programmatically mutating entities should be reflected in the file and Plate editor", async () => {
   // Initialize with enhanced markdown plugin
-  const lix = await openLixInMemory({
+  const lix = await openLix({
     providePlugins: [plugin],
   });
 

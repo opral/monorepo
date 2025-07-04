@@ -1,6 +1,6 @@
 import type { DetectedChange, LixPlugin } from "@lix-js/sdk";
 import { flatten } from "flat";
-import { JSONPropertySchema } from "./schemas/JSONPropertySchema.js";
+import { JSONPropertySchema } from "./schemas/json-property.js";
 
 export const detectChanges: NonNullable<LixPlugin["detectChanges"]> = ({
 	before,

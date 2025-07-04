@@ -263,7 +263,7 @@ test("preferredLanguage precedence over url", async () => {
 	expect(locale).toBe("de");
 });
 
-test("returns locale from custom strategy", async () => {
+test("sync version no longer supports custom strategies", async () => {
 	const runtime = await createParaglide({
 		blob: await newProject({
 			settings: {
@@ -286,11 +286,12 @@ test("returns locale from custom strategy", async () => {
 		},
 	});
 
+	// Sync version skips custom strategies and falls back to baseLocale
 	const locale = runtime.extractLocaleFromRequest(request);
-	expect(locale).toBe("fr");
+	expect(locale).toBe("en"); // baseLocale fallback
 });
 
-test("falls back to next strategy when custom strategy returns undefined", async () => {
+test("sync version skips custom strategy and falls back to next built-in strategy", async () => {
 	const runtime = await createParaglide({
 		blob: await newProject({
 			settings: {
@@ -307,10 +308,10 @@ test("falls back to next strategy when custom strategy returns undefined", async
 
 	const request = new Request("http://example.com");
 	const locale = runtime.extractLocaleFromRequest(request);
-	expect(locale).toBe("en"); // Should fall back to baseLocale
+	expect(locale).toBe("en"); // Should fall back to baseLocale (skipping custom strategy)
 });
 
-test("custom strategy takes precedence over built-in strategies", async () => {
+test("sync version uses built-in strategies instead of custom strategies", async () => {
 	const runtime = await createParaglide({
 		blob: await newProject({
 			settings: {
@@ -333,10 +334,10 @@ test("custom strategy takes precedence over built-in strategies", async () => {
 	});
 
 	const locale = runtime.extractLocaleFromRequest(request);
-	expect(locale).toBe("de"); // Should use custom strategy, not cookie
+	expect(locale).toBe("fr"); // Should use cookie since custom strategy is skipped in sync version
 });
 
-test("multiple custom strategies work in order", async () => {
+test("sync version skips all custom strategies and uses baseLocale", async () => {
 	const runtime = await createParaglide({
 		blob: await newProject({
 			settings: {
@@ -357,5 +358,5 @@ test("multiple custom strategies work in order", async () => {
 
 	const request = new Request("http://example.com");
 	const locale = runtime.extractLocaleFromRequest(request);
-	expect(locale).toBe("fr"); // Should use second custom strategy
+	expect(locale).toBe("en"); // Should skip all custom strategies and use baseLocale
 });

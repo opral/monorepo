@@ -1,5 +1,5 @@
 import { test, expect, describe } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createEntityStateView } from "./entity-state.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
@@ -31,7 +31,7 @@ describe("createEntityViewIfNotExists", () => {
 	} as const;
 
 	test("should throw error if schema has no primary key", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		const invalidSchema: LixSchemaDefinition = {
 			"x-lix-key": "invalid_schema",
@@ -54,7 +54,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should create view with correct columns (no lixcol_version_id)", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -94,10 +94,12 @@ describe("createEntityViewIfNotExists", () => {
 		expect(entity).toHaveProperty("lixcol_created_at");
 		expect(entity).toHaveProperty("lixcol_updated_at");
 		expect(entity).toHaveProperty("lixcol_file_id", "test_file");
+		expect(entity).toHaveProperty("lixcol_untracked");
+		expect(entity?.lixcol_untracked).toBe(0); // Default value is false (0)
 	});
 
 	test("should create CRUD triggers", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -148,7 +150,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle insert operations without defaults", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -203,7 +205,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle update operations", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -261,7 +263,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle delete operations", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -306,7 +308,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle composite primary keys", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -372,7 +374,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should handle default values", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		let defaultIdCalled = false;
 		let defaultValueCalled = false;
@@ -449,7 +451,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should use dynamic file_id when not hardcoded", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -483,7 +485,7 @@ describe("createEntityViewIfNotExists", () => {
 	});
 
 	test("should use schema key as default view name", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityStateView({
 			lix,
@@ -510,5 +512,81 @@ describe("createEntityViewIfNotExists", () => {
 			name: "test_name",
 			value: 42,
 		});
+	});
+
+	test("should expose lixcol_untracked column for untracked state operations", async () => {
+		const lix = await openLix({});
+
+		createEntityStateView({
+			lix,
+			schema: testSchema,
+			overrideName: "test_view",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Insert tracked entity (default)
+		await lix.db
+			.insertInto("test_view" as any)
+			.values({
+				id: "tracked_entity",
+				name: "tracked",
+				value: 100,
+			})
+			.execute();
+
+		// Insert untracked entity
+		await lix.db
+			.insertInto("test_view" as any)
+			.values({
+				id: "untracked_entity",
+				name: "untracked",
+				value: 200,
+				lixcol_untracked: true,
+			})
+			.execute();
+
+		// Query all entities
+		const allEntities = await lix.db
+			.selectFrom("test_view" as any)
+			.selectAll()
+			.orderBy("id")
+			.execute();
+
+		expect(allEntities).toHaveLength(2);
+
+		// Verify tracked entity
+		const trackedEntity = allEntities.find(
+			(e: any) => e.id === "tracked_entity"
+		);
+		expect(trackedEntity).toBeDefined();
+		expect(trackedEntity!.lixcol_untracked).toBe(0); // false
+
+		// Verify untracked entity
+		const untrackedEntity = allEntities.find(
+			(e: any) => e.id === "untracked_entity"
+		);
+		expect(untrackedEntity).toBeDefined();
+		expect(untrackedEntity!.lixcol_untracked).toBe(1); // true
+
+		// Query only untracked entities
+		const onlyUntracked = await lix.db
+			.selectFrom("test_view" as any)
+			.where("lixcol_untracked", "=", true)
+			.selectAll()
+			.execute();
+
+		expect(onlyUntracked).toHaveLength(1);
+		expect(onlyUntracked[0]?.id).toBe("untracked_entity");
+
+		// Query only tracked entities
+		const onlyTracked = await lix.db
+			.selectFrom("test_view" as any)
+			.where("lixcol_untracked", "=", false)
+			.selectAll()
+			.execute();
+
+		expect(onlyTracked).toHaveLength(1);
+		expect(onlyTracked[0]?.id).toBe("tracked_entity");
 	});
 });

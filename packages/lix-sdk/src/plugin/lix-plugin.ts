@@ -1,7 +1,6 @@
 import type { Change } from "../change/schema.js";
 import type { LixFile } from "../file/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { Snapshot } from "../snapshot/schema.js";
 
 // named lixplugin to avoid conflict with built-in plugin type
 export type LixPlugin = {
@@ -45,7 +44,7 @@ export type LixPlugin = {
 		 * has been deleted and should be restored at a later point.
 		 */
 		file: Omit<LixFile, "data"> & { data?: Uint8Array };
-		changes: Array<Change & { snapshot_content: Snapshot["content"] }>;
+		changes: Array<Change>;
 	}) => { fileData: Uint8Array };
 	/**
 	 * UI components that are used to render the diff view.

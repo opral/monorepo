@@ -1,5 +1,5 @@
 import { test, expect, describe } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createEntityViewsIfNotExists } from "./entity-view-builder.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
@@ -18,7 +18,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 	} as const;
 
 	test("should create all three views: active, _all, and _history", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Add stored schema
 		const mockSchema: LixSchemaDefinition = {
@@ -105,7 +105,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 	});
 
 	test("should handle cross-view operations", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		// Add stored schema
 		const mockSchema: LixSchemaDefinition = {
@@ -135,7 +135,14 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		// Insert through _all view
 		await lix.db
 			.insertInto("cross_test_all" as any)
-			.values({ id: "test_id", name: "test_name", value: 42 })
+			.values({
+				id: "test_id",
+				name: "test_name",
+				value: 42,
+				lixcol_version_id: lix.db
+					.selectFrom("active_version")
+					.select("version_id"),
+			})
 			.execute();
 
 		// Update through primary view
@@ -213,7 +220,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 	});
 
 	test("should use consistent naming conventions", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		createEntityViewsIfNotExists({
 			lix,
@@ -261,7 +268,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 	});
 
 	test("should handle validation and error cases", async () => {
-		const lix = await openLixInMemory({});
+		const lix = await openLix({});
 
 		const invalidSchema: LixSchemaDefinition = {
 			"x-lix-key": "invalid_schema",

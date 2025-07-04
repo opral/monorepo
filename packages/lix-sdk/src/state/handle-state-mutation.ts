@@ -153,17 +153,6 @@ export function handleStateMutation(
 		// If entity exists locally (not inherited), continue with normal deletion
 	}
 
-	// // workaround to bootstrap the initial state
-	// // TODO implement skip_change_control flag which
-	// // the initial state can use.
-	// if (
-	// 	entity_id.includes(INITIAL_VERSION_ID) ||
-	// 	entity_id.includes(INITIAL_CHANGE_SET_ID) ||
-	// 	entity_id.includes(INITIAL_WORKING_CHANGE_SET_ID)
-	// ) {
-	// 	return 0;
-	// }
-
 	createChangeWithSnapshot({
 		sqlite,
 		db,

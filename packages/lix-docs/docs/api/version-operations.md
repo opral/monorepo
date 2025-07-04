@@ -239,7 +239,7 @@ Here's a comprehensive example demonstrating a version management workflow:
 
 ```typescript
 import { 
-  openLixInMemory, 
+  openLix, 
   newLixFile,
   handleFileInsert,
   handleFileUpdate,
@@ -252,7 +252,7 @@ import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 async function versionManagementWorkflow() {
   // Create and open a new Lix file
   const lixFile = await newLixFile();
-  const lix = await openLixInMemory({
+  const lix = await openLix({
     blob: lixFile,
     providePlugins: [jsonPlugin]
   });

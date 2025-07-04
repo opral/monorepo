@@ -27,8 +27,10 @@ describe("isCustomStrategy", () => {
 		expect(isCustomStrategy("custom-")).toBe(false);
 		expect(isCustomStrategy("header")).toBe(false);
 		expect(isCustomStrategy("custom")).toBe(false);
-		expect(isCustomStrategy("custom-invalid-name")).toBe(false);
-		expect(isCustomStrategy("custom-invalid_name")).toBe(false);
+		// These are now valid with our relaxed pattern:
+		expect(isCustomStrategy("custom-invalid-name")).toBe(true);
+		expect(isCustomStrategy("custom-invalid_name")).toBe(true);
+		// But spaces and special chars are still invalid:
 		expect(isCustomStrategy("custom-invalid name")).toBe(false);
 		expect(isCustomStrategy("custom-invalid@")).toBe(false);
 		expect(isCustomStrategy("Custom-header")).toBe(false);
@@ -72,8 +74,6 @@ describe.each([
 
 	const invalidInputs = [
 		["", "empty name"],
-		["invalid-name", "names with hyphens"],
-		["invalid_name", "names with underscores"],
 		["@invalid", "names with special characters (@)"],
 		["invalid!", "names with special characters (!)"],
 		["inva lid", "names with spaces"],
@@ -83,7 +83,7 @@ describe.each([
 		`${strategyName} throws error for %s (%s)`,
 		(input) => {
 			expect(() => defineStrategy(input, defaultHandler)).toThrow(
-				`Invalid custom strategy: "${input}". Must be a custom strategy following the pattern custom-<name> where <name> contains only alphanumeric characters.`
+				`Invalid custom strategy: "${input}". Must be a custom strategy following the pattern custom-name.`
 			);
 		}
 	);

@@ -2,7 +2,7 @@ import { assertIsLocale } from "./assert-is-locale.js";
 import { extractLocaleFromHeader } from "./extract-locale-from-header.js";
 import { extractLocaleFromUrl } from "./extract-locale-from-url.js";
 import { isLocale } from "./is-locale.js";
-import { customServerStrategies, isCustomStrategy } from "./strategy.js";
+import { isCustomStrategy } from "./strategy.js";
 import {
 	baseLocale,
 	cookieName,
@@ -21,6 +21,9 @@ import {
  * The function goes through the strategies in the order
  * they are defined. If a strategy returns an invalid locale,
  * it will fall back to the next strategy.
+ *
+ * Note: Custom server strategies are not supported in this synchronous version.
+ * Use `extractLocaleFromRequestAsync` if you need custom server strategies with async getLocale methods.
  *
  * @example
  *   const locale = extractLocaleFromRequest(request);
@@ -51,9 +54,10 @@ export const extractLocaleFromRequest = (request) => {
 			return baseLocale;
 		} else if (strat === "localStorage") {
 			continue;
-		} else if (isCustomStrategy(strat) && customServerStrategies.has(strat)) {
-			const handler = customServerStrategies.get(strat);
-			locale = handler.getLocale(request);
+		} else if (isCustomStrategy(strat)) {
+			// Custom strategies are not supported in sync version
+			// Use extractLocaleFromRequestAsync for custom server strategies
+			continue;
 		}
 		if (locale !== undefined) {
 			if (!isLocale(locale)) {

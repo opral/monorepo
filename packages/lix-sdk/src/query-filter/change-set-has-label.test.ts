@@ -1,11 +1,11 @@
 import { test, expect } from "vitest";
 import { changeSetHasLabel } from "./change-set-has-label.js";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 import { createLabel } from "../label/create-label.js";
 
 test("should only return change sets with the given label", async () => {
-	const lix = await openLixInMemory({});
+	const lix = await openLix({});
 
 	// Create two change sets
 	const cs0 = await createChangeSet({

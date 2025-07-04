@@ -5,6 +5,7 @@ import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 export function storeDetectedChangeSchema(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
+	untracked?: boolean;
 }): void {
 	const schemaKey = args.schema["x-lix-key"];
 	const schemaVersion = args.schema["x-lix-version"];
@@ -44,6 +45,7 @@ export function storeDetectedChangeSchema(args: {
 				key: schemaKey,
 				version: schemaVersion,
 				value: args.schema as any,
+				lixcol_untracked: args.untracked || false,
 			}),
 		});
 	}

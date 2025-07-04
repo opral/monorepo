@@ -1,9 +1,29 @@
 import { defineConfig } from "vitepress";
+import typedocSidebar from "../api/reference/typedoc-sidebar.json";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
-export default defineConfig({
+// Fix typedoc sidebar links
+const fixTypedocSidebar = (sidebar: any) => {
+  return sidebar.map((section: any) => {
+    return {
+      ...section,
+      items: section.items.map((item: any) => {
+        return {
+          ...item,
+          link: item.link.replace("/docs", "").replace(".md", ""),
+        };
+      }),
+    };
+  });
+};
+
+export default withMermaid({
   title: "Lix SDK Documentation",
   description:
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
+  rewrites: {
+    "guide/index.md": "index.md",
+  },
   appearance: {
     // @ts-expect-error not fully supported yet
     initialValue: "light",
@@ -18,21 +38,42 @@ export default defineConfig({
     siteTitle: "Lix SDK",
 
     nav: [
-      { text: "Home", link: "/" },
-      { text: "Guide", link: "/guide/" },
-      { text: "API", link: "/api/" },
+      { text: "Guide", link: "/" },
+      { text: "Reference", link: "/api/" },
       { text: "Plugins", link: "/plugins/" },
       { text: "Examples", link: "/examples/" },
     ],
 
     sidebar: {
-      "/guide/": [
+      "/": [
         {
           text: "Introduction",
           items: [
-            { text: "What is Lix?", link: "/guide/" },
+            { text: "What is Lix?", link: "/" },
             { text: "Getting Started", link: "/guide/getting-started" },
+            {
+              text: "AI Agent Collaboration",
+              link: "/guide/ai-agent-collaboration",
+            },
+            { text: "Architecture", link: "/guide/architecture" },
             { text: "How Lix Works", link: "/guide/how-lix-works" },
+          ],
+        },
+        {
+          text: "Ready-made Features",
+          collapsed: false,
+          items: [
+            {
+              text: "Attribution (Blame)",
+              link: "/guide/features/attribution",
+            },
+            { text: "Proposals", link: "/guide/features/change-proposals" },
+            { text: "Diffs", link: "/guide/features/diffs" },
+            { text: "History", link: "/guide/features/history" },
+            { text: "Restore", link: "/guide/features/restore" },
+            { text: "Undo/Redo", link: "/guide/features/undo-redo" },
+            { text: "Comments", link: "/guide/features/comments" },
+            { text: "Versions (Branching)", link: "/guide/features/versions" },
           ],
         },
         {
@@ -70,15 +111,11 @@ export default defineConfig({
           text: "API Reference",
           items: [
             { text: "Overview", link: "/api/" },
-            { text: "Core API", link: "/api/core" },
-            { text: "Database Schema", link: "/api/schema" },
-            { text: "File Operations", link: "/api/file-operations" },
-            { text: "Change Operations", link: "/api/change-operations" },
-            { text: "Version Operations", link: "/api/version-operations" },
-            { text: "Utilities", link: "/api/utilities" },
+            { text: "TypeDoc Reference", link: "/api/reference/" },
           ],
         },
       ],
+      "/api/reference/": fixTypedocSidebar(typedocSidebar),
       "/plugins/": [
         {
           text: "Plugins",
@@ -120,12 +157,6 @@ export default defineConfig({
 
     search: {
       provider: "local",
-    },
-
-    // Enable appearance switch with light mode as default
-    appearance: {
-      lighten: "0.15",
-      darken: "0.15",
     },
   },
 });

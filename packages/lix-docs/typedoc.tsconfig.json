@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig/tsconfig.default.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ESNext", "DOM"],
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": false,
+    "checkJs": false
+  },
+  "include": ["../lix-sdk/src/**/*"]
+}

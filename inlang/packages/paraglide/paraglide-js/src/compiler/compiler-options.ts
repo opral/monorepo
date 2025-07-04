@@ -108,10 +108,22 @@ export type CompilerOptions = {
 	cookieMaxAge?: number;
 	/**
 	 * The host to which the cookie will be sent.
-	 * If null, this defaults to the host portion of the current document location and the cookie is not available on subdomains.
-	 * Otherwise, subdomains are always included.
+	 * If undefined or empty, the domain attribute is omitted from the cookie, scoping it to the exact current domain only (no subdomains).
+	 * If specified, the cookie will be available to the specified domain and all its subdomains.
 	 *
-	 * @default window.location.hostname
+	 * Use this when you need cookies to be shared across subdomains (e.g., between `app.example.com` and `api.example.com`).
+	 * The default behavior (no domain) ensures better compatibility with server-side cookies that don't specify a domain attribute.
+	 *
+	 * @example
+	 * ```ts
+	 * // Default: exact domain only (compatible with server-side cookies)
+	 * cookieDomain: undefined // Cookie: "PARAGLIDE_LOCALE=en; path=/; max-age=34560000"
+	 *
+	 * // Subdomain sharing: available across all subdomains
+	 * cookieDomain: "example.com" // Cookie: "PARAGLIDE_LOCALE=en; path=/; max-age=34560000; domain=example.com"
+	 * ```
+	 *
+	 * @default "" (no domain attribute, exact domain only)
 	 */
 	cookieDomain?: string;
 	/**

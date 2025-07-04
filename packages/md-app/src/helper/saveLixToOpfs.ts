@@ -1,4 +1,4 @@
-import { Lix, toBlob } from "@lix-js/sdk";
+import { Lix } from "@lix-js/sdk";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { findLixFilesInOpfs, cleanupLixFilesInOpfs } from "./findLixInOpfs";
 
@@ -66,7 +66,7 @@ export async function saveLixToOpfs(args: {
 		create: true,
 	});
 	const writable = await fileHandle.createWritable();
-	const file = await toBlob({ lix: args.lix });
+	const file = await args.lix.toBlob();
 	await writable.write(file);
 	await writable.close();
 

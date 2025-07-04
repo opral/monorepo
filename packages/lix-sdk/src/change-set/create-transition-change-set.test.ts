@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "../lix/open-lix-in-memory.js";
+import { openLix } from "../lix/open-lix.js";
 import {
 	mockJsonPlugin,
 	MockJsonPropertySchema,
@@ -12,7 +12,7 @@ import { createTransitionChangeSet } from "./create-transition-change-set.js";
 // related https://github.com/opral/lix-sdk/issues/311
 test.skip("it transitions state to a specific change set", async () => {
 	// Create a Lix instance with our plugin
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
@@ -46,19 +46,6 @@ test.skip("it transitions state to a specific change set", async () => {
 		.where("id", "=", "file1")
 		.executeTakeFirstOrThrow();
 
-	// Insert snapshots with { value: "..." } content to match mockJsonPlugin format
-	await lix.db
-		.insertInto("snapshot")
-		.values([
-			{ id: "s0", content: { value: "Value 0" } },
-			{ id: "s1", content: { value: "Value 1" } },
-			{ id: "s2", content: { value: "Value 2" } },
-			{ id: "s3", content: { value: "Value 2 Modified" } }, // For c3
-			{ id: "s4", content: { value: "Value 3" } }, // For c4
-			{ id: "s5", content: { value: "Value 4" } }, // For c5
-		])
-		.execute();
-
 	const changes = await lix.db
 		.insertInto("change")
 		.values([
@@ -69,7 +56,7 @@ test.skip("it transitions state to a specific change set", async () => {
 				entity_id: "l0",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "s0",
+				snapshot_content: { value: "Value 0" },
 			},
 			{
 				id: "c1",
@@ -78,7 +65,7 @@ test.skip("it transitions state to a specific change set", async () => {
 				entity_id: "l1",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "s1",
+				snapshot_content: { value: "Value 1" },
 			},
 			{
 				id: "c2",
@@ -87,7 +74,7 @@ test.skip("it transitions state to a specific change set", async () => {
 				entity_id: "l2",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "s2",
+				snapshot_content: { value: "Value 2" },
 			},
 			{
 				id: "c3",
@@ -96,7 +83,7 @@ test.skip("it transitions state to a specific change set", async () => {
 				entity_id: "l2",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "s3",
+				snapshot_content: { value: "Value 2 Modified" },
 			},
 			{
 				id: "c4",
@@ -105,7 +92,7 @@ test.skip("it transitions state to a specific change set", async () => {
 				entity_id: "l3",
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
-				snapshot_id: "s4",
+				snapshot_content: { value: "Value 3" },
 			},
 			{
 				id: "c5", // Add another change/entity for complexity
@@ -114,7 +101,7 @@ test.skip("it transitions state to a specific change set", async () => {
 				schema_key: "mock_json_property",
 				schema_version: "1.0",
 				plugin_key: mockJsonPlugin.key,
-				snapshot_id: "s5",
+				snapshot_content: { value: "Value 4" },
 			},
 		])
 		.returningAll()

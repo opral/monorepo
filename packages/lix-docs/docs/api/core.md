@@ -6,7 +6,7 @@ The Core API in Lix provides the fundamental functions for creating, opening, an
 
 ### `newLixFile()`
 
-Creates a new empty Lix file that can be opened with `openLix` or `openLixInMemory`.
+Creates a new empty Lix file that can be opened with `openLix` or `openLix`.
 
 ```typescript
 import { newLixFile } from "@lix-js/sdk";
@@ -26,17 +26,17 @@ async function createNewLix() {
 
 ---
 
-### `openLixInMemory()`
+### `openLix()`
 
 Opens a Lix file in memory with the provided plugins.
 
 ```typescript
-import { openLixInMemory } from "@lix-js/sdk";
+import { openLix } from "@lix-js/sdk";
 import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 
 async function openMyLix(lixFile: Blob) {
   // Open the Lix file in memory
-  const lix = await openLixInMemory({
+  const lix = await openLix({
     blob: lixFile,
     providePlugins: [jsonPlugin]
   });
@@ -45,14 +45,14 @@ async function openMyLix(lixFile: Blob) {
 ```
 
 **Parameters**:
-- `options: OpenLixInMemoryOptions` - Object with the following properties:
+- `options: openLixOptions` - Object with the following properties:
   - `blob: Blob` - The Lix file blob to open
   - `providePlugins: LixPlugin[]` - Array of plugins to use
   - `signalProgress?: (progress: LixProgress) => void` - Optional callback for progress updates
 
 **Returns**: `Promise<Lix>` - A Lix instance ready to use
 
-**Source Code**: [openLixInMemory](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/lix/open-lix-in-memory.ts)
+**Source Code**: [openLix](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/lix/open-lix-in-memory.ts)
 
 ---
 

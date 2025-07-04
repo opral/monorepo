@@ -1,5 +1,5 @@
-import { useQuery } from "./useQuery";
-import { lix } from "../state";
+import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
+import { Lix } from "@lix-js/sdk";
 
 /**
  * A hook that provides persistent key-value storage using the Lix database.
@@ -13,50 +13,27 @@ import { lix } from "../state";
  * @returns A tuple of [value, setValue] similar to useState
  */
 export function useKeyValue<T>(key: string) {
-	// Use the query hook to keep the value in sync
-	// using 75ms interval for non perceivable polling
-	const [value, , , refetch] = useQuery(() => selectKeyValue(key), 75);
+	const lix = useLix();
+	const result = useQueryTakeFirst((lix) => selectKeyValue(lix, key));
 
-	// Function to update the value
 	const setValue = async (newValue: T) => {
-		await upsertKeyValue(key, newValue);
-		refetch();
+		await upsertKeyValue(lix, key, newValue);
 	};
 
-	// Return the current value and the setter function
-	return [value, setValue] as const;
+	return [result.data?.value, setValue] as const;
 }
 
-/**
- * Retrieves the value associated with a key from the Lix database.
- * If the key does not exist, returns null.
- *
- * @param key - The unique key to retrieve the value for
- * @returns The value associated with the key, or null if not found
- */
-async function selectKeyValue(key: string) {
-	// Try to find the key in the database
-	const result = await lix.db
+function selectKeyValue(lix: Lix, key: string) {
+	return lix.db
 		.selectFrom("key_value")
 		.where("key", "=", key)
-		.select(["value"])
-		.executeTakeFirst();
-
-	// Return the value if found, otherwise null
-	// need to figure out why json parsing is flaky
-	return result?.value;
+		.select(["value"]);
 }
 
 /**
  * Upserts a key-value pair into the Lix database.
- * If the key already exists, it will be updated.
- * Otherwise, a new key will be created.
- *
- * @param key - The unique key to store the value under
- * @param value - The value to store
- * @returns The stored value
  */
-async function upsertKeyValue(key: string, value: any) {
+async function upsertKeyValue(lix: Lix, key: string, value: any) {
 	// Use a transaction to ensure atomicity and handle race conditions
 	return await lix.db.transaction().execute(async (trx) => {
 		const existing = await trx

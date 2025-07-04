@@ -25,10 +25,8 @@ export function ChangeSetElementsWindow(props: ChangeSetElementsWindowProps) {
         "change_set_element.change_id",
         "change.id"
       )
-      .innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
       .where("change_set_element.change_set_id", "=", props.changeSetId)
       .selectAll("change")
-      .select("snapshot.content")
       .execute();
   });
 
@@ -104,9 +102,13 @@ function FloatingWindowPortal({
   return createPortal(windowContent, portalTarget!);
 }
 
-function ChangeComponent(props: { change: Change & { content: any } }) {
+function ChangeComponent(props: { change: Change }) {
   // Format the JSON content
-  const formattedContent = JSON.stringify(props.change.content, null, 2);
+  const formattedContent = JSON.stringify(
+    props.change.snapshot_content,
+    null,
+    2
+  );
 
   const handleCopy = () => {
     const changeText = `ID: ${props.change.id}

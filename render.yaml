@@ -237,6 +237,8 @@ services:
     runtime: static
     autoDeploy: true
     staticPublishPath: ./packages/md-app/dist
+    previews:
+      generation: automatic
     envVars:
       - fromGroup: production
     buildCommand: pnpm install && pnpm run --filter md-app... build
@@ -253,6 +255,8 @@ services:
     branch: main
     staticPublishPath: ./packages/lix-new-landing/dist
     buildCommand: pnpm install && pnpm run --filter lix-new-landing... build
+    previews:
+      generation: automatic
     buildFilter:
       paths:
         - packages/lix-new-landing/**
@@ -265,7 +269,8 @@ services:
     type: web
     runtime: static
     autoDeploy: true
-    branch: main
+    previews:
+      generation: automatic
     staticPublishPath: ./packages/lix-docs/docs/.vitepress/dist
     buildCommand: pnpm install && pnpm run --filter @lix-js/docs... build
     buildFilter:

@@ -1,9 +1,9 @@
 import { Ajv } from "ajv";
 import type { Lix } from "../lix/open-lix.js";
-import type { Snapshot } from "../snapshot/schema.js";
 import { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { executeSync } from "../database/execute-sync.js";
 import { sql } from "kysely";
+import type { Change } from "../change/schema.js";
 
 const ajv = new Ajv({
 	strict: true,
@@ -16,10 +16,11 @@ const validateLixSchema = ajv.compile(LixSchemaDefinition);
 export function validateStateMutation(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition | null;
-	snapshot_content: Snapshot["content"];
+	snapshot_content: Change["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
+	untracked?: boolean;
 }): void {
 	// console.log(`validateStateMutation called with operation: ${args.operation}, schema: ${args.schema?.["x-lix-key"]}, entity_id: ${args.entity_id}`);
 	// Validate version_id is provided
@@ -122,6 +123,7 @@ export function validateStateMutation(args: {
 				schema: args.schema,
 				snapshot_content: args.snapshot_content,
 				version_id: args.version_id,
+				untracked: args.untracked,
 			});
 		}
 	}
@@ -140,7 +142,7 @@ export function validateStateMutation(args: {
 function validatePrimaryKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Snapshot["content"];
+	snapshot_content: Change["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
@@ -201,7 +203,7 @@ function validatePrimaryKeyConstraints(args: {
 function validateUniqueConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Snapshot["content"];
+	snapshot_content: Change["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
@@ -286,8 +288,9 @@ function getValueByPath(obj: any, path: string): any {
 function validateForeignKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Snapshot["content"];
+	snapshot_content: Change["snapshot_content"];
 	version_id: string;
+	untracked?: boolean;
 }): void {
 	const foreignKeys = args.schema["x-lix-foreign-keys"];
 	if (!foreignKeys) {
@@ -413,6 +416,37 @@ function validateForeignKeyConstraints(args: {
 			errorMessage += `\nNote: Foreign key constraints only validate entities that exist in the version context. Inherited entities from other versions cannot be referenced by foreign keys. If you reference global state, ensure that you are creating the entity in the global version.`;
 
 			throw new Error(errorMessage);
+		}
+
+		// If this is a tracked entity, check if the referenced entity is untracked
+		if (!args.untracked && !isRealSqlTable) {
+			// Query the untracked table to see if the referenced entity is untracked
+			const untrackedReferences = executeSync({
+				lix: args.lix,
+				query: args.lix.db
+					.selectFrom("state_all")
+					.select("entity_id")
+					.where("schema_key", "=", foreignKeyDef.schemaKey)
+					.where("version_id", "=", args.version_id)
+					.where("untracked", "=", true)
+					.where(
+						sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
+						"=",
+						foreignKeyValue
+					),
+			});
+
+			if (untrackedReferences.length > 0) {
+				let errorMessage = `Foreign key constraint violation: tracked entities cannot reference untracked entities. This would create broken references during sync.\n`;
+				errorMessage += `\nThe tracked entity '${args.schema["x-lix-key"]}' is trying to reference an untracked entity '${foreignKeyDef.schemaKey}' with ${foreignKeyDef.property}='${foreignKeyValue}'.\n`;
+				errorMessage += `\nUntracked entities are local-only and will not be synced to remote. If a tracked entity references an untracked entity, it would fail validation on the remote because the untracked entity doesn't exist there.\n`;
+				errorMessage += `\nSolutions:\n`;
+				errorMessage += `1. Make the referenced entity tracked (remove untracked flag)\n`;
+				errorMessage += `2. Make the referencing entity untracked as well\n`;
+				errorMessage += `3. Remove the foreign key reference`;
+
+				throw new Error(errorMessage);
+			}
 		}
 	}
 }
@@ -558,9 +592,89 @@ function validateDeletionConstraints(args: {
 			});
 
 			if (referencingEntities.length > 0) {
-				throw new Error(
-					`Foreign key constraint violation: Cannot delete entity because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}' via foreign key '${localProperty}'`
-				);
+				// Helper function to truncate property values
+				const truncateValue = (value: any, maxLength: number = 40): string => {
+					const str = typeof value === "string" ? value : JSON.stringify(value);
+					return str.length > maxLength
+						? str.substring(0, maxLength - 3) + "..."
+						: str;
+				};
+
+				// Get the entity being deleted for display
+				const rawContent = currentEntity[0].snapshot_content;
+				const entityContent =
+					typeof rawContent === "string"
+						? JSON.parse(rawContent)
+						: (rawContent as any);
+
+				// Get a sample referencing entity for display
+				const sampleReferencingEntity = executeSync({
+					lix: args.lix,
+					query: args.lix.db
+						.selectFrom("state_all")
+						.selectAll()
+						.where("schema_key", "=", schema["x-lix-key"])
+						.where("version_id", "=", args.version_id)
+						.where(
+							sql`json_extract(snapshot_content, '$.' || ${localProperty})`,
+							"=",
+							referencedValue
+						)
+						.limit(1),
+				});
+
+				let errorMessage = `Foreign key constraint violation: Cannot delete entity '${args.entity_id}' from schema '${args.schema["x-lix-key"]}' because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}'.`;
+
+				// Add relationship visualization
+				errorMessage += `\n\nForeign Key Relationship:\n`;
+				errorMessage += `  ${schema["x-lix-key"]}.${localProperty} → ${args.schema["x-lix-key"]}.${foreignKeyDef.property}\n`;
+
+				// Show entity being deleted
+				errorMessage += `\nEntity Being Deleted (${args.schema["x-lix-key"]}):\n`;
+				errorMessage += `┌─────────────────┬──────────────────────────────────────────┐\n`;
+				errorMessage += `│ Property        │ Value                                    │\n`;
+				errorMessage += `├─────────────────┼──────────────────────────────────────────┤\n`;
+				
+				// Show key properties of the entity being deleted
+				const entityKeys = Object.keys(entityContent).slice(0, 3); // Show first 3 properties
+				for (const key of entityKeys) {
+					const displayKey = key.substring(0, 15).padEnd(15);
+					const displayValue = truncateValue(entityContent[key], 40).padEnd(40);
+					errorMessage += `│ ${displayKey} │ ${displayValue} │\n`;
+				}
+				errorMessage += `└─────────────────┴──────────────────────────────────────────┘\n`;
+
+				// Show sample referencing record
+				if (sampleReferencingEntity.length > 0) {
+					const referencingContent = typeof sampleReferencingEntity[0].snapshot_content === "string"
+						? JSON.parse(sampleReferencingEntity[0].snapshot_content)
+						: sampleReferencingEntity[0].snapshot_content;
+
+					errorMessage += `\nReferencing Records (${schema["x-lix-key"]}):\n`;
+					errorMessage += `┌─────────────────┬──────────────────────────────────────────┐\n`;
+					errorMessage += `│ Property        │ Value                                    │\n`;
+					errorMessage += `├─────────────────┼──────────────────────────────────────────┤\n`;
+					
+					// Show the foreign key property and a few other key properties
+					const refKeys = [localProperty, ...Object.keys(referencingContent).filter(k => k !== localProperty).slice(0, 2)];
+					for (const key of refKeys) {
+						const displayKey = key.substring(0, 15).padEnd(15);
+						const displayValue = truncateValue(referencingContent[key], 40).padEnd(40);
+						errorMessage += `│ ${displayKey} │ ${displayValue} │\n`;
+					}
+					errorMessage += `└─────────────────┴──────────────────────────────────────────┘\n`;
+
+					if (referencingEntities.length > 1) {
+						errorMessage += `\n(${referencingEntities.length - 1} additional referencing record(s) not shown)\n`;
+					}
+				}
+
+				// Add resolution guidance
+				errorMessage += `\nTo resolve this constraint violation:\n`;
+				errorMessage += `• Delete or update the referencing records first\n`;
+				errorMessage += `• Or modify the foreign key constraint to CASCADE deletes`;
+
+				throw new Error(errorMessage);
 			}
 		}
 	}

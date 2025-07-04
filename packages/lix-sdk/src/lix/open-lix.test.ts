@@ -1,16 +1,14 @@
 import { expect, test } from "vitest";
-import { openLixInMemory } from "./open-lix-in-memory.js";
 import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
-import { toBlob } from "./to-blob.js";
-import { usedFileExtensions } from "./open-lix.js";
+import { openLix, usedFileExtensions } from "./open-lix.js";
 import type { Account } from "../account/schema.js";
 
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
 		key: "mock-plugin",
 	};
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 		providePlugins: [mockPlugin],
 	});
@@ -18,7 +16,7 @@ test("providing plugins should be possible", async () => {
 });
 
 test("providing key values should be possible", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 		keyValues: [{ key: "mock_key", value: "value" }],
 	});
@@ -32,8 +30,8 @@ test("providing key values should be possible", async () => {
 	expect(value).toMatchObject({ key: "mock_key", value: "value" });
 
 	// testing overwriting key values
-	const lix1 = await openLixInMemory({
-		blob: await toBlob({ lix }),
+	const lix1 = await openLix({
+		blob: await lix.toBlob(),
 		keyValues: [{ key: "mock_key", value: "value2" }],
 	});
 
@@ -52,7 +50,7 @@ test("providing an account should be possible", async () => {
 		name: "peter",
 	};
 
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		account: mockAccount,
 		blob: await newLixFile(),
 	});
@@ -67,7 +65,7 @@ test("providing an account should be possible", async () => {
 });
 
 test("usedFileExtensions", async () => {
-	const lix = await openLixInMemory({
+	const lix = await openLix({
 		blob: await newLixFile(),
 	});
 	await lix.db
@@ -90,4 +88,60 @@ test("usedFileExtensions", async () => {
 
 	const extensions = await usedFileExtensions(lix.db);
 	expect(new Set(extensions)).toEqual(new Set(["txt", "pdf"]));
+});
+
+test("it should open a lix in memory from a blob", async () => {
+	const lix1 = await openLix({});
+
+	await lix1.db
+		.insertInto("file")
+		.values({
+			id: "1",
+			path: "/a.txt",
+			data: new TextEncoder().encode("hello"),
+		})
+		.execute();
+
+	const lix2 = await openLix({ blob: await lix1.toBlob() });
+	const files = await lix2.db.selectFrom("file").selectAll().execute();
+
+	expect(files).toEqual([
+		expect.objectContaining({
+			id: "1",
+			path: "/a.txt",
+			data: new TextEncoder().encode("hello"),
+		}),
+	]);
+});
+
+test("should default to InMemoryStorage when no storage is provided", async () => {
+	const lix = await openLix({});
+
+	// Should create a valid lix with new data
+	const lixId = await lix.db
+		.selectFrom("key_value")
+		.select("value")
+		.where("key", "=", "lix_id")
+		.executeTakeFirstOrThrow();
+
+	expect(lixId.value).toBeDefined();
+	expect(typeof lixId.value).toBe("string");
+
+	// Should be able to add and query data
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "test-file",
+			path: "/test.txt",
+			data: new TextEncoder().encode("test content"),
+		})
+		.execute();
+
+	const files = await lix.db.selectFrom("file").selectAll().execute();
+	expect(files).toHaveLength(1);
+	expect(files[0]).toMatchObject({
+		id: "test-file",
+		path: "/test.txt",
+		data: new TextEncoder().encode("test content"),
+	});
 });

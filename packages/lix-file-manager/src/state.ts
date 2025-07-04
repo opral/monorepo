@@ -1,5 +1,5 @@
 import {
-	openLixInMemory,
+	openLix,
 	Account,
 	switchAccount,
 	Lix,
@@ -94,7 +94,7 @@ export const lixAtom = atom(async (get) => {
 				);
 				if (response.ok) {
 					const blob = await response.blob();
-					const lix = await openLixInMemory({
+					const lix = await openLix({
 						blob,
 						providePlugins: supportedFileTypes.map((type) => type.plugin),
 					});
@@ -132,13 +132,13 @@ export const lixAtom = atom(async (get) => {
 
 	try {
 		if (storedActiveAccount) {
-			lix = await openLixInMemory({
+			lix = await openLix({
 				blob: lixBlob!,
 				providePlugins: supportedFileTypes.map((type) => type.plugin),
 				account: JSON.parse(storedActiveAccount),
 			});
 		} else {
-			lix = await openLixInMemory({
+			lix = await openLix({
 				blob: lixBlob!,
 				providePlugins: supportedFileTypes.map((type) => type.plugin),
 			});

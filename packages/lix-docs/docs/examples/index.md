@@ -17,12 +17,12 @@ Lix SDK can be used to build a variety of applications that benefit from change 
 Here's a simple example of using Lix SDK to track changes in a JSON file:
 
 ```javascript
-import { newLixFile, openLixInMemory } from "@lix-js/sdk";
+import { newLixFile, openLix } from "@lix-js/sdk";
 import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 
 // Create and open a new Lix file
 const lixFile = await newLixFile();
-const lix = await openLixInMemory({
+const lix = await openLix({
   blob: lixFile,
   providePlugins: [jsonPlugin],
 });

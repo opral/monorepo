@@ -1,4 +1,4 @@
-# 🧬 Lix Universal Diff
+# 🧬 (Experimental) Lix Universal Diff
 
 Build a diff view in your lix app with this universal differ ✨
 
@@ -11,7 +11,7 @@ This package offers a simple way to generate and display diffs, showing users ex
 
 ## How Does It Work? (The Rendered HTML Trick)
 
-The core idea is to diff the *rendered HTML output* instead of source data structures given that anything is rendered as HTML anyways. This bypasses the need for custom diff implementations. 
+The core idea is to diff the *rendered HTML output* instead of source data structures, given that anything is rendered as HTML anyway. This bypasses the need for custom diff implementations. 
 
 **Legend:**
 

@@ -2,47 +2,17 @@
 
 The Lix SDK provides a comprehensive API for working with files, changes, versions, and more. This section documents the core API functions, types, and interfaces.
 
-## Core APIs
+## Auto-generated API Reference
 
-The core APIs provide the fundamental functionality for creating, opening, and managing Lix files:
+For the most up-to-date and comprehensive API documentation, see the [TypeDoc generated API reference](./reference/).
 
-- [newLixFile()](./core#newlixfile) - Create a new empty Lix file
-- [openLix()](./core#openlix) - Open a Lix file from disk
-- [openLixInMemory()](./core#openlixinmemory) - Open a Lix file in memory
-- [closeLix()](./core#closelix) - Close a Lix instance
+This reference is automatically generated from the TypeScript source code and includes:
 
-## File Operations
+- All exported functions with their parameters and return types
+- Type definitions and interfaces
+- Detailed method descriptions and examples where available
 
-Functions for working with files:
-
-- [handleFileInsert()](./file-operations#handlefileinsert) - Insert a new file and detect changes
-- [handleFileUpdate()](./file-operations#handlefileupdate) - Update an existing file and detect changes
-- [materializeFileData()](./file-operations#materializefiledata) - Reconstruct file content from changes
-
-## Change Operations
-
-Functions for working with changes and change sets:
-
-- [createChange()](./change-operations#createchange) - Create a change record
-- [createChangeSet()](./change-operations#createchangeset) - Create a collection of related changes
-- [applyChangeSet()](./change-operations#applychangeset) - Apply a change set to update state
-- [createCheckpoint()](./change-operations#createcheckpoint) - Create a named checkpoint in history
-
-## Version Operations
-
-Functions for working with versions:
-
-- [createVersion()](./version-operations#createversion) - Create a new version
-- [switchVersion()](./version-operations#switchversion) - Switch to a different version
-- Various helper methods for version management
-
-## Utilities
-
-Helper functions for common tasks:
-
-- [toBlob()](./utilities#toblob) - Serialize a Lix instance to a blob
-- [saveLixToOpfs()](./utilities#savelixtopfs) - Save Lix to browser storage
-- Progress tracking and other helper functions
+## Key API Categories
 
 ## Database Schema
 
@@ -83,7 +53,7 @@ interface Lix {
 Here's a complete example of using the Lix API:
 
 ```typescript
-import { newLixFile, openLixInMemory, handleFileInsert, createChangeSet, toBlob } from "@lix-js/sdk";
+import { newLixFile, openLix, handleFileInsert, createChangeSet, toBlob } from "@lix-js/sdk";
 import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 
 async function workWithLix() {
@@ -91,7 +61,7 @@ async function workWithLix() {
   const lixFile = await newLixFile();
   
   // Open it with the JSON plugin
-  const lix = await openLixInMemory({
+  const lix = await openLix({
     blob: lixFile,
     providePlugins: [jsonPlugin]
   });

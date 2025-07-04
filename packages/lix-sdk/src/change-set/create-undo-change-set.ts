@@ -67,7 +67,7 @@ export async function createUndoChangeSet(args: {
 					plugin_key: change.plugin_key,
 					schema_key: change.schema_key,
 					schema_version: change.schema_version,
-					snapshot_id: "no-content", // Mark as deletion
+					snapshot_content: null, // Mark as deletion
 				});
 			} else {
 				// Find the previous state in the parent change set
@@ -96,7 +96,7 @@ export async function createUndoChangeSet(args: {
 						plugin_key: change.plugin_key,
 						schema_key: change.schema_key,
 						schema_version: change.schema_version,
-						snapshot_id: previousChange.snapshot_id, // Restore previous snapshot
+						snapshot_content: previousChange.snapshot_content, // Restore previous snapshot
 					});
 				} else {
 					// Entity didn't exist before, so delete it
@@ -107,7 +107,7 @@ export async function createUndoChangeSet(args: {
 						plugin_key: change.plugin_key,
 						schema_key: change.schema_key,
 						schema_version: change.schema_version,
-						snapshot_id: "no-content", // Mark as deletion
+						snapshot_content: null, // Mark as deletion
 					});
 				}
 			}

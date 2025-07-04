@@ -1,4 +1,4 @@
-import { toBlob, type Account, type Lix } from "@lix-js/sdk";
+import { type Account, type Lix } from "@lix-js/sdk";
 import type { InlangPlugin } from "../plugin/schema.js";
 import type { ProjectSettings } from "../json-schema/settings.js";
 import {
@@ -204,7 +204,7 @@ export async function loadProject(args: {
 		_sqlite: args.sqlite,
 		toBlob: async () => {
 			await saveDbToLix({ sqlite: args.sqlite, lix: args.lix });
-			return await toBlob({ lix: args.lix });
+			return await args.lix.toBlob();
 		},
 		lix: args.lix,
 	};
