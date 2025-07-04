@@ -254,7 +254,7 @@ test("state is separated by version", async () => {
 		.selectAll()
 		.execute();
 
-	expect(stateAfterInserts).toMatchObject([
+	expect(stateAfterInserts, "we queried state_all - we expect one entry per version").toMatchObject([
 		{
 			entity_id: "e0",
 			file_id: "f0",

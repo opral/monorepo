@@ -128,7 +128,8 @@ export async function openLix(args: {
 
 	// await initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
 
-	captureOpened({ db });
+	// NOTE we could let this run in the background, but it may causes pain during debugging async method calls
+	await captureOpened({ db });
 
 	const lix = {
 		db,

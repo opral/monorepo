@@ -90,6 +90,9 @@ export async function newLixFile(): Promise<Blob> {
 		WHERE NOT EXISTS (SELECT 1 FROM active_version);
 `);
 
+	// NOTE - we select one row from state_all to ensure the cache is populated
+	sqlite.exec("select * from state_all limit 1;");
+
 	try {
 		return new Blob([contentFromDatabase(sqlite)]);
 	} catch (e) {
