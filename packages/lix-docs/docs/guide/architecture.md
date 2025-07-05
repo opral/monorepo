@@ -1,6 +1,6 @@
 # Architecture
 
-## Core Data Model
+## Core Concepts
 
 Lix represents all data through four fundamental concepts that build upon each other. 
 
@@ -35,6 +35,10 @@ graph RL
     V["Version"] -.-> CSG2
 ```
 
+## Advanced Concepts
+
+### Divergent Versions
+
 Multiple versions can point to different change sets, creating divergent versions which can be merged later:
 
 ```mermaid
@@ -45,7 +49,25 @@ graph RL
     V2["Version B"] -.-> CS4
 ```
 
-## State
+Here, Version A and Version B diverge after CS2, each with their own subsequent changes. This enables:
+- Parallel development workflows
+- Feature branches
+- Experimental changes without affecting other versions
+
+### Historical State
+
+History in Lix is simply pointing to a specific change set in the graph and materializing the state up to that change set. Any change set in the graph can be queried, not just those pointed to by versions.
+
+```mermaid
+graph RL
+    CS3["{c5, c6}"] --> CS2["{c3, c4}"] --> CS1["{c1, c2}"]
+    V["Version"] -.-> CS3
+    H["Historical Query"] -.-> CS2
+```
+
+In this example, the "Historical Query" points to change set `{c3, c4}`, allowing access to the exact state at that point in time, even though no version currently points there.
+
+## On Demand State Materialization
 
 Rather than storing state for every version and historical point, which would require large amounts of storage, Lix stores only the changes. State is then materialized on-demand in a cache by traversing the change set graph and applying the relevant changes.
 
@@ -57,21 +79,7 @@ graph RL
     V["Version"] -.-> CSG2
 ```
 
-
-### Historical State
-
-History in Lix is simply pointing to a specific change set in the graph and materializing the state up to that change set. Any change set in the graph can be queried, not just those pointed to by versions.
-
-In the diagram beneath, the "Historical Query" points to the change set `{c3, c4}`. Lix materializes the state by taking the union of all change sets in the lineage (`{c1, c2} ∪ {c3, c4}`) and then applying only the leaf changes—the latest change for each entity—providing the exact state at that point in time.
-
-```mermaid
-graph RL
-    CS3["{c5, c6}"] --> CS2["{c3, c4}"] --> CS1["{c1, c2}"]
-    P["Version"] -.-> CS3
-    H["Historical Query"] -.-> CS2
-```
-
-### Materializing State
+### Materializing Logic
 
 State materialization can be simplified to the process of taking the union of all change sets in the lineage and filtering for leaf changes. Leaf changes are the latest change for each entity, ensuring that only the most recent modifications are applied.
 
