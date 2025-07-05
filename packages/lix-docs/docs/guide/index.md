@@ -19,7 +19,7 @@ Prevent hallucinations and maintain control over AI-generated changes:
 - Rollback problematic AI edits
 - Create safe experimentation spaces for AI
 
-_Find more information in the [AI agent collaboration](/guide/ai-agent-collaboration.md) section._
+_Find more information, read the [AI agent collaboration](/guide/ai-agent-collaboration.md) section._
 
 ### Lix for Web Applications
 
