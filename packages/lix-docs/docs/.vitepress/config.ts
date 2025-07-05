@@ -52,7 +52,7 @@ export default withMermaid({
             { text: "What is Lix?", link: "/" },
             { text: "Getting Started", link: "/guide/getting-started" },
             {
-              text: "AI Agent Collaboration",
+              text: "Lix for AI Agents",
               link: "/guide/ai-agent-collaboration",
             },
             { text: "Architecture", link: "/guide/architecture" },
