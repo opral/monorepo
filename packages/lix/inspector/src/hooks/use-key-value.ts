@@ -1,5 +1,5 @@
 import type { Lix } from "@lix-js/sdk";
-import { useQuery } from "./use-query.ts";
+import { useQuery } from "@lix-js/react-utils";
 import { useLix } from "./use-lix.ts";
 
 // Define the schema for *known* keys and their value types
@@ -32,8 +32,17 @@ export function useKeyValue<K extends string>(key: K) {
   const lix = useLix();
   type T = K extends ValidKeyValue ? InspectorKeyValueSchema[K] : any;
 
-  // Type T is passed to selectKeyValue
-  const [value, , , refetch] = useQuery(() => selectKeyValue<T>(lix, key), 75);
+  // The new useQuery API doesn't return a refetch function or use polling
+  // We'll need to use the database directly for setValue
+  const keyValueData = useQuery((lix) => 
+    lix.db
+      .selectFrom("key_value")
+      .where("key", "=", key)
+      .select(["value"])
+  );
+
+  // Extract the value from the query result
+  const value = keyValueData.length > 0 ? (JSON.parse(keyValueData[0]!.value) as T) : null;
 
   // setValue expects the inferred type T
   const setValue = async (
@@ -42,26 +51,13 @@ export function useKeyValue<K extends string>(key: K) {
   ) => {
     // Pass inferred type T to upsertKeyValue
     await upsertKeyValue<T>(lix, key, newValue);
-    refetch();
+    // The new useQuery will automatically update due to subscription
   };
 
   // Return type reflects the potentially any type T
   return [value as T | null, setValue] as const;
 }
 
-/**
- * Retrieves the value associated with a key from the Lix database.
- */
-async function selectKeyValue<T>(lix: Lix, key: string): Promise<T | null> {
-  const result = await lix.db
-    .selectFrom("key_value")
-    .where("key", "=", key)
-    .select(["value"])
-    .executeTakeFirst();
-
-  // Cast to T (which could be a specific type or any)
-  return result ? (result.value as T) : null;
-}
 
 /**
  * Upserts a key-value pair into the Lix database.

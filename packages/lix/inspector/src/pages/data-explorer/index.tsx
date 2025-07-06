@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
-import { useLix } from "../../hooks/use-lix";
-import { useQuery } from "../../hooks/use-query";
+import { useState, Suspense, useMemo } from "react";
+import { useQuery } from "@lix-js/react-utils";
 import { type ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "./data-table";
 import { type ColumnFiltersState } from "@tanstack/react-table";
@@ -15,232 +14,161 @@ interface EntityInfo {
   viewTypes: string[];
 }
 
-export default function DataExplorer() {
-  const lix = useLix();
+// Stable cell renderers to prevent re-creation
+const defaultCellRenderer = (info: any) => info.getValue();
 
-  const [selectedTable, setSelectedTable] = useState<string>("");
-  const [tables, setTables] = useState<TableInfo[]>([]);
-  const [entities, setEntities] = useState<EntityInfo[]>([]);
+const jsonCellRenderer = (info: any) => {
+  const value = info.getValue();
+  try {
+    const parsedValue = typeof value === "string" ? JSON.parse(value) : value;
+    const formattedJson = JSON.stringify(parsedValue, null, 2);
+    return (
+      <pre className="text-xs whitespace-pre-wrap break-all">
+        {formattedJson}
+      </pre>
+    );
+  } catch (e) {
+    console.error("Failed to parse or stringify JSON content:", e);
+    return <span className="text-error text-xs">Error formatting JSON</span>;
+  }
+};
+
+function DataExplorerContent() {
   const [selectedEntity, setSelectedEntity] = useState<string>("");
   const [selectedViewType, setSelectedViewType] = useState<string>("active");
-  const [tableData, setTableData] = useState<any[]>([]);
-  const [tableColumns, setTableColumns] = useState<ColumnDef<any>[]>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const [tablesResult] = useQuery<string[][]>(() => {
-    if (!lix) return [];
-    try {
-      // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
-      const result = lix.sqlite.exec(
-        "SELECT name, type FROM sqlite_master WHERE type IN ('table', 'view') ORDER BY type, name;",
-        { returnValue: "resultRows" }
-      );
-      return result as any;
-    } catch (error) {
-      console.error("Error querying tables and views:", error);
-      return [];
-    }
-  }, []);
+  const tablesQueryData = useQuery((lix) =>
+    lix.db
+      .selectFrom("sqlite_master" as any)
+      .select(["name", "type"])
+      .where("type", "in", ["table", "view"])
+      .orderBy("type")
+      .orderBy("name")
+  );
 
-  // Process table results and extract entities
-  useEffect(() => {
-    if (tablesResult && tablesResult.length > 0) {
-      const tableInfos = tablesResult.map((row) => ({
-        name: row[0],
-        type: row[1] as "table" | "view",
-      }));
-      setTables(tableInfos);
+  // Compute tables and entities directly from query result using useMemo
+  const tables = useMemo(
+    () =>
+      tablesQueryData.map((row) => ({
+        name: row.name,
+        type: row.type as "table" | "view",
+      })),
+    [tablesQueryData]
+  );
 
-      // Extract entities from views
-      const views = tableInfos.filter((table) => table.type === "view");
-      const entityMap = new Map<string, Set<string>>();
+  const entities = useMemo(() => {
+    const views = tables.filter((table) => table.type === "view");
+    const entityMap = new Map<string, Set<string>>();
 
-      views.forEach((view) => {
-        const name = view.name;
-        let entityName: string;
-        let viewType: string;
+    views.forEach((view) => {
+      const name = view.name;
+      let entityName: string;
+      let viewType: string;
 
-        if (name?.endsWith("_all")) {
-          entityName = name.slice(0, -4);
-          viewType = "all";
-        } else if (name?.endsWith("_history")) {
-          entityName = name.slice(0, -8);
-          viewType = "history";
-        } else {
-          entityName = name ?? "unknown name";
-          viewType = "active";
-        }
-
-        if (!entityMap.has(entityName)) {
-          entityMap.set(entityName, new Set());
-        }
-        entityMap.get(entityName)!.add(viewType);
-      });
-
-      const entityInfos: EntityInfo[] = Array.from(entityMap.entries()).map(
-        ([name, types]) => ({
-          name,
-          viewTypes: Array.from(types).sort(),
-        })
-      );
-
-      setEntities(entityInfos);
-
-      // Auto-select first entity if none selected
-      if (entityInfos.length > 0 && !selectedEntity) {
-        setSelectedEntity(entityInfos[0]!.name);
-      }
-
-      // Auto-select first table if none selected and no entities
-      if (tableInfos.length > 0 && !selectedTable && entityInfos.length === 0) {
-        setSelectedTable(tableInfos[0]!.name);
-      }
-    }
-  }, [tablesResult, selectedTable, selectedEntity]);
-
-  // Update selectedTable when entity or view type changes
-  useEffect(() => {
-    if (selectedEntity && selectedViewType) {
-      let tableName: string;
-      if (selectedViewType === "active") {
-        tableName = selectedEntity;
+      if (name?.endsWith("_all")) {
+        entityName = name.slice(0, -4);
+        viewType = "all";
+      } else if (name?.endsWith("_history")) {
+        entityName = name.slice(0, -8);
+        viewType = "history";
       } else {
-        tableName = `${selectedEntity}_${selectedViewType}`;
+        entityName = name ?? "unknown name";
+        viewType = "active";
       }
-      setSelectedTable(tableName);
+
+      if (!entityMap.has(entityName)) {
+        entityMap.set(entityName, new Set());
+      }
+      entityMap.get(entityName)!.add(viewType);
+    });
+
+    return Array.from(entityMap.entries()).map(([name, types]) => ({
+      name,
+      viewTypes: Array.from(types).sort(),
+    }));
+  }, [tables]);
+
+  // Compute selectedTable directly from selectedEntity and selectedViewType
+  const selectedTable = useMemo(() => {
+    if (!selectedEntity) return "";
+
+    if (selectedViewType === "active") {
+      return selectedEntity;
+    } else {
+      return `${selectedEntity}_${selectedViewType}`;
     }
   }, [selectedEntity, selectedViewType]);
 
   // Fetch table data when a table is selected
-  const [tableDataResult] = useQuery<any[]>(() => {
-    if (!lix || !selectedTable) return [];
+  const tableDataQueryResult = useQuery((lix) => {
+    if (!selectedTable) {
+      return lix.db
+        .selectFrom("sqlite_master" as any)
+        .select("name")
+        .where("name", "=", "")
+        .limit(0);
+    }
+    return lix.db
+      .selectFrom(selectedTable as any)
+      .selectAll()
+      .limit(100);
+  });
 
-    // Construct query based on selected table
-    let sqlQuery = `SELECT * FROM "${selectedTable}" LIMIT 100;`;
-
-    try {
-      // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
-      const result = lix.sqlite.exec(sqlQuery, {
-        returnValue: "resultRows",
-      });
-      return result as any;
-    } catch (error) {
-      console.error(`Error querying table ${selectedTable}:`, error);
+  // Get column names from the first row of data or infer from keys
+  const columnNames = useMemo(() => {
+    if (
+      !selectedTable ||
+      !tableDataQueryResult ||
+      tableDataQueryResult.length === 0
+    ) {
       return [];
     }
-  }, [selectedTable]);
+    // Get column names from the first row's keys
+    return Object.keys(tableDataQueryResult[0]!);
+  }, [selectedTable, tableDataQueryResult]);
 
-  // Get column names for the selected table
-  const [columnNamesResult] = useQuery<any[]>(() => {
-    if (!lix || !selectedTable) return [];
-    try {
-      // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
-      const result = lix.sqlite.exec(`PRAGMA table_info("${selectedTable}");`, {
-        returnValue: "resultRows",
-      });
-      return result as any;
-    } catch (error) {
-      console.error(`Error getting schema for ${selectedTable}:`, error);
+  // Create a stable string representation of column names for memoization
+  const columnNamesKey = useMemo(() => {
+    return columnNames.join(",");
+  }, [columnNames]);
+
+  // Compute columns from query result
+  const computedTableColumns = useMemo(() => {
+    if (!selectedTable || columnNames.length === 0) {
       return [];
     }
-  }, [selectedTable]);
 
-  // Process column data
-  useEffect(() => {
     if (selectedTable === "snapshot") {
       // --- Special case for snapshot table ---
-      // Define columns manually based on the custom query structure
-      const columns: ColumnDef<any>[] = [
+      return [
         {
           id: "id",
-          accessorKey: "0", // Corresponds to SELECT index 0
+          accessorKey: "id",
           header: "id",
-          cell: (info: any) => info.getValue(),
+          cell: defaultCellRenderer,
         },
         {
           id: "content",
-          accessorKey: "1", // Corresponds to SELECT index 1
+          accessorKey: "content",
           header: "content",
-          cell: (info: any) => {
-            // JSON renderer
-            const value = info.getValue();
-            try {
-              // Step 1: Parse the value if it's a string containing JSON
-              const parsedValue =
-                typeof value === "string" ? JSON.parse(value) : value;
-              // Step 2: Stringify the potentially parsed object for pretty printing
-              const formattedJson = JSON.stringify(parsedValue, null, 2);
-              return (
-                <pre className="text-xs whitespace-pre-wrap break-all">
-                  {formattedJson}
-                </pre>
-              );
-            } catch (e) {
-              console.error(
-                "Failed to parse or stringify snapshot content:",
-                e,
-                "Original value:",
-                value
-              );
-              // Fallback: Display raw value or error message
-              return (
-                <span className="text-error text-xs">
-                  Error formatting JSON
-                </span>
-              );
-            }
-          },
+          cell: jsonCellRenderer,
         },
       ];
-      setTableColumns(columns);
-    } else if (columnNamesResult && columnNamesResult.length > 0) {
-      // --- Default case for other tables (using PRAGMA) ---
-      const columns: ColumnDef<any>[] = columnNamesResult.map((col, index) => {
-        const columnName = col[1]; // column name is at index 1
-
-        // Default cell renderer (could customize for other tables later if needed)
-        let cellRenderer = (info: any) => info.getValue();
-
-        // Special formatting for snapshot_content in state views
-        if (columnName === "snapshot_content") {
-          cellRenderer = (info: any) => {
-            const value = info.getValue();
-            try {
-              // Step 1: Parse the value if it's a string containing JSON
-              const parsedValue =
-                typeof value === "string" ? JSON.parse(value) : value;
-              // Step 2: Stringify the potentially parsed object for pretty printing
-              const formattedJson = JSON.stringify(parsedValue, null, 2);
-              return (
-                <pre className="text-xs whitespace-pre-wrap break-all">
-                  {formattedJson}
-                </pre>
-              );
-            } catch (e) {
-              console.error(
-                "Failed to parse or stringify snapshot_content:",
-                e,
-                "Original value:",
-                value
-              );
-              // Fallback: Display raw value or error message
-              return (
-                <span className="text-error text-xs">
-                  Error formatting JSON
-                </span>
-              );
-            }
-          };
-        }
+    } else {
+      return columnNames.map((columnName: string) => {
+        const cellRenderer =
+          columnName === "snapshot_content"
+            ? jsonCellRenderer
+            : defaultCellRenderer;
 
         const columnDef: ColumnDef<any> = {
           id: columnName,
-          accessorKey: String(index), // Use index from PRAGMA
+          accessorKey: columnName,
           header: columnName,
           cell: cellRenderer,
         };
 
-        // Set wider column for snapshot_content to accommodate JSON
         if (columnName === "snapshot_content") {
           columnDef.size = 800;
           columnDef.minSize = 400;
@@ -250,27 +178,13 @@ export default function DataExplorer() {
 
         return columnDef;
       });
-      setTableColumns(columns);
-    } else {
-      setTableColumns([]);
     }
-  }, [columnNamesResult, selectedTable]);
+  }, [selectedTable, columnNamesKey]);
 
-  // Process table data
-  useEffect(() => {
-    if (tableDataResult && tableDataResult.length > 0) {
-      const data = tableDataResult.map((row) => {
-        const rowData: Record<string, any> = {};
-        row.forEach((cell: any, cellIndex: number) => {
-          rowData[String(cellIndex)] = cell;
-        });
-        return rowData;
-      });
-      setTableData(data);
-    } else {
-      setTableData([]);
-    }
-  }, [tableDataResult]);
+  // Use the query result directly as table data (no transformation needed)
+  const computedTableData = useMemo(() => {
+    return tableDataQueryResult || [];
+  }, [tableDataQueryResult]);
 
   // Log table auto-filter integration
   // useEffect(() => {
@@ -288,34 +202,31 @@ export default function DataExplorer() {
   // }, [tables, selectedTable]);
 
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTable(e.target.value);
+    const tableName = e.target.value;
     setColumnFilters([]);
-    setTableData([]);
-    setTableColumns([]);
-    // Reset entity selection when manually selecting a table
-    setSelectedEntity("");
+
+    // When directly selecting a table, reset entity selection
+    // and set the entity to the table name for consistency
+    setSelectedEntity(tableName);
+    setSelectedViewType("active"); // Direct table selection implies active view
   };
 
   const handleEntityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const entityName = e.target.value;
     setSelectedEntity(entityName);
     setColumnFilters([]);
-    setTableData([]);
-    setTableColumns([]);
 
-    // For tables selected from entity dropdown, set selectedTable directly
+    // For real tables, ensure view type is set to active
     if (
       tables.find((t: TableInfo) => t.name === entityName && t.type === "table")
     ) {
-      setSelectedTable(entityName);
+      setSelectedViewType("active");
     }
   };
 
   const handleViewTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedViewType(e.target.value);
     setColumnFilters([]);
-    setTableData([]);
-    setTableColumns([]);
   };
 
   return (
@@ -429,12 +340,22 @@ export default function DataExplorer() {
 
       {selectedTable && (
         <DataTable
-          data={tableData}
-          columns={tableColumns}
+          data={computedTableData}
+          columns={computedTableColumns}
           columnFilters={columnFilters}
           setColumnFilters={setColumnFilters}
         />
       )}
     </div>
+  );
+}
+
+export default function DataExplorer() {
+  return (
+    <Suspense
+      fallback={<div className="container mx-auto p-4">Loading...</div>}
+    >
+      <DataExplorerContent />
+    </Suspense>
   );
 }
