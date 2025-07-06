@@ -398,7 +398,7 @@ export function applyStateDatabaseSchema(
 					if (idxStr) {
 						const columns = idxStr.split(",").filter((c) => c.length > 0);
 						for (let i = 0; i < Math.min(columns.length, args.length); i++) {
-							if (args[i] !== null && args[i] !== undefined) {
+							if (args[i] !== null) {
 								filters[columns[i]!] = args[i]; // Keep original type
 							}
 						}
@@ -464,10 +464,7 @@ export function applyStateDatabaseSchema(
 
 							// TODO the CTE should not return inherited entities (optimization for later)
 							// Skip inherited entities - they should be resolved via inheritance logic, not stored as duplicates
-							if (
-								inherited_from_version_id !== null &&
-								inherited_from_version_id !== undefined
-							) {
+							if (inherited_from_version_id !== null) {
 								continue;
 							}
 
@@ -485,10 +482,7 @@ export function applyStateDatabaseSchema(
 									schema_version,
 									created_at,
 									updated_at,
-									inherited_from_version_id === null ||
-									inherited_from_version_id === undefined
-										? null
-										: inherited_from_version_id,
+									inherited_from_version_id,
 									isDeletion ? 1 : 0,
 									change_id || "unknown-change-id",
 								],
@@ -564,7 +558,7 @@ export function applyStateDatabaseSchema(
 					return capi.SQLITE_OK;
 				}
 
-				if (value === null || value === undefined) {
+				if (value === null) {
 					capi.sqlite3_result_null(pContext);
 				} else {
 					capi.sqlite3_result_js(pContext, value);
@@ -615,8 +609,8 @@ export function applyStateDatabaseSchema(
 
 					// INSERT operation: nArg = N+2, args[0] = NULL, args[1] = new rowid
 					// UPDATE operation: nArg = N+2, args[0] = old rowid, args[1] = new rowid
-					const isInsert = args[0] === null || args[0] === undefined;
-					const isUpdate = args[0] !== null && args[0] !== undefined;
+					const isInsert = args[0] === null;
+					const isUpdate = args[0] !== null;
 
 					if (!isInsert && !isUpdate) {
 						throw new Error("Invalid xUpdate operation");
@@ -647,20 +641,11 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchemaResult = sqlite.exec({
-						sql: "SELECT value FROM stored_schema WHERE key = ?",
-						bind: [String(schema_key)],
-						returnValue: "resultRows",
-					});
-
-					const storedSchema =
-						storedSchemaResult && storedSchemaResult.length > 0
-							? storedSchemaResult[0]![0]
-							: null;
+					const storedSchema = getStoredSchema(sqlite, schema_key);
 
 					validateStateMutation({
 						lix: { sqlite, db: db as any },
-						schema: storedSchema ? JSON.parse(storedSchema as string) : null,
+						schema: storedSchema ? JSON.parse(storedSchema) : null,
 						snapshot_content: JSON.parse(snapshot_content),
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
@@ -949,20 +934,11 @@ export function handleStateDelete(
 		return;
 	}
 
-	const storedSchemaResult = sqlite.exec({
-		sql: "SELECT value FROM stored_schema WHERE key = ?",
-		bind: [String(schema_key)],
-		returnValue: "resultRows",
-	});
-
-	const storedSchema =
-		storedSchemaResult && storedSchemaResult.length > 0
-			? storedSchemaResult[0]![0]
-			: null;
+	const storedSchema = getStoredSchema(sqlite, schema_key);
 
 	validateStateMutation({
 		lix: { sqlite, db: db as any },
-		schema: storedSchema ? JSON.parse(storedSchema as string) : null,
+		schema: storedSchema ? JSON.parse(storedSchema) : null,
 		snapshot_content: JSON.parse(snapshot_content as string),
 		operation: "delete",
 		entity_id: String(entity_id),
@@ -983,6 +959,19 @@ export function handleStateDelete(
 }
 
 // Helper functions for the virtual table
+
+function getStoredSchema(
+	sqlite: SqliteWasmDatabase,
+	schemaKey: any
+): string | null {
+	const result = sqlite.exec({
+		sql: "SELECT value FROM stored_schema WHERE key = ?",
+		bind: [String(schemaKey)],
+		returnValue: "resultRows",
+	});
+	
+	return result && result.length > 0 ? result[0]![0] as string : null;
+}
 
 function getColumnName(columnIndex: number): string {
 	const columns = [
