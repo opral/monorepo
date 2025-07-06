@@ -8,6 +8,22 @@ import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 
+// Virtual table schema definition
+const VTAB_CREATE_SQL = `CREATE TABLE x(
+	entity_id TEXT,
+	schema_key TEXT,
+	file_id TEXT,
+	version_id TEXT,
+	plugin_key TEXT,
+	snapshot_content TEXT,
+	schema_version TEXT,
+	created_at TEXT,
+	updated_at TEXT,
+	inherited_from_version_id TEXT,
+	change_id TEXT,
+	untracked INTEGER
+)`;
+
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
@@ -78,22 +94,7 @@ export function applyStateDatabaseSchema(
 	module.installMethods(
 		{
 			xCreate: (db: any, _pAux: any, _argc: number, _argv: any, pVTab: any) => {
-				const sql = `CREATE TABLE x(
-				entity_id TEXT,
-				schema_key TEXT,
-				file_id TEXT,
-				version_id TEXT,
-				plugin_key TEXT,
-				snapshot_content TEXT,
-				schema_version TEXT,
-				created_at TEXT,
-				updated_at TEXT,
-				inherited_from_version_id TEXT,
-				change_id TEXT,
-				untracked INTEGER
-			)`;
-
-				const result = capi.sqlite3_declare_vtab(db, sql);
+				const result = capi.sqlite3_declare_vtab(db, VTAB_CREATE_SQL);
 				if (result !== capi.SQLITE_OK) {
 					return result;
 				}
@@ -109,22 +110,7 @@ export function applyStateDatabaseSchema(
 				_argv: any,
 				pVTab: any
 			) => {
-				const sql = `CREATE TABLE x(
-				entity_id TEXT,
-				schema_key TEXT,
-				file_id TEXT,
-				version_id TEXT,
-				plugin_key TEXT,
-				snapshot_content TEXT,
-				schema_version TEXT,
-				created_at TEXT,
-				updated_at TEXT,
-				inherited_from_version_id TEXT,
-				change_id TEXT,
-				untracked INTEGER
-			)`;
-
-				const result = capi.sqlite3_declare_vtab(db, sql);
+				const result = capi.sqlite3_declare_vtab(db, VTAB_CREATE_SQL);
 				if (result !== capi.SQLITE_OK) {
 					return result;
 				}
