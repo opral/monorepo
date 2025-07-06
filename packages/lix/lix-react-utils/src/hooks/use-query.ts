@@ -11,13 +11,21 @@ import type { SelectQueryBuilder } from "kysely";
 // Map to cache promises by query key
 const queryPromiseCache = new Map<string, Promise<any>>();
 
+interface UseQueryOptions {
+	subscribe?: boolean;
+}
+
 /**
  * Subscribe to a live query using React 19 Suspense.
+ *
+ * @param query - Factory function that creates a Kysely SelectQueryBuilder
+ * @param options - Optional configuration
+ * @param options.subscribe - Whether to subscribe to live updates (default: true)
  *
  * @example
  * ```tsx
  * function KeyValueList() {
- *   const keyValues = useSuspenseQuery(lix =>
+ *   const keyValues = useQuery(lix =>
  *     lix.db.selectFrom('key_value')
  *       .where('key', 'like', 'example_%')
  *       .selectAll()
@@ -33,6 +41,16 @@ const queryPromiseCache = new Map<string, Promise<any>>();
  *   );
  * }
  *
+ * // One-time query without subscription
+ * function ConfigData() {
+ *   const config = useQuery(lix => 
+ *     lix.db.selectFrom('config').selectAll(),
+ *     { subscribe: false }
+ *   );
+ *   
+ *   return <div>{config.length} config items</div>;
+ * }
+ *
  * // Wrap with Suspense and ErrorBoundary:
  * <Suspense fallback={<div>Loading...</div>}>
  *   <ErrorBoundary fallback={<div>Error occurred</div>}>
@@ -43,18 +61,21 @@ const queryPromiseCache = new Map<string, Promise<any>>();
  */
 export function useQuery<TRow>(
 	query: (lix: Lix) => SelectQueryBuilder<any, any, TRow>,
+	options: UseQueryOptions = {}
 ): TRow[] {
 	const lix = useContext(LixContext);
 	if (!lix)
-		throw new Error("useSuspenseQuery must be used inside <LixProvider>.");
+		throw new Error("useQuery must be used inside <LixProvider>.");
+	
+	const { subscribe = true } = options;
 
 	// Create stable cache key that includes the compiled SQL to capture closure variables
 	const cacheKey = useMemo(() => {
 		// Compile the query to get the actual SQL with parameters
 		const builder = query(lix);
 		const compiled = builder.compile();
-		return `${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
-	}, [query, lix]);
+		return `${subscribe ? 'sub' : 'once'}:${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
+	}, [query, lix, subscribe]);
 
 	// Get or create promise
 	let promise = queryPromiseCache.get(cacheKey);
@@ -70,8 +91,14 @@ export function useQuery<TRow>(
 	// Local state for updates
 	const [rows, setRows] = useState(initialRows);
 
-	// Subscribe for ongoing updates
+	// Subscribe for ongoing updates (only if subscribe is true)
 	useEffect(() => {
+		if (!subscribe) {
+			// For one-time queries, just use the initial data
+			setRows(initialRows);
+			return;
+		}
+
 		const builder = query(lix);
 		const sub = lix.observe(builder).subscribe({
 			next: (value) => setRows(value as TRow[]),
@@ -85,7 +112,7 @@ export function useQuery<TRow>(
 			},
 		});
 		return () => sub.unsubscribe();
-	}, [cacheKey]); // Re-subscribe when query changes
+	}, [cacheKey, subscribe, initialRows]); // Re-subscribe when query changes
 
 	return rows;
 }
@@ -101,7 +128,7 @@ export function useQuery<TRow>(
  * @example
  * ```tsx
  * function ExampleComponent({ itemId }: { itemId: string }) {
- *   const item = useSuspenseQueryTakeFirst(lix =>
+ *   const item = useQueryTakeFirst(lix =>
  *     lix.db.selectFrom('key_value')
  *       .where('key', '=', `example_${itemId}`)
  *       .selectAll()
@@ -125,9 +152,10 @@ export function useQuery<TRow>(
  */
 export const useQueryTakeFirst = <TResult>(
 	query: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
+	options: UseQueryOptions = {}
 ): TResult | undefined => {
 	// Wrap the builder to limit results to 1
-	const rows = useQuery((lix) => query(lix).limit(1));
+	const rows = useQuery((lix) => query(lix).limit(1), options);
 
 	// Return the first row or undefined
 	return rows[0] as TResult | undefined;
@@ -164,9 +192,10 @@ export const useQueryTakeFirst = <TResult>(
  */
 export const useQueryTakeFirstOrThrow = <TResult>(
 	query: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
+	options: UseQueryOptions = {}
 ): TResult => {
 	// Use the regular takeFirst hook
-	const data = useQueryTakeFirst(query);
+	const data = useQueryTakeFirst(query, options);
 
 	// Throw if no data found
 	if (data === undefined) {

@@ -34,13 +34,13 @@ class MockErrorBoundary extends React.Component<
 	}
 }
 
-test("useSuspenseQuery throws error when used outside LixProvider", () => {
+test("useQuery throws error when used outside LixProvider", () => {
 	// We need to catch the error since it's thrown during render
 	expect(() => {
 		renderHook(() =>
 			useQuery((lix) => lix.db.selectFrom("key_value").selectAll()),
 		);
-	}).toThrow("useSuspenseQuery must be used inside <LixProvider>.");
+	}).toThrow("useQuery must be used inside <LixProvider>.");
 });
 
 test("useSuspenseQuery returns array with data using new API", async () => {
@@ -466,7 +466,75 @@ test("useSuspenseQuery re-executes when query function changes (dependency array
 	await lix.close();
 });
 
-test("useSuspenseQuery subscription updates when query dependencies change", async () => {
+test("useQuery with subscribe: false executes once without live updates", async () => {
+	const lix = await openLix({});
+
+	// Insert initial test data
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "once_test", value: "initial" })
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult: { current: State<KeyValue>[] };
+
+	await act(async () => {
+		const { result } = renderHook(
+			() => {
+				const data = useQuery(
+					(lix) =>
+						lix.db
+							.selectFrom("key_value")
+							.selectAll()
+							.where("key", "=", "once_test"),
+					{ subscribe: false },
+				);
+				return data;
+			},
+			{ wrapper },
+		);
+		hookResult = result;
+	});
+
+	// Wait for initial data
+	await waitFor(() => {
+		expect(hookResult.current).toHaveLength(1);
+		expect(hookResult.current[0]).toMatchObject({
+			key: "once_test",
+			value: "initial",
+		});
+	});
+
+	// Update the data in the database
+	await act(async () => {
+		await lix.db
+			.updateTable("key_value")
+			.set({ value: "updated" })
+			.where("key", "=", "once_test")
+			.execute();
+	});
+
+	// Give some time for potential updates (there shouldn't be any)
+	await new Promise((resolve) => setTimeout(resolve, 100));
+
+	// Data should NOT have updated because subscribe: false
+	expect(hookResult!.current).toHaveLength(1);
+	expect(hookResult!.current[0]).toMatchObject({
+		key: "once_test",
+		value: "initial", // Still the initial value
+	});
+
+	await lix.close();
+});
+
+test("useQuery subscription updates when query dependencies change", async () => {
 	const lix = await openLix({});
 
 	// Insert initial test data
