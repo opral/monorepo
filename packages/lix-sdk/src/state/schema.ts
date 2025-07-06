@@ -584,8 +584,6 @@ export function applyStateDatabaseSchema(
 
 				if (value === null || value === undefined) {
 					capi.sqlite3_result_null(pContext);
-				} else if (typeof value === "object") {
-					capi.sqlite3_result_js(pContext, JSON.stringify(value));
 				} else {
 					capi.sqlite3_result_js(pContext, value);
 				}
