@@ -35,6 +35,8 @@ export function DataTable<TData>({
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
     state: {
       sorting,
       columnFilters,
@@ -49,7 +51,15 @@ export function DataTable<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <th key={header.id} className="text-center">
+                  <th 
+                    key={header.id} 
+                    className="text-center"
+                    style={{
+                      width: header.getSize(),
+                      minWidth: header.column.columnDef.minSize,
+                      maxWidth: header.column.columnDef.maxSize,
+                    }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -79,7 +89,14 @@ export function DataTable<TData>({
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
+                    <td 
+                      key={cell.id}
+                      style={{
+                        width: cell.column.getSize(),
+                        minWidth: cell.column.columnDef.minSize,
+                        maxWidth: cell.column.columnDef.maxSize,
+                      }}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
