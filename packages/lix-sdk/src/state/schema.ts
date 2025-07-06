@@ -291,7 +291,79 @@ export function applyStateDatabaseSchema(
 				});
 			},
 
-			xBestIndex: () => {
+			xBestIndex: (pVTab: any, pIdxInfo: any) => {
+				const idxInfo = sqlite.sqlite3.vtab.xIndexInfo(pIdxInfo);
+
+				// Track which columns have equality constraints
+				const usableConstraints: string[] = [];
+				let argIndex = 0;
+
+				// Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
+				const columnMap = [
+					"entity_id", // 0
+					"schema_key", // 1
+					"file_id", // 2
+					"version_id", // 3
+					"plugin_key", // 4
+					"snapshot_content", // 5
+					"schema_version", // 6
+					"created_at", // 7
+					"updated_at", // 8
+					"inherited_from_version_id", // 9
+				];
+
+				// Process constraints
+				// @ts-expect-error - idxInfo.$nConstraint is not defined in the type
+				for (let i = 0; i < idxInfo.$nConstraint; i++) {
+					// @ts-expect-error - idxInfo.nthConstraint is not defined in the type
+					const constraint = idxInfo.nthConstraint(i);
+
+					// Only handle equality constraints that are usable
+					if (
+						constraint.$op === capi.SQLITE_INDEX_CONSTRAINT_EQ &&
+						constraint.$usable
+					) {
+						const columnName = columnMap[constraint.$iColumn];
+						if (columnName) {
+							usableConstraints.push(columnName);
+
+							// Mark this constraint as used
+							// @ts-expect-error - idxInfo.nthConstraintUsage is not defined in the type
+							idxInfo.nthConstraintUsage(i).$argvIndex = ++argIndex;
+						}
+					}
+				}
+
+				const fullTableCost = 1000000; // Default cost for full table scan
+				const fullTableRows = 10000000;
+
+				// Set the index string to pass column names to xFilter
+				if (usableConstraints.length > 0) {
+					const idxStr = usableConstraints.join(",");
+					// @ts-expect-error - idxInfo.$idxStr is not defined in the type
+					idxInfo.$idxStr = sqlite.sqlite3.wasm.allocCString(idxStr, false);
+					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
+					idxInfo.$needToFreeIdxStr = 1; // We don't need SQLite to free this string
+
+					// Lower cost when we can use filters (more selective)
+					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
+					idxInfo.$estimatedCost =
+						fullTableCost / (usableConstraints.length + 1);
+					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
+					idxInfo.$estimatedRows = Math.ceil(
+						fullTableRows / (usableConstraints.length + 1)
+					);
+				} else {
+					// @ts-expect-error - idxInfo.$needToFreeIdxStr is not defined in the type
+					idxInfo.$needToFreeIdxStr = 0;
+
+					// Higher cost for full table scan
+					// @ts-expect-error - idxInfo.$estimatedCost is not defined in the type
+					idxInfo.$estimatedCost = fullTableCost;
+					// @ts-expect-error - idxInfo.$estimatedRows is not defined in the type
+					idxInfo.$estimatedRows = fullTableRows;
+				}
+
 				return capi.SQLITE_OK;
 			},
 
@@ -317,55 +389,46 @@ export function applyStateDatabaseSchema(
 				return capi.SQLITE_OK;
 			},
 
-			xFilter: (pCursor: any) => {
+			xFilter: (
+				pCursor: any,
+				idxNum: number,
+				idxStrPtr: number,
+				argc: number,
+				argv: any
+			) => {
 				const cursorState = cursorStates.get(pCursor);
+				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
+
+				// Extract filter arguments if provided
+				const filters: Record<string, string> = {};
+				if (argc > 0 && argv) {
+					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(argc, argv);
+					// Parse idxStr to understand which columns are being filtered
+					// idxStr format: "column1,column2,..."
+					if (idxStr) {
+						const columns = idxStr.split(",").filter((c) => c.length > 0);
+						for (let i = 0; i < Math.min(columns.length, args.length); i++) {
+							if (args[i] !== null && args[i] !== undefined) {
+								filters[columns[i]!] = String(args[i]);
+							}
+						}
+					}
+				}
 
 				// Try cache first - include inherited entities via union
-				const cacheResults = sqlite.exec({
-					sql: `
-						-- Direct entities from cache
-						SELECT entity_id, schema_key, file_id, version_id, plugin_key, 
-							   snapshot_content, schema_version, created_at, updated_at,
-							   inherited_from_version_id, change_id
-						FROM internal_state_cache
-							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions						
-						UNION ALL
-						
-						-- Inherited entities: child versions see parent entities they don't override
-						SELECT isc.entity_id, isc.schema_key, isc.file_id, 
-							   vi.version_id, -- Return child version_id
-							   isc.plugin_key, isc.snapshot_content, isc.schema_version, 
-							   isc.created_at, isc.updated_at,
-							   vi.parent_version_id as inherited_from_version_id, isc.change_id
-						FROM (
-							-- Get version inheritance relationships from cache
-							SELECT 
-								json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-								json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-							FROM internal_state_cache isc_v
-							WHERE isc_v.schema_key = 'lix_version'
-						) vi
-						JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
-						WHERE vi.parent_version_id IS NOT NULL
-						-- Only inherit entities that exist (not deleted) in parent
-						AND isc.inheritance_delete_marker = 0
-						-- Don't inherit if child already has this entity (including deletion markers)
-						AND NOT EXISTS (
-							SELECT 1 FROM internal_state_cache child_isc
-							WHERE child_isc.version_id = vi.version_id
-							  AND child_isc.entity_id = isc.entity_id
-							  AND child_isc.schema_key = isc.schema_key
-							  AND child_isc.file_id = isc.file_id
-						)
-					`,
-					returnValue: "resultRows",
-				});
+				const cacheResults = queryCache(sqlite, filters);
 
 				cursorState.results = cacheResults || [];
 				cursorState.rowIndex = 0;
 
+				const recordsInCache = sqlite.exec({
+					sql: `SELECT COUNT(*) as count FROM internal_state_cache`,
+					returnValue: "resultRows",
+				})[0]![0] as number;
+
 				// Cache miss - populate cache with actual recursive state query
-				if (cursorState.results.length === 0) {
+
+				if (cursorState.results.length === 0 && recordsInCache === 0) {
 					if (canLog()) {
 						createLixOwnLogSync({
 							lix: { sqlite, db: db as any },
@@ -459,45 +522,7 @@ export function applyStateDatabaseSchema(
 					// Re-query cache after population
 
 					// Re-query after population with inheritance logic
-					const newResults = sqlite.exec({
-						sql: `
-							-- Direct entities from cache
-							SELECT entity_id, schema_key, file_id, version_id, plugin_key, 
-								   snapshot_content, schema_version, created_at, updated_at,
-								   inherited_from_version_id, change_id
-							FROM internal_state_cache
-								WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions						
-							UNION ALL
-							
-							-- Inherited entities: child versions see parent entities they don't override
-							SELECT isc.entity_id, isc.schema_key, isc.file_id, 
-								   vi.version_id, -- Return child version_id
-								   isc.plugin_key, isc.snapshot_content, isc.schema_version, 
-								   isc.created_at, isc.updated_at,
-								   vi.parent_version_id as inherited_from_version_id, isc.change_id
-							FROM (
-								-- Get version inheritance relationships from cache
-								SELECT 
-									json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-									json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-								FROM internal_state_cache isc_v
-								WHERE isc_v.schema_key = 'lix_version'
-							) vi
-							JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
-							WHERE vi.parent_version_id IS NOT NULL
-							-- Only inherit entities that exist (not deleted) in parent
-							AND isc.inheritance_delete_marker = 0
-							-- Don't inherit if child already has this entity (including deletion markers)
-							AND NOT EXISTS (
-								SELECT 1 FROM internal_state_cache child_isc
-								WHERE child_isc.version_id = vi.version_id
-								  AND child_isc.entity_id = isc.entity_id
-								  AND child_isc.schema_key = isc.schema_key
-								  AND child_isc.file_id = isc.file_id
-							)
-						`,
-						returnValue: "resultRows",
-					});
+					const newResults = queryCache(sqlite, filters);
 					cursorState.results = newResults || [];
 				} else {
 					if (canLog()) {
@@ -536,7 +561,9 @@ export function applyStateDatabaseSchema(
 				// Handle array-style results from SQLite exec
 				let value;
 				if (Array.isArray(row)) {
-					value = row[iCol];
+					// Account for rowid being the first column (index 0)
+					// So we need to shift all column indices by 1
+					value = row[iCol + 1];
 				} else {
 					const columnName = getColumnName(iCol);
 					value = row[columnName];
@@ -564,7 +591,24 @@ export function applyStateDatabaseSchema(
 
 			xRowid: (pCursor: any, pRowid: any) => {
 				const cursorState = cursorStates.get(pCursor);
-				sqlite.sqlite3.vtab.xRowid(pRowid, cursorState.rowIndex);
+				const row = cursorState.results[cursorState.rowIndex];
+
+				if (!row) {
+					return capi.SQLITE_ERROR;
+				}
+
+				// Extract rowid from the result row
+				let rowid;
+				if (Array.isArray(row)) {
+					// rowid is the first column (index 0)
+					rowid = row[0];
+				} else {
+					// rowid is a property on the object
+					rowid = row.rowid;
+				}
+
+				// Use the actual rowid from the cache table
+				sqlite.sqlite3.vtab.xRowid(pRowid, rowid);
 				return capi.SQLITE_OK;
 			},
 
@@ -1001,14 +1045,20 @@ function selectStateViaCTE(
 			pe.snapshot_content,
 			pe.schema_version,
 			pe.version_id,
-			(SELECT MIN(ic.created_at) FROM internal_change ic 
-			 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id) AS created_at,
+			COALESCE(
+				(SELECT MIN(ic.created_at) FROM internal_change ic 
+				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id),
+				(SELECT MIN(ict.created_at) FROM internal_change_in_transaction ict 
+				 WHERE ict.entity_id = pe.entity_id AND ict.schema_key = pe.schema_key AND ict.file_id = pe.file_id)
+			) AS created_at,
 			COALESCE(
 				(SELECT MAX(ic.created_at) FROM internal_change ic 
 				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id
 				   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = pe.version_id)),
 				(SELECT MIN(ic.created_at) FROM internal_change ic 
-				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id)
+				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id),
+				(SELECT MAX(ict.created_at) FROM internal_change_in_transaction ict 
+				 WHERE ict.entity_id = pe.entity_id AND ict.schema_key = pe.schema_key AND ict.file_id = pe.file_id)
 			) AS updated_at,
 			pe.inherited_from_version_id,
 			pe.change_id
@@ -1041,6 +1091,97 @@ function selectStateViaCTE(
 	});
 
 	return result || [];
+}
+
+function queryCache(
+	sqlite: SqliteWasmDatabase,
+	filters: Record<string, any>
+): any[] {
+	const filterBindings = Object.values(filters);
+	const buildWhereClause = (tableAlias: string = "") => {
+		const conditions: string[] = [];
+		const prefix = tableAlias ? `${tableAlias}.` : "";
+
+		Object.keys(filters).forEach((column) => {
+			conditions.push(`${prefix}${column} = ?`);
+		});
+
+		return conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+	};
+
+	const statment = `select * from (
+						-- Direct entities from cache
+						SELECT rowid,
+								entity_id, 
+								schema_key, 
+								file_id, 
+								version_id, 
+								plugin_key, 
+								snapshot_content, 
+							   	schema_version, 
+							   	created_at, 
+							   	updated_at,
+							   	inherited_from_version_id, 
+							   	change_id
+						FROM internal_state_cache
+							WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions	
+											
+						UNION ALL
+						
+						-- Inherited entities: child versions see parent entities they don't override
+
+						SELECT 
+							rowid,
+							isc.entity_id as entity_id, 
+							isc.schema_key as schema_key,
+							isc.file_id as file_id, 
+							vi.version_id as version_id, -- Return child version_id
+							isc.plugin_key as plugin_key, 
+							isc.snapshot_content as snapshot_content, 
+							isc.schema_version as schema_version, 
+							isc.created_at as created_at, 
+							isc.updated_at as updated_at,
+							vi.parent_version_id as inherited_from_version_id,
+							isc.change_id as change_id
+
+						FROM (
+							-- Get version inheritance relationships from cache
+							SELECT
+								isc_v.entity_id,
+								isc_v.schema_key,
+								isc_v.file_id,
+								json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+								json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+							FROM internal_state_cache isc_v
+							WHERE isc_v.schema_key = 'lix_version'
+						) vi
+						JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
+						 	
+						WHERE vi.parent_version_id IS NOT NULL
+						-- Only inherit entities that exist (not deleted) in parent
+						AND isc.inheritance_delete_marker = 0
+						-- Don't inherit if child already has this entity (including deletion markers)
+						AND NOT EXISTS (
+							SELECT 1 FROM internal_state_cache child_isc
+							WHERE child_isc.version_id = vi.version_id
+							  AND child_isc.entity_id = isc.entity_id
+							  AND child_isc.schema_key = isc.schema_key
+							  AND child_isc.file_id = isc.file_id
+							
+						)
+					) as combined_results `;
+
+	const result = sqlite.exec({
+		sql: `
+					${statment}
+					${buildWhereClause("combined_results")}
+					`,
+		bind: [...filterBindings],
+
+		returnValue: "resultRows",
+	});
+
+	return result;
 }
 
 export type StateView = {
