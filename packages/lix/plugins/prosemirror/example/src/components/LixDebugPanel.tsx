@@ -11,10 +11,9 @@ const LixDebugPanel = () => {
 	const currentDoc = useQueryTakeFirst(selectProsemirrorDoc);
 	const jsonDoc = JSON.parse(
 		new TextDecoder().decode(
-			currentDoc.data?.data ?? new TextEncoder().encode("{}"),
+			currentDoc?.data ?? new TextEncoder().encode("{}"),
 		),
 	);
-
 
 	if (changes === null) {
 		return <p>Loading...</p>;
@@ -149,11 +148,11 @@ const LixDebugPanel = () => {
 				<div>
 					<h4 className="text-lg font-medium mb-2">
 						All Changes{" "}
-						{(changes.data?.length ?? 0 > 0) ? `(${changes.data?.length})` : ""}
+						{(changes?.length ?? 0 > 0) ? `(${changes.length})` : ""}
 					</h4>
 					<div className="border border-base-300 rounded overflow-auto">
-						{(changes.data?.length ?? 0 > 0) ? (
-							changes.data?.map((change) => (
+						{(changes?.length ?? 0 > 0) ? (
+							changes.map((change) => (
 								<div
 									key={`change-${change?.id}`}
 									className="p-2 border border-base-300"
@@ -268,7 +267,7 @@ const ProsemirrorDocExport = () => {
 	const handleExportDocument = () => {
 		try {
 			// Create a blob with the document content
-			const docContent = JSON.stringify(currentDoc.data, null, 2);
+			const docContent = JSON.stringify(currentDoc, null, 2);
 			const blob = new Blob([docContent], { type: "application/json" });
 
 			// Create a download link

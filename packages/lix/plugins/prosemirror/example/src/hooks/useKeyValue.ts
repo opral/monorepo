@@ -20,7 +20,7 @@ export function useKeyValue<T>(key: string) {
 		await upsertKeyValue(lix, key, newValue);
 	};
 
-	return [result.data?.value, setValue] as const;
+	return [result?.value, setValue] as const;
 }
 
 function selectKeyValue(lix: Lix, key: string) {

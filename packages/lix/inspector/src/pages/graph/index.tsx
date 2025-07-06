@@ -1,6 +1,10 @@
-import { useLix } from "../../hooks/use-lix";
-import { jsonArrayFrom, type ChangeSetEdge, type Version } from "@lix-js/sdk";
-import { useQuery } from "../../hooks/use-query";
+import { useQuery } from "@lix-js/react-utils";
+import {
+  selectVersions,
+  selectAvailableLabels,
+  selectChangeSets,
+  selectChangeSetEdges,
+} from "./queries";
 import {
   ReactFlow,
   type Node,
@@ -21,109 +25,21 @@ export interface ExtendedChangeSet {
 }
 
 export default function Graph() {
-  const lix = useLix();
   const reactFlowInstanceRef = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
 
-  const [versions] = useQuery<Version[]>(async () => {
-    try {
-      const result = await lix.db.selectFrom("version").selectAll().execute();
-      return result;
-    } catch (error) {
-      console.error("Error fetching versions:", error);
-      return [];
-    }
-  }, [lix]);
+  const versions = useQuery(selectVersions);
+  const availableLabels = useQuery(selectAvailableLabels);
 
-  // Fetch all available labels
-  const [availableLabels] = useQuery(async () => {
-    try {
-      const result = await lix.db
-        .selectFrom("label")
-        .select(["id", "name"])
-        .execute();
-      return result;
-    } catch (error) {
-      console.error("Error fetching labels:", error);
-      return [];
-    }
-  }, [lix]);
+  // Direct approach preserves type inference
+  const changeSets = useQuery((lix) =>
+    selectChangeSets(lix, selectedLabels, availableLabels || [])
+  );
 
-  const [changeSets] = useQuery<ExtendedChangeSet[]>(async () => {
-    try {
-      const result = await lix.db
-        .selectFrom("change_set")
-        .$if(selectedLabels.length > 0, (eb) =>
-          eb
-            .leftJoin(
-              "change_set_label",
-              "change_set_label.change_set_id",
-              "change_set.id"
-            )
-            .$if(true, (qb) =>
-              qb.where((eb) =>
-                eb.or([
-                  eb(
-                    "change_set_label.label_id",
-                    "in",
-                    availableLabels?.map((l) => l.id) ?? []
-                  ),
-                  eb.exists(
-                    eb
-                      .selectFrom("version")
-                      .whereRef(
-                        "version.working_change_set_id",
-                        "=",
-                        "change_set.id"
-                      )
-                      .select("version.id")
-                  ),
-                ])
-              )
-            )
-        )
-        .select((eb) => [
-          "id",
-          jsonArrayFrom(
-            eb
-              .selectFrom("change_set_label")
-              .innerJoin(
-                "change_set_edge",
-                "change_set_edge.child_id",
-                "change_set.id"
-              )
-              .innerJoin("label", "label.id", "change_set_label.label_id")
-              .where(
-                "change_set_label.change_set_id",
-                "=",
-                eb.ref("change_set.id")
-              )
-              .select(["label.name", "label.id"])
-          ).as("labels"),
-        ])
-        .execute();
-      return result;
-    } catch (error) {
-      console.error("Error fetching change sets:", error);
-      return [];
-    }
-  }, [lix, selectedLabels, availableLabels]); // Add selectedLabels as a dependency to re-run query when labels change
-
-  const [changeSetEdges] = useQuery<ChangeSetEdge[]>(async () => {
-    try {
-      const result = await lix.db
-        .selectFrom("change_set_edge")
-        .where("parent_id", "in", changeSets?.map((cs) => cs.id) ?? [])
-        .where("child_id", "in", changeSets?.map((cs) => cs.id) ?? [])
-        .selectAll()
-        .execute();
-      return result;
-    } catch (error) {
-      console.error("Error fetching change set edges:", error);
-      return [];
-    }
-  }, [lix, changeSets, availableLabels]);
+  const changeSetEdges = useQuery((lix) =>
+    selectChangeSetEdges(lix, changeSets?.map((cs) => cs.id) ?? [])
+  );
 
   // Toggle label selection
   const toggleLabel = (labelName: string) => {

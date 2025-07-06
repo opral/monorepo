@@ -83,7 +83,7 @@ const Editor: React.FC = () => {
 				lixProsemirror({
 					lix,
 					schema,
-					fileId: prosemirrorFile.data?.id ?? "",
+					fileId: prosemirrorFile?.id ?? "",
 				}),
 			],
 		});
@@ -117,7 +117,7 @@ const Editor: React.FC = () => {
 			editorView.destroy();
 			setView(null);
 		};
-	}, [prosemirrorFile.data?.id]);
+	}, [prosemirrorFile?.id]);
 
 	// Handle clicks to focus the editor
 	const handleClick = () => {
