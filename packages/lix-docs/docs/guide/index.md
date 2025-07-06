@@ -2,7 +2,7 @@
 
 ![Lix features](../assets/lix-features.svg)
 
-Lix is a JavaScript SDK for change control that enables Git-like capabilities for apps and agents: [Change proposals](./features/change-proposals.md), [versioning](./features/versions.md) (branching), [history](./features/history.md), [blame](./features/blame.md), and more.  
+Lix is a JavaScript SDK for change control that enables Git-like capabilities for apps and agents: [Change proposals](/guide/features/change-proposals.md), [versioning](/guide/features/versions.md) (branching), [history](/guide/features/history.md), [blame](/guide/features/attribution.md), and more.
 
 - 🌐 Works in browsers and Node.js environments
 - 🔌 Works with any data format (Excel, JSON, CSV, etc.)
