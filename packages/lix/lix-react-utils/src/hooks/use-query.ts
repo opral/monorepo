@@ -43,11 +43,11 @@ interface UseQueryOptions {
  *
  * // One-time query without subscription
  * function ConfigData() {
- *   const config = useQuery(lix => 
+ *   const config = useQuery(lix =>
  *     lix.db.selectFrom('config').selectAll(),
  *     { subscribe: false }
  *   );
- *   
+ *
  *   return <div>{config.length} config items</div>;
  * }
  *
@@ -61,12 +61,11 @@ interface UseQueryOptions {
  */
 export function useQuery<TRow>(
 	query: (lix: Lix) => SelectQueryBuilder<any, any, TRow>,
-	options: UseQueryOptions = {}
+	options: UseQueryOptions = {},
 ): TRow[] {
 	const lix = useContext(LixContext);
-	if (!lix)
-		throw new Error("useQuery must be used inside <LixProvider>.");
-	
+	if (!lix) throw new Error("useQuery must be used inside <LixProvider>.");
+
 	const { subscribe = true } = options;
 
 	// Create stable cache key that includes the compiled SQL to capture closure variables
@@ -74,7 +73,7 @@ export function useQuery<TRow>(
 		// Compile the query to get the actual SQL with parameters
 		const builder = query(lix);
 		const compiled = builder.compile();
-		return `${subscribe ? 'sub' : 'once'}:${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
+		return `${subscribe ? "sub" : "once"}:${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
 	}, [query, lix, subscribe]);
 
 	// Get or create promise
@@ -152,7 +151,7 @@ export function useQuery<TRow>(
  */
 export const useQueryTakeFirst = <TResult>(
 	query: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
-	options: UseQueryOptions = {}
+	options: UseQueryOptions = {},
 ): TResult | undefined => {
 	// Wrap the builder to limit results to 1
 	const rows = useQuery((lix) => query(lix).limit(1), options);
@@ -192,7 +191,7 @@ export const useQueryTakeFirst = <TResult>(
  */
 export const useQueryTakeFirstOrThrow = <TResult>(
 	query: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
-	options: UseQueryOptions = {}
+	options: UseQueryOptions = {},
 ): TResult => {
 	// Use the regular takeFirst hook
 	const data = useQueryTakeFirst(query, options);
