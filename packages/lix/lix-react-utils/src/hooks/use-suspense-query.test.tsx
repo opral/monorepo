@@ -383,3 +383,162 @@ test("useSuspenseQueryTakeFirstOrThrow throws when no result found", async () =>
 	console.error = originalError;
 	await lix.close();
 });
+
+test("useSuspenseQuery re-executes when query function changes (dependency array fix)", async () => {
+	const lix = await openLix({});
+	
+	// Insert test data with different prefixes
+	await lix.db
+		.insertInto("key_value")
+		.values([
+			{ key: "prefix_a_1", value: "value_a_1" },
+			{ key: "prefix_a_2", value: "value_a_2" },
+			{ key: "prefix_b_1", value: "value_b_1" },
+			{ key: "prefix_b_2", value: "value_b_2" },
+		])
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	// State to control which prefix to query
+	let hookResult: { current: State<KeyValue>[] };
+	let rerender: (props?: { prefix: string }) => void;
+
+	await act(async () => {
+		const { result, rerender: rerenderFn } = renderHook(
+			({ prefix = "prefix_a" }: { prefix?: string } = {}) => {
+				// Create a new query function each time prefix changes
+				const data = useSuspenseQuery((lix) =>
+					lix.db
+						.selectFrom("key_value")
+						.selectAll()
+						.where("key", "like", `${prefix}_%`)
+						.orderBy("key", "asc"),
+				);
+				return data;
+			},
+			{ 
+				wrapper,
+				initialProps: { prefix: "prefix_a" }
+			},
+		);
+		hookResult = result;
+		rerender = rerenderFn;
+	});
+
+	// Wait for initial data (prefix_a results)
+	await waitFor(() => {
+		expect(hookResult.current).toHaveLength(2);
+		expect(hookResult.current[0]).toMatchObject({
+			key: "prefix_a_1",
+			value: "value_a_1",
+		});
+		expect(hookResult.current[1]).toMatchObject({
+			key: "prefix_a_2",
+			value: "value_a_2",
+		});
+	});
+
+	// Change the query prefix - this should trigger a re-execution
+	await act(async () => {
+		rerender({ prefix: "prefix_b" });
+	});
+
+	// Wait for the query to re-execute with new prefix
+	await waitFor(() => {
+		expect(hookResult.current).toHaveLength(2);
+		expect(hookResult.current[0]).toMatchObject({
+			key: "prefix_b_1",
+			value: "value_b_1",
+		});
+		expect(hookResult.current[1]).toMatchObject({
+			key: "prefix_b_2",
+			value: "value_b_2",
+		});
+	});
+
+	await lix.close();
+});
+
+test("useSuspenseQuery subscription updates when query dependencies change", async () => {
+	const lix = await openLix({});
+	
+	// Insert initial test data
+	await lix.db
+		.insertInto("key_value")
+		.values([
+			{ key: "sub_test_a_1", value: "initial_a" },
+			{ key: "sub_test_b_1", value: "initial_b" },
+		])
+		.execute();
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={lix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult: { current: State<KeyValue>[] };
+	let rerender: (props?: { filter: string }) => void;
+
+	await act(async () => {
+		const { result, rerender: rerenderFn } = renderHook(
+			({ filter = "sub_test_a" }: { filter?: string } = {}) => {
+				const data = useSuspenseQuery((lix) =>
+					lix.db
+						.selectFrom("key_value")
+						.selectAll()
+						.where("key", "like", `${filter}_%`),
+				);
+				return data;
+			},
+			{ 
+				wrapper,
+				initialProps: { filter: "sub_test_a" }
+			},
+		);
+		hookResult = result;
+		rerender = rerenderFn;
+	});
+
+	// Verify initial subscription works
+	await waitFor(() => {
+		expect(hookResult.current).toHaveLength(1);
+		expect(hookResult.current[0]?.key).toBe("sub_test_a_1");
+	});
+
+	// Switch to different filter - new subscription should be created
+	await act(async () => {
+		rerender({ filter: "sub_test_b" });
+	});
+
+	// Verify new subscription works
+	await waitFor(() => {
+		expect(hookResult.current).toHaveLength(1);
+		expect(hookResult.current[0]?.key).toBe("sub_test_b_1");
+	});
+
+	// Insert new data that matches the current filter
+	await act(async () => {
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: "sub_test_b_2", value: "new_b" })
+			.execute();
+	});
+
+	// The subscription should pick up the new data
+	await waitFor(() => {
+		expect(hookResult.current).toHaveLength(2);
+		expect(hookResult.current.some(item => item.key === "sub_test_b_2")).toBe(true);
+	});
+
+	await lix.close();
+});

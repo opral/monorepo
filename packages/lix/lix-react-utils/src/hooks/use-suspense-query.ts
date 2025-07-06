@@ -48,8 +48,13 @@ export function useSuspenseQuery<TRow>(
 	if (!lix)
 		throw new Error("useSuspenseQuery must be used inside <LixProvider>.");
 
-	// Create stable cache key
-	const cacheKey = useMemo(() => query.toString(), [query]);
+	// Create stable cache key that includes the compiled SQL to capture closure variables
+	const cacheKey = useMemo(() => {
+		// Compile the query to get the actual SQL with parameters
+		const builder = query(lix);
+		const compiled = builder.compile();
+		return `${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
+	}, [query, lix]);
 
 	// Get or create promise
 	let promise = queryPromiseCache.get(cacheKey);
@@ -80,7 +85,7 @@ export function useSuspenseQuery<TRow>(
 			},
 		});
 		return () => sub.unsubscribe();
-	}, []); // Empty deps
+	}, [cacheKey]); // Re-subscribe when query changes
 
 	return rows;
 }
