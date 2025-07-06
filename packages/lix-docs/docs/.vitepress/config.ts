@@ -52,7 +52,7 @@ export default withMermaid({
             { text: "What is Lix?", link: "/" },
             { text: "Getting Started", link: "/guide/getting-started" },
             {
-              text: "AI Agent Collaboration",
+              text: "Lix for AI Agents",
               link: "/guide/ai-agent-collaboration",
             },
             { text: "Architecture", link: "/guide/architecture" },
@@ -67,18 +67,25 @@ export default withMermaid({
               text: "Attribution (Blame)",
               link: "/guide/features/attribution",
             },
-            { text: "Proposals", link: "/guide/features/change-proposals" },
+            {
+              text: "Change Proposals",
+              link: "/guide/features/change-proposals",
+            },
             { text: "Diffs", link: "/guide/features/diffs" },
             { text: "History", link: "/guide/features/history" },
             { text: "Restore", link: "/guide/features/restore" },
             { text: "Undo/Redo", link: "/guide/features/undo-redo" },
-            { text: "Comments", link: "/guide/features/comments" },
+            {
+              text: "Validation Rules",
+              link: "/guide/features/validation-rules",
+            },
             { text: "Versions (Branching)", link: "/guide/features/versions" },
           ],
         },
         {
           text: "Core Concepts",
           items: [
+            { text: "Comments", link: "/guide/features/comments" },
             { text: "Files", link: "/guide/concepts/files" },
             { text: "Changes", link: "/guide/concepts/changes" },
             { text: "Snapshots", link: "/guide/concepts/snapshots" },

@@ -1,58 +1,34 @@
 # What is Lix?
 
-TODOS
-
-- [ ] AI collaboration
-
-Lix is a change control system that runs in the browser and provides an SDK to build web applications.
-
 ![Lix features](../assets/lix-features.svg)
 
-## Understanding Change Control
+Lix is a JavaScript SDK for change control that enables Git-like capabilities for apps and agents: [Change proposals](/guide/features/change-proposals.md), [versioning](/guide/features/versions.md) (branching), [history](/guide/features/history.md), [blame](/guide/features/attribution.md), and more.
 
-A change control system allows for storing, tracking, querying, and reviewing changes in different file formats, such as `.xlsx`, `.sqlite`, or `.json`. Unlike version control systems (like Git), a change control system understands *what* specifically changed in a file - for example, cell C43 in a spreadsheet or a specific property in a JSON object.
-
-## Key Differences from Git
-
-Lix is not a Git replacement, nor is it designed primarily for software engineering. Instead, the goal of Lix is to bring change control workflows to industries beyond software engineering, such as:
-
-- Health
-- Finance
-- Policy making
-- Design
-- Data science
-- And more...
-
-## Key Features
-
-### 📌 Versioning
-Create divergent states (similar to branches in Git) to experiment with different changes.
-
-### ⚡ CI/CD Automations
-Implement software engineering-like automations for your data workflows.
-
-### 🔀 Change Proposals
-Review and discuss changes before they're merged (similar to pull requests).
-
-### 🤝 Collaboration
-Built-in sync that enables both asynchronous (Git-like) and real-time (Google Docs-like) collaboration capabilities.
-
-### 🔍 SQL-Based Queries
-Query data using SQL through Kysely, a type-safe SQL query builder. No new query language to learn!
-
-### 🌐 Browser-First Architecture
-Designed to run in the browser, avoiding Node/Unix dependencies.
+- 🌐 Works in browsers and Node.js environments
+- 🔌 Works with any data format (Excel, JSON, CSV, etc.)
+- 🔍 SQL-based querying
 
 ## Use Cases
 
-Lix is ideal for applications that revolve around changes and follow an "edit → review → automate" workflow:
+### Lix for AI Agents
 
-- Document editors (markdown, PDF)
-- Accounting solutions (auditing)
-- Content creation tools (Figma, Adobe Premiere)
+Prevent hallucinations and maintain control over AI-generated changes:
+
+- Review and approve AI modifications
+- Track what changes were made by which agent
+- Rollback problematic AI edits
+- Create safe experimentation spaces for AI
+
+_Find more information, read the [AI agent collaboration](/guide/ai-agent-collaboration.md) section._
+
+### Lix for Web Applications
+
+Lix is ideal for applications that need visibility and control over changes:
+
+- Document editors (Markdown, PDF, Word)
+- Accounting solutions (Auditing)
 - Spreadsheets (Excel, Google Sheets)
 - CAD software (Fusion 360, Autodesk)
-- Data science tools (Jupyter Notebooks)
 - Dashboards (Analytics, Infrastructure)
 
 ## Getting Started
