@@ -1,5 +1,5 @@
 import { type LixPlugin } from "@lix-js/sdk";
-import { JSONPropertySchema } from "./schemas/JSONPropertySchema.js";
+import { JSONPropertySchema } from "./schemas/json-property.js";
 import { flatten, unflatten } from "flat";
 
 export const applyChanges: NonNullable<LixPlugin["applyChanges"]> = ({

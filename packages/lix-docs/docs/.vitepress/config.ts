@@ -1,5 +1,6 @@
 import { defineConfig } from "vitepress";
 import typedocSidebar from "../api/reference/typedoc-sidebar.json";
+import { withMermaid } from "vitepress-plugin-mermaid";
 
 // Fix typedoc sidebar links
 const fixTypedocSidebar = (sidebar: any) => {
@@ -16,7 +17,7 @@ const fixTypedocSidebar = (sidebar: any) => {
   });
 };
 
-export default defineConfig({
+export default withMermaid({
   title: "Lix SDK Documentation",
   description:
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
@@ -38,7 +39,7 @@ export default defineConfig({
 
     nav: [
       { text: "Guide", link: "/" },
-      { text: "API", link: "/api/" },
+      { text: "Reference", link: "/api/" },
       { text: "Plugins", link: "/plugins/" },
       { text: "Examples", link: "/examples/" },
     ],
@@ -50,7 +51,29 @@ export default defineConfig({
           items: [
             { text: "What is Lix?", link: "/" },
             { text: "Getting Started", link: "/guide/getting-started" },
+            {
+              text: "AI Agent Collaboration",
+              link: "/guide/ai-agent-collaboration",
+            },
+            { text: "Architecture", link: "/guide/architecture" },
             { text: "How Lix Works", link: "/guide/how-lix-works" },
+          ],
+        },
+        {
+          text: "Ready-made Features",
+          collapsed: false,
+          items: [
+            {
+              text: "Attribution (Blame)",
+              link: "/guide/features/attribution",
+            },
+            { text: "Proposals", link: "/guide/features/change-proposals" },
+            { text: "Diffs", link: "/guide/features/diffs" },
+            { text: "History", link: "/guide/features/history" },
+            { text: "Restore", link: "/guide/features/restore" },
+            { text: "Undo/Redo", link: "/guide/features/undo-redo" },
+            { text: "Comments", link: "/guide/features/comments" },
+            { text: "Versions (Branching)", link: "/guide/features/versions" },
           ],
         },
         {

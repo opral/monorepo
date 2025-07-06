@@ -4,7 +4,7 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"version": "0.1.8",
+	"version": "1.0.0-preview.0",
 	"license": "Apache-2.0",
 	"types": "./dist/index.d.ts",
 	"exports": {

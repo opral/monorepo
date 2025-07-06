@@ -7,7 +7,8 @@ import {
 } from "../change-set/schema.js";
 import {
 	LixVersionSchema,
-	type ActiveVersionTable,
+	type ActiveVersion,
+	// type ActiveVersionTable,
 } from "../version/schema.js";
 import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
@@ -17,6 +18,7 @@ import type {
 	StateView,
 	InternalStateCacheTable,
 	InternalChangeInTransactionTable,
+	StateAllView,
 } from "../state/schema.js";
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixFileDescriptorSchema } from "../file/schema.js";
@@ -34,6 +36,7 @@ import {
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
+import type { ToKysely } from "../entity-views/types.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -67,7 +70,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 
 export type LixDatabaseSchema = {
 	state: StateView;
-	state_all: StateView;
+	state_all: StateAllView;
 	state_history: StateHistoryView;
 	// account
 	active_account: ActiveAccountTable;
@@ -77,7 +80,7 @@ export type LixDatabaseSchema = {
 	// // change proposal
 	// // change_proposal: ChangeProposalTable;
 
-	active_version: ActiveVersionTable;
+	active_version: ToKysely<ActiveVersion>;
 } & EntityViews<
 	typeof LixKeyValueSchema,
 	"key_value",

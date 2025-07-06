@@ -117,3 +117,103 @@ test("bootstrap changes include lix_id key-value in global version", async () =>
 	expect(kv[0]?.key).toBe("lix_id");
 	expect(kv[0]?.value).toBeDefined();
 });
+
+test("bootstrap changes include lix_name key-value in the global version", async () => {
+	const blob = await newLixFile();
+	const lix = await openLix({ blob });
+
+	const kv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_name")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.execute();
+
+	console.log("lix_name key-value:", kv);
+
+	expect(kv).toHaveLength(1);
+	expect(kv[0]?.key).toBe("lix_name");
+	expect(kv[0]?.value).toBeDefined();
+});
+
+test("newLixFile returns blob with ._lix.id property", async () => {
+	const blob = await newLixFile();
+
+	// Check that ._lix.id is accessible directly on the blob
+	expect(blob._lix).toBeDefined();
+	expect(blob._lix.id).toBeDefined();
+	expect(typeof blob._lix.id).toBe("string");
+	expect(blob._lix.id.length).toBeGreaterThan(0);
+
+	// Verify the ._lix.id matches the one stored in the database
+	const lix = await openLix({ blob });
+	const kv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_id")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.execute();
+
+	expect(kv).toHaveLength(1);
+	expect(blob._lix.id).toBe(kv[0]?.value);
+});
+
+test("newLixFile returns blob with ._lix.name property", async () => {
+	const blob = await newLixFile({});
+
+	// Check that ._lix.name is accessible directly on the blob
+	expect(blob._lix).toBeDefined();
+	expect(blob._lix.name).toBeDefined();
+	expect(typeof blob._lix.name).toBe("string");
+	expect(blob._lix.name.length).toBeGreaterThan(0);
+
+	// Verify the ._lix.name matches the one stored in the database
+	const lix = await openLix({ blob });
+	const kv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_name")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.execute();
+
+	expect(kv).toHaveLength(1);
+	expect(blob._lix.name).toBe(kv[0]?.value);
+});
+
+test("newLixFile can use provided key values", async () => {
+	const blob = await newLixFile({
+		keyValues: [
+			{ key: "lix_name", value: "Test Lix Name", lixcol_version_id: "global" },
+			{ key: "lix_id", value: "test-lix-id", lixcol_version_id: "global" },
+			{ key: "custom_key", value: "custom_value", lixcol_version_id: "global" },
+		],
+	});
+
+	// Check the `_lix` property on the blob
+	expect(blob._lix.name).toBe("Test Lix Name");
+	expect(blob._lix.id).toBe("test-lix-id");
+
+	// Check the values in the database
+	const lix = await openLix({ blob });
+	const nameKv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_name")
+		.selectAll()
+		.executeTakeFirst();
+	expect(nameKv?.value).toBe("Test Lix Name");
+
+	const idKv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_id")
+		.selectAll()
+		.executeTakeFirst();
+	expect(idKv?.value).toBe("test-lix-id");
+
+	const customKv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "custom_key")
+		.selectAll()
+		.executeTakeFirst();
+	expect(customKv?.value).toBe("custom_value");
+	expect(customKv?.lixcol_version_id).toBe("global");
+});
