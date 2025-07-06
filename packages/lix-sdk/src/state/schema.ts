@@ -650,7 +650,9 @@ export function applyStateDatabaseSchema(
 					const file_id = args[4];
 					const version_id = args[5];
 					const plugin_key = args[6];
-					const snapshot_content = args[7];
+					// this is an update where we have a snapshot_content
+					// the snapshot_content is a JSON string as returned by SQlite
+					const snapshot_content = args[7] as string;
 					const schema_version = args[8];
 					// Skip created_at (args[9]), updated_at (args[10]), inherited_from_version_id (args[11]), change_id (args[12])
 					const untracked = args[13] ?? false;
@@ -663,12 +665,6 @@ export function applyStateDatabaseSchema(
 					if (!version_id) {
 						throw new Error("version_id is required for state mutation");
 					}
-
-					// Ensure snapshot_content is a string
-					const snapshotStr =
-						typeof snapshot_content === "string"
-							? snapshot_content
-							: JSON.stringify(snapshot_content);
 
 					// Call validation function (same logic as triggers)
 					const storedSchemaResult = sqlite.exec({
@@ -685,7 +681,7 @@ export function applyStateDatabaseSchema(
 					validateStateMutation({
 						lix: { sqlite, db: db as any },
 						schema: storedSchema ? JSON.parse(storedSchema as string) : null,
-						snapshot_content: JSON.parse(snapshotStr),
+						snapshot_content: JSON.parse(snapshot_content),
 						operation: isInsert ? "insert" : "update",
 						entity_id: String(entity_id),
 						version_id: String(version_id),
@@ -705,7 +701,7 @@ export function applyStateDatabaseSchema(
 								String(file_id),
 								String(version_id),
 								String(plugin_key),
-								snapshotStr,
+								snapshot_content,
 								String(schema_version),
 							],
 						});
@@ -731,7 +727,7 @@ export function applyStateDatabaseSchema(
 							String(schema_key),
 							String(file_id),
 							String(plugin_key),
-							snapshotStr,
+							snapshot_content,
 							String(version_id),
 							String(schema_version)
 						);
@@ -743,7 +739,7 @@ export function applyStateDatabaseSchema(
 					//
 					// Handle cache copying for new versions that share change sets
 					if (isInsert && String(schema_key) === "lix_version") {
-						const versionData = JSON.parse(snapshotStr);
+						const versionData = JSON.parse(snapshot_content);
 						const newVersionId = versionData.id;
 						const changeSetId = versionData.change_set_id;
 
