@@ -495,11 +495,7 @@ export function applyStateDatabaseSchema(
 									file_id,
 									version_id,
 									plugin_key,
-									isDeletion
-										? null
-										: typeof snapshot_content === "string"
-											? snapshot_content
-											: JSON.stringify(snapshot_content),
+									isDeletion ? null : snapshot_content,
 									schema_version,
 									created_at,
 									updated_at,
