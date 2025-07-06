@@ -57,14 +57,6 @@ export default function DataExplorer() {
     // Construct query based on selected table
     let sqlQuery = `SELECT * FROM "${selectedTable}" LIMIT 100;`;
 
-    if (selectedTable === "snapshot") {
-      // Use json() function for the content column
-      // Corrected columns: id, content
-      sqlQuery = `SELECT id, json(content) as content FROM snapshot LIMIT 100;`;
-    } else if (selectedTable === "key_value") {
-      sqlQuery = `SELECT key, json(value) as value FROM key_value LIMIT 100;`;
-    }
-
     try {
       // @ts-ignore - returnValue is a valid option but TypeScript doesn't recognize it
       const result = lix.sqlite.exec(sqlQuery, {
