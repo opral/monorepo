@@ -24,7 +24,7 @@ export default function Sidebar() {
 }
 
 function MainVersionSidebar() {
-	const [activeTab, setActiveTab] = useKeyValue("activeTab");
+	const [activeTab, setActiveTab] = useKeyValue("activeTab", { global: true, untracked: true });
 
 	useEffect(() => {
 		if (!activeTab) {

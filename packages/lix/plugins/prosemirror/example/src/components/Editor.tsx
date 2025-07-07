@@ -45,7 +45,7 @@ const Editor: React.FC = () => {
 	const [diffView] = useKeyValue<{
 		beforeCsId?: string;
 		afterCsId?: string;
-	} | null>("diffView");
+	} | null>("diffView", { global: true, untracked: true });
 
 	// Initialize editor using useEffect for proper lifecycle management
 	useEffect(() => {

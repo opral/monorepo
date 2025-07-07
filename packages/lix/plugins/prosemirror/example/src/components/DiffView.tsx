@@ -11,7 +11,7 @@ export function DiffView() {
 	const [diffView] = useKeyValue<{
 		beforeCsId?: string;
 		afterCsId?: string;
-	} | null>("diffView");
+	} | null>("diffView", { global: true, untracked: true });
 	const lix = useLix();
 	const fileId = useSuspenseQueryTakeFirstOrThrow(selectFileId);
 	const [diffHtml, setDiffHtml] = useState<string | null>(null);

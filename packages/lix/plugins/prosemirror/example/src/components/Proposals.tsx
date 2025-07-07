@@ -14,7 +14,7 @@ import { useKeyValue } from "../hooks/useKeyValue";
 export default function Proposals() {
 	// Get all open proposals
 	const [proposals] = useQuery(selectOpenChangeProposals);
-	const [_, setActiveTab] = useKeyValue("activeTab");
+	const [_, setActiveTab] = useKeyValue("activeTab", { global: true, untracked: true });
 
 	const handleAccept = async (id: string) => {
 		await mergeChangeSet(id);

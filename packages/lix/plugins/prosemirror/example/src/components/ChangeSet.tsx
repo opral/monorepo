@@ -57,12 +57,12 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		// Use shared key-value storage for expansion state
 		const [expandedChangeSetId, setExpandedChangeSetId] = useKeyValue<
 			string | null
-		>("expandedChangeSetId");
+		>("expandedChangeSetId", { global: true, untracked: true });
 
 		const [diffView, setDiffView] = useKeyValue<{
 			beforeCsId?: string;
 			afterCsId?: string;
-		} | null>("diffView");
+		} | null>("diffView", { global: true, untracked: true });
 
 		const activeAccount = useSuspenseQueryTakeFirst(selectActiveAccount);
 
