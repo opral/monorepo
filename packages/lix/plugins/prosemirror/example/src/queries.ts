@@ -141,6 +141,7 @@ export function selectThreads(
 						"thread_comment.lixcol_updated_at",
 					])
 					.select((eb) => eb.val("TODO username").as("author_name"))
+					.orderBy("thread_comment.lixcol_created_at", "asc")
 					.whereRef("thread_comment.thread_id", "=", "thread.id"),
 			).as("comments"),
 		])

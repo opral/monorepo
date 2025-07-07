@@ -103,13 +103,15 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			lix.db.transaction().execute(async (trx) => {
 				const thread = await createThread({
 					lix: { ...lix, db: trx },
+					versionId: "global",
 					comments: [{ body: args.body }],
 				});
 				await trx
-					.insertInto("change_set_thread")
+					.insertInto("change_set_thread_all")
 					.values({
 						change_set_id: changeSet.id,
 						thread_id: thread.id,
+						lixcol_version_id: "global",
 					})
 					.execute();
 			});
