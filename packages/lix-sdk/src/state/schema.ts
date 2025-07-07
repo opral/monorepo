@@ -1260,7 +1260,7 @@ function queryCache(
 		
 		UNION ALL
 		
-		-- 3. Inherited state (lowest priority) - only if no untracked or tracked exists
+		-- 3. Inherited tracked state (lower priority) - only if no untracked or tracked exists
 		SELECT 
 			rowid,
 			isc.entity_id, 
@@ -1302,6 +1302,50 @@ function queryCache(
 			  AND unt.entity_id = isc.entity_id
 			  AND unt.schema_key = isc.schema_key
 			  AND unt.file_id = isc.file_id
+		)
+		
+		UNION ALL
+		
+		-- 4. Inherited untracked state (lowest priority) - only if no untracked or tracked exists
+		SELECT 
+			rowid,
+			unt.entity_id, 
+			unt.schema_key, 
+			unt.file_id, 
+			vi.version_id, -- Return child version_id
+			unt.plugin_key, 
+			unt.snapshot_content, 
+			unt.schema_version, 
+			unt.created_at, 
+			unt.updated_at,
+			vi.parent_version_id as inherited_from_version_id, 
+			'untracked-inherited' as change_id, 
+			1 as untracked
+		FROM (
+			-- Get version inheritance relationships from cache
+			SELECT 
+				json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+				json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+			FROM internal_state_cache isc_v
+			WHERE isc_v.schema_key = 'lix_version'
+		) vi
+		JOIN internal_state_all_untracked unt ON unt.version_id = vi.parent_version_id
+		WHERE vi.parent_version_id IS NOT NULL
+		-- Don't inherit if child has tracked state
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_state_cache child_isc
+			WHERE child_isc.version_id = vi.version_id
+			  AND child_isc.entity_id = unt.entity_id
+			  AND child_isc.schema_key = unt.schema_key
+			  AND child_isc.file_id = unt.file_id
+		)
+		-- Don't inherit if child has untracked state
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_state_all_untracked child_unt
+			WHERE child_unt.version_id = vi.version_id
+			  AND child_unt.entity_id = unt.entity_id
+			  AND child_unt.schema_key = unt.schema_key
+			  AND child_unt.file_id = unt.file_id
 		)
 	) as combined_results`;
 

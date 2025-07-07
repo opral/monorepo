@@ -2414,3 +2414,66 @@ test("untracked state overrides inherited state (untracked > inherited)", async 
 	// Should only have the original change from global version, not the untracked one
 	expect(changes).toHaveLength(1);
 });
+
+test("untracked state inheritance", async () => {
+	const lix = await openLix({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema_all")
+		.values({ value: mockSchema, lixcol_version_id: "global" })
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// inserting into the global version
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			file_id: "test-file",
+			schema_key: "mock_schema",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			entity_id: "test_key",
+			snapshot_content: {
+				value: "test_value",
+			},
+			version_id: "global",
+			untracked: true,
+		})
+		.execute();
+
+	const globalState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "test_key")
+		.where("version_id", "=", "global")
+		.select("snapshot_content")
+		.executeTakeFirstOrThrow();
+
+	expect(globalState).toBeDefined();
+
+	const versionState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "test_key")
+		.where("version_id", "=", activeVersion.id)
+		.select("snapshot_content")
+		.executeTakeFirstOrThrow();
+
+	expect(versionState).toBeDefined();
+	expect(versionState).toEqual(globalState);
+});
