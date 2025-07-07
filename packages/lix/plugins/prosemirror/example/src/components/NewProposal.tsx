@@ -21,11 +21,11 @@ export default function NewProposal() {
 	const [mainVersion] = useQuery(selectMainVersion);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
-		{ global: true, untracked: true },
+		{ versionId: "global", untracked: true },
 	);
 
 	const [, setActiveTab] = useKeyValue("activeTab", {
-		global: true,
+		versionId: "global",
 		untracked: true,
 	});
 

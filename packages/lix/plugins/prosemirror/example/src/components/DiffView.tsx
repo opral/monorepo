@@ -4,16 +4,16 @@ import { schema } from "../prosemirror/schema";
 import { renderUniversalDiff } from "@lix-js/universal-diff";
 import "@lix-js/universal-diff/default.css";
 import { useKeyValue } from "../hooks/useKeyValue";
-import { useLix, useSuspenseQueryTakeFirstOrThrow } from "@lix-js/react-utils";
+import { useLix, useQueryTakeFirstOrThrow } from "@lix-js/react-utils";
 import { selectFileId } from "../queries";
 
 export function DiffView() {
 	const [diffView] = useKeyValue<{
 		beforeCsId?: string;
 		afterCsId?: string;
-	} | null>("diffView", { global: true, untracked: true });
+	} | null>("diffView", { versionId: "global", untracked: true });
 	const lix = useLix();
-	const fileId = useSuspenseQueryTakeFirstOrThrow(selectFileId);
+	const fileId = useQueryTakeFirstOrThrow(selectFileId);
 	const [diffHtml, setDiffHtml] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
