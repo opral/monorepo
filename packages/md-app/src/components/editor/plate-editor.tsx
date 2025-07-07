@@ -15,10 +15,10 @@ import { mdastEntitiesToPlateValue, plateValueToMdastEntities } from "./mdast-pl
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
 import { TElement } from "@udecode/plate";
 import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
-import { useLix, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
+import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
 export function PlateEditor() {
   const lix = useLix();
-  const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
+  const activeFile = useQueryTakeFirst(selectActiveFile);
   const { state: mdAstState, updateEntities } = useMdAstState();
   const editorRef = useRef<any>(null);
 

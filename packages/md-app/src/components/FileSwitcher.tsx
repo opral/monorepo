@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useSuspenseQuery, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
+import { useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 import { selectActiveFile, selectFiles } from "@/queries";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { generateHumanId } from "@/helper/generateHumanId";
@@ -16,8 +16,8 @@ import { nanoid } from "@lix-js/sdk";
 import { useLix } from "@lix-js/react-utils";
 
 export default function FileSwitcher() {
-	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
-	const files = useSuspenseQuery(selectFiles);
+	const activeFile = useQueryTakeFirst(selectActiveFile);
+	const files = useQuery(selectFiles);
 	const lix = useLix();
 
 	const switchToFile = useCallback(

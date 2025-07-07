@@ -1,6 +1,6 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-import { useSuspenseQuery, useSuspenseQueryTakeFirst, useSuspenseQueryTakeFirstOrThrow } from '@lix-js/react-utils';
+import { useQueryTakeFirst } from '@lix-js/react-utils';
 import { selectActiveFile, selectIntermediateChanges, selectActiveAccount } from '@/queries';
 import FileName from '@/components/FileName';
 import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
@@ -17,9 +17,9 @@ import posthog from 'posthog-js';
 
 // Wrapper component that has access to the MultiSidebar context
 function PageContent() {
-	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
-	const activeAccount = useSuspenseQueryTakeFirst(selectActiveAccount);
-	// const intermediateChanges = useSuspenseQuery(selectIntermediateChanges);
+	const activeFile = useQueryTakeFirst(selectActiveFile);
+	const activeAccount = useQueryTakeFirst(selectActiveAccount);
+	// const intermediateChanges = useQuery(selectIntermediateChanges);
 	const intermediateChanges = []
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
@@ -84,7 +84,6 @@ function PageContent() {
 				{activeFile ?
 					<div className="h-full flex-1 overflow-hidden" data-registry="plate">
 						<PlateEditor />
-						{JSON.stringify(activeFile.id, null, 2)}
 						<Toaster />
 					</div>
 					: <div className="h-full flex-1 flex justify-center items-center">

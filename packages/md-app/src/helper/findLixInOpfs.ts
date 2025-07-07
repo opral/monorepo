@@ -2,10 +2,6 @@ import { openLix } from "@lix-js/sdk";
 import { getOriginPrivateDirectory } from "native-file-system-adapter";
 import { plugin as mdPlugin } from "@lix-js/plugin-md";
 
-// Cache for OPFS file metadata to avoid re-reading files
-const opfsCache = new Map<string, { id: string; name: string; fullName: string; lastModified: number }>();
-const CACHE_DURATION = 30000; // 30 seconds cache
-
 export interface LixFileInfo {
 	handle: FileSystemFileHandle;
 	name: string; // File name without extension
@@ -27,7 +23,6 @@ export async function findLixFilesInOpfs(
 	try {
 		const rootHandle = await getOriginPrivateDirectory();
 		const results: LixFileInfo[] = [];
-		const now = Date.now();
 
 		// Collect all .lix files first for parallel processing
 		const lixFiles: string[] = [];
@@ -42,21 +37,6 @@ export async function findLixFilesInOpfs(
 			try {
 				// Get a fresh file handle to avoid stale references
 				const fileHandle = await rootHandle.getFileHandle(name);
-				
-				// Check cache first
-				const cached = opfsCache.get(name);
-				if (cached && (now - cached.lastModified) < CACHE_DURATION) {
-					// Use cached data if still valid
-					if (!lixId || cached.id === lixId) {
-						return {
-							handle: fileHandle as FileSystemFileHandle,
-							name: cached.name,
-							fullName: cached.fullName,
-							id: cached.id,
-						};
-					}
-					return null;
-				}
 
 				// Cache miss or expired - read file with optimized retry logic
 				let file: File | null = null;
@@ -69,22 +49,31 @@ export async function findLixFilesInOpfs(
 						break; // Success, exit retry loop
 					} catch (fileError) {
 						retryCount++;
-						
+
 						// Don't retry certain types of errors
 						if (fileError instanceof DOMException) {
 							switch (fileError.name) {
-								case 'NotReadableError':
-									console.warn(`File ${name} not readable (permission denied), skipping:`, fileError.message);
+								case "NotReadableError":
+									console.warn(
+										`File ${name} not readable (permission denied), skipping:`,
+										fileError.message
+									);
 									return null;
-								case 'SecurityError':
-									console.warn(`Security restriction for file ${name}, skipping:`, fileError.message);
+								case "SecurityError":
+									console.warn(
+										`Security restriction for file ${name}, skipping:`,
+										fileError.message
+									);
 									return null;
-								case 'NotFoundError':
-									console.warn(`File ${name} not found, skipping:`, fileError.message);
+								case "NotFoundError":
+									console.warn(
+										`File ${name} not found, skipping:`,
+										fileError.message
+									);
 									return null;
 							}
 						}
-						
+
 						if (retryCount >= maxRetries) {
 							console.warn(
 								`Could not read file ${name} after ${maxRetries} attempts, skipping:`,
@@ -118,21 +107,27 @@ export async function findLixFilesInOpfs(
 					.select("value")
 					.executeTakeFirst();
 
+				const lixNameValue = await tempLix.db
+					.selectFrom("key_value")
+					.where("key", "=", "lix_name")
+					.select("value")
+					.executeTakeFirst();
+
 				const lixIdValue = tempLixId?.value || "";
-				
+
 				// Cache the result
-				opfsCache.set(name, {
-					id: lixIdValue,
-					name: name.replace(/\.lix$/, ""),
-					fullName: name,
-					lastModified: now,
-				});
+				// opfsCache.set(name, {
+				// 	id: lixIdValue,
+				// 	name: name.replace(/\.lix$/, ""),
+				// 	fullName: name,
+				// 	lastModified: now,
+				// });
 
 				// If no specific ID was requested, or if this file matches the requested ID
 				if (!lixId || lixIdValue === lixId) {
 					return {
 						handle: fileHandle as FileSystemFileHandle,
-						name: name.replace(/\.lix$/, ""),
+						name: lixNameValue?.value || name.replace(/\.lix$/, ""),
 						fullName: name,
 						id: lixIdValue,
 					};
@@ -142,17 +137,27 @@ export async function findLixFilesInOpfs(
 				// Handle different types of file errors
 				if (e instanceof DOMException) {
 					switch (e.name) {
-						case 'NotReadableError':
-							console.warn(`File ${name} not readable (permission denied), skipping:`, e.message);
+						case "NotReadableError":
+							console.warn(
+								`File ${name} not readable (permission denied), skipping:`,
+								e.message
+							);
 							break;
-						case 'NotFoundError':
+						case "NotFoundError":
 							console.warn(`File ${name} not found, skipping:`, e.message);
 							break;
-						case 'SecurityError':
-							console.warn(`Security restriction for file ${name}, skipping:`, e.message);
+						case "SecurityError":
+							console.warn(
+								`Security restriction for file ${name}, skipping:`,
+								e.message
+							);
 							break;
 						default:
-							console.error(`OPFS error reading file ${name}:`, e.name, e.message);
+							console.error(
+								`OPFS error reading file ${name}:`,
+								e.name,
+								e.message
+							);
 					}
 				} else {
 					console.error(`Error reading file ${name}:`, e);
@@ -162,17 +167,24 @@ export async function findLixFilesInOpfs(
 		};
 
 		// Process files in parallel with limited concurrency (max 3 concurrent)
-		const processInBatches = async (files: string[], batchSize: number = 3): Promise<LixFileInfo[]> => {
+		const processInBatches = async (
+			files: string[],
+			batchSize: number = 3
+		): Promise<LixFileInfo[]> => {
 			const results: LixFileInfo[] = [];
-			
+
 			for (let i = 0; i < files.length; i += batchSize) {
 				const batch = files.slice(i, i + batchSize);
 				const batchResults = await Promise.all(batch.map(processFile));
-				
+
 				// Filter out null results and add to results array
-				results.push(...batchResults.filter((result): result is LixFileInfo => result !== null));
+				results.push(
+					...batchResults.filter(
+						(result): result is LixFileInfo => result !== null
+					)
+				);
 			}
-			
+
 			return results;
 		};
 

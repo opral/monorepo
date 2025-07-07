@@ -54,7 +54,7 @@ function useFiles() {
 ### Phase 1: Foundation (Completed)
 - ✅ Migrate from `openLixInMemory` to `openLix` with `OpfsStorage`
 - ✅ Remove `saveLixToOpfs` helper function and manual persistence
-- ✅ Create reactive hooks infrastructure (`useQuery`, `useSuspenseQuery`, `useKeyValue`)
+- ✅ Create reactive hooks infrastructure (`useQuery`, `useKeyValue`)
 
 ### Phase 2: Component Migration (In Progress)
 - Replace Jotai atoms with reactive hooks in components
@@ -86,24 +86,19 @@ function MyComponent() {
 }
 ```
 
-### `useSuspenseQuery<T>(queryFn: (lix: Lix) => Promise<T>): T`
+### `useQuery<T>(queryFn: (lix: Lix) => Promise<T>): T`
 
 Suspense-compatible reactive query hook for concurrent rendering.
 
 **Usage:**
 ```typescript
 function MyComponent() {
-  const files = useSuspenseQuery(async (lix) => {
+  const files = useQuery(async (lix) => {
     return await lix.db.selectFrom("file").selectAll().execute();
   });
   
   return <div>{files.length} files</div>;
 }
-
-// Wrap with Suspense boundary
-<Suspense fallback={<div>Loading...</div>}>
-  <MyComponent />
-</Suspense>
 ```
 
 ### `useKeyValue<T>(key: string)`

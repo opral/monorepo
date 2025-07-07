@@ -33,7 +33,12 @@ function selectKeyValue(lix: Lix, key: string) {
 /**
  * Upserts a key-value pair into the Lix database.
  */
-export async function upsertKeyValue(lix: Lix, key: string, value: any) {
+export async function upsertKeyValue(
+	lix: Lix,
+	key: string,
+	value: any,
+	options?: { global?: boolean }
+) {
 	// Use a transaction to ensure atomicity and handle race conditions
 	return await lix.db.transaction().execute(async (trx) => {
 		const existing = await trx
@@ -44,21 +49,31 @@ export async function upsertKeyValue(lix: Lix, key: string, value: any) {
 
 		if (existing) {
 			await trx
-				.updateTable("key_value")
+				.updateTable("key_value_all")
 				.set({
 					value,
 					// skip change control as this is only UI state that
 					// should be persisted but not controlled
 					// skip_change_control: true,
 				})
+				.where(
+					"lixcol_version_id",
+					"=",
+					options?.global
+						? "global"
+						: lix.db.selectFrom("active_version").select("version_id")
+				)
 				.where("key", "=", key)
 				.execute();
 		} else {
 			await trx
-				.insertInto("key_value")
+				.insertInto("key_value_all")
 				.values({
 					key,
 					value,
+					lixcol_version_id: options?.global
+						? "global"
+						: lix.db.selectFrom("active_version").select("version_id"),
 				})
 				.execute();
 		}

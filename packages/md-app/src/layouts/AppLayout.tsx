@@ -6,7 +6,6 @@ import { nanoid, type Lix } from "@lix-js/sdk";
 import { useSearchParams } from "react-router-dom";
 import { upsertKeyValue } from "@/hooks/useKeyValue";
 import { selectFiles } from "@/queries";
-import { Suspense } from "react";
 
 function LoadingScreen() {
 	return (
@@ -21,9 +20,9 @@ function LoadingScreen() {
 
 export function App({ children }: { children: React.ReactNode }) {
 	const [lix, setLix] = useState<Lix | null>(null);
+	const [lixId, setLixId] = useState<string | undefined>(undefined);
 	const [lixError, setLixError] = useState<Error | null>(null);
-	const [searchParams] = useSearchParams();
-
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	useEffect(() => {
 		if (import.meta.env.PUBLIC_LIX_POSTHOG_TOKEN) {
@@ -45,10 +44,22 @@ export function App({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	useEffect(() => {
-		initializeLix()
-			.then(setLix)
+		if (!lix || searchParams.get("lix") !== lixId) {
+			const lixIdFromUrl = searchParams.get("lix");
+			initializeLix(lixIdFromUrl)
+				.then(({ lix, lixId }) => {
+					setLix(lix);
+					setLixId(lixId);
+					if (lixId) {
+						setSearchParams((currentParams) => {
+							currentParams.set("lix", lixId);
+							return currentParams
+						});
+					}
+				})
 			.catch(setLixError);
-	}, []);
+		}
+	}, [lix, searchParams, lixId]);
 
 	useEffect(() => {
 		if (lix) {
@@ -60,9 +71,15 @@ export function App({ children }: { children: React.ReactNode }) {
 					if (!file) {
 						const newFileId = nanoid()
 						lix.db.insertInto("file").values({ id: newFileId, path: "/document.md", data: new TextEncoder().encode("") }).execute()
-						searchParams.set("f", newFileId)
+						setSearchParams((currentParams) => {
+							currentParams.set("f", newFileId);
+							return currentParams;
+						});
 					} else {
-						searchParams.set("f", file.id)
+						setSearchParams((currentParams) => {
+							currentParams.set("f", file.id);
+							return currentParams;
+						});
 					}
 				})
 			}
@@ -92,11 +109,11 @@ export function App({ children }: { children: React.ReactNode }) {
 
 	return (
 		<LixProvider lix={lix}>
-			<Suspense fallback={<LoadingScreen />}>
+			{/* <Suspense fallback={<LoadingScreen />}> */}
 				<main className="w-full h-screen overflow-hidden bg-white flex flex-col">
 					{children}
 				</main>
-			</Suspense>
+			{/* </Suspense> */}
 		</LixProvider>
 	);
 }

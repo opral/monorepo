@@ -6,11 +6,7 @@ import {
 	selectMdAstNodes,
 	selectActiveFile,
 } from "@/queries";
-import {
-	useLix,
-	useSuspenseQuery,
-	useSuspenseQueryTakeFirst,
-} from "@lix-js/react-utils";
+import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
 import { useState } from "react";
 import { useEffect } from "react";
 
@@ -33,9 +29,9 @@ export interface UseMdAstStateReturn {
 export function useMdAstState(): UseMdAstStateReturn {
 	const lix = useLix();
 
-	// const mdRoot = useSuspenseQueryTakeFirst(selectMdAstRoot);
+	// const mdRoot = useQueryTakeFirst(selectMdAstRoot);
 
-	// const mdNodes = useSuspenseQuery(selectMdAstNodes);
+	// const mdNodes = useQuery(selectMdAstNodes);
 
 	const [state, setState] = useState({
 		order: [],
@@ -47,9 +43,9 @@ export function useMdAstState(): UseMdAstStateReturn {
 	// const [mdRoot, setMdRoot] = useState();
 	// const [mdNodes, setMdNodes] = useState();
 
-	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
+	const activeFile = useQueryTakeFirst(selectActiveFile);
 
-	console.log("called hook");
+	// console.log("called hook");
 
 	async function x() {
 		const root = await selectMdAstRoot(lix).executeTakeFirst();

@@ -10,14 +10,14 @@ import {
 	setPromptDismissed,
 } from "@/helper/emptyPromptElementHelpers";
 import { AIChatPlugin } from "@udecode/plate-ai/react";
-import { useLix, useSuspenseQueryTakeFirst } from "@lix-js/react-utils";
+import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
 
 export function EmptyDocumentPromptElement({
 	attributes,
 	editor,
 }: PlateElementProps) {
 	const [prompt, setPrompt] = useState("");
-	const activeFile = useSuspenseQueryTakeFirst(selectActiveFile);
+	const activeFile = useQueryTakeFirst(selectActiveFile);
 	const lix = useLix();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
