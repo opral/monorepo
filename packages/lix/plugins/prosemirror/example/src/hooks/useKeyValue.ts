@@ -14,7 +14,7 @@ import { Lix } from "@lix-js/sdk";
  */
 export function useKeyValue<T>(
 	key: string,
-	options: { global?: boolean; untracked?: boolean } = {},
+	options: { versionId?: string; untracked?: boolean } = {},
 ) {
 	const lix = useLix();
 	const result = useQueryTakeFirst((lix) => selectKeyValue(lix, key));
@@ -40,7 +40,7 @@ async function upsertKeyValue(
 	lix: Lix,
 	key: string,
 	value: any,
-	options: { global?: boolean; untracked?: boolean } = {},
+	options: { versionId?: string; untracked?: boolean } = {},
 ) {
 	// Use a transaction to ensure atomicity and handle race conditions
 	return await lix.db.transaction().execute(async (trx) => {
@@ -50,9 +50,8 @@ async function upsertKeyValue(
 			.where(
 				"lixcol_version_id",
 				"=",
-				options.global
-					? "global"
-					: trx.selectFrom("active_version").select("version_id"),
+				options.versionId ??
+					trx.selectFrom("active_version").select("version_id"),
 			)
 			.select(["key"])
 			.executeTakeFirst();
@@ -67,9 +66,8 @@ async function upsertKeyValue(
 				.where(
 					"lixcol_version_id",
 					"=",
-					options.global
-						? "global"
-						: trx.selectFrom("active_version").select("version_id"),
+					options.versionId ??
+						trx.selectFrom("active_version").select("version_id"),
 				)
 				.where("key", "=", key)
 				.execute();
@@ -79,10 +77,10 @@ async function upsertKeyValue(
 				.values({
 					key,
 					value,
-					lixcol_version_id: options.global
-						? "global"
-						: trx.selectFrom("active_version").select("version_id"),
 					lixcol_untracked: options.untracked,
+					lixcol_version_id:
+						options.versionId ??
+						trx.selectFrom("active_version").select("version_id"),
 				})
 				.execute();
 		}

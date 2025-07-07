@@ -19,11 +19,7 @@ import { selectActiveAccount, selectThreads } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { Composer, Thread } from "./Thread";
 import { toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
-import {
-	useLix,
-	useSuspenseQuery,
-	useSuspenseQueryTakeFirst,
-} from "@lix-js/react-utils";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -57,14 +53,14 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		// Use shared key-value storage for expansion state
 		const [expandedChangeSetId, setExpandedChangeSetId] = useKeyValue<
 			string | null
-		>("expandedChangeSetId", { global: true, untracked: true });
+		>("expandedChangeSetId", { versionId: "global", untracked: true });
 
 		const [diffView, setDiffView] = useKeyValue<{
 			beforeCsId?: string;
 			afterCsId?: string;
-		} | null>("diffView", { global: true, untracked: true });
+		} | null>("diffView", { versionId: "global", untracked: true });
 
-		const activeAccount = useSuspenseQueryTakeFirst(selectActiveAccount);
+		const activeAccount = useQueryTakeFirst(selectActiveAccount);
 
 		// Determine if this change set is the expanded one
 		const isExpanded = alwaysExpand || expandedChangeSetId === changeSet.id;
@@ -82,7 +78,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			changeSet,
 		]);
 
-		const threads = useSuspenseQuery((lix) =>
+		const threads = useQuery((lix) =>
 			selectThreads(lix, { changeSetId: changeSet.id }),
 		);
 
@@ -121,6 +117,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 		// Toggle expansion state
 		const handleToggleExpand = () => {
+			// If alwaysExpand
 			// If this change set is already expanded, collapse it
 			// Otherwise, expand this change set (which automatically collapses any other)
 			setExpandedChangeSetId(isExpanded ? null : changeSet.id);

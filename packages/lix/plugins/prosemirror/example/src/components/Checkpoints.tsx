@@ -3,19 +3,15 @@ import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
 import { useRef } from "react";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { createCheckpoint } from "@lix-js/sdk";
-import {
-	useLix,
-	useSuspenseQuery,
-	useSuspenseQueryTakeFirst,
-} from "@lix-js/react-utils";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 const Checkpoints: React.FC = () => {
 	const lix = useLix();
-	const checkpoints = useSuspenseQuery(selectCheckpoints);
-	const workingChangeSet = useSuspenseQueryTakeFirst(selectWorkingChangeSet);
+	const checkpoints = useQuery(selectCheckpoints);
+	const workingChangeSet = useQueryTakeFirst(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
-		{ global: true, untracked: true }
+		{ versionId: "global", untracked: true },
 	);
 	const changeSetRef = useRef<ChangeSetHandle>(null);
 
