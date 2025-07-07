@@ -1319,7 +1319,7 @@ function queryCache(
 			unt.created_at, 
 			unt.updated_at,
 			vi.parent_version_id as inherited_from_version_id, 
-			'untracked-inherited' as change_id, 
+			'untracked' as change_id, 
 			1 as untracked
 		FROM (
 			-- Get version inheritance relationships from cache
