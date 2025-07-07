@@ -612,3 +612,83 @@ test("useQuery subscription updates when query dependencies change", async () =>
 
 	await lix.close();
 });
+
+test("useQuery refreshes when lix instance is switched", async () => {
+	// Create two separate lix instances - each will have its own unique lix_id
+	const lix1 = await openLix({});
+	const lix2 = await openLix({});
+
+	// Check that they have different lix_id values
+	const lix1IdDirect = await lix1.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "lix_id")
+		.executeTakeFirst();
+	const lix2IdDirect = await lix2.db
+		.selectFrom("key_value")
+		.selectAll()
+		.where("key", "=", "lix_id")
+		.executeTakeFirst();
+	
+	// Ensure the test is valid - the two instances should have different lix_ids
+	expect(lix1IdDirect?.value).not.toBe(lix2IdDirect?.value);
+
+	// Use a state variable to control which lix instance is used
+	let currentLix = lix1;
+
+	// Wrapper function that uses the current lix
+	const TestComponent = () => {
+		const data = useQuery((lix) =>
+			lix.db
+				.selectFrom("key_value")
+				.selectAll()
+				.where("key", "=", "lix_id"),
+		);
+		return data;
+	};
+
+	const wrapper = ({ children }: { children: React.ReactNode }) => (
+		<LixProvider lix={currentLix}>
+			<Suspense fallback={<div>Loading...</div>}>
+				<MockErrorBoundary>{children}</MockErrorBoundary>
+			</Suspense>
+		</LixProvider>
+	);
+
+	let hookResult: { current: State<KeyValue>[] };
+	let rerender: () => void;
+
+	await act(async () => {
+		const { result, rerender: rerenderFn } = renderHook(() => TestComponent(), {
+			wrapper,
+		});
+		hookResult = result;
+		rerender = rerenderFn;
+	});
+
+	// Verify we get data from lix1
+	await waitFor(() => {
+		expect(hookResult.current).toHaveLength(1);
+		expect(hookResult.current[0]?.key).toBe("lix_id");
+	});
+
+	// Store the initial lix_id value
+	const lix1Id = hookResult!.current[0]?.value;
+
+	// Switch to lix2 by changing the current lix and rerendering
+	await act(async () => {
+		currentLix = lix2;
+		rerender();
+	});
+
+	// Verify the query refreshes and we now get data from lix2
+	await waitFor(() => {
+		expect(hookResult.current).toHaveLength(1);
+		expect(hookResult.current[0]?.key).toBe("lix_id");
+		// The lix_id value should be different from lix1
+		expect(hookResult.current[0]?.value).not.toBe(lix1Id);
+	});
+
+	await lix1.close();
+	await lix2.close();
+});
