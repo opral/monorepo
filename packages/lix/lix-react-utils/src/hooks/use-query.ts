@@ -111,7 +111,7 @@ export function useQuery<TRow>(
 			},
 		});
 		return () => sub.unsubscribe();
-	}, [cacheKey, subscribe, initialRows]); // Re-subscribe when query changes
+	}, [cacheKey, subscribe, initialRows, lix]); // Re-subscribe when query changes
 
 	return rows;
 }
