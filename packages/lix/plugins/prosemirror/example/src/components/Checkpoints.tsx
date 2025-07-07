@@ -1,13 +1,23 @@
-import { selectCheckpoints, selectWorkingChangeSet } from "../queries";
+import {
+	selectActiveVersion,
+	selectCheckpoints,
+	selectWorkingChangeSet,
+} from "../queries";
 import { ChangeSet, ChangeSetHandle } from "./ChangeSet";
 import { useRef } from "react";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { createCheckpoint } from "@lix-js/sdk";
-import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
+import {
+	useLix,
+	useQuery,
+	useQueryTakeFirst,
+	useQueryTakeFirstOrThrow,
+} from "@lix-js/react-utils";
 
 const Checkpoints: React.FC = () => {
 	const lix = useLix();
-	const checkpoints = useQuery(selectCheckpoints);
+	const activeVersion = useQueryTakeFirstOrThrow(selectActiveVersion);
+	const checkpoints = useQuery((lix) => selectCheckpoints(lix, activeVersion));
 	const workingChangeSet = useQueryTakeFirst(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",

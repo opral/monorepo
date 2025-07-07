@@ -2,6 +2,7 @@ import {
 	ChangeSet,
 	changeSetHasLabel,
 	jsonArrayFrom,
+	Version,
 	type Lix,
 } from "@lix-js/sdk";
 
@@ -34,7 +35,7 @@ export function selectChanges(lix: Lix) {
 		.orderBy("change.created_at", "desc");
 }
 
-export function selectCheckpoints(lix: Lix) {
+export function selectCheckpoints(lix: Lix, version: Version) {
 	// This function needs to work with the changeSetIsAncestorOf helper
 	// For now, let's simplify it to just get checkpoints
 	return (
@@ -53,15 +54,7 @@ export function selectCheckpoints(lix: Lix) {
 			.select((eb) => [
 				eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 			])
-			.select((eb) =>
-				eb
-					.selectFrom("change")
-					.where("change.schema_key", "=", "lix_change_set_table")
-					.whereRef("change.entity_id", "=", "change_set.id")
-					.select("change.created_at")
-					.as("created_at"),
-			)
-			.orderBy("created_at", "desc")
+			.orderBy("change_set.lixcol_updated_at", "desc")
 	);
 }
 
