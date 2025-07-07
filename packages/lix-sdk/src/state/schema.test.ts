@@ -2635,3 +2635,87 @@ test("untracked state in child overrides inherited untracked state", async () =>
 	expect(finalState[0]?.snapshot_content).toEqual({ value: "child untracked" });
 	expect(finalState[0]?.untracked).toBe(1);
 });
+
+test("untracked state has untracked change_id for both inherited and non-inherited entities", async () => {
+	const lix = await openLix({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	const childVersion = await createVersion({ lix, name: "child" });
+
+	// 1. Insert untracked state in global version (will be inherited by child)
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "inherited-entity",
+			file_id: "test-file",
+			schema_key: "mock_schema",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			snapshot_content: { value: "global untracked" },
+			version_id: "global",
+			untracked: true,
+		})
+		.execute();
+
+	// 2. Insert untracked state directly in child version (non-inherited)
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "non-inherited-entity",
+			file_id: "test-file",
+			schema_key: "mock_schema",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			snapshot_content: { value: "child untracked" },
+			version_id: childVersion.id,
+			untracked: true,
+		})
+		.execute();
+
+	// 3. Query all untracked entities in child version
+	const untrackedEntities = await lix.db
+		.selectFrom("state_all")
+		.where("version_id", "=", childVersion.id)
+		.where("entity_id", "in", ["inherited-entity", "non-inherited-entity"])
+		.where("untracked", "=", true)
+		.selectAll()
+		.execute();
+
+	expect(untrackedEntities).toHaveLength(2);
+
+	// 4. Check that both entities have untracked change_id
+	for (const entity of untrackedEntities) {
+		expect(entity.change_id).toBe("untracked");
+	}
+
+	// 5. Verify specific entities
+	const inheritedEntity = untrackedEntities.find(
+		(e) => e.entity_id === "inherited-entity"
+	);
+	const nonInheritedEntity = untrackedEntities.find(
+		(e) => e.entity_id === "non-inherited-entity"
+	);
+
+	expect(inheritedEntity).toBeDefined();
+	expect(nonInheritedEntity).toBeDefined();
+
+	// Both inherited and non-inherited untracked entities should have change_id = "untracked"
+	expect(inheritedEntity?.change_id).toBe("untracked");
+	expect(nonInheritedEntity?.change_id).toBe("untracked");
+});
