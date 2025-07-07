@@ -15,6 +15,7 @@ const Checkpoints: React.FC = () => {
 	const workingChangeSet = useSuspenseQueryTakeFirst(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
+		{ global: true, untracked: true }
 	);
 	const changeSetRef = useRef<ChangeSetHandle>(null);
 
