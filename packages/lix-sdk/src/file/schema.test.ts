@@ -988,3 +988,68 @@ test("file data updates with untracked state", async () => {
 
 	expect(deletedFile).toHaveLength(0);
 });
+
+
+test("file history", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// Insert a JSON file
+	const data = {
+		name: "My Project",
+		version: "1.0.0",
+	};
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			path: "/config.json",
+			data: new TextEncoder().encode(JSON.stringify(data)),
+		})
+		.execute();
+
+	// Make a change
+	data.name = "My Cool Project";
+	data.version = "1.1.0";
+
+	await lix.db
+		.updateTable("file")
+		.where("path", "=", "/config.json")
+		.set({
+			data: new TextEncoder().encode(JSON.stringify(data)),
+		})
+		.execute();
+
+	// 1. Get the last two versions of the JSON file from history
+	const fileHistory = await lix.db
+		.selectFrom("file_history")
+		.where("file_history.path", "=", "/config.json")
+		.where(
+			"lixcol_change_set_id",
+			"=",
+			lix.db
+				.selectFrom("version")
+				.select("change_set_id")
+				.where("version.name", "=", "main")
+		)
+		.orderBy("lixcol_depth", "asc")
+		.selectAll()
+		.execute();
+
+	expect(fileHistory).toHaveLength(2);
+
+	const afterState = JSON.parse(new TextDecoder().decode(fileHistory[0]!.data));
+	const beforeState = JSON.parse(
+		new TextDecoder().decode(fileHistory[1]!.data)
+	);
+
+	expect(afterState).toEqual({
+		name: "My Cool Project",
+		version: "1.1.0",
+	});
+	expect(beforeState).toEqual({
+		name: "My Project",
+		version: "1.0.0",
+	});
+});
