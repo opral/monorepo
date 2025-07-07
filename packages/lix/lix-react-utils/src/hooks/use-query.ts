@@ -1,110 +1,119 @@
 /* ------------------------------------------------------------------------- *
- *  lix-react/useQuery.tsx
- *  Simple React hook for live database queries
+ *  lix-react/useSuspenseQuery.tsx
+ *  React 19 Suspense-based hooks for live database queries
  * ------------------------------------------------------------------------- */
 
-import { useMemo, useContext, useEffect, useState } from "react";
+import { useMemo, useContext, useEffect, useState, use } from "react";
 import type { Lix, LixDatabaseSchema } from "@lix-js/sdk";
 import { LixContext } from "../provider.js";
 import type { SelectQueryBuilder } from "kysely";
 
-/* ────────────────────────────────────────────────────────────────────────── */
-/* useQuery                                                                  */
-/* ────────────────────────────────────────────────────────────────────────── */
+// Map to cache promises by query key
+const queryPromiseCache = new Map<string, Promise<any>>();
 
-// Internal snapshot type for useSyncExternalStore
-type Snapshot<T> = {
-	data: T[] | undefined;
-	error: Error | null;
-};
+interface UseQueryOptions {
+	subscribe?: boolean;
+}
 
 /**
- * Subscribe to a live query inside React.
+ * Subscribe to a live query using React 19 Suspense.
  *
- * @param buildQuery - Factory function that creates a Kysely SelectQueryBuilder
- * @returns `{ data, error, loading }` with discriminated union types for type guards
+ * @param query - Factory function that creates a Kysely SelectQueryBuilder
+ * @param options - Optional configuration
+ * @param options.subscribe - Whether to subscribe to live updates (default: true)
  *
  * @example
  * ```tsx
  * function KeyValueList() {
- *   const result = useQuery(lix =>
+ *   const keyValues = useQuery(lix =>
  *     lix.db.selectFrom('key_value')
- *       .where('key', 'like', 'user_%')
+ *       .where('key', 'like', 'example_%')
  *       .selectAll()
  *   );
  *
- *   if (result.error) {
- *     return <div>Error: {result.error.message}</div>;
- *   }
- *
- *   if (result.loading) {
- *     return <div>Loading...</div>;
- *   }
- *
- *   // TypeScript knows result.data is KeyValue[] here
+ *   // No loading/error states needed - Suspense and ErrorBoundary handle them
  *   return (
  *     <ul>
- *       {result.data.map(item => (
+ *       {keyValues.map(item => (
  *         <li key={item.key}>{item.key}: {item.value}</li>
  *       ))}
  *     </ul>
  *   );
  * }
+ *
+ * // One-time query without subscription
+ * function ConfigData() {
+ *   const config = useQuery(lix =>
+ *     lix.db.selectFrom('config').selectAll(),
+ *     { subscribe: false }
+ *   );
+ *
+ *   return <div>{config.length} config items</div>;
+ * }
+ *
+ * // Wrap with Suspense and ErrorBoundary:
+ * <Suspense fallback={<div>Loading...</div>}>
+ *   <ErrorBoundary fallback={<div>Error occurred</div>}>
+ *     <KeyValueList />
+ *   </ErrorBoundary>
+ * </Suspense>
  * ```
  */
-type UseQueryResult<TResult> =
-	| { data: undefined; error: Error; loading: false }
-	| { data: undefined; error: null; loading: true }
-	| { data: TResult[]; error: null; loading: false };
-
-export function useQuery<TResult>(
-	buildQuery: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
-): UseQueryResult<TResult> {
-	/* -------------------------------- context -------------------------------- */
+export function useQuery<TRow>(
+	query: (lix: Lix) => SelectQueryBuilder<any, any, TRow>,
+	options: UseQueryOptions = {},
+): TRow[] {
 	const lix = useContext(LixContext);
 	if (!lix) throw new Error("useQuery must be used inside <LixProvider>.");
 
-	/* ---------------------------- freeze builder ----------------------------- */
-	const builder = useMemo(
-		() => (typeof buildQuery === "function" ? buildQuery(lix) : buildQuery),
-		[], // frozen for component lifetime (recreate hook if query must change)
-	);
+	const { subscribe = true } = options;
 
-	// Simple state-based approach
-	const [state, setState] = useState<Snapshot<TResult>>({
-		data: undefined,
-		error: null,
-	});
+	// Create stable cache key that includes the compiled SQL to capture closure variables
+	const cacheKey = useMemo(() => {
+		// Compile the query to get the actual SQL with parameters
+		const builder = query(lix);
+		const compiled = builder.compile();
+		return `${subscribe ? "sub" : "once"}:${compiled.sql}:${JSON.stringify(compiled.parameters)}`;
+	}, [query, lix, subscribe]);
 
+	// Get or create promise
+	let promise = queryPromiseCache.get(cacheKey);
+	if (!promise) {
+		const builder = query(lix);
+		promise = builder.execute() as Promise<TRow[]>;
+		queryPromiseCache.set(cacheKey, promise);
+	}
+
+	// Use the promise (suspends on first render)
+	const initialRows = use(promise);
+
+	// Local state for updates
+	const [rows, setRows] = useState(initialRows);
+
+	// Subscribe for ongoing updates (only if subscribe is true)
 	useEffect(() => {
-		// Subscribe to the observable
-		const observable = lix.observe(builder);
-		const subscription = observable.subscribe({
-			next: (rows) => {
-				setState({ data: rows as TResult[], error: null });
-			},
+		if (!subscribe) {
+			// For one-time queries, just use the initial data
+			setRows(initialRows);
+			return;
+		}
+
+		const builder = query(lix);
+		const sub = lix.observe(builder).subscribe({
+			next: (value) => setRows(value as TRow[]),
 			error: (err) => {
-				setState({
-					data: undefined,
-					error: err instanceof Error ? err : new Error(String(err)),
+				// Clear promise to allow retry
+				queryPromiseCache.delete(cacheKey);
+				// Surface error to ErrorBoundary
+				setRows(() => {
+					throw err instanceof Error ? err : new Error(String(err));
 				});
 			},
 		});
+		return () => sub.unsubscribe();
+	}, [cacheKey, subscribe, initialRows]); // Re-subscribe when query changes
 
-		// Cleanup
-		return () => {
-			subscription.unsubscribe();
-		};
-	}, [lix, builder]);
-
-	/* local loading flag: true until first next or error */
-	const loading = state.data === undefined && state.error === null;
-
-	return {
-		data: state.data,
-		error: state.error,
-		loading,
-	} as UseQueryResult<TResult>;
+	return rows;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -115,96 +124,100 @@ export function useQuery<TResult>(
  * Subscribe to a live query and return only the first result inside React.
  * Equivalent to calling `.executeTakeFirst()` on a Kysely query.
  *
- * @param buildQuery - Factory function that creates a Kysely SelectQueryBuilder
- * @returns `{ data, error, loading }` where data is TResult | undefined for empty results
- *
  * @example
  * ```tsx
- * function UserProfile({ userId }: { userId: string }) {
- *   const result = useQueryTakeFirst(lix =>
+ * function ExampleComponent({ itemId }: { itemId: string }) {
+ *   const item = useQueryTakeFirst(lix =>
  *     lix.db.selectFrom('key_value')
- *       .where('key', '=', `user_${userId}`)
+ *       .where('key', '=', `example_${itemId}`)
  *       .selectAll()
  *   );
  *
- *   if (result.error) {
- *     return <div>Error: {result.error.message}</div>;
+ *   // No loading/error states needed - Suspense and ErrorBoundary handle them
+ *   if (!item) {
+ *     return <div>Item not found</div>;
  *   }
  *
- *   if (result.loading) {
- *     return <div>Loading...</div>;
- *   }
- *
- *   // TypeScript knows result.data is KeyValue | undefined here
- *   if (!result.data) {
- *     return <div>User not found</div>;
- *   }
- *
- *   return <div>User: {result.data.value}</div>;
+ *   return <div>Value: {item.value}</div>;
  * }
+ *
+ * // Wrap with Suspense and ErrorBoundary:
+ * <Suspense fallback={<div>Loading...</div>}>
+ *   <ErrorBoundary fallback={<div>Error occurred</div>}>
+ *     <ExampleComponent itemId="123" />
+ *   </ErrorBoundary>
+ * </Suspense>
  * ```
  */
-type UseQueryTakeFirstResult<TResult> =
-	| { data: undefined; error: Error; loading: false }
-	| { data: undefined; error: null; loading: true }
-	| { data: TResult | undefined; error: null; loading: false };
-
 export const useQueryTakeFirst = <TResult>(
-	buildQuery: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
-): UseQueryTakeFirstResult<TResult> => {
-	/* -------------------------------- context -------------------------------- */
-	const lix = useContext(LixContext);
-	if (!lix)
-		throw new Error("useQueryTakeFirst must be used inside <LixProvider>.");
+	query: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
+	options: UseQueryOptions = {},
+): TResult | undefined => {
+	// Wrap the builder to limit results to 1
+	const rows = useQuery((lix) => query(lix).limit(1), options);
 
-	/* ---------------------------- freeze builder ----------------------------- */
-	const builder = useMemo(
-		() => (typeof buildQuery === "function" ? buildQuery(lix) : buildQuery),
-		[], // frozen for component lifetime (recreate hook if query must change)
-	);
-
-	// Simple state-based approach with loading flag
-	const [state, setState] = useState<{
-		data: TResult | undefined;
-		error: Error | null;
-		hasReceived: boolean;
-	}>({
-		data: undefined,
-		error: null,
-		hasReceived: false,
-	});
-
-	useEffect(() => {
-		// Reset state when effect runs
-		setState({ data: undefined, error: null, hasReceived: false });
-
-		// Subscribe to the observable using subscribeTakeFirst for efficiency
-		const observable = lix.observe(builder);
-		const subscription = observable.subscribeTakeFirst({
-			next: (row) => {
-				setState({ data: row as TResult, error: null, hasReceived: true });
-			},
-			error: (err) => {
-				setState({
-					data: undefined,
-					error: err instanceof Error ? err : new Error(String(err)),
-					hasReceived: true,
-				});
-			},
-		});
-
-		// Cleanup
-		return () => {
-			subscription.unsubscribe();
-		};
-	}, [lix, builder]);
-
-	/* local loading flag: true until first next or error */
-	const loading = !state.hasReceived;
-
-	return {
-		data: state.data,
-		error: state.error,
-		loading,
-	} as UseQueryTakeFirstResult<TResult>;
+	// Return the first row or undefined
+	return rows[0] as TResult | undefined;
 };
+
+/**
+ * Subscribe to a live query and return only the first result inside React.
+ * Throws an error if no result is found.
+ *
+ * @param query - Factory function that creates a Kysely SelectQueryBuilder
+ *
+ * @throws Error if no result is found
+ *
+ * @example
+ * ```tsx
+ * function ExampleDetail({ itemId }: { itemId: string }) {
+ *   const item = useSuspenseQueryTakeFirstOrThrow(lix =>
+ *     lix.db.selectFrom('key_value')
+ *       .where('key', '=', `example_${itemId}`)
+ *       .selectAll()
+ *   );
+ *
+ *   // No need to check for undefined - will throw to ErrorBoundary if not found
+ *   return <div>Value: {item.value}</div>;
+ * }
+ *
+ * // Wrap with Suspense and ErrorBoundary:
+ * <Suspense fallback={<div>Loading...</div>}>
+ *   <ErrorBoundary fallback={<div>Item not found</div>}>
+ *     <ExampleDetail itemId="123" />
+ *   </ErrorBoundary>
+ * </Suspense>
+ * ```
+ */
+export const useQueryTakeFirstOrThrow = <TResult>(
+	query: (lix: Lix) => SelectQueryBuilder<LixDatabaseSchema, any, TResult>,
+	options: UseQueryOptions = {},
+): TResult => {
+	// Use the regular takeFirst hook
+	const data = useQueryTakeFirst(query, options);
+
+	// Throw if no data found
+	if (data === undefined) {
+		throw new Error("No result found");
+	}
+
+	return data;
+};
+
+/**
+ * @deprecated Use `useQuery` instead.
+ * This will be removed in a future version.
+ */
+export const useSuspenseQuery = useQuery;
+
+/**
+ * @deprecated Use `useQueryTakeFirst` instead.
+ * This will be removed in a future version.
+ */
+export const useSuspenseQueryTakeFirst = useQueryTakeFirst;
+
+/**
+ * @deprecated Use `useQueryTakeFirstOrThrow` instead.
+ * This will be removed in a future version.
+ */
+export const useSuspenseQueryTakeFirstOrThrow = useQueryTakeFirstOrThrow;

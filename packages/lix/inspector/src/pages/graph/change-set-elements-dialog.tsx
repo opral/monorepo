@@ -1,10 +1,9 @@
-import { useLix } from "../../hooks/use-lix";
 import { useState, useContext } from "react";
 import type { Change } from "@lix-js/sdk";
 import { FloatingWindow } from "../../components/floating-window";
 import { createPortal } from "react-dom";
 import { Context } from "../../context";
-import { useQuery } from "../../hooks/use-query";
+import { useQuery } from "@lix-js/react-utils";
 import { Copy } from "lucide-react";
 
 interface ChangeSetElementsWindowProps {
@@ -13,12 +12,11 @@ interface ChangeSetElementsWindowProps {
 }
 
 export function ChangeSetElementsWindow(props: ChangeSetElementsWindowProps) {
-  const lix = useLix();
   const { rootContainer } = useContext(Context);
   const [isOpen, setIsOpen] = useState(false);
 
-  const [changes] = useQuery(async () => {
-    return await lix.db
+  const changes = useQuery((lix) =>
+    lix.db
       .selectFrom("change")
       .innerJoin(
         "change_set_element",
@@ -27,8 +25,7 @@ export function ChangeSetElementsWindow(props: ChangeSetElementsWindowProps) {
       )
       .where("change_set_element.change_set_id", "=", props.changeSetId)
       .selectAll("change")
-      .execute();
-  });
+  );
 
   const handleClose = () => {
     setIsOpen(false);

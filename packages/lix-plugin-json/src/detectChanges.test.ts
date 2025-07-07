@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { detectChanges } from "./detectChanges.js";
 import { type FromLixSchemaDefinition, type DetectedChange } from "@lix-js/sdk";
-import { JSONPropertySchema } from "./schemas/JSONPropertySchema.js";
+import { JSONPropertySchema } from "./schemas/json-property.js";
 
 test("it should not detect changes if the json did not update", async () => {
 	const before = new TextEncoder().encode(

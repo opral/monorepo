@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { Lix } from "@lix-js/sdk";
+import { LixProvider } from "@lix-js/react-utils";
 
 interface ContextValue {
   lix: Lix;
@@ -32,7 +33,7 @@ export function Provider({
         rootContainer,
       }}
     >
-      {children}
+      <LixProvider lix={lix}>{children}</LixProvider>
     </Context.Provider>
   );
 }
