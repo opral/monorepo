@@ -990,8 +990,8 @@ function getStoredSchema(
 		bind: [String(schemaKey)],
 		returnValue: "resultRows",
 	});
-	
-	return result && result.length > 0 ? result[0]![0] as string : null;
+
+	return result && result.length > 0 ? (result[0]![0] as string) : null;
 }
 
 function getColumnName(columnIndex: number): string {

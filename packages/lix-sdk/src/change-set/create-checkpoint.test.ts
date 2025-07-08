@@ -165,9 +165,9 @@ test("creates edge from checkpoint to new working change set", async () => {
 
 	// Should find the key-value pair in history even though working set is empty
 	expect(historyFromWorking.length).toBeGreaterThan(0);
-	expect(historyFromWorking[0]?.snapshot_content).toEqual({ 
+	expect(historyFromWorking[0]?.snapshot_content).toEqual({
 		key: "test-key",
-		value: "test-value" 
+		value: "test-value",
 	});
 });
 

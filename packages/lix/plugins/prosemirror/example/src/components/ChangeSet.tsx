@@ -226,11 +226,11 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 								<button
 									className="btn btn-sm btn-ghost gap-1 flex items-center"
-									onClick={() => {
+									onClick={async () => {
 										if (diffView) {
-											setDiffView(null);
+											await setDiffView(null);
 										} else {
-											setDiffView({
+											await setDiffView({
 												beforeCsId: previousChangeSetId,
 												afterCsId: changeSet.id,
 											});

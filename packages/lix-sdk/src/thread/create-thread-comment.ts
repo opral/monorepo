@@ -36,14 +36,21 @@ export async function createThreadComment(
 				.selectFrom("thread_comment_all as c1")
 				.where("c1.thread_id", "=", args.thread_id)
 				.where("c1.lixcol_version_id", "=", existingThread.lixcol_version_id)
-				.where((eb) => 
-					eb.not(eb.exists(
-						eb.selectFrom("thread_comment_all as c2")
-							.where("c2.thread_id", "=", args.thread_id)
-							.where("c2.lixcol_version_id", "=", existingThread.lixcol_version_id)
-							.whereRef("c2.parent_id", "=", "c1.id")
-							.select("c2.id")
-					))
+				.where((eb) =>
+					eb.not(
+						eb.exists(
+							eb
+								.selectFrom("thread_comment_all as c2")
+								.where("c2.thread_id", "=", args.thread_id)
+								.where(
+									"c2.lixcol_version_id",
+									"=",
+									existingThread.lixcol_version_id
+								)
+								.whereRef("c2.parent_id", "=", "c1.id")
+								.select("c2.id")
+						)
+					)
 				)
 				.select("c1.id")
 				.executeTakeFirst();

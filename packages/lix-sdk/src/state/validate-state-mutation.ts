@@ -740,9 +740,9 @@ function validateChangeSetGraphAcyclic(args: {
 
 				throw new Error(
 					`Cycle detected in change set graph!\n` +
-					`New edge: ${args.newEdge.parent_id} -> ${args.newEdge.child_id}\n` +
-					`Cycle path: ${cyclePath.join(" -> ")}\n` +
-					`Adding this edge would create a cycle in the graph.`
+						`New edge: ${args.newEdge.parent_id} -> ${args.newEdge.child_id}\n` +
+						`Cycle path: ${cyclePath.join(" -> ")}\n` +
+						`Adding this edge would create a cycle in the graph.`
 				);
 			}
 		}

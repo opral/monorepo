@@ -2,7 +2,6 @@ import {
 	ChangeSet,
 	changeSetHasLabel,
 	jsonArrayFrom,
-	Version,
 	type Lix,
 } from "@lix-js/sdk";
 
@@ -35,7 +34,7 @@ export function selectChanges(lix: Lix) {
 		.orderBy("change.created_at", "desc");
 }
 
-export function selectCheckpoints(lix: Lix, version: Version) {
+export function selectCheckpoints(lix: Lix) {
 	// This function needs to work with the changeSetIsAncestorOf helper
 	// For now, let's simplify it to just get checkpoints
 	return (

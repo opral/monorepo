@@ -2477,7 +2477,7 @@ test("untracked state inheritance", async () => {
 	expect(versionState).toBeDefined();
 	expect(versionState).toEqual(globalState);
 });
-	
+
 test("tracked state in child overrides inherited untracked state", async () => {
 	const lix = await openLix({});
 
