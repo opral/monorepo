@@ -30,7 +30,6 @@ export function useMdAstState(): UseMdAstStateReturn {
 	const lix = useLix();
 
 	// const mdRoot = useQueryTakeFirst(selectMdAstRoot);
-
 	// const mdNodes = useQuery(selectMdAstNodes);
 
 	const [state, setState] = useState({
@@ -47,9 +46,8 @@ export function useMdAstState(): UseMdAstStateReturn {
 
 	// console.log("called hook");
 
-	async function x() {
+	async function loadFileContent() {
 		const root = await selectMdAstRoot(lix).executeTakeFirst();
-
 		const entities = await selectMdAstNodes(lix).execute();
 
 		console.log("setting state", root, entities);
@@ -63,14 +61,13 @@ export function useMdAstState(): UseMdAstStateReturn {
 	}
 
 	useEffect(() => {
-		x();
-	}, [lix]);
+		loadFileContent();
+	}, [lix, activeFile]);
 
 	// Update entities with optimistic updates
 	const updateEntities = useCallback(
 		async (entities: MdAstEntity[], order: string[]) => {
 			console.log("updating state", order, entities);
-			// console.log({ entities, order });
 
 			try {
 				await updateMdAstEntities(lix, activeFile ?? null, entities, order);

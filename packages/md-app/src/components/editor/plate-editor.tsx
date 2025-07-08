@@ -175,14 +175,14 @@ export function PlateEditor() {
   const handleValueChange = useCallback((newValue: any) => {
     if (!activeFile || !lix) return; // Don't save if no active file or lix
 
-    const hasPromptElement = hasEmptyPromptElement(newValue.editor);
+    // const hasPromptElement = hasEmptyPromptElement(newValue.editor);
 
-    // If there was a prompt but now it's gone, mark it as dismissed
-    if (previousHasPromptElement && !hasPromptElement && activeFile.id) {
-      setPromptDismissed(lix, activeFile.id);
-    }
+    // // If there was a prompt but now it's gone, mark it as dismissed
+    // if (previousHasPromptElement && !hasPromptElement && activeFile.id) {
+    //   setPromptDismissed(lix, activeFile.id);
+    // }
 
-    setPreviousHasPromptElement(hasPromptElement);
+    // setPreviousHasPromptElement(hasPromptElement);
 
     // Check if content has changed by comparing current entities with new Plate value
     try {

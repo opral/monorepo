@@ -49,7 +49,9 @@ export function remarkMdastId() {
 
 			// Assign ID to current node
 			const nodeId =
-				previousNode && previousNode.value && isHtmlIdComment(previousNode.value)
+				previousNode &&
+				previousNode.value &&
+				isHtmlIdComment(previousNode.value)
 					? parseHtmlIdComment(previousNode.value!)
 					: generateMdastId();
 
@@ -220,9 +222,9 @@ export function plateValueToMdastEntities(plateValue: Descendant[]): {
 		}
 
 		// Use existing mdast_id or Plate ID, or generate new one
-		const mdast_id: string = 
-			(plateElement.mdast_id as string) || 
-			(plateElement.id as string) || 
+		const mdast_id: string =
+			(plateElement.id as string) ||
+			(plateElement.mdast_id as string) ||
 			generateMdastId();
 
 		// Extract text content from immediate text children
@@ -249,11 +251,11 @@ export function plateValueToMdastEntities(plateValue: Descendant[]): {
 			mdast_id: mdast_id as string,
 			type: mapPlateTypeToMdast(plateElement.type),
 		};
-		
+
 		if (textContent) {
 			entity.value = textContent;
 		}
-		
+
 		if (childIds.length > 0) {
 			entity.children = childIds;
 		}
@@ -520,57 +522,57 @@ function convertEntityToMdastNode(
  */
 function serializeSimpleMarkdown(root: MdastRoot): string {
 	const lines: string[] = [];
-	
+
 	for (const child of root.children) {
 		const serialized = serializeNode(child as any);
 		if (serialized) {
 			lines.push(serialized);
 		}
 	}
-	
-	return lines.join('\n\n');
+
+	return lines.join("\n\n");
 }
 
 function serializeNode(node: any): string {
 	switch (node.type) {
-		case 'paragraph':
+		case "paragraph":
 			return serializeChildren(node);
-		case 'heading': {
-			const level = '#'.repeat(node.depth || 1);
+		case "heading": {
+			const level = "#".repeat(node.depth || 1);
 			return `${level} ${serializeChildren(node)}`;
 		}
-		case 'text':
-			return node.value || '';
-		case 'strong':
+		case "text":
+			return node.value || "";
+		case "strong":
 			return `**${serializeChildren(node)}**`;
-		case 'emphasis':
+		case "emphasis":
 			return `_${serializeChildren(node)}_`;
-		case 'link':
-			return `[${serializeChildren(node)}](${node.url || ''})`;
-		case 'list':
+		case "link":
+			return `[${serializeChildren(node)}](${node.url || ""})`;
+		case "list":
 			return serializeList(node);
-		case 'listItem':
+		case "listItem":
 			return serializeChildren(node);
-		case 'code': {
-			const lang = node.lang ? node.lang : '';
-			return `\`\`\`${lang}\n${node.value || ''}\n\`\`\``;
+		case "code": {
+			const lang = node.lang ? node.lang : "";
+			return `\`\`\`${lang}\n${node.value || ""}\n\`\`\``;
 		}
-		case 'inlineCode':
-			return `\`${node.value || ''}\``;
+		case "inlineCode":
+			return `\`${node.value || ""}\``;
 		default:
-			return serializeChildren(node) || node.value || '';
+			return serializeChildren(node) || node.value || "";
 	}
 }
 
 function serializeChildren(node: any): string {
-	if (!node.children) return '';
-	return node.children.map((child: any) => serializeNode(child)).join('');
+	if (!node.children) return "";
+	return node.children.map((child: any) => serializeNode(child)).join("");
 }
 
 function serializeList(node: any): string {
-	if (!node.children) return '';
-	const marker = node.ordered ? '1. ' : '- ';
+	if (!node.children) return "";
+	const marker = node.ordered ? "1. " : "- ";
 	return node.children
 		.map((item: any) => `${marker}${serializeNode(item)}`)
-		.join('\n');
+		.join("\n");
 }
