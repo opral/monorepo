@@ -108,6 +108,69 @@ test("creates checkpoint and returns change set", async () => {
 	});
 });
 
+// The edge from checkpoint to new working change set is critical for history traversal.
+// Without this edge, queries from the working change set cannot traverse backwards through
+// checkpoints to find historical states. This ensures the change set graph remains connected
+// and allows state_history queries to work correctly from any point in the graph.
+test("creates edge from checkpoint to new working change set", async () => {
+	const lix = await openLix({});
+
+	// Make some changes to create working change set elements
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "test-key", value: "test-value" })
+		.execute();
+
+	// Create checkpoint
+	const checkpoint = await createCheckpoint({ lix });
+
+	// Get updated version with new working change set
+	const updatedVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Verify edge exists from checkpoint to new working change set
+	const edgeToNewWorking = await lix.db
+		.selectFrom("change_set_edge")
+		.where("parent_id", "=", checkpoint.id)
+		.where("child_id", "=", updatedVersion.working_change_set_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(edgeToNewWorking).toMatchObject({
+		parent_id: checkpoint.id,
+		child_id: updatedVersion.working_change_set_id,
+	});
+
+	// Verify the new working change set can traverse back to the checkpoint
+	const isCheckpointAncestor = await lix.db
+		.selectFrom("change_set")
+		.where("id", "=", checkpoint.id)
+		.where(changeSetIsAncestorOf({ id: updatedVersion.working_change_set_id }))
+		.selectAll()
+		.execute();
+
+	expect(isCheckpointAncestor).toHaveLength(1);
+
+	// Verify history traversal works from new working change set
+	const historyFromWorking = await lix.db
+		.selectFrom("state_history")
+		.where("entity_id", "=", "test-key")
+		.where("schema_key", "=", "lix_key_value")
+		.where("root_change_set_id", "=", updatedVersion.working_change_set_id)
+		.selectAll()
+		.execute();
+
+	// Should find the key-value pair in history even though working set is empty
+	expect(historyFromWorking.length).toBeGreaterThan(0);
+	expect(historyFromWorking[0]?.snapshot_content).toEqual({ 
+		key: "test-key",
+		value: "test-value" 
+	});
+});
+
 test("creating a checkpoint with no changes throws", async () => {
 	const lix = await openLix({});
 

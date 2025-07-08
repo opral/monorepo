@@ -824,3 +824,94 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 	// // The oldest state (depth 2) should show parents for changeSet1 (may be empty or have working change set)
 	// expect(Array.isArray(history[2]?.parent_change_set_ids)).toBe(true);
 });
+
+test("querying the history of the working change set", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_debug", value: "true" }],
+	});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		additionalProperties: false,
+		type: "object",
+		properties: {
+			value: { type: "string" },
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	// Insert initial entity
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "entity0",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
+			snapshot_content: { value: "initial content" },
+		})
+		.execute();
+
+	const checkpoint0 = await createCheckpoint({ lix });
+
+	// Modify the entity
+	await lix.db
+		.updateTable("state")
+		.set({ snapshot_content: { value: "modified content" } })
+		.where("entity_id", "=", "entity0")
+		.execute();
+
+	const checkpoint1 = await createCheckpoint({ lix });
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.select("version.working_change_set_id")
+		.executeTakeFirstOrThrow();
+
+	const workingChangeSetId = activeVersion.working_change_set_id;
+
+	const checkpoint1History = await lix.db
+		.selectFrom("state_history")
+		.where("entity_id", "=", "entity0")
+		.where("root_change_set_id", "=", checkpoint1.id)
+		.innerJoin("change_set", "state_history.change_set_id", "change_set.id")
+		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.orderBy("depth", "asc")
+		.selectAll()
+		.execute();
+
+	expect(checkpoint1History).toHaveLength(2);
+	expect(checkpoint1History[0]?.change_set_id).toBe(checkpoint1.id);
+	expect(checkpoint1History[0]?.snapshot_content).toEqual({
+		value: "modified content",
+	});
+	expect(checkpoint1History[1]?.change_set_id).toBe(checkpoint0.id);
+	expect(checkpoint1History[1]?.snapshot_content).toEqual({
+		value: "initial content",
+	});
+
+	const workingHistory = await lix.db
+		.selectFrom("state_history")
+		.where("entity_id", "=", "entity0")
+		.where("root_change_set_id", "=", workingChangeSetId)
+		.innerJoin("change_set", "state_history.change_set_id", "change_set.id")
+		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.orderBy("depth", "asc")
+		.selectAll()
+		.execute();
+
+	expect(workingHistory).toHaveLength(2);
+	expect(workingHistory[0]?.snapshot_content).toEqual({
+		value: "modified content",
+	});
+	expect(workingHistory[1]?.snapshot_content).toEqual({
+		value: "initial content",
+	});
+});

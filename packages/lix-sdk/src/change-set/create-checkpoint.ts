@@ -88,6 +88,16 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			})
 			.execute();
 
+		// 4. Add edge from checkpoint to new working change set
+		await trx
+			.insertInto("change_set_edge_all")
+			.values({
+				parent_id: workingChangeSetId,
+				child_id: newWorkingChangeSetId,
+				lixcol_version_id: "global",
+			})
+			.execute();
+
 		return {
 			id: workingChangeSetId,
 		};
