@@ -2719,3 +2719,102 @@ test("untracked state has untracked change_id for both inherited and non-inherit
 	expect(inheritedEntity?.change_id).toBe("untracked");
 	expect(nonInheritedEntity?.change_id).toBe("untracked");
 });
+
+test("state version_id defaults active version", async () => {
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	// Get the active version ID to verify it gets auto-filled
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert into state view without specifying version_id
+	// This should auto-fill with the active version
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "entity0",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
+			snapshot_content: { value: "initial content" },
+		})
+		.execute();
+
+	// Verify the entity was inserted with the correct version_id
+	const insertedEntity = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "entity0")
+		.selectAll()
+		.execute();
+
+	expect(insertedEntity).toHaveLength(1);
+	expect(insertedEntity[0]).toMatchObject({
+		entity_id: "entity0",
+		file_id: "f0",
+		schema_key: "mock_schema",
+		plugin_key: "lix_own_entity",
+		schema_version: "1.0",
+		snapshot_content: { value: "initial content" },
+	});
+
+	// Verify the version_id was auto-filled with the active version
+	const entityInStateAll = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "entity0")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	expect(entityInStateAll.version_id).toBe(activeVersion.version_id);
+
+	// Test update operation
+	await lix.db
+		.updateTable("state")
+		.where("entity_id", "=", "entity0")
+		.set({
+			snapshot_content: { value: "updated content" },
+		})
+		.execute();
+
+	// Verify update worked
+	const updatedEntity = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "entity0")
+		.selectAll()
+		.execute();
+
+	expect(updatedEntity[0]?.snapshot_content).toEqual({
+		value: "updated content",
+	});
+
+	// Test delete operation
+	await lix.db.deleteFrom("state").where("entity_id", "=", "entity0").execute();
+
+	// Verify delete worked
+	const deletedEntity = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "entity0")
+		.selectAll()
+		.execute();
+
+	expect(deletedEntity).toHaveLength(0);
+});

@@ -806,11 +806,31 @@ export function applyStateDatabaseSchema(
 		INSTEAD OF INSERT ON state
 		BEGIN
 			INSERT INTO state_all (
-				entity_id, schema_key, file_id, version_id, plugin_key,
-				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id, untracked
+				entity_id,
+				schema_key,
+				file_id,
+				version_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				created_at,
+				updated_at,
+				inherited_from_version_id,
+				change_id,
+				untracked
 			) VALUES (
-				NEW.entity_id, NEW.schema_key, NEW.file_id, NEW.version_id, NEW.plugin_key,
-				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id, NEW.change_id, NEW.untracked
+				NEW.entity_id,
+				NEW.schema_key,
+				NEW.file_id,
+				(SELECT version_id FROM active_version),
+				NEW.plugin_key,
+				NEW.snapshot_content,
+				NEW.schema_version,
+				NEW.created_at,
+				NEW.updated_at,
+				NEW.inherited_from_version_id,
+				NEW.change_id,
+				NEW.untracked
 			);
 		END;
 
@@ -822,7 +842,7 @@ export function applyStateDatabaseSchema(
 				entity_id = NEW.entity_id,
 				schema_key = NEW.schema_key,
 				file_id = NEW.file_id,
-				version_id = NEW.version_id,
+				version_id = (SELECT version_id FROM active_version),
 				plugin_key = NEW.plugin_key,
 				snapshot_content = NEW.snapshot_content,
 				schema_version = NEW.schema_version,
@@ -842,7 +862,8 @@ export function applyStateDatabaseSchema(
 		INSTEAD OF DELETE ON state
 		BEGIN
 			DELETE FROM state_all
-			WHERE entity_id = OLD.entity_id
+			WHERE 
+				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
 				AND file_id = OLD.file_id
 				AND version_id = OLD.version_id;
