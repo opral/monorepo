@@ -99,7 +99,7 @@ export function applyFileDatabaseSchema(
 					path: args[1],
 					metadata: args[4],
 				},
-				changeSetId: args[2],
+				rootChangeSetId: args[2],
 				depth: args[3],
 			});
 		},
@@ -237,7 +237,7 @@ export function applyFileDatabaseSchema(
     materialize_file_data_at_changeset(
       json_extract(snapshot_content, '$.id'),
       json_extract(snapshot_content, '$.path'),
-      change_set_id,
+      root_change_set_id,
       depth,
       json_extract(snapshot_content, '$.metadata')
     ) AS data,
@@ -247,6 +247,7 @@ export function applyFileDatabaseSchema(
     schema_version AS lixcol_schema_version,
     change_id AS lixcol_change_id,
     change_set_id AS lixcol_change_set_id,
+    root_change_set_id AS lixcol_root_change_set_id,
     depth AS lixcol_depth
   FROM state_history
   WHERE schema_key = 'lix_file_descriptor';

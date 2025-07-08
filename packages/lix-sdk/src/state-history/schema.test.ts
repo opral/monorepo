@@ -52,7 +52,7 @@ test("query current state at head of version lineage", async () => {
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", activeVersion.change_set_id)
+		.where("root_change_set_id", "=", activeVersion.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -119,7 +119,7 @@ test("query state at specific depth in history", async () => {
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", activeVersion.change_set_id)
+		.where("root_change_set_id", "=", activeVersion.change_set_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -131,7 +131,7 @@ test("query state at specific depth in history", async () => {
 	const previousState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", activeVersion.change_set_id)
+		.where("root_change_set_id", "=", activeVersion.change_set_id)
 		.where("depth", "=", 1)
 		.selectAll()
 		.execute();
@@ -143,7 +143,7 @@ test("query state at specific depth in history", async () => {
 	const oldestState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", activeVersion.change_set_id)
+		.where("root_change_set_id", "=", activeVersion.change_set_id)
 		.where("depth", "=", 2)
 		.selectAll()
 		.execute();
@@ -180,7 +180,7 @@ test("query state at specific change set", async () => {
 	const changeSetStates = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "in", ["changeset1", "changeset2"])
+		.where("root_change_set_id", "in", ["changeset1", "changeset2"])
 		.selectAll()
 		.execute();
 
@@ -227,7 +227,7 @@ test("query state at checkpoint using createCheckpoint API", async () => {
 	const checkpointState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", checkpoint.id)
+		.where("root_change_set_id", "=", checkpoint.id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -292,7 +292,7 @@ test("diff detection between current and checkpoint state", async () => {
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", updatedVersion.change_set_id)
+		.where("root_change_set_id", "=", updatedVersion.change_set_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -301,7 +301,7 @@ test("diff detection between current and checkpoint state", async () => {
 	const checkpointState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", checkpoint.id)
+		.where("root_change_set_id", "=", checkpoint.id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -369,7 +369,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", updatedVersion.change_set_id)
+		.where("root_change_set_id", "=", updatedVersion.change_set_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -378,7 +378,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 	const checkpointState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", checkpoint.id)
+		.where("root_change_set_id", "=", checkpoint.id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -436,7 +436,7 @@ test("insertion diff - entity exists current but not at checkpoint", async () =>
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", updatedVersion.change_set_id)
+		.where("root_change_set_id", "=", updatedVersion.change_set_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -445,7 +445,7 @@ test("insertion diff - entity exists current but not at checkpoint", async () =>
 	const checkpointState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", checkpoint.id)
+		.where("root_change_set_id", "=", checkpoint.id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -477,29 +477,28 @@ test("blame functionality - track entity changes over time", async () => {
 		.values({ value: mockSchema })
 		.execute();
 
-	// Simulate multiple edits by different authors
+	// Simulate multiple edits
 	await lix.db
-		.insertInto("state_all")
+		.insertInto("state")
 		.values({
 			entity_id: "paragraph0",
 			file_id: "f0",
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
-			version_id: lix.db.selectFrom("active_version").select("version_id"),
 			schema_version: "1.0",
-			snapshot_content: { value: "alice's draft", author: "alice" },
+			snapshot_content: { value: "initial", author: "alice" },
 		})
 		.execute();
 
 	await lix.db
-		.updateTable("state_all")
-		.set({ snapshot_content: { value: "bob's revision", author: "bob" } })
+		.updateTable("state")
+		.set({ snapshot_content: { value: "update", author: "bob" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
 	await lix.db
-		.updateTable("state_all")
-		.set({ snapshot_content: { value: "charlie's final", author: "charlie" } })
+		.updateTable("state")
+		.set({ snapshot_content: { value: "final", author: "charlie" } })
 		.where("entity_id", "=", "paragraph0")
 		.execute();
 
@@ -513,7 +512,7 @@ test("blame functionality - track entity changes over time", async () => {
 	const recentHistory = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", activeVersion.change_set_id)
+		.where("root_change_set_id", "=", activeVersion.change_set_id)
 		.where("depth", "<=", 2)
 		.orderBy("depth", "asc")
 		.selectAll()
@@ -523,15 +522,15 @@ test("blame functionality - track entity changes over time", async () => {
 
 	// Should show evolution from oldest to newest
 	expect(recentHistory[2]?.snapshot_content).toEqual({
-		value: "alice's draft",
+		value: "initial",
 		author: "alice",
 	}); // depth 2 (oldest)
 	expect(recentHistory[1]?.snapshot_content).toEqual({
-		value: "bob's revision",
+		value: "update",
 		author: "bob",
 	}); // depth 1
 	expect(recentHistory[0]?.snapshot_content).toEqual({
-		value: "charlie's final",
+		value: "final",
 		author: "charlie",
 	}); // depth 0 (newest)
 });
@@ -597,7 +596,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "=", activeVersion.change_set_id)
+		.where("root_change_set_id", "=", activeVersion.change_set_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -606,7 +605,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 	const checkpointStates = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("change_set_id", "in", [checkpoint1.id, checkpoint2.id])
+		.where("root_change_set_id", "in", [checkpoint1.id, checkpoint2.id])
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -708,7 +707,7 @@ test("query history between two change sets using ancestor/descendant filters", 
 	const historyInRange = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "tracked-entity")
-		.where("change_set_id", "in", [checkpoint2.id, checkpoint3.id])
+		.where("root_change_set_id", "in", [checkpoint2.id, checkpoint3.id])
 		.where("depth", "=", 0)
 		.orderBy("change_id", "asc")
 		.selectAll()
@@ -797,7 +796,7 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 	const history = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "test-entity")
-		.where("change_set_id", "=", changeSet3.change_set_id)
+		.where("root_change_set_id", "=", changeSet3.change_set_id)
 		.orderBy("depth", "asc")
 		.selectAll()
 		.execute();

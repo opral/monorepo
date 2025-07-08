@@ -481,7 +481,7 @@ test("file_history provides access to historical file data", async () => {
 	const fileHistoryAtInsert = await lix.db
 		.selectFrom("file_history")
 		.where("id", "=", "test-file")
-		.where("lixcol_change_set_id", "=", insertCheckpoint.id)
+		.where("lixcol_root_change_set_id", "=", insertCheckpoint.id)
 		.where("lixcol_depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -502,7 +502,7 @@ test("file_history provides access to historical file data", async () => {
 	const fileHistoryAtUpdate = await lix.db
 		.selectFrom("file_history")
 		.where("id", "=", "test-file")
-		.where("lixcol_change_set_id", "=", updateCheckpoint.id)
+		.where("lixcol_root_change_set_id", "=", updateCheckpoint.id)
 		.where("lixcol_depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -1041,7 +1041,7 @@ test("file history", async () => {
 		.selectFrom("file_history")
 		.where("file_history.path", "=", "/config.json")
 		.where(
-			"lixcol_change_set_id",
+			"lixcol_root_change_set_id",
 			"=",
 			lix.db
 				.selectFrom("version")
@@ -1113,7 +1113,7 @@ test("file_history handles partial updates correctly", async () => {
 	const beforeFile = await lix.db
 		.selectFrom("file_history")
 		.where("path", "=", "/test.json")
-		.where("lixcol_change_set_id", "=", checkpoint0.id)
+		.where("lixcol_root_change_set_id", "=", checkpoint0.id)
 		.where("lixcol_depth", "=", 0)
 		.select("data")
 		.executeTakeFirstOrThrow();
@@ -1121,7 +1121,7 @@ test("file_history handles partial updates correctly", async () => {
 	const afterFile = await lix.db
 		.selectFrom("file_history")
 		.where("path", "=", "/test.json")
-		.where("lixcol_change_set_id", "=", checkpoint1.id)
+		.where("lixcol_root_change_set_id", "=", checkpoint1.id)
 		.where("lixcol_depth", "=", 0)
 		.select("data")
 		.executeTakeFirstOrThrow();

@@ -34,22 +34,33 @@ export interface StateHistoryTable {
 	change_id: string;
 
 	/**
-	 * Change set ID that serves as the root/starting point for depth calculation.
-	 * This is the change_set_id that was queried, NOT the change set where this
-	 * specific entity state was originally created.
-	 *
-	 * For example, if you query `WHERE change_set_id = 'checkpoint-123'`, then
-	 * all returned rows will have `change_set_id = 'checkpoint-123'`, even if
-	 * some entity states came from earlier change sets (at depth > 0).
-	 *
-	 * To get the actual change set where this entity state was created,
-	 * join with the change table: `JOIN change ON state_history.change_id = change.id`
-	 * and then `JOIN change_set_element ON change.id = change_set_element.change_id`.
+	 * The actual change set ID where this entity state was originally created.
+	 * 
+	 * This represents the true origin changeset for each historical state, making it easy
+	 * to understand the provenance of each entity state without additional joins.
+	 * 
+	 * For example, when viewing history you might see:
+	 * - depth 0: change_set_id = 'checkpoint-123' (current state created in checkpoint-123)  
+	 * - depth 2: change_set_id = 'checkpoint-100' (historical state created in checkpoint-100)
+	 * 
+	 * This tells you exactly where each state was created in the changeset graph.
 	 */
 	change_set_id: string;
 
 	/**
-	 * Depth of this entity state relative to the queried change_set_id.
+	 * The root change set ID used as the starting point for traversing history.
+	 * 
+	 * When querying history from a specific changeset, this field contains that 
+	 * changeset ID for all returned rows. Used with `depth` to understand how
+	 * far back in history each entity state is from this root.
+	 * 
+	 * For example, if you query `WHERE root_change_set_id = 'checkpoint-123'`,
+	 * all returned rows will have `root_change_set_id = 'checkpoint-123'`.
+	 */
+	root_change_set_id: string;
+
+	/**
+	 * Depth of this entity state relative to the root_change_set_id.
 	 * - depth = 0: Current state at the queried change_set_id
 	 * - depth = 1: One change set back in history (parent)
 	 * - depth = 2: Two change sets back in history (grandparent)
@@ -190,7 +201,8 @@ SELECT
 	esad.snapshot_content,
 	esad.schema_version,
 	esad.target_change_id as change_id,
-	esad.root_change_set_id as change_set_id,
+	esad.cse_origin_change_set_id as change_set_id,
+	esad.root_change_set_id as root_change_set_id,
 	esad.changeset_depth as depth
 FROM entity_states_at_depths esad
 WHERE esad.snapshot_content IS NOT NULL  -- Exclude deletions for now
