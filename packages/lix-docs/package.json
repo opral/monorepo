@@ -5,11 +5,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm run typedoc:clean && typedoc && vitepress dev docs",
-    "build": "pnpm run typedoc:clean && typedoc && vitepress build docs",
+    "dev": "pnpm run typedoc:clean && typedoc && pnpm run copy:examples && vitepress dev docs",
+    "build": "pnpm run typedoc:clean && typedoc && pnpm run build:sdk-sandpack && pnpm run copy:examples && vitepress build docs",
     "preview": "vitepress preview docs",
     "typedoc": "typedoc",
-    "typedoc:clean": "rm -rf docs/api/reference"
+    "typedoc:clean": "rm -rf docs/api/reference",
+    "build:sdk-sandpack": "tsup",
+    "copy:examples": "cp ../lix-sdk/examples/examples-mapping.json docs/public/ && cp ../lix-sdk/examples/*.js docs/public/examples/",
+    "test:sandpack": "node test-sandpack.js",
+    "test:sandpack-simple": "node test-sandpack-simple.js",
+    "test:examples": "node test-examples-output.js"
   },
   "devDependencies": {
     "@lix-js/sdk": "workspace:*",
@@ -24,7 +29,12 @@
     "typedoc-vitepress-theme": "^1.1.2",
     "vitepress": "^1.0.0-rc.40",
     "vitepress-plugin-mermaid": "^2.0.17",
-    "vue": "^3.3.4"
+    "vue": "^3.3.4",
+    "@vitejs/plugin-react": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@codesandbox/sandpack-react": "^2.13.0",
+    "tsup": "^8.0.0"
   },
   "keywords": [
     "lix",

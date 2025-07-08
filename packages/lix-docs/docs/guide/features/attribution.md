@@ -4,7 +4,6 @@ Attribution enables seeing who made changes and when, providing transparency and
 
 ![Blame](../../assets/blame.svg)
 
-## Examples
 
 ## Find out who authored a change
 
@@ -37,6 +36,12 @@ console.log(
 );
 ```
 
+<LixSandpack 
+  feature="attribution" 
+  example="attribution-selected-entity"
+  height="600px"
+/>
+
 ### File change attribution
 
 ```ts
@@ -52,3 +57,9 @@ console.log(
   `${fileChangeAuthor?.path} was last modified by ${fileChangeAuthor?.name} at ${fileChangeAuthor?.created_at}`
 );
 ```
+
+<LixSandpack 
+  feature="attribution" 
+  example="attribution-file-change"
+  height="600px"
+/>
