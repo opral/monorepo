@@ -75,7 +75,7 @@ export function useMdAstState(): UseMdAstStateReturn {
 				console.error("Failed to update MD-AST entities:", error);
 			}
 		},
-		[lix]
+		[lix, activeFile]
 	);
 
 	return {

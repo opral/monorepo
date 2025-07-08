@@ -633,69 +633,68 @@ export async function updateMdAstEntities(
 ): Promise<void> {
 	if (!activeFile) return;
 	try {
-		const trx = lix.db;
-		// await lix.db.transaction().execute(async (trx) => {
-		console.log("opening transaction to write md ast");
-		// deleting all nodes avoids diffing delete changes
-		// if this leads to bugs, this is a bug in the lix state
-		// handler and should be reported
-		// await trx
-		// 	.deleteFrom("state")
-		// 	.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
-		// 	.where(
-		// 		// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
-		// 		"version_id",
-		// 		"=",
-		// 		trx.selectFrom("active_version").select("version_id")
-		// 	)
-		// 	.where("file_id", "=", activeFile.id)
-		// 	.execute();
-		for (const entity of entities) {
-			await trx
-				.insertInto("state")
-				.values({
-					entity_id: entity.entity_id,
-					file_id: activeFile.id,
-					schema_key: MarkdownNodeSchemaV1["x-lix-key"],
-					schema_version: MarkdownNodeSchemaV1["x-lix-version"],
-					plugin_key: mdPlugin.key,
-					snapshot_content: entity,
-					// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
-					version_id: trx.selectFrom("active_version").select("version_id"),
-				})
-				.execute();
-		}
-		const existingRoot = await trx
-			.selectFrom("state")
-			.where("file_id", "=", activeFile.id)
-			.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
-			.selectAll()
-			.executeTakeFirst();
-
-		if (existingRoot) {
-			await trx
-				.updateTable("state")
+		await lix.db.transaction().execute(async (trx) => {
+			console.log("opening transaction to write md ast");
+			// deleting all nodes avoids diffing delete changes
+			// if this leads to bugs, this is a bug in the lix state
+			// handler and should be reported
+			// await trx
+			// 	.deleteFrom("state")
+			// 	.where("schema_key", "=", MarkdownNodeSchemaV1["x-lix-key"])
+			// 	.where(
+			// 		// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
+			// 		"version_id",
+			// 		"=",
+			// 		trx.selectFrom("active_version").select("version_id")
+			// 	)
+			// 	.where("file_id", "=", activeFile.id)
+			// 	.execute();
+			for (const entity of entities) {
+				await trx
+					.insertInto("state")
+					.values({
+						entity_id: entity.entity_id,
+						file_id: activeFile.id,
+						schema_key: MarkdownNodeSchemaV1["x-lix-key"],
+						schema_version: MarkdownNodeSchemaV1["x-lix-version"],
+						plugin_key: mdPlugin.key,
+						snapshot_content: entity,
+						// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
+						version_id: trx.selectFrom("active_version").select("version_id"),
+					})
+					.execute();
+			}
+			const existingRoot = await trx
+				.selectFrom("state")
 				.where("file_id", "=", activeFile.id)
 				.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
-				.set({ snapshot_content: { order } })
-				.execute();
-		} else {
-			await trx
-				.insertInto("state")
-				.values({
-					entity_id: "root",
-					file_id: activeFile.id,
-					schema_key: MarkdownRootSchemaV1["x-lix-key"],
-					schema_version: MarkdownRootSchemaV1["x-lix-version"],
-					plugin_key: mdPlugin.key,
-					snapshot_content: { order },
-					// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
-					version_id: trx.selectFrom("active_version").select("version_id"),
-				})
-				.execute();
-		}
-		console.log("closing transaction to write mdast");
-		// });
+				.selectAll()
+				.executeTakeFirst();
+
+			if (existingRoot) {
+				await trx
+					.updateTable("state")
+					.where("file_id", "=", activeFile.id)
+					.where("schema_key", "=", MarkdownRootSchemaV1["x-lix-key"])
+					.set({ snapshot_content: { order } })
+					.execute();
+			} else {
+				await trx
+					.insertInto("state")
+					.values({
+						entity_id: "root",
+						file_id: activeFile.id,
+						schema_key: MarkdownRootSchemaV1["x-lix-key"],
+						schema_version: MarkdownRootSchemaV1["x-lix-version"],
+						plugin_key: mdPlugin.key,
+						snapshot_content: { order },
+						// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
+						version_id: trx.selectFrom("active_version").select("version_id"),
+					})
+					.execute();
+			}
+			console.log("closing transaction to write mdast");
+		});
 	} catch (error) {
 		console.error("Failed to update MD-AST entities:", error);
 		throw error;
