@@ -2351,3 +2351,112 @@ test("should allow untracked entities to reference other untracked entities", as
 	// This should PASS - untracked entity can reference another untracked entity
 	expect(() => validateStateMutation(validationArgs)).not.toThrow();
 });
+
+test("should detect and prevent cycles in change set graph when lix_debug is enabled", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_debug", value: "true" }],
+	});
+
+	// Get the change set edge schema
+	const changeSetEdgeSchema = await lix.db
+		.selectFrom("stored_schema")
+		.select("value")
+		.where("key", "=", "lix_change_set_edge")
+		.executeTakeFirstOrThrow();
+
+	// Create a few change sets
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "cs1", lixcol_version_id: "global" },
+			{ id: "cs2", lixcol_version_id: "global" },
+			{ id: "cs3", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	// Create edges: cs1 -> cs2 -> cs3
+	await lix.db
+		.insertInto("change_set_edge_all")
+		.values([
+			{ parent_id: "cs1", child_id: "cs2", lixcol_version_id: "global" },
+			{ parent_id: "cs2", child_id: "cs3", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	// This should fail - creating cs3 -> cs1 would create a cycle
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: changeSetEdgeSchema.value as LixSchemaDefinition,
+			snapshot_content: {
+				parent_id: "cs3",
+				child_id: "cs1", // This would complete the cycle
+			},
+			operation: "insert",
+			version_id: "global",
+		})
+	).toThrowError(
+		/Cycle detected in change set graph.*New edge: cs3 -> cs1.*Cycle path: cs1 -> cs2 -> cs3 -> cs1/s
+	);
+
+	// This should also fail - self-loop
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: changeSetEdgeSchema.value as LixSchemaDefinition,
+			snapshot_content: {
+				parent_id: "cs1",
+				child_id: "cs1", // Self-referencing edge
+			},
+			operation: "insert",
+			version_id: "global",
+		})
+	).toThrowError(/Self-referencing edges are not allowed/);
+});
+
+test("should not check for cycles when lix_debug is disabled", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_debug", value: "false" }],
+	});
+
+	// Get the change set edge schema
+	const changeSetEdgeSchema = await lix.db
+		.selectFrom("stored_schema")
+		.select("value")
+		.where("key", "=", "lix_change_set_edge")
+		.executeTakeFirstOrThrow();
+
+	// Create a few change sets
+	await lix.db
+		.insertInto("change_set_all")
+		.values([
+			{ id: "cs1", lixcol_version_id: "global" },
+			{ id: "cs2", lixcol_version_id: "global" },
+			{ id: "cs3", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	// Create edges: cs1 -> cs2 -> cs3
+	await lix.db
+		.insertInto("change_set_edge_all")
+		.values([
+			{ parent_id: "cs1", child_id: "cs2", lixcol_version_id: "global" },
+			{ parent_id: "cs2", child_id: "cs3", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	// This would create a cycle, but with lix_debug=false it won't be detected
+	// (This is intentional for performance - cycle detection is expensive)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: changeSetEdgeSchema.value as LixSchemaDefinition,
+			snapshot_content: {
+				parent_id: "cs3",
+				child_id: "cs1", // This would complete the cycle
+			},
+			operation: "insert",
+			version_id: "global",
+		})
+	).not.toThrowError();
+});

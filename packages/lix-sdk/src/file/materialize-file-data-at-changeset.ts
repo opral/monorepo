@@ -22,7 +22,7 @@ function globSync(args: {
 export function materializeFileDataAtChangeset(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
 	file: Omit<LixFile, "data">;
-	changeSetId: string;
+	rootChangeSetId: string;
 	depth: number;
 }): Uint8Array {
 	const plugins = args.lix.plugin.getAllSync();
@@ -47,20 +47,13 @@ export function materializeFileDataAtChangeset(args: {
 		// Get plugin changes from state_history table
 		const changes = executeSync({
 			lix: args.lix,
-			query: args.lix.db
-				.selectFrom("state_history")
-				.where("plugin_key", "=", plugin.key)
-				.where("file_id", "=", args.file.id)
-				.where("change_set_id", "=", args.changeSetId)
-				.where("depth", "=", args.depth)
-				.select([
-					"entity_id",
-					"schema_key",
-					"file_id",
-					"plugin_key",
-					"snapshot_content",
-					"change_set_id as version_id", // Map to maintain compatibility
-				]),
+			query: selectFileChanges({
+				lix: args.lix,
+				pluginKey: plugin.key,
+				fileId: args.file.id,
+				rootChangeSetId: args.rootChangeSetId,
+				depth: args.depth,
+			}),
 		});
 
 		// Format changes for plugin
@@ -83,20 +76,13 @@ export function materializeFileDataAtChangeset(args: {
 	// If no specific plugin matched, use the fallback plugin
 	const changes = executeSync({
 		lix: args.lix,
-		query: args.lix.db
-			.selectFrom("state_history")
-			.where("plugin_key", "=", lixUnknownFileFallbackPlugin.key)
-			.where("file_id", "=", args.file.id)
-			.where("change_set_id", "=", args.changeSetId)
-			.where("depth", "=", args.depth)
-			.select([
-				"entity_id",
-				"schema_key",
-				"file_id",
-				"plugin_key",
-				"snapshot_content",
-				"change_set_id as version_id", // Map to maintain compatibility
-			]),
+		query: selectFileChanges({
+			lix: args.lix,
+			pluginKey: lixUnknownFileFallbackPlugin.key,
+			fileId: args.file.id,
+			rootChangeSetId: args.rootChangeSetId,
+			depth: args.depth,
+		}),
 	});
 
 	// Format changes for plugin
@@ -110,7 +96,7 @@ export function materializeFileDataAtChangeset(args: {
 
 	if (formattedChanges.length === 0) {
 		throw new Error(
-			`[materializeFileDataAtChangeset] No changes found for file ${args.file.id} with plugin ${lixUnknownFileFallbackPlugin.key} at changeset ${args.changeSetId} depth ${args.depth}. Cannot materialize file data.`
+			`[materializeFileDataAtChangeset] No changes found for file ${args.file.id} with plugin ${lixUnknownFileFallbackPlugin.key} at root changeset ${args.rootChangeSetId} depth ${args.depth}. Cannot materialize file data.`
 		);
 	}
 
@@ -120,4 +106,52 @@ export function materializeFileDataAtChangeset(args: {
 	});
 
 	return file.fileData;
+}
+
+function selectFileChanges(args: {
+	lix: Pick<Lix, "db">;
+	pluginKey: string;
+	fileId: string;
+	rootChangeSetId: string;
+	depth: number;
+}) {
+	return args.lix.db
+		.selectFrom("state_history as sh1")
+		.where("sh1.plugin_key", "=", args.pluginKey)
+		.where("sh1.file_id", "=", args.fileId)
+		.where("sh1.root_change_set_id", "=", args.rootChangeSetId)
+		.where("sh1.depth", ">=", args.depth)
+		.where("sh1.depth", "=", (eb) =>
+			// This subquery finds the "leaf state" for each entity at the requested depth in history.
+			//
+			// What this does: "For each entity in the file, find its most recent state that existed
+			// at or before the requested depth. Some entities might have changed at depth 0, others
+			// might be unchanged since depth 5 - we need all of them to reconstruct the complete file."
+			//
+			// Example: Requesting depth=1 for a JSON file
+			// - "name" entity: last changed at depth=3 (unchanged for 3 changesets)
+			// - "value" entity: last changed at depth=1 (changed 1 changeset ago)
+			// - "description" entity: last changed at depth=0 (just changed)
+			//
+			// Result: We get "name" from depth=3 and "value" from depth=1 (ignoring "description" at depth=0)
+			//
+			// args.depth: The depth we want to reconstruct the file at (0=current, higher=further back in history)
+			// >= args.depth: Go backwards in history to find all entities that existed at or before this point
+			// min(depth): For each entity, get its most recent state (leaf) at or after the requested depth
+			eb
+				.selectFrom("state_history as sh2")
+				.select((eb) => eb.fn.min("sh2.depth").as("min_depth"))
+				.whereRef("sh2.entity_id", "=", "sh1.entity_id")
+				.whereRef("sh2.file_id", "=", "sh1.file_id")
+				.whereRef("sh2.plugin_key", "=", "sh1.plugin_key")
+				.whereRef("sh2.root_change_set_id", "=", "sh1.root_change_set_id")
+				.where("sh2.depth", ">=", args.depth)
+		)
+		.select([
+			"sh1.entity_id",
+			"sh1.schema_key",
+			"sh1.file_id",
+			"sh1.plugin_key",
+			"sh1.snapshot_content",
+		]);
 }

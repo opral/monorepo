@@ -143,6 +143,15 @@ export type StateEntityHistoryColumns = {
 	lixcol_change_set_id: LixGenerated<string>;
 
 	/**
+	 * The root change set ID used as the starting point for traversing history.
+	 *
+	 * When querying history from a specific changeset, this field contains that
+	 * changeset ID for all returned rows. Used with `depth` to understand how
+	 * far back in history each entity state is from this root.
+	 */
+	lixcol_root_change_set_id: LixGenerated<string>;
+
+	/**
 	 * Depth of this entity state relative to the queried change_set_id.
 	 *
 	 * - `0`: The entity state at the exact queried change set

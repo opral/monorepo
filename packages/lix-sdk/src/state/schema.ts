@@ -797,7 +797,18 @@ export function applyStateDatabaseSchema(
 	// Create state view that filters to active version only
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS state AS
-		SELECT *
+		SELECT 
+			entity_id,
+			schema_key,
+			file_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			created_at,
+			updated_at,
+			inherited_from_version_id,
+			change_id,
+			untracked
 		FROM state_all
 		WHERE version_id IN (SELECT version_id FROM active_version);
 
@@ -806,11 +817,31 @@ export function applyStateDatabaseSchema(
 		INSTEAD OF INSERT ON state
 		BEGIN
 			INSERT INTO state_all (
-				entity_id, schema_key, file_id, version_id, plugin_key,
-				snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id, untracked
+				entity_id,
+				schema_key,
+				file_id,
+				version_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				created_at,
+				updated_at,
+				inherited_from_version_id,
+				change_id,
+				untracked
 			) VALUES (
-				NEW.entity_id, NEW.schema_key, NEW.file_id, NEW.version_id, NEW.plugin_key,
-				NEW.snapshot_content, NEW.schema_version, NEW.created_at, NEW.updated_at, NEW.inherited_from_version_id, NEW.change_id, NEW.untracked
+				NEW.entity_id,
+				NEW.schema_key,
+				NEW.file_id,
+				(SELECT version_id FROM active_version),
+				NEW.plugin_key,
+				NEW.snapshot_content,
+				NEW.schema_version,
+				NEW.created_at,
+				NEW.updated_at,
+				NEW.inherited_from_version_id,
+				NEW.change_id,
+				NEW.untracked
 			);
 		END;
 
@@ -822,7 +853,7 @@ export function applyStateDatabaseSchema(
 				entity_id = NEW.entity_id,
 				schema_key = NEW.schema_key,
 				file_id = NEW.file_id,
-				version_id = NEW.version_id,
+				version_id = (SELECT version_id FROM active_version),
 				plugin_key = NEW.plugin_key,
 				snapshot_content = NEW.snapshot_content,
 				schema_version = NEW.schema_version,
@@ -835,17 +866,18 @@ export function applyStateDatabaseSchema(
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
 				AND file_id = OLD.file_id
-				AND version_id = OLD.version_id;
+				AND version_id = (SELECT version_id FROM active_version);
 		END;
 
 		CREATE TRIGGER IF NOT EXISTS state_delete
 		INSTEAD OF DELETE ON state
 		BEGIN
 			DELETE FROM state_all
-			WHERE entity_id = OLD.entity_id
+			WHERE 
+				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
 				AND file_id = OLD.file_id
-				AND version_id = OLD.version_id;
+				AND version_id = (SELECT version_id FROM active_version);
 		END;
 	`);
 
@@ -969,8 +1001,8 @@ function getStoredSchema(
 		bind: [String(schemaKey)],
 		returnValue: "resultRows",
 	});
-	
-	return result && result.length > 0 ? result[0]![0] as string : null;
+
+	return result && result.length > 0 ? (result[0]![0] as string) : null;
 }
 
 function getColumnName(columnIndex: number): string {
@@ -1260,7 +1292,7 @@ function queryCache(
 		
 		UNION ALL
 		
-		-- 3. Inherited state (lowest priority) - only if no untracked or tracked exists
+		-- 3. Inherited tracked state (lower priority) - only if no untracked or tracked exists
 		SELECT 
 			rowid,
 			isc.entity_id, 
@@ -1302,6 +1334,50 @@ function queryCache(
 			  AND unt.entity_id = isc.entity_id
 			  AND unt.schema_key = isc.schema_key
 			  AND unt.file_id = isc.file_id
+		)
+		
+		UNION ALL
+		
+		-- 4. Inherited untracked state (lowest priority) - only if no untracked or tracked exists
+		SELECT 
+			rowid,
+			unt.entity_id, 
+			unt.schema_key, 
+			unt.file_id, 
+			vi.version_id, -- Return child version_id
+			unt.plugin_key, 
+			unt.snapshot_content, 
+			unt.schema_version, 
+			unt.created_at, 
+			unt.updated_at,
+			vi.parent_version_id as inherited_from_version_id, 
+			'untracked' as change_id, 
+			1 as untracked
+		FROM (
+			-- Get version inheritance relationships from cache
+			SELECT 
+				json_extract(isc_v.snapshot_content, '$.id') AS version_id,
+				json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+			FROM internal_state_cache isc_v
+			WHERE isc_v.schema_key = 'lix_version'
+		) vi
+		JOIN internal_state_all_untracked unt ON unt.version_id = vi.parent_version_id
+		WHERE vi.parent_version_id IS NOT NULL
+		-- Don't inherit if child has tracked state
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_state_cache child_isc
+			WHERE child_isc.version_id = vi.version_id
+			  AND child_isc.entity_id = unt.entity_id
+			  AND child_isc.schema_key = unt.schema_key
+			  AND child_isc.file_id = unt.file_id
+		)
+		-- Don't inherit if child has untracked state
+		AND NOT EXISTS (
+			SELECT 1 FROM internal_state_all_untracked child_unt
+			WHERE child_unt.version_id = vi.version_id
+			  AND child_unt.entity_id = unt.entity_id
+			  AND child_unt.schema_key = unt.schema_key
+			  AND child_unt.file_id = unt.file_id
 		)
 	) as combined_results`;
 
