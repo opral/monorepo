@@ -45,6 +45,11 @@ export const LixLogSchema = {
 			type: "string",
 			description: "The level of the log entry",
 		},
+		payload: {
+			type: "object",
+			description: "Additional structured data associated with the log entry",
+			additionalProperties: true,
+		},
 	},
 	required: ["id", "key", "message", "level"],
 	additionalProperties: false,

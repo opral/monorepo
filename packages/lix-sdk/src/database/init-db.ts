@@ -49,6 +49,8 @@ const ViewsWithJsonColumns = {
 	})(),
 };
 
+// Query logging will be implemented differently due to Kysely plugin limitations
+
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
 	hooks: LixHooks;

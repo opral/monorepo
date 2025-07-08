@@ -60,6 +60,7 @@ export function createLixOwnLogSync(args: {
 	message: string;
 	level: string;
 	key: string;
+	payload?: Record<string, any>;
 }): void {
 	const logLevels = executeSync({
 		lix: args.lix,
@@ -79,6 +80,11 @@ export function createLixOwnLogSync(args: {
 		return undefined; // Filtered out
 	}
 
+	let sqlPreview = args.payload?.sql;
+	if (typeof sqlPreview === "string" && sqlPreview.length > 100) {
+		sqlPreview = sqlPreview.slice(0, 100) + "...";
+	}
+	console.log("Creating log:", args.message, sqlPreview, args.payload);
 	// Insert the log
 	executeSync({
 		lix: args.lix,
@@ -86,6 +92,7 @@ export function createLixOwnLogSync(args: {
 			key: args.key,
 			message: args.message,
 			level: args.level,
+			...(args.payload && { payload: args.payload }),
 		}),
 	});
 }
@@ -95,6 +102,7 @@ export async function createLixOwnLog(args: {
 	message: string;
 	level: string;
 	key: string;
+	payload?: Record<string, any>;
 }): Promise<void> {
 	const logLevels = await args.lix.db
 		.selectFrom("key_value")
@@ -119,6 +127,7 @@ export async function createLixOwnLog(args: {
 			key: args.key,
 			message: args.message,
 			level: args.level,
+			...(args.payload && { payload: args.payload }),
 		})
 		.execute();
 }
