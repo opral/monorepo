@@ -113,7 +113,7 @@ export function applyFileDatabaseSchema(
 		materialize_file_data(
 			json_extract(snapshot_content, '$.id'), 
 			json_extract(snapshot_content, '$.path'), 
-			version_id,
+			(SELECT version_id FROM active_version),
 			json_extract(snapshot_content, '$.metadata')
 		) AS data,
 		json_extract(snapshot_content, '$.metadata') AS metadata,

@@ -797,7 +797,18 @@ export function applyStateDatabaseSchema(
 	// Create state view that filters to active version only
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS state AS
-		SELECT *
+		SELECT 
+			entity_id,
+			schema_key,
+			file_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			created_at,
+			updated_at,
+			inherited_from_version_id,
+			change_id,
+			untracked
 		FROM state_all
 		WHERE version_id IN (SELECT version_id FROM active_version);
 
@@ -855,7 +866,7 @@ export function applyStateDatabaseSchema(
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
 				AND file_id = OLD.file_id
-				AND version_id = OLD.version_id;
+				AND version_id = (SELECT version_id FROM active_version);
 		END;
 
 		CREATE TRIGGER IF NOT EXISTS state_delete
@@ -866,7 +877,7 @@ export function applyStateDatabaseSchema(
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
 				AND file_id = OLD.file_id
-				AND version_id = OLD.version_id;
+				AND version_id = (SELECT version_id FROM active_version);
 		END;
 	`);
 
