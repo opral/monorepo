@@ -71,13 +71,13 @@ export function initDb(args: {
 	});
 
 	// Apply all database schemas first (tables, views, triggers)
+	applySnapshotDatabaseSchema(args.sqlite);
+	applyChangeDatabaseSchema(args.sqlite);
 	applyStateDatabaseSchema(
 		args.sqlite,
 		db as unknown as Kysely<LixInternalDatabaseSchema>,
 		args.hooks
 	);
-	applySnapshotDatabaseSchema(args.sqlite);
-	applyChangeDatabaseSchema(args.sqlite);
 	applyChangeSetDatabaseSchema(args.sqlite);
 
 	applyStoredSchemaDatabaseSchema(args.sqlite);

@@ -71,26 +71,6 @@ export function applyStateDatabaseSchema(
 		return loggingInitialized;
 	};
 
-	const create_temp_change_table_sql = `
-  -- add a table we use within the transaction
-  CREATE TEMP TABLE IF NOT EXISTS internal_change_in_transaction (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    entity_id TEXT NOT NULL,
-    schema_key TEXT NOT NULL,
-    schema_version TEXT NOT NULL,
-    file_id TEXT NOT NULL,
-    plugin_key TEXT NOT NULL,
-	  version_id TEXT NOT NULL,
-    snapshot_content BLOB,
-    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
-	--- NOTE schena_key must be unique per entity_id and file_id
-	UNIQUE(entity_id, file_id, schema_key, version_id)
-  ) STRICT;
-
-`;
-
-	sqlite.exec(create_temp_change_table_sql);
-
 	module.installMethods(
 		{
 			xCreate: (db: any, _pAux: any, _argc: number, _argv: any, pVTab: any) => {
