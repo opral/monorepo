@@ -10,21 +10,16 @@ import { findLixFileInOpfs, findLixFilesInOpfs } from "./findLixInOpfs";
 export async function initializeLix(
 	lixIdFromUrl?: string | null
 ): Promise<{ lix: Lix; lixId?: string }> {
-	console.log("Initializing lix instance...");
-
 	let lixFile: File | undefined;
 	let lixId: string | undefined;
 
 	// Try to open a lix file from the URL parameter
 	if (lixIdFromUrl && lixIdFromUrl.trim() !== "") {
-		console.log(`Loading lix from URL parameter: ${lixIdFromUrl}`);
-
 		try {
 			const lixFileInfo = await findLixFileInOpfs(lixIdFromUrl);
 			if (lixFileInfo) {
 				lixFile = await lixFileInfo.handle.getFile();
 				lixId = lixFileInfo.id;
-				console.log(`Found lix file: ${lixFileInfo.fullName}`);
 			} else {
 				console.warn(`Lix file with ID ${lixIdFromUrl} not found in OPFS`);
 			}
@@ -40,7 +35,6 @@ export async function initializeLix(
 			// Use the first file found if no specific ID was provided
 			lixFile = await files[0].handle.getFile();
 			lixId = files[0].id;
-			console.log(`Found lix file: ${files[0].fullName}`);
 		} else {
 			console.warn("No existing lix files found in OPFS");
 		}

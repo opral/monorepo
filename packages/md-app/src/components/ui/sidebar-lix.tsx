@@ -585,7 +585,6 @@ export function LixSidebar() {
 
 	// Update lix name when the current lix name changes
 	React.useEffect(() => {
-		console.log("Updating lix name from currentLixName:", currentLixName);
 		setLixName(currentLixName || "");
 	}, [currentLixName]);
 
