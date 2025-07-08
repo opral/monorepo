@@ -15,7 +15,13 @@ interface EntityInfo {
 }
 
 // Stable cell renderers to prevent re-creation
-const defaultCellRenderer = (info: any) => info.getValue();
+const defaultCellRenderer = (info: any) => {
+  const value = info.getValue();
+  if (typeof value === 'object' && value !== null) {
+    return jsonCellRenderer(info);
+  }
+  return value;
+};
 
 const jsonCellRenderer = (info: any) => {
   const value = info.getValue();
@@ -157,10 +163,7 @@ function DataExplorerContent() {
       ];
     } else {
       return columnNames.map((columnName: string) => {
-        const cellRenderer =
-          columnName === "snapshot_content"
-            ? jsonCellRenderer
-            : defaultCellRenderer;
+        const cellRenderer = defaultCellRenderer;
 
         const columnDef: ColumnDef<any> = {
           id: columnName,
@@ -169,7 +172,9 @@ function DataExplorerContent() {
           cell: cellRenderer,
         };
 
-        if (columnName === "snapshot_content") {
+        // Check if the column contains objects by sampling the first row
+        const firstRowValue = tableDataQueryResult?.[0]?.[columnName];
+        if (typeof firstRowValue === 'object' && firstRowValue !== null) {
           columnDef.size = 800;
           columnDef.minSize = 400;
           columnDef.maxSize = 1200;
@@ -179,7 +184,7 @@ function DataExplorerContent() {
         return columnDef;
       });
     }
-  }, [selectedTable, columnNamesKey]);
+  }, [selectedTable, columnNamesKey, tableDataQueryResult]);
 
   // Use the query result directly as table data (no transformation needed)
   const computedTableData = useMemo(() => {

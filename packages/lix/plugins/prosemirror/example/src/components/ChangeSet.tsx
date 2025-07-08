@@ -19,11 +19,7 @@ import { selectActiveAccount, selectThreads } from "../queries";
 import { getInitials } from "../utilities/nameUtils";
 import { Composer, Thread } from "./Thread";
 import { toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
-import {
-	useLix,
-	useSuspenseQuery,
-	useSuspenseQueryTakeFirst,
-} from "@lix-js/react-utils";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 export interface ChangeSetHandle {
 	getCommentText: () => string;
@@ -57,14 +53,14 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		// Use shared key-value storage for expansion state
 		const [expandedChangeSetId, setExpandedChangeSetId] = useKeyValue<
 			string | null
-		>("expandedChangeSetId");
+		>("expandedChangeSetId", { versionId: "global", untracked: true });
 
 		const [diffView, setDiffView] = useKeyValue<{
 			beforeCsId?: string;
 			afterCsId?: string;
-		} | null>("diffView");
+		} | null>("diffView", { versionId: "global", untracked: true });
 
-		const activeAccount = useSuspenseQueryTakeFirst(selectActiveAccount);
+		const activeAccount = useQueryTakeFirst(selectActiveAccount);
 
 		// Determine if this change set is the expanded one
 		const isExpanded = alwaysExpand || expandedChangeSetId === changeSet.id;
@@ -82,7 +78,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			changeSet,
 		]);
 
-		const threads = useSuspenseQuery((lix) =>
+		const threads = useQuery((lix) =>
 			selectThreads(lix, { changeSetId: changeSet.id }),
 		);
 
@@ -107,13 +103,15 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			lix.db.transaction().execute(async (trx) => {
 				const thread = await createThread({
 					lix: { ...lix, db: trx },
+					versionId: "global",
 					comments: [{ body: args.body }],
 				});
 				await trx
-					.insertInto("change_set_thread")
+					.insertInto("change_set_thread_all")
 					.values({
 						change_set_id: changeSet.id,
 						thread_id: thread.id,
+						lixcol_version_id: "global",
 					})
 					.execute();
 			});
@@ -121,6 +119,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 		// Toggle expansion state
 		const handleToggleExpand = () => {
+			// If alwaysExpand
 			// If this change set is already expanded, collapse it
 			// Otherwise, expand this change set (which automatically collapses any other)
 			setExpandedChangeSetId(isExpanded ? null : changeSet.id);
@@ -227,11 +226,11 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 
 								<button
 									className="btn btn-sm btn-ghost gap-1 flex items-center"
-									onClick={() => {
+									onClick={async () => {
 										if (diffView) {
-											setDiffView(null);
+											await setDiffView(null);
 										} else {
-											setDiffView({
+											await setDiffView({
 												beforeCsId: previousChangeSetId,
 												afterCsId: changeSet.id,
 											});

@@ -629,7 +629,7 @@ test("useQuery refreshes when lix instance is switched", async () => {
 		.selectAll()
 		.where("key", "=", "lix_id")
 		.executeTakeFirst();
-	
+
 	// Ensure the test is valid - the two instances should have different lix_ids
 	expect(lix1IdDirect?.value).not.toBe(lix2IdDirect?.value);
 
@@ -639,10 +639,7 @@ test("useQuery refreshes when lix instance is switched", async () => {
 	// Wrapper function that uses the current lix
 	const TestComponent = () => {
 		const data = useQuery((lix) =>
-			lix.db
-				.selectFrom("key_value")
-				.selectAll()
-				.where("key", "=", "lix_id"),
+			lix.db.selectFrom("key_value").selectAll().where("key", "=", "lix_id"),
 		);
 		return data;
 	};

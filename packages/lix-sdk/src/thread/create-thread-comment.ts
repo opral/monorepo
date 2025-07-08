@@ -29,13 +29,41 @@ export async function createThreadComment(
 			.select("lixcol_version_id")
 			.executeTakeFirstOrThrow();
 
+		// If parent_id is not provided, find the leaf comment using SQL traversal
+		let parentId = args.parent_id;
+		if (parentId === undefined) {
+			const leafComment = await trx
+				.selectFrom("thread_comment_all as c1")
+				.where("c1.thread_id", "=", args.thread_id)
+				.where("c1.lixcol_version_id", "=", existingThread.lixcol_version_id)
+				.where((eb) =>
+					eb.not(
+						eb.exists(
+							eb
+								.selectFrom("thread_comment_all as c2")
+								.where("c2.thread_id", "=", args.thread_id)
+								.where(
+									"c2.lixcol_version_id",
+									"=",
+									existingThread.lixcol_version_id
+								)
+								.whereRef("c2.parent_id", "=", "c1.id")
+								.select("c2.id")
+						)
+					)
+				)
+				.select("c1.id")
+				.executeTakeFirst();
+			parentId = leafComment?.id ?? null;
+		}
+
 		await trx
 			.insertInto("thread_comment_all")
 			.values({
 				id: commentId,
 				thread_id: args.thread_id,
 				body: args.body,
-				parent_id: args.parent_id,
+				parent_id: parentId,
 				lixcol_version_id: existingThread.lixcol_version_id,
 			})
 			.execute();

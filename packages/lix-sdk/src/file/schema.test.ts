@@ -447,7 +447,7 @@ test("file_history provides access to historical file data", async () => {
 		.execute();
 
 	// 2. Create checkpoint
-	const checkpoint = await createCheckpoint({
+	const insertCheckpoint = await createCheckpoint({
 		lix,
 	});
 
@@ -460,6 +460,10 @@ test("file_history provides access to historical file data", async () => {
 			data: new TextEncoder().encode(JSON.stringify(updatedData)),
 		})
 		.execute();
+
+	const updateCheckpoint = await createCheckpoint({
+		lix,
+	});
 
 	// 4. Query file, assert that file equals update
 	const currentFile = await lix.db
@@ -474,32 +478,44 @@ test("file_history provides access to historical file data", async () => {
 	expect(currentFileData).toEqual(updatedData);
 
 	// 5. Query history at checkpoint and assert is initial
-	const historicalFiles = await lix.db
+	const fileHistoryAtInsert = await lix.db
 		.selectFrom("file_history")
 		.where("id", "=", "test-file")
-		.where("lixcol_change_set_id", "=", checkpoint.id)
+		.where("lixcol_root_change_set_id", "=", insertCheckpoint.id)
 		.where("lixcol_depth", "=", 0)
 		.selectAll()
 		.execute();
 
-	expect(historicalFiles).toHaveLength(1);
+	expect(fileHistoryAtInsert).toHaveLength(1);
 
-	const historicalFile = historicalFiles[0]!;
-	const historicalFileData = JSON.parse(
-		new TextDecoder().decode(historicalFile.data)
+	const historicalFileAtInsert = fileHistoryAtInsert[0]!;
+	const historicalFileAtInsertData = JSON.parse(
+		new TextDecoder().decode(historicalFileAtInsert.data)
 	);
 
-	expect(historicalFileData).toEqual(initialData);
-	expect(historicalFile.id).toBe("test-file");
-	expect(historicalFile.path).toBe("/test.json");
+	expect(historicalFileAtInsertData).toEqual(initialData);
+	expect(historicalFileAtInsert.id).toBe("test-file");
+	expect(historicalFileAtInsert.path).toBe("/test.json");
+	expect(historicalFileAtInsert.lixcol_change_set_id).toBe(insertCheckpoint.id);
 
-	// Verify historical file has the expected history columns
-	expect(historicalFile.lixcol_change_set_id).toBe(checkpoint.id);
-	expect(historicalFile.lixcol_depth).toBe(0);
-	expect(historicalFile.lixcol_change_id).toBeDefined();
-	expect(historicalFile.lixcol_file_id).toBeDefined();
-	expect(historicalFile.lixcol_plugin_key).toBeDefined();
-	expect(historicalFile.lixcol_schema_version).toBeDefined();
+	// 6. Query history at update checkpoint and assert is updated
+	const fileHistoryAtUpdate = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", "test-file")
+		.where("lixcol_root_change_set_id", "=", updateCheckpoint.id)
+		.where("lixcol_depth", "=", 0)
+		.selectAll()
+		.execute();
+
+	expect(fileHistoryAtUpdate).toHaveLength(1);
+	const historicalFileAtUpdate = fileHistoryAtUpdate[0]!;
+	const historicalFileAtUpdateData = JSON.parse(
+		new TextDecoder().decode(historicalFileAtUpdate.data)
+	);
+	expect(historicalFileAtUpdateData).toEqual(updatedData);
+	expect(historicalFileAtUpdate.id).toBe("test-file");
+	expect(historicalFileAtUpdate.path).toBe("/test.json");
+	expect(historicalFileAtUpdate.lixcol_change_set_id).toBe(updateCheckpoint.id);
 });
 
 // its super annoying to work with metadata otherwise
@@ -987,4 +1003,142 @@ test("file data updates with untracked state", async () => {
 		.execute();
 
 	expect(deletedFile).toHaveLength(0);
+});
+
+test("file history", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// Insert a JSON file
+	const data = {
+		name: "My Project",
+		version: "1.0.0",
+	};
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			path: "/config.json",
+			data: new TextEncoder().encode(JSON.stringify(data)),
+		})
+		.execute();
+
+	// Make a change
+	data.name = "My Cool Project";
+	data.version = "1.1.0";
+
+	await lix.db
+		.updateTable("file")
+		.where("path", "=", "/config.json")
+		.set({
+			data: new TextEncoder().encode(JSON.stringify(data)),
+		})
+		.execute();
+
+	// 1. Get the last two versions of the JSON file from history
+	const fileHistory = await lix.db
+		.selectFrom("file_history")
+		.where("file_history.path", "=", "/config.json")
+		.where(
+			"lixcol_root_change_set_id",
+			"=",
+			lix.db
+				.selectFrom("version")
+				.select("change_set_id")
+				.where("version.name", "=", "main")
+		)
+		.orderBy("lixcol_depth", "asc")
+		.selectAll()
+		.execute();
+
+	expect(fileHistory).toHaveLength(2);
+
+	const afterState = JSON.parse(new TextDecoder().decode(fileHistory[0]!.data));
+	const beforeState = JSON.parse(
+		new TextDecoder().decode(fileHistory[1]!.data)
+	);
+
+	expect(afterState).toEqual({
+		name: "My Cool Project",
+		version: "1.1.0",
+	});
+	expect(beforeState).toEqual({
+		name: "My Project",
+		version: "1.0.0",
+	});
+});
+
+// This test verifies that file_history correctly reconstructs files when only some properties change.
+// The bug occurred when querying file_history at depth=0 after a partial update:
+// - Changed entities appeared at depth=0
+// - Unchanged entities remained at depth=1+
+// The old implementation only returned entities at the exact depth, missing unchanged properties.
+test("file_history handles partial updates correctly", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "abcdefg",
+			path: "/test.json",
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					name: "test-item",
+					value: 100,
+				})
+			),
+		})
+		.execute();
+
+	const checkpoint0 = await createCheckpoint({ lix });
+
+	await lix.db
+		.updateTable("file")
+		.where("path", "=", "/test.json")
+		.set({
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					name: "test-item",
+					value: 105,
+				})
+			),
+		})
+		.execute();
+
+	const checkpoint1 = await createCheckpoint({ lix });
+
+	const beforeFile = await lix.db
+		.selectFrom("file_history")
+		.where("path", "=", "/test.json")
+		.where("lixcol_root_change_set_id", "=", checkpoint0.id)
+		.where("lixcol_depth", "=", 0)
+		.select("data")
+		.executeTakeFirstOrThrow();
+
+	const afterFile = await lix.db
+		.selectFrom("file_history")
+		.where("path", "=", "/test.json")
+		.where("lixcol_root_change_set_id", "=", checkpoint1.id)
+		.where("lixcol_depth", "=", 0)
+		.select("data")
+		.executeTakeFirstOrThrow();
+
+	const beforeData = new TextDecoder().decode(beforeFile.data);
+	const afterData = new TextDecoder().decode(afterFile.data);
+
+	const beforeDoc = JSON.parse(beforeData);
+	const afterDoc = JSON.parse(afterData);
+
+	expect(beforeDoc).toEqual({
+		name: "test-item",
+		value: 100,
+	});
+
+	expect(afterDoc).toEqual({
+		name: "test-item",
+		value: 105,
+	});
 });

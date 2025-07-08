@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Lix, State, type Thread, type ThreadComment } from "@lix-js/sdk";
+import {
+	createThreadComment,
+	Lix,
+	State,
+	type Thread,
+	type ThreadComment,
+} from "@lix-js/sdk";
 import { fromPlainText, toPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 import { toRelativeTime } from "../utilities/timeUtils";
 import { getInitials } from "../utilities/nameUtils";
@@ -16,13 +22,11 @@ export function Thread(props: {
 }) {
 	// Handler for adding a new comment to THIS thread
 	const handleCommentSubmit = async (args: { body: ZettelDoc }) => {
-		await props.lix.db
-			.insertInto("thread_comment")
-			.values({
-				body: args.body,
-				thread_id: props.thread.id,
-			})
-			.execute();
+		await createThreadComment({
+			lix: props.lix,
+			body: args.body,
+			thread_id: props.thread.id,
+		});
 	};
 
 	return (
@@ -52,10 +56,11 @@ export function Composer(props: {
 	const [value, setValue] = useState<string | undefined>(undefined);
 
 	const handleSubmitClick = () => {
+		console.log("Submitting comment:", value);
 		// Use optional chaining for safe access and check text content
 		if (value !== "") {
 			props.onComposerSubmit({ body: fromPlainText(value!) });
-			setValue(undefined);
+			setValue(""); // Clear the input after submission
 		}
 	};
 

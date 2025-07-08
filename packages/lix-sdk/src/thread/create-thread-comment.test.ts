@@ -61,3 +61,62 @@ test("defaults to the version of the thread", async () => {
 
 	expect(globalThreadComment).toBeDefined();
 });
+
+test("defaults parent_id to the last comment when not provided", async () => {
+	const lix = await openLix({});
+
+	const threadId = nanoid();
+	await lix.db.insertInto("thread").values({ id: threadId }).execute();
+
+	const thread = await lix.db
+		.selectFrom("thread")
+		.selectAll()
+		.where("id", "=", threadId)
+		.executeTakeFirstOrThrow();
+
+	// Create first comment (should have parent_id = null)
+	const firstComment = await createThreadComment({
+		lix,
+		thread_id: thread.id,
+		body: fromPlainText("First comment"),
+	});
+
+	expect(firstComment.parent_id).toBeNull();
+
+	// Create second comment without parent_id (should default to first comment)
+	const secondComment = await createThreadComment({
+		lix,
+		thread_id: thread.id,
+		body: fromPlainText("Second comment"),
+	});
+
+	expect(secondComment.parent_id).toBe(firstComment.id);
+
+	// Create third comment without parent_id (should default to second comment)
+	const thirdComment = await createThreadComment({
+		lix,
+		thread_id: thread.id,
+		body: fromPlainText("Third comment"),
+	});
+
+	expect(thirdComment.parent_id).toBe(secondComment.id);
+
+	// Create fourth comment with explicit parent_id (should use provided parent_id)
+	const fourthComment = await createThreadComment({
+		lix,
+		thread_id: thread.id,
+		body: fromPlainText("Fourth comment"),
+		parent_id: firstComment.id,
+	});
+
+	expect(fourthComment.parent_id).toBe(firstComment.id);
+
+	// Create fifth comment without parent_id (should default to third comment, which is still the leaf)
+	const fifthComment = await createThreadComment({
+		lix,
+		thread_id: thread.id,
+		body: fromPlainText("Fifth comment"),
+	});
+
+	expect(fifthComment.parent_id).toBe(thirdComment.id);
+});

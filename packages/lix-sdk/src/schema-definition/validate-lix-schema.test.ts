@@ -1,5 +1,8 @@
 import { test, expect } from "vitest";
-import { validateLixSchema, validateLixSchemaDefinition } from "./validate-lix-schema.js";
+import {
+	validateLixSchema,
+	validateLixSchemaDefinition,
+} from "./validate-lix-schema.js";
 
 test("validateLixSchemaDefinition passes for valid Lix schema", () => {
 	const validSchema = {
@@ -25,7 +28,9 @@ test("validateLixSchemaDefinition throws for invalid schema", () => {
 		// Missing required x-lix-key
 	};
 
-	expect(() => validateLixSchemaDefinition(invalidSchema)).toThrow("Invalid Lix schema definition");
+	expect(() => validateLixSchemaDefinition(invalidSchema)).toThrow(
+		"Invalid Lix schema definition"
+	);
 });
 
 test("validateLixSchema validates both schema and data successfully", () => {
@@ -61,7 +66,9 @@ test("validateLixSchema throws when schema is invalid", () => {
 
 	const data = { id: "123" };
 
-	expect(() => validateLixSchema(invalidSchema, data)).toThrow("Invalid Lix schema definition");
+	expect(() => validateLixSchema(invalidSchema, data)).toThrow(
+		"Invalid Lix schema definition"
+	);
 });
 
 test("validateLixSchema throws when data doesn't match schema", () => {
@@ -81,5 +88,7 @@ test("validateLixSchema throws when data doesn't match schema", () => {
 		// Missing required 'name' field
 	};
 
-	expect(() => validateLixSchema(schema, invalidData)).toThrow("Data validation failed");
+	expect(() => validateLixSchema(schema, invalidData)).toThrow(
+		"Data validation failed"
+	);
 });
