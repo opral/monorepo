@@ -659,8 +659,6 @@ export async function updateMdAstEntities(
 						schema_version: MarkdownNodeSchemaV1["x-lix-version"],
 						plugin_key: mdPlugin.key,
 						snapshot_content: entity,
-						// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
-						version_id: trx.selectFrom("active_version").select("version_id"),
 					})
 					.execute();
 			}
@@ -688,8 +686,6 @@ export async function updateMdAstEntities(
 						schema_version: MarkdownRootSchemaV1["x-lix-version"],
 						plugin_key: mdPlugin.key,
 						snapshot_content: { order },
-						// @ts-expect-error - https://github.com/opral/lix-sdk/issues/331
-						version_id: trx.selectFrom("active_version").select("version_id"),
 					})
 					.execute();
 			}
