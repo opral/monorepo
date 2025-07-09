@@ -1,1 +1,4 @@
-export { LixChangeAuthorSchema, type ChangeAuthor } from "./schema.js";
+export {
+	LixChangeAuthorSchema,
+	type LixChangeAuthor as ChangeAuthor,
+} from "./schema.js";

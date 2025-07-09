@@ -1,7 +1,7 @@
 import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { ChangeSet, ChangeSetElement } from "./schema.js";
-import type { Label } from "../label/schema.js";
+import type { LixChangeSet, LixChangeSetElement } from "./schema.js";
+import type { LixLabel } from "../label/schema.js";
 import type { NewState } from "../entity-views/types.js";
 
 /**
@@ -20,13 +20,13 @@ import type { NewState } from "../entity-views/types.js";
 export async function createChangeSet(args: {
 	lix: Pick<Lix, "db">;
 	id?: string;
-	elements?: Omit<NewState<ChangeSetElement>, "change_set_id">[];
-	labels?: Pick<Label, "id">[];
+	elements?: Omit<NewState<LixChangeSetElement>, "change_set_id">[];
+	labels?: Pick<LixLabel, "id">[];
 	/** Parent change sets that this change set will be a child of */
-	parents?: Pick<ChangeSet, "id">[];
+	parents?: Pick<LixChangeSet, "id">[];
 	/** Version ID where the change set should be stored. Defaults to active version */
 	lixcol_version_id?: string;
-}): Promise<ChangeSet & { lixcol_version_id: string }> {
+}): Promise<LixChangeSet & { lixcol_version_id: string }> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const csId = args.id ?? nanoid();
 

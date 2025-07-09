@@ -75,7 +75,7 @@ export const LixChangeSetSchema = {
 LixChangeSetSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type ChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
+export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
 
 export const LixChangeSetElementSchema = {
 	"x-lix-key": "lix_change_set_element",
@@ -115,7 +115,7 @@ export const LixChangeSetElementSchema = {
 } as const;
 LixChangeSetElementSchema satisfies LixSchemaDefinition;
 
-export type ChangeSetElement = FromLixSchemaDefinition<
+export type LixChangeSetElement = FromLixSchemaDefinition<
 	typeof LixChangeSetElementSchema
 >;
 
@@ -144,7 +144,7 @@ export const LixChangeSetEdgeSchema = {
 LixChangeSetEdgeSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type ChangeSetEdge = FromLixSchemaDefinition<
+export type LixChangeSetEdge = FromLixSchemaDefinition<
 	typeof LixChangeSetEdgeSchema
 >;
 
@@ -174,7 +174,7 @@ export const LixChangeSetLabelSchema = {
 LixChangeSetLabelSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type ChangeSetLabel = FromLixSchemaDefinition<
+export type LixChangeSetLabel = FromLixSchemaDefinition<
 	typeof LixChangeSetLabelSchema
 >;
 
@@ -202,6 +202,6 @@ export const LixChangeSetThreadSchema = {
 } as const;
 LixChangeSetThreadSchema satisfies LixSchemaDefinition;
 
-export type ChangeSetThread = FromLixSchemaDefinition<
+export type LixChangeSetThread = FromLixSchemaDefinition<
 	typeof LixChangeSetThreadSchema
 >;

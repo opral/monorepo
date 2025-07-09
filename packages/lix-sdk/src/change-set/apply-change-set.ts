@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/index.js";
-import type { ChangeSet } from "./schema.js";
+import type { LixChangeSet } from "./schema.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
@@ -8,7 +8,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
  */
 export async function applyChangeSet(args: {
 	lix: Lix;
-	changeSet: Pick<ChangeSet, "id">;
+	changeSet: Pick<LixChangeSet, "id">;
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Get the current version

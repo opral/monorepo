@@ -1,8 +1,8 @@
 import { createChangeSet } from "../change-set/create-change-set.js";
-import type { ChangeSet } from "../change-set/schema.js";
+import type { LixChangeSet } from "../change-set/schema.js";
 import { nanoid } from "../database/nano-id.js";
 import type { Lix } from "../lix/open-lix.js";
-import type { Version } from "./schema.js";
+import type { LixVersion } from "./schema.js";
 
 /**
  * Creates a new version.
@@ -14,11 +14,11 @@ import type { Version } from "./schema.js";
  */
 export async function createVersion(args: {
 	lix: Lix;
-	id?: Version["id"];
-	changeSet?: Pick<ChangeSet, "id">;
-	name?: Version["name"];
-	inherits_from_version_id?: Version["inherits_from_version_id"];
-}): Promise<Version> {
+	id?: LixVersion["id"];
+	changeSet?: Pick<LixChangeSet, "id">;
+	name?: LixVersion["name"];
+	inherits_from_version_id?: LixVersion["inherits_from_version_id"];
+}): Promise<LixVersion> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		const workingCs = await createChangeSet({
 			lix: { ...args.lix, db: trx },

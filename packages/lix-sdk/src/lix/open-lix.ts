@@ -3,12 +3,12 @@ import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { KeyValue } from "../key-value/schema.js";
+import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewState } from "../entity-views/types.js";
-import type { Account } from "../account/schema.js";
+import type { LixAccount } from "../account/schema.js";
 import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
@@ -91,7 +91,7 @@ export async function openLix(args: {
 	 *   const account = localStorage.getItem("account")
 	 *   const lix = await openLix({ account })
 	 */
-	account?: Account;
+	account?: LixAccount;
 	/**
 	 * Lix file data to initialize the database with.
 	 */
@@ -122,7 +122,7 @@ export async function openLix(args: {
 	 * @example
 	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: NewState<KeyValue>[];
+	keyValues?: NewState<LixKeyValue>[];
 }): Promise<Lix> {
 	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
 	const database = await storage.open();

@@ -5,8 +5,8 @@ import { pushToServer } from "./push-to-server.js";
 import { newLixFile } from "../lix/new-lix.js";
 import { pullFromServer } from "./pull-from-server.js";
 import { createLspInMemoryEnvironment } from "../server-protocol-handler/environment/create-in-memory-environment.js";
-import type { KeyValue } from "../key-value/schema.js";
-import type { Account } from "../account/schema.js";
+import type { LixKeyValue } from "../key-value/schema.js";
+import type { LixAccount } from "../account/schema.js";
 
 test.skip("push rows of multiple tables to server successfully", async () => {
 	const lixBlob = await newLixFile();
@@ -76,14 +76,14 @@ test.skip("push rows of multiple tables to server successfully", async () => {
 		.execute();
 
 	expect(accountsChangesOnServer.map((c) => c.snapshot_content)).toEqual([
-		{ id: "account0", name: "some account" } satisfies Account,
+		{ id: "account0", name: "some account" } satisfies LixAccount,
 	]);
 	expect(keyValueChangesOnServer.map((c) => c.snapshot_content)).toEqual([
 		expect.objectContaining({
 			key: "mock-key",
 			value: "mock-value",
 		}),
-	] satisfies Account[]);
+	] satisfies LixAccount[]);
 });
 
 // commented out for lix v0.5
@@ -157,7 +157,7 @@ test.skip("push-pull-push with two clients", async () => {
 
 	expect(client2AccountAfterPull).toEqual(
 		expect.arrayContaining([
-			{ id: "account0", name: "account from client 1" } satisfies Account,
+			{ id: "account0", name: "account from client 1" } satisfies LixAccount,
 		])
 	);
 
@@ -166,7 +166,7 @@ test.skip("push-pull-push with two clients", async () => {
 			expect.objectContaining({
 				key: "mock-key",
 				value: "mock-value from client 1",
-			} satisfies KeyValue),
+			} satisfies LixKeyValue),
 		])
 	);
 

@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { Lix } from "../lix/open-lix.js";
 import { createLixOwnLog } from "./create-lix-own-log.js";
-import type { Log } from "./schema.js";
+import type { LixLog } from "./schema.js";
 
 test("should insert logs default log levels when lix_log_levels is not set)", async () => {
 	const lix = await openLix({
@@ -114,6 +114,6 @@ async function createLogs(lix: Lix) {
 	});
 }
 
-async function getLogs(lix: Lix): Promise<Log[]> {
+async function getLogs(lix: Lix): Promise<LixLog[]> {
 	return lix.db.selectFrom("log").selectAll().execute();
 }
