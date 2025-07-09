@@ -79,10 +79,9 @@ export function initDb(args: {
 		args.hooks
 	);
 	applyChangeSetDatabaseSchema(args.sqlite);
-
 	applyStoredSchemaDatabaseSchema(args.sqlite);
-	applyAccountDatabaseSchema(args.sqlite);
 	applyVersionDatabaseSchema(args.sqlite);
+	applyAccountDatabaseSchema(args.sqlite);
 	applyKeyValueDatabaseSchema(args.sqlite);
 	applyChangeAuthorDatabaseSchema(args.sqlite);
 	applyLabelDatabaseSchema(args.sqlite);

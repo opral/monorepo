@@ -174,13 +174,9 @@ export async function openLix(args: {
 
 	if (accountToSet) {
 		await db.transaction().execute(async (trx) => {
-			// delete the default inserted active account from `initDb`
+			// delete the existing active account
 			await trx.deleteFrom("active_account").execute();
-			await trx
-				.insertInto("active_account")
-				.values(accountToSet)
-				.onConflict((oc) => oc.doUpdateSet(() => ({ ...accountToSet })))
-				.execute();
+			await trx.insertInto("active_account").values(accountToSet).execute();
 		});
 	}
 
@@ -214,6 +210,11 @@ export async function openLix(args: {
 
 	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
+
+	// Set up storage persistence if the adapter supports it
+	if (storage.setupPersistence) {
+		storage.setupPersistence(lix);
+	}
 
 	return lix;
 }

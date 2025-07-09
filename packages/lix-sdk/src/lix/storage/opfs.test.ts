@@ -301,4 +301,48 @@ describe("OpfsStorage", () => {
 		expect(activeAccount2.id).toBe(account.id);
 		expect(activeAccount2.name).toBe(account.name);
 	});
+
+	test("only saves active accounts when they change", async () => {
+		const path = "observer-test.lix";
+		const storage = new OpfsStorage({ path });
+
+		const account = { id: "observer-account", name: "Observer Test" };
+		const lix = await openLix({ storage, account });
+
+		// Spy on the saveActiveAccounts method
+		const saveActiveAccountsSpy = vi.spyOn(storage as any, "saveActiveAccounts");
+
+		// Wait a bit for the initial save from the observer
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		
+		// Clear the spy to ignore the initial save
+		saveActiveAccountsSpy.mockClear();
+
+		// Make a change that doesn't affect active_account
+		await lix.db
+			.insertInto("key_value")
+			.values({ key: "test-key", value: "test-value" })
+			.execute();
+
+		// Wait for potential save
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		// Should not have saved active accounts
+		expect(saveActiveAccountsSpy).not.toHaveBeenCalled();
+
+		// Now update the active account
+		await lix.db
+			.updateTable("active_account")
+			.set({ name: "Updated Name" })
+			.where("id", "=", account.id)
+			.execute();
+
+		// Wait for save
+		await new Promise((resolve) => setTimeout(resolve, 150));
+
+		// Should have saved active accounts now
+		expect(saveActiveAccountsSpy).toHaveBeenCalledTimes(1);
+
+		await lix.close();
+	});
 });

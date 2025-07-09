@@ -7,6 +7,7 @@ import {
 import { newLixFile } from "../new-lix.js";
 import type { LixStorageAdapter } from "./lix-storage-adapter.js";
 import type { Account } from "../../account/schema.js";
+import type { Lix } from "../open-lix.js";
 
 /**
  * OPFS (Origin Private File System) storage adapter for Lix.
@@ -23,6 +24,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	private savePromise?: Promise<void>;
 	private pendingSave = false;
 	private activeAccounts?: Pick<Account, "id" | "name">[];
+	private activeAccountSubscription?: { unsubscribe(): void };
 
 	/**
 	 * Creates a new OpfsStorage instance.
@@ -90,8 +92,12 @@ export class OpfsStorage implements LixStorageAdapter {
 	async close(): Promise<void> {
 		if (this.database) {
 			await this.save();
-			await this.saveActiveAccounts();
 			this.database = undefined;
+		}
+		// Clean up active account subscription
+		if (this.activeAccountSubscription) {
+			this.activeAccountSubscription.unsubscribe();
+			this.activeAccountSubscription = undefined;
 		}
 	}
 
@@ -147,32 +153,37 @@ export class OpfsStorage implements LixStorageAdapter {
 	 */
 	onStateCommit(): void {
 		this.batchedSave();
-		// Also save active accounts when state changes
-		this.saveActiveAccounts().catch((error) => {
-			console.error("Failed to save active accounts:", error);
-		});
+	}
+
+	/**
+	 * Sets up persistence observers for active account changes.
+	 * This is called after the Lix instance is fully initialized.
+	 */
+	setupPersistence(lix: Lix): void {
+		// Observe changes to the active_account table
+		this.activeAccountSubscription = lix
+			.observe(lix.db.selectFrom("active_account").selectAll())
+			.subscribe({
+				next: (accounts) => {
+					// Save accounts when they change
+					this.saveActiveAccounts(accounts).catch((error) => {
+						console.error("Failed to save active accounts:", error);
+					});
+				},
+			});
 	}
 
 	/**
 	 * Saves the current active accounts to a JSON file in OPFS.
 	 */
-	private async saveActiveAccounts(): Promise<void> {
-		if (!this.database || !this.opfsRoot) {
+	private async saveActiveAccounts(
+		accounts: Pick<Account, "id" | "name">[]
+	): Promise<void> {
+		if (!this.opfsRoot) {
 			return;
 		}
 
 		try {
-			// Query the active accounts from the database
-			const result = this.database.exec({
-				sql: "SELECT id, name FROM active_account",
-				returnValue: "resultRows",
-			}) as unknown as Array<[string, string]>;
-
-			const accounts = result.map((row) => ({
-				id: row[0],
-				name: row[1],
-			}));
-
 			// Save to JSON file
 			const jsonContent = JSON.stringify(accounts);
 			const fileHandle = await this.opfsRoot.getFileHandle(

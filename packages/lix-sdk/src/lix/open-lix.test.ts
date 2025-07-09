@@ -57,7 +57,7 @@ test("providing an account should be possible", async () => {
 
 	const accounts = await lix.db
 		.selectFrom("active_account")
-		.selectAll()
+		.select(["id", "name"])
 		.execute();
 
 	expect(accounts, "to be the provided account").toContainEqual(mockAccount);
