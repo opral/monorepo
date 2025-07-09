@@ -89,12 +89,14 @@ const json = {
 // Insert the file 
 const file = await lix.db
 	.insertInto("file")
-	.values({
-		path: "/example.json",
-		data: new TextEncoder().encode(JSON.stringify(json)),
-	})
-	.returningAll()
-	.executeTakeFirstOrThrow();
+        .values({
+                path: "/example.json",
+                data: new TextEncoder().encode(JSON.stringify(json)),
+                // Optional hidden flag
+                hidden: false,
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
 
 console.log("JSON file inserted with ID:", file.id);
 ```

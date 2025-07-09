@@ -12,7 +12,7 @@ export function applyFileDatabaseSchema(
 ): void {
 	lix.sqlite.createFunction({
 		name: "handle_file_insert",
-		arity: 6,
+		arity: 7,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
 			let metadata = args[3];
@@ -31,9 +31,10 @@ export function applyFileDatabaseSchema(
 					path: args[1],
 					data: args[2],
 					metadata: metadata,
+					hidden: Boolean(args[4]),
 				},
-				versionId: args[4],
-				untracked: Boolean(args[5]),
+				versionId: args[5],
+				untracked: Boolean(args[6]),
 			});
 			return result;
 		},
@@ -42,7 +43,7 @@ export function applyFileDatabaseSchema(
 
 	lix.sqlite.createFunction({
 		name: "handle_file_update",
-		arity: 6,
+		arity: 7,
 		xFunc: (_ctx: number, ...args: any[]) => {
 			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
 			let metadata = args[3];
@@ -61,9 +62,10 @@ export function applyFileDatabaseSchema(
 					path: args[1],
 					data: args[2],
 					metadata: metadata,
+					hidden: Boolean(args[4]),
 				},
-				versionId: args[4],
-				untracked: Boolean(args[5]),
+				versionId: args[5],
+				untracked: Boolean(args[6]),
 			});
 			return result;
 		},
@@ -107,43 +109,45 @@ export function applyFileDatabaseSchema(
 
 	lix.sqlite.exec(`
   CREATE VIEW IF NOT EXISTS file AS
-	SELECT
-		json_extract(snapshot_content, '$.id') AS id,
-		json_extract(snapshot_content, '$.path') AS path,
-		materialize_file_data(
-			json_extract(snapshot_content, '$.id'), 
-			json_extract(snapshot_content, '$.path'), 
-			(SELECT version_id FROM active_version),
-			json_extract(snapshot_content, '$.metadata')
-		) AS data,
-		json_extract(snapshot_content, '$.metadata') AS metadata,
-		inherited_from_version_id AS lixcol_inherited_from_version_id,
-		created_at AS lixcol_created_at,
-		updated_at AS lixcol_updated_at,
-		change_id AS lixcol_change_id,
-		untracked AS lixcol_untracked
-	FROM state
-	WHERE schema_key = 'lix_file_descriptor';
+        SELECT
+                json_extract(snapshot_content, '$.id') AS id,
+                json_extract(snapshot_content, '$.path') AS path,
+                materialize_file_data(
+                        json_extract(snapshot_content, '$.id'),
+                        json_extract(snapshot_content, '$.path'),
+                        (SELECT version_id FROM active_version),
+                        json_extract(snapshot_content, '$.metadata')
+                ) AS data,
+                json_extract(snapshot_content, '$.metadata') AS metadata,
+                json_extract(snapshot_content, '$.hidden') AS hidden,
+                inherited_from_version_id AS lixcol_inherited_from_version_id,
+                created_at AS lixcol_created_at,
+                updated_at AS lixcol_updated_at,
+                change_id AS lixcol_change_id,
+                untracked AS lixcol_untracked
+        FROM state
+        WHERE schema_key = 'lix_file_descriptor';
 
   CREATE VIEW IF NOT EXISTS file_all AS
-	SELECT
-		json_extract(snapshot_content, '$.id') AS id,
-		json_extract(snapshot_content, '$.path') AS path,
-		materialize_file_data(
-			json_extract(snapshot_content, '$.id'), 
-			json_extract(snapshot_content, '$.path'), 
-			version_id,
-			json_extract(snapshot_content, '$.metadata')
-		) AS data,
-		json_extract(snapshot_content, '$.metadata') AS metadata,
-		version_id AS lixcol_version_id,
-		inherited_from_version_id AS lixcol_inherited_from_version_id,
-		created_at AS lixcol_created_at,
-		updated_at AS lixcol_updated_at,
-		change_id AS lixcol_change_id,
-		untracked AS lixcol_untracked
-	FROM state_all
-	WHERE schema_key = 'lix_file_descriptor';
+        SELECT
+                json_extract(snapshot_content, '$.id') AS id,
+                json_extract(snapshot_content, '$.path') AS path,
+                materialize_file_data(
+                        json_extract(snapshot_content, '$.id'),
+                        json_extract(snapshot_content, '$.path'),
+                        version_id,
+                        json_extract(snapshot_content, '$.metadata')
+                ) AS data,
+                json_extract(snapshot_content, '$.metadata') AS metadata,
+                json_extract(snapshot_content, '$.hidden') AS hidden,
+                version_id AS lixcol_version_id,
+                inherited_from_version_id AS lixcol_inherited_from_version_id,
+                created_at AS lixcol_created_at,
+                updated_at AS lixcol_updated_at,
+                change_id AS lixcol_change_id,
+                untracked AS lixcol_untracked
+        FROM state_all
+        WHERE schema_key = 'lix_file_descriptor';
 
 
   CREATE TRIGGER IF NOT EXISTS file_insert
@@ -154,6 +158,7 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
+        COALESCE(NEW.hidden, 0),
         (SELECT version_id FROM active_version),
         COALESCE(NEW.lixcol_untracked, 0)
       );
@@ -167,6 +172,7 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
+        COALESCE(NEW.hidden, OLD.hidden),
         (SELECT version_id FROM active_version),
         COALESCE(NEW.lixcol_untracked, 0)
       );
@@ -196,6 +202,7 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
+        COALESCE(NEW.hidden, 0),
         COALESCE(NEW.lixcol_version_id, (SELECT version_id FROM active_version)),
         COALESCE(NEW.lixcol_untracked, 0)
       );
@@ -209,6 +216,7 @@ export function applyFileDatabaseSchema(
         NEW.path,
         NEW.data,
         NEW.metadata,
+        COALESCE(NEW.hidden, OLD.hidden),
         COALESCE(NEW.lixcol_version_id, OLD.lixcol_version_id),
         COALESCE(NEW.lixcol_untracked, 0)
       );
@@ -242,6 +250,7 @@ export function applyFileDatabaseSchema(
       json_extract(snapshot_content, '$.metadata')
     ) AS data,
     json_extract(snapshot_content, '$.metadata') AS metadata,
+    json_extract(snapshot_content, '$.hidden') AS hidden,
     file_id AS lixcol_file_id,
     plugin_key AS lixcol_plugin_key,
     schema_version AS lixcol_schema_version,
@@ -272,6 +281,7 @@ export const LixFileDescriptorSchema = {
 			type: "object",
 			nullable: true,
 		},
+		hidden: { type: "boolean", "x-lix-generated": true },
 	},
 	required: ["id", "path"],
 	additionalProperties: false,
