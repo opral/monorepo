@@ -1,4 +1,4 @@
-# 🧬 (Experimental) Lix HTML Diff
+# 🧬 Lix HTML Diff
 
 Build a diff view in your app with this HTML differ ✨
 

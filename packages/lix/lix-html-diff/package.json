@@ -17,26 +17,36 @@
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "vite",
+    "dev": "tsc --watch",
     "test": "tsc --noEmit && vitest run",
     "test:watch": "vitest",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@braintree/sanitize-url": "^7.1.1",
     "@monaco-editor/react": "^4.7.0",
     "@opral/tsconfig": "workspace:*",
     "@tailwindcss/vite": "^4.0.17",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "cytoscape": "^3.30.4",
+    "cytoscape-cose-bilkent": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "debug": "^4.4.1",
     "dedent": "1.5.1",
+    "mermaid": "^11.8.1",
     "prettier": "^3.5.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.0.17",
     "typescript": "^5.5.3",
     "vite": "^6.2.6",
+    "vitepress": "^1.6.3",
+    "vitepress-plugin-mermaid": "^2.0.17",
     "vitest": "^2.1.8"
   }
 }
