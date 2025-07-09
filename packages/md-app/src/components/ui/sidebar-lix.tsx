@@ -67,7 +67,7 @@ import { Separator } from "./separator";
 import { generateHumanId } from "@/helper/generateHumanId";
 import { useChat } from "../editor/use-chat";
 import { useLix } from "@lix-js/react-utils";
-import { findLixFilesInOpfs } from "@/helper/findLixInOpfs";
+import { findLixFileInOpfs, findLixFilesInOpfs } from "@/helper/findLixInOpfs";
 import { upsertKeyValue } from "@/hooks/useKeyValue";
 
 /**
@@ -462,25 +462,41 @@ export function LixSidebar() {
 		if (!lix || !lixIdSearchParams) return;
 
 		try {
+			// 1. Find the actual file info to get the correct filename
+			const lixFile = await findLixFileInOpfs(lixIdSearchParams);
+			if (!lixFile) {
+				console.error("Lix file not found:", lixIdSearchParams);
+				return;
+			}
+
+			// 2. Close the lix instance to ensure proper cleanup
 			await lix.close();
 
+			// 3. Remove the lix file from OPFS using the actual filename
 			const root = await navigator.storage.getDirectory();
-			await root.removeEntry(`${lixIdSearchParams}.lix`);
+			await root.removeEntry(lixFile.fullName);
 
+			// 4. Verify if the lix was successfully deleted
+			const remainingLixFile = await findLixFileInOpfs(lixIdSearchParams);
+			if (remainingLixFile) {
+				console.error("Failed to delete lix file:", lixFile.fullName);
+				return;
+			}
+
+			// 5. Navigate to next available lix or create new one
 			const availableLixes = await getAvailableLixes();
 			if (availableLixes.length > 0) {
 				// Navigate to another lix
 				const nextLixId = availableLixes[0].id;
 				switchToLix(nextLixId);
 			} else {
-				// No lixes left, create a new one by navigating to root
+				// No lixes left, create a new one
+				const newLix = await createNewLixFileInOpfs();
 				setSearchParams((currentParams) => {
-					currentParams.delete("lix");
 					currentParams.delete("f");
+					currentParams.set("lix", newLix.id);
 					return currentParams;
 				});
-				const lixId = await createNewLixFileInOpfs();
-				switchToLix(lixId.id);
 			}
 
 			setShowDeleteProjectsDialog(false);

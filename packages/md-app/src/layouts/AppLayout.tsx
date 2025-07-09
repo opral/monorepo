@@ -57,34 +57,38 @@ export function App({ children }: { children: React.ReactNode }) {
 						});
 					}
 				})
-			.catch(setLixError);
+				.catch(setLixError);
 		}
 	}, [lix, searchParams, lixId]);
 
 	useEffect(() => {
 		if (lix) {
-			const fileId = searchParams.get("f");
-			if (fileId) {
-				upsertKeyValue(lix, "flashtype_active_file", fileId)
-			} else {
-				selectFiles(lix).executeTakeFirst().then((file) => {
-					if (!file) {
-						const newFileId = nanoid()
-						lix.db.insertInto("file").values({ id: newFileId, path: "/document.md", data: new TextEncoder().encode("") }).execute()
-						setSearchParams((currentParams) => {
-							currentParams.set("f", newFileId);
-							return currentParams;
-						});
-					} else {
-						setSearchParams((currentParams) => {
-							currentParams.set("f", file.id);
-							return currentParams;
-						});
-					}
-				})
+			const urlLixId = searchParams.get("lix");
+			// Only proceed if the current lix matches the URL parameter
+			if (lixId && urlLixId === lixId) {
+				const fileId = searchParams.get("f");
+				if (fileId) {
+					upsertKeyValue(lix, "flashtype_active_file", fileId)
+				} else {
+					selectFiles(lix).executeTakeFirst().then((file) => {
+						if (!file) {
+							const newFileId = nanoid()
+							lix.db.insertInto("file").values({ id: newFileId, path: "/document.md", data: new TextEncoder().encode("") }).execute()
+							setSearchParams((currentParams) => {
+								currentParams.set("f", newFileId);
+								return currentParams;
+							});
+						} else {
+							setSearchParams((currentParams) => {
+								currentParams.set("f", file.id);
+								return currentParams;
+							});
+						}
+					})
+				}
 			}
 		}
-	}, [lix, searchParams]);
+	}, [lix, searchParams, lixId]);
 
 	if (lixError) {
 		return (
@@ -109,11 +113,9 @@ export function App({ children }: { children: React.ReactNode }) {
 
 	return (
 		<LixProvider lix={lix}>
-			{/* <Suspense fallback={<LoadingScreen />}> */}
-				<main className="w-full h-screen overflow-hidden bg-white flex flex-col">
-					{children}
-				</main>
-			{/* </Suspense> */}
+			<main className="w-full h-screen overflow-hidden bg-white flex flex-col">
+				{children}
+			</main>
 		</LixProvider>
 	);
 }
