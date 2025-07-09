@@ -71,26 +71,6 @@ export function applyStateDatabaseSchema(
 		return loggingInitialized;
 	};
 
-	const create_temp_change_table_sql = `
-  -- add a table we use within the transaction
-  CREATE TEMP TABLE IF NOT EXISTS internal_change_in_transaction (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
-    entity_id TEXT NOT NULL,
-    schema_key TEXT NOT NULL,
-    schema_version TEXT NOT NULL,
-    file_id TEXT NOT NULL,
-    plugin_key TEXT NOT NULL,
-	  version_id TEXT NOT NULL,
-    snapshot_content BLOB,
-    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
-	--- NOTE schena_key must be unique per entity_id and file_id
-	UNIQUE(entity_id, file_id, schema_key, version_id)
-  ) STRICT;
-
-`;
-
-	sqlite.exec(create_temp_change_table_sql);
-
 	module.installMethods(
 		{
 			xCreate: (db: any, _pAux: any, _argc: number, _argv: any, pVTab: any) => {
@@ -115,18 +95,30 @@ export function applyStateDatabaseSchema(
 					return result;
 				}
 
+				// wiping all rows on connect simulates a temp table for internal_change_in_transaction.
+				// we need to clear any existing changes on connect in case a transaction remained open.
+				// otherwise, the lix can't boot up properly and will throw an error.
+				//
+				// an open transaction can happen if the storage layer crashes or is not properly shut down.
+				//
+				// PS internal_change_in_transaction is not a temp table because sqlite
+				// prohibits access to temp tables from virtual tables
+				sqlite.exec({
+					sql: "DELETE FROM internal_change_in_transaction",
+					returnValue: "resultRows",
+				});
+
 				sqlite.sqlite3.vtab.xVtab.create(pVTab);
 				return capi.SQLITE_OK;
 			},
 
 			xBegin: () => {
 				// assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
-				if (
-					sqlite.exec({
-						sql: "SELECT * FROM internal_change_in_transaction",
-						returnValue: "resultRows",
-					}).length > 0
-				) {
+				const existingChangesInTransaction = sqlite.exec({
+					sql: "SELECT * FROM internal_change_in_transaction",
+					returnValue: "resultRows",
+				});
+				if (existingChangesInTransaction.length > 0) {
 					const errorMessage = "Transaction already in progress";
 					if (canLog()) {
 						createLixOwnLogSync({

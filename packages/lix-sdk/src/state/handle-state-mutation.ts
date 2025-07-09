@@ -3,8 +3,9 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { Change } from "../change/schema.js";
-
 import type { NewStateRow } from "./schema.js";
+import { uuidV7 } from "../database/index.js";
+import { LixChangeAuthorSchema } from "../change-author/schema.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,
@@ -218,7 +219,6 @@ export function createChangeWithSnapshot(args: {
 	// 		.returning(["id", "schema_key", "file_id", "entity_id"]),
 	// });
 
-	// we don't need the created snapshot
 	const [change] = executeSync({
 		lix: { sqlite: args.sqlite },
 		query: args.db
@@ -272,6 +272,13 @@ export function createChangeWithSnapshot(args: {
 			change_id: change.id,
 		});
 	}
+
+	// Create change_author records for all active accounts
+	createChangeAuthorRecords({
+		sqlite: args.sqlite,
+		db: args.db,
+		change_id: change.id,
+	});
 
 	return change;
 }
@@ -415,4 +422,89 @@ function updateStateCache(args: {
 					})
 			),
 	});
+}
+
+function createChangeAuthorRecords(args: {
+	sqlite: SqliteWasmDatabase;
+	db: Kysely<LixInternalDatabaseSchema>;
+	change_id: string;
+}): void {
+	try {
+		// Get all active accounts using sqlite.exec since we're in the virtual table context
+		const activeAccounts = args.sqlite.exec({
+			sql: "SELECT id, name FROM active_account",
+			returnValue: "resultRows",
+		});
+
+		// Create change_author records for each active account
+		if (activeAccounts && activeAccounts.length > 0) {
+			for (const account of activeAccounts) {
+				const accountId = account[0] as string;
+				const accountName = account[1] as string;
+
+				// First ensure the account exists in global version
+				const [existingAccount] = executeSync({
+					lix: { sqlite: args.sqlite },
+					query: args.db
+						.selectFrom("account_all")
+						.where("id", "=", accountId)
+						.selectAll(),
+				});
+
+				if (!existingAccount) {
+					executeSync({
+						lix: { sqlite: args.sqlite },
+						query: args.db.insertInto("account_all").values({
+							id: accountId,
+							name: accountName,
+							lixcol_version_id: "global",
+						}),
+					});
+				}
+
+				// Create change_author snapshot content
+				const changeAuthorSnapshot = {
+					change_id: args.change_id,
+					account_id: accountId,
+				};
+
+				const currentTime = new Date().toISOString();
+				const changeAuthorId = uuidV7();
+
+				executeSync({
+					lix: { sqlite: args.sqlite },
+					query: args.db.insertInto("internal_change_in_transaction").values({
+						id: changeAuthorId,
+						entity_id: `${args.change_id}::${accountId}`,
+						schema_key: LixChangeAuthorSchema["x-lix-key"],
+						schema_version: LixChangeAuthorSchema["x-lix-version"],
+						file_id: "lix",
+						plugin_key: "lix",
+						version_id: "global",
+						snapshot_content: sql`jsonb(${JSON.stringify(changeAuthorSnapshot)})`,
+						created_at: currentTime,
+					}),
+				});
+
+				// Update state cache directly
+				updateStateCache({
+					sqlite: args.sqlite,
+					db: args.db,
+					entity_id: `${args.change_id}::${accountId}`,
+					schema_key: LixChangeAuthorSchema["x-lix-key"],
+					schema_version: LixChangeAuthorSchema["x-lix-version"],
+					file_id: "lix",
+					version_id: "global",
+					plugin_key: "lix",
+					snapshot_content: JSON.stringify(changeAuthorSnapshot),
+					timestamp: currentTime,
+					change_id: changeAuthorId,
+				});
+			}
+		}
+	} catch (error) {
+		// If active_account table doesn't exist, skip change_author creation
+		// This can happen in some test contexts or during initialization
+		console.log("Could not create change_author records:", error);
+	}
 }

@@ -2,9 +2,10 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { sql } from "kysely";
+import { Kysely, sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
 import type { ChangeSetElement } from "../change-set/schema.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 test("throws if the schema is not a valid lix schema", async () => {
 	const lix = await openLix({});
@@ -2457,6 +2458,186 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 			},
 			operation: "insert",
 			version_id: "global",
+		})
+	).not.toThrowError();
+});
+
+test("should validate foreign keys that reference changes in internal_change_in_transaction during transaction", async () => {
+	const lix = await openLix({});
+
+	// Create a simple mock schema that references a change
+	const mockChangeReferencingSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_change_reference",
+		"x-lix-primary-key": ["change_id"],
+		"x-lix-foreign-keys": {
+			change_id: {
+				schemaKey: "lix_change",
+				property: "id",
+			},
+		},
+		properties: {
+			change_id: { type: "string" },
+		},
+		required: ["change_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the mock schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockChangeReferencingSchema })
+		.execute();
+
+	// Get active version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	await lix.db.transaction().execute(async (trx) => {
+		// Insert a key-value entity which creates a change in internal_change_in_transaction
+		await trx
+			.insertInto("key_value")
+			.values({
+				key: "test_key_for_change_reference",
+				value: "test_value",
+			})
+			.execute();
+
+		// Get the change ID that was just created in internal_change_in_transaction
+		const changes = await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
+			.selectFrom("internal_change_in_transaction")
+			.select("id")
+			.where("entity_id", "=", "test_key_for_change_reference")
+			.where("schema_key", "=", "lix_key_value")
+			.execute();
+
+		expect(changes).toHaveLength(1);
+		const changeId = changes[0]!.id;
+
+		// This should NOT throw an error because the change exists in internal_change_in_transaction
+		// But currently it will throw because validation only checks the "change" table (internal_change)
+		// which doesn't include internal_change_in_transaction
+		expect(() =>
+			validateStateMutation({
+				lix: { sqlite: lix.sqlite, db: trx as any },
+				schema: mockChangeReferencingSchema,
+				snapshot_content: {
+					change_id: changeId,
+				},
+				operation: "insert",
+				version_id: activeVersion.version_id,
+			})
+		).not.toThrowError();
+	});
+});
+
+/**
+ * 🧪 Regression-guard for “versionless change FKs”
+ *
+ * Context from architecture discussion:
+ * ─────────────────────────────────────
+ * • `lix_change` rows are **version-agnostic** (no `version_id` column) and
+ *   append-only.  They form the immutable source-of-truth that every branch
+ *   materialises state from.
+ *
+ * • Therefore **any** version-scoped table is allowed to carry a foreign key
+ *   that points at `lix_change.id`, because the target row can never disappear
+ *   or mutate in a way that would break the reference.
+ *
+ * • The validator treats these targets specially: if the referenced schema’s
+ *   scope is `versionless`, it skips the usual “same version” check.
+ *
+ * What this test proves:
+ * ──────────────────────
+ * 1. A table that references `lix_change.id` can be inserted **in the global
+ *    context**.
+ * 2. The **same row** can also be inserted in an arbitrary branch
+ *    (`activeVersion.version_id`) without triggering a
+ *    “foreign-key constraint violation”.
+ *
+ * If either expectation starts failing, it means the validator has regressed
+ * and is once again enforcing version isolation for versionless targets—
+ * something we explicitly decided against.
+ */
+test("should allow foreign keys to changes from any version context", async () => {
+	const lix = await openLix({});
+
+	// Create a schema that references change.id (like change_author does)
+	const mockSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_schema",
+		"x-lix-primary-key": ["change_id"],
+		"x-lix-foreign-keys": {
+			change_id: {
+				schemaKey: "lix_change",
+				property: "id",
+			},
+		},
+		properties: {
+			change_id: { type: "string" },
+		},
+		required: ["change_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// First create a key-value entity to generate a real change
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "test_key_for_change_ref",
+			value: "test_value",
+		})
+		.execute();
+
+	// Get the change that was created
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "test_key_for_change_ref")
+		.where("schema_key", "=", "lix_key_value")
+		.selectAll()
+		.execute();
+
+	expect(changes).toHaveLength(1);
+	const realChangeId = changes[0]!.id;
+
+	// This should PASS because changes are versionless and can be referenced from global version
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockSchema,
+			snapshot_content: {
+				change_id: realChangeId,
+			},
+			operation: "insert",
+			version_id: "global",
+		})
+	).not.toThrowError();
+
+	// This should ALSO PASS because changes are versionless and can be referenced from any version
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockSchema,
+			snapshot_content: {
+				change_id: realChangeId,
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
 		})
 	).not.toThrowError();
 });
