@@ -309,7 +309,6 @@ export function LixSidebar() {
 
 			try {
 				const isActiveFile = activeFile?.id === fileId;
-
 				// Delete the file
 				await lix.db.deleteFrom("file").where("id", "=", fileId).execute();
 
@@ -464,15 +463,14 @@ export function LixSidebar() {
 
 		try {
 			const root = await navigator.storage.getDirectory();
-			// Find another lix to navigate to
+			// The file is saved with the current name displayed in the UI (with .lix extension)
+			console.log("Deleting current lix:", lixIdSearchParams);
+			if (lixIdSearchParams) {
+				await root.removeEntry(`${lixIdSearchParams}.lix`);
+			}
 
-
+			const availableLixes = await getAvailableLixes();
 			if (availableLixes.length > 0) {
-				// The file is saved with the current name displayed in the UI (with .lix extension)
-				if (lixIdSearchParams) {
-					await root.removeEntry(`${lixIdSearchParams}.lix`);
-				}
-
 				// Navigate to another lix
 				const nextLixId = availableLixes[0].id;
 				switchToLix(nextLixId);
@@ -483,7 +481,6 @@ export function LixSidebar() {
 					currentParams.delete("f");
 					return currentParams;
 				});
-				await createNewLixFileInOpfs();
 			}
 
 			setShowDeleteProjectsDialog(false);
@@ -642,13 +639,13 @@ export function LixSidebar() {
 						{/* Workspace selector using Select component */}
 						<Select
 							onValueChange={(value) => {
-									if (value === "CreateNewLix") {
+								if (value === "CreateNewLix") {
 									handleCreateNewLix();
 								} else {
 									switchToLix(value);
 								}
 							}}
-								value={lixIdSearchParams || ""}
+							value={lixIdSearchParams || ""}
 						>
 							<SelectTrigger
 								size="sm"
@@ -656,7 +653,7 @@ export function LixSidebar() {
 							>
 								<SelectValue placeholder="Select Workspace">
 									<div className="flex items-center justify-between w-full">
-											<span className="truncate mr-1">{currentLixName}</span>
+										<span className="truncate mr-1">{currentLixName}</span>
 									</div>
 								</SelectValue>
 							</SelectTrigger>
@@ -672,7 +669,7 @@ export function LixSidebar() {
 										</SelectItem>
 									))}
 									<SelectSeparator />
-										<SelectItem value="CreateNewLix">
+									<SelectItem value="CreateNewLix">
 										<div className="flex items-center w-full">
 											<FolderPlus className="h-4 w-4 mr-2 shrink-0" />
 											<span>New Lix</span>

@@ -29,9 +29,6 @@ export interface UseMdAstStateReturn {
 export function useMdAstState(): UseMdAstStateReturn {
 	const lix = useLix();
 
-	// const mdRoot = useQueryTakeFirst(selectMdAstRoot);
-	// const mdNodes = useQuery(selectMdAstNodes);
-
 	const [state, setState] = useState({
 		order: [],
 		entities: [] as any,
@@ -39,18 +36,13 @@ export function useMdAstState(): UseMdAstStateReturn {
 		error: null,
 	});
 
-	// const [mdRoot, setMdRoot] = useState();
-	// const [mdNodes, setMdNodes] = useState();
-
 	const activeFile = useQueryTakeFirst(selectActiveFile);
-
-	// console.log("called hook");
 
 	async function loadFileContent() {
 		const root = await selectMdAstRoot(lix).executeTakeFirst();
 		const entities = await selectMdAstNodes(lix).execute();
 
-		console.log("setting state", root, entities);
+		// console.log("setting state", root, entities);
 
 		setState({
 			order: root?.snapshot_content?.order ?? [],

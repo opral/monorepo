@@ -115,14 +115,6 @@ export async function findLixFilesInOpfs(
 
 				const lixIdValue = tempLixId?.value || "";
 
-				// Cache the result
-				// opfsCache.set(name, {
-				// 	id: lixIdValue,
-				// 	name: name.replace(/\.lix$/, ""),
-				// 	fullName: name,
-				// 	lastModified: now,
-				// });
-
 				// If no specific ID was requested, or if this file matches the requested ID
 				if (!lixId || lixIdValue === lixId) {
 					return {

@@ -55,7 +55,7 @@ export async function initializeLix(
 		const _newLixFile = await newLixFile();
 		lixId = _newLixFile._lix.id;
 		lix = await openLix({
-			blob: lixFile,
+			blob: _newLixFile,
 			providePlugins: [mdPlugin],
 			storage: new OpfsStorage({ path: `${lixId}.lix` }),
 		});
