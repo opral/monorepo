@@ -96,6 +96,7 @@ describe("createEntityViewIfNotExists", () => {
 		expect(entity).toHaveProperty("lixcol_file_id", "test_file");
 		expect(entity).toHaveProperty("lixcol_untracked");
 		expect(entity?.lixcol_untracked).toBe(0); // Default value is false (0)
+		expect(entity).toHaveProperty("lixcol_change_set_id");
 	});
 
 	test("should create CRUD triggers", async () => {
@@ -588,5 +589,58 @@ describe("createEntityViewIfNotExists", () => {
 
 		expect(onlyTracked).toHaveLength(1);
 		expect(onlyTracked[0]?.id).toBe("tracked_entity");
+	});
+
+	test("should expose lixcol_change_set_id for history queries", async () => {
+		const lix = await openLix({});
+
+		// First, store the test schema
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ key: "test_entity", value: testSchema as any })
+			.execute();
+
+		createEntityStateView({
+			lix,
+			schema: testSchema,
+			overrideName: "test_view",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Insert test data through the view (uses active version)
+		await lix.db
+			.insertInto("test_view" as any)
+			.values({
+				id: "test_id",
+				name: "test_name",
+				value: 42,
+			})
+			.execute();
+
+		// Query the view and verify lixcol_change_set_id is exposed
+		const result = await lix.db
+			.selectFrom("test_view" as any)
+			.selectAll()
+			.execute();
+
+		expect(result).toHaveLength(1);
+		const entity = result[0];
+
+		// Verify that lixcol_change_set_id is exposed
+		expect(entity).toHaveProperty("lixcol_change_set_id");
+		// The change_set_id should be populated (either from a change set or 'untracked')
+		expect(entity?.lixcol_change_set_id).toBeDefined();
+		expect(typeof entity?.lixcol_change_set_id).toBe("string");
+
+		// Verify we can query by lixcol_change_set_id
+		const queryByChangeSetId = await lix.db
+			.selectFrom("test_view" as any)
+			.where("lixcol_change_set_id", "=", entity?.lixcol_change_set_id)
+			.selectAll()
+			.execute();
+
+		expect(queryByChangeSetId).toHaveLength(1);
+		expect(queryByChangeSetId[0]?.id).toBe("test_id");
 	});
 });

@@ -37,7 +37,7 @@ export function createChangesetForTransaction(
 		},
 		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
 	>[]
-): void {
+): string {
 	const versionRecord = getVersionRecordByIdOrThrow(sqlite, db, version_id);
 
 	if (!versionRecord) {
@@ -318,4 +318,6 @@ export function createChangesetForTransaction(
 			}
 		}
 	}
+
+	return nextChangeSetId;
 }
