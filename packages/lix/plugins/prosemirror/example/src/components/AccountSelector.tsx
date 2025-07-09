@@ -10,7 +10,6 @@ import {
 
 const AccountSelector: React.FC = () => {
 	const lix = useLix();
-	const [isOpen, setIsOpen] = useState(false);
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [newAccountName, setNewAccountName] = useState("");
 
@@ -23,16 +22,18 @@ const AccountSelector: React.FC = () => {
 	);
 
 	const handleAccountSelect = async (account: Account) => {
-		setIsOpen(false);
 		await switchAccount({
 			lix,
 			to: [account],
 		});
+		// Close dropdown by removing focus
+		(document.activeElement as HTMLElement)?.blur();
 	};
 
 	const handleCreateAccountClick = () => {
-		setIsOpen(false);
 		setShowCreateDialog(true);
+		// Close dropdown by removing focus
+		(document.activeElement as HTMLElement)?.blur();
 	};
 
 	const handleCreateAccount = async () => {
@@ -60,18 +61,15 @@ const AccountSelector: React.FC = () => {
 
 	// Avatar component with wireframe style
 	const Avatar = ({ name }: { name: string }) => (
-		<div className="w-6 h-6 rounded-full bg-base-300 border border-base-300 flex items-center justify-center text-xs font-bold text-base-content mr-2 flex-shrink-0">
+		<div className="w-6 h-6 rounded-full bg-base-300 flex items-center justify-center text-xs font-bold text-base-content mr-2 flex-shrink-0">
 			{getInitials(name)}
 		</div>
 	);
 
 	// Loading state or display account
 	return (
-		<div className="relative inline-block">
-			<button
-				onClick={() => setIsOpen(!isOpen)}
-				className="btn btn-outline justify-between normal-case"
-			>
+		<div className="dropdown dropdown-end">
+			<label tabIndex={0} className="btn btn-ghost border border-base-300">
 				<div className="flex items-center">
 					{activeAccount ? (
 						<>
@@ -82,44 +80,45 @@ const AccountSelector: React.FC = () => {
 						</>
 					) : (
 						<>
-							<div className="w-6 h-6 bg-base-300 border border-base-300 rounded-full mr-2 flex items-center justify-center text-xs font-bold flex-shrink-0"></div>
+							<div className="w-6 h-6 bg-base-300 rounded-full mr-2 flex items-center justify-center text-xs font-bold flex-shrink-0"></div>
 							<span>Loading...</span>
 						</>
 					)}
 				</div>
 				<ChevronDown size={16} className="ml-2" />
-			</button>
+			</label>
 
-			{isOpen && (
-				<div className="absolute top-full right-0 min-w-full w-auto max-w-[200px] bg-white border border-base-300 rounded-b-md shadow-md z-10 max-h-[300px] overflow-y-auto">
-					{allAccounts.map((account) => (
-						<div
-							key={account.id}
+			<ul
+				tabIndex={0}
+				className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 mt-1"
+			>
+				{allAccounts.map((account) => (
+					<li key={account.id}>
+						<a
 							onClick={() => handleAccountSelect(account)}
-							className={`p-3 cursor-pointer border-b border-base-200 flex items-center ${
-								activeAccount && account.id === activeAccount.id
-									? "bg-base-200"
-									: "bg-white"
+							className={`flex items-center ${
+								activeAccount && account.id === activeAccount.id ? "active" : ""
 							}`}
 						>
 							<Avatar name={account.name} />
 							<span className="overflow-hidden text-ellipsis whitespace-nowrap">
 								{account.name}
 							</span>
-						</div>
-					))}
-					{/* Create new account option */}
-					<div
-						onClick={handleCreateAccountClick}
-						className="p-3 cursor-pointer border-t border-base-200 bg-base-100 flex items-center"
-					>
-						<div className="w-6 h-6 bg-base-200 border border-base-300 rounded-full mr-2 flex items-center justify-center text-xs font-bold">
+						</a>
+					</li>
+				))}
+				{/* Divider */}
+				<div className="divider my-1"></div>
+				{/* Create new account option */}
+				<li>
+					<a onClick={handleCreateAccountClick} className="flex items-center">
+						<div className="w-6 h-6 bg-base-300 rounded-full mr-2 flex items-center justify-center text-xs font-bold">
 							+
 						</div>
 						<span>Create new account</span>
-					</div>
-				</div>
-			)}
+					</a>
+				</li>
+			</ul>
 
 			{/* Create account dialog */}
 			{showCreateDialog && (

@@ -11,10 +11,17 @@ import { initLixInspector } from "@lix-js/inspector";
 import { LixProvider } from "@lix-js/react-utils";
 
 // Initialize Lix
-const lix = await openLix({
-	providePlugins: [prosemirrorPlugin],
-	storage: new OpfsStorage({ path: "example.lix" }),
-});
+let lix;
+try {
+	lix = await openLix({
+		providePlugins: [prosemirrorPlugin],
+		storage: new OpfsStorage({ path: "example.lix" }),
+	});
+} catch (error) {
+	console.error("Failed to open Lix, cleaning OPFS and reloading:", error);
+	await OpfsStorage.clean();
+	window.location.reload();
+}
 
 // dev tool for debugging
 initLixInspector({ lix });

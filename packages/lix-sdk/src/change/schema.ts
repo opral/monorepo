@@ -19,13 +19,50 @@ export function applyChangeDatabaseSchema(
     FOREIGN KEY(snapshot_id) REFERENCES internal_snapshot(id)
   ) STRICT;
 
+  -- add a table we use within the transaction
+  -- which is used by the state logic
+  -- defined here to avoid circular dependencies
+  CREATE TABLE IF NOT EXISTS internal_change_in_transaction (
+    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    entity_id TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
+    schema_version TEXT NOT NULL,
+    file_id TEXT NOT NULL,
+    plugin_key TEXT NOT NULL,
+    version_id TEXT NOT NULL,
+    snapshot_content BLOB,
+    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
+    --- NOTE schena_key must be unique per entity_id and file_id in the transaction
+    UNIQUE(entity_id, file_id, schema_key, version_id)
+  ) STRICT;
+
   CREATE VIEW IF NOT EXISTS change AS
   SELECT 
-    c.*,
+    c.id,
+    c.entity_id,
+    c.schema_key,
+    c.schema_version,
+    c.file_id,
+    c.plugin_key,
+    c.created_at,
     (SELECT json(s.content)
      FROM internal_snapshot s
      WHERE s.id = c.snapshot_id) AS snapshot_content
-  FROM internal_change AS c;
+  FROM internal_change AS c
+  UNION ALL
+  SELECT 
+    t.id,
+    t.entity_id,
+    t.schema_key,
+    t.schema_version,
+    t.file_id,
+    t.plugin_key,
+    t.created_at,
+    CASE 
+      WHEN t.snapshot_content IS NULL THEN NULL
+      ELSE json(t.snapshot_content)
+    END AS snapshot_content
+  FROM internal_change_in_transaction AS t;
 
   CREATE TRIGGER IF NOT EXISTS change_insert
   INSTEAD OF INSERT ON change

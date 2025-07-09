@@ -23,10 +23,7 @@ import type {
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixFileDescriptorSchema } from "../file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
-import {
-	LixAccountSchema,
-	type ActiveAccountTable,
-} from "../account/schema.js";
+import { LixAccountSchema, type ActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { LixLabelSchema } from "../label/schema.js";
 import {
@@ -69,18 +66,14 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 };
 
 export type LixDatabaseSchema = {
+	active_account: ToKysely<ActiveAccount>;
+	active_version: ToKysely<ActiveVersion>;
+
 	state: StateView;
 	state_all: StateAllView;
 	state_history: StateHistoryView;
-	// account
-	active_account: ActiveAccountTable;
 
 	change: ChangeView;
-
-	// // change proposal
-	// // change_proposal: ChangeProposalTable;
-
-	active_version: ToKysely<ActiveVersion>;
 } & EntityViews<
 	typeof LixKeyValueSchema,
 	"key_value",

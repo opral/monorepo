@@ -282,3 +282,41 @@ test("inserting a change with snapshot_content: null uses no-content snapshot", 
 	expect(internalChange).toBeDefined();
 	expect(internalChange?.snapshot_id).toBe("no-content");
 });
+
+test("changes in transaction can be accessed via change view", async () => {
+	const lix = await openLix({});
+
+	await lix.db.transaction().execute(async (trx) => {
+		// Insert a key-value entity within transaction
+		await trx
+			.insertInto("key_value")
+			.values({
+				key: "test_key_in_transaction",
+				value: "test_value",
+			})
+			.execute();
+
+		// This should create a change in internal_change_in_transaction
+		// The change view should include changes from both internal_change and internal_change_in_transaction
+
+		// Try to find the change within the transaction via the change view
+		const changesInTransaction = await trx
+			.selectFrom("change")
+			.where("entity_id", "=", "test_key_in_transaction")
+			.where("schema_key", "=", "lix_key_value")
+			.selectAll()
+			.execute();
+
+		// This should find the change that was created in internal_change_in_transaction
+		expect(changesInTransaction).toHaveLength(1);
+		expect(changesInTransaction[0]).toMatchObject({
+			entity_id: "test_key_in_transaction",
+			schema_key: "lix_key_value",
+			file_id: "lix",
+			snapshot_content: {
+				key: "test_key_in_transaction",
+				value: "test_value",
+			},
+		});
+	});
+});
