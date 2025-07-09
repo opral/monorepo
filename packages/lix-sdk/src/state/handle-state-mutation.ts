@@ -219,7 +219,6 @@ export function createChangeWithSnapshot(args: {
 	// 		.returning(["id", "schema_key", "file_id", "entity_id"]),
 	// });
 
-	// we don't need the created snapshot
 	const [change] = executeSync({
 		lix: { sqlite: args.sqlite },
 		query: args.db
@@ -472,12 +471,11 @@ function createChangeAuthorRecords(args: {
 				const currentTime = new Date().toISOString();
 				const changeAuthorId = uuidV7();
 
-				// Write directly to internal_change_in_transaction to avoid infinite recursion
 				executeSync({
 					lix: { sqlite: args.sqlite },
 					query: args.db.insertInto("internal_change_in_transaction").values({
 						id: changeAuthorId,
-						entity_id: `${args.change_id}-${accountId}`, // Unique entity ID for change_author
+						entity_id: `${args.change_id}::${accountId}`,
 						schema_key: LixChangeAuthorSchema["x-lix-key"],
 						schema_version: LixChangeAuthorSchema["x-lix-version"],
 						file_id: "lix",
@@ -492,13 +490,13 @@ function createChangeAuthorRecords(args: {
 				updateStateCache({
 					sqlite: args.sqlite,
 					db: args.db,
-					entity_id: `${args.change_id}-${accountId}`,
-					schema_key: "lix_change_author",
+					entity_id: `${args.change_id}::${accountId}`,
+					schema_key: LixChangeAuthorSchema["x-lix-key"],
+					schema_version: LixChangeAuthorSchema["x-lix-version"],
 					file_id: "lix",
 					version_id: "global",
 					plugin_key: "lix",
 					snapshot_content: JSON.stringify(changeAuthorSnapshot),
-					schema_version: "1.0",
 					timestamp: currentTime,
 					change_id: changeAuthorId,
 				});
