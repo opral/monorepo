@@ -1,5 +1,5 @@
 {
-  "name": "@lix-js/universal-diff",
+  "name": "@lix-js/html-diff",
   "version": "0.0.1",
   "type": "module",
   "types": "./dist/index.d.ts",

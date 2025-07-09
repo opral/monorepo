@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { renderUniversalDiff } from "../../src/render-universal-diff.js";
+import { renderHtmlDiff } from "../../src/render-html-diff.js";
 
 // Type for showcase entry
 interface ShowcaseEntry {
@@ -115,7 +115,7 @@ export function Showcase() {
             <div className="mt-6">
               <div className="min-h-[60px] bg-white">
                 <ShadowHtml
-                  html={renderUniversalDiff({
+                  html={renderHtmlDiff({
                     beforeHtml: current.before,
                     afterHtml: current.after,
                   })}

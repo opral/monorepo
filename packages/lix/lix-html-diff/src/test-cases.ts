@@ -1,5 +1,5 @@
 /**
- * A collection of test cases for the renderUniversalDiff function.
+ * A collection of test cases for the renderHtmlDiff function.
  * Each test case includes a name, the HTML before the change, and the HTML after the change.
  */
 import dedent from "dedent";
@@ -15,7 +15,7 @@ export type TestCase = {
 };
 
 /**
- * Defines a collection of test cases for the `renderUniversalDiff` function.
+ * Defines a collection of test cases for the `renderHtmlDiff` function.
  * This array serves as a single source of truth for both unit tests (`*.test.ts`)
  * and potentially visual regression tests or viewers.
  */

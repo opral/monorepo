@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { renderUniversalDiff } from "./render-universal-diff.js";
+import { renderHtmlDiff } from "./render-html-diff.js";
 import { testCases } from "./test-cases.js";
 
 function normalizeHtml(html: string): string {
@@ -12,7 +12,7 @@ function normalizeHtml(html: string): string {
 test.each(testCases)(
   "$name",
   ({ name, beforeHtml, afterHtml, expectedHtml }) => {
-    const result = renderUniversalDiff({ beforeHtml, afterHtml });
+    const result = renderHtmlDiff({ beforeHtml, afterHtml });
     expect(normalizeHtml(result), `Test failed: ${name}`).toBe(
       normalizeHtml(expectedHtml),
     );

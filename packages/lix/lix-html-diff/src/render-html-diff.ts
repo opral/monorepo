@@ -6,16 +6,16 @@
  *
  * Use this if you want to bypass parsing and DOM creation by
  * directly working with the DOM elements instead of the HTML string
- * output of `renderUniversalDiff()`.
+ * output of `renderHtmlDiff()`.
  *
  * @example
- *   renderUniversalDiffElement({
+ *   renderHtmlDiffElement({
  *     beforeHtml: `<p data-diff-id="abc">Test</p>`,
  *     afterHtml: `<p data-diff-id="abc">Test World</p>`,
  *   });
  *
  */
-function renderUniversalDiffElement(args: {
+function renderHtmlDiffElement(args: {
   beforeHtml: string;
   afterHtml: string;
 }): HTMLElement {
@@ -240,18 +240,18 @@ function renderUniversalDiffElement(args: {
  *
  * Use this if you want to bypass parsing and DOM creation by
  * directly working with the DOM elements instead of the HTML string
- * output of `renderUniversalDiff()`.
+ * output of `renderHtmlDiff()`.
  *
  * @example
- *   renderUniversalDiffElement({
+ *   renderHtmlDiffElement({
  *     beforeHtml: `<p data-diff-id="abc">Test</p>`,
  *     afterHtml: `<p data-diff-id="abc">Test World</p>`,
  *   });
  *
  */
-export function renderUniversalDiff(args: {
+export function renderHtmlDiff(args: {
   beforeHtml: string;
   afterHtml: string;
 }): string {
-  return renderUniversalDiffElement(args).outerHTML;
+  return renderHtmlDiffElement(args).outerHTML;
 }
