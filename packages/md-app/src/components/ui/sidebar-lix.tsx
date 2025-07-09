@@ -459,15 +459,13 @@ export function LixSidebar() {
 	);
 
 	const handleDeleteCurrentLix = React.useCallback(async () => {
-		if (!lix) return;
+		if (!lix || !lixIdSearchParams) return;
 
 		try {
+			await lix.close();
+
 			const root = await navigator.storage.getDirectory();
-			// The file is saved with the current name displayed in the UI (with .lix extension)
-			console.log("Deleting current lix:", lixIdSearchParams);
-			if (lixIdSearchParams) {
-				await root.removeEntry(`${lixIdSearchParams}.lix`);
-			}
+			await root.removeEntry(`${lixIdSearchParams}.lix`);
 
 			const availableLixes = await getAvailableLixes();
 			if (availableLixes.length > 0) {
@@ -481,13 +479,15 @@ export function LixSidebar() {
 					currentParams.delete("f");
 					return currentParams;
 				});
+				const lixId = await createNewLixFileInOpfs();
+				switchToLix(lixId.id);
 			}
 
 			setShowDeleteProjectsDialog(false);
 		} catch (error) {
 			console.error("Error deleting current lix:", error);
 		}
-	}, [lix]);
+	}, [lix, lixIdSearchParams]);
 
 	const handleResetAllOpfs = React.useCallback(async () => {
 		try {
