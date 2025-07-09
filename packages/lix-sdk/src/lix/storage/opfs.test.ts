@@ -345,4 +345,66 @@ describe("OpfsStorage", () => {
 
 		await lix.close();
 	});
+
+	test("clean() removes all files from OPFS", async () => {
+		// Create some files in OPFS
+		const storage1 = new OpfsStorage({ path: "file1.lix" });
+		const storage2 = new OpfsStorage({ path: "file2.lix" });
+		
+		// Open and create files
+		await openLix({ storage: storage1 });
+		await openLix({ storage: storage2 });
+		
+		// Also create an active accounts file
+		const lix3 = await openLix({ 
+			storage: new OpfsStorage({ path: "file3.lix" }),
+			account: { id: "test-clean", name: "Clean Test" }
+		});
+		await lix3.close();
+		
+		// Mock the OPFS directory structure for clean()
+		const mockFiles = new Map([
+			["file1.lix", { kind: "file", name: "file1.lix" }],
+			["file2.lix", { kind: "file", name: "file2.lix" }],
+			["file3.lix", { kind: "file", name: "file3.lix" }],
+			["lix_active_accounts.json", { kind: "file", name: "lix_active_accounts.json" }],
+			["some-dir", { kind: "directory", name: "some-dir" }],
+		]);
+		
+		const removeEntrySpy = vi.fn();
+		
+		// Override getDirectory for clean() to return our mock structure
+		vi.mocked(navigator.storage.getDirectory).mockResolvedValueOnce({
+			values: vi.fn().mockImplementation(function* () {
+				for (const entry of mockFiles.values()) {
+					yield entry;
+				}
+			}),
+			removeEntry: removeEntrySpy,
+		} as any);
+		
+		// Call clean()
+		await OpfsStorage.clean();
+		
+		// Verify all files and directories were removed
+		expect(removeEntrySpy).toHaveBeenCalledTimes(5);
+		expect(removeEntrySpy).toHaveBeenCalledWith("file1.lix");
+		expect(removeEntrySpy).toHaveBeenCalledWith("file2.lix");
+		expect(removeEntrySpy).toHaveBeenCalledWith("file3.lix");
+		expect(removeEntrySpy).toHaveBeenCalledWith("lix_active_accounts.json");
+		expect(removeEntrySpy).toHaveBeenCalledWith("some-dir", { recursive: true });
+	});
+
+	test("clean() throws error if OPFS is not supported", async () => {
+		// Remove navigator to simulate unsupported environment
+		const originalNavigator = globalThis.navigator;
+		delete (globalThis as any).navigator;
+
+		await expect(OpfsStorage.clean()).rejects.toThrow(
+			"OPFS is not supported in this environment"
+		);
+
+		// Restore navigator
+		globalThis.navigator = originalNavigator;
+	});
 });

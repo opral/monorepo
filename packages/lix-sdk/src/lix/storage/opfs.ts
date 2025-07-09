@@ -18,6 +18,38 @@ import type { Lix } from "../open-lix.js";
  * Features auto-saving functionality when integrated with the hooks system.
  */
 export class OpfsStorage implements LixStorageAdapter {
+	/**
+	 * Cleans the entire OPFS by removing all files.
+	 * Useful for debugging and testing.
+	 *
+	 * TODO refactor to only delete opfs adapter related files
+	 *      after https://github.com/opral/lix-sdk/issues/332 is implemented.
+	 *
+	 * @warning This will delete ALL files in OPFS, not just Lix files!
+	 */
+	static async clean(): Promise<void> {
+		// Check if OPFS is supported
+		if (
+			!("navigator" in globalThis) ||
+			!("storage" in navigator) ||
+			!("getDirectory" in navigator.storage)
+		) {
+			throw new Error("OPFS is not supported in this environment");
+		}
+
+		const root = await navigator.storage.getDirectory();
+
+		// List all entries in the root directory
+		// @ts-expect-error - values() is not in the TypeScript definitions yet
+		for await (const entry of root.values()) {
+			if (entry.kind === "file") {
+				await root.removeEntry(entry.name);
+			} else if (entry.kind === "directory") {
+				await root.removeEntry(entry.name, { recursive: true });
+			}
+		}
+	}
+
 	private database?: SqliteWasmDatabase;
 	private readonly path: string;
 	private opfsRoot?: FileSystemDirectoryHandle;
