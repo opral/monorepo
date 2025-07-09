@@ -442,4 +442,73 @@ describe("createEntityAllViewIfNotExists", () => {
 		expect(onlyTracked).toHaveLength(1);
 		expect(onlyTracked[0]?.id).toBe("tracked_entity");
 	});
+
+	test("should expose lixcol_change_set_id for history queries", async () => {
+		const lix = await openLix({});
+
+		// Store the test schema
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ key: "test_entity", value: testSchema as any })
+			.execute();
+
+		createEntityStateAllView({
+			lix,
+			schema: testSchema,
+			overrideName: "test_view_all",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Get the active version ID
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirst();
+
+		// Insert test data through the view
+		await lix.db
+			.insertInto("test_view_all" as any)
+			.values({
+				id: "test_id",
+				name: "test_name",
+				value: 42,
+				lixcol_version_id: activeVersion?.version_id,
+			})
+			.execute();
+
+		// Query the view and verify lixcol_change_set_id is exposed
+		const result = await lix.db
+			.selectFrom("test_view_all" as any)
+			.selectAll()
+			.execute();
+
+		expect(result).toHaveLength(1);
+		const entity = result[0];
+
+		// Verify that lixcol_change_set_id is exposed
+		expect(entity).toHaveProperty("lixcol_change_set_id");
+		expect(entity?.lixcol_change_set_id).toBeDefined();
+		expect(typeof entity?.lixcol_change_set_id).toBe("string");
+
+		// Verify we can query by lixcol_change_set_id
+		const queryByChangeSetId = await lix.db
+			.selectFrom("test_view_all" as any)
+			.where("lixcol_change_set_id", "=", entity?.lixcol_change_set_id)
+			.where("lixcol_version_id", "=", activeVersion?.version_id)
+			.selectAll()
+			.execute();
+
+		expect(queryByChangeSetId).toHaveLength(1);
+		expect(queryByChangeSetId[0]?.id).toBe("test_id");
+
+		// Also verify it's exposed alongside other lixcol columns
+		expect(entity).toHaveProperty("lixcol_version_id");
+		expect(entity).toHaveProperty("lixcol_inherited_from_version_id");
+		expect(entity).toHaveProperty("lixcol_created_at");
+		expect(entity).toHaveProperty("lixcol_updated_at");
+		expect(entity).toHaveProperty("lixcol_file_id");
+		expect(entity).toHaveProperty("lixcol_change_id");
+		expect(entity).toHaveProperty("lixcol_untracked");
+	});
 });

@@ -371,6 +371,7 @@ function updateStateCache(args: {
 								inherited_from_version_id: null,
 								inheritance_delete_marker: 1,
 								change_id: resolvedChangeId,
+								change_set_id: null, // Will be populated when changeset is created at commit
 							})
 					),
 			});
@@ -407,6 +408,7 @@ function updateStateCache(args: {
 				inherited_from_version_id: null, // Direct entities are not inherited
 				inheritance_delete_marker: 0, // Not a deletion marker
 				change_id: args.change_id || "no-change-id",
+				change_set_id: null, // Will be populated when changeset is created at commit
 			})
 			.onConflict((oc) =>
 				oc
@@ -419,6 +421,7 @@ function updateStateCache(args: {
 						inherited_from_version_id: null, // Direct entities are not inherited
 						inheritance_delete_marker: 0, // Not a deletion marker
 						change_id: resolvedChangeId,
+						change_set_id: null, // Will be populated when changeset is created at commit
 					})
 			),
 	});

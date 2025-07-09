@@ -78,6 +78,15 @@ export type StateEntityView = {
 	 * in the state resolution order: untracked > tracked > inherited.
 	 */
 	lixcol_untracked: Generated<boolean>;
+
+	/**
+	 * Change set identifier that contains this entity's last change.
+	 *
+	 * This references the change_set.id that contains the last change to this entity.
+	 * Useful for understanding which change set a particular entity state belongs to,
+	 * enabling history queries and version comparison.
+	 */
+	lixcol_change_set_id: Generated<string>;
 };
 
 /**
@@ -156,6 +165,15 @@ export type EntityStateColumns = {
 	 * in the state resolution order: untracked > tracked > inherited.
 	 */
 	lixcol_untracked: LixGenerated<boolean>;
+
+	/**
+	 * Change set identifier that contains this entity's last change.
+	 *
+	 * This references the change_set.id that contains the last change to this entity.
+	 * Useful for understanding which change set a particular entity state belongs to,
+	 * enabling history queries and version comparison.
+	 */
+	lixcol_change_set_id: LixGenerated<string>;
 };
 
 /**
@@ -372,6 +390,7 @@ function createSingleEntityView(args: {
 		"file_id AS lixcol_file_id",
 		"change_id AS lixcol_change_id",
 		"untracked AS lixcol_untracked",
+		"change_set_id AS lixcol_change_set_id",
 	];
 
 	// Handle version_id for active view
@@ -445,12 +464,12 @@ function createSingleEntityView(args: {
           json_object(${properties.map((prop) => `'${prop}', with_default_values.${prop}`).join(", ")}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference.replace(/NEW\./g, "with_default_values.")},
-          with_default_values.lixcol_untracked
+          COALESCE(with_default_values.lixcol_untracked, 0)
         FROM (
           SELECT
             ${defaultsSubquery},
             NEW.lixcol_file_id AS lixcol_file_id,
-            NEW.lixcol_untracked AS lixcol_untracked
+            COALESCE(NEW.lixcol_untracked, 0) AS lixcol_untracked
         ) AS with_default_values`
 						: `
         VALUES (
@@ -461,7 +480,7 @@ function createSingleEntityView(args: {
           json_object(${properties.map((prop) => `'${prop}', NEW.${prop}`).join(", ")}),
           '${args.schema["x-lix-version"]}',
           ${versionIdReference},
-          NEW.lixcol_untracked
+          COALESCE(NEW.lixcol_untracked, 0)
         )`
 				};
       END;

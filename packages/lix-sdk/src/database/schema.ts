@@ -19,6 +19,7 @@ import type {
 	InternalStateCacheTable,
 	InternalChangeInTransactionTable,
 	StateAllView,
+	InternalStateAllUntrackedTable,
 } from "../state/schema.js";
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixFileDescriptorSchema } from "../file/schema.js";
@@ -45,6 +46,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_change: InternalChangeTable;
 	internal_snapshot: InternalSnapshotTable;
 	internal_state_cache: InternalStateCacheTable;
+	internal_state_all_untracked: InternalStateAllUntrackedTable;
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
