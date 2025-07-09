@@ -148,21 +148,18 @@ export class OpfsStorage implements LixStorageAdapter {
 	}
 
 	/**
-	 * Called when state commits happen.
-	 * Automatically saves the current state to OPFS.
+	 * Called after the Lix instance is fully initialized.
+	 * Sets up observers for persisting state changes.
 	 */
-	onStateCommit(): void {
-		this.batchedSave();
-	}
+	connect(args: { lix: Lix }): void {
+		// Set up hook for database persistence
+		args.lix.hooks.onStateCommit(() => {
+			this.batchedSave();
+		});
 
-	/**
-	 * Sets up persistence observers for active account changes.
-	 * This is called after the Lix instance is fully initialized.
-	 */
-	setupPersistence(lix: Lix): void {
 		// Observe changes to the active_account table
-		this.activeAccountSubscription = lix
-			.observe(lix.db.selectFrom("active_account").selectAll())
+		this.activeAccountSubscription = args.lix
+			.observe(args.lix.db.selectFrom("active_account").selectAll())
 			.subscribe({
 				next: (accounts) => {
 					// Save accounts when they change
@@ -227,10 +224,23 @@ export class OpfsStorage implements LixStorageAdapter {
 	}
 
 	/**
-	 * Gets the loaded active accounts.
+	 * Returns any persisted state that should be restored.
 	 */
-	getActiveAccounts(): Pick<Account, "id" | "name">[] | undefined {
-		return this.activeAccounts;
+	async getPersistedState(): Promise<
+		{ activeAccounts?: Pick<Account, "id" | "name">[] } | undefined
+	> {
+		// Load active accounts if not already loaded
+		if (!this.activeAccounts && this.opfsRoot) {
+			await this.loadActiveAccounts();
+		}
+
+		if (!this.activeAccounts || this.activeAccounts.length === 0) {
+			return undefined;
+		}
+
+		return {
+			activeAccounts: this.activeAccounts,
+		};
 	}
 
 	/**

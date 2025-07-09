@@ -137,13 +137,6 @@ export async function openLix(args: {
 
 	const db = initDb({ sqlite: database, hooks });
 
-	// Connect storage to state commit hooks if it supports it
-	if ("onStateCommit" in storage && storage.onStateCommit) {
-		hooks.onStateCommit(() => {
-			storage.onStateCommit!();
-		});
-	}
-
 	if (args.keyValues && args.keyValues.length > 0) {
 		for (const keyValue of args.keyValues) {
 			// Check if the key already exists
@@ -167,10 +160,9 @@ export async function openLix(args: {
 		}
 	}
 
-	// Check if storage has persisted active accounts
-	const persistedAccounts = storage.getActiveAccounts?.();
-	const accountToSet =
-		args.account ?? (persistedAccounts && persistedAccounts[0]);
+	// Check if storage has persisted state
+	const persistedState = await storage.getPersistedState?.();
+	const accountToSet = args.account ?? persistedState?.activeAccounts?.[0];
 
 	if (accountToSet) {
 		await db.transaction().execute(async (trx) => {
@@ -211,9 +203,9 @@ export async function openLix(args: {
 	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
 
-	// Set up storage persistence if the adapter supports it
-	if (storage.setupPersistence) {
-		storage.setupPersistence(lix);
+	// Connect storage to Lix if the adapter supports it
+	if (storage.connect) {
+		storage.connect({ lix });
 	}
 
 	return lix;
