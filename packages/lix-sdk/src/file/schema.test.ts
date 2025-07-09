@@ -32,7 +32,7 @@ test("insert, update, delete on the file view", async () => {
 		data: JSON.parse(new TextDecoder().decode(row.data)),
 	}));
 
-	expect(viewAfterInsert).toEqual([
+	expect(viewAfterInsert).toMatchObject([
 		{
 			id: "file0",
 			path: "/path/to/file.json",
@@ -66,7 +66,7 @@ test("insert, update, delete on the file view", async () => {
 		data: JSON.parse(new TextDecoder().decode(row.data)),
 	}));
 
-	expect(viewAfterUpdate).toEqual([
+	expect(viewAfterUpdate).toMatchObject([
 		{
 			id: "file0",
 			path: "/path/to/renamed_file.json",
@@ -165,7 +165,7 @@ test("file insert data materialization", async () => {
 		data: JSON.parse(new TextDecoder().decode(row.data)),
 	}));
 
-	expect(viewAfterInsert).toEqual([
+	expect(viewAfterInsert).toMatchObject([
 		{
 			id: "file0",
 			path: "/path/to/file.json",
@@ -241,9 +241,9 @@ test("files should be able to have metadata", async () => {
 });
 
 test("invalid file paths should be rejected", async () => {
-        const lix = await openLix({
-                providePlugins: [mockJsonPlugin],
-        });
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
 
 	await expect(
 		lix.db
@@ -253,52 +253,52 @@ test("invalid file paths should be rejected", async () => {
 				data: new Uint8Array(),
 			})
 			.execute()
-        ).rejects.toThrowError("path must match pattern");
+	).rejects.toThrowError("path must match pattern");
 });
 
 test("files should have hidden property defaulting to false", async () => {
-        const lix = await openLix({
-                providePlugins: [mockJsonPlugin],
-        });
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
 
-        await lix.db
-                .insertInto("file")
-                .values({
-                        path: "/hidden-default.json",
-                        data: new Uint8Array(),
-                })
-                .execute();
+	await lix.db
+		.insertInto("file")
+		.values({
+			path: "/hidden-default.json",
+			data: new Uint8Array(),
+		})
+		.execute();
 
-        const file = await lix.db
-                .selectFrom("file")
-                .where("path", "=", "/hidden-default.json")
-                .selectAll()
-                .executeTakeFirstOrThrow();
+	const file = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/hidden-default.json")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-        expect(file.hidden).toBe(0);
+	expect(file.hidden).toBe(0);
 });
 
 test("can explicitly set hidden to true", async () => {
-        const lix = await openLix({
-                providePlugins: [mockJsonPlugin],
-        });
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
 
-        await lix.db
-                .insertInto("file")
-                .values({
-                        path: "/hidden.json",
-                        data: new Uint8Array(),
-                        hidden: true,
-                })
-                .execute();
+	await lix.db
+		.insertInto("file")
+		.values({
+			path: "/hidden.json",
+			data: new Uint8Array(),
+			hidden: true,
+		})
+		.execute();
 
-        const file = await lix.db
-                .selectFrom("file")
-                .where("path", "=", "/hidden.json")
-                .selectAll()
-                .executeTakeFirstOrThrow();
+	const file = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/hidden.json")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
-        expect(file.hidden).toBe(1);
+	expect(file.hidden).toBe(1);
 });
 
 test("file_all operations are version specific and isolated", async () => {

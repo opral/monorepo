@@ -10,67 +10,67 @@ import type { Lix } from "../lix/open-lix.js";
 export function applyFileDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin" | "hooks">
 ): void {
-        lix.sqlite.createFunction({
-                name: "handle_file_insert",
-                arity: 7,
-                xFunc: (_ctx: number, ...args: any[]) => {
-                        // Parse metadata if it's a JSON string (SQLite converts objects to strings)
-                        let metadata = args[3];
-                        if (typeof metadata === "string" && metadata !== null) {
-                                try {
-                                        metadata = JSON.parse(metadata);
-                                } catch {
-                                        // If parsing fails, keep as string
-                                }
-                        }
+	lix.sqlite.createFunction({
+		name: "handle_file_insert",
+		arity: 7,
+		xFunc: (_ctx: number, ...args: any[]) => {
+			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
+			let metadata = args[3];
+			if (typeof metadata === "string" && metadata !== null) {
+				try {
+					metadata = JSON.parse(metadata);
+				} catch {
+					// If parsing fails, keep as string
+				}
+			}
 
-                        const result = handleFileInsert({
-                                lix,
-                                file: {
-                                        id: args[0],
-                                        path: args[1],
-                                        data: args[2],
-                                        metadata: metadata,
-                                        hidden: Boolean(args[4]),
-                                },
-                                versionId: args[5],
-                                untracked: Boolean(args[6]),
-                        });
-                        return result;
-                },
-                deterministic: true,
-        });
+			const result = handleFileInsert({
+				lix,
+				file: {
+					id: args[0],
+					path: args[1],
+					data: args[2],
+					metadata: metadata,
+					hidden: Boolean(args[4]),
+				},
+				versionId: args[5],
+				untracked: Boolean(args[6]),
+			});
+			return result;
+		},
+		deterministic: true,
+	});
 
-        lix.sqlite.createFunction({
-                name: "handle_file_update",
-                arity: 7,
-                xFunc: (_ctx: number, ...args: any[]) => {
-                        // Parse metadata if it's a JSON string (SQLite converts objects to strings)
-                        let metadata = args[3];
-                        if (typeof metadata === "string" && metadata !== null) {
-                                try {
-                                        metadata = JSON.parse(metadata);
-                                } catch {
-                                        // If parsing fails, keep as string
-                                }
-                        }
+	lix.sqlite.createFunction({
+		name: "handle_file_update",
+		arity: 7,
+		xFunc: (_ctx: number, ...args: any[]) => {
+			// Parse metadata if it's a JSON string (SQLite converts objects to strings)
+			let metadata = args[3];
+			if (typeof metadata === "string" && metadata !== null) {
+				try {
+					metadata = JSON.parse(metadata);
+				} catch {
+					// If parsing fails, keep as string
+				}
+			}
 
-                        const result = handleFileUpdate({
-                                lix,
-                                file: {
-                                        id: args[0],
-                                        path: args[1],
-                                        data: args[2],
-                                        metadata: metadata,
-                                        hidden: Boolean(args[4]),
-                                },
-                                versionId: args[5],
-                                untracked: Boolean(args[6]),
-                        });
-                        return result;
-                },
-                deterministic: true,
-        });
+			const result = handleFileUpdate({
+				lix,
+				file: {
+					id: args[0],
+					path: args[1],
+					data: args[2],
+					metadata: metadata,
+					hidden: Boolean(args[4]),
+				},
+				versionId: args[5],
+				untracked: Boolean(args[6]),
+			});
+			return result;
+		},
+		deterministic: true,
+	});
 
 	lix.sqlite.createFunction({
 		name: "materialize_file_data",
@@ -277,14 +277,14 @@ export const LixFileDescriptorSchema = {
 			description:
 				"File path must start with a slash, not contain backslashes or consecutive slashes, and not end with a slash",
 		},
-                metadata: {
-                        type: "object",
-                        nullable: true,
-                },
-                hidden: { type: "boolean", "x-lix-generated": true },
-        },
-        required: ["id", "path"],
-        additionalProperties: false,
+		metadata: {
+			type: "object",
+			nullable: true,
+		},
+		hidden: { type: "boolean", "x-lix-generated": true },
+	},
+	required: ["id", "path"],
+	additionalProperties: false,
 } as const;
 LixFileDescriptorSchema satisfies LixSchemaDefinition;
 
