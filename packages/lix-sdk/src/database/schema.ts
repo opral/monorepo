@@ -7,13 +7,13 @@ import {
 } from "../change-set/schema.js";
 import {
 	LixVersionSchema,
-	type ActiveVersion,
+	type LixActiveVersion,
 	// type ActiveVersionTable,
 } from "../version/schema.js";
 import { type InternalSnapshotTable } from "../snapshot/schema.js";
 import { LixStoredSchemaSchema } from "../stored-schema/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
+import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import type {
 	StateView,
 	InternalStateCacheTable,
@@ -24,13 +24,13 @@ import type {
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixFileDescriptorSchema } from "../file/schema.js";
 import { LixLogSchema } from "../log/schema.js";
-import { LixAccountSchema, type ActiveAccount } from "../account/schema.js";
+import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { LixLabelSchema } from "../label/schema.js";
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,
-	type ThreadComment,
+	type LixThreadComment,
 } from "../thread/schema.js";
 import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
@@ -68,8 +68,8 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 };
 
 export type LixDatabaseSchema = {
-	active_account: ToKysely<ActiveAccount>;
-	active_version: ToKysely<ActiveVersion>;
+	active_account: ToKysely<LixActiveAccount>;
+	active_version: ToKysely<LixActiveVersion>;
 
 	state: StateView;
 	state_all: StateAllView;
@@ -79,7 +79,7 @@ export type LixDatabaseSchema = {
 } & EntityViews<
 	typeof LixKeyValueSchema,
 	"key_value",
-	{ value: KeyValue["value"] }
+	{ value: LixKeyValue["value"] }
 > &
 	EntityViews<typeof LixAccountSchema, "account"> &
 	EntityViews<typeof LixChangeSetSchema, "change_set"> &
@@ -96,6 +96,6 @@ export type LixDatabaseSchema = {
 	EntityViews<
 		typeof LixThreadCommentSchema,
 		"thread_comment",
-		{ body: ThreadComment["body"] }
+		{ body: LixThreadComment["body"] }
 	> &
 	EntityViews<typeof LixVersionSchema, "version">;

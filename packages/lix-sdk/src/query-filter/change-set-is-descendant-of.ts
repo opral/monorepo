@@ -5,7 +5,7 @@ import {
 	type ExpressionWrapper,
 } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { ChangeSet } from "../change-set/schema.js";
+import type { LixChangeSet } from "../change-set/schema.js";
 
 /**
  * Filters change sets that are descendants of the given change set.
@@ -44,7 +44,7 @@ import type { ChangeSet } from "../change-set/schema.js";
  * ```
  */
 export function changeSetIsDescendantOf(
-	changeSet: Pick<ChangeSet, "id">,
+	changeSet: Pick<LixChangeSet, "id">,
 	options?: { depth?: number; includeSelf?: boolean }
 ): (
 	eb: ExpressionBuilder<LixDatabaseSchema, "change_set">

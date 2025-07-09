@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { Thread, ThreadComment } from "./schema.js";
+import type { LixThread, LixThreadComment } from "./schema.js";
 import { nanoid } from "../database/nano-id.js";
 import type { NewState } from "../entity-views/types.js";
 
@@ -19,13 +19,13 @@ import type { NewState } from "../entity-views/types.js";
 export async function createThread(args: {
 	lix: Lix;
 	id?: string;
-	comments?: Pick<NewState<ThreadComment>, "body">[];
+	comments?: Pick<NewState<LixThreadComment>, "body">[];
 	/** defaults to global */
 	versionId?: string;
 }): Promise<
-	Thread & {
+	LixThread & {
 		lixcol_version_id: string;
-		comments: (ThreadComment & {
+		comments: (LixThreadComment & {
 			lixcol_version_id: string;
 		})[];
 	}

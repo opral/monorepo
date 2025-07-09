@@ -1,8 +1,8 @@
 import type { Lix } from "../lix/index.js";
-import type { ChangeSet } from "./schema.js";
+import type { LixChangeSet } from "./schema.js";
 import { createChangeSet } from "./create-change-set.js";
-import type { Label } from "../label/schema.js";
-import type { NewChange } from "../change/schema.js";
+import type { LixLabel } from "../label/schema.js";
+import type { NewLixChange } from "../change/schema.js";
 import { v7 } from "uuid";
 
 /**
@@ -25,9 +25,9 @@ import { v7 } from "uuid";
  */
 export async function createUndoChangeSet(args: {
 	lix: Lix;
-	changeSet: Pick<ChangeSet, "id">;
-	labels?: Pick<Label, "id">[];
-}): Promise<ChangeSet> {
+	changeSet: Pick<LixChangeSet, "id">;
+	labels?: Pick<LixLabel, "id">[];
+}): Promise<LixChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Check for multiple parents (not supported yet)
 		const parents = await trx
@@ -56,7 +56,7 @@ export async function createUndoChangeSet(args: {
 			.selectAll("change")
 			.execute();
 
-		const undoChanges: Array<NewChange> = [];
+		const undoChanges: Array<NewLixChange> = [];
 
 		for (const change of targetChanges) {
 			if (parents.length === 0) {

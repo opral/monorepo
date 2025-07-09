@@ -37,4 +37,4 @@ export const LixLabelSchema = {
 LixLabelSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type Label = FromLixSchemaDefinition<typeof LixLabelSchema>;
+export type LixLabel = FromLixSchemaDefinition<typeof LixLabelSchema>;

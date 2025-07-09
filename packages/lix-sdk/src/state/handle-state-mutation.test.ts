@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import type { ChangeSetEdge } from "../change-set/schema.js";
+import type { LixChangeSetEdge } from "../change-set/schema.js";
 import { switchAccount } from "../account/switch-account.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 
@@ -86,7 +86,7 @@ test("creates a new change set and updates the version's change set id for mutat
 				parent_id: versionAfterUpdate.change_set_id,
 				child_id: versionAfterDelete.change_set_id,
 			},
-		] satisfies ChangeSetEdge[])
+		] satisfies LixChangeSetEdge[])
 	);
 });
 

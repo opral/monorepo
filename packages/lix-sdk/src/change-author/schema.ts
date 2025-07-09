@@ -43,6 +43,6 @@ export const LixChangeAuthorSchema = {
 LixChangeAuthorSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type ChangeAuthor = FromLixSchemaDefinition<
+export type LixChangeAuthor = FromLixSchemaDefinition<
 	typeof LixChangeAuthorSchema
 >;

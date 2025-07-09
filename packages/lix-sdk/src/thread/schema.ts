@@ -77,8 +77,8 @@ export const LixThreadCommentSchema = {
 LixThreadCommentSchema satisfies LixSchemaDefinition;
 
 // Business logic types with LixGenerated markers
-export type Thread = FromLixSchemaDefinition<typeof LixThreadSchema>;
-export type ThreadComment = FromLixSchemaDefinition<
+export type LixThread = FromLixSchemaDefinition<typeof LixThreadSchema>;
+export type LixThreadComment = FromLixSchemaDefinition<
 	typeof LixThreadCommentSchema
 > & {
 	body: ZettelDoc; // Override the body type

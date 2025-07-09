@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { newLixFile } from "./new-lix.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { openLix, usedFileExtensions } from "./open-lix.js";
-import type { Account } from "../account/schema.js";
+import type { LixAccount } from "../account/schema.js";
 
 test("providing plugins should be possible", async () => {
 	const mockPlugin: LixPlugin = {
@@ -45,7 +45,7 @@ test("providing key values should be possible", async () => {
 });
 
 test("providing an account should be possible", async () => {
-	const mockAccount: Account = {
+	const mockAccount: LixAccount = {
 		id: "mock-account",
 		name: "peter",
 	};

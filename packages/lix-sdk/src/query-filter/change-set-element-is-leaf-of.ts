@@ -1,4 +1,4 @@
-import type { ChangeSet } from "../change-set/schema.js";
+import type { LixChangeSet } from "../change-set/schema.js";
 import {
 	sql,
 	type ExpressionBuilder,
@@ -32,7 +32,7 @@ import type { LixDatabaseSchema } from "../database/schema.js";
  *   .selectAll()
  */
 export function changeSetElementIsLeafOf(
-	target: Pick<ChangeSet, "id"> | Array<Pick<ChangeSet, "id">>
+	target: Pick<LixChangeSet, "id"> | Array<Pick<LixChangeSet, "id">>
 ): (
 	eb: ExpressionBuilder<LixDatabaseSchema, "change_set_element">
 ) => ExpressionWrapper<LixDatabaseSchema, "change_set_element", SqlBool> {

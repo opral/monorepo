@@ -121,7 +121,7 @@ export const LixAccountSchema = {
 LixAccountSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type Account = FromLixSchemaDefinition<typeof LixAccountSchema>;
+export type LixAccount = FromLixSchemaDefinition<typeof LixAccountSchema>;
 
 // Active account type using State
-export type ActiveAccount = Account;
+export type LixActiveAccount = LixAccount;

@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { Label } from "./schema.js";
+import type { LixLabel } from "./schema.js";
 import { nanoid } from "../database/nano-id.js";
 
 /**
@@ -16,10 +16,10 @@ import { nanoid } from "../database/nano-id.js";
 
 export async function createLabel(args: {
 	lix: Pick<Lix, "db">;
-	id?: Label["id"];
-	name: Label["name"];
+	id?: LixLabel["id"];
+	name: LixLabel["name"];
 	lixcol_version_id?: string;
-}): Promise<Label> {
+}): Promise<LixLabel> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
 		const labelId = args.id || nanoid();
