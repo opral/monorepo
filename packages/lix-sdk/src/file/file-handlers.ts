@@ -36,11 +36,12 @@ export function handleFileInsert(args: {
 			schema_key: LixFileDescriptorSchema["x-lix-key"],
 			file_id: args.file.id,
 			plugin_key: "lix_own_entity",
-			snapshot_content: {
-				id: args.file.id,
-				path: args.file.path,
-				metadata: args.file.metadata || null,
-			},
+                        snapshot_content: {
+                                id: args.file.id,
+                                path: args.file.path,
+                                metadata: args.file.metadata || null,
+                                hidden: args.file.hidden ?? false,
+                        },
 			schema_version: LixFileDescriptorSchema["x-lix-version"],
 			version_id: args.versionId,
 			untracked: args.untracked || false,
@@ -185,11 +186,12 @@ export function handleFileUpdate(args: {
 		query: args.lix.db
 			.updateTable("state_all")
 			.set({
-				snapshot_content: {
-					id: args.file.id,
-					path: args.file.path,
-					metadata: args.file.metadata || null,
-				},
+                        snapshot_content: {
+                                id: args.file.id,
+                                path: args.file.path,
+                                metadata: args.file.metadata || null,
+                                hidden: args.file.hidden ?? false,
+                        },
 				untracked: args.untracked || false,
 			})
 			.where("entity_id", "=", args.file.id)
