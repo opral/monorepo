@@ -29,16 +29,14 @@ class MockOPFS {
 				if (typeof data === "string") {
 					return Promise.resolve({
 						text: vi.fn().mockResolvedValue(data),
-						arrayBuffer: vi.fn().mockResolvedValue(
-							new TextEncoder().encode(data).buffer
-						),
+						arrayBuffer: vi
+							.fn()
+							.mockResolvedValue(new TextEncoder().encode(data).buffer),
 					});
 				} else {
 					const bytes = data || new Uint8Array(0);
 					return Promise.resolve({
-						text: vi.fn().mockResolvedValue(
-							new TextDecoder().decode(bytes)
-						),
+						text: vi.fn().mockResolvedValue(new TextDecoder().decode(bytes)),
 						arrayBuffer: vi.fn().mockResolvedValue(bytes.buffer),
 					});
 				}
@@ -310,11 +308,14 @@ describe("OpfsStorage", () => {
 		const lix = await openLix({ storage, account });
 
 		// Spy on the saveActiveAccounts method
-		const saveActiveAccountsSpy = vi.spyOn(storage as any, "saveActiveAccounts");
+		const saveActiveAccountsSpy = vi.spyOn(
+			storage as any,
+			"saveActiveAccounts"
+		);
 
 		// Wait a bit for the initial save from the observer
 		await new Promise((resolve) => setTimeout(resolve, 50));
-		
+
 		// Clear the spy to ignore the initial save
 		saveActiveAccountsSpy.mockClear();
 
@@ -350,29 +351,32 @@ describe("OpfsStorage", () => {
 		// Create some files in OPFS
 		const storage1 = new OpfsStorage({ path: "file1.lix" });
 		const storage2 = new OpfsStorage({ path: "file2.lix" });
-		
+
 		// Open and create files
 		await openLix({ storage: storage1 });
 		await openLix({ storage: storage2 });
-		
+
 		// Also create an active accounts file
-		const lix3 = await openLix({ 
+		const lix3 = await openLix({
 			storage: new OpfsStorage({ path: "file3.lix" }),
-			account: { id: "test-clean", name: "Clean Test" }
+			account: { id: "test-clean", name: "Clean Test" },
 		});
 		await lix3.close();
-		
+
 		// Mock the OPFS directory structure for clean()
 		const mockFiles = new Map([
 			["file1.lix", { kind: "file", name: "file1.lix" }],
 			["file2.lix", { kind: "file", name: "file2.lix" }],
 			["file3.lix", { kind: "file", name: "file3.lix" }],
-			["lix_active_accounts.json", { kind: "file", name: "lix_active_accounts.json" }],
+			[
+				"lix_active_accounts.json",
+				{ kind: "file", name: "lix_active_accounts.json" },
+			],
 			["some-dir", { kind: "directory", name: "some-dir" }],
 		]);
-		
+
 		const removeEntrySpy = vi.fn();
-		
+
 		// Override getDirectory for clean() to return our mock structure
 		vi.mocked(navigator.storage.getDirectory).mockResolvedValueOnce({
 			values: vi.fn().mockImplementation(function* () {
@@ -382,17 +386,19 @@ describe("OpfsStorage", () => {
 			}),
 			removeEntry: removeEntrySpy,
 		} as any);
-		
+
 		// Call clean()
 		await OpfsStorage.clean();
-		
+
 		// Verify all files and directories were removed
 		expect(removeEntrySpy).toHaveBeenCalledTimes(5);
 		expect(removeEntrySpy).toHaveBeenCalledWith("file1.lix");
 		expect(removeEntrySpy).toHaveBeenCalledWith("file2.lix");
 		expect(removeEntrySpy).toHaveBeenCalledWith("file3.lix");
 		expect(removeEntrySpy).toHaveBeenCalledWith("lix_active_accounts.json");
-		expect(removeEntrySpy).toHaveBeenCalledWith("some-dir", { recursive: true });
+		expect(removeEntrySpy).toHaveBeenCalledWith("some-dir", {
+			recursive: true,
+		});
 	});
 
 	test("clean() throws error if OPFS is not supported", async () => {

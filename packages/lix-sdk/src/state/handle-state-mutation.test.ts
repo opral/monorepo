@@ -871,14 +871,14 @@ test("creates change_author records for insert, update, and delete operations", 
 		.execute();
 
 	expect(updateAuthors).toHaveLength(2);
-	
+
 	// Check that both accounts are represented
-	const updateAccountIds = updateAuthors.map(author => author.account_id);
+	const updateAccountIds = updateAuthors.map((author) => author.account_id);
 	expect(updateAccountIds).toContain("test-account-1");
 	expect(updateAccountIds).toContain("test-account-2");
-	
+
 	// Check that all records have the correct change_id
-	updateAuthors.forEach(author => {
+	updateAuthors.forEach((author) => {
 		expect(author).toMatchObject({
 			change_id: updateChangeId,
 		});
