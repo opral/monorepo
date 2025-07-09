@@ -132,3 +132,20 @@ In the global change set graph above:
 - All versions can see and reference any change set
 - Version "main" can query the history of Version "feature-x" by traversing from CS6
 - Historical queries can point to any change set, even those not currently pointed to by a version (like CS4)
+
+
+## Foreign Keys
+
+Lix supports foreign key constraints to maintain referential integrity between entities. 
+
+For simplicity, Lix only allows foreign keys on entities in the same version scope, with the exception of references to changes themselves. This design choice avoids global cascading effects and acknowledges that changes are versionless - they exist outside the version system as the immutable source of truth.
+
+
+
+| Rule                                                  | Rationale                                                                        | Engine behaviour                                                                   |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **1. Version‑scoped → change**                        | Changes live outside any version, so the reference is valid across all versions. | Validator skips the `version_id = ?` check when the target schema is `lix_change`. |
+| **2. Version‑scoped → version‑scoped (same version)** | Keeps each version self‑contained and makes deletes cheap.                       | Current logic stands: both rows must share the same `version_id`.                  |
+| **3. Change → version‑scoped**                  | Would immediately violate Rule 2.                                                | Disallowed at schema‑registration time.                                            |
+
+> **Result:** An example\_entity, comment or change‑set element lives inside a specific version, but can freely point at any `lix_change.id` without special handling.
