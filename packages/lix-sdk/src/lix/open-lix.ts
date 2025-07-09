@@ -66,11 +66,6 @@ export type Lix = {
  * the database is initialized with that data. If a database is provided,
  * uses that database directly.
  *
- * TODO: Add storage abstraction to support:
- *   - OPFS storage (persistent in browser)
- *   - Node.js filesystem storage
- *   - Custom storage adapters
- *
  * @example
  * ```ts
  * // In-memory (default)
@@ -79,9 +74,11 @@ export type Lix = {
  * // From existing data
  * const lix = await openLix({ blob: existingLixFile })
  *
- * // With custom database (current approach)
- * const db = await createInMemoryDatabase({ readOnly: false })
- * const lix = await openLix({ database: db })
+ * // With custom storage adapter
+ * import { MyCustomStorage } from "./my-custom-storage.js"
+ * const lix = await openLix({
+ *   storage: new MyCustomStorage()
+ * })
  * ```
  */
 export async function openLix(args: {
@@ -191,10 +188,6 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 		getAllSync: () => plugins,
 	};
-
-	// await initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
-
-	// await initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
 
 	captureOpened({ db });
 
