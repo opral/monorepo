@@ -6,6 +6,7 @@ import {
 } from "sqlite-wasm-kysely";
 import { newLixFile } from "../new-lix.js";
 import type { LixStorageAdapter } from "./lix-storage-adapter.js";
+import type { Account } from "../../account/schema.js";
 
 /**
  * OPFS (Origin Private File System) storage adapter for Lix.
@@ -21,6 +22,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	private opfsRoot?: FileSystemDirectoryHandle;
 	private savePromise?: Promise<void>;
 	private pendingSave = false;
+	private activeAccounts?: Pick<Account, "id" | "name">[];
 
 	/**
 	 * Creates a new OpfsStorage instance.
@@ -72,6 +74,9 @@ export class OpfsStorage implements LixStorageAdapter {
 				// Save the initial state to OPFS
 				await this.save();
 			}
+
+			// Load active accounts if they exist
+			await this.loadActiveAccounts();
 		}
 
 		return this.database;
@@ -85,6 +90,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	async close(): Promise<void> {
 		if (this.database) {
 			await this.save();
+			await this.saveActiveAccounts();
 			this.database = undefined;
 		}
 	}
@@ -141,6 +147,79 @@ export class OpfsStorage implements LixStorageAdapter {
 	 */
 	onStateCommit(): void {
 		this.batchedSave();
+		// Also save active accounts when state changes
+		this.saveActiveAccounts().catch((error) => {
+			console.error("Failed to save active accounts:", error);
+		});
+	}
+
+	/**
+	 * Saves the current active accounts to a JSON file in OPFS.
+	 */
+	private async saveActiveAccounts(): Promise<void> {
+		if (!this.database || !this.opfsRoot) {
+			return;
+		}
+
+		try {
+			// Query the active accounts from the database
+			const result = this.database.exec({
+				sql: "SELECT id, name FROM active_account",
+				returnValue: "resultRows",
+			}) as unknown as Array<[string, string]>;
+
+			const accounts = result.map((row) => ({
+				id: row[0],
+				name: row[1],
+			}));
+
+			// Save to JSON file
+			const jsonContent = JSON.stringify(accounts);
+			const fileHandle = await this.opfsRoot.getFileHandle(
+				"lix_active_accounts.json",
+				{ create: true }
+			);
+			const writable = await fileHandle.createWritable();
+			await writable.write(jsonContent);
+			await writable.close();
+
+			// Update cached accounts
+			this.activeAccounts = accounts;
+		} catch (error) {
+			console.error("Error saving active accounts:", error);
+		}
+	}
+
+	/**
+	 * Loads active accounts from the JSON file in OPFS.
+	 */
+	private async loadActiveAccounts(): Promise<
+		Pick<Account, "id" | "name">[] | undefined
+	> {
+		if (!this.opfsRoot) {
+			return undefined;
+		}
+
+		try {
+			const fileHandle = await this.opfsRoot.getFileHandle(
+				"lix_active_accounts.json"
+			);
+			const file = await fileHandle.getFile();
+			const content = await file.text();
+			const accounts = JSON.parse(content) as Pick<Account, "id" | "name">[];
+			this.activeAccounts = accounts;
+			return accounts;
+		} catch {
+			// File doesn't exist or error reading, return undefined
+			return undefined;
+		}
+	}
+
+	/**
+	 * Gets the loaded active accounts.
+	 */
+	getActiveAccounts(): Pick<Account, "id" | "name">[] | undefined {
+		return this.activeAccounts;
 	}
 
 	/**

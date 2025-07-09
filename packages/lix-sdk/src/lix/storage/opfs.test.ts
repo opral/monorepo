@@ -5,7 +5,7 @@ import { InMemoryStorage } from "./in-memory.js";
 
 // Create a realistic in-memory OPFS mock
 class MockOPFS {
-	private files = new Map<string, Uint8Array>();
+	private files = new Map<string, Uint8Array | string>();
 
 	createMockOpfsRoot() {
 		return {
@@ -25,10 +25,23 @@ class MockOPFS {
 	private createMockFileHandle(filename: string) {
 		return {
 			getFile: vi.fn().mockImplementation(() => {
-				const data = this.files.get(filename) || new Uint8Array(0);
-				return Promise.resolve({
-					arrayBuffer: vi.fn().mockResolvedValue(data.buffer),
-				});
+				const data = this.files.get(filename);
+				if (typeof data === "string") {
+					return Promise.resolve({
+						text: vi.fn().mockResolvedValue(data),
+						arrayBuffer: vi.fn().mockResolvedValue(
+							new TextEncoder().encode(data).buffer
+						),
+					});
+				} else {
+					const bytes = data || new Uint8Array(0);
+					return Promise.resolve({
+						text: vi.fn().mockResolvedValue(
+							new TextDecoder().decode(bytes)
+						),
+						arrayBuffer: vi.fn().mockResolvedValue(bytes.buffer),
+					});
+				}
 			}),
 			createWritable: vi.fn().mockImplementation(() => {
 				return Promise.resolve(this.createMockWritable(filename));
@@ -37,11 +50,15 @@ class MockOPFS {
 	}
 
 	private createMockWritable(filename: string) {
-		let buffer = new Uint8Array(0);
+		let buffer: Uint8Array | string;
 
 		return {
-			write: vi.fn().mockImplementation((data: Uint8Array) => {
-				buffer = new Uint8Array(data);
+			write: vi.fn().mockImplementation((data: Uint8Array | string) => {
+				if (typeof data === "string") {
+					buffer = data;
+				} else {
+					buffer = new Uint8Array(data);
+				}
 				return Promise.resolve();
 			}),
 			close: vi.fn().mockImplementation(() => {
@@ -211,5 +228,77 @@ describe("OpfsStorage", () => {
 
 		expect(result).toHaveLength(1);
 		expect(result[0]?.value).toBe("test-value");
+	});
+
+	test("persists active account", async () => {
+		const path = "example.lix";
+		const storage = new OpfsStorage({ path });
+
+		const account = { id: "test-account", name: "Test User" };
+
+		// provide lix on initial load with an account
+		const lix = await openLix({
+			storage,
+			account,
+		});
+
+		// Verify current active account
+		const activeAccount = await lix.db
+			.selectFrom("active_account")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(activeAccount.id).toBe(account.id);
+		expect(activeAccount.name).toBe(account.name);
+
+		await lix.close();
+
+		// Reopen the lix
+		const lix2 = await openLix({ storage });
+
+		// Verify active account persisted
+		const activeAccount2 = await lix2.db
+			.selectFrom("active_account")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(activeAccount2.id).toBe(account.id);
+		expect(activeAccount2.name).toBe(account.name);
+	});
+
+	test("active account persistence across multiple storage instances", async () => {
+		const path = "example.lix";
+		const storage1 = new OpfsStorage({ path });
+
+		const account = { id: "test-account", name: "Test User" };
+
+		const lix1 = await openLix({
+			storage: storage1,
+			account,
+		});
+
+		// Verify current active account
+		const activeAccount = await lix1.db
+			.selectFrom("active_account")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(activeAccount.id).toBe(account.id);
+		expect(activeAccount.name).toBe(account.name);
+
+		await lix1.close();
+
+		const storage2 = new OpfsStorage({ path });
+		// Reopen the lix instance
+		const lix2 = await openLix({ storage: storage2 });
+
+		// Verify active account persisted
+		const activeAccount2 = await lix2.db
+			.selectFrom("active_account")
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		expect(activeAccount2.id).toBe(account.id);
+		expect(activeAccount2.name).toBe(account.name);
 	});
 });

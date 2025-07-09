@@ -124,7 +124,7 @@ export async function openLix(args: {
 	 */
 	keyValues?: NewState<KeyValue>[];
 }): Promise<Lix> {
-	const storage = args.storage ?? new InMemoryStorage();
+	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
 	const database = await storage.open();
 
 	// Import blob data if provided
@@ -167,14 +167,19 @@ export async function openLix(args: {
 		}
 	}
 
-	if (args.account) {
+	// Check if storage has persisted active accounts
+	const persistedAccounts = storage.getActiveAccounts?.();
+	const accountToSet =
+		args.account ?? (persistedAccounts && persistedAccounts[0]);
+
+	if (accountToSet) {
 		await db.transaction().execute(async (trx) => {
 			// delete the default inserted active account from `initDb`
 			await trx.deleteFrom("active_account").execute();
 			await trx
 				.insertInto("active_account")
-				.values(args.account!)
-				.onConflict((oc) => oc.doUpdateSet(() => ({ ...args.account })))
+				.values(accountToSet)
+				.onConflict((oc) => oc.doUpdateSet(() => ({ ...accountToSet })))
 				.execute();
 		});
 	}
