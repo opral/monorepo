@@ -38,9 +38,9 @@ export default defineConfig({
     darkMode: false,
     nav: [
       { text: "Guide", link: "/guide/" },
-      { text: "Reference", link: "/api/" },
-      { text: "Plugins", link: "/plugins/" },
       { text: "Examples", link: "/examples/" },
+      { text: "Plugins", link: "/plugins/" },
+      { text: "Reference", link: "/api/" },
     ],
     sidebar: {
       "/guide/": [
