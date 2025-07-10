@@ -113,32 +113,140 @@ npm install @lix-js/html-diff
 
 ## Usage
 
-1. Add `data-diff-key` attributes to your rendered HTML elements.
-2. Use `renderHtmlDiff` to generate a diff HTML string.
-3. Display the diff HTML string in your app.
+### Step 1: Add `data-diff-key` attributes
+
+Add unique [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes to elements you want to track for changes. Use random, short identifiers (not semantic names):
+
+```html
+<!-- ✅ Good: Random keys -->
+<div data-diff-key="k7m2">User content</div>
+<p data-diff-key="x9n4">Some text</p>
+
+<!-- ❌ Avoid: Semantic names -->
+<div data-diff-key="user-profile">...</div>
+<p data-diff-key="description">...</p>
+```
+
+**Key guidelines:**
+- Use the same key for the same element in before/after HTML
+- Only add keys to elements you want to diff (not every element)
+- Elements without keys remain unchanged in the diff
+
+#### Programmatic key generation
+
+In most apps you will programatically generate the keys based on your data:
+
+```ts
+function UserCard({ user }) {
+  return (
+    <div>
+      <h3 data-diff-key={`user-${user.id}-name`}>{user.name}</h3>
+      <p data-diff-key={`user-${user.id}-email`}>{user.email}</p>
+    </div>
+  );
+}
+
+// Same component with different data = matching keys for diffing
+const beforeHtml = renderToString(<UserCard user={oldUser} />);
+const afterHtml = renderToString(<UserCard user={newUser} />);
+```
+
+### Step 2: Generate the diff
+
+Use `renderHtmlDiff` to compare your before and after HTML:
 
 ```typescript
 import { renderHtmlDiff } from "@lix-js/html-diff";
 
-// Example before and after HTML
-//
-// Usually, you would get these from your app's rendering logic,
-// but for demonstration, we'll use hardcoded strings.
-const beforeHtml = `
-  <p data-diff-key='p1'>Old text.</p>
-`;
+const beforeHtml = `<p data-diff-key="x9n4">The quick brown fox</p>`;
 const afterHtml = `
-  <p data-diff-key='p1'>Updated text!</p>
-  <p data-diff-key='p2'>Added.</p>
+  <p data-diff-key="x9n4">The fast red fox</p>
+  <p data-diff-key="k7m2">The lazy dog sleeps</p>
 `;
 
-const diffHtmlString = renderHtmlDiff({ beforeHtml, afterHtml });
+const diff = renderHtmlDiff({ beforeHtml, afterHtml });
 
-document.getElementById("diff-container")!.innerHTML = diffHtmlString;
+// The diff now contains:
+// - "The fast red fox" with class="diff-update" 
+// - "The lazy dog sleeps" with class="diff-create"
+```
+
+### Step 3: Render the diff
+
+The diff HTML preserves your original elements and styling - only CSS classes are added. Your app's existing CSS continues to work:
+
+```typescript
+// Vanilla JS
+document.getElementById("diff-container")!.innerHTML = diff;
+
+// React
+function DiffViewer({ diff }: { diff: string }) {
+  return <div dangerouslySetInnerHTML={{ __html: diff }} />;
+}
+```
+
+```css
+/* Your existing app styles */
+.my-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2d3748;
+  font-family: Georgia, serif;
+  line-height: 1.4;
+}
+
+/* Only these 3 classes needed for diff highlighting */
+.diff-create { color: #22c55e; }
+.diff-update { color: #f59e0b; }
+.diff-delete { color: #ef4444; }
 ```
 
 <Showcase
-  before="<p data-diff-key='p1'>Old text.</p>"
-  after="<p data-diff-key='p1'>Updated text!</p><p data-diff-key='p2'>Added.</p>"
-  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+  before={`<p data-diff-key="x9n4" class="my-text">The quick brown fox</p>`}
+  after={`
+<p data-diff-key="x9n4" class="my-text">The fast red fox</p>
+<p data-diff-key="k7m2" class="my-text">The lazy dog sleeps</p>
+`}
+  css={`/* Your existing app styles */
+.my-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2d3748;
+  font-family: Georgia, serif;
+  line-height: 1.4;
+}
+
+/* Only these 3 classes needed for diff highlighting */
+.diff-create { color: #22c55e; }
+.diff-update { color: #f59e0b; }
+.diff-delete { color: #ef4444; }`}
 />
+
+Notice how your existing `.my-text` styles (large, bold typography) are preserved. Only the diff highlighting is added on top based on your CSS diff classes.
+
+### Step 4: Make diffs more granular (optional)
+
+For word-level highlighting within text elements, add the `data-diff-words` attribute:
+
+<Showcase
+  before={`<p data-diff-key="x9n4" data-diff-words class="my-text">The quick brown fox</p>`}
+  after={`
+<p data-diff-key="x9n4" data-diff-words class="my-text">The fast red fox</p>
+<p data-diff-key="k7m2" data-diff-words class="my-text">The lazy dog sleeps</p>
+`}
+  css={`/* Your existing app styles */
+.my-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2d3748;
+  font-family: Georgia, serif;
+  line-height: 1.4;
+}
+
+/* Diff highlighting styles */
+.diff-create { color: #22c55e; }
+.diff-update { color: #f59e0b; }
+.diff-delete { color: #ef4444; text-decoration: line-through; }`}
+/>
+
+Notice how `data-diff-words` enables word-level highlighting instead of highlighting the entire element. Learn more in the [attributes guide](/guide/attributes).
