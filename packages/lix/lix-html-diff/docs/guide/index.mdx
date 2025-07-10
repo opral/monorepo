@@ -36,7 +36,7 @@ const beforeHtml = `
   <p data-diff-id='p1'>Old text.</p>
 `;
 const afterHtml = `
-  <p data-diff-id='p1'>New text!</p>
+  <p data-diff-id='p1'>Updated text!</p>
   <p data-diff-id='p2'>Added.</p>
 `;
 
@@ -47,6 +47,6 @@ document.getElementById("diff-container")!.innerHTML = diffHtmlString;
 
 <Showcase
   before="<p data-diff-id='p1'>Old text.</p>"
-  after="<p data-diff-id='p1'>New text!</p><p data-diff-id='p2'>Added.</p>"
+  after="<p data-diff-id='p1'>Updated text!</p><p data-diff-id='p2'>Added.</p>"
   css=".diff-before { color: red; } .diff-after { color: green; }"
 />
