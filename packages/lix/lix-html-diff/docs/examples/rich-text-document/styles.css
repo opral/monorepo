@@ -1825,3 +1825,25 @@ button:hover {
   height: 1px;
   background-color: #000;
 }
+
+/* Diff highlighting styles */
+.diff-created {
+  color: green;
+  text-decoration: none;
+  outline: none;
+}
+.diff-updated {
+  color: orange;
+  text-decoration: none;
+  outline: none;
+}
+.diff-deleted {
+  color: red;
+  text-decoration: none;
+  outline: none;
+}
+
+/* Strikethrough only for word-level diffing */
+[data-diff-mode="words"] .diff-deleted {
+  text-decoration: line-through;
+}
