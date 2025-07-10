@@ -1,7 +1,7 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-import { useQueryTakeFirst } from '@lix-js/react-utils';
-import { selectActiveFile, selectIntermediateChanges, selectActiveAccount } from '@/queries';
+import { useQuery, useQueryTakeFirst } from '@lix-js/react-utils';
+import { selectActiveFile, selectWorkingChanges, selectActiveAccount } from '@/queries';
 import FileName from '@/components/FileName';
 import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
 import {
@@ -19,8 +19,7 @@ import posthog from 'posthog-js';
 function PageContent() {
 	const activeFile = useQueryTakeFirst(selectActiveFile);
 	const activeAccount = useQueryTakeFirst(selectActiveAccount);
-	// const intermediateChanges = useQuery(selectIntermediateChanges);
-	const intermediateChanges = []
+	const workingChanges = useQuery(selectWorkingChanges);
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
 	useEffect(() => {
@@ -70,7 +69,7 @@ function PageContent() {
 							className="size-8 relative"
 							onClick={toggleRightSidebar}
 						>
-							{intermediateChanges && intermediateChanges.length > 0 && !rightSidebar.open && (
+							{workingChanges && workingChanges.length > 0 && !rightSidebar.open && (
 								<>
 									<span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary animate-ping" />
 									<span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary" />
@@ -92,9 +91,9 @@ function PageContent() {
 			</div>
 
 			{/* Right sidebar */}
-			{/* <div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[20rem]' : 'w-0'}`}>
+			<div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[20rem]' : 'w-0'}`}>
 				<ChangeControlSidebar />
-			</div> */}
+			</div>
 		</div>
 	);
 }
