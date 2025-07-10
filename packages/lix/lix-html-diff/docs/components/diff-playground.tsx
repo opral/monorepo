@@ -11,13 +11,13 @@ import { renderHtmlDiff } from "../../src/render-html-diff";
 export function DiffPlayground() {
   // Default examples to help users get started
   const defaultBeforeHtml = dedent`
-  <p data-diff-id="p1">
+  <p data-diff-key="p1">
     Paste your before HTML here
   </p>
 `;
 
   const defaultAfterHtml = dedent`
-  <p data-diff-id="p1">
+  <p data-diff-key="p1">
     Paste your after HTML here to see a diff
   </p>
 `;
@@ -120,7 +120,7 @@ export function DiffPlayground() {
       <div className="flex justify-between items-center mb-4">
         <p className="text-gray-600">
           Paste your HTML in the "Before" and "After" editors to see how the
-          diff would look. Make sure to include <code>data-diff-id</code>{" "}
+          diff would look. Make sure to include <code>data-diff-key</code>{" "}
           attributes for elements you want to track.
         </p>
         <button

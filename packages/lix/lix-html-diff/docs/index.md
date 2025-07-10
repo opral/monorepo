@@ -17,7 +17,7 @@ features:
     details: Works for any app that renders to HTML (which is most apps!) using the "HTML trick"
     icon: 🌐
   - title: Simple
-    details: No need for renderer-specific diff logic - just add data-diff-id attributes
+    details: No need for renderer-specific diff logic - just add data-diff-key attributes
     icon: ⚡
   - title: Framework Agnostic
     details: Works with React, Vue, Svelte, Angular, or any framework that renders HTML

@@ -1,6 +1,6 @@
 import { Node, Schema, DOMOutputSpec } from "prosemirror-model";
 
-// Helper function to add data-diff-id attribute
+// Helper function to add data-diff-key attribute
 function addDiffId(node: Node, spec: DOMOutputSpec): DOMOutputSpec {
   if (node.attrs.id && Array.isArray(spec) && spec.length > 0) {
     const tag = spec[0];
@@ -19,7 +19,7 @@ function addDiffId(node: Node, spec: DOMOutputSpec): DOMOutputSpec {
         }
     }
 
-    attrs["data-diff-id"] = node.attrs.id;
+    attrs["data-diff-key"] = node.attrs.id;
 
     // Reconstruct the spec: tag, attributes object, then the rest of the content
     return [tag, attrs, ...content];

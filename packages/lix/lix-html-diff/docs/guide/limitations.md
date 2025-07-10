@@ -1,8 +1,8 @@
 # Limitations
 
-## ⚠️ `data-diff-id` Required
+## ⚠️ `data-diff-key` Required
 
-Diff quality depends on stable `data-diff-id` attributes being present in the rendered HTML.
+Diff quality depends on stable `data-diff-key` attributes being present in the rendered HTML.
 
 Without these attributes, the HTML differ cannot reliably match elements between the "before" and "after" versions, which may result in:
 
@@ -12,7 +12,7 @@ Without these attributes, the HTML differ cannot reliably match elements between
 
 ## Best Practices
 
-- Ensure `data-diff-id` attributes are stable across renders
+- Ensure `data-diff-key` attributes are stable across renders
 - Use meaningful, unique identifiers for each element
-- Include `data-diff-id` on all elements you want to track changes for
+- Include `data-diff-key` on all elements you want to track changes for
 - Avoid dynamically generated IDs that change between renders

@@ -65,16 +65,16 @@ graph TD
 
 ## Usage
 
-1. Add `data-diff-id` attributes to your rendered HTML elements.
+1. Add `data-diff-key` attributes to your rendered HTML elements.
 2. Use `renderHtmlDiff` to generate a diff HTML string.
 3. Display the diff HTML string in your app.
 
 ```typescript
 import { renderHtmlDiff } from "@lix-js/html-diff";
 
-const beforeHtml = "<p data-diff-id='p1'>Old text.</p>";
+const beforeHtml = "<p data-diff-key='p1'>Old text.</p>";
 const afterHtml =
-  "<p data-diff-id='p1'>New text!</p><p data-diff-id='p2'>Added.</p>";
+  "<p data-diff-key='p1'>New text!</p><p data-diff-key='p2'>Added.</p>";
 
 const diffHtmlString = renderHtmlDiff({ beforeHtml, afterHtml });
 
@@ -83,7 +83,7 @@ document.getElementById("diff-container")!.innerHTML = diffHtmlString;
 
 ## ⚠️ Limitations
 
-**`data-diff-id` Required:** Diff quality depends on stable `data-diff-id` attributes being present in the rendered HTML.
+**`data-diff-key` Required:** Diff quality depends on stable `data-diff-key` attributes being present in the rendered HTML.
 
 ---
 

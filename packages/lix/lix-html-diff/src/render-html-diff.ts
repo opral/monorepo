@@ -10,8 +10,8 @@
  *
  * @example
  *   renderHtmlDiffElement({
- *     beforeHtml: `<p data-diff-id="abc">Test</p>`,
- *     afterHtml: `<p data-diff-id="abc">Test World</p>`,
+ *     beforeHtml: `<p data-diff-key="abc">Test</p>`,
+ *     afterHtml: `<p data-diff-key="abc">Test World</p>`,
  *   });
  *
  */
@@ -32,8 +32,8 @@ function renderHtmlDiffElement(args: {
   // --- Step 1: Map elements and identify changes ---
   const beforeElementsMap = new Map<string, Element>();
   const beforeElementOrder: { id: string; element: Element }[] = [];
-  beforeDoc.body.querySelectorAll("[data-diff-id]").forEach((el) => {
-    const id = el.getAttribute("data-diff-id");
+  beforeDoc.body.querySelectorAll("[data-diff-key]").forEach((el) => {
+    const id = el.getAttribute("data-diff-key");
     if (id) {
       beforeElementsMap.set(id, el);
       beforeElementOrder.push({ id, element: el });
@@ -43,9 +43,9 @@ function renderHtmlDiffElement(args: {
   const afterElementsInResultMap = new Map<string, Element>();
   // Query within the result container which holds the 'after' structure clone
   const afterElementsInResult =
-    resultContainer.querySelectorAll("[data-diff-id]");
+    resultContainer.querySelectorAll("[data-diff-key]");
   afterElementsInResult.forEach((el) => {
-    const id = el.getAttribute("data-diff-id");
+    const id = el.getAttribute("data-diff-key");
     if (id) {
       afterElementsInResultMap.set(id, el);
     }
@@ -86,13 +86,13 @@ function renderHtmlDiffElement(args: {
 
       // Check if direct child structure changed
       const beforeChildIds = new Set(
-        Array.from(beforeEl.querySelectorAll(":scope > [data-diff-id]")).map(
-          (el) => el.getAttribute("data-diff-id"),
+        Array.from(beforeEl.querySelectorAll(":scope > [data-diff-key]")).map(
+          (el) => el.getAttribute("data-diff-key"),
         ),
       );
       const afterChildIds = new Set(
-        Array.from(afterEl.querySelectorAll(":scope > [data-diff-id]")).map(
-          (el) => el.getAttribute("data-diff-id"),
+        Array.from(afterEl.querySelectorAll(":scope > [data-diff-key]")).map(
+          (el) => el.getAttribute("data-diff-key"),
         ),
       );
       const areChildSetsEqual =
@@ -150,7 +150,7 @@ function renderHtmlDiffElement(args: {
   for (const { id, element: beforeEl } of beforeElementOrder) {
     if (removedIds.has(id)) {
       // Check if parent was also removed. If so, skip (it'll be handled with the parent)
-      const parentId = beforeEl.parentElement?.getAttribute("data-diff-id");
+      const parentId = beforeEl.parentElement?.getAttribute("data-diff-key");
       if (parentId && removedIds.has(parentId)) {
         continue;
       }
@@ -159,7 +159,7 @@ function renderHtmlDiffElement(args: {
       let parentInResult: Element | null = null;
       if (parentId) {
         parentInResult = resultContainer.querySelector(
-          `[data-diff-id="${parentId}"]`,
+          `[data-diff-key="${parentId}"]`,
         );
       } else if (beforeEl.parentElement === beforeDoc.body) {
         parentInResult = resultContainer; // Element was direct child of body
@@ -172,7 +172,7 @@ function renderHtmlDiffElement(args: {
         while (currentSibling) {
           if (currentSibling.nodeType === Node.ELEMENT_NODE) {
             const siblingId = (currentSibling as Element).getAttribute(
-              "data-diff-id",
+              "data-diff-key",
             );
             // Check if this sibling exists in the 'after' state (i.e., wasn't removed)
             if (siblingId && afterElementsInResultMap.has(siblingId)) {
@@ -244,8 +244,8 @@ function renderHtmlDiffElement(args: {
  *
  * @example
  *   renderHtmlDiffElement({
- *     beforeHtml: `<p data-diff-id="abc">Test</p>`,
- *     afterHtml: `<p data-diff-id="abc">Test World</p>`,
+ *     beforeHtml: `<p data-diff-key="abc">Test</p>`,
+ *     afterHtml: `<p data-diff-key="abc">Test World</p>`,
  *   });
  *
  */
