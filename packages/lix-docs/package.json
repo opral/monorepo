@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "pnpm run typedoc:clean && typedoc && vitepress dev docs",
     "build": "pnpm run typedoc:clean && typedoc && vitepress build docs",
+    "dev:rspress": "rspress dev",
+    "build:rspress": "rspress build",
     "preview": "vitepress preview docs",
     "typedoc": "typedoc",
     "typedoc:clean": "rm -rf docs/api/reference"
@@ -22,6 +24,14 @@
     "typedoc": "^0.28.5",
     "typedoc-plugin-markdown": "^4.7.0",
     "typedoc-vitepress-theme": "^1.1.2",
+    "rspress": "^1.40.2",
+    "rspress-plugin-mermaid": "^0.3.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "@tailwindcss/postcss": "^4.1.10",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "tailwindcss": "^4.1.11",
     "vitepress": "^1.0.0-rc.40",
     "vitepress-plugin-mermaid": "^2.0.17",
     "vue": "^3.3.4"
