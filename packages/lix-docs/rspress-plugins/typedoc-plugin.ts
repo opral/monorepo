@@ -2,7 +2,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import * as fsSync from "node:fs";
 import type { RspressPlugin } from "@rspress/shared";
-import { Application } from "typedoc";
+import { Application, TypeDocOptions } from "typedoc";
 
 export interface CustomTypeDocOptions {
   entryPoints: string[];
@@ -77,7 +77,36 @@ async function generateMetaJson(absoluteApiDir: string) {
   await fs.writeFile(metaJsonPath, JSON.stringify(["index", ...meta]));
 }
 
+async function renameHtmlToMd(outputDir: string) {
+  // Recursively rename all .html files to .md files
+  const traverse = async (dir: string) => {
+    const files = await fs.readdir(dir);
+    const filePaths = files.map((file) => path.join(dir, file));
+    const stats = await Promise.all(filePaths.map((fp) => fs.stat(fp)));
+
+    await Promise.all(
+      stats.map(async (stat, index) => {
+        const file = files[index];
+        const filePath = filePaths[index];
+
+        if (stat.isDirectory()) {
+          return traverse(filePath);
+        }
+
+        if (stat.isFile() && file.endsWith(".html")) {
+          const mdPath = filePath.replace(/\.html$/, ".md");
+          await fs.rename(filePath, mdPath);
+        }
+      })
+    );
+  };
+  await traverse(outputDir);
+}
+
 async function patchGeneratedApiDocs(absoluteApiDir: string) {
+  // First rename .html files to .md files
+  await renameHtmlToMd(absoluteApiDir);
+
   await patchLinks(absoluteApiDir);
 
   // Only rename README.md if it exists
@@ -166,10 +195,14 @@ export function customTypeDocPlugin(
         out: outdir,
         theme: "markdown",
         disableSources: true,
+        // hidePageHeader: "true",
+        hideBreadcrumbs: true,
+        hidePageHeader: true,
         excludePrivate: true,
         excludeExternals: true,
         tsconfig,
-      });
+        hideGenerator: true,
+      } as Partial<TypeDocOptions>);
       const project = await app.convert();
 
       if (project) {
