@@ -32,7 +32,7 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
 <Showcase 
   before="<div><p data-diff-key='ixn4'>First paragraph</p></div>" 
   after="<div><p data-diff-key='ixn4'>First paragraph</p><p data-diff-key='zm7q'>Second paragraph</p></div>" 
-  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
 />
 
 ### Example: Removing an element
@@ -53,7 +53,7 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
 <Showcase 
   before="<div><p data-diff-key='bw5c'>Keep this</p><p data-diff-key='ft9x'>Remove this</p></div>" 
   after="<div><p data-diff-key='bw5c'>Keep this</p></div>" 
-  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
 />
 
 ## data-diff-words
@@ -75,7 +75,7 @@ By default, when text content changes, the entire element is shown as deleted (t
 <Showcase 
   before="<p data-diff-key='qr8n'>Hello there</p>" 
   after="<p data-diff-key='qr8n'>Hello world</p>" 
-  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
 />
 
 ### With data-diff-words (granular word diffing)
@@ -91,7 +91,7 @@ By default, when text content changes, the entire element is shown as deleted (t
 <Showcase 
   before="<p data-diff-key='kv3m' data-diff-words>Hello there</p>" 
   after="<p data-diff-key='kv3m' data-diff-words>Hello world</p>" 
-  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
 />
 
 ### When to use data-diff-words
@@ -125,7 +125,7 @@ By default, when text content changes, the entire element is shown as deleted (t
 <Showcase 
   before="<div class='card' data-diff-key='jx9w'><h3>Old Title</h3><p>Content</p></div>" 
   after="<div class='card' data-diff-key='jx9w'><h3>New Title</h3><p>Content</p></div>" 
-  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
+  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
 />
 
 The atomic block approach preserves the component structure while clearly showing what changed.

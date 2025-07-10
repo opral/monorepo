@@ -1,14 +1,14 @@
-.diff-create {
+.diff-created {
   color: green;
   text-decoration: none;
   outline: none;
 }
-.diff-update {
+.diff-updated {
   color: orange;
   text-decoration: none;
   outline: none;
 }
-.diff-delete {
+.diff-deleted {
   color: red;
   text-decoration: none;
   outline: none;

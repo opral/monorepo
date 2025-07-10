@@ -49,7 +49,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <div>
           <p data-diff-key="p1">Para 1</p>
-          <p data-diff-key="p2" class="diff-create">New Para</p>
+          <p data-diff-key="p2" class="diff-created">New Para</p>
         </div>
       `,
     },
@@ -62,7 +62,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <div class="tool-container" data-diff-key="complex-component">New complex component</div>
       `,
       expectedHtml: dedent`
-        <div class="tool-container diff-delete" data-diff-key="complex-component">Old complex component</div>
+        <div class="tool-container diff-deleted" data-diff-key="complex-component">Old complex component</div>
       `,
     },
   ],
@@ -76,7 +76,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="ksu4" data-diff-words>Hello World</p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="ksu4" data-diff-words="">Hello <span class="diff-create">World</span></p>
+        <p data-diff-key="ksu4" data-diff-words="">Hello <span class="diff-created">World</span></p>
       `,
     },
     {
@@ -88,7 +88,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="rem" data-diff-words>Remove </p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="rem" data-diff-words="">Remove <span class="diff-delete">This</span></p>
+        <p data-diff-key="rem" data-diff-words="">Remove <span class="diff-deleted">This</span></p>
       `,
     },
     {
@@ -100,7 +100,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <span data-diff-key="complex" data-diff-words>New text there</span>
       `,
       expectedHtml: dedent`
-        <span data-diff-key="complex" data-diff-words=""><span class="diff-delete">Old</span><span class="diff-create">New</span> text <span class="diff-delete">here</span><span class="diff-create">there</span></span>
+        <span data-diff-key="complex" data-diff-words=""><span class="diff-deleted">Old</span><span class="diff-created">New</span> text <span class="diff-deleted">here</span><span class="diff-created">there</span></span>
       `,
     },
     {
@@ -112,7 +112,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p data-diff-key="merge" class="foo bar" data-diff-words>New</p>
       `,
       expectedHtml: dedent`
-        <p data-diff-key="merge" class="foo bar" data-diff-words=""><span class="diff-delete">Old</span><span class="diff-create">New</span></p>
+        <p data-diff-key="merge" class="foo bar" data-diff-words=""><span class="diff-deleted">Old</span><span class="diff-created">New</span></p>
       `,
     },
   ],

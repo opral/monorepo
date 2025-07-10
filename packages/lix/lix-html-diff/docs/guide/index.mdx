@@ -14,9 +14,9 @@ import { renderHtmlDiff } from "@lix-js/html-diff";
 const tableBefore = renderTable(beforeData);
 const tableAfter = renderTable(afterData);
 
-const diff = renderHtmlDiff({ 
-  beforeHtml: tableBefore, 
-  afterHtml: tableAfter 
+const diff = renderHtmlDiff({
+  beforeHtml: tableBefore,
+  afterHtml: tableAfter,
 });
 
 render(diff, document.getElementById("diff-container"));
@@ -73,28 +73,28 @@ render(diff, document.getElementById("diff-container"));
 
 .pricing-table th,
 .pricing-table td {
-  border: 1.1px solid #ccc;
-  padding: 8px;
+border: 1.1px solid #ccc;
+padding: 8px;
 }
 
 .pricing-table .row-header {
-  font-weight: bold;
+font-weight: bold;
 }
 
-/* Diff highlighting */
-.diff-create {
-  background-color: #d4edda;
-  color: #155724;
+/_ Diff highlighting _/
+.diff-created {
+background-color: #d4edda;
+color: #155724;
 }
 
-.diff-update {
-  background-color: #fff3cd;
-  color: #856404;
+.diff-updated {
+background-color: #fff3cd;
+color: #856404;
 }
 
-.diff-delete {
-  background-color: #f8d7da;
-  color: #721c24;
+.diff-deleted {
+background-color: #f8d7da;
+color: #721c24;
 }`}
 />
 
@@ -128,6 +128,7 @@ Add unique [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes to
 ```
 
 **Key guidelines:**
+
 - Use the same key for the same element in before/after HTML
 - Only add keys to elements you want to diff (not every element)
 - Elements without keys remain unchanged in the diff
@@ -167,8 +168,8 @@ const afterHtml = `
 const diff = renderHtmlDiff({ beforeHtml, afterHtml });
 
 // The diff now contains:
-// - "The fast red fox" with class="diff-update" 
-// - "The lazy dog sleeps" with class="diff-create"
+// - "The fast red fox" with class="diff-updated"
+// - "The lazy dog sleeps" with class="diff-created"
 ```
 
 ### Step 3: Render the diff
@@ -196,9 +197,15 @@ function DiffViewer({ diff }: { diff: string }) {
 }
 
 /* Only these 3 classes needed for diff highlighting */
-.diff-create { color: #22c55e; }
-.diff-update { color: #f59e0b; }
-.diff-delete { color: #ef4444; }
+.diff-created {
+  color: #22c55e;
+}
+.diff-updated {
+  color: #f59e0b;
+}
+.diff-deleted {
+  color: #ef4444;
+}
 ```
 
 <Showcase
@@ -216,10 +223,10 @@ function DiffViewer({ diff }: { diff: string }) {
   line-height: 1.4;
 }
 
-/* Only these 3 classes needed for diff highlighting */
-.diff-create { color: #22c55e; }
-.diff-update { color: #f59e0b; }
-.diff-delete { color: #ef4444; }`}
+/_ Only these 3 classes needed for diff highlighting _/
+.diff-created { color: #22c55e; }
+.diff-updated { color: #f59e0b; }
+.diff-deleted { color: #ef4444; }`}
 />
 
 Notice how your existing `.my-text` styles (large, bold typography) are preserved. Only the diff highlighting is added on top based on your CSS diff classes.
@@ -243,10 +250,10 @@ For word-level highlighting within text elements, add the `data-diff-words` attr
   line-height: 1.4;
 }
 
-/* Diff highlighting styles */
-.diff-create { color: #22c55e; }
-.diff-update { color: #f59e0b; }
-.diff-delete { color: #ef4444; text-decoration: line-through; }`}
+/_ Diff highlighting styles _/
+.diff-created { color: #22c55e; }
+.diff-updated { color: #f59e0b; }
+.diff-deleted { color: #ef4444; text-decoration: line-through; }`}
 />
 
 Notice how `data-diff-words` enables word-level highlighting instead of highlighting the entire element. Learn more in the [attributes guide](/guide/attributes).

@@ -4,7 +4,11 @@ import { diffWords } from "diff";
  * Applies granular text diffing to an element by comparing before and after text content
  * and wrapping changed parts in spans with appropriate diff classes.
  */
-function applyGranularTextDiff(element: HTMLElement, beforeText: string, afterText: string): void {
+function applyGranularTextDiff(
+  element: HTMLElement,
+  beforeText: string,
+  afterText: string,
+): void {
   // If texts are identical, no changes needed
   if (beforeText === afterText) {
     return;
@@ -12,22 +16,22 @@ function applyGranularTextDiff(element: HTMLElement, beforeText: string, afterTe
 
   // Get word-level diff
   const changes = diffWords(beforeText, afterText);
-  
+
   // Clear the element's content
-  element.innerHTML = '';
-  
+  element.innerHTML = "";
+
   // Build the new content with diff spans
-  changes.forEach(change => {
+  changes.forEach((change) => {
     if (change.added) {
       // Text was added
-      const span = document.createElement('span');
-      span.className = 'diff-create';
+      const span = document.createElement("span");
+      span.className = "diff-created";
       span.textContent = change.value;
       element.appendChild(span);
     } else if (change.removed) {
       // Text was removed - we'll show this as deleted text
-      const span = document.createElement('span');
-      span.className = 'diff-delete';
+      const span = document.createElement("span");
+      span.className = "diff-deleted";
       span.textContent = change.value;
       element.appendChild(span);
     } else {
@@ -112,9 +116,9 @@ function renderHtmlDiffElement(args: {
       // Handle Added Element
       if (afterEl instanceof HTMLElement) {
         if (afterEl.hasAttribute("class")) {
-          afterEl.className += " diff-create";
+          afterEl.className += " diff-created";
         } else {
-          afterEl.className = "diff-create";
+          afterEl.className = "diff-created";
         }
       }
     } else if (modifiedIds.has(id)) {
@@ -142,22 +146,25 @@ function renderHtmlDiffElement(args: {
       } else if (beforeEl.textContent !== afterEl.textContent) {
         // Child structure is the same, but text content differs.
         // Check if element is marked as safe for word-level diffing
-        if (afterEl instanceof HTMLElement && afterEl.hasAttribute("data-diff-words")) {
+        if (
+          afterEl instanceof HTMLElement &&
+          afterEl.hasAttribute("data-diff-words")
+        ) {
           // Apply granular word diffing for elements that opt in
           applyGranularTextDiff(
             afterEl,
             beforeEl.textContent || "",
-            afterEl.textContent || ""
+            afterEl.textContent || "",
           );
         } else {
           // Fall back to atomic block diffing for complex components
           // For atomic blocks with content changes, show as updated
-          
+
           // Style the 'after' element as updated
           if (afterEl.hasAttribute("class")) {
-            afterEl.className += " diff-update";
+            afterEl.className += " diff-updated";
           } else {
-            afterEl.className = "diff-update";
+            afterEl.className = "diff-updated";
           }
         }
       } else {
@@ -208,9 +215,9 @@ function renderHtmlDiffElement(args: {
         const clone = beforeEl.cloneNode(true) as HTMLElement;
         // Style with class
         if (clone.hasAttribute("class")) {
-          clone.className += " diff-delete";
+          clone.className += " diff-deleted";
         } else {
-          clone.className = "diff-delete";
+          clone.className = "diff-deleted";
         }
 
         // Ensure contenteditable is false on the clone to prevent interaction
