@@ -103,38 +103,38 @@ function processLogQueue() {
 				timestamp: new Date().toISOString(),
 				error: error ? error.message : undefined,
 			};
-			// console.log("Creating log:", message, payload);
+			console.log("Creating log:", message, payload);
 			// Insert the log
 
 			// // @ts-expect-error -- this is fine for now
 			// if (window.logQueries) {
-			// 	executeSync({
-			// 		lix: lix,
-			// 		query: lix.db.insertInto("log").values({
-			// 			key: "lix_query_executed",
-			// 			message,
-			// 			level: "info",
-			// 			payload,
-			// 		}),
-			// 	});
+			executeSync({
+				lix: lix,
+				query: lix.db.insertInto("log").values({
+					key: "lix_query_executed",
+					message,
+					level: "info",
+					payload,
+				}),
+			});
 			// }
 
-			createLixOwnLogSync({
-				lix,
-				key: "lix_query_executed",
-				level: "info",
-				// @ts-expect-error --- using flag
-				message: `${queueLength - logQueue.length}/${queueLength} skipLpgs: ${lix.skipLogging} reacitvity off: ${lix.sqlite.skipLogging} Query executed in ${duration}ms`,
-				payload: {
-					sql: sql,
-					bindings: bindings,
-					duration_ms: duration,
-					result_count: Array.isArray(result) ? result.length : 0,
-					query_type: detectQueryType(sql),
-					timestamp: new Date().toISOString(),
-					error: error ? error.message : undefined,
-				},
-			});
+			// createLixOwnLogSync({
+			// 	lix,
+			// 	key: "lix_query_executed",
+			// 	level: "info",
+			// 	// @ts-expect-error --- using flag
+			// 	message: `${queueLength - logQueue.length}/${queueLength} skipLpgs: ${lix.skipLogging} reacitvity off: ${lix.sqlite.skipLogging} Query executed in ${duration}ms`,
+			// 	payload: {
+			// 		sql: sql,
+			// 		bindings: bindings,
+			// 		duration_ms: duration,
+			// 		result_count: Array.isArray(result) ? result.length : 0,
+			// 		query_type: detectQueryType(sql),
+			// 		timestamp: new Date().toISOString(),
+			// 		error: error ? error.message : undefined,
+			// 	},
+			// });
 
 			lix.skipLogging = false;
 			// @ts-expect-error - check

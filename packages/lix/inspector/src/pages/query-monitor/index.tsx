@@ -41,6 +41,9 @@ export default function QueryMonitor() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(50);
+  const [showSlowQueriesOnly, setShowSlowQueriesOnly] = useState(false);
 
   // Fetch query logs
   const queryLogs = useQuery(
@@ -49,8 +52,7 @@ export default function QueryMonitor() {
         .selectFrom("log")
         .select(["id", "message", "payload", "lixcol_created_at"])
         .where("key", "=", "lix_query_executed")
-        .orderBy("lixcol_created_at", "desc")
-        .limit(100),
+        .orderBy("lixcol_created_at", "desc"),
     { subscribe: autoRefresh },
   ) as QueryLogEntry[];
 
@@ -59,8 +61,14 @@ export default function QueryMonitor() {
     return queryLogs.filter((log) => {
       if (!log.payload) return false;
 
+      debugger;
       // Type filter
       if (selectedType !== "ALL" && log.payload.query_type !== selectedType) {
+        return false;
+      }
+
+      // Slow query filter
+      if (showSlowQueriesOnly && log.payload.duration_ms <= 100) {
         return false;
       }
 
@@ -75,7 +83,22 @@ export default function QueryMonitor() {
 
       return true;
     });
-  }, [queryLogs, selectedType, searchQuery]);
+  }, [queryLogs, selectedType, searchQuery, showSlowQueriesOnly]);
+
+  // Calculate paginated queries
+  const paginatedQueries = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredQueries.slice(startIndex, endIndex);
+  }, [filteredQueries, currentPage, itemsPerPage]);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredQueries.length / itemsPerPage);
+
+  // Reset to first page when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [selectedType, searchQuery, showSlowQueriesOnly]);
 
   // Calculate performance metrics
   const metrics = useMemo(() => {
@@ -177,6 +200,19 @@ export default function QueryMonitor() {
               Clear
             </button>
           )}
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showSlowQueriesOnly}
+              onChange={(e) => setShowSlowQueriesOnly(e.target.checked)}
+              className="checkbox checkbox-sm"
+            />
+            <span className="text-sm flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3 text-warning" />
+              Slow queries only
+            </span>
+          </label>
         </div>
 
         {/* Performance Metrics */}
@@ -197,7 +233,7 @@ export default function QueryMonitor() {
             </tr>
           </thead>
           <tbody>
-            {filteredQueries.map((log) => {
+            {paginatedQueries.map((log) => {
               const isExpanded = expandedRows.has(log.id);
               const isSlowQuery = log.payload && log.payload.duration_ms > 100;
 
@@ -258,6 +294,64 @@ export default function QueryMonitor() {
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {filteredQueries.length > 0 && (
+        <div className="flex items-center justify-between p-4 border-t bg-base-100">
+          <div className="text-sm text-gray-600">
+            Showing {((currentPage - 1) * itemsPerPage) + 1} to{" "}
+            {Math.min(currentPage * itemsPerPage, filteredQueries.length)} of{" "}
+            {filteredQueries.length} queries
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <button
+              className="btn btn-sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    className={`btn btn-sm ${currentPage === pageNum ? 'btn-primary' : ''}`}
+                    onClick={() => setCurrentPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              className="btn btn-sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+          
+          <div className="text-sm text-gray-600">
+            Page {currentPage} of {totalPages}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
