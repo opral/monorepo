@@ -81,7 +81,6 @@ padding: 8px;
 font-weight: bold;
 }
 
-/_ Diff highlighting _/
 .diff-created {
 background-color: #d4edda;
 color: #155724;
@@ -223,10 +222,11 @@ function DiffViewer({ diff }: { diff: string }) {
   line-height: 1.4;
 }
 
-/_ Only these 3 classes needed for diff highlighting _/
-.diff-created { color: #22c55e; }
-.diff-updated { color: #f59e0b; }
-.diff-deleted { color: #ef4444; }`}
+/* Only these 3 classes needed for diff highlighting */
+
+.diff-created { color: #22c55e }
+.diff-updated { color: #f59e0b }
+.diff-deleted { color: #ef4444 }`}
 />
 
 Notice how your existing `.my-text` styles (large, bold typography) are preserved. Only the diff highlighting is added on top based on your CSS diff classes.
@@ -250,7 +250,6 @@ For word-level highlighting within text elements, add the `data-diff-words` attr
   line-height: 1.4;
 }
 
-/_ Diff highlighting styles _/
 .diff-created { color: #22c55e; }
 .diff-updated { color: #f59e0b; }
 .diff-deleted { color: #ef4444; text-decoration: line-through; }`}

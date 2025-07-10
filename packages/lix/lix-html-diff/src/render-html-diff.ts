@@ -116,7 +116,7 @@ function renderHtmlDiffElement(args: {
       // Handle Added Element
       if (afterEl instanceof HTMLElement) {
         if (afterEl.hasAttribute("class")) {
-          afterEl.className += " diff-created";
+          afterEl.className = "diff-created " + afterEl.className;
         } else {
           afterEl.className = "diff-created";
         }
@@ -162,7 +162,7 @@ function renderHtmlDiffElement(args: {
 
           // Style the 'after' element as updated
           if (afterEl.hasAttribute("class")) {
-            afterEl.className += " diff-updated";
+            afterEl.className = "diff-updated " + afterEl.className;
           } else {
             afterEl.className = "diff-updated";
           }
@@ -215,7 +215,7 @@ function renderHtmlDiffElement(args: {
         const clone = beforeEl.cloneNode(true) as HTMLElement;
         // Style with class
         if (clone.hasAttribute("class")) {
-          clone.className += " diff-deleted";
+          clone.className = "diff-deleted " + clone.className;
         } else {
           clone.className = "diff-deleted";
         }
