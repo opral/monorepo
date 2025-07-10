@@ -112,11 +112,6 @@ export function DiffPlayground() {
   return (
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <p className="text-gray-600">
-          Paste your HTML in the "Before" and "After" editors to see how the
-          diff would look. Make sure to include <code>data-diff-key</code>{" "}
-          attributes for elements you want to track.
-        </p>
         <button
           onClick={resetToDefault}
           className="text-sm px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded border border-gray-300"
@@ -163,9 +158,9 @@ export function DiffPlayground() {
         )}
       </div>
 
-      <Showcase 
-        before={beforeHtml} 
-        after={afterHtml} 
+      <Showcase
+        before={beforeHtml}
+        after={afterHtml}
         css={customCss}
         editable={true}
         onBeforeChange={setBeforeHtml}
