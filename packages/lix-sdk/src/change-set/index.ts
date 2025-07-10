@@ -4,11 +4,11 @@ export {
 	LixChangeSetEdgeSchema,
 	LixChangeSetLabelSchema,
 	LixChangeSetThreadSchema,
-	type ChangeSet,
-	type ChangeSetElement,
-	type ChangeSetEdge,
-	type ChangeSetLabel,
-	type ChangeSetThread,
+	type LixChangeSet as ChangeSet,
+	type LixChangeSetElement as ChangeSetElement,
+	type LixChangeSetEdge as ChangeSetEdge,
+	type LixChangeSetLabel as ChangeSetLabel,
+	type LixChangeSetThread as ChangeSetThread,
 } from "./schema.js";
 export { createChangeSet } from "./create-change-set.js";
 export { applyChangeSet } from "./apply-change-set.js";

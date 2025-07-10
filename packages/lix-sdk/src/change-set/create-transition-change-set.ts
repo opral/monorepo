@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/index.js";
-import type { ChangeSet } from "./schema.js";
+import type { LixChangeSet } from "./schema.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { createChangeSet } from "./create-change-set.js";
@@ -16,9 +16,9 @@ import { createChangeSet } from "./create-change-set.js";
  */
 export async function createTransitionChangeSet(args: {
 	lix: Lix;
-	sourceChangeSet: Pick<ChangeSet, "id">;
-	targetChangeSet: Pick<ChangeSet, "id">;
-}): Promise<ChangeSet> {
+	sourceChangeSet: Pick<LixChangeSet, "id">;
+	targetChangeSet: Pick<LixChangeSet, "id">;
+}): Promise<LixChangeSet> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// 1. Find leaf changes defining the state AT the *target* change set
 		const leafChangesToApply = await trx

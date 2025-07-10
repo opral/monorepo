@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
-import type { ChangeSet } from "../change-set/schema.js";
+import type { LixChangeSet } from "../change-set/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { ChangeProposal } from "./database-schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
@@ -16,8 +16,8 @@ import { changeSetElementInSymmetricDifference } from "../query-filter/change-se
  */
 export async function createChangeProposal(args: {
 	lix: Lix;
-	sourceChangeSet: Pick<ChangeSet, "id">;
-	targetChangeSet: Pick<ChangeSet, "id">;
+	sourceChangeSet: Pick<LixChangeSet, "id">;
+	targetChangeSet: Pick<LixChangeSet, "id">;
 }): Promise<ChangeProposal> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Get the changes that are in the symmetric difference between the two change sets

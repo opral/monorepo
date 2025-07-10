@@ -116,8 +116,8 @@ export type InternalChangeTable = {
 	created_at: Generated<string>;
 };
 
-export type Change = Selectable<ChangeView>;
-export type NewChange = Insertable<ChangeView>;
+export type LixChange = Selectable<ChangeView>;
+export type NewLixChange = Insertable<ChangeView>;
 export type ChangeView = {
 	id: Generated<string>;
 	entity_id: string;

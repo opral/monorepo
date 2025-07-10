@@ -2,7 +2,7 @@ import { sql, type Kysely } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
-import type { Change } from "../change/schema.js";
+import type { LixChange } from "../change/schema.js";
 import type { NewStateRow } from "./schema.js";
 import { uuidV7 } from "../database/index.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
@@ -189,7 +189,7 @@ export function createChangeWithSnapshot(args: {
 	> & { snapshot_content: string | null };
 	timestamp?: string;
 	version_id?: string;
-}): Pick<Change, "id" | "schema_key" | "file_id" | "entity_id"> {
+}): Pick<LixChange, "id" | "schema_key" | "file_id" | "entity_id"> {
 	// const [snapshot] = args.data.snapshot_content
 	// 	? executeSync({
 	// 			lix: { sqlite: args.sqlite },
@@ -371,6 +371,7 @@ function updateStateCache(args: {
 								inherited_from_version_id: null,
 								inheritance_delete_marker: 1,
 								change_id: resolvedChangeId,
+								change_set_id: null, // Will be populated when changeset is created at commit
 							})
 					),
 			});
@@ -407,6 +408,7 @@ function updateStateCache(args: {
 				inherited_from_version_id: null, // Direct entities are not inherited
 				inheritance_delete_marker: 0, // Not a deletion marker
 				change_id: args.change_id || "no-change-id",
+				change_set_id: null, // Will be populated when changeset is created at commit
 			})
 			.onConflict((oc) =>
 				oc
@@ -419,6 +421,7 @@ function updateStateCache(args: {
 						inherited_from_version_id: null, // Direct entities are not inherited
 						inheritance_delete_marker: 0, // Not a deletion marker
 						change_id: resolvedChangeId,
+						change_set_id: null, // Will be populated when changeset is created at commit
 					})
 			),
 	});

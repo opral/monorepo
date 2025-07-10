@@ -5,18 +5,18 @@ import {
 import { initDb } from "../database/init-db.js";
 import { v7 as uuid_v7 } from "uuid";
 import { nanoid } from "../database/nano-id.js";
-import { LixVersionSchema, type Version } from "../version/schema.js";
+import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import {
 	LixChangeSetSchema,
 	LixChangeSetElementSchema,
-	type ChangeSet,
-	type ChangeSetElement,
+	type LixChangeSet,
+	type LixChangeSetElement,
 } from "../change-set/schema.js";
-import { LixLabelSchema, type Label } from "../label/schema.js";
-import { LixKeyValueSchema, type KeyValue } from "../key-value/schema.js";
+import { LixLabelSchema, type LixLabel } from "../label/schema.js";
+import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import { LixSchemaViewMap } from "../database/schema.js";
-import type { Change } from "../change/schema.js";
-import type { StoredSchema } from "../stored-schema/schema.js";
+import type { LixChange } from "../change/schema.js";
+import type { LixStoredSchema } from "../stored-schema/schema.js";
 import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
@@ -98,7 +98,7 @@ export async function newLixFile(args?: {
 	 *    { key: "my_custom_key", value: "my_custom_value", lixcol_version_id: "global" },
 	 *  ]
 	 */
-	keyValues?: NewStateAll<KeyValue>[];
+	keyValues?: NewStateAll<LixKeyValue>[];
 }): Promise<NewLixBlob> {
 	const sqlite = await createInMemoryDatabase({
 		readOnly: false,
@@ -183,7 +183,7 @@ export async function newLixFile(args?: {
 	}
 }
 
-type BootstrapChange = Omit<Change, "snapshot_id"> & {
+type BootstrapChange = Omit<LixChange, "snapshot_id"> & {
 	snapshot_content: any;
 };
 
@@ -192,7 +192,7 @@ type BootstrapChange = Omit<Change, "snapshot_id"> & {
  * All entities are created in a single change set to avoid dependency ordering issues.
  */
 function createBootstrapChanges(
-	providedKeyValues?: NewStateAll<KeyValue>[]
+	providedKeyValues?: NewStateAll<LixKeyValue>[]
 ): BootstrapChange[] {
 	const changes: BootstrapChange[] = [];
 	const created_at = new Date().toISOString();
@@ -205,7 +205,7 @@ function createBootstrapChanges(
 	const initialGlobalVersionWorkingChangeSetId = nanoid();
 
 	// Create all required change sets
-	const changeSets: ChangeSet[] = [
+	const changeSets: LixChangeSet[] = [
 		{
 			id: initialGlobalVersionChangeSetId,
 		},
@@ -247,7 +247,7 @@ function createBootstrapChanges(
 			change_set_id: initialGlobalVersionChangeSetId,
 			working_change_set_id: initialGlobalVersionWorkingChangeSetId,
 			hidden: true,
-		} satisfies Version,
+		} satisfies LixVersion,
 		created_at,
 	});
 
@@ -266,7 +266,7 @@ function createBootstrapChanges(
 			working_change_set_id: initialWorkingChangeSetId,
 			inherits_from_version_id: "global",
 			hidden: false,
-		} satisfies Version,
+		} satisfies LixVersion,
 		created_at,
 	});
 
@@ -282,7 +282,7 @@ function createBootstrapChanges(
 		snapshot_content: {
 			id: checkpointLabelId,
 			name: "checkpoint",
-		} satisfies Label,
+		} satisfies LixLabel,
 		created_at,
 	});
 
@@ -298,7 +298,7 @@ function createBootstrapChanges(
 		snapshot_content: {
 			key: "lix_id",
 			value: lixId ?? nanoid(10),
-		} satisfies KeyValue,
+		} satisfies LixKeyValue,
 		created_at,
 	});
 
@@ -314,7 +314,7 @@ function createBootstrapChanges(
 		snapshot_content: {
 			key: "lix_name",
 			value: lixName ?? humanId({ separator: "-", capitalize: false }),
-		} satisfies KeyValue,
+		} satisfies LixKeyValue,
 		created_at,
 	});
 
@@ -334,7 +334,7 @@ function createBootstrapChanges(
 				snapshot_content: {
 					key: kv.key,
 					value: kv.value,
-				} satisfies KeyValue,
+				} satisfies LixKeyValue,
 				created_at,
 			});
 		}
@@ -353,7 +353,7 @@ function createBootstrapChanges(
 				key: schema["x-lix-key"],
 				version: schema["x-lix-version"],
 				value: JSON.stringify(schema),
-			} satisfies StoredSchema,
+			} satisfies LixStoredSchema,
 			created_at,
 		});
 	}
@@ -377,7 +377,7 @@ function createBootstrapChanges(
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,
 				file_id: change.file_id,
-			} satisfies ChangeSetElement,
+			} satisfies LixChangeSetElement,
 			created_at,
 		};
 		changes.push(changeSetElementChange);
@@ -407,7 +407,7 @@ function createBootstrapChanges(
 				entity_id: changeSetElementChange.entity_id,
 				schema_key: changeSetElementChange.schema_key,
 				file_id: changeSetElementChange.file_id,
-			} satisfies ChangeSetElement,
+			} satisfies LixChangeSetElement,
 			created_at,
 		});
 	}

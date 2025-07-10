@@ -1,2 +1,2 @@
 export { createLabel } from "./create-label.js";
-export { LixLabelSchema, type Label } from "./schema.js";
+export { LixLabelSchema, type LixLabel as Label } from "./schema.js";

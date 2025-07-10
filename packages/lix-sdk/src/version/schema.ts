@@ -143,7 +143,7 @@ export const LixActiveVersionSchema = {
 LixActiveVersionSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type Version = FromLixSchemaDefinition<typeof LixVersionSchema>;
-export type ActiveVersion = FromLixSchemaDefinition<
+export type LixVersion = FromLixSchemaDefinition<typeof LixVersionSchema>;
+export type LixActiveVersion = FromLixSchemaDefinition<
 	typeof LixActiveVersionSchema
 >;

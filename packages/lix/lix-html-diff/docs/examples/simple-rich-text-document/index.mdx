@@ -1,0 +1,11 @@
+# Simple Rich Text Document
+
+This example demonstrates basic HTML diff with a simplified rich text document. The document contains headings, paragraphs, lists, and basic formatting - showcasing common text content diffing scenarios.
+
+import { Showcase } from "../../components/showcase";
+import beforeHtml from "./before.html?raw";
+import afterHtml from "./after.html?raw";
+import showcaseCSS from "./styles.css?raw";
+import defaultCSS from "../../../src/default.css?raw";
+
+<Showcase before={beforeHtml} after={afterHtml} css={defaultCSS + "\n\n" + showcaseCSS} />

@@ -2,7 +2,7 @@
  * Storage adapter interface for Lix.
  */
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { Account } from "../../account/schema.js";
+import type { LixAccount } from "../../account/schema.js";
 import type { Lix } from "../open-lix.js";
 
 export interface LixStorageAdapter {
@@ -42,7 +42,7 @@ export interface LixStorageAdapter {
 	 */
 	getPersistedState?(): Promise<
 		| {
-				activeAccounts?: Pick<Account, "id" | "name">[];
+				activeAccounts?: Pick<LixAccount, "id" | "name">[];
 				// Future: Add more persisted state here
 		  }
 		| undefined

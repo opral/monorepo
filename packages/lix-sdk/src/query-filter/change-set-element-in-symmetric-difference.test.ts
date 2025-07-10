@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { changeSetElementInSymmetricDifference } from "./change-set-element-in-symmetric-difference.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import type { ChangeSetElement } from "../change-set/schema.js";
+import type { LixChangeSetElement } from "../change-set/schema.js";
 
 // Helper function to extract necessary fields from a Change object
 function getEntityChangeFields(change: any) {
@@ -84,7 +84,7 @@ test("should return the symmetric difference between two change sets", async () 
 	const changeMap = new Map(changes.map((c) => [c.id, c]));
 
 	// Setup: Create change set elements
-	const changeElementsA: ChangeSetElement[] = [
+	const changeElementsA: LixChangeSetElement[] = [
 		{
 			change_set_id: "changeSetA",
 			change_id: "change1",
@@ -97,7 +97,7 @@ test("should return the symmetric difference between two change sets", async () 
 		},
 	];
 
-	const changeElementsB: ChangeSetElement[] = [
+	const changeElementsB: LixChangeSetElement[] = [
 		{
 			change_set_id: "changeSetB",
 			change_id: "change2",
@@ -211,7 +211,7 @@ test("should return an empty array if there are no differences", async () => {
 
 	const changeMap = new Map(changes.map((c) => [c.id, c]));
 
-	const sharedChangeElements: ChangeSetElement[] = [
+	const sharedChangeElements: LixChangeSetElement[] = [
 		{
 			change_set_id: "changeSetA",
 			change_id: "change1",
@@ -340,7 +340,7 @@ test("should handle disjoint change sets", async () => {
 
 	const changeMap = new Map(changes.map((c) => [c.id, c]));
 
-	const disjointChangeElementsA: ChangeSetElement[] = [
+	const disjointChangeElementsA: LixChangeSetElement[] = [
 		{
 			change_set_id: "changeSetA",
 			change_id: "change1",
@@ -352,7 +352,7 @@ test("should handle disjoint change sets", async () => {
 			...getEntityChangeFields(changeMap.get("change2")!),
 		},
 	];
-	const disjointChangeElementsB: ChangeSetElement[] = [
+	const disjointChangeElementsB: LixChangeSetElement[] = [
 		{
 			change_set_id: "changeSetB",
 			change_id: "change3",

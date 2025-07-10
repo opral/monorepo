@@ -6,7 +6,7 @@ import {
 } from "sqlite-wasm-kysely";
 import { newLixFile } from "../new-lix.js";
 import type { LixStorageAdapter } from "./lix-storage-adapter.js";
-import type { Account } from "../../account/schema.js";
+import type { LixAccount } from "../../account/schema.js";
 import type { Lix } from "../open-lix.js";
 
 /**
@@ -55,7 +55,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	private opfsRoot?: FileSystemDirectoryHandle;
 	private savePromise?: Promise<void>;
 	private pendingSave = false;
-	private activeAccounts?: Pick<Account, "id" | "name">[];
+	private activeAccounts?: Pick<LixAccount, "id" | "name">[];
 	private activeAccountSubscription?: { unsubscribe(): void };
 
 	/**
@@ -206,7 +206,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	 * Saves the current active accounts to a JSON file in OPFS.
 	 */
 	private async saveActiveAccounts(
-		accounts: Pick<Account, "id" | "name">[]
+		accounts: Pick<LixAccount, "id" | "name">[]
 	): Promise<void> {
 		if (!this.opfsRoot) {
 			return;
@@ -234,7 +234,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	 * Loads active accounts from the JSON file in OPFS.
 	 */
 	private async loadActiveAccounts(): Promise<
-		Pick<Account, "id" | "name">[] | undefined
+		Pick<LixAccount, "id" | "name">[] | undefined
 	> {
 		if (!this.opfsRoot) {
 			return undefined;
@@ -246,7 +246,7 @@ export class OpfsStorage implements LixStorageAdapter {
 			);
 			const file = await fileHandle.getFile();
 			const content = await file.text();
-			const accounts = JSON.parse(content) as Pick<Account, "id" | "name">[];
+			const accounts = JSON.parse(content) as Pick<LixAccount, "id" | "name">[];
 			this.activeAccounts = accounts;
 			return accounts;
 		} catch {
@@ -259,7 +259,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	 * Returns any persisted state that should be restored.
 	 */
 	async getPersistedState(): Promise<
-		{ activeAccounts?: Pick<Account, "id" | "name">[] } | undefined
+		{ activeAccounts?: Pick<LixAccount, "id" | "name">[] } | undefined
 	> {
 		// Load active accounts if not already loaded
 		if (!this.activeAccounts && this.opfsRoot) {

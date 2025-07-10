@@ -1,0 +1,10 @@
+# Rich Text Document
+
+This example demonstrates HTML diff with a rich text document created using [ProseMirror](https://prosemirror.net/) ([Tiptap](https://tiptap.dev/)). The document contains structured content with interactive elements, styled components, and complex nested HTML structures typical of modern rich text editors.
+
+import { Showcase } from "../../components/showcase";
+import beforeHtml from "./before.html?raw";
+import afterHtml from "./after.html?raw";
+import showcaseCSS from "./styles.css?raw";
+
+<Showcase before={beforeHtml} after={afterHtml} css={showcaseCSS} />
