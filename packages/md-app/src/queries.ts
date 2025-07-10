@@ -1,17 +1,10 @@
 import {
-	openLix,
 	switchAccount,
 	Lix,
 	Account,
-	changeSetIsAncestorOf,
 	changeSetHasLabel,
-	changeSetElementIsLeafOf,
-	changeHasLabel,
 	jsonArrayFrom,
-	UiDiffComponentProps,
 	ChangeSet,
-	nanoid,
-	OpfsStorage,
 	LixFileDescriptor,
 } from "@lix-js/sdk";
 import {
@@ -283,6 +276,7 @@ export function selectWorkingChanges(lix: Lix) {
 				)
 				.where("before_change.entity_id", "=", eb.ref("change.entity_id"))
 				.where("before_change.schema_key", "=", eb.ref("change.schema_key"))
+				.where("before_change.plugin_key", "=", eb.ref("change.plugin_key"))
 				.where("before_change.file_id", "=", eb.ref("change.file_id"))
 				.select("before_change.snapshot_content")
 				.orderBy("before_change.created_at", "desc")
@@ -510,6 +504,7 @@ export function selectChangeDiffs(
 						.where("before_cse.change_set_id", "=", changeSetBeforeId)
 						.where("before_change.entity_id", "=", eb.ref("change.entity_id"))
 						.where("before_change.schema_key", "=", eb.ref("change.schema_key"))
+						.where("before_change.plugin_key", "=", eb.ref("change.plugin_key"))
 						.where("before_change.file_id", "=", eb.ref("change.file_id"))
 						.select("before_change.snapshot_content")
 						.orderBy("before_change.created_at", "desc")
