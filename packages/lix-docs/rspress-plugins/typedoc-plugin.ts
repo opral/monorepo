@@ -79,19 +79,22 @@ async function generateMetaJson(absoluteApiDir: string) {
 
 async function patchGeneratedApiDocs(absoluteApiDir: string) {
   await patchLinks(absoluteApiDir);
-  
+
   // Only rename README.md if it exists
   const readmePath = path.join(absoluteApiDir, "README.md");
   const indexPath = path.join(absoluteApiDir, "index.md");
-  
+
   try {
     await fs.access(readmePath);
     await fs.rename(readmePath, indexPath);
   } catch (error) {
     // README.md doesn't exist, create a basic index.md
-    await fs.writeFile(indexPath, `# API Reference\n\nBrowse the API documentation using the sidebar.`);
+    await fs.writeFile(
+      indexPath,
+      `# API Reference\n\nBrowse the API documentation using the sidebar.`
+    );
   }
-  
+
   await generateMetaJson(absoluteApiDir);
 }
 
@@ -146,39 +149,33 @@ export function generateApiSidebar(docsRoot: string) {
 export function customTypeDocPlugin(
   options: CustomTypeDocOptions
 ): RspressPlugin {
-  let docRoot: string | undefined;
   const { entryPoints = [], tsconfig, outDir = "api" } = options;
 
   return {
     name: "custom-typedoc-plugin",
     async config(config) {
-      docRoot = config.root;
+      const docRoot = config.root;
 
-      // Bootstrap options - updated for TypeDoc 0.28+ API
-      const bootstrapOptions: any = {
+      const outdir = path.join(docRoot!, outDir);
+
+      // Use Application.bootstrap static method for TypeDoc 0.28+
+      const app = await Application.bootstrapWithPlugins({
         name: config.title,
         entryPoints,
         plugin: ["typedoc-plugin-markdown"],
-        out: path.join(docRoot!, outDir),
-        readme: "none",
+        out: outdir,
+        theme: "markdown",
         disableSources: true,
         excludePrivate: true,
         excludeExternals: true,
-      };
-
-      // Add tsconfig if provided
-      if (tsconfig) {
-        bootstrapOptions.tsconfig = tsconfig;
-      }
-
-      // Use Application.bootstrap static method for TypeDoc 0.28+
-      const app = await Application.bootstrap(bootstrapOptions);
+        tsconfig,
+      });
       const project = await app.convert();
 
       if (project) {
         // Generate docs (output directory is specified in bootstrap options)
-        await app.generateDocs(project, bootstrapOptions.out);
-        await patchGeneratedApiDocs(bootstrapOptions.out);
+        await app.generateDocs(project, outdir);
+        await patchGeneratedApiDocs(outdir);
       }
 
       return config;

@@ -123,9 +123,19 @@ function LandingPage() {
               href="https://flashtype.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-blue-600 text-white px-6 py-2 rounded-md text-base hover:bg-blue-700 transition-all duration-200 flex items-center font-medium group shadow-sm"
+              className="px-6 py-2 rounded-md text-base transition-all duration-200 flex items-center font-medium group shadow-sm"
+              style={{
+                backgroundColor: '#2563EB',
+                color: 'white',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#1d4ed8';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#2563EB';
+              }}
             >
-              <span className="flex items-center">
+              <span className="flex items-center" style={{ color: 'white' }}>
                 Try a demo app
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

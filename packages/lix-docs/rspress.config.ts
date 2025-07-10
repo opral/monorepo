@@ -30,11 +30,11 @@ export default defineConfig({
     },
   },
   plugins: [
-    // mermaid(),
-    // customTypeDocPlugin({
-    //   entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
-    //   tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
-    // }),
+    mermaid(),
+    customTypeDocPlugin({
+      entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
+      tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
+    }),
   ],
   themeConfig: {
     darkMode: false,
@@ -113,7 +113,7 @@ export default defineConfig({
           ],
         },
       ],
-      // "/api/": generateApiSidebar(path.join(__dirname, "docs")),
+      "/api/": generateApiSidebar(path.join(__dirname, "docs")),
       "/plugins/": [
         {
           text: "Plugins",
