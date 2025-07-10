@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+/* Default diff styles */
+.diff-before {
+  color: red;
+  text-decoration: none;
+  outline: none;
+}
+
+.diff-after {
+  color: green;
+  text-decoration: none;
+  outline: none;
+}

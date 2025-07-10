@@ -1,41 +1,30 @@
 import React, { useRef, useEffect, useState } from "react";
-import { renderHtmlDiff } from "../../src/render-html-diff.js";
+import { renderHtmlDiff } from "../../../src/render-html-diff";
 
 // Type for showcase entry
 interface ShowcaseEntry {
   key: string;
   before: string;
   after: string;
+  css: string;
 }
 
-// Use Vite's glob import to import all before/after HTML files as raw text, eagerly
-// @ts-expect-error - glob is not a property of ImportMeta
-const beforeModules = import.meta.glob<{ default: string }>(
-  "./**/before.html",
-  { as: "raw", eager: true },
-);
-// @ts-expect-error - glob is not a property of ImportMeta
-const afterModules = import.meta.glob<{ default: string }>("./**/after.html", {
-  as: "raw",
-  eager: true,
-});
-// @ts-expect-error - glob is not a property of ImportMeta
-const cssModules = import.meta.glob<{ default: string }>("./**/styles.css", {
-  as: "raw",
-  eager: true,
-});
+// @ts-expect-error - raw import
+import beforeHtml from "./0-prosemirror-document/before.html?raw";
+// @ts-expect-error - raw import
+import afterHtml from "./0-prosemirror-document/after.html?raw";
+// @ts-expect-error - raw import
+import showcaseCSS from "./0-prosemirror-document/styles.css?raw";
 
-// Build the showcases array at the top level using the eagerly imported modules
-const showcases: ShowcaseEntry[] = Object.keys(beforeModules)
-  .map((path) => {
-    const match = path.match(/\.\/(.+)\/before\.html$/);
-    if (!match) return undefined;
-    const key = match[1];
-    const before = (beforeModules[path] as string) || "";
-    const after = (afterModules[`./${key}/after.html`] as string) || "";
-    return { key, before, after };
-  })
-  .filter((entry): entry is ShowcaseEntry => Boolean(entry));
+// Build the showcases array manually
+const showcases: ShowcaseEntry[] = [
+  {
+    key: "0-prosemirror-document",
+    before: beforeHtml,
+    after: afterHtml,
+    css: showcaseCSS,
+  },
+];
 
 // ShadowHtml component for style isolation
 function ShadowHtml({ html, css }: { html: string; css?: string }) {
@@ -68,8 +57,6 @@ function ShadowHtml({ html, css }: { html: string; css?: string }) {
 export function Showcase() {
   const [activeKey, setActiveKey] = useState<string>(showcases[0]?.key || "");
   const current = showcases.find((s) => s.key === activeKey);
-  // Load CSS for the current showcase
-  const css = cssModules[`./${activeKey}/styles.css`] as string | undefined;
 
   return (
     <div className="max-w-7xl mx-auto my-8">
@@ -98,13 +85,13 @@ export function Showcase() {
             <div>
               <div className="font-medium mb-1 text-gray-600">Before</div>
               <div className="p-2 bg-gray-50 rounded text-xs overflow-x-auto">
-                <ShadowHtml html={current.before} css={css} />
+                <ShadowHtml html={current.before} css={current.css} />
               </div>
             </div>
             <div>
               <div className="font-medium mb-1 text-gray-600">After</div>
               <div className="p-2 bg-gray-50 rounded text-xs overflow-x-auto">
-                <ShadowHtml html={current.after} css={css} />
+                <ShadowHtml html={current.after} css={current.css} />
               </div>
             </div>
           </div>
@@ -119,7 +106,7 @@ export function Showcase() {
                     beforeHtml: current.before,
                     afterHtml: current.after,
                   })}
-                  css={css}
+                  css={current.css}
                 />
               </div>
             </div>

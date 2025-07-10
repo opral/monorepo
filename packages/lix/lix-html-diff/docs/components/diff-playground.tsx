@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { TabbedContentViewer } from "./tabbed-content-viewer.js";
+import { TabbedContentViewer } from "./tabbed-content-viewer";
 import dedent from "dedent";
-import { renderHtmlDiff } from "../src/render-html-diff.js";
+import { renderHtmlDiff } from "../../src/render-html-diff";
 
 /**
  * A playground component that allows users to paste in "before" and "after" HTML
@@ -125,7 +125,7 @@ export function DiffPlayground() {
         </p>
         <button
           onClick={resetToDefault}
-          className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded"
+          className="text-sm px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded border border-gray-300"
         >
           Reset
         </button>

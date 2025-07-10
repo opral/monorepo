@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { type TestCase, testCases } from "../src/test-cases.js";
-import { renderHtmlDiff } from "../src/render-html-diff.js";
-import { TabbedContentViewer } from "./tabbed-content-viewer.js";
+import { type TestCase, testCases } from "../../src/test-cases";
+import { renderHtmlDiff } from "../../src/render-html-diff";
+import { TabbedContentViewer } from "./tabbed-content-viewer";
 
 export function TestCases() {
   const [searchTerm, setSearchTerm] = useState("");
