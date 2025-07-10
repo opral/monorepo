@@ -287,6 +287,8 @@ services:
     runtime: static
     autoDeploy: true
     branch: main
+    previews:
+      generation: automatic
     staticPublishPath: ./packages/lix/plugins/prosemirror/example/dist
     buildCommand: pnpm install && pnpm run --filter @lix-js/plugin-prosemirror-example... build
     buildFilter:
@@ -300,7 +302,9 @@ services:
     runtime: static
     autoDeploy: true
     branch: main
-    staticPublishPath: ./packages/lix/lix-html-diff/docs/.rspress/dist
+    previews:
+      generation: automatic
+    staticPublishPath: ./packages/lix/lix-html-diff/docs_build
     buildCommand: pnpm install && pnpm run --filter @lix-js/html-diff... build:docs
     buildFilter:
       paths:

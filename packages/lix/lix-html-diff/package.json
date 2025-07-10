@@ -16,7 +16,7 @@
     "src"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && pnpm docs:build",
     "dev": "tsc --watch",
     "test": "tsc --noEmit && vitest run",
     "test:watch": "vitest",
