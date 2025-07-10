@@ -1,0 +1,194 @@
+{
+  "attribution": {
+    "page": "guide/features/attribution.md",
+    "examples": [
+      {
+        "name": "attribution-basic",
+        "title": "Basic Attribution - Who Changed This Record?",
+        "description": "Demonstrates basic change attribution functionality",
+        "files": {
+          "/index.js": "attribution-basic.js"
+        }
+      },
+      {
+        "name": "attribution-by-author",
+        "title": "Attribution by Author",
+        "description": "Filter changes by specific author",
+        "files": {
+          "/index.js": "attribution-by-author.js"
+        }
+      },
+      {
+        "name": "attribution-timeline",
+        "title": "Attribution Timeline",
+        "description": "Show chronological attribution timeline",
+        "files": {
+          "/index.js": "attribution-timeline.js"
+        }
+      },
+      {
+        "name": "attribution-selected-entity",
+        "title": "Selected Entity Attribution",
+        "description": "Find out who authored a change for a selected entity",
+        "files": {
+          "/index.js": "attribution-selected-entity.js"
+        }
+      },
+      {
+        "name": "attribution-file-change",
+        "title": "File Change Attribution",
+        "description": "Query attribution for file-level changes",
+        "files": {
+          "/index.js": "attribution-file-change.js"
+        }
+      }
+    ]
+  },
+  "change-proposals": {
+    "page": "guide/features/change-proposals.md",
+    "examples": [
+      {
+        "name": "change-proposals-basic",
+        "title": "Basic Change Proposals",
+        "description": "Create and manage change proposals",
+        "files": {
+          "/index.js": "change-proposals-basic.js"
+        }
+      },
+      {
+        "name": "change-proposals-workflow",
+        "title": "Change Proposal Workflow",
+        "description": "Complete workflow for change proposals",
+        "files": {
+          "/index.js": "change-proposals-workflow.js"
+        }
+      }
+    ]
+  },
+  "diffs": {
+    "page": "guide/features/diffs.md",
+    "examples": [
+      {
+        "name": "diffs-basic",
+        "title": "Basic Diffs",
+        "description": "Generate and view diffs between versions",
+        "files": {
+          "/index.js": "diffs-basic.js"
+        }
+      },
+      {
+        "name": "diffs-visual",
+        "title": "Visual Diffs",
+        "description": "Enhanced visual diff presentation",
+        "files": {
+          "/index.js": "diffs-visual.js"
+        }
+      }
+    ]
+  },
+  "history": {
+    "page": "guide/features/history.md",
+    "examples": [
+      {
+        "name": "history-basic",
+        "title": "Basic History",
+        "description": "Track and view entity history",
+        "files": {
+          "/index.js": "history-basic.js"
+        }
+      },
+      {
+        "name": "history-entity",
+        "title": "Entity History",
+        "description": "Detailed entity history tracking",
+        "files": {
+          "/index.js": "history-entity.js"
+        }
+      }
+    ]
+  },
+  "restore": {
+    "page": "guide/features/restore.md",
+    "examples": [
+      {
+        "name": "restore-basic",
+        "title": "Basic Restore",
+        "description": "Restore entities to previous states",
+        "files": {
+          "/index.js": "restore-basic.js"
+        }
+      },
+      {
+        "name": "restore-selective",
+        "title": "Selective Restore",
+        "description": "Selectively restore specific changes",
+        "files": {
+          "/index.js": "restore-selective.js"
+        }
+      }
+    ]
+  },
+  "undo-redo": {
+    "page": "guide/features/undo-redo.md",
+    "examples": [
+      {
+        "name": "undo-basic",
+        "title": "Basic Undo/Redo",
+        "description": "Implement undo and redo functionality",
+        "files": {
+          "/index.js": "undo-basic.js"
+        }
+      },
+      {
+        "name": "undo-advanced",
+        "title": "Advanced Undo/Redo",
+        "description": "Advanced undo/redo with branching",
+        "files": {
+          "/index.js": "undo-advanced.js"
+        }
+      }
+    ]
+  },
+  "validation-rules": {
+    "page": "guide/features/validation-rules.md",
+    "examples": [
+      {
+        "name": "validation-basic",
+        "title": "Basic Validation",
+        "description": "Implement basic validation rules",
+        "files": {
+          "/index.js": "validation-basic.js"
+        }
+      },
+      {
+        "name": "validation-advanced",
+        "title": "Advanced Validation",
+        "description": "Complex validation rules and workflows",
+        "files": {
+          "/index.js": "validation-advanced.js"
+        }
+      }
+    ]
+  },
+  "versions": {
+    "page": "guide/features/versions.md",
+    "examples": [
+      {
+        "name": "versions-basic",
+        "title": "Basic Versioning",
+        "description": "Create and manage versions",
+        "files": {
+          "/index.js": "versions-basic.js"
+        }
+      },
+      {
+        "name": "versions-collaboration",
+        "title": "Collaborative Versioning",
+        "description": "Multi-user version collaboration",
+        "files": {
+          "/index.js": "versions-collaboration.js"
+        }
+      }
+    ]
+  }
+}

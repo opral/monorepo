@@ -1,6 +1,7 @@
 import { defineConfig } from "vitepress";
 import typedocSidebar from "../api/reference/typedoc-sidebar.json";
 import { withMermaid } from "vitepress-plugin-mermaid";
+import react from "@vitejs/plugin-react";
 
 // Fix typedoc sidebar links
 const fixTypedocSidebar = (sidebar: any) => {
@@ -33,7 +34,16 @@ export default withMermaid({
     ["link", { rel: "alternate icon", href: "/favicon.ico" }], // Fallback for browsers that don't support SVG
     ["link", { rel: "mask-icon", href: "/favicon.svg", color: "#08B5D6" }],
     ["meta", { name: "theme-color", content: "#08B5D6" }],
+    ["script", { src: "https://embed.runkit.com" }], // Load RunKit for interactive examples
   ],
+  vite: {
+    plugins: [react()],
+    server: {
+      fs: {
+        allow: ['..']
+      }
+    }
+  },
   themeConfig: {
     siteTitle: "Lix SDK",
 
