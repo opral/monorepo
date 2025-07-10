@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import { defineConfig } from "rspress/config";
 import mermaid from "rspress-plugin-mermaid";
+import { customTypeDocPlugin } from "./rspress-plugins/typedoc-plugin";
 
 export default defineConfig({
   root: path.join(__dirname, "docs"),
@@ -26,7 +27,13 @@ export default defineConfig({
       },
     },
   },
-  plugins: [mermaid()],
+  plugins: [
+    mermaid(),
+    customTypeDocPlugin({
+      entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
+      tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
+    }),
+  ],
   themeConfig: {
     darkMode: false,
     nav: [
@@ -107,10 +114,7 @@ export default defineConfig({
       "/api/": [
         {
           text: "API Reference",
-          items: [
-            { text: "Overview", link: "/api/" },
-            { text: "TypeDoc Reference", link: "/api/reference/" },
-          ],
+          items: [{ text: "Overview", link: "/api/" }],
         },
       ],
       "/plugins/": [

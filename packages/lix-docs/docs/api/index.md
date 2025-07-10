@@ -1,105 +1,120 @@
-# API Reference
+# Lix
 
-The Lix SDK provides a comprehensive API for working with files, changes, versions, and more. This section documents the core API functions, types, and interfaces.
+## Table of contents
 
-## Auto-generated API Reference
+### Classes
 
-For the most up-to-date and comprehensive API documentation, see the [TypeDoc generated API reference](./reference/).
+- [InMemoryStorage](/api/classes/InMemoryStorage.md)
+- [LixObservable](/api/classes/LixObservable.md)
+- [OpfsStorage](/api/classes/OpfsStorage.md)
 
-This reference is automatically generated from the TypeScript source code and includes:
+### Interfaces
 
-- All exported functions with their parameters and return types
-- Type definitions and interfaces
-- Detailed method descriptions and examples where available
+- [LixStorageAdapter](/api/interfaces/LixStorageAdapter.md)
 
-## Key API Categories
+### Type Aliases
 
-## Database Schema
+- [Account](/api/types/Account.md)
+- [ActiveAccount](/api/types/ActiveAccount.md)
+- [ActiveVersion](/api/types/ActiveVersion.md)
+- [Change](/api/types/Change.md)
+- [ChangeAuthor](/api/types/ChangeAuthor.md)
+- [ChangeSet](/api/types/ChangeSet.md)
+- [ChangeSetEdge](/api/types/ChangeSetEdge.md)
+- [ChangeSetElement](/api/types/ChangeSetElement.md)
+- [ChangeSetLabel](/api/types/ChangeSetLabel.md)
+- [ChangeSetThread](/api/types/ChangeSetThread.md)
+- [DetectedChange](/api/types/DetectedChange.md)
+- [EntityStateAllView](/api/types/EntityStateAllView.md)
+- [EntityStateHistoryView](/api/types/EntityStateHistoryView.md)
+- [EntityStateView](/api/types/EntityStateView.md)
+- [FromLixSchemaDefinition](/api/types/FromLixSchemaDefinition.md)
+- [JSONType](/api/types/JSONType.md)
+- [Label](/api/types/Label.md)
+- [Lix](/api/types/Lix.md)
+- [LixDatabaseSchema](/api/types/LixDatabaseSchema.md)
+- [LixFile](/api/types/LixFile.md)
+- [LixFileDescriptor](/api/types/LixFileDescriptor.md)
+- [LixGenerated](/api/types/LixGenerated.md)
+- [LixHooks](/api/types/LixHooks.md)
+- [LixInsertable](/api/types/LixInsertable.md)
+- [LixKeyValue](/api/types/LixKeyValue.md)
+- [LixPlugin](/api/types/LixPlugin.md)
+- [LixSchemaDefinition](/api/types/LixSchemaDefinition.md)
+- [LixSelectable](/api/types/LixSelectable.md)
+- [LixServerProtocolHandlerContext](/api/types/LixServerProtocolHandlerContext.md)
+- [LixUpdateable](/api/types/LixUpdateable.md)
+- [Log](/api/types/Log.md)
+- [NewChange](/api/types/NewChange.md)
+- [NewState](/api/types/NewState.md)
+- [NewStateAll](/api/types/NewStateAll.md)
+- [State](/api/types/State.md)
+- [StateAll](/api/types/StateAll.md)
+- [StateAllUpdate](/api/types/StateAllUpdate.md)
+- [StateHistory](/api/types/StateHistory.md)
+- [StateUpdate](/api/types/StateUpdate.md)
+- [StoredSchema](/api/types/StoredSchema.md)
+- [Thread](/api/types/Thread.md)
+- [ThreadComment](/api/types/ThreadComment.md)
+- [ToKysely](/api/types/ToKysely.md)
+- [UiDiffComponentProps](/api/types/UiDiffComponentProps.md)
+- [Version](/api/types/Version.md)
 
-Lix uses a SQL database to store and query data. The [database schema](./schema) includes tables for:
+### Variables
 
-- `file` - Stores file metadata and content
-- `change` - Records individual changes to files
-- `change_set` - Collections of related changes
-- `snapshot` - Groups related changes together
-- `version` - Manages different versions of the data
-- And more...
+- [JSONTypeSchema](/api/variables/JSONTypeSchema.md)
+- [LixAccountSchema](/api/variables/LixAccountSchema.md)
+- [LixChangeAuthorSchema](/api/variables/LixChangeAuthorSchema.md)
+- [LixChangeSetEdgeSchema](/api/variables/LixChangeSetEdgeSchema.md)
+- [LixChangeSetElementSchema](/api/variables/LixChangeSetElementSchema.md)
+- [LixChangeSetLabelSchema](/api/variables/LixChangeSetLabelSchema.md)
+- [LixChangeSetSchema](/api/variables/LixChangeSetSchema.md)
+- [LixChangeSetThreadSchema](/api/variables/LixChangeSetThreadSchema.md)
+- [LixFileDescriptorSchema](/api/variables/LixFileDescriptorSchema.md)
+- [LixKeyValueSchema](/api/variables/LixKeyValueSchema.md)
+- [LixLabelSchema](/api/variables/LixLabelSchema.md)
+- [LixLogSchema](/api/variables/LixLogSchema.md)
+- [LixSchemaDefinition](/api/variables/LixSchemaDefinition-1.md)
+- [LixStoredSchemaSchema](/api/variables/LixStoredSchemaSchema.md)
+- [LixThreadCommentSchema](/api/variables/LixThreadCommentSchema.md)
+- [LixThreadSchema](/api/variables/LixThreadSchema.md)
+- [LixVersionSchema](/api/variables/LixVersionSchema.md)
+- [mockJsonPlugin](/api/variables/mockJsonPlugin.md)
 
-Each table has a corresponding TypeScript interface that defines its structure.
+### Functions
 
-## Type Definitions
-
-The SDK includes comprehensive TypeScript type definitions for all entities and functions, providing type safety and autocompletion in your IDE:
-
-```typescript
-// Database schema types
-interface LixDatabaseSchema {
-  file: File;
-  change: Change;
-  change_set: ChangeSet;
-  version: Version;
-  // ... and more
-}
-
-// The main Lix interface
-interface Lix {
-  db: Kysely<LixDatabaseSchema>;
-  // ... other properties
-}
-```
-
-## Example Usage
-
-Here's a complete example of using the Lix API:
-
-```typescript
-import { newLixFile, openLix, handleFileInsert, createChangeSet, toBlob } from "@lix-js/sdk";
-import { plugin as jsonPlugin } from "@lix-js/plugin-json";
-
-async function workWithLix() {
-  // Create a new Lix file
-  const lixFile = await newLixFile();
-  
-  // Open it with the JSON plugin
-  const lix = await openLix({
-    blob: lixFile,
-    providePlugins: [jsonPlugin]
-  });
-  
-  // Insert a JSON file
-  await handleFileInsert({
-    lix,
-    file: {
-      path: "/config.json",
-      data: new TextEncoder().encode(JSON.stringify({ 
-        version: "1.0.0",
-        settings: { theme: "light" }
-      }))
-    }
-  });
-  
-  // Create a change set to track these changes
-  const changeSet = await createChangeSet({ lix });
-  console.log("Created change set:", changeSet.id);
-  
-  // Query the changes
-  const changes = await lix.db
-    .selectFrom("change")
-    .selectAll()
-    .execute();
-  
-  console.log(`Detected ${changes.length} changes`);
-  
-  // Save the Lix file for later use
-  const savedBlob = await toBlob({ lix });
-  console.log(`Saved ${savedBlob.size} bytes`);
-  
-  return savedBlob;
-}
-```
-
-## Additional Resources
-
-- [Getting Started Guide](../guide/getting-started) - Step-by-step introduction to Lix
-- [Concept Documentation](../guide/concepts/changes) - Understand the core concepts
-- [Plugin Documentation](../plugins/) - Learn about available plugins
+- [applyChangeSet](/api/functions/applyChangeSet.md)
+- [applyKeyValueDatabaseSchema](/api/functions/applyKeyValueDatabaseSchema.md)
+- [changeHasLabel](/api/functions/changeHasLabel.md)
+- [changeSetElementInAncestryOf](/api/functions/changeSetElementInAncestryOf.md)
+- [changeSetElementInSymmetricDifference](/api/functions/changeSetElementInSymmetricDifference.md)
+- [changeSetElementIsLeafOf](/api/functions/changeSetElementIsLeafOf.md)
+- [changeSetHasLabel](/api/functions/changeSetHasLabel.md)
+- [changeSetIsAncestorOf](/api/functions/changeSetIsAncestorOf.md)
+- [changeSetIsDescendantOf](/api/functions/changeSetIsDescendantOf.md)
+- [createAccount](/api/functions/createAccount.md)
+- [createChangeSet](/api/functions/createChangeSet.md)
+- [createCheckpoint](/api/functions/createCheckpoint.md)
+- [createHooks](/api/functions/createHooks.md)
+- [createLabel](/api/functions/createLabel.md)
+- [createLog](/api/functions/createLog.md)
+- [createLspInMemoryEnvironment](/api/functions/createLspInMemoryEnvironment.md)
+- [createMergeChangeSet](/api/functions/createMergeChangeSet.md)
+- [createServerProtocolHandler](/api/functions/createServerProtocolHandler.md)
+- [createThread](/api/functions/createThread.md)
+- [createThreadComment](/api/functions/createThreadComment.md)
+- [createTransitionChangeSet](/api/functions/createTransitionChangeSet.md)
+- [createUndoChangeSet](/api/functions/createUndoChangeSet.md)
+- [createVersion](/api/functions/createVersion.md)
+- [executeSync](/api/functions/executeSync.md)
+- [jsonArrayFrom](/api/functions/jsonArrayFrom.md)
+- [jsonObjectFrom](/api/functions/jsonObjectFrom.md)
+- [nanoid](/api/functions/nanoid.md)
+- [newLixFile](/api/functions/newLixFile.md)
+- [openLix](/api/functions/openLix.md)
+- [sql](/api/functions/sql.md)
+- [switchAccount](/api/functions/switchAccount.md)
+- [switchVersion](/api/functions/switchVersion.md)
+- [uuidV7](/api/functions/uuidV7.md)
+- [validateLixSchema](/api/functions/validateLixSchema.md)
+- [validateLixSchemaDefinition](/api/functions/validateLixSchemaDefinition.md)
