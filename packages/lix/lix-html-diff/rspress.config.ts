@@ -74,6 +74,10 @@ export default defineConfig({
               link: "/guide/styling",
             },
             {
+              text: "Interactivity",
+              link: "/guide/interactivity",
+            },
+            {
               text: "Contributing",
               link: "/guide/contributing",
             },
