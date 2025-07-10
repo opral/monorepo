@@ -31,8 +31,8 @@ export default defineConfig({
         link: "/guide/",
       },
       {
-        text: "Showcase",
-        link: "/showcase/rich-text-document/",
+        text: "Examples",
+        link: "/examples/rich-text-document/",
       },
       {
         text: "Playground",
@@ -80,14 +80,14 @@ export default defineConfig({
           ],
         },
       ],
-      "/showcase/": [
+      "/examples/": [
         {
           text: "Rich Text Document",
-          link: "/showcase/rich-text-document/",
+          link: "/examples/rich-text-document/",
         },
         {
           text: "Table",
-          link: "/showcase/table-diff/",
+          link: "/examples/table-diff/",
         },
       ],
       "/test-cases": [
