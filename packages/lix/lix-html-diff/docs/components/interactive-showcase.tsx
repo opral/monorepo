@@ -9,7 +9,7 @@ interface HoverCard {
   after: string;
 }
 
-export function InteractiveShowcase() {
+export default function InteractiveShowcase() {
   const ref = useRef<HTMLDivElement>(null);
   const [hoverCard, setHoverCard] = useState<HoverCard | null>(null);
 
