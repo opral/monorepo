@@ -1,5 +1,181 @@
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
+import { executeSync } from "./execute-sync.js";
+
+/**
+ * Queue for pending log entries to be processed
+ */
+interface LogEntry {
+	lix: Lix;
+	sql: string;
+	duration: number;
+	bindings: any[];
+	result: any;
+	error: any;
+	options?: {
+		logSlowQueriesOnly?: boolean;
+		slowQueryThreshold?: number;
+	};
+}
+
+const logQueue: LogEntry[] = [];
+let currentTimeout: NodeJS.Timeout | null = null;
+
+/**
+ * Debugging info about the queue and timeout
+ */
+export const queueInfo = {
+	get queueLength(): number {
+		return logQueue.length;
+	},
+	get hasActiveTimeout(): boolean {
+		return currentTimeout !== null;
+	},
+	get queue(): LogEntry[] {
+		return [...logQueue];
+	},
+};
+
+/**
+ * Process all entries in the log queue
+ */
+function processLogQueue() {
+	// Clear the timeout reference
+	currentTimeout = null;
+
+	const queueLength = logQueue.length;
+
+	// Exit early if queue is empty
+	if (queueLength === 0) return;
+
+	// Get the first lix instance from the queue to use for transaction
+	const firstEntry = logQueue[0];
+	if (!firstEntry) return;
+
+	const { lix } = firstEntry;
+
+	// Begin transaction
+	try {
+		lix.skipLogging = true;
+		// @ts-expect-error - check
+		lix.sqlite.skipLogging = true;
+
+		lix.sqlite.exec("BEGIN IMMEDIATE");
+
+		lix.skipLogging = false;
+		// @ts-expect-error - check
+		lix.sqlite.skipLogging = false;
+	} catch (error) {
+		console.error("Failed to begin transaction for query logging:", error);
+		// Clear the queue to prevent infinite retry
+		logQueue.length = 0;
+		return;
+	}
+
+	// Process all entries in the queue
+	while (logQueue.length > 0) {
+		const entry = logQueue.shift();
+		if (!entry) continue;
+
+		const { lix, sql, duration, bindings, result, error, options } = entry;
+
+		try {
+			// Skip if only logging slow queries
+			if (
+				options?.logSlowQueriesOnly &&
+				duration < (options?.slowQueryThreshold ?? 100)
+			) {
+				continue;
+			}
+
+			lix.skipLogging = true;
+			// @ts-expect-error - check
+			lix.sqlite.skipLogging = true;
+
+			// @ts-expect-error --- using flag
+			const message = `${queueLength - logQueue.length}/${queueLength} skipLpgs: ${lix.skipLogging} reacitvity off: ${lix.sqlite.skipLogging} Query executed in ${duration}ms`;
+			const payload = {
+				sql: sql,
+				bindings: bindings,
+				duration_ms: duration,
+				result_count: Array.isArray(result) ? result.length : 0,
+				query_type: detectQueryType(sql),
+				timestamp: new Date().toISOString(),
+				error: error ? error.message : undefined,
+			};
+			// console.log("Creating log:", message, payload);
+			// Insert the log
+
+			// // @ts-expect-error -- this is fine for now
+			// if (window.logQueries) {
+			// 	executeSync({
+			// 		lix: lix,
+			// 		query: lix.db.insertInto("log").values({
+			// 			key: "lix_query_executed",
+			// 			message,
+			// 			level: "info",
+			// 			payload,
+			// 		}),
+			// 	});
+			// }
+
+			createLixOwnLogSync({
+				lix,
+				key: "lix_query_executed",
+				level: "info",
+				// @ts-expect-error --- using flag
+				message: `${queueLength - logQueue.length}/${queueLength} skipLpgs: ${lix.skipLogging} reacitvity off: ${lix.sqlite.skipLogging} Query executed in ${duration}ms`,
+				payload: {
+					sql: sql,
+					bindings: bindings,
+					duration_ms: duration,
+					result_count: Array.isArray(result) ? result.length : 0,
+					query_type: detectQueryType(sql),
+					timestamp: new Date().toISOString(),
+					error: error ? error.message : undefined,
+				},
+			});
+
+			lix.skipLogging = false;
+			// @ts-expect-error - check
+			lix.sqlite.skipLogging = false;
+		} catch (logError) {
+			console.error("Failed to log query:", logError);
+			lix.skipLogging = false;
+			// @ts-expect-error - check
+			lix.sqlite.skipLogging = false;
+		}
+	}
+
+	// Commit the transaction
+	try {
+		lix.skipLogging = true;
+		// @ts-expect-error - check
+		lix.sqlite.skipLogging = true;
+
+		lix.sqlite.exec("COMMIT");
+
+		lix.skipLogging = false;
+		// @ts-expect-error - check
+		lix.sqlite.skipLogging = false;
+	} catch (error) {
+		console.error("Failed to commit transaction for query logging:", error);
+
+		// Try to rollback
+		try {
+			lix.skipLogging = true;
+			// @ts-expect-error - check
+			lix.sqlite.skipLogging = true;
+			lix.sqlite.exec("ROLLBACK");
+		} catch (rollbackError) {
+			console.error("Failed to rollback transaction:", rollbackError);
+		} finally {
+			lix.skipLogging = false;
+			// @ts-expect-error - check
+			lix.sqlite.skipLogging = false;
+		}
+	}
+}
 
 /**
  * Enables basic query logging by intercepting SQLite exec calls.
@@ -81,69 +257,42 @@ export function enableQueryLogging(
 
 		// Only log if not in a log query context
 		if (!lix.skipLogging && sql) {
-			// Log the query asynchronously to avoid blocking
-			setTimeout(() => {
-				try {
-					const duration = Date.now() - startTime;
+			// Calculate duration immediately
+			const duration = Date.now() - startTime;
 
-					// Skip if only logging slow queries
-					if (
-						options?.logSlowQueriesOnly &&
-						duration < (options?.slowQueryThreshold ?? 100)
-					) {
-						return;
-					}
+			// Extract bindings from arguments
+			let bindings: any[] = [];
+			if (
+				args.length > 1 &&
+				typeof args[1] === "object" &&
+				args[1] &&
+				"bind" in args[1]
+			) {
+				bindings = Array.isArray(args[1].bind) ? args[1].bind : [args[1].bind];
+			} else if (
+				args.length === 1 &&
+				typeof args[0] === "object" &&
+				args[0] &&
+				"bind" in args[0]
+			) {
+				bindings = Array.isArray(args[0].bind) ? args[0].bind : [args[0].bind];
+			}
 
-					// Extract bindings from arguments
-					let bindings: any[] = [];
-					if (
-						args.length > 1 &&
-						typeof args[1] === "object" &&
-						args[1] &&
-						"bind" in args[1]
-					) {
-						bindings = Array.isArray(args[1].bind)
-							? args[1].bind
-							: [args[1].bind];
-					} else if (
-						args.length === 1 &&
-						typeof args[0] === "object" &&
-						args[0] &&
-						"bind" in args[0]
-					) {
-						bindings = Array.isArray(args[0].bind)
-							? args[0].bind
-							: [args[0].bind];
-					}
+			// Add to queue
+			logQueue.push({
+				lix,
+				sql,
+				duration,
+				bindings,
+				result,
+				error,
+				options,
+			});
 
-					lix.skipLogging = true;
-					// @ts-expect-error - check
-					lix.sqlite.skipLogging = true;
-					createLixOwnLogSync({
-						lix,
-						key: "lix_query_executed",
-						level: "info",
-						message: `Query executed in ${duration}ms`,
-						payload: {
-							sql: sql,
-							bindings: bindings,
-							duration_ms: duration,
-							result_count: Array.isArray(result) ? result.length : 0,
-							query_type: detectQueryType(sql),
-							timestamp: new Date().toISOString(),
-							error: error ? error.message : undefined,
-						},
-					});
-					lix.skipLogging = false;
-					// @ts-expect-error - check
-					lix.sqlite.skipLogging = false;
-				} catch (logError) {
-					console.error("Failed to log query:", logError);
-					lix.skipLogging = false;
-					// @ts-expect-error - check
-					lix.sqlite.skipLogging = false;
-				}
-			}, 0);
+			// Schedule processing if no timeout is active
+			if (!currentTimeout) {
+				currentTimeout = setTimeout(processLogQueue, 0);
+			}
 		}
 
 		if (resetSkipLogging) {

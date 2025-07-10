@@ -84,17 +84,24 @@ export function createLixOwnLogSync(args: {
 	if (typeof sqlPreview === "string" && sqlPreview.length > 100) {
 		sqlPreview = sqlPreview.slice(0, 100) + "...";
 	}
-	console.log("Creating log:", args.message, sqlPreview, args.payload);
+	// console.log("Creating log:", args.message, sqlPreview, args.payload);
 	// Insert the log
+
+	// // @ts-expect-error -- this is fine for now
+	// if (window.logQueries) {
 	executeSync({
 		lix: args.lix,
 		query: args.lix.db.insertInto("log").values({
 			key: args.key,
 			message: args.message,
 			level: args.level,
+			lixcol_untracked: true,
 			...(args.payload && { payload: args.payload }),
 		}),
 	});
+	// } else {
+	// 	console.log("skipping write to db");
+	// }
 }
 
 export async function createLixOwnLog(args: {
