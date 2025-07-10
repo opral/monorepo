@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { defineConfig } from "rspress/config";
 import mermaid from "rspress-plugin-mermaid";
-import { customTypeDocPlugin } from "./rspress-plugins/typedoc-plugin";
+import { customTypeDocPlugin, generateApiSidebar } from "./rspress-plugins/typedoc-plugin";
 
 export default defineConfig({
   root: path.join(__dirname, "docs"),
@@ -111,12 +111,7 @@ export default defineConfig({
           ],
         },
       ],
-      "/api/": [
-        {
-          text: "API Reference",
-          items: [{ text: "Overview", link: "/api/" }],
-        },
-      ],
+      "/api/": generateApiSidebar(path.join(__dirname, "docs")),
       "/plugins/": [
         {
           text: "Plugins",

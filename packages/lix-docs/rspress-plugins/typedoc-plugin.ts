@@ -1,5 +1,6 @@
 import path from "node:path";
 import fs from "node:fs/promises";
+import * as fsSync from "node:fs";
 import type { RspressPlugin } from "@rspress/shared";
 import { Application, TSConfigReader } from "typedoc";
 import { load } from "typedoc-plugin-markdown";
@@ -86,6 +87,53 @@ async function patchGeneratedApiDocs(absoluteApiDir: string) {
   await generateMetaJson(absoluteApiDir);
 }
 
+export function generateApiSidebar(docsRoot: string) {
+  const apiDir = path.join(docsRoot, "api");
+  
+  // Check if API directory exists
+  if (!fsSync.existsSync(apiDir)) {
+    return [];
+  }
+  
+  const sidebar: any[] = [];
+  
+  // Define the categories we want to show
+  const categories = [
+    { dir: "classes", title: "Classes", collapsed: false },
+    { dir: "interfaces", title: "Interfaces", collapsed: false },
+    { dir: "functions", title: "Functions", collapsed: true },
+    { dir: "types", title: "Type Aliases", collapsed: true },
+    { dir: "variables", title: "Variables", collapsed: true },
+  ];
+  
+  categories.forEach(category => {
+    const categoryDir = path.join(apiDir, category.dir);
+    
+    if (fsSync.existsSync(categoryDir)) {
+      const files = fsSync.readdirSync(categoryDir)
+        .filter(file => file.endsWith('.md'))
+        .map(file => {
+          const name = file.replace('.md', '');
+          return {
+            text: name,
+            link: `/api/${category.dir}/${name}`
+          };
+        })
+        .sort((a, b) => a.text.localeCompare(b.text));
+      
+      if (files.length > 0) {
+        sidebar.push({
+          text: category.title,
+          collapsed: category.collapsed,
+          items: files
+        });
+      }
+    }
+  });
+  
+  return sidebar;
+}
+
 export function customTypeDocPlugin(
   options: CustomTypeDocOptions
 ): RspressPlugin {
@@ -101,7 +149,7 @@ export function customTypeDocPlugin(
       app.options.addReader(new TSConfigReader());
       load(app);
 
-      // Bootstrap options - matching the official plugin structure
+      // Bootstrap options - working with current TypeDoc version
       const bootstrapOptions: any = {
         name: config.title,
         entryPoints,
