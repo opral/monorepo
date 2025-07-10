@@ -1,10 +1,37 @@
-# Styling the Diff Output
+# Styling the Diff
 
-The diff renderer uses semantic CSS classes to style changes based on the operation performed:
+## Your App's CSS is Preserved
+
+Your app's existing CSS continues to work exactly as before.
+
+When you render a diff using Lix HTML Diff, it only adds CSS classes to highlight changes. It does not modify your existing HTML structure or styling. The exception is when you opt-in to specific behaviors using [data-diff-mode](/guide/attributes.html#data-diff-mode) attributes, which allows for more control over how diffs are displayed.
+
+The diff renderer uses semantic CSS classes to highlight changes:
 
 - `.diff-created` — applied to newly added elements
 - `.diff-updated` — applied to modified elements  
 - `.diff-deleted` — applied to removed elements
+
+### Example: Your Styling is Preserved
+
+```html
+<!-- Your original component -->
+<button class="primary-btn large-size" id="submit-btn" data-diff-key="btn1">
+  Submit Order
+</button>
+
+<!-- After diff processing (text changed) -->
+<button class="diff-updated primary-btn large-size" id="submit-btn" data-diff-key="btn1">
+  Complete Purchase
+</button>
+```
+
+Notice how:
+
+- Your `primary-btn` and `large-size` classes remain untouched
+- Your `id` and `data-diff-key` attributes are preserved  
+- Only `diff-updated` was added to highlight the change
+- All your existing CSS for `.primary-btn` and `.large-size` continues to work
 
 ## Default Styles
 
@@ -18,26 +45,6 @@ Or, add it to your HTML:
 
 ```html
 <link rel="stylesheet" href="/node_modules/@lix-js/html-diff/default.css" />
-```
-
-This file provides sensible defaults:
-
-```css
-.diff-created {
-  color: green;
-  text-decoration: none;
-  outline: none;
-}
-.diff-updated {
-  color: orange;
-  text-decoration: none;
-  outline: none;
-}
-.diff-deleted {
-  color: red;
-  text-decoration: none;
-  outline: none;
-}
 ```
 
 ## Custom Styling
@@ -59,19 +66,36 @@ You can override these styles in your own CSS for custom themes or branding:
 }
 ```
 
-## Legacy Before/After Style
+## Class Merging Strategy
 
-If you prefer the traditional before/after styling, you can achieve it with:
+HTML diff uses a **prepend strategy** for CSS classes to ensure diff highlighting takes precedence while preserving your existing styles:
 
-```css
-.diff-created, .diff-updated {
-  color: green;
-}
-.diff-deleted {
-  color: red;
-}
+```html
+<!-- Original -->
+<div class="card featured">Content</div>
+
+<!-- After diff (created) -->
+<div class="diff-created card featured">Content</div>
+
+<!-- After diff (updated) -->  
+<div class="diff-updated card featured">Content</div>
 ```
 
-## Merging with Existing Classes
+**Why prepend?** Diff classes are added first so they can override conflicting styles (like color) while your layout classes (like `card`, `featured`) continue to work.
 
-If your original elements have classes, the diff classes will be merged (e.g. `<p class="foo diff-created">`). This allows you to maintain your existing styling while adding diff-specific styles.
+### CSS Specificity Tips
+
+Since diff classes are prepended, you can rely on CSS cascade:
+
+```css
+/* Your existing styles work as normal */
+.card { padding: 20px; border: 1px solid #ccc; }
+.featured { border-color: gold; }
+
+/* Diff styles override conflicting properties */
+.diff-updated { color: orange; }  /* This color wins */
+.diff-created { color: green; }   /* This color wins */
+.diff-deleted { color: red; }     /* This color wins */
+```
+
+This ensures your app's layout and design remain intact while only the diff highlighting is added on top.
