@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { TabbedContentViewer } from "./tabbed-content-viewer";
+import { Showcase } from "./showcase";
 import dedent from "dedent";
-import { renderHtmlDiff } from "../../src/render-html-diff";
 
 /**
  * A playground component that allows users to paste in "before" and "after" HTML
@@ -62,11 +61,6 @@ export function DiffPlayground() {
   );
   const [cssCollapsed, setCssCollapsed] = useState(true);
 
-  // Generate diff based on current state
-  const diff = renderHtmlDiff({
-    beforeHtml,
-    afterHtml,
-  });
 
   // Apply custom CSS to the diff view
   useEffect(() => {
@@ -169,37 +163,14 @@ export function DiffPlayground() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div className="flex-1 min-w-0">
-          <TabbedContentViewer
-            title="Before"
-            htmlContent={beforeHtml}
-            onContentChange={setBeforeHtml}
-            editable={true}
-            showTitle={true}
-            defaultTab="code"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <TabbedContentViewer
-            title="After"
-            htmlContent={afterHtml}
-            onContentChange={setAfterHtml}
-            editable={true}
-            showTitle={true}
-            defaultTab="code"
-          />
-        </div>
-      </div>
-
-      <div className="mt-8">
-        <TabbedContentViewer
-          title="Diff Result"
-          htmlContent={diff}
-          showTitle={true}
-          defaultTab="rendered"
-        />
-      </div>
+      <Showcase 
+        before={beforeHtml} 
+        after={afterHtml} 
+        css={customCss}
+        editable={true}
+        onBeforeChange={setBeforeHtml}
+        onAfterChange={setAfterHtml}
+      />
     </div>
   );
 }

@@ -1,0 +1,15 @@
+/* Table diff styling */
+.diff-create {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.diff-update {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.diff-delete {
+  background-color: #f8d7da;
+  color: #721c24;
+}

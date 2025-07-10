@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Editor from "@monaco-editor/react";
 
 /**
@@ -21,15 +21,16 @@ export function TabbedContentViewer(props: {
       {props.showTitle && (
         <h4 className="text-md font-medium mb-2 mt-1">{props.title}</h4>
       )}
-      <div className="absolute top-1 right-1 flex space-x-1 bg-gray-100 rounded border border-gray-300 p-0.5">
+      <div className="absolute top-1 right-1 flex items-center bg-gray-50 rounded border border-gray-200 px-1 py-0.5 opacity-60 hover:opacity-100 transition-opacity">
         <button
-          className={`px-2 py-0.5 text-xs rounded ${activeTab === "rendered" ? "bg-white shadow-sm font-medium text-gray-800" : "text-gray-500 hover:bg-gray-200"}`}
+          className={`px-1.5 py-0.5 text-xs rounded ${activeTab === "rendered" ? "bg-white shadow-xs text-gray-700" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}
           onClick={() => setActiveTab("rendered")}
         >
           Rendered
         </button>
+        <div className="text-gray-300 text-xs mx-1">|</div>
         <button
-          className={`px-2 py-0.5 text-xs rounded ${activeTab === "code" ? "bg-white shadow-sm font-medium text-gray-800" : "text-gray-500 hover:bg-gray-200"}`}
+          className={`px-1.5 py-0.5 text-xs rounded ${activeTab === "code" ? "bg-white shadow-xs text-gray-700" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"}`}
           onClick={() => setActiveTab("code")}
         >
           Code
@@ -68,9 +69,13 @@ function CodeBlock({
   onContentChange?: (newContent: string) => void;
   editable?: boolean;
 }) {
+  // Calculate height based on content lines (with min/max bounds)
+  const lineCount = htmlContent.split('\n').length;
+  const calculatedHeight = Math.max(150, Math.min(400, lineCount * 19 + 40));
+
   return (
     <Editor
-      height="150px"
+      height={`${calculatedHeight}px`}
       defaultLanguage="html"
       value={htmlContent}
       onChange={(value) => {
