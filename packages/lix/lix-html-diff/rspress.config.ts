@@ -66,6 +66,10 @@ export default defineConfig({
           text: 'Guide',
           items: [
             {
+              text: 'Attributes',
+              link: '/guide/attributes',
+            },
+            {
               text: 'Styling',
               link: '/guide/styling',
             },
@@ -80,6 +84,16 @@ export default defineConfig({
         {
           text: 'Rich Text Document',
           link: '/showcase/rich-text-document/',
+        },
+      ],
+      '/test-cases': [
+        {
+          text: 'data-diff-key',
+          link: '/test-cases#data-diff-key',
+        },
+        {
+          text: 'data-diff-words',
+          link: '/test-cases#data-diff-words',
         },
       ],
     },

@@ -1,0 +1,131 @@
+import { Showcase } from "../components/showcase";
+
+# Attributes
+
+HTML diff uses data attributes to control how elements are diffed and displayed.
+
+## data-diff-key
+
+**Required for all elements you want to track changes for.**
+
+The `data-diff-key` attribute provides a unique identifier that allows the diff algorithm to match elements between the "before" and "after" states.
+
+```html
+<p data-diff-key="kx8m">Hello World</p>
+```
+
+### Example: Adding an element
+
+```html
+<!-- Before -->
+<div>
+  <p data-diff-key='ixn4'>First paragraph</p>
+</div>
+
+<!-- After -->
+<div>
+  <p data-diff-key='ixn4'>First paragraph</p>
+  <p data-diff-key='zm7q'>Second paragraph</p>
+</div>
+```
+
+<Showcase 
+  before="<div><p data-diff-key='ixn4'>First paragraph</p></div>" 
+  after="<div><p data-diff-key='ixn4'>First paragraph</p><p data-diff-key='zm7q'>Second paragraph</p></div>" 
+  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+/>
+
+### Example: Removing an element
+
+```html
+<!-- Before -->
+<div>
+  <p data-diff-key='bw5c'>Keep this</p>
+  <p data-diff-key='ft9x'>Remove this</p>
+</div>
+
+<!-- After -->
+<div>
+  <p data-diff-key='bw5c'>Keep this</p>
+</div>
+```
+
+<Showcase 
+  before="<div><p data-diff-key='bw5c'>Keep this</p><p data-diff-key='ft9x'>Remove this</p></div>" 
+  after="<div><p data-diff-key='bw5c'>Keep this</p></div>" 
+  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+/>
+
+## data-diff-words
+
+**Optional attribute for granular word-level diffing.**
+
+By default, when text content changes, the entire element is shown as deleted (the old content is preserved). Adding `data-diff-words` enables granular word-level diffing within the element.
+
+### Without data-diff-words (atomic block diffing)
+
+```html
+<!-- Before -->
+<p data-diff-key='qr8n'>Hello there</p>
+
+<!-- After -->
+<p data-diff-key='qr8n'>Hello world</p>
+```
+
+<Showcase 
+  before="<p data-diff-key='qr8n'>Hello there</p>" 
+  after="<p data-diff-key='qr8n'>Hello world</p>" 
+  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+/>
+
+### With data-diff-words (granular word diffing)
+
+```html
+<!-- Before -->
+<p data-diff-key='kv3m' data-diff-words>Hello there</p>
+
+<!-- After -->
+<p data-diff-key='kv3m' data-diff-words>Hello world</p>
+```
+
+<Showcase 
+  before="<p data-diff-key='kv3m' data-diff-words>Hello there</p>" 
+  after="<p data-diff-key='kv3m' data-diff-words>Hello world</p>" 
+  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; }"
+/>
+
+### When to use data-diff-words
+
+✅ **Use for simple text content:**
+- Paragraphs with plain text
+- Headings
+- Simple spans
+
+❌ **Avoid for complex components:**
+- Components with nested HTML structure
+- Elements with specific styling that would break with inserted spans
+- Interactive components (buttons, forms, etc.)
+
+### Example: Complex component (avoid data-diff-words)
+
+```html
+<!-- Before -->
+<div class='card' data-diff-key='jx9w'>
+  <h3>Old Title</h3>
+  <p>Content</p>
+</div>
+
+<!-- After -->
+<div class='card' data-diff-key='jx9w'>
+  <h3>New Title</h3>
+  <p>Content</p>
+</div>
+```
+
+<Showcase 
+  before="<div class='card' data-diff-key='jx9w'><h3>Old Title</h3><p>Content</p></div>" 
+  after="<div class='card' data-diff-key='jx9w'><h3>New Title</h3><p>Content</p></div>" 
+  css=".diff-create { color: green; } .diff-update { color: orange; } .diff-delete { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
+/>
+
+The atomic block approach preserves the component structure while clearly showing what changed.

@@ -1,9 +1,10 @@
 # Styling the Diff Output
 
-The diff renderer uses semantic CSS classes to style changes:
+The diff renderer uses semantic CSS classes to style changes based on the operation performed:
 
-- `.diff-before` — applied to elements representing removed or old content
-- `.diff-after` — applied to elements representing added or new content
+- `.diff-create` — applied to newly added elements
+- `.diff-update` — applied to modified elements  
+- `.diff-delete` — applied to removed elements
 
 ## Default Styles
 
@@ -22,13 +23,18 @@ Or, add it to your HTML:
 This file provides sensible defaults:
 
 ```css
-.diff-before {
-  color: red;
+.diff-create {
+  color: green;
   text-decoration: none;
   outline: none;
 }
-.diff-after {
-  color: green;
+.diff-update {
+  color: orange;
+  text-decoration: none;
+  outline: none;
+}
+.diff-delete {
+  color: red;
   text-decoration: none;
   outline: none;
 }
@@ -39,16 +45,33 @@ This file provides sensible defaults:
 You can override these styles in your own CSS for custom themes or branding:
 
 ```css
-.diff-before {
+.diff-create {
+  color: #080;
+  background: #efe;
+}
+.diff-update {
+  color: #f60;
+  background: #ffc;
+}
+.diff-delete {
   color: #b00;
   background: #fee;
 }
-.diff-after {
-  color: #080;
-  background: #efe;
+```
+
+## Legacy Before/After Style
+
+If you prefer the traditional before/after styling, you can achieve it with:
+
+```css
+.diff-create, .diff-update {
+  color: green;
+}
+.diff-delete {
+  color: red;
 }
 ```
 
 ## Merging with Existing Classes
 
-If your original elements have classes, the diff classes will be merged (e.g. `<p class="foo diff-after">`). This allows you to maintain your existing styling while adding diff-specific styles.
+If your original elements have classes, the diff classes will be merged (e.g. `<p class="foo diff-create">`). This allows you to maintain your existing styling while adding diff-specific styles.

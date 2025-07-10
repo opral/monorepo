@@ -1,4 +1,42 @@
-// import { diffWords } from "diff";
+import { diffWords } from "diff";
+
+/**
+ * Applies granular text diffing to an element by comparing before and after text content
+ * and wrapping changed parts in spans with appropriate diff classes.
+ */
+function applyGranularTextDiff(element: HTMLElement, beforeText: string, afterText: string): void {
+  // If texts are identical, no changes needed
+  if (beforeText === afterText) {
+    return;
+  }
+
+  // Get word-level diff
+  const changes = diffWords(beforeText, afterText);
+  
+  // Clear the element's content
+  element.innerHTML = '';
+  
+  // Build the new content with diff spans
+  changes.forEach(change => {
+    if (change.added) {
+      // Text was added
+      const span = document.createElement('span');
+      span.className = 'diff-create';
+      span.textContent = change.value;
+      element.appendChild(span);
+    } else if (change.removed) {
+      // Text was removed - we'll show this as deleted text
+      const span = document.createElement('span');
+      span.className = 'diff-delete';
+      span.textContent = change.value;
+      element.appendChild(span);
+    } else {
+      // Text is unchanged
+      const textNode = document.createTextNode(change.value);
+      element.appendChild(textNode);
+    }
+  });
+}
 
 /**
  * Compares two HTML strings (`beforeHtml` and `afterHtml`) and generates an HTMLElement
@@ -22,7 +60,6 @@ function renderHtmlDiffElement(args: {
   const parser = new DOMParser();
   const beforeDoc = parser.parseFromString(args.beforeHtml, "text/html");
   const afterDoc = parser.parseFromString(args.afterHtml, "text/html");
-  const doc = document; // Use the global document context for creating elements/fragments
 
   // Create a container element for the result
   // Clone the 'after' body content into it, as we'll modify this clone
@@ -75,9 +112,9 @@ function renderHtmlDiffElement(args: {
       // Handle Added Element
       if (afterEl instanceof HTMLElement) {
         if (afterEl.hasAttribute("class")) {
-          afterEl.className += " diff-after";
+          afterEl.className += " diff-create";
         } else {
-          afterEl.className = "diff-after";
+          afterEl.className = "diff-create";
         }
       }
     } else if (modifiedIds.has(id)) {
@@ -104,26 +141,27 @@ function renderHtmlDiffElement(args: {
         // Do nothing to the parent element itself.
       } else if (beforeEl.textContent !== afterEl.textContent) {
         // Child structure is the same, but text content differs.
-        // Treat as Delete Old + Insert New
-        if (afterEl instanceof HTMLElement) {
-          // 1. Style the 'after' element as inserted
-          if (afterEl.hasAttribute("class")) {
-            afterEl.className += " diff-after";
-          } else {
-            afterEl.className = "diff-after";
-          }
-
-          // 2. Clone the 'before' element
+        // Check if element is marked as safe for word-level diffing
+        if (afterEl instanceof HTMLElement && afterEl.hasAttribute("data-diff-words")) {
+          // Apply granular word diffing for elements that opt in
+          applyGranularTextDiff(
+            afterEl,
+            beforeEl.textContent || "",
+            afterEl.textContent || ""
+          );
+        } else {
+          // Fall back to atomic block diffing for complex components
+          // For atomic blocks, replace the 'after' element with the 'before' element styled as deleted
+          
+          // Clone the 'before' element and style as deleted
           const beforeClone = beforeEl.cloneNode(true) as HTMLElement;
-
-          // 3. Style the clone as deleted
           if (beforeClone.hasAttribute("class")) {
-            beforeClone.className += " diff-before";
+            beforeClone.className += " diff-delete";
           } else {
-            beforeClone.className = "diff-before";
+            beforeClone.className = "diff-delete";
           }
 
-          // 4. Disable interactions in the clone
+          // Disable interactions in the clone
           beforeClone
             .querySelectorAll("button, input, select, textarea, a[href]")
             .forEach((interactiveEl) => {
@@ -136,8 +174,8 @@ function renderHtmlDiffElement(args: {
               }
             });
 
-          // 5. Insert the styled 'before' clone right before the 'after' element
-          afterEl.parentNode?.insertBefore(beforeClone, afterEl);
+          // Replace the 'after' element with the 'before' clone
+          afterEl.parentNode?.replaceChild(beforeClone, afterEl);
         }
       } else {
         // Child structure same, text content same. Check attributes? (TODO)
@@ -187,9 +225,9 @@ function renderHtmlDiffElement(args: {
         const clone = beforeEl.cloneNode(true) as HTMLElement;
         // Style with class
         if (clone.hasAttribute("class")) {
-          clone.className += " diff-before";
+          clone.className += " diff-delete";
         } else {
-          clone.className = "diff-before";
+          clone.className = "diff-delete";
         }
 
         // Ensure contenteditable is false on the clone to prevent interaction

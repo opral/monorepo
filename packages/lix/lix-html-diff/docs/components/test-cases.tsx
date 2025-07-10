@@ -1,18 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { type TestCase, testCases } from "../../src/test-cases";
+import React, { useState } from "react";
+import { type TestCase, testCasesBySection } from "../../src/test-cases";
 import { renderHtmlDiff } from "../../src/render-html-diff";
 import { TabbedContentViewer } from "./tabbed-content-viewer";
 
 export function TestCases() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredCases, setFilteredCases] = useState(testCases);
-
-  useEffect(() => {
-    setFilteredCases(filterTestCases(searchTerm));
-  }, [searchTerm]);
 
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+  };
+
+  const filterCases = (cases: TestCase[]) => {
+    if (searchTerm.trim() === "") {
+      return cases;
+    }
+    return cases.filter((tc) =>
+      tc.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
   };
 
   return (
@@ -22,16 +26,22 @@ export function TestCases() {
         placeholder="Filter test cases by name..."
         value={searchTerm}
         onChange={handleSearchInput}
-        className="w-full p-2 mb-4 border border-gray-300 rounded"
+        className="w-full p-2 mb-8 border border-gray-300 rounded"
       />
-      <div className="test-cases">
-        {filteredCases.map((tc) => (
-          <React.Fragment key={tc.name}>
-            <TestCaseCard testCase={tc} />
-            <hr className="my-6 border-gray-200" />
-          </React.Fragment>
-        ))}
-      </div>
+
+      {Object.keys(testCasesBySection).map((sectionKey, index) => (
+        <section key={sectionKey} id={sectionKey} className={`mb-12 ${index === 0 ? 'mt-4' : ''}`}>
+          <h2 className="text-2xl font-bold mb-6">{sectionKey}</h2>
+          <div className="test-cases">
+            {filterCases(testCasesBySection[sectionKey as keyof typeof testCasesBySection]).map((tc) => (
+              <React.Fragment key={tc.name}>
+                <TestCaseCard testCase={tc} />
+                <hr className="my-6 border-gray-200" />
+              </React.Fragment>
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
@@ -84,12 +94,3 @@ function TestCaseCard(props: { testCase: TestCase }) {
   );
 }
 
-function filterTestCases(searchTerm: string): TestCase[] {
-  if (searchTerm.trim() === "") {
-    return testCases;
-  }
-
-  return testCases.filter((tc) =>
-    tc.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-}

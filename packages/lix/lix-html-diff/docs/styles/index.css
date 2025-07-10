@@ -1,14 +1,20 @@
 @import 'tailwindcss';
 
 /* Default diff styles */
-.diff-before {
-  color: red;
+.diff-create {
+  color: green;
   text-decoration: none;
   outline: none;
 }
 
-.diff-after {
-  color: green;
+.diff-update {
+  color: orange;
+  text-decoration: none;
+  outline: none;
+}
+
+.diff-delete {
+  color: red;
   text-decoration: none;
   outline: none;
 }
