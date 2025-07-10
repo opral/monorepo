@@ -34,7 +34,7 @@ export default defineConfig({
       },
       {
         text: 'Showcase',
-        link: '/showcase',
+        link: '/showcase/rich-text-document/',
       },
       {
         text: 'Playground',
@@ -45,6 +45,14 @@ export default defineConfig({
         link: '/test-cases',
       },
     ],
+    sidebar: {
+      '/showcase/': [
+        {
+          text: 'Rich Text Document',
+          link: '/showcase/rich-text-document/',
+        },
+      ],
+    },
     socialLinks: [
       {
         icon: 'github',
