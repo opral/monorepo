@@ -6,14 +6,14 @@ aside: false
 
 Restore functionality allows you to recover previous states of your data. These examples demonstrate different restore scenarios and techniques.
 
-## Basic Restore
+## Restore to Last Change Set
 
-Restore entities to previous states with this fundamental example showing the core restore functionality.
+Restore repository to the most recent change set. This example shows the core restore functionality.
 
-<LixSandpack feature="restore" example="restore-basic" height="800px" fullWidth />
+<LixSandpack feature="restore" example="restore-last-changeset" height="800px" fullWidth />
 
-## Selective Restore
+## Checkpoint Restore
 
-Selectively restore specific changes while keeping others intact. This example shows fine-grained control over what gets restored.
+Create and restore to named checkpoints. This example shows how to create safe points in your development process and restore to them when needed.
 
-<LixSandpack feature="restore" example="restore-selective" height="800px" fullWidth />
+<LixSandpack feature="restore" example="restore-checkpoint" height="800px" fullWidth />

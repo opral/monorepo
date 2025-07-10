@@ -8,12 +8,6 @@ Undo and redo functionality allows users to easily reverse and reapply changes. 
 
 ## Basic Undo/Redo
 
-Implement undo and redo functionality with this fundamental example showing the core mechanics.
+Implement undo and redo functionality with optional step counts. This example shows the fundamental mechanics of undoing and redoing operations.
 
-<LixSandpack feature="undo-redo" example="undo-basic" height="800px" fullWidth />
-
-## Advanced Undo/Redo
-
-Advanced undo/redo with branching support, allowing for complex undo scenarios and non-linear operation histories.
-
-<LixSandpack feature="undo-redo" example="undo-advanced" height="800px" fullWidth />
+<LixSandpack feature="undo-redo" example="undo-redo-basic" height="800px" fullWidth />

@@ -6,14 +6,14 @@ aside: false
 
 Version management allows you to create branches, merge changes, and manage parallel development. These examples demonstrate version control concepts.
 
-## Basic Versioning
+## Version Creation and Switching
 
-Create and manage versions with this fundamental example showing branching and merging basics.
+Create new versions and switch between them. This example shows branching basics and how to work with multiple versions.
 
-<LixSandpack feature="versions" example="versions-basic" height="800px" fullWidth />
+<LixSandpack feature="versions" example="versions-create-switch" height="800px" fullWidth />
 
-## Collaborative Versioning
+## Version Merging
 
-Multi-user version collaboration showing how multiple developers can work on different branches and merge their changes.
+Merge changes between different versions. This shows how to combine work from feature branches back into the main branch.
 
-<LixSandpack feature="versions" example="versions-collaboration" height="800px" fullWidth />
+<LixSandpack feature="versions" example="versions-merge" height="800px" fullWidth />

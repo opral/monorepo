@@ -4,16 +4,19 @@ aside: false
 
 # Validation Rules Interactive Examples
 
-Validation rules ensure data integrity by enforcing constraints and business rules. These examples show how to implement and use validation rules.
+Validation rules ensure data integrity by enforcing constraints and business rules. 
 
-## Basic Validation
+> [!NOTE]
+> Validation rules are a proposed feature. Interactive examples will be available once the feature is implemented.
+> 
+> - **Upvote the proposal:** [github.com/opral/lix-sdk/issues/239](https://github.com/opral/lix-sdk/issues/239)
+> - **Watch the demo:** See validation rules in action in the [issue's demo video](https://github.com/opral/lix-sdk/issues/239)
 
-Implement basic validation rules with this fundamental example showing how to validate data changes.
+## Coming Soon
 
-<LixSandpack feature="validation-rules" example="validation-basic" height="800px" fullWidth />
+Interactive examples for validation rules will be added here once the feature is implemented. The examples will demonstrate:
 
-## Advanced Validation
-
-Complex validation rules and workflows including conditional validation, cross-field validation, and custom validation logic.
-
-<LixSandpack feature="validation-rules" example="validation-advanced" height="800px" fullWidth />
+- Basic validation rule implementation
+- Complex validation rules and workflows
+- Conditional validation scenarios
+- Custom validation logic

@@ -6,11 +6,11 @@ aside: false
 
 Attribution shows who made changes to your data and when. These interactive examples demonstrate how to query and display attribution information for different scenarios.
 
-## Selected Entity Attribution
+## Entity Attribution Query
 
 Find out who authored a change for a selected entity. This is useful for implementing "blame" functionality in your application.
 
-<LixSandpack feature="attribution" example="attribution-selected-entity" height="800px" fullWidth />
+<LixSandpack feature="attribution" example="attribution-entity-query" height="800px" fullWidth />
 
 ## File Change Attribution
 
