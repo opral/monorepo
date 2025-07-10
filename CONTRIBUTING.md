@@ -5,7 +5,7 @@
 - [Node.js](https://nodejs.org/en/) (v20 or higher)
 - [pnpm](https://pnpm.io/) (v8 or higher)
 
-> [!IMPORTANT]  
+> [!INFO]  
 > If you are developing on Windows, you need to use [WSL](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux). 
 
 ## Development
@@ -17,7 +17,7 @@
    
 ### Example
 
-> [!IMPORTANT]  
+> [!INFO]  
 > You need to run the build for the dependencies of the package via the three dots `...` at least once. [Here](https://pnpm.io/filtering#--filter-package_name-1) is the pnpm documentation for filtering.
 
 1. `pnpm i`

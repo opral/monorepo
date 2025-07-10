@@ -1,0 +1,54 @@
+import { Showcase } from "../components/showcase";
+
+# Getting Started
+
+## Overview
+
+![HTML Diff Visualization](/diff.svg)
+
+Lix HTML Diff is a simple way to generate and display diffs for any app UI using the "HTML trick" - since most apps ultimately render to HTML, you can use this HTML diff to visualize changes in your application's interface.
+
+- ✅ **Universal**: Works for any app that renders to HTML (which is most apps!)
+- ✅ **Simple**: No need for renderer-specific diff logic.
+- ✅ **Styling**: Uses your existing CSS.
+- ✅ **Framework Agnostic**: Works with React, Vue, Svelte, Angular, and more.
+
+## Installation
+
+```bash
+npm install @lix-js/html-diff
+```
+
+## Usage
+
+1. Add `data-diff-id` attributes to your rendered HTML elements.
+2. Use `renderHtmlDiff` to generate a diff HTML string.
+3. Display the diff HTML string in your app.
+
+```typescript
+import { renderHtmlDiff } from "@lix-js/html-diff";
+
+// Example before and after HTML
+//
+// Usually, you would get these from your app's rendering logic,
+// but for demonstration, we'll use hardcoded strings.
+const beforeHtml = `
+  <p data-diff-id='p1'>Old text.</p>
+`;
+const afterHtml = `
+  <p data-diff-id='p1'>New text!</p>
+  <p data-diff-id='p2'>Added.</p>
+`;
+
+const diffHtmlString = renderHtmlDiff({ beforeHtml, afterHtml });
+
+document.getElementById("diff-container")!.innerHTML = diffHtmlString;
+```
+
+Example output:
+
+<Showcase
+  before="<p data-diff-id='p1'>Old text.</p>"
+  after="<p data-diff-id='p1'>New text!</p><p data-diff-id='p2'>Added.</p>"
+  css=".diff-before { color: red; } .diff-after { color: green; }"
+/>
