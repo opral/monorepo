@@ -4,14 +4,106 @@ import { Showcase } from "../components/showcase";
 
 ## Overview
 
-![HTML Diff Visualization](/diff.svg)
+Lix HTML Diff is a simple way to generate and display diffs for any app UI.
 
-Lix HTML Diff is a simple way to generate and display diffs for any app UI using the "HTML trick" - since most apps ultimately render to HTML, you can use this HTML diff to visualize changes in your application's interface.
+Assume you want to diff a table that's displayed to users. You render the before and after HTML, then pass both into the `renderHtmlDiff` function to get the diff:
 
-- ✅ **Universal**: Works for any app that renders to HTML (which is most apps!)
-- ✅ **Simple**: No need for renderer-specific diff logic.
-- ✅ **Styling**: Uses your existing CSS.
-- ✅ **Framework Agnostic**: Works with React, Vue, Svelte, Angular, and more.
+```typescript
+import { renderHtmlDiff } from "@lix-js/html-diff";
+
+const tableBefore = renderTable(beforeData);
+const tableAfter = renderTable(afterData);
+
+const diff = renderHtmlDiff({ 
+  beforeHtml: tableBefore, 
+  afterHtml: tableAfter 
+});
+
+render(diff, document.getElementById("diff-container"));
+```
+
+<Showcase
+  before={`<table class="pricing-table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>T-Shirt</th>
+      <th>Shoe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="row-header">Cost</td>
+      <td data-diff-key="xjht">$8</td>
+      <td data-diff-key="pk9m">$15</td>
+    </tr>
+    <tr>
+      <td class="row-header">Sales Price</td>
+      <td data-diff-key="zm7q">$40</td>
+      <td data-diff-key="nf2w">$35</td>
+    </tr>
+  </tbody>
+</table>`}
+  after={`<table class="pricing-table">
+  <thead>
+    <tr>
+      <th></th>
+      <th>T-Shirt</th>
+      <th>Shoe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="row-header">Cost</td>
+      <td data-diff-key="xjht">$6</td>
+      <td data-diff-key="pk9m">$15</td>
+    </tr>
+    <tr>
+      <td class="row-header">Sales Price</td>
+      <td data-diff-key="zm7q">$45</td>
+      <td data-diff-key="nf2w">$39</td>
+    </tr>
+  </tbody>
+</table>`}
+  css={`/* Table styling */
+.pricing-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.pricing-table th,
+.pricing-table td {
+  border: 1.1px solid #ccc;
+  padding: 8px;
+}
+
+.pricing-table .row-header {
+  font-weight: bold;
+}
+
+/* Diff highlighting */
+.diff-create {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.diff-update {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.diff-delete {
+  background-color: #f8d7da;
+  color: #721c24;
+}`}
+/>
+
+Notice how the rendered diff automatically highlights changed cells while preserving the table structure. This works without any custom diff logic - just your existing HTML with [`data-diff-key`](/guide/attributes.html#data-diff-key) attributes.
+
+- 🌐 **Universal**: Works for any app that renders to HTML (which is most apps!)
+- ⚡ **Simple**: No need for renderer-specific diff logic.
+- 🎨 **Uses your styles**: Uses your existing CSS.
+- 🔧 **Framework Agnostic**: Works with React, Vue, Svelte, Angular, and more.
 
 ## Installation
 

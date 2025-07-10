@@ -53,8 +53,8 @@ export default defineConfig({
               link: "/guide/",
             },
             {
-              text: "Why HTML Diff?",
-              link: "/guide/why-html-diff",
+              text: "How it Works",
+              link: "/guide/how-it-works",
             },
             {
               text: "Limitations",

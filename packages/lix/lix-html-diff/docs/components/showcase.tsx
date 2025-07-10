@@ -21,16 +21,11 @@ export function Showcase({ before, after, css, editable = false, onBeforeChange,
   useEffect(() => {
     if (!css) return;
     
-    const styleId = "showcase-custom-styles";
-    let styleElement = document.getElementById(styleId) as HTMLStyleElement;
-    
-    if (!styleElement) {
-      styleElement = document.createElement("style");
-      styleElement.id = styleId;
-      document.head.appendChild(styleElement);
-    }
-    
+    const styleId = `showcase-styles-${Math.random().toString(36).substring(2, 9)}`;
+    const styleElement = document.createElement("style");
+    styleElement.id = styleId;
     styleElement.textContent = css;
+    document.head.appendChild(styleElement);
     
     return () => {
       const element = document.getElementById(styleId);

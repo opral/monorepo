@@ -1,4 +1,20 @@
-/* Table diff styling */
+/* Table styling */
+.pricing-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.pricing-table th,
+.pricing-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.pricing-table .row-header {
+  font-weight: bold;
+}
+
+/* Diff styling */
 .diff-create {
   background-color: #d4edda;
   color: #155724;

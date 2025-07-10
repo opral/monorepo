@@ -151,31 +151,14 @@ function renderHtmlDiffElement(args: {
           );
         } else {
           // Fall back to atomic block diffing for complex components
-          // For atomic blocks, replace the 'after' element with the 'before' element styled as deleted
+          // For atomic blocks with content changes, show as updated
           
-          // Clone the 'before' element and style as deleted
-          const beforeClone = beforeEl.cloneNode(true) as HTMLElement;
-          if (beforeClone.hasAttribute("class")) {
-            beforeClone.className += " diff-delete";
+          // Style the 'after' element as updated
+          if (afterEl.hasAttribute("class")) {
+            afterEl.className += " diff-update";
           } else {
-            beforeClone.className = "diff-delete";
+            afterEl.className = "diff-update";
           }
-
-          // Disable interactions in the clone
-          beforeClone
-            .querySelectorAll("button, input, select, textarea, a[href]")
-            .forEach((interactiveEl) => {
-              if (interactiveEl instanceof HTMLElement) {
-                interactiveEl.setAttribute("disabled", "true");
-                interactiveEl.style.pointerEvents = "none";
-              }
-              if (interactiveEl instanceof HTMLAnchorElement) {
-                interactiveEl.removeAttribute("href");
-              }
-            });
-
-          // Replace the 'after' element with the 'before' clone
-          afterEl.parentNode?.replaceChild(beforeClone, afterEl);
         }
       } else {
         // Child structure same, text content same. Check attributes? (TODO)
