@@ -172,3 +172,90 @@ This example shows how using `data-diff-mode="words"` on complex components brea
 />
 
 Notice how the word-level diffing breaks the HTML structure by inserting `<span>` elements, making the result invalid HTML. The correct approach is to use `data-diff-mode="element"` or no mode at all for complex components.
+
+## data-diff-show-when-deleted
+
+**Optional attribute to show deleted elements in the diff result.**
+
+By default, when elements are deleted, they are not inserted into the diff result - only existing elements get CSS classes. The `data-diff-show-when-deleted` attribute tells the diff engine that this element should be displayed with strikethrough styling when deleted.
+
+### When to use data-diff-show-when-deleted
+
+✅ **Use for elements safe to re-insert:**
+- Table rows (`<tr>`) that won't break table layout
+- List items (`<li>`) that can be safely displayed  
+- Elements where showing deletions improves clarity
+- Content elements that flow naturally
+
+❌ **Avoid for layout-sensitive elements:**
+- Elements in flexbox/grid layouts where extra DOM nodes break positioning
+- Components with strict child count requirements
+- Interactive elements that might cause confusion when deleted
+- Elements where re-insertion might cause layout issues
+
+### Example: Table with deleted rows
+
+```html
+<!-- Before -->
+<tbody data-diff-key="table-body">
+  <tr data-diff-key="row1" data-diff-show-when-deleted>
+    <td>Product A</td>
+    <td>$10</td>
+  </tr>
+  <tr data-diff-key="row2" data-diff-show-when-deleted>
+    <td>Product B</td>
+    <td>$20</td>
+  </tr>
+  <tr data-diff-key="row3" data-diff-show-when-deleted>
+    <td>Product C</td>
+    <td>$30</td>
+  </tr>
+</tbody>
+
+<!-- After -->
+<tbody data-diff-key="table-body">
+  <tr data-diff-key="row1" data-diff-show-when-deleted>
+    <td>Product A</td>
+    <td>$10</td>
+  </tr>
+  <tr data-diff-key="row3" data-diff-show-when-deleted>
+    <td>Product C</td>
+    <td>$30</td>
+  </tr>
+</tbody>
+```
+
+<Showcase 
+  before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-deleted><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2' data-diff-show-when-deleted><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3' data-diff-show-when-deleted><td>Product C</td><td>$30</td></tr></tbody></table>" 
+  after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1' data-diff-show-when-deleted><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3' data-diff-show-when-deleted><td>Product C</td><td>$30</td></tr></tbody></table>" 
+  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; text-decoration: line-through; }"
+/>
+
+Notice how the deleted row (Product B) is inserted and shown with strikethrough styling.
+
+### Mixed scenarios
+
+You can be selective about which elements show when deleted:
+
+```html
+<tbody data-diff-key="table-body">
+  <tr data-diff-key="safe-row" data-diff-show-when-deleted>
+    <td>This row shows when deleted</td>
+  </tr>
+  <tr data-diff-key="unsafe-row">
+    <td>This row doesn't show when deleted</td>
+  </tr>
+</tbody>
+```
+
+### Without data-diff-show-when-deleted
+
+Without the `data-diff-show-when-deleted` attribute, deleted elements are not inserted:
+
+<Showcase 
+  before="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row2'><td>Product B</td><td>$20</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>" 
+  after="<table><tbody data-diff-key='table-body'><tr data-diff-key='row1'><td>Product A</td><td>$10</td></tr><tr data-diff-key='row3'><td>Product C</td><td>$30</td></tr></tbody></table>" 
+  css="table { border-collapse: collapse; } td { border: 1px solid #ccc; padding: 8px; } .diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
+/>
+
+Only the existing rows are shown - the deleted row is not inserted.

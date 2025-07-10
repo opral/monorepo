@@ -203,6 +203,11 @@ function renderHtmlDiffElement(args: {
   // Iterate in the original order to insert removed items correctly
   for (const { id, element: beforeEl } of beforeElementOrder) {
     if (removedIds.has(id)) {
+      // Only insert deleted elements if they have data-diff-show-when-deleted
+      if (!beforeEl.hasAttribute("data-diff-show-when-deleted")) {
+        continue; // Skip insertion - element doesn't want to be shown when deleted
+      }
+
       // Check if parent was also removed. If so, skip (it'll be handled with the parent)
       const parentId = beforeEl.parentElement?.getAttribute("data-diff-key");
       if (parentId && removedIds.has(parentId)) {

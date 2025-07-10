@@ -6,7 +6,7 @@
       <th>Shoe</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody data-diff-key="table-body">
     <tr>
       <td class="row-header">Cost</td>
       <td data-diff-key="tshirt-cost">$8</td>
@@ -16,6 +16,11 @@
       <td class="row-header">Sales Price</td>
       <td data-diff-key="tshirt-price">$40</td>
       <td data-diff-key="shoe-price">$35</td>
+    </tr>
+    <tr data-diff-key="discount-row" data-diff-show-when-deleted>
+      <td class="row-header">Discount</td>
+      <td data-diff-key="tshirt-discount">10%</td>
+      <td data-diff-key="shoe-discount">5%</td>
     </tr>
   </tbody>
 </table>

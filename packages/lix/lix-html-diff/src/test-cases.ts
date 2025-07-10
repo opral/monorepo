@@ -142,6 +142,89 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       `,
     },
   ],
+  "data-diff-show-when-deleted": [
+    {
+      name: "should insert deleted element when it has data-diff-show-when-deleted",
+      beforeHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1">First item</li>
+          <li data-diff-key="item2" data-diff-show-when-deleted>Second item</li>
+          <li data-diff-key="item3">Third item</li>
+        </ul>
+      `,
+      afterHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1">First item</li>
+          <li data-diff-key="item3">Third item</li>
+        </ul>
+      `,
+      expectedHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1">First item</li>
+          <li data-diff-key="item2" data-diff-show-when-deleted class="diff-deleted" contenteditable="false">Second item</li>
+          <li data-diff-key="item3">Third item</li>
+        </ul>
+      `,
+    },
+    {
+      name: "should NOT insert deleted element when it lacks data-diff-show-when-deleted",
+      beforeHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1">First item</li>
+          <li data-diff-key="item2">Second item</li>
+          <li data-diff-key="item3">Third item</li>
+        </ul>
+      `,
+      afterHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1">First item</li>
+          <li data-diff-key="item3">Third item</li>
+        </ul>
+      `,
+      expectedHtml: dedent`
+        <ul data-diff-key="list">
+          <li data-diff-key="item1">First item</li>
+          <li data-diff-key="item3">Third item</li>
+        </ul>
+      `,
+    },
+    {
+      name: "should handle mixed scenarios - some elements show when deleted, others don't",
+      beforeHtml: dedent`
+        <table>
+          <tbody data-diff-key="table-body">
+            <tr data-diff-key="row1" data-diff-show-when-deleted>
+              <td>Safe row</td>
+            </tr>
+            <tr data-diff-key="row2">
+              <td>Unsafe row</td>
+            </tr>
+            <tr data-diff-key="row3" data-diff-show-when-deleted>
+              <td>Another safe row</td>
+            </tr>
+          </tbody>
+        </table>
+      `,
+      afterHtml: dedent`
+        <table>
+          <tbody data-diff-key="table-body">
+          </tbody>
+        </table>
+      `,
+      expectedHtml: dedent`
+        <table>
+          <tbody data-diff-key="table-body">
+            <tr data-diff-key="row1" data-diff-show-when-deleted class="diff-deleted" contenteditable="false">
+              <td>Safe row</td>
+            </tr>
+            <tr data-diff-key="row3" data-diff-show-when-deleted class="diff-deleted" contenteditable="false">
+              <td>Another safe row</td>
+            </tr>
+          </tbody>
+        </table>
+      `,
+    },
+  ],
 };
 
 // Flattened array for backward compatibility with existing tests
@@ -149,4 +232,5 @@ export const testCases: TestCase[] = [
   ...testCasesBySection["data-diff-key"]!,
   ...testCasesBySection["data-diff-mode='element'"]!,
   ...testCasesBySection["data-diff-mode='words'"]!,
+  ...testCasesBySection["data-diff-show-when-deleted"]!,
 ];

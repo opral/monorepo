@@ -108,6 +108,10 @@ export default defineConfig({
             },
           ],
         },
+        {
+          text: "data-diff-show-when-deleted",
+          link: "/test-cases#data-diff-show-when-deleted",
+        },
       ],
     },
     socialLinks: [
