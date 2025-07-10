@@ -149,24 +149,26 @@ Use `data-diff-mode="words"` to enable granular word-level diffing within the el
 
 #### Example: Complex component (avoid data-diff-mode="words")
 
+This example shows how using `data-diff-mode="words"` on complex components breaks the layout by inserting `<span>` elements that disrupt the HTML structure:
+
 ```html
-<!-- Before -->
-<div class='card' data-diff-key='jx9w'>
+<!-- ❌ DON'T: Using words mode on complex component -->
+<div class='card' data-diff-key='jx9w' data-diff-mode="words">
   <h3>Old Title</h3>
-  <p>Content</p>
+  <p>Some content here</p>
 </div>
 
 <!-- After -->
-<div class='card' data-diff-key='jx9w'>
+<div class='card' data-diff-key='jx9w' data-diff-mode="words">
   <h3>New Title</h3>
-  <p>Content</p>
+  <p>Different content here</p>
 </div>
 ```
 
 <Showcase 
-  before="<div class='card' data-diff-key='jx9w'><h3>Old Title</h3><p>Content</p></div>" 
-  after="<div class='card' data-diff-key='jx9w'><h3>New Title</h3><p>Content</p></div>" 
+  before="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>Old Title</h3><p>Some content here</p></div>" 
+  after="<div class='card' data-diff-key='jx9w' data-diff-mode='words'><h3>New Title</h3><p>Different content here</p></div>" 
   css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; } .card { border: 1px solid #ccc; padding: 10px; }"
 />
 
-The atomic block approach preserves the component structure while clearly showing what changed.
+Notice how the word-level diffing breaks the HTML structure by inserting `<span>` elements, making the result invalid HTML. The correct approach is to use `data-diff-mode="element"` or no mode at all for complex components.
