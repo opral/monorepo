@@ -1,7 +1,10 @@
 import * as path from "node:path";
 import { defineConfig } from "rspress/config";
 import mermaid from "rspress-plugin-mermaid";
-import { customTypeDocPlugin, generateApiSidebar } from "./rspress-plugins/typedoc-plugin";
+import {
+  customTypeDocPlugin,
+  generateApiSidebar,
+} from "./rspress-plugins/typedoc-plugin";
 
 export default defineConfig({
   root: path.join(__dirname, "docs"),
@@ -16,6 +19,9 @@ export default defineConfig({
     tools: {
       rspack: {
         target: ["web", "es2022"],
+        resolve: {
+          conditionNames: ['browser', 'import', 'require', 'default'],
+        },
         module: {
           rules: [
             {
@@ -28,11 +34,11 @@ export default defineConfig({
     },
   },
   plugins: [
-    mermaid(),
-    customTypeDocPlugin({
-      entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
-      tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
-    }),
+    // mermaid(),
+    // customTypeDocPlugin({
+    //   entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
+    //   tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
+    // }),
   ],
   themeConfig: {
     darkMode: false,
@@ -111,7 +117,7 @@ export default defineConfig({
           ],
         },
       ],
-      "/api/": generateApiSidebar(path.join(__dirname, "docs")),
+      // "/api/": generateApiSidebar(path.join(__dirname, "docs")),
       "/plugins/": [
         {
           text: "Plugins",
