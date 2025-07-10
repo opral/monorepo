@@ -2,8 +2,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import * as fsSync from "node:fs";
 import type { RspressPlugin } from "@rspress/shared";
-import { Application, TSConfigReader } from "typedoc";
-import { load } from "typedoc-plugin-markdown";
+import { Application } from "typedoc";
 
 export interface CustomTypeDocOptions {
   entryPoints: string[];
@@ -80,23 +79,32 @@ async function generateMetaJson(absoluteApiDir: string) {
 
 async function patchGeneratedApiDocs(absoluteApiDir: string) {
   await patchLinks(absoluteApiDir);
-  await fs.rename(
-    path.join(absoluteApiDir, "README.md"),
-    path.join(absoluteApiDir, "index.md")
-  );
+  
+  // Only rename README.md if it exists
+  const readmePath = path.join(absoluteApiDir, "README.md");
+  const indexPath = path.join(absoluteApiDir, "index.md");
+  
+  try {
+    await fs.access(readmePath);
+    await fs.rename(readmePath, indexPath);
+  } catch (error) {
+    // README.md doesn't exist, create a basic index.md
+    await fs.writeFile(indexPath, `# API Reference\n\nBrowse the API documentation using the sidebar.`);
+  }
+  
   await generateMetaJson(absoluteApiDir);
 }
 
 export function generateApiSidebar(docsRoot: string) {
   const apiDir = path.join(docsRoot, "api");
-  
+
   // Check if API directory exists
   if (!fsSync.existsSync(apiDir)) {
     return [];
   }
-  
+
   const sidebar: any[] = [];
-  
+
   // Define the categories we want to show
   const categories = [
     { dir: "classes", title: "Classes", collapsed: false },
@@ -105,32 +113,33 @@ export function generateApiSidebar(docsRoot: string) {
     { dir: "types", title: "Type Aliases", collapsed: true },
     { dir: "variables", title: "Variables", collapsed: true },
   ];
-  
-  categories.forEach(category => {
+
+  categories.forEach((category) => {
     const categoryDir = path.join(apiDir, category.dir);
-    
+
     if (fsSync.existsSync(categoryDir)) {
-      const files = fsSync.readdirSync(categoryDir)
-        .filter(file => file.endsWith('.md'))
-        .map(file => {
-          const name = file.replace('.md', '');
+      const files = fsSync
+        .readdirSync(categoryDir)
+        .filter((file) => file.endsWith(".md"))
+        .map((file) => {
+          const name = file.replace(".md", "");
           return {
             text: name,
-            link: `/api/${category.dir}/${name}`
+            link: `/api/${category.dir}/${name}`,
           };
         })
         .sort((a, b) => a.text.localeCompare(b.text));
-      
+
       if (files.length > 0) {
         sidebar.push({
           text: category.title,
           collapsed: category.collapsed,
-          items: files
+          items: files,
         });
       }
     }
   });
-  
+
   return sidebar;
 }
 
@@ -143,29 +152,18 @@ export function customTypeDocPlugin(
   return {
     name: "custom-typedoc-plugin",
     async config(config) {
-      const app = new Application();
       docRoot = config.root;
 
-      app.options.addReader(new TSConfigReader());
-      load(app);
-
-      // Bootstrap options - working with current TypeDoc version
+      // Bootstrap options - updated for TypeDoc 0.28+ API
       const bootstrapOptions: any = {
         name: config.title,
         entryPoints,
-        theme: "markdown",
-        disableSources: true,
-        readme: "none",
-        githubPages: false,
-        requiredToBeDocumented: ["Class", "Function", "Interface"],
         plugin: ["typedoc-plugin-markdown"],
-        hideBreadcrumbs: true,
-        hideMembersSymbol: true,
-        allReflectionsHaveOwnDocument: true,
-        publicPath: "/api/",
-        navigationLinks: {
-          Home: "/api/README",
-        },
+        out: path.join(docRoot!, outDir),
+        readme: "none",
+        disableSources: true,
+        excludePrivate: true,
+        excludeExternals: true,
       };
 
       // Add tsconfig if provided
@@ -173,14 +171,14 @@ export function customTypeDocPlugin(
         bootstrapOptions.tsconfig = tsconfig;
       }
 
-      app.bootstrap(bootstrapOptions);
-      const project = app.convert();
+      // Use Application.bootstrap static method for TypeDoc 0.28+
+      const app = await Application.bootstrap(bootstrapOptions);
+      const project = await app.convert();
 
       if (project) {
-        // 1. Generate doc/api, doc/api/_meta.json by typedoc
-        const absoluteApiDir = path.join(docRoot!, outDir);
-        await app.generateDocs(project, absoluteApiDir);
-        await patchGeneratedApiDocs(absoluteApiDir);
+        // Generate docs (output directory is specified in bootstrap options)
+        await app.generateDocs(project, bootstrapOptions.out);
+        await patchGeneratedApiDocs(bootstrapOptions.out);
       }
 
       return config;
