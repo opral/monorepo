@@ -36,12 +36,6 @@ console.log(
 );
 ```
 
-<LixSandpack 
-  feature="attribution" 
-  example="attribution-selected-entity"
-  height="600px"
-/>
-
 ### File change attribution
 
 ```ts
@@ -58,8 +52,12 @@ console.log(
 );
 ```
 
-<LixSandpack 
-  feature="attribution" 
-  example="attribution-file-change"
-  height="600px"
+## Interactive Examples
+
+Explore these interactive examples to see attribution in action:
+
+<InteractiveExampleCard
+  title="Attribution Interactive Examples"
+  description="Explore interactive examples showing how to query attribution data, find who made changes, and track modification history."
+  link="/examples/interactive/attribution/"
 />

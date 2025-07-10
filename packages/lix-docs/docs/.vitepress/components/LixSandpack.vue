@@ -3,43 +3,48 @@
 </template>
 
 <script setup lang="ts">
-import { createElement } from 'react'
-import { createRoot } from 'react-dom/client'
-import { ref, onMounted, onUnmounted } from 'vue'
-import LixSandpackReact from './LixSandpack.jsx'
+import { createElement } from "react";
+import { createRoot } from "react-dom/client";
+import { ref, onMounted, onUnmounted } from "vue";
+import LixSandpackReact from "./LixSandpack.jsx";
 
 interface Props {
-  example: string
-  feature: string
-  height?: string
-  showConsole?: boolean
+  example: string;
+  feature: string;
+  height?: string;
+  showConsole?: boolean;
+  fullWidth?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  height: '600px',
-  showConsole: true
-})
+  height: "800px",
+  showConsole: true,
+  fullWidth: false,
+});
 
-const sandpackContainer = ref<HTMLDivElement>()
-let root: any = null
+const sandpackContainer = ref<HTMLDivElement>();
+let root: any = null;
 
 onMounted(() => {
   if (sandpackContainer.value) {
-    root = createRoot(sandpackContainer.value)
-    root.render(createElement(LixSandpackReact, {
-      feature: props.feature,
-      example: props.example,
-      height: props.height,
-      showConsole: props.showConsole
-    }))
+    root = createRoot(sandpackContainer.value);
+    root.render(
+      createElement(LixSandpackReact, {
+        feature: props.feature,
+        example: props.example,
+        height: props.height,
+        showConsole: props.showConsole,
+        fullWidth: props.fullWidth,
+      })
+    );
   }
-})
+});
 
 onUnmounted(() => {
   if (root) {
-    root.unmount()
+    root.unmount();
   }
-})
+});
 </script>
 
 <style scoped>
@@ -51,7 +56,8 @@ onUnmounted(() => {
 
 :deep(.lix-sandpack-wrapper) {
   border-radius: 6px;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas,
+    "Courier New", monospace;
 }
 
 :deep(.lix-sandpack-layout) {
@@ -100,5 +106,23 @@ onUnmounted(() => {
 :deep(.sp-console-item.info) {
   background-color: var(--vp-c-info-soft);
   color: var(--vp-c-info);
+}
+
+/* Full-width styles */
+.full-width {
+  width: 100%;
+}
+
+/* Move console under code and make it bigger */
+:deep(.sp-layout) {
+  flex-direction: column !important;
+}
+
+:deep(.sp-console-wrapper) {
+  min-height: 300px !important;
+}
+
+:deep(.sp-console) {
+  min-height: 300px !important;
 }
 </style>

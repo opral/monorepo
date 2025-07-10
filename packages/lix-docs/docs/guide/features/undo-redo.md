@@ -20,3 +20,14 @@ await undo({ lix, steps: 3 });
 await redo({ lix });
 ```
 
+## Interactive Examples
+
+Explore these interactive examples to see undo/redo functionality in action:
+
+<InteractiveExampleCard
+  title="Undo/Redo Interactive Examples"
+  description="Explore interactive examples showing how to implement reliable undo and redo functionality in your application."
+  link="/examples/interactive/undo-redo/"
+/>
+```
+

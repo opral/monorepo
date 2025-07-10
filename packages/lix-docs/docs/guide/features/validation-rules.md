@@ -21,3 +21,13 @@ Validation rules are automated quality checks that run on every change, similar 
 - **Localization:** Ensure all messages are translated to required languages
 - **Data formats:** Validate dates conform to ISO 8601 in spreadsheets
 - **AI agent self-correction:** Enable agents to detect and fix their own mistakes
+
+## Interactive Examples
+
+Explore these interactive examples to see validation rules in action:
+
+<InteractiveExampleCard
+  title="Validation Rules Interactive Examples"
+  description="Explore interactive examples showing how to implement automated quality checks and validation rules for your data."
+  link="/examples/interactive/validation-rules/"
+/>

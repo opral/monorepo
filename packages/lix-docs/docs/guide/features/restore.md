@@ -29,3 +29,14 @@ await restore({ lix, to: lastChangeSet.id });
 const checkpoints = await selectCheckpoints({ lix }).execute();
 await restore({ lix, to: checkpoints[0].id });
 ```
+
+## Interactive Examples
+
+Explore these interactive examples to see restore functionality in action:
+
+<InteractiveExampleCard
+  title="Restore Interactive Examples"
+  description="Explore interactive examples showing how to restore your data to previous states and create recovery checkpoints."
+  link="/examples/interactive/restore/"
+/>
+```

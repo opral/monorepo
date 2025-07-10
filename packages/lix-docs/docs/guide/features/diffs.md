@@ -132,3 +132,13 @@ This would output a string like:
 ```
 The "name" property changed from "My Project" to "My Awesome Project"
 ```
+
+## Interactive Examples
+
+Explore these interactive examples to see diffs in action:
+
+<InteractiveExampleCard
+  title="Diffs Interactive Examples"
+  description="Explore interactive examples showing how to generate and visualize diffs between different versions of your data."
+  link="/examples/interactive/diffs/"
+/>

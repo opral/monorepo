@@ -51,3 +51,14 @@ await rejectChangeProposal({
   comment: "Needs more work on error handling"
 });
 ```
+
+## Interactive Examples
+
+Explore these interactive examples to see change proposals in action:
+
+<InteractiveExampleCard
+  title="Change Proposals Interactive Examples"
+  description="Explore interactive examples showing how to create, review, and manage change proposals in your application."
+  link="/examples/interactive/change-proposals/"
+/>
+```

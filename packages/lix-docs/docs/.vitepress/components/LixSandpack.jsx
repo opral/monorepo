@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Sandpack } from "@codesandbox/sandpack-react";
+import { 
+  SandpackProvider, 
+  SandpackCodeEditor, 
+  SandpackConsole,
+  SandpackPreview
+} from "@codesandbox/sandpack-react";
 
 const LixSandpack = ({
   feature,
   example,
-  height = "600px",
+  height = "800px",
   showConsole = true,
+  fullWidth = false,
 }) => {
   const [files, setFiles] = useState({});
   const [loading, setLoading] = useState(true);
@@ -15,12 +21,8 @@ const LixSandpack = ({
 
   const options = {
     autorun: true,
-    showConsole: false,
+    showConsole: true,
     layout: "console",
-    initMode: "immediate",
-    showNavigator: false,
-    showLineNumbers: false,
-    showInlineErrors: true,
   };
 
   const loadSdkBundle = async () => {
@@ -142,16 +144,30 @@ const LixSandpack = ({
 
   return (
     <div
-      className="lix-sandpack"
-      style={{ margin: "1rem 0", borderRadius: "6px", overflow: "hidden" }}
+      className={`lix-sandpack ${fullWidth ? "full-width" : ""}`}
+      style={{
+        margin: "1rem 0",
+        borderRadius: "6px",
+        overflow: "hidden",
+      }}
     >
-      <Sandpack
+      <SandpackProvider
         template="vanilla"
         files={files}
         customSetup={customSetup}
         options={options}
         theme="light"
-      />
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <SandpackCodeEditor showLineNumbers />
+          <SandpackConsole 
+            showHeader={true}
+            standalone={false}
+          />
+          {/* Hidden preview to make console work */}
+          <SandpackPreview style={{ display: "none" }} />
+        </div>
+      </SandpackProvider>
     </div>
   );
 };

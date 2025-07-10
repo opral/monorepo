@@ -159,6 +159,19 @@ export default withMermaid({
             { text: "Building an App", link: "/examples/building-an-app" },
           ],
         },
+        {
+          text: "Interactive Examples",
+          items: [
+            { text: "Attribution", link: "/examples/interactive/attribution/" },
+            { text: "Change Proposals", link: "/examples/interactive/change-proposals/" },
+            { text: "Diffs", link: "/examples/interactive/diffs/" },
+            { text: "History", link: "/examples/interactive/history/" },
+            { text: "Restore", link: "/examples/interactive/restore/" },
+            { text: "Undo/Redo", link: "/examples/interactive/undo-redo/" },
+            { text: "Validation Rules", link: "/examples/interactive/validation-rules/" },
+            { text: "Versions", link: "/examples/interactive/versions/" },
+          ],
+        },
       ],
     },
 

@@ -163,3 +163,13 @@ Notice that:
 - Each entry shows its original `lixcol_change_set_id` (where it was created)
 - All entries have the same `lixcol_root_change_set_id` (CS3, the query root)
 - The `lixcol_depth` increases as we go further back in history
+
+## Interactive Examples
+
+Explore these interactive examples to see history tracking in action:
+
+<InteractiveExampleCard
+  title="History Interactive Examples"
+  description="Explore interactive examples showing how to track and query the complete history of your data changes."
+  link="/examples/interactive/history/"
+/>

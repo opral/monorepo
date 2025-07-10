@@ -25,3 +25,14 @@ await switchVersion({ lix, to: newVersion });
 ```ts
 await mergeVersion({ lix, source: activeVersion, target: newVersion });
 ```
+
+## Interactive Examples
+
+Explore these interactive examples to see version management in action:
+
+<InteractiveExampleCard
+  title="Versions Interactive Examples"
+  description="Explore interactive examples showing how to create, manage, and merge versions (branches) of your data."
+  link="/examples/interactive/versions/"
+/>
+```
