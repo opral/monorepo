@@ -18,10 +18,6 @@ export default defineConfig({
   builderConfig: {
     tools: {
       rspack: {
-        target: ["web", "es2022"],
-        resolve: {
-          conditionNames: ['browser', 'import', 'require', 'default'],
-        },
         module: {
           rules: [
             {
