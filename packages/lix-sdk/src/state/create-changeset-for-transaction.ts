@@ -1,9 +1,9 @@
 import { type Kysely, sql } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import {
-	type ChangeSet,
-	type ChangeSetEdge,
-	type ChangeSetElement,
+	type LixChangeSet,
+	type LixChangeSetEdge,
+	type LixChangeSetElement,
 	LixChangeSetEdgeSchema,
 	LixChangeSetElementSchema,
 	LixChangeSetSchema,
@@ -12,7 +12,7 @@ import { executeSync } from "../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
-import { LixVersionSchema, type Version } from "../version/schema.js";
+import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import { createChangeWithSnapshot } from "./handle-state-mutation.js";
 import { nanoid } from "../database/nano-id.js";
 import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
@@ -37,7 +37,7 @@ export function createChangesetForTransaction(
 		},
 		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
 	>[]
-): void {
+): string {
 	const versionRecord = getVersionRecordByIdOrThrow(sqlite, db, version_id);
 
 	if (!versionRecord) {
@@ -56,7 +56,7 @@ export function createChangesetForTransaction(
 			snapshot_content: JSON.stringify({
 				id: nextChangeSetId,
 				metadata: null,
-			} satisfies ChangeSet),
+			} satisfies LixChangeSet),
 			schema_version: LixChangeSetSchema["x-lix-version"],
 		},
 		timestamp: currentTime,
@@ -74,7 +74,7 @@ export function createChangesetForTransaction(
 			snapshot_content: JSON.stringify({
 				parent_id: mutatedVersion.change_set_id,
 				child_id: nextChangeSetId,
-			} satisfies ChangeSetEdge),
+			} satisfies LixChangeSetEdge),
 			schema_version: LixChangeSetEdgeSchema["x-lix-version"],
 		},
 		timestamp: currentTime,
@@ -95,7 +95,7 @@ export function createChangesetForTransaction(
 			snapshot_content: JSON.stringify({
 				...mutatedVersion,
 				change_set_id: nextChangeSetId,
-			} satisfies Version),
+			} satisfies LixVersion),
 			schema_version: LixVersionSchema["x-lix-version"],
 		},
 		timestamp: currentTime,
@@ -119,7 +119,7 @@ export function createChangesetForTransaction(
 					schema_key: change.schema_key,
 					file_id: change.file_id,
 					entity_id: change.entity_id,
-				} satisfies ChangeSetElement),
+				} satisfies LixChangeSetElement),
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 			},
 			timestamp: currentTime,
@@ -247,7 +247,7 @@ export function createChangesetForTransaction(
 								entity_id: change.entity_id,
 								schema_key: change.schema_key,
 								file_id: change.file_id,
-							} satisfies ChangeSetElement),
+							} satisfies LixChangeSetElement),
 							schema_version: LixChangeSetElementSchema["x-lix-version"],
 						},
 						timestamp: currentTime,
@@ -309,7 +309,7 @@ export function createChangesetForTransaction(
 							entity_id: change.entity_id,
 							schema_key: change.schema_key,
 							file_id: change.file_id,
-						} satisfies ChangeSetElement),
+						} satisfies LixChangeSetElement),
 						schema_version: LixChangeSetElementSchema["x-lix-version"],
 					},
 					timestamp: currentTime,
@@ -318,4 +318,6 @@ export function createChangesetForTransaction(
 			}
 		}
 	}
+
+	return nextChangeSetId;
 }

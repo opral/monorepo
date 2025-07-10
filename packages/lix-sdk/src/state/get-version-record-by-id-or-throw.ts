@@ -2,13 +2,13 @@ import { type Kysely, sql } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { executeSync } from "../database/execute-sync.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import type { Version } from "../version/schema.js";
+import type { LixVersion } from "../version/schema.js";
 
 export function getVersionRecordByIdOrThrow(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
 	version_id: string
-): Version {
+): LixVersion {
 	let [versionRecord] = executeSync({
 		lix: { sqlite },
 		query: db
@@ -47,5 +47,5 @@ export function getVersionRecordByIdOrThrow(
 		throw new Error(`Version with id '${version_id}' not found.`);
 	}
 
-	return JSON.parse(versionRecord.content) as Version;
+	return JSON.parse(versionRecord.content) as LixVersion;
 }

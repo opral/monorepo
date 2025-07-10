@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import type { Account } from "./schema.js";
+import type { LixAccount } from "./schema.js";
 import { v7 as uuid_v7 } from "uuid";
 
 /**
@@ -17,10 +17,10 @@ import { v7 as uuid_v7 } from "uuid";
 
 export async function createAccount(args: {
 	lix: Pick<Lix, "db">;
-	id?: Account["id"];
-	name: Account["name"];
+	id?: LixAccount["id"];
+	name: LixAccount["name"];
 	lixcol_version_id?: string;
-}): Promise<Account> {
+}): Promise<LixAccount> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
 		const accountId = args.id || uuid_v7();

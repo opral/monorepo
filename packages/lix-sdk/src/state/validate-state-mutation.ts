@@ -3,7 +3,7 @@ import type { Lix } from "../lix/open-lix.js";
 import { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { executeSync } from "../database/execute-sync.js";
 import { sql } from "kysely";
-import type { Change } from "../change/schema.js";
+import type { LixChange } from "../change/schema.js";
 
 const ajv = new Ajv({
 	strict: true,
@@ -16,7 +16,7 @@ const validateLixSchema = ajv.compile(LixSchemaDefinition);
 export function validateStateMutation(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition | null;
-	snapshot_content: Change["snapshot_content"];
+	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
@@ -136,13 +136,33 @@ export function validateStateMutation(args: {
 				"Self-referencing edges are not allowed: parent_id cannot equal child_id"
 			);
 		}
+
+		// Check for cycles if lix_debug is enabled
+		if (args.operation === "insert") {
+			const debugEnabled = executeSync({
+				lix: args.lix,
+				query: args.lix.db
+					.selectFrom("key_value_all")
+					.select("value")
+					.where("key", "=", "lix_debug")
+					.where("value", "=", "true"),
+			});
+
+			if (debugEnabled.length > 0 && debugEnabled[0].value === "true") {
+				validateChangeSetGraphAcyclic({
+					lix: args.lix,
+					newEdge: content,
+					version_id: args.version_id,
+				});
+			}
+		}
 	}
 }
 
 function validatePrimaryKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Change["snapshot_content"];
+	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
@@ -203,7 +223,7 @@ function validatePrimaryKeyConstraints(args: {
 function validateUniqueConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Change["snapshot_content"];
+	snapshot_content: LixChange["snapshot_content"];
 	operation: "insert" | "update" | "delete";
 	entity_id?: string;
 	version_id: string;
@@ -288,7 +308,7 @@ function getValueByPath(obj: any, path: string): any {
 function validateForeignKeyConstraints(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	schema: LixSchemaDefinition;
-	snapshot_content: Change["snapshot_content"];
+	snapshot_content: LixChange["snapshot_content"];
 	version_id: string;
 	untracked?: boolean;
 }): void {
@@ -661,4 +681,80 @@ function parseJsonPropertiesInSnapshotContent(
 	}
 
 	return parsed;
+}
+
+/**
+ * Validates that adding a new edge to the change set graph won't create a cycle.
+ * Uses depth-first search to detect cycles.
+ */
+function validateChangeSetGraphAcyclic(args: {
+	lix: Pick<Lix, "sqlite" | "db">;
+	newEdge: { parent_id: string; child_id: string };
+	version_id: string;
+}): void {
+	// Get all existing edges
+	const existingEdges = executeSync({
+		lix: args.lix,
+		query: args.lix.db
+			.selectFrom("change_set_edge_all")
+			.select(["parent_id", "child_id"])
+			.where("lixcol_version_id", "=", args.version_id),
+	});
+
+	// Build adjacency list including the new edge
+	const adjacencyList = new Map<string, string[]>();
+
+	// Add existing edges
+	for (const edge of existingEdges) {
+		if (!adjacencyList.has(edge.parent_id)) {
+			adjacencyList.set(edge.parent_id, []);
+		}
+		adjacencyList.get(edge.parent_id)!.push(edge.child_id);
+	}
+
+	// Add the new edge
+	if (!adjacencyList.has(args.newEdge.parent_id)) {
+		adjacencyList.set(args.newEdge.parent_id, []);
+	}
+	adjacencyList.get(args.newEdge.parent_id)!.push(args.newEdge.child_id);
+
+	// DFS to detect cycles
+	const visited = new Set<string>();
+	const recursionStack = new Set<string>();
+
+	function hasCycle(node: string, path: string[] = []): boolean {
+		visited.add(node);
+		recursionStack.add(node);
+		path.push(node);
+
+		const neighbors = adjacencyList.get(node) || [];
+		for (const neighbor of neighbors) {
+			if (!visited.has(neighbor)) {
+				if (hasCycle(neighbor, [...path])) {
+					return true;
+				}
+			} else if (recursionStack.has(neighbor)) {
+				// Found a cycle
+				const cycleStart = path.indexOf(neighbor);
+				const cyclePath = [...path.slice(cycleStart), neighbor];
+
+				throw new Error(
+					`Cycle detected in change set graph!\n` +
+						`New edge: ${args.newEdge.parent_id} -> ${args.newEdge.child_id}\n` +
+						`Cycle path: ${cyclePath.join(" -> ")}\n` +
+						`Adding this edge would create a cycle in the graph.`
+				);
+			}
+		}
+
+		recursionStack.delete(node);
+		return false;
+	}
+
+	// Check all nodes that haven't been visited
+	for (const node of adjacencyList.keys()) {
+		if (!visited.has(node)) {
+			hasCycle(node);
+		}
+	}
 }

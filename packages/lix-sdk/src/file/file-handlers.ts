@@ -40,6 +40,7 @@ export function handleFileInsert(args: {
 				id: args.file.id,
 				path: args.file.path,
 				metadata: args.file.metadata || null,
+				hidden: args.file.hidden ?? false,
 			},
 			schema_version: LixFileDescriptorSchema["x-lix-version"],
 			version_id: args.versionId,
@@ -189,6 +190,7 @@ export function handleFileUpdate(args: {
 					id: args.file.id,
 					path: args.file.path,
 					metadata: args.file.metadata || null,
+					hidden: args.file.hidden ?? false,
 				},
 				untracked: args.untracked || false,
 			})

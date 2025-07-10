@@ -2,12 +2,12 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import type { NewState } from "../entity-views/types.js";
-import type { StoredSchema } from "./schema.js";
+import type { LixStoredSchema } from "./schema.js";
 
 test("insert and delete a stored schema", async () => {
 	const lix = await openLix({});
 
-	const schema: NewState<StoredSchema> = {
+	const schema: NewState<LixStoredSchema> = {
 		value: {
 			type: "object",
 			"x-lix-key": "mock",
@@ -50,7 +50,7 @@ test("insert and delete a stored schema", async () => {
 test("throws if the stored schema version does not match the x-lix-version prop", async () => {
 	const lix = await openLix({});
 
-	const schema: NewState<StoredSchema> = {
+	const schema: NewState<LixStoredSchema> = {
 		version: "2.0",
 		key: "mock",
 		value: {
@@ -73,7 +73,7 @@ test("throws if the stored schema version does not match the x-lix-version prop"
 test("throws if the stored schema key does not match the x-lix-key prop", async () => {
 	const lix = await openLix({});
 
-	const schema: NewState<StoredSchema> = {
+	const schema: NewState<LixStoredSchema> = {
 		key: "mock",
 		version: "1.0",
 		value: {
@@ -96,7 +96,7 @@ test("throws if the stored schema key does not match the x-lix-key prop", async 
 test("updating is not possible (schema is immutable, needs new version bumb)", async () => {
 	const lix = await openLix({});
 
-	const schema: NewState<StoredSchema> = {
+	const schema: NewState<LixStoredSchema> = {
 		value: {
 			type: "object",
 			"x-lix-key": "mock",
@@ -121,7 +121,7 @@ test("updating is not possible (schema is immutable, needs new version bumb)", a
 test("default fills in key and version from the schema value", async () => {
 	const lix = await openLix({});
 
-	const schema: NewState<StoredSchema> = {
+	const schema: NewState<LixStoredSchema> = {
 		value: {
 			"x-lix-key": "mock",
 			"x-lix-version": "1.0",
@@ -149,7 +149,7 @@ test("default fills in key and version from the schema value", async () => {
 test("validates inserted schemas", async () => {
 	const lix = await openLix({});
 
-	const schema: NewState<StoredSchema> = {
+	const schema: NewState<LixStoredSchema> = {
 		value: {
 			type: "object",
 			"x-lix-key": "mock",

@@ -1,1 +1,4 @@
-export { LixStoredSchemaSchema, type StoredSchema } from "./schema.js";
+export {
+	LixStoredSchemaSchema,
+	type LixStoredSchema as StoredSchema,
+} from "./schema.js";

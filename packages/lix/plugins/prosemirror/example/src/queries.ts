@@ -53,15 +53,7 @@ export function selectCheckpoints(lix: Lix) {
 			.select((eb) => [
 				eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 			])
-			.select((eb) =>
-				eb
-					.selectFrom("change")
-					.where("change.schema_key", "=", "lix_change_set_table")
-					.whereRef("change.entity_id", "=", "change_set.id")
-					.select("change.created_at")
-					.as("created_at"),
-			)
-			.orderBy("created_at", "desc")
+			.orderBy("change_set.lixcol_updated_at", "desc")
 	);
 }
 
@@ -131,7 +123,12 @@ export function selectThreads(
 			jsonArrayFrom(
 				eb
 					.selectFrom("thread_comment")
-					// .innerJoin("account", "account.id", "change_author.account_id")
+					.innerJoin(
+						"change_author",
+						"thread_comment.lixcol_change_id",
+						"change_author.change_id",
+					)
+					.innerJoin("account", "account.id", "change_author.account_id")
 					.select([
 						"thread_comment.id",
 						"thread_comment.body",
@@ -140,7 +137,8 @@ export function selectThreads(
 						"thread_comment.lixcol_created_at",
 						"thread_comment.lixcol_updated_at",
 					])
-					.select((eb) => eb.val("TODO username").as("author_name"))
+					.select("account.name as author_name")
+					.orderBy("thread_comment.lixcol_created_at", "asc")
 					.whereRef("thread_comment.thread_id", "=", "thread.id"),
 			).as("comments"),
 		])

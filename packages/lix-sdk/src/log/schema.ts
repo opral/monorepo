@@ -57,4 +57,4 @@ export const LixLogSchema = {
 LixLogSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (runtime/selectable type)
-export type Log = FromLixSchemaDefinition<typeof LixLogSchema>;
+export type LixLog = FromLixSchemaDefinition<typeof LixLogSchema>;

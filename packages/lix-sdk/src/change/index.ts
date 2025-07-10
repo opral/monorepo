@@ -1,1 +1,4 @@
-export { type Change, type NewChange } from "./schema.js";
+export {
+	type LixChange as Change,
+	type NewLixChange as NewChange,
+} from "./schema.js";

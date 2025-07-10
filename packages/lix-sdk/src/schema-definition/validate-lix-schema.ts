@@ -13,12 +13,12 @@ const _validateLixSchemaDefinition = ajv.compile(LixSchemaDefinition);
 /**
  * Validates that a schema conforms to the LixSchemaDefinition format
  * and then validates data against that schema.
- * 
+ *
  * @param schema - The Lix schema definition to validate against
  * @param data - The data to validate
  * @returns true if both the schema and data are valid
  * @throws Error with validation details if either validation fails
- * 
+ *
  * @example
  * ```typescript
  * const userSchema = {
@@ -32,13 +32,13 @@ const _validateLixSchemaDefinition = ajv.compile(LixSchemaDefinition);
  *   },
  *   required: ["id", "name"]
  * } as const satisfies LixSchemaDefinition;
- * 
+ *
  * const userData = {
  *   id: "123",
  *   name: "John Doe",
  *   age: 30
  * };
- * 
+ *
  * try {
  *   validateLixSchema(userSchema, userData); // returns true
  * } catch (error) {
@@ -46,10 +46,7 @@ const _validateLixSchemaDefinition = ajv.compile(LixSchemaDefinition);
  * }
  * ```
  */
-export function validateLixSchema(
-	schema: unknown,
-	data: unknown
-): boolean {
+export function validateLixSchema(schema: unknown, data: unknown): boolean {
 	// First validate that the schema itself is valid
 	const schemaValid = _validateLixSchemaDefinition(schema);
 	if (!schemaValid) {
@@ -73,22 +70,22 @@ export function validateLixSchema(
 /**
  * Validates only the Lix schema definition format.
  * Use this when you only need to check if a schema is valid.
- * 
+ *
  * @param schema - The schema to validate
  * @returns true if the schema is valid
  * @throws Error with validation details if validation fails
- * 
+ *
  * @example
  * ```typescript
  * const schema = {
- *   "x-lix-key": "product", 
+ *   "x-lix-key": "product",
  *   "x-lix-version": "1.0",
  *   type: "object",
  *   properties: {
  *     id: { type: "string" }
  *   }
  * };
- * 
+ *
  * try {
  *   validateLixSchemaDefinition(schema); // returns true
  * } catch (error) {
@@ -105,4 +102,3 @@ export function validateLixSchemaDefinition(schema: unknown): boolean {
 	}
 	return valid;
 }
-

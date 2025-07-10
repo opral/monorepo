@@ -21,8 +21,13 @@ export default function NewProposal() {
 	const [mainVersion] = useQuery(selectMainVersion);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",
+		{ versionId: "global", untracked: true },
 	);
-	const [, setActiveTab] = useKeyValue("activeTab");
+
+	const [, setActiveTab] = useKeyValue("activeTab", {
+		versionId: "global",
+		untracked: true,
+	});
 
 	// Create a ref for the discussion component to access its methods
 	const changeSetRef = useRef<ChangeSetHandle>(null);

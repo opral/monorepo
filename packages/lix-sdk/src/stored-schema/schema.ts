@@ -59,7 +59,7 @@ export const LixStoredSchemaSchema = {
 
 LixStoredSchemaSchema satisfies LixSchemaDefinition;
 
-export type StoredSchema = FromLixSchemaDefinition<
+export type LixStoredSchema = FromLixSchemaDefinition<
 	typeof LixStoredSchemaSchema
 > & {
 	// override the value to any to allow any JSON type (instead of unknown which is annoying)

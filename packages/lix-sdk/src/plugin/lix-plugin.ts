@@ -1,4 +1,4 @@
-import type { Change } from "../change/schema.js";
+import type { LixChange } from "../change/schema.js";
 import type { LixFile } from "../file/schema.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
@@ -44,7 +44,7 @@ export type LixPlugin = {
 		 * has been deleted and should be restored at a later point.
 		 */
 		file: Omit<LixFile, "data"> & { data?: Uint8Array };
-		changes: Array<Change>;
+		changes: Array<LixChange>;
 	}) => { fileData: Uint8Array };
 	/**
 	 * UI components that are used to render the diff view.
@@ -115,7 +115,7 @@ export type DetectedChange<T = any> = {
 
 export type UiDiffComponentProps = {
 	diffs: Array<
-		Pick<Change, "entity_id" | "plugin_key" | "schema_key"> & {
+		Pick<LixChange, "entity_id" | "plugin_key" | "schema_key"> & {
 			snapshot_content_before: Record<string, any> | null;
 			snapshot_content_after: Record<string, any> | null;
 		}

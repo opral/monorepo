@@ -17,7 +17,9 @@ test("JSONPropertySchema throws when property is missing", () => {
 		value: "some value",
 	};
 
-	expect(() => validateLixSchema(JSONPropertySchema, invalidData)).toThrow("Data validation failed");
+	expect(() => validateLixSchema(JSONPropertySchema, invalidData)).toThrow(
+		"Data validation failed",
+	);
 });
 
 test("JSONPropertySchema throws when value is missing", () => {
@@ -25,7 +27,9 @@ test("JSONPropertySchema throws when value is missing", () => {
 		property: "user.email",
 	};
 
-	expect(() => validateLixSchema(JSONPropertySchema, invalidData)).toThrow("Data validation failed");
+	expect(() => validateLixSchema(JSONPropertySchema, invalidData)).toThrow(
+		"Data validation failed",
+	);
 });
 
 test("JSONPropertySchema accepts any valid JSON type as value", () => {
@@ -43,9 +47,18 @@ test("JSONPropertySchema accepts any valid JSON type as value", () => {
 		// Object value
 		{ property: "settings", value: { theme: "dark", notifications: true } },
 		// Nested array
-		{ property: "matrix", value: [[1, 2], [3, 4]] },
+		{
+			property: "matrix",
+			value: [
+				[1, 2],
+				[3, 4],
+			],
+		},
 		// Nested object
-		{ property: "user", value: { name: "Bob", address: { city: "NYC", zip: "10001" } } },
+		{
+			property: "user",
+			value: { name: "Bob", address: { city: "NYC", zip: "10001" } },
+		},
 	];
 
 	testCases.forEach((testData) => {
@@ -61,7 +74,9 @@ test("JSONPropertySchema throws when additionalProperties are provided", () => {
 		extraField: "should not be allowed",
 	};
 
-	expect(() => validateLixSchema(JSONPropertySchema, invalidData)).toThrow("Data validation failed");
+	expect(() => validateLixSchema(JSONPropertySchema, invalidData)).toThrow(
+		"Data validation failed",
+	);
 });
 
 test("JSONPropertySchema throws when property is not a string", () => {
@@ -74,7 +89,9 @@ test("JSONPropertySchema throws when property is not a string", () => {
 	];
 
 	testCases.forEach((invalidData) => {
-		expect(() => validateLixSchema(JSONPropertySchema, invalidData)).toThrow("Data validation failed");
+		expect(() => validateLixSchema(JSONPropertySchema, invalidData)).toThrow(
+			"Data validation failed",
+		);
 	});
 });
 
@@ -120,6 +137,8 @@ test("JSONPropertySchema accepts complex nested JSON structures", () => {
 		},
 	};
 
-	expect(() => validateLixSchema(JSONPropertySchema, complexData)).not.toThrow();
+	expect(() =>
+		validateLixSchema(JSONPropertySchema, complexData),
+	).not.toThrow();
 	expect(validateLixSchema(JSONPropertySchema, complexData)).toBe(true);
 });

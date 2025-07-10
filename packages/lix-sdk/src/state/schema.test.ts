@@ -1070,6 +1070,122 @@ test("state and state_all views expose change_id for blame and diff functionalit
 	});
 });
 
+test("state and state_all views expose change_set_id for history queries", async () => {
+	const lix = await openLix({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	// Insert initial state using Kysely to ensure virtual table is triggered
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "change-set-id-test-entity",
+			schema_key: "mock_schema",
+			file_id: "change-set-id-test-file",
+			plugin_key: "change-set-id-test-plugin",
+			snapshot_content: { value: "initial value" },
+			schema_version: "1.0",
+			version_id: sql`(SELECT version_id FROM active_version)`,
+		})
+		.execute();
+
+	const activeVersionAfterInsert = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Query state_all view to verify change_set_id is exposed
+	const stateAllResult = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "change-set-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.selectAll()
+		.execute();
+
+	expect(stateAllResult).toHaveLength(1);
+	expect(stateAllResult[0]).toHaveProperty("change_set_id");
+	expect(stateAllResult[0]?.change_set_id).toBe(
+		activeVersionAfterInsert.change_set_id
+	);
+
+	// Query state view (filtered by active version) to verify change_set_id is exposed
+	const stateResult = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "change-set-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.selectAll()
+		.execute();
+
+	expect(stateResult).toHaveLength(1);
+	expect(stateResult[0]?.change_set_id).toBeDefined();
+	expect(stateResult[0]?.change_set_id).toBe(
+		activeVersionAfterInsert.change_set_id
+	);
+
+	// Verify that change_set_id matches between state and state_all views
+	expect(stateResult[0]?.change_set_id).toBe(stateAllResult[0]?.change_set_id);
+
+	// Get the change_set_element records - there should be two:
+	// 1. One in the working change set
+	// 2. One in the version's current change set (after commit)
+	const changeSetElements = await lix.db
+		.selectFrom("change_set_element")
+		.where("entity_id", "=", "change-set-id-test-entity")
+		.where("schema_key", "=", "mock_schema")
+		.where("file_id", "=", "change-set-id-test-file")
+		.select(["change_set_id", "change_id"])
+		.execute();
+
+	expect(changeSetElements).toHaveLength(2);
+
+	// Get the version to understand which change sets we're dealing with
+	const version = await lix.db
+		.selectFrom("version")
+		.where("id", "=", activeVersionAfterInsert.id)
+		.select(["id", "change_set_id", "working_change_set_id"])
+		.executeTakeFirstOrThrow();
+
+	// Find which change_set_element is in the version's change set (not working)
+	const versionChangeSetElement = changeSetElements.find(
+		(el) => el.change_set_id === version.change_set_id
+	);
+	const workingChangeSetElement = changeSetElements.find(
+		(el) => el.change_set_id === version.working_change_set_id
+	);
+
+	expect(versionChangeSetElement).toBeDefined();
+	expect(workingChangeSetElement).toBeDefined();
+
+	// The state view should show the change_set_id from the version's change set graph,
+	// not the working change set (which is temporary and not part of the graph)
+	expect(stateResult[0]?.change_set_id).toBe(
+		versionChangeSetElement!.change_set_id
+	);
+	expect(stateAllResult[0]?.change_set_id).toBe(
+		versionChangeSetElement!.change_set_id
+	);
+
+	// Verify that the change_id also matches for consistency
+	expect(stateResult[0]?.change_id).toBe(versionChangeSetElement!.change_id);
+	expect(stateAllResult[0]?.change_id).toBe(versionChangeSetElement!.change_id);
+});
+
 // Important to note that only a full cache clear (like during schema changes) triggers
 // a cache miss and repopulation from the CTE at the moment!
 //
@@ -2413,4 +2529,408 @@ test("untracked state overrides inherited state (untracked > inherited)", async 
 
 	// Should only have the original change from global version, not the untracked one
 	expect(changes).toHaveLength(1);
+});
+
+test("untracked state inheritance", async () => {
+	const lix = await openLix({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema_all")
+		.values({ value: mockSchema, lixcol_version_id: "global" })
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "active_version.version_id", "version.id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// inserting into the global version
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			file_id: "test-file",
+			schema_key: "mock_schema",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			entity_id: "test_key",
+			snapshot_content: {
+				value: "test_value",
+			},
+			version_id: "global",
+			untracked: true,
+		})
+		.execute();
+
+	const globalState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "test_key")
+		.where("version_id", "=", "global")
+		.select("snapshot_content")
+		.executeTakeFirstOrThrow();
+
+	expect(globalState).toBeDefined();
+
+	const versionState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "test_key")
+		.where("version_id", "=", activeVersion.id)
+		.select("snapshot_content")
+		.executeTakeFirstOrThrow();
+
+	expect(versionState).toBeDefined();
+	expect(versionState).toEqual(globalState);
+});
+
+test("tracked state in child overrides inherited untracked state", async () => {
+	const lix = await openLix({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema") // Use stored_schema, not stored_schema_all
+		.values({ value: mockSchema })
+		.execute();
+
+	const childVersion = await createVersion({ lix, name: "child" });
+
+	// 1. Insert untracked state in global version
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "override_test",
+			file_id: "f1",
+			schema_key: "mock_schema",
+			plugin_key: "p1",
+			schema_version: "1.0",
+			snapshot_content: { value: "global untracked" },
+			version_id: "global",
+			untracked: true,
+		})
+		.execute();
+
+	// 2. Verify child inherits untracked state
+	const inheritedState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "override_test")
+		.where("version_id", "=", childVersion.id)
+		.selectAll()
+		.execute();
+
+	expect(inheritedState).toHaveLength(1);
+	expect(inheritedState[0]?.snapshot_content).toEqual({
+		value: "global untracked",
+	});
+	expect(inheritedState[0]?.untracked).toBe(1);
+
+	// 3. Insert tracked state in child version for same entity
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "override_test",
+			file_id: "f1",
+			schema_key: "mock_schema",
+			plugin_key: "p1",
+			schema_version: "1.0",
+			snapshot_content: { value: "child tracked" },
+			version_id: childVersion.id,
+			untracked: false, // Important: this is tracked state
+		})
+		.execute();
+
+	// 4. Verify child now sees tracked state, not inherited untracked
+	const finalState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "override_test")
+		.where("version_id", "=", childVersion.id)
+		.selectAll()
+		.execute();
+
+	expect(finalState).toHaveLength(1);
+	expect(finalState[0]?.snapshot_content).toEqual({ value: "child tracked" });
+	expect(finalState[0]?.untracked).toBe(0); // Should be tracked
+});
+
+test("untracked state in child overrides inherited untracked state", async () => {
+	const lix = await openLix({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema") // Use stored_schema
+		.values({ value: mockSchema })
+		.execute();
+
+	const childVersion = await createVersion({ lix, name: "child" });
+
+	// 1. Insert untracked state in global version
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "untracked_override_test",
+			file_id: "f1",
+			schema_key: "mock_schema",
+			plugin_key: "p1",
+			schema_version: "1.0",
+			snapshot_content: { value: "global untracked" },
+			version_id: "global",
+			untracked: true,
+		})
+		.execute();
+
+	// 2. Verify child inherits untracked state
+	const inheritedState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "untracked_override_test")
+		.where("version_id", "=", childVersion.id)
+		.selectAll()
+		.execute();
+
+	expect(inheritedState).toHaveLength(1);
+	expect(inheritedState[0]?.snapshot_content).toEqual({
+		value: "global untracked",
+	});
+	expect(inheritedState[0]?.untracked).toBe(1);
+
+	// 3. Insert untracked state in child version for same entity
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "untracked_override_test",
+			file_id: "f1",
+			schema_key: "mock_schema",
+			plugin_key: "p1",
+			schema_version: "1.0",
+			snapshot_content: { value: "child untracked" },
+			version_id: childVersion.id,
+			untracked: true,
+		})
+		.execute();
+
+	// 4. Verify child now sees its own untracked state
+	const finalState = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "untracked_override_test")
+		.where("version_id", "=", childVersion.id)
+		.selectAll()
+		.execute();
+
+	expect(finalState).toHaveLength(1);
+	expect(finalState[0]?.snapshot_content).toEqual({ value: "child untracked" });
+	expect(finalState[0]?.untracked).toBe(1);
+});
+
+test("untracked state has untracked change_id for both inherited and non-inherited entities", async () => {
+	const lix = await openLix({});
+
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	const childVersion = await createVersion({ lix, name: "child" });
+
+	// 1. Insert untracked state in global version (will be inherited by child)
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "inherited-entity",
+			file_id: "test-file",
+			schema_key: "mock_schema",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			snapshot_content: { value: "global untracked" },
+			version_id: "global",
+			untracked: true,
+		})
+		.execute();
+
+	// 2. Insert untracked state directly in child version (non-inherited)
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "non-inherited-entity",
+			file_id: "test-file",
+			schema_key: "mock_schema",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			snapshot_content: { value: "child untracked" },
+			version_id: childVersion.id,
+			untracked: true,
+		})
+		.execute();
+
+	// 3. Query all untracked entities in child version
+	const untrackedEntities = await lix.db
+		.selectFrom("state_all")
+		.where("version_id", "=", childVersion.id)
+		.where("entity_id", "in", ["inherited-entity", "non-inherited-entity"])
+		.where("untracked", "=", true)
+		.selectAll()
+		.execute();
+
+	expect(untrackedEntities).toHaveLength(2);
+
+	// 4. Check that both entities have untracked change_id
+	for (const entity of untrackedEntities) {
+		expect(entity.change_id).toBe("untracked");
+	}
+
+	// 5. Verify specific entities
+	const inheritedEntity = untrackedEntities.find(
+		(e) => e.entity_id === "inherited-entity"
+	);
+	const nonInheritedEntity = untrackedEntities.find(
+		(e) => e.entity_id === "non-inherited-entity"
+	);
+
+	expect(inheritedEntity).toBeDefined();
+	expect(nonInheritedEntity).toBeDefined();
+
+	// Both inherited and non-inherited untracked entities should have change_id = "untracked"
+	expect(inheritedEntity?.change_id).toBe("untracked");
+	expect(nonInheritedEntity?.change_id).toBe("untracked");
+});
+
+test("state version_id defaults active version", async () => {
+	const mockSchema: LixSchemaDefinition = {
+		"x-lix-key": "mock_schema",
+		"x-lix-version": "1.0",
+		type: "object",
+		additionalProperties: false,
+		properties: {
+			value: {
+				type: "string",
+			},
+		},
+	};
+
+	const lix = await openLix({});
+
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockSchema })
+		.execute();
+
+	// Get the active version ID to verify it gets auto-filled
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Insert into state view without specifying version_id
+	// This should auto-fill with the active version
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "entity0",
+			file_id: "f0",
+			schema_key: "mock_schema",
+			plugin_key: "lix_own_entity",
+			schema_version: "1.0",
+			snapshot_content: { value: "initial content" },
+		})
+		.execute();
+
+	// Verify the entity was inserted with the correct version_id
+	const insertedEntity = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "entity0")
+		.selectAll()
+		.execute();
+
+	expect(insertedEntity).toHaveLength(1);
+	expect(insertedEntity[0]).toMatchObject({
+		entity_id: "entity0",
+		file_id: "f0",
+		schema_key: "mock_schema",
+		plugin_key: "lix_own_entity",
+		schema_version: "1.0",
+		snapshot_content: { value: "initial content" },
+	});
+
+	// Verify the version_id was auto-filled with the active version
+	const entityInStateAll = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "entity0")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	expect(entityInStateAll.version_id).toBe(activeVersion.version_id);
+
+	// Test update operation
+	await lix.db
+		.updateTable("state")
+		.where("entity_id", "=", "entity0")
+		.set({
+			snapshot_content: { value: "updated content" },
+		})
+		.execute();
+
+	// Verify update worked
+	const updatedEntity = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "entity0")
+		.selectAll()
+		.execute();
+
+	expect(updatedEntity[0]?.snapshot_content).toEqual({
+		value: "updated content",
+	});
+
+	// Test delete operation
+	await lix.db.deleteFrom("state").where("entity_id", "=", "entity0").execute();
+
+	// Verify delete worked
+	const deletedEntity = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "entity0")
+		.selectAll()
+		.execute();
+
+	expect(deletedEntity).toHaveLength(0);
 });

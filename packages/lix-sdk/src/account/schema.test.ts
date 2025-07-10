@@ -22,6 +22,7 @@ test("insert, update, delete on the account view", async () => {
 	const viewAfterInsert = await lix.db
 		.selectFrom("account")
 		.select(["id", "name"])
+		.where("id", "in", ["account0", "account1"])
 		.orderBy("id")
 		.execute();
 
@@ -47,6 +48,7 @@ test("insert, update, delete on the account view", async () => {
 	const viewAfterUpdate = await lix.db
 		.selectFrom("account")
 		.orderBy("id")
+		.where("id", "in", ["account0", "account1"])
 		.select(["id", "name"])
 		.execute();
 
@@ -66,6 +68,7 @@ test("insert, update, delete on the account view", async () => {
 	const viewAfterDelete = await lix.db
 		.selectFrom("account")
 		.orderBy("id")
+		.where("id", "in", ["account0", "account1"])
 		.select(["id", "name"])
 		.execute();
 
@@ -134,12 +137,14 @@ test("account operations are version specific and isolated", async () => {
 	const accountsInVersionA = await lix.db
 		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionA.id)
+		.where("id", "in", ["accountA", "accountB"])
 		.selectAll()
 		.execute();
 
 	const accountsInVersionB = await lix.db
 		.selectFrom("account_all")
 		.where("lixcol_version_id", "=", versionB.id)
+		.where("id", "in", ["accountA", "accountB"])
 		.selectAll()
 		.execute();
 
@@ -184,12 +189,14 @@ test("account operations are version specific and isolated", async () => {
 	// Verify deletion only affected version A
 	const remainingAccountsA = await lix.db
 		.selectFrom("account_all")
+		.where("id", "in", ["accountA", "accountB"])
 		.where("lixcol_version_id", "=", versionA.id)
 		.selectAll()
 		.execute();
 
 	const remainingAccountsB = await lix.db
 		.selectFrom("account_all")
+		.where("id", "in", ["accountA", "accountB"])
 		.where("lixcol_version_id", "=", versionB.id)
 		.selectAll()
 		.execute();

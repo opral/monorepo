@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
-import type { ChangeSet } from "../change-set/schema.js";
+import type { LixChangeSet } from "../change-set/schema.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
 
 test("should create a version linked to the provided change_set_id", async () => {
@@ -77,8 +77,8 @@ test("should work within an existing transaction", async () => {
 
 test("should fail if the 'from' change_set_id does not exist", async () => {
 	const lix = await openLix({});
-	const nonExistentChangeSet: Pick<ChangeSet, "id"> = {
-		id: "hello world" as ChangeSet["id"], // ID that won't exist
+	const nonExistentChangeSet: Pick<LixChangeSet, "id"> = {
+		id: "hello world" as LixChangeSet["id"], // ID that won't exist
 	};
 
 	await expect(

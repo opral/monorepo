@@ -11,80 +11,100 @@ Lix provides history APIs built on automatically captured changes in state. This
 
 ### Get history for a specific file
 
-This query retrieves all historical records for a file with a given ID, ordered from newest to oldest. This shows every change made to the file across all versions.
+To query the history of a file, you need to specify which change set you want to view the history from. The `lixcol_root_change_set_id` field is used to filter the results to a specific point in the change set graph.
 
 ```ts
+// Get the current change set from the active version
+const activeVersion = await lix.db
+  .selectFrom("active_version")
+  .innerJoin("version", "active_version.version_id", "version.id")
+  .select("version.change_set_id")
+  .executeTakeFirstOrThrow();
+
+// Query file history from the current change set
 const fileHistory = await lix.db
   .selectFrom("file_history")
-  .where("file_id", "=", "README.md")
-  .orderBy("lixcol_created_at", "desc")
+  .where("path", "=", "/README.md")
+  .where("lixcol_root_change_set_id", "=", activeVersion.change_set_id)
+  .orderBy("lixcol_depth", "asc")
   .execute();
 
 console.log(fileHistory);
 ```
 
-The query returns an array of `file_history` objects, each representing a snapshot of the file at a point in time:
+The query returns an array of `file_history` objects, each representing a snapshot of the file at different points in history:
 
 ```json
 [
   {
-    "id": "file-history-id-3",
-    "file_id": "README.md",
-    "snapshot_content": "# Updated README",
-    "lixcol_created_at": "2024-07-02T12:00:00Z",
-    "lixcol_change_set_id": "change-set-id-3"
+    "id": "file-id",
+    "path": "/README.md",
+    "data": "# Updated README",
+    "lixcol_change_set_id": "change-set-id-3",
+    "lixcol_root_change_set_id": "change-set-id-3",
+    "lixcol_depth": 0
   },
   {
-    "id": "file-history-id-2",
-    "file_id": "README.md",
-    "snapshot_content": "# Initial README",
-    "lixcol_created_at": "2024-07-01T10:00:00Z",
-    "lixcol_change_set_id": "change-set-id-2"
+    "id": "file-id",
+    "path": "/README.md",
+    "data": "# Initial README",
+    "lixcol_change_set_id": "change-set-id-1",
+    "lixcol_root_change_set_id": "change-set-id-3",
+    "lixcol_depth": 2
   }
 ]
 ```
+
+Note that:
+- `lixcol_change_set_id` shows where each state was actually created
+- `lixcol_root_change_set_id` shows the change set you queried from (same for all results)
+- `lixcol_depth` indicates how far back in history each state is (0 = current, higher = older)
 
 ### Get history for a specific entity
 
 You can also query the history of a single entity, like a paragraph in a Markdown file or a row in a CSV. This is useful for building features like comment threads or fine-grained audit trails.
 
 ```ts
+// Get the current change set from the active version
+const activeVersion = await lix.db
+  .selectFrom("active_version")
+  .innerJoin("version", "active_version.version_id", "version.id")
+  .select("version.change_set_id")
+  .executeTakeFirstOrThrow();
+
+// Query entity history from the current change set
 const entityHistory = await lix.db
   .selectFrom("state_history")
   .where("entity_id", "=", "para_123")
-  .orderBy("lixcol_created_at", "desc")
+  .where("root_change_set_id", "=", activeVersion.change_set_id)
+  .orderBy("depth", "asc")
   .execute();
 ```
 
 ### Get history for a file within a specific version
 
-To get the history of a file for a specific version, you first need to identify the change sets that make up that version's lineage. The example below shows a simplified way to do this.
+To get the history of a file for a specific version, you simply query using that version's change set ID as the root. The history view will automatically traverse the change set graph to show all historical states.
 
 ```ts
-// This example assumes `version_change_set_id` is the ID of the latest
-// change set for the version you are interested in.
+// Get a specific version's change set
+const version = await lix.db
+  .selectFrom("version")
+  .where("name", "=", "feature-branch")
+  .select("change_set_id")
+  .executeTakeFirstOrThrow();
 
-// 1. Get the lineage of change sets for the desired version.
-const lineage = await lix.db
-  .selectFrom("change_sets")
-  .where("id", "=", version_change_set_id)
-  .selectLineage() // Custom Kysely utility for traversing history
-  .execute();
-
-const lineageChangeSetIds = lineage.map((cs) => cs.id);
-
-// 2. Filter the file history using the version's change set IDs.
+// Query file history from that version's perspective
 const versionFileHistory = await lix.db
   .selectFrom("file_history")
-  .where("file_id", "=", "config.json")
-  .where("lixcol_change_set_id", "in", lineageChangeSetIds)
-  .orderBy("lixcol_created_at", "desc")
+  .where("path", "=", "/config.json")
+  .where("lixcol_root_change_set_id", "=", version.change_set_id)
+  .orderBy("lixcol_depth", "asc")
   .execute();
 
 console.log(versionFileHistory);
 ```
 
-This returns only the history for `config.json` that occurred within the specified version's lineage.
+This returns the complete history of `/config.json` as seen from the specified version, with each entry showing its original change set ID and depth from the queried version.
 
 ## Data Model
 
@@ -107,20 +127,39 @@ graph RL
 Querying the history at change set CS3 entails traversing the graph backward from that point:
 
 ```ts
-// Query to get the state of config.json up to change set CS3
+// Query to get the history of config.json from change set CS3's perspective
 const fileHistory = await lix.db.selectFrom("file_history")
-  .where("file_id", "=", "config.json")
-  .where("lixcol_change_set_id", "=", "cs3")
-  .select("data")
+  .where("path", "=", "/config.json")
+  .where("lixcol_root_change_set_id", "=", "CS3")
+  .orderBy("lixcol_depth", "asc")
   .execute();
 
 console.log(fileHistory);
 // Output:
 [
-  { "data": { "setting": "C" } },
-  { "data": { "setting": "B" } },
-  { "data": { "setting": "A" } }
+  { 
+    "data": { "setting": "C" },
+    "lixcol_change_set_id": "CS3",
+    "lixcol_root_change_set_id": "CS3",
+    "lixcol_depth": 0
+  },
+  { 
+    "data": { "setting": "B" },
+    "lixcol_change_set_id": "CS2", 
+    "lixcol_root_change_set_id": "CS3",
+    "lixcol_depth": 1
+  },
+  { 
+    "data": { "setting": "A" },
+    "lixcol_change_set_id": "CS1",
+    "lixcol_root_change_set_id": "CS3", 
+    "lixcol_depth": 2
+  }
 ]
 ```
 
-Notice that CS4 is not included because it comes after CS3 in the graph.
+Notice that:
+- CS4 is not included because it comes after CS3 in the graph
+- Each entry shows its original `lixcol_change_set_id` (where it was created)
+- All entries have the same `lixcol_root_change_set_id` (CS3, the query root)
+- The `lixcol_depth` increases as we go further back in history

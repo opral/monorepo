@@ -1,84 +1,74 @@
 import { useEffect, useState } from "react";
 import { Node, DOMSerializer } from "prosemirror-model";
 import { schema } from "../prosemirror/schema";
-import { renderUniversalDiff } from "@lix-js/universal-diff";
-import "@lix-js/universal-diff/default.css";
+import { renderHtmlDiff } from "@lix-js/html-diff";
+import "@lix-js/html-diff/default.css";
 import { useKeyValue } from "../hooks/useKeyValue";
-import { useLix, useSuspenseQueryTakeFirstOrThrow } from "@lix-js/react-utils";
+import { useLix, useQueryTakeFirstOrThrow } from "@lix-js/react-utils";
 import { selectFileId } from "../queries";
 
 export function DiffView() {
 	const [diffView] = useKeyValue<{
 		beforeCsId?: string;
 		afterCsId?: string;
-	} | null>("diffView");
+	}>("diffView", { versionId: "global", untracked: true });
 	const lix = useLix();
-	const fileId = useSuspenseQueryTakeFirstOrThrow(selectFileId);
+	const fileId = useQueryTakeFirstOrThrow(selectFileId);
 	const [diffHtml, setDiffHtml] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const fetchDocuments = async () => {
+		if (!diffView?.beforeCsId || !diffView?.afterCsId) {
+			setError("No before or after diff is available.");
+			setLoading(false);
+			return;
+		}
+
+		setError(null);
+
+		const renderDiff = async () => {
+			setLoading(true);
 			try {
-				if (!diffView) {
-					return;
-				}
+				const [before, after] = await Promise.all([
+					lix.db
+						.selectFrom("file_history")
+						.where("lixcol_root_change_set_id", "=", diffView.beforeCsId)
+						.where("id", "=", fileId.id)
+						.where("lixcol_depth", "=", 0)
+						.selectAll()
+						.executeTakeFirst(),
+					lix.db
+						.selectFrom("file_history")
+						.where("lixcol_root_change_set_id", "=", diffView.afterCsId)
+						.where("id", "=", fileId.id)
+						.where("lixcol_depth", "=", 0)
+						.selectAll()
+						.executeTakeFirst(),
+				]);
 
-				setLoading(true);
-				setError(null);
-				setDiffHtml(null);
-
-				const { beforeCsId, afterCsId } = diffView;
-
-				const before = await lix.db
-					.selectFrom("file_history")
-					.where("lixcol_change_set_id", "=", beforeCsId)
-					.where("id", "=", fileId.id)
-					.where("lixcol_depth", "=", 0)
-					.selectAll()
-					.executeTakeFirst();
-
-				const after = await lix.db
-					.selectFrom("file_history")
-					.where("lixcol_change_set_id", "=", afterCsId)
-					.where("id", "=", fileId.id)
-					.where("lixcol_depth", "=", 0)
-					.selectAll()
-					.executeTakeFirst();
-
-				const diffHtml = renderUniversalDiff({
+				const diffHtml = renderHtmlDiff({
 					beforeHtml: renderDocToHtml(before) ?? "",
 					afterHtml: renderDocToHtml(after) ?? "",
 				});
-
 				setDiffHtml(diffHtml);
-			} catch (err) {
-				console.error("Error loading or processing diff documents:", err);
-				setError(
-					`Failed to load/process documents: ${err instanceof Error ? err.message : "Unknown error"}`,
-				);
+			} catch (error) {
+				console.error("Error rendering diff:", error);
+				setDiffHtml(null);
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		fetchDocuments();
-	}, [diffView]);
-
-	console.log("Rendering DiffView", {
-		diffView,
-		diffHtml,
-		loading,
-		error,
-	});
+		renderDiff();
+	}, [diffView?.beforeCsId, diffView?.afterCsId, lix, fileId.id]);
 
 	if (loading) {
 		return <div className="diff-loading">Loading diff view...</div>;
 	}
 
 	if (error) {
-		return <div className="diff-error">Error: {error}</div>;
+		return <div className="diff-error">{error}</div>;
 	}
 
 	if (!diffHtml) {

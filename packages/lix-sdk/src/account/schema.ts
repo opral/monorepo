@@ -1,4 +1,3 @@
-import type { Selectable } from "kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
@@ -21,16 +20,67 @@ export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 		},
 	});
 
-	// Create session-specific temp table
+	// Create active_account as an entity view (similar to active_version)
+	// entity_id is the account id to support multiple active accounts
 	sqlite.exec(`
-		-- current account(s)
-		-- temp table because current accounts are session
-		-- specific and should not be persisted
-		CREATE TEMP TABLE IF NOT EXISTS active_account (
-			id TEXT PRIMARY KEY,
-			name TEXT NOT NULL
-			-- can't use foreign keys in temp tables... :(
-		) STRICT;
+		CREATE VIEW IF NOT EXISTS active_account AS
+		SELECT
+			entity_id AS id,
+			json_extract(snapshot_content, '$.name') AS name,
+			inherited_from_version_id AS lixcol_inherited_from_version_id,
+			created_at AS lixcol_created_at,
+			updated_at AS lixcol_updated_at,
+			file_id AS lixcol_file_id,
+			change_id AS lixcol_change_id,
+			untracked AS lixcol_untracked
+		FROM state_all
+		WHERE schema_key = 'lix_active_account' AND version_id = 'global';
+
+		CREATE TRIGGER IF NOT EXISTS active_account_insert
+		INSTEAD OF INSERT ON active_account
+		BEGIN
+			INSERT OR REPLACE INTO state_all (
+				entity_id,
+				schema_key,
+				file_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				version_id,
+				untracked
+			) VALUES (
+				NEW.id,
+				'lix_active_account',
+				'lix',
+				'lix_own_entity',
+				json_object('name', NEW.name),
+				'1.0',
+				'global',
+				1
+			);
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS active_account_update
+		INSTEAD OF UPDATE ON active_account
+		BEGIN
+			UPDATE state_all
+			SET
+				snapshot_content = json_object('name', NEW.name),
+				untracked = 1
+			WHERE
+				entity_id = OLD.id
+				AND schema_key = 'lix_active_account'
+				AND version_id = 'global';
+		END;
+
+		CREATE TRIGGER IF NOT EXISTS active_account_delete
+		INSTEAD OF DELETE ON active_account
+		BEGIN
+			DELETE FROM state_all
+			WHERE entity_id = OLD.id
+			AND schema_key = 'lix_active_account'
+			AND version_id = 'global';
+		END;
 	`);
 
 	const anonymousAccountName = `Anonymous ${humanId({
@@ -43,10 +93,16 @@ export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 		// Human ID uses plural, remove the last character to make it singular
 		.slice(0, -1)}`;
 
-	// Insert default account
+	// Insert default active account only if none exists
 	sqlite.exec(`
 		-- default to a new account
-		INSERT INTO active_account (id, name) values (nano_id(), '${anonymousAccountName}');
+		INSERT INTO active_account (id, name)
+		SELECT nano_id(), '${anonymousAccountName}'
+		WHERE NOT EXISTS (
+			SELECT 1 FROM state_all
+			WHERE schema_key = 'lix_active_account'
+			AND version_id = 'global'
+		);
 	`);
 }
 
@@ -65,12 +121,7 @@ export const LixAccountSchema = {
 LixAccountSchema satisfies LixSchemaDefinition;
 
 // Pure business logic type (inferred from schema)
-export type Account = FromLixSchemaDefinition<typeof LixAccountSchema>;
+export type LixAccount = FromLixSchemaDefinition<typeof LixAccountSchema>;
 
-// Active account table type (temp table)
-export type ActiveAccountTable = {
-	id: string;
-	name: string;
-};
-
-export type ActiveAccount = Selectable<ActiveAccountTable>;
+// Active account type using State
+export type LixActiveAccount = LixAccount;

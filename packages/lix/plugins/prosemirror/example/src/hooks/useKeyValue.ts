@@ -12,12 +12,15 @@ import { Lix } from "@lix-js/sdk";
  * @param key - The unique key to store the value under
  * @returns A tuple of [value, setValue] similar to useState
  */
-export function useKeyValue<T>(key: string) {
+export function useKeyValue<T>(
+	key: string,
+	options: { versionId?: string; untracked?: boolean } = {},
+) {
 	const lix = useLix();
 	const result = useQueryTakeFirst((lix) => selectKeyValue(lix, key));
 
 	const setValue = async (newValue: T) => {
-		await upsertKeyValue(lix, key, newValue);
+		await upsertKeyValue(lix, key, newValue, options);
 	};
 
 	return [result?.value, setValue] as const;
@@ -33,32 +36,51 @@ function selectKeyValue(lix: Lix, key: string) {
 /**
  * Upserts a key-value pair into the Lix database.
  */
-async function upsertKeyValue(lix: Lix, key: string, value: any) {
+async function upsertKeyValue(
+	lix: Lix,
+	key: string,
+	value: any,
+	options: { versionId?: string; untracked?: boolean } = {},
+) {
 	// Use a transaction to ensure atomicity and handle race conditions
 	return await lix.db.transaction().execute(async (trx) => {
 		const existing = await trx
-			.selectFrom("key_value")
+			.selectFrom("key_value_all")
 			.where("key", "=", key)
+			.where(
+				"lixcol_version_id",
+				"=",
+				options.versionId ??
+					trx.selectFrom("active_version").select("version_id"),
+			)
 			.select(["key"])
 			.executeTakeFirst();
 
 		if (existing) {
 			await trx
-				.updateTable("key_value")
+				.updateTable("key_value_all")
 				.set({
 					value,
-					// skip change control as this is only UI state that
-					// should be persisted but not controlled
-					// skip_change_control: true,
+					lixcol_untracked: options.untracked,
 				})
+				.where(
+					"lixcol_version_id",
+					"=",
+					options.versionId ??
+						trx.selectFrom("active_version").select("version_id"),
+				)
 				.where("key", "=", key)
 				.execute();
 		} else {
 			await trx
-				.insertInto("key_value")
+				.insertInto("key_value_all")
 				.values({
 					key,
 					value,
+					lixcol_untracked: options.untracked,
+					lixcol_version_id:
+						options.versionId ??
+						trx.selectFrom("active_version").select("version_id"),
 				})
 				.execute();
 		}

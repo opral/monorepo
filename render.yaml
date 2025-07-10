@@ -281,3 +281,29 @@ services:
       - fromGroup: production
     domains:
       - docs.lix.dev
+
+  - name: prosemirror-example
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./packages/lix/plugins/prosemirror/example/dist
+    buildCommand: pnpm install && pnpm run --filter @lix-js/plugin-prosemirror-example... build
+    buildFilter:
+      paths:
+        - packages/lix/plugins/prosemirror/**
+    envVars:
+      - fromGroup: production
+
+  - name: lix-html-diff-docs
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./packages/lix/lix-html-diff/docs/.rspress/dist
+    buildCommand: pnpm install && pnpm run --filter @lix-js/html-diff... build:docs
+    buildFilter:
+      paths:
+        - packages/lix/lix-html-diff/**
+    envVars:
+      - fromGroup: production

@@ -3,12 +3,12 @@ import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
 import type { LixDatabaseSchema } from "../database/schema.js";
-import type { KeyValue } from "../key-value/schema.js";
+import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
 import type { NewState } from "../entity-views/types.js";
-import type { Account } from "../account/schema.js";
+import type { LixAccount } from "../account/schema.js";
 import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
@@ -68,11 +68,6 @@ export type Lix = {
  * the database is initialized with that data. If a database is provided,
  * uses that database directly.
  *
- * TODO: Add storage abstraction to support:
- *   - OPFS storage (persistent in browser)
- *   - Node.js filesystem storage
- *   - Custom storage adapters
- *
  * @example
  * ```ts
  * // In-memory (default)
@@ -81,9 +76,11 @@ export type Lix = {
  * // From existing data
  * const lix = await openLix({ blob: existingLixFile })
  *
- * // With custom database (current approach)
- * const db = await createInMemoryDatabase({ readOnly: false })
- * const lix = await openLix({ database: db })
+ * // With custom storage adapter
+ * import { MyCustomStorage } from "./my-custom-storage.js"
+ * const lix = await openLix({
+ *   storage: new MyCustomStorage()
+ * })
  * ```
  */
 export async function openLix(args: {
@@ -96,7 +93,7 @@ export async function openLix(args: {
 	 *   const account = localStorage.getItem("account")
 	 *   const lix = await openLix({ account })
 	 */
-	account?: Account;
+	account?: LixAccount;
 	/**
 	 * Lix file data to initialize the database with.
 	 */
@@ -127,9 +124,9 @@ export async function openLix(args: {
 	 * @example
 	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: NewState<KeyValue>[];
+	keyValues?: NewState<LixKeyValue>[];
 }): Promise<Lix> {
-	const storage = args.storage ?? new InMemoryStorage();
+	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
 	const database = await storage.open();
 
 	// Import blob data if provided
@@ -141,13 +138,6 @@ export async function openLix(args: {
 	const hooks = createHooks();
 
 	const db = initDb({ sqlite: database, hooks });
-
-	// Connect storage to state commit hooks if it supports it
-	if ("onStateCommit" in storage && storage.onStateCommit) {
-		hooks.onStateCommit(() => {
-			storage.onStateCommit!();
-		});
-	}
 
 	if (args.keyValues && args.keyValues.length > 0) {
 		for (const keyValue of args.keyValues) {
@@ -172,15 +162,15 @@ export async function openLix(args: {
 		}
 	}
 
-	if (args.account) {
+	// Check if storage has persisted state
+	const persistedState = await storage.getPersistedState?.();
+	const accountToSet = args.account ?? persistedState?.activeAccounts?.[0];
+
+	if (accountToSet) {
 		await db.transaction().execute(async (trx) => {
-			// delete the default inserted active account from `initDb`
+			// delete the existing active account
 			await trx.deleteFrom("active_account").execute();
-			await trx
-				.insertInto("active_account")
-				.values(args.account!)
-				.onConflict((oc) => oc.doUpdateSet(() => ({ ...args.account })))
-				.execute();
+			await trx.insertInto("active_account").values(accountToSet).execute();
 		});
 	}
 
@@ -193,10 +183,6 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 		getAllSync: () => plugins,
 	};
-
-	// await initFileQueueProcess({ lix: { db, plugin, sqlite: args.database } });
-
-	// await initSyncProcess({ lix: { db, plugin, sqlite: args.database } });
 
 	captureOpened({ db });
 
@@ -224,6 +210,11 @@ export async function openLix(args: {
 		enabled: true,
 		logSlowQueriesOnly: false,
 	});
+
+	// Connect storage to Lix if the adapter supports it
+	if (storage.connect) {
+		storage.connect({ lix });
+	}
 
 	return lix;
 }
