@@ -32,7 +32,7 @@ export default defineConfig({
       },
       {
         text: "Examples",
-        link: "/examples/rich-text-document/",
+        link: "/examples/simple-rich-text-document/",
       },
       {
         text: "Playground",
@@ -83,7 +83,16 @@ export default defineConfig({
       "/examples/": [
         {
           text: "Rich Text Document",
-          link: "/examples/rich-text-document/",
+          items: [
+            {
+              text: "Simple",
+              link: "/examples/simple-rich-text-document/",
+            },
+            {
+              text: "Complex",
+              link: "/examples/rich-text-document/",
+            },
+          ],
         },
         {
           text: "Table",

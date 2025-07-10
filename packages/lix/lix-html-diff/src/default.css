@@ -1,16 +1,21 @@
 .diff-created {
-  color: green;
+  color: #1f883d;
   text-decoration: none;
   outline: none;
 }
 .diff-updated {
-  color: orange;
+  color: #0969da;
   text-decoration: none;
   outline: none;
 }
 .diff-deleted {
-  color: red;
+  color: #d1242f;
   text-decoration: none;
   outline: none;
   /* contenteditable: false; */
+}
+
+/* Strikethrough only for word-level diffing */
+[data-diff-mode="words"] .diff-deleted {
+  text-decoration: line-through;
 }
