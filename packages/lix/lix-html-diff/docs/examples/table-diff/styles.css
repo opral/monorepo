@@ -1,0 +1,31 @@
+/* Table styling */
+.pricing-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.pricing-table th,
+.pricing-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+.pricing-table .row-header {
+  font-weight: bold;
+}
+
+/* Diff styling */
+.diff-created {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.diff-updated {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.diff-deleted {
+  background-color: #f8d7da;
+  color: #721c24;
+}

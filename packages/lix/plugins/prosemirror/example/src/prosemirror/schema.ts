@@ -1,31 +1,36 @@
 import { Node, Schema, DOMOutputSpec } from "prosemirror-model";
 
-// Helper function to add data-diff-id attribute
-function addDiffId(node: Node, spec: DOMOutputSpec): DOMOutputSpec {
-  if (node.attrs.id && Array.isArray(spec) && spec.length > 0) {
-    const tag = spec[0];
-    let attrs: { [key: string]: any } = {};
-    let content = spec.slice(2); // Default content starts from index 2
+// Helper function to add data-diff-key attribute
+function addDiffKey(node: Node, spec: DOMOutputSpec): DOMOutputSpec {
+	if (node.attrs.id && Array.isArray(spec) && spec.length > 0) {
+		const tag = spec[0];
+		let attrs: { [key: string]: any } = {};
+		let content = spec.slice(2); // Default content starts from index 2
 
-    if (spec.length > 1) {
-        const maybeAttrs = spec[1];
-        if (typeof maybeAttrs === 'object' && maybeAttrs !== null && !Array.isArray(maybeAttrs)) {
-            // It's an attribute object
-            attrs = { ...maybeAttrs };
-        } else {
-            // It's not an attribute object, must be the content hole (or part of content)
-            attrs = {}; // Start with empty attributes
-            content = spec.slice(1); // Correct content starts from index 1
-        }
-    }
+		if (spec.length > 1) {
+			const maybeAttrs = spec[1];
+			if (
+				typeof maybeAttrs === "object" &&
+				maybeAttrs !== null &&
+				!Array.isArray(maybeAttrs)
+			) {
+				// It's an attribute object
+				attrs = { ...maybeAttrs };
+			} else {
+				// It's not an attribute object, must be the content hole (or part of content)
+				attrs = {}; // Start with empty attributes
+				content = spec.slice(1); // Correct content starts from index 1
+			}
+		}
 
-    attrs["data-diff-id"] = node.attrs.id;
+		attrs["data-diff-key"] = node.attrs.id;
+		attrs["data-diff-mode"] = "words";
 
-    // Reconstruct the spec: tag, attributes object, then the rest of the content
-    return [tag, attrs, ...content];
-  }
-  // Return original spec if no id or spec is not an array we can modify
-  return spec;
+		// Reconstruct the spec: tag, attributes object, then the rest of the content
+		return [tag, attrs, ...content];
+	}
+	// Return original spec if no id or spec is not an array we can modify
+	return spec;
 }
 
 // Define schema that matches both before.json and after.json structures
@@ -47,7 +52,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["h1", 0]);
+				return addDiffKey(node, ["h1", 0]);
 			},
 		},
 		description: {
@@ -58,7 +63,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["div", { class: "description" }, 0]);
+				return addDiffKey(node, ["div", { class: "description" }, 0]);
 			},
 		},
 		inputs: {
@@ -70,7 +75,7 @@ export const schema = new Schema({
 				mode: { default: "inputs" },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["div", { class: "inputs" }, 0]);
+				return addDiffKey(node, ["div", { class: "inputs" }, 0]);
 			},
 		},
 		input: {
@@ -86,7 +91,7 @@ export const schema = new Schema({
 				fromTrigger: { default: false },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["div", { class: "input" }, 0]);
+				return addDiffKey(node, ["div", { class: "input" }, 0]);
 			},
 		},
 		horizontalRule: {
@@ -95,7 +100,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["hr"]);
+				return addDiffKey(node, ["hr"]);
 			},
 		},
 		paragraph: {
@@ -105,7 +110,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["p", 0]);
+				return addDiffKey(node, ["p", 0]);
 			},
 		},
 		bulletList: {
@@ -115,7 +120,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["ul", 0]);
+				return addDiffKey(node, ["ul", 0]);
 			},
 		},
 		listItem: {
@@ -124,7 +129,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["li", 0]);
+				return addDiffKey(node, ["li", 0]);
 			},
 		},
 		mention: {
@@ -139,7 +144,7 @@ export const schema = new Schema({
 				id: { default: null },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["span", { class: "mention" }, 0]);
+				return addDiffKey(node, ["span", { class: "mention" }, 0]);
 			},
 		},
 		generation: {
@@ -158,7 +163,7 @@ export const schema = new Schema({
 				responseModel: { default: "{}" },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["span", { class: "generation" }, 0]);
+				return addDiffKey(node, ["span", { class: "generation" }, 0]);
 			},
 		},
 		tool: {
@@ -173,7 +178,7 @@ export const schema = new Schema({
 				state: { default: null },
 			},
 			toDOM(node) {
-				return addDiffId(node, ["div", { class: "tool" }, 0]);
+				return addDiffKey(node, ["div", { class: "tool" }, 0]);
 			},
 		},
 		text: {

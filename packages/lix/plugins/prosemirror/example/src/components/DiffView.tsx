@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Node, DOMSerializer } from "prosemirror-model";
 import { schema } from "../prosemirror/schema";
-import { renderUniversalDiff } from "@lix-js/universal-diff";
-import "@lix-js/universal-diff/default.css";
+import { renderHtmlDiff } from "@lix-js/html-diff";
+import "@lix-js/html-diff/default.css";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { useLix, useQueryTakeFirstOrThrow } from "@lix-js/react-utils";
 import { selectFileId } from "../queries";
@@ -47,7 +47,7 @@ export function DiffView() {
 						.executeTakeFirst(),
 				]);
 
-				const diffHtml = renderUniversalDiff({
+				const diffHtml = renderHtmlDiff({
 					beforeHtml: renderDocToHtml(before) ?? "",
 					afterHtml: renderDocToHtml(after) ?? "",
 				});

@@ -294,3 +294,16 @@ services:
         - packages/lix/plugins/prosemirror/**
     envVars:
       - fromGroup: production
+
+  - name: lix-html-diff-docs
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    staticPublishPath: ./packages/lix/lix-html-diff/docs/.rspress/dist
+    buildCommand: pnpm install && pnpm run --filter @lix-js/html-diff... build:docs
+    buildFilter:
+      paths:
+        - packages/lix/lix-html-diff/**
+    envVars:
+      - fromGroup: production

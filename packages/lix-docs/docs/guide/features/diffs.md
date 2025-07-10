@@ -31,7 +31,9 @@ if (plugin?.diffComponent) {
 
 ### Diff Libraries
 
-For custom data formats, you can use a dedicated library. The experimental [universal diff package](https://github.com/opral/monorepo/tree/main/packages/lix/universal-diff) is one such option.
+You can use diff libraries to visualize changes in your data. Popular options include general-purpose libraries like [diff](https://www.npmjs.com/package/diff) for text-based comparisons, or specialized solutions like the [Lix HTML diff package](https://github.com/opral/monorepo/tree/main/packages/lix/lix-html-diff).
+
+The Lix HTML diff is particularly powerful because it leverages the fact that web applications render to HTML. This means that, in theory, the HTML diff can be universally used to visualize changes in any web app's UI—regardless of what is rendered by diffing the rendered HTML output.
 
 ### Build Your Own
 
