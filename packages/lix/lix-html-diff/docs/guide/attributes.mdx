@@ -56,13 +56,54 @@ The `data-diff-key` attribute provides a unique identifier that allows the diff 
   css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
 />
 
-## data-diff-words
+## data-diff-mode
 
-**Optional attribute for granular word-level diffing.**
+**Optional attribute to control diffing behavior.**
 
-By default, when text content changes, the entire element is shown as deleted (the old content is preserved). Adding `data-diff-words` enables granular word-level diffing within the element.
+By default, when text content changes, elements with `data-diff-key` are marked as `diff-updated`. The `data-diff-mode` attribute allows you to specify different diffing behaviors for more control.
 
-### Without data-diff-words (atomic block diffing)
+### element
+
+Use `data-diff-mode="element"` to explicitly mark the element for atomic element diffing. When content changes, the old element is shown as `diff-deleted` and the new element is shown as `diff-created`.
+
+```html
+<!-- Before -->
+<div class="card" data-diff-key="my-card" data-diff-mode="element">
+  <h3>Old Title</h3>
+  <p>Old content here</p>
+</div>
+
+<!-- After -->
+<div class="card" data-diff-key="my-card" data-diff-mode="element">
+  <h3>New Title</h3>
+  <p>New content here</p>
+</div>
+```
+
+<Showcase 
+  before="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>Old Title</h3><p>Old content</p></div>" 
+  after="<div class='card' data-diff-key='my-card' data-diff-mode='element'><h3>New Title</h3><p>New content</p></div>" 
+  css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; } .card { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }"
+/>
+
+#### When to use element mode
+
+✅ **Use for complex HTML structures:**
+- Components with nested elements and specific styling
+- Elements where word-level diffing would break the UI
+- Cards, panels, or widgets with multiple child elements
+- Interactive components (buttons, forms, etc.)
+
+❌ **Avoid for simple text content:**
+- Plain paragraphs or headings
+- Simple text spans
+- Content where word-level diffing would be more useful
+
+### words
+
+Use `data-diff-mode="words"` to enable granular word-level diffing within the element instead of atomic block diffing.
+
+#### Without data-diff-mode (atomic block diffing)
 
 ```html
 <!-- Before -->
@@ -78,23 +119,23 @@ By default, when text content changes, the entire element is shown as deleted (t
   css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
 />
 
-### With data-diff-words (granular word diffing)
+#### With data-diff-mode="words" (granular word diffing)
 
 ```html
 <!-- Before -->
-<p data-diff-key='kv3m' data-diff-words>Hello there</p>
+<p data-diff-key='kv3m' data-diff-mode="words">Hello there</p>
 
 <!-- After -->
-<p data-diff-key='kv3m' data-diff-words>Hello world</p>
+<p data-diff-key='kv3m' data-diff-mode="words">Hello world</p>
 ```
 
 <Showcase 
-  before="<p data-diff-key='kv3m' data-diff-words>Hello there</p>" 
-  after="<p data-diff-key='kv3m' data-diff-words>Hello world</p>" 
+  before="<p data-diff-key='kv3m' data-diff-mode='words'>Hello there</p>" 
+  after="<p data-diff-key='kv3m' data-diff-mode='words'>Hello world</p>" 
   css=".diff-created { color: green; } .diff-updated { color: orange; } .diff-deleted { color: red; }"
 />
 
-### When to use data-diff-words
+#### When to use data-diff-mode="words"
 
 ✅ **Use for simple text content:**
 - Paragraphs with plain text
@@ -106,7 +147,7 @@ By default, when text content changes, the entire element is shown as deleted (t
 - Elements with specific styling that would break with inserted spans
 - Interactive components (buttons, forms, etc.)
 
-### Example: Complex component (avoid data-diff-words)
+#### Example: Complex component (avoid data-diff-mode="words")
 
 ```html
 <!-- Before -->

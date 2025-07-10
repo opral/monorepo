@@ -96,8 +96,17 @@ export default defineConfig({
           link: "/test-cases#data-diff-key",
         },
         {
-          text: "data-diff-words",
-          link: "/test-cases#data-diff-words",
+          text: "data-diff-mode",
+          items: [
+            {
+              text: "element",
+              link: "/test-cases#data-diff-mode='element'",
+            },
+            {
+              text: "words", 
+              link: "/test-cases#data-diff-mode='words'",
+            },
+          ],
         },
       ],
     },

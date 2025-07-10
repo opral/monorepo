@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { Showcase } from "./showcase";
 import dedent from "dedent";
+// @ts-expect-error - raw import
+import defaultCss from "../../src/default.css?raw";
 
 /**
  * A playground component that allows users to paste in "before" and "after" HTML
@@ -21,18 +23,31 @@ export function DiffPlayground() {
   </p>
 `;
 
-  const defaultCss = dedent`
-  /* Add CSS to style your HTML content */
-  /* Use the CSS that you are using in your app to get a 1:1 representation of the diff */
-`;
+  const defaultPlaygroundCss = `/* Default diff highlighting styles */
+${defaultCss}
+
+/* Add additional CSS to style your HTML content */
+/* Use the CSS that you are using in your app to get a 1:1 representation of the diff */`;
 
   // Load from localStorage or use defaults
   const loadInitialState = () => {
     // Try localStorage for the user's last session
     try {
       const savedState = localStorage.getItem("diffPlaygroundState");
-      if (savedState) {
-        return JSON.parse(savedState);
+      const lastSaved = localStorage.getItem("diffPlaygroundTimestamp");
+      
+      if (savedState && lastSaved) {
+        const savedTime = parseInt(lastSaved, 10);
+        const oneMonthAgo = Date.now() - (30 * 24 * 60 * 60 * 1000); // 30 days in milliseconds
+        
+        // If saved state is less than 1 month old, use it
+        if (savedTime > oneMonthAgo) {
+          return JSON.parse(savedState);
+        } else {
+          // Clear old data if it's older than 1 month
+          localStorage.removeItem("diffPlaygroundState");
+          localStorage.removeItem("diffPlaygroundTimestamp");
+        }
       }
     } catch (e) {
       console.error("Error loading from localStorage:", e);
@@ -42,7 +57,7 @@ export function DiffPlayground() {
     return {
       beforeHtml: defaultBeforeHtml,
       afterHtml: defaultAfterHtml,
-      customCss: defaultCss,
+      customCss: defaultPlaygroundCss,
     };
   };
 
@@ -95,6 +110,8 @@ export function DiffPlayground() {
           customCss,
         }),
       );
+      // Save timestamp for auto-reset after 1 month
+      localStorage.setItem("diffPlaygroundTimestamp", Date.now().toString());
     } catch (e) {
       console.error("Error saving state:", e);
     }
@@ -105,7 +122,7 @@ export function DiffPlayground() {
     if (confirm("Are you sure you want to reset to default examples?")) {
       setBeforeHtml(defaultBeforeHtml);
       setAfterHtml(defaultAfterHtml);
-      setCustomCss(defaultCss);
+      setCustomCss(defaultPlaygroundCss);
     }
   };
 

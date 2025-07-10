@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import { renderHtmlDiff } from "../../src/render-html-diff";
 import Editor from "@monaco-editor/react";
+// @ts-expect-error - raw import
+import defaultCss from "../../src/default.css?raw";
 
 interface ShowcaseProps {
   before: string;
@@ -24,12 +26,10 @@ function ShadowHtml({ html, css }: { html: string; css?: string }) {
     }
     // Clear previous content
     shadow.innerHTML = "";
-    // Inject styles (if any)
-    if (css) {
-      const style = document.createElement("style");
-      style.textContent = css;
-      shadow.appendChild(style);
-    }
+    // Inject styles (use default CSS if none provided)
+    const style = document.createElement("style");
+    style.textContent = css || defaultCss;
+    shadow.appendChild(style);
     // Inject HTML
     const wrapper = document.createElement("div");
     wrapper.innerHTML = html;
@@ -149,6 +149,9 @@ export function Showcase({ before, after, css, editable = false, onBeforeChange,
     afterHtml: after,
   });
 
+  // Use provided CSS or fall back to default
+  const showcaseCss = css || defaultCss;
+
   return (
     <div className="max-w-7xl mx-auto my-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -159,7 +162,7 @@ export function Showcase({ before, after, css, editable = false, onBeforeChange,
           editable={editable}
           showTitle={true}
           defaultTab={editable ? "code" : "rendered"}
-          css={css}
+          css={showcaseCss}
         />
         <TabbedContentViewer
           title="After"
@@ -168,7 +171,7 @@ export function Showcase({ before, after, css, editable = false, onBeforeChange,
           editable={editable}
           showTitle={true}
           defaultTab={editable ? "code" : "rendered"}
-          css={css}
+          css={showcaseCss}
         />
       </div>
       
@@ -177,7 +180,7 @@ export function Showcase({ before, after, css, editable = false, onBeforeChange,
         htmlContent={diff}
         showTitle={true}
         defaultTab="rendered"
-        css={css}
+        css={showcaseCss}
       />
     </div>
   );

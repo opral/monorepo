@@ -233,13 +233,13 @@ Notice how your existing `.my-text` styles (large, bold typography) are preserve
 
 ### Step 4: Make diffs more granular (optional)
 
-For word-level highlighting within text elements, add the `data-diff-words` attribute:
+For word-level highlighting within text elements, add the `data-diff-mode="words"` attribute:
 
 <Showcase
-  before={`<p data-diff-key="x9n4" data-diff-words class="my-text">The quick brown fox</p>`}
+  before={`<p data-diff-key="x9n4" data-diff-mode="words" class="my-text">The quick brown fox</p>`}
   after={`
-<p data-diff-key="x9n4" data-diff-words class="my-text">The fast red fox</p>
-<p data-diff-key="k7m2" data-diff-words class="my-text">The lazy dog sleeps</p>
+<p data-diff-key="x9n4" data-diff-mode="words" class="my-text">The fast red fox</p>
+<p data-diff-key="k7m2" data-diff-mode="words" class="my-text">The lazy dog sleeps</p>
 `}
   css={`/* Your existing app styles */
 .my-text {
@@ -255,4 +255,4 @@ For word-level highlighting within text elements, add the `data-diff-words` attr
 .diff-deleted { color: #ef4444; text-decoration: line-through; }`}
 />
 
-Notice how `data-diff-words` enables word-level highlighting instead of highlighting the entire element. Learn more in the [attributes guide](/guide/attributes).
+Notice how `data-diff-mode="words"` enables word-level highlighting instead of highlighting the entire element. Learn more in the [attributes guide](/guide/attributes).

@@ -96,7 +96,8 @@ Notice how in the diff result:
 The progression of diffing granularity:
 
 1. **No attributes**: No diffing, HTML unchanged
-2. **`data-diff-key` only**: CSS classes added, structure preserved (atomic block diffing)
-3. **`data-diff-key` + `data-diff-words`**: CSS classes + granular text spans (opt-in for text content)
+2. **`data-diff-key` only**: CSS classes added to changed elements
+3. **`data-diff-key` + `data-diff-mode="element"`**: Explicit atomic element diffing (entire element marked as updated)
+4. **`data-diff-key` + `data-diff-mode="words"`**: Granular word-level diffing with spans
 
 This approach makes `data-diff-key` safe for complex layouts like tables, where inserting wrapper elements would break the structure.

@@ -145,22 +145,48 @@ function renderHtmlDiffElement(args: {
         // Do nothing to the parent element itself.
       } else if (beforeEl.textContent !== afterEl.textContent) {
         // Child structure is the same, but text content differs.
-        // Check if element is marked as safe for word-level diffing
-        if (
-          afterEl instanceof HTMLElement &&
-          afterEl.hasAttribute("data-diff-words")
-        ) {
+        const diffMode = afterEl instanceof HTMLElement ? afterEl.getAttribute("data-diff-mode") : null;
+        
+        if (diffMode === "words") {
           // Apply granular word diffing for elements that opt in
           applyGranularTextDiff(
-            afterEl,
+            afterEl as HTMLElement,
             beforeEl.textContent || "",
             afterEl.textContent || "",
           );
+        } else if (diffMode === "element") {
+          // Explicit atomic element diffing - show old as deleted, new as created
+          // Mark the after element as created
+          if (afterEl.hasAttribute("class")) {
+            afterEl.className = "diff-created " + afterEl.className;
+          } else {
+            afterEl.className = "diff-created";
+          }
+          
+          // Insert the old element as deleted before the new one
+          const deletedEl = beforeEl.cloneNode(true) as HTMLElement;
+          if (deletedEl.hasAttribute("class")) {
+            deletedEl.className = "diff-deleted " + deletedEl.className;
+          } else {
+            deletedEl.className = "diff-deleted";
+          }
+          
+          // Make the deleted element non-interactive
+          deletedEl.setAttribute("contenteditable", "false");
+          deletedEl.querySelectorAll("button, input, select, textarea, a[href]").forEach((interactiveEl) => {
+            if (interactiveEl instanceof HTMLElement) {
+              interactiveEl.setAttribute("disabled", "true");
+              interactiveEl.style.pointerEvents = "none";
+            }
+            if (interactiveEl instanceof HTMLAnchorElement) {
+              interactiveEl.removeAttribute("href");
+            }
+          });
+          
+          // Insert the deleted element before the new one
+          afterEl.parentNode?.insertBefore(deletedEl, afterEl);
         } else {
-          // Fall back to atomic block diffing for complex components
-          // For atomic blocks with content changes, show as updated
-
-          // Style the 'after' element as updated
+          // Default behavior: mark the after element as updated
           if (afterEl.hasAttribute("class")) {
             afterEl.className = "diff-updated " + afterEl.className;
           } else {
