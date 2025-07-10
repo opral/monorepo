@@ -76,7 +76,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <div class="card" data-diff-key="complex" data-diff-mode="element">New content here</div>
       `,
       expectedHtml: dedent`
-        <div class="diff-deleted card" data-diff-key="complex" data-diff-mode="element" contenteditable="false">Old content here</div><div class="diff-created card" data-diff-key="complex" data-diff-mode="element">New content here</div>
+        <div><div class="diff-deleted card" data-diff-key="complex" data-diff-mode="element" contenteditable="false">Old content here</div><div class="diff-created card" data-diff-key="complex" data-diff-mode="element">New content here</div></div>
       `,
     },
     {
@@ -88,7 +88,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
         <p class="highlight important" data-diff-key="text" data-diff-mode="element">After text</p>
       `,
       expectedHtml: dedent`
-        <p class="diff-deleted highlight important" data-diff-key="text" data-diff-mode="element" contenteditable="false">Before text</p><p class="diff-created highlight important" data-diff-key="text" data-diff-mode="element">After text</p>
+        <div><p class="diff-deleted highlight important" data-diff-key="text" data-diff-mode="element" contenteditable="false">Before text</p><p class="diff-created highlight important" data-diff-key="text" data-diff-mode="element">After text</p></div>
       `,
     },
   ],
@@ -161,7 +161,7 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <ul data-diff-key="list">
           <li data-diff-key="item1">First item</li>
-          <li data-diff-key="item2" data-diff-show-when-deleted class="diff-deleted" contenteditable="false">Second item</li>
+          <li data-diff-key="item2" data-diff-show-when-deleted="" class="diff-deleted" contenteditable="false">Second item</li>
           <li data-diff-key="item3">Third item</li>
         </ul>
       `,
@@ -214,10 +214,10 @@ export const testCasesBySection: Record<string, TestCase[]> = {
       expectedHtml: dedent`
         <table>
           <tbody data-diff-key="table-body">
-            <tr data-diff-key="row1" data-diff-show-when-deleted class="diff-deleted" contenteditable="false">
+            <tr data-diff-key="row1" data-diff-show-when-deleted="" class="diff-deleted" contenteditable="false">
               <td>Safe row</td>
             </tr>
-            <tr data-diff-key="row3" data-diff-show-when-deleted class="diff-deleted" contenteditable="false">
+            <tr data-diff-key="row3" data-diff-show-when-deleted="" class="diff-deleted" contenteditable="false">
               <td>Another safe row</td>
             </tr>
           </tbody>

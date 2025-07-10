@@ -145,8 +145,11 @@ function renderHtmlDiffElement(args: {
         // Do nothing to the parent element itself.
       } else if (beforeEl.textContent !== afterEl.textContent) {
         // Child structure is the same, but text content differs.
-        const diffMode = afterEl instanceof HTMLElement ? afterEl.getAttribute("data-diff-mode") : null;
-        
+        const diffMode =
+          afterEl instanceof HTMLElement
+            ? afterEl.getAttribute("data-diff-mode")
+            : null;
+
         if (diffMode === "words") {
           // Apply granular word diffing for elements that opt in
           applyGranularTextDiff(
@@ -162,7 +165,7 @@ function renderHtmlDiffElement(args: {
           } else {
             afterEl.className = "diff-created";
           }
-          
+
           // Insert the old element as deleted before the new one
           const deletedEl = beforeEl.cloneNode(true) as HTMLElement;
           if (deletedEl.hasAttribute("class")) {
@@ -170,19 +173,21 @@ function renderHtmlDiffElement(args: {
           } else {
             deletedEl.className = "diff-deleted";
           }
-          
+
           // Make the deleted element non-interactive
           deletedEl.setAttribute("contenteditable", "false");
-          deletedEl.querySelectorAll("button, input, select, textarea, a[href]").forEach((interactiveEl) => {
-            if (interactiveEl instanceof HTMLElement) {
-              interactiveEl.setAttribute("disabled", "true");
-              interactiveEl.style.pointerEvents = "none";
-            }
-            if (interactiveEl instanceof HTMLAnchorElement) {
-              interactiveEl.removeAttribute("href");
-            }
-          });
-          
+          deletedEl
+            .querySelectorAll("button, input, select, textarea, a[href]")
+            .forEach((interactiveEl) => {
+              if (interactiveEl instanceof HTMLElement) {
+                interactiveEl.setAttribute("disabled", "true");
+                interactiveEl.style.pointerEvents = "none";
+              }
+              if (interactiveEl instanceof HTMLAnchorElement) {
+                interactiveEl.removeAttribute("href");
+              }
+            });
+
           // Insert the deleted element before the new one
           afterEl.parentNode?.insertBefore(deletedEl, afterEl);
         } else {
