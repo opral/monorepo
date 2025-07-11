@@ -15,6 +15,13 @@ export default defineConfig({
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
   icon: "/logo.svg",
   globalStyles: path.join(__dirname, "docs/styles/index.css"),
+  markdown: {
+    // Disable Rust MDX compiler to support global components
+    mdxRs: false,
+    globalComponents: [
+      path.join(__dirname, "docs/components/InteractiveExampleCard.tsx"),
+    ],
+  },
   builderConfig: {
     tools: {
       rspack: {
