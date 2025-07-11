@@ -1,3 +1,7 @@
+import CodeSnippet from "../../components/code-snippet";
+import * as example from "../../examples/versions.ts";
+import exampleSrcCode from "../../examples/versions.ts?raw";
+
 # Versions (Branching)
 
 Versions allow you to manage divergent states of your data, similar to branching in Git. This is a powerful feature for building applications that need to support drafts, experiments, or different contexts for the same data.
@@ -9,19 +13,15 @@ Versions allow you to manage divergent states of your data, similar to branching
 
 ## Examples
 
-```ts
-const lix = await openLix({});
-```
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["create-switch-version"]}
+/>
 
-```ts
-const activeVersion = await selectActiveVersion({ lix })
-  .executeTakeFirstOrThrow();
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["merge-version"]}
+/>
 
-const newVersion = await createVersion({ lix, from: activeVersion });
-
-await switchVersion({ lix, to: newVersion });
-```
-
-```ts
-await mergeVersion({ lix, source: activeVersion, target: newVersion });
-```
