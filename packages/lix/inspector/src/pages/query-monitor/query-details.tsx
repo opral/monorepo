@@ -53,9 +53,10 @@ export default function QueryDetails({ log }: QueryDetailsProps) {
 		setShowExplain(true);
 		
 		try {
-			// Only explain SELECT statements (EXPLAIN QUERY PLAN doesn't work with INSERT/UPDATE/DELETE)
-			if (!log.payload.sql.trim().toUpperCase().startsWith("SELECT")) {
-				setExplainResult("EXPLAIN QUERY PLAN only works with SELECT statements");
+			// Only explain SELECT and DELETE statements (EXPLAIN QUERY PLAN doesn't work with INSERT/UPDATE)
+			const sqlUpper = log.payload.sql.trim().toUpperCase();
+			if (!sqlUpper.startsWith("SELECT") && !sqlUpper.startsWith("DELETE")) {
+				setExplainResult("EXPLAIN QUERY PLAN only works with SELECT and DELETE statements");
 				return;
 			}
 			
@@ -171,7 +172,7 @@ export default function QueryDetails({ log }: QueryDetailsProps) {
 							</div>
 						)}
 					</div>
-					{log.payload.query_type === "SELECT" && (
+					{(log.payload.query_type === "SELECT" || log.payload.query_type === "DELETE") && (
 						<button
 							className="btn btn-xs btn-ghost"
 							onClick={executeExplainQuery}
