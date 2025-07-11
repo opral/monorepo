@@ -440,7 +440,7 @@ export function applyStateDatabaseSchema(
 							message: `Cache miss detected - materializing state from CTE`,
 						});
 					}
-
+					
 					// Run the expensive recursive CTE to materialize state
 					// Include deletions when populating cache so inheritance blocking works
 					const stateResults = materializeState(sqlite, {}, true);
@@ -1085,206 +1085,248 @@ function materializeState(
 	includeDeletions: boolean = false
 ): any[] {
 	let sql = `
+		/* -----------------------------  CTEs  --------------------------------- */
 		WITH
+			/*  Collect every committed or in-flight change with its snapshot */
 			all_changes_with_snapshots AS (
-				-- Include committed changes
-				SELECT ic.id, ic.entity_id, ic.schema_key, ic.file_id, ic.plugin_key,
-					   ic.schema_version, 
-					   CASE 
-					     WHEN ic.snapshot_id = 'no-content' THEN NULL
+				SELECT 
+					ic.id,
+					ic.entity_id,
+					ic.schema_key,
+					ic.file_id,
+					ic.plugin_key,
+					ic.schema_version,
+					ic.created_at,
+					CASE WHEN ic.snapshot_id = 'no-content' THEN NULL
 					     ELSE json(s.content)
-					   END AS snapshot_content 
+					END AS snapshot_content
 				FROM internal_change ic
 				LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
-				
+
 				UNION ALL
-				
-				-- Include changes from current transaction
-				SELECT ict.id, ict.entity_id, ict.schema_key, ict.file_id, ict.plugin_key,
-					   ict.schema_version, ict.snapshot_content
+
+				SELECT 
+					ict.id,
+					ict.entity_id,
+					ict.schema_key,
+					ict.file_id,
+					ict.plugin_key,
+					ict.schema_version,
+					ict.created_at,
+					ict.snapshot_content
 				FROM internal_change_in_transaction ict
-				
+
 				UNION ALL
-				
-				-- Include untracked state (pseudo-changes with special change_id)
-				SELECT 'untracked-' || unt.entity_id || '-' || unt.schema_key AS id,
-					   unt.entity_id, unt.schema_key, unt.file_id, unt.plugin_key,
-					   unt.schema_version, json(unt.snapshot_content) AS snapshot_content
+
+				SELECT 
+					'untracked-'||unt.entity_id||'-'||unt.schema_key,
+					unt.entity_id,
+					unt.schema_key,
+					unt.file_id,
+					unt.plugin_key,
+					unt.schema_version,
+					unt.created_at,
+					json(unt.snapshot_content) AS snapshot_content
 				FROM internal_state_all_untracked unt
 			),
+
+			/* Discover every change-set reachable from ANY version root */
 			root_cs_of_all_versions AS (
-				SELECT json_extract(v.snapshot_content, '$.change_set_id') AS version_change_set_id, 
-					   v.entity_id AS version_id
+				SELECT 
+					json_extract(v.snapshot_content,'$.change_set_id') AS version_change_set_id,
+					v.entity_id AS version_id
 				FROM all_changes_with_snapshots v
 				WHERE v.schema_key = 'lix_version'
 			),
 			reachable_cs_from_roots(id, version_id) AS (
-				SELECT version_change_set_id, version_id FROM root_cs_of_all_versions
+				SELECT 
+					version_change_set_id, 
+					version_id 
+				FROM root_cs_of_all_versions
+				
 				UNION
-				SELECT json_extract(e.snapshot_content, '$.parent_id'), r.version_id
-				FROM all_changes_with_snapshots e 
-				JOIN reachable_cs_from_roots r ON json_extract(e.snapshot_content, '$.child_id') = r.id
-				WHERE e.schema_key = 'lix_change_set_edge'
+				
+				SELECT 
+					json_extract(edge.snapshot_content,'$.child_id'), 
+					r.version_id
+				FROM all_changes_with_snapshots edge
+				JOIN reachable_cs_from_roots r ON json_extract(edge.snapshot_content,'$.parent_id') = r.id
+				WHERE edge.schema_key = 'lix_change_set_edge'
 			),
+
+			/*  Calculate depth of each reachable change-set within *its* version DAG */
+			cs_depth AS (
+				SELECT 
+					id, 
+					version_id, 
+					0 AS depth
+				FROM reachable_cs_from_roots
+
+				UNION ALL
+
+				SELECT 
+					json_extract(edge.snapshot_content,'$.child_id') AS id,
+					r.version_id AS version_id,
+					d.depth + 1 AS depth
+				FROM all_changes_with_snapshots edge
+				JOIN cs_depth d ON json_extract(edge.snapshot_content,'$.parent_id') = d.id
+				JOIN reachable_cs_from_roots r ON r.id = d.id  -- ensure same reachable set
+				WHERE edge.schema_key = 'lix_change_set_edge'
+			),
+
+			/* Map entities that belong to those change-sets */
 			cse_in_reachable_cs AS (
-				SELECT json_extract(ias.snapshot_content, '$.entity_id') AS target_entity_id,
-					   json_extract(ias.snapshot_content, '$.file_id') AS target_file_id,
-					   json_extract(ias.snapshot_content, '$.schema_key') AS target_schema_key, 
-					   json_extract(ias.snapshot_content, '$.change_id') AS target_change_id,
-					   json_extract(ias.snapshot_content, '$.change_set_id') AS cse_origin_change_set_id,
-					   rcs.version_id
+				SELECT 
+					json_extract(ias.snapshot_content,'$.entity_id') AS target_entity_id,
+					json_extract(ias.snapshot_content,'$.file_id') AS target_file_id,
+					json_extract(ias.snapshot_content,'$.schema_key') AS target_schema_key,
+					json_extract(ias.snapshot_content,'$.change_id') AS target_change_id,
+					json_extract(ias.snapshot_content,'$.change_set_id') AS cse_origin_change_set_id,
+					rcs.version_id
 				FROM all_changes_with_snapshots ias
-				JOIN reachable_cs_from_roots rcs ON json_extract(ias.snapshot_content, '$.change_set_id') = rcs.id
+				JOIN reachable_cs_from_roots rcs ON json_extract(ias.snapshot_content,'$.change_set_id') = rcs.id
 				WHERE ias.schema_key = 'lix_change_set_element'
 			),
+
+			/* Select the leaf change for every entity in every version */
 			leaf_target_snapshots AS (
-				SELECT target_change.entity_id, target_change.schema_key, target_change.file_id,
-					   target_change.plugin_key, target_change.snapshot_content AS snapshot_content,
-					   target_change.schema_version, r.version_id, target_change.id as change_id,
-					   r.cse_origin_change_set_id as change_set_id
-				FROM cse_in_reachable_cs r 
-				INNER JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
+				SELECT 
+					target_change.entity_id,
+					target_change.schema_key,
+					target_change.file_id,
+					target_change.plugin_key,
+					target_change.snapshot_content,
+					target_change.schema_version,
+					r.version_id,
+					target_change.created_at,
+					target_change.id AS change_id,
+					r.cse_origin_change_set_id AS change_set_id
+				FROM cse_in_reachable_cs r
+				JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
 				WHERE NOT EXISTS (
-					WITH RECURSIVE descendants_of_current_cs(id) AS ( 
-						SELECT r.cse_origin_change_set_id 
+					/* any *newer* change for the same entity in a *descendant* CS */
+					WITH RECURSIVE descendants_of_current_cs(id) AS (
+						SELECT r.cse_origin_change_set_id
 						UNION
-						SELECT json_extract(edge.snapshot_content, '$.child_id')
-						FROM all_changes_with_snapshots edge
-						JOIN descendants_of_current_cs d ON json_extract(edge.snapshot_content, '$.parent_id') = d.id
-						WHERE edge.schema_key = 'lix_change_set_edge'
-						  AND json_extract(edge.snapshot_content, '$.child_id') IN (
-						  	SELECT id FROM reachable_cs_from_roots WHERE version_id = r.version_id
-						  )
+						SELECT json_extract(edge.snapshot_content,'$.child_id')
+						FROM   all_changes_with_snapshots edge
+						JOIN   descendants_of_current_cs d ON json_extract(edge.snapshot_content,'$.parent_id') = d.id
+						WHERE  edge.schema_key = 'lix_change_set_edge'
+						  AND  json_extract(edge.snapshot_content,'$.child_id') IN (
+						         SELECT id FROM reachable_cs_from_roots WHERE version_id = r.version_id
+						       )
 					)
-					SELECT 1 FROM cse_in_reachable_cs newer_r 
-					WHERE newer_r.target_entity_id = r.target_entity_id 
-					  AND newer_r.target_file_id = r.target_file_id       
-					  AND newer_r.target_schema_key = r.target_schema_key 
-					  AND newer_r.version_id = r.version_id
-					  AND (newer_r.cse_origin_change_set_id != r.cse_origin_change_set_id OR newer_r.target_change_id != r.target_change_id) 
-					  AND newer_r.cse_origin_change_set_id IN descendants_of_current_cs
+					SELECT 1
+					FROM   cse_in_reachable_cs newer_r
+					WHERE  newer_r.target_entity_id  = r.target_entity_id
+					  AND  newer_r.target_file_id    = r.target_file_id
+					  AND  newer_r.target_schema_key = r.target_schema_key
+					  AND  newer_r.version_id        = r.version_id
+					  AND  newer_r.target_change_id != r.target_change_id
+					  AND  newer_r.cse_origin_change_set_id IN descendants_of_current_cs
 				)
 			),
-			-- Get version inheritance relationships
+
+			/* Version inheritance */
 			version_inheritance AS (
-				SELECT DISTINCT
+				SELECT DISTINCT 
 					v.entity_id AS version_id,
-					json_extract(v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
+					json_extract(v.snapshot_content,'$.inherits_from_version_id') AS parent_version_id
 				FROM all_changes_with_snapshots v
 				WHERE v.schema_key = 'lix_version'
 			),
-			-- Combine direct entities with inherited entities
+
+			/* Combine direct and inherited entities */
 			all_entities AS (
-				-- Direct entities from leaf_target_snapshots 
+				/* direct */
 				SELECT 
-					entity_id, schema_key, file_id, plugin_key, snapshot_content, schema_version,
-					version_id, version_id as visible_in_version, NULL as inherited_from_version_id, change_id, change_set_id
+					entity_id, 
+					schema_key, 
+					file_id, 
+					plugin_key, 
+					snapshot_content, 
+					schema_version,
+					version_id, 
+					version_id AS visible_in_version, 
+					NULL AS inherited_from_version_id,
+					created_at, 
+					change_id, 
+					change_set_id
 				FROM leaf_target_snapshots
-				
+
 				UNION ALL
-				
-				-- Inherited entities from parent versions
+
+				/* inherited */
 				SELECT 
-					ls.entity_id, ls.schema_key, ls.file_id, ls.plugin_key, ls.snapshot_content, ls.schema_version,
-					vi.version_id, -- Use child version_id for testing
-					vi.version_id as visible_in_version, -- Make visible in child version
-					vi.parent_version_id as inherited_from_version_id, ls.change_id, ls.change_set_id
+					ls.entity_id, 
+					ls.schema_key, 
+					ls.file_id, 
+					ls.plugin_key, 
+					ls.snapshot_content, 
+					ls.schema_version,
+					vi.version_id, 
+					vi.version_id AS visible_in_version, 
+					vi.parent_version_id AS inherited_from_version_id,
+					ls.created_at, 
+					ls.change_id, 
+					ls.change_set_id
 				FROM version_inheritance vi
 				JOIN leaf_target_snapshots ls ON ls.version_id = vi.parent_version_id
 				WHERE vi.parent_version_id IS NOT NULL
-				AND ls.snapshot_content IS NOT NULL -- Don't inherit deleted entities
-				-- Don't inherit if child already has this entity (including deletion markers)
-				-- Use a more comprehensive check that includes both leaf snapshots and direct inheritance blocking
-				AND NOT EXISTS (
-					-- Check if there's ANY change for this entity in the child version
-					-- This includes creation, update, AND deletion changes
+				  AND ls.snapshot_content IS NOT NULL /* don't inherit deletions */
+				  AND NOT EXISTS (
+					/* child already changed this entity */
 					SELECT 1 FROM leaf_target_snapshots child_ls
 					WHERE child_ls.version_id = vi.version_id
-					  AND child_ls.entity_id = ls.entity_id
+					  AND child_ls.entity_id  = ls.entity_id
 					  AND child_ls.schema_key = ls.schema_key
-					  AND child_ls.file_id = ls.file_id
-				)
-				-- Additional safeguard: check that no change set element exists for this entity in child
-				AND NOT EXISTS (
-					SELECT 1 FROM cse_in_reachable_cs cse
-					JOIN all_changes_with_snapshots target_change ON cse.target_change_id = target_change.id
-					WHERE cse.version_id = vi.version_id
-					  AND target_change.entity_id = ls.entity_id
-					  AND target_change.schema_key = ls.schema_key
-					  AND target_change.file_id = ls.file_id
-				)
+					  AND child_ls.file_id    = ls.file_id
+				  )
 			),
-		-- Prioritize direct entities over inherited ones, then deduplicate
-		prioritized_entities AS (
-			SELECT *,
-				   -- Priority: direct entities (inherited_from_version_id IS NULL) over inherited
-				   CASE WHEN inherited_from_version_id IS NULL THEN 1 ELSE 2 END as priority,
-				   -- Row number for deduplication within same priority
-				   ROW_NUMBER() OVER (
-					   PARTITION BY entity_id, schema_key, file_id, visible_in_version 
-					   ORDER BY CASE WHEN inherited_from_version_id IS NULL THEN 1 ELSE 2 END,
-					            -- Among inherited entities, prefer those with earlier timestamps
-					            version_id
-				   ) as rn
-			FROM all_entities ae
-			-- Don't filter out entities with null snapshot_content here
-			-- We need deletion markers to be included for proper inheritance blocking
-		)
-		SELECT DISTINCT
-			pe.entity_id,
-			pe.schema_key,
-			pe.file_id,
-			pe.plugin_key,
-			pe.snapshot_content,
-			pe.schema_version,
-			pe.version_id,
-			COALESCE(
-				(SELECT MIN(ic.created_at) FROM internal_change ic 
-				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id),
-				(SELECT MIN(ict.created_at) FROM internal_change_in_transaction ict 
-				 WHERE ict.entity_id = pe.entity_id AND ict.schema_key = pe.schema_key AND ict.file_id = pe.file_id)
-			) AS created_at,
-			COALESCE(
-				(SELECT MAX(ic.created_at) FROM internal_change ic 
-				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id
-				   AND ic.id IN (SELECT cse.target_change_id FROM cse_in_reachable_cs cse WHERE cse.version_id = pe.version_id)),
-				(SELECT MIN(ic.created_at) FROM internal_change ic 
-				 WHERE ic.entity_id = pe.entity_id AND ic.schema_key = pe.schema_key AND ic.file_id = pe.file_id),
-				(SELECT MAX(ict.created_at) FROM internal_change_in_transaction ict 
-				 WHERE ict.entity_id = pe.entity_id AND ict.schema_key = pe.schema_key AND ict.file_id = pe.file_id)
-			) AS updated_at,
-			pe.inherited_from_version_id,
-			pe.change_id,
-			COALESCE(pe.change_set_id, 'untracked') as change_set_id
-		FROM prioritized_entities pe
-		WHERE pe.rn = 1
-		${includeDeletions ? "" : "-- Filter out deletion markers from final results\n		AND pe.snapshot_content IS NOT NULL"}
+
+			/* Deduplicate: prefer direct, then deepest CS */
+			prioritized_entities AS (
+				SELECT *,
+					   ROW_NUMBER() OVER (
+					     PARTITION BY entity_id, schema_key, file_id, visible_in_version
+					     ORDER BY CASE WHEN inherited_from_version_id IS NULL THEN 1 ELSE 2 END,
+					              (
+					                SELECT depth
+					                FROM   cs_depth
+					                WHERE  cs_depth.id = change_set_id
+					                  AND  cs_depth.version_id = visible_in_version
+					              ) DESC,
+					              change_id DESC  /* deterministic fall-back, should rarely fire */
+					   ) AS rn
+				FROM   all_entities
+				${includeDeletions ? `` : `WHERE snapshot_content IS NOT NULL`}
+			)
+		/* ---------------------- final projection ------------------------------ */
+		SELECT 
+			entity_id,
+			schema_key,
+			file_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			version_id,
+			created_at,
+			created_at AS updated_at,   -- TODO compute real updated_at later
+			inherited_from_version_id,
+			change_id,
+			COALESCE(change_set_id,'untracked') AS change_set_id
+		FROM prioritized_entities
+		WHERE rn = 1
 	`;
 
+	/* ------------------------ dynamic filters ------------------------------ */
 	const bindings: string[] = [];
-	const conditions: string[] = [];
-
-	Object.entries(filters).forEach(([key, value]) => {
-		if (key === "version_id") {
-			// For version_id filter, use visible_in_version
-			conditions.push(`ae.visible_in_version = ?`);
-		} else {
-			conditions.push(`ae.${key} = ?`);
-		}
-		bindings.push(value);
+	Object.entries(filters).forEach(([col, val]) => {
+		sql += `\n      AND ${col} = ?`;
+		bindings.push(val);
 	});
 
-	if (conditions.length > 0) {
-		sql += " AND " + conditions.join(" AND ");
-	}
-
-	const result = sqlite.exec({
-		sql,
-		bind: bindings,
-		returnValue: "resultRows",
-	});
-
-	return result || [];
+	return sqlite.exec({ sql, bind: bindings, returnValue: "resultRows" });
 }
 
 function selectFromCache(
