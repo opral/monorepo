@@ -106,7 +106,7 @@ function CodeBlock({
   editable?: boolean;
 }) {
   // Calculate height based on content lines (with min/max bounds)
-  const lineCount = htmlContent.split('\n').length;
+  const lineCount = htmlContent.split("\n").length;
   const calculatedHeight = Math.max(150, Math.min(400, lineCount * 19 + 40));
 
   return (
@@ -143,7 +143,14 @@ function CodeBlock({
   );
 }
 
-export function Showcase({ before, after, css, editable = false, onBeforeChange, onAfterChange }: ShowcaseProps) {
+export default function Showcase({
+  before,
+  after,
+  css,
+  editable = false,
+  onBeforeChange,
+  onAfterChange,
+}: ShowcaseProps) {
   const diff = renderHtmlDiff({
     beforeHtml: before,
     afterHtml: after,
@@ -174,7 +181,7 @@ export function Showcase({ before, after, css, editable = false, onBeforeChange,
           css={showcaseCss}
         />
       </div>
-      
+
       <TabbedContentViewer
         title="Diff Result"
         htmlContent={diff}

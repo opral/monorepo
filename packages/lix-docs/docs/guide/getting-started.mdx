@@ -1,0 +1,102 @@
+import CodeSnippet from "../components/code-snippet";
+import * as example from "../examples/getting-started.ts";
+import exampleSrcCode from "../examples/getting-started.ts?raw";
+
+# Getting Started with Lix SDK
+
+This guide will help you get started with the Lix SDK and demonstrate basic usage patterns.
+
+## Installation
+
+Install the Lix SDK package:
+
+```bash
+npm install @lix-js/sdk @lix-js/plugin-json
+```
+
+## Creating and Opening a Lix File
+
+To start using Lix, you need to create a Lix and configure it with plugins. Plugins are essential - they tell Lix what types of files to track and how to detect changes within those files.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["opening-lix"]}
+/>
+
+Key points: 
+
+- The `jsonPlugin` enables Lix to understand JSON file changes at a granular level (e.g., detecting which specific properties changed)
+- Without plugins, Lix would only see files as binary blobs
+
+## Inserting Files
+
+Once Lix is opened, you can start adding files for change control. This is typically your first action - taking an existing file (like a JSON) and putting it under Lix's change tracking.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["inserting-file"]}
+/>
+
+## Updating Files
+
+Files in Lix are updated just like in any database. When you update a file, Lix automatically creates a new change record while preserving the complete history.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["updating-file"]}
+/>
+
+What happens during an update:
+
+- The JSON plugin detects that the `age` property changed from 50 to 51
+- The file's current state is updated, but history is preserved
+- All changes are tracked with metadata (who, when, what)
+
+## Querying File History
+
+One of Lix's key features is maintaining a complete history of all changes. You can query this history to see how a file evolved over time.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["querying-file-history"]}
+/>
+
+Understanding the query:
+
+- `file_history` is a view that shows all historical states of files
+- Results are ordered by `lixcol_depth` (0 = most recent, higher = older)
+- Each row represents a complete file state at a point in time
+- The query filters by the current version's change set to show relevant history
+
+## Creating and Switching Versions
+
+You can create different versions (similar to branches in Git):
+
+```javascript
+import { createVersion, switchVersion } from "@lix-js/sdk";
+
+// Create a new version based on the current version
+const versionB = await createVersion({ lix, name: "B" });
+
+// Switch to the new version
+await switchVersion({ lix, to: versionB });
+
+console.log("New version created:", versionB.id);
+```
+
+*See implementation: [createVersion](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/version/create-version.ts), [switchVersion](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/version/switch-version.ts)*
+
+## Further Reading
+
+To learn more about Lix and its capabilities, check out:
+
+- [How Lix Works](./how-lix-works) - Understand the core architecture
+- [Core Concepts](./concepts/files) - Learn about the fundamental concepts
+- [API Reference](/api/) - Explore the complete API documentation
+- [Examples](/examples/) - See practical usage examples
+
+In the next section, we'll dive deeper into how Lix works and explore its architecture.

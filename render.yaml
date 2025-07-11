@@ -248,23 +248,6 @@ services:
     domains:
       - flashtype.ai
       
-  - name: lix-landing
-    type: web
-    runtime: static
-    autoDeploy: true
-    branch: main
-    staticPublishPath: ./packages/lix-new-landing/dist
-    buildCommand: pnpm install && pnpm run --filter lix-new-landing... build
-    previews:
-      generation: automatic
-    buildFilter:
-      paths:
-        - packages/lix-new-landing/**
-    envVars:
-      - fromGroup: production
-    domains:
-      - lix.dev
-      
   - name: lix-docs
     type: web
     runtime: static
@@ -287,6 +270,8 @@ services:
     runtime: static
     autoDeploy: true
     branch: main
+    previews:
+      generation: automatic
     staticPublishPath: ./packages/lix/plugins/prosemirror/example/dist
     buildCommand: pnpm install && pnpm run --filter @lix-js/plugin-prosemirror-example... build
     buildFilter:
@@ -300,10 +285,31 @@ services:
     runtime: static
     autoDeploy: true
     branch: main
-    staticPublishPath: ./packages/lix/lix-html-diff/docs/.rspress/dist
-    buildCommand: pnpm install && pnpm run --filter @lix-js/html-diff... build:docs
+    previews:
+      generation: automatic
+    staticPublishPath: ./packages/lix/lix-html-diff/docs_build
+    buildCommand: pnpm install && pnpm run --filter @lix-js/html-diff... build
     buildFilter:
       paths:
         - packages/lix/lix-html-diff/**
     envVars:
       - fromGroup: production
+    domains:
+      - html-diff.lix.dev
+
+  - name: lix-website
+    type: web
+    runtime: static
+    autoDeploy: true
+    branch: main
+    previews:
+      generation: automatic
+    staticPublishPath: ./packages/lix/lix-docs/docs_build
+    buildCommand: pnpm install && pnpm run --filter @lix-js/docs... build
+    buildFilter:
+      paths:
+        - packages/lix/lix-docs/**
+    envVars:
+      - fromGroup: production
+    domains:
+      - lix.dev

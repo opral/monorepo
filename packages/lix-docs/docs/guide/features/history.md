@@ -2,7 +2,7 @@
 
 Lix provides history APIs built on automatically captured changes in state. This enables the creation of powerful features like [audit trails](./attribution.md), [version](./versions.md) history, or [restore](./restore.md) functionality.
 
-![History](../../assets/history.svg)
+![History](/history.svg)
 
 ## Examples
 

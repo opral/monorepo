@@ -2,7 +2,7 @@
 
 Lix provides APIs to query any two states of your data—the "before" and "after"—which is the foundation for showing users what has changed. These states can be from different points in [history](./history.md) or different [versions](./versions.md).
 
-![Diff](../../assets/diff.svg)
+![Diff](/diff.svg)
 
 ## Rendering Diffs
 
@@ -41,7 +41,7 @@ You always have the flexibility to implement your own diff rendering logic for c
 
 Lix is unopinionated about how you visualize changes. Because Lix provides "before" and "after" states (or changes in between states), you can build any kind of diff UI you can imagine—from text-based diffs to visual comparisons of images, designs, or even 3D models, as illustrated below.
 
-![Diffs come in many different types](../../assets/diffs-many-types.svg)
+![Diffs come in many different types](/diffs-many-types.svg)
 
 ## Code Examples
 

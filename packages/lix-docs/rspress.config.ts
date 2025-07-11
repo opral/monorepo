@@ -1,55 +1,55 @@
-import { defineConfig } from "vitepress";
-import typedocSidebar from "../api/reference/typedoc-sidebar.json";
-import { withMermaid } from "vitepress-plugin-mermaid";
+import * as path from "node:path";
+import { defineConfig } from "rspress/config";
+import mermaid from "rspress-plugin-mermaid";
+import {
+  customTypeDocPlugin,
+  generateApiSidebar,
+} from "./rspress-plugins/typedoc-plugin";
 
-// Fix typedoc sidebar links
-const fixTypedocSidebar = (sidebar: any) => {
-  return sidebar.map((section: any) => {
-    return {
-      ...section,
-      items: section.items.map((item: any) => {
-        return {
-          ...item,
-          link: item.link.replace("/docs", "").replace(".md", ""),
-        };
-      }),
-    };
-  });
-};
-
-export default withMermaid({
-  title: "Lix SDK Documentation",
+export default defineConfig({
+  root: path.join(__dirname, "docs"),
+  outDir: "docs_build",
+  title: "Lix",
+  logo: "/logo.svg",
   description:
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
-  rewrites: {
-    "guide/index.md": "index.md",
+  icon: "/logo.svg",
+  globalStyles: path.join(__dirname, "docs/styles/index.css"),
+  builderConfig: {
+    tools: {
+      rspack: {
+        module: {
+          rules: [
+            {
+              resourceQuery: /raw/,
+              type: "asset/source",
+            },
+          ],
+        },
+      },
+    },
   },
-  appearance: {
-    // @ts-expect-error not fully supported yet
-    initialValue: "light",
-  },
-  head: [
-    ["link", { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
-    ["link", { rel: "alternate icon", href: "/favicon.ico" }], // Fallback for browsers that don't support SVG
-    ["link", { rel: "mask-icon", href: "/favicon.svg", color: "#08B5D6" }],
-    ["meta", { name: "theme-color", content: "#08B5D6" }],
+  plugins: [
+    mermaid(),
+    customTypeDocPlugin({
+      entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
+      tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
+    }),
   ],
   themeConfig: {
-    siteTitle: "Lix SDK",
-
+    darkMode: false,
     nav: [
-      { text: "Guide", link: "/" },
-      { text: "Reference", link: "/api/" },
-      { text: "Plugins", link: "/plugins/" },
+      { text: "Guide", link: "/guide/" },
       { text: "Examples", link: "/examples/" },
+      { text: "Plugins", link: "/plugins/" },
+      { text: "Reference", link: "/api/" },
     ],
-
     sidebar: {
-      "/": [
+      "/guide/": [
         {
           text: "Introduction",
           items: [
-            { text: "What is Lix?", link: "/" },
+            { text: "What is Lix?", link: "/guide/" },
             { text: "Getting Started", link: "/guide/getting-started" },
             {
               text: "Lix for AI Agents",
@@ -113,16 +113,7 @@ export default withMermaid({
           ],
         },
       ],
-      "/api/": [
-        {
-          text: "API Reference",
-          items: [
-            { text: "Overview", link: "/api/" },
-            { text: "TypeDoc Reference", link: "/api/reference/" },
-          ],
-        },
-      ],
-      "/api/reference/": fixTypedocSidebar(typedocSidebar),
+      "/api/": generateApiSidebar(path.join(__dirname, "docs")),
       "/plugins/": [
         {
           text: "Plugins",
@@ -151,19 +142,20 @@ export default withMermaid({
         },
       ],
     },
-
     socialLinks: [
-      { icon: "github", link: "https://github.com/opral/lix-sdk" },
-      { icon: "discord", link: "https://discord.gg/xjQA897RyK" },
+      {
+        icon: "github",
+        mode: "link",
+        content: "https://github.com/opral/lix-sdk",
+      },
+      {
+        icon: "discord",
+        mode: "link",
+        content: "https://discord.gg/xjQA897RyK",
+      },
     ],
-
     footer: {
       message: "Released under the Apache-2.0 License",
-      copyright: "Copyright © 2023-present Opral, Inc.",
-    },
-
-    search: {
-      provider: "local",
     },
   },
 });

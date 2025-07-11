@@ -4,11 +4,11 @@ Validation rules are automated quality checks that run on every change, similar 
 
 **Applications**
   
-![Validation Rules](../../assets/validation-rules.svg)
+![Validation Rules](/validation-rules.svg)
 
 **AI agents**
 
-![Validation Rules for AI Agents](../../assets/validation-rules-agent.svg)
+![Validation Rules for AI Agents](/validation-rules-agent.svg)
 
 > [!NOTE]
 > Validation rules are a proposed feature. If you're interested in using validation rules:
