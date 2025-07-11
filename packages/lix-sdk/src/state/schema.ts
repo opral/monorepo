@@ -419,7 +419,7 @@ export function applyStateDatabaseSchema(
 				}
 
 				// Try cache first - include inherited entities via union
-				const cacheResults = queryCache(sqlite, filters);
+				const cacheResults = selectFromCache(sqlite, filters);
 
 				cursorState.results = cacheResults || [];
 				cursorState.rowIndex = 0;
@@ -443,7 +443,7 @@ export function applyStateDatabaseSchema(
 
 					// Run the expensive recursive CTE to materialize state
 					// Include deletions when populating cache so inheritance blocking works
-					const stateResults = selectStateViaCTE(sqlite, {}, true);
+					const stateResults = materializeState(sqlite, {}, true);
 
 					// Populate cache with materialized state results
 					if (stateResults && stateResults.length > 0) {
@@ -539,7 +539,7 @@ export function applyStateDatabaseSchema(
 					// Re-query cache after population
 
 					// Re-query after population with inheritance logic
-					const newResults = queryCache(sqlite, filters);
+					const newResults = selectFromCache(sqlite, filters);
 					cursorState.results = newResults || [];
 				} else {
 					if (canLog()) {
@@ -1079,7 +1079,7 @@ function getColumnName(columnIndex: number): string {
 	return columns[columnIndex] || "unknown";
 }
 
-function selectStateViaCTE(
+function materializeState(
 	sqlite: SqliteWasmDatabase,
 	filters: Record<string, string>,
 	includeDeletions: boolean = false
@@ -1287,7 +1287,7 @@ function selectStateViaCTE(
 	return result || [];
 }
 
-function queryCache(
+function selectFromCache(
 	sqlite: SqliteWasmDatabase,
 	filters: Record<string, any>
 ): any[] {

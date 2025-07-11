@@ -4,108 +4,126 @@ import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { clearCache } from "./clear-cache.js";
 
-test("select, insert, update, delete entity", async () => {
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
+describe.each([
+	{ scenario: "cache hit", shouldClearCache: false },
+	{ scenario: "cache miss", shouldClearCache: true },
+])("$scenario", ({ shouldClearCache }) => {
+	test("select, insert, update, delete entity", async () => {
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
 			},
-		},
-	};
+		};
 
-	const lix = await openLix({});
+		const lix = await openLix({});
 
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-			snapshot_content: {
-				value: "hello world",
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: {
+					value: "hello world",
+				},
+			})
+			.execute();
+
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
+
+		const viewAfterInsert = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterInsert).toMatchObject([
+			{
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					value: "hello world",
+				},
 			},
-		})
-		.execute();
+		]);
 
-	const viewAfterInsert = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: {
+					value: "hello world - updated",
+				},
+			})
+			.where("entity_id", "=", "e0")
+			.where("schema_key", "=", "mock_schema")
+			.where("file_id", "=", "f0")
+			.execute();
 
-	expect(viewAfterInsert).toMatchObject([
-		{
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			snapshot_content: {
-				value: "hello world",
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
+
+		const viewAfterUpdate = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterUpdate).toMatchObject([
+			{
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					value: "hello world - updated",
+				},
 			},
-		},
-	]);
+		]);
 
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: {
-				value: "hello world - updated",
-			},
-		})
-		.where("entity_id", "=", "e0")
-		.where("schema_key", "=", "mock_schema")
-		.where("file_id", "=", "f0")
-		.execute();
+		await lix.db
+			.deleteFrom("state_all")
+			.where("entity_id", "=", "e0")
+			.where(
+				"version_id",
+				"=",
+				lix.db.selectFrom("active_version").select("version_id")
+			)
+			.where("schema_key", "=", "mock_schema")
+			.execute();
 
-	const viewAfterUpdate = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
 
-	expect(viewAfterUpdate).toMatchObject([
-		{
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			snapshot_content: {
-				value: "hello world - updated",
-			},
-		},
-	]);
+		const viewAfterDelete = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
 
-	await lix.db
-		.deleteFrom("state_all")
-		.where("entity_id", "=", "e0")
-		.where(
-			"version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
-		.where("schema_key", "=", "mock_schema")
-		.execute();
-
-	const viewAfterDelete = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
-
-	expect(viewAfterDelete).toHaveLength(0);
+		expect(viewAfterDelete).toHaveLength(0);
+	});
 });
 
 test("validates the schema on insert", async () => {
