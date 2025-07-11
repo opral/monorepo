@@ -178,6 +178,20 @@ function processLogQueue() {
 }
 
 /**
+ * Cleanup function to clear pending timeouts and flush the log queue
+ */
+export function cleanupQueryLogging(): void {
+	// Clear any pending timeout
+	if (currentTimeout) {
+		clearTimeout(currentTimeout);
+		currentTimeout = null;
+	}
+	
+	// Clear the log queue to prevent memory leaks
+	logQueue.length = 0;
+}
+
+/**
  * Enables basic query logging by intercepting SQLite exec calls.
  * This is a simplified implementation that logs query execution times.
  */

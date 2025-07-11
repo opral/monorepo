@@ -13,7 +13,7 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { enableQueryLogging } from "../database/enable-query-logging.js";
+import { enableQueryLogging, cleanupQueryLogging } from "../database/enable-query-logging.js";
 
 export type Lix = {
 	skipLogging?: boolean;
@@ -195,6 +195,8 @@ export async function openLix(args: {
 		hooks,
 		observe,
 		close: async () => {
+			// Clean up query logging timeouts before closing
+			cleanupQueryLogging();
 			await storage.close();
 		},
 		toBlob: async () => {
