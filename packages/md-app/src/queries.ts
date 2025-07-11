@@ -90,8 +90,15 @@ export function selectCheckpoints(lix: Lix) {
 			.groupBy("change_set.id")
 			.select((eb) => [
 				eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+				eb
+					.selectFrom("change_set_label")
+					.innerJoin("label", "label.id", "change_set_label.label_id")
+					.where("change_set_label.change_set_id", "=", eb.ref("change_set.id"))
+					.where("label.name", "=", "checkpoint")
+					.select("change_set_label.lixcol_created_at")
+					.as("checkpoint_created_at"),
 			])
-			.orderBy("change_set.lixcol_updated_at", "desc")
+			.orderBy("checkpoint_created_at", "desc")
 	);
 }
 
@@ -233,7 +240,6 @@ export function selectWorkingChanges(lix: Lix) {
 				.where("key", "=", "flashtype_active_file")
 				.select("value")
 		)
-		.where("change.file_id", "!=", "lix_own_change_control")
 		.select([
 			"change.id",
 			"change.entity_id",
@@ -309,7 +315,6 @@ export function selectWorkingChanges(lix: Lix) {
 // 		)
 // 		.where("change_set_element.change_set_id", "=", workingChangeSetId)
 // 		.where("change.file_id", "=", activeFile.id)
-// 		.where("change.file_id", "!=", "lix_own_change_control")
 // 		.select([
 // 			"change.id",
 // 			"change.entity_id",
@@ -482,7 +487,6 @@ export function selectChangeDiffs(
 				.where("key", "=", "flashtype_active_file")
 				.select("value")
 		)
-		.where("change.file_id", "!=", "lix_own_change_control")
 		.select([
 			"change.id",
 			"change.entity_id",

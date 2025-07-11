@@ -16,7 +16,7 @@ export const CheckpointComponent = (props: {
 	checkpointChangeSet: {
 		id: string;
 		change_count: number;
-		lixcol_updated_at: string | null;
+		checkpoint_created_at: string | null;
 		author_name: string | null;
 	};
 	previousChangeSetId: string | null;
@@ -109,7 +109,7 @@ export const CheckpointComponent = (props: {
 
 						<div className="flex items-center flex-shrink-0">
 							<span className="text-xs text-slate-500 mr-1">
-								{timeAgo(props.checkpointChangeSet.lixcol_updated_at!)}
+								{timeAgo(props.checkpointChangeSet.checkpoint_created_at!)}
 							</span>
 							<Button variant="ghost" size="sm" className="h-6 w-6 p-0">
 								<ChevronDown

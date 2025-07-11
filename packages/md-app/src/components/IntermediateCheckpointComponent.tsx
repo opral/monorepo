@@ -88,7 +88,7 @@ export default IntermediateCheckpointComponent;
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const lix = useLix();
-  const [currentChangeSet] = useQuery(selectWorkingChangeSet);
+  const currentChangeSet = useQuery(selectWorkingChangeSet);
   const workingChanges = useQuery(selectWorkingChanges);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
