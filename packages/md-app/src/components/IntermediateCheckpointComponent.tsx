@@ -1,17 +1,16 @@
 import { useState, useRef, useEffect } from "react"; // Added useRef, useEffect
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
-import { useAtom } from "jotai/react";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { UiDiffComponentProps, createCheckpoint, createThread } from "@lix-js/sdk";
-import { lixAtom } from "@/state.ts";
+import { useQuery } from "@/hooks/useQuery";
+import { selectCheckpointChangeSets, selectIntermediateChanges, selectWorkingChangeSet } from "@/queries";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown, Zap, Loader2 } from "lucide-react";
 import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 import { useChat } from "@/components/editor/use-chat";
 import { toast } from "sonner";
+import { useLix } from "@lix-js/react-utils";
 
 interface IntermediateCheckpointComponentProps {
   filteredChanges?: UiDiffComponentProps["diffs"];
@@ -19,7 +18,7 @@ interface IntermediateCheckpointComponentProps {
 
 export const IntermediateCheckpointComponent = ({ filteredChanges }: IntermediateCheckpointComponentProps) => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
-  const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
+  const [checkpointChangeSets] = useQuery(selectCheckpointChangeSets, 500);
 
 
   // Don't render anything if there's no change data
@@ -48,7 +47,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
         }
       }}
     >
-      <ChangeDot top={false} bottom={checkpointChangeSets.length > 0} highlighted />
+      <ChangeDot top={false} bottom={!!checkpointChangeSets && checkpointChangeSets.length > 0} highlighted />
       <div className="flex-1 z-10">
         <div className="h-12 flex items-center w-full gap-2">
           <p className="flex-1 truncate text-ellipsis overflow-hidden text-sm">
@@ -90,9 +89,9 @@ export default IntermediateCheckpointComponent;
 
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
-  const [lix] = useAtom(lixAtom);
-  const [currentChangeSet] = useAtom(workingChangeSetAtom);
-  const [intermediateChanges] = useAtom(intermediateChangesAtom); // Added to access changes for prompt
+  const lix = useLix();
+  const [currentChangeSet] = useQuery(selectWorkingChangeSet);
+  const [intermediateChanges] = useQuery(selectIntermediateChanges); // Added to access changes for prompt
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
@@ -121,7 +120,7 @@ const CreateCheckpointInput = () => {
   });
 
   const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
-    if (!description.trim()) return;
+    if (!description.trim() || !lix) return;
 
     lix.db.transaction().execute(async (trx) => {
       const thread = await createThread({
@@ -140,16 +139,16 @@ const CreateCheckpointInput = () => {
   };
 
   const handleCreateCheckpoint = async () => {
-    // Ensure description is not empty before proceeding
-    if (!description.trim() || isGeneratingDescription) return;
+    // Ensure description is not empty and lix is available before proceeding
+    if (!description.trim() || isGeneratingDescription || !lix) return;
     await onThreadComposerSubmit({ content: fromPlainText(description!) });
     await createCheckpoint({ lix });
-    await saveLixToOpfs({ lix });
+    // OpfsStorage now handles persistence automatically through the onStateCommit hook
     setDescription(""); // Clear description after submission
   };
 
   const handleGenerateDescription = async () => {
-    if (intermediateChanges.length === 0) {
+    if (!intermediateChanges || intermediateChanges.length === 0) {
       toast.info("No changes to describe.");
       return;
     }
@@ -235,7 +234,7 @@ const CreateCheckpointInput = () => {
           size="icon"
           aria-label="Generate description"
           className="absolute top-1 right-1 w-6 h-6 rounded-sm"
-          disabled={isGeneratingDescription || intermediateChanges.length === 0}
+          disabled={isGeneratingDescription || !intermediateChanges || intermediateChanges.length === 0}
         >
           {isGeneratingDescription ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
         </Button>

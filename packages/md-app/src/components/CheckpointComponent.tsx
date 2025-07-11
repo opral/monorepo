@@ -1,16 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
-import { Thread, UiDiffComponentProps } from "@lix-js/sdk";
+import { UiDiffComponentProps } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
-import { useAtom } from "jotai/react";
-import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { activeFileAtom, getChangeDiffs, getThreads } from "@/state-active-file.ts";
+import { useQuery } from "@/hooks/useQuery";
+import { selectThreads, selectChangeDiffs } from "@/queries";
 import { ChevronDown } from "lucide-react";
 
 export const CheckpointComponent = (props: {
@@ -25,21 +24,17 @@ export const CheckpointComponent = (props: {
 	showBottomLine: boolean;
 }) => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
-	const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
-	const [threads, setThreads] = useState<Thread[]>([]);
-	const [lix] = useAtom(lixAtom);
-	const [activeFile] = useAtom(activeFileAtom);
+	const [shouldLoadDiffs, setShouldLoadDiffs] = useState<boolean>(false);
+	const [threads] = useQuery(async () => {
+		if (!props.checkpointChangeSet.id) return [];
+		return await selectThreads({ changeSetId: props.checkpointChangeSet.id });
+	}, 500);
+	const [diffs] = useQuery(async () => {
+		if (!shouldLoadDiffs || !props.checkpointChangeSet.id) return [];
+		return await selectChangeDiffs(props.checkpointChangeSet.id, props.previousChangeSetId);
+	}, 500);
 
-	useEffect(() => {
-		const fetchThreads = async () => {
-			if (props.checkpointChangeSet.id) {
-				const threads = await getThreads(lix, props.checkpointChangeSet.id);
-				if (threads) setThreads(threads);
-			}
-		};
-
-		fetchThreads();
-	}, []);
+	// No longer need useEffect for threads - handled by useThreads hook
 
 	// Don't render anything if there's no change data
 	if (!props.checkpointChangeSet || !props.checkpointChangeSet.id) {
@@ -47,33 +42,15 @@ export const CheckpointComponent = (props: {
 	}
 
 	const toggleExpanded = () => {
-		if (diffs.length > 0) {
-			setIsExpanded(!isExpanded);
-			return;
+		if (!isExpanded && !shouldLoadDiffs) {
+			// Start loading diffs when expanding for the first time
+			setShouldLoadDiffs(true);
 		}
-		getChangeDiffs(
-			lix,
-			activeFile!.id,
-			props.checkpointChangeSet.id,
-			props.previousChangeSetId
-		).then((diffs) => {
-			setDiffs(diffs);
-		});
-		// TODO: diff needs to hanndle before and after file
-		// getBeforeAfterOfFile({
-		//   lix,
-		//   changeSetBefore: props.previousChangeSetId ? { id: props.previousChangeSetId } : undefined,
-		//   changeSetAfter: props.checkpointChangeSet.id ? { id: props.checkpointChangeSet.id } : undefined,
-		//   file: { id: activeFile!.id },
-		// }).then((diffs) => {
-		//   setDiffs([diffs]);
-		// });
-
 		setIsExpanded(!isExpanded);
 	};
 
 	// Group changes by plugin_key
-	const groupedChanges = diffs.reduce(
+	const groupedChanges = (diffs || []).reduce(
 		(acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
 			const key = change.plugin_key;
 			if (!acc[key]) {
@@ -86,7 +63,6 @@ export const CheckpointComponent = (props: {
 	);
 
 	// Get the first comment if it exists
-	// @ts-expect-error - Typescript doesn't know that threads are created with initial comment
 	const firstComment = threads?.[0]?.comments?.[0];
 
 	// Truncate comment content if it's longer than 50 characters

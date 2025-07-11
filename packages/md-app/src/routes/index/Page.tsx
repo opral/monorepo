@@ -1,7 +1,7 @@
 import { Toaster } from 'sonner';
 import { PlateEditor } from '@/components/editor/plate-editor';
-import { activeFileAtom, intermediateChangesAtom } from '@/state-active-file';
-import { useAtom } from 'jotai/react';
+import { useQueryTakeFirst } from '@lix-js/react-utils';
+import { selectActiveFile, selectIntermediateChanges, selectActiveAccount } from '@/queries';
 import FileName from '@/components/FileName';
 import { useUrlChangeListener } from '@/hooks/useUrlChangeListener';
 import {
@@ -13,14 +13,14 @@ import { useEffect, useState } from "react";
 import { Button } from '@/components/ui/button';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import ChangeControlSidebar from '@/components/ui/sidebar-change-control';
-import { activeAccountAtom } from '@/state';
 import posthog from 'posthog-js';
 
 // Wrapper component that has access to the MultiSidebar context
 function PageContent() {
-	const [activeFile] = useAtom(activeFileAtom);
-	const [activeAccount] = useAtom(activeAccountAtom);
-	const [intermediateChanges] = useAtom(intermediateChangesAtom);
+	const activeFile = useQueryTakeFirst(selectActiveFile);
+	const activeAccount = useQueryTakeFirst(selectActiveAccount);
+	// const intermediateChanges = useQuery(selectIntermediateChanges);
+	const intermediateChanges = []
 	const { leftSidebar, rightSidebar } = useMultiSidebar();
 
 	useEffect(() => {
@@ -70,7 +70,7 @@ function PageContent() {
 							className="size-8 relative"
 							onClick={toggleRightSidebar}
 						>
-							{intermediateChanges.length > 0 && !rightSidebar.open && (
+							{intermediateChanges && intermediateChanges.length > 0 && !rightSidebar.open && (
 								<>
 									<span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary animate-ping" />
 									<span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary" />
@@ -92,9 +92,9 @@ function PageContent() {
 			</div>
 
 			{/* Right sidebar */}
-			<div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[20rem]' : 'w-0'}`}>
+			{/* <div className={`h-full overflow-hidden transition-all duration-200 ease-in-out bg-sidebar border-l ${rightSidebar.open ? 'w-[20rem]' : 'w-0'}`}>
 				<ChangeControlSidebar />
-			</div>
+			</div> */}
 		</div>
 	);
 }
