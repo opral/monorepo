@@ -69,8 +69,7 @@ export const IntermediateCheckpointComponent = ({ workingChanges }: Intermediate
               {Object.keys(groupedChanges).map((pluginKey) => (
                 <ChangeDiffComponent
                   key={pluginKey}
-                  // TODO: Rework changes query to what we need
-                  diffs={[workingChanges![workingChanges!.length - 1]]}
+                  diffs={groupedChanges[pluginKey]}
                   contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
                 // debug={true}
                 />
