@@ -1,13 +1,10 @@
-import { useAtom } from "jotai";
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { activeFileAtom } from "@/state-active-file";
-import { lixAtom, withPollingAtom } from "@/state";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
+import { selectActiveFile } from "@/queries";
+import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
 
 export default function FileName() {
-  const [activeFile] = useAtom(activeFileAtom);
-  const [lix] = useAtom(lixAtom);
-  const [, setPolling] = useAtom(withPollingAtom);
+  const activeFile = useQueryTakeFirst(selectActiveFile);
+  const lix = useLix();
   const [isEditing, setIsEditing] = useState(false);
   const [fileName, setFileName] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -62,8 +59,7 @@ export default function FileName() {
       .where("id", "=", activeFile.id)
       .execute();
 
-    await saveLixToOpfs({ lix });
-    setPolling(Date.now()); // Refresh state
+    // OpfsStorage now handles persistence automatically through the onStateCommit hook
     setIsEditing(false);
   };
 

@@ -19,9 +19,12 @@
 	"sideEffects": false,
 	"dependencies": {
 		"@lix-js/sdk": "workspace:*",
+		"@lix-js/html-diff": "^0.0.1",
 		"crypto": "^1.0.1",
 		"diff": "^7.0.0",
+		"hast-util-to-html": "^9.0.0",
 		"lit": "^3.2.1",
+		"mdast-util-to-hast": "^13.0.0",
 		"papaparse": "^5.4.1",
 		"remark-parse": "10.0.2",
 		"remark-stringify": "^11.0.0",

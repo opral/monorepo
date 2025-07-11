@@ -1,36 +1,32 @@
-import { useAtom } from "jotai";
 import { useCallback } from "react";
-import { activeFileAtom } from "@/state-active-file";
-import { filesAtom, lixAtom, withPollingAtom } from "@/state";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
+import { useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
+import { selectActiveFile, selectFiles } from "@/queries";
 import { updateUrlParams } from "@/helper/updateUrlParams";
 import { generateHumanId } from "@/helper/generateHumanId";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Check, ChevronDown, FileText, Plus } from "lucide-react";
 import { nanoid } from "@lix-js/sdk";
+import { useLix } from "@lix-js/react-utils";
 
 export default function FileSwitcher() {
-	const [activeFile] = useAtom(activeFileAtom);
-	const [files] = useAtom(filesAtom);
-	const [lix] = useAtom(lixAtom);
-	const [, setPolling] = useAtom(withPollingAtom);
+	const activeFile = useQueryTakeFirst(selectActiveFile);
+	const files = useQuery(selectFiles);
+	const lix = useLix();
 
 	const switchToFile = useCallback(
 		async (fileId: string) => {
 			// Update URL without causing a navigation
 			updateUrlParams({ f: fileId });
-
-			// Trigger polling to refresh state without full page reload
-			setPolling(Date.now());
+			// Data will automatically refresh via reactive queries
 		},
-		[setPolling]
+		[]
 	);
 
 	const createNewFile = useCallback(async () => {
@@ -51,23 +47,19 @@ export default function FileSwitcher() {
 				})
 				.executeTakeFirstOrThrow();
 
-			// Save the changes to OPFS
-			await saveLixToOpfs({ lix });
+			// OpfsStorage now handles persistence automatically through the onStateCommit hook
 
 			// Update URL without full navigation
 			updateUrlParams({ f: newFileId });
-
-			// Refresh state
-			setPolling(Date.now());
 		} catch (error) {
 			console.error("Failed to create new file:", error);
 		}
-	}, [lix, setPolling]);
+	}, [lix]);
 
 	if (!activeFile) return null;
 
 	// Filter only markdown files (assuming they end with .md)
-	const mdFiles = files.filter((file) => file.path.endsWith(".md"));
+	const mdFiles = files ? files.filter((file) => file.path.endsWith(".md")) : [];
 
 	return (
 		<DropdownMenu>

@@ -29,6 +29,14 @@ export default defineConfig({
 			"@": path.resolve(__dirname, "./src"),
 		},
 	},
+	define: {
+		global: "globalThis",
+		// Provide a simple crypto polyfill for Node.js crypto module
+		process: JSON.stringify({
+			env: {},
+			browser: true
+		}),
+	},
 	build: {
 		minify: false,
 		target: "esnext",

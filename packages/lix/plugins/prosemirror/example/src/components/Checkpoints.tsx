@@ -8,7 +8,7 @@ import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 const Checkpoints: React.FC = () => {
 	const lix = useLix();
 	// const activeVersion = useQueryTakeFirstOrThrow(selectActiveVersion);
-	const checkpoints = useQuery((lix) => selectCheckpoints(lix));
+	const checkpoints = useQuery(selectCheckpoints);
 	const workingChangeSet = useQueryTakeFirst(selectWorkingChangeSet);
 	const [, setExpandedChangeSetId] = useKeyValue<string | null>(
 		"expandedChangeSetId",

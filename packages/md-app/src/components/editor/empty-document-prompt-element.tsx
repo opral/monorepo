@@ -1,30 +1,24 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { useAtom } from "jotai";
+import { useState, useRef, useEffect } from "react";
 import { PlateElementProps } from "@udecode/plate/react";
-import { activeFileAtom } from "@/state-active-file";
+import { selectActiveFile } from "@/queries";
 import { useChat } from "./use-chat";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Loader2, Zap } from "lucide-react";
-import { lixAtom, withPollingAtom } from "@/state";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs";
-import { generateHumanId } from "@/helper/generateHumanId";
-import { updateUrlParams } from "@/helper/updateUrlParams";
 import {
 	removeEmptyPromptElement,
 	setPromptDismissed,
 } from "@/helper/emptyPromptElementHelpers";
 import { AIChatPlugin } from "@udecode/plate-ai/react";
-import { nanoid } from "@lix-js/sdk";
+import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
 
 export function EmptyDocumentPromptElement({
 	attributes,
 	editor,
 }: PlateElementProps) {
 	const [prompt, setPrompt] = useState("");
-	const [activeFile] = useAtom(activeFileAtom);
-	const [lix] = useAtom(lixAtom);
-	const [, setPolling] = useAtom(withPollingAtom);
+	const activeFile = useQueryTakeFirst(selectActiveFile);
+	const lix = useLix();
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 	const chat = useChat({
@@ -45,53 +39,6 @@ export function EmptyDocumentPromptElement({
 		}
 	};
 
-	const createNewFile = useCallback(
-		async (content?: string) => {
-			if (!lix) return;
-
-			try {
-				// Use prompt-based name if generating content, otherwise use random ID
-				const fileBaseName = content
-					? prompt
-							.trim()
-							.toLowerCase()
-							.split(/\s+/)
-							.reduce((acc: string[], word: string) => {
-								if (
-									(acc.join("-") + (acc.length ? "-" : "") + word).length <= 30
-								) {
-									acc.push(word);
-								}
-								return acc;
-							}, [])
-							.join("-")
-					: generateHumanId();
-
-				const newFileId = nanoid();
-
-				await lix.db
-					.insertInto("file")
-					.values({
-						id: newFileId,
-						path: `/${fileBaseName}.md`,
-						data: new TextEncoder().encode(``),
-					})
-					.executeTakeFirstOrThrow();
-
-				await saveLixToOpfs({ lix });
-				updateUrlParams({ f: newFileId });
-				setPolling(Date.now());
-
-				// Return the new file ID for later use
-				return newFileId;
-			} catch (error) {
-				console.error("Failed to create new file:", error);
-				return null;
-			}
-		},
-		[lix, setPolling, prompt]
-	);
-
 	// Initialize height and reset on changes
 	useEffect(() => {
 		adjustHeight();
@@ -102,25 +49,6 @@ export function EmptyDocumentPromptElement({
 		if (!activeFile || !prompt.trim()) return;
 
 		try {
-			// If we're in welcome.md, create a new file first
-			if (activeFile.path === "/welcome.md") {
-				const newFileId = await createNewFile(prompt);
-				if (newFileId) {
-					// Wait longer for navigation and editor synchronization to complete
-					await new Promise((resolve) => setTimeout(resolve, 500));
-
-					// Clear the editor content before starting generation
-					const currentEditor = editor;
-					if (currentEditor) {
-						currentEditor.tf.setValue([]);
-					}
-				} else {
-					// If file creation failed, stay in current file
-					toast.error(
-						"Failed to create new file. Generating in current file instead."
-					);
-				}
-			}
 			editor.getApi(AIChatPlugin).aiChat.submit({
 				prompt: `Generate a complete, well-structured markdown document about: ${prompt}. Include appropriate headings starting with level 1 heading (#), paragraphs, and relevant formatting like lists or emphasis where appropriate.`,
 			});

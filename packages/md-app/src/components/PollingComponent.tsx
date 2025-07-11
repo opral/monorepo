@@ -1,17 +1,8 @@
-import { useEffect } from "react";
-import { useAtom } from "jotai";
-import { withPollingAtom } from "@/state.ts";
+// PollingComponent is no longer needed with the new query-based architecture
+// Each hook now manages its own polling interval via useQuery
 
 const PollingComponent = () => {
-  const [, setPolling] = useAtom(withPollingAtom);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPolling(Date.now());
-    }, 100);
-    return () => clearInterval(interval);
-  }, [setPolling]);
-
+  // No longer needed - individual hooks handle their own polling
   return null;
 };
 
