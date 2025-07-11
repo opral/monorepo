@@ -1303,20 +1303,37 @@ function materializeState(
 			)
 		/* ---------------------- final projection ------------------------------ */
 		SELECT 
-			entity_id,
-			schema_key,
-			file_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-			version_id,
-			created_at,
-			created_at AS updated_at,   -- TODO compute real updated_at later
-			inherited_from_version_id,
-			change_id,
-			COALESCE(change_set_id,'untracked') AS change_set_id
-		FROM prioritized_entities
-		WHERE rn = 1
+			pe.entity_id,
+			pe.schema_key,
+			pe.file_id,
+			pe.plugin_key,
+			pe.snapshot_content,
+			pe.schema_version,
+			pe.version_id,
+			COALESCE(
+				(SELECT MIN(ac.created_at) 
+				 FROM all_changes_with_snapshots ac
+				 WHERE ac.entity_id = pe.entity_id 
+				   AND ac.schema_key = pe.schema_key 
+				   AND ac.file_id = pe.file_id),
+				pe.created_at
+			) AS created_at,
+			COALESCE(
+				(SELECT MAX(ac.created_at) 
+				 FROM all_changes_with_snapshots ac
+				 JOIN cse_in_reachable_cs cse 
+				   ON cse.target_change_id = ac.id
+				 WHERE ac.entity_id = pe.entity_id 
+				   AND ac.schema_key = pe.schema_key 
+				   AND ac.file_id = pe.file_id
+				   AND cse.version_id = pe.version_id),
+				pe.created_at
+			) AS updated_at,
+			pe.inherited_from_version_id,
+			pe.change_id,
+			COALESCE(pe.change_set_id,'untracked') AS change_set_id
+		FROM prioritized_entities pe
+		WHERE pe.rn = 1
 	`;
 
 	/* ------------------------ dynamic filters ------------------------------ */

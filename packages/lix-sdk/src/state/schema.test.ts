@@ -382,88 +382,103 @@ describe.each([
 			},
 		]);
 	});
-});
 
-test("created_at and updated_at timestamps are computed correctly", async () => {
-	const lix = await openLix({});
+	test("created_at and updated_at timestamps are computed correctly", async () => {
+		const lix = await openLix({});
 
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
 			},
-		},
-	};
+		};
 
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
-	// Insert initial entity
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-			snapshot_content: {
-				value: "initial value",
-			},
-		})
-		.execute();
+		// Insert initial entity
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: {
+					value: "initial value",
+				},
+			})
+			.execute();
 
-	const stateAfterInsert = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "e0")
-		.selectAll()
-		.execute();
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
 
-	expect(stateAfterInsert).toHaveLength(1);
-	expect(stateAfterInsert[0]?.created_at).toBeDefined();
-	expect(stateAfterInsert[0]?.updated_at).toBeDefined();
-	expect(stateAfterInsert[0]?.created_at).toBe(stateAfterInsert[0]?.updated_at);
+		const stateAfterInsert = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "e0")
+			.selectAll()
+			.execute();
 
-	// Wait a bit to ensure different timestamps
-	await new Promise((resolve) => setTimeout(resolve, 1));
+		expect(stateAfterInsert).toHaveLength(1);
+		expect(stateAfterInsert[0]?.created_at).toBeDefined();
+		expect(stateAfterInsert[0]?.updated_at).toBeDefined();
+		expect(stateAfterInsert[0]?.created_at).toBe(
+			stateAfterInsert[0]?.updated_at
+		);
 
-	// Update the entity
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: {
-				value: "updated value",
-			},
-		})
-		.where("entity_id", "=", "e0")
-		.where("schema_key", "=", "mock_schema")
-		.execute();
+		// Wait a bit to ensure different timestamps
+		await new Promise((resolve) => setTimeout(resolve, 1));
 
-	const stateAfterUpdate = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "e0")
-		.selectAll()
-		.execute();
+		// Update the entity
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: {
+					value: "updated value",
+				},
+			})
+			.where("entity_id", "=", "e0")
+			.where("schema_key", "=", "mock_schema")
+			.execute();
 
-	expect(stateAfterUpdate).toHaveLength(1);
-	expect(stateAfterUpdate[0]?.created_at).toBeDefined();
-	expect(stateAfterUpdate[0]?.updated_at).toBeDefined();
-	// created_at should remain the same
-	expect(stateAfterUpdate[0]?.created_at).toBe(stateAfterInsert[0]?.created_at);
-	// updated_at should be different (newer)
-	expect(stateAfterUpdate[0]?.updated_at).not.toBe(
-		stateAfterInsert[0]?.updated_at
-	);
-	expect(new Date(stateAfterUpdate[0]!.updated_at).getTime()).toBeGreaterThan(
-		new Date(stateAfterInsert[0]!.updated_at).getTime()
-	);
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
+
+		const stateAfterUpdate = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "e0")
+			.selectAll()
+			.execute();
+
+		expect(stateAfterUpdate).toHaveLength(1);
+		expect(stateAfterUpdate[0]?.created_at).toBeDefined();
+		expect(stateAfterUpdate[0]?.updated_at).toBeDefined();
+
+		// created_at should remain the same
+		expect(stateAfterUpdate[0]?.created_at).toBe(
+			stateAfterInsert[0]?.created_at
+		);
+
+		// updated_at should be different (newer)
+		expect(stateAfterUpdate[0]?.updated_at).not.toBe(
+			stateAfterInsert[0]?.updated_at
+		);
+
+		expect(new Date(stateAfterUpdate[0]!.updated_at).getTime()).toBeGreaterThan(
+			new Date(stateAfterInsert[0]!.updated_at).getTime()
+		);
+	});
 });
 
 test("created_at and updated_at are version specific", async () => {
