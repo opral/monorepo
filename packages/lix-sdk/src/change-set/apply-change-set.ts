@@ -18,6 +18,20 @@ export async function applyChangeSet(args: {
 			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
+		// Skip change control for this transaction
+		// This allows us to apply changes without triggering change control logic
+		// This is necessary because we are applying a change set directly
+		// and we don't want to create a new change set for this operation
+		await trx
+			.insertInto("key_value_all")
+			.values({
+				key: "lix_skip_file_handlers",
+				value: true,
+				lixcol_untracked: true,
+				lixcol_version_id: version.id,
+			})
+			.execute();
+
 		// Update the version to point to the new change set
 		await trx
 			.updateTable("version")
@@ -177,6 +191,13 @@ export async function applyChangeSet(args: {
 					.where("id", "=", file.id)
 					.execute();
 			}
+
+			// After processing all plugins, emit file change event
+			await trx
+				.deleteFrom("key_value_all")
+				.where("lixcol_version_id", "=", version.id)
+				.where("key", "=", "lix_skip_file_handlers")
+				.execute();
 		}
 	};
 
