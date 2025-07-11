@@ -613,168 +613,181 @@ describe.each([
 			new Date(updatedStateVersionB[0]!.updated_at).getTime()
 		).toBeGreaterThan(new Date(stateVersionB[0]!.updated_at).getTime());
 	});
-});
 
-test("state appears in both versions when they share the same change set", async () => {
-	const lix = await openLix({});
+	test("state appears in both versions when they share the same change set", async () => {
+		const lix = await openLix({});
 
-	const versionA = await createVersion({ lix, id: "version_a" });
-	// Insert state into version A
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "mock_plugin",
-			schema_version: "1.0",
-			snapshot_content: {
-				value: "shared state",
+		const versionA = await createVersion({ lix, id: "version_a" });
+		// Insert state into version A
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "mock_plugin",
+				schema_version: "1.0",
+				snapshot_content: {
+					value: "shared state",
+				},
+				version_id: "version_a",
+			})
+			.execute();
+
+		const versionAAfterInsert = await lix.db
+			.selectFrom("version")
+			.where("id", "=", versionA.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// Create version B with the same change set as version A
+		await createVersion({
+			lix,
+			id: "version_b",
+			changeSet: { id: versionAAfterInsert.change_set_id },
+		});
+
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
+
+		const stateInBothVersions = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.where("entity_id", "=", "e0")
+			.selectAll()
+			.execute();
+
+		// Both versions should see the same state
+		expect(stateInBothVersions).toMatchObject([
+			{
+				entity_id: "e0",
+				schema_key: "mock_schema",
+				snapshot_content: { value: "shared state" },
+				version_id: "version_a",
 			},
-			version_id: "version_a",
-		})
-		.execute();
-
-	const versionAAfterInsert = await lix.db
-		.selectFrom("version")
-		.where("id", "=", versionA.id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// Create version B with the same change set as version A
-	await createVersion({
-		lix,
-		id: "version_b",
-		changeSet: { id: versionAAfterInsert.change_set_id },
-	});
-
-	const stateInBothVersions = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.where("entity_id", "=", "e0")
-		.selectAll()
-		.execute();
-
-	// Both versions should see the same state
-	expect(stateInBothVersions).toMatchObject([
-		{
-			entity_id: "e0",
-			schema_key: "mock_schema",
-			snapshot_content: { value: "shared state" },
-			version_id: "version_a",
-		},
-		{
-			entity_id: "e0",
-			schema_key: "mock_schema",
-			snapshot_content: { value: "shared state" },
-			version_id: "version_b",
-		},
-	]);
-});
-
-test("state diverges when versions have common ancestor but different changes", async () => {
-	const lix = await openLix({});
-
-	// Create base version and add initial state
-	const baseVersion = await createVersion({ lix, id: "base_version" });
-
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "mock_plugin",
-			schema_version: "1.0",
-			snapshot_content: {
-				value: "base state",
+			{
+				entity_id: "e0",
+				schema_key: "mock_schema",
+				snapshot_content: { value: "shared state" },
+				version_id: "version_b",
 			},
-			version_id: "base_version",
-		})
-		.execute();
-
-	const baseVersionAfterInsert = await lix.db
-		.selectFrom("version")
-		.where("id", "=", baseVersion.id)
-		.selectAll()
-		.executeTakeFirstOrThrow();
-
-	// Create two versions from the same base changeset
-	await createVersion({
-		lix,
-		id: "version_a",
-		changeSet: { id: baseVersionAfterInsert.change_set_id },
+		]);
 	});
 
-	await createVersion({
-		lix,
-		id: "version_b",
-		changeSet: { id: baseVersionAfterInsert.change_set_id },
+	test("state diverges when versions have common ancestor but different changes", async () => {
+		const lix = await openLix({});
+
+		// Create base version and add initial state
+		const baseVersion = await createVersion({ lix, id: "base_version" });
+
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "mock_plugin",
+				schema_version: "1.0",
+				snapshot_content: {
+					value: "base state",
+				},
+				version_id: "base_version",
+			})
+			.execute();
+
+		const baseVersionAfterInsert = await lix.db
+			.selectFrom("version")
+			.where("id", "=", baseVersion.id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// Create two versions from the same base changeset
+		await createVersion({
+			lix,
+			id: "version_a",
+			changeSet: { id: baseVersionAfterInsert.change_set_id },
+		});
+
+		await createVersion({
+			lix,
+			id: "version_b",
+			changeSet: { id: baseVersionAfterInsert.change_set_id },
+		});
+
+		const versions = await lix.db
+			.selectFrom("version")
+			.where("id", "in", ["base_version", "version_a", "version_b"])
+			.select(["id", "change_set_id"])
+			.execute();
+
+		expect(versions).toHaveLength(3);
+
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
+
+		// Both versions should initially see the base state
+		const initialState = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.where("entity_id", "=", "e0")
+			.selectAll()
+			.execute();
+
+		expect(initialState).toHaveLength(3); // base, version_a, version_b
+
+		// Update state in version A
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: { value: "updated in version A" },
+			})
+			.where("entity_id", "=", "e0")
+			.where("version_id", "=", "version_a")
+			.execute();
+
+		// Update state in version B differently
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: { value: "updated in version B" },
+			})
+			.where("entity_id", "=", "e0")
+			.where("version_id", "=", "version_b")
+			.execute();
+
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
+
+		const divergedState = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.where("entity_id", "=", "e0")
+			.selectAll()
+			.orderBy("version_id")
+			.execute();
+
+		// All three versions should have different states
+		expect(divergedState).toMatchObject([
+			{
+				entity_id: "e0",
+				snapshot_content: { value: "base state" },
+				version_id: "base_version",
+			},
+			{
+				entity_id: "e0",
+				snapshot_content: { value: "updated in version A" },
+				version_id: "version_a",
+			},
+			{
+				entity_id: "e0",
+				snapshot_content: { value: "updated in version B" },
+				version_id: "version_b",
+			},
+		]);
 	});
-
-	const versions = await lix.db
-		.selectFrom("version")
-		.where("id", "in", ["base_version", "version_a", "version_b"])
-		.select(["id", "change_set_id"])
-		.execute();
-
-	expect(versions).toHaveLength(3);
-
-	// Both versions should initially see the base state
-	const initialState = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.where("entity_id", "=", "e0")
-		.selectAll()
-		.execute();
-
-	expect(initialState).toHaveLength(3); // base, version_a, version_b
-
-	// Update state in version A
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: { value: "updated in version A" },
-		})
-		.where("entity_id", "=", "e0")
-		.where("version_id", "=", "version_a")
-		.execute();
-
-	// Update state in version B differently
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: { value: "updated in version B" },
-		})
-		.where("entity_id", "=", "e0")
-		.where("version_id", "=", "version_b")
-		.execute();
-
-	const divergedState = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.where("entity_id", "=", "e0")
-		.selectAll()
-		.execute();
-
-	// All three versions should have different states
-	expect(divergedState).toMatchObject([
-		{
-			entity_id: "e0",
-			snapshot_content: { value: "base state" },
-			version_id: "base_version",
-		},
-		{
-			entity_id: "e0",
-			snapshot_content: { value: "updated in version A" },
-			version_id: "version_a",
-		},
-		{
-			entity_id: "e0",
-			snapshot_content: { value: "updated in version B" },
-			version_id: "version_b",
-		},
-	]);
 });
 
 // Write-through cache behavior tests

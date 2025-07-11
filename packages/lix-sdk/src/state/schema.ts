@@ -440,7 +440,7 @@ export function applyStateDatabaseSchema(
 							message: `Cache miss detected - materializing state from CTE`,
 						});
 					}
-					
+
 					// Run the expensive recursive CTE to materialize state
 					// Include deletions when populating cache so inheritance blocking works
 					const stateResults = materializeState(sqlite, {}, true);
@@ -1130,48 +1130,57 @@ function materializeState(
 				FROM internal_state_all_untracked unt
 			),
 
-			/* Discover every change-set reachable from ANY version root */
+			/* Discover every change-set in the lineage of each version's tip */
+			/* (tip + all ancestors, but not descendant branches) */
 			root_cs_of_all_versions AS (
 				SELECT 
-					json_extract(v.snapshot_content,'$.change_set_id') AS version_change_set_id,
+					json_extract(v.snapshot_content,'$.change_set_id') AS tip_change_set_id,
 					v.entity_id AS version_id
 				FROM all_changes_with_snapshots v
 				WHERE v.schema_key = 'lix_version'
 			),
-			reachable_cs_from_roots(id, version_id) AS (
+			lineage_cs(id, version_id) AS (
+				/* anchor: the tip itself */
 				SELECT 
-					version_change_set_id, 
+					tip_change_set_id, 
 					version_id 
 				FROM root_cs_of_all_versions
-				
+
 				UNION
-				
+
+				/* recurse upwards via parent_id - collects only ancestors */
 				SELECT 
-					json_extract(edge.snapshot_content,'$.child_id'), 
-					r.version_id
+					json_extract(edge.snapshot_content,'$.parent_id') AS id,
+					l.version_id AS version_id
 				FROM all_changes_with_snapshots edge
-				JOIN reachable_cs_from_roots r ON json_extract(edge.snapshot_content,'$.parent_id') = r.id
+				JOIN lineage_cs l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
 				WHERE edge.schema_key = 'lix_change_set_edge'
+				  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
 			),
 
-			/*  Calculate depth of each reachable change-set within *its* version DAG */
+			/* Calculate depth: 0 = tip, 1 = parent, etc */
 			cs_depth AS (
 				SELECT 
-					id, 
+					tip_change_set_id AS id, 
 					version_id, 
-					0 AS depth
-				FROM reachable_cs_from_roots
+					0 AS depth 
+				FROM root_cs_of_all_versions
 
 				UNION ALL
 
 				SELECT 
-					json_extract(edge.snapshot_content,'$.child_id') AS id,
-					r.version_id AS version_id,
+					json_extract(edge.snapshot_content,'$.parent_id') AS id,
+					d.version_id AS version_id,
 					d.depth + 1 AS depth
 				FROM all_changes_with_snapshots edge
-				JOIN cs_depth d ON json_extract(edge.snapshot_content,'$.parent_id') = d.id
-				JOIN reachable_cs_from_roots r ON r.id = d.id  -- ensure same reachable set
+				JOIN cs_depth d ON json_extract(edge.snapshot_content,'$.child_id') = d.id
 				WHERE edge.schema_key = 'lix_change_set_edge'
+				  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
+				  AND EXISTS (
+					SELECT 1 FROM lineage_cs 
+					WHERE lineage_cs.id = json_extract(edge.snapshot_content,'$.parent_id')
+					  AND lineage_cs.version_id = d.version_id
+				  )
 			),
 
 			/* Map entities that belong to those change-sets */
@@ -1182,9 +1191,9 @@ function materializeState(
 					json_extract(ias.snapshot_content,'$.schema_key') AS target_schema_key,
 					json_extract(ias.snapshot_content,'$.change_id') AS target_change_id,
 					json_extract(ias.snapshot_content,'$.change_set_id') AS cse_origin_change_set_id,
-					rcs.version_id
+					lcs.version_id
 				FROM all_changes_with_snapshots ias
-				JOIN reachable_cs_from_roots rcs ON json_extract(ias.snapshot_content,'$.change_set_id') = rcs.id
+				JOIN lineage_cs lcs ON json_extract(ias.snapshot_content,'$.change_set_id') = lcs.id
 				WHERE ias.schema_key = 'lix_change_set_element'
 			),
 
@@ -1213,7 +1222,7 @@ function materializeState(
 						JOIN   descendants_of_current_cs d ON json_extract(edge.snapshot_content,'$.parent_id') = d.id
 						WHERE  edge.schema_key = 'lix_change_set_edge'
 						  AND  json_extract(edge.snapshot_content,'$.child_id') IN (
-						         SELECT id FROM reachable_cs_from_roots WHERE version_id = r.version_id
+						         SELECT id FROM lineage_cs WHERE version_id = r.version_id
 						       )
 					)
 					SELECT 1
