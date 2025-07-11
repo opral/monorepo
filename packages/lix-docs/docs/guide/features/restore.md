@@ -2,7 +2,7 @@
 
 Restore enables applications to revert to a previous state using any change set ID, providing a powerful safety net for users. This is especially useful when [working with AI agents](../ai-agent-collaboration.md), as it provides a way to recover from unintended changes.
 
-![Restore](../../assets/restore.svg)
+![Restore](/restore.svg)
 
 ## Examples
 

@@ -2,7 +2,7 @@
 
 Attribution enables seeing who made changes and when, providing transparency and accountability in collaborative environments. Lix surfaces attribution for every modification - from document edits to configuration updates.
 
-![Blame](../../assets/blame.svg)
+![Blame](/blame.svg)
 
 ## Examples
 
