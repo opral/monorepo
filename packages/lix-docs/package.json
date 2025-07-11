@@ -11,7 +11,9 @@
   },
   "devDependencies": {
     "@braintree/sanitize-url": "^7.0.2",
+    "@lix-js/plugin-json": "workspace:*",
     "@lix-js/sdk": "workspace:*",
+    "@monaco-editor/react": "^4.7.0",
     "@rspress/shared": "^1.44.0",
     "@tailwindcss/postcss": "^4.1.10",
     "@types/react": "^19.0.12",
@@ -36,5 +38,8 @@
     "browser"
   ],
   "author": "Opral, Inc.",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "shiki": "^3.7.0"
+  }
 }
