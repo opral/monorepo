@@ -294,6 +294,8 @@ services:
         - packages/lix/lix-html-diff/**
     envVars:
       - fromGroup: production
+    domains:
+      - html-diff.lix.dev
 
   - name: lix-website
     type: web
