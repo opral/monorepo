@@ -479,132 +479,140 @@ describe.each([
 			new Date(stateAfterInsert[0]!.updated_at).getTime()
 		);
 	});
-});
 
-test("created_at and updated_at are version specific", async () => {
-	const lix = await openLix({});
+	test("created_at and updated_at are version specific", async () => {
+		const lix = await openLix({});
 
-	await createVersion({ lix, id: "version_a" });
-	await createVersion({ lix, id: "version_b" });
+		await createVersion({ lix, id: "version_a" });
+		await createVersion({ lix, id: "version_b" });
 
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		additionalProperties: false,
-		type: "object",
-		properties: {
-			value: {
-				type: "string",
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			additionalProperties: false,
+			type: "object",
+			properties: {
+				value: {
+					type: "string",
+				},
 			},
-		},
-	};
+		};
 
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
-	// Insert entity in version A
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			schema_version: "1.0",
-			version_id: "version_a",
-			snapshot_content: {
-				value: "value in version a",
-			},
-		})
-		.execute();
+		// Insert entity in version A
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				schema_version: "1.0",
+				version_id: "version_a",
+				snapshot_content: {
+					value: "value in version a",
+				},
+			})
+			.execute();
 
-	// Wait a bit to ensure different timestamps
-	await new Promise((resolve) => setTimeout(resolve, 1));
+		// Wait a bit to ensure different timestamps
+		await new Promise((resolve) => setTimeout(resolve, 1));
 
-	// Insert same entity in version B
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			schema_version: "1.0",
-			version_id: "version_b",
-			snapshot_content: {
-				value: "value in version b",
-			},
-		})
-		.execute();
+		// Insert same entity in version B
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				schema_version: "1.0",
+				version_id: "version_b",
+				snapshot_content: {
+					value: "value in version b",
+				},
+			})
+			.execute();
 
-	const stateVersionA = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "e0")
-		.where("version_id", "=", "version_a")
-		.selectAll()
-		.execute();
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
 
-	const stateVersionB = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "e0")
-		.where("version_id", "=", "version_b")
-		.selectAll()
-		.execute();
+		const stateVersionA = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "e0")
+			.where("version_id", "=", "version_a")
+			.selectAll()
+			.execute();
 
-	expect(stateVersionA).toHaveLength(1);
-	expect(stateVersionB).toHaveLength(1);
+		const stateVersionB = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "e0")
+			.where("version_id", "=", "version_b")
+			.selectAll()
+			.execute();
 
-	// Both should have timestamps
-	expect(stateVersionA[0]?.created_at).toBeDefined();
-	expect(stateVersionA[0]?.updated_at).toBeDefined();
-	expect(stateVersionB[0]?.created_at).toBeDefined();
-	expect(stateVersionB[0]?.updated_at).toBeDefined();
+		expect(stateVersionA).toHaveLength(1);
+		expect(stateVersionB).toHaveLength(1);
 
-	// the same entity has been inserted but with different changes
-	expect(stateVersionA[0]?.created_at).not.toBe(stateVersionB[0]?.created_at);
+		// Both should have timestamps
+		expect(stateVersionA[0]?.created_at).toBeDefined();
+		expect(stateVersionA[0]?.updated_at).toBeDefined();
+		expect(stateVersionB[0]?.created_at).toBeDefined();
+		expect(stateVersionB[0]?.updated_at).toBeDefined();
 
-	// Wait and update only version B
-	await new Promise((resolve) => setTimeout(resolve, 1));
+		// the same entity has been inserted but with different changes
+		expect(stateVersionA[0]?.created_at).not.toBe(stateVersionB[0]?.created_at);
 
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: {
-				value: "updated value in version b",
-			},
-		})
-		.where("entity_id", "=", "e0")
-		.where("version_id", "=", "version_b")
-		.execute();
+		// Wait and update only version B
+		await new Promise((resolve) => setTimeout(resolve, 1));
 
-	const updatedStateVersionA = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "e0")
-		.where("version_id", "=", "version_a")
-		.selectAll()
-		.execute();
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: {
+					value: "updated value in version b",
+				},
+			})
+			.where("entity_id", "=", "e0")
+			.where("version_id", "=", "version_b")
+			.execute();
 
-	const updatedStateVersionB = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "e0")
-		.where("version_id", "=", "version_b")
-		.selectAll()
-		.execute();
+		if (shouldClearCache) {
+			await clearCache({ lix });
+		}
 
-	// Version A should remain unchanged
-	expect(updatedStateVersionA[0]?.updated_at).toBe(
-		stateVersionA[0]?.updated_at
-	);
+		const updatedStateVersionA = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "e0")
+			.where("version_id", "=", "version_a")
+			.selectAll()
+			.execute();
 
-	// Version B should have updated timestamp
-	expect(updatedStateVersionB[0]?.updated_at).not.toBe(
-		stateVersionB[0]?.updated_at
-	);
-	expect(
-		new Date(updatedStateVersionB[0]!.updated_at).getTime()
-	).toBeGreaterThan(new Date(stateVersionB[0]!.updated_at).getTime());
+		const updatedStateVersionB = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "e0")
+			.where("version_id", "=", "version_b")
+			.selectAll()
+			.execute();
+
+		// Version A should remain unchanged
+		expect(updatedStateVersionA[0]?.updated_at).toBe(
+			stateVersionA[0]?.updated_at
+		);
+
+		// Version B should have updated timestamp
+		expect(updatedStateVersionB[0]?.updated_at).not.toBe(
+			stateVersionB[0]?.updated_at
+		);
+		expect(
+			new Date(updatedStateVersionB[0]!.updated_at).getTime()
+		).toBeGreaterThan(new Date(stateVersionB[0]!.updated_at).getTime());
+	});
 });
 
 test("state appears in both versions when they share the same change set", async () => {
