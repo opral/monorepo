@@ -1,8 +1,15 @@
-import { describe, expect } from "vitest";
+import { describe, expect, test } from "vitest";
 import { scenarioTest, type ScenarioTestDef } from "./scenario-test.js";
+import { openLix } from "../../lix/open-lix.js";
 
-describe("deterministic data and IDs across scenarios", () => {
-	let deterministicLixId: string | null = null;
+test("scenario test discovery", () => {});
+
+describe("every scenario opens the same lix", async () => {
+	// Testing this with materialized state and the changes the lix has
+	// Both need to be exactly the same for all scenarios
+
+	let previousState: any | null = null;
+	let previousChanges: any | null = null;
 
 	const mockScenario: ScenarioTestDef = {
 		name: "mock-scenario",
@@ -12,26 +19,27 @@ describe("deterministic data and IDs across scenarios", () => {
 		},
 	};
 
-	scenarioTest(
-		"hello",
-		async ({ openLix, scenario }) => {
-			const lix = await openLix();
+	await scenarioTest(
+		"",
+		async ({ initialLix }) => {
+			const lix = await openLix({ blob: initialLix });
 
-			console.log(`Running scenario: ${scenario}`);
+			const allState = await lix.db
+				.selectFrom("state_all")
+				.selectAll()
+				.execute();
 
-			const id = await lix.db
-				.selectFrom("key_value")
-				.where("key", "=", "lix_id")
-				.select("value")
-				.executeTakeFirstOrThrow();
+			const changes = await lix.db.selectFrom("change").selectAll().execute();
 
-			if (deterministicLixId === null) {
-				deterministicLixId = id.value;
+			if (previousState === null) {
+				previousState = allState;
+				previousChanges = changes;
 			} else {
-				expect(deterministicLixId).toEqual(id.value);
+				expect(previousState).toEqual(allState);
+				expect(previousChanges).toEqual(changes);
 			}
 
-			expect(id).toBeDefined();
+			expect(allState).toBeDefined();
 		},
 		{
 			scenarios: ["baseline", "mock-scenario"],

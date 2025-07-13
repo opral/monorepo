@@ -1,5 +1,6 @@
 import { test, expect } from "vitest";
-import { openLix, type Lix } from "../../lix/open-lix.js";
+import { type Lix } from "../../lix/open-lix.js";
+import { newLixFile } from "../../lix/new-lix.js";
 import { cacheMissScenario } from "./cache-miss-scenario.js";
 
 // Scenario test types
@@ -73,15 +74,15 @@ const defaultScenarios: Record<string, ScenarioTestDef> = {
  *   customScenarios: [myScenario]
  * });
  */
-export function scenarioTest(
+export async function scenarioTest(
 	name: string,
 	fn: (args: {
 		scenario: string;
-		openLix: () => Promise<Lix>;
+		initialLix: Blob;
 		expect: typeof expect;
 	}) => Promise<void>,
 	options?: ScenarioTestOptions
-): void {
+): Promise<void> {
 	// Merge default and additional scenarios
 	const allScenarios: Record<string, ScenarioTestDef> = {
 		...defaultScenarios,
@@ -105,8 +106,9 @@ export function scenarioTest(
 		return scenario;
 	});
 
-	// Create independent lix instances for each scenario
-	const lixInstances = new Map<string, Lix>();
+	// Create initial Lix blob for all scenarios
+	const initialLixBlob = await newLixFile();
+
 	const expectedValues = new Map<string, any>();
 
 	test.each(scenariosToRun)(`${name} > $name`, async (scenario) => {
@@ -135,15 +137,7 @@ export function scenarioTest(
 
 		await fn({
 			scenario: scenario.name,
-			openLix: async () => {
-				// Each scenario gets its own independent lix instance
-				if (!lixInstances.has(scenario.name)) {
-					const lix = await openLix({});
-					const processedLix = await scenario.setup(lix);
-					lixInstances.set(scenario.name, processedLix);
-				}
-				return lixInstances.get(scenario.name)!;
-			},
+			initialLix: initialLixBlob,
 			expect: deterministicExpect as typeof expect,
 		});
 	});
