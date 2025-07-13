@@ -4,23 +4,23 @@ import { openLix } from "../../lix/open-lix.js";
 
 test("scenario test discovery", () => {});
 
-describe("expectConsistent validates values across scenarios", async () => {
+describe("expectDeterministic validates values across scenarios", async () => {
 	const customScenario: ScenarioTestDef = {
 		name: "custom",
-		description: "Custom scenario for testing expectConsistent",
+		description: "Custom scenario for testing expectDeterministic",
 		setup: async (lix) => lix,
 	};
 
 	await scenarioTest(
 		"consistent values pass",
-		async ({ expectConsistent }) => {
+		async ({ expectDeterministic }) => {
 			// These should be consistent across all scenarios
 
 			expect(() => {
-				expectConsistent("same-string").toBe("same-string");
-				expectConsistent(42).toBe(42);
-				expectConsistent({ foo: "bar" }).toEqual({ foo: "bar" });
-				expectConsistent([1, 2, 3]).toEqual([1, 2, 3]);
+				expectDeterministic("same-string").toBe("same-string");
+				expectDeterministic(42).toBe(42);
+				expectDeterministic({ foo: "bar" }).toEqual({ foo: "bar" });
+				expectDeterministic([1, 2, 3]).toEqual([1, 2, 3]);
 			}).not.toThrow();
 		},
 		{
@@ -30,17 +30,17 @@ describe("expectConsistent validates values across scenarios", async () => {
 	);
 });
 
-// This test will fail intentionally to demonstrate expectConsistent working
-describe("expectConsistent failure demonstration", async () => {
+// This test will fail intentionally to demonstrate expectDeterministic working
+describe("expectDeterministic failure demonstration", async () => {
 	const customScenario: ScenarioTestDef = {
 		name: "custom",
-		description: "Custom scenario for testing expectConsistent failure",
+		description: "Custom scenario for testing expectDeterministic failure",
 		setup: async (lix) => lix,
 	};
 
 	await scenarioTest(
-		"this should fail - expectConsistent catches differences",
-		async ({ scenario, expectConsistent }) => {
+		"this should fail - expectDeterministic catches differences",
+		async ({ scenario, expectDeterministic }) => {
 			// This will store different values in different scenarios
 			const scenarioSpecificValue =
 				scenario === "baseline" ? "baseline-value" : "other-value";
@@ -48,12 +48,12 @@ describe("expectConsistent failure demonstration", async () => {
 			if (scenario === "baseline") {
 				// This will fail in the second scenario
 				expect(() =>
-					expectConsistent(scenarioSpecificValue).toBe("baseline-value")
+					expectDeterministic(scenarioSpecificValue).toBe("baseline-value")
 				).not.toThrow();
 			} else {
 				expect(() =>
-					expectConsistent(scenarioSpecificValue).toBe("baseline-value")
-				).toThrow(/SCENARIO CONSISTENCY VIOLATION/);
+					expectDeterministic(scenarioSpecificValue).toBe("baseline-value")
+				).toThrow(/SCENARIO DETERMINISM VIOLATION/);
 			}
 		},
 		{
@@ -73,9 +73,7 @@ describe("every scenario opens the same lix", async () => {
 	const mockScenario: ScenarioTestDef = {
 		name: "mock-scenario",
 		description: "A mock scenario for testing deterministic data",
-		setup: async (lix) => {
-			return lix;
-		},
+		setup: async (lix) => lix,
 	};
 
 	await scenarioTest(
@@ -99,6 +97,44 @@ describe("every scenario opens the same lix", async () => {
 			}
 
 			expect(allState).toBeDefined();
+		},
+		{
+			scenarios: ["baseline", "mock-scenario"],
+			customScenarios: [mockScenario],
+		}
+	);
+});
+
+describe("database operations are deterministic", async () => {
+	const mockScenario: ScenarioTestDef = {
+		name: "mock-scenario",
+		description: "A mock scenario for testing deterministic data",
+		setup: async (lix) => lix,
+	};
+
+	await scenarioTest(
+		"",
+		async ({ initialLix, expectDeterministic }) => {
+			const lix = await openLix({ blob: initialLix });
+
+			await lix.db
+				.insertInto("key_value")
+				.values({
+					key: "test_key",
+					value: "test_value",
+				})
+				.execute();
+
+			const result = await lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "test_key")
+				.selectAll()
+				.executeTakeFirst();
+
+			expectDeterministic(result).toMatchObject({
+				key: "test_key",
+				value: "test_value",
+			});
 		},
 		{
 			scenarios: ["baseline", "mock-scenario"],

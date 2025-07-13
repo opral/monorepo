@@ -52,21 +52,21 @@ const defaultScenarios: Record<string, ScenarioTestDef> = {
  *
  * @example
  * // Run default scenarios (baseline, cache-miss)
- * scenarioTest("my test", async ({ initialLix, scenario, expectConsistent }) => {
+ * scenarioTest("my test", async ({ initialLix, scenario, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * });
  *
  * @example
  * // Run only specific scenarios
- * scenarioTest("my test", async ({ initialLix, scenario, expectConsistent }) => {
+ * scenarioTest("my test", async ({ initialLix, scenario, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, { scenarios: ["cache-miss"] });
  *
  * @example
  * // Add custom scenarios
- * scenarioTest("my test", async ({ initialLix, scenario, expectConsistent }) => {
+ * scenarioTest("my test", async ({ initialLix, scenario, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, {
@@ -79,7 +79,7 @@ export async function scenarioTest(
 	fn: (args: {
 		scenario: string;
 		initialLix: Blob;
-		expectConsistent: typeof expect;
+		expectDeterministic: typeof expect;
 	}) => Promise<void>,
 	options?: ScenarioTestOptions
 ): Promise<void> {
@@ -127,17 +127,17 @@ export async function scenarioTest(
 				if (expected !== undefined) {
 					const errorMessage = `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ SCENARIO CONSISTENCY VIOLATION
+❌ SCENARIO DETERMINISM VIOLATION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-expectConsistent() failed: Values differ between scenarios
+expectDeterministic() failed: Values differ between scenarios
 
 📍 Location: Call #${callIndex - 1}
 🎭 Scenario: ${scenario.name}
 ❌ Expected: ${JSON.stringify(expected)} (from ${scenariosToRun[0]?.name || 'first'} scenario)
 ✅ Received: ${JSON.stringify(actual)} (in current scenario)
 
-💡 expectConsistent ensures identical values across all test scenarios.
+💡 expectDeterministic ensures identical values across all test scenarios.
    Use regular expect() for scenario-specific assertions.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
@@ -151,7 +151,7 @@ expectConsistent() failed: Values differ between scenarios
 		await fn({
 			scenario: scenario.name,
 			initialLix: initialLixBlob,
-			expectConsistent: deterministicExpect as typeof expect,
+			expectDeterministic: deterministicExpect as typeof expect,
 		});
 	});
 }
