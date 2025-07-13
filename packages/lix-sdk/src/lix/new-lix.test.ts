@@ -129,8 +129,6 @@ test("bootstrap changes include lix_name key-value in the global version", async
 		.selectAll()
 		.execute();
 
-	console.log("lix_name key-value:", kv);
-
 	expect(kv).toHaveLength(1);
 	expect(kv[0]?.key).toBe("lix_name");
 	expect(kv[0]?.value).toBeDefined();

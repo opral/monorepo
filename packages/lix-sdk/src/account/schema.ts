@@ -2,7 +2,6 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import { humanId } from "human-id";
 import { nanoid } from "../database/nano-id.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
@@ -81,28 +80,6 @@ export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 			AND schema_key = 'lix_active_account'
 			AND version_id = 'global';
 		END;
-	`);
-
-	const anonymousAccountName = `Anonymous ${humanId({
-		capitalize: true,
-		adjectiveCount: 0,
-		separator: "_",
-	})
-		// Human ID has two words, remove the last one
-		.split("_")[0]!
-		// Human ID uses plural, remove the last character to make it singular
-		.slice(0, -1)}`;
-
-	// Insert default active account only if none exists
-	sqlite.exec(`
-		-- default to a new account
-		INSERT INTO active_account (id, name)
-		SELECT nano_id(), '${anonymousAccountName}'
-		WHERE NOT EXISTS (
-			SELECT 1 FROM state_all
-			WHERE schema_key = 'lix_active_account'
-			AND version_id = 'global'
-		);
 	`);
 }
 

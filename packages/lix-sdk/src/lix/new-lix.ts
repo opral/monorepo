@@ -358,6 +358,32 @@ function createBootstrapChanges(
 		});
 	}
 
+	// Create default active account
+	const activeAccountId = nanoid();
+	const anonymousAccountName = `Anonymous ${humanId({
+		capitalize: true,
+		adjectiveCount: 0,
+		separator: "_",
+	})
+		// Human ID has two words, remove the last one
+		.split("_")[0]!
+		// Human ID uses plural, remove the last character to make it singular
+		.slice(0, -1)}`;
+
+	// Create the active account entry (the account entity will be created on first change)
+	changes.push({
+		id: uuid_v7(),
+		entity_id: activeAccountId,
+		schema_key: "lix_active_account",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_content: {
+			name: anonymousAccountName,
+		},
+		created_at,
+	});
+
 	// Create change set elements linking all changes to the global change set
 	const originalChanges = [...changes]; // snapshot of original changes
 	const changeSetElementChanges: BootstrapChange[] = [];
