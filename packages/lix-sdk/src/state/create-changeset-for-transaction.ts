@@ -234,7 +234,7 @@ export function createChangesetForTransaction(
 
 				// If entity existed at checkpoint, add deletion to working change set
 				if (entityExistedAtCheckpoint) {
-					createChangeWithSnapshot({
+					const workingChangeSetElementChange = createChangeWithSnapshot({
 						sqlite,
 						db,
 						data: {
@@ -248,6 +248,28 @@ export function createChangesetForTransaction(
 								entity_id: change.entity_id,
 								schema_key: change.schema_key,
 								file_id: change.file_id,
+							} satisfies LixChangeSetElement),
+							schema_version: LixChangeSetElementSchema["x-lix-version"],
+						},
+						timestamp: currentTime,
+						version_id: "global",
+					});
+					
+					// Create a meta change set element for the working change set element change itself
+					createChangeWithSnapshot({
+						sqlite,
+						db,
+						data: {
+							entity_id: `${mutatedVersion.working_change_set_id}::${workingChangeSetElementChange.id}`,
+							schema_key: "lix_change_set_element",
+							file_id: "lix",
+							plugin_key: "lix_own_entity",
+							snapshot_content: JSON.stringify({
+								change_set_id: mutatedVersion.working_change_set_id,
+								change_id: workingChangeSetElementChange.id,
+								schema_key: "lix_change_set_element",
+								file_id: "lix",
+								entity_id: workingChangeSetElementChange.entity_id,
 							} satisfies LixChangeSetElement),
 							schema_version: LixChangeSetElementSchema["x-lix-version"],
 						},
