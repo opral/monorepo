@@ -52,22 +52,22 @@ const defaultScenarios: Record<string, ScenarioTestDef> = {
  *
  * @example
  * // Run default scenarios (baseline, cache-miss)
- * scenarioTest("my test", async ({ openLix, scenario }) => {
- *   const lix = await openLix();
+ * scenarioTest("my test", async ({ initialLix, scenario, expectConsistent }) => {
+ *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * });
  *
  * @example
  * // Run only specific scenarios
- * scenarioTest("my test", async ({ openLix, scenario }) => {
- *   const lix = await openLix();
+ * scenarioTest("my test", async ({ initialLix, scenario, expectConsistent }) => {
+ *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, { scenarios: ["cache-miss"] });
  *
  * @example
  * // Add custom scenarios
- * scenarioTest("my test", async ({ openLix, scenario }) => {
- *   const lix = await openLix();
+ * scenarioTest("my test", async ({ initialLix, scenario, expectConsistent }) => {
+ *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, {
  *   scenarios: ["baseline", "my-scenario"],
@@ -79,7 +79,7 @@ export async function scenarioTest(
 	fn: (args: {
 		scenario: string;
 		initialLix: Blob;
-		expect: typeof expect;
+		expectConsistent: typeof expect;
 	}) => Promise<void>,
 	options?: ScenarioTestOptions
 ): Promise<void> {
@@ -125,10 +125,23 @@ export async function scenarioTest(
 				// Verify values match first scenario in subsequent scenarios
 				const expected = expectedValues.get(key);
 				if (expected !== undefined) {
-					expect(
-						actual,
-						`Deterministic expectation failed at call ${callIndex - 1}: ${message || ""}`
-					).toEqual(expected);
+					const errorMessage = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❌ SCENARIO CONSISTENCY VIOLATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+expectConsistent() failed: Values differ between scenarios
+
+📍 Location: Call #${callIndex - 1}
+🎭 Scenario: ${scenario.name}
+❌ Expected: ${JSON.stringify(expected)} (from ${scenariosToRun[0]?.name || 'first'} scenario)
+✅ Received: ${JSON.stringify(actual)} (in current scenario)
+
+💡 expectConsistent ensures identical values across all test scenarios.
+   Use regular expect() for scenario-specific assertions.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+					expect(actual, errorMessage).toEqual(expected);
 				}
 			}
 
@@ -138,7 +151,7 @@ export async function scenarioTest(
 		await fn({
 			scenario: scenario.name,
 			initialLix: initialLixBlob,
-			expect: deterministicExpect as typeof expect,
+			expectConsistent: deterministicExpect as typeof expect,
 		});
 	});
 }
