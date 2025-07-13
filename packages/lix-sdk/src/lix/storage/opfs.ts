@@ -82,31 +82,41 @@ export class OpfsStorage implements LixStorageAdapter {
 	 * Loads existing data from OPFS if available, otherwise creates a new lix.
 	 * Returns the same database instance on subsequent calls.
 	 */
-	async open(): Promise<SqliteWasmDatabase> {
+	async open(args?: { blob?: Blob }): Promise<SqliteWasmDatabase> {
 		if (!this.database) {
 			this.database = await createInMemoryDatabase({ readOnly: false });
 			this.opfsRoot = await navigator.storage.getDirectory();
 
-			try {
-				// Try to load existing data from OPFS
-				const fileHandle = await this.opfsRoot.getFileHandle(this.path);
-				const file = await fileHandle.getFile();
-				const content = new Uint8Array(await file.arrayBuffer());
-
+			if (args?.blob) {
+				// Use provided blob
 				importDatabase({
 					db: this.database,
-					content,
+					content: new Uint8Array(await args.blob.arrayBuffer()),
 				});
-			} catch {
-				// File doesn't exist, create new empty lix
-				const blob = await newLixFile();
-				importDatabase({
-					db: this.database,
-					content: new Uint8Array(await blob.arrayBuffer()),
-				});
-
-				// Save the initial state to OPFS
+				// Save the imported state to OPFS
 				await this.save();
+			} else {
+				try {
+					// Try to load existing data from OPFS
+					const fileHandle = await this.opfsRoot.getFileHandle(this.path);
+					const file = await fileHandle.getFile();
+					const content = new Uint8Array(await file.arrayBuffer());
+
+					importDatabase({
+						db: this.database,
+						content,
+					});
+				} catch {
+					// File doesn't exist, create new empty lix
+					const blob = await newLixFile();
+					importDatabase({
+						db: this.database,
+						content: new Uint8Array(await blob.arrayBuffer()),
+					});
+
+					// Save the initial state to OPFS
+					await this.save();
+				}
 			}
 
 			// Load active accounts if they exist
@@ -131,22 +141,6 @@ export class OpfsStorage implements LixStorageAdapter {
 			this.activeAccountSubscription.unsubscribe();
 			this.activeAccountSubscription = undefined;
 		}
-	}
-
-	/**
-	 * Imports data from a blob, replacing the current database content.
-	 *
-	 * Also saves the imported data to OPFS.
-	 */
-	async import(blob: Blob): Promise<void> {
-		const database = await this.open();
-		importDatabase({
-			db: database,
-			content: new Uint8Array(await blob.arrayBuffer()),
-		});
-
-		// Save the imported data to OPFS
-		await this.save();
 	}
 
 	/**

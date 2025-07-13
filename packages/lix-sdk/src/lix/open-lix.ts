@@ -125,12 +125,7 @@ export async function openLix(args: {
 	keyValues?: NewState<LixKeyValue>[];
 }): Promise<Lix> {
 	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
-	const database = await storage.open();
-
-	// Import blob data if provided
-	if (args.blob) {
-		await storage.import(args.blob);
-	}
+	const database = await storage.open({ blob: args.blob });
 
 	// Create hooks before initializing database so they can be used in schema setup
 	const hooks = createHooks();
