@@ -44,6 +44,9 @@ test("providing key values should be possible", async () => {
 	expect(value1).toMatchObject({ key: "mock_key", value: "value2" });
 });
 
+// TODO occasional test failures due to timing issues
+// faulty state materialization might be the cause.
+// fix after https://github.com/opral/lix-sdk/issues/308
 test("providing an account should be possible", async () => {
 	const mockAccount: LixAccount = {
 		id: "mock-account",
@@ -61,7 +64,10 @@ test("providing an account should be possible", async () => {
 		.execute();
 
 	expect(accounts, "to be the provided account").toContainEqual(mockAccount);
-	expect(accounts, "no other active account is inserted").lengthOf(1);
+	expect(
+		accounts,
+		"no other active account exists except for the provided one"
+	).lengthOf(1);
 });
 
 test("usedFileExtensions", async () => {

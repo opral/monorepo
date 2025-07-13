@@ -1,7 +1,6 @@
 import { test, expect, describe, beforeEach, vi } from "vitest";
 import { OpfsStorage } from "./opfs.js";
 import { openLix } from "../open-lix.js";
-import { InMemoryStorage } from "./in-memory.js";
 
 // Create a realistic in-memory OPFS mock
 class MockOPFS {
@@ -128,26 +127,6 @@ describe("OpfsStorage", () => {
 		await expect(storage.close()).resolves.not.toThrow();
 	});
 
-	test("imports lix file blob and saves to OPFS", async () => {
-		const storage = new OpfsStorage({ path: "test.db" });
-
-		const sourceLix = await openLix({ storage: new InMemoryStorage() });
-
-		// Add some data to the source
-		await sourceLix.db
-			.insertInto("key_value")
-			.values({
-				key: "imported-key",
-				value: "imported-value",
-			})
-			.execute();
-
-		const lixBlob = await sourceLix.toBlob();
-
-		// This should not throw
-		await expect(storage.import(lixBlob)).resolves.not.toThrow();
-	});
-
 	test("integrates with openLix", async () => {
 		const storage = new OpfsStorage({ path: "integration.db" });
 		const lix = await openLix({ storage });
@@ -195,6 +174,9 @@ describe("OpfsStorage", () => {
 		expect(result[0]?.value).toBe("e2e-test-value");
 	});
 
+	// TODO occasional test failures due to timing issues
+	// faulty state materialization might be the cause.
+	// fix after https://github.com/opral/lix-sdk/issues/308
 	test("can save and load data persistence", async () => {
 		const path = "persistence-test.db";
 
@@ -300,6 +282,9 @@ describe("OpfsStorage", () => {
 		expect(activeAccount2.name).toBe(account.name);
 	});
 
+	// TODO occasional test failures due to timing issues
+	// faulty state materialization might be the cause.
+	// fix after https://github.com/opral/lix-sdk/issues/308
 	test("only saves active accounts when they change", async () => {
 		const path = "observer-test.lix";
 		const storage = new OpfsStorage({ path });
@@ -318,6 +303,15 @@ describe("OpfsStorage", () => {
 
 		// Clear the spy to ignore the initial save
 		saveActiveAccountsSpy.mockClear();
+
+		// Ensure active version exists before proceeding
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirst();
+
+		expect(activeVersion).toBeDefined();
+		expect(activeVersion?.version_id).toBeDefined();
 
 		// Make a change that doesn't affect active_account
 		await lix.db

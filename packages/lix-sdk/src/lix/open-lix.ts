@@ -132,6 +132,32 @@ export async function openLix(args: {
 
 	const db = initDb({ sqlite: database, hooks });
 
+	// Set up account IMMEDIATELY after db init, before any other operations
+	const persistedState = await storage.getPersistedState?.();
+	const accountToSet = args.account ?? persistedState?.activeAccounts?.[0];
+
+	if (accountToSet) {
+		// Check if there are any existing active accounts
+		const existingActiveAccounts = await db
+			.selectFrom("active_account")
+			.select(["id", "name"])
+			.execute();
+		
+		// If there are existing active accounts, delete them
+		if (existingActiveAccounts.length > 0) {
+			for (const account of existingActiveAccounts) {
+				await db
+					.deleteFrom("active_account")
+					.where("id", "=", account.id)
+					.execute();
+			}
+		}
+		
+		// Insert the new active account
+		// The account entity will be created automatically when needed
+		await db.insertInto("active_account").values(accountToSet).execute();
+	}
+
 	if (args.keyValues && args.keyValues.length > 0) {
 		for (const keyValue of args.keyValues) {
 			// Check if the key already exists
@@ -155,17 +181,6 @@ export async function openLix(args: {
 		}
 	}
 
-	// Check if storage has persisted state
-	const persistedState = await storage.getPersistedState?.();
-	const accountToSet = args.account ?? persistedState?.activeAccounts?.[0];
-
-	if (accountToSet) {
-		await db.transaction().execute(async (trx) => {
-			// delete the existing active account
-			await trx.deleteFrom("active_account").execute();
-			await trx.insertInto("active_account").values(accountToSet).execute();
-		});
-	}
 
 	const plugins: LixPlugin[] = [];
 	if (args.providePlugins && args.providePlugins.length > 0) {
