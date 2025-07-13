@@ -19,19 +19,12 @@ export class InMemoryStorage implements LixStorageAdapter {
 	/**
 	 * Opens an in-memory SQLite database.
 	 *
-	 * Creates a new empty lix if this is the first time opening.
+	 * Creates a new empty database if this is the first time opening.
 	 * Returns the same database instance on subsequent calls.
 	 */
 	async open(): Promise<SqliteWasmDatabase> {
 		if (!this.database) {
 			this.database = await createInMemoryDatabase({ readOnly: false });
-
-			// Initialize with new empty lix
-			const blob = await newLixFile();
-			importDatabase({
-				db: this.database,
-				content: new Uint8Array(await blob.arrayBuffer()),
-			});
 		}
 
 		return this.database;
