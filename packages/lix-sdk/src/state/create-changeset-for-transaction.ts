@@ -125,27 +125,28 @@ export function createChangesetForTransaction(
 			timestamp: currentTime,
 			version_id: "global",
 		});
-		// TODO investigate if needed as part of a change set itself
-		// seems to make queries slower
-		// creating a change set element for the change set element change
-		// this is meta but allows us to reconstruct and mutate a change set
-		// createChangeWithSnapshot({
-		// 	sqlite,
-		// 	db,
-		// 	data: {
-		// 		entity_id: changeSetElementChange.entity_id,
-		// 		schema_key: "lix_change_set_element",
-		// 		file_id: "lix",
-		// 		plugin_key: "lix_own_entity",
-		// 		snapshot_content: JSON.stringify({
-		// 			change_set_id: changeSetId,
-		// 			change_id: changeSetElementChange.id,
-		// 			schema_key: "lix_change_set_element",
-		// 			file_id: "lix",
-		// 			entity_id: changeSetElementChange.entity_id,
-		// 		} satisfies ChangeSetElement),
-		// 	},
-		// });
+		// Create a change set element for the change set element change itself
+		// This is meta but necessary to ensure all changes are reachable
+		createChangeWithSnapshot({
+			sqlite,
+			db,
+			data: {
+				entity_id: `${nextChangeSetId}::${changeSetElementChange.id}`,
+				schema_key: "lix_change_set_element",
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify({
+					change_set_id: nextChangeSetId,
+					change_id: changeSetElementChange.id,
+					schema_key: "lix_change_set_element",
+					file_id: "lix",
+					entity_id: changeSetElementChange.entity_id,
+				} satisfies LixChangeSetElement),
+				schema_version: LixChangeSetElementSchema["x-lix-version"],
+			},
+			timestamp: currentTime,
+			version_id: "global",
+		});
 	}
 
 	// Create/update working change set element for user data changes
