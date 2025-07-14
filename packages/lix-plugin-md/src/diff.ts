@@ -34,37 +34,29 @@ export class DiffComponent extends LitElement {
 			padding: 16px;
 		}
 
-		.entity-item {
-			border: 1px solid transparent;
-			border-radius: 4px;
-			padding: 8px;
-			transition: border-color 0.2s;
-		}
-
-		.entity-item:hover {
-			border-color: var(--color-border);
+		.entity-list * {
+			margin-top: 0;
+			margin-bottom: 0;
+			padding-left: 4px;
 		}
 
 		/* Enhance lix HTML diff classes */
 		.diff-created {
 			color: #080;
 			background: #efe;
-			border-left: 4px solid #080;
-			padding-left: 12px;
+			// border-left: 2px solid #080;
 		}
 
 		.diff-updated {
 			color: #f60;
 			background: #ffc;
-			border-left: 4px solid #f60;
-			padding-left: 12px;
+			// border-left: 2px solid #f60;
 		}
 
 		.diff-deleted {
 			color: #b00;
 			background: #fee;
-			border-left: 4px solid #b00;
-			padding-left: 12px;
+			// border-left: 2px solid #b00;
 			opacity: 0.7;
 		}
 	`;
