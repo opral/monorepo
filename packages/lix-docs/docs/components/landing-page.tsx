@@ -841,7 +841,7 @@ function LandingPage() {
 
             <div className="mt-12 text-center">
               <a
-                href="https://docs.lix.dev/guide/concepts/change-proposals"
+                href="https://lix.dev/guide/ai-agent-collaboration.html"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-gray-800 border border-gray-300 px-6 py-3 rounded-md text-base hover:bg-gray-50 transition-all duration-200 inline-flex items-center font-medium shadow-sm"
