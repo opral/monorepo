@@ -235,7 +235,13 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 
 test("deterministic mode can be turned on and off", async () => {
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
 		blob: await newLixFile(),
 	});
 
@@ -330,7 +336,7 @@ test("deterministic mode can be turned on and off", async () => {
 				.selectFrom("key_value")
 				.where("key", "=", "test_key_3")
 				.selectAll()
-				.execute()
+				.executeTakeFirst()
 		)
 	);
 
