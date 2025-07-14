@@ -173,7 +173,7 @@ function LandingPage() {
                 <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
               </svg>
               <span className="text-sm font-medium text-gray-700">
-                27k+ monthly downloads
+                27k+ weekly downloads
               </span>
             </a>
 
