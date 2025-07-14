@@ -3,7 +3,7 @@ import { openLix } from "@lix-js/sdk";
 export default async function runExample(console: any) {
   const lix = await openLix({});
 
-  // SECTION-START "file-history"
+  console.log("SECTION START 'file-history'");
   // Get the current change set from the active version
   const activeVersion = await lix.db
     .selectFrom("active_version")
@@ -38,9 +38,10 @@ export default async function runExample(console: any) {
       updated_at: exampleFile.lixcol_updated_at
     }, null, 2));
   }
-  // SECTION-END "file-history"
 
-  // SECTION-START "entity-history"
+  console.log("SECTION END 'file-history'");
+
+  console.log("SECTION START 'entity-history'");
   // Get all entities in the current state to demonstrate entity history
   const allEntities = await lix.db
     .selectFrom("state")
@@ -54,9 +55,10 @@ export default async function runExample(console: any) {
     console.log(`  Updated: ${entity.updated_at}`);
     console.log(`  Change ID: ${entity.change_id}`);
   });
-  // SECTION-END "entity-history"
 
-  // SECTION-START "version-specific-history"
+  console.log("SECTION END 'entity-history'");
+
+  console.log("SECTION START 'version-specific-history'");
   // Get version information to show version-specific history
   const allVersions = await lix.db
     .selectFrom("version")
@@ -70,9 +72,10 @@ export default async function runExample(console: any) {
     console.log(`  Created: ${version.lixcol_created_at}`);
     console.log(`  Hidden: ${version.hidden ? 'Yes' : 'No'}`);
   });
-  // SECTION-END "version-specific-history"
 
-  // SECTION-START "history-data-model"
+  console.log("SECTION END 'version-specific-history'");
+
+  console.log("SECTION START 'history-data-model'");
   // Example of the change set graph concept
   console.log("History Data Model Example:");
   console.log("Imagine config.json changes over time:");
@@ -103,7 +106,8 @@ export default async function runExample(console: any) {
   console.log("History from CS3 perspective:");
   console.log(JSON.stringify(mockHistoryFromCS3, null, 2));
   console.log("Notice: CS4 is not included because it comes after CS3 in the graph");
-  // SECTION-END "history-data-model"
+
+  console.log("SECTION END 'history-data-model'");
 }
 
 // Uncomment for running in node

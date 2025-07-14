@@ -28,7 +28,7 @@ async function mergeVersion(options: any) {
 export default async function runExample(console: any) {
   const lix = await openLix({});
 
-  // SECTION-START "create-switch-version"
+  console.log("SECTION START 'create-switch-version'");
   const activeVersion = await lix.db
     .selectFrom("active_version")
     .innerJoin("version", "active_version.version_id", "version.id")
@@ -44,16 +44,18 @@ export default async function runExample(console: any) {
   await switchVersion({ lix, to: newVersion });
 
   console.log("Switched to new version");
-  // SECTION-END "create-switch-version"
 
-  // SECTION-START "merge-version"
+  console.log("SECTION END 'create-switch-version'");
+
+  console.log("SECTION START 'merge-version'");
   // Switch back to main version for merging demonstration
   await switchVersion({ lix, to: activeVersion });
 
   await mergeVersion({ lix, source: newVersion, target: activeVersion });
 
   console.log("Merged feature branch into main");
-  // SECTION-END "merge-version"
+
+  console.log("SECTION END 'merge-version'");
 }
 
 // Uncomment for running in node

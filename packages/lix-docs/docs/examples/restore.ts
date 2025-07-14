@@ -17,7 +17,7 @@ async function selectCheckpoints(options: any) {
 export default async function runExample(console: any) {
   const lix = await openLix({});
 
-  // SECTION-START "restore-last-changeset"
+  console.log("SECTION START 'restore-last-changeset'");
   // Get the most recent change set from the history
   const lastChangeSet = await lix.db
     .selectFrom("change_set")
@@ -28,9 +28,10 @@ export default async function runExample(console: any) {
   await restore({ lix, to: lastChangeSet.id });
 
   console.log("Restored to most recent change set:", lastChangeSet.id);
-  // SECTION-END "restore-last-changeset"
 
-  // SECTION-START "checkpoint-restore"
+  console.log("SECTION END 'restore-last-changeset'");
+
+  console.log("SECTION START 'checkpoint-restore'");
   // Later, you can easily find and restore to that checkpoint
   const checkpoints = await selectCheckpoints({ lix });
   const results = await checkpoints.execute();
@@ -41,7 +42,8 @@ export default async function runExample(console: any) {
   } else {
     console.log("No checkpoints available");
   }
-  // SECTION-END "checkpoint-restore"
+
+  console.log("SECTION END 'checkpoint-restore'");
 }
 
 // Uncomment for running in node

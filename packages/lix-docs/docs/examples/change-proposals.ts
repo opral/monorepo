@@ -19,7 +19,7 @@ async function rejectChangeProposal(options: any) {
 export default async function runExample(console: any) {
   const lix = await openLix({});
 
-  // SECTION-START "create-proposal"
+  console.log("SECTION START 'create-proposal'");
   const activeVersion = await lix.db.selectFrom("active_version")
     .innerJoin("version", "active_version.version_id", "version.id")
     .select("version.id")
@@ -40,9 +40,10 @@ export default async function runExample(console: any) {
   });
 
   console.log("Change proposal created:", proposal.title);
-  // SECTION-END "create-proposal"
 
-  // SECTION-START "handle-proposal"
+  console.log("SECTION END 'create-proposal'");
+
+  console.log("SECTION START 'handle-proposal'");
   // Merge the proposal (accepts and merges in one action)
   await acceptChangeProposal({
     lix,
@@ -59,7 +60,8 @@ export default async function runExample(console: any) {
   });
 
   console.log("Proposal rejected with feedback");
-  // SECTION-END "handle-proposal"
+
+  console.log("SECTION END 'handle-proposal'");
 }
 
 // Uncomment for running in node

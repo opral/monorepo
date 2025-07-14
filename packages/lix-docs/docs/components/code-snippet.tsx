@@ -194,47 +194,47 @@ function parseSections(code: string): {
   let currentSection: string | null = null;
   let sectionContent: string[] = [];
   let sectionStartLine = 0;
+  let inSection = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Check for section marker using regex to match: SECTION 'section-name'
-    // This is more reliable than looking for console since bundlers may rename it
-    const sectionMatch = line.match(/SECTION\s+['"]([^'"]+)['"]/);
-    if (sectionMatch) {
-      // Save previous section if exists
+    // Check for section start marker: SECTION START 'section-name'
+    const sectionStartMatch = line.match(/SECTION\s+START\s+['"]([^'"]+)['"]/);
+    if (sectionStartMatch) {
+      currentSection = sectionStartMatch[1];
+      sectionContent = [];
+      sectionStartLine = i + 1; // Next line after section start marker
+      inSection = true;
+      continue;
+    }
+
+    // Check for section end marker: SECTION END 'section-name'
+    const sectionEndMatch = line.match(/SECTION\s+END\s+['"]([^'"]+)['"]/);
+    if (sectionEndMatch) {
       if (currentSection && sectionContent.length > 0) {
         sections[currentSection] = dedentCode(sectionContent.join("\n"));
         sectionRanges[currentSection] = { start: sectionStartLine, end: i - 1 };
       }
-      
-      // Start new section
-      currentSection = sectionMatch[1];
-      sectionContent = [];
-      sectionStartLine = i + 1; // Next line after section marker
+      currentSection = null;
+      inSection = false;
       continue;
     }
 
     // Collect imports (before any section)
-    if (!currentSection && line.match(/^import\s+/)) {
+    if (!inSection && line.match(/^import\s+/)) {
       importLines.push(line);
     }
 
     // Add to current section (skip the function declaration and closing brace)
-    if (currentSection && !line.includes("export default async function") && !line.match(/^}$/)) {
+    if (inSection && currentSection && !line.includes("export default async function") && !line.match(/^}$/)) {
       sectionContent.push(line);
     }
   }
 
-  // Save the last section
-  if (currentSection && sectionContent.length > 0) {
-    sections[currentSection] = dedentCode(sectionContent.join("\n"));
-    sectionRanges[currentSection] = { start: sectionStartLine, end: lines.length - 1 };
-  }
-
   // Create full code without section markers and function wrapper
   const fullCode = lines
-    .filter((line) => !line.match(/SECTION\s+['"]([^'"]+)['"]/) && !line.includes("SECTION"))
+    .filter((line) => !line.match(/SECTION\s+(START|END)\s+['"]([^'"]+)['"]/) && !line.includes("SECTION"))
     .filter((line) => !line.includes("export default async function"))
     .filter((line) => !line.match(/^}$/)) // Remove closing brace of function
     .join("\n")
@@ -355,11 +355,16 @@ export default function CodeSnippet({
           const mockConsole = {
             log: (...args: any[]) => {
               const firstArg = String(args[0]);
-              // Check if this is a section marker
-              const sectionMatch = firstArg.match(/SECTION\s+['"]([^'"]+)['"]/);
-              if (sectionMatch) {
-                currentSection = sectionMatch[1];
-                return; // Don't log section markers
+              // Check if this is a section start marker
+              const sectionStartMatch = firstArg.match(/SECTION\s+START\s+['"]([^'"]+)['"]/);
+              if (sectionStartMatch) {
+                currentSection = sectionStartMatch[1];
+                return; // Don't log section start markers
+              }
+              // Check if this is a section end marker
+              const sectionEndMatch = firstArg.match(/SECTION\s+END\s+['"]([^'"]+)['"]/);
+              if (sectionEndMatch) {
+                return; // Don't log section end markers
               }
               logOutput("log", currentSection, ...args);
             },
@@ -477,16 +482,19 @@ export default function CodeSnippet({
           {hasExecuted && (
             <CodeBlock
               code={
-                consoleOutput.length > 0
-                  ? formatConsoleOutput(
-                      // Filter logs to only show those from selected sections (if sections are specified)
-                      sections 
-                        ? consoleOutput.filter(output => 
-                            !output.section || sections.includes(output.section)
-                          )
-                        : consoleOutput
-                    )
-                  : "// Nothing was logged"
+                (() => {
+                  const filteredOutput = sections 
+                    ? consoleOutput.filter(output => 
+                        !output.section || sections.includes(output.section)
+                      )
+                    : consoleOutput;
+                  
+                  if (filteredOutput.length === 0) {
+                    return "// No output";
+                  }
+                  
+                  return formatConsoleOutput(filteredOutput);
+                })()
               }
               language="javascript"
               showLineNumbers={false}

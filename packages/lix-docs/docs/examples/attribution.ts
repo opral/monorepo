@@ -13,7 +13,7 @@ function entityIs(entity: any) {
 export default async function runExample(console: any, sharedLix?: any) {
   const lix = sharedLix || await openLix({});
 
-  console.log("SECTION 'entity-attribution'");
+  console.log("SECTION START 'entity-attribution'");
 
   // Assume that `selectedEntity` is the entity the user has selected in your application
   const selectedEntity = {
@@ -40,7 +40,9 @@ export default async function runExample(console: any, sharedLix?: any) {
     console.log("No entities found in the database");
   }
 
-  console.log("SECTION 'file-attribution'");
+  console.log("SECTION END 'entity-attribution'");
+
+  console.log("SECTION START 'file-attribution'");
 
   const fileEntity = await lix.db
     .selectFrom("file")
@@ -59,6 +61,7 @@ export default async function runExample(console: any, sharedLix?: any) {
     );
   }
 
+  console.log("SECTION END 'file-attribution'");
 }
 
 // Uncomment for running in node

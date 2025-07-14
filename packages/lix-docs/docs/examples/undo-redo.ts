@@ -15,7 +15,7 @@ async function redo(options: any) {
 export default async function runExample(console: any) {
   const lix = await openLix({});
 
-  // SECTION-START "basic-undo-redo"
+  console.log("SECTION START 'basic-undo-redo'");
   // Basic undo operation
   await undo({ lix });
   console.log("Performed undo operation");
@@ -27,7 +27,8 @@ export default async function runExample(console: any) {
   // Basic redo operation
   await redo({ lix });
   console.log("Performed redo operation");
-  // SECTION-END "basic-undo-redo"
+
+  console.log("SECTION END 'basic-undo-redo'");
 }
 
 // Uncomment for running in node
