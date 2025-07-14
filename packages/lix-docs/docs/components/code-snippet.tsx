@@ -148,7 +148,7 @@ function formatConsoleOutput(
 ): string {
   return outputs
     .map((entry) => {
-      const prefix = entry.level === "error" ? "// Error: " : "";
+      const prefix = entry.level !== "log" ? `// ${entry.level.toUpperCase()}: ` : "";
       const content = entry.args.map((arg) => arg.content).join(" ");
       return prefix + content;
     })
@@ -283,38 +283,12 @@ function getPrerequisiteCode(
   return [imports, prerequisiteSections].filter(Boolean).join("\n\n");
 }
 
-// Helper to extract console.log patterns from each section
-function extractSectionLogs(
-  sections: Record<string, string>
-): Record<string, string[]> {
-  const sectionLogs: Record<string, string[]> = {};
-
-  for (const [sectionName, sectionCode] of Object.entries(sections)) {
-    // Find all console.log statements in this section
-    // This regex matches console.log with string literals or template literals
-    const logMatches = sectionCode.matchAll(
-      /console\.log\s*\(\s*["'`]([^"'`]*?)["'`]/g
-    );
-    const logPatterns: string[] = [];
-
-    for (const match of logMatches) {
-      if (match[1]) {
-        logPatterns.push(match[1]);
-      }
-    }
-
-    sectionLogs[sectionName] = logPatterns;
-  }
-
-  return sectionLogs;
-}
 
 export default function CodeSnippet({
   module,
   srcCode,
   sections,
 }: CodeSnippetProps) {
-  console.log("CodeSnippet rendered with", srcCode);
   const [setupExpanded, setSetupExpanded] = useState(false);
   const [outputExpanded, setOutputExpanded] = useState(false);
   const [hasExecuted, setHasExecuted] = useState(false);
@@ -334,9 +308,6 @@ export default function CodeSnippet({
   const prerequisiteCode = sections
     ? getPrerequisiteCode(allSections, sections, imports)
     : "";
-
-  // Extract log patterns for each section (memoized to prevent infinite loops)
-  const sectionLogs = useMemo(() => extractSectionLogs(allSections), [srcCode]);
 
   const executeCode = async () => {
     if (isExecuting) return;
@@ -381,35 +352,59 @@ export default function CodeSnippet({
 
       try {
         if (module.default && typeof module.default === "function") {
-          // Create a custom console that identifies which section each log belongs to
-          const mockConsole = {
-            log: (...args: any[]) => {
-              // Try to identify which section this log belongs to
-              let logSection: string | undefined;
+          // If no sections specified, run everything normally
+          if (!sections || sections.length === 0) {
+            const mockConsole = {
+              log: (...args: any[]) => logOutput("log", undefined, ...args),
+              warn: (...args: any[]) => logOutput("warn", undefined, ...args),
+              error: (...args: any[]) => logOutput("error", undefined, ...args),
+              info: (...args: any[]) => logOutput("info", undefined, ...args),
+            };
+            await module.default(mockConsole);
+          } else {
+            // Execute only selected sections by creating a custom function
+            const selectedSectionCode = sections
+              .filter(sectionName => allSections[sectionName])
+              .map(sectionName => allSections[sectionName])
+              .join('\n\n');
 
-              if (args.length > 0 && typeof args[0] === "string") {
-                // Check each section's log patterns
-                for (const [sectionName, patterns] of Object.entries(
-                  sectionLogs
-                )) {
-                  if (patterns.some((pattern) => args[0].startsWith(pattern))) {
-                    logSection = sectionName;
-                    break;
-                  }
-                }
+            if (selectedSectionCode.trim()) {
+              // Create a simple function that executes just the selected sections
+              const functionCode = `
+                ${imports}
+                
+                const mockConsole = arguments[0];
+                const { openLix } = arguments[1] || {};
+                
+                (async () => {
+                  ${allSections[Object.keys(allSections)[0]] ? 'const lix = await openLix({});' : ''}
+                  
+                  // Replace console with mockConsole in the section code
+                  const console = mockConsole;
+                  
+                  ${selectedSectionCode}
+                })();
+              `;
+
+              try {
+                const mockConsole = {
+                  log: (...args: any[]) => logOutput("log", undefined, ...args),
+                  warn: (...args: any[]) => logOutput("warn", undefined, ...args),
+                  error: (...args: any[]) => logOutput("error", undefined, ...args),
+                  info: (...args: any[]) => logOutput("info", undefined, ...args),
+                };
+
+                // Execute the selected sections code
+                const executeFunction = new Function(functionCode);
+                await executeFunction(mockConsole, module);
+              } catch (error) {
+                console.error('Error executing selected sections:', error);
+                logOutput("error", undefined, "Error executing selected sections:", error);
               }
-
-              // Only log if this belongs to a selected section or if no sections are specified
-              if (!sections || !logSection || sections.includes(logSection)) {
-                logOutput("log", logSection, ...args);
-              }
-            },
-          };
-
-          // Execute the default function with our mock console
-          await module.default(mockConsole);
+            }
+          }
         } else {
-          console.log("Module doesn't export default function");
+          logOutput("error", undefined, "Module doesn't export default function");
         }
       } catch (error) {
         console.error("Error executing code:", error);
