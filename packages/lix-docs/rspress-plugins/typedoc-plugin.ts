@@ -132,7 +132,7 @@ export function generateApiSidebar(docsRoot: string) {
 
   // Check if API directory exists
   if (!fsSync.existsSync(apiDir)) {
-    return [];
+    throw new Error(`API directory not found: ${apiDir}`);
   }
 
   const sidebar: any[] = [];
@@ -175,6 +175,44 @@ export function generateApiSidebar(docsRoot: string) {
   return sidebar;
 }
 
+export async function generateApiDocs(
+  options: CustomTypeDocOptions & { docRoot: string; title?: string }
+): Promise<void> {
+  const {
+    entryPoints = [],
+    tsconfig,
+    outDir = "api",
+    docRoot,
+    title = "API",
+  } = options;
+
+  const outdir = path.join(docRoot, outDir);
+
+  // Use Application.bootstrap static method for TypeDoc 0.28+
+  const app = await Application.bootstrapWithPlugins({
+    name: title,
+    entryPoints,
+    plugin: ["typedoc-plugin-markdown"],
+    out: outdir,
+    theme: "markdown",
+    disableSources: true,
+    // hidePageHeader: "true",
+    hideBreadcrumbs: true,
+    hidePageHeader: true,
+    excludePrivate: true,
+    excludeExternals: true,
+    tsconfig,
+    hideGenerator: true,
+  } as Partial<TypeDocOptions>);
+  const project = await app.convert();
+
+  if (project) {
+    // Generate docs (output directory is specified in bootstrap options)
+    await app.generateDocs(project, outdir);
+    await patchGeneratedApiDocs(outdir);
+  }
+}
+
 export function customTypeDocPlugin(
   options: CustomTypeDocOptions
 ): RspressPlugin {
@@ -185,31 +223,11 @@ export function customTypeDocPlugin(
     async config(config) {
       const docRoot = config.root;
 
-      const outdir = path.join(docRoot!, outDir);
-
-      // Use Application.bootstrap static method for TypeDoc 0.28+
-      const app = await Application.bootstrapWithPlugins({
-        name: config.title,
-        entryPoints,
-        plugin: ["typedoc-plugin-markdown"],
-        out: outdir,
-        theme: "markdown",
-        disableSources: true,
-        // hidePageHeader: "true",
-        hideBreadcrumbs: true,
-        hidePageHeader: true,
-        excludePrivate: true,
-        excludeExternals: true,
-        tsconfig,
-        hideGenerator: true,
-      } as Partial<TypeDocOptions>);
-      const project = await app.convert();
-
-      if (project) {
-        // Generate docs (output directory is specified in bootstrap options)
-        await app.generateDocs(project, outdir);
-        await patchGeneratedApiDocs(outdir);
-      }
+      await generateApiDocs({
+        ...options,
+        docRoot: docRoot!,
+        title: config.title,
+      });
 
       return config;
     },
