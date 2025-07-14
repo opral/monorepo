@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { scenarioTest, type ScenarioTestDef } from "./scenario-test.js";
 import { openLix } from "../../lix/open-lix.js";
+import type { Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 test("scenario test discovery", () => {});
 
@@ -117,6 +119,11 @@ describe("database operations are deterministic", async () => {
 		async ({ initialLix, expectDeterministic }) => {
 			const lix = await openLix({ blob: initialLix });
 
+			// Testing two types of entity views that exist:
+			// 1. Regular entity view (on key_value table)
+			// 2. File entity view (whish is a special case because it aggregates multiple entities into one)
+
+			// regular entity view
 			await lix.db
 				.insertInto("key_value")
 				.values({
@@ -125,16 +132,42 @@ describe("database operations are deterministic", async () => {
 				})
 				.execute();
 
-			const result = await lix.db
-				.selectFrom("key_value")
-				.where("key", "=", "test_key")
-				.selectAll()
-				.executeTakeFirst();
+			// special entity view
+			await lix.db
+				.insertInto("file")
+				.values({
+					path: "/test.txt",
+					data: new TextEncoder().encode("test content"),
+				})
+				.execute();
 
-			expectDeterministic(result).toMatchObject({
-				key: "test_key",
-				value: "test_value",
-			});
+			// Get all tables and views from the database
+			const tablesAndViews = lix.sqlite
+				.exec({
+					sql: `SELECT name FROM sqlite_master 
+					  WHERE type IN ('table', 'view') 
+					  AND name NOT LIKE 'sqlite_%'
+					  ORDER BY name`,
+					returnValue: "resultRows",
+				})
+				.map((row) => row[0] as string);
+
+			// Query each table/view and check determinism
+			for (const tableName of tablesAndViews) {
+				const data = lix.sqlite.exec({
+					sql: `SELECT * FROM "${tableName}"`,
+					returnValue: "resultRows",
+					columnNames: [],
+				});
+
+				try {
+					expectDeterministic(data).toBeDefined();
+				} catch (error) {
+					throw new Error(
+						`Determinism check failed for table/view "${tableName}": ${error}`
+					);
+				}
+			}
 		},
 		{
 			scenarios: ["baseline", "mock-scenario"],

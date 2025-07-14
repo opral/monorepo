@@ -1,9 +1,9 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
+import { v7 as uuid_v7 } from "uuid";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { humanId } from "human-id";
-import { nanoid } from "./nano-id.js";
+import { randomNanoId } from "./nano-id.js";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
 import { LixSchemaViewMap } from "./schema.js";
@@ -23,6 +23,7 @@ import { applyThreadDatabaseSchema } from "../thread/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
+import { executeSync } from "./execute-sync.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
@@ -97,16 +98,13 @@ function initFunctions(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 }) {
+	// Counter for deterministic ID generation
+	let deterministicIdCounter = 0;
+
 	args.sqlite.createFunction({
 		name: "uuid_v7",
 		arity: 0,
 		xFunc: () => uuid_v7(),
-	});
-
-	args.sqlite.createFunction({
-		name: "uuid_v4",
-		arity: 0,
-		xFunc: () => uuid_v4(),
 	});
 
 	args.sqlite.createFunction({
@@ -120,7 +118,82 @@ function initFunctions(args: {
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working
 		xFunc: (_ctx: number, length: number) => {
-			return nanoid(length);
+			return randomNanoId(length);
+		},
+	});
+
+	// Deterministic timestamp function
+	args.sqlite.createFunction({
+		name: "lix_timestamp",
+		arity: 0,
+		xFunc: () => {
+			// Check if deterministic mode is enabled
+			const [isDeterministic] = executeSync({
+				lix: { sqlite: args.sqlite },
+				query: args.db
+					.selectFrom("key_value")
+					.where("key", "=", "lix_deterministic_mode")
+					.select("value"),
+			});
+
+			if (isDeterministic) {
+				// Return a fixed timestamp for deterministic mode
+				return "2024-01-01T00:00:00.000Z";
+			}
+
+			// Return current timestamp in ISO format
+			return new Date().toISOString();
+		},
+	});
+
+	// Deterministic UUID v7 function
+	args.sqlite.createFunction({
+		name: "lix_uuid_v7",
+		arity: 0,
+		xFunc: () => {
+			// Check if deterministic mode is enabled
+			const [isDeterministic] = executeSync({
+				lix: { sqlite: args.sqlite },
+				query: args.db
+					.selectFrom("key_value")
+					.where("key", "=", "lix_deterministic_mode")
+					.select("value"),
+			});
+
+			if (isDeterministic) {
+				// Generate deterministic UUID v7 with incrementing counter
+				const counter = deterministicIdCounter++;
+				const hex = counter.toString(16).padStart(8, "0");
+				return `01920000-0000-7000-8000-0000${hex}`;
+			}
+
+			// Return regular UUID v7
+			return uuid_v7();
+		},
+	});
+
+	// Deterministic nanoid function
+	args.sqlite.createFunction({
+		name: "lix_nano_id",
+		arity: 0,
+		xFunc: () => {
+			// Check if deterministic mode is enabled
+			const [isDeterministic] = executeSync({
+				lix: { sqlite: args.sqlite },
+				query: args.db
+					.selectFrom("key_value")
+					.where("key", "=", "lix_deterministic_mode")
+					.select("value"),
+			});
+
+			if (isDeterministic) {
+				// Generate deterministic nanoid with incrementing counter
+				const counter = deterministicIdCounter++;
+				return `test_${counter.toString().padStart(10, "0")}`;
+			}
+
+			// Return regular nanoid
+			return randomNanoId();
 		},
 	});
 }

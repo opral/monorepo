@@ -107,7 +107,15 @@ export async function scenarioTest(
 	});
 
 	// Create initial Lix blob for all scenarios
-	const initialLixBlob = await newLixFile();
+	const initialLixBlob = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	const expectedValues = new Map<string, any>();
 
@@ -127,18 +135,16 @@ export async function scenarioTest(
 				if (expected !== undefined) {
 					const errorMessage = `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-❌ SCENARIO DETERMINISM VIOLATION
+SCENARIO DETERMINISM VIOLATION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 expectDeterministic() failed: Values differ between scenarios
 
-📍 Location: Call #${callIndex - 1}
-🎭 Scenario: ${scenario.name}
-❌ Expected: ${JSON.stringify(expected)} (from ${scenariosToRun[0]?.name || 'first'} scenario)
-✅ Received: ${JSON.stringify(actual)} (in current scenario)
+Location: Call #${callIndex - 1}
+Scenario: ${scenario.name} vs ${scenariosToRun[0]?.name || 'baseline'}
 
-💡 expectDeterministic ensures identical values across all test scenarios.
-   Use regular expect() for scenario-specific assertions.
+Use expectDeterministic() for values that must be identical across scenarios.
+Use regular expect() for scenario-specific assertions.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 					expect(actual, errorMessage).toEqual(expected);

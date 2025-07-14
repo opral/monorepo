@@ -154,7 +154,7 @@ export function applyFileDatabaseSchema(
   INSTEAD OF INSERT ON file
   BEGIN
       SELECT handle_file_insert(
-        COALESCE(NEW.id, nano_id()),
+        COALESCE(NEW.id, lix_nano_id()),
         NEW.path,
         NEW.data,
         NEW.metadata,
@@ -198,7 +198,7 @@ export function applyFileDatabaseSchema(
   INSTEAD OF INSERT ON file_all
   BEGIN
       SELECT handle_file_insert(
-        COALESCE(NEW.id, nano_id()),
+        COALESCE(NEW.id, lix_nano_id()),
         NEW.path,
         NEW.data,
         NEW.metadata,

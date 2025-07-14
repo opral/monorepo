@@ -4,7 +4,7 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../database/functions.js";
 import { humanId } from "human-id";
 
 export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
@@ -17,9 +17,9 @@ export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 		hardcodedFileId: "lix",
 		hardcodedVersionId: "global",
 		defaultValues: {
-			id: () => nanoid(),
+			id: () => nanoId({ lix: { sqlite } }),
 			name: () => humanId(),
-			working_change_set_id: () => nanoid(),
+			working_change_set_id: () => nanoId({ lix: { sqlite } }),
 			inherits_from_version_id: () => "global",
 			hidden: () => false,
 		},

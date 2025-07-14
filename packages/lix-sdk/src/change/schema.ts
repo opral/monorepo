@@ -6,14 +6,14 @@ export function applyChangeDatabaseSchema(
 ): SqliteWasmDatabase {
 	return sqlite.exec(`
   CREATE TABLE IF NOT EXISTS internal_change (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
     entity_id TEXT NOT NULL,
     schema_key TEXT NOT NULL,
     schema_version TEXT NOT NULL,
     file_id TEXT NOT NULL,
     plugin_key TEXT NOT NULL,
     snapshot_id TEXT NOT NULL, -- Foreign key to internal_snapshot
-    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
+    created_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (created_at LIKE '%Z'),
 
     UNIQUE (id, entity_id, file_id, schema_key),
     FOREIGN KEY(snapshot_id) REFERENCES internal_snapshot(id)
@@ -23,7 +23,7 @@ export function applyChangeDatabaseSchema(
   -- which is used by the state logic
   -- defined here to avoid circular dependencies
   CREATE TABLE IF NOT EXISTS internal_change_in_transaction (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
     entity_id TEXT NOT NULL,
     schema_key TEXT NOT NULL,
     schema_version TEXT NOT NULL,
@@ -31,7 +31,7 @@ export function applyChangeDatabaseSchema(
     plugin_key TEXT NOT NULL,
     version_id TEXT NOT NULL,
     snapshot_content BLOB,
-    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
+    created_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (created_at LIKE '%Z'),
     --- NOTE schena_key must be unique per entity_id and file_id in the transaction
     UNIQUE(entity_id, file_id, schema_key, version_id)
   ) STRICT;
@@ -70,7 +70,7 @@ export function applyChangeDatabaseSchema(
     -- Insert the snapshot first (if there's content)
     INSERT INTO internal_snapshot (id, content)
     SELECT 
-      uuid_v7(), 
+      lix_uuid_v7(), 
       jsonb(NEW.snapshot_content)
     WHERE NEW.snapshot_content IS NOT NULL
       AND NOT EXISTS (SELECT 1 FROM internal_snapshot WHERE id = 'no-content' AND NEW.snapshot_content IS NULL);
@@ -86,7 +86,7 @@ export function applyChangeDatabaseSchema(
       snapshot_id,
       created_at
     ) VALUES (
-      COALESCE(NEW.id, uuid_v7()),
+      COALESCE(NEW.id, lix_uuid_v7()),
       NEW.entity_id,
       NEW.schema_key,
       NEW.schema_version,
@@ -96,7 +96,7 @@ export function applyChangeDatabaseSchema(
         WHEN NEW.snapshot_content IS NULL THEN 'no-content'
         ELSE (SELECT id FROM internal_snapshot WHERE content = jsonb(NEW.snapshot_content) ORDER BY id DESC LIMIT 1)
       END,
-      COALESCE(NEW.created_at, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+      COALESCE(NEW.created_at, lix_timestamp())
     );
   END;
 `);

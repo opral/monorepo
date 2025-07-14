@@ -4,8 +4,9 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { LixChange } from "../change/schema.js";
 import type { NewStateRow } from "./schema.js";
-import { uuidV7 } from "../database/index.js";
+import { uuidV7 } from "../database/functions.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
+import { timestamp } from "../database/functions.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,
@@ -19,7 +20,7 @@ export function handleStateMutation(
 	schema_version: string
 ): 0 | 1 {
 	// Use consistent timestamp for both changes and cache
-	const currentTime = new Date().toISOString();
+	const currentTime = timestamp({ lix: { sqlite } });
 
 	// Handle copy-on-write deletion for inherited entities
 	if (snapshot_content === null || snapshot_content === "null") {
@@ -187,7 +188,7 @@ export function createChangeWithSnapshot(args: {
 		NewStateRow,
 		"version_id" | "created_at" | "updated_at" | "snapshot_content"
 	> & { snapshot_content: string | null };
-	timestamp?: string;
+	timestamp: string;
 	version_id?: string;
 }): Pick<LixChange, "id" | "schema_key" | "file_id" | "entity_id"> {
 	// const [snapshot] = args.data.snapshot_content
@@ -233,7 +234,7 @@ export function createChangeWithSnapshot(args: {
 				file_id: args.data.file_id,
 				plugin_key: args.data.plugin_key,
 				version_id: args.version_id!,
-				created_at: args.timestamp || new Date().toISOString(),
+				created_at: args.timestamp,
 				schema_version: args.data.schema_version,
 			})
 			.onConflict((oc) =>
@@ -248,7 +249,7 @@ export function createChangeWithSnapshot(args: {
 					file_id: args.data.file_id,
 					plugin_key: args.data.plugin_key,
 					version_id: args.version_id!,
-					created_at: args.timestamp || new Date().toISOString(),
+					created_at: args.timestamp,
 					schema_version: args.data.schema_version,
 				})
 			)
@@ -268,7 +269,7 @@ export function createChangeWithSnapshot(args: {
 			plugin_key: args.data.plugin_key,
 			snapshot_content: args.data.snapshot_content as string | null,
 			schema_version: args.data.schema_version,
-			timestamp: args.timestamp || new Date().toISOString(),
+			timestamp: args.timestamp,
 			change_id: change.id,
 		});
 	}
@@ -279,6 +280,7 @@ export function createChangeWithSnapshot(args: {
 		db: args.db,
 		change_id: change.id,
 		version_id: args.version_id || "global",
+		timestamp: args.timestamp,
 	});
 
 	return change;
@@ -431,6 +433,7 @@ function updateStateCache(args: {
 function createChangeAuthorRecords(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
+	timestamp: string;
 	change_id: string;
 	version_id: string;
 }): void {
@@ -472,8 +475,7 @@ function createChangeAuthorRecords(args: {
 				account_id: accountId,
 			};
 
-			const currentTime = new Date().toISOString();
-			const changeAuthorId = uuidV7();
+			const changeAuthorId = uuidV7({ lix: { sqlite: args.sqlite } });
 
 			executeSync({
 				lix: { sqlite: args.sqlite },
@@ -486,7 +488,7 @@ function createChangeAuthorRecords(args: {
 					plugin_key: "lix",
 					version_id: args.version_id,
 					snapshot_content: sql`jsonb(${JSON.stringify(changeAuthorSnapshot)})`,
-					created_at: currentTime,
+					created_at: args.timestamp,
 				}),
 			});
 
@@ -501,7 +503,7 @@ function createChangeAuthorRecords(args: {
 				version_id: args.version_id,
 				plugin_key: "lix",
 				snapshot_content: JSON.stringify(changeAuthorSnapshot),
-				timestamp: currentTime,
+				timestamp: args.timestamp,
 				change_id: changeAuthorId,
 			});
 		}

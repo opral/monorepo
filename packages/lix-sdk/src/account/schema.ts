@@ -2,7 +2,7 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../database/functions.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
@@ -15,7 +15,7 @@ export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoid(),
+			id: () => nanoId({ lix: { sqlite } }),
 		},
 	});
 

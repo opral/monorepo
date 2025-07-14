@@ -1,6 +1,6 @@
 import { createChangeSet } from "../change-set/create-change-set.js";
 import type { LixChangeSet } from "../change-set/schema.js";
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../database/functions.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixVersion } from "./schema.js";
 
@@ -31,7 +31,7 @@ export async function createVersion(args: {
 				lixcol_version_id: "global",
 			}));
 
-		const versionId = args.id ?? nanoid();
+		const versionId = args.id ?? nanoId({ lix: { sqlite: args.lix.sqlite } });
 
 		await trx
 			.insertInto("version")

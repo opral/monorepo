@@ -1,4 +1,4 @@
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../database/functions.js";
 import type { State } from "../entity-views/types.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLog } from "./schema.js";
@@ -32,7 +32,7 @@ export async function createLog(args: {
 	key: string;
 }): Promise<State<LixLog>> {
 	// Insert the log entry
-	const id = nanoid();
+	const id = nanoId({ lix: { sqlite: args.lix.sqlite } });
 	await args.lix.db
 		.insertInto("log")
 		.values({

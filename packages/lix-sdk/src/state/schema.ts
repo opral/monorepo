@@ -147,7 +147,17 @@ export function applyStateDatabaseSchema(
 			},
 
 			xCommit: () => {
-				const currentTime = new Date().toISOString();
+				// Try to get deterministic timestamp, fallback to current time
+				let currentTime: string;
+				try {
+					currentTime = sqlite.exec({
+						sql: "SELECT lix_timestamp() as timestamp",
+						returnValue: "resultRows",
+					})[0]?.[0] as string;
+				} catch {
+					// Fallback if lix_timestamp() isn't available yet (during bootstrap)
+					currentTime = new Date().toISOString();
+				}
 
 				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
 				// using the same id for snapshot_id in internal_change as in internal_snapshot.
@@ -969,8 +979,8 @@ export function applyStateDatabaseSchema(
     plugin_key TEXT NOT NULL,
     snapshot_content TEXT NOT NULL, -- JSON content
     schema_version TEXT NOT NULL,
-    created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (created_at LIKE '%Z'),
-    updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) NOT NULL CHECK (updated_at LIKE '%Z'),
+    created_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (created_at LIKE '%Z'),
+    updated_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (updated_at LIKE '%Z'),
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   ) STRICT;
 
@@ -979,7 +989,7 @@ export function applyStateDatabaseSchema(
   AFTER UPDATE ON internal_state_all_untracked
   BEGIN
     UPDATE internal_state_all_untracked 
-    SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+    SET updated_at = lix_timestamp()
     WHERE entity_id = NEW.entity_id 
       AND schema_key = NEW.schema_key 
       AND file_id = NEW.file_id 

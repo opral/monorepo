@@ -4,7 +4,7 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../database/functions.js";
 
 export function applyLabelDatabaseSchema(
 	sqlite: SqliteWasmDatabase
@@ -16,7 +16,7 @@ export function applyLabelDatabaseSchema(
 		overrideName: "label",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
-		defaultValues: { id: () => nanoid() },
+		defaultValues: { id: () => nanoId({ lix: { sqlite } }) },
 	});
 
 	return sqlite;

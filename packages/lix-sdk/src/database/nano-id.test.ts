@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest";
-import { _nanoIdAlphabet, nanoid } from "./nano-id.js";
+import { _nanoIdAlphabet, randomNanoId } from "./nano-id.js";
 
 test("length is obeyed", () => {
-	const id = nanoid(10);
+	const id = randomNanoId(10);
 	expect(id.length).toBe(10);
 });
 
@@ -28,7 +28,7 @@ test("polyfill works when crypto is not available", () => {
 	vi.stubGlobal("crypto", undefined);
 
 	try {
-		const id = nanoid(10);
+		const id = randomNanoId(10);
 		expect(id.length).toBe(10);
 		expect(typeof id).toBe("string");
 		// Check that it only contains characters from our alphabet

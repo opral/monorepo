@@ -3,7 +3,7 @@ import type { LixChangeSet } from "./schema.js";
 import { createChangeSet } from "./create-change-set.js";
 import type { LixLabel } from "../label/schema.js";
 import type { NewLixChange } from "../change/schema.js";
-import { v7 } from "uuid";
+import { uuidV7 } from "../database/functions.js";
 
 /**
  * Creates a "reverse" change set that undoes the changes made by the specified change set.
@@ -90,7 +90,7 @@ export async function createUndoChangeSet(args: {
 				if (previousChange) {
 					// Restore to previous state
 					undoChanges.push({
-						id: v7(),
+						id: uuidV7({ lix: args.lix }),
 						entity_id: change.entity_id,
 						file_id: change.file_id,
 						plugin_key: change.plugin_key,
@@ -101,7 +101,7 @@ export async function createUndoChangeSet(args: {
 				} else {
 					// Entity didn't exist before, so delete it
 					undoChanges.push({
-						id: v7(),
+						id: uuidV7({ lix: args.lix }),
 						entity_id: change.entity_id,
 						file_id: change.file_id,
 						plugin_key: change.plugin_key,

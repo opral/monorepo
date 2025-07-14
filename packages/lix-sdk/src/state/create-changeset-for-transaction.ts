@@ -14,7 +14,7 @@ import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import { createChangeWithSnapshot } from "./handle-state-mutation.js";
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../database/functions.js";
 import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 import { handleStateDelete } from "./schema.js";
 
@@ -44,7 +44,7 @@ export function createChangesetForTransaction(
 		throw new Error(`Version with id '${version_id}' not found.`);
 	}
 	const mutatedVersion = versionRecord as any;
-	const nextChangeSetId = nanoid();
+	const nextChangeSetId = nanoId({ lix: { sqlite } });
 	const changeSetChange = createChangeWithSnapshot({
 		sqlite,
 		db,
@@ -104,7 +104,6 @@ export function createChangesetForTransaction(
 	changesToProcess.push(versionChange);
 
 	for (const change of changesToProcess) {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const changeSetElementChange = createChangeWithSnapshot({
 			sqlite,
 			db,
@@ -254,7 +253,7 @@ export function createChangesetForTransaction(
 						timestamp: currentTime,
 						version_id: "global",
 					});
-					
+
 					// Create a meta change set element for the working change set element change itself
 					createChangeWithSnapshot({
 						sqlite,
