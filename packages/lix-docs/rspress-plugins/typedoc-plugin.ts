@@ -128,28 +128,6 @@ Browse the API documentation using the sidebar navigation.
 
 Welcome to the comprehensive Lix SDK API documentation. This reference provides detailed information about all available functions, classes, and interfaces to help you integrate change control into your applications.
 
-## Getting Started
-
-The Lix SDK provides a powerful set of tools for implementing version control, change tracking, and collaborative features in your applications. Explore the sidebar to find detailed documentation for each API endpoint.
-
-## Core Features
-
-- **Change Tracking**: Monitor and record all modifications to your data
-- **Version Management**: Create, manage, and navigate between different versions
-- **Collaborative Workflows**: Enable multiple users to work together with conflict resolution
-- **History & Blame**: Track who made what changes and when
-- **Diff & Merge**: Compare versions and merge changes intelligently
-
-## Quick Navigation
-
-Use the sidebar to browse through different modules and their respective functions. Each API endpoint includes:
-
-- **Function signatures** with TypeScript types
-- **Parameters** with descriptions and examples
-- **Return values** and their structure
-- **Usage examples** showing real-world implementation
-- **Related functions** to explore connected functionality
-
 ## Need Help?
 
 If you're new to Lix, consider starting with our [Getting Started Guide](/guide/getting-started) before diving into the API reference.
