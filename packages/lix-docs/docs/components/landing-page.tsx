@@ -103,20 +103,20 @@ function LandingPage() {
       {/* Main content */}
       <main className="relative px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="py-28 text-center max-w-3xl mx-auto">
-          <h1 className="text-gray-900 text-5xl sm:text-6xl font-bold mb-10 leading-tight">
-            Enable change control
+        <section className="pt-28 pb-8 text-center max-w-3xl mx-auto">
+          <h1 className="text-gray-900 font-bold mb-10 leading-tight" style={{ fontSize: 'clamp(2rem, 5vw, 3.75rem)' }}>
+            Enable <span className="whitespace-nowrap">change control</span>
             <br />
             in your app or agent
           </h1>
 
-          <p className="text-gray-600 max-w-xl mx-auto mb-16 text-xl leading-relaxed">
+          <p className="text-gray-600 max-w-xl mx-auto mb-16 leading-relaxed" style={{ fontSize: 'clamp(1rem, 3vw, 1.25rem)' }}>
             Build versioned workflows, AI proposals, diffs, and review UIs with
             one SDK. Designed for modern collaborative applications.
           </p>
 
           {/* Command and buttons in one row */}
-          <div className="flex flex-row items-center justify-center gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <PackageInstaller />
 
             <a
@@ -864,7 +864,7 @@ function LandingPage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <a
-              href="https://docs.lix.dev"
+              href="https://lix.dev/guide/index.html"
               target="_blank"
               rel="noopener noreferrer"
               className="h-44 bg-blue-600 text-white rounded-lg p-6 font-medium hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg border border-blue-700 flex flex-col justify-between group"
