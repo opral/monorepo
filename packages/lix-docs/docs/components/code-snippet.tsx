@@ -374,15 +374,20 @@ export default function CodeSnippet({
                 ${imports}
                 
                 const mockConsole = arguments[0];
-                const { openLix } = arguments[1] || {};
+                const moduleExports = arguments[1] || {};
+                const { openLix } = moduleExports;
                 
                 (async () => {
-                  ${allSections[Object.keys(allSections)[0]] ? 'const lix = await openLix({});' : ''}
-                  
-                  // Replace console with mockConsole in the section code
-                  const console = mockConsole;
-                  
-                  ${selectedSectionCode}
+                  try {
+                    ${allSections[Object.keys(allSections)[0]] ? 'const lix = await openLix({});' : ''}
+                    
+                    // Replace console with mockConsole in the section code
+                    const console = mockConsole;
+                    
+                    ${selectedSectionCode}
+                  } catch (error) {
+                    mockConsole.error('Error in section execution:', error);
+                  }
                 })();
               `;
 
@@ -396,7 +401,7 @@ export default function CodeSnippet({
 
                 // Execute the selected sections code
                 const executeFunction = new Function(functionCode);
-                await executeFunction(mockConsole, module);
+                await executeFunction(mockConsole, { ...module, openLix: module.openLix || (() => {}) });
               } catch (error) {
                 console.error('Error executing selected sections:', error);
                 logOutput("error", undefined, "Error executing selected sections:", error);
