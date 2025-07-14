@@ -159,11 +159,11 @@ export class DiffComponent extends LitElement {
 			if (entity.value) {
 				if (entity.type === "text") {
 					// Text nodes should render their value directly
-					return `<span data-diff-key="${entityId}">${entity.value}</span>`;
+					return `<span data-diff-key="${entityId}" data-diff-mode="words">${entity.value}</span>`;
 				} else {
 					// Other nodes with direct values (like code blocks, html, etc.)
 					const tagName = this.getTagForType(entity.type);
-					return `<${tagName} data-diff-key="${entityId}">${entity.value}</${tagName}>`;
+					return `<${tagName} data-diff-key="${entityId}" data-diff-mode="words">${entity.value}</${tagName}>`;
 				}
 			}
 
@@ -190,7 +190,7 @@ export class DiffComponent extends LitElement {
 
 			// Fallback for entities without value or children
 			const tagName = this.getTagForType(entity.type);
-			return `<${tagName} data-diff-key="${entityId}"></${tagName}>`;
+			return `<${tagName} data-diff-key="${entityId}" data-diff-mode="words"></${tagName}>`;
 		} catch (error) {
 			console.error("Entity to HTML conversion failed:", error);
 			return `<div data-diff-key="${entityId}">${JSON.stringify(entity)}</div>`;
@@ -243,7 +243,7 @@ export class DiffComponent extends LitElement {
 			const [fullMatch, tagName, attributes = ""] = tagMatch;
 			const newAttributes = attributes.includes("data-diff-key")
 				? attributes
-				: `${attributes} data-diff-key="${entityId}"`;
+				: `${attributes} data-diff-key="${entityId}" data-diff-mode="words"`;
 			return html.replace(fullMatch, `<${tagName}${newAttributes}>`);
 		}
 		return html;
