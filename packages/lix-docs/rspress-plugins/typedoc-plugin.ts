@@ -139,11 +139,11 @@ export function generateApiSidebar(docsRoot: string) {
 
   // Define the categories we want to show
   const categories = [
-    { dir: "classes", title: "Classes", collapsed: false },
-    { dir: "interfaces", title: "Interfaces", collapsed: false },
     { dir: "functions", title: "Functions", collapsed: true },
     { dir: "types", title: "Type Aliases", collapsed: true },
     { dir: "variables", title: "Variables", collapsed: true },
+    { dir: "classes", title: "Classes", collapsed: true },
+    { dir: "interfaces", title: "Interfaces", collapsed: true },
   ];
 
   categories.forEach((category) => {
