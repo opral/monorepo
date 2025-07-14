@@ -31,13 +31,12 @@ export class DiffComponent extends LitElement {
 			display: flex;
 			flex-direction: column;
 			gap: 8px;
-			padding: 16px;
+			padding: 8px;
 		}
 
 		.entity-list * {
 			margin-top: 0;
 			margin-bottom: 0;
-			padding-left: 4px;
 		}
 
 		/* Enhance lix HTML diff classes */
