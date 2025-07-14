@@ -262,8 +262,11 @@ services:
         - packages/lix-sdk/**
     envVars:
       - fromGroup: production
+      - key: NODE_VERSION
+        value: 22.11.0
     domains:
       - lix.dev
+      - lix.com
 
   - name: prosemirror-example
     type: web
