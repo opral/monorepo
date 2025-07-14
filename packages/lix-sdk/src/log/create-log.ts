@@ -1,4 +1,4 @@
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 import type { State } from "../entity-views/types.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLog } from "./schema.js";

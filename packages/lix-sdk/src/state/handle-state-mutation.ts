@@ -4,9 +4,9 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { LixChange } from "../change/schema.js";
 import type { NewStateRow } from "./schema.js";
-import { uuidV7 } from "../database/functions.js";
+import { uuidV7 } from "../database/index.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
-import { timestamp } from "../database/functions.js";
+import { timestamp } from "../database/index.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,

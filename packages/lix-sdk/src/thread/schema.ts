@@ -5,7 +5,7 @@ import type {
 } from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 
 export function applyThreadDatabaseSchema(
 	sqlite: SqliteWasmDatabase

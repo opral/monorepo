@@ -23,10 +23,17 @@ import { applyThreadDatabaseSchema } from "../thread/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
-import { nextDeterministicCount } from "../state/deterministic-counter.js";
-import { isDeterministicMode } from "./is-deterministic-mode.js";
 import type { Lix } from "../lix/open-lix.js";
-import { createTimestampFunction } from "./functions/timestamp.js";
+import { 
+	createTimestampFunction
+} from "./functions/timestamp.js";
+import {
+	createUuidV7Function
+} from "./functions/uuid-v7.js";
+import {
+	createNanoIdFunction,
+	createRandomNanoIdFunction
+} from "./functions/nano-id.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
@@ -125,46 +132,14 @@ function initFunctions(args: {
 	});
 
 	// Deterministic timestamp function
-	args.sqlite.createFunction(createTimestampFunction({ lix }));
+	createTimestampFunction({ lix });
 
 	// Deterministic UUID v7 function
-	args.sqlite.createFunction({
-		name: "lix_uuid_v7",
-		arity: 0,
-		xFunc: () => {
-			// Check if deterministic mode is enabled
-			if (isDeterministicMode({ lix })) {
-				// Get the next deterministic counter value
-				const counter = nextDeterministicCount({
-					sqlite: args.sqlite,
-					db: args.db,
-				});
-				const hex = counter.toString(16).padStart(8, "0");
-				return `01920000-0000-7000-8000-0000${hex}`;
-			}
-
-			// Return regular UUID v7
-			return uuid_v7();
-		},
-	});
+	createUuidV7Function({ lix });
 
 	// Deterministic nanoid function
-	args.sqlite.createFunction({
-		name: "lix_nano_id",
-		arity: 0,
-		xFunc: () => {
-			// Check if deterministic mode is enabled
-			if (isDeterministicMode({ lix })) {
-				// Get the next deterministic counter value
-				const counter = nextDeterministicCount({
-					sqlite: args.sqlite,
-					db: args.db,
-				});
-				return `test_${counter.toString().padStart(10, "0")}`;
-			}
+	createNanoIdFunction({ lix });
 
-			// Return regular nanoid
-			return randomNanoId();
-		},
-	});
+	// Random nanoid function (always non-deterministic)
+	createRandomNanoIdFunction({ sqlite: args.sqlite });
 }

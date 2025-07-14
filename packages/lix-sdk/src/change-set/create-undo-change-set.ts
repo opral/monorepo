@@ -3,7 +3,7 @@ import type { LixChangeSet } from "./schema.js";
 import { createChangeSet } from "./create-change-set.js";
 import type { LixLabel } from "../label/schema.js";
 import type { NewLixChange } from "../change/schema.js";
-import { uuidV7 } from "../database/functions.js";
+import { uuidV7 } from "../database/index.js";
 
 /**
  * Creates a "reverse" change set that undoes the changes made by the specified change set.

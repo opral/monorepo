@@ -2,7 +2,7 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 

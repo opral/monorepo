@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixAccount } from "./schema.js";
-import { uuidV7 } from "../database/functions.js";
+import { uuidV7 } from "../database/index.js";
 
 /**
  * Inserts a new account into the Lix database.

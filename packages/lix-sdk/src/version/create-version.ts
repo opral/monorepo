@@ -1,6 +1,6 @@
 import { createChangeSet } from "../change-set/create-change-set.js";
 import type { LixChangeSet } from "../change-set/schema.js";
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixVersion } from "./schema.js";
 

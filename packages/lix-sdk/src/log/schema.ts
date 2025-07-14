@@ -4,7 +4,7 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 
 export function applyLogDatabaseSchema(
 	sqlite: SqliteWasmDatabase

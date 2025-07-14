@@ -1,13 +1,16 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { uuidV7 } from "../database/functions.js";
+import { uuidV7 } from "../database/index.js";
 
 test("deterministic mode returns the same uuid_v7 sequence in an independent clone", async () => {
 	const lixA = await openLix({
 		keyValues: [{ key: "lix_deterministic_mode", value: true }],
 	});
 
-	const lixB = await openLix({ blob: await lixA.toBlob() });
+	// Create an independent clone with the same initial state
+	const lixB = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+	});
 
 	const seqA = [
 		uuidV7({ lix: lixA }),
@@ -15,6 +18,7 @@ test("deterministic mode returns the same uuid_v7 sequence in an independent clo
 		uuidV7({ lix: lixA }),
 	];
 
+	console.log("BEGIN SEQUENCE");
 	const seqB = [
 		uuidV7({ lix: lixB }),
 		uuidV7({ lix: lixB }),

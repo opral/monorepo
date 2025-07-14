@@ -42,13 +42,13 @@ export function timestamp(args: { lix: Pick<Lix, "sqlite"> }): string {
 }
 
 /**
- * SQLite function definition for lix_timestamp.
- * This should be registered with sqlite.createFunction() during database initialization.
+ * Creates and registers the lix_timestamp SQLite function.
+ * This function returns deterministic timestamps in deterministic mode.
  */
 export function createTimestampFunction(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
-}) {
-	return {
+}): void {
+	args.lix.sqlite.createFunction({
 		name: "lix_timestamp",
 		arity: 0,
 		xFunc: (): string => {
@@ -66,5 +66,5 @@ export function createTimestampFunction(args: {
 			// Return current timestamp in ISO format
 			return new Date().toISOString();
 		},
-	};
+	});
 }

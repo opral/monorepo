@@ -14,7 +14,7 @@ import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import { createChangeWithSnapshot } from "./handle-state-mutation.js";
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 import { handleStateDelete } from "./schema.js";
 

@@ -1,4 +1,4 @@
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixChangeSet, LixChangeSetElement } from "./schema.js";
 import type { LixLabel } from "../label/schema.js";

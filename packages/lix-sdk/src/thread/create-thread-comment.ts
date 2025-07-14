@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 import type { NewState, State } from "../entity-views/types.js";
 import type { LixThreadComment } from "./schema.js";
 

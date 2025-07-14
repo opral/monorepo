@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLabel } from "./schema.js";
-import { nanoId } from "../database/functions.js";
+import { nanoId } from "../database/index.js";
 
 /**
  * Creates a label that can be attached to change sets.
