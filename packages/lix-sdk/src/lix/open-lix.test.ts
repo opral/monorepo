@@ -151,3 +151,39 @@ test("should default to InMemoryStorage when no storage is provided", async () =
 		data: new TextEncoder().encode("test content"),
 	});
 });
+
+test("providing lix_deterministic_mode = true should lead to deterministic state", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		blob: await newLixFile(),
+	});
+
+	const lixCopy = await openLix({
+		blob: await lix.toBlob(),
+	});
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "test_key",
+			value: "test_value",
+		})
+		.execute();
+
+	await lixCopy.db
+		.insertInto("key_value")
+		.values({
+			key: "test_key",
+			value: "test_value",
+		})
+		.execute();
+
+	const lixState = await lix.db.selectFrom("state").selectAll().execute();
+
+	const lixCopyState = await lixCopy.db
+		.selectFrom("state")
+		.selectAll()
+		.execute();
+
+	expect(lixState).toEqual(lixCopyState);
+});

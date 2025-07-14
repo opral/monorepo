@@ -23,7 +23,9 @@ import { applyThreadDatabaseSchema } from "../thread/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
-import { executeSync } from "./execute-sync.js";
+import { nextDeterministicCount } from "../state/deterministic-counter.js";
+import { isDeterministicMode } from "./is-deterministic-mode.js";
+import type { Lix } from "../lix/open-lix.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
@@ -98,8 +100,7 @@ function initFunctions(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 }) {
-	// Counter for deterministic ID generation
-	let deterministicIdCounter = 0;
+	const lix = { sqlite: args.sqlite, db: args.db } as unknown as Lix;
 
 	args.sqlite.createFunction({
 		name: "uuid_v7",
@@ -128,15 +129,7 @@ function initFunctions(args: {
 		arity: 0,
 		xFunc: () => {
 			// Check if deterministic mode is enabled
-			const [isDeterministic] = executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.selectFrom("key_value")
-					.where("key", "=", "lix_deterministic_mode")
-					.select("value"),
-			});
-
-			if (isDeterministic) {
+			if (isDeterministicMode({ lix })) {
 				// Return a fixed timestamp for deterministic mode
 				return "2024-01-01T00:00:00.000Z";
 			}
@@ -152,17 +145,12 @@ function initFunctions(args: {
 		arity: 0,
 		xFunc: () => {
 			// Check if deterministic mode is enabled
-			const [isDeterministic] = executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.selectFrom("key_value")
-					.where("key", "=", "lix_deterministic_mode")
-					.select("value"),
-			});
-
-			if (isDeterministic) {
-				// Generate deterministic UUID v7 with incrementing counter
-				const counter = deterministicIdCounter++;
+			if (isDeterministicMode({ lix })) {
+				// Get the next deterministic counter value
+				const counter = nextDeterministicCount({
+					sqlite: args.sqlite,
+					db: args.db,
+				});
 				const hex = counter.toString(16).padStart(8, "0");
 				return `01920000-0000-7000-8000-0000${hex}`;
 			}
@@ -178,17 +166,12 @@ function initFunctions(args: {
 		arity: 0,
 		xFunc: () => {
 			// Check if deterministic mode is enabled
-			const [isDeterministic] = executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.selectFrom("key_value")
-					.where("key", "=", "lix_deterministic_mode")
-					.select("value"),
-			});
-
-			if (isDeterministic) {
-				// Generate deterministic nanoid with incrementing counter
-				const counter = deterministicIdCounter++;
+			if (isDeterministicMode({ lix })) {
+				// Get the next deterministic counter value
+				const counter = nextDeterministicCount({
+					sqlite: args.sqlite,
+					db: args.db,
+				});
 				return `test_${counter.toString().padStart(10, "0")}`;
 			}
 

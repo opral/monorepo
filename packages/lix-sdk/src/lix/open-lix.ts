@@ -2,7 +2,10 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
-import type { LixDatabaseSchema } from "../database/schema.js";
+import type {
+	LixDatabaseSchema,
+	LixInternalDatabaseSchema,
+} from "../database/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
@@ -13,6 +16,7 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
+import { commitDeterministicCountIncrement } from "../state/deterministic-counter.js";
 
 export type Lix = {
 	/**
@@ -142,7 +146,7 @@ export async function openLix(args: {
 			.selectFrom("active_account")
 			.select(["id", "name"])
 			.execute();
-		
+
 		// If there are existing active accounts, delete them
 		if (existingActiveAccounts.length > 0) {
 			for (const account of existingActiveAccounts) {
@@ -152,7 +156,7 @@ export async function openLix(args: {
 					.execute();
 			}
 		}
-		
+
 		// Insert the new active account
 		// The account entity will be created automatically when needed
 		await db.insertInto("active_account").values(accountToSet).execute();
@@ -181,7 +185,6 @@ export async function openLix(args: {
 		}
 	}
 
-
 	const plugins: LixPlugin[] = [];
 	if (args.providePlugins && args.providePlugins.length > 0) {
 		plugins.push(...args.providePlugins);
@@ -206,6 +209,10 @@ export async function openLix(args: {
 			await storage.close();
 		},
 		toBlob: async () => {
+			commitDeterministicCountIncrement({
+				sqlite: database,
+				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
+			});
 			return storage.export();
 		},
 	};

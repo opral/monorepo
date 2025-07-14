@@ -1,8 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { scenarioTest, type ScenarioTestDef } from "./scenario-test.js";
 import { openLix } from "../../lix/open-lix.js";
-import type { Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 test("scenario test discovery", () => {});
 
