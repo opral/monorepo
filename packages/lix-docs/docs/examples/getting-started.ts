@@ -2,7 +2,7 @@ import { openLix } from "@lix-js/sdk";
 import { plugin as jsonPlugin } from "@lix-js/plugin-json";
 
 export default async function runExample(console: any) {
-  // SECTION-START "opening-lix"
+  console.log("SECTION START 'opening-lix'");
 
   const lix = await openLix({
     providePlugins: [jsonPlugin],
@@ -13,9 +13,9 @@ export default async function runExample(console: any) {
     age: 50,
   };
 
-  // SECTION-END "opening-lix"
+  console.log("SECTION END 'opening-lix'");
 
-  // SECTION-START "inserting-file"
+  console.log("SECTION START 'inserting-file'");
 
   await lix.db
     .insertInto("file")
@@ -39,9 +39,9 @@ export default async function runExample(console: any) {
     },
   ]);
 
-  // SECTION-END "inserting-file"
+  console.log("SECTION END 'inserting-file'");
 
-  // SECTION-START "updating-file"
+  console.log("SECTION START 'updating-file'");
 
   // we update the user's age to 51
   await lix.db
@@ -70,9 +70,9 @@ export default async function runExample(console: any) {
     },
   ]);
 
-  // SECTION-END "updating-file"
+  console.log("SECTION END 'updating-file'");
 
-  // SECTION-START "querying-file-history"
+  console.log("SECTION START 'querying-file-history'");
 
   const activeVersion = await lix.db
     .selectFrom("active_version")
@@ -97,8 +97,8 @@ export default async function runExample(console: any) {
     }))
   );
 
-  // SECTION-END "querying-file-history"
+  console.log("SECTION END 'querying-file-history'");
 }
 
 // outcomment for running in node
-// runExample(console);
+runExample(console);

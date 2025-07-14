@@ -62,6 +62,7 @@ export async function createUndoChangeSet(args: {
 			if (parents.length === 0) {
 				// No parent = this was the first change set, undo = delete everything
 				undoChanges.push({
+					id: v7(),
 					entity_id: change.entity_id,
 					file_id: change.file_id,
 					plugin_key: change.plugin_key,
