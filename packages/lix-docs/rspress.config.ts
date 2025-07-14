@@ -2,9 +2,23 @@ import * as path from "node:path";
 import { defineConfig } from "rspress/config";
 import mermaid from "rspress-plugin-mermaid";
 import {
-  customTypeDocPlugin,
+  generateApiDocs,
   generateApiSidebar,
 } from "./rspress-plugins/typedoc-plugin";
+
+// Generate API docs before creating the config
+// We need to generate the API docs at the top level (before defineConfig) because
+// the sidebar generation function (generateApiSidebar) runs synchronously during
+// config evaluation. If we used a plugin instead, the API docs would be generated
+// asynchronously after the sidebar tries to read them, resulting in an empty sidebar.
+console.log("Generating API Reference documentation...");
+await generateApiDocs({
+  entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
+  tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
+  docRoot: path.join(__dirname, "docs"),
+  title: "Lix",
+});
+console.log("✅ API Reference documentation generated successfully.");
 
 export default defineConfig({
   root: path.join(__dirname, "docs"),
@@ -36,13 +50,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    mermaid(),
-    customTypeDocPlugin({
-      entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
-      tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
-    }),
-  ],
+  plugins: [mermaid()],
   themeConfig: {
     darkMode: false,
     nav: [
