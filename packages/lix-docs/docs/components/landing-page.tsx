@@ -77,11 +77,11 @@ const PackageInstaller = () => {
   };
 
   return (
-    <div className="relative w-full sm:w-auto">
-      <div className="bg-white text-gray-800 px-4 rounded-md font-mono text-sm flex items-center w-full sm:w-auto justify-between space-x-4 border border-gray-200 shadow-sm h-10">
+    <div className="relative w-auto">
+      <div className="bg-white text-gray-800 px-3 rounded-md font-mono text-sm flex items-center w-auto justify-between space-x-2 border border-gray-200 shadow-sm h-10">
         <div className="flex items-center h-full">
-          <span className="text-gray-500 mr-1 select-none">npm install</span>
-          <span className="text-blue-600 tracking-wide cursor-text select-all">
+          <span className="text-gray-500 mr-1 select-none text-sm">npm install</span>
+          <span className="text-blue-600 tracking-wide cursor-text select-all text-sm">
             @lix-js/sdk
           </span>
         </div>
@@ -104,23 +104,23 @@ function LandingPage() {
       <main className="relative px-4 sm:px-6">
         {/* Hero Section */}
         <section className="py-28 text-center max-w-3xl mx-auto">
-          <h1 className="text-gray-900 text-5xl sm:text-6xl font-bold mb-6 leading-tight">
+          <h1 className="text-gray-900 text-5xl sm:text-6xl font-bold mb-10 leading-tight">
             Enable change control
             <br />
             in your app or agent
           </h1>
 
-          <p className="text-gray-600 max-w-xl mx-auto mb-12 text-xl leading-relaxed">
+          <p className="text-gray-600 max-w-xl mx-auto mb-16 text-xl leading-relaxed">
             Build versioned workflows, AI proposals, diffs, and review UIs with
             one SDK. Designed for modern collaborative applications.
           </p>
 
           {/* Command and buttons in one row */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+          <div className="flex flex-row items-center justify-center gap-4 mb-10">
             <PackageInstaller />
 
             <a
-              href="https://flashtype.ai"
+              href="https://prosemirror-example.onrender.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-2 rounded-md text-base transition-all duration-200 flex items-center font-medium group shadow-sm"
@@ -135,7 +135,7 @@ function LandingPage() {
                 e.currentTarget.style.backgroundColor = '#2563EB';
               }}
             >
-              <span className="flex items-center" style={{ color: 'white' }}>
+              <span className="flex items-center whitespace-nowrap" style={{ color: 'white' }}>
                 Try a demo app
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -220,12 +220,12 @@ function LandingPage() {
         </section>
 
         {/* What You Can Build Section */}
-        <section className="py-20 bg-gradient-to-r from-gray-50 to-white w-full px-6 sm:px-12 md:px-16">
-          <h2 className="text-center text-2xl sm:text-3xl font-bold mb-12 text-gray-800 flex items-center justify-center">
+        <section className="py-20 bg-gradient-to-r from-gray-50 to-white w-full px-6 sm:px-12 md:px-16 mt-16">
+          <h2 className="text-center text-2xl sm:text-3xl font-bold mb-24 text-gray-800 flex items-center justify-center">
             <span>What you can build with</span>{" "}
             <LixLogo className="ml-2 w-10 h-8 transform translate-y-[-2px]" />
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-14 max-w-[100rem] mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-14 max-w-[100rem] mx-auto px-4 sm:px-6 mt-16">
             <div className="group cursor-pointer text-center">
               <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
                 {/* Markdown Document Editor UI - Enhanced */}
@@ -874,11 +874,11 @@ function LandingPage() {
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
                   viewBox="0 0 20 20"
-                  fill="currentColor"
+                  fill="white"
                 >
                   <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
                 </svg>
-                Go to Docs
+<span style={{ color: 'white' }}>Go to Docs</span>
               </span>
               <div className="flex justify-end">
                 <span className="opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
