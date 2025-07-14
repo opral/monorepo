@@ -13,7 +13,8 @@ function entityIs(entity: any) {
 export default async function runExample(console: any, sharedLix?: any) {
   const lix = sharedLix || await openLix({});
 
-  // SECTION-START "entity-attribution"
+  console.log("SECTION 'entity-attribution'");
+
   // Assume that `selectedEntity` is the entity the user has selected in your application
   const selectedEntity = {
     entity_id: "example-entity",
@@ -38,10 +39,9 @@ export default async function runExample(console: any, sharedLix?: any) {
   } else {
     console.log("No entities found in the database");
   }
-  // SECTION-END "entity-attribution"
 
-  // SECTION-START "file-attribution"
-  // In this example, we'll use the example.json file from the getting-started example
+  console.log("SECTION 'file-attribution'");
+
   const fileEntity = await lix.db
     .selectFrom("file")
     .where("path", "=", "/example.json")
@@ -54,9 +54,11 @@ export default async function runExample(console: any, sharedLix?: any) {
     );
     console.log(`File change ID: ${fileEntity.lixcol_change_id}`);
   } else {
-    console.log("File /example.json not found - run getting-started example first");
+    console.log(
+      "File /example.json not found - run getting-started example first"
+    );
   }
-  // SECTION-END "file-attribution"
+
 }
 
 // Uncomment for running in node

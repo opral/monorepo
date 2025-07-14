@@ -193,52 +193,48 @@ function parseSections(code: string): {
 
   let currentSection: string | null = null;
   let sectionContent: string[] = [];
-  let inSection = false;
   let sectionStartLine = 0;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Check for section start
-    if (line.includes("SECTION-START")) {
-      const match = line.match(/SECTION-START\s*"([^"]+)"/);
-      if (match) {
-        currentSection = match[1];
-        sectionContent = [];
-        inSection = true;
-        sectionStartLine = i + 1; // Next line after SECTION-START
-        continue;
-      }
-    }
-
-    // Check for section end
-    if (line.includes("SECTION-END")) {
+    // Check for section marker using regex to match: SECTION 'section-name'
+    // This is more reliable than looking for console since bundlers may rename it
+    const sectionMatch = line.match(/SECTION\s+['"]([^'"]+)['"]/);
+    if (sectionMatch) {
+      // Save previous section if exists
       if (currentSection && sectionContent.length > 0) {
-        // Dedent the section content to remove function-level indentation
         sections[currentSection] = dedentCode(sectionContent.join("\n"));
         sectionRanges[currentSection] = { start: sectionStartLine, end: i - 1 };
       }
-      currentSection = null;
-      inSection = false;
+      
+      // Start new section
+      currentSection = sectionMatch[1];
+      sectionContent = [];
+      sectionStartLine = i + 1; // Next line after section marker
       continue;
     }
 
     // Collect imports (before any section)
-    if (!inSection && line.match(/^import\s+/)) {
+    if (!currentSection && line.match(/^import\s+/)) {
       importLines.push(line);
     }
 
-    // Add to current section
-    if (inSection && currentSection) {
+    // Add to current section (skip the function declaration and closing brace)
+    if (currentSection && !line.includes("export default async function") && !line.match(/^}$/)) {
       sectionContent.push(line);
     }
   }
 
+  // Save the last section
+  if (currentSection && sectionContent.length > 0) {
+    sections[currentSection] = dedentCode(sectionContent.join("\n"));
+    sectionRanges[currentSection] = { start: sectionStartLine, end: lines.length - 1 };
+  }
+
   // Create full code without section markers and function wrapper
   const fullCode = lines
-    .filter(
-      (line) => !line.includes("SECTION-START") && !line.includes("SECTION-END")
-    )
+    .filter((line) => !line.match(/SECTION\s+['"]([^'"]+)['"]/) && !line.includes("SECTION"))
     .filter((line) => !line.includes("export default async function"))
     .filter((line) => !line.match(/^}$/)) // Remove closing brace of function
     .join("\n")
@@ -260,7 +256,8 @@ function combineSections(
   return selectedSections
     .map((sectionName) => allSections[sectionName])
     .filter(Boolean)
-    .join("\n\n");
+    .join("\n\n")
+    .replace(/console1\.log/g, 'console.log'); // Fix bundler issue that transforms console to console1
 }
 
 // Function to get all prerequisite code (imports + previous sections)
@@ -284,6 +281,7 @@ function getPrerequisiteCode(
 }
 
 
+
 export default function CodeSnippet({
   module,
   srcCode,
@@ -303,7 +301,7 @@ export default function CodeSnippet({
   >([]);
 
   // Parse the source code to extract sections and setup
-  const { sections: allSections, imports } = parseSections(srcCode);
+  const { sections: allSections, imports } = parseSections(srcCode.replace(/console1\.log/g, 'console.log'));
   const currentCode = combineSections(allSections, sections);
   const prerequisiteCode = sections
     ? getPrerequisiteCode(allSections, sections, imports)
@@ -352,62 +350,31 @@ export default function CodeSnippet({
 
       try {
         if (module.default && typeof module.default === "function") {
-          // If no sections specified, run everything normally
-          if (!sections || sections.length === 0) {
-            const mockConsole = {
-              log: (...args: any[]) => logOutput("log", undefined, ...args),
-              warn: (...args: any[]) => logOutput("warn", undefined, ...args),
-              error: (...args: any[]) => logOutput("error", undefined, ...args),
-              info: (...args: any[]) => logOutput("info", undefined, ...args),
-            };
-            await module.default(mockConsole);
-          } else {
-            // Execute only selected sections by creating a custom function
-            const selectedSectionCode = sections
-              .filter(sectionName => allSections[sectionName])
-              .map(sectionName => allSections[sectionName])
-              .join('\n\n');
-
-            if (selectedSectionCode.trim()) {
-              // Create a simple function that executes just the selected sections
-              const functionCode = `
-                ${imports}
-                
-                const mockConsole = arguments[0];
-                const moduleExports = arguments[1] || {};
-                const { openLix } = moduleExports;
-                
-                (async () => {
-                  try {
-                    ${allSections[Object.keys(allSections)[0]] ? 'const lix = await openLix({});' : ''}
-                    
-                    // Replace console with mockConsole in the section code
-                    const console = mockConsole;
-                    
-                    ${selectedSectionCode}
-                  } catch (error) {
-                    mockConsole.error('Error in section execution:', error);
-                  }
-                })();
-              `;
-
-              try {
-                const mockConsole = {
-                  log: (...args: any[]) => logOutput("log", undefined, ...args),
-                  warn: (...args: any[]) => logOutput("warn", undefined, ...args),
-                  error: (...args: any[]) => logOutput("error", undefined, ...args),
-                  info: (...args: any[]) => logOutput("info", undefined, ...args),
-                };
-
-                // Execute the selected sections code
-                const executeFunction = new Function(functionCode);
-                await executeFunction(mockConsole, { ...module, openLix: module.openLix || (() => {}) });
-              } catch (error) {
-                console.error('Error executing selected sections:', error);
-                logOutput("error", undefined, "Error executing selected sections:", error);
+          let currentSection: string | undefined = undefined;
+          
+          const mockConsole = {
+            log: (...args: any[]) => {
+              const firstArg = String(args[0]);
+              // Check if this is a section marker
+              const sectionMatch = firstArg.match(/SECTION\s+['"]([^'"]+)['"]/);
+              if (sectionMatch) {
+                currentSection = sectionMatch[1];
+                return; // Don't log section markers
               }
-            }
-          }
+              logOutput("log", currentSection, ...args);
+            },
+            warn: (...args: any[]) => {
+              logOutput("warn", currentSection, ...args);
+            },
+            error: (...args: any[]) => {
+              logOutput("error", currentSection, ...args);
+            },
+            info: (...args: any[]) => {
+              logOutput("info", currentSection, ...args);
+            },
+          };
+          
+          await module.default(mockConsole);
         } else {
           logOutput("error", undefined, "Module doesn't export default function");
         }
@@ -511,7 +478,14 @@ export default function CodeSnippet({
             <CodeBlock
               code={
                 consoleOutput.length > 0
-                  ? formatConsoleOutput(consoleOutput)
+                  ? formatConsoleOutput(
+                      // Filter logs to only show those from selected sections (if sections are specified)
+                      sections 
+                        ? consoleOutput.filter(output => 
+                            !output.section || sections.includes(output.section)
+                          )
+                        : consoleOutput
+                    )
                   : "// Nothing was logged"
               }
               language="javascript"
