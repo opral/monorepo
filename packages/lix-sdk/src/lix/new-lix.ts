@@ -127,17 +127,12 @@ export async function newLixFile(args?: {
 
 	// Insert all bootstrap changes directly into the change tables
 	for (const change of bootstrapChanges) {
-		// Insert snapshot content if it exists
-		let snapshotId = "no-content";
 		if (change.snapshot_content) {
-			const result = sqlite.exec({
-				sql: `INSERT INTO internal_snapshot (content) VALUES (jsonb(?)) RETURNING id`,
-				bind: [JSON.stringify(change.snapshot_content)],
+			sqlite.exec({
+				sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+				bind: [change.snapshot_id, JSON.stringify(change.snapshot_content)],
 				returnValue: "resultRows",
 			});
-			if (result && result.length > 0) {
-				snapshotId = result[0]![0] as string;
-			}
 		}
 
 		// Insert the change record
@@ -151,7 +146,7 @@ export async function newLixFile(args?: {
 				change.schema_version,
 				change.file_id,
 				change.plugin_key,
-				snapshotId,
+				change.snapshot_id,
 				change.created_at,
 			],
 		});
@@ -200,6 +195,7 @@ export async function newLixFile(args?: {
 
 type BootstrapChange = Omit<LixChange, "snapshot_id"> & {
 	snapshot_content: any;
+	snapshot_id: string;
 };
 
 /**
@@ -273,6 +269,7 @@ function createBootstrapChanges(
 			schema_version: LixChangeSetSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			snapshot_id: generateUuid(),
 			snapshot_content: changeSet,
 			created_at,
 		});
@@ -286,6 +283,7 @@ function createBootstrapChanges(
 		schema_version: LixVersionSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: generateUuid(),
 		snapshot_content: {
 			id: "global",
 			name: "global",
@@ -304,6 +302,7 @@ function createBootstrapChanges(
 		schema_version: LixVersionSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: generateUuid(),
 		snapshot_content: {
 			id: initialVersionId,
 			name: "main",
@@ -324,6 +323,7 @@ function createBootstrapChanges(
 		schema_version: LixLabelSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: generateUuid(),
 		snapshot_content: {
 			id: checkpointLabelId,
 			name: "checkpoint",
@@ -340,6 +340,7 @@ function createBootstrapChanges(
 		schema_version: LixKeyValueSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: generateUuid(),
 		snapshot_content: {
 			key: "lix_id",
 			value: lixId ?? randomNanoId(10),
@@ -356,6 +357,7 @@ function createBootstrapChanges(
 		schema_version: LixKeyValueSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: generateUuid(),
 		snapshot_content: {
 			key: "lix_name",
 			value: lixName ?? humanId({ separator: "-", capitalize: false }),
@@ -376,6 +378,7 @@ function createBootstrapChanges(
 				schema_version: LixKeyValueSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				snapshot_id: generateUuid(),
 				snapshot_content: {
 					key: kv.key,
 					value: kv.value,
@@ -394,6 +397,7 @@ function createBootstrapChanges(
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			snapshot_id: generateUuid(),
 			snapshot_content: {
 				key: schema["x-lix-key"],
 				version: schema["x-lix-version"],
@@ -423,6 +427,7 @@ function createBootstrapChanges(
 		schema_version: "1.0",
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: generateUuid(),
 		snapshot_content: {
 			name: anonymousAccountName,
 		},
@@ -437,11 +442,11 @@ function createBootstrapChanges(
 	for (const change of originalChanges) {
 		// Determine which change set this change should belong to
 		let targetChangeSetId = initialGlobalVersionChangeSetId;
-		
+
 		// Check if this is a key-value change from provided key values
 		if (change.schema_key === "lix_key_value" && providedKeyValues) {
 			const providedKv = providedKeyValues.find(
-				kv => kv.key === change.snapshot_content?.key
+				(kv) => kv.key === change.snapshot_content?.key
 			);
 			if (providedKv && !providedKv.lixcol_version_id) {
 				// If no version specified, use main version's change set
@@ -456,6 +461,7 @@ function createBootstrapChanges(
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			snapshot_id: generateUuid(),
 			snapshot_content: {
 				change_set_id: targetChangeSetId,
 				change_id: change.id,
@@ -486,6 +492,7 @@ function createBootstrapChanges(
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			snapshot_id: generateUuid(),
 			snapshot_content: {
 				change_set_id: initialGlobalVersionChangeSetId,
 				change_id: changeSetElementChange.id,

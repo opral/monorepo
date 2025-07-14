@@ -6,7 +6,7 @@ export function applySnapshotDatabaseSchema(
 ): SqliteWasmDatabase {
 	return sqlite.exec(`
   CREATE TABLE IF NOT EXISTS internal_snapshot (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
     content BLOB -- jsonb or binary file
   ) STRICT;
 
