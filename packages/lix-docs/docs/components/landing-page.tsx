@@ -103,7 +103,7 @@ function LandingPage() {
       {/* Main content */}
       <main className="relative px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="pt-28 pb-8 text-center max-w-3xl mx-auto">
+        <section className="pt-28 pb-6 text-center max-w-3xl mx-auto">
           <h1 className="text-gray-900 font-bold mb-10 leading-tight" style={{ fontSize: 'clamp(2rem, 5vw, 3.75rem)' }}>
             Enable <span className="whitespace-nowrap">change control</span>
             <br />
