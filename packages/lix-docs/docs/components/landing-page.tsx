@@ -761,7 +761,7 @@ function LandingPage() {
             <h2 className="text-center text-2xl sm:text-3xl font-bold mb-6 text-gray-800 flex items-center justify-center">
               <span>Human and AI collaboration</span>
             </h2>
-            <p className="text-center text-gray-600 max-w-2xl mx-auto mb-8 text-lg">
+            <p className="text-center text-gray-600 max-w-2xl mx-auto mb-16 text-lg">
               Lix provides the foundation for effective human-AI collaboration
               with complete transparency and control over AI-generated changes.
             </p>
@@ -804,10 +804,10 @@ function LandingPage() {
 
                   {/* Action buttons */}
                   <div className="flex space-x-2">
-                    <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
+                    <button className="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded px-4 py-2 text-sm font-medium flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3 mr-1"
+                        className="h-4 w-4 mr-2"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -819,10 +819,10 @@ function LandingPage() {
                       </svg>
                       Approve
                     </button>
-                    <button className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 rounded px-3 py-1.5 text-xs font-medium flex items-center justify-center">
+                    <button className="flex-1 bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 rounded px-4 py-2 text-sm font-medium flex items-center justify-center">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3 mr-1"
+                        className="h-4 w-4 mr-2"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
