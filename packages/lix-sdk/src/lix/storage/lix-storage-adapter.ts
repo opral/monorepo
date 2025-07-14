@@ -9,10 +9,14 @@ export interface LixStorageAdapter {
 	/**
 	 * Opens and returns the database instance.
 	 * 
-	 * @param args - Optional arguments for opening the storage
-	 * @param args.blob - Optional blob to initialize the storage with
+	 * @param args - Arguments for opening the storage
+	 * @param args.blob - Optional blob to initialize the storage with (takes precedence over existing data)
+	 * @param args.createBlob - Callback to create a new blob if no existing data is found
 	 */
-	open(args?: { blob?: Blob }): Promise<SqliteWasmDatabase>;
+	open(args: { 
+		blob?: Blob;
+		createBlob: () => Promise<Blob>;
+	}): Promise<SqliteWasmDatabase>;
 
 	/**
 	 * Closes the database and cleans up resources.
