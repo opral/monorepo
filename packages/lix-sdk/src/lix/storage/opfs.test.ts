@@ -1,6 +1,7 @@
 import { test, expect, describe, beforeEach, vi } from "vitest";
 import { OpfsStorage } from "./opfs.js";
 import { openLix } from "../open-lix.js";
+import { newLixFile } from "../new-lix.js";
 
 // Create a realistic in-memory OPFS mock
 class MockOPFS {
@@ -71,6 +72,7 @@ describe("OpfsStorage", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Create a fresh MockOPFS instance for each test to prevent cross-test pollution
 		mockOpfs = new MockOPFS();
 
 		// Setup OPFS mock
@@ -83,6 +85,7 @@ describe("OpfsStorage", () => {
 				},
 			},
 			writable: true,
+			configurable: true,
 		});
 	});
 
@@ -113,8 +116,8 @@ describe("OpfsStorage", () => {
 
 	test("returns same database instance on multiple open calls", async () => {
 		const storage = new OpfsStorage({ path: "test.db" });
-		const db1 = await storage.open();
-		const db2 = await storage.open();
+		const db1 = await storage.open({ createBlob: () => newLixFile() });
+		const db2 = await storage.open({ createBlob: () => newLixFile() });
 
 		expect(db1).toBe(db2);
 	});
@@ -194,6 +197,9 @@ describe("OpfsStorage", () => {
 
 		// Wait for auto-save to complete
 		await new Promise((resolve) => setTimeout(resolve, 150));
+
+		// Close the first lix to ensure data is saved
+		await lix1.close();
 
 		// Open new storage instance with same path
 		const storage2 = new OpfsStorage({ path });

@@ -134,19 +134,17 @@ export async function scenarioTest(
 				const expected = expectedValues.get(key);
 				if (expected !== undefined) {
 					const errorMessage = `
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SCENARIO DETERMINISM VIOLATION
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 expectDeterministic() failed: Values differ between scenarios
 
 Location: Call #${callIndex - 1}
-Scenario: ${scenario.name} vs ${scenariosToRun[0]?.name || 'baseline'}
+Scenario: ${scenario.name} vs ${scenariosToRun[0]?.name || "baseline"}
 
 Use expectDeterministic() for values that must be identical across scenarios.
 Use regular expect() for scenario-specific assertions.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+`;
 					expect(actual, errorMessage).toEqual(expected);
 				}
 			}

@@ -202,12 +202,23 @@ test("should default to InMemoryStorage when no storage is provided", async () =
 
 test("providing lix_deterministic_mode = true should lead to deterministic state", async () => {
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
-		blob: await newLixFile(),
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	const lix2 = await openLix({
-		blob: await lix1.toBlob(),
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	await lix1.db
@@ -242,11 +253,16 @@ test("deterministic mode can be turned on and off", async () => {
 				lixcol_version_id: "global",
 			},
 		],
-		blob: await newLixFile(),
 	});
 
 	const lix2 = await openLix({
-		blob: await lix1.toBlob(),
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	await Promise.all(

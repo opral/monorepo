@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { InMemoryStorage } from "./in-memory.js";
 import { openLix } from "../open-lix.js";
+import { newLixFile } from "../new-lix.js";
 
 test("should open a database with new lix on first call", async () => {
 	const storage = new InMemoryStorage();
@@ -18,8 +19,8 @@ test("should open a database with new lix on first call", async () => {
 
 test("should return same database instance on subsequent calls", async () => {
 	const storage = new InMemoryStorage();
-	const database1 = await storage.open();
-	const database2 = await storage.open();
+	const database1 = await storage.open({ createBlob: newLixFile });
+	const database2 = await storage.open({ createBlob: newLixFile });
 
 	expect(database1).toBe(database2);
 });
@@ -56,12 +57,12 @@ test("should export current database state as blob", async () => {
 
 test("should close database connection", async () => {
 	const storage = new InMemoryStorage();
-	const database1 = await storage.open();
+	const database1 = await storage.open({ createBlob: newLixFile });
 
 	await storage.close();
 
 	// Opening again should create a new database
-	const database2 = await storage.open();
+	const database2 = await storage.open({ createBlob: newLixFile });
 	expect(database1).not.toBe(database2);
 });
 
@@ -69,11 +70,8 @@ test("should close database connection", async () => {
 test("should handle export before open", async () => {
 	const storage = new InMemoryStorage();
 
-	// Export should work even if we haven't opened yet
-	const blob = await storage.export();
-
-	expect(blob).toBeInstanceOf(Blob);
-	expect(blob.size).toBeGreaterThan(0);
+	// Export should throw an error if we haven't opened yet
+	await expect(storage.export()).rejects.toThrow("Database has not been opened yet");
 });
 
 test("multiple storage instances should be independent", async () => {
