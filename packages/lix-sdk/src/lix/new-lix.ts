@@ -91,6 +91,8 @@ export async function newLixFile(args?: {
 	 * Use this to set initial values for `lix_id`, `lix_name`, or other custom keys.
 	 * If `lix_id` or `lix_name` are not provided, they will be generated automatically.
 	 *
+	 * The `lixcol_version_id` defaults to the active version.
+	 *
 	 * @example
 	 *  keyValues: [
 	 *    { key: "lix_name", value: "my-project", lixcol_version_id: "global" },
@@ -433,15 +435,29 @@ function createBootstrapChanges(
 
 	// First, create change set elements for all original changes
 	for (const change of originalChanges) {
+		// Determine which change set this change should belong to
+		let targetChangeSetId = initialGlobalVersionChangeSetId;
+		
+		// Check if this is a key-value change from provided key values
+		if (change.schema_key === "lix_key_value" && providedKeyValues) {
+			const providedKv = providedKeyValues.find(
+				kv => kv.key === change.snapshot_content?.key
+			);
+			if (providedKv && !providedKv.lixcol_version_id) {
+				// If no version specified, use main version's change set
+				targetChangeSetId = initialChangeSetId;
+			}
+		}
+
 		const changeSetElementChange = {
 			id: generateUuid(),
-			entity_id: `${initialGlobalVersionChangeSetId}::${change.id}`,
+			entity_id: `${targetChangeSetId}::${change.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
 			snapshot_content: {
-				change_set_id: initialGlobalVersionChangeSetId,
+				change_set_id: targetChangeSetId,
 				change_id: change.id,
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,

@@ -10,7 +10,7 @@ import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
-import type { NewState } from "../entity-views/types.js";
+import type { NewStateAll } from "../entity-views/types.js";
 import type { LixAccount } from "../account/schema.js";
 import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
@@ -123,10 +123,12 @@ export async function openLix(args: {
 	/**
 	 * Set the key values when opening the lix.
 	 *
+	 * The `lixcol_version_id` defaults to the active version.
+	 *
 	 * @example
 	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: NewState<LixKeyValue>[];
+	keyValues?: NewStateAll<LixKeyValue>[];
 }): Promise<Lix> {
 	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
 	const database = await storage.open({ blob: args.blob });
@@ -164,23 +166,57 @@ export async function openLix(args: {
 
 	if (args.keyValues && args.keyValues.length > 0) {
 		for (const keyValue of args.keyValues) {
-			// Check if the key already exists
-			const existing = await db
-				.selectFrom("key_value")
-				.select("key")
-				.where("key", "=", keyValue.key)
-				.executeTakeFirst();
-
-			if (existing) {
-				// Update existing key
-				await db
-					.updateTable("key_value")
-					.set({ value: keyValue.value })
+			// Determine which table to use based on whether version is specified
+			if (keyValue.lixcol_version_id) {
+				// Check if the key already exists in the specified version
+				const existing = await db
+					.selectFrom("key_value_all")
+					.select("key")
 					.where("key", "=", keyValue.key)
-					.execute();
+					.where("lixcol_version_id", "=", keyValue.lixcol_version_id)
+					.executeTakeFirst();
+
+				if (existing) {
+					// Update existing key in the specified version
+					await db
+						.updateTable("key_value_all")
+						.set({ value: keyValue.value })
+						.where("key", "=", keyValue.key)
+						.where("lixcol_version_id", "=", keyValue.lixcol_version_id)
+						.execute();
+				} else {
+					// Insert new key into the specified version
+					await db
+						.insertInto("key_value_all")
+						.values({
+							key: keyValue.key,
+							value: keyValue.value,
+							lixcol_version_id: keyValue.lixcol_version_id,
+						})
+						.execute();
+				}
 			} else {
-				// Insert new key
-				await db.insertInto("key_value").values(keyValue).execute();
+				// No version specified, use default key_value table (active version)
+				const existing = await db
+					.selectFrom("key_value")
+					.select("key")
+					.where("key", "=", keyValue.key)
+					.executeTakeFirst();
+
+				if (existing) {
+					// Update existing key
+					await db
+						.updateTable("key_value")
+						.set({ value: keyValue.value })
+						.where("key", "=", keyValue.key)
+						.execute();
+				} else {
+					// Insert new key
+					await db
+						.insertInto("key_value")
+						.values({ key: keyValue.key, value: keyValue.value })
+						.execute();
+				}
 			}
 		}
 	}

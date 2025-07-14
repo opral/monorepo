@@ -44,6 +44,54 @@ test("providing key values should be possible", async () => {
 	expect(value1).toMatchObject({ key: "mock_key", value: "value2" });
 });
 
+test("provided key values in openLix should default to the active version if lixcol_version_id is not specified", async () => {
+	const lix = await openLix({
+		blob: await newLixFile(),
+		keyValues: [
+			{ key: "test_key_1", value: "test_value_1" },
+			{ key: "test_key_2", value: "test_value_2", lixcol_version_id: "global" },
+		],
+	});
+
+	// Get the active version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirst();
+
+	expect(activeVersion).toBeDefined();
+	expect(activeVersion?.version_id).toBeDefined();
+
+	// Check that test_key_1 without lixcol_version_id is associated with the active version
+	const kv1 = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "test_key_1")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(kv1?.value).toBe("test_value_1");
+	expect(kv1?.lixcol_version_id).toBe(activeVersion?.version_id);
+
+	// Check that test_key_2 with explicit lixcol_version_id is associated with the global version
+	const kv2 = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "test_key_2")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(kv2?.value).toBe("test_value_2");
+	expect(kv2?.lixcol_version_id).toBe("global");
+
+	// The active version should be "main" (not "global")
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.where("id", "=", activeVersion!.version_id)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(mainVersion?.name).toBe("main");
+});
+
 // TODO occasional test failures due to timing issues
 // faulty state materialization might be the cause.
 // fix after https://github.com/opral/lix-sdk/issues/308
@@ -153,16 +201,16 @@ test("should default to InMemoryStorage when no storage is provided", async () =
 });
 
 test("providing lix_deterministic_mode = true should lead to deterministic state", async () => {
-	const lix = await openLix({
+	const lix1 = await openLix({
 		keyValues: [{ key: "lix_deterministic_mode", value: true }],
 		blob: await newLixFile(),
 	});
 
-	const lixCopy = await openLix({
-		blob: await lix.toBlob(),
+	const lix2 = await openLix({
+		blob: await lix1.toBlob(),
 	});
 
-	await lix.db
+	await lix1.db
 		.insertInto("key_value")
 		.values({
 			key: "test_key",
@@ -170,7 +218,7 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 		})
 		.execute();
 
-	await lixCopy.db
+	await lix2.db
 		.insertInto("key_value")
 		.values({
 			key: "test_key",
@@ -178,12 +226,114 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 		})
 		.execute();
 
-	const lixState = await lix.db.selectFrom("state").selectAll().execute();
+	const lix1State = await lix1.db.selectFrom("state").selectAll().execute();
 
-	const lixCopyState = await lixCopy.db
-		.selectFrom("state")
-		.selectAll()
-		.execute();
+	const lix2State = await lix2.db.selectFrom("state").selectAll().execute();
 
-	expect(lixState).toEqual(lixCopyState);
+	expect(lix1State).toEqual(lix2State);
+});
+
+test("deterministic mode can be turned on and off", async () => {
+	const lix1 = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		blob: await newLixFile(),
+	});
+
+	const lix2 = await openLix({
+		blob: await lix1.toBlob(),
+	});
+
+	await Promise.all(
+		[lix1, lix2].map(async (lix) => {
+			await lix.db
+				.insertInto("key_value")
+				.values({
+					key: "test_key",
+					value: "test_value",
+				})
+				.execute();
+		})
+	);
+
+	const lix1State = await lix1.db.selectFrom("state").selectAll().execute();
+
+	const lix2State = await lix2.db.selectFrom("state").selectAll().execute();
+
+	expect(lix1State).toEqual(lix2State);
+
+	// now turning off deterministic mode and insert a new key value
+
+	await Promise.all(
+		[lix1, lix2].map(async (lix) => {
+			await lix.db
+				.updateTable("key_value_all")
+				.where("lixcol_version_id", "=", "global")
+				.where("key", "=", "lix_deterministic_mode")
+				.set({ value: false })
+				.execute();
+		})
+	);
+
+	await Promise.all(
+		[lix1, lix2].map(async (lix) => {
+			await lix.db
+				.insertInto("key_value")
+				.values({
+					key: "test_key_2",
+					value: "test_value_2",
+				})
+				.execute();
+		})
+	);
+
+	const [lix1Kv, lix2Kv] = await Promise.all(
+		[lix1, lix2].map((lix) =>
+			lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "test_key_2")
+				.selectAll()
+				.execute()
+		)
+	);
+
+	// the change ids etc should be different given that deterministic mode was turned off
+	expect(lix1Kv).not.toEqual(lix2Kv);
+
+	// turn on deterministic mode again and insert a new key value
+
+	await Promise.all(
+		[lix1, lix2].map(async (lix) => {
+			await lix.db
+				.updateTable("key_value_all")
+				.where("lixcol_version_id", "=", "global")
+				.where("key", "=", "lix_deterministic_mode")
+				.set({ value: true })
+				.execute();
+		})
+	);
+
+	await Promise.all(
+		[lix1, lix2].map(async (lix) => {
+			await lix.db
+				.insertInto("key_value")
+				.values({
+					key: "test_key_3",
+					value: "test_value_3",
+				})
+				.execute();
+		})
+	);
+
+	const [lix1Kv2, lix2Kv2] = await Promise.all(
+		[lix1, lix2].map((lix) =>
+			lix.db
+				.selectFrom("key_value")
+				.where("key", "=", "test_key_3")
+				.selectAll()
+				.execute()
+		)
+	);
+
+	// the change ids etc should be the same given that deterministic mode was turned on again
+	expect(lix1Kv2).toEqual(lix2Kv2);
 });

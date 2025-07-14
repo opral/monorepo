@@ -215,3 +215,51 @@ test("newLixFile can use provided key values", async () => {
 	expect(customKv?.value).toBe("custom_value");
 	expect(customKv?.lixcol_version_id).toBe("global");
 });
+
+test("provided key values default to the active version if lixcol_version_id is not specified", async () => {
+	const blob = await newLixFile({
+		keyValues: [
+			{ key: "test_key_1", value: "test_value_1" },
+			{ key: "test_key_2", value: "test_value_2" },
+		],
+	});
+
+	const lix = await openLix({ blob });
+
+	// Get the active version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirst();
+
+	expect(activeVersion).toBeDefined();
+	expect(activeVersion?.version_id).toBeDefined();
+
+	// Check that the key values are associated with the active version
+	const kv1 = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "test_key_1")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(kv1?.value).toBe("test_value_1");
+	expect(kv1?.lixcol_version_id).toBe(activeVersion?.version_id);
+
+	const kv2 = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "test_key_2")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(kv2?.value).toBe("test_value_2");
+	expect(kv2?.lixcol_version_id).toBe(activeVersion?.version_id);
+
+	// The active version should be "main" (not "global")
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.where("id", "=", activeVersion!.version_id)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(mainVersion?.name).toBe("main");
+});
