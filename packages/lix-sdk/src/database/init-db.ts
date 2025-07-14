@@ -26,6 +26,7 @@ import type { LixHooks } from "../hooks/create-hooks.js";
 import { nextDeterministicCount } from "../state/deterministic-counter.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 import type { Lix } from "../lix/open-lix.js";
+import { createTimestampFunction } from "./functions/timestamp.js";
 
 // dynamically computes the json columns for each view
 // via the json schemas.
@@ -124,20 +125,7 @@ function initFunctions(args: {
 	});
 
 	// Deterministic timestamp function
-	args.sqlite.createFunction({
-		name: "lix_timestamp",
-		arity: 0,
-		xFunc: () => {
-			// Check if deterministic mode is enabled
-			if (isDeterministicMode({ lix })) {
-				// Return a fixed timestamp for deterministic mode
-				return "2024-01-01T00:00:00.000Z";
-			}
-
-			// Return current timestamp in ISO format
-			return new Date().toISOString();
-		},
-	});
+	args.sqlite.createFunction(createTimestampFunction({ lix }));
 
 	// Deterministic UUID v7 function
 	args.sqlite.createFunction({
