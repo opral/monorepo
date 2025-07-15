@@ -29,6 +29,13 @@ export default defineConfig({
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
   icon: "/logo.svg",
   globalStyles: path.join(__dirname, "docs/styles/index.css"),
+  route: {
+    cleanUrls: true,
+    redirects: {
+      "/guide": "/guide/getting-started",
+      "/guide/": "/guide/getting-started",
+    },
+  },
   markdown: {
     // Disable Rust MDX compiler to support global components
     mdxRs: false,
@@ -54,7 +61,7 @@ export default defineConfig({
   themeConfig: {
     darkMode: false,
     nav: [
-      { text: "Guide", link: "/guide/" },
+      { text: "Guide", link: "/guide/getting-started" },
       { text: "Examples", link: "/examples/" },
       { text: "Plugins", link: "/plugins/" },
       { text: "Reference", link: "/api/" },
@@ -64,7 +71,6 @@ export default defineConfig({
         {
           text: "Introduction",
           items: [
-            { text: "What is Lix?", link: "/guide/" },
             { text: "Getting Started", link: "/guide/getting-started" },
             {
               text: "Lix for AI Agents",

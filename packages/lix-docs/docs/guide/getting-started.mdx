@@ -3,9 +3,15 @@ import * as example from "../examples/getting-started.ts";
 import exampleSrcCode from "../examples/getting-started.ts?raw";
 import { PackageManagerTabs } from '@theme';
 
-# Getting Started with Lix SDK
+# Getting Started 
 
-This guide will help you get started with the Lix SDK and demonstrate basic usage patterns.
+Lix is a JavaScript SDK for change control that enables Git-like capabilities for apps and agents: [Change proposals](/guide/features/change-proposals.md), [versioning](/guide/features/versions.md) (branching), [history](/guide/features/history.md), [blame](/guide/features/attribution.md), and more.
+
+- 🌐 Works in browsers and Node.js environments
+- 🔌 Works with any data format (Excel, JSON, CSV, etc.)
+- 🤖 Made for _Human to Human_ and _Human to AI agent_ collaboration
+
+![Lix features](/lix-features.svg)
 
 ## Installation
 
@@ -13,9 +19,9 @@ Install the Lix SDK package:
 
 <PackageManagerTabs command="install @lix-js/sdk @lix-js/plugin-json" />
 
-## Creating and Opening a Lix File
+## Opening a Lix
 
-To start using Lix, you need to create a Lix and configure it with plugins. Plugins are essential - they tell Lix what types of files to track and how to detect changes within those files.
+Open a lix with `openLix()` and provide plugins for files types you are going to use.
 
 <CodeSnippet
   module={example}
@@ -23,14 +29,17 @@ To start using Lix, you need to create a Lix and configure it with plugins. Plug
   sections={["opening-lix"]}
 />
 
-Key points: 
+Key points:
 
 - The `jsonPlugin` enables Lix to understand JSON file changes at a granular level (e.g., detecting which specific properties changed)
 - Without plugins, Lix would only see files as binary blobs
 
-## Inserting Files
+## Insert a File
 
-Once Lix is opened, you can start adding files for change control. This is typically your first action - taking an existing file (like a JSON) and putting it under Lix's change tracking.
+Inserting a file is the first step to start controlling changes with Lix. When you insert a file:
+
+1. **Lix controls the changes in the file** - From this point forward, every change of the file is tracked and versioned
+2. **Any file type is supported** - While this example uses JSON, Lix can handle any file format (CSV, Excel, images, etc.). See a list of available plugins in the [Plugins](/plugins) section.
 
 <CodeSnippet
   module={example}
@@ -38,9 +47,14 @@ Once Lix is opened, you can start adding files for change control. This is typic
   sections={["inserting-file"]}
 />
 
+Key points:
+- Files are stored as `Uint8Array` (binary data), making Lix format-agnostic
+- The `path` acts as the unique identifier for the file
+- Once inserted, the file becomes part of Lix's change control system
+
 ## Updating Files
 
-Files in Lix are updated just like in any database. When you update a file, Lix automatically creates a new change record while preserving the complete history.
+Once a file is under Lix's change control, updates work just like regular database operations. No special commands or workflows - just update the data and Lix handles the rest.
 
 <CodeSnippet
   module={example}
@@ -48,15 +62,15 @@ Files in Lix are updated just like in any database. When you update a file, Lix 
   sections={["updating-file"]}
 />
 
-What happens during an update:
+Key points:
 
-- The JSON plugin detects that the `age` property changed from 50 to 51
-- The file's current state is updated, but history is preserved
-- All changes are tracked with metadata (who, when, what)
+- The JSON plugin identifies exactly what changed (the `age` property from 50 to 51)
+- History preservation - The previous state remains accessible while the current state is updated
+- No manual commits needed - Unlike Git, changes are captured instantly without explicit commits
 
-## Querying File History
+## File History
 
-One of Lix's key features is maintaining a complete history of all changes. You can query this history to see how a file evolved over time.
+With files under change control, you can query their complete history using standard SQL. Every change is preserved and accessible.
 
 <CodeSnippet
   module={example}
@@ -64,30 +78,12 @@ One of Lix's key features is maintaining a complete history of all changes. You 
   sections={["querying-file-history"]}
 />
 
-Understanding the query:
+Key points:
 
-- `file_history` is a view that shows all historical states of files
-- Results are ordered by `lixcol_depth` (0 = most recent, higher = older)
-- Each row represents a complete file state at a point in time
-- The query filters by the current version's change set to show relevant history
-
-## Creating and Switching Versions
-
-You can create different versions (similar to branches in Git):
-
-```javascript
-import { createVersion, switchVersion } from "@lix-js/sdk";
-
-// Create a new version based on the current version
-const versionB = await createVersion({ lix, name: "B" });
-
-// Switch to the new version
-await switchVersion({ lix, to: versionB });
-
-console.log("New version created:", versionB.id);
-```
-
-*See implementation: [createVersion](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/version/create-version.ts), [switchVersion](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/version/switch-version.ts)*
+- `file_history` provides access to all previous states of a file
+- Changes are ordered by depth: 0 is the current state, higher numbers are older
+- Each row contains the complete file content at that point in time
+- Standard SQL queries work - filter, join, and analyze history however you need
 
 ## Further Reading
 
@@ -95,7 +91,7 @@ To learn more about Lix and its capabilities, check out:
 
 - [How Lix Works](./how-lix-works) - Understand the core architecture
 - [Core Concepts](./concepts/files) - Learn about the fundamental concepts
+- [Switching between versions](./versions) - Work with multiple versions like branches
 - [API Reference](/api/) - Explore the complete API documentation
 - [Examples](/examples/) - See practical usage examples
 
-In the next section, we'll dive deeper into how Lix works and explore its architecture.

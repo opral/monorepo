@@ -1,31 +1,29 @@
-import { openLix } from "@lix-js/sdk";
-import { plugin as jsonPlugin } from "@lix-js/plugin-json";
-
 export default async function runExample(console: any) {
   console.log("SECTION START 'opening-lix'");
+
+  const { openLix } = await import("@lix-js/sdk");
+  const { plugin: jsonPlugin } = await import("@lix-js/plugin-json");
 
   const lix = await openLix({
     providePlugins: [jsonPlugin],
   });
 
-  const user = {
-    name: "Peter",
-    age: 50,
-  };
-
   console.log("SECTION END 'opening-lix'");
 
   console.log("SECTION START 'inserting-file'");
+
+  const json = {
+    name: "Peter",
+    age: 50,
+  };
 
   await lix.db
     .insertInto("file")
     .values({
       path: "/example.json",
-      // lix expects the data to be a Uint8Array
-      // so we convert the JSON object to a string and then to a Uint8Array
-      data: new TextEncoder().encode(JSON.stringify(user)),
+      data: new TextEncoder().encode(JSON.stringify(json)),
     })
-    .executeTakeFirstOrThrow();
+    .execute();
 
   const fileAfterInsert = await lix.db
     .selectFrom("file")
@@ -48,7 +46,9 @@ export default async function runExample(console: any) {
     .updateTable("file")
     .where("path", "=", "/example.json")
     .set({
-      data: new TextEncoder().encode(JSON.stringify({ ...user, age: 51 })),
+      data: new TextEncoder().encode(
+        JSON.stringify({ name: "Peter", age: 51 })
+      ),
     })
     .execute();
 
@@ -101,4 +101,4 @@ export default async function runExample(console: any) {
 }
 
 // outcomment for running in node
-runExample(console);
+// runExample(console);
