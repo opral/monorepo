@@ -13,8 +13,8 @@ import { selectActiveFile } from "@/queries";
 import { useMdAstState } from "@/hooks/useMdAstState";
 import { mdastEntitiesToPlateValue, plateValueToMdastEntities } from "./mdast-plate-bridge";
 import { ExtendedMarkdownPlugin } from "./plugins/markdown/markdown-plugin";
-import { TElement } from "@udecode/plate";
-import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
+// import { TElement } from "@udecode/plate";
+// import { getPromptDismissed, hasEmptyPromptElement, insertEmptyPromptElement, removeEmptyPromptElement, setPromptDismissed } from "@/helper/emptyPromptElementHelpers";
 import { useLix, useQueryTakeFirst } from "@lix-js/react-utils";
 export function PlateEditor() {
   const lix = useLix();

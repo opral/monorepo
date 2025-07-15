@@ -97,6 +97,7 @@ export function selectCheckpoints(lix: Lix) {
 					.where("label.name", "=", "checkpoint")
 					.select("change_set_label.lixcol_created_at")
 					.as("checkpoint_created_at"),
+				eb.val(null).as("author_name"),
 			])
 			.orderBy("checkpoint_created_at", "desc")
 	);
@@ -604,7 +605,7 @@ export async function updateMdAstEntities(
 	if (!activeFile) return;
 	try {
 		await lix.db.transaction().execute(async (trx) => {
-			console.log("opening transaction to write md ast");
+			// console.log("opening transaction to write md ast");
 			// deleting all nodes avoids diffing delete changes
 			// if this leads to bugs, this is a bug in the lix state
 			// handler and should be reported
@@ -659,7 +660,7 @@ export async function updateMdAstEntities(
 					})
 					.execute();
 			}
-			console.log("closing transaction to write mdast");
+			// console.log("closing transaction to write mdast");
 		});
 	} catch (error) {
 		console.error("Failed to update MD-AST entities:", error);

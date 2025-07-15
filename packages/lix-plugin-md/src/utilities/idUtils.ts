@@ -23,12 +23,12 @@ export function generateNodeId(node: Node, suffix?: string): string {
 	let hash = 0;
 	for (let i = 0; i < seed.length; i++) {
 		const char = seed.charCodeAt(i);
-		hash = ((hash << 5) - hash) + char;
+		hash = (hash << 5) - hash + char;
 		hash = hash & hash; // Convert to 32-bit integer
 	}
 
 	// Convert to base36 and take first 10 chars to match nanoid length
-	const id = Math.abs(hash).toString(36).padStart(10, '0').substring(0, 10);
+	const id = Math.abs(hash).toString(36).padStart(10, "0").substring(0, 10);
 	return id;
 }
 

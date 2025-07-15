@@ -9,7 +9,7 @@ import { ChevronDown, Zap, Loader2 } from "lucide-react";
 import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 import { useChat } from "@/components/editor/use-chat";
 import { toast } from "sonner";
-import { useLix, useQuery } from "@lix-js/react-utils";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 interface IntermediateCheckpointComponentProps {
   workingChanges?: UiDiffComponentProps["diffs"];
@@ -87,14 +87,14 @@ export default IntermediateCheckpointComponent;
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const lix = useLix();
-  const currentChangeSet = useQuery(selectWorkingChangeSet);
+  const currentChangeSet = useQueryTakeFirst(selectWorkingChangeSet);
   const workingChanges = useQuery(selectWorkingChanges);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
   const chat = useChat({
     streamProtocol: "text",
-    onResponse: async (res: { body: { getReader: () => any; }; }) => {
+    onResponse: async (res: Response) => {
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let currentDescription = "";
