@@ -243,6 +243,33 @@ function parseSections(code: string): {
   return { sections, imports: importLines.join("\n"), fullCode, sectionRanges };
 }
 
+// Function to transform dynamic imports to static imports
+function transformDynamicImports(code: string): string {
+  // Transform dynamic import patterns to static imports
+  let transformedCode = code;
+  
+  // Pattern 1: const { named: alias } = await import("module");
+  // Must handle this before the general destructuring pattern
+  transformedCode = transformedCode.replace(
+    /const\s*{\s*(\w+)\s*:\s*(\w+)\s*}\s*=\s*await\s+import\s*\(\s*["']([^"']+)["']\s*\)\s*;/g,
+    'import { $1 as $2 } from "$3";'
+  );
+  
+  // Pattern 2: const { named } = await import("module");
+  transformedCode = transformedCode.replace(
+    /const\s*{\s*([^}]+)\s*}\s*=\s*await\s+import\s*\(\s*["']([^"']+)["']\s*\)\s*;/g,
+    'import { $1 } from "$2";'
+  );
+  
+  // Pattern 3: const name = await import("module");
+  transformedCode = transformedCode.replace(
+    /const\s+(\w+)\s*=\s*await\s+import\s*\(\s*["']([^"']+)["']\s*\)\s*;/g,
+    'import $1 from "$2";'
+  );
+  
+  return transformedCode;
+}
+
 // Function to combine selected sections with necessary setup code
 function combineSections(
   allSections: Record<string, string>,
@@ -302,9 +329,9 @@ export default function CodeSnippet({
 
   // Parse the source code to extract sections and setup
   const { sections: allSections, imports } = parseSections(srcCode.replace(/console1\.log/g, 'console.log'));
-  const currentCode = combineSections(allSections, sections);
+  const currentCode = transformDynamicImports(combineSections(allSections, sections));
   const prerequisiteCode = sections
-    ? getPrerequisiteCode(allSections, sections, imports)
+    ? transformDynamicImports(getPrerequisiteCode(allSections, sections, imports))
     : "";
 
   const executeCode = async () => {
