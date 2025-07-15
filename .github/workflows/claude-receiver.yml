@@ -28,13 +28,16 @@ jobs:
           
           # Direct prompt with the request from the subrepo
           direct_prompt: |
-            Handle this request from ${{ github.event.client_payload.repository }}#${{ github.event.client_payload.issue_number }}:
-
-            ${{ github.event.client_payload.comment_body || github.event.client_payload.issue_body }}
-
-            IMPORTANT: When creating a PR, you MUST include "Closes ${{ github.event.client_payload.issue_url }}" in the PR description.
-            The original issue is at: ${{ github.event.client_payload.issue_url }}
-            Focus on changes that relate to the specific subrepo package mentioned in the request.
+            Read the issue thread at: ${{ github.event.client_payload.issue_url }}
+            
+            This is from repository: ${{ github.event.client_payload.repository }}
+            
+            The user mentioned you with: ${{ github.event.client_payload.comment_body || github.event.client_payload.issue_body }}
+            
+            IMPORTANT: 
+            1. First use WebFetch to read the ENTIRE issue thread at the URL above to understand the full context
+            2. When creating a PR, you MUST include "Closes ${{ github.event.client_payload.issue_url }}" in the PR description
+            3. Focus on changes that relate to the specific subrepo package mentioned in the request
       
       - name: Update comment in source repo
         if: always() && github.event.client_payload.comment_id
