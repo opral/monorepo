@@ -16,7 +16,7 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitDeterministicCountIncrement } from "../deterministic/deterministic-counter.js";
+import { commitSequenceNumberIncrement } from "../deterministic/sequence.js";
 import { newLixFile } from "./new-lix.js";
 
 export type Lix = {
@@ -132,9 +132,9 @@ export async function openLix(args: {
 	keyValues?: NewStateAll<LixKeyValue>[];
 }): Promise<Lix> {
 	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
-	const database = await storage.open({ 
+	const database = await storage.open({
 		blob: args.blob,
-		createBlob: () => newLixFile({ keyValues: args.keyValues })
+		createBlob: () => newLixFile({ keyValues: args.keyValues }),
 	});
 
 	// Create hooks before initializing database so they can be used in schema setup
@@ -249,7 +249,7 @@ export async function openLix(args: {
 			await storage.close();
 		},
 		toBlob: async () => {
-			commitDeterministicCountIncrement({
+			commitSequenceNumberIncrement({
 				sqlite: database,
 				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
 			});

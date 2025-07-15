@@ -18,8 +18,8 @@ import { openLix } from "@lix-js/sdk";
 const lix = await openLix({
   blob: await yourBlob,
   keyValues: [
-    { key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" }
-  ]
+    { key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" },
+  ],
 });
 ```
 
@@ -35,13 +35,11 @@ These _functional_ helpers expose the three independent entropy sources used in 
 | `nextSequenceNumber({ lix })` | Monotone counter      | Collision‑free IDs (`ENTITY_7`), pagination cursors |
 | `random({ lix })`             | Replayable randomness | Sampling, shuffle, deterministic jitter             |
 
-
 ## Key properties
 
 - **Deterministic** – identical blobs + seeds ⇒ identical sequences across runs/platforms.
 - **State‑persisted** – every successful mutating transaction and every `lix.toBlob()`/`lix.close()` flushes updated state to `internal_state_all_untracked`.
 - **Pure call‑site API** – no globals; each helper requires `{ lix }`.
-
 
 ## API reference
 
@@ -59,10 +57,11 @@ const t = timestamp({ lix }); // "1970-01-01T00:00:00.000Z", "1970-01-01T00:00:0
 - Monotone, never decreases.
 - Persisted and resumed on re‑open / clone.
 
-
 ### `nextSequenceNumber({ lix }): number`
 
 Returns the next **monotone sequence number**, starting at 0.
+
+Available only when `lix_deterministic_mode = true`; otherwise the function throws.
 
 ```ts
 const n = nextSequenceNumber({ lix }); // 0, 1, 2, …
@@ -70,9 +69,9 @@ const n = nextSequenceNumber({ lix }); // 0, 1, 2, …
 
 **Guarantees**
 
-- Strictly +1 each call, no gaps or duplicates.
-- Persisted via `lix_deterministic_counter` record.
-
+- Available only in deterministic mode
+- Strictly +1 each call, no gaps or duplicates
+- Persisted via `lix_sequence_number` key value
 
 ### `random({ lix }): number`
 
@@ -88,7 +87,6 @@ const r = random({ lix }); // 0.318…, 0.937…, …
 - Override by inserting `lix_deterministic_rng_seed` **before** first `random()` call.
 - PRNG state persisted on each call.
 
-
 ## Flush protocol
 
 | Event                          | Counter/RNG/Clock state flushed? |
@@ -100,22 +98,19 @@ const r = random({ lix }); // 0.318…, 0.937…, …
 
 All state is stored in `internal_state_all_untracked` (`version_id = "global"`).
 
-
 ## Edge‑cases
 
-| Scenario                                        | Behaviour                                                                   |
-| ----------------------------------------------- | --------------------------------------------------------------------------- |
+| Scenario                                             | Behaviour                                                                   |
+| ---------------------------------------------------- | --------------------------------------------------------------------------- |
 | Clone blob, change only `lix_deterministic_rng_seed` | `random()` diverges, `timestamp()` & `nextSequenceNumber()` remain aligned. |
-| Sequence overflow (`> Number.MAX_SAFE_INTEGER`) | Helpers throw; requires schema migration.                                   |
-| Parallel Lix objects in same process            | Independent state; helpers require explicit `{ lix }` arg.                  |
-
+| Sequence overflow (`> Number.MAX_SAFE_INTEGER`)      | Helpers throw; requires schema migration.                                   |
+| Parallel Lix objects in same process                 | Independent state; helpers require explicit `{ lix }` arg.                  |
 
 ## Extensibility (non‑breaking)
 
 - `timestampMode` key to configure tick policy (`"write"`, `"step"`, `"manual"`).
 - `randomAlgorithm` key to choose alternate PRNG (`"xoshiro"`, `"counter‑hash"`).
 - Namespaced counters via future `nextSequenceNumber({ lix, namespace })`.
-
 
 ## Example
 
@@ -138,6 +133,7 @@ const r2 = random({ lix }); // 0.937…
 ### When should I use deterministic mode?
 
 Use deterministic mode for:
+
 - Unit and integration tests
 - Debugging distributed systems
 - Reproducing bug reports
@@ -159,12 +155,14 @@ Change the RNG seed before calling `random()`:
 
 ```ts
 // Instance 1
-await lix1.db.insertInto("key_value")
+await lix1.db
+  .insertInto("key_value")
   .values({ key: "lix_deterministic_rng_seed", value: "instance-1" })
   .execute();
 
-// Instance 2  
-await lix2.db.insertInto("key_value")
+// Instance 2
+await lix2.db
+  .insertInto("key_value")
   .values({ key: "lix_deterministic_rng_seed", value: "instance-2" })
   .execute();
 
@@ -172,4 +170,3 @@ await lix2.db.insertInto("key_value")
 const r1 = random({ lix: lix1 }); // Different values
 const r2 = random({ lix: lix2 }); // for each instance
 ```
-

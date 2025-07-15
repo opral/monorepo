@@ -4,6 +4,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import { isDeterministicMode } from "./is-deterministic-mode.js";
 
 /** State kept per SQLite connection */
 type CounterState = {
@@ -15,39 +16,55 @@ type CounterState = {
 const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
 
 /**
- * Return the next monotone **deterministic count** for this **Lix** instance.
+ * Returns the next **monotone sequence number**, starting at 0.
+ * 
+ * Available only when `lix_deterministic_mode = true`; otherwise the function throws.
+ * Generates collision-free IDs and pagination cursors in deterministic mode.
+ * The sequence is strictly incrementing with no gaps or duplicates.
  *
+ * @example Basic usage (deterministic mode required)
  * ```ts
- * // quick-start
- * const n1 = nextDeterministicCount({ lix }); // 0
- * const n2 = nextDeterministicCount({ lix }); // 1
- *
- * // do any normal write – counts are flushed automatically
- * await lix.db.insertInto("kv").values({ key: "a", value: "1" }).execute();
- *
- * // later, even after toBlob()/re-open, the sequence continues
- * const n3 = nextDeterministicCount({ lix }); // 2
+ * const lix = await openLix({
+ *   keyValues: [{ key: "lix_deterministic_mode", value: true }]
+ * });
+ * const n1 = nextSequenceNumber({ lix }); // 0
+ * const n2 = nextSequenceNumber({ lix }); // 1
+ * const n3 = nextSequenceNumber({ lix }); // 2
  * ```
  *
- * @example Deterministic string IDs
+ * @example Collision-free IDs
  * ```ts
- * const c  = nextDeterministicCount({ lix }); // e.g. 7
- * const id = `ENTITY_${c}`;                   // "ENTITY_7"
+ * const n = nextSequenceNumber({ lix }); // e.g. 7
+ * const id = `ENTITY_${n}`;              // "ENTITY_7"
+ * ```
+ * 
+ * @example Pagination cursors
+ * ```ts
+ * const cursor = nextSequenceNumber({ lix });
+ * await lix.db.insertInto("page_view")
+ *   .values({ cursor, page_id: "home" })
+ *   .execute();
  * ```
  *
- * @param args.lix  A fully-initialised Lix instance (from `openLix()`).
- * @returns         The next integer in the deterministic sequence.
+ * @param args.lix - The Lix instance with sqlite and db connections
+ * @returns The next number in the sequence (starting from 0)
+ * @throws {Error} If `lix_deterministic_mode` is not true
  *
  * @remarks
- * * Any two clones that start from the same blob will emit **identical**
- *   sequences (0, 1, 2, …).
- * * Persistence is automatic – every successful write-transaction and every
- *   `lix.toBlob()`/`lix.close()` stores the current counter. No manual
- *   flushing is required.
+ * - Available only in deterministic mode
+ * - Strictly +1 each call, no gaps or duplicates
+ * - Persisted via `lix_sequence_number` key value
+ * - State automatically flushed on successful mutations and `toBlob()`/`close()`
+ * - Clones from the same blob continue the sequence where it left off
  */
-export function nextDeterministicCount(args: {
+export function nextSequenceNumber(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 }): number {
+	// Check if deterministic mode is enabled
+	if (!isDeterministicMode({ lix: args.lix })) {
+		throw new Error("nextSequenceNumber() is available only when lix_deterministic_mode = true");
+	}
+	
 	let state = counterCache.get(args.lix.sqlite);
 
 	/* First use on this connection → pull initial value from DB */
@@ -58,7 +75,7 @@ export function nextDeterministicCount(args: {
 			// that hits the internal_state_all_untracked table
 			query: args.lix.db
 				.selectFrom("key_value_all")
-				.where("key", "=", "lix_deterministic_counter")
+				.where("key", "=", "lix_sequence_number")
 				.where("lixcol_version_id", "=", "global")
 				.select("value"),
 		});
@@ -84,7 +101,7 @@ export function nextDeterministicCount(args: {
  * Called automatically by Lix after each committing write and during
  * `lix.toBlob()` / `lix.close()`.  **Not part of the public API.**
  */
-export function commitDeterministicCountIncrement(args: {
+export function commitSequenceNumberIncrement(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 }): void {
@@ -94,7 +111,7 @@ export function commitDeterministicCountIncrement(args: {
 	state.dirty = false; // mark clean _before_ we try to write
 
 	const newValue = JSON.stringify({
-		key: "lix_deterministic_counter",
+		key: "lix_sequence_number",
 		value: state.highestSeen,
 	} satisfies LixKeyValue);
 
@@ -103,7 +120,7 @@ export function commitDeterministicCountIncrement(args: {
 		query: args.db
 			.insertInto("internal_state_all_untracked")
 			.values({
-				entity_id: "lix_deterministic_counter",
+				entity_id: "lix_sequence_number",
 				version_id: "global",
 				file_id: "lix",
 				schema_key: LixKeyValueSchema["x-lix-key"],

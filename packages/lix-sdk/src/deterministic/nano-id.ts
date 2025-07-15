@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import { nextDeterministicCount } from "./index.js";
+import { nextSequenceNumber } from "./index.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 
 /**
@@ -39,7 +39,7 @@ export function nanoId(args: {
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
 		// Get the next deterministic counter value
-		const counter = nextDeterministicCount({ lix: args.lix });
+		const counter = nextSequenceNumber({ lix: args.lix });
 		// Return counter with test_ prefix and padded to 10 digits
 		return `test_${counter.toString().padStart(10, "0")}`;
 	}
