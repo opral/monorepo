@@ -1,20 +1,20 @@
 import { describe, expect, test } from "vitest";
-import { scenarioTest, type ScenarioTestDef } from "./scenario-test.js";
+import { dsTest, type DstSimulation } from "./ds-test.js";
 import { openLix } from "../../lix/open-lix.js";
 
-test("scenario test discovery", () => {});
+test("simulation test discovery", () => {});
 
-describe("expectDeterministic validates values across scenarios", async () => {
-	const customScenario: ScenarioTestDef = {
+describe("expectDeterministic validates values across simulations", async () => {
+	const customSimulation: DstSimulation = {
 		name: "custom",
-		description: "Custom scenario for testing expectDeterministic",
+		description: "Custom simulation for testing expectDeterministic",
 		setup: async (lix) => lix,
 	};
 
-	await scenarioTest(
+	await dsTest(
 		"consistent values pass",
 		async ({ expectDeterministic }) => {
-			// These should be consistent across all scenarios
+			// These should be consistent across all simulations
 
 			expect(() => {
 				expectDeterministic("same-string").toBe("same-string");
@@ -24,59 +24,59 @@ describe("expectDeterministic validates values across scenarios", async () => {
 			}).not.toThrow();
 		},
 		{
-			scenarios: ["baseline", "custom"],
-			customScenarios: [customScenario],
+			simulations: ["baseline", "custom"],
+			customSimulations: [customSimulation],
 		}
 	);
 });
 
 // This test will fail intentionally to demonstrate expectDeterministic working
 describe("expectDeterministic failure demonstration", async () => {
-	const customScenario: ScenarioTestDef = {
+	const customSimulation: DstSimulation = {
 		name: "custom",
-		description: "Custom scenario for testing expectDeterministic failure",
+		description: "Custom simulation for testing expectDeterministic failure",
 		setup: async (lix) => lix,
 	};
 
-	await scenarioTest(
+	await dsTest(
 		"this should fail - expectDeterministic catches differences",
-		async ({ scenario, expectDeterministic }) => {
-			// This will store different values in different scenarios
-			const scenarioSpecificValue =
-				scenario === "baseline" ? "baseline-value" : "other-value";
+		async ({ simulation, expectDeterministic }) => {
+			// This will store different values in different simulations
+			const simulationSpecificValue =
+				simulation === "baseline" ? "baseline-value" : "other-value";
 
-			if (scenario === "baseline") {
-				// This will fail in the second scenario
+			if (simulation === "baseline") {
+				// This will fail in the second simulation
 				expect(() =>
-					expectDeterministic(scenarioSpecificValue).toBe("baseline-value")
+					expectDeterministic(simulationSpecificValue).toBe("baseline-value")
 				).not.toThrow();
 			} else {
 				expect(() =>
-					expectDeterministic(scenarioSpecificValue).toBe("baseline-value")
-				).toThrow(/SCENARIO DETERMINISM VIOLATION/);
+					expectDeterministic(simulationSpecificValue).toBe("baseline-value")
+				).toThrow(/SIMULATION DETERMINISM VIOLATION/);
 			}
 		},
 		{
-			scenarios: ["baseline", "custom"],
-			customScenarios: [customScenario],
+			simulations: ["baseline", "custom"],
+			customSimulations: [customSimulation],
 		}
 	);
 });
 
-describe("every scenario opens the same lix", async () => {
+describe("every simulation opens the same lix", async () => {
 	// Testing this with materialized state and the changes the lix has
-	// Both need to be exactly the same for all scenarios
+	// Both need to be exactly the same for all simulations
 
 	let previousState: any | null = null;
 	let previousChanges: any | null = null;
 
-	const mockScenario: ScenarioTestDef = {
-		name: "mock-scenario",
-		description: "A mock scenario for testing deterministic data",
+	const mockSimulation: DstSimulation = {
+		name: "mock-simulation",
+		description: "A mock simulation for testing deterministic data",
 		setup: async (lix) => lix,
 	};
 
-	await scenarioTest(
+	await dsTest(
 		"",
 		async ({ initialLix }) => {
 			const lix = await openLix({ blob: initialLix });
@@ -99,20 +99,20 @@ describe("every scenario opens the same lix", async () => {
 			expect(allState).toBeDefined();
 		},
 		{
-			scenarios: ["baseline", "mock-scenario"],
-			customScenarios: [mockScenario],
+			simulations: ["baseline", "mock-simulation"],
+			customSimulations: [mockSimulation],
 		}
 	);
 });
 
 describe("database operations are deterministic", async () => {
-	const mockScenario: ScenarioTestDef = {
-		name: "mock-scenario",
-		description: "A mock scenario for testing deterministic data",
+	const mockSimulation: DstSimulation = {
+		name: "mock-simulation",
+		description: "A mock simulation for testing deterministic data",
 		setup: async (lix) => lix,
 	};
 
-	await scenarioTest(
+	await dsTest(
 		"",
 		async ({ initialLix, expectDeterministic }) => {
 			const lix = await openLix({ blob: initialLix });
@@ -168,8 +168,8 @@ describe("database operations are deterministic", async () => {
 			}
 		},
 		{
-			scenarios: ["baseline", "mock-scenario"],
-			customScenarios: [mockScenario],
+			simulations: ["baseline", "mock-simulation"],
+			customSimulations: [mockSimulation],
 		}
 	);
 });
