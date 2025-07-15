@@ -16,23 +16,6 @@ services:
     domains:
       - opral.com
 
-  - name: lix-website
-    type: web
-    runtime: static
-    branch: main
-    staticPublishPath: ./packages/lix/website/dist
-    envVars:
-      - fromGroup: production
-      - key: PORT
-        value: 3006
-    buildCommand: pnpm --filter lix-website... i && pnpm --filter lix-website... build
-    autoDeploy: true
-    buildFilter:
-      paths:
-        - packages/lix-website/**
-    domains:
-      - lix.opral.com
-
   - name: lix-host
     type: web
     runtime: node
