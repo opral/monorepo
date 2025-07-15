@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { openLix } from "../../lix/open-lix.js";
 import { uuidV7 } from "./uuid-v7.js";
+import { openLix } from "../lix/open-lix.js";
 
 test("uuidV7 returns deterministic values when deterministic mode is enabled", async () => {
 	const lix = await openLix({
@@ -12,7 +12,8 @@ test("uuidV7 returns deterministic values when deterministic mode is enabled", a
 	const id3 = uuidV7({ lix });
 
 	// Should be valid UUID v7 format
-	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+	const uuidRegex =
+		/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 	expect(id1).toMatch(uuidRegex);
 	expect(id2).toMatch(uuidRegex);
 	expect(id3).toMatch(uuidRegex);
@@ -41,7 +42,8 @@ test("uuidV7 returns random values when deterministic mode is disabled", async (
 	const id3 = uuidV7({ lix });
 
 	// Should be valid UUID v7 format
-	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+	const uuidRegex =
+		/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 	expect(id1).toMatch(uuidRegex);
 	expect(id2).toMatch(uuidRegex);
 	expect(id3).toMatch(uuidRegex);
@@ -105,7 +107,7 @@ test("uuidV7 is persisted across lix instances", async () => {
 	const id4 = uuidV7({ lix: lix2 });
 
 	// Extract counters
-	const counters = [id1, id2, id3, id4].map(id => parseInt(id.slice(-8), 16));
+	const counters = [id1, id2, id3, id4].map((id) => parseInt(id.slice(-8), 16));
 
 	// Verify they continue sequentially
 	expect(counters[1]).toBe(counters[0]! + 1);
@@ -130,7 +132,7 @@ test("uuidV7 advances correctly with many operations", async () => {
 	}
 
 	// Extract counters
-	const counters = uuids.map(id => parseInt(id.slice(-8), 16));
+	const counters = uuids.map((id) => parseInt(id.slice(-8), 16));
 
 	// All should be strictly increasing
 	for (let i = 1; i < counters.length; i++) {

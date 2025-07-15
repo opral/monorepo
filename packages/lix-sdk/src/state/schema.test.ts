@@ -989,7 +989,7 @@ dsTest(
 
 dsTest(
 	"state and state_all views expose change_set_id for history queries",
-	async ({ expectDeterministic, initialLix, simulation }) => {
+	async ({ expectDeterministic, initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
 
 		const mockSchema: LixSchemaDefinition = {

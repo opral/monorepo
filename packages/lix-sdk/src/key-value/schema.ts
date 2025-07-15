@@ -1,14 +1,16 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { JSONTypeSchema } from "../schema-definition/json-type.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
+import type { Lix } from "../index.js";
 
-export function applyKeyValueDatabaseSchema(sqlite: SqliteWasmDatabase): void {
+export function applyKeyValueDatabaseSchema(
+	lix: Pick<Lix, "sqlite" | "db">
+): void {
 	return createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixKeyValueSchema,
 		overrideName: "key_value",
 		pluginKey: "lix_own_entity",
@@ -18,7 +20,7 @@ export function applyKeyValueDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 
 /**
  * Schema definition for key-value pairs in Lix.
- * 
+ *
  * Key-value pairs provide a flexible storage mechanism for configuration,
  * settings, and metadata within a Lix instance.
  */
@@ -38,19 +40,19 @@ LixKeyValueSchema satisfies LixSchemaDefinition;
 
 /**
  * Represents a key-value pair in Lix.
- * 
+ *
  * The value can be any JSON-serializable type (string, number, boolean, object, array, null).
- * 
+ *
  * **Important SQLite Limitation with Boolean Values:**
  * SQLite does not have a native boolean type. When storing JSON values:
  * - `true` is stored as `1`
  * - `false` is stored as `0`
- * 
+ *
  * This is a fundamental limitation of SQLite's JSON implementation. There is no way
  * to distinguish between a boolean `true` and the number `1` after retrieval.
- * 
+ *
  * When querying boolean values, use loose equality (`==`) or handle the numeric representation.
- * 
+ *
  * @example
  * ```typescript
  * // Inserting key-value pairs
@@ -58,13 +60,13 @@ LixKeyValueSchema satisfies LixSchemaDefinition;
  *   key: "lix_sync_enabled",
  *   value: true  // Will be stored as 1 in SQLite
  * }).execute();
- * 
+ *
  * await lix.db.insertInto("key_value").values({
- *   key: "lix_server_url", 
+ *   key: "lix_server_url",
  *   value: "https://api.example.com"
  * }).execute();
  * ```
- * 
+ *
  * @example
  * ```typescript
  * // Querying boolean values
@@ -73,13 +75,13 @@ LixKeyValueSchema satisfies LixSchemaDefinition;
  *   .where("key", "=", "lix_sync_enabled")
  *   .select("value")
  *   .executeTakeFirst();
- * 
+ *
  * // result.value will be 1 (not true)
  * const isEnabled = result?.value == true; // Use loose equality
  * // or
  * const isEnabled = result?.value === 1; // Check for numeric value
  * ```
- * 
+ *
  * @example
  * ```typescript
  * // Common Lix system keys

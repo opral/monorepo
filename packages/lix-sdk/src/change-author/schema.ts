@@ -2,15 +2,15 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
+import type { Lix } from "../lix/open-lix.js";
 
 export function applyChangeAuthorDatabaseSchema(
-	sqlite: SqliteWasmDatabase
+	lix: Pick<Lix, "sqlite" | "db">
 ): void {
 	// Create change_author view using the generalized entity view builder
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixChangeAuthorSchema,
 		overrideName: "change_author",
 		pluginKey: "lix_own_entity",

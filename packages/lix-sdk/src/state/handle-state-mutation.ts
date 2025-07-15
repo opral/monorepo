@@ -1,12 +1,14 @@
 import { sql, type Kysely } from "kysely";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type {
+	LixDatabaseSchema,
+	LixInternalDatabaseSchema,
+} from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import type { LixChange } from "../change/schema.js";
 import type { NewStateRow } from "./schema.js";
-import { uuidV7 } from "../database/index.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
-import { timestamp } from "../database/index.js";
+import { uuidV7, timestamp } from "../deterministic/index.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,
@@ -20,7 +22,9 @@ export function handleStateMutation(
 	schema_version: string
 ): 0 | 1 {
 	// Use consistent timestamp for both changes and cache
-	const currentTime = timestamp({ lix: { sqlite } });
+	const currentTime = timestamp({
+		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
+	});
 
 	// Handle copy-on-write deletion for inherited entities
 	if (snapshot_content === null || snapshot_content === "null") {
@@ -475,7 +479,12 @@ function createChangeAuthorRecords(args: {
 				account_id: accountId,
 			};
 
-			const changeAuthorId = uuidV7({ lix: { sqlite: args.sqlite } });
+			const changeAuthorId = uuidV7({
+				lix: {
+					sqlite: args.sqlite,
+					db: args.db as unknown as Kysely<LixDatabaseSchema>,
+				},
+			});
 
 			executeSync({
 				lix: { sqlite: args.sqlite },

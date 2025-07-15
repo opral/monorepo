@@ -2,11 +2,15 @@ import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
-import { nanoId } from "../database/index.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import { nanoId } from "../deterministic/index.js";
+import type { Lix } from "../lix/open-lix.js";
 
-export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
+export function applyAccountDatabaseSchema(
+	sqlite: SqliteWasmDatabase,
+	db: Lix["db"]
+): void {
 	// Create account view using the generalized entity view builder
 	createEntityViewsIfNotExists({
 		lix: { sqlite },
@@ -15,7 +19,7 @@ export function applyAccountDatabaseSchema(sqlite: SqliteWasmDatabase): void {
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoId({ lix: { sqlite } }),
+			id: () => nanoId({ lix: { sqlite, db } }),
 		},
 	});
 

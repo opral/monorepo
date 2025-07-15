@@ -3,6 +3,7 @@ import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
+import type { Lix } from "../lix/open-lix.js";
 
 /** State kept per SQLite connection */
 type CounterState = {
@@ -45,18 +46,17 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  *   flushing is required.
  */
 export function nextDeterministicCount(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
+	lix: Pick<Lix, "sqlite" | "db">;
 }): number {
-	let state = counterCache.get(args.sqlite);
+	let state = counterCache.get(args.lix.sqlite);
 
 	/* First use on this connection → pull initial value from DB */
 	if (!state) {
 		const [row] = executeSync({
-			lix: { sqlite: args.sqlite },
+			lix: { sqlite: args.lix.sqlite },
 			// querying from key_value_all is fine here because its a view
 			// that hits the internal_state_all_untracked table
-			query: args.db
+			query: args.lix.db
 				.selectFrom("key_value_all")
 				.where("key", "=", "lix_deterministic_counter")
 				.where("lixcol_version_id", "=", "global")
@@ -66,7 +66,7 @@ export function nextDeterministicCount(args: {
 		// The persisted value is the next counter to use
 		const start = row ? Number(row.value) + 1 : 0;
 		state = { next: start, highestSeen: start - 1, dirty: false };
-		counterCache.set(args.sqlite, state);
+		counterCache.set(args.lix.sqlite, state);
 	}
 
 	/* Hand out current, then bump for the next call */

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { uuidV7 } from "../database/index.js";
+import { uuidV7 } from "./uuid-v7.js";
 
 test("deterministic mode returns the same uuid_v7 sequence in an independent clone", async () => {
 	const lixA = await openLix({

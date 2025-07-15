@@ -12,7 +12,7 @@ import {
 	applyMaterializeStateSchema,
 	materializeState,
 } from "./materialize-state.js";
-import { commitDeterministicCountIncrement } from "./deterministic-counter.js";
+import { commitDeterministicCountIncrement } from "../deterministic/index.js";
 
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(

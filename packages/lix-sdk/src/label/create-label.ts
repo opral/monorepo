@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixLabel } from "./schema.js";
-import { nanoId } from "../database/index.js";
+import { nanoId } from "../deterministic/index.js";
 
 /**
  * Creates a label that can be attached to change sets.
@@ -22,7 +22,7 @@ export async function createLabel(args: {
 }): Promise<LixLabel> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
-		const labelId = args.id || nanoId({ lix: { sqlite: args.lix.sqlite } });
+		const labelId = args.id || nanoId({ lix: args.lix });
 
 		// Insert the label (views don't support returningAll)
 		await trx

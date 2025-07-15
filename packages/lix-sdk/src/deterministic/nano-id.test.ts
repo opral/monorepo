@@ -1,6 +1,6 @@
-import { expect, test } from "vitest";
-import { openLix } from "../../lix/open-lix.js";
-import { nanoId } from "./nano-id.js";
+import { expect, test, vi } from "vitest";
+import { _nanoIdAlphabet, nanoId } from "./nano-id.js";
+import { openLix } from "../lix/open-lix.js";
 
 test("nanoId returns deterministic values when deterministic mode is enabled", async () => {
 	const lix = await openLix({
@@ -100,7 +100,7 @@ test("nanoId is persisted across lix instances", async () => {
 	const id4 = nanoId({ lix: lix2 });
 
 	// Extract counters
-	const counters = [id1, id2, id3, id4].map(id => parseInt(id.slice(5), 10));
+	const counters = [id1, id2, id3, id4].map((id) => parseInt(id.slice(5), 10));
 
 	// Verify they continue sequentially
 	expect(counters[1]).toBe(counters[0]! + 1);
@@ -125,7 +125,7 @@ test("nanoId advances correctly with many operations", async () => {
 	}
 
 	// Extract counters
-	const counters = ids.map(id => parseInt(id.slice(5), 10));
+	const counters = ids.map((id) => parseInt(id.slice(5), 10));
 
 	// All should be strictly increasing
 	for (let i = 1; i < counters.length; i++) {
@@ -154,4 +154,47 @@ test("nanoId format is consistent across different counter values", async () => 
 	const idAfter1000 = nanoId({ lix });
 	expect(idAfter1000).toMatch(/^test_\d{10}$/);
 	expect(idAfter1000.length).toBe(15); // Should still be padded to same length
+});
+
+test("length is obeyed", async () => {
+	const lix = await openLix({});
+	const id = nanoId({ lix, length: 10 });
+	expect(id.length).toBe(10);
+});
+
+test("the alphabet does not contain underscores `_` because they are not URL safe", () => {
+	expect(_nanoIdAlphabet).not.toContain("_");
+});
+
+test("the alphabet does not contain dashes `-` because they break selecting the ID from the URL in the browser", () => {
+	expect(_nanoIdAlphabet).not.toContain("-");
+});
+
+/**
+ * Test the crypto polyfill that was added to fix environments without crypto support
+ * like older versions of Node in Stackblitz.
+ *
+ * See: https://github.com/opral/lix-sdk/issues/258
+ */
+test("polyfill works when crypto is not available", async () => {
+	const lix = await openLix({});
+
+	// Store original crypto
+	const originalCrypto = global.crypto;
+
+	// Mock crypto as undefined to test the polyfill
+	vi.stubGlobal("crypto", undefined);
+
+	try {
+		const id = nanoId({ lix, length: 10 });
+		expect(id.length).toBe(10);
+		expect(typeof id).toBe("string");
+		// Check that it only contains characters from our alphabet
+		for (let i = 0; i < id.length; i++) {
+			expect(_nanoIdAlphabet).toContain(id[i]);
+		}
+	} finally {
+		// Restore original crypto
+		vi.stubGlobal("crypto", originalCrypto);
+	}
 });

@@ -1,6 +1,6 @@
 import type { Lix } from "../lix/open-lix.js";
 import type { LixThread, LixThreadComment } from "./schema.js";
-import { nanoId } from "../database/index.js";
+import { nanoId } from "../deterministic/index.js";
 import type { NewState } from "../entity-views/types.js";
 
 /**
@@ -31,7 +31,7 @@ export async function createThread(args: {
 	}
 > {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		const threadId = args.id ?? nanoId({ lix: { sqlite: args.lix.sqlite } });
+		const threadId = args.id ?? nanoId({ lix: args.lix });
 		const versionId = args.versionId ?? "global";
 
 		await trx
@@ -49,7 +49,7 @@ export async function createThread(args: {
 		const insertedComments = [];
 
 		for (const [index, comment] of (args.comments ?? []).entries()) {
-			const commentId = nanoId({ lix: { sqlite: args.lix.sqlite } });
+			const commentId = nanoId({ lix: args.lix });
 
 			await trx
 				.insertInto("thread_comment_all")

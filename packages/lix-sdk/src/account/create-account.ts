@@ -1,6 +1,6 @@
+import { uuidV7 } from "../deterministic/uuid-v7.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixAccount } from "./schema.js";
-import { uuidV7 } from "../database/index.js";
 
 /**
  * Inserts a new account into the Lix database.
@@ -23,7 +23,7 @@ export async function createAccount(args: {
 }): Promise<LixAccount> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Generate ID if not provided (views handle this, but we need it for querying back)
-		const accountId = args.id || uuidV7({ lix: { sqlite: args.lix.sqlite } });
+		const accountId = args.id || uuidV7({ lix: args.lix });
 
 		// Insert the account (views don't support returningAll)
 		await trx

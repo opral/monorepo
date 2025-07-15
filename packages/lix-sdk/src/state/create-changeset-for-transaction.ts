@@ -9,12 +9,15 @@ import {
 	LixChangeSetSchema,
 } from "../change-set/schema.js";
 import { executeSync } from "../database/execute-sync.js";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type {
+	LixDatabaseSchema,
+	LixInternalDatabaseSchema,
+} from "../database/schema.js";
 import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import { createChangeWithSnapshot } from "./handle-state-mutation.js";
-import { nanoId } from "../database/index.js";
+import { nanoId } from "../deterministic/index.js";
 import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 import { handleStateDelete } from "./schema.js";
 
@@ -44,7 +47,9 @@ export function createChangesetForTransaction(
 		throw new Error(`Version with id '${version_id}' not found.`);
 	}
 	const mutatedVersion = versionRecord as any;
-	const nextChangeSetId = nanoId({ lix: { sqlite } });
+	const nextChangeSetId = nanoId({
+		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
+	});
 	const changeSetChange = createChangeWithSnapshot({
 		sqlite,
 		db,

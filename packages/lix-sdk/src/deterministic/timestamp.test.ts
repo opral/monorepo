@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import { openLix } from "../../lix/open-lix.js";
 import { timestamp } from "./timestamp.js";
+import { openLix } from "../lix/open-lix.js";
 
 test("timestamp returns deterministic values when deterministic mode is enabled", async () => {
 	const lix = await openLix({

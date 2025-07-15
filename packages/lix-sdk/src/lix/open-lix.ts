@@ -16,7 +16,7 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitDeterministicCountIncrement } from "../state/deterministic-counter.js";
+import { commitDeterministicCountIncrement } from "../deterministic/deterministic-counter.js";
 import { newLixFile } from "./new-lix.js";
 
 export type Lix = {

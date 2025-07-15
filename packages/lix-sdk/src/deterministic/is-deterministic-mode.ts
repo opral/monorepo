@@ -1,5 +1,5 @@
 import type { Lix } from "../lix/open-lix.js";
-import { executeSync } from "./execute-sync.js";
+import { executeSync } from "../database/execute-sync.js";
 
 /**
  * Checks if deterministic mode is enabled by querying the key_value table.
