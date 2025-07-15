@@ -1,0 +1,27 @@
+import CodeSnippet from "../../components/code-snippet";
+import * as example from "../../examples/change-proposals.ts";
+import exampleSrcCode from "../../examples/change-proposals.ts?raw";
+
+# Change Proposals
+
+Change proposals let you build review and approval workflows for into your application. This allows users and AI agents to safely suggest, discuss, and approve edits before they are merged.
+
+![Change Proposals](/change-proposal.svg)
+
+## Examples
+
+### Create a change proposal
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["create-proposal"]}
+/>
+
+### Accepting or rejecting a proposal
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["handle-proposal"]}
+/>

@@ -117,10 +117,22 @@ async function patchGeneratedApiDocs(absoluteApiDir: string) {
     await fs.access(readmePath);
     await fs.rename(readmePath, indexPath);
   } catch (error) {
-    // README.md doesn't exist, create a basic index.md
+    // README.md doesn't exist, create a rich index.md
     await fs.writeFile(
       indexPath,
-      `# API Reference\n\nBrowse the API documentation using the sidebar.`
+      `# API Reference
+
+:::info
+Browse the API documentation using the sidebar navigation.
+:::
+
+Welcome to the comprehensive Lix SDK API documentation. This reference provides detailed information about all available functions, classes, and interfaces to help you integrate change control into your applications.
+
+## Need Help?
+
+If you're new to Lix, consider starting with our [Getting Started Guide](/guide/getting-started) before diving into the API reference.
+
+Browse the API documentation using the sidebar to find the specific functionality you need.`
     );
   }
 
@@ -132,18 +144,18 @@ export function generateApiSidebar(docsRoot: string) {
 
   // Check if API directory exists
   if (!fsSync.existsSync(apiDir)) {
-    return [];
+    throw new Error(`API directory not found: ${apiDir}`);
   }
 
   const sidebar: any[] = [];
 
   // Define the categories we want to show
   const categories = [
-    { dir: "classes", title: "Classes", collapsed: false },
-    { dir: "interfaces", title: "Interfaces", collapsed: false },
     { dir: "functions", title: "Functions", collapsed: true },
     { dir: "types", title: "Type Aliases", collapsed: true },
     { dir: "variables", title: "Variables", collapsed: true },
+    { dir: "classes", title: "Classes", collapsed: true },
+    { dir: "interfaces", title: "Interfaces", collapsed: true },
   ];
 
   categories.forEach((category) => {
@@ -175,6 +187,44 @@ export function generateApiSidebar(docsRoot: string) {
   return sidebar;
 }
 
+export async function generateApiDocs(
+  options: CustomTypeDocOptions & { docRoot: string; title?: string }
+): Promise<void> {
+  const {
+    entryPoints = [],
+    tsconfig,
+    outDir = "api",
+    docRoot,
+    title = "API",
+  } = options;
+
+  const outdir = path.join(docRoot, outDir);
+
+  // Use Application.bootstrap static method for TypeDoc 0.28+
+  const app = await Application.bootstrapWithPlugins({
+    name: title,
+    entryPoints,
+    plugin: ["typedoc-plugin-markdown"],
+    out: outdir,
+    theme: "markdown",
+    disableSources: true,
+    // hidePageHeader: "true",
+    hideBreadcrumbs: true,
+    hidePageHeader: true,
+    excludePrivate: true,
+    excludeExternals: true,
+    tsconfig,
+    hideGenerator: true,
+  } as Partial<TypeDocOptions>);
+  const project = await app.convert();
+
+  if (project) {
+    // Generate docs (output directory is specified in bootstrap options)
+    await app.generateDocs(project, outdir);
+    await patchGeneratedApiDocs(outdir);
+  }
+}
+
 export function customTypeDocPlugin(
   options: CustomTypeDocOptions
 ): RspressPlugin {
@@ -185,31 +235,11 @@ export function customTypeDocPlugin(
     async config(config) {
       const docRoot = config.root;
 
-      const outdir = path.join(docRoot!, outDir);
-
-      // Use Application.bootstrap static method for TypeDoc 0.28+
-      const app = await Application.bootstrapWithPlugins({
-        name: config.title,
-        entryPoints,
-        plugin: ["typedoc-plugin-markdown"],
-        out: outdir,
-        theme: "markdown",
-        disableSources: true,
-        // hidePageHeader: "true",
-        hideBreadcrumbs: true,
-        hidePageHeader: true,
-        excludePrivate: true,
-        excludeExternals: true,
-        tsconfig,
-        hideGenerator: true,
-      } as Partial<TypeDocOptions>);
-      const project = await app.convert();
-
-      if (project) {
-        // Generate docs (output directory is specified in bootstrap options)
-        await app.generateDocs(project, outdir);
-        await patchGeneratedApiDocs(outdir);
-      }
+      await generateApiDocs({
+        ...options,
+        docRoot: docRoot!,
+        title: config.title,
+      });
 
       return config;
     },

@@ -254,7 +254,7 @@ services:
     autoDeploy: true
     previews:
       generation: automatic
-    staticPublishPath: ./packages/lix-docs/docs/.vitepress/dist
+    staticPublishPath: ./packages/lix-docs/docs_build
     buildCommand: pnpm install && pnpm run --filter @lix-js/docs... build
     buildFilter:
       paths:
@@ -262,8 +262,11 @@ services:
         - packages/lix-sdk/**
     envVars:
       - fromGroup: production
+      - key: NODE_VERSION
+        value: 22.11.0
     domains:
-      - docs.lix.dev
+      - lix.dev
+      - lix.com
 
   - name: prosemirror-example
     type: web
@@ -296,20 +299,4 @@ services:
       - fromGroup: production
     domains:
       - html-diff.lix.dev
-
-  - name: lix-website
-    type: web
-    runtime: static
-    autoDeploy: true
-    branch: main
-    previews:
-      generation: automatic
-    staticPublishPath: ./packages/lix/lix-docs/docs_build
-    buildCommand: pnpm install && pnpm run --filter @lix-js/docs... build
-    buildFilter:
-      paths:
-        - packages/lix/lix-docs/**
-    envVars:
-      - fromGroup: production
-    domains:
-      - lix.dev
+      
