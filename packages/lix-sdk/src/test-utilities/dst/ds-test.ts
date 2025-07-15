@@ -108,7 +108,7 @@ export function dsTest(
 
 		const expectedValues = new Map<string, any>();
 
-		test.each(simulationsToRun)(`${name} > $name`, async (simulation) => {
+		test.each(simulationsToRun)(`$name`, async (simulation) => {
 			let callIndex = 0;
 			const isFirstSimulation = simulation === simulationsToRun[0];
 
