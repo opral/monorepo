@@ -1,0 +1,59 @@
+name: Claude Unified Handler
+
+on:
+  # Handle dispatched requests from all repos (including monorepo itself)
+  repository_dispatch:
+    types: [claude-request]
+
+jobs:
+  claude:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          
+          # Direct prompt with the request from the subrepo
+          direct_prompt: |
+            Handle this request from ${{ github.event.client_payload.repository }}#${{ github.event.client_payload.issue_number }}:
+
+            ${{ github.event.client_payload.comment_body || github.event.client_payload.issue_body }}
+
+            IMPORTANT: When creating a PR, you MUST include "Closes ${{ github.event.client_payload.issue_url }}" in the PR description.
+            The original issue is at: ${{ github.event.client_payload.issue_url }}
+            Focus on changes that relate to the specific subrepo package mentioned in the request.
+      
+      - name: Update comment in source repo
+        if: always() && github.event.client_payload.comment_id
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
+          script: |
+            const [owner, repo] = '${{ github.event.client_payload.repository }}'.split('/');
+            const commentId = '${{ github.event.client_payload.comment_id }}';
+            
+            let body = '❌ Claude encountered an error processing your request.';
+            
+            if ('${{ steps.claude.outcome }}' === 'success') {
+              body = '✅ Claude has processed your request. Check the monorepo for the PR.';
+            }
+            
+            await github.rest.issues.updateComment({
+              owner: owner,
+              repo: repo,
+              comment_id: parseInt(commentId),
+              body: body
+            });
