@@ -31,10 +31,6 @@ export default defineConfig({
   globalStyles: path.join(__dirname, "docs/styles/index.css"),
   route: {
     cleanUrls: true,
-    redirects: {
-      "/guide": "/guide/getting-started",
-      "/guide/": "/guide/getting-started",
-    },
   },
   markdown: {
     // Disable Rust MDX compiler to support global components
@@ -50,7 +46,14 @@ export default defineConfig({
           rules: [
             {
               resourceQuery: /raw/,
-              type: "asset/source",
+              use: [
+                {
+                  loader: path.join(
+                    __dirname,
+                    "./rspress-plugins/preserve-raw-loader.mjs"
+                  ),
+                },
+              ],
             },
           ],
         },

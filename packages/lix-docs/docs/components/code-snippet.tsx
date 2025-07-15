@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { bundledLanguages, createHighlighter, type Highlighter } from 'shiki';
 
 // Global highlighter instance
@@ -164,8 +164,23 @@ interface CodeSnippetProps {
 // Helper function to dedent a block of code
 function dedentCode(code: string): string {
   const lines = code.split("\n");
+  
+  // Remove leading and trailing empty lines
+  let startIndex = 0;
+  let endIndex = lines.length - 1;
+  
+  while (startIndex < lines.length && lines[startIndex].trim() === '') {
+    startIndex++;
+  }
+  
+  while (endIndex > startIndex && lines[endIndex].trim() === '') {
+    endIndex--;
+  }
+  
+  const trimmedLines = lines.slice(startIndex, endIndex + 1);
+  
   // Find the minimum indentation (excluding empty lines)
-  const minIndent = lines
+  const minIndent = trimmedLines
     .filter((line) => line.trim().length > 0)
     .reduce((min, line) => {
       const match = line.match(/^(\s*)/);
@@ -174,9 +189,9 @@ function dedentCode(code: string): string {
     }, Infinity);
 
   // Remove the common indentation from all lines
-  if (minIndent === Infinity || minIndent === 0) return code;
+  if (minIndent === Infinity || minIndent === 0) return trimmedLines.join("\n");
 
-  return lines.map((line) => line.slice(minIndent)).join("\n");
+  return trimmedLines.map((line) => line.slice(minIndent)).join("\n");
 }
 
 // Function to parse sections from code
@@ -327,8 +342,13 @@ export default function CodeSnippet({
     }>
   >([]);
 
+  // Parse the JSON stringified source code
+  // Trim any trailing semicolon or whitespace that might be added by webpack
+  const trimmedSrcCode = srcCode.trim().replace(/;$/, '');
+  const decodedSrcCode = JSON.parse(trimmedSrcCode);
+
   // Parse the source code to extract sections and setup
-  const { sections: allSections, imports } = parseSections(srcCode.replace(/console1\.log/g, 'console.log'));
+  const { sections: allSections, imports } = parseSections(decodedSrcCode.replace(/console1\.log/g, 'console.log'));
   const currentCode = transformDynamicImports(combineSections(allSections, sections));
   const prerequisiteCode = sections
     ? transformDynamicImports(getPrerequisiteCode(allSections, sections, imports))
