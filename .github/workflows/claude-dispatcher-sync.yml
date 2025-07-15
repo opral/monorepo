@@ -1,0 +1,57 @@
+name: Push Claude Dispatcher to Subrepos
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/claude-dispatcher.yml'
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: 'Comma-separated list of repos to sync (e.g., opral/inlang-paraglide-js,opral/inlang-sdk)'
+        required: false
+
+jobs:
+  push-to-repos:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: 
+          # Add your issue tracker repos here
+          - opral/inlang-paraglide-js
+          - opral/inlang-sdk
+          # Add more repos as needed
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          path: monorepo
+
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ secrets.MONOREPO_DISPATCH_TOKEN }}
+          path: target-repo
+
+      - name: Copy dispatcher and push
+        run: |
+          # Copy the dispatcher
+          cp monorepo/.github/workflows/claude-dispatcher.yml target-repo/.github/workflows/
+          
+          cd target-repo
+          
+          # Configure git
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Check if there are changes
+          if git diff --quiet; then
+            echo "No changes in ${{ matrix.repo }}"
+            exit 0
+          fi
+          
+          # Commit and push
+          git add .github/workflows/claude-dispatcher.yml
+          git commit -m "chore: sync Claude dispatcher from monorepo"
+          git push origin main
