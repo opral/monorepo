@@ -2363,6 +2363,9 @@ importers:
 
   packages/lix-plugin-md:
     dependencies:
+      '@lix-js/html-diff':
+        specifier: ^0.0.1
+        version: 0.0.1(rspress@1.44.0(webpack@5.99.9))
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../lix-sdk
@@ -2372,9 +2375,15 @@ importers:
       diff:
         specifier: ^7.0.0
         version: 7.0.0
+      hast-util-to-html:
+        specifier: ^9.0.0
+        version: 9.0.5
       lit:
         specifier: ^3.2.1
         version: 3.2.1
+      mdast-util-to-hast:
+        specifier: ^13.0.0
+        version: 13.2.0
       papaparse:
         specifier: ^5.4.1
         version: 5.5.3
@@ -3141,6 +3150,9 @@ importers:
       '@lix-js/plugin-txt':
         specifier: workspace:*
         version: link:../lix-plugin-txt
+      '@lix-js/react-utils':
+        specifier: workspace:*
+        version: link:../lix/lix-react-utils
       '@lix-js/sdk':
         specifier: workspace:*
         version: link:../lix-sdk
@@ -6228,6 +6240,9 @@ packages:
   '@lix-js/fs@2.2.0':
     resolution: {integrity: sha512-B9X3FjD8WmdG7tbA44JuniSO0KdKBWnjfxl8zpgrDCkavrp/GP7U0xxBkc0WgeeoHjQ/pkqq9VqtWB2kS9jIUg==}
     deprecated: use the lix sdk instead https://www.npmjs.com/package/@lix-js/sdk
+
+  '@lix-js/html-diff@0.0.1':
+    resolution: {integrity: sha512-z1Gt+3/xlu64K0F3lEfQp5YvGL9BN8ar+PVPHlepyz5MI8NRGCqxyBKtYeVCIMpu32agxk4MpYnAfgblAa+fgg==}
 
   '@ljharb/through@2.3.13':
     resolution: {integrity: sha512-/gKJun8NNiWGZJkGzI/Ragc53cOdcLNdzjLaIa+GEjguQs0ulsurx8WN0jijdK9yPqDvziX995sMRLyLt1uZMQ==}
@@ -13997,9 +14012,6 @@ packages:
   hast-util-to-estree@2.3.3:
     resolution: {integrity: sha512-ihhPIUPxN0v0w6M5+IiAZZrn0LH2uZomeWwhn7uP7avZC6TE7lIiEh2yBMPr5+zi1aUCXq6VoYRgs2Bw9xmycQ==}
 
-  hast-util-to-html@9.0.4:
-    resolution: {integrity: sha512-wxQzXtdbhiwGAUKrnQJXlOPmHnEehzphwkK7aluUPQ+lEc1xefC8pblMgpp2w5ldBTEfveRIrADcrhGIWrlTDA==}
-
   hast-util-to-html@9.0.5:
     resolution: {integrity: sha512-OguPdidb+fbHQSU4Q4ZiLKnzWo8Wwsf5bZfbvu7//a9oTYoqD/fWpe96NuHkoS9h0ccGOTe0C4NGXdtS0iObOw==}
 
@@ -17211,9 +17223,6 @@ packages:
 
   property-information@6.5.0:
     resolution: {integrity: sha512-PgTgs/BlvHxOu8QuEN7wi5A0OmXaBcHpmCSTehcs6Uuu9IkDIEo13Hy7n898RHfrQ49vKCoGeWZSaAK01nwVig==}
-
-  property-information@7.0.0:
-    resolution: {integrity: sha512-7D/qOz/+Y4X/rzSB6jKxKUsQnphO046ei8qxG59mtM3RG3DHgTK81HrxrmoDVINJb8NKT5ZsRbwHvQ6B68Iyhg==}
 
   property-information@7.1.0:
     resolution: {integrity: sha512-TwEZ+X+yCJmYfL7TPUOcvBZ4QfoT5YenQiJuX//0th53DE6w0xxLEtfK3iyryQFddXuvkIk51EEgrJQ0WJkOmQ==}
@@ -24041,6 +24050,15 @@ snapshots:
   '@lix-js/fs@2.2.0':
     dependencies:
       typescript: 5.2.2
+
+  '@lix-js/html-diff@0.0.1(rspress@1.44.0(webpack@5.99.9))':
+    dependencies:
+      '@types/diff': 8.0.0
+      diff: 8.0.2
+      rspress-plugin-mermaid: 0.3.0(rspress@1.44.0(webpack@5.99.9))
+    transitivePeerDependencies:
+      - rspress
+      - supports-color
 
   '@ljharb/through@2.3.13':
     dependencies:
@@ -34971,20 +34989,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  hast-util-to-html@9.0.4:
-    dependencies:
-      '@types/hast': 3.0.4
-      '@types/unist': 3.0.3
-      ccount: 2.0.1
-      comma-separated-tokens: 2.0.3
-      hast-util-whitespace: 3.0.0
-      html-void-elements: 3.0.0
-      mdast-util-to-hast: 13.2.0
-      property-information: 6.5.0
-      space-separated-tokens: 2.0.2
-      stringify-entities: 4.0.4
-      zwitch: 2.0.4
-
   hast-util-to-html@9.0.5:
     dependencies:
       '@types/hast': 3.0.4
@@ -34994,7 +34998,7 @@ snapshots:
       hast-util-whitespace: 3.0.0
       html-void-elements: 3.0.0
       mdast-util-to-hast: 13.2.0
-      property-information: 7.0.0
+      property-information: 7.1.0
       space-separated-tokens: 2.0.2
       stringify-entities: 4.0.4
       zwitch: 2.0.4
@@ -39127,8 +39131,6 @@ snapshots:
 
   property-information@6.5.0: {}
 
-  property-information@7.0.0: {}
-
   property-information@7.1.0: {}
 
   prosemirror-commands@1.7.1:
@@ -40166,7 +40168,7 @@ snapshots:
   rehype-stringify@10.0.0:
     dependencies:
       '@types/hast': 3.0.4
-      hast-util-to-html: 9.0.4
+      hast-util-to-html: 9.0.5
       unified: 11.0.3
 
   rehype-stringify@10.0.1:

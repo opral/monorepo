@@ -1,34 +1,31 @@
 import { useState, useRef, useEffect } from "react"; // Added useRef, useEffect
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, intermediateChangesAtom, workingChangeSetAtom } from "@/state-active-file.ts";
-import { useAtom } from "jotai/react";
-import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { UiDiffComponentProps, createCheckpoint, createThread } from "@lix-js/sdk";
-import { lixAtom } from "@/state.ts";
+import { selectCheckpoints, selectWorkingChanges, selectWorkingChangeSet } from "@/queries";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
 import ChangeDot from "@/components/ChangeDot.tsx";
 import { ChevronDown, Zap, Loader2 } from "lucide-react";
 import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
 import { useChat } from "@/components/editor/use-chat";
 import { toast } from "sonner";
+import { useLix, useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 
 interface IntermediateCheckpointComponentProps {
-  filteredChanges?: UiDiffComponentProps["diffs"];
+  workingChanges?: UiDiffComponentProps["diffs"];
 }
 
-export const IntermediateCheckpointComponent = ({ filteredChanges }: IntermediateCheckpointComponentProps) => {
+export const IntermediateCheckpointComponent = ({ workingChanges }: IntermediateCheckpointComponentProps) => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
-  const [checkpointChangeSets] = useAtom(checkpointChangeSetsAtom);
-
+  const checkpointChangeSets = useQuery(selectCheckpoints);
 
   // Don't render anything if there's no change data
-  if (filteredChanges!.length === 0) {
+  if (workingChanges!.length === 0) {
     return null;
   }
 
   // Group changes by plugin_key
-  const groupedChanges = filteredChanges!.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
+  const groupedChanges = workingChanges!.reduce((acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
     const key = change.plugin_key;
     if (!acc[key]) {
       acc[key] = [];
@@ -48,7 +45,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
         }
       }}
     >
-      <ChangeDot top={false} bottom={checkpointChangeSets.length > 0} highlighted />
+      <ChangeDot top={false} bottom={!!checkpointChangeSets && checkpointChangeSets.length > 0} highlighted />
       <div className="flex-1 z-10">
         <div className="h-12 flex items-center w-full gap-2">
           <p className="flex-1 truncate text-ellipsis overflow-hidden text-sm">
@@ -72,8 +69,7 @@ export const IntermediateCheckpointComponent = ({ filteredChanges }: Intermediat
               {Object.keys(groupedChanges).map((pluginKey) => (
                 <ChangeDiffComponent
                   key={pluginKey}
-                  // TODO: Rework changes query to what we need
-                  diffs={[filteredChanges![filteredChanges!.length - 1]]}
+                  diffs={groupedChanges[pluginKey]}
                   contentClassName="text-sm" /* Set font size to 14px (text-sm in Tailwind) */
                 // debug={true}
                 />
@@ -90,15 +86,15 @@ export default IntermediateCheckpointComponent;
 
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
-  const [lix] = useAtom(lixAtom);
-  const [currentChangeSet] = useAtom(workingChangeSetAtom);
-  const [intermediateChanges] = useAtom(intermediateChangesAtom); // Added to access changes for prompt
+  const lix = useLix();
+  const currentChangeSet = useQueryTakeFirst(selectWorkingChangeSet);
+  const workingChanges = useQuery(selectWorkingChanges);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
   const chat = useChat({
     streamProtocol: "text",
-    onResponse: async (res) => {
+    onResponse: async (res: Response) => {
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let currentDescription = "";
@@ -114,14 +110,14 @@ const CreateCheckpointInput = () => {
     onFinish: () => {
       setIsGeneratingDescription(false);
     },
-    onError: (error) => {
+    onError: (error: { message: any; }) => {
       toast.error(error.message || "Failed to generate description.");
       setIsGeneratingDescription(false);
     }
   });
 
   const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
-    if (!description.trim()) return;
+    if (!description.trim() || !lix) return;
 
     lix.db.transaction().execute(async (trx) => {
       const thread = await createThread({
@@ -140,16 +136,16 @@ const CreateCheckpointInput = () => {
   };
 
   const handleCreateCheckpoint = async () => {
-    // Ensure description is not empty before proceeding
-    if (!description.trim() || isGeneratingDescription) return;
+    // Ensure description is not empty and lix is available before proceeding
+    if (!description.trim() || isGeneratingDescription || !lix) return;
     await onThreadComposerSubmit({ content: fromPlainText(description!) });
     await createCheckpoint({ lix });
-    await saveLixToOpfs({ lix });
+    // OpfsStorage now handles persistence automatically through the onStateCommit hook
     setDescription(""); // Clear description after submission
   };
 
   const handleGenerateDescription = async () => {
-    if (intermediateChanges.length === 0) {
+    if (!workingChanges || workingChanges.length === 0) {
       toast.info("No changes to describe.");
       return;
     }
@@ -159,7 +155,7 @@ const CreateCheckpointInput = () => {
     setDescription("");
 
     // Use the last change in the intermediate changes for generating the description
-    const lastTextChange = intermediateChanges.filter(
+    const lastTextChange = workingChanges.filter(
       (change) => change.plugin_key === "lix_plugin_txt"
     ).slice(-1)[0];
 
@@ -235,7 +231,7 @@ const CreateCheckpointInput = () => {
           size="icon"
           aria-label="Generate description"
           className="absolute top-1 right-1 w-6 h-6 rounded-sm"
-          disabled={isGeneratingDescription || intermediateChanges.length === 0}
+          disabled={isGeneratingDescription || !workingChanges || workingChanges.length === 0}
         >
           {isGeneratingDescription ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
         </Button>

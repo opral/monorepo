@@ -5,6 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { routes } from "./routes.tsx";
 import { App } from "./layouts/AppLayout.tsx";
 
+
 const router = createBrowserRouter(
 	routes.map((route) => ({
 		...route,
