@@ -32,7 +32,7 @@ These _functional_ helpers expose the three independent entropy sources used in 
 | Helper                        | Kind of entropy       | Typical use‑cases                                   |
 | ----------------------------- | --------------------- | --------------------------------------------------- |
 | `timestamp({ lix })`          | Logical clock         | `createdAt`, TTL, “time‑ordered” queries            |
-| `nextSequenceNumber({ lix })` | Monotone counter      | Collision‑free IDs (`ENTITY_7`), pagination cursors |
+| `nextDeterministicSequenceNumber({ lix })` | Monotone counter      | Collision‑free IDs (`ENTITY_7`), pagination cursors |
 | `random({ lix })`             | Replayable randomness | Sampling, shuffle, deterministic jitter             |
 
 ## Key properties
@@ -57,21 +57,21 @@ const t = timestamp({ lix }); // "1970-01-01T00:00:00.000Z", "1970-01-01T00:00:0
 - Monotone, never decreases.
 - Persisted and resumed on re‑open / clone.
 
-### `nextSequenceNumber({ lix }): number`
+### `nextDeterministicSequenceNumber({ lix }): number`
 
 Returns the next **monotone sequence number**, starting at 0.
 
 Available only when `lix_deterministic_mode = true`; otherwise the function throws.
 
 ```ts
-const n = nextSequenceNumber({ lix }); // 0, 1, 2, …
+const n = nextDeterministicSequenceNumber({ lix }); // 0, 1, 2, …
 ```
 
 **Guarantees**
 
 - Available only in deterministic mode
 - Strictly +1 each call, no gaps or duplicates
-- Persisted via `lix_sequence_number` key value
+- Persisted via `lix_deterministic_sequence_number` key value
 
 ### `random({ lix }): number`
 
@@ -102,29 +102,23 @@ All state is stored in `internal_state_all_untracked` (`version_id = "global"`).
 
 | Scenario                                             | Behaviour                                                                   |
 | ---------------------------------------------------- | --------------------------------------------------------------------------- |
-| Clone blob, change only `lix_deterministic_rng_seed` | `random()` diverges, `timestamp()` & `nextSequenceNumber()` remain aligned. |
+| Clone blob, change only `lix_deterministic_rng_seed` | `random()` diverges, `timestamp()` & `nextDeterministicSequenceNumber()` remain aligned. |
 | Sequence overflow (`> Number.MAX_SAFE_INTEGER`)      | Helpers throw; requires schema migration.                                   |
 | Parallel Lix objects in same process                 | Independent state; helpers require explicit `{ lix }` arg.                  |
-
-## Extensibility (non‑breaking)
-
-- `timestampMode` key to configure tick policy (`"write"`, `"step"`, `"manual"`).
-- `randomAlgorithm` key to choose alternate PRNG (`"xoshiro"`, `"counter‑hash"`).
-- Namespaced counters via future `nextSequenceNumber({ lix, namespace })`.
 
 ## Example
 
 ```ts
-import { timestamp, random, nextSequenceNumber } from "@lix-js/sdk";
+import { timestamp, random, nextDeterministicSequenceNumber } from "@lix-js/sdk";
 
 const t1 = timestamp({ lix }); // "1970-01-01T00:00:00.000Z"
-const n1 = nextSequenceNumber({ lix }); // 0
+const n1 = nextDeterministicSequenceNumber({ lix }); // 0
 const r1 = random({ lix }); // 0.318…
 
 await lix.db.insertInto("kv").values({ key: "foo", value: "bar" }).execute();
 
 const t2 = timestamp({ lix }); // "1970-01-01T00:00:00.001Z"
-const n2 = nextSequenceNumber({ lix }); // 1
+const n2 = nextDeterministicSequenceNumber({ lix }); // 1
 const r2 = random({ lix }); // 0.937…
 ```
 

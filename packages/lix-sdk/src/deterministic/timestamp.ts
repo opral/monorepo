@@ -1,10 +1,10 @@
 import type { Lix } from "../lix/open-lix.js";
-import { nextSequenceNumber } from "./sequence.js";
+import { nextDeterministicSequenceNumber } from "./sequence.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 
 /**
  * Returns the current **logical timestamp** as an ISO 8601 string.
- * 
+ *
  * In deterministic mode, returns timestamps starting from Unix epoch (1970-01-01),
  * with the clock advancing according to implementation (e.g. +1 ms per write).
  * In normal mode, returns the current system time.
@@ -36,10 +36,10 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  *   })
  *   .execute();
  * ```
- * 
+ *
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns ISO 8601 timestamp string
- * 
+ *
  * @remarks
  * - Monotone, never decreases
  * - Persisted and resumed on re-open / clone
@@ -49,7 +49,7 @@ export function timestamp(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
 		// Get the next deterministic counter value
-		const counter = nextSequenceNumber({
+		const counter = nextDeterministicSequenceNumber({
 			lix: args.lix,
 		});
 		// Use counter as milliseconds since epoch

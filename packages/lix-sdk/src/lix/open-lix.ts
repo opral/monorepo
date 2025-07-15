@@ -16,7 +16,7 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitSequenceNumberIncrement } from "../deterministic/sequence.js";
+import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
 import { newLixFile } from "./new-lix.js";
 
 export type Lix = {
@@ -249,7 +249,7 @@ export async function openLix(args: {
 			await storage.close();
 		},
 		toBlob: async () => {
-			commitSequenceNumberIncrement({
+			commitDeterminsticSequenceNumber({
 				sqlite: database,
 				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
 			});

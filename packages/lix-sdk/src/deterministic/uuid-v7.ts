@@ -1,5 +1,5 @@
 import { v7 } from "uuid";
-import { nextSequenceNumber } from "./sequence.js";
+import { nextDeterministicSequenceNumber } from "./sequence.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 import type { Lix } from "../lix/open-lix.js";
 
@@ -36,7 +36,7 @@ export function uuidV7(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
 		// Get the next deterministic counter value
-		const counter = nextSequenceNumber({ lix: args.lix });
+		const counter = nextDeterministicSequenceNumber({ lix: args.lix });
 		const hex = counter.toString(16).padStart(8, "0");
 		return `01920000-0000-7000-8000-0000${hex}`;
 	}

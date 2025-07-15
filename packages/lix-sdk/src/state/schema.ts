@@ -12,7 +12,7 @@ import {
 	applyMaterializeStateSchema,
 	materializeState,
 } from "./materialize-state.js";
-import { commitSequenceNumberIncrement } from "../deterministic/sequence.js";
+import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
 
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(
@@ -295,7 +295,7 @@ export function applyStateDatabaseSchema(
 					});
 				}
 
-				commitSequenceNumberIncrement({ sqlite, db });
+				commitDeterminsticSequenceNumber({ sqlite, db });
 
 				//* Emit state commit hook after transaction is successfully committed
 				//* must come last to ensure that subscribers see the changes
