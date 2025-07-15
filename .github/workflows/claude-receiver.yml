@@ -1,4 +1,4 @@
-name: Claude Unified Handler
+name: Claude Receiver
 
 on:
   # Handle dispatched requests from all repos (including monorepo itself)

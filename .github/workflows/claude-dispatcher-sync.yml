@@ -1,4 +1,4 @@
-name: Push Claude Dispatcher to Subrepos
+name: Claude Dispatcher Sync
 
 on:
   push:
@@ -45,8 +45,8 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # Check if there are changes
-          if git diff --quiet; then
+          # Check if there are changes (including untracked files)
+          if git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
             echo "No changes in ${{ matrix.repo }}"
             exit 0
           fi
