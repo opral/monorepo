@@ -1,4 +1,4 @@
-import { test, expect, describe } from "vitest";
+import { test, expect } from "vitest";
 import { type Lix } from "../../lix/open-lix.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { cacheMissSimulation } from "./cache-miss-simulation.js";
@@ -71,58 +71,59 @@ export function dsTest(
 	}) => Promise<void>,
 	options?: DsTestOptions
 ): void {
-	describe(name, async () => {
-		// Merge default and additional simulations
-		const allSimulations: Record<string, DstSimulation> = {
-			...defaultSimulations,
-		};
+	// Merge default and additional simulations
+	const allSimulations: Record<string, DstSimulation> = {
+		...defaultSimulations,
+	};
 
-		if (options?.customSimulations) {
-			for (const simulation of options.customSimulations) {
-				allSimulations[simulation.name] = simulation;
-			}
+	if (options?.customSimulations) {
+		for (const simulation of options.customSimulations) {
+			allSimulations[simulation.name] = simulation;
 		}
+	}
 
-		// Determine which simulations to run
-		const simulationNames = options?.simulations || Object.keys(allSimulations);
-		const simulationsToRun = simulationNames.map((name) => {
-			const simulation = allSimulations[name];
-			if (!simulation) {
-				throw new Error(
-					`Simulation "${name}" not found. Available simulations: ${Object.keys(allSimulations).join(", ")}`
-				);
-			}
-			return simulation;
-		});
+	// Determine which simulations to run
+	const simulationNames = options?.simulations || Object.keys(allSimulations);
+	const simulationsToRun = simulationNames.map((name) => {
+		const simulation = allSimulations[name];
+		if (!simulation) {
+			throw new Error(
+				`Simulation "${name}" not found. Available simulations: ${Object.keys(allSimulations).join(", ")}`
+			);
+		}
+		return simulation;
+	});
 
-		// Create initial Lix blob for all simulations
-		const initialLixBlob = await newLixFile({
-			keyValues: [
-				{
-					key: "lix_deterministic_mode",
-					value: true,
-					lixcol_version_id: "global",
-				},
-			],
-		});
+	// // Create initial Lix blob for all simulations
+	const initialLixBlob = newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
-		const expectedValues = new Map<string, any>();
+	// const initialLixBlob = {};
 
-		test.each(simulationsToRun)(`$name`, async (simulation) => {
-			let callIndex = 0;
-			const isFirstSimulation = simulation === simulationsToRun[0];
+	const expectedValues = new Map<string, any>();
 
-			const deterministicExpect = (actual: any, message?: string) => {
-				const key = `expect-${callIndex++}`;
+	test.each(simulationsToRun)(`${name} > $name`, async (simulation) => {
+		let callIndex = 0;
+		const isFirstSimulation = simulation === simulationsToRun[0];
 
-				if (isFirstSimulation) {
-					// Store expected values in first simulation
-					expectedValues.set(key, actual);
-				} else {
-					// Verify values match first simulation in subsequent simulations
-					const expected = expectedValues.get(key);
-					if (expected !== undefined) {
-						const errorMessage = `
+		const deterministicExpect = (actual: any, message?: string) => {
+			const key = `expect-${callIndex++}`;
+
+			if (isFirstSimulation) {
+				// Store expected values in first simulation
+				expectedValues.set(key, actual);
+			} else {
+				// Verify values match first simulation in subsequent simulations
+				const expected = expectedValues.get(key);
+				if (expected !== undefined) {
+					const errorMessage = `
 SIMULATION DETERMINISM VIOLATION
 
 expectDeterministic() failed: Values differ between simulations
@@ -134,18 +135,17 @@ Use expectDeterministic() for values that must be identical across simulations.
 Use regular expect() for simulation-specific assertions.
 
 `;
-						expect(actual, errorMessage).toEqual(expected);
-					}
+					expect(actual, errorMessage).toEqual(expected);
 				}
+			}
 
-				return expect(actual, message);
-			};
+			return expect(actual, message);
+		};
 
-			await fn({
-				simulation: simulation.name,
-				initialLix: initialLixBlob,
-				expectDeterministic: deterministicExpect as typeof expect,
-			});
+		await fn({
+			simulation: simulation.name,
+			initialLix: await initialLixBlob,
+			expectDeterministic: deterministicExpect as typeof expect,
 		});
 	});
 }
