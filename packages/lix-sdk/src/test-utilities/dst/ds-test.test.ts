@@ -4,15 +4,14 @@ import { openLix } from "../../lix/open-lix.js";
 
 test("simulation test discovery", () => {});
 
-describe("expectDeterministic validates values across simulations", async () => {
+describe("expectDeterministic validates values across simulations", () => {
 	const customSimulation: DstSimulation = {
 		name: "custom",
-		description: "Custom simulation for testing expectDeterministic",
 		setup: async (lix) => lix,
 	};
 
-	await dsTest(
-		"consistent values pass",
+	dsTest(
+		"",
 		async ({ expectDeterministic }) => {
 			// These should be consistent across all simulations
 
@@ -30,16 +29,14 @@ describe("expectDeterministic validates values across simulations", async () => 
 	);
 });
 
-// This test will fail intentionally to demonstrate expectDeterministic working
-describe("expectDeterministic failure demonstration", async () => {
+describe("expectDeterministic catches simulation differences", () => {
 	const customSimulation: DstSimulation = {
 		name: "custom",
-		description: "Custom simulation for testing expectDeterministic failure",
 		setup: async (lix) => lix,
 	};
 
-	await dsTest(
-		"this should fail - expectDeterministic catches differences",
+	dsTest(
+		"",
 		async ({ simulation, expectDeterministic }) => {
 			// This will store different values in different simulations
 			const simulationSpecificValue =
@@ -63,7 +60,7 @@ describe("expectDeterministic failure demonstration", async () => {
 	);
 });
 
-describe("every simulation opens the same lix", async () => {
+describe("deterministic state validation", () => {
 	// Testing this with materialized state and the changes the lix has
 	// Both need to be exactly the same for all simulations
 
@@ -72,12 +69,11 @@ describe("every simulation opens the same lix", async () => {
 
 	const mockSimulation: DstSimulation = {
 		name: "mock-simulation",
-		description: "A mock simulation for testing deterministic data",
 		setup: async (lix) => lix,
 	};
 
-	await dsTest(
-		"",
+	dsTest(
+		"every simulation opens the same lix",
 		async ({ initialLix }) => {
 			const lix = await openLix({ blob: initialLix });
 
@@ -108,11 +104,10 @@ describe("every simulation opens the same lix", async () => {
 describe("database operations are deterministic", async () => {
 	const mockSimulation: DstSimulation = {
 		name: "mock-simulation",
-		description: "A mock simulation for testing deterministic data",
 		setup: async (lix) => lix,
 	};
 
-	await dsTest(
+	dsTest(
 		"",
 		async ({ initialLix, expectDeterministic }) => {
 			const lix = await openLix({ blob: initialLix });
@@ -143,9 +138,9 @@ describe("database operations are deterministic", async () => {
 			const tablesAndViews = lix.sqlite
 				.exec({
 					sql: `SELECT name FROM sqlite_master 
-					  WHERE type IN ('table', 'view') 
-					  AND name NOT LIKE 'sqlite_%'
-					  ORDER BY name`,
+				WHERE type IN ('table', 'view') 
+				AND name NOT LIKE 'sqlite_%'
+				ORDER BY name`,
 					returnValue: "resultRows",
 				})
 				.map((row) => row[0] as string);

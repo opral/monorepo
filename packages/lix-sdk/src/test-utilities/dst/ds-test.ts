@@ -1,17 +1,11 @@
-import { test, expect } from "vitest";
+import { test, expect, describe } from "vitest";
 import { type Lix } from "../../lix/open-lix.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { cacheMissSimulation } from "./cache-miss-simulation.js";
 
 export type DstSimulation = {
 	name: string;
-	description?: string;
 	setup: (lix: Lix, baseline?: Lix) => Promise<Lix>;
-	hooks?: {
-		beforeQuery?: (lix: Lix, context: any) => Promise<void>;
-		afterWrite?: (lix: Lix, context: any) => Promise<void>;
-		onError?: (error: Error) => Error;
-	};
 };
 
 /**
@@ -20,7 +14,6 @@ export type DstSimulation = {
  */
 const baselineSimulation: DstSimulation = {
 	name: "baseline",
-	description: "Standard test execution without any modifications",
 	setup: async (lix) => lix,
 };
 
@@ -69,7 +62,7 @@ const defaultSimulations: Record<string, DstSimulation> = {
  *   customSimulations: [mySimulation]
  * });
  */
-export async function dsTest(
+export function dsTest(
 	name: string,
 	fn: (args: {
 		simulation: string;
@@ -77,58 +70,59 @@ export async function dsTest(
 		expectDeterministic: typeof expect;
 	}) => Promise<void>,
 	options?: DsTestOptions
-): Promise<void> {
-	// Merge default and additional simulations
-	const allSimulations: Record<string, DstSimulation> = {
-		...defaultSimulations,
-	};
+): void {
+	describe(name, async () => {
+		// Merge default and additional simulations
+		const allSimulations: Record<string, DstSimulation> = {
+			...defaultSimulations,
+		};
 
-	if (options?.customSimulations) {
-		for (const simulation of options.customSimulations) {
-			allSimulations[simulation.name] = simulation;
+		if (options?.customSimulations) {
+			for (const simulation of options.customSimulations) {
+				allSimulations[simulation.name] = simulation;
+			}
 		}
-	}
 
-	// Determine which simulations to run
-	const simulationNames = options?.simulations || Object.keys(allSimulations);
-	const simulationsToRun = simulationNames.map((name) => {
-		const simulation = allSimulations[name];
-		if (!simulation) {
-			throw new Error(
-				`Simulation "${name}" not found. Available simulations: ${Object.keys(allSimulations).join(", ")}`
-			);
-		}
-		return simulation;
-	});
+		// Determine which simulations to run
+		const simulationNames = options?.simulations || Object.keys(allSimulations);
+		const simulationsToRun = simulationNames.map((name) => {
+			const simulation = allSimulations[name];
+			if (!simulation) {
+				throw new Error(
+					`Simulation "${name}" not found. Available simulations: ${Object.keys(allSimulations).join(", ")}`
+				);
+			}
+			return simulation;
+		});
 
-	// Create initial Lix blob for all simulations
-	const initialLixBlob = await newLixFile({
-		keyValues: [
-			{
-				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-		],
-	});
+		// Create initial Lix blob for all simulations
+		const initialLixBlob = await newLixFile({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: true,
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	const expectedValues = new Map<string, any>();
+		const expectedValues = new Map<string, any>();
 
-	test.each(simulationsToRun)(`${name} > $name`, async (simulation) => {
-		let callIndex = 0;
-		const isFirstSimulation = simulation === simulationsToRun[0];
+		test.each(simulationsToRun)(`${name} > $name`, async (simulation) => {
+			let callIndex = 0;
+			const isFirstSimulation = simulation === simulationsToRun[0];
 
-		const deterministicExpect = (actual: any, message?: string) => {
-			const key = `expect-${callIndex++}`;
+			const deterministicExpect = (actual: any, message?: string) => {
+				const key = `expect-${callIndex++}`;
 
-			if (isFirstSimulation) {
-				// Store expected values in first simulation
-				expectedValues.set(key, actual);
-			} else {
-				// Verify values match first simulation in subsequent simulations
-				const expected = expectedValues.get(key);
-				if (expected !== undefined) {
-					const errorMessage = `
+				if (isFirstSimulation) {
+					// Store expected values in first simulation
+					expectedValues.set(key, actual);
+				} else {
+					// Verify values match first simulation in subsequent simulations
+					const expected = expectedValues.get(key);
+					if (expected !== undefined) {
+						const errorMessage = `
 SIMULATION DETERMINISM VIOLATION
 
 expectDeterministic() failed: Values differ between simulations
@@ -140,17 +134,18 @@ Use expectDeterministic() for values that must be identical across simulations.
 Use regular expect() for simulation-specific assertions.
 
 `;
-					expect(actual, errorMessage).toEqual(expected);
+						expect(actual, errorMessage).toEqual(expected);
+					}
 				}
-			}
 
-			return expect(actual, message);
-		};
+				return expect(actual, message);
+			};
 
-		await fn({
-			simulation: simulation.name,
-			initialLix: initialLixBlob,
-			expectDeterministic: deterministicExpect as typeof expect,
+			await fn({
+				simulation: simulation.name,
+				initialLix: initialLixBlob,
+				expectDeterministic: deterministicExpect as typeof expect,
+			});
 		});
 	});
 }
