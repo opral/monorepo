@@ -38,7 +38,7 @@ jobs:
           client-payload: |
             {
               "issue_number": "${{ github.event.issue.number }}",
-              "issue_title": "${{ toJSON(github.event.issue.title) }}",
+              "issue_title": ${{ toJSON(github.event.issue.title) }},
               "issue_body": ${{ toJSON(github.event.issue.body) }},
               "comment_body": ${{ toJSON(github.event.comment.body || github.event.review.body) }},
               "issue_url": "${{ github.event.issue.html_url }}",
