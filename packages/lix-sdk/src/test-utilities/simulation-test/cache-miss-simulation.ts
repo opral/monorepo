@@ -1,4 +1,4 @@
-import { clearCache } from "../../state/cache/clear-cache.js";
+import { clearStateCache } from "../../state/cache/clear-state-cache.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 /**
@@ -10,7 +10,7 @@ export const cacheMissSimulation: SimulationTestDef = {
 	name: "cache miss",
 	setup: async (lix) => {
 		// Clear initial cache
-		await clearCache({ lix });
+		await clearStateCache({ lix });
 
 		// Use the afterStateCommit hook to clear cache after each commit
 		lix.hooks.onStateCommit(() => {
