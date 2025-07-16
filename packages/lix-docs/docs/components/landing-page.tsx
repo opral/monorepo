@@ -1,5 +1,4 @@
 import { useState } from "react";
-// import { Bot, User } from "lucide-react";
 
 // Copy icon component
 const CopyIcon = () => (
@@ -248,44 +247,32 @@ function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-14 max-w-[100rem] mx-auto px-4 sm:px-6 mt-16">
             <div className="group cursor-pointer text-center">
               <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* ProseMirror Document Editor - Real Demo */}
-                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative bg-gray-50 p-6 flex items-center justify-center">
-                  <div className="w-full max-w-md text-center">
-                    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 mb-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-gray-800">
-                          ProseMirror + Lix
-                        </h3>
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        </div>
-                      </div>
-                      <div className="text-left">
-                        <div className="h-4 bg-gray-800 rounded mb-2 w-3/4"></div>
-                        <div className="h-3 bg-gray-300 rounded mb-1 w-full"></div>
-                        <div className="h-3 bg-gray-300 rounded mb-1 w-5/6"></div>
-                        <div className="h-3 bg-green-200 rounded mb-1 w-4/5 border-l-2 border-green-400"></div>
-                        <div className="h-3 bg-gray-300 rounded mb-3 w-2/3"></div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">
-                            Version 1.2
-                          </span>
-                          <div className="flex space-x-1">
-                            <div className="w-4 h-4 bg-blue-500 rounded-full text-white text-xs flex items-center justify-center">
-                              ✓
-                            </div>
-                            <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                {/* ProseMirror Document Editor - Real Screenshot */}
+                <div className="w-full h-64 relative overflow-hidden">
+                  <img
+                    src="/prosemirror.png"
+                    alt="ProseMirror editor with Lix version control"
+                    className="w-full h-full object-cover"
+                    onLoad={() => console.log('prosemirror.png loaded successfully')}
+                    onError={(e) => {
+                      console.error('Failed to load prosemirror.png', e);
+                      const container = e.currentTarget.parentElement;
+                      if (container) {
+                        container.style.backgroundColor = '#f3f4f6';
+                        container.style.display = 'flex';
+                        container.style.alignItems = 'center';
+                        container.style.justifyContent = 'center';
+                        container.innerHTML = '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">ProseMirror Demo</div>';
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
                     <a
                       href="https://prosemirror-example.onrender.com/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block text-xs bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition-colors"
+                      className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
+                      style={{ color: 'white' }}
                     >
                       Try Live Demo →
                     </a>
@@ -304,56 +291,34 @@ function LandingPage() {
             <div className="group cursor-pointer text-center">
               <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
                 {/* Fink App - Real Screenshot */}
-                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative bg-gradient-to-br from-cyan-100 to-blue-100 p-6 flex items-center justify-center">
-                  <div className="w-full max-w-sm">
-                    <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">
-                              F
-                            </span>
-                          </div>
-                          <span className="text-sm font-semibold text-gray-800">
-                            Fink Localization
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          Change Control
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-8 h-5 bg-gray-200 rounded text-xs flex items-center justify-center font-mono">
-                            en
-                          </div>
-                          <div className="w-8 h-5 bg-blue-600 rounded text-xs flex items-center justify-center font-mono text-white">
-                            ref
-                          </div>
-                          <div className="flex-1 h-5 bg-gray-100 rounded px-2 text-xs flex items-center">
-                            Hello World.
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <div className="w-8 h-5 bg-gray-200 rounded text-xs flex items-center justify-center font-mono">
-                            de
-                          </div>
-                          <div className="w-8 h-5 bg-gray-200 rounded"></div>
-                          <div className="flex-1 h-5 bg-cyan-100 rounded px-2 text-xs flex items-center border-2 border-cyan-400">
-                            Hallo W|
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center mt-3">
-                          <span className="text-xs text-gray-500">
-                            2 changes pending
-                          </span>
-                          <div className="flex space-x-1">
-                            <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
-                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                <div className="w-full h-64 relative overflow-hidden">
+                  <img
+                    src="/fink2.png"
+                    alt="Fink localization app with change tracking"
+                    className="w-full h-full object-cover"
+                    onLoad={() => console.log('fink2.png loaded successfully')}
+                    onError={(e) => {
+                      console.error('Failed to load fink2.png', e);
+                      const container = e.currentTarget.parentElement;
+                      if (container) {
+                        container.style.backgroundColor = '#f3f4f6';
+                        container.style.display = 'flex';
+                        container.style.alignItems = 'center';
+                        container.style.justifyContent = 'center';
+                        container.innerHTML = '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">Fink Demo</div>';
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <a
+                      href="https://fink2.onrender.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
+                      style={{ color: 'white' }}
+                    >
+                      Try Live Demo →
+                    </a>
                   </div>
                 </div>
               </div>
@@ -368,54 +333,44 @@ function LandingPage() {
             </div>
             <div className="group cursor-pointer text-center">
               <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* Flashtype-style App */}
-                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative bg-gray-50 p-6 flex items-center justify-center">
-                  <div className="w-full max-w-md">
-                    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-gray-800">
-                          Content Editor
-                        </h3>
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                          <span className="text-xs text-gray-500">Live</span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-4 bg-gray-800 rounded w-2/3"></div>
-                        <div className="h-3 bg-gray-300 rounded w-full"></div>
-                        <div className="h-3 bg-gray-300 rounded w-4/5"></div>
-                        <div className="h-3 bg-blue-200 rounded w-3/4 border-l-2 border-blue-400"></div>
-                        <div className="h-3 bg-gray-300 rounded w-5/6"></div>
-                      </div>
-                      <div className="flex justify-between items-center mt-4">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 bg-blue-500 rounded-full text-white text-xs flex items-center justify-center">
-                            AI
-                          </div>
-                          <span className="text-xs text-gray-600">
-                            3 suggestions
-                          </span>
-                        </div>
-                        <div className="flex space-x-1">
-                          <div className="w-6 h-4 bg-green-500 rounded text-white text-xs flex items-center justify-center">
-                            ✓
-                          </div>
-                          <div className="w-6 h-4 bg-gray-300 rounded text-gray-600 text-xs flex items-center justify-center">
-                            ⟲
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                {/* GitHub Integration Screenshot */}
+                <div className="w-full h-64 relative overflow-hidden">
+                  <img
+                    src="/flashtype.jpg"
+                    alt="Flashtype app with Lix change control"
+                    className="w-full h-full object-cover"
+                    onLoad={() => console.log('flashtype.jpg loaded successfully')}
+                    onError={(e) => {
+                      console.error('Failed to load flashtype.jpg', e);
+                      const container = e.currentTarget.parentElement;
+                      if (container) {
+                        container.style.backgroundColor = '#f3f4f6';
+                        container.style.display = 'flex';
+                        container.style.alignItems = 'center';
+                        container.style.justifyContent = 'center';
+                        container.innerHTML = '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">Flashtype Demo</div>';
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <a
+                      href="https://flashtype.dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
+                      style={{ color: 'white' }}
+                    >
+                      Try Flashtype →
+                    </a>
                   </div>
                 </div>
               </div>
               <div className="mt-6">
                 <p className="text-gray-800 text-xl font-medium">
-                  AI-powered content
+                  Flashtype editor
                 </p>
                 <p className="text-gray-800 text-xl font-medium">
-                  with approval workflows
+                  with AI workflows
                 </p>
               </div>
             </div>
