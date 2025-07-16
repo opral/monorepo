@@ -13,6 +13,7 @@ import {
 	materializeState,
 } from "./materialize-state.js";
 import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
+import { timestamp } from "../deterministic/timestamp.js";
 
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(
@@ -149,16 +150,6 @@ export function applyStateDatabaseSchema(
 
 			xCommit: () => {
 				// Try to get deterministic timestamp, fallback to current time
-				let currentTime: string;
-				try {
-					currentTime = sqlite.exec({
-						sql: "SELECT lix_timestamp() as timestamp",
-						returnValue: "resultRows",
-					})[0]?.[0] as string;
-				} catch {
-					// Fallback if lix_timestamp() isn't available yet (during bootstrap)
-					currentTime = new Date().toISOString();
-				}
 
 				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
 				// using the same id for snapshot_id in internal_change as in internal_snapshot.
@@ -221,7 +212,7 @@ export function applyStateDatabaseSchema(
 					const changesetId = createChangesetForTransaction(
 						sqlite,
 						db as any,
-						currentTime,
+						timestamp({ lix: { sqlite, db: db as any } }),
 						version_id,
 						versionChanges
 					);
