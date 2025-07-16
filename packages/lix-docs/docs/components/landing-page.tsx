@@ -103,119 +103,124 @@ function LandingPage() {
       {/* Main content */}
       <main className="relative px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="pt-28 pb-6 text-center max-w-3xl mx-auto">
-          <h1 className="text-gray-900 font-bold mb-10 leading-tight" style={{ fontSize: 'clamp(2rem, 5vw, 3.75rem)' }}>
-            Enable <span className="whitespace-nowrap">change control</span>
-            <br />
-            in your app or agent
-          </h1>
+        <section className="pt-28 pb-16 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+            {/* Left side - Main content */}
+            <div className="lg:col-span-2 text-left">
+              <h1 className="text-gray-900 font-bold leading-tight" style={{ fontSize: 'clamp(2rem, 5vw, 3.75rem)', marginBottom: '1.5rem' }}>
+                Change control SDK
+                <br />
+                for your app and AI agent
+              </h1>
 
-          <p className="text-gray-600 max-w-xl mx-auto mb-16 leading-relaxed" style={{ fontSize: 'clamp(1rem, 3vw, 1.25rem)' }}>
-            Build versioned workflows, AI proposals, diffs, and review UIs with
-            one SDK. Designed for modern collaborative applications.
-          </p>
+              <p className="text-gray-600 max-w-xl leading-relaxed" style={{ fontSize: 'clamp(1rem, 3vw, 1.25rem)', marginBottom: '2rem' }}>
+                Build versioned workflows, AI proposals, diffs, and review UIs with
+                one SDK. Designed for modern collaborative applications.
+              </p>
 
-          {/* Command and buttons in one row */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-            <PackageInstaller />
+              {/* Command and buttons in one row */}
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <PackageInstaller />
 
-            <a
-              href="https://prosemirror-example.onrender.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-2 rounded-md text-base transition-all duration-200 flex items-center font-medium group shadow-sm"
-              style={{
-                backgroundColor: '#2563EB',
-                color: 'white',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#1d4ed8';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563EB';
-              }}
-            >
-              <span className="flex items-center whitespace-nowrap" style={{ color: 'white' }}>
-                Try a demo app
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 ml-2 group-hover:ml-3 transition-all duration-200"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="white"
+                <a
+                  href="/guide/"
+                  className="px-6 py-2 rounded-md text-base transition-all duration-200 flex items-center font-medium group shadow-sm"
+                  style={{
+                    backgroundColor: '#2563EB',
+                    color: 'white',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#1d4ed8';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#2563EB';
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14 5l7 7m0 0l-7 7m7-7H3"
-                  />
-                </svg>
-              </span>
-            </a>
-          </div>
+                  <span className="flex items-center whitespace-nowrap" style={{ color: 'white' }}>
+                    Getting started
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 ml-2 group-hover:ml-3 transition-all duration-200"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="white"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                      />
+                    </svg>
+                  </span>
+                </a>
+              </div>
+            </div>
 
-          {/* Stats row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-            {/* NPM Downloads */}
-            <a
-              href="https://www.npmjs.com/package/@lix-js/sdk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
-            >
-              <svg
-                className="w-5 h-5 text-red-500"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">
-                27k+ weekly downloads
-              </span>
-            </a>
+            {/* Right side - Social proof */}
+            <div className="lg:col-span-1 flex justify-start lg:justify-end">
+              <div className="grid grid-cols-1 gap-3 w-64">
+                {/* NPM Downloads */}
+                <a
+                  href="https://www.npmjs.com/package/@lix-js/sdk"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-3 px-4 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3 text-sm"
+                >
+                  <svg
+                    className="w-4 h-4 text-red-500 flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
+                  </svg>
+                  <span className="font-medium text-gray-700">
+                    27k+ weekly downloads
+                  </span>
+                </a>
 
-            {/* GitHub Contributors */}
-            <a
-              href="https://github.com/opral/monorepo/graphs/contributors"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
-            >
-              <svg
-                className="w-5 h-5 text-gray-700"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.48 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.645.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">
-                100+ contributors
-              </span>
-            </a>
+                {/* GitHub Contributors */}
+                <a
+                  href="https://github.com/opral/monorepo/graphs/contributors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-3 px-4 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3 text-sm"
+                >
+                  <svg
+                    className="w-4 h-4 text-gray-700 flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.48 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.645.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
+                  </svg>
+                  <span className="font-medium text-gray-700">
+                    100+ contributors
+                  </span>
+                </a>
 
-            {/* MIT License */}
-            <a
-              href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/LICENSE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="py-2 px-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-200 flex flex-col items-center gap-1"
-            >
-              <svg
-                className="w-5 h-5 text-gray-700"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.95-7 10.18-3.87-1.23-7-5.51-7-10.18V6.3l7-3.12zM11 7h2v6h-2V7zm0 8h2v2h-2v-2z" />
-              </svg>
-              <span className="text-sm font-medium text-gray-700">
-                MIT Open Source
-              </span>
-            </a>
+                {/* MIT License */}
+                <a
+                  href="https://github.com/opral/monorepo/blob/main/packages/lix-sdk/LICENSE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-3 px-4 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3 text-sm"
+                >
+                  <svg
+                    className="w-4 h-4 text-gray-700 flex-shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.95-7 10.18-3.87-1.23-7-5.51-7-10.18V6.3l7-3.12zM11 7h2v6h-2V7zm0 8h2v2h-2v-2z" />
+                  </svg>
+                  <span className="font-medium text-gray-700">
+                    MIT Open Source
+                  </span>
+                </a>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -228,378 +233,84 @@ function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-14 max-w-[100rem] mx-auto px-4 sm:px-6 mt-16">
             <div className="group cursor-pointer text-center">
               <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* Markdown Document Editor UI - Enhanced */}
-                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative">
-                  <div className="absolute inset-0 flex">
-                    <div className="w-1/2 bg-white p-4 border-r border-gray-100">
-                      {/* Document Editor Toolbar */}
-                      <div className="flex space-x-1 mb-3">
-                        <div className="h-5 w-5 bg-gray-200 rounded flex items-center justify-center">
-                          <div className="h-3 w-3 bg-gray-400 rounded"></div>
-                        </div>
-                        <div className="h-5 w-5 bg-gray-200 rounded flex items-center justify-center">
-                          <div className="h-2 w-3 bg-gray-400 rounded"></div>
-                        </div>
-                        <div className="h-5 w-5 bg-gray-200 rounded flex items-center justify-center">
-                          <div className="h-1 w-3 bg-gray-400 rounded"></div>
-                        </div>
-                        <div className="h-5 w-5 bg-blue-600 rounded flex items-center justify-center">
-                          <div className="h-1 w-3 bg-white rounded"></div>
-                        </div>
-                        <div className="ml-1 h-5 px-2 bg-gray-700 rounded text-white text-[8px] flex items-center">
-                          VERSION 1
+                {/* ProseMirror Document Editor - Real Demo */}
+                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative bg-gray-50 p-6 flex items-center justify-center">
+                  <div className="w-full max-w-md text-center">
+                    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-gray-800">ProseMirror + Lix</h3>
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                         </div>
                       </div>
-
-                      {/* Document Content */}
-                      <div className="h-5 w-3/4 bg-gray-700 rounded mb-3 flex items-center px-2">
-                        <div className="h-2 w-full bg-gray-600 rounded"></div>
-                      </div>
-                      <div className="h-3 w-full bg-gray-300 rounded mb-2"></div>
-                      <div className="h-3 w-5/6 bg-gray-300 rounded mb-2"></div>
-                      <div className="h-3 w-11/12 bg-gray-300 rounded mb-4"></div>
-                      <div className="h-4 w-2/3 bg-gray-500 rounded mb-2"></div>
-                      <div className="h-3 w-full bg-gray-300 rounded mb-2"></div>
-                      <div className="h-3 w-3/4 bg-gray-300 rounded mb-2"></div>
-                    </div>
-                    <div className="w-1/2 bg-gray-50 p-4">
-                      {/* Version Comparison Header */}
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="h-5 w-3/5 bg-blue-100 rounded border border-blue-200 flex items-center px-2">
-                          <div className="h-2 w-full bg-blue-200 rounded"></div>
-                        </div>
-                        <div className="h-5 px-2 bg-blue-600 rounded text-white text-[8px] flex items-center">
-                          VERSION 2
-                        </div>
-                      </div>
-
-                      {/* Version Comparison Content */}
-                      <div className="h-3 w-full bg-gray-100 rounded mb-2"></div>
-                      <div className="h-3 w-5/6 bg-gray-100 rounded mb-2"></div>
-                      <div className="h-3 w-11/12 bg-gray-100 rounded mb-2"></div>
-
-                      {/* Highlight the changes */}
-                      <div className="h-4 w-2/3 bg-green-100 rounded mb-2 border-2 border-green-400 shadow-sm"></div>
-                      <div className="h-4 w-4/5 bg-green-100 rounded mb-2 border-2 border-green-400 shadow-sm"></div>
-
-                      <div className="h-3 w-full bg-gray-100 rounded mb-2"></div>
-                      <div className="h-3 w-3/4 bg-gray-100 rounded mb-2"></div>
-
-                      {/* Version control footer */}
-                      <div className="flex justify-between mt-2">
-                        <div className="h-5 w-5 bg-gray-200 rounded"></div>
-                        <div className="h-5 w-16 bg-blue-500 rounded-md shadow-sm text-white text-[8px] flex items-center justify-center">
-                          MERGE
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6">
-                <p className="text-gray-800 text-xl font-medium">
-                  Document editors
-                </p>
-                <p className="text-gray-800 text-xl font-medium">
-                  with versions
-                </p>
-              </div>
-            </div>
-            <div className="group cursor-pointer text-center">
-              <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* Spreadsheet UI - Enhanced */}
-                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative">
-                  <div className="absolute inset-0 flex">
-                    <div className="w-3/4 bg-white p-3">
-                      {/* Spreadsheet Tab and Toolbar */}
-                      <div className="flex mb-2">
-                        <div className="h-6 px-3 bg-blue-500 rounded-t-md text-white text-[8px] font-medium flex items-center mr-1">
-                          Budget 2025
-                        </div>
-                        <div className="h-6 px-3 bg-gray-200 rounded-t-md text-gray-600 text-[8px] font-medium flex items-center">
-                          History
-                        </div>
-                        <div className="ml-auto flex space-x-1">
-                          <div className="h-5 w-5 bg-blue-100 rounded flex items-center justify-center">
-                            <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
-                          </div>
-                          <div className="h-5 w-5 bg-gray-100 rounded flex items-center justify-center">
-                            <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Spreadsheet Header Row */}
-                      <div className="h-6 w-full bg-gray-100 rounded-t-sm mb-1 flex font-medium">
-                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
-                          <div className="text-[8px] text-gray-600">A</div>
-                        </div>
-                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
-                          <div className="text-[8px] text-gray-600">B</div>
-                        </div>
-                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
-                          <div className="text-[8px] text-gray-600">C</div>
-                        </div>
-                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center justify-center">
-                          <div className="text-[8px] text-gray-600">D</div>
-                        </div>
-                        <div className="w-1/5 h-full flex items-center justify-center">
-                          <div className="text-[8px] text-gray-600">E</div>
-                        </div>
-                      </div>
-
-                      {/* Spreadsheet Data Rows */}
-                      {[...Array(2)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100"
-                        >
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-2/3 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-3/4 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 h-full flex items-center">
-                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* Highlighted Row (Active Edit) */}
-                      <div className="h-5 w-full bg-gray-100 rounded-sm mb-1 flex border-b border-gray-300 shadow-sm">
-                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center">
-                          <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                        </div>
-                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center">
-                          <div className="h-2 w-2/3 bg-gray-400 mx-1 rounded-sm"></div>
-                        </div>
-                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center">
-                          <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                        </div>
-                        <div className="w-1/5 border-r border-gray-200 h-full flex items-center">
-                          <div className="h-2 w-3/4 bg-gray-400 mx-1 rounded-sm"></div>
-                        </div>
-                        <div className="w-1/5 h-full flex items-center">
-                          <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                        </div>
-                      </div>
-
-                      {/* Regular Rows */}
-                      {[...Array(3)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100"
-                        >
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-2/3 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-3/4 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 h-full flex items-center">
-                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* History Panel */}
-                    <div className="w-1/4 bg-gray-50 p-2 border-l border-gray-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="text-[8px] font-semibold text-gray-600">
-                          CELL HISTORY
-                        </div>
-                        <div className="h-4 w-4 bg-gray-200 rounded-full flex items-center justify-center">
-                          <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                        </div>
-                      </div>
-
-                      {/* History Timeline */}
-                      <div className="relative mb-2">
-                        <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-
-                        <div className="flex items-start mb-2 relative">
-                          <div className="h-3 w-3 rounded-full bg-green-500 shadow-sm z-10 mt-1 mr-2"></div>
-                          <div className="flex-1">
-                            <div className="text-[8px] font-medium mb-1 text-gray-700">
-                              Current Value
-                            </div>
-                            <div className="h-4 w-full bg-white border border-gray-200 rounded-sm shadow-sm flex items-center px-1">
-                              <div className="h-2 w-2/3 bg-green-100 rounded-sm"></div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start mb-2 relative">
-                          <div className="h-3 w-3 rounded-full bg-blue-500 shadow-sm z-10 mt-1 mr-2"></div>
-                          <div className="flex-1">
-                            <div className="text-[8px] font-medium mb-1 text-gray-700">
-                              Previous Edit
-                            </div>
-                            <div className="h-4 w-full bg-white border border-gray-200 rounded-sm flex items-center px-1">
-                              <div className="h-2 w-1/2 bg-blue-100 rounded-sm"></div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start relative">
-                          <div className="h-3 w-3 rounded-full bg-gray-400 shadow-sm z-10 mt-1 mr-2"></div>
-                          <div className="flex-1">
-                            <div className="text-[8px] font-medium mb-1 text-gray-700">
-                              Original Value
-                            </div>
-                            <div className="h-4 w-full bg-white border border-gray-200 rounded-sm flex items-center px-1">
-                              <div className="h-2 w-1/3 bg-gray-200 rounded-sm"></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-between">
-                        <div className="h-5 px-2 bg-blue-500 rounded-sm text-white text-[8px] flex items-center justify-center shadow-sm">
-                          RESTORE
-                        </div>
-                        <div className="h-5 px-2 bg-gray-200 rounded-sm text-gray-600 text-[8px] flex items-center justify-center">
-                          COMPARE
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6">
-                <p className="text-gray-800 text-xl font-medium">
-                  Spreadsheets with
-                </p>
-                <p className="text-gray-800 text-xl font-medium">
-                  complete history
-                </p>
-              </div>
-            </div>
-            <div className="group cursor-pointer text-center">
-              <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
-                {/* Agent UI */}
-                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative">
-                  <div className="absolute inset-0 flex">
-                    <div className="w-3/4 bg-white p-3">
-                      <div className="h-6 w-full bg-gray-100 rounded-sm mb-1 flex">
-                        <div className="w-1/5 border-r border-gray-200 h-full"></div>
-                        <div className="w-1/5 border-r border-gray-200 h-full"></div>
-                        <div className="w-1/5 border-r border-gray-200 h-full"></div>
-                        <div className="w-1/5 border-r border-gray-200 h-full"></div>
-                        <div className="w-1/5 h-full"></div>
-                      </div>
-                      {[...Array(6)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-5 w-full bg-white rounded-sm mb-1 flex border-b border-gray-100"
-                        >
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div
-                              className={`h-2 ${
-                                i === 2
-                                  ? "w-2/3 bg-green-300"
-                                  : "w-2/3 bg-gray-300"
-                              } mx-1 rounded-sm`}
-                            ></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div
-                              className={`h-2 ${
-                                i === 3
-                                  ? "w-1/2 bg-blue-300"
-                                  : "w-1/2 bg-gray-300"
-                              } mx-1 rounded-sm`}
-                            ></div>
-                          </div>
-                          <div className="w-1/5 border-r border-gray-100 h-full flex items-center">
-                            <div className="h-2 w-3/4 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                          <div className="w-1/5 h-full flex items-center">
-                            <div className="h-2 w-1/2 bg-gray-300 mx-1 rounded-sm"></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="w-1/4 bg-gray-50 p-2 border-l border-gray-200">
-                      <div className="h-4 w-5/6 bg-gray-300 rounded-sm mb-3"></div>
-                      <div className="mb-3">
-                        {/* Robot AI Agent Icon - Much more obvious */}
-                        <div className="h-16 w-16 mx-auto relative">
-                          {/* Robot Head */}
-                          <div className="h-8 w-12 bg-gray-600 rounded-t-lg border-2 border-gray-700 absolute top-0 left-2 flex items-center justify-center shadow-md">
-                            {/* Robot Eyes */}
-                            <div className="flex space-x-3">
-                              <div className="h-2.5 w-2.5 bg-white rounded-full flex items-center justify-center">
-                                <div className="h-1.5 w-1.5 bg-gray-800 rounded-full"></div>
-                              </div>
-                              <div className="h-2.5 w-2.5 bg-white rounded-full flex items-center justify-center">
-                                <div className="h-1.5 w-1.5 bg-gray-800 rounded-full"></div>
-                              </div>
-                            </div>
-                          </div>
-                          {/* Robot Body */}
-                          <div className="h-7 w-14 bg-gray-500 rounded-b-lg border-2 border-gray-600 absolute top-8 left-1 flex flex-col items-center justify-center shadow-md">
-                            {/* Mouth/Display */}
-                            <div className="h-1.5 w-8 bg-gray-300 rounded-sm mb-1 border border-gray-400"></div>
-                            <div className="flex space-x-1">
-                              <div className="h-1 w-1 bg-red-500 rounded-full"></div>
-                              <div className="h-1 w-1 bg-yellow-500 rounded-full"></div>
-                              <div className="h-1 w-1 bg-green-500 rounded-full"></div>
-                            </div>
-                          </div>
-                          {/* Robot Antenna */}
-                          <div className="h-3 w-1 bg-gray-600 absolute top-[-3px] left-8">
-                            <div className="h-2 w-2 bg-red-500 rounded-full absolute top-[-1px] left-[-0.5px]"></div>
-                          </div>
-                          {/* Robot Arms */}
-                          <div className="h-1.5 w-4 bg-gray-400 absolute top-10 left-[-2px] rounded-full border border-gray-500"></div>
-                          <div className="h-1.5 w-4 bg-gray-400 absolute top-10 right-[-2px] rounded-full border border-gray-500"></div>
-                        </div>
-                        <div className="flex justify-center mt-1">
-                          <div className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md">
-                            AI AGENT
-                          </div>
-                        </div>
-                      </div>
-                      <div className="h-16 bg-white rounded-lg border border-gray-200 p-2 mb-2 shadow-sm">
-                        <div className="flex items-center mb-1.5">
-                          <div className="h-2.5 w-2.5 rounded-full bg-blue-500 mr-1.5"></div>
-                          <div className="h-2 w-2/3 bg-gray-200 rounded-sm"></div>
-                        </div>
-                        <div className="h-3 w-full bg-green-100 rounded-sm mb-1.5 border border-green-200 flex items-center px-1">
-                          <div className="h-1.5 w-1/4 bg-green-300 rounded-sm"></div>
-                        </div>
+                      <div className="text-left">
+                        <div className="h-4 bg-gray-800 rounded mb-2 w-3/4"></div>
+                        <div className="h-3 bg-gray-300 rounded mb-1 w-full"></div>
+                        <div className="h-3 bg-gray-300 rounded mb-1 w-5/6"></div>
+                        <div className="h-3 bg-green-200 rounded mb-1 w-4/5 border-l-2 border-green-400"></div>
+                        <div className="h-3 bg-gray-300 rounded mb-3 w-2/3"></div>
                         <div className="flex justify-between items-center">
-                          <div className="h-2 w-1/2 bg-gray-200 rounded-sm"></div>
-                          <div className="h-2 w-2 rounded-full bg-yellow-400"></div>
+                          <span className="text-xs text-gray-500">Version 1.2</span>
+                          <div className="flex space-x-1">
+                            <div className="w-4 h-4 bg-blue-500 rounded-full text-white text-xs flex items-center justify-center">✓</div>
+                            <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex justify-between">
-                        <div className="h-3 w-1/2 bg-green-500 rounded-sm text-white text-[8px] flex items-center justify-center shadow-sm">
-                          Processing
+                    </div>
+                    <a 
+                      href="https://prosemirror-example.onrender.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-xs bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition-colors"
+                    >
+                      Try Live Demo →
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6">
+                <p className="text-gray-800 text-xl font-medium">
+                  ProseMirror editors
+                </p>
+                <p className="text-gray-800 text-xl font-medium">
+                  with version control
+                </p>
+              </div>
+            </div>
+            <div className="group cursor-pointer text-center">
+              <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
+                {/* Fink App - Real Screenshot */}
+                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative bg-gradient-to-br from-cyan-100 to-blue-100 p-6 flex items-center justify-center">
+                  <div className="w-full max-w-sm">
+                    <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">F</span>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-800">Fink Localization</span>
                         </div>
-                        <div className="h-3 w-6 bg-gray-200 rounded-sm flex items-center justify-center shadow-sm">
-                          <div className="flex space-x-0.5">
-                            <div className="h-1.5 w-1 bg-gray-400 rounded-sm"></div>
-                            <div className="h-1.5 w-1 bg-gray-400 rounded-sm"></div>
-                            <div className="h-1.5 w-1 bg-gray-400 rounded-sm"></div>
+                        <div className="text-xs text-gray-500">Change Control</div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-5 bg-gray-200 rounded text-xs flex items-center justify-center font-mono">en</div>
+                          <div className="w-8 h-5 bg-blue-600 rounded text-xs flex items-center justify-center font-mono text-white">ref</div>
+                          <div className="flex-1 h-5 bg-gray-100 rounded px-2 text-xs flex items-center">Hello World.</div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-8 h-5 bg-gray-200 rounded text-xs flex items-center justify-center font-mono">de</div>
+                          <div className="w-8 h-5 bg-gray-200 rounded"></div>
+                          <div className="flex-1 h-5 bg-cyan-100 rounded px-2 text-xs flex items-center border-2 border-cyan-400">Hallo W|</div>
+                        </div>
+                        <div className="flex justify-between items-center mt-3">
+                          <span className="text-xs text-gray-500">2 changes pending</span>
+                          <div className="flex space-x-1">
+                            <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
+                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                           </div>
                         </div>
                       </div>
@@ -609,9 +320,54 @@ function LandingPage() {
               </div>
               <div className="mt-6">
                 <p className="text-gray-800 text-xl font-medium">
-                  Agents that perform
+                  Fink localization
                 </p>
-                <p className="text-gray-800 text-xl font-medium">async work</p>
+                <p className="text-gray-800 text-xl font-medium">
+                  with change tracking
+                </p>
+              </div>
+            </div>
+            <div className="group cursor-pointer text-center">
+              <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 border border-gray-200 shadow-sm">
+                {/* Flashtype-style App */}
+                <div className="w-full h-64 lg:h-auto lg:aspect-[3/2] relative bg-gray-50 p-6 flex items-center justify-center">
+                  <div className="w-full max-w-md">
+                    <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-gray-800">Content Editor</h3>
+                        <div className="flex items-center space-x-1">
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                          <span className="text-xs text-gray-500">Live</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-800 rounded w-2/3"></div>
+                        <div className="h-3 bg-gray-300 rounded w-full"></div>
+                        <div className="h-3 bg-gray-300 rounded w-4/5"></div>
+                        <div className="h-3 bg-blue-200 rounded w-3/4 border-l-2 border-blue-400"></div>
+                        <div className="h-3 bg-gray-300 rounded w-5/6"></div>
+                      </div>
+                      <div className="flex justify-between items-center mt-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 bg-blue-500 rounded-full text-white text-xs flex items-center justify-center">AI</div>
+                          <span className="text-xs text-gray-600">3 suggestions</span>
+                        </div>
+                        <div className="flex space-x-1">
+                          <div className="w-6 h-4 bg-green-500 rounded text-white text-xs flex items-center justify-center">✓</div>
+                          <div className="w-6 h-4 bg-gray-300 rounded text-gray-600 text-xs flex items-center justify-center">⟲</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6">
+                <p className="text-gray-800 text-xl font-medium">
+                  AI-powered content
+                </p>
+                <p className="text-gray-800 text-xl font-medium">
+                  with approval workflows
+                </p>
               </div>
             </div>
           </div>
