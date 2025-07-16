@@ -16,6 +16,8 @@ import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
 import { timestamp } from "../deterministic/timestamp.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
 import { selectFromStateCache } from "./cache/select-from-state-cache.js";
+import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
+import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
 
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(
@@ -68,6 +70,20 @@ export function applyStateDatabaseSchema(
 
 	// Cache initialization state to avoid repeated table existence checks
 	let loggingInitialized: boolean | null = null;
+
+	/**
+	 * Flag to prevent recursion when updating cache state.
+	 *
+	 * The guard ensures that while we're marking cache as fresh, any nested state queries
+	 * bypass the cache and use materialized state directly, preventing recursion.
+	 *
+	 * Why is this needed is unclear. Queries are executed in sync. Why concurrent
+	 * reads simultaneously update the cache is not clear. Given that state
+	 * materialization is rare, this workaround has been deemed sufficient.
+	 *
+	 * This is a temporary fix and should be revisited in the future.
+	 */
+	let isUpdatingCacheState = false;
 
 	const canLog = () => {
 		if (loggingInitialized === null) {
@@ -431,20 +447,35 @@ export function applyStateDatabaseSchema(
 					}
 				}
 
-				// Try cache first - include inherited entities via union
-				const cacheResults = selectFromStateCache(sqlite, filters);
+				console.log("=== xFilter called ===", filters, new Error().stack);
+
+				// If we're updating cache state, we must use materialized state directly to avoid recursion
+				if (isUpdatingCacheState) {
+					console.log(
+						"Updating cache state, using materialized state directly"
+					);
+					// Directly materialize state without cache
+					const stateResults = materializeState(sqlite, filters, false);
+					cursorState.results = stateResults || [];
+					cursorState.rowIndex = 0;
+					return capi.SQLITE_OK;
+				}
+
+				// Normal path: check cache staleness
+				const cacheIsStale = isStaleStateCache({ lix: { sqlite } });
+
+				// Try cache first - but only if it's not stale
+				let cacheResults: any[] | null = null;
+				if (!cacheIsStale) {
+					cacheResults = selectFromStateCache({ lix: { sqlite }, filters });
+				}
 
 				cursorState.results = cacheResults || [];
 				cursorState.rowIndex = 0;
 
-				const recordsInCache = sqlite.exec({
-					sql: `SELECT COUNT(*) as count FROM internal_state_cache`,
-					returnValue: "resultRows",
-				})[0]![0] as number;
-
-				// Cache miss - populate cache with actual recursive state query
-
-				if (cursorState.results.length === 0 && recordsInCache === 0) {
+				if (cacheIsStale) {
+					console.log("State cache is stale, will materialize state from CTE");
+					// Cache miss - populate cache with actual recursive state query
 					if (canLog()) {
 						createLixOwnLogSync({
 							lix: { sqlite, db: db as any },
@@ -539,20 +570,31 @@ export function applyStateDatabaseSchema(
 							});
 							cachePopulated = true;
 						}
-						if (cachePopulated && canLog()) {
-							createLixOwnLogSync({
-								lix: { sqlite, db: db as any },
-								key: "lix_state_cache_populated",
-								level: "debug",
-								message: `Cache populated with ${stateResults?.length || 0} rows from CTE`,
-							});
+
+						if (cachePopulated) {
+							// Mark cache as fresh after population
+							isUpdatingCacheState = true;
+							try {
+								markStateCacheAsFresh({ lix: { sqlite } });
+							} finally {
+								isUpdatingCacheState = false;
+							}
+
+							if (canLog()) {
+								createLixOwnLogSync({
+									lix: { sqlite, db: db as any },
+									key: "lix_state_cache_populated",
+									level: "debug",
+									message: `Cache populated with ${stateResults?.length || 0} rows from CTE`,
+								});
+							}
 						}
 					}
 
-					// Re-query cache after population
-
-					// Re-query after population with inheritance logic
-					const newResults = selectFromStateCache(sqlite, filters);
+					const newResults = selectFromStateCache({
+						lix: { sqlite },
+						filters,
+					});
 					cursorState.results = newResults || [];
 				} else {
 					if (canLog()) {

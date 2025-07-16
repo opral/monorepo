@@ -1,15 +1,15 @@
 import type { Lix } from "../../lix/open-lix.js";
 
-export function selectFromStateCache(
-	sqlite: Lix["sqlite"],
-	filters: Record<string, any>
-): any[] {
-	const filterBindings = Object.values(filters);
+export function selectFromStateCache(args: {
+	lix: Pick<Lix, "sqlite">;
+	filters: Record<string, any>;
+}): any[] {
+	const filterBindings = Object.values(args.filters);
 	const buildWhereClause = (tableAlias: string = "") => {
 		const conditions: string[] = [];
 		const prefix = tableAlias ? `${tableAlias}.` : "";
 
-		Object.keys(filters).forEach((column) => {
+		Object.keys(args.filters).forEach((column) => {
 			conditions.push(`${prefix}${column} = ?`);
 		});
 
@@ -156,7 +156,7 @@ export function selectFromStateCache(
     )
   ) as combined_results`;
 
-	const result = sqlite.exec({
+	const result = args.lix.sqlite.exec({
 		sql: `${statement} ${buildWhereClause("combined_results")}`,
 		bind: [...filterBindings],
 		returnValue: "resultRows",

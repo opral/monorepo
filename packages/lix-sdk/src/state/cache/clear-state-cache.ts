@@ -1,19 +1,16 @@
-import type { Kysely } from "kysely";
 import type { Lix } from "../../lix/open-lix.js";
-import type { LixInternalDatabaseSchema } from "../../database/schema.js";
+import { markStateCacheAsStale } from "./mark-state-cache-as-stale.js";
 
 /**
  * Clears the internal state cache.
  */
-export async function clearStateCache(args: { lix: Lix }): Promise<void> {
-	const executeInTransaction = async (trx: Lix["db"]) => {
-		await (trx as unknown as Kysely<LixInternalDatabaseSchema>)
-			.deleteFrom("internal_state_cache")
-			.execute();
-	};
-	if (args.lix.db.isTransaction) {
-		return await args.lix.db.transaction().execute(executeInTransaction);
-	} else {
-		return await executeInTransaction(args.lix.db);
-	}
+export function clearStateCache(args: { lix: Lix }): void {
+	// Mark the cache as stale first to prevent repopulation during delete
+	markStateCacheAsStale({ lix: args.lix });
+
+	// Delete all entries from the cache
+	args.lix.sqlite.exec({
+		sql: `DELETE FROM internal_state_cache`,
+		returnValue: "resultRows",
+	});
 }
