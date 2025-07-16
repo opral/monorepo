@@ -1,12 +1,12 @@
 import { clearCache } from "../../state/clear-cache.js";
-import type { DstSimulation } from "./simulation-test.js";
+import type { SimulationTestDef } from "./simulation-test.js";
 
 /**
  * Cache miss simulation - Clears cache before every select query to force re-materialization from changes.
  * This tests that state can be correctly reconstructed from the change log
  * without relying on cached state.
  */
-export const cacheMissSimulation: DstSimulation = {
+export const cacheMissSimulation: SimulationTestDef = {
 	name: "cache miss",
 	setup: async (lix) => {
 		// Clear initial cache

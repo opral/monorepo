@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { simulationTest, type DstSimulation } from "./simulation-test.js";
+import { simulationTest, type SimulationTestDef } from "./simulation-test.js";
 import { openLix } from "../../lix/open-lix.js";
 
 test("simulation test discovery", () => {});
 
 describe("expectDeterministic validates values across simulations", () => {
-	const customSimulation: DstSimulation = {
+	const customSimulation: SimulationTestDef = {
 		name: "custom",
 		setup: async (lix) => lix,
 	};
@@ -23,14 +23,14 @@ describe("expectDeterministic validates values across simulations", () => {
 			}).not.toThrow();
 		},
 		{
-			simulations: ["normal", "custom"],
-			customSimulations: [customSimulation],
+			onlyRun: ["normal"],
+			additionalCustomSimulations: [customSimulation],
 		}
 	);
 });
 
 describe("expectDeterministic catches simulation differences", () => {
-	const customSimulation: DstSimulation = {
+	const customSimulation: SimulationTestDef = {
 		name: "custom",
 		setup: async (lix) => lix,
 	};
@@ -54,8 +54,8 @@ describe("expectDeterministic catches simulation differences", () => {
 			}
 		},
 		{
-			simulations: ["normal", "custom"],
-			customSimulations: [customSimulation],
+			onlyRun: ["normal"],
+			additionalCustomSimulations: [customSimulation],
 		}
 	);
 });
@@ -67,7 +67,7 @@ describe("deterministic state validation", () => {
 	let previousState: any | null = null;
 	let previousChanges: any | null = null;
 
-	const mockSimulation: DstSimulation = {
+	const mockSimulation: SimulationTestDef = {
 		name: "mock-simulation",
 		setup: async (lix) => lix,
 	};
@@ -95,14 +95,14 @@ describe("deterministic state validation", () => {
 			expect(allState).toBeDefined();
 		},
 		{
-			simulations: ["normal", "mock-simulation"],
-			customSimulations: [mockSimulation],
+			onlyRun: ["normal"],
+			additionalCustomSimulations: [mockSimulation],
 		}
 	);
 });
 
 describe("database operations are deterministic", async () => {
-	const mockSimulation: DstSimulation = {
+	const mockSimulation: SimulationTestDef = {
 		name: "mock-simulation",
 		setup: async (lix) => lix,
 	};
@@ -163,8 +163,8 @@ describe("database operations are deterministic", async () => {
 			}
 		},
 		{
-			simulations: ["normal", "mock-simulation"],
-			customSimulations: [mockSimulation],
+			onlyRun: ["normal"],
+			additionalCustomSimulations: [mockSimulation],
 		}
 	);
 });

@@ -3,7 +3,7 @@ import { type Lix } from "../../lix/open-lix.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { cacheMissSimulation } from "./cache-miss-simulation.js";
 
-export type DstSimulation = {
+export type SimulationTestDef = {
 	name: string;
 	setup: (lix: Lix, baseline?: Lix) => Promise<Lix>;
 };
@@ -11,22 +11,33 @@ export type DstSimulation = {
 /**
  * Normal simulation - Standard test execution without any modifications.
  */
-const simulationUnderNormalConditions: DstSimulation = {
+const simulationUnderNormalConditions: SimulationTestDef = {
 	name: "normal",
 	setup: async (lix) => lix,
 };
 
-// Options for simulation tests
-interface simulationTestOptions {
-	simulations?: string[];
-	customSimulations?: DstSimulation[];
-}
+/**
+ * Options for configuring simulation tests
+ */
+type SimulationTestOptions = {
+	/**
+	 * Array of default simulation names to run.
+	 * If not specified, all default simulations will be run.
+	 * Available default simulations: "normal", "cache-miss"
+	 */
+	onlyRun?: (keyof typeof defaultSimulations)[];
+	/**
+	 * Additional custom simulations to run after the default ones.
+	 * These simulations will always be run and don't need to be listed in onlyRun.
+	 */
+	additionalCustomSimulations?: SimulationTestDef[];
+};
 
 // Default simulations available
-const defaultSimulations: Record<string, DstSimulation> = {
-	normal: simulationUnderNormalConditions,
-	"cache-miss": cacheMissSimulation,
-};
+const defaultSimulations = {
+	normal: simulationUnderNormalConditions as SimulationTestDef,
+	"cache-miss": cacheMissSimulation as SimulationTestDef,
+} as const;
 
 /**
  * Test utility that runs the same test in different simulations.
@@ -34,8 +45,8 @@ const defaultSimulations: Record<string, DstSimulation> = {
  * @param name - Test name
  * @param fn - Test function that receives simulation context
  * @param options - Optional configuration:
- *   - simulations: Array of simulation names to run (defaults to all)
- *   - customSimulations: Custom simulation definitions to add
+ *   - onlyRun: Array of default simulation names to run (defaults to all)
+ *   - additionalCustomSimulations: Additional custom simulations to run after the default ones
  *
  * @example
  * // Run default simulations (normal, cache-miss)
@@ -45,20 +56,20 @@ const defaultSimulations: Record<string, DstSimulation> = {
  * });
  *
  * @example
- * // Run only specific simulations
+ * // Run only specific default simulations
  * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
- * }, { simulations: ["cache-miss"] });
+ * }, { onlyRun: ["cache-miss"] });
  *
  * @example
- * // Add custom simulations
+ * // Add custom simulations (run after default ones)
  * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, {
- *   simulations: ["normal", "my-simulation"],
- *   customSimulations: [mySimulation]
+ *   onlyRun: ["normal"],
+ *   additionalCustomSimulations: [mySimulation]
  * });
  */
 export function simulationTest(
@@ -68,30 +79,31 @@ export function simulationTest(
 		initialLix: Blob;
 		expectDeterministic: typeof expect;
 	}) => Promise<void>,
-	options?: simulationTestOptions
+	options?: SimulationTestOptions
 ): void {
-	// Merge default and additional simulations
-	const allSimulations: Record<string, DstSimulation> = {
-		...defaultSimulations,
-	};
+	// Determine which simulations to run
+	let simulationsToRun: SimulationTestDef[] = [];
 
-	if (options?.customSimulations) {
-		for (const simulation of options.customSimulations) {
-			allSimulations[simulation.name] = simulation;
-		}
+	if (options?.onlyRun) {
+		// Run only specified default simulations
+		simulationsToRun = options.onlyRun.map((name) => {
+			const simulation = defaultSimulations[name];
+			if (!simulation) {
+				throw new Error(
+					`Simulation "${name}" not found. Available simulations: ${Object.keys(defaultSimulations).join(", ")}`
+				);
+			}
+			return simulation;
+		});
+	} else {
+		// Run all default simulations if onlyRun is not specified
+		simulationsToRun = Object.values(defaultSimulations);
 	}
 
-	// Determine which simulations to run
-	const simulationNames = options?.simulations || Object.keys(allSimulations);
-	const simulationsToRun = simulationNames.map((name) => {
-		const simulation = allSimulations[name];
-		if (!simulation) {
-			throw new Error(
-				`Simulation "${name}" not found. Available simulations: ${Object.keys(allSimulations).join(", ")}`
-			);
-		}
-		return simulation;
-	});
+	// Add custom simulations at the end
+	if (options?.additionalCustomSimulations) {
+		simulationsToRun.push(...options.additionalCustomSimulations);
+	}
 
 	// // Create initial Lix blob for all simulations
 	const initialLixBlob = newLixFile({

@@ -53,7 +53,7 @@ simulationTest(
 		);
 	},
 	{
-		simulations: ["cache-miss"], // Only run with cache miss simulation
+		onlyRun: ["cache-miss"], // Only run with cache miss simulation
 	}
 );
 
@@ -91,6 +91,6 @@ simulationTest(
 		expect(configA?.snapshot_content?.value).toBe('"a"'); // JSON encoded
 	},
 	{
-		simulations: ["cache-miss"], // Only run with cache miss simulation
+		onlyRun: ["cache-miss"], // Only run with cache miss simulation
 	}
 );
