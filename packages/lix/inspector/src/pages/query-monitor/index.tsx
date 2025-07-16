@@ -61,7 +61,6 @@ export default function QueryMonitor() {
     return queryLogs.filter((log) => {
       if (!log.payload) return false;
 
-      debugger;
       // Type filter
       if (selectedType !== "ALL" && log.payload.query_type !== selectedType) {
         return false;

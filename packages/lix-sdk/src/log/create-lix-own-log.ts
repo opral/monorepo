@@ -1,7 +1,7 @@
 import { executeSync } from "../database/execute-sync.js";
 import type { Lix } from "../lix/open-lix.js";
 
-const DEFAULT_LOG_LEVELS = ["info", "warn", "error"];
+export const DEFAULT_LOG_LEVELS: string[] = ["info", "warn", "error"];
 
 /**
  * Creates a log entry in the Lix database, applying log level filtering.

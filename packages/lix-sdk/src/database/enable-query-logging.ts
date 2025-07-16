@@ -1,6 +1,14 @@
-import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
+import {
+	createLixOwnLogSync,
+	DEFAULT_LOG_LEVELS,
+} from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import { executeSync } from "./execute-sync.js";
+import type { LixInternalDatabaseSchema } from "./schema.js";
+import type { Kysely } from "kysely";
+import { LixKeyValueSchema } from "../key-value/schema.js";
+import { nanoid } from "./nano-id.js";
+import { LixLogSchema } from "../log/schema.js";
 
 /**
  * Queue for pending log entries to be processed
@@ -56,15 +64,7 @@ function processLogQueue() {
 
 	// Begin transaction
 	try {
-		lix.skipLogging = true;
-		// @ts-expect-error - check
-		lix.sqlite.skipLogging = true;
-
 		lix.sqlite.exec("BEGIN IMMEDIATE");
-
-		lix.skipLogging = false;
-		// @ts-expect-error - check
-		lix.sqlite.skipLogging = false;
 	} catch (error) {
 		console.error("Failed to begin transaction for query logging:", error);
 		// Clear the queue to prevent infinite retry
@@ -72,12 +72,38 @@ function processLogQueue() {
 		return;
 	}
 
+	const logCount = logQueue.length;
+
+	console.time("inserting logs " + logCount);
+
+	let logLevels: undefined | string[];
+
 	// Process all entries in the queue
 	while (logQueue.length > 0) {
 		const entry = logQueue.shift();
 		if (!entry) continue;
 
 		const { lix, sql, duration, bindings, result, error, options } = entry;
+
+		if (logLevels === undefined) {
+			// NOTE: we could query the log level per batch but with the current change table this increases a single query log from ~1ms to >200ms
+			// logLevels =
+			// 	executeSync({
+			// 		lix: lix,
+			// 		query: lix.db
+			// 			.selectFrom("key_value")
+			// 			.select("value")
+			// 			.where("key", "=", "lix_log_levels"),
+			// 	})[0]?.values ?? DEFAULT_LOG_LEVELS;
+			logLevels = DEFAULT_LOG_LEVELS;
+		}
+
+		// Check if the level is allowed
+		const shouldLog = logLevels!.includes("*") || logLevels!.includes("info");
+
+		if (!shouldLog) {
+			continue; // Skip logging if not allowed
+		}
 
 		try {
 			// Skip if only logging slow queries
@@ -88,12 +114,7 @@ function processLogQueue() {
 				continue;
 			}
 
-			lix.skipLogging = true;
-			// @ts-expect-error - check
-			lix.sqlite.skipLogging = true;
-
-			// @ts-expect-error --- using flag
-			const message = `${queueLength - logQueue.length}/${queueLength} skipLpgs: ${lix.skipLogging} reacitvity off: ${lix.sqlite.skipLogging} Query executed in ${duration}ms`;
+			const message = `Batched log: ${queueLength - logQueue.length}/${queueLength} Query executed in ${duration}ms`;
 			const payload = {
 				sql: sql,
 				bindings: bindings,
@@ -103,76 +124,49 @@ function processLogQueue() {
 				timestamp: new Date().toISOString(),
 				error: error ? error.message : undefined,
 			};
-			console.log("Creating log:", message, payload);
-			// Insert the log
 
-			// // @ts-expect-error -- this is fine for now
-			// if (window.logQueries) {
 			executeSync({
-				lix: lix,
-				query: lix.db.insertInto("log").values({
-					key: "lix_query_executed",
-					message,
-					level: "info",
-					payload,
-				}),
+				lix: { sqlite: lix.sqlite },
+				query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+					.insertInto("internal_state_all_untracked")
+					.values({
+						entity_id: nanoid(),
+						version_id: "global",
+						file_id: "lix",
+						schema_key: LixLogSchema["x-lix-key"],
+						plugin_key: "lix_own_entity",
+						schema_version: LixLogSchema["x-lix-version"],
+						snapshot_content: JSON.stringify({
+							key: "lix_query_executed",
+							message,
+							level: "info",
+							payload,
+						}),
+					}),
+				// no conflict handling here, as we don't mutate logs
+				// .onConflict((oc) =>
+				//     oc.doUpdateSet({
+				//         snapshot_content: newValue,
+				//     })
+				// ),
 			});
-			// }
-
-			// createLixOwnLogSync({
-			// 	lix,
-			// 	key: "lix_query_executed",
-			// 	level: "info",
-			// 	// @ts-expect-error --- using flag
-			// 	message: `${queueLength - logQueue.length}/${queueLength} skipLpgs: ${lix.skipLogging} reacitvity off: ${lix.sqlite.skipLogging} Query executed in ${duration}ms`,
-			// 	payload: {
-			// 		sql: sql,
-			// 		bindings: bindings,
-			// 		duration_ms: duration,
-			// 		result_count: Array.isArray(result) ? result.length : 0,
-			// 		query_type: detectQueryType(sql),
-			// 		timestamp: new Date().toISOString(),
-			// 		error: error ? error.message : undefined,
-			// 	},
-			// });
-
-			lix.skipLogging = false;
-			// @ts-expect-error - check
-			lix.sqlite.skipLogging = false;
 		} catch (logError) {
 			console.error("Failed to log query:", logError);
-			lix.skipLogging = false;
-			// @ts-expect-error - check
-			lix.sqlite.skipLogging = false;
 		}
 	}
 
+	console.timeEnd("inserting logs " + logCount);
 	// Commit the transaction
 	try {
-		lix.skipLogging = true;
-		// @ts-expect-error - check
-		lix.sqlite.skipLogging = true;
-
 		lix.sqlite.exec("COMMIT");
-
-		lix.skipLogging = false;
-		// @ts-expect-error - check
-		lix.sqlite.skipLogging = false;
 	} catch (error) {
 		console.error("Failed to commit transaction for query logging:", error);
 
 		// Try to rollback
 		try {
-			lix.skipLogging = true;
-			// @ts-expect-error - check
-			lix.sqlite.skipLogging = true;
 			lix.sqlite.exec("ROLLBACK");
 		} catch (rollbackError) {
 			console.error("Failed to rollback transaction:", rollbackError);
-		} finally {
-			lix.skipLogging = false;
-			// @ts-expect-error - check
-			lix.sqlite.skipLogging = false;
 		}
 	}
 }
@@ -186,7 +180,7 @@ export function cleanupQueryLogging(): void {
 		clearTimeout(currentTimeout);
 		currentTimeout = null;
 	}
-	
+
 	// Clear the log queue to prevent memory leaks
 	logQueue.length = 0;
 }
@@ -244,23 +238,6 @@ export function enableQueryLogging(
 			}
 		}
 
-		// there are three cases:
-		// 1. this exec is part of a loging query
-		// 2. this exec is a query to the logging table
-		// 3. this exec is a query to a virtual table that is not related to logging - outsite of a logging request
-
-		let resetSkipLogging = false;
-
-		// skipLogging is a dynamic property used to prevent recursive logging
-		if (!lix.skipLogging) {
-			if (isLogTableQuery(sql)) {
-				lix.skipLogging = true; // Set flag to skip logging for this query
-				// @ts-expect-error - check
-				lix.sqlite.skipLogging = true;
-				resetSkipLogging = true;
-			}
-		}
-
 		try {
 			// Execute the query with original arguments
 			// @ts-expect-error -- check types
@@ -308,14 +285,6 @@ export function enableQueryLogging(
 				currentTimeout = setTimeout(processLogQueue, 0);
 			}
 		}
-
-		if (resetSkipLogging) {
-			// skipLogging is a dynamic property used to prevent recursive logging
-			lix.skipLogging = false; // Reset flag after query execution
-			// @ts-expect-error - check
-			lix.sqlite.skipLogging = false;
-		}
-
 		// Re-throw error if query failed
 		if (error) {
 			throw error;
@@ -341,46 +310,4 @@ function detectQueryType(sql: string): string {
 	if (upperSql.startsWith("PRAGMA")) return "PRAGMA";
 
 	return "OTHER";
-}
-
-function isLogTableQuery(sql: string): boolean {
-	if (!sql) return false;
-
-	const upperSql = sql.trim().toUpperCase();
-
-	return upperSql.indexOf("LOG") > 0;
-
-	// // Check if this query touches the log table or its related views
-	// const logTablePatterns = [
-	// 	// Direct log table access (with word boundaries to avoid false positives)
-	// 	"\\bFROM\\s+LOG\\b",
-	// 	"\\bINTO\\s+LOG\\b",
-	// 	"\\bUPDATE\\s+LOG\\b",
-	// 	"\\bDELETE\\s+FROM\\s+LOG\\b",
-	// 	// Log views
-	// 	"\\bFROM\\s+LOG_ALL\\b",
-	// 	"\\bINTO\\s+LOG_ALL\\b",
-	// 	"\\bUPDATE\\s+LOG_ALL\\b",
-	// 	"\\bDELETE\\s+FROM\\s+LOG_ALL\\b",
-	// 	"\\bFROM\\s+LOG_HISTORY\\b",
-	// 	// Join queries with log tables
-	// 	"\\bJOIN\\s+LOG\\b",
-	// 	"\\bJOIN\\s+LOG_ALL\\b",
-	// 	"\\bJOIN\\s+LOG_HISTORY\\b",
-	// 	// CTEs or subqueries referencing log
-	// 	"\\bLOG\\s+WHERE\\b",
-	// 	"\\bLOG_ALL\\s+WHERE\\b",
-	// 	// Key value queries for log levels (exact match)
-	// 	"KEY\\s*=\\s*['\"]LIX_LOG_LEVELS['\"]",
-	// 	// Queries that reference the log key in where clauses
-	// 	"KEY\\s*=\\s*['\"]LIX_QUERY_EXECUTED['\"]",
-	// 	// State queries that might be log-related
-	// 	"WHERE\\s+KEY\\s*=\\s*['\"]LIX_LOG['\"]",
-	// 	"AND\\s+KEY\\s*=\\s*['\"]LIX_LOG['\"]",
-	// ];
-
-	// return logTablePatterns.some((pattern) => {
-	// 	const regex = new RegExp(pattern, "i");
-	// 	return regex.test(upperSql);
-	// });
 }
