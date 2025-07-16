@@ -12,6 +12,11 @@ import type { Lix } from "../lix/open-lix.js";
  * UUID v7 provides better database performance than {@link nanoId} due to time-based sorting,
  * but produces longer IDs that are less suitable for URLs.
  *
+ * - Normal mode: Standard UUID v7 with current timestamp
+ * - Deterministic mode: Fixed prefix "01920000-0000-7000-8800-" + 12-digit hex counter
+ * - Counter state shared with {@link nextDeterministicSequenceNumber}
+ * - Choose UUID v7 for time-sortable database keys, {@link nanoId} for URL-friendly short IDs
+ *
  * @example Normal mode - returns random UUID v7
  * ```ts
  * const lix = await openLix();
@@ -41,12 +46,6 @@ import type { Lix } from "../lix/open-lix.js";
  *
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns UUID v7 string
- *
- * @remarks
- * - Normal mode: Standard UUID v7 with current timestamp
- * - Deterministic mode: Fixed prefix "01920000-0000-7000-8800-" + 12-digit hex counter
- * - Counter state shared with {@link nextDeterministicSequenceNumber}
- * - Choose UUID v7 for time-sortable database keys, {@link nanoId} for URL-friendly short IDs
  */
 export function uuidV7(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 	// Check if deterministic mode is enabled

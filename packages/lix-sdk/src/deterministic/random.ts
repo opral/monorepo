@@ -43,6 +43,13 @@ function randomUnstable(): number {
  * (the same algorithm used by V8/Chrome for Math.random()).
  * In normal mode, uses crypto.getRandomValues() for cryptographically secure randomness.
  *
+ * - Normal mode: Uses crypto.getRandomValues() for cryptographic quality
+ * - Deterministic mode: Uses xorshift128+ PRNG (same as V8/Chrome's Math.random())
+ * - Default seed: Uses `lix_id` value unless `lix_deterministic_rng_seed` is set
+ * - State persisted via `lix_deterministic_rng_state` key value
+ * - Both modes return 53-bit precision floats for consistency
+ * - For ID generation, consider {@link uuidV7} or {@link nanoId} instead
+ *
  * @example Normal mode - cryptographically secure randomness
  * ```ts
  * const lix = await openLix();
@@ -80,14 +87,6 @@ function randomUnstable(): number {
  *
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns Random float between 0 (inclusive) and 1 (exclusive) with 53-bit precision
- *
- * @remarks
- * - Normal mode: Uses crypto.getRandomValues() for cryptographic quality
- * - Deterministic mode: Uses xorshift128+ PRNG (same as V8/Chrome's Math.random())
- * - Default seed: Uses `lix_id` value unless `lix_deterministic_rng_seed` is set
- * - State persisted via `lix_deterministic_rng_state` key value
- * - Both modes return 53-bit precision floats for consistency
- * - For ID generation, consider {@link uuidV7} or {@link nanoId} instead
  */
 export function random(args: { lix: Pick<Lix, "sqlite" | "db"> }): number {
 	// Non-deterministic mode: use crypto.getRandomValues()

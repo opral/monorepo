@@ -11,6 +11,13 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  * Use nano IDs when IDs will appear in URLs - their shorter length makes links easier to share.
  * For better database performance with time-ordered queries, consider {@link uuidV7} instead.
  *
+ * - Normal mode: URL-safe random ID using custom alphabet (no `-` or `_`)
+ * - Deterministic mode: "test_" + 10-digit zero-padded counter
+ * - Counter state shared with {@link nextDeterministicSequenceNumber}
+ * - The "test_" prefix makes deterministic IDs easily identifiable
+ * - Choose nano IDs for URL-friendly short IDs, {@link uuidV7} for time-sortable database keys
+ * - Use the [Nano ID collision calculator](https://zelark.github.io/nano-id-cc/) to find the optimal length for your shareability vs uniqueness needs
+ *
  * @example Normal mode - returns random nanoid
  * ```ts
  * const lix = await openLix();
@@ -42,14 +49,6 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  * @param args.lix - The Lix instance with sqlite and db connections
  * @param args.length - Custom length for non-deterministic mode (default: 21)
  * @returns Nano ID string
- *
- * @remarks
- * - Normal mode: URL-safe random ID using custom alphabet (no `-` or `_`)
- * - Deterministic mode: "test_" + 10-digit zero-padded counter
- * - Counter state shared with {@link nextDeterministicSequenceNumber}
- * - The "test_" prefix makes deterministic IDs easily identifiable
- * - Choose nano IDs for URL-friendly short IDs, {@link uuidV7} for time-sortable database keys
- * - Use the [Nano ID collision calculator](https://zelark.github.io/nano-id-cc/) to find the optimal length for your shareability vs uniqueness needs
  */
 export function nanoId(args: {
 	lix: Pick<Lix, "sqlite" | "db">;

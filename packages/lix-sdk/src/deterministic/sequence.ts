@@ -21,6 +21,12 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * Only available in deterministic mode. Provides a simple counter for cases where
  * you need sequential integers rather than timestamps or random values.
  *
+ * - Requires `lix_deterministic_mode = true`
+ * - Increments by exactly 1 per call (no gaps or duplicates)
+ * - State persisted via `lix_deterministic_sequence_number` key value
+ * - Clones continue from where the sequence left off
+ * - Consider using {@link timestamp}, {@link uuidV7}, or {@link nanoId} for most ID generation needs
+ *
  * @example Basic usage (deterministic mode required)
  * ```ts
  * const lix = await openLix({
@@ -48,13 +54,6 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns The next number in the sequence (starting from 0)
  * @throws {Error} If `lix_deterministic_mode` is not enabled
- *
- * @remarks
- * - Requires `lix_deterministic_mode = true`
- * - Increments by exactly 1 per call (no gaps or duplicates)
- * - State persisted via `lix_deterministic_sequence_number` key value
- * - Clones continue from where the sequence left off
- * - Consider using {@link timestamp}, {@link uuidV7}, or {@link nanoId} for most ID generation needs
  */
 export function nextDeterministicSequenceNumber(args: {
 	lix: Pick<Lix, "sqlite" | "db">;

@@ -8,6 +8,11 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  * In deterministic mode, returns logical timestamps starting from Unix epoch (1970-01-01T00:00:00.000Z),
  * incrementing by 1ms per call. In normal mode, returns the current system time.
  *
+ * - In deterministic mode: Advances by exactly 1ms per call
+ * - Monotonically increasing (never goes backwards)
+ * - State persisted across reopens via `lix_deterministic_sequence_number`
+ * - Common uses: `createdAt` fields, TTL calculations, time-ordered queries
+ *
  * @example Normal mode - returns current time
  * ```ts
  * const lix = await openLix();
@@ -38,12 +43,6 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  *
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns ISO 8601 timestamp string
- *
- * @remarks
- * - In deterministic mode: Advances by exactly 1ms per call
- * - Monotonically increasing (never goes backwards)
- * - State persisted across reopens via `lix_deterministic_sequence_number`
- * - Common uses: `createdAt` fields, TTL calculations, time-ordered queries
  */
 export function timestamp(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 	// Check if deterministic mode is enabled

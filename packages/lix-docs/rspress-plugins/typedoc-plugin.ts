@@ -202,6 +202,16 @@ export function customTypeDocPlugin(
         excludeExternals: true,
         tsconfig,
         hideGenerator: true,
+        // Expand parameters to show full type information in function signatures
+        expandParameters: true,
+        // Also expand objects inside declarations for better type visibility
+        expandObjects: true,
+        // Use table format for parameters to improve readability
+        parametersFormat: "table",
+        // Use table format for interface properties
+        interfacePropertiesFormat: "table",
+        // Preserve the order of @example tags
+        blockTagsPreserveOrder: ["@example", "@examples"],
       } as Partial<TypeDocOptions>);
       const project = await app.convert();
 
