@@ -9,11 +9,10 @@ export type DstSimulation = {
 };
 
 /**
- * Baseline simulation - Standard test execution without any modifications.
- * This simulation serves as the reference point for comparing other simulations.
+ * Normal simulation - Standard test execution without any modifications.
  */
-const baselineSimulation: DstSimulation = {
-	name: "baseline",
+const simulationUnderNormalConditions: DstSimulation = {
+	name: "normal",
 	setup: async (lix) => lix,
 };
 
@@ -25,7 +24,7 @@ interface simulationTestOptions {
 
 // Default simulations available
 const defaultSimulations: Record<string, DstSimulation> = {
-	baseline: baselineSimulation,
+	normal: simulationUnderNormalConditions,
 	"cache-miss": cacheMissSimulation,
 };
 
@@ -39,7 +38,7 @@ const defaultSimulations: Record<string, DstSimulation> = {
  *   - customSimulations: Custom simulation definitions to add
  *
  * @example
- * // Run default simulations (baseline, cache-miss)
+ * // Run default simulations (normal, cache-miss)
  * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
@@ -58,7 +57,7 @@ const defaultSimulations: Record<string, DstSimulation> = {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, {
- *   simulations: ["baseline", "my-simulation"],
+ *   simulations: ["normal", "my-simulation"],
  *   customSimulations: [mySimulation]
  * });
  */
@@ -129,7 +128,7 @@ SIMULATION DETERMINISM VIOLATION
 expectDeterministic() failed: Values differ between simulations
 
 Location: Call #${callIndex - 1}
-Simulation: ${simulation.name} vs ${simulationsToRun[0]?.name || "baseline"}
+Simulation: ${simulation.name} vs ${simulationsToRun[0]?.name || "normal"}
 
 Use expectDeterministic() for values that must be identical across simulations.
 Use regular expect() for simulation-specific assertions.

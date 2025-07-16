@@ -23,7 +23,7 @@ describe("expectDeterministic validates values across simulations", () => {
 			}).not.toThrow();
 		},
 		{
-			simulations: ["baseline", "custom"],
+			simulations: ["normal", "custom"],
 			customSimulations: [customSimulation],
 		}
 	);
@@ -40,21 +40,21 @@ describe("expectDeterministic catches simulation differences", () => {
 		async ({ simulation, expectDeterministic }) => {
 			// This will store different values in different simulations
 			const simulationSpecificValue =
-				simulation === "baseline" ? "baseline-value" : "other-value";
+				simulation === "normal" ? "normal-value" : "other-value";
 
-			if (simulation === "baseline") {
+			if (simulation === "normal") {
 				// This will fail in the second simulation
 				expect(() =>
-					expectDeterministic(simulationSpecificValue).toBe("baseline-value")
+					expectDeterministic(simulationSpecificValue).toBe("normal-value")
 				).not.toThrow();
 			} else {
 				expect(() =>
-					expectDeterministic(simulationSpecificValue).toBe("baseline-value")
+					expectDeterministic(simulationSpecificValue).toBe("normal-value")
 				).toThrow(/SIMULATION DETERMINISM VIOLATION/);
 			}
 		},
 		{
-			simulations: ["baseline", "custom"],
+			simulations: ["normal", "custom"],
 			customSimulations: [customSimulation],
 		}
 	);
@@ -95,7 +95,7 @@ describe("deterministic state validation", () => {
 			expect(allState).toBeDefined();
 		},
 		{
-			simulations: ["baseline", "mock-simulation"],
+			simulations: ["normal", "mock-simulation"],
 			customSimulations: [mockSimulation],
 		}
 	);
@@ -163,7 +163,7 @@ describe("database operations are deterministic", async () => {
 			}
 		},
 		{
-			simulations: ["baseline", "mock-simulation"],
+			simulations: ["normal", "mock-simulation"],
 			customSimulations: [mockSimulation],
 		}
 	);
