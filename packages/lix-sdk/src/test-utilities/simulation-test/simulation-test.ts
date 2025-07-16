@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { type Lix } from "../../lix/open-lix.js";
+import { type Lix, openLix } from "../../lix/open-lix.js";
 import { newLixFile } from "../../lix/new-lix.js";
 import { cacheMissSimulation } from "./cache-miss-simulation.js";
 
@@ -77,6 +77,7 @@ export function simulationTest(
 	fn: (args: {
 		simulation: string;
 		initialLix: Blob;
+		openSimulatedLix: typeof openLix;
 		expectDeterministic: typeof expect;
 	}) => Promise<void>,
 	options?: SimulationTestOptions
@@ -153,9 +154,22 @@ Use regular expect() for simulation-specific assertions.
 			return expect(actual, message);
 		};
 
+		// Create openSimulatedLix function
+		const openSimulatedLix = async (args?: Parameters<typeof openLix>[0]) => {
+			// Default to using the initial blob if no blob provided
+			const blob = args?.blob || (await initialLixBlob);
+
+			// Open lix with the provided arguments
+			const lix = await openLix({ ...args, blob });
+
+			// Apply simulation setup
+			return await simulation.setup(lix);
+		};
+
 		await fn({
 			simulation: simulation.name,
 			initialLix: await initialLixBlob,
+			openSimulatedLix,
 			expectDeterministic: deterministicExpect as typeof expect,
 		});
 	});

@@ -1,59 +1,66 @@
 import { test, expect } from "vitest";
 import { simulationTest } from "./simulation-test.js";
 import { openLix } from "../../lix/open-lix.js";
+import type { Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 
 test("cache miss simulation test discovery", () => {});
 
 simulationTest(
 	"cache miss simulation clears cache before every select",
-	async ({ initialLix }) => {
-		const lix = await openLix({ blob: initialLix });
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_log_levels",
+					value: ["*"],
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				},
+			],
+		});
 
 		// Insert test data
 		await lix.db
 			.insertInto("key_value")
-			.values([
-				{ key: "test_1", value: "value_1" },
-				{ key: "test_2", value: "value_2" },
-				{ key: "test_3", value: "value_3" },
-			])
+			.values([{ key: "test_1", value: "value_1" }])
 			.execute();
 
-		// Cache should have data from the inserts
-		const cacheResult = lix.sqlite.exec({
-			sql: "SELECT COUNT(*) as count FROM internal_state_cache",
-			returnValue: "resultRows",
-		})[0] as any;
-		const cacheCountBeforeSelect = cacheResult[0];
-		expect(cacheCountBeforeSelect).toBeGreaterThan(0);
+		const cacheAfterInsert = await (
+			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+		)
+			.selectFrom("internal_state_cache")
+			.selectAll()
+			.execute();
 
-		// Perform selects
+		expect(cacheAfterInsert).toHaveLength(0);
+
+		const cacheMissLogsBefore = await lix.db
+			.selectFrom("log")
+			.where("key", "=", "lix_state_cache_miss")
+			.selectAll()
+			.execute();
+
+		expect(cacheMissLogsBefore).toHaveLength(0);
+
+		console.log("About to execute SELECT query on key_value");
 		await lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "test_1")
 			.selectAll()
-			.executeTakeFirst();
+			.execute();
+		console.log("SELECT query completed");
 
-		await lix.db
-			.selectFrom("key_value")
-			.where("key", "=", "test_2")
+		const cacheMissAfter = await lix.db
+			.selectFrom("log")
+			.where("key", "=", "lix_state_cache_miss")
 			.selectAll()
-			.executeTakeFirst();
+			.execute();
 
-		// After selects, cache should have been cleared and rebuilt
-		const cacheResultAfter = lix.sqlite.exec({
-			sql: "SELECT COUNT(*) as count FROM internal_state_cache",
-			returnValue: "resultRows",
-		})[0] as any;
-		const cacheCountAfterSelect = cacheResultAfter[0];
-
-		// Cache shouldn't grow indefinitely - it's cleared before each select
-		expect(cacheCountAfterSelect).toBeLessThanOrEqual(
-			cacheCountBeforeSelect + 10
-		);
+		expect(cacheMissAfter).toHaveLength(1);
 	},
 	{
-		onlyRun: ["cache-miss"], // Only run with cache miss simulation
+		onlyRun: ["cache-miss"],
 	}
 );
 

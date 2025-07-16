@@ -1,8 +1,8 @@
-import { clearCache } from "../../state/clear-cache.js";
+import { clearCache } from "../../state/cache/clear-cache.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 /**
- * Cache miss simulation - Clears cache before every select query to force re-materialization from changes.
+ * Cache miss simulation - Clears cache after every commit to force re-materialization from changes.
  * This tests that state can be correctly reconstructed from the change log
  * without relying on cached state.
  */
@@ -12,66 +12,25 @@ export const cacheMissSimulation: SimulationTestDef = {
 		// Clear initial cache
 		await clearCache({ lix });
 
-		// Track if we're in a materialization query to avoid infinite loops
-		let isInternalQuery = false;
+		// Use the afterStateCommit hook to clear cache after each commit
+		lix.hooks.onStateCommit(() => {
+			console.log("Clearing cache after state commit");
+			// Clear cache synchronously
+			lix.sqlite.exec({
+				sql: "DELETE FROM internal_state_cache",
+				returnValue: "resultRows",
+			});
 
-		// Store the original selectFrom method
-		const originalSelectFrom = lix.db.selectFrom.bind(lix.db);
+			const cacheCount = lix.sqlite.exec({
+				sql: "SELECT COUNT(*) as count FROM internal_state_cache",
+				returnValue: "resultRows",
+			})[0];
 
-		// Override the selectFrom method
-		(lix.db as any).selectFrom = function (table: any) {
-			// Only clear cache for user queries, not internal materialization queries
-			// We detect internal queries by checking if we're already in a query
-			if (!isInternalQuery) {
-				isInternalQuery = true;
+			console.log(`Cache cleared, new count: ${cacheCount}`);
+		});
 
-				// Clear cache synchronously before executing the select
-				lix.sqlite.exec({
-					sql: "DELETE FROM internal_state_cache",
-					returnValue: "resultRows",
-				});
-
-				// Call the original selectFrom and reset the flag when done
-				const result = originalSelectFrom(table);
-
-				// Wrap the execute methods to reset the flag
-				const originalExecute = result.execute;
-				const originalExecuteTakeFirst = result.executeTakeFirst;
-				const originalExecuteTakeFirstOrThrow = result.executeTakeFirstOrThrow;
-
-				result.execute = async function (...args: any[]) {
-					try {
-						return await originalExecute.apply(this, args as any);
-					} finally {
-						isInternalQuery = false;
-					}
-				};
-
-				result.executeTakeFirst = async function (...args: any[]) {
-					try {
-						return await originalExecuteTakeFirst.apply(this, args as any);
-					} finally {
-						isInternalQuery = false;
-					}
-				};
-
-				result.executeTakeFirstOrThrow = async function (...args: any[]) {
-					try {
-						return await originalExecuteTakeFirstOrThrow.apply(
-							this,
-							args as any
-						);
-					} finally {
-						isInternalQuery = false;
-					}
-				};
-
-				return result;
-			} else {
-				// Internal query, don't clear cache
-				return originalSelectFrom(table);
-			}
-		};
+		// Note: We don't unsubscribe because the lix instance is isolated to this test
+		// and we want the hook to remain active for the duration of the test
 
 		// Return the modified lix object
 		return lix;
