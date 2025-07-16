@@ -433,7 +433,7 @@ function createBootstrapChanges(args: {
 	// Create any other provided key-values
 	if (args.providedKeyValues) {
 		for (const kv of args.providedKeyValues) {
-			if (kv.key === "lix_id" || kv.key === "lix_name" || !kv.key || !kv.value)
+			if (kv.key === "lix_id" || kv.key === "lix_name" || !kv.key || kv.value === undefined || kv.value === null)
 				continue;
 
 			changes.push({

@@ -370,3 +370,31 @@ test("deterministic mode can be turned on and off", async () => {
 	// the change ids etc should be the same given that deterministic mode was turned on again
 	expect(lix1Kv2).toEqual(lix2Kv2);
 });
+
+// reproduction of a real bug
+test("providing deterministic mode with kv false should still insert it", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: false,
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const kvs = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_deterministic_mode")
+		.where("lixcol_inherited_from_version_id", "is", null)
+		.selectAll()
+		.execute();
+
+	expect(kvs).toContainEqual(
+		expect.objectContaining({
+			key: "lix_deterministic_mode",
+			value: 0, // false is stored as 0
+			lixcol_version_id: "global",
+		})
+	);
+});
