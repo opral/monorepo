@@ -1,5 +1,5 @@
 import { clearCache } from "../../state/clear-cache.js";
-import type { DstSimulation } from "./ds-test.js";
+import type { DstSimulation } from "./simulation-test.js";
 
 /**
  * Cache miss simulation - Clears cache before every select query to force re-materialization from changes.

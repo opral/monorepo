@@ -4,114 +4,117 @@ import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { dsTest } from "../test-utilities/dst/ds-test.js";
+import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
 
 test("dstest discovery", () => {});
 
-dsTest("select, insert, update, delete entity", async ({ initialLix }) => {
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
+simulationTest(
+	"select, insert, update, delete entity",
+	async ({ initialLix }) => {
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
 			},
-		},
-	};
+		};
 
-	const lix = await openLix({ blob: initialLix });
+		const lix = await openLix({ blob: initialLix });
 
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-			snapshot_content: {
-				value: "hello world",
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: {
+					value: "hello world",
+				},
+			})
+			.execute();
+
+		const viewAfterInsert = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterInsert).toMatchObject([
+			{
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					value: "hello world",
+				},
 			},
-		})
-		.execute();
+		]);
 
-	const viewAfterInsert = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: {
+					value: "hello world - updated",
+				},
+			})
+			.where("entity_id", "=", "e0")
+			.where("schema_key", "=", "mock_schema")
+			.where("file_id", "=", "f0")
+			.execute();
 
-	expect(viewAfterInsert).toMatchObject([
-		{
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			snapshot_content: {
-				value: "hello world",
+		const viewAfterUpdate = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
+
+		expect(viewAfterUpdate).toMatchObject([
+			{
+				entity_id: "e0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				snapshot_content: {
+					value: "hello world - updated",
+				},
 			},
-		},
-	]);
+		]);
 
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: {
-				value: "hello world - updated",
-			},
-		})
-		.where("entity_id", "=", "e0")
-		.where("schema_key", "=", "mock_schema")
-		.where("file_id", "=", "f0")
-		.execute();
+		await lix.db
+			.deleteFrom("state_all")
+			.where("entity_id", "=", "e0")
+			.where(
+				"version_id",
+				"=",
+				lix.db.selectFrom("active_version").select("version_id")
+			)
+			.where("schema_key", "=", "mock_schema")
+			.execute();
 
-	const viewAfterUpdate = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
+		const viewAfterDelete = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
 
-	expect(viewAfterUpdate).toMatchObject([
-		{
-			entity_id: "e0",
-			file_id: "f0",
-			schema_key: "mock_schema",
-			plugin_key: "lix_own_entity",
-			snapshot_content: {
-				value: "hello world - updated",
-			},
-		},
-	]);
+		expect(viewAfterDelete).toHaveLength(0);
+	}
+);
 
-	await lix.db
-		.deleteFrom("state_all")
-		.where("entity_id", "=", "e0")
-		.where(
-			"version_id",
-			"=",
-			lix.db.selectFrom("active_version").select("version_id")
-		)
-		.where("schema_key", "=", "mock_schema")
-		.execute();
-
-	const viewAfterDelete = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
-
-	expect(viewAfterDelete).toHaveLength(0);
-});
-
-dsTest("validates the schema on insert", async ({ initialLix }) => {
+simulationTest("validates the schema on insert", async ({ initialLix }) => {
 	const lix = await openLix({ blob: initialLix });
 
 	const mockSchema: LixSchemaDefinition = {
@@ -148,7 +151,7 @@ dsTest("validates the schema on insert", async ({ initialLix }) => {
 	).rejects.toThrow(/value must be number/);
 });
 
-dsTest("validates the schema on update", async ({ initialLix }) => {
+simulationTest("validates the schema on update", async ({ initialLix }) => {
 	const lix = await openLix({ blob: initialLix });
 
 	const mockSchema: LixSchemaDefinition = {
@@ -216,7 +219,7 @@ dsTest("validates the schema on update", async ({ initialLix }) => {
 	]);
 });
 
-dsTest("state is separated by version", async ({ initialLix }) => {
+simulationTest("state is separated by version", async ({ initialLix }) => {
 	const lix = await openLix({ blob: initialLix });
 
 	await createVersion({ lix, id: "version_a" });
@@ -353,7 +356,7 @@ dsTest("state is separated by version", async ({ initialLix }) => {
 	]);
 });
 
-dsTest(
+simulationTest(
 	"created_at and updated_at timestamps are computed correctly",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -445,7 +448,7 @@ dsTest(
 	}
 );
 
-dsTest(
+simulationTest(
 	"created_at and updated_at are version specific",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -574,7 +577,7 @@ dsTest(
 	}
 );
 
-dsTest(
+simulationTest(
 	"state appears in both versions when they share the same change set",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -634,7 +637,7 @@ dsTest(
 	}
 );
 
-dsTest(
+simulationTest(
 	"state diverges when versions have common ancestor but different changes",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -743,7 +746,7 @@ dsTest(
 	}
 );
 
-dsTest(
+simulationTest(
 	"delete operations remove entries from underlying data",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -797,7 +800,7 @@ dsTest(
 	}
 );
 
-dsTest(
+simulationTest(
 	"change.created_at and state timestamps are consistent",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -859,7 +862,7 @@ dsTest(
 	}
 );
 
-dsTest(
+simulationTest(
 	"state and state_all views expose change_id for blame and diff functionality",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -987,7 +990,7 @@ dsTest(
 	}
 );
 
-dsTest(
+simulationTest(
 	"state and state_all views expose change_set_id for history queries",
 	async ({ expectDeterministic, initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -1113,7 +1116,7 @@ dsTest(
 );
 
 // Write-through cache behavior tests
-dsTest(
+simulationTest(
 	"write-through cache: insert operations populate cache immediately",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });

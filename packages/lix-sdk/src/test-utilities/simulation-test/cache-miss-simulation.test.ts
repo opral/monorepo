@@ -1,10 +1,10 @@
 import { test, expect } from "vitest";
-import { dsTest } from "./ds-test.js";
+import { simulationTest } from "./simulation-test.js";
 import { openLix } from "../../lix/open-lix.js";
 
 test("cache miss simulation test discovery", () => {});
 
-dsTest(
+simulationTest(
 	"cache miss simulation clears cache before every select",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });
@@ -57,7 +57,7 @@ dsTest(
 	}
 );
 
-dsTest(
+simulationTest(
 	"cache miss simulation produces correct query results",
 	async ({ initialLix }) => {
 		const lix = await openLix({ blob: initialLix });

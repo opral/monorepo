@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { dsTest, type DstSimulation } from "./ds-test.js";
+import { simulationTest, type DstSimulation } from "./simulation-test.js";
 import { openLix } from "../../lix/open-lix.js";
 
 test("simulation test discovery", () => {});
@@ -10,7 +10,7 @@ describe("expectDeterministic validates values across simulations", () => {
 		setup: async (lix) => lix,
 	};
 
-	dsTest(
+	simulationTest(
 		"",
 		async ({ expectDeterministic }) => {
 			// These should be consistent across all simulations
@@ -35,7 +35,7 @@ describe("expectDeterministic catches simulation differences", () => {
 		setup: async (lix) => lix,
 	};
 
-	dsTest(
+	simulationTest(
 		"",
 		async ({ simulation, expectDeterministic }) => {
 			// This will store different values in different simulations
@@ -72,7 +72,7 @@ describe("deterministic state validation", () => {
 		setup: async (lix) => lix,
 	};
 
-	dsTest(
+	simulationTest(
 		"every simulation opens the same lix",
 		async ({ initialLix }) => {
 			const lix = await openLix({ blob: initialLix });
@@ -107,7 +107,7 @@ describe("database operations are deterministic", async () => {
 		setup: async (lix) => lix,
 	};
 
-	dsTest(
+	simulationTest(
 		"",
 		async ({ initialLix, expectDeterministic }) => {
 			const lix = await openLix({ blob: initialLix });

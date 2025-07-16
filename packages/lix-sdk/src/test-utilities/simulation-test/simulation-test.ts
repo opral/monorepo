@@ -18,7 +18,7 @@ const baselineSimulation: DstSimulation = {
 };
 
 // Options for simulation tests
-interface DsTestOptions {
+interface simulationTestOptions {
 	simulations?: string[];
 	customSimulations?: DstSimulation[];
 }
@@ -40,21 +40,21 @@ const defaultSimulations: Record<string, DstSimulation> = {
  *
  * @example
  * // Run default simulations (baseline, cache-miss)
- * dsTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
+ * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * });
  *
  * @example
  * // Run only specific simulations
- * dsTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
+ * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, { simulations: ["cache-miss"] });
  *
  * @example
  * // Add custom simulations
- * dsTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
+ * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, {
@@ -62,14 +62,14 @@ const defaultSimulations: Record<string, DstSimulation> = {
  *   customSimulations: [mySimulation]
  * });
  */
-export function dsTest(
+export function simulationTest(
 	name: string,
 	fn: (args: {
 		simulation: string;
 		initialLix: Blob;
 		expectDeterministic: typeof expect;
 	}) => Promise<void>,
-	options?: DsTestOptions
+	options?: simulationTestOptions
 ): void {
 	// Merge default and additional simulations
 	const allSimulations: Record<string, DstSimulation> = {
