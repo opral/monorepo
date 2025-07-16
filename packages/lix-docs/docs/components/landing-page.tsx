@@ -79,7 +79,9 @@ const PackageInstaller = () => {
     <div className="relative w-auto">
       <div className="bg-white text-gray-800 px-3 rounded-md font-mono text-sm flex items-center w-auto justify-between space-x-2 border border-gray-200 shadow-sm h-10">
         <div className="flex items-center h-full">
-          <span className="text-gray-500 mr-1 select-none text-sm">npm install</span>
+          <span className="text-gray-500 mr-1 select-none text-sm">
+            npm install
+          </span>
           <span className="text-blue-600 tracking-wide cursor-text select-all text-sm">
             @lix-js/sdk
           </span>
@@ -182,15 +184,15 @@ function LandingPage() {
                   className="py-3 px-4 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3 text-sm"
                 >
                   <svg
-                    className="w-4 h-4 text-red-500 flex-shrink-0"
+                    className="w-6 h-6 text-red-500 flex-shrink-0"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
                   </svg>
-                  <span className="font-medium text-gray-700">
-                    27k+ weekly downloads
+                  <span className="font-medium text-gray-700 text-lg">
+                    30k+ weekly
                   </span>
                 </a>
 
@@ -202,14 +204,14 @@ function LandingPage() {
                   className="py-3 px-4 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3 text-sm"
                 >
                   <svg
-                    className="w-4 h-4 text-gray-700 flex-shrink-0"
+                    className="w-6 h-6 text-gray-700 flex-shrink-0"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.48 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.645.35-1.087.636-1.337-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
                   </svg>
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-gray-700 text-lg">
                     100+ contributors
                   </span>
                 </a>
@@ -222,14 +224,14 @@ function LandingPage() {
                   className="py-3 px-4 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3 text-sm"
                 >
                   <svg
-                    className="w-4 h-4 text-gray-700 flex-shrink-0"
+                    className="w-6 h-6 text-gray-700 flex-shrink-0"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.67-3.13 8.95-7 10.18-3.87-1.23-7-5.51-7-10.18V6.3l7-3.12zM11 7h2v6h-2V7zm0 8h2v2h-2v-2z" />
                   </svg>
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-gray-700 text-lg">
                     MIT Open Source
                   </span>
                 </a>
@@ -253,16 +255,19 @@ function LandingPage() {
                     src="/prosemirror.png"
                     alt="ProseMirror editor with Lix version control"
                     className="w-full h-full object-cover"
-                    onLoad={() => console.log('prosemirror.png loaded successfully')}
+                    onLoad={() =>
+                      console.log("prosemirror.png loaded successfully")
+                    }
                     onError={(e) => {
-                      console.error('Failed to load prosemirror.png', e);
+                      console.error("Failed to load prosemirror.png", e);
                       const container = e.currentTarget.parentElement;
                       if (container) {
-                        container.style.backgroundColor = '#f3f4f6';
-                        container.style.display = 'flex';
-                        container.style.alignItems = 'center';
-                        container.style.justifyContent = 'center';
-                        container.innerHTML = '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">ProseMirror Demo</div>';
+                        container.style.backgroundColor = "#f3f4f6";
+                        container.style.display = "flex";
+                        container.style.alignItems = "center";
+                        container.style.justifyContent = "center";
+                        container.innerHTML =
+                          '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">ProseMirror Demo</div>';
                       }
                     }}
                   />
@@ -272,7 +277,7 @@ function LandingPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
-                      style={{ color: 'white' }}
+                      style={{ color: "white" }}
                     >
                       Try Live Demo →
                     </a>
@@ -296,16 +301,17 @@ function LandingPage() {
                     src="/fink2.png"
                     alt="Fink localization app with change tracking"
                     className="w-full h-full object-cover"
-                    onLoad={() => console.log('fink2.png loaded successfully')}
+                    onLoad={() => console.log("fink2.png loaded successfully")}
                     onError={(e) => {
-                      console.error('Failed to load fink2.png', e);
+                      console.error("Failed to load fink2.png", e);
                       const container = e.currentTarget.parentElement;
                       if (container) {
-                        container.style.backgroundColor = '#f3f4f6';
-                        container.style.display = 'flex';
-                        container.style.alignItems = 'center';
-                        container.style.justifyContent = 'center';
-                        container.innerHTML = '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">Fink Demo</div>';
+                        container.style.backgroundColor = "#f3f4f6";
+                        container.style.display = "flex";
+                        container.style.alignItems = "center";
+                        container.style.justifyContent = "center";
+                        container.innerHTML =
+                          '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">Fink Demo</div>';
                       }
                     }}
                   />
@@ -315,7 +321,7 @@ function LandingPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
-                      style={{ color: 'white' }}
+                      style={{ color: "white" }}
                     >
                       Try Live Demo →
                     </a>
@@ -339,16 +345,19 @@ function LandingPage() {
                     src="/flashtype.jpg"
                     alt="Flashtype app with Lix change control"
                     className="w-full h-full object-cover"
-                    onLoad={() => console.log('flashtype.jpg loaded successfully')}
+                    onLoad={() =>
+                      console.log("flashtype.jpg loaded successfully")
+                    }
                     onError={(e) => {
-                      console.error('Failed to load flashtype.jpg', e);
+                      console.error("Failed to load flashtype.jpg", e);
                       const container = e.currentTarget.parentElement;
                       if (container) {
-                        container.style.backgroundColor = '#f3f4f6';
-                        container.style.display = 'flex';
-                        container.style.alignItems = 'center';
-                        container.style.justifyContent = 'center';
-                        container.innerHTML = '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">Flashtype Demo</div>';
+                        container.style.backgroundColor = "#f3f4f6";
+                        container.style.display = "flex";
+                        container.style.alignItems = "center";
+                        container.style.justifyContent = "center";
+                        container.innerHTML =
+                          '<div style="color: #6b7280; font-size: 14px; font-weight: 500;">Flashtype Demo</div>';
                       }
                     }}
                   />
@@ -358,7 +367,7 @@ function LandingPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
-                      style={{ color: 'white' }}
+                      style={{ color: "white" }}
                     >
                       Try Flashtype →
                     </a>
