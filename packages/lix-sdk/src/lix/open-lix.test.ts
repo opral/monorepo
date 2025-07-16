@@ -398,3 +398,61 @@ test("providing deterministic mode with kv false should still insert it", async 
 		})
 	);
 });
+
+// TODO fix state materialization first
+// state materialization bug. selecting from the active version 
+// before querying the key values makes the test pass. 
+test("provided key values respect lixcol_untracked setting", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "tracked_key",
+				value: "tracked_value",
+				lixcol_version_id: "global",
+			},
+			{
+				key: "untracked_key",
+				value: "untracked_value",
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			},
+		],
+	});
+
+	// Check active version
+	// const activeVersion = await lix.db
+	// 	.selectFrom("active_version")
+	// 	.selectAll()
+	// 	.executeTakeFirst();
+	// console.log("Active version:", activeVersion?.version_id);
+
+	// Check tracked key
+	const trackedKv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "tracked_key")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(trackedKv).toMatchObject({
+		key: "tracked_key",
+		value: "tracked_value",
+		lixcol_version_id: "global",
+		lixcol_untracked: 0, // tracked
+	});
+
+	// Check untracked key
+	const untrackedKv = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "untracked_key")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(untrackedKv).toMatchObject({
+		key: "untracked_key",
+		value: "untracked_value",
+		lixcol_version_id: "global",
+		lixcol_untracked: 1, // untracked
+	});
+});

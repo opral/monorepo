@@ -256,6 +256,43 @@ export async function newLixFile(args?: {
 		});
 	}
 
+	// Handle other untracked key values
+	const untrackedKeyValues = args?.keyValues?.filter(
+		(kv) => kv.lixcol_untracked === true && kv.key !== "lix_deterministic_bootstrap"
+	);
+	if (untrackedKeyValues) {
+		for (const kv of untrackedKeyValues) {
+			const versionId = kv.lixcol_version_id ?? "global";
+			sqlite.exec({
+				sql: `INSERT INTO internal_state_all_untracked (
+					entity_id,
+					schema_key,
+					file_id,
+					version_id,
+					plugin_key,
+					snapshot_content,
+					schema_version,
+					created_at,
+					updated_at
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				bind: [
+					kv.key,
+					"lix_key_value",
+					"lix",
+					versionId,
+					"lix_own_entity",
+					JSON.stringify({
+						key: kv.key,
+						value: kv.value,
+					}),
+					LixKeyValueSchema["x-lix-version"],
+					created_at,
+					created_at,
+				],
+			});
+		}
+	}
+
 	try {
 		const blob = new Blob([contentFromDatabase(sqlite)]);
 		// Create a LixBlob by extending the blob with the lix property
@@ -430,10 +467,14 @@ function createBootstrapChanges(args: {
 		created_at: args.created_at,
 	});
 
-	// Create any other provided key-values
+	// Create any other provided key-values (excluding untracked ones)
 	if (args.providedKeyValues) {
 		for (const kv of args.providedKeyValues) {
 			if (kv.key === "lix_id" || kv.key === "lix_name" || !kv.key || kv.value === undefined || kv.value === null)
+				continue;
+			
+			// Skip untracked keys - they're handled separately
+			if (kv.lixcol_untracked === true)
 				continue;
 
 			changes.push({
