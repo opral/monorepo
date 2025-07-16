@@ -1,166 +1,140 @@
-# Lix Deterministic Mode
+# Deterministic Mode
 
-Deterministic mode enables reproducible behavior in Lix by controlling all sources of non-determinism (timestamps, IDs, and randomness). This is essential for:
+> **Who is this for?** If you're testing, debugging, or simulating distributed systems with Lix and need predictable, reproducible behavior across runs, deterministic mode is for you.
 
-- **Deterministic Simulation Testing (DST)** - Run the same test across multiple simulated environments to verify robustness
-- **Debugging distributed systems** - Reproduce exact sequences of events across multiple Lix instances
-- **Time-travel debugging** - Replay application state with identical IDs and timestamps
-- **Testing conflict resolution** - Simulate concurrent modifications with predictable IDs
-- **Regression testing** - Ensure tests produce identical results across runs
+Use deterministic mode for:
 
-## Getting Started
+- **Testing** - Unit and integration tests that produce identical results every run
+- **Debugging** - Reproduce exact sequences of events from bug reports
+- **Simulations** - Run deterministic simulations across multiple environments
 
-To enable deterministic mode, set the `lix_deterministic_mode` key when opening a Lix file:
+## Quick Example
+
+**Normal mode (default)** - different results each run:
+```ts
+import { openLix, timestamp, random } from "@lix-js/sdk";
+
+const lix = await openLix({ blob });
+
+timestamp({ lix }); // "2024-03-15T10:32:45.123Z" (current time)
+timestamp({ lix }); // "2024-03-15T10:32:45.124Z" (real time passes)
+random({ lix });    // 0.7234... (unpredictable)
+random({ lix });    // 0.1823... (unpredictable)
+```
+
+**Deterministic mode** - same results every run:
 
 ```ts
-import { openLix } from "@lix-js/sdk";
+const lix = await openLix({ 
+  blob,
+  keyValues: [{ key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" }]
+});
 
+timestamp({ lix }); // "1970-01-01T00:00:00.000Z" (always epoch)
+timestamp({ lix }); // "1970-01-01T00:00:00.001Z" (always +1ms)
+random({ lix });    // 0.318... (always this sequence)
+random({ lix });    // 0.937... (always this sequence)
+```
+
+## Configuration
+
+### Basic Setup
+
+Enable deterministic mode when opening a Lix:
+
+```ts
 const lix = await openLix({
-  blob: await yourBlob,
+  blob,
   keyValues: [
+    { key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" }
+  ],
+});
+```
+
+Or enable it after opening:
+
+```ts
+await lix.db
+  .updateTable("key_value_all")
+  .set({ value: true })
+  .where("key", "=", "lix_deterministic_mode")
+  .where("lixcol_version_id", "=", "global")
+  .execute();
+```
+
+### Deterministic Bootstrap (Optional)
+
+For tests requiring fully reproducible behavior from creation:
+
+```ts
+// Creates a new Lix with deterministic IDs and timestamps
+const lix = await openLix({
+  keyValues: [
+    { key: "lix_deterministic_bootstrap", value: true, lixcol_version_id: "global" },
     { key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" },
   ],
 });
 ```
 
-Once enabled, all IDs, timestamps, and random values become deterministic and reproducible.
+> [!NOTE]
+> **Choosing the right bootstrap mode:**
+> - Use **deterministic bootstrap** for reproducibility testing that doesn't involve distribution (e.g., unit tests, regression tests)
+> - Use **non-deterministic bootstrap** (default) for distributed testing scenarios (e.g., simulating multiple Lix instances syncing)
 
-## Overview
+### Key Values
 
-These _functional_ helpers expose the three independent entropy sources used in deterministic‑simulation tests:
+| Key | Type | Purpose |
+| --- | ---- | ------- |
+| `lix_deterministic_mode` | boolean | Runtime determinism (PRNG, sequence, clock) once the repo exists |
+| `lix_deterministic_bootstrap` | boolean | Reproducible bootstrap when creating new Lix (deterministic IDs like "deterministic-lix-id", epoch timestamps). Only applies when no blob is provided. |
+| `lix_deterministic_rng_seed` | string | Custom seed for the random number generator. Defaults to `lix_id` if not specified. |
 
-| Helper                        | Kind of entropy       | Typical use‑cases                                   |
-| ----------------------------- | --------------------- | --------------------------------------------------- |
-| `timestamp({ lix })`          | Logical clock         | `createdAt`, TTL, “time‑ordered” queries            |
-| `nextDeterministicSequenceNumber({ lix })` | Monotone counter      | Collision‑free IDs (`ENTITY_7`), pagination cursors |
-| `random({ lix })`             | Replayable randomness | Sampling, shuffle, deterministic jitter             |
+## Advanced Usage
 
-## Key properties
+### Different RNG Seeds
 
-- **Deterministic** – identical blobs + seeds ⇒ identical sequences across runs/platforms.
-- **State‑persisted** – every successful mutating transaction and every `lix.toBlob()`/`lix.close()` flushes updated state to `internal_state_all_untracked`.
-- **Pure call‑site API** – no globals; each helper requires `{ lix }`.
-
-## API reference
-
-### `timestamp({ lix }): string`
-
-Returns the current **logical timestamp** as an ISO 8601 string.
-Clock advances according to implementation (e.g. +1 ms per write).
+To make multiple Lix instances behave differently in deterministic mode:
 
 ```ts
-const t = timestamp({ lix }); // "1970-01-01T00:00:00.000Z", "1970-01-01T00:00:00.001Z", …
-```
+// Set seed when opening
+const lix1 = await openLix({
+  blob,
+  keyValues: [
+    { key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" },
+    { key: "lix_deterministic_rng_seed", value: "instance-1", lixcol_version_id: "global" }
+  ]
+});
 
-**Guarantees**
-
-- Monotone, never decreases.
-- Persisted and resumed on re‑open / clone.
-
-### `nextDeterministicSequenceNumber({ lix }): number`
-
-Returns the next **monotone sequence number**, starting at 0.
-
-Available only when `lix_deterministic_mode = true`; otherwise the function throws.
-
-```ts
-const n = nextDeterministicSequenceNumber({ lix }); // 0, 1, 2, …
-```
-
-**Guarantees**
-
-- Available only in deterministic mode
-- Strictly +1 each call, no gaps or duplicates
-- Persisted via `lix_deterministic_sequence_number` key value
-
-### `random({ lix }): number`
-
-Returns a deterministic pseudo‑random float `r` where `0 ≤ r < 1`, generated by a seed‑initialised xoshiro128\*\* PRNG.
-
-```ts
-const r = random({ lix }); // 0.318…, 0.937…, …
-```
-
-**Seeding rules**
-
-- First run → seed defaults to the Lix UUID.
-- Override by inserting `lix_deterministic_rng_seed` **before** first `random()` call.
-- PRNG state persisted on each call.
-
-## Flush protocol
-
-| Event                          | Counter/RNG/Clock state flushed? |
-| ------------------------------ | -------------------------------- |
-| Successful mutating Tx         | ✅                               |
-| `lix.toBlob()` / `lix.close()` | ✅                               |
-| Read‑only Tx (`SELECT`)        | ❌                               |
-| Tx rollback / error            | ❌ (state rolled back)           |
-
-All state is stored in `internal_state_all_untracked` (`version_id = "global"`).
-
-## Edge‑cases
-
-| Scenario                                             | Behaviour                                                                   |
-| ---------------------------------------------------- | --------------------------------------------------------------------------- |
-| Clone blob, change only `lix_deterministic_rng_seed` | `random()` diverges, `timestamp()` & `nextDeterministicSequenceNumber()` remain aligned. |
-| Sequence overflow (`> Number.MAX_SAFE_INTEGER`)      | Helpers throw; requires schema migration.                                   |
-| Parallel Lix objects in same process                 | Independent state; helpers require explicit `{ lix }` arg.                  |
-
-## Example
-
-```ts
-import { timestamp, random, nextDeterministicSequenceNumber } from "@lix-js/sdk";
-
-const t1 = timestamp({ lix }); // "1970-01-01T00:00:00.000Z"
-const n1 = nextDeterministicSequenceNumber({ lix }); // 0
-const r1 = random({ lix }); // 0.318…
-
-await lix.db.insertInto("kv").values({ key: "foo", value: "bar" }).execute();
-
-const t2 = timestamp({ lix }); // "1970-01-01T00:00:00.001Z"
-const n2 = nextDeterministicSequenceNumber({ lix }); // 1
-const r2 = random({ lix }); // 0.937…
-```
-
-## FAQ
-
-### When should I use deterministic mode?
-
-Use deterministic mode for:
-
-- Unit and integration tests
-- Debugging distributed systems
-- Reproducing bug reports
-- Deterministic simulation testing
-
-Avoid it in production unless you specifically need reproducible IDs/timestamps.
-
-### Is there a performance cost?
-
-Minimal. The deterministic functions have similar performance to their non-deterministic counterparts.
-
-### Can I use deterministic mode with existing Lix files?
-
-Yes, but only new operations will be deterministic. Existing IDs and timestamps remain unchanged.
-
-### How do I make multiple Lix instances behave differently?
-
-Change the RNG seed before calling `random()`:
-
-```ts
-// Instance 1
-await lix1.db
-  .insertInto("key_value")
-  .values({ key: "lix_deterministic_rng_seed", value: "instance-1" })
-  .execute();
-
-// Instance 2
+// Or update seed after opening
 await lix2.db
-  .insertInto("key_value")
-  .values({ key: "lix_deterministic_rng_seed", value: "instance-2" })
+  .updateTable("key_value_all")
+  .set({ value: "instance-2" })
+  .where("key", "=", "lix_deterministic_rng_seed")
+  .where("lixcol_version_id", "=", "global")
   .execute();
-
-// Now random() will produce different sequences
-const r1 = random({ lix: lix1 }); // Different values
-const r2 = random({ lix: lix2 }); // for each instance
 ```
+
+### State Persistence
+
+Deterministic state is automatically persisted:
+
+| Event | State Flushed? |
+| ----- | -------------- |
+| Successful mutating transaction | ✅ |
+| `lix.toBlob()` / `lix.close()` | ✅ |
+| Read-only transaction | ❌ |
+| Transaction rollback/error | ❌ |
+
+All state is stored in `internal_state_all_untracked` with `version_id = "global"`.
+
+## API Quick-Links
+
+The following functions provide deterministic behavior when `lix_deterministic_mode` is enabled:
+
+| Function | Purpose | Docs |
+| -------- | ------- | ---- |
+| `timestamp({ lix })` | Logical clock timestamps | [API docs](/api/functions/timestamp) |
+| `random({ lix })` | Reproducible random numbers | [API docs](/api/functions/random) |
+| `uuidV7({ lix })` | Deterministic UUID v7 generation | [API docs](/api/functions/uuidV7) |
+| `nanoId({ lix })` | Deterministic nano ID generation | [API docs](/api/functions/nanoId) |
+| `nextDeterministicSequenceNumber({ lix })` | Monotonic counter (advanced) | [API docs](/api/functions/nextDeterministicSequenceNumber) |

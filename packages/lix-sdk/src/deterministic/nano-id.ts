@@ -3,26 +3,32 @@ import { nextDeterministicSequenceNumber } from "./index.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 
 /**
- * Returns a nanoid that is deterministic in deterministic mode.
- * In deterministic mode, returns deterministic IDs with sequential counters.
- * Otherwise returns a random nanoid.
+ * Returns a nano ID that is deterministic in deterministic mode.
  *
- * @example
- * // Normal mode - returns random nanoid
+ * In normal mode, returns a random 21-character nano ID using the [nanoid](https://github.com/ai/nanoid) algorithm.
+ * In deterministic mode, returns sequential IDs with "test_" prefix for easy identification.
+ *
+ * Use nano IDs when IDs will appear in URLs - their shorter length makes links easier to share.
+ * For better database performance with time-ordered queries, consider {@link uuidV7} instead.
+ *
+ * @example Normal mode - returns random nanoid
+ * ```ts
  * const lix = await openLix();
  * nanoId({ lix }); // "V1StGXR8_Z5jdHi6B-myT"
+ * ```
  *
- * @example
- * // Deterministic mode - returns sequential IDs with test_ prefix
+ * @example Deterministic mode - returns sequential IDs
+ * ```ts
  * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: true }]
+ *   keyValues: [{ key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" }]
  * });
- * nanoId({ lix }); // "test_0000000050"
- * nanoId({ lix }); // "test_0000000051"
- * nanoId({ lix }); // "test_0000000052"
+ * nanoId({ lix }); // "test_0000000000"
+ * nanoId({ lix }); // "test_0000000001"
+ * nanoId({ lix }); // "test_0000000002"
+ * ```
  *
- * @example
- * // Use in database operations
+ * @example Database operations
+ * ```ts
  * await lix.db
  *   .insertInto("label")
  *   .values({
@@ -31,6 +37,19 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  *     color: "#ff0000"
  *   })
  *   .execute();
+ * ```
+ *
+ * @param args.lix - The Lix instance with sqlite and db connections
+ * @param args.length - Custom length for non-deterministic mode (default: 21)
+ * @returns Nano ID string
+ *
+ * @remarks
+ * - Normal mode: URL-safe random ID using custom alphabet (no `-` or `_`)
+ * - Deterministic mode: "test_" + 10-digit zero-padded counter
+ * - Counter state shared with {@link nextDeterministicSequenceNumber}
+ * - The "test_" prefix makes deterministic IDs easily identifiable
+ * - Choose nano IDs for URL-friendly short IDs, {@link uuidV7} for time-sortable database keys
+ * - Use the [Nano ID collision calculator](https://zelark.github.io/nano-id-cc/) to find the optimal length for your shareability vs uniqueness needs
  */
 export function nanoId(args: {
 	lix: Pick<Lix, "sqlite" | "db">;

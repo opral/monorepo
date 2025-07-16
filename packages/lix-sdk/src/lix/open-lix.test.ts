@@ -208,6 +208,11 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 				value: true,
 				lixcol_version_id: "global",
 			},
+			{
+				key: "lix_deterministic_bootstrap",
+				value: true,
+				lixcol_version_id: "global",
+			},
 		],
 	});
 
@@ -215,6 +220,11 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+			{
+				key: "lix_deterministic_bootstrap",
 				value: true,
 				lixcol_version_id: "global",
 			},
@@ -245,24 +255,25 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 });
 
 test("deterministic mode can be turned on and off", async () => {
+	const deterministicModeKeyValues = [
+		{
+			key: "lix_deterministic_mode",
+			value: true,
+			lixcol_version_id: "global",
+		},
+		{
+			key: "lix_deterministic_bootstrap",
+			value: true,
+			lixcol_version_id: "global",
+		},
+	];
+
 	const lix1 = await openLix({
-		keyValues: [
-			{
-				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-		],
+		keyValues: [...deterministicModeKeyValues],
 	});
 
 	const lix2 = await openLix({
-		keyValues: [
-			{
-				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-		],
+		keyValues: [...deterministicModeKeyValues],
 	});
 
 	await Promise.all(

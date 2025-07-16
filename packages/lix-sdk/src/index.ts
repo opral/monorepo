@@ -3,6 +3,7 @@ export * from "./change/index.js";
 export * from "./change-author/index.js";
 export * from "./change-set/index.js";
 export * from "./database/index.js";
+export * from "./deterministic/index.js";
 export * from "./entity-views/index.js";
 export * from "./file/index.js";
 export * from "./hooks/create-hooks.js";

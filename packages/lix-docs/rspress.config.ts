@@ -84,6 +84,7 @@ export default defineConfig({
         },
         {
           text: "Core Concepts",
+          collapsed: true,
           items: [
             { text: "Comments", link: "/guide/features/comments" },
             { text: "Files", link: "/guide/concepts/files" },
@@ -102,7 +103,15 @@ export default defineConfig({
           ],
         },
         {
+          text: "Development & Debugging",
+          collapsed: true,
+          items: [
+            { text: "Deterministic Mode", link: "/guide/deterministic-mode" },
+          ],
+        },
+        {
           text: "Advanced",
+          collapsed: true,
           items: [
             { text: "SQL Queries", link: "/guide/advanced/sql-queries" },
             {

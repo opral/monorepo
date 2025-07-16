@@ -263,3 +263,122 @@ test("provided key values default to the active version if lixcol_version_id is 
 
 	expect(mainVersion?.name).toBe("main");
 });
+
+test("lix_deterministic_bootstrap: false results in different lix_ids", async () => {
+	// Create two lix files without deterministic bootstrap
+	const blob1 = await newLixFile({
+		keyValues: [{ key: "lix_deterministic_bootstrap", value: false }],
+	});
+	const blob2 = await newLixFile({
+		keyValues: [{ key: "lix_deterministic_bootstrap", value: false }],
+	});
+
+	// The lix_ids should be different
+	expect(blob1._lix.id).toBeDefined();
+	expect(blob2._lix.id).toBeDefined();
+	expect(blob1._lix.id).not.toBe(blob2._lix.id);
+});
+
+test("lix_deterministic_bootstrap: true results in identical lix_ids", async () => {
+	// Create two lix files with deterministic bootstrap
+	const blob1 = await newLixFile({
+		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+	});
+	const blob2 = await newLixFile({
+		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+	});
+
+	// The lix_ids should be identical (deterministic-lix-id)
+	expect(blob1._lix.id).toBeDefined();
+	expect(blob2._lix.id).toBeDefined();
+	expect(blob1._lix.id).toBe(blob2._lix.id);
+	expect(blob1._lix.id).toBe("deterministic-lix-id");
+});
+
+test("lix_deterministic_bootstrap creates fully deterministic lix", async () => {
+	// Create two lix files with deterministic bootstrap
+	const blob1 = await newLixFile({
+		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+	});
+	const blob2 = await newLixFile({
+		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+	});
+
+	const lix1 = await openLix({ blob: blob1 });
+	const lix2 = await openLix({ blob: blob2 });
+
+	// Check that all changes have identical IDs and timestamps
+	const changes1 = await lix1.db
+		.selectFrom("change")
+		.select(["id", "entity_id", "created_at"])
+		.orderBy("id")
+		.execute();
+	const changes2 = await lix2.db
+		.selectFrom("change")
+		.select(["id", "entity_id", "created_at"])
+		.orderBy("id")
+		.execute();
+
+	expect(changes1).toEqual(changes2);
+
+	// Check that all entity IDs are identical
+	const versions1 = await lix1.db
+		.selectFrom("version")
+		.select(["id", "name"])
+		.orderBy("id")
+		.execute();
+	const versions2 = await lix2.db
+		.selectFrom("version")
+		.select(["id", "name"])
+		.orderBy("id")
+		.execute();
+
+	expect(versions1).toEqual(versions2);
+
+	// Check timestamps are deterministic (epoch 0)
+	expect(changes1[0]?.created_at).toBe("1970-01-01T00:00:00.000Z");
+});
+
+test("lix_deterministic_bootstrap is persisted as untracked global key", async () => {
+	const blob = await newLixFile({
+		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+	});
+	const lix = await openLix({ blob });
+
+	// Check that lix_deterministic_bootstrap exists in key_value_all
+	const result = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_deterministic_bootstrap")
+		.where("lixcol_version_id", "=", "global")
+		.select(["key", "value"])
+		.executeTakeFirst();
+
+	expect(result).toBeDefined();
+	expect(result?.key).toBe("lix_deterministic_bootstrap");
+	expect(result?.value).toBe(1); // SQLite stores boolean true as 1
+});
+
+test("lix_deterministic_bootstrap with custom version_id is persisted correctly", async () => {
+	const blob = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_bootstrap",
+				value: true,
+				lixcol_version_id: "custom_version",
+			},
+		],
+	});
+	const lix = await openLix({ blob });
+
+	// Check that lix_deterministic_bootstrap exists with custom version_id
+	const result = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_deterministic_bootstrap")
+		.where("lixcol_version_id", "=", "custom_version")
+		.select(["key", "value"])
+		.executeTakeFirst();
+
+	expect(result).toBeDefined();
+	expect(result?.key).toBe("lix_deterministic_bootstrap");
+	expect(result?.value).toBe(1); // SQLite stores boolean true as 1
+});

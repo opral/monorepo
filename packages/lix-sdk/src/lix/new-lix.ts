@@ -111,9 +111,9 @@ export async function newLixFile(args?: {
 	// applying the schema etc.
 	const db = initDb({ sqlite, hooks });
 
-	// Check if deterministic mode is enabled
-	const isDeterministicMode = args?.keyValues?.some(
-		(kv) => kv.key === "lix_deterministic_mode" && kv.value === true
+	// Check if deterministic bootstrap is enabled
+	const isDeterministicBootstrap = args?.keyValues?.some(
+		(kv) => kv.key === "lix_deterministic_bootstrap" && kv.value === true
 	);
 
 	// Counter for deterministic IDs
@@ -121,7 +121,7 @@ export async function newLixFile(args?: {
 
 	// Helper to generate IDs based on mode
 	const generateUuid = () => {
-		if (isDeterministicMode) {
+		if (isDeterministicBootstrap) {
 			const hex = (deterministicIdCounter++).toString(16).padStart(8, "0");
 			// Use a different prefix (0192aaaa) for bootstrap changes to avoid collisions
 			// from the normal deterministic uuidV7 generator
@@ -131,15 +131,15 @@ export async function newLixFile(args?: {
 	};
 
 	const generateNanoid = () => {
-		if (isDeterministicMode) {
+		if (isDeterministicBootstrap) {
 			// Use "boot_" prefix for bootstrap nanoids to avoid collisions
 			return `boot_${(deterministicIdCounter++).toString().padStart(10, "0")}`;
 		}
 		return randomNanoId();
 	};
 
-	// Hardcode timestamp to epoch 0 for deterministic mode
-	const created_at = isDeterministicMode
+	// Hardcode timestamp to epoch 0 for deterministic bootstrap
+	const created_at = isDeterministicBootstrap
 		? new Date(0).toISOString()
 		: new Date().toISOString();
 
@@ -149,7 +149,7 @@ export async function newLixFile(args?: {
 		created_at,
 		generateUuid,
 		generateNanoid,
-		isDeterministicMode: isDeterministicMode || false,
+		isDeterministicBootstrap: isDeterministicBootstrap || false,
 	});
 
 	// Extract the lix_id from bootstrap changes
@@ -221,6 +221,41 @@ export async function newLixFile(args?: {
 		],
 	});
 
+	// If lix_deterministic_bootstrap was provided, persist it as untracked
+	const deterministicBootstrapKv = args?.keyValues?.find(
+		(kv) => kv.key === "lix_deterministic_bootstrap"
+	);
+	if (deterministicBootstrapKv) {
+		const versionId = deterministicBootstrapKv.lixcol_version_id ?? "global";
+		sqlite.exec({
+			sql: `INSERT INTO internal_state_all_untracked (
+				entity_id,
+				schema_key,
+				file_id,
+				version_id,
+				plugin_key,
+				snapshot_content,
+				schema_version,
+				created_at,
+				updated_at
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			bind: [
+				"lix_deterministic_bootstrap",
+				"lix_key_value",
+				"lix",
+				versionId,
+				"lix_own_entity",
+				JSON.stringify({
+					key: "lix_deterministic_bootstrap",
+					value: true,
+				}),
+				LixKeyValueSchema["x-lix-version"],
+				created_at,
+				created_at,
+			],
+		});
+	}
+
 	try {
 		const blob = new Blob([contentFromDatabase(sqlite)]);
 		// Create a LixBlob by extending the blob with the lix property
@@ -252,7 +287,7 @@ function createBootstrapChanges(args: {
 	created_at: string;
 	generateUuid: () => string;
 	generateNanoid: () => string;
-	isDeterministicMode: boolean;
+	isDeterministicBootstrap: boolean;
 }): BootstrapChange[] {
 	const changes: BootstrapChange[] = [];
 
@@ -365,7 +400,7 @@ function createBootstrapChanges(args: {
 			key: "lix_id",
 			value:
 				lixId ??
-				(args.isDeterministicMode
+				(args.isDeterministicBootstrap
 					? "deterministic-lix-id"
 					: args.generateNanoid()),
 		} satisfies LixKeyValue,
@@ -388,7 +423,7 @@ function createBootstrapChanges(args: {
 			key: "lix_name",
 			value:
 				lixName ??
-				(args.isDeterministicMode
+				(args.isDeterministicBootstrap
 					? "deterministic-lix-name"
 					: humanId({ separator: "-", capitalize: false })),
 		} satisfies LixKeyValue,
@@ -439,7 +474,7 @@ function createBootstrapChanges(args: {
 
 	// Create default active account
 	const activeAccountId = args.generateNanoid();
-	const anonymousAccountName = args.isDeterministicMode
+	const anonymousAccountName = args.isDeterministicBootstrap
 		? "Anonymous User"
 		: `Anonymous ${humanId({
 				capitalize: true,

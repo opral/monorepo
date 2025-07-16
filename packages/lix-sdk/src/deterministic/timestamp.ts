@@ -3,11 +3,10 @@ import { nextDeterministicSequenceNumber } from "./sequence.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 
 /**
- * Returns the current **logical timestamp** as an ISO 8601 string.
+ * Returns the current timestamp as an ISO 8601 string.
  *
- * In deterministic mode, returns timestamps starting from Unix epoch (1970-01-01),
- * with the clock advancing according to implementation (e.g. +1 ms per write).
- * In normal mode, returns the current system time.
+ * In deterministic mode, returns logical timestamps starting from Unix epoch (1970-01-01T00:00:00.000Z),
+ * incrementing by 1ms per call. In normal mode, returns the current system time.
  *
  * @example Normal mode - returns current time
  * ```ts
@@ -21,11 +20,11 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  *   keyValues: [{ key: "lix_deterministic_mode", value: true }]
  * });
  * timestamp({ lix }); // "1970-01-01T00:00:00.000Z"
- * timestamp({ lix }); // "1970-01-01T00:00:00.001Z"
- * timestamp({ lix }); // "1970-01-01T00:00:00.002Z"
+ * timestamp({ lix }); // "1970-01-01T00:00:00.001Z" (+1ms)
+ * timestamp({ lix }); // "1970-01-01T00:00:00.002Z" (+1ms)
  * ```
  *
- * @example Use in database operations for createdAt, TTL, time-ordered queries
+ * @example Database operations - createdAt, TTL, time-ordered queries
  * ```ts
  * await lix.db
  *   .insertInto("log")
@@ -41,9 +40,10 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  * @returns ISO 8601 timestamp string
  *
  * @remarks
- * - Monotone, never decreases
- * - Persisted and resumed on re-open / clone
- * - Typical use cases: `createdAt`, TTL, "time-ordered" queries
+ * - In deterministic mode: Advances by exactly 1ms per call
+ * - Monotonically increasing (never goes backwards)
+ * - State persisted across reopens via `lix_deterministic_sequence_number`
+ * - Common uses: `createdAt` fields, TTL calculations, time-ordered queries
  */
 export function timestamp(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 	// Check if deterministic mode is enabled

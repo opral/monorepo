@@ -16,11 +16,10 @@ type CounterState = {
 const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
 
 /**
- * Returns the next **monotone sequence number**, starting at 0.
+ * Returns the next monotonic sequence number, starting at 0.
  * 
- * Available only when `lix_deterministic_mode = true`; otherwise the function throws.
- * Generates collision-free IDs and pagination cursors in deterministic mode.
- * The sequence is strictly incrementing with no gaps or duplicates.
+ * Only available in deterministic mode. Provides a simple counter for cases where
+ * you need sequential integers rather than timestamps or random values.
  *
  * @example Basic usage (deterministic mode required)
  * ```ts
@@ -48,14 +47,14 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  *
  * @param args.lix - The Lix instance with sqlite and db connections
  * @returns The next number in the sequence (starting from 0)
- * @throws {Error} If `lix_deterministic_mode` is not true
+ * @throws {Error} If `lix_deterministic_mode` is not enabled
  *
  * @remarks
- * - Available only in deterministic mode
- * - Strictly +1 each call, no gaps or duplicates
- * - Persisted via `lix_deterministic_sequence_number` key value
- * - State automatically flushed on successful mutations and `toBlob()`/`close()`
- * - Clones from the same blob continue the sequence where it left off
+ * - Requires `lix_deterministic_mode = true`
+ * - Increments by exactly 1 per call (no gaps or duplicates)
+ * - State persisted via `lix_deterministic_sequence_number` key value
+ * - Clones continue from where the sequence left off
+ * - Consider using {@link timestamp}, {@link uuidV7}, or {@link nanoId} for most ID generation needs
  */
 export function nextDeterministicSequenceNumber(args: {
 	lix: Pick<Lix, "sqlite" | "db">;

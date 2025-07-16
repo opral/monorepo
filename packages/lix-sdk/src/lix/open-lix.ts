@@ -17,6 +17,7 @@ import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
 import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
+import { commitDeterministicRngState } from "../deterministic/random.js";
 import { newLixFile } from "./new-lix.js";
 
 export type Lix = {
@@ -168,7 +169,9 @@ export async function openLix(args: {
 		await db.insertInto("active_account").values(accountToSet).execute();
 	}
 
-	if (args.keyValues && args.keyValues.length > 0) {
+	// Only process keyValues if we're opening an existing blob
+	// (newLixFile already handles keyValues during creation)
+	if (args.blob && args.keyValues && args.keyValues.length > 0) {
 		for (const keyValue of args.keyValues) {
 			// Determine which table to use based on whether version is specified
 			if (keyValue.lixcol_version_id) {
@@ -250,6 +253,10 @@ export async function openLix(args: {
 		},
 		toBlob: async () => {
 			commitDeterminsticSequenceNumber({
+				sqlite: database,
+				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
+			});
+			commitDeterministicRngState({
 				sqlite: database,
 				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
 			});
