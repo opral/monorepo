@@ -59,7 +59,7 @@ export function useMdAstState(): UseMdAstStateReturn {
 	// Update entities with optimistic updates
 	const updateEntities = useCallback(
 		async (entities: MdAstEntity[], order: string[]) => {
-			console.log("updating state", order, entities);
+			// console.log("updating state", order, entities);
 
 			try {
 				await updateMdAstEntities(lix, activeFile ?? null, entities, order);

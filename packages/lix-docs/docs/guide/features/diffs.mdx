@@ -1,0 +1,62 @@
+import CodeSnippet from "../../components/code-snippet";
+import * as example from "../../examples/diffs.ts";
+import exampleSrcCode from "../../examples/diffs.ts?raw";
+
+# Diffs
+
+Lix provides APIs to query any two states of your data—the "before" and "after"—which is the foundation for showing users what has changed. These states can be from different points in [history](./history.md) or different [versions](./versions.md).
+
+![Diff](/diff.svg)
+
+## Rendering Diffs
+
+Lix's responsibility is to provide the before and after states and/or changes between states. Lix relies on plugins to provide the UI for rendering diffs, or developers to implement their own rendering logic.
+
+### Plugin Provided Diffs
+
+Lix plugins can provide ready-to-use diff components. These components can be rendered directly in your application, offering a quick way to display changes.
+
+However, this convenience comes with a trade-off: you are limited to the UI and rendering logic provided by the plugin. If you need more control over the appearance or behavior of the diffs, you may want to consider other options.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["plugin-diffs"]}
+/>
+
+### Diff Libraries
+
+You can use diff libraries to visualize changes in your data. Popular options include general-purpose libraries like [diff](https://www.npmjs.com/package/diff) for text-based comparisons, or specialized solutions like the [Lix HTML diff package](https://github.com/opral/monorepo/tree/main/packages/lix/lix-html-diff).
+
+The Lix HTML diff is particularly powerful because it leverages the fact that web applications render to HTML. This means that, in theory, the HTML diff can be universally used to visualize changes in any web app's UI—regardless of what is rendered by diffing the rendered HTML output.
+
+### Build Your Own
+
+You always have the flexibility to implement your own diff rendering logic for complete control over how changes are detected and displayed. 
+
+Lix is unopinionated about how you visualize changes. Because Lix provides "before" and "after" states (or changes in between states), you can build any kind of diff UI you can imagine—from text-based diffs to visual comparisons of images, designs, or even 3D models, as illustrated below.
+
+![Diffs come in many different types](/diffs-many-types.svg)
+
+## Code Examples
+
+### Diffing a JSON file
+
+The following example shows how to query two versions of a JSON file and then generate a simple textual diff.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["json-file-diff"]}
+/>
+
+### Diffing a single entity
+
+This example shows how to diff a single entity. While the example uses a JSON property, the same principle applies to any entity defined by a Lix plugin, such as a paragraph in a Markdown document or a cell in a CSV file. Diffing at the entity level is more efficient than diffing an entire file when you only care about a specific part of the data.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["entity-diff"]}
+/>
+

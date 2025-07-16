@@ -2,7 +2,7 @@
 
 Lix has a universal commenting system. You can attach threaded conversations to any entity, whether it's a paragraph in a document, a cell in a spreadsheet, or a proposed change set.
 
-![Comments](../../assets/comments.svg)
+![Comments](/comments.svg)
 
 ## Examples
 
@@ -72,7 +72,7 @@ Comments are composed of two main parts:
 1. **Threads:** A thread is a conversation that can be attached to one or more entities. This makes it possible to have shared conversations across entities.
 2. **Comments:** Each comment belongs to a specific thread.
 
-![Comments data model](../../assets/comments-data-model.svg)
+![Comments data model](/comments-data-model.svg)
 
 ### Comment Body (Zettel)
 

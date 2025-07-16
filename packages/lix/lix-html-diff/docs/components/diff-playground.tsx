@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { Showcase } from "./showcase";
+import Showcase from "./showcase";
 import dedent from "dedent";
 // @ts-expect-error - raw import
 import defaultCss from "../../src/default.css?raw";
@@ -9,7 +9,7 @@ import defaultCss from "../../src/default.css?raw";
  * A playground component that allows users to paste in "before" and "after" HTML
  * to see how the diff would look in real-time.
  */
-export function DiffPlayground() {
+export default function DiffPlayground() {
   // Default examples to help users get started
   const defaultBeforeHtml = dedent`
   <p data-diff-key="p1">
@@ -31,15 +31,24 @@ ${defaultCss}
 
   // Load from localStorage or use defaults
   const loadInitialState = () => {
+    // Check if we're in a browser environment
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      return {
+        beforeHtml: defaultBeforeHtml,
+        afterHtml: defaultAfterHtml,
+        customCss: defaultPlaygroundCss,
+      };
+    }
+
     // Try localStorage for the user's last session
     try {
       const savedState = localStorage.getItem("diffPlaygroundState");
       const lastSaved = localStorage.getItem("diffPlaygroundTimestamp");
-      
+
       if (savedState && lastSaved) {
         const savedTime = parseInt(lastSaved, 10);
-        const oneMonthAgo = Date.now() - (30 * 24 * 60 * 60 * 1000); // 30 days in milliseconds
-        
+        const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+
         // If saved state is less than 1 month old, use it
         if (savedTime > oneMonthAgo) {
           return JSON.parse(savedState);
@@ -76,7 +85,6 @@ ${defaultCss}
   );
   const [cssCollapsed, setCssCollapsed] = useState(true);
 
-
   // Apply custom CSS to the diff view
   useEffect(() => {
     // Create or update the style element
@@ -101,6 +109,11 @@ ${defaultCss}
 
   // Save to localStorage whenever state changes
   useEffect(() => {
+    // Check if we're in a browser environment
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      return;
+    }
+
     try {
       localStorage.setItem(
         "diffPlaygroundState",

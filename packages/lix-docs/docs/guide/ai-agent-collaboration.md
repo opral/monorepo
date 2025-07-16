@@ -1,6 +1,6 @@
 # Lix for AI Agents
 
-![AI agent changes need to be visible and controllable](../assets/blame-what-did-you-change.svg)
+![AI agent changes need to be visible and controllable](/blame-what-did-you-change.svg)
 
 
 AI agents are powerful but imperfect—they hallucinate, generate incorrect data, and break things outright. Without lix change control, there is no visibility, accountability, or control over AI agents.
@@ -17,8 +17,10 @@ Review AI-generated changes through [change proposals](./features/change-proposa
 
 [Validation rules](./features/validation-rules.md) automatically check AI-generated changes for quality issues and data format violations. AI agents can use validation results to self-correct their mistakes, improving output quality without human intervention.
 
-![Validation rules for AI agents](../assets/validation-rules-agent.svg)
+![Validation rules for AI agents](/validation-rules-agent.svg)
 
 ### Versions for Experimentation
+
+Create isolated [versions](./features/versions.md) (branches) where AI agents can experiment safely without affecting the main data. Test AI-generated changes in these sandboxed environments before merging them back.
 
 Made a mistake accepting AI changes? [Restore](./features/restore.md) to any previous state. 

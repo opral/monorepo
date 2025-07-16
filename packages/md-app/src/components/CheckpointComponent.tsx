@@ -8,15 +8,15 @@ import ChangeDot from "./ChangeDot.tsx";
 import { UiDiffComponentProps } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { useQuery } from "@/hooks/useQuery";
 import { selectThreads, selectChangeDiffs } from "@/queries";
 import { ChevronDown } from "lucide-react";
+import { useQuery } from "@lix-js/react-utils";
 
 export const CheckpointComponent = (props: {
 	checkpointChangeSet: {
 		id: string;
 		change_count: number;
-		created_at: string | null;
+		checkpoint_created_at: string | null;
 		author_name: string | null;
 	};
 	previousChangeSetId: string | null;
@@ -25,16 +25,12 @@ export const CheckpointComponent = (props: {
 }) => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
 	const [shouldLoadDiffs, setShouldLoadDiffs] = useState<boolean>(false);
-	const [threads] = useQuery(async () => {
-		if (!props.checkpointChangeSet.id) return [];
-		return await selectThreads({ changeSetId: props.checkpointChangeSet.id });
-	}, 500);
-	const [diffs] = useQuery(async () => {
-		if (!shouldLoadDiffs || !props.checkpointChangeSet.id) return [];
-		return await selectChangeDiffs(props.checkpointChangeSet.id, props.previousChangeSetId);
-	}, 500);
-
-	// No longer need useEffect for threads - handled by useThreads hook
+	const threads = useQuery((lix) =>
+		selectThreads(lix, { changeSetId: props.checkpointChangeSet.id }),
+	);
+	const diffs = useQuery((lix) =>
+		selectChangeDiffs(lix, props.checkpointChangeSet.id, props.previousChangeSetId),
+	);
 
 	// Don't render anything if there's no change data
 	if (!props.checkpointChangeSet || !props.checkpointChangeSet.id) {
@@ -85,7 +81,6 @@ export const CheckpointComponent = (props: {
 			<ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
 			<div className="flex-1">
 				<div className="flex flex-col w-full mt-1.5">
-					{/* {props.checkpointChangeSet.id} */}
 					<div className="h-8 flex items-center justify-between w-full">
 						<div className="flex items-center gap-2 min-w-0 flex-shrink-1">
 							<TooltipProvider>
@@ -114,7 +109,7 @@ export const CheckpointComponent = (props: {
 
 						<div className="flex items-center flex-shrink-0">
 							<span className="text-xs text-slate-500 mr-1">
-								{timeAgo(props.checkpointChangeSet.created_at!)}
+								{timeAgo(props.checkpointChangeSet.checkpoint_created_at!)}
 							</span>
 							<Button variant="ghost" size="sm" className="h-6 w-6 p-0">
 								<ChevronDown
@@ -155,7 +150,7 @@ export const CheckpointComponent = (props: {
               <CreateCheckpointDiscussion
                 changeSetId={props.checkpointChangeSet}
               />
-            } */}
+						} */}
 					</div>
 				)}
 			</div>

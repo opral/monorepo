@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { type TestCase, testCasesBySection } from "../../src/test-cases";
-import { Showcase } from "./showcase";
+import Showcase from "./showcase";
 // @ts-expect-error - raw import
 import defaultCss from "../../src/default.css?raw";
 
-export function TestCases() {
+export default function TestCases() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearchInput = (event: React.ChangeEvent<HTMLInputElement>) => {

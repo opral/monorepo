@@ -4,7 +4,7 @@ import Editor from "@monaco-editor/react";
 /**
  * A component that displays content in either rendered or code view
  */
-export function TabbedContentViewer(props: {
+function TabbedContentViewer(props: {
   title: string;
   htmlContent: string;
   onContentChange?: (newContent: string) => void;
@@ -56,6 +56,8 @@ export function TabbedContentViewer(props: {
     </div>
   );
 }
+
+export default TabbedContentViewer;
 
 /**
  * Helper component for syntax highlighted code block
