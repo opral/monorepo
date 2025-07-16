@@ -354,7 +354,7 @@ function LandingPage() {
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <a
-                      href="https://flashtype.dev"
+                      href="https://flashtype.ai"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
