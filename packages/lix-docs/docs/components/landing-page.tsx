@@ -103,19 +103,31 @@ function LandingPage() {
       {/* Main content */}
       <main className="relative px-4 sm:px-6">
         {/* Hero Section */}
-        <section className="pt-28 pb-16 max-w-6xl mx-auto">
+        <section className="pt-28 pb-8 max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
             {/* Left side - Main content */}
             <div className="lg:col-span-2 text-left">
-              <h1 className="text-gray-900 font-bold leading-tight" style={{ fontSize: 'clamp(2rem, 5vw, 3.75rem)', marginBottom: '1.5rem' }}>
+              <h1
+                className="text-gray-900 font-bold leading-tight"
+                style={{
+                  fontSize: "clamp(2rem, 5vw, 3.75rem)",
+                  marginBottom: "1.5rem",
+                }}
+              >
                 Change control SDK
                 <br />
                 for your app and AI agent
               </h1>
 
-              <p className="text-gray-600 max-w-xl leading-relaxed" style={{ fontSize: 'clamp(1rem, 3vw, 1.25rem)', marginBottom: '2rem' }}>
-                Build versioned workflows, AI proposals, diffs, and review UIs with
-                one SDK. Designed for modern collaborative applications.
+              <p
+                className="text-gray-600 max-w-xl leading-relaxed"
+                style={{
+                  fontSize: "clamp(1rem, 3vw, 1.25rem)",
+                  marginBottom: "2rem",
+                }}
+              >
+                Build versioned workflows, AI proposals, diffs, and review UIs
+                with one SDK. Designed for modern collaborative applications.
               </p>
 
               {/* Command and buttons in one row */}
@@ -126,17 +138,20 @@ function LandingPage() {
                   href="/guide/"
                   className="px-6 py-2 rounded-md text-base transition-all duration-200 flex items-center font-medium group shadow-sm"
                   style={{
-                    backgroundColor: '#2563EB',
-                    color: 'white',
+                    backgroundColor: "#2563EB",
+                    color: "white",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#1d4ed8';
+                    e.currentTarget.style.backgroundColor = "#1d4ed8";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#2563EB';
+                    e.currentTarget.style.backgroundColor = "#2563EB";
                   }}
                 >
-                  <span className="flex items-center whitespace-nowrap" style={{ color: 'white' }}>
+                  <span
+                    className="flex items-center whitespace-nowrap"
+                    style={{ color: "white" }}
+                  >
                     Getting started
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -238,7 +253,9 @@ function LandingPage() {
                   <div className="w-full max-w-md text-center">
                     <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200 mb-4">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-gray-800">ProseMirror + Lix</h3>
+                        <h3 className="text-sm font-semibold text-gray-800">
+                          ProseMirror + Lix
+                        </h3>
                         <div className="flex space-x-1">
                           <div className="w-2 h-2 bg-red-400 rounded-full"></div>
                           <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
@@ -252,15 +269,19 @@ function LandingPage() {
                         <div className="h-3 bg-green-200 rounded mb-1 w-4/5 border-l-2 border-green-400"></div>
                         <div className="h-3 bg-gray-300 rounded mb-3 w-2/3"></div>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">Version 1.2</span>
+                          <span className="text-xs text-gray-500">
+                            Version 1.2
+                          </span>
                           <div className="flex space-x-1">
-                            <div className="w-4 h-4 bg-blue-500 rounded-full text-white text-xs flex items-center justify-center">✓</div>
+                            <div className="w-4 h-4 bg-blue-500 rounded-full text-white text-xs flex items-center justify-center">
+                              ✓
+                            </div>
                             <div className="w-4 h-4 bg-gray-300 rounded-full"></div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <a 
+                    <a
                       href="https://prosemirror-example.onrender.com/"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -289,25 +310,43 @@ function LandingPage() {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center space-x-2">
                           <div className="w-6 h-6 bg-blue-500 rounded flex items-center justify-center">
-                            <span className="text-white text-xs font-bold">F</span>
+                            <span className="text-white text-xs font-bold">
+                              F
+                            </span>
                           </div>
-                          <span className="text-sm font-semibold text-gray-800">Fink Localization</span>
+                          <span className="text-sm font-semibold text-gray-800">
+                            Fink Localization
+                          </span>
                         </div>
-                        <div className="text-xs text-gray-500">Change Control</div>
+                        <div className="text-xs text-gray-500">
+                          Change Control
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center space-x-2">
-                          <div className="w-8 h-5 bg-gray-200 rounded text-xs flex items-center justify-center font-mono">en</div>
-                          <div className="w-8 h-5 bg-blue-600 rounded text-xs flex items-center justify-center font-mono text-white">ref</div>
-                          <div className="flex-1 h-5 bg-gray-100 rounded px-2 text-xs flex items-center">Hello World.</div>
+                          <div className="w-8 h-5 bg-gray-200 rounded text-xs flex items-center justify-center font-mono">
+                            en
+                          </div>
+                          <div className="w-8 h-5 bg-blue-600 rounded text-xs flex items-center justify-center font-mono text-white">
+                            ref
+                          </div>
+                          <div className="flex-1 h-5 bg-gray-100 rounded px-2 text-xs flex items-center">
+                            Hello World.
+                          </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="w-8 h-5 bg-gray-200 rounded text-xs flex items-center justify-center font-mono">de</div>
+                          <div className="w-8 h-5 bg-gray-200 rounded text-xs flex items-center justify-center font-mono">
+                            de
+                          </div>
                           <div className="w-8 h-5 bg-gray-200 rounded"></div>
-                          <div className="flex-1 h-5 bg-cyan-100 rounded px-2 text-xs flex items-center border-2 border-cyan-400">Hallo W|</div>
+                          <div className="flex-1 h-5 bg-cyan-100 rounded px-2 text-xs flex items-center border-2 border-cyan-400">
+                            Hallo W|
+                          </div>
                         </div>
                         <div className="flex justify-between items-center mt-3">
-                          <span className="text-xs text-gray-500">2 changes pending</span>
+                          <span className="text-xs text-gray-500">
+                            2 changes pending
+                          </span>
                           <div className="flex space-x-1">
                             <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
                             <div className="w-4 h-4 bg-green-500 rounded-full"></div>
@@ -334,7 +373,9 @@ function LandingPage() {
                   <div className="w-full max-w-md">
                     <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-semibold text-gray-800">Content Editor</h3>
+                        <h3 className="text-sm font-semibold text-gray-800">
+                          Content Editor
+                        </h3>
                         <div className="flex items-center space-x-1">
                           <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                           <span className="text-xs text-gray-500">Live</span>
@@ -349,12 +390,20 @@ function LandingPage() {
                       </div>
                       <div className="flex justify-between items-center mt-4">
                         <div className="flex items-center space-x-2">
-                          <div className="w-4 h-4 bg-blue-500 rounded-full text-white text-xs flex items-center justify-center">AI</div>
-                          <span className="text-xs text-gray-600">3 suggestions</span>
+                          <div className="w-4 h-4 bg-blue-500 rounded-full text-white text-xs flex items-center justify-center">
+                            AI
+                          </div>
+                          <span className="text-xs text-gray-600">
+                            3 suggestions
+                          </span>
                         </div>
                         <div className="flex space-x-1">
-                          <div className="w-6 h-4 bg-green-500 rounded text-white text-xs flex items-center justify-center">✓</div>
-                          <div className="w-6 h-4 bg-gray-300 rounded text-gray-600 text-xs flex items-center justify-center">⟲</div>
+                          <div className="w-6 h-4 bg-green-500 rounded text-white text-xs flex items-center justify-center">
+                            ✓
+                          </div>
+                          <div className="w-6 h-4 bg-gray-300 rounded text-gray-600 text-xs flex items-center justify-center">
+                            ⟲
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -634,7 +683,7 @@ function LandingPage() {
                 >
                   <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
                 </svg>
-<span style={{ color: 'white' }}>Go to Docs</span>
+                <span style={{ color: "white" }}>Go to Docs</span>
               </span>
               <div className="flex justify-end">
                 <span className="opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
