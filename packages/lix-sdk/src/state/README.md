@@ -12,9 +12,9 @@ All state mutations flow through a SQLite virtual table that orchestrates the th
      User SQL Operations
             │
             v
-    ┌───────────────┐
-    │ Virtual Table │  <── Entry point for ALL mutations
-    └───────┬───────┘
+    ┌─────────────────────┐
+    │ State Virtual Table │  <── Entry point for ALL mutations
+    └───────┬─────────────┘
             │
             v
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
@@ -68,7 +68,7 @@ The virtual table acts as a facade over the actual storage mechanism:
                       │
                       v
 ┌─────────────────────────────────────────────────┐
-│           SQLite Virtual Table                  │
+│           State Virtual Table                   │
 │                                                 │
 │  • Intercepts all operations                    │
 │  • Maintains change history                     │
