@@ -307,3 +307,48 @@ test("should debug log compiled query structure", async () => {
 	
 	await lix.close();
 });
+
+test("should observe key value and handle untracked insertions", async () => {
+	const lix = await openLix({});
+	const values: any[] = [];
+
+	// Listen to a specific key value
+	const subscription = lix
+		.observe(
+			lix.db
+				.selectFrom("key_value")
+				.selectAll()
+				.where("key", "=", "untracked_test_key")
+		)
+		.subscribe({ next: (rows) => values.push(rows) });
+
+	// Wait for initial emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(values).toHaveLength(1);
+	expect(values[0]).toEqual([]);
+
+	// Insert a key value with lixcol_untracked: true
+	await lix.db
+		.insertInto("key_value")
+		.values({ 
+			key: "untracked_test_key", 
+			value: "untracked_value",
+			lixcol_untracked: true
+		})
+		.execute();
+
+	// Wait for update
+	await new Promise((resolve) => setTimeout(resolve, 10));
+
+	// Should have received an update with the untracked value
+	expect(values).toHaveLength(2);
+	expect(values[1]).toHaveLength(1);
+	expect(values[1][0]).toMatchObject({
+		key: "untracked_test_key",
+		value: "untracked_value",
+		lixcol_untracked: 1, // SQLite stores boolean as integer
+	});
+
+	subscription.unsubscribe();
+	await lix.close();
+});
