@@ -1,12 +1,9 @@
-import {
-	createLixOwnLogSync,
-	DEFAULT_LOG_LEVELS,
-} from "../log/create-lix-own-log.js";
+import { DEFAULT_LOG_LEVELS } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import { executeSync } from "./execute-sync.js";
 import type { LixInternalDatabaseSchema } from "./schema.js";
 import type { Kysely } from "kysely";
-import { LixKeyValueSchema } from "../key-value/schema.js";
+
 import { nanoid } from "./nano-id.js";
 import { LixLogSchema } from "../log/schema.js";
 
@@ -43,133 +40,6 @@ export const queueInfo = {
 		return [...logQueue];
 	},
 };
-
-/**
- * Process all entries in the log queue
- */
-function processLogQueue() {
-	// Clear the timeout reference
-	currentTimeout = null;
-
-	const queueLength = logQueue.length;
-
-	// Exit early if queue is empty
-	if (queueLength === 0) return;
-
-	// Get the first lix instance from the queue to use for transaction
-	const firstEntry = logQueue[0];
-	if (!firstEntry) return;
-
-	const { lix } = firstEntry;
-
-	// Begin transaction
-	try {
-		lix.sqlite.exec("BEGIN IMMEDIATE");
-	} catch (error) {
-		console.error("Failed to begin transaction for query logging:", error);
-		// Clear the queue to prevent infinite retry
-		logQueue.length = 0;
-		return;
-	}
-
-	const logCount = logQueue.length;
-
-	console.time("inserting logs " + logCount);
-
-	let logLevels: undefined | string[];
-
-	// Process all entries in the queue
-	while (logQueue.length > 0) {
-		const entry = logQueue.shift();
-		if (!entry) continue;
-
-		const { lix, sql, duration, bindings, result, error, options } = entry;
-
-		if (logLevels === undefined) {
-			// NOTE: we could query the log level per batch but with the current change table this increases a single query log from ~1ms to >200ms
-			// logLevels =
-			// 	executeSync({
-			// 		lix: lix,
-			// 		query: lix.db
-			// 			.selectFrom("key_value")
-			// 			.select("value")
-			// 			.where("key", "=", "lix_log_levels"),
-			// 	})[0]?.values ?? DEFAULT_LOG_LEVELS;
-			logLevels = DEFAULT_LOG_LEVELS;
-		}
-
-		// Check if the level is allowed
-		const shouldLog = logLevels!.includes("*") || logLevels!.includes("info");
-
-		if (!shouldLog) {
-			continue; // Skip logging if not allowed
-		}
-
-		try {
-			// Skip if only logging slow queries
-			if (
-				options?.logSlowQueriesOnly &&
-				duration < (options?.slowQueryThreshold ?? 100)
-			) {
-				continue;
-			}
-
-			const message = `Batched log: ${queueLength - logQueue.length}/${queueLength} Query executed in ${duration}ms`;
-			const payload = {
-				sql: sql,
-				bindings: bindings,
-				duration_ms: duration,
-				result_count: Array.isArray(result) ? result.length : 0,
-				query_type: detectQueryType(sql),
-				timestamp: new Date().toISOString(),
-				error: error ? error.message : undefined,
-			};
-
-			executeSync({
-				lix: { sqlite: lix.sqlite },
-				query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-					.insertInto("internal_state_all_untracked")
-					.values({
-						entity_id: nanoid(),
-						version_id: "global",
-						file_id: "lix",
-						schema_key: LixLogSchema["x-lix-key"],
-						plugin_key: "lix_own_entity",
-						schema_version: LixLogSchema["x-lix-version"],
-						snapshot_content: JSON.stringify({
-							key: "lix_query_executed",
-							message,
-							level: "info",
-							payload,
-						}),
-					}),
-				// no conflict handling here, as we don't mutate logs
-				// .onConflict((oc) =>
-				//     oc.doUpdateSet({
-				//         snapshot_content: newValue,
-				//     })
-				// ),
-			});
-		} catch (logError) {
-			console.error("Failed to log query:", logError);
-		}
-	}
-
-	console.timeEnd("inserting logs " + logCount);
-	// Commit the transaction
-	try {
-		lix.sqlite.exec("COMMIT");
-	} catch (error) {
-		console.error("Failed to commit transaction for query logging:", error);
-
-		// Try to rollback
-		try {
-			lix.sqlite.exec("ROLLBACK");
-		} catch (rollbackError) {
-			console.error("Failed to rollback transaction:", rollbackError);
-		}
-	}
-}
 
 /**
  * Cleanup function to clear pending timeouts and flush the log queue
@@ -269,21 +139,46 @@ export function enableQueryLogging(
 				bindings = Array.isArray(args[0].bind) ? args[0].bind : [args[0].bind];
 			}
 
-			// Add to queue
-			logQueue.push({
-				lix,
-				sql,
-				duration,
-				bindings,
-				result,
-				error,
-				options,
-			});
+			const message = `Query executed in ${duration}ms`;
+			const payload = {
+				sql: sql,
+				bindings: bindings,
+				duration_ms: duration,
+				result_count: Array.isArray(result) ? result.length : 0,
+				query_type: detectQueryType(sql),
+				timestamp: new Date().toISOString(),
+				error: error ? error.message : undefined,
+			};
 
-			// Schedule processing if no timeout is active
-			if (!currentTimeout) {
-				currentTimeout = setTimeout(processLogQueue, 0);
-			}
+			// console.log(message, payload);
+
+			lix.skipLogging = true;
+			executeSync({
+				lix: { sqlite: lix.sqlite },
+				query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+					.insertInto("internal_state_all_untracked")
+					.values({
+						entity_id: nanoid(),
+						version_id: "global",
+						file_id: "lix",
+						schema_key: LixLogSchema["x-lix-key"],
+						plugin_key: "lix_own_entity",
+						schema_version: LixLogSchema["x-lix-version"],
+						snapshot_content: JSON.stringify({
+							key: "lix_query_executed",
+							message,
+							level: "info",
+							payload,
+						}),
+					}),
+				// no conflict handling here, as we don't mutate logs
+				// .onConflict((oc) =>
+				//     oc.doUpdateSet({
+				//         snapshot_content: newValue,
+				//     })
+				// ),
+			});
+			lix.skipLogging = false;
 		}
 		// Re-throw error if query failed
 		if (error) {
