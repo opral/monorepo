@@ -285,10 +285,7 @@ function LandingPage() {
               </div>
               <div className="mt-6">
                 <p className="text-gray-800 text-xl font-medium">
-                  Prosemirror/TipTap
-                </p>
-                <p className="text-gray-800 text-xl font-medium">
-                  Change Control Demo
+                  Prosemirror / TipTap Demo
                 </p>
               </div>
             </div>
@@ -330,9 +327,6 @@ function LandingPage() {
               <div className="mt-6">
                 <p className="text-gray-800 text-xl font-medium">
                   Fink - Translation Editor
-                </p>
-                <p className="text-gray-800 text-xl font-medium">
-                  with change tracking
                 </p>
               </div>
             </div>
