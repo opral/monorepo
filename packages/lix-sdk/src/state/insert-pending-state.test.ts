@@ -78,15 +78,6 @@ test("insertPendingState creates tracked entity with pending change", async () =
 	expect(changeInTransaction).toBeDefined();
 	expect(changeInTransaction.id).toBe(cacheBeforeCommit.change_id);
 
-	const allTransactionBefore = await lixInternalDb
-		.selectFrom("internal_change_in_transaction")
-		.selectAll()
-		.execute();
-
-	console.log("Transaction table before commit:", allTransactionBefore);
-
-	console.log("Committing changes...");
-
 	// Trigger a commit
 	commit({ lix });
 

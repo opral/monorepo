@@ -26,13 +26,8 @@ test("clearStateCache deletes all cache entries", async () => {
 
 	expect(cacheBeforeClear.length).toBeGreaterThan(0);
 
-
-	console.log("Clearing cache");
-
 	// Clear the cache
 	clearStateCache({ lix });
-
-	console.log("Select from internal_state_cache after clear");
 
 	// Verify cache is empty
 	const cacheAfterClear = await internalDb

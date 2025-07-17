@@ -5,9 +5,6 @@ import type {
 	LixInternalDatabaseSchema,
 } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
-import type { LixChange } from "../change/schema.js";
-import type { NewStateRow } from "./schema.js";
-import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { timestamp } from "../deterministic/index.js";
 import { insertPendingState } from "./insert-pending-state.js";
 
@@ -183,103 +180,4 @@ export function handleStateMutation(
 	// ]);
 
 	return 0; // Return 0 to indicate success
-}
-
-export function createChangeWithSnapshot(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
-	id?: string;
-	data: Omit<
-		NewStateRow,
-		"version_id" | "created_at" | "updated_at" | "snapshot_content"
-	> & { snapshot_content: string | null };
-	timestamp: string;
-	version_id?: string;
-}): Pick<LixChange, "id" | "schema_key" | "file_id" | "entity_id"> {
-	// Use insertPendingState instead of direct insertion
-	const result = insertPendingState({
-		lix: { sqlite: args.sqlite, db: args.db },
-		data: {
-			entity_id: args.data.entity_id,
-			schema_key: args.data.schema_key,
-			file_id: args.data.file_id,
-			plugin_key: args.data.plugin_key,
-			snapshot_content: args.data.snapshot_content,
-			schema_version: args.data.schema_version,
-			version_id: args.version_id || "global",
-			untracked: false, // tracked entity
-		},
-	});
-
-	// Note: change_author records are created during commit, not during state mutation
-	
-	return {
-		id: result.data.change_id!,
-		schema_key: result.data.schema_key,
-		file_id: result.data.file_id,
-		entity_id: result.data.entity_id,
-	};
-}
-
-
-function createChangeAuthorRecords(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
-	timestamp: string;
-	change_id: string;
-	version_id: string;
-}): void {
-	// Get all active accounts using sqlite.exec since we're in the virtual table context
-	const activeAccounts = args.sqlite.exec({
-		sql: "SELECT id, name FROM active_account",
-		returnValue: "resultRows",
-	});
-
-	// Create change_author records for each active account
-	if (activeAccounts && activeAccounts.length > 0) {
-		for (const account of activeAccounts) {
-			const accountId = account[0] as string;
-			const accountName = account[1] as string;
-
-			// First ensure the account exists in global version
-			const [existingAccount] = executeSync({
-				lix: { sqlite: args.sqlite },
-				query: args.db
-					.selectFrom("account_all")
-					.where("id", "=", accountId)
-					.selectAll(),
-			});
-
-			if (!existingAccount) {
-				executeSync({
-					lix: { sqlite: args.sqlite },
-					query: args.db.insertInto("account_all").values({
-						id: accountId,
-						name: accountName,
-						lixcol_version_id: args.version_id,
-					}),
-				});
-			}
-
-			// Create change_author snapshot content
-			const changeAuthorSnapshot = {
-				change_id: args.change_id,
-				account_id: accountId,
-			};
-
-			insertPendingState({
-				lix: { sqlite: args.sqlite, db: args.db },
-				data: {
-					entity_id: `${args.change_id}::${accountId}`,
-					schema_key: LixChangeAuthorSchema["x-lix-key"],
-					schema_version: LixChangeAuthorSchema["x-lix-version"],
-					file_id: "lix",
-					plugin_key: "lix",
-					snapshot_content: JSON.stringify(changeAuthorSnapshot),
-					version_id: args.version_id,
-					untracked: false, // tracked entity
-				},
-			});
-		}
-	}
 }

@@ -4,6 +4,7 @@ import { timestamp, uuidV7 } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "./schema.js";
+import { LixChangeAuthorSchema } from "../change-author/schema.js";
 
 type NewPendingStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;
@@ -13,10 +14,59 @@ export type PendingStateRow = Omit<StateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;
 };
 
+/**
+ * Inserts a pending state change into the transaction stage.
+ *
+ * This function handles the TRANSACTION stage of the state mutation flow, where
+ * changes are temporarily stored before being committed to permanent storage.
+ * It supports both tracked and untracked entities, manages the state cache for
+ * immediate consistency, and automatically creates change_author records to
+ * track who made each change.
+ *
+ * @param args.lix - The Lix instance with SQLite database and Kysely query builder
+ * @param args.data - The state data to insert, including entity details and snapshot
+ * @param args.timestamp - Optional timestamp to use (defaults to current time)
+ * @param args.createChangeAuthors - Whether to create change_author records (defaults to true)
+ *
+ * @returns The inserted state row with generated fields like change_id
+ *
+ * @example
+ * // Insert a new entity state
+ * insertPendingState({
+ *   lix: { sqlite, db },
+ *   data: {
+ *     entity_id: "user-123",
+ *     schema_key: "user",
+ *     file_id: "file1",
+ *     plugin_key: "my-plugin",
+ *     snapshot_content: JSON.stringify({ name: "John", email: "john@example.com" }),
+ *     schema_version: "1.0",
+ *     version_id: "version-abc",
+ *     untracked: false
+ *   }
+ * });
+ *
+ * @example
+ * // Delete an entity (null snapshot_content)
+ * insertPendingState({
+ *   lix: { sqlite, db },
+ *   data: {
+ *     entity_id: "user-123",
+ *     schema_key: "user",
+ *     file_id: "file1",
+ *     plugin_key: "my-plugin",
+ *     snapshot_content: null, // Deletion
+ *     schema_version: "1.0",
+ *     version_id: "version-abc",
+ *     untracked: false
+ *   }
+ * });
+ */
 export function insertPendingState(args: {
 	lix: { sqlite: Lix["sqlite"]; db: Kysely<LixInternalDatabaseSchema> };
 	data: NewPendingStateRow;
 	timestamp?: string;
+	createChangeAuthors?: boolean;
 }): {
 	data: PendingStateRow;
 } {
@@ -78,7 +128,7 @@ export function insertPendingState(args: {
 				schema_key: args.data.schema_key,
 				file_id: args.data.file_id,
 				plugin_key: args.data.plugin_key,
-				snapshot_content: args.data.snapshot_content 
+				snapshot_content: args.data.snapshot_content
 					? sql`jsonb(${args.data.snapshot_content})`
 					: null,
 				schema_version: args.data.schema_version,
@@ -86,6 +136,92 @@ export function insertPendingState(args: {
 				created_at: _timestamp,
 			}),
 		});
+
+		// Create change_author records if enabled (default true)
+		if (args.createChangeAuthors !== false) {
+			// Query from internal_underlying_state_all to get active accounts
+			const activeAccounts = executeSync({
+				lix: args.lix,
+				query: args.lix.db
+					.selectFrom("internal_underlying_state_all")
+					.where("schema_key", "=", "lix_active_account")
+					.where("version_id", "=", "global")
+					.select(["entity_id as account_id"]),
+			});
+
+			if (activeAccounts && activeAccounts.length > 0) {
+				for (const activeAccount of activeAccounts) {
+					const accountId = activeAccount.account_id as string;
+
+					// Get account details from internal_underlying_state_all
+					const [accountDetails] = executeSync({
+						lix: args.lix,
+						query: args.lix.db
+							.selectFrom("internal_underlying_state_all")
+							.where("entity_id", "=", accountId)
+							.where("schema_key", "=", "lix_account")
+							.where("version_id", "=", args.data.version_id)
+							.select(["snapshot_content"]),
+					});
+
+					// If account doesn't exist in this version, create it
+					if (!accountDetails) {
+						// Get account from global version
+						const [globalAccount] = executeSync({
+							lix: args.lix,
+							query: args.lix.db
+								.selectFrom("internal_underlying_state_all")
+								.where("entity_id", "=", accountId)
+								.where("schema_key", "=", "lix_account")
+								.where("version_id", "=", "global")
+								.select(["snapshot_content"]),
+						});
+
+						if (globalAccount) {
+							// Recursively insert account without creating change authors for it
+							insertPendingState({
+								lix: args.lix,
+								data: {
+									entity_id: accountId,
+									schema_key: "lix_account",
+									file_id: "lix",
+									plugin_key: "lix",
+									snapshot_content: globalAccount.snapshot_content!,
+									schema_version: "1.0",
+									version_id: args.data.version_id,
+									untracked: false,
+								},
+								timestamp: _timestamp,
+								createChangeAuthors: false, // Avoid infinite recursion
+							});
+						}
+					}
+
+					// Create change_author record
+					const changeAuthorSnapshot = {
+						change_id: changeId,
+						account_id: accountId,
+					};
+
+					// Recursively insert change_author without creating change authors for it
+					insertPendingState({
+						lix: args.lix,
+						data: {
+							entity_id: `${changeId}::${accountId}`,
+							schema_key: LixChangeAuthorSchema["x-lix-key"],
+							file_id: "lix",
+							plugin_key: "lix",
+							snapshot_content: JSON.stringify(changeAuthorSnapshot),
+							schema_version: LixChangeAuthorSchema["x-lix-version"],
+							version_id: args.data.version_id,
+							untracked: false,
+						},
+						timestamp: _timestamp,
+						createChangeAuthors: false, // Avoid infinite recursion
+					});
+				}
+			}
+		}
 
 		// Update the cache - handle deletions
 		if (args.data.snapshot_content === null) {
