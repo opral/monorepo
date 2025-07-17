@@ -7,54 +7,6 @@ import type { Kysely } from "kysely";
 import { nanoid } from "./nano-id.js";
 import { LixLogSchema } from "../log/schema.js";
 
-/**
- * Queue for pending log entries to be processed
- */
-interface LogEntry {
-	lix: Lix;
-	sql: string;
-	duration: number;
-	bindings: any[];
-	result: any;
-	error: any;
-	options?: {
-		logSlowQueriesOnly?: boolean;
-		slowQueryThreshold?: number;
-	};
-}
-
-const logQueue: LogEntry[] = [];
-let currentTimeout: NodeJS.Timeout | null = null;
-
-/**
- * Debugging info about the queue and timeout
- */
-export const queueInfo = {
-	get queueLength(): number {
-		return logQueue.length;
-	},
-	get hasActiveTimeout(): boolean {
-		return currentTimeout !== null;
-	},
-	get queue(): LogEntry[] {
-		return [...logQueue];
-	},
-};
-
-/**
- * Cleanup function to clear pending timeouts and flush the log queue
- */
-export function cleanupQueryLogging(): void {
-	// Clear any pending timeout
-	if (currentTimeout) {
-		clearTimeout(currentTimeout);
-		currentTimeout = null;
-	}
-
-	// Clear the log queue to prevent memory leaks
-	logQueue.length = 0;
-}
-
 const logLevels = new WeakMap<Kysely<LixDatabaseSchema>, string[]>();
 
 /**

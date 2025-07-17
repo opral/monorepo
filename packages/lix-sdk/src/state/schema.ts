@@ -278,13 +278,7 @@ export function applyStateDatabaseSchema(
 					});
 				}
 
-				// Emit state commit hook after transaction is successfully committed
-				// @ts-expect-error - flag not part of the type
-				if (!sqlite.skipLogging) {
-					hooks._emit("state_commit");
-				} else {
-					console.log("skipped state_commit");
-				}
+				hooks._emit("state_commit");
 
 				return capi.SQLITE_OK;
 			},
