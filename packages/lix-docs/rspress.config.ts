@@ -2,9 +2,23 @@ import * as path from "node:path";
 import { defineConfig } from "rspress/config";
 import mermaid from "rspress-plugin-mermaid";
 import {
-  customTypeDocPlugin,
+  generateApiDocs,
   generateApiSidebar,
 } from "./rspress-plugins/typedoc-plugin";
+
+// Generate API docs before creating the config
+// We need to generate the API docs at the top level (before defineConfig) because
+// the sidebar generation function (generateApiSidebar) runs synchronously during
+// config evaluation. If we used a plugin instead, the API docs would be generated
+// asynchronously after the sidebar tries to read them, resulting in an empty sidebar.
+console.log("Generating API Reference documentation...");
+await generateApiDocs({
+  entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
+  tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
+  docRoot: path.join(__dirname, "docs"),
+  title: "Lix",
+});
+console.log("✅ API Reference documentation generated successfully.");
 
 export default defineConfig({
   root: path.join(__dirname, "docs"),
@@ -15,6 +29,16 @@ export default defineConfig({
     "Official documentation for the Lix SDK - a change control system that runs in the browser",
   icon: "/logo.svg",
   globalStyles: path.join(__dirname, "docs/styles/index.css"),
+  route: {
+    cleanUrls: true,
+  },
+  markdown: {
+    // Disable Rust MDX compiler to support global components
+    mdxRs: false,
+    globalComponents: [
+      path.join(__dirname, "docs/components/InteractiveExampleCard.tsx"),
+    ],
+  },
   builderConfig: {
     tools: {
       rspack: {
@@ -22,24 +46,25 @@ export default defineConfig({
           rules: [
             {
               resourceQuery: /raw/,
-              type: "asset/source",
+              use: [
+                {
+                  loader: path.join(
+                    __dirname,
+                    "./rspress-plugins/preserve-raw-loader.mjs"
+                  ),
+                },
+              ],
             },
           ],
         },
       },
     },
   },
-  plugins: [
-    mermaid(),
-    customTypeDocPlugin({
-      entryPoints: [path.join(__dirname, "../lix-sdk/src/index.ts")],
-      tsconfig: path.join(__dirname, "../lix-sdk/tsconfig.json"),
-    }),
-  ],
+  plugins: [mermaid()],
   themeConfig: {
     darkMode: false,
     nav: [
-      { text: "Guide", link: "/guide/" },
+      { text: "Guide", link: "/guide/getting-started" },
       { text: "Examples", link: "/examples/" },
       { text: "Plugins", link: "/plugins/" },
       { text: "Reference", link: "/api/" },
@@ -49,7 +74,6 @@ export default defineConfig({
         {
           text: "Introduction",
           items: [
-            { text: "What is Lix?", link: "/guide/" },
             { text: "Getting Started", link: "/guide/getting-started" },
             {
               text: "Lix for AI Agents",

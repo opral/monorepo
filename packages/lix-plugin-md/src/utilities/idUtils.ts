@@ -1,31 +1,35 @@
 import type { Node } from "mdast";
-import { createHash } from "crypto";
 
 export function generateNodeId(node: Node, suffix?: string): string {
-	// Create a hash based on node content and type
-	const hash = createHash("md5");
-
-	// Include node type
-	hash.update(node.type);
+	// Create a deterministic ID based on node content and type
+	let seed = node.type;
 
 	// Include node value if present
 	if ("value" in node && typeof node.value === "string") {
-		hash.update(node.value);
+		seed += node.value;
 	}
 
 	// Include node position if present (for uniqueness)
 	if (node.position) {
-		hash.update(JSON.stringify(node.position));
+		seed += JSON.stringify(node.position);
 	}
 
 	// Add suffix for child nodes
 	if (suffix) {
-		hash.update(suffix);
+		seed += suffix;
 	}
 
-	// Generate a short, readable ID
-	const fullHash = hash.digest("hex");
-	return fullHash.substring(0, 8);
+	// Create a simple hash from the seed to generate deterministic IDs
+	let hash = 0;
+	for (let i = 0; i < seed.length; i++) {
+		const char = seed.charCodeAt(i);
+		hash = (hash << 5) - hash + char;
+		hash = hash & hash; // Convert to 32-bit integer
+	}
+
+	// Convert to base36 and take first 10 chars to match nanoid length
+	const id = Math.abs(hash).toString(36).padStart(10, "0").substring(0, 10);
+	return id;
 }
 
 export function parseHtmlIdComment(html: string): string {

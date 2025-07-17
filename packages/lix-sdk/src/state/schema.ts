@@ -12,6 +12,7 @@ import {
 	applyMaterializeStateSchema,
 	materializeState,
 } from "./materialize-state.js";
+import { applyUnderlyingStateView } from "./underlying-state-view.js";
 import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
 import { timestamp } from "../deterministic/timestamp.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
@@ -43,6 +44,7 @@ export function applyStateDatabaseSchema(
 ): SqliteWasmDatabase {
 	applyMaterializeStateSchema(sqlite);
 	applyStateCacheSchema({ sqlite });
+	applyUnderlyingStateView(sqlite);
 
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -447,13 +449,11 @@ export function applyStateDatabaseSchema(
 					}
 				}
 
-				console.log("=== xFilter called ===", filters, new Error().stack);
-
 				// If we're updating cache state, we must use materialized state directly to avoid recursion
 				if (isUpdatingCacheState) {
-					console.log(
-						"Updating cache state, using materialized state directly"
-					);
+					// console.log(
+					// 	"Updating cache state, using materialized state directly"
+					// );
 					// Directly materialize state without cache
 					const stateResults = materializeState(sqlite, filters, false);
 					cursorState.results = stateResults || [];
@@ -474,7 +474,7 @@ export function applyStateDatabaseSchema(
 				cursorState.rowIndex = 0;
 
 				if (cacheIsStale) {
-					console.log("State cache is stale, will materialize state from CTE");
+					// console.log("State cache is stale, will materialize state from CTE");
 					// Cache miss - populate cache with actual recursive state query
 					if (canLog()) {
 						createLixOwnLogSync({
@@ -1151,7 +1151,6 @@ export type InternalStateAllUntrackedTable = {
 export type StateRow = Selectable<StateView>;
 export type NewStateRow = Insertable<StateView>;
 export type StateRowUpdate = Updateable<StateView>;
-
 
 // Types for the internal_change TABLE
 export type InternalChangeInTransaction =

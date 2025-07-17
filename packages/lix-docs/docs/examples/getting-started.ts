@@ -1,31 +1,29 @@
-import { openLix } from "@lix-js/sdk";
-import { plugin as jsonPlugin } from "@lix-js/plugin-json";
-
 export default async function runExample(console: any) {
-  // SECTION-START "opening-lix"
+  console.log("SECTION START 'opening-lix'");
+
+  const { openLix } = await import("@lix-js/sdk");
+  const { plugin: jsonPlugin } = await import("@lix-js/plugin-json");
 
   const lix = await openLix({
     providePlugins: [jsonPlugin],
   });
 
-  const user = {
+  console.log("SECTION END 'opening-lix'");
+
+  console.log("SECTION START 'inserting-file'");
+
+  const json = {
     name: "Peter",
     age: 50,
   };
-
-  // SECTION-END "opening-lix"
-
-  // SECTION-START "inserting-file"
 
   await lix.db
     .insertInto("file")
     .values({
       path: "/example.json",
-      // lix expects the data to be a Uint8Array
-      // so we convert the JSON object to a string and then to a Uint8Array
-      data: new TextEncoder().encode(JSON.stringify(user)),
+      data: new TextEncoder().encode(JSON.stringify(json)),
     })
-    .executeTakeFirstOrThrow();
+    .execute();
 
   const fileAfterInsert = await lix.db
     .selectFrom("file")
@@ -39,16 +37,18 @@ export default async function runExample(console: any) {
     },
   ]);
 
-  // SECTION-END "inserting-file"
+  console.log("SECTION END 'inserting-file'");
 
-  // SECTION-START "updating-file"
+  console.log("SECTION START 'updating-file'");
 
   // we update the user's age to 51
   await lix.db
     .updateTable("file")
     .where("path", "=", "/example.json")
     .set({
-      data: new TextEncoder().encode(JSON.stringify({ ...user, age: 51 })),
+      data: new TextEncoder().encode(
+        JSON.stringify({ name: "Peter", age: 51 })
+      ),
     })
     .execute();
 
@@ -70,9 +70,9 @@ export default async function runExample(console: any) {
     },
   ]);
 
-  // SECTION-END "updating-file"
+  console.log("SECTION END 'updating-file'");
 
-  // SECTION-START "querying-file-history"
+  console.log("SECTION START 'querying-file-history'");
 
   const activeVersion = await lix.db
     .selectFrom("active_version")
@@ -97,7 +97,7 @@ export default async function runExample(console: any) {
     }))
   );
 
-  // SECTION-END "querying-file-history"
+  console.log("SECTION END 'querying-file-history'");
 }
 
 // outcomment for running in node
