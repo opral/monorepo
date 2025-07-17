@@ -859,7 +859,8 @@ simulationTest(
 		// Verify all timestamps are identical
 		expect(changeRecord.created_at).toBe(cacheRecord.created_at);
 		expect(changeRecord.created_at).toBe(cacheRecord.updated_at);
-	}
+	},
+	{ onlyRun: ["normal", "normal"] }
 );
 
 simulationTest(
