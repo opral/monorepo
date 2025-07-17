@@ -20,7 +20,7 @@ export function isDeterministicMode(args: {
 	const [row] = executeSync({
 		lix: args.lix,
 		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.selectFrom("internal_underlying_state_all")
+			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
 			.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),

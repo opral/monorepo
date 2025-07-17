@@ -48,7 +48,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_snapshot: InternalSnapshotTable;
 	internal_state_cache: InternalStateCacheTable;
 	internal_state_all_untracked: InternalStateAllUntrackedTable;
-	internal_underlying_state_all: InternalUnderlyingStateAllView;
+	internal_resolved_state_all: InternalUnderlyingStateAllView;
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {

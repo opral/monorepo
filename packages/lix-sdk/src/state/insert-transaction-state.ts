@@ -139,11 +139,11 @@ export function insertTransactionState(args: {
 
 		// Create change_author records if enabled (default true)
 		if (args.createChangeAuthors !== false) {
-			// Query from internal_underlying_state_all to get active accounts
+			// Query from internal_resolved_state_all to get active accounts
 			const activeAccounts = executeSync({
 				lix: args.lix,
 				query: args.lix.db
-					.selectFrom("internal_underlying_state_all")
+					.selectFrom("internal_resolved_state_all")
 					.where("schema_key", "=", "lix_active_account")
 					.where("version_id", "=", "global")
 					.select(["entity_id as account_id"]),
@@ -153,11 +153,11 @@ export function insertTransactionState(args: {
 				for (const activeAccount of activeAccounts) {
 					const accountId = activeAccount.account_id as string;
 
-					// Get account details from internal_underlying_state_all
+					// Get account details from internal_resolved_state_all
 					const [accountDetails] = executeSync({
 						lix: args.lix,
 						query: args.lix.db
-							.selectFrom("internal_underlying_state_all")
+							.selectFrom("internal_resolved_state_all")
 							.where("entity_id", "=", accountId)
 							.where("schema_key", "=", "lix_account")
 							.where("version_id", "=", args.data.version_id)
@@ -170,7 +170,7 @@ export function insertTransactionState(args: {
 						const [globalAccount] = executeSync({
 							lix: args.lix,
 							query: args.lix.db
-								.selectFrom("internal_underlying_state_all")
+								.selectFrom("internal_resolved_state_all")
 								.where("entity_id", "=", accountId)
 								.where("schema_key", "=", "lix_account")
 								.where("version_id", "=", "global")

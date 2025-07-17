@@ -4,9 +4,14 @@ import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 /**
- * Creates a view that provides direct access to underlying state tables
+ * Creates a view that provides direct access to resolved state data
  * without going through the state virtual table. This avoids recursion
  * issues when operations like lix_timestamp() need to query state.
+ *
+ * The "resolved state" combines:
+ * - Untracked state (highest priority)
+ * - Tracked state from cache
+ * - Inherited state (resolved from parent versions)
  *
  * IMPORTANT: This view assumes that the cache is fresh. It does not check
  * for cache staleness or trigger cache population. The caller is responsible
@@ -14,13 +19,13 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
  *
  * See https://github.com/opral/lix-sdk/issues/355
  */
-export function applyUnderlyingStateView(args: {
+export function applyResolvedStateView(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 }): void {
-	// Create the view that unions cache and untracked state
+	// Create the view that provides resolved state by combining cache and untracked state
 	args.sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_underlying_state_all AS
+		CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
 		SELECT * FROM (
 			-- 1. Untracked state (highest priority)
 			SELECT 
@@ -160,11 +165,10 @@ export function applyUnderlyingStateView(args: {
 }
 
 // Type for the view - matches StateAllView
-export type InternalUnderlyingStateAllView = Omit<
+export type InternalResolvedStateAllView = Omit<
 	StateAllView,
 	"snapshot_content"
 > & {
 	// needs to manually stringify snapshot_content
 	snapshot_content: string | null;
 };
-

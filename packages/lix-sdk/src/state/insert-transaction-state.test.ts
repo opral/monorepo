@@ -44,7 +44,7 @@ test("insertPendingState creates tracked entity with pending change", async () =
 	});
 
 	const results = await lixInternalDb
-		.selectFrom("internal_underlying_state_all")
+		.selectFrom("internal_resolved_state_all")
 		.where("entity_id", "=", "test-insert")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
@@ -107,7 +107,7 @@ test("insertPendingState creates tracked entity with pending change", async () =
 		.execute();
 
 	const resultingUnderlyingState = await lixInternalDb
-		.selectFrom("internal_underlying_state_all")
+		.selectFrom("internal_resolved_state_all")
 		.selectAll()
 		.execute();
 

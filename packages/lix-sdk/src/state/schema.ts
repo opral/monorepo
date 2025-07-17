@@ -11,7 +11,7 @@ import {
 	applyMaterializeStateSchema,
 	materializeState,
 } from "./materialize-state.js";
-import { applyUnderlyingStateView } from "./underlying-state-view.js";
+import { applyResolvedStateView } from "./resolved-state-view.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
 import { selectFromStateCache } from "./cache/select-from-state-cache.js";
 import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
@@ -42,7 +42,7 @@ export function applyStateDatabaseSchema(
 ): SqliteWasmDatabase {
 	applyMaterializeStateSchema(sqlite);
 	applyStateCacheSchema({ sqlite });
-	applyUnderlyingStateView({ sqlite, db });
+	applyResolvedStateView({ sqlite, db });
 
 	sqlite.createFunction({
 		name: "validate_snapshot_content",

@@ -27,7 +27,7 @@ test("underlying_state view should return same results as state_all for a tracke
 		.execute();
 
 	const underlyingStateResults = await lixInternalDb
-		.selectFrom("internal_underlying_state_all")
+		.selectFrom("internal_resolved_state_all")
 		.where("entity_id", "=", "test-key")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
@@ -60,7 +60,7 @@ test("underlying_state view should return same results as state_all for an untra
 		.execute();
 
 	const underlyingStateResults = await lixInternalDb
-		.selectFrom("internal_underlying_state_all")
+		.selectFrom("internal_resolved_state_all")
 		.where("entity_id", "=", "cache_stale")
 		.where("schema_key", "=", "lix_key_value")
 		.selectAll()
@@ -103,7 +103,7 @@ test("underlying_state view should handle version inheritance", async () => {
 		.execute();
 
 	const underlyingStateResults = await lixInternalDb
-		.selectFrom("internal_underlying_state_all")
+		.selectFrom("internal_resolved_state_all")
 		.where("entity_id", "=", "inherited-key")
 		.where("version_id", "=", activeVersion!.version_id)
 		.selectAll()
@@ -152,7 +152,7 @@ test("underlying_state view should handle inherited untracked entities", async (
 		.execute();
 
 	const underlyingStateResults = await lixInternalDb
-		.selectFrom("internal_underlying_state_all")
+		.selectFrom("internal_resolved_state_all")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("version_id", "=", activeVersion!.version_id)
 		.selectAll()
@@ -211,7 +211,7 @@ test.skip("underlying_state view should block inheritance when child has own val
 		.execute();
 
 	const underlyingStateResults = await lixInternalDb
-		.selectFrom("internal_underlying_state_all")
+		.selectFrom("internal_resolved_state_all")
 		.where("entity_id", "=", "overridden-key")
 		.where("version_id", "=", activeVersion!.version_id)
 		.selectAll()
@@ -239,4 +239,3 @@ test.skip("underlying_state view should block inheritance when child has own val
 	expect(stateSnapshot?.value).toBe("child-value");
 	expect(underlyingSnapshot?.value).toBe("child-value");
 });
-
