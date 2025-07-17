@@ -279,7 +279,7 @@ export function applyStateDatabaseSchema(
 				}
 
 				// Emit state commit hook after transaction is successfully committed
-				hooks._emit("state_commit");
+				hooks._emit("state_commit", { changes: changesToRealize });
 
 				return capi.SQLITE_OK;
 			},

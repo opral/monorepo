@@ -25,7 +25,7 @@ export type LixHooks = {
 	 * unsubscribe();
 	 * ```
 	 */
-	onStateCommit: (handler: () => void) => () => void;
+	onStateCommit: (handler: (data: any) => void) => () => void;
 
 	/**
 	 * Listen to file change events.
@@ -77,7 +77,7 @@ export function createHooks(): LixHooks {
 	const eventTarget = new EventTarget();
 
 	return {
-		onStateCommit(handler: () => void): () => void {
+		onStateCommit(handler: (data: any) => void): () => void {
 			eventTarget.addEventListener("state_commit", handler);
 			return () => eventTarget.removeEventListener("state_commit", handler);
 		},
