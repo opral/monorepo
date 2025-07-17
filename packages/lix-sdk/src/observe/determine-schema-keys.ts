@@ -55,6 +55,7 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 	const specialMappings = {
 		change: "change", // Special case for change table
 		state: "state", // Virtual state table - could include multiple schema keys
+		state_all: "state_all", // Virtual state_all table - includes all versions
 		active_version: "lix_version", // Maps to version schema
 		active_account: "lix_account", // Maps to account schema
 	};

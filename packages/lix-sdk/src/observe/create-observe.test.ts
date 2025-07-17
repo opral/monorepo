@@ -550,6 +550,44 @@ test("query with change table join should always re-execute", async () => {
 	await lix.close();
 });
 
+test("query with state_all table should always re-execute", async () => {
+	const lix = await openLix({});
+	const stateAllEmissions: any[] = [];
+
+	// Observe a query that uses the state_all table
+	// This should always re-execute because state_all includes all versions
+	const stateAllSub = lix
+		.observe(
+			lix.db
+				.selectFrom("state_all")
+				.selectAll()
+				.where("schema_key", "=", "lix_version")
+		)
+		.subscribe({ next: (rows) => stateAllEmissions.push(rows) });
+
+	// Wait for initial emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(stateAllEmissions).toHaveLength(1);
+
+	const countBefore = stateAllEmissions.length;
+
+	// Insert into key_value - should trigger state_all observer
+	// because state_all queries should always re-execute (special case)
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "state_all_test_key", value: "state_all_test_value" })
+		.execute();
+
+	// Wait for emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+
+	// state_all observer should have received an update
+	expect(stateAllEmissions).toHaveLength(countBefore + 1);
+
+	stateAllSub.unsubscribe();
+	await lix.close();
+});
+
 test("multiple observers with different entities should not interfere", async () => {
 	const lix = await openLix({});
 	const keyValueEmissions: any[] = [];

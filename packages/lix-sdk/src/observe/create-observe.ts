@@ -137,8 +137,8 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 					// changesToRealize is an array of arrays: [change_id, entity_id, schema_key, ...]
 					const schemaKey = change[2] || change.schema_key;
 
-					// Special case: queries with 'change' schema should always re-execute
-					if (schemaKeys.includes("change")) {
+					// Special case: queries with 'change' or 'state_all' schema should always re-execute
+					if (schemaKeys.includes("change") || schemaKeys.includes("state_all")) {
 						return true;
 					}
 

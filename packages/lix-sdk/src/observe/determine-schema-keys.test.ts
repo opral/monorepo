@@ -56,8 +56,25 @@ test("should extract schema keys from state table queries", async () => {
 	const schemaKeys = determineSchemaKeys(mdAstRootQuery.compile());
 	
 	// "state" is a virtual table that should map to appropriate schema keys
-	// For now, this test documents the current behavior
-	expect(Array.isArray(schemaKeys)).toBe(true);
+	expect(schemaKeys).toContain("state");
+	
+	await lix.close();
+});
+
+test("should extract schema keys from state_all table queries", async () => {
+	const lix = await openLix({});
+	
+	// Test query using "state_all" table (includes all versions)
+	const stateAllQuery = lix.db
+		.selectFrom("state_all")
+		.where("schema_key", "=", "lix_version")
+		.where("version_id", "=", "test_version_id")
+		.selectAll();
+	
+	const schemaKeys = determineSchemaKeys(stateAllQuery.compile());
+	
+	// "state_all" should be detected as a special schema key
+	expect(schemaKeys).toContain("state_all");
 	
 	await lix.close();
 });
