@@ -40,7 +40,7 @@ export function insertPendingState(args: {
 						.columns(["entity_id", "schema_key", "file_id", "version_id"])
 						.doUpdateSet({
 							snapshot_content: args.data.snapshot_content,
-							updated_at: new Date().toISOString(),
+							updated_at: _timestamp,
 						})
 				),
 		});
@@ -118,7 +118,7 @@ export function insertPendingState(args: {
 				version_id: args.data.version_id,
 				created_at: _timestamp,
 				updated_at: _timestamp,
-				untracked: true,
+				untracked: false,
 				inherited_from_version_id: null,
 				change_id: changeId,
 				change_set_id: "pending",
