@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { determineSchemaKeys } from "./create-observe.js";
+import { determineSchemaKeys } from "./determine-schema-keys.js";
 
 /**
  * Tests for the determineSchemaKeys function using real queries from md-app.
@@ -104,7 +104,7 @@ test("should extract schema keys from subquery queries", async () => {
 	const schemaKeys = determineSchemaKeys(activeFileQuery.compile());
 	
 	// Should include schema keys for both main query and subquery tables
-	expect(schemaKeys).toContain("lix_file");
+	expect(schemaKeys).toContain("lix_file_descriptor");
 	expect(schemaKeys).toContain("lix_key_value");
 	
 	await lix.close();
@@ -113,16 +113,17 @@ test("should extract schema keys from subquery queries", async () => {
 test("should handle queries with aliases", async () => {
 	const lix = await openLix({});
 	
-	// Test query with table aliases
+	// Test query with table aliases using key_value (has schema key lix_key_value)
 	const aliasQuery = lix.db
-		.selectFrom("change as main_change")
-		.innerJoin("change as before_change", "main_change.entity_id", "before_change.entity_id")
-		.selectAll("main_change");
+		.selectFrom("key_value as kv1")
+		.innerJoin("key_value as kv2", "kv1.key", "kv2.value")
+		.selectAll("kv1");
 	
 	const schemaKeys = determineSchemaKeys(aliasQuery.compile());
 	
 	// Should recognize the underlying table despite aliases
-	expect(schemaKeys).toContain("change");  // Should map to change table
+	// Since both aliases point to key_value, should contain lix_key_value
+	expect(schemaKeys).toContain("lix_key_value");
 	
 	await lix.close();
 });
@@ -254,7 +255,7 @@ test("should correctly extract schema keys from real md-app queries", async () =
 						.select("value")
 				)
 				.select(["id", "path"]),
-			expectedKeys: ["lix_file", "lix_key_value"]
+			expectedKeys: ["lix_file_descriptor", "lix_key_value"]
 		}
 	];
 	
