@@ -1,3 +1,5 @@
+import type { Change } from "../change/index.js";
+
 /**
  * Lix hooks system for listening to database lifecycle events.
  *
@@ -25,7 +27,7 @@ export type LixHooks = {
 	 * unsubscribe();
 	 * ```
 	 */
-	onStateCommit: (handler: () => void) => () => void;
+	onStateCommit: (handler: (data: { changes: Change[] }) => void) => () => void;
 
 	/**
 	 * Listen to file change events.
@@ -77,9 +79,14 @@ export function createHooks(): LixHooks {
 	const eventTarget = new EventTarget();
 
 	return {
-		onStateCommit(handler: () => void): () => void {
-			eventTarget.addEventListener("state_commit", handler);
-			return () => eventTarget.removeEventListener("state_commit", handler);
+		onStateCommit(handler: (data: { changes: Change[] }) => void): () => void {
+			const wrappedHandler = (event: Event) => {
+				const customEvent = event as CustomEvent;
+				handler(customEvent.detail);
+			};
+			eventTarget.addEventListener("state_commit", wrappedHandler);
+			return () =>
+				eventTarget.removeEventListener("state_commit", wrappedHandler);
 		},
 
 		onFileChange(

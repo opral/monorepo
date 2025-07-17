@@ -1,6 +1,8 @@
 import type { SelectQueryBuilder } from "kysely";
 import type { Lix } from "../lix/open-lix.js";
 import { LixObservable } from "./lix-observable.js";
+import { determineSchemaKeys } from "./determine-schema-keys.js";
+import type { Change } from "../change/index.js";
 
 /**
  * Options for the observe method.
@@ -114,9 +116,42 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			// Execute initial query
 			executeQuery();
 
+			const shouldReexecute = (data: { changes: Change[] }) => {
+				// Extract changes from the data structure
+				const changes = data.changes || [];
+
+				// If no changes provided, always re-execute for safety
+				if (!changes || changes.length === 0) {
+					return true;
+				}
+
+				// Get schema keys that this query depends on
+				const schemaKeys = determineSchemaKeys(query.compile());
+				// If no schema keys extracted, always re-execute for safety
+				if (!schemaKeys.length) {
+					return true;
+				}
+
+				// Check if any of the changed entities match our query's schema keys
+				return changes.some((change: any) => {
+					// changesToRealize is an array of arrays: [change_id, entity_id, schema_key, ...]
+					const schemaKey = change[2] || change.schema_key;
+
+					// Special case: queries with 'change' or 'state_all' schema should always re-execute
+					if (schemaKeys.includes("change") || schemaKeys.includes("state_all")) {
+						return true;
+					}
+
+					// Check if this specific schema key affects our query
+					return schemaKeys.includes(schemaKey);
+				});
+			};
+
 			// Subscribe to state commits for updates
-			const unsubscribeFromStateCommit = lix.hooks.onStateCommit(() => {
-				executeQuery();
+			const unsubscribeFromStateCommit = lix.hooks.onStateCommit((data) => {
+				if (shouldReexecute(data)) {
+					executeQuery();
+				}
 			});
 
 			// Store the cleanup function
