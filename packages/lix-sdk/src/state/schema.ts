@@ -283,8 +283,7 @@ export function applyStateDatabaseSchema(
 				if (!sqlite.skipLogging) {
 					hooks._emit("state_commit");
 				} else {
-					console.log('skipped state_commit')
-
+					console.log("skipped state_commit");
 				}
 
 				return capi.SQLITE_OK;

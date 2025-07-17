@@ -1,7 +1,7 @@
 import { DEFAULT_LOG_LEVELS } from "../log/create-lix-own-log.js";
 import type { Lix } from "../lix/open-lix.js";
 import { executeSync } from "./execute-sync.js";
-import type { LixInternalDatabaseSchema } from "./schema.js";
+import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import type { Kysely } from "kysely";
 
 import { nanoid } from "./nano-id.js";
@@ -54,6 +54,8 @@ export function cleanupQueryLogging(): void {
 	// Clear the log queue to prevent memory leaks
 	logQueue.length = 0;
 }
+
+const logLevels = new WeakMap<Kysely<LixDatabaseSchema>, string[]>();
 
 /**
  * Enables basic query logging by intercepting SQLite exec calls.
@@ -139,6 +141,8 @@ export function enableQueryLogging(
 				bindings = Array.isArray(args[0].bind) ? args[0].bind : [args[0].bind];
 			}
 
+			lix.skipLogging = true;
+
 			const message = `Query executed in ${duration}ms`;
 			const payload = {
 				sql: sql,
@@ -150,34 +154,52 @@ export function enableQueryLogging(
 				error: error ? error.message : undefined,
 			};
 
-			// console.log(message, payload);
+			if (logLevels.get(lix.db) === undefined) {
+				const fetchedLogLevels =
+					executeSync({
+						lix: lix,
+						query: lix.db
+							.selectFrom("key_value")
+							.select("value")
+							.where("key", "=", "lix_log_levels"),
+					})[0]?.values ?? DEFAULT_LOG_LEVELS;
 
-			lix.skipLogging = true;
-			executeSync({
-				lix: { sqlite: lix.sqlite },
-				query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-					.insertInto("internal_state_all_untracked")
-					.values({
-						entity_id: nanoid(),
-						version_id: "global",
-						file_id: "lix",
-						schema_key: LixLogSchema["x-lix-key"],
-						plugin_key: "lix_own_entity",
-						schema_version: LixLogSchema["x-lix-version"],
-						snapshot_content: JSON.stringify({
-							key: "lix_query_executed",
-							message,
-							level: "info",
-							payload,
+				logLevels.set(lix.db, fetchedLogLevels);
+			}
+
+			// // Check if the level is allowed
+			const shouldLog =
+				logLevels.get(lix.db)!.includes("*") ||
+				logLevels.get(lix.db)!.includes("info");
+
+			if (shouldLog) {
+				executeSync({
+					lix: { sqlite: lix.sqlite },
+					query: (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+						.insertInto("internal_state_all_untracked")
+						.values({
+							entity_id: nanoid(),
+							version_id: "global",
+							file_id: "lix",
+							schema_key: LixLogSchema["x-lix-key"],
+							plugin_key: "lix_own_entity",
+							schema_version: LixLogSchema["x-lix-version"],
+							snapshot_content: JSON.stringify({
+								key: "lix_query_executed",
+								message,
+								level: "info",
+								payload,
+							}),
 						}),
-					}),
-				// no conflict handling here, as we don't mutate logs
-				// .onConflict((oc) =>
-				//     oc.doUpdateSet({
-				//         snapshot_content: newValue,
-				//     })
-				// ),
-			});
+					// no conflict handling here, as we don't mutate logs
+					// .onConflict((oc) =>
+					//     oc.doUpdateSet({
+					//         snapshot_content: newValue,
+					//     })
+					// ),
+				});
+			}
+
 			lix.skipLogging = false;
 		}
 		// Re-throw error if query failed

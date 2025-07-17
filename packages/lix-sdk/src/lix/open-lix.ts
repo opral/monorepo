@@ -13,7 +13,10 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { enableQueryLogging, cleanupQueryLogging } from "../database/enable-query-logging.js";
+import {
+	enableQueryLogging,
+	cleanupQueryLogging,
+} from "../database/enable-query-logging.js";
 
 export type Lix = {
 	skipLogging?: boolean;
