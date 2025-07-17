@@ -1,7 +1,7 @@
 import { executeSync } from "../database/execute-sync.js";
 import type { Lix } from "../lix/open-lix.js";
 
-const DEFAULT_LOG_LEVELS = ["info", "warn", "error"];
+export const DEFAULT_LOG_LEVELS: string[] = ["info", "warn", "error"];
 
 /**
  * Creates a log entry in the Lix database, applying log level filtering.
@@ -60,6 +60,7 @@ export function createLixOwnLogSync(args: {
 	message: string;
 	level: string;
 	key: string;
+	payload?: Record<string, any>;
 }): void {
 	const logLevels = executeSync({
 		lix: args.lix,
@@ -79,15 +80,28 @@ export function createLixOwnLogSync(args: {
 		return undefined; // Filtered out
 	}
 
+	let sqlPreview = args.payload?.sql;
+	if (typeof sqlPreview === "string" && sqlPreview.length > 100) {
+		sqlPreview = sqlPreview.slice(0, 100) + "...";
+	}
+	// console.log("Creating log:", args.message, sqlPreview, args.payload);
 	// Insert the log
+
+	// // @ts-expect-error -- this is fine for now
+	// if (window.logQueries) {
 	executeSync({
 		lix: args.lix,
 		query: args.lix.db.insertInto("log").values({
 			key: args.key,
 			message: args.message,
 			level: args.level,
+			lixcol_untracked: true,
+			...(args.payload && { payload: args.payload }),
 		}),
 	});
+	// } else {
+	// 	console.log("skipping write to db");
+	// }
 }
 
 export async function createLixOwnLog(args: {
@@ -95,6 +109,7 @@ export async function createLixOwnLog(args: {
 	message: string;
 	level: string;
 	key: string;
+	payload?: Record<string, any>;
 }): Promise<void> {
 	const logLevels = await args.lix.db
 		.selectFrom("key_value")
@@ -119,6 +134,7 @@ export async function createLixOwnLog(args: {
 			key: args.key,
 			message: args.message,
 			level: args.level,
+			...(args.payload && { payload: args.payload }),
 		})
 		.execute();
 }

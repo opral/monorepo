@@ -13,8 +13,10 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
+import { enableQueryLogging } from "../database/enable-query-logging.js";
 
 export type Lix = {
+	skipLogging?: boolean;
 	/**
 	 * The raw SQLite instance.
 	 *
@@ -193,6 +195,7 @@ export async function openLix(args: {
 		hooks,
 		observe,
 		close: async () => {
+			// Clean up query logging timeouts before closing
 			await storage.close();
 		},
 		toBlob: async () => {
@@ -202,6 +205,12 @@ export async function openLix(args: {
 
 	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
+
+	// Enable query logging (can be configured via environment or options)
+	enableQueryLogging(lix, {
+		enabled: true,
+		logSlowQueriesOnly: false,
+	});
 
 	// Connect storage to Lix if the adapter supports it
 	if (storage.connect) {

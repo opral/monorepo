@@ -17,6 +17,7 @@ bench(
 
 		// Create 100 changes for the same entity in the same version
 		for (let i = 0; i < 100; i++) {
+			console.log(`Inserting change ${i + 1} for entity mock_entity_id`);
 			await lix.db
 				.insertInto("state_all")
 				.values({
@@ -38,6 +39,10 @@ bench(
 			.where("version_id", "=", version.id)
 			.selectAll()
 			.execute();
+
+		await lix.close();
+
+		console.log("Benchmark completed successfully");
 	},
 	{ iterations: 5, warmupIterations: 1 }
 );

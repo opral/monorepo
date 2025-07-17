@@ -13,11 +13,12 @@ import {
 } from "lucide-react";
 import DataExplorer from "./pages/data-explorer/index";
 import Graph from "./pages/graph/index";
+import QueryMonitor from "./pages/query-monitor/index";
 import { FloatingWindow } from "./components/floating-window";
 import { LogIndicator } from "./components/log-indicator";
 
 // Define the types of content that can be displayed
-type Pages = "data-explorer" | "graph";
+type Pages = "data-explorer" | "graph" | "query-monitor";
 
 // Inline Lix SVG logo component
 const LixLogo = () => (
@@ -69,6 +70,10 @@ const WINDOW_CONFIG: Record<
   graph: {
     title: "Graph",
     initialSize: { width: 900, height: 700 },
+  },
+  "query-monitor": {
+    title: "Query Monitor",
+    initialSize: { width: 900, height: 600 },
   },
 };
 
@@ -324,7 +329,7 @@ export default function App(args: { show: boolean }) {
   ];
 
   const handleNavItemClick = (id: string) => {
-    if (id === "data-explorer" || id === "graph") {
+    if (id === "data-explorer" || id === "graph" || id === "query-monitor") {
       const pageId = id as Pages;
 
       // If the window is already pinned, just make it active
@@ -408,6 +413,7 @@ export default function App(args: { show: boolean }) {
               {[
                 { id: "graph", label: "Graph" },
                 { id: "data-explorer", label: "Data Explorer" },
+                { id: "query-monitor", label: "Query Monitor" },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -541,7 +547,13 @@ export default function App(args: { show: boolean }) {
               handleWindowStateChange(pageId, { isExpanded })
             }
           >
-            {pageId === "data-explorer" ? <DataExplorer /> : <Graph />}
+            {pageId === "data-explorer" ? (
+              <DataExplorer />
+            ) : pageId === "graph" ? (
+              <Graph />
+            ) : (
+              <QueryMonitor />
+            )}
           </FloatingWindow>
         ))}
     </div>
