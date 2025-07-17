@@ -3,6 +3,19 @@ import { timestamp } from "../deterministic/timestamp.js";
 import type { Lix } from "../lix/open-lix.js";
 import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 
+/**
+ * Commits all pending changes from the transaction stage to permanent storage.
+ *
+ * This function handles the COMMIT stage of the state mutation flow. It takes
+ * all changes accumulated in the transaction table (internal_change_in_transaction),
+ * groups them by version, creates changesets for each version, and saves
+ * them to permanent storage (internal_change and internal_snapshot tables).
+ *
+ * @example
+ * // After accumulating changes via insertTransactionState
+ * commit({ lix });
+ * // All pending changes are now persisted
+ */
 export function commit(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {

@@ -168,7 +168,9 @@ export function applyStateDatabaseSchema(
 				// }
 			},
 
-			xCommit: () => commit({ lix: { sqlite, db: db as any, hooks } }),
+			xCommit: () => {
+				return commit({ lix: { sqlite, db: db as any, hooks } });
+			},
 
 			xRollback: () => {
 				sqlite.exec({

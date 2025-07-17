@@ -6,16 +6,16 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "./schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 
-type NewPendingStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
+type NewTransactionStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;
 };
 
-export type PendingStateRow = Omit<StateAllRow, "snapshot_content"> & {
+export type TransactionStateRow = Omit<StateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;
 };
 
 /**
- * Inserts a pending state change into the transaction stage.
+ * Inserts a state change into the transaction stage.
  *
  * This function handles the TRANSACTION stage of the state mutation flow, where
  * changes are temporarily stored before being committed to permanent storage.
@@ -32,7 +32,7 @@ export type PendingStateRow = Omit<StateAllRow, "snapshot_content"> & {
  *
  * @example
  * // Insert a new entity state
- * insertPendingState({
+ * insertTransactionState({
  *   lix: { sqlite, db },
  *   data: {
  *     entity_id: "user-123",
@@ -48,7 +48,7 @@ export type PendingStateRow = Omit<StateAllRow, "snapshot_content"> & {
  *
  * @example
  * // Delete an entity (null snapshot_content)
- * insertPendingState({
+ * insertTransactionState({
  *   lix: { sqlite, db },
  *   data: {
  *     entity_id: "user-123",
@@ -62,13 +62,13 @@ export type PendingStateRow = Omit<StateAllRow, "snapshot_content"> & {
  *   }
  * });
  */
-export function insertPendingState(args: {
+export function insertTransactionState(args: {
 	lix: { sqlite: Lix["sqlite"]; db: Kysely<LixInternalDatabaseSchema> };
-	data: NewPendingStateRow;
+	data: NewTransactionStateRow;
 	timestamp?: string;
 	createChangeAuthors?: boolean;
 }): {
-	data: PendingStateRow;
+	data: TransactionStateRow;
 } {
 	const _timestamp = args.timestamp || timestamp({ lix: args.lix as any });
 	if (args.data.untracked == true) {
@@ -179,7 +179,7 @@ export function insertPendingState(args: {
 
 						if (globalAccount) {
 							// Recursively insert account without creating change authors for it
-							insertPendingState({
+							insertTransactionState({
 								lix: args.lix,
 								data: {
 									entity_id: accountId,
@@ -204,7 +204,7 @@ export function insertPendingState(args: {
 					};
 
 					// Recursively insert change_author without creating change authors for it
-					insertPendingState({
+					insertTransactionState({
 						lix: args.lix,
 						data: {
 							entity_id: `${changeId}::${accountId}`,

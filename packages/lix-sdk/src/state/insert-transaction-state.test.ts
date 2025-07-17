@@ -3,7 +3,7 @@ import { openLix } from "../lix/open-lix.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { commit } from "./commit.js";
-import { insertPendingState } from "./insert-pending-state.js";
+import { insertTransactionState } from "./insert-transaction-state.js";
 
 test("insertPendingState creates tracked entity with pending change", async () => {
 	const lix = await openLix({
@@ -29,7 +29,7 @@ test("insertPendingState creates tracked entity with pending change", async () =
 		.executeTakeFirstOrThrow();
 
 	// Use insertPendingState function
-	insertPendingState({
+	insertTransactionState({
 		lix: { sqlite: lix.sqlite, db: lixInternalDb },
 		data: {
 			entity_id: "test-insert",

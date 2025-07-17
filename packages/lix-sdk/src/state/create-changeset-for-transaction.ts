@@ -19,8 +19,24 @@ import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import { nanoId } from "../deterministic/index.js";
 import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 import { handleStateDelete } from "./schema.js";
-import { insertPendingState } from "./insert-pending-state.js";
+import { insertTransactionState } from "./insert-transaction-state.js";
 
+/**
+ * Creates a changeset for all changes in a transaction and updates the version.
+ *
+ * This function:
+ * 1. Creates a new changeset and links it to the current version's changeset
+ * 2. Updates the version to point to the new changeset
+ * 3. Creates changeset elements for each change
+ * 4. Updates working changeset elements for user data changes
+ *
+ * @param sqlite - SQLite database instance
+ * @param db - Kysely database instance
+ * @param _currentTime - Current timestamp (unused)
+ * @param version_id - The version to create the changeset for
+ * @param changes - Array of changes to include in the changeset
+ * @returns The ID of the newly created changeset
+ */
 export function createChangesetForTransaction(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
@@ -50,7 +66,8 @@ export function createChangesetForTransaction(
 	const nextChangeSetId = nanoId({
 		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
 	});
-	const changeSetChangeResult = insertPendingState({
+	// Create changeset
+	const changeSetChange = insertTransactionState({
 		lix: { sqlite, db },
 		data: {
 			entity_id: nextChangeSetId,
@@ -62,19 +79,13 @@ export function createChangesetForTransaction(
 				metadata: null,
 			} satisfies LixChangeSet),
 			schema_version: LixChangeSetSchema["x-lix-version"],
-			version_id: "global", // Always use 'global' for change sets
+			version_id: "global",
 			untracked: false,
 		},
-	});
+	}).data;
 
-	const changeSetChange = {
-		id: changeSetChangeResult.data.change_id,
-		entity_id: changeSetChangeResult.data.entity_id,
-		schema_key: changeSetChangeResult.data.schema_key,
-		file_id: changeSetChangeResult.data.file_id,
-	};
-
-	const changeSetEdgeChangeResult = insertPendingState({
+	// Create changeset edge
+	const changeSetEdgeChange = insertTransactionState({
 		lix: { sqlite, db },
 		data: {
 			entity_id: `${mutatedVersion.change_set_id}::${nextChangeSetId}`,
@@ -86,21 +97,13 @@ export function createChangesetForTransaction(
 				child_id: nextChangeSetId,
 			} satisfies LixChangeSetEdge),
 			schema_version: LixChangeSetEdgeSchema["x-lix-version"],
-			version_id: "global", // Always use 'global' for change set edges
+			version_id: "global",
 			untracked: false,
 		},
-	});
-	const changeSetEdgeChange = {
-		id: changeSetEdgeChangeResult.data.change_id!,
-		entity_id: changeSetEdgeChangeResult.data.entity_id,
-		schema_key: changeSetEdgeChangeResult.data.schema_key,
-		file_id: changeSetEdgeChangeResult.data.file_id,
-	};
+	}).data;
 
-	// Only create separate version change if root change is not already a version change
-	const changesToProcess = [...changes, changeSetChange, changeSetEdgeChange];
-
-	const versionChangeResult = insertPendingState({
+	// Update version with new changeset
+	const versionChange = insertTransactionState({
 		lix: { sqlite, db },
 		data: {
 			entity_id: mutatedVersion.id,
@@ -115,27 +118,31 @@ export function createChangesetForTransaction(
 			version_id: "global",
 			untracked: false,
 		},
-	});
+	}).data;
 
-	const versionChange = {
-		id: versionChangeResult.data.change_id!,
-		entity_id: versionChangeResult.data.entity_id,
-		schema_key: versionChangeResult.data.schema_key,
-		file_id: versionChangeResult.data.file_id,
-	};
-	changesToProcess.push(versionChange);
+	// Create changeset elements for all changes
+	const changesToProcess = [
+		...changes,
+		changeSetChange,
+		changeSetEdgeChange,
+		versionChange,
+	];
 
 	for (const change of changesToProcess) {
-		const changeSetElementChangeResult = insertPendingState({
+		// Get the change ID - it may be 'id' for original changes or 'change_id' for results from insertTransactionState
+		const changeId = "change_id" in change ? change.change_id : change.id;
+
+		// Create changeset element for this change
+		const elementChange = insertTransactionState({
 			lix: { sqlite, db },
 			data: {
-				entity_id: `${nextChangeSetId}::${change.id}`,
+				entity_id: `${nextChangeSetId}::${changeId}`,
 				schema_key: "lix_change_set_element",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					change_set_id: nextChangeSetId,
-					change_id: change.id,
+					change_id: changeId,
 					schema_key: change.schema_key,
 					file_id: change.file_id,
 					entity_id: change.entity_id,
@@ -144,28 +151,22 @@ export function createChangesetForTransaction(
 				version_id: "global",
 				untracked: false,
 			},
-		});
-		const changeSetElementChange = {
-			id: changeSetElementChangeResult.data.change_id!,
-			entity_id: changeSetElementChangeResult.data.entity_id,
-			schema_key: changeSetElementChangeResult.data.schema_key,
-			file_id: changeSetElementChangeResult.data.file_id,
-		};
-		// Create a change set element for the change set element change itself
-		// This is meta but necessary to ensure all changes are reachable
-		insertPendingState({
+		}).data;
+
+		// Create meta element for the element change itself
+		insertTransactionState({
 			lix: { sqlite, db },
 			data: {
-				entity_id: `${nextChangeSetId}::${changeSetElementChange.id}`,
+				entity_id: `${nextChangeSetId}::${elementChange.change_id}`,
 				schema_key: "lix_change_set_element",
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
 				snapshot_content: JSON.stringify({
 					change_set_id: nextChangeSetId,
-					change_id: changeSetElementChange.id,
+					change_id: elementChange.change_id,
 					schema_key: "lix_change_set_element",
 					file_id: "lix",
-					entity_id: changeSetElementChange.entity_id,
+					entity_id: elementChange.entity_id,
 				} satisfies LixChangeSetElement),
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
 				version_id: "global",
@@ -259,7 +260,7 @@ export function createChangesetForTransaction(
 
 				// If entity existed at checkpoint, add deletion to working change set
 				if (entityExistedAtCheckpoint) {
-					const workingChangeSetElementChangeResult = insertPendingState({
+					const workingElement = insertTransactionState({
 						lix: { sqlite, db },
 						data: {
 							entity_id: `${mutatedVersion.working_change_set_id}::${change.id}`,
@@ -277,26 +278,22 @@ export function createChangesetForTransaction(
 							version_id: "global",
 							untracked: false,
 						},
-					});
-					const workingChangeSetElementChange = {
-						id: workingChangeSetElementChangeResult.data.change_id!,
-						entity_id: workingChangeSetElementChangeResult.data.entity_id,
-					};
+					}).data;
 
-					// Create a meta change set element for the working change set element change itself
-					insertPendingState({
+					// Create meta element
+					insertTransactionState({
 						lix: { sqlite, db },
 						data: {
-							entity_id: `${mutatedVersion.working_change_set_id}::${workingChangeSetElementChange.id}`,
+							entity_id: `${mutatedVersion.working_change_set_id}::${workingElement.change_id}`,
 							schema_key: "lix_change_set_element",
 							file_id: "lix",
 							plugin_key: "lix_own_entity",
 							snapshot_content: JSON.stringify({
 								change_set_id: mutatedVersion.working_change_set_id,
-								change_id: workingChangeSetElementChange.id,
+								change_id: workingElement.change_id,
 								schema_key: "lix_change_set_element",
 								file_id: "lix",
-								entity_id: workingChangeSetElementChange.entity_id,
+								entity_id: workingElement.entity_id,
 							} satisfies LixChangeSetElement),
 							schema_version: LixChangeSetElementSchema["x-lix-version"],
 							version_id: "global",
@@ -345,7 +342,7 @@ export function createChangesetForTransaction(
 				}
 
 				// Then create new element with latest change
-				insertPendingState({
+				insertTransactionState({
 					lix: { sqlite, db },
 					data: {
 						entity_id: `${mutatedVersion.working_change_set_id}::${change.id}`,

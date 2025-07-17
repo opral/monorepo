@@ -6,7 +6,7 @@ import type {
 } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { timestamp } from "../deterministic/index.js";
-import { insertPendingState } from "./insert-pending-state.js";
+import { insertTransactionState } from "./insert-transaction-state.js";
 
 export function handleStateMutation(
 	sqlite: SqliteWasmDatabase,
@@ -157,7 +157,7 @@ export function handleStateMutation(
 		// If entity exists locally (not inherited), continue with normal deletion
 	}
 
-	insertPendingState({
+	insertTransactionState({
 		lix: { sqlite, db },
 		data: {
 			entity_id,
