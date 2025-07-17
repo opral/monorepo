@@ -101,11 +101,10 @@ export function nextDeterministicSequenceNumber(args: {
  * Called automatically by Lix after each committing write and during
  * `lix.toBlob()` / `lix.close()`.  **Not part of the public API.**
  */
-export function commitDeterminsticSequenceNumber(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
+export function commitDeterministicSequenceNumber(args: {
+	lix: Pick<Lix, "sqlite" | "db">;
 }): void {
-	const state = counterCache.get(args.sqlite);
+	const state = counterCache.get(args.lix.sqlite);
 	if (!state || !state.dirty) return; // nothing to do
 
 	state.dirty = false; // mark clean _before_ we try to write
@@ -116,8 +115,8 @@ export function commitDeterminsticSequenceNumber(args: {
 	} satisfies LixKeyValue);
 
 	executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
+		lix: args.lix,
+		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.insertInto("internal_state_all_untracked")
 			.values({
 				entity_id: "lix_deterministic_sequence_number",

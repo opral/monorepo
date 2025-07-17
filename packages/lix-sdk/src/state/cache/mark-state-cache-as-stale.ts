@@ -27,7 +27,7 @@ export function markStateCacheAsStale(args: {
 		],
 		returnValue: "resultRows",
 	});
-	console.log("State cache marked as stale");
+	// console.log("State cache marked as stale");
 }
 
 export function markStateCacheAsFresh(args: {
@@ -55,5 +55,5 @@ export function markStateCacheAsFresh(args: {
 		],
 		returnValue: "resultRows",
 	});
-	console.log("State cache marked as fresh");
+	// console.log("State cache marked as fresh");
 }

@@ -2,10 +2,7 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
-import type {
-	LixDatabaseSchema,
-	LixInternalDatabaseSchema,
-} from "../database/schema.js";
+import type { LixDatabaseSchema } from "../database/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
@@ -16,7 +13,7 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
+import { commitDeterministicSequenceNumber } from "../deterministic/sequence.js";
 import {
 	commitDeterministicRngState,
 	random,
@@ -253,14 +250,8 @@ export async function openLix(args: {
 			await storage.close();
 		},
 		toBlob: async () => {
-			commitDeterminsticSequenceNumber({
-				sqlite: database,
-				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
-			});
-			commitDeterministicRngState({
-				sqlite: database,
-				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
-			});
+			commitDeterministicSequenceNumber({ lix: { sqlite: database, db } });
+			commitDeterministicRngState({ lix: { sqlite: database, db } });
 			return storage.export();
 		},
 	};

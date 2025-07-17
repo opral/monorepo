@@ -16,15 +16,15 @@ import type {
 import { changeSetHasLabel } from "../query-filter/change-set-has-label.js";
 import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
 import { LixVersionSchema, type LixVersion } from "../version/schema.js";
-import { createChangeWithSnapshot } from "./handle-state-mutation.js";
 import { nanoId } from "../deterministic/index.js";
 import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 import { handleStateDelete } from "./schema.js";
+import { insertPendingState } from "./insert-pending-state.js";
 
 export function createChangesetForTransaction(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
-	currentTime: string,
+	_currentTime: string,
 	version_id: string,
 	changes: Pick<
 		{
@@ -50,9 +50,8 @@ export function createChangesetForTransaction(
 	const nextChangeSetId = nanoId({
 		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
 	});
-	const changeSetChange = createChangeWithSnapshot({
-		sqlite,
-		db,
+	const changeSetChangeResult = insertPendingState({
+		lix: { sqlite, db },
 		data: {
 			entity_id: nextChangeSetId,
 			schema_key: "lix_change_set",
@@ -63,14 +62,20 @@ export function createChangesetForTransaction(
 				metadata: null,
 			} satisfies LixChangeSet),
 			schema_version: LixChangeSetSchema["x-lix-version"],
+			version_id: "global", // Always use 'global' for change sets
+			untracked: false,
 		},
-		timestamp: currentTime,
-		version_id: "global", // Always use 'global' for change sets
 	});
 
-	const changeSetEdgeChange = createChangeWithSnapshot({
-		sqlite,
-		db,
+	const changeSetChange = {
+		id: changeSetChangeResult.data.change_id,
+		entity_id: changeSetChangeResult.data.entity_id,
+		schema_key: changeSetChangeResult.data.schema_key,
+		file_id: changeSetChangeResult.data.file_id,
+	};
+
+	const changeSetEdgeChangeResult = insertPendingState({
+		lix: { sqlite, db },
 		data: {
 			entity_id: `${mutatedVersion.change_set_id}::${nextChangeSetId}`,
 			schema_key: "lix_change_set_edge",
@@ -81,17 +86,22 @@ export function createChangesetForTransaction(
 				child_id: nextChangeSetId,
 			} satisfies LixChangeSetEdge),
 			schema_version: LixChangeSetEdgeSchema["x-lix-version"],
+			version_id: "global", // Always use 'global' for change set edges
+			untracked: false,
 		},
-		timestamp: currentTime,
-		version_id: "global", // Always use 'global' for change set edges
 	});
+	const changeSetEdgeChange = {
+		id: changeSetEdgeChangeResult.data.change_id!,
+		entity_id: changeSetEdgeChangeResult.data.entity_id,
+		schema_key: changeSetEdgeChangeResult.data.schema_key,
+		file_id: changeSetEdgeChangeResult.data.file_id,
+	};
 
 	// Only create separate version change if root change is not already a version change
 	const changesToProcess = [...changes, changeSetChange, changeSetEdgeChange];
 
-	const versionChange = createChangeWithSnapshot({
-		sqlite,
-		db,
+	const versionChangeResult = insertPendingState({
+		lix: { sqlite, db },
 		data: {
 			entity_id: mutatedVersion.id,
 			schema_key: "lix_version",
@@ -102,16 +112,22 @@ export function createChangesetForTransaction(
 				change_set_id: nextChangeSetId,
 			} satisfies LixVersion),
 			schema_version: LixVersionSchema["x-lix-version"],
+			version_id: "global",
+			untracked: false,
 		},
-		timestamp: currentTime,
-		version_id: "global",
 	});
+
+	const versionChange = {
+		id: versionChangeResult.data.change_id!,
+		entity_id: versionChangeResult.data.entity_id,
+		schema_key: versionChangeResult.data.schema_key,
+		file_id: versionChangeResult.data.file_id,
+	};
 	changesToProcess.push(versionChange);
 
 	for (const change of changesToProcess) {
-		const changeSetElementChange = createChangeWithSnapshot({
-			sqlite,
-			db,
+		const changeSetElementChangeResult = insertPendingState({
+			lix: { sqlite, db },
 			data: {
 				entity_id: `${nextChangeSetId}::${change.id}`,
 				schema_key: "lix_change_set_element",
@@ -125,15 +141,20 @@ export function createChangesetForTransaction(
 					entity_id: change.entity_id,
 				} satisfies LixChangeSetElement),
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
+				version_id: "global",
+				untracked: false,
 			},
-			timestamp: currentTime,
-			version_id: "global",
 		});
+		const changeSetElementChange = {
+			id: changeSetElementChangeResult.data.change_id!,
+			entity_id: changeSetElementChangeResult.data.entity_id,
+			schema_key: changeSetElementChangeResult.data.schema_key,
+			file_id: changeSetElementChangeResult.data.file_id,
+		};
 		// Create a change set element for the change set element change itself
 		// This is meta but necessary to ensure all changes are reachable
-		createChangeWithSnapshot({
-			sqlite,
-			db,
+		insertPendingState({
+			lix: { sqlite, db },
 			data: {
 				entity_id: `${nextChangeSetId}::${changeSetElementChange.id}`,
 				schema_key: "lix_change_set_element",
@@ -147,9 +168,9 @@ export function createChangesetForTransaction(
 					entity_id: changeSetElementChange.entity_id,
 				} satisfies LixChangeSetElement),
 				schema_version: LixChangeSetElementSchema["x-lix-version"],
+				version_id: "global",
+				untracked: false,
 			},
-			timestamp: currentTime,
-			version_id: "global",
 		});
 	}
 
@@ -238,9 +259,8 @@ export function createChangesetForTransaction(
 
 				// If entity existed at checkpoint, add deletion to working change set
 				if (entityExistedAtCheckpoint) {
-					const workingChangeSetElementChange = createChangeWithSnapshot({
-						sqlite,
-						db,
+					const workingChangeSetElementChangeResult = insertPendingState({
+						lix: { sqlite, db },
 						data: {
 							entity_id: `${mutatedVersion.working_change_set_id}::${change.id}`,
 							schema_key: "lix_change_set_element",
@@ -254,15 +274,18 @@ export function createChangesetForTransaction(
 								file_id: change.file_id,
 							} satisfies LixChangeSetElement),
 							schema_version: LixChangeSetElementSchema["x-lix-version"],
+							version_id: "global",
+							untracked: false,
 						},
-						timestamp: currentTime,
-						version_id: "global",
 					});
+					const workingChangeSetElementChange = {
+						id: workingChangeSetElementChangeResult.data.change_id!,
+						entity_id: workingChangeSetElementChangeResult.data.entity_id,
+					};
 
 					// Create a meta change set element for the working change set element change itself
-					createChangeWithSnapshot({
-						sqlite,
-						db,
+					insertPendingState({
+						lix: { sqlite, db },
 						data: {
 							entity_id: `${mutatedVersion.working_change_set_id}::${workingChangeSetElementChange.id}`,
 							schema_key: "lix_change_set_element",
@@ -276,9 +299,9 @@ export function createChangesetForTransaction(
 								entity_id: workingChangeSetElementChange.entity_id,
 							} satisfies LixChangeSetElement),
 							schema_version: LixChangeSetElementSchema["x-lix-version"],
+							version_id: "global",
+							untracked: false,
 						},
-						timestamp: currentTime,
-						version_id: "global",
 					});
 				}
 				// If entity didn't exist at checkpoint, just remove from working change set (already done above)
@@ -322,9 +345,8 @@ export function createChangesetForTransaction(
 				}
 
 				// Then create new element with latest change
-				createChangeWithSnapshot({
-					sqlite,
-					db,
+				insertPendingState({
+					lix: { sqlite, db },
 					data: {
 						entity_id: `${mutatedVersion.working_change_set_id}::${change.id}`,
 						schema_key: "lix_change_set_element",
@@ -338,9 +360,9 @@ export function createChangesetForTransaction(
 							file_id: change.file_id,
 						} satisfies LixChangeSetElement),
 						schema_version: LixChangeSetElementSchema["x-lix-version"],
+						version_id: "global",
+						untracked: false,
 					},
-					timestamp: currentTime,
-					version_id: "global",
 				});
 			}
 		}

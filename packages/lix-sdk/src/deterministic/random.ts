@@ -221,10 +221,9 @@ function nextXorshift128Plus(state: RngState): number {
  * `lix.toBlob()` / `lix.close()`. **Not part of the public API.**
  */
 export function commitDeterministicRngState(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
+	lix: Pick<Lix, "sqlite" | "db">;
 }): void {
-	const state = rngCache.get(args.sqlite);
+	const state = rngCache.get(args.lix.sqlite);
 	if (!state || !state.dirty) return; // nothing to do
 
 	state.dirty = false; // mark clean _before_ we try to write
@@ -238,8 +237,8 @@ export function commitDeterministicRngState(args: {
 	} satisfies LixKeyValue);
 
 	executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
+		lix: args.lix,
+		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
 			.insertInto("internal_state_all_untracked")
 			.values({
 				entity_id: "lix_deterministic_rng_state",

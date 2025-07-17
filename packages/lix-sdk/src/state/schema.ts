@@ -5,7 +5,6 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { handleStateMutation } from "./handle-state-mutation.js";
 import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
-import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
 import {
@@ -13,12 +12,11 @@ import {
 	materializeState,
 } from "./materialize-state.js";
 import { applyUnderlyingStateView } from "./underlying-state-view.js";
-import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
-import { timestamp } from "../deterministic/timestamp.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
 import { selectFromStateCache } from "./cache/select-from-state-cache.js";
 import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
+import { commit } from "./commit.js";
 
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(
@@ -44,7 +42,7 @@ export function applyStateDatabaseSchema(
 ): SqliteWasmDatabase {
 	applyMaterializeStateSchema(sqlite);
 	applyStateCacheSchema({ sqlite });
-	applyUnderlyingStateView(sqlite);
+	applyUnderlyingStateView({ sqlite, db });
 
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -150,170 +148,27 @@ export function applyStateDatabaseSchema(
 			},
 
 			xBegin: () => {
-				// assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
-				const existingChangesInTransaction = executeSync({
-					lix: { sqlite },
-					query: db.selectFrom("internal_change_in_transaction").selectAll(),
-				});
-				if (existingChangesInTransaction.length > 0) {
-					const errorMessage = "Transaction already in progress";
-					if (canLog()) {
-						createLixOwnLogSync({
-							lix: { sqlite, db: db as any },
-							key: "lix_state_xbegin_error",
-							level: "error",
-							message: `xBegin error: ${errorMessage}`,
-						});
-					}
-					throw new Error(errorMessage);
-				}
+				// TODO comment in after all internal v-table logic uses underlying state view
+				// // assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
+				// const existingChangesInTransaction = executeSync({
+				// 	lix: { sqlite },
+				// 	query: db.selectFrom("internal_change_in_transaction").selectAll(),
+				// });
+				// if (existingChangesInTransaction.length > 0) {
+				// 	const errorMessage = "Transaction already in progress";
+				// 	if (canLog()) {
+				// 		createLixOwnLogSync({
+				// 			lix: { sqlite, db: db as any },
+				// 			key: "lix_state_xbegin_error",
+				// 			level: "error",
+				// 			message: `xBegin error: ${errorMessage}`,
+				// 		});
+				// 	}
+				// 	throw new Error(errorMessage);
+				// }
 			},
 
-			xCommit: () => {
-				// Try to get deterministic timestamp, fallback to current time
-
-				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
-				// using the same id for snapshot_id in internal_change as in internal_snapshot.
-				const changesWithoutChangeSets = sqlite.exec({
-					sql: `
-						SELECT 
-							id, 
-							entity_id, 
-							schema_key, 
-							schema_version, 
-							file_id, 
-							plugin_key, 
-							version_id, 
-							CASE 
-								WHEN snapshot_content IS NOT NULL THEN json(snapshot_content) 
-								ELSE NULL 
-							END as snapshot_content, 
-							created_at 
-						FROM internal_change_in_transaction 
-						ORDER BY version_id
-					`,
-					returnValue: "resultRows",
-				});
-
-				// Group changes by version_id
-				const changesByVersion = new Map<
-					string,
-					{
-						id: string;
-						entity_id: string;
-						schema_key: string;
-						schema_version: string;
-						file_id: string;
-						plugin_key: string;
-						created_at: string;
-						snapshot_content: string | null;
-					}[]
-				>();
-				for (const changeWithoutChangeset of changesWithoutChangeSets) {
-					const version_id = changeWithoutChangeset[6] as string;
-					if (!changesByVersion.has(version_id)) {
-						changesByVersion.set(version_id, []);
-					}
-					changesByVersion.get(version_id)!.push({
-						id: changeWithoutChangeset[0] as string,
-						entity_id: changeWithoutChangeset[1] as string,
-						schema_key: changeWithoutChangeset[2] as string,
-						schema_version: changeWithoutChangeset[3] as string,
-						file_id: changeWithoutChangeset[4] as string,
-						plugin_key: changeWithoutChangeset[5] as string,
-						snapshot_content: changeWithoutChangeset[7] as string,
-						created_at: changeWithoutChangeset[8] as string,
-					});
-				}
-
-				// Process each version's changes to create changesets
-				const changesetIdsByVersion = new Map<string, string>();
-				for (const [version_id, versionChanges] of changesByVersion) {
-					// Create changeset and edges for this version's transaction
-					const changesetId = createChangesetForTransaction(
-						sqlite,
-						db as any,
-						timestamp({ lix: { sqlite, db: db as any } }),
-						version_id,
-						versionChanges
-					);
-					changesetIdsByVersion.set(version_id, changesetId);
-				}
-
-				const changesToRealize = sqlite.exec({
-					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, version_id, snapshot_content, created_at FROM internal_change_in_transaction ORDER BY version_id",
-					returnValue: "resultRows",
-				});
-
-				for (const changeToRealize of changesToRealize) {
-					const [
-						id,
-						entity_id,
-						schema_key,
-						schema_version,
-						file_id,
-						plugin_key,
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						version_id,
-						snapshot_content,
-						created_at,
-					] = changeToRealize;
-
-					let snapshot_id = "no-content";
-
-					if (snapshot_content) {
-						// Insert into internal_snapshot
-						const result = sqlite.exec({
-							sql: `INSERT OR IGNORE INTO internal_snapshot (content) VALUES (?) RETURNING id`,
-							bind: [snapshot_content],
-							returnValue: "resultRows",
-						});
-						// Get the 'id' column of the newly created row
-						if (result && result.length > 0) {
-							snapshot_id = result[0]![0] as string; // assuming 'id' is the first column
-						}
-					}
-
-					// Insert into internal_change
-					sqlite.exec({
-						sql: `INSERT INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
-							   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-						bind: [
-							id,
-							entity_id,
-							schema_key,
-							schema_version,
-							file_id,
-							plugin_key,
-							snapshot_id,
-							created_at,
-						],
-						returnValue: "resultRows",
-					});
-				}
-
-				sqlite.exec({
-					sql: "DELETE FROM internal_change_in_transaction",
-					returnValue: "resultRows",
-				});
-
-				// Update cache entries with the changeset IDs
-				for (const [version_id, changesetId] of changesetIdsByVersion) {
-					sqlite.exec({
-						sql: `UPDATE internal_state_cache 
-						      SET change_set_id = ? 
-						      WHERE version_id = ? AND change_set_id IS NULL`,
-						bind: [changesetId, version_id],
-					});
-				}
-
-				commitDeterminsticSequenceNumber({ sqlite, db });
-
-				//* Emit state commit hook after transaction is successfully committed
-				//* must come last to ensure that subscribers see the changes
-				hooks._emit("state_commit");
-				return capi.SQLITE_OK;
-			},
+			xCommit: () => commit({ lix: { sqlite, db: db as any, hooks } }),
 
 			xRollback: () => {
 				sqlite.exec({
@@ -1151,6 +1006,10 @@ export type InternalStateAllUntrackedTable = {
 export type StateRow = Selectable<StateView>;
 export type NewStateRow = Insertable<StateView>;
 export type StateRowUpdate = Updateable<StateView>;
+
+export type StateAllRow = Selectable<StateAllView>;
+export type NewStateAllRow = Insertable<StateAllView>;
+export type StateAllRowUpdate = Updateable<StateAllView>;
 
 // Types for the internal_change TABLE
 export type InternalChangeInTransaction =

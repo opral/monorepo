@@ -1,5 +1,7 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { StateAllView } from "./schema.js";
+import type { Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 /**
  * Creates a view that provides direct access to underlying state tables
@@ -12,9 +14,12 @@ import type { StateAllView } from "./schema.js";
  *
  * See https://github.com/opral/lix-sdk/issues/355
  */
-export function applyUnderlyingStateView(sqlite: SqliteWasmDatabase): void {
+export function applyUnderlyingStateView(args: {
+	sqlite: SqliteWasmDatabase;
+	db: Kysely<LixInternalDatabaseSchema>;
+}): void {
 	// Create the view that unions cache and untracked state
-	sqlite.exec(`
+	args.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_underlying_state_all AS
 		SELECT * FROM (
 			-- 1. Untracked state (highest priority)
@@ -155,4 +160,11 @@ export function applyUnderlyingStateView(sqlite: SqliteWasmDatabase): void {
 }
 
 // Type for the view - matches StateAllView
-export type InternalUnderlyingStateAllView = StateAllView;
+export type InternalUnderlyingStateAllView = Omit<
+	StateAllView,
+	"snapshot_content"
+> & {
+	// needs to manually stringify snapshot_content
+	snapshot_content: string | null;
+};
+

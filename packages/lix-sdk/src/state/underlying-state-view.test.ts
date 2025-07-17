@@ -2,6 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { commit } from "./commit.js";
 
 test("underlying_state view should return same results as state_all for a tracked entity", async () => {
 	const lix = await openLix({});
@@ -238,3 +239,4 @@ test.skip("underlying_state view should block inheritance when child has own val
 	expect(stateSnapshot?.value).toBe("child-value");
 	expect(underlyingSnapshot?.value).toBe("child-value");
 });
+
