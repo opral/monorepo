@@ -9,7 +9,7 @@ import { nanoid } from "../database/nano-id.js";
 export function applyLogDatabaseSchema(
 	sqlite: SqliteWasmDatabase
 ): SqliteWasmDatabase {
-	// Temporarily bypassing view logic - using real table for logs
+	// Create both primary and _all views for log
 	createEntityViewsIfNotExists({
 		lix: { sqlite },
 		schema: LixLogSchema,
