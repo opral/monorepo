@@ -3,9 +3,9 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
+import { sql } from "kysely";
 import { handleStateMutation } from "./handle-state-mutation.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
-import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
 import {
@@ -18,6 +18,10 @@ import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
 import { commit } from "./commit.js";
 import { parsePk } from "./primary-key.js";
+import { uuidV7 } from "../deterministic/uuid-v7.js";
+import { LixLogSchema } from "../log/schema.js";
+import { shouldLog } from "../log/create-lix-own-log.js";
+// import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(
@@ -70,9 +74,6 @@ export function applyStateDatabaseSchema(
 	// Store cursor state
 	const cursorStates = new Map();
 
-	// Cache initialization state to avoid repeated table existence checks
-	let loggingInitialized: boolean | null = null;
-
 	/**
 	 * Flag to prevent recursion when updating cache state.
 	 *
@@ -86,21 +87,6 @@ export function applyStateDatabaseSchema(
 	 * This is a temporary fix and should be revisited in the future.
 	 */
 	let isUpdatingCacheState = false;
-
-	const canLog = () => {
-		if (loggingInitialized === null) {
-			try {
-				const tableExists = sqlite.exec({
-					sql: "SELECT 1 FROM sqlite_master WHERE type='table' AND name='key_value'",
-					returnValue: "resultRows",
-				});
-				loggingInitialized = tableExists && tableExists.length > 0;
-			} catch {
-				loggingInitialized = false;
-			}
-		}
-		return loggingInitialized;
-	};
 
 	module.installMethods(
 		{
@@ -322,22 +308,24 @@ export function applyStateDatabaseSchema(
 				}
 
 				// Normal path: check cache staleness
-				const cacheIsStale = isStaleStateCache({ lix: { sqlite } });
+				const cacheIsStale = isStaleStateCache({
+					lix: { sqlite, db: db as any },
+				});
 
 				// Try cache first - but only if it's not stale
 				let cacheResults: any[] | null = null;
 				if (!cacheIsStale) {
 					// Select directly from resolved state view using Kysely
 					let query = db.selectFrom("internal_resolved_state_all").selectAll();
-					
+
 					// Apply filters
 					for (const [column, value] of Object.entries(filters)) {
 						query = query.where(column as any, "=", value);
 					}
-					
+
 					cacheResults = executeSync({
 						lix: { sqlite },
-						query
+						query,
 					});
 				}
 
@@ -345,17 +333,6 @@ export function applyStateDatabaseSchema(
 				cursorState.rowIndex = 0;
 
 				if (cacheIsStale) {
-					// console.log("State cache is stale, will materialize state from CTE");
-					// Cache miss - populate cache with actual recursive state query
-					if (canLog()) {
-						createLixOwnLogSync({
-							lix: { sqlite, db: db as any },
-							key: "lix_state_cache_miss",
-							level: "debug",
-							message: `Cache miss detected - materializing state from CTE`,
-						});
-					}
-
 					// Run the expensive recursive CTE to materialize state
 					// Include deletions when populating cache so inheritance blocking works
 					const stateResults = materializeState(sqlite, {}, true);
@@ -443,6 +420,13 @@ export function applyStateDatabaseSchema(
 						}
 
 						if (cachePopulated) {
+							insertVTableLog({
+								sqlite,
+								db: db as any,
+								key: "lix_state_cache_miss",
+								level: "debug",
+								message: `Cache miss detected - materialized state`,
+							});
 							// Mark cache as fresh after population
 							isUpdatingCacheState = true;
 							try {
@@ -450,40 +434,30 @@ export function applyStateDatabaseSchema(
 							} finally {
 								isUpdatingCacheState = false;
 							}
-
-							if (canLog()) {
-								createLixOwnLogSync({
-									lix: { sqlite, db: db as any },
-									key: "lix_state_cache_populated",
-									level: "debug",
-									message: `Cache populated with ${stateResults?.length || 0} rows from CTE`,
-								});
-							}
 						}
 					}
 
 					// After populating cache, query from resolved state view
 					let query = db.selectFrom("internal_resolved_state_all").selectAll();
-					
+
 					// Apply filters
 					for (const [column, value] of Object.entries(filters)) {
 						query = query.where(column as any, "=", value);
 					}
-					
+
 					const newResults = executeSync({
 						lix: { sqlite },
-						query
+						query,
 					});
 					cursorState.results = newResults || [];
 				} else {
-					if (canLog()) {
-						createLixOwnLogSync({
-							lix: { sqlite, db: db as any },
-							key: "lix_state_cache_hit",
-							level: "debug",
-							message: `Cache hit - returning ${cursorState.results.length} cached rows`,
-						});
-					}
+					insertVTableLog({
+						sqlite,
+						db: db as any,
+						key: "lix_state_cache_hit",
+						level: "debug",
+						message: `Cache hit - returning ${cursorState.results.length} cached rows`,
+					});
 				}
 
 				return capi.SQLITE_OK;
@@ -595,7 +569,7 @@ export function applyStateDatabaseSchema(
 									.selectFrom("internal_resolved_state_all")
 									.select([
 										"entity_id",
-										"schema_key", 
+										"schema_key",
 										"file_id",
 										"version_id",
 										"plugin_key",
@@ -603,7 +577,7 @@ export function applyStateDatabaseSchema(
 									])
 									.where("_pk", "=", oldPk),
 							})[0];
-							
+
 							if (rowToDelete) {
 								// Call insertTransactionState with null snapshot to create tombstone
 								insertTransactionState({
@@ -662,7 +636,7 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchema = getStoredSchema(sqlite, schema_key);
+					const storedSchema = getStoredSchema(sqlite, db, schema_key);
 
 					validateStateMutation({
 						lix: { sqlite, db: db as any },
@@ -786,35 +760,15 @@ export function applyStateDatabaseSchema(
 						error instanceof Error ? error.message : String(error);
 
 					// Log error for debugging
-					if (canLog()) {
-						createLixOwnLogSync({
-							lix: { sqlite, db: db as any },
-							key: "lix_state_xupdate_error",
-							level: "error",
-							message: `xUpdate error: ${errorMessage}`,
-						});
-					}
+					insertVTableLog({
+						sqlite,
+						db: db as any,
+						key: "lix_state_xupdate_error",
+						level: "error",
+						message: `xUpdate error: ${errorMessage}`,
+					});
 
-					throw error; //new Error("test");
-
-					// const vtab = sqlite.sqlite3.vtab.xVtab.get(_pVTab);
-
-					// // Set proper error message on the virtual table
-					// if (vtab) {
-					// 	// Free any existing error message first
-					// 	if (vtab.zErrMsg) {
-					// 		capi.sqlite3_free(vtab.zErrMsg);
-					// 	}
-					// 	// Allocate new error message using sqlite3_malloc
-					// 	const errorBytes = new TextEncoder().encode(errorMessage + "\0");
-					// 	const errorPtr = capi.sqlite3_malloc(errorBytes.length);
-					// 	if (errorPtr) {
-					// 		sqlite.sqlite3.wasm.heap8u().set(errorBytes, errorPtr);
-					// 		vtab.zErrMsg = errorPtr;
-					// 	}
-					// }
-
-					// return capi.SQLITE_ERROR;
+					throw error; // Re-throw to propagate error
 				}
 			},
 		},
@@ -956,10 +910,7 @@ export function handleStateDelete(
 	primaryKey: string,
 	db: Kysely<LixInternalDatabaseSchema>
 ): void {
-	// Parse the primary key to get the components
-	const parsed = parsePk(primaryKey);
-
-	// Query the row using the resolved state view with Kysely
+	// Query the row to delete using the resolved state view with Kysely
 	const rowToDelete = executeSync({
 		lix: { sqlite },
 		query: db
@@ -1006,7 +957,7 @@ export function handleStateDelete(
 		return;
 	}
 
-	const storedSchema = getStoredSchema(sqlite, schema_key);
+	const storedSchema = getStoredSchema(sqlite, db, schema_key);
 
 	validateStateMutation({
 		lix: { sqlite, db: db as any },
@@ -1032,17 +983,87 @@ export function handleStateDelete(
 
 // Helper functions for the virtual table
 
-function getStoredSchema(
-	sqlite: SqliteWasmDatabase,
-	schemaKey: any
-): string | null {
-	const result = sqlite.exec({
-		sql: "SELECT value FROM stored_schema WHERE key = ?",
-		bind: [String(schemaKey)],
-		returnValue: "resultRows",
+/**
+ * Insert a log entry directly using insertTransactionState to avoid recursion
+ * when logging from within the virtual table methods.
+ */
+function insertVTableLog(args: {
+	sqlite: SqliteWasmDatabase;
+	db: Kysely<LixInternalDatabaseSchema>;
+	key: string;
+	message: string;
+	level: string;
+}): void {
+	// Check log levels directly from internal state tables to avoid recursion
+	const logLevelsResult = executeSync({
+		lix: { sqlite: args.sqlite },
+		query: args.db
+			.selectFrom("internal_resolved_state_all")
+			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+			.where("schema_key", "=", "lix_key_value")
+			.where(
+				sql`json_extract(snapshot_content, '$.key')`,
+				"=",
+				"lix_log_levels"
+			)
+			.limit(1),
 	});
 
-	return result && result.length > 0 ? (result[0]![0] as string) : null;
+	const logLevelsValue = logLevelsResult[0]?.value;
+
+	// Check if the level is allowed
+	if (!shouldLog(logLevelsValue as string[] | undefined, args.level)) {
+		return;
+	}
+
+	// Create log entry data
+	const lix = { sqlite: args.sqlite, db: args.db } as any;
+	const logData = {
+		id: uuidV7({ lix }),
+		key: args.key,
+		message: args.message,
+		level: args.level,
+	};
+
+	// Insert log using insertTransactionState
+	insertTransactionState({
+		lix,
+		data: {
+			entity_id: logData.id,
+			schema_key: LixLogSchema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify(logData),
+			schema_version: LixLogSchema["x-lix-version"],
+			// Using global and untracked for vtable logs.
+			// if we need to track them, we can change this later
+			version_id: "global",
+			untracked: true,
+		},
+	});
+}
+
+function getStoredSchema(
+	sqlite: SqliteWasmDatabase,
+	db: Kysely<LixInternalDatabaseSchema>,
+	schemaKey: any
+): string | null {
+	// Query directly from internal_resolved_state_all to avoid vtable recursion
+	const result = executeSync({
+		lix: { sqlite },
+		query: db
+			.selectFrom("internal_resolved_state_all")
+			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+			.where("schema_key", "=", "lix_stored_schema")
+			.where(
+				sql`json_extract(snapshot_content, '$.key')`,
+				"=",
+				String(schemaKey)
+			)
+			.limit(1),
+	});
+
+	return result && result.length > 0 ? result[0]!.value : null;
 }
 
 function getColumnName(columnIndex: number): string {

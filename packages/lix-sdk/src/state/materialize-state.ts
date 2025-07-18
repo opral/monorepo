@@ -29,7 +29,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		FROM internal_state_all_untracked unt;
 	`);
 
-	// View 2: Version change set roots (tip only for now)
+	// View 2: Version change set roots
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_version_roots AS
 		SELECT 

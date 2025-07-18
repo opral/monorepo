@@ -1,4 +1,4 @@
-import { clearStateCache } from "../../state/cache/clear-state-cache.js";
+import { markStateCacheAsStale } from "../../state/cache/mark-state-cache-as-stale.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
 /**
@@ -9,9 +9,6 @@ import type { SimulationTestDef } from "./simulation-test.js";
 export const cacheMissSimulation: SimulationTestDef = {
 	name: "cache miss",
 	setup: async (lix) => {
-		// Clear initial cache
-		await clearStateCache({ lix });
-
 		// Use the afterStateCommit hook to clear cache after each commit
 		lix.hooks.onStateCommit(() => {
 			console.log("Clearing cache after state commit");
@@ -20,6 +17,8 @@ export const cacheMissSimulation: SimulationTestDef = {
 				sql: "DELETE FROM internal_state_cache",
 				returnValue: "resultRows",
 			});
+
+			markStateCacheAsStale({ lix });
 
 			const cacheCount = lix.sqlite.exec({
 				sql: "SELECT COUNT(*) as count FROM internal_state_cache",

@@ -114,6 +114,11 @@ export function simulationTest(
 				value: true,
 				lixcol_version_id: "global",
 			},
+			{
+				key: "lix_deterministic_bootstrap",
+				value: true,
+				lixcol_version_id: "global",
+			},
 		],
 	});
 
@@ -160,7 +165,7 @@ Use regular expect() for simulation-specific assertions.
 			const blob = args?.blob || (await initialLixBlob);
 
 			// Open lix with the provided arguments
-			const lix = await openLix({ ...args, blob });
+			const lix = await openLix({ blob, ...args });
 
 			// Apply simulation setup
 			return await simulation.setup(lix);

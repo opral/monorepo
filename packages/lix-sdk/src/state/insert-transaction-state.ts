@@ -168,21 +168,39 @@ export function insertTransactionState(args: {
 		const changeId = uuidV7({ lix: args.lix as any });
 
 		// Insert into internal_change_in_transaction
+		// Use ON CONFLICT to handle updates within the same transaction
+		// This is necessary when an entity is created and then updated in the same transaction
+		// (e.g., when creating a version and then updating it with a new changeset during commit)
 		executeSync({
 			lix: args.lix,
-			query: args.lix.db.insertInto("internal_change_in_transaction").values({
-				id: changeId,
-				entity_id: args.data.entity_id,
-				schema_key: args.data.schema_key,
-				file_id: args.data.file_id,
-				plugin_key: args.data.plugin_key,
-				snapshot_content: args.data.snapshot_content
-					? sql`jsonb(${args.data.snapshot_content})`
-					: null,
-				schema_version: args.data.schema_version,
-				version_id: args.data.version_id,
-				created_at: _timestamp,
-			}),
+			query: args.lix.db
+				.insertInto("internal_change_in_transaction")
+				.values({
+					id: changeId,
+					entity_id: args.data.entity_id,
+					schema_key: args.data.schema_key,
+					file_id: args.data.file_id,
+					plugin_key: args.data.plugin_key,
+					snapshot_content: args.data.snapshot_content
+						? sql`jsonb(${args.data.snapshot_content})`
+						: null,
+					schema_version: args.data.schema_version,
+					version_id: args.data.version_id,
+					created_at: _timestamp,
+				})
+				.onConflict((oc) =>
+					oc
+						.columns(["entity_id", "file_id", "schema_key", "version_id"])
+						.doUpdateSet({
+							id: changeId,
+							plugin_key: args.data.plugin_key,
+							snapshot_content: args.data.snapshot_content
+								? sql`jsonb(${args.data.snapshot_content})`
+								: null,
+							schema_version: args.data.schema_version,
+							created_at: _timestamp,
+						})
+				),
 		});
 
 		// Create change_author records if enabled (default true)

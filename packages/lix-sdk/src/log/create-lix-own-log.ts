@@ -4,6 +4,21 @@ import type { Lix } from "../lix/open-lix.js";
 const DEFAULT_LOG_LEVELS = ["info", "warn", "error"];
 
 /**
+ * Determines if a log entry should be created based on the configured log levels.
+ * 
+ * @param logLevelsValue - The configured log levels (e.g., ["info", "warn", "error"] or ["*"])
+ * @param level - The level of the log entry to check
+ * @returns true if the log should be created, false otherwise
+ */
+export function shouldLog(logLevelsValue: string[] | undefined, level: string): boolean {
+	return (
+		(logLevelsValue === undefined && DEFAULT_LOG_LEVELS.includes(level)) ||
+		(logLevelsValue && logLevelsValue.includes("*")) ||
+		(logLevelsValue?.includes(level) ?? false)
+	);
+}
+
+/**
  * Creates a log entry in the Lix database, applying log level filtering.
  *
  * Reads the `lix_log_levels` key from the key-value store. This key is expected
@@ -70,12 +85,7 @@ export function createLixOwnLogSync(args: {
 	})[0];
 
 	// Check if the level is allowed
-	const shouldLog =
-		(logLevels === undefined && DEFAULT_LOG_LEVELS.includes(args.level)) ||
-		(logLevels?.value && logLevels.value.includes("*")) ||
-		logLevels?.value.includes(args.level);
-
-	if (!shouldLog) {
+	if (!shouldLog(logLevels?.value, args.level)) {
 		return undefined; // Filtered out
 	}
 
@@ -91,34 +101,10 @@ export function createLixOwnLogSync(args: {
 }
 
 export async function createLixOwnLog(args: {
-	lix: Pick<Lix, "db">;
+	lix: Pick<Lix, "sqlite" | "db">;
 	message: string;
 	level: string;
 	key: string;
 }): Promise<void> {
-	const logLevels = await args.lix.db
-		.selectFrom("key_value")
-		.select("value")
-		.where("key", "=", "lix_log_levels")
-		.executeTakeFirst();
-
-	// Check if the level is allowed
-	const shouldLog =
-		(logLevels === undefined && DEFAULT_LOG_LEVELS.includes(args.level)) ||
-		(logLevels?.value && (logLevels.value as string[]).includes("*")) ||
-		(logLevels?.value as string[] | undefined)?.includes(args.level);
-
-	if (!shouldLog) {
-		return undefined; // Filtered out
-	}
-
-	// Insert the log
-	await args.lix.db
-		.insertInto("log")
-		.values({
-			key: args.key,
-			message: args.message,
-			level: args.level,
-		})
-		.execute();
+	return createLixOwnLogSync(args);
 }
