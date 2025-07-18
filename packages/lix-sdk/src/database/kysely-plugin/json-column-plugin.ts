@@ -205,7 +205,11 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		if (val instanceof ArrayBuffer || ArrayBuffer.isView(val) || val === null) {
 			return node;
 		}
-		const jsonText = JSON.stringify(val);
+		
+		// If the value is already a string, assume it's pre-serialized JSON
+		// to avoid double serialization
+		const jsonText = typeof val === 'string' ? val : JSON.stringify(val);
+		
 		return {
 			kind: "FunctionNode",
 			func: "json",
