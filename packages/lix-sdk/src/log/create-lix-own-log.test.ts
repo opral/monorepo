@@ -3,7 +3,6 @@ import { openLix } from "../lix/open-lix.js";
 import type { Lix } from "../lix/open-lix.js";
 import { createLixOwnLog } from "./create-lix-own-log.js";
 import type { LixLog } from "./schema.js";
-import { executeSync } from "../database/execute-sync.js";
 
 test("should insert logs default log levels when lix_log_levels is not set)", async () => {
 	const lix = await openLix({
@@ -91,30 +90,34 @@ test("should insert all levels contain wildcard '*'", async () => {
 async function createLogs(lix: Lix) {
 	await createLixOwnLog({
 		lix,
-		key: "lix.test.debug",
+		key: "log_test_debug",
 		level: "debug",
 		message: "debug message",
 	});
 	await createLixOwnLog({
 		lix,
-		key: "lix.test.info",
+		key: "log_test_info",
 		level: "info",
 		message: "info message",
 	});
 	await createLixOwnLog({
 		lix,
-		key: "lix.test.warn",
+		key: "log_test_warn",
 		level: "warn",
 		message: "warn message",
 	});
 	await createLixOwnLog({
 		lix,
-		key: "lix.test.error",
+		key: "log_test_error",
 		level: "error",
 		message: "error message",
 	});
 }
 
 async function getLogs(lix: Lix): Promise<LixLog[]> {
-	return lix.db.selectFrom("log").selectAll().execute();
+	return lix.db
+		.selectFrom("log")
+		.where("key", "like", "log_test%")
+		.selectAll()
+		.execute();
 }
