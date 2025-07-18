@@ -130,6 +130,61 @@ test("can insert null content explicitly", async () => {
 	expect(snapshot.content).toBeNull();
 });
 
+test("snapshot content validation - accepts JSONB", async () => {
+	const lix = await openLix({});
+
+	// This should succeed - content is properly formatted as JSONB
+	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.insertInto("internal_snapshot")
+		.values({
+			id: "valid-jsonb",
+			content: sql`jsonb(${JSON.stringify({ test: "data", value: 123 })})`,
+		})
+		.execute();
+
+	const snapshot = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_snapshot")
+		.where("id", "=", "valid-jsonb")
+		.select(["id", (eb) => eb.fn("json", [`content`]).as("content")])
+		.executeTakeFirstOrThrow();
+
+	expect(snapshot.content).toEqual({ test: "data", value: 123 });
+});
+
+test("snapshot content validation - rejects text JSON", async () => {
+	const lix = await openLix({});
+
+	// This should fail - content is text JSON, not JSONB
+	// SQLite's STRICT tables enforce that BLOB columns can't store TEXT
+	await expect(
+		(lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			.insertInto("internal_snapshot")
+			.values({
+				id: "invalid-text-json",
+				content: sql`${JSON.stringify({ test: "data" })}`,
+			})
+			.execute()
+	).rejects.toThrow(/SQLITE_CONSTRAINT_DATATYPE.*cannot store TEXT value in BLOB column/);
+});
+
+test("snapshot content validation - rejects arbitrary binary", async () => {
+	const lix = await openLix({});
+
+	// This should fail - content is arbitrary binary data, not valid JSONB
+	// Using raw SQL to insert arbitrary binary that's not JSONB format
+	const encoder = new TextEncoder();
+	const arbitraryBytes = encoder.encode("arbitrary binary data");
+	
+	await expect(async () => {
+		lix.sqlite.exec({
+			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, ?)`,
+			bind: ["invalid-binary", arbitraryBytes],
+		});
+	}).rejects.toThrow(/CHECK constraint failed.*json_valid/);
+});
+
 test("snapshot ids must be unique", async () => {
 	const lix = await openLix({});
 

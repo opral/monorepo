@@ -7,7 +7,11 @@ export function applySnapshotDatabaseSchema(
 	return sqlite.exec(`
   CREATE TABLE IF NOT EXISTS internal_snapshot (
     id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
-    content BLOB -- jsonb or binary file
+    content BLOB -- jsonb,
+
+    -- 8 = strictly JSONB
+    -- https://www.sqlite.org/json1.html#jvalid
+    CHECK (json_valid(content, 8))
   ) STRICT;
 
   INSERT OR IGNORE INTO internal_snapshot (id, content)
