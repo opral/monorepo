@@ -127,7 +127,7 @@ function LandingPage() {
                   marginBottom: "2rem",
                 }}
               >
-                One SDK to version, review, and control every change your agents make—right inside your product.
+                One SDK to see, review, and control every change AI agents make—right inside your product.
               </p>
 
               {/* Command and buttons in one row */}
