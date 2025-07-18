@@ -8,6 +8,7 @@ import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
+import { applyUnderlyingStateView } from "./underlying-state-view.js";
 
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(
@@ -31,6 +32,7 @@ export function applyStateDatabaseSchema(
 	db: Kysely<LixInternalDatabaseSchema>,
 	hooks: LixHooks
 ): SqliteWasmDatabase {
+	applyUnderlyingStateView(sqlite);
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
 		deterministic: true,
