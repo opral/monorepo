@@ -25,30 +25,88 @@ import type { Lix } from "../lix/open-lix.js";
 import { timestamp, uuidV7 } from "../deterministic/index.js";
 import { nanoId } from "../deterministic/nano-id.js";
 
-// dynamically computes the json columns for each view
-// via the json schemas.
-const ViewsWithJsonColumns = {
-	state: ["snapshot_content"],
-	state_all: ["snapshot_content"],
-	state_history: ["snapshot_content"],
-	change: ["snapshot_content"],
-	...(() => {
-		const result: Record<string, string[]> = {};
-		for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
-			// Check if schema is an object and has properties
-			if (typeof schema === "boolean" || !schema.properties) continue;
-			const jsonColumns = Object.entries(schema.properties)
-				.filter(([, def]) => isJsonType(def))
-				.map(([key]) => key);
-			if (jsonColumns.length) {
-				result[viewName] = jsonColumns;
-				// Also add the _all variant view with the same JSON columns
-				result[viewName + "_all"] = jsonColumns;
+/**
+ * Configuration for JSON columns in database views.
+ * 
+ * Specifies which columns contain JSON data and what types of JSON values they accept.
+ * This is used by the JSONColumnPlugin to properly serialize/deserialize JSON data.
+ * 
+ * Column types:
+ * - `type: 'object'` - Column only accepts JSON objects. String values are assumed to be 
+ *   pre-serialized JSON to prevent double serialization when data flows between views.
+ * - `type: ['string', 'number', 'boolean', 'object', 'array', 'null']` - Column accepts 
+ *   any valid JSON value. All values are properly serialized.
+ * 
+ * @example
+ * ```typescript
+ * {
+ *   change: {
+ *     snapshot_content: { type: 'object' } // Only objects, prevents double serialization
+ *   },
+ *   key_value: {
+ *     value: { type: ['string', 'number', 'boolean', 'object', 'array', 'null'] } // Any JSON
+ *   }
+ * }
+ * ```
+ */
+const ViewsWithJsonColumns = (() => {
+	const result: Record<
+		string,
+		Record<
+			string,
+			{
+				type:
+					| "object"
+					| Array<
+							"string" | "number" | "boolean" | "object" | "array" | "null"
+					  >;
+			}
+		>
+	> = {};
+
+	// Hardcoded object-only columns
+	const hardcodedViews = {
+		state: { snapshot_content: { type: "object" as const } },
+		state_all: { snapshot_content: { type: "object" as const } },
+		state_history: { snapshot_content: { type: "object" as const } },
+		change: { snapshot_content: { type: "object" as const } },
+	};
+
+	// Add the hardcoded columns first
+	Object.assign(result, hardcodedViews);
+
+	// Process schema-based columns
+	for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
+		// Check if schema is an object and has properties
+		if (typeof schema === "boolean" || !schema.properties) continue;
+
+		const jsonColumns: Record<
+			string,
+			{
+				type: Array<
+					"string" | "number" | "boolean" | "object" | "array" | "null"
+				>;
+			}
+		> = {};
+
+		for (const [key, def] of Object.entries(schema.properties)) {
+			if (isJsonType(def)) {
+				// All schema-based JSON columns accept any JSON value
+				jsonColumns[key] = {
+					type: ["string", "number", "boolean", "object", "array", "null"],
+				};
 			}
 		}
-		return result;
-	})(),
-};
+
+		if (Object.keys(jsonColumns).length > 0) {
+			result[viewName] = jsonColumns;
+			// Also add the _all variant view with the same JSON columns
+			result[viewName + "_all"] = jsonColumns;
+		}
+	}
+
+	return result;
+})();
 
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
