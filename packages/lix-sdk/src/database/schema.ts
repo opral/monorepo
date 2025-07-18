@@ -35,7 +35,7 @@ import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
-import type { InternalUnderlyingStateAllView } from "../state/underlying-state-view.js";
+import type { InternalResolvedStateAllView } from "../state/resolved-state-view.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],
@@ -48,7 +48,7 @@ export type LixInternalDatabaseSchema = LixDatabaseSchema & {
 	internal_snapshot: InternalSnapshotTable;
 	internal_state_cache: InternalStateCacheTable;
 	internal_state_all_untracked: InternalStateAllUntrackedTable;
-	internal_resolved_state_all: InternalUnderlyingStateAllView;
+	internal_resolved_state_all: InternalResolvedStateAllView;
 };
 
 export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {

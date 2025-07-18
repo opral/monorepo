@@ -225,10 +225,8 @@ export function createChangesetForTransaction(
 				const toDelete = executeSync({
 					lix: { sqlite },
 					query: db
-						.selectFrom("state_all")
-
-						// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
-						.select("rowid")
+						.selectFrom("internal_resolved_state_all")
+						.select("_pk")
 						.where(
 							"entity_id",
 							"like",
@@ -255,7 +253,7 @@ export function createChangesetForTransaction(
 				});
 
 				if (toDelete.length > 0) {
-					handleStateDelete(sqlite, toDelete[0]!.rowid, db);
+					handleStateDelete(sqlite, toDelete[0]!._pk, db);
 				}
 
 				// If entity existed at checkpoint, add deletion to working change set
@@ -308,9 +306,8 @@ export function createChangesetForTransaction(
 				const toDelete = executeSync({
 					lix: { sqlite },
 					query: db
-						.selectFrom("state_all")
-						// @ts-expect-error - rowid is a valid SQLite column but not in Kysely types
-						.select("rowid")
+						.selectFrom("internal_resolved_state_all")
+						.select("_pk")
 						.where(
 							"entity_id",
 							"like",
@@ -338,7 +335,7 @@ export function createChangesetForTransaction(
 
 				if (toDelete.length > 0) {
 					// throw new Error("not implement - us the delete function ");
-					handleStateDelete(sqlite, toDelete[0]!.rowid, db);
+					handleStateDelete(sqlite, toDelete[0]!._pk, db);
 				}
 
 				// Then create new element with latest change

@@ -72,11 +72,59 @@ export function insertTransactionState(args: {
 } {
 	const _timestamp = args.timestamp || timestamp({ lix: args.lix as any });
 	if (args.data.untracked == true) {
-		// Untracked entities cannot have null snapshot_content (that would be a deletion)
+		// For untracked entities with null snapshot_content, we need to handle deletion
 		if (args.data.snapshot_content === null) {
-			throw new Error("Untracked entities cannot have null snapshot_content");
+			// Check if this is an inherited untracked entity that needs a tombstone
+			// We need to create a tombstone in the cache to block inheritance
+			executeSync({
+				lix: { sqlite: args.lix.sqlite },
+				query: args.lix.db
+					.insertInto("internal_state_cache")
+					.values({
+						entity_id: args.data.entity_id,
+						schema_key: args.data.schema_key,
+						file_id: args.data.file_id,
+						plugin_key: args.data.plugin_key,
+						snapshot_content: null,
+						schema_version: args.data.schema_version,
+						version_id: args.data.version_id,
+						change_id: "untracked-delete",
+						inheritance_delete_marker: 1,
+						created_at: _timestamp,
+						updated_at: _timestamp,
+						inherited_from_version_id: null,
+						change_set_id: "untracked",
+					})
+					.onConflict((oc) =>
+						oc
+							.columns(["entity_id", "schema_key", "file_id", "version_id"])
+							.doUpdateSet({
+								snapshot_content: null,
+								updated_at: _timestamp,
+								inheritance_delete_marker: 1,
+								change_id: "untracked-delete",
+							})
+					),
+			});
+			return {
+				data: {
+					entity_id: args.data.entity_id,
+					schema_key: args.data.schema_key,
+					file_id: args.data.file_id,
+					plugin_key: args.data.plugin_key,
+					snapshot_content: null,
+					schema_version: args.data.schema_version,
+					version_id: args.data.version_id,
+					created_at: _timestamp,
+					updated_at: _timestamp,
+					untracked: true,
+					inherited_from_version_id: null,
+					change_id: "untracked",
+					change_set_id: "pending",
+				},
+			};
 		}
-		// Insert into untracked state table
+		// Normal untracked insert/update
 		executeSync({
 			lix: { sqlite: args.lix.sqlite },
 			query: args.lix.db
@@ -223,53 +271,41 @@ export function insertTransactionState(args: {
 			}
 		}
 
-		// Update the cache - handle deletions
-		if (args.data.snapshot_content === null) {
-			// For deletions, remove from cache
-			executeSync({
-				lix: args.lix,
-				query: args.lix.db
-					.deleteFrom("internal_state_cache")
-					.where("entity_id", "=", args.data.entity_id)
-					.where("schema_key", "=", args.data.schema_key)
-					.where("file_id", "=", args.data.file_id)
-					.where("version_id", "=", args.data.version_id),
-			});
-		} else {
-			// For inserts/updates, update cache
-			executeSync({
-				lix: args.lix,
-				query: args.lix.db
-					.insertInto("internal_state_cache")
-					.values({
-						entity_id: args.data.entity_id,
-						schema_key: args.data.schema_key,
-						file_id: args.data.file_id,
-						plugin_key: args.data.plugin_key,
-						snapshot_content: args.data.snapshot_content,
-						schema_version: args.data.schema_version,
-						version_id: args.data.version_id,
-						change_id: changeId,
-						inheritance_delete_marker: 0,
-						created_at: _timestamp,
-						updated_at: _timestamp,
-						inherited_from_version_id: null,
-					})
-					.onConflict((oc) =>
-						oc
-							.columns(["entity_id", "schema_key", "file_id", "version_id"])
-							.doUpdateSet({
-								plugin_key: args.data.plugin_key,
-								snapshot_content: args.data.snapshot_content,
-								schema_version: args.data.schema_version,
-								updated_at: _timestamp,
-								change_id: changeId,
-								inheritance_delete_marker: 0,
-								inherited_from_version_id: null,
-							})
-					),
-			});
-		}
+		// Update the cache - handle all mutations including deletions
+		// For deletions, we still need to update the cache to maintain tombstones
+		// The handleStateMutation function already sets up deletion markers properly
+		executeSync({
+			lix: args.lix,
+			query: args.lix.db
+				.insertInto("internal_state_cache")
+				.values({
+					entity_id: args.data.entity_id,
+					schema_key: args.data.schema_key,
+					file_id: args.data.file_id,
+					plugin_key: args.data.plugin_key,
+					snapshot_content: args.data.snapshot_content,
+					schema_version: args.data.schema_version,
+					version_id: args.data.version_id,
+					change_id: changeId,
+					inheritance_delete_marker: args.data.snapshot_content === null ? 1 : 0,
+					created_at: _timestamp,
+					updated_at: _timestamp,
+					inherited_from_version_id: null,
+				})
+				.onConflict((oc) =>
+					oc
+						.columns(["entity_id", "schema_key", "file_id", "version_id"])
+						.doUpdateSet({
+							plugin_key: args.data.plugin_key,
+							snapshot_content: args.data.snapshot_content,
+							schema_version: args.data.schema_version,
+							updated_at: _timestamp,
+							change_id: changeId,
+							inheritance_delete_marker: args.data.snapshot_content === null ? 1 : 0,
+							inherited_from_version_id: null,
+						})
+				),
+		});
 		return {
 			data: {
 				entity_id: args.data.entity_id,

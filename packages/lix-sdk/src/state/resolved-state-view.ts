@@ -29,6 +29,7 @@ export function applyResolvedStateView(args: {
 		SELECT * FROM (
 			-- 1. Untracked state (highest priority)
 			SELECT 
+				'U' || '~' || file_id || '~' || entity_id || '~' || version_id as _pk,
 				entity_id, 
 				schema_key, 
 				file_id, 
@@ -48,6 +49,7 @@ export function applyResolvedStateView(args: {
 			
 			-- 2. Tracked state from cache (second priority) - only if no untracked exists
 			SELECT 
+				'C' || '~' || file_id || '~' || entity_id || '~' || version_id as _pk,
 				entity_id, 
 				schema_key, 
 				file_id, 
@@ -75,6 +77,7 @@ export function applyResolvedStateView(args: {
 			
 			-- 3. Inherited tracked state (lower priority) - only if no untracked or tracked exists
 			SELECT 
+				'CI' || '~' || isc.file_id || '~' || isc.entity_id || '~' || vi.version_id as _pk,
 				isc.entity_id, 
 				isc.schema_key, 
 				isc.file_id, 
@@ -121,6 +124,7 @@ export function applyResolvedStateView(args: {
 			
 			-- 4. Inherited untracked state (lowest priority) - only if no untracked or tracked exists
 			SELECT 
+				'UI' || '~' || unt.file_id || '~' || unt.entity_id || '~' || vi.version_id as _pk,
 				unt.entity_id, 
 				unt.schema_key, 
 				unt.file_id, 
@@ -169,6 +173,11 @@ export type InternalResolvedStateAllView = Omit<
 	StateAllView,
 	"snapshot_content"
 > & {
+	/**
+	 * Primary key in format: tag~file_id~entity_id~version_id
+	 * where tag is U (untracked), UI (untracked inherited), C (cached), or CI (cached inherited)
+	 */
+	_pk: string;
 	// needs to manually stringify snapshot_content
 	snapshot_content: string | null;
 };
