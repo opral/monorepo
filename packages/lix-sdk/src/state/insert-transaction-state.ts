@@ -137,6 +137,8 @@ export function insertTransactionState(args: {
 					snapshot_content: args.data.snapshot_content,
 					schema_version: args.data.schema_version,
 					version_id: args.data.version_id,
+					created_at: _timestamp,
+					updated_at: _timestamp,
 				})
 				.onConflict((oc) =>
 					oc

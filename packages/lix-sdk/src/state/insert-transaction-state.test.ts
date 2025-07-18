@@ -299,3 +299,66 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 	// No commit needed for untracked entities - they don't participate in change control
 });
 
+test("untracked entities use same timestamp for created_at and updated_at", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+			{
+				key: "lix_deterministic_bootstrap",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Use insertTransactionState for untracked entity
+	const result = insertTransactionState({
+		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		data: {
+			entity_id: "test-untracked-timestamp",
+			schema_key: "lix_key_value",
+			file_id: "mock",
+			plugin_key: "mock",
+			snapshot_content: JSON.stringify({
+				key: "test-key",
+				value: "test-value",
+			}),
+			schema_version: "1.0",
+			version_id: activeVersion.version_id,
+			untracked: true,
+		},
+	});
+
+	// Check returned data has same timestamps
+	expect(result.data.created_at).toBe(result.data.updated_at);
+
+	// Verify in the actual table
+	const untrackedEntity = await lixInternalDb
+		.selectFrom("internal_state_all_untracked")
+		.where("entity_id", "=", "test-untracked-timestamp")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(untrackedEntity.created_at).toBe(untrackedEntity.updated_at);
+
+	// Also verify through the state view
+	const stateView = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-untracked-timestamp")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(stateView.created_at).toBe(stateView.updated_at);
+});
+
