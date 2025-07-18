@@ -22,8 +22,8 @@ export function markStateCacheAsStale(args: {
 		      updated_at = lix_timestamp()`,
 		bind: [
 			CACHE_STALE_KEY,
-			JSON.stringify({ key: CACHE_STALE_KEY, value: "true" }),
-			JSON.stringify({ key: CACHE_STALE_KEY, value: "true" }),
+			JSON.stringify({ key: CACHE_STALE_KEY, value: true }),
+			JSON.stringify({ key: CACHE_STALE_KEY, value: true }),
 		],
 		returnValue: "resultRows",
 	});
@@ -50,8 +50,8 @@ export function markStateCacheAsFresh(args: {
           updated_at = lix_timestamp()`,
 		bind: [
 			CACHE_STALE_KEY,
-			JSON.stringify({ key: CACHE_STALE_KEY, value: "false" }),
-			JSON.stringify({ key: CACHE_STALE_KEY, value: "false" }),
+			JSON.stringify({ key: CACHE_STALE_KEY, value: false }),
+			JSON.stringify({ key: CACHE_STALE_KEY, value: false }),
 		],
 		returnValue: "resultRows",
 	});
