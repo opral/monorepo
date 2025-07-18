@@ -52,10 +52,7 @@ export function commit(args: {
 				"file_id",
 				"plugin_key",
 				"version_id",
-				sql<string | null>`CASE 
-					WHEN snapshot_content IS NOT NULL THEN json(snapshot_content) 
-					ELSE NULL 
-				END`.as("snapshot_content"),
+				sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
 				"created_at",
 			])
 			.orderBy("version_id"),
@@ -103,10 +100,7 @@ export function commit(args: {
 							"file_id",
 							"plugin_key",
 							"version_id",
-							sql<string | null>`CASE 
-							WHEN snapshot_content IS NOT NULL THEN json(snapshot_content) 
-							ELSE NULL 
-						END`.as("snapshot_content"),
+							sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
 							"created_at",
 						])
 						.where(

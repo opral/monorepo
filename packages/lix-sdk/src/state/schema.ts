@@ -450,14 +450,6 @@ export function applyStateDatabaseSchema(
 						query,
 					});
 					cursorState.results = newResults || [];
-				} else {
-					insertVTableLog({
-						sqlite,
-						db: db as any,
-						key: "lix_state_cache_hit",
-						level: "debug",
-						message: `Cache hit - returning ${cursorState.results.length} cached rows`,
-					});
 				}
 
 				return capi.SQLITE_OK;

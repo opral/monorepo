@@ -73,8 +73,12 @@ export function applyChangeDatabaseSchema(
       lix_uuid_v7(), 
       jsonb(NEW.snapshot_content)
     WHERE NEW.snapshot_content IS NOT NULL
-      AND NOT EXISTS (SELECT 1 FROM internal_snapshot WHERE id = 'no-content' AND NEW.snapshot_content IS NULL);
-    
+      AND NOT EXISTS (
+        SELECT 1 FROM internal_snapshot 
+        WHERE id = 'no-content' 
+        AND NEW.snapshot_content IS NULL
+      );
+
     -- Insert the change, referencing the snapshot
     INSERT INTO internal_change (
       id,

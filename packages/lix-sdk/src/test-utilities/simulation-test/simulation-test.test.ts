@@ -190,22 +190,11 @@ describe("providing key values", async () => {
 
 		commit({ lix });
 
-		console.log("about to perform select query");
 		const logLevels = await lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "test_key_1")
 			.selectAll()
 			.execute();
-		console.log("end select query");
-
-		const changeExists = await lix.db
-			.selectFrom("change")
-			.where("entity_id", "=", "test_0000000066")
-			// .where("schema_key", "=", "lix_change_set")
-			.selectAll()
-			.execute();
-
-		console.log("[simulation-test.test.ts] Change exists:", changeExists);
 
 		expect(logLevels).toMatchObject([
 			{

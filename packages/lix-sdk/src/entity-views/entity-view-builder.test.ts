@@ -183,7 +183,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		const historyResult = await lix.db
 			.selectFrom("cross_test_history" as any)
 			.where("entity_id", "=", "test_id")
-			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_root_change_set_id", "=", activeVersion.change_set_id)
 			.orderBy("lixcol_depth", "asc")
 			.selectAll()
 			.execute();
