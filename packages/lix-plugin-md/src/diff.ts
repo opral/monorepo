@@ -70,25 +70,47 @@ export class DiffComponent extends LitElement {
 
 		const contentDiffs = this.diffs
 			.filter((diff) => diff.schema_key === MarkdownNodeSchemaV1["x-lix-key"])
-			.sort((a, b) => {
-				// Sort by position in order array if available
-				if (orderDiff?.snapshot_content_after?.order) {
-					const posA = orderDiff.snapshot_content_after.order.indexOf(
-						a.entity_id,
-					);
-					const posB = orderDiff.snapshot_content_after.order.indexOf(
-						b.entity_id,
-					);
-					if (posA !== -1 && posB !== -1) {
-						return posA - posB;
-					}
+			.filter((diff) => {
+				// Only include entities that are in either the before or after order arrays
+				const beforeOrder = orderDiff?.snapshot_content_before?.order;
+				const afterOrder = orderDiff?.snapshot_content_after?.order;
+
+				// If no order arrays exist, don't show any content diffs
+				if (
+					(!beforeOrder || beforeOrder.length === 0) &&
+					(!afterOrder || afterOrder.length === 0)
+				) {
+					return false;
 				}
-				// Fall back to entity_id comparison
-				return a.entity_id.localeCompare(b.entity_id);
+
+				// Include entity if it's in either order array (handles additions, modifications, and deletions)
+				const inBeforeOrder = beforeOrder?.includes(diff.entity_id) || false;
+				const inAfterOrder = afterOrder?.includes(diff.entity_id) || false;
+
+				return inBeforeOrder || inAfterOrder;
 			});
 
+		// Create combined order array that preserves positions from both before and after
+		const combinedOrder = this.createCombinedOrder(
+			orderDiff?.snapshot_content_before?.order || [],
+			orderDiff?.snapshot_content_after?.order || []
+		);
+
+		// Sort content diffs by combined order
+		const sortedContentDiffs = contentDiffs.sort((a, b) => {
+			const posA = combinedOrder.indexOf(a.entity_id);
+			const posB = combinedOrder.indexOf(b.entity_id);
+			
+			if (posA !== -1 && posB !== -1) {
+				return posA - posB;
+			}
+			
+			// Fall back to entity_id comparison for entities not in order arrays
+			return a.entity_id.localeCompare(b.entity_id);
+		});
+
 		// Generate HTML diff for all entities
-		const diffHtml = this.generateHtmlDiff(contentDiffs);
+		const diffHtml = this.generateHtmlDiff(sortedContentDiffs);
 
 		return html`
 			<div class="diff-container">
@@ -225,6 +247,44 @@ export class DiffComponent extends LitElement {
 			default:
 				return "div";
 		}
+	}
+
+	private createCombinedOrder(beforeOrder: string[], afterOrder: string[]): string[] {
+		const combinedOrder: string[] = [];
+		const afterSet = new Set(afterOrder);
+		
+		// Start with afterOrder as the base structure
+		for (const entityId of afterOrder) {
+			combinedOrder.push(entityId);
+		}
+		
+		// Insert deleted entities (from before but not in after) at their original positions
+		for (let i = 0; i < beforeOrder.length; i++) {
+			const entityId = beforeOrder[i]!; // Array access is guaranteed to be defined
+			
+			// Skip if entity is already in the combined order (exists in after)
+			if (afterSet.has(entityId)) {
+				continue;
+			}
+			
+			// Find the insertion point by looking for the next entity that exists in both arrays
+			let insertionIndex = combinedOrder.length; // Default to end
+			
+			for (let j = i + 1; j < beforeOrder.length; j++) {
+				const nextEntityId = beforeOrder[j]!; // Array access is guaranteed to be defined
+				const nextEntityIndexInCombined = combinedOrder.indexOf(nextEntityId);
+				
+				if (nextEntityIndexInCombined !== -1) {
+					insertionIndex = nextEntityIndexInCombined;
+					break;
+				}
+			}
+			
+			// Insert the deleted entity at the calculated position
+			combinedOrder.splice(insertionIndex, 0, entityId);
+		}
+		
+		return combinedOrder;
 	}
 
 	private addDataDiffKey(html: string, entityId: string): string {
