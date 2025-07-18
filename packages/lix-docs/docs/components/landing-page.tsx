@@ -285,7 +285,7 @@ function LandingPage() {
               </div>
               <div className="mt-6">
                 <p className="text-gray-800 text-xl font-medium">
-                  Prosemirror / TipTap Demo
+                  Prosemirror / TipTap Plugin
                 </p>
               </div>
             </div>
