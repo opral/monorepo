@@ -31,7 +31,7 @@ export function applyChangeDatabaseSchema(
     plugin_key TEXT NOT NULL,
     version_id TEXT NOT NULL,
     snapshot_content BLOB,
-    created_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (created_at LIKE '%Z'),
+    created_at TEXT NOT NULL CHECK (created_at LIKE '%Z'),
     --- NOTE schena_key must be unique per entity_id and file_id in the transaction
     UNIQUE(entity_id, file_id, schema_key, version_id)
   ) STRICT;
@@ -73,8 +73,12 @@ export function applyChangeDatabaseSchema(
       lix_uuid_v7(), 
       jsonb(NEW.snapshot_content)
     WHERE NEW.snapshot_content IS NOT NULL
-      AND NOT EXISTS (SELECT 1 FROM internal_snapshot WHERE id = 'no-content' AND NEW.snapshot_content IS NULL);
-    
+      AND NOT EXISTS (
+        SELECT 1 FROM internal_snapshot 
+        WHERE id = 'no-content' 
+        AND NEW.snapshot_content IS NULL
+      );
+
     -- Insert the change, referencing the snapshot
     INSERT INTO internal_change (
       id,

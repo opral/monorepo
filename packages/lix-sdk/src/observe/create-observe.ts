@@ -112,11 +112,11 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			};
 
 			// Execute initial query
-			executeQuery();
+			void executeQuery();
 
 			// Subscribe to state commits for updates
 			const unsubscribeFromStateCommit = lix.hooks.onStateCommit(() => {
-				executeQuery();
+				void executeQuery();
 			});
 
 			// Store the cleanup function

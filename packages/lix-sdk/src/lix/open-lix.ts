@@ -2,10 +2,7 @@ import type { LixPlugin } from "../plugin/lix-plugin.js";
 import { type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
 import { sql, type Kysely } from "kysely";
-import type {
-	LixDatabaseSchema,
-	LixInternalDatabaseSchema,
-} from "../database/schema.js";
+import type { LixDatabaseSchema } from "../database/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
@@ -16,8 +13,11 @@ import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
-import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
-import { commitDeterministicRngState } from "../deterministic/random.js";
+import { commitDeterministicSequenceNumber } from "../deterministic/sequence.js";
+import {
+	commitDeterministicRngState,
+	random,
+} from "../deterministic/random.js";
 import { newLixFile } from "./new-lix.js";
 
 export type Lix = {
@@ -238,8 +238,6 @@ export async function openLix(args: {
 		getAllSync: () => plugins,
 	};
 
-	captureOpened({ db });
-
 	const observe = createObserve({ hooks });
 
 	const lix = {
@@ -252,17 +250,17 @@ export async function openLix(args: {
 			await storage.close();
 		},
 		toBlob: async () => {
-			commitDeterminsticSequenceNumber({
-				sqlite: database,
-				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
-			});
-			commitDeterministicRngState({
-				sqlite: database,
-				db: db as unknown as Kysely<LixInternalDatabaseSchema>,
-			});
+			commitDeterministicSequenceNumber({ lix: { sqlite: database, db } });
+			commitDeterministicRngState({ lix: { sqlite: database, db } });
 			return storage.export();
 		},
 	};
+
+	// MUST BE AWAITED
+	// The databse queries must run. Otherwise, we get super unexpected behavior
+	// where something is tested and then the async queue kicks in and leads
+	// to unexpected results. For example, cache population!
+	await captureOpened({ lix });
 
 	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
@@ -275,9 +273,9 @@ export async function openLix(args: {
 	return lix;
 }
 
-async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {
+async function captureOpened(args: { lix: Lix }) {
 	try {
-		const telemetry = await args.db
+		const telemetry = await args.lix.db
 			.selectFrom("key_value")
 			.select("value")
 			.where("key", "=", "lix_telemetry")
@@ -287,20 +285,23 @@ async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {
 			return;
 		}
 
-		const activeAccount = await args.db
+		const activeAccount = await args.lix.db
 			.selectFrom("active_account")
 			.select("id")
 			.executeTakeFirstOrThrow();
 
-		const lixId = await args.db
+		const lixId = await args.lix.db
 			.selectFrom("key_value")
 			.select("value")
 			.where("key", "=", "lix_id")
 			.executeTakeFirstOrThrow();
 
-		const fileExtensions = await usedFileExtensions(args.db);
-		if (Math.random() > 0.1) {
-			await capture("LIX-SDK lix opened", {
+		const fileExtensions = await usedFileExtensions(args.lix.db);
+		if (random({ lix: args.lix }) > 0.1) {
+			// Not awaiting to avoid boot up time and knowing that
+			// no database query is performed here. we dont care if the
+			// server responds with an error or not.
+			void capture("LIX-SDK lix opened", {
 				accountId: activeAccount.id,
 				lixId: lixId.value as string,
 				telemetryKeyValue: (telemetry?.value ?? "on") as string,

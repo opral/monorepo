@@ -3,20 +3,29 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
+import { sql } from "kysely";
 import { handleStateMutation } from "./handle-state-mutation.js";
-import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
-import { createChangesetForTransaction } from "./create-changeset-for-transaction.js";
+import { insertTransactionState } from "./insert-transaction-state.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
 import {
 	applyMaterializeStateSchema,
 	materializeState,
 } from "./materialize-state.js";
-import { commitDeterminsticSequenceNumber } from "../deterministic/sequence.js";
-import { timestamp } from "../deterministic/timestamp.js";
+import { applyResolvedStateView } from "./resolved-state-view.js";
+import { applyStateCacheSchema } from "./cache/schema.js";
+import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
+import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
+import { commit } from "./commit.js";
+import { parsePk } from "./primary-key.js";
+import { uuidV7 } from "../deterministic/uuid-v7.js";
+import { LixLogSchema } from "../log/schema.js";
+import { shouldLog } from "../log/create-lix-own-log.js";
+// import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition
 const VTAB_CREATE_SQL = `CREATE TABLE x(
+	_pk HIDDEN TEXT NOT NULL PRIMARY KEY,
 	entity_id TEXT,
 	schema_key TEXT,
 	file_id TEXT,
@@ -30,7 +39,7 @@ const VTAB_CREATE_SQL = `CREATE TABLE x(
 	change_id TEXT,
 	untracked INTEGER,
 	change_set_id TEXT
-)`;
+) WITHOUT ROWID;`;
 
 export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
@@ -38,6 +47,8 @@ export function applyStateDatabaseSchema(
 	hooks: LixHooks
 ): SqliteWasmDatabase {
 	applyMaterializeStateSchema(sqlite);
+	applyStateCacheSchema({ sqlite });
+	applyResolvedStateView({ sqlite, db });
 
 	sqlite.createFunction({
 		name: "validate_snapshot_content",
@@ -63,23 +74,19 @@ export function applyStateDatabaseSchema(
 	// Store cursor state
 	const cursorStates = new Map();
 
-	// Cache initialization state to avoid repeated table existence checks
-	let loggingInitialized: boolean | null = null;
-
-	const canLog = () => {
-		if (loggingInitialized === null) {
-			try {
-				const tableExists = sqlite.exec({
-					sql: "SELECT 1 FROM sqlite_master WHERE type='table' AND name='key_value'",
-					returnValue: "resultRows",
-				});
-				loggingInitialized = tableExists && tableExists.length > 0;
-			} catch {
-				loggingInitialized = false;
-			}
-		}
-		return loggingInitialized;
-	};
+	/**
+	 * Flag to prevent recursion when updating cache state.
+	 *
+	 * The guard ensures that while we're marking cache as fresh, any nested state queries
+	 * bypass the cache and use materialized state directly, preventing recursion.
+	 *
+	 * Why is this needed is unclear. Queries are executed in sync. Why concurrent
+	 * reads simultaneously update the cache is not clear. Given that state
+	 * materialization is rare, this workaround has been deemed sufficient.
+	 *
+	 * This is a temporary fix and should be revisited in the future.
+	 */
+	let isUpdatingCacheState = false;
 
 	module.installMethods(
 		{
@@ -129,169 +136,28 @@ export function applyStateDatabaseSchema(
 			},
 
 			xBegin: () => {
-				// assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
-				const existingChangesInTransaction = executeSync({
-					lix: { sqlite },
-					query: db.selectFrom("internal_change_in_transaction").selectAll(),
-				});
-				if (existingChangesInTransaction.length > 0) {
-					const errorMessage = "Transaction already in progress";
-					if (canLog()) {
-						createLixOwnLogSync({
-							lix: { sqlite, db: db as any },
-							key: "lix_state_xbegin_error",
-							level: "error",
-							message: `xBegin error: ${errorMessage}`,
-						});
-					}
-					throw new Error(errorMessage);
-				}
+				// TODO comment in after all internal v-table logic uses underlying state view
+				// // assert that we are not already in a transaction (the internal_change_in_transaction table is empty)
+				// const existingChangesInTransaction = executeSync({
+				// 	lix: { sqlite },
+				// 	query: db.selectFrom("internal_change_in_transaction").selectAll(),
+				// });
+				// if (existingChangesInTransaction.length > 0) {
+				// 	const errorMessage = "Transaction already in progress";
+				// 	if (canLog()) {
+				// 		createLixOwnLogSync({
+				// 			lix: { sqlite, db: db as any },
+				// 			key: "lix_state_xbegin_error",
+				// 			level: "error",
+				// 			message: `xBegin error: ${errorMessage}`,
+				// 		});
+				// 	}
+				// 	throw new Error(errorMessage);
+				// }
 			},
 
 			xCommit: () => {
-				// Try to get deterministic timestamp, fallback to current time
-
-				// Insert each row from internal_change_in_transaction into internal_snapshot and internal_change,
-				// using the same id for snapshot_id in internal_change as in internal_snapshot.
-				const changesWithoutChangeSets = sqlite.exec({
-					sql: `
-						SELECT 
-							id, 
-							entity_id, 
-							schema_key, 
-							schema_version, 
-							file_id, 
-							plugin_key, 
-							version_id, 
-							CASE 
-								WHEN snapshot_content IS NOT NULL THEN json(snapshot_content) 
-								ELSE NULL 
-							END as snapshot_content, 
-							created_at 
-						FROM internal_change_in_transaction 
-						ORDER BY version_id
-					`,
-					returnValue: "resultRows",
-				});
-
-				// Group changes by version_id
-				const changesByVersion = new Map<
-					string,
-					{
-						id: string;
-						entity_id: string;
-						schema_key: string;
-						schema_version: string;
-						file_id: string;
-						plugin_key: string;
-						created_at: string;
-						snapshot_content: string | null;
-					}[]
-				>();
-				for (const changeWithoutChangeset of changesWithoutChangeSets) {
-					const version_id = changeWithoutChangeset[6] as string;
-					if (!changesByVersion.has(version_id)) {
-						changesByVersion.set(version_id, []);
-					}
-					changesByVersion.get(version_id)!.push({
-						id: changeWithoutChangeset[0] as string,
-						entity_id: changeWithoutChangeset[1] as string,
-						schema_key: changeWithoutChangeset[2] as string,
-						schema_version: changeWithoutChangeset[3] as string,
-						file_id: changeWithoutChangeset[4] as string,
-						plugin_key: changeWithoutChangeset[5] as string,
-						snapshot_content: changeWithoutChangeset[7] as string,
-						created_at: changeWithoutChangeset[8] as string,
-					});
-				}
-
-				// Process each version's changes to create changesets
-				const changesetIdsByVersion = new Map<string, string>();
-				for (const [version_id, versionChanges] of changesByVersion) {
-					// Create changeset and edges for this version's transaction
-					const changesetId = createChangesetForTransaction(
-						sqlite,
-						db as any,
-						timestamp({ lix: { sqlite, db: db as any } }),
-						version_id,
-						versionChanges
-					);
-					changesetIdsByVersion.set(version_id, changesetId);
-				}
-
-				const changesToRealize = sqlite.exec({
-					sql: "SELECT id, entity_id, schema_key, schema_version, file_id, plugin_key, version_id, snapshot_content, created_at FROM internal_change_in_transaction ORDER BY version_id",
-					returnValue: "resultRows",
-				});
-
-				for (const changeToRealize of changesToRealize) {
-					const [
-						id,
-						entity_id,
-						schema_key,
-						schema_version,
-						file_id,
-						plugin_key,
-						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						version_id,
-						snapshot_content,
-						created_at,
-					] = changeToRealize;
-
-					let snapshot_id = "no-content";
-
-					if (snapshot_content) {
-						// Insert into internal_snapshot
-						const result = sqlite.exec({
-							sql: `INSERT OR IGNORE INTO internal_snapshot (content) VALUES (?) RETURNING id`,
-							bind: [snapshot_content],
-							returnValue: "resultRows",
-						});
-						// Get the 'id' column of the newly created row
-						if (result && result.length > 0) {
-							snapshot_id = result[0]![0] as string; // assuming 'id' is the first column
-						}
-					}
-
-					// Insert into internal_change
-					sqlite.exec({
-						sql: `INSERT INTO internal_change (id, entity_id, schema_key, schema_version, file_id, plugin_key, snapshot_id, created_at)
-							   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-						bind: [
-							id,
-							entity_id,
-							schema_key,
-							schema_version,
-							file_id,
-							plugin_key,
-							snapshot_id,
-							created_at,
-						],
-						returnValue: "resultRows",
-					});
-				}
-
-				sqlite.exec({
-					sql: "DELETE FROM internal_change_in_transaction",
-					returnValue: "resultRows",
-				});
-
-				// Update cache entries with the changeset IDs
-				for (const [version_id, changesetId] of changesetIdsByVersion) {
-					sqlite.exec({
-						sql: `UPDATE internal_state_cache 
-						      SET change_set_id = ? 
-						      WHERE version_id = ? AND change_set_id IS NULL`,
-						bind: [changesetId, version_id],
-					});
-				}
-
-				commitDeterminsticSequenceNumber({ sqlite, db });
-
-				//* Emit state commit hook after transaction is successfully committed
-				//* must come last to ensure that subscribers see the changes
-				hooks._emit("state_commit");
-				return capi.SQLITE_OK;
+				return commit({ lix: { sqlite, db: db as any, hooks } });
 			},
 
 			xRollback: () => {
@@ -310,19 +176,20 @@ export function applyStateDatabaseSchema(
 
 				// Column mapping (matching the CREATE TABLE order in xCreate/xConnect)
 				const columnMap = [
-					"entity_id", // 0
-					"schema_key", // 1
-					"file_id", // 2
-					"version_id", // 3
-					"plugin_key", // 4
-					"snapshot_content", // 5
-					"schema_version", // 6
-					"created_at", // 7
-					"updated_at", // 8
-					"inherited_from_version_id", // 9
-					"change_id", // 10
-					"untracked", // 11
-					"change_set_id", // 12
+					"_pk", // 0 (HIDDEN column)
+					"entity_id", // 1
+					"schema_key", // 2
+					"file_id", // 3
+					"version_id", // 4
+					"plugin_key", // 5
+					"snapshot_content", // 6
+					"schema_version", // 7
+					"created_at", // 8
+					"updated_at", // 9
+					"inherited_from_version_id", // 10
+					"change_id", // 11
+					"untracked", // 12
+					"change_set_id", // 13
 				];
 
 				// Process constraints
@@ -428,29 +295,44 @@ export function applyStateDatabaseSchema(
 					}
 				}
 
-				// Try cache first - include inherited entities via union
-				const cacheResults = selectFromCache(sqlite, filters);
+				// If we're updating cache state, we must use materialized state directly to avoid recursion
+				if (isUpdatingCacheState) {
+					// console.log(
+					// 	"Updating cache state, using materialized state directly"
+					// );
+					// Directly materialize state without cache
+					const stateResults = materializeState(sqlite, filters, false);
+					cursorState.results = stateResults || [];
+					cursorState.rowIndex = 0;
+					return capi.SQLITE_OK;
+				}
+
+				// Normal path: check cache staleness
+				const cacheIsStale = isStaleStateCache({
+					lix: { sqlite, db: db as any },
+				});
+
+				// Try cache first - but only if it's not stale
+				let cacheResults: any[] | null = null;
+				if (!cacheIsStale) {
+					// Select directly from resolved state view using Kysely
+					let query = db.selectFrom("internal_resolved_state_all").selectAll();
+
+					// Apply filters
+					for (const [column, value] of Object.entries(filters)) {
+						query = query.where(column as any, "=", value);
+					}
+
+					cacheResults = executeSync({
+						lix: { sqlite },
+						query,
+					});
+				}
 
 				cursorState.results = cacheResults || [];
 				cursorState.rowIndex = 0;
 
-				const recordsInCache = sqlite.exec({
-					sql: `SELECT COUNT(*) as count FROM internal_state_cache`,
-					returnValue: "resultRows",
-				})[0]![0] as number;
-
-				// Cache miss - populate cache with actual recursive state query
-
-				if (cursorState.results.length === 0 && recordsInCache === 0) {
-					if (canLog()) {
-						createLixOwnLogSync({
-							lix: { sqlite, db: db as any },
-							key: "lix_state_cache_miss",
-							level: "debug",
-							message: `Cache miss detected - materializing state from CTE`,
-						});
-					}
-
+				if (cacheIsStale) {
 					// Run the expensive recursive CTE to materialize state
 					// Include deletions when populating cache so inheritance blocking works
 					const stateResults = materializeState(sqlite, {}, true);
@@ -536,30 +418,38 @@ export function applyStateDatabaseSchema(
 							});
 							cachePopulated = true;
 						}
-						if (cachePopulated && canLog()) {
-							createLixOwnLogSync({
-								lix: { sqlite, db: db as any },
-								key: "lix_state_cache_populated",
+
+						if (cachePopulated) {
+							insertVTableLog({
+								sqlite,
+								db: db as any,
+								key: "lix_state_cache_miss",
 								level: "debug",
-								message: `Cache populated with ${stateResults?.length || 0} rows from CTE`,
+								message: `Cache miss detected - materialized state`,
 							});
+							// Mark cache as fresh after population
+							isUpdatingCacheState = true;
+							try {
+								markStateCacheAsFresh({ lix: { sqlite } });
+							} finally {
+								isUpdatingCacheState = false;
+							}
 						}
 					}
 
-					// Re-query cache after population
+					// After populating cache, query from resolved state view
+					let query = db.selectFrom("internal_resolved_state_all").selectAll();
 
-					// Re-query after population with inheritance logic
-					const newResults = selectFromCache(sqlite, filters);
-					cursorState.results = newResults || [];
-				} else {
-					if (canLog()) {
-						createLixOwnLogSync({
-							lix: { sqlite, db: db as any },
-							key: "lix_state_cache_hit",
-							level: "debug",
-							message: `Cache hit - returning ${cursorState.results.length} cached rows`,
-						});
+					// Apply filters
+					for (const [column, value] of Object.entries(filters)) {
+						query = query.where(column as any, "=", value);
 					}
+
+					const newResults = executeSync({
+						lix: { sqlite },
+						query,
+					});
+					cursorState.results = newResults || [];
 				}
 
 				return capi.SQLITE_OK;
@@ -585,12 +475,28 @@ export function applyStateDatabaseSchema(
 					return capi.SQLITE_OK;
 				}
 
+				// Handle primary key column (_pk)
+				if (iCol === 0) {
+					if (Array.isArray(row)) {
+						// For array results, _pk is at index 0
+						capi.sqlite3_result_js(pContext, row[0]);
+					} else if (row._pk) {
+						// If row already has _pk, use it
+						capi.sqlite3_result_js(pContext, row._pk);
+					} else {
+						// Generate primary key from row data
+						const tag = row.untracked ? "U" : "C";
+						const primaryKey = `${tag}~${row.file_id}~${row.entity_id}~${row.version_id}`;
+						capi.sqlite3_result_js(pContext, primaryKey);
+					}
+					return capi.SQLITE_OK;
+				}
+
 				// Handle array-style results from SQLite exec
 				let value;
 				if (Array.isArray(row)) {
-					// Account for rowid being the first column (index 0)
-					// So we need to shift all column indices by 1
-					value = row[iCol + 1];
+					// For array results, composite_key is at index 0, so we use iCol directly
+					value = row[iCol];
 				} else {
 					const columnName = getColumnName(iCol);
 					value = row[columnName];
@@ -614,27 +520,10 @@ export function applyStateDatabaseSchema(
 				return capi.SQLITE_OK;
 			},
 
-			xRowid: (pCursor: any, pRowid: any) => {
-				const cursorState = cursorStates.get(pCursor);
-				const row = cursorState.results[cursorState.rowIndex];
-
-				if (!row) {
-					return capi.SQLITE_ERROR;
-				}
-
-				// Extract rowid from the result row
-				let rowid;
-				if (Array.isArray(row)) {
-					// rowid is the first column (index 0)
-					rowid = row[0];
-				} else {
-					// rowid is a property on the object
-					rowid = row.rowid;
-				}
-
-				// Use the actual rowid from the cache table
-				sqlite.sqlite3.vtab.xRowid(pRowid, rowid);
-				return capi.SQLITE_OK;
+			xRowid: () => {
+				// For WITHOUT ROWID tables, xRowid should not be called
+				// But if it is, we return an error
+				return capi.SQLITE_ERROR;
 			},
 
 			xUpdate: (_pVTab: number, nArg: number, ppArgv: any) => {
@@ -642,20 +531,71 @@ export function applyStateDatabaseSchema(
 					// Extract arguments using the proper SQLite WASM API
 					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(nArg, ppArgv);
 
-					// DELETE operation: nArg = 1, args[0] = old rowid
+					// DELETE operation: nArg = 1, args[0] = old primary key
 					if (nArg === 1) {
-						// For DELETE, we need the old row data to pass to handleStateMutation
-						// We can't get this from the virtual table directly, so we'll need to
-						// handle DELETE differently:
-						// we query the row by rowid and pass it to handleStateMutation
+						const oldPk = args[0] as string;
+						if (!oldPk) {
+							throw new Error("Missing primary key for DELETE operation");
+						}
 
-						handleStateDelete(sqlite, args[0]! as number, db);
+						// Parse primary key to determine tag and extract values
+						const parsed = parsePk(oldPk);
+
+						// Route based on tag
+						if (parsed.tag === "U") {
+							// Delete from untracked table - direct untracked entity
+							executeSync({
+								lix: { sqlite },
+								query: db
+									.deleteFrom("internal_state_all_untracked")
+									.where("entity_id", "=", parsed.entityId)
+									.where("file_id", "=", parsed.fileId)
+									.where("version_id", "=", parsed.versionId),
+							});
+						} else if (parsed.tag === "UI") {
+							// For inherited untracked, we need to create a tombstone
+							// Get the row data first
+							const rowToDelete = executeSync({
+								lix: { sqlite },
+								query: db
+									.selectFrom("internal_resolved_state_all")
+									.select([
+										"entity_id",
+										"schema_key",
+										"file_id",
+										"version_id",
+										"plugin_key",
+										"schema_version",
+									])
+									.where("_pk", "=", oldPk),
+							})[0];
+
+							if (rowToDelete) {
+								// Call insertTransactionState with null snapshot to create tombstone
+								insertTransactionState({
+									lix: { sqlite, db },
+									data: {
+										entity_id: rowToDelete.entity_id,
+										schema_key: rowToDelete.schema_key,
+										file_id: rowToDelete.file_id,
+										plugin_key: rowToDelete.plugin_key,
+										snapshot_content: null, // Deletion
+										schema_version: rowToDelete.schema_version,
+										version_id: rowToDelete.version_id,
+										untracked: true,
+									},
+								});
+							}
+						} else if (parsed.tag === "C" || parsed.tag === "CI") {
+							// For tracked state, use handleStateDelete
+							handleStateDelete(sqlite, oldPk, db);
+						}
 
 						return capi.SQLITE_OK;
 					}
 
-					// INSERT operation: nArg = N+2, args[0] = NULL, args[1] = new rowid
-					// UPDATE operation: nArg = N+2, args[0] = old rowid, args[1] = new rowid
+					// INSERT operation: nArg = N+2, args[0] = NULL, args[1] = new primary key
+					// UPDATE operation: nArg = N+2, args[0] = old primary key, args[1] = new primary key
 					const isInsert = args[0] === null;
 					const isUpdate = args[0] !== null;
 
@@ -664,19 +604,19 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Extract column values (args[2] through args[N+1])
-					// Column order: entity_id, schema_key, file_id, version_id, plugin_key,
+					// Column order: _pk, entity_id, schema_key, file_id, version_id, plugin_key,
 					//               snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, change_id, untracked
-					const entity_id = args[2];
-					const schema_key = args[3];
-					const file_id = args[4];
-					const version_id = args[5];
-					const plugin_key = args[6];
+					const entity_id = args[3];
+					const schema_key = args[4];
+					const file_id = args[5];
+					const version_id = args[6];
+					const plugin_key = args[7];
 					// this is an update where we have a snapshot_content
 					// the snapshot_content is a JSON string as returned by SQlite
-					const snapshot_content = args[7] as string;
-					const schema_version = args[8];
-					// Skip created_at (args[9]), updated_at (args[10]), inherited_from_version_id (args[11]), change_id (args[12])
-					const untracked = args[13] ?? false;
+					const snapshot_content = args[8] as string;
+					const schema_version = args[9];
+					// Skip created_at (args[10]), updated_at (args[11]), inherited_from_version_id (args[12]), change_id (args[13])
+					const untracked = args[14] ?? false;
 
 					// assert required fields
 					if (!entity_id || !schema_key || !file_id || !plugin_key) {
@@ -688,7 +628,7 @@ export function applyStateDatabaseSchema(
 					}
 
 					// Call validation function (same logic as triggers)
-					const storedSchema = getStoredSchema(sqlite, schema_key);
+					const storedSchema = getStoredSchema(sqlite, db, schema_key);
 
 					validateStateMutation({
 						lix: { sqlite, db: db as any },
@@ -812,35 +752,15 @@ export function applyStateDatabaseSchema(
 						error instanceof Error ? error.message : String(error);
 
 					// Log error for debugging
-					if (canLog()) {
-						createLixOwnLogSync({
-							lix: { sqlite, db: db as any },
-							key: "lix_state_xupdate_error",
-							level: "error",
-							message: `xUpdate error: ${errorMessage}`,
-						});
-					}
+					insertVTableLog({
+						sqlite,
+						db: db as any,
+						key: "lix_state_xupdate_error",
+						level: "error",
+						message: `xUpdate error: ${errorMessage}`,
+					});
 
-					throw error; //new Error("test");
-
-					// const vtab = sqlite.sqlite3.vtab.xVtab.get(_pVTab);
-
-					// // Set proper error message on the virtual table
-					// if (vtab) {
-					// 	// Free any existing error message first
-					// 	if (vtab.zErrMsg) {
-					// 		capi.sqlite3_free(vtab.zErrMsg);
-					// 	}
-					// 	// Allocate new error message using sqlite3_malloc
-					// 	const errorBytes = new TextEncoder().encode(errorMessage + "\0");
-					// 	const errorPtr = capi.sqlite3_malloc(errorBytes.length);
-					// 	if (errorPtr) {
-					// 		sqlite.sqlite3.wasm.heap8u().set(errorBytes, errorPtr);
-					// 		vtab.zErrMsg = errorPtr;
-					// 	}
-					// }
-
-					// return capi.SQLITE_ERROR;
+					throw error; // Re-throw to propagate error
 				}
 			},
 		},
@@ -947,23 +867,6 @@ export function applyStateDatabaseSchema(
 
 	// Create the cache table for performance optimization and the untracked state table
 	const sql = `
-  CREATE TABLE IF NOT EXISTS internal_state_cache (
-    entity_id TEXT NOT NULL,
-    schema_key TEXT NOT NULL,
-    file_id TEXT NOT NULL,
-    version_id TEXT NOT NULL,
-    plugin_key TEXT NOT NULL,
-    snapshot_content TEXT, -- Allow NULL for deletions
-    schema_version TEXT NOT NULL,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    inherited_from_version_id TEXT,
-    inheritance_delete_marker INTEGER DEFAULT 0, -- Flag for copy-on-write deletion markers
-    change_id TEXT, -- Allow NULL during migration and for deletion markers 
-    change_set_id TEXT, -- Allow NULL until changeset is created at commit
-    PRIMARY KEY (entity_id, schema_key, file_id, version_id)
-  );
-
   -- Table for untracked state that bypasses change control
   CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
     entity_id TEXT NOT NULL,
@@ -996,42 +899,57 @@ export function applyStateDatabaseSchema(
 
 export function handleStateDelete(
 	sqlite: SqliteWasmDatabase,
-	rowId: number,
+	primaryKey: string,
 	db: Kysely<LixInternalDatabaseSchema>
 ): void {
-	const rowToDelete = sqlite.exec({
-		sql: "SELECT * FROM state_all WHERE rowid = ?",
-		bind: [rowId],
-		returnValue: "resultRows",
-	})[0]!;
+	// Query the row to delete using the resolved state view with Kysely
+	const rowToDelete = executeSync({
+		lix: { sqlite },
+		query: db
+			.selectFrom("internal_resolved_state_all")
+			.select([
+				"entity_id",
+				"schema_key",
+				"file_id",
+				"version_id",
+				"plugin_key",
+				"snapshot_content",
+				"schema_version",
+				"untracked",
+				"inherited_from_version_id",
+			])
+			.where("_pk", "=", primaryKey),
+	})[0];
 
-	const entity_id = rowToDelete[0];
-	const schema_key = rowToDelete[1];
-	const file_id = rowToDelete[2];
-	const version_id = rowToDelete[3];
-	const plugin_key = rowToDelete[4];
-	const snapshot_content = rowToDelete[5];
-	const schema_version = rowToDelete[6];
-	// Column indices: created_at[7], updated_at[8], inherited_from_version_id[9], change_id[10], untracked[11]
-	const untracked = rowToDelete[11];
+	if (!rowToDelete) {
+		throw new Error(`Row not found for primary key: ${primaryKey}`);
+	}
+
+	const entity_id = rowToDelete.entity_id;
+	const schema_key = rowToDelete.schema_key;
+	const file_id = rowToDelete.file_id;
+	const version_id = rowToDelete.version_id;
+	const plugin_key = rowToDelete.plugin_key;
+	const snapshot_content = rowToDelete.snapshot_content;
+	const schema_version = rowToDelete.schema_version;
+	const untracked = rowToDelete.untracked;
 
 	// If entity is untracked, just delete it without creating changes
 	if (untracked) {
 		// Delete from untracked table
-		sqlite.exec({
-			sql: `DELETE FROM internal_state_all_untracked 
-				  WHERE entity_id = ? AND schema_key = ? AND file_id = ? AND version_id = ?`,
-			bind: [
-				String(entity_id),
-				String(schema_key),
-				String(file_id),
-				String(version_id),
-			],
+		executeSync({
+			lix: { sqlite },
+			query: db
+				.deleteFrom("internal_state_all_untracked")
+				.where("entity_id", "=", String(entity_id))
+				.where("schema_key", "=", String(schema_key))
+				.where("file_id", "=", String(file_id))
+				.where("version_id", "=", String(version_id)),
 		});
 		return;
 	}
 
-	const storedSchema = getStoredSchema(sqlite, schema_key);
+	const storedSchema = getStoredSchema(sqlite, db, schema_key);
 
 	validateStateMutation({
 		lix: { sqlite, db: db as any },
@@ -1057,21 +975,92 @@ export function handleStateDelete(
 
 // Helper functions for the virtual table
 
-function getStoredSchema(
-	sqlite: SqliteWasmDatabase,
-	schemaKey: any
-): string | null {
-	const result = sqlite.exec({
-		sql: "SELECT value FROM stored_schema WHERE key = ?",
-		bind: [String(schemaKey)],
-		returnValue: "resultRows",
+/**
+ * Insert a log entry directly using insertTransactionState to avoid recursion
+ * when logging from within the virtual table methods.
+ */
+function insertVTableLog(args: {
+	sqlite: SqliteWasmDatabase;
+	db: Kysely<LixInternalDatabaseSchema>;
+	key: string;
+	message: string;
+	level: string;
+}): void {
+	// Check log levels directly from internal state tables to avoid recursion
+	const logLevelsResult = executeSync({
+		lix: { sqlite: args.sqlite },
+		query: args.db
+			.selectFrom("internal_resolved_state_all")
+			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+			.where("schema_key", "=", "lix_key_value")
+			.where(
+				sql`json_extract(snapshot_content, '$.key')`,
+				"=",
+				"lix_log_levels"
+			)
+			.limit(1),
 	});
 
-	return result && result.length > 0 ? (result[0]![0] as string) : null;
+	const logLevelsValue = logLevelsResult[0]?.value;
+
+	// Check if the level is allowed
+	if (!shouldLog(logLevelsValue as string[] | undefined, args.level)) {
+		return;
+	}
+
+	// Create log entry data
+	const lix = { sqlite: args.sqlite, db: args.db } as any;
+	const logData = {
+		id: uuidV7({ lix }),
+		key: args.key,
+		message: args.message,
+		level: args.level,
+	};
+
+	// Insert log using insertTransactionState
+	insertTransactionState({
+		lix,
+		data: {
+			entity_id: logData.id,
+			schema_key: LixLogSchema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify(logData),
+			schema_version: LixLogSchema["x-lix-version"],
+			// Using global and untracked for vtable logs.
+			// if we need to track them, we can change this later
+			version_id: "global",
+			untracked: true,
+		},
+	});
+}
+
+function getStoredSchema(
+	sqlite: SqliteWasmDatabase,
+	db: Kysely<LixInternalDatabaseSchema>,
+	schemaKey: any
+): string | null {
+	// Query directly from internal_resolved_state_all to avoid vtable recursion
+	const result = executeSync({
+		lix: { sqlite },
+		query: db
+			.selectFrom("internal_resolved_state_all")
+			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+			.where("schema_key", "=", "lix_stored_schema")
+			.where(
+				sql`json_extract(snapshot_content, '$.key')`,
+				"=",
+				String(schemaKey)
+			)
+			.limit(1),
+	});
+
+	return result && result.length > 0 ? result[0]!.value : null;
 }
 
 function getColumnName(columnIndex: number): string {
 	const columns = [
+		"_pk",
 		"entity_id",
 		"schema_key",
 		"file_id",
@@ -1087,171 +1076,6 @@ function getColumnName(columnIndex: number): string {
 		"change_set_id",
 	];
 	return columns[columnIndex] || "unknown";
-}
-
-function selectFromCache(
-	sqlite: SqliteWasmDatabase,
-	filters: Record<string, any>
-): any[] {
-	const filterBindings = Object.values(filters);
-	const buildWhereClause = (tableAlias: string = "") => {
-		const conditions: string[] = [];
-		const prefix = tableAlias ? `${tableAlias}.` : "";
-
-		Object.keys(filters).forEach((column) => {
-			conditions.push(`${prefix}${column} = ?`);
-		});
-
-		return conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-	};
-
-	const statement = `SELECT * FROM (
-		-- 1. Untracked state (highest priority)
-		SELECT 
-			rowid,
-			entity_id, 
-			schema_key, 
-			file_id, 
-			version_id, 
-			plugin_key,
-			snapshot_content, 
-			schema_version, 
-			created_at, 
-			updated_at,
-			NULL as inherited_from_version_id, 
-			'untracked' as change_id, 
-			1 as untracked,
-			'untracked' as change_set_id
-		FROM internal_state_all_untracked
-		
-		UNION ALL
-		
-		-- 2. Tracked state (second priority) - only if no untracked exists
-		SELECT 
-			rowid,
-			entity_id, 
-			schema_key, 
-			file_id, 
-			version_id, 
-			plugin_key, 
-			snapshot_content, 
-			schema_version, 
-			created_at, 
-			updated_at,
-			inherited_from_version_id, 
-			change_id, 
-			0 as untracked,
-			change_set_id
-		FROM internal_state_cache
-		WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions
-		AND NOT EXISTS (
-			SELECT 1 FROM internal_state_all_untracked unt
-			WHERE unt.entity_id = internal_state_cache.entity_id
-			  AND unt.schema_key = internal_state_cache.schema_key
-			  AND unt.file_id = internal_state_cache.file_id
-			  AND unt.version_id = internal_state_cache.version_id
-		)
-		
-		UNION ALL
-		
-		-- 3. Inherited tracked state (lower priority) - only if no untracked or tracked exists
-		SELECT 
-			rowid,
-			isc.entity_id, 
-			isc.schema_key, 
-			isc.file_id, 
-			vi.version_id, -- Return child version_id
-			isc.plugin_key, 
-			isc.snapshot_content, 
-			isc.schema_version, 
-			isc.created_at, 
-			isc.updated_at,
-			vi.parent_version_id as inherited_from_version_id, 
-			isc.change_id, 
-			0 as untracked,
-			isc.change_set_id
-		FROM (
-			-- Get version inheritance relationships from cache
-			SELECT 
-				json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-				json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-			FROM internal_state_cache isc_v
-			WHERE isc_v.schema_key = 'lix_version'
-		) vi
-		JOIN internal_state_cache isc ON isc.version_id = vi.parent_version_id
-		WHERE vi.parent_version_id IS NOT NULL
-		-- Only inherit entities that exist (not deleted) in parent
-		AND isc.inheritance_delete_marker = 0
-		-- Don't inherit if child has tracked state
-		AND NOT EXISTS (
-			SELECT 1 FROM internal_state_cache child_isc
-			WHERE child_isc.version_id = vi.version_id
-			  AND child_isc.entity_id = isc.entity_id
-			  AND child_isc.schema_key = isc.schema_key
-			  AND child_isc.file_id = isc.file_id
-		)
-		-- Don't inherit if child has untracked state
-		AND NOT EXISTS (
-			SELECT 1 FROM internal_state_all_untracked unt
-			WHERE unt.version_id = vi.version_id
-			  AND unt.entity_id = isc.entity_id
-			  AND unt.schema_key = isc.schema_key
-			  AND unt.file_id = isc.file_id
-		)
-		
-		UNION ALL
-		
-		-- 4. Inherited untracked state (lowest priority) - only if no untracked or tracked exists
-		SELECT 
-			rowid,
-			unt.entity_id, 
-			unt.schema_key, 
-			unt.file_id, 
-			vi.version_id, -- Return child version_id
-			unt.plugin_key, 
-			unt.snapshot_content, 
-			unt.schema_version, 
-			unt.created_at, 
-			unt.updated_at,
-			vi.parent_version_id as inherited_from_version_id, 
-			'untracked' as change_id, 
-			1 as untracked,
-			'untracked' as change_set_id
-		FROM (
-			-- Get version inheritance relationships from cache
-			SELECT 
-				json_extract(isc_v.snapshot_content, '$.id') AS version_id,
-				json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
-			FROM internal_state_cache isc_v
-			WHERE isc_v.schema_key = 'lix_version'
-		) vi
-		JOIN internal_state_all_untracked unt ON unt.version_id = vi.parent_version_id
-		WHERE vi.parent_version_id IS NOT NULL
-		-- Don't inherit if child has tracked state
-		AND NOT EXISTS (
-			SELECT 1 FROM internal_state_cache child_isc
-			WHERE child_isc.version_id = vi.version_id
-			  AND child_isc.entity_id = unt.entity_id
-			  AND child_isc.schema_key = unt.schema_key
-			  AND child_isc.file_id = unt.file_id
-		)
-		-- Don't inherit if child has untracked state
-		AND NOT EXISTS (
-			SELECT 1 FROM internal_state_all_untracked child_unt
-			WHERE child_unt.version_id = vi.version_id
-			  AND child_unt.entity_id = unt.entity_id
-			  AND child_unt.schema_key = unt.schema_key
-			  AND child_unt.file_id = unt.file_id
-		)
-	) as combined_results`;
-
-	const result = sqlite.exec({
-		sql: `${statement} ${buildWhereClause("combined_results")}`,
-		bind: [...filterBindings],
-		returnValue: "resultRows",
-	});
-
-	return result;
 }
 
 export type StateView = Omit<StateAllView, "version_id">;
@@ -1272,23 +1096,6 @@ export type StateAllView = {
 	change_set_id: Generated<string>;
 };
 
-// Cache table type (internal table for state materialization)
-export type InternalStateCacheTable = {
-	entity_id: string;
-	schema_key: string;
-	file_id: string;
-	version_id: string;
-	plugin_key: string;
-	snapshot_content: string | null; // JSON string, NULL for deletions
-	schema_version: string;
-	created_at: string;
-	updated_at: string;
-	inherited_from_version_id: string | null;
-	inheritance_delete_marker: number; // 1 for copy-on-write deletion markers, 0 otherwise
-	change_id: string;
-	change_set_id: string | null;
-};
-
 export type InternalStateAllUntrackedTable = {
 	entity_id: string;
 	schema_key: string;
@@ -1306,9 +1113,9 @@ export type StateRow = Selectable<StateView>;
 export type NewStateRow = Insertable<StateView>;
 export type StateRowUpdate = Updateable<StateView>;
 
-export type StateCacheRow = Selectable<InternalStateCacheTable>;
-export type NewStateCacheRow = Insertable<InternalStateCacheTable>;
-export type StateCacheRowUpdate = Updateable<InternalStateCacheTable>;
+export type StateAllRow = Selectable<StateAllView>;
+export type NewStateAllRow = Insertable<StateAllView>;
+export type StateAllRowUpdate = Updateable<StateAllView>;
 
 // Types for the internal_change TABLE
 export type InternalChangeInTransaction =

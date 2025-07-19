@@ -1,23 +1,22 @@
 import { css, html, LitElement } from "lit";
 import { property } from "lit/decorators.js";
 import type { UiDiffComponentProps } from "@lix-js/sdk";
-import { diffLines } from "diff";
+import { renderHtmlDiff } from "@lix-js/html-diff";
+import { toHast } from "mdast-util-to-hast";
+import { toHtml } from "hast-util-to-html";
 import { MarkdownRootSchemaV1 } from "./schemas/root.js";
 import { MarkdownNodeSchemaV1 } from "./schemas/nodes.js";
-import { serializeMarkdown } from "./utilities/serializeMarkdown.js";
 import type { MdAstNode } from "./utilities/parseMarkdown.js";
 
 export class DiffComponent extends LitElement {
 	static override styles = css`
 		:host {
-			--color-added-bg: #e6ffed;
-			--color-added-text: #22863a;
-			--color-removed-bg: #ffeef0;
-			--color-removed-text: #b31d28;
 			--color-border: #e1e4e8;
-			--color-line-bg: #f6f8fa;
 			--color-text: #24292e;
 		}
+
+		/* Import lix HTML diff default styles */
+		@import "@lix-js/html-diff/default.css";
 
 		.diff-container {
 			display: flex;
@@ -25,50 +24,39 @@ export class DiffComponent extends LitElement {
 			border: 1px solid var(--color-border);
 			border-radius: 6px;
 			overflow: hidden;
-			font-family: "Courier New", monospace;
+			font-family: system-ui, sans-serif;
 		}
 
-		.diff-row {
-			display: flex;
-			width: 100%;
-		}
-
-		.column {
-			flex: 1;
+		.entity-list {
 			display: flex;
 			flex-direction: column;
-			border-right: 1px solid var(--color-border);
+			gap: 8px;
+			padding: 8px;
 		}
 
-		.line {
-			display: flex;
-			align-items: center;
-			padding: 4px 8px;
-			white-space: pre-wrap;
-			word-break: break-all;
+		.entity-list * {
+			margin-top: 0;
+			margin-bottom: 0;
 		}
 
-		.line-number {
-			width: 40px;
-			text-align: right;
-			padding: 4px 8px;
-			background-color: var(--color-line-bg);
-			color: var(--color-text);
-			border-right: 1px solid var(--color-border);
+		/* Enhance lix HTML diff classes */
+		.diff-created {
+			color: #080;
+			background: #efe;
+			// border-left: 2px solid #080;
 		}
 
-		.added {
-			background-color: var(--color-added-bg);
-			color: var(--color-added-text);
+		.diff-updated {
+			color: #f60;
+			background: #ffc;
+			// border-left: 2px solid #f60;
 		}
 
-		.removed {
-			background-color: var(--color-removed-bg);
-			color: var(--color-removed-text);
-		}
-
-		.empty {
-			visibility: hidden;
+		.diff-deleted {
+			color: #b00;
+			background: #fee;
+			// border-left: 2px solid #b00;
+			opacity: 0.7;
 		}
 	`;
 
@@ -99,90 +87,162 @@ export class DiffComponent extends LitElement {
 				return a.entity_id.localeCompare(b.entity_id);
 			});
 
+		// Generate HTML diff for all entities
+		const diffHtml = this.generateHtmlDiff(contentDiffs);
+
 		return html`
 			<div class="diff-container">
-				${contentDiffs.map((diff) => this.renderDiff(diff))}
+				<div class="entity-list">${this.renderEntityList(diffHtml)}</div>
 			</div>
 		`;
 	}
 
-	renderDiff(diff: UiDiffComponentProps["diffs"][0]) {
-		// Convert MD-AST nodes to readable markdown for diff display
-		const before = this.getNodeContent(diff.snapshot_content_before);
-		const after = this.getNodeContent(diff.snapshot_content_after);
-		const lineDiffs = diffLines(before, after);
+	private generateHtmlDiff(
+		contentDiffs: UiDiffComponentProps["diffs"],
+	): string {
+		// Group diffs by before/after state
+		const beforeEntities = new Map<string, any>();
+		const afterEntities = new Map<string, any>();
 
-		// Track left and right columns
-		const leftColumn: unknown[] = [];
-		const rightColumn: unknown[] = [];
-
-		lineDiffs.forEach((part) => {
-			const isAdded = part.added;
-			const isRemoved = part.removed;
-			const className = isAdded ? "added" : isRemoved ? "removed" : "";
-
-			if (isRemoved) {
-				// Removed lines go only in the left column
-				leftColumn.push(html`
-					<div class="diff-row ${className}">
-						<span class="line">${part.value}</span>
-					</div>
-				`);
-				rightColumn.push(html`<div class="diff-row empty"></div>`);
-			} else if (isAdded) {
-				// Added lines go only in the right column
-				rightColumn.push(html`
-					<div class="diff-row ${className}">
-						<span class="line">${part.value}</span>
-					</div>
-				`);
-				leftColumn.push(html`<div class="diff-row empty"></div>`);
-			} else {
-				// Unchanged lines go in both columns
-				leftColumn.push(html`
-					<div class="diff-row">
-						<span class="line">${part.value}</span>
-					</div>
-				`);
-				rightColumn.push(html`
-					<div class="diff-row">
-						<span class="line">${part.value}</span>
-					</div>
-				`);
+		contentDiffs.forEach((diff) => {
+			if (diff.snapshot_content_before) {
+				beforeEntities.set(diff.entity_id, diff.snapshot_content_before);
+			}
+			if (diff.snapshot_content_after) {
+				afterEntities.set(diff.entity_id, diff.snapshot_content_after);
 			}
 		});
 
-		return html`
-			<div class="diff-row">
-				<div class="column">${leftColumn}</div>
-				<div class="column">${rightColumn}</div>
-			</div>
-		`;
+		// Convert entities to HTML
+		const beforeHtml = this.entitiesToHtml(beforeEntities);
+		const afterHtml = this.entitiesToHtml(afterEntities);
+
+		// Generate HTML diff using lix HTML diff
+		try {
+			return renderHtmlDiff({ beforeHtml, afterHtml });
+		} catch (error) {
+			console.error("HTML diff generation failed:", error);
+			// Fallback to simple after HTML
+			return afterHtml;
+		}
 	}
 
-	private getNodeContent(node: any): string {
-		if (!node) return "";
+	private entitiesToHtml(entities: Map<string, any>): string {
+		const htmlParts: string[] = [];
 
-		// Handle root order changes
-		if (node.order) {
-			return `Order: [${node.order.join(", ")}]`;
+		entities.forEach((entity, entityId) => {
+			const html = this.convertEntityToHtml(entity, entityId);
+			if (html) {
+				htmlParts.push(html);
+			}
+		});
+
+		return htmlParts.join("\n");
+	}
+
+	private convertEntityToHtml(entity: any, entityId: string): string {
+		if (!entity || !entity.type) {
+			return "";
 		}
 
-		// Handle MD-AST nodes - serialize them to markdown
-		if (node.type && node.mdast_id) {
-			try {
+		try {
+			// Handle entities with direct value property first
+			if (entity.value) {
+				if (entity.type === "text") {
+					// Text nodes should render their value directly
+					return `<span data-diff-key="${entityId}" data-diff-mode="words">${entity.value}</span>`;
+				} else {
+					// Other nodes with direct values (like code blocks, html, etc.)
+					const tagName = this.getTagForType(entity.type);
+					return `<${tagName} data-diff-key="${entityId}" data-diff-mode="words">${entity.value}</${tagName}>`;
+				}
+			}
+
+			// Handle entities with children
+			if (entity.children && entity.children.length > 0) {
+				// Create temporary AST with single entity
 				const tempAst = {
 					type: "root" as const,
-					children: [node as MdAstNode],
+					children: [entity as MdAstNode],
 				};
-				return serializeMarkdown(tempAst, { skip_id_comments: true }).trim();
-			} catch {
-				// Fallback to JSON representation
-				return JSON.stringify(node, null, 2);
-			}
-		}
 
-		// Fallback for other content
-		return typeof node === "string" ? node : JSON.stringify(node, null, 2);
+				// Convert to HTML AST
+				const hast = toHast(tempAst as any);
+				if (!hast) {
+					return "";
+				}
+
+				// Convert to HTML string
+				const html = toHtml(hast);
+
+				// Add data-diff-key attribute using entity ID
+				return this.addDataDiffKey(html, entityId);
+			}
+
+			// Fallback for entities without value or children
+			const tagName = this.getTagForType(entity.type);
+			return `<${tagName} data-diff-key="${entityId}" data-diff-mode="words"></${tagName}>`;
+		} catch (error) {
+			console.error("Entity to HTML conversion failed:", error);
+			return `<div data-diff-key="${entityId}">${JSON.stringify(entity)}</div>`;
+		}
+	}
+
+	private getTagForType(type: string): string {
+		switch (type) {
+			case "paragraph":
+				return "p";
+			case "heading":
+				return "h1"; // Could be h1-h6 based on depth
+			case "code":
+				return "code";
+			case "html":
+				return "div";
+			case "text":
+				return "span";
+			case "emphasis":
+				return "em";
+			case "strong":
+				return "strong";
+			case "link":
+				return "a";
+			case "image":
+				return "img";
+			case "list":
+				return "ul";
+			case "listItem":
+				return "li";
+			case "blockquote":
+				return "blockquote";
+			case "break":
+				return "br";
+			case "thematicBreak":
+				return "hr";
+			case "inlineCode":
+				return "code";
+			case "delete":
+				return "del";
+			default:
+				return "div";
+		}
+	}
+
+	private addDataDiffKey(html: string, entityId: string): string {
+		// Add data-diff-key to the first HTML element
+		const tagMatch = html.match(/^<([a-zA-Z][^>\s]*)(\s[^>]*)?>/);
+		if (tagMatch) {
+			const [fullMatch, tagName, attributes = ""] = tagMatch;
+			const newAttributes = attributes.includes("data-diff-key")
+				? attributes
+				: `${attributes} data-diff-key="${entityId}" data-diff-mode="words"`;
+			return html.replace(fullMatch, `<${tagName}${newAttributes}>`);
+		}
+		return html;
+	}
+
+	private renderEntityList(diffHtml: string): unknown {
+		// Parse the HTML diff result and render as template
+		// For now, render as unsafe HTML - in production, this should be sanitized
+		return html`<div .innerHTML=${diffHtml}></div>`;
 	}
 }

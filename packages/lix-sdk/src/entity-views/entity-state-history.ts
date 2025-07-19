@@ -72,6 +72,15 @@ export type StateEntityHistoryView = {
 	lixcol_change_set_id: Generated<string>;
 
 	/**
+	 * The root change set ID used as the starting point for traversing history.
+	 *
+	 * When querying history from a specific changeset, this field contains that
+	 * changeset ID for all returned rows. Used with `depth` to understand how
+	 * far back in history each entity state is from this root.
+	 */
+	lixcol_root_change_set_id: Generated<string>;
+
+	/**
 	 * Depth of this entity state relative to the queried change_set_id.
 	 *
 	 * - `0`: The entity state at the exact queried change set
@@ -226,6 +235,7 @@ export function createEntityStateHistoryView(args: {
         schema_version AS lixcol_schema_version,
         change_id AS lixcol_change_id,
         change_set_id AS lixcol_change_set_id,
+        root_change_set_id AS lixcol_root_change_set_id,
         depth AS lixcol_depth
       FROM state_history
       WHERE schema_key = '${schema_key}';

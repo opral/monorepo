@@ -1,23 +1,22 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip.tsx";
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
-import { Thread, UiDiffComponentProps } from "@lix-js/sdk";
+import { UiDiffComponentProps } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
-import { useAtom } from "jotai/react";
-import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { activeFileAtom, getChangeDiffs, getThreads } from "@/state-active-file.ts";
+import { selectThreads, selectChangeDiffs } from "@/queries";
 import { ChevronDown } from "lucide-react";
+import { useQuery } from "@lix-js/react-utils";
 
 export const CheckpointComponent = (props: {
 	checkpointChangeSet: {
 		id: string;
 		change_count: number;
-		created_at: string | null;
+		checkpoint_created_at: string | null;
 		author_name: string | null;
 	};
 	previousChangeSetId: string | null;
@@ -25,21 +24,13 @@ export const CheckpointComponent = (props: {
 	showBottomLine: boolean;
 }) => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
-	const [diffs, setDiffs] = useState<UiDiffComponentProps["diffs"]>([]);
-	const [threads, setThreads] = useState<Thread[]>([]);
-	const [lix] = useAtom(lixAtom);
-	const [activeFile] = useAtom(activeFileAtom);
-
-	useEffect(() => {
-		const fetchThreads = async () => {
-			if (props.checkpointChangeSet.id) {
-				const threads = await getThreads(lix, props.checkpointChangeSet.id);
-				if (threads) setThreads(threads);
-			}
-		};
-
-		fetchThreads();
-	}, []);
+	const [shouldLoadDiffs, setShouldLoadDiffs] = useState<boolean>(false);
+	const threads = useQuery((lix) =>
+		selectThreads(lix, { changeSetId: props.checkpointChangeSet.id }),
+	);
+	const diffs = useQuery((lix) =>
+		selectChangeDiffs(lix, props.checkpointChangeSet.id, props.previousChangeSetId),
+	);
 
 	// Don't render anything if there's no change data
 	if (!props.checkpointChangeSet || !props.checkpointChangeSet.id) {
@@ -47,33 +38,15 @@ export const CheckpointComponent = (props: {
 	}
 
 	const toggleExpanded = () => {
-		if (diffs.length > 0) {
-			setIsExpanded(!isExpanded);
-			return;
+		if (!isExpanded && !shouldLoadDiffs) {
+			// Start loading diffs when expanding for the first time
+			setShouldLoadDiffs(true);
 		}
-		getChangeDiffs(
-			lix,
-			activeFile!.id,
-			props.checkpointChangeSet.id,
-			props.previousChangeSetId
-		).then((diffs) => {
-			setDiffs(diffs);
-		});
-		// TODO: diff needs to hanndle before and after file
-		// getBeforeAfterOfFile({
-		//   lix,
-		//   changeSetBefore: props.previousChangeSetId ? { id: props.previousChangeSetId } : undefined,
-		//   changeSetAfter: props.checkpointChangeSet.id ? { id: props.checkpointChangeSet.id } : undefined,
-		//   file: { id: activeFile!.id },
-		// }).then((diffs) => {
-		//   setDiffs([diffs]);
-		// });
-
 		setIsExpanded(!isExpanded);
 	};
 
 	// Group changes by plugin_key
-	const groupedChanges = diffs.reduce(
+	const groupedChanges = (diffs || []).reduce(
 		(acc: { [key: string]: UiDiffComponentProps["diffs"] }, change) => {
 			const key = change.plugin_key;
 			if (!acc[key]) {
@@ -86,7 +59,6 @@ export const CheckpointComponent = (props: {
 	);
 
 	// Get the first comment if it exists
-	// @ts-expect-error - Typescript doesn't know that threads are created with initial comment
 	const firstComment = threads?.[0]?.comments?.[0];
 
 	// Truncate comment content if it's longer than 50 characters
@@ -109,7 +81,6 @@ export const CheckpointComponent = (props: {
 			<ChangeDot top={props.showTopLine} bottom={props.showBottomLine} />
 			<div className="flex-1">
 				<div className="flex flex-col w-full mt-1.5">
-					{/* {props.checkpointChangeSet.id} */}
 					<div className="h-8 flex items-center justify-between w-full">
 						<div className="flex items-center gap-2 min-w-0 flex-shrink-1">
 							<TooltipProvider>
@@ -138,7 +109,7 @@ export const CheckpointComponent = (props: {
 
 						<div className="flex items-center flex-shrink-0">
 							<span className="text-xs text-slate-500 mr-1">
-								{timeAgo(props.checkpointChangeSet.created_at!)}
+								{timeAgo(props.checkpointChangeSet.checkpoint_created_at!)}
 							</span>
 							<Button variant="ghost" size="sm" className="h-6 w-6 p-0">
 								<ChevronDown
@@ -179,7 +150,7 @@ export const CheckpointComponent = (props: {
               <CreateCheckpointDiscussion
                 changeSetId={props.checkpointChangeSet}
               />
-            } */}
+						} */}
 					</div>
 				)}
 			</div>

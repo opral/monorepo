@@ -4,7 +4,18 @@ import { openLix } from "../lix/open-lix.js";
 
 test("timestamp returns deterministic values when deterministic mode is enabled", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+			{
+				key: "lix_deterministic_bootstrap",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	const t1 = timestamp({ lix });
@@ -28,7 +39,13 @@ test("timestamp returns deterministic values when deterministic mode is enabled"
 
 test("timestamp returns real time when deterministic mode is disabled", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: false }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: false,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	const before = Date.now();
@@ -47,7 +64,13 @@ test("timestamp returns real time when deterministic mode is disabled", async ()
 
 test("timestamp toggles between deterministic and real time", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	// Start with deterministic
@@ -77,7 +100,13 @@ test("timestamp toggles between deterministic and real time", async () => {
 
 test("timestamp is persisted across lix instances", async () => {
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	// Generate some timestamps to advance the counter
@@ -105,7 +134,13 @@ test("timestamp is persisted across lix instances", async () => {
 
 test("timestamp advances correctly with many operations", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: true,
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	// Generate 100 timestamps

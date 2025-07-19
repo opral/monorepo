@@ -29,14 +29,22 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		FROM internal_state_all_untracked unt;
 	`);
 
-	// View 2: Version change set roots (tip only for now)
+	// View 2: Version change set roots - only the latest change for each version
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_version_roots AS
 		SELECT 
 			json_extract(v.snapshot_content,'$.change_set_id') AS tip_change_set_id,
 			v.entity_id AS version_id
 		FROM internal_materialization_all_changes v
-		WHERE v.schema_key = 'lix_version';
+		WHERE v.schema_key = 'lix_version'
+		  AND NOT EXISTS (
+			-- Exclude if there's a newer change for the same version
+			SELECT 1 
+			FROM internal_materialization_all_changes newer
+			WHERE newer.entity_id = v.entity_id
+			  AND newer.schema_key = 'lix_version'
+			  AND newer.created_at > v.created_at
+		  );
 	`);
 
 	// View 3: Change set lineage (recursive - includes ancestors)
@@ -196,6 +204,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		JOIN internal_materialization_leaf_snapshots ls ON ls.version_id = vi.parent_version_id
 		WHERE vi.parent_version_id IS NOT NULL
 		  AND ls.snapshot_content IS NOT NULL /* don't inherit deletions */
+		  AND ls.schema_key != 'lix_version' /* don't inherit version entities */
 		  AND NOT EXISTS (
 		  /* child already changed this entity */
 		  SELECT 1 FROM internal_materialization_leaf_snapshots child_ls
