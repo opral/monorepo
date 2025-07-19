@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
+import { sql } from "kysely";
 
 test("inserts, updates, deletes are handled", async () => {
 	const lix = await openLix({});
@@ -176,4 +177,104 @@ test.todo("view should show changes across versions", async () => {
 			lixcol_version_id: versionB.id,
 		},
 	]);
+});
+
+test("can update individual JSON properties using SQLite JSON functions", async () => {
+	const lix = await openLix({});
+
+	// Insert a complex JSON object
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "test_config",
+			value: {
+				enabled: true,
+				settings: {
+					theme: "dark",
+					language: "en",
+					notifications: true,
+				},
+				features: ["feature1", "feature2"],
+				count: 42,
+			},
+		})
+		.execute();
+
+	// First check the initial insert worked
+	const initialValue = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "test_config")
+		.select("value")
+		.executeTakeFirst();
+
+	expect(initialValue?.value).toBeDefined();
+
+	// Update a single nested property using json_set
+	await lix.db
+		.updateTable("key_value")
+		.set({
+			value: sql`json_set(value, '$.settings.theme', 'light')`
+		})
+		.where("key", "=", "test_config")
+		.execute();
+
+	const afterThemeUpdate = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "test_config")
+		.select("value")
+		.executeTakeFirst();
+
+	expect(afterThemeUpdate?.value).toMatchObject({
+		enabled: true,
+		settings: {
+			theme: "light", // Changed
+			language: "en",
+			notifications: true,
+		},
+		features: ["feature1", "feature2"],
+		count: 42,
+	});
+
+	// Update multiple properties at once
+	await lix.db
+		.updateTable("key_value")
+		.set({
+			value: sql`json_set(value, '$.enabled', false, '$.count', 100, '$.settings.notifications', false)`
+		})
+		.where("key", "=", "test_config")
+		.execute();
+
+	const afterMultiUpdate = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "test_config")
+		.select("value")
+		.executeTakeFirst();
+
+	expect(afterMultiUpdate?.value).toMatchObject({
+		enabled: 0, // Changed - SQLite stores false as 0
+		settings: {
+			theme: "light",
+			language: "en",
+			notifications: 0, // Changed - SQLite stores false as 0
+		},
+		features: ["feature1", "feature2"],
+		count: 100, // Changed
+	});
+
+	// Read specific properties using JSON operators
+	const specificProps = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "test_config")
+		.select([
+			sql<boolean>`value ->> '$.enabled'`.as("enabled"),
+			sql<string>`value ->> '$.settings.theme'`.as("theme"),
+			sql<number>`value ->> '$.count'`.as("count"),
+		])
+		.executeTakeFirst();
+
+	expect(specificProps).toEqual({
+		enabled: 0, // SQLite returns 0 for false
+		theme: "light",
+		count: 100,
+	});
 });

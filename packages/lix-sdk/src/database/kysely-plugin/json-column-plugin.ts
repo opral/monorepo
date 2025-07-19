@@ -99,6 +99,17 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		return this.getJsonColumnConfig(columnName) !== undefined;
 	}
 
+	private isSqlExpression(node: any): boolean {
+		// Check if the node is a SQL expression that shouldn't be wrapped
+		// Common SQL expression node types:
+		// - RawNode: Created by sql`` template literals
+		// - FunctionNode: SQL functions like json_set()
+		// - BinaryOperationNode: SQL operations
+		// - etc.
+		// ValueNode is the only type we want to wrap in json()
+		return node && node.kind !== "ValueNode";
+	}
+
 	override transformOnConflict(node: OnConflictNode): OnConflictNode {
 		if (!node.updates) {
 			return node;
@@ -112,6 +123,10 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 				const columnName = updateItem.column.column.name;
 				if (this.isJsonbColumn(columnName)) {
 					const valueNode = updateItem.value;
+					// Check if the value is a SQL expression - if so, don't wrap it
+					if (this.isSqlExpression(valueNode)) {
+						return updateItem;
+					}
 					// Check if the value part is specifically a ValueNode
 					if (valueNode.kind === "ValueNode") {
 						// If it is, serialize it
@@ -148,6 +163,10 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		// @ts-expect-error - kysely type narrowing
 		const columnName = node.column.column.name;
 		if (this.isJsonbColumn(columnName)) {
+			// Check if the value is a SQL expression (RawNode, etc.) - if so, don't wrap it
+			if (this.isSqlExpression(node.value)) {
+				return node;
+			}
 			return {
 				...node,
 				// @ts-expect-error - kysely type narrowing
@@ -162,6 +181,10 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		// node.column.column.name is the column name for SetOperationNode
 		const columnName = node.column?.column?.name;
 		if (columnName && this.isJsonbColumn(columnName)) {
+			// Check if the value is a SQL expression - if so, don't wrap it
+			if (this.isSqlExpression(node.value)) {
+				return node;
+			}
 			return {
 				...node,
 				value: this.serializeValue(node.value, this.getJsonColumnConfig(columnName)),

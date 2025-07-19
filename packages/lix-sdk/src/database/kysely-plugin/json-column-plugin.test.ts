@@ -223,3 +223,187 @@ const mockDatabase = async () => {
 
 	return db;
 };
+
+test("SQL expressions in JSON columns should not be wrapped in json()", async () => {
+	const db = await mockDatabase();
+
+	// Insert initial data
+	await db
+		.insertInto("mock_table")
+		.values({
+			data: {
+				enabled: true,
+				settings: {
+					theme: "dark",
+					language: "en"
+				}
+			},
+			other: "value",
+		})
+		.execute();
+
+	// Try to update using json_set SQL expression
+	const updateQuery = db
+		.updateTable("mock_table")
+		.set({
+			data: sql`json_set(data, '$.settings.theme', 'light')`
+		})
+		.where("other", "=", "value")
+		.compile();
+
+	console.log("Update query SQL:", updateQuery.sql);
+	console.log("Update query parameters:", updateQuery.parameters);
+
+	// The SQL should contain json_set directly, not wrapped in json()
+	// Currently this fails - it produces: update "mock_table" set "data" = json(?) where "other" = ?
+	// We want: update "mock_table" set "data" = json_set(data, '$.settings.theme', 'light') where "other" = ?
+	expect(updateQuery.sql).toContain("json_set");
+	expect(updateQuery.sql).not.toContain("json(?)");
+
+	// Execute the update
+	await db
+		.updateTable("mock_table")
+		.set({
+			data: sql`json_set(data, '$.settings.theme', 'light')`
+		})
+		.where("other", "=", "value")
+		.execute();
+
+	// Verify the update worked correctly
+	const result = await db
+		.selectFrom("mock_table")
+		.select("data")
+		.executeTakeFirst();
+
+	expect(result?.data).toMatchObject({
+		enabled: true,
+		settings: {
+			theme: "light", // Changed from "dark"
+			language: "en"
+		}
+	});
+});
+
+test("Multiple SQL expressions in JSON columns", async () => {
+	const db = await mockDatabase();
+
+	// Insert initial data
+	await db
+		.insertInto("mock_table")
+		.values({
+			data: {
+				count: 10,
+				active: true,
+				nested: {
+					value: 100
+				}
+			},
+			other: "test",
+		})
+		.execute();
+
+	// Update multiple properties using json_set
+	const updateQuery = db
+		.updateTable("mock_table")
+		.set({
+			data: sql`json_set(data, '$.count', 20, '$.active', false, '$.nested.value', 200)`
+		})
+		.compile();
+
+	// Should not wrap the SQL expression
+	expect(updateQuery.sql).toContain("json_set");
+	expect(updateQuery.sql).not.toContain("json(?)");
+
+	await db
+		.updateTable("mock_table")
+		.set({
+			data: sql`json_set(data, '$.count', 20, '$.active', false, '$.nested.value', 200)`
+		})
+		.execute();
+
+	const result = await db
+		.selectFrom("mock_table")
+		.select("data")
+		.executeTakeFirst();
+
+	expect(result?.data).toMatchObject({
+		count: 20,
+		active: 0, // SQLite stores false as 0
+		nested: {
+			value: 200
+		}
+	});
+});
+
+test("SQL expressions in onConflict updates", async () => {
+	const db = await mockDatabase();
+
+	// Insert initial data
+	await db
+		.insertInto("mock_table")
+		.values({
+			id: 1,
+			data: {
+				version: 1,
+				name: "original",
+				metadata: {
+					updated: false
+				}
+			},
+			other: "test",
+		})
+		.execute();
+
+	// Try to insert with same id, using onConflict with SQL expression
+	const insertQuery = db
+		.insertInto("mock_table")
+		.values({
+			id: 1,
+			data: { version: 2, name: "ignored" },
+			other: "test",
+		})
+		.onConflict((oc) => 
+			oc.doUpdateSet({ 
+				data: sql`json_set(data, '$.version', 2, '$.metadata.updated', true)`
+			})
+		)
+		.compile();
+
+	console.log("OnConflict query SQL:", insertQuery.sql);
+	
+	// The INSERT values will be wrapped in json(?), but the UPDATE should use json_set
+	expect(insertQuery.sql).toContain("json_set");
+	expect(insertQuery.sql).toContain("on conflict do update set");
+	// Verify json_set is in the UPDATE part, not wrapped in json()
+	expect(insertQuery.sql).toMatch(/do update set.*json_set.*\$\.version/);
+
+	// Execute the insert with conflict
+	await db
+		.insertInto("mock_table")
+		.values({
+			id: 1,
+			data: { version: 2, name: "ignored" },
+			other: "test",
+		})
+		.onConflict((oc) => 
+			oc.doUpdateSet({ 
+				data: sql`json_set(data, '$.version', 2, '$.metadata.updated', true)`
+			})
+		)
+		.execute();
+
+	// Verify the conflict update worked
+	const result = await db
+		.selectFrom("mock_table")
+		.where("id", "=", 1)
+		.select("data")
+		.executeTakeFirst();
+
+	expect(result?.data).toMatchObject({
+		version: 2, // Updated
+		name: "original", // Kept original
+		metadata: {
+			updated: 1 // SQLite stores true as 1
+		}
+	});
+});
