@@ -1,6 +1,9 @@
 import type { Lix } from "../lix/open-lix.js";
 import { nextDeterministicSequenceNumber } from "./index.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
+import { executeSync } from "../database/execute-sync.js";
+import { sql, type Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 /**
  * Returns a nano ID that is deterministic in deterministic mode.
@@ -27,7 +30,7 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  * @example Deterministic mode - returns sequential IDs
  * ```ts
  * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" }]
+ *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true }, lixcol_version_id: "global" }]
  * });
  * nanoId({ lix }); // "test_0000000000"
  * nanoId({ lix }); // "test_0000000001"
@@ -56,6 +59,22 @@ export function nanoId(args: {
 }): string {
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
+		// Check if nano_id is disabled in the config
+		const [config] = executeSync({
+			lix: args.lix,
+			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				.selectFrom("internal_resolved_state_all")
+				.where("entity_id", "=", "lix_deterministic_mode")
+				.where("schema_key", "=", "lix_key_value")
+				.select(sql`json_extract(snapshot_content, '$.value.nano_id')`.as("nano_id")),
+		});
+		
+		// If nano_id is explicitly set to false, use non-deterministic
+		if (config?.nano_id == false) {
+			return randomNanoId(args.length);
+		}
+		
+		// Otherwise use deterministic nano ID
 		// Get the next deterministic counter value
 		const counter = nextDeterministicSequenceNumber({ lix: args.lix });
 		// Return counter with test_ prefix and padded to 10 digits

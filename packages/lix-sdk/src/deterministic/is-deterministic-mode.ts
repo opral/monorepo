@@ -6,7 +6,7 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 /**
  * Checks if deterministic mode is enabled by querying the key_value table.
  *
- * Returns true if the value is loosely equal to true (e.g., true, 1, "1").
+ * Returns true if the enabled property in the JSON object is true.
  * Returns false for any other value or if the key doesn't exist.
  *
  * @param args - Object containing the lix instance with sqlite connection
@@ -23,8 +23,8 @@ export function isDeterministicMode(args: {
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
-			.select(sql`json_extract(snapshot_content, '$.value')`.as("value")),
+			.select(sql`json_extract(snapshot_content, '$.value.enabled')`.as("enabled")),
 	});
 
-	return row?.value == true;
+	return row?.enabled == true;
 }

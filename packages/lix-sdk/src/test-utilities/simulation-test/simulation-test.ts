@@ -111,12 +111,7 @@ export function simulationTest(
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
+				value: { enabled: true, bootstrap: true },
 				lixcol_version_id: "global",
 			},
 		],

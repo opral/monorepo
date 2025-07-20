@@ -30,7 +30,7 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * @example Basic usage (deterministic mode required)
  * ```ts
  * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: true }]
+ *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }]
  * });
  * const n1 = nextDeterministicSequenceNumber({ lix }); // 0
  * const n2 = nextDeterministicSequenceNumber({ lix }); // 1

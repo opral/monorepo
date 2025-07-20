@@ -205,12 +205,7 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
+				value: { enabled: true, bootstrap: true },
 				lixcol_version_id: "global",
 			},
 		],
@@ -220,12 +215,7 @@ test("providing lix_deterministic_mode = true should lead to deterministic state
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
+				value: { enabled: true, bootstrap: true },
 				lixcol_version_id: "global",
 			},
 		],
@@ -258,12 +248,7 @@ test("deterministic mode can be turned on and off", async () => {
 	const deterministicModeKeyValues = [
 		{
 			key: "lix_deterministic_mode",
-			value: true,
-			lixcol_version_id: "global",
-		},
-		{
-			key: "lix_deterministic_bootstrap",
-			value: true,
+			value: { enabled: true, bootstrap: true },
 			lixcol_version_id: "global",
 		},
 	];
@@ -302,7 +287,7 @@ test("deterministic mode can be turned on and off", async () => {
 				.updateTable("key_value_all")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_deterministic_mode")
-				.set({ value: false })
+				.set({ value: { enabled: false } })
 				.execute();
 		})
 	);
@@ -340,7 +325,7 @@ test("deterministic mode can be turned on and off", async () => {
 				.updateTable("key_value_all")
 				.where("lixcol_version_id", "=", "global")
 				.where("key", "=", "lix_deterministic_mode")
-				.set({ value: true })
+				.set({ value: { enabled: true } })
 				.execute();
 		})
 	);
@@ -377,7 +362,7 @@ test("providing deterministic mode with kv false should still insert it", async 
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: false,
+				value: { enabled: false },
 				lixcol_version_id: "global",
 			},
 		],
@@ -393,7 +378,7 @@ test("providing deterministic mode with kv false should still insert it", async 
 	expect(kvs).toContainEqual(
 		expect.objectContaining({
 			key: "lix_deterministic_mode",
-			value: 0, // false is stored as 0
+			value: { enabled: false }, // JSON structure is preserved
 			lixcol_version_id: "global",
 		})
 	);

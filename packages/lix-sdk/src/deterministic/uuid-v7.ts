@@ -2,6 +2,9 @@ import { v7 } from "uuid";
 import { nextDeterministicSequenceNumber } from "./sequence.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 import type { Lix } from "../lix/open-lix.js";
+import { executeSync } from "../database/execute-sync.js";
+import { sql, type Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 /**
  * Returns a UUID v7 that is deterministic in deterministic mode.
@@ -26,7 +29,7 @@ import type { Lix } from "../lix/open-lix.js";
  * @example Deterministic mode - returns sequential UUIDs
  * ```ts
  * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" }]
+ *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true }, lixcol_version_id: "global" }]
  * });
  * uuidV7({ lix }); // "01920000-0000-7000-8000-000000000000"
  * uuidV7({ lix }); // "01920000-0000-7000-8000-000000000001"
@@ -50,6 +53,22 @@ import type { Lix } from "../lix/open-lix.js";
 export function uuidV7(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
+		// Check if uuid_v7 is disabled in the config
+		const [config] = executeSync({
+			lix: args.lix,
+			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				.selectFrom("internal_resolved_state_all")
+				.where("entity_id", "=", "lix_deterministic_mode")
+				.where("schema_key", "=", "lix_key_value")
+				.select(sql`json_extract(snapshot_content, '$.value.uuid_v7')`.as("uuid_v7")),
+		});
+		
+		// If uuid_v7 is explicitly set to false, use non-deterministic
+		if (config?.uuid_v7 == false) {
+			return v7();
+		}
+		
+		// Otherwise use deterministic UUID
 		// Get the next deterministic counter value
 		const counter = nextDeterministicSequenceNumber({ lix: args.lix });
 		const hex = counter.toString(16).padStart(8, "0");

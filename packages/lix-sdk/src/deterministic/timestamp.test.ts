@@ -7,12 +7,10 @@ test("timestamp returns deterministic values when deterministic mode is enabled"
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
+				value: {
+					enabled: true,
+					bootstrap: true
+				},
 				lixcol_version_id: "global",
 			},
 		],
@@ -42,7 +40,9 @@ test("timestamp returns real time when deterministic mode is disabled", async ()
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: false,
+				value: {
+					enabled: false
+				},
 				lixcol_version_id: "global",
 			},
 		],
@@ -67,7 +67,9 @@ test("timestamp toggles between deterministic and real time", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
+				value: {
+					enabled: true
+				},
 				lixcol_version_id: "global",
 			},
 		],
@@ -77,10 +79,9 @@ test("timestamp toggles between deterministic and real time", async () => {
 	const t1 = timestamp({ lix });
 	expect(t1).toMatch(/^1970-/);
 
-	// Switch to real time
+	// Switch to real time by deleting the key (cleaner approach)
 	await lix.db
-		.updateTable("key_value")
-		.set({ value: false })
+		.deleteFrom("key_value")
 		.where("key", "=", "lix_deterministic_mode")
 		.execute();
 
@@ -89,9 +90,11 @@ test("timestamp toggles between deterministic and real time", async () => {
 
 	// Switch back to deterministic
 	await lix.db
-		.updateTable("key_value")
-		.set({ value: true })
-		.where("key", "=", "lix_deterministic_mode")
+		.insertInto("key_value")
+		.values({ 
+			key: "lix_deterministic_mode", 
+			value: { enabled: true } 
+		})
 		.execute();
 
 	const t3 = timestamp({ lix });
@@ -103,7 +106,9 @@ test("timestamp is persisted across lix instances", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
+				value: {
+					enabled: true
+				},
 				lixcol_version_id: "global",
 			},
 		],
@@ -137,7 +142,9 @@ test("timestamp advances correctly with many operations", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
+				value: {
+					enabled: true
+				},
 				lixcol_version_id: "global",
 			},
 		],

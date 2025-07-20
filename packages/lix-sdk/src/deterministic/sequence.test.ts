@@ -4,7 +4,7 @@ import { nextDeterministicSequenceNumber } from "./sequence.js";
 
 test("nextDeterministicSequenceNumber throws error when deterministic mode is false", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: false }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
 	});
 
 	expect(() => nextDeterministicSequenceNumber({ lix })).toThrow(
@@ -22,7 +22,7 @@ test("nextDeterministicSequenceNumber throws error when deterministic mode is no
 
 test("nextDeterministicSequenceNumber works when deterministic mode is true", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const n1 = nextDeterministicSequenceNumber({ lix });
@@ -40,7 +40,7 @@ test("nextDeterministicSequenceNumber works when deterministic mode is true", as
 
 test("nextDeterministicSequenceNumber persists state across blob operations", async () => {
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	// Generate some sequence numbers and record the last one
@@ -66,11 +66,11 @@ test("nextDeterministicSequenceNumber persists state across blob operations", as
 
 test("independent Lix instances have independent sequences", async () => {
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const lix2 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	// Get initial values - they should be the same for both since they started identically

@@ -27,7 +27,13 @@ random({ lix });    // 0.1823... (unpredictable)
 ```ts
 const lix = await openLix({ 
   blob,
-  keyValues: [{ key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" }]
+  keyValues: [{
+    key: "lix_deterministic_mode",
+    value: {
+      enabled: true
+    },
+    lixcol_version_id: "global"
+  }]
 });
 
 timestamp({ lix }); // "1970-01-01T00:00:00.000Z" (always epoch)
@@ -46,7 +52,13 @@ Enable deterministic mode when opening a Lix:
 const lix = await openLix({
   blob,
   keyValues: [
-    { key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" }
+    {
+      key: "lix_deterministic_mode",
+      value: {
+        enabled: true
+      },
+      lixcol_version_id: "global"
+    }
   ],
 });
 ```
@@ -56,7 +68,7 @@ Or enable it after opening:
 ```ts
 await lix.db
   .updateTable("key_value_all")
-  .set({ value: true })
+  .set({ value: { enabled: true } })
   .where("key", "=", "lix_deterministic_mode")
   .where("lixcol_version_id", "=", "global")
   .execute();
@@ -70,8 +82,14 @@ For tests requiring fully reproducible behavior from creation:
 // Creates a new Lix with deterministic IDs and timestamps
 const lix = await openLix({
   keyValues: [
-    { key: "lix_deterministic_bootstrap", value: true, lixcol_version_id: "global" },
-    { key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" },
+    {
+      key: "lix_deterministic_mode",
+      value: {
+        enabled: true,
+        bootstrap: true
+      },
+      lixcol_version_id: "global"
+    }
   ],
 });
 ```
@@ -81,13 +99,24 @@ const lix = await openLix({
 > - Use **deterministic bootstrap** for reproducibility testing that doesn't involve distribution (e.g., unit tests, regression tests)
 > - Use **non-deterministic bootstrap** (default) for distributed testing scenarios (e.g., simulating multiple Lix instances syncing)
 
-### Key Values
+### Configuration Options
 
-| Key | Type | Purpose |
-| --- | ---- | ------- |
-| `lix_deterministic_mode` | boolean | Runtime determinism (PRNG, sequence, clock) once the repo exists |
-| `lix_deterministic_bootstrap` | boolean | Reproducible bootstrap when creating new Lix (deterministic IDs like "deterministic-lix-id", epoch timestamps). Only applies when no blob is provided. |
-| `lix_deterministic_rng_seed` | string | Custom seed for the random number generator. Defaults to `lix_id` if not specified. |
+The deterministic mode is configured through a single key-value object:
+
+| Key | Type | Description |
+| --- | ---- | ----------- |
+| `lix_deterministic_mode` | object | Configuration object for deterministic mode |
+
+The configuration object has the following properties:
+
+| Property | Type | Default | Description |
+| -------- | ---- | ------- | ----------- |
+| `enabled` | boolean | *required* | Enable/disable deterministic mode |
+| `bootstrap` | boolean | `false` | Use deterministic IDs during Lix creation |
+| `timestamp` | boolean | `true` | Use deterministic timestamps |
+| `random_seed` | string | `"lix-deterministic-seed"` | Seed for the random number generator |
+| `nano_id` | boolean | `true` | Use deterministic nano ID generation |
+| `uuid_v7` | boolean | `true` | Use deterministic UUID v7 generation |
 
 ## Advanced Usage
 
@@ -100,16 +129,26 @@ To make multiple Lix instances behave differently in deterministic mode:
 const lix1 = await openLix({
   blob,
   keyValues: [
-    { key: "lix_deterministic_mode", value: true, lixcol_version_id: "global" },
-    { key: "lix_deterministic_rng_seed", value: "instance-1", lixcol_version_id: "global" }
+    {
+      key: "lix_deterministic_mode",
+      value: {
+        enabled: true,
+        random_seed: "instance-1"
+      },
+      lixcol_version_id: "global"
+    }
   ]
 });
 
-// Or update seed after opening
-await lix2.db
+// Or update seed after opening using SQLite's json_set function
+import { sql } from "@lix-js/sdk";
+
+await lix.db
   .updateTable("key_value_all")
-  .set({ value: "instance-2" })
-  .where("key", "=", "lix_deterministic_rng_seed")
+  .set({ 
+    value: sql`json_set(value, '$.random_seed', 'instance-2')`
+  })
+  .where("key", "=", "lix_deterministic_mode")
   .where("lixcol_version_id", "=", "global")
   .execute();
 ```

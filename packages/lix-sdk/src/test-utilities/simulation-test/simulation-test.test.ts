@@ -176,12 +176,7 @@ describe("providing key values", async () => {
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: true,
-					lixcol_version_id: "global",
-				},
-				{
-					key: "lix_deterministic_bootstrap",
-					value: true,
+					value: { enabled: true, bootstrap: true },
 					lixcol_version_id: "global",
 				},
 				{ key: "test_key_1", value: ["*"], lixcol_version_id: "global" },

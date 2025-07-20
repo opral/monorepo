@@ -112,9 +112,23 @@ export async function newLixFile(args?: {
 	const db = initDb({ sqlite, hooks });
 
 	// Check if deterministic bootstrap is enabled
-	const isDeterministicBootstrap = args?.keyValues?.some(
-		(kv) => kv.key === "lix_deterministic_bootstrap" && kv.value === true
+	// First check for the new JSON structure
+	const deterministicModeConfig = args?.keyValues?.find(
+		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
 	);
+	
+	let isDeterministicBootstrap = false;
+	if (deterministicModeConfig?.value && typeof deterministicModeConfig.value === "object") {
+		// Check if bootstrap is enabled in the config
+		isDeterministicBootstrap = (deterministicModeConfig.value as any).bootstrap === true;
+	}
+	
+	// For backward compatibility, also check legacy key
+	if (!isDeterministicBootstrap) {
+		isDeterministicBootstrap = args?.keyValues?.some(
+			(kv) => kv.key === "lix_deterministic_bootstrap" && kv.value === true
+		) ?? false;
+	}
 
 	// Counter for deterministic IDs
 	let deterministicIdCounter = 0;
@@ -221,40 +235,8 @@ export async function newLixFile(args?: {
 		],
 	});
 
-	// If lix_deterministic_bootstrap was provided, persist it as untracked
-	const deterministicBootstrapKv = args?.keyValues?.find(
-		(kv) => kv.key === "lix_deterministic_bootstrap"
-	);
-	if (deterministicBootstrapKv) {
-		const versionId = deterministicBootstrapKv.lixcol_version_id ?? "global";
-		sqlite.exec({
-			sql: `INSERT INTO internal_state_all_untracked (
-				entity_id,
-				schema_key,
-				file_id,
-				version_id,
-				plugin_key,
-				snapshot_content,
-				schema_version,
-				created_at,
-				updated_at
-			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			bind: [
-				"lix_deterministic_bootstrap",
-				"lix_key_value",
-				"lix",
-				versionId,
-				"lix_own_entity",
-				JSON.stringify({
-					key: "lix_deterministic_bootstrap",
-					value: true,
-				}),
-				LixKeyValueSchema["x-lix-version"],
-				created_at,
-				created_at,
-			],
-		});
-	}
+	// No need to persist lix_deterministic_bootstrap separately anymore
+	// It's handled as part of the deterministic mode config
 
 	// Handle other untracked key values
 	const untrackedKeyValues = args?.keyValues?.filter(

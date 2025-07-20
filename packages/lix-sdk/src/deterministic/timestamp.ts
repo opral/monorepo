@@ -1,6 +1,9 @@
 import type { Lix } from "../lix/open-lix.js";
 import { nextDeterministicSequenceNumber } from "./sequence.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
+import { executeSync } from "../database/execute-sync.js";
+import { sql, type Kysely } from "kysely";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 
 /**
  * Returns the current timestamp as an ISO 8601 string.
@@ -22,7 +25,7 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
  * @example Deterministic mode - logical clock from epoch
  * ```ts
  * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: true }]
+ *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }]
  * });
  * timestamp({ lix }); // "1970-01-01T00:00:00.000Z"
  * timestamp({ lix }); // "1970-01-01T00:00:00.001Z" (+1ms)
@@ -47,6 +50,22 @@ import { isDeterministicMode } from "./is-deterministic-mode.js";
 export function timestamp(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 	// Check if deterministic mode is enabled
 	if (isDeterministicMode({ lix: args.lix })) {
+		// Check if timestamps are disabled in the config
+		const [config] = executeSync({
+			lix: args.lix,
+			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				.selectFrom("internal_resolved_state_all")
+				.where("entity_id", "=", "lix_deterministic_mode")
+				.where("schema_key", "=", "lix_key_value")
+				.select(sql`json_extract(snapshot_content, '$.value.timestamp')`.as("timestamp")),
+		});
+		
+		// If timestamp is explicitly set to false, use real time
+		if (config?.timestamp == false) {
+			return new Date().toISOString();
+		}
+		
+		// Otherwise use deterministic timestamps
 		// Get the next deterministic counter value
 		const counter = nextDeterministicSequenceNumber({
 			lix: args.lix,

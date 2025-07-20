@@ -1,5 +1,5 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import type { Kysely } from "kysely";
+import { type Kysely, sql } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
@@ -60,7 +60,7 @@ function randomUnstable(): number {
  * @example Deterministic mode - reproducible randomness
  * ```ts
  * const lix = await openLix({
- *   keyValues: [{ key: "lix_deterministic_mode", value: true }]
+ *   keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }]
  * });
  * const r1 = random({ lix }); // 0.318... (always same sequence)
  * const r2 = random({ lix }); // 0.937... (for same seed)
@@ -138,21 +138,21 @@ export function random(args: { lix: Pick<Lix, "sqlite" | "db"> }): number {
 }
 
 /**
- * Get the RNG seed - either from lix_deterministic_rng_seed or derive from lix_id
+ * Get the RNG seed - either from deterministic mode config or derive from lix_id
  */
 function getRngSeed(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
-	// Check for user-provided seed
-	const [seedRow] = executeSync({
+	// Check for seed in the deterministic mode config
+	const [configRow] = executeSync({
 		lix: { sqlite: args.lix.sqlite },
-		query: args.lix.db
-			.selectFrom("key_value_all")
-			.where("key", "=", "lix_deterministic_rng_seed")
-			.where("lixcol_version_id", "=", "global")
-			.select("value"),
+		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			.selectFrom("internal_resolved_state_all")
+			.where("entity_id", "=", "lix_deterministic_mode")
+			.where("schema_key", "=", "lix_key_value")
+			.select(sql`json_extract(snapshot_content, '$.value.random_seed')`.as("random_seed")),
 	});
 
-	if (seedRow && seedRow.value) {
-		return seedRow.value as string;
+	if (configRow && configRow.random_seed) {
+		return configRow.random_seed as string;
 	}
 
 	// Derive default seed from lix_id

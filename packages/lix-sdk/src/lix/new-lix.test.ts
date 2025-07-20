@@ -264,13 +264,13 @@ test("provided key values default to the active version if lixcol_version_id is 
 	expect(mainVersion?.name).toBe("main");
 });
 
-test("lix_deterministic_bootstrap: false results in different lix_ids", async () => {
+test("deterministic mode with bootstrap: false results in different lix_ids", async () => {
 	// Create two lix files without deterministic bootstrap
 	const blob1 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_bootstrap", value: false }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: false } }],
 	});
 	const blob2 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_bootstrap", value: false }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: false } }],
 	});
 
 	// The lix_ids should be different
@@ -279,13 +279,13 @@ test("lix_deterministic_bootstrap: false results in different lix_ids", async ()
 	expect(blob1._lix.id).not.toBe(blob2._lix.id);
 });
 
-test("lix_deterministic_bootstrap: true results in identical lix_ids", async () => {
+test("deterministic mode with bootstrap: true results in identical lix_ids", async () => {
 	// Create two lix files with deterministic bootstrap
 	const blob1 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
 	});
 	const blob2 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
 	});
 
 	// The lix_ids should be identical (deterministic-lix-id)
@@ -295,13 +295,13 @@ test("lix_deterministic_bootstrap: true results in identical lix_ids", async () 
 	expect(blob1._lix.id).toBe("deterministic-lix-id");
 });
 
-test("lix_deterministic_bootstrap creates fully deterministic lix", async () => {
+test("deterministic mode with bootstrap creates fully deterministic lix", async () => {
 	// Create two lix files with deterministic bootstrap
 	const blob1 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
 	});
 	const blob2 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
 	});
 
 	const lix1 = await openLix({ blob: blob1 });
@@ -339,46 +339,46 @@ test("lix_deterministic_bootstrap creates fully deterministic lix", async () => 
 	expect(changes1[0]?.created_at).toBe("1970-01-01T00:00:00.000Z");
 });
 
-test("lix_deterministic_bootstrap is persisted as untracked global key", async () => {
+test("deterministic mode config is persisted correctly", async () => {
 	const blob = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_bootstrap", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
 	});
 	const lix = await openLix({ blob });
 
-	// Check that lix_deterministic_bootstrap exists in key_value_all
+	// Check that lix_deterministic_mode exists in key_value_all
+	// Since no lixcol_version_id was specified, it should be in the main version
 	const result = await lix.db
 		.selectFrom("key_value_all")
-		.where("key", "=", "lix_deterministic_bootstrap")
-		.where("lixcol_version_id", "=", "global")
-		.select(["key", "value"])
+		.where("key", "=", "lix_deterministic_mode")
+		.select(["key", "value", "lixcol_version_id"])
 		.executeTakeFirst();
 
 	expect(result).toBeDefined();
-	expect(result?.key).toBe("lix_deterministic_bootstrap");
-	expect(result?.value).toBe(1); // SQLite stores boolean true as 1
+	expect(result?.key).toBe("lix_deterministic_mode");
+	expect(result?.value).toEqual({ enabled: true, bootstrap: true }); // JSON values are preserved
 });
 
-test("lix_deterministic_bootstrap with custom version_id is persisted correctly", async () => {
+test("deterministic mode config with global version_id is persisted correctly", async () => {
 	const blob = await newLixFile({
 		keyValues: [
 			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
-				lixcol_version_id: "custom_version",
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+				lixcol_version_id: "global",
 			},
 		],
 	});
 	const lix = await openLix({ blob });
 
-	// Check that lix_deterministic_bootstrap exists with custom version_id
+	// Check that lix_deterministic_mode exists with global version_id
 	const result = await lix.db
 		.selectFrom("key_value_all")
-		.where("key", "=", "lix_deterministic_bootstrap")
-		.where("lixcol_version_id", "=", "custom_version")
+		.where("key", "=", "lix_deterministic_mode")
+		.where("lixcol_version_id", "=", "global")
 		.select(["key", "value"])
 		.executeTakeFirst();
 
 	expect(result).toBeDefined();
-	expect(result?.key).toBe("lix_deterministic_bootstrap");
-	expect(result?.value).toBe(1); // SQLite stores boolean true as 1
+	expect(result?.key).toBe("lix_deterministic_mode");
+	expect(result?.value).toEqual({ enabled: true, bootstrap: true }); // JSON values are preserved
 });

@@ -10,12 +10,7 @@ test("insertPendingState creates tracked entity with pending change", async () =
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
+				value: { enabled: true, bootstrap: true },
 				lixcol_version_id: "global",
 			},
 		],
@@ -121,12 +116,7 @@ test("insertTransactionState creates tombstone for inherited entity deletion", a
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
+				value: { enabled: true, bootstrap: true },
 				lixcol_version_id: "global",
 			},
 		],
@@ -218,12 +208,7 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
+				value: { enabled: true, bootstrap: true },
 				lixcol_version_id: "global",
 			},
 		],
@@ -304,12 +289,7 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: true,
-				lixcol_version_id: "global",
-			},
-			{
-				key: "lix_deterministic_bootstrap",
-				value: true,
+				value: { enabled: true, bootstrap: true },
 				lixcol_version_id: "global",
 			},
 		],

@@ -4,7 +4,7 @@ import { openLix } from "../lix/open-lix.js";
 
 test("uuidV7 returns deterministic values when deterministic mode is enabled", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const id1 = uuidV7({ lix });
@@ -34,7 +34,7 @@ test("uuidV7 returns deterministic values when deterministic mode is enabled", a
 
 test("uuidV7 returns random values when deterministic mode is disabled", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: false }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
 	});
 
 	const id1 = uuidV7({ lix });
@@ -61,7 +61,7 @@ test("uuidV7 returns random values when deterministic mode is disabled", async (
 
 test("uuidV7 toggles between deterministic and random", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	// Start with deterministic
@@ -71,7 +71,7 @@ test("uuidV7 toggles between deterministic and random", async () => {
 	// Switch to random
 	await lix.db
 		.updateTable("key_value")
-		.set({ value: false })
+		.set({ value: { enabled: false } })
 		.where("key", "=", "lix_deterministic_mode")
 		.execute();
 
@@ -81,7 +81,7 @@ test("uuidV7 toggles between deterministic and random", async () => {
 	// Switch back to deterministic
 	await lix.db
 		.updateTable("key_value")
-		.set({ value: true })
+		.set({ value: { enabled: true } })
 		.where("key", "=", "lix_deterministic_mode")
 		.execute();
 
@@ -91,7 +91,7 @@ test("uuidV7 toggles between deterministic and random", async () => {
 
 test("uuidV7 is persisted across lix instances", async () => {
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	// Generate some IDs to advance the counter
@@ -117,7 +117,7 @@ test("uuidV7 is persisted across lix instances", async () => {
 
 test("uuidV7 advances correctly with many operations", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	// Generate 100 UUIDs

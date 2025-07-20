@@ -251,9 +251,6 @@ test("SQL expressions in JSON columns should not be wrapped in json()", async ()
 		.where("other", "=", "value")
 		.compile();
 
-	console.log("Update query SQL:", updateQuery.sql);
-	console.log("Update query parameters:", updateQuery.parameters);
-
 	// The SQL should contain json_set directly, not wrapped in json()
 	// Currently this fails - it produces: update "mock_table" set "data" = json(?) where "other" = ?
 	// We want: update "mock_table" set "data" = json_set(data, '$.settings.theme', 'light') where "other" = ?
@@ -369,8 +366,6 @@ test("SQL expressions in onConflict updates", async () => {
 		)
 		.compile();
 
-	console.log("OnConflict query SQL:", insertQuery.sql);
-	
 	// The INSERT values will be wrapped in json(?), but the UPDATE should use json_set
 	expect(insertQuery.sql).toContain("json_set");
 	expect(insertQuery.sql).toContain("on conflict do update set");

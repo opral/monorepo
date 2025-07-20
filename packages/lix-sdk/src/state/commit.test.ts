@@ -8,7 +8,7 @@ import { nanoId } from "../deterministic/index.js";
 
 test("commit should include meta changes (changeset, edges, version updates) in the change table", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
@@ -155,7 +155,7 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 
 test("commit with no changes should not create a change set", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
@@ -190,7 +190,7 @@ test("commit with no changes should not create a change set", async () => {
 
 test("commit should handle multiple versions correctly", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 

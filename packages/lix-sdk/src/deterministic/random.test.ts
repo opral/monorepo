@@ -4,7 +4,7 @@ import { random } from "./random.js";
 
 test("random works in non-deterministic mode", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: false }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: false } }],
 	});
 
 	const values = new Set<number>();
@@ -23,7 +23,7 @@ test("random works in non-deterministic mode", async () => {
 
 test("random works in deterministic mode", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const sequence1 = [];
@@ -55,11 +55,12 @@ test("random works in deterministic mode", async () => {
 test("deterministic mode produces same sequence with same seed", async () => {
 	const lix1 = await openLix({
 		keyValues: [
-			{ key: "lix_deterministic_mode", value: true },
-			{
-				key: "lix_deterministic_rng_seed",
-				value: "test-seed",
-				lixcol_version_id: "global",
+			{ 
+				key: "lix_deterministic_mode", 
+				value: { 
+					enabled: true,
+					random_seed: "test-seed"
+				} 
 			},
 		],
 	});
@@ -79,11 +80,12 @@ test("deterministic mode produces same sequence with same seed", async () => {
 
 	const lix2 = await openLix({
 		keyValues: [
-			{ key: "lix_deterministic_mode", value: true },
-			{
-				key: "lix_deterministic_rng_seed",
-				value: "test-seed",
-				lixcol_version_id: "global",
+			{ 
+				key: "lix_deterministic_mode", 
+				value: { 
+					enabled: true,
+					random_seed: "test-seed"
+				} 
 			},
 		],
 	});
@@ -101,11 +103,12 @@ test("deterministic mode produces same sequence with same seed", async () => {
 test("deterministic mode produces different sequences with different seeds", async () => {
 	const lix1 = await openLix({
 		keyValues: [
-			{ key: "lix_deterministic_mode", value: true },
-			{
-				key: "lix_deterministic_rng_seed",
-				value: "seed-1",
-				lixcol_version_id: "global",
+			{ 
+				key: "lix_deterministic_mode", 
+				value: { 
+					enabled: true,
+					random_seed: "seed-1"
+				} 
 			},
 		],
 	});
@@ -117,11 +120,12 @@ test("deterministic mode produces different sequences with different seeds", asy
 
 	const lix2 = await openLix({
 		keyValues: [
-			{ key: "lix_deterministic_mode", value: true },
-			{
-				key: "lix_deterministic_rng_seed",
-				value: "seed-2",
-				lixcol_version_id: "global",
+			{ 
+				key: "lix_deterministic_mode", 
+				value: { 
+					enabled: true,
+					random_seed: "seed-2"
+				} 
 			},
 		],
 	});
@@ -141,7 +145,7 @@ test("random state persists across blob operations", async () => {
 	const lix1 = await openLix({
 		keyValues: [
 			{ key: "lix_deterministic_bootstrap", value: true },
-			{ key: "lix_deterministic_mode", value: true },
+			{ key: "lix_deterministic_mode", value: { enabled: true } },
 		],
 	});
 
@@ -153,7 +157,7 @@ test("random state persists across blob operations", async () => {
 	const lix2 = await openLix({
 		keyValues: [
 			{ key: "lix_deterministic_bootstrap", value: true },
-			{ key: "lix_deterministic_mode", value: true },
+			{ key: "lix_deterministic_mode", value: { enabled: true } },
 		],
 	});
 
@@ -180,11 +184,11 @@ test("random state persists across blob operations", async () => {
 test("random uses lix_id as default seed when no seed specified", async () => {
 	// Create two instances without deterministic bootstrap
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const lix2 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: true }],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const sequence1 = [];
@@ -208,14 +212,14 @@ test("random produces same sequence with deterministic bootstrap", async () => {
 	const lix1 = await openLix({
 		keyValues: [
 			{ key: "lix_deterministic_bootstrap", value: true },
-			{ key: "lix_deterministic_mode", value: true },
+			{ key: "lix_deterministic_mode", value: { enabled: true } },
 		],
 	});
 
 	const lix2 = await openLix({
 		keyValues: [
 			{ key: "lix_deterministic_bootstrap", value: true },
-			{ key: "lix_deterministic_mode", value: true },
+			{ key: "lix_deterministic_mode", value: { enabled: true } },
 		],
 	});
 
@@ -244,7 +248,7 @@ test("random works after enabling deterministic mode", async () => {
 	// Enable deterministic mode
 	await lix.db
 		.insertInto("key_value")
-		.values({ key: "lix_deterministic_mode", value: true })
+		.values({ key: "lix_deterministic_mode", value: { enabled: true } })
 		.execute();
 
 	// Generate deterministic values
