@@ -316,10 +316,8 @@ test("should debug log compiled query structure", async () => {
 		.select("value");
 
 	const compiled = simpleQuery.compile();
-	console.log("Compiled query structure:", JSON.stringify(compiled, null, 2));
 
 	const schemaKeys = determineSchemaKeys(compiled);
-	console.log("Extracted schema keys:", schemaKeys);
 
 	expect(schemaKeys).toContain("lix_key_value");
 
