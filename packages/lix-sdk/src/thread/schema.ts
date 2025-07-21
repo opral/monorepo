@@ -7,7 +7,9 @@ import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builde
 import { nanoId } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
-export function applyThreadDatabaseSchema(lix: Pick<Lix, "sqlite" | "db">): void {
+export function applyThreadDatabaseSchema(
+	lix: Pick<Lix, "sqlite" | "db">
+): void {
 	// Create both primary and _all views for thread with default ID generation
 	createEntityViewsIfNotExists({
 		lix,

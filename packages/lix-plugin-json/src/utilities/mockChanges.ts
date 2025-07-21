@@ -1,4 +1,4 @@
-import { uuidV7, type Change, type LixFile } from "@lix-js/sdk";
+import { type Change, type LixFile } from "@lix-js/sdk";
 import { detectChanges } from "../detectChanges.js";
 
 /**
@@ -40,7 +40,7 @@ export function mockChanges(args: {
 		// Transform DetectedChange objects to the format expected by applyChanges
 		const formattedChanges: (Change & { snapshot_content: any })[] =
 			detectedChanges.map((change) => ({
-				id: uuidV7(),
+				id: crypto.randomUUID(),
 				entity_id: change.entity_id,
 				created_at: new Date().toISOString(),
 				snapshot_content: change.snapshot_content,

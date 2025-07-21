@@ -57,14 +57,18 @@ export function timestamp(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
-				.select(sql`json_extract(snapshot_content, '$.value.timestamp')`.as("timestamp")),
+				.select(
+					sql`json_extract(snapshot_content, '$.value.timestamp')`.as(
+						"timestamp"
+					)
+				),
 		});
-		
+
 		// If timestamp is explicitly set to false, use real time
 		if (config?.timestamp == false) {
 			return new Date().toISOString();
 		}
-		
+
 		// Otherwise use deterministic timestamps
 		// Get the next deterministic counter value
 		const counter = nextDeterministicSequenceNumber({

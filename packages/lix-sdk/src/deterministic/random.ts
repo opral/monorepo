@@ -112,10 +112,11 @@ export function random(args: { lix: Pick<Lix, "sqlite" | "db"> }): number {
 		if (stateRow && stateRow.value) {
 			// Restore persisted state
 			// The value is stored as a JSON string in key_value_all view
-			const stateData = typeof stateRow.value === 'string' 
-				? JSON.parse(stateRow.value) 
-				: stateRow.value;
-			
+			const stateData =
+				typeof stateRow.value === "string"
+					? JSON.parse(stateRow.value)
+					: stateRow.value;
+
 			// Handle both string and direct values
 			state = {
 				hi: BigInt(stateData.hi),
@@ -148,7 +149,11 @@ function getRngSeed(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 			.selectFrom("internal_resolved_state_all")
 			.where("entity_id", "=", "lix_deterministic_mode")
 			.where("schema_key", "=", "lix_key_value")
-			.select(sql`json_extract(snapshot_content, '$.value.random_seed')`.as("random_seed")),
+			.select(
+				sql`json_extract(snapshot_content, '$.value.random_seed')`.as(
+					"random_seed"
+				)
+			),
 	});
 
 	if (configRow && configRow.random_seed) {
@@ -179,22 +184,22 @@ function seedXorshift128Plus(seed: string): RngState {
 	// FNV-1a hash to get initial value
 	let z = 0xcbf29ce484222325n;
 	for (const ch of seed) {
-		z = (z ^ BigInt(ch.charCodeAt(0))) * 0x100000001b3n & 0xffffffffffffffffn;
+		z = ((z ^ BigInt(ch.charCodeAt(0))) * 0x100000001b3n) & 0xffffffffffffffffn;
 	}
-	
+
 	// SplitMix64 to expand into two non-zero words
 	const next = (): bigint => {
 		z = (z + 0x9e3779b97f4a7c15n) & 0xffffffffffffffffn;
 		let t = z;
-		t = (t ^ (t >> 30n)) * 0xbf58476d1ce4e5b9n & 0xffffffffffffffffn;
-		t = (t ^ (t >> 27n)) * 0x94d049bb133111ebn & 0xffffffffffffffffn;
+		t = ((t ^ (t >> 30n)) * 0xbf58476d1ce4e5b9n) & 0xffffffffffffffffn;
+		t = ((t ^ (t >> 27n)) * 0x94d049bb133111ebn) & 0xffffffffffffffffn;
 		return t ^ (t >> 31n);
 	};
-	
-	return { 
-		hi: next() || 1n, 
-		lo: next() || 2n, 
-		dirty: true  // New seed always needs to be persisted
+
+	return {
+		hi: next() || 1n,
+		lo: next() || 2n,
+		dirty: true, // New seed always needs to be persisted
 	};
 }
 

@@ -166,7 +166,9 @@ test("snapshot content validation - rejects text JSON", async () => {
 				content: sql`${JSON.stringify({ test: "data" })}`,
 			})
 			.execute()
-	).rejects.toThrow(/SQLITE_CONSTRAINT_DATATYPE.*cannot store TEXT value in BLOB column/);
+	).rejects.toThrow(
+		/SQLITE_CONSTRAINT_DATATYPE.*cannot store TEXT value in BLOB column/
+	);
 });
 
 test("snapshot content validation - rejects arbitrary binary", async () => {
@@ -176,7 +178,7 @@ test("snapshot content validation - rejects arbitrary binary", async () => {
 	// Using raw SQL to insert arbitrary binary that's not JSONB format
 	const encoder = new TextEncoder();
 	const arbitraryBytes = encoder.encode("arbitrary binary data");
-	
+
 	await expect(async () => {
 		lix.sqlite.exec({
 			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, ?)`,

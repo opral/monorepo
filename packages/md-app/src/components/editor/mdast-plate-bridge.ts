@@ -1,5 +1,5 @@
 import type { Descendant, TElement, TText } from "@udecode/plate";
-import { nanoid } from "@lix-js/sdk";
+import { nanoId, openLix } from "@lix-js/sdk";
 import type { MdAstEntity } from "@/queries";
 
 // Define basic mdast types inline to avoid import issues
@@ -112,11 +112,14 @@ function parseHtmlIdComment(value: string): string {
 	return match?.[1]?.trim() || generateMdastId();
 }
 
+// TODO use real lix
+const mockLix = await openLix({});
+
 /**
  * Generate a new mdast_id (compatible with Plate's nanoid format)
  */
 function generateMdastId(): string {
-	return nanoid(10);
+	return nanoId({ lix: mockLix, length: 10 });
 }
 
 /**

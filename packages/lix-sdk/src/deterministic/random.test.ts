@@ -55,12 +55,12 @@ test("random works in deterministic mode", async () => {
 test("deterministic mode produces same sequence with same seed", async () => {
 	const lix1 = await openLix({
 		keyValues: [
-			{ 
-				key: "lix_deterministic_mode", 
-				value: { 
+			{
+				key: "lix_deterministic_mode",
+				value: {
 					enabled: true,
-					random_seed: "test-seed"
-				} 
+					random_seed: "test-seed",
+				},
 			},
 		],
 	});
@@ -80,12 +80,12 @@ test("deterministic mode produces same sequence with same seed", async () => {
 
 	const lix2 = await openLix({
 		keyValues: [
-			{ 
-				key: "lix_deterministic_mode", 
-				value: { 
+			{
+				key: "lix_deterministic_mode",
+				value: {
 					enabled: true,
-					random_seed: "test-seed"
-				} 
+					random_seed: "test-seed",
+				},
 			},
 		],
 	});
@@ -103,12 +103,12 @@ test("deterministic mode produces same sequence with same seed", async () => {
 test("deterministic mode produces different sequences with different seeds", async () => {
 	const lix1 = await openLix({
 		keyValues: [
-			{ 
-				key: "lix_deterministic_mode", 
-				value: { 
+			{
+				key: "lix_deterministic_mode",
+				value: {
 					enabled: true,
-					random_seed: "seed-1"
-				} 
+					random_seed: "seed-1",
+				},
 			},
 		],
 	});
@@ -120,12 +120,12 @@ test("deterministic mode produces different sequences with different seeds", asy
 
 	const lix2 = await openLix({
 		keyValues: [
-			{ 
-				key: "lix_deterministic_mode", 
-				value: { 
+			{
+				key: "lix_deterministic_mode",
+				value: {
 					enabled: true,
-					random_seed: "seed-2"
-				} 
+					random_seed: "seed-2",
+				},
 			},
 		],
 	});
@@ -203,7 +203,7 @@ test("random uses lix_id as default seed when no seed specified", async () => {
 	// Without deterministic bootstrap, each instance gets a different lix_id,
 	// so they will produce different sequences when using lix_id as default seed
 	expect(sequence1).not.toEqual(sequence2);
-	
+
 	// But each sequence should be deterministic (verified by other tests)
 });
 
@@ -269,7 +269,7 @@ test("random works after enabling deterministic mode", async () => {
 
 	// Values should continue from where they left off (deterministic state persisted)
 	expect(sequence2[0]).not.toBe(sequence1[0]);
-	
+
 	// All values should be valid random numbers
 	const allValues = [...sequence1, ...sequence2];
 	for (const val of allValues) {

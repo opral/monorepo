@@ -341,4 +341,3 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 
 	expect(stateView.created_at).toBe(stateView.updated_at);
 });
-

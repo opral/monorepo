@@ -5,12 +5,15 @@ const DEFAULT_LOG_LEVELS = ["info", "warn", "error"];
 
 /**
  * Determines if a log entry should be created based on the configured log levels.
- * 
+ *
  * @param logLevelsValue - The configured log levels (e.g., ["info", "warn", "error"] or ["*"])
  * @param level - The level of the log entry to check
  * @returns true if the log should be created, false otherwise
  */
-export function shouldLog(logLevelsValue: string[] | undefined, level: string): boolean {
+export function shouldLog(
+	logLevelsValue: string[] | undefined,
+	level: string
+): boolean {
 	return (
 		(logLevelsValue === undefined && DEFAULT_LOG_LEVELS.includes(level)) ||
 		(logLevelsValue && logLevelsValue.includes("*")) ||

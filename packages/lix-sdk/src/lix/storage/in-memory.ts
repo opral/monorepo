@@ -29,7 +29,7 @@ export class InMemoryStorage implements LixStorageAdapter {
 			this.database = await createInMemoryDatabase({ readOnly: false });
 
 			// Initialize with provided blob or create new one
-			const blob = args.blob ?? await args.createBlob();
+			const blob = args.blob ?? (await args.createBlob());
 			importDatabase({
 				db: this.database,
 				content: new Uint8Array(await blob.arrayBuffer()),
@@ -51,7 +51,7 @@ export class InMemoryStorage implements LixStorageAdapter {
 
 	/**
 	 * Exports the current database state as a blob.
-	 * 
+	 *
 	 * @throws Error if the database has not been opened yet
 	 */
 	async export(): Promise<Blob> {

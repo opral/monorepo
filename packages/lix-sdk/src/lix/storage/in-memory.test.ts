@@ -66,12 +66,13 @@ test("should close database connection", async () => {
 	expect(database1).not.toBe(database2);
 });
 
-
 test("should handle export before open", async () => {
 	const storage = new InMemoryStorage();
 
 	// Export should throw an error if we haven't opened yet
-	await expect(storage.export()).rejects.toThrow("Database has not been opened yet");
+	await expect(storage.export()).rejects.toThrow(
+		"Database has not been opened yet"
+	);
 });
 
 test("multiple storage instances should be independent", async () => {

@@ -66,6 +66,7 @@ SELECT * FROM key_value;
 ```
 
 The view:
+
 - **Filters** rows where `schema_key = 'lix:key_value'`
 - **Extracts** JSON properties (`key`, `value`) as columns
 - **Excludes** entities with different schemas (like `lix:account`)
@@ -117,7 +118,7 @@ SELECT value, description FROM key_value
 -- Returns: value='hello', description='greeting'
 ```
 
-### Operational Columns (lixcol_*)
+### Operational Columns (lixcol\_\*)
 
 Entity views add metadata columns prefixed with `lixcol_`:
 
@@ -153,14 +154,14 @@ The TypeScript type system ensures compile-time safety:
 ```typescript
 // Schema definition
 type KeyValue = {
-  key: string
-  value: string
-  description?: string
-}
+	key: string;
+	value: string;
+	description?: string;
+};
 
 // Generated types for queries
-type KeyValueRow = State<KeyValue>      // For SELECT from key_value
-type NewKeyValueRow = NewState<KeyValue> // For INSERT into key_value
+type KeyValueRow = State<KeyValue>; // For SELECT from key_value
+type NewKeyValueRow = NewState<KeyValue>; // For INSERT into key_value
 ```
 
 ## Usage Examples
@@ -188,7 +189,7 @@ SELECT * FROM key_value WHERE value LIKE 'h%';
 SELECT * FROM key_value_all WHERE lixcol_version_id = 'version-123';
 
 -- Insert into specific version
-INSERT INTO key_value_all (key, value, lixcol_version_id) 
+INSERT INTO key_value_all (key, value, lixcol_version_id)
 VALUES ('greeting', 'hello', 'version-123');
 ```
 
@@ -199,10 +200,9 @@ VALUES ('greeting', 'hello', 'version-123');
 SELECT * FROM key_value_history WHERE key = 'greeting' ORDER BY depth;
 
 -- Find who changed an entity
-SELECT * FROM key_value_history 
+SELECT * FROM key_value_history
 WHERE key = 'greeting' AND lixcol_change_id IS NOT NULL;
 ```
-
 
 ## Benefits
 

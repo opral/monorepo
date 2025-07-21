@@ -385,8 +385,8 @@ test("providing deterministic mode with kv false should still insert it", async 
 });
 
 // TODO fix state materialization first
-// state materialization bug. selecting from the active version 
-// before querying the key values makes the test pass. 
+// state materialization bug. selecting from the active version
+// before querying the key values makes the test pass.
 test("provided key values respect lixcol_untracked setting", async () => {
 	const lix = await openLix({
 		keyValues: [

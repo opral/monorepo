@@ -12,8 +12,8 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Check, ChevronDown, FileText, Plus } from "lucide-react";
-import { nanoid } from "@lix-js/sdk";
 import { useLix } from "@lix-js/react-utils";
+import { nanoId } from "@lix-js/sdk";
 
 export default function FileSwitcher() {
 	const activeFile = useQueryTakeFirst(selectActiveFile);
@@ -35,7 +35,7 @@ export default function FileSwitcher() {
 		const fileName = generateHumanId();
 
 		try {
-			const newFileId = nanoid();
+			const newFileId = nanoId({ lix });
 
 			// Create a new file in the database
 			await lix.db

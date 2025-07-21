@@ -17,7 +17,7 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
 
 /**
  * Returns the next monotonic sequence number, starting at 0.
- * 
+ *
  * Only available in deterministic mode. Provides a simple counter for cases where
  * you need sequential integers rather than timestamps or random values.
  *
@@ -42,7 +42,7 @@ const counterCache = new WeakMap<SqliteWasmDatabase, CounterState>();
  * const n = nextDeterministicSequenceNumber({ lix }); // e.g. 7
  * const id = `ENTITY_${n}`;              // "ENTITY_7"
  * ```
- * 
+ *
  * @example Pagination cursors
  * ```ts
  * const cursor = nextDeterministicSequenceNumber({ lix });

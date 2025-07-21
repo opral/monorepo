@@ -9,7 +9,7 @@ test("timestamp returns deterministic values when deterministic mode is enabled"
 				key: "lix_deterministic_mode",
 				value: {
 					enabled: true,
-					bootstrap: true
+					bootstrap: true,
 				},
 				lixcol_version_id: "global",
 			},
@@ -41,7 +41,7 @@ test("timestamp returns real time when deterministic mode is disabled", async ()
 			{
 				key: "lix_deterministic_mode",
 				value: {
-					enabled: false
+					enabled: false,
 				},
 				lixcol_version_id: "global",
 			},
@@ -68,7 +68,7 @@ test("timestamp toggles between deterministic and real time", async () => {
 			{
 				key: "lix_deterministic_mode",
 				value: {
-					enabled: true
+					enabled: true,
 				},
 				lixcol_version_id: "global",
 			},
@@ -91,9 +91,9 @@ test("timestamp toggles between deterministic and real time", async () => {
 	// Switch back to deterministic
 	await lix.db
 		.insertInto("key_value")
-		.values({ 
-			key: "lix_deterministic_mode", 
-			value: { enabled: true } 
+		.values({
+			key: "lix_deterministic_mode",
+			value: { enabled: true },
 		})
 		.execute();
 
@@ -107,7 +107,7 @@ test("timestamp is persisted across lix instances", async () => {
 			{
 				key: "lix_deterministic_mode",
 				value: {
-					enabled: true
+					enabled: true,
 				},
 				lixcol_version_id: "global",
 			},
@@ -143,7 +143,7 @@ test("timestamp advances correctly with many operations", async () => {
 			{
 				key: "lix_deterministic_mode",
 				value: {
-					enabled: true
+					enabled: true,
 				},
 				lixcol_version_id: "global",
 			},

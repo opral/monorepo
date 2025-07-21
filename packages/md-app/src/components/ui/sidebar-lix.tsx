@@ -32,7 +32,7 @@ import {
 	selectCurrentLixName
 } from "@/queries";
 import { createNewLixFileInOpfs } from "@/helper/newLix";
-import { nanoid, openLix } from "@lix-js/sdk";
+import { nanoId, openLix } from "@lix-js/sdk";
 
 import {
 	SidebarContent,
@@ -100,7 +100,7 @@ export const getAvailableLixes = async (): Promise<
 		console.error("Failed to load available lixes:", error);
 		return [];
 	}
-}
+};
 
 export function LixSidebar() {
 	const lix = useLix();
@@ -109,7 +109,9 @@ export function LixSidebar() {
 	const activeFile = useQueryTakeFirst(selectActiveFile);
 	const currentLixName = useQueryTakeFirst(selectCurrentLixName)?.value;
 	const lixIdSearchParams = searchParams.get("lix");
-	const [availableLixes, setAvailableLixes] = React.useState<{ id: string, name: string }[]>([]);
+	const [availableLixes, setAvailableLixes] = React.useState<
+		{ id: string; name: string }[]
+	>([]);
 
 	const fileIdSearchParams = searchParams.get("f");
 	const [fileToDelete, setFileToDelete] = React.useState<string | null>(null);
@@ -148,13 +150,13 @@ export function LixSidebar() {
 	const switchToLix = (lixId: string) =>
 		setSearchParams((currentParams) => {
 			currentParams.set("lix", lixId);
-			return currentParams
+			return currentParams;
 		});
 
 	const switchToFile = (fileId: string) =>
 		setSearchParams((currentParams) => {
-			currentParams.set("f", fileId)
-			return currentParams
+			currentParams.set("f", fileId);
+			return currentParams;
 		});
 
 	const createNewFile = React.useCallback(async () => {
@@ -163,7 +165,7 @@ export function LixSidebar() {
 		try {
 			const fileName = generateHumanId();
 
-			const newFileId = nanoid();
+			const newFileId = nanoId({ lix });
 
 			await lix.db
 				.insertInto("file")
@@ -316,12 +318,13 @@ export function LixSidebar() {
 
 				// If we deleted the active file, switch to another file
 				if (isActiveFile) {
-					const remainingFiles = files ? files.filter((f) => f.id !== fileId) : [];
+					const remainingFiles = files
+						? files.filter((f) => f.id !== fileId)
+						: [];
 					if (remainingFiles.length > 0) {
 						switchToFile(remainingFiles[0].id);
 					}
 				}
-
 			} catch (error) {
 				console.error("Failed to delete file:", error);
 			}
@@ -352,7 +355,7 @@ export function LixSidebar() {
 					const fileContent = await file.text();
 					const fileName = file.name.replace(/\.md$/, "");
 
-					const importedFileId = nanoid();
+					const importedFileId = nanoId({ lix });
 
 					await lix.db
 						.insertInto("file")
@@ -527,13 +530,11 @@ export function LixSidebar() {
 				}
 			}
 
-			setSearchParams(
-				(currentParams) => {
-					currentParams.delete("lix");
-					currentParams.delete("f");
-					return currentParams;
-				}
-			);
+			setSearchParams((currentParams) => {
+				currentParams.delete("lix");
+				currentParams.delete("f");
+				return currentParams;
+			});
 		} catch (error) {
 			console.error("Error resetting OPFS:", error);
 		}
@@ -595,13 +596,14 @@ export function LixSidebar() {
 		setIsRenamingLix(false);
 	}, [previousLixName]);
 
-
 	// Update lix name when the current lix name changes
 	React.useEffect(() => {
 		setLixName(currentLixName || "");
 	}, [currentLixName]);
 
-	const mdFiles = files ? files.filter((file) => file.path.endsWith(".md")) : [];
+	const mdFiles = files
+		? files.filter((file) => file.path.endsWith(".md"))
+		: [];
 
 	const backlink = React.useCallback(() => {
 		return `https://lix.host/app/fm?lix=${lixIdSearchParams}&f=${fileIdSearchParams}`;
@@ -676,14 +678,19 @@ export function LixSidebar() {
 							<SelectContent align="center" className="w-60 -ml-0.5">
 								<SelectGroup>
 									<SelectLabel className="font-medium">Lixes</SelectLabel>
-									{availableLixes?.filter((lix: { id: string; name: string }) => lix.id && lix.id.trim() !== "").map((lix: { id: string; name: string }) => (
-										<SelectItem key={lix.id} value={lix.id}>
-											<div className="flex items-center w-full">
-												<Folder className="h-4 w-4 mr-2 shrink-0" />
-												<span className="truncate flex-1">{lix.name}</span>
-											</div>
-										</SelectItem>
-									))}
+									{availableLixes
+										?.filter(
+											(lix: { id: string; name: string }) =>
+												lix.id && lix.id.trim() !== ""
+										)
+										.map((lix: { id: string; name: string }) => (
+											<SelectItem key={lix.id} value={lix.id}>
+												<div className="flex items-center w-full">
+													<Folder className="h-4 w-4 mr-2 shrink-0" />
+													<span className="truncate flex-1">{lix.name}</span>
+												</div>
+											</SelectItem>
+										))}
 									<SelectSeparator />
 									<SelectItem value="CreateNewLix">
 										<div className="flex items-center w-full">

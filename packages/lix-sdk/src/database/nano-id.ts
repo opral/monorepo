@@ -88,7 +88,7 @@ export const _nanoIdAlphabet =
 
 /**
  * Generate secure URL-friendly unique ID.
- * 
+ *
  * NOTE: This is the non-deterministic version. For deterministic IDs in tests,
  * use `nanoid({ lix })` from './functions.js' instead.
  *

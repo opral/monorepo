@@ -307,7 +307,8 @@ export function insertTransactionState(args: {
 					schema_version: args.data.schema_version,
 					version_id: args.data.version_id,
 					change_id: changeId,
-					inheritance_delete_marker: args.data.snapshot_content === null ? 1 : 0,
+					inheritance_delete_marker:
+						args.data.snapshot_content === null ? 1 : 0,
 					created_at: _timestamp,
 					updated_at: _timestamp,
 					inherited_from_version_id: null,
@@ -321,7 +322,8 @@ export function insertTransactionState(args: {
 							schema_version: args.data.schema_version,
 							updated_at: _timestamp,
 							change_id: changeId,
-							inheritance_delete_marker: args.data.snapshot_content === null ? 1 : 0,
+							inheritance_delete_marker:
+								args.data.snapshot_content === null ? 1 : 0,
 							inherited_from_version_id: null,
 						})
 				),

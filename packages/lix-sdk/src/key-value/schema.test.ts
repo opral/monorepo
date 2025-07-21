@@ -213,7 +213,7 @@ test("can update individual JSON properties using SQLite JSON functions", async 
 	await lix.db
 		.updateTable("key_value")
 		.set({
-			value: sql`json_set(value, '$.settings.theme', 'light')`
+			value: sql`json_set(value, '$.settings.theme', 'light')`,
 		})
 		.where("key", "=", "test_config")
 		.execute();
@@ -239,7 +239,7 @@ test("can update individual JSON properties using SQLite JSON functions", async 
 	await lix.db
 		.updateTable("key_value")
 		.set({
-			value: sql`json_set(value, '$.enabled', false, '$.count', 100, '$.settings.notifications', false)`
+			value: sql`json_set(value, '$.enabled', false, '$.count', 100, '$.settings.notifications', false)`,
 		})
 		.where("key", "=", "test_config")
 		.execute();

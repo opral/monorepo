@@ -81,7 +81,7 @@ export class OpfsStorage implements LixStorageAdapter {
 	 * Loads existing data from OPFS if available, otherwise creates a new lix.
 	 * Returns the same database instance on subsequent calls.
 	 */
-	async open(args: { 
+	async open(args: {
 		blob?: Blob;
 		createBlob: () => Promise<Blob>;
 	}): Promise<SqliteWasmDatabase> {
@@ -147,7 +147,7 @@ export class OpfsStorage implements LixStorageAdapter {
 
 	/**
 	 * Exports the current database state as a blob.
-	 * 
+	 *
 	 * @throws Error if the database has not been opened yet
 	 */
 	async export(): Promise<Blob> {

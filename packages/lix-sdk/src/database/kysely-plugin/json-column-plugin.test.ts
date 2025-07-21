@@ -35,7 +35,7 @@ test("correctly serializes JavaScript objects", async () => {
 
 	// Insert with a JavaScript object
 	const jsObject = { id: "test_id", name: "test_name", value: 123 };
-	
+
 	await db
 		.insertInto("mock_table")
 		.values({
@@ -235,8 +235,8 @@ test("SQL expressions in JSON columns should not be wrapped in json()", async ()
 				enabled: true,
 				settings: {
 					theme: "dark",
-					language: "en"
-				}
+					language: "en",
+				},
 			},
 			other: "value",
 		})
@@ -246,7 +246,7 @@ test("SQL expressions in JSON columns should not be wrapped in json()", async ()
 	const updateQuery = db
 		.updateTable("mock_table")
 		.set({
-			data: sql`json_set(data, '$.settings.theme', 'light')`
+			data: sql`json_set(data, '$.settings.theme', 'light')`,
 		})
 		.where("other", "=", "value")
 		.compile();
@@ -261,7 +261,7 @@ test("SQL expressions in JSON columns should not be wrapped in json()", async ()
 	await db
 		.updateTable("mock_table")
 		.set({
-			data: sql`json_set(data, '$.settings.theme', 'light')`
+			data: sql`json_set(data, '$.settings.theme', 'light')`,
 		})
 		.where("other", "=", "value")
 		.execute();
@@ -276,8 +276,8 @@ test("SQL expressions in JSON columns should not be wrapped in json()", async ()
 		enabled: true,
 		settings: {
 			theme: "light", // Changed from "dark"
-			language: "en"
-		}
+			language: "en",
+		},
 	});
 });
 
@@ -292,8 +292,8 @@ test("Multiple SQL expressions in JSON columns", async () => {
 				count: 10,
 				active: true,
 				nested: {
-					value: 100
-				}
+					value: 100,
+				},
 			},
 			other: "test",
 		})
@@ -303,7 +303,7 @@ test("Multiple SQL expressions in JSON columns", async () => {
 	const updateQuery = db
 		.updateTable("mock_table")
 		.set({
-			data: sql`json_set(data, '$.count', 20, '$.active', false, '$.nested.value', 200)`
+			data: sql`json_set(data, '$.count', 20, '$.active', false, '$.nested.value', 200)`,
 		})
 		.compile();
 
@@ -314,7 +314,7 @@ test("Multiple SQL expressions in JSON columns", async () => {
 	await db
 		.updateTable("mock_table")
 		.set({
-			data: sql`json_set(data, '$.count', 20, '$.active', false, '$.nested.value', 200)`
+			data: sql`json_set(data, '$.count', 20, '$.active', false, '$.nested.value', 200)`,
 		})
 		.execute();
 
@@ -327,8 +327,8 @@ test("Multiple SQL expressions in JSON columns", async () => {
 		count: 20,
 		active: 0, // SQLite stores false as 0
 		nested: {
-			value: 200
-		}
+			value: 200,
+		},
 	});
 });
 
@@ -344,8 +344,8 @@ test("SQL expressions in onConflict updates", async () => {
 				version: 1,
 				name: "original",
 				metadata: {
-					updated: false
-				}
+					updated: false,
+				},
 			},
 			other: "test",
 		})
@@ -359,9 +359,9 @@ test("SQL expressions in onConflict updates", async () => {
 			data: { version: 2, name: "ignored" },
 			other: "test",
 		})
-		.onConflict((oc) => 
-			oc.doUpdateSet({ 
-				data: sql`json_set(data, '$.version', 2, '$.metadata.updated', true)`
+		.onConflict((oc) =>
+			oc.doUpdateSet({
+				data: sql`json_set(data, '$.version', 2, '$.metadata.updated', true)`,
 			})
 		)
 		.compile();
@@ -380,9 +380,9 @@ test("SQL expressions in onConflict updates", async () => {
 			data: { version: 2, name: "ignored" },
 			other: "test",
 		})
-		.onConflict((oc) => 
-			oc.doUpdateSet({ 
-				data: sql`json_set(data, '$.version', 2, '$.metadata.updated', true)`
+		.onConflict((oc) =>
+			oc.doUpdateSet({
+				data: sql`json_set(data, '$.version', 2, '$.metadata.updated', true)`,
 			})
 		)
 		.execute();
@@ -398,7 +398,7 @@ test("SQL expressions in onConflict updates", async () => {
 		version: 2, // Updated
 		name: "original", // Kept original
 		metadata: {
-			updated: 1 // SQLite stores true as 1
-		}
+			updated: 1, // SQLite stores true as 1
+		},
 	});
 });

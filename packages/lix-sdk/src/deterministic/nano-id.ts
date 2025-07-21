@@ -66,14 +66,16 @@ export function nanoId(args: {
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
-				.select(sql`json_extract(snapshot_content, '$.value.nano_id')`.as("nano_id")),
+				.select(
+					sql`json_extract(snapshot_content, '$.value.nano_id')`.as("nano_id")
+				),
 		});
-		
+
 		// If nano_id is explicitly set to false, use non-deterministic
 		if (config?.nano_id == false) {
 			return randomNanoId(args.length);
 		}
-		
+
 		// Otherwise use deterministic nano ID
 		// Get the next deterministic counter value
 		const counter = nextDeterministicSequenceNumber({ lix: args.lix });

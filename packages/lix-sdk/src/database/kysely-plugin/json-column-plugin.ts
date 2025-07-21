@@ -12,15 +12,17 @@ import {
 } from "kysely";
 
 type JsonColumnConfig = {
-	type: 'object' | Array<'string' | 'number' | 'boolean' | 'object' | 'array' | 'null'>;
+	type:
+		| "object"
+		| Array<"string" | "number" | "boolean" | "object" | "array" | "null">;
 };
 
 export function JSONColumnPlugin(
 	jsonColumns: Record<string, Record<string, JsonColumnConfig>>
 ): KyselyPlugin {
 	// Build a flat list of all JSON column names for the result transformer
-	const jsonColumnNames = Object.keys(jsonColumns).flatMap(
-		(table) => Object.keys(jsonColumns[table]!)
+	const jsonColumnNames = Object.keys(jsonColumns).flatMap((table) =>
+		Object.keys(jsonColumns[table]!)
 	);
 
 	return {
@@ -75,7 +77,10 @@ export function JSONColumnPlugin(
 }
 
 class SerializeJsonbTransformer extends OperationNodeTransformer {
-	private readonly jsonbColumns: Record<string, Record<string, JsonColumnConfig>>;
+	private readonly jsonbColumns: Record<
+		string,
+		Record<string, JsonColumnConfig>
+	>;
 	private readonly table: string | undefined;
 	private readonly columns: ReadonlyArray<ColumnNode> | undefined;
 
@@ -90,7 +95,9 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		this.columns = columns;
 	}
 
-	private getJsonColumnConfig(columnName: string): JsonColumnConfig | undefined {
+	private getJsonColumnConfig(
+		columnName: string
+	): JsonColumnConfig | undefined {
 		if (!this.table || !columnName) return undefined;
 		return this.jsonbColumns[this.table]?.[columnName];
 	}
@@ -132,8 +139,11 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 						// If it is, serialize it
 						return {
 							...updateItem,
-							// @ts-expect-error - kysely type narrowing
-							value: this.serializeValue(valueNode, this.getJsonColumnConfig(columnName)),
+							value: this.serializeValue(
+								// @ts-expect-error - kysely type narrowing
+								valueNode,
+								this.getJsonColumnConfig(columnName)
+							),
 						};
 					}
 				}
@@ -169,8 +179,11 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 			}
 			return {
 				...node,
-				// @ts-expect-error - kysely type narrowing
-				value: this.serializeValue(node.value, this.getJsonColumnConfig(columnName)),
+				value: this.serializeValue(
+					// @ts-expect-error - kysely type narrowing
+					node.value,
+					this.getJsonColumnConfig(columnName)
+				),
 			} as ColumnUpdateNode;
 		}
 		return super.transformColumnUpdate(node);
@@ -187,7 +200,10 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 			}
 			return {
 				...node,
-				value: this.serializeValue(node.value, this.getJsonColumnConfig(columnName)),
+				value: this.serializeValue(
+					node.value,
+					this.getJsonColumnConfig(columnName)
+				),
 			};
 		}
 		return super.transformSetOperation(node);
@@ -239,10 +255,10 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 		if (val instanceof ArrayBuffer || ArrayBuffer.isView(val) || val === null) {
 			return node;
 		}
-		
+
 		// Check if this column only accepts objects and we have a string
 		// that might be pre-serialized JSON
-		if (config?.type === 'object' && typeof val === 'string') {
+		if (config?.type === "object" && typeof val === "string") {
 			// For object-only columns, assume string values are pre-serialized JSON
 			// to avoid double serialization
 			return {
@@ -251,10 +267,10 @@ class SerializeJsonbTransformer extends OperationNodeTransformer {
 				arguments: [{ kind: "ValueNode", value: val }],
 			};
 		}
-		
+
 		// For all other cases, stringify the value
 		const jsonText = JSON.stringify(val);
-		
+
 		return {
 			kind: "FunctionNode",
 			func: "json",

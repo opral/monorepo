@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test } from "vitest";
 import { simulationTest } from "./simulation-test.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { nextDeterministicSequenceNumber } from "../../deterministic/sequence.js";
@@ -95,7 +95,7 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expectDeterministic(stateAll);
+		expectDeterministic(stateAll).toBeDefined();
 	},
 	{
 		onlyRun: ["normal", "cache-miss"],

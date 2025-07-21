@@ -60,14 +60,16 @@ export function uuidV7(args: { lix: Pick<Lix, "sqlite" | "db"> }): string {
 				.selectFrom("internal_resolved_state_all")
 				.where("entity_id", "=", "lix_deterministic_mode")
 				.where("schema_key", "=", "lix_key_value")
-				.select(sql`json_extract(snapshot_content, '$.value.uuid_v7')`.as("uuid_v7")),
+				.select(
+					sql`json_extract(snapshot_content, '$.value.uuid_v7')`.as("uuid_v7")
+				),
 		});
-		
+
 		// If uuid_v7 is explicitly set to false, use non-deterministic
 		if (config?.uuid_v7 == false) {
 			return v7();
 		}
-		
+
 		// Otherwise use deterministic UUID
 		// Get the next deterministic counter value
 		const counter = nextDeterministicSequenceNumber({ lix: args.lix });

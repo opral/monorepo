@@ -1,21 +1,21 @@
-import { vi } from "vitest";
-import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
+// import { vi } from "vitest";
+// import * as cacheModule from "../../state/cache/mark-state-cache-as-stale.js";
 import type { SimulationTestDef } from "./simulation-test.js";
 
-const CACHE_TIMESTAMP = "2099-12-31T23:59:59.999Z";
+// const CACHE_TIMESTAMP = "2099-12-31T23:59:59.999Z";
 
-// Store original functions
-const originalMarkStale = cacheModule.markStateCacheAsStale;
-const originalMarkFresh = cacheModule.markStateCacheAsFresh;
+// // Store original functions
+// const originalMarkStale = cacheModule.markStateCacheAsStale;
+// const originalMarkFresh = cacheModule.markStateCacheAsFresh;
 
-// Create wrapped versions that inject the fixed timestamp
-const wrappedMarkStale = (args: any) => {
-	return originalMarkStale({ ...args, timestamp: CACHE_TIMESTAMP });
-};
+// // Create wrapped versions that inject the fixed timestamp
+// const wrappedMarkStale = (args: any) => {
+// 	return originalMarkStale({ ...args, timestamp: CACHE_TIMESTAMP });
+// };
 
-const wrappedMarkFresh = (args: any) => {
-	return originalMarkFresh({ ...args, timestamp: CACHE_TIMESTAMP });
-};
+// const wrappedMarkFresh = (args: any) => {
+// 	return originalMarkFresh({ ...args, timestamp: CACHE_TIMESTAMP });
+// };
 
 /**
  * Cache miss simulation - Clears cache before every select operation to force re-materialization from changes.

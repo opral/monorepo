@@ -267,10 +267,20 @@ test("provided key values default to the active version if lixcol_version_id is 
 test("deterministic mode with bootstrap: false results in different lix_ids", async () => {
 	// Create two lix files without deterministic bootstrap
 	const blob1 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: false } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: false },
+			},
+		],
 	});
 	const blob2 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: false } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: false },
+			},
+		],
 	});
 
 	// The lix_ids should be different
@@ -282,10 +292,20 @@ test("deterministic mode with bootstrap: false results in different lix_ids", as
 test("deterministic mode with bootstrap: true results in identical lix_ids", async () => {
 	// Create two lix files with deterministic bootstrap
 	const blob1 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
 	});
 	const blob2 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
 	});
 
 	// The lix_ids should be identical (deterministic-lix-id)
@@ -298,10 +318,20 @@ test("deterministic mode with bootstrap: true results in identical lix_ids", asy
 test("deterministic mode with bootstrap creates fully deterministic lix", async () => {
 	// Create two lix files with deterministic bootstrap
 	const blob1 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
 	});
 	const blob2 = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
 	});
 
 	const lix1 = await openLix({ blob: blob1 });
@@ -341,7 +371,12 @@ test("deterministic mode with bootstrap creates fully deterministic lix", async 
 
 test("deterministic mode config is persisted correctly", async () => {
 	const blob = await newLixFile({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
 	});
 	const lix = await openLix({ blob });
 

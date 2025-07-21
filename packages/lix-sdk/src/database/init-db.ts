@@ -27,16 +27,16 @@ import { nanoId } from "../deterministic/nano-id.js";
 
 /**
  * Configuration for JSON columns in database views.
- * 
+ *
  * Specifies which columns contain JSON data and what types of JSON values they accept.
  * This is used by the JSONColumnPlugin to properly serialize/deserialize JSON data.
- * 
+ *
  * Column types:
- * - `type: 'object'` - Column only accepts JSON objects. String values are assumed to be 
+ * - `type: 'object'` - Column only accepts JSON objects. String values are assumed to be
  *   pre-serialized JSON to prevent double serialization when data flows between views.
- * - `type: ['string', 'number', 'boolean', 'object', 'array', 'null']` - Column accepts 
+ * - `type: ['string', 'number', 'boolean', 'object', 'array', 'null']` - Column accepts
  *   any valid JSON value. All values are properly serialized.
- * 
+ *
  * @example
  * ```typescript
  * {

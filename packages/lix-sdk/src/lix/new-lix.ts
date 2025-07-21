@@ -116,18 +116,23 @@ export async function newLixFile(args?: {
 	const deterministicModeConfig = args?.keyValues?.find(
 		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
 	);
-	
+
 	let isDeterministicBootstrap = false;
-	if (deterministicModeConfig?.value && typeof deterministicModeConfig.value === "object") {
+	if (
+		deterministicModeConfig?.value &&
+		typeof deterministicModeConfig.value === "object"
+	) {
 		// Check if bootstrap is enabled in the config
-		isDeterministicBootstrap = (deterministicModeConfig.value as any).bootstrap === true;
+		isDeterministicBootstrap =
+			(deterministicModeConfig.value as any).bootstrap === true;
 	}
-	
+
 	// For backward compatibility, also check legacy key
 	if (!isDeterministicBootstrap) {
-		isDeterministicBootstrap = args?.keyValues?.some(
-			(kv) => kv.key === "lix_deterministic_bootstrap" && kv.value === true
-		) ?? false;
+		isDeterministicBootstrap =
+			args?.keyValues?.some(
+				(kv) => kv.key === "lix_deterministic_bootstrap" && kv.value === true
+			) ?? false;
 	}
 
 	// Counter for deterministic IDs
@@ -240,7 +245,8 @@ export async function newLixFile(args?: {
 
 	// Handle other untracked key values
 	const untrackedKeyValues = args?.keyValues?.filter(
-		(kv) => kv.lixcol_untracked === true && kv.key !== "lix_deterministic_bootstrap"
+		(kv) =>
+			kv.lixcol_untracked === true && kv.key !== "lix_deterministic_bootstrap"
 	);
 	if (untrackedKeyValues) {
 		for (const kv of untrackedKeyValues) {
@@ -452,12 +458,17 @@ function createBootstrapChanges(args: {
 	// Create any other provided key-values (excluding untracked ones)
 	if (args.providedKeyValues) {
 		for (const kv of args.providedKeyValues) {
-			if (kv.key === "lix_id" || kv.key === "lix_name" || !kv.key || kv.value === undefined || kv.value === null)
+			if (
+				kv.key === "lix_id" ||
+				kv.key === "lix_name" ||
+				!kv.key ||
+				kv.value === undefined ||
+				kv.value === null
+			)
 				continue;
-			
+
 			// Skip untracked keys - they're handled separately
-			if (kv.lixcol_untracked === true)
-				continue;
+			if (kv.lixcol_untracked === true) continue;
 
 			changes.push({
 				id: args.generateUuid(),
