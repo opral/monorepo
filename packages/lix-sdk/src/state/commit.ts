@@ -159,7 +159,7 @@ export function commit(args: {
 
 	//* Emit state commit hook after transaction is successfully committed
 	//* must come last to ensure that subscribers see the changes
-	args.lix.hooks._emit("state_commit");
+	args.lix.hooks._emit("state_commit", { changes: allChangesToRealize });
 	return args.lix.sqlite.sqlite3.capi.SQLITE_OK;
 }
 
