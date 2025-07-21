@@ -19,8 +19,8 @@ export function markStateCacheAsStale(args: {
 			.insertInto("internal_state_all_untracked")
 			.values({
 				entity_id: CACHE_STALE_KEY,
-				schema_key: "lix_key_value",
-				file_id: "internal",
+				schema_key: LixKeyValueSchema["x-lix-key"],
+				file_id: "lix",
 				version_id: "global",
 				plugin_key: "lix_own_entity",
 				snapshot_content: snapshotContent,
@@ -62,12 +62,12 @@ export function markStateCacheAsFresh(args: {
 			.insertInto("internal_state_all_untracked")
 			.values({
 				entity_id: CACHE_STALE_KEY,
-				schema_key: "lix_key_value",
-				file_id: "internal",
+				schema_key: LixKeyValueSchema["x-lix-key"],
+				file_id: "lix",
 				version_id: "global",
-				plugin_key: "lix_key_value_plugin",
+				plugin_key: "lix_own_entity",
 				snapshot_content: snapshotContent,
-				schema_version: "1.0",
+				schema_version: LixKeyValueSchema["x-lix-version"],
 				created_at: args.timestamp
 					? sql`${args.timestamp}`
 					: sql`lix_timestamp()`,
