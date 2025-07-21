@@ -10,7 +10,7 @@ import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
 import {
 	applyMaterializeStateSchema,
-	materializeState,
+	populateStateCache,
 } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
@@ -282,6 +282,7 @@ export function applyStateDatabaseSchema(
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 
+		
 				// Debug: Track recursion depth
 				const recursionKey = "_vtab_recursion_depth";
 				// @ts-expect-error - using global for debugging
@@ -314,13 +315,23 @@ export function applyStateDatabaseSchema(
 						}
 					}
 
-					// If we're updating cache state, we must use materialized state directly to avoid recursion
+					// If we're updating cache state, we must use resolved state view directly to avoid recursion
 					if (isUpdatingCacheState) {
-						// console.log(
-						// 	"Updating cache state, using materialized state directly"
-						// );
-						// Directly materialize state without cache
-						const stateResults = materializeState(sqlite, filters, false);
+						// Query directly from resolved state view which handles inheritance correctly
+						let query = db
+							.selectFrom("internal_resolved_state_all")
+							.selectAll();
+
+						// Apply filters
+						for (const [column, value] of Object.entries(filters)) {
+							query = query.where(column as any, "=", value);
+						}
+
+						const stateResults = executeSync({
+							lix: { sqlite },
+							query,
+						});
+						
 						cursorState.results = stateResults || [];
 						cursorState.rowIndex = 0;
 						return capi.SQLITE_OK;
@@ -354,111 +365,24 @@ export function applyStateDatabaseSchema(
 					cursorState.rowIndex = 0;
 
 					if (cacheIsStale) {
-						// Run the expensive recursive CTE to materialize state
-						// Include deletions when populating cache so inheritance blocking works
-						const stateResults = materializeState(sqlite, {}, true);
-
-						// Populate cache with materialized state results
-						if (stateResults && stateResults.length > 0) {
-							let cachePopulated = false;
-							for (const row of stateResults) {
-								// CTE returns rows as arrays, so access by index
-								const entity_id = Array.isArray(row) ? row[0] : row.entity_id;
-								const schema_key = Array.isArray(row) ? row[1] : row.schema_key;
-								const file_id = Array.isArray(row) ? row[2] : row.file_id;
-								const plugin_key = Array.isArray(row) ? row[3] : row.plugin_key;
-								const snapshot_content = Array.isArray(row)
-									? row[4]
-									: row.snapshot_content;
-								const schema_version = Array.isArray(row)
-									? row[5]
-									: row.schema_version;
-								const version_id = Array.isArray(row) ? row[6] : row.version_id;
-								const created_at = Array.isArray(row) ? row[7] : row.created_at;
-								const updated_at = Array.isArray(row) ? row[8] : row.updated_at;
-								const inherited_from_version_id = Array.isArray(row)
-									? row[9]
-									: row.inherited_from_version_id;
-								const change_id = Array.isArray(row) ? row[10] : row.change_id;
-								const change_set_id = Array.isArray(row)
-									? row[11]
-									: row.change_set_id;
-
-								// Skip rows with null entity_id (no actual state data found)
-								if (!entity_id) {
-									continue;
-								}
-
-								const isDeletion = snapshot_content === null;
-
-								// TODO the CTE should not return inherited entities (optimization for later)
-								// Skip inherited entities - they should be resolved via inheritance logic, not stored as duplicates
-								if (inherited_from_version_id !== null) {
-									continue;
-								}
-
-								executeSync({
-									lix: { sqlite },
-									query: db
-										.insertInto("internal_state_cache")
-										.values({
-											entity_id,
-											schema_key,
-											file_id,
-											version_id,
-											plugin_key,
-											snapshot_content: isDeletion ? null : snapshot_content,
-											schema_version,
-											created_at,
-											updated_at,
-											inherited_from_version_id,
-											inheritance_delete_marker: isDeletion ? 1 : 0,
-											change_id: change_id || "unknown-change-id",
-											change_set_id: change_set_id || "untracked",
-										})
-										.onConflict((oc) =>
-											oc
-												.columns([
-													"entity_id",
-													"schema_key",
-													"file_id",
-													"version_id",
-												])
-												.doUpdateSet({
-													plugin_key,
-													snapshot_content: isDeletion
-														? null
-														: snapshot_content,
-													schema_version,
-													created_at,
-													updated_at,
-													inherited_from_version_id,
-													inheritance_delete_marker: isDeletion ? 1 : 0,
-													change_id: change_id || "unknown-change-id",
-													change_set_id: change_set_id || "untracked",
-												})
-										),
-								});
-								cachePopulated = true;
-							}
-
-							if (cachePopulated) {
-								// Log the cache miss immediately (guard flag will prevent recursion)
-								insertVTableLog({
-									sqlite,
-									db: db as any,
-									key: "lix_state_cache_miss",
-									level: "debug",
-									message: `Cache miss detected - materialized state`,
-								});
-								// Mark cache as fresh after population
-								isUpdatingCacheState = true;
-								try {
-									markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
-								} finally {
-									isUpdatingCacheState = false;
-								}
-							}
+						// Populate cache directly with materialized state
+						populateStateCache(sqlite);
+						
+						// Log the cache miss
+						insertVTableLog({
+							sqlite,
+							db: db as any,
+							key: "lix_state_cache_miss",
+							level: "debug",
+							message: `Cache miss detected - materialized state`,
+						});
+						
+						// Mark cache as fresh after population
+						isUpdatingCacheState = true;
+						try {
+							markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
+						} finally {
+							isUpdatingCacheState = false;
 						}
 
 						// After populating cache, query from resolved state view

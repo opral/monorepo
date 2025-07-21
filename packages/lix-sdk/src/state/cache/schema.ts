@@ -14,7 +14,7 @@ export function applyStateCacheSchema(lix: Pick<Lix, "sqlite">): void {
     updated_at TEXT NOT NULL,
     inherited_from_version_id TEXT,
     inheritance_delete_marker INTEGER DEFAULT 0, -- Flag for copy-on-write deletion markers
-    change_id TEXT, -- Allow NULL during migration and for deletion markers 
+    change_id TEXT, 
     change_set_id TEXT, -- Allow NULL until changeset is created at commit
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   );
