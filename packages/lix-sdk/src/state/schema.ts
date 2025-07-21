@@ -45,7 +45,7 @@ export function applyStateDatabaseSchema(
 	sqlite: SqliteWasmDatabase,
 	db: Kysely<LixInternalDatabaseSchema>,
 	hooks: LixHooks
-): SqliteWasmDatabase {
+): void {
 	applyMaterializeStateSchema(sqlite);
 	applyStateCacheSchema({ sqlite });
 	applyResolvedStateView({ sqlite, db });
@@ -73,6 +73,9 @@ export function applyStateDatabaseSchema(
 
 	// Store cursor state
 	const cursorStates = new Map();
+
+	// Guard flag to prevent recursion when logging
+	let loggingIsInProgress = false;
 
 	/**
 	 * Flag to prevent recursion when updating cache state.
@@ -279,180 +282,208 @@ export function applyStateDatabaseSchema(
 				const cursorState = cursorStates.get(pCursor);
 				const idxStr = sqlite.sqlite3.wasm.cstrToJs(idxStrPtr);
 
-				// Extract filter arguments if provided
-				const filters: Record<string, any> = {};
-				if (argc > 0 && argv) {
-					const args = sqlite.sqlite3.capi.sqlite3_values_to_js(argc, argv);
-					// Parse idxStr to understand which columns are being filtered
-					// idxStr format: "column1,column2,..."
-					if (idxStr) {
-						const columns = idxStr.split(",").filter((c) => c.length > 0);
-						for (let i = 0; i < Math.min(columns.length, args.length); i++) {
-							if (args[i] !== null) {
-								filters[columns[i]!] = args[i]; // Keep original type
+				// Debug: Track recursion depth
+				const recursionKey = "_vtab_recursion_depth";
+				// @ts-expect-error - using global for debugging
+				const currentDepth = (globalThis[recursionKey] || 0) + 1;
+				// @ts-expect-error - using global for debugging
+				globalThis[recursionKey] = currentDepth;
+
+				if (currentDepth > 10) {
+					// @ts-expect-error - using global for debugging
+					globalThis[recursionKey] = 0; // Reset
+					throw new Error(
+						`Virtual table recursion depth exceeded: ${currentDepth}`
+					);
+				}
+
+				try {
+					// Extract filter arguments if provided
+					const filters: Record<string, any> = {};
+					if (argc > 0 && argv) {
+						const args = sqlite.sqlite3.capi.sqlite3_values_to_js(argc, argv);
+						// Parse idxStr to understand which columns are being filtered
+						// idxStr format: "column1,column2,..."
+						if (idxStr) {
+							const columns = idxStr.split(",").filter((c) => c.length > 0);
+							for (let i = 0; i < Math.min(columns.length, args.length); i++) {
+								if (args[i] !== null) {
+									filters[columns[i]!] = args[i]; // Keep original type
+								}
 							}
 						}
 					}
-				}
 
-				// If we're updating cache state, we must use materialized state directly to avoid recursion
-				if (isUpdatingCacheState) {
-					// console.log(
-					// 	"Updating cache state, using materialized state directly"
-					// );
-					// Directly materialize state without cache
-					const stateResults = materializeState(sqlite, filters, false);
-					cursorState.results = stateResults || [];
+					// If we're updating cache state, we must use materialized state directly to avoid recursion
+					if (isUpdatingCacheState) {
+						// console.log(
+						// 	"Updating cache state, using materialized state directly"
+						// );
+						// Directly materialize state without cache
+						const stateResults = materializeState(sqlite, filters, false);
+						cursorState.results = stateResults || [];
+						cursorState.rowIndex = 0;
+						return capi.SQLITE_OK;
+					}
+
+					// Normal path: check cache staleness
+					const cacheIsStale = isStaleStateCache({
+						lix: { sqlite, db: db as any },
+					});
+
+					// Try cache first - but only if it's not stale
+					let cacheResults: any[] | null = null;
+					if (!cacheIsStale) {
+						// Select directly from resolved state view using Kysely
+						let query = db
+							.selectFrom("internal_resolved_state_all")
+							.selectAll();
+
+						// Apply filters
+						for (const [column, value] of Object.entries(filters)) {
+							query = query.where(column as any, "=", value);
+						}
+
+						cacheResults = executeSync({
+							lix: { sqlite },
+							query,
+						});
+					}
+
+					cursorState.results = cacheResults || [];
 					cursorState.rowIndex = 0;
+
+					if (cacheIsStale) {
+						// Run the expensive recursive CTE to materialize state
+						// Include deletions when populating cache so inheritance blocking works
+						const stateResults = materializeState(sqlite, {}, true);
+
+						// Populate cache with materialized state results
+						if (stateResults && stateResults.length > 0) {
+							let cachePopulated = false;
+							for (const row of stateResults) {
+								// CTE returns rows as arrays, so access by index
+								const entity_id = Array.isArray(row) ? row[0] : row.entity_id;
+								const schema_key = Array.isArray(row) ? row[1] : row.schema_key;
+								const file_id = Array.isArray(row) ? row[2] : row.file_id;
+								const plugin_key = Array.isArray(row) ? row[3] : row.plugin_key;
+								const snapshot_content = Array.isArray(row)
+									? row[4]
+									: row.snapshot_content;
+								const schema_version = Array.isArray(row)
+									? row[5]
+									: row.schema_version;
+								const version_id = Array.isArray(row) ? row[6] : row.version_id;
+								const created_at = Array.isArray(row) ? row[7] : row.created_at;
+								const updated_at = Array.isArray(row) ? row[8] : row.updated_at;
+								const inherited_from_version_id = Array.isArray(row)
+									? row[9]
+									: row.inherited_from_version_id;
+								const change_id = Array.isArray(row) ? row[10] : row.change_id;
+								const change_set_id = Array.isArray(row)
+									? row[11]
+									: row.change_set_id;
+
+								// Skip rows with null entity_id (no actual state data found)
+								if (!entity_id) {
+									continue;
+								}
+
+								const isDeletion = snapshot_content === null;
+
+								// TODO the CTE should not return inherited entities (optimization for later)
+								// Skip inherited entities - they should be resolved via inheritance logic, not stored as duplicates
+								if (inherited_from_version_id !== null) {
+									continue;
+								}
+
+								executeSync({
+									lix: { sqlite },
+									query: db
+										.insertInto("internal_state_cache")
+										.values({
+											entity_id,
+											schema_key,
+											file_id,
+											version_id,
+											plugin_key,
+											snapshot_content: isDeletion ? null : snapshot_content,
+											schema_version,
+											created_at,
+											updated_at,
+											inherited_from_version_id,
+											inheritance_delete_marker: isDeletion ? 1 : 0,
+											change_id: change_id || "unknown-change-id",
+											change_set_id: change_set_id || "untracked",
+										})
+										.onConflict((oc) =>
+											oc
+												.columns([
+													"entity_id",
+													"schema_key",
+													"file_id",
+													"version_id",
+												])
+												.doUpdateSet({
+													plugin_key,
+													snapshot_content: isDeletion
+														? null
+														: snapshot_content,
+													schema_version,
+													created_at,
+													updated_at,
+													inherited_from_version_id,
+													inheritance_delete_marker: isDeletion ? 1 : 0,
+													change_id: change_id || "unknown-change-id",
+													change_set_id: change_set_id || "untracked",
+												})
+										),
+								});
+								cachePopulated = true;
+							}
+
+							if (cachePopulated) {
+								// Log the cache miss immediately (guard flag will prevent recursion)
+								insertVTableLog({
+									sqlite,
+									db: db as any,
+									key: "lix_state_cache_miss",
+									level: "debug",
+									message: `Cache miss detected - materialized state`,
+								});
+								// Mark cache as fresh after population
+								isUpdatingCacheState = true;
+								try {
+									markStateCacheAsFresh({ lix: { sqlite } });
+								} finally {
+									isUpdatingCacheState = false;
+								}
+							}
+						}
+
+						// After populating cache, query from resolved state view
+						let query = db
+							.selectFrom("internal_resolved_state_all")
+							.selectAll();
+
+						// Apply filters
+						for (const [column, value] of Object.entries(filters)) {
+							query = query.where(column as any, "=", value);
+						}
+
+						const newResults = executeSync({
+							lix: { sqlite },
+							query,
+						});
+						cursorState.results = newResults || [];
+					}
+
 					return capi.SQLITE_OK;
+				} finally {
+					// Always decrement recursion depth
+					// @ts-expect-error - using global for debugging
+					globalThis[recursionKey] = currentDepth - 1;
 				}
-
-				// Normal path: check cache staleness
-				const cacheIsStale = isStaleStateCache({
-					lix: { sqlite, db: db as any },
-				});
-
-				// Try cache first - but only if it's not stale
-				let cacheResults: any[] | null = null;
-				if (!cacheIsStale) {
-					// Select directly from resolved state view using Kysely
-					let query = db.selectFrom("internal_resolved_state_all").selectAll();
-
-					// Apply filters
-					for (const [column, value] of Object.entries(filters)) {
-						query = query.where(column as any, "=", value);
-					}
-
-					cacheResults = executeSync({
-						lix: { sqlite },
-						query,
-					});
-				}
-
-				cursorState.results = cacheResults || [];
-				cursorState.rowIndex = 0;
-
-				if (cacheIsStale) {
-					// Run the expensive recursive CTE to materialize state
-					// Include deletions when populating cache so inheritance blocking works
-					const stateResults = materializeState(sqlite, {}, true);
-
-					// Populate cache with materialized state results
-					if (stateResults && stateResults.length > 0) {
-						let cachePopulated = false;
-						for (const row of stateResults) {
-							// CTE returns rows as arrays, so access by index
-							const entity_id = Array.isArray(row) ? row[0] : row.entity_id;
-							const schema_key = Array.isArray(row) ? row[1] : row.schema_key;
-							const file_id = Array.isArray(row) ? row[2] : row.file_id;
-							const plugin_key = Array.isArray(row) ? row[3] : row.plugin_key;
-							const snapshot_content = Array.isArray(row)
-								? row[4]
-								: row.snapshot_content;
-							const schema_version = Array.isArray(row)
-								? row[5]
-								: row.schema_version;
-							const version_id = Array.isArray(row) ? row[6] : row.version_id;
-							const created_at = Array.isArray(row) ? row[7] : row.created_at;
-							const updated_at = Array.isArray(row) ? row[8] : row.updated_at;
-							const inherited_from_version_id = Array.isArray(row)
-								? row[9]
-								: row.inherited_from_version_id;
-							const change_id = Array.isArray(row) ? row[10] : row.change_id;
-							const change_set_id = Array.isArray(row)
-								? row[11]
-								: row.change_set_id;
-
-							// Skip rows with null entity_id (no actual state data found)
-							if (!entity_id) {
-								continue;
-							}
-
-							const isDeletion = snapshot_content === null;
-
-							// TODO the CTE should not return inherited entities (optimization for later)
-							// Skip inherited entities - they should be resolved via inheritance logic, not stored as duplicates
-							if (inherited_from_version_id !== null) {
-								continue;
-							}
-
-							executeSync({
-								lix: { sqlite },
-								query: db
-									.insertInto("internal_state_cache")
-									.values({
-										entity_id,
-										schema_key,
-										file_id,
-										version_id,
-										plugin_key,
-										snapshot_content: isDeletion ? null : snapshot_content,
-										schema_version,
-										created_at,
-										updated_at,
-										inherited_from_version_id,
-										inheritance_delete_marker: isDeletion ? 1 : 0,
-										change_id: change_id || "unknown-change-id",
-										change_set_id: change_set_id || "untracked",
-									})
-									.onConflict((oc) =>
-										oc
-											.columns([
-												"entity_id",
-												"schema_key",
-												"file_id",
-												"version_id",
-											])
-											.doUpdateSet({
-												plugin_key,
-												snapshot_content: isDeletion ? null : snapshot_content,
-												schema_version,
-												created_at,
-												updated_at,
-												inherited_from_version_id,
-												inheritance_delete_marker: isDeletion ? 1 : 0,
-												change_id: change_id || "unknown-change-id",
-												change_set_id: change_set_id || "untracked",
-											})
-									),
-							});
-							cachePopulated = true;
-						}
-
-						if (cachePopulated) {
-							insertVTableLog({
-								sqlite,
-								db: db as any,
-								key: "lix_state_cache_miss",
-								level: "debug",
-								message: `Cache miss detected - materialized state`,
-							});
-							// Mark cache as fresh after population
-							isUpdatingCacheState = true;
-							try {
-								markStateCacheAsFresh({ lix: { sqlite } });
-							} finally {
-								isUpdatingCacheState = false;
-							}
-						}
-					}
-
-					// After populating cache, query from resolved state view
-					let query = db.selectFrom("internal_resolved_state_all").selectAll();
-
-					// Apply filters
-					for (const [column, value] of Object.entries(filters)) {
-						query = query.where(column as any, "=", value);
-					}
-
-					const newResults = executeSync({
-						lix: { sqlite },
-						query,
-					});
-					cursorState.results = newResults || [];
-				}
-
-				return capi.SQLITE_OK;
 			},
 
 			xNext: (pCursor: any) => {
@@ -866,7 +897,7 @@ export function applyStateDatabaseSchema(
 	`);
 
 	// Create the cache table for performance optimization and the untracked state table
-	const sql = `
+	sqlite.exec(`
   -- Table for untracked state that bypasses change control
   CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
     entity_id TEXT NOT NULL,
@@ -892,9 +923,74 @@ export function applyStateDatabaseSchema(
       AND file_id = NEW.file_id 
       AND version_id = NEW.version_id;
   END;
-`;
+`);
 
-	return sqlite.exec(sql);
+	/**
+	 * Insert a log entry directly using insertTransactionState to avoid recursion
+	 * when logging from within the virtual table methods.
+	 */
+	function insertVTableLog(args: {
+		sqlite: SqliteWasmDatabase;
+		db: Kysely<LixInternalDatabaseSchema>;
+		key: string;
+		message: string;
+		level: string;
+	}): void {
+		if (loggingIsInProgress) {
+			return;
+		}
+		// preventing recursivly logging that we inserted a log entry
+		// with this flag
+		loggingIsInProgress = true;
+		// Check log levels directly from internal state tables to avoid recursion
+		const logLevelsResult = executeSync({
+			lix: { sqlite: args.sqlite },
+			query: args.db
+				.selectFrom("internal_resolved_state_all")
+				.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
+				.where("schema_key", "=", "lix_key_value")
+				.where(
+					sql`json_extract(snapshot_content, '$.key')`,
+					"=",
+					"lix_log_levels"
+				)
+				.limit(1),
+		});
+
+		const logLevelsValue = logLevelsResult[0]?.value;
+
+		// Check if the level is allowed
+		if (!shouldLog(logLevelsValue as string[] | undefined, args.level)) {
+			return;
+		}
+
+		// Create log entry data
+		const lix = { sqlite: args.sqlite, db: args.db } as any;
+		const logData = {
+			id: uuidV7({ lix }),
+			key: args.key,
+			message: args.message,
+			level: args.level,
+		};
+
+		// Insert log using insertTransactionState
+		insertTransactionState({
+			lix,
+			data: {
+				entity_id: logData.id,
+				schema_key: LixLogSchema["x-lix-key"],
+				file_id: "lix",
+				plugin_key: "lix_own_entity",
+				snapshot_content: JSON.stringify(logData),
+				schema_version: LixLogSchema["x-lix-version"],
+				// Using global and untracked for vtable logs.
+				// if we need to track them, we can change this later
+				version_id: "global",
+				untracked: true,
+			},
+		});
+		loggingIsInProgress = false;
+	}
 }
 
 export function handleStateDelete(
@@ -974,66 +1070,6 @@ export function handleStateDelete(
 }
 
 // Helper functions for the virtual table
-
-/**
- * Insert a log entry directly using insertTransactionState to avoid recursion
- * when logging from within the virtual table methods.
- */
-function insertVTableLog(args: {
-	sqlite: SqliteWasmDatabase;
-	db: Kysely<LixInternalDatabaseSchema>;
-	key: string;
-	message: string;
-	level: string;
-}): void {
-	// Check log levels directly from internal state tables to avoid recursion
-	const logLevelsResult = executeSync({
-		lix: { sqlite: args.sqlite },
-		query: args.db
-			.selectFrom("internal_resolved_state_all")
-			.select(sql`json_extract(snapshot_content, '$.value')`.as("value"))
-			.where("schema_key", "=", "lix_key_value")
-			.where(
-				sql`json_extract(snapshot_content, '$.key')`,
-				"=",
-				"lix_log_levels"
-			)
-			.limit(1),
-	});
-
-	const logLevelsValue = logLevelsResult[0]?.value;
-
-	// Check if the level is allowed
-	if (!shouldLog(logLevelsValue as string[] | undefined, args.level)) {
-		return;
-	}
-
-	// Create log entry data
-	const lix = { sqlite: args.sqlite, db: args.db } as any;
-	const logData = {
-		id: uuidV7({ lix }),
-		key: args.key,
-		message: args.message,
-		level: args.level,
-	};
-
-	// Insert log using insertTransactionState
-	insertTransactionState({
-		lix,
-		data: {
-			entity_id: logData.id,
-			schema_key: LixLogSchema["x-lix-key"],
-			file_id: "lix",
-			plugin_key: "lix_own_entity",
-			snapshot_content: JSON.stringify(logData),
-			schema_version: LixLogSchema["x-lix-version"],
-			// Using global and untracked for vtable logs.
-			// if we need to track them, we can change this later
-			version_id: "global",
-			untracked: true,
-		},
-	});
-}
 
 function getStoredSchema(
 	sqlite: SqliteWasmDatabase,

@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
 import { simulationTest, type SimulationTestDef } from "./simulation-test.js";
-import { openLix } from "../../lix/open-lix.js";
 import { commit } from "../../state/commit.js";
 
 test("simulation test discovery", () => {});
@@ -74,9 +73,17 @@ describe("deterministic state validation", () => {
 	};
 
 	simulationTest(
-		"every simulation opens the same lix",
-		async ({ initialLix, openSimulatedLix }) => {
-			const lix = await openSimulatedLix({ blob: initialLix });
+		"",
+		async ({ openSimulatedLix }) => {
+			const lix = await openSimulatedLix({
+				keyValues: [
+					{
+						key: "lix_deterministic_mode",
+						value: { enabled: true, bootstrap: true },
+						lixcol_version_id: "global",
+					},
+				],
+			});
 
 			const allState = await lix.db
 				.selectFrom("state_all")
@@ -110,8 +117,16 @@ describe("database operations are deterministic", async () => {
 
 	simulationTest(
 		"",
-		async ({ initialLix, expectDeterministic, openSimulatedLix }) => {
-			const lix = await openSimulatedLix({ blob: initialLix });
+		async ({ expectDeterministic, openSimulatedLix }) => {
+			const lix = await openSimulatedLix({
+				keyValues: [
+					{
+						key: "lix_deterministic_mode",
+						value: { enabled: true, bootstrap: true },
+						lixcol_version_id: "global",
+					},
+				],
+			});
 
 			// Testing two types of entity views that exist:
 			// 1. Regular entity view (on key_value table)

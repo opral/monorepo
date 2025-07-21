@@ -40,7 +40,12 @@ test("nextDeterministicSequenceNumber works when deterministic mode is true", as
 
 test("nextDeterministicSequenceNumber persists state across blob operations", async () => {
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true },
+			},
+		],
 	});
 
 	// Generate some sequence numbers and record the last one
