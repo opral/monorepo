@@ -40,9 +40,9 @@ describe("expectDeterministic catches simulation differences", () => {
 		async ({ simulation, expectDeterministic }) => {
 			// This will store different values in different simulations
 			const simulationSpecificValue =
-				simulation === "normal" ? "normal-value" : "other-value";
+				simulation.name === "normal" ? "normal-value" : "other-value";
 
-			if (simulation === "normal") {
+			if (simulation.name === "normal") {
 				// This will fail in the second simulation
 				expect(() =>
 					expectDeterministic(simulationSpecificValue).toBe("normal-value")
@@ -239,7 +239,7 @@ describe("expectDeterministic diff callback receives correct values", () => {
 		async ({ expectDeterministic, simulation }) => {
 			const store = globalStore.__testCallback1;
 
-			if (simulation === "normal") {
+			if (simulation.name === "normal") {
 				// First simulation - set the expected value
 				const testValue = { foo: "bar", count: 42 };
 				expectDeterministic(testValue).toBeDefined();

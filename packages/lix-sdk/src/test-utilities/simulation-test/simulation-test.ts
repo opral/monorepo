@@ -99,7 +99,7 @@ interface ExpectDeterministic {
 export function simulationTest(
 	name: string,
 	fn: (args: {
-		simulation: string;
+		simulation: SimulationTestDef;
 		openSimulatedLix: typeof openLix;
 		expectDeterministic: ExpectDeterministic;
 	}) => Promise<void>,
@@ -197,7 +197,7 @@ Use regular expect() for simulation-specific assertions.
 		};
 
 		await fn({
-			simulation: simulation.name,
+			simulation: simulation,
 			openSimulatedLix,
 			expectDeterministic: deterministicExpect as ExpectDeterministic,
 		});
