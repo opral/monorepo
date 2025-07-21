@@ -564,12 +564,15 @@ test("passes when foreign key references exist", async () => {
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "user",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			author_id: { type: "string" },
@@ -644,12 +647,15 @@ test("throws when foreign key reference does not exist", async () => {
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "user",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			author_id: { type: "string" },
@@ -720,16 +726,22 @@ test("handles multiple foreign keys", async () => {
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "user",
+					properties: ["id"],
+				},
 			},
-			category_id: {
-				schemaKey: "category",
-				property: "id",
+			{
+				properties: ["category_id"],
+				references: {
+					schemaKey: "category",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			author_id: { type: "string" },
@@ -840,12 +852,15 @@ test("allows null foreign key values", async () => {
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "user",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			author_id: { type: ["string", "null"] },
@@ -896,6 +911,116 @@ test("allows null foreign key values", async () => {
 	).not.toThrowError();
 });
 
+test("handles composite foreign keys", async () => {
+	const lix = await openLix({});
+
+	// Create a schema that uses composite primary key
+	const addressSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "address",
+		"x-lix-primary-key": ["country", "postal_code", "street"],
+		properties: {
+			country: { type: "string" },
+			postal_code: { type: "string" },
+			street: { type: "string" },
+			city: { type: "string" },
+		},
+		required: ["country", "postal_code", "street", "city"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Create a schema that references the composite key
+	const deliverySchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "delivery",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["address_country", "address_postal", "address_street"],
+				references: {
+					schemaKey: "address",
+					properties: ["country", "postal_code", "street"],
+				},
+			},
+		],
+		properties: {
+			id: { type: "string" },
+			address_country: { type: "string" },
+			address_postal: { type: "string" },
+			address_street: { type: "string" },
+			package_id: { type: "string" },
+		},
+		required: ["id", "address_country", "address_postal", "address_street", "package_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store schemas
+	await lix.db
+		.insertInto("stored_schema")
+		.values([{ value: addressSchema }, { value: deliverySchema }])
+		.execute();
+
+	// Insert an address that will be referenced
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "addr1",
+			file_id: "file1",
+			schema_key: "address",
+			plugin_key: "test_plugin",
+			version_id: lix.db.selectFrom("active_version").select("version_id"),
+			snapshot_content: {
+				country: "USA",
+				postal_code: "12345",
+				street: "123 Main St",
+				city: "Springfield",
+			},
+			schema_version: "1.0",
+		})
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// This should pass - composite foreign key reference exists
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: deliverySchema,
+			snapshot_content: {
+				id: "delivery1",
+				address_country: "USA",
+				address_postal: "12345",
+				address_street: "123 Main St",
+				package_id: "pkg123",
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+
+	// This should fail - composite foreign key reference doesn't exist (wrong postal code)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: deliverySchema,
+			snapshot_content: {
+				id: "delivery2",
+				address_country: "USA",
+				address_postal: "54321", // Wrong postal code
+				address_street: "123 Main St",
+				package_id: "pkg456",
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrowError(/Foreign key constraint violation.*address_country, address_postal, address_street.*referencing.*address.*country, postal_code, street/);
+});
+
 test("foreign key referencing real SQL table (change.id)", async () => {
 	const lix = await openLix({});
 
@@ -927,12 +1052,15 @@ test("foreign key referencing real SQL table (change.id)", async () => {
 		type: "object",
 		"x-lix-version": "1.0",
 		"x-lix-key": "change_set_element_test",
-		"x-lix-foreign-keys": {
-			change_id: {
-				schemaKey: "lix_change",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["change_id"],
+				references: {
+					schemaKey: "lix_change",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			change_id: { type: "string" },
@@ -1217,12 +1345,15 @@ test("should prevent deletion when foreign keys reference the entity", async () 
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "user",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			author_id: { type: "string" },
@@ -1587,12 +1718,15 @@ test("foreign key validation should fail when referenced entity exists in differ
 		"x-lix-key": "mock_post",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "mock_user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "mock_user",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		type: "object",
 		properties: {
 			id: { type: "string" },
@@ -1691,12 +1825,15 @@ test("should allow self-referential foreign keys", async () => {
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			inherits_from_version_id: {
-				schemaKey: "mock_version", // Self-referential foreign key
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["inherits_from_version_id"],
+				references: {
+					schemaKey: "mock_version", // Self-referential foreign key
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1790,12 +1927,15 @@ test("should allow self-referential foreign keys for update operations", async (
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			inherits_from_version_id: {
-				schemaKey: "mock_version",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["inherits_from_version_id"],
+				references: {
+					schemaKey: "mock_version",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -1891,12 +2031,15 @@ test("should prevent deletion when self-referential foreign keys reference the e
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_version",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			inherits_from_version_id: {
-				schemaKey: "mock_version",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["inherits_from_version_id"],
+				references: {
+					schemaKey: "mock_version",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			name: { type: "string" },
@@ -2115,12 +2258,15 @@ test("should prevent tracked entities from referencing untracked entities", asyn
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "user",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			author_id: { type: "string" },
@@ -2203,12 +2349,15 @@ test("should allow untracked entities to reference tracked entities", async () =
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "user",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			author_id: { type: "string" },
@@ -2291,12 +2440,15 @@ test("should allow untracked entities to reference other untracked entities", as
 		"x-lix-version": "1.0",
 		"x-lix-key": "post",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			author_id: {
-				schemaKey: "user",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["author_id"],
+				references: {
+					schemaKey: "user",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			id: { type: "string" },
 			author_id: { type: "string" },
@@ -2471,12 +2623,15 @@ test("should validate foreign keys that reference changes in internal_change_in_
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_change_reference",
 		"x-lix-primary-key": ["change_id"],
-		"x-lix-foreign-keys": {
-			change_id: {
-				schemaKey: "lix_change",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["change_id"],
+				references: {
+					schemaKey: "lix_change",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			change_id: { type: "string" },
 		},
@@ -2571,12 +2726,15 @@ test("should allow foreign keys to changes from any version context", async () =
 		"x-lix-version": "1.0",
 		"x-lix-key": "mock_schema",
 		"x-lix-primary-key": ["change_id"],
-		"x-lix-foreign-keys": {
-			change_id: {
-				schemaKey: "lix_change",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["change_id"],
+				references: {
+					schemaKey: "lix_change",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		properties: {
 			change_id: { type: "string" },
 		},

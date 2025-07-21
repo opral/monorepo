@@ -1,5 +1,38 @@
 import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 
+/**
+ * Foreign key constraint definition
+ */
+export type LixForeignKey = {
+	/**
+	 * Local JSON-schema property names that participate in the FK.
+	 * Must have at least one property.
+	 */
+	properties: readonly string[] | string[];
+
+	/**
+	 * Where they point to.
+	 */
+	references: {
+		/**
+		 * The x-lix-key of the referenced schema
+		 */
+		schemaKey: string;
+		/**
+		 * Remote property names (must have same length as local properties)
+		 */
+		properties: readonly string[] | string[];
+		/**
+		 * Optional version of the referenced schema
+		 */
+		schemaVersion?: string;
+	};
+
+	// Future features - not implemented yet
+	// onDelete?: "cascade" | "restrict" | "set null";
+	// onUpdate?: "cascade" | "restrict";
+};
+
 export const LixSchemaDefinition = {
 	$schema: "http://json-schema.org/draft-07/schema#",
 	title: "Lix Change Schema",
@@ -28,25 +61,49 @@ export const LixSchemaDefinition = {
 					},
 				},
 				"x-lix-foreign-keys": {
-					type: "object",
-					additionalProperties: {
+					type: "array",
+					items: {
 						type: "object",
+						required: ["properties", "references"],
 						properties: {
-							schemaKey: {
-								type: "string",
-								description: "The x-lix-key of the referenced schema",
+							properties: {
+								type: "array",
+								minItems: 1,
+								items: { type: "string" },
+								description: "Local JSON-schema property names that participate in the FK",
 							},
-							property: {
-								type: "string",
-								description: "The property name in the referenced schema",
+							references: {
+								type: "object",
+								required: ["schemaKey", "properties"],
+								properties: {
+									schemaKey: {
+										type: "string",
+										description: "The x-lix-key of the referenced schema",
+									},
+									properties: {
+										type: "array",
+										minItems: 1,
+										items: { type: "string" },
+										description: "Remote property names (same length as local properties)",
+									},
+									schemaVersion: {
+										type: "string",
+										pattern: "^\\d+\\.\\d+$",
+										description: "Optional version of the referenced schema",
+									},
+								},
 							},
-							schemaVersion: {
-								type: "string",
-								pattern: "^\\d+\\.\\d+$",
-								description: "Optional version of the referenced schema",
-							},
+							// onDelete: {
+							//   type: "string",
+							//   enum: ["cascade", "restrict", "set null"],
+							//   description: "Action to take when referenced entity is deleted (future feature)"
+							// },
+							// onUpdate: {
+							//   type: "string", 
+							//   enum: ["cascade", "restrict"],
+							//   description: "Action to take when referenced entity is updated (future feature)"
+							// },
 						},
-						required: ["schemaKey", "property"],
 					},
 				},
 				"x-lix-key": {
@@ -149,26 +206,24 @@ export type LixSchemaDefinition = JSONSchema & {
 	 * Foreign key constraints referencing other schemas.
 	 *
 	 * @example
-	 *   {
-	 *     "x-lix-foreign-keys": {
-	 *       "author_id": {
+	 *   [
+	 *     {
+	 *       "properties": ["author_id"],
+	 *       "references": {
 	 *         "schemaKey": "user_profile",
-	 *         "property": "id"
-	 *       },
-	 *       "category_id": {
-	 *         "schemaKey": "post_category",
-	 *         "property": "id"
+	 *         "properties": ["id"]
+	 *       }
+	 *     },
+	 *     {
+	 *       "properties": ["entity_id", "schema_key", "file_id"],
+	 *       "references": {
+	 *         "schemaKey": "state",
+	 *         "properties": ["entity_id", "schema_key", "file_id"]
 	 *       }
 	 *     }
-	 *   }
+	 *   ]
 	 */
-	"x-lix-foreign-keys"?: {
-		[localProperty: string]: {
-			schemaKey: string;
-			property: string;
-			schemaVersion?: string;
-		};
-	};
+	"x-lix-foreign-keys"?: LixForeignKey[] | readonly LixForeignKey[];
 	type: "object";
 	properties?: {
 		[key: string]: LixPropertySchema;

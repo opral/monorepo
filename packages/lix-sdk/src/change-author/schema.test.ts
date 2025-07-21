@@ -126,7 +126,7 @@ test("should enforce foreign key constraint on change_id", async () => {
 			})
 			.execute()
 	).rejects.toThrow(
-		/Foreign key constraint violation.*change_id.*lix_change.id/i
+		/Foreign key constraint violation.*lix_change_author.*\(change_id\).*lix_change\.\(id\)/i
 	);
 });
 
@@ -156,7 +156,7 @@ test("should enforce foreign key constraint on account_id", async () => {
 			})
 			.execute()
 	).rejects.toThrow(
-		/Foreign key constraint violation.*account_id.*lix_account.id/i
+		/Foreign key constraint violation.*lix_change_author.*\(account_id\).*lix_account\.\(id\)/i
 	);
 });
 

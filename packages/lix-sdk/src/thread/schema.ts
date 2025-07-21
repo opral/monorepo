@@ -53,16 +53,22 @@ export const LixThreadCommentSchema = {
 	"x-lix-key": "lix_thread_comment",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
-	"x-lix-foreign-keys": {
-		thread_id: {
-			schemaKey: "lix_thread",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["thread_id"],
+			references: {
+				schemaKey: "lix_thread",
+				properties: ["id"],
+			},
 		},
-		parent_id: {
-			schemaKey: "lix_thread_comment",
-			property: "id",
+		{
+			properties: ["parent_id"],
+			references: {
+				schemaKey: "lix_thread_comment",
+				properties: ["id"],
+			},
 		},
-	},
+	],
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
