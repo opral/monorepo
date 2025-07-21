@@ -454,7 +454,7 @@ export function applyStateDatabaseSchema(
 								// Mark cache as fresh after population
 								isUpdatingCacheState = true;
 								try {
-									markStateCacheAsFresh({ lix: { sqlite } });
+									markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
 								} finally {
 									isUpdatingCacheState = false;
 								}
