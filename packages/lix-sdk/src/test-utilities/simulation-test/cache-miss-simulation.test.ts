@@ -1,59 +1,59 @@
-import { test } from "vitest";
+import { expect, test } from "vitest";
 import { simulationTest } from "./simulation-test.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { nextDeterministicSequenceNumber } from "../../deterministic/sequence.js";
 
 test("cache miss simulation test discovery", () => {});
 
-// simulationTest(
-// 	"cache miss simulation clears cache before every select",
-// 	async ({ openSimulatedLix }) => {
-// 		const lix = await openSimulatedLix({
-// 			keyValues: [
-// 				{
-// 					key: "lix_deterministic_mode",
-// 					value: { enabled: true },
-// 					lixcol_version_id: "global",
-// 					lixcol_untracked: true,
-// 				},
-// 				{
-// 					key: "lix_log_levels",
-// 					value: ["debug"],
-// 					lixcol_version_id: "global",
-// 					lixcol_untracked: true,
-// 				},
-// 			],
-// 		});
+simulationTest(
+	"cache miss simulation clears cache before every select",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				},
+				{
+					key: "lix_log_levels",
+					value: ["debug"],
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				},
+			],
+		});
 
-// 		// Insert test data
-// 		await lix.db
-// 			.insertInto("key_value")
-// 			.values([{ key: "test_1", value: "value_1" }])
-// 			.execute();
+		// Insert test data
+		await lix.db
+			.insertInto("key_value")
+			.values([{ key: "test_1", value: "value_1" }])
+			.execute();
 
-// 		const timeBefore = timestamp({ lix });
+		const timeBefore = timestamp({ lix });
 
-// 		await lix.db
-// 			.selectFrom("key_value")
-// 			.where("key", "=", "test_1")
-// 			.selectAll()
-// 			.execute();
+		await lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "test_1")
+			.selectAll()
+			.execute();
 
-// 		const cacheMissAfter = await lix.db
-// 			.selectFrom("log")
-// 			.where("key", "=", "lix_state_cache_miss")
-// 			.where("lixcol_created_at", ">", timeBefore)
-// 			.selectAll()
-// 			.execute();
+		const cacheMissAfter = await lix.db
+			.selectFrom("log")
+			.where("key", "=", "lix_state_cache_miss")
+			.where("lixcol_created_at", ">", timeBefore)
+			.selectAll()
+			.execute();
 
-// 		// greater than one because the entity view key value
-// 		// might fire off subqueries that also trigger cache misses
-// 		expect(cacheMissAfter.length).toBeGreaterThan(1);
-// 	},
-// 	{
-// 		onlyRun: ["cache-miss"],
-// 	}
-// );
+		// greater than one because the entity view key value
+		// might fire off subqueries that also trigger cache misses
+		expect(cacheMissAfter.length).toBeGreaterThan(1);
+	},
+	{
+		onlyRun: ["cache-miss"],
+	}
+);
 
 simulationTest(
 	"cache miss simulation produces correct query results",
