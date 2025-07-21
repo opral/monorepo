@@ -130,6 +130,119 @@ test("can insert null content explicitly", async () => {
 	expect(snapshot.content).toBeNull();
 });
 
+test("snapshot content validation - accepts JSONB", async () => {
+	const lix = await openLix({});
+
+	// This should succeed - content is properly formatted as JSONB
+	await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+		.insertInto("internal_snapshot")
+		.values({
+			id: "valid-jsonb",
+			content: sql`jsonb(${JSON.stringify({ test: "data", value: 123 })})`,
+		})
+		.execute();
+
+	const snapshot = await (
+		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+	)
+		.selectFrom("internal_snapshot")
+		.where("id", "=", "valid-jsonb")
+		.select(["id", (eb) => eb.fn("json", [`content`]).as("content")])
+		.executeTakeFirstOrThrow();
+
+	expect(snapshot.content).toEqual({ test: "data", value: 123 });
+});
+
+test("snapshot content validation - rejects text JSON", async () => {
+	const lix = await openLix({});
+
+	// This should fail - content is text JSON, not JSONB
+	// SQLite's STRICT tables enforce that BLOB columns can't store TEXT
+	await expect(
+		(lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			.insertInto("internal_snapshot")
+			.values({
+				id: "invalid-text-json",
+				content: sql`${JSON.stringify({ test: "data" })}`,
+			})
+			.execute()
+	).rejects.toThrow(
+		/SQLITE_CONSTRAINT_DATATYPE.*cannot store TEXT value in BLOB column/
+	);
+});
+
+test("snapshot content validation - rejects arbitrary binary", async () => {
+	const lix = await openLix({});
+
+	// This should fail - content is arbitrary binary data, not valid JSONB
+	// Using raw SQL to insert arbitrary binary that's not JSONB format
+	const encoder = new TextEncoder();
+	const arbitraryBytes = encoder.encode("arbitrary binary data");
+
+	await expect(async () => {
+		lix.sqlite.exec({
+			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, ?)`,
+			bind: ["invalid-binary", arbitraryBytes],
+		});
+	}).rejects.toThrow(/CHECK constraint failed.*json_valid/);
+});
+
+test("snapshot content validation - prevents double-stringified JSON storage", async () => {
+	const lix = await openLix({});
+
+	// This test demonstrates the double-stringified JSON issue we were investigating
+	const originalData = { id: "test", name: "value" };
+	const onceStringified = JSON.stringify(originalData);
+	const doubleStringified = JSON.stringify(onceStringified);
+
+	// First, verify that plain text JSON is rejected by STRICT table
+	await expect(
+		(lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+			.insertInto("internal_snapshot")
+			.values({
+				id: "double-stringified",
+				content: sql`${doubleStringified}`,
+			})
+			.execute()
+	).rejects.toThrow(
+		/SQLITE_CONSTRAINT_DATATYPE.*cannot store TEXT value in BLOB column/
+	);
+
+	// The real issue: jsonb() on double-stringified JSON creates valid JSONB
+	// because a JSON string is valid JSON! But with our new json_type check,
+	// this should now be rejected since it's storing a string, not an object
+	expect(() => {
+		lix.sqlite.exec({
+			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+			bind: ["double-stringified-jsonb", doubleStringified],
+		});
+	}).toThrow(/CHECK constraint failed/);
+
+	// Also verify that storing arrays is rejected (we only want objects)
+	expect(() => {
+		lix.sqlite.exec({
+			sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+			bind: ["array-content", JSON.stringify([1, 2, 3])],
+		});
+	}).toThrow(/CHECK constraint failed/);
+
+	// Verify the correct way: jsonb() on properly stringified JSON
+	lix.sqlite.exec({
+		sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+		bind: ["correct-jsonb", onceStringified],
+	});
+
+	// Verify it retrieves correctly
+	const correctResult: any = lix.sqlite.exec({
+		sql: `SELECT json(content) as json_content FROM internal_snapshot WHERE id = ?`,
+		bind: ["correct-jsonb"],
+		returnValue: "resultRows",
+	});
+
+	expect(correctResult[0]?.[0]).toBe(onceStringified);
+	expect(JSON.parse(correctResult[0]![0]!)).toEqual(originalData);
+});
+
 test("snapshot ids must be unique", async () => {
 	const lix = await openLix({});
 

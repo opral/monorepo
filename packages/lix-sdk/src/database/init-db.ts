@@ -1,9 +1,7 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { v7 as uuid_v7, v4 as uuid_v4 } from "uuid";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
 import { humanId } from "human-id";
-import { nanoid } from "./nano-id.js";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
 import { LixSchemaViewMap } from "./schema.js";
@@ -23,31 +21,92 @@ import { applyThreadDatabaseSchema } from "../thread/schema.js";
 import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
+import type { Lix } from "../lix/open-lix.js";
+import { timestamp, uuidV7 } from "../deterministic/index.js";
+import { nanoId } from "../deterministic/nano-id.js";
 
-// dynamically computes the json columns for each view
-// via the json schemas.
-const ViewsWithJsonColumns = {
-	state: ["snapshot_content"],
-	state_all: ["snapshot_content"],
-	state_history: ["snapshot_content"],
-	change: ["snapshot_content"],
-	...(() => {
-		const result: Record<string, string[]> = {};
-		for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
-			// Check if schema is an object and has properties
-			if (typeof schema === "boolean" || !schema.properties) continue;
-			const jsonColumns = Object.entries(schema.properties)
-				.filter(([, def]) => isJsonType(def))
-				.map(([key]) => key);
-			if (jsonColumns.length) {
-				result[viewName] = jsonColumns;
-				// Also add the _all variant view with the same JSON columns
-				result[viewName + "_all"] = jsonColumns;
+/**
+ * Configuration for JSON columns in database views.
+ *
+ * Specifies which columns contain JSON data and what types of JSON values they accept.
+ * This is used by the JSONColumnPlugin to properly serialize/deserialize JSON data.
+ *
+ * Column types:
+ * - `type: 'object'` - Column only accepts JSON objects. String values are assumed to be
+ *   pre-serialized JSON to prevent double serialization when data flows between views.
+ * - `type: ['string', 'number', 'boolean', 'object', 'array', 'null']` - Column accepts
+ *   any valid JSON value. All values are properly serialized.
+ *
+ * @example
+ * ```typescript
+ * {
+ *   change: {
+ *     snapshot_content: { type: 'object' } // Only objects, prevents double serialization
+ *   },
+ *   key_value: {
+ *     value: { type: ['string', 'number', 'boolean', 'object', 'array', 'null'] } // Any JSON
+ *   }
+ * }
+ * ```
+ */
+const ViewsWithJsonColumns = (() => {
+	const result: Record<
+		string,
+		Record<
+			string,
+			{
+				type:
+					| "object"
+					| Array<
+							"string" | "number" | "boolean" | "object" | "array" | "null"
+					  >;
+			}
+		>
+	> = {};
+
+	// Hardcoded object-only columns
+	const hardcodedViews = {
+		state: { snapshot_content: { type: "object" as const } },
+		state_all: { snapshot_content: { type: "object" as const } },
+		state_history: { snapshot_content: { type: "object" as const } },
+		change: { snapshot_content: { type: "object" as const } },
+	};
+
+	// Add the hardcoded columns first
+	Object.assign(result, hardcodedViews);
+
+	// Process schema-based columns
+	for (const [viewName, schema] of Object.entries(LixSchemaViewMap)) {
+		// Check if schema is an object and has properties
+		if (typeof schema === "boolean" || !schema.properties) continue;
+
+		const jsonColumns: Record<
+			string,
+			{
+				type: Array<
+					"string" | "number" | "boolean" | "object" | "array" | "null"
+				>;
+			}
+		> = {};
+
+		for (const [key, def] of Object.entries(schema.properties)) {
+			if (isJsonType(def)) {
+				// All schema-based JSON columns accept any JSON value
+				jsonColumns[key] = {
+					type: ["string", "number", "boolean", "object", "array", "null"],
+				};
 			}
 		}
-		return result;
-	})(),
-};
+
+		if (Object.keys(jsonColumns).length > 0) {
+			result[viewName] = jsonColumns;
+			// Also add the _all variant view with the same JSON columns
+			result[viewName + "_all"] = jsonColumns;
+		}
+	}
+
+	return result;
+})();
 
 export function initDb(args: {
 	sqlite: SqliteWasmDatabase;
@@ -65,6 +124,9 @@ export function initDb(args: {
 			new ViewInsertReturningErrorPlugin(Object.keys(LixSchemaViewMap)),
 		],
 	});
+
+	const lix = { sqlite: args.sqlite, db } as unknown as Lix;
+
 	initFunctions({
 		sqlite: args.sqlite,
 		db: db as unknown as Kysely<LixInternalDatabaseSchema>,
@@ -78,17 +140,17 @@ export function initDb(args: {
 		db as unknown as Kysely<LixInternalDatabaseSchema>,
 		args.hooks
 	);
-	applyChangeSetDatabaseSchema(args.sqlite);
+	applyChangeSetDatabaseSchema(args.sqlite, db);
 	applyStoredSchemaDatabaseSchema(args.sqlite);
-	applyVersionDatabaseSchema(args.sqlite);
-	applyAccountDatabaseSchema(args.sqlite);
-	applyKeyValueDatabaseSchema(args.sqlite);
-	applyChangeAuthorDatabaseSchema(args.sqlite);
-	applyLabelDatabaseSchema(args.sqlite);
-	applyThreadDatabaseSchema(args.sqlite);
-	applyStateHistoryDatabaseSchema(args.sqlite);
+	applyVersionDatabaseSchema(lix);
+	applyAccountDatabaseSchema(args.sqlite, db);
+	applyKeyValueDatabaseSchema(lix);
+	applyChangeAuthorDatabaseSchema(lix);
+	applyLabelDatabaseSchema(lix);
+	applyThreadDatabaseSchema(lix);
+	applyStateHistoryDatabaseSchema(lix);
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
-	applyLogDatabaseSchema(args.sqlite);
+	applyLogDatabaseSchema(lix);
 
 	return db;
 }
@@ -97,16 +159,12 @@ function initFunctions(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 }) {
-	args.sqlite.createFunction({
-		name: "uuid_v7",
-		arity: 0,
-		xFunc: () => uuid_v7(),
-	});
+	const lix = { sqlite: args.sqlite, db: args.db } as unknown as Lix;
 
 	args.sqlite.createFunction({
-		name: "uuid_v4",
+		name: "lix_uuid_v7",
 		arity: 0,
-		xFunc: () => uuid_v4(),
+		xFunc: () => uuidV7({ lix }),
 	});
 
 	args.sqlite.createFunction({
@@ -116,11 +174,17 @@ function initFunctions(args: {
 	});
 
 	args.sqlite.createFunction({
-		name: "nano_id",
+		name: "lix_timestamp",
+		arity: 0,
+		xFunc: () => timestamp({ lix }),
+	});
+
+	args.sqlite.createFunction({
+		name: "lix_nano_id",
 		arity: -1,
 		// @ts-expect-error - not sure why this is not working
 		xFunc: (_ctx: number, length: number) => {
-			return nanoid(length);
+			return nanoId({ lix, length });
 		},
 	});
 }

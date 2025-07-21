@@ -6,7 +6,7 @@ export function applyChangeProposalDatabaseSchema(
 ): SqliteWasmDatabase {
 	const sql = `
   CREATE TABLE IF NOT EXISTS change_proposal (
-    id TEXT PRIMARY KEY DEFAULT (uuid_v7()),
+    id TEXT PRIMARY KEY DEFAULT (lix_uuid_v7()),
 
     change_set_id TEXT NOT NULL,
     source_change_set_id TEXT,

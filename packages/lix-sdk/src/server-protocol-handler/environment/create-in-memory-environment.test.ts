@@ -14,7 +14,7 @@ test.skip("opening a lix works", async () => {
 		.executeTakeFirstOrThrow()) as { value: string };
 
 	// initialize the env with the lix file
-	environment.setLix({ id: lixId, blob: await mockLix.toBlob() });
+	await environment.setLix({ id: lixId, blob: await mockLix.toBlob() });
 
 	const open0 = await environment.openLix({ id: lixId });
 
@@ -61,7 +61,7 @@ test.todo("it handles concurrent connections", async () => {
 		.executeTakeFirstOrThrow()) as { value: string };
 
 	// initialize the env with the lix file
-	environment.setLix({ id: lixId, blob: await mockLix.toBlob() });
+	await environment.setLix({ id: lixId, blob: await mockLix.toBlob() });
 
 	const open0 = await environment.openLix({ id: lixId });
 	const open1 = await environment.openLix({ id: lixId });

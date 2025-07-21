@@ -130,7 +130,7 @@ test.skip("it should return 400 for a failed insert operation", async () => {
 
 	const environment = createLspInMemoryEnvironment();
 
-	environment.setLix({ id, blob: await lix.toBlob() });
+	await environment.setLix({ id, blob: await lix.toBlob() });
 
 	const lsa = await createServerProtocolHandler({ environment });
 

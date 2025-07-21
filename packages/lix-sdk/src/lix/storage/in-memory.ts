@@ -4,7 +4,6 @@ import {
 	importDatabase,
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
-import { newLixFile } from "../new-lix.js";
 import type { LixStorageAdapter } from "./lix-storage-adapter.js";
 
 /**
@@ -19,15 +18,18 @@ export class InMemoryStorage implements LixStorageAdapter {
 	/**
 	 * Opens an in-memory SQLite database.
 	 *
-	 * Creates a new empty lix if this is the first time opening.
+	 * Creates a new database and optionally initializes it with the provided blob.
 	 * Returns the same database instance on subsequent calls.
 	 */
-	async open(): Promise<SqliteWasmDatabase> {
+	async open(args: {
+		blob?: Blob;
+		createBlob: () => Promise<Blob>;
+	}): Promise<SqliteWasmDatabase> {
 		if (!this.database) {
 			this.database = await createInMemoryDatabase({ readOnly: false });
 
-			// Initialize with new empty lix
-			const blob = await newLixFile();
+			// Initialize with provided blob or create new one
+			const blob = args.blob ?? (await args.createBlob());
 			importDatabase({
 				db: this.database,
 				content: new Uint8Array(await blob.arrayBuffer()),
@@ -48,22 +50,15 @@ export class InMemoryStorage implements LixStorageAdapter {
 	}
 
 	/**
-	 * Imports data from a blob, replacing the current database content.
-	 */
-	async import(blob: Blob): Promise<void> {
-		const database = await this.open();
-		importDatabase({
-			db: database,
-			content: new Uint8Array(await blob.arrayBuffer()),
-		});
-	}
-
-	/**
 	 * Exports the current database state as a blob.
+	 *
+	 * @throws Error if the database has not been opened yet
 	 */
 	async export(): Promise<Blob> {
-		const database = await this.open();
-		const content = contentFromDatabase(database);
+		if (!this.database) {
+			throw new Error("Database has not been opened yet");
+		}
+		const content = contentFromDatabase(this.database);
 		return new Blob([content]);
 	}
 }

@@ -1,32 +1,34 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../deterministic/index.js";
 import { humanId } from "human-id";
+import type { Lix } from "../lix/open-lix.js";
 
-export function applyVersionDatabaseSchema(sqlite: SqliteWasmDatabase): void {
+export function applyVersionDatabaseSchema(
+	lix: Pick<Lix, "sqlite" | "db">
+): void {
 	// Create both primary and _all views for version with global version constraint
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixVersionSchema,
 		overrideName: "version",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		hardcodedVersionId: "global",
 		defaultValues: {
-			id: () => nanoid(),
+			id: () => nanoId({ lix }),
 			name: () => humanId(),
-			working_change_set_id: () => nanoid(),
+			working_change_set_id: () => nanoId({ lix }),
 			inherits_from_version_id: () => "global",
 			hidden: () => false,
 		},
 	});
 
 	// Create active_version as an entity view manually with untracked state
-	sqlite.exec(`
+	lix.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS active_version AS
 		SELECT
 			json_extract(snapshot_content, '$.version_id') AS version_id,

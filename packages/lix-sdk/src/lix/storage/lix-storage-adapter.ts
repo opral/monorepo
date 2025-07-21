@@ -8,18 +8,20 @@ import type { Lix } from "../open-lix.js";
 export interface LixStorageAdapter {
 	/**
 	 * Opens and returns the database instance.
+	 *
+	 * @param args - Arguments for opening the storage
+	 * @param args.blob - Optional blob to initialize the storage with (takes precedence over existing data)
+	 * @param args.createBlob - Callback to create a new blob if no existing data is found
 	 */
-	open(): Promise<SqliteWasmDatabase>;
+	open(args: {
+		blob?: Blob;
+		createBlob: () => Promise<Blob>;
+	}): Promise<SqliteWasmDatabase>;
 
 	/**
 	 * Closes the database and cleans up resources.
 	 */
 	close(): Promise<void>;
-
-	/**
-	 * Imports data from a blob into the storage.
-	 */
-	import(blob: Blob): Promise<void>;
 
 	/**
 	 * Exports the current storage state as a blob.

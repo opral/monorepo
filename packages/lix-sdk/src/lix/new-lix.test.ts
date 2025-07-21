@@ -129,8 +129,6 @@ test("bootstrap changes include lix_name key-value in the global version", async
 		.selectAll()
 		.execute();
 
-	console.log("lix_name key-value:", kv);
-
 	expect(kv).toHaveLength(1);
 	expect(kv[0]?.key).toBe("lix_name");
 	expect(kv[0]?.value).toBeDefined();
@@ -216,4 +214,206 @@ test("newLixFile can use provided key values", async () => {
 		.executeTakeFirst();
 	expect(customKv?.value).toBe("custom_value");
 	expect(customKv?.lixcol_version_id).toBe("global");
+});
+
+test("provided key values default to the active version if lixcol_version_id is not specified", async () => {
+	const blob = await newLixFile({
+		keyValues: [
+			{ key: "test_key_1", value: "test_value_1" },
+			{ key: "test_key_2", value: "test_value_2" },
+		],
+	});
+
+	const lix = await openLix({ blob });
+
+	// Get the active version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirst();
+
+	expect(activeVersion).toBeDefined();
+	expect(activeVersion?.version_id).toBeDefined();
+
+	// Check that the key values are associated with the active version
+	const kv1 = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "test_key_1")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(kv1?.value).toBe("test_value_1");
+	expect(kv1?.lixcol_version_id).toBe(activeVersion?.version_id);
+
+	const kv2 = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "test_key_2")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(kv2?.value).toBe("test_value_2");
+	expect(kv2?.lixcol_version_id).toBe(activeVersion?.version_id);
+
+	// The active version should be "main" (not "global")
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.where("id", "=", activeVersion!.version_id)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(mainVersion?.name).toBe("main");
+});
+
+test("deterministic mode with bootstrap: false results in different lix_ids", async () => {
+	// Create two lix files without deterministic bootstrap
+	const blob1 = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: false },
+			},
+		],
+	});
+	const blob2 = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: false },
+			},
+		],
+	});
+
+	// The lix_ids should be different
+	expect(blob1._lix.id).toBeDefined();
+	expect(blob2._lix.id).toBeDefined();
+	expect(blob1._lix.id).not.toBe(blob2._lix.id);
+});
+
+test("deterministic mode with bootstrap: true results in identical lix_ids", async () => {
+	// Create two lix files with deterministic bootstrap
+	const blob1 = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+	const blob2 = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+
+	// The lix_ids should be identical (deterministic-lix-id)
+	expect(blob1._lix.id).toBeDefined();
+	expect(blob2._lix.id).toBeDefined();
+	expect(blob1._lix.id).toBe(blob2._lix.id);
+	expect(blob1._lix.id).toBe("deterministic-lix-id");
+});
+
+test("deterministic mode with bootstrap creates fully deterministic lix", async () => {
+	// Create two lix files with deterministic bootstrap
+	const blob1 = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+	const blob2 = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+
+	const lix1 = await openLix({ blob: blob1 });
+	const lix2 = await openLix({ blob: blob2 });
+
+	// Check that all changes have identical IDs and timestamps
+	const changes1 = await lix1.db
+		.selectFrom("change")
+		.select(["id", "entity_id", "created_at"])
+		.orderBy("id")
+		.execute();
+	const changes2 = await lix2.db
+		.selectFrom("change")
+		.select(["id", "entity_id", "created_at"])
+		.orderBy("id")
+		.execute();
+
+	expect(changes1).toEqual(changes2);
+
+	// Check that all entity IDs are identical
+	const versions1 = await lix1.db
+		.selectFrom("version")
+		.select(["id", "name"])
+		.orderBy("id")
+		.execute();
+	const versions2 = await lix2.db
+		.selectFrom("version")
+		.select(["id", "name"])
+		.orderBy("id")
+		.execute();
+
+	expect(versions1).toEqual(versions2);
+
+	// Check timestamps are deterministic (epoch 0)
+	expect(changes1[0]?.created_at).toBe("1970-01-01T00:00:00.000Z");
+});
+
+test("deterministic mode config is persisted correctly", async () => {
+	const blob = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+	const lix = await openLix({ blob });
+
+	// Check that lix_deterministic_mode exists in key_value_all
+	// Since no lixcol_version_id was specified, it should be in the main version
+	const result = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_deterministic_mode")
+		.select(["key", "value", "lixcol_version_id"])
+		.executeTakeFirst();
+
+	expect(result).toBeDefined();
+	expect(result?.key).toBe("lix_deterministic_mode");
+	expect(result?.value).toEqual({ enabled: true, bootstrap: true }); // JSON values are preserved
+});
+
+test("deterministic mode config with global version_id is persisted correctly", async () => {
+	const blob = await newLixFile({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+	const lix = await openLix({ blob });
+
+	// Check that lix_deterministic_mode exists with global version_id
+	const result = await lix.db
+		.selectFrom("key_value_all")
+		.where("key", "=", "lix_deterministic_mode")
+		.where("lixcol_version_id", "=", "global")
+		.select(["key", "value"])
+		.executeTakeFirst();
+
+	expect(result).toBeDefined();
+	expect(result?.key).toBe("lix_deterministic_mode");
+	expect(result?.value).toEqual({ enabled: true, bootstrap: true }); // JSON values are preserved
 });

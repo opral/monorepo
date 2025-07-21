@@ -1,39 +1,38 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { ZettelDocJsonSchema, type ZettelDoc } from "@opral/zettel-ast";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
+import { nanoId } from "../deterministic/index.js";
+import type { Lix } from "../lix/open-lix.js";
 
 export function applyThreadDatabaseSchema(
-	sqlite: SqliteWasmDatabase
-): SqliteWasmDatabase {
+	lix: Pick<Lix, "sqlite" | "db">
+): void {
 	// Create both primary and _all views for thread with default ID generation
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixThreadSchema,
 		overrideName: "thread",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => "nano_id()",
+			id: () => nanoId({ lix }),
 		},
 	});
 
 	// Create both primary and _all views for thread_comment with default ID generation
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixThreadCommentSchema,
 		overrideName: "thread_comment",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => "nano_id()",
+			id: () => nanoId({ lix }),
 		},
 	});
-
-	return sqlite;
 }
 
 export const LixThreadSchema = {

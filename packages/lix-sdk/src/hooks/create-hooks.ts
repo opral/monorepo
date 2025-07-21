@@ -30,34 +30,6 @@ export type LixHooks = {
 	onStateCommit: (handler: (data: { changes: Change[] }) => void) => () => void;
 
 	/**
-	 * Listen to file change events.
-	 *
-	 * Note: This API will become redundant once subscriptions are implemented.
-	 *
-	 * Fires when a file is inserted, updated, or deleted in the database.
-	 * Useful for updating UI, triggering re-parsing, or synchronizing external systems.
-	 *
-	 * @param handler - Function to call when a file changes
-	 * @returns Unsubscribe function to remove the listener
-	 *
-	 * @example
-	 * ```typescript
-	 * const unsubscribe = lix.hooks.onFileChange((fileId, operation) => {
-	 *   console.log(`File ${fileId} was ${operation}`);
-	 *   if (operation === 'updated') {
-	 *     reloadEditor(fileId);
-	 *   }
-	 * });
-	 *
-	 * // Later, remove the listener
-	 * unsubscribe();
-	 * ```
-	 */
-	onFileChange: (
-		handler: (fileId: string, operation: "inserted" | "updated") => void
-	) => () => void;
-
-	/**
 	 * Internal method for emitting events.
 	 *
 	 * @internal
@@ -87,18 +59,6 @@ export function createHooks(): LixHooks {
 			eventTarget.addEventListener("state_commit", wrappedHandler);
 			return () =>
 				eventTarget.removeEventListener("state_commit", wrappedHandler);
-		},
-
-		onFileChange(
-			handler: (fileId: string, operation: "inserted" | "updated") => void
-		): () => void {
-			const wrappedHandler = (event: Event) => {
-				const customEvent = event as CustomEvent;
-				handler(customEvent.detail.fileId, customEvent.detail.operation);
-			};
-			eventTarget.addEventListener("file_change", wrappedHandler);
-			return () =>
-				eventTarget.removeEventListener("file_change", wrappedHandler);
 		},
 
 		_emit(eventType: string, data?: any): void {

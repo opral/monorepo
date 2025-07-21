@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import posthog from "posthog-js";
 import { LixProvider } from "@lix-js/react-utils";
 import { initializeLix } from "../helper/initializeLix";
-import { nanoid, type Lix } from "@lix-js/sdk";
+import { nanoId, type Lix } from "@lix-js/sdk";
 import { useSearchParams } from "react-router-dom";
 import { upsertKeyValue } from "@/hooks/useKeyValue";
 import { selectFiles } from "@/queries";
@@ -32,10 +32,10 @@ export function App({ children }: { children: React.ReactNode }) {
 				autocapture: {
 					capture_copied_text: true,
 				},
-				persistence: 'localStorage',
+				persistence: "localStorage",
 				loaded: (posthog) => {
 					posthog.capture("$pageview");
-				}
+				},
 			});
 		} else {
 			console.info("No posthog token found");
@@ -53,7 +53,7 @@ export function App({ children }: { children: React.ReactNode }) {
 					if (lixId) {
 						setSearchParams((currentParams) => {
 							currentParams.set("lix", lixId);
-							return currentParams
+							return currentParams;
 						});
 					}
 				})
@@ -68,23 +68,32 @@ export function App({ children }: { children: React.ReactNode }) {
 			if (lixId && urlLixId === lixId) {
 				const fileId = searchParams.get("f");
 				if (fileId) {
-					upsertKeyValue(lix, "flashtype_active_file", fileId)
+					upsertKeyValue(lix, "flashtype_active_file", fileId);
 				} else {
-					selectFiles(lix).executeTakeFirst().then((file) => {
-						if (!file) {
-							const newFileId = nanoid()
-							lix.db.insertInto("file").values({ id: newFileId, path: "/document.md", data: new TextEncoder().encode("") }).execute()
-							setSearchParams((currentParams) => {
-								currentParams.set("f", newFileId);
-								return currentParams;
-							});
-						} else {
-							setSearchParams((currentParams) => {
-								currentParams.set("f", file.id);
-								return currentParams;
-							});
-						}
-					})
+					selectFiles(lix)
+						.executeTakeFirst()
+						.then((file) => {
+							if (!file) {
+								const newFileId = nanoId({ lix });
+								lix.db
+									.insertInto("file")
+									.values({
+										id: newFileId,
+										path: "/document.md",
+										data: new TextEncoder().encode(""),
+									})
+									.execute();
+								setSearchParams((currentParams) => {
+									currentParams.set("f", newFileId);
+									return currentParams;
+								});
+							} else {
+								setSearchParams((currentParams) => {
+									currentParams.set("f", file.id);
+									return currentParams;
+								});
+							}
+						});
 				}
 			}
 		}
@@ -94,7 +103,9 @@ export function App({ children }: { children: React.ReactNode }) {
 		return (
 			<main className="w-full h-screen overflow-hidden bg-white flex flex-col items-center justify-center">
 				<div className="text-center">
-					<h2 className="text-xl font-semibold text-red-600 mb-2">Failed to initialize Lix</h2>
+					<h2 className="text-xl font-semibold text-red-600 mb-2">
+						Failed to initialize Lix
+					</h2>
 					<p className="text-gray-600 mb-4">{lixError.message}</p>
 					<button
 						onClick={() => window.location.reload()}

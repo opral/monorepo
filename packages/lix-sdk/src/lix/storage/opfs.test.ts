@@ -1,7 +1,7 @@
 import { test, expect, describe, beforeEach, vi } from "vitest";
 import { OpfsStorage } from "./opfs.js";
 import { openLix } from "../open-lix.js";
-import { InMemoryStorage } from "./in-memory.js";
+import { newLixFile } from "../new-lix.js";
 
 // Create a realistic in-memory OPFS mock
 class MockOPFS {
@@ -72,6 +72,7 @@ describe("OpfsStorage", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Create a fresh MockOPFS instance for each test to prevent cross-test pollution
 		mockOpfs = new MockOPFS();
 
 		// Setup OPFS mock
@@ -84,6 +85,7 @@ describe("OpfsStorage", () => {
 				},
 			},
 			writable: true,
+			configurable: true,
 		});
 	});
 
@@ -114,8 +116,8 @@ describe("OpfsStorage", () => {
 
 	test("returns same database instance on multiple open calls", async () => {
 		const storage = new OpfsStorage({ path: "test.db" });
-		const db1 = await storage.open();
-		const db2 = await storage.open();
+		const db1 = await storage.open({ createBlob: () => newLixFile() });
+		const db2 = await storage.open({ createBlob: () => newLixFile() });
 
 		expect(db1).toBe(db2);
 	});
@@ -126,26 +128,6 @@ describe("OpfsStorage", () => {
 
 		// This should not throw
 		await expect(storage.close()).resolves.not.toThrow();
-	});
-
-	test("imports lix file blob and saves to OPFS", async () => {
-		const storage = new OpfsStorage({ path: "test.db" });
-
-		const sourceLix = await openLix({ storage: new InMemoryStorage() });
-
-		// Add some data to the source
-		await sourceLix.db
-			.insertInto("key_value")
-			.values({
-				key: "imported-key",
-				value: "imported-value",
-			})
-			.execute();
-
-		const lixBlob = await sourceLix.toBlob();
-
-		// This should not throw
-		await expect(storage.import(lixBlob)).resolves.not.toThrow();
 	});
 
 	test("integrates with openLix", async () => {
@@ -195,6 +177,9 @@ describe("OpfsStorage", () => {
 		expect(result[0]?.value).toBe("e2e-test-value");
 	});
 
+	// TODO occasional test failures due to timing issues
+	// faulty state materialization might be the cause.
+	// fix after https://github.com/opral/lix-sdk/issues/308
 	test("can save and load data persistence", async () => {
 		const path = "persistence-test.db";
 
@@ -212,6 +197,9 @@ describe("OpfsStorage", () => {
 
 		// Wait for auto-save to complete
 		await new Promise((resolve) => setTimeout(resolve, 150));
+
+		// Close the first lix to ensure data is saved
+		await lix1.close();
 
 		// Open new storage instance with same path
 		const storage2 = new OpfsStorage({ path });
@@ -300,6 +288,9 @@ describe("OpfsStorage", () => {
 		expect(activeAccount2.name).toBe(account.name);
 	});
 
+	// TODO occasional test failures due to timing issues
+	// faulty state materialization might be the cause.
+	// fix after https://github.com/opral/lix-sdk/issues/308
 	test("only saves active accounts when they change", async () => {
 		const path = "observer-test.lix";
 		const storage = new OpfsStorage({ path });
@@ -318,6 +309,15 @@ describe("OpfsStorage", () => {
 
 		// Clear the spy to ignore the initial save
 		saveActiveAccountsSpy.mockClear();
+
+		// Ensure active version exists before proceeding
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirst();
+
+		expect(activeVersion).toBeDefined();
+		expect(activeVersion?.version_id).toBeDefined();
 
 		// Make a change that doesn't affect active_account
 		await lix.db

@@ -89,9 +89,12 @@ export const _nanoIdAlphabet =
 /**
  * Generate secure URL-friendly unique ID.
  *
+ * NOTE: This is the non-deterministic version. For deterministic IDs in tests,
+ * use `nanoid({ lix })` from './functions.js' instead.
+ *
  * Use https://zelark.github.io/nano-id-cc/ to calculate the length
  * of the ID for the use case with the alphabet provided in the
  * implementation.
  */
-export const nanoid: (size?: number) => string =
+export const randomNanoId: (size?: number) => string =
 	customAlphabet(_nanoIdAlphabet);

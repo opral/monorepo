@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
-import { nanoid } from "../database/nano-id.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
+import { randomNanoId } from "../database/nano-id.js";
 
 describe("file insert", () => {
 	it("should handle unknown file types with fallback plugin", async () => {
@@ -21,7 +21,7 @@ describe("file insert", () => {
 		handleFileInsert({
 			lix,
 			file: {
-				id: nanoid(),
+				id: randomNanoId(),
 				path: "/test.unknown",
 				data: new TextEncoder().encode("some content"),
 				metadata: null,
@@ -52,7 +52,7 @@ describe("file update", () => {
 			],
 		});
 		const version = await createVersion({ lix });
-		const fileId = nanoid();
+		const fileId = randomNanoId();
 
 		// Manually insert the file into the file table first
 		await lix.db
@@ -94,7 +94,7 @@ describe("file update", () => {
 			providePlugins: [mockJsonPlugin],
 		});
 		const version = await createVersion({ lix });
-		const fileId = nanoid();
+		const fileId = randomNanoId();
 
 		// Initial JSON data with two users
 		const initialJsonData = {

@@ -1,25 +1,21 @@
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../deterministic/index.js";
+import type { Lix } from "../lix/open-lix.js";
 
-export function applyLogDatabaseSchema(
-	sqlite: SqliteWasmDatabase
-): SqliteWasmDatabase {
+export function applyLogDatabaseSchema(lix: Pick<Lix, "sqlite" | "db">): void {
 	// Create both primary and _all views for log
 	createEntityViewsIfNotExists({
-		lix: { sqlite },
+		lix,
 		schema: LixLogSchema,
 		overrideName: "log",
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
-		defaultValues: { id: () => nanoid() },
+		defaultValues: { id: () => nanoId({ lix }) },
 	});
-
-	return sqlite;
 }
 
 export const LixLogSchema = {

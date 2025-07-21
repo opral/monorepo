@@ -42,15 +42,17 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 
 	// Build table to schema key mapping from LixSchemaViewMap
 	const tableToSchemaMap: Record<string, string> = {};
-	
+
 	// Add mappings from LixSchemaViewMap
-	for (const [schemaKey, schemaDefinition] of Object.entries(LixSchemaViewMap)) {
+	for (const [schemaKey, schemaDefinition] of Object.entries(
+		LixSchemaViewMap
+	)) {
 		const lixKey = schemaDefinition["x-lix-key"];
 		if (lixKey) {
 			tableToSchemaMap[schemaKey] = lixKey;
 		}
 	}
-	
+
 	// Add special tables that don't have direct schema mappings but are important
 	const specialMappings = {
 		change: "change", // Special case for change table
@@ -59,7 +61,7 @@ export function determineSchemaKeys(compiledQuery: any): string[] {
 		active_version: "lix_version", // Maps to version schema
 		active_account: "lix_account", // Maps to account schema
 	};
-	
+
 	Object.assign(tableToSchemaMap, specialMappings);
 
 	const schemaKeys: string[] = [];

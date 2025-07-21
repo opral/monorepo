@@ -1,5 +1,5 @@
 import type { Selectable } from "kysely";
-import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
+import type { Lix } from "../lix/open-lix.js";
 
 /**
  * State history table interface for querying historical entity states.
@@ -102,10 +102,9 @@ export interface StateHistoryTable {
 export type StateHistoryView = Selectable<StateHistoryTable>;
 
 export function applyStateHistoryDatabaseSchema(
-	sqlite: SqliteWasmDatabase
-): SqliteWasmDatabase {
-	sqlite.exec(STATE_HISTORY_VIEW_SQL);
-	return sqlite;
+	lix: Pick<Lix, "sqlite" | "db">
+): void {
+	lix.sqlite.exec(STATE_HISTORY_VIEW_SQL);
 }
 
 // Optimized to use materialized change_set_edge_all and change_set_element_all from global version

@@ -3,8 +3,6 @@ import {
 	contentFromDatabase,
 } from "sqlite-wasm-kysely";
 import { initDb } from "../database/init-db.js";
-import { v7 as uuid_v7 } from "uuid";
-import { nanoid } from "../database/nano-id.js";
 import { LixVersionSchema, type LixVersion } from "../version/schema.js";
 import {
 	LixChangeSetSchema,
@@ -20,6 +18,8 @@ import type { LixStoredSchema } from "../stored-schema/schema.js";
 import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
+import { v7 } from "uuid";
+import { randomNanoId } from "../database/nano-id.js";
 
 /**
  * A Blob with an attached `._lix` property for easy access to some lix properties.
@@ -91,6 +91,8 @@ export async function newLixFile(args?: {
 	 * Use this to set initial values for `lix_id`, `lix_name`, or other custom keys.
 	 * If `lix_id` or `lix_name` are not provided, they will be generated automatically.
 	 *
+	 * The `lixcol_version_id` defaults to the active version.
+	 *
 	 * @example
 	 *  keyValues: [
 	 *    { key: "lix_name", value: "my-project", lixcol_version_id: "global" },
@@ -109,8 +111,65 @@ export async function newLixFile(args?: {
 	// applying the schema etc.
 	const db = initDb({ sqlite, hooks });
 
+	// Check if deterministic bootstrap is enabled
+	// First check for the new JSON structure
+	const deterministicModeConfig = args?.keyValues?.find(
+		(kv) => kv.key === "lix_deterministic_mode" && typeof kv.value === "object"
+	);
+
+	let isDeterministicBootstrap = false;
+	if (
+		deterministicModeConfig?.value &&
+		typeof deterministicModeConfig.value === "object"
+	) {
+		// Check if bootstrap is enabled in the config
+		isDeterministicBootstrap =
+			(deterministicModeConfig.value as any).bootstrap === true;
+	}
+
+	// For backward compatibility, also check legacy key
+	if (!isDeterministicBootstrap) {
+		isDeterministicBootstrap =
+			args?.keyValues?.some(
+				(kv) => kv.key === "lix_deterministic_bootstrap" && kv.value === true
+			) ?? false;
+	}
+
+	// Counter for deterministic IDs
+	let deterministicIdCounter = 0;
+
+	// Helper to generate IDs based on mode
+	const generateUuid = () => {
+		if (isDeterministicBootstrap) {
+			const hex = (deterministicIdCounter++).toString(16).padStart(8, "0");
+			// Use a different prefix (0192aaaa) for bootstrap changes to avoid collisions
+			// from the normal deterministic uuidV7 generator
+			return `0192aaaa-0000-7000-8000-0000${hex}`;
+		}
+		return v7();
+	};
+
+	const generateNanoid = () => {
+		if (isDeterministicBootstrap) {
+			// Use "boot_" prefix for bootstrap nanoids to avoid collisions
+			return `boot_${(deterministicIdCounter++).toString().padStart(10, "0")}`;
+		}
+		return randomNanoId();
+	};
+
+	// Hardcode timestamp to epoch 0 for deterministic bootstrap
+	const created_at = isDeterministicBootstrap
+		? new Date(0).toISOString()
+		: new Date().toISOString();
+
 	// Create bootstrap changes for initial data
-	const bootstrapChanges = createBootstrapChanges(args?.keyValues);
+	const bootstrapChanges = createBootstrapChanges({
+		providedKeyValues: args?.keyValues,
+		created_at,
+		generateUuid,
+		generateNanoid,
+		isDeterministicBootstrap: isDeterministicBootstrap || false,
+	});
 
 	// Extract the lix_id from bootstrap changes
 	const lixId = bootstrapChanges.find(
@@ -125,17 +184,12 @@ export async function newLixFile(args?: {
 
 	// Insert all bootstrap changes directly into the change tables
 	for (const change of bootstrapChanges) {
-		// Insert snapshot content if it exists
-		let snapshotId = "no-content";
 		if (change.snapshot_content) {
-			const result = sqlite.exec({
-				sql: `INSERT INTO internal_snapshot (content) VALUES (jsonb(?)) RETURNING id`,
-				bind: [JSON.stringify(change.snapshot_content)],
+			sqlite.exec({
+				sql: `INSERT INTO internal_snapshot (id, content) VALUES (?, jsonb(?))`,
+				bind: [change.snapshot_id, JSON.stringify(change.snapshot_content)],
 				returnValue: "resultRows",
 			});
-			if (result && result.length > 0) {
-				snapshotId = result[0]![0] as string;
-			}
 		}
 
 		// Insert the change record
@@ -149,7 +203,7 @@ export async function newLixFile(args?: {
 				change.schema_version,
 				change.file_id,
 				change.plugin_key,
-				snapshotId,
+				change.snapshot_id,
 				change.created_at,
 			],
 		});
@@ -160,11 +214,72 @@ export async function newLixFile(args?: {
 		(c) => c.schema_key === "lix_version" && c.snapshot_content?.name === "main"
 	)?.entity_id;
 
-	sqlite.exec(`
-		INSERT INTO active_version (version_id)
-		SELECT '${initialVersionId}'
-		WHERE NOT EXISTS (SELECT 1 FROM active_version);
-`);
+	// Set active version using internal_state_all_untracked for determinism
+	sqlite.exec({
+		sql: `INSERT INTO internal_state_all_untracked (
+			entity_id,
+			schema_key,
+			file_id,
+			version_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			created_at,
+			updated_at
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		bind: [
+			"active",
+			"lix_active_version",
+			"lix",
+			"global",
+			"lix_own_entity",
+			JSON.stringify({ version_id: initialVersionId }),
+			"1.0",
+			created_at,
+			created_at,
+		],
+	});
+
+	// No need to persist lix_deterministic_bootstrap separately anymore
+	// It's handled as part of the deterministic mode config
+
+	// Handle other untracked key values
+	const untrackedKeyValues = args?.keyValues?.filter(
+		(kv) =>
+			kv.lixcol_untracked === true && kv.key !== "lix_deterministic_bootstrap"
+	);
+	if (untrackedKeyValues) {
+		for (const kv of untrackedKeyValues) {
+			const versionId = kv.lixcol_version_id ?? "global";
+			sqlite.exec({
+				sql: `INSERT INTO internal_state_all_untracked (
+					entity_id,
+					schema_key,
+					file_id,
+					version_id,
+					plugin_key,
+					snapshot_content,
+					schema_version,
+					created_at,
+					updated_at
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+				bind: [
+					kv.key,
+					"lix_key_value",
+					"lix",
+					versionId,
+					"lix_own_entity",
+					JSON.stringify({
+						key: kv.key,
+						value: kv.value,
+					}),
+					LixKeyValueSchema["x-lix-version"],
+					created_at,
+					created_at,
+				],
+			});
+		}
+	}
 
 	try {
 		const blob = new Blob([contentFromDatabase(sqlite)]);
@@ -185,24 +300,28 @@ export async function newLixFile(args?: {
 
 type BootstrapChange = Omit<LixChange, "snapshot_id"> & {
 	snapshot_content: any;
+	snapshot_id: string;
 };
 
 /**
  * Creates all bootstrap changes needed for a new lix file.
  * All entities are created in a single change set to avoid dependency ordering issues.
  */
-function createBootstrapChanges(
-	providedKeyValues?: NewStateAll<LixKeyValue>[]
-): BootstrapChange[] {
+function createBootstrapChanges(args: {
+	providedKeyValues?: NewStateAll<LixKeyValue>[];
+	created_at: string;
+	generateUuid: () => string;
+	generateNanoid: () => string;
+	isDeterministicBootstrap: boolean;
+}): BootstrapChange[] {
 	const changes: BootstrapChange[] = [];
-	const created_at = new Date().toISOString();
 
 	// Generate random IDs for initial entities
-	const initialVersionId = nanoid();
-	const initialChangeSetId = nanoid();
-	const initialWorkingChangeSetId = nanoid();
-	const initialGlobalVersionChangeSetId = nanoid();
-	const initialGlobalVersionWorkingChangeSetId = nanoid();
+	const initialVersionId = args.generateNanoid();
+	const initialChangeSetId = args.generateNanoid();
+	const initialWorkingChangeSetId = args.generateNanoid();
+	const initialGlobalVersionChangeSetId = args.generateNanoid();
+	const initialGlobalVersionWorkingChangeSetId = args.generateNanoid();
 
 	// Create all required change sets
 	const changeSets: LixChangeSet[] = [
@@ -222,25 +341,27 @@ function createBootstrapChanges(
 
 	for (const changeSet of changeSets) {
 		changes.push({
-			id: uuid_v7(),
+			id: args.generateUuid(),
 			entity_id: changeSet.id,
 			schema_key: "lix_change_set",
 			schema_version: LixChangeSetSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			snapshot_id: args.generateUuid(),
 			snapshot_content: changeSet,
-			created_at,
+			created_at: args.created_at,
 		});
 	}
 
 	// Create global version
 	changes.push({
-		id: uuid_v7(),
+		id: args.generateUuid(),
 		entity_id: "global",
 		schema_key: "lix_version",
 		schema_version: LixVersionSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: "global",
 			name: "global",
@@ -248,17 +369,18 @@ function createBootstrapChanges(
 			working_change_set_id: initialGlobalVersionWorkingChangeSetId,
 			hidden: true,
 		} satisfies LixVersion,
-		created_at,
+		created_at: args.created_at,
 	});
 
 	// Create main version
 	changes.push({
-		id: uuid_v7(),
+		id: args.generateUuid(),
 		entity_id: initialVersionId,
 		schema_key: "lix_version",
 		schema_version: LixVersionSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: initialVersionId,
 			name: "main",
@@ -267,75 +389,100 @@ function createBootstrapChanges(
 			inherits_from_version_id: "global",
 			hidden: false,
 		} satisfies LixVersion,
-		created_at,
+		created_at: args.created_at,
 	});
 
 	// Create default checkpoint label
-	const checkpointLabelId = nanoid();
+	const checkpointLabelId = args.generateNanoid();
 	changes.push({
-		id: uuid_v7(),
+		id: args.generateUuid(),
 		entity_id: checkpointLabelId,
 		schema_key: "lix_label",
 		schema_version: LixLabelSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			id: checkpointLabelId,
 			name: "checkpoint",
 		} satisfies LixLabel,
-		created_at,
+		created_at: args.created_at,
 	});
 
 	// Create lix_id key-value pair
-	const lixId = providedKeyValues?.find((kv) => kv.key === "lix_id")?.value;
+	const lixId = args.providedKeyValues?.find(
+		(kv) => kv.key === "lix_id"
+	)?.value;
 	changes.push({
-		id: uuid_v7(),
+		id: args.generateUuid(),
 		entity_id: "lix_id",
 		schema_key: "lix_key_value",
 		schema_version: LixKeyValueSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			key: "lix_id",
-			value: lixId ?? nanoid(10),
+			value:
+				lixId ??
+				(args.isDeterministicBootstrap
+					? "deterministic-lix-id"
+					: args.generateNanoid()),
 		} satisfies LixKeyValue,
-		created_at,
+		created_at: args.created_at,
 	});
 
 	// create lix_name key-value pair
-	const lixName = providedKeyValues?.find((kv) => kv.key === "lix_name")?.value;
+	const lixName = args.providedKeyValues?.find(
+		(kv) => kv.key === "lix_name"
+	)?.value;
 	changes.push({
-		id: uuid_v7(),
+		id: args.generateUuid(),
 		entity_id: "lix_name",
 		schema_key: "lix_key_value",
 		schema_version: LixKeyValueSchema["x-lix-version"],
 		file_id: "lix",
 		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
 		snapshot_content: {
 			key: "lix_name",
-			value: lixName ?? humanId({ separator: "-", capitalize: false }),
+			value:
+				lixName ??
+				(args.isDeterministicBootstrap
+					? "deterministic-lix-name"
+					: humanId({ separator: "-", capitalize: false })),
 		} satisfies LixKeyValue,
-		created_at,
+		created_at: args.created_at,
 	});
 
-	// Create any other provided key-values
-	if (providedKeyValues) {
-		for (const kv of providedKeyValues) {
-			if (kv.key === "lix_id" || kv.key === "lix_name" || !kv.key || !kv.value)
+	// Create any other provided key-values (excluding untracked ones)
+	if (args.providedKeyValues) {
+		for (const kv of args.providedKeyValues) {
+			if (
+				kv.key === "lix_id" ||
+				kv.key === "lix_name" ||
+				!kv.key ||
+				kv.value === undefined ||
+				kv.value === null
+			)
 				continue;
 
+			// Skip untracked keys - they're handled separately
+			if (kv.lixcol_untracked === true) continue;
+
 			changes.push({
-				id: uuid_v7(),
+				id: args.generateUuid(),
 				entity_id: kv.key,
 				schema_key: "lix_key_value",
 				schema_version: LixKeyValueSchema["x-lix-version"],
 				file_id: "lix",
 				plugin_key: "lix_own_entity",
+				snapshot_id: args.generateUuid(),
 				snapshot_content: {
 					key: kv.key,
 					value: kv.value,
 				} satisfies LixKeyValue,
-				created_at,
+				created_at: args.created_at,
 			});
 		}
 	}
@@ -343,20 +490,50 @@ function createBootstrapChanges(
 	// Create all schema definitions
 	for (const schema of Object.values(LixSchemaViewMap)) {
 		changes.push({
-			id: uuid_v7(),
+			id: args.generateUuid(),
 			entity_id: schema["x-lix-key"],
 			schema_key: "lix_stored_schema",
 			schema_version: "1.0",
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			snapshot_id: args.generateUuid(),
 			snapshot_content: {
 				key: schema["x-lix-key"],
 				version: schema["x-lix-version"],
 				value: JSON.stringify(schema),
 			} satisfies LixStoredSchema,
-			created_at,
+			created_at: args.created_at,
 		});
 	}
+
+	// Create default active account
+	const activeAccountId = args.generateNanoid();
+	const anonymousAccountName = args.isDeterministicBootstrap
+		? "Anonymous User"
+		: `Anonymous ${humanId({
+				capitalize: true,
+				adjectiveCount: 0,
+				separator: "_",
+			})
+				// Human ID has two words, remove the last one
+				.split("_")[0]!
+				// Human ID uses plural, remove the last character to make it singular
+				.slice(0, -1)}`;
+
+	// Create the active account entry (the account entity will be created on first change)
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: activeAccountId,
+		schema_key: "lix_active_account",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			name: anonymousAccountName,
+		},
+		created_at: args.created_at,
+	});
 
 	// Create change set elements linking all changes to the global change set
 	const originalChanges = [...changes]; // snapshot of original changes
@@ -364,21 +541,36 @@ function createBootstrapChanges(
 
 	// First, create change set elements for all original changes
 	for (const change of originalChanges) {
+		// Determine which change set this change should belong to
+		let targetChangeSetId = initialGlobalVersionChangeSetId;
+
+		// Check if this is a key-value change from provided key values
+		if (change.schema_key === "lix_key_value" && args.providedKeyValues) {
+			const providedKv = args.providedKeyValues.find(
+				(kv) => kv.key === change.snapshot_content?.key
+			);
+			if (providedKv && !providedKv.lixcol_version_id) {
+				// If no version specified, use main version's change set
+				targetChangeSetId = initialChangeSetId;
+			}
+		}
+
 		const changeSetElementChange = {
-			id: uuid_v7(),
-			entity_id: `${initialGlobalVersionChangeSetId}::${change.id}`,
+			id: args.generateUuid(),
+			entity_id: `${targetChangeSetId}::${change.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			snapshot_id: args.generateUuid(),
 			snapshot_content: {
-				change_set_id: initialGlobalVersionChangeSetId,
+				change_set_id: targetChangeSetId,
 				change_id: change.id,
 				entity_id: change.entity_id,
 				schema_key: change.schema_key,
 				file_id: change.file_id,
 			} satisfies LixChangeSetElement,
-			created_at,
+			created_at: args.created_at,
 		};
 		changes.push(changeSetElementChange);
 		changeSetElementChanges.push(changeSetElementChange);
@@ -395,12 +587,13 @@ function createBootstrapChanges(
 	// (one level of self-reference, then stop to avoid infinite recursion)
 	for (const changeSetElementChange of changeSetElementChanges) {
 		changes.push({
-			id: uuid_v7(),
+			id: args.generateUuid(),
 			entity_id: `${initialGlobalVersionChangeSetId}::${changeSetElementChange.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
 			plugin_key: "lix_own_entity",
+			snapshot_id: args.generateUuid(),
 			snapshot_content: {
 				change_set_id: initialGlobalVersionChangeSetId,
 				change_id: changeSetElementChange.id,
@@ -408,7 +601,7 @@ function createBootstrapChanges(
 				schema_key: changeSetElementChange.schema_key,
 				file_id: changeSetElementChange.file_id,
 			} satisfies LixChangeSetElement,
-			created_at,
+			created_at: args.created_at,
 		});
 	}
 

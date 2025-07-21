@@ -1,4 +1,4 @@
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
@@ -54,7 +54,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			.execute();
 
 		// 2. Create new empty working change set for continued work
-		const newWorkingChangeSetId = nanoid();
+		const newWorkingChangeSetId = nanoId({ lix: args.lix });
 		await trx
 			.insertInto("change_set_all")
 			.values({

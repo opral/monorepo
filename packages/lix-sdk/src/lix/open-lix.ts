@@ -7,12 +7,18 @@ import type { LixKeyValue } from "../key-value/schema.js";
 import { capture } from "../services/telemetry/capture.js";
 import { ENV_VARIABLES } from "../services/env-variables/index.js";
 import { applyFileDatabaseSchema } from "../file/schema.js";
-import type { NewState } from "../entity-views/types.js";
+import type { NewStateAll } from "../entity-views/types.js";
 import type { LixAccount } from "../account/schema.js";
 import { InMemoryStorage } from "./storage/in-memory.js";
 import type { LixStorageAdapter } from "./storage/lix-storage-adapter.js";
 import { createHooks, type LixHooks } from "../hooks/create-hooks.js";
 import { createObserve } from "../observe/create-observe.js";
+import { commitDeterministicSequenceNumber } from "../deterministic/sequence.js";
+import {
+	commitDeterministicRngState,
+	random,
+} from "../deterministic/random.js";
+import { newLixFile } from "./new-lix.js";
 
 export type Lix = {
 	/**
@@ -119,57 +125,107 @@ export async function openLix(args: {
 	/**
 	 * Set the key values when opening the lix.
 	 *
+	 * The `lixcol_version_id` defaults to the active version.
+	 *
 	 * @example
 	 *   const lix = await openLix({ keyValues: [{ key: "lix_sync", value: "false" }] })
 	 */
-	keyValues?: NewState<LixKeyValue>[];
+	keyValues?: NewStateAll<LixKeyValue>[];
 }): Promise<Lix> {
 	const storage = args.storage ?? (new InMemoryStorage() as LixStorageAdapter);
-	const database = await storage.open();
-
-	// Import blob data if provided
-	if (args.blob) {
-		await storage.import(args.blob);
-	}
+	const database = await storage.open({
+		blob: args.blob,
+		createBlob: () => newLixFile({ keyValues: args.keyValues }),
+	});
 
 	// Create hooks before initializing database so they can be used in schema setup
 	const hooks = createHooks();
 
 	const db = initDb({ sqlite: database, hooks });
 
-	if (args.keyValues && args.keyValues.length > 0) {
-		for (const keyValue of args.keyValues) {
-			// Check if the key already exists
-			const existing = await db
-				.selectFrom("key_value")
-				.select("key")
-				.where("key", "=", keyValue.key)
-				.executeTakeFirst();
-
-			if (existing) {
-				// Update existing key
-				await db
-					.updateTable("key_value")
-					.set({ value: keyValue.value })
-					.where("key", "=", keyValue.key)
-					.execute();
-			} else {
-				// Insert new key
-				await db.insertInto("key_value").values(keyValue).execute();
-			}
-		}
-	}
-
-	// Check if storage has persisted state
+	// Set up account IMMEDIATELY after db init, before any other operations
 	const persistedState = await storage.getPersistedState?.();
 	const accountToSet = args.account ?? persistedState?.activeAccounts?.[0];
 
 	if (accountToSet) {
-		await db.transaction().execute(async (trx) => {
-			// delete the existing active account
-			await trx.deleteFrom("active_account").execute();
-			await trx.insertInto("active_account").values(accountToSet).execute();
-		});
+		// Check if there are any existing active accounts
+		const existingActiveAccounts = await db
+			.selectFrom("active_account")
+			.select(["id", "name"])
+			.execute();
+
+		// If there are existing active accounts, delete them
+		if (existingActiveAccounts.length > 0) {
+			for (const account of existingActiveAccounts) {
+				await db
+					.deleteFrom("active_account")
+					.where("id", "=", account.id)
+					.execute();
+			}
+		}
+
+		// Insert the new active account
+		// The account entity will be created automatically when needed
+		await db.insertInto("active_account").values(accountToSet).execute();
+	}
+
+	// Only process keyValues if we're opening an existing blob
+	// (newLixFile already handles keyValues during creation)
+	if (args.blob && args.keyValues && args.keyValues.length > 0) {
+		for (const keyValue of args.keyValues) {
+			// Determine which table to use based on whether version is specified
+			if (keyValue.lixcol_version_id) {
+				// Check if the key already exists in the specified version
+				const existing = await db
+					.selectFrom("key_value_all")
+					.select("key")
+					.where("key", "=", keyValue.key)
+					.where("lixcol_version_id", "=", keyValue.lixcol_version_id)
+					.executeTakeFirst();
+
+				if (existing) {
+					// Update existing key in the specified version
+					await db
+						.updateTable("key_value_all")
+						.set({ value: keyValue.value })
+						.where("key", "=", keyValue.key)
+						.where("lixcol_version_id", "=", keyValue.lixcol_version_id)
+						.execute();
+				} else {
+					// Insert new key into the specified version
+					await db
+						.insertInto("key_value_all")
+						.values({
+							key: keyValue.key,
+							value: keyValue.value,
+							lixcol_version_id: keyValue.lixcol_version_id,
+						})
+						.execute();
+				}
+			} else {
+				// No version specified, use default key_value table (active version)
+				const existing = await db
+					.selectFrom("key_value")
+					.select("key")
+					.where("key", "=", keyValue.key)
+					.executeTakeFirst();
+
+				if (existing) {
+					// Update existing key
+					await db
+						.updateTable("key_value")
+						.set({ value: keyValue.value })
+						.where("key", "=", keyValue.key)
+						.execute();
+				} else {
+					// Insert new key
+					await db
+						.insertInto("key_value")
+						.values({ key: keyValue.key, value: keyValue.value })
+						.execute();
+				}
+			}
+		}
 	}
 
 	const plugins: LixPlugin[] = [];
@@ -181,8 +237,6 @@ export async function openLix(args: {
 		getAll: async () => plugins,
 		getAllSync: () => plugins,
 	};
-
-	captureOpened({ db });
 
 	const observe = createObserve({ hooks });
 
@@ -196,9 +250,17 @@ export async function openLix(args: {
 			await storage.close();
 		},
 		toBlob: async () => {
+			commitDeterministicSequenceNumber({ lix: { sqlite: database, db } });
+			commitDeterministicRngState({ lix: { sqlite: database, db } });
 			return storage.export();
 		},
 	};
+
+	// MUST BE AWAITED
+	// The databse queries must run. Otherwise, we get super unexpected behavior
+	// where something is tested and then the async queue kicks in and leads
+	// to unexpected results. For example, cache population!
+	await captureOpened({ lix });
 
 	// Apply file and account schemas now that we have the full lix object with plugins
 	applyFileDatabaseSchema(lix);
@@ -211,9 +273,9 @@ export async function openLix(args: {
 	return lix;
 }
 
-async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {
+async function captureOpened(args: { lix: Lix }) {
 	try {
-		const telemetry = await args.db
+		const telemetry = await args.lix.db
 			.selectFrom("key_value")
 			.select("value")
 			.where("key", "=", "lix_telemetry")
@@ -223,20 +285,23 @@ async function captureOpened(args: { db: Kysely<LixDatabaseSchema> }) {
 			return;
 		}
 
-		const activeAccount = await args.db
+		const activeAccount = await args.lix.db
 			.selectFrom("active_account")
 			.select("id")
 			.executeTakeFirstOrThrow();
 
-		const lixId = await args.db
+		const lixId = await args.lix.db
 			.selectFrom("key_value")
 			.select("value")
 			.where("key", "=", "lix_id")
 			.executeTakeFirstOrThrow();
 
-		const fileExtensions = await usedFileExtensions(args.db);
-		if (Math.random() > 0.1) {
-			await capture("LIX-SDK lix opened", {
+		const fileExtensions = await usedFileExtensions(args.lix.db);
+		if (random({ lix: args.lix }) > 0.1) {
+			// Not awaiting to avoid boot up time and knowing that
+			// no database query is performed here. we dont care if the
+			// server responds with an error or not.
+			void capture("LIX-SDK lix opened", {
 				accountId: activeAccount.id,
 				lixId: lixId.value as string,
 				telemetryKeyValue: (telemetry?.value ?? "on") as string,

@@ -28,6 +28,25 @@ export function handleFileInsert(args: {
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
+	const [shouldSkip] = executeSync({
+		lix: args.lix,
+		query: args.lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "lix_skip_file_handlers")
+			.select("value"),
+	});
+
+	if (shouldSkip) {
+		// If skip flag is set, do not process the file
+		createLixOwnLogSync({
+			lix: args.lix,
+			key: "lix_file_skipped_insert_handler",
+			level: "debug",
+			message: `Skipping file insert for ${args.file.path} due to lix_skip_file_handlers flag`,
+		});
+		return 1; // Indicate no changes were made
+	}
+
 	// Insert the file metadata into state table
 	executeSync({
 		lix: args.lix,
@@ -180,6 +199,25 @@ export function handleFileUpdate(args: {
 	versionId: string;
 	untracked?: boolean;
 }): 0 | 1 {
+	const [shouldSkip] = executeSync({
+		lix: args.lix,
+		query: args.lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "lix_skip_file_handlers")
+			.select("value"),
+	});
+
+	if (shouldSkip) {
+		// If skip flag is set, do not process the file
+		createLixOwnLogSync({
+			lix: args.lix,
+			key: "lix_file_skipped_update_handler",
+			level: "debug",
+			message: `Skipping file update for ${args.file.path} due to lix_skip_file_handlers flag`,
+		});
+		return 1; // Indicate no changes were made
+	}
+
 	// Update the file metadata in state table
 	executeSync({
 		lix: args.lix,

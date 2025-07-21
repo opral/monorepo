@@ -4,10 +4,13 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoid } from "../database/nano-id.js";
+import { nanoId } from "../deterministic/index.js";
+import type { LixDatabaseSchema } from "../database/schema.js";
+import type { Kysely } from "kysely";
 
 export function applyChangeSetDatabaseSchema(
-	sqlite: SqliteWasmDatabase
+	sqlite: SqliteWasmDatabase,
+	db: Kysely<LixDatabaseSchema>
 ): SqliteWasmDatabase {
 	// Create change_set view using the generalized entity view builder
 	createEntityViewsIfNotExists({
@@ -17,7 +20,7 @@ export function applyChangeSetDatabaseSchema(
 		pluginKey: "lix_own_entity",
 		hardcodedFileId: "lix",
 		defaultValues: {
-			id: () => nanoid(),
+			id: () => nanoId({ lix: { sqlite, db } }),
 		},
 	});
 

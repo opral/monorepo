@@ -114,7 +114,7 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			};
 
 			// Execute initial query
-			executeQuery();
+			void executeQuery();
 
 			const shouldReexecute = (data: { changes: Change[] }) => {
 				// Extract changes from the data structure
@@ -138,7 +138,10 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 					const schemaKey = change[2] || change.schema_key;
 
 					// Special case: queries with 'change' or 'state_all' schema should always re-execute
-					if (schemaKeys.includes("change") || schemaKeys.includes("state_all")) {
+					if (
+						schemaKeys.includes("change") ||
+						schemaKeys.includes("state_all")
+					) {
 						return true;
 					}
 
@@ -150,7 +153,7 @@ export function createObserve(lix: Pick<Lix, "hooks">) {
 			// Subscribe to state commits for updates
 			const unsubscribeFromStateCommit = lix.hooks.onStateCommit((data) => {
 				if (shouldReexecute(data)) {
-					executeQuery();
+					void executeQuery();
 				}
 			});
 
