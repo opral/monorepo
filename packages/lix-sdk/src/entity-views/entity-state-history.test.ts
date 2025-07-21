@@ -91,8 +91,8 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		expect(historyEntity).toHaveProperty("value", 42);
 
 		// History-specific columns
-		expect(historyEntity).toHaveProperty("entity_id", "test_id");
-		expect(historyEntity).toHaveProperty("schema_key", "test_entity");
+		expect(historyEntity).toHaveProperty("lixcol_entity_id", "test_id");
+		expect(historyEntity).toHaveProperty("lixcol_schema_key", "test_entity");
 		expect(historyEntity).toHaveProperty("lixcol_file_id", "test_file");
 		expect(historyEntity).toHaveProperty("lixcol_plugin_key", "test_plugin");
 		expect(historyEntity).toHaveProperty("lixcol_schema_version", "1.0");
@@ -222,7 +222,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		// Query all history for this entity
 		const historyResult = await lix.db
 			.selectFrom("test_history" as any)
-			.where("entity_id", "=", "tracked_entity")
+			.where("lixcol_entity_id", "=", "tracked_entity")
 			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
 			.orderBy("lixcol_depth", "asc")
 			.selectAll()
@@ -298,7 +298,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		// Verify we can read the data
 		const readResult = await lix.db
 			.selectFrom("readonly_history" as any)
-			.where("entity_id", "=", "test_id")
+			.where("lixcol_entity_id", "=", "test_id")
 			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
 			.selectAll()
 			.execute();
@@ -309,7 +309,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		await expect(
 			lix.db
 				.updateTable("readonly_history" as any)
-				.where("entity_id", "=", "test_id")
+				.where("lixcol_entity_id", "=", "test_id")
 				.set({ name: "updated_name" })
 				.execute()
 		).rejects.toThrow();
@@ -318,8 +318,70 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		await expect(
 			lix.db
 				.deleteFrom("readonly_history" as any)
-				.where("entity_id", "=", "test_id")
+				.where("lixcol_entity_id", "=", "test_id")
 				.execute()
 		).rejects.toThrow();
+	});
+
+	test("should expose lixcol_entity_id, lixcol_schema_key, lixcol_file_id, and lixcol_plugin_key in history view", async () => {
+		const lix = await openLix({});
+
+		createEntityStateHistoryView({
+			lix,
+			schema: testSchema,
+			overrideName: "test_history_view",
+		});
+
+		// Insert test data
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "test_id",
+				schema_key: "test_entity",
+				file_id: "test_file",
+				plugin_key: "test_plugin",
+				snapshot_content: {
+					id: "test_id",
+					name: "test_name",
+					value: 42,
+				},
+				schema_version: "1.0",
+				version_id: lix.db.selectFrom("active_version").select("version_id"),
+			})
+			.execute();
+
+		// Get the active version's change set
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.select("version.change_set_id")
+			.executeTakeFirstOrThrow();
+
+		// Query the history view to verify all entity identification columns are exposed
+		const result = await lix.db
+			.selectFrom("test_history_view" as any)
+			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_entity_id", "=", "test_id")
+			.select([
+				"id",
+				"name",
+				"lixcol_entity_id",
+				"lixcol_schema_key",
+				"lixcol_file_id",
+				"lixcol_plugin_key",
+				"lixcol_change_set_id",
+				"lixcol_depth",
+			])
+			.executeTakeFirst();
+
+		expect(result).toBeDefined();
+		
+		// Verify all required lixcol_ columns are present and have correct values
+		expect(result?.lixcol_entity_id).toBe("test_id");
+		expect(result?.lixcol_schema_key).toBe("test_entity");
+		expect(result?.lixcol_file_id).toBe("test_file");
+		expect(result?.lixcol_plugin_key).toBe("test_plugin");
+		expect(result?.lixcol_change_set_id).toBe(activeVersion.change_set_id);
+		expect(result?.lixcol_depth).toBe(0);
 	});
 });

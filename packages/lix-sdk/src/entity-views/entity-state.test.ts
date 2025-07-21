@@ -643,4 +643,90 @@ describe("createEntityViewIfNotExists", () => {
 		expect(queryByChangeSetId).toHaveLength(1);
 		expect(queryByChangeSetId[0]?.id).toBe("test_id");
 	});
+
+	test("should expose lixcol_entity_id, lixcol_schema_key, lixcol_file_id, and lixcol_plugin_key", async () => {
+		const lix = await openLix({});
+
+		createEntityStateView({
+			lix,
+			schema: testSchema,
+			overrideName: "test_view",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Insert test data
+		await lix.db
+			.insertInto("test_view" as any)
+			.values({
+				id: "test_id",
+				name: "test_name",
+				value: 42,
+			})
+			.execute();
+
+		// Query the view to verify all entity identification columns are exposed
+		const result = await lix.db
+			.selectFrom("test_view" as any)
+			.select([
+				"id",
+				"name",
+				"lixcol_entity_id",
+				"lixcol_schema_key",
+				"lixcol_file_id",
+				"lixcol_plugin_key",
+			])
+			.executeTakeFirst();
+
+		expect(result).toBeDefined();
+		
+		// Verify all required lixcol_ columns are present and have correct values
+		expect(result?.lixcol_entity_id).toBe("test_id");
+		expect(result?.lixcol_schema_key).toBe("test_entity");
+		expect(result?.lixcol_file_id).toBe("test_file");
+		expect(result?.lixcol_plugin_key).toBe("test_plugin");
+	});
+
+	test("should expose entity identification columns for composite primary keys", async () => {
+		const lix = await openLix({});
+
+		createEntityStateView({
+			lix,
+			schema: compositeKeySchema,
+			overrideName: "composite_view",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Insert data with composite key
+		await lix.db
+			.insertInto("composite_view" as any)
+			.values({
+				category: "cat1",
+				id: "id1",
+				data: "test_data",
+			})
+			.execute();
+
+		// Query to verify lixcol_ columns
+		const result = await lix.db
+			.selectFrom("composite_view" as any)
+			.select([
+				"category",
+				"id",
+				"lixcol_entity_id",
+				"lixcol_schema_key",
+				"lixcol_file_id",
+				"lixcol_plugin_key",
+			])
+			.executeTakeFirst();
+
+		expect(result).toBeDefined();
+		
+		// For composite keys, entity_id is joined with ::
+		expect(result?.lixcol_entity_id).toBe("cat1::id1");
+		expect(result?.lixcol_schema_key).toBe("composite_entity");
+		expect(result?.lixcol_file_id).toBe("test_file");
+		expect(result?.lixcol_plugin_key).toBe("test_plugin");
+	});
 });
