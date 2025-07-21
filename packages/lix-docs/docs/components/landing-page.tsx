@@ -115,9 +115,9 @@ function LandingPage() {
                   marginBottom: "1.5rem",
                 }}
               >
-                Change control SDK
+                Change control SDK for
                 <br />
-                for your app and AI agent
+                AI agents and apps
               </h1>
 
               <p
@@ -127,8 +127,7 @@ function LandingPage() {
                   marginBottom: "2rem",
                 }}
               >
-                Build versioned workflows, AI proposals, diffs, and review UIs
-                with one SDK. Designed for modern collaborative applications.
+                One SDK to see, review, and control every change AI agents and humans make — right inside your product.
               </p>
 
               {/* Command and buttons in one row */}
@@ -192,7 +191,7 @@ function LandingPage() {
                     <path d="M0 0v24h24V0H0zm19.2 19.2h-2.4V9.6h-4.8v9.6H4.8V4.8h14.4v14.4z" />
                   </svg>
                   <span className="font-medium text-gray-700 text-lg">
-                    30k+ weekly
+                    30k+ weekly downloads
                   </span>
                 </a>
 
@@ -243,7 +242,7 @@ function LandingPage() {
         {/* What You Can Build Section */}
         <section className="py-20 bg-gradient-to-r from-gray-50 to-white w-full px-6 sm:px-12 md:px-16 mt-16">
           <h2 className="text-center text-2xl sm:text-3xl font-bold mb-24 text-gray-800 flex items-center justify-center">
-            <span>What you can build with</span>{" "}
+            <span>What people build with</span>{" "}
             <LixLogo className="ml-2 w-10 h-8 transform translate-y-[-2px]" />
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-14 max-w-[100rem] mx-auto px-4 sm:px-6 mt-16">
@@ -279,17 +278,14 @@ function LandingPage() {
                       className="opacity-0 group-hover:opacity-100 bg-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:bg-blue-700"
                       style={{ color: "white" }}
                     >
-                      Try Live Demo →
+                      Open →
                     </a>
                   </div>
                 </div>
               </div>
               <div className="mt-6">
                 <p className="text-gray-800 text-xl font-medium">
-                  ProseMirror editors
-                </p>
-                <p className="text-gray-800 text-xl font-medium">
-                  with version control
+                  Prosemirror / TipTap Plugin
                 </p>
               </div>
             </div>
@@ -330,10 +326,7 @@ function LandingPage() {
               </div>
               <div className="mt-6">
                 <p className="text-gray-800 text-xl font-medium">
-                  Fink localization
-                </p>
-                <p className="text-gray-800 text-xl font-medium">
-                  with change tracking
+                  Fink - Translation Editor
                 </p>
               </div>
             </div>
@@ -376,10 +369,7 @@ function LandingPage() {
               </div>
               <div className="mt-6">
                 <p className="text-gray-800 text-xl font-medium">
-                  Flashtype editor
-                </p>
-                <p className="text-gray-800 text-xl font-medium">
-                  with AI workflows
+                  Flashtype - AI Markdown Editor
                 </p>
               </div>
             </div>

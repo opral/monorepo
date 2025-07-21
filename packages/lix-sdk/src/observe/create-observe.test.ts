@@ -194,66 +194,6 @@ test("subscribeTakeFirstOrThrow should emit value when row exists", async () => 
 	await lix.close();
 });
 
-test("observe should re-execute queries on any state commit", async () => {
-	const lix = await openLix({});
-	const values: any[] = [];
-
-	// Observe only our test namespace
-	const subscription = lix
-		.observe(
-			lix.db.selectFrom("key_value").selectAll().where("key", "like", "multi_%")
-		)
-		.subscribe({ next: (rows) => values.push(rows) });
-
-	// Wait for initial emission
-	await new Promise((resolve) => setTimeout(resolve, 10));
-	expect(values).toHaveLength(1);
-	expect(values[0]).toEqual([]);
-
-	// Make multiple changes
-	await lix.db
-		.insertInto("key_value")
-		.values({ key: "multi_key1", value: "value1" })
-		.execute();
-
-	await lix.db
-		.insertInto("key_value")
-		.values({ key: "multi_key2", value: "value2" })
-		.execute();
-
-	await lix.db
-		.updateTable("key_value")
-		.set({ value: "updated_value1" })
-		.where("key", "=", "multi_key1")
-		.execute();
-
-	// Wait for mutations to complete
-	await new Promise((resolve) => setTimeout(resolve, 50));
-
-	// Focus on final state rather than exact emission count
-	// (in case of future optimizations that batch commits)
-	expect(values.length).toBeGreaterThanOrEqual(4); // initial + 3 mutations
-
-	// Verify final state contains both keys with correct values
-	const finalResult = values[values.length - 1];
-	expect(finalResult).toHaveLength(2);
-	expect(
-		finalResult.find((row: any) => row.key === "multi_key1")
-	).toMatchObject({
-		key: "multi_key1",
-		value: "updated_value1",
-	});
-	expect(
-		finalResult.find((row: any) => row.key === "multi_key2")
-	).toMatchObject({
-		key: "multi_key2",
-		value: "value2",
-	});
-
-	subscription.unsubscribe();
-	await lix.close();
-});
-
 test("unsubscribe should stop receiving updates", async () => {
 	const lix = await openLix({});
 	const values: any[] = [];
@@ -497,5 +437,400 @@ test("subscribeTakeFirst with explicit limit(1) should not double-limit", async 
 	});
 
 	subscription.unsubscribe();
+	await lix.close();
+});
+
+test("query should only re-execute when observed entity changes", async () => {
+	const lix = await openLix({});
+	const keyValueEmissions: any[] = [];
+
+	// Observe key_value table
+	const keyValueSub = lix
+		.observe(
+			lix.db
+				.selectFrom("key_value")
+				.selectAll()
+				.where("key", "like", "opt_test_%")
+		)
+		.subscribe({ next: (rows) => keyValueEmissions.push(rows) });
+
+	// Wait for initial emissions
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(keyValueEmissions).toHaveLength(1);
+
+	const keyValueCountBefore = keyValueEmissions.length;
+
+	// Insert into key_value - should trigger key_value observer
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "opt_test_key", value: "opt_test_value" })
+		.execute();
+
+	// Wait for emissions
+	await new Promise((resolve) => setTimeout(resolve, 50));
+
+	// key_value observer should have received an update
+	expect(keyValueEmissions).toHaveLength(keyValueCountBefore + 1);
+	expect(keyValueEmissions[keyValueEmissions.length - 1]).toHaveLength(1);
+
+	keyValueSub.unsubscribe();
+	await lix.close();
+});
+
+test("query with innerJoin should handle schema key detection correctly", async () => {
+	const lix = await openLix({});
+	const joinEmissions: any[] = [];
+
+	// Test that innerJoin queries can be properly parsed by determineSchemaKeys
+	// This demonstrates that the optimization system can handle complex join queries
+	const joinQuery = lix.db
+		.selectFrom("key_value")
+		.innerJoin("label", "key_value.value", "label.id")
+		.selectAll("key_value")
+		.where("key_value.key", "like", "join_test_%");
+
+	const joinSub = lix
+		.observe(joinQuery)
+		.subscribe({ next: (rows) => joinEmissions.push(rows) });
+
+	// Wait for initial emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(joinEmissions).toHaveLength(1);
+
+	// The test passes by verifying that innerJoin queries can be observed
+	// and that the optimization system doesn't crash on complex queries
+	expect(joinEmissions[0]).toEqual([]);
+
+	// Verify that both schema keys are detected in the join query
+	const { determineSchemaKeys } = await import("./determine-schema-keys.js");
+	const schemaKeys = determineSchemaKeys(joinQuery.compile());
+	expect(schemaKeys).toContain("lix_key_value");
+	expect(schemaKeys).toContain("lix_label");
+
+	joinSub.unsubscribe();
+	await lix.close();
+});
+
+test("query with change table join should always re-execute", async () => {
+	const lix = await openLix({});
+	const changeJoinEmissions: any[] = [];
+
+	// Observe a join query that includes the change table
+	// This should always re-execute because change table mutates frequently
+	const changeJoinSub = lix
+		.observe(
+			lix.db
+				.selectFrom("key_value")
+				.leftJoin("change", "change.entity_id", "key_value.key")
+				.selectAll()
+				.where("key_value.key", "like", "change_test_%")
+		)
+		.subscribe({ next: (rows) => changeJoinEmissions.push(rows) });
+
+	// Wait for initial emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(changeJoinEmissions).toHaveLength(1);
+
+	const countBefore = changeJoinEmissions.length;
+
+	// Insert into key_value - should trigger change join observer
+	// because it joins with the change table (special case)
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "change_test_key", value: "change_test_value" })
+		.execute();
+
+	// Wait for emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+
+	// Change join observer should have received an update
+	expect(changeJoinEmissions).toHaveLength(countBefore + 1);
+
+	changeJoinSub.unsubscribe();
+	await lix.close();
+});
+
+test("query with state_all table should always re-execute", async () => {
+	const lix = await openLix({});
+	const stateAllEmissions: any[] = [];
+
+	// Observe a query that uses the state_all table
+	// This should always re-execute because state_all includes all versions
+	const stateAllSub = lix
+		.observe(
+			lix.db
+				.selectFrom("state_all")
+				.selectAll()
+				.where("schema_key", "=", "lix_version")
+		)
+		.subscribe({ next: (rows) => stateAllEmissions.push(rows) });
+
+	// Wait for initial emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(stateAllEmissions).toHaveLength(1);
+
+	const countBefore = stateAllEmissions.length;
+
+	// Insert into key_value - should trigger state_all observer
+	// because state_all queries should always re-execute (special case)
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "state_all_test_key", value: "state_all_test_value" })
+		.execute();
+
+	// Wait for emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+
+	// state_all observer should have received an update
+	expect(stateAllEmissions).toHaveLength(countBefore + 1);
+
+	stateAllSub.unsubscribe();
+	await lix.close();
+});
+
+test("multiple observers with different entities should not interfere", async () => {
+	const lix = await openLix({});
+	const keyValueEmissions: any[] = [];
+	const labelEmissions: any[] = [];
+	const accountEmissions: any[] = [];
+
+	// Three observers on different tables
+	const keyValueSub = lix
+		.observe(
+			lix.db
+				.selectFrom("key_value")
+				.selectAll()
+				.where("key", "like", "multi_test_%")
+		)
+		.subscribe({ next: (rows) => keyValueEmissions.push(rows) });
+
+	const labelSub = lix
+		.observe(
+			lix.db.selectFrom("label").selectAll().where("id", "like", "multi_test_%")
+		)
+		.subscribe({ next: (rows) => labelEmissions.push(rows) });
+
+	const accountSub = lix
+		.observe(
+			lix.db
+				.selectFrom("account")
+				.selectAll()
+				.where("id", "like", "multi_test_%")
+		)
+		.subscribe({ next: (rows) => accountEmissions.push(rows) });
+
+	// Wait for initial emissions
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(keyValueEmissions).toHaveLength(1);
+	expect(labelEmissions).toHaveLength(1);
+	expect(accountEmissions).toHaveLength(1);
+
+	const keyValueCountBefore = keyValueEmissions.length;
+	const labelCountBefore = labelEmissions.length;
+	const accountCountBefore = accountEmissions.length;
+
+	// Insert into key_value - should only trigger key_value observer
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "multi_test_key", value: "multi_test_value" })
+		.execute();
+
+	// Wait for emissions
+	await new Promise((resolve) => setTimeout(resolve, 50));
+
+	// Only key_value observer should have received an update (optimization working)
+	expect(keyValueEmissions).toHaveLength(keyValueCountBefore + 1);
+	expect(labelEmissions).toHaveLength(labelCountBefore);
+	expect(accountEmissions).toHaveLength(accountCountBefore);
+
+	// Test all three tables to make sure they all work independently
+	const keyValueCountAfterFirst = keyValueEmissions.length;
+	const labelCountAfterFirst = labelEmissions.length;
+	const accountCountAfterFirst = accountEmissions.length;
+
+	// Insert into label - should only trigger label observer
+	await lix.db
+		.insertInto("label")
+		.values({
+			id: "multi_test_label",
+			name: "Multi Test Label",
+		})
+		.execute();
+
+	// Wait for emissions
+	await new Promise((resolve) => setTimeout(resolve, 50));
+
+	// Only label observer should have received an update
+	expect(keyValueEmissions).toHaveLength(keyValueCountAfterFirst);
+	expect(labelEmissions).toHaveLength(labelCountAfterFirst + 1);
+	expect(accountEmissions).toHaveLength(accountCountAfterFirst);
+
+	keyValueSub.unsubscribe();
+	labelSub.unsubscribe();
+	accountSub.unsubscribe();
+	await lix.close();
+});
+
+test("subquery should re-execute when parent or child entities change", async () => {
+	const lix = await openLix({});
+	const subqueryEmissions: any[] = [];
+
+	// Insert test data
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "subquery_parent", value: "parent_value" })
+		.execute();
+
+	// Observe a query with a subquery
+	const subquerySub = lix
+		.observe(
+			lix.db
+				.selectFrom("key_value as parent")
+				.selectAll()
+				.where("parent.key", "like", "subquery_parent%")
+				.where(
+					"parent.value",
+					"in",
+					lix.db
+						.selectFrom("key_value as child")
+						.select("child.value")
+						.where("child.key", "like", "subquery_child%")
+				)
+		)
+		.subscribe({ next: (rows) => subqueryEmissions.push(rows) });
+
+	// Wait for initial emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(subqueryEmissions).toHaveLength(1);
+
+	const countBefore = subqueryEmissions.length;
+
+	// Insert into the subquery table - should trigger re-execution
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "subquery_child", value: "parent_value" })
+		.execute();
+
+	// Wait for emission
+	await new Promise((resolve) => setTimeout(resolve, 10));
+
+	// Subquery observer should have received an update
+	expect(subqueryEmissions).toHaveLength(countBefore + 1);
+
+	subquerySub.unsubscribe();
+	await lix.close();
+});
+
+test("optimization prevents unnecessary query re-executions", async () => {
+	const lix = await openLix({});
+	const keyValueEmissions: any[] = [];
+	const labelEmissions: any[] = [];
+	const accountEmissions: any[] = [];
+
+	// Set up observers for different tables
+	const keyValueSub = lix
+		.observe(
+			lix.db
+				.selectFrom("key_value")
+				.selectAll()
+				.where("key", "like", "opt_prevent_%")
+		)
+		.subscribe({ next: (rows) => keyValueEmissions.push(rows) });
+
+	const labelSub = lix
+		.observe(
+			lix.db
+				.selectFrom("label")
+				.selectAll()
+				.where("id", "like", "opt_prevent_%")
+		)
+		.subscribe({ next: (rows) => labelEmissions.push(rows) });
+
+	const accountSub = lix
+		.observe(
+			lix.db
+				.selectFrom("account")
+				.selectAll()
+				.where("id", "like", "opt_prevent_%")
+		)
+		.subscribe({ next: (rows) => accountEmissions.push(rows) });
+
+	// Wait for initial emissions
+	await new Promise((resolve) => setTimeout(resolve, 10));
+	expect(keyValueEmissions).toHaveLength(1);
+	expect(labelEmissions).toHaveLength(1);
+	expect(accountEmissions).toHaveLength(1);
+
+	// Track counts before any mutations
+	const initialCounts = {
+		keyValue: keyValueEmissions.length,
+		label: labelEmissions.length,
+		account: accountEmissions.length,
+	};
+
+	// Test 1: Insert into key_value should only affect key_value observer
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "opt_prevent_key1", value: "value1" })
+		.execute();
+
+	await new Promise((resolve) => setTimeout(resolve, 50));
+
+	expect(keyValueEmissions).toHaveLength(initialCounts.keyValue + 1);
+	expect(labelEmissions).toHaveLength(initialCounts.label); // Should NOT change
+	expect(accountEmissions).toHaveLength(initialCounts.account); // Should NOT change
+
+	// Test 2: Insert into label should only affect label observer
+	const countsAfterKeyValue = {
+		keyValue: keyValueEmissions.length,
+		label: labelEmissions.length,
+		account: accountEmissions.length,
+	};
+
+	await lix.db
+		.insertInto("label")
+		.values({
+			id: "opt_prevent_label1",
+			name: "Prevent Test Label",
+		})
+		.execute();
+
+	await new Promise((resolve) => setTimeout(resolve, 50));
+
+	expect(keyValueEmissions).toHaveLength(countsAfterKeyValue.keyValue); // Should NOT change
+	expect(labelEmissions).toHaveLength(countsAfterKeyValue.label + 1);
+	expect(accountEmissions).toHaveLength(countsAfterKeyValue.account); // Should NOT change
+
+	// Test 3: Insert into account should only affect account observer
+	const countsAfterLabel = {
+		keyValue: keyValueEmissions.length,
+		label: labelEmissions.length,
+		account: accountEmissions.length,
+	};
+
+	await lix.db
+		.insertInto("account")
+		.values({
+			id: "opt_prevent_account1",
+			name: "Prevent Test Account",
+		})
+		.execute();
+
+	await new Promise((resolve) => setTimeout(resolve, 50));
+
+	expect(keyValueEmissions).toHaveLength(countsAfterLabel.keyValue); // Should NOT change
+	expect(labelEmissions).toHaveLength(countsAfterLabel.label); // Should NOT change
+	expect(accountEmissions).toHaveLength(countsAfterLabel.account + 1);
+
+	// Verify the optimization is working by checking that we have the expected pattern:
+	// - Each observer only increased when its own table was modified
+	// - No observer increased when other tables were modified
+	expect(keyValueEmissions).toHaveLength(initialCounts.keyValue + 1); // Only 1 increase
+	expect(labelEmissions).toHaveLength(initialCounts.label + 1); // Only 1 increase
+	expect(accountEmissions).toHaveLength(initialCounts.account + 1); // Only 1 increase
+
+	keyValueSub.unsubscribe();
+	labelSub.unsubscribe();
+	accountSub.unsubscribe();
 	await lix.close();
 });
