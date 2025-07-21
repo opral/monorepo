@@ -24,6 +24,7 @@ import type { LixHooks } from "../hooks/create-hooks.js";
 import type { Lix } from "../lix/open-lix.js";
 import { timestamp, uuidV7 } from "../deterministic/index.js";
 import { nanoId } from "../deterministic/nano-id.js";
+import { applyEntityDatabaseSchema } from "../entity/schema.js";
 
 /**
  * Configuration for JSON columns in database views.
@@ -140,6 +141,7 @@ export function initDb(args: {
 		db as unknown as Kysely<LixInternalDatabaseSchema>,
 		args.hooks
 	);
+	applyEntityDatabaseSchema(lix);
 	applyChangeSetDatabaseSchema(args.sqlite, db);
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyVersionDatabaseSchema(lix);
