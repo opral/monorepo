@@ -38,32 +38,6 @@ export async function createEntityLabel(args: {
 }): Promise<void> {
 	const { lix, entity, label } = args;
 
-	// Check if the entity exists in state
-	const entityExists = await lix.db
-		.selectFrom("state")
-		.where("entity_id", "=", entity.entity_id)
-		.where("schema_key", "=", entity.schema_key)
-		.where("file_id", "=", entity.file_id)
-		.select(["entity_id"])
-		.executeTakeFirst();
-
-	if (!entityExists) {
-		throw new Error(
-			`Entity with id "${entity.entity_id}" (schema: ${entity.schema_key}, file: ${entity.file_id}) does not exist in state`
-		);
-	}
-
-	// Check if the label exists
-	const labelExists = await lix.db
-		.selectFrom("label")
-		.where("id", "=", label.id)
-		.select(["id"])
-		.executeTakeFirst();
-
-	if (!labelExists) {
-		throw new Error(`Label with id "${label.id}" does not exist`);
-	}
-
 	// Check if the mapping already exists
 	const existingMapping = await lix.db
 		.selectFrom("entity_label")
@@ -80,6 +54,9 @@ export async function createEntityLabel(args: {
 	}
 
 	// Create the entity-label mapping
+	// Foreign key constraints will automatically validate that:
+	// - The entity exists in state
+	// - The label exists
 	await lix.db
 		.insertInto("entity_label")
 		.values({

@@ -559,3 +559,131 @@ test("query entities with specific label combinations", async () => {
 	expect(criticalBugs).toHaveLength(1);
 	expect(criticalBugs[0]?.entity_id).toBe("issue1");
 });
+
+// Foreign key constraint tests
+test("entity_label foreign key constraint prevents referencing non-existent state entities", async () => {
+	const lix = await openLix({});
+
+	// Create a label
+	const label = await createLabel({ lix, name: "test-label" });
+
+	// Try to create entity_label mapping for non-existent entity
+	// This should fail due to foreign key constraint on (entity_id, schema_key, file_id)
+	await expect(
+		lix.db
+			.insertInto("entity_label")
+			.values({
+				entity_id: "non_existent_entity",
+				schema_key: "non_existent_schema",
+				file_id: "non_existent.json",
+				label_id: label.id,
+			})
+			.execute()
+	).rejects.toThrow(
+		/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/
+	);
+});
+
+test("entity_label foreign key constraint prevents referencing non-existent labels", async () => {
+	const lix = await openLix({});
+
+	// Create an entity in state
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "test_entity",
+			schema_key: "test_schema",
+			file_id: "test.json",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			snapshot_content: { id: "test_entity" },
+		})
+		.execute();
+
+	// Try to create entity_label mapping with non-existent label
+	// This should fail due to foreign key constraint on label_id
+	await expect(
+		lix.db
+			.insertInto("entity_label")
+			.values({
+				entity_id: "test_entity",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				label_id: "non_existent_label_id",
+			})
+			.execute()
+	).rejects.toThrow(
+		/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/
+	);
+});
+
+test("entity_label composite foreign key correctly validates all three state columns", async () => {
+	const lix = await openLix({});
+
+	const label = await createLabel({ lix, name: "test-label" });
+
+	// Create an entity in state
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "entity1",
+			schema_key: "schema1",
+			file_id: "file1.json",
+			plugin_key: "test_plugin",
+			schema_version: "1.0",
+			snapshot_content: { id: "entity1" },
+		})
+		.execute();
+
+	// Try with wrong entity_id - should fail
+	await expect(
+		lix.db
+			.insertInto("entity_label")
+			.values({
+				entity_id: "wrong_entity",
+				schema_key: "schema1",
+				file_id: "file1.json",
+				label_id: label.id,
+			})
+			.execute()
+	).rejects.toThrow(/Foreign key constraint violation/);
+
+	// Try with wrong schema_key - should fail
+	await expect(
+		lix.db
+			.insertInto("entity_label")
+			.values({
+				entity_id: "entity1",
+				schema_key: "wrong_schema",
+				file_id: "file1.json",
+				label_id: label.id,
+			})
+			.execute()
+	).rejects.toThrow(/Foreign key constraint violation/);
+
+	// Try with wrong file_id - should fail
+	await expect(
+		lix.db
+			.insertInto("entity_label")
+			.values({
+				entity_id: "entity1",
+				schema_key: "schema1",
+				file_id: "wrong_file.json",
+				label_id: label.id,
+			})
+			.execute()
+	).rejects.toThrow(/Foreign key constraint violation/);
+
+	// With all correct values - should succeed
+	await expect(
+		lix.db
+			.insertInto("entity_label")
+			.values({
+				entity_id: "entity1",
+				schema_key: "schema1",
+				file_id: "file1.json",
+				label_id: label.id,
+			})
+			.execute()
+	).resolves.not.toThrow();
+});

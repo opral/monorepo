@@ -55,6 +55,7 @@ test("createEntityLabel throws error if entity doesn't exist", async () => {
 	const label = await createLabel({ lix, name: "test-label" });
 
 	// Try to create mapping for non-existent entity
+	// Should throw foreign key constraint error
 	await expect(
 		createEntityLabel({
 			lix,
@@ -65,7 +66,7 @@ test("createEntityLabel throws error if entity doesn't exist", async () => {
 			},
 			label: { id: label.id },
 		})
-	).rejects.toThrow('Entity with id "non-existent" (schema: document, file: docs.json) does not exist in state');
+	).rejects.toThrow(/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/);
 });
 
 test("createEntityLabel throws error if label doesn't exist", async () => {
@@ -85,6 +86,7 @@ test("createEntityLabel throws error if label doesn't exist", async () => {
 		.execute();
 
 	// Try to create mapping with non-existent label
+	// Should throw foreign key constraint error
 	await expect(
 		createEntityLabel({
 			lix,
@@ -95,7 +97,7 @@ test("createEntityLabel throws error if label doesn't exist", async () => {
 			},
 			label: { id: "non-existent-label" },
 		})
-	).rejects.toThrow('Label with id "non-existent-label" does not exist');
+	).rejects.toThrow(/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/);
 });
 
 test("createEntityLabel is idempotent - doesn't fail if mapping already exists", async () => {

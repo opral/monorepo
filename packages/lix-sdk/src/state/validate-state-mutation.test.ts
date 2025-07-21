@@ -2799,3 +2799,448 @@ test("should allow foreign keys to changes from any version context", async () =
 		})
 	).not.toThrowError();
 });
+
+// State table foreign key tests
+test("should validate composite foreign keys referencing state table", async () => {
+	const lix = await openLix({});
+
+	// Create a schema that references state table with composite key (like entity_label does)
+	const mockStateReferenceSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_state_reference",
+		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["entity_id", "schema_key", "file_id"],
+				references: {
+					schemaKey: "state",
+					properties: ["entity_id", "schema_key", "file_id"],
+				},
+			},
+		],
+		properties: {
+			entity_id: { type: "string" },
+			schema_key: { type: "string" },
+			file_id: { type: "string" },
+			tag: { type: "string" },
+		},
+		required: ["entity_id", "schema_key", "file_id", "tag"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockStateReferenceSchema })
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// First create a state entity that can be referenced
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "test_entity",
+			schema_key: "test_schema",
+			file_id: "test_file.json",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: { id: "test_entity" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// This should PASS - entity exists in state table
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockStateReferenceSchema,
+			snapshot_content: {
+				entity_id: "test_entity",
+				schema_key: "test_schema",
+				file_id: "test_file.json",
+				tag: "important",
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+
+	// This should FAIL - entity doesn't exist in state table
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockStateReferenceSchema,
+			snapshot_content: {
+				entity_id: "nonexistent_entity",
+				schema_key: "test_schema",
+				file_id: "test_file.json",
+				tag: "important",
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrow(
+		/Foreign key constraint violation.*mock_state_reference.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\).*no matching record exists/
+	);
+});
+
+test("state foreign key references should respect version context", async () => {
+	const lix = await openLix({});
+
+	// Create a schema that references state table
+	const mockStateReferenceSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_state_reference",
+		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["entity_id", "schema_key", "file_id"],
+				references: {
+					schemaKey: "state",
+					properties: ["entity_id", "schema_key", "file_id"],
+				},
+			},
+		],
+		properties: {
+			entity_id: { type: "string" },
+			schema_key: { type: "string" },
+			file_id: { type: "string" },
+			tag: { type: "string" },
+		},
+		required: ["entity_id", "schema_key", "file_id", "tag"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockStateReferenceSchema })
+		.execute();
+
+	// Create a second version
+	const version2 = await createVersion({
+		lix,
+		name: "version2",
+	});
+
+	// Get the main version
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.select("id")
+		.where("name", "=", "main")
+		.executeTakeFirstOrThrow();
+
+	// Create state entity in main version only
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "main_only_entity",
+			schema_key: "test_schema",
+			file_id: "test.json",
+			plugin_key: "test_plugin",
+			version_id: mainVersion.id,
+			snapshot_content: { id: "main_only_entity" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Create state entity in version2 only
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "version2_only_entity",
+			schema_key: "test_schema",
+			file_id: "test.json",
+			plugin_key: "test_plugin",
+			version_id: version2.id,
+			snapshot_content: { id: "version2_only_entity" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Reference from main version should only see main entities
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockStateReferenceSchema,
+			snapshot_content: {
+				entity_id: "main_only_entity",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				tag: "tag1",
+			},
+			operation: "insert",
+			version_id: mainVersion.id,
+		})
+	).not.toThrowError();
+
+	// Reference from main version to version2 entity should fail
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockStateReferenceSchema,
+			snapshot_content: {
+				entity_id: "version2_only_entity",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				tag: "tag2",
+			},
+			operation: "insert",
+			version_id: mainVersion.id,
+		})
+	).toThrow(/Foreign key constraint violation/);
+
+	// Reference from version2 should only see version2 entities
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockStateReferenceSchema,
+			snapshot_content: {
+				entity_id: "version2_only_entity",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				tag: "tag3",
+			},
+			operation: "insert",
+			version_id: version2.id,
+		})
+	).not.toThrowError();
+
+	// Reference from version2 to main entity should fail
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockStateReferenceSchema,
+			snapshot_content: {
+				entity_id: "main_only_entity",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				tag: "tag4",
+			},
+			operation: "insert",
+			version_id: version2.id,
+		})
+	).toThrow(/Foreign key constraint violation/);
+});
+
+test("state foreign key references should handle inherited entities", async () => {
+	const lix = await openLix({});
+
+	// Create a schema that references state table
+	const mockStateReferenceSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "mock_state_reference",
+		"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "tag"],
+		"x-lix-foreign-keys": [
+			{
+				properties: ["entity_id", "schema_key", "file_id"],
+				references: {
+					schemaKey: "state",
+					properties: ["entity_id", "schema_key", "file_id"],
+				},
+			},
+		],
+		properties: {
+			entity_id: { type: "string" },
+			schema_key: { type: "string" },
+			file_id: { type: "string" },
+			tag: { type: "string" },
+		},
+		required: ["entity_id", "schema_key", "file_id", "tag"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: mockStateReferenceSchema })
+		.execute();
+
+	// Get the main version
+	const mainVersion = await lix.db
+		.selectFrom("version")
+		.select("id")
+		.where("name", "=", "main")
+		.executeTakeFirstOrThrow();
+
+	// Create a state entity in main version
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "shared_entity",
+			schema_key: "test_schema",
+			file_id: "test.json",
+			plugin_key: "test_plugin",
+			version_id: mainVersion.id,
+			snapshot_content: { id: "shared_entity", value: "original" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Create a child version that inherits from main
+	const childVersion = await createVersion({
+		lix,
+		name: "child_version",
+		inherits_from_version_id: mainVersion.id,
+	});
+
+	// The inherited entity should NOT be visible for foreign key validation
+	// because foreign keys only validate entities in the same version (not inherited)
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: mockStateReferenceSchema,
+			snapshot_content: {
+				entity_id: "shared_entity",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				tag: "from_child",
+			},
+			operation: "insert",
+			version_id: childVersion.id,
+		})
+	).toThrow(
+		/Foreign key constraint violation.*no matching record exists.*Note: Foreign key constraints only validate entities that exist in the version context/s
+	);
+});
+
+test("state foreign key with mixed single and composite properties", async () => {
+	const lix = await openLix({});
+
+	// Create a complex schema with multiple foreign keys
+	const complexSchema = {
+		type: "object",
+		"x-lix-version": "1.0",
+		"x-lix-key": "complex_reference",
+		"x-lix-primary-key": ["id"],
+		"x-lix-foreign-keys": [
+			{
+				// Composite foreign key to state
+				properties: ["entity_id", "schema_key", "file_id"],
+				references: {
+					schemaKey: "state",
+					properties: ["entity_id", "schema_key", "file_id"],
+				},
+			},
+			{
+				// Single property foreign key to change
+				properties: ["change_id"],
+				references: {
+					schemaKey: "lix_change",
+					properties: ["id"],
+				},
+			},
+		],
+		properties: {
+			id: { type: "string" },
+			entity_id: { type: "string" },
+			schema_key: { type: "string" },
+			file_id: { type: "string" },
+			change_id: { type: "string" },
+		},
+		required: ["id", "entity_id", "schema_key", "file_id", "change_id"],
+		additionalProperties: false,
+	} as const satisfies LixSchemaDefinition;
+
+	// Store the schema
+	await lix.db
+		.insertInto("stored_schema")
+		.values({ value: complexSchema })
+		.execute();
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.select("version_id")
+		.executeTakeFirstOrThrow();
+
+	// Create a state entity
+	await lix.db
+		.insertInto("state_all")
+		.values({
+			entity_id: "test_entity",
+			schema_key: "test_schema",
+			file_id: "test.json",
+			plugin_key: "test_plugin",
+			version_id: activeVersion.version_id,
+			snapshot_content: { id: "test_entity" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Create a key-value to generate a change
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "test_key",
+			value: "test_value",
+		})
+		.execute();
+
+	// Get the created change
+	const changes = await lix.db
+		.selectFrom("change")
+		.select("id")
+		.where("entity_id", "=", "test_key")
+		.execute();
+
+	expect(changes).toHaveLength(1);
+	const changeId = changes[0]!.id;
+
+	// This should PASS - both foreign keys are satisfied
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: complexSchema,
+			snapshot_content: {
+				id: "complex1",
+				entity_id: "test_entity",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				change_id: changeId,
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).not.toThrowError();
+
+	// This should FAIL - state foreign key not satisfied
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: complexSchema,
+			snapshot_content: {
+				id: "complex2",
+				entity_id: "nonexistent",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				change_id: changeId,
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrow(/Foreign key constraint violation.*state/);
+
+	// This should FAIL - change foreign key not satisfied
+	expect(() =>
+		validateStateMutation({
+			lix,
+			schema: complexSchema,
+			snapshot_content: {
+				id: "complex3",
+				entity_id: "test_entity",
+				schema_key: "test_schema",
+				file_id: "test.json",
+				change_id: "nonexistent_change",
+			},
+			operation: "insert",
+			version_id: activeVersion.version_id,
+		})
+	).toThrow(/Foreign key constraint violation.*lix_change/);
+});

@@ -361,7 +361,7 @@ function validateForeignKeyConstraints(args: {
 			// Special handling for state table which supports composite keys
 			if (foreignKey.references.schemaKey === "state") {
 				query = args.lix.db
-					.selectFrom("state" as any)
+					.selectFrom("state_all" as any)
 					.select(foreignKey.references.properties as any);
 				
 				// Add WHERE conditions for each property
@@ -433,7 +433,11 @@ function validateForeignKeyConstraints(args: {
 		const referencedStates = executeSync({
 			lix: args.lix,
 			query: isRealSqlTable
-				? query
+				? foreignKey.references.schemaKey === "state"
+					? query
+							.where("version_id", "=", args.version_id)
+							.where("inherited_from_version_id", "is", null)
+					: query
 				: query
 						.where("version_id", "=", args.version_id)
 						.where("inherited_from_version_id", "is", null),
@@ -518,9 +522,8 @@ function validateForeignKeyConstraints(args: {
 			});
 
 			if (untrackedReferences.length > 0) {
-				const localPropsStr = foreignKey.properties.join(", ");
 				const refPropsStr = foreignKey.references.properties.join(", ");
-				const valuesStr = localValues.map(v => `'${v}'`).join(", ");
+				const valuesStr = localValues.map((v) => `'${v}'`).join(", ");
 
 				let errorMessage = `Foreign key constraint violation: tracked entities cannot reference untracked entities. This would create broken references during sync.\n`;
 				errorMessage += `\nThe tracked entity '${args.schema["x-lix-key"]}' is trying to reference an untracked entity '${foreignKey.references.schemaKey}' with (${refPropsStr})=(${valuesStr}).\n`;
