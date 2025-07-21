@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, type Assertion } from "vitest";
 import { type Lix, openLix } from "../../lix/open-lix.js";
 import { cacheMissSimulation } from "./cache-miss-simulation.js";
 
@@ -71,12 +71,37 @@ const defaultSimulations = {
  *   additionalCustomSimulations: [mySimulation]
  * });
  */
+/**
+ * Enhanced expect function for simulation tests that verifies values are identical across simulations.
+ *
+ * @param actual - The value to test
+ * @param diffCallback - Optional callback that receives both actual and expected values when they differ.
+ *                       This is useful for debugging simulation differences by allowing you to inspect
+ *                       and log detailed differences between simulation results before the test fails.
+ *                       The callback is only invoked when values actually differ between simulations,
+ *                       allowing you to leave debugging code in place without cluttering output when
+ *                       tests are passing.
+ * @returns Standard expect assertion object
+ *
+ * @example
+ * expectDeterministic(cacheContents, ({ actual, expected }) => {
+ *   console.log(`Cache has ${actual.length} vs ${expected.length} entries`);
+ *   // Custom diff logic to help debug why simulations differ
+ * });
+ */
+interface ExpectDeterministic {
+	<T>(
+		actual: T,
+		diffCallback?: (args: { actual: T; expected: T }) => void
+	): Assertion<T>;
+}
+
 export function simulationTest(
 	name: string,
 	fn: (args: {
 		simulation: string;
 		openSimulatedLix: typeof openLix;
-		expectDeterministic: typeof expect;
+		expectDeterministic: ExpectDeterministic;
 	}) => Promise<void>,
 	options?: SimulationTestOptions
 ): void {
@@ -112,7 +137,10 @@ export function simulationTest(
 		let callIndex = 0;
 		const isFirstSimulation = simulation === simulationsToRun[0];
 
-		const deterministicExpect = (actual: any, message?: string) => {
+		const deterministicExpect = (
+			actual: any,
+			diffCallback?: (args: { actual: any; expected: any }) => void
+		) => {
 			const key = `expect-${callIndex++}`;
 
 			if (isFirstSimulation) {
@@ -122,6 +150,24 @@ export function simulationTest(
 				// Verify values match first simulation in subsequent simulations
 				const expected = expectedValues.get(key);
 				if (expected !== undefined) {
+					// Check if values differ before invoking callback
+					let valuesMatch = false;
+					try {
+						expect(actual).toEqual(expected);
+						valuesMatch = true;
+					} catch {
+						// Values don't match
+					}
+
+					// Only call diff callback if values actually differ
+					if (!valuesMatch && diffCallback) {
+						diffCallback({
+							actual,
+							expected,
+						});
+					}
+
+					// Always perform the assertion (will throw if values differ)
 					const errorMessage = `
 SIMULATION DETERMINISM VIOLATION
 
@@ -138,7 +184,7 @@ Use regular expect() for simulation-specific assertions.
 				}
 			}
 
-			return expect(actual, message);
+			return expect(actual);
 		};
 
 		// Create openSimulatedLix function
@@ -153,7 +199,7 @@ Use regular expect() for simulation-specific assertions.
 		await fn({
 			simulation: simulation.name,
 			openSimulatedLix,
-			expectDeterministic: deterministicExpect as typeof expect,
+			expectDeterministic: deterministicExpect as ExpectDeterministic,
 		});
 	});
 }

@@ -214,3 +214,101 @@ describe("providing key values", async () => {
 		]);
 	});
 });
+
+describe("expectDeterministic diff callback receives correct values", () => {
+	// Use a global store that persists across test runs
+	const globalStore = globalThis as any;
+	if (!globalStore.__testCallback1) {
+		globalStore.__testCallback1 = {};
+	}
+
+	// Reset before this test suite
+	globalStore.__testCallback1 = {
+		invoked: false,
+		actual: undefined,
+		expected: undefined,
+	};
+
+	const testSimulation: SimulationTestDef = {
+		name: "test-diff-callback",
+		setup: async (lix) => lix,
+	};
+
+	simulationTest(
+		"",
+		async ({ expectDeterministic, simulation }) => {
+			const store = globalStore.__testCallback1;
+
+			if (simulation === "normal") {
+				// First simulation - set the expected value
+				const testValue = { foo: "bar", count: 42 };
+				expectDeterministic(testValue).toBeDefined();
+			} else {
+				// Second simulation - use different value to trigger callback and error
+				const differentValue = { foo: "baz", count: 100 };
+				try {
+					expectDeterministic(differentValue, ({ actual, expected }) => {
+						store.invoked = true;
+						store.actual = actual;
+						store.expected = expected;
+					}).toBeDefined();
+				} catch {
+					// Expected to throw after callback
+				}
+			}
+		},
+		{
+			onlyRun: ["normal"],
+			additionalCustomSimulations: [testSimulation],
+		}
+	);
+
+	test("callback was invoked with correct values", () => {
+		const { invoked, actual, expected } = globalStore.__testCallback1;
+
+		// Verify callback was invoked before the error
+		expect(invoked).toBe(true);
+
+		// Verify actual value matches what was passed in second simulation
+		expect(actual).toEqual({ foo: "baz", count: 100 });
+
+		// Verify expected value matches what was passed in first simulation
+		expect(expected).toEqual({ foo: "bar", count: 42 });
+	});
+});
+
+describe("expectDeterministic diff callback is not invoked when values match", () => {
+	// Use a global store that persists across test runs
+	const globalStore = globalThis as any;
+	if (!globalStore.__testCallback2) {
+		globalStore.__testCallback2 = {};
+	}
+
+	// Reset before this test suite
+	globalStore.__testCallback2 = { invoked: false };
+
+	const testSimulation: SimulationTestDef = {
+		name: "test-no-diff",
+		setup: async (lix) => lix,
+	};
+
+	simulationTest(
+		"",
+		async ({ expectDeterministic }) => {
+			const store = globalStore.__testCallback2;
+			const sameValue = { consistent: true, data: [1, 2, 3] };
+
+			expectDeterministic(sameValue, () => {
+				store.invoked = true;
+			}).toBeDefined();
+		},
+		{
+			onlyRun: ["normal"],
+			additionalCustomSimulations: [testSimulation],
+		}
+	);
+
+	test("callback should not be invoked", () => {
+		expect(globalStore.__testCallback2.invoked).toBe(false);
+	});
+});
