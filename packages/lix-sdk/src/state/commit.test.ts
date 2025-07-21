@@ -588,3 +588,232 @@ describe("onStateCommit", () => {
 		unsubscribe();
 	});
 });
+
+/**
+ * Tests that when changes are made directly to the global version,
+ * the global version's change_set_id is updated to reflect those changes.
+ * 
+ * This is a simpler case than non-global versions because:
+ * - Only one version needs to be updated (global itself)
+ * - The changes and the version update are both stored in the same version (global)
+ */
+test("global version should move forward when mutations occur", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+	});
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	// Get the global version before any changes
+	const globalVersionBefore = await db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const initialChangeSetId = globalVersionBefore.change_set_id;
+
+	// Insert data with version_id = "global"
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: "test-global-entity",
+			schema_key: "lix_key_value",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				key: "test-global-key",
+				value: "test-global-value",
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	// Commit the changes
+	commit({ lix });
+
+	// Get the global version after changes
+	const globalVersionAfter = await db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// The global version's change_set_id should have been updated
+	expect(globalVersionAfter.change_set_id).not.toBe(initialChangeSetId);
+
+	// Verify a new changeset was created and linked
+	const edges = await db
+		.selectFrom("change_set_edge")
+		.where("parent_id", "=", initialChangeSetId)
+		.where("child_id", "=", globalVersionAfter.change_set_id)
+		.selectAll()
+		.execute();
+
+	expect(edges.length).toBe(1);
+
+	// Verify the change set contains our change
+	const changeSetElements = await db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", globalVersionAfter.change_set_id)
+		.selectAll()
+		.execute();
+
+	// Should contain our test entity change and the meta changes
+	const elementIds = changeSetElements.map((e) => e.entity_id);
+	expect(elementIds.some((id) => id.includes("test-global-entity"))).toBe(true);
+});
+
+/**
+ * Tests that when changes are made to a non-global version (like the active/main version),
+ * both the version itself AND the global version are updated.
+ * 
+ * This is critical because:
+ * 1. The non-global version's change_set_id moves forward to include its data changes
+ * 2. The global version's change_set_id ALSO moves forward to track the version update itself
+ * 3. All version changes (updates to any version entity) are stored in the global version's history
+ * 
+ * Without this behavior, each version would need to maintain its own history of all other versions,
+ * which would be redundant and complex. Instead, the global version serves as the central registry
+ * of all version state changes.
+ */
+test("active version should move forward when mutations occur", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+	});
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	// Get the global version before for comparison
+	const globalVersionBefore = await db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Get the active version (should be the main version, not global)
+	const activeVersion = await db
+		.selectFrom("active_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const activeVersionId = activeVersion.version_id;
+	expect(activeVersionId).not.toBe("global"); // Ensure we're testing a non-global version
+
+	// Get the version before any changes
+	const versionBefore = await db
+		.selectFrom("version")
+		.where("id", "=", activeVersionId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const initialActiveVersionChangeSetId = versionBefore.change_set_id;
+
+	// Insert data with version_id = activeVersionId
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: "test-active-entity",
+			schema_key: "lix_key_value",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				key: "test-active-key",
+				value: "test-active-value",
+			}),
+			schema_version: "1.0",
+			version_id: activeVersionId,
+			untracked: false,
+		},
+	});
+
+	// Commit the changes
+	commit({ lix });
+
+	// Get the version after changes
+	const versionAfter = await db
+		.selectFrom("version")
+		.where("id", "=", activeVersionId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// The version's change_set_id should have been updated
+	expect(versionAfter.change_set_id).not.toBe(initialActiveVersionChangeSetId);
+
+	// Verify a new changeset was created and linked
+	const edges = await db
+		.selectFrom("change_set_edge")
+		.where("parent_id", "=", initialActiveVersionChangeSetId)
+		.where("child_id", "=", versionAfter.change_set_id)
+		.selectAll()
+		.execute();
+
+	expect(edges.length).toBe(1);
+
+	// Verify the change set contains our change
+	const changeSetElements = await db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", versionAfter.change_set_id)
+		.selectAll()
+		.execute();
+
+	// Should contain our test entity change and the meta changes
+	const elementIds = changeSetElements.map((e) => e.entity_id);
+	expect(elementIds.some((id) => id.includes("test-active-entity"))).toBe(true);
+
+	// Also verify that the global version DID move forward
+	// (because all version changes are tracked in global)
+	const globalVersionAfter = await db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Global version should have been updated to track the version change
+	expect(globalVersionAfter.change_set_id).not.toBe(
+		globalVersionBefore.change_set_id
+	);
+
+	// Verify the global version's new changeset contains the version updates
+	const globalChangeSetElements = await db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", globalVersionAfter.change_set_id)
+		.selectAll()
+		.execute();
+
+	// Should contain exactly two version updates: global and active version
+	const versionUpdateElements = globalChangeSetElements.filter(
+		(e) => e.schema_key === "lix_version"
+	);
+	expect(versionUpdateElements.length).toBe(2);
+
+	// Verify both version updates point to the correct entities
+	const versionUpdateEntityIds = versionUpdateElements.map((e) => e.entity_id);
+	expect(versionUpdateEntityIds).toContain("global");
+	expect(versionUpdateEntityIds).toContain(activeVersionId);
+
+	// Get the actual version changes to verify they have the correct change_set_ids
+	const versionChanges = await db
+		.selectFrom("change")
+		.where(
+			"id",
+			"in",
+			versionUpdateElements.map((e) => e.change_id)
+		)
+		.where("schema_key", "=", "lix_version")
+		.selectAll()
+		.execute();
+
+	// Verify the version snapshots contain the correct change_set_ids
+	for (const change of versionChanges) {
+		if (change.entity_id === "global") {
+			expect(change.snapshot_content?.change_set_id).toBe(
+				globalVersionAfter.change_set_id
+			);
+		} else if (change.entity_id === activeVersionId) {
+			expect(change.snapshot_content?.change_set_id).toBe(
+				versionAfter.change_set_id
+			);
+		}
+	}
+});

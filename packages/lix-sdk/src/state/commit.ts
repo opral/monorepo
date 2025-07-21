@@ -69,16 +69,55 @@ export function commit(args: {
 
 	// Process each version's changes to create changesets
 	const changesetIdsByVersion = new Map<string, string>();
+	
+	// First pass: Create changesets for non-global versions
 	for (const [version_id, versionChanges] of changesByVersion) {
-		// Create changeset and edges for this version's transaction
-		const changesetId = createChangesetForTransaction(
-			args.lix.sqlite,
-			args.lix.db as any,
-			timestamp({ lix: args.lix }),
-			version_id,
-			versionChanges
-		);
-		changesetIdsByVersion.set(version_id, changesetId);
+		if (version_id !== "global") {
+			// Create changeset and edges for this version's transaction
+			const changesetId = createChangesetForTransaction(
+				args.lix.sqlite,
+				args.lix.db as any,
+				timestamp({ lix: args.lix }),
+				version_id,
+				versionChanges
+			);
+			changesetIdsByVersion.set(version_id, changesetId);
+		}
+	}
+	
+	// Second pass: Handle global version
+	// At this point, any version updates from the first pass are in the transaction
+	// with version_id: "global", so we need to re-query
+	if (changesetIdsByVersion.size > 0 || changesByVersion.has("global")) {
+		// Get all changes for global version (including version updates from first pass)
+		const globalChanges = executeSync({
+			lix: args.lix,
+			query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
+				.selectFrom("internal_change_in_transaction")
+				.select([
+					"id",
+					"entity_id",
+					"schema_key",
+					"schema_version",
+					"file_id",
+					"plugin_key",
+					"version_id",
+					sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
+					"created_at",
+				])
+				.where("version_id", "=", "global"),
+		});
+		
+		if (globalChanges.length > 0) {
+			const globalChangesetId = createChangesetForTransaction(
+				args.lix.sqlite,
+				args.lix.db as any,
+				timestamp({ lix: args.lix }),
+				"global",
+				globalChanges
+			);
+			changesetIdsByVersion.set("global", globalChangesetId);
+		}
 	}
 
 	// Use the same changes we already queried at the beginning
@@ -475,3 +514,4 @@ function createChangesetForTransaction(
 
 	return nextChangeSetId;
 }
+
