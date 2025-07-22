@@ -147,8 +147,8 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	// Change author entity IDs should reference the user data change IDs
 	const userDataChangeIds = keyValueChanges.map((c) => c.id);
 	for (const author of changeAuthors) {
-		// Entity ID format for change authors is "changeId::accountId"
-		const changeId = author.entity_id.split("::")[0];
+		// Entity ID format for change authors is "changeId~accountId"
+		const changeId = author.entity_id.split("~")[0];
 		expect(userDataChangeIds).toContain(changeId);
 	}
 });

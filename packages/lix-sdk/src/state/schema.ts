@@ -17,7 +17,7 @@ import { applyStateCacheSchema } from "./cache/schema.js";
 import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
 import { commit } from "./commit.js";
-import { parsePk } from "./primary-key.js";
+import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
@@ -517,7 +517,12 @@ export function applyStateDatabaseSchema(
 					} else {
 						// Generate primary key from row data
 						const tag = row.untracked ? "U" : "C";
-						const primaryKey = `${tag}~${row.file_id}~${row.entity_id}~${row.version_id}`;
+						const primaryKey = serializeStatePk(
+							tag,
+							row.file_id,
+							row.entity_id,
+							row.version_id
+						);
 						capi.sqlite3_result_js(pContext, primaryKey);
 					}
 					return capi.SQLITE_OK;
@@ -570,7 +575,7 @@ export function applyStateDatabaseSchema(
 						}
 
 						// Parse primary key to determine tag and extract values
-						const parsed = parsePk(oldPk);
+						const parsed = parseStatePk(oldPk);
 
 						// Route based on tag
 						if (parsed.tag === "U") {
