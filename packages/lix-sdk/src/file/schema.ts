@@ -109,45 +109,100 @@ export function applyFileDatabaseSchema(
 
 	lix.sqlite.exec(`
   CREATE VIEW IF NOT EXISTS file AS
+        WITH latest_file_change AS (
+            SELECT 
+                fd.entity_id as file_id,
+                -- Get the latest change across all entities in this file
+                (SELECT s.change_id 
+                 FROM state s 
+                 WHERE s.file_id = fd.entity_id
+                 ORDER BY s.updated_at DESC 
+                 LIMIT 1) as latest_change_id,
+                -- Get the latest change_set that contains any change for this file
+                (SELECT cse.change_set_id
+                 FROM change_set_element cse
+                 INNER JOIN state s ON s.change_id = cse.change_id
+                 WHERE s.file_id = fd.entity_id
+                 ORDER BY s.updated_at DESC
+                 LIMIT 1
+                ) as latest_change_set_id
+            FROM state fd
+            WHERE fd.schema_key = 'lix_file_descriptor'
+        )
         SELECT
-                json_extract(snapshot_content, '$.id') AS id,
-                json_extract(snapshot_content, '$.path') AS path,
+                json_extract(fd.snapshot_content, '$.id') AS id,
+                json_extract(fd.snapshot_content, '$.path') AS path,
                 materialize_file_data(
-                        json_extract(snapshot_content, '$.id'),
-                        json_extract(snapshot_content, '$.path'),
+                        json_extract(fd.snapshot_content, '$.id'),
+                        json_extract(fd.snapshot_content, '$.path'),
                         (SELECT version_id FROM active_version),
-                        json_extract(snapshot_content, '$.metadata')
+                        json_extract(fd.snapshot_content, '$.metadata')
                 ) AS data,
-                json_extract(snapshot_content, '$.metadata') AS metadata,
-                json_extract(snapshot_content, '$.hidden') AS hidden,
-                inherited_from_version_id AS lixcol_inherited_from_version_id,
-                created_at AS lixcol_created_at,
-                updated_at AS lixcol_updated_at,
-                change_id AS lixcol_change_id,
-                untracked AS lixcol_untracked
-        FROM state
-        WHERE schema_key = 'lix_file_descriptor';
+                json_extract(fd.snapshot_content, '$.metadata') AS metadata,
+                json_extract(fd.snapshot_content, '$.hidden') AS hidden,
+                fd.entity_id AS lixcol_entity_id,
+                'lix_file_descriptor' AS lixcol_schema_key,
+                fd.entity_id AS lixcol_file_id,  -- For files, file_id equals entity_id
+                fd.inherited_from_version_id AS lixcol_inherited_from_version_id,
+                -- Use the latest change info from any entity in the file
+                lc.latest_change_id AS lixcol_change_id,
+                (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_created_at,
+                (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_updated_at,
+                lc.latest_change_set_id AS lixcol_change_set_id,
+                fd.untracked AS lixcol_untracked
+        FROM state fd
+        JOIN latest_file_change lc ON lc.file_id = fd.entity_id
+        WHERE fd.schema_key = 'lix_file_descriptor';
 
   CREATE VIEW IF NOT EXISTS file_all AS
+        WITH latest_file_change AS (
+            SELECT 
+                fd.entity_id as file_id,
+                fd.version_id,
+                -- Get the latest change across all entities in this file for this version
+                (SELECT s.change_id 
+                 FROM state_all s 
+                 WHERE s.file_id = fd.entity_id
+                   AND s.version_id = fd.version_id
+                 ORDER BY s.updated_at DESC 
+                 LIMIT 1) as latest_change_id,
+                -- Get the latest change_set that contains any change for this file
+                (SELECT cse.change_set_id
+                 FROM change_set_element cse
+                 INNER JOIN state_all s ON s.change_id = cse.change_id
+                 WHERE s.file_id = fd.entity_id
+                   AND s.version_id = fd.version_id
+                 ORDER BY s.updated_at DESC
+                 LIMIT 1
+                ) as latest_change_set_id
+            FROM state_all fd
+            WHERE fd.schema_key = 'lix_file_descriptor'
+        )
         SELECT
-                json_extract(snapshot_content, '$.id') AS id,
-                json_extract(snapshot_content, '$.path') AS path,
+                json_extract(fd.snapshot_content, '$.id') AS id,
+                json_extract(fd.snapshot_content, '$.path') AS path,
                 materialize_file_data(
-                        json_extract(snapshot_content, '$.id'),
-                        json_extract(snapshot_content, '$.path'),
-                        version_id,
-                        json_extract(snapshot_content, '$.metadata')
+                        json_extract(fd.snapshot_content, '$.id'),
+                        json_extract(fd.snapshot_content, '$.path'),
+                        fd.version_id,
+                        json_extract(fd.snapshot_content, '$.metadata')
                 ) AS data,
-                json_extract(snapshot_content, '$.metadata') AS metadata,
-                json_extract(snapshot_content, '$.hidden') AS hidden,
-                version_id AS lixcol_version_id,
-                inherited_from_version_id AS lixcol_inherited_from_version_id,
-                created_at AS lixcol_created_at,
-                updated_at AS lixcol_updated_at,
-                change_id AS lixcol_change_id,
-                untracked AS lixcol_untracked
-        FROM state_all
-        WHERE schema_key = 'lix_file_descriptor';
+                json_extract(fd.snapshot_content, '$.metadata') AS metadata,
+                json_extract(fd.snapshot_content, '$.hidden') AS hidden,
+                fd.entity_id AS lixcol_entity_id,
+                'lix_file_descriptor' AS lixcol_schema_key,
+                fd.entity_id AS lixcol_file_id,  -- For files, file_id equals entity_id
+                fd.version_id AS lixcol_version_id,
+                fd.inherited_from_version_id AS lixcol_inherited_from_version_id,
+                -- Use the latest change info from any entity in the file
+                lc.latest_change_id AS lixcol_change_id,
+                (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_created_at,
+                (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_updated_at,
+                lc.latest_change_set_id AS lixcol_change_set_id,
+                fd.untracked AS lixcol_untracked
+        FROM state_all fd
+        JOIN latest_file_change lc ON lc.file_id = fd.entity_id AND lc.version_id = fd.version_id
+        WHERE fd.schema_key = 'lix_file_descriptor';
 
 
   CREATE TRIGGER IF NOT EXISTS file_insert
@@ -251,6 +306,8 @@ export function applyFileDatabaseSchema(
     ) AS data,
     json_extract(snapshot_content, '$.metadata') AS metadata,
     json_extract(snapshot_content, '$.hidden') AS hidden,
+    entity_id AS lixcol_entity_id,
+    'lix_file_descriptor' AS lixcol_schema_key,
     file_id AS lixcol_file_id,
     plugin_key AS lixcol_plugin_key,
     schema_version AS lixcol_schema_version,
@@ -291,8 +348,38 @@ LixFileDescriptorSchema satisfies LixSchemaDefinition;
 /**
  * The file descriptor type representing the stored metadata for a file.
  *
- * This contains the file's identity and metadata but not the actual file content.
- * The file content (data) is materialized separately by aggregating entities from plugins.
+ * This is the underlying entity stored in the database with schema_key 'lix_file_descriptor'.
+ * It contains only the file's identity and metadata - NOT the actual file content.
+ *
+ * ```
+ * ┌─────────────────────────────────────────┐
+ * │         LixFileDescriptor               │
+ * │    (schema_key: 'lix_file_descriptor')  │
+ * ├─────────────────────────────────────────┤
+ * │ • id: string (file identifier)          │
+ * │ • path: string (e.g., "/docs/README.md")│
+ * │ • metadata: object | null               │
+ * │ • hidden: boolean                       │
+ * └─────────────────────────────────────────┘
+ *               ↓
+ *     Stored in state/state_all table
+ *               ↓
+ * ┌─────────────────────────────────────────┐
+ * │ File content entities are stored        │
+ * │ separately with file_id = descriptor.id │
+ * │                                         │
+ * │ • JSON properties (mock_json_property)  │
+ * │ • Markdown blocks (markdown_block)      │
+ * │ • CSV rows (csv_row)                    │
+ * │ • etc...                                │
+ * └─────────────────────────────────────────┘
+ * ```
+ *
+ * Key points:
+ * - File descriptors are just metadata - they don't contain file data
+ * - The actual file content is stored as separate entities linked by file_id
+ * - File views aggregate the descriptor + content entities into a complete file
+ * - Changes to file content don't update the descriptor (and vice versa)
  */
 export type LixFileDescriptor = FromLixSchemaDefinition<
 	typeof LixFileDescriptorSchema
@@ -302,9 +389,38 @@ export type LixFileDescriptor = FromLixSchemaDefinition<
  * Complete file type combining the descriptor with materialized data.
  *
  * Uses "Lix" prefix to avoid collision with JavaScript's built-in File type.
- * This represents the full file as seen in views, combining:
- * - LixFileDescriptor: stored metadata (id, path, metadata)
- * - data: materialized file content from plugin entities
+ *
+ * IMPORTANT: File views are projections over multiple entities, not just the file descriptor.
+ * However, they expose schema_key as 'lix_file_descriptor' to maintain foreign key integrity.
+ *
+ * ```
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │                        File View                            │
+ * │               (schema_key: 'lix_file_descriptor')           │
+ * │                                                             │
+ * │  ┌─────────────────────────┐   ┌─────────────────────────┐ │
+ * │  │   File Descriptor       │   │   Plugin Entities       │ │
+ * │  │ (lix_file_descriptor)   │   │                         │ │
+ * │  ├─────────────────────────┤   ├─────────────────────────┤ │
+ * │  │ • id                    │   │ • JSON properties       │ │
+ * │  │ • path                  │ + │ • Markdown blocks       │ │
+ * │  │ • metadata              │   │ • CSV rows              │ │
+ * │  │ • hidden                │   │ • Future: thumbnails    │ │
+ * │  └─────────────────────────┘   └─────────────────────────┘ │
+ * │                    ↓                       ↓                │
+ * │              ┌─────────────────────────────────┐           │
+ * │              │    Materialized as LixFile      │           │
+ * │              │  • All descriptor fields        │           │
+ * │              │  • data: Uint8Array (from       │           │
+ * │              │    plugin entities)             │           │
+ * │              └─────────────────────────────────┘           │
+ * └─────────────────────────────────────────────────────────────┘
+ * ```
+ *
+ * This projection approach means:
+ * - File views aggregate changes from ALL entities within the file
+ * - The 'data' field is dynamically materialized from plugin entities
+ * - A single file view row represents multiple underlying entities
  */
 export type LixFile = LixFileDescriptor & {
 	data: Uint8Array;

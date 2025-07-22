@@ -20,12 +20,33 @@ import type {
  */
 export type StateEntityView = {
 	/**
+	 * The unique identifier for this entity within its schema and file.
+	 *
+	 * This is the primary identifier used to reference this specific entity.
+	 */
+	lixcol_entity_id: Generated<string>;
+
+	/**
+	 * The schema key that defines the structure and type of this entity.
+	 *
+	 * This references the schema definition that validates and types this entity.
+	 */
+	lixcol_schema_key: Generated<string>;
+
+	/**
 	 * File identifier where this entity is stored.
 	 *
 	 * This references the file_id in the state table and links the entity
 	 * to a specific file in the Lix file system.
 	 */
 	lixcol_file_id: Generated<string>;
+
+	/**
+	 * The plugin key that manages this entity type.
+	 *
+	 * This identifies which plugin is responsible for handling this entity.
+	 */
+	lixcol_plugin_key: Generated<string>;
 
 	/**
 	 * Version identifier this entity was inherited from during branching.
@@ -107,12 +128,33 @@ export type StateEntityView = {
  */
 export type EntityStateColumns = {
 	/**
+	 * The unique identifier for this entity within its schema and file.
+	 *
+	 * This is the primary identifier used to reference this specific entity.
+	 */
+	lixcol_entity_id: LixGenerated<string>;
+
+	/**
+	 * The schema key that defines the structure and type of this entity.
+	 *
+	 * This references the schema definition that validates and types this entity.
+	 */
+	lixcol_schema_key: LixGenerated<string>;
+
+	/**
 	 * File identifier where this entity is stored.
 	 *
 	 * This references the file_id in the state table and links the entity
 	 * to a specific file in the Lix file system.
 	 */
 	lixcol_file_id: LixGenerated<string>;
+
+	/**
+	 * The plugin key that manages this entity type.
+	 *
+	 * This identifies which plugin is responsible for handling this entity.
+	 */
+	lixcol_plugin_key: LixGenerated<string>;
 
 	/**
 	 * Version identifier this entity was inherited from during branching.
@@ -384,10 +426,13 @@ function createSingleEntityView(args: {
 
 	// Operational columns for active view (no version_id exposed)
 	const operationalColumns = [
+		"entity_id AS lixcol_entity_id",
+		"schema_key AS lixcol_schema_key",
+		"file_id AS lixcol_file_id",
+		"plugin_key AS lixcol_plugin_key",
 		"inherited_from_version_id AS lixcol_inherited_from_version_id",
 		"created_at AS lixcol_created_at",
 		"updated_at AS lixcol_updated_at",
-		"file_id AS lixcol_file_id",
 		"change_id AS lixcol_change_id",
 		"untracked AS lixcol_untracked",
 		"change_set_id AS lixcol_change_set_id",

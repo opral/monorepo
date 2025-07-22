@@ -5,6 +5,12 @@ import { executeSync } from "../database/execute-sync.js";
 import { sql } from "kysely";
 import type { LixChange } from "../change/schema.js";
 
+/**
+ * List of special entity types that are not stored as JSON in the state table,
+ * but have their own dedicated SQL tables.
+ */
+const SPECIAL_ENTITIES = ["lix_change", "state"] as const;
+
 const ajv = new Ajv({
 	strict: true,
 	// allow 'x-*' properties in alignment with new json schema spec
@@ -313,50 +319,106 @@ function validateForeignKeyConstraints(args: {
 	untracked?: boolean;
 }): void {
 	const foreignKeys = args.schema["x-lix-foreign-keys"];
-	if (!foreignKeys) {
+	if (!foreignKeys || !Array.isArray(foreignKeys)) {
 		return;
 	}
 
 	// Validate each foreign key constraint
-	for (const [localProperty, foreignKeyDef] of Object.entries(foreignKeys)) {
-		const foreignKeyValue = (args.snapshot_content as any)[localProperty];
+	for (const foreignKey of foreignKeys) {
+		// Validate that properties arrays have same length
+		if (
+			foreignKey.properties.length !== foreignKey.references.properties.length
+		) {
+			throw new Error(
+				`Foreign key constraint error: Local properties (${foreignKey.properties.join(", ")}) and ` +
+					`referenced properties (${foreignKey.references.properties.join(", ")}) must have the same length`
+			);
+		}
 
-		// Skip validation if foreign key value is null or undefined
+		// Extract values for all local properties
+		const localValues: any[] = [];
+		let hasNullValue = false;
+
+		for (const localProperty of foreignKey.properties) {
+			const value = (args.snapshot_content as any)[localProperty];
+			if (value === null || value === undefined) {
+				hasNullValue = true;
+				break;
+			}
+			localValues.push(value);
+		}
+
+		// Skip validation if any foreign key value is null or undefined
 		// (like SQL foreign keys, null values are allowed)
-		if (foreignKeyValue === null || foreignKeyValue === undefined) {
+		if (hasNullValue) {
 			continue;
 		}
 
-		// Check if this references a real SQL table vs a JSON schema entity
-		const isRealSqlTable = ["lix_change"].includes(foreignKeyDef.schemaKey);
+		// Check if this references a special entity with its own SQL table
+		const isSpecialEntity = SPECIAL_ENTITIES.includes(
+			foreignKey.references.schemaKey as any
+		);
 
 		let query: any;
-		if (isRealSqlTable) {
-			// Query the real SQL table directly
+		if (isSpecialEntity) {
+			// Query the dedicated SQL table directly
 			// Map schema key to actual table name
 			const tableName =
-				foreignKeyDef.schemaKey === "lix_change"
+				foreignKey.references.schemaKey === "lix_change"
 					? "change"
-					: foreignKeyDef.schemaKey;
-			query = args.lix.db
-				.selectFrom(tableName as any)
-				.select(foreignKeyDef.property as any)
-				.where(foreignKeyDef.property as any, "=", foreignKeyValue);
+					: foreignKey.references.schemaKey;
+
+			// Special handling for state table which supports composite keys
+			if (foreignKey.references.schemaKey === "state") {
+				query = args.lix.db
+					.selectFrom("state_all" as any)
+					.select(foreignKey.references.properties as any);
+
+				// Add WHERE conditions for each property
+				for (let i = 0; i < foreignKey.properties.length; i++) {
+					const refProperty = foreignKey.references.properties[i];
+					const localValue = localValues[i];
+					query = query.where(refProperty as any, "=", localValue);
+				}
+			} else {
+				// For other special entities, we only support single property references
+				if (foreignKey.properties.length !== 1) {
+					throw new Error(
+						`Foreign key constraint error: Special entity '${foreignKey.references.schemaKey}' references only support single property, ` +
+							`but got ${foreignKey.properties.length} properties`
+					);
+				}
+
+				query = args.lix.db
+					.selectFrom(tableName as any)
+					.select(foreignKey.references.properties[0] as any)
+					.where(
+						foreignKey.references.properties[0] as any,
+						"=",
+						localValues[0]
+					);
+			}
 		} else {
 			// Query JSON schema entities in the state table
 			query = args.lix.db
 				.selectFrom("state_all")
 				.select("snapshot_content")
-				.where("schema_key", "=", foreignKeyDef.schemaKey)
-				.where(
-					sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
+				.where("schema_key", "=", foreignKey.references.schemaKey);
+
+			// Add WHERE conditions for each property
+			for (let i = 0; i < foreignKey.properties.length; i++) {
+				const refProperty = foreignKey.references.properties[i];
+				const localValue = localValues[i];
+				query = query.where(
+					sql`json_extract(snapshot_content, '$.' || ${refProperty})`,
 					"=",
-					foreignKeyValue
+					localValue
 				);
+			}
 		}
 
-		// Add version constraint if specified (only for JSON schema entities)
-		if (foreignKeyDef.schemaVersion && !isRealSqlTable) {
+		// Add version constraint if specified (only for regular schema entities)
+		if (foreignKey.references.schemaVersion && !isSpecialEntity) {
 			// Get stored schema with specific version
 			const referencedSchema = executeSync({
 				lix: args.lix,
@@ -366,26 +428,30 @@ function validateForeignKeyConstraints(args: {
 					.where(
 						sql`json_extract(value, '$.["x-lix-key"]')`,
 						"=",
-						foreignKeyDef.schemaKey
+						foreignKey.references.schemaKey
 					)
 					.where(
 						sql`json_extract(value, '$.["x-lix-version"]')`,
 						"=",
-						foreignKeyDef.schemaVersion
+						foreignKey.references.schemaVersion
 					),
 			});
 
 			if (referencedSchema.length === 0) {
 				throw new Error(
-					`Foreign key constraint violation. Referenced schema '${foreignKeyDef.schemaKey}' with version '${foreignKeyDef.schemaVersion}' does not exist.`
+					`Foreign key constraint violation. Referenced schema '${foreignKey.references.schemaKey}' with version '${foreignKey.references.schemaVersion}' does not exist.`
 				);
 			}
 		}
 
 		const referencedStates = executeSync({
 			lix: args.lix,
-			query: isRealSqlTable
-				? query
+			query: isSpecialEntity
+				? foreignKey.references.schemaKey === "state"
+					? query
+							.where("version_id", "=", args.version_id)
+							.where("inherited_from_version_id", "is", null)
+					: query
 				: query
 						.where("version_id", "=", args.version_id)
 						.where("inherited_from_version_id", "is", null),
@@ -403,12 +469,17 @@ function validateForeignKeyConstraints(args: {
 			const versionName =
 				versionInfo.length > 0 ? versionInfo[0].name : "unknown";
 
+			// Build the property/value pairs for error message
+			const localPropsStr = foreignKey.properties.join(", ");
+			const refPropsStr = foreignKey.references.properties.join(", ");
+			const valuesStr = localValues.map((v) => `'${v}'`).join(", ");
+
 			// First line: compact string for regex matching (backwards compatibility)
-			let errorMessage = `Foreign key constraint violation. The schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) has a foreign key constraint on '${localProperty}' referencing '${foreignKeyDef.schemaKey}.${foreignKeyDef.property}' but no matching record exists with value '${foreignKeyValue}' in version '${args.version_id}' (${versionName}).`;
+			let errorMessage = `Foreign key constraint violation. The schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) has a foreign key constraint on (${localPropsStr}) referencing '${foreignKey.references.schemaKey}.(${refPropsStr})' but no matching record exists with values (${valuesStr}) in version '${args.version_id}' (${versionName}).`;
 
 			// Add foreign key relationship visualization
 			errorMessage += `\n\nForeign Key Relationship:\n`;
-			errorMessage += `  ${args.schema["x-lix-key"]}.${localProperty} → ${foreignKeyDef.schemaKey}.${foreignKeyDef.property}\n`;
+			errorMessage += `  ${args.schema["x-lix-key"]}.(${localPropsStr}) → ${foreignKey.references.schemaKey}.(${refPropsStr})\n`;
 
 			// Helper function to truncate property values
 			const truncateValue = (value: any, maxLength: number = 40): string => {
@@ -439,26 +510,37 @@ function validateForeignKeyConstraints(args: {
 		}
 
 		// If this is a tracked entity, check if the referenced entity is untracked
-		if (!args.untracked && !isRealSqlTable) {
-			// Query the untracked table to see if the referenced entity is untracked
+		if (!args.untracked && !isSpecialEntity) {
+			// Build query to check for untracked references
+			let untrackedQuery = args.lix.db
+				.selectFrom("state_all")
+				.select("entity_id")
+				.where("schema_key", "=", foreignKey.references.schemaKey)
+				.where("version_id", "=", args.version_id)
+				.where("untracked", "=", true);
+
+			// Add WHERE conditions for each property
+			for (let i = 0; i < foreignKey.properties.length; i++) {
+				const refProperty = foreignKey.references.properties[i];
+				const localValue = localValues[i];
+				untrackedQuery = untrackedQuery.where(
+					sql`json_extract(snapshot_content, '$.' || ${refProperty})`,
+					"=",
+					localValue
+				);
+			}
+
 			const untrackedReferences = executeSync({
 				lix: args.lix,
-				query: args.lix.db
-					.selectFrom("state_all")
-					.select("entity_id")
-					.where("schema_key", "=", foreignKeyDef.schemaKey)
-					.where("version_id", "=", args.version_id)
-					.where("untracked", "=", true)
-					.where(
-						sql`json_extract(snapshot_content, '$.' || ${foreignKeyDef.property})`,
-						"=",
-						foreignKeyValue
-					),
+				query: untrackedQuery,
 			});
 
 			if (untrackedReferences.length > 0) {
+				const refPropsStr = foreignKey.references.properties.join(", ");
+				const valuesStr = localValues.map((v) => `'${v}'`).join(", ");
+
 				let errorMessage = `Foreign key constraint violation: tracked entities cannot reference untracked entities. This would create broken references during sync.\n`;
-				errorMessage += `\nThe tracked entity '${args.schema["x-lix-key"]}' is trying to reference an untracked entity '${foreignKeyDef.schemaKey}' with ${foreignKeyDef.property}='${foreignKeyValue}'.\n`;
+				errorMessage += `\nThe tracked entity '${args.schema["x-lix-key"]}' is trying to reference an untracked entity '${foreignKey.references.schemaKey}' with (${refPropsStr})=(${valuesStr}).\n`;
 				errorMessage += `\nUntracked entities are local-only and will not be synced to remote. If a tracked entity references an untracked entity, it would fail validation on the remote because the untracked entity doesn't exist there.\n`;
 				errorMessage += `\nSolutions:\n`;
 				errorMessage += `1. Make the referenced entity tracked (remove untracked flag)\n`;
@@ -575,44 +657,68 @@ function validateDeletionConstraints(args: {
 		}
 
 		// Check each foreign key in this schema
-		for (const [localProperty, foreignKeyDef] of Object.entries(
-			schema["x-lix-foreign-keys"]
-		)) {
+		const foreignKeys = schema["x-lix-foreign-keys"];
+		if (!foreignKeys || !Array.isArray(foreignKeys)) {
+			continue;
+		}
+
+		for (const foreignKey of foreignKeys) {
 			// Skip if this foreign key doesn't reference our schema
-			if (foreignKeyDef.schemaKey !== args.schema["x-lix-key"]) {
+			if (foreignKey.references.schemaKey !== args.schema["x-lix-key"]) {
 				continue;
 			}
 
-			// Get the value of the property that is being referenced
+			// Get the values of the properties that are being referenced
 			const rawContent = currentEntity[0].snapshot_content;
 			const entityContent =
 				typeof rawContent === "string"
 					? JSON.parse(rawContent)
 					: (rawContent as any);
-			const referencedValue = entityContent[foreignKeyDef.property];
 
-			if (referencedValue === null || referencedValue === undefined) {
+			// Extract referenced values
+			const referencedValues: any[] = [];
+			let hasNullValue = false;
+
+			for (const refProperty of foreignKey.references.properties) {
+				const value = entityContent[refProperty];
+				if (value === null || value === undefined) {
+					hasNullValue = true;
+					break;
+				}
+				referencedValues.push(value);
+			}
+
+			if (hasNullValue) {
 				continue;
 			}
 
-			// Check if any entities reference this value
+			// Build query to check if any entities reference these values
+			let query = args.lix.db
+				.selectFrom("state_all")
+				.select("entity_id")
+				.where("schema_key", "=", schema["x-lix-key"])
+				.where("version_id", "=", args.version_id);
+
+			// Add WHERE conditions for each property
+			for (let i = 0; i < foreignKey.properties.length; i++) {
+				const localProperty = foreignKey.properties[i];
+				const referencedValue = referencedValues[i];
+				query = query.where(
+					sql`json_extract(snapshot_content, '$.' || ${localProperty})`,
+					"=",
+					referencedValue
+				);
+			}
+
 			const referencingEntities = executeSync({
 				lix: args.lix,
-				query: args.lix.db
-					.selectFrom("state_all")
-					.select("entity_id")
-					.where("schema_key", "=", schema["x-lix-key"])
-					.where("version_id", "=", args.version_id)
-					.where(
-						sql`json_extract(snapshot_content, '$.' || ${localProperty})`,
-						"=",
-						referencedValue
-					),
+				query,
 			});
 
 			if (referencingEntities.length > 0) {
+				const localPropsStr = foreignKey.properties.join(", ");
 				throw new Error(
-					`Foreign key constraint violation: Cannot delete entity because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}' via foreign key '${localProperty}'`
+					`Foreign key constraint violation: Cannot delete entity because it is referenced by ${referencingEntities.length} record(s) in schema '${schema["x-lix-key"]}' via foreign key (${localPropsStr})`
 				);
 			}
 		}

@@ -1468,12 +1468,15 @@ test("delete operations are validated for foreign key constraints", async () => 
 		"x-lix-key": "child_entity",
 		"x-lix-version": "1.0",
 		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": {
-			parent_id: {
-				schemaKey: "parent_entity",
-				property: "id",
+		"x-lix-foreign-keys": [
+			{
+				properties: ["parent_id"],
+				references: {
+					schemaKey: "parent_entity",
+					properties: ["id"],
+				},
 			},
-		},
+		],
 		type: "object",
 		properties: {
 			id: { type: "string" },

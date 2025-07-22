@@ -94,20 +94,29 @@ export const LixVersionSchema = {
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
 	"x-lix-unique": [["working_change_set_id"]],
-	"x-lix-foreign-keys": {
-		change_set_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["change_set_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-		working_change_set_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+		{
+			properties: ["working_change_set_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-		inherits_from_version_id: {
-			schemaKey: "lix_version",
-			property: "id",
+		{
+			properties: ["inherits_from_version_id"],
+			references: {
+				schemaKey: "lix_version",
+				properties: ["id"],
+			},
 		},
-	},
+	],
 	type: "object",
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
@@ -129,12 +138,15 @@ export const LixActiveVersionSchema = {
 	"x-lix-key": "lix_active_version",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["version_id"],
-	"x-lix-foreign-keys": {
-		version_id: {
-			schemaKey: "lix_version",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["version_id"],
+			references: {
+				schemaKey: "lix_version",
+				properties: ["id"],
+			},
 		},
-	},
+	],
 	type: "object",
 	properties: {
 		version_id: { type: "string" },

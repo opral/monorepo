@@ -31,6 +31,20 @@ import type {
  */
 export type StateEntityHistoryView = {
 	/**
+	 * The unique identifier for this entity within its schema and file.
+	 *
+	 * This is the primary identifier used to reference this specific entity.
+	 */
+	lixcol_entity_id: Generated<string>;
+
+	/**
+	 * The schema key that defines the structure and type of this entity.
+	 *
+	 * This references the schema definition that validates and types this entity.
+	 */
+	lixcol_schema_key: Generated<string>;
+
+	/**
 	 * File identifier where this entity is stored.
 	 *
 	 * This references the file_id in the state_history table and links the entity
@@ -110,6 +124,20 @@ export type StateEntityHistoryView = {
  * ```
  */
 export type StateEntityHistoryColumns = {
+	/**
+	 * The unique identifier for this entity within its schema and file.
+	 *
+	 * This is the primary identifier used to reference this specific entity.
+	 */
+	lixcol_entity_id: LixGenerated<string>;
+
+	/**
+	 * The schema key that defines the structure and type of this entity.
+	 *
+	 * This references the schema definition that validates and types this entity.
+	 */
+	lixcol_schema_key: LixGenerated<string>;
+
 	/**
 	 * File identifier where this entity is stored.
 	 *
@@ -228,8 +256,8 @@ export function createEntityStateHistoryView(args: {
 						(prop) => `json_extract(snapshot_content, '$.${prop}') AS ${prop}`
 					)
 					.join(",\n        ")},
-        entity_id,
-        schema_key,
+        entity_id AS lixcol_entity_id,
+        schema_key AS lixcol_schema_key,
         file_id AS lixcol_file_id,
         plugin_key AS lixcol_plugin_key,
         schema_version AS lixcol_schema_version,

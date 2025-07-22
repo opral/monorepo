@@ -83,20 +83,29 @@ export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
 export const LixChangeSetElementSchema = {
 	"x-lix-key": "lix_change_set_element",
 	"x-lix-version": "1.0",
-	"x-lix-foreign-keys": {
-		change_set_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["change_set_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-		change_id: {
-			schemaKey: "lix_change",
-			property: "id",
+		{
+			properties: ["change_id"],
+			references: {
+				schemaKey: "lix_change",
+				properties: ["id"],
+			},
 		},
-		schema_key: {
-			schemaKey: "lix_stored_schema",
-			property: "key",
+		{
+			properties: ["schema_key"],
+			references: {
+				schemaKey: "lix_stored_schema",
+				properties: ["key"],
+			},
 		},
-	},
+	],
 	"x-lix-primary-key": ["change_set_id", "change_id"],
 	"x-lix-unique": [["change_set_id", "entity_id", "schema_key", "file_id"]],
 	type: "object",
@@ -126,16 +135,22 @@ export const LixChangeSetEdgeSchema = {
 	"x-lix-key": "lix_change_set_edge",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["parent_id", "child_id"],
-	"x-lix-foreign-keys": {
-		parent_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["parent_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-		child_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+		{
+			properties: ["child_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-	},
+	],
 	type: "object",
 	properties: {
 		parent_id: { type: "string" },
@@ -155,16 +170,22 @@ export const LixChangeSetLabelSchema = {
 	"x-lix-key": "lix_change_set_label",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["change_set_id", "label_id"],
-	"x-lix-foreign-keys": {
-		change_set_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["change_set_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-		label_id: {
-			schemaKey: "lix_label",
-			property: "id",
+		{
+			properties: ["label_id"],
+			references: {
+				schemaKey: "lix_label",
+				properties: ["id"],
+			},
 		},
-	},
+	],
 	type: "object",
 	properties: {
 		change_set_id: { type: "string" },
@@ -185,16 +206,22 @@ export const LixChangeSetThreadSchema = {
 	"x-lix-key": "lix_change_set_thread",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["change_set_id", "thread_id"],
-	"x-lix-foreign-keys": {
-		change_set_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["change_set_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-		thread_id: {
-			schemaKey: "lix_thread",
-			property: "id",
+		{
+			properties: ["thread_id"],
+			references: {
+				schemaKey: "lix_thread",
+				properties: ["id"],
+			},
 		},
-	},
+	],
 	type: "object",
 	properties: {
 		change_set_id: { type: "string" },

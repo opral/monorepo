@@ -511,4 +511,56 @@ describe("createEntityAllViewIfNotExists", () => {
 		expect(entity).toHaveProperty("lixcol_change_id");
 		expect(entity).toHaveProperty("lixcol_untracked");
 	});
+
+	test("should expose lixcol_entity_id, lixcol_schema_key, lixcol_file_id, and lixcol_plugin_key in _all view", async () => {
+		const lix = await openLix({});
+
+		createEntityStateAllView({
+			lix,
+			schema: testSchema,
+			overrideName: "test_view_all",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Get active version
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
+		// Insert test data
+		await lix.db
+			.insertInto("test_view_all" as any)
+			.values({
+				id: "test_id",
+				name: "test_name",
+				value: 42,
+				lixcol_version_id: activeVersion.version_id,
+			})
+			.execute();
+
+		// Query the view to verify all entity identification columns are exposed
+		const result = await lix.db
+			.selectFrom("test_view_all" as any)
+			.select([
+				"id",
+				"name",
+				"lixcol_entity_id",
+				"lixcol_schema_key",
+				"lixcol_file_id",
+				"lixcol_plugin_key",
+				"lixcol_version_id", // _all views also have version_id
+			])
+			.executeTakeFirst();
+
+		expect(result).toBeDefined();
+
+		// Verify all required lixcol_ columns are present and have correct values
+		expect(result?.lixcol_entity_id).toBe("test_id");
+		expect(result?.lixcol_schema_key).toBe("test_entity");
+		expect(result?.lixcol_file_id).toBe("test_file");
+		expect(result?.lixcol_plugin_key).toBe("test_plugin");
+		expect(result?.lixcol_version_id).toBeDefined();
+	});
 });

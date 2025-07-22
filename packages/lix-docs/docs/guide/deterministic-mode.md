@@ -166,7 +166,7 @@ Deterministic state is automatically persisted:
 
 All state is stored in `internal_state_all_untracked` with `version_id = "global"`.
 
-## API Quick-Links
+## API Reference Quick-Links
 
 The following functions provide deterministic behavior when `lix_deterministic_mode` is enabled:
 
