@@ -5,6 +5,12 @@ import { executeSync } from "../database/execute-sync.js";
 import { sql } from "kysely";
 import type { LixChange } from "../change/schema.js";
 
+/**
+ * List of special entity types that are not stored as JSON in the state table,
+ * but have their own dedicated SQL tables.
+ */
+const SPECIAL_ENTITIES = ["lix_change", "state"] as const;
+
 const ajv = new Ajv({
 	strict: true,
 	// allow 'x-*' properties in alignment with new json schema spec
@@ -348,14 +354,14 @@ function validateForeignKeyConstraints(args: {
 			continue;
 		}
 
-		// Check if this references a real SQL table vs a JSON schema entity
-		const isRealSqlTable = ["lix_change", "state"].includes(
-			foreignKey.references.schemaKey
+		// Check if this references a special entity with its own SQL table
+		const isSpecialEntity = SPECIAL_ENTITIES.includes(
+			foreignKey.references.schemaKey as any
 		);
 
 		let query: any;
-		if (isRealSqlTable) {
-			// Query the real SQL table directly
+		if (isSpecialEntity) {
+			// Query the dedicated SQL table directly
 			// Map schema key to actual table name
 			const tableName =
 				foreignKey.references.schemaKey === "lix_change"
@@ -411,8 +417,8 @@ function validateForeignKeyConstraints(args: {
 			}
 		}
 
-		// Add version constraint if specified (only for JSON schema entities)
-		if (foreignKey.references.schemaVersion && !isRealSqlTable) {
+		// Add version constraint if specified (only for regular schema entities)
+		if (foreignKey.references.schemaVersion && !isSpecialEntity) {
 			// Get stored schema with specific version
 			const referencedSchema = executeSync({
 				lix: args.lix,
@@ -440,7 +446,7 @@ function validateForeignKeyConstraints(args: {
 
 		const referencedStates = executeSync({
 			lix: args.lix,
-			query: isRealSqlTable
+			query: isSpecialEntity
 				? foreignKey.references.schemaKey === "state"
 					? query
 							.where("version_id", "=", args.version_id)
@@ -504,7 +510,7 @@ function validateForeignKeyConstraints(args: {
 		}
 
 		// If this is a tracked entity, check if the referenced entity is untracked
-		if (!args.untracked && !isRealSqlTable) {
+		if (!args.untracked && !isSpecialEntity) {
 			// Build query to check for untracked references
 			let untrackedQuery = args.lix.db
 				.selectFrom("state_all")
