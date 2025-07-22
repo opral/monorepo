@@ -70,7 +70,8 @@ export const LixSchemaDefinition = {
 								type: "array",
 								minItems: 1,
 								items: { type: "string" },
-								description: "Local JSON-schema property names that participate in the FK",
+								description:
+									"Local JSON-schema property names that participate in the FK",
 							},
 							references: {
 								type: "object",
@@ -84,7 +85,8 @@ export const LixSchemaDefinition = {
 										type: "array",
 										minItems: 1,
 										items: { type: "string" },
-										description: "Remote property names (same length as local properties)",
+										description:
+											"Remote property names (same length as local properties)",
 									},
 									schemaVersion: {
 										type: "string",
@@ -99,7 +101,7 @@ export const LixSchemaDefinition = {
 							//   description: "Action to take when referenced entity is deleted (future feature)"
 							// },
 							// onUpdate: {
-							//   type: "string", 
+							//   type: "string",
 							//   enum: ["cascade", "restrict"],
 							//   description: "Action to take when referenced entity is updated (future feature)"
 							// },

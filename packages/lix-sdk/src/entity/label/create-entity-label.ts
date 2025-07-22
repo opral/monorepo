@@ -39,9 +39,11 @@ export async function createEntityLabel(args: {
 	const { lix, entity, label } = args;
 
 	// Extract entity fields - support both canonical and lixcol_ prefixed names
-	const entity_id = 'entity_id' in entity ? entity.entity_id : entity.lixcol_entity_id;
-	const schema_key = 'schema_key' in entity ? entity.schema_key : entity.lixcol_schema_key;
-	const file_id = 'file_id' in entity ? entity.file_id : entity.lixcol_file_id;
+	const entity_id =
+		"entity_id" in entity ? entity.entity_id : entity.lixcol_entity_id;
+	const schema_key =
+		"schema_key" in entity ? entity.schema_key : entity.lixcol_schema_key;
+	const file_id = "file_id" in entity ? entity.file_id : entity.lixcol_file_id;
 
 	// Check if the mapping already exists
 	const existingMapping = await lix.db
@@ -95,9 +97,11 @@ export async function deleteEntityLabel(args: {
 	const { lix, entity, label } = args;
 
 	// Extract entity fields - support both canonical and lixcol_ prefixed names
-	const entity_id = 'entity_id' in entity ? entity.entity_id : entity.lixcol_entity_id;
-	const schema_key = 'schema_key' in entity ? entity.schema_key : entity.lixcol_schema_key;
-	const file_id = 'file_id' in entity ? entity.file_id : entity.lixcol_file_id;
+	const entity_id =
+		"entity_id" in entity ? entity.entity_id : entity.lixcol_entity_id;
+	const schema_key =
+		"schema_key" in entity ? entity.schema_key : entity.lixcol_schema_key;
+	const file_id = "file_id" in entity ? entity.file_id : entity.lixcol_file_id;
 
 	await lix.db
 		.deleteFrom("entity_label")
@@ -107,4 +111,3 @@ export async function deleteEntityLabel(args: {
 		.where("label_id", "=", label.id)
 		.execute();
 }
-

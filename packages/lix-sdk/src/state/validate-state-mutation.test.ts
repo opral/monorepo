@@ -952,7 +952,13 @@ test("handles composite foreign keys", async () => {
 			address_street: { type: "string" },
 			package_id: { type: "string" },
 		},
-		required: ["id", "address_country", "address_postal", "address_street", "package_id"],
+		required: [
+			"id",
+			"address_country",
+			"address_postal",
+			"address_street",
+			"package_id",
+		],
 		additionalProperties: false,
 	} as const satisfies LixSchemaDefinition;
 
@@ -1018,7 +1024,9 @@ test("handles composite foreign keys", async () => {
 			operation: "insert",
 			version_id: activeVersion.version_id,
 		})
-	).toThrowError(/Foreign key constraint violation.*address_country, address_postal, address_street.*referencing.*address.*country, postal_code, street/);
+	).toThrowError(
+		/Foreign key constraint violation.*address_country, address_postal, address_street.*referencing.*address.*country, postal_code, street/
+	);
 });
 
 test("foreign key referencing real SQL table (change.id)", async () => {

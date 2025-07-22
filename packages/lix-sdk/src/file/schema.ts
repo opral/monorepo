@@ -350,7 +350,7 @@ LixFileDescriptorSchema satisfies LixSchemaDefinition;
  *
  * This is the underlying entity stored in the database with schema_key 'lix_file_descriptor'.
  * It contains only the file's identity and metadata - NOT the actual file content.
- * 
+ *
  * ```
  * ┌─────────────────────────────────────────┐
  * │         LixFileDescriptor               │
@@ -374,7 +374,7 @@ LixFileDescriptorSchema satisfies LixSchemaDefinition;
  * │ • etc...                                │
  * └─────────────────────────────────────────┘
  * ```
- * 
+ *
  * Key points:
  * - File descriptors are just metadata - they don't contain file data
  * - The actual file content is stored as separate entities linked by file_id
@@ -389,10 +389,10 @@ export type LixFileDescriptor = FromLixSchemaDefinition<
  * Complete file type combining the descriptor with materialized data.
  *
  * Uses "Lix" prefix to avoid collision with JavaScript's built-in File type.
- * 
+ *
  * IMPORTANT: File views are projections over multiple entities, not just the file descriptor.
  * However, they expose schema_key as 'lix_file_descriptor' to maintain foreign key integrity.
- * 
+ *
  * ```
  * ┌─────────────────────────────────────────────────────────────┐
  * │                        File View                            │
@@ -416,7 +416,7 @@ export type LixFileDescriptor = FromLixSchemaDefinition<
  * │              └─────────────────────────────────┘           │
  * └─────────────────────────────────────────────────────────────┘
  * ```
- * 
+ *
  * This projection approach means:
  * - File views aggregate changes from ALL entities within the file
  * - The 'data' field is dynamically materialized from plugin entities

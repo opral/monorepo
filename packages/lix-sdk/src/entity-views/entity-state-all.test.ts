@@ -555,7 +555,7 @@ describe("createEntityAllViewIfNotExists", () => {
 			.executeTakeFirst();
 
 		expect(result).toBeDefined();
-		
+
 		// Verify all required lixcol_ columns are present and have correct values
 		expect(result?.lixcol_entity_id).toBe("test_id");
 		expect(result?.lixcol_schema_key).toBe("test_entity");

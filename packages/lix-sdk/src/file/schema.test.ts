@@ -1229,11 +1229,7 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 	};
 
 	// Filter out columns that don't make sense for file views (files are themselves entities)
-	const blacklist = [
-		"lixcol_file_id",
-		"lixcol_plugin_key",
-		"lixcol_entity_id",
-	];
+	const blacklist = ["lixcol_file_id", "lixcol_plugin_key", "lixcol_entity_id"];
 
 	const filterColumns = (lixcols: Record<string, any>) => {
 		const filtered: Record<string, any> = {};
@@ -1463,11 +1459,17 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 		.executeTakeFirstOrThrow();
 
 	// file_all should show the same change_id as the file view at this point
-	expect(fileAllAfterContentUpdate.lixcol_change_id).toBe(fileAfterContentUpdate.lixcol_change_id);
-	expect(fileAllAfterContentUpdate.lixcol_updated_at).toBe(fileAfterContentUpdate.lixcol_updated_at);
+	expect(fileAllAfterContentUpdate.lixcol_change_id).toBe(
+		fileAfterContentUpdate.lixcol_change_id
+	);
+	expect(fileAllAfterContentUpdate.lixcol_updated_at).toBe(
+		fileAfterContentUpdate.lixcol_updated_at
+	);
 
 	// Verify that file_all view also exposes lix_file_descriptor as schema key
-	expect(fileAllAfterContentUpdate.lixcol_schema_key).toBe("lix_file_descriptor");
+	expect(fileAllAfterContentUpdate.lixcol_schema_key).toBe(
+		"lix_file_descriptor"
+	);
 
 	// Additional verification that descriptor changes DO work
 	await lix.db
@@ -1496,7 +1498,9 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(fileAllAfterPathUpdate.lixcol_change_id).toBe(fileAfterPathUpdate.lixcol_change_id);
+	expect(fileAllAfterPathUpdate.lixcol_change_id).toBe(
+		fileAfterPathUpdate.lixcol_change_id
+	);
 	expect(fileAllAfterPathUpdate.path).toBe("/renamed-document.json");
 
 	// Create a checkpoint to test file_history
@@ -1513,11 +1517,13 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 
 	// file_history should show the latest state including the path update
 	expect(fileHistoryAtCheckpoint.path).toBe("/renamed-document.json");
-	expect(fileHistoryAtCheckpoint.lixcol_change_id).toBe(fileAfterPathUpdate.lixcol_change_id);
+	expect(fileHistoryAtCheckpoint.lixcol_change_id).toBe(
+		fileAfterPathUpdate.lixcol_change_id
+	);
 
 	// Verify that file_history view also exposes lix_file_descriptor as schema key
 	expect(fileHistoryAtCheckpoint.lixcol_schema_key).toBe("lix_file_descriptor");
-	
+
 	// The materialized data should reflect the content updates
 	const historicalData = JSON.parse(
 		new TextDecoder().decode(fileHistoryAtCheckpoint.data)

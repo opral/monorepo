@@ -320,10 +320,12 @@ function validateForeignKeyConstraints(args: {
 	// Validate each foreign key constraint
 	for (const foreignKey of foreignKeys) {
 		// Validate that properties arrays have same length
-		if (foreignKey.properties.length !== foreignKey.references.properties.length) {
+		if (
+			foreignKey.properties.length !== foreignKey.references.properties.length
+		) {
 			throw new Error(
 				`Foreign key constraint error: Local properties (${foreignKey.properties.join(", ")}) and ` +
-				`referenced properties (${foreignKey.references.properties.join(", ")}) must have the same length`
+					`referenced properties (${foreignKey.references.properties.join(", ")}) must have the same length`
 			);
 		}
 
@@ -347,7 +349,9 @@ function validateForeignKeyConstraints(args: {
 		}
 
 		// Check if this references a real SQL table vs a JSON schema entity
-		const isRealSqlTable = ["lix_change", "state"].includes(foreignKey.references.schemaKey);
+		const isRealSqlTable = ["lix_change", "state"].includes(
+			foreignKey.references.schemaKey
+		);
 
 		let query: any;
 		if (isRealSqlTable) {
@@ -357,13 +361,13 @@ function validateForeignKeyConstraints(args: {
 				foreignKey.references.schemaKey === "lix_change"
 					? "change"
 					: foreignKey.references.schemaKey;
-			
+
 			// Special handling for state table which supports composite keys
 			if (foreignKey.references.schemaKey === "state") {
 				query = args.lix.db
 					.selectFrom("state_all" as any)
 					.select(foreignKey.references.properties as any);
-				
+
 				// Add WHERE conditions for each property
 				for (let i = 0; i < foreignKey.properties.length; i++) {
 					const refProperty = foreignKey.references.properties[i];
@@ -375,14 +379,18 @@ function validateForeignKeyConstraints(args: {
 				if (foreignKey.properties.length !== 1) {
 					throw new Error(
 						`Foreign key constraint error: Real SQL table references only support single property, ` +
-						`but got ${foreignKey.properties.length} properties`
+							`but got ${foreignKey.properties.length} properties`
 					);
 				}
-				
+
 				query = args.lix.db
 					.selectFrom(tableName as any)
 					.select(foreignKey.references.properties[0] as any)
-					.where(foreignKey.references.properties[0] as any, "=", localValues[0]);
+					.where(
+						foreignKey.references.properties[0] as any,
+						"=",
+						localValues[0]
+					);
 			}
 		} else {
 			// Query JSON schema entities in the state table
@@ -390,7 +398,7 @@ function validateForeignKeyConstraints(args: {
 				.selectFrom("state_all")
 				.select("snapshot_content")
 				.where("schema_key", "=", foreignKey.references.schemaKey);
-			
+
 			// Add WHERE conditions for each property
 			for (let i = 0; i < foreignKey.properties.length; i++) {
 				const refProperty = foreignKey.references.properties[i];
@@ -458,7 +466,7 @@ function validateForeignKeyConstraints(args: {
 			// Build the property/value pairs for error message
 			const localPropsStr = foreignKey.properties.join(", ");
 			const refPropsStr = foreignKey.references.properties.join(", ");
-			const valuesStr = localValues.map(v => `'${v}'`).join(", ");
+			const valuesStr = localValues.map((v) => `'${v}'`).join(", ");
 
 			// First line: compact string for regex matching (backwards compatibility)
 			let errorMessage = `Foreign key constraint violation. The schema '${args.schema["x-lix-key"]}' (${args.schema["x-lix-version"]}) has a foreign key constraint on (${localPropsStr}) referencing '${foreignKey.references.schemaKey}.(${refPropsStr})' but no matching record exists with values (${valuesStr}) in version '${args.version_id}' (${versionName}).`;
@@ -504,7 +512,7 @@ function validateForeignKeyConstraints(args: {
 				.where("schema_key", "=", foreignKey.references.schemaKey)
 				.where("version_id", "=", args.version_id)
 				.where("untracked", "=", true);
-			
+
 			// Add WHERE conditions for each property
 			for (let i = 0; i < foreignKey.properties.length; i++) {
 				const refProperty = foreignKey.references.properties[i];
@@ -660,11 +668,11 @@ function validateDeletionConstraints(args: {
 				typeof rawContent === "string"
 					? JSON.parse(rawContent)
 					: (rawContent as any);
-			
+
 			// Extract referenced values
 			const referencedValues: any[] = [];
 			let hasNullValue = false;
-			
+
 			for (const refProperty of foreignKey.references.properties) {
 				const value = entityContent[refProperty];
 				if (value === null || value === undefined) {
@@ -684,7 +692,7 @@ function validateDeletionConstraints(args: {
 				.select("entity_id")
 				.where("schema_key", "=", schema["x-lix-key"])
 				.where("version_id", "=", args.version_id);
-			
+
 			// Add WHERE conditions for each property
 			for (let i = 0; i < foreignKey.properties.length; i++) {
 				const localProperty = foreignKey.properties[i];

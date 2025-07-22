@@ -679,7 +679,7 @@ describe("createEntityViewIfNotExists", () => {
 			.executeTakeFirst();
 
 		expect(result).toBeDefined();
-		
+
 		// Verify all required lixcol_ columns are present and have correct values
 		expect(result?.lixcol_entity_id).toBe("test_id");
 		expect(result?.lixcol_schema_key).toBe("test_entity");
@@ -722,7 +722,7 @@ describe("createEntityViewIfNotExists", () => {
 			.executeTakeFirst();
 
 		expect(result).toBeDefined();
-		
+
 		// For composite keys, entity_id is joined with ::
 		expect(result?.lixcol_entity_id).toBe("cat1::id1");
 		expect(result?.lixcol_schema_key).toBe("composite_entity");

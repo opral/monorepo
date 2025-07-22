@@ -6,7 +6,10 @@ test("entity_label mapping requires entity to exist in state", async () => {
 	const lix = await openLix({});
 
 	// First create a label
-	const needsTranslationLabel = await createLabel({ lix, name: "needs translation" });
+	const needsTranslationLabel = await createLabel({
+		lix,
+		name: "needs translation",
+	});
 
 	// Create an entity in state (simulate a bundle entity)
 	await lix.db

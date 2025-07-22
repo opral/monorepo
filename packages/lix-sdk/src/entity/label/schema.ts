@@ -21,7 +21,7 @@ export const LixEntityLabelSchema = {
 	"x-lix-key": "lix_entity_label",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["entity_id", "schema_key", "file_id", "label_id"],
-"x-lix-foreign-keys": [
+	"x-lix-foreign-keys": [
 		{
 			properties: ["entity_id", "schema_key", "file_id"],
 			references: {
