@@ -124,6 +124,7 @@ export function applyFileDatabaseSchema(
                 created_at AS lixcol_created_at,
                 updated_at AS lixcol_updated_at,
                 change_id AS lixcol_change_id,
+                change_set_id AS lixcol_change_set_id,
                 untracked AS lixcol_untracked
         FROM state
         WHERE schema_key = 'lix_file_descriptor';
@@ -145,6 +146,7 @@ export function applyFileDatabaseSchema(
                 created_at AS lixcol_created_at,
                 updated_at AS lixcol_updated_at,
                 change_id AS lixcol_change_id,
+                change_set_id AS lixcol_change_set_id,
                 untracked AS lixcol_untracked
         FROM state_all
         WHERE schema_key = 'lix_file_descriptor';

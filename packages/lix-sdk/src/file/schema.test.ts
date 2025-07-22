@@ -1187,3 +1187,132 @@ test("file_history handles partial updates correctly", async () => {
 		value: 105,
 	});
 });
+
+test("file views should expose same relevant lixcol_* columns as key_value view", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	// Create a file that will be available in all file views
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "lixcol-test-file",
+			path: "/lixcol-test.json",
+			data: new TextEncoder().encode(JSON.stringify({ test: "data" })),
+		})
+		.execute();
+
+	// Create a key_value entry for comparison baseline
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "lixcol-test-kv", value: "test_value" })
+		.execute();
+
+	// Create a checkpoint for view queries
+	const checkpoint = await createCheckpoint({ lix });
+
+	// Extract lixcol_* columns helper function
+	const extractLixcols = (obj: Record<string, any>) => {
+		const lixcols: Record<string, any> = {};
+		for (const [key, value] of Object.entries(obj)) {
+			if (key.startsWith("lixcol_")) {
+				lixcols[key] = value;
+			}
+		}
+		return lixcols;
+	};
+
+	// Filter out columns that don't make sense for file views (files are themselves entities)
+	const blacklist = [
+		"lixcol_file_id",
+		"lixcol_schema_key",
+		"lixcol_plugin_key",
+		"lixcol_entity_id",
+	];
+
+	const filterColumns = (lixcols: Record<string, any>) => {
+		const filtered: Record<string, any> = {};
+		for (const [key, value] of Object.entries(lixcols)) {
+			if (!blacklist.includes(key)) {
+				filtered[key] = value;
+			}
+		}
+		return filtered;
+	};
+
+	// Test each file view type against corresponding key_value view
+	const views = [
+		{
+			name: "file",
+			fileQuery: () =>
+				lix.db
+					.selectFrom("file")
+					.selectAll()
+					.where("id", "=", "lixcol-test-file"),
+			keyValueQuery: () =>
+				lix.db
+					.selectFrom("key_value")
+					.selectAll()
+					.where("key", "=", "lixcol-test-kv"),
+		},
+		{
+			name: "file_all",
+			fileQuery: () =>
+				lix.db
+					.selectFrom("file_all")
+					.selectAll()
+					.where("id", "=", "lixcol-test-file"),
+			keyValueQuery: () =>
+				lix.db
+					.selectFrom("key_value_all")
+					.selectAll()
+					.where("key", "=", "lixcol-test-kv"),
+		},
+		{
+			name: "file_history",
+			fileQuery: () =>
+				lix.db
+					.selectFrom("file_history")
+					.selectAll()
+					.where("id", "=", "lixcol-test-file")
+					.where("lixcol_root_change_set_id", "=", checkpoint.id)
+					.where("lixcol_depth", "=", 0),
+			keyValueQuery: () =>
+				lix.db
+					.selectFrom("key_value_history")
+					.selectAll()
+					.where("key", "=", "lixcol-test-kv")
+					.where("lixcol_root_change_set_id", "=", checkpoint.id)
+					.where("lixcol_depth", "=", 0),
+		},
+	];
+
+	for (const view of views) {
+		// Query both the file view and corresponding key_value view
+		const fileResult = await view.fileQuery().executeTakeFirstOrThrow();
+		const keyValueResult = await view.keyValueQuery().executeTakeFirstOrThrow();
+
+		// Extract and filter lixcol_* columns from both
+		const fileLixcols = extractLixcols(fileResult);
+		const keyValueLixcols = extractLixcols(keyValueResult);
+
+		const fileFilteredLixcols = filterColumns(fileLixcols);
+		const keyValueFilteredLixcols = filterColumns(keyValueLixcols);
+
+		const fileFilteredKeys = Object.keys(fileFilteredLixcols).sort();
+		const keyValueFilteredKeys = Object.keys(keyValueFilteredLixcols).sort();
+
+		// File view should expose the same relevant lixcol_* columns as corresponding key_value view (excluding blacklisted ones)
+		expect(fileFilteredKeys).toEqual(keyValueFilteredKeys);
+
+		// Both should have the same number of relevant lixcol_* columns
+		expect(fileFilteredKeys.length).toBe(keyValueFilteredKeys.length);
+
+		// All lixcol_* values should be defined (can be null, but not undefined)
+		const fileLixcolKeys = Object.keys(fileLixcols).sort();
+		for (const key of fileLixcolKeys) {
+			expect(fileLixcols[key]).toBeDefined();
+		}
+	}
+});
