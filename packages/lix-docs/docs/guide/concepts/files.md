@@ -1,123 +1,126 @@
 # Files
 
-Files are the primary data containers in Lix. They represent the content that changes over time.
+Files in Lix are **exactly what you expect** — JSON, CSV, Word documents, PDFs, images, or any custom format your app uses.
 
-## What are Files in Lix?
+The super-power is that **Lix understands the _content_ inside those formats**:
 
-In Lix, a file is a named container for data, similar to files in a traditional filesystem. Each file has:
+- Edit a JSON file → Lix tracks which properties changed
+- Update a CSV → Lix knows which cells were added or modified
+- Modify a Word document → Lix captures which paragraphs changed
 
-- A unique identifier
-- A path (similar to a file path in a filesystem)
-- Binary content data
-- Metadata (creation time, modification time, etc.)
+Unlike Git which tracks line-by-line changes, Lix tracks the actual content units (e.g. properties, paragraphs, rows) as separate entities. All entities with the same `file_id` are grouped together — they share the same lifecycle and move as one logical file.
 
-Files are stored in the Lix database and can be queried using SQL.
+### Quick benefits
 
-## File Table Schema
+| What you get                         | Why you care                                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Content-aware change control**     | Diff whole files _or_ drill down to cells, blocks, or props.                                     |
+| **Built-in "last touched" metadata** | `lixcol_updated_at` / `lixcol_change_id` always show the freshest edit—ideal for file explorers. |
+| **Time travel**                      | `file_history` view lets you materialise any past version for previews, rollbacks, or audits.    |
 
-The file table has the following schema:
+## Getting started - everyday CRUD
 
-```typescript
-interface LixFile {
-  id: string;
-  path: string;
-  data: Uint8Array;
-  created_at: string;
-  updated_at: string;
-  type: string;
-}
-```
-
-## Working with Files
-
-### Creating Files
-
-You can create a file by inserting it into the `file` table:
-
-```javascript
-const file = await lix.db
+```ts
+// CREATE
+await lix.db
   .insertInto("file")
   .values({
     path: "/example.json",
-    data: new TextEncoder().encode(JSON.stringify(data)),
+    data: new TextEncoder().encode(JSON.stringify({ key: "value" })),
   })
-  .returningAll()
-  .executeTakeFirstOrThrow();
-```
+  .execute();
 
-### Reading Files
-
-You can read a file by querying the `file` table:
-
-```javascript
+// READ
 const file = await lix.db
   .selectFrom("file")
   .where("path", "=", "/example.json")
   .selectAll()
   .executeTakeFirstOrThrow();
 
-// Convert binary data to string (for text-based files)
-const content = new TextDecoder().decode(file.data);
-```
+const json = JSON.parse(new TextDecoder().decode(file.data));
 
-### Updating Files
-
-You can update a file by updating its record in the `file` table:
-
-```javascript
+// UPDATE
 await lix.db
   .updateTable("file")
-  .set({
-    data: new TextEncoder().encode(JSON.stringify(updatedData)),
-  })
+  .set({ data: new TextEncoder().encode(JSON.stringify({ key: "new value" })) })
   .where("path", "=", "/example.json")
+  .execute();
+
+// DELETE (descriptor + all content entities)
+await lix.db.deleteFrom("file").where("path", "=", "/example.json").execute();
+```
+
+## How files work under the hood
+
+A file is a **SQL view** that combines the file descriptor with all content entities reported by plugins. Here's what Lix actually stores:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                           Storage Layer                            │
+├─────────────────────────────────────┬───────────────────────────────┤
+│    File Descriptor Entity           │     Plugin Content Entities   │
+│  (schema: lix_file_descriptor)      │   (schema: varies by plugin)  │
+├─────────────────────────────────────┼───────────────────────────────┤
+│  • id, path, metadata, hidden …     │  • JSON props, cells, blocks… │
+│  • bookkeeping columns              │  • file_id → descriptor.id    │
+└─────────────────────────────────────┴───────────────────────────────┘
+                    ↓ SQL view merges these rows ↓
+┌─────────────────────────────────────────────────────────────────────┐
+│                              File View                             │
+│                        (schema: lix_file)                          │
+├─────────────────────────────────────────────────────────────────────┤
+│  • All descriptor fields                                           │
+│  • data (Uint8Array — materialised content)                        │
+│  • lixcol_change_id / lixcol_updated_at (latest across the file)   │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+_SQL devs_: it’s a classic **view**.
+_Event-sourcing folks_: you’d call it a **projection**. Same idea.
+
+### What happens on updates?
+
+When you update a file:
+
+1. **Plugins diff the new bytes** against the previous version
+2. **Lix inserts one change row per modified entity** - if you change 3 JSON properties,
+   that's 3 change rows
+3. **The file view recalculates** `lixcol_updated_at` / `lixcol_change_id` to reflect the
+   latest change anywhere in the file
+
+This aggregation ensures file explorers always show accurate "last modified" times without
+extra queries.
+
+## History & time travel
+
+```ts
+const history = await lix.db
+  .selectFrom("file_history")
+  .where("id", "=", "file123")
+  .orderBy("lixcol_depth", "asc") // 0 = current version
+  .selectAll()
   .execute();
 ```
 
-When you update a file, Lix automatically:
-1. Detects what changed in the file
-2. Creates change records to track those modifications
-3. Groups the changes into a snapshot
+| Column                 | Meaning                                  |
+| ---------------------- | ---------------------------------------- |
+| `lixcol_change_set_id` | Change-set that produced this revision   |
+| `lixcol_depth`         | How many edges away from current version |
+| `data`                 | Snapshot materialised at that point      |
 
-### Deleting Files
+## Plugin ecosystem
 
-You can delete a file by removing it from the `file` table:
+Check out [available plugins](/guide/plugins) to see how Lix can handle various file formats like JSON, CSV, Markdown, and more. You can also write your own plugins to support custom formats.
 
-```javascript
-await lix.db
-  .deleteFrom("file")
-  .where("path", "=", "/example.json")
-  .execute();
-```
-
-## File Types and Plugins
-
-Lix uses plugins to understand the structure of different file types. These plugins enable Lix to:
-
-1. Parse the file's content
-2. Detect changes between versions
-3. Apply changes to the file
-
-Each file type has a corresponding plugin:
-
-- JSON files: [JSON plugin](https://github.com/opral/monorepo/tree/main/packages/lix-plugin-json)
-- CSV files: [CSV plugin](https://github.com/opral/monorepo/tree/main/packages/lix-plugin-csv)
-- Markdown files: [Markdown plugin](https://github.com/opral/monorepo/tree/main/packages/lix-plugin-md)
-- And more...
-
-When opening a Lix instance, you specify which plugins to use:
-
-```javascript
+```ts
 const lix = await openLix({
-  blob: lixFile,
-  providePlugins: [jsonPlugin, csvPlugin],
+  providePlugins: [jsonPlugin, csvPlugin, markdownPlugin],
 });
 ```
 
-## Next Steps
+## API Reference quick-links
 
-Now that you understand files in Lix, explore related concepts:
-
-- [Changes](./changes) - Learn how changes to files are tracked
-- [Snapshots](./snapshots) - Understand how changes are grouped
-- [Versions](./versions) - See how different states of files are managed
+| Type / Interface    | Purpose                              | Docs                                |
+| ------------------- | ------------------------------------ | ----------------------------------- |
+| `LixFile`           | Unified record (`descriptor + data`) | [API](/api/types/LixFile)           |
+| `LixFileDescriptor` | Raw metadata row                     | [API](/api/types/LixFileDescriptor) |
