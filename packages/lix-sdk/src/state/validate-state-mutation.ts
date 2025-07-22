@@ -381,10 +381,10 @@ function validateForeignKeyConstraints(args: {
 					query = query.where(refProperty as any, "=", localValue);
 				}
 			} else {
-				// For other real SQL tables, we only support single property references
+				// For other special entities, we only support single property references
 				if (foreignKey.properties.length !== 1) {
 					throw new Error(
-						`Foreign key constraint error: Real SQL table references only support single property, ` +
+						`Foreign key constraint error: Special entity '${foreignKey.references.schemaKey}' references only support single property, ` +
 							`but got ${foreignKey.properties.length} properties`
 					);
 				}
