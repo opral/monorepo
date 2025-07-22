@@ -24,7 +24,7 @@ export function encodeStatePkPart(part: string): string {
 	return encodeURIComponent(part).replace(/~/g, DELIM_ENC);
 }
 
-/** Reverse of encodePart */
+/** Reverse of encodeStatePkPart */
 function decodeStatePkPart(encoded: string): string {
 	// decodeURIComponent happily turns %7E → ~ and %25 → %
 	return decodeURIComponent(encoded);
