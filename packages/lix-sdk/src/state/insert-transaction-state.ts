@@ -275,7 +275,7 @@ export function insertTransactionState(args: {
 					insertTransactionState({
 						lix: args.lix,
 						data: {
-							entity_id: `${changeId}::${accountId}`,
+							entity_id: `${changeId}~${accountId}`,
 							schema_key: LixChangeAuthorSchema["x-lix-key"],
 							file_id: "lix",
 							plugin_key: "lix",

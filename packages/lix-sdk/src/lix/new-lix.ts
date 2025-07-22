@@ -557,7 +557,7 @@ function createBootstrapChanges(args: {
 
 		const changeSetElementChange = {
 			id: args.generateUuid(),
-			entity_id: `${targetChangeSetId}::${change.id}`,
+			entity_id: `${targetChangeSetId}~${change.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
@@ -588,7 +588,7 @@ function createBootstrapChanges(args: {
 	for (const changeSetElementChange of changeSetElementChanges) {
 		changes.push({
 			id: args.generateUuid(),
-			entity_id: `${initialGlobalVersionChangeSetId}::${changeSetElementChange.id}`,
+			entity_id: `${initialGlobalVersionChangeSetId}~${changeSetElementChange.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",

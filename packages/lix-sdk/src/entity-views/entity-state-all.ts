@@ -340,11 +340,11 @@ function createSingleEntityAllView(args: {
 	const entityIdNew =
 		primaryKeys.length === 1
 			? `NEW.${primaryKeys[0]}`
-			: `(${primaryKeys.map((key) => `NEW.${key}`).join(" || '::' || ")})`;
+			: `(${primaryKeys.map((key) => `NEW.${key}`).join(" || '~' || ")})`;
 	const entityIdOld =
 		primaryKeys.length === 1
 			? `OLD.${primaryKeys[0]}`
-			: `(${primaryKeys.map((key) => `OLD.${key}`).join(" || '::' || ")})`;
+			: `(${primaryKeys.map((key) => `OLD.${key}`).join(" || '~' || ")})`;
 
 	// Create UDFs for default values
 	if (args.defaultValues) {

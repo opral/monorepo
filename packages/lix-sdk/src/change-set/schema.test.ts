@@ -894,7 +894,7 @@ describe("change_set_thread", () => {
 			.selectFrom("change")
 
 			.where("schema_key", "=", "lix_change_set_thread")
-			.where("entity_id", "in", ["cs0::t0", "cs1::t1"])
+			.where("entity_id", "in", ["cs0~t0", "cs1~t1"])
 			.orderBy("change.created_at", "asc")
 			.selectAll("change")
 

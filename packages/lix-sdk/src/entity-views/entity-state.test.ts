@@ -337,7 +337,7 @@ describe("createEntityViewIfNotExists", () => {
 			.execute();
 
 		expect(stateData).toHaveLength(1);
-		expect(stateData[0]?.entity_id).toBe("cat1::id1"); // Composite key joined with ::
+		expect(stateData[0]?.entity_id).toBe("cat1~id1"); // Composite key joined with ~
 
 		// Update with composite key
 		await lix.db
@@ -723,8 +723,8 @@ describe("createEntityViewIfNotExists", () => {
 
 		expect(result).toBeDefined();
 
-		// For composite keys, entity_id is joined with ::
-		expect(result?.lixcol_entity_id).toBe("cat1::id1");
+		// For composite keys, entity_id is joined with ~
+		expect(result?.lixcol_entity_id).toBe("cat1~id1");
 		expect(result?.lixcol_schema_key).toBe("composite_entity");
 		expect(result?.lixcol_file_id).toBe("test_file");
 		expect(result?.lixcol_plugin_key).toBe("test_plugin");

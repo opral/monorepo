@@ -2,6 +2,7 @@ import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { StateAllView } from "./schema.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { encodeStatePkPart } from "./primary-key.js";
 
 /**
  * Creates a view that provides direct access to resolved state data
@@ -23,13 +24,24 @@ export function applyResolvedStateView(args: {
 	sqlite: SqliteWasmDatabase;
 	db: Kysely<LixInternalDatabaseSchema>;
 }): void {
+	// Register a custom SQLite function for encoding primary key parts
+	args.sqlite.createFunction({
+		name: "lix_encode_pk_part",
+		deterministic: true,
+		arity: 1,
+		xFunc: (_ctxPtr: number, ...args: any[]) => {
+			const part = args[0];
+			if (part === null || part === undefined) return "";
+			return encodeStatePkPart(String(part));
+		},
+	});
 	// Create the view that provides resolved state by combining cache and untracked state
 	args.sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_resolved_state_all AS
 		SELECT * FROM (
 			-- 1. Untracked state (highest priority)
 			SELECT 
-				'U' || '~' || file_id || '~' || entity_id || '~' || version_id as _pk,
+				'U' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
 				entity_id, 
 				schema_key, 
 				file_id, 
@@ -49,7 +61,7 @@ export function applyResolvedStateView(args: {
 			
 			-- 2. Tracked state from cache (second priority) - only if no untracked exists
 			SELECT 
-				'C' || '~' || file_id || '~' || entity_id || '~' || version_id as _pk,
+				'C' || '~' || lix_encode_pk_part(file_id) || '~' || lix_encode_pk_part(entity_id) || '~' || lix_encode_pk_part(version_id) as _pk,
 				entity_id, 
 				schema_key, 
 				file_id, 
@@ -77,7 +89,7 @@ export function applyResolvedStateView(args: {
 			
 			-- 3. Inherited tracked state (lower priority) - only if no untracked or tracked exists
 			SELECT 
-				'CI' || '~' || isc.file_id || '~' || isc.entity_id || '~' || vi.version_id as _pk,
+				'CI' || '~' || lix_encode_pk_part(isc.file_id) || '~' || lix_encode_pk_part(isc.entity_id) || '~' || lix_encode_pk_part(vi.version_id) as _pk,
 				isc.entity_id, 
 				isc.schema_key, 
 				isc.file_id, 
@@ -124,7 +136,7 @@ export function applyResolvedStateView(args: {
 			
 			-- 4. Inherited untracked state (lowest priority) - only if no untracked or tracked exists
 			SELECT 
-				'UI' || '~' || unt.file_id || '~' || unt.entity_id || '~' || vi.version_id as _pk,
+				'UI' || '~' || lix_encode_pk_part(unt.file_id) || '~' || lix_encode_pk_part(unt.entity_id) || '~' || lix_encode_pk_part(vi.version_id) as _pk,
 				unt.entity_id, 
 				unt.schema_key, 
 				unt.file_id, 
