@@ -583,6 +583,16 @@ test("file metadata is Record<string, any>", async () => {
 test("file and file_all views expose change_id for blame and diff functionality", async () => {
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: {
+					enabled: true,
+					bootstrap: true,
+				},
+				lixcol_version_id: "global",
+			},
+		],
 	});
 
 	// Insert initial file using file view to ensure triggers are executed
@@ -622,23 +632,19 @@ test("file and file_all views expose change_id for blame and diff functionality"
 		fileAllResult[0]?.lixcol_change_id
 	);
 
-	// Get the actual file entity change record to verify the change_id is correct
-	const fileChangeRecord = await lix.db
+	// Get the latest change for this file (could be descriptor or content)
+	const latestChange = await lix.db
 		.selectFrom("change")
-		.where("entity_id", "=", "change-id-test-file")
-		.where("schema_key", "=", "lix_file_descriptor")
-		.select(["id", "snapshot_content"])
+		.where("file_id", "=", "change-id-test-file")
+		.orderBy("created_at", "desc")
+		.select(["id", "schema_key", "snapshot_content"])
 		.executeTakeFirstOrThrow();
 
-	// Verify that the change_id in the views matches the actual file change.id
-	expect(fileResult[0]?.lixcol_change_id).toBe(fileChangeRecord.id);
-	expect(fileAllResult[0]?.lixcol_change_id).toBe(fileChangeRecord.id);
+	// Verify that the change_id in the views matches the latest change
+	expect(fileResult[0]?.lixcol_change_id).toBe(latestChange.id);
+	expect(fileAllResult[0]?.lixcol_change_id).toBe(latestChange.id);
 
-	// Verify that the snapshot content in the change matches the file view
-	expect(fileChangeRecord.snapshot_content).toMatchObject({
-		id: "change-id-test-file",
-		path: "/test-change-id.json",
-	});
+	// Verify that the file view shows correct file info
 	expect(fileResult[0]?.id).toBe("change-id-test-file");
 	expect(fileResult[0]?.path).toBe("/test-change-id.json");
 
@@ -647,7 +653,6 @@ test("file and file_all views expose change_id for blame and diff functionality"
 		.updateTable("file")
 		.set({
 			path: "/test-change-id-updated.json",
-			data: new TextEncoder().encode(JSON.stringify({ prop: "updated value" })),
 		})
 		.where("id", "=", "change-id-test-file")
 		.execute();
@@ -669,7 +674,7 @@ test("file and file_all views expose change_id for blame and diff functionality"
 	// Get the new file entity change record
 	const newFileChangeRecord = await lix.db
 		.selectFrom("change")
-		.where("entity_id", "=", "change-id-test-file")
+		.where("file_id", "=", "change-id-test-file")
 		.where("schema_key", "=", "lix_file_descriptor")
 		.orderBy("created_at", "desc")
 		.select(["id", "snapshot_content"])
@@ -1315,4 +1320,199 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 			expect(fileLixcols[key]).toBeDefined();
 		}
 	}
+});
+
+test("file should expose lixcol columns based on file data AND the descriptor", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: {
+					enabled: true,
+				},
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	// Create a file with JSON content
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "aggregate-info-test",
+			path: "/document.json",
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					title: "Original Title",
+					content: "Original content",
+				})
+			),
+		})
+		.execute();
+
+	// Get initial file info
+	const fileAfterCreate = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "aggregate-info-test")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const initialChangeId = fileAfterCreate.lixcol_change_id;
+	const initialUpdatedAt = fileAfterCreate.lixcol_updated_at;
+
+	// Verify the initial change is either for the file descriptor or a content entity
+	const initialChange = await lix.db
+		.selectFrom("change")
+		.where("id", "=", initialChangeId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// When creating a file with content, the latest change could be either:
+	// - The file descriptor change
+	// - A content entity change (e.g., mock_json_property)
+	expect(["lix_file_descriptor", "mock_json_property"]).toContain(
+		initialChange.schema_key
+	);
+
+	// If it's a content change, verify it belongs to this file
+	if (initialChange.schema_key !== "lix_file_descriptor") {
+		expect(initialChange.file_id).toBe("aggregate-info-test");
+	}
+
+	// Update only the JSON content (not path or metadata)
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", "aggregate-info-test")
+		.set({
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					title: "Updated Title", // Changed
+					content: "Updated content", // Changed
+				})
+			),
+		})
+		.execute();
+
+	// Get file info after content update
+	const fileAfterContentUpdate = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "aggregate-info-test")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Get all changes related to this file (descriptor + content)
+	const allFileChanges = await lix.db
+		.selectFrom("change")
+		.where((eb) =>
+			eb.or([
+				// File descriptor changes
+				eb("entity_id", "=", "aggregate-info-test").and(
+					"schema_key",
+					"=",
+					"lix_file_descriptor"
+				),
+				// Content changes (any entity within this file)
+				eb("file_id", "=", "aggregate-info-test"),
+			])
+		)
+		.orderBy("created_at", "desc")
+		.selectAll()
+		.execute();
+
+	// There should be multiple changes (descriptor + content properties)
+	expect(allFileChanges.length).toBeGreaterThan(1);
+
+	const latestContentChange = allFileChanges[0]!;
+
+	// The actual latest change is a content change, not the descriptor
+	expect(latestContentChange.schema_key).not.toBe("lix_file_descriptor");
+
+	// The file view should show the latest change across ALL entities in the file
+	expect(fileAfterContentUpdate.lixcol_change_id).toBe(latestContentChange.id);
+
+	// The updated_at should reflect when the file was last modified (including content)
+	expect(fileAfterContentUpdate.lixcol_updated_at).toBe(
+		latestContentChange.created_at
+	);
+
+	// The file's change_set_id should contain the latest content change
+	// Get all changes in the file's current change_set
+	const changesInFileChangeSet = await lix.db
+		.selectFrom("change_set_element")
+		.where("change_set_id", "=", fileAfterContentUpdate.lixcol_change_set_id)
+		.selectAll()
+		.execute();
+
+	const changeIdsInSet = changesInFileChangeSet.map((el) => el.change_id);
+
+	// The file's change_set_id should contain the latest content change
+	expect(changeIdsInSet).toContain(latestContentChange.id);
+
+	// Test file_all view shows the same aggregated behavior AT THIS POINT (before path update)
+	// Re-query file_all after content update to verify it shows latest change
+	const fileAllAfterContentUpdate = await lix.db
+		.selectFrom("file_all")
+		.where("id", "=", "aggregate-info-test")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// file_all should show the same change_id as the file view at this point
+	expect(fileAllAfterContentUpdate.lixcol_change_id).toBe(fileAfterContentUpdate.lixcol_change_id);
+	expect(fileAllAfterContentUpdate.lixcol_updated_at).toBe(fileAfterContentUpdate.lixcol_updated_at);
+
+	// Additional verification that descriptor changes DO work
+	await lix.db
+		.updateTable("file")
+		.where("id", "=", "aggregate-info-test")
+		.set({
+			path: "/renamed-document.json", // This updates the descriptor
+		})
+		.execute();
+
+	const fileAfterPathUpdate = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "aggregate-info-test")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Descriptor changes ARE reflected (this part works correctly)
+	expect(fileAfterPathUpdate.lixcol_change_id).not.toBe(initialChangeId);
+	// For string timestamps, use string comparison
+	expect(fileAfterPathUpdate.lixcol_updated_at > initialUpdatedAt).toBe(true);
+
+	// After path update, file_all should show the descriptor change
+	const fileAllAfterPathUpdate = await lix.db
+		.selectFrom("file_all")
+		.where("id", "=", "aggregate-info-test")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	expect(fileAllAfterPathUpdate.lixcol_change_id).toBe(fileAfterPathUpdate.lixcol_change_id);
+	expect(fileAllAfterPathUpdate.path).toBe("/renamed-document.json");
+
+	// Create a checkpoint to test file_history
+	const checkpoint = await createCheckpoint({ lix });
+
+	// Test file_history view also aggregates changes correctly
+	const fileHistoryAtCheckpoint = await lix.db
+		.selectFrom("file_history")
+		.where("id", "=", "aggregate-info-test")
+		.where("lixcol_root_change_set_id", "=", checkpoint.id)
+		.where("lixcol_depth", "=", 0)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// file_history should show the latest state including the path update
+	expect(fileHistoryAtCheckpoint.path).toBe("/renamed-document.json");
+	expect(fileHistoryAtCheckpoint.lixcol_change_id).toBe(fileAfterPathUpdate.lixcol_change_id);
+	
+	// The materialized data should reflect the content updates
+	const historicalData = JSON.parse(
+		new TextDecoder().decode(fileHistoryAtCheckpoint.data)
+	);
+	expect(historicalData).toEqual({
+		title: "Updated Title",
+		content: "Updated content",
+	});
 });
