@@ -141,7 +141,7 @@ export function applyFileDatabaseSchema(
                 json_extract(fd.snapshot_content, '$.metadata') AS metadata,
                 json_extract(fd.snapshot_content, '$.hidden') AS hidden,
                 fd.entity_id AS lixcol_entity_id,
-                'lix_file' AS lixcol_schema_key,  -- Synthetic key for the file abstraction
+                'lix_file_descriptor' AS lixcol_schema_key,
                 fd.entity_id AS lixcol_file_id,  -- For files, file_id equals entity_id
                 fd.inherited_from_version_id AS lixcol_inherited_from_version_id,
                 -- Use the latest change info from any entity in the file
@@ -190,7 +190,7 @@ export function applyFileDatabaseSchema(
                 json_extract(fd.snapshot_content, '$.metadata') AS metadata,
                 json_extract(fd.snapshot_content, '$.hidden') AS hidden,
                 fd.entity_id AS lixcol_entity_id,
-                'lix_file' AS lixcol_schema_key,  -- Synthetic key for the file abstraction
+                'lix_file_descriptor' AS lixcol_schema_key,
                 fd.entity_id AS lixcol_file_id,  -- For files, file_id equals entity_id
                 fd.version_id AS lixcol_version_id,
                 fd.inherited_from_version_id AS lixcol_inherited_from_version_id,
@@ -307,7 +307,7 @@ export function applyFileDatabaseSchema(
     json_extract(snapshot_content, '$.metadata') AS metadata,
     json_extract(snapshot_content, '$.hidden') AS hidden,
     entity_id AS lixcol_entity_id,
-    'lix_file' AS lixcol_schema_key,  -- Synthetic key for the file abstraction
+    'lix_file_descriptor' AS lixcol_schema_key,
     file_id AS lixcol_file_id,
     plugin_key AS lixcol_plugin_key,
     schema_version AS lixcol_schema_version,
@@ -391,12 +391,12 @@ export type LixFileDescriptor = FromLixSchemaDefinition<
  * Uses "Lix" prefix to avoid collision with JavaScript's built-in File type.
  * 
  * IMPORTANT: File views are projections over multiple entities, not just the file descriptor.
- * This is why file views expose a synthetic schema_key of 'lix_file' instead of 'lix_file_descriptor'.
+ * However, they expose schema_key as 'lix_file_descriptor' to maintain foreign key integrity.
  * 
  * ```
  * ┌─────────────────────────────────────────────────────────────┐
  * │                        File View                            │
- * │                   (schema_key: 'lix_file')                  │
+ * │               (schema_key: 'lix_file_descriptor')           │
  * │                                                             │
  * │  ┌─────────────────────────┐   ┌─────────────────────────┐ │
  * │  │   File Descriptor       │   │   Plugin Entities       │ │

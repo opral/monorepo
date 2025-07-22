@@ -67,7 +67,7 @@ A file is a **SQL view** that combines the file descriptor with all content enti
                     ↓ SQL view merges these rows ↓
 ┌─────────────────────────────────────────────────────────────────────┐
 │                              File View                             │
-│                        (schema: lix_file)                          │
+│                  (schema: lix_file_descriptor)                     │
 ├─────────────────────────────────────────────────────────────────────┤
 │  • All descriptor fields                                           │
 │  • data (Uint8Array — materialised content)                        │
@@ -75,8 +75,20 @@ A file is a **SQL view** that combines the file descriptor with all content enti
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-_SQL devs_: it’s a classic **view**.
+_SQL devs_: it’s a classic **view**.  
 _Event-sourcing folks_: you’d call it a **projection**. Same idea.
+
+**Why does the file view return `lix_file_descriptor` as its schema key?**
+
+The file descriptor acts as the "root" entity that ties all content together. When you label a
+file or create any reference to it, you're addressing the whole file unit — not just
+individual properties or blocks inside. Using `lix_file_descriptor` ensures:
+
+- **Foreign key integrity** — references point to an actual entity that exists in the database
+- **Logical grouping** — all content entities share the same `file_id`, making the descriptor
+  the natural anchor point
+- **Consistent behavior** — operations like labeling work the same way for files as for any
+  other entity
 
 ### What happens on updates?
 

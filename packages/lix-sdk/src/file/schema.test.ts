@@ -1231,7 +1231,6 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 	// Filter out columns that don't make sense for file views (files are themselves entities)
 	const blacklist = [
 		"lixcol_file_id",
-		"lixcol_schema_key",
 		"lixcol_plugin_key",
 		"lixcol_entity_id",
 	];
@@ -1319,6 +1318,9 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 		for (const key of fileLixcolKeys) {
 			expect(fileLixcols[key]).toBeDefined();
 		}
+
+		// Verify that file views expose lix_file_descriptor as schema key
+		expect(fileResult.lixcol_schema_key).toBe("lix_file_descriptor");
 	}
 });
 
@@ -1360,6 +1362,9 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 
 	const initialChangeId = fileAfterCreate.lixcol_change_id;
 	const initialUpdatedAt = fileAfterCreate.lixcol_updated_at;
+
+	// Verify that file view exposes lix_file_descriptor as schema key
+	expect(fileAfterCreate.lixcol_schema_key).toBe("lix_file_descriptor");
 
 	// Verify the initial change is either for the file descriptor or a content entity
 	const initialChange = await lix.db
@@ -1461,6 +1466,9 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 	expect(fileAllAfterContentUpdate.lixcol_change_id).toBe(fileAfterContentUpdate.lixcol_change_id);
 	expect(fileAllAfterContentUpdate.lixcol_updated_at).toBe(fileAfterContentUpdate.lixcol_updated_at);
 
+	// Verify that file_all view also exposes lix_file_descriptor as schema key
+	expect(fileAllAfterContentUpdate.lixcol_schema_key).toBe("lix_file_descriptor");
+
 	// Additional verification that descriptor changes DO work
 	await lix.db
 		.updateTable("file")
@@ -1506,6 +1514,9 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 	// file_history should show the latest state including the path update
 	expect(fileHistoryAtCheckpoint.path).toBe("/renamed-document.json");
 	expect(fileHistoryAtCheckpoint.lixcol_change_id).toBe(fileAfterPathUpdate.lixcol_change_id);
+
+	// Verify that file_history view also exposes lix_file_descriptor as schema key
+	expect(fileHistoryAtCheckpoint.lixcol_schema_key).toBe("lix_file_descriptor");
 	
 	// The materialized data should reflect the content updates
 	const historicalData = JSON.parse(

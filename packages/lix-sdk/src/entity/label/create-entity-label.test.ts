@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import { openLix } from "../../lix/open-lix.js";
 import { createLabel } from "../../label/create-label.js";
 import { createEntityLabel, deleteEntityLabel } from "./create-entity-label.js";
+import { mockJsonPlugin } from "../../plugin/mock-json-plugin.js";
 
 test("createEntityLabel creates a mapping between entity and label", async () => {
 	const lix = await openLix({});
@@ -66,7 +67,9 @@ test("createEntityLabel throws error if entity doesn't exist", async () => {
 			},
 			label: { id: label.id },
 		})
-	).rejects.toThrow(/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/);
+	).rejects.toThrow(
+		/Foreign key constraint violation.*lix_entity_label.*\(entity_id, schema_key, file_id\).*state\.\(entity_id, schema_key, file_id\)/
+	);
 });
 
 test("createEntityLabel throws error if label doesn't exist", async () => {
@@ -97,7 +100,9 @@ test("createEntityLabel throws error if label doesn't exist", async () => {
 			},
 			label: { id: "non-existent-label" },
 		})
-	).rejects.toThrow(/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/);
+	).rejects.toThrow(
+		/Foreign key constraint violation.*lix_entity_label.*\(label_id\).*lix_label\.\(id\)/
+	);
 });
 
 test("createEntityLabel is idempotent - doesn't fail if mapping already exists", async () => {
@@ -247,4 +252,65 @@ test("createEntityLabel works with change_set entities", async () => {
 
 	expect(mapping).toBeDefined();
 	expect(mapping?.label_id).toBe(reviewedLabel.id);
+});
+
+test("createEntityLabel works with files", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const importantLabel = await createLabel({ lix, name: "important-file" });
+
+	// Create a file
+	await lix.db
+		.insertInto("file")
+		.values({
+			id: "test-file-123",
+			path: "/important-data.json",
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					title: "Important Data",
+					content: "This file contains critical information",
+				})
+			),
+		})
+		.execute();
+
+	// Get the file to retrieve its lixcol_* columns
+	const file = await lix.db
+		.selectFrom("file")
+		.where("id", "=", "test-file-123")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Label the file using its lixcol_* columns
+	await createEntityLabel({
+		lix,
+		entity: file,
+		label: importantLabel,
+	});
+
+	// Verify the label was applied
+	const mapping = await lix.db
+		.selectFrom("entity_label")
+		.where("entity_id", "=", file.lixcol_entity_id)
+		.where("schema_key", "=", "lix_file_descriptor")
+		.where("file_id", "=", file.lixcol_file_id)
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(mapping).toBeDefined();
+	expect(mapping?.label_id).toBe(importantLabel.id);
+
+	// Also verify we can query files by label using entityEb
+	const { ebEntity: entityEb } = await import("../eb-entity.js");
+
+	const importantFiles = await lix.db
+		.selectFrom("file")
+		.where(entityEb("file").hasLabel(importantLabel))
+		.selectAll()
+		.execute();
+
+	expect(importantFiles).toHaveLength(1);
+	expect(importantFiles[0]?.id).toBe("test-file-123");
 });
