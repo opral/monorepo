@@ -138,21 +138,21 @@ test("handles entity IDs with tildes", () => {
 test("parsePk throws on malformed input", () => {
 	// Missing parts
 	expect(() => parseStatePk("U")).toThrow(
-		"Invalid composite key: U – expected 4 parts"
+		"Invalid composite key: U - expected 4 parts"
 	);
 
 	// Only tag and one field
 	expect(() => parseStatePk("C~file")).toThrow(
-		"Invalid composite key: C~file – expected 4 parts"
+		"Invalid composite key: C~file - expected 4 parts"
 	);
 
 	// Two fields
 	expect(() => parseStatePk("UI~file~entity")).toThrow(
-		"Invalid composite key: UI~file~entity – expected 4 parts"
+		"Invalid composite key: UI~file~entity - expected 4 parts"
 	);
 
 	// Too many fields
 	expect(() => parseStatePk("CI~file~entity~version~extra")).toThrow(
-		"Invalid composite key: CI~file~entity~version~extra – expected 4 parts"
+		"Invalid composite key: CI~file~entity~version~extra - expected 4 parts"
 	);
 });
