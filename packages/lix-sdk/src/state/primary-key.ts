@@ -68,7 +68,7 @@ export function parseStatePk(pk: string): {
 	const parts = pk.split(DELIM);
 
 	if (parts.length !== 4) {
-		throw new Error(`Invalid composite key: ${pk} – expected 4 parts`);
+		throw new Error(`Invalid composite key: ${pk} - expected 4 parts`);
 	}
 
 	return {
