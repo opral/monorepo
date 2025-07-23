@@ -1,15 +1,16 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { createUndoChangeSet } from "./create-undo-change-set.js";
-import { createChangeSet } from "./create-change-set.js";
-import { applyChangeSet } from "./apply-change-set.js";
+import { createUndoCommit } from "./create-undo-commit.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import { createCommit } from "./create-commit.js";
+import { applyCommit } from "./apply-commit.js";
 import {
 	mockJsonPlugin,
 	MockJsonPropertySchema,
 } from "../plugin/mock-json-plugin.js";
 import { createCheckpoint } from "./create-checkpoint.js";
 
-test("it creates an undo change set that reverses the operations of the original change set", async () => {
+test("it creates an undo commit that reverses the operations of the original commit", async () => {
 	// Create a Lix instance with the mockJsonPlugin
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
@@ -80,9 +81,15 @@ test("it creates an undo change set that reverses the operations of the original
 		})),
 	});
 
-	await applyChangeSet({
+	// Create a commit for the change set
+	const commit0 = await createCommit({
 		lix,
 		changeSet: cs0,
+	});
+
+	await applyCommit({
+		lix,
+		commit: commit0,
 	});
 
 	// Verify the file has the expected state
@@ -103,24 +110,25 @@ test("it creates an undo change set that reverses the operations of the original
 
 	expect(actualJsonStateOriginal).toEqual(expectedJsonStateOriginal);
 
-	// Create the undo change set
-	const undoCs = await createUndoChangeSet({
+	// Create the undo commit
+	const undoCommit = await createUndoCommit({
 		lix,
-		changeSet: cs0,
+		commit: commit0,
 	});
 
-	// Verify the undo change set has no parents (the dev is reponsible or by calling applyChanges())
+	// Verify the undo commit has the original commit as parent
 	const edges = await lix.db
-		.selectFrom("change_set_edge")
+		.selectFrom("commit_edge")
 		.selectAll()
-		.where("child_id", "=", undoCs.id)
+		.where("child_id", "=", undoCommit.id)
 		.execute();
 
-	expect(edges).toHaveLength(0);
+	expect(edges).toHaveLength(1);
+	expect(edges[0]?.parent_id).toBe(commit0.id);
 
-	await applyChangeSet({
+	await applyCommit({
 		lix,
-		changeSet: undoCs,
+		commit: undoCommit,
 	});
 
 	// Verify the file state after undo - should be empty again
@@ -198,6 +206,12 @@ test("it correctly undoes delete operations by restoring previous state", async 
 		})),
 	});
 
+	// Create a commit for cs0
+	const commit0 = await createCommit({
+		lix,
+		changeSet: cs0,
+	});
+
 	// Second change set - delete the entity
 	const deleteChanges = await lix.db
 		.insertInto("change")
@@ -227,18 +241,24 @@ test("it correctly undoes delete operations by restoring previous state", async 
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
 	});
 
-	// Create undo change set for the delete operation
-	const undoDeleteCs = await createUndoChangeSet({
+	// Create a commit for cs1
+	const commit1 = await createCommit({
 		lix,
 		changeSet: cs1,
+		parentCommits: [commit0],
 	});
 
-	await applyChangeSet({
+	// Create undo commit for the delete operation
+	const undoDeleteCommit = await createUndoCommit({
 		lix,
-		changeSet: undoDeleteCs,
+		commit: commit1,
+	});
+
+	await applyCommit({
+		lix,
+		commit: undoDeleteCommit,
 	});
 
 	// Verify the entity is restored to its previous state
@@ -261,6 +281,15 @@ test.skip("does not naively create delete changes if a previous state existed", 
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
+
+	// Insert the schema that the mockJsonPlugin uses
+	await lix.db
+		.insertInto("stored_schema_all")
+		.values({
+			value: MockJsonPropertySchema,
+			lixcol_version_id: "global",
+		})
+		.execute();
 
 	const file = await lix.db
 		.insertInto("file")
@@ -302,14 +331,14 @@ test.skip("does not naively create delete changes if a previous state existed", 
 		age: 20,
 	});
 
-	const undoChangeSet = await createUndoChangeSet({
+	const undoCommit = await createUndoCommit({
 		lix,
-		changeSet: checkpoints[1]!,
+		commit: checkpoints[1]!,
 	});
 
-	await applyChangeSet({
+	await applyCommit({
 		lix,
-		changeSet: undoChangeSet!,
+		commit: undoCommit,
 	});
 
 	const fileAfterUndo = await lix.db

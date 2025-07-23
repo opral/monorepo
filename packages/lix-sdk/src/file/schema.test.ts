@@ -1,7 +1,7 @@
 import { test, expect, expectTypeOf } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
-import { createCheckpoint } from "../change-set/create-checkpoint.js";
+import { createCheckpoint } from "../commit/create-checkpoint.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import type { LixFile } from "./schema.js";
@@ -526,7 +526,7 @@ test("file_history provides access to historical file data", async () => {
 	const fileHistoryAtInsert = await lix.db
 		.selectFrom("file_history")
 		.where("id", "=", "test-file")
-		.where("lixcol_root_change_set_id", "=", insertCheckpoint.id)
+		.where("lixcol_root_commit_id", "=", insertCheckpoint.id)
 		.where("lixcol_depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -541,13 +541,13 @@ test("file_history provides access to historical file data", async () => {
 	expect(historicalFileAtInsertData).toEqual(initialData);
 	expect(historicalFileAtInsert.id).toBe("test-file");
 	expect(historicalFileAtInsert.path).toBe("/test.json");
-	expect(historicalFileAtInsert.lixcol_change_set_id).toBe(insertCheckpoint.id);
+	expect(historicalFileAtInsert.lixcol_commit_id).toBe(insertCheckpoint.id);
 
 	// 6. Query history at update checkpoint and assert is updated
 	const fileHistoryAtUpdate = await lix.db
 		.selectFrom("file_history")
 		.where("id", "=", "test-file")
-		.where("lixcol_root_change_set_id", "=", updateCheckpoint.id)
+		.where("lixcol_root_commit_id", "=", updateCheckpoint.id)
 		.where("lixcol_depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -560,7 +560,7 @@ test("file_history provides access to historical file data", async () => {
 	expect(historicalFileAtUpdateData).toEqual(updatedData);
 	expect(historicalFileAtUpdate.id).toBe("test-file");
 	expect(historicalFileAtUpdate.path).toBe("/test.json");
-	expect(historicalFileAtUpdate.lixcol_change_set_id).toBe(updateCheckpoint.id);
+	expect(historicalFileAtUpdate.lixcol_commit_id).toBe(updateCheckpoint.id);
 });
 
 // its super annoying to work with metadata otherwise
@@ -1091,11 +1091,11 @@ test("file history", async () => {
 		.selectFrom("file_history")
 		.where("file_history.path", "=", "/config.json")
 		.where(
-			"lixcol_root_change_set_id",
+			"lixcol_root_commit_id",
 			"=",
 			lix.db
 				.selectFrom("version")
-				.select("change_set_id")
+				.select("commit_id")
 				.where("version.name", "=", "main")
 		)
 		.orderBy("lixcol_depth", "asc")
@@ -1163,7 +1163,7 @@ test("file_history handles partial updates correctly", async () => {
 	const beforeFile = await lix.db
 		.selectFrom("file_history")
 		.where("path", "=", "/test.json")
-		.where("lixcol_root_change_set_id", "=", checkpoint0.id)
+		.where("lixcol_root_commit_id", "=", checkpoint0.id)
 		.where("lixcol_depth", "=", 0)
 		.select("data")
 		.executeTakeFirstOrThrow();
@@ -1171,7 +1171,7 @@ test("file_history handles partial updates correctly", async () => {
 	const afterFile = await lix.db
 		.selectFrom("file_history")
 		.where("path", "=", "/test.json")
-		.where("lixcol_root_change_set_id", "=", checkpoint1.id)
+		.where("lixcol_root_commit_id", "=", checkpoint1.id)
 		.where("lixcol_depth", "=", 0)
 		.select("data")
 		.executeTakeFirstOrThrow();
@@ -1276,14 +1276,14 @@ test("file views should expose same relevant lixcol_* columns as key_value view"
 					.selectFrom("file_history")
 					.selectAll()
 					.where("id", "=", "lixcol-test-file")
-					.where("lixcol_root_change_set_id", "=", checkpoint.id)
+					.where("lixcol_root_commit_id", "=", checkpoint.id)
 					.where("lixcol_depth", "=", 0),
 			keyValueQuery: () =>
 				lix.db
 					.selectFrom("key_value_history")
 					.selectAll()
 					.where("key", "=", "lixcol-test-kv")
-					.where("lixcol_root_change_set_id", "=", checkpoint.id)
+					.where("lixcol_root_commit_id", "=", checkpoint.id)
 					.where("lixcol_depth", "=", 0),
 		},
 	];
@@ -1441,7 +1441,7 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 	// Get all changes in the file's current change_set
 	const changesInFileChangeSet = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", fileAfterContentUpdate.lixcol_change_set_id)
+		.where("change_set_id", "=", fileAfterContentUpdate.lixcol_commit_id)
 		.selectAll()
 		.execute();
 
@@ -1510,7 +1510,7 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 	const fileHistoryAtCheckpoint = await lix.db
 		.selectFrom("file_history")
 		.where("id", "=", "aggregate-info-test")
-		.where("lixcol_root_change_set_id", "=", checkpoint.id)
+		.where("lixcol_root_commit_id", "=", checkpoint.id)
 		.where("lixcol_depth", "=", 0)
 		.selectAll()
 		.executeTakeFirstOrThrow();

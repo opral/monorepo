@@ -2,12 +2,12 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
-import { createCheckpoint } from "../change-set/create-checkpoint.js";
+import { createCheckpoint } from "../commit/create-checkpoint.js";
 import {
-	changeSetHasLabel,
-	changeSetIsAncestorOf,
-	changeSetIsDescendantOf,
+	commitIsDescendantOf,
+	commitIsAncestorOf,
 } from "../query-filter/index.js";
+import { ebEntity } from "../entity/index.js";
 
 test("query current state at head of version lineage", async () => {
 	const lix = await openLix({});
@@ -45,21 +45,21 @@ test("query current state at head of version lineage", async () => {
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
-	// Query current state using change_set_id
+	// Query current state using commit_id
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", activeVersion.change_set_id)
+		.where("root_commit_id", "=", activeVersion.commit_id)
 		.selectAll()
 		.execute();
 
 	expect(currentState).toHaveLength(1);
 	expect(currentState[0]).toMatchObject({
 		entity_id: "paragraph0",
-		change_set_id: activeVersion.change_set_id,
+		commit_id: activeVersion.commit_id,
 		depth: 0,
 		snapshot_content: { value: "initial content" },
 	});
@@ -112,14 +112,14 @@ test("query state at specific depth in history", async () => {
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Query current state (depth 0)
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", activeVersion.change_set_id)
+		.where("root_commit_id", "=", activeVersion.commit_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -131,7 +131,7 @@ test("query state at specific depth in history", async () => {
 	const previousState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", activeVersion.change_set_id)
+		.where("root_commit_id", "=", activeVersion.commit_id)
 		.where("depth", "=", 1)
 		.selectAll()
 		.execute();
@@ -143,7 +143,7 @@ test("query state at specific depth in history", async () => {
 	const oldestState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", activeVersion.change_set_id)
+		.where("root_commit_id", "=", activeVersion.commit_id)
 		.where("depth", "=", 2)
 		.selectAll()
 		.execute();
@@ -152,17 +152,27 @@ test("query state at specific depth in history", async () => {
 	expect(oldestState[0]?.snapshot_content).toEqual({ value: "value0" });
 });
 
-test("query state at specific change set", async () => {
-	const lix = await openLix({});
+test("query state at specific commit", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
 
 	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
+		"x-lix-key": "mock_entity",
 		"x-lix-version": "1.0",
 		additionalProperties: false,
 		type: "object",
 		properties: {
+			id: { type: "string" },
 			value: { type: "string" },
 		},
+		"x-lix-primary-key": ["id"],
 	};
 
 	await lix.db
@@ -170,22 +180,101 @@ test("query state at specific change set", async () => {
 		.values({ value: mockSchema })
 		.execute();
 
-	// Create multiple change sets
+	// Get the active version before insert
+	const versionBeforeInsert = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.select(["version.commit_id"])
+		.executeTakeFirstOrThrow();
+
+	// Insert initial state
 	await lix.db
-		.insertInto("change_set")
-		.values([{ id: "changeset1" }, { id: "changeset2" }, { id: "current" }])
+		.insertInto("state")
+		.values({
+			entity_id: "test-entity-1",
+			schema_key: "mock_entity",
+			file_id: "test.json",
+			schema_version: "1.0",
+			plugin_key: "mock_plugin",
+			snapshot_content: { id: "test-entity-1", value: "initial value" },
+		})
 		.execute();
 
-	// Query state at specific change sets
-	const changeSetStates = await lix.db
+	// Get the active version after insert
+	const stateAfterInsert = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-entity-1")
+		.select(["entity_id", "snapshot_content", "commit_id"])
+		.executeTakeFirstOrThrow();
+
+	const insertCommitId = stateAfterInsert.commit_id;
+
+	// Verify commit changed after insert
+	expect(insertCommitId).not.toBe(versionBeforeInsert.commit_id);
+
+	// Query state history at the insert commit
+	const historyAtInsert = await lix.db
 		.selectFrom("state_history")
-		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "in", ["changeset1", "changeset2"])
-		.selectAll()
+		.where("entity_id", "=", "test-entity-1")
+		.where("root_commit_id", "=", insertCommitId)
+		.select(["entity_id", "snapshot_content", "root_commit_id"])
+		.executeTakeFirstOrThrow();
+
+	// Verify the history shows the inserted state
+	expect(historyAtInsert.snapshot_content).toEqual({
+		id: "test-entity-1",
+		value: "initial value",
+	});
+	expect(historyAtInsert.root_commit_id).toBe(insertCommitId);
+
+	// Update the entity
+	await lix.db
+		.updateTable("state")
+		.set({
+			snapshot_content: { id: "test-entity-1", value: "updated value" },
+		})
+		.where("entity_id", "=", "test-entity-1")
 		.execute();
 
-	// Should be able to query both change sets (even if no data exists yet)
-	expect(changeSetStates.length).toBeGreaterThanOrEqual(0);
+	// Get the commit ID after update
+	const stateAfterUpdate = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-entity-1")
+		.select(["entity_id", "snapshot_content", "commit_id"])
+		.executeTakeFirstOrThrow();
+
+	const updateCommitId = stateAfterUpdate.commit_id;
+
+	// Verify commit changed
+	expect(updateCommitId).not.toBe(insertCommitId);
+
+	// Query state history at the update commit
+	const historyAtUpdate = await lix.db
+		.selectFrom("state_history")
+		.where("entity_id", "=", "test-entity-1")
+		.where("root_commit_id", "=", updateCommitId)
+		.select(["entity_id", "snapshot_content", "root_commit_id"])
+		.executeTakeFirstOrThrow();
+
+	// Verify the history shows the updated state
+	expect(historyAtUpdate.snapshot_content).toEqual({
+		id: "test-entity-1",
+		value: "updated value",
+	});
+	expect(historyAtUpdate.root_commit_id).toBe(updateCommitId);
+
+	// Also verify we can still query the old state at the insert commit
+	const historyAtInsertAgain = await lix.db
+		.selectFrom("state_history")
+		.where("entity_id", "=", "test-entity-1")
+		.where("root_commit_id", "=", insertCommitId)
+		.select(["entity_id", "snapshot_content", "root_commit_id"])
+		.executeTakeFirstOrThrow();
+
+	expect(historyAtInsertAgain.snapshot_content).toEqual({
+		id: "test-entity-1",
+		value: "initial value",
+	});
 });
 
 test("query state at checkpoint using createCheckpoint API", async () => {
@@ -227,7 +316,7 @@ test("query state at checkpoint using createCheckpoint API", async () => {
 	const checkpointState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", checkpoint.id)
+		.where("root_commit_id", "=", checkpoint.id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -236,7 +325,7 @@ test("query state at checkpoint using createCheckpoint API", async () => {
 	expect(checkpointState[0]?.snapshot_content).toEqual({
 		value: "checkpoint content",
 	});
-	expect(checkpointState[0]?.change_set_id).toBe(checkpoint.id);
+	expect(checkpointState[0]?.commit_id).toBe(checkpoint.id);
 });
 
 test("diff detection between current and checkpoint state", async () => {
@@ -285,14 +374,14 @@ test("diff detection between current and checkpoint state", async () => {
 	const updatedVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Query current state (depth 0 only)
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", updatedVersion.change_set_id)
+		.where("root_commit_id", "=", updatedVersion.commit_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -301,7 +390,7 @@ test("diff detection between current and checkpoint state", async () => {
 	const checkpointState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", checkpoint.id)
+		.where("root_commit_id", "=", checkpoint.id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -310,10 +399,8 @@ test("diff detection between current and checkpoint state", async () => {
 	expect(currentState).toHaveLength(1);
 	expect(checkpointState).toHaveLength(1);
 
-	// Different change_set_ids indicate diff detected
-	expect(currentState[0]?.change_set_id).not.toBe(
-		checkpointState[0]?.change_set_id
-	);
+	// Different commit_ids indicate diff detected
+	expect(currentState[0]?.commit_id).not.toBe(checkpointState[0]?.commit_id);
 	expect(currentState[0]?.snapshot_content).toEqual({ value: "modified" });
 	expect(checkpointState[0]?.snapshot_content).toEqual({ value: "initial" });
 });
@@ -362,14 +449,14 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 	const updatedVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Query current state (should be empty after deletion)
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", updatedVersion.change_set_id)
+		.where("root_commit_id", "=", updatedVersion.commit_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -378,7 +465,7 @@ test("deletion diff - entity exists at checkpoint but not current", async () => 
 	const checkpointState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", checkpoint.id)
+		.where("root_commit_id", "=", checkpoint.id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -429,14 +516,14 @@ test("insertion diff - entity exists current but not at checkpoint", async () =>
 	const updatedVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Query current state (should exist at depth 0)
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", updatedVersion.change_set_id)
+		.where("root_commit_id", "=", updatedVersion.commit_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -445,7 +532,7 @@ test("insertion diff - entity exists current but not at checkpoint", async () =>
 	const checkpointState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", checkpoint.id)
+		.where("root_commit_id", "=", checkpoint.id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -505,14 +592,14 @@ test("blame functionality - track entity changes over time", async () => {
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Query recent history for blame (last 3 changes)
 	const recentHistory = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", activeVersion.change_set_id)
+		.where("root_commit_id", "=", activeVersion.commit_id)
 		.where("depth", "<=", 2)
 		.orderBy("depth", "asc")
 		.selectAll()
@@ -589,14 +676,14 @@ test("working change set diff - compare current vs checkpoints", async () => {
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Query current working state (depth 0 only)
 	const currentState = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "=", activeVersion.change_set_id)
+		.where("root_commit_id", "=", activeVersion.commit_id)
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -605,7 +692,7 @@ test("working change set diff - compare current vs checkpoints", async () => {
 	const checkpointStates = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "paragraph0")
-		.where("root_change_set_id", "in", [checkpoint1.id, checkpoint2.id])
+		.where("root_commit_id", "in", [checkpoint1.id, checkpoint2.id])
 		.where("depth", "=", 0)
 		.selectAll()
 		.execute();
@@ -618,16 +705,16 @@ test("working change set diff - compare current vs checkpoints", async () => {
 
 	expect(checkpointStates).toHaveLength(2);
 	expect(
-		checkpointStates.find((s) => s.change_set_id === checkpoint1.id)
+		checkpointStates.find((s) => s.commit_id === checkpoint1.id)
 			?.snapshot_content
 	).toEqual({ value: "checkpoint 1 content" });
 	expect(
-		checkpointStates.find((s) => s.change_set_id === checkpoint2.id)
+		checkpointStates.find((s) => s.commit_id === checkpoint2.id)
 			?.snapshot_content
 	).toEqual({ value: "checkpoint 2 content" });
 });
 
-test("query history between two change sets using ancestor/descendant filters", async () => {
+test("query history between two commits using ancestor/descendant filters", async () => {
 	const lix = await openLix({});
 
 	const mockSchema: LixSchemaDefinition = {
@@ -689,17 +776,17 @@ test("query history between two change sets using ancestor/descendant filters", 
 	const checkpoint4 = await createCheckpoint({ lix });
 
 	// Query history between checkpoint1 and checkpoint4 (should include checkpoint2 and checkpoint3)
-	const betweenChangeSets = await lix.db
-		.selectFrom("change_set")
-		.where(changeSetIsDescendantOf({ id: checkpoint1.id }))
-		.where(changeSetIsAncestorOf({ id: checkpoint4.id }))
-		.where(changeSetHasLabel({ name: "checkpoint" }))
+	const betweenCommits = await lix.db
+		.selectFrom("commit")
+		.where(commitIsDescendantOf({ id: checkpoint1.id }))
+		.where(commitIsAncestorOf({ id: checkpoint4.id }))
+		.where(ebEntity("commit").hasLabel({ name: "checkpoint" }))
 		.select("id")
 		.execute();
 
 	// Should find checkpoint2 and checkpoint3 (between checkpoint1 and checkpoint4)
-	expect(betweenChangeSets).toHaveLength(2);
-	const betweenIds = betweenChangeSets.map((cs) => cs.id);
+	expect(betweenCommits).toHaveLength(2);
+	const betweenIds = betweenCommits.map((c) => c.id);
 	expect(betweenIds).toContain(checkpoint2.id);
 	expect(betweenIds).toContain(checkpoint3.id);
 
@@ -707,7 +794,7 @@ test("query history between two change sets using ancestor/descendant filters", 
 	const historyInRange = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "tracked-entity")
-		.where("root_change_set_id", "in", [checkpoint2.id, checkpoint3.id])
+		.where("root_commit_id", "in", [checkpoint2.id, checkpoint3.id])
 		.where("depth", "=", 0)
 		.orderBy("change_id", "asc")
 		.selectAll()
@@ -761,7 +848,7 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 	const changeSet1 = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Update entity to value1
@@ -775,7 +862,7 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 	const changeSet2 = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Update entity to value2
@@ -789,14 +876,14 @@ test.skip("parent_change_set_ids field shows correct parent relationships", asyn
 	const changeSet3 = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.change_set_id")
+		.select("version.commit_id")
 		.executeTakeFirstOrThrow();
 
 	// Query all history in one go using the final change set
 	const history = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "test-entity")
-		.where("root_change_set_id", "=", changeSet3.change_set_id)
+		// .where("root_change_set_id", "=", changeSet3.change_set_id)
 		.orderBy("depth", "asc")
 		.selectAll()
 		.execute();
@@ -872,27 +959,25 @@ test("querying the history of the working change set", async () => {
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select("version.working_change_set_id")
+		.select(["version.working_change_set_id", "version.commit_id"])
 		.executeTakeFirstOrThrow();
-
-	const workingChangeSetId = activeVersion.working_change_set_id;
 
 	const checkpoint1History = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "entity0")
-		.where("root_change_set_id", "=", checkpoint1.id)
-		.innerJoin("change_set", "state_history.change_set_id", "change_set.id")
-		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.where("root_commit_id", "=", checkpoint1.id)
+		.innerJoin("commit", "state_history.commit_id", "commit.id")
+		.where(ebEntity("commit").hasLabel({ name: "checkpoint" }))
 		.orderBy("depth", "asc")
 		.selectAll()
 		.execute();
 
 	expect(checkpoint1History).toHaveLength(2);
-	expect(checkpoint1History[0]?.change_set_id).toBe(checkpoint1.id);
+	expect(checkpoint1History[0]?.commit_id).toBe(checkpoint1.id);
 	expect(checkpoint1History[0]?.snapshot_content).toEqual({
 		value: "modified content",
 	});
-	expect(checkpoint1History[1]?.change_set_id).toBe(checkpoint0.id);
+	expect(checkpoint1History[1]?.commit_id).toBe(checkpoint0.id);
 	expect(checkpoint1History[1]?.snapshot_content).toEqual({
 		value: "initial content",
 	});
@@ -900,9 +985,9 @@ test("querying the history of the working change set", async () => {
 	const workingHistory = await lix.db
 		.selectFrom("state_history")
 		.where("entity_id", "=", "entity0")
-		.where("root_change_set_id", "=", workingChangeSetId)
-		.innerJoin("change_set", "state_history.change_set_id", "change_set.id")
-		.where(changeSetHasLabel({ name: "checkpoint" }))
+		.where("root_commit_id", "=", activeVersion.commit_id)
+		.innerJoin("commit", "state_history.commit_id", "commit.id")
+		.where(ebEntity("commit").hasLabel({ name: "checkpoint" }))
 		.orderBy("depth", "asc")
 		.selectAll()
 		.execute();

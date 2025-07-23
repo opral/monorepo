@@ -96,9 +96,9 @@ export const LixVersionSchema = {
 	"x-lix-unique": [["working_change_set_id"]],
 	"x-lix-foreign-keys": [
 		{
-			properties: ["change_set_id"],
+			properties: ["commit_id"],
 			references: {
-				schemaKey: "lix_change_set",
+				schemaKey: "lix_commit",
 				properties: ["id"],
 			},
 		},
@@ -121,7 +121,7 @@ export const LixVersionSchema = {
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
 		name: { type: "string", "x-lix-generated": true },
-		change_set_id: { type: "string" },
+		commit_id: { type: "string" },
 		working_change_set_id: { type: "string", "x-lix-generated": true },
 		inherits_from_version_id: {
 			type: ["string", "null"],
@@ -129,7 +129,7 @@ export const LixVersionSchema = {
 		},
 		hidden: { type: "boolean", "x-lix-generated": true },
 	},
-	required: ["id", "name", "change_set_id", "working_change_set_id"],
+	required: ["id", "name", "commit_id", "working_change_set_id"],
 	additionalProperties: false,
 } as const;
 LixVersionSchema satisfies LixSchemaDefinition;

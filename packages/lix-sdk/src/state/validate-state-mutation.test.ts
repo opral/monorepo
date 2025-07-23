@@ -1567,12 +1567,22 @@ test("should handle deletion validation for change sets referenced by versions",
 		.execute();
 
 	// Create a version that references the change set
+	// Create a commit that references the change set
+	await lix.db
+		.insertInto("commit_all")
+		.values({
+			id: "commit_1",
+			change_set_id: "cs_referenced",
+			lixcol_version_id: "global",
+		})
+		.execute();
+
 	await lix.db
 		.insertInto("version")
 		.values({
 			id: "v1",
 			name: "test_version",
-			change_set_id: "cs_referenced",
+			commit_id: "commit_1",
 			working_change_set_id: "cs_referenced",
 		})
 		.execute();
@@ -1600,7 +1610,7 @@ test("should handle deletion validation for change sets referenced by versions",
 			version_id: "global",
 		})
 	).toThrowError(
-		/Foreign key constraint violation.*Cannot delete entity.*referenced by.*lix_version/i
+		/Foreign key constraint violation.*Cannot delete entity.*referenced by.*lix_commit/i
 	);
 });
 
@@ -2513,19 +2523,19 @@ test("should allow untracked entities to reference other untracked entities", as
 	expect(() => validateStateMutation(validationArgs)).not.toThrow();
 });
 
-test("should detect and prevent cycles in change set graph when lix_debug is enabled", async () => {
+test("should detect and prevent cycles in commit graph when lix_debug is enabled", async () => {
 	const lix = await openLix({
 		keyValues: [{ key: "lix_debug", value: "true" }],
 	});
 
-	// Get the change set edge schema
-	const changeSetEdgeSchema = await lix.db
+	// Get the commit edge schema
+	const commitEdgeSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_change_set_edge")
+		.where("key", "=", "lix_commit_edge")
 		.executeTakeFirstOrThrow();
 
-	// Create a few change sets
+	// Create a few change sets and commits
 	await lix.db
 		.insertInto("change_set_all")
 		.values([
@@ -2535,39 +2545,56 @@ test("should detect and prevent cycles in change set graph when lix_debug is ena
 		])
 		.execute();
 
-	// Create edges: cs1 -> cs2 -> cs3
 	await lix.db
-		.insertInto("change_set_edge_all")
+		.insertInto("commit_all")
 		.values([
-			{ parent_id: "cs1", child_id: "cs2", lixcol_version_id: "global" },
-			{ parent_id: "cs2", child_id: "cs3", lixcol_version_id: "global" },
+			{ id: "commit1", change_set_id: "cs1", lixcol_version_id: "global" },
+			{ id: "commit2", change_set_id: "cs2", lixcol_version_id: "global" },
+			{ id: "commit3", change_set_id: "cs3", lixcol_version_id: "global" },
 		])
 		.execute();
 
-	// This should fail - creating cs3 -> cs1 would create a cycle
+	// Create edges: commit1 -> commit2 -> commit3
+	await lix.db
+		.insertInto("commit_edge_all")
+		.values([
+			{
+				parent_id: "commit1",
+				child_id: "commit2",
+				lixcol_version_id: "global",
+			},
+			{
+				parent_id: "commit2",
+				child_id: "commit3",
+				lixcol_version_id: "global",
+			},
+		])
+		.execute();
+
+	// This should fail - creating commit3 -> commit1 would create a cycle
 	expect(() =>
 		validateStateMutation({
 			lix,
-			schema: changeSetEdgeSchema.value as LixSchemaDefinition,
+			schema: commitEdgeSchema.value as LixSchemaDefinition,
 			snapshot_content: {
-				parent_id: "cs3",
-				child_id: "cs1", // This would complete the cycle
+				parent_id: "commit3",
+				child_id: "commit1", // This would complete the cycle
 			},
 			operation: "insert",
 			version_id: "global",
 		})
 	).toThrowError(
-		/Cycle detected in change set graph.*New edge: cs3 -> cs1.*Cycle path: cs1 -> cs2 -> cs3 -> cs1/s
+		/Cycle detected in commit graph.*New edge: commit3 -> commit1.*Cycle path: commit1 -> commit2 -> commit3 -> commit1/s
 	);
 
 	// This should also fail - self-loop
 	expect(() =>
 		validateStateMutation({
 			lix,
-			schema: changeSetEdgeSchema.value as LixSchemaDefinition,
+			schema: commitEdgeSchema.value as LixSchemaDefinition,
 			snapshot_content: {
-				parent_id: "cs1",
-				child_id: "cs1", // Self-referencing edge
+				parent_id: "commit1",
+				child_id: "commit1", // Self-referencing edge
 			},
 			operation: "insert",
 			version_id: "global",
@@ -2580,14 +2607,14 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 		keyValues: [{ key: "lix_debug", value: "false" }],
 	});
 
-	// Get the change set edge schema
-	const changeSetEdgeSchema = await lix.db
+	// Get the commit edge schema
+	const commitEdgeSchema = await lix.db
 		.selectFrom("stored_schema")
 		.select("value")
-		.where("key", "=", "lix_change_set_edge")
+		.where("key", "=", "lix_commit_edge")
 		.executeTakeFirstOrThrow();
 
-	// Create a few change sets
+	// Create a few change sets and commits
 	await lix.db
 		.insertInto("change_set_all")
 		.values([
@@ -2597,12 +2624,29 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 		])
 		.execute();
 
-	// Create edges: cs1 -> cs2 -> cs3
 	await lix.db
-		.insertInto("change_set_edge_all")
+		.insertInto("commit_all")
 		.values([
-			{ parent_id: "cs1", child_id: "cs2", lixcol_version_id: "global" },
-			{ parent_id: "cs2", child_id: "cs3", lixcol_version_id: "global" },
+			{ id: "commit1", change_set_id: "cs1", lixcol_version_id: "global" },
+			{ id: "commit2", change_set_id: "cs2", lixcol_version_id: "global" },
+			{ id: "commit3", change_set_id: "cs3", lixcol_version_id: "global" },
+		])
+		.execute();
+
+	// Create edges: commit1 -> commit2 -> commit3
+	await lix.db
+		.insertInto("commit_edge_all")
+		.values([
+			{
+				parent_id: "commit1",
+				child_id: "commit2",
+				lixcol_version_id: "global",
+			},
+			{
+				parent_id: "commit2",
+				child_id: "commit3",
+				lixcol_version_id: "global",
+			},
 		])
 		.execute();
 
@@ -2611,10 +2655,10 @@ test("should not check for cycles when lix_debug is disabled", async () => {
 	expect(() =>
 		validateStateMutation({
 			lix,
-			schema: changeSetEdgeSchema.value as LixSchemaDefinition,
+			schema: commitEdgeSchema.value as LixSchemaDefinition,
 			snapshot_content: {
-				parent_id: "cs3",
-				child_id: "cs1", // This would complete the cycle
+				parent_id: "commit3",
+				child_id: "commit1", // This would complete the cycle
 			},
 			operation: "insert",
 			version_id: "global",

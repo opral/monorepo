@@ -10,6 +10,7 @@ import { isJsonType } from "../schema-definition/json-type.js";
 import { applyLogDatabaseSchema } from "../log/schema.js";
 import { applyChangeDatabaseSchema } from "../change/schema.js";
 import { applyChangeSetDatabaseSchema } from "../change-set/schema.js";
+import { applyCommitDatabaseSchema } from "../commit/schema.js";
 import { applyVersionDatabaseSchema } from "../version/schema.js";
 import { applySnapshotDatabaseSchema } from "../snapshot/schema.js";
 import { applyStoredSchemaDatabaseSchema } from "../stored-schema/schema.js";
@@ -143,6 +144,7 @@ export function initDb(args: {
 	);
 	applyEntityDatabaseSchema(lix);
 	applyChangeSetDatabaseSchema(args.sqlite, db);
+	applyCommitDatabaseSchema(lix);
 	applyStoredSchemaDatabaseSchema(args.sqlite);
 	applyVersionDatabaseSchema(lix);
 	applyAccountDatabaseSchema(args.sqlite, db);

@@ -29,7 +29,7 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 		.where("id", "=", versionId)
 		.selectAll()
 		.executeTakeFirstOrThrow();
-	const previousChangeSetId = versionBefore.change_set_id;
+	const previousCommitId = versionBefore.commit_id;
 
 	// 2. Insert transaction state
 	insertTransactionState({
@@ -76,18 +76,27 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const newChangeSetId = versionAfter.change_set_id;
-	expect(newChangeSetId).not.toBe(previousChangeSetId);
+	const newCommitId = versionAfter.commit_id;
+	expect(newCommitId).not.toBe(previousCommitId);
 
 	// Check edges - should have exactly one edge from previous to new
 	const edges = await db
-		.selectFrom("change_set_edge")
-		.where("parent_id", "=", previousChangeSetId)
-		.where("child_id", "=", newChangeSetId)
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", previousCommitId)
+		.where("child_id", "=", newCommitId)
 		.selectAll()
 		.execute();
 
 	expect(edges.length).toBe(1);
+
+	// Get the change set ID from the commit
+	const newCommit = await db
+		.selectFrom("commit")
+		.where("id", "=", newCommitId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const newChangeSetId = newCommit.change_set_id;
 
 	// 5. Directly expect on the elements in this new set to contain the expected changes
 	const changeSetElements = await db
@@ -100,10 +109,11 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	// - 2 user data changes (test-entity-1, test-entity-2)
 	// - 2 change authors (one for each user data change)
 	// - 1 changeset creation
-	// - 1 edge creation
+	// - 1 commit creation
+	// - 1 commit edge creation
 	// - 1 version update
-	// Total: 7 elements
-	expect(changeSetElements.length).toBe(7);
+	// Total: 8 elements
+	expect(changeSetElements.length).toBe(8);
 
 	// Verify the specific changes are in the change set
 	const elementChangeIds = changeSetElements.map((e) => e.change_id);
@@ -131,7 +141,8 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	expect(changesBySchema["lix_key_value"]?.length).toBe(2); // Our test data
 	expect(changesBySchema["lix_change_author"]?.length).toBe(2); // Change authors for test data
 	expect(changesBySchema["lix_change_set"]?.length).toBe(1); // The new changeset
-	expect(changesBySchema["lix_change_set_edge"]?.length).toBe(1); // The edge
+	expect(changesBySchema["lix_commit"]?.length).toBe(1); // The new commit
+	expect(changesBySchema["lix_commit_edge"]?.length).toBe(1); // The commit edge
 	expect(changesBySchema["lix_version"]?.length).toBe(1); // Version update
 
 	// Verify the test entities are included
