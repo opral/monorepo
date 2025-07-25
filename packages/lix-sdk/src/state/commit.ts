@@ -336,6 +336,23 @@ function createChangesetForTransaction(
 	}
 
 	// Create/update working change set element for user data changes
+	// Get the working commit and its change set
+	const workingCommit = executeSync({
+		lix: { sqlite },
+		query: db
+			.selectFrom("commit")
+			.where("id", "=", mutatedVersion.working_commit_id)
+			.selectAll(),
+	});
+
+	if (workingCommit.length === 0) {
+		throw new Error(
+			`Working commit not found: ${mutatedVersion.working_commit_id}`
+		);
+	}
+
+	const workingChangeSetId = workingCommit[0]!.change_set_id;
+
 	// TODO skipping lix internal entities is likely undesired.
 	// Skip lix internal entities (change sets, edges, etc.)
 	for (const change of changes) {
@@ -393,11 +410,7 @@ function createChangesetForTransaction(
 					query: db
 						.selectFrom("internal_resolved_state_all")
 						.select("_pk")
-						.where(
-							"entity_id",
-							"like",
-							`${mutatedVersion.working_change_set_id}::%`
-						)
+						.where("entity_id", "like", `${workingChangeSetId}::%`)
 						.where("schema_key", "=", "lix_change_set_element")
 						.where("file_id", "=", "lix")
 						.where("version_id", "=", "global")
@@ -427,12 +440,12 @@ function createChangesetForTransaction(
 					insertTransactionState({
 						lix: { sqlite, db },
 						data: {
-							entity_id: `${mutatedVersion.working_change_set_id}::${change.id}`,
+							entity_id: `${workingChangeSetId}::${change.id}`,
 							schema_key: "lix_change_set_element",
 							file_id: "lix",
 							plugin_key: "lix_own_entity",
 							snapshot_content: JSON.stringify({
-								change_set_id: mutatedVersion.working_change_set_id,
+								change_set_id: workingChangeSetId,
 								change_id: change.id,
 								entity_id: change.entity_id,
 								schema_key: change.schema_key,
@@ -454,11 +467,7 @@ function createChangesetForTransaction(
 					query: db
 						.selectFrom("internal_resolved_state_all")
 						.select("_pk")
-						.where(
-							"entity_id",
-							"like",
-							`${mutatedVersion.working_change_set_id}::%`
-						)
+						.where("entity_id", "like", `${workingChangeSetId}::%`)
 						.where("schema_key", "=", "lix_change_set_element")
 						.where("file_id", "=", "lix")
 						.where("version_id", "=", "global")
@@ -488,12 +497,12 @@ function createChangesetForTransaction(
 				insertTransactionState({
 					lix: { sqlite, db },
 					data: {
-						entity_id: `${mutatedVersion.working_change_set_id}::${change.id}`,
+						entity_id: `${workingChangeSetId}::${change.id}`,
 						schema_key: "lix_change_set_element",
 						file_id: "lix",
 						plugin_key: "lix_own_entity",
 						snapshot_content: JSON.stringify({
-							change_set_id: mutatedVersion.working_change_set_id,
+							change_set_id: workingChangeSetId,
 							change_id: change.id,
 							entity_id: change.entity_id,
 							schema_key: change.schema_key,

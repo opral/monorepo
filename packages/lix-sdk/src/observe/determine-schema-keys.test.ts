@@ -187,7 +187,7 @@ test("should handle complex working changes query", async () => {
 			lix.db
 				.selectFrom("active_version")
 				.innerJoin("version", "active_version.version_id", "version.id")
-				.select("version.working_change_set_id")
+				.select("version.working_commit_id")
 		)
 		.where(
 			"change.file_id",

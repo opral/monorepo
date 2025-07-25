@@ -323,6 +323,10 @@ function createBootstrapChanges(args: {
 	const initialGlobalVersionChangeSetId = args.generateNanoid();
 	const initialGlobalVersionWorkingChangeSetId = args.generateNanoid();
 
+	// Generate IDs for working commits
+	const mainWorkingCommitId = args.generateUuid();
+	const globalWorkingCommitId = args.generateUuid();
+
 	// Create all required change sets
 	const changeSets: LixChangeSet[] = [
 		{
@@ -389,6 +393,37 @@ function createBootstrapChanges(args: {
 		created_at: args.created_at,
 	});
 
+	// Create working commits for both versions
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: globalWorkingCommitId,
+		schema_key: "lix_commit",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: globalWorkingCommitId,
+			change_set_id: initialGlobalVersionWorkingChangeSetId,
+		},
+		created_at: args.created_at,
+	});
+
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: mainWorkingCommitId,
+		schema_key: "lix_commit",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: mainWorkingCommitId,
+			change_set_id: initialWorkingChangeSetId,
+		},
+		created_at: args.created_at,
+	});
+
 	// Create global version
 	changes.push({
 		id: args.generateUuid(),
@@ -402,7 +437,7 @@ function createBootstrapChanges(args: {
 			id: "global",
 			name: "global",
 			commit_id: globalCommitId,
-			working_change_set_id: initialGlobalVersionWorkingChangeSetId,
+			working_commit_id: globalWorkingCommitId,
 			hidden: true,
 		} satisfies LixVersion,
 		created_at: args.created_at,
@@ -421,7 +456,7 @@ function createBootstrapChanges(args: {
 			id: initialVersionId,
 			name: "main",
 			commit_id: mainCommitId,
-			working_change_set_id: initialWorkingChangeSetId,
+			working_commit_id: mainWorkingCommitId,
 			inherits_from_version_id: "global",
 			hidden: false,
 		} satisfies LixVersion,

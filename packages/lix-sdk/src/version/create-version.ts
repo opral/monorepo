@@ -55,6 +55,17 @@ export async function createVersion(args: {
 				.execute();
 		}
 
+		// Create a working commit for the new version
+		const workingCommitId = uuidV7({ lix: args.lix });
+		await trx
+			.insertInto("commit_all")
+			.values({
+				id: workingCommitId,
+				change_set_id: workingCs.id,
+				lixcol_version_id: "global",
+			})
+			.execute();
+
 		const versionId = args.id ?? nanoId({ lix: args.lix });
 
 		await trx
@@ -63,7 +74,7 @@ export async function createVersion(args: {
 				id: versionId,
 				name: args.name,
 				commit_id: commitId,
-				working_change_set_id: workingCs.id,
+				working_commit_id: workingCommitId,
 				inherits_from_version_id: args.inherits_from_version_id ?? "global",
 			})
 			.execute();

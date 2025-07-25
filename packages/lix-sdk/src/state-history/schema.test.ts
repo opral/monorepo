@@ -959,7 +959,7 @@ test("querying the history of the working change set", async () => {
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
-		.select(["version.working_change_set_id", "version.commit_id"])
+		.select(["version.working_commit_id", "version.commit_id"])
 		.executeTakeFirstOrThrow();
 
 	const checkpoint1History = await lix.db

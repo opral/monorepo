@@ -1186,7 +1186,7 @@ simulationTest(
 		const version = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersionAfterInsert.id)
-			.select(["id", "commit_id", "working_change_set_id"])
+			.select(["id", "commit_id", "working_commit_id"])
 			.executeTakeFirstOrThrow();
 
 		// Get the change set ID from the version's commit
@@ -1196,12 +1196,19 @@ simulationTest(
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
+		// Get the change set ID from the working commit
+		const workingCommit = await lix.db
+			.selectFrom("commit")
+			.where("id", "=", version.working_commit_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
 		// Find which change_set_element is in the version's change set (not working)
 		const versionChangeSetElement = changeSetElements.find(
 			(el) => el.change_set_id === versionCommit.change_set_id
 		);
 		const workingChangeSetElement = changeSetElements.find(
-			(el) => el.change_set_id === version.working_change_set_id
+			(el) => el.change_set_id === workingCommit.change_set_id
 		);
 
 		expectDeterministic(versionChangeSetElement).toBeDefined();

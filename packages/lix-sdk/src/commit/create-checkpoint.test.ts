@@ -24,9 +24,16 @@ test("creates a checkpoint from working change set elements", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Verify working change set has elements
+	// Get the working commit first
+	const initialWorkingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", initialVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const workingElementsBefore = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", initialVersion.working_change_set_id)
+		.where("change_set_id", "=", initialWorkingCommit.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -77,14 +84,20 @@ test("creates a checkpoint from working change set elements", async () => {
 		.executeTakeFirstOrThrow();
 
 	// expect(updatedVersion.change_set_id).toBe(checkpoint.id);
-	expect(updatedVersion.working_change_set_id).not.toBe(
-		initialVersion.working_change_set_id
+	expect(updatedVersion.working_commit_id).not.toBe(
+		initialVersion.working_commit_id
 	);
 
 	// Verify new working change set is empty
+	const newWorkingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", updatedVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const newWorkingElements = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", updatedVersion.working_change_set_id)
+		.where("change_set_id", "=", newWorkingCommit.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -108,20 +121,15 @@ test("creates checkpoint and returns change set", async () => {
 	});
 });
 
-// TODO change sets have no graph anymore after https://github.com/opral/lix-sdk/issues/359
-//      determine if this is still needed. the history of a working change set can be traversed
-//      by taking the version's commit_id and traversing the commit graph from there.
-//      EXCEPT if this feature was introduced because the working change set yields different
-//      history than the version's commit_id.
 //
-// The edge from checkpoint to new working change set is critical for history traversal.
+// The edge from checkpoint to new working commit is critical for history traversal.
 // Without this edge, queries from the working change set cannot traverse backwards through
 // checkpoints to find historical states. This ensures the change set graph remains connected
 // and allows state_history queries to work correctly from any point in the graph.
-test.skip("creates edge from checkpoint to new working change set", async () => {
+test("creates edge from checkpoint to new working commit", async () => {
 	const lix = await openLix({});
 
-	// Make some changes to create working change set elements
+	// Make some changes to create working commit elements
 	await lix.db
 		.insertInto("key_value")
 		.values({ key: "test-key", value: "test-value" })
@@ -141,20 +149,20 @@ test.skip("creates edge from checkpoint to new working change set", async () => 
 	const edgeToNewWorking = await lix.db
 		.selectFrom("commit_edge")
 		.where("parent_id", "=", checkpoint.id)
-		.where("child_id", "=", updatedVersion.commit_id)
+		.where("child_id", "=", updatedVersion.working_commit_id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(edgeToNewWorking).toMatchObject({
 		parent_id: checkpoint.id,
-		child_id: updatedVersion.commit_id,
+		child_id: updatedVersion.working_commit_id,
 	});
 
 	// Verify the new working commit can traverse back to the checkpoint
 	const isCheckpointAncestor = await lix.db
 		.selectFrom("commit")
 		.where("id", "=", checkpoint.id)
-		.where(commitIsAncestorOf({ id: updatedVersion.commit_id }))
+		.where(commitIsAncestorOf({ id: updatedVersion.working_commit_id }))
 		.selectAll()
 		.execute();
 
@@ -165,7 +173,7 @@ test.skip("creates edge from checkpoint to new working change set", async () => 
 		.selectFrom("state_history")
 		.where("entity_id", "=", "test-key")
 		.where("schema_key", "=", "lix_key_value")
-		.where("root_commit_id", "=", updatedVersion.commit_id)
+		.where("root_commit_id", "=", updatedVersion.working_commit_id)
 		.selectAll()
 		.execute();
 
@@ -213,9 +221,15 @@ test("checkpoint enables clean working change set for new work", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Working change set should only contain post-checkpoint changes
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", version.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const workingElements = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", version.working_change_set_id)
+		.where("change_set_id", "=", workingCommit.change_set_id)
 		.selectAll()
 		.execute();
 

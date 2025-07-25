@@ -1560,30 +1560,40 @@ test("should throw when entity_id is missing for delete operations", async () =>
 test("should handle deletion validation for change sets referenced by versions", async () => {
 	const lix = await openLix({});
 
-	// Create a change set
+	// Create change sets
 	await lix.db
 		.insertInto("change_set_all")
-		.values({ id: "cs_referenced", lixcol_version_id: "global" })
+		.values([
+			{ id: "cs_referenced", lixcol_version_id: "global" },
+			{ id: "cs_working", lixcol_version_id: "global" }
+		])
 		.execute();
 
-	// Create a version that references the change set
-	// Create a commit that references the change set
+	// Create commits that reference the change sets
 	await lix.db
 		.insertInto("commit_all")
-		.values({
-			id: "commit_1",
-			change_set_id: "cs_referenced",
-			lixcol_version_id: "global",
-		})
+		.values([
+			{
+				id: "commit_1",
+				change_set_id: "cs_referenced",
+				lixcol_version_id: "global",
+			},
+			{
+				id: "working_commit_1",
+				change_set_id: "cs_working",
+				lixcol_version_id: "global",
+			}
+		])
 		.execute();
 
+	// Create a version that references the commits
 	await lix.db
 		.insertInto("version")
 		.values({
 			id: "v1",
 			name: "test_version",
 			commit_id: "commit_1",
-			working_change_set_id: "cs_referenced",
+			working_commit_id: "working_commit_1",
 		})
 		.execute();
 

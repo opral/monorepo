@@ -24,8 +24,14 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<LixCommit> {
 			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
-		const workingChangeSetId = activeVersion.working_change_set_id;
-		// Use the current change_set_id as parent - this represents the latest changes
+		// Get the working commit and its change set
+		const workingCommit = await trx
+			.selectFrom("commit")
+			.where("id", "=", activeVersion.working_commit_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		const workingChangeSetId = workingCommit.change_set_id;
 
 		// Check if there are any working change set elements to checkpoint
 		const workingElements = await trx
@@ -90,15 +96,6 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<LixCommit> {
 			})
 			.execute();
 
-		await trx
-			.updateTable("version")
-			.where("id", "=", activeVersion.id)
-			.set({
-				commit_id: checkpointCommitId,
-				working_change_set_id: newWorkingChangeSetId,
-			})
-			.execute();
-
 		// 4. Create a new commit for the new working change set
 		const newWorkingCommitId = uuidV7({ lix: args.lix });
 		await trx
@@ -117,6 +114,16 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<LixCommit> {
 				parent_id: checkpointCommitId,
 				child_id: newWorkingCommitId,
 				lixcol_version_id: "global",
+			})
+			.execute();
+
+		// Update version to point to new working commit
+		await trx
+			.updateTable("version")
+			.where("id", "=", activeVersion.id)
+			.set({
+				commit_id: checkpointCommitId,
+				working_commit_id: newWorkingCommitId,
 			})
 			.execute();
 
