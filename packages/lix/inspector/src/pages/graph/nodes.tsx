@@ -2,8 +2,7 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
 import { TagIcon, Radar } from "lucide-react";
 import { useQuery } from "@lix-js/react-utils";
-import { ChangeSetElementsWindow } from "./change-set-elements-dialog";
-import { CommitDetailsDialog } from "./commit-details-dialog";
+import { CommitDetailsWindow } from "./commit-details-window";
 
 // Define a generic data structure for our Lix nodes
 export interface LixNodeData {
@@ -16,93 +15,6 @@ export interface LixNodeData {
 }
 
 
-// Change Set Node Component
-const ChangeSetNode = ({
-  id,
-  entity,
-  title,
-}: {
-  id: string;
-  entity: any;
-  title?: string;
-}) => {
-  // Determine the change set ID - for working change sets, use the entity.id
-  const changeSetId = entity.type === "working_change_set" ? entity.id : entity.id;
-  
-  return (
-    <div className="card card-compact bg-base-100 shadow-sm min-w-[200px] text-sm">
-      <div className="card-body p-4">
-        <h3 className="card-title text-sm capitalize border-b mb-2">
-          {title || "change set"}
-        </h3>
-        <div className="space-y-1">
-          {Object.entries(entity).map(([key, value]) => {
-            // Skip rendering labels array and type in the regular properties list
-            if (
-              key === "labels" ||
-              key === "type" ||
-              value === null ||
-              value === undefined ||
-              value === ""
-            )
-              return null;
-
-            const displayValue =
-              typeof value === "string"
-                ? value.substring(0, 20) + (value.length > 20 ? "..." : "")
-                : String(value);
-
-            return (
-              <div key={key} className="flex justify-between text-neutral-600">
-                <span className="font-medium mr-2">{key}:</span>
-                <span title={String(value)} className="truncate">
-                  {displayValue}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Display labels if they exist */}
-        {entity.labels && entity.labels.length > 0 && (
-          <div className="mt-2">
-            <h4 className="text-sm font-medium mb-1">
-              <TagIcon className="inline-block h-3 w-3 mr-1" />
-              Labels:
-            </h4>
-            <div className="flex flex-wrap gap-1">
-              {entity.labels.map((label: { name: string }, index: number) => (
-                <span key={index} className="badge badge-sm" title={label.name}>
-                  {label.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="mt-2">
-          <ChangeSetElementsWindow changeSetId={changeSetId} onClose={() => {}} />
-        </div>
-
-        {/* Handles for connections */}
-        <Handle
-          type="target"
-          position={Position.Top}
-          id={`${id}-target`}
-          style={{ visibility: "hidden" }}
-          isConnectable={false}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          id={`${id}-source`}
-          style={{ visibility: "hidden" }}
-          isConnectable={false}
-        />
-      </div>
-    </div>
-  );
-};
 
 // Commit Node Component
 const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: string }) => {
@@ -199,9 +111,9 @@ const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: st
         </div>
       </div>
 
-      {/* Commit Details Dialog */}
+      {/* Commit Details Window */}
       {showDetails && (
-        <CommitDetailsDialog
+        <CommitDetailsWindow
           commit={entity}
           onClose={() => setShowDetails(false)}
         />
@@ -264,9 +176,7 @@ const GenericLixNodeComponent = ({ id, data }: NodeProps) => {
   const { tableName, entity, title } = data as LixNodeData;
 
   // Render the appropriate node type based on tableName
-  if (tableName === "change_set") {
-    return <ChangeSetNode id={id} entity={entity} title={title} />;
-  } else if (tableName === "version") {
+  if (tableName === "version") {
     return <VersionNode id={id} entity={entity} />;
   } else if (tableName === "commit") {
     return <CommitNode id={id} entity={entity} title={title} />;

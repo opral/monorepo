@@ -1,5 +1,7 @@
-import { ReactNode, useEffect, useRef, useState, useCallback } from "react";
+import { ReactNode, useEffect, useRef, useState, useCallback, useContext } from "react";
+import { createPortal } from "react-dom";
 import { X, Maximize2, Minimize2, Pin } from "lucide-react";
+import { Context } from "../context";
 
 interface FloatingWindowProps {
   children: ReactNode;
@@ -50,6 +52,7 @@ export function FloatingWindow({
   onSizeChange,
   onExpandedChange,
 }: FloatingWindowProps) {
+  const { rootContainer } = useContext(Context);
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
   const [isDragging, setIsDragging] = useState(false);
@@ -683,6 +686,9 @@ export function FloatingWindow({
     </>
   );
 
-  // For now, just return the window content directly
-  return windowContent;
+  // Get the shadow root from the container and create portal
+  const portalTarget = rootContainer?.shadowRoot;
+  
+  // Create the portal if we have a target, otherwise return null
+  return portalTarget ? createPortal(windowContent, portalTarget) : null;
 }
