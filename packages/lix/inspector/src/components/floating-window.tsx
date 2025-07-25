@@ -1,4 +1,11 @@
-import { ReactNode, useEffect, useRef, useState, useCallback, useContext, useMemo } from "react";
+import {
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useContext,
+} from "react";
 import { createPortal } from "react-dom";
 import { X, Maximize2, Minimize2, Pin } from "lucide-react";
 import { Context } from "../context";
@@ -57,10 +64,12 @@ export function FloatingWindow({
 }: FloatingWindowProps) {
   const { rootContainer } = useContext(Context);
   const windowManager = useWindowManager();
-  
+
   // Generate a unique ID if not provided (only once)
-  const [windowId] = useState(() => id || `window-${Date.now()}-${Math.random()}`);
-  
+  const [windowId] = useState(
+    () => id || `window-${Date.now()}-${Math.random()}`
+  );
+
   // Get z-index from window manager
   const zIndex = windowManager.getZIndex(windowId);
   const [position, setPosition] = useState(initialPosition);
@@ -108,7 +117,7 @@ export function FloatingWindow({
 
   // Auto-focus when window opens (only once per open/close cycle)
   const hasFocusedOnOpen = useRef(false);
-  
+
   useEffect(() => {
     if (isOpen && !hasFocusedOnOpen.current) {
       // Focus immediately when window opens for the first time
@@ -151,11 +160,14 @@ export function FloatingWindow({
 
         // Calculate initial position to center the window
         const newX = Math.max(0, (viewportWidth - responsiveWidth) / 2);
-        const newY = Math.max(navbarHeight + 20, (viewportHeight - responsiveHeight) / 3);
+        const newY = Math.max(
+          navbarHeight + 20,
+          (viewportHeight - responsiveHeight) / 3
+        );
 
         setPosition({ x: newX, y: newY });
       }
-      
+
       setHasInitialized(true);
     }
   }, [initialPosition, initialSize, hasInitialized, navbarHeight]);
@@ -370,7 +382,7 @@ export function FloatingWindow({
   // Handle mouse move for dragging and resizing
   useEffect(() => {
     let rafId: number | null = null;
-    
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging && !isResizing) return;
 
@@ -436,7 +448,10 @@ export function FloatingWindow({
               deltaX,
               resizeStartRef.current.width - 200
             );
-            newWidth = Math.max(200, resizeStartRef.current.width - widthChange);
+            newWidth = Math.max(
+              200,
+              resizeStartRef.current.width - widthChange
+            );
             newX = resizeStartRef.current.x + widthChange;
           }
 
@@ -468,7 +483,7 @@ export function FloatingWindow({
         cancelAnimationFrame(rafId);
         rafId = null;
       }
-      
+
       if (isDragging || isResizing) {
         if (isSnapping && snapPreview) {
           // Apply snap
@@ -666,9 +681,7 @@ export function FloatingWindow({
         className={`floating-window bg-base-100 shadow-lg border border-base-300 rounded-md ${isDragging ? "dragging" : ""} ${isResizing ? "resizing" : ""} ${pinned ? "pinned" : ""}`}
         style={{
           position: "fixed",
-          top: isExpanded
-            ? `${navbarHeight + 8}px`
-            : `${position.y}px`,
+          top: isExpanded ? `${navbarHeight + 8}px` : `${position.y}px`,
           left: isExpanded ? `${EXPANDED_MARGIN}px` : `${position.x}px`,
           width: isExpanded
             ? `calc(100vw - ${EXPANDED_MARGIN * 2}px)`
@@ -741,7 +754,7 @@ export function FloatingWindow({
 
   // Get the shadow root from the container and create portal
   const portalTarget = rootContainer?.shadowRoot;
-  
+
   // Create the portal if we have a target, otherwise return null
   return portalTarget ? createPortal(windowContent, portalTarget) : null;
 }

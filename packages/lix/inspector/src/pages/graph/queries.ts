@@ -28,15 +28,15 @@ export function selectCommits(
     .$if(selectedLabels.length > 0, (eb) =>
       eb
         .leftJoin(
-          "change_set_label",
-          "change_set_label.change_set_id",
-          "change_set.id"
+          "entity_label",
+          "entity_label.entity_id",
+          "commit.id"
         )
         .$if(true, (qb) =>
           qb.where((eb) =>
             eb.or([
               eb(
-                "change_set_label.label_id",
+                "entity_label.label_id",
                 "in",
                 availableLabels?.map((l) => l.id) ?? []
               ),
@@ -60,9 +60,9 @@ export function selectCommits(
       "commit.change_set_id",
       jsonArrayFrom(
         eb
-          .selectFrom("change_set_label")
-          .innerJoin("label", "label.id", "change_set_label.label_id")
-          .where("change_set_label.change_set_id", "=", eb.ref("change_set.id"))
+          .selectFrom("entity_label")
+          .innerJoin("label", "label.id", "entity_label.label_id")
+          .where("entity_label.entity_id", "=", eb.ref("commit.id"))
           .select(["label.name", "label.id"])
       ).as("labels"),
     ]);

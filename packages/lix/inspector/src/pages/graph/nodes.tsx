@@ -20,6 +20,7 @@ export interface LixNodeData {
 const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: string }) => {
   const [showDetails, setShowDetails] = useState(false);
 
+
   // Fetch change count for this commit
   const changeSetElements = useQuery((lix) =>
     lix.db
@@ -34,7 +35,9 @@ const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: st
     <>
       <div className="card card-compact bg-base-100 shadow-sm min-w-[200px] text-sm">
         <div className="card-body p-4">
-          <h3 className="card-title text-sm capitalize border-b mb-2">{title || "commit"}</h3>
+          <h3 className="card-title text-sm capitalize border-b mb-2">
+            {title || "commit"}
+          </h3>
           <div className="space-y-1">
             {Object.entries(entity).map(([key, value]) => {
               // Skip rendering labels array and changeCount in the regular properties list
@@ -53,7 +56,10 @@ const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: st
                   : String(value);
 
               return (
-                <div key={key} className="flex justify-between text-neutral-600">
+                <div
+                  key={key}
+                  className="flex justify-between text-neutral-600"
+                >
                   <span className="font-medium mr-2">{key}:</span>
                   <span title={String(value)} className="truncate">
                     {displayValue}
@@ -75,14 +81,16 @@ const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: st
               <div className="flex items-center gap-1 text-neutral-600">
                 <TagIcon className="h-3 w-3" />
                 <span className="text-sm">
-                  {entity.labels.map((label: { name: string }) => label.name).join(", ")}
+                  {entity.labels
+                    .map((label: { name: string }) => label.name)
+                    .join(", ")}
                 </span>
               </div>
             </div>
           )}
 
           <div className="mt-2">
-            <button 
+            <button
               className="btn btn-xs btn-ghost w-full"
               onClick={(e) => {
                 e.stopPropagation();
