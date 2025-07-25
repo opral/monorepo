@@ -203,6 +203,9 @@ export default function Graph() {
         (commits || []).some((commit) => commit.id === commitEdge.parent_id) &&
         (commits || []).some((commit) => commit.id === commitEdge.child_id)
       ) {
+        // Check if the child (source) is a working commit
+        const isChildWorkingCommit = (versions || []).some(v => v.working_commit_id === commitEdge.child_id);
+        
         allEdges.push({
           id: `e_${commitEdge.parent_id}-${commitEdge.child_id}`,
           source: commitEdge.child_id,
@@ -210,6 +213,7 @@ export default function Graph() {
           markerEnd: { type: MarkerType.Arrow }, // Arrow points from child to parent
           type: "straight", // Use straight edges for cleaner vertical layout
           animated: false,
+          style: isChildWorkingCommit ? { strokeDasharray: "5 5" } : undefined, // Dashed line for working commit edges
         });
       }
     }
