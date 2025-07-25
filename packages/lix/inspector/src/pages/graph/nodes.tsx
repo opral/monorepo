@@ -1,7 +1,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
 import { TagIcon, Radar } from "lucide-react";
-import { useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
+import { useQueryTakeFirst } from "@lix-js/react-utils";
 import { CommitDetailsWindow } from "./commit-details-window";
 
 // Define a generic data structure for our Lix nodes
