@@ -1,10 +1,14 @@
 import CodeSnippet from "../components/code-snippet";
-import * as example from "./versions.example.ts";
-import exampleSrcCode from "./versions.example.ts?raw";
+import * as gettingStartedExample from "./versions.getting-started.ts";
+import gettingStartedSrcCode from "./versions.getting-started.ts?raw";
+import * as autoCommitExample from "./versions.auto-commit.ts";
+import autoCommitSrcCode from "./versions.auto-commit.ts?raw";
 
-# Versions
+# Versions - The safety net for AI agents 
 
-Versions in Lix are like branches in Git—they are named pointers that let developers manage different states of data, experiment in parallel, and maintain a clear history of changes.
+Give every AI agent (& human) its own playground, keep the main version safe.
+
+Agents act fast and often unpredictably; uncontrolled writes can trash live data. Versions create “sealed rooms” where agents iterate without collateral damage.
 
 ![Versions](/versions.svg)
 
@@ -13,18 +17,89 @@ Versions in Lix are like branches in Git—they are named pointers that let deve
 
 The super-power is that **Lix auto-commits every transaction**. Unlike Git which requires manual `git commit` operations, Lix creates a new commit in the history for every modification. Versions provide a stable, human-friendly way to manage this rapid, continuous history.
 
-### Quick benefits
+## Why versions matter for agent-powered apps
 
-| Benefit                       | Why it matters                                                                                                                       |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Parallel development**      | Isolated "branches" can be created for new features without affecting the main version.                                              |
-| **Risk-free experimentation** | New ideas can be tested in a separate version, which can be deleted if the experiment is unsuccessful.                               |
-| **Clear milestones**          | Checkpoints are used to create stable, named releases like v1.0 or production-ready.                                                 |
-| **Live collaboration**        | A version's "working commit" lets multiple users see and discuss ongoing changes in real-time before they are formally checkpointed. |
+| Benefit | What it unlocks in production |
+|---------|------------------------------|
+| **Parallel work** | Multiple AI agents—and human editors—can make different changes at the same time without overwriting each other's progress. |
+| **Risk - free experiments** | Let agents make changes without impacting the users' version—delete instantly if results disappoint. |
+| **Clear diffs & reviews** | See exactly *what* each agent (or human) changes between versions. |
+
+## Use cases
+
+### Human-AI Agent Collaboration
+
+1. Agent (or your orchestration layer) **creates a version**.
+2. Agent writes data; Lix **auto-commits** each change.
+3. Human (or another agent) **asks for a diff vs main**.
+4. On approval, **merge or discard** the version.
+
+```typescript
+// 1. Create and switch to an isolated version for Agent A
+const versionA = await createVersion({ lix, name: "agent-a-playground" });
+await switchVersion({ lix, to: versionA });
+
+// 2. Agent writes changes (auto-committed under the hood)
+await agentA.runTasks(lix);
+
+// 3. Diff against main
+const diff = await diffVersion({ lix, from: versionA.id, to: "main" });
+
+// 4. Review / merge or drop
+if (await humanApproves(diff)) {
+  await mergeVersion({ lix, from: versionA.id, into: "main" });
+} else {
+  await deleteVersion({ lix, id: versionA.id });
+}
+```
+
+### A/B Testing
+
+Let different AI agents create competing advertisements autonomously, then automatically promote the one with better conversion rates.
+
+```typescript
+// Create parallel versions for competing agents
+const versionA = await createVersion({ lix, name: "agent-a-campaign" });
+const versionB = await createVersion({ lix, name: "agent-b-campaign" });
+
+// Let agents work autonomously with their own strategies
+agentA.createAdvertisements(versionA),
+agentB.createAdvertisements(versionB)
+
+// Compare performance and merge the winner
+const winner = await determineWinner(versionA, versionB);
+
+await mergeVersion({ lix, source: winner.id, target: "main" });
+
+// Clean up the losing version
+const loser = winner.id === versionA.id ? versionB : versionA;
+await deleteVersion({ lix, id: loser.id });
+
+// Winner function compares conversion rates
+async function determineWinner(versionA, versionB) {
+  const [conversionsA, conversionsB] = await Promise.all([
+    getConversionRate(versionA),
+    getConversionRate(versionB)
+  ]);
+  
+  return conversionsA > conversionsB ? versionA : versionB;
+}
+```
+
+**Key benefits:**
+- **Safe experimentation**: Both agents work in isolation, no risk to production
+- **Data-driven decisions**: Compare real performance metrics, not just agent confidence
+- **Easy rollback**: If both experiments fail, main version stays untouched
+- **Scalable testing**: Run dozens of agent experiments simultaneously
+
+
 
 ## How Versions Work
 
-A version is a named reference that points to two key commits in the history, providing both a stable anchor and a live view of current work:
+Versions in Lix are like branches in Git—they are named pointers that express different states of data, experiment in parallel, and maintain a clear history of changes.
+
+
+Technically, a version is a named reference that points to two key commits in the history, providing both a stable anchor and a live view of current work:
 
 - **Where you are** in the commit graph (`commit_id`)
 - **What you're working on** via a special working commit (`working_commit_id`)
@@ -36,12 +111,14 @@ Version A (main)      ──► commit (245) ↘
 Version B (feature-x) ──► commit (sh4) ↗
 ```
 
-## Getting Started - Everyday CRUD
+## Interactive example
+
+Versions let you work with different states of your data in isolation. Here's a simple example showing how to update product prices in a separate version:
 
 <CodeSnippet
-  module={example}
-  srcCode={exampleSrcCode}
-  sections={["crud-operations"]}
+  module={gettingStartedExample}
+  srcCode={gettingStartedSrcCode}
+  sections={["getting-started-versions"]}
 />
 
 ## How versions work under the hood
@@ -60,80 +137,10 @@ commit_1 ← commit_2 ← commit_3 (checkpoint) ← commit_4 ← commit_5 ← co
 ### Auto-commits in action
 
 <CodeSnippet
-  module={example}
-  srcCode={exampleSrcCode}
+  module={autoCommitExample}
+  srcCode={autoCommitSrcCode}
   sections={["auto-commits"]}
 />
-
-### Creating checkpoints
-
-<CodeSnippet
-  module={example}
-  srcCode={exampleSrcCode}
-  sections={["checkpoints"]}
-/>
-
-What happens when you create a checkpoint:
-
-1. Takes the current state and creates a commit
-2. Adds the "checkpoint" label to that commit
-3. Updates the version's `commit_id` to point to this new checkpoint
-4. The working commit now starts tracking changes from this point
-
-### Why this matters
-
-- **Checkpoints are just labeled commits** - They're not special structures, just regular commits with metadata
-- **Working commits are computed** - They dynamically represent "changes since last checkpoint"
-- **Every change is permanent** - Auto-commits ensure nothing is ever lost
-
-## Working with data across versions
-
-Each version shows a different view of your data based on its commit history:
-
-<CodeSnippet
-  module={example}
-  srcCode={exampleSrcCode}
-  sections={["working-across-versions"]}
-/>
-
-## Version inheritance
-
-Versions can inherit from each other through the `inherits_from_version_id` field. This inheritance is crucial for the commit graph—it determines which commits are visible in each version.
-
-When a version inherits from another:
-
-- The child version can see all commits from the parent's history
-- The child can build on top of the parent's commit graph
-- Changes in the child version create new commits that branch from the parent's timeline
-
-This enables parallel development where multiple versions share a common history but diverge at different points.
-
-<CodeSnippet
-  module={example}
-  srcCode={exampleSrcCode}
-  sections={["version-inheritance"]}
-/>
-
-## Practical example: Feature branch workflow
-
-<CodeSnippet
-  module={example}
-  srcCode={exampleSrcCode}
-  sections={["feature-branch-workflow"]}
-/>
-
-## Version structure
-
-```typescript
-interface LixVersion {
-  id: string;
-  name: string;
-  commit_id: string; // Points to last checkpoint
-  working_commit_id: string; // Computed from commits since checkpoint
-  inherits_from_version_id: string | null;
-  hidden: boolean;
-}
-```
 
 ## API reference quick-links
 
