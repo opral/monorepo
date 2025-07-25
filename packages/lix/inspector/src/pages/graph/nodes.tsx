@@ -33,12 +33,12 @@ const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: st
 
   return (
     <>
-      <div className="card card-compact bg-base-100 shadow-sm min-w-[200px] text-sm">
-        <div className="card-body p-4">
-          <h3 className="card-title text-sm capitalize border-b mb-2">
+      <div className="card card-compact bg-base-100 shadow-sm w-[200px] h-[150px] text-sm overflow-hidden">
+        <div className="card-body p-4 flex flex-col h-full">
+          <h3 className="card-title text-sm capitalize border-b mb-2 flex-shrink-0">
             {title || "commit"}
           </h3>
-          <div className="space-y-1">
+          <div className="space-y-1 flex-grow overflow-y-auto">
             {Object.entries(entity).map(([key, value]) => {
               // Skip rendering labels array and changeCount in the regular properties list
               if (
@@ -69,15 +69,16 @@ const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: st
             })}
           </div>
 
-          {/* Display change count */}
-          <div className="mt-2 flex items-center gap-1 text-neutral-600">
-            <Radar className="h-3 w-3" />
-            <span>{changeCount} changes</span>
-          </div>
+          {/* Fixed bottom section */}
+          <div className="flex-shrink-0 space-y-1 mt-2">
+            {/* Display change count */}
+            <div className="flex items-center gap-1 text-neutral-600">
+              <Radar className="h-3 w-3" />
+              <span>{changeCount} changes</span>
+            </div>
 
-          {/* Display labels if they exist */}
-          {entity.labels && entity.labels.length > 0 && (
-            <div className="mt-2">
+            {/* Display labels if they exist */}
+            {entity?.labels && entity.labels.length > 0 && (
               <div className="flex items-center gap-1 text-neutral-600">
                 <TagIcon className="h-3 w-3" />
                 <span className="text-sm">
@@ -86,10 +87,9 @@ const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: st
                     .join(", ")}
                 </span>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="mt-2">
+            {/* View Details button */}
             <button
               className="btn btn-xs btn-ghost w-full"
               onClick={(e) => {

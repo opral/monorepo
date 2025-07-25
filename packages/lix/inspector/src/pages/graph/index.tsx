@@ -73,13 +73,15 @@ export default function Graph() {
     });
 
     const commitNodeWidth = 200;
-    const commitNodeHeight = 80;
+    const commitNodeHeight = 150; // Updated to match the actual node height
     const versionNodeWidth = 180;
     const versionNodeHeight = 60;
 
     // First add regular commits (non-working commits)
     for (const commit of commits || []) {
-      const isWorkingCommit = (versions || []).some(v => v.working_commit_id === commit.id);
+      const isWorkingCommit = (versions || []).some(
+        (v) => v.working_commit_id === commit.id
+      );
       if (!isWorkingCommit) {
         g.setNode(commit.id, {
           label: "commit",
@@ -88,10 +90,12 @@ export default function Graph() {
         });
       }
     }
-    
+
     // Then add working commits (this helps dagre place them on the right)
     for (const commit of commits || []) {
-      const isWorkingCommit = (versions || []).some(v => v.working_commit_id === commit.id);
+      const isWorkingCommit = (versions || []).some(
+        (v) => v.working_commit_id === commit.id
+      );
       if (isWorkingCommit) {
         g.setNode(commit.id, {
           label: "commit",
@@ -100,7 +104,6 @@ export default function Graph() {
         });
       }
     }
-
 
     for (const v of versions || []) {
       // Use a consistent prefix for version nodes to avoid ID conflicts
@@ -204,14 +207,16 @@ export default function Graph() {
         (commits || []).some((commit) => commit.id === commitEdge.child_id)
       ) {
         // Check if the child (source) is a working commit
-        const isChildWorkingCommit = (versions || []).some(v => v.working_commit_id === commitEdge.child_id);
-        
+        const isChildWorkingCommit = (versions || []).some(
+          (v) => v.working_commit_id === commitEdge.child_id
+        );
+
         allEdges.push({
           id: `e_${commitEdge.parent_id}-${commitEdge.child_id}`,
           source: commitEdge.child_id,
           target: commitEdge.parent_id,
           markerEnd: { type: MarkerType.Arrow }, // Arrow points from child to parent
-          type: "straight", // Use straight edges for cleaner vertical layout
+          type: "smoothstep", // Use smoothstep edges for better visual flow
           animated: false,
           style: isChildWorkingCommit ? { strokeDasharray: "5 5" } : undefined, // Dashed line for working commit edges
         });
@@ -220,7 +225,7 @@ export default function Graph() {
 
     for (const v of versions || []) {
       const versionNodeId = `version_${v.id}`;
-      
+
       // Add edge from version to commit (pointing up)
       if ((commits || []).some((commit) => commit.id === v.commit_id)) {
         allEdges.push({
@@ -228,24 +233,28 @@ export default function Graph() {
           source: versionNodeId,
           target: v.commit_id,
           markerEnd: { type: MarkerType.Arrow },
-          type: "straight",
+          type: "smoothstep",
           animated: false,
         });
       }
-      
+
       // Add edge from version to working commit (pointing up)
-      if (v.working_commit_id && (commits || []).some((commit) => commit.id === v.working_commit_id)) {
+      if (
+        v.working_commit_id &&
+        (commits || []).some((commit) => commit.id === v.working_commit_id)
+      ) {
         allEdges.push({
           id: `ve_wc_${v.id}_${v.working_commit_id}`,
           source: versionNodeId,
           target: v.working_commit_id,
           markerEnd: { type: MarkerType.Arrow },
-          type: "straight",
+          type: "smoothstep",
           animated: false,
           style: { strokeDasharray: "5 5" }, // Dashed line for working commit
         });
       }
     }
+
 
     return { nodes, edges: allEdges };
   }, [commits, commitEdges, versions]);
@@ -362,10 +371,10 @@ export default function Graph() {
           minZoom={0.1}
           maxZoom={2}
           defaultEdgeOptions={{
-            type: "straight",
+            type: "smoothstep",
             style: { strokeWidth: 1.5 },
           }}
-          connectionLineType={ConnectionLineType.Straight}
+          connectionLineType={ConnectionLineType.SmoothStep}
           onInit={(instance: any) => {
             reactFlowInstanceRef.current = instance;
             // Initial fit view
