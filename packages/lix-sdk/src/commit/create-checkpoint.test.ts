@@ -468,3 +468,138 @@ test(
 		expect(deletionChangesInCheckpoint).toHaveLength(2);
 	}
 );
+
+test("no orphaned commits exist after creating checkpoint", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+	
+	// Get initial version state before checkpoint
+	const initialVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	
+	const initialWorkingCommitId = initialVersion.working_commit_id;
+
+	// Make some changes to create working change set elements
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "test", value: "value" })
+		.execute();
+	
+	// Get version state right before checkpoint (after making changes)
+	const versionBeforeCheckpoint = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Create checkpoint
+	const checkpoint = await createCheckpoint({ lix });
+
+	// Get all commits
+	const allCommits = await lix.db.selectFrom("commit").selectAll().execute();
+
+	// For each commit, verify it has at least one edge (as parent or child)
+	for (const commit of allCommits) {
+		const hasParentEdge = await lix.db
+			.selectFrom("commit_edge")
+			.where("child_id", "=", commit.id)
+			.selectAll()
+			.execute();
+
+		const hasChildEdge = await lix.db
+			.selectFrom("commit_edge")
+			.where("parent_id", "=", commit.id)
+			.selectAll()
+			.execute();
+
+		const isReferencedByVersion = await lix.db
+			.selectFrom("version")
+			.where((eb) =>
+				eb.or([
+					eb("commit_id", "=", commit.id),
+					eb("working_commit_id", "=", commit.id),
+				])
+			)
+			.selectAll()
+			.execute();
+
+		// Every commit should either:
+		// 1. Have at least one parent edge (it's a child of another commit)
+		// 2. Have at least one child edge (it's a parent of another commit)
+		// 3. Be referenced by a version (as commit_id or working_commit_id)
+		const hasConnections =
+			hasParentEdge.length > 0 ||
+			hasChildEdge.length > 0 ||
+			isReferencedByVersion.length > 0;
+
+		if (!hasConnections) {
+			console.error(`Orphaned commit found: ${commit.id}`, {
+				hasParentEdge: hasParentEdge.length,
+				hasChildEdge: hasChildEdge.length,
+				isReferencedByVersion: isReferencedByVersion.length,
+				commit,
+			});
+		}
+
+		expect(hasConnections).toBe(true);
+	}
+
+	// Additionally, verify the specific structure after checkpoint
+	const version = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// The checkpoint should have an edge from the previous commit
+	const checkpointHasParent = await lix.db
+		.selectFrom("commit_edge")
+		.where("child_id", "=", checkpoint.id)
+		.selectAll()
+		.execute();
+
+	expect(checkpointHasParent.length).toBeGreaterThan(0);
+
+	// The checkpoint should have an edge to the new working commit
+	const checkpointHasChild = await lix.db
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", checkpoint.id)
+		.where("child_id", "=", version.working_commit_id)
+		.selectAll()
+		.execute();
+
+	expect(checkpointHasChild).toHaveLength(1);
+
+	// The working commit should be referenced by the version
+	expect(version.working_commit_id).toBeDefined();
+	expect(version.commit_id).toBe(checkpoint.id);
+	
+	// The checkpoint ID should be the former working commit ID
+	expect(checkpoint.id).toBe(initialWorkingCommitId);
+	
+	// The previous working commit should now be the version's commit
+	expect(version.commit_id).toBe(initialWorkingCommitId);
+	
+	// The new working commit should be different from the checkpoint
+	expect(version.working_commit_id).not.toBe(checkpoint.id);
+	
+	// There should be exactly one edge between the version's previous commit (before checkpoint) and the checkpoint
+	// The edge is created from the version's commit_id at the time of checkpoint creation
+	const edgesBetweenPreviousAndCheckpoint = await lix.db
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", versionBeforeCheckpoint.commit_id)
+		.where("child_id", "=", checkpoint.id)
+		.selectAll()
+		.execute();
+	
+	expect(edgesBetweenPreviousAndCheckpoint).toHaveLength(1);
+});

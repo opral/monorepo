@@ -1,7 +1,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { memo, useState } from "react";
 import { TagIcon, Radar } from "lucide-react";
-import { useQuery } from "@lix-js/react-utils";
+import { useQuery, useQueryTakeFirst } from "@lix-js/react-utils";
 import { CommitDetailsWindow } from "./commit-details-window";
 
 // Define a generic data structure for our Lix nodes
@@ -14,59 +14,41 @@ export interface LixNodeData {
   [key: string]: any;
 }
 
-
-
 // Commit Node Component
-const CommitNode = ({ id, entity, title }: { id: string; entity: any; title?: string }) => {
+const CommitNode = ({
+  id,
+  entity,
+  title,
+}: {
+  id: string;
+  entity: any;
+  title?: string;
+}) => {
   const [showDetails, setShowDetails] = useState(false);
 
-
   // Fetch change count for this commit
-  const changeSetElements = useQuery((lix) =>
+  const changeSetElements = useQueryTakeFirst((lix) =>
     lix.db
       .selectFrom("change_set_element")
       .where("change_set_element.change_set_id", "=", entity.change_set_id)
       .select(lix.db.fn.count("change_set_element.change_id").as("count"))
   );
 
-  const changeCount = changeSetElements?.[0]?.count || 0;
+  const changeCount = changeSetElements?.count ?? 0;
 
   return (
     <>
-      <div className="card card-compact bg-base-100 shadow-sm w-[200px] h-[150px] text-sm overflow-hidden">
+      <div className="card card-compact bg-base-100 shadow-sm w-[380px] text-sm">
         <div className="card-body p-4 flex flex-col h-full">
           <h3 className="card-title text-sm capitalize border-b mb-2 flex-shrink-0">
             {title || "commit"}
           </h3>
-          <div className="space-y-1 flex-grow overflow-y-auto">
-            {Object.entries(entity).map(([key, value]) => {
-              // Skip rendering labels array and changeCount in the regular properties list
-              if (
-                key === "labels" ||
-                key === "changeCount" ||
-                value === null ||
-                value === undefined ||
-                value === ""
-              )
-                return null;
-
-              const displayValue =
-                typeof value === "string"
-                  ? value.substring(0, 20) + (value.length > 20 ? "..." : "")
-                  : String(value);
-
-              return (
-                <div
-                  key={key}
-                  className="flex justify-between text-neutral-600"
-                >
-                  <span className="font-medium mr-2">{key}:</span>
-                  <span title={String(value)} className="truncate">
-                    {displayValue}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="space-y-1 flex-grow">
+            {/* Always show ID first */}
+            <div className="flex justify-between text-neutral-600">
+              <span className="font-medium mr-2">id:</span>
+              <span className="text-xs font-mono">{entity.id}</span>
+            </div>
           </div>
 
           {/* Fixed bottom section */}
@@ -139,7 +121,12 @@ const VersionNode = ({ id, entity }: { id: string; entity: any }) => {
         <div className="space-y-1">
           {Object.entries(entity).map(([key, value]) => {
             // Hide lixcol properties and null/undefined/empty values
-            if (key.startsWith('lixcol_') || value === null || value === undefined || value === "")
+            if (
+              key.startsWith("lixcol_") ||
+              value === null ||
+              value === undefined ||
+              value === ""
+            )
               return null;
 
             const displayValue =
@@ -157,7 +144,6 @@ const VersionNode = ({ id, entity }: { id: string; entity: any }) => {
             );
           })}
         </div>
-
 
         {/* Handles for connections */}
         <Handle
@@ -190,52 +176,7 @@ const GenericLixNodeComponent = ({ id, data }: NodeProps) => {
     return <CommitNode id={id} entity={entity} title={title} />;
   }
 
-  // Fallback for any other node types
-  return (
-    <div className="card card-compact bg-base-100 shadow-sm min-w-[180px] text-sm">
-      <div className="card-body p-4">
-        <h3 className="card-title text-sm capitalize border-b mb-2">
-          {title || tableName.replace("_", " ")}
-        </h3>
-        <div className="space-y-1">
-          {Object.entries(entity).map(([key, value]) => {
-            if (value === null || value === undefined || value === "")
-              return null;
-
-            const displayValue =
-              typeof value === "string"
-                ? value.substring(0, 20) + (value.length > 20 ? "..." : "")
-                : String(value);
-
-            return (
-              <div key={key} className="flex justify-between text-neutral-600">
-                <span className="font-medium mr-2">{key}:</span>
-                <span title={String(value)} className="truncate">
-                  {displayValue}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Handles for connections */}
-        <Handle
-          type="target"
-          position={Position.Top}
-          id={`${id}-target`}
-          style={{ visibility: "hidden" }}
-          isConnectable={false}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          id={`${id}-source`}
-          style={{ visibility: "hidden" }}
-          isConnectable={false}
-        />
-      </div>
-    </div>
-  );
+  throw new Error(`Unsupported tableName: ${tableName}`);
 };
 
 // Memoize the component for performance

@@ -63,7 +63,7 @@ export default function Graph() {
     const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
     g.setGraph({
       rankdir: "TB", // Top to bottom layout - versions at top, commits flow downward
-      nodesep: 150, // Increased horizontal separation for working commits
+      nodesep: 100, // Horizontal separation between nodes
       ranksep: 180, // Large vertical gap between ranks (versions and commits)
       ranker: "network-simplex", // Better for aligning nodes at same level
       marginx: 40,
@@ -72,8 +72,8 @@ export default function Graph() {
       align: "UL", // Align nodes to up-left
     });
 
-    const commitNodeWidth = 200;
-    const commitNodeHeight = 150; // Updated to match the actual node height
+    const commitNodeWidth = 380; // Increased to fit full UUID
+    const commitNodeHeight = 200; // Increased for dynamic content
     const versionNodeWidth = 180;
     const versionNodeHeight = 60;
 
@@ -133,19 +133,22 @@ export default function Graph() {
     // First add edges to regular commits
     for (const v of versions || []) {
       const versionNodeId = `version_${v.id}`;
-      
+
       // Add edge from version to commit (for layout purposes)
       if ((commits || []).some((commit) => commit.id === v.commit_id)) {
         g.setEdge(versionNodeId, v.commit_id);
       }
     }
-    
+
     // Then add edges to working commits (this helps dagre place them on the right)
     for (const v of versions || []) {
       const versionNodeId = `version_${v.id}`;
-      
+
       // Add edge from version to working commit (for layout purposes)
-      if (v.working_commit_id && (commits || []).some((commit) => commit.id === v.working_commit_id)) {
+      if (
+        v.working_commit_id &&
+        (commits || []).some((commit) => commit.id === v.working_commit_id)
+      ) {
         g.setEdge(versionNodeId, v.working_commit_id);
       }
     }
@@ -176,7 +179,9 @@ export default function Graph() {
       // Check if this commit is a working commit
       let isWorkingCommit = false;
       if (label === "commit" && entity) {
-        isWorkingCommit = (versions || []).some(v => v.working_commit_id === entity.id);
+        isWorkingCommit = (versions || []).some(
+          (v) => v.working_commit_id === entity.id
+        );
       }
 
       // Create the node with proper typing
@@ -188,7 +193,12 @@ export default function Graph() {
           tableName: label,
           entity: entity,
           originalId: originalId,
-          title: label === "commit" ? (isWorkingCommit ? "working commit" : "commit") : "version",
+          title:
+            label === "commit"
+              ? isWorkingCommit
+                ? "working commit"
+                : "commit"
+              : "version",
           isWorkingCommit: isWorkingCommit,
         },
         style: {
@@ -255,7 +265,6 @@ export default function Graph() {
       }
     }
 
-
     return { nodes, edges: allEdges };
   }, [commits, commitEdges, versions]);
 
@@ -266,7 +275,6 @@ export default function Graph() {
       console.error("ReactFlow instance not ready");
       return;
     }
-
 
     // Use setCenter for more reliable focusing
     setTimeout(() => {

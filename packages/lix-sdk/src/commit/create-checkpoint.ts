@@ -47,18 +47,10 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<LixCommit> {
 			);
 		}
 
-		// 1. Create a new commit for the checkpoint and link it
-		const checkpointCommitId = uuidV7({ lix: args.lix });
-		await trx
-			.insertInto("commit_all")
-			.values({
-				id: checkpointCommitId,
-				change_set_id: workingChangeSetId,
-				lixcol_version_id: "global",
-			})
-			.execute();
+		// 1. The old working commit becomes the checkpoint commit
+		const checkpointCommitId = activeVersion.working_commit_id;
 
-		// Add commit edge from parent commit to checkpoint commit
+		// Add commit edge from parent commit to checkpoint commit (which is the old working commit)
 		await trx
 			.insertInto("commit_edge_all")
 			.values({
