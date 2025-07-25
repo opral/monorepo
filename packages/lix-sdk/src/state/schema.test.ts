@@ -3154,3 +3154,79 @@ test("deleting key_value entities from state should not cause infinite loop", as
 
 	expect(keyValueAfterDelete).toHaveLength(0);
 });
+
+// see https://github.com/opral/lix-sdk/issues/359
+test("commit_id in state should be from the real auto-commit, not the working commit", async () => {
+	const lix = await openLix({});
+
+	// Get the active version with its commit_id and working_commit_id
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Verify we have both commit_id and working_commit_id
+	expect(activeVersion.commit_id).toBeTruthy();
+	expect(activeVersion.working_commit_id).toBeTruthy();
+	expect(activeVersion.commit_id).not.toBe(activeVersion.working_commit_id);
+
+	// Insert some state data
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "test-entity-1",
+			schema_key: "test_schema",
+			file_id: "test-file",
+			plugin_key: "test-plugin",
+			schema_version: "1.0",
+			snapshot_content: { value: "initial value" },
+		})
+		.execute();
+
+	// Query the state to check the commit_id
+	const stateAfterInsert = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-entity-1")
+		.select(["entity_id", "commit_id"])
+		.executeTakeFirstOrThrow();
+
+	// The commit_id should NOT be the working_commit_id
+	expect(stateAfterInsert.commit_id).not.toBe(activeVersion.working_commit_id);
+
+	// Get the actual commit that was created by the auto-commit
+	const latestCommit = await lix.db
+		.selectFrom("commit")
+		.orderBy("id", "desc")
+		.select(["id"])
+		.executeTakeFirst();
+
+	// The commit_id should be the auto-commit ID (not the working commit)
+	expect(stateAfterInsert.commit_id).toBe(latestCommit?.id);
+
+	// Update the state to trigger another auto-commit
+	await lix.db
+		.updateTable("state")
+		.where("entity_id", "=", "test-entity-1")
+		.set({ snapshot_content: { value: "updated value" } })
+		.execute();
+
+	// Check the state again
+	const stateAfterUpdate = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-entity-1")
+		.select(["entity_id", "commit_id"])
+		.executeTakeFirstOrThrow();
+
+	// Get the new latest commit
+	const newLatestCommit = await lix.db
+		.selectFrom("commit")
+		.orderBy("id", "desc")
+		.select(["id"])
+		.executeTakeFirst();
+
+	// The commit_id should now be the new auto-commit ID
+	expect(stateAfterUpdate.commit_id).toBe(newLatestCommit?.id);
+	expect(stateAfterUpdate.commit_id).not.toBe(activeVersion.working_commit_id);
+	expect(stateAfterUpdate.commit_id).not.toBe(latestCommit?.id);
+});
