@@ -15,6 +15,7 @@ import DataExplorer from "./pages/data-explorer/index";
 import Graph from "./pages/graph/index";
 import { FloatingWindow } from "./components/floating-window";
 import { LogIndicator } from "./components/log-indicator";
+import { WindowManagerProvider, useWindowManager } from "./components/window-manager-context";
 
 // Define the types of content that can be displayed
 type Pages = "data-explorer" | "graph";
@@ -136,10 +137,11 @@ function LogCountsProvider({
   return <>{children(logCounts)}</>;
 }
 
-export default function App(args: { show: boolean }) {
+function AppContent(args: { show: boolean }) {
   const lix = useLix();
   const { setLix, rootContainer } = useContext(Context);
-  const [activeContent, setActiveContent] = useState<Pages | null>(null);
+  const windowManager = useWindowManager();
+  const [openWindows, setOpenWindows] = useState<Pages[]>([]);
   const [pinnedWindows, setPinnedWindows] = useState<Pages[]>([]);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [isFrozen, setIsFrozen] = useState(false);
@@ -211,13 +213,8 @@ export default function App(args: { show: boolean }) {
   // Initialize window states on first render
   useEffect(() => {
     if (headerHeight > 0) {
-      // Calculate initial positions for windows
-      // Center horizontally beneath the header
+      // Calculate initial positions for windows - stagger them so they don't overlap
       const viewportWidth = window.innerWidth;
-      const centerX = Math.max(
-        0,
-        (viewportWidth - WINDOW_CONFIG["data-explorer"].initialSize.width) / 2
-      );
       const topY = headerHeight + 20; // Some padding below header
 
       // Create initial states for all window types
@@ -226,13 +223,24 @@ export default function App(args: { show: boolean }) {
         WindowState
       >;
 
+      let offsetX = 50; // Start offset for staggering windows
       Object.entries(WINDOW_CONFIG).forEach(([typedPageId, config]) => {
         const pageId = typedPageId as Pages;
+        const centerX = Math.max(
+          offsetX,
+          Math.min(
+            (viewportWidth - config.initialSize.width) / 2 + offsetX,
+            viewportWidth - config.initialSize.width - 20
+          )
+        );
+        
         initialStates[pageId] = {
-          position: { x: centerX, y: topY },
+          position: { x: centerX, y: topY + offsetX },
           size: config.initialSize,
           isExpanded: false,
         };
+        
+        offsetX += 30; // Stagger each window by 30px
       });
 
       setWindowStates(initialStates);
@@ -304,37 +312,42 @@ export default function App(args: { show: boolean }) {
 
   // Handle window close
   const handleCloseWindow = (pageId: Pages) => {
+    // Remove from open windows
+    setOpenWindows((prev: Pages[]) => prev.filter((id) => id !== pageId));
+    
     // If window is pinned, unpin it
     if (pinnedWindows.includes(pageId)) {
-      setPinnedWindows((prev) => prev.filter((id) => id !== pageId));
+      setPinnedWindows((prev: Pages[]) => prev.filter((id) => id !== pageId));
     }
-
-    // If this is the active window, clear active content
-    if (pageId === activeContent) {
-      setActiveContent(null);
+    
+    // If this was the focused window, clear the focus
+    if (windowManager.focusedWindow === pageId) {
+      windowManager.clearFocus();
     }
   };
 
   // Determine which windows should be visible
   const visibleWindows = [
-    // Show active content if it exists
-    ...(activeContent ? [activeContent] : []),
-    // Show pinned windows that aren't already shown as active content
-    ...pinnedWindows.filter((id) => id !== activeContent),
+    // Show all open windows
+    ...openWindows,
+    // Show pinned windows that aren't already open
+    ...pinnedWindows.filter((id) => !openWindows.includes(id)),
   ];
 
   const handleNavItemClick = (id: string) => {
     if (id === "data-explorer" || id === "graph") {
       const pageId = id as Pages;
 
-      // If the window is already pinned, just make it active
-      if (pinnedWindows.includes(pageId)) {
-        setActiveContent(pageId);
-        return;
+      const isWindowOpen = openWindows.includes(pageId) || pinnedWindows.includes(pageId);
+      
+      if (isWindowOpen) {
+        // If window is open, bring it to the front (focus it)
+        windowManager.focusWindow(pageId);
+      } else {
+        // If not open, open it and focus it
+        setOpenWindows((prev) => [...prev, pageId]);
+        windowManager.focusWindow(pageId);
       }
-
-      // Otherwise, set it as the active content
-      setActiveContent(pageId);
     }
   };
 
@@ -404,21 +417,31 @@ export default function App(args: { show: boolean }) {
               <span className="text-sm font-medium">Inspector</span>
             </div>
 
-            <div className="join">
+            <div className="flex gap-2">
               {[
                 { id: "graph", label: "Graph" },
                 { id: "data-explorer", label: "Data Explorer" },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  className={`join-item btn btn-xs ${
-                    activeContent === item.id ? "btn-active" : "btn-ghost"
-                  }`}
-                  onClick={() => handleNavItemClick(item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
+              ].map((item) => {
+                const pageId = item.id as Pages;
+                const isWindowOpen = openWindows.includes(pageId) || pinnedWindows.includes(pageId);
+                const isFocused = isWindowOpen && windowManager.focusedWindow === pageId;
+                
+                return (
+                  <button
+                    key={item.id}
+                    className={`btn btn-xs ${
+                      isFocused 
+                        ? "btn-primary" // Focused window gets primary styling
+                        : isWindowOpen 
+                          ? "btn-outline" // Open but not focused gets outline
+                          : "btn-ghost"   // Closed window gets ghost styling
+                    }`}
+                    onClick={() => handleNavItemClick(item.id)}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="ml-auto flex items-center gap-2">
@@ -439,7 +462,12 @@ export default function App(args: { show: boolean }) {
                         (logCounts?.unknown ?? 0)
                       }
                       onClick={(level) => {
-                        setActiveContent("data-explorer");
+                        // Open data explorer if not already open, otherwise just focus it
+                        if (!openWindows.includes("data-explorer") && !pinnedWindows.includes("data-explorer")) {
+                          setOpenWindows((prev) => [...prev, "data-explorer"]);
+                        }
+                        windowManager.focusWindow("data-explorer");
+                        
                         // Only set filter for error or warning; show all logs for 'other'
                         if (level === "error" || level === "warning") {
                           window.localStorage.setItem(
@@ -525,12 +553,13 @@ export default function App(args: { show: boolean }) {
         visibleWindows.map((pageId) => (
           <FloatingWindow
             key={pageId}
+            id={pageId}
             title={WINDOW_CONFIG[pageId].title}
             isOpen={true}
             onClose={() => handleCloseWindow(pageId)}
-            initialPosition={windowStates[pageId].position}
-            initialSize={windowStates[pageId].size}
-            isExpanded={windowStates[pageId].isExpanded}
+            initialPosition={windowStates[pageId]?.position}
+            initialSize={windowStates[pageId]?.size}
+            isExpanded={windowStates[pageId]?.isExpanded}
             isPinned={pinnedWindows.includes(pageId)}
             onPinChange={(isPinned) => handlePinChange(pageId, isPinned)}
             onPositionChange={(position) =>
@@ -545,5 +574,13 @@ export default function App(args: { show: boolean }) {
           </FloatingWindow>
         ))}
     </div>
+  );
+}
+
+export default function App(args: { show: boolean }) {
+  return (
+    <WindowManagerProvider>
+      <AppContent {...args} />
+    </WindowManagerProvider>
   );
 }

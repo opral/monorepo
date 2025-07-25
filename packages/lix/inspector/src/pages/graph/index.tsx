@@ -251,62 +251,32 @@ export default function Graph() {
   }, [commits, commitEdges, versions]);
 
   // Function to focus on a specific node
-  const focusNode = useCallback(
-    (nodeId: string) => {
-      const instance = reactFlowInstanceRef.current;
-      if (!instance) {
-        console.error("ReactFlow instance not ready");
-        return;
+  const focusNode = useCallback((nodeId: string) => {
+    const instance = reactFlowInstanceRef.current;
+    if (!instance) {
+      console.error("ReactFlow instance not ready");
+      return;
+    }
+
+
+    // Use setCenter for more reliable focusing
+    setTimeout(() => {
+      const nodeWithWidth = instance.getNode(nodeId);
+      if (nodeWithWidth) {
+        const x = nodeWithWidth.position.x + (nodeWithWidth.width || 0) / 2;
+        const y = nodeWithWidth.position.y + (nodeWithWidth.height || 0) / 2;
+        instance.setCenter(x, y, { zoom: 1.2, duration: 800 });
+      } else {
+        // Fallback to fitView
+        instance.fitView({
+          padding: 0.5,
+          includeHiddenNodes: false,
+          nodes: [{ id: nodeId }],
+          duration: 800,
+        });
       }
-
-      console.log("Focusing on node:", nodeId);
-
-      // Find the node
-      const node = nodes.find((n) => n.id === nodeId);
-      if (!node) {
-        console.warn(`Node with ID ${nodeId} not found in graph`);
-        return;
-      }
-
-      console.log("Found node:", node);
-      console.log("Node position:", node.position);
-
-      // Add a visual highlight to the focused node first
-      const updatedNodes = nodes.map((n) => ({
-        ...n,
-        style: {
-          ...n.style,
-          boxShadow:
-            n.id === nodeId
-              ? "0 0 15px 5px rgba(66, 153, 225, 0.6)"
-              : undefined,
-          zIndex: n.id === nodeId ? 1000 : undefined,
-        },
-      }));
-
-      // Update nodes with highlight
-      instance.setNodes(updatedNodes);
-
-      // Use setCenter for more reliable focusing
-      setTimeout(() => {
-        const nodeWithWidth = instance.getNode(nodeId);
-        if (nodeWithWidth) {
-          const x = nodeWithWidth.position.x + (nodeWithWidth.width || 0) / 2;
-          const y = nodeWithWidth.position.y + (nodeWithWidth.height || 0) / 2;
-          instance.setCenter(x, y, { zoom: 1.2, duration: 800 });
-        } else {
-          // Fallback to fitView
-          instance.fitView({
-            padding: 0.5,
-            includeHiddenNodes: false,
-            nodes: [{ id: nodeId }],
-            duration: 800,
-          });
-        }
-      }, 100);
-    },
-    [nodes]
-  );
+    }, 100);
+  }, []);
 
   // Refit view when container size changes or nodes change
   useEffect(() => {
@@ -330,7 +300,6 @@ export default function Graph() {
             <button
               key={version.id}
               onClick={() => {
-                console.log("Version button clicked:", version);
                 // Directly focus on the version node
                 focusNode(`version_${version.id}`);
               }}
