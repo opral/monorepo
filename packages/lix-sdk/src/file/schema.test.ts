@@ -2,6 +2,7 @@ import { test, expect, expectTypeOf } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "../version/create-version.js";
 import { createCheckpoint } from "../commit/create-checkpoint.js";
+import { switchVersion } from "../version/switch-version.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 import type { LixPlugin } from "../plugin/lix-plugin.js";
 import type { LixFile } from "./schema.js";
@@ -1532,4 +1533,114 @@ test("file should expose lixcol columns based on file data AND the descriptor", 
 		title: "Updated Title",
 		content: "Updated content",
 	});
+});
+
+test("files should be identical across versions when versions have the same commit", async () => {
+	const lix = await openLix({
+		providePlugins: [mockJsonPlugin],
+	});
+
+	const initialFile = new TextEncoder().encode(
+		JSON.stringify({
+			items: [{ id: 1, name: "T-Shirt", price: 29.99, stock: 100 }],
+		})
+	);
+
+	// Create a file in the main version
+	await lix.db
+		.insertInto("file")
+		.values({
+			path: "/products.json",
+			data: initialFile,
+		})
+		.execute();
+
+	// Verify the file exists in main version
+	const fileInMain = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/products.json")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(fileInMain?.data).toEqual(initialFile);
+
+	// Create a new version (should inherit from active version)
+	const newVersion = await createVersion({
+		lix,
+		name: "price-update",
+	});
+
+	// Switch to the new version
+	await switchVersion({ lix, to: newVersion });
+
+	// Check if the file is inherited in the new version
+	const fileInNewVersion = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/products.json")
+		.selectAll()
+		.executeTakeFirst();
+
+	expect(fileInNewVersion?.data).toEqual(initialFile);
+
+	// Update the file in the new version
+	await lix.db
+		.updateTable("file")
+		.set({
+			data: new TextEncoder().encode(
+				JSON.stringify({
+					items: [
+						{ id: 1, name: "T-Shirt", price: 34.99, stock: 100 }, // Price changed
+					],
+				})
+			),
+		})
+		.where("path", "=", "/products.json")
+		.execute();
+
+	// Verify the update worked
+	const updatedFile = await lix.db
+		.selectFrom("file")
+		.where("path", "=", "/products.json")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const updatedData = JSON.parse(new TextDecoder().decode(updatedFile.data));
+	expect(updatedData.items[0].price).toBe(34.99);
+
+	// Query file_all to see both versions
+	const filesAcrossVersions = await lix.db
+		.selectFrom("file_all")
+		.where("path", "=", "/products.json")
+		.select(["lixcol_version_id", "data"])
+		.execute();
+
+	expect(filesAcrossVersions).toHaveLength(2);
+
+	// Get version info for verification
+	const versions = await lix.db
+		.selectFrom("version")
+		.select(["id", "name"])
+		.execute();
+
+	const mainVersionData = filesAcrossVersions.find((f) => {
+		const version = versions.find((v) => v.id === f.lixcol_version_id);
+		return version?.name === "main";
+	});
+
+	const newVersionData = filesAcrossVersions.find((f) => {
+		const version = versions.find((v) => v.id === f.lixcol_version_id);
+		return version?.name === "price-update";
+	});
+
+	expect(mainVersionData).toBeDefined();
+	expect(newVersionData).toBeDefined();
+
+	// Verify the prices are different
+	const mainData = JSON.parse(new TextDecoder().decode(mainVersionData!.data));
+	const updatedVersionData = JSON.parse(
+		new TextDecoder().decode(newVersionData!.data)
+	);
+
+	expect(mainData.items[0].price).toBe(29.99); // Original price
+	expect(updatedVersionData.items[0].price).toBe(34.99); // Updated price
 });
