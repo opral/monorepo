@@ -62,48 +62,45 @@ export default function Graph() {
   const { nodes, edges } = useMemo(() => {
     const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
     g.setGraph({
-      rankdir: "BT", // Bottom to top layout - version at bottom pointing up
-      nodesep: 300, // Horizontal separation between nodes
-      ranksep: 150, // Increased vertical separation between ranks
-      ranker: "network-simplex", // Better for complex graphs
-      marginx: 50,
-      marginy: 50,
-      edgesep: 50, // Separation between edges
+      rankdir: "TB", // Top to bottom layout - versions at top, commits flow downward
+      nodesep: 150, // Increased horizontal separation for working commits
+      ranksep: 180, // Large vertical gap between ranks (versions and commits)
+      ranker: "network-simplex", // Better for aligning nodes at same level
+      marginx: 40,
+      marginy: 40,
+      edgesep: 50, // Increased edge separation for cleaner layout
+      align: "UL", // Align nodes to up-left
     });
 
-    const commitNodeWidth = 170;
-    const commitNodeHeight = 60;
-    const versionNodeWidth = 150;
-    const versionNodeHeight = 40;
-    const changeSetNodeWidth = 180; // Slightly larger for working change sets
-    const changeSetNodeHeight = 70;
+    const commitNodeWidth = 200;
+    const commitNodeHeight = 80;
+    const versionNodeWidth = 180;
+    const versionNodeHeight = 60;
 
-    // Add nodes to the graph for commits
+    // First add regular commits (non-working commits)
     for (const commit of commits || []) {
-      g.setNode(commit.id, {
-        label: "commit",
-        width: commitNodeWidth,
-        height: commitNodeHeight,
-      });
+      const isWorkingCommit = (versions || []).some(v => v.working_commit_id === commit.id);
+      if (!isWorkingCommit) {
+        g.setNode(commit.id, {
+          label: "commit",
+          width: commitNodeWidth,
+          height: commitNodeHeight,
+        });
+      }
     }
-
-    // Collect all unique working change sets from versions
-    const workingChangeSets = new Set<string>();
-    for (const v of versions || []) {
-      if (v.working_change_set_id) {
-        workingChangeSets.add(v.working_change_set_id);
+    
+    // Then add working commits (this helps dagre place them on the right)
+    for (const commit of commits || []) {
+      const isWorkingCommit = (versions || []).some(v => v.working_commit_id === commit.id);
+      if (isWorkingCommit) {
+        g.setNode(commit.id, {
+          label: "commit",
+          width: commitNodeWidth,
+          height: commitNodeHeight,
+        });
       }
     }
 
-    // Add nodes for working change sets
-    for (const changeSetId of workingChangeSets) {
-      g.setNode(`working_changeset_${changeSetId}`, {
-        label: "working_change_set",
-        width: changeSetNodeWidth,
-        height: changeSetNodeHeight,
-        customData: { originalId: changeSetId },
-      });
-    }
 
     for (const v of versions || []) {
       // Use a consistent prefix for version nodes to avoid ID conflicts
@@ -114,6 +111,8 @@ export default function Graph() {
         height: versionNodeHeight,
         // Store metadata as a custom property
         customData: { originalId: v.id },
+        // Force all versions to be at the same rank (top level)
+        rank: 0,
       });
     }
 
@@ -124,21 +123,27 @@ export default function Graph() {
         (commits || []).some((commit) => commit.id === commitEdge.parent_id) &&
         (commits || []).some((commit) => commit.id === commitEdge.child_id)
       ) {
-        g.setEdge(commitEdge.parent_id, commitEdge.child_id);
+        g.setEdge(commitEdge.child_id, commitEdge.parent_id);
       }
     }
 
+    // First add edges to regular commits
     for (const v of versions || []) {
       const versionNodeId = `version_${v.id}`;
       
-      // Add edge from version to its commit
+      // Add edge from version to commit (for layout purposes)
       if ((commits || []).some((commit) => commit.id === v.commit_id)) {
         g.setEdge(versionNodeId, v.commit_id);
       }
+    }
+    
+    // Then add edges to working commits (this helps dagre place them on the right)
+    for (const v of versions || []) {
+      const versionNodeId = `version_${v.id}`;
       
-      // Add edge from version to its working change set
-      if (v.working_change_set_id && workingChangeSets.has(v.working_change_set_id)) {
-        g.setEdge(versionNodeId, `working_changeset_${v.working_change_set_id}`);
+      // Add edge from version to working commit (for layout purposes)
+      if (v.working_commit_id && (commits || []).some((commit) => commit.id === v.working_commit_id)) {
+        g.setEdge(versionNodeId, v.working_commit_id);
       }
     }
 
@@ -160,17 +165,15 @@ export default function Graph() {
         const nodeAny = node as any;
         originalId = nodeAny.customData?.originalId;
         entity = (versions || []).find((v) => v.id === originalId);
-      } else if (nodeId.startsWith("working_changeset_")) {
-        // For working change set nodes, create a synthetic entity
-        const nodeAny = node as any;
-        originalId = nodeAny.customData?.originalId;
-        entity = {
-          id: originalId,
-          type: "working_change_set",
-        };
       } else {
         // For commit nodes, find directly
         entity = (commits || []).find((commit) => commit.id === nodeId);
+      }
+
+      // Check if this commit is a working commit
+      let isWorkingCommit = false;
+      if (label === "commit" && entity) {
+        isWorkingCommit = (versions || []).some(v => v.working_commit_id === entity.id);
       }
 
       // Create the node with proper typing
@@ -179,11 +182,11 @@ export default function Graph() {
         type: "lixNode",
         position: { x: node.x - node.width / 2, y: node.y - node.height / 2 },
         data: {
-          tableName: label === "working_change_set" ? "change_set" : label,
+          tableName: label,
           entity: entity,
           originalId: originalId,
-          title: label === "commit" ? "commit" : 
-                 label === "working_change_set" ? "working change set" : "version",
+          title: label === "commit" ? (isWorkingCommit ? "working commit" : "commit") : "version",
+          isWorkingCommit: isWorkingCommit,
         },
         style: {
           border: "1px solid #ccc",
@@ -202,10 +205,10 @@ export default function Graph() {
       ) {
         allEdges.push({
           id: `e_${commitEdge.parent_id}-${commitEdge.child_id}`,
-          source: commitEdge.parent_id,
-          target: commitEdge.child_id,
-          markerEnd: { type: MarkerType.Arrow }, // Arrow at the end (target)
-          type: "smoothstep", // Use smoothstep for curved edges
+          source: commitEdge.child_id,
+          target: commitEdge.parent_id,
+          markerEnd: { type: MarkerType.Arrow }, // Arrow points from child to parent
+          type: "straight", // Use straight edges for cleaner vertical layout
           animated: false,
         });
       }
@@ -214,28 +217,28 @@ export default function Graph() {
     for (const v of versions || []) {
       const versionNodeId = `version_${v.id}`;
       
-      // Add edge from version to its commit
+      // Add edge from version to commit (pointing up)
       if ((commits || []).some((commit) => commit.id === v.commit_id)) {
         allEdges.push({
           id: `ve_${v.id}_${v.commit_id}`,
-          source: v.commit_id,
-          target: versionNodeId,
-          markerStart: { type: MarkerType.Arrow },
-          type: "smoothstep",
+          source: versionNodeId,
+          target: v.commit_id,
+          markerEnd: { type: MarkerType.Arrow },
+          type: "straight",
           animated: false,
         });
       }
       
-      // Add edge from version to its working change set
-      if (v.working_change_set_id && nodes.some(n => n.id === `working_changeset_${v.working_change_set_id}`)) {
+      // Add edge from version to working commit (pointing up)
+      if (v.working_commit_id && (commits || []).some((commit) => commit.id === v.working_commit_id)) {
         allEdges.push({
-          id: `ve_wcs_${v.id}_${v.working_change_set_id}`,
-          source: `working_changeset_${v.working_change_set_id}`,
-          target: versionNodeId,
-          markerStart: { type: MarkerType.Arrow },
-          type: "smoothstep",
+          id: `ve_wc_${v.id}_${v.working_commit_id}`,
+          source: versionNodeId,
+          target: v.working_commit_id,
+          markerEnd: { type: MarkerType.Arrow },
+          type: "straight",
           animated: false,
-          style: { strokeDasharray: "5 5" }, // Dashed line for working change set
+          style: { strokeDasharray: "5 5" }, // Dashed line for working commit
         });
       }
     }
@@ -247,7 +250,10 @@ export default function Graph() {
   const focusNode = useCallback(
     (nodeId: string) => {
       const instance = reactFlowInstanceRef.current;
-      if (!instance) return;
+      if (!instance) {
+        console.error("ReactFlow instance not ready");
+        return;
+      }
 
       console.log("Focusing on node:", nodeId);
 
@@ -261,31 +267,39 @@ export default function Graph() {
       console.log("Found node:", node);
       console.log("Node position:", node.position);
 
-      // Use fitView to focus on a specific node
+      // Add a visual highlight to the focused node first
+      const updatedNodes = nodes.map((n) => ({
+        ...n,
+        style: {
+          ...n.style,
+          boxShadow:
+            n.id === nodeId
+              ? "0 0 15px 5px rgba(66, 153, 225, 0.6)"
+              : undefined,
+          zIndex: n.id === nodeId ? 1000 : undefined,
+        },
+      }));
+
+      // Update nodes with highlight
+      instance.setNodes(updatedNodes);
+
+      // Use setCenter for more reliable focusing
       setTimeout(() => {
-        instance.fitView({
-          padding: 0.5,
-          includeHiddenNodes: false,
-          nodes: [node],
-          duration: 800,
-        });
-
-        // Add a visual highlight to the focused node
-        const updatedNodes = nodes.map((n: Node<LixNodeData>) => ({
-          ...n,
-          style: {
-            ...n.style,
-            boxShadow:
-              n.id === nodeId
-                ? "0 0 15px 5px rgba(66, 153, 225, 0.6)"
-                : undefined,
-            zIndex: n.id === nodeId ? 1000 : undefined,
-          },
-        }));
-
-        // Update nodes with highlight
-        instance.setNodes(updatedNodes);
-      }, 50);
+        const nodeWithWidth = instance.getNode(nodeId);
+        if (nodeWithWidth) {
+          const x = nodeWithWidth.position.x + (nodeWithWidth.width || 0) / 2;
+          const y = nodeWithWidth.position.y + (nodeWithWidth.height || 0) / 2;
+          instance.setCenter(x, y, { zoom: 1.2, duration: 800 });
+        } else {
+          // Fallback to fitView
+          instance.fitView({
+            padding: 0.5,
+            includeHiddenNodes: false,
+            nodes: [{ id: nodeId }],
+            duration: 800,
+          });
+        }
+      }, 100);
     },
     [nodes]
   );
@@ -328,7 +342,7 @@ export default function Graph() {
       {/* Label Filter Bar */}
       <div className="p-2 border-b flex flex-wrap gap-2 items-center">
         <span className="font-bold mr-2 flex items-center">
-          Filter by labels:
+          Filter commits by labels:
         </span>
         <div className="flex flex-wrap gap-1">
           {(availableLabels || []).map((label) => (
@@ -375,10 +389,10 @@ export default function Graph() {
           minZoom={0.1}
           maxZoom={2}
           defaultEdgeOptions={{
-            type: "smoothstep",
+            type: "straight",
             style: { strokeWidth: 1.5 },
           }}
-          connectionLineType={ConnectionLineType.SmoothStep}
+          connectionLineType={ConnectionLineType.Straight}
           onInit={(instance: any) => {
             reactFlowInstanceRef.current = instance;
             // Initial fit view

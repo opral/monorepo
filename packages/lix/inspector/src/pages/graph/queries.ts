@@ -43,8 +43,9 @@ export function selectCommits(
               eb.exists(
                 eb
                   .selectFrom("version")
+                  .innerJoin("commit", "version.working_commit_id", "commit.id")
                   .whereRef(
-                    "version.working_change_set_id",
+                    "commit.change_set_id",
                     "=",
                     "change_set.id"
                   )

@@ -11,7 +11,7 @@ import {
 import {
 	applyChangeSet,
 	createThread,
-	createUndoChangeSet,
+	createUndoCommit,
 	type ChangeSet as ChangeSetType,
 } from "@lix-js/sdk";
 import { useKeyValue } from "../hooks/useKeyValue";
@@ -148,7 +148,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 					<div className="flex-1">
 						<div className="text-sm break-words">
 							{isWorkingChangeSet
-								? "Working Change Set"
+								? "Current changes"
 								: truncatedComment
 									? truncatedComment
 									: "No description yet"}
@@ -208,13 +208,25 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 										<button
 											className="btn btn-sm btn-ghost"
 											onClick={async () => {
-												const undoChangeSet = await createUndoChangeSet({
+												// Find the commit for this change set
+												const commit = await lix.db
+													.selectFrom("commit")
+													.where("change_set_id", "=", changeSet.id)
+													.selectAll()
+													.executeTakeFirst();
+												
+												if (!commit) {
+													console.error("Could not find commit for change set");
+													return;
+												}
+
+												const undoCommit = await createUndoCommit({
 													lix,
-													changeSet: { id: changeSet.id },
+													commit: { id: commit.id },
 												});
 												await applyChangeSet({
 													lix,
-													changeSet: undoChangeSet,
+													changeSet: { id: undoCommit.change_set_id },
 												});
 											}}
 											title="Undo this change set"

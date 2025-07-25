@@ -2,6 +2,7 @@ export * from "./account/index.js";
 export * from "./change/index.js";
 export * from "./change-author/index.js";
 export * from "./change-set/index.js";
+export * from "./commit/index.js";
 export * from "./database/index.js";
 export * from "./deterministic/index.js";
 export * from "./entity/index.js";
