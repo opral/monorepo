@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { useQuery } from "@lix-js/react-utils";
 import { ChevronDown, ChevronRight, ChevronLeft, ChevronRight as Next } from "lucide-react";
 import type { ExtendedCommit } from "./index";
@@ -161,9 +161,8 @@ export function CommitDetailsDialog({ commit, onClose }: CommitDetailsDialogProp
               {currentElements.map((element) => {
                 const isExpanded = expandedElements.has(element.change_id);
                 return (
-                  <>
+                  <React.Fragment key={element.change_id}>
                     <tr 
-                      key={element.change_id} 
                       className="hover cursor-pointer transition-colors hover:bg-base-200"
                       onClick={() => toggleElement(element.change_id)}
                     >
@@ -191,7 +190,7 @@ export function CommitDetailsDialog({ commit, onClose }: CommitDetailsDialogProp
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })}
             </tbody>
