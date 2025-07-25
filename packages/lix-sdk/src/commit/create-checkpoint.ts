@@ -1,4 +1,5 @@
-import { nanoId } from "../deterministic/index.js";
+import type { LixCommit } from "./schema.js";
+import { nanoId, uuidV7 } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
 /**
@@ -14,9 +15,7 @@ import type { Lix } from "../lix/open-lix.js";
  * ```
  */
 
-export async function createCheckpoint(args: { lix: Lix }): Promise<{
-	id: string;
-}> {
+export async function createCheckpoint(args: { lix: Lix }): Promise<LixCommit> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Get current active version
 		const activeVersion = await trx
@@ -25,9 +24,14 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			.selectAll("version")
 			.executeTakeFirstOrThrow();
 
-		const workingChangeSetId = activeVersion.working_change_set_id;
-		// Use the current change_set_id as parent - this represents the latest changes
-		const parentChangeSetId = activeVersion.change_set_id;
+		// Get the working commit and its change set
+		const workingCommit = await trx
+			.selectFrom("commit")
+			.where("id", "=", activeVersion.working_commit_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		const workingChangeSetId = workingCommit.change_set_id;
 
 		// Check if there are any working change set elements to checkpoint
 		const workingElements = await trx
@@ -43,12 +47,15 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			);
 		}
 
-		// 1. Add ancestry edge from parent to working change set (working becomes checkpoint)
+		// 1. The old working commit becomes the checkpoint commit
+		const checkpointCommitId = activeVersion.working_commit_id;
+
+		// Add commit edge from parent commit to checkpoint commit (which is the old working commit)
 		await trx
-			.insertInto("change_set_edge_all")
+			.insertInto("commit_edge_all")
 			.values({
-				parent_id: parentChangeSetId,
-				child_id: workingChangeSetId,
+				parent_id: activeVersion.commit_id,
+				child_id: checkpointCommitId,
 				lixcol_version_id: "global",
 			})
 			.execute();
@@ -63,7 +70,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			})
 			.execute();
 
-		// 3. Get checkpoint label and assign it to the checkpoint change set
+		// 3. Get checkpoint label and assign it to the checkpoint commit
 		const checkpointLabel = await trx
 			.selectFrom("label")
 			.where("name", "=", "checkpoint")
@@ -71,35 +78,50 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<{
 			.executeTakeFirstOrThrow();
 
 		await trx
-			.insertInto("change_set_label_all")
+			.insertInto("entity_label_all")
 			.values({
-				change_set_id: workingChangeSetId,
+				entity_id: checkpointCommitId,
+				schema_key: "lix_commit",
+				file_id: "lix",
 				label_id: checkpointLabel.id,
 				lixcol_version_id: "global",
 			})
 			.execute();
 
+		// 4. Create a new commit for the new working change set
+		const newWorkingCommitId = uuidV7({ lix: args.lix });
 		await trx
-			.updateTable("version")
-			.where("id", "=", activeVersion.id)
-			.set({
-				change_set_id: workingChangeSetId, // becomes checkpoint
-				working_change_set_id: newWorkingChangeSetId,
-			})
-			.execute();
-
-		// 4. Add edge from checkpoint to new working change set
-		await trx
-			.insertInto("change_set_edge_all")
+			.insertInto("commit_all")
 			.values({
-				parent_id: workingChangeSetId,
-				child_id: newWorkingChangeSetId,
+				id: newWorkingCommitId,
+				change_set_id: newWorkingChangeSetId,
 				lixcol_version_id: "global",
 			})
 			.execute();
 
+		// Add commit edge from checkpoint commit to new working commit
+		await trx
+			.insertInto("commit_edge_all")
+			.values({
+				parent_id: checkpointCommitId,
+				child_id: newWorkingCommitId,
+				lixcol_version_id: "global",
+			})
+			.execute();
+
+		// Update version to point to new working commit
+		await trx
+			.updateTable("version")
+			.where("id", "=", activeVersion.id)
+			.set({
+				commit_id: checkpointCommitId,
+				working_commit_id: newWorkingCommitId,
+			})
+			.execute();
+
 		return {
-			id: workingChangeSetId,
+			id: checkpointCommitId,
+			change_set_id: workingChangeSetId,
 		};
 	};
 

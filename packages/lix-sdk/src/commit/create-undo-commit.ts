@@ -1,47 +1,56 @@
 import type { Lix } from "../lix/index.js";
-import type { LixChangeSet } from "./schema.js";
-import { createChangeSet } from "./create-change-set.js";
+import type { LixCommit } from "./schema.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import { createCommit } from "./create-commit.js";
 import type { LixLabel } from "../label/schema.js";
 import type { NewLixChange } from "../change/schema.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 
 /**
- * Creates a "reverse" change set that undoes the changes made by the specified change set.
+ * Creates a "reverse" commit that undoes the changes made by the specified commit.
  *
  * @example
  *   ```ts
- *   const undoChangeSet = await createUndoChangeSet({
+ *   const undoCommit = await createUndoCommit({
  *     lix,
- *     changeSet: targetChangeSet
+ *     commit: targetCommit
  *   });
  *
  *   await applyChangeSet({
  *     lix,
- *     changeSet: undoChangeSet
+ *     changeSet: { id: undoCommit.change_set_id }
  *   });
  *   ```
  *
- * @returns The newly created change set that contains the undo operations
+ * @returns The newly created commit that contains the undo operations
  */
-export async function createUndoChangeSet(args: {
+export async function createUndoCommit(args: {
 	lix: Lix;
-	changeSet: Pick<LixChangeSet, "id">;
+	commit: Pick<LixCommit, "id">;
 	labels?: Pick<LixLabel, "id">[];
-}): Promise<LixChangeSet> {
+}): Promise<LixCommit> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Check for multiple parents (not supported yet)
 		const parents = await trx
-			.selectFrom("change_set_edge_all")
+			.selectFrom("commit_edge_all")
 			.where("lixcol_version_id", "=", "global")
-			.where("child_id", "=", args.changeSet.id)
+			.where("child_id", "=", args.commit.id)
 			.select("parent_id")
 			.execute();
 
 		if (parents.length > 1) {
 			throw new Error(
-				"Cannot undo change sets with multiple parents (merge scenarios not yet supported)"
+				"Cannot undo commits with multiple parents (merge scenarios not yet supported)"
 			);
 		}
+
+		// Get the change set ID from the commit
+		const targetCommit = await trx
+			.selectFrom("commit_all")
+			.where("lixcol_version_id", "=", "global")
+			.where("id", "=", args.commit.id)
+			.select("change_set_id")
+			.executeTakeFirstOrThrow();
 
 		// Get all changes in the target change set (direct changes only, non-recursive)
 		const targetChanges = await trx
@@ -52,7 +61,11 @@ export async function createUndoChangeSet(args: {
 				"change.id"
 			)
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
-			.where("change_set_element_all.change_set_id", "=", args.changeSet.id)
+			.where(
+				"change_set_element_all.change_set_id",
+				"=",
+				targetCommit.change_set_id
+			)
 			.selectAll("change")
 			.execute();
 
@@ -60,7 +73,7 @@ export async function createUndoChangeSet(args: {
 
 		for (const change of targetChanges) {
 			if (parents.length === 0) {
-				// No parent = this was the first change set, undo = delete everything
+				// No parent = this was the first commit, undo = delete everything
 				undoChanges.push({
 					id: uuidV7({ lix: args.lix }),
 					entity_id: change.entity_id,
@@ -71,8 +84,16 @@ export async function createUndoChangeSet(args: {
 					snapshot_content: null, // Mark as deletion
 				});
 			} else {
-				// Find the previous state in the parent change set
-				const parentChangeSet = parents[0]!.parent_id;
+				// Find the previous state in the parent commit
+				const parentCommitId = parents[0]!.parent_id;
+
+				// Get the parent commit's change set
+				const parentCommit = await trx
+					.selectFrom("commit_all")
+					.where("lixcol_version_id", "=", "global")
+					.where("id", "=", parentCommitId)
+					.select("change_set_id")
+					.executeTakeFirstOrThrow();
 
 				const previousChange = await trx
 					.selectFrom("change")
@@ -81,7 +102,11 @@ export async function createUndoChangeSet(args: {
 						"change_set_element.change_id",
 						"change.id"
 					)
-					.where("change_set_element.change_set_id", "=", parentChangeSet)
+					.where(
+						"change_set_element.change_set_id",
+						"=",
+						parentCommit.change_set_id
+					)
 					.where("change_set_element.entity_id", "=", change.entity_id)
 					.where("change_set_element.file_id", "=", change.file_id)
 					.where("change_set_element.schema_key", "=", change.schema_key)
@@ -137,7 +162,14 @@ export async function createUndoChangeSet(args: {
 			})),
 		});
 
-		return undoChangeSet;
+		// Create a commit for the undo change set
+		const undoCommit = await createCommit({
+			lix: { ...args.lix, db: trx },
+			changeSet: undoChangeSet,
+			parentCommits: args.commit.id ? [args.commit] : [],
+		});
+
+		return undoCommit;
 	};
 
 	if (args.lix.db.isTransaction) {

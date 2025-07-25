@@ -29,11 +29,11 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		FROM internal_state_all_untracked unt;
 	`);
 
-	// View 2: Version change set roots - only the latest change for each version
+	// View 2: Version commit roots - only the latest change for each version
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_version_roots AS
 		SELECT 
-			json_extract(v.snapshot_content,'$.change_set_id') AS tip_change_set_id,
+			json_extract(v.snapshot_content,'$.commit_id') AS tip_commit_id,
 			v.entity_id AS version_id
 		FROM internal_materialization_all_changes v
 		WHERE v.schema_key = 'lix_version'
@@ -47,13 +47,13 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		  );
 	`);
 
-	// View 3: Change set lineage (recursive - includes ancestors)
+	// View 3: Commit lineage (recursive - includes ancestors)
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_lineage AS
-		WITH RECURSIVE lineage_cs(id, version_id) AS (
+		WITH RECURSIVE lineage_commits(id, version_id) AS (
 			/* anchor: the tip itself */
 			SELECT 
-				tip_change_set_id, 
+				tip_commit_id, 
 				version_id 
 			FROM internal_materialization_version_roots
 
@@ -64,19 +64,19 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 				json_extract(edge.snapshot_content,'$.parent_id') AS id,
 				l.version_id AS version_id
 			FROM internal_materialization_all_changes edge
-			JOIN lineage_cs l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
-			WHERE edge.schema_key = 'lix_change_set_edge'
+			JOIN lineage_commits l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
+			WHERE edge.schema_key = 'lix_commit_edge'
 			  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
 		)
-		SELECT * FROM lineage_cs;
+		SELECT * FROM lineage_commits;
 	`);
 
-	// View 4: Change set depth calculation
+	// View 4: Commit depth calculation
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_cs_depth AS
-		WITH RECURSIVE cs_depth AS (
+		WITH RECURSIVE commit_depth AS (
 			SELECT 
-				tip_change_set_id AS id, 
+				tip_commit_id AS id, 
 				version_id, 
 				0 AS depth 
 			FROM internal_materialization_version_roots
@@ -88,8 +88,8 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 				d.version_id AS version_id,
 				d.depth + 1 AS depth
 			FROM internal_materialization_all_changes edge
-			JOIN cs_depth d ON json_extract(edge.snapshot_content,'$.child_id') = d.id
-			WHERE edge.schema_key = 'lix_change_set_edge'
+			JOIN commit_depth d ON json_extract(edge.snapshot_content,'$.child_id') = d.id
+			WHERE edge.schema_key = 'lix_commit_edge'
 			  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
 			  AND EXISTS (
 				SELECT 1 FROM internal_materialization_lineage 
@@ -97,22 +97,23 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 				  AND internal_materialization_lineage.version_id = d.version_id
 			  )
 		)
-		SELECT * FROM cs_depth;
+		SELECT * FROM commit_depth;
 	`);
 
-	// View 5: Change set elements in reachable change sets
+	// View 5: Change set elements in reachable commits
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_cse AS
 		SELECT 
-			json_extract(ias.snapshot_content,'$.entity_id') AS target_entity_id,
-			json_extract(ias.snapshot_content,'$.file_id') AS target_file_id,
-			json_extract(ias.snapshot_content,'$.schema_key') AS target_schema_key,
-			json_extract(ias.snapshot_content,'$.change_id') AS target_change_id,
-			json_extract(ias.snapshot_content,'$.change_set_id') AS cse_origin_change_set_id,
+			json_extract(cse.snapshot_content,'$.entity_id') AS target_entity_id,
+			json_extract(cse.snapshot_content,'$.file_id') AS target_file_id,
+			json_extract(cse.snapshot_content,'$.schema_key') AS target_schema_key,
+			json_extract(cse.snapshot_content,'$.change_id') AS target_change_id,
+			json_extract(cse.snapshot_content,'$.change_set_id') AS cse_origin_change_set_id,
 			lcs.version_id
-		FROM internal_materialization_all_changes ias
-		JOIN internal_materialization_lineage lcs ON json_extract(ias.snapshot_content,'$.change_set_id') = lcs.id
-		WHERE ias.schema_key = 'lix_change_set_element';
+		FROM internal_materialization_lineage lcs
+		JOIN internal_materialization_all_changes c ON c.entity_id = lcs.id AND c.schema_key = 'lix_commit'
+		JOIN internal_materialization_all_changes cse ON json_extract(cse.snapshot_content,'$.change_set_id') = json_extract(c.snapshot_content,'$.change_set_id')
+		WHERE cse.schema_key = 'lix_change_set_element';
 	`);
 
 	// View 6: Leaf target snapshots (latest change for each entity in each version)
@@ -128,18 +129,33 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 			r.version_id,
 			target_change.created_at,
 			target_change.id AS change_id,
-			r.cse_origin_change_set_id AS change_set_id
+			-- Get the commit_id for this change set
+			(SELECT c.entity_id 
+			 FROM internal_materialization_all_changes c 
+			 WHERE c.schema_key = 'lix_commit' 
+			   AND json_extract(c.snapshot_content,'$.change_set_id') = r.cse_origin_change_set_id
+			   AND c.entity_id IN (SELECT id FROM internal_materialization_lineage WHERE version_id = r.version_id)
+			 LIMIT 1) AS commit_id
 		FROM internal_materialization_cse r
 		JOIN internal_materialization_all_changes target_change ON r.target_change_id = target_change.id
 		WHERE NOT EXISTS (
-			/* any *newer* change for the same entity in a *descendant* CS */
-			WITH RECURSIVE descendants_of_current_cs(id) AS (
-				SELECT r.cse_origin_change_set_id
+			/* any *newer* change for the same entity in a *descendant* commit */
+			WITH RECURSIVE descendants_of_current_commit(commit_id, change_set_id) AS (
+				-- Start with the commit associated with the current change set
+				SELECT c.entity_id, json_extract(c.snapshot_content,'$.change_set_id')
+				FROM internal_materialization_all_changes c
+				WHERE c.schema_key = 'lix_commit' 
+				  AND json_extract(c.snapshot_content,'$.change_set_id') = r.cse_origin_change_set_id
+				  AND c.entity_id IN (SELECT id FROM internal_materialization_lineage WHERE version_id = r.version_id)
+				
 				UNION
-				SELECT json_extract(edge.snapshot_content,'$.child_id')
+				
+				-- Get descendant commits
+				SELECT json_extract(edge.snapshot_content,'$.child_id'), json_extract(child_c.snapshot_content,'$.change_set_id')
 				FROM internal_materialization_all_changes edge
-				JOIN descendants_of_current_cs d ON json_extract(edge.snapshot_content,'$.parent_id') = d.id
-				WHERE edge.schema_key = 'lix_change_set_edge'
+				JOIN descendants_of_current_commit d ON json_extract(edge.snapshot_content,'$.parent_id') = d.commit_id
+				JOIN internal_materialization_all_changes child_c ON child_c.entity_id = json_extract(edge.snapshot_content,'$.child_id') AND child_c.schema_key = 'lix_commit'
+				WHERE edge.schema_key = 'lix_commit_edge'
 				  AND json_extract(edge.snapshot_content,'$.child_id') IN (
 						 SELECT id FROM internal_materialization_lineage WHERE version_id = r.version_id
 					   )
@@ -151,7 +167,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 			  AND newer_r.target_schema_key = r.target_schema_key
 			  AND newer_r.version_id        = r.version_id
 			  AND newer_r.target_change_id != r.target_change_id
-			  AND newer_r.cse_origin_change_set_id IN descendants_of_current_cs
+			  AND newer_r.cse_origin_change_set_id IN (SELECT change_set_id FROM descendants_of_current_commit)
 		);
 	`);
 
@@ -181,7 +197,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 			NULL AS inherited_from_version_id,
 			created_at, 
 			change_id, 
-			change_set_id
+			commit_id
 		FROM internal_materialization_leaf_snapshots
 
 		UNION ALL
@@ -199,7 +215,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 			vi.parent_version_id AS inherited_from_version_id,
 			ls.created_at, 
 			ls.change_id, 
-			ls.change_set_id
+			ls.commit_id
 		FROM internal_materialization_version_inheritance vi
 		JOIN internal_materialization_leaf_snapshots ls ON ls.version_id = vi.parent_version_id
 		WHERE vi.parent_version_id IS NOT NULL
@@ -225,7 +241,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 						(
 							SELECT depth
 							FROM internal_materialization_cs_depth
-							WHERE internal_materialization_cs_depth.id = change_set_id
+							WHERE internal_materialization_cs_depth.id = commit_id
 							  AND internal_materialization_cs_depth.version_id = visible_in_version
 						) DESC,
 						change_id DESC  /* deterministic fall-back, should rarely fire */
@@ -291,7 +307,7 @@ export function materializeState(
                         (
                           SELECT depth
                           FROM   internal_materialization_cs_depth
-                          WHERE  internal_materialization_cs_depth.id = change_set_id
+                          WHERE  internal_materialization_cs_depth.id = commit_id
                             AND  internal_materialization_cs_depth.version_id = visible_in_version
                         ) DESC,
                         change_id DESC  /* deterministic fall-back, should rarely fire */
@@ -332,7 +348,7 @@ export function materializeState(
       ) AS updated_at,
       pe.inherited_from_version_id,
       pe.change_id,
-      COALESCE(pe.change_set_id,'untracked') AS change_set_id
+      COALESCE(pe.commit_id,'untracked') AS commit_id
     FROM prioritized_entities pe
     WHERE pe.rn = 1
   `;

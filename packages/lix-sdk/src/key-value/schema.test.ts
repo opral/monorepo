@@ -89,7 +89,7 @@ test("arbitrary json is allowed", async () => {
 	expect(viewAfterInsert).toEqual(kvs);
 });
 
-test.todo("view should show changes across versions", async () => {
+test("view should show changes across versions", async () => {
 	const lix = await openLix({});
 
 	// creating a new version
@@ -130,7 +130,7 @@ test.todo("view should show changes across versions", async () => {
 		lix,
 		id: "versionB",
 		name: "versionB",
-		changeSet: { id: versionAAfterKvInsert.change_set_id },
+		commit_id: versionAAfterKvInsert.commit_id,
 	});
 
 	const kvAfterInsertInVersionB = await lix.db

@@ -443,7 +443,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		expect(onlyTracked[0]?.id).toBe("tracked_entity");
 	});
 
-	test("should expose lixcol_change_set_id for history queries", async () => {
+	test("should expose lixcol_commit_id for history queries", async () => {
 		const lix = await openLix({});
 
 		// Store the test schema
@@ -477,7 +477,7 @@ describe("createEntityAllViewIfNotExists", () => {
 			})
 			.execute();
 
-		// Query the view and verify lixcol_change_set_id is exposed
+		// Query the view and verify lixcol_commit_id is exposed
 		const result = await lix.db
 			.selectFrom("test_view_all" as any)
 			.selectAll()
@@ -486,15 +486,15 @@ describe("createEntityAllViewIfNotExists", () => {
 		expect(result).toHaveLength(1);
 		const entity = result[0];
 
-		// Verify that lixcol_change_set_id is exposed
-		expect(entity).toHaveProperty("lixcol_change_set_id");
-		expect(entity?.lixcol_change_set_id).toBeDefined();
-		expect(typeof entity?.lixcol_change_set_id).toBe("string");
+		// Verify that lixcol_commit_id is exposed
+		expect(entity).toHaveProperty("lixcol_commit_id");
+		expect(entity?.lixcol_commit_id).toBeDefined();
+		expect(typeof entity?.lixcol_commit_id).toBe("string");
 
-		// Verify we can query by lixcol_change_set_id
+		// Verify we can query by lixcol_commit_id
 		const queryByChangeSetId = await lix.db
 			.selectFrom("test_view_all" as any)
-			.where("lixcol_change_set_id", "=", entity?.lixcol_change_set_id)
+			.where("lixcol_commit_id", "=", entity?.lixcol_commit_id)
 			.where("lixcol_version_id", "=", activeVersion?.version_id)
 			.selectAll()
 			.execute();

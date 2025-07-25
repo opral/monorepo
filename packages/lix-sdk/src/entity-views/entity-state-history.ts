@@ -20,11 +20,11 @@ import type {
  *   name: string;
  * } & StateEntityHistoryView;
  *
- * // Query entity history at a specific change set
+ * // Query entity history at a specific commit
  * const history = await lix.db
  *   .selectFrom("account_history")
- *   .where("lixcol_change_set_id", "=", changeSetId)
- *   .where("lixcol_depth", "=", 0) // Get the state at this exact change set
+ *   .where("lixcol_commit_id", "=", commitId)
+ *   .where("lixcol_depth", "=", 0) // Get the state at this exact commit
  *   .selectAll()
  *   .execute();
  * ```
@@ -77,28 +77,28 @@ export type StateEntityHistoryView = {
 	lixcol_change_id: Generated<string>;
 
 	/**
-	 * Change set ID that serves as the query root for depth calculation.
+	 * Commit ID that serves as the query root for depth calculation.
 	 *
 	 * When querying history, this represents the "perspective" from which
 	 * you're viewing the entity's history. The depth is calculated relative
-	 * to this change set.
+	 * to this commit.
 	 */
-	lixcol_change_set_id: Generated<string>;
+	lixcol_commit_id: Generated<string>;
 
 	/**
-	 * The root change set ID used as the starting point for traversing history.
+	 * The root commit ID used as the starting point for traversing history.
 	 *
-	 * When querying history from a specific changeset, this field contains that
-	 * changeset ID for all returned rows. Used with `depth` to understand how
+	 * When querying history from a specific commit, this field contains that
+	 * commit ID for all returned rows. Used with `depth` to understand how
 	 * far back in history each entity state is from this root.
 	 */
-	lixcol_root_change_set_id: Generated<string>;
+	lixcol_root_commit_id: Generated<string>;
 
 	/**
-	 * Depth of this entity state relative to the queried change_set_id.
+	 * Depth of this entity state relative to the queried commit_id.
 	 *
-	 * - `0`: The entity state at the exact queried change set
-	 * - `1`: The entity state one change before the queried change set
+	 * - `0`: The entity state at the exact queried commit
+	 * - `1`: The entity state one commit before the queried commit
 	 * - `2+`: Earlier states, going back in history
 	 *
 	 * This is useful for blame functionality and understanding how an entity
@@ -171,28 +171,28 @@ export type StateEntityHistoryColumns = {
 	lixcol_change_id: LixGenerated<string>;
 
 	/**
-	 * Change set ID that serves as the query root for depth calculation.
+	 * Commit ID that serves as the query root for depth calculation.
 	 *
 	 * When querying history, this represents the "perspective" from which
 	 * you're viewing the entity's history. The depth is calculated relative
-	 * to this change set.
+	 * to this commit.
 	 */
-	lixcol_change_set_id: LixGenerated<string>;
+	lixcol_commit_id: LixGenerated<string>;
 
 	/**
-	 * The root change set ID used as the starting point for traversing history.
+	 * The root commit ID used as the starting point for traversing history.
 	 *
-	 * When querying history from a specific changeset, this field contains that
-	 * changeset ID for all returned rows. Used with `depth` to understand how
+	 * When querying history from a specific commit, this field contains that
+	 * commit ID for all returned rows. Used with `depth` to understand how
 	 * far back in history each entity state is from this root.
 	 */
-	lixcol_root_change_set_id: LixGenerated<string>;
+	lixcol_root_commit_id: LixGenerated<string>;
 
 	/**
-	 * Depth of this entity state relative to the queried change_set_id.
+	 * Depth of this entity state relative to the queried commit_id.
 	 *
-	 * - `0`: The entity state at the exact queried change set
-	 * - `1`: The entity state one change before the queried change set
+	 * - `0`: The entity state at the exact queried commit
+	 * - `1`: The entity state one commit before the queried commit
 	 * - `2+`: Earlier states, going back in history
 	 *
 	 * This is useful for blame functionality and understanding how an entity
@@ -244,12 +244,14 @@ export function createEntityStateHistoryView(args: {
 	}
 
 	const view_name = args.overrideName ?? args.schema["x-lix-key"] + "_history";
+	// Quote the view name to handle SQL reserved keywords
+	const quoted_view_name = `"${view_name}"`;
 	const schema_key = args.schema["x-lix-key"];
 	const properties = Object.keys((args.schema as any).properties);
 
 	// Generated SQL query for history view
 	const sqlQuery = `
-    CREATE VIEW IF NOT EXISTS ${view_name} AS
+    CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
       SELECT
         ${properties
 					.map(
@@ -262,8 +264,8 @@ export function createEntityStateHistoryView(args: {
         plugin_key AS lixcol_plugin_key,
         schema_version AS lixcol_schema_version,
         change_id AS lixcol_change_id,
-        change_set_id AS lixcol_change_set_id,
-        root_change_set_id AS lixcol_root_change_set_id,
+        commit_id AS lixcol_commit_id,
+        root_commit_id AS lixcol_root_commit_id,
         depth AS lixcol_depth
       FROM state_history
       WHERE schema_key = '${schema_key}';

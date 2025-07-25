@@ -93,7 +93,7 @@ export function insertTransactionState(args: {
 						created_at: _timestamp,
 						updated_at: _timestamp,
 						inherited_from_version_id: null,
-						change_set_id: "untracked",
+						commit_id: "untracked",
 					})
 					.onConflict((oc) =>
 						oc
@@ -120,7 +120,7 @@ export function insertTransactionState(args: {
 					untracked: true,
 					inherited_from_version_id: null,
 					change_id: "untracked",
-					change_set_id: "pending",
+					commit_id: "pending",
 				},
 			};
 		}
@@ -163,7 +163,7 @@ export function insertTransactionState(args: {
 				untracked: true,
 				inherited_from_version_id: null,
 				change_id: "untracked",
-				change_set_id: "pending",
+				commit_id: "pending",
 			},
 		};
 	} else {
@@ -342,7 +342,7 @@ export function insertTransactionState(args: {
 				untracked: false,
 				inherited_from_version_id: null,
 				change_id: changeId,
-				change_set_id: "pending",
+				commit_id: "pending",
 			},
 		};
 	}

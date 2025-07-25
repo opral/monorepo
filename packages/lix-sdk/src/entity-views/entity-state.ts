@@ -101,13 +101,13 @@ export type StateEntityView = {
 	lixcol_untracked: Generated<boolean>;
 
 	/**
-	 * Change set identifier that contains this entity's last change.
+	 * Commit identifier that contains this entity's last change.
 	 *
-	 * This references the change_set.id that contains the last change to this entity.
-	 * Useful for understanding which change set a particular entity state belongs to,
+	 * This references the commit.id that contains the last change to this entity.
+	 * Useful for understanding which commit a particular entity state belongs to,
 	 * enabling history queries and version comparison.
 	 */
-	lixcol_change_set_id: Generated<string>;
+	lixcol_commit_id: Generated<string>;
 };
 
 /**
@@ -209,13 +209,13 @@ export type EntityStateColumns = {
 	lixcol_untracked: LixGenerated<boolean>;
 
 	/**
-	 * Change set identifier that contains this entity's last change.
+	 * Commit identifier that contains this entity's last change.
 	 *
-	 * This references the change_set.id that contains the last change to this entity.
-	 * Useful for understanding which change set a particular entity state belongs to,
+	 * This references the commit.id that contains the last change to this entity.
+	 * Useful for understanding which commit a particular entity state belongs to,
 	 * enabling history queries and version comparison.
 	 */
-	lixcol_change_set_id: LixGenerated<string>;
+	lixcol_commit_id: LixGenerated<string>;
 };
 
 /**
@@ -296,10 +296,13 @@ export function createEntityStateView(args: {
 	validation?: ValidationCallbacks;
 }): void {
 	const view_name = args.overrideName ?? args.schema["x-lix-key"];
+	// Quote the view name to handle SQL reserved keywords
+	const quoted_view_name = `"${view_name}"`;
 
 	createSingleEntityView({
 		...args,
 		viewName: view_name,
+		quotedViewName: quoted_view_name,
 		stateTable: "state",
 	});
 }
@@ -308,6 +311,7 @@ function createSingleEntityView(args: {
 	lix: Pick<Lix, "sqlite">;
 	schema: LixSchemaDefinition;
 	viewName: string;
+	quotedViewName?: string;
 	stateTable: "state";
 	/** Plugin identifier for the entity */
 	pluginKey: string;
@@ -330,6 +334,7 @@ function createSingleEntityView(args: {
 	}
 
 	const view_name = args.viewName;
+	const quoted_view_name = args.quotedViewName || `"${view_name}"`;
 	const schema_key = args.schema["x-lix-key"];
 	const properties = Object.keys((args.schema as any).properties);
 	const primaryKeys = args.schema["x-lix-primary-key"];
@@ -435,7 +440,7 @@ function createSingleEntityView(args: {
 		"updated_at AS lixcol_updated_at",
 		"change_id AS lixcol_change_id",
 		"untracked AS lixcol_untracked",
-		"change_set_id AS lixcol_change_set_id",
+		"commit_id AS lixcol_commit_id",
 	];
 
 	// Handle version_id for active view
@@ -474,7 +479,7 @@ function createSingleEntityView(args: {
 
 	// Generated SQL query - set breakpoint here to inspect the generated SQL during debugging
 	const sqlQuery = `
-    CREATE VIEW IF NOT EXISTS ${view_name} AS
+    CREATE VIEW IF NOT EXISTS ${quoted_view_name} AS
       SELECT
         ${Object.keys((args.schema as any).properties)
 					.map(
@@ -486,7 +491,7 @@ function createSingleEntityView(args: {
       WHERE schema_key = '${schema_key}';
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_insert
-      INSTEAD OF INSERT ON ${view_name}
+      INSTEAD OF INSERT ON ${quoted_view_name}
       BEGIN      
         ${insertValidationSQL}
         INSERT INTO state_all (
@@ -531,7 +536,7 @@ function createSingleEntityView(args: {
       END;
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_update
-      INSTEAD OF UPDATE ON ${view_name}
+      INSTEAD OF UPDATE ON ${quoted_view_name}
       BEGIN
         ${updateValidationSQL}
         UPDATE state_all
@@ -551,7 +556,7 @@ function createSingleEntityView(args: {
       END;
 
       CREATE TRIGGER IF NOT EXISTS ${view_name}_delete
-      INSTEAD OF DELETE ON ${view_name}
+      INSTEAD OF DELETE ON ${quoted_view_name}
       BEGIN
         ${deleteValidationSQL}
         DELETE FROM state_all

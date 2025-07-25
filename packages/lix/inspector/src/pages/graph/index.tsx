@@ -2,8 +2,8 @@ import { useQuery } from "@lix-js/react-utils";
 import {
   selectVersions,
   selectAvailableLabels,
-  selectChangeSets,
-  selectChangeSetEdges,
+  selectCommits,
+  selectCommitEdges,
 } from "./queries";
 import {
   ReactFlow,
@@ -18,8 +18,9 @@ import dagre from "@dagrejs/dagre";
 import { useMemo, useCallback, useRef, useEffect, useState } from "react";
 import { type LixNodeData, lixNodeTypes } from "./nodes";
 
-export interface ExtendedChangeSet {
+export interface ExtendedCommit {
   id: string;
+  change_set_id: string;
   labels?: { name: string }[];
   [key: string]: any;
 }
@@ -33,12 +34,12 @@ export default function Graph() {
   const availableLabels = useQuery(selectAvailableLabels);
 
   // Direct approach preserves type inference
-  const changeSets = useQuery((lix) =>
-    selectChangeSets(lix, selectedLabels, availableLabels || [])
+  const commits = useQuery((lix) =>
+    selectCommits(lix, selectedLabels, availableLabels || [])
   );
 
-  const changeSetEdges = useQuery((lix) =>
-    selectChangeSetEdges(lix, changeSets?.map((cs) => cs.id) ?? [])
+  const commitEdges = useQuery((lix) =>
+    selectCommitEdges(lix, commits?.map((commit) => commit.id) ?? [])
   );
 
   // Toggle label selection
@@ -61,26 +62,47 @@ export default function Graph() {
   const { nodes, edges } = useMemo(() => {
     const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
     g.setGraph({
-      rankdir: "TB",
-      nodesep: 250, // Increased node separation (horizontal spacing)
-      ranksep: 200, // Increased rank separation (vertical spacing)
-      ranker: "network-simplex",
-      marginx: 80,
-      marginy: 80,
+      rankdir: "TB", // Top to bottom layout - versions at top, commits flow downward
+      nodesep: 100, // Horizontal separation between nodes
+      ranksep: 180, // Large vertical gap between ranks (versions and commits)
+      ranker: "network-simplex", // Better for aligning nodes at same level
+      marginx: 40,
+      marginy: 40,
+      edgesep: 50, // Increased edge separation for cleaner layout
+      align: "UL", // Align nodes to up-left
     });
 
-    const changeSetNodeWidth = 170;
-    const changeSetNodeHeight = 60;
-    const versionNodeWidth = 150;
-    const versionNodeHeight = 40;
+    const commitNodeWidth = 380; // Increased to fit full UUID
+    const commitNodeHeight = 200; // Increased for dynamic content
+    const versionNodeWidth = 180;
+    const versionNodeHeight = 60;
 
-    // Add nodes to the graph
-    for (const cs of changeSets || []) {
-      g.setNode(cs.id, {
-        label: "change_set",
-        width: changeSetNodeWidth,
-        height: changeSetNodeHeight,
-      });
+    // First add regular commits (non-working commits)
+    for (const commit of commits || []) {
+      const isWorkingCommit = (versions || []).some(
+        (v) => v.working_commit_id === commit.id
+      );
+      if (!isWorkingCommit) {
+        g.setNode(commit.id, {
+          label: "commit",
+          width: commitNodeWidth,
+          height: commitNodeHeight,
+        });
+      }
+    }
+
+    // Then add working commits (this helps dagre place them on the right)
+    for (const commit of commits || []) {
+      const isWorkingCommit = (versions || []).some(
+        (v) => v.working_commit_id === commit.id
+      );
+      if (isWorkingCommit) {
+        g.setNode(commit.id, {
+          label: "commit",
+          width: commitNodeWidth,
+          height: commitNodeHeight,
+        });
+      }
     }
 
     for (const v of versions || []) {
@@ -92,33 +114,42 @@ export default function Graph() {
         height: versionNodeHeight,
         // Store metadata as a custom property
         customData: { originalId: v.id },
+        // Force all versions to be at the same rank (top level)
+        rank: 0,
       });
     }
 
     // Add edges to the graph for layout calculation
-    for (const cse of changeSetEdges || []) {
+    for (const commitEdge of commitEdges || []) {
       // Only add edges if both nodes exist in the filtered set
       if (
-        (changeSets || []).some((cs) => cs.id === cse.parent_id) &&
-        (changeSets || []).some((cs) => cs.id === cse.child_id)
+        (commits || []).some((commit) => commit.id === commitEdge.parent_id) &&
+        (commits || []).some((commit) => commit.id === commitEdge.child_id)
       ) {
-        g.setEdge(cse.parent_id, cse.child_id);
+        g.setEdge(commitEdge.child_id, commitEdge.parent_id);
       }
     }
 
+    // First add edges to regular commits
     for (const v of versions || []) {
       const versionNodeId = `version_${v.id}`;
-      // Only add edges if the change set exists in the filtered set
-      if ((changeSets || []).some((cs) => cs.id === v.change_set_id)) {
-        g.setEdge(v.change_set_id, versionNodeId);
+
+      // Add edge from version to commit (for layout purposes)
+      if ((commits || []).some((commit) => commit.id === v.commit_id)) {
+        g.setEdge(versionNodeId, v.commit_id);
       }
-      // Add edge for working change set if it exists and is different from the main change set
+    }
+
+    // Then add edges to working commits (this helps dagre place them on the right)
+    for (const v of versions || []) {
+      const versionNodeId = `version_${v.id}`;
+
+      // Add edge from version to working commit (for layout purposes)
       if (
-        v.working_change_set_id &&
-        v.working_change_set_id !== v.change_set_id &&
-        (changeSets || []).some((cs) => cs.id === v.working_change_set_id)
+        v.working_commit_id &&
+        (commits || []).some((commit) => commit.id === v.working_commit_id)
       ) {
-        g.setEdge(v.working_change_set_id, versionNodeId);
+        g.setEdge(versionNodeId, v.working_commit_id);
       }
     }
 
@@ -131,8 +162,8 @@ export default function Graph() {
       const label = node.label || "";
 
       // Find the entity based on the node ID
-      let entity;
-      let originalId;
+      let entity: any;
+      let originalId: string | undefined;
 
       if (nodeId.startsWith("version_")) {
         // For version nodes, find by the original ID
@@ -141,8 +172,16 @@ export default function Graph() {
         originalId = nodeAny.customData?.originalId;
         entity = (versions || []).find((v) => v.id === originalId);
       } else {
-        // For change set nodes, find directly
-        entity = (changeSets || []).find((cs) => cs.id === nodeId);
+        // For commit nodes, find directly
+        entity = (commits || []).find((commit) => commit.id === nodeId);
+      }
+
+      // Check if this commit is a working commit
+      let isWorkingCommit = false;
+      if (label === "commit" && entity) {
+        isWorkingCommit = (versions || []).some(
+          (v) => v.working_commit_id === entity.id
+        );
       }
 
       // Create the node with proper typing
@@ -154,11 +193,13 @@ export default function Graph() {
           tableName: label,
           entity: entity,
           originalId: originalId,
-          title: (versions || []).some(
-            (v) => v.working_change_set_id === nodeId
-          )
-            ? "working change set"
-            : "change set",
+          title:
+            label === "commit"
+              ? isWorkingCommit
+                ? "working commit"
+                : "commit"
+              : "version",
+          isWorkingCommit: isWorkingCommit,
         },
         style: {
           border: "1px solid #ccc",
@@ -169,108 +210,96 @@ export default function Graph() {
     // Create edges with proper routing
     const allEdges: Edge[] = [];
 
-    for (const cse of changeSetEdges || []) {
+    for (const commitEdge of commitEdges || []) {
       // Only add edges if both nodes exist in the filtered set
       if (
-        (changeSets || []).some((cs) => cs.id === cse.parent_id) &&
-        (changeSets || []).some((cs) => cs.id === cse.child_id)
+        (commits || []).some((commit) => commit.id === commitEdge.parent_id) &&
+        (commits || []).some((commit) => commit.id === commitEdge.child_id)
       ) {
+        // Check if the child (source) is a working commit
+        const isChildWorkingCommit = (versions || []).some(
+          (v) => v.working_commit_id === commitEdge.child_id
+        );
+
         allEdges.push({
-          id: `e_${cse.parent_id}-${cse.child_id}`,
-          source: cse.parent_id,
-          target: cse.child_id,
-          markerStart: { type: MarkerType.Arrow },
-          type: "smoothstep", // Use smoothstep for curved edges
+          id: `e_${commitEdge.parent_id}-${commitEdge.child_id}`,
+          source: commitEdge.child_id,
+          target: commitEdge.parent_id,
+          markerEnd: { type: MarkerType.Arrow }, // Arrow points from child to parent
+          type: "smoothstep", // Use smoothstep edges for better visual flow
           animated: false,
+          style: isChildWorkingCommit ? { strokeDasharray: "5 5" } : undefined, // Dashed line for working commit edges
         });
       }
     }
 
     for (const v of versions || []) {
       const versionNodeId = `version_${v.id}`;
-      // Only add edges if the change set exists in the filtered set
-      if ((changeSets || []).some((cs) => cs.id === v.change_set_id)) {
+
+      // Add edge from version to commit (pointing up)
+      if ((commits || []).some((commit) => commit.id === v.commit_id)) {
         allEdges.push({
-          id: `ve_${v.id}_${v.change_set_id}`,
-          source: v.change_set_id,
-          target: versionNodeId,
-          markerStart: { type: MarkerType.Arrow },
+          id: `ve_${v.id}_${v.commit_id}`,
+          source: versionNodeId,
+          target: v.commit_id,
+          markerEnd: { type: MarkerType.Arrow },
           type: "smoothstep",
           animated: false,
         });
       }
-      // Add edge for working change set if it exists and is different from the main change set
+
+      // Add edge from version to working commit (pointing up)
       if (
-        v.working_change_set_id &&
-        v.working_change_set_id !== v.change_set_id &&
-        (changeSets || []).some((cs) => cs.id === v.working_change_set_id)
+        v.working_commit_id &&
+        (commits || []).some((commit) => commit.id === v.working_commit_id)
       ) {
         allEdges.push({
-          id: `ve_working_${v.id}_${v.working_change_set_id}`,
-          source: v.working_change_set_id,
-          target: versionNodeId,
-          markerStart: { type: MarkerType.Arrow },
+          id: `ve_wc_${v.id}_${v.working_commit_id}`,
+          source: versionNodeId,
+          target: v.working_commit_id,
+          markerEnd: { type: MarkerType.Arrow },
           type: "smoothstep",
           animated: false,
+          style: { strokeDasharray: "5 5" }, // Dashed line for working commit
         });
       }
     }
 
     return { nodes, edges: allEdges };
-  }, [changeSets, changeSetEdges, versions]);
+  }, [commits, commitEdges, versions]);
 
   // Function to focus on a specific node
-  const focusNode = useCallback(
-    (nodeId: string) => {
-      const instance = reactFlowInstanceRef.current;
-      if (!instance) return;
+  const focusNode = useCallback((nodeId: string) => {
+    const instance = reactFlowInstanceRef.current;
+    if (!instance) {
+      console.error("ReactFlow instance not ready");
+      return;
+    }
 
-      console.log("Focusing on node:", nodeId);
-
-      // Find the node
-      const node = nodes.find((n) => n.id === nodeId);
-      if (!node) {
-        console.warn(`Node with ID ${nodeId} not found in graph`);
-        return;
-      }
-
-      console.log("Found node:", node);
-      console.log("Node position:", node.position);
-
-      // Use fitView to focus on a specific node
-      setTimeout(() => {
+    // Use setCenter for more reliable focusing
+    setTimeout(() => {
+      const nodeWithWidth = instance.getNode(nodeId);
+      if (nodeWithWidth) {
+        const x = nodeWithWidth.position.x + (nodeWithWidth.width || 0) / 2;
+        const y = nodeWithWidth.position.y + (nodeWithWidth.height || 0) / 2;
+        instance.setCenter(x, y, { zoom: 1.2, duration: 800 });
+      } else {
+        // Fallback to fitView
         instance.fitView({
           padding: 0.5,
           includeHiddenNodes: false,
-          nodes: [node],
+          nodes: [{ id: nodeId }],
           duration: 800,
         });
-
-        // Add a visual highlight to the focused node
-        const updatedNodes = nodes.map((n) => ({
-          ...n,
-          style: {
-            ...n.style,
-            boxShadow:
-              n.id === nodeId
-                ? "0 0 15px 5px rgba(66, 153, 225, 0.6)"
-                : undefined,
-            zIndex: n.id === nodeId ? 1000 : undefined,
-          },
-        }));
-
-        // Update nodes with highlight
-        instance.setNodes(updatedNodes);
-      }, 50);
-    },
-    [nodes]
-  );
+      }
+    }, 100);
+  }, []);
 
   // Refit view when container size changes or nodes change
   useEffect(() => {
     if (reactFlowInstanceRef.current) {
       setTimeout(() => {
-        reactFlowInstanceRef.current?.fitView({
+        (reactFlowInstanceRef.current as any)?.fitView({
           padding: 0.2,
           includeHiddenNodes: false,
         });
@@ -288,7 +317,6 @@ export default function Graph() {
             <button
               key={version.id}
               onClick={() => {
-                console.log("Version button clicked:", version);
                 // Directly focus on the version node
                 focusNode(`version_${version.id}`);
               }}
@@ -304,7 +332,7 @@ export default function Graph() {
       {/* Label Filter Bar */}
       <div className="p-2 border-b flex flex-wrap gap-2 items-center">
         <span className="font-bold mr-2 flex items-center">
-          Filter by labels:
+          Filter commits by labels:
         </span>
         <div className="flex flex-wrap gap-1">
           {(availableLabels || []).map((label) => (
@@ -355,7 +383,7 @@ export default function Graph() {
             style: { strokeWidth: 1.5 },
           }}
           connectionLineType={ConnectionLineType.SmoothStep}
-          onInit={(instance) => {
+          onInit={(instance: any) => {
             reactFlowInstanceRef.current = instance;
             // Initial fit view
             setTimeout(() => {

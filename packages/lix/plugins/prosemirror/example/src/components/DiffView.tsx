@@ -30,17 +30,35 @@ export function DiffView() {
 		const renderDiff = async () => {
 			setLoading(true);
 			try {
+				// First get the commits for these change sets
+				const [beforeCommit, afterCommit] = await Promise.all([
+					lix.db
+						.selectFrom("commit")
+						.where("change_set_id", "=", diffView.beforeCsId)
+						.selectAll()
+						.executeTakeFirst(),
+					lix.db
+						.selectFrom("commit")
+						.where("change_set_id", "=", diffView.afterCsId)
+						.selectAll()
+						.executeTakeFirst(),
+				]);
+
+				if (!beforeCommit || !afterCommit) {
+					throw new Error("Could not find commits for change sets");
+				}
+
 				const [before, after] = await Promise.all([
 					lix.db
 						.selectFrom("file_history")
-						.where("lixcol_root_change_set_id", "=", diffView.beforeCsId)
+						.where("lixcol_root_commit_id", "=", beforeCommit.id)
 						.where("id", "=", fileId.id)
 						.where("lixcol_depth", "=", 0)
 						.selectAll()
 						.executeTakeFirst(),
 					lix.db
 						.selectFrom("file_history")
-						.where("lixcol_root_change_set_id", "=", diffView.afterCsId)
+						.where("lixcol_root_commit_id", "=", afterCommit.id)
 						.where("id", "=", fileId.id)
 						.where("lixcol_depth", "=", 0)
 						.selectAll()

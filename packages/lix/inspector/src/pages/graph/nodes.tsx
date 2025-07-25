@@ -1,7 +1,8 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { memo } from "react";
-import { TagIcon } from "lucide-react";
-import { ChangeSetElementsWindow } from "./change-set-elements-dialog";
+import { memo, useState } from "react";
+import { TagIcon, Radar } from "lucide-react";
+import { useQueryTakeFirst } from "@lix-js/react-utils";
+import { CommitDetailsWindow } from "./commit-details-window";
 
 // Define a generic data structure for our Lix nodes
 export interface LixNodeData {
@@ -9,11 +10,12 @@ export interface LixNodeData {
   entity: any;
   originalId?: string; // Added for version nodes to store original ID
   title?: string; // Custom title for the node
+  isWorkingCommit?: boolean; // Flag to indicate if this is a working commit
   [key: string]: any;
 }
 
-// Change Set Node Component
-const ChangeSetNode = ({
+// Commit Node Component
+const CommitNode = ({
   id,
   entity,
   title,
@@ -22,75 +24,91 @@ const ChangeSetNode = ({
   entity: any;
   title?: string;
 }) => {
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Fetch change count for this commit
+  const changeSetElements = useQueryTakeFirst((lix) =>
+    lix.db
+      .selectFrom("change_set_element")
+      .where("change_set_element.change_set_id", "=", entity.change_set_id)
+      .select(lix.db.fn.count("change_set_element.change_id").as("count"))
+  );
+
+  const changeCount = changeSetElements?.count ?? 0;
+
   return (
-    <div className="card card-compact bg-base-100 shadow-sm min-w-[200px] text-sm">
-      <div className="card-body p-4">
-        <h3 className="card-title text-sm capitalize border-b mb-2">
-          {title || "change set"}
-        </h3>
-        <div className="space-y-1">
-          {Object.entries(entity).map(([key, value]) => {
-            // Skip rendering labels array in the regular properties list
-            if (
-              key === "labels" ||
-              value === null ||
-              value === undefined ||
-              value === ""
-            )
-              return null;
-
-            const displayValue =
-              typeof value === "string"
-                ? value.substring(0, 20) + (value.length > 20 ? "..." : "")
-                : String(value);
-
-            return (
-              <div key={key} className="flex justify-between text-neutral-600">
-                <span className="font-medium mr-2">{key}:</span>
-                <span title={String(value)} className="truncate">
-                  {displayValue}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Display labels if they exist */}
-        {entity.labels && entity.labels.length > 0 && (
-          <div className="mt-2">
-            <h4 className="text-sm font-medium mb-1">
-              <TagIcon className="inline-block h-3 w-3 mr-1" />
-              Labels:
-            </h4>
-            <div className="flex flex-wrap gap-1">
-              {entity.labels.map((label: { name: string }, index: number) => (
-                <span key={index} className="badge badge-sm" title={label.name}>
-                  {label.name}
-                </span>
-              ))}
+    <>
+      <div className="card card-compact bg-base-100 shadow-sm w-[380px] text-sm">
+        <div className="card-body p-4 flex flex-col h-full">
+          <h3 className="card-title text-sm capitalize border-b mb-2 flex-shrink-0">
+            {title || "commit"}
+          </h3>
+          <div className="space-y-1 flex-grow">
+            {/* Always show ID first */}
+            <div className="flex justify-between text-neutral-600">
+              <span className="font-medium mr-2">id:</span>
+              <span className="text-xs font-mono">{entity.id}</span>
             </div>
           </div>
-        )}
 
-        <ChangeSetElementsWindow changeSetId={entity.id} onClose={() => {}} />
+          {/* Fixed bottom section */}
+          <div className="flex-shrink-0 space-y-1 mt-2">
+            {/* Display change count */}
+            <div className="flex items-center gap-1 text-neutral-600">
+              <Radar className="h-3 w-3" />
+              <span>{changeCount} changes</span>
+            </div>
 
-        {/* Handles for connections */}
-        <Handle
-          type="target"
-          position={Position.Top}
-          id={`${id}-target`}
-          style={{ visibility: "hidden" }}
-          isConnectable={false}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          id={`${id}-source`}
-          style={{ visibility: "hidden" }}
-          isConnectable={false}
-        />
+            {/* Display labels if they exist */}
+            {entity?.labels && entity.labels.length > 0 && (
+              <div className="flex items-center gap-1 text-neutral-600">
+                <TagIcon className="h-3 w-3" />
+                <span className="text-sm">
+                  {entity.labels
+                    .map((label: { name: string }) => label.name)
+                    .join(", ")}
+                </span>
+              </div>
+            )}
+
+            {/* View Details button */}
+            <button
+              className="btn btn-xs btn-ghost w-full"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetails(true);
+              }}
+            >
+              View Details
+            </button>
+          </div>
+
+          {/* Handles for connections */}
+          <Handle
+            type="target"
+            position={Position.Top}
+            id={`${id}-target`}
+            style={{ visibility: "hidden" }}
+            isConnectable={false}
+          />
+          <Handle
+            type="source"
+            position={Position.Bottom}
+            id={`${id}-source`}
+            style={{ visibility: "hidden" }}
+            isConnectable={false}
+          />
+        </div>
       </div>
-    </div>
+
+      {/* Commit Details Window */}
+      {showDetails && (
+        <CommitDetailsWindow
+          commit={entity}
+          onClose={() => setShowDetails(false)}
+        />
+      )}
+    </>
   );
 };
 
@@ -102,7 +120,13 @@ const VersionNode = ({ id, entity }: { id: string; entity: any }) => {
         <h3 className="card-title text-sm capitalize border-b mb-2">version</h3>
         <div className="space-y-1">
           {Object.entries(entity).map(([key, value]) => {
-            if (value === null || value === undefined || value === "")
+            // Hide lixcol properties and null/undefined/empty values
+            if (
+              key.startsWith("lixcol_") ||
+              value === null ||
+              value === undefined ||
+              value === ""
+            )
               return null;
 
             const displayValue =
@@ -146,58 +170,13 @@ const GenericLixNodeComponent = ({ id, data }: NodeProps) => {
   const { tableName, entity, title } = data as LixNodeData;
 
   // Render the appropriate node type based on tableName
-  if (tableName === "change_set") {
-    return <ChangeSetNode id={id} entity={entity} title={title} />;
-  } else if (tableName === "version") {
+  if (tableName === "version") {
     return <VersionNode id={id} entity={entity} />;
+  } else if (tableName === "commit") {
+    return <CommitNode id={id} entity={entity} title={title} />;
   }
 
-  // Fallback for any other node types
-  return (
-    <div className="card card-compact bg-base-100 shadow-sm min-w-[180px] text-sm">
-      <div className="card-body p-4">
-        <h3 className="card-title text-sm capitalize border-b mb-2">
-          {title || tableName.replace("_", " ")}
-        </h3>
-        <div className="space-y-1">
-          {Object.entries(entity).map(([key, value]) => {
-            if (value === null || value === undefined || value === "")
-              return null;
-
-            const displayValue =
-              typeof value === "string"
-                ? value.substring(0, 20) + (value.length > 20 ? "..." : "")
-                : String(value);
-
-            return (
-              <div key={key} className="flex justify-between text-neutral-600">
-                <span className="font-medium mr-2">{key}:</span>
-                <span title={String(value)} className="truncate">
-                  {displayValue}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Handles for connections */}
-        <Handle
-          type="target"
-          position={Position.Top}
-          id={`${id}-target`}
-          style={{ visibility: "hidden" }}
-          isConnectable={false}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          id={`${id}-source`}
-          style={{ visibility: "hidden" }}
-          isConnectable={false}
-        />
-      </div>
-    </div>
-  );
+  throw new Error(`Unsupported tableName: ${tableName}`);
 };
 
 // Memoize the component for performance

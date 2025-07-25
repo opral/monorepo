@@ -21,7 +21,7 @@ export function applyVersionDatabaseSchema(
 		defaultValues: {
 			id: () => nanoId({ lix }),
 			name: () => humanId(),
-			working_change_set_id: () => nanoId({ lix }),
+			working_commit_id: () => nanoId({ lix }),
 			inherits_from_version_id: () => "global",
 			hidden: () => false,
 		},
@@ -93,19 +93,19 @@ export const LixVersionSchema = {
 	"x-lix-key": "lix_version",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["id"],
-	"x-lix-unique": [["working_change_set_id"]],
+	"x-lix-unique": [["working_commit_id"]],
 	"x-lix-foreign-keys": [
 		{
-			properties: ["change_set_id"],
+			properties: ["commit_id"],
 			references: {
-				schemaKey: "lix_change_set",
+				schemaKey: "lix_commit",
 				properties: ["id"],
 			},
 		},
 		{
-			properties: ["working_change_set_id"],
+			properties: ["working_commit_id"],
 			references: {
-				schemaKey: "lix_change_set",
+				schemaKey: "lix_commit",
 				properties: ["id"],
 			},
 		},
@@ -121,15 +121,15 @@ export const LixVersionSchema = {
 	properties: {
 		id: { type: "string", "x-lix-generated": true },
 		name: { type: "string", "x-lix-generated": true },
-		change_set_id: { type: "string" },
-		working_change_set_id: { type: "string", "x-lix-generated": true },
+		commit_id: { type: "string" },
+		working_commit_id: { type: "string", "x-lix-generated": true },
 		inherits_from_version_id: {
 			type: ["string", "null"],
 			"x-lix-generated": true,
 		},
 		hidden: { type: "boolean", "x-lix-generated": true },
 	},
-	required: ["id", "name", "change_set_id", "working_change_set_id"],
+	required: ["id", "name", "commit_id", "working_commit_id"],
 	additionalProperties: false,
 } as const;
 LixVersionSchema satisfies LixSchemaDefinition;

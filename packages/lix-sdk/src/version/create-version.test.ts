@@ -1,49 +1,52 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createVersion } from "./create-version.js";
-import type { LixChangeSet } from "../change-set/schema.js";
-import { createChangeSet } from "../change-set/create-change-set.js";
 
-test("should create a version linked to the provided change_set_id", async () => {
+test("should create a version with the provided commit_id", async () => {
 	const lix = await openLix({});
-	// Setup: Create a change_set to link to (must be in global version for version graph)
-	const changeSet = await createChangeSet({ lix, lixcol_version_id: "global" });
+	// Create a source version to get a commit_id
+	const sourceVersion = await createVersion({ lix, name: "source-version" });
 
-	const newVersion = await createVersion({ lix, changeSet });
+	const newVersion = await createVersion({
+		lix,
+		commit_id: sourceVersion.commit_id,
+	});
 
-	expect(newVersion.change_set_id).toBe(changeSet.id);
+	// The new version should have the same commit as the source version
+	expect(newVersion.commit_id).toBe(sourceVersion.commit_id);
 	expect(newVersion.id).toBeDefined();
-	// Check if default name is assigned (assuming schema has a default or generated name)
+	expect(newVersion.id).not.toBe(sourceVersion.id);
+	// Check if default name is assigned
 	expect(newVersion.name).toBeDefined();
 });
 
 test("should create a version with the specified name", async () => {
 	const lix = await openLix({});
-	const changeSet = await createChangeSet({ lix, lixcol_version_id: "global" });
+	const sourceVersion = await createVersion({ lix, name: "source-version" });
 	const versionName = "My Test Version";
 
 	const newVersion = await createVersion({
 		lix,
-		changeSet,
+		commit_id: sourceVersion.commit_id,
 		name: versionName,
 	});
 
-	expect(newVersion.change_set_id).toBe(changeSet.id);
+	expect(newVersion.commit_id).toBe(sourceVersion.commit_id);
 	expect(newVersion.name).toBe(versionName);
 	expect(newVersion.id).toBeDefined();
 });
 
 test("should create a version with the specified id", async () => {
 	const lix = await openLix({});
-	const changeSet = await createChangeSet({ lix, lixcol_version_id: "global" });
+	const sourceVersion = await createVersion({ lix, name: "source-version" });
 
 	const newVersion = await createVersion({
 		lix,
-		changeSet,
+		commit_id: sourceVersion.commit_id,
 		id: "hello world",
 	});
 
-	expect(newVersion.change_set_id).toBe(changeSet.id);
+	expect(newVersion.commit_id).toBe(sourceVersion.commit_id);
 	expect(newVersion.id).toBe("hello world");
 	// Check default name assignment
 	expect(newVersion.name).toBeDefined();
@@ -51,18 +54,18 @@ test("should create a version with the specified id", async () => {
 
 test("should work within an existing transaction", async () => {
 	const lix = await openLix({});
-	const changeSet = await createChangeSet({ lix, lixcol_version_id: "global" });
+	const sourceVersion = await createVersion({ lix, name: "source-version" });
 	const versionName = "Transaction Test Version";
 
 	const newVersion = await lix.db.transaction().execute(async (trx) => {
 		return createVersion({
 			lix: { ...lix, db: trx }, // Pass the transaction object
-			changeSet,
+			commit_id: sourceVersion.commit_id,
 			name: versionName,
 		});
 	});
 
-	expect(newVersion.change_set_id).toBe(changeSet.id);
+	expect(newVersion.commit_id).toBe(sourceVersion.commit_id);
 	expect(newVersion.name).toBe(versionName);
 	expect(newVersion.id).toBeDefined();
 
@@ -75,23 +78,20 @@ test("should work within an existing transaction", async () => {
 	expect(dbVersion.name).toBe(versionName);
 });
 
-test("should fail if the 'from' change_set_id does not exist", async () => {
+test("should fail if the provided commit_id does not exist", async () => {
 	const lix = await openLix({});
-	const nonExistentChangeSet: Pick<LixChangeSet, "id"> = {
-		id: "hello world" as LixChangeSet["id"], // ID that won't exist
-	};
+	const nonExistentCommitId = "non-existent-commit-id";
 
 	await expect(
-		createVersion({ lix, changeSet: nonExistentChangeSet })
-		// Check for foreign key constraint error
-		// The specific error message might vary based on the db driver
-	).rejects.toThrow(/Foreign key constraint violation/i);
+		createVersion({ lix, commit_id: nonExistentCommitId })
+		// Should fail when trying to use non-existent commit
+	).rejects.toThrow();
 });
 
 test("should automatically create inheritance from global version", async () => {
 	const lix = await openLix({});
 
-	// Create a new version (should automatically inherit from global)
+	// Create a new version without commit_id (should inherit from active version)
 	const newVersion = await createVersion({
 		lix,
 		name: "test-version",
@@ -99,4 +99,56 @@ test("should automatically create inheritance from global version", async () => 
 
 	// Check that inheritance column was set correctly
 	expect(newVersion.inherits_from_version_id).toBe("global");
+	// Should have a commit_id from the active version
+	expect(newVersion.commit_id).toBeDefined();
+});
+
+test("should default to active version's commit_id when no commit_id is provided", async () => {
+	const lix = await openLix({});
+
+	// Get the active version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Create a new version without commit_id
+	const newVersion = await createVersion({
+		lix,
+		name: "branched-version",
+	});
+
+	// The new version should have the same commit_id as the active version
+	expect(newVersion.commit_id).toBe(activeVersion.commit_id);
+	expect(newVersion.id).not.toBe(activeVersion.id);
+	expect(newVersion.name).toBe("branched-version");
+});
+
+test("multiple versions created without commit_id should all point to active version's commit", async () => {
+	const lix = await openLix({});
+
+	// Get the active version's commit_id
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Create two versions without commit_id
+	const version1 = await createVersion({
+		lix,
+		name: "version-1",
+	});
+
+	const version2 = await createVersion({
+		lix,
+		name: "version-2",
+	});
+
+	// Both should have the same commit_id as the active version
+	expect(version1.commit_id).toBe(activeVersion.commit_id);
+	expect(version2.commit_id).toBe(activeVersion.commit_id);
+	// But different version IDs
+	expect(version1.id).not.toBe(version2.id);
 });

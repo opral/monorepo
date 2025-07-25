@@ -38,7 +38,7 @@ const VTAB_CREATE_SQL = `CREATE TABLE x(
 	inherited_from_version_id TEXT,
 	change_id TEXT,
 	untracked INTEGER,
-	change_set_id TEXT
+	commit_id TEXT
 ) WITHOUT ROWID;`;
 
 export function applyStateDatabaseSchema(
@@ -192,7 +192,7 @@ export function applyStateDatabaseSchema(
 					"inherited_from_version_id", // 10
 					"change_id", // 11
 					"untracked", // 12
-					"change_set_id", // 13
+					"commit_id", // 13
 				];
 
 				// Process constraints
@@ -380,9 +380,7 @@ export function applyStateDatabaseSchema(
 									? row[9]
 									: row.inherited_from_version_id;
 								const change_id = Array.isArray(row) ? row[10] : row.change_id;
-								const change_set_id = Array.isArray(row)
-									? row[11]
-									: row.change_set_id;
+								const commit_id = Array.isArray(row) ? row[11] : row.commit_id;
 
 								// Skip rows with null entity_id (no actual state data found)
 								if (!entity_id) {
@@ -414,7 +412,7 @@ export function applyStateDatabaseSchema(
 											inherited_from_version_id,
 											inheritance_delete_marker: isDeletion ? 1 : 0,
 											change_id: change_id || "unknown-change-id",
-											change_set_id: change_set_id || "untracked",
+											commit_id: commit_id || "untracked",
 										})
 										.onConflict((oc) =>
 											oc
@@ -435,7 +433,7 @@ export function applyStateDatabaseSchema(
 													inherited_from_version_id,
 													inheritance_delete_marker: isDeletion ? 1 : 0,
 													change_id: change_id || "unknown-change-id",
-													change_set_id: change_set_id || "untracked",
+													commit_id: commit_id || "untracked",
 												})
 										),
 								});
@@ -734,45 +732,44 @@ export function applyStateDatabaseSchema(
 						);
 					}
 
-					// TODO: This cache copying logic is a temporary workaround for shared change sets.
-					// The proper solution requires improving cache miss logic to handle change set sharing
+					// TODO: This cache copying logic is a temporary workaround for shared commits.
+					// The proper solution requires improving cache miss logic to handle commit sharing
 					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
 					//
-					// Handle cache copying for new versions that share change sets
+					// Handle cache copying for new versions that share commits
 					if (isInsert && String(schema_key) === "lix_version") {
 						const versionData = JSON.parse(snapshot_content);
 						const newVersionId = versionData.id;
-						const changeSetId = versionData.change_set_id;
+						const commitId = versionData.commit_id;
 
-						if (newVersionId && changeSetId) {
-							// Find other versions that already use this change set
-							const existingVersionsWithSameChangeSet = sqlite.exec({
+						if (newVersionId && commitId) {
+							// Find other versions that point to the same commit
+							const existingVersionsWithSameCommit = sqlite.exec({
 								sql: `
 									SELECT json_extract(snapshot_content, '$.id') as version_id
 									FROM internal_state_cache 
 									WHERE schema_key = 'lix_version' 
-									  AND json_extract(snapshot_content, '$.change_set_id') = ?
+									  AND json_extract(snapshot_content, '$.commit_id') = ?
 									  AND json_extract(snapshot_content, '$.id') != ?
 								`,
-								bind: [changeSetId, newVersionId],
+								bind: [commitId, newVersionId],
 								returnValue: "resultRows",
 							});
 
-							// If there are existing versions with the same change set, copy their cache entries
+							// If there are existing versions with the same commit, copy their cache entries
 							if (
-								existingVersionsWithSameChangeSet &&
-								existingVersionsWithSameChangeSet.length > 0
+								existingVersionsWithSameCommit &&
+								existingVersionsWithSameCommit.length > 0
 							) {
-								const sourceVersionId =
-									existingVersionsWithSameChangeSet[0]![0]; // Take first existing version
+								const sourceVersionId = existingVersionsWithSameCommit[0]![0]; // Take first existing version
 
 								// Copy cache entries from source version to new version
 								sqlite.exec({
 									sql: `
 										INSERT OR IGNORE INTO internal_state_cache 
-										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, change_set_id)
+										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id)
 										SELECT 
-											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, change_set_id
+											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id
 										FROM internal_state_cache
 										WHERE version_id = ? AND schema_key != 'lix_version'
 									`,
@@ -825,7 +822,7 @@ export function applyStateDatabaseSchema(
 			inherited_from_version_id,
 			change_id,
 			untracked,
-			change_set_id
+			commit_id
 		FROM state_all
 		WHERE version_id IN (SELECT version_id FROM active_version);
 
@@ -846,7 +843,7 @@ export function applyStateDatabaseSchema(
 				inherited_from_version_id,
 				change_id,
 				untracked,
-				change_set_id
+				commit_id
 			) VALUES (
 				NEW.entity_id,
 				NEW.schema_key,
@@ -860,7 +857,7 @@ export function applyStateDatabaseSchema(
 				NEW.inherited_from_version_id,
 				NEW.change_id,
 				NEW.untracked,
-				NEW.change_set_id
+				NEW.commit_id
 			);
 		END;
 
@@ -881,7 +878,7 @@ export function applyStateDatabaseSchema(
 				inherited_from_version_id = NEW.inherited_from_version_id,
 				change_id = NEW.change_id,
 				untracked = NEW.untracked,
-				change_set_id = NEW.change_set_id
+				commit_id = NEW.commit_id
 			WHERE
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
@@ -1114,7 +1111,7 @@ function getColumnName(columnIndex: number): string {
 		"inherited_from_version_id",
 		"change_id",
 		"untracked",
-		"change_set_id",
+		"commit_id",
 	];
 	return columns[columnIndex] || "unknown";
 }
@@ -1134,7 +1131,7 @@ export type StateAllView = {
 	inherited_from_version_id: string | null;
 	change_id: Generated<string>;
 	untracked: Generated<boolean>;
-	change_set_id: Generated<string>;
+	commit_id: Generated<string>;
 };
 
 export type InternalStateAllUntrackedTable = {

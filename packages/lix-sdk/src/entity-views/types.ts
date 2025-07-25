@@ -97,10 +97,10 @@ export type EntityStateAllView<T> = T & EntityStateAllColumns;
  * // Define a history view type for key-value entities
  * type KeyValueHistoryView = EntityStateHistoryView<KeyValue>;
  *
- * // Query entity state at a specific change set
+ * // Query entity state at a specific commit
  * await lix.db
  *   .selectFrom("key_value_history")
- *   .where("lixcol_change_set_id", "=", changeSetId)
+ *   .where("lixcol_commit_id", "=", commitId)
  *   .where("lixcol_depth", "=", 0)
  *   .selectAll()
  *   .execute();

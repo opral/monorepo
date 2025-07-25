@@ -1,29 +1,31 @@
 import type { Lix } from "../lix/open-lix.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
-import { createChangeSet } from "./create-change-set.js";
-import type { LixChangeSet } from "./schema.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import type { LixCommit } from "./schema.js";
+import { uuidV7 } from "../deterministic/uuid-v7.js";
 
 /**
- * Merges two change sets using a "source wins" strategy (until lix models conflicts).
+ * Merges two commits using a "source wins" strategy (until lix models conflicts).
  *
- * Creates a new change set containing the merged result. If an element
- * (identified by entity_id, file_id, schema_key) exists in both the source
- * and target change sets (considering their respective histories), the element
- * from the source change set's history takes precedence.
+ * Creates a new change set containing the merged result and a commit that
+ * points to both source and target commits. If an element (identified by
+ * entity_id, file_id, schema_key) exists in both the source and target
+ * commits (considering their respective histories), the element from the
+ * source commit's history takes precedence.
  *
  * @param args - The arguments for the merge operation.
  * @param args.lix - The Lix instance.
- * @param args.source - The source change set (only `id` is needed).
- * @param args.target - The target change set (only `id` is needed).
+ * @param args.source - The source commit (only `id` is needed).
+ * @param args.target - The target commit (only `id` is needed).
  *
- * @returns A Promise resolving to the newly created ChangeSet representing the merged state.
+ * @returns A Promise resolving to the newly created Commit representing the merged state.
  */
-export async function createMergeChangeSet(args: {
+export async function createMergeCommit(args: {
 	lix: Lix;
-	source: Pick<LixChangeSet, "id">;
-	target: Pick<LixChangeSet, "id">;
-}): Promise<LixChangeSet> {
+	source: Pick<LixCommit, "id">;
+	target: Pick<LixCommit, "id">;
+}): Promise<LixCommit> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// --- Calculate the merged elements using "source wins" logic ---
 		const mergedElements = await trx
@@ -84,10 +86,47 @@ export async function createMergeChangeSet(args: {
 				schema_key: ce.schema_key,
 				file_id: ce.file_id,
 			})),
-			parents: [args.source, args.target],
+			lixcol_version_id: "global",
 		});
 
-		return newChangeSet;
+		// Create a commit for the merged change set
+		const commitId = uuidV7({ lix: args.lix });
+
+		// Insert the commit
+		await trx
+			.insertInto("commit_all")
+			.values({
+				id: commitId,
+				change_set_id: newChangeSet.id,
+				lixcol_version_id: "global",
+			})
+			.execute();
+
+		// Create commit edges to both parents
+		await trx
+			.insertInto("commit_edge_all")
+			.values([
+				{
+					parent_id: args.source.id,
+					child_id: commitId,
+					lixcol_version_id: "global",
+				},
+				{
+					parent_id: args.target.id,
+					child_id: commitId,
+					lixcol_version_id: "global",
+				},
+			])
+			.execute();
+
+		// Return the commit
+		const commit = await trx
+			.selectFrom("commit")
+			.where("id", "=", commitId)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		return commit;
 	};
 
 	// Restore transaction handling

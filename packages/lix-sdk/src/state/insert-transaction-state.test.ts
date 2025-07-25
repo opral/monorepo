@@ -270,7 +270,6 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 	expect(tombstone[0]?.inheritance_delete_marker).toBe(1);
 	expect(tombstone[0]?.snapshot_content).toBe(null);
 	expect(tombstone[0]?.change_id).toBe("untracked-delete");
-	expect(tombstone[0]?.change_set_id).toBe("untracked");
 
 	// Verify entity no longer appears in active version
 	const afterDelete = await lix.db

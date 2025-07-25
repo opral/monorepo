@@ -54,7 +54,7 @@ export function applyResolvedStateView(args: {
 				NULL as inherited_from_version_id, 
 				'untracked' as change_id, 
 				1 as untracked,
-				'untracked' as change_set_id
+				'untracked' as commit_id
 			FROM internal_state_all_untracked
 			
 			UNION ALL
@@ -74,7 +74,7 @@ export function applyResolvedStateView(args: {
 				inherited_from_version_id, 
 				change_id, 
 				0 as untracked,
-				change_set_id
+				commit_id
 			FROM internal_state_cache
 			WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions
 			AND NOT EXISTS (
@@ -102,7 +102,7 @@ export function applyResolvedStateView(args: {
 				vi.parent_version_id as inherited_from_version_id, 
 				isc.change_id, 
 				0 as untracked,
-				isc.change_set_id
+				isc.commit_id
 			FROM (
 				-- Get version inheritance relationships from cache
 				SELECT 
@@ -149,7 +149,7 @@ export function applyResolvedStateView(args: {
 				vi.parent_version_id as inherited_from_version_id, 
 				'untracked' as change_id, 
 				1 as untracked,
-				'untracked' as change_set_id
+				'untracked' as commit_id
 			FROM (
 				-- Get version inheritance relationships from cache
 				SELECT 

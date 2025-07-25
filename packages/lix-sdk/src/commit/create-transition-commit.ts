@@ -1,24 +1,25 @@
 import type { Lix } from "../lix/index.js";
-import type { LixChangeSet } from "./schema.js";
+import type { LixCommit } from "./schema.js";
 import { changeSetElementIsLeafOf } from "../query-filter/change-set-element-is-leaf-of.js";
 import { changeSetElementInAncestryOf } from "../query-filter/change-set-element-in-ancestry-of.js";
-import { createChangeSet } from "./create-change-set.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import { uuidV7 } from "../deterministic/uuid-v7.js";
 
 /**
- * Creates a change set that enables a transition from a source state
- * (defined by `sourceChangeSet`) to a target state (defined by `targetChangeSet`).
+ * Creates a commit that enables a transition from a source state
+ * (defined by `sourceCommit`) to a target state (defined by `targetCommit`).
  *
- * Applying the returned change set to the source state will result in a state
+ * Applying the returned commit to the source state will result in a state
  * that matches the target state.
  *
  * - switch between state (switching versions, checkpoints, etc.)
- * - restore old state (applying the transition set on top of current state)
+ * - restore old state (applying the transition commit on top of current state)
  */
-export async function createTransitionChangeSet(args: {
+export async function createTransitionCommit(args: {
 	lix: Lix;
-	sourceChangeSet: Pick<LixChangeSet, "id">;
-	targetChangeSet: Pick<LixChangeSet, "id">;
-}): Promise<LixChangeSet> {
+	sourceCommit: Pick<LixCommit, "id">;
+	targetCommit: Pick<LixCommit, "id">;
+}): Promise<LixCommit> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// 1. Find leaf changes defining the state AT the *target* change set
 		const leafChangesToApply = await trx
@@ -28,8 +29,8 @@ export async function createTransitionChangeSet(args: {
 				"change_set_element.change_id",
 				"change.id"
 			)
-			.where(changeSetElementInAncestryOf([args.targetChangeSet]))
-			.where(changeSetElementIsLeafOf([args.targetChangeSet]))
+			.where(changeSetElementInAncestryOf([args.targetCommit]))
+			.where(changeSetElementIsLeafOf([args.targetCommit]))
 			.select([
 				"change.id",
 				"change.entity_id",
@@ -49,8 +50,8 @@ export async function createTransitionChangeSet(args: {
 				"change.id"
 			)
 			// Condition A: The change must be a leaf in the *source* state
-			.where(changeSetElementInAncestryOf([{ id: args.sourceChangeSet.id }]))
-			.where(changeSetElementIsLeafOf([{ id: args.sourceChangeSet.id }]))
+			.where(changeSetElementInAncestryOf([args.sourceCommit]))
+			.where(changeSetElementIsLeafOf([args.sourceCommit]))
 			// Condition B: The change must NOT be a leaf in the *target* state
 			.where(({ not, exists, selectFrom }) =>
 				not(
@@ -63,8 +64,8 @@ export async function createTransitionChangeSet(args: {
 							)
 							.whereRef("target_leaf_check.id", "=", "change.id")
 							// *** Swapped target and source here relative to previous version ***
-							.where(changeSetElementInAncestryOf([args.targetChangeSet]))
-							.where(changeSetElementIsLeafOf([args.targetChangeSet]))
+							.where(changeSetElementInAncestryOf([args.targetCommit]))
+							.where(changeSetElementIsLeafOf([args.targetCommit]))
 							.select("target_leaf_check.id")
 					)
 				)
@@ -86,8 +87,8 @@ export async function createTransitionChangeSet(args: {
 							)
 							// Check if any change for this entity is a leaf AT THE TARGET change set
 							// *** Swapped target and source here relative to previous version ***
-							.where(changeSetElementInAncestryOf([args.targetChangeSet]))
-							.where(changeSetElementIsLeafOf([args.targetChangeSet]))
+							.where(changeSetElementInAncestryOf([args.targetCommit]))
+							.where(changeSetElementIsLeafOf([args.targetCommit]))
 							.select("restored_entity_check.id")
 					)
 				)
@@ -114,8 +115,7 @@ export async function createTransitionChangeSet(args: {
 								plugin_key: c.plugin_key,
 								entity_id: c.entity_id,
 								file_id: c.file_id,
-								// delete change
-								snapshot_id: "no-content",
+								snapshot_content: null, // Deletion
 							}))
 						)
 						.returning(["id", "entity_id", "schema_key", "file_id"])
@@ -125,7 +125,7 @@ export async function createTransitionChangeSet(args: {
 		const combinedChanges = [...leafChangesToApply, ...deleteChanges];
 
 		if (combinedChanges.length === 0) {
-			throw new Error("No changes to apply in the transition change set.");
+			throw new Error("No changes to apply in the transition commit.");
 		}
 
 		const transitionChangeSet = await createChangeSet({
@@ -136,9 +136,47 @@ export async function createTransitionChangeSet(args: {
 				schema_key: change.schema_key,
 				file_id: change.file_id,
 			})),
+			lixcol_version_id: "global",
 		});
 
-		return transitionChangeSet;
+		// Create a commit for the transition change set
+		const commitId = uuidV7({ lix: args.lix });
+
+		// Insert the commit
+		await trx
+			.insertInto("commit_all")
+			.values({
+				id: commitId,
+				change_set_id: transitionChangeSet.id,
+				lixcol_version_id: "global",
+			})
+			.execute();
+
+		// Create commit edges to both source and target commits
+		await trx
+			.insertInto("commit_edge_all")
+			.values([
+				{
+					parent_id: args.sourceCommit.id,
+					child_id: commitId,
+					lixcol_version_id: "global",
+				},
+				{
+					parent_id: args.targetCommit.id,
+					child_id: commitId,
+					lixcol_version_id: "global",
+				},
+			])
+			.execute();
+
+		// Return the commit
+		const commit = await trx
+			.selectFrom("commit")
+			.where("id", "=", commitId)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		return commit;
 	};
 
 	if (args.lix.db.isTransaction) {

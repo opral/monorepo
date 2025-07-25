@@ -4,29 +4,31 @@ import {
 	mockJsonPlugin,
 	MockJsonPropertySchema,
 } from "../plugin/mock-json-plugin.js";
-import { createChangeSet } from "./create-change-set.js";
-import { applyChangeSet } from "./apply-change-set.js";
-import { createTransitionChangeSet } from "./create-transition-change-set.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import { applyChangeSet } from "../change-set/apply-change-set.js";
+import { createTransitionCommit } from "./create-transition-commit.js";
+import { createCommit } from "./create-commit.js";
 
-// needs faster graph traversal. currently timing out.
-// related https://github.com/opral/lix-sdk/issues/311
-test.skip("it transitions state to a specific change set", async () => {
+test.todo("it transitions state to a specific commit", async () => {
 	// Create a Lix instance with our plugin
 	const lix = await openLix({
 		providePlugins: [mockJsonPlugin],
 	});
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "version.id", "active_version.version_id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+	// const activeVersion = await lix.db
+	// 	.selectFrom("active_version")
+	// 	.innerJoin("version", "version.id", "active_version.version_id")
+	// 	.selectAll("version")
+	// 	.executeTakeFirstOrThrow();
 
 	// Insert the schema that the mockJsonPlugin uses
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
+			key: "mock_json_property",
+			version: "1.0",
 			value: MockJsonPropertySchema,
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -116,7 +118,9 @@ test.skip("it transitions state to a specific change set", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
 
 	const cs1 = await createChangeSet({
 		lix,
@@ -127,7 +131,12 @@ test.skip("it transitions state to a specific change set", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
+	});
+	const commit1 = await createCommit({
+		lix,
+		changeSet: cs1,
+		parentCommits: [commit0],
 	});
 
 	const cs2 = await createChangeSet({
@@ -139,7 +148,12 @@ test.skip("it transitions state to a specific change set", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
+	});
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
 	});
 
 	// Apply change sets in order: cs0, then cs1, then cs2
@@ -202,34 +216,31 @@ test.skip("it transitions state to a specific change set", async () => {
 
 	expect(actualJsonStateCs2).toEqual(expectedJsonStateCs2);
 
-	// Action: Create transition change set to restore to cs0
-	const transitionChangeSet = await createTransitionChangeSet({
+	// Action: Create transition commit to restore to commit0
+	const transitionCommit = await createTransitionCommit({
 		lix,
-		sourceChangeSet: cs2,
-		targetChangeSet: cs0,
+		sourceCommit: commit2,
+		targetCommit: commit0,
 	});
 
-	// Apply the transition change set
+	// Apply the transition commit
 	await applyChangeSet({
 		lix,
-		changeSet: transitionChangeSet,
+		changeSet: { id: transitionCommit.change_set_id },
 	});
 
 	// Verify final state
-	// 1. Check that versions change set parent is cs2
-	const finalVersion = await lix.db
-		.selectFrom("version")
-		.where("id", "=", activeVersion.id)
-		.select(["change_set_id"])
-		.executeTakeFirstOrThrow();
-
-	const parentCs = await lix.db
-		.selectFrom("change_set_edge")
-		.where("child_id", "=", finalVersion.change_set_id)
+	// 1. Check that the transition commit has both source and target as parents
+	const parentCommits = await lix.db
+		.selectFrom("commit_edge")
+		.where("child_id", "=", transitionCommit.id)
 		.select(["parent_id"])
-		.executeTakeFirstOrThrow();
+		.execute();
 
-	expect(parentCs.parent_id).toBe(cs2.id);
+	expect(parentCommits).toHaveLength(2);
+	expect(parentCommits.map((e) => e.parent_id).sort()).toEqual(
+		[commit2.id, commit0.id].sort()
+	);
 
 	// 2. Check if data is updated
 	const finalFile = await lix.db

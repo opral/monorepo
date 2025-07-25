@@ -19,10 +19,10 @@ function globSync(args: {
 	return (result[0]?.[0] as any) === 1;
 }
 
-export function materializeFileDataAtChangeset(args: {
+export function materializeFileDataAtCommit(args: {
 	lix: Pick<Lix, "sqlite" | "plugin" | "db">;
 	file: Omit<LixFile, "data">;
-	rootChangeSetId: string;
+	rootCommitId: string;
 	depth: number;
 }): Uint8Array {
 	const plugins = args.lix.plugin.getAllSync();
@@ -51,7 +51,7 @@ export function materializeFileDataAtChangeset(args: {
 				lix: args.lix,
 				pluginKey: plugin.key,
 				fileId: args.file.id,
-				rootChangeSetId: args.rootChangeSetId,
+				rootCommitId: args.rootCommitId,
 				depth: args.depth,
 			}),
 		});
@@ -80,7 +80,7 @@ export function materializeFileDataAtChangeset(args: {
 			lix: args.lix,
 			pluginKey: lixUnknownFileFallbackPlugin.key,
 			fileId: args.file.id,
-			rootChangeSetId: args.rootChangeSetId,
+			rootCommitId: args.rootCommitId,
 			depth: args.depth,
 		}),
 	});
@@ -96,7 +96,7 @@ export function materializeFileDataAtChangeset(args: {
 
 	if (formattedChanges.length === 0) {
 		throw new Error(
-			`[materializeFileDataAtChangeset] No changes found for file ${args.file.id} with plugin ${lixUnknownFileFallbackPlugin.key} at root changeset ${args.rootChangeSetId} depth ${args.depth}. Cannot materialize file data.`
+			`[materializeFileDataAtCommit] No changes found for file ${args.file.id} with plugin ${lixUnknownFileFallbackPlugin.key} at root commit ${args.rootCommitId} depth ${args.depth}. Cannot materialize file data.`
 		);
 	}
 
@@ -112,14 +112,14 @@ function selectFileChanges(args: {
 	lix: Pick<Lix, "db">;
 	pluginKey: string;
 	fileId: string;
-	rootChangeSetId: string;
+	rootCommitId: string;
 	depth: number;
 }) {
 	return args.lix.db
 		.selectFrom("state_history as sh1")
 		.where("sh1.plugin_key", "=", args.pluginKey)
 		.where("sh1.file_id", "=", args.fileId)
-		.where("sh1.root_change_set_id", "=", args.rootChangeSetId)
+		.where("sh1.root_commit_id", "=", args.rootCommitId)
 		.where("sh1.depth", ">=", args.depth)
 		.where("sh1.depth", "=", (eb) =>
 			// This subquery finds the "leaf state" for each entity at the requested depth in history.
@@ -144,7 +144,7 @@ function selectFileChanges(args: {
 				.whereRef("sh2.entity_id", "=", "sh1.entity_id")
 				.whereRef("sh2.file_id", "=", "sh1.file_id")
 				.whereRef("sh2.plugin_key", "=", "sh1.plugin_key")
-				.whereRef("sh2.root_change_set_id", "=", "sh1.root_change_set_id")
+				.whereRef("sh2.root_commit_id", "=", "sh1.root_commit_id")
 				.where("sh2.depth", ">=", args.depth)
 		)
 		.select([
