@@ -8,15 +8,15 @@ import type { LixVersion } from "./schema.js";
  * Creates a new version.
  *
  * If `commit_id` is provided, the new version will point to that commit.
- * Otherwise, a new empty change set and commit will be created.
+ * Otherwise, defaults to the active version's commit_id.
+ *
+ * @example
+ *   // Create a version branching from the current active version
+ *   const version = await createVersion({ lix, name: "feature-branch" });
  *
  * @example
  *   // Create a version pointing to a specific commit
  *   const version = await createVersion({ lix, commit_id: existingCommitId });
- *
- * @example
- *   // Create a version with a new change set and commit
- *   const version = await createVersion({ lix, name: "feature-branch" });
  */
 export async function createVersion(args: {
 	lix: Lix;
@@ -37,22 +37,14 @@ export async function createVersion(args: {
 			// Use the provided commit
 			commitId = args.commit_id;
 		} else {
-			// Create a new change set and commit
-			const cs = await createChangeSet({
-				lix: { ...args.lix, db: trx },
-				lixcol_version_id: "global",
-			});
-
-			// Create a commit that points to the change set
-			commitId = uuidV7({ lix: args.lix });
-			await trx
-				.insertInto("commit_all")
-				.values({
-					id: commitId,
-					change_set_id: cs.id,
-					lixcol_version_id: "global",
-				})
-				.execute();
+			// Default to active version's commit_id
+			const activeVersion = await trx
+				.selectFrom("active_version")
+				.innerJoin("version", "version.id", "active_version.version_id")
+				.select("version.commit_id")
+				.executeTakeFirstOrThrow();
+			
+			commitId = activeVersion.commit_id;
 		}
 
 		// Create a working commit for the new version

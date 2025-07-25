@@ -91,7 +91,7 @@ test("should fail if the provided commit_id does not exist", async () => {
 test("should automatically create inheritance from global version", async () => {
 	const lix = await openLix({});
 
-	// Create a new version without commit_id (should create new commit and inherit from global)
+	// Create a new version without commit_id (should inherit from active version)
 	const newVersion = await createVersion({
 		lix,
 		name: "test-version",
@@ -99,12 +99,41 @@ test("should automatically create inheritance from global version", async () => 
 
 	// Check that inheritance column was set correctly
 	expect(newVersion.inherits_from_version_id).toBe("global");
-	// Should have a commit_id
+	// Should have a commit_id from the active version
 	expect(newVersion.commit_id).toBeDefined();
 });
 
-test("should create a new commit when no commit_id is provided", async () => {
+test("should default to active version's commit_id when no commit_id is provided", async () => {
 	const lix = await openLix({});
+
+	// Get the active version
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Create a new version without commit_id
+	const newVersion = await createVersion({
+		lix,
+		name: "branched-version",
+	});
+
+	// The new version should have the same commit_id as the active version
+	expect(newVersion.commit_id).toBe(activeVersion.commit_id);
+	expect(newVersion.id).not.toBe(activeVersion.id);
+	expect(newVersion.name).toBe("branched-version");
+});
+
+test("multiple versions created without commit_id should all point to active version's commit", async () => {
+	const lix = await openLix({});
+
+	// Get the active version's commit_id
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
 
 	// Create two versions without commit_id
 	const version1 = await createVersion({
@@ -117,8 +146,9 @@ test("should create a new commit when no commit_id is provided", async () => {
 		name: "version-2",
 	});
 
-	// They should have different commits since each creates a new one
-	expect(version1.commit_id).toBeDefined();
-	expect(version2.commit_id).toBeDefined();
-	expect(version1.commit_id).not.toBe(version2.commit_id);
+	// Both should have the same commit_id as the active version
+	expect(version1.commit_id).toBe(activeVersion.commit_id);
+	expect(version2.commit_id).toBe(activeVersion.commit_id);
+	// But different version IDs
+	expect(version1.id).not.toBe(version2.id);
 });

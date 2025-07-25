@@ -1,0 +1,145 @@
+import CodeSnippet from "../components/code-snippet";
+import * as example from "./versions.example.ts";
+import exampleSrcCode from "./versions.example.ts?raw";
+
+# Versions
+
+Versions in Lix are like branches in Git—they are named pointers that let developers manage different states of data, experiment in parallel, and maintain a clear history of changes.
+
+![Versions](/versions.svg)
+
+> [!TIP]
+> Lix uses the term "version" instead of "branch" because it's more intuitive for non-technical users. "Version" mirrors the familiar concept of duplicating a file and adding `v2` or `final` to the file name e.g. `something_v2.docx` or `something_final.docx`.
+
+The super-power is that **Lix auto-commits every transaction**. Unlike Git which requires manual `git commit` operations, Lix creates a new commit in the history for every modification. Versions provide a stable, human-friendly way to manage this rapid, continuous history.
+
+### Quick benefits
+
+| Benefit                       | Why it matters                                                                                                                       |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Parallel development**      | Isolated "branches" can be created for new features without affecting the main version.                                              |
+| **Risk-free experimentation** | New ideas can be tested in a separate version, which can be deleted if the experiment is unsuccessful.                               |
+| **Clear milestones**          | Checkpoints are used to create stable, named releases like v1.0 or production-ready.                                                 |
+| **Live collaboration**        | A version's "working commit" lets multiple users see and discuss ongoing changes in real-time before they are formally checkpointed. |
+
+## How Versions Work
+
+A version is a named reference that points to two key commits in the history, providing both a stable anchor and a live view of current work:
+
+- **Where you are** in the commit graph (`commit_id`)
+- **What you're working on** via a special working commit (`working_commit_id`)
+- **Where you came from** through inheritance (`inherits_from_version_id`)
+
+```
+Version A (main)      ──► commit (245) ↘
+                                        commit (309) ──► commit (38e) ...
+Version B (feature-x) ──► commit (sh4) ↗
+```
+
+## Getting Started - Everyday CRUD
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["crud-operations"]}
+/>
+
+## How versions work under the hood
+
+Every change in Lix creates an auto-commit. A **checkpoint** is simply a commit with a "checkpoint" label—nothing more, nothing less.
+
+The **working commit** is computed dynamically: it represents all commits since the last checkpoint.
+
+```
+commit_1 ← commit_2 ← commit_3 (checkpoint) ← commit_4 ← commit_5 ← commit_6
+                           ↑                                         ↑
+                       commit_id                              working_commit_id
+                    (last checkpoint)                    (computed: commits 4-6)
+```
+
+### Auto-commits in action
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["auto-commits"]}
+/>
+
+### Creating checkpoints
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["checkpoints"]}
+/>
+
+What happens when you create a checkpoint:
+
+1. Takes the current state and creates a commit
+2. Adds the "checkpoint" label to that commit
+3. Updates the version's `commit_id` to point to this new checkpoint
+4. The working commit now starts tracking changes from this point
+
+### Why this matters
+
+- **Checkpoints are just labeled commits** - They're not special structures, just regular commits with metadata
+- **Working commits are computed** - They dynamically represent "changes since last checkpoint"
+- **Every change is permanent** - Auto-commits ensure nothing is ever lost
+
+## Working with data across versions
+
+Each version shows a different view of your data based on its commit history:
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["working-across-versions"]}
+/>
+
+## Version inheritance
+
+Versions can inherit from each other through the `inherits_from_version_id` field. This inheritance is crucial for the commit graph—it determines which commits are visible in each version.
+
+When a version inherits from another:
+
+- The child version can see all commits from the parent's history
+- The child can build on top of the parent's commit graph
+- Changes in the child version create new commits that branch from the parent's timeline
+
+This enables parallel development where multiple versions share a common history but diverge at different points.
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["version-inheritance"]}
+/>
+
+## Practical example: Feature branch workflow
+
+<CodeSnippet
+  module={example}
+  srcCode={exampleSrcCode}
+  sections={["feature-branch-workflow"]}
+/>
+
+## Version structure
+
+```typescript
+interface LixVersion {
+  id: string;
+  name: string;
+  commit_id: string; // Points to last checkpoint
+  working_commit_id: string; // Computed from commits since checkpoint
+  inherits_from_version_id: string | null;
+  hidden: boolean;
+}
+```
+
+## API reference quick-links
+
+| Function / Type      | Purpose                     | Docs                                   |
+| -------------------- | --------------------------- | -------------------------------------- |
+| `createVersion()`    | Create a new version branch | [API](/api/functions/createVersion)    |
+| `switchVersion()`    | Change active version       | [API](/api/functions/switchVersion)    |
+| `createCheckpoint()` | Create a labeled commit     | [API](/api/functions/createCheckpoint) |
+| `LixVersion`         | Version type definition     | [API](/api/types/LixVersion)           |

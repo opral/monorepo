@@ -103,7 +103,7 @@ export default defineConfig({
               text: "Validation Rules",
               link: "/guide/features/validation-rules",
             },
-            { text: "Versions (Branching)", link: "/guide/features/versions" },
+            { text: "Versions (Branching)", link: "/guide/versions" },
           ],
         },
         {
