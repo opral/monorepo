@@ -764,16 +764,23 @@ export function applyStateDatabaseSchema(
 								const sourceVersionId = existingVersionsWithSameCommit[0]![0]; // Take first existing version
 
 								// Copy cache entries from source version to new version
+								// IMPORTANT: When copying cache entries, we need to mark them as inherited
+								// if they don't have an inherited_from_version_id already
 								sqlite.exec({
 									sql: `
 										INSERT OR IGNORE INTO internal_state_cache 
 										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id)
 										SELECT 
-											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id
+											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
+											CASE 
+												WHEN inherited_from_version_id IS NULL THEN ?
+												ELSE inherited_from_version_id
+											END as inherited_from_version_id,
+											inheritance_delete_marker, change_id, commit_id
 										FROM internal_state_cache
 										WHERE version_id = ? AND schema_key != 'lix_version'
 									`,
-									bind: [newVersionId, sourceVersionId],
+									bind: [newVersionId, sourceVersionId, sourceVersionId],
 								});
 							}
 						}
