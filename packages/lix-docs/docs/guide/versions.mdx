@@ -4,28 +4,20 @@ import gettingStartedSrcCode from "./versions.getting-started.ts?raw";
 import * as autoCommitExample from "./versions.auto-commit.ts";
 import autoCommitSrcCode from "./versions.auto-commit.ts?raw";
 
-# Versions - The safety net for AI agents 
 
-Give every AI agent (& human) its own playground, keep the main version safe.
+# Versions - Enable Parallel Work 
 
-Agents act fast and often unpredictably; uncontrolled writes can trash live data. Versions create “sealed rooms” where agents iterate without collateral damage.
+Versions enable parallel work, safe experimentation, and clear diffs in Lix. They allow you to create isolated environments for different tasks or experiments, similar to branches in Git.
 
 ![Versions](/versions.svg)
 
-> [!TIP]
-> Lix uses the term "version" instead of "branch" because it's more intuitive for non-technical users. "Version" mirrors the familiar concept of duplicating a file and adding `v2` or `final` to the file name e.g. `something_v2.docx` or `something_final.docx`.
+|  |  |
+|--|--|
+| **Parallel work** | Multiple AI agents — and human editors — can make different changes at the same time without overwriting each other's progress. |
+| **Risk free experiments** | Let agents make changes without impacting the users' version—delete instantly if results disappoint. |
+| **Clear diffs & reviews** | See exactly *what* each agent (or human) changed between versions. |
 
-The super-power is that **Lix auto-commits every transaction**. Unlike Git which requires manual `git commit` operations, Lix creates a new commit in the history for every modification. Versions provide a stable, human-friendly way to manage this rapid, continuous history.
-
-## Why versions matter for agent-powered apps
-
-| Benefit | What it unlocks in production |
-|---------|------------------------------|
-| **Parallel work** | Multiple AI agents—and human editors—can make different changes at the same time without overwriting each other's progress. |
-| **Risk - free experiments** | Let agents make changes without impacting the users' version—delete instantly if results disappoint. |
-| **Clear diffs & reviews** | See exactly *what* each agent (or human) changes between versions. |
-
-## Use cases
+## Use case examples
 
 ### Human-AI Agent Collaboration
 
@@ -93,23 +85,19 @@ async function determineWinner(versionA, versionB) {
 - **Scalable testing**: Run dozens of agent experiments simultaneously
 
 
-
 ## How Versions Work
 
-Versions in Lix are like branches in Git—they are named pointers that express different states of data, experiment in parallel, and maintain a clear history of changes.
-
-
-Technically, a version is a named reference that points to two key commits in the history, providing both a stable anchor and a live view of current work:
-
-- **Where you are** in the commit graph (`commit_id`)
-- **What you're working on** via a special working commit (`working_commit_id`)
-- **Where you came from** through inheritance (`inherits_from_version_id`)
+Versions in Lix are like branches in Git—they are pointers to a specific commit that expresses state at a point in time. 
 
 ```
 Version A (main)      ──► commit (245) ↘
                                         commit (309) ──► commit (38e) ...
 Version B (feature-x) ──► commit (sh4) ↗
 ```
+
+> [!NOTE]
+> Lix uses the term "version" instead of "branch" because it's more intuitive for non-technical users. "Version" mirrors the familiar concept of duplicating a file and adding `v2` or `final` to the file name e.g. `something_v2.docx` or `something_final.docx`.
+
 
 ## Interactive example
 
@@ -119,27 +107,6 @@ Versions let you work with different states of your data in isolation. Here's a 
   module={gettingStartedExample}
   srcCode={gettingStartedSrcCode}
   sections={["getting-started-versions"]}
-/>
-
-## How versions work under the hood
-
-Every change in Lix creates an auto-commit. A **checkpoint** is simply a commit with a "checkpoint" label—nothing more, nothing less.
-
-The **working commit** is computed dynamically: it represents all commits since the last checkpoint.
-
-```
-commit_1 ← commit_2 ← commit_3 (checkpoint) ← commit_4 ← commit_5 ← commit_6
-                           ↑                                         ↑
-                       commit_id                              working_commit_id
-                    (last checkpoint)                    (computed: commits 4-6)
-```
-
-### Auto-commits in action
-
-<CodeSnippet
-  module={autoCommitExample}
-  srcCode={autoCommitSrcCode}
-  sections={["auto-commits"]}
 />
 
 ## API reference quick-links
