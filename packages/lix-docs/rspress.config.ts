@@ -84,13 +84,9 @@ export default defineConfig({
           ],
         },
         {
-          text: "Ready-made Features",
+          text: "Most Used Features",
           collapsed: false,
           items: [
-            {
-              text: "Attribution (Blame)",
-              link: "/guide/features/attribution",
-            },
             {
               text: "Change Proposals",
               link: "/guide/features/change-proposals",
@@ -110,6 +106,10 @@ export default defineConfig({
           text: "Core Concepts",
           collapsed: true,
           items: [
+            {
+              text: "Attribution (Blame)",
+              link: "/guide/features/attribution",
+            },
             { text: "Comments", link: "/guide/features/comments" },
             { text: "Files", link: "/guide/concepts/files" },
             { text: "Changes", link: "/guide/concepts/changes" },
