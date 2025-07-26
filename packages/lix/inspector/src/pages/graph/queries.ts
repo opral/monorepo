@@ -15,7 +15,7 @@ export function selectAvailableLabels(lix: Lix) {
 }
 
 /**
- * Selects commits with their associated change sets and conditional filtering based on selected labels
+ * Selects commits and their associated change sets with conditional filtering based on selected labels
  */
 export function selectCommits(
   lix: Lix,
