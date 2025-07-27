@@ -2,6 +2,8 @@ import type { Lix } from "../lix/open-lix.js";
 import type { LixThread, LixThreadComment } from "./schema.js";
 import { nanoId } from "../deterministic/index.js";
 import type { NewState } from "../entity-views/types.js";
+import type { LixEntity, LixEntityCanonical } from "../entity/schema.js";
+import { createEntityThread } from "../entity/thread/create-entity-thread.js";
 
 /**
  * Starts a new discussion thread.
@@ -12,7 +14,18 @@ import type { NewState } from "../entity-views/types.js";
  *
  * @example
  * ```ts
+ * // Create a standalone thread
  * const thread = await createThread({ lix, comments: [{ body: "Hello" }] })
+ * ```
+ *
+ * @example
+ * ```ts
+ * // Create a thread attached to an entity
+ * const thread = await createThread({ 
+ *   lix, 
+ *   entity: { entity_id: "para_123", schema_key: "markdown_paragraph", file_id: "README.md" },
+ *   comments: [{ body: "This paragraph needs review" }] 
+ * })
  * ```
  */
 
@@ -22,6 +35,8 @@ export async function createThread(args: {
 	comments?: Pick<NewState<LixThreadComment>, "body">[];
 	/** defaults to global */
 	versionId?: string;
+	/** Optional entity to attach the thread to */
+	entity?: LixEntity | LixEntityCanonical;
 }): Promise<
 	LixThread & {
 		lixcol_version_id: string;
@@ -70,6 +85,16 @@ export async function createThread(args: {
 				.executeTakeFirstOrThrow();
 
 			insertedComments.push(insertedComment);
+		}
+
+		// If an entity is provided, create the entity-thread mapping
+		if (args.entity) {
+			await createEntityThread({
+				lix: { db: trx },
+				entity: args.entity,
+				thread: { id: threadId },
+				versionId: versionId
+			});
 		}
 
 		return { ...thread, comments: insertedComments };

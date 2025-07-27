@@ -27,6 +27,7 @@ import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { LixLabelSchema } from "../label/schema.js";
 import { LixEntityLabelSchema } from "../entity/label/schema.js";
+import { LixEntityThreadSchema } from "../entity/thread/schema.js";
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,
@@ -68,6 +69,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
 	entity_label: LixEntityLabelSchema,
+	entity_thread: LixEntityThreadSchema,
 	thread: LixThreadSchema,
 	thread_comment: LixThreadCommentSchema,
 };
@@ -95,6 +97,7 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
 	EntityViews<typeof LixLabelSchema, "label"> &
 	EntityViews<typeof LixEntityLabelSchema, "entity_label"> &
+	EntityViews<typeof LixEntityThreadSchema, "entity_thread"> &
 	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
 	EntityViews<typeof LixLogSchema, "log"> &
 	EntityViews<typeof LixThreadSchema, "thread"> &

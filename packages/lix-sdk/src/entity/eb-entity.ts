@@ -6,7 +6,7 @@ import type { LixEntity, LixEntityCanonical } from "./schema.js";
  * List of tables that use canonical column names (entity_id, schema_key, file_id)
  * instead of the lixcol_ prefixed versions used by entity views.
  */
-const CANONICAL_TABLES = ["state", "state_all", "entity_label"] as const;
+const CANONICAL_TABLES = ["state", "state_all", "entity_label", "entity_thread", "entity_thread_all"] as const;
 
 /**
  * Entity Expression Builder - provides fluent API for entity operations in queries.

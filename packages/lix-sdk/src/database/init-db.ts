@@ -26,6 +26,7 @@ import type { Lix } from "../lix/open-lix.js";
 import { timestamp, uuidV7 } from "../deterministic/index.js";
 import { nanoId } from "../deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
+import { applyEntityThreadDatabaseSchema } from "../entity/thread/schema.js";
 
 /**
  * Configuration for JSON columns in database views.
@@ -152,6 +153,7 @@ export function initDb(args: {
 	applyChangeAuthorDatabaseSchema(lix);
 	applyLabelDatabaseSchema(lix);
 	applyThreadDatabaseSchema(lix);
+	applyEntityThreadDatabaseSchema(lix);
 	applyStateHistoryDatabaseSchema(lix);
 	// applyFileDatabaseSchema will be called later when lix is fully constructed
 	applyLogDatabaseSchema(lix);
