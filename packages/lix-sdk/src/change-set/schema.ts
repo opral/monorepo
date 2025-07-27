@@ -33,7 +33,6 @@ export function applyChangeSetDatabaseSchema(
 		hardcodedFileId: "lix",
 	});
 
-
 	// Create change_set_label views
 	createEntityViewsIfNotExists({
 		lix: { sqlite },
@@ -149,4 +148,3 @@ LixChangeSetLabelSchema satisfies LixSchemaDefinition;
 export type LixChangeSetLabel = FromLixSchemaDefinition<
 	typeof LixChangeSetLabelSchema
 >;
-

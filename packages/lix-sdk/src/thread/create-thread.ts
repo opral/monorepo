@@ -21,10 +21,10 @@ import { createEntityThread } from "../entity/thread/create-entity-thread.js";
  * @example
  * ```ts
  * // Create a thread attached to an entity
- * const thread = await createThread({ 
- *   lix, 
+ * const thread = await createThread({
+ *   lix,
  *   entity: { entity_id: "para_123", schema_key: "markdown_paragraph", file_id: "README.md" },
- *   comments: [{ body: "This paragraph needs review" }] 
+ *   comments: [{ body: "This paragraph needs review" }]
  * })
  * ```
  */
@@ -93,7 +93,7 @@ export async function createThread(args: {
 				lix: { db: trx },
 				entity: args.entity,
 				thread: { id: threadId },
-				versionId: versionId
+				versionId: versionId,
 			});
 		}
 

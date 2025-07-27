@@ -139,7 +139,11 @@ test("query threads using ebEntity helper", async () => {
 	// Query threads for entity 1 using ebEntity
 	const threadsForEntity1 = await lix.db
 		.selectFrom("thread_all")
-		.innerJoin("entity_thread_all", "entity_thread_all.thread_id", "thread_all.id")
+		.innerJoin(
+			"entity_thread_all",
+			"entity_thread_all.thread_id",
+			"thread_all.id"
+		)
 		.where("thread_all.lixcol_version_id", "=", "global")
 		.where("entity_thread_all.lixcol_version_id", "=", "global")
 		.where(
@@ -160,7 +164,11 @@ test("query threads using ebEntity helper", async () => {
 	// Query threads for entity 2 using ebEntity
 	const threadsForEntity2 = await lix.db
 		.selectFrom("thread_all")
-		.innerJoin("entity_thread_all", "entity_thread_all.thread_id", "thread_all.id")
+		.innerJoin(
+			"entity_thread_all",
+			"entity_thread_all.thread_id",
+			"thread_all.id"
+		)
 		.where("thread_all.lixcol_version_id", "=", "global")
 		.where("entity_thread_all.lixcol_version_id", "=", "global")
 		.where(
@@ -181,13 +189,46 @@ test("query entities with threads and comment counts", async () => {
 	const lix = await openLix({});
 
 	// Create multiple key-value entities
-	await lix.db.insertInto("key_value_all").values({ key: "with-threads", value: { threads: true }, lixcol_version_id: "global" }).execute();
-	await lix.db.insertInto("key_value_all").values({ key: "without-threads", value: { threads: false }, lixcol_version_id: "global" }).execute();
-	await lix.db.insertInto("key_value_all").values({ key: "one-thread", value: { threads: "one" }, lixcol_version_id: "global" }).execute();
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "with-threads",
+			value: { threads: true },
+			lixcol_version_id: "global",
+		})
+		.execute();
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "without-threads",
+			value: { threads: false },
+			lixcol_version_id: "global",
+		})
+		.execute();
+	await lix.db
+		.insertInto("key_value_all")
+		.values({
+			key: "one-thread",
+			value: { threads: "one" },
+			lixcol_version_id: "global",
+		})
+		.execute();
 
-	const keyValue1 = await lix.db.selectFrom("key_value").where("key", "=", "with-threads").selectAll().executeTakeFirstOrThrow();
-	const keyValue2 = await lix.db.selectFrom("key_value").where("key", "=", "without-threads").selectAll().executeTakeFirstOrThrow();
-	const keyValue3 = await lix.db.selectFrom("key_value").where("key", "=", "one-thread").selectAll().executeTakeFirstOrThrow();
+	const keyValue1 = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "with-threads")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	const keyValue2 = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "without-threads")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+	const keyValue3 = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "one-thread")
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	// Create threads with different comment counts
 	const thread1 = await createThread({
@@ -253,10 +294,14 @@ test("query entities with threads and comment counts", async () => {
 	);
 	expect(keyValue1Threads).toHaveLength(2);
 
-	const thread1Result = keyValue1Threads.find((t) => t.thread_id === thread1.id);
+	const thread1Result = keyValue1Threads.find(
+		(t) => t.thread_id === thread1.id
+	);
 	expect(thread1Result?.comment_count).toBe(3);
 
-	const thread2Result = keyValue1Threads.find((t) => t.thread_id === thread2.id);
+	const thread2Result = keyValue1Threads.find(
+		(t) => t.thread_id === thread2.id
+	);
 	expect(thread2Result?.comment_count).toBe(1);
 
 	const keyValue3Threads = entitiesWithThreads.filter(
@@ -290,7 +335,7 @@ test("query threads across different entity types", async () => {
 		.where("key", "=", "test-config")
 		.selectAll()
 		.executeTakeFirstOrThrow();
-	
+
 	// Create a change set entity (which is also stored as state)
 	await lix.db
 		.insertInto("change_set_all")

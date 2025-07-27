@@ -669,4 +669,3 @@ describe("change_set_label", () => {
 		).rejects.toThrow(/Foreign key constraint violation/i);
 	});
 });
-
