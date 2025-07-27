@@ -19,6 +19,7 @@ import {
 	random,
 } from "../deterministic/random.js";
 import { newLixFile } from "./new-lix.js";
+import { switchAccount } from "../account/switch-account.js";
 
 export type Lix = {
 	/**
@@ -148,25 +149,63 @@ export async function openLix(args: {
 	const accountToSet = args.account ?? persistedState?.activeAccounts?.[0];
 
 	if (accountToSet) {
-		// Check if there are any existing active accounts
-		const existingActiveAccounts = await db
-			.selectFrom("active_account")
-			.select(["id", "name"])
-			.execute();
-
-		// If there are existing active accounts, delete them
-		if (existingActiveAccounts.length > 0) {
-			for (const account of existingActiveAccounts) {
-				await db
-					.deleteFrom("active_account")
-					.where("id", "=", account.id)
-					.execute();
-			}
+		// First ensure the account exists (create it if it doesn't)
+		const existingAccount = await db
+			.selectFrom("account_all")
+			.where("id", "=", accountToSet.id)
+			.where("lixcol_version_id", "=", "global")
+			.selectAll()
+			.executeTakeFirst();
+		
+		if (!existingAccount) {
+			// Create the account in global version
+			await db
+				.insertInto("account_all")
+				.values({
+					id: accountToSet.id,
+					name: accountToSet.name,
+					lixcol_version_id: "global",
+				})
+				.execute();
 		}
-
-		// Insert the new active account
-		// The account entity will be created automatically when needed
-		await db.insertInto("active_account").values(accountToSet).execute();
+		
+		// Use switchAccount to properly set this as the only active account
+		await switchAccount({ lix: { db }, to: [accountToSet] });
+	} else {
+		// Check if there's already an active account
+		const existingActiveAccount = await db
+			.selectFrom("active_account")
+			.selectAll()
+			.executeTakeFirst();
+		
+		if (!existingActiveAccount) {
+			// No account provided and no active account exists - create anonymous account
+			const { nanoId } = await import("../deterministic/index.js");
+			const { generateHumanId } = await import("../deterministic/generate-human-id.js");
+			
+			const activeAccountId = nanoId({ lix: { sqlite: database, db: db as any } });
+			const humanName = generateHumanId({ lix: { sqlite: database, db: db as any } });
+			const anonymousAccountName = `Anonymous ${humanName}`;
+			
+			// Create the anonymous account as untracked
+			await db
+				.insertInto("account_all")
+				.values({
+					id: activeAccountId,
+					name: anonymousAccountName,
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				})
+				.execute();
+			
+			// Set it as the active account
+			await db
+				.insertInto("active_account")
+				.values({
+					account_id: activeAccountId,
+				})
+				.execute();
+		}
 	}
 
 	// Only process keyValues if we're opening an existing blob
@@ -287,7 +326,7 @@ async function captureOpened(args: { lix: Lix }) {
 
 		const activeAccount = await args.lix.db
 			.selectFrom("active_account")
-			.select("id")
+			.select("account_id")
 			.executeTakeFirstOrThrow();
 
 		const lixId = await args.lix.db
@@ -302,7 +341,7 @@ async function captureOpened(args: { lix: Lix }) {
 			// no database query is performed here. we dont care if the
 			// server responds with an error or not.
 			void capture("LIX-SDK lix opened", {
-				accountId: activeAccount.id,
+				accountId: activeAccount.account_id,
 				lixId: lixId.value as string,
 				telemetryKeyValue: (telemetry?.value ?? "on") as string,
 				properties: {

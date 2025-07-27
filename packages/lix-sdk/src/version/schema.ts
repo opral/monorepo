@@ -3,8 +3,7 @@ import type {
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import { createEntityViewsIfNotExists } from "../entity-views/entity-view-builder.js";
-import { nanoId } from "../deterministic/index.js";
-import { humanId } from "human-id";
+import { nanoId, generateHumanId } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
 
 export function applyVersionDatabaseSchema(
@@ -20,7 +19,7 @@ export function applyVersionDatabaseSchema(
 		hardcodedVersionId: "global",
 		defaultValues: {
 			id: () => nanoId({ lix }),
-			name: () => humanId(),
+			name: () => generateHumanId({ lix }),
 			working_commit_id: () => nanoId({ lix }),
 			inherits_from_version_id: () => "global",
 			hidden: () => false,

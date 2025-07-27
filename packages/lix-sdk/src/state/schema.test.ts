@@ -3230,3 +3230,147 @@ test("commit_id in state should be from the real auto-commit, not the working co
 	expect(stateAfterUpdate.commit_id).not.toBe(activeVersion.working_commit_id);
 	expect(stateAfterUpdate.commit_id).not.toBe(latestCommit?.id);
 });
+
+test("delete ALL from state view should delete untracked entities", async () => {
+	const lix = await openLix({});
+
+	// Create a tracked entity in state
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "tracked-entity",
+			schema_key: "mock_test_schema",
+			file_id: "test-file",
+			plugin_key: "test_plugin",
+			snapshot_content: { value: "tracked" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Create an untracked entity in state_all directly with the active version
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "untracked-entity",
+			schema_key: "mock_test_schema",
+			file_id: "test-file",
+			plugin_key: "test_plugin",
+			snapshot_content: { value: "untracked" },
+			schema_version: "1.0",
+			untracked: true,
+		})
+		.execute();
+
+	// Verify we have both entities in state view
+	const beforeDelete = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "mock_test_schema")
+		.selectAll()
+		.execute();
+
+	expect(beforeDelete).toHaveLength(2);
+	expect(beforeDelete.some((e) => e.entity_id === "tracked-entity")).toBe(true);
+	expect(beforeDelete.some((e) => e.entity_id === "untracked-entity")).toBe(
+		true
+	);
+
+	// Delete ALL from the state view (no WHERE clause)
+	await lix.db
+		.deleteFrom("state")
+		.where("schema_key", "=", "mock_test_schema")
+		.execute();
+
+	// Check if ALL entries were deleted including untracked
+	const afterDelete = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "mock_test_schema")
+		.selectAll()
+		.execute();
+
+	// This should be 0 - all entries including untracked should be deleted
+	// BUG: The untracked entry is not deleted
+	console.log("Remaining entries after DELETE ALL:", afterDelete);
+	expect(afterDelete).toHaveLength(0);
+
+	// Also check the underlying state_all table
+	const stateAfterDelete = await lix.db
+		.selectFrom("state_all")
+		.where("schema_key", "=", "mock_test_schema")
+		.selectAll()
+		.execute();
+
+	// All entities should be gone from state_all
+	expect(stateAfterDelete).toHaveLength(0);
+});
+
+test("delete from state view with WHERE should delete untracked entities", async () => {
+	const lix = await openLix({});
+
+	// Create a tracked entity in state
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "tracked-entity",
+			schema_key: "mock_test_schema",
+			file_id: "test-file",
+			plugin_key: "test_plugin",
+			snapshot_content: { value: "tracked" },
+			schema_version: "1.0",
+		})
+		.execute();
+
+	// Create an untracked entity in state_all directly with the active version
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "untracked-entity",
+			schema_key: "mock_test_schema",
+			file_id: "test-file",
+			plugin_key: "test_plugin",
+			snapshot_content: { value: "untracked" },
+			schema_version: "1.0",
+			untracked: true,
+		})
+		.execute();
+
+	// Verify both entities exist in the state view
+	const beforeDelete = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "mock_test_schema")
+		.selectAll()
+		.execute();
+
+	expect(beforeDelete).toHaveLength(2);
+	expect(beforeDelete.some((e) => e.entity_id === "tracked-entity")).toBe(true);
+	expect(beforeDelete.some((e) => e.entity_id === "untracked-entity")).toBe(
+		true
+	);
+
+	// Delete the untracked entity from the state view with WHERE clause
+	await lix.db
+		.deleteFrom("state")
+		.where("entity_id", "=", "untracked-entity")
+		.execute();
+
+	// Check if the untracked entry was deleted
+	const afterDelete = await lix.db
+		.selectFrom("state")
+		.where("schema_key", "=", "mock_test_schema")
+		.selectAll()
+		.execute();
+
+	// Should only have the tracked entity remaining
+	expect(afterDelete).toHaveLength(1);
+	expect(afterDelete[0]?.entity_id).toBe("tracked-entity");
+
+	// Also check the underlying state_all table to confirm deletion
+	const stateAfterDelete = await lix.db
+		.selectFrom("state_all")
+		.where("entity_id", "=", "untracked-entity")
+		.where("schema_key", "=", "mock_test_schema")
+		.selectAll()
+		.execute();
+
+	// The untracked entry should be gone from state_all too
+	expect(stateAfterDelete).toHaveLength(0);
+});

@@ -25,16 +25,16 @@ export async function switchAccount(args: {
 	to: Pick<LixAccount, "id" | "name">[];
 }): Promise<void> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
-		// delete all rows from the current_account table
+		// Delete all active account entries (both tracked and untracked)
 		await trx.deleteFrom("active_account").execute();
+		
 		// insert the new account id into the current_account table
-		// active_account table only has id and name columns
+		// active_account view only has account_id column
 		await trx
 			.insertInto("active_account")
 			.values(
 				args.to.map((account) => ({
-					id: account.id,
-					name: account.name,
+					account_id: account.id,
 				}))
 			)
 			.execute();

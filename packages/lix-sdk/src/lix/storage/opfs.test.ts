@@ -228,13 +228,15 @@ describe("OpfsStorage", () => {
 			account,
 		});
 
-		// Verify current active account
+		// Verify current active account with details
 		const activeAccount = await lix.db
-			.selectFrom("active_account")
-			.selectAll()
+			.selectFrom("active_account as aa")
+			.innerJoin("account_all as a", "a.id", "aa.account_id")
+			.where("a.lixcol_version_id", "=", "global")
+			.select(["aa.account_id", "a.id", "a.name"])
 			.executeTakeFirstOrThrow();
 
-		expect(activeAccount.id).toBe(account.id);
+		expect(activeAccount.account_id).toBe(account.id);
 		expect(activeAccount.name).toBe(account.name);
 
 		await lix.close();
@@ -242,13 +244,15 @@ describe("OpfsStorage", () => {
 		// Reopen the lix
 		const lix2 = await openLix({ storage });
 
-		// Verify active account persisted
+		// Verify active account persisted with details
 		const activeAccount2 = await lix2.db
-			.selectFrom("active_account")
-			.selectAll()
+			.selectFrom("active_account as aa")
+			.innerJoin("account_all as a", "a.id", "aa.account_id")
+			.where("a.lixcol_version_id", "=", "global")
+			.select(["aa.account_id", "a.id", "a.name"])
 			.executeTakeFirstOrThrow();
 
-		expect(activeAccount2.id).toBe(account.id);
+		expect(activeAccount2.account_id).toBe(account.id);
 		expect(activeAccount2.name).toBe(account.name);
 	});
 
@@ -263,13 +267,15 @@ describe("OpfsStorage", () => {
 			account,
 		});
 
-		// Verify current active account
+		// Verify current active account with details
 		const activeAccount = await lix1.db
-			.selectFrom("active_account")
-			.selectAll()
+			.selectFrom("active_account as aa")
+			.innerJoin("account_all as a", "a.id", "aa.account_id")
+			.where("a.lixcol_version_id", "=", "global")
+			.select(["aa.account_id", "a.id", "a.name"])
 			.executeTakeFirstOrThrow();
 
-		expect(activeAccount.id).toBe(account.id);
+		expect(activeAccount.account_id).toBe(account.id);
 		expect(activeAccount.name).toBe(account.name);
 
 		await lix1.close();
@@ -278,13 +284,15 @@ describe("OpfsStorage", () => {
 		// Reopen the lix instance
 		const lix2 = await openLix({ storage: storage2 });
 
-		// Verify active account persisted
+		// Verify active account persisted with details
 		const activeAccount2 = await lix2.db
-			.selectFrom("active_account")
-			.selectAll()
+			.selectFrom("active_account as aa")
+			.innerJoin("account_all as a", "a.id", "aa.account_id")
+			.where("a.lixcol_version_id", "=", "global")
+			.select(["aa.account_id", "a.id", "a.name"])
 			.executeTakeFirstOrThrow();
 
-		expect(activeAccount2.id).toBe(account.id);
+		expect(activeAccount2.account_id).toBe(account.id);
 		expect(activeAccount2.name).toBe(account.name);
 	});
 
@@ -331,18 +339,22 @@ describe("OpfsStorage", () => {
 		// Should not have saved active accounts
 		expect(saveActiveAccountsSpy).not.toHaveBeenCalled();
 
-		// Now update the active account
+		// Now update the active account by deleting and re-inserting
 		await lix.db
-			.updateTable("active_account")
-			.set({ name: "Updated Name" })
-			.where("id", "=", account.id)
+			.deleteFrom("active_account")
+			.where("account_id", "=", account.id)
+			.execute();
+		
+		await lix.db
+			.insertInto("active_account")
+			.values({ account_id: "new-account" })
 			.execute();
 
 		// Wait for save
 		await new Promise((resolve) => setTimeout(resolve, 150));
 
-		// Should have saved active accounts now
-		expect(saveActiveAccountsSpy).toHaveBeenCalledTimes(1);
+		// Should have saved active accounts now (twice: once for delete, once for insert)
+		expect(saveActiveAccountsSpy).toHaveBeenCalledTimes(2);
 
 		await lix.close();
 	});

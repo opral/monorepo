@@ -193,7 +193,20 @@ export class OpfsStorage implements LixStorageAdapter {
 		this.activeAccountSubscription = args.lix
 			.observe(args.lix.db.selectFrom("active_account").selectAll())
 			.subscribe({
-				next: (accounts) => {
+				next: async (activeAccounts) => {
+					// Fetch the full account details for each active account
+					const accountPromises = activeAccounts.map(async (active) => {
+						const account = await args.lix.db
+							.selectFrom("account_all")
+							.where("id", "=", active.account_id)
+							.select(["id", "name"])
+							.executeTakeFirst();
+						return account;
+					});
+					
+					const accounts = (await Promise.all(accountPromises))
+						.filter((acc): acc is Pick<LixAccount, "id" | "name"> => acc !== undefined);
+					
 					// Save accounts when they change
 					this.saveActiveAccounts(accounts).catch((error) => {
 						console.error("Failed to save active accounts:", error);
