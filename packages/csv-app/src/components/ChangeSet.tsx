@@ -187,17 +187,27 @@ const CreateCheckpointBox = () => {
 		if (!description) return;
 
 		lix.db.transaction().execute(async (trx) => {
-			const thread = await createThread({
+			// Get the commit associated with the working change set
+			const commit = await trx
+				.selectFrom("commit")
+				.where("change_set_id", "=", workingChangeSet!.id)
+				.selectAll()
+				.executeTakeFirst();
+
+			if (!commit) {
+				throw new Error("No commit found for working change set");
+			}
+
+			// Create thread with entity (commit) attachment using the new system
+			await createThread({
 				lix: { ...lix, db: trx },
 				comments: [{ body: args.content }],
+				entity: {
+					entity_id: commit.id,
+					schema_key: "lix_commit",
+					file_id: "lix",
+				},
 			});
-			await trx
-				.insertInto("change_set_thread")
-				.values({
-					change_set_id: workingChangeSet!.id,
-					thread_id: thread.id,
-				})
-				.execute();
 		});
 	};
 

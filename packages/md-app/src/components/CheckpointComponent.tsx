@@ -5,10 +5,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import timeAgo from "@/helper/timeAgo.ts";
 import clsx from "clsx";
 import ChangeDot from "./ChangeDot.tsx";
-import { UiDiffComponentProps } from "@lix-js/sdk";
+import { UiDiffComponentProps, jsonArrayFrom } from "@lix-js/sdk";
 import { toPlainText } from "@lix-js/sdk/zettel-ast";
 import { ChangeDiffComponent } from "@/components/ChangeDiffComponent.tsx";
-import { selectThreads, selectChangeDiffs } from "@/queries";
+import { selectChangeDiffs } from "@/queries";
 import { ChevronDown } from "lucide-react";
 import { useQuery } from "@lix-js/react-utils";
 
@@ -25,9 +25,45 @@ export const CheckpointComponent = (props: {
 }) => {
 	const [isExpanded, setIsExpanded] = useState<boolean>(false);
 	const [shouldLoadDiffs, setShouldLoadDiffs] = useState<boolean>(false);
+	
+	// Get threads by finding the commit for this change set and querying threads for that commit
 	const threads = useQuery((lix) =>
-		selectThreads(lix, { changeSetId: props.checkpointChangeSet.id }),
+		lix.db
+			.selectFrom("thread")
+			.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
+			.innerJoin("commit", (join) =>
+				join
+					.onRef("commit.id", "=", "entity_thread.entity_id")
+					.on("entity_thread.schema_key", "=", "lix_commit")
+					.on("entity_thread.file_id", "=", "lix")
+			)
+			.where("commit.change_set_id", "=", props.checkpointChangeSet.id)
+			.select((eb) => [
+				jsonArrayFrom(
+					eb
+						.selectFrom("thread_comment")
+						.innerJoin(
+							"change_author",
+							"thread_comment.lixcol_change_id",
+							"change_author.change_id"
+						)
+						.innerJoin("account", "account.id", "change_author.account_id")
+						.select([
+							"thread_comment.id",
+							"thread_comment.body",
+							"thread_comment.thread_id",
+							"thread_comment.parent_id",
+							"thread_comment.lixcol_created_at",
+							"thread_comment.lixcol_updated_at",
+						])
+						.select("account.name as author_name")
+						.orderBy("thread_comment.lixcol_created_at", "asc")
+						.whereRef("thread_comment.thread_id", "=", "thread.id")
+				).as("comments"),
+			])
+			.selectAll("thread")
 	);
+	
 	const diffs = useQuery((lix) =>
 		selectChangeDiffs(lix, props.checkpointChangeSet.id, props.previousChangeSetId),
 	);

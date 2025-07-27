@@ -3,14 +3,14 @@ import { Button } from "@/components/ui/button.tsx";
 import ChangeDot from "./ChangeDot.tsx";
 import IconChevron from "@/components/icons/IconChevron.tsx";
 import clsx from "clsx";
-import { checkpointChangeSetsAtom, workingChangeSetAtom, intermediateChangesAtom } from "@/state-active-file.ts";
+import { checkpointChangeSetsAtom, intermediateChangesAtom } from "@/state-active-file.ts";
 import { useAtom } from "jotai/react";
 import { Input } from "./ui/input.tsx";
 import { saveLixToOpfs } from "@/helper/saveLixToOpfs.ts";
 import { createCheckpoint, createThread, UiDiffComponentProps } from "@lix-js/sdk";
 import { lixAtom } from "@/state.ts";
 import { ChangeDiffComponent } from "./ChangeDiffComponent.tsx";
-import { fromPlainText, ZettelDoc } from "@lix-js/sdk/zettel-ast";
+import { fromPlainText } from "@lix-js/sdk/zettel-ast";
 
 export const IntermediateCheckpointComponent = () => {
   const [isExpandedState, setIsExpandedState] = useState<boolean>(true);
@@ -82,29 +82,26 @@ export default IntermediateCheckpointComponent;
 const CreateCheckpointInput = () => {
   const [description, setDescription] = useState("");
   const [lix] = useAtom(lixAtom);
-  const [currentChangeSet] = useAtom(workingChangeSetAtom);
-
-  const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
-    if (!description) return;
-
-    lix.db.transaction().execute(async (trx) => {
-      const thread = await createThread({
-        lix: { ...lix, db: trx },
-        comments: [{ body: args.content }],
-      });
-      await trx
-        .insertInto("change_set_thread")
-        .values({
-          change_set_id: currentChangeSet!.id,
-          thread_id: thread.id,
-        })
-        .execute();
-    });
-  };
 
   const handleCreateCheckpoint = async () => {
-    await onThreadComposerSubmit({ content: fromPlainText(description!) });
-    await createCheckpoint({ lix });
+    if (!description) return;
+
+    await lix.db.transaction().execute(async (trx) => {
+      // Create the checkpoint first to get the commit ID
+      const checkpoint = await createCheckpoint({ lix: { ...lix, db: trx } });
+      
+      // Now create the thread and attach it to the commit
+      await createThread({
+        lix: { ...lix, db: trx },
+        comments: [{ body: fromPlainText(description!) }],
+        entity: {
+          entity_id: checkpoint.id,
+          schema_key: "lix_commit",
+          file_id: "lix",
+        },
+      });
+    });
+    
     await saveLixToOpfs({ lix });
   };
 

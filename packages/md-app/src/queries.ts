@@ -4,7 +4,6 @@ import {
 	Account,
 	ebEntity,
 	jsonArrayFrom,
-	ChangeSet,
 	LixFileDescriptor,
 } from "@lix-js/sdk";
 import {
@@ -439,16 +438,18 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 };
 
 /**
- * Get threads for a specific change set
+ * Get threads for a specific commit
  */
 export function selectThreads(
 	lix: Lix,
-	args: { changeSetId: ChangeSet["id"] }
+	args: { commitId: string }
 ) {
 	return lix.db
 		.selectFrom("thread")
-		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
-		.where("change_set_thread.change_set_id", "=", args.changeSetId)
+		.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
+		.where("entity_thread.entity_id", "=", args.commitId)
+		.where("entity_thread.schema_key", "=", "lix_commit")
+		.where("entity_thread.file_id", "=", "lix")
 		.select((eb) => [
 			jsonArrayFrom(
 				eb
