@@ -134,8 +134,8 @@ export function validateStateMutation(args: {
 		}
 	}
 
-	// Hardcoded validation for change_set_edge self-referencing
-	if (args.schema["x-lix-key"] === "lix_change_set_edge") {
+	// Hardcoded validation for commit_edge self-referencing
+	if (args.schema["x-lix-key"] === "lix_commit_edge") {
 		const content = args.snapshot_content as any;
 		if (content.parent_id === content.child_id) {
 			throw new Error(
@@ -155,7 +155,7 @@ export function validateStateMutation(args: {
 			});
 
 			if (debugEnabled.length > 0 && debugEnabled[0].value === "true") {
-				validateChangeSetGraphAcyclic({
+				validateAcyclicCommitGraph({
 					lix: args.lix,
 					newEdge: content,
 					version_id: args.version_id,
@@ -790,10 +790,10 @@ function parseJsonPropertiesInSnapshotContent(
 }
 
 /**
- * Validates that adding a new edge to the change set graph won't create a cycle.
+ * Validates that adding a new edge to the commit graph won't create a cycle.
  * Uses depth-first search to detect cycles.
  */
-function validateChangeSetGraphAcyclic(args: {
+function validateAcyclicCommitGraph(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
 	newEdge: { parent_id: string; child_id: string };
 	version_id: string;
@@ -802,7 +802,7 @@ function validateChangeSetGraphAcyclic(args: {
 	const existingEdges = executeSync({
 		lix: args.lix,
 		query: args.lix.db
-			.selectFrom("change_set_edge_all")
+			.selectFrom("commit_edge_all")
 			.select(["parent_id", "child_id"])
 			.where("lixcol_version_id", "=", args.version_id),
 	});
@@ -845,7 +845,7 @@ function validateChangeSetGraphAcyclic(args: {
 				const cyclePath = [...path.slice(cycleStart), neighbor];
 
 				throw new Error(
-					`Cycle detected in change set graph!\n` +
+					`Cycle detected in commit graph!\n` +
 						`New edge: ${args.newEdge.parent_id} -> ${args.newEdge.child_id}\n` +
 						`Cycle path: ${cyclePath.join(" -> ")}\n` +
 						`Adding this edge would create a cycle in the graph.`

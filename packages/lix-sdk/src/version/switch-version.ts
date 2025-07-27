@@ -16,7 +16,7 @@ import type { LixVersion } from "./schema.js";
  *
  *   ```ts
  *   await lix.db.transaction().execute(async (trx) => {
- *      const newVersion = await createVersion({ lix: { db: trx }, changeSet: { id: currentVersion.change_set_id } });
+ *      const newVersion = await createVersion({ lix: { db: trx }, commit_id: currentVersion.commit_id });
  *      await switchVersion({ lix: { db: trx }, to: newVersion });
  *   });
  *   ```

@@ -1,15 +1,18 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import { createMergeChangeSet } from "./create-merge-change-set.js";
-import { createChangeSet } from "./create-change-set.js";
+import { createMergeCommit } from "./create-merge-commit.js";
+import { createChangeSet } from "../change-set/create-change-set.js";
+import { createCommit } from "./create-commit.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 
 test("it should merge non-conflicting changes", async () => {
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
+			key: "test_schema",
+			version: "1.0",
 			value: {
 				"x-lix-key": "test_schema",
 				"x-lix-version": "1.0",
@@ -20,6 +23,7 @@ test("it should merge non-conflicting changes", async () => {
 				},
 				required: ["id"],
 			} satisfies LixSchemaDefinition,
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -65,7 +69,9 @@ test("it should merge non-conflicting changes", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
 
 	const cs1 = await createChangeSet({
 		lix,
@@ -75,7 +81,9 @@ test("it should merge non-conflicting changes", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit1 = await createCommit({ lix, changeSet: cs1 });
 
 	// simulating graph relation
 	const cs2 = await createChangeSet({
@@ -86,18 +94,23 @@ test("it should merge non-conflicting changes", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
+	});
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
 	});
 
-	const merged = await createMergeChangeSet({
+	const merged = await createMergeCommit({
 		lix,
-		source: cs0,
-		target: cs2,
+		source: commit0,
+		target: commit2,
 	});
 
 	const mergedElements = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_element.change_set_id", "=", merged.id)
+		.where("change_set_element.change_set_id", "=", merged.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -111,8 +124,10 @@ test("should handle conflicting elements with source winning (until conflicts ar
 	const lix = await openLix({});
 
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
+			key: "s1",
+			version: "1.0",
 			value: {
 				"x-lix-key": "s1",
 				"x-lix-version": "1.0",
@@ -124,6 +139,7 @@ test("should handle conflicting elements with source winning (until conflicts ar
 				},
 				required: ["id"],
 			} satisfies LixSchemaDefinition,
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -171,6 +187,11 @@ test("should handle conflicting elements with source winning (until conflicts ar
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
+	});
+	const commit_base = await createCommit({
+		lix,
+		changeSet: cs_base,
 	});
 
 	// 2. Target branch - modifies e1
@@ -182,7 +203,12 @@ test("should handle conflicting elements with source winning (until conflicts ar
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs_base],
+		lixcol_version_id: "global",
+	});
+	const commit_target = await createCommit({
+		lix,
+		changeSet: cs_target,
+		parentCommits: [commit_base],
 	});
 
 	// 3. Source branch - modifies e1 differently
@@ -194,20 +220,25 @@ test("should handle conflicting elements with source winning (until conflicts ar
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs_base],
+		lixcol_version_id: "global",
+	});
+	const commit_source = await createCommit({
+		lix,
+		changeSet: cs_source,
+		parentCommits: [commit_base],
 	});
 
 	// 4. Merge source into target
-	const merged = await createMergeChangeSet({
+	const merged = await createMergeCommit({
 		lix,
-		source: cs_source,
-		target: cs_target,
+		source: commit_source,
+		target: commit_target,
 	});
 
 	// 5. Verify merged change set elements
 	const mergedElements = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_element.change_set_id", "=", merged.id)
+		.where("change_set_element.change_set_id", "=", merged.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -215,7 +246,7 @@ test("should handle conflicting elements with source winning (until conflicts ar
 	expect(mergedElements).toHaveLength(1);
 	expect(mergedElements[0]).toEqual(
 		expect.objectContaining({
-			change_set_id: merged.id,
+			change_set_id: merged.change_set_id,
 			change_id: changes[2]!.id,
 			entity_id: changes[2]!.entity_id,
 			schema_key: changes[2]!.schema_key,
@@ -223,15 +254,15 @@ test("should handle conflicting elements with source winning (until conflicts ar
 		})
 	);
 
-	// 6. Verify graph structure
+	// 6. Verify graph structure - the merged commit should have edges pointing to both source and target
 	const edges = await lix.db
-		.selectFrom("change_set_edge")
+		.selectFrom("commit_edge")
 		.where("child_id", "=", merged.id)
 		.selectAll()
 		.execute();
 
 	expect(edges).toHaveLength(2);
 	expect(edges.map((e) => e.parent_id).sort()).toEqual(
-		[cs_source.id, cs_target.id].sort()
+		[commit_source.id, commit_target.id].sort()
 	);
 });

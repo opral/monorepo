@@ -4,4 +4,4 @@ export {
 	createEntityLabel,
 	deleteEntityLabel,
 } from "./label/create-entity-label.js";
-export { ebEntity as entityEb } from "./eb-entity.js";
+export { ebEntity } from "./eb-entity.js";

@@ -11,15 +11,14 @@ import {
 	threadSearchParamsAtom,
 } from "./state.ts";
 import {
-	changeHasLabel,
 	ChangeSet,
 	changeSetElementIsLeafOf,
-	changeSetHasLabel,
-	changeSetIsAncestorOf,
+	commitIsAncestorOf,
 	jsonArrayFrom,
 	Lix,
 	sql,
 	UiDiffComponentProps,
+	ebEntity,
 } from "@lix-js/sdk";
 import { redirect } from "react-router-dom";
 
@@ -61,10 +60,19 @@ export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
 
 	if (!activeVersion) return null;
 
+	// Get the working commit and its change set
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirst();
+
+	if (!workingCommit) return null;
+
 	// Get the working change set
 	return await lix.db
 		.selectFrom("change_set")
-		.where("id", "=", activeVersion.working_change_set_id)
+		.where("id", "=", workingCommit.change_set_id)
 		// left join in case the change set has no elements
 		.leftJoin(
 			"change_set_element",
@@ -104,8 +112,16 @@ export const intermediateChangesAtom = atom<
 	const checkpointChanges = await get(checkpointChangeSetsAtom);
 	if (!activeVersion) return [];
 
-	// Get all changes in the working change set
-	const workingChangeSetId = activeVersion.working_change_set_id;
+	// Get the working commit and its change set
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirst();
+
+	if (!workingCommit) return [];
+
+	const workingChangeSetId = workingCommit.change_set_id;
 
 	// Get changes that are in the working change set
 	const queryIntermediateLeafChanges = lix.db
@@ -201,14 +217,16 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 	const activeVersion = await get(activeVersionAtom);
 	if (!activeVersion) return [];
 
+	// Get change sets that have the checkpoint label and are ancestors of the active version's commit
 	let query = lix.db
 		.selectFrom("change_set")
-		.where(changeSetHasLabel({ name: "checkpoint" }))
-		.where(
-			changeSetIsAncestorOf(
-				{ id: activeVersion.change_set_id },
-				// in case the checkpoint is the active version's change set
-				{ includeSelf: true }
+		.where(ebEntity("change_set").hasLabel({ name: "checkpoint" }))
+		.where((eb) => 
+			eb("change_set.id", "in", (subquery) =>
+				subquery
+					.selectFrom("commit")
+					.where(commitIsAncestorOf({ id: activeVersion.commit_id }, { includeSelf: true }))
+					.select("commit.change_set_id")
 			)
 		)
 		.leftJoin(
@@ -284,7 +302,7 @@ export const getChangeDiffs = async (
 		)
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where(changeSetElementIsLeafOf([{ id: changeSetId }])) // Only get leaf changes
-		.where(changeHasLabel({ name: "checkpoint" }))
+		.where(ebEntity("change").hasLabel({ name: "checkpoint" }))
 		.selectAll("change")
 		.select(sql`json(snapshot.content)`.as("snapshot_content_after"));
 
@@ -316,7 +334,7 @@ export const getChangeDiffs = async (
 						.where(changeSetElementIsLeafOf([{ id: changeSetBeforeId }]))
 						.where("change.entity_id", "=", change.entity_id)
 						.where("change.schema_key", "=", change.schema_key)
-						.where(changeHasLabel({ name: "checkpoint" }))
+						.where(ebEntity("change").hasLabel({ name: "checkpoint" }))
 						.select(sql`json(snapshot.content)`.as("snapshot_content_before"))
 						.orderBy("change.created_at", "desc")
 						.limit(1);

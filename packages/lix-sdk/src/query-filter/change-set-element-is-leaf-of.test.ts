@@ -1,15 +1,19 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
+import { createCommit } from "../commit/create-commit.js";
 import { changeSetElementInAncestryOf } from "./change-set-element-in-ancestry-of.js";
 import { changeSetElementIsLeafOf } from "./change-set-element-is-leaf-of.js";
 
 test("returns only leaf change_set_elements per entity", async () => {
 	const lix = await openLix({});
 
+	// Insert required schema entry in global version
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
+			key: "mock_schema",
+			version: "1.0",
 			value: {
 				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",
@@ -17,6 +21,7 @@ test("returns only leaf change_set_elements per entity", async () => {
 				properties: {},
 				type: "object",
 			},
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -64,7 +69,9 @@ test("returns only leaf change_set_elements per entity", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
 
 	const cs1 = await createChangeSet({
 		lix,
@@ -75,7 +82,12 @@ test("returns only leaf change_set_elements per entity", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
+	});
+	const commit1 = await createCommit({
+		lix,
+		changeSet: cs1,
+		parentCommits: [commit0],
 	});
 
 	const cs2 = await createChangeSet({
@@ -87,14 +99,19 @@ test("returns only leaf change_set_elements per entity", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
+	});
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
 	});
 
 	// Only c2 should be the leaf (latest definition in the ancestry)
 	const leafChanges = await lix.db
 		.selectFrom("change_set_element")
 		.where("change_set_element.change_set_id", "in", [cs0.id, cs1.id, cs2.id])
-		.where(changeSetElementIsLeafOf(cs2))
+		.where(changeSetElementIsLeafOf(commit2))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.execute();
 
@@ -107,9 +124,12 @@ test("returns only leaf change_set_elements per entity", async () => {
 test("correctly identifies leaves at different points in history", async () => {
 	const lix = await openLix({});
 
+	// Insert required schema entry in global version
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
+			key: "mock_schema",
+			version: "1.0",
 			value: {
 				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",
@@ -117,6 +137,7 @@ test("correctly identifies leaves at different points in history", async () => {
 				properties: {},
 				type: "object",
 			},
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -187,7 +208,9 @@ test("correctly identifies leaves at different points in history", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
 
 	// First modification - updates line 2
 	const cs1 = await createChangeSet({
@@ -199,7 +222,12 @@ test("correctly identifies leaves at different points in history", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
+	});
+	const commit1 = await createCommit({
+		lix,
+		changeSet: cs1,
+		parentCommits: [commit0],
 	});
 
 	// Second modification - adds line 3
@@ -212,7 +240,12 @@ test("correctly identifies leaves at different points in history", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
+	});
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
 	});
 
 	// Alternative branch - used to demonstrate branching in the graph
@@ -220,7 +253,7 @@ test("correctly identifies leaves at different points in history", async () => {
 		lix,
 		id: "cs3",
 		elements: [],
-		parents: [cs0],
+		lixcol_version_id: "global",
 	});
 
 	// Use cs3 in a query to avoid the lint error
@@ -239,8 +272,8 @@ test("correctly identifies leaves at different points in history", async () => {
 	// This should return c0, c1, c3, c4 (c3 replaces c2 since it's the same entity)
 	const leafChangesCs2 = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs2]))
-		.where(changeSetElementIsLeafOf([cs2]))
+		.where(changeSetElementInAncestryOf([commit2]))
+		.where(changeSetElementIsLeafOf([commit2]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
 		.execute();
@@ -261,7 +294,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	// This should return all changes in the ancestry: c0, c1, c2, c3, c4
 	const allChangesCs2 = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs2]))
+		.where(changeSetElementInAncestryOf([commit2]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
 		.execute();
@@ -300,7 +333,7 @@ test("correctly identifies leaves at different points in history", async () => {
 	// To restore cs1, we need c0, c1 from cs0 and c3 from cs1
 	const restoreChangesCs1Recursive = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs1]))
+		.where(changeSetElementInAncestryOf([commit1]))
 		// No leaf filter here
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
@@ -323,8 +356,8 @@ test("correctly identifies leaves at different points in history", async () => {
 	// This correctly includes c3 instead of c2, but for restore we'd need to handle this differently
 	const leafChangesCs1 = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs1]))
-		.where(changeSetElementIsLeafOf([cs1]))
+		.where(changeSetElementInAncestryOf([commit1]))
+		.where(changeSetElementIsLeafOf([commit1]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
 		.execute();
@@ -345,8 +378,8 @@ test("correctly identifies leaves at different points in history", async () => {
 	// This incorrectly filters out c2 because c3 is the leaf for entity l2
 	const restoreChangesCs0WithLeafAtPoint = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs0]))
-		.where(changeSetElementIsLeafOf([cs0]))
+		.where(changeSetElementInAncestryOf([commit0]))
+		.where(changeSetElementIsLeafOf([commit0]))
 		.select(["change_set_element.change_id", "change_set_element.entity_id"])
 		.orderBy("change_set_element.change_id")
 		.execute();
@@ -365,9 +398,12 @@ test("correctly identifies leaves at different points in history", async () => {
 test("returns combined leaves from multiple target change sets", async () => {
 	const lix = await openLix({});
 
+	// Insert required schema entry in global version
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
+			key: "mock_schema",
+			version: "1.0",
 			value: {
 				"x-lix-key": "mock_schema",
 				"x-lix-version": "1.0",
@@ -375,6 +411,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 				properties: {},
 				type: "object",
 			},
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -464,7 +501,9 @@ test("returns combined leaves from multiple target change sets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
 
 	const cs1 = await createChangeSet({
 		lix,
@@ -475,7 +514,12 @@ test("returns combined leaves from multiple target change sets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
+	});
+	const commit1 = await createCommit({
+		lix,
+		changeSet: cs1,
+		parentCommits: [commit0],
 	});
 
 	const cs2 = await createChangeSet({
@@ -487,7 +531,12 @@ test("returns combined leaves from multiple target change sets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
+	});
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
 	});
 
 	const cs3 = await createChangeSet({
@@ -499,7 +548,12 @@ test("returns combined leaves from multiple target change sets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
+	});
+	const commit3 = await createCommit({
+		lix,
+		changeSet: cs3,
+		parentCommits: [commit0],
 	});
 
 	const cs4 = await createChangeSet({
@@ -511,13 +565,18 @@ test("returns combined leaves from multiple target change sets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs3],
+		lixcol_version_id: "global",
+	});
+	const commit4 = await createCommit({
+		lix,
+		changeSet: cs4,
+		parentCommits: [commit3],
 	});
 
 	// Test 1: Leaves in cs2 (Ancestry: cs0 -> cs1 -> cs2)
 	const leavesCs2 = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementIsLeafOf([cs2]))
+		.where(changeSetElementIsLeafOf([commit2]))
 		.selectAll()
 		.execute();
 	// Expected leaves: c1, c2, c6 (c0 is superseded by c6)
@@ -526,7 +585,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 	// Test 2: Leaves in cs4 branch (Ancestry: cs0 -> cs3 -> cs4)
 	const leavesCs4 = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementIsLeafOf([cs4]))
+		.where(changeSetElementIsLeafOf([commit4]))
 		.selectAll()
 		.execute();
 	// Expected leaves: c0, c3, c4, c5
@@ -540,7 +599,7 @@ test("returns combined leaves from multiple target change sets", async () => {
 	// Test 3: Combined leaves from both cs2 and cs4 branches
 	const combinedLeaves = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementIsLeafOf([cs2, cs4])) // Target heads are cs2 and cs4
+		.where(changeSetElementIsLeafOf([commit2, commit4])) // Target heads are commit2 and commit4
 		.selectAll()
 		.execute();
 

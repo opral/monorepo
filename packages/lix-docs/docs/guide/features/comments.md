@@ -76,13 +76,8 @@ Comments are composed of two main parts:
 
 ### Comment Body (Zettel)
 
-The body of each comment is stored in a format called [Zettel](https://github.com/opral/monorepo/tree/main/packages/zettel/zettel-ast). 
+The body of each comment is stored in a format called [Zettel](https://github.com/opral/monorepo/tree/main/packages/zettel/zettel-ast).
 
 Zettel is a portable, JSON-based Abstract Syntax Tree (AST) for rich text. Think of it as a structured, machine-readable version of Markdown.
 
 Using Zettel makes comments highly interoperable. It allows different applications and rich text editors to read, render, and edit comment content without losing formatting or data. It's designed to be extensible, so you can define your own custom elements like mentions or embedded objects, while still allowing other applications to gracefully handle unknown types.
-
-
-
-
-

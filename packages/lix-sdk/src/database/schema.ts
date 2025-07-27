@@ -1,10 +1,10 @@
 import type { ChangeView, InternalChangeTable } from "../change/schema.js";
 import {
-	LixChangeSetEdgeSchema,
 	LixChangeSetElementSchema,
 	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 } from "../change-set/schema.js";
+import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
 import {
 	LixVersionSchema,
 	type LixActiveVersion,
@@ -56,9 +56,10 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	version: LixVersionSchema,
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
-	change_set_edge: LixChangeSetEdgeSchema,
 	change_set_label: LixChangeSetLabelSchema,
 	change_set_thread: LixChangeSetThreadSchema,
+	commit: LixCommitSchema,
+	commit_edge: LixCommitEdgeSchema,
 	file: LixFileDescriptorSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
@@ -88,7 +89,6 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixAccountSchema, "account"> &
 	EntityViews<typeof LixChangeSetSchema, "change_set"> &
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
-	EntityViews<typeof LixChangeSetEdgeSchema, "change_set_edge"> &
 	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
 	EntityViews<typeof LixChangeSetThreadSchema, "change_set_thread"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
@@ -103,4 +103,6 @@ export type LixDatabaseSchema = {
 		"thread_comment",
 		{ body: LixThreadComment["body"] }
 	> &
-	EntityViews<typeof LixVersionSchema, "version">;
+	EntityViews<typeof LixVersionSchema, "version"> &
+	EntityViews<typeof LixCommitSchema, "commit"> &
+	EntityViews<typeof LixCommitEdgeSchema, "commit_edge">;

@@ -34,40 +34,40 @@ export interface StateHistoryTable {
 	change_id: string;
 
 	/**
-	 * The actual change set ID where this entity state was originally created.
+	 * The actual commit ID where this entity state was originally created.
 	 *
-	 * This represents the true origin changeset for each historical state, making it easy
+	 * This represents the true origin commit for each historical state, making it easy
 	 * to understand the provenance of each entity state without additional joins.
 	 *
 	 * For example, when viewing history you might see:
-	 * - depth 0: change_set_id = 'checkpoint-123' (current state created in checkpoint-123)
-	 * - depth 2: change_set_id = 'checkpoint-100' (historical state created in checkpoint-100)
+	 * - depth 0: commit_id = 'commit-123' (current state created in commit-123)
+	 * - depth 2: commit_id = 'commit-100' (historical state created in commit-100)
 	 *
-	 * This tells you exactly where each state was created in the changeset graph.
+	 * This tells you exactly where each state was created in the commit graph.
 	 */
-	change_set_id: string;
+	commit_id: string;
 
 	/**
-	 * The root change set ID used as the starting point for traversing history.
+	 * The root commit ID used as the starting point for traversing history.
 	 *
-	 * When querying history from a specific changeset, this field contains that
-	 * changeset ID for all returned rows. Used with `depth` to understand how
+	 * When querying history from a specific commit, this field contains that
+	 * commit ID for all returned rows. Used with `depth` to understand how
 	 * far back in history each entity state is from this root.
 	 *
-	 * For example, if you query `WHERE root_change_set_id = 'checkpoint-123'`,
-	 * all returned rows will have `root_change_set_id = 'checkpoint-123'`.
+	 * For example, if you query `WHERE root_commit_id = 'commit-123'`,
+	 * all returned rows will have `root_commit_id = 'commit-123'`.
 	 */
-	root_change_set_id: string;
+	root_commit_id: string;
 
 	/**
-	 * Depth of this entity state relative to the root_change_set_id.
-	 * - depth = 0: Current state at the queried change_set_id
-	 * - depth = 1: One change set back in history (parent)
-	 * - depth = 2: Two change sets back in history (grandparent)
+	 * Depth of this entity state relative to the root_commit_id.
+	 * - depth = 0: Current state at the queried commit_id
+	 * - depth = 1: One commit back in history (parent)
+	 * - depth = 2: Two commits back in history (grandparent)
 	 * - etc.
 	 *
-	 * Depth is calculated by traversing the change set ancestry graph backwards
-	 * from the queried change_set_id through parent change set edges.
+	 * Depth is calculated by traversing the commit ancestry graph backwards
+	 * from the queried commit_id through parent commit edges.
 	 * Used for blame functionality to show how entities evolved over time.
 	 */
 	depth: number;
@@ -107,7 +107,7 @@ export function applyStateHistoryDatabaseSchema(
 	lix.sqlite.exec(STATE_HISTORY_VIEW_SQL);
 }
 
-// Optimized to use materialized change_set_edge_all and change_set_element_all from global version
+// Optimized to use materialized commit_edge_all and change_set_element_all from global version
 export const STATE_HISTORY_VIEW_SQL = `
 CREATE VIEW IF NOT EXISTS state_history AS
 WITH
@@ -122,49 +122,61 @@ WITH
 		FROM internal_change ic
 		LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
 	),
-	-- For state_history, we work with any change_set_id, not just version heads
-	requested_change_sets AS (
-		SELECT DISTINCT cs.id as change_set_id
-		FROM change_set_all cs
+	-- For state_history, we work with any commit_id, not just version heads
+	requested_commits AS (
+		SELECT DISTINCT c.id as commit_id
+		FROM commit_all c
 		-- This will be filtered by the WHERE clause in queries
 	),
-	-- Find all change sets reachable from requested ones (including ancestors)
-	reachable_cs_from_requested(id, root_change_set_id, depth) AS (
-		SELECT change_set_id, change_set_id as root_change_set_id, 0 as depth 
-		FROM requested_change_sets
+	-- Find all commits reachable from requested ones (including ancestors)
+	reachable_commits_from_requested(id, root_commit_id, depth) AS (
+		SELECT commit_id, commit_id as root_commit_id, 0 as depth 
+		FROM requested_commits
 		UNION
-		SELECT cse.parent_id, r.root_change_set_id, r.depth + 1
-		FROM change_set_edge_all cse 
-		JOIN reachable_cs_from_requested r ON cse.child_id = r.id
-		WHERE cse.lixcol_version_id = 'global'
+		SELECT ce.parent_id, r.root_commit_id, r.depth + 1
+		FROM commit_edge_all ce 
+		JOIN reachable_commits_from_requested r ON ce.child_id = r.id
+		WHERE ce.lixcol_version_id = 'global'
 	),
-	-- Find all change set elements in reachable change sets
-	cse_in_reachable_cs AS (
+	-- Get change set IDs for each commit
+	commit_changesets AS (
+		SELECT 
+			c.id as commit_id,
+			c.change_set_id as change_set_id,
+			rc.root_commit_id,
+			rc.depth as commit_depth
+		FROM commit_all c
+		JOIN reachable_commits_from_requested rc ON c.id = rc.id
+		WHERE c.lixcol_version_id = 'global'
+	),
+	-- Find all change set elements in reachable commits
+	cse_in_reachable_commits AS (
 		SELECT cse.entity_id AS target_entity_id,
 			   cse.file_id AS target_file_id,
 			   cse.schema_key AS target_schema_key, 
 			   cse.change_id AS target_change_id,
 			   cse.change_set_id AS cse_origin_change_set_id,
-			   rcs.root_change_set_id,
-			   rcs.depth as changeset_depth,
-			   rcs.id as depth_change_set_id
+			   cc.commit_id AS origin_commit_id,
+			   cc.root_commit_id,
+			   cc.commit_depth,
+			   cc.commit_id as depth_commit_id
 		FROM change_set_element_all cse
-		JOIN reachable_cs_from_requested rcs ON cse.change_set_id = rcs.id
+		JOIN commit_changesets cc ON cse.change_set_id = cc.change_set_id
 		WHERE cse.lixcol_version_id = 'global'
 	),
-	-- For each entity at each depth, find the latest change within that depth's change set
+	-- For each entity at each depth, find the latest change within that depth's commit
 	latest_change_per_entity_per_depth AS (
 		SELECT 
 			r.target_entity_id,
 			r.target_file_id,
 			r.target_schema_key,
-			r.root_change_set_id,
-			r.changeset_depth,
-			r.depth_change_set_id,
+			r.root_commit_id,
+			r.commit_depth,
+			r.depth_commit_id,
 			MAX(target_change.created_at) as latest_created_at
-		FROM cse_in_reachable_cs r 
+		FROM cse_in_reachable_commits r 
 		INNER JOIN all_changes_with_snapshots target_change ON r.target_change_id = target_change.id
-		GROUP BY r.target_entity_id, r.target_file_id, r.target_schema_key, r.root_change_set_id, r.changeset_depth
+		GROUP BY r.target_entity_id, r.target_file_id, r.target_schema_key, r.root_commit_id, r.commit_depth
 	),
 	-- Get the actual changes for each entity at each depth
 	entity_states_at_depths AS (
@@ -176,16 +188,16 @@ WITH
 			target_change.snapshot_content,
 			target_change.schema_version,
 			r.target_change_id,
-			r.cse_origin_change_set_id,
-			r.root_change_set_id,
-			latest.changeset_depth
+			r.origin_commit_id,
+			r.root_commit_id,
+			latest.commit_depth
 		FROM latest_change_per_entity_per_depth latest
-		INNER JOIN cse_in_reachable_cs r ON (
+		INNER JOIN cse_in_reachable_commits r ON (
 			latest.target_entity_id = r.target_entity_id 
 			AND latest.target_file_id = r.target_file_id
 			AND latest.target_schema_key = r.target_schema_key
-			AND latest.root_change_set_id = r.root_change_set_id
-			AND latest.changeset_depth = r.changeset_depth
+			AND latest.root_commit_id = r.root_commit_id
+			AND latest.commit_depth = r.commit_depth
 		)
 		INNER JOIN all_changes_with_snapshots target_change ON (
 			r.target_change_id = target_change.id
@@ -200,10 +212,10 @@ SELECT
 	esad.snapshot_content,
 	esad.schema_version,
 	esad.target_change_id as change_id,
-	esad.cse_origin_change_set_id as change_set_id,
-	esad.root_change_set_id as root_change_set_id,
-	esad.changeset_depth as depth
+	esad.origin_commit_id as commit_id,
+	esad.root_commit_id as root_commit_id,
+	esad.commit_depth as depth
 FROM entity_states_at_depths esad
 WHERE esad.snapshot_content IS NOT NULL  -- Exclude deletions for now
-ORDER BY esad.entity_id, esad.changeset_depth;
+ORDER BY esad.entity_id, esad.commit_depth;
 `;

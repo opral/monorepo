@@ -54,7 +54,7 @@ export function VersionDropdown() {
 
 		const newVersion = await createVersion({
 			lix,
-			changeSet: { id: activeVersion.change_set_id },
+			commit_id: activeVersion.commit_id,
 		});
 
 		await switchToVersion(newVersion);

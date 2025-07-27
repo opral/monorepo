@@ -1,11 +1,11 @@
 import { handleFileInsert, handleFileUpdate } from "./file-handlers.js";
-import { materializeFileData } from "./materialize-file-data.js";
-import { materializeFileDataAtChangeset } from "./materialize-file-data-at-changeset.js";
+import { materializeFileDataAtCommit } from "./materialize-file-data-at-commit.js";
 import type {
 	LixSchemaDefinition,
 	FromLixSchemaDefinition,
 } from "../schema-definition/definition.js";
 import type { Lix } from "../lix/open-lix.js";
+import { materializeFileData } from "./materialize-file-data.js";
 
 export function applyFileDatabaseSchema(
 	lix: Pick<Lix, "sqlite" | "db" | "plugin" | "hooks">
@@ -90,18 +90,18 @@ export function applyFileDatabaseSchema(
 	});
 
 	lix.sqlite.createFunction({
-		name: "materialize_file_data_at_changeset",
+		name: "materialize_file_data_at_commit",
 		arity: 5,
 		deterministic: false,
 		xFunc: (_ctx: number, ...args: any[]) => {
-			return materializeFileDataAtChangeset({
+			return materializeFileDataAtCommit({
 				lix,
 				file: {
 					id: args[0],
 					path: args[1],
 					metadata: args[4],
 				},
-				rootChangeSetId: args[2],
+				rootCommitId: args[2],
 				depth: args[3],
 			});
 		},
@@ -148,7 +148,7 @@ export function applyFileDatabaseSchema(
                 lc.latest_change_id AS lixcol_change_id,
                 (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_created_at,
                 (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_updated_at,
-                lc.latest_change_set_id AS lixcol_change_set_id,
+                lc.latest_change_set_id AS lixcol_commit_id,
                 fd.untracked AS lixcol_untracked
         FROM state fd
         JOIN latest_file_change lc ON lc.file_id = fd.entity_id
@@ -198,7 +198,7 @@ export function applyFileDatabaseSchema(
                 lc.latest_change_id AS lixcol_change_id,
                 (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_created_at,
                 (SELECT created_at FROM change WHERE id = lc.latest_change_id) AS lixcol_updated_at,
-                lc.latest_change_set_id AS lixcol_change_set_id,
+                lc.latest_change_set_id AS lixcol_commit_id,
                 fd.untracked AS lixcol_untracked
         FROM state_all fd
         JOIN latest_file_change lc ON lc.file_id = fd.entity_id AND lc.version_id = fd.version_id
@@ -297,10 +297,10 @@ export function applyFileDatabaseSchema(
   SELECT
     json_extract(snapshot_content, '$.id') AS id,
     json_extract(snapshot_content, '$.path') AS path,
-    materialize_file_data_at_changeset(
+    materialize_file_data_at_commit(
       json_extract(snapshot_content, '$.id'),
       json_extract(snapshot_content, '$.path'),
-      root_change_set_id,
+      root_commit_id,
       depth,
       json_extract(snapshot_content, '$.metadata')
     ) AS data,
@@ -312,8 +312,8 @@ export function applyFileDatabaseSchema(
     plugin_key AS lixcol_plugin_key,
     schema_version AS lixcol_schema_version,
     change_id AS lixcol_change_id,
-    change_set_id AS lixcol_change_set_id,
-    root_change_set_id AS lixcol_root_change_set_id,
+    commit_id AS lixcol_commit_id,
+    root_commit_id AS lixcol_root_commit_id,
     depth AS lixcol_depth
   FROM state_history
   WHERE schema_key = 'lix_file_descriptor';

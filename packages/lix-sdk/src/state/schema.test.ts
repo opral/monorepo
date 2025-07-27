@@ -627,7 +627,7 @@ simulationTest(
 );
 
 simulationTest(
-	"state appears in both versions when they share the same change set",
+	"state appears in both versions when they share the same commit",
 	async ({ openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -662,12 +662,16 @@ simulationTest(
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		// Create version B with the same change set as version A
-		await createVersion({
+		const sharedCommitId = versionAAfterInsert.commit_id;
+
+		// Create version B from version A
+		const versionB = await createVersion({
 			lix,
 			id: "version_b",
-			changeSet: { id: versionAAfterInsert.change_set_id },
+			commit_id: sharedCommitId,
 		});
+
+		expect(versionB.commit_id).toBe(sharedCommitId);
 
 		const stateInBothVersions = await lix.db
 			.selectFrom("state_all")
@@ -683,12 +687,14 @@ simulationTest(
 				schema_key: "mock_schema",
 				snapshot_content: { value: "shared state" },
 				version_id: "version_a",
+				commit_id: sharedCommitId,
 			},
 			{
 				entity_id: "e0",
 				schema_key: "mock_schema",
 				snapshot_content: { value: "shared state" },
 				version_id: "version_b",
+				commit_id: sharedCommitId,
 			},
 		]);
 	}
@@ -731,23 +737,23 @@ simulationTest(
 			.selectAll()
 			.executeTakeFirstOrThrow();
 
-		// Create two versions from the same base changeset
+		// Create two versions from the same base version
 		await createVersion({
 			lix,
 			id: "version_a",
-			changeSet: { id: baseVersionAfterInsert.change_set_id },
+			commit_id: baseVersionAfterInsert.commit_id,
 		});
 
 		await createVersion({
 			lix,
 			id: "version_b",
-			changeSet: { id: baseVersionAfterInsert.change_set_id },
+			commit_id: baseVersionAfterInsert.commit_id,
 		});
 
 		const versions = await lix.db
 			.selectFrom("version")
 			.where("id", "in", ["base_version", "version_a", "version_b"])
-			.select(["id", "change_set_id"])
+			.select(["id", "commit_id"])
 			.execute();
 
 		expect(versions).toHaveLength(3);
@@ -1081,7 +1087,7 @@ simulationTest(
 );
 
 simulationTest(
-	"state and state_all views expose change_set_id for history queries",
+	"state and state_all views expose commit_id for history queries",
 	async ({ expectDeterministic, openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
@@ -1139,12 +1145,12 @@ simulationTest(
 			.execute();
 
 		expectDeterministic(stateAllResult).toHaveLength(1);
-		expectDeterministic(stateAllResult[0]).toHaveProperty("change_set_id");
-		expectDeterministic(stateAllResult[0]?.change_set_id).toBe(
-			activeVersionAfterInsert.change_set_id
+		expectDeterministic(stateAllResult[0]).toHaveProperty("commit_id");
+		expectDeterministic(stateAllResult[0]?.commit_id).toBe(
+			activeVersionAfterInsert.commit_id
 		);
 
-		// Query state view (filtered by active version) to verify change_set_id is exposed
+		// Query state view (filtered by active version) to verify commit_id is exposed
 		const stateResult = await lix.db
 			.selectFrom("state")
 			.where("entity_id", "=", "change-set-id-test-entity")
@@ -1153,14 +1159,14 @@ simulationTest(
 			.execute();
 
 		expectDeterministic(stateResult).toHaveLength(1);
-		expectDeterministic(stateResult[0]?.change_set_id).toBeDefined();
-		expectDeterministic(stateResult[0]?.change_set_id).toBe(
-			activeVersionAfterInsert.change_set_id
+		expectDeterministic(stateResult[0]?.commit_id).toBeDefined();
+		expectDeterministic(stateResult[0]?.commit_id).toBe(
+			activeVersionAfterInsert.commit_id
 		);
 
-		// Verify that change_set_id matches between state and state_all views
-		expectDeterministic(stateResult[0]?.change_set_id).toBe(
-			stateAllResult[0]?.change_set_id
+		// Verify that commit_id matches between state and state_all views
+		expectDeterministic(stateResult[0]?.commit_id).toBe(
+			stateAllResult[0]?.commit_id
 		);
 
 		// Get the change_set_element records - there should be two:
@@ -1180,28 +1186,38 @@ simulationTest(
 		const version = await lix.db
 			.selectFrom("version")
 			.where("id", "=", activeVersionAfterInsert.id)
-			.select(["id", "change_set_id", "working_change_set_id"])
+			.select(["id", "commit_id", "working_commit_id"])
+			.executeTakeFirstOrThrow();
+
+		// Get the change set ID from the version's commit
+		const versionCommit = await lix.db
+			.selectFrom("commit")
+			.where("id", "=", version.commit_id)
+			.selectAll()
+			.executeTakeFirstOrThrow();
+
+		// Get the change set ID from the working commit
+		const workingCommit = await lix.db
+			.selectFrom("commit")
+			.where("id", "=", version.working_commit_id)
+			.selectAll()
 			.executeTakeFirstOrThrow();
 
 		// Find which change_set_element is in the version's change set (not working)
 		const versionChangeSetElement = changeSetElements.find(
-			(el) => el.change_set_id === version.change_set_id
+			(el) => el.change_set_id === versionCommit.change_set_id
 		);
 		const workingChangeSetElement = changeSetElements.find(
-			(el) => el.change_set_id === version.working_change_set_id
+			(el) => el.change_set_id === workingCommit.change_set_id
 		);
 
 		expectDeterministic(versionChangeSetElement).toBeDefined();
 		expectDeterministic(workingChangeSetElement).toBeDefined();
 
-		// The state view should show the change_set_id from the version's change set graph,
-		// not the working change set (which is temporary and not part of the graph)
-		expectDeterministic(stateResult[0]?.change_set_id).toBe(
-			versionChangeSetElement!.change_set_id
-		);
-		expectDeterministic(stateAllResult[0]?.change_set_id).toBe(
-			versionChangeSetElement!.change_set_id
-		);
+		// The state view should show the commit_id from the version,
+		// not related to the working change set (which is temporary and not part of the graph)
+		expectDeterministic(stateResult[0]?.commit_id).toBe(version.commit_id);
+		expectDeterministic(stateAllResult[0]?.commit_id).toBe(version.commit_id);
 
 		// Verify that the change_id also matches for consistency
 		expectDeterministic(stateResult[0]?.change_id).toBe(
@@ -1640,7 +1656,7 @@ describe.each([
 					.selectAll()
 					.executeTakeFirstOrThrow();
 
-				const originalChangeSetId = mainVersion.change_set_id;
+				const originalChangeSetId = mainVersion.commit_id;
 
 				// Make a mutation to trigger version update in global context
 				await lix.db
@@ -3137,4 +3153,80 @@ test("deleting key_value entities from state should not cause infinite loop", as
 		.execute();
 
 	expect(keyValueAfterDelete).toHaveLength(0);
+});
+
+// see https://github.com/opral/lix-sdk/issues/359
+test("commit_id in state should be from the real auto-commit, not the working commit", async () => {
+	const lix = await openLix({});
+
+	// Get the active version with its commit_id and working_commit_id
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	// Verify we have both commit_id and working_commit_id
+	expect(activeVersion.commit_id).toBeTruthy();
+	expect(activeVersion.working_commit_id).toBeTruthy();
+	expect(activeVersion.commit_id).not.toBe(activeVersion.working_commit_id);
+
+	// Insert some state data
+	await lix.db
+		.insertInto("state")
+		.values({
+			entity_id: "test-entity-1",
+			schema_key: "test_schema",
+			file_id: "test-file",
+			plugin_key: "test-plugin",
+			schema_version: "1.0",
+			snapshot_content: { value: "initial value" },
+		})
+		.execute();
+
+	// Query the state to check the commit_id
+	const stateAfterInsert = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-entity-1")
+		.select(["entity_id", "commit_id"])
+		.executeTakeFirstOrThrow();
+
+	// The commit_id should NOT be the working_commit_id
+	expect(stateAfterInsert.commit_id).not.toBe(activeVersion.working_commit_id);
+
+	// Get the actual commit that was created by the auto-commit
+	const latestCommit = await lix.db
+		.selectFrom("commit")
+		.orderBy("id", "desc")
+		.select(["id"])
+		.executeTakeFirst();
+
+	// The commit_id should be the auto-commit ID (not the working commit)
+	expect(stateAfterInsert.commit_id).toBe(latestCommit?.id);
+
+	// Update the state to trigger another auto-commit
+	await lix.db
+		.updateTable("state")
+		.where("entity_id", "=", "test-entity-1")
+		.set({ snapshot_content: { value: "updated value" } })
+		.execute();
+
+	// Check the state again
+	const stateAfterUpdate = await lix.db
+		.selectFrom("state")
+		.where("entity_id", "=", "test-entity-1")
+		.select(["entity_id", "commit_id"])
+		.executeTakeFirstOrThrow();
+
+	// Get the new latest commit
+	const newLatestCommit = await lix.db
+		.selectFrom("commit")
+		.orderBy("id", "desc")
+		.select(["id"])
+		.executeTakeFirst();
+
+	// The commit_id should now be the new auto-commit ID
+	expect(stateAfterUpdate.commit_id).toBe(newLatestCommit?.id);
+	expect(stateAfterUpdate.commit_id).not.toBe(activeVersion.working_commit_id);
+	expect(stateAfterUpdate.commit_id).not.toBe(latestCommit?.id);
 });

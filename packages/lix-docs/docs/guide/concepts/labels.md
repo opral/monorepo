@@ -11,6 +11,7 @@ Labels are key-value pairs attached to various entities in Lix:
 - Labels can be attached to change sets, files, versions, and other entities
 
 For example:
+
 - `{ key: "priority", value: "high" }`
 - `{ key: "author", value: "team-member" }`
 - `{ key: "status", value: "review-needed" }`
@@ -29,18 +30,18 @@ Labels serve multiple purposes in Lix:
 Lix provides separate tables for different label types:
 
 - `change_set_label` - Labels for change sets
-- `file_label` - Labels for files 
+- `file_label` - Labels for files
 - `version_label` - Labels for versions
 
 Each label table follows a similar structure:
 
 ```typescript
 interface Label {
-  id: string;          // Unique identifier
-  entity_id: string;   // Reference to the labeled entity
-  key: string;         // The label key/category
-  value: string;       // The label value/tag
-  created_at: string;  // When the label was created
+  id: string; // Unique identifier
+  entity_id: string; // Reference to the labeled entity
+  key: string; // The label key/category
+  value: string; // The label value/tag
+  created_at: string; // When the label was created
 }
 ```
 
@@ -56,8 +57,8 @@ const changeSet = await createChangeSet({
   lix,
   labels: [
     { key: "type", value: "feature" },
-    { key: "priority", value: "high" }
-  ]
+    { key: "priority", value: "high" },
+  ],
 });
 
 // Add a label to a file
@@ -68,7 +69,7 @@ await lix.db
     entity_id: fileId,
     key: "status",
     value: "approved",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 ```
@@ -110,7 +111,7 @@ While you can create any label types that make sense for your application, here 
 
 ### File Labels
 
-- `status`: "draft", "review", "final" 
+- `status`: "draft", "review", "final"
 - `category`: "config", "data", "documentation"
 - `visibility`: "public", "internal", "private"
 
@@ -135,7 +136,7 @@ import { createCheckpoint } from "@lix-js/sdk";
 const checkpoint = await createCheckpoint({
   lix,
   name: "Feature Complete",
-  description: "Completed implementation of feature X"
+  description: "Completed implementation of feature X",
 });
 ```
 
@@ -152,15 +153,15 @@ const featureChangeSet = await createChangeSet({
   labels: [
     { key: "type", value: "feature" },
     { key: "status", value: "in-progress" },
-    { key: "feature", value: "user-authentication" }
-  ]
+    { key: "feature", value: "user-authentication" },
+  ],
 });
 
 // Update status label when ready for review
 await lix.db
   .updateTable("change_set_label")
   .set({
-    value: "review"
+    value: "review",
   })
   .where("entity_id", "=", featureChangeSet.id)
   .where("key", "=", "status")
@@ -173,8 +174,8 @@ const approvedCheckpoint = await createCheckpoint({
   description: "User authentication feature approved",
   labels: [
     { key: "status", value: "approved" },
-    { key: "reviewed-by", value: "team-lead" }
-  ]
+    { key: "reviewed-by", value: "team-lead" },
+  ],
 });
 ```
 

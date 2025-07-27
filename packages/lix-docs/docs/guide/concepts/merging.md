@@ -33,10 +33,7 @@ import { createMergeChangeSet } from "@lix-js/sdk";
 // Merge two branches
 const mergeChangeSet = await createMergeChangeSet({
   lix,
-  sources: [
-    { id: mainBranchChangeSetId },
-    { id: featureBranchChangeSetId }
-  ]
+  sources: [{ id: mainBranchChangeSetId }, { id: featureBranchChangeSetId }],
 });
 
 console.log("Created merge change set:", mergeChangeSet.id);
@@ -73,11 +70,12 @@ Here's an example of manual conflict resolution:
 // Identify conflicts
 const conflicts = await lix.db
   .selectFrom("change")
-  .whereExists(qb => 
-    qb.selectFrom("change_set_element")
+  .whereExists((qb) =>
+    qb
+      .selectFrom("change_set_element")
       .whereRef("change_set_element.change_id", "=", "change.id")
       .where("change_set_element.change_set_id", "=", mergeChangeSetId)
-      .where("change_set_element.conflict", "=", true)
+      .where("change_set_element.conflict", "=", true),
   )
   .selectAll()
   .execute();
@@ -93,15 +91,17 @@ for (const conflict of conflicts) {
     file_id: conflict.file_id,
     plugin_key: conflict.plugin_key,
     // Set the resolved value here
-    snapshot: { /* resolved data */ }
+    snapshot: {
+      /* resolved data */
+    },
   });
-  
+
   // Add the resolved change to the merge change set
   await lix.db
     .updateTable("change_set_element")
     .set({
       conflict: false,
-      resolution_change_id: resolvedChange.id
+      resolution_change_id: resolvedChange.id,
     })
     .where("change_set_id", "=", mergeChangeSetId)
     .where("change_id", "=", conflict.id)
@@ -129,12 +129,14 @@ await handleFileInsert({
   lix,
   file: {
     path: "/document.json",
-    data: new TextEncoder().encode(JSON.stringify({
-      title: "Original Title",
-      content: "Original content",
-      metadata: { author: "User" }
-    }))
-  }
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        title: "Original Title",
+        content: "Original content",
+        metadata: { author: "User" },
+      }),
+    ),
+  },
 });
 
 // Create the base change set
@@ -145,12 +147,14 @@ await handleFileUpdate({
   lix,
   file: {
     path: "/document.json",
-    data: new TextEncoder().encode(JSON.stringify({
-      title: "Updated Title",
-      content: "Original content",
-      metadata: { author: "User" }
-    }))
-  }
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        title: "Updated Title",
+        content: "Original content",
+        metadata: { author: "User" },
+      }),
+    ),
+  },
 });
 
 // Create change set for Branch A
@@ -159,7 +163,7 @@ const branchAChangeSet = await createChangeSet({ lix });
 // Switch back to the base change set
 await switchVersion({
   lix,
-  to: baseChangeSet.id
+  to: baseChangeSet.id,
 });
 
 // Create Branch B: modify the content
@@ -167,12 +171,14 @@ await handleFileUpdate({
   lix,
   file: {
     path: "/document.json",
-    data: new TextEncoder().encode(JSON.stringify({
-      title: "Original Title",
-      content: "Updated content with new information",
-      metadata: { author: "User", lastModified: "2023-06-01" }
-    }))
-  }
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        title: "Original Title",
+        content: "Updated content with new information",
+        metadata: { author: "User", lastModified: "2023-06-01" },
+      }),
+    ),
+  },
 });
 
 // Create change set for Branch B
@@ -181,16 +187,13 @@ const branchBChangeSet = await createChangeSet({ lix });
 // Merge the branches
 const mergeChangeSet = await createMergeChangeSet({
   lix,
-  sources: [
-    { id: branchAChangeSet.id },
-    { id: branchBChangeSet.id }
-  ]
+  sources: [{ id: branchAChangeSet.id }, { id: branchBChangeSet.id }],
 });
 
 // Apply the merge change set
 await applyChangeSet({
   lix,
-  changeSet: mergeChangeSet
+  changeSet: mergeChangeSet,
 });
 
 // The document now has changes from both branches:
@@ -208,12 +211,14 @@ await handleFileInsert({
   lix,
   file: {
     path: "/config.json",
-    data: new TextEncoder().encode(JSON.stringify({
-      theme: "light",
-      language: "en",
-      features: ["search", "notifications"]
-    }))
-  }
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        theme: "light",
+        language: "en",
+        features: ["search", "notifications"],
+      }),
+    ),
+  },
 });
 
 // Create base change set
@@ -224,12 +229,14 @@ await handleFileUpdate({
   lix,
   file: {
     path: "/config.json",
-    data: new TextEncoder().encode(JSON.stringify({
-      theme: "dark",
-      language: "en",
-      features: ["search", "notifications", "offline-mode"]
-    }))
-  }
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        theme: "dark",
+        language: "en",
+        features: ["search", "notifications", "offline-mode"],
+      }),
+    ),
+  },
 });
 
 const branchAChangeSet = await createChangeSet({ lix });
@@ -237,7 +244,7 @@ const branchAChangeSet = await createChangeSet({ lix });
 // Switch back to base
 await switchVersion({
   lix,
-  to: baseChangeSet.id
+  to: baseChangeSet.id,
 });
 
 // Branch B: Change theme and language
@@ -245,12 +252,14 @@ await handleFileUpdate({
   lix,
   file: {
     path: "/config.json",
-    data: new TextEncoder().encode(JSON.stringify({
-      theme: "blue",
-      language: "fr",
-      features: ["search", "notifications"]
-    }))
-  }
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        theme: "blue",
+        language: "fr",
+        features: ["search", "notifications"],
+      }),
+    ),
+  },
 });
 
 const branchBChangeSet = await createChangeSet({ lix });
@@ -258,20 +267,18 @@ const branchBChangeSet = await createChangeSet({ lix });
 // Attempt to merge (will detect conflicts on the 'theme' property)
 const mergeChangeSet = await createMergeChangeSet({
   lix,
-  sources: [
-    { id: branchAChangeSet.id },
-    { id: branchBChangeSet.id }
-  ]
+  sources: [{ id: branchAChangeSet.id }, { id: branchBChangeSet.id }],
 });
 
 // Resolve the conflict manually
 const conflicts = await lix.db
   .selectFrom("change")
-  .whereExists(qb => 
-    qb.selectFrom("change_set_element")
+  .whereExists((qb) =>
+    qb
+      .selectFrom("change_set_element")
       .whereRef("change_set_element.change_id", "=", "change.id")
       .where("change_set_element.change_set_id", "=", mergeChangeSet.id)
-      .where("change_set_element.conflict", "=", true)
+      .where("change_set_element.conflict", "=", true),
   )
   .selectAll()
   .execute();
@@ -284,31 +291,31 @@ if (conflicts.length > 0) {
     .where("path", "=", "/config.json")
     .selectAll()
     .executeTakeFirstOrThrow();
-  
+
   // Create a resolved version
   const resolvedData = {
     theme: "dark", // Choose dark theme from Branch A
     language: "fr", // Keep language from Branch B
-    features: ["search", "notifications", "offline-mode"] // Keep expanded features from Branch A
+    features: ["search", "notifications", "offline-mode"], // Keep expanded features from Branch A
   };
-  
+
   // Update the file with the resolved content
   await handleFileUpdate({
     lix,
     file: {
       path: "/config.json",
-      data: new TextEncoder().encode(JSON.stringify(resolvedData))
-    }
+      data: new TextEncoder().encode(JSON.stringify(resolvedData)),
+    },
   });
-  
+
   // Create a resolution change set
   const resolutionChangeSet = await createChangeSet({ lix });
-  
+
   // Complete the merge by linking the resolution
   await lix.db
     .updateTable("change_set_edge")
     .set({
-      resolution_change_set_id: resolutionChangeSet.id
+      resolution_change_set_id: resolutionChangeSet.id,
     })
     .where("child_id", "=", mergeChangeSet.id)
     .execute();
@@ -326,6 +333,7 @@ A --- B --- C --- F  Main Branch
 ```
 
 In this diagram:
+
 - Branch point is at B
 - Feature branch includes changes D and E
 - Main branch continues with change C

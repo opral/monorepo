@@ -72,13 +72,13 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
-			.select("version.change_set_id")
+			.select("version.commit_id")
 			.executeTakeFirstOrThrow();
 
 		// Query the history view
 		const historyResult = await lix.db
 			.selectFrom("test_entity_history" as any)
-			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_commit_id", "=", activeVersion.commit_id)
 			.selectAll()
 			.execute();
 
@@ -98,8 +98,8 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		expect(historyEntity).toHaveProperty("lixcol_schema_version", "1.0");
 		expect(historyEntity).toHaveProperty("lixcol_change_id");
 		expect(historyEntity).toHaveProperty(
-			"lixcol_change_set_id",
-			activeVersion.change_set_id
+			"lixcol_commit_id",
+			activeVersion.commit_id
 		);
 		expect(historyEntity).toHaveProperty("lixcol_depth", 0);
 	});
@@ -135,13 +135,13 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
-			.select("version.change_set_id")
+			.select("version.commit_id")
 			.executeTakeFirstOrThrow();
 
 		// Test that we can query the view using the schema key + _history name
 		const result = await lix.db
 			.selectFrom("test_entity_history" as any)
-			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_commit_id", "=", activeVersion.commit_id)
 			.selectAll()
 			.execute();
 
@@ -216,14 +216,14 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
-			.select("version.change_set_id")
+			.select("version.commit_id")
 			.executeTakeFirstOrThrow();
 
 		// Query all history for this entity
 		const historyResult = await lix.db
 			.selectFrom("test_history" as any)
 			.where("lixcol_entity_id", "=", "tracked_entity")
-			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_commit_id", "=", activeVersion.commit_id)
 			.orderBy("lixcol_depth", "asc")
 			.selectAll()
 			.execute();
@@ -292,14 +292,14 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
-			.select("version.change_set_id")
+			.select("version.commit_id")
 			.executeTakeFirstOrThrow();
 
 		// Verify we can read the data
 		const readResult = await lix.db
 			.selectFrom("readonly_history" as any)
 			.where("lixcol_entity_id", "=", "test_id")
-			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_commit_id", "=", activeVersion.commit_id)
 			.selectAll()
 			.execute();
 
@@ -354,13 +354,13 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
-			.select("version.change_set_id")
+			.select("version.commit_id")
 			.executeTakeFirstOrThrow();
 
 		// Query the history view to verify all entity identification columns are exposed
 		const result = await lix.db
 			.selectFrom("test_history_view" as any)
-			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_commit_id", "=", activeVersion.commit_id)
 			.where("lixcol_entity_id", "=", "test_id")
 			.select([
 				"id",
@@ -369,7 +369,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 				"lixcol_schema_key",
 				"lixcol_file_id",
 				"lixcol_plugin_key",
-				"lixcol_change_set_id",
+				"lixcol_commit_id",
 				"lixcol_depth",
 			])
 			.executeTakeFirst();
@@ -381,7 +381,7 @@ describe("createEntityHistoryViewIfNotExists", () => {
 		expect(result?.lixcol_schema_key).toBe("test_entity");
 		expect(result?.lixcol_file_id).toBe("test_file");
 		expect(result?.lixcol_plugin_key).toBe("test_plugin");
-		expect(result?.lixcol_change_set_id).toBe(activeVersion.change_set_id);
+		expect(result?.lixcol_commit_id).toBe(activeVersion.commit_id);
 		expect(result?.lixcol_depth).toBe(0);
 	});
 });

@@ -8,7 +8,7 @@ import {
 } from "../plugin/mock-json-plugin.js";
 import type { LixChange } from "../change/schema.js";
 import type { LixKeyValue } from "../key-value/schema.js";
-import { createCheckpoint } from "./create-checkpoint.js";
+import { createCheckpoint } from "../commit/create-checkpoint.js";
 
 test("it applies lix own entity changes", async () => {
 	const lix = await openLix({});
@@ -101,7 +101,7 @@ test("it applies the changes associated with the change set", async () => {
 		.execute();
 
 	// Apply the change set
-	await applyChangeSet({ lix, changeSet: checkpoint });
+	await applyChangeSet({ lix, changeSet: { id: checkpoint.change_set_id } });
 
 	// Verify file data was updated by the mock plugin via applyChangeSet
 	const updatedFile = await lix.db
@@ -304,7 +304,10 @@ test("file deletion bypasses plugin and removes file from state", async () => {
 
 	expect(recreatedFile).toBeDefined();
 	// Apply the deletion change set
-	await applyChangeSet({ lix, changeSet: checkpointAfterDeletion });
+	await applyChangeSet({
+		lix,
+		changeSet: { id: checkpointAfterDeletion.change_set_id },
+	});
 
 	// Verify file is deleted again after applying change set
 	const finalFile = await lix.db

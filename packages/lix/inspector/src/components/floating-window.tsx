@@ -1,11 +1,22 @@
-import { ReactNode, useEffect, useRef, useState, useCallback } from "react";
+import {
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useContext,
+} from "react";
+import { createPortal } from "react-dom";
 import { X, Maximize2, Minimize2, Pin } from "lucide-react";
+import { Context } from "../context";
+import { useWindowManager } from "./window-manager-context";
 
 interface FloatingWindowProps {
   children: ReactNode;
   title: string;
   isOpen: boolean;
   onClose: () => void;
+  id?: string; // Optional ID for window management
   initialPosition?: { x: number; y: number };
   initialSize?: { width: number; height: number };
   isPinned?: boolean;
@@ -41,6 +52,7 @@ export function FloatingWindow({
   isOpen,
   onClose,
   children,
+  id,
   initialPosition = { x: 100, y: 100 },
   initialSize = { width: 600, height: 400 },
   isPinned = false,
@@ -50,6 +62,16 @@ export function FloatingWindow({
   onSizeChange,
   onExpandedChange,
 }: FloatingWindowProps) {
+  const { rootContainer } = useContext(Context);
+  const windowManager = useWindowManager();
+
+  // Generate a unique ID if not provided (only once)
+  const [windowId] = useState(
+    () => id || `window-${Date.now()}-${Math.random()}`
+  );
+
+  // Get z-index from window manager
+  const zIndex = windowManager.getZIndex(windowId);
   const [position, setPosition] = useState(initialPosition);
   const [size, setSize] = useState(initialSize);
   const [isDragging, setIsDragging] = useState(false);
@@ -93,6 +115,20 @@ export function FloatingWindow({
     setPinned(isPinned);
   }, [isPinned]);
 
+  // Auto-focus when window opens (only once per open/close cycle)
+  const hasFocusedOnOpen = useRef(false);
+
+  useEffect(() => {
+    if (isOpen && !hasFocusedOnOpen.current) {
+      // Focus immediately when window opens for the first time
+      windowManager.focusWindow(windowId);
+      hasFocusedOnOpen.current = true;
+    } else if (!isOpen) {
+      // Reset the flag when window is closed
+      hasFocusedOnOpen.current = false;
+    }
+  }, [isOpen, windowId, windowManager]);
+
   // Initialize position and size only once
   useEffect(() => {
     if (!hasInitialized) {
@@ -124,11 +160,14 @@ export function FloatingWindow({
 
         // Calculate initial position to center the window
         const newX = Math.max(0, (viewportWidth - responsiveWidth) / 2);
-        const newY = Math.max(navbarHeight + 20, (viewportHeight - responsiveHeight) / 3);
+        const newY = Math.max(
+          navbarHeight + 20,
+          (viewportHeight - responsiveHeight) / 3
+        );
 
         setPosition({ x: newX, y: newY });
       }
-      
+
       setHasInitialized(true);
     }
   }, [initialPosition, initialSize, hasInitialized, navbarHeight]);
@@ -342,90 +381,109 @@ export function FloatingWindow({
 
   // Handle mouse move for dragging and resizing
   useEffect(() => {
+    let rafId: number | null = null;
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging && !isResizing) return;
 
       // Prevent text selection during drag/resize
       e.preventDefault();
 
-      if (isDragging) {
-        // Calculate new position
-        const newX = e.clientX - dragOffsetRef.current.x;
-        const newY = e.clientY - dragOffsetRef.current.y;
-
-        // Always update position to follow cursor, even when snapping
-        setPosition({ x: newX, y: newY });
-
-        // Check if we should snap to a zone
-        const snapInfo = checkSnapping(e.clientX, e.clientY);
-
-        if (snapInfo) {
-          // Show snap preview
-          setIsSnapping(true);
-          setSnapPreview({
-            x: snapInfo.x,
-            y: snapInfo.y,
-            width: snapInfo.width,
-            height: snapInfo.height,
-          });
-
-          // Store pre-snap size if not already stored
-          if (!preSnapSize) {
-            setPreSnapSize({
-              width: sizeRef.current.width,
-              height: sizeRef.current.height,
-            });
-          }
-        } else {
-          // Clear snap preview
-          setIsSnapping(false);
-          setSnapPreview(null);
-          setPreSnapSize(null);
-        }
-      } else if (isResizing) {
-        // Calculate position and size changes based on resize direction
-        const deltaX = e.clientX - resizeStartRef.current.x;
-        const deltaY = e.clientY - resizeStartRef.current.y;
-
-        let newWidth = resizeStartRef.current.width;
-        let newHeight = resizeStartRef.current.height;
-        let newX = positionRef.current.x;
-        let newY = positionRef.current.y;
-
-        // Handle width changes
-        if (resizeDirection.includes("e")) {
-          newWidth = Math.max(200, resizeStartRef.current.width + deltaX);
-        } else if (resizeDirection.includes("w")) {
-          const widthChange = Math.min(
-            deltaX,
-            resizeStartRef.current.width - 200
-          );
-          newWidth = Math.max(200, resizeStartRef.current.width - widthChange);
-          newX = resizeStartRef.current.x + widthChange;
-        }
-
-        // Handle height changes
-        if (resizeDirection.includes("s")) {
-          newHeight = Math.max(100, resizeStartRef.current.height + deltaY);
-        } else if (resizeDirection.includes("n")) {
-          const heightChange = Math.min(
-            deltaY,
-            resizeStartRef.current.height - 100
-          );
-          newHeight = Math.max(
-            100,
-            resizeStartRef.current.height - heightChange
-          );
-          newY = resizeStartRef.current.y + heightChange;
-        }
-
-        // Update position and size
-        setPosition({ x: newX, y: newY });
-        setSize({ width: newWidth, height: newHeight });
+      // Cancel previous animation frame
+      if (rafId) {
+        cancelAnimationFrame(rafId);
       }
+
+      // Use requestAnimationFrame to throttle updates
+      rafId = requestAnimationFrame(() => {
+        if (isDragging) {
+          // Calculate new position
+          const newX = e.clientX - dragOffsetRef.current.x;
+          const newY = e.clientY - dragOffsetRef.current.y;
+
+          // Always update position to follow cursor, even when snapping
+          setPosition({ x: newX, y: newY });
+
+          // Throttle snapping calculations (less frequent than position updates)
+          const snapInfo = checkSnapping(e.clientX, e.clientY);
+
+          if (snapInfo) {
+            // Show snap preview
+            setIsSnapping(true);
+            setSnapPreview({
+              x: snapInfo.x,
+              y: snapInfo.y,
+              width: snapInfo.width,
+              height: snapInfo.height,
+            });
+
+            // Store pre-snap size if not already stored
+            if (!preSnapSize) {
+              setPreSnapSize({
+                width: sizeRef.current.width,
+                height: sizeRef.current.height,
+              });
+            }
+          } else {
+            // Clear snap preview
+            setIsSnapping(false);
+            setSnapPreview(null);
+            setPreSnapSize(null);
+          }
+        } else if (isResizing) {
+          // Calculate position and size changes based on resize direction
+          const deltaX = e.clientX - resizeStartRef.current.x;
+          const deltaY = e.clientY - resizeStartRef.current.y;
+
+          let newWidth = resizeStartRef.current.width;
+          let newHeight = resizeStartRef.current.height;
+          let newX = positionRef.current.x;
+          let newY = positionRef.current.y;
+
+          // Handle width changes
+          if (resizeDirection.includes("e")) {
+            newWidth = Math.max(200, resizeStartRef.current.width + deltaX);
+          } else if (resizeDirection.includes("w")) {
+            const widthChange = Math.min(
+              deltaX,
+              resizeStartRef.current.width - 200
+            );
+            newWidth = Math.max(
+              200,
+              resizeStartRef.current.width - widthChange
+            );
+            newX = resizeStartRef.current.x + widthChange;
+          }
+
+          // Handle height changes
+          if (resizeDirection.includes("s")) {
+            newHeight = Math.max(100, resizeStartRef.current.height + deltaY);
+          } else if (resizeDirection.includes("n")) {
+            const heightChange = Math.min(
+              deltaY,
+              resizeStartRef.current.height - 100
+            );
+            newHeight = Math.max(
+              100,
+              resizeStartRef.current.height - heightChange
+            );
+            newY = resizeStartRef.current.y + heightChange;
+          }
+
+          // Update position and size
+          setPosition({ x: newX, y: newY });
+          setSize({ width: newWidth, height: newHeight });
+        }
+      });
     };
 
     const handleMouseUp = () => {
+      // Cancel any pending animation frame
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+
       if (isDragging || isResizing) {
         if (isSnapping && snapPreview) {
           // Apply snap
@@ -452,11 +510,14 @@ export function FloatingWindow({
     };
 
     // Add event listeners
-    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mousemove", handleMouseMove, { passive: false });
     document.addEventListener("mouseup", handleMouseUp);
 
     return () => {
       // Clean up
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
@@ -620,9 +681,7 @@ export function FloatingWindow({
         className={`floating-window bg-base-100 shadow-lg border border-base-300 rounded-md ${isDragging ? "dragging" : ""} ${isResizing ? "resizing" : ""} ${pinned ? "pinned" : ""}`}
         style={{
           position: "fixed",
-          top: isExpanded
-            ? `${navbarHeight + 8}px`
-            : `${position.y}px`,
+          top: isExpanded ? `${navbarHeight + 8}px` : `${position.y}px`,
           left: isExpanded ? `${EXPANDED_MARGIN}px` : `${position.x}px`,
           width: isExpanded
             ? `calc(100vw - ${EXPANDED_MARGIN * 2}px)`
@@ -632,7 +691,7 @@ export function FloatingWindow({
             : `${size.height}px`,
           maxWidth: isExpanded ? "none" : "calc(100vw - 40px)",
           maxHeight: isExpanded ? "none" : "calc(100vh - 40px)",
-          zIndex: 1000,
+          zIndex: zIndex, // Use z-index from window manager
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -640,6 +699,11 @@ export function FloatingWindow({
             isDragging || isResizing ? "none" : "all 0.2s ease-in-out",
           willChange:
             isDragging || isResizing ? "transform, width, height" : "auto",
+        }}
+        onClick={(e) => {
+          // Focus this window when clicked anywhere
+          e.stopPropagation();
+          windowManager.focusWindow(windowId);
         }}
       >
         <div
@@ -675,6 +739,11 @@ export function FloatingWindow({
         <div
           className="window-content p-4 overflow-auto flex-1"
           style={{ height: "calc(100% - 40px)" }}
+          onClick={(e) => {
+            // Focus this window when clicking in content area
+            e.stopPropagation();
+            windowManager.focusWindow(windowId);
+          }}
         >
           {children}
         </div>
@@ -683,6 +752,9 @@ export function FloatingWindow({
     </>
   );
 
-  // For now, just return the window content directly
-  return windowContent;
+  // Get the shadow root from the container and create portal
+  const portalTarget = rootContainer?.shadowRoot;
+
+  // Create the portal if we have a target, otherwise return null
+  return portalTarget ? createPortal(windowContent, portalTarget) : null;
 }

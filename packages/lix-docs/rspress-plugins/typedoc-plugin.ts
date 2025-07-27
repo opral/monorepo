@@ -33,7 +33,7 @@ async function patchLinks(outputDir: string) {
           return `[${p1}](${p2})`;
         }
         return `[${p1}](./${p2})`;
-      }
+      },
     );
     await fs.writeFile(filePath, newContent);
   };
@@ -53,7 +53,7 @@ async function patchLinks(outputDir: string) {
         if (stat.isFile() && /\.mdx?/.test(file)) {
           return normalizeLinksInFile(filePath);
         }
-      })
+      }),
     );
   };
   await traverse(outputDir);
@@ -97,7 +97,7 @@ async function renameHtmlToMd(outputDir: string) {
           const mdPath = filePath.replace(/\.html$/, ".md");
           await fs.rename(filePath, mdPath);
         }
-      })
+      }),
     );
   };
   await traverse(outputDir);
@@ -132,7 +132,7 @@ Welcome to the comprehensive Lix SDK API documentation. This reference provides 
 
 If you're new to Lix, consider starting with our [Getting Started Guide](/guide/getting-started) before diving into the API reference.
 
-Browse the API documentation using the sidebar to find the specific functionality you need.`
+Browse the API documentation using the sidebar to find the specific functionality you need.`,
     );
   }
 
@@ -188,7 +188,7 @@ export function generateApiSidebar(docsRoot: string) {
 }
 
 export async function generateApiDocs(
-  options: CustomTypeDocOptions & { docRoot: string; title?: string }
+  options: CustomTypeDocOptions & { docRoot: string; title?: string },
 ): Promise<void> {
   const {
     entryPoints = [],
@@ -236,7 +236,7 @@ export async function generateApiDocs(
 }
 
 export function customTypeDocPlugin(
-  options: CustomTypeDocOptions
+  options: CustomTypeDocOptions,
 ): RspressPlugin {
   const { entryPoints = [], tsconfig, outDir = "api" } = options;
 

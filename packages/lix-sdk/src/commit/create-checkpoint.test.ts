@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createCheckpoint } from "./create-checkpoint.js";
-import { changeSetIsAncestorOf } from "../query-filter/change-set-is-ancestor-of.js";
+import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import { mockJsonPlugin } from "../plugin/mock-json-plugin.js";
 
 test("creates a checkpoint from working change set elements", async () => {
@@ -24,9 +24,16 @@ test("creates a checkpoint from working change set elements", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Verify working change set has elements
+	// Get the working commit first
+	const initialWorkingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", initialVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const workingElementsBefore = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", initialVersion.working_change_set_id)
+		.where("change_set_id", "=", initialWorkingCommit.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -37,7 +44,7 @@ test("creates a checkpoint from working change set elements", async () => {
 		lix,
 	});
 
-	// Verify checkpoint label was applied
+	// Verify checkpoint label was applied to the checkpoint commit
 	const checkpointLabel = await lix.db
 		.selectFrom("label")
 		.where("name", "=", "checkpoint")
@@ -45,27 +52,27 @@ test("creates a checkpoint from working change set elements", async () => {
 		.executeTakeFirstOrThrow();
 
 	const checkpointLabelAssignment = await lix.db
-		.selectFrom("change_set_label")
-		.where("change_set_id", "=", checkpoint.id)
+		.selectFrom("entity_label")
+		.where("entity_id", "=", checkpoint.id)
 		.where("label_id", "=", checkpointLabel.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(checkpointLabelAssignment).toMatchObject({
-		change_set_id: checkpoint.id,
+		entity_id: checkpoint.id,
 		label_id: checkpointLabel.id,
 	});
 
-	// Verify edge was created
+	// Verify commit edge was created
 	const edge = await lix.db
-		.selectFrom("change_set_edge")
-		.where("parent_id", "=", initialVersion.change_set_id)
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", initialVersion.commit_id)
 		.where("child_id", "=", checkpoint.id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(edge).toMatchObject({
-		parent_id: initialVersion.change_set_id,
+		parent_id: initialVersion.commit_id,
 		child_id: checkpoint.id,
 	});
 
@@ -77,14 +84,20 @@ test("creates a checkpoint from working change set elements", async () => {
 		.executeTakeFirstOrThrow();
 
 	// expect(updatedVersion.change_set_id).toBe(checkpoint.id);
-	expect(updatedVersion.working_change_set_id).not.toBe(
-		initialVersion.working_change_set_id
+	expect(updatedVersion.working_commit_id).not.toBe(
+		initialVersion.working_commit_id
 	);
 
 	// Verify new working change set is empty
+	const newWorkingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", updatedVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const newWorkingElements = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", updatedVersion.working_change_set_id)
+		.where("change_set_id", "=", newWorkingCommit.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -108,14 +121,15 @@ test("creates checkpoint and returns change set", async () => {
 	});
 });
 
-// The edge from checkpoint to new working change set is critical for history traversal.
+//
+// The edge from checkpoint to new working commit is critical for history traversal.
 // Without this edge, queries from the working change set cannot traverse backwards through
 // checkpoints to find historical states. This ensures the change set graph remains connected
 // and allows state_history queries to work correctly from any point in the graph.
-test("creates edge from checkpoint to new working change set", async () => {
+test("creates edge from checkpoint to new working commit", async () => {
 	const lix = await openLix({});
 
-	// Make some changes to create working change set elements
+	// Make some changes to create working commit elements
 	await lix.db
 		.insertInto("key_value")
 		.values({ key: "test-key", value: "test-value" })
@@ -131,24 +145,24 @@ test("creates edge from checkpoint to new working change set", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// Verify edge exists from checkpoint to new working change set
+	// Verify commit edge exists from checkpoint to new working commit
 	const edgeToNewWorking = await lix.db
-		.selectFrom("change_set_edge")
+		.selectFrom("commit_edge")
 		.where("parent_id", "=", checkpoint.id)
-		.where("child_id", "=", updatedVersion.working_change_set_id)
+		.where("child_id", "=", updatedVersion.working_commit_id)
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
 	expect(edgeToNewWorking).toMatchObject({
 		parent_id: checkpoint.id,
-		child_id: updatedVersion.working_change_set_id,
+		child_id: updatedVersion.working_commit_id,
 	});
 
-	// Verify the new working change set can traverse back to the checkpoint
+	// Verify the new working commit can traverse back to the checkpoint
 	const isCheckpointAncestor = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("commit")
 		.where("id", "=", checkpoint.id)
-		.where(changeSetIsAncestorOf({ id: updatedVersion.working_change_set_id }))
+		.where(commitIsAncestorOf({ id: updatedVersion.working_commit_id }))
 		.selectAll()
 		.execute();
 
@@ -159,7 +173,7 @@ test("creates edge from checkpoint to new working change set", async () => {
 		.selectFrom("state_history")
 		.where("entity_id", "=", "test-key")
 		.where("schema_key", "=", "lix_key_value")
-		.where("root_change_set_id", "=", updatedVersion.working_change_set_id)
+		.where("root_commit_id", "=", updatedVersion.working_commit_id)
 		.selectAll()
 		.execute();
 
@@ -207,9 +221,15 @@ test("checkpoint enables clean working change set for new work", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Working change set should only contain post-checkpoint changes
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", version.working_commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	const workingElements = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", version.working_change_set_id)
+		.where("change_set_id", "=", workingCommit.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -220,7 +240,7 @@ test("checkpoint enables clean working change set for new work", async () => {
 	// Checkpoint should contain pre-checkpoint changes
 	const checkpointElements = await lix.db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", checkpoint.id)
+		.where("change_set_id", "=", checkpoint.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -275,11 +295,11 @@ test("creates proper change set ancestry chain", async () => {
 
 	// expect(versionAfterCheckpoint2.change_set_id).toBe(checkpoint2.id);
 
-	// Verify ancestry: initial change set should be an ancestor of checkpoint1
+	// Verify ancestry: initial commit should be an ancestor of checkpoint1
 	const initialIsAncestorOfCheckpoint1 = await lix.db
-		.selectFrom("change_set")
-		.where("id", "=", initialVersion.change_set_id)
-		.where(changeSetIsAncestorOf({ id: checkpoint1.id }))
+		.selectFrom("commit")
+		.where("id", "=", initialVersion.commit_id)
+		.where(commitIsAncestorOf({ id: checkpoint1.id }))
 		.selectAll()
 		.execute();
 
@@ -287,9 +307,9 @@ test("creates proper change set ancestry chain", async () => {
 
 	// Verify ancestry: checkpoint1 should be an ancestor of checkpoint2
 	const checkpoint1IsAncestorOfCheckpoint2 = await lix.db
-		.selectFrom("change_set")
+		.selectFrom("commit")
 		.where("id", "=", checkpoint1.id)
-		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
+		.where(commitIsAncestorOf({ id: checkpoint2.id }))
 		.selectAll()
 		.execute();
 
@@ -297,9 +317,9 @@ test("creates proper change set ancestry chain", async () => {
 
 	// Verify full chain: initial should be an ancestor of checkpoint2
 	const initialIsAncestorOfCheckpoint2 = await lix.db
-		.selectFrom("change_set")
-		.where("id", "=", initialVersion.change_set_id)
-		.where(changeSetIsAncestorOf({ id: checkpoint2.id }))
+		.selectFrom("commit")
+		.where("id", "=", initialVersion.commit_id)
+		.where(commitIsAncestorOf({ id: checkpoint2.id }))
 		.selectAll()
 		.execute();
 
@@ -363,7 +383,7 @@ test(
 			.where(
 				"change_set_element_all.change_set_id",
 				"=",
-				checkpointAfterDeletion.id
+				checkpointAfterDeletion.change_set_id
 			)
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.entity_id", "=", "test-key")
@@ -437,7 +457,7 @@ test(
 			.where(
 				"change_set_element_all.change_set_id",
 				"=",
-				checkpointAfterDeletion.id
+				checkpointAfterDeletion.change_set_id
 			)
 			.where("change_set_element_all.lixcol_version_id", "=", "global")
 			.where("change.file_id", "=", "file-to-delete")
@@ -448,3 +468,138 @@ test(
 		expect(deletionChangesInCheckpoint).toHaveLength(2);
 	}
 );
+
+test("no orphaned commits exist after creating checkpoint", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
+	});
+
+	// Get initial version state before checkpoint
+	const initialVersion = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const initialWorkingCommitId = initialVersion.working_commit_id;
+
+	// Make some changes to create working change set elements
+	await lix.db
+		.insertInto("key_value")
+		.values({ key: "test", value: "value" })
+		.execute();
+
+	// Get version state right before checkpoint (after making changes)
+	const versionBeforeCheckpoint = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// Create checkpoint
+	const checkpoint = await createCheckpoint({ lix });
+
+	// Get all commits
+	const allCommits = await lix.db.selectFrom("commit").selectAll().execute();
+
+	// For each commit, verify it has at least one edge (as parent or child)
+	for (const commit of allCommits) {
+		const hasParentEdge = await lix.db
+			.selectFrom("commit_edge")
+			.where("child_id", "=", commit.id)
+			.selectAll()
+			.execute();
+
+		const hasChildEdge = await lix.db
+			.selectFrom("commit_edge")
+			.where("parent_id", "=", commit.id)
+			.selectAll()
+			.execute();
+
+		const isReferencedByVersion = await lix.db
+			.selectFrom("version")
+			.where((eb) =>
+				eb.or([
+					eb("commit_id", "=", commit.id),
+					eb("working_commit_id", "=", commit.id),
+				])
+			)
+			.selectAll()
+			.execute();
+
+		// Every commit should either:
+		// 1. Have at least one parent edge (it's a child of another commit)
+		// 2. Have at least one child edge (it's a parent of another commit)
+		// 3. Be referenced by a version (as commit_id or working_commit_id)
+		const hasConnections =
+			hasParentEdge.length > 0 ||
+			hasChildEdge.length > 0 ||
+			isReferencedByVersion.length > 0;
+
+		if (!hasConnections) {
+			console.error(`Orphaned commit found: ${commit.id}`, {
+				hasParentEdge: hasParentEdge.length,
+				hasChildEdge: hasChildEdge.length,
+				isReferencedByVersion: isReferencedByVersion.length,
+				commit,
+			});
+		}
+
+		expect(hasConnections).toBe(true);
+	}
+
+	// Additionally, verify the specific structure after checkpoint
+	const version = await lix.db
+		.selectFrom("version")
+		.where("name", "=", "main")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// The checkpoint should have an edge from the previous commit
+	const checkpointHasParent = await lix.db
+		.selectFrom("commit_edge")
+		.where("child_id", "=", checkpoint.id)
+		.selectAll()
+		.execute();
+
+	expect(checkpointHasParent.length).toBeGreaterThan(0);
+
+	// The checkpoint should have an edge to the new working commit
+	const checkpointHasChild = await lix.db
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", checkpoint.id)
+		.where("child_id", "=", version.working_commit_id)
+		.selectAll()
+		.execute();
+
+	expect(checkpointHasChild).toHaveLength(1);
+
+	// The working commit should be referenced by the version
+	expect(version.working_commit_id).toBeDefined();
+	expect(version.commit_id).toBe(checkpoint.id);
+
+	// The checkpoint ID should be the former working commit ID
+	expect(checkpoint.id).toBe(initialWorkingCommitId);
+
+	// The previous working commit should now be the version's commit
+	expect(version.commit_id).toBe(initialWorkingCommitId);
+
+	// The new working commit should be different from the checkpoint
+	expect(version.working_commit_id).not.toBe(checkpoint.id);
+
+	// There should be exactly one edge between the version's previous commit (before checkpoint) and the checkpoint
+	// The edge is created from the version's commit_id at the time of checkpoint creation
+	const edgesBetweenPreviousAndCheckpoint = await lix.db
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", versionBeforeCheckpoint.commit_id)
+		.where("child_id", "=", checkpoint.id)
+		.selectAll()
+		.execute();
+
+	expect(edgesBetweenPreviousAndCheckpoint).toHaveLength(1);
+});

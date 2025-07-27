@@ -2,7 +2,7 @@
 
 ## Core Concepts
 
-Lix represents all data through four fundamental concepts that build upon each other. 
+Lix represents all data through four fundamental concepts that build upon each other.
 
 Changes are the atomic units, which are grouped in change sets, which form a graph, and the graph defines state. This simple hierarchy enables powerful features like [versioning](./features/versions.md) (branching), merging, and time-travel queries.
 
@@ -50,6 +50,7 @@ graph RL
 ```
 
 Here, Version A and Version B diverge after CS2, each with their own subsequent changes. This enables:
+
 - Parallel development workflows
 - Feature branches
 - Experimental changes without affecting other versions
@@ -91,21 +92,20 @@ graph RL
 ```
 
 1. The union of all change sets in the lineage is taken:
-   
+
    `CS1 ∪ CS2 ∪ CS3 = { e1: "benn", e1: "julia", e2: "gunther" }`
 
 2. Filter for leaf changes, which are the latest changes for each entity:
-
    - For `e1`, the latest change is `"julia"` from `CS2`.
    - For `e2`, the latest change is `"gunther"` from `CS3`.
 
 3. The resulting state is:
-   
+
    `State = { e1: "julia", e2: "gunther" }`
 
 ## Global Change Set Graph
 
-The change set graph in Lix is global and shared across all versions. By having a global graph, all versions share the same understanding of history—each version may have a different lineage, but they all agree on what that lineage contains. If the change set graph were version-scoped, versions couldn't agree on what the history of another version is. 
+The change set graph in Lix is global and shared across all versions. By having a global graph, all versions share the same understanding of history—each version may have a different lineage, but they all agree on what that lineage contains. If the change set graph were version-scoped, versions couldn't agree on what the history of another version is.
 
 ```mermaid
 graph RL
@@ -115,12 +115,12 @@ graph RL
     CS4 --> CS2["{c3, c4}"]
     CS3 --> CS2
     CS2 --> CS1["{c1, c2}"]
-    
+
     %% Version pointers
     V1["Version: main"] -.-> CS5
     V2["Version: feature-x"] -.-> CS6
     V3["Version: experiment"] -.-> CS3
-    
+
     %% Style the versions differently
     style V1 fill:#e1f5fe
     style V2 fill:#f3e5f5
@@ -133,19 +133,16 @@ In the global change set graph above:
 - Version "main" can query the history of Version "feature-x" by traversing from CS6
 - Historical queries can point to any change set, even those not currently pointed to by a version (like CS4)
 
-
 ## Foreign Keys
 
-Lix supports foreign key constraints to maintain referential integrity between entities. 
+Lix supports foreign key constraints to maintain referential integrity between entities.
 
 For simplicity, Lix only allows foreign keys on entities in the same version scope, with the exception of references to changes themselves. This design choice avoids global cascading effects and acknowledges that changes are versionless - they exist outside the version system as the immutable source of truth.
-
-
 
 | Rule                                                  | Rationale                                                                        | Engine behaviour                                                                   |
 | ----------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | **1. Version‑scoped → change**                        | Changes live outside any version, so the reference is valid across all versions. | Validator skips the `version_id = ?` check when the target schema is `lix_change`. |
 | **2. Version‑scoped → version‑scoped (same version)** | Keeps each version self‑contained and makes deletes cheap.                       | Current logic stands: both rows must share the same `version_id`.                  |
-| **3. Change → version‑scoped**                  | Would immediately violate Rule 2.                                                | Disallowed at schema‑registration time.                                            |
+| **3. Change → version‑scoped**                        | Would immediately violate Rule 2.                                                | Disallowed at schema‑registration time.                                            |
 
-> **Result:** An example\_entity, comment or change‑set element lives inside a specific version, but can freely point at any `lix_change.id` without special handling.
+> **Result:** An example_entity, comment or change‑set element lives inside a specific version, but can freely point at any `lix_change.id` without special handling.

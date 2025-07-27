@@ -2,7 +2,6 @@
 
 ![AI agent changes need to be visible and controllable](/blame-what-did-you-change.svg)
 
-
 AI agents are powerful but imperfect—they hallucinate, generate incorrect data, and break things outright. Without lix change control, there is no visibility, accountability, or control over AI agents.
 
 ### See Every Change
@@ -23,4 +22,4 @@ Review AI-generated changes through [change proposals](./features/change-proposa
 
 Create isolated [versions](./features/versions.md) (branches) where AI agents can experiment safely without affecting the main data. Test AI-generated changes in these sandboxed environments before merging them back.
 
-Made a mistake accepting AI changes? [Restore](./features/restore.md) to any previous state. 
+Made a mistake accepting AI changes? [Restore](./features/restore.md) to any previous state.

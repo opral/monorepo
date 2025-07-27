@@ -31,6 +31,7 @@ export default defineConfig({
   globalStyles: path.join(__dirname, "docs/styles/index.css"),
   route: {
     cleanUrls: true,
+    exclude: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
   },
   markdown: {
     // Disable Rust MDX compiler to support global components
@@ -50,7 +51,7 @@ export default defineConfig({
                 {
                   loader: path.join(
                     __dirname,
-                    "./rspress-plugins/preserve-raw-loader.mjs"
+                    "./rspress-plugins/preserve-raw-loader.mjs",
                   ),
                 },
               ],
@@ -84,13 +85,9 @@ export default defineConfig({
           ],
         },
         {
-          text: "Ready-made Features",
+          text: "Most Used Features",
           collapsed: false,
           items: [
-            {
-              text: "Attribution (Blame)",
-              link: "/guide/features/attribution",
-            },
             {
               text: "Change Proposals",
               link: "/guide/features/change-proposals",
@@ -103,13 +100,17 @@ export default defineConfig({
               text: "Validation Rules",
               link: "/guide/features/validation-rules",
             },
-            { text: "Versions (Branching)", link: "/guide/features/versions" },
+            { text: "Versions (Branching)", link: "/guide/versions" },
           ],
         },
         {
           text: "Core Concepts",
           collapsed: true,
           items: [
+            {
+              text: "Attribution (Blame)",
+              link: "/guide/features/attribution",
+            },
             { text: "Comments", link: "/guide/features/comments" },
             { text: "Files", link: "/guide/concepts/files" },
             { text: "Changes", link: "/guide/concepts/changes" },

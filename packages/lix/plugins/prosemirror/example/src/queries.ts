@@ -1,9 +1,4 @@
-import {
-	ChangeSet,
-	changeSetHasLabel,
-	jsonArrayFrom,
-	type Lix,
-} from "@lix-js/sdk";
+import { ChangeSet, ebEntity, jsonArrayFrom, type Lix } from "@lix-js/sdk";
 
 // Helper to get the prosemirror file ID
 export const selectFileId = (lix: Lix) =>
@@ -35,12 +30,12 @@ export function selectChanges(lix: Lix) {
 }
 
 export function selectCheckpoints(lix: Lix) {
-	// This function needs to work with the changeSetIsAncestorOf helper
-	// For now, let's simplify it to just get checkpoints
+	// Select commits with checkpoint label and their associated change sets
 	return (
 		lix.db
-			.selectFrom("change_set")
-			.where(changeSetHasLabel({ name: "checkpoint" }))
+			.selectFrom("commit")
+			.innerJoin("change_set", "change_set.id", "commit.change_set_id")
+			.where(ebEntity("commit").hasLabel({ name: "checkpoint" }))
 			// left join in case the change set has no elements
 			.leftJoin(
 				"change_set_element",
@@ -159,7 +154,8 @@ export function selectWorkingChangeSet(lix: Lix) {
 				lix.db
 					.selectFrom("active_version")
 					.innerJoin("version", "active_version.version_id", "version.id")
-					.select("version.working_change_set_id"),
+					.innerJoin("commit", "version.working_commit_id", "commit.id")
+					.select("commit.change_set_id"),
 			)
 			// left join in case the change set has no elements
 			.leftJoin(

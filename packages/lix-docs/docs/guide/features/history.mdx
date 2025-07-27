@@ -47,7 +47,7 @@ To get the history of a file for a specific version, you simply query using that
 
 History is simply querying state at a specific change set. Because the change set graph is global, no version needs to be specified when querying history. Every change set is part of the same unified structure, allowing you to traverse the history without worrying about which version you are in.
 
-### Example 
+### Example
 
 Imagine a file, `config.json`, changes over time. Each change creates a new change set that points to its predecessor:
 
@@ -68,4 +68,3 @@ Querying the history at change set CS3 entails traversing the graph backward fro
   srcCode={exampleSrcCode}
   sections={["history-data-model"]}
 />
-

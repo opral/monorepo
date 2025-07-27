@@ -4,12 +4,16 @@ import { openLix } from "@lix-js/sdk";
 // but are shown here for demonstration purposes based on the documentation
 async function undo(options: any) {
   const steps = options.steps || 1;
-  console.log(`Performing undo operation (${steps} step${steps > 1 ? 's' : ''})`);
+  console.log(
+    `Performing undo operation (${steps} step${steps > 1 ? "s" : ""})`,
+  );
 }
 
 async function redo(options: any) {
   const steps = options.steps || 1;
-  console.log(`Performing redo operation (${steps} step${steps > 1 ? 's' : ''})`);
+  console.log(
+    `Performing redo operation (${steps} step${steps > 1 ? "s" : ""})`,
+  );
 }
 
 export default async function runExample(console: any) {
@@ -32,4 +36,4 @@ export default async function runExample(console: any) {
 }
 
 // Uncomment for running in node
-runExample(console);
+// runExample(console);

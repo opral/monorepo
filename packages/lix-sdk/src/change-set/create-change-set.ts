@@ -5,7 +5,7 @@ import type { LixLabel } from "../label/schema.js";
 import type { NewState } from "../entity-views/types.js";
 
 /**
- * Creates a change set and optionally attaches elements, labels and parents.
+ * Creates a change set and optionally attaches elements and labels.
  *
  * Change sets are the building blocks of versions and checkpoints. This
  * function inserts all provided relations in a single transaction and
@@ -22,8 +22,6 @@ export async function createChangeSet(args: {
 	id?: string;
 	elements?: Omit<NewState<LixChangeSetElement>, "change_set_id">[];
 	labels?: Pick<LixLabel, "id">[];
-	/** Parent change sets that this change set will be a child of */
-	parents?: Pick<LixChangeSet, "id">[];
 	/** Version ID where the change set should be stored. Defaults to active version */
 	lixcol_version_id?: string;
 }): Promise<LixChangeSet & { lixcol_version_id: string }> {
@@ -96,28 +94,6 @@ export async function createChangeSet(args: {
 							change_set_id: csId,
 						}))
 					)
-					.execute();
-			}
-		}
-
-		// Add parent-child relationships if parents are provided
-		for (const parent of args.parents ?? []) {
-			if (args.lixcol_version_id) {
-				await trx
-					.insertInto("change_set_edge_all")
-					.values({
-						parent_id: parent.id,
-						child_id: csId,
-						lixcol_version_id: args.lixcol_version_id,
-					})
-					.execute();
-			} else {
-				await trx
-					.insertInto("change_set_edge")
-					.values({
-						parent_id: parent.id,
-						child_id: csId,
-					})
 					.execute();
 			}
 		}
