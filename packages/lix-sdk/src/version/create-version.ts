@@ -43,7 +43,7 @@ export async function createVersion(args: {
 				.innerJoin("version", "version.id", "active_version.version_id")
 				.select("version.commit_id")
 				.executeTakeFirstOrThrow();
-			
+
 			commitId = activeVersion.commit_id;
 		}
 

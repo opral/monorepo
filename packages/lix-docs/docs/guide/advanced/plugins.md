@@ -19,7 +19,7 @@ Lix comes with several built-in plugins for common file formats:
 For working with JSON files and objects:
 
 ```typescript
-import { jsonPlugin } from '@lix-js/plugin-json';
+import { jsonPlugin } from "@lix-js/plugin-json";
 
 const lix = await openLix({
   blob: lixFile,
@@ -28,29 +28,31 @@ const lix = await openLix({
 
 // Insert a JSON file
 const file = await lix.db
-  .insertInto('file')
+  .insertInto("file")
   .values({
-    path: '/config.json',
-    data: new TextEncoder().encode(JSON.stringify({ 
-      name: 'My Project',
-      version: '1.0.0',
-      settings: {
-        maxUsers: 10,
-        theme: 'light'
-      }
-    })),
+    path: "/config.json",
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        name: "My Project",
+        version: "1.0.0",
+        settings: {
+          maxUsers: 10,
+          theme: "light",
+        },
+      }),
+    ),
   })
   .returningAll()
   .executeTakeFirstOrThrow();
 
 // Update the JSON data
 const updatedData = {
-  name: 'My Project',
-  version: '1.0.1',  // Changed version
+  name: "My Project",
+  version: "1.0.1", // Changed version
   settings: {
-    maxUsers: 20,    // Changed maxUsers
-    theme: 'dark'    // Changed theme
-  }
+    maxUsers: 20, // Changed maxUsers
+    theme: "dark", // Changed theme
+  },
 };
 
 // Update the file with new content
@@ -61,9 +63,9 @@ await lix.updateFile({
 
 // Get the detected changes
 const changes = await lix.db
-  .selectFrom('change')
-  .where('file_id', '=', file.id)
-  .select(['path', 'from_value', 'to_value'])
+  .selectFrom("change")
+  .where("file_id", "=", file.id)
+  .select(["path", "from_value", "to_value"])
   .execute();
 
 // Changes will include:
@@ -77,7 +79,7 @@ const changes = await lix.db
 For working with tabular data in CSV format:
 
 ```typescript
-import { csvPlugin } from '@lix-js/plugin-csv';
+import { csvPlugin } from "@lix-js/plugin-csv";
 
 const lix = await openLix({
   blob: lixFile,
@@ -91,9 +93,9 @@ Bob,25,Los Angeles
 Charlie,35,Chicago`;
 
 const file = await lix.db
-  .insertInto('file')
+  .insertInto("file")
   .values({
-    path: '/users.csv',
+    path: "/users.csv",
     data: new TextEncoder().encode(csvContent),
   })
   .returningAll()
@@ -113,9 +115,9 @@ await lix.updateFile({
 
 // Get the detected changes
 const changes = await lix.db
-  .selectFrom('change')
-  .where('file_id', '=', file.id)
-  .select(['metadata', 'from_value', 'to_value'])
+  .selectFrom("change")
+  .where("file_id", "=", file.id)
+  .select(["metadata", "from_value", "to_value"])
   .execute();
 
 // Changes will include:
@@ -128,7 +130,7 @@ const changes = await lix.db
 For working with Markdown documents:
 
 ```typescript
-import { markdownPlugin } from '@lix-js/plugin-md';
+import { markdownPlugin } from "@lix-js/plugin-md";
 
 const lix = await openLix({
   blob: lixFile,
@@ -148,9 +150,9 @@ This is a paragraph.
 More content here.`;
 
 const file = await lix.db
-  .insertInto('file')
+  .insertInto("file")
   .values({
-    path: '/document.md',
+    path: "/document.md",
     data: new TextEncoder().encode(mdContent),
   })
   .returningAll()
@@ -177,9 +179,9 @@ await lix.updateFile({
 
 // Get the detected changes at block level
 const changes = await lix.db
-  .selectFrom('change')
-  .where('file_id', '=', file.id)
-  .select(['metadata', 'from_value', 'to_value'])
+  .selectFrom("change")
+  .where("file_id", "=", file.id)
+  .select(["metadata", "from_value", "to_value"])
   .execute();
 ```
 
@@ -188,9 +190,9 @@ const changes = await lix.db
 You can register multiple plugins to handle different file types:
 
 ```typescript
-import { jsonPlugin } from '@lix-js/plugin-json';
-import { csvPlugin } from '@lix-js/plugin-csv';
-import { markdownPlugin } from '@lix-js/plugin-md';
+import { jsonPlugin } from "@lix-js/plugin-json";
+import { csvPlugin } from "@lix-js/plugin-csv";
+import { markdownPlugin } from "@lix-js/plugin-md";
 
 const lix = await openLix({
   blob: lixFile,
@@ -215,7 +217,7 @@ You can explicitly specify which plugin to use:
 await lix.updateFile({
   fileId: file.id,
   data: newData,
-  pluginName: 'json',
+  pluginName: "json",
 });
 ```
 
@@ -234,11 +236,11 @@ Here's a simplified example of a custom plugin for a hypothetical "notes" format
 
 ```typescript
 // notes-plugin.ts
-import { LixPlugin } from '@lix-js/sdk';
+import { LixPlugin } from "@lix-js/sdk";
 
 // Define the structure of our changes
 interface NoteChange {
-  type: 'create' | 'update' | 'delete';
+  type: "create" | "update" | "delete";
   id: string;
   title?: string;
   content?: string;
@@ -246,73 +248,79 @@ interface NoteChange {
 
 // Create the plugin
 export const notesPlugin: LixPlugin = {
-  name: 'notes',
-  fileExtensions: ['.notes'],
-  contentTypes: ['application/x-notes'],
-  
+  name: "notes",
+  fileExtensions: [".notes"],
+  contentTypes: ["application/x-notes"],
+
   // Detect changes between two versions
   async detectChanges({ oldContent, newContent }) {
     // Parse the content
-    const oldNotes = oldContent ? JSON.parse(new TextDecoder().decode(oldContent)) : [];
-    const newNotes = newContent ? JSON.parse(new TextDecoder().decode(newContent)) : [];
-    
+    const oldNotes = oldContent
+      ? JSON.parse(new TextDecoder().decode(oldContent))
+      : [];
+    const newNotes = newContent
+      ? JSON.parse(new TextDecoder().decode(newContent))
+      : [];
+
     const changes: NoteChange[] = [];
-    
+
     // Find deleted and updated notes
     for (const oldNote of oldNotes) {
-      const newNote = newNotes.find(n => n.id === oldNote.id);
+      const newNote = newNotes.find((n) => n.id === oldNote.id);
       if (!newNote) {
         // Note was deleted
         changes.push({
-          type: 'delete',
+          type: "delete",
           id: oldNote.id,
         });
       } else if (
-        oldNote.title !== newNote.title || 
+        oldNote.title !== newNote.title ||
         oldNote.content !== newNote.content
       ) {
         // Note was updated
         changes.push({
-          type: 'update',
+          type: "update",
           id: oldNote.id,
           title: newNote.title,
           content: newNote.content,
         });
       }
     }
-    
+
     // Find created notes
     for (const newNote of newNotes) {
-      const oldNote = oldNotes.find(n => n.id === newNote.id);
+      const oldNote = oldNotes.find((n) => n.id === newNote.id);
       if (!oldNote) {
         // Note was created
         changes.push({
-          type: 'create',
+          type: "create",
           id: newNote.id,
           title: newNote.title,
           content: newNote.content,
         });
       }
     }
-    
+
     return changes;
   },
-  
+
   // Apply changes to create new content
   async applyChanges({ oldContent, changes }) {
     // Parse the content
-    const notes = oldContent ? JSON.parse(new TextDecoder().decode(oldContent)) : [];
-    
+    const notes = oldContent
+      ? JSON.parse(new TextDecoder().decode(oldContent))
+      : [];
+
     // Apply each change
     for (const change of changes) {
-      if (change.type === 'create') {
+      if (change.type === "create") {
         notes.push({
           id: change.id,
           title: change.title,
           content: change.content,
         });
-      } else if (change.type === 'update') {
-        const noteIndex = notes.findIndex(n => n.id === change.id);
+      } else if (change.type === "update") {
+        const noteIndex = notes.findIndex((n) => n.id === change.id);
         if (noteIndex !== -1) {
           notes[noteIndex] = {
             ...notes[noteIndex],
@@ -320,14 +328,14 @@ export const notesPlugin: LixPlugin = {
             content: change.content ?? notes[noteIndex].content,
           };
         }
-      } else if (change.type === 'delete') {
-        const noteIndex = notes.findIndex(n => n.id === change.id);
+      } else if (change.type === "delete") {
+        const noteIndex = notes.findIndex((n) => n.id === change.id);
         if (noteIndex !== -1) {
           notes.splice(noteIndex, 1);
         }
       }
     }
-    
+
     // Serialize the updated content
     return new TextEncoder().encode(JSON.stringify(notes));
   },
@@ -339,7 +347,7 @@ export const notesPlugin: LixPlugin = {
 Register your custom plugin the same way as built-in plugins:
 
 ```typescript
-import { notesPlugin } from './notes-plugin';
+import { notesPlugin } from "./notes-plugin";
 
 const lix = await openLix({
   blob: lixFile,
@@ -348,14 +356,14 @@ const lix = await openLix({
 
 // You can now work with .notes files
 const notesData = [
-  { id: '1', title: 'Meeting notes', content: 'Discuss project timeline' },
-  { id: '2', title: 'Ideas', content: 'New feature concepts' }
+  { id: "1", title: "Meeting notes", content: "Discuss project timeline" },
+  { id: "2", title: "Ideas", content: "New feature concepts" },
 ];
 
 const file = await lix.db
-  .insertInto('file')
+  .insertInto("file")
   .values({
-    path: '/my-notes.notes',
+    path: "/my-notes.notes",
     data: new TextEncoder().encode(JSON.stringify(notesData)),
   })
   .returningAll()
@@ -373,11 +381,11 @@ You can implement custom conflict resolution logic in your plugin:
 async detectConflicts({ baseContent, ourContent, theirContent, ourChanges, theirChanges }) {
   // Compare changes to identify conflicts
   const conflicts = [];
-  
+
   for (const ourChange of ourChanges) {
     for (const theirChange of theirChanges) {
-      if (ourChange.id === theirChange.id && 
-          (ourChange.title !== theirChange.title || 
+      if (ourChange.id === theirChange.id &&
+          (ourChange.title !== theirChange.title ||
            ourChange.content !== theirChange.content)) {
         conflicts.push({
           id: ourChange.id,
@@ -387,14 +395,14 @@ async detectConflicts({ baseContent, ourContent, theirContent, ourChanges, their
       }
     }
   }
-  
+
   return conflicts;
 },
 
 async resolveConflicts({ conflicts, resolution }) {
   // Apply conflict resolutions based on user choices
   const resolvedChanges = [];
-  
+
   for (const conflict of conflicts) {
     if (resolution[conflict.id] === 'ours') {
       resolvedChanges.push(conflict.ours);
@@ -410,7 +418,7 @@ async resolveConflicts({ conflicts, resolution }) {
       });
     }
   }
-  
+
   return resolvedChanges;
 }
 ```
@@ -421,20 +429,24 @@ You can provide additional metadata for your plugin:
 
 ```typescript
 const myPlugin: LixPlugin = {
-  name: 'my-custom-plugin',
-  fileExtensions: ['.custom'],
-  contentTypes: ['application/x-custom'],
-  
+  name: "my-custom-plugin",
+  fileExtensions: [".custom"],
+  contentTypes: ["application/x-custom"],
+
   // Plugin metadata
-  version: '1.0.0',
-  author: 'Your Name',
-  description: 'A custom plugin for handling specialized data',
-  homepage: 'https://github.com/yourusername/my-custom-plugin',
-  
+  version: "1.0.0",
+  author: "Your Name",
+  description: "A custom plugin for handling specialized data",
+  homepage: "https://github.com/yourusername/my-custom-plugin",
+
   // Core functionality
-  async detectChanges() { /* ... */ },
-  async applyChanges() { /* ... */ },
-  
+  async detectChanges() {
+    /* ... */
+  },
+  async applyChanges() {
+    /* ... */
+  },
+
   // Optional utilities
   utilities: {
     validateContent(content) {
@@ -443,16 +455,16 @@ const myPlugin: LixPlugin = {
         const data = JSON.parse(new TextDecoder().decode(content));
         return { valid: true };
       } catch (e) {
-        return { valid: false, error: 'Invalid format' };
+        return { valid: false, error: "Invalid format" };
       }
     },
-    
+
     formatContent(content) {
       // Pretty-print or format the content
       const data = JSON.parse(new TextDecoder().decode(content));
       return new TextEncoder().encode(JSON.stringify(data, null, 2));
-    }
-  }
+    },
+  },
 };
 ```
 

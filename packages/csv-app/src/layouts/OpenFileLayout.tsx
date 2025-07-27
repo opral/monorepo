@@ -273,7 +273,7 @@ const VersionDropdown = () => {
 					onClick={async () => {
 						const newversion = await createVersion({
 							lix,
-							changeSet: { id: currentVersion.change_set_id },
+							commit_id: currentVersion.commit_id,
 						});
 						await switchToversion(newversion);
 					}}

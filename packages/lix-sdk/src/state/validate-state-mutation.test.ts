@@ -1565,7 +1565,7 @@ test("should handle deletion validation for change sets referenced by versions",
 		.insertInto("change_set_all")
 		.values([
 			{ id: "cs_referenced", lixcol_version_id: "global" },
-			{ id: "cs_working", lixcol_version_id: "global" }
+			{ id: "cs_working", lixcol_version_id: "global" },
 		])
 		.execute();
 
@@ -1582,7 +1582,7 @@ test("should handle deletion validation for change sets referenced by versions",
 				id: "working_commit_1",
 				change_set_id: "cs_working",
 				lixcol_version_id: "global",
-			}
+			},
 		])
 		.execute();
 

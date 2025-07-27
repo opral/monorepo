@@ -232,7 +232,7 @@ test("update active version view", async () => {
 		.insertInto("change_set_all")
 		.values([
 			{ id: "cs1", lixcol_version_id: "global" },
-			{ id: "working_cs1", lixcol_version_id: "global" }
+			{ id: "working_cs1", lixcol_version_id: "global" },
 		])
 		.execute();
 
@@ -241,7 +241,11 @@ test("update active version view", async () => {
 		.insertInto("commit_all")
 		.values([
 			{ id: "commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
-			{ id: "working_commit_1", change_set_id: "working_cs1", lixcol_version_id: "global" },
+			{
+				id: "working_commit_1",
+				change_set_id: "working_cs1",
+				lixcol_version_id: "global",
+			},
 		])
 		.execute();
 
@@ -321,7 +325,11 @@ test("should use default id and name if not provided", async () => {
 	await lix.db
 		.insertInto("commit_all")
 		.values([
-			{ id: "working_commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
+			{
+				id: "working_commit_cs1",
+				change_set_id: "cs1",
+				lixcol_version_id: "global",
+			},
 		])
 		.execute();
 
@@ -429,7 +437,11 @@ test("should allow version insertion with valid commit and change set references
 		.insertInto("commit_all")
 		.values([
 			{ id: "commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
-			{ id: "working_commit_cs2", change_set_id: "cs2", lixcol_version_id: "global" },
+			{
+				id: "working_commit_cs2",
+				change_set_id: "cs2",
+				lixcol_version_id: "global",
+			},
 		])
 		.execute();
 
@@ -481,7 +493,11 @@ test("should allow active_version update with valid version_id", async () => {
 	await lix.db
 		.insertInto("commit_all")
 		.values([
-			{ id: "working_commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
+			{
+				id: "working_commit_cs1",
+				change_set_id: "cs1",
+				lixcol_version_id: "global",
+			},
 		])
 		.execute();
 
@@ -534,9 +550,21 @@ test("versions should be globally accessible regardless of version context", asy
 			{ id: "commit_a", change_set_id: "cs_a", lixcol_version_id: "global" },
 			{ id: "commit_b", change_set_id: "cs_b", lixcol_version_id: "global" },
 			{ id: "commit_c", change_set_id: "cs_c", lixcol_version_id: "global" },
-			{ id: "working_commit_a", change_set_id: "working_cs_a", lixcol_version_id: "global" },
-			{ id: "working_commit_b", change_set_id: "working_cs_b", lixcol_version_id: "global" },
-			{ id: "working_commit_c", change_set_id: "working_cs_c", lixcol_version_id: "global" },
+			{
+				id: "working_commit_a",
+				change_set_id: "working_cs_a",
+				lixcol_version_id: "global",
+			},
+			{
+				id: "working_commit_b",
+				change_set_id: "working_cs_b",
+				lixcol_version_id: "global",
+			},
+			{
+				id: "working_commit_c",
+				change_set_id: "working_cs_c",
+				lixcol_version_id: "global",
+			},
 		])
 		.execute();
 
@@ -725,8 +753,16 @@ test("should enforce UNIQUE constraint on working_commit_id", async () => {
 		.values([
 			{ id: "commit_cs1", change_set_id: "cs1", lixcol_version_id: "global" },
 			{ id: "commit_cs2", change_set_id: "cs2", lixcol_version_id: "global" },
-			{ id: "working_commit_1", change_set_id: "workingCs1", lixcol_version_id: "global" },
-			{ id: "working_commit_2", change_set_id: "workingCs2", lixcol_version_id: "global" },
+			{
+				id: "working_commit_1",
+				change_set_id: "workingCs1",
+				lixcol_version_id: "global",
+			},
+			{
+				id: "working_commit_2",
+				change_set_id: "workingCs2",
+				lixcol_version_id: "global",
+			},
 		])
 		.execute();
 

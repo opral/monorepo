@@ -31,6 +31,7 @@ export default defineConfig({
   globalStyles: path.join(__dirname, "docs/styles/index.css"),
   route: {
     cleanUrls: true,
+    exclude: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
   },
   markdown: {
     // Disable Rust MDX compiler to support global components
@@ -50,7 +51,7 @@ export default defineConfig({
                 {
                   loader: path.join(
                     __dirname,
-                    "./rspress-plugins/preserve-raw-loader.mjs"
+                    "./rspress-plugins/preserve-raw-loader.mjs",
                   ),
                 },
               ],

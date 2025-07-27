@@ -40,7 +40,7 @@ const changeSet = await createChangeSet({
   // Optionally include specific changes
   elements: [{ id: changeId1 }, { id: changeId2 }],
   // Optionally add labels
-  labels: [{ key: "type", value: "feature" }]
+  labels: [{ key: "type", value: "feature" }],
 });
 
 console.log("Created change set:", changeSet.id);
@@ -64,7 +64,7 @@ import { createCheckpoint } from "@lix-js/sdk";
 const checkpoint = await createCheckpoint({
   lix,
   name: "Version 1.0 Release",
-  description: "Stable release with all core features"
+  description: "Stable release with all core features",
 });
 ```
 
@@ -79,10 +79,7 @@ import { createMergeChangeSet } from "@lix-js/sdk";
 
 const mergeChangeSet = await createMergeChangeSet({
   lix,
-  sources: [
-    { id: branchAChangeSetId },
-    { id: branchBChangeSetId }
-  ]
+  sources: [{ id: branchAChangeSetId }, { id: branchBChangeSetId }],
 });
 ```
 
@@ -99,7 +96,7 @@ import { applyChangeSet } from "@lix-js/sdk";
 
 await applyChangeSet({
   lix,
-  changeSet
+  changeSet,
 });
 ```
 
@@ -111,10 +108,7 @@ You can query change sets directly through the database interface:
 
 ```typescript
 // Get all change sets
-const changeSets = await lix.db
-  .selectFrom("change_set")
-  .selectAll()
-  .execute();
+const changeSets = await lix.db.selectFrom("change_set").selectAll().execute();
 
 // Get change sets with specific labels
 const featureChangeSets = await lix.db
@@ -132,10 +126,7 @@ You can explore the relationships between change sets:
 
 ```typescript
 // Get parent-child relationships
-const edges = await lix.db
-  .selectFrom("change_set_edge")
-  .selectAll()
-  .execute();
+const edges = await lix.db.selectFrom("change_set_edge").selectAll().execute();
 
 // Get the changes in a specific change set
 const changes = await lix.db
@@ -172,8 +163,8 @@ await handleFileInsert({
   lix,
   file: {
     path: "/document.md",
-    data: new TextEncoder().encode("# Initial Draft")
-  }
+    data: new TextEncoder().encode("# Initial Draft"),
+  },
 });
 
 // Create a change set for the initial version
@@ -183,7 +174,7 @@ const initialChangeSet = await createChangeSet({ lix });
 const checkpoint1 = await createCheckpoint({
   lix,
   name: "Initial Draft",
-  description: "First version of the document"
+  description: "First version of the document",
 });
 
 // Update the document
@@ -191,8 +182,8 @@ await handleFileUpdate({
   lix,
   file: {
     path: "/document.md",
-    data: new TextEncoder().encode("# Revised Draft\n\nAdded content.")
-  }
+    data: new TextEncoder().encode("# Revised Draft\n\nAdded content."),
+  },
 });
 
 // Create another change set for the revision
@@ -202,18 +193,22 @@ const revisionChangeSet = await createChangeSet({ lix });
 const checkpoint2 = await createCheckpoint({
   lix,
   name: "Revision 1",
-  description: "First revision with additional content"
+  description: "First revision with additional content",
 });
 
 // Query the change history
 const history = await lix.db
   .selectFrom("change_set")
-  .leftJoin("change_set_label", "change_set.id", "change_set_label.change_set_id")
+  .leftJoin(
+    "change_set_label",
+    "change_set.id",
+    "change_set_label.change_set_id",
+  )
   .where("change_set_label.key", "=", "checkpoint")
   .select([
     "change_set.id",
     "change_set.created_at",
-    "change_set_label.value as name"
+    "change_set_label.value as name",
   ])
   .orderBy("change_set.created_at", "asc")
   .execute();

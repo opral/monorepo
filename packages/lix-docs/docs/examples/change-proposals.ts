@@ -13,19 +13,26 @@ async function acceptChangeProposal(options: any) {
 }
 
 async function rejectChangeProposal(options: any) {
-  console.log("Rejecting proposal:", options.proposal.id, "with comment:", options.comment);
+  console.log(
+    "Rejecting proposal:",
+    options.proposal.id,
+    "with comment:",
+    options.comment,
+  );
 }
 
 export default async function runExample(console: any) {
   const lix = await openLix({});
 
   console.log("SECTION START 'create-proposal'");
-  const activeVersion = await lix.db.selectFrom("active_version")
+  const activeVersion = await lix.db
+    .selectFrom("active_version")
     .innerJoin("version", "active_version.version_id", "version.id")
     .select("version.id")
     .executeTakeFirstOrThrow();
 
-  const mainVersion = await lix.db.selectFrom("version")
+  const mainVersion = await lix.db
+    .selectFrom("version")
     .where("name", "=", "main")
     .select("id")
     .executeTakeFirstOrThrow();
@@ -36,7 +43,7 @@ export default async function runExample(console: any) {
     title: "Fix typos in documentation",
     description: "This proposal fixes several spelling errors",
     sourceVersion: activeVersion,
-    targetVersion: mainVersion
+    targetVersion: mainVersion,
   });
 
   console.log("Change proposal created:", proposal.title);
@@ -47,7 +54,7 @@ export default async function runExample(console: any) {
   // Merge the proposal (accepts and merges in one action)
   await acceptChangeProposal({
     lix,
-    proposal: proposal
+    proposal: proposal,
   });
 
   console.log("Proposal accepted and merged");
@@ -56,7 +63,7 @@ export default async function runExample(console: any) {
   await rejectChangeProposal({
     lix,
     proposal: proposal,
-    comment: "Needs more work on error handling"
+    comment: "Needs more work on error handling",
   });
 
   console.log("Proposal rejected with feedback");
@@ -65,4 +72,4 @@ export default async function runExample(console: any) {
 }
 
 // Uncomment for running in node
-runExample(console);
+// runExample(console);

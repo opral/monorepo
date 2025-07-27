@@ -37,8 +37,8 @@ const snapshot = await createSnapshot({
   content: {
     title: "My Document",
     version: "1.0.0",
-    sections: ["Introduction", "Main", "Conclusion"]
-  }
+    sections: ["Introduction", "Main", "Conclusion"],
+  },
 });
 
 console.log("Created snapshot:", snapshot.id);
@@ -69,7 +69,7 @@ const change = {
   operation: "update",
   path: ["title"],
   from_value: "Draft Document", // Previous value
-  to_value: "Final Document"    // New value
+  to_value: "Final Document", // New value
 };
 ```
 

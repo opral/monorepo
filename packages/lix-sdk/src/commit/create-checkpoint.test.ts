@@ -478,14 +478,14 @@ test("no orphaned commits exist after creating checkpoint", async () => {
 			},
 		],
 	});
-	
+
 	// Get initial version state before checkpoint
 	const initialVersion = await lix.db
 		.selectFrom("version")
 		.where("name", "=", "main")
 		.selectAll()
 		.executeTakeFirstOrThrow();
-	
+
 	const initialWorkingCommitId = initialVersion.working_commit_id;
 
 	// Make some changes to create working change set elements
@@ -493,7 +493,7 @@ test("no orphaned commits exist after creating checkpoint", async () => {
 		.insertInto("key_value")
 		.values({ key: "test", value: "value" })
 		.execute();
-	
+
 	// Get version state right before checkpoint (after making changes)
 	const versionBeforeCheckpoint = await lix.db
 		.selectFrom("version")
@@ -582,16 +582,16 @@ test("no orphaned commits exist after creating checkpoint", async () => {
 	// The working commit should be referenced by the version
 	expect(version.working_commit_id).toBeDefined();
 	expect(version.commit_id).toBe(checkpoint.id);
-	
+
 	// The checkpoint ID should be the former working commit ID
 	expect(checkpoint.id).toBe(initialWorkingCommitId);
-	
+
 	// The previous working commit should now be the version's commit
 	expect(version.commit_id).toBe(initialWorkingCommitId);
-	
+
 	// The new working commit should be different from the checkpoint
 	expect(version.working_commit_id).not.toBe(checkpoint.id);
-	
+
 	// There should be exactly one edge between the version's previous commit (before checkpoint) and the checkpoint
 	// The edge is created from the version's commit_id at the time of checkpoint creation
 	const edgesBetweenPreviousAndCheckpoint = await lix.db
@@ -600,6 +600,6 @@ test("no orphaned commits exist after creating checkpoint", async () => {
 		.where("child_id", "=", checkpoint.id)
 		.selectAll()
 		.execute();
-	
+
 	expect(edgesBetweenPreviousAndCheckpoint).toHaveLength(1);
 });

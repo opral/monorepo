@@ -1863,6 +1863,8 @@ importers:
         specifier: 2.1.8
         version: 2.1.8(@types/node@20.5.9)(@vitest/browser@2.1.8)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@20.5.9)(typescript@5.8.3))(sass-embedded@1.89.2)(terser@5.36.0)
 
+  inlang/packages/website/dist/server: {}
+
   inlang/packages/website/tailwind-color-plugin:
     dependencies:
       '@ctrl/tinycolor':
@@ -2027,6 +2029,9 @@ importers:
       mermaid:
         specifier: ^11.7.0
         version: 11.8.1
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -2048,6 +2053,9 @@ importers:
       typedoc-plugin-markdown:
         specifier: ^4.7.0
         version: 4.7.0(typedoc@0.28.5(typescript@5.8.3))
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@24.0.4)(jiti@2.4.2)(jsdom@26.1.0)(lightningcss@1.30.1)(msw@2.10.2(@types/node@24.0.4)(typescript@5.8.3))(sass-embedded@1.89.2)(terser@5.36.0)(tsx@4.20.3)(yaml@2.8.0)
 
   packages/lix-file-manager:
     dependencies:
@@ -16940,6 +16948,11 @@ packages:
 
   prettier@3.6.1:
     resolution: {integrity: sha512-5xGWRa90Sp2+x1dQtNpIpeOQpTDBs9cZDmA/qs2vDNN2i18PdapqY7CmBeyLlMuGqXJRIOPaCaVZTLNQRWUH/A==}
+    engines: {node: '>=14'}
+    hasBin: true
+
+  prettier@3.6.2:
+    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -38577,6 +38590,8 @@ snapshots:
   prettier@3.3.3: {}
 
   prettier@3.6.1: {}
+
+  prettier@3.6.2: {}
 
   pretty-error@4.0.0:
     dependencies:

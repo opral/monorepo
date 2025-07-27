@@ -15,7 +15,7 @@ export default async function runExample(console: any) {
 
   console.log("SECTION START 'plugin-diffs'");
   const plugin = (await lix.plugin.getAll()).find(
-    (p: any) => p.key === "csv_plugin"
+    (p: any) => p.key === "csv_plugin",
   );
 
   if (plugin?.diffUiComponent) {
@@ -66,7 +66,7 @@ export default async function runExample(console: any) {
     console.log(diffOutput.join("\n"));
   } else {
     console.log(
-      "File /example.json not found - run getting-started example first"
+      "File /example.json not found - run getting-started example first",
     );
   }
 
@@ -83,10 +83,10 @@ export default async function runExample(console: any) {
   if (currentEntities.length >= 2) {
     console.log("Comparing two entities from the current state:");
     console.log(
-      `Entity 1: ${currentEntities[0].entity_id} (${currentEntities[0].schema_key})`
+      `Entity 1: ${currentEntities[0].entity_id} (${currentEntities[0].schema_key})`,
     );
     console.log(
-      `Entity 2: ${currentEntities[1].entity_id} (${currentEntities[1].schema_key})`
+      `Entity 2: ${currentEntities[1].entity_id} (${currentEntities[1].schema_key})`,
     );
 
     // Show their content differences
@@ -100,4 +100,4 @@ export default async function runExample(console: any) {
 }
 
 // Uncomment for running in node
-runExample(console);
+// runExample(console);

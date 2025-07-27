@@ -30,6 +30,7 @@ A → B → C → D   (main branch)
 ```
 
 In this diagram:
+
 - Each letter represents a change set
 - Arrows represent parent-child relationships
 - The graph shows two branches of development
@@ -44,7 +45,7 @@ import { createChangeSet } from "@lix-js/sdk";
 // Create a change set with a parent
 const changeSet = await createChangeSet({
   lix,
-  parent: { id: parentChangeSetId }
+  parent: { id: parentChangeSetId },
 });
 
 console.log("Created change set:", changeSet.id);
@@ -71,6 +72,7 @@ if (isAncestor) {
 ```
 
 The Lix SDK provides several helpers for graph traversal:
+
 - `changeSetIsAncestorOf()` - Checks if one change set is an ancestor of another
 - `changeSetIsDescendantOf()` - Checks if one change set is a descendant of another
 - `changeSetElementInSymmetricDifference()` - Finds elements unique to each branch
@@ -85,16 +87,14 @@ import { createMergeChangeSet } from "@lix-js/sdk";
 // Merge two branches
 const mergeChangeSet = await createMergeChangeSet({
   lix,
-  sources: [
-    { id: branchAChangeSetId },
-    { id: branchBChangeSetId }
-  ]
+  sources: [{ id: branchAChangeSetId }, { id: branchBChangeSetId }],
 });
 
 console.log("Created merge change set:", mergeChangeSet.id);
 ```
 
 When you merge branches, Lix:
+
 1. Creates a new change set that has multiple parents
 2. Identifies and resolves any conflicts between the branches
 3. Combines changes from both branches into a unified state
@@ -114,10 +114,10 @@ g.setDefaultEdgeLabel(() => ({}));
 
 // Add nodes for each change set
 changeSets.forEach((changeSet) => {
-  g.setNode(changeSet.id, { 
+  g.setNode(changeSet.id, {
     label: changeSet.id,
     width: 150,
-    height: 30
+    height: 30,
   });
 });
 
@@ -151,6 +151,7 @@ The change graph is implemented through several key files in the Lix SDK:
 - [`change-set-is-ancestor-of.ts`](https://github.com/opral/monorepo/blob/main/packages/lix-sdk/src/query-filter/change-set-is-ancestor-of.ts) - Traverses the graph
 
 The underlying data model uses several tables:
+
 - `change_set` - Stores the nodes
 - `change_set_edge` - Stores the edges (connections)
 - `change_set_element` - Associates changes with change sets
@@ -162,20 +163,24 @@ Here's an example of using the change graph to track document revisions:
 ```typescript
 // Create initial document
 const initialChangeSet = await createChangeSet({ lix });
-await lix.db.insertInto("file").values({
-  path: "/document.md",
-  data: new TextEncoder().encode("# Initial Draft"),
-}).execute();
+await lix.db
+  .insertInto("file")
+  .values({
+    path: "/document.md",
+    data: new TextEncoder().encode("# Initial Draft"),
+  })
+  .execute();
 
 // Create a branch for review
 const reviewChangeSet = await createChangeSet({
   lix,
-  parent: { id: initialChangeSet.id }
+  parent: { id: initialChangeSet.id },
 });
 
 // Make changes in the review branch
 await switchChangeSet({ lix, to: reviewChangeSet });
-await lix.db.updateTable("file")
+await lix.db
+  .updateTable("file")
   .set({
     data: new TextEncoder().encode("# Revised Draft\n\nAdded content."),
   })
@@ -184,7 +189,8 @@ await lix.db.updateTable("file")
 
 // Make different changes in the main branch
 await switchChangeSet({ lix, to: initialChangeSet });
-await lix.db.updateTable("file")
+await lix.db
+  .updateTable("file")
   .set({
     data: new TextEncoder().encode("# Initial Draft\n\nFixed typo."),
   })
@@ -194,10 +200,7 @@ await lix.db.updateTable("file")
 // Merge the branches
 const mergeChangeSet = await createMergeChangeSet({
   lix,
-  sources: [
-    { id: initialChangeSet.id },
-    { id: reviewChangeSet.id }
-  ]
+  sources: [{ id: initialChangeSet.id }, { id: reviewChangeSet.id }],
 });
 ```
 

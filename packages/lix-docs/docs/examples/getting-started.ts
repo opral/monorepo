@@ -47,7 +47,7 @@ export default async function runExample(console: any) {
     .where("path", "=", "/example.json")
     .set({
       data: new TextEncoder().encode(
-        JSON.stringify({ name: "Peter", age: 51 })
+        JSON.stringify({ name: "Peter", age: 51 }),
       ),
     })
     .execute();
@@ -77,14 +77,14 @@ export default async function runExample(console: any) {
   const activeVersion = await lix.db
     .selectFrom("active_version")
     .innerJoin("version", "active_version.version_id", "version.id")
-    .select("version.change_set_id")
+    .select("version.commit_id")
     .executeTakeFirstOrThrow();
 
-  // Query file history from the current change set
+  // Query file history from the current commit
   const fileHistory = await lix.db
     .selectFrom("file_history")
     .where("path", "=", "/example.json")
-    .where("lixcol_root_change_set_id", "=", activeVersion.change_set_id)
+    .where("lixcol_root_commit_id", "=", activeVersion.commit_id)
     .orderBy("lixcol_depth", "asc")
     .select(["path", "data", "lixcol_depth"])
     .execute();
@@ -94,7 +94,7 @@ export default async function runExample(console: any) {
     fileHistory.map((f) => ({
       ...f,
       data: JSON.parse(new TextDecoder().decode(f.data)),
-    }))
+    })),
   );
 
   console.log("SECTION END 'querying-file-history'");

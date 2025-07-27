@@ -26,12 +26,12 @@ For persistent storage with user-controlled files, you can use the File System A
 ```typescript
 // Get a file handle using the File System Access API
 const fileHandle = await window.showSaveFilePicker({
-  suggestedName: 'document.lix',
+  suggestedName: "document.lix",
   types: [
     {
-      description: 'Lix Files',
+      description: "Lix Files",
       accept: {
-        'application/octet-stream': ['.lix'],
+        "application/octet-stream": [".lix"],
       },
     },
   ],
@@ -59,16 +59,16 @@ For applications that need persistent storage without requiring the user to mana
 
 ```typescript
 // Using a helper library like idb-keyval
-import { set, get } from 'idb-keyval';
+import { set, get } from "idb-keyval";
 
 // Save Lix file to IndexedDB
 async function saveLixToIDB(lixFile) {
-  await set('my-document.lix', lixFile);
+  await set("my-document.lix", lixFile);
 }
 
 // Load Lix file from IndexedDB
 async function loadLixFromIDB() {
-  const lixFile = await get('my-document.lix');
+  const lixFile = await get("my-document.lix");
   if (lixFile) {
     return await openLix({
       blob: lixFile,
@@ -77,7 +77,7 @@ async function loadLixFromIDB() {
   }
   // Create new file if not found
   const newLixFile = await newLixFile();
-  await set('my-document.lix', newLixFile);
+  await set("my-document.lix", newLixFile);
   return await openLix({
     blob: newLixFile,
     providePlugins: [jsonPlugin],
@@ -91,10 +91,10 @@ For Chrome and Chromium-based browsers, the Origin Private File System provides 
 
 ```typescript
 // Check if OPFS is supported
-if ('storage' in navigator && 'getDirectory' in navigator.storage) {
+if ("storage" in navigator && "getDirectory" in navigator.storage) {
   const root = await navigator.storage.getDirectory();
-  const fileHandle = await root.getFileHandle('document.lix', { create: true });
-  
+  const fileHandle = await root.getFileHandle("document.lix", { create: true });
+
   // Create or load Lix file
   let lixFile;
   try {
@@ -107,7 +107,7 @@ if ('storage' in navigator && 'getDirectory' in navigator.storage) {
     await writable.write(lixFile);
     await writable.close();
   }
-  
+
   // Open Lix with the file
   const lix = await openLix({
     blob: lixFile,
@@ -124,17 +124,17 @@ For improved performance, you can run Lix operations in a Web Worker to avoid bl
 
 ```typescript
 // Create a worker
-const worker = new Worker('lix-worker.js');
+const worker = new Worker("lix-worker.js");
 
 // Send commands to the worker
 worker.postMessage({
-  type: 'CREATE_FILE',
+  type: "CREATE_FILE",
 });
 
 // Listen for responses
 worker.onmessage = (event) => {
-  if (event.data.type === 'FILE_CREATED') {
-    console.log('Lix file created with ID:', event.data.fileId);
+  if (event.data.type === "FILE_CREATED") {
+    console.log("Lix file created with ID:", event.data.fileId);
   }
 };
 ```
@@ -143,7 +143,7 @@ worker.onmessage = (event) => {
 
 ```typescript
 // Import Lix in the worker
-importScripts('path-to-lix-bundle.js');
+importScripts("path-to-lix-bundle.js");
 
 // Initialize Lix instance
 let lix;
@@ -151,26 +151,26 @@ let lix;
 // Handle messages from the main thread
 self.onmessage = async (event) => {
   const { type, data } = event.data;
-  
+
   switch (type) {
-    case 'CREATE_FILE':
+    case "CREATE_FILE":
       const lixFile = await newLixFile();
       lix = await openLix({
         blob: lixFile,
         providePlugins: [jsonPlugin],
       });
-      self.postMessage({ type: 'FILE_CREATED', fileId: lix.id });
+      self.postMessage({ type: "FILE_CREATED", fileId: lix.id });
       break;
-      
-    case 'INSERT_FILE':
+
+    case "INSERT_FILE":
       const file = await lix.db
-        .insertInto('file')
+        .insertInto("file")
         .values(data)
         .returningAll()
         .executeTakeFirstOrThrow();
-      self.postMessage({ type: 'FILE_INSERTED', file });
+      self.postMessage({ type: "FILE_INSERTED", file });
       break;
-      
+
     // Add more command handlers
   }
 };
@@ -184,11 +184,11 @@ Implementing auto-save functionality with Lix:
 async function setupAutoSave(lix, fileHandle, interval = 5000) {
   let lastSaveTime = Date.now();
   let pendingSave = false;
-  
+
   // Function to save changes
   async function saveChanges() {
     if (pendingSave) return;
-    
+
     pendingSave = true;
     try {
       const serialized = await lix.serialize();
@@ -196,14 +196,14 @@ async function setupAutoSave(lix, fileHandle, interval = 5000) {
       await writable.write(serialized);
       await writable.close();
       lastSaveTime = Date.now();
-      console.log('Auto-saved at', new Date().toLocaleTimeString());
+      console.log("Auto-saved at", new Date().toLocaleTimeString());
     } catch (err) {
-      console.error('Auto-save failed:', err);
+      console.error("Auto-save failed:", err);
     } finally {
       pendingSave = false;
     }
   }
-  
+
   // Set up periodic saving
   const intervalId = setInterval(async () => {
     // Only save if there are unsaved changes
@@ -212,16 +212,16 @@ async function setupAutoSave(lix, fileHandle, interval = 5000) {
       await saveChanges();
     }
   }, interval);
-  
+
   // Add event listener for page unload
-  window.addEventListener('beforeunload', async (event) => {
+  window.addEventListener("beforeunload", async (event) => {
     const hasChanges = await lix.hasUnsavedChanges();
     if (hasChanges) {
       // Synchronous save before unload
       await saveChanges();
     }
   });
-  
+
   // Return cleanup function
   return () => clearInterval(intervalId);
 }
@@ -231,12 +231,12 @@ async function setupAutoSave(lix, fileHandle, interval = 5000) {
 
 Lix is compatible with modern browsers that support WebAssembly and other required APIs:
 
-| Browser | Minimum Version | Notes |
-|---------|----------------|-------|
-| Chrome | 91+ | Full support including OPFS |
-| Firefox | 90+ | No OPFS support |
-| Safari | 15.4+ | Limited OPFS support |
-| Edge | 91+ | Full support including OPFS |
+| Browser | Minimum Version | Notes                       |
+| ------- | --------------- | --------------------------- |
+| Chrome  | 91+             | Full support including OPFS |
+| Firefox | 90+             | No OPFS support             |
+| Safari  | 15.4+           | Limited OPFS support        |
+| Edge    | 91+             | Full support including OPFS |
 
 ### Feature Detection
 
@@ -244,23 +244,24 @@ Always use feature detection to ensure compatibility:
 
 ```typescript
 // Check for File System Access API
-const hasFileSystemAccess = 'showOpenFilePicker' in window;
+const hasFileSystemAccess = "showOpenFilePicker" in window;
 
 // Check for OPFS
-const hasOPFS = 'storage' in navigator && 'getDirectory' in navigator.storage;
+const hasOPFS = "storage" in navigator && "getDirectory" in navigator.storage;
 
 // Check for WebAssembly
-const hasWasm = typeof WebAssembly === 'object' && 
-               typeof WebAssembly.instantiate === 'function';
+const hasWasm =
+  typeof WebAssembly === "object" &&
+  typeof WebAssembly.instantiate === "function";
 
 // Choose appropriate storage strategy based on available features
 function chooseStorageStrategy() {
   if (hasFileSystemAccess) {
-    return 'file-system-access';
+    return "file-system-access";
   } else if (hasOPFS) {
-    return 'opfs';
+    return "opfs";
   } else {
-    return 'indexeddb';
+    return "indexeddb";
   }
 }
 ```
@@ -275,18 +276,20 @@ For better performance, batch related operations:
 // Batch multiple changes in a single transaction
 await lix.db.transaction().execute(async (trx) => {
   const snapshot = await trx
-    .insertInto('snapshot')
+    .insertInto("snapshot")
     .values({ created_at: new Date().toISOString() })
     .returningAll()
     .executeTakeFirstOrThrow();
-    
+
   // Insert multiple changes at once
   await trx
-    .insertInto('change')
-    .values(multipleChanges.map(change => ({
-      ...change,
-      snapshot_id: snapshot.id
-    })))
+    .insertInto("change")
+    .values(
+      multipleChanges.map((change) => ({
+        ...change,
+        snapshot_id: snapshot.id,
+      })),
+    )
     .execute();
 });
 ```
@@ -298,7 +301,11 @@ Monitor memory usage when working with large datasets:
 ```typescript
 // Check for performance.memory (Chrome only)
 if (performance.memory) {
-  console.log('JS Heap Size:', performance.memory.usedJSHeapSize / 1048576, 'MB');
+  console.log(
+    "JS Heap Size:",
+    performance.memory.usedJSHeapSize / 1048576,
+    "MB",
+  );
 }
 
 // Use FinalizationRegistry to track object cleanup
@@ -307,7 +314,7 @@ const registry = new FinalizationRegistry((name) => {
 });
 
 // Register objects for cleanup tracking
-registry.register(largeDataObject, 'Large data object');
+registry.register(largeDataObject, "Large data object");
 ```
 
 ## Network Considerations
@@ -318,20 +325,20 @@ Lix works well in offline scenarios, but you should handle synchronization when 
 
 ```typescript
 // Listen for online/offline events
-window.addEventListener('online', async () => {
-  console.log('Connection restored, syncing changes...');
+window.addEventListener("online", async () => {
+  console.log("Connection restored, syncing changes...");
   await syncChangesToServer(lix);
 });
 
-window.addEventListener('offline', () => {
-  console.log('Connection lost, working in offline mode');
+window.addEventListener("offline", () => {
+  console.log("Connection lost, working in offline mode");
 });
 
 // Check initial state
 if (navigator.onLine) {
-  console.log('Starting in online mode');
+  console.log("Starting in online mode");
 } else {
-  console.log('Starting in offline mode');
+  console.log("Starting in offline mode");
 }
 ```
 

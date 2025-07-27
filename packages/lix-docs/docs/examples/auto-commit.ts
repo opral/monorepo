@@ -39,8 +39,14 @@ export default async function runExample(console: any) {
     .executeTakeFirstOrThrow();
 
   // 5. Log the version's (new) commit
-  console.log("After insert - Version commit_id:", versionAfterInsert.commit_id);
-  console.log("Did the commit_id change?", activeVersion.commit_id !== versionAfterInsert.commit_id ? "Yes" : "No");
+  console.log(
+    "After insert - Version commit_id:",
+    versionAfterInsert.commit_id,
+  );
+  console.log(
+    "Did the commit_id change?",
+    activeVersion.commit_id !== versionAfterInsert.commit_id ? "Yes" : "No",
+  );
 
   console.log("SECTION END 'auto-commits'");
 }
