@@ -11,7 +11,6 @@ import {
 	threadSearchParamsAtom,
 } from "./state.ts";
 import {
-	ChangeSet,
 	changeSetElementIsLeafOf,
 	commitIsAncestorOf,
 	jsonArrayFrom,
@@ -218,24 +217,20 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 	if (!activeVersion) return [];
 
 	// Get change sets that have the checkpoint label and are ancestors of the active version's commit
+	// Also include the commit ID so we can query threads
 	let query = lix.db
 		.selectFrom("change_set")
+		.innerJoin("commit", "commit.change_set_id", "change_set.id")
 		.where(ebEntity("change_set").hasLabel({ name: "checkpoint" }))
-		.where((eb) => 
-			eb("change_set.id", "in", (subquery) =>
-				subquery
-					.selectFrom("commit")
-					.where(commitIsAncestorOf({ id: activeVersion.commit_id }, { includeSelf: true }))
-					.select("commit.change_set_id")
-			)
-		)
+		.where(commitIsAncestorOf({ id: activeVersion.commit_id }, { includeSelf: true }))
 		.leftJoin(
 			"change_set_element",
 			"change_set.id",
 			"change_set_element.change_set_id"
 		)
 		.selectAll("change_set")
-		.groupBy("change_set.id")
+		.select("commit.id as commit_id")
+		.groupBy(["change_set.id", "commit.id"])
 		.select((eb) => [
 			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 		])
@@ -372,13 +367,15 @@ export const getChangeDiffs = async (
 	return changesWithBeforeSnapshot;
 };
 
-export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
-	if (!changeSetId || !lix) return null;
+export const getThreads = async (lix: Lix, commitId: string) => {
+	if (!commitId || !lix) return null;
 
 	return await lix.db
 		.selectFrom("thread")
-		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
-		.where("change_set_thread.change_set_id", "=", changeSetId)
+		.leftJoin("entity_thread", "thread.id", "entity_thread.thread_id")
+		.where("entity_thread.entity_id", "=", commitId)
+		.where("entity_thread.schema_key", "=", "lix_commit")
+		.where("entity_thread.file_id", "=", "lix")
 		.select((eb) => [
 			jsonArrayFrom(
 				eb

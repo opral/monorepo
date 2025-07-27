@@ -403,10 +403,22 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 export const getThreads = async (lix: Lix, changeSetId: string) => {
 	if (!changeSetId || !lix) return null;
 
+	// Get the commit associated with the change set
+	const commit = await lix.db
+		.selectFrom("commit")
+		.where("change_set_id", "=", changeSetId)
+		.selectAll()
+		.executeTakeFirst();
+
+	if (!commit) return [];
+
+	// Query threads attached to the commit using the entity_thread system
 	return await lix.db
 		.selectFrom("thread")
-		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
-		.where("change_set_thread.change_set_id", "=", changeSetId)
+		.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
+		.where("entity_thread.entity_id", "=", commit.id)
+		.where("entity_thread.schema_key", "=", "lix_commit")
+		.where("entity_thread.file_id", "=", "lix")
 		.select((eb) => [
 			jsonArrayFrom(
 				eb

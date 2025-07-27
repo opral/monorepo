@@ -27,12 +27,12 @@ import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { LixLabelSchema } from "../label/schema.js";
 import { LixEntityLabelSchema } from "../entity/label/schema.js";
+import { LixEntityThreadSchema } from "../entity/thread/schema.js";
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,
 	type LixThreadComment,
 } from "../thread/schema.js";
-import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
@@ -57,7 +57,6 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
 	change_set_label: LixChangeSetLabelSchema,
-	change_set_thread: LixChangeSetThreadSchema,
 	commit: LixCommitSchema,
 	commit_edge: LixCommitEdgeSchema,
 	file: LixFileDescriptorSchema,
@@ -68,6 +67,7 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
 	entity_label: LixEntityLabelSchema,
+	entity_thread: LixEntityThreadSchema,
 	thread: LixThreadSchema,
 	thread_comment: LixThreadCommentSchema,
 };
@@ -90,11 +90,11 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixChangeSetSchema, "change_set"> &
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
 	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
-	EntityViews<typeof LixChangeSetThreadSchema, "change_set_thread"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
 	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
 	EntityViews<typeof LixLabelSchema, "label"> &
 	EntityViews<typeof LixEntityLabelSchema, "entity_label"> &
+	EntityViews<typeof LixEntityThreadSchema, "entity_thread"> &
 	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
 	EntityViews<typeof LixLogSchema, "log"> &
 	EntityViews<typeof LixThreadSchema, "thread"> &

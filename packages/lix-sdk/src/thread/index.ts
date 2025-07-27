@@ -6,3 +6,4 @@ export {
 } from "./schema.js";
 export { createThread } from "./create-thread.js";
 export { createThreadComment } from "./create-thread-comment.js";
+export type { LixEntityThread } from "../entity/thread/schema.js";

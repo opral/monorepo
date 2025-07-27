@@ -209,26 +209,34 @@ async function createChangesWithCheckpoint(args: {
 	const changeSet = await getWorkingChangeSet(args.lix, args.file.id);
 
 	if (changeSet) {
-		args.lix.db.transaction().execute(async (trx) => {
-			const thread = await createThread({
+		await args.lix.db.transaction().execute(async (trx) => {
+			// Create the checkpoint first to get the commit ID
+			const checkpoint = await createCheckpoint({ lix: { ...args.lix, db: trx } });
+			
+			// Now create the thread and attach it to the commit
+			await createThread({
 				lix: { ...args.lix, db: trx },
 				comments: [{ body: fromPlainText(args.comment) }],
+				entity: {
+					entity_id: checkpoint.id,
+					schema_key: "lix_commit",
+					file_id: "lix",
+				},
 			});
-			await trx
-				.insertInto("change_set_thread")
-				.values({
-					change_set_id: changeSet.id,
-					thread_id: thread.id,
-				})
-				.execute();
 		});
+
+		// Get threads for the newly created commit
+		const checkpointCommit = await args.lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
+
+		const threads = await getThreads(args.lix, checkpointCommit.commit_id);
+		return { threads };
 	}
 
-	const threads = await getThreads(args.lix, changeSet!.id);
-
-	await createCheckpoint({ lix: args.lix });
-
-	return { threads };
+	return { threads: [] };
 }
 
 export const createComment = async (args: {

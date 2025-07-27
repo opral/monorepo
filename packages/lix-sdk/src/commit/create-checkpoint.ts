@@ -1,6 +1,7 @@
 import type { LixCommit } from "./schema.js";
 import { nanoId, uuidV7 } from "../deterministic/index.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { State } from "../entity-views/types.js";
 
 /**
  * Converts the current working change set into a checkpoint.
@@ -15,7 +16,9 @@ import type { Lix } from "../lix/open-lix.js";
  * ```
  */
 
-export async function createCheckpoint(args: { lix: Lix }): Promise<LixCommit> {
+export async function createCheckpoint(args: {
+	lix: Lix;
+}): Promise<State<LixCommit>> {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Get current active version
 		const activeVersion = await trx
@@ -99,6 +102,13 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<LixCommit> {
 			})
 			.execute();
 
+		const createdCommit = await trx
+			.selectFrom("commit_all")
+			.selectAll()
+			.where("id", "=", checkpointCommitId)
+			.where("lixcol_version_id", "=", "global")
+			.executeTakeFirstOrThrow();
+
 		// Add commit edge from checkpoint commit to new working commit
 		await trx
 			.insertInto("commit_edge_all")
@@ -119,10 +129,7 @@ export async function createCheckpoint(args: { lix: Lix }): Promise<LixCommit> {
 			})
 			.execute();
 
-		return {
-			id: checkpointCommitId,
-			change_set_id: workingChangeSetId,
-		};
+		return createdCommit;
 	};
 
 	if (args.lix.db.isTransaction) {
