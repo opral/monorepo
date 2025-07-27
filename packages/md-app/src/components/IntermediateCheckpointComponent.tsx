@@ -129,14 +129,10 @@ const CreateCheckpointInput = () => {
 
       // Create thread with commit entity
       await createThread({
-        lix: { ...lix, db: trx },
-        comments: [{ body: args.content }],
-        entity: {
-          entity_id: commit.id,
-          schema_key: "lix_commit",
-          file_id: "lix",
-        },
-      });
+				lix: { ...lix, db: trx },
+				comments: [{ body: args.content }],
+				entity: commit,
+			});
     });
   };
 
