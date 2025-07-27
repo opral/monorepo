@@ -113,7 +113,7 @@ test("providing an account should be possible", async () => {
 
 	expect(activeAccounts).toHaveLength(1);
 	expect(activeAccounts[0]?.account_id).toBe(mockAccount.id);
-	
+
 	// Join to verify the actual account was created with correct details
 	const activeAccountWithDetails = await lix.db
 		.selectFrom("active_account as aa")
@@ -121,7 +121,7 @@ test("providing an account should be possible", async () => {
 		.where("a.lixcol_version_id", "=", "global")
 		.select(["a.id", "a.name"])
 		.executeTakeFirst();
-		
+
 	expect(activeAccountWithDetails?.name).toBe(mockAccount.name);
 });
 

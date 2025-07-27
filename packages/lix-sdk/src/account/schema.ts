@@ -127,4 +127,6 @@ export const LixActiveAccountSchema = {
 LixActiveAccountSchema satisfies LixSchemaDefinition;
 
 // Active account type
-export type LixActiveAccount = FromLixSchemaDefinition<typeof LixActiveAccountSchema>;
+export type LixActiveAccount = FromLixSchemaDefinition<
+	typeof LixActiveAccountSchema
+>;

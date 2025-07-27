@@ -27,7 +27,7 @@ export async function switchAccount(args: {
 	const executeInTransaction = async (trx: Lix["db"]) => {
 		// Delete all active account entries (both tracked and untracked)
 		await trx.deleteFrom("active_account").execute();
-		
+
 		// insert the new account id into the current_account table
 		// active_account view only has account_id column
 		await trx

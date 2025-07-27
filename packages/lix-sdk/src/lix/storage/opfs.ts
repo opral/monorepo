@@ -203,10 +203,11 @@ export class OpfsStorage implements LixStorageAdapter {
 							.executeTakeFirst();
 						return account;
 					});
-					
-					const accounts = (await Promise.all(accountPromises))
-						.filter((acc): acc is Pick<LixAccount, "id" | "name"> => acc !== undefined);
-					
+
+					const accounts = (await Promise.all(accountPromises)).filter(
+						(acc): acc is Pick<LixAccount, "id" | "name"> => acc !== undefined
+					);
+
 					// Save accounts when they change
 					this.saveActiveAccounts(accounts).catch((error) => {
 						console.error("Failed to save active accounts:", error);

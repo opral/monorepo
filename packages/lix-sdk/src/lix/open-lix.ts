@@ -156,7 +156,7 @@ export async function openLix(args: {
 			.where("lixcol_version_id", "=", "global")
 			.selectAll()
 			.executeTakeFirst();
-		
+
 		if (!existingAccount) {
 			// Create the account in global version
 			await db
@@ -168,7 +168,7 @@ export async function openLix(args: {
 				})
 				.execute();
 		}
-		
+
 		// Use switchAccount to properly set this as the only active account
 		await switchAccount({ lix: { db }, to: [accountToSet] });
 	} else {
@@ -177,16 +177,22 @@ export async function openLix(args: {
 			.selectFrom("active_account")
 			.selectAll()
 			.executeTakeFirst();
-		
+
 		if (!existingActiveAccount) {
 			// No account provided and no active account exists - create anonymous account
 			const { nanoId } = await import("../deterministic/index.js");
-			const { generateHumanId } = await import("../deterministic/generate-human-id.js");
-			
-			const activeAccountId = nanoId({ lix: { sqlite: database, db: db as any } });
-			const humanName = generateHumanId({ lix: { sqlite: database, db: db as any } });
+			const { generateHumanId } = await import(
+				"../deterministic/generate-human-id.js"
+			);
+
+			const activeAccountId = nanoId({
+				lix: { sqlite: database, db: db as any },
+			});
+			const humanName = generateHumanId({
+				lix: { sqlite: database, db: db as any },
+			});
 			const anonymousAccountName = `Anonymous ${humanName}`;
-			
+
 			// Create the anonymous account as untracked
 			await db
 				.insertInto("account_all")
@@ -197,7 +203,7 @@ export async function openLix(args: {
 					lixcol_untracked: true,
 				})
 				.execute();
-			
+
 			// Set it as the active account
 			await db
 				.insertInto("active_account")

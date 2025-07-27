@@ -220,7 +220,8 @@ export function insertTransactionState(args: {
 			if (activeAccounts && activeAccounts.length > 0) {
 				for (const activeAccount of activeAccounts) {
 					// Parse the account_id from the active account reference
-					const accountId = JSON.parse(activeAccount.snapshot_content as string).account_id as string;
+					const accountId = JSON.parse(activeAccount.snapshot_content as string)
+						.account_id as string;
 
 					// Check if account exists and is tracked in the current version
 					const [accountState] = executeSync({

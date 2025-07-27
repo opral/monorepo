@@ -344,7 +344,7 @@ describe("OpfsStorage", () => {
 			.deleteFrom("active_account")
 			.where("account_id", "=", account.id)
 			.execute();
-		
+
 		await lix.db
 			.insertInto("active_account")
 			.values({ account_id: "new-account" })

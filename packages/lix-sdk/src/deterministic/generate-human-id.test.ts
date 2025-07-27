@@ -14,10 +14,10 @@ test("returns deterministic names in deterministic mode", async () => {
 	// Generate IDs from both instances - they should match
 	const id1_lix1 = generateHumanId({ lix: lix1 });
 	const id1_lix2 = generateHumanId({ lix: lix2 });
-	
+
 	const id2_lix1 = generateHumanId({ lix: lix1 });
 	const id2_lix2 = generateHumanId({ lix: lix2 });
-	
+
 	const id3_lix1 = generateHumanId({ lix: lix1 });
 	const id3_lix2 = generateHumanId({ lix: lix2 });
 
@@ -46,10 +46,10 @@ test("cycles through names when exceeding array length", async () => {
 			break;
 		}
 	}
-	
+
 	// Should cycle after 40 names
 	expect(firstRepeatIndex).toBe(40);
-	
+
 	// Verify cycling pattern
 	expect(names[40]).toBe(names[0]);
 	expect(names[41]).toBe(names[1]);
@@ -119,7 +119,7 @@ test("persists sequence across lix instances", async () => {
 
 	// Generate next ID - should continue from where we left off
 	const id4 = generateHumanId({ lix: lix2 });
-	
+
 	// Verify it's not repeating the sequence
 	expect(id4).not.toBe(id1);
 	expect(id4).not.toBe(id2);
@@ -137,7 +137,7 @@ test("handles capitalize option", async () => {
 
 	// Capitalized should be uppercase first letter
 	expect(capitalizedId[0]).toBe(capitalizedId[0]?.toUpperCase());
-	
+
 	// Lowercase should be all lowercase
 	expect(lowercaseId).toBe(lowercaseId.toLowerCase());
 });
@@ -148,7 +148,7 @@ test("default capitalize is true", async () => {
 	});
 
 	const id = generateHumanId({ lix });
-	
+
 	// Should be capitalized by default
 	expect(id[0]).toBe(id[0]?.toUpperCase());
 });
