@@ -95,7 +95,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			return selectThreads(lix, { commitId: commit.id });
 		});
 
-		console.log("ChangeSet threads", threads);
+// Removed the console.log statement as it is a debugging artifact.
 
 		// Get the first comment if it exists
 		const firstComment = threads?.[0]?.comments?.[0];
