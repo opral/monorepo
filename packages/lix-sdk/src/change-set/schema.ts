@@ -33,14 +33,6 @@ export function applyChangeSetDatabaseSchema(
 		hardcodedFileId: "lix",
 	});
 
-	// Create change_set_thread views
-	createEntityViewsIfNotExists({
-		lix: { sqlite },
-		schema: LixChangeSetThreadSchema,
-		overrideName: "change_set_thread",
-		pluginKey: "lix_own_entity",
-		hardcodedFileId: "lix",
-	});
 
 	// Create change_set_label views
 	createEntityViewsIfNotExists({
@@ -158,36 +150,3 @@ export type LixChangeSetLabel = FromLixSchemaDefinition<
 	typeof LixChangeSetLabelSchema
 >;
 
-export const LixChangeSetThreadSchema = {
-	"x-lix-key": "lix_change_set_thread",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["change_set_id", "thread_id"],
-	"x-lix-foreign-keys": [
-		{
-			properties: ["change_set_id"],
-			references: {
-				schemaKey: "lix_change_set",
-				properties: ["id"],
-			},
-		},
-		{
-			properties: ["thread_id"],
-			references: {
-				schemaKey: "lix_thread",
-				properties: ["id"],
-			},
-		},
-	],
-	type: "object",
-	properties: {
-		change_set_id: { type: "string" },
-		thread_id: { type: "string" },
-	},
-	required: ["change_set_id", "thread_id"],
-	additionalProperties: false,
-} as const;
-LixChangeSetThreadSchema satisfies LixSchemaDefinition;
-
-export type LixChangeSetThread = FromLixSchemaDefinition<
-	typeof LixChangeSetThreadSchema
->;

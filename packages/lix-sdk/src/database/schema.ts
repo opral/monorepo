@@ -33,7 +33,6 @@ import {
 	LixThreadCommentSchema,
 	type LixThreadComment,
 } from "../thread/schema.js";
-import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
@@ -58,7 +57,6 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
 	change_set_label: LixChangeSetLabelSchema,
-	change_set_thread: LixChangeSetThreadSchema,
 	commit: LixCommitSchema,
 	commit_edge: LixCommitEdgeSchema,
 	file: LixFileDescriptorSchema,
@@ -92,7 +90,6 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixChangeSetSchema, "change_set"> &
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
 	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
-	EntityViews<typeof LixChangeSetThreadSchema, "change_set_thread"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
 	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
 	EntityViews<typeof LixLabelSchema, "label"> &

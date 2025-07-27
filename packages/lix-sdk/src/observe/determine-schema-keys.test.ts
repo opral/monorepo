@@ -220,10 +220,10 @@ test("should handle complex working changes query", async () => {
 test("should handle thread queries with json aggregation", async () => {
 	const lix = await openLix({});
 
-	// Test selectThreads query from md-app (uses jsonArrayFrom)
+	// Test selectThreads query updated to use entity_thread for universal commenting
 	const threadsQuery = lix.db
 		.selectFrom("thread")
-		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
+		.leftJoin("entity_thread", "thread.id", "entity_thread.thread_id")
 		.leftJoin("thread_comment", "thread_comment.thread_id", "thread.id")
 		.leftJoin(
 			"change_author",
@@ -231,14 +231,15 @@ test("should handle thread queries with json aggregation", async () => {
 			"change_author.change_id"
 		)
 		.leftJoin("account", "account.id", "change_author.account_id")
-		.where("change_set_thread.change_set_id", "=", "test_changeset")
+		.where("entity_thread.entity_id", "=", "test_changeset")
+		.where("entity_thread.schema_key", "=", "lix_change_set")
 		.selectAll("thread");
 
 	const schemaKeys = determineSchemaKeys(threadsQuery.compile());
 
 	// Should include all joined tables
 	expect(schemaKeys).toContain("lix_thread");
-	expect(schemaKeys).toContain("lix_change_set_thread");
+	expect(schemaKeys).toContain("lix_entity_thread");
 	expect(schemaKeys).toContain("lix_thread_comment");
 	expect(schemaKeys).toContain("lix_change_author");
 	expect(schemaKeys).toContain("lix_account");
