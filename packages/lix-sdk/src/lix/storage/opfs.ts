@@ -189,25 +189,17 @@ export class OpfsStorage implements LixStorageAdapter {
 			this.batchedSave();
 		});
 
-		// Observe changes to the active_account table
+		// Observe changes to the active_account table with account details
 		this.activeAccountSubscription = args.lix
-			.observe(args.lix.db.selectFrom("active_account").selectAll())
+			.observe(
+				args.lix.db
+					.selectFrom("active_account as aa")
+					.innerJoin("account_all as a", "a.id", "aa.account_id")
+					.where("a.lixcol_version_id", "=", "global")
+					.select(["a.id", "a.name"])
+			)
 			.subscribe({
-				next: async (activeAccounts) => {
-					// Fetch the full account details for each active account
-					const accountPromises = activeAccounts.map(async (active) => {
-						const account = await args.lix.db
-							.selectFrom("account_all")
-							.where("id", "=", active.account_id)
-							.select(["id", "name"])
-							.executeTakeFirst();
-						return account;
-					});
-
-					const accounts = (await Promise.all(accountPromises)).filter(
-						(acc): acc is Pick<LixAccount, "id" | "name"> => acc !== undefined
-					);
-
+				next: (accounts) => {
 					// Save accounts when they change
 					this.saveActiveAccounts(accounts).catch((error) => {
 						console.error("Failed to save active accounts:", error);

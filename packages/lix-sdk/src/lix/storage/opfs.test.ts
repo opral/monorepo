@@ -340,6 +340,16 @@ describe("OpfsStorage", () => {
 		expect(saveActiveAccountsSpy).not.toHaveBeenCalled();
 
 		// Now update the active account by deleting and re-inserting
+		// First create the new account in account_all
+		await lix.db
+			.insertInto("account_all")
+			.values({
+				id: "new-account",
+				name: "New Account",
+				lixcol_version_id: "global",
+			})
+			.execute();
+
 		await lix.db
 			.deleteFrom("active_account")
 			.where("account_id", "=", account.id)

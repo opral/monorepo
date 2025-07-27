@@ -60,7 +60,11 @@ export const selectAccounts = (lix: Lix) =>
  * Selects the current active account
  */
 export const selectActiveAccount = (lix: Lix) =>
-	lix.db.selectFrom("active_account").selectAll();
+	lix.db
+		.selectFrom("active_account as aa")
+		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.where("a.lixcol_version_id", "=", "global")
+		.select(["aa.account_id", "a.id", "a.name"]);
 
 /**
  * Selects checkpoints for the active file
