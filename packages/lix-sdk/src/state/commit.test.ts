@@ -70,7 +70,7 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	// 3. Commit
 	commit({ lix });
 
-	// 4. Expect the change set of the active version to have one edge to the previous one
+	// 4. Expect the commit of the active version to have one edge to the previous one
 	const versionAfter = await db
 		.selectFrom("version")
 		.where("id", "=", versionId)
@@ -743,7 +743,7 @@ describe("onStateCommit", () => {
 /**
  * Tests that when changes are made directly to the global version,
  * the global version's change_set_id is updated to reflect those changes.
- * 
+ *
  * This is a simpler case than non-global versions because:
  * - Only one version needs to be updated (global itself)
  * - The changes and the version update are both stored in the same version (global)
@@ -761,7 +761,7 @@ test("global version should move forward when mutations occur", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const initialChangeSetId = globalVersionBefore.change_set_id;
+	const initialCommitId = globalVersionBefore.commit_id;
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
@@ -791,23 +791,30 @@ test("global version should move forward when mutations occur", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// The global version's change_set_id should have been updated
-	expect(globalVersionAfter.change_set_id).not.toBe(initialChangeSetId);
+	// The global version's commit_id should have been updated
+	expect(globalVersionAfter.commit_id).not.toBe(initialCommitId);
 
-	// Verify a new changeset was created and linked
+	// Verify a new commit was created and linked
 	const edges = await db
-		.selectFrom("change_set_edge")
-		.where("parent_id", "=", initialChangeSetId)
-		.where("child_id", "=", globalVersionAfter.change_set_id)
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", initialCommitId)
+		.where("child_id", "=", globalVersionAfter.commit_id)
 		.selectAll()
 		.execute();
 
 	expect(edges.length).toBe(1);
 
+	// Get the change set ID from the new commit
+	const newCommit = await db
+		.selectFrom("commit")
+		.where("id", "=", globalVersionAfter.commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	// Verify the change set contains our change
 	const changeSetElements = await db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", globalVersionAfter.change_set_id)
+		.where("change_set_id", "=", newCommit.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -819,13 +826,19 @@ test("global version should move forward when mutations occur", async () => {
 /**
  * Tests that edge changes are properly created during commit.
  * 
- * When a version moves forward (creates a new changeset), an edge change must be created
- * with schema_key='lix_change_set_edge' that links the old changeset to the new one.
- * This is critical for the materialization lineage CTE to traverse the changeset history.
+ * When a version moves forward (creates a new commit), an edge change must be created
+ * with schema_key='lix_commit_edge' that links the old commit to the new one.
+ * This is critical for the materialization lineage CTE to traverse the commit history.
  */
 test("commit should create edge changes that are discoverable by lineage CTE", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: false }, lixcol_version_id: "global" }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: false },
+				lixcol_version_id: "global",
+			},
+		],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
@@ -836,21 +849,21 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const initialChangeSetId = globalVersionBefore.change_set_id;
-	
-	// Debug: Check all changesets that exist initially
-	const initialChangesets = await db
-		.selectFrom("change_set")
-		.selectAll()
-		.execute();
-	console.log("Initial changesets:", initialChangesets.map(cs => cs.id));
-	
+	const previousCommitId = globalVersionBefore.commit_id;
+
+	// Debug: Check all commits that exist initially
+	const initialCommits = await db.selectFrom("commit").selectAll().execute();
+	console.log(
+		"Initial commits:",
+		initialCommits.map((c) => c.id)
+	);
+
 	// Check what the version snapshots look like
 	const versionSnapshots = lix.sqlite.exec({
 		sql: `
 			SELECT 
 				entity_id,
-				json_extract(snapshot_content,'$.change_set_id') as change_set_id,
+				json_extract(snapshot_content,'$.commit_id') as commit_id,
 				created_at
 			FROM change 
 			WHERE schema_key = 'lix_version'
@@ -888,40 +901,46 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const newChangeSetId = globalVersionAfter.change_set_id;
-	expect(newChangeSetId).not.toBe(initialChangeSetId);
+	const newCommitId = globalVersionAfter.commit_id;
+	expect(newCommitId).not.toBe(previousCommitId);
 
 	// CRITICAL: Verify that an actual edge CHANGE exists (not just an element)
 	const edgeChanges = await db
 		.selectFrom("change")
-		.where("schema_key", "=", "lix_change_set_edge")
-		.where("entity_id", "=", `${initialChangeSetId}::${newChangeSetId}`)
+		.where("schema_key", "=", "lix_commit_edge")
+		.where("entity_id", "=", `${previousCommitId}~${newCommitId}`)
 		.selectAll()
 		.execute();
 
 	console.log("Edge changes found:", edgeChanges.length);
-	console.log("Looking for edge entity_id:", `${initialChangeSetId}::${newChangeSetId}`);
-	
+	console.log(
+		"Looking for edge entity_id:",
+		`${previousCommitId}~${newCommitId}`
+	);
+
 	// Let's also check all edge changes
 	const allEdgeChanges = await db
 		.selectFrom("change")
-		.where("schema_key", "=", "lix_change_set_edge")
+		.where("schema_key", "=", "lix_commit_edge")
 		.selectAll()
 		.execute();
-	console.log("All edge changes:", allEdgeChanges.map(e => ({ 
-		entity_id: e.entity_id, 
-		snapshot: e.snapshot_content 
-	})));
+	console.log(
+		"All edge changes:",
+		allEdgeChanges.map((e) => ({
+			entity_id: e.entity_id,
+			snapshot: e.snapshot_content,
+		}))
+	);
 
 	expect(edgeChanges.length).toBe(1);
-	
+
 	const edgeChange = edgeChanges[0]!;
 	expect(edgeChange.snapshot_content).toBeTruthy();
-	
+
 	// Verify the edge snapshot content
 	const edgeSnapshot = edgeChange.snapshot_content as any;
-	expect(edgeSnapshot.parent_id).toBe(initialChangeSetId);
-	expect(edgeSnapshot.child_id).toBe(newChangeSetId);
+	expect(edgeSnapshot.parent_id).toBe(previousCommitId);
+	expect(edgeSnapshot.child_id).toBe(newCommitId);
 
 	// First check what edges exist in the database
 	const allEdgesDetailed = lix.sqlite.exec({
@@ -932,7 +951,7 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 				json_extract(snapshot_content,'$.child_id') as child_id,
 				created_at
 			FROM change 
-			WHERE schema_key = 'lix_change_set_edge'
+			WHERE schema_key = 'lix_commit_edge'
 			ORDER BY created_at
 		`,
 		returnValue: "resultRows",
@@ -944,7 +963,7 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		sql: `
 			SELECT 
 				entity_id,
-				json_extract(snapshot_content,'$.change_set_id') AS change_set_id,
+				json_extract(snapshot_content,'$.commit_id') AS commit_id,
 				created_at
 			FROM change v
 			WHERE v.schema_key = 'lix_version'
@@ -960,14 +979,14 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		returnValue: "resultRows",
 	});
 	console.log("Latest global version change:", latestVersionChange);
-	
+
 	// Check ALL global version changes
 	const allGlobalVersionChanges = lix.sqlite.exec({
 		sql: `
 			SELECT 
 				id,
 				entity_id,
-				json_extract(snapshot_content,'$.change_set_id') AS change_set_id,
+				json_extract(snapshot_content,'$.commit_id') AS commit_id,
 				created_at
 			FROM change
 			WHERE schema_key = 'lix_version'
@@ -982,17 +1001,17 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	const edgeBasedVersionRoot = lix.sqlite.exec({
 		sql: `
 			SELECT 
-				json_extract(v.snapshot_content,'$.change_set_id') AS tip_change_set_id,
+				json_extract(v.snapshot_content,'$.commit_id') AS tip_commit_id,
 				v.entity_id AS version_id
 			FROM change v
 			WHERE v.schema_key = 'lix_version'
 			  AND v.entity_id = 'global'
-			  /* keep only the row whose change_set_id has NO outgoing edge */
+			  /* keep only the row whose commit_id has NO outgoing edge */
 			  AND NOT EXISTS (
 				SELECT 1
 				FROM change edge
-				WHERE edge.schema_key = 'lix_change_set_edge'
-				  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.change_set_id')
+				WHERE edge.schema_key = 'lix_commit_edge'
+				  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.commit_id')
 			  )
 		`,
 		returnValue: "resultRows",
@@ -1003,20 +1022,20 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	// This simulates what internal_materialization_lineage does
 	const lineageRows = lix.sqlite.exec({
 		sql: `
-			WITH RECURSIVE lineage_cs(id, version_id) AS (
+			WITH RECURSIVE lineage_commits(id, version_id) AS (
 				/* anchor: use edge-based approach to find the tip */
 				SELECT 
-					json_extract(v.snapshot_content,'$.change_set_id') AS id,
+					json_extract(v.snapshot_content,'$.commit_id') AS id,
 					v.entity_id AS version_id 
 				FROM change v
 				WHERE v.schema_key = 'lix_version'
 				  AND v.entity_id = 'global'
-				  /* keep only the row whose change_set_id has NO outgoing edge */
+				  /* keep only the row whose commit_id has NO outgoing edge */
 				  AND NOT EXISTS (
 					SELECT 1
 					FROM change edge
-					WHERE edge.schema_key = 'lix_change_set_edge'
-					  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.change_set_id')
+					WHERE edge.schema_key = 'lix_commit_edge'
+					  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.commit_id')
 				  )
 
 				UNION
@@ -1026,27 +1045,27 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 					json_extract(edge.snapshot_content,'$.parent_id') AS id,
 					l.version_id AS version_id
 				FROM change edge
-				JOIN lineage_cs l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
-				WHERE edge.schema_key = 'lix_change_set_edge'
+				JOIN lineage_commits l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
+				WHERE edge.schema_key = 'lix_commit_edge'
 				  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
 			)
-			SELECT id FROM lineage_cs WHERE version_id = 'global' ORDER BY id;
+			SELECT id FROM lineage_commits WHERE version_id = 'global' ORDER BY id;
 		`,
 		returnValue: "resultRows",
 	});
 
 	// Debug: Print what's in the lineage
 	console.log("Lineage rows:", lineageRows);
-	console.log("Initial changeset ID:", initialChangeSetId);
-	console.log("New changeset ID:", newChangeSetId);
-	
-	// Should have at least 2 entries: the new changeset and its parent
+	console.log("Previous commit ID:", previousCommitId);
+	console.log("New commit ID:", newCommitId);
+
+	// Should have at least 2 entries: the new commit and its parent
 	expect(lineageRows.length).toBeGreaterThanOrEqual(2);
-	
-	// Verify both changesets are in the lineage
-	const lineageIds = lineageRows.map(row => row[0]);
-	expect(lineageIds).toContain(newChangeSetId);
-	expect(lineageIds).toContain(initialChangeSetId);
+
+	// Verify both commits are in the lineage
+	const lineageIds = lineageRows.map((row) => row[0]);
+	expect(lineageIds).toContain(newCommitId);
+	expect(lineageIds).toContain(previousCommitId);
 });
 
 /**
@@ -1054,8 +1073,8 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
  * both the version itself AND the global version are updated.
  * 
  * This is critical because:
- * 1. The non-global version's change_set_id moves forward to include its data changes
- * 2. The global version's change_set_id ALSO moves forward to track the version update itself
+ * 1. The non-global version's commit_id moves forward to include its data changes
+ * 2. The global version's commit_id ALSO moves forward to track the version update itself
  * 3. All version changes (updates to any version entity) are stored in the global version's history
  * 
  * Without this behavior, each version would need to maintain its own history of all other versions,
@@ -1064,7 +1083,12 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
  */
 test("active version should move forward when mutations occur", async () => {
 	const lix = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+			},
+		],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
@@ -1091,7 +1115,7 @@ test("active version should move forward when mutations occur", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const initialActiveVersionChangeSetId = versionBefore.change_set_id;
+	const initialActiveVersionCommitId = versionBefore.commit_id;
 
 	// Insert data with version_id = activeVersionId
 	insertTransactionState({
@@ -1121,23 +1145,30 @@ test("active version should move forward when mutations occur", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	// The version's change_set_id should have been updated
-	expect(versionAfter.change_set_id).not.toBe(initialActiveVersionChangeSetId);
+	// The version's commit_id should have been updated
+	expect(versionAfter.commit_id).not.toBe(initialActiveVersionCommitId);
 
-	// Verify a new changeset was created and linked
+	// Verify a new commit was created and linked
 	const edges = await db
-		.selectFrom("change_set_edge")
-		.where("parent_id", "=", initialActiveVersionChangeSetId)
-		.where("child_id", "=", versionAfter.change_set_id)
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", initialActiveVersionCommitId)
+		.where("child_id", "=", versionAfter.commit_id)
 		.selectAll()
 		.execute();
 
 	expect(edges.length).toBe(1);
 
+	// Get the change set ID from the new commit
+	const newCommit = await db
+		.selectFrom("commit")
+		.where("id", "=", versionAfter.commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
 	// Verify the change set contains our change
 	const changeSetElements = await db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", versionAfter.change_set_id)
+		.where("change_set_id", "=", newCommit.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -1154,14 +1185,19 @@ test("active version should move forward when mutations occur", async () => {
 		.executeTakeFirstOrThrow();
 
 	// Global version should have been updated to track the version change
-	expect(globalVersionAfter.change_set_id).not.toBe(
-		globalVersionBefore.change_set_id
-	);
+	expect(globalVersionAfter.commit_id).not.toBe(globalVersionBefore.commit_id);
+
+	// Get the change set ID from the global version's new commit
+	const globalNewCommit = await db
+		.selectFrom("commit")
+		.where("id", "=", globalVersionAfter.commit_id)
+		.selectAll()
+		.executeTakeFirstOrThrow();
 
 	// Verify the global version's new changeset contains the version updates
 	const globalChangeSetElements = await db
 		.selectFrom("change_set_element")
-		.where("change_set_id", "=", globalVersionAfter.change_set_id)
+		.where("change_set_id", "=", globalNewCommit.change_set_id)
 		.selectAll()
 		.execute();
 
@@ -1188,16 +1224,14 @@ test("active version should move forward when mutations occur", async () => {
 		.selectAll()
 		.execute();
 
-	// Verify the version snapshots contain the correct change_set_ids
+	// Verify the version snapshots contain the correct commit_ids
 	for (const change of versionChanges) {
 		if (change.entity_id === "global") {
-			expect(change.snapshot_content?.change_set_id).toBe(
-				globalVersionAfter.change_set_id
+			expect(change.snapshot_content?.commit_id).toBe(
+				globalVersionAfter.commit_id
 			);
 		} else if (change.entity_id === activeVersionId) {
-			expect(change.snapshot_content?.change_set_id).toBe(
-				versionAfter.change_set_id
-			);
+			expect(change.snapshot_content?.commit_id).toBe(versionAfter.commit_id);
 		}
 	}
 });

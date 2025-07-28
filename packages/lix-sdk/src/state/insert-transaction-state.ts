@@ -314,6 +314,7 @@ export function insertTransactionState(args: {
 					created_at: _timestamp,
 					updated_at: _timestamp,
 					inherited_from_version_id: null,
+					commit_id: "pending",
 				})
 				.onConflict((oc) =>
 					oc
@@ -327,6 +328,7 @@ export function insertTransactionState(args: {
 							inheritance_delete_marker:
 								args.data.snapshot_content === null ? 1 : 0,
 							inherited_from_version_id: null,
+							commit_id: "pending",
 						})
 				),
 		});
