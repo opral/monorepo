@@ -39,6 +39,9 @@ import type { LixCommitEdge } from "../commit/schema.js";
 export function commit(args: {
 	lix: Pick<Lix, "sqlite" | "db" | "hooks">;
 }): number {
+	// Create a single timestamp for the entire transaction
+	const transactionTimestamp = timestamp({ lix: args.lix });
+	
 	const transactionChanges = executeSync({
 		lix: args.lix,
 		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
@@ -76,7 +79,7 @@ export function commit(args: {
 			const commitId = createChangesetForTransaction(
 				args.lix.sqlite,
 				args.lix.db as any,
-				timestamp({ lix: args.lix }),
+				transactionTimestamp,
 				version_id,
 				versionChanges
 			);
@@ -111,7 +114,7 @@ export function commit(args: {
 			const globalCommitId = createChangesetForTransaction(
 				args.lix.sqlite,
 				args.lix.db as any,
-				timestamp({ lix: args.lix }),
+				transactionTimestamp,
 				"global",
 				globalChanges
 			);
@@ -204,7 +207,7 @@ export function commit(args: {
 		}
 	}
 
-	commitDeterministicSequenceNumber({ lix: args.lix });
+commitDeterministicSequenceNumber({ lix: args.lix, timestamp: transactionTimestamp });
 
 	//* Emit state commit hook after transaction is successfully committed
 	//* must come last to ensure that subscribers see the changes

@@ -19,6 +19,7 @@ import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
 import { commit } from "./commit.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
+import { timestamp } from "../deterministic/timestamp.js";
 import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
@@ -66,6 +67,24 @@ export function applyStateDatabaseSchema(
 			});
 		},
 	});
+
+	// Create the cache table for performance optimization and the untracked state table
+	sqlite.exec(`
+  -- Table for untracked state that bypasses change control
+  CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
+    entity_id TEXT NOT NULL,
+    schema_key TEXT NOT NULL,
+    file_id TEXT NOT NULL,
+    version_id TEXT NOT NULL,
+    plugin_key TEXT NOT NULL,
+    snapshot_content TEXT NOT NULL, -- JSON content
+    schema_version TEXT NOT NULL,
+    created_at TEXT NOT NULL CHECK (created_at LIKE '%Z'),
+    updated_at TEXT NOT NULL CHECK (updated_at LIKE '%Z'),
+    PRIMARY KEY (entity_id, schema_key, file_id, version_id)
+  ) STRICT;
+
+`);
 
 	// Create virtual table using the proper SQLite WASM API (following vtab-experiment pattern)
 	const capi = sqlite.sqlite3.capi;
@@ -330,7 +349,7 @@ export function applyStateDatabaseSchema(
 							lix: { sqlite },
 							query,
 						});
-						
+
 						cursorState.results = stateResults || [];
 						cursorState.rowIndex = 0;
 						return capi.SQLITE_OK;
@@ -364,9 +383,17 @@ export function applyStateDatabaseSchema(
 					cursorState.rowIndex = 0;
 
 					if (cacheIsStale) {
+						// Log for debugging
+						if (
+							typeof process !== "undefined" &&
+							process.env.DEBUG_DETERMINISTIC_SEQ
+						) {
+							console.log("[DEBUG] Cache is stale, starting population");
+						}
+
 						// Populate cache directly with materialized state
 						populateStateCache(sqlite);
-						
+
 						// Log the cache miss
 						insertVTableLog({
 							sqlite,
@@ -375,16 +402,30 @@ export function applyStateDatabaseSchema(
 							level: "debug",
 							message: `Cache miss detected - materialized state`,
 						});
-						
+
 						// Mark cache as fresh after population
 						isUpdatingCacheState = true;
 						try {
+							if (
+								typeof process !== "undefined" &&
+								process.env.DEBUG_DETERMINISTIC_SEQ
+							) {
+								console.log("[DEBUG] About to mark cache as fresh");
+							}
 							markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
 						} finally {
 							isUpdatingCacheState = false;
 						}
 
 						// After populating cache, query from resolved state view
+						if (
+							typeof process !== "undefined" &&
+							process.env.DEBUG_DETERMINISTIC_SEQ
+						) {
+							console.log(
+								"[DEBUG] Cache populated, now querying resolved state"
+							);
+						}
 						let query = db
 							.selectFrom("internal_resolved_state_all")
 							.selectAll();
@@ -602,6 +643,9 @@ export function applyStateDatabaseSchema(
 					// Route based on untracked flag
 					if (untracked) {
 						// Handle untracked mutation - write directly to untracked table
+						const updateTimestamp = timestamp({
+							lix: { sqlite, db: db as any },
+						});
 						executeSync({
 							lix: { sqlite },
 							query: db
@@ -614,6 +658,8 @@ export function applyStateDatabaseSchema(
 									plugin_key: String(plugin_key),
 									snapshot_content,
 									schema_version: String(schema_version),
+									created_at: updateTimestamp,
+									updated_at: updateTimestamp,
 								})
 								.onConflict((oc) =>
 									oc
@@ -627,6 +673,7 @@ export function applyStateDatabaseSchema(
 											plugin_key: String(plugin_key),
 											snapshot_content,
 											schema_version: String(schema_version),
+											updated_at: updateTimestamp,
 										})
 								),
 						});
@@ -838,35 +885,6 @@ export function applyStateDatabaseSchema(
 				AND version_id = (SELECT version_id FROM active_version);
 		END;
 	`);
-
-	// Create the cache table for performance optimization and the untracked state table
-	sqlite.exec(`
-  -- Table for untracked state that bypasses change control
-  CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
-    entity_id TEXT NOT NULL,
-    schema_key TEXT NOT NULL,
-    file_id TEXT NOT NULL,
-    version_id TEXT NOT NULL,
-    plugin_key TEXT NOT NULL,
-    snapshot_content TEXT NOT NULL, -- JSON content
-    schema_version TEXT NOT NULL,
-    created_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (created_at LIKE '%Z'),
-    updated_at TEXT DEFAULT (lix_timestamp()) NOT NULL CHECK (updated_at LIKE '%Z'),
-    PRIMARY KEY (entity_id, schema_key, file_id, version_id)
-  ) STRICT;
-
-  -- Trigger to update updated_at on untracked state changes
-  CREATE TRIGGER IF NOT EXISTS internal_state_all_untracked_update_timestamp
-  AFTER UPDATE ON internal_state_all_untracked
-  BEGIN
-    UPDATE internal_state_all_untracked 
-    SET updated_at = lix_timestamp()
-    WHERE entity_id = NEW.entity_id 
-      AND schema_key = NEW.schema_key 
-      AND file_id = NEW.file_id 
-      AND version_id = NEW.version_id;
-  END;
-`);
 
 	/**
 	 * Insert a log entry directly using insertTransactionState to avoid recursion

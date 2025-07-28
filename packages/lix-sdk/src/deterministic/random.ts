@@ -5,6 +5,7 @@ import { executeSync } from "../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
+import { timestamp } from "./timestamp.js";
 
 /** State kept per SQLite connection - 16 bytes for xorshift128+ */
 type RngState = {
@@ -227,6 +228,7 @@ function nextXorshift128Plus(state: RngState): number {
  */
 export function commitDeterministicRngState(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
+	timestamp?: string;
 }): void {
 	const state = rngCache.get(args.lix.sqlite);
 	if (!state || !state.dirty) return; // nothing to do
@@ -241,6 +243,7 @@ export function commitDeterministicRngState(args: {
 		},
 	} satisfies LixKeyValue);
 
+	const now = args.timestamp ?? timestamp({ lix: args.lix });
 	executeSync({
 		lix: args.lix,
 		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
@@ -253,10 +256,13 @@ export function commitDeterministicRngState(args: {
 				plugin_key: "lix_own_entity",
 				schema_version: LixKeyValueSchema["x-lix-version"],
 				snapshot_content: newValue,
+				created_at: now,
+				updated_at: now,
 			})
 			.onConflict((oc) =>
 				oc.doUpdateSet({
 					snapshot_content: newValue,
+					updated_at: now,
 				})
 			),
 	});

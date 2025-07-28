@@ -3,6 +3,7 @@ import { executeSync } from "../../database/execute-sync.js";
 import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../../database/schema.js";
 import { LixKeyValueSchema } from "../../key-value/schema.js";
+import { timestamp } from "../../deterministic/timestamp.js";
 
 const CACHE_STALE_KEY = "lix_state_cache_stale";
 
@@ -25,21 +26,15 @@ export function markStateCacheAsStale(args: {
 				plugin_key: "lix_own_entity",
 				snapshot_content: snapshotContent,
 				schema_version: LixKeyValueSchema["x-lix-version"],
-				created_at: args.timestamp
-					? sql`${args.timestamp}`
-					: sql`lix_timestamp()`,
-				updated_at: args.timestamp
-					? sql`${args.timestamp}`
-					: sql`lix_timestamp()`,
+				created_at: args.timestamp ?? timestamp({ lix: args.lix }),
+				updated_at: args.timestamp ?? timestamp({ lix: args.lix }),
 			})
 			.onConflict((oc) =>
 				oc
 					.columns(["entity_id", "schema_key", "file_id", "version_id"])
 					.doUpdateSet({
 						snapshot_content: snapshotContent,
-						updated_at: args.timestamp
-							? sql`${args.timestamp}`
-							: sql`lix_timestamp()`,
+						updated_at: args.timestamp ?? timestamp({ lix: args.lix }),
 					})
 			),
 	});
