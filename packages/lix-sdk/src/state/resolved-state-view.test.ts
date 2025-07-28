@@ -254,6 +254,7 @@ test("resolved state view generates correct composite keys", async () => {
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Insert some test data into untracked state
+	const now = timestamp({ lix });
 	await lixInternalDb
 		.insertInto("internal_state_all_untracked")
 		.values({
@@ -264,6 +265,8 @@ test("resolved state view generates correct composite keys", async () => {
 			snapshot_content: JSON.stringify({ test: "data" }),
 			schema_version: "1.0",
 			version_id: "version1",
+			created_at: now,
+			updated_at: now,
 		})
 		.execute();
 
@@ -426,6 +429,7 @@ test("resolved state view generates correct composite keys for inherited state",
 		.execute();
 
 	// Insert data in parent version (untracked)
+	const untrackedTimestamp = timestamp({ lix });
 	await lixInternalDb
 		.insertInto("internal_state_all_untracked")
 		.values({
@@ -436,6 +440,8 @@ test("resolved state view generates correct composite keys for inherited state",
 			snapshot_content: JSON.stringify({ test: "inherited_untracked_data" }),
 			schema_version: "1.0",
 			version_id: parentVersionId,
+			created_at: untrackedTimestamp,
+			updated_at: untrackedTimestamp,
 		})
 		.execute();
 
