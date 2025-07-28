@@ -666,6 +666,239 @@ test("global version should move forward when mutations occur", async () => {
 });
 
 /**
+ * Tests that edge changes are properly created during commit.
+ * 
+ * When a version moves forward (creates a new changeset), an edge change must be created
+ * with schema_key='lix_change_set_edge' that links the old changeset to the new one.
+ * This is critical for the materialization lineage CTE to traverse the changeset history.
+ */
+test("commit should create edge changes that are discoverable by lineage CTE", async () => {
+	const lix = await openLix({
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, bootstrap: false }, lixcol_version_id: "global" }],
+	});
+	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	// Get the global version before any changes
+	const globalVersionBefore = await db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const initialChangeSetId = globalVersionBefore.change_set_id;
+	
+	// Debug: Check all changesets that exist initially
+	const initialChangesets = await db
+		.selectFrom("change_set")
+		.selectAll()
+		.execute();
+	console.log("Initial changesets:", initialChangesets.map(cs => cs.id));
+	
+	// Check what the version snapshots look like
+	const versionSnapshots = lix.sqlite.exec({
+		sql: `
+			SELECT 
+				entity_id,
+				json_extract(snapshot_content,'$.change_set_id') as change_set_id,
+				created_at
+			FROM change 
+			WHERE schema_key = 'lix_version'
+			ORDER BY created_at
+		`,
+		returnValue: "resultRows",
+	});
+	console.log("Version snapshots:", versionSnapshots);
+
+	// Insert data with version_id = "global"
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: "test-edge-entity",
+			schema_key: "lix_key_value",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				key: "test-edge-key",
+				value: "test-edge-value",
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	// Commit the changes
+	commit({ lix });
+
+	// Get the global version after changes
+	const globalVersionAfter = await db
+		.selectFrom("version")
+		.where("id", "=", "global")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const newChangeSetId = globalVersionAfter.change_set_id;
+	expect(newChangeSetId).not.toBe(initialChangeSetId);
+
+	// CRITICAL: Verify that an actual edge CHANGE exists (not just an element)
+	const edgeChanges = await db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_change_set_edge")
+		.where("entity_id", "=", `${initialChangeSetId}::${newChangeSetId}`)
+		.selectAll()
+		.execute();
+
+	console.log("Edge changes found:", edgeChanges.length);
+	console.log("Looking for edge entity_id:", `${initialChangeSetId}::${newChangeSetId}`);
+	
+	// Let's also check all edge changes
+	const allEdgeChanges = await db
+		.selectFrom("change")
+		.where("schema_key", "=", "lix_change_set_edge")
+		.selectAll()
+		.execute();
+	console.log("All edge changes:", allEdgeChanges.map(e => ({ 
+		entity_id: e.entity_id, 
+		snapshot: e.snapshot_content 
+	})));
+
+	expect(edgeChanges.length).toBe(1);
+	
+	const edgeChange = edgeChanges[0]!;
+	expect(edgeChange.snapshot_content).toBeTruthy();
+	
+	// Verify the edge snapshot content
+	const edgeSnapshot = edgeChange.snapshot_content as any;
+	expect(edgeSnapshot.parent_id).toBe(initialChangeSetId);
+	expect(edgeSnapshot.child_id).toBe(newChangeSetId);
+
+	// First check what edges exist in the database
+	const allEdgesDetailed = lix.sqlite.exec({
+		sql: `
+			SELECT 
+				entity_id,
+				json_extract(snapshot_content,'$.parent_id') as parent_id,
+				json_extract(snapshot_content,'$.child_id') as child_id,
+				created_at
+			FROM change 
+			WHERE schema_key = 'lix_change_set_edge'
+			ORDER BY created_at
+		`,
+		returnValue: "resultRows",
+	});
+	console.log("All edges in database:", allEdgesDetailed);
+
+	// First check what the latest version change looks like
+	const latestVersionChange = lix.sqlite.exec({
+		sql: `
+			SELECT 
+				entity_id,
+				json_extract(snapshot_content,'$.change_set_id') AS change_set_id,
+				created_at
+			FROM change v
+			WHERE v.schema_key = 'lix_version'
+			  AND v.entity_id = 'global'
+			  AND NOT EXISTS (
+				SELECT 1 
+				FROM change newer
+				WHERE newer.entity_id = v.entity_id
+				  AND newer.schema_key = 'lix_version'
+				  AND newer.created_at > v.created_at
+			  )
+		`,
+		returnValue: "resultRows",
+	});
+	console.log("Latest global version change:", latestVersionChange);
+	
+	// Check ALL global version changes
+	const allGlobalVersionChanges = lix.sqlite.exec({
+		sql: `
+			SELECT 
+				id,
+				entity_id,
+				json_extract(snapshot_content,'$.change_set_id') AS change_set_id,
+				created_at
+			FROM change
+			WHERE schema_key = 'lix_version'
+			  AND entity_id = 'global'
+			ORDER BY created_at DESC
+		`,
+		returnValue: "resultRows",
+	});
+	console.log("All global version changes:", allGlobalVersionChanges);
+
+	// Test the edge-based approach for finding version roots
+	const edgeBasedVersionRoot = lix.sqlite.exec({
+		sql: `
+			SELECT 
+				json_extract(v.snapshot_content,'$.change_set_id') AS tip_change_set_id,
+				v.entity_id AS version_id
+			FROM change v
+			WHERE v.schema_key = 'lix_version'
+			  AND v.entity_id = 'global'
+			  /* keep only the row whose change_set_id has NO outgoing edge */
+			  AND NOT EXISTS (
+				SELECT 1
+				FROM change edge
+				WHERE edge.schema_key = 'lix_change_set_edge'
+				  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.change_set_id')
+			  )
+		`,
+		returnValue: "resultRows",
+	});
+	console.log("Edge-based version root:", edgeBasedVersionRoot);
+
+	// Verify the edge is discoverable by the lineage CTE
+	// This simulates what internal_materialization_lineage does
+	const lineageRows = lix.sqlite.exec({
+		sql: `
+			WITH RECURSIVE lineage_cs(id, version_id) AS (
+				/* anchor: use edge-based approach to find the tip */
+				SELECT 
+					json_extract(v.snapshot_content,'$.change_set_id') AS id,
+					v.entity_id AS version_id 
+				FROM change v
+				WHERE v.schema_key = 'lix_version'
+				  AND v.entity_id = 'global'
+				  /* keep only the row whose change_set_id has NO outgoing edge */
+				  AND NOT EXISTS (
+					SELECT 1
+					FROM change edge
+					WHERE edge.schema_key = 'lix_change_set_edge'
+					  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.change_set_id')
+				  )
+
+				UNION
+
+				/* recurse upwards via parent_id */
+				SELECT 
+					json_extract(edge.snapshot_content,'$.parent_id') AS id,
+					l.version_id AS version_id
+				FROM change edge
+				JOIN lineage_cs l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
+				WHERE edge.schema_key = 'lix_change_set_edge'
+				  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
+			)
+			SELECT id FROM lineage_cs WHERE version_id = 'global' ORDER BY id;
+		`,
+		returnValue: "resultRows",
+	});
+
+	// Debug: Print what's in the lineage
+	console.log("Lineage rows:", lineageRows);
+	console.log("Initial changeset ID:", initialChangeSetId);
+	console.log("New changeset ID:", newChangeSetId);
+	
+	// Should have at least 2 entries: the new changeset and its parent
+	expect(lineageRows.length).toBeGreaterThanOrEqual(2);
+	
+	// Verify both changesets are in the lineage
+	const lineageIds = lineageRows.map(row => row[0]);
+	expect(lineageIds).toContain(newChangeSetId);
+	expect(lineageIds).toContain(initialChangeSetId);
+});
+
+/**
  * Tests that when changes are made to a non-global version (like the active/main version),
  * both the version itself AND the global version are updated.
  * 

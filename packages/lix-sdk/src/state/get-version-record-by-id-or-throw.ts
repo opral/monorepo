@@ -9,14 +9,30 @@ export function getVersionRecordByIdOrThrow(
 	db: Kysely<LixInternalDatabaseSchema>,
 	version_id: string
 ): LixVersion {
+	// First check the transaction table for uncommitted changes
 	let [versionRecord] = executeSync({
 		lix: { sqlite },
 		query: db
-			.selectFrom("internal_state_cache")
+			.selectFrom("internal_change_in_transaction")
 			.where("schema_key", "=", "lix_version")
 			.where("entity_id", "=", version_id)
-			.select("snapshot_content as content"),
+			.where("snapshot_content", "is not", null)
+			.orderBy("created_at", "desc")
+			.limit(1)
+			.select(sql`json(snapshot_content)`.as("content")),
 	}) as [{ content: string } | undefined];
+
+	// If not found in transaction, check cache
+	if (!versionRecord) {
+		[versionRecord] = executeSync({
+			lix: { sqlite },
+			query: db
+				.selectFrom("internal_state_cache")
+				.where("schema_key", "=", "lix_version")
+				.where("entity_id", "=", version_id)
+				.select("snapshot_content as content"),
+		}) as [{ content: string } | undefined];
+	}
 
 	// If not found in cache, try the change/snapshot tables (normal operation)
 	if (!versionRecord) {

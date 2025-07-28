@@ -29,7 +29,8 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		FROM internal_state_all_untracked unt;
 	`);
 
-	// View 2: Version change set roots - only the latest change for each version
+	// View 2: Version change set roots - find the tip by checking which changeset has no outgoing edges
+	// The only thing that is always monotonic in Lix is the graph itself
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_version_roots AS
 		SELECT 
@@ -37,13 +38,12 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 			v.entity_id AS version_id
 		FROM internal_materialization_all_changes v
 		WHERE v.schema_key = 'lix_version'
+		  /* keep only the row whose change_set_id has NO outgoing edge */
 		  AND NOT EXISTS (
-			-- Exclude if there's a newer change for the same version
-			SELECT 1 
-			FROM internal_materialization_all_changes newer
-			WHERE newer.entity_id = v.entity_id
-			  AND newer.schema_key = 'lix_version'
-			  AND newer.created_at > v.created_at
+			SELECT 1
+			FROM internal_materialization_all_changes edge
+			WHERE edge.schema_key = 'lix_change_set_edge'
+			  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.change_set_id')
 		  );
 	`);
 
@@ -234,57 +234,73 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		WHERE snapshot_content IS NOT NULL;
 	`);
 
-	// View 10: Final materialized state for all versions
+	// View 10: Final materialized state for cache population
+	// For entities that appear in multiple versions' lineages, we need to determine
+	// which version_id they should have in the cache. We use these rules:
+	// 1. Entities that appear in only one version belong to that version
+	// 2. Entities that appear in multiple versions belong to global
+	// We select each entity only once, preferring the global version for multi-version entities
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_state_materializer AS
-		WITH all_versions AS (
-			SELECT DISTINCT entity_id as version_id 
-			FROM change 
-			WHERE schema_key = 'lix_version'
-			UNION
-			SELECT 'global' as version_id
+		WITH entity_versions AS (
+			-- For each entity, determine which versions it appears in
+			SELECT 
+				entity_id,
+				schema_key,
+				file_id,
+				GROUP_CONCAT(DISTINCT version_id) as versions,
+				COUNT(DISTINCT version_id) as version_count,
+				CASE 
+					WHEN COUNT(DISTINCT version_id) > 1 THEN 'global'
+					ELSE MIN(version_id)
+				END as target_version_id
+			FROM internal_materialization_leaf_snapshots
+			WHERE snapshot_content IS NOT NULL
+			GROUP BY entity_id, schema_key, file_id
 		)
-		SELECT 
-			pe.entity_id,
-			pe.schema_key,
-			pe.file_id,
-			pe.version_id,
-			pe.plugin_key,
+		SELECT DISTINCT
+			ls.entity_id,
+			ls.schema_key,
+			ls.file_id,
+			ev.target_version_id as version_id,
+			ls.plugin_key,
 			CASE 
-				WHEN pe.snapshot_content IS NULL THEN NULL 
-				ELSE json(pe.snapshot_content)
+				WHEN ls.snapshot_content IS NULL THEN NULL 
+				ELSE json(ls.snapshot_content)
 			END as snapshot_content,
-			pe.schema_version,
-			COALESCE(
-				(SELECT MIN(ac.created_at) 
-				 FROM internal_materialization_all_changes ac
-				 JOIN internal_materialization_cse cse 
-				   ON cse.target_change_id = ac.id
-				 WHERE ac.entity_id = pe.entity_id 
-				   AND ac.schema_key = pe.schema_key 
-				   AND ac.file_id = pe.file_id
-				   AND cse.version_id = pe.version_id),
-				pe.created_at
-			) AS created_at,
-			COALESCE(
-				(SELECT MAX(ac.created_at) 
-				 FROM internal_materialization_all_changes ac
-				 JOIN internal_materialization_cse cse 
-				   ON cse.target_change_id = ac.id
-				 WHERE ac.entity_id = pe.entity_id 
-				   AND ac.schema_key = pe.schema_key 
-				   AND ac.file_id = pe.file_id
-				   AND cse.version_id = pe.version_id),
-				pe.created_at
-			) AS updated_at,
-			pe.inherited_from_version_id,
-			CASE WHEN pe.snapshot_content IS NULL THEN 1 ELSE 0 END as inheritance_delete_marker,
-			pe.change_id,
-			COALESCE(pe.change_set_id,'untracked') AS change_set_id
-		FROM internal_materialization_prioritized_entities pe
-		CROSS JOIN all_versions av
-		WHERE pe.rn = 1 
-		  AND pe.version_id = av.version_id;
+			ls.schema_version,
+			MIN(ls.created_at) as created_at,
+			MAX(ls.created_at) as updated_at,
+			NULL as inherited_from_version_id,
+			CASE WHEN ls.snapshot_content IS NULL THEN 1 ELSE 0 END as inheritance_delete_marker,
+			-- For multi-version entities, prefer the change from global version
+			CASE 
+				WHEN ev.version_count > 1 THEN
+					(SELECT ls2.change_id FROM internal_materialization_leaf_snapshots ls2
+					 WHERE ls2.entity_id = ls.entity_id 
+					   AND ls2.schema_key = ls.schema_key 
+					   AND ls2.file_id = ls.file_id
+					   AND ls2.version_id = 'global'
+					 LIMIT 1)
+				ELSE ls.change_id
+			END as change_id,
+			CASE 
+				WHEN ev.version_count > 1 THEN
+					(SELECT ls2.change_set_id FROM internal_materialization_leaf_snapshots ls2
+					 WHERE ls2.entity_id = ls.entity_id 
+					   AND ls2.schema_key = ls.schema_key 
+					   AND ls2.file_id = ls.file_id
+					   AND ls2.version_id = 'global'
+					 LIMIT 1)
+				ELSE ls.change_set_id
+			END as change_set_id
+		FROM internal_materialization_leaf_snapshots ls
+		JOIN entity_versions ev 
+			ON ev.entity_id = ls.entity_id 
+			AND ev.schema_key = ls.schema_key 
+			AND ev.file_id = ls.file_id
+		WHERE ls.snapshot_content IS NOT NULL
+		GROUP BY ls.entity_id, ls.schema_key, ls.file_id, ev.target_version_id, ls.plugin_key, ls.schema_version;
 	`);
 }
 

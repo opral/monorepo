@@ -247,6 +247,7 @@ function createChangesetForTransaction(
 	const nextChangeSetId = nanoId({
 		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
 	});
+	
 
 	// TODO: Don't create change author for the changeset itself.
 	// Change authors should be associated with commit entities when implemented.
@@ -289,6 +290,7 @@ function createChangesetForTransaction(
 		},
 		createChangeAuthors: false,
 	}).data;
+	
 
 	// Update version with new changeset
 	const versionChange = insertTransactionState({
