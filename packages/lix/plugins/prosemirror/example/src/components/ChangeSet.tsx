@@ -11,8 +11,8 @@ import {
 import {
 	applyChangeSet,
 	createThread,
-	createUndoChangeSet,
-	type ChangeSet as ChangeSetType,
+	createUndoCommit,
+	type LixChangeSet as ChangeSetType,
 } from "@lix-js/sdk";
 import { useKeyValue } from "../hooks/useKeyValue";
 import { selectActiveAccount, selectThreads } from "../queries";
@@ -78,9 +78,24 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 			changeSet,
 		]);
 
-		const threads = useQuery((lix) =>
-			selectThreads(lix, { changeSetId: changeSet.id }),
+		// Get the commit ID for this change set
+		const commits = useQuery((lix) =>
+			lix.db
+				.selectFrom("commit")
+				.where("change_set_id", "=", changeSet.id)
+				.select("id"),
 		);
+
+		const commit = commits?.[0];
+
+		const threads: any = useQuery((lix) => {
+			if (!commit?.id) {
+				return [] as any;
+			}
+			return selectThreads(lix, { commitId: commit.id });
+		});
+
+// Removed the console.log statement as it is a debugging artifact.
 
 		// Get the first comment if it exists
 		const firstComment = threads?.[0]?.comments?.[0];
@@ -100,20 +115,21 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 		}));
 
 		const onThreadComposerSubmit = async (args: { body: ZettelDoc }) => {
-			lix.db.transaction().execute(async (trx) => {
-				const thread = await createThread({
-					lix: { ...lix, db: trx },
-					versionId: "global",
-					comments: [{ body: args.body }],
-				});
-				await trx
-					.insertInto("change_set_thread_all")
-					.values({
-						change_set_id: changeSet.id,
-						thread_id: thread.id,
-						lixcol_version_id: "global",
-					})
-					.execute();
+			if (!commit?.id) {
+				console.error("Cannot create thread: commit not found for change set");
+				return;
+			}
+
+			// Create thread attached to the commit entity
+			await createThread({
+				lix,
+				versionId: "global",
+				comments: [{ body: args.body }],
+				entity: {
+					entity_id: commit.id,
+					schema_key: "lix_commit",
+					file_id: "lix",
+				},
 			});
 		};
 
@@ -148,7 +164,7 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 					<div className="flex-1">
 						<div className="text-sm break-words">
 							{isWorkingChangeSet
-								? "Working Change Set"
+								? "Current changes"
 								: truncatedComment
 									? truncatedComment
 									: "No description yet"}
@@ -208,13 +224,25 @@ export const ChangeSet = forwardRef<ChangeSetHandle, ChangeSetProps>(
 										<button
 											className="btn btn-sm btn-ghost"
 											onClick={async () => {
-												const undoChangeSet = await createUndoChangeSet({
+												// Find the commit for this change set
+												const commit = await lix.db
+													.selectFrom("commit")
+													.where("change_set_id", "=", changeSet.id)
+													.selectAll()
+													.executeTakeFirst();
+												
+												if (!commit) {
+													console.error("Could not find commit for change set");
+													return;
+												}
+
+												const undoCommit = await createUndoCommit({
 													lix,
-													changeSet: { id: changeSet.id },
+													commit: { id: commit.id },
 												});
 												await applyChangeSet({
 													lix,
-													changeSet: undoChangeSet,
+													changeSet: { id: undoCommit.change_set_id },
 												});
 											}}
 											title="Undo this change set"

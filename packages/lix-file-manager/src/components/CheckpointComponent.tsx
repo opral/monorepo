@@ -16,6 +16,7 @@ import { ChevronDown } from "lucide-react";
 export const CheckpointComponent = (props: {
   checkpointChangeSet: {
     id: string;
+    commit_id: string;
     change_count: number;
     created_at: string | null;
     author_name: string | null;
@@ -32,8 +33,8 @@ export const CheckpointComponent = (props: {
 
   useEffect(() => {
     const fetchThreads = async () => {
-      if (props.checkpointChangeSet.id) {
-        const threads = await getThreads(lix, props.checkpointChangeSet.id);
+      if (props.checkpointChangeSet.commit_id) {
+        const threads = await getThreads(lix, props.checkpointChangeSet.commit_id);
         if (threads) setThreads(threads);
       }
     };

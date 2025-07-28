@@ -189,9 +189,15 @@ export class OpfsStorage implements LixStorageAdapter {
 			this.batchedSave();
 		});
 
-		// Observe changes to the active_account table
+		// Observe changes to the active_account table with account details
 		this.activeAccountSubscription = args.lix
-			.observe(args.lix.db.selectFrom("active_account").selectAll())
+			.observe(
+				args.lix.db
+					.selectFrom("active_account as aa")
+					.innerJoin("account_all as a", "a.id", "aa.account_id")
+					.where("a.lixcol_version_id", "=", "global")
+					.select(["a.id", "a.name"])
+			)
 			.subscribe({
 				next: (accounts) => {
 					// Save accounts when they change

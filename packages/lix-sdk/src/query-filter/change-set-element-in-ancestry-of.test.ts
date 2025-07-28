@@ -1,14 +1,15 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import { createChangeSet } from "../change-set/create-change-set.js";
+import { createCommit } from "../commit/create-commit.js";
 import { changeSetElementInAncestryOf } from "./change-set-element-in-ancestry-of.js";
 
 test("returns all elements from a single change set and its ancestors", async () => {
 	const lix = await openLix({});
 
-	// Insert required schema entry
+	// Insert required schema entry in global version
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			key: "mock",
 			version: "1",
@@ -19,6 +20,7 @@ test("returns all elements from a single change set and its ancestors", async ()
 				properties: {},
 				type: "object",
 			},
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -37,7 +39,7 @@ test("returns all elements from a single change set and its ancestors", async ()
 		.returningAll()
 		.execute();
 
-	// cs0 <- cs1 <- cs2
+	// cs0 <- cs1 <- cs2 (with corresponding commits)
 	const cs0 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -46,7 +48,11 @@ test("returns all elements from a single change set and its ancestors", async ()
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
+
 	const cs1 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -55,8 +61,14 @@ test("returns all elements from a single change set and its ancestors", async ()
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
 	});
+	const commit1 = await createCommit({
+		lix,
+		changeSet: cs1,
+		parentCommits: [commit0],
+	});
+
 	const cs2 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -65,12 +77,17 @@ test("returns all elements from a single change set and its ancestors", async ()
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
+	});
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
 	});
 
 	const elements = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf(cs2))
+		.where(changeSetElementInAncestryOf(commit2))
 		.select("change_set_id")
 		.execute();
 
@@ -82,9 +99,9 @@ test("returns all elements from a single change set and its ancestors", async ()
 test("respects depth limit when provided for a single target", async () => {
 	const lix = await openLix({});
 
-	// Insert required schema entry
+	// Insert required schema entry in global version
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			key: "mock",
 			version: "1",
@@ -95,6 +112,7 @@ test("respects depth limit when provided for a single target", async () => {
 				properties: {},
 				type: "object",
 			},
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -112,7 +130,7 @@ test("respects depth limit when provided for a single target", async () => {
 		.returningAll()
 		.execute();
 
-	// cs0 <- cs1 <- cs2
+	// cs0 <- cs1 <- cs2 (with corresponding commits)
 	const cs0 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -121,7 +139,10 @@ test("respects depth limit when provided for a single target", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
+
 	const cs1 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -130,8 +151,14 @@ test("respects depth limit when provided for a single target", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
 	});
+	const commit1 = await createCommit({
+		lix,
+		changeSet: cs1,
+		parentCommits: [commit0],
+	});
+
 	const cs2 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -140,12 +167,17 @@ test("respects depth limit when provided for a single target", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
+	});
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
 	});
 
 	const elements = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf(cs2, { depth: 1 }))
+		.where(changeSetElementInAncestryOf(commit2, { depth: 1 }))
 		.select("change_set_id")
 		.execute();
 
@@ -157,9 +189,9 @@ test("respects depth limit when provided for a single target", async () => {
 test("returns combined elements from multiple divergent change set ancestries", async () => {
 	const lix = await openLix({});
 
-	// Insert required schema entry
+	// Insert required schema entry in global version
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			key: "mock",
 			version: "1",
@@ -170,6 +202,7 @@ test("returns combined elements from multiple divergent change set ancestries", 
 				properties: {},
 				type: "object",
 			},
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -199,7 +232,10 @@ test("returns combined elements from multiple divergent change set ancestries", 
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
+
 	const cs1 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -208,8 +244,14 @@ test("returns combined elements from multiple divergent change set ancestries", 
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
 	});
+	const commit1 = await createCommit({
+		lix,
+		changeSet: cs1,
+		parentCommits: [commit0],
+	});
+
 	const cs2 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -218,8 +260,14 @@ test("returns combined elements from multiple divergent change set ancestries", 
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
 	}); // Branch 1 leaf
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
+	});
+
 	const cs3 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -228,8 +276,14 @@ test("returns combined elements from multiple divergent change set ancestries", 
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
 	});
+	const commit3 = await createCommit({
+		lix,
+		changeSet: cs3,
+		parentCommits: [commit0],
+	});
+
 	const cs4 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -238,12 +292,17 @@ test("returns combined elements from multiple divergent change set ancestries", 
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs3],
+		lixcol_version_id: "global",
 	}); // Branch 2 leaf
+	const commit4 = await createCommit({
+		lix,
+		changeSet: cs4,
+		parentCommits: [commit3],
+	});
 
 	const elements = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs2, cs4])) // Target both leaves
+		.where(changeSetElementInAncestryOf([commit2, commit4])) // Target both leaves
 		.select("change_set_id")
 		.distinct()
 		.execute();
@@ -257,9 +316,9 @@ test("returns combined elements from multiple divergent change set ancestries", 
 test("respects depth limit with multiple divergent targets", async () => {
 	const lix = await openLix({});
 
-	// Insert required schema entry
+	// Insert required schema entry in global version
 	await lix.db
-		.insertInto("stored_schema")
+		.insertInto("stored_schema_all")
 		.values({
 			key: "mock",
 			version: "1",
@@ -270,6 +329,7 @@ test("respects depth limit with multiple divergent targets", async () => {
 				properties: {},
 				type: "object",
 			},
+			lixcol_version_id: "global",
 		})
 		.execute();
 
@@ -298,7 +358,10 @@ test("respects depth limit with multiple divergent targets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
+		lixcol_version_id: "global",
 	});
+	const commit0 = await createCommit({ lix, changeSet: cs0 });
+
 	const cs1 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -307,8 +370,14 @@ test("respects depth limit with multiple divergent targets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
 	});
+	const commit1 = await createCommit({
+		lix,
+		changeSet: cs1,
+		parentCommits: [commit0],
+	});
+
 	const cs2 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -317,8 +386,14 @@ test("respects depth limit with multiple divergent targets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs1],
+		lixcol_version_id: "global",
 	}); // Branch 1 leaf
+	const commit2 = await createCommit({
+		lix,
+		changeSet: cs2,
+		parentCommits: [commit1],
+	});
+
 	const cs3 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -327,8 +402,14 @@ test("respects depth limit with multiple divergent targets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs0],
+		lixcol_version_id: "global",
 	});
+	const commit3 = await createCommit({
+		lix,
+		changeSet: cs3,
+		parentCommits: [commit0],
+	});
+
 	const cs4 = await createChangeSet({
 		lix,
 		elements: [changes[0]!].map((change) => ({
@@ -337,12 +418,17 @@ test("respects depth limit with multiple divergent targets", async () => {
 			schema_key: change.schema_key,
 			file_id: change.file_id,
 		})),
-		parents: [cs3],
+		lixcol_version_id: "global",
 	}); // Branch 2 leaf
+	const commit4 = await createCommit({
+		lix,
+		changeSet: cs4,
+		parentCommits: [commit3],
+	});
 
 	const elements = await lix.db
 		.selectFrom("change_set_element")
-		.where(changeSetElementInAncestryOf([cs2, cs4], { depth: 1 })) // Depth 1 from targets
+		.where(changeSetElementInAncestryOf([commit2, commit4], { depth: 1 })) // Depth 1 from targets
 		.select("change_set_id")
 		.distinct()
 		.execute();

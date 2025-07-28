@@ -24,20 +24,19 @@ export function applyAccountDatabaseSchema(
 	});
 
 	// Create active_account as an entity view (similar to active_version)
-	// entity_id is the account id to support multiple active accounts
+	// Stores references to account IDs, joining with account table for details
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS active_account AS
 		SELECT
-			entity_id AS id,
-			json_extract(snapshot_content, '$.name') AS name,
-			inherited_from_version_id AS lixcol_inherited_from_version_id,
-			created_at AS lixcol_created_at,
-			updated_at AS lixcol_updated_at,
-			file_id AS lixcol_file_id,
-			change_id AS lixcol_change_id,
-			untracked AS lixcol_untracked
-		FROM state_all
-		WHERE schema_key = 'lix_active_account' AND version_id = 'global';
+			json_extract(sa.snapshot_content, '$.account_id') AS account_id,
+			sa.inherited_from_version_id AS lixcol_inherited_from_version_id,
+			sa.created_at AS lixcol_created_at,
+			sa.updated_at AS lixcol_updated_at,
+			sa.file_id AS lixcol_file_id,
+			sa.change_id AS lixcol_change_id,
+			sa.untracked AS lixcol_untracked
+		FROM state_all sa
+		WHERE sa.schema_key = 'lix_active_account' AND sa.version_id = 'global';
 
 		CREATE TRIGGER IF NOT EXISTS active_account_insert
 		INSTEAD OF INSERT ON active_account
@@ -52,11 +51,11 @@ export function applyAccountDatabaseSchema(
 				version_id,
 				untracked
 			) VALUES (
-				NEW.id,
+				'active_' || NEW.account_id,
 				'lix_active_account',
 				'lix',
 				'lix_own_entity',
-				json_object('name', NEW.name),
+				json_object('account_id', NEW.account_id),
 				'1.0',
 				'global',
 				1
@@ -68,10 +67,10 @@ export function applyAccountDatabaseSchema(
 		BEGIN
 			UPDATE state_all
 			SET
-				snapshot_content = json_object('name', NEW.name),
+				snapshot_content = json_object('account_id', NEW.account_id),
 				untracked = 1
 			WHERE
-				entity_id = OLD.id
+				entity_id = 'active_' || OLD.account_id
 				AND schema_key = 'lix_active_account'
 				AND version_id = 'global';
 		END;
@@ -80,7 +79,7 @@ export function applyAccountDatabaseSchema(
 		INSTEAD OF DELETE ON active_account
 		BEGIN
 			DELETE FROM state_all
-			WHERE entity_id = OLD.id
+			WHERE entity_id = 'active_' || OLD.account_id
 			AND schema_key = 'lix_active_account'
 			AND version_id = 'global';
 		END;
@@ -104,5 +103,30 @@ LixAccountSchema satisfies LixSchemaDefinition;
 // Pure business logic type (inferred from schema)
 export type LixAccount = FromLixSchemaDefinition<typeof LixAccountSchema>;
 
-// Active account type using State
-export type LixActiveAccount = LixAccount;
+// Active account schema definition
+export const LixActiveAccountSchema = {
+	"x-lix-key": "lix_active_account",
+	"x-lix-version": "1.0",
+	"x-lix-primary-key": ["account_id"],
+	"x-lix-foreign-keys": [
+		{
+			properties: ["account_id"],
+			references: {
+				schemaKey: "lix_account",
+				properties: ["id"],
+			},
+		},
+	],
+	type: "object",
+	properties: {
+		account_id: { type: "string" },
+	},
+	required: ["account_id"],
+	additionalProperties: false,
+} as const;
+LixActiveAccountSchema satisfies LixSchemaDefinition;
+
+// Active account type
+export type LixActiveAccount = FromLixSchemaDefinition<
+	typeof LixActiveAccountSchema
+>;

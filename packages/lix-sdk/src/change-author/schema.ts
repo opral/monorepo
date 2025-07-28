@@ -22,16 +22,22 @@ export const LixChangeAuthorSchema = {
 	"x-lix-key": "lix_change_author",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["change_id", "account_id"],
-	"x-lix-foreign-keys": {
-		change_id: {
-			schemaKey: "lix_change",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["change_id"],
+			references: {
+				schemaKey: "lix_change",
+				properties: ["id"],
+			},
 		},
-		account_id: {
-			schemaKey: "lix_account",
-			property: "id",
+		{
+			properties: ["account_id"],
+			references: {
+				schemaKey: "lix_account",
+				properties: ["id"],
+			},
 		},
-	},
+	],
 	type: "object",
 	properties: {
 		change_id: { type: "string" },

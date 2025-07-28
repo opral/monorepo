@@ -2,7 +2,7 @@ import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { serializePk, parsePk } from "./primary-key.js";
+import { serializeStatePk, parseStatePk } from "./primary-key.js";
 import { timestamp } from "../deterministic/timestamp.js";
 
 test("resolved state view should return same results as state_all for a tracked entity", async () => {
@@ -281,7 +281,7 @@ test("resolved state view generates correct composite keys", async () => {
 			change_id: "change1",
 			inheritance_delete_marker: 0,
 			inherited_from_version_id: null,
-			change_set_id: "changeset1",
+			commit_id: "changeset1",
 			created_at: timestamp({ lix }),
 			updated_at: timestamp({ lix }),
 		})
@@ -313,7 +313,7 @@ test("resolved state view generates correct composite keys", async () => {
 	expect(result1.inherited_from_version_id).toBe(null);
 
 	// Verify primary key matches serializePk
-	const expectedKey1 = serializePk(
+	const expectedKey1 = serializeStatePk(
 		"U",
 		result1.file_id,
 		result1.entity_id,
@@ -322,7 +322,7 @@ test("resolved state view generates correct composite keys", async () => {
 	expect(result1._pk).toBe(expectedKey1);
 
 	// Parse and verify
-	const parsed1 = parsePk(result1._pk);
+	const parsed1 = parseStatePk(result1._pk);
 	expect(parsed1).toEqual({
 		tag: "U",
 		fileId: "file1",
@@ -339,7 +339,7 @@ test("resolved state view generates correct composite keys", async () => {
 	expect(result2.inherited_from_version_id).toBe(null);
 
 	// Verify primary key matches serializePk
-	const expectedKey2 = serializePk(
+	const expectedKey2 = serializeStatePk(
 		"C",
 		result2.file_id,
 		result2.entity_id,
@@ -348,7 +348,7 @@ test("resolved state view generates correct composite keys", async () => {
 	expect(result2._pk).toBe(expectedKey2);
 
 	// Parse and verify
-	const parsed2 = parsePk(result2._pk);
+	const parsed2 = parseStatePk(result2._pk);
 	expect(parsed2).toEqual({
 		tag: "C",
 		fileId: "file2",
@@ -380,7 +380,7 @@ test("resolved state view generates correct composite keys for inherited state",
 				change_id: "change1",
 				inheritance_delete_marker: 0,
 				inherited_from_version_id: null,
-				change_set_id: "changeset1",
+				commit_id: "changeset1",
 				created_at: timestamp({ lix }),
 				updated_at: timestamp({ lix }),
 			},
@@ -398,7 +398,7 @@ test("resolved state view generates correct composite keys for inherited state",
 				change_id: "change2",
 				inheritance_delete_marker: 0,
 				inherited_from_version_id: null,
-				change_set_id: "changeset2",
+				commit_id: "changeset2",
 				created_at: timestamp({ lix }),
 				updated_at: timestamp({ lix }),
 			},
@@ -419,7 +419,7 @@ test("resolved state view generates correct composite keys for inherited state",
 			change_id: "change3",
 			inheritance_delete_marker: 0,
 			inherited_from_version_id: null,
-			change_set_id: "changeset3",
+			commit_id: "changeset3",
 			created_at: timestamp({ lix }),
 			updated_at: timestamp({ lix }),
 		})
@@ -466,7 +466,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	expect(result1.inherited_from_version_id).toBe(parentVersionId);
 
 	// Verify primary key for inherited cached state
-	const expectedKey1 = serializePk(
+	const expectedKey1 = serializeStatePk(
 		"CI",
 		result1.file_id,
 		result1.entity_id,
@@ -475,7 +475,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	expect(result1._pk).toBe(expectedKey1);
 
 	// Parse and verify
-	const parsed1 = parsePk(result1._pk);
+	const parsed1 = parseStatePk(result1._pk);
 	expect(parsed1).toEqual({
 		tag: "CI",
 		fileId: "file3",
@@ -492,7 +492,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	expect(result2.inherited_from_version_id).toBe(parentVersionId);
 
 	// Verify primary key for inherited untracked state
-	const expectedKey2 = serializePk(
+	const expectedKey2 = serializeStatePk(
 		"UI",
 		result2.file_id,
 		result2.entity_id,
@@ -501,7 +501,7 @@ test("resolved state view generates correct composite keys for inherited state",
 	expect(result2._pk).toBe(expectedKey2);
 
 	// Parse and verify
-	const parsed2 = parsePk(result2._pk);
+	const parsed2 = parseStatePk(result2._pk);
 	expect(parsed2).toEqual({
 		tag: "UI",
 		fileId: "file4",

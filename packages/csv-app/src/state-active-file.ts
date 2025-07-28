@@ -11,14 +11,11 @@ import {
 } from "./state.ts";
 import Papa from "papaparse";
 import {
-	ChangeSet,
-	// changeSetElementIsLeafOf,
-	changeSetHasLabel,
-	changeSetIsAncestorOf,
 	jsonArrayFrom,
 	Lix,
 	sql,
 	UiDiffComponentProps,
+	ebEntity,
 } from "@lix-js/sdk";
 import { CellSchemaV1 } from "@lix-js/plugin-csv";
 
@@ -153,7 +150,7 @@ export const activeCellChangesAtom = atom(async (get) => {
  * This is extracted to be reusable across the application
  */
 export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
-	// Get the active version with working change set id
+	// Get the active version with working commit id
 	const activeVersion = await lix.db
 		.selectFrom("active_version")
 		.innerJoin("version", "active_version.version_id", "version.id")
@@ -162,10 +159,19 @@ export const getWorkingChangeSet = async (lix: Lix, fileId: string) => {
 
 	if (!activeVersion) return null;
 
+	// Get the working commit
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirst();
+
+	if (!workingCommit) return null;
+
 	// Get the working change set
 	return await lix.db
 		.selectFrom("change_set")
-		.where("id", "=", activeVersion.working_change_set_id)
+		.where("id", "=", workingCommit.change_set_id)
 		// left join in case the change set has no elements
 		.leftJoin(
 			"change_set_element",
@@ -205,8 +211,17 @@ export const intermediateChangesAtom = atom<
 	const checkpointChanges = await get(checkpointChangeSetsAtom);
 	if (!activeVersion || !activeFile) return [];
 
+	// Get the working commit
+	const workingCommit = await lix.db
+		.selectFrom("commit")
+		.where("id", "=", activeVersion.working_commit_id)
+		.selectAll()
+		.executeTakeFirst();
+
+	if (!workingCommit) return [];
+
 	// Get all changes in the working change set
-	const workingChangeSetId = activeVersion.working_change_set_id;
+	const workingChangeSetId = workingCommit.change_set_id;
 
 	// Get changes that are in the working change set
 	const intermediateChanges = await lix.db
@@ -292,16 +307,33 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 	const activeVersion = await get(currentVersionAtom);
 	if (!activeFile || !activeVersion) return [];
 
-	return await lix.db
-		.selectFrom("change_set")
-		.where(changeSetHasLabel({ name: "checkpoint" }))
-		.where(
-			changeSetIsAncestorOf(
-				{ id: activeVersion.change_set_id },
-				// in case the checkpoint is the active version's change set
-				{ includeSelf: true }
+	// Query for commits that have the checkpoint label and are ancestors of current commit
+	const checkpointCommits = await lix.db
+		.selectFrom("commit")
+		.where(ebEntity("commit").hasLabel({ name: "checkpoint" }))
+		// Get commits that are ancestors of the current version's commit
+		.where((eb) =>
+			eb.exists(
+				eb
+					.selectFrom("commit_edge")
+					.whereRef("commit_edge.parent_id", "=", "commit.id")
+					.where((eb) =>
+						eb.or([
+							// Direct parent
+							eb("commit_edge.child_id", "=", activeVersion.commit_id),
+							// Or transitive ancestor
+							eb.exists(
+								eb
+									.selectFrom("commit_edge as ce2")
+									.whereRef("ce2.parent_id", "=", "commit_edge.child_id")
+									.where("ce2.child_id", "=", activeVersion.commit_id)
+							)
+						])
+					)
 			)
 		)
+		// Get the associated change set data
+		.innerJoin("change_set", "change_set.id", "commit.change_set_id")
 		// left join in case the change set has no elements
 		.leftJoin(
 			"change_set_element",
@@ -309,41 +341,20 @@ export const checkpointChangeSetsAtom = atom(async (get) => {
 			"change_set_element.change_set_id"
 		)
 		.where("file_id", "=", activeFile.id)
-		.selectAll("change_set")
-		.groupBy("change_set.id")
-		.select((eb) => [
-			eb.fn.count<number>("change_set_element.change_id").as("change_count"),
+		.select([
+			"change_set.id",
+			sql`commit.id`.as("commit_id"),
+			sql`commit.created_at`.as("created_at"),
 		])
-		.select((eb) =>
-			eb
-				.selectFrom("change")
-				.where("change.schema_key", "=", "lix_change_set_label_table")
-				.where(
-					// @ts-expect-error - this is a workaround for the type system
-					(eb) => eb.ref("change.snapshot_content", "->>").key("change_set_id"),
-					"=",
-					eb.ref("change_set.id")
-				)
-				.select("change.created_at")
-				.as("created_at")
+		.select((eb) => 
+			eb.fn.count<number>("change_set_element.change_id").as("change_count")
 		)
-		.select((eb) =>
-			eb
-				.selectFrom("change_author")
-				.innerJoin("change", "change.id", "change_author.change_id")
-				.innerJoin("account", "account.id", "change_author.account_id")
-				.where("change.schema_key", "=", "lix_change_set_label_table")
-				.where(
-					// @ts-expect-error - this is a workaround for the type system
-					(eb) => eb.ref("change.snapshot_content", "->>").key("change_set_id"),
-					"=",
-					eb.ref("change_set.id")
-				)
-				.select("account.name")
-				.as("author_name")
-		)
+		.select(() => sql<string | null>`NULL`.as("author_name"))
+		.groupBy(["change_set.id", "commit.id"])
 		.orderBy("created_at", "desc")
 		.execute();
+
+	return checkpointCommits;
 });
 
 export const allChangesAtom = atom(async (get) => {
@@ -389,13 +400,25 @@ export const changesCurrentVersionAtom = atom(async (get) => {
 		.execute();
 });
 
-export const getThreads = async (lix: Lix, changeSetId: ChangeSet["id"]) => {
+export const getThreads = async (lix: Lix, changeSetId: string) => {
 	if (!changeSetId || !lix) return null;
 
+	// Get the commit associated with the change set
+	const commit = await lix.db
+		.selectFrom("commit")
+		.where("change_set_id", "=", changeSetId)
+		.selectAll()
+		.executeTakeFirst();
+
+	if (!commit) return [];
+
+	// Query threads attached to the commit using the entity_thread system
 	return await lix.db
 		.selectFrom("thread")
-		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
-		.where("change_set_thread.change_set_id", "=", changeSetId)
+		.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
+		.where("entity_thread.entity_id", "=", commit.id)
+		.where("entity_thread.schema_key", "=", "lix_commit")
+		.where("entity_thread.file_id", "=", "lix")
 		.select((eb) => [
 			jsonArrayFrom(
 				eb
@@ -424,11 +447,19 @@ export const allEdgesAtom = atom(async (get) => {
 
 	if (!activeFile) return [];
 
+	// Query for commit edges instead of change set edges
 	return await lix.db
-		.selectFrom("change_set_edge")
-		.innerJoin("change", "change.id", "change_set_edge.parent_id")
+		.selectFrom("commit_edge")
+		.innerJoin("commit", "commit.id", "commit_edge.parent_id")
+		.innerJoin("change_set", "change_set.id", "commit.change_set_id")
+		.innerJoin("change_set_element", "change_set_element.change_set_id", "change_set.id")
+		.innerJoin("change", "change.id", "change_set_element.change_id")
 		.where("change.file_id", "=", activeFile.id)
-		.selectAll("change_set_edge")
+		.select([
+			"commit_edge.parent_id",
+			"commit_edge.child_id",
+		])
+		.distinct()
 		.execute();
 });
 

@@ -96,7 +96,7 @@ describe("createEntityViewIfNotExists", () => {
 		expect(entity).toHaveProperty("lixcol_file_id", "test_file");
 		expect(entity).toHaveProperty("lixcol_untracked");
 		expect(entity?.lixcol_untracked).toBe(0); // Default value is false (0)
-		expect(entity).toHaveProperty("lixcol_change_set_id");
+		expect(entity).toHaveProperty("lixcol_commit_id");
 	});
 
 	test("should create CRUD triggers", async () => {
@@ -337,7 +337,7 @@ describe("createEntityViewIfNotExists", () => {
 			.execute();
 
 		expect(stateData).toHaveLength(1);
-		expect(stateData[0]?.entity_id).toBe("cat1::id1"); // Composite key joined with ::
+		expect(stateData[0]?.entity_id).toBe("cat1~id1"); // Composite key joined with ~
 
 		// Update with composite key
 		await lix.db
@@ -591,7 +591,7 @@ describe("createEntityViewIfNotExists", () => {
 		expect(onlyTracked[0]?.id).toBe("tracked_entity");
 	});
 
-	test("should expose lixcol_change_set_id for history queries", async () => {
+	test("should expose lixcol_commit_id for history queries", async () => {
 		const lix = await openLix({});
 
 		// First, store the test schema
@@ -618,7 +618,7 @@ describe("createEntityViewIfNotExists", () => {
 			})
 			.execute();
 
-		// Query the view and verify lixcol_change_set_id is exposed
+		// Query the view and verify lixcol_commit_id is exposed
 		const result = await lix.db
 			.selectFrom("test_view" as any)
 			.selectAll()
@@ -627,20 +627,106 @@ describe("createEntityViewIfNotExists", () => {
 		expect(result).toHaveLength(1);
 		const entity = result[0];
 
-		// Verify that lixcol_change_set_id is exposed
-		expect(entity).toHaveProperty("lixcol_change_set_id");
+		// Verify that lixcol_commit_id is exposed
+		expect(entity).toHaveProperty("lixcol_commit_id");
 		// The change_set_id should be populated (either from a change set or 'untracked')
-		expect(entity?.lixcol_change_set_id).toBeDefined();
-		expect(typeof entity?.lixcol_change_set_id).toBe("string");
+		expect(entity?.lixcol_commit_id).toBeDefined();
+		expect(typeof entity?.lixcol_commit_id).toBe("string");
 
-		// Verify we can query by lixcol_change_set_id
+		// Verify we can query by lixcol_commit_id
 		const queryByChangeSetId = await lix.db
 			.selectFrom("test_view" as any)
-			.where("lixcol_change_set_id", "=", entity?.lixcol_change_set_id)
+			.where("lixcol_commit_id", "=", entity?.lixcol_commit_id)
 			.selectAll()
 			.execute();
 
 		expect(queryByChangeSetId).toHaveLength(1);
 		expect(queryByChangeSetId[0]?.id).toBe("test_id");
+	});
+
+	test("should expose lixcol_entity_id, lixcol_schema_key, lixcol_file_id, and lixcol_plugin_key", async () => {
+		const lix = await openLix({});
+
+		createEntityStateView({
+			lix,
+			schema: testSchema,
+			overrideName: "test_view",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Insert test data
+		await lix.db
+			.insertInto("test_view" as any)
+			.values({
+				id: "test_id",
+				name: "test_name",
+				value: 42,
+			})
+			.execute();
+
+		// Query the view to verify all entity identification columns are exposed
+		const result = await lix.db
+			.selectFrom("test_view" as any)
+			.select([
+				"id",
+				"name",
+				"lixcol_entity_id",
+				"lixcol_schema_key",
+				"lixcol_file_id",
+				"lixcol_plugin_key",
+			])
+			.executeTakeFirst();
+
+		expect(result).toBeDefined();
+
+		// Verify all required lixcol_ columns are present and have correct values
+		expect(result?.lixcol_entity_id).toBe("test_id");
+		expect(result?.lixcol_schema_key).toBe("test_entity");
+		expect(result?.lixcol_file_id).toBe("test_file");
+		expect(result?.lixcol_plugin_key).toBe("test_plugin");
+	});
+
+	test("should expose entity identification columns for composite primary keys", async () => {
+		const lix = await openLix({});
+
+		createEntityStateView({
+			lix,
+			schema: compositeKeySchema,
+			overrideName: "composite_view",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Insert data with composite key
+		await lix.db
+			.insertInto("composite_view" as any)
+			.values({
+				category: "cat1",
+				id: "id1",
+				data: "test_data",
+			})
+			.execute();
+
+		// Query to verify lixcol_ columns
+		const result = await lix.db
+			.selectFrom("composite_view" as any)
+			.select([
+				"category",
+				"id",
+				"lixcol_entity_id",
+				"lixcol_schema_key",
+				"lixcol_file_id",
+				"lixcol_plugin_key",
+			])
+			.executeTakeFirst();
+
+		expect(result).toBeDefined();
+
+		// For composite keys, entity_id is joined with ~
+		expect(result?.lixcol_entity_id).toBe("cat1~id1");
+		expect(result?.lixcol_schema_key).toBe("composite_entity");
+		expect(result?.lixcol_file_id).toBe("test_file");
+		expect(result?.lixcol_plugin_key).toBe("test_plugin");
 	});
 });

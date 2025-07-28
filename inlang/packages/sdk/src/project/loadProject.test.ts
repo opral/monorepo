@@ -130,7 +130,8 @@ test("providing an account should work", async () => {
 
 	const activeAccount = await project.lix.db
 		.selectFrom("active_account")
-		.selectAll()
+		.innerJoin("account", "account.id", "active_account.account_id")
+		.select(["id", "name"])
 		.execute();
 
 	expect(activeAccount).toEqual([expect.objectContaining(mockAccount)]);

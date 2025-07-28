@@ -32,7 +32,7 @@ export default function Page() {
 									key={checkpointChangeSet.id}
 									changeSetid={checkpointChangeSet.id || ""}
 									previousChangeSetId={previousCheckpointId}
-									authorName={checkpointChangeSet.author_name}
+									authorName={checkpointChangeSet.author_name ?? null}
 								/>
 							);
 						})}

@@ -138,45 +138,6 @@ test("creating a change set with labels should associate the labels with the cha
 	);
 });
 
-test("creating a change set with parents should establish parent-child relationships", async () => {
-	const lix = await openLix({});
-
-	// Create two parent change sets
-	const parentChangeSet1 = await createChangeSet({
-		lix,
-		elements: [],
-	});
-
-	const parentChangeSet2 = await createChangeSet({
-		lix,
-		elements: [],
-	});
-
-	// Create a child change set with two parents
-	const childChangeSet = await createChangeSet({
-		lix,
-		elements: [],
-		parents: [parentChangeSet1, parentChangeSet2],
-	});
-
-	// Get the parent-child relationships from the database
-	const edges = await lix.db
-		.selectFrom("change_set_edge")
-		.selectAll()
-		.where("child_id", "=", childChangeSet.id)
-		.execute();
-
-	// Verify both parent-child relationships were created
-	expect(edges).toHaveLength(2);
-	expect(edges.map((edge) => edge.parent_id)).toEqual(
-		expect.arrayContaining([parentChangeSet1.id, parentChangeSet2.id])
-	);
-	expect(edges.map((edge) => edge.child_id)).toEqual([
-		childChangeSet.id,
-		childChangeSet.id,
-	]);
-});
-
 test("creating a change set with version_id should store it in the specified version", async () => {
 	const lix = await openLix({});
 

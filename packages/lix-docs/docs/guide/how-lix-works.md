@@ -5,6 +5,7 @@ Lix is a change control system designed to run in the browser. This page provide
 ## Core Architecture
 
 At its core, Lix combines:
+
 1. A SQLite database (running in WebAssembly)
 2. A type-safe SQL query builder ([Kysely](https://kysely.dev/))
 3. A plugin system for handling different file formats
@@ -45,6 +46,7 @@ Plugins in Lix handle specific file formats, providing:
 3. **Change Application**: Applying changes to files
 
 Different plugins handle different file formats:
+
 - [JSON Plugin](https://github.com/opral/monorepo/tree/main/packages/lix-plugin-json) for JSON files
 - [CSV Plugin](https://github.com/opral/monorepo/tree/main/packages/lix-plugin-csv) for CSV files
 - [Markdown Plugin](https://github.com/opral/monorepo/tree/main/packages/lix-plugin-md) for Markdown files

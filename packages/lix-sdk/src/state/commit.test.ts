@@ -4,10 +4,11 @@ import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import { commit } from "./commit.js";
 import { openLix } from "../lix/open-lix.js";
-import { nanoId } from "../deterministic/index.js";
+import { nanoId, uuidV7 } from "../deterministic/index.js";
 
 test("commit should include meta changes (changeset, edges, version updates) in the change table", async () => {
 	const lix = await openLix({
+		account: { id: "test-account", name: "Test User" },
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
@@ -29,7 +30,7 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 		.where("id", "=", versionId)
 		.selectAll()
 		.executeTakeFirstOrThrow();
-	const previousChangeSetId = versionBefore.change_set_id;
+	const previousCommitId = versionBefore.commit_id;
 
 	// 2. Insert transaction state
 	insertTransactionState({
@@ -76,18 +77,27 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	const newChangeSetId = versionAfter.change_set_id;
-	expect(newChangeSetId).not.toBe(previousChangeSetId);
+	const newCommitId = versionAfter.commit_id;
+	expect(newCommitId).not.toBe(previousCommitId);
 
 	// Check edges - should have exactly one edge from previous to new
 	const edges = await db
-		.selectFrom("change_set_edge")
-		.where("parent_id", "=", previousChangeSetId)
-		.where("child_id", "=", newChangeSetId)
+		.selectFrom("commit_edge")
+		.where("parent_id", "=", previousCommitId)
+		.where("child_id", "=", newCommitId)
 		.selectAll()
 		.execute();
 
 	expect(edges.length).toBe(1);
+
+	// Get the change set ID from the commit
+	const newCommit = await db
+		.selectFrom("commit")
+		.where("id", "=", newCommitId)
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	const newChangeSetId = newCommit.change_set_id;
 
 	// 5. Directly expect on the elements in this new set to contain the expected changes
 	const changeSetElements = await db
@@ -100,10 +110,11 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	// - 2 user data changes (test-entity-1, test-entity-2)
 	// - 2 change authors (one for each user data change)
 	// - 1 changeset creation
-	// - 1 edge creation
+	// - 1 commit creation
+	// - 1 commit edge creation
 	// - 1 version update
-	// Total: 7 elements
-	expect(changeSetElements.length).toBe(7);
+	// Total: 8 elements
+	expect(changeSetElements.length).toBe(8);
 
 	// Verify the specific changes are in the change set
 	const elementChangeIds = changeSetElements.map((e) => e.change_id);
@@ -131,7 +142,8 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	expect(changesBySchema["lix_key_value"]?.length).toBe(2); // Our test data
 	expect(changesBySchema["lix_change_author"]?.length).toBe(2); // Change authors for test data
 	expect(changesBySchema["lix_change_set"]?.length).toBe(1); // The new changeset
-	expect(changesBySchema["lix_change_set_edge"]?.length).toBe(1); // The edge
+	expect(changesBySchema["lix_commit"]?.length).toBe(1); // The new commit
+	expect(changesBySchema["lix_commit_edge"]?.length).toBe(1); // The commit edge
 	expect(changesBySchema["lix_version"]?.length).toBe(1); // Version update
 
 	// Verify the test entities are included
@@ -147,8 +159,8 @@ test("commit should include meta changes (changeset, edges, version updates) in 
 	// Change author entity IDs should reference the user data change IDs
 	const userDataChangeIds = keyValueChanges.map((c) => c.id);
 	for (const author of changeAuthors) {
-		// Entity ID format for change authors is "changeId::accountId"
-		const changeId = author.entity_id.split("::")[0];
+		// Entity ID format for change authors is "changeId~accountId"
+		const changeId = author.entity_id.split("~")[0];
 		expect(userDataChangeIds).toContain(changeId);
 	}
 });
@@ -196,13 +208,117 @@ test("commit should handle multiple versions correctly", async () => {
 
 	// Create version A with dynamic IDs
 	const versionAId = nanoId({ lix });
+	const versionACommitId = uuidV7({ lix });
 	const versionAChangeSetId = nanoId({ lix });
 	const versionAWorkingChangeSetId = nanoId({ lix });
+	const versionAWorkingCommitId = uuidV7({ lix });
 
 	// Create version B with dynamic IDs
 	const versionBId = nanoId({ lix });
+	const versionBCommitId = uuidV7({ lix });
 	const versionBChangeSetId = nanoId({ lix });
 	const versionBWorkingChangeSetId = nanoId({ lix });
+	const versionBWorkingCommitId = uuidV7({ lix });
+
+	// Create change sets for versions
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: versionAChangeSetId,
+			schema_key: "lix_change_set",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: versionAChangeSetId,
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: versionAWorkingChangeSetId,
+			schema_key: "lix_change_set",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: versionAWorkingChangeSetId,
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: versionBChangeSetId,
+			schema_key: "lix_change_set",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: versionBChangeSetId,
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: versionBWorkingChangeSetId,
+			schema_key: "lix_change_set",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: versionBWorkingChangeSetId,
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	// Create commits for version A
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: versionACommitId,
+			schema_key: "lix_commit",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: versionACommitId,
+				change_set_id: versionAChangeSetId,
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: versionAWorkingCommitId,
+			schema_key: "lix_commit",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: versionAWorkingCommitId,
+				change_set_id: versionAWorkingChangeSetId,
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
 
 	// Create version A
 	insertTransactionState({
@@ -215,8 +331,43 @@ test("commit should handle multiple versions correctly", async () => {
 			snapshot_content: JSON.stringify({
 				id: versionAId,
 				name: "version A",
-				change_set_id: versionAChangeSetId,
-				working_change_set_id: versionAWorkingChangeSetId,
+				commit_id: versionACommitId,
+				working_commit_id: versionAWorkingCommitId,
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	// Create commits for version B
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: versionBCommitId,
+			schema_key: "lix_commit",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: versionBCommitId,
+				change_set_id: versionBChangeSetId,
+			}),
+			schema_version: "1.0",
+			version_id: "global",
+			untracked: false,
+		},
+	});
+
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db },
+		data: {
+			entity_id: versionBWorkingCommitId,
+			schema_key: "lix_commit",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				id: versionBWorkingCommitId,
+				change_set_id: versionBWorkingChangeSetId,
 			}),
 			schema_version: "1.0",
 			version_id: "global",
@@ -235,8 +386,8 @@ test("commit should handle multiple versions correctly", async () => {
 			snapshot_content: JSON.stringify({
 				id: versionBId,
 				name: "version B",
-				change_set_id: versionBChangeSetId,
-				working_change_set_id: versionBWorkingChangeSetId,
+				commit_id: versionBCommitId,
+				working_commit_id: versionBWorkingCommitId,
 			}),
 			schema_version: "1.0",
 			version_id: "global",

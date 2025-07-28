@@ -126,7 +126,7 @@ test("should enforce foreign key constraint on change_id", async () => {
 			})
 			.execute()
 	).rejects.toThrow(
-		/Foreign key constraint violation.*change_id.*lix_change.id/i
+		/Foreign key constraint violation.*lix_change_author.*\(change_id\).*lix_change\.\(id\)/i
 	);
 });
 
@@ -156,7 +156,7 @@ test("should enforce foreign key constraint on account_id", async () => {
 			})
 			.execute()
 	).rejects.toThrow(
-		/Foreign key constraint violation.*account_id.*lix_account.id/i
+		/Foreign key constraint violation.*lix_change_author.*\(account_id\).*lix_account\.\(id\)/i
 	);
 });
 
@@ -328,8 +328,12 @@ test("change authors are accessible during a transaction", async () => {
 			.selectAll()
 			.execute();
 
-		expect(changeAuthors).toHaveLength(1);
-		expect(changeAuthors[0]).toMatchObject({
+		// Find the test account's change author (there may be multiple active accounts)
+		const testAuthor = changeAuthors.find(
+			(a) => a.account_id === "test-account"
+		);
+		expect(testAuthor).toBeDefined();
+		expect(testAuthor).toMatchObject({
 			change_id: changeId,
 			account_id: "test-account",
 		});

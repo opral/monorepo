@@ -84,8 +84,10 @@ export async function compile(
 
 			if (!localAccount) {
 				const activeAccount = await project.lix.db
-					.selectFrom("active_account")
-					.selectAll()
+					.selectFrom("active_account as aa")
+					.innerJoin("account_all as a", "a.id", "aa.account_id")
+					.where("a.lixcol_version_id", "=", "global")
+					.select(["a.id", "a.name"])
 					.executeTakeFirstOrThrow();
 
 				saveLocalAccount({ fs, account: activeAccount });

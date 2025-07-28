@@ -1,17 +1,7 @@
 import { openLix } from "@lix-js/sdk";
 
-// Helper function to match entities
-function entityIs(entity: any) {
-  return (eb: any) => 
-    eb.and([
-      eb("entity_id", "=", entity.entity_id),
-      eb("schema_key", "=", entity.schema_key),
-      eb("file_id", "=", entity.file_id)
-    ]);
-}
-
 export default async function runExample(console: any, sharedLix?: any) {
-  const lix = sharedLix || await openLix({});
+  const lix = sharedLix || (await openLix({}));
 
   console.log("SECTION START 'entity-attribution'");
 
@@ -32,7 +22,7 @@ export default async function runExample(console: any, sharedLix?: any) {
   if (actualEntity) {
     // Query the change information for this entity
     console.log(
-      `Entity ${actualEntity.entity_id} was last modified at ${actualEntity.updated_at}`
+      `Entity ${actualEntity.entity_id} was last modified at ${actualEntity.updated_at}`,
     );
     console.log(`Change ID: ${actualEntity.change_id}`);
     console.log(`Entity type: ${actualEntity.schema_key}`);
@@ -52,12 +42,12 @@ export default async function runExample(console: any, sharedLix?: any) {
 
   if (fileEntity) {
     console.log(
-      `File ${fileEntity.path} was last modified at ${fileEntity.lixcol_updated_at}`
+      `File ${fileEntity.path} was last modified at ${fileEntity.lixcol_updated_at}`,
     );
     console.log(`File change ID: ${fileEntity.lixcol_change_id}`);
   } else {
     console.log(
-      "File /example.json not found - run getting-started example first"
+      "File /example.json not found - run getting-started example first",
     );
   }
 
@@ -65,4 +55,4 @@ export default async function runExample(console: any, sharedLix?: any) {
 }
 
 // Uncomment for running in node
-runExample(console);
+// runExample(console);

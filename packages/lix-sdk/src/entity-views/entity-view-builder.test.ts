@@ -66,12 +66,12 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
-			.select("version.change_set_id")
+			.select("version.commit_id")
 			.executeTakeFirstOrThrow();
 
 		const historyResult = await lix.db
 			.selectFrom("triple_test_history" as any)
-			.where("lixcol_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_commit_id", "=", activeVersion.commit_id)
 			.selectAll()
 			.execute();
 
@@ -100,7 +100,7 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		// Verify column differences between views
 		expect(activeResult[0]).not.toHaveProperty("lixcol_version_id"); // Primary view hides version_id
 		expect(allResult[0]).toHaveProperty("lixcol_version_id"); // _all view exposes version_id
-		expect(historyResult[0]).toHaveProperty("lixcol_change_set_id"); // _history view has history columns
+		expect(historyResult[0]).toHaveProperty("lixcol_commit_id"); // _history view has history columns
 		expect(historyResult[0]).toHaveProperty("lixcol_depth", 0); // Current state is at depth 0
 	});
 
@@ -177,13 +177,13 @@ describe("createEntityViewsIfNotExists (Integration)", () => {
 		const activeVersion = await lix.db
 			.selectFrom("active_version")
 			.innerJoin("version", "active_version.version_id", "version.id")
-			.select("version.change_set_id")
+			.select("version.commit_id")
 			.executeTakeFirstOrThrow();
 
 		const historyResult = await lix.db
 			.selectFrom("cross_test_history" as any)
-			.where("entity_id", "=", "test_id")
-			.where("lixcol_root_change_set_id", "=", activeVersion.change_set_id)
+			.where("lixcol_entity_id", "=", "test_id")
+			.where("lixcol_root_commit_id", "=", activeVersion.commit_id)
 			.orderBy("lixcol_depth", "asc")
 			.selectAll()
 			.execute();

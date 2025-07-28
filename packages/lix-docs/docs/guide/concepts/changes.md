@@ -11,6 +11,7 @@ In Lix, a change represents a specific modification to a file. Unlike traditiona
 - In a markdown file, a change might be updating a specific paragraph or heading
 
 Each change is associated with:
+
 - The file that was modified
 - A snapshot of the file's state
 - Metadata about the change (time, author, etc.)
@@ -24,6 +25,7 @@ When you update a file in Lix, the system automatically detects what changed by:
 3. Identifying specific elements that were added, removed, or modified
 
 This granular change detection is what allows Lix to provide powerful change control features like:
+
 - Precise conflict detection
 - Intelligent merging
 - Detailed change history

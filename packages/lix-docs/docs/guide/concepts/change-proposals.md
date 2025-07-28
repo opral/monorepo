@@ -35,8 +35,8 @@ const featureChangeSet = await createChangeSet({
     { key: "type", value: "feature" },
     { key: "proposal", value: "true" },
     { key: "title", value: "Add dark theme support" },
-    { key: "status", value: "open" }
-  ]
+    { key: "status", value: "open" },
+  ],
 });
 
 // Add a thread for discussion
@@ -45,9 +45,10 @@ const thread = await lix.db
   .values({
     id: generateId(),
     title: "Add dark theme support",
-    description: "This change adds a new dark theme option to the application settings.",
+    description:
+      "This change adds a new dark theme option to the application settings.",
     created_at: new Date().toISOString(),
-    change_set_id: featureChangeSet.id
+    change_set_id: featureChangeSet.id,
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -59,7 +60,7 @@ await lix.db
     id: generateId(),
     proposal_change_set_id: featureChangeSet.id,
     target_version_id: mainVersionId,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 ```
@@ -82,9 +83,10 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "The dark theme looks good, but we should adjust the contrast ratio for better accessibility.",
+    content:
+      "The dark theme looks good, but we should adjust the contrast ratio for better accessibility.",
     author: "reviewer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -92,7 +94,7 @@ await lix.db
 await lix.db
   .updateTable("change_set_label")
   .set({
-    value: "needs-revision"
+    value: "needs-revision",
   })
   .where("entity_id", "=", featureChangeSet.id)
   .where("key", "=", "status")
@@ -106,7 +108,7 @@ await lix.db
     entity_id: featureChangeSet.id,
     key: "approved-by",
     value: "reviewer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -114,7 +116,7 @@ await lix.db
 await lix.db
   .updateTable("change_set_label")
   .set({
-    value: "approved"
+    value: "approved",
   })
   .where("entity_id", "=", featureChangeSet.id)
   .where("key", "=", "status")
@@ -129,13 +131,13 @@ Once a proposal is approved, it can be merged into the target version:
 // Get the proposal change set
 const proposalChangeSet = await lix.db
   .selectFrom("change_set")
-  .innerJoin("change_set_label as proposal_label", join => {
+  .innerJoin("change_set_label as proposal_label", (join) => {
     return join
       .onRef("proposal_label.entity_id", "=", "change_set.id")
       .on("proposal_label.key", "=", sql`'proposal'`)
       .on("proposal_label.value", "=", sql`'true'`);
   })
-  .innerJoin("change_set_label as status_label", join => {
+  .innerJoin("change_set_label as status_label", (join) => {
     return join
       .onRef("status_label.entity_id", "=", "change_set.id")
       .on("status_label.key", "=", sql`'status'`)
@@ -148,7 +150,11 @@ const proposalChangeSet = await lix.db
 // Get the target version
 const targetVersion = await lix.db
   .selectFrom("version")
-  .innerJoin("proposal_target", "proposal_target.target_version_id", "version.id")
+  .innerJoin(
+    "proposal_target",
+    "proposal_target.target_version_id",
+    "version.id",
+  )
   .where("proposal_target.proposal_change_set_id", "=", proposalChangeSet.id)
   .selectAll("version")
   .executeTakeFirstOrThrow();
@@ -156,17 +162,14 @@ const targetVersion = await lix.db
 // Create a merge change set
 const mergeChangeSet = await createMergeChangeSet({
   lix,
-  sources: [
-    { id: targetVersion.change_set_id },
-    { id: proposalChangeSet.id }
-  ]
+  sources: [{ id: targetVersion.change_set_id }, { id: proposalChangeSet.id }],
 });
 
 // Update the target version to point to the merge change set
 await lix.db
   .updateTable("version")
   .set({
-    change_set_id: mergeChangeSet.id
+    change_set_id: mergeChangeSet.id,
   })
   .where("id", "=", targetVersion.id)
   .execute();
@@ -175,7 +178,7 @@ await lix.db
 await lix.db
   .updateTable("change_set_label")
   .set({
-    value: "merged"
+    value: "merged",
   })
   .where("entity_id", "=", proposalChangeSet.id)
   .where("key", "=", "status")
@@ -189,7 +192,7 @@ await lix.db
     thread_id: thread.id,
     content: `Merged into ${targetVersion.name} as change set ${mergeChangeSet.id}`,
     author: "system",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 ```
@@ -222,13 +225,13 @@ const featureVersion = await createVersion({
   lix,
   name: "feature/dark-theme",
   changeSet: { id: mainVersion.change_set_id },
-  inherits_from_version_id: mainVersion.id
+  inherits_from_version_id: mainVersion.id,
 });
 
 // Switch to the feature branch
 await switchVersion({
   lix,
-  to: featureVersion.id
+  to: featureVersion.id,
 });
 
 // Make changes in the feature branch
@@ -236,11 +239,13 @@ await handleFileUpdate({
   lix,
   file: {
     path: "/config.json",
-    data: new TextEncoder().encode(JSON.stringify({
-      theme: "dark",
-      // other settings...
-    }))
-  }
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        theme: "dark",
+        // other settings...
+      }),
+    ),
+  },
 });
 
 // Create a change set for the feature
@@ -250,16 +255,19 @@ const featureChangeSet = await createChangeSet({
     { key: "type", value: "feature" },
     { key: "proposal", value: "true" },
     { key: "title", value: "Add dark theme support" },
-    { key: "description", value: "This change adds dark theme support with proper contrast ratios." },
-    { key: "status", value: "open" }
-  ]
+    {
+      key: "description",
+      value: "This change adds dark theme support with proper contrast ratios.",
+    },
+    { key: "status", value: "open" },
+  ],
 });
 
 // Update the feature version to point to the new change set
 await lix.db
   .updateTable("version")
   .set({
-    change_set_id: featureChangeSet.id
+    change_set_id: featureChangeSet.id,
   })
   .where("id", "=", featureVersion.id)
   .execute();
@@ -270,9 +278,10 @@ const thread = await lix.db
   .values({
     id: generateId(),
     title: "Add dark theme support",
-    description: "This change adds a new dark theme option to the application settings.",
+    description:
+      "This change adds a new dark theme option to the application settings.",
     created_at: new Date().toISOString(),
-    change_set_id: featureChangeSet.id
+    change_set_id: featureChangeSet.id,
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -284,7 +293,7 @@ await lix.db
     id: generateId(),
     proposal_change_set_id: featureChangeSet.id,
     target_version_id: mainVersion.id,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -296,7 +305,7 @@ await lix.db
     thread_id: thread.id,
     content: "Please adjust the contrast of the secondary colors.",
     author: "reviewer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -305,12 +314,14 @@ await handleFileUpdate({
   lix,
   file: {
     path: "/config.json",
-    data: new TextEncoder().encode(JSON.stringify({
-      theme: "dark",
-      contrast: "high",
-      // other settings...
-    }))
-  }
+    data: new TextEncoder().encode(
+      JSON.stringify({
+        theme: "dark",
+        contrast: "high",
+        // other settings...
+      }),
+    ),
+  },
 });
 
 // Create a new change set for the revision
@@ -321,16 +332,19 @@ const revisionChangeSet = await createChangeSet({
     { key: "type", value: "revision" },
     { key: "proposal", value: "true" },
     { key: "title", value: "Add dark theme support" },
-    { key: "description", value: "Updated with higher contrast ratios per review feedback." },
-    { key: "status", value: "in-review" }
-  ]
+    {
+      key: "description",
+      value: "Updated with higher contrast ratios per review feedback.",
+    },
+    { key: "status", value: "in-review" },
+  ],
 });
 
 // Update the feature version to point to the revised change set
 await lix.db
   .updateTable("version")
   .set({
-    change_set_id: revisionChangeSet.id
+    change_set_id: revisionChangeSet.id,
   })
   .where("id", "=", featureVersion.id)
   .execute();
@@ -341,9 +355,10 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "I've increased the contrast ratio as requested. The theme now passes WCAG AA standards.",
+    content:
+      "I've increased the contrast ratio as requested. The theme now passes WCAG AA standards.",
     author: "proposer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -355,7 +370,7 @@ await lix.db
     entity_id: revisionChangeSet.id,
     key: "approved-by",
     value: "reviewer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -363,7 +378,7 @@ await lix.db
 await lix.db
   .updateTable("change_set_label")
   .set({
-    value: "approved"
+    value: "approved",
   })
   .where("entity_id", "=", revisionChangeSet.id)
   .where("key", "=", "status")
@@ -372,17 +387,14 @@ await lix.db
 // Create a merge change set
 const mergeChangeSet = await createMergeChangeSet({
   lix,
-  sources: [
-    { id: mainVersion.change_set_id },
-    { id: revisionChangeSet.id }
-  ]
+  sources: [{ id: mainVersion.change_set_id }, { id: revisionChangeSet.id }],
 });
 
 // Update the main version to point to the merge change set
 await lix.db
   .updateTable("version")
   .set({
-    change_set_id: mergeChangeSet.id
+    change_set_id: mergeChangeSet.id,
   })
   .where("id", "=", mainVersion.id)
   .execute();
@@ -391,7 +403,7 @@ await lix.db
 await lix.db
   .updateTable("change_set_label")
   .set({
-    value: "merged"
+    value: "merged",
   })
   .where("entity_id", "=", revisionChangeSet.id)
   .where("key", "=", "status")
@@ -405,7 +417,7 @@ await lix.db
     thread_id: thread.id,
     content: `Changes have been merged into the main version.`,
     author: "system",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 ```

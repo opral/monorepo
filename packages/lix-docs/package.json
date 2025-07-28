@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "rspress dev",
     "build": "rspress build",
+    "test": "vitest run",
+    "format": "prettier --write .",
     "preview": "rspress preview"
   },
   "devDependencies": {
@@ -25,9 +27,11 @@
     "react-dom": "^19.1.0",
     "rspress": "^1.40.2",
     "rspress-plugin-mermaid": "^0.3.0",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
     "typedoc": "^0.28.5",
-    "typedoc-plugin-markdown": "^4.7.0"
+    "typedoc-plugin-markdown": "^4.7.0",
+    "vitest": "^3.2.4"
   },
   "keywords": [
     "lix",

@@ -17,7 +17,7 @@ import { applyStateCacheSchema } from "./cache/schema.js";
 import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
 import { commit } from "./commit.js";
-import { parsePk } from "./primary-key.js";
+import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
@@ -38,7 +38,7 @@ const VTAB_CREATE_SQL = `CREATE TABLE x(
 	inherited_from_version_id TEXT,
 	change_id TEXT,
 	untracked INTEGER,
-	change_set_id TEXT
+	commit_id TEXT
 ) WITHOUT ROWID;`;
 
 export function applyStateDatabaseSchema(
@@ -192,7 +192,7 @@ export function applyStateDatabaseSchema(
 					"inherited_from_version_id", // 10
 					"change_id", // 11
 					"untracked", // 12
-					"change_set_id", // 13
+					"commit_id", // 13
 				];
 
 				// Process constraints
@@ -365,24 +365,109 @@ export function applyStateDatabaseSchema(
 					cursorState.rowIndex = 0;
 
 					if (cacheIsStale) {
-						// Populate cache directly with materialized state
-						populateStateCache(sqlite);
-						
-						// Log the cache miss
-						insertVTableLog({
-							sqlite,
-							db: db as any,
-							key: "lix_state_cache_miss",
-							level: "debug",
-							message: `Cache miss detected - materialized state`,
-						});
-						
-						// Mark cache as fresh after population
-						isUpdatingCacheState = true;
-						try {
-							markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
-						} finally {
-							isUpdatingCacheState = false;
+						// Run the expensive recursive CTE to materialize state
+						// Include deletions when populating cache so inheritance blocking works
+						const stateResults = materializeState(sqlite, {}, true);
+
+						// Populate cache with materialized state results
+						if (stateResults && stateResults.length > 0) {
+							let cachePopulated = false;
+							for (const row of stateResults) {
+								// CTE returns rows as arrays, so access by index
+								const entity_id = Array.isArray(row) ? row[0] : row.entity_id;
+								const schema_key = Array.isArray(row) ? row[1] : row.schema_key;
+								const file_id = Array.isArray(row) ? row[2] : row.file_id;
+								const plugin_key = Array.isArray(row) ? row[3] : row.plugin_key;
+								const snapshot_content = Array.isArray(row)
+									? row[4]
+									: row.snapshot_content;
+								const schema_version = Array.isArray(row)
+									? row[5]
+									: row.schema_version;
+								const version_id = Array.isArray(row) ? row[6] : row.version_id;
+								const created_at = Array.isArray(row) ? row[7] : row.created_at;
+								const updated_at = Array.isArray(row) ? row[8] : row.updated_at;
+								const inherited_from_version_id = Array.isArray(row)
+									? row[9]
+									: row.inherited_from_version_id;
+								const change_id = Array.isArray(row) ? row[10] : row.change_id;
+								const commit_id = Array.isArray(row) ? row[11] : row.commit_id;
+
+								// Skip rows with null entity_id (no actual state data found)
+								if (!entity_id) {
+									continue;
+								}
+
+								const isDeletion = snapshot_content === null;
+
+								// TODO the CTE should not return inherited entities (optimization for later)
+								// Skip inherited entities - they should be resolved via inheritance logic, not stored as duplicates
+								if (inherited_from_version_id !== null) {
+									continue;
+								}
+
+								executeSync({
+									lix: { sqlite },
+									query: db
+										.insertInto("internal_state_cache")
+										.values({
+											entity_id,
+											schema_key,
+											file_id,
+											version_id,
+											plugin_key,
+											snapshot_content: isDeletion ? null : snapshot_content,
+											schema_version,
+											created_at,
+											updated_at,
+											inherited_from_version_id,
+											inheritance_delete_marker: isDeletion ? 1 : 0,
+											change_id: change_id || "unknown-change-id",
+											commit_id: commit_id || "untracked",
+										})
+										.onConflict((oc) =>
+											oc
+												.columns([
+													"entity_id",
+													"schema_key",
+													"file_id",
+													"version_id",
+												])
+												.doUpdateSet({
+													plugin_key,
+													snapshot_content: isDeletion
+														? null
+														: snapshot_content,
+													schema_version,
+													created_at,
+													updated_at,
+													inherited_from_version_id,
+													inheritance_delete_marker: isDeletion ? 1 : 0,
+													change_id: change_id || "unknown-change-id",
+													commit_id: commit_id || "untracked",
+												})
+										),
+								});
+								cachePopulated = true;
+							}
+
+							if (cachePopulated) {
+								// Log the cache miss immediately (guard flag will prevent recursion)
+								insertVTableLog({
+									sqlite,
+									db: db as any,
+									key: "lix_state_cache_miss",
+									level: "debug",
+									message: `Cache miss detected - materialized state`,
+								});
+								// Mark cache as fresh after population
+								isUpdatingCacheState = true;
+								try {
+									markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
+								} finally {
+									isUpdatingCacheState = false;
+								}
+							}
 						}
 
 						// After populating cache, query from resolved state view
@@ -441,7 +526,12 @@ export function applyStateDatabaseSchema(
 					} else {
 						// Generate primary key from row data
 						const tag = row.untracked ? "U" : "C";
-						const primaryKey = `${tag}~${row.file_id}~${row.entity_id}~${row.version_id}`;
+						const primaryKey = serializeStatePk(
+							tag,
+							row.file_id,
+							row.entity_id,
+							row.version_id
+						);
 						capi.sqlite3_result_js(pContext, primaryKey);
 					}
 					return capi.SQLITE_OK;
@@ -494,7 +584,7 @@ export function applyStateDatabaseSchema(
 						}
 
 						// Parse primary key to determine tag and extract values
-						const parsed = parsePk(oldPk);
+						const parsed = parseStatePk(oldPk);
 
 						// Route based on tag
 						if (parsed.tag === "U") {
@@ -653,49 +743,55 @@ export function applyStateDatabaseSchema(
 						);
 					}
 
-					// TODO: This cache copying logic is a temporary workaround for shared change sets.
-					// The proper solution requires improving cache miss logic to handle change set sharing
+					// TODO: This cache copying logic is a temporary workaround for shared commits.
+					// The proper solution requires improving cache miss logic to handle commit sharing
 					// without duplicating entries. See: https://github.com/opral/lix-sdk/issues/309
 					//
-					// Handle cache copying for new versions that share change sets
+					// Handle cache copying for new versions that share commits
 					if (isInsert && String(schema_key) === "lix_version") {
 						const versionData = JSON.parse(snapshot_content);
 						const newVersionId = versionData.id;
-						const changeSetId = versionData.change_set_id;
+						const commitId = versionData.commit_id;
 
-						if (newVersionId && changeSetId) {
-							// Find other versions that already use this change set
-							const existingVersionsWithSameChangeSet = sqlite.exec({
+						if (newVersionId && commitId) {
+							// Find other versions that point to the same commit
+							const existingVersionsWithSameCommit = sqlite.exec({
 								sql: `
 									SELECT json_extract(snapshot_content, '$.id') as version_id
 									FROM internal_state_cache 
 									WHERE schema_key = 'lix_version' 
-									  AND json_extract(snapshot_content, '$.change_set_id') = ?
+									  AND json_extract(snapshot_content, '$.commit_id') = ?
 									  AND json_extract(snapshot_content, '$.id') != ?
 								`,
-								bind: [changeSetId, newVersionId],
+								bind: [commitId, newVersionId],
 								returnValue: "resultRows",
 							});
 
-							// If there are existing versions with the same change set, copy their cache entries
+							// If there are existing versions with the same commit, copy their cache entries
 							if (
-								existingVersionsWithSameChangeSet &&
-								existingVersionsWithSameChangeSet.length > 0
+								existingVersionsWithSameCommit &&
+								existingVersionsWithSameCommit.length > 0
 							) {
-								const sourceVersionId =
-									existingVersionsWithSameChangeSet[0]![0]; // Take first existing version
+								const sourceVersionId = existingVersionsWithSameCommit[0]![0]; // Take first existing version
 
 								// Copy cache entries from source version to new version
+								// IMPORTANT: When copying cache entries, we need to mark them as inherited
+								// if they don't have an inherited_from_version_id already
 								sqlite.exec({
 									sql: `
 										INSERT OR IGNORE INTO internal_state_cache 
-										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, change_set_id)
+										(entity_id, schema_key, file_id, version_id, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, commit_id)
 										SELECT 
-											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, inherited_from_version_id, inheritance_delete_marker, change_id, change_set_id
+											entity_id, schema_key, file_id, ?, plugin_key, snapshot_content, schema_version, created_at, updated_at, 
+											CASE 
+												WHEN inherited_from_version_id IS NULL THEN ?
+												ELSE inherited_from_version_id
+											END as inherited_from_version_id,
+											inheritance_delete_marker, change_id, commit_id
 										FROM internal_state_cache
 										WHERE version_id = ? AND schema_key != 'lix_version'
 									`,
-									bind: [newVersionId, sourceVersionId],
+									bind: [newVersionId, sourceVersionId, sourceVersionId],
 								});
 							}
 						}
@@ -744,7 +840,7 @@ export function applyStateDatabaseSchema(
 			inherited_from_version_id,
 			change_id,
 			untracked,
-			change_set_id
+			commit_id
 		FROM state_all
 		WHERE version_id IN (SELECT version_id FROM active_version);
 
@@ -765,7 +861,7 @@ export function applyStateDatabaseSchema(
 				inherited_from_version_id,
 				change_id,
 				untracked,
-				change_set_id
+				commit_id
 			) VALUES (
 				NEW.entity_id,
 				NEW.schema_key,
@@ -779,7 +875,7 @@ export function applyStateDatabaseSchema(
 				NEW.inherited_from_version_id,
 				NEW.change_id,
 				NEW.untracked,
-				NEW.change_set_id
+				NEW.commit_id
 			);
 		END;
 
@@ -800,7 +896,7 @@ export function applyStateDatabaseSchema(
 				inherited_from_version_id = NEW.inherited_from_version_id,
 				change_id = NEW.change_id,
 				untracked = NEW.untracked,
-				change_set_id = NEW.change_set_id
+				commit_id = NEW.commit_id
 			WHERE
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
@@ -811,7 +907,16 @@ export function applyStateDatabaseSchema(
 		CREATE TRIGGER IF NOT EXISTS state_delete
 		INSTEAD OF DELETE ON state
 		BEGIN
+			-- Delete from state_all (handles tracked entities)
 			DELETE FROM state_all
+			WHERE 
+				entity_id = OLD.entity_id
+				AND schema_key = OLD.schema_key
+				AND file_id = OLD.file_id
+				AND version_id = (SELECT version_id FROM active_version);
+				
+			-- Also delete from untracked table if the entity is untracked
+			DELETE FROM internal_state_all_untracked
 			WHERE 
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key
@@ -1033,7 +1138,7 @@ function getColumnName(columnIndex: number): string {
 		"inherited_from_version_id",
 		"change_id",
 		"untracked",
-		"change_set_id",
+		"commit_id",
 	];
 	return columns[columnIndex] || "unknown";
 }
@@ -1053,7 +1158,7 @@ export type StateAllView = {
 	inherited_from_version_id: string | null;
 	change_id: Generated<string>;
 	untracked: Generated<boolean>;
-	change_set_id: Generated<string>;
+	commit_id: Generated<string>;
 };
 
 export type InternalStateAllUntrackedTable = {

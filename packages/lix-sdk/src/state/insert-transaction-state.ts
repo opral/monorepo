@@ -93,7 +93,7 @@ export function insertTransactionState(args: {
 						created_at: _timestamp,
 						updated_at: _timestamp,
 						inherited_from_version_id: null,
-						change_set_id: "untracked",
+						commit_id: "untracked",
 					})
 					.onConflict((oc) =>
 						oc
@@ -120,7 +120,7 @@ export function insertTransactionState(args: {
 					untracked: true,
 					inherited_from_version_id: null,
 					change_id: "untracked",
-					change_set_id: "pending",
+					commit_id: "pending",
 				},
 			};
 		}
@@ -163,7 +163,7 @@ export function insertTransactionState(args: {
 				untracked: true,
 				inherited_from_version_id: null,
 				change_id: "untracked",
-				change_set_id: "pending",
+				commit_id: "pending",
 			},
 		};
 	} else {
@@ -214,26 +214,28 @@ export function insertTransactionState(args: {
 					.selectFrom("internal_resolved_state_all")
 					.where("schema_key", "=", "lix_active_account")
 					.where("version_id", "=", "global")
-					.select(["entity_id as account_id"]),
+					.select(["snapshot_content"]),
 			});
 
 			if (activeAccounts && activeAccounts.length > 0) {
 				for (const activeAccount of activeAccounts) {
-					const accountId = activeAccount.account_id as string;
+					// Parse the account_id from the active account reference
+					const accountId = JSON.parse(activeAccount.snapshot_content as string)
+						.account_id as string;
 
-					// Get account details from internal_resolved_state_all
-					const [accountDetails] = executeSync({
+					// Check if account exists and is tracked in the current version
+					const [accountState] = executeSync({
 						lix: args.lix,
 						query: args.lix.db
 							.selectFrom("internal_resolved_state_all")
 							.where("entity_id", "=", accountId)
 							.where("schema_key", "=", "lix_account")
 							.where("version_id", "=", args.data.version_id)
-							.select(["snapshot_content"]),
+							.select(["snapshot_content", "untracked"]),
 					});
 
-					// If account doesn't exist in this version, create it
-					if (!accountDetails) {
+					// If account is untracked or doesn't exist in this version
+					if (!accountState || accountState.untracked) {
 						// Get account from global version
 						const [globalAccount] = executeSync({
 							lix: args.lix,
@@ -246,18 +248,18 @@ export function insertTransactionState(args: {
 						});
 
 						if (globalAccount) {
-							// Recursively insert account without creating change authors for it
+							// Insert account as tracked (for foreign key support)
 							insertTransactionState({
 								lix: args.lix,
 								data: {
 									entity_id: accountId,
 									schema_key: "lix_account",
 									file_id: "lix",
-									plugin_key: "lix",
+									plugin_key: "lix_own_entity",
 									snapshot_content: globalAccount.snapshot_content!,
 									schema_version: "1.0",
 									version_id: args.data.version_id,
-									untracked: false,
+									untracked: false, // Track it now
 								},
 								timestamp: _timestamp,
 								createChangeAuthors: false, // Avoid infinite recursion
@@ -275,10 +277,10 @@ export function insertTransactionState(args: {
 					insertTransactionState({
 						lix: args.lix,
 						data: {
-							entity_id: `${changeId}::${accountId}`,
+							entity_id: `${changeId}~${accountId}`,
 							schema_key: LixChangeAuthorSchema["x-lix-key"],
 							file_id: "lix",
-							plugin_key: "lix",
+							plugin_key: "lix_own_entity",
 							snapshot_content: JSON.stringify(changeAuthorSnapshot),
 							schema_version: LixChangeAuthorSchema["x-lix-version"],
 							version_id: args.data.version_id,
@@ -342,7 +344,7 @@ export function insertTransactionState(args: {
 				untracked: false,
 				inherited_from_version_id: null,
 				change_id: changeId,
-				change_set_id: "pending",
+				commit_id: "pending",
 			},
 		};
 	}

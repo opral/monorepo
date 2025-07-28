@@ -14,8 +14,8 @@ export function applyStateCacheSchema(lix: Pick<Lix, "sqlite">): void {
     updated_at TEXT NOT NULL,
     inherited_from_version_id TEXT,
     inheritance_delete_marker INTEGER DEFAULT 0, -- Flag for copy-on-write deletion markers
-    change_id TEXT, 
-    change_set_id TEXT, -- Allow NULL until changeset is created at commit
+    change_id TEXT, -- Allow NULL during migration and for deletion markers 
+    commit_id TEXT, -- Allow NULL until commit is created
     PRIMARY KEY (entity_id, schema_key, file_id, version_id)
   );
 `);
@@ -34,5 +34,5 @@ export type InternalStateCacheTable = {
 	inherited_from_version_id: string | null;
 	inheritance_delete_marker: number; // 1 for copy-on-write deletion markers, 0 otherwise
 	change_id: string;
-	change_set_id: string | null;
+	commit_id: string | null;
 };

@@ -26,8 +26,8 @@ interface Thread {
   description: string;
   created_at: string;
   change_set_id?: string; // Optional reference to a change set
-  file_id?: string;       // Optional reference to a file
-  status?: string;        // E.g., "open", "resolved", "closed"
+  file_id?: string; // Optional reference to a file
+  status?: string; // E.g., "open", "resolved", "closed"
 }
 ```
 
@@ -36,10 +36,10 @@ interface Thread {
 ```typescript
 interface Comment {
   id: string;
-  thread_id: string;    // Reference to the parent thread
-  content: string;      // The comment text
-  author: string;       // Author identifier
-  created_at: string;   // Timestamp
+  thread_id: string; // Reference to the parent thread
+  content: string; // The comment text
+  author: string; // Author identifier
+  created_at: string; // Timestamp
   reply_to_id?: string; // Optional reference to another comment
 }
 ```
@@ -59,7 +59,7 @@ const thread = await lix.db
     title: "Feedback on user authentication flow",
     description: "Please review the new login and registration process.",
     created_at: new Date().toISOString(),
-    change_set_id: changeSetId
+    change_set_id: changeSetId,
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -78,9 +78,10 @@ const comment = await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "The login form looks good, but we should add password strength indicators.",
+    content:
+      "The login form looks good, but we should add password strength indicators.",
     author: "team.member@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -102,7 +103,7 @@ const reply = await lix.db
     content: "Good point. I'll add strength indicators in the next revision.",
     author: "developer@example.com",
     created_at: new Date().toISOString(),
-    reply_to_id: comment.id
+    reply_to_id: comment.id,
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -132,10 +133,12 @@ const openThreads = await lix.db
 // Search threads by title or description
 const searchResults = await lix.db
   .selectFrom("thread")
-  .where(({ or, cmpr }) => or([
-    cmpr("title", "like", `%${searchTerm}%`),
-    cmpr("description", "like", `%${searchTerm}%`)
-  ]))
+  .where(({ or, cmpr }) =>
+    or([
+      cmpr("title", "like", `%${searchTerm}%`),
+      cmpr("description", "like", `%${searchTerm}%`),
+    ]),
+  )
   .selectAll()
   .execute();
 ```
@@ -161,7 +164,7 @@ const commentsWithAuthors = await lix.db
     "comment.id",
     "comment.content",
     "comment.created_at",
-    "comment.author"
+    "comment.author",
   ])
   .orderBy("comment.created_at", "asc")
   .execute();
@@ -178,7 +181,7 @@ You can update the status of a thread to track its progress:
 await lix.db
   .updateTable("thread")
   .set({
-    status: "resolved"
+    status: "resolved",
   })
   .where("id", "=", threadId)
   .execute();
@@ -193,7 +196,7 @@ You can edit comments if needed:
 await lix.db
   .updateTable("comment")
   .set({
-    content: "Updated comment text with additional information."
+    content: "Updated comment text with additional information.",
   })
   .where("id", "=", commentId)
   .execute();
@@ -217,7 +220,7 @@ const reviewThread = await lix.db
     description: "Please review the new user profile functionality.",
     created_at: new Date().toISOString(),
     change_set_id: changeSetId,
-    status: "open"
+    status: "open",
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -230,7 +233,7 @@ await lix.db
     thread_id: reviewThread.id,
     content: "The profile image upload feature needs additional validation.",
     author: "reviewer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 ```
@@ -246,9 +249,10 @@ const docThread = await lix.db
   .values({
     id: generateId(),
     title: "Database Schema Design Decisions",
-    description: "Documentation of key decisions regarding our database schema.",
+    description:
+      "Documentation of key decisions regarding our database schema.",
     created_at: new Date().toISOString(),
-    status: "documentation"
+    status: "documentation",
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -259,9 +263,10 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: docThread.id,
-    content: "We chose to use a separate table for user preferences rather than embedding them in the user table to enable better performance for preference queries.",
+    content:
+      "We chose to use a separate table for user preferences rather than embedding them in the user table to enable better performance for preference queries.",
     author: "architect@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 ```
@@ -277,9 +282,10 @@ const issueThread = await lix.db
   .values({
     id: generateId(),
     title: "Bug: Login fails on Safari",
-    description: "Users are reporting login failures specifically on Safari browsers.",
+    description:
+      "Users are reporting login failures specifically on Safari browsers.",
     created_at: new Date().toISOString(),
-    status: "open"
+    status: "open",
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -290,9 +296,10 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: issueThread.id,
-    content: "Reproduces on Safari 16.1. The login form submits but the authentication token isn't being stored correctly.",
+    content:
+      "Reproduces on Safari 16.1. The login form submits but the authentication token isn't being stored correctly.",
     author: "tester@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 ```
@@ -309,8 +316,8 @@ const featureChangeSet = await createChangeSet({
     { key: "type", value: "feature" },
     { key: "proposal", value: "true" },
     { key: "title", value: "Add dark theme support" },
-    { key: "status", value: "open" }
-  ]
+    { key: "status", value: "open" },
+  ],
 });
 
 // Create a discussion thread for the proposal
@@ -319,10 +326,11 @@ const thread = await lix.db
   .values({
     id: generateId(),
     title: "Proposal: Add dark theme support",
-    description: "This change adds a new dark theme option to the application settings.",
+    description:
+      "This change adds a new dark theme option to the application settings.",
     created_at: new Date().toISOString(),
     change_set_id: featureChangeSet.id,
-    status: "open"
+    status: "open",
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -333,9 +341,10 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "The implementation uses CSS variables to switch between light and dark color schemes. All colors have been adjusted for proper contrast ratios.",
+    content:
+      "The implementation uses CSS variables to switch between light and dark color schemes. All colors have been adjusted for proper contrast ratios.",
     author: "proposer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -345,9 +354,10 @@ const questionComment = await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "Have you tested this with screen readers? We need to ensure accessibility is maintained.",
+    content:
+      "Have you tested this with screen readers? We need to ensure accessibility is maintained.",
     author: "reviewer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .returningAll()
   .executeTakeFirstOrThrow();
@@ -358,10 +368,11 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "Yes, I've tested with VoiceOver and NVDA. All elements maintain their proper roles and labels regardless of theme.",
+    content:
+      "Yes, I've tested with VoiceOver and NVDA. All elements maintain their proper roles and labels regardless of theme.",
     author: "proposer@example.com",
     created_at: new Date().toISOString(),
-    reply_to_id: questionComment.id
+    reply_to_id: questionComment.id,
   })
   .execute();
 
@@ -371,9 +382,10 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "The contrast ratio in the notification component is too low. Please increase it to meet WCAG AA standards.",
+    content:
+      "The contrast ratio in the notification component is too low. Please increase it to meet WCAG AA standards.",
     author: "reviewer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -383,9 +395,10 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "Good catch. I'll fix the notification component contrast in the next revision.",
+    content:
+      "Good catch. I'll fix the notification component contrast in the next revision.",
     author: "proposer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -395,9 +408,10 @@ await lix.db
   .values({
     id: generateId(),
     thread_id: thread.id,
-    content: "I've updated the notification component colors to increase the contrast ratio. Now all components meet WCAG AA standards.",
+    content:
+      "I've updated the notification component colors to increase the contrast ratio. Now all components meet WCAG AA standards.",
     author: "proposer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -409,7 +423,7 @@ await lix.db
     thread_id: thread.id,
     content: "The changes look good. I approve this proposal.",
     author: "reviewer@example.com",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -417,7 +431,7 @@ await lix.db
 await lix.db
   .updateTable("thread")
   .set({
-    status: "approved"
+    status: "approved",
   })
   .where("id", "=", thread.id)
   .execute();
@@ -430,7 +444,7 @@ await lix.db
     thread_id: thread.id,
     content: "This proposal has been merged into the main version.",
     author: "system",
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   })
   .execute();
 
@@ -438,7 +452,7 @@ await lix.db
 await lix.db
   .updateTable("thread")
   .set({
-    status: "closed"
+    status: "closed",
   })
   .where("id", "=", thread.id)
   .execute();

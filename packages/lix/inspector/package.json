@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "test": "tsc --noEmit",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },

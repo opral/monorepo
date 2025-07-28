@@ -2,9 +2,8 @@ import {
 	switchAccount,
 	Lix,
 	Account,
-	changeSetHasLabel,
+	ebEntity,
 	jsonArrayFrom,
-	ChangeSet,
 	LixFileDescriptor,
 } from "@lix-js/sdk";
 import {
@@ -60,7 +59,11 @@ export const selectAccounts = (lix: Lix) =>
  * Selects the current active account
  */
 export const selectActiveAccount = (lix: Lix) =>
-	lix.db.selectFrom("active_account").selectAll();
+	lix.db
+		.selectFrom("active_account as aa")
+		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.where("a.lixcol_version_id", "=", "global")
+		.select(["aa.account_id", "a.id", "a.name"]);
 
 /**
  * Selects checkpoints for the active file
@@ -70,8 +73,9 @@ export function selectCheckpoints(lix: Lix) {
 	// For now, let's simplify it to just get checkpoints
 	return (
 		lix.db
-			.selectFrom("change_set")
-			.where(changeSetHasLabel({ name: "checkpoint" }))
+			.selectFrom("commit")
+			.innerJoin("change_set", "commit.change_set_id", "change_set.id")
+			.where(ebEntity("commit").hasLabel({ name: "checkpoint" }))
 			// left join in case the change set has no elements
 			.leftJoin(
 				"change_set_element",
@@ -86,20 +90,27 @@ export function selectCheckpoints(lix: Lix) {
 					.where("key", "=", "flashtype_active_file")
 					.select("value")
 			)
-			.selectAll("change_set")
 			.groupBy("change_set.id")
-			.select((eb) => [
+			.select((eb: any) => [
+				"change_set.id",
+				// @ts-expect-error  - type issue
 				eb.fn.count<number>("change_set_element.change_id").as("change_count"),
 				eb
-					.selectFrom("change_set_label")
-					.innerJoin("label", "label.id", "change_set_label.label_id")
-					.where("change_set_label.change_set_id", "=", eb.ref("change_set.id"))
+					.selectFrom("entity_label")
+					.innerJoin("label", "label.id", "entity_label.label_id")
+					.where("entity_label.entity_id", "=", eb.ref("commit.id"))
 					.where("label.name", "=", "checkpoint")
-					.select("change_set_label.lixcol_created_at")
+					.select("entity_label.lixcol_created_at")
 					.as("checkpoint_created_at"),
 				eb.val(null).as("author_name"),
 			])
 			.orderBy("checkpoint_created_at", "desc")
+			.$castTo<{
+				id: string;
+				change_count: number;
+				checkpoint_created_at: string | null;
+				author_name: string | null;
+			}>()
 	);
 }
 
@@ -189,7 +200,8 @@ export function selectWorkingChangeSet(lix: Lix) {
 				lix.db
 					.selectFrom("active_version")
 					.innerJoin("version", "active_version.version_id", "version.id")
-					.select("version.working_change_set_id")
+					.innerJoin("commit", "version.working_commit_id", "commit.id")
+					.select("commit.change_set_id")
 			)
 			// left join in case the change set has no elements
 			.leftJoin(
@@ -231,7 +243,8 @@ export function selectWorkingChanges(lix: Lix) {
 			lix.db
 				.selectFrom("active_version")
 				.innerJoin("version", "active_version.version_id", "version.id")
-				.select("version.working_change_set_id")
+				.innerJoin("commit", "version.working_commit_id", "commit.id")
+				.select("commit.change_set_id")
 		)
 		.where(
 			"change.file_id",
@@ -262,13 +275,14 @@ export function selectWorkingChanges(lix: Lix) {
 					"before_cse.change_set_id",
 					"=",
 					eb
-						.selectFrom("change_set")
+						.selectFrom("commit")
+						.innerJoin("change_set", "commit.change_set_id", "change_set.id")
 						.leftJoin(
 							"change_set_element as cse_checkpoint",
 							"change_set.id",
 							"cse_checkpoint.change_set_id"
 						)
-						.where(changeSetHasLabel({ name: "checkpoint" }))
+						.where(ebEntity("commit").hasLabel({ name: "checkpoint" }))
 						.where(
 							"cse_checkpoint.file_id",
 							"=",
@@ -278,7 +292,7 @@ export function selectWorkingChanges(lix: Lix) {
 								.select("value")
 						)
 						.select("change_set.id")
-						.orderBy("change_set.lixcol_updated_at", "desc")
+						.orderBy("commit.lixcol_updated_at", "desc")
 						.limit(1)
 				)
 				.where("before_change.entity_id", "=", eb.ref("change.entity_id"))
@@ -428,16 +442,18 @@ export const switchActiveAccount = async (lix: Lix, account: Account) => {
 };
 
 /**
- * Get threads for a specific change set
+ * Get threads for a specific commit
  */
 export function selectThreads(
 	lix: Lix,
-	args: { changeSetId: ChangeSet["id"] }
+	args: { commitId: string }
 ) {
 	return lix.db
 		.selectFrom("thread")
-		.leftJoin("change_set_thread", "thread.id", "change_set_thread.thread_id")
-		.where("change_set_thread.change_set_id", "=", args.changeSetId)
+		.innerJoin("entity_thread", "thread.id", "entity_thread.thread_id")
+		.where("entity_thread.entity_id", "=", args.commitId)
+		.where("entity_thread.schema_key", "=", "lix_commit")
+		.where("entity_thread.file_id", "=", "lix")
 		.select((eb) => [
 			jsonArrayFrom(
 				eb

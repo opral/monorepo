@@ -28,15 +28,12 @@ const db = lix.db;
 
 ```typescript
 // Get all files
-const files = await lix.db
-  .selectFrom('file')
-  .selectAll()
-  .execute();
+const files = await lix.db.selectFrom("file").selectAll().execute();
 
 // Get specific columns
 const fileInfo = await lix.db
-  .selectFrom('file')
-  .select(['id', 'path', 'created_at'])
+  .selectFrom("file")
+  .select(["id", "path", "created_at"])
   .execute();
 ```
 
@@ -45,16 +42,16 @@ const fileInfo = await lix.db
 ```typescript
 // Get changes for a specific file
 const changes = await lix.db
-  .selectFrom('change')
-  .where('file_id', '=', fileId)
+  .selectFrom("change")
+  .where("file_id", "=", fileId)
   .selectAll()
   .execute();
 
 // Get changes within a date range
 const recentChanges = await lix.db
-  .selectFrom('change')
-  .where('created_at', '>', lastWeek)
-  .orderBy('created_at', 'desc')
+  .selectFrom("change")
+  .where("created_at", ">", lastWeek)
+  .orderBy("created_at", "desc")
   .selectAll()
   .execute();
 ```
@@ -64,15 +61,15 @@ const recentChanges = await lix.db
 ```typescript
 // Get changes with their snapshots
 const changesWithSnapshots = await lix.db
-  .selectFrom('change')
-  .innerJoin('snapshot', 'snapshot.id', 'change.snapshot_id')
+  .selectFrom("change")
+  .innerJoin("snapshot", "snapshot.id", "change.snapshot_id")
   .select([
-    'change.id',
-    'change.file_id',
-    'change.from_value',
-    'change.to_value',
-    'snapshot.id as snapshot_id',
-    'snapshot.created_at'
+    "change.id",
+    "change.file_id",
+    "change.from_value",
+    "change.to_value",
+    "snapshot.id as snapshot_id",
+    "snapshot.created_at",
   ])
   .execute();
 ```
@@ -84,12 +81,9 @@ const changesWithSnapshots = await lix.db
 ```typescript
 // Count changes per file
 const changesByFile = await lix.db
-  .selectFrom('change')
-  .select((eb) => [
-    'file_id',
-    eb.fn.count('id').as('change_count')
-  ])
-  .groupBy('file_id')
+  .selectFrom("change")
+  .select((eb) => ["file_id", eb.fn.count("id").as("change_count")])
+  .groupBy("file_id")
   .execute();
 ```
 
@@ -100,8 +94,8 @@ Many fields in Lix store JSON data. You can query inside JSON values using SQLit
 ```typescript
 // Query using JSON path extraction
 const cellChanges = await lix.db
-  .selectFrom('change')
-  .where(sql`json_extract(change.metadata, '$.entity_type')`, '=', 'cell')
+  .selectFrom("change")
+  .where(sql`json_extract(change.metadata, '$.entity_type')`, "=", "cell")
   .selectAll()
   .execute();
 ```
@@ -111,15 +105,15 @@ const cellChanges = await lix.db
 ```typescript
 // Find changes matching multiple conditions
 const specificChanges = await lix.db
-  .selectFrom('change')
-  .where((eb) => 
+  .selectFrom("change")
+  .where((eb) =>
     eb.or([
-      eb('file_id', '=', fileId),
+      eb("file_id", "=", fileId),
       eb.and([
-        eb('created_at', '>', lastWeek),
-        eb('metadata', 'like', '%important%')
-      ])
-    ])
+        eb("created_at", ">", lastWeek),
+        eb("metadata", "like", "%important%"),
+      ]),
+    ]),
   )
   .selectAll()
   .execute();
@@ -152,21 +146,29 @@ const result = await lix.db.executeQuery(sql`
 ```typescript
 // Get all change sets in the current branch
 const changeSets = await lix.db
-  .selectFrom('change_set')
-  .where('is_current_branch', '=', 1)
+  .selectFrom("change_set")
+  .where("is_current_branch", "=", 1)
   .selectAll()
   .execute();
 
 // Get the relationship between change sets
 const edges = await lix.db
-  .selectFrom('change_set_edge')
-  .innerJoin('change_set as from_cs', 'from_cs.id', 'change_set_edge.from_change_set_id')
-  .innerJoin('change_set as to_cs', 'to_cs.id', 'change_set_edge.to_change_set_id')
+  .selectFrom("change_set_edge")
+  .innerJoin(
+    "change_set as from_cs",
+    "from_cs.id",
+    "change_set_edge.from_change_set_id",
+  )
+  .innerJoin(
+    "change_set as to_cs",
+    "to_cs.id",
+    "change_set_edge.to_change_set_id",
+  )
   .select([
-    'change_set_edge.from_change_set_id',
-    'change_set_edge.to_change_set_id',
-    'from_cs.name as from_name',
-    'to_cs.name as to_name'
+    "change_set_edge.from_change_set_id",
+    "change_set_edge.to_change_set_id",
+    "from_cs.name as from_name",
+    "to_cs.name as to_name",
   ])
   .execute();
 ```
@@ -176,20 +178,20 @@ const edges = await lix.db
 ```typescript
 // Get all versions
 const versions = await lix.db
-  .selectFrom('version')
-  .leftJoin('change_set', 'change_set.id', 'version.current_change_set_id')
+  .selectFrom("version")
+  .leftJoin("change_set", "change_set.id", "version.current_change_set_id")
   .select([
-    'version.id',
-    'version.name',
-    'version.created_at',
-    'change_set.id as current_change_set_id'
+    "version.id",
+    "version.name",
+    "version.created_at",
+    "change_set.id as current_change_set_id",
   ])
   .execute();
 
 // Get the current version
 const currentVersion = await lix.db
-  .selectFrom('version')
-  .where('is_current', '=', 1)
+  .selectFrom("version")
+  .where("is_current", "=", 1)
   .selectAll()
   .executeTakeFirst();
 ```
@@ -203,33 +205,39 @@ For operations that need to be atomic, you can use transactions:
 await lix.db.transaction().execute(async (trx) => {
   // Create a snapshot
   const snapshot = await trx
-    .insertInto('snapshot')
+    .insertInto("snapshot")
     .values({
       created_at: new Date().toISOString(),
     })
     .returningAll()
     .executeTakeFirstOrThrow();
-  
+
   // Create changes associated with the snapshot
   await trx
-    .insertInto('change')
+    .insertInto("change")
     .values([
       {
         file_id: fileId,
         snapshot_id: snapshot.id,
         created_at: new Date().toISOString(),
-        from_value: 'old value',
-        to_value: 'new value',
-        metadata: JSON.stringify({ entity_type: 'property', path: ['settings', 'name'] })
+        from_value: "old value",
+        to_value: "new value",
+        metadata: JSON.stringify({
+          entity_type: "property",
+          path: ["settings", "name"],
+        }),
       },
       {
         file_id: fileId,
         snapshot_id: snapshot.id,
         created_at: new Date().toISOString(),
-        from_value: '10',
-        to_value: '20',
-        metadata: JSON.stringify({ entity_type: 'property', path: ['settings', 'count'] })
-      }
+        from_value: "10",
+        to_value: "20",
+        metadata: JSON.stringify({
+          entity_type: "property",
+          path: ["settings", "count"],
+        }),
+      },
     ])
     .execute();
 });

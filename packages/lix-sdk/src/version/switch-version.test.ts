@@ -15,7 +15,7 @@ test("switching versiones should update the active_version", async () => {
 	const newVersion = await lix.db.transaction().execute(async (trx) => {
 		const newVersion = await createVersion({
 			lix: { ...lix, db: trx },
-			changeSet: { id: activeVersion.change_set_id },
+			commit_id: activeVersion.commit_id,
 		});
 		await switchVersion({ lix: { ...lix, db: trx }, to: newVersion });
 		return newVersion;

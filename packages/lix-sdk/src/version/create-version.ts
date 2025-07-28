@@ -1,21 +1,27 @@
 import { createChangeSet } from "../change-set/create-change-set.js";
-import type { LixChangeSet } from "../change-set/schema.js";
 import { nanoId } from "../deterministic/index.js";
+import { uuidV7 } from "../deterministic/uuid-v7.js";
 import type { Lix } from "../lix/open-lix.js";
 import type { LixVersion } from "./schema.js";
 
 /**
  * Creates a new version.
  *
- * The changeSet can be any change set e.g. another version, a checkpoint, etc.
+ * If `commit_id` is provided, the new version will point to that commit.
+ * Otherwise, defaults to the active version's commit_id.
  *
  * @example
- *   const version = await createVersion({ lix, changeSet: otherVersion.change_set_id });
+ *   // Create a version branching from the current active version
+ *   const version = await createVersion({ lix, name: "feature-branch" });
+ *
+ * @example
+ *   // Create a version pointing to a specific commit
+ *   const version = await createVersion({ lix, commit_id: existingCommitId });
  */
 export async function createVersion(args: {
 	lix: Lix;
 	id?: LixVersion["id"];
-	changeSet?: Pick<LixChangeSet, "id">;
+	commit_id?: LixVersion["commit_id"];
 	name?: LixVersion["name"];
 	inherits_from_version_id?: LixVersion["inherits_from_version_id"];
 }): Promise<LixVersion> {
@@ -24,12 +30,33 @@ export async function createVersion(args: {
 			lix: { ...args.lix, db: trx },
 			lixcol_version_id: "global",
 		});
-		const cs =
-			args.changeSet ??
-			(await createChangeSet({
-				lix: { ...args.lix, db: trx },
+
+		let commitId: string;
+
+		if (args.commit_id) {
+			// Use the provided commit
+			commitId = args.commit_id;
+		} else {
+			// Default to active version's commit_id
+			const activeVersion = await trx
+				.selectFrom("active_version")
+				.innerJoin("version", "version.id", "active_version.version_id")
+				.select("version.commit_id")
+				.executeTakeFirstOrThrow();
+
+			commitId = activeVersion.commit_id;
+		}
+
+		// Create a working commit for the new version
+		const workingCommitId = uuidV7({ lix: args.lix });
+		await trx
+			.insertInto("commit_all")
+			.values({
+				id: workingCommitId,
+				change_set_id: workingCs.id,
 				lixcol_version_id: "global",
-			}));
+			})
+			.execute();
 
 		const versionId = args.id ?? nanoId({ lix: args.lix });
 
@@ -38,8 +65,8 @@ export async function createVersion(args: {
 			.values({
 				id: versionId,
 				name: args.name,
-				change_set_id: cs.id,
-				working_change_set_id: workingCs.id,
+				commit_id: commitId,
+				working_commit_id: workingCommitId,
 				inherits_from_version_id: args.inherits_from_version_id ?? "global",
 			})
 			.execute();

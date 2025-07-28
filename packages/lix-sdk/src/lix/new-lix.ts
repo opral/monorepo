@@ -240,6 +240,9 @@ export async function newLixFile(args?: {
 		],
 	});
 
+	// Anonymous account creation has been moved to openLix
+	// No need to set up any accounts here
+
 	// No need to persist lix_deterministic_bootstrap separately anymore
 	// It's handled as part of the deterministic mode config
 
@@ -323,6 +326,10 @@ function createBootstrapChanges(args: {
 	const initialGlobalVersionChangeSetId = args.generateNanoid();
 	const initialGlobalVersionWorkingChangeSetId = args.generateNanoid();
 
+	// Generate IDs for working commits
+	const mainWorkingCommitId = args.generateUuid();
+	const globalWorkingCommitId = args.generateUuid();
+
 	// Create all required change sets
 	const changeSets: LixChangeSet[] = [
 		{
@@ -353,6 +360,73 @@ function createBootstrapChanges(args: {
 		});
 	}
 
+	// Create commits for the two versions
+	const globalCommitId = args.generateUuid();
+	const mainCommitId = args.generateUuid();
+
+	// Create commit for global version
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: globalCommitId,
+		schema_key: "lix_commit",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: globalCommitId,
+			change_set_id: initialGlobalVersionChangeSetId,
+		},
+		created_at: args.created_at,
+	});
+
+	// Create commit for main version
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: mainCommitId,
+		schema_key: "lix_commit",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: mainCommitId,
+			change_set_id: initialChangeSetId,
+		},
+		created_at: args.created_at,
+	});
+
+	// Create working commits for both versions
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: globalWorkingCommitId,
+		schema_key: "lix_commit",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: globalWorkingCommitId,
+			change_set_id: initialGlobalVersionWorkingChangeSetId,
+		},
+		created_at: args.created_at,
+	});
+
+	changes.push({
+		id: args.generateUuid(),
+		entity_id: mainWorkingCommitId,
+		schema_key: "lix_commit",
+		schema_version: "1.0",
+		file_id: "lix",
+		plugin_key: "lix_own_entity",
+		snapshot_id: args.generateUuid(),
+		snapshot_content: {
+			id: mainWorkingCommitId,
+			change_set_id: initialWorkingChangeSetId,
+		},
+		created_at: args.created_at,
+	});
+
 	// Create global version
 	changes.push({
 		id: args.generateUuid(),
@@ -365,8 +439,8 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: "global",
 			name: "global",
-			change_set_id: initialGlobalVersionChangeSetId,
-			working_change_set_id: initialGlobalVersionWorkingChangeSetId,
+			commit_id: globalCommitId,
+			working_commit_id: globalWorkingCommitId,
 			hidden: true,
 		} satisfies LixVersion,
 		created_at: args.created_at,
@@ -384,8 +458,8 @@ function createBootstrapChanges(args: {
 		snapshot_content: {
 			id: initialVersionId,
 			name: "main",
-			change_set_id: initialChangeSetId,
-			working_change_set_id: initialWorkingChangeSetId,
+			commit_id: mainCommitId,
+			working_commit_id: mainWorkingCommitId,
 			inherits_from_version_id: "global",
 			hidden: false,
 		} satisfies LixVersion,
@@ -506,34 +580,8 @@ function createBootstrapChanges(args: {
 		});
 	}
 
-	// Create default active account
-	const activeAccountId = args.generateNanoid();
-	const anonymousAccountName = args.isDeterministicBootstrap
-		? "Anonymous User"
-		: `Anonymous ${humanId({
-				capitalize: true,
-				adjectiveCount: 0,
-				separator: "_",
-			})
-				// Human ID has two words, remove the last one
-				.split("_")[0]!
-				// Human ID uses plural, remove the last character to make it singular
-				.slice(0, -1)}`;
-
-	// Create the active account entry (the account entity will be created on first change)
-	changes.push({
-		id: args.generateUuid(),
-		entity_id: activeAccountId,
-		schema_key: "lix_active_account",
-		schema_version: "1.0",
-		file_id: "lix",
-		plugin_key: "lix_own_entity",
-		snapshot_id: args.generateUuid(),
-		snapshot_content: {
-			name: anonymousAccountName,
-		},
-		created_at: args.created_at,
-	});
+	// Anonymous account creation has been moved to openLix
+	// to only create when no account is provided and no active account exists
 
 	// Create change set elements linking all changes to the global change set
 	const originalChanges = [...changes]; // snapshot of original changes
@@ -557,7 +605,7 @@ function createBootstrapChanges(args: {
 
 		const changeSetElementChange = {
 			id: args.generateUuid(),
-			entity_id: `${targetChangeSetId}::${change.id}`,
+			entity_id: `${targetChangeSetId}~${change.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",
@@ -588,7 +636,7 @@ function createBootstrapChanges(args: {
 	for (const changeSetElementChange of changeSetElementChanges) {
 		changes.push({
 			id: args.generateUuid(),
-			entity_id: `${initialGlobalVersionChangeSetId}::${changeSetElementChange.id}`,
+			entity_id: `${initialGlobalVersionChangeSetId}~${changeSetElementChange.id}`,
 			schema_key: "lix_change_set_element",
 			schema_version: LixChangeSetElementSchema["x-lix-version"],
 			file_id: "lix",

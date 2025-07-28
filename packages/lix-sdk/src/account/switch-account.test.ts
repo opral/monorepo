@@ -33,7 +33,7 @@ test("should switch the current account", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(activeAccount.id).toBe(account1.id);
+	expect(activeAccount.account_id).toBe(account1.id);
 
 	// Switch to account2
 	await switchAccount({ lix, to: [account2] });
@@ -44,7 +44,7 @@ test("should switch the current account", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(activeAccount.id).toBe(account2.id);
+	expect(activeAccount.account_id).toBe(account2.id);
 });
 
 test("should handle switching to the same account", async () => {
@@ -71,7 +71,7 @@ test("should handle switching to the same account", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(activeAccount.id).toBe(account.id);
+	expect(activeAccount.account_id).toBe(account.id);
 
 	// Switch to the same account again
 	await switchAccount({ lix, to: [account] });
@@ -82,5 +82,5 @@ test("should handle switching to the same account", async () => {
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	expect(activeAccount.id).toBe(account.id);
+	expect(activeAccount.account_id).toBe(account.id);
 });

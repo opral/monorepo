@@ -1,12 +1,10 @@
 import {
 	Change,
-	changeHasLabel,
 	Lix,
 	createThread,
 	createCheckpoint,
 	Thread,
 	Version,
-	changeSetElementIsLeafOf,
 } from "@lix-js/sdk";
 import { useAtom } from "jotai";
 import { useCallback, useEffect, useState } from "react";
@@ -189,17 +187,27 @@ const CreateCheckpointBox = () => {
 		if (!description) return;
 
 		lix.db.transaction().execute(async (trx) => {
-			const thread = await createThread({
+			// Get the commit associated with the working change set
+			const commit = await trx
+				.selectFrom("commit")
+				.where("change_set_id", "=", workingChangeSet!.id)
+				.selectAll()
+				.executeTakeFirst();
+
+			if (!commit) {
+				throw new Error("No commit found for working change set");
+			}
+
+			// Create thread with entity (commit) attachment using the new system
+			await createThread({
 				lix: { ...lix, db: trx },
 				comments: [{ body: args.content }],
+				entity: {
+					entity_id: commit.id,
+					schema_key: "lix_commit",
+					file_id: "lix",
+				},
 			});
-			await trx
-				.insertInto("change_set_thread")
-				.values({
-					change_set_id: workingChangeSet!.id,
-					thread_id: thread.id,
-				})
-				.execute();
 		});
 	};
 
@@ -264,7 +272,6 @@ const getChanges = async (
 			"change.id"
 		)
 		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
-		.where(changeHasLabel({ name: "checkpoint" }))
 		.where("change_set_element.change_set_id", "=", changeSetId)
 		.where("change.file_id", "=", fileId)
 		.selectAll("change")
@@ -319,11 +326,10 @@ const getChanges = async (
 						"change_set_element.change_id",
 						"change.id"
 					)
-					.where(changeSetElementIsLeafOf([{ id: previousChangeSetId }]))
+					.where("change_set_element.change_set_id", "=", previousChangeSetId)
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", change.schema_key)
 					.where("change.file_id", "=", fileId)
-					.where(changeHasLabel({ name: "checkpoint" }))
 					.selectAll("change")
 					.orderBy("change.created_at", "desc")
 					.executeTakeFirst();
@@ -376,7 +382,18 @@ const getIntermediateChanges = async (
 		.innerJoin("version", "active_version.version_id", "version.id")
 		.selectAll("version")
 		.executeTakeFirst()
-		.then((version) => version?.working_change_set_id);
+		.then((version) => {
+			// Get the working commit and its change set
+			return (
+				lix.db
+					.selectFrom("commit")
+					// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+					.where("id", "=", version?.working_commit_id!)
+					.select("change_set_id")
+					.executeTakeFirst()
+					.then((commit) => commit?.change_set_id)
+			);
+		});
 
 	const intermediateLeafChanges = await lix.db
 		.selectFrom("change")
@@ -385,17 +402,7 @@ const getIntermediateChanges = async (
 			"change_set_element.change_id",
 			"change.id"
 		)
-		.where(changeSetElementIsLeafOf([{ id: workingChangeSetId! }]))
-		.where((eb) =>
-			workingChangeSetId
-				? eb("change_set_element.change_set_id", "=", workingChangeSetId)
-				: eb.exists(
-						eb
-							.selectFrom("change_set_element")
-							.whereRef("change_set_element.change_id", "=", "change.id")
-							.where((eb) => eb.not(changeHasLabel({ name: "checkpoint" })))
-					)
-		)
+		.where("change_set_element.change_set_id", "=", workingChangeSetId!)
 		.where("change.file_id", "=", fileId)
 		.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
 		.selectAll("change")
@@ -455,7 +462,6 @@ const getIntermediateChanges = async (
 					)
 					.where("change.entity_id", "=", change.entity_id)
 					.where("change.schema_key", "=", CellSchemaV1["x-lix-key"])
-					.where(changeHasLabel({ name: "checkpoint" }))
 					.selectAll("change")
 					.executeTakeFirst();
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { bundledLanguages, createHighlighter, type Highlighter } from 'shiki';
+import { bundledLanguages, createHighlighter, type Highlighter } from "shiki";
 
 // Global highlighter instance
 let highlighterPromise: Promise<Highlighter> | null = null;
@@ -8,7 +8,7 @@ let highlighterPromise: Promise<Highlighter> | null = null;
 async function getHighlighter(): Promise<Highlighter> {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighter({
-      themes: ['github-light', 'github-dark'],
+      themes: ["github-light", "github-dark"],
       langs: Object.keys(bundledLanguages),
     });
   }
@@ -144,11 +144,12 @@ function formatConsoleOutput(
     args: Array<{ type: string; content: string }>;
     timestamp: string;
     section?: string;
-  }>
+  }>,
 ): string {
   return outputs
     .map((entry) => {
-      const prefix = entry.level !== "log" ? `// ${entry.level.toUpperCase()}: ` : "";
+      const prefix =
+        entry.level !== "log" ? `// ${entry.level.toUpperCase()}: ` : "";
       const content = entry.args.map((arg) => arg.content).join(" ");
       return prefix + content;
     })
@@ -164,21 +165,21 @@ interface CodeSnippetProps {
 // Helper function to dedent a block of code
 function dedentCode(code: string): string {
   const lines = code.split("\n");
-  
+
   // Remove leading and trailing empty lines
   let startIndex = 0;
   let endIndex = lines.length - 1;
-  
-  while (startIndex < lines.length && lines[startIndex].trim() === '') {
+
+  while (startIndex < lines.length && lines[startIndex].trim() === "") {
     startIndex++;
   }
-  
-  while (endIndex > startIndex && lines[endIndex].trim() === '') {
+
+  while (endIndex > startIndex && lines[endIndex].trim() === "") {
     endIndex--;
   }
-  
+
   const trimmedLines = lines.slice(startIndex, endIndex + 1);
-  
+
   // Find the minimum indentation (excluding empty lines)
   const minIndent = trimmedLines
     .filter((line) => line.trim().length > 0)
@@ -242,14 +243,23 @@ function parseSections(code: string): {
     }
 
     // Add to current section (skip the function declaration and closing brace)
-    if (inSection && currentSection && !line.includes("export default async function") && !line.match(/^}$/)) {
+    if (
+      inSection &&
+      currentSection &&
+      !line.includes("export default async function") &&
+      !line.match(/^}$/)
+    ) {
       sectionContent.push(line);
     }
   }
 
   // Create full code without section markers and function wrapper
   const fullCode = lines
-    .filter((line) => !line.match(/SECTION\s+(START|END)\s+['"]([^'"]+)['"]/) && !line.includes("SECTION"))
+    .filter(
+      (line) =>
+        !line.match(/SECTION\s+(START|END)\s+['"]([^'"]+)['"]/) &&
+        !line.includes("SECTION"),
+    )
     .filter((line) => !line.includes("export default async function"))
     .filter((line) => !line.match(/^}$/)) // Remove closing brace of function
     .join("\n")
@@ -262,33 +272,33 @@ function parseSections(code: string): {
 function transformDynamicImports(code: string): string {
   // Transform dynamic import patterns to static imports
   let transformedCode = code;
-  
+
   // Pattern 1: const { named: alias } = await import("module");
   // Must handle this before the general destructuring pattern
   transformedCode = transformedCode.replace(
     /const\s*{\s*(\w+)\s*:\s*(\w+)\s*}\s*=\s*await\s+import\s*\(\s*["']([^"']+)["']\s*\)\s*;/g,
-    'import { $1 as $2 } from "$3";'
+    'import { $1 as $2 } from "$3";',
   );
-  
+
   // Pattern 2: const { named } = await import("module");
   transformedCode = transformedCode.replace(
     /const\s*{\s*([^}]+)\s*}\s*=\s*await\s+import\s*\(\s*["']([^"']+)["']\s*\)\s*;/g,
-    'import { $1 } from "$2";'
+    'import { $1 } from "$2";',
   );
-  
+
   // Pattern 3: const name = await import("module");
   transformedCode = transformedCode.replace(
     /const\s+(\w+)\s*=\s*await\s+import\s*\(\s*["']([^"']+)["']\s*\)\s*;/g,
-    'import $1 from "$2";'
+    'import $1 from "$2";',
   );
-  
+
   return transformedCode;
 }
 
 // Function to combine selected sections with necessary setup code
 function combineSections(
   allSections: Record<string, string>,
-  selectedSections?: string[]
+  selectedSections?: string[],
 ): string {
   if (!selectedSections || selectedSections.length === 0) {
     return Object.values(allSections).join("\n\n");
@@ -299,18 +309,18 @@ function combineSections(
     .map((sectionName) => allSections[sectionName])
     .filter(Boolean)
     .join("\n\n")
-    .replace(/console1\.log/g, 'console.log'); // Fix bundler issue that transforms console to console1
+    .replace(/console1\.log/g, "console.log"); // Fix bundler issue that transforms console to console1
 }
 
 // Function to get all prerequisite code (imports + previous sections)
 function getPrerequisiteCode(
   allSections: Record<string, string>,
   selectedSections: string[],
-  imports: string
+  imports: string,
 ): string {
   const sectionNames = Object.keys(allSections);
   const firstSelectedIndex = Math.min(
-    ...selectedSections.map((s) => sectionNames.indexOf(s))
+    ...selectedSections.map((s) => sectionNames.indexOf(s)),
   );
 
   const prerequisiteSections = sectionNames
@@ -321,8 +331,6 @@ function getPrerequisiteCode(
 
   return [imports, prerequisiteSections].filter(Boolean).join("\n\n");
 }
-
-
 
 export default function CodeSnippet({
   module,
@@ -344,14 +352,20 @@ export default function CodeSnippet({
 
   // Parse the JSON stringified source code
   // Trim any trailing semicolon or whitespace that might be added by webpack
-  const trimmedSrcCode = srcCode.trim().replace(/;$/, '');
+  const trimmedSrcCode = srcCode.trim().replace(/;$/, "");
   const decodedSrcCode = JSON.parse(trimmedSrcCode);
 
   // Parse the source code to extract sections and setup
-  const { sections: allSections, imports } = parseSections(decodedSrcCode.replace(/console1\.log/g, 'console.log'));
-  const currentCode = transformDynamicImports(combineSections(allSections, sections));
+  const { sections: allSections, imports } = parseSections(
+    decodedSrcCode.replace(/console1\.log/g, "console.log"),
+  );
+  const currentCode = transformDynamicImports(
+    combineSections(allSections, sections),
+  );
   const prerequisiteCode = sections
-    ? transformDynamicImports(getPrerequisiteCode(allSections, sections, imports))
+    ? transformDynamicImports(
+        getPrerequisiteCode(allSections, sections, imports),
+      )
     : "";
 
   const executeCode = async () => {
@@ -398,18 +412,22 @@ export default function CodeSnippet({
       try {
         if (module.default && typeof module.default === "function") {
           let currentSection: string | undefined = undefined;
-          
+
           const mockConsole = {
             log: (...args: any[]) => {
               const firstArg = String(args[0]);
               // Check if this is a section start marker
-              const sectionStartMatch = firstArg.match(/SECTION\s+START\s+['"]([^'"]+)['"]/);
+              const sectionStartMatch = firstArg.match(
+                /SECTION\s+START\s+['"]([^'"]+)['"]/,
+              );
               if (sectionStartMatch) {
                 currentSection = sectionStartMatch[1];
                 return; // Don't log section start markers
               }
               // Check if this is a section end marker
-              const sectionEndMatch = firstArg.match(/SECTION\s+END\s+['"]([^'"]+)['"]/);
+              const sectionEndMatch = firstArg.match(
+                /SECTION\s+END\s+['"]([^'"]+)['"]/,
+              );
               if (sectionEndMatch) {
                 return; // Don't log section end markers
               }
@@ -425,10 +443,14 @@ export default function CodeSnippet({
               logOutput("info", currentSection, ...args);
             },
           };
-          
+
           await module.default(mockConsole);
         } else {
-          logOutput("error", undefined, "Module doesn't export default function");
+          logOutput(
+            "error",
+            undefined,
+            "Module doesn't export default function",
+          );
         }
       } catch (error) {
         console.error("Error executing code:", error);
@@ -528,21 +550,20 @@ export default function CodeSnippet({
         >
           {hasExecuted && (
             <CodeBlock
-              code={
-                (() => {
-                  const filteredOutput = sections 
-                    ? consoleOutput.filter(output => 
-                        !output.section || sections.includes(output.section)
-                      )
-                    : consoleOutput;
-                  
-                  if (filteredOutput.length === 0) {
-                    return "// No output";
-                  }
-                  
-                  return formatConsoleOutput(filteredOutput);
-                })()
-              }
+              code={(() => {
+                const filteredOutput = sections
+                  ? consoleOutput.filter(
+                      (output) =>
+                        !output.section || sections.includes(output.section),
+                    )
+                  : consoleOutput;
+
+                if (filteredOutput.length === 0) {
+                  return "// No output";
+                }
+
+                return formatConsoleOutput(filteredOutput);
+              })()}
               language="javascript"
               showLineNumbers={false}
             />

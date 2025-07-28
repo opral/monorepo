@@ -33,24 +33,6 @@ export function applyChangeSetDatabaseSchema(
 		hardcodedFileId: "lix",
 	});
 
-	// Create change_set_edge views
-	createEntityViewsIfNotExists({
-		lix: { sqlite },
-		schema: LixChangeSetEdgeSchema,
-		overrideName: "change_set_edge",
-		pluginKey: "lix_own_entity",
-		hardcodedFileId: "lix",
-	});
-
-	// Create change_set_thread views
-	createEntityViewsIfNotExists({
-		lix: { sqlite },
-		schema: LixChangeSetThreadSchema,
-		overrideName: "change_set_thread",
-		pluginKey: "lix_own_entity",
-		hardcodedFileId: "lix",
-	});
-
 	// Create change_set_label views
 	createEntityViewsIfNotExists({
 		lix: { sqlite },
@@ -83,20 +65,29 @@ export type LixChangeSet = FromLixSchemaDefinition<typeof LixChangeSetSchema>;
 export const LixChangeSetElementSchema = {
 	"x-lix-key": "lix_change_set_element",
 	"x-lix-version": "1.0",
-	"x-lix-foreign-keys": {
-		change_set_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["change_set_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-		change_id: {
-			schemaKey: "lix_change",
-			property: "id",
+		{
+			properties: ["change_id"],
+			references: {
+				schemaKey: "lix_change",
+				properties: ["id"],
+			},
 		},
-		schema_key: {
-			schemaKey: "lix_stored_schema",
-			property: "key",
+		{
+			properties: ["schema_key"],
+			references: {
+				schemaKey: "lix_stored_schema",
+				properties: ["key"],
+			},
 		},
-	},
+	],
 	"x-lix-primary-key": ["change_set_id", "change_id"],
 	"x-lix-unique": [["change_set_id", "entity_id", "schema_key", "file_id"]],
 	type: "object",
@@ -122,49 +113,26 @@ export type LixChangeSetElement = FromLixSchemaDefinition<
 	typeof LixChangeSetElementSchema
 >;
 
-export const LixChangeSetEdgeSchema = {
-	"x-lix-key": "lix_change_set_edge",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["parent_id", "child_id"],
-	"x-lix-foreign-keys": {
-		parent_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
-		},
-		child_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
-		},
-	},
-	type: "object",
-	properties: {
-		parent_id: { type: "string" },
-		child_id: { type: "string" },
-	},
-	required: ["parent_id", "child_id"],
-	additionalProperties: false,
-} as const;
-LixChangeSetEdgeSchema satisfies LixSchemaDefinition;
-
-// Pure business logic type (inferred from schema)
-export type LixChangeSetEdge = FromLixSchemaDefinition<
-	typeof LixChangeSetEdgeSchema
->;
-
 export const LixChangeSetLabelSchema = {
 	"x-lix-key": "lix_change_set_label",
 	"x-lix-version": "1.0",
 	"x-lix-primary-key": ["change_set_id", "label_id"],
-	"x-lix-foreign-keys": {
-		change_set_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
+	"x-lix-foreign-keys": [
+		{
+			properties: ["change_set_id"],
+			references: {
+				schemaKey: "lix_change_set",
+				properties: ["id"],
+			},
 		},
-		label_id: {
-			schemaKey: "lix_label",
-			property: "id",
+		{
+			properties: ["label_id"],
+			references: {
+				schemaKey: "lix_label",
+				properties: ["id"],
+			},
 		},
-	},
+	],
 	type: "object",
 	properties: {
 		change_set_id: { type: "string" },
@@ -179,32 +147,4 @@ LixChangeSetLabelSchema satisfies LixSchemaDefinition;
 // Pure business logic type (inferred from schema)
 export type LixChangeSetLabel = FromLixSchemaDefinition<
 	typeof LixChangeSetLabelSchema
->;
-
-export const LixChangeSetThreadSchema = {
-	"x-lix-key": "lix_change_set_thread",
-	"x-lix-version": "1.0",
-	"x-lix-primary-key": ["change_set_id", "thread_id"],
-	"x-lix-foreign-keys": {
-		change_set_id: {
-			schemaKey: "lix_change_set",
-			property: "id",
-		},
-		thread_id: {
-			schemaKey: "lix_thread",
-			property: "id",
-		},
-	},
-	type: "object",
-	properties: {
-		change_set_id: { type: "string" },
-		thread_id: { type: "string" },
-	},
-	required: ["change_set_id", "thread_id"],
-	additionalProperties: false,
-} as const;
-LixChangeSetThreadSchema satisfies LixSchemaDefinition;
-
-export type LixChangeSetThread = FromLixSchemaDefinition<
-	typeof LixChangeSetThreadSchema
 >;

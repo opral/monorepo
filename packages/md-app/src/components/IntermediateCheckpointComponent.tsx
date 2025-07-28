@@ -119,19 +119,20 @@ const CreateCheckpointInput = () => {
   const onThreadComposerSubmit = async (args: { content: ZettelDoc }) => {
     if (!description.trim() || !lix) return;
 
-    lix.db.transaction().execute(async (trx) => {
-      const thread = await createThread({
-        lix: { ...lix, db: trx },
-        comments: [{ body: args.content }],
-      });
-      await trx
-        .insertInto("change_set_thread_all")
-        .values({
-          change_set_id: currentChangeSet!.id,
-          thread_id: thread.id,
-          lixcol_version_id: "global",
-        })
-        .execute();
+    await lix.db.transaction().execute(async (trx) => {
+      // Get the commit associated with the current change set
+      const commit = await trx
+        .selectFrom("commit")
+        .where("change_set_id", "=", currentChangeSet!.id)
+        .selectAll()
+        .executeTakeFirstOrThrow();
+
+      // Create thread with commit entity
+      await createThread({
+				lix: { ...lix, db: trx },
+				comments: [{ body: args.content }],
+				entity: commit,
+			});
     });
   };
 

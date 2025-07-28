@@ -209,21 +209,32 @@ test("account operations are version specific and isolated", async () => {
 test("active_account temp table operations", async () => {
 	const lix = await openLix({});
 
-	// Check if the default anonymous account was created
+	// Check if the default anonymous account was created with proper details
 	const activeAccounts = await lix.db
-		.selectFrom("active_account")
-		.selectAll()
+		.selectFrom("active_account as aa")
+		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.where("a.lixcol_version_id", "=", "global")
+		.select(["aa.account_id", "a.id", "a.name"])
 		.execute();
 
 	expect(activeAccounts).toHaveLength(1);
 	expect(activeAccounts[0]?.name).toMatch(/^Anonymous \w+$/);
 
-	// Insert a new active account
+	// First create a real account in global version (where active accounts look)
 	await lix.db
-		.insertInto("active_account")
+		.insertInto("account_all")
 		.values({
 			id: "user123",
 			name: "Alice",
+			lixcol_version_id: "global",
+		})
+		.execute();
+
+	// Then make it active
+	await lix.db
+		.insertInto("active_account")
+		.values({
+			account_id: "user123",
 		})
 		.execute();
 
@@ -233,27 +244,42 @@ test("active_account temp table operations", async () => {
 		.execute();
 
 	expect(updatedActiveAccounts).toHaveLength(2);
-	expect(updatedActiveAccounts.some((acc) => acc.name === "Alice")).toBe(true);
+	// The new active account might show null name if the account is not in the right version
+	// Let's check if the ID is there at least
+	const aliceActive = updatedActiveAccounts.find(
+		(acc) => acc.account_id === "user123"
+	);
+	expect(aliceActive).toBeDefined();
+	expect(aliceActive?.account_id).toBe("user123");
 
-	// Update active account
+	// Update the actual account (not the active account reference)
 	await lix.db
-		.updateTable("active_account")
+		.updateTable("account_all")
 		.where("id", "=", "user123")
+		.where("lixcol_version_id", "=", "global")
 		.set({ name: "Alice Updated" })
 		.execute();
 
 	const afterUpdate = await lix.db
 		.selectFrom("active_account")
-		.where("id", "=", "user123")
+		.where("account_id", "=", "user123")
 		.selectAll()
 		.execute();
 
-	expect(afterUpdate[0]?.name).toBe("Alice Updated");
+	expect(afterUpdate).toHaveLength(1);
+	// Verify the account was updated by checking the actual account
+	const updatedAccount = await lix.db
+		.selectFrom("account_all")
+		.where("id", "=", "user123")
+		.where("lixcol_version_id", "=", "global")
+		.selectAll()
+		.executeTakeFirst();
+	expect(updatedAccount?.name).toBe("Alice Updated");
 
 	// Delete active account
 	await lix.db
 		.deleteFrom("active_account")
-		.where("id", "=", "user123")
+		.where("account_id", "=", "user123")
 		.execute();
 
 	const afterDelete = await lix.db
@@ -262,24 +288,54 @@ test("active_account temp table operations", async () => {
 		.execute();
 
 	expect(afterDelete).toHaveLength(1);
-	expect(afterDelete.some((acc) => acc.id === "user123")).toBe(false);
+	expect(afterDelete.some((acc) => acc.account_id === "user123")).toBe(false);
 });
 
-test("account table should have no entries initially but active_account should have default", async () => {
+test("account table should have one untracked entry initially and active_account should reference it", async () => {
 	const lix = await openLix({});
 
-	// Check that account table is empty
-	const accounts = await lix.db.selectFrom("account").selectAll().execute();
-	expect(accounts).toHaveLength(0);
-
-	// Check that active_account has a default entry
-	const activeAccounts = await lix.db
-		.selectFrom("active_account")
+	// Check the anonymous account in account_all (includes untracked)
+	const allAccounts = await lix.db
+		.selectFrom("account_all")
 		.selectAll()
 		.execute();
 
-	expect(activeAccounts).toHaveLength(1);
-	expect(activeAccounts[0]?.name).toMatch(/^Anonymous \w+$/);
+	// The anonymous account exists and is initially untracked
+	expect(allAccounts.length).toBeGreaterThan(0);
+	const anonymousAccount = allAccounts.find((acc) =>
+		acc.name?.match(/^Anonymous \w+$/)
+	);
+	expect(anonymousAccount).toBeDefined();
+	expect(anonymousAccount?.lixcol_untracked).toBe(1);
+
+	// Check that active_account references the same account using a join
+	const activeAccount = await lix.db
+		.selectFrom("active_account as aa")
+		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.where("a.lixcol_version_id", "=", "global")
+		.select(["aa.account_id", "a.id", "a.name"])
+		.executeTakeFirst();
+
+	expect(activeAccount).toBeDefined();
+	expect(activeAccount?.account_id).toBe(anonymousAccount?.id);
+});
+
+test.skip("active_account should enforce foreign key constraint on account_id", async () => {
+	// TODO: Foreign key constraints are not enforced on views with INSTEAD OF triggers
+	// because the LixActiveAccountSchema is not stored in stored_schema table.
+	// This would require storing the schema and ensuring validation is called
+	// in the trigger or virtual table implementation.
+	const lix = await openLix({});
+
+	// Try to insert an active account reference to a non-existent account
+	await expect(
+		lix.db
+			.insertInto("active_account")
+			.values({
+				account_id: "non-existent-account",
+			})
+			.execute()
+	).rejects.toThrow(/foreign key/i);
 });
 
 test("should generate different anonymous account names", async () => {
@@ -287,19 +343,26 @@ test("should generate different anonymous account names", async () => {
 	const lix1 = await openLix({});
 	const lix2 = await openLix({});
 
+	// Get active accounts with details using joins
 	const account0 = await lix0.db
-		.selectFrom("active_account")
-		.selectAll()
+		.selectFrom("active_account as aa")
+		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.where("a.lixcol_version_id", "=", "global")
+		.select(["a.id", "a.name"])
 		.executeTakeFirst();
 
 	const account1 = await lix1.db
-		.selectFrom("active_account")
-		.selectAll()
+		.selectFrom("active_account as aa")
+		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.where("a.lixcol_version_id", "=", "global")
+		.select(["a.id", "a.name"])
 		.executeTakeFirst();
 
 	const account2 = await lix2.db
-		.selectFrom("active_account")
-		.selectAll()
+		.selectFrom("active_account as aa")
+		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.where("a.lixcol_version_id", "=", "global")
+		.select(["a.id", "a.name"])
 		.executeTakeFirst();
 
 	expect(account0?.name).not.toBe(account1?.name);

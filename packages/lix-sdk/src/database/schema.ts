@@ -1,10 +1,10 @@
 import type { ChangeView, InternalChangeTable } from "../change/schema.js";
 import {
-	LixChangeSetEdgeSchema,
 	LixChangeSetElementSchema,
 	LixChangeSetLabelSchema,
 	LixChangeSetSchema,
 } from "../change-set/schema.js";
+import { LixCommitSchema, LixCommitEdgeSchema } from "../commit/schema.js";
 import {
 	LixVersionSchema,
 	type LixActiveVersion,
@@ -26,12 +26,13 @@ import { LixLogSchema } from "../log/schema.js";
 import { LixAccountSchema, type LixActiveAccount } from "../account/schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
 import { LixLabelSchema } from "../label/schema.js";
+import { LixEntityLabelSchema } from "../entity/label/schema.js";
+import { LixEntityThreadSchema } from "../entity/thread/schema.js";
 import {
 	LixThreadSchema,
 	LixThreadCommentSchema,
 	type LixThreadComment,
 } from "../thread/schema.js";
-import { LixChangeSetThreadSchema } from "../change-set/schema.js";
 import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
@@ -55,9 +56,9 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	version: LixVersionSchema,
 	change_set: LixChangeSetSchema,
 	change_set_element: LixChangeSetElementSchema,
-	change_set_edge: LixChangeSetEdgeSchema,
 	change_set_label: LixChangeSetLabelSchema,
-	change_set_thread: LixChangeSetThreadSchema,
+	commit: LixCommitSchema,
+	commit_edge: LixCommitEdgeSchema,
 	file: LixFileDescriptorSchema,
 	log: LixLogSchema,
 	stored_schema: LixStoredSchemaSchema,
@@ -65,6 +66,8 @@ export const LixSchemaViewMap: Record<string, LixSchemaDefinition> = {
 	account: LixAccountSchema,
 	change_author: LixChangeAuthorSchema,
 	label: LixLabelSchema,
+	entity_label: LixEntityLabelSchema,
+	entity_thread: LixEntityThreadSchema,
 	thread: LixThreadSchema,
 	thread_comment: LixThreadCommentSchema,
 };
@@ -86,12 +89,12 @@ export type LixDatabaseSchema = {
 	EntityViews<typeof LixAccountSchema, "account"> &
 	EntityViews<typeof LixChangeSetSchema, "change_set"> &
 	EntityViews<typeof LixChangeSetElementSchema, "change_set_element"> &
-	EntityViews<typeof LixChangeSetEdgeSchema, "change_set_edge"> &
 	EntityViews<typeof LixChangeSetLabelSchema, "change_set_label"> &
-	EntityViews<typeof LixChangeSetThreadSchema, "change_set_thread"> &
 	EntityViews<typeof LixChangeAuthorSchema, "change_author"> &
 	EntityViews<typeof LixFileDescriptorSchema, "file", { data: Uint8Array }> &
 	EntityViews<typeof LixLabelSchema, "label"> &
+	EntityViews<typeof LixEntityLabelSchema, "entity_label"> &
+	EntityViews<typeof LixEntityThreadSchema, "entity_thread"> &
 	EntityViews<typeof LixStoredSchemaSchema, "stored_schema", { value: any }> &
 	EntityViews<typeof LixLogSchema, "log"> &
 	EntityViews<typeof LixThreadSchema, "thread"> &
@@ -100,4 +103,6 @@ export type LixDatabaseSchema = {
 		"thread_comment",
 		{ body: LixThreadComment["body"] }
 	> &
-	EntityViews<typeof LixVersionSchema, "version">;
+	EntityViews<typeof LixVersionSchema, "version"> &
+	EntityViews<typeof LixCommitSchema, "commit"> &
+	EntityViews<typeof LixCommitEdgeSchema, "commit_edge">;

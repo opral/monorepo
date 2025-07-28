@@ -1,62 +1,83 @@
-import { openLix } from "@lix-js/sdk";
-
-// Note: These functions may not be available in the current SDK version
-// but are shown here for demonstration purposes based on the documentation
-async function selectActiveVersion(options: any) {
-  return {
-    executeTakeFirstOrThrow: async () => ({
-      id: "version-main",
-      name: "main",
-      change_set_id: "cs-main"
-    })
-  };
-}
-
-async function createVersion(options: any) {
-  console.log("Creating new version from:", options.from.name);
-  return { id: "version-feature", name: "feature-branch", change_set_id: "cs-feature" };
-}
-
-async function switchVersion(options: any) {
-  console.log("Switching to version:", options.to.name);
-}
-
-async function mergeVersion(options: any) {
-  console.log(`Merging ${options.source.name} into ${options.target.name}`);
-}
-
 export default async function runExample(console: any) {
-  const lix = await openLix({});
+  console.log("SECTION START 'setup'");
 
-  console.log("SECTION START 'create-switch-version'");
-  const activeVersion = await lix.db
-    .selectFrom("active_version")
-    .innerJoin("version", "active_version.version_id", "version.id")
-    .select(["version.id", "version.name"])
+  const { openLix, createVersion, switchVersion } = await import("@lix-js/sdk");
+  const { plugin: jsonPlugin } = await import("@lix-js/plugin-json");
+
+  const lix = await openLix({
+    providePlugins: [jsonPlugin],
+  });
+
+  // Get main version info for later use
+  const mainVersion = await lix.db
+    .selectFrom("version")
+    .where("name", "=", "main")
+    .select(["id"])
     .executeTakeFirstOrThrow();
 
-  console.log("Current active version:", activeVersion.name);
+  // Helper function to log file differences
+  const logFileDifferences = (allFiles: any[]) => {
+    allFiles.forEach((file) => {
+      const data = JSON.parse(new TextDecoder().decode(file.data));
+      const versionName =
+        file.lixcol_version_id === mainVersion.id ? "main" : "price-update";
+      const tshirtPrice = data.items.find(
+        (item: any) => item.name === "T-Shirt",
+      ).price;
+      console.log(`T-Shirt price in '${versionName}': $${tshirtPrice}`);
+    });
+  };
 
-  const newVersion = await createVersion({ lix, from: activeVersion });
+  console.log("SECTION END 'setup'");
 
-  console.log("Created new version:", newVersion.name);
+  console.log("SECTION START 'getting-started-versions'");
 
-  await switchVersion({ lix, to: newVersion });
+  // Create a product catalog file in the main version
+  await lix.db
+    .insertInto("file")
+    .values({
+      path: "/products.json",
+      data: new TextEncoder().encode(
+        JSON.stringify({
+          items: [{ id: 1, name: "T-Shirt", price: 29.99, stock: 100 }],
+        }),
+      ),
+    })
+    .execute();
 
-  console.log("Switched to new version");
+  // 1. Create a new version (branches from active version by default)
+  const priceUpdateVersion = await createVersion({
+    lix,
+    name: "price-update",
+  });
 
-  console.log("SECTION END 'create-switch-version'");
+  // 2. Switch to the new version
+  await switchVersion({ lix, to: priceUpdateVersion });
 
-  console.log("SECTION START 'merge-version'");
-  // Switch back to main version for merging demonstration
-  await switchVersion({ lix, to: activeVersion });
+  // 3. Modify the file - update prices
+  await lix.db
+    .updateTable("file")
+    .set({
+      data: new TextEncoder().encode(
+        JSON.stringify({
+          items: [{ id: 1, name: "T-Shirt", price: 34.99, stock: 100 }],
+        }),
+      ),
+    })
+    .where("path", "=", "/products.json")
+    .execute();
 
-  await mergeVersion({ lix, source: newVersion, target: activeVersion });
+  // 4. Query files across all versions to see the differences
+  const allFiles = await lix.db
+    .selectFrom("file_all")
+    .where("path", "=", "/products.json")
+    .select(["lixcol_version_id", "data"])
+    .execute();
 
-  console.log("Merged feature branch into main");
+  logFileDifferences(allFiles);
 
-  console.log("SECTION END 'merge-version'");
+  console.log("SECTION END 'getting-started-versions'");
 }
 
 // Uncomment for running in node
-runExample(console);
+// runExample(console);
