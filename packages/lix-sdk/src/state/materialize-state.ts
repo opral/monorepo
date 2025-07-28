@@ -323,6 +323,30 @@ export function populateStateCache(sqlite: SqliteWasmDatabase): void {
 	// Clear existing cache
 	sqlite.exec(`DELETE FROM internal_state_cache`);
 
+	// Populate cache with the full materialization query
+	// Include deletions when populating cache so inheritance blocking works
+	const sql = `
+    /* -----------------------------  CTEs  --------------------------------- */
+    INSERT INTO internal_state_cache (
+      entity_id,
+      schema_key,
+      file_id,
+      plugin_key,
+      snapshot_content,
+      schema_version,
+      version_id,
+      created_at,
+      updated_at,
+      inherited_from_version_id,
+      change_id,
+      commit_id
+    )
+    WITH
+      /*  Collect every committed or in-flight change with its snapshot */
+      all_changes_with_snapshots AS (
+        SELECT * FROM internal_materialization_all_changes
+      ),
+
       /* Discover every change-set in the lineage of each version's tip */
       /* (tip + all ancestors, but not descendant branches) */
       root_cs_of_all_versions AS (
@@ -372,7 +396,6 @@ export function populateStateCache(sqlite: SqliteWasmDatabase): void {
                         change_id DESC  /* deterministic fall-back, should rarely fire */
              ) AS rn
         FROM   internal_materialization_all_entities
-        ${includeDeletions ? `` : `WHERE snapshot_content IS NOT NULL`}
       )
     /* ---------------------- final projection ------------------------------ */
     SELECT 
@@ -412,12 +435,5 @@ export function populateStateCache(sqlite: SqliteWasmDatabase): void {
     WHERE pe.rn = 1
   `;
 
-	/* ------------------------ dynamic filters ------------------------------ */
-	const bindings: string[] = [];
-	Object.entries(filters).forEach(([col, val]) => {
-		sql += `\n      AND ${col} = ?`;
-		bindings.push(val);
-	});
-
-	return sqlite.exec({ sql, bind: bindings, returnValue: "resultRows" });
+	sqlite.exec(sql);
 }
