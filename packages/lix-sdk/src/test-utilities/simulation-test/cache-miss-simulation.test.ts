@@ -316,7 +316,7 @@ simulationTest(
 			
 			// Check all CSE leaf snapshots for version global
 			const globalCSELeafSnapshots = lix.sqlite.exec({
-				sql: `SELECT entity_id, schema_key, version_id, change_set_id 
+				sql: `SELECT entity_id, schema_key, version_id, commit_id 
 				      FROM internal_materialization_leaf_snapshots 
 				      WHERE schema_key = 'lix_change_set_element' 
 				        AND version_id = 'global'
@@ -418,10 +418,11 @@ simulationTest(
 			// Also check internal_change table directly
 			const internalEdgeCheck = lix.sqlite.exec({
 				sql: `
-					SELECT entity_id, created_at, snapshot_content
-					FROM internal_change 
-					WHERE schema_key = 'lix_change_set_edge'
-					  AND entity_id = 'boot_0000000003::test_0000000050'
+					SELECT ic.entity_id, ic.created_at, s.content as snapshot_content
+					FROM internal_change ic
+					LEFT JOIN internal_snapshot s ON ic.snapshot_id = s.id
+					WHERE ic.schema_key = 'lix_change_set_edge'
+					  AND ic.entity_id = 'boot_0000000003::test_0000000050'
 				`,
 				returnValue: "resultRows",
 			});

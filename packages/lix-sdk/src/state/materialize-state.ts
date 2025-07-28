@@ -249,116 +249,112 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		FROM internal_materialization_all_entities
 		WHERE snapshot_content IS NOT NULL;
 	`);
+
+	// View 10: Final materialized state for cache population
+	// For entities that appear in multiple versions' lineages, we need to determine
+	// which version_id they should have in the cache. We use these rules:
+	// 1. Entities that appear in only one version belong to that version
+	// 2. Entities that appear in multiple versions belong to global
+	// We select each entity only once, preferring the global version for multi-version entities
+	sqlite.exec(`
+		CREATE VIEW IF NOT EXISTS internal_state_materializer AS
+		WITH entity_versions AS (
+			-- For each entity, determine which versions it appears in
+			SELECT 
+				entity_id,
+				schema_key,
+				file_id,
+				GROUP_CONCAT(DISTINCT version_id) as versions,
+				COUNT(DISTINCT version_id) as version_count,
+				CASE 
+					WHEN COUNT(DISTINCT version_id) > 1 THEN 'global'
+					ELSE MIN(version_id)
+				END as target_version_id
+			FROM internal_materialization_leaf_snapshots
+			WHERE snapshot_content IS NOT NULL
+			GROUP BY entity_id, schema_key, file_id
+		)
+		SELECT DISTINCT
+			ls.entity_id,
+			ls.schema_key,
+			ls.file_id,
+			ev.target_version_id as version_id,
+			ls.plugin_key,
+			CASE 
+				WHEN ls.snapshot_content IS NULL THEN NULL 
+				ELSE json(ls.snapshot_content)
+			END as snapshot_content,
+			ls.schema_version,
+			MIN(ls.created_at) as created_at,
+			MAX(ls.created_at) as updated_at,
+			NULL as inherited_from_version_id,
+			CASE WHEN ls.snapshot_content IS NULL THEN 1 ELSE 0 END as inheritance_delete_marker,
+			-- For multi-version entities, prefer the change from global version
+			CASE 
+				WHEN ev.version_count > 1 THEN
+					(SELECT ls2.change_id FROM internal_materialization_leaf_snapshots ls2
+					 WHERE ls2.entity_id = ls.entity_id 
+					   AND ls2.schema_key = ls.schema_key 
+					   AND ls2.file_id = ls.file_id
+					   AND ls2.version_id = 'global'
+					 LIMIT 1)
+				ELSE ls.change_id
+			END as change_id,
+			CASE 
+				WHEN ev.version_count > 1 THEN
+					(SELECT ls2.commit_id FROM internal_materialization_leaf_snapshots ls2
+					 WHERE ls2.entity_id = ls.entity_id 
+					   AND ls2.schema_key = ls.schema_key 
+					   AND ls2.file_id = ls.file_id
+					   AND ls2.version_id = 'global'
+					 LIMIT 1)
+				ELSE ls.commit_id
+			END as commit_id
+		FROM internal_materialization_leaf_snapshots ls
+		JOIN entity_versions ev 
+			ON ev.entity_id = ls.entity_id 
+			AND ev.schema_key = ls.schema_key 
+			AND ev.file_id = ls.file_id
+		WHERE ls.snapshot_content IS NOT NULL
+		GROUP BY ls.entity_id, ls.schema_key, ls.file_id, ev.target_version_id, ls.plugin_key, ls.schema_version;
+	`);
 }
 
-export function materializeState(
-	sqlite: SqliteWasmDatabase,
-	filters: Record<string, string>,
-	includeDeletions: boolean = false
-): any[] {
-	let sql = `
-    /* -----------------------------  CTEs  --------------------------------- */
-    WITH
-      /*  Collect every committed or in-flight change with its snapshot */
-      all_changes_with_snapshots AS (
-        SELECT * FROM internal_materialization_all_changes
-      ),
+export function populateStateCache(sqlite: SqliteWasmDatabase): void {
+	// Clear existing cache
+	sqlite.exec(`DELETE FROM internal_state_cache`);
 
-      /* Discover every change-set in the lineage of each version's tip */
-      /* (tip + all ancestors, but not descendant branches) */
-      root_cs_of_all_versions AS (
-        SELECT * FROM internal_materialization_version_roots
-      ),
-      lineage_cs AS (
-        SELECT * FROM internal_materialization_lineage
-      ),
-
-      /* Calculate depth: 0 = tip, 1 = parent, etc */
-      cs_depth AS (
-        SELECT * FROM internal_materialization_cs_depth
-      ),
-
-      /* Map entities that belong to those change-sets */
-      cse_in_reachable_cs AS (
-        SELECT * FROM internal_materialization_cse
-      ),
-
-      /* Select the leaf change for every entity in every version */
-      leaf_target_snapshots AS (
-        SELECT * FROM internal_materialization_leaf_snapshots
-      ),
-
-      /* Version inheritance */
-      version_inheritance AS (
-        SELECT * FROM internal_materialization_version_inheritance
-      ),
-
-      /* Combine direct and inherited entities */
-      all_entities AS (
-        SELECT * FROM internal_materialization_all_entities
-      ),
-
-      /* Deduplicate: prefer direct, then deepest CS */
-      prioritized_entities AS (
-        SELECT *,
-             ROW_NUMBER() OVER (
-               PARTITION BY entity_id, schema_key, file_id, visible_in_version
-               ORDER BY CASE WHEN inherited_from_version_id IS NULL THEN 1 ELSE 2 END,
-                        (
-                          SELECT depth
-                          FROM   internal_materialization_cs_depth
-                          WHERE  internal_materialization_cs_depth.id = commit_id
-                            AND  internal_materialization_cs_depth.version_id = visible_in_version
-                        ) DESC,
-                        change_id DESC  /* deterministic fall-back, should rarely fire */
-             ) AS rn
-        FROM   internal_materialization_all_entities
-        ${includeDeletions ? `` : `WHERE snapshot_content IS NOT NULL`}
-      )
-    /* ---------------------- final projection ------------------------------ */
-    SELECT 
-      pe.entity_id,
-      pe.schema_key,
-      pe.file_id,
-      pe.plugin_key,
-      pe.snapshot_content,
-      pe.schema_version,
-      pe.version_id,
-      COALESCE(
-        (SELECT MIN(ac.created_at) 
-         FROM all_changes_with_snapshots ac
-         JOIN cse_in_reachable_cs cse 
-           ON cse.target_change_id = ac.id
-         WHERE ac.entity_id = pe.entity_id 
-           AND ac.schema_key = pe.schema_key 
-           AND ac.file_id = pe.file_id
-           AND cse.version_id = pe.version_id),
-        pe.created_at
-      ) AS created_at,
-      COALESCE(
-        (SELECT MAX(ac.created_at) 
-         FROM all_changes_with_snapshots ac
-         JOIN cse_in_reachable_cs cse 
-           ON cse.target_change_id = ac.id
-         WHERE ac.entity_id = pe.entity_id 
-           AND ac.schema_key = pe.schema_key 
-           AND ac.file_id = pe.file_id
-           AND cse.version_id = pe.version_id),
-        pe.created_at
-      ) AS updated_at,
-      pe.inherited_from_version_id,
-      pe.change_id,
-      COALESCE(pe.commit_id,'untracked') AS commit_id
-    FROM prioritized_entities pe
-    WHERE pe.rn = 1
-  `;
-
-	/* ------------------------ dynamic filters ------------------------------ */
-	const bindings: string[] = [];
-	Object.entries(filters).forEach(([col, val]) => {
-		sql += `\n      AND ${col} = ?`;
-		bindings.push(val);
-	});
-
-	return sqlite.exec({ sql, bind: bindings, returnValue: "resultRows" });
+	// Populate cache from the materializer view in a single SQL statement
+	sqlite.exec(`
+		INSERT INTO internal_state_cache (
+			entity_id,
+			schema_key,
+			file_id,
+			version_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			created_at,
+			updated_at,
+			inherited_from_version_id,
+			inheritance_delete_marker,
+			change_id,
+			commit_id
+		)
+		SELECT 
+			entity_id,
+			schema_key,
+			file_id,
+			version_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			created_at,
+			updated_at,
+			inherited_from_version_id,
+			inheritance_delete_marker,
+			change_id,
+			commit_id
+		FROM internal_state_materializer
+	`);
 }
