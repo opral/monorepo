@@ -8,6 +8,7 @@ import { nanoId, uuidV7 } from "../deterministic/index.js";
 
 test("commit should include meta changes (changeset, edges, version updates) in the change table", async () => {
 	const lix = await openLix({
+		account: { id: "test-account", name: "Test User" },
 		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 	const db = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;

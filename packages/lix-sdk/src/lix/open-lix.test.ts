@@ -106,16 +106,23 @@ test("providing an account should be possible", async () => {
 		blob: await newLixFile(),
 	});
 
-	const accounts = await lix.db
+	const activeAccounts = await lix.db
 		.selectFrom("active_account")
-		.select(["id", "name"])
+		.selectAll()
 		.execute();
 
-	expect(accounts, "to be the provided account").toContainEqual(mockAccount);
-	expect(
-		accounts,
-		"no other active account exists except for the provided one"
-	).lengthOf(1);
+	expect(activeAccounts).toHaveLength(1);
+	expect(activeAccounts[0]?.account_id).toBe(mockAccount.id);
+
+	// Join to verify the actual account was created with correct details
+	const activeAccountWithDetails = await lix.db
+		.selectFrom("active_account as aa")
+		.innerJoin("account_all as a", "a.id", "aa.account_id")
+		.where("a.lixcol_version_id", "=", "global")
+		.select(["a.id", "a.name"])
+		.executeTakeFirst();
+
+	expect(activeAccountWithDetails?.name).toBe(mockAccount.name);
 });
 
 test("usedFileExtensions", async () => {

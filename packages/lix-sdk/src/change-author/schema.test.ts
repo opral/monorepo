@@ -328,8 +328,12 @@ test("change authors are accessible during a transaction", async () => {
 			.selectAll()
 			.execute();
 
-		expect(changeAuthors).toHaveLength(1);
-		expect(changeAuthors[0]).toMatchObject({
+		// Find the test account's change author (there may be multiple active accounts)
+		const testAuthor = changeAuthors.find(
+			(a) => a.account_id === "test-account"
+		);
+		expect(testAuthor).toBeDefined();
+		expect(testAuthor).toMatchObject({
 			change_id: changeId,
 			account_id: "test-account",
 		});

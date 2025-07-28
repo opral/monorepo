@@ -1,7 +1,6 @@
 import { Kysely, ParseJSONResultsPlugin } from "kysely";
 import { createDialect, type SqliteWasmDatabase } from "sqlite-wasm-kysely";
 import type { LixDatabaseSchema, LixInternalDatabaseSchema } from "./schema.js";
-import { humanId } from "human-id";
 import { JSONColumnPlugin } from "./kysely-plugin/json-column-plugin.js";
 import { ViewInsertReturningErrorPlugin } from "./kysely-plugin/view-insert-returning-error-plugin.js";
 import { LixSchemaViewMap } from "./schema.js";
@@ -23,7 +22,7 @@ import { applyAccountDatabaseSchema } from "../account/schema.js";
 import { applyStateHistoryDatabaseSchema } from "../state-history/schema.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import type { Lix } from "../lix/open-lix.js";
-import { timestamp, uuidV7 } from "../deterministic/index.js";
+import { timestamp, uuidV7, generateHumanId } from "../deterministic/index.js";
 import { nanoId } from "../deterministic/nano-id.js";
 import { applyEntityDatabaseSchema } from "../entity/schema.js";
 import { applyEntityThreadDatabaseSchema } from "../entity/thread/schema.js";
@@ -176,7 +175,7 @@ function initFunctions(args: {
 	args.sqlite.createFunction({
 		name: "human_id",
 		arity: 0,
-		xFunc: () => humanId({ separator: "-", capitalize: false }),
+		xFunc: () => generateHumanId({ lix, separator: "-", capitalize: false }),
 	});
 
 	args.sqlite.createFunction({

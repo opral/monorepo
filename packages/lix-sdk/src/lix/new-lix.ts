@@ -240,6 +240,9 @@ export async function newLixFile(args?: {
 		],
 	});
 
+	// Anonymous account creation has been moved to openLix
+	// No need to set up any accounts here
+
 	// No need to persist lix_deterministic_bootstrap separately anymore
 	// It's handled as part of the deterministic mode config
 
@@ -577,34 +580,8 @@ function createBootstrapChanges(args: {
 		});
 	}
 
-	// Create default active account
-	const activeAccountId = args.generateNanoid();
-	const anonymousAccountName = args.isDeterministicBootstrap
-		? "Anonymous User"
-		: `Anonymous ${humanId({
-				capitalize: true,
-				adjectiveCount: 0,
-				separator: "_",
-			})
-				// Human ID has two words, remove the last one
-				.split("_")[0]!
-				// Human ID uses plural, remove the last character to make it singular
-				.slice(0, -1)}`;
-
-	// Create the active account entry (the account entity will be created on first change)
-	changes.push({
-		id: args.generateUuid(),
-		entity_id: activeAccountId,
-		schema_key: "lix_active_account",
-		schema_version: "1.0",
-		file_id: "lix",
-		plugin_key: "lix_own_entity",
-		snapshot_id: args.generateUuid(),
-		snapshot_content: {
-			name: anonymousAccountName,
-		},
-		created_at: args.created_at,
-	});
+	// Anonymous account creation has been moved to openLix
+	// to only create when no account is provided and no active account exists
 
 	// Create change set elements linking all changes to the global change set
 	const originalChanges = [...changes]; // snapshot of original changes

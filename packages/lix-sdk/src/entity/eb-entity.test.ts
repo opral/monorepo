@@ -11,57 +11,57 @@ test("ebEntity.hasLabel filters entities by label name", async () => {
 	const importantLabel = await createLabel({ lix, name: "important" });
 	const archivedLabel = await createLabel({ lix, name: "archived" });
 
-	// Create accounts
+	// Create key-value entries
 	await lix.db
-		.insertInto("account")
+		.insertInto("key_value")
 		.values([
-			{ id: "acc1", name: "John Doe" },
-			{ id: "acc2", name: "Jane Smith" },
-			{ id: "acc3", name: "Bob Johnson" },
+			{ key: "item1", value: "First item" },
+			{ key: "item2", value: "Second item" },
+			{ key: "item3", value: "Third item" },
 		])
 		.execute();
 
-	// Get accounts from view to get the full entity info
-	const accounts = await lix.db.selectFrom("account").selectAll().execute();
+	// Get entries from view to get the full entity info
+	const entries = await lix.db.selectFrom("key_value").selectAll().execute();
 
-	// Label some accounts
+	// Label some entries
 	await createEntityLabel({
 		lix,
-		entity: accounts[0]!,
+		entity: entries[0]!,
 		label: importantLabel,
 	});
 
 	await createEntityLabel({
 		lix,
-		entity: accounts[1]!,
+		entity: entries[1]!,
 		label: importantLabel,
 	});
 
 	await createEntityLabel({
 		lix,
-		entity: accounts[2]!,
+		entity: entries[2]!,
 		label: archivedLabel,
 	});
 
-	// Query accounts with "important" label using new API
-	const importantAccounts = await lix.db
-		.selectFrom("account")
-		.where(ebEntity("account").hasLabel({ name: "important" }))
-		.select(["id", "name"])
+	// Query entries with "important" label using new API
+	const importantEntries = await lix.db
+		.selectFrom("key_value")
+		.where(ebEntity("key_value").hasLabel({ name: "important" }))
+		.select(["key", "value"])
 		.execute();
 
-	expect(importantAccounts).toHaveLength(2);
-	expect(importantAccounts.map((a) => a.id).sort()).toEqual(["acc1", "acc2"]);
+	expect(importantEntries).toHaveLength(2);
+	expect(importantEntries.map((e) => e.key).sort()).toEqual(["item1", "item2"]);
 
-	// Query accounts with "archived" label
-	const archivedAccounts = await lix.db
-		.selectFrom("account")
-		.where(ebEntity("account").hasLabel({ name: "archived" }))
-		.select(["id", "name"])
+	// Query entries with "archived" label
+	const archivedEntries = await lix.db
+		.selectFrom("key_value")
+		.where(ebEntity("key_value").hasLabel({ name: "archived" }))
+		.select(["key", "value"])
 		.execute();
 
-	expect(archivedAccounts).toHaveLength(1);
-	expect(archivedAccounts[0]?.id).toBe("acc3");
+	expect(archivedEntries).toHaveLength(1);
+	expect(archivedEntries[0]?.key).toBe("item3");
 });
 
 test("ebEntity.hasLabel filters entities by label id", async () => {
@@ -149,31 +149,31 @@ test("ebEntity.hasLabel with negation", async () => {
 test("ebEntity.equals matches entities by composite key", async () => {
 	const lix = await openLix({});
 
-	// Create multiple accounts
+	// Create multiple key-value entries
 	await lix.db
-		.insertInto("account")
+		.insertInto("key_value")
 		.values([
-			{ id: "acc1", name: "John" },
-			{ id: "acc2", name: "Jane" },
-			{ id: "acc3", name: "Bob" },
+			{ key: "config1", value: "Development" },
+			{ key: "config2", value: "Production" },
+			{ key: "config3", value: "Testing" },
 		])
 		.execute();
 
-	// Get accounts from view
-	const accounts = await lix.db.selectFrom("account").selectAll().execute();
+	// Get entries from view
+	const entries = await lix.db.selectFrom("key_value").selectAll().execute();
 
-	const targetAccount = accounts[1]!; // Jane
+	const targetEntry = entries[1]!; // config2
 
-	// Query for the specific account using equals
-	const matchingAccounts = await lix.db
-		.selectFrom("account")
-		.where(ebEntity("account").equals(targetAccount))
-		.select(["id", "name"])
+	// Query for the specific entry using equals
+	const matchingEntries = await lix.db
+		.selectFrom("key_value")
+		.where(ebEntity("key_value").equals(targetEntry))
+		.select(["key", "value"])
 		.execute();
 
-	expect(matchingAccounts).toHaveLength(1);
-	expect(matchingAccounts[0]?.id).toBe("acc2");
-	expect(matchingAccounts[0]?.name).toBe("Jane");
+	expect(matchingEntries).toHaveLength(1);
+	expect(matchingEntries[0]?.key).toBe("config2");
+	expect(matchingEntries[0]?.value).toBe("Production");
 });
 
 test("ebEntity.equals works with canonical column names", async () => {
@@ -375,18 +375,18 @@ test("ebEntity with multiple labels and complex conditions", async () => {
 test("ebEntity works with state table using canonical columns", async () => {
 	const lix = await openLix({});
 
-	// Create accounts first
+	// Create key-value entries first
 	await lix.db
-		.insertInto("account")
+		.insertInto("key_value")
 		.values([
-			{ id: "user1", name: "Alice" },
-			{ id: "user2", name: "Bob" },
-			{ id: "user3", name: "Charlie" },
+			{ key: "user1", value: "Alice" },
+			{ key: "user2", value: "Bob" },
+			{ key: "user3", value: "Charlie" },
 		])
 		.execute();
 
-	// Get account entities from view
-	const accounts = await lix.db.selectFrom("account").selectAll().execute();
+	// Get key-value entities from view
+	const keyValues = await lix.db.selectFrom("key_value").selectAll().execute();
 
 	// Create entities in state table directly
 	await lix.db
@@ -431,8 +431,8 @@ test("ebEntity works with state table using canonical columns", async () => {
 		])
 		.execute();
 
-	// Get the user account entity for Alice (has canonical columns)
-	const userAccount = accounts.find((a) => a.id === "user1")!;
+	// Get the user key-value entity for Alice (has canonical columns)
+	const userKeyValue = keyValues.find((kv) => kv.key === "user1")!;
 
 	// Query state table for all documents authored by this specific user account
 	// This simulates a real-world scenario where you want to find all entities
@@ -447,7 +447,7 @@ test("ebEntity works with state table using canonical columns", async () => {
 					eb.val("$.author_id"),
 				]),
 			"=",
-			userAccount.id
+			userKeyValue.key
 		)
 		.selectAll()
 		.execute();
@@ -547,60 +547,60 @@ test("ebEntity works without table parameter when context is unambiguous", async
 	expect(matchingDocs).toHaveLength(2);
 	expect(matchingDocs.map((d) => d.entity_id).sort()).toEqual(["doc1", "doc2"]);
 
-	// Create some accounts to test with view tables
+	// Create some key-value entries to test with view tables
 	await lix.db
-		.insertInto("account")
+		.insertInto("key_value")
 		.values([
-			{ id: "acc1", name: "Alice" },
-			{ id: "acc2", name: "Bob" },
-			{ id: "acc3", name: "Charlie" },
+			{ key: "pref1", value: "Dark mode" },
+			{ key: "pref2", value: "Light mode" },
+			{ key: "pref3", value: "Auto mode" },
 		])
 		.execute();
 
-	const accounts = await lix.db
-		.selectFrom("account")
+	const entries = await lix.db
+		.selectFrom("key_value")
 		.limit(2)
 		.selectAll()
 		.execute();
 
 	// Test ebEntity().in() without specifying table - should work for view tables
-	const matchingAccounts = await lix.db
-		.selectFrom("account")
-		.where(ebEntity().in(accounts))
-		.select(["id", "name"])
+	const matchingEntries = await lix.db
+		.selectFrom("key_value")
+		.where(ebEntity().in(entries))
+		.select(["key", "value"])
 		.execute();
 
-	expect(matchingAccounts).toHaveLength(2);
-	expect(matchingAccounts.map((a) => a.id).sort()).toEqual(["acc1", "acc2"]);
+	expect(matchingEntries).toHaveLength(2);
+	expect(matchingEntries.map((e) => e.key).sort()).toEqual(["pref1", "pref2"]);
 
 	// Test ebEntity().equals() without table parameter
-	const targetAccount = accounts[0]!;
-	const foundAccount = await lix.db
-		.selectFrom("account")
-		.where(ebEntity().equals(targetAccount))
+	const targetEntry = entries[0]!;
+	const foundEntry = await lix.db
+		.selectFrom("key_value")
+		.where(ebEntity().equals(targetEntry))
 		.selectAll()
 		.executeTakeFirst();
 
-	expect(foundAccount?.id).toBe("acc1");
-	expect(foundAccount?.name).toBe("Alice");
+	expect(foundEntry?.key).toBe("pref1");
+	expect(foundEntry?.value).toBe("Dark mode");
 
 	// Test with labels too
 	const testLabel = await createLabel({ lix, name: "test-optional" });
 	await createEntityLabel({
 		lix,
-		entity: accounts[1]!,
+		entity: entries[1]!,
 		label: testLabel,
 	});
 
 	// ebEntity().hasLabel() without table parameter
-	const labeledAccounts = await lix.db
-		.selectFrom("account")
+	const labeledEntries = await lix.db
+		.selectFrom("key_value")
 		.where(ebEntity().hasLabel({ name: "test-optional" }))
-		.select(["id"])
+		.select(["key"])
 		.execute();
 
-	expect(labeledAccounts).toHaveLength(1);
-	expect(labeledAccounts[0]?.id).toBe("acc2");
+	expect(labeledEntries).toHaveLength(1);
+	expect(labeledEntries[0]?.key).toBe("pref2");
 });
 
 test("ebEntity without table parameter fails when context is ambiguous (joins)", async () => {
@@ -608,10 +608,10 @@ test("ebEntity without table parameter fails when context is ambiguous (joins)",
 
 	// Create some test data
 	await lix.db
-		.insertInto("account")
+		.insertInto("key_value")
 		.values([
-			{ id: "user1", name: "Alice" },
-			{ id: "user2", name: "Bob" },
+			{ key: "user1", value: "Alice" },
+			{ key: "user2", value: "Bob" },
 		])
 		.execute();
 
@@ -639,19 +639,19 @@ test("ebEntity without table parameter fails when context is ambiguous (joins)",
 		.execute();
 
 	// Get entities for testing
-	const account = await lix.db
-		.selectFrom("account")
-		.where("id", "=", "user1")
+	const keyValue = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "user1")
 		.selectAll()
 		.executeTakeFirstOrThrow();
 
-	//  Join between account (view) and thread (view) - both use lixcol_* columns
+	//  Join between key_value (view) and thread (view) - both use lixcol_* columns
 	// This should fail because we have ambiguous column references
 	await expect(
 		lix.db
-			.selectFrom("account")
-			.innerJoin("thread", "thread.id", "account.id") // Contrived join
-			.where(ebEntity().equals(account))
+			.selectFrom("key_value")
+			.innerJoin("thread", "thread.id", "key_value.key") // Contrived join
+			.where(ebEntity().equals(keyValue))
 			.selectAll()
 			.execute()
 	).rejects.toThrow(/ambiguous|lixcol_entity_id/i);
@@ -661,27 +661,27 @@ test("ebEntity without table parameter fails when context is ambiguous (joins)",
 
 	await expect(
 		lix.db
-			.selectFrom("account")
-			.innerJoin("thread", "thread.id", "account.id")
+			.selectFrom("key_value")
+			.innerJoin("thread", "thread.id", "key_value.key")
 			.where(ebEntity().hasLabel({ name: "ambiguous-test" }))
 			.selectAll()
 			.execute()
 	).rejects.toThrow(/ambiguous|lixcol_entity_id/i);
 
 	// Correct usage: specify the table when using joins
-	// Create a thread with ID matching an account ID for the join to work
+	// Create a thread with ID matching a key_value key for the join to work
 	await lix.db
 		.insertInto("thread")
-		.values({ id: "user1" }) // Same as account ID
+		.values({ id: "user1" }) // Same as key_value key
 		.execute();
 
 	const correctQuery = await lix.db
-		.selectFrom("account")
-		.innerJoin("thread", "thread.id", "account.id")
-		.where(ebEntity("account").equals(account))
-		.select(["account.id", "account.name"])
+		.selectFrom("key_value")
+		.innerJoin("thread", "thread.id", "key_value.key")
+		.where(ebEntity("key_value").equals(keyValue))
+		.select(["key_value.key", "key_value.value"])
 		.execute();
 
 	expect(correctQuery).toHaveLength(1);
-	expect(correctQuery[0]?.id).toBe("user1");
+	expect(correctQuery[0]?.key).toBe("user1");
 });

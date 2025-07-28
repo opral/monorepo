@@ -26,7 +26,7 @@ test("it should capture as expected", async () => {
 
 	const account = await project.lix.db
 		.selectFrom("active_account")
-		.select("id")
+		.select("account_id")
 		.executeTakeFirstOrThrow();
 
 	const bundle = await project.db
@@ -66,7 +66,7 @@ test("it should capture as expected", async () => {
 	expect(capture).toHaveBeenCalledWith("SDK loaded project", {
 		projectId: await project.id.get(),
 		settings: await project.settings.get(),
-		accountId: account.id,
+		accountId: account.account_id,
 		properties: {
 			appId: "test",
 			settings: await project.settings.get(),
