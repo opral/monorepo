@@ -169,6 +169,18 @@ export function insertTransactionState(args: {
 	} else {
 		const changeId = uuidV7({ lix: args.lix as any });
 
+		// When inserting tracked state, delete any existing untracked state
+		// This ensures tracked state always overrides untracked state
+		executeSync({
+			lix: args.lix,
+			query: args.lix.db
+				.deleteFrom("internal_state_all_untracked")
+				.where("entity_id", "=", args.data.entity_id)
+				.where("schema_key", "=", args.data.schema_key)
+				.where("file_id", "=", args.data.file_id)
+				.where("version_id", "=", args.data.version_id),
+		});
+
 		// Insert into internal_change_in_transaction
 		// Use ON CONFLICT to handle updates within the same transaction
 		// This is necessary when an entity is created and then updated in the same transaction
