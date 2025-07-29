@@ -21,7 +21,8 @@ export function applyVersionDatabaseSchema(
 			id: () => nanoId({ lix }),
 			name: () => generateHumanId({ lix }),
 			working_commit_id: () => nanoId({ lix }),
-			inherits_from_version_id: () => "global",
+			// Note: inherits_from_version_id default is handled in createVersion
+			// to allow explicit null values
 			hidden: () => false,
 		},
 	});
