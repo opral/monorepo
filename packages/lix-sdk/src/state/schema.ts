@@ -16,6 +16,7 @@ import { applyResolvedStateView } from "./resolved-state-view.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
 import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
 import { markStateCacheAsFresh } from "./cache/mark-state-cache-as-stale.js";
+import { applyUntrackedStateSchema } from "./untracked/schema.js";
 import { commit } from "./commit.js";
 import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
@@ -48,6 +49,7 @@ export function applyStateDatabaseSchema(
 ): void {
 	applyMaterializeStateSchema(sqlite);
 	applyStateCacheSchema({ sqlite });
+	applyUntrackedStateSchema({ sqlite });
 	applyResolvedStateView({ sqlite, db });
 
 	sqlite.createFunction({
@@ -66,24 +68,6 @@ export function applyStateDatabaseSchema(
 			});
 		},
 	});
-
-	// Create the cache table for performance optimization and the untracked state table
-	sqlite.exec(`
-  -- Table for untracked state that bypasses change control
-  CREATE TABLE IF NOT EXISTS internal_state_all_untracked (
-    entity_id TEXT NOT NULL,
-    schema_key TEXT NOT NULL,
-    file_id TEXT NOT NULL,
-    version_id TEXT NOT NULL,
-    plugin_key TEXT NOT NULL,
-    snapshot_content TEXT NOT NULL, -- JSON content
-    schema_version TEXT NOT NULL,
-    created_at TEXT NOT NULL CHECK (created_at LIKE '%Z'),
-    updated_at TEXT NOT NULL CHECK (updated_at LIKE '%Z'),
-    PRIMARY KEY (entity_id, schema_key, file_id, version_id)
-  ) STRICT;
-
-`);
 
 	// Create virtual table using the proper SQLite WASM API (following vtab-experiment pattern)
 	const capi = sqlite.sqlite3.capi;
@@ -895,7 +879,7 @@ export function handleStateDelete(
 	if (untracked) {
 		// Parse the primary key to check if it's inherited untracked (UI tag)
 		const parsed = parseStatePk(primaryKey);
-		
+
 		if (parsed.tag === "UI") {
 			// For inherited untracked, create a tombstone to block inheritance
 			insertTransactionState({
@@ -1013,17 +997,6 @@ export type StateAllView = {
 	commit_id: Generated<string>;
 };
 
-export type InternalStateAllUntrackedTable = {
-	entity_id: string;
-	schema_key: string;
-	file_id: string;
-	version_id: string;
-	plugin_key: string;
-	snapshot_content: string; // JSON string, not null for untracked
-	schema_version: string;
-	created_at: Generated<string>;
-	updated_at: Generated<string>;
-};
 
 // Kysely operation types
 export type StateRow = Selectable<StateView>;
