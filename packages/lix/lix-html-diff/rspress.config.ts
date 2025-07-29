@@ -5,7 +5,7 @@ import mermaid from "rspress-plugin-mermaid";
 export default defineConfig({
   root: path.join(__dirname, "docs"),
   outDir: "docs_build",
-  title: "Lix HTML Diff",
+  title: "HTML Diff",
   description: "Build a diff view in your app with this HTML differ",
   icon: "/rspress-icon.png",
   globalStyles: path.join(__dirname, "docs/styles/index.css"),
