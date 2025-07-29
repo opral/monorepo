@@ -2,7 +2,7 @@
 pageType: home
 
 hero:
-  name: Lix HTML Diff
+  name: HTML Diff
   text: Build a diff view in your app
   tagline: Universal HTML diffing for any app UI - works with React, Vue, Svelte, Angular, and more
   actions:
