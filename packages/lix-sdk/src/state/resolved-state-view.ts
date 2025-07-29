@@ -105,7 +105,7 @@ export function applyResolvedStateView(args: {
 				isc.commit_id
 			FROM (
 				-- Get version inheritance relationships from cache
-				SELECT 
+				SELECT DISTINCT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
 				FROM internal_state_cache isc_v
@@ -152,7 +152,7 @@ export function applyResolvedStateView(args: {
 				'untracked' as commit_id
 			FROM (
 				-- Get version inheritance relationships from cache
-				SELECT 
+				SELECT DISTINCT
 					json_extract(isc_v.snapshot_content, '$.id') AS version_id,
 					json_extract(isc_v.snapshot_content, '$.inherits_from_version_id') AS parent_version_id
 				FROM internal_state_cache isc_v

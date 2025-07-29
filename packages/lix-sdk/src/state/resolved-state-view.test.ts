@@ -116,6 +116,7 @@ test("resolved state view should handle version inheritance", async () => {
 		.selectAll()
 		.execute();
 
+
 	// Both should return the inherited entity
 	expect(stateAllResults).toHaveLength(1);
 	expect(resolvedStateResults).toHaveLength(1);
