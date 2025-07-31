@@ -4,7 +4,6 @@ import { validateStateMutation } from "./validate-state-mutation.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { Kysely } from "kysely";
 import { sql } from "kysely";
-import { handleStateMutation } from "./handle-state-mutation.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
@@ -888,17 +887,19 @@ export function handleStateDelete(
 		version_id: String(version_id),
 	});
 
-	handleStateMutation(
-		sqlite,
-		db,
-		String(entity_id),
-		String(schema_key),
-		String(file_id),
-		String(plugin_key),
-		null, // No snapshot content for DELETE
-		String(version_id),
-		String(schema_version)
-	);
+	insertTransactionState({
+		lix: { sqlite, db },
+		data: {
+			entity_id: String(entity_id),
+			schema_key: String(schema_key),
+			file_id: String(file_id),
+			plugin_key: String(plugin_key),
+			snapshot_content: null, // No snapshot content for DELETE
+			schema_version: String(schema_version),
+			version_id: String(version_id),
+			untracked: false, // tracked entity
+		},
+	});
 }
 
 // Helper functions for the virtual table

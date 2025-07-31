@@ -1,10 +1,13 @@
 import { test, expect, describe } from "vitest";
 import type { Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import type { LixCommitEdge } from "../commit/schema.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import { commit } from "./commit.js";
 import { openLix } from "../lix/open-lix.js";
 import { nanoId, uuidV7 } from "../deterministic/index.js";
+import { switchAccount } from "../account/switch-account.js";
+import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 
 test("commit should include meta changes (changeset, edges, version updates) in the change table", async () => {
 	const lix = await openLix({
@@ -1111,4 +1114,258 @@ test("active version should move forward when mutations occur", async () => {
 			expect(change.snapshot_content?.commit_id).toBe(versionAfter.commit_id);
 		}
 	}
+});
+
+// Tests moved from handle-state-mutation.test.ts since they test commit behavior
+
+test("creates a new commit and updates the version's commit id for mutations", async () => {
+	const lix = await openLix({});
+
+	const versionBeforeInsert = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll()
+		.where("name", "=", "main")
+		.executeTakeFirstOrThrow();
+
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "mock_key",
+			value: "mock_value",
+		})
+		.execute();
+
+	const versionAfterInsert = await lix.db
+		.selectFrom("version")
+		.selectAll()
+		.where("id", "=", versionBeforeInsert.id)
+		.executeTakeFirstOrThrow();
+
+	expect(versionAfterInsert.commit_id).not.toEqual(
+		versionBeforeInsert.commit_id
+	);
+
+	await lix.db
+		.updateTable("key_value_all")
+		.where("key", "=", "mock_key")
+		.where(
+			"lixcol_version_id",
+			"=",
+			lix.db.selectFrom("active_version").select("version_id")
+		)
+		.set({
+			value: "mock_value_updated",
+		})
+		.execute();
+
+	const versionAfterUpdate = await lix.db
+		.selectFrom("version")
+		.selectAll()
+		.where("id", "=", versionAfterInsert.id)
+		.executeTakeFirstOrThrow();
+
+	expect(versionAfterUpdate.commit_id).not.toEqual(
+		versionAfterInsert.commit_id
+	);
+
+	await lix.db.deleteFrom("key_value").where("key", "=", "mock_key").execute();
+
+	const versionAfterDelete = await lix.db
+		.selectFrom("version")
+		.selectAll()
+		.where("id", "=", versionAfterUpdate.id)
+		.executeTakeFirstOrThrow();
+
+	expect(versionAfterDelete.commit_id).not.toEqual(
+		versionAfterUpdate.commit_id
+	);
+
+	const edges = await lix.db
+		.selectFrom("commit_edge")
+		.select(["parent_id", "child_id"])
+		.execute();
+
+	expect(edges).toEqual(
+		expect.arrayContaining([
+			{
+				parent_id: versionBeforeInsert.commit_id,
+				child_id: versionAfterInsert.commit_id,
+			},
+			{
+				parent_id: versionAfterInsert.commit_id,
+				child_id: versionAfterUpdate.commit_id,
+			},
+			{
+				parent_id: versionAfterUpdate.commit_id,
+				child_id: versionAfterDelete.commit_id,
+			},
+		] satisfies LixCommitEdge[])
+	);
+});
+
+test("groups changes of a transaction into the same change set for the given version", async () => {
+	const lix = await openLix({});
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	const commitAncestryBefore = await lix.db
+		.selectFrom("commit")
+		.where(commitIsAncestorOf({ id: activeVersion.commit_id }))
+		.selectAll()
+		.execute();
+
+	await lix.db.transaction().execute(async (trx) => {
+		await trx
+			.insertInto("key_value")
+			.values({
+				key: "mock_key",
+				value: "mock_value",
+			})
+			.execute();
+
+		await trx
+			.insertInto("key_value")
+			.values({
+				key: "mock_key2",
+				value: "mock_value2",
+			})
+			.execute();
+	});
+
+	const activeVersionAfterTransaction = await lix.db
+		.selectFrom("active_version")
+		.innerJoin("version", "version.id", "active_version.version_id")
+		.selectAll("version")
+		.executeTakeFirstOrThrow();
+
+	const commitAncestryAfter = await lix.db
+		.selectFrom("commit")
+		.where(commitIsAncestorOf({ id: activeVersionAfterTransaction.commit_id }))
+		.selectAll()
+		.execute();
+
+	expect(commitAncestryAfter).toHaveLength(commitAncestryBefore.length + 1);
+});
+
+test("creates change_author records for insert, update, and delete operations", async () => {
+	const lix = await openLix({});
+
+	// Create test accounts
+	await lix.db
+		.insertInto("account")
+		.values([
+			{ id: "test-account-1", name: "Test User 1" },
+			{ id: "test-account-2", name: "Test User 2" },
+		])
+		.execute();
+
+	// Switch to single active account for insert
+	await switchAccount({
+		lix,
+		to: [{ id: "test-account-1", name: "Test User 1" }],
+	});
+
+	// INSERT: Create initial entity
+	await lix.db
+		.insertInto("key_value")
+		.values({
+			key: "crud_test_key",
+			value: "initial_value",
+		})
+		.execute();
+
+	// Switch to multiple active accounts for update
+	await switchAccount({
+		lix,
+		to: [
+			{ id: "test-account-1", name: "Test User 1" },
+			{ id: "test-account-2", name: "Test User 2" },
+		],
+	});
+
+	// UPDATE: Modify the entity
+	await lix.db
+		.updateTable("key_value")
+		.where("key", "=", "crud_test_key")
+		.set({ value: "updated_value" })
+		.execute();
+
+	// Switch back to single account for delete
+	await switchAccount({
+		lix,
+		to: [{ id: "test-account-2", name: "Test User 2" }],
+	});
+
+	// DELETE: Remove the entity
+	await lix.db
+		.deleteFrom("key_value")
+		.where("key", "=", "crud_test_key")
+		.execute();
+
+	// Get all changes for this entity
+	const changes = await lix.db
+		.selectFrom("change")
+		.where("entity_id", "=", "crud_test_key")
+		.where("schema_key", "=", "lix_key_value")
+		.orderBy("created_at", "asc")
+		.select(["id"])
+		.execute();
+
+	expect(changes).toHaveLength(3); // Insert + Update + Delete
+
+	const insertChangeId = changes[0]!.id;
+	const updateChangeId = changes[1]!.id;
+	const deleteChangeId = changes[2]!.id;
+
+	// Verify change_author records for INSERT (single account)
+	const insertAuthors = await lix.db
+		.selectFrom("change_author")
+		.where("change_id", "=", insertChangeId)
+		.selectAll()
+		.execute();
+
+	expect(insertAuthors).toHaveLength(1);
+	expect(insertAuthors[0]).toMatchObject({
+		change_id: insertChangeId,
+		account_id: "test-account-1",
+	});
+
+	// Verify change_author records for UPDATE (multiple accounts)
+	const updateAuthors = await lix.db
+		.selectFrom("change_author")
+		.where("change_id", "=", updateChangeId)
+		.selectAll()
+		.execute();
+
+	expect(updateAuthors).toHaveLength(2);
+
+	// Check that both accounts are represented
+	const updateAccountIds = updateAuthors.map((author) => author.account_id);
+	expect(updateAccountIds).toContain("test-account-1");
+	expect(updateAccountIds).toContain("test-account-2");
+
+	// Check that all records have the correct change_id
+	updateAuthors.forEach((author) => {
+		expect(author).toMatchObject({
+			change_id: updateChangeId,
+		});
+	});
+
+	// Verify change_author records for DELETE (single account)
+	const deleteAuthors = await lix.db
+		.selectFrom("change_author")
+		.where("change_id", "=", deleteChangeId)
+		.selectAll()
+		.execute();
+
+	expect(deleteAuthors).toHaveLength(1);
+	expect(deleteAuthors[0]).toMatchObject({
+		change_id: deleteChangeId,
+		account_id: "test-account-2",
+	});
 });
