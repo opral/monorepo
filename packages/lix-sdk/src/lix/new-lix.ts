@@ -18,6 +18,7 @@ import type { LixStoredSchema } from "../stored-schema/schema.js";
 import { createHooks } from "../hooks/create-hooks.js";
 import { humanId } from "human-id";
 import type { NewStateAll } from "../entity-views/types.js";
+import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 import { v7 } from "uuid";
 import { randomNanoId } from "../database/nano-id.js";
 
@@ -214,34 +215,20 @@ export async function newLixFile(args?: {
 		(c) => c.schema_key === "lix_version" && c.snapshot_content?.name === "main"
 	)?.entity_id;
 
-	// Set active version using internal_state_all_untracked for determinism
-	sqlite.exec({
-		sql: `INSERT INTO internal_state_all_untracked (
-			entity_id,
-			schema_key,
-			file_id,
-			version_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-			created_at,
-			updated_at,
-			inherited_from_version_id,
-			inheritance_delete_marker
-		) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?)`,
-		bind: [
-			"active",
-			"lix_active_version",
-			"lix",
-			"global",
-			"lix_own_entity",
-			JSON.stringify({ version_id: initialVersionId }),
-			"1.0",
-			created_at,
-			created_at,
-			null, // inherited_from_version_id
-			0, // inheritance_delete_marker
-		],
+	// Set active version using updateUntrackedState for proper inheritance handling
+	updateUntrackedState({
+		lix: { sqlite, db },
+		change: {
+			id: "untracked",
+			entity_id: "active",
+			schema_key: "lix_active_version",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({ version_id: initialVersionId }),
+			schema_version: "1.0",
+			created_at: created_at,
+		},
+		version_id: "global",
 	});
 
 	// Anonymous account creation has been moved to openLix
@@ -258,32 +245,22 @@ export async function newLixFile(args?: {
 	if (untrackedKeyValues) {
 		for (const kv of untrackedKeyValues) {
 			const versionId = kv.lixcol_version_id ?? "global";
-			sqlite.exec({
-				sql: `INSERT INTO internal_state_all_untracked (
-					entity_id,
-					schema_key,
-					file_id,
-					version_id,
-					plugin_key,
-					snapshot_content,
-					schema_version,
-					created_at,
-					updated_at
-				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-				bind: [
-					kv.key,
-					"lix_key_value",
-					"lix",
-					versionId,
-					"lix_own_entity",
-					JSON.stringify({
+			updateUntrackedState({
+				lix: { sqlite, db },
+				change: {
+					id: "untracked",
+					entity_id: kv.key,
+					schema_key: "lix_key_value",
+					file_id: "lix",
+					plugin_key: "lix_own_entity",
+					snapshot_content: JSON.stringify({
 						key: kv.key,
 						value: kv.value,
 					}),
-					LixKeyValueSchema["x-lix-version"],
-					created_at,
-					created_at,
-				],
+					schema_version: LixKeyValueSchema["x-lix-version"],
+					created_at: created_at,
+				},
+				version_id: versionId,
 			});
 		}
 	}
