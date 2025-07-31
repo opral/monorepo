@@ -1178,6 +1178,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "change-set-id-test-file")
 			.select(["change_set_id", "change_id"])
+			.orderBy("change_set_id")
 			.execute();
 
 		expectDeterministic(changeSetElements).toHaveLength(2);
