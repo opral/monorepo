@@ -51,7 +51,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		GROUP BY commit_id, version_id;
 	`);
 
-	// View 3: Latest visible state - first seen wins
+	// View 3: Latest visible state - first seen wins, with proper timestamps
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
 		WITH commit_changes AS (
@@ -70,7 +70,14 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 				ROW_NUMBER() OVER (
 					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
 					ORDER BY cg.depth ASC
-				) as first_seen
+				) as first_seen,
+				-- Get first and last change timestamps for proper created_at/updated_at
+				MIN(c.created_at) OVER (
+					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
+				) as entity_created_at,
+				MAX(c.created_at) OVER (
+					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
+				) as entity_updated_at
 			FROM internal_materialization_commit_graph cg
 			-- Get commit's change_set_id
 			JOIN change cmt ON cmt.entity_id = cg.commit_id 
@@ -92,7 +99,8 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 			plugin_key,
 			snapshot_content,
 			schema_version,
-			created_at
+			entity_created_at as created_at,
+			entity_updated_at as updated_at
 		FROM commit_changes 
 		WHERE first_seen = 1;
 		-- Note: We do NOT filter out NULL snapshots here to allow deletion tracking
@@ -152,6 +160,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 				s.snapshot_content,
 				s.schema_version,
 				s.created_at,
+				s.updated_at,
 				s.change_id,
 				s.commit_id,
 				va.ancestor_version_id,
@@ -174,7 +183,7 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 			snapshot_content,
 			schema_version,
 			created_at,
-			created_at as updated_at,
+			updated_at,
 			CASE 
 				WHEN inheritance_depth > 0 THEN ancestor_version_id 
 				ELSE NULL 
