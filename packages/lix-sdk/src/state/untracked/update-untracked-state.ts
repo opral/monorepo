@@ -5,6 +5,15 @@ import type { LixChangeRaw } from "../../change/schema.js";
 import type { Lix } from "../../lix/open-lix.js";
 
 /**
+ * Change data for untracked state updates with optional ID.
+ * Since untracked entities don't participate in change control,
+ * the change ID is not required.
+ */
+type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
+	id?: string;
+};
+
+/**
  * Updates untracked state with inheritance support.
  *
  * This function handles all untracked entity operations (insert, update, delete)
@@ -20,12 +29,12 @@ import type { Lix } from "../../lix/open-lix.js";
  *
  * @param args - Update parameters
  * @param args.lix - Lix instance with sqlite and db
- * @param args.change - Change object containing entity information
+ * @param args.change - Change object containing entity information (ID is optional since untracked entities don't participate in change control)
  * @param args.version_id - Version ID to update
  */
 export function updateUntrackedState(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
-	change: LixChangeRaw;
+	change: UntrackedChangeData;
 	version_id: string;
 }): void {
 	const intDb = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;

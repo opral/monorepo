@@ -77,7 +77,6 @@ export function insertTransactionState(args: {
 		updateUntrackedState({
 			lix: args.lix as any,
 			change: {
-				id: "untracked",
 				entity_id: args.data.entity_id,
 				schema_key: args.data.schema_key,
 				file_id: args.data.file_id,

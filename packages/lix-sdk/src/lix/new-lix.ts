@@ -219,7 +219,6 @@ export async function newLixFile(args?: {
 	updateUntrackedState({
 		lix: { sqlite, db },
 		change: {
-			id: "untracked",
 			entity_id: "active",
 			schema_key: "lix_active_version",
 			file_id: "lix",
@@ -248,7 +247,6 @@ export async function newLixFile(args?: {
 			updateUntrackedState({
 				lix: { sqlite, db },
 				change: {
-					id: "untracked",
 					entity_id: kv.key,
 					schema_key: "lix_key_value",
 					file_id: "lix",

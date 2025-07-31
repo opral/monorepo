@@ -1,11 +1,10 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { sql, type Kysely } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { executeSync } from "../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import type { Lix } from "../lix/open-lix.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 import { timestamp } from "./timestamp.js";
+import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 
 /** State kept per SQLite connection */
 type CounterState = {
@@ -117,28 +116,17 @@ export function commitDeterministicSequenceNumber(args: {
 	} satisfies LixKeyValue);
 
 	const now = args.timestamp ?? timestamp({ lix: args.lix });
-	executeSync({
+	updateUntrackedState({
 		lix: args.lix,
-		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.insertInto("internal_state_all_untracked")
-			.values({
-				entity_id: "lix_deterministic_sequence_number",
-				version_id: "global",
-				file_id: "lix",
-				schema_key: LixKeyValueSchema["x-lix-key"],
-				plugin_key: "lix_own_entity",
-				schema_version: LixKeyValueSchema["x-lix-version"],
-				snapshot_content: sql`jsonb(${newValue})`,
-				created_at: now,
-				updated_at: now,
-				inherited_from_version_id: null,
-				inheritance_delete_marker: 0,
-			})
-			.onConflict((oc) =>
-				oc.doUpdateSet({
-					snapshot_content: sql`jsonb(${newValue})`,
-					updated_at: now,
-				})
-			),
+		change: {
+			entity_id: "lix_deterministic_sequence_number",
+			schema_key: LixKeyValueSchema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: newValue,
+			schema_version: LixKeyValueSchema["x-lix-version"],
+			created_at: now,
+		},
+		version_id: "global",
 	});
 }
