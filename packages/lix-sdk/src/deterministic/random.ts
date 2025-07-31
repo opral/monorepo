@@ -1,8 +1,9 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { sql } from "kysely";
+import { sql, type Kysely } from "kysely";
 import { executeSync } from "../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
 import { timestamp } from "./timestamp.js";
 import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";

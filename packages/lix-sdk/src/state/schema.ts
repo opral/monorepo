@@ -364,13 +364,6 @@ export function applyStateDatabaseSchema(
 					cursorState.rowIndex = 0;
 
 					if (cacheIsStale) {
-						// Log for debugging
-						if (
-							typeof process !== "undefined" &&
-							process.env.DEBUG_DETERMINISTIC_SEQ
-						) {
-						}
-
 						// Populate cache directly with materialized state
 						populateStateCache(sqlite);
 
@@ -386,25 +379,11 @@ export function applyStateDatabaseSchema(
 						// Mark cache as fresh after population
 						isUpdatingCacheState = true;
 						try {
-							if (
-								typeof process !== "undefined" &&
-								process.env.DEBUG_DETERMINISTIC_SEQ
-							) {
-							}
 							markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
 						} finally {
 							isUpdatingCacheState = false;
 						}
 
-						// After populating cache, query from resolved state view
-						if (
-							typeof process !== "undefined" &&
-							process.env.DEBUG_DETERMINISTIC_SEQ
-						) {
-							console.log(
-								"[DEBUG] Cache populated, now querying resolved state"
-							);
-						}
 						let query = db
 							.selectFrom("internal_resolved_state_all")
 							.selectAll();

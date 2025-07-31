@@ -825,7 +825,7 @@ test("global version should move forward when mutations occur", async () => {
 
 /**
  * Tests that edge changes are properly created during commit.
- * 
+ *
  * When a version moves forward (creates a new commit), an edge change must be created
  * with schema_key='lix_commit_edge' that links the old commit to the new one.
  * This is critical for the materialization lineage CTE to traverse the commit history.
@@ -850,23 +850,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		.executeTakeFirstOrThrow();
 
 	const previousCommitId = globalVersionBefore.commit_id;
-
-	// Debug: Check all commits that exist initially
-	const initialCommits = await db.selectFrom("commit").selectAll().execute();
-
-	// Check what the version snapshots look like
-	const versionSnapshots = lix.sqlite.exec({
-		sql: `
-			SELECT 
-				entity_id,
-				json_extract(snapshot_content,'$.commit_id') as commit_id,
-				created_at
-			FROM change 
-			WHERE schema_key = 'lix_version'
-			ORDER BY created_at
-		`,
-		returnValue: "resultRows",
-	});
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
@@ -907,14 +890,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		.selectAll()
 		.execute();
 
-
-	// Let's also check all edge changes
-	const allEdgeChanges = await db
-		.selectFrom("change")
-		.where("schema_key", "=", "lix_commit_edge")
-		.selectAll()
-		.execute();
-
 	expect(edgeChanges.length).toBe(1);
 
 	const edgeChange = edgeChanges[0]!;
@@ -924,78 +899,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	const edgeSnapshot = edgeChange.snapshot_content as any;
 	expect(edgeSnapshot.parent_id).toBe(previousCommitId);
 	expect(edgeSnapshot.child_id).toBe(newCommitId);
-
-	// First check what edges exist in the database
-	const allEdgesDetailed = lix.sqlite.exec({
-		sql: `
-			SELECT 
-				entity_id,
-				json_extract(snapshot_content,'$.parent_id') as parent_id,
-				json_extract(snapshot_content,'$.child_id') as child_id,
-				created_at
-			FROM change 
-			WHERE schema_key = 'lix_commit_edge'
-			ORDER BY created_at
-		`,
-		returnValue: "resultRows",
-	});
-
-	// First check what the latest version change looks like
-	const latestVersionChange = lix.sqlite.exec({
-		sql: `
-			SELECT 
-				entity_id,
-				json_extract(snapshot_content,'$.commit_id') AS commit_id,
-				created_at
-			FROM change v
-			WHERE v.schema_key = 'lix_version'
-			  AND v.entity_id = 'global'
-			  AND NOT EXISTS (
-				SELECT 1 
-				FROM change newer
-				WHERE newer.entity_id = v.entity_id
-				  AND newer.schema_key = 'lix_version'
-				  AND newer.created_at > v.created_at
-			  )
-		`,
-		returnValue: "resultRows",
-	});
-
-	// Check ALL global version changes
-	const allGlobalVersionChanges = lix.sqlite.exec({
-		sql: `
-			SELECT 
-				id,
-				entity_id,
-				json_extract(snapshot_content,'$.commit_id') AS commit_id,
-				created_at
-			FROM change
-			WHERE schema_key = 'lix_version'
-			  AND entity_id = 'global'
-			ORDER BY created_at DESC
-		`,
-		returnValue: "resultRows",
-	});
-
-	// Test the edge-based approach for finding version roots
-	const edgeBasedVersionRoot = lix.sqlite.exec({
-		sql: `
-			SELECT 
-				json_extract(v.snapshot_content,'$.commit_id') AS tip_commit_id,
-				v.entity_id AS version_id
-			FROM change v
-			WHERE v.schema_key = 'lix_version'
-			  AND v.entity_id = 'global'
-			  /* keep only the row whose commit_id has NO outgoing edge */
-			  AND NOT EXISTS (
-				SELECT 1
-				FROM change edge
-				WHERE edge.schema_key = 'lix_commit_edge'
-				  AND json_extract(edge.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.commit_id')
-			  )
-		`,
-		returnValue: "resultRows",
-	});
 
 	// Verify the edge is discoverable by the lineage CTE
 	// This simulates what internal_materialization_lineage does
@@ -1033,8 +936,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		returnValue: "resultRows",
 	});
 
-	// Debug: Print what's in the lineage
-
 	// Should have at least 2 entries: the new commit and its parent
 	expect(lineageRows.length).toBeGreaterThanOrEqual(2);
 
@@ -1047,12 +948,12 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 /**
  * Tests that when changes are made to a non-global version (like the active/main version),
  * both the version itself AND the global version are updated.
- * 
+ *
  * This is critical because:
  * 1. The non-global version's commit_id moves forward to include its data changes
  * 2. The global version's commit_id ALSO moves forward to track the version update itself
  * 3. All version changes (updates to any version entity) are stored in the global version's history
- * 
+ *
  * Without this behavior, each version would need to maintain its own history of all other versions,
  * which would be redundant and complex. Instead, the global version serves as the central registry
  * of all version state changes.

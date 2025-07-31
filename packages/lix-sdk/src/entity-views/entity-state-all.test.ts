@@ -579,10 +579,10 @@ describe("createEntityAllViewIfNotExists", () => {
 		// Create parent and child versions
 		const { createVersion } = await import("../version/create-version.js");
 		await createVersion({ lix, id: "parent-version" });
-		await createVersion({ 
-			lix, 
+		await createVersion({
+			lix,
 			id: "child-version",
-			inherits_from_version_id: "parent-version"
+			inherits_from_version_id: "parent-version",
 		});
 
 		// Insert entity into parent version
@@ -608,7 +608,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		expect(parentStateBefore[0]!.snapshot_content).toEqual({
 			id: "shared-entity",
 			name: "parent-value",
-			value: 100
+			value: 100,
 		});
 
 		// Attempt to delete the entity from child version
@@ -631,7 +631,7 @@ describe("createEntityAllViewIfNotExists", () => {
 		expect(parentStateAfter[0]!.snapshot_content).toEqual({
 			id: "shared-entity",
 			name: "parent-value",
-			value: 100
+			value: 100,
 		});
 
 		// Verify child version has no entry
@@ -640,19 +640,7 @@ describe("createEntityAllViewIfNotExists", () => {
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", "child-version")
 			.selectAll()
-			.select("_pk")
 			.execute();
-
-		console.log("Child state result:", JSON.stringify(childState, null, 2));
-
-		// Also check the cache to see what's there
-		const childCache = await (lix.db as any)
-			.selectFrom("internal_state_cache")
-			.where("entity_id", "=", "shared-entity")
-			.selectAll()
-			.execute();
-
-		console.log("Child cache result:", JSON.stringify(childCache, null, 2));
 
 		expect(childState).toHaveLength(0);
 	});
