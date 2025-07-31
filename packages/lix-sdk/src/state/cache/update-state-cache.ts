@@ -24,6 +24,7 @@ export function updateStateCache(args: {
 }): void {
 	const intDb = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
+
 	// Handle deletions (null snapshot_content) with cache cleanup
 	if (args.change.snapshot_content === null) {
 		// First, check if any versions inherit from this version
@@ -35,6 +36,7 @@ export function updateStateCache(args: {
 				.where("schema_key", "=", "lix_version")
 				.where(sql`json_extract(snapshot_content, '$.inherits_from_version_id')`, "=", args.version_id),
 		});
+
 
 		if (childVersions.length > 0) {
 			// There are child versions - move the cache entry to each child
@@ -68,7 +70,7 @@ export function updateStateCache(args: {
 								schema_version: currentCacheEntry.schema_version,
 								created_at: currentCacheEntry.created_at,
 								updated_at: currentCacheEntry.updated_at,
-								inherited_from_version_id: args.version_id, // Inherited from parent
+								inherited_from_version_id: null, // Now direct entry in child version
 								inheritance_delete_marker: 0,
 								change_id: currentCacheEntry.change_id,
 								commit_id: currentCacheEntry.commit_id,
@@ -81,7 +83,7 @@ export function updateStateCache(args: {
 										snapshot_content: currentCacheEntry.snapshot_content,
 										schema_version: currentCacheEntry.schema_version,
 										updated_at: currentCacheEntry.updated_at,
-										inherited_from_version_id: args.version_id,
+										inherited_from_version_id: null, // Now direct entry in child version
 										change_id: currentCacheEntry.change_id,
 										commit_id: currentCacheEntry.commit_id,
 									})
@@ -117,7 +119,7 @@ export function updateStateCache(args: {
 							created_at: args.change.created_at,
 							updated_at: args.change.created_at,
 							inherited_from_version_id: null,
-							inheritance_delete_marker: 0,
+							inheritance_delete_marker: 1, // Mark as tombstone for null snapshot_content
 							change_id: args.change.id,
 							commit_id: args.commit_id,
 						})
@@ -129,6 +131,7 @@ export function updateStateCache(args: {
 									snapshot_content: args.change.snapshot_content,
 									schema_version: args.change.schema_version,
 									updated_at: args.change.created_at,
+									inheritance_delete_marker: 1, // Mark as tombstone for null snapshot_content
 									change_id: args.change.id,
 									commit_id: args.commit_id,
 								})
@@ -149,20 +152,96 @@ export function updateStateCache(args: {
 					.limit(1),
 			})[0];
 
+
 			if (existingCacheEntry) {
-				// Delete the existing cache entry
-				executeSync({
-					lix: args.lix,
-					query: intDb
-						.deleteFrom("internal_state_cache")
-						.where("entity_id", "=", args.change.entity_id)
-						.where("schema_key", "=", args.change.schema_key)
-						.where("file_id", "=", args.change.file_id)
-						.where("version_id", "=", args.version_id),
-				});
+				// Cache entry exists - check if it's a tombstone or regular entry
+				if (existingCacheEntry.inheritance_delete_marker === 1) {
+					// It's already a tombstone - just update the commit_id and change_id
+					executeSync({
+						lix: args.lix,
+						query: intDb
+							.insertInto("internal_state_cache")
+							.values({
+								entity_id: args.change.entity_id,
+								schema_key: args.change.schema_key,
+								file_id: args.change.file_id,
+								version_id: args.version_id,
+								plugin_key: args.change.plugin_key,
+								snapshot_content: args.change.snapshot_content,
+								schema_version: args.change.schema_version,
+								created_at: args.change.created_at,
+								updated_at: args.change.created_at,
+								inherited_from_version_id: null,
+								inheritance_delete_marker: 1, // Keep as tombstone
+								change_id: args.change.id,
+								commit_id: args.commit_id,
+							})
+							.onConflict((oc) =>
+								oc
+									.columns(["entity_id", "schema_key", "file_id", "version_id"])
+									.doUpdateSet({
+										plugin_key: args.change.plugin_key,
+										snapshot_content: args.change.snapshot_content,
+										schema_version: args.change.schema_version,
+										updated_at: args.change.created_at,
+										inheritance_delete_marker: 1, // Keep as tombstone
+										change_id: args.change.id,
+										commit_id: args.commit_id,
+									})
+							),
+					});
+				} else if (existingCacheEntry.inherited_from_version_id) {
+					// It's inherited - replace with tombstone to block inheritance
+					executeSync({
+						lix: args.lix,
+						query: intDb
+							.insertInto("internal_state_cache")
+							.values({
+								entity_id: args.change.entity_id,
+								schema_key: args.change.schema_key,
+								file_id: args.change.file_id,
+								version_id: args.version_id,
+								plugin_key: args.change.plugin_key,
+								snapshot_content: args.change.snapshot_content,
+								schema_version: args.change.schema_version,
+								created_at: args.change.created_at,
+								updated_at: args.change.created_at,
+								inherited_from_version_id: null,
+								inheritance_delete_marker: 1, // Mark as tombstone for null snapshot_content
+								change_id: args.change.id,
+								commit_id: args.commit_id,
+							})
+							.onConflict((oc) =>
+								oc
+									.columns(["entity_id", "schema_key", "file_id", "version_id"])
+									.doUpdateSet({
+										plugin_key: args.change.plugin_key,
+										snapshot_content: args.change.snapshot_content,
+										schema_version: args.change.schema_version,
+										updated_at: args.change.created_at,
+										inheritance_delete_marker: 1, // Mark as tombstone for null snapshot_content
+										change_id: args.change.id,
+										commit_id: args.commit_id,
+									})
+							),
+					});
+				} else {
+					// It's a direct entry - just delete it completely
+					executeSync({
+						lix: args.lix,
+						query: intDb
+							.deleteFrom("internal_state_cache")
+							.where("entity_id", "=", args.change.entity_id)
+							.where("schema_key", "=", args.change.schema_key)
+							.where("file_id", "=", args.change.file_id)
+							.where("version_id", "=", args.version_id),
+					});
+				}
 			} else {
-				// No existing cache entry, but we still need to create a tombstone
-				// to block inheritance from parent versions
+				// No existing cache entry - this could be:
+				// 1. Deleting an inherited entity (need tombstone)
+				// 2. Updating an existing tombstone during commit (preserve tombstone)
+				// Use onConflict to handle both cases properly
 				executeSync({
 					lix: args.lix,
 					query: intDb
@@ -178,7 +257,7 @@ export function updateStateCache(args: {
 							created_at: args.change.created_at,
 							updated_at: args.change.created_at,
 							inherited_from_version_id: null,
-							inheritance_delete_marker: 0,
+							inheritance_delete_marker: 1, // Mark as tombstone for null snapshot_content
 							change_id: args.change.id,
 							commit_id: args.commit_id,
 						})
@@ -190,6 +269,7 @@ export function updateStateCache(args: {
 									snapshot_content: args.change.snapshot_content,
 									schema_version: args.change.schema_version,
 									updated_at: args.change.created_at,
+									inheritance_delete_marker: 1, // Preserve tombstone marker for deletions
 									change_id: args.change.id,
 									commit_id: args.commit_id,
 								})
@@ -226,6 +306,7 @@ export function updateStateCache(args: {
 							snapshot_content: args.change.snapshot_content,
 							schema_version: args.change.schema_version,
 							updated_at: args.change.created_at,
+							inheritance_delete_marker: 0, // Reset tombstone flag for non-null content
 							change_id: args.change.id,
 							commit_id: args.commit_id,
 						})

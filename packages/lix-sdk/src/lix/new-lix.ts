@@ -225,8 +225,10 @@ export async function newLixFile(args?: {
 			snapshot_content,
 			schema_version,
 			created_at,
-			updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			updated_at,
+			inherited_from_version_id,
+			inheritance_delete_marker
+		) VALUES (?, ?, ?, ?, ?, jsonb(?), ?, ?, ?, ?, ?)`,
 		bind: [
 			"active",
 			"lix_active_version",
@@ -237,6 +239,8 @@ export async function newLixFile(args?: {
 			"1.0",
 			created_at,
 			created_at,
+			null, // inherited_from_version_id
+			0, // inheritance_delete_marker
 		],
 	});
 

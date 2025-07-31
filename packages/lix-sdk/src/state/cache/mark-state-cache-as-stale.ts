@@ -24,16 +24,18 @@ export function markStateCacheAsStale(args: {
 				file_id: "lix",
 				version_id: "global",
 				plugin_key: "lix_own_entity",
-				snapshot_content: snapshotContent,
+				snapshot_content: sql`jsonb(${snapshotContent})`,
 				schema_version: LixKeyValueSchema["x-lix-version"],
 				created_at: args.timestamp ?? timestamp({ lix: args.lix }),
 				updated_at: args.timestamp ?? timestamp({ lix: args.lix }),
+				inherited_from_version_id: null,
+				inheritance_delete_marker: 0,
 			})
 			.onConflict((oc) =>
 				oc
 					.columns(["entity_id", "schema_key", "file_id", "version_id"])
 					.doUpdateSet({
-						snapshot_content: snapshotContent,
+						snapshot_content: sql`jsonb(${snapshotContent})`,
 						updated_at: args.timestamp ?? timestamp({ lix: args.lix }),
 					})
 			),
@@ -61,7 +63,7 @@ export function markStateCacheAsFresh(args: {
 				file_id: "lix",
 				version_id: "global",
 				plugin_key: "lix_own_entity",
-				snapshot_content: snapshotContent,
+				snapshot_content: sql`jsonb(${snapshotContent})`,
 				schema_version: LixKeyValueSchema["x-lix-version"],
 				created_at: args.timestamp
 					? sql`${args.timestamp}`
@@ -69,12 +71,14 @@ export function markStateCacheAsFresh(args: {
 				updated_at: args.timestamp
 					? sql`${args.timestamp}`
 					: sql`lix_timestamp()`,
+				inherited_from_version_id: null,
+				inheritance_delete_marker: 0,
 			})
 			.onConflict((oc) =>
 				oc
 					.columns(["entity_id", "schema_key", "file_id", "version_id"])
 					.doUpdateSet({
-						snapshot_content: snapshotContent,
+						snapshot_content: sql`jsonb(${snapshotContent})`,
 						updated_at: args.timestamp
 							? sql`${args.timestamp}`
 							: sql`lix_timestamp()`,

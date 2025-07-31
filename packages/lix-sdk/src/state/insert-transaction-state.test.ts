@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { commit } from "./commit.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
@@ -257,9 +257,9 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 		},
 	});
 
-	// Verify tombstone exists in cache
+	// Verify tombstone exists in untracked table (not cache)
 	const tombstone = await lixInternalDb
-		.selectFrom("internal_state_cache")
+		.selectFrom("internal_state_all_untracked")
 		.where("entity_id", "=", "inherited-untracked-key")
 		.where("schema_key", "=", "lix_key_value")
 		.where("version_id", "=", activeVersion.version_id)
@@ -269,7 +269,6 @@ test("insertTransactionState creates tombstone for inherited untracked entity de
 	expect(tombstone).toHaveLength(1);
 	expect(tombstone[0]?.inheritance_delete_marker).toBe(1);
 	expect(tombstone[0]?.snapshot_content).toBe(null);
-	expect(tombstone[0]?.change_id).toBe("untracked-delete");
 
 	// Verify entity no longer appears in active version
 	const afterDelete = await lix.db
@@ -339,4 +338,113 @@ test("untracked entities use same timestamp for created_at and updated_at", asyn
 		.executeTakeFirstOrThrow();
 
 	expect(stateView.created_at).toBe(stateView.updated_at);
+});
+
+test("insertTransactionState deletes direct untracked entity on null snapshot_content", async () => {
+	const lix = await openLix({
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, bootstrap: true },
+				lixcol_version_id: "global",
+			},
+		],
+	});
+
+	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
+
+	const activeVersion = await lix.db
+		.selectFrom("active_version")
+		.selectAll()
+		.executeTakeFirstOrThrow();
+
+	// First insert a direct untracked entity
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		data: {
+			entity_id: "direct-untracked-key",
+			schema_key: "lix_key_value",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: JSON.stringify({
+				key: "direct-untracked-key",
+				value: "direct-value",
+			}),
+			schema_version: "1.0",
+			version_id: activeVersion.version_id,
+			untracked: true,
+		},
+	});
+
+	// Verify it exists in untracked table
+	const beforeDelete = await lixInternalDb
+		.selectFrom("internal_state_all_untracked")
+		.where("entity_id", "=", "direct-untracked-key")
+		.where("version_id", "=", activeVersion.version_id)
+		.select([
+			"entity_id",
+			"schema_key", 
+			"file_id",
+			"version_id",
+			"plugin_key",
+			sql<string | null>`json(snapshot_content)`.as("snapshot_content"),
+			"schema_version",
+			"created_at",
+			"updated_at",
+			"inherited_from_version_id",
+			"inheritance_delete_marker"
+		])
+		.execute();
+
+	expect(beforeDelete).toHaveLength(1);
+	const content = beforeDelete[0]!.snapshot_content;
+	const parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+	expect(parsedContent).toEqual({
+		key: "direct-untracked-key",
+		value: "direct-value",
+	});
+
+	// Now delete the direct untracked entity
+	insertTransactionState({
+		lix: { sqlite: lix.sqlite, db: lixInternalDb },
+		data: {
+			entity_id: "direct-untracked-key",
+			schema_key: "lix_key_value",
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: null, // Deletion
+			schema_version: "1.0",
+			version_id: activeVersion.version_id,
+			untracked: true,
+		},
+	});
+
+	// Verify it's deleted from untracked table
+	const afterDelete = await lixInternalDb
+		.selectFrom("internal_state_all_untracked")
+		.where("entity_id", "=", "direct-untracked-key")
+		.where("version_id", "=", activeVersion.version_id)
+		.selectAll()
+		.execute();
+
+	expect(afterDelete).toHaveLength(0);
+
+	// Verify no tombstone was created in cache (direct untracked deletions don't need tombstones)
+	const cacheEntry = await lixInternalDb
+		.selectFrom("internal_state_cache")
+		.where("entity_id", "=", "direct-untracked-key")
+		.where("version_id", "=", activeVersion.version_id)
+		.selectAll()
+		.execute();
+
+	expect(cacheEntry).toHaveLength(0);
+
+	// Verify entity no longer appears in state view
+	const stateView = await lix.db
+		.selectFrom("key_value")
+		.where("key", "=", "direct-untracked-key")
+		.selectAll()
+		.execute();
+
+	expect(stateView).toHaveLength(0);
 });

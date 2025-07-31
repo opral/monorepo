@@ -18,11 +18,24 @@ export function applyUntrackedStateSchema(args: {
 			file_id TEXT NOT NULL,
 			version_id TEXT NOT NULL,
 			plugin_key TEXT NOT NULL,
-			snapshot_content TEXT NOT NULL, -- JSON content
+			snapshot_content BLOB, -- JSONB content, NULL for tombstones
 			schema_version TEXT NOT NULL,
 			created_at TEXT NOT NULL CHECK (created_at LIKE '%Z'),
 			updated_at TEXT NOT NULL CHECK (updated_at LIKE '%Z'),
-			PRIMARY KEY (entity_id, schema_key, file_id, version_id)
+			inherited_from_version_id TEXT, -- Track inheritance source
+			inheritance_delete_marker INTEGER DEFAULT 0 CHECK (inheritance_delete_marker IN (0, 1)), -- Flag for tombstones (1 = tombstone, 0 = normal)
+			PRIMARY KEY (entity_id, schema_key, file_id, version_id),
+			-- 8 = strictly JSONB
+			-- https://www.sqlite.org/json1.html#jvalid
+			CHECK (snapshot_content IS NULL OR json_valid(snapshot_content, 8)),
+			-- Ensure content is either NULL or a JSON object (not string, array, etc)
+			-- This prevents double-stringified JSON from being stored
+			CHECK (snapshot_content IS NULL OR json_type(snapshot_content) = 'object'),
+			-- Validation: if inheritance_delete_marker is 1, snapshot_content must be NULL
+			CHECK (
+				(inheritance_delete_marker = 1 AND snapshot_content IS NULL) OR
+				(inheritance_delete_marker = 0)
+			)
 		) STRICT;
 	`);
 }
@@ -33,8 +46,10 @@ export type InternalStateAllUntrackedTable = {
 	file_id: string;
 	version_id: string;
 	plugin_key: string;
-	snapshot_content: string; // JSON string, not null for untracked
+	snapshot_content: string | null; // JSON string, NULL for tombstones
 	schema_version: string;
 	created_at: string;
 	updated_at: string;
+	inherited_from_version_id: string | null;
+	inheritance_delete_marker: number; // 1 for tombstones, 0 for normal entries
 };

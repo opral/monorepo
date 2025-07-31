@@ -110,7 +110,6 @@ export function commit(args: {
 				.where("version_id", "=", "global"),
 		});
 
-		console.log("[DEBUG] globalChanges:", globalChanges.length);
 
 		if (globalChanges.length > 0) {
 			const globalCommitId = createChangesetForTransaction(
@@ -120,7 +119,6 @@ export function commit(args: {
 				"global",
 				globalChanges
 			);
-			console.log("[DEBUG] Created global commit:", globalCommitId);
 			commitIdsByVersion.set("global", globalCommitId);
 		}
 	}
@@ -194,9 +192,6 @@ export function commit(args: {
 				? allChangesToRealize.filter((c) => c.version_id === "global")
 				: changesByVersion.get(version_id)!;
 
-		console.log(
-			`[DEBUG] Updating cache for version ${version_id} with ${changesForVersion.length} changes`
-		);
 
 		// Only update cache entries for entities that were actually changed
 		for (const change of changesForVersion) {

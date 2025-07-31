@@ -369,7 +369,6 @@ export function applyStateDatabaseSchema(
 							typeof process !== "undefined" &&
 							process.env.DEBUG_DETERMINISTIC_SEQ
 						) {
-							console.log("[DEBUG] Cache is stale, starting population");
 						}
 
 						// Populate cache directly with materialized state
@@ -391,7 +390,6 @@ export function applyStateDatabaseSchema(
 								typeof process !== "undefined" &&
 								process.env.DEBUG_DETERMINISTIC_SEQ
 							) {
-								console.log("[DEBUG] About to mark cache as fresh");
 							}
 							markStateCacheAsFresh({ lix: { sqlite, db: db as any } });
 						} finally {
@@ -750,16 +748,8 @@ export function applyStateDatabaseSchema(
 		CREATE TRIGGER IF NOT EXISTS state_delete
 		INSTEAD OF DELETE ON state
 		BEGIN
-			-- Delete from state_all (handles tracked entities)
+			-- Delete from state_all (handles both tracked and untracked entities)
 			DELETE FROM state_all
-			WHERE 
-				entity_id = OLD.entity_id
-				AND schema_key = OLD.schema_key
-				AND file_id = OLD.file_id
-				AND version_id = (SELECT version_id FROM active_version);
-				
-			-- Also delete from untracked table if the entity is untracked
-			DELETE FROM internal_state_all_untracked
 			WHERE 
 				entity_id = OLD.entity_id
 				AND schema_key = OLD.schema_key

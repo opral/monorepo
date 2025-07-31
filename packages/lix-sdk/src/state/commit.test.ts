@@ -853,10 +853,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 
 	// Debug: Check all commits that exist initially
 	const initialCommits = await db.selectFrom("commit").selectAll().execute();
-	console.log(
-		"Initial commits:",
-		initialCommits.map((c) => c.id)
-	);
 
 	// Check what the version snapshots look like
 	const versionSnapshots = lix.sqlite.exec({
@@ -871,7 +867,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		`,
 		returnValue: "resultRows",
 	});
-	console.log("Version snapshots:", versionSnapshots);
 
 	// Insert data with version_id = "global"
 	insertTransactionState({
@@ -912,11 +907,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		.selectAll()
 		.execute();
 
-	console.log("Edge changes found:", edgeChanges.length);
-	console.log(
-		"Looking for edge entity_id:",
-		`${previousCommitId}~${newCommitId}`
-	);
 
 	// Let's also check all edge changes
 	const allEdgeChanges = await db
@@ -924,13 +914,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		.where("schema_key", "=", "lix_commit_edge")
 		.selectAll()
 		.execute();
-	console.log(
-		"All edge changes:",
-		allEdgeChanges.map((e) => ({
-			entity_id: e.entity_id,
-			snapshot: e.snapshot_content,
-		}))
-	);
 
 	expect(edgeChanges.length).toBe(1);
 
@@ -956,7 +939,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		`,
 		returnValue: "resultRows",
 	});
-	console.log("All edges in database:", allEdgesDetailed);
 
 	// First check what the latest version change looks like
 	const latestVersionChange = lix.sqlite.exec({
@@ -978,7 +960,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		`,
 		returnValue: "resultRows",
 	});
-	console.log("Latest global version change:", latestVersionChange);
 
 	// Check ALL global version changes
 	const allGlobalVersionChanges = lix.sqlite.exec({
@@ -995,7 +976,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		`,
 		returnValue: "resultRows",
 	});
-	console.log("All global version changes:", allGlobalVersionChanges);
 
 	// Test the edge-based approach for finding version roots
 	const edgeBasedVersionRoot = lix.sqlite.exec({
@@ -1016,7 +996,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 		`,
 		returnValue: "resultRows",
 	});
-	console.log("Edge-based version root:", edgeBasedVersionRoot);
 
 	// Verify the edge is discoverable by the lineage CTE
 	// This simulates what internal_materialization_lineage does
@@ -1055,9 +1034,6 @@ test("commit should create edge changes that are discoverable by lineage CTE", a
 	});
 
 	// Debug: Print what's in the lineage
-	console.log("Lineage rows:", lineageRows);
-	console.log("Previous commit ID:", previousCommitId);
-	console.log("New commit ID:", newCommitId);
 
 	// Should have at least 2 entries: the new commit and its parent
 	expect(lineageRows.length).toBeGreaterThanOrEqual(2);

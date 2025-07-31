@@ -255,13 +255,15 @@ export function commitDeterministicRngState(args: {
 				schema_key: LixKeyValueSchema["x-lix-key"],
 				plugin_key: "lix_own_entity",
 				schema_version: LixKeyValueSchema["x-lix-version"],
-				snapshot_content: newValue,
+				snapshot_content: sql`jsonb(${newValue})`,
 				created_at: now,
 				updated_at: now,
+				inherited_from_version_id: null,
+				inheritance_delete_marker: 0,
 			})
 			.onConflict((oc) =>
 				oc.doUpdateSet({
-					snapshot_content: newValue,
+					snapshot_content: sql`jsonb(${newValue})`,
 					updated_at: now,
 				})
 			),

@@ -5,6 +5,7 @@ import type { Lix } from "../lix/open-lix.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import type { NewStateAllRow, StateAllRow } from "./schema.js";
 import { LixChangeAuthorSchema } from "../change-author/schema.js";
+import { updateUntrackedState } from "./untracked/update-untracked-state.js";
 
 type NewTransactionStateRow = Omit<NewStateAllRow, "snapshot_content"> & {
 	snapshot_content: string | null;
@@ -72,84 +73,22 @@ export function insertTransactionState(args: {
 } {
 	const _timestamp = args.timestamp || timestamp({ lix: args.lix as any });
 	if (args.data.untracked == true) {
-		// For untracked entities with null snapshot_content, we need to handle deletion
-		if (args.data.snapshot_content === null) {
-			// Check if this is an inherited untracked entity that needs a tombstone
-			// We need to create a tombstone in the cache to block inheritance
-			// TODO: Consider enhancing updateStateCache to handle untracked deletions with inheritance_delete_marker
-			executeSync({
-				lix: { sqlite: args.lix.sqlite },
-				query: args.lix.db
-					.insertInto("internal_state_cache")
-					.values({
-						entity_id: args.data.entity_id,
-						schema_key: args.data.schema_key,
-						file_id: args.data.file_id,
-						plugin_key: args.data.plugin_key,
-						snapshot_content: null,
-						schema_version: args.data.schema_version,
-						version_id: args.data.version_id,
-						change_id: "untracked-delete",
-						inheritance_delete_marker: 1,
-						created_at: _timestamp,
-						updated_at: _timestamp,
-						inherited_from_version_id: null,
-						commit_id: "untracked",
-					})
-					.onConflict((oc) =>
-						oc
-							.columns(["entity_id", "schema_key", "file_id", "version_id"])
-							.doUpdateSet({
-								snapshot_content: null,
-								updated_at: _timestamp,
-								inheritance_delete_marker: 1,
-								change_id: "untracked-delete",
-							})
-					),
-			});
-			return {
-				data: {
-					entity_id: args.data.entity_id,
-					schema_key: args.data.schema_key,
-					file_id: args.data.file_id,
-					plugin_key: args.data.plugin_key,
-					snapshot_content: null,
-					schema_version: args.data.schema_version,
-					version_id: args.data.version_id,
-					created_at: _timestamp,
-					updated_at: _timestamp,
-					untracked: true,
-					inherited_from_version_id: null,
-					change_id: "untracked",
-					commit_id: "pending",
-				},
-			};
-		}
-		// Normal untracked insert/update
-		executeSync({
-			lix: { sqlite: args.lix.sqlite },
-			query: args.lix.db
-				.insertInto("internal_state_all_untracked")
-				.values({
-					entity_id: args.data.entity_id,
-					schema_key: args.data.schema_key,
-					file_id: args.data.file_id,
-					plugin_key: args.data.plugin_key,
-					snapshot_content: args.data.snapshot_content,
-					schema_version: args.data.schema_version,
-					version_id: args.data.version_id,
-					created_at: _timestamp,
-					updated_at: _timestamp,
-				})
-				.onConflict((oc) =>
-					oc
-						.columns(["entity_id", "schema_key", "file_id", "version_id"])
-						.doUpdateSet({
-							snapshot_content: args.data.snapshot_content!,
-							updated_at: _timestamp,
-						})
-				),
+		// Use the new untracked API for all untracked operations
+		updateUntrackedState({
+			lix: args.lix as any,
+			change: {
+				id: "untracked",
+				entity_id: args.data.entity_id,
+				schema_key: args.data.schema_key,
+				file_id: args.data.file_id,
+				plugin_key: args.data.plugin_key,
+				snapshot_content: args.data.snapshot_content,
+				schema_version: args.data.schema_version,
+				created_at: _timestamp,
+			},
+			version_id: args.data.version_id,
 		});
+
 		return {
 			data: {
 				entity_id: args.data.entity_id,
