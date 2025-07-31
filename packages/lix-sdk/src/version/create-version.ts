@@ -67,7 +67,6 @@ export async function createVersion(args: {
 				name: args.name,
 				commit_id: commitId,
 				working_commit_id: workingCommitId,
-				// @ts-expect-error - generated type error
 				inherits_from_version_id:
 					args.inherits_from_version_id === undefined
 						? "global"

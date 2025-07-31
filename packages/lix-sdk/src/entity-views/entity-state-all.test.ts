@@ -640,7 +640,19 @@ describe("createEntityAllViewIfNotExists", () => {
 			.where("entity_id", "=", "shared-entity")
 			.where("version_id", "=", "child-version")
 			.selectAll()
+			.select("_pk")
 			.execute();
+
+		console.log("Child state result:", JSON.stringify(childState, null, 2));
+
+		// Also check the cache to see what's there
+		const childCache = await (lix.db as any)
+			.selectFrom("internal_state_cache")
+			.where("entity_id", "=", "shared-entity")
+			.selectAll()
+			.execute();
+
+		console.log("Child cache result:", JSON.stringify(childCache, null, 2));
 
 		expect(childState).toHaveLength(0);
 	});

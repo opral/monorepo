@@ -8,10 +8,7 @@ import { handleStateMutation } from "./handle-state-mutation.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import type { LixHooks } from "../hooks/create-hooks.js";
 import { executeSync } from "../database/execute-sync.js";
-import {
-	applyMaterializeStateSchema,
-	populateStateCache,
-} from "./materialize-state.js";
+import { applyMaterializeStateSchema } from "./materialize-state.js";
 import { applyResolvedStateView } from "./resolved-state-view.js";
 import { applyStateCacheSchema } from "./cache/schema.js";
 import { isStaleStateCache } from "./cache/is-stale-state-cache.js";
@@ -22,6 +19,7 @@ import { parseStatePk, serializeStatePk } from "./primary-key.js";
 import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { LixLogSchema } from "../log/schema.js";
 import { shouldLog } from "../log/create-lix-own-log.js";
+import { populateStateCache } from "./cache/populate-state-cache.js";
 // import { createLixOwnLogSync } from "../log/create-lix-own-log.js";
 
 // Virtual table schema definition

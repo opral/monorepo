@@ -77,6 +77,7 @@ export function applyResolvedStateView(args: {
 				commit_id
 			FROM internal_state_cache
 			WHERE inheritance_delete_marker = 0  -- Hide copy-on-write deletions
+			AND snapshot_content IS NOT NULL     -- Hide tombstones (deleted entries)
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_all_untracked unt
 				WHERE unt.entity_id = internal_state_cache.entity_id
@@ -115,6 +116,7 @@ export function applyResolvedStateView(args: {
 			WHERE vi.parent_version_id IS NOT NULL
 			-- Only inherit entities that exist (not deleted) in parent
 			AND isc.inheritance_delete_marker = 0
+			AND isc.snapshot_content IS NOT NULL  -- Don't inherit tombstones
 			-- Don't inherit if child has tracked state
 			AND NOT EXISTS (
 				SELECT 1 FROM internal_state_cache child_isc

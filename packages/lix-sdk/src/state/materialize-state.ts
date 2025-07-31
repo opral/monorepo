@@ -183,52 +183,11 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 			change_id,
 			commit_id
 		FROM all_possible_states
-		WHERE inheritance_rank = 1
-		  AND snapshot_content IS NOT NULL; -- Only return actual state, not deletions
+		-- inheritance_rank = 1 means this is the closest ancestor that has state for this entity
+		-- (rank 1 = direct state, rank 2 = parent state, rank 3 = grandparent state, etc.)
+		-- We only want the most specific/closest state, not all inherited variants
+		WHERE inheritance_rank = 1;
+		-- Note: Now includes tombstones (null snapshot_content) for proper deletion handling
 	`);
-}
 
-export function populateStateCache(sqlite: SqliteWasmDatabase): void {
-	// Clear existing cache
-	sqlite.exec(`DELETE FROM internal_state_cache`);
-
-	// Populate cache from the materializer view for all active versions
-	// The materializer already handles inheritance correctly, so we just copy it
-	sqlite.exec(`
-		INSERT INTO internal_state_cache (
-			entity_id,
-			schema_key,
-			file_id,
-			version_id,
-			plugin_key,
-			snapshot_content,
-			schema_version,
-			created_at,
-			updated_at,
-			inherited_from_version_id,
-			inheritance_delete_marker,
-			change_id,
-			commit_id
-		)
-		SELECT 
-			m.entity_id,
-			m.schema_key,
-			m.file_id,
-			m.version_id,
-			m.plugin_key,
-			m.snapshot_content,
-			m.schema_version,
-			m.created_at,
-			m.updated_at,
-			m.inherited_from_version_id,
-			0 as inheritance_delete_marker, -- No deletion markers from materializer
-			m.change_id,
-			m.commit_id
-		FROM internal_state_materializer m
-		-- Only populate for versions that are "active" (have tips)
-		WHERE EXISTS (
-			SELECT 1 FROM internal_materialization_version_tips vt
-			WHERE vt.version_id = m.version_id
-		)
-	`);
 }

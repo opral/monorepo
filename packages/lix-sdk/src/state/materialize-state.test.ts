@@ -1788,7 +1788,8 @@ describe("internal_state_materializer", () => {
 		});
 		expect(bKey!.inherited_from_version_id).toBe("version-b");
 	});
-	test("filters out deleted entities (NULL snapshots)", async () => {
+
+	test("includes deleted entities as tombstones (NULL snapshots)", async () => {
 		const lix = await openLix({
 			keyValues: [
 				{
@@ -1818,7 +1819,7 @@ describe("internal_state_materializer", () => {
 			.where("lixcol_version_id", "=", "version-1")
 			.execute();
 
-		// Query the materializer - should NOT return deleted entities
+		// Query the materializer - should return deleted entities as tombstones
 		const materializedState = await lix.db
 			.selectFrom("internal_state_materializer" as any)
 			.selectAll()
@@ -1826,8 +1827,11 @@ describe("internal_state_materializer", () => {
 			.where("entity_id", "=", "entity-to-delete")
 			.executeTakeFirst();
 
-		// Materializer should filter out the deleted entity
-		expect(materializedState).toBeUndefined();
+		// Materializer should include the deleted entity as a tombstone
+		expect(materializedState).toBeDefined();
+		expect(materializedState!.snapshot_content).toBeNull();
+		expect(materializedState!.entity_id).toBe("entity-to-delete");
+		expect(materializedState!.version_id).toBe("version-1");
 
 		// But the latest visible state should still have it with NULL
 		const latestVisible = await lix.db
@@ -1899,7 +1903,7 @@ describe("internal_state_materializer", () => {
 			value: "parent-value",
 		});
 
-		// Query materializer for child - should NOT see the entity (deleted)
+		// Query materializer for child - should see the entity as a tombstone (deleted)
 		const childState = await lix.db
 			.selectFrom("internal_state_materializer" as any)
 			.selectAll()
@@ -1907,7 +1911,11 @@ describe("internal_state_materializer", () => {
 			.where("entity_id", "=", "entity-to-override")
 			.executeTakeFirst();
 
-		expect(childState).toBeUndefined();
+		expect(childState).toBeDefined();
+		expect(childState!.snapshot_content).toBeNull();
+		expect(childState!.entity_id).toBe("entity-to-override");
+		expect(childState!.version_id).toBe("child-version");
+		expect(childState!.inherited_from_version_id).toBeNull(); // Direct deletion in child
 
 		// But the latest visible state for child should have NULL snapshot
 		const childLatestVisible = await lix.db
@@ -1920,6 +1928,7 @@ describe("internal_state_materializer", () => {
 		expect(childLatestVisible).toBeDefined();
 		expect(childLatestVisible!.snapshot_content).toBeNull();
 	});
+
 	test("handles diamond inheritance - takes from closest ancestor", async () => {
 		const lix = await openLix({
 			keyValues: [

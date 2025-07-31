@@ -23,6 +23,7 @@ export function applyVersionDatabaseSchema(
 			working_commit_id: () => nanoId({ lix }),
 			// Note: inherits_from_version_id default is handled in createVersion
 			// to allow explicit null values
+			// inherits_from_version_id: () => "global",
 			hidden: () => false,
 		},
 	});
@@ -125,7 +126,6 @@ export const LixVersionSchema = {
 		working_commit_id: { type: "string", "x-lix-generated": true },
 		inherits_from_version_id: {
 			type: ["string", "null"],
-			"x-lix-generated": true,
 		},
 		hidden: { type: "boolean", "x-lix-generated": true },
 	},

@@ -76,6 +76,7 @@ export function insertTransactionState(args: {
 		if (args.data.snapshot_content === null) {
 			// Check if this is an inherited untracked entity that needs a tombstone
 			// We need to create a tombstone in the cache to block inheritance
+			// TODO: Consider enhancing updateStateCache to handle untracked deletions with inheritance_delete_marker
 			executeSync({
 				lix: { sqlite: args.lix.sqlite },
 				query: args.lix.db
@@ -305,9 +306,11 @@ export function insertTransactionState(args: {
 			}
 		}
 
-		// Update the cache - handle all mutations including deletions
-		// For deletions, we still need to update the cache to maintain tombstones
-		// The handleStateMutation function already sets up deletion markers properly
+		// Update the cache using centralized function for tracked entities
+		// Note: We can't fully use updateStateCache here because it doesn't handle
+		// the inheritance_delete_marker field or "pending" commit_id properly
+		// For now, keep the inline cache update but add a TODO to enhance updateStateCache
+		// TODO: Enhance updateStateCache to handle inheritance_delete_marker and pending state
 		executeSync({
 			lix: args.lix,
 			query: args.lix.db

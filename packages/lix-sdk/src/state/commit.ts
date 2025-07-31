@@ -17,11 +17,11 @@ import { uuidV7 } from "../deterministic/uuid-v7.js";
 import { commitDeterministicSequenceNumber } from "../deterministic/sequence.js";
 import { timestamp } from "../deterministic/timestamp.js";
 import type { Lix } from "../lix/open-lix.js";
-import { getVersionRecordByIdOrThrow } from "./get-version-record-by-id-or-throw.js";
 import { handleStateDelete } from "./schema.js";
 import { insertTransactionState } from "./insert-transaction-state.js";
 import { commitIsAncestorOf } from "../query-filter/commit-is-ancestor-of.js";
 import type { LixCommitEdge } from "../commit/schema.js";
+import { updateStateCache } from "./cache/update-state-cache.js";
 
 /**
  * Commits all pending changes from the transaction stage to permanent storage.
@@ -41,7 +41,7 @@ export function commit(args: {
 }): number {
 	// Create a single timestamp for the entire transaction
 	const transactionTimestamp = timestamp({ lix: args.lix });
-	
+
 	const transactionChanges = executeSync({
 		lix: args.lix,
 		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
@@ -71,7 +71,7 @@ export function commit(args: {
 
 	// Process each version's changes to create changesets and commits
 	const commitIdsByVersion = new Map<string, string>();
-	
+
 	// First pass: Create changesets for non-global versions
 	for (const [version_id, versionChanges] of changesByVersion) {
 		if (version_id !== "global") {
@@ -86,7 +86,7 @@ export function commit(args: {
 			commitIdsByVersion.set(version_id, commitId);
 		}
 	}
-	
+
 	// Second pass: Handle global version
 	// At this point, any version updates from the first pass are in the transaction
 	// with version_id: "global", so we need to re-query
@@ -109,7 +109,9 @@ export function commit(args: {
 				])
 				.where("version_id", "=", "global"),
 		});
-		
+
+		console.log("[DEBUG] globalChanges:", globalChanges.length);
+
 		if (globalChanges.length > 0) {
 			const globalCommitId = createChangesetForTransaction(
 				args.lix.sqlite,
@@ -118,6 +120,7 @@ export function commit(args: {
 				"global",
 				globalChanges
 			);
+			console.log("[DEBUG] Created global commit:", globalCommitId);
 			commitIdsByVersion.set("global", globalCommitId);
 		}
 	}
@@ -186,28 +189,40 @@ export function commit(args: {
 	for (const [version_id, commitId] of commitIdsByVersion) {
 		// Get the changes for this version
 		// For global version, we need to use all changes in the version (including from second pass)
-		const changesForVersion = version_id === "global" 
-			? allChangesToRealize.filter(c => c.version_id === "global")
-			: changesByVersion.get(version_id)!;
+		const changesForVersion =
+			version_id === "global"
+				? allChangesToRealize.filter((c) => c.version_id === "global")
+				: changesByVersion.get(version_id)!;
+
+		console.log(
+			`[DEBUG] Updating cache for version ${version_id} with ${changesForVersion.length} changes`
+		);
 
 		// Only update cache entries for entities that were actually changed
 		for (const change of changesForVersion) {
-			executeSync({
+			// Use the centralized updateStateCache function instead of inline updates
+			updateStateCache({
 				lix: args.lix,
-				query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-					.updateTable("internal_state_cache")
-					.set({
-						commit_id: commitId,
-					})
-					.where("version_id", "=", version_id)
-					.where("entity_id", "=", change.entity_id)
-					.where("schema_key", "=", change.schema_key)
-					.where("file_id", "=", change.file_id),
+				change: {
+					id: change.id,
+					entity_id: change.entity_id,
+					schema_key: change.schema_key,
+					schema_version: change.schema_version,
+					file_id: change.file_id,
+					plugin_key: change.plugin_key,
+					snapshot_content: change.snapshot_content,
+					created_at: change.created_at,
+				},
+				commit_id: commitId,
+				version_id: version_id,
 			});
 		}
 	}
 
-commitDeterministicSequenceNumber({ lix: args.lix, timestamp: transactionTimestamp });
+	commitDeterministicSequenceNumber({
+		lix: args.lix,
+		timestamp: transactionTimestamp,
+	});
 
 	//* Emit state commit hook after transaction is successfully committed
 	//* must come last to ensure that subscribers see the changes
@@ -252,16 +267,25 @@ function createChangesetForTransaction(
 		"id" | "entity_id" | "schema_key" | "file_id" | "snapshot_content"
 	>[]
 ): string {
-	const versionRecord = getVersionRecordByIdOrThrow(sqlite, db, version_id);
+	// Get the version record from resolved state view
+	const versionRows = executeSync({
+		lix: { sqlite },
+		query: db
+			.selectFrom("internal_resolved_state_all")
+			.where("schema_key", "=", "lix_version")
+			.where("entity_id", "=", version_id)
+			.select("snapshot_content")
+			.limit(1),
+	});
 
-	if (!versionRecord) {
+	if (versionRows.length === 0 || !versionRows[0]?.snapshot_content) {
 		throw new Error(`Version with id '${version_id}' not found.`);
 	}
-	const mutatedVersion = versionRecord as any;
+
+	const mutatedVersion = JSON.parse(versionRows[0].snapshot_content) as any;
 	const nextChangeSetId = nanoId({
 		lix: { sqlite, db: db as unknown as Kysely<LixDatabaseSchema> },
 	});
-	
 
 	// TODO: Don't create change author for the changeset itself.
 	// Change authors should be associated with commit entities when implemented.
@@ -308,7 +332,6 @@ function createChangesetForTransaction(
 		},
 		createChangeAuthors: false,
 	}).data;
-	
 
 	// Create commit edge from previous commit to new commit
 	const commitEdgeChange = insertTransactionState({
@@ -569,4 +592,3 @@ function createChangesetForTransaction(
 
 	return nextCommitId;
 }
-
