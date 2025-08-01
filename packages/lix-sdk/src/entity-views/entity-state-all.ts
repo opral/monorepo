@@ -567,7 +567,7 @@ function createSingleEntityAllView(args: {
         WHERE entity_id = ${entityIdOld}
         AND schema_key = '${schema_key}'
         AND file_id = ${args.hardcodedFileId ? `'${args.hardcodedFileId}'` : "OLD.lixcol_file_id"}
-        ${args.hardcodedVersionId ? `AND version_id = '${args.hardcodedVersionId}'` : ""};
+        AND version_id = ${args.hardcodedVersionId ? `'${args.hardcodedVersionId}'` : "OLD.lixcol_version_id"};
       END;
     `;
 

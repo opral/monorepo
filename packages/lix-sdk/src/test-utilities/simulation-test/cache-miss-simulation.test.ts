@@ -1,60 +1,62 @@
-import { test } from "vitest";
-import { simulationTest } from "./simulation-test.js";
+import { expect, test } from "vitest";
+import {
+	simulationTest,
+	normalSimulation,
+	cacheMissSimulation,
+} from "./simulation-test.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { nextDeterministicSequenceNumber } from "../../deterministic/sequence.js";
-
 test("cache miss simulation test discovery", () => {});
 
-// simulationTest(
-// 	"cache miss simulation clears cache before every select",
-// 	async ({ openSimulatedLix }) => {
-// 		const lix = await openSimulatedLix({
-// 			keyValues: [
-// 				{
-// 					key: "lix_deterministic_mode",
-// 					value: { enabled: true },
-// 					lixcol_version_id: "global",
-// 					lixcol_untracked: true,
-// 				},
-// 				{
-// 					key: "lix_log_levels",
-// 					value: ["debug"],
-// 					lixcol_version_id: "global",
-// 					lixcol_untracked: true,
-// 				},
-// 			],
-// 		});
+simulationTest(
+	"cache miss simulation clears cache before every select",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true },
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				},
+				{
+					key: "lix_log_levels",
+					value: ["debug"],
+					lixcol_version_id: "global",
+					lixcol_untracked: true,
+				},
+			],
+		});
 
-// 		// Insert test data
-// 		await lix.db
-// 			.insertInto("key_value")
-// 			.values([{ key: "test_1", value: "value_1" }])
-// 			.execute();
+		// Insert test data
+		await lix.db
+			.insertInto("key_value")
+			.values([{ key: "test_1", value: "value_1" }])
+			.execute();
 
-// 		const timeBefore = timestamp({ lix });
+		const timeBefore = timestamp({ lix });
 
-// 		await lix.db
-// 			.selectFrom("key_value")
-// 			.where("key", "=", "test_1")
-// 			.selectAll()
-// 			.execute();
+		await lix.db
+			.selectFrom("key_value")
+			.where("key", "=", "test_1")
+			.selectAll()
+			.execute();
 
-// 		const cacheMissAfter = await lix.db
-// 			.selectFrom("log")
-// 			.where("key", "=", "lix_state_cache_miss")
-// 			.where("lixcol_created_at", ">", timeBefore)
-// 			.selectAll()
-// 			.execute();
+		const cacheMissAfter = await lix.db
+			.selectFrom("log")
+			.where("key", "=", "lix_state_cache_miss")
+			.where("lixcol_created_at", ">", timeBefore)
+			.selectAll()
+			.execute();
 
-// 		// greater than one because the entity view key value
-// 		// might fire off subqueries that also trigger cache misses
-// 		expect(cacheMissAfter.length).toBeGreaterThan(1);
-// 	},
-// 	{
-// 		onlyRun: ["cache-miss"],
-// 	}
-// );
-
+		// greater than one because the entity view key value
+		// might fire off subqueries that also trigger cache misses
+		expect(cacheMissAfter.length).toBeGreaterThan(1);
+	},
+	{
+		simulations: [cacheMissSimulation],
+	}
+);
 simulationTest(
 	"cache miss simulation produces correct query results",
 	async ({ openSimulatedLix, expectDeterministic }) => {
@@ -69,7 +71,7 @@ simulationTest(
 			],
 		});
 
-		// Insert data
+		// Insert data - this creates changes and change sets
 		await lix.db
 			.insertInto("key_value")
 			.values([
@@ -79,26 +81,23 @@ simulationTest(
 			])
 			.execute();
 
-		const kvs = await lix.db
-			.selectFrom("key_value")
-			.where("key", "in", ["config_a", "config_b", "config_c"])
-			.selectAll()
-			.execute();
-
-		expectDeterministic(kvs);
-
-		// Query state_all - this triggers materialization
+		// Query state_all
 		const stateAll = await lix.db
 			.selectFrom("state_all")
 			.where("schema_key", "=", "lix_key_value")
+			.where("entity_id", "!=", "lix_state_cache_stale")
 			.orderBy("entity_id")
 			.selectAll()
 			.execute();
 
+		const allChanges = await lix.db.selectFrom("change").selectAll().execute();
+
+		// expect that the state and all changes are identical
 		expectDeterministic(stateAll).toBeDefined();
+		expectDeterministic(allChanges).toBeDefined();
 	},
 	{
-		onlyRun: ["normal", "cache-miss"],
+		simulations: [normalSimulation, cacheMissSimulation],
 	}
 );
 
@@ -109,7 +108,7 @@ simulationTest(
 			keyValues: [
 				{
 					key: "lix_deterministic_mode",
-					value: { enabled: true },
+					value: { enabled: true, bootstrap: true },
 					lixcol_version_id: "global",
 					lixcol_untracked: true,
 				},
@@ -135,59 +134,16 @@ simulationTest(
 		expectDeterministic(ts2).toBeDefined();
 
 		// Perform a query that would trigger cache operations
-		console.log("[TEST] Inserting test_key into key_value");
 		await lix.db
 			.insertInto("key_value")
 			.values({ key: "test_key", value: "test_value" })
 			.execute();
 
-		// Check if data was actually inserted
-		const rawCheck = lix.sqlite.exec({
-			sql: "SELECT * FROM internal_resolved_state_all WHERE entity_id = 'test_key' AND schema_key = 'lix_key_value'",
-			returnValue: "resultRows",
-		});
-		console.log(
-			"[TEST] Raw check of internal_resolved_state_all:",
-			JSON.stringify(rawCheck, null, 2)
-		);
-
-		// Check the active version
-		const activeVersion = lix.sqlite.exec({
-			sql: "SELECT * FROM active_version",
-			returnValue: "resultRows",
-		});
-		console.log(
-			"[TEST] Active version:",
-			JSON.stringify(activeVersion, null, 2)
-		);
-
-		// Check what's in cache before query
-		const cacheCheck = lix.sqlite.exec({
-			sql: "SELECT * FROM internal_state_cache WHERE entity_id = 'test_key'",
-			returnValue: "resultRows",
-		});
-		console.log(
-			"[TEST] Cache before query:",
-			JSON.stringify(cacheCheck, null, 2)
-		);
-
-		console.log("[TEST] About to query key_value table");
 		const result = await lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "test_key")
 			.selectAll()
 			.execute();
-
-		console.log("[TEST] Query result:", JSON.stringify(result, null, 2));
-
-		// Check what's in the underlying tables
-		const stateAll = await lix.db
-			.selectFrom("state_all")
-			.where("schema_key", "=", "lix_key_value")
-			.selectAll()
-			.execute();
-
-		console.log("[TEST] state_all entries:", JSON.stringify(stateAll, null, 2));
 
 		// The query result should be deterministic
 		expectDeterministic(result).toHaveLength(1);
@@ -201,6 +157,6 @@ simulationTest(
 		expectDeterministic(seqAfter).toBeGreaterThan(seq3);
 	},
 	{
-		onlyRun: ["normal", "cache-miss"],
+		simulations: [normalSimulation, cacheMissSimulation],
 	}
 );

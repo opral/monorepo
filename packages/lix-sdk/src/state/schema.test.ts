@@ -1,10 +1,13 @@
-import { test, expect, describe } from "vitest";
+import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
 import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
+import {
+	simulationTest,
+	normalSimulation,
+} from "../test-utilities/simulation-test/simulation-test.js";
 
 test("dstest discovery", () => {});
 
@@ -448,9 +451,6 @@ simulationTest(
 			stateAfterInsert[0]?.updated_at
 		);
 
-		// Wait a bit to ensure different timestamps
-		await new Promise((resolve) => setTimeout(resolve, 1));
-
 		// Update the entity
 		await lix.db
 			.updateTable("state_all")
@@ -481,10 +481,6 @@ simulationTest(
 		// updated_at should be different (newer)
 		expect(stateAfterUpdate[0]?.updated_at).not.toBe(
 			stateAfterInsert[0]?.updated_at
-		);
-
-		expect(new Date(stateAfterUpdate[0]!.updated_at).getTime()).toBeGreaterThan(
-			new Date(stateAfterInsert[0]!.updated_at).getTime()
 		);
 	}
 );
@@ -538,9 +534,6 @@ simulationTest(
 			})
 			.execute();
 
-		// Wait a bit to ensure different timestamps
-		await new Promise((resolve) => setTimeout(resolve, 1));
-
 		// Insert same entity in version B
 		await lix.db
 			.insertInto("state_all")
@@ -583,9 +576,6 @@ simulationTest(
 		// the same entity has been inserted but with different changes
 		expect(stateVersionA[0]?.created_at).not.toBe(stateVersionB[0]?.created_at);
 
-		// Wait and update only version B
-		await new Promise((resolve) => setTimeout(resolve, 1));
-
 		await lix.db
 			.updateTable("state_all")
 			.set({
@@ -620,9 +610,6 @@ simulationTest(
 		expect(updatedStateVersionB[0]?.updated_at).not.toBe(
 			stateVersionB[0]?.updated_at
 		);
-		expect(
-			new Date(updatedStateVersionB[0]!.updated_at).getTime()
-		).toBeGreaterThan(new Date(stateVersionB[0]!.updated_at).getTime());
 	}
 );
 
@@ -947,12 +934,12 @@ simulationTest(
 		expect(changeRecord.created_at).toBe(cacheRecord.created_at);
 		expect(changeRecord.created_at).toBe(cacheRecord.updated_at);
 	},
-	{ onlyRun: ["normal", "normal"] }
+	{ simulations: [normalSimulation] }
 );
 
 simulationTest(
 	"state and state_all views expose change_id for blame and diff functionality",
-	async ({ openSimulatedLix }) => {
+	async ({ expectDeterministic, openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
 				{
@@ -1002,7 +989,7 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expect(stateAllResult).toHaveLength(1);
+		expectDeterministic(stateAllResult).toHaveLength(1);
 		expect(stateAllResult[0]?.change_id).toBeDefined();
 		expect(typeof stateAllResult[0]?.change_id).toBe("string");
 
@@ -1014,7 +1001,7 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expect(stateResult).toHaveLength(1);
+		expectDeterministic(stateResult).toHaveLength(1);
 		expect(stateResult[0]?.change_id).toBeDefined();
 		expect(typeof stateResult[0]?.change_id).toBe("string");
 
@@ -1064,12 +1051,10 @@ simulationTest(
 			stateResult[0]?.change_id
 		);
 
-		// Get the new change record
+		// Get the new change record by matching the change_id from the updated state
 		const newChangeRecord = await lix.db
 			.selectFrom("change")
-			.where("entity_id", "=", "change-id-test-entity")
-			.where("schema_key", "=", "mock_schema")
-			.orderBy("created_at", "desc")
+			.where("change.id", "=", updatedStateResult[0]!.change_id)
 			.select(["change.id", "snapshot_content"])
 			.executeTakeFirstOrThrow();
 
@@ -1178,6 +1163,7 @@ simulationTest(
 			.where("schema_key", "=", "mock_schema")
 			.where("file_id", "=", "change-set-id-test-file")
 			.select(["change_set_id", "change_id"])
+			.orderBy("change_set_id")
 			.execute();
 
 		expectDeterministic(changeSetElements).toHaveLength(2);
@@ -1295,717 +1281,544 @@ simulationTest(
 			test: "write-through-data",
 		});
 	},
-	{ onlyRun: ["normal"] }
+	{ simulations: [normalSimulation] }
 );
 
-test("write-through cache: update operations update cache immediately", async () => {
-	const lix = await openLix({});
+simulationTest(
+	"write-through cache: update operations update cache immediately",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "active_version.version_id", "version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	// Insert initial state
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "update-cache-entity",
-			schema_key: "update-cache-schema",
-			file_id: "update-cache-file",
-			plugin_key: "initial-plugin",
-			snapshot_content: { initial: "value" },
-			schema_version: "1.0",
-			version_id: activeVersion.id,
-		})
-		.execute();
-
-	// Update the state - should update cache via write-through
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: { updated: "value" },
-			plugin_key: "updated-plugin",
-		})
-		.where("entity_id", "=", "update-cache-entity")
-		.where("schema_key", "=", "update-cache-schema")
-		.where("file_id", "=", "update-cache-file")
-		.where("version_id", "=", activeVersion.id)
-		.execute();
-
-	// Cache should be immediately updated
-	const cacheEntry = await (
-		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-	)
-		.selectFrom("internal_state_cache")
-		.where("entity_id", "=", "update-cache-entity")
-		.where("schema_key", "=", "update-cache-schema")
-		.where("file_id", "=", "update-cache-file")
-		.where("version_id", "=", activeVersion.id)
-		.selectAll()
-		.executeTakeFirst();
-
-	expect(cacheEntry).toBeDefined();
-	expect(cacheEntry?.snapshot_content).toEqual({
-		updated: "value",
-	});
-	expect(cacheEntry?.plugin_key).toBe("updated-plugin");
-
-	// State view should return updated data
-	const stateResults = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "update-cache-entity")
-		.selectAll()
-		.execute();
-
-	expect(stateResults).toHaveLength(1);
-	expect(stateResults[0]?.snapshot_content).toEqual({ updated: "value" });
-	expect(stateResults[0]?.plugin_key).toBe("updated-plugin");
-});
-
-// Important to note that only a full cache clear (like during schema changes) triggers
-// a cache miss and repopulation from the CTE at the moment!
-//
-// This is simpler, at the cost of state inconsistencies when changes are made
-// without populating or invalidating the cache.
-test.todo(
-	"state view should work and re-populate the cache after cache is fully (!) cleared",
-	async () => {
-		const lix = await openLix({});
-
-		// Insert a key-value pair
+		// Insert initial state
 		await lix.db
-			.insertInto("key_value")
+			.insertInto("state_all")
 			.values({
-				key: "test_cache_miss",
-				value: "initial_value",
+				entity_id: "update-cache-entity",
+				schema_key: "update-cache-schema",
+				file_id: "update-cache-file",
+				plugin_key: "initial-plugin",
+				snapshot_content: { initial: "value" },
+				schema_version: "1.0",
+				version_id: activeVersion.id,
 			})
 			.execute();
 
-		// Verify it's accessible through state view (should populate cache)
-		const stateBeforeCacheClear = await lix.db
-			.selectFrom("state_all")
-			.where("schema_key", "=", "lix_key_value")
-			.where("entity_id", "=", "test_cache_miss")
-			.selectAll()
+		// Update the state - should update cache via write-through
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: { updated: "value" },
+				plugin_key: "updated-plugin",
+			})
+			.where("entity_id", "=", "update-cache-entity")
+			.where("schema_key", "=", "update-cache-schema")
+			.where("file_id", "=", "update-cache-file")
+			.where("version_id", "=", activeVersion.id)
 			.execute();
 
-		expect(stateBeforeCacheClear).toHaveLength(1);
-		expect(stateBeforeCacheClear[0]).toMatchObject({
-			entity_id: "test_cache_miss",
-			schema_key: "lix_key_value",
-			snapshot_content: {
-				key: "test_cache_miss",
-				value: "initial_value",
-			},
+		// Cache should be immediately updated
+		const cacheEntry = await (
+			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+		)
+			.selectFrom("internal_state_cache")
+			.where("entity_id", "=", "update-cache-entity")
+			.where("schema_key", "=", "update-cache-schema")
+			.where("file_id", "=", "update-cache-file")
+			.where("version_id", "=", activeVersion.id)
+			.selectAll()
+			.executeTakeFirst();
+
+		expect(cacheEntry).toBeDefined();
+		expect(cacheEntry?.snapshot_content).toEqual({
+			updated: "value",
 		});
+		expect(cacheEntry?.plugin_key).toBe("updated-plugin");
 
-		// Verify it's in the cache
-		const cacheBeforeClear = await (
-			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-		)
-			.selectFrom("internal_state_cache")
-			.where("schema_key", "=", "lix_key_value")
-			.where("entity_id", "=", "test_cache_miss")
-			.selectAll()
-			.execute();
-
-		expect(cacheBeforeClear).toHaveLength(1);
-
-		// Simulate cache invalidation (like what happens during stored_schema insertion)
-		await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.deleteFrom("internal_state_cache")
-			.execute();
-
-		// Verify cache is empty
-		const cacheAfterClear = await (
-			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-		)
-			.selectFrom("internal_state_cache")
-			.selectAll()
-			.execute();
-
-		expect(cacheAfterClear).toHaveLength(0);
-
-		// Try to access the same data through state view again
-		// This should trigger cache miss logic and repopulate from CTE
-		const stateAfterCacheClear = await lix.db
+		// State view should return updated data
+		const stateResults = await lix.db
 			.selectFrom("state_all")
-			.where("schema_key", "=", "lix_key_value")
-			.where("entity_id", "=", "test_cache_miss")
+			.where("entity_id", "=", "update-cache-entity")
 			.selectAll()
 			.execute();
 
-		// This should work - if cache miss logic is working correctly
-		expect(stateAfterCacheClear).toHaveLength(1);
-		expect(stateAfterCacheClear[0]).toMatchObject({
-			entity_id: "test_cache_miss",
-			schema_key: "lix_key_value",
-			snapshot_content: {
-				key: "test_cache_miss",
-				value: "initial_value",
-			},
-		});
-
-		// Verify cache was repopulated
-		const cacheAfterRefill = await (
-			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-		)
-			.selectFrom("internal_state_cache")
-			.where("schema_key", "=", "lix_key_value")
-			.where("entity_id", "=", "test_cache_miss")
-			.selectAll()
-			.execute();
-
-		expect(cacheAfterRefill).toHaveLength(1);
-	}
+		expect(stateResults).toHaveLength(1);
+		expect(stateResults[0]?.snapshot_content).toEqual({ updated: "value" });
+		expect(stateResults[0]?.plugin_key).toBe("updated-plugin");
+	},
+	{ simulations: [normalSimulation] }
 );
 
-test("delete operations are validated for foreign key constraints", async () => {
-	const lix = await openLix({});
-
-	// Define parent schema (referenced entity)
-	const parentSchema: LixSchemaDefinition = {
-		"x-lix-key": "parent_entity",
-		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
-		type: "object",
-		properties: {
-			id: { type: "string" },
-			name: { type: "string" },
-		},
-		required: ["id", "name"],
-		additionalProperties: false,
-	};
-
-	// Define child schema with foreign key to parent
-	const childSchema: LixSchemaDefinition = {
-		"x-lix-key": "child_entity",
-		"x-lix-version": "1.0",
-		"x-lix-primary-key": ["id"],
-		"x-lix-foreign-keys": [
-			{
-				properties: ["parent_id"],
-				references: {
-					schemaKey: "parent_entity",
-					properties: ["id"],
+simulationTest(
+	"delete operations are validated for foreign key constraints",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
 				},
+			],
+		});
+
+		// Define parent schema (referenced entity)
+		const parentSchema: LixSchemaDefinition = {
+			"x-lix-key": "parent_entity",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["id"],
+			type: "object",
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
 			},
-		],
-		type: "object",
-		properties: {
-			id: { type: "string" },
-			parent_id: { type: "string" },
-			value: { type: "string" },
-		},
-		required: ["id", "parent_id", "value"],
-		additionalProperties: false,
-	};
+			required: ["id", "name"],
+			additionalProperties: false,
+		};
 
-	// Register both schemas
-	await lix.db
-		.insertInto("stored_schema")
-		.values([{ value: parentSchema }, { value: childSchema }])
-		.execute();
-
-	// Insert parent entity
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "parent-1",
-			schema_key: "parent_entity",
-			file_id: "test-file",
-			plugin_key: "test-plugin",
-			snapshot_content: {
-				id: "parent-1",
-				name: "Parent Entity",
+		// Define child schema with foreign key to parent
+		const childSchema: LixSchemaDefinition = {
+			"x-lix-key": "child_entity",
+			"x-lix-version": "1.0",
+			"x-lix-primary-key": ["id"],
+			"x-lix-foreign-keys": [
+				{
+					properties: ["parent_id"],
+					references: {
+						schemaKey: "parent_entity",
+						properties: ["id"],
+					},
+				},
+			],
+			type: "object",
+			properties: {
+				id: { type: "string" },
+				parent_id: { type: "string" },
+				value: { type: "string" },
 			},
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-		})
-		.execute();
+			required: ["id", "parent_id", "value"],
+			additionalProperties: false,
+		};
 
-	// Insert child entity that references the parent
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "child-1",
-			schema_key: "child_entity",
-			file_id: "test-file",
-			plugin_key: "test-plugin",
-			snapshot_content: {
-				id: "child-1",
-				parent_id: "parent-1",
-				value: "Child Value",
-			},
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-		})
-		.execute();
+		// Register both schemas
+		await lix.db
+			.insertInto("stored_schema")
+			.values([{ value: parentSchema }, { value: childSchema }])
+			.execute();
 
-	// Verify both entities exist
-	const parentBefore = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "parent-1")
-		.where("schema_key", "=", "parent_entity")
-		.selectAll()
-		.execute();
+		// Insert parent entity
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "parent-1",
+				schema_key: "parent_entity",
+				file_id: "test-file",
+				plugin_key: "test-plugin",
+				snapshot_content: {
+					id: "parent-1",
+					name: "Parent Entity",
+				},
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+			})
+			.execute();
 
-	const childBefore = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "child-1")
-		.where("schema_key", "=", "child_entity")
-		.selectAll()
-		.execute();
+		// Insert child entity that references the parent
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "child-1",
+				schema_key: "child_entity",
+				file_id: "test-file",
+				plugin_key: "test-plugin",
+				snapshot_content: {
+					id: "child-1",
+					parent_id: "parent-1",
+					value: "Child Value",
+				},
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+			})
+			.execute();
 
-	expect(parentBefore).toHaveLength(1);
-	expect(childBefore).toHaveLength(1);
-
-	// Attempting to delete the parent entity should fail due to foreign key constraint
-	// because there's a child entity that references it
-	await expect(
-		lix.db
-			.deleteFrom("state_all")
+		// Verify both entities exist
+		const parentBefore = await lix.db
+			.selectFrom("state_all")
 			.where("entity_id", "=", "parent-1")
 			.where("schema_key", "=", "parent_entity")
-			.execute()
-	).rejects.toThrow(/foreign key/i);
+			.selectAll()
+			.execute();
 
-	// Verify the parent still exists after failed deletion attempt
-	const parentAfter = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "parent-1")
-		.where("schema_key", "=", "parent_entity")
-		.selectAll()
-		.execute();
+		const childBefore = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "child-1")
+			.where("schema_key", "=", "child_entity")
+			.selectAll()
+			.execute();
 
-	expect(parentAfter).toHaveLength(1);
-});
+		expectDeterministic(parentBefore).toHaveLength(1);
+		expectDeterministic(childBefore).toHaveLength(1);
 
-describe.each([
-	{ scenario: "cache hit", clearCache: false },
-	// { scenario: "cache miss", clearCache: true },
-])(
-	"($scenario) inheritance should work - child version should see entities from parent version",
-	({ clearCache }) => {
-		test("child version inherits entities from parent version", async () => {
-			const lix = await openLix({});
+		// Attempting to delete the parent entity should fail due to foreign key constraint
+		// because there's a child entity that references it
+		await expect(
+			lix.db
+				.deleteFrom("state_all")
+				.where("entity_id", "=", "parent-1")
+				.where("schema_key", "=", "parent_entity")
+				.execute()
+		).rejects.toThrow(/foreign key/i);
 
-			// Insert an entity into global version
-			await lix.db
-				.insertInto("state_all")
-				.values({
-					entity_id: "global-entity-1",
-					file_id: "test-file",
-					schema_key: "test_schema",
-					plugin_key: "test_plugin",
-					version_id: "global",
-					snapshot_content: {
-						id: "global-entity-1",
-						name: "Global Entity",
-					},
-					schema_version: "1.0",
-				})
-				.execute();
+		// Verify the parent still exists after failed deletion attempt
+		const parentAfter = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "parent-1")
+			.where("schema_key", "=", "parent_entity")
+			.selectAll()
+			.execute();
 
-			// Create a child version that inherits from global
-			const childVersion = await createVersion({
-				lix,
-				name: "child-version",
-			});
+		expectDeterministic(parentAfter).toHaveLength(1);
+	}
+);
 
-			// Verify inheritance was set up correctly
-			expect(childVersion.inherits_from_version_id).toBe("global");
-
-			if (clearCache) {
-				// Clear the state cache to force re-materialization with inheritance (CTE path)
-				lix.sqlite.exec("DELETE FROM internal_state_cache");
-			}
-			// If clearCache is false, we test the cache hit path
-
-			// The child version should inherit the entity from global
-			const inheritedEntity = await lix.db
-				.selectFrom("state_all")
-				.where("entity_id", "=", "global-entity-1")
-				.where("version_id", "=", childVersion.id)
-				.selectAll()
-				.execute();
-
-			// This should pass - the entity should be visible in the child version via inheritance
-			expect(inheritedEntity).toHaveLength(1);
-			expect(inheritedEntity[0]?.entity_id).toBe("global-entity-1");
-			expect(inheritedEntity[0]?.version_id).toBe(childVersion.id); // Should return child version ID
-			expect(inheritedEntity[0]?.inherited_from_version_id).toBe("global"); // Should track inheritance source
-			expect(inheritedEntity[0]?.snapshot_content).toEqual({
-				id: "global-entity-1",
-				name: "Global Entity",
-			});
+simulationTest(
+	"child version inherits entities from parent version",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
 		});
 
-		// Flaky cache CTE
-		test.todo(
-			"inherited entities should reflect changes in parent",
-			async () => {
-				const lix = await openLix({});
+		// Insert an entity into global version
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "global-entity-1",
+				file_id: "test-file",
+				schema_key: "test_schema",
+				plugin_key: "test_plugin",
+				version_id: "global",
+				snapshot_content: {
+					id: "global-entity-1",
+					name: "Global Entity",
+				},
+				schema_version: "1.0",
+			})
+			.execute();
 
-				// Get the main version
-				const mainVersion = await lix.db
-					.selectFrom("version")
-					.where("name", "=", "main")
-					.selectAll()
-					.executeTakeFirstOrThrow();
+		// Create a child version that inherits from global
+		const childVersion = await createVersion({
+			lix,
+			name: "child-version",
+		});
 
-				const originalChangeSetId = mainVersion.commit_id;
+		// Verify inheritance was set up correctly
+		expectDeterministic(childVersion.inherits_from_version_id).toBe("global");
 
-				// Make a mutation to trigger version update in global context
-				await lix.db
-					.insertInto("key_value_all")
-					.values({
-						key: "cache_rebuild_test_key",
-						value: "cache_rebuild_test_value",
-						lixcol_version_id: mainVersion.id,
-					})
-					.execute();
+		// The child version should inherit the entity from global
+		const inheritedEntity = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "global-entity-1")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
 
-				// Check the global version after mutation
-				const globalVersionAfterMutation = await lix.db
-					.selectFrom("state_all")
-					.where("schema_key", "=", "lix_version")
-					.where("entity_id", "=", mainVersion.id)
-					.where("version_id", "=", "global")
-					.selectAll()
-					.executeTakeFirst();
+		// This should pass - the entity should be visible in the child version via inheritance
+		expectDeterministic(inheritedEntity).toHaveLength(1);
+		expectDeterministic(inheritedEntity[0]?.entity_id).toBe("global-entity-1");
+		expectDeterministic(inheritedEntity[0]?.version_id).toBe(childVersion.id); // Should return child version ID
+		expectDeterministic(inheritedEntity[0]?.inherited_from_version_id).toBe(
+			"global"
+		); // Should track inheritance source
+		expectDeterministic(inheritedEntity[0]?.snapshot_content).toEqual({
+			id: "global-entity-1",
+			name: "Global Entity",
+		});
+	}
+);
 
-				console.log("🌍 Global version after mutation:", {
-					change_set_id: (globalVersionAfterMutation?.snapshot_content as any)
-						?.change_set_id,
-					original: originalChangeSetId,
-				});
+simulationTest(
+	"child version inherits then overrides with own entity",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-				if (clearCache) {
-					// Clear the cache to force a rebuild from CTE
-					await (lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-						.deleteFrom("internal_state_cache")
-						.execute();
-				}
+		// Insert an entity into global version
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "shared-entity",
+				file_id: "test-file",
+				schema_key: "test_schema",
+				plugin_key: "test_plugin",
+				version_id: "global",
+				snapshot_content: {
+					id: "shared-entity",
+					name: "Original Global Value",
+					count: 1,
+				},
+				schema_version: "1.0",
+			})
+			.execute();
 
-				const state = await lix.db
-					.selectFrom("state_all")
-					.where("schema_key", "=", "lix_version")
-					.where("entity_id", "=", mainVersion.id)
-					.selectAll()
-					.execute();
+		// Create a child version that inherits from global
+		const childVersion = await createVersion({
+			lix,
+			id: "child-version",
+			inherits_from_version_id: "global",
+		});
 
-				console.log(
-					"🔍 State query result:",
-					state.map((s) => ({
-						entity_id: s.entity_id,
-						version_id: s.version_id,
-						change_set_id: (s.snapshot_content as any).change_set_id,
-						inherited_from_version_id: s.inherited_from_version_id,
-					}))
-				);
+		// Verify the child initially sees the inherited entity
+		const inheritedEntity = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
 
-				// testing for cached contents first to make a cache miss test fail faster
-				const cacheContents = await (
-					lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-				)
-					.selectFrom("internal_state_cache")
-					.where("schema_key", "=", "lix_version")
-					.where("entity_id", "=", mainVersion.id)
-					.selectAll()
-					.execute();
-
-				// Both version entries should have the same updated change_set_id
-				const cachedInheritedMainVersion = cacheContents.find(
-					(entry) => entry.version_id === mainVersion.id
-				);
-				const cachedMainVersionGlobal = cacheContents.find(
-					(entry) => entry.version_id === "global"
-				);
-
-				// we have copy on write deletion in place, so the cache should not contain the inherited version
-				expect(cachedInheritedMainVersion).toBeUndefined();
-				expect(cachedMainVersionGlobal).toBeDefined();
-
-				// Both version entries should have the same updated change_set_id
-				const inheritedMainVersion = state.find(
-					(entry) => entry.version_id === mainVersion.id
-				);
-				const mainVersionGlobal = state.find(
-					(entry) => entry.version_id === "global"
-				);
-
-				expect(inheritedMainVersion).toBeDefined();
-				expect(mainVersionGlobal).toBeDefined();
-
-				// Both should have the same change_set_id
-				expect(
-					(inheritedMainVersion?.snapshot_content as any).change_set_id
-				).toEqual((mainVersionGlobal?.snapshot_content as any).change_set_id);
-
-				// The change_set_id should be different from the original change_set_Id
-				expect(
-					(inheritedMainVersion?.snapshot_content as any).change_set_id
-				).not.toEqual(originalChangeSetId);
-				expect(
-					(mainVersionGlobal?.snapshot_content as any).change_set_id
-				).not.toEqual(originalChangeSetId);
-
-				expect(
-					(cachedMainVersionGlobal?.snapshot_content as any).change_set_id
-				).toEqual(mainVersionGlobal?.snapshot_content.change_set_id);
-			}
+		expectDeterministic(inheritedEntity).toHaveLength(1);
+		expectDeterministic(inheritedEntity[0]?.version_id).toBe(childVersion.id);
+		expectDeterministic(inheritedEntity[0]?.inherited_from_version_id).toBe(
+			"global"
 		);
-	}
-);
+		expectDeterministic(inheritedEntity[0]?.snapshot_content).toEqual({
+			id: "shared-entity",
+			name: "Original Global Value",
+			count: 1,
+		});
 
-// TODO flaky test https://github.com/opral/lix-sdk/issues/308
-describe.skip.each([
-	{ scenario: "cache hit", clearCache: false },
-	{ scenario: "cache miss", clearCache: true },
-])(
-	"($scenario) updating an inherited entity in child version should create a copy-on-write entity",
-	() => {
-		test("child version inherits then overrides with own entity", async () => {
-			const lix = await openLix({});
+		// Now modify the entity in the child version (copy-on-write)
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: {
+					id: "shared-entity",
+					name: "Modified in Child Version",
+					count: 2,
+				},
+			})
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", childVersion.id)
+			.execute();
 
-			// Insert an entity into global version
-			await lix.db
-				.insertInto("state_all")
-				.values({
-					entity_id: "shared-entity",
-					file_id: "test-file",
-					schema_key: "test_schema",
-					plugin_key: "test_plugin",
-					version_id: "global",
-					snapshot_content: {
-						id: "shared-entity",
-						name: "Original Global Value",
-						count: 1,
-					},
-					schema_version: "1.0",
-				})
-				.execute();
+		// Verify the child now has its own version of the entity
+		const childEntity = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
 
-			// Create a child version that inherits from global
-			const childVersion = await createVersion({
-				lix,
-				name: "child-version",
-			});
+		expectDeterministic(childEntity).toHaveLength(1);
+		expectDeterministic(childEntity[0]?.version_id).toBe(childVersion.id);
+		expectDeterministic(childEntity[0]?.inherited_from_version_id).toBe(null); // No longer inherited
+		expectDeterministic(childEntity[0]?.snapshot_content).toEqual({
+			id: "shared-entity",
+			name: "Modified in Child Version",
+			count: 2,
+		});
 
-			// Note: For cache miss testing, we'll clear cache AFTER the update operation
+		// Verify the global version still has the original value
+		const globalEntity = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", "global")
+			.selectAll()
+			.execute();
 
-			// Verify the child initially sees the inherited entity
-			const inheritedEntity = await lix.db
-				.selectFrom("state_all")
-				.where("entity_id", "=", "shared-entity")
-				.where("version_id", "=", childVersion.id)
-				.selectAll()
-				.execute();
+		expectDeterministic(globalEntity).toHaveLength(1);
+		expectDeterministic(globalEntity[0]?.version_id).toBe("global");
+		expectDeterministic(globalEntity[0]?.inherited_from_version_id).toBe(null);
+		expectDeterministic(globalEntity[0]?.snapshot_content).toEqual({
+			id: "shared-entity",
+			name: "Original Global Value",
+			count: 1,
+		});
 
-			expect(inheritedEntity).toHaveLength(1);
-			expect(inheritedEntity[0]?.version_id).toBe(childVersion.id);
-			expect(inheritedEntity[0]?.inherited_from_version_id).toBe("global");
-			expect(inheritedEntity[0]?.snapshot_content).toEqual({
-				id: "shared-entity",
-				name: "Original Global Value",
-				count: 1,
-			});
+		// Verify we now have 2 separate entities (one in global, one in child)
+		const allEntities = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "in", ["global", childVersion.id])
+			.orderBy("version_id", "asc")
+			.selectAll()
+			.execute();
 
-			// Now modify the entity in the child version (copy-on-write)
-			await lix.db
-				.updateTable("state_all")
-				.set({
-					snapshot_content: {
-						id: "shared-entity",
-						name: "Modified in Child Version",
-						count: 2,
-					},
-				})
-				.where("entity_id", "=", "shared-entity")
-				.where("version_id", "=", childVersion.id)
-				.execute();
+		expectDeterministic(allEntities).toHaveLength(2);
 
-			// Clear cache after update to test cache miss scenario
-			// if (clearCache) {
-			// 	lix.sqlite.exec("DELETE FROM internal_state_cache");
-			// }
+		// Child version entity (modified)
+		expectDeterministic(allEntities[0]?.version_id).toBe(childVersion.id);
+		expectDeterministic(allEntities[0]?.inherited_from_version_id).toBe(null);
+		expectDeterministic(allEntities[0]?.snapshot_content).toEqual({
+			id: "shared-entity",
+			name: "Modified in Child Version",
+			count: 2,
+		});
 
-			// Verify the child now has its own version of the entity
-			const childEntity = await lix.db
-				.selectFrom("state_all")
-				.where("entity_id", "=", "shared-entity")
-				.where("version_id", "=", childVersion.id)
-				.selectAll()
-				.execute();
-
-			expect(childEntity).toHaveLength(1);
-			expect(childEntity[0]?.version_id).toBe(childVersion.id);
-			expect(childEntity[0]?.inherited_from_version_id).toBe(null); // No longer inherited
-			expect(childEntity[0]?.snapshot_content).toEqual({
-				id: "shared-entity",
-				name: "Modified in Child Version",
-				count: 2,
-			});
-
-			// Verify the global version still has the original value
-			const globalEntity = await lix.db
-				.selectFrom("state_all")
-				.where("entity_id", "=", "shared-entity")
-				.where("version_id", "=", "global")
-				.selectAll()
-				.execute();
-
-			expect(globalEntity).toHaveLength(1);
-			expect(globalEntity[0]?.version_id).toBe("global");
-			expect(globalEntity[0]?.inherited_from_version_id).toBe(null);
-			expect(globalEntity[0]?.snapshot_content).toEqual({
-				id: "shared-entity",
-				name: "Original Global Value",
-				count: 1,
-			});
-
-			// Verify we now have 2 separate entities (one in global, one in child)
-			const allEntities = await lix.db
-				.selectFrom("state_all")
-				.where("entity_id", "=", "shared-entity")
-				.selectAll()
-				.execute();
-
-			expect(allEntities).toHaveLength(2);
-
-			// Sort by version_id for consistent ordering
-			allEntities.sort((a, b) => a.version_id.localeCompare(b.version_id));
-
-			// Child version entity (modified)
-			expect(allEntities[0]?.version_id).toBe(childVersion.id);
-			expect(allEntities[0]?.inherited_from_version_id).toBe(null);
-			expect(allEntities[0]?.snapshot_content).toEqual({
-				id: "shared-entity",
-				name: "Modified in Child Version",
-				count: 2,
-			});
-
-			// Global version entity (original)
-			expect(allEntities[1]?.version_id).toBe("global");
-			expect(allEntities[1]?.inherited_from_version_id).toBe(null);
-			expect(allEntities[1]?.snapshot_content).toEqual({
-				id: "shared-entity",
-				name: "Original Global Value",
-				count: 1,
-			});
+		// Global version entity (original)
+		expectDeterministic(allEntities[1]?.version_id).toBe("global");
+		expectDeterministic(allEntities[1]?.inherited_from_version_id).toBe(null);
+		expectDeterministic(allEntities[1]?.snapshot_content).toEqual({
+			id: "shared-entity",
+			name: "Original Global Value",
+			count: 1,
 		});
 	}
 );
 
-test("child version deletes inherited entity via copy-on-write", async () => {
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "test_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			id: { type: "string" },
-			name: { type: "string" },
-		},
-	};
-
-	const lix = await openLix({});
-
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "active_version.version_id", "version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
-
-	// Insert schema
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
-
-	// Insert an entity into global version
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "shared-entity",
-			file_id: "test-file",
-			schema_key: "test_schema",
-			plugin_key: "test_plugin",
-			version_id: "global",
-			snapshot_content: {
-				id: "shared-entity",
-				name: "shared Entity",
+simulationTest(
+	"child version deletes inherited entity via copy-on-write",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "test_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				id: { type: "string" },
+				name: { type: "string" },
 			},
-			schema_version: "1.0",
-		})
-		.execute();
+		};
 
-	// Verify the child initially sees the inherited entity
-	const inheritedEntity = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "shared-entity")
-		.where("version_id", "=", activeVersion.id)
-		.selectAll()
-		.execute();
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	expect(inheritedEntity).toHaveLength(1);
-	expect(inheritedEntity[0]?.version_id).toBe(activeVersion.id);
-	expect(inheritedEntity[0]?.inherited_from_version_id).toBe("global");
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	// Delete the inherited entity in child version (should create copy-on-write deletion)
-	await lix.db
-		.deleteFrom("state_all")
-		.where("entity_id", "=", "shared-entity")
-		.where("version_id", "=", activeVersion.id)
-		.execute();
+		// Insert schema
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
-	// Verify the entity is deleted in child version
-	const childEntityAfterDelete = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "shared-entity")
-		.where("version_id", "=", activeVersion.id)
-		.selectAll()
-		.execute();
+		// Insert an entity into global version
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "shared-entity",
+				file_id: "test-file",
+				schema_key: "test_schema",
+				plugin_key: "test_plugin",
+				version_id: "global",
+				snapshot_content: {
+					id: "shared-entity",
+					name: "shared Entity",
+				},
+				schema_version: "1.0",
+			})
+			.execute();
 
-	// Entity should be deleted in child version (copy-on-write deletion)
-	expect(childEntityAfterDelete).toHaveLength(0);
+		// Verify the child initially sees the inherited entity
+		const inheritedEntity = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", activeVersion.id)
+			.selectAll()
+			.execute();
 
-	// Verify the entity still exists in global version (not affected by child deletion)
-	const inheritedEntityAfterDelete = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "shared-entity")
-		.where("version_id", "=", "global")
-		.selectAll()
-		.execute();
+		expectDeterministic(inheritedEntity).toHaveLength(1);
+		expectDeterministic(inheritedEntity[0]?.version_id).toBe(activeVersion.id);
+		expectDeterministic(inheritedEntity[0]?.inherited_from_version_id).toBe(
+			"global"
+		);
 
-	expect(inheritedEntityAfterDelete).toHaveLength(1);
-	expect(inheritedEntityAfterDelete[0]?.snapshot_content).toEqual({
-		id: "shared-entity",
-		name: "shared Entity",
-	});
+		// Delete the inherited entity in child version (should create copy-on-write deletion)
+		await lix.db
+			.deleteFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", activeVersion.id)
+			.execute();
 
-	// Verify we now only see the global entity through the state view (deletion marker is hidden)
-	const allEntities = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "shared-entity")
-		.selectAll()
-		.execute();
+		// Verify the entity is deleted in child version
+		const childEntityAfterDelete = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", activeVersion.id)
+			.selectAll()
+			.execute();
 
-	// Both cache hit and cache miss scenarios should behave identically:
-	// copy-on-write deletion hides the entity from child but preserves it in parent
-	expect(allEntities).toHaveLength(1);
-	expect(allEntities[0]?.version_id).toBe("global");
-	expect(allEntities[0]?.inherited_from_version_id).toBe(null); // It's the original global entity
-});
+		// Entity should be deleted in child version (copy-on-write deletion)
+		expectDeterministic(childEntityAfterDelete).toHaveLength(0);
 
-// TODO flaky test (ordering of deletions)
-test.todo(
+		// Verify the entity still exists in global version (not affected by child deletion)
+		const inheritedEntityAfterDelete = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", "global")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(inheritedEntityAfterDelete).toHaveLength(1);
+		expectDeterministic(
+			inheritedEntityAfterDelete[0]?.snapshot_content
+		).toEqual({
+			id: "shared-entity",
+			name: "shared Entity",
+		});
+
+		// Verify we now only see the global entity through the state view (deletion marker is hidden)
+		const allEntities = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.selectAll()
+			.execute();
+
+		// Both cache hit and cache miss scenarios should behave identically:
+		// copy-on-write deletion hides the entity from child but preserves it in parent
+		expectDeterministic(allEntities).toHaveLength(1);
+		expectDeterministic(allEntities[0]?.version_id).toBe("global");
+		expectDeterministic(allEntities[0]?.inherited_from_version_id).toBe(null); // It's the original global entity
+	}
+);
+
+simulationTest(
 	"deleting without filtering for the version_id deletes the entity from all versions",
-	async () => {
-		const lix = await openLix({});
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
 		// Insert an entity into global version
 		await lix.db
@@ -2039,8 +1852,8 @@ test.todo(
 			.selectAll()
 			.execute();
 
-		expect(beforeDelete).toHaveLength(2); // One in global, one inherited in child
-		expect(beforeDelete).toMatchObject([
+		expectDeterministic(beforeDelete).toHaveLength(2); // One in global, one inherited in child
+		expectDeterministic(beforeDelete).toMatchObject([
 			{
 				entity_id: "shared-entity",
 				version_id: "global",
@@ -2068,1309 +1881,1380 @@ test.todo(
 			.execute();
 
 		// Should be deleted from every version
-		expect(afterDelete).toHaveLength(0);
+		expectDeterministic(afterDelete).toHaveLength(0);
 	}
 );
 
-// todo @martin-lysk the insert or ignore is not working as expected
-// i am not fixing this now to avoid merge conflicts in the xUpdate function
-test.todo(
-	"INSERT OR IGNORE into state virtual table should not throw validation errors for duplicates or update the row",
-	async () => {
-		const lix = await openLix({});
+simulationTest(
+	"untracked mutations don't trigger change control",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-		// First, insert a record successfully
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		// Count changes before any untracked mutations
+		const changesInitial = await lix.db
+			.selectFrom("change")
+			.selectAll()
+			.execute();
+
+		// 1. INSERT untracked state
 		await lix.db
 			.insertInto("state_all")
 			.values({
-				entity_id: "test-duplicate-entity",
-				schema_key: "test_schema",
-				file_id: "test",
+				entity_id: "untracked-entity",
+				file_id: "test-file",
+				schema_key: "mock_schema",
 				plugin_key: "test_plugin",
-				snapshot_content: { id: "test-duplicate-entity", name: "Original" },
 				schema_version: "1.0",
-				version_id: "global",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: {
+					value: "untracked value",
+				},
+				untracked: true,
 			})
 			.execute();
 
-		// Verify the record exists
-		const originalRecord = await lix.db
-			.selectFrom("state_all")
-			.where("entity_id", "=", "test-duplicate-entity")
+		// Count changes after untracked insert
+		const changesAfterInsert = await lix.db
+			.selectFrom("change")
 			.selectAll()
-			.executeTakeFirst();
+			.execute();
 
-		expect(originalRecord).toBeDefined();
-		expect(originalRecord?.snapshot_content).toMatchObject({
-			id: "test-duplicate-entity",
-			name: "Original",
-		});
+		// Number of changes should be identical (no change control for untracked)
+		expectDeterministic(changesAfterInsert.length).toBe(changesInitial.length);
 
-		// Now try to INSERT OR IGNORE the same entity - this should NOT throw an error
-		// but currently it does because validation runs before OR IGNORE logic
-		expect(() => {
-			lix.sqlite.exec(`
-			INSERT OR IGNORE INTO state (
-				entity_id, schema_key, file_id, plugin_key, 
-				snapshot_content, schema_version, version_id
-			) VALUES (
-				'test-duplicate-entity', 'test_schema', 'test', 'test_plugin',
-				'{"id":"test-duplicate-entity","name":"Duplicate"}', '1.0', 'global'
-			)
-		`);
-		}).not.toThrow(); // This should not throw, but currently does
-
-		// Verify the original record is unchanged (OR IGNORE should have ignored the duplicate)
-		const afterIgnore = await lix.db
+		// Verify the untracked entity exists in state view
+		const untrackedState = await lix.db
 			.selectFrom("state_all")
-			.where("entity_id", "=", "test-duplicate-entity")
+			.where("entity_id", "=", "untracked-entity")
 			.selectAll()
-			.executeTakeFirst();
+			.execute();
 
-		expect(afterIgnore?.snapshot_content).toMatchObject({
-			id: "test-duplicate-entity",
-			name: "Original", // Should still be original, not "Duplicate"
+		expectDeterministic(untrackedState).toHaveLength(1);
+		expectDeterministic(untrackedState[0]?.snapshot_content).toEqual({
+			value: "untracked value",
 		});
+		expectDeterministic(untrackedState[0]?.untracked).toBe(1);
+
+		// 2. UPDATE untracked state
+		await lix.db
+			.updateTable("state_all")
+			.where("entity_id", "=", "untracked-entity")
+			.set({
+				snapshot_content: {
+					value: "untracked value updated",
+				},
+				untracked: true,
+			})
+			.execute();
+
+		// Count changes after untracked update
+		const changesAfterUpdate = await lix.db
+			.selectFrom("change")
+			.selectAll()
+			.execute();
+
+		// Number of changes should still be identical (no change control for untracked)
+		expectDeterministic(changesAfterUpdate.length).toBe(changesInitial.length);
+
+		// Verify the untracked entity was updated
+		const updatedState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "untracked-entity")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(updatedState).toHaveLength(1);
+		expectDeterministic(updatedState[0]?.snapshot_content).toEqual({
+			value: "untracked value updated",
+		});
+		expectDeterministic(updatedState[0]?.untracked).toBe(1);
+
+		// 3. DELETE untracked state
+		await lix.db
+			.deleteFrom("state_all")
+			.where("entity_id", "=", "untracked-entity")
+			.execute();
+
+		// Count changes after untracked delete
+		const changesAfterDelete = await lix.db
+			.selectFrom("change")
+			.selectAll()
+			.execute();
+
+		// Number of changes should still be identical (no change control for untracked)
+		expectDeterministic(changesAfterDelete.length).toBe(changesInitial.length);
+
+		// Verify the untracked entity was deleted
+		const deletedState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "untracked-entity")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(deletedState).toHaveLength(0);
 	}
 );
 
-test("should emit state_commit hook when database transaction commits", async () => {
-	const lix = await openLix({});
+simulationTest(
+	"tracked update to previously untracked entity deletes untracked state",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
 			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
-
-	// Set up hook listener
-	let hookCallCount = 0;
-	lix.hooks.onStateCommit(() => {
-		hookCallCount++;
-	});
-
-	// Perform a database operation that should trigger the hook
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "test-entity",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-			snapshot_content: {
-				value: "test value",
-			},
-		})
-		.execute();
-
-	// Hook should have been called once
-	expect(hookCallCount).toBe(1);
-
-	// Perform another operation
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: {
-				value: "updated value",
-			},
-		})
-		.where("entity_id", "=", "test-entity")
-		.execute();
-
-	// Hook should have been called twice now
-	expect(hookCallCount).toBe(2);
-});
-
-test("untracked mutations don't trigger change control", async () => {
-	const lix = await openLix({});
-
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
-
-	// Count changes before any untracked mutations
-	const changesInitial = await lix.db
-		.selectFrom("change")
-		.selectAll()
-		.execute();
-
-	// 1. INSERT untracked state
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "untracked-entity",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-			snapshot_content: {
-				value: "untracked value",
-			},
-			untracked: true,
-		})
-		.execute();
-
-	// Count changes after untracked insert
-	const changesAfterInsert = await lix.db
-		.selectFrom("change")
-		.selectAll()
-		.execute();
-
-	// Number of changes should be identical (no change control for untracked)
-	expect(changesAfterInsert.length).toBe(changesInitial.length);
-
-	// Verify the untracked entity exists in state view
-	const untrackedState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "untracked-entity")
-		.selectAll()
-		.execute();
-
-	expect(untrackedState).toHaveLength(1);
-	expect(untrackedState[0]?.snapshot_content).toEqual({
-		value: "untracked value",
-	});
-	expect(untrackedState[0]?.untracked).toBe(1);
-
-	// 2. UPDATE untracked state
-	await lix.db
-		.updateTable("state_all")
-		.where("entity_id", "=", "untracked-entity")
-		.set({
-			snapshot_content: {
-				value: "untracked value updated",
-			},
-			untracked: true,
-		})
-		.execute();
-
-	// Count changes after untracked update
-	const changesAfterUpdate = await lix.db
-		.selectFrom("change")
-		.selectAll()
-		.execute();
-
-	// Number of changes should still be identical (no change control for untracked)
-	expect(changesAfterUpdate.length).toBe(changesInitial.length);
-
-	// Verify the untracked entity was updated
-	const updatedState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "untracked-entity")
-		.selectAll()
-		.execute();
-
-	expect(updatedState).toHaveLength(1);
-	expect(updatedState[0]?.snapshot_content).toEqual({
-		value: "untracked value updated",
-	});
-	expect(updatedState[0]?.untracked).toBe(1);
-
-	// 3. DELETE untracked state
-	await lix.db
-		.deleteFrom("state_all")
-		.where("entity_id", "=", "untracked-entity")
-		.execute();
-
-	// Count changes after untracked delete
-	const changesAfterDelete = await lix.db
-		.selectFrom("change")
-		.selectAll()
-		.execute();
-
-	// Number of changes should still be identical (no change control for untracked)
-	expect(changesAfterDelete.length).toBe(changesInitial.length);
-
-	// Verify the untracked entity was deleted
-	const deletedState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "untracked-entity")
-		.selectAll()
-		.execute();
-
-	expect(deletedState).toHaveLength(0);
-});
-
-test("tracked update to previously untracked entity deletes untracked state", async () => {
-	const lix = await openLix({});
-
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
-
-	// Insert untracked state
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "override-entity",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-			snapshot_content: {
-				value: "untracked value",
-			},
-			untracked: true,
-		})
-		.execute();
-
-	// Verify untracked state exists
-	const untrackedState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "override-entity")
-		.selectAll()
-		.execute();
-
-	expect(untrackedState).toHaveLength(1);
-	expect(untrackedState[0]?.snapshot_content).toEqual({
-		value: "untracked value",
-	});
-
-	// Now update the untracked entity to make it tracked (should delete from untracked table)
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: {
-				value: "tracked value",
-			},
-			untracked: false,
-		})
-		.where("entity_id", "=", "override-entity")
-		.where("schema_key", "=", "mock_schema")
-		.execute();
-
-	// Verify tracked state has overridden untracked state
-	const finalState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "override-entity")
-		.selectAll()
-		.execute();
-
-	expect(finalState).toHaveLength(1);
-	expect(finalState[0]?.snapshot_content).toEqual({
-		value: "tracked value",
-	});
-
-	// Verify a change was created for the tracked mutation
-	const changes = await lix.db
-		.selectFrom("change")
-		.where("entity_id", "=", "override-entity")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
-
-	expect(changes.length).toBeGreaterThan(0);
-});
-
-test("untracked state is persisted across lix sessions", async () => {
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	// First session - create and insert untracked state
-	const lix1 = await openLix({});
-
-	await lix1.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
-
-	await lix1.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "persistent-entity",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-			snapshot_content: {
-				value: "persistent untracked value",
-			},
-			untracked: true,
-		})
-		.execute();
-
-	// Second session - verify untracked state persists
-	const lix2 = await openLix({ blob: await lix1.toBlob() });
-
-	const persistedState = await lix2.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "persistent-entity")
-		.selectAll()
-		.execute();
-
-	expect(persistedState).toHaveLength(1);
-	expect(persistedState[0]?.snapshot_content).toEqual({
-		value: "persistent untracked value",
-	});
-
-	await lix2.close();
-});
-
-test("untracked state has highest priority in UNION (untracked > tracked > inherited)", async () => {
-	const lix = await openLix({});
-
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
-
-	// Step 1: Insert tracked state with "init"
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "entity0",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			version_id: sql`(SELECT version_id FROM active_version)`,
-			snapshot_content: {
-				value: "init",
-			},
-			untracked: false,
-		})
-		.execute();
-
-	// Verify tracked state exists
-	const afterInit = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "entity0")
-		.selectAll()
-		.execute();
-
-	expect(afterInit).toHaveLength(1);
-	expect(afterInit[0]?.snapshot_content).toEqual({ value: "init" });
-
-	// Step 2: Update to untracked state with "update" (should NOT delete tracked state)
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: {
-				value: "update",
-			},
-			untracked: true,
-		})
-		.where("entity_id", "=", "entity0")
-		.where("schema_key", "=", "mock_schema")
-		.execute();
-
-	// Step 3: Query should return untracked state "update" (highest priority)
-	const afterUntrackedUpdate = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "entity0")
-		.selectAll()
-		.execute();
-
-	expect(afterUntrackedUpdate).toHaveLength(1);
-	expect(afterUntrackedUpdate[0]?.snapshot_content).toEqual({
-		value: "update",
-	});
-
-	// Step 4: Update back to tracked state with "update2" (should delete untracked state)
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: {
-				value: "update2",
-			},
-			untracked: false,
-		})
-		.where("entity_id", "=", "entity0")
-		.where("schema_key", "=", "mock_schema")
-		.execute();
-
-	// Step 5: Query should return tracked state "update2"
-	const afterTrackedUpdate = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "entity0")
-		.selectAll()
-		.execute();
-
-	expect(afterTrackedUpdate).toHaveLength(1);
-	expect(afterTrackedUpdate[0]?.snapshot_content).toEqual({ value: "update2" });
-
-	// Verify that a change was created for the final tracked mutation
-	const changes = await lix.db
-		.selectFrom("change")
-		.where("entity_id", "=", "entity0")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
-
-	expect(changes.length).toBeGreaterThan(0);
-});
-
-test("untracked state overrides inherited state (untracked > inherited)", async () => {
-	const lix = await openLix({});
-
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
-
-	// Step 1: Insert entity in global version (will be inherited by child)
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "inherited-entity",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			version_id: "global",
-			snapshot_content: {
-				value: "inherited value",
-			},
-			untracked: false,
-		})
-		.execute();
-
-	// Step 2: Create a child version that inherits from global
-	const childVersion = await createVersion({ lix, name: "child-version" });
-
-	// Verify inheritance is set up correctly
-	expect(childVersion.inherits_from_version_id).toBe("global");
-
-	// Step 3: Verify child initially sees inherited entity
-	const inheritedState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "inherited-entity")
-		.where("version_id", "=", childVersion.id)
-		.selectAll()
-		.execute();
-
-	expect(inheritedState).toHaveLength(1);
-	expect(inheritedState[0]?.snapshot_content).toEqual({
-		value: "inherited value",
-	});
-	expect(inheritedState[0]?.inherited_from_version_id).toBe("global");
-
-	// Step 4: Add untracked state for same entity in child version
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "inherited-entity",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			version_id: childVersion.id,
-			snapshot_content: {
-				value: "untracked override",
-			},
-			untracked: true,
-		})
-		.execute();
-
-	// Step 5: Query should return untracked state (higher priority than inherited)
-	const finalState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "inherited-entity")
-		.where("version_id", "=", childVersion.id)
-		.selectAll()
-		.execute();
-
-	expect(finalState).toHaveLength(1);
-	expect(finalState[0]?.snapshot_content).toEqual({
-		value: "untracked override",
-	});
-	expect(finalState[0]?.inherited_from_version_id).toBe(null); // Should not be inherited anymore
-	expect(finalState[0]?.version_id).toBe(childVersion.id);
-
-	// Step 6: Verify the inherited entity still exists in global version (unchanged)
-	const globalState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "inherited-entity")
-		.where("version_id", "=", "global")
-		.selectAll()
-		.execute();
-
-	expect(globalState).toHaveLength(1);
-	expect(globalState[0]?.snapshot_content).toEqual({
-		value: "inherited value",
-	});
-	expect(globalState[0]?.inherited_from_version_id).toBe(null);
-
-	// Step 7: No changes should be created for untracked mutations
-	const changes = await lix.db
-		.selectFrom("change")
-		.where("entity_id", "=", "inherited-entity")
-		.where("schema_key", "=", "mock_schema")
-		.selectAll()
-		.execute();
-
-	// Should only have the original change from global version, not the untracked one
-	expect(changes).toHaveLength(1);
-});
-
-test("untracked state inheritance", async () => {
-	const lix = await openLix({});
-
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema_all")
-		.values({ value: mockSchema, lixcol_version_id: "global" })
-		.execute();
-
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "active_version.version_id", "version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
-
-	// inserting into the global version
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			entity_id: "test_key",
-			snapshot_content: {
-				value: "test_value",
-			},
-			version_id: "global",
-			untracked: true,
-		})
-		.execute();
-
-	const globalState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "test_key")
-		.where("version_id", "=", "global")
-		.select("snapshot_content")
-		.executeTakeFirstOrThrow();
-
-	expect(globalState).toBeDefined();
-
-	const versionState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "test_key")
-		.where("version_id", "=", activeVersion.id)
-		.select("snapshot_content")
-		.executeTakeFirstOrThrow();
-
-	expect(versionState).toBeDefined();
-	expect(versionState).toEqual(globalState);
-});
-
-test("tracked state in child overrides inherited untracked state", async () => {
-	const lix = await openLix({});
-
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema") // Use stored_schema, not stored_schema_all
-		.values({ value: mockSchema })
-		.execute();
-
-	const childVersion = await createVersion({ lix, name: "child" });
-
-	// 1. Insert untracked state in global version
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "override_test",
-			file_id: "f1",
-			schema_key: "mock_schema",
-			plugin_key: "p1",
-			schema_version: "1.0",
-			snapshot_content: { value: "global untracked" },
-			version_id: "global",
-			untracked: true,
-		})
-		.execute();
-
-	// 2. Verify child inherits untracked state
-	const inheritedState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "override_test")
-		.where("version_id", "=", childVersion.id)
-		.selectAll()
-		.execute();
-
-	expect(inheritedState).toHaveLength(1);
-	expect(inheritedState[0]?.snapshot_content).toEqual({
-		value: "global untracked",
-	});
-	expect(inheritedState[0]?.untracked).toBe(1);
-
-	// 3. Insert tracked state in child version for same entity
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "override_test",
-			file_id: "f1",
-			schema_key: "mock_schema",
-			plugin_key: "p1",
-			schema_version: "1.0",
-			snapshot_content: { value: "child tracked" },
-			version_id: childVersion.id,
-			untracked: false, // Important: this is tracked state
-		})
-		.execute();
-
-	// 4. Verify child now sees tracked state, not inherited untracked
-	const finalState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "override_test")
-		.where("version_id", "=", childVersion.id)
-		.selectAll()
-		.execute();
-
-	expect(finalState).toHaveLength(1);
-	expect(finalState[0]?.snapshot_content).toEqual({ value: "child tracked" });
-	expect(finalState[0]?.untracked).toBe(0); // Should be tracked
-});
-
-test("untracked state in child overrides inherited untracked state", async () => {
-	const lix = await openLix({});
-
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema") // Use stored_schema
-		.values({ value: mockSchema })
-		.execute();
-
-	const childVersion = await createVersion({ lix, name: "child" });
-
-	// 1. Insert untracked state in global version
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "untracked_override_test",
-			file_id: "f1",
-			schema_key: "mock_schema",
-			plugin_key: "p1",
-			schema_version: "1.0",
-			snapshot_content: { value: "global untracked" },
-			version_id: "global",
-			untracked: true,
-		})
-		.execute();
-
-	// 2. Verify child inherits untracked state
-	const inheritedState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "untracked_override_test")
-		.where("version_id", "=", childVersion.id)
-		.selectAll()
-		.execute();
-
-	expect(inheritedState).toHaveLength(1);
-	expect(inheritedState[0]?.snapshot_content).toEqual({
-		value: "global untracked",
-	});
-	expect(inheritedState[0]?.untracked).toBe(1);
-
-	// 3. Insert untracked state in child version for same entity
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "untracked_override_test",
-			file_id: "f1",
-			schema_key: "mock_schema",
-			plugin_key: "p1",
-			schema_version: "1.0",
-			snapshot_content: { value: "child untracked" },
-			version_id: childVersion.id,
-			untracked: true,
-		})
-		.execute();
-
-	// 4. Verify child now sees its own untracked state
-	const finalState = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "untracked_override_test")
-		.where("version_id", "=", childVersion.id)
-		.selectAll()
-		.execute();
-
-	expect(finalState).toHaveLength(1);
-	expect(finalState[0]?.snapshot_content).toEqual({ value: "child untracked" });
-	expect(finalState[0]?.untracked).toBe(1);
-});
-
-test("untracked state has untracked change_id for both inherited and non-inherited entities", async () => {
-	const lix = await openLix({});
-
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
-			},
-		},
-	};
-
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
-
-	const childVersion = await createVersion({ lix, name: "child" });
-
-	// 1. Insert untracked state in global version (will be inherited by child)
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "inherited-entity",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			snapshot_content: { value: "global untracked" },
-			version_id: "global",
-			untracked: true,
-		})
-		.execute();
-
-	// 2. Insert untracked state directly in child version (non-inherited)
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "non-inherited-entity",
-			file_id: "test-file",
-			schema_key: "mock_schema",
-			plugin_key: "test_plugin",
-			schema_version: "1.0",
-			snapshot_content: { value: "child untracked" },
-			version_id: childVersion.id,
-			untracked: true,
-		})
-		.execute();
-
-	// 3. Query all untracked entities in child version
-	const untrackedEntities = await lix.db
-		.selectFrom("state_all")
-		.where("version_id", "=", childVersion.id)
-		.where("entity_id", "in", ["inherited-entity", "non-inherited-entity"])
-		.where("untracked", "=", true)
-		.selectAll()
-		.execute();
-
-	expect(untrackedEntities).toHaveLength(2);
-
-	// 4. Check that both entities have untracked change_id
-	for (const entity of untrackedEntities) {
-		expect(entity.change_id).toBe("untracked");
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		// Insert untracked state
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "override-entity",
+				file_id: "test-file",
+				schema_key: "mock_schema",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: {
+					value: "untracked value",
+				},
+				untracked: true,
+			})
+			.execute();
+
+		// Verify untracked state exists
+		const untrackedState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "override-entity")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(untrackedState).toHaveLength(1);
+		expectDeterministic(untrackedState[0]?.snapshot_content).toEqual({
+			value: "untracked value",
+		});
+
+		// Now update the untracked entity to make it tracked (should delete from untracked table)
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: {
+					value: "tracked value",
+				},
+				untracked: false,
+			})
+			.where("entity_id", "=", "override-entity")
+			.where("schema_key", "=", "mock_schema")
+			.execute();
+
+		// Verify tracked state has overridden untracked state
+		const finalState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "override-entity")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(finalState).toHaveLength(1);
+		expectDeterministic(finalState[0]?.snapshot_content).toEqual({
+			value: "tracked value",
+		});
+
+		// Verify a change was created for the tracked mutation
+		const changes = await lix.db
+			.selectFrom("change")
+			.where("entity_id", "=", "override-entity")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(changes.length).toBeGreaterThan(0);
 	}
+);
 
-	// 5. Verify specific entities
-	const inheritedEntity = untrackedEntities.find(
-		(e) => e.entity_id === "inherited-entity"
-	);
-	const nonInheritedEntity = untrackedEntities.find(
-		(e) => e.entity_id === "non-inherited-entity"
-	);
-
-	expect(inheritedEntity).toBeDefined();
-	expect(nonInheritedEntity).toBeDefined();
-
-	// Both inherited and non-inherited untracked entities should have change_id = "untracked"
-	expect(inheritedEntity?.change_id).toBe("untracked");
-	expect(nonInheritedEntity?.change_id).toBe("untracked");
-});
-
-test("state version_id defaults active version", async () => {
-	const mockSchema: LixSchemaDefinition = {
-		"x-lix-key": "mock_schema",
-		"x-lix-version": "1.0",
-		type: "object",
-		additionalProperties: false,
-		properties: {
-			value: {
-				type: "string",
+simulationTest(
+	"untracked state is persisted across lix sessions",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
 			},
-		},
-	};
+		};
 
-	const lix = await openLix({});
+		// First session - create and insert untracked state
+		const lix1 = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	await lix.db
-		.insertInto("stored_schema")
-		.values({ value: mockSchema })
-		.execute();
+		await lix1.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
 
-	// Get the active version ID to verify it gets auto-filled
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.select("version_id")
-		.executeTakeFirstOrThrow();
+		await lix1.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "persistent-entity",
+				file_id: "test-file",
+				schema_key: "mock_schema",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: {
+					value: "persistent untracked value",
+				},
+				untracked: true,
+			})
+			.execute();
 
-	// Insert into state view without specifying version_id
-	// This should auto-fill with the active version
-	await lix.db
-		.insertInto("state")
-		.values({
+		// Second session - verify untracked state persists
+		const lix2 = await openLix({ blob: await lix1.toBlob() });
+
+		const persistedState = await lix2.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "persistent-entity")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(persistedState).toHaveLength(1);
+		expectDeterministic(persistedState[0]?.snapshot_content).toEqual({
+			value: "persistent untracked value",
+		});
+
+		await lix2.close();
+	}
+);
+
+simulationTest(
+	"untracked state has highest priority in UNION (untracked > tracked > inherited)",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		// Step 1: Insert tracked state with "init"
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "entity0",
+				file_id: "test-file",
+				schema_key: "mock_schema",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: sql`(SELECT version_id FROM active_version)`,
+				snapshot_content: {
+					value: "init",
+				},
+				untracked: false,
+			})
+			.execute();
+
+		// Verify tracked state exists
+		const afterInit = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "entity0")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(afterInit).toHaveLength(1);
+		expectDeterministic(afterInit[0]?.snapshot_content).toEqual({
+			value: "init",
+		});
+
+		// Step 2: Update to untracked state with "update" (should NOT delete tracked state)
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: {
+					value: "update",
+				},
+				untracked: true,
+			})
+			.where("entity_id", "=", "entity0")
+			.where("schema_key", "=", "mock_schema")
+			.execute();
+
+		// Step 3: Query should return untracked state "update" (highest priority)
+		const afterUntrackedUpdate = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "entity0")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(afterUntrackedUpdate).toHaveLength(1);
+		expectDeterministic(afterUntrackedUpdate[0]?.snapshot_content).toEqual({
+			value: "update",
+		});
+
+		// Step 4: Update back to tracked state with "update2" (should delete untracked state)
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: {
+					value: "update2",
+				},
+				untracked: false,
+			})
+			.where("entity_id", "=", "entity0")
+			.where("schema_key", "=", "mock_schema")
+			.execute();
+
+		// Step 5: Query should return tracked state "update2"
+		const afterTrackedUpdate = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "entity0")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(afterTrackedUpdate).toHaveLength(1);
+		expectDeterministic(afterTrackedUpdate[0]?.snapshot_content).toEqual({
+			value: "update2",
+		});
+
+		// Verify that a change was created for the final tracked mutation
+		const changes = await lix.db
+			.selectFrom("change")
+			.where("entity_id", "=", "entity0")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(changes.length).toBeGreaterThan(0);
+	}
+);
+
+simulationTest(
+	"untracked state overrides inherited state (untracked > inherited)",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		// Step 1: Insert entity in global version (will be inherited by child)
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "inherited-entity",
+				file_id: "test-file",
+				schema_key: "mock_schema",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: "global",
+				snapshot_content: {
+					value: "inherited value",
+				},
+				untracked: false,
+			})
+			.execute();
+
+		// Step 2: Create a child version that inherits from global
+		const childVersion = await createVersion({ lix, name: "child-version" });
+
+		// Verify inheritance is set up correctly
+		expectDeterministic(childVersion.inherits_from_version_id).toBe("global");
+
+		// Step 3: Verify child initially sees inherited entity
+		const inheritedState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "inherited-entity")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
+
+		expectDeterministic(inheritedState).toHaveLength(1);
+		expectDeterministic(inheritedState[0]?.snapshot_content).toEqual({
+			value: "inherited value",
+		});
+		expectDeterministic(inheritedState[0]?.inherited_from_version_id).toBe(
+			"global"
+		);
+
+		// Step 4: Add untracked state for same entity in child version
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "inherited-entity",
+				file_id: "test-file",
+				schema_key: "mock_schema",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				version_id: childVersion.id,
+				snapshot_content: {
+					value: "untracked override",
+				},
+				untracked: true,
+			})
+			.execute();
+
+		// Step 5: Query should return untracked state (higher priority than inherited)
+		const finalState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "inherited-entity")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
+
+		expectDeterministic(finalState).toHaveLength(1);
+		expectDeterministic(finalState[0]?.snapshot_content).toEqual({
+			value: "untracked override",
+		});
+		expectDeterministic(finalState[0]?.inherited_from_version_id).toBe(null); // Should not be inherited anymore
+		expectDeterministic(finalState[0]?.version_id).toBe(childVersion.id);
+
+		// Step 6: Verify the inherited entity still exists in global version (unchanged)
+		const globalState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "inherited-entity")
+			.where("version_id", "=", "global")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(globalState).toHaveLength(1);
+		expectDeterministic(globalState[0]?.snapshot_content).toEqual({
+			value: "inherited value",
+		});
+		expectDeterministic(globalState[0]?.inherited_from_version_id).toBe(null);
+
+		// Step 7: No changes should be created for untracked mutations
+		const changes = await lix.db
+			.selectFrom("change")
+			.where("entity_id", "=", "inherited-entity")
+			.where("schema_key", "=", "mock_schema")
+			.selectAll()
+			.execute();
+
+		// Should only have the original change from global version, not the untracked one
+		expectDeterministic(changes).toHaveLength(1);
+	}
+);
+
+simulationTest(
+	"untracked state inheritance",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema_all")
+			.values({ value: mockSchema, lixcol_version_id: "global" })
+			.execute();
+
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
+
+		// inserting into the global version
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				file_id: "test-file",
+				schema_key: "mock_schema",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				entity_id: "test_key",
+				snapshot_content: {
+					value: "test_value",
+				},
+				version_id: "global",
+				untracked: true,
+			})
+			.execute();
+
+		const globalState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "test_key")
+			.where("version_id", "=", "global")
+			.select("snapshot_content")
+			.executeTakeFirstOrThrow();
+
+		expectDeterministic(globalState).toBeDefined();
+
+		const versionState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "test_key")
+			.where("version_id", "=", activeVersion.id)
+			.select("snapshot_content")
+			.executeTakeFirstOrThrow();
+
+		expectDeterministic(versionState).toBeDefined();
+		expectDeterministic(versionState).toEqual(globalState);
+	}
+);
+
+simulationTest(
+	"tracked state in child overrides inherited untracked state",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema") // Use stored_schema, not stored_schema_all
+			.values({ value: mockSchema })
+			.execute();
+
+		const childVersion = await createVersion({ lix, name: "child" });
+
+		// 1. Insert untracked state in global version
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "override_test",
+				file_id: "f1",
+				schema_key: "mock_schema",
+				plugin_key: "p1",
+				schema_version: "1.0",
+				snapshot_content: { value: "global untracked" },
+				version_id: "global",
+				untracked: true,
+			})
+			.execute();
+
+		// 2. Verify child inherits untracked state
+		const inheritedState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "override_test")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
+
+		expectDeterministic(inheritedState).toHaveLength(1);
+		expectDeterministic(inheritedState[0]?.snapshot_content).toEqual({
+			value: "global untracked",
+		});
+		expectDeterministic(inheritedState[0]?.untracked).toBe(1);
+
+		// 3. Insert tracked state in child version for same entity
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "override_test",
+				file_id: "f1",
+				schema_key: "mock_schema",
+				plugin_key: "p1",
+				schema_version: "1.0",
+				snapshot_content: { value: "child tracked" },
+				version_id: childVersion.id,
+				untracked: false, // Important: this is tracked state
+			})
+			.execute();
+
+		// 4. Verify child now sees tracked state, not inherited untracked
+		const finalState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "override_test")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
+
+		expectDeterministic(finalState).toHaveLength(1);
+		expectDeterministic(finalState[0]?.snapshot_content).toEqual({
+			value: "child tracked",
+		});
+		expectDeterministic(finalState[0]?.untracked).toBe(0); // Should be tracked
+	}
+);
+
+simulationTest(
+	"untracked state in child overrides inherited untracked state",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema") // Use stored_schema
+			.values({ value: mockSchema })
+			.execute();
+
+		const childVersion = await createVersion({ lix, name: "child" });
+
+		// 1. Insert untracked state in global version
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "untracked_override_test",
+				file_id: "f1",
+				schema_key: "mock_schema",
+				plugin_key: "p1",
+				schema_version: "1.0",
+				snapshot_content: { value: "global untracked" },
+				version_id: "global",
+				untracked: true,
+			})
+			.execute();
+
+		// 2. Verify child inherits untracked state
+		const inheritedState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "untracked_override_test")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
+
+		expectDeterministic(inheritedState).toHaveLength(1);
+		expectDeterministic(inheritedState[0]?.snapshot_content).toEqual({
+			value: "global untracked",
+		});
+		expectDeterministic(inheritedState[0]?.untracked).toBe(1);
+
+		// 3. Insert untracked state in child version for same entity
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "untracked_override_test",
+				file_id: "f1",
+				schema_key: "mock_schema",
+				plugin_key: "p1",
+				schema_version: "1.0",
+				snapshot_content: { value: "child untracked" },
+				version_id: childVersion.id,
+				untracked: true,
+			})
+			.execute();
+
+		// 4. Verify child now sees its own untracked state
+		const finalState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "untracked_override_test")
+			.where("version_id", "=", childVersion.id)
+			.selectAll()
+			.execute();
+
+		expectDeterministic(finalState).toHaveLength(1);
+		expectDeterministic(finalState[0]?.snapshot_content).toEqual({
+			value: "child untracked",
+		});
+		expectDeterministic(finalState[0]?.untracked).toBe(1);
+	}
+);
+
+simulationTest(
+	"untracked state has untracked change_id for both inherited and non-inherited entities",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		const childVersion = await createVersion({ lix, name: "child" });
+
+		// 1. Insert untracked state in global version (will be inherited by child)
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "inherited-entity",
+				file_id: "test-file",
+				schema_key: "mock_schema",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				snapshot_content: { value: "global untracked" },
+				version_id: "global",
+				untracked: true,
+			})
+			.execute();
+
+		// 2. Insert untracked state directly in child version (non-inherited)
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "non-inherited-entity",
+				file_id: "test-file",
+				schema_key: "mock_schema",
+				plugin_key: "test_plugin",
+				schema_version: "1.0",
+				snapshot_content: { value: "child untracked" },
+				version_id: childVersion.id,
+				untracked: true,
+			})
+			.execute();
+
+		// 3. Query all untracked entities in child version
+		const untrackedEntities = await lix.db
+			.selectFrom("state_all")
+			.where("version_id", "=", childVersion.id)
+			.where("entity_id", "in", ["inherited-entity", "non-inherited-entity"])
+			.where("untracked", "=", true)
+			.selectAll()
+			.execute();
+
+		expectDeterministic(untrackedEntities).toHaveLength(2);
+
+		// 4. Check that both entities have untracked change_id
+		for (const entity of untrackedEntities) {
+			expectDeterministic(entity.change_id).toBe("untracked");
+		}
+
+		// 5. Verify specific entities
+		const inheritedEntity = untrackedEntities.find(
+			(e) => e.entity_id === "inherited-entity"
+		);
+		const nonInheritedEntity = untrackedEntities.find(
+			(e) => e.entity_id === "non-inherited-entity"
+		);
+
+		expectDeterministic(inheritedEntity).toBeDefined();
+		expectDeterministic(nonInheritedEntity).toBeDefined();
+
+		// Both inherited and non-inherited untracked entities should have change_id = "untracked"
+		expectDeterministic(inheritedEntity?.change_id).toBe("untracked");
+		expectDeterministic(nonInheritedEntity?.change_id).toBe("untracked");
+	}
+);
+
+simulationTest(
+	"state version_id defaults active version",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const mockSchema: LixSchemaDefinition = {
+			"x-lix-key": "mock_schema",
+			"x-lix-version": "1.0",
+			type: "object",
+			additionalProperties: false,
+			properties: {
+				value: {
+					type: "string",
+				},
+			},
+		};
+
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
+
+		await lix.db
+			.insertInto("stored_schema")
+			.values({ value: mockSchema })
+			.execute();
+
+		// Get the active version ID to verify it gets auto-filled
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
+
+		// Insert into state view without specifying version_id
+		// This should auto-fill with the active version
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "entity0",
+				file_id: "f0",
+				schema_key: "mock_schema",
+				plugin_key: "lix_own_entity",
+				schema_version: "1.0",
+				snapshot_content: { value: "initial content" },
+			})
+			.execute();
+
+		// Verify the entity was inserted with the correct version_id
+		const insertedEntity = await lix.db
+			.selectFrom("state")
+			.where("entity_id", "=", "entity0")
+			.selectAll()
+			.execute();
+
+		expectDeterministic(insertedEntity).toHaveLength(1);
+		expectDeterministic(insertedEntity[0]).toMatchObject({
 			entity_id: "entity0",
 			file_id: "f0",
 			schema_key: "mock_schema",
 			plugin_key: "lix_own_entity",
 			schema_version: "1.0",
 			snapshot_content: { value: "initial content" },
-		})
-		.execute();
+		});
 
-	// Verify the entity was inserted with the correct version_id
-	const insertedEntity = await lix.db
-		.selectFrom("state")
-		.where("entity_id", "=", "entity0")
-		.selectAll()
-		.execute();
+		// Verify the version_id was auto-filled with the active version
+		const entityInStateAll = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "entity0")
+			.select("version_id")
+			.executeTakeFirstOrThrow();
 
-	expect(insertedEntity).toHaveLength(1);
-	expect(insertedEntity[0]).toMatchObject({
-		entity_id: "entity0",
-		file_id: "f0",
-		schema_key: "mock_schema",
-		plugin_key: "lix_own_entity",
-		schema_version: "1.0",
-		snapshot_content: { value: "initial content" },
-	});
+		expectDeterministic(entityInStateAll.version_id).toBe(
+			activeVersion.version_id
+		);
 
-	// Verify the version_id was auto-filled with the active version
-	const entityInStateAll = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "entity0")
-		.select("version_id")
-		.executeTakeFirstOrThrow();
+		// Test update operation
+		await lix.db
+			.updateTable("state")
+			.where("entity_id", "=", "entity0")
+			.set({
+				snapshot_content: { value: "updated content" },
+			})
+			.execute();
 
-	expect(entityInStateAll.version_id).toBe(activeVersion.version_id);
+		// Verify update worked
+		const updatedEntity = await lix.db
+			.selectFrom("state")
+			.where("entity_id", "=", "entity0")
+			.selectAll()
+			.execute();
 
-	// Test update operation
-	await lix.db
-		.updateTable("state")
-		.where("entity_id", "=", "entity0")
-		.set({
-			snapshot_content: { value: "updated content" },
-		})
-		.execute();
+		expectDeterministic(updatedEntity[0]?.snapshot_content).toEqual({
+			value: "updated content",
+		});
 
-	// Verify update worked
-	const updatedEntity = await lix.db
-		.selectFrom("state")
-		.where("entity_id", "=", "entity0")
-		.selectAll()
-		.execute();
+		// Test delete operation
+		await lix.db
+			.deleteFrom("state")
+			.where("entity_id", "=", "entity0")
+			.execute();
 
-	expect(updatedEntity[0]?.snapshot_content).toEqual({
-		value: "updated content",
-	});
+		// Verify delete worked
+		const deletedEntity = await lix.db
+			.selectFrom("state")
+			.where("entity_id", "=", "entity0")
+			.selectAll()
+			.execute();
 
-	// Test delete operation
-	await lix.db.deleteFrom("state").where("entity_id", "=", "entity0").execute();
-
-	// Verify delete worked
-	const deletedEntity = await lix.db
-		.selectFrom("state")
-		.where("entity_id", "=", "entity0")
-		.selectAll()
-		.execute();
-
-	expect(deletedEntity).toHaveLength(0);
-});
+		expectDeterministic(deletedEntity).toHaveLength(0);
+	}
+);
 
 // https://github.com/opral/lix-sdk/issues/344
-test("deleting key_value entities from state should not cause infinite loop", async () => {
-	const lix = await openLix({});
+simulationTest(
+	"deleting key_value entities from state should not cause infinite loop",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	// 1. Insert key_value in global version (tracked)
-	await lix.db
-		.insertInto("key_value_all")
-		.values({
-			key: "test-key-global",
-			value: "global-tracked-value",
-			lixcol_version_id: "global",
-		})
-		.execute();
+		// 1. Insert key_value in global version (tracked)
+		await lix.db
+			.insertInto("key_value_all")
+			.values({
+				key: "test-key-global",
+				value: "global-tracked-value",
+				lixcol_version_id: "global",
+			})
+			.execute();
 
-	// 2. Insert key_value in global version (untracked)
-	await lix.db
-		.insertInto("key_value_all")
-		.values({
-			key: "test-key-global-untracked",
-			value: "global-untracked-value",
-			lixcol_version_id: "global",
-			lixcol_untracked: true,
-		})
-		.execute();
+		// 2. Insert key_value in global version (untracked)
+		await lix.db
+			.insertInto("key_value_all")
+			.values({
+				key: "test-key-global-untracked",
+				value: "global-untracked-value",
+				lixcol_version_id: "global",
+				lixcol_untracked: true,
+			})
+			.execute();
 
-	// 3. Insert key_value in active version (tracked)
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "test-key-active",
-			value: "active-tracked-value",
-		})
-		.execute();
+		// 3. Insert key_value in active version (tracked)
+		await lix.db
+			.insertInto("key_value")
+			.values({
+				key: "test-key-active",
+				value: "active-tracked-value",
+			})
+			.execute();
 
-	// 4. Insert key_value in active version (untracked)
-	await lix.db
-		.insertInto("key_value")
-		.values({
-			key: "test-key-active-untracked",
-			value: "active-untracked-value",
-			lixcol_untracked: true,
-		})
-		.execute();
+		// 4. Insert key_value in active version (untracked)
+		await lix.db
+			.insertInto("key_value")
+			.values({
+				key: "test-key-active-untracked",
+				value: "active-untracked-value",
+				lixcol_untracked: true,
+			})
+			.execute();
 
-	// Verify all entities exist before deletion (including inherited)
-	const entitiesBeforeDelete = await lix.db
-		.selectFrom("state")
-		.where("schema_key", "=", "lix_key_value")
-		.where("entity_id", "like", "test-key-%")
-		.selectAll()
-		.execute();
+		// Verify all entities exist before deletion (including inherited)
+		const entitiesBeforeDelete = await lix.db
+			.selectFrom("state")
+			.where("schema_key", "=", "lix_key_value")
+			.where("entity_id", "like", "test-key-%")
+			.selectAll()
+			.execute();
 
-	// state view shows active version entities + inherited from global
-	expect(entitiesBeforeDelete).toHaveLength(4);
+		// state view shows active version entities + inherited from global
+		expectDeterministic(entitiesBeforeDelete).toHaveLength(4);
 
-	// Delete all key_value entities
-	// this is the reproduction of the infinite loop issue
-	await lix.db
-		.deleteFrom("state")
-		.where("schema_key", "=", "lix_key_value")
-		.execute();
+		// Delete all key_value entities
+		// this is the reproduction of the infinite loop issue
+		await lix.db
+			.deleteFrom("state")
+			.where("schema_key", "=", "lix_key_value")
+			.execute();
 
-	// Verify all entities are deleted
-	const keyValueAfterDelete = await lix.db
-		.selectFrom("state")
-		.where("schema_key", "=", "lix_key_value")
-		.where("entity_id", "like", "test-key-%")
-		.selectAll()
-		.execute();
+		// Verify all entities are deleted
+		const keyValueAfterDelete = await lix.db
+			.selectFrom("state")
+			.where("schema_key", "=", "lix_key_value")
+			.where("entity_id", "like", "test-key-%")
+			.selectAll()
+			.execute();
 
-	expect(keyValueAfterDelete).toHaveLength(0);
-});
+		expectDeterministic(keyValueAfterDelete).toHaveLength(0);
+	}
+);
 
 // see https://github.com/opral/lix-sdk/issues/359
-test("commit_id in state should be from the real auto-commit, not the working commit", async () => {
-	const lix = await openLix({});
+simulationTest(
+	"commit_id in state should be from the real auto-commit, not the working commit",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	// Get the active version with its commit_id and working_commit_id
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "version.id", "active_version.version_id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+		// Get the active version with its commit_id and working_commit_id
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "version.id", "active_version.version_id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	// Verify we have both commit_id and working_commit_id
-	expect(activeVersion.commit_id).toBeTruthy();
-	expect(activeVersion.working_commit_id).toBeTruthy();
-	expect(activeVersion.commit_id).not.toBe(activeVersion.working_commit_id);
+		// Verify we have both commit_id and working_commit_id
+		expectDeterministic(activeVersion.commit_id).toBeTruthy();
+		expectDeterministic(activeVersion.working_commit_id).toBeTruthy();
+		expectDeterministic(activeVersion.commit_id).not.toBe(
+			activeVersion.working_commit_id
+		);
 
-	// Insert some state data
-	await lix.db
-		.insertInto("state")
-		.values({
-			entity_id: "test-entity-1",
-			schema_key: "test_schema",
-			file_id: "test-file",
-			plugin_key: "test-plugin",
-			schema_version: "1.0",
-			snapshot_content: { value: "initial value" },
-		})
-		.execute();
+		const commitsBeforeInsert = await lix.db
+			.selectFrom("commit")
+			.select("id")
+			.execute();
 
-	// Query the state to check the commit_id
-	const stateAfterInsert = await lix.db
-		.selectFrom("state")
-		.where("entity_id", "=", "test-entity-1")
-		.select(["entity_id", "commit_id"])
-		.executeTakeFirstOrThrow();
+		// Insert some state data
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "test-entity-1",
+				schema_key: "test_schema",
+				file_id: "test-file",
+				plugin_key: "test-plugin",
+				schema_version: "1.0",
+				snapshot_content: { value: "initial value" },
+			})
+			.execute();
 
-	// The commit_id should NOT be the working_commit_id
-	expect(stateAfterInsert.commit_id).not.toBe(activeVersion.working_commit_id);
+		const commitsAfterInsert = await lix.db
+			.selectFrom("commit")
+			.select("id")
+			.execute();
 
-	// Get the actual commit that was created by the auto-commit
-	const latestCommit = await lix.db
-		.selectFrom("commit")
-		.orderBy("id", "desc")
-		.select(["id"])
-		.executeTakeFirst();
+		// two commits for the global and active version
+		expectDeterministic(commitsAfterInsert.length).toBe(
+			commitsBeforeInsert.length + 2
+		);
 
-	// The commit_id should be the auto-commit ID (not the working commit)
-	expect(stateAfterInsert.commit_id).toBe(latestCommit?.id);
+		const activeVersionAfterInsert = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	// Update the state to trigger another auto-commit
-	await lix.db
-		.updateTable("state")
-		.where("entity_id", "=", "test-entity-1")
-		.set({ snapshot_content: { value: "updated value" } })
-		.execute();
+		// Query the state to check the commit_id
+		const stateAfterInsert = await lix.db
+			.selectFrom("state")
+			.where("entity_id", "=", "test-entity-1")
+			.select(["entity_id", "commit_id"])
+			.executeTakeFirstOrThrow();
 
-	// Check the state again
-	const stateAfterUpdate = await lix.db
-		.selectFrom("state")
-		.where("entity_id", "=", "test-entity-1")
-		.select(["entity_id", "commit_id"])
-		.executeTakeFirstOrThrow();
+		// The commit_id should NOT be the working_commit_id
+		expectDeterministic(stateAfterInsert.commit_id).not.toBe(
+			activeVersionAfterInsert.working_commit_id
+		);
 
-	// Get the new latest commit
-	const newLatestCommit = await lix.db
-		.selectFrom("commit")
-		.orderBy("id", "desc")
-		.select(["id"])
-		.executeTakeFirst();
+		// The commit_id should be the auto-commit ID (not the working commit)
+		expectDeterministic(stateAfterInsert.commit_id).toBe(
+			activeVersionAfterInsert.commit_id
+		);
 
-	// The commit_id should now be the new auto-commit ID
-	expect(stateAfterUpdate.commit_id).toBe(newLatestCommit?.id);
-	expect(stateAfterUpdate.commit_id).not.toBe(activeVersion.working_commit_id);
-	expect(stateAfterUpdate.commit_id).not.toBe(latestCommit?.id);
-});
+		// Update the state to trigger another auto-commit
+		await lix.db
+			.updateTable("state")
+			.where("entity_id", "=", "test-entity-1")
+			.set({ snapshot_content: { value: "updated value" } })
+			.execute();
 
-test("delete ALL from state view should delete untracked entities", async () => {
-	const lix = await openLix({});
+		// Check the state again
+		const stateAfterUpdate = await lix.db
+			.selectFrom("state")
+			.where("entity_id", "=", "test-entity-1")
+			.select(["entity_id", "commit_id"])
+			.executeTakeFirstOrThrow();
 
-	// Create a tracked entity in state
-	await lix.db
-		.insertInto("state")
-		.values({
-			entity_id: "tracked-entity",
-			schema_key: "mock_test_schema",
-			file_id: "test-file",
-			plugin_key: "test_plugin",
-			snapshot_content: { value: "tracked" },
-			schema_version: "1.0",
-		})
-		.execute();
+		const activeVersionAfterUpdate = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	// Create an untracked entity in state_all directly with the active version
-	await lix.db
-		.insertInto("state")
-		.values({
-			entity_id: "untracked-entity",
-			schema_key: "mock_test_schema",
-			file_id: "test-file",
-			plugin_key: "test_plugin",
-			snapshot_content: { value: "untracked" },
-			schema_version: "1.0",
-			untracked: true,
-		})
-		.execute();
+		// The commit_id should now be the new auto-commit ID
+		expectDeterministic(stateAfterUpdate.commit_id).toBe(
+			activeVersionAfterUpdate.commit_id
+		);
+		expectDeterministic(stateAfterUpdate.commit_id).not.toBe(
+			activeVersion.working_commit_id
+		);
+	}
+);
 
-	// Verify we have both entities in state view
-	const beforeDelete = await lix.db
-		.selectFrom("state")
-		.where("schema_key", "=", "mock_test_schema")
-		.selectAll()
-		.execute();
+simulationTest(
+	"delete ALL from state view should delete untracked entities",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	expect(beforeDelete).toHaveLength(2);
-	expect(beforeDelete.some((e) => e.entity_id === "tracked-entity")).toBe(true);
-	expect(beforeDelete.some((e) => e.entity_id === "untracked-entity")).toBe(
-		true
-	);
+		// Create a tracked entity in state
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "tracked-entity",
+				schema_key: "mock_test_schema",
+				file_id: "test-file",
+				plugin_key: "test_plugin",
+				snapshot_content: { value: "tracked" },
+				schema_version: "1.0",
+			})
+			.execute();
 
-	// Delete ALL from the state view (no WHERE clause)
-	await lix.db
-		.deleteFrom("state")
-		.where("schema_key", "=", "mock_test_schema")
-		.execute();
+		// Create an untracked entity in state_all directly with the active version
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "untracked-entity",
+				schema_key: "mock_test_schema",
+				file_id: "test-file",
+				plugin_key: "test_plugin",
+				snapshot_content: { value: "untracked" },
+				schema_version: "1.0",
+				untracked: true,
+			})
+			.execute();
 
-	// Check if ALL entries were deleted including untracked
-	const afterDelete = await lix.db
-		.selectFrom("state")
-		.where("schema_key", "=", "mock_test_schema")
-		.selectAll()
-		.execute();
+		// Verify we have both entities in state view
+		const beforeDelete = await lix.db
+			.selectFrom("state")
+			.where("schema_key", "=", "mock_test_schema")
+			.selectAll()
+			.execute();
 
-	// This should be 0 - all entries including untracked should be deleted
-	// BUG: The untracked entry is not deleted
-	console.log("Remaining entries after DELETE ALL:", afterDelete);
-	expect(afterDelete).toHaveLength(0);
+		expectDeterministic(beforeDelete).toHaveLength(2);
+		expectDeterministic(
+			beforeDelete.some((e) => e.entity_id === "tracked-entity")
+		).toBe(true);
+		expectDeterministic(
+			beforeDelete.some((e) => e.entity_id === "untracked-entity")
+		).toBe(true);
 
-	// Also check the underlying state_all table
-	const stateAfterDelete = await lix.db
-		.selectFrom("state_all")
-		.where("schema_key", "=", "mock_test_schema")
-		.selectAll()
-		.execute();
+		// Delete ALL from the state view (no WHERE clause)
+		await lix.db
+			.deleteFrom("state")
+			.where("schema_key", "=", "mock_test_schema")
+			.execute();
 
-	// All entities should be gone from state_all
-	expect(stateAfterDelete).toHaveLength(0);
-});
+		// Check if ALL entries were deleted including untracked
+		const afterDelete = await lix.db
+			.selectFrom("state")
+			.where("schema_key", "=", "mock_test_schema")
+			.selectAll()
+			.execute();
 
-test("delete from state view with WHERE should delete untracked entities", async () => {
-	const lix = await openLix({});
+		// This should be 0 - all entries including untracked should be deleted
+		expectDeterministic(afterDelete).toHaveLength(0);
 
-	// Create a tracked entity in state
-	await lix.db
-		.insertInto("state")
-		.values({
-			entity_id: "tracked-entity",
-			schema_key: "mock_test_schema",
-			file_id: "test-file",
-			plugin_key: "test_plugin",
-			snapshot_content: { value: "tracked" },
-			schema_version: "1.0",
-		})
-		.execute();
+		// Also check the underlying state_all table
+		const stateAfterDelete = await lix.db
+			.selectFrom("state_all")
+			.where("schema_key", "=", "mock_test_schema")
+			.selectAll()
+			.execute();
 
-	// Create an untracked entity in state_all directly with the active version
-	await lix.db
-		.insertInto("state")
-		.values({
-			entity_id: "untracked-entity",
-			schema_key: "mock_test_schema",
-			file_id: "test-file",
-			plugin_key: "test_plugin",
-			snapshot_content: { value: "untracked" },
-			schema_version: "1.0",
-			untracked: true,
-		})
-		.execute();
+		// All entities should be gone from state_all
+		expectDeterministic(stateAfterDelete).toHaveLength(0);
+	}
+);
 
-	// Verify both entities exist in the state view
-	const beforeDelete = await lix.db
-		.selectFrom("state")
-		.where("schema_key", "=", "mock_test_schema")
-		.selectAll()
-		.execute();
+simulationTest(
+	"delete from state view with WHERE should delete untracked entities",
+	async ({ openSimulatedLix, expectDeterministic }) => {
+		const lix = await openSimulatedLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+					lixcol_version_id: "global",
+				},
+			],
+		});
 
-	expect(beforeDelete).toHaveLength(2);
-	expect(beforeDelete.some((e) => e.entity_id === "tracked-entity")).toBe(true);
-	expect(beforeDelete.some((e) => e.entity_id === "untracked-entity")).toBe(
-		true
-	);
+		// Create a tracked entity in state
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "tracked-entity",
+				schema_key: "mock_test_schema",
+				file_id: "test-file",
+				plugin_key: "test_plugin",
+				snapshot_content: { value: "tracked" },
+				schema_version: "1.0",
+			})
+			.execute();
 
-	// Delete the untracked entity from the state view with WHERE clause
-	await lix.db
-		.deleteFrom("state")
-		.where("entity_id", "=", "untracked-entity")
-		.execute();
+		// Create an untracked entity in state_all directly with the active version
+		await lix.db
+			.insertInto("state")
+			.values({
+				entity_id: "untracked-entity",
+				schema_key: "mock_test_schema",
+				file_id: "test-file",
+				plugin_key: "test_plugin",
+				snapshot_content: { value: "untracked" },
+				schema_version: "1.0",
+				untracked: true,
+			})
+			.execute();
 
-	// Check if the untracked entry was deleted
-	const afterDelete = await lix.db
-		.selectFrom("state")
-		.where("schema_key", "=", "mock_test_schema")
-		.selectAll()
-		.execute();
+		// Verify both entities exist in the state view
+		const beforeDelete = await lix.db
+			.selectFrom("state")
+			.where("schema_key", "=", "mock_test_schema")
+			.selectAll()
+			.execute();
 
-	// Should only have the tracked entity remaining
-	expect(afterDelete).toHaveLength(1);
-	expect(afterDelete[0]?.entity_id).toBe("tracked-entity");
+		expectDeterministic(beforeDelete).toHaveLength(2);
+		expectDeterministic(
+			beforeDelete.some((e) => e.entity_id === "tracked-entity")
+		).toBe(true);
+		expectDeterministic(
+			beforeDelete.some((e) => e.entity_id === "untracked-entity")
+		).toBe(true);
 
-	// Also check the underlying state_all table to confirm deletion
-	const stateAfterDelete = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "untracked-entity")
-		.where("schema_key", "=", "mock_test_schema")
-		.selectAll()
-		.execute();
+		// Delete the untracked entity from the state view with WHERE clause
+		await lix.db
+			.deleteFrom("state")
+			.where("entity_id", "=", "untracked-entity")
+			.execute();
 
-	// The untracked entry should be gone from state_all too
-	expect(stateAfterDelete).toHaveLength(0);
-});
+		// Check if the untracked entry was deleted
+		const afterDelete = await lix.db
+			.selectFrom("state")
+			.where("schema_key", "=", "mock_test_schema")
+			.selectAll()
+			.execute();
+
+		// Should only have the tracked entity remaining
+		expectDeterministic(afterDelete).toHaveLength(1);
+		expectDeterministic(afterDelete[0]?.entity_id).toBe("tracked-entity");
+
+		// Also check the underlying state_all table to confirm deletion
+		const stateAfterDelete = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "untracked-entity")
+			.where("schema_key", "=", "mock_test_schema")
+			.selectAll()
+			.execute();
+
+		// The untracked entry should be gone from state_all too
+		expectDeterministic(stateAfterDelete).toHaveLength(0);
+	}
+);

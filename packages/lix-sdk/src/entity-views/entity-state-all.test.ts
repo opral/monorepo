@@ -563,4 +563,85 @@ describe("createEntityAllViewIfNotExists", () => {
 		expect(result?.lixcol_plugin_key).toBe("test_plugin");
 		expect(result?.lixcol_version_id).toBeDefined();
 	});
+
+	test("DELETE with version_id only affects the specified version", async () => {
+		const lix = await openLix({});
+
+		// Create the entity view
+		createEntityStateAllView({
+			lix,
+			schema: testSchema,
+			overrideName: "test_view_all",
+			pluginKey: "test_plugin",
+			hardcodedFileId: "test_file",
+		});
+
+		// Create parent and child versions
+		const { createVersion } = await import("../version/create-version.js");
+		await createVersion({ lix, id: "parent-version" });
+		await createVersion({
+			lix,
+			id: "child-version",
+			inherits_from_version_id: "parent-version",
+		});
+
+		// Insert entity into parent version
+		await lix.db
+			.insertInto("test_view_all" as any)
+			.values({
+				id: "shared-entity",
+				name: "parent-value",
+				value: 100,
+				lixcol_version_id: "parent-version",
+			})
+			.execute();
+
+		// Verify entity exists in parent version's state_all
+		const parentStateBefore = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", "parent-version")
+			.selectAll()
+			.execute();
+
+		expect(parentStateBefore).toHaveLength(1);
+		expect(parentStateBefore[0]!.snapshot_content).toEqual({
+			id: "shared-entity",
+			name: "parent-value",
+			value: 100,
+		});
+
+		// Attempt to delete the entity from child version
+		// This should not affect any data since the entity doesn't exist in child version
+		await lix.db
+			.deleteFrom("test_view_all" as any)
+			.where("id", "=", "shared-entity")
+			.where("lixcol_version_id", "=", "child-version")
+			.execute();
+
+		// Verify parent version still has the entity
+		const parentStateAfter = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", "parent-version")
+			.selectAll()
+			.execute();
+
+		expect(parentStateAfter).toHaveLength(1);
+		expect(parentStateAfter[0]!.snapshot_content).toEqual({
+			id: "shared-entity",
+			name: "parent-value",
+			value: 100,
+		});
+
+		// Verify child version has no entry
+		const childState = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "shared-entity")
+			.where("version_id", "=", "child-version")
+			.selectAll()
+			.execute();
+
+		expect(childState).toHaveLength(0);
+	});
 });

@@ -18,7 +18,6 @@ import type {
 	StateView,
 	InternalChangeInTransactionTable,
 	StateAllView,
-	InternalStateAllUntrackedTable,
 } from "../state/schema.js";
 import type { StateHistoryView } from "../state-history/schema.js";
 import { LixFileDescriptorSchema } from "../file/schema.js";
@@ -37,6 +36,7 @@ import type { EntityViews } from "../entity-views/entity-view-builder.js";
 import type { ToKysely } from "../entity-views/types.js";
 import type { InternalStateCacheTable } from "../state/cache/schema.js";
 import type { InternalResolvedStateAllView } from "../state/resolved-state-view.js";
+import type { InternalStateAllUntrackedTable } from "../state/untracked/schema.js";
 
 export const LixDatabaseSchemaJsonColumns = {
 	snapshot: ["content"],

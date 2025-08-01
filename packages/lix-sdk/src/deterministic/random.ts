@@ -1,10 +1,12 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
-import { type Kysely, sql } from "kysely";
-import type { LixInternalDatabaseSchema } from "../database/schema.js";
+import { sql, type Kysely } from "kysely";
 import { executeSync } from "../database/execute-sync.js";
 import { LixKeyValueSchema, type LixKeyValue } from "../key-value/schema.js";
 import type { Lix } from "../lix/open-lix.js";
+import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { isDeterministicMode } from "./is-deterministic-mode.js";
+import { timestamp } from "./timestamp.js";
+import { updateUntrackedState } from "../state/untracked/update-untracked-state.js";
 
 /** State kept per SQLite connection - 16 bytes for xorshift128+ */
 type RngState = {
@@ -227,6 +229,7 @@ function nextXorshift128Plus(state: RngState): number {
  */
 export function commitDeterministicRngState(args: {
 	lix: Pick<Lix, "sqlite" | "db">;
+	timestamp?: string;
 }): void {
 	const state = rngCache.get(args.lix.sqlite);
 	if (!state || !state.dirty) return; // nothing to do
@@ -241,23 +244,18 @@ export function commitDeterministicRngState(args: {
 		},
 	} satisfies LixKeyValue);
 
-	executeSync({
+	const now = args.timestamp ?? timestamp({ lix: args.lix });
+	updateUntrackedState({
 		lix: args.lix,
-		query: (args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>)
-			.insertInto("internal_state_all_untracked")
-			.values({
-				entity_id: "lix_deterministic_rng_state",
-				version_id: "global",
-				file_id: "lix",
-				schema_key: LixKeyValueSchema["x-lix-key"],
-				plugin_key: "lix_own_entity",
-				schema_version: LixKeyValueSchema["x-lix-version"],
-				snapshot_content: newValue,
-			})
-			.onConflict((oc) =>
-				oc.doUpdateSet({
-					snapshot_content: newValue,
-				})
-			),
+		change: {
+			entity_id: "lix_deterministic_rng_state",
+			schema_key: LixKeyValueSchema["x-lix-key"],
+			file_id: "lix",
+			plugin_key: "lix_own_entity",
+			snapshot_content: newValue,
+			schema_version: LixKeyValueSchema["x-lix-version"],
+			created_at: now,
+		},
+		version_id: "global",
 	});
 }

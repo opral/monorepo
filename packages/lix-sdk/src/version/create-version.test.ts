@@ -152,3 +152,17 @@ test("multiple versions created without commit_id should all point to active ver
 	// But different version IDs
 	expect(version1.id).not.toBe(version2.id);
 });
+
+test("should allow explicit null for inherits_from_version_id", async () => {
+	const lix = await openLix({});
+
+	// Create a version with explicit null inheritance
+	const version = await createVersion({
+		lix,
+		name: "standalone-version",
+		inherits_from_version_id: null,
+	});
+
+	// Should be null, not "global"
+	expect(version.inherits_from_version_id).toBeNull();
+});

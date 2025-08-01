@@ -52,6 +52,7 @@ test("insert, update, delete on the version view", async () => {
 				commit_id: "commit_id_0",
 				working_commit_id: "working_commit_0",
 				lixcol_version_id: "global",
+				inherits_from_version_id: "global",
 			},
 			{
 				id: "version1",
@@ -59,6 +60,7 @@ test("insert, update, delete on the version view", async () => {
 				commit_id: "commit_id_1",
 				working_commit_id: "working_commit_1",
 				lixcol_version_id: "global",
+				inherits_from_version_id: "global",
 			},
 		])
 		.execute();

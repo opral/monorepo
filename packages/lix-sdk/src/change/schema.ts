@@ -120,6 +120,45 @@ export type InternalChangeTable = {
 	created_at: Generated<string>;
 };
 
+/**
+ * Raw change type with snapshot_content as a JSON string or null.
+ *
+ * This type exists to avoid parsing and serializing the snapshot_content
+ * when working directly with database operations or internal cache functions.
+ * Use this type when you need to work with the raw JSON string representation
+ * of the snapshot content.
+ *
+ * @example
+ * ```typescript
+ * const rawChange: LixChangeRaw = {
+ *   id: "change-123",
+ *   entity_id: "entity-456",
+ *   // ... other fields
+ *   snapshot_content: JSON.stringify({ key: "value" }) // JSON string
+ * };
+ * ```
+ */
+export type LixChangeRaw = Omit<LixChange, "snapshot_content"> & {
+	snapshot_content: string | null; // JSON string or null
+};
+
+/**
+ * Change type with parsed snapshot_content as a JavaScript object.
+ *
+ * This is the standard change type used throughout the application when
+ * working with business logic. The snapshot_content field is automatically
+ * parsed from JSON into a JavaScript object for easy manipulation.
+ *
+ * @example
+ * ```typescript
+ * const change: LixChange = {
+ *   id: "change-123",
+ *   entity_id: "entity-456",
+ *   // ... other fields
+ *   snapshot_content: { key: "value" } // Parsed JavaScript object
+ * };
+ * ```
+ */
 export type LixChange = Selectable<ChangeView>;
 export type NewLixChange = Insertable<ChangeView>;
 export type ChangeView = {

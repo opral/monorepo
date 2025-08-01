@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { openLix } from "../lix/open-lix.js";
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
 import { serializeStatePk, parseStatePk } from "./primary-key.js";
 import { timestamp } from "../deterministic/timestamp.js";
@@ -254,6 +254,7 @@ test("resolved state view generates correct composite keys", async () => {
 	const lixInternalDb = lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
 	// Insert some test data into untracked state
+	const now = timestamp({ lix });
 	await lixInternalDb
 		.insertInto("internal_state_all_untracked")
 		.values({
@@ -261,9 +262,13 @@ test("resolved state view generates correct composite keys", async () => {
 			schema_key: "test_schema",
 			file_id: "file1",
 			plugin_key: "test_plugin",
-			snapshot_content: JSON.stringify({ test: "data" }),
+			snapshot_content: sql`jsonb(${JSON.stringify({ test: "data" })})`,
 			schema_version: "1.0",
 			version_id: "version1",
+			created_at: now,
+			updated_at: now,
+			inherited_from_version_id: null,
+			inheritance_delete_marker: 0,
 		})
 		.execute();
 
@@ -426,6 +431,7 @@ test("resolved state view generates correct composite keys for inherited state",
 		.execute();
 
 	// Insert data in parent version (untracked)
+	const untrackedTimestamp = timestamp({ lix });
 	await lixInternalDb
 		.insertInto("internal_state_all_untracked")
 		.values({
@@ -433,9 +439,13 @@ test("resolved state view generates correct composite keys for inherited state",
 			schema_key: "test_schema",
 			file_id: "file4",
 			plugin_key: "test_plugin",
-			snapshot_content: JSON.stringify({ test: "inherited_untracked_data" }),
+			snapshot_content: sql`jsonb(${JSON.stringify({ test: "inherited_untracked_data" })})`,
 			schema_version: "1.0",
 			version_id: parentVersionId,
+			created_at: untrackedTimestamp,
+			updated_at: untrackedTimestamp,
+			inherited_from_version_id: null,
+			inheritance_delete_marker: 0,
 		})
 		.execute();
 

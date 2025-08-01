@@ -10,7 +10,7 @@ import type {
  * @example
  * const options = {
  *   enabled: true,
- *   bootstrap: false,
+ *   randomLixId: false,
  *   timestamp: true,
  *   random_seed: "default-seed",
  *   nano_id: true,
@@ -25,7 +25,7 @@ export const LixDeterministicModeOptionsSchema = {
 		enabled: {
 			type: "boolean",
 		},
-		bootstrap: {
+		randomLixId: {
 			type: "boolean",
 			default: false,
 			"x-lix-generated": true,

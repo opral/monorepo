@@ -1,364 +1,235 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
-	// View 1: All changes including untracked
+	// View 1: Version tips - one row per version with its current tip commit
+	// Rule: "if a version entity exists, the version is active. even if other versions 'build' on this version by branching away from the commit"
+	// A commit C is the tip for version V iff:
+	// • C appears in at least one lix_version change row for V AND
+	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version row of the same version V
 	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_all_changes AS
-		SELECT 
-			c.id,
-			c.entity_id,
-			c.schema_key,
-			c.file_id,
-			c.plugin_key,
-			c.schema_version,
-			c.created_at,
-			c.snapshot_content
-		FROM change c
-
-		UNION ALL
-
-		SELECT 
-			'untracked-'||unt.entity_id||'-'||unt.schema_key AS id,
-			unt.entity_id,
-			unt.schema_key,
-			unt.file_id,
-			unt.plugin_key,
-			unt.schema_version,
-			unt.created_at,
-			json(unt.snapshot_content) AS snapshot_content
-		FROM internal_state_all_untracked unt;
-	`);
-
-	// View 2: Version commit roots - only the latest change for each version
-	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_version_roots AS
-		SELECT 
-			json_extract(v.snapshot_content,'$.commit_id') AS tip_commit_id,
-			v.entity_id AS version_id
-		FROM internal_materialization_all_changes v
-		WHERE v.schema_key = 'lix_version'
-		  AND NOT EXISTS (
-			-- Exclude if there's a newer change for the same version
-			SELECT 1 
-			FROM internal_materialization_all_changes newer
-			WHERE newer.entity_id = v.entity_id
-			  AND newer.schema_key = 'lix_version'
-			  AND newer.created_at > v.created_at
-		  );
-	`);
-
-	// View 3: Commit lineage (recursive - includes ancestors)
-	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_lineage AS
-		WITH RECURSIVE lineage_commits(id, version_id) AS (
-			/* anchor: the tip itself */
-			SELECT 
-				tip_commit_id, 
-				version_id 
-			FROM internal_materialization_version_roots
-
-			UNION
-
-			/* recurse upwards via parent_id - collects only ancestors */
-			SELECT 
-				json_extract(edge.snapshot_content,'$.parent_id') AS id,
-				l.version_id AS version_id
-			FROM internal_materialization_all_changes edge
-			JOIN lineage_commits l ON json_extract(edge.snapshot_content,'$.child_id') = l.id
-			WHERE edge.schema_key = 'lix_commit_edge'
-			  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
+		CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
+		WITH
+		-- 1. every (version, commit) ever recorded
+		version_commits(version_id, commit_id) AS (
+			SELECT
+				v.entity_id,
+				json_extract(v.snapshot_content,'$.commit_id')
+			FROM change v
+			WHERE v.schema_key = 'lix_version'
+		),
+		-- 2. mark (version, commit) pairs that still have a child commit referenced by the same version
+		non_tips AS (
+			SELECT DISTINCT
+				vc.version_id,
+				vc.commit_id
+			FROM version_commits vc
+			JOIN change e -- commit-edge
+				ON e.schema_key = 'lix_commit_edge'
+				AND json_extract(e.snapshot_content,'$.parent_id') = vc.commit_id
+			JOIN version_commits vc_child
+				ON vc_child.commit_id = json_extract(e.snapshot_content,'$.child_id')
+				AND vc_child.version_id = vc.version_id -- same version!
 		)
-		SELECT * FROM lineage_commits;
-	`);
-
-	// View 4: Commit depth calculation
-	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_cs_depth AS
-		WITH RECURSIVE commit_depth AS (
-			SELECT 
-				tip_commit_id AS id, 
-				version_id, 
-				0 AS depth 
-			FROM internal_materialization_version_roots
-
-			UNION ALL
-
-			SELECT 
-				json_extract(edge.snapshot_content,'$.parent_id') AS id,
-				d.version_id AS version_id,
-				d.depth + 1 AS depth
-			FROM internal_materialization_all_changes edge
-			JOIN commit_depth d ON json_extract(edge.snapshot_content,'$.child_id') = d.id
-			WHERE edge.schema_key = 'lix_commit_edge'
-			  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
-			  AND EXISTS (
-				SELECT 1 FROM internal_materialization_lineage 
-				WHERE internal_materialization_lineage.id = json_extract(edge.snapshot_content,'$.parent_id')
-				  AND internal_materialization_lineage.version_id = d.version_id
-			  )
-		)
-		SELECT * FROM commit_depth;
-	`);
-
-	// View 5: Change set elements in reachable commits
-	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_cse AS
-		SELECT 
-			json_extract(cse.snapshot_content,'$.entity_id') AS target_entity_id,
-			json_extract(cse.snapshot_content,'$.file_id') AS target_file_id,
-			json_extract(cse.snapshot_content,'$.schema_key') AS target_schema_key,
-			json_extract(cse.snapshot_content,'$.change_id') AS target_change_id,
-			json_extract(cse.snapshot_content,'$.change_set_id') AS cse_origin_change_set_id,
-			lcs.version_id
-		FROM internal_materialization_lineage lcs
-		JOIN internal_materialization_all_changes c ON c.entity_id = lcs.id AND c.schema_key = 'lix_commit'
-		JOIN internal_materialization_all_changes cse ON json_extract(cse.snapshot_content,'$.change_set_id') = json_extract(c.snapshot_content,'$.change_set_id')
-		WHERE cse.schema_key = 'lix_change_set_element';
-	`);
-
-	// View 6: Leaf target snapshots (latest change for each entity in each version)
-	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_leaf_snapshots AS
-		SELECT 
-			target_change.entity_id,
-			target_change.schema_key,
-			target_change.file_id,
-			target_change.plugin_key,
-			target_change.snapshot_content,
-			target_change.schema_version,
-			r.version_id,
-			target_change.created_at,
-			target_change.id AS change_id,
-			-- Get the commit_id for this change set
-			(SELECT c.entity_id 
-			 FROM internal_materialization_all_changes c 
-			 WHERE c.schema_key = 'lix_commit' 
-			   AND json_extract(c.snapshot_content,'$.change_set_id') = r.cse_origin_change_set_id
-			   AND c.entity_id IN (SELECT id FROM internal_materialization_lineage WHERE version_id = r.version_id)
-			 LIMIT 1) AS commit_id
-		FROM internal_materialization_cse r
-		JOIN internal_materialization_all_changes target_change ON r.target_change_id = target_change.id
+		-- 3. tips = version commits that are NOT in the non_tip set
+		SELECT
+			vc.version_id,
+			vc.commit_id AS tip_commit_id
+		FROM version_commits vc
 		WHERE NOT EXISTS (
-			/* any *newer* change for the same entity in a *descendant* commit */
-			WITH RECURSIVE descendants_of_current_commit(commit_id, change_set_id) AS (
-				-- Start with the commit associated with the current change set
-				SELECT c.entity_id, json_extract(c.snapshot_content,'$.change_set_id')
-				FROM internal_materialization_all_changes c
-				WHERE c.schema_key = 'lix_commit' 
-				  AND json_extract(c.snapshot_content,'$.change_set_id') = r.cse_origin_change_set_id
-				  AND c.entity_id IN (SELECT id FROM internal_materialization_lineage WHERE version_id = r.version_id)
-				
-				UNION
-				
-				-- Get descendant commits
-				SELECT json_extract(edge.snapshot_content,'$.child_id'), json_extract(child_c.snapshot_content,'$.change_set_id')
-				FROM internal_materialization_all_changes edge
-				JOIN descendants_of_current_commit d ON json_extract(edge.snapshot_content,'$.parent_id') = d.commit_id
-				JOIN internal_materialization_all_changes child_c ON child_c.entity_id = json_extract(edge.snapshot_content,'$.child_id') AND child_c.schema_key = 'lix_commit'
-				WHERE edge.schema_key = 'lix_commit_edge'
-				  AND json_extract(edge.snapshot_content,'$.child_id') IN (
-						 SELECT id FROM internal_materialization_lineage WHERE version_id = r.version_id
-					   )
-			)
 			SELECT 1
-			FROM internal_materialization_cse newer_r
-			WHERE newer_r.target_entity_id  = r.target_entity_id
-			  AND newer_r.target_file_id    = r.target_file_id
-			  AND newer_r.target_schema_key = r.target_schema_key
-			  AND newer_r.version_id        = r.version_id
-			  AND newer_r.target_change_id != r.target_change_id
-			  AND newer_r.cse_origin_change_set_id IN (SELECT change_set_id FROM descendants_of_current_commit)
+			FROM non_tips nt
+			WHERE nt.version_id = vc.version_id
+			AND nt.commit_id = vc.commit_id
 		);
 	`);
 
-	// View 7: Version inheritance relationships
+	// View 2: Commit graph - lineage with depth (combines old views 3 & 4)
 	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_version_inheritance AS
-		SELECT DISTINCT 
-			v.entity_id AS version_id,
-			json_extract(v.snapshot_content,'$.inherits_from_version_id') AS parent_version_id
-		FROM internal_materialization_all_changes v
-		WHERE v.schema_key = 'lix_version';
+		CREATE VIEW IF NOT EXISTS internal_materialization_commit_graph AS
+		WITH RECURSIVE commit_paths(commit_id, version_id, depth, path) AS (
+			-- Start from version tips at depth 0
+			SELECT 
+				tip_commit_id, 
+				version_id, 
+				0,
+				',' || tip_commit_id || ',' -- Path for cycle detection
+			FROM internal_materialization_version_tips
+			
+			UNION ALL
+			
+			-- Walk up parent chain, incrementing depth
+			SELECT 
+				json_extract(edge.snapshot_content,'$.parent_id'),
+				g.version_id,
+				g.depth + 1,
+				g.path || json_extract(edge.snapshot_content,'$.parent_id') || ','
+			FROM change edge
+			JOIN commit_paths g ON json_extract(edge.snapshot_content,'$.child_id') = g.commit_id
+			WHERE edge.schema_key = 'lix_commit_edge'
+			  AND json_extract(edge.snapshot_content,'$.parent_id') IS NOT NULL
+			  -- Cycle detection: stop if parent already in path
+			  AND INSTR(g.path, ',' || json_extract(edge.snapshot_content,'$.parent_id') || ',') = 0
+		)
+		-- Group by commit_id and version_id, taking MIN depth for merge commits
+		SELECT 
+			commit_id,
+			version_id,
+			MIN(depth) as depth
+		FROM commit_paths
+		GROUP BY commit_id, version_id;
 	`);
 
-	// View 8: All entities (direct and inherited)
+	// View 3: Latest visible state - first seen wins, with proper timestamps
 	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_all_entities AS
-		/* direct */
+		CREATE VIEW IF NOT EXISTS internal_materialization_latest_visible_state AS
+		WITH commit_changes AS (
+			SELECT 
+				cg.version_id,
+				cg.commit_id,
+				cg.depth,
+				c.id as change_id,
+				c.entity_id,
+				c.schema_key,
+				c.file_id,
+				c.plugin_key,
+				c.snapshot_content,
+				c.schema_version,
+				c.created_at,
+				ROW_NUMBER() OVER (
+					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
+					ORDER BY cg.depth ASC
+				) as first_seen,
+				-- Get timestamps based on commit graph depth, not wall-clock time
+				-- Deepest ancestor (highest depth) → created_at
+				FIRST_VALUE(c.created_at) OVER (
+					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
+					ORDER BY cg.depth DESC
+					ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+				) as entity_created_at,
+				-- Current tip (depth 0) → updated_at  
+				FIRST_VALUE(c.created_at) OVER (
+					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
+					ORDER BY cg.depth ASC
+					ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+				) as entity_updated_at
+			FROM internal_materialization_commit_graph cg
+			-- Get commit's change_set_id
+			JOIN change cmt ON cmt.entity_id = cg.commit_id 
+				AND cmt.schema_key = 'lix_commit'
+			-- Get changes in this change_set  
+			JOIN change cse ON cse.schema_key = 'lix_change_set_element'
+				AND json_extract(cse.snapshot_content,'$.change_set_id') = json_extract(cmt.snapshot_content,'$.change_set_id')
+			-- Get the actual change
+			JOIN change c ON c.id = json_extract(cse.snapshot_content,'$.change_id')
+		)
 		SELECT 
-			entity_id, 
-			schema_key, 
-			file_id, 
-			plugin_key, 
-			snapshot_content, 
+			version_id,
+			commit_id,
+			depth,
+			change_id,
+			entity_id,
+			schema_key,
+			file_id,
+			plugin_key,
+			snapshot_content,
 			schema_version,
-			version_id, 
-			version_id AS visible_in_version, 
-			NULL AS inherited_from_version_id,
-			created_at, 
-			change_id, 
-			commit_id
-		FROM internal_materialization_leaf_snapshots
-
-		UNION ALL
-
-		/* inherited */
-		SELECT 
-			ls.entity_id, 
-			ls.schema_key, 
-			ls.file_id, 
-			ls.plugin_key, 
-			ls.snapshot_content, 
-			ls.schema_version,
-			vi.version_id, 
-			vi.version_id AS visible_in_version, 
-			vi.parent_version_id AS inherited_from_version_id,
-			ls.created_at, 
-			ls.change_id, 
-			ls.commit_id
-		FROM internal_materialization_version_inheritance vi
-		JOIN internal_materialization_leaf_snapshots ls ON ls.version_id = vi.parent_version_id
-		WHERE vi.parent_version_id IS NOT NULL
-		  AND ls.snapshot_content IS NOT NULL /* don't inherit deletions */
-		  AND ls.schema_key != 'lix_version' /* don't inherit version entities */
-		  AND NOT EXISTS (
-		  /* child already changed this entity */
-		  SELECT 1 FROM internal_materialization_leaf_snapshots child_ls
-		  WHERE child_ls.version_id = vi.version_id
-			AND child_ls.entity_id  = ls.entity_id
-			AND child_ls.schema_key = ls.schema_key
-			AND child_ls.file_id    = ls.file_id
-		  );
+			entity_created_at as created_at,
+			entity_updated_at as updated_at
+		FROM commit_changes 
+		WHERE first_seen = 1;
+		-- Note: We do NOT filter out NULL snapshots here to allow deletion tracking
 	`);
 
-	// View 9: Prioritized entities (with deduplication logic)
+	// View 4: Version ancestry - computes the complete ancestral lineage for each version
+	// This view recursively follows inherits_from_version_id relationships to build
+	// the full ancestry tree. Each version sees:
+	// - Itself as an ancestor at depth 0
+	// - Its direct parent at depth 1 (if it inherits)
+	// - Its grandparent at depth 2
+	// - And so on up the inheritance chain
+	// Used by the state materializer to implement multi-level inheritance where
+	// child versions can see state from all ancestors unless overridden
 	sqlite.exec(`
-		CREATE VIEW IF NOT EXISTS internal_materialization_prioritized_entities AS
-		SELECT *,
-			ROW_NUMBER() OVER (
-				PARTITION BY entity_id, schema_key, file_id, visible_in_version
-				ORDER BY CASE WHEN inherited_from_version_id IS NULL THEN 1 ELSE 2 END,
-						(
-							SELECT depth
-							FROM internal_materialization_cs_depth
-							WHERE internal_materialization_cs_depth.id = commit_id
-							  AND internal_materialization_cs_depth.version_id = visible_in_version
-						) DESC,
-						change_id DESC  /* deterministic fall-back, should rarely fire */
-			) AS rn
-		FROM internal_materialization_all_entities
-		WHERE snapshot_content IS NOT NULL;
+		CREATE VIEW IF NOT EXISTS internal_materialization_version_ancestry AS
+		WITH RECURSIVE version_ancestry(version_id, ancestor_version_id, inheritance_depth, path) AS (
+			-- Each version is its own ancestor at depth 0
+			SELECT 
+				entity_id as version_id, 
+				entity_id as ancestor_version_id, 
+				0 as inheritance_depth,
+				',' || entity_id || ',' -- Path for cycle detection
+			FROM change 
+			WHERE schema_key = 'lix_version'
+			
+			UNION ALL
+			
+			-- Recursively find all ancestors
+			SELECT
+				va.version_id,
+				json_extract(parent_v.snapshot_content,'$.inherits_from_version_id'),
+				va.inheritance_depth + 1,
+				va.path || json_extract(parent_v.snapshot_content,'$.inherits_from_version_id') || ','
+			FROM version_ancestry va
+			JOIN change parent_v 
+				ON parent_v.entity_id = va.ancestor_version_id 
+				AND parent_v.schema_key = 'lix_version'
+			WHERE json_extract(parent_v.snapshot_content,'$.inherits_from_version_id') IS NOT NULL
+			  -- Cycle detection: stop if ancestor already in path
+			  AND INSTR(va.path, ',' || json_extract(parent_v.snapshot_content,'$.inherits_from_version_id') || ',') = 0
+		)
+		SELECT version_id, ancestor_version_id, inheritance_depth 
+		FROM version_ancestry;
 	`);
-}
 
-export function materializeState(
-	sqlite: SqliteWasmDatabase,
-	filters: Record<string, string>,
-	includeDeletions: boolean = false
-): any[] {
-	let sql = `
-    /* -----------------------------  CTEs  --------------------------------- */
-    WITH
-      /*  Collect every committed or in-flight change with its snapshot */
-      all_changes_with_snapshots AS (
-        SELECT * FROM internal_materialization_all_changes
-      ),
-
-      /* Discover every change-set in the lineage of each version's tip */
-      /* (tip + all ancestors, but not descendant branches) */
-      root_cs_of_all_versions AS (
-        SELECT * FROM internal_materialization_version_roots
-      ),
-      lineage_cs AS (
-        SELECT * FROM internal_materialization_lineage
-      ),
-
-      /* Calculate depth: 0 = tip, 1 = parent, etc */
-      cs_depth AS (
-        SELECT * FROM internal_materialization_cs_depth
-      ),
-
-      /* Map entities that belong to those change-sets */
-      cse_in_reachable_cs AS (
-        SELECT * FROM internal_materialization_cse
-      ),
-
-      /* Select the leaf change for every entity in every version */
-      leaf_target_snapshots AS (
-        SELECT * FROM internal_materialization_leaf_snapshots
-      ),
-
-      /* Version inheritance */
-      version_inheritance AS (
-        SELECT * FROM internal_materialization_version_inheritance
-      ),
-
-      /* Combine direct and inherited entities */
-      all_entities AS (
-        SELECT * FROM internal_materialization_all_entities
-      ),
-
-      /* Deduplicate: prefer direct, then deepest CS */
-      prioritized_entities AS (
-        SELECT *,
-             ROW_NUMBER() OVER (
-               PARTITION BY entity_id, schema_key, file_id, visible_in_version
-               ORDER BY CASE WHEN inherited_from_version_id IS NULL THEN 1 ELSE 2 END,
-                        (
-                          SELECT depth
-                          FROM   internal_materialization_cs_depth
-                          WHERE  internal_materialization_cs_depth.id = commit_id
-                            AND  internal_materialization_cs_depth.version_id = visible_in_version
-                        ) DESC,
-                        change_id DESC  /* deterministic fall-back, should rarely fire */
-             ) AS rn
-        FROM   internal_materialization_all_entities
-        ${includeDeletions ? `` : `WHERE snapshot_content IS NOT NULL`}
-      )
-    /* ---------------------- final projection ------------------------------ */
-    SELECT 
-      pe.entity_id,
-      pe.schema_key,
-      pe.file_id,
-      pe.plugin_key,
-      pe.snapshot_content,
-      pe.schema_version,
-      pe.version_id,
-      COALESCE(
-        (SELECT MIN(ac.created_at) 
-         FROM all_changes_with_snapshots ac
-         JOIN cse_in_reachable_cs cse 
-           ON cse.target_change_id = ac.id
-         WHERE ac.entity_id = pe.entity_id 
-           AND ac.schema_key = pe.schema_key 
-           AND ac.file_id = pe.file_id
-           AND cse.version_id = pe.version_id),
-        pe.created_at
-      ) AS created_at,
-      COALESCE(
-        (SELECT MAX(ac.created_at) 
-         FROM all_changes_with_snapshots ac
-         JOIN cse_in_reachable_cs cse 
-           ON cse.target_change_id = ac.id
-         WHERE ac.entity_id = pe.entity_id 
-           AND ac.schema_key = pe.schema_key 
-           AND ac.file_id = pe.file_id
-           AND cse.version_id = pe.version_id),
-        pe.created_at
-      ) AS updated_at,
-      pe.inherited_from_version_id,
-      pe.change_id,
-      COALESCE(pe.commit_id,'untracked') AS commit_id
-    FROM prioritized_entities pe
-    WHERE pe.rn = 1
-  `;
-
-	/* ------------------------ dynamic filters ------------------------------ */
-	const bindings: string[] = [];
-	Object.entries(filters).forEach(([col, val]) => {
-		sql += `\n      AND ${col} = ?`;
-		bindings.push(val);
-	});
-
-	return sqlite.exec({ sql, bind: bindings, returnValue: "resultRows" });
+	// View 5: Final state materializer with multi-level inheritance
+	sqlite.exec(`
+		CREATE VIEW IF NOT EXISTS internal_state_materializer AS
+		WITH all_possible_states AS (
+			SELECT
+				va.version_id,
+				s.entity_id,
+				s.schema_key,
+				s.file_id,
+				s.plugin_key,
+				s.snapshot_content,
+				s.schema_version,
+				s.created_at,
+				s.updated_at,
+				s.change_id,
+				s.commit_id,
+				va.ancestor_version_id,
+				va.inheritance_depth,
+				-- Rank by inheritance depth - closer ancestors win
+				ROW_NUMBER() OVER (
+					PARTITION BY va.version_id, s.entity_id, s.schema_key, s.file_id
+					ORDER BY va.inheritance_depth ASC
+				) as inheritance_rank
+			FROM internal_materialization_version_ancestry va
+			JOIN internal_materialization_latest_visible_state s
+				ON s.version_id = va.ancestor_version_id
+		)
+		SELECT 
+			entity_id,
+			schema_key,
+			file_id,
+			version_id,
+			plugin_key,
+			snapshot_content,
+			schema_version,
+			created_at,
+			updated_at,
+			CASE 
+				WHEN inheritance_depth > 0 THEN ancestor_version_id 
+				ELSE NULL 
+			END as inherited_from_version_id,
+			0 as untracked,
+			change_id,
+			commit_id
+		FROM all_possible_states
+		-- inheritance_rank = 1 means this is the closest ancestor that has state for this entity
+		-- (rank 1 = direct state, rank 2 = parent state, rank 3 = grandparent state, etc.)
+		-- We only want the most specific/closest state, not all inherited variants
+		WHERE inheritance_rank = 1;
+		-- Note: Now includes tombstones (null snapshot_content) for proper deletion handling
+	`);
 }

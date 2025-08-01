@@ -264,13 +264,13 @@ test("provided key values default to the active version if lixcol_version_id is 
 	expect(mainVersion?.name).toBe("main");
 });
 
-test("deterministic mode with bootstrap: false results in different lix_ids", async () => {
-	// Create two lix files without deterministic bootstrap
+test("deterministic mode with randomLixId: true results in different lix_ids", async () => {
+	// Create two lix files with deterministic mode but randomLixId: true
 	const blob1 = await newLixFile({
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: false },
+				value: { enabled: true, randomLixId: true },
 			},
 		],
 	});
@@ -278,24 +278,24 @@ test("deterministic mode with bootstrap: false results in different lix_ids", as
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: false },
+				value: { enabled: true, randomLixId: true },
 			},
 		],
 	});
 
-	// The lix_ids should be different
+	// The lix_ids should be different when randomLixId is true
 	expect(blob1._lix.id).toBeDefined();
 	expect(blob2._lix.id).toBeDefined();
 	expect(blob1._lix.id).not.toBe(blob2._lix.id);
 });
 
-test("deterministic mode with bootstrap: true results in identical lix_ids", async () => {
-	// Create two lix files with deterministic bootstrap
+test("deterministic mode results in identical lix_ids", async () => {
+	// Create two lix files with deterministic mode enabled
 	const blob1 = await newLixFile({
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -303,7 +303,7 @@ test("deterministic mode with bootstrap: true results in identical lix_ids", asy
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -315,13 +315,13 @@ test("deterministic mode with bootstrap: true results in identical lix_ids", asy
 	expect(blob1._lix.id).toBe("deterministic-lix-id");
 });
 
-test("deterministic mode with bootstrap creates fully deterministic lix", async () => {
-	// Create two lix files with deterministic bootstrap
+test("deterministic mode creates fully deterministic lix", async () => {
+	// Create two lix files with deterministic mode enabled
 	const blob1 = await newLixFile({
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -329,7 +329,7 @@ test("deterministic mode with bootstrap creates fully deterministic lix", async 
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true },
 			},
 		],
 	});
@@ -374,7 +374,7 @@ test("deterministic mode config is persisted correctly", async () => {
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true, randomLixId: false },
 			},
 		],
 	});
@@ -390,7 +390,7 @@ test("deterministic mode config is persisted correctly", async () => {
 
 	expect(result).toBeDefined();
 	expect(result?.key).toBe("lix_deterministic_mode");
-	expect(result?.value).toEqual({ enabled: true, bootstrap: true }); // JSON values are preserved
+	expect(result?.value).toEqual({ enabled: true, randomLixId: false }); // JSON values are preserved
 });
 
 test("deterministic mode config with global version_id is persisted correctly", async () => {
@@ -398,7 +398,7 @@ test("deterministic mode config with global version_id is persisted correctly", 
 		keyValues: [
 			{
 				key: "lix_deterministic_mode",
-				value: { enabled: true, bootstrap: true },
+				value: { enabled: true, randomLixId: true },
 				lixcol_version_id: "global",
 			},
 		],
@@ -415,5 +415,5 @@ test("deterministic mode config with global version_id is persisted correctly", 
 
 	expect(result).toBeDefined();
 	expect(result?.key).toBe("lix_deterministic_mode");
-	expect(result?.value).toEqual({ enabled: true, bootstrap: true }); // JSON values are preserved
+	expect(result?.value).toEqual({ enabled: true, randomLixId: true }); // JSON values are preserved
 });
