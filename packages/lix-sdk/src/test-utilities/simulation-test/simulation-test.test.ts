@@ -312,3 +312,93 @@ describe("expectDeterministic diff callback is not invoked when values match", (
 		expect(globalStore.__testCallback2.invoked).toBe(false);
 	});
 });
+
+describe("skip option filters out specified simulations", () => {
+	const globalStore = globalThis as any;
+	if (!globalStore.__skipTest) {
+		globalStore.__skipTest = {};
+	}
+
+	// Reset before this test suite
+	globalStore.__skipTest = {
+		normalRan: false,
+		cacheMissRan: false,
+		customRan: false,
+	};
+
+	const customSimulation: SimulationTestDef = {
+		name: "custom-for-skip-test",
+		setup: async (lix) => lix,
+	};
+
+	simulationTest(
+		"",
+		async ({ simulation }) => {
+			const store = globalStore.__skipTest;
+
+			// Track which simulations actually ran
+			if (simulation.name === "normal") {
+				store.normalRan = true;
+			} else if (simulation.name === "cache-miss") {
+				store.cacheMissRan = true;
+			} else if (simulation.name === "custom-for-skip-test") {
+				store.customRan = true;
+			}
+		},
+		{
+			skip: ["cache-miss"], // Should skip cache-miss but run normal and custom
+			additionalCustomSimulations: [customSimulation],
+		}
+	);
+
+	test("should run normal simulation", () => {
+		expect(globalStore.__skipTest.normalRan).toBe(true);
+	});
+
+	test("should skip cache-miss simulation", () => {
+		expect(globalStore.__skipTest.cacheMissRan).toBe(false);
+	});
+
+	test("should run custom simulation (not affected by skip)", () => {
+		expect(globalStore.__skipTest.customRan).toBe(true);
+	});
+});
+
+describe("skip option combined with onlyRun", () => {
+	const globalStore = globalThis as any;
+	if (!globalStore.__skipOnlyRunTest) {
+		globalStore.__skipOnlyRunTest = {};
+	}
+
+	// Reset before this test suite
+	globalStore.__skipOnlyRunTest = {
+		normalRan: false,
+		cacheMissRan: false,
+	};
+
+	simulationTest(
+		"",
+		async ({ simulation }) => {
+			const store = globalStore.__skipOnlyRunTest;
+
+			// Track which simulations actually ran
+			if (simulation.name === "normal") {
+				store.normalRan = true;
+			} else if (simulation.name === "cache-miss") {
+				store.cacheMissRan = true;
+			}
+		},
+		{
+			onlyRun: ["normal", "cache-miss"], // Include both
+			skip: ["cache-miss"], // But then skip cache-miss
+		}
+	);
+
+	test("should run normal simulation (included and not skipped)", () => {
+		expect(globalStore.__skipOnlyRunTest.normalRan).toBe(true);
+	});
+
+	test("should skip cache-miss simulation (included but then skipped)", () => {
+		expect(globalStore.__skipOnlyRunTest.cacheMissRan).toBe(false);
+	});
+});

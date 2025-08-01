@@ -26,6 +26,13 @@ type SimulationTestOptions = {
 	 */
 	onlyRun?: (keyof typeof defaultSimulations)[];
 	/**
+	 * Array of default simulation names to skip.
+	 * These simulations will be excluded from the test run.
+	 * Applied after onlyRun filtering.
+	 * Available default simulations: "normal", "cache-miss"
+	 */
+	skip?: (keyof typeof defaultSimulations)[];
+	/**
 	 * Additional custom simulations to run after the default ones.
 	 * These simulations will always be run and don't need to be listed in onlyRun.
 	 */
@@ -45,6 +52,7 @@ const defaultSimulations = {
  * @param fn - Test function that receives simulation context
  * @param options - Optional configuration:
  *   - onlyRun: Array of default simulation names to run (defaults to all)
+ *   - skip: Array of default simulation names to skip (applied after onlyRun)
  *   - additionalCustomSimulations: Additional custom simulations to run after the default ones
  *
  * @example
@@ -60,6 +68,13 @@ const defaultSimulations = {
  *   const lix = await openLix({ blob: initialLix });
  *   // test code
  * }, { onlyRun: ["cache-miss"] });
+ *
+ * @example
+ * // Skip specific simulations
+ * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
+ *   const lix = await openLix({ blob: initialLix });
+ *   // test code that doesn't work in cache miss mode
+ * }, { skip: ["cache-miss"] });
  *
  * @example
  * // Add custom simulations (run after default ones)
@@ -122,6 +137,18 @@ export function simulationTest(
 	} else {
 		// Run all default simulations if onlyRun is not specified
 		simulationsToRun = Object.values(defaultSimulations);
+	}
+
+	// Filter out skipped simulations
+	if (options?.skip) {
+		const skipNames = new Set(options.skip);
+		simulationsToRun = simulationsToRun.filter((simulation) => {
+			// Find the name of this simulation in defaultSimulations
+			const simulationName = Object.entries(defaultSimulations).find(
+				([, sim]) => sim === simulation
+			)?.[0];
+			return !skipNames.has(simulationName as keyof typeof defaultSimulations);
+		});
 	}
 
 	// Add custom simulations at the end
