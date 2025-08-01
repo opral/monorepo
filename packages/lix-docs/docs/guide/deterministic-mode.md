@@ -77,32 +77,6 @@ await lix.db
   .execute();
 ```
 
-### Deterministic Bootstrap (Optional)
-
-For tests requiring fully reproducible behavior from creation:
-
-```ts
-// Creates a new Lix with deterministic IDs and timestamps
-const lix = await openLix({
-  keyValues: [
-    {
-      key: "lix_deterministic_mode",
-      value: {
-        enabled: true,
-        bootstrap: true,
-      },
-      lixcol_version_id: "global",
-    },
-  ],
-});
-```
-
-> [!NOTE]
-> **Choosing the right bootstrap mode:**
->
-> - Use **deterministic bootstrap** for reproducibility testing that doesn't involve distribution (e.g., unit tests, regression tests)
-> - Use **non-deterministic bootstrap** (default) for distributed testing scenarios (e.g., simulating multiple Lix instances syncing)
-
 ### Configuration Options
 
 The deterministic mode is configured through a single key-value object:
@@ -116,13 +90,52 @@ The configuration object has the following properties:
 | Property      | Type    | Default                    | Description                               |
 | ------------- | ------- | -------------------------- | ----------------------------------------- |
 | `enabled`     | boolean | _required_                 | Enable/disable deterministic mode         |
-| `bootstrap`   | boolean | `false`                    | Use deterministic IDs during Lix creation |
+| `randomLixId` | boolean | `false`                    | Use random lix_id for distributed testing |
 | `timestamp`   | boolean | `true`                     | Use deterministic timestamps              |
 | `random_seed` | string  | `"lix-deterministic-seed"` | Seed for the random number generator      |
 | `nano_id`     | boolean | `true`                     | Use deterministic nano ID generation      |
 | `uuid_v7`     | boolean | `true`                     | Use deterministic UUID v7 generation      |
 
 ## Advanced Usage
+
+### Distributed Testing with Random Lix IDs
+
+For distributed testing scenarios where you need multiple Lix instances with different IDs:
+
+```ts
+// Creates Lix instances with random IDs for distributed testing
+const lix1 = await openLix({
+  keyValues: [
+    {
+      key: "lix_deterministic_mode",
+      value: {
+        enabled: true,
+        randomLixId: true, // Each instance gets a random lix_id
+      },
+      lixcol_version_id: "global",
+    },
+  ],
+});
+
+const lix2 = await openLix({
+  keyValues: [
+    {
+      key: "lix_deterministic_mode",
+      value: {
+        enabled: true,
+        randomLixId: true, // Different from lix1
+      },
+      lixcol_version_id: "global",
+    },
+  ],
+});
+```
+
+> [!NOTE]
+> **Choosing the right mode:**
+>
+> - Use **default deterministic mode** (`enabled: true`) for reproducibility testing (e.g., unit tests, regression tests)
+> - Use **randomLixId mode** (`enabled: true, randomLixId: true`) for distributed testing scenarios (e.g., simulating multiple Lix instances syncing)
 
 ### Different RNG Seeds
 

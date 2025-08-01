@@ -17,7 +17,7 @@ test("deterministic mode options schema is a valid LixSchemaDefinition", () => {
 test("validates correct deterministic mode options", () => {
 	const validOptions: DeterministicModeOptions = {
 		enabled: true,
-		bootstrap: false,
+		randomLixId: false,
 		timestamp: true,
 		random_seed: "test-seed",
 		nano_id: true,
@@ -42,7 +42,7 @@ test("validates minimal deterministic mode options with only required fields", (
 test("fails validation when enabled is missing", () => {
 	// @ts-expect-error - Testing missing required field
 	const invalidOptions: DeterministicModeOptions = {
-		bootstrap: false,
+		randomLixId: false,
 		timestamp: true,
 	};
 
@@ -55,7 +55,7 @@ test("fails validation when enabled is not a boolean", () => {
 	const invalidOptions: DeterministicModeOptions = {
 		// @ts-expect-error - Testing invalid type for enabled field
 		enabled: "true", // string instead of boolean
-		bootstrap: false,
+		randomLixId: false,
 	};
 
 	expect(() =>
@@ -78,7 +78,7 @@ test("fails validation with additional properties", () => {
 test("validates all boolean fields correctly", () => {
 	const options: DeterministicModeOptions = {
 		enabled: false,
-		bootstrap: true,
+		randomLixId: true,
 		timestamp: false,
 		random_seed: "custom-seed",
 		nano_id: false,
@@ -94,8 +94,8 @@ test("fails validation when boolean fields have wrong types", () => {
 	const testCases: DeterministicModeOptions[] = [
 		{
 			enabled: true,
-			// @ts-expect-error - Testing invalid type for bootstrap
-			bootstrap: "true",
+			// @ts-expect-error - Testing invalid type for randomLixId
+			randomLixId: "true",
 		},
 		{
 			enabled: true,
@@ -146,7 +146,7 @@ test("schema has correct metadata", () => {
 test("schema has correct default values", () => {
 	const properties = LixDeterministicModeOptionsSchema.properties;
 
-	expect(properties.bootstrap.default).toBe(false);
+	expect(properties.randomLixId.default).toBe(false);
 	expect(properties.timestamp.default).toBe(true);
 	expect(properties.random_seed.default).toBe("lix-deterministic-seed");
 	expect(properties.nano_id.default).toBe(true);
