@@ -23,7 +23,7 @@ type UntrackedChangeData = Omit<LixChangeRaw, "id"> & {
  * Inheritance Logic:
  * - Direct entities: Stored with inherited_from_version_id: null
  * - Inherited entities: Visible through parent version queries
- * - Deletions: 
+ * - Deletions:
  *   - Direct entities: Remove from untracked table
  *   - Inherited entities: Create tombstone with inheritance_delete_marker: 1
  *

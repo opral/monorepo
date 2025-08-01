@@ -232,5 +232,4 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 		WHERE inheritance_rank = 1;
 		-- Note: Now includes tombstones (null snapshot_content) for proper deletion handling
 	`);
-
 }

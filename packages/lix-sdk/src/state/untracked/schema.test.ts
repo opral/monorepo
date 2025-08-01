@@ -45,7 +45,7 @@ test("untracked schema validates JSONB content properly", async () => {
 		.where("entity_id", "=", "test-valid-jsonb")
 		.select([
 			"entity_id",
-			"schema_key", 
+			"schema_key",
 			"file_id",
 			"version_id",
 			"plugin_key",
@@ -54,17 +54,18 @@ test("untracked schema validates JSONB content properly", async () => {
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker"
+			"inheritance_delete_marker",
 		])
 		.execute();
 
 	expect(validResult).toHaveLength(1);
 	// The json() function returns the parsed JSON directly
 	const content = validResult[0]!.snapshot_content;
-	const parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+	const parsedContent =
+		typeof content === "string" ? JSON.parse(content) : content;
 	expect(parsedContent).toEqual({
 		key: "test",
-		value: "valid"
+		value: "valid",
 	});
 });
 

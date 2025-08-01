@@ -143,9 +143,7 @@ test("deterministic mode produces different sequences with different seeds", asy
 
 test("random state persists across blob operations", async () => {
 	const lix1 = await openLix({
-		keyValues: [
-			{ key: "lix_deterministic_mode", value: { enabled: true } },
-		],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const fullSequence = [];
@@ -154,9 +152,7 @@ test("random state persists across blob operations", async () => {
 	}
 
 	const lix2 = await openLix({
-		keyValues: [
-			{ key: "lix_deterministic_mode", value: { enabled: true } },
-		],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const beforeBlob = [];
@@ -182,11 +178,21 @@ test("random state persists across blob operations", async () => {
 test("random uses lix_id as default seed when no seed specified", async () => {
 	// Create two instances with randomLixId: true to get different lix_ids
 	const lix1 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, randomLixId: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, randomLixId: true },
+			},
+		],
 	});
 
 	const lix2 = await openLix({
-		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true, randomLixId: true } }],
+		keyValues: [
+			{
+				key: "lix_deterministic_mode",
+				value: { enabled: true, randomLixId: true },
+			},
+		],
 	});
 
 	const sequence1 = [];
@@ -208,15 +214,11 @@ test("random uses lix_id as default seed when no seed specified", async () => {
 test("random produces same sequence with deterministic mode", async () => {
 	// Create two instances with deterministic mode enabled
 	const lix1 = await openLix({
-		keyValues: [
-			{ key: "lix_deterministic_mode", value: { enabled: true } },
-		],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const lix2 = await openLix({
-		keyValues: [
-			{ key: "lix_deterministic_mode", value: { enabled: true } },
-		],
+		keyValues: [{ key: "lix_deterministic_mode", value: { enabled: true } }],
 	});
 
 	const sequence1 = [];

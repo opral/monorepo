@@ -965,7 +965,6 @@ export type StateAllView = {
 	commit_id: Generated<string>;
 };
 
-
 // Kysely operation types
 export type StateRow = Selectable<StateView>;
 export type NewStateRow = Insertable<StateView>;

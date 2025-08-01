@@ -1,5 +1,9 @@
 import { expect, test } from "vitest";
-import { simulationTest, normalSimulation, cacheMissSimulation } from "./simulation-test.js";
+import {
+	simulationTest,
+	normalSimulation,
+	cacheMissSimulation,
+} from "./simulation-test.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { nextDeterministicSequenceNumber } from "../../deterministic/sequence.js";
 test("cache miss simulation test discovery", () => {});

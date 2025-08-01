@@ -24,7 +24,6 @@ export function updateStateCache(args: {
 }): void {
 	const intDb = args.lix.db as unknown as Kysely<LixInternalDatabaseSchema>;
 
-
 	// Handle deletions (null snapshot_content) with cache cleanup
 	if (args.change.snapshot_content === null) {
 		// First, check if any versions inherit from this version
@@ -34,9 +33,12 @@ export function updateStateCache(args: {
 				.selectFrom("internal_resolved_state_all")
 				.select([sql`json_extract(snapshot_content, '$.id')`.as("id")])
 				.where("schema_key", "=", "lix_version")
-				.where(sql`json_extract(snapshot_content, '$.inherits_from_version_id')`, "=", args.version_id),
+				.where(
+					sql`json_extract(snapshot_content, '$.inherits_from_version_id')`,
+					"=",
+					args.version_id
+				),
 		});
-
 
 		if (childVersions.length > 0) {
 			// There are child versions - move the cache entry to each child
@@ -151,7 +153,6 @@ export function updateStateCache(args: {
 					.where("version_id", "=", args.version_id)
 					.limit(1),
 			})[0];
-
 
 			if (existingCacheEntry) {
 				// Cache entry exists - check if it's a tombstone or regular entry

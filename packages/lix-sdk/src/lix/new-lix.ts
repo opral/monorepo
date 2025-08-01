@@ -119,7 +119,7 @@ export async function newLixFile(args?: {
 
 	let isDeterministicBootstrap = false;
 	let useRandomLixId = false;
-	
+
 	if (
 		deterministicModeConfig?.value &&
 		typeof deterministicModeConfig.value === "object"
@@ -459,7 +459,7 @@ function createBootstrapChanges(args: {
 	const lixId = args.providedKeyValues?.find(
 		(kv) => kv.key === "lix_id"
 	)?.value;
-	
+
 	// Generate lix_id based on flags
 	let generatedLixId: string;
 	if (lixId) {
@@ -473,7 +473,7 @@ function createBootstrapChanges(args: {
 		// Regular mode - use the generator (which is random)
 		generatedLixId = args.generateNanoid();
 	}
-	
+
 	changes.push({
 		id: args.generateUuid(),
 		entity_id: "lix_id",

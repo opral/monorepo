@@ -59,13 +59,14 @@ test("updateUntrackedState creates direct untracked entity", async () => {
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker"
+			"inheritance_delete_marker",
 		])
 		.execute();
 
 	expect(result).toHaveLength(1);
 	const content = result[0]!.snapshot_content;
-	const parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+	const parsedContent =
+		typeof content === "string" ? JSON.parse(content) : content;
 	expect(parsedContent).toEqual({
 		key: "direct-untracked-key",
 		value: "direct-value",
@@ -147,13 +148,14 @@ test("updateUntrackedState updates existing direct untracked entity", async () =
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker"
+			"inheritance_delete_marker",
 		])
 		.execute();
 
 	expect(result).toHaveLength(1);
 	const content = result[0]!.snapshot_content;
-	const parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+	const parsedContent =
+		typeof content === "string" ? JSON.parse(content) : content;
 	expect(parsedContent).toEqual({
 		key: "update-test-key",
 		value: "updated-value",
@@ -448,14 +450,15 @@ test("updateUntrackedState resets tombstone flag when updating tombstone", async
 			"created_at",
 			"updated_at",
 			"inherited_from_version_id",
-			"inheritance_delete_marker"
+			"inheritance_delete_marker",
 		])
 		.execute();
 
 	expect(result).toHaveLength(1);
 	expect(result[0]!.inheritance_delete_marker).toBe(0);
 	const content = result[0]!.snapshot_content;
-	const parsedContent = typeof content === 'string' ? JSON.parse(content) : content;
+	const parsedContent =
+		typeof content === "string" ? JSON.parse(content) : content;
 	expect(parsedContent).toEqual({
 		key: "tombstone-test-key",
 		value: "revived-value",

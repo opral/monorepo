@@ -444,20 +444,20 @@ test("commit should handle multiple versions correctly", async () => {
 		.where("id", "=", versionAId)
 		.selectAll()
 		.executeTakeFirst();
-	
+
 	expect(versionA).toBeDefined();
 	expect(versionA?.id).toBe(versionAId);
 	// After commit, the commit_id will be updated to the new commit containing changes
 	expect(versionA?.commit_id).toBeDefined();
 	expect(versionA?.working_commit_id).toBeDefined();
 
-	// Version B should exist  
+	// Version B should exist
 	const versionB = await db
 		.selectFrom("version")
 		.where("id", "=", versionBId)
 		.selectAll()
 		.executeTakeFirst();
-	
+
 	expect(versionB).toBeDefined();
 	expect(versionB?.id).toBe(versionBId);
 	// After commit, the commit_id will be updated to the new commit containing changes
@@ -471,7 +471,7 @@ test("commit should handle multiple versions correctly", async () => {
 		.where("version_id", "=", versionAId)
 		.selectAll()
 		.executeTakeFirst();
-	
+
 	expect(versionAEntity).toBeDefined();
 
 	const versionBEntity = await db
@@ -480,7 +480,7 @@ test("commit should handle multiple versions correctly", async () => {
 		.where("version_id", "=", versionBId)
 		.selectAll()
 		.executeTakeFirst();
-	
+
 	expect(versionBEntity).toBeDefined();
 
 	// Verify version updates

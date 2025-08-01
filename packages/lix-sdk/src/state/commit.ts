@@ -110,7 +110,6 @@ export function commit(args: {
 				.where("version_id", "=", "global"),
 		});
 
-
 		if (globalChanges.length > 0) {
 			const globalCommitId = createChangesetForTransaction(
 				args.lix.sqlite,
@@ -191,7 +190,6 @@ export function commit(args: {
 			version_id === "global"
 				? allChangesToRealize.filter((c) => c.version_id === "global")
 				: changesByVersion.get(version_id)!;
-
 
 		// Only update cache entries for entities that were actually changed
 		for (const change of changesForVersion) {

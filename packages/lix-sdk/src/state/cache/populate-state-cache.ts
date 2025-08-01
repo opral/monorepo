@@ -14,9 +14,9 @@ export function populateStateCache(
 	// Build WHERE clause based on options
 	const whereConditions: string[] = [];
 	const bindParams: any[] = [];
-	
+
 	if (options.version_id) {
-		whereConditions.push('m.version_id = ?');
+		whereConditions.push("m.version_id = ?");
 		bindParams.push(options.version_id);
 	} else {
 		// If no version_id specified, only populate active versions (with tips)
@@ -25,46 +25,51 @@ export function populateStateCache(
 			WHERE vt.version_id = m.version_id
 		)`);
 	}
-	
+
 	if (options.entity_id) {
-		whereConditions.push('m.entity_id = ?');
+		whereConditions.push("m.entity_id = ?");
 		bindParams.push(options.entity_id);
 	}
 	if (options.schema_key) {
-		whereConditions.push('m.schema_key = ?');
+		whereConditions.push("m.schema_key = ?");
 		bindParams.push(options.schema_key);
 	}
 	if (options.file_id) {
-		whereConditions.push('m.file_id = ?');
+		whereConditions.push("m.file_id = ?");
 		bindParams.push(options.file_id);
 	}
 
 	// Delete existing cache entries that match the criteria
-	if (options.version_id || options.entity_id || options.schema_key || options.file_id) {
+	if (
+		options.version_id ||
+		options.entity_id ||
+		options.schema_key ||
+		options.file_id
+	) {
 		// Build delete conditions - only for specific filters, not for the EXISTS clause
 		const deleteConditions: string[] = [];
 		const deleteParams: any[] = [];
-		
+
 		if (options.version_id) {
-			deleteConditions.push('version_id = ?');
+			deleteConditions.push("version_id = ?");
 			deleteParams.push(options.version_id);
 		}
 		if (options.entity_id) {
-			deleteConditions.push('entity_id = ?');
+			deleteConditions.push("entity_id = ?");
 			deleteParams.push(options.entity_id);
 		}
 		if (options.schema_key) {
-			deleteConditions.push('schema_key = ?');
-			deleteParams.push(options.schema_key);  
+			deleteConditions.push("schema_key = ?");
+			deleteParams.push(options.schema_key);
 		}
 		if (options.file_id) {
-			deleteConditions.push('file_id = ?');
+			deleteConditions.push("file_id = ?");
 			deleteParams.push(options.file_id);
 		}
-		
+
 		if (deleteConditions.length > 0) {
 			sqlite.exec({
-				sql: `DELETE FROM internal_state_cache WHERE ${deleteConditions.join(' AND ')}`,
+				sql: `DELETE FROM internal_state_cache WHERE ${deleteConditions.join(" AND ")}`,
 				bind: deleteParams,
 			});
 		}
@@ -108,10 +113,10 @@ export function populateStateCache(
 			m.change_id,
 			m.commit_id
 		FROM internal_state_materializer m
-		WHERE ${whereConditions.join(' AND ')}
+		WHERE ${whereConditions.join(" AND ")}
 		  AND m.inherited_from_version_id IS NULL  -- Only direct entries, no inherited state
 	`;
-	
+
 	sqlite.exec({
 		sql: insertSql,
 		bind: bindParams,

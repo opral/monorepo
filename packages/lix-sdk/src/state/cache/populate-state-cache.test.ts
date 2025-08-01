@@ -208,7 +208,6 @@ test("should cache tombstones (delete markers) when they are direct entries", as
 
 	// Clear cache and populate for the feature version
 	clearStateCache({ lix });
-	
 
 	populateStateCache(lix.sqlite, { version_id: "feature-version" });
 
@@ -241,7 +240,9 @@ test("should cache tombstones (delete markers) when they are direct entries", as
 		.execute();
 
 	expect(globalResolvedState).toHaveLength(1);
-	expect((globalResolvedState[0]?.snapshot_content as any)?.value).toBe("original-value");
+	expect((globalResolvedState[0]?.snapshot_content as any)?.value).toBe(
+		"original-value"
+	);
 
 	// Check resolved state for feature-version - should NOT have the entity (it's deleted)
 	const featureResolvedState = await lix.db
