@@ -48,7 +48,7 @@ export const cacheMissSimulation: SimulationTestDef = {
 					returnValue: "resultRows",
 				});
 
-				cacheModule.markStateCacheAsStale({ lix });
+				cacheModule.markStateCacheAsStale({ lix, timestamp: CACHE_TIMESTAMP });
 
 				// Call the original execute
 				return originalExecute.apply(this, args);

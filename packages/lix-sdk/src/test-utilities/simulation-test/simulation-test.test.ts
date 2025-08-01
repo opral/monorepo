@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { simulationTest, type SimulationTestDef } from "./simulation-test.js";
+import {
+	simulationTest,
+	type SimulationTestDef,
+	normalSimulation,
+} from "./simulation-test.js";
 import { commit } from "../../state/commit.js";
 
 test("simulation test discovery", () => {});
@@ -23,8 +27,7 @@ describe("expectDeterministic validates values across simulations", () => {
 			}).not.toThrow();
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [customSimulation],
+			simulations: [normalSimulation, customSimulation],
 		}
 	);
 });
@@ -54,8 +57,7 @@ describe("expectDeterministic catches simulation differences", () => {
 			}
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [customSimulation],
+			simulations: [normalSimulation, customSimulation],
 		}
 	);
 });
@@ -103,8 +105,7 @@ describe("deterministic state validation", () => {
 			expect(allState).toBeDefined();
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [mockSimulation],
+			simulations: [normalSimulation, mockSimulation],
 		}
 	);
 });
@@ -179,8 +180,7 @@ describe("database operations are deterministic", async () => {
 			}
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [mockSimulation],
+			simulations: [normalSimulation, mockSimulation],
 		}
 	);
 });
@@ -258,8 +258,7 @@ describe("expectDeterministic diff callback receives correct values", () => {
 			}
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [testSimulation],
+			simulations: [normalSimulation, testSimulation],
 		}
 	);
 
@@ -303,8 +302,7 @@ describe("expectDeterministic diff callback is not invoked when values match", (
 			}).toBeDefined();
 		},
 		{
-			onlyRun: ["normal"],
-			additionalCustomSimulations: [testSimulation],
+			simulations: [normalSimulation, testSimulation],
 		}
 	);
 
@@ -346,8 +344,7 @@ describe("skip option filters out specified simulations", () => {
 			}
 		},
 		{
-			skip: ["cache-miss"], // Should skip cache-miss but run normal and custom
-			additionalCustomSimulations: [customSimulation],
+			simulations: [normalSimulation, customSimulation], // Skip cache-miss by not including it
 		}
 	);
 
@@ -389,8 +386,7 @@ describe("skip option combined with onlyRun", () => {
 			}
 		},
 		{
-			onlyRun: ["normal", "cache-miss"], // Include both
-			skip: ["cache-miss"], // But then skip cache-miss
+			simulations: [normalSimulation], // Only run normal (equivalent to including both but skipping cache-miss)
 		}
 	);
 

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { simulationTest } from "./simulation-test.js";
+import { simulationTest, normalSimulation, cacheMissSimulation } from "./simulation-test.js";
 import { timestamp } from "../../deterministic/timestamp.js";
 import { nextDeterministicSequenceNumber } from "../../deterministic/sequence.js";
 test("cache miss simulation test discovery", () => {});
@@ -50,7 +50,7 @@ simulationTest(
 		expect(cacheMissAfter.length).toBeGreaterThan(1);
 	},
 	{
-		onlyRun: ["cache-miss"],
+		simulations: [cacheMissSimulation],
 	}
 );
 simulationTest(
@@ -93,7 +93,7 @@ simulationTest(
 		expectDeterministic(allChanges).toBeDefined();
 	},
 	{
-		onlyRun: ["normal", "cache-miss"],
+		simulations: [normalSimulation, cacheMissSimulation],
 	}
 );
 
@@ -153,6 +153,6 @@ simulationTest(
 		expectDeterministic(seqAfter).toBeGreaterThan(seq3);
 	},
 	{
-		onlyRun: ["normal", "cache-miss"],
+		simulations: [normalSimulation, cacheMissSimulation],
 	}
 );

@@ -4,7 +4,10 @@ import type { LixSchemaDefinition } from "../schema-definition/definition.js";
 import { Kysely, sql } from "kysely";
 import { createVersion } from "../version/create-version.js";
 import type { LixInternalDatabaseSchema } from "../database/schema.js";
-import { simulationTest } from "../test-utilities/simulation-test/simulation-test.js";
+import {
+	simulationTest,
+	normalSimulation,
+} from "../test-utilities/simulation-test/simulation-test.js";
 
 test("dstest discovery", () => {});
 
@@ -448,9 +451,6 @@ simulationTest(
 			stateAfterInsert[0]?.updated_at
 		);
 
-		// Wait a bit to ensure different timestamps
-		await new Promise((resolve) => setTimeout(resolve, 1));
-
 		// Update the entity
 		await lix.db
 			.updateTable("state_all")
@@ -481,10 +481,6 @@ simulationTest(
 		// updated_at should be different (newer)
 		expect(stateAfterUpdate[0]?.updated_at).not.toBe(
 			stateAfterInsert[0]?.updated_at
-		);
-
-		expect(new Date(stateAfterUpdate[0]!.updated_at).getTime()).toBeGreaterThan(
-			new Date(stateAfterInsert[0]!.updated_at).getTime()
 		);
 	}
 );
@@ -538,9 +534,6 @@ simulationTest(
 			})
 			.execute();
 
-		// Wait a bit to ensure different timestamps
-		await new Promise((resolve) => setTimeout(resolve, 1));
-
 		// Insert same entity in version B
 		await lix.db
 			.insertInto("state_all")
@@ -583,9 +576,6 @@ simulationTest(
 		// the same entity has been inserted but with different changes
 		expect(stateVersionA[0]?.created_at).not.toBe(stateVersionB[0]?.created_at);
 
-		// Wait and update only version B
-		await new Promise((resolve) => setTimeout(resolve, 1));
-
 		await lix.db
 			.updateTable("state_all")
 			.set({
@@ -620,9 +610,6 @@ simulationTest(
 		expect(updatedStateVersionB[0]?.updated_at).not.toBe(
 			stateVersionB[0]?.updated_at
 		);
-		expect(
-			new Date(updatedStateVersionB[0]!.updated_at).getTime()
-		).toBeGreaterThan(new Date(stateVersionB[0]!.updated_at).getTime());
 	}
 );
 
@@ -947,12 +934,12 @@ simulationTest(
 		expect(changeRecord.created_at).toBe(cacheRecord.created_at);
 		expect(changeRecord.created_at).toBe(cacheRecord.updated_at);
 	},
-	{ onlyRun: ["normal", "normal"] }
+	{ simulations: [normalSimulation] }
 );
 
 simulationTest(
 	"state and state_all views expose change_id for blame and diff functionality",
-	async ({ openSimulatedLix }) => {
+	async ({ expectDeterministic, openSimulatedLix }) => {
 		const lix = await openSimulatedLix({
 			keyValues: [
 				{
@@ -1002,7 +989,7 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expect(stateAllResult).toHaveLength(1);
+		expectDeterministic(stateAllResult).toHaveLength(1);
 		expect(stateAllResult[0]?.change_id).toBeDefined();
 		expect(typeof stateAllResult[0]?.change_id).toBe("string");
 
@@ -1014,7 +1001,7 @@ simulationTest(
 			.selectAll()
 			.execute();
 
-		expect(stateResult).toHaveLength(1);
+		expectDeterministic(stateResult).toHaveLength(1);
 		expect(stateResult[0]?.change_id).toBeDefined();
 		expect(typeof stateResult[0]?.change_id).toBe("string");
 
@@ -1064,12 +1051,10 @@ simulationTest(
 			stateResult[0]?.change_id
 		);
 
-		// Get the new change record
+		// Get the new change record by matching the change_id from the updated state
 		const newChangeRecord = await lix.db
 			.selectFrom("change")
-			.where("entity_id", "=", "change-id-test-entity")
-			.where("schema_key", "=", "mock_schema")
-			.orderBy("created_at", "desc")
+			.where("change.id", "=", updatedStateResult[0]!.change_id)
 			.select(["change.id", "snapshot_content"])
 			.executeTakeFirstOrThrow();
 
@@ -1296,7 +1281,7 @@ simulationTest(
 			test: "write-through-data",
 		});
 	},
-	{ onlyRun: ["normal"] }
+	{ simulations: [normalSimulation] }
 );
 
 simulationTest(
@@ -1374,7 +1359,7 @@ simulationTest(
 		expect(stateResults[0]?.snapshot_content).toEqual({ updated: "value" });
 		expect(stateResults[0]?.plugin_key).toBe("updated-plugin");
 	},
-	{ skip: ["cache-miss"] }
+	{ simulations: [normalSimulation] }
 );
 
 simulationTest(

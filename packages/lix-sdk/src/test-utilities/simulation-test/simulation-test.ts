@@ -1,6 +1,7 @@
-import { test, expect, type Assertion } from "vitest";
+import { test, expect, type Assertion, vi } from "vitest";
 import { type Lix, openLix } from "../../lix/open-lix.js";
 import { cacheMissSimulation } from "./cache-miss-simulation.js";
+import { outOfOrderSequenceSimulation } from "./out-of-order-sequence-simulation.js";
 
 export type SimulationTestDef = {
 	name: string;
@@ -10,7 +11,7 @@ export type SimulationTestDef = {
 /**
  * Normal simulation - Standard test execution without any modifications.
  */
-const simulationUnderNormalConditions: SimulationTestDef = {
+const normalSimulation: SimulationTestDef = {
 	name: "normal",
 	setup: async (lix) => lix,
 };
@@ -20,30 +21,19 @@ const simulationUnderNormalConditions: SimulationTestDef = {
  */
 type SimulationTestOptions = {
 	/**
-	 * Array of default simulation names to run.
-	 * If not specified, all default simulations will be run.
-	 * Available default simulations: "normal", "cache-miss"
+	 * Array of simulations to run. If not specified, runs default simulations (normal, cache-miss).
 	 */
-	onlyRun?: (keyof typeof defaultSimulations)[];
-	/**
-	 * Array of default simulation names to skip.
-	 * These simulations will be excluded from the test run.
-	 * Applied after onlyRun filtering.
-	 * Available default simulations: "normal", "cache-miss"
-	 */
-	skip?: (keyof typeof defaultSimulations)[];
-	/**
-	 * Additional custom simulations to run after the default ones.
-	 * These simulations will always be run and don't need to be listed in onlyRun.
-	 */
-	additionalCustomSimulations?: SimulationTestDef[];
+	simulations?: SimulationTestDef[];
 };
 
 // Default simulations available
-const defaultSimulations = {
-	normal: simulationUnderNormalConditions as SimulationTestDef,
-	"cache-miss": cacheMissSimulation as SimulationTestDef,
-} as const;
+export const defaultSimulations: SimulationTestDef[] = [
+	normalSimulation,
+	cacheMissSimulation,
+];
+
+// Export individual simulations for custom use
+export { normalSimulation, cacheMissSimulation, outOfOrderSequenceSimulation };
 
 /**
  * Test utility that runs the same test in different simulations.
@@ -51,40 +41,28 @@ const defaultSimulations = {
  * @param name - Test name
  * @param fn - Test function that receives simulation context
  * @param options - Optional configuration:
- *   - onlyRun: Array of default simulation names to run (defaults to all)
- *   - skip: Array of default simulation names to skip (applied after onlyRun)
- *   - additionalCustomSimulations: Additional custom simulations to run after the default ones
+ *   - simulations: Array of simulations to run (defaults to normal + cache-miss)
  *
  * @example
  * // Run default simulations (normal, cache-miss)
- * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
- *   const lix = await openLix({ blob: initialLix });
- *   // test code
+ * simulationTest("my test", async ({ openSimulatedLix, expectDeterministic }) => {
+ *   const lix = await openSimulatedLix({});
+ *   // test code - expectDeterministic ensures values match across simulations
  * });
  *
  * @example
- * // Run only specific default simulations
- * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
- *   const lix = await openLix({ blob: initialLix });
+ * // Run only normal simulation
+ * simulationTest("my test", async ({ openSimulatedLix, expectDeterministic }) => {
+ *   const lix = await openSimulatedLix({});
  *   // test code
- * }, { onlyRun: ["cache-miss"] });
+ * }, { simulations: [normalSimulation] });
  *
  * @example
- * // Skip specific simulations
- * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
- *   const lix = await openLix({ blob: initialLix });
- *   // test code that doesn't work in cache miss mode
- * }, { skip: ["cache-miss"] });
- *
- * @example
- * // Add custom simulations (run after default ones)
- * simulationTest("my test", async ({ initialLix, simulation, expectDeterministic }) => {
- *   const lix = await openLix({ blob: initialLix });
- *   // test code
- * }, {
- *   onlyRun: ["normal"],
- *   additionalCustomSimulations: [mySimulation]
- * });
+ * // Run custom simulations including out-of-order
+ * simulationTest("my test", async ({ openSimulatedLix, expectDeterministic }) => {
+ *   const lix = await openSimulatedLix({});
+ *   // test code - but be careful with expectDeterministic if using out-of-order!
+ * }, { simulations: [cacheMissSimulation, outOfOrderSequenceSimulation] });
  */
 /**
  * Enhanced expect function for simulation tests that verifies values are identical across simulations.
@@ -120,43 +98,8 @@ export function simulationTest(
 	}) => Promise<void>,
 	options?: SimulationTestOptions
 ): void {
-	// Determine which simulations to run
-	let simulationsToRun: SimulationTestDef[] = [];
-
-	if (options?.onlyRun) {
-		// Run only specified default simulations
-		simulationsToRun = options.onlyRun.map((name) => {
-			const simulation = defaultSimulations[name];
-			if (!simulation) {
-				throw new Error(
-					`Simulation "${name}" not found. Available simulations: ${Object.keys(defaultSimulations).join(", ")}`
-				);
-			}
-			return simulation;
-		});
-	} else {
-		// Run all default simulations if onlyRun is not specified
-		simulationsToRun = Object.values(defaultSimulations);
-	}
-
-	// Filter out skipped simulations
-	if (options?.skip) {
-		const skipNames = new Set(options.skip);
-		simulationsToRun = simulationsToRun.filter((simulation) => {
-			// Find the name of this simulation in defaultSimulations
-			const simulationName = Object.entries(defaultSimulations).find(
-				([, sim]) => sim === simulation
-			)?.[0];
-			return !skipNames.has(simulationName as keyof typeof defaultSimulations);
-		});
-	}
-
-	// Add custom simulations at the end
-	if (options?.additionalCustomSimulations) {
-		simulationsToRun.push(...options.additionalCustomSimulations);
-	}
-
-	// const initialLixBlob = {};
+	// Use provided simulations or default ones
+	const simulationsToRun = options?.simulations || defaultSimulations;
 
 	const expectedValues = new Map<string, any>();
 
@@ -228,5 +171,6 @@ Use regular expect() for simulation-specific assertions.
 			openSimulatedLix,
 			expectDeterministic: deterministicExpect as ExpectDeterministic,
 		});
+		vi.resetAllMocks();
 	});
 }

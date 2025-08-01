@@ -99,12 +99,18 @@ export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
 					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
 					ORDER BY cg.depth ASC
 				) as first_seen,
-				-- Get first and last change timestamps for proper created_at/updated_at
-				MIN(c.created_at) OVER (
+				-- Get timestamps based on commit graph depth, not wall-clock time
+				-- Deepest ancestor (highest depth) → created_at
+				FIRST_VALUE(c.created_at) OVER (
 					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
+					ORDER BY cg.depth DESC
+					ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
 				) as entity_created_at,
-				MAX(c.created_at) OVER (
+				-- Current tip (depth 0) → updated_at  
+				FIRST_VALUE(c.created_at) OVER (
 					PARTITION BY cg.version_id, c.entity_id, c.schema_key, c.file_id
+					ORDER BY cg.depth ASC
+					ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
 				) as entity_updated_at
 			FROM internal_materialization_commit_graph cg
 			-- Get commit's change_set_id
