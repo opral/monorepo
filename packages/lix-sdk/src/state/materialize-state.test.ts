@@ -5,6 +5,122 @@ import { createVersion } from "../version/create-version.js";
 import { timestamp } from "../deterministic/timestamp.js";
 
 describe("internal_materialization_version_tips", () => {
+	test("includes all versions with state, even if other versions branch from them", async () => {
+		// Test the rule: "if a version entity exists, the version is active. 
+		// even if other versions 'build' on this version by branching away from the commit"
+		const lix = await openLix({
+			keyValues: [
+				{
+					key: "lix_deterministic_mode",
+					value: { enabled: true, bootstrap: true },
+				},
+			],
+		});
+
+		// Create base version with state
+		await createVersion({ lix, id: "base-version" });
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "base-entity",
+				schema_key: "mock_entity",
+				schema_version: "1.0",
+				file_id: "mock-file",
+				version_id: "base-version",
+				plugin_key: "mock-plugin", 
+				snapshot_content: { id: "base-entity", name: "Base Entity" },
+			})
+			.execute();
+
+		// Get base version's current commit
+		const baseVersion = await lix.db
+			.selectFrom("version")
+			.select("commit_id")
+			.where("id", "=", "base-version")
+			.executeTakeFirstOrThrow();
+
+		// Create version A that branches from base version's commit
+		await createVersion({ lix, id: "version-a" });
+		await lix.db
+			.updateTable("version")
+			.set({ commit_id: baseVersion.commit_id })
+			.where("id", "=", "version-a")
+			.execute();
+
+		// Add state to version A (this will create a new commit, making base-version no longer a "tip")
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "entity-a",
+				schema_key: "mock_entity",
+				schema_version: "1.0",
+				file_id: "mock-file",
+				version_id: "version-a",
+				plugin_key: "mock-plugin",
+				snapshot_content: { id: "entity-a", name: "Version A Entity" },
+			})
+			.execute();
+
+		// Create version B that also branches from base version's commit
+		await createVersion({ lix, id: "version-b" });
+		await lix.db
+			.updateTable("version")
+			.set({ commit_id: baseVersion.commit_id })
+			.where("id", "=", "version-b")
+			.execute();
+
+		// Add state to version B
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "entity-b",
+				schema_key: "mock_entity",
+				schema_version: "1.0",
+				file_id: "mock-file",
+				version_id: "version-b",
+				plugin_key: "mock-plugin",
+				snapshot_content: { id: "entity-b", name: "Version B Entity" },
+			})
+			.execute();
+
+		// Now base-version has children (version-a and version-b branched from it),
+		// so it's no longer a "tip" commit. But it still has important state that should be materialized.
+
+		// Query version tips - should include ALL versions with state, not just leaf tips
+		const tips = await lix.db
+			.selectFrom("internal_materialization_version_tips" as any)
+			.selectAll()
+			.where("version_id", "in", ["base-version", "version-a", "version-b"])
+			.orderBy("version_id")
+			.execute();
+
+		// All three versions should be included because they all have entities/state
+		expect(tips).toHaveLength(3);
+		
+		const baseVersionTip = tips.find((t: any) => t.version_id === "base-version");
+		const versionATip = tips.find((t: any) => t.version_id === "version-a");
+		const versionBTip = tips.find((t: any) => t.version_id === "version-b");
+
+		// All versions should be present in version tips
+		expect(baseVersionTip).toBeDefined();
+		expect(versionATip).toBeDefined();
+		expect(versionBTip).toBeDefined();
+
+		// Verify that the base version's state can be materialized (not excluded from materialization pipeline)
+		const baseMaterializedState = await lix.db
+			.selectFrom("internal_state_materializer" as any)
+			.selectAll()
+			.where("version_id", "=", "base-version")
+			.where("entity_id", "=", "base-entity")
+			.executeTakeFirst();
+
+		expect(baseMaterializedState).toBeDefined();
+		expect(baseMaterializedState!.snapshot_content).toEqual({
+			id: "base-entity",
+			name: "Base Entity",
+		});
+	});
+
 	test("finds tip commit for a version with single commit", async () => {
 		const lix = await openLix({
 			keyValues: [
@@ -754,8 +870,8 @@ describe("internal_materialization_commit_graph", () => {
 		// Version Y should have 2 commits (initial + one change)
 		expect(graphY).toHaveLength(2);
 
-		// Version Z has no additional commits, so won't appear in commit graph
-		expect(graphZ).toHaveLength(0);
+		// Version Z has only the initial commit, so will appear with 1 commit in the graph
+		expect(graphZ).toHaveLength(1);
 
 		// Verify each version has its own unique tip commit
 		const xTip = graphX.find((g: any) => g.depth === 0);

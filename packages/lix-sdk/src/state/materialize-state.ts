@@ -1,18 +1,46 @@
 import type { SqliteWasmDatabase } from "sqlite-wasm-kysely";
 
 export function applyMaterializeStateSchema(sqlite: SqliteWasmDatabase): void {
-	// View 1: Version tips - find tip commit without using timestamps
+	// View 1: Version tips - one row per version with its current tip commit
+	// Rule: "if a version entity exists, the version is active. even if other versions 'build' on this version by branching away from the commit"
+	// A commit C is the tip for version V iff:
+	// • C appears in at least one lix_version change row for V AND
+	// • there is no commit that is both a child of C in lix_commit_edge table AND referenced by any lix_version row of the same version V
 	sqlite.exec(`
 		CREATE VIEW IF NOT EXISTS internal_materialization_version_tips AS
-		SELECT 
-			v.entity_id AS version_id,
-			json_extract(v.snapshot_content,'$.commit_id') AS tip_commit_id
-		FROM change v
-		LEFT JOIN change e
-			ON e.schema_key = 'lix_commit_edge' 
-			AND json_extract(e.snapshot_content,'$.parent_id') = json_extract(v.snapshot_content,'$.commit_id')
-		WHERE v.schema_key = 'lix_version'
-		  AND e.id IS NULL; -- No edge where this commit is parent = it's a tip
+		WITH
+		-- 1. every (version, commit) ever recorded
+		version_commits(version_id, commit_id) AS (
+			SELECT
+				v.entity_id,
+				json_extract(v.snapshot_content,'$.commit_id')
+			FROM change v
+			WHERE v.schema_key = 'lix_version'
+		),
+		-- 2. mark (version, commit) pairs that still have a child commit referenced by the same version
+		non_tips AS (
+			SELECT DISTINCT
+				vc.version_id,
+				vc.commit_id
+			FROM version_commits vc
+			JOIN change e -- commit-edge
+				ON e.schema_key = 'lix_commit_edge'
+				AND json_extract(e.snapshot_content,'$.parent_id') = vc.commit_id
+			JOIN version_commits vc_child
+				ON vc_child.commit_id = json_extract(e.snapshot_content,'$.child_id')
+				AND vc_child.version_id = vc.version_id -- same version!
+		)
+		-- 3. tips = version commits that are NOT in the non_tip set
+		SELECT
+			vc.version_id,
+			vc.commit_id AS tip_commit_id
+		FROM version_commits vc
+		WHERE NOT EXISTS (
+			SELECT 1
+			FROM non_tips nt
+			WHERE nt.version_id = vc.version_id
+			AND nt.commit_id = vc.commit_id
+		);
 	`);
 
 	// View 2: Commit graph - lineage with depth (combines old views 3 & 4)

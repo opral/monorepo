@@ -1299,71 +1299,75 @@ simulationTest(
 	{ onlyRun: ["normal"] }
 );
 
-test("write-through cache: update operations update cache immediately", async () => {
-	const lix = await openLix({});
+simulationTest(
+	"write-through cache: update operations update cache immediately",
+	async ({ openSimulatedLix }) => {
+		const lix = await openSimulatedLix({});
 
-	const activeVersion = await lix.db
-		.selectFrom("active_version")
-		.innerJoin("version", "active_version.version_id", "version.id")
-		.selectAll("version")
-		.executeTakeFirstOrThrow();
+		const activeVersion = await lix.db
+			.selectFrom("active_version")
+			.innerJoin("version", "active_version.version_id", "version.id")
+			.selectAll("version")
+			.executeTakeFirstOrThrow();
 
-	// Insert initial state
-	await lix.db
-		.insertInto("state_all")
-		.values({
-			entity_id: "update-cache-entity",
-			schema_key: "update-cache-schema",
-			file_id: "update-cache-file",
-			plugin_key: "initial-plugin",
-			snapshot_content: { initial: "value" },
-			schema_version: "1.0",
-			version_id: activeVersion.id,
-		})
-		.execute();
+		// Insert initial state
+		await lix.db
+			.insertInto("state_all")
+			.values({
+				entity_id: "update-cache-entity",
+				schema_key: "update-cache-schema",
+				file_id: "update-cache-file",
+				plugin_key: "initial-plugin",
+				snapshot_content: { initial: "value" },
+				schema_version: "1.0",
+				version_id: activeVersion.id,
+			})
+			.execute();
 
-	// Update the state - should update cache via write-through
-	await lix.db
-		.updateTable("state_all")
-		.set({
-			snapshot_content: { updated: "value" },
-			plugin_key: "updated-plugin",
-		})
-		.where("entity_id", "=", "update-cache-entity")
-		.where("schema_key", "=", "update-cache-schema")
-		.where("file_id", "=", "update-cache-file")
-		.where("version_id", "=", activeVersion.id)
-		.execute();
+		// Update the state - should update cache via write-through
+		await lix.db
+			.updateTable("state_all")
+			.set({
+				snapshot_content: { updated: "value" },
+				plugin_key: "updated-plugin",
+			})
+			.where("entity_id", "=", "update-cache-entity")
+			.where("schema_key", "=", "update-cache-schema")
+			.where("file_id", "=", "update-cache-file")
+			.where("version_id", "=", activeVersion.id)
+			.execute();
 
-	// Cache should be immediately updated
-	const cacheEntry = await (
-		lix.db as unknown as Kysely<LixInternalDatabaseSchema>
-	)
-		.selectFrom("internal_state_cache")
-		.where("entity_id", "=", "update-cache-entity")
-		.where("schema_key", "=", "update-cache-schema")
-		.where("file_id", "=", "update-cache-file")
-		.where("version_id", "=", activeVersion.id)
-		.selectAll()
-		.executeTakeFirst();
+		// Cache should be immediately updated
+		const cacheEntry = await (
+			lix.db as unknown as Kysely<LixInternalDatabaseSchema>
+		)
+			.selectFrom("internal_state_cache")
+			.where("entity_id", "=", "update-cache-entity")
+			.where("schema_key", "=", "update-cache-schema")
+			.where("file_id", "=", "update-cache-file")
+			.where("version_id", "=", activeVersion.id)
+			.selectAll()
+			.executeTakeFirst();
 
-	expect(cacheEntry).toBeDefined();
-	expect(cacheEntry?.snapshot_content).toEqual({
-		updated: "value",
-	});
-	expect(cacheEntry?.plugin_key).toBe("updated-plugin");
+		expect(cacheEntry).toBeDefined();
+		expect(cacheEntry?.snapshot_content).toEqual({
+			updated: "value",
+		});
+		expect(cacheEntry?.plugin_key).toBe("updated-plugin");
 
-	// State view should return updated data
-	const stateResults = await lix.db
-		.selectFrom("state_all")
-		.where("entity_id", "=", "update-cache-entity")
-		.selectAll()
-		.execute();
+		// State view should return updated data
+		const stateResults = await lix.db
+			.selectFrom("state_all")
+			.where("entity_id", "=", "update-cache-entity")
+			.selectAll()
+			.execute();
 
-	expect(stateResults).toHaveLength(1);
-	expect(stateResults[0]?.snapshot_content).toEqual({ updated: "value" });
-	expect(stateResults[0]?.plugin_key).toBe("updated-plugin");
-});
+		expect(stateResults).toHaveLength(1);
+		expect(stateResults[0]?.snapshot_content).toEqual({ updated: "value" });
+		expect(stateResults[0]?.plugin_key).toBe("updated-plugin");
+	},
+	{ skip: ["cache-miss"] }
+);
 
 // Important to note that only a full cache clear (like during schema changes) triggers
 // a cache miss and repopulation from the CTE at the moment!

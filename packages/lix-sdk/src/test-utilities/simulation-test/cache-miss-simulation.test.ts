@@ -130,59 +130,16 @@ simulationTest(
 		expectDeterministic(ts2).toBeDefined();
 
 		// Perform a query that would trigger cache operations
-		console.log("[TEST] Inserting test_key into key_value");
 		await lix.db
 			.insertInto("key_value")
 			.values({ key: "test_key", value: "test_value" })
 			.execute();
 
-		// Check if data was actually inserted
-		const rawCheck = lix.sqlite.exec({
-			sql: "SELECT * FROM internal_resolved_state_all WHERE entity_id = 'test_key' AND schema_key = 'lix_key_value'",
-			returnValue: "resultRows",
-		});
-		console.log(
-			"[TEST] Raw check of internal_resolved_state_all:",
-			JSON.stringify(rawCheck, null, 2)
-		);
-
-		// Check the active version
-		const activeVersion = lix.sqlite.exec({
-			sql: "SELECT * FROM active_version",
-			returnValue: "resultRows",
-		});
-		console.log(
-			"[TEST] Active version:",
-			JSON.stringify(activeVersion, null, 2)
-		);
-
-		// Check what's in cache before query
-		const cacheCheck = lix.sqlite.exec({
-			sql: "SELECT * FROM internal_state_cache WHERE entity_id = 'test_key'",
-			returnValue: "resultRows",
-		});
-		console.log(
-			"[TEST] Cache before query:",
-			JSON.stringify(cacheCheck, null, 2)
-		);
-
-		console.log("[TEST] About to query key_value table");
 		const result = await lix.db
 			.selectFrom("key_value")
 			.where("key", "=", "test_key")
 			.selectAll()
 			.execute();
-
-		console.log("[TEST] Query result:", JSON.stringify(result, null, 2));
-
-		// Check what's in the underlying tables
-		const stateAll = await lix.db
-			.selectFrom("state_all")
-			.where("schema_key", "=", "lix_key_value")
-			.selectAll()
-			.execute();
-
-		console.log("[TEST] state_all entries:", JSON.stringify(stateAll, null, 2));
 
 		// The query result should be deterministic
 		expectDeterministic(result).toHaveLength(1);
