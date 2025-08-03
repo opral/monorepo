@@ -2,20 +2,159 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Opral</title>
-		<link rel="stylesheet" href="css/style.css" />
+		<style>
+			body {
+				font-family: serif;
+				line-height: 1.6;
+				margin: 0;
+				padding: 2rem;
+				max-width: 800px;
+				margin: 0 auto;
+			}
+
+			.header {
+				text-align: center;
+				margin-bottom: 3rem;
+			}
+
+			.header h1 {
+				font-size: 3rem;
+				margin: 0;
+			}
+
+			.intro {
+				text-align: center;
+				font-size: 1.2rem;
+				margin-bottom: 3rem;
+			}
+
+			.product-cards {
+				display: flex;
+				flex-direction: row;
+				gap: 2rem;
+				margin-bottom: 3rem;
+			}
+
+			.product-card {
+				border: 1px solid black;
+				padding: 2rem;
+				text-align: center;
+				flex: 1;
+			}
+
+			.product-card h2 {
+				font-size: 2rem;
+				margin: 0 0 1rem 0;
+			}
+
+			.product-card .subtitle {
+				font-size: 1.3rem;
+				margin-bottom: 1rem;
+			}
+
+			.product-card .description {
+				margin-bottom: 2rem;
+				font-size: 1.1rem;
+			}
+
+			.product-card .cta {
+				display: inline-block;
+				border: 1px solid black;
+				text-decoration: none;
+				padding: 0.8rem 2rem;
+			}
+
+			.footer {
+				text-align: center;
+				border-top: 1px solid black;
+				padding-top: 2rem;
+			}
+
+			.footer-links {
+				display: flex;
+				justify-content: center;
+				gap: 2rem;
+				margin-bottom: 1rem;
+				flex-wrap: wrap;
+			}
+
+			.footer-links a {
+				text-decoration: none;
+			}
+
+			.footer-links a:hover {
+				text-decoration: underline;
+			}
+
+			.footer-note {
+				font-style: italic;
+				font-size: 0.9rem;
+			}
+
+			@media (max-width: 600px) {
+				body {
+					padding: 1rem;
+				}
+				
+				.header h1 {
+					font-size: 2.5rem;
+				}
+				
+				.intro {
+					font-size: 1.1rem;
+				}
+				
+				.product-cards {
+					flex-direction: column;
+				}
+				
+				.footer-links {
+					flex-direction: column;
+					gap: 1rem;
+				}
+			}
+		</style>
 	</head>
 	<body>
-		<h1>Opral</h1>
-		<p>
-			We are the company behind the change control system <a href="https://lix.opral.com/" target="_blank">lix</a> 
-			and globalization infrastructure <a href="https://inlang.com" target="_blank">inlang.com</a>.
-    </p>
-    <small><i>PS Nothing is broken about this page. It's just simple on purpose :)</i></small>
-    <div style="display: flex; flex-direction: row; column-gap: 1rem;">
-      <h4><a href="https://github.com/opral/monorepo/tree/main/careers">• Careers</a></h4>
-      <h4><a href="https://github.com/opral/monorepo">• GitHub</a></h4>
-      <h4><a href="mailto:hello@opral.com">• Contact</a></h4>
-    </div>
+		<div class="header">
+			<h1>Opral</h1>
+		</div>
+
+		<div class="intro">
+			We are the company behind two key products:
+		</div>
+
+		<div class="product-cards">
+			<div class="product-card">
+				<h2>Lix</h2>
+				<div class="subtitle">Change Control System</div>
+				<div class="description">
+					See, review, and control every change AI agents and humans make.
+				</div>
+				<a href="https://lix.dev/" target="_blank" class="cta">Visit Site</a>
+			</div>
+
+			<div class="product-card">
+				<h2>Inlang</h2>
+				<div class="subtitle">Globalization Infrastructure</div>
+				<div class="description">
+					An open file format for managing software translations.
+				</div>
+				<a href="https://inlang.com" target="_blank" class="cta">Visit Site</a>
+			</div>
+		</div>
+
+		<div class="footer">
+			<div class="footer-links">
+				<a href="https://github.com/opral/monorepo/tree/main/careers">Careers</a>
+				<a href="https://github.com/opral/monorepo">GitHub</a>
+				<a href="mailto:hello@opral.com">Contact</a>
+			</div>
+			<div class="footer-note">
+				PS Nothing is broken about this page. It's simple on purpose to iterate faster :)
+			</div>
+		</div>
 	</body>
 </html>
